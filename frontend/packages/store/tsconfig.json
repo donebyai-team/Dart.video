@@ -1,0 +1,4 @@
+{
+  "extends": "@coasterai/ts-config/base",
+  "include": ["**/*.ts"]
+}

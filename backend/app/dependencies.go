@@ -1,0 +1,181 @@
+package app
+
+import (
+	"context"
+	"fmt"
+	"github.com/shank318/coasterai/auth"
+	"github.com/shank318/coasterai/auth/crypto"
+	"github.com/shank318/coasterai/datastore"
+	google2 "github.com/shank318/coasterai/integrations/google"
+	"golang.org/x/oauth2"
+	"regexp"
+	"strings"
+	"time"
+
+	"github.com/streamingfast/logging"
+	"go.uber.org/dig"
+	"go.uber.org/zap"
+)
+
+type GoogleConfig struct {
+	ClientID     string
+	ClientSecret string
+	RedirectURL  string
+	Scopes       []string
+	Endpoint     oauth2.Endpoint
+}
+
+type DependenciesBuilder struct {
+	PGDSN              string
+	KMSKeyPath         string
+	CorsURLRegexAllow  string
+	AttachmentStoreURL string
+	PubsubGCPProject   string
+	Processor          bool
+	AIConfig           *AIConfig
+	ConversationState  *conversationState
+	GoogleConfig       *GoogleConfig
+	dig                *dig.Container
+}
+
+func NewDependenciesBuilder() *DependenciesBuilder {
+	return &DependenciesBuilder{
+		dig: dig.New(),
+	}
+}
+
+type conversationState struct {
+	redisAddr         string
+	phoneCallStateTTL time.Duration
+	namespace, prefix string
+}
+
+type AIConfig struct {
+	LiteLLMAPIKey        string
+	OpenAIAPIKey         string
+	OpenAIOrganization   string
+	OpenAIDebugLogsStore string
+	LangsmithApiKey      string
+	LangsmithProject     string
+}
+
+func (b *DependenciesBuilder) mustProvide(constructor interface{}) {
+	if err := b.dig.Provide(constructor); err != nil {
+		panic(fmt.Errorf("failed to register provider: %w", err))
+	}
+}
+
+func (b *DependenciesBuilder) WithDataStore(pgDSN string) *DependenciesBuilder {
+	b.mustProvide(func() PostgresDSNString { return PostgresDSNString(pgDSN) })
+	b.PGDSN = pgDSN
+	return b
+}
+
+func (b *DependenciesBuilder) WithGoogle(clientId, clientSecret, redirectUrl string) *DependenciesBuilder {
+	redirectUrl = strings.Replace(redirectUrl, "auth/callback", "callback/login", 1)
+
+	b.GoogleConfig = &GoogleConfig{
+		ClientID:     clientId,
+		ClientSecret: clientSecret,
+		RedirectURL:  redirectUrl,
+	}
+	return b
+}
+
+func (b *DependenciesBuilder) WithConversationState(phoneCallStateTTL time.Duration, redisAddr, namespace, prefix string) *DependenciesBuilder {
+	b.ConversationState = &conversationState{
+		redisAddr,
+		phoneCallStateTTL,
+		namespace, prefix,
+	}
+	return b
+}
+
+func (b *DependenciesBuilder) WithAI(defaultLLMModel, liteLLMAPIKey string, openAIAPIKey string, openAIOrg string, openAIDebugLogsStore string, langsmithApiKey string, langsmithProject string) *DependenciesBuilder {
+	b.AIConfig = &AIConfig{
+		LiteLLMAPIKey:        liteLLMAPIKey,
+		OpenAIAPIKey:         openAIAPIKey,
+		OpenAIOrganization:   openAIOrg,
+		OpenAIDebugLogsStore: openAIDebugLogsStore,
+		LangsmithApiKey:      langsmithApiKey,
+		LangsmithProject:     langsmithProject,
+	}
+	return b
+}
+
+func (b *DependenciesBuilder) WithKMSKeyPath(kmsKeyPath string) *DependenciesBuilder {
+	b.KMSKeyPath = kmsKeyPath
+	return b
+}
+
+func (b *DependenciesBuilder) WithCORSURLRegexAllow(corsURLRegexAllow string) *DependenciesBuilder {
+	b.CorsURLRegexAllow = corsURLRegexAllow
+	return b
+}
+
+func (b *DependenciesBuilder) Build(ctx context.Context, logger *zap.Logger, tracer logging.Tracer) (out *Dependencies, err error) {
+	b.mustProvide(func() *zap.Logger { return logger })
+	b.mustProvide(func() logging.Tracer { return tracer })
+	b.mustProvide(func() context.Context { return ctx })
+	b.mustProvide(newDataStore)
+
+	logger.Info("building dependencies", zap.Reflect("builder", b))
+
+	out = &Dependencies{
+		coasteraiDepMissing: []string{},
+	}
+
+	if b.PGDSN != "" {
+		err := b.dig.Invoke(func(dataStore datastore.Repository) {
+			out.DataStore = dataStore
+		})
+		if err != nil {
+			return nil, fmt.Errorf("failed to setup datastore: %w", err)
+		}
+		// out.DataStore, err = SetupDataStore(ctx, b.PGDSN, logger, tracer)
+	} else {
+		out.coasteraiDepMissing = append(out.coasteraiDepMissing, "datastore")
+	}
+
+	if b.KMSKeyPath != "" {
+		out.AuthSigningKeyGetter, out.AuthTokenValidator, err = SetupKMS(ctx, b.KMSKeyPath, logger)
+		if err != nil {
+			return nil, fmt.Errorf("failed to setup kms: %w", err)
+		}
+	} else {
+		out.AuthSigningKeyGetter, out.AuthTokenValidator, err = SetupMockKMS(ctx, "", logger)
+		if err != nil {
+			return nil, fmt.Errorf("failed to setup kms: %w", err)
+		}
+	}
+
+	if b.CorsURLRegexAllow != "" {
+		urlRegex, err := regexp.Compile(b.CorsURLRegexAllow)
+		if err != nil {
+			return nil, fmt.Errorf("failed to compile CORS URL regex: %w", err)
+		}
+		out.CorsURLRegexAllow = urlRegex
+	}
+
+	if b.GoogleConfig != nil {
+		logger.Info("setting up google",
+			zap.Reflect("client_id", b.GoogleConfig.ClientID),
+		)
+		out.GoogleClient = google2.NewOauthClient(b.GoogleConfig.ClientID, b.GoogleConfig.ClientSecret, b.GoogleConfig.RedirectURL, logger)
+	}
+
+	return out, nil
+}
+
+type Dependencies struct {
+	DataStore datastore.Repository
+
+	AuthSigningKeyGetter crypto.SigningKeyGetter
+	AuthTokenValidator   auth.TokenValidationFunc
+
+	CorsURLRegexAllow *regexp.Regexp
+
+	coasteraiDepMissing []string
+
+	GoogleClient *google2.OauthClient
+}
