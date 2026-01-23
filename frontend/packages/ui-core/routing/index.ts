@@ -12,6 +12,7 @@ export const routes = {
 
   app: {
     home: '/dashboard',
+    editor: '/editor',
     auth: {
       login: '/auth/login',
       callback: '/auth/callback',

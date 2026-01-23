@@ -12,39 +12,39 @@ interface AuthGuardProps {
 }
 
 const AuthGuard = ({ children, fallback }: AuthGuardProps) => {
-  const { user, loading: authLoading } = useAuth()
-  const router = useRouter()
-  const path = usePathname()
-  const [isReady, setIsReady] = useState(false)
+  // const { user, loading: authLoading } = useAuth()
+  // const router = useRouter()
+  // const path = usePathname()
+  // const [isReady, setIsReady] = useState(false)
 
-  useEffect(() => {
-    const checkAuthAndSetup = async () => {
-      if (authLoading) return
+  // useEffect(() => {
+  //   const checkAuthAndSetup = async () => {
+  //     if (authLoading) return
 
-      if (!user) {
-        const token = await browserTokenStore.Get()
-        if (!token) {
-          router.replace(routes.app.auth.login)
-          return
-        }
-      }
+  //     if (!user) {
+  //       const token = await browserTokenStore.Get()
+  //       if (!token) {
+  //         router.replace(routes.app.auth.login)
+  //         return
+  //       }
+  //     }
 
-      if (user) {
-        router.replace(routes.app.home)
-        return
-      }
+  //     if (user) {
+  //       router.replace(routes.app.home)
+  //       return
+  //     }
 
-      // Mark as ready ONLY after everything else
-      setIsReady(true)
-    }
+  //     // Mark as ready ONLY after everything else
+  //     setIsReady(true)
+  //   }
 
-    checkAuthAndSetup()
-  }, [authLoading, user, path, router])
+  //   checkAuthAndSetup()
+  // }, [authLoading, user, path, router])
 
-  // Strict block on rendering until ready
-  if (!isReady) {
-    return fallback
-  }
+  // // Strict block on rendering until ready
+  // if (!isReady) {
+  //   return fallback
+  // }
 
   return <>{children}</>
 }

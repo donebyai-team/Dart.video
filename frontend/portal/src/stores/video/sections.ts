@@ -1,0 +1,85 @@
+import type { Section } from "@/types/slides";
+
+export const createSectionActions = (set, get) => ({
+  addSection() {
+    const { sections, videoConfig } = get();
+    if (!videoConfig) return;
+
+    const newSection: Section = {
+      id: `section-${Date.now()}`,
+      title: videoConfig.sectionConfig.defaultTitle,
+      color: videoConfig.sectionConfig.defaultColor,
+      slides: [],
+    };
+
+    const newSections = [...sections, newSection];
+    set({
+      sections: newSections,
+      openSections: [...get().openSections, newSection.id],
+    });
+    get().notifyConfigChange(newSections);
+  },
+
+  setEditingSectionId: (sectionId) => set({ editingSectionId: sectionId }),
+  setEditingSectionTitle: (title) => set({ editingSectionTitle: title }),
+
+  removeSection(sectionId: string) {
+    const { sections, selectedSlide } = get();
+    const newSections = sections.filter((s) => s.id !== sectionId);
+
+    set({ sections: newSections });
+
+    // If selected section deleted, reselect fallback
+    if (selectedSlide?.section.id === sectionId) {
+      const first = newSections.find((s) => s.slides.length > 0);
+      if (first) {
+        set({ selectedSlide: { section: first, slide: first.slides[0] } });
+      } else {
+        set({ selectedSlide: null });
+      }
+    }
+  },
+
+  updateSectionTitle(sectionId: string, newTitle: string) {
+    const { sections, selectedSlide } = get();
+
+    const newSections = sections.map((s) =>
+      s.id === sectionId ? { ...s, title: newTitle } : s
+    );
+
+    set({ sections: newSections, editingSectionId: null });
+
+    if (selectedSlide?.section.id === sectionId) {
+      set({
+        selectedSlide: {
+          ...selectedSlide,
+          section: { ...selectedSlide.section, title: newTitle },
+        },
+      });
+    }
+  },
+
+  toggleSection(sectionId: string) {
+    const { openSections } = get();
+    set({
+      openSections: openSections.includes(sectionId)
+        ? openSections.filter((id) => id !== sectionId)
+        : [...openSections, sectionId],
+    });
+  },
+
+  handleSectionDragEnd(event) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const { sections } = get();
+
+    const oldIdx = sections.findIndex((s) => s.id === active.id);
+    const newIdx = sections.findIndex((s) => s.id === over.id);
+
+    const reordered = [...sections];
+    const [moved] = reordered.splice(oldIdx, 1);
+    reordered.splice(newIdx, 0, moved);
+
+    set({ sections: reordered });
+  },
+});

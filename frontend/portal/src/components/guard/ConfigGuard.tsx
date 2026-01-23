@@ -15,8 +15,10 @@ const ConfigGuard = (props: ConfigGuardProps) => {
   const { children, fallback } = props
   // const [loading, setLoading] = useState(false)
 
-  const apiKey = process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY;
-  initAmplitude(apiKey)
+  useEffect(() => {
+    const apiKey = process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY;
+    initAmplitude(apiKey)
+  }, [])
 
   // useEffect(() => {
   //   setLoading(true)

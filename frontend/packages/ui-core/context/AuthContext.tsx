@@ -59,31 +59,31 @@ export const BaseAuthProvider: FC<Props> = ({
   const [loading, setLoading] = useState<boolean>(defaultProvider.loading)
   const { portalClient } = useClientsContext()
 
-  useEffect(() => {
-    const initAuth = async (): Promise<void> => {
-      const jwt = await tokenStore.Get()
-      if (jwt === undefined) {
-        setLoading(false)
-        return
-      }
+  // useEffect(() => {
+  //   const initAuth = async (): Promise<void> => {
+  //     const jwt = await tokenStore.Get()
+  //     if (jwt === undefined) {
+  //       setLoading(false)
+  //       return
+  //     }
 
-      await refreshSession()
-    }
+  //     await refreshSession()
+  //   }
 
-    initAuth()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tokenStore])
+  //   initAuth()
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [tokenStore])
 
-  useEffect(() => {
-    organizationStore
-      .Get()
-      .then(org => {
-        setOrganization(org ?? null)
-      })
-      .catch(err => {
-        console.error('failed to get organization', { err: err })
-      })
-  }, [organizationStore])
+  // useEffect(() => {
+  //   organizationStore
+  //     .Get()
+  //     .then(org => {
+  //       setOrganization(org ?? null)
+  //     })
+  //     .catch(err => {
+  //       console.error('failed to get organization', { err: err })
+  //     })
+  // }, [organizationStore])
 
   const getUser = (): Promise<User> => {
     console.debug('getting self')

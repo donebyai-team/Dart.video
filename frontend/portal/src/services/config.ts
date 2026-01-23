@@ -23,7 +23,7 @@ export class ConfigProvider {
   }
 
   async bootstrap(): Promise<Config> {
-    this.config = await this.buildConfig()
+    // this.config = await this.buildConfig()
 
     return this.config
   }

@@ -1,5 +1,7 @@
-import Dashboard from "@/components/pages/Dashboard";
+"use client"
+
+import DashboardPage from "@/pages/DashboardPage";
 
 export default function Page() {
-    return (<Dashboard />);
+    return (<DashboardPage />);
 }

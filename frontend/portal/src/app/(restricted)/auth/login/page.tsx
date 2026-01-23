@@ -6,7 +6,7 @@ import toast from 'react-hot-toast'
 import { useAuth } from '@coasterai/ui-core/hooks/useAuth'
 import { JWT } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
 import { Box } from '@mui/material'
-import { LoginPanel } from '@/components/pages/Login'
+import { LoginPanel } from '@/pages/Login'
 
 export default function Page() {
   const { login } = useAuth()

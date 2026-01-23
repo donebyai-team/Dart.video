@@ -5,7 +5,8 @@ import { AuthLoading } from '@/components/Loader/loader'
 export default function Layout({ children }: { children: React.ReactNode }) {
     return (
         <AuthGuard fallback={<AuthLoading />}>
-            <DashboardLayout>{children}</DashboardLayout>
+            {/* <DashboardLayout>{children}</DashboardLayout> */}
+            {children}
         </AuthGuard>
     )
 }

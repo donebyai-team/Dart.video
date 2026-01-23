@@ -9,9 +9,9 @@ import { useClientsContext } from "@coasterai/ui-core/context/ClientContext";
 import { routes } from "@coasterai/ui-core/routing";
 import { Logo } from "@coasterai/ui-core/components/Logo";
 import { toast } from "@/hooks/use-toast";
-import { Input } from "../ui/input";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
 import { useRouter } from "next/navigation";
+import { Input } from "@/components/ui/input";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 type Props = {
   onPasswordlessStarted: (message: string) => void
@@ -199,7 +199,7 @@ export const LoginPanel: FC<Props> = ({
                   <div className="flex justify-center">
                     <InputOTP
                       value={otp}
-                      onChange={(value) => setOtp(value)}
+                      onChange={setOtp}
                       maxLength={6}
                     >
                       <InputOTPGroup>

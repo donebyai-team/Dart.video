@@ -1,0 +1,1 @@
+export { SpotlightEffect } from "./SpotlightEffect";

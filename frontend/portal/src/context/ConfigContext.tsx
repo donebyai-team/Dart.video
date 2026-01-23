@@ -24,20 +24,22 @@ const ConfigProvider = ({ children }: Props) => {
   const [config, setConfig] = useState<Config>(defaultProvider)
   const [loading, setLoading] = useState<boolean>(true)
 
-  useEffect(() => {
-    portalClient
-      .getConfig({})
-      .then(config => {
-        setConfig(config)
-      })
-      .finally(() => {
-        setLoading(false)
-      })
-  }, [])
+  // useEffect(() => {
+  //   portalClient
+  //     .getConfig({})
+  //     .then(config => {
+  //       setConfig(config)
+  //     })
+  //     .finally(() => {
+  //       // TOFO: remove
+  //       setConfig(defaultProvider)
+  //       setLoading(false)
+  //     })
+  // }, [])
 
-  if (loading) {
-    return <FallbackSpinner />
-  }
+  // if (loading) {
+  //   return <FallbackSpinner />
+  // }
 
   return <ConfigContext.Provider value={config}>{children}</ConfigContext.Provider>
 }

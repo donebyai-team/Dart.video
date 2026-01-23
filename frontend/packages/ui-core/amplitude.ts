@@ -4,6 +4,12 @@ import { setUser } from '@sentry/browser'
 let amplitudeInitialized = false;
 
 export function initAmplitude(apiKey?: string) {
+    // Check if we're in a browser environment
+    if (typeof window === 'undefined') {
+        console.log('Amplitude initialization skipped on server-side')
+        return
+    }
+
     if (!apiKey) {
         console.log('Amplitude API key not found in env')
         return
@@ -17,6 +23,12 @@ export function initAmplitude(apiKey?: string) {
 }
 
 export function logDailyVisit(customerId: string, productName: string, metadata: Record<string, any> = {}) {
+    // Check if we're in a browser environment
+    if (typeof window === 'undefined') {
+        console.log('Amplitude logging skipped on server-side')
+        return
+    }
+
     // Set user information in Decipher via the Sentry TypeScript SDK
     setUser({
         "id": customerId, // Optional: use if email not available
