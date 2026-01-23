@@ -4,6 +4,7 @@
 A motion graphic template system where users can assemble videos out of multiple slides.
 Each slide can load a **template**, and templates render like a **React UI with runtime-editable values**.
 
+An example motion graphic: [[10K Followers Animation](https://www.animstats.com/templates/ten-k-followers-template)]
 ---
 
 ## 📌 What is a Template?
@@ -40,10 +41,13 @@ Each template belongs to one high-level category:
 
 1. **Infographic**
    Visual representation of information/data (e.g., charts, diagrams).
+   Eg. [[Process Diagram](https://youtu.be/oBcVO_DuxGo?t=40)]
 2. **Textual**
    Templates designed primarily for textual content.
+   Eg.[[10K Followers Animation](https://www.animstats.com/templates/ten-k-followers-template)
 3. **Abstract**
    No text—pure animation (e.g., SVG animation of a person waving).
+   [[A jumping scaler](https://youtu.be/oBcVO_DuxGo?t=2)
 
 ---
 
