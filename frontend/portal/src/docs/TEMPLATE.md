@@ -218,9 +218,176 @@ function MyTemplateAnimation(props, isEditing) {
 }
 ```
 
-The wrapper components handle editing; the template focuses on animation.
+# 🧩 **Template Package Specification**
+
+Each video template is packaged with three JSON files:
+
+```
+/template-name/
+   ├── schema.json
+   ├── defaults.json
+   └── preview.json
+```
+
+This specification ensures:
+
+* LLM can generate valid input props
+* Output can be validated
+* Templates render consistently
+* Editors can preview without user input
 
 ---
+
+# 🧱 **1. `schema.json` — LLM + Validation Schema**
+
+This file defines:
+
+✔ What fields exist in the template
+✔ Whether each field is optional or required
+✔ Styling properties allowed for each field
+✔ Enum restrictions for styling values (optional)
+✔ Repeatable sections (arrays)
+✔ Descriptions to guide LLM generation
+
+> ✨ Note: The schema contains **no default values** and **no rendering metadata**.
+> It exists solely for LLM + validation.
+
+---
+
+### 📦 **Schema Structure Rules**
+
+* Top-level keys = field names directly (e.g., `title`, `subtitle`, `section-left`)
+* Every field may have:
+  * `description`
+  * `optional`
+  * `style` block
+  * `items` block for repeatable arrays
+* All values produced by LLM are **strings**
+* No types are defined — we do not use `string`, `icon`, etc.
+* Enums can restrict values if defined
+
+---
+
+### 📄 **Example `schema.json`**
+
+```json
+{
+  "title": {
+    "description": "Main title of the slide",
+    "optional": false,
+    "style": {
+      "weight": {
+        "optional": true,
+        "enum": ["regular", "medium", "bold"]
+      },
+      "size": {
+        "optional": true,
+        "enum": ["S", "M", "L", "XL", "XXL"]
+      },
+      "color": { "optional": true }
+    }
+  },
+
+  "subtitle": {
+    "description": "Subtitle or supporting statement",
+    "optional": true,
+    "style": {
+      "size": { "optional": true },
+      "color": { "optional": true }
+    }
+  },
+
+  "features": {
+    "description": "List of product features",
+    "min": 1,
+    "max": 6,
+    "optional": false,
+    "style": {
+      "color: { "optional": true } // section level styling
+    },
+    "item": {
+      "text": {
+        "description": "Feature description",
+        "optional": false,
+        "style": {
+          "size": { "optional": true, "enum": ["S", "M"] },
+          "color": { "optional": true }
+        }
+      },
+      "icon": {
+        "description": "Icon representing the feature",
+        "optional": true,
+        "style": {
+          "color": { "optional": true }
+        }
+      }
+    }
+  }
+}
+```
+
+# 📦 **2. `defaults.json` — Flattened Default Values**
+
+This file provides default values for template fields.
+Defaults are merged when LLM output is missing or omits optional fields.
+
+> Format is flat for easy merging.
+
+### 📄 **Example `defaults.json`**
+
+```json
+{
+  "title.value": "Introducing AlphaOS",
+  "title.style.size": "XL",
+  "title.style.weight": "bold",
+  "subtitle.value": "",
+  "features[0].text.value": "Fast performance",
+  "features[0].icon.value": "bolt",
+  "features.min": 1,
+  "features.max": 6
+}
+```
+
+# 📸 **3. `preview.json` — Sample Example Output**
+
+Contains a realistic example populated with content.
+
+Used for:
+
+✔ previewing template selection
+✔ design QA
+✔ regression tests
+
+### 📄 **Example `preview.json`**
+
+```json
+{
+  "title": {
+    "value": "Tesla Autopilot",
+    "style": { "size": "XL", "weight": "bold", "color": "primary" }
+  },
+  "subtitle": {
+    "value": "Self-driving intelligence for everyday travel"
+  },
+  "features": {
+    "style": {
+      "color: "#000"
+    },
+    "min": 1,
+    "max": 6,
+    "items: [
+    {
+      "text": { "value": "Lane keeping & adaptive cruise" },
+      "icon": { "value": "https://ico.png" }
+    },
+    {
+      "text": { "value": "Automatic lane changes" },
+      "icon": { "value": "swap" }
+    }
+  ]
+  }
+}
+```
 
 # 📤 Compiling & Deploying Templates
 
