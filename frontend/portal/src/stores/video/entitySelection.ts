@@ -1,9 +1,10 @@
 import { parseEntityId } from "@/types/selection";
-import { SlideType } from "@/types/slides";
+import { SlideType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { ActiveToolType } from "@/types/tools";
+import { VideoStoreGet, VideoStoreSet } from "./types";
 
-export const createEntitySelectionActions = (set, get) => ({
-    handleSelectEntity(entityId) {
+export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
+    handleSelectEntity(entityId: string) {
         console.debug("[VideoStore] handleSelectEntity", { entityId });
         const { sections } = get();
         set({ selectedEntityId: entityId });
@@ -24,7 +25,7 @@ export const createEntitySelectionActions = (set, get) => ({
                 }
             }
 
-            if (!foundSlide) return;
+            if (!foundSlide || !foundSection) return;
 
             set({ selectedSlide: { section: foundSection, slide: foundSlide } });
 
@@ -34,26 +35,42 @@ export const createEntitySelectionActions = (set, get) => ({
                     selectedStackItemId: null,
                 });
 
-                const obj = get()
-                    .getEffectiveCanvasObjects()
-                    .find((o) => o.id === parsed.overlayId);
-
-                set({
-                    activeTool: obj
-                        ? { type: ActiveToolType.INSERT, tool: obj.type }
-                        : null,
+                const objects = get().getEffectiveCanvasObjects();
+                // Find the object by checking the inner IDs
+                const obj = objects.find((e) => {
+                    switch (e.effect.case) {
+                        case "spotlight":
+                        case "zoom":
+                            return e.effect.value.id === parsed.overlayId;
+                        default:
+                            return false;
+                    }
                 });
+
+                if (obj) {
+                    // Determine the tool type based on the object
+                    let toolType = null;
+                    if ('effect' in obj && obj.effect.case === 'spotlight') {
+                        toolType = 'spotlight';
+                    } else if ('effect' in obj && obj.effect.case === 'zoom') {
+                        toolType = 'zoom';
+                    } 
+
+                    if (toolType) {
+                        set({ activeTool: { type: ActiveToolType.INSERT, tool: toolType } });
+                    }
+                }
             } else if (parsed.type === "stack-item") {
                 set({
                     selectedObjectId: null,
                     selectedStackItemId: parsed.itemId,
-                    activeTool: { type: "stack-settings" },
+                    activeTool: { type: ActiveToolType.STACK_SETTINGS },
                 });
             } else if (parsed.type === "stack-item-overlay") {
                 set({
                     selectedObjectId: parsed.overlayId,
                     selectedStackItemId: parsed.itemId,
-                    activeTool: { type: ActiveToolType.INSERT },
+                    activeTool: { tool: ActiveToolType.INSERT, type: ActiveToolType.INSERT },
                 });
             } else {
                 set({
@@ -95,17 +112,35 @@ export const createEntitySelectionActions = (set, get) => ({
                 set({ activeTool: { type: ActiveToolType.TEXT_ANIMATION_TEMPLATE } });
             }
         } else if (parsed.type === "overlay" || parsed.type === "stack-item-overlay") {
-            const obj = get()
-                .getEffectiveCanvasObjects()
-                .find((o) => o.id === parsed.overlayId);
+            const objects = get().getEffectiveCanvasObjects();
+
+            // Find the object by checking the inner IDs
+            const obj = objects.find((o) => {
+                if ('effect' in o && o.effect.case) {
+                    const effectInnerObj = o.effect.case === 'spotlight' ? o.effect.value :
+                        o.effect.case === 'zoom' ? o.effect.value : null;
+                    return effectInnerObj?.id === parsed.overlayId;
+                } 
+                return false;
+            });
 
             if (obj) {
-                set({ activeTool: { type: ActiveToolType.INSERT, tool: obj.type } });
+                // Determine the tool type based on the object
+                let toolType = null;
+                if ('effect' in obj && obj.effect.case === 'spotlight') {
+                    toolType = 'spotlight';
+                } else if ('effect' in obj && obj.effect.case === 'zoom') {
+                    toolType = 'zoom';
+                } 
+
+                if (toolType) {
+                    set({ activeTool: { type: ActiveToolType.INSERT, tool: toolType } });
+                }
             }
         }
     },
 
-    handleSelectObject(id) {
+    handleSelectObject(id: string | null) {
         const { selectedSlide, selectedStackItemId } = get();
         if (!selectedSlide) return;
 
@@ -113,18 +148,35 @@ export const createEntitySelectionActions = (set, get) => ({
 
         if (id) {
             set({ selectedStackItemId: null });
-            const obj = get()
-                .getEffectiveCanvasObjects()
-                .find((o) => o.id === id);
+            const objects = get().getEffectiveCanvasObjects();
+
+            // Find the object by checking the inner IDs
+            const obj = objects.find((o) => {
+                if ('effect' in o && o.effect.case) {
+                    const effectInnerObj = o.effect.case === 'spotlight' ? o.effect.value :
+                        o.effect.case === 'zoom' ? o.effect.value : null;
+                    return effectInnerObj?.id === id;
+                }
+                return false;
+            });
 
             if (obj) {
-                set({ activeTool: { type: ActiveToolType.INSERT, tool: obj.type } });
+                // Determine the tool type based on the object
+                let toolType = null;
+                if ('effect' in obj && obj.effect.case === 'spotlight') {
+                    toolType = 'spotlight';
+                } else if ('effect' in obj && obj.effect.case === 'zoom') {
+                    toolType = 'zoom';
+                }
+                if (toolType) {
+                    set({ activeTool: { type: ActiveToolType.INSERT, tool: toolType } });
+                }
             }
         } else {
             const slide = selectedSlide.slide;
-            if (slide.type === SlideType.TEXT_ANIMATION) {
+            if (slide?.type === SlideType.TEXT_ANIMATION) {
                 set({ activeTool: { type: ActiveToolType.TEXT_ANIMATION_TEMPLATE } });
-            } else if (slide.type === SlideType.STACK) {
+            } else if (slide?.type === SlideType.STACK) {
                 set({ activeTool: { type: ActiveToolType.STACK_SETTINGS } });
                 const first = (slide.content as any)?.items?.[0];
                 if (first && !selectedStackItemId) {

@@ -5,8 +5,9 @@ import type {
   Section,
   Resolution,
   SlideType,
-  CanvasObjectType
-} from "./slides";
+  CanvasObjectType,
+  TransitionType
+} from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 // ==========================================
 // Project & Metadata
@@ -169,14 +170,14 @@ export interface AnimationConfig {
 // ==========================================
 
 export interface TransitionOption {
-  id: string;
+  id: TransitionType;
   name: string;
   preview: string; // CSS class for preview
 }
 
 export interface TransitionsConfig {
   options: TransitionOption[];
-  default: string;
+  default: TransitionType;
 }
 
 // ==========================================

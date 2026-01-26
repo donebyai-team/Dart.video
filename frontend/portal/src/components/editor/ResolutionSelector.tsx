@@ -6,8 +6,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { resolutions, type Resolution } from "@/types/slides";
 import { useVideoStore } from "@/stores/video";
+import { Resolution } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 const resolutionIcons: Record<string, React.ElementType> = {
   "16:9": Monitor,
@@ -16,17 +16,25 @@ const resolutionIcons: Record<string, React.ElementType> = {
   "1:1": Square,
 };
 
+const resolutions: Resolution[] = [
+  { $typeName: "coasterai.core.v1.Resolution", id: "16:9", name: "Landscape", aspect: "16/9", width: 1920, height: 1080 },
+  { $typeName: "coasterai.core.v1.Resolution", id: "4:3", name: "Standard", aspect: "4/3", width: 1440, height: 1080 },
+  { $typeName: "coasterai.core.v1.Resolution", id: "9:16", name: "Portrait", aspect: "9/16", width: 1080, height: 1920 },
+  { $typeName: "coasterai.core.v1.Resolution", id: "1:1", name: "Square", aspect: "1/1", width: 1080, height: 1080 },
+];
+
+
 const ResolutionSelector = () => {
   const resolution = useVideoStore(s => s.resolution);
   const setResolution = useVideoStore(s => s.setResolution);
-  const Icon = resolutionIcons[resolution.id] || Monitor;
+  const Icon = resolutionIcons[resolution?.id] || Monitor;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2 h-8 text-xs">
           <Icon className="w-3.5 h-3.5" />
-          {resolution.id}
+          {resolution?.id}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

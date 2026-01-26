@@ -1,12 +1,11 @@
 import { useEffect } from "react";
 import { PlayerRef } from "@remotion/player";
-import type { Section } from "@/types/slides";
 import { getSlideAbsoluteEndFrame, getRealSlideStartFrame } from "@/components/editor/frame_calculations";
+import { SlideType, StackSlideContent } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { TimelineSlide } from "@/components/editor/timeline/types";
 
 interface UseRemotionPlayerEventsProps {
   playerRef: React.RefObject<PlayerRef | null>;
-  sections: Section[];
   allSlides: TimelineSlide[];
   selectedSlideId: string;
   selectedStackItemId?: string | null;
@@ -23,7 +22,6 @@ interface UseRemotionPlayerEventsProps {
 
 export function useRemotionPlayerEvents({
   playerRef,
-  sections,
   allSlides,
   selectedSlideId,
   selectedStackItemId,
@@ -66,10 +64,9 @@ export function useRemotionPlayerEvents({
       }
 
       // Check if we've reached the end of the video and pause
-      const allSlides = sections.flatMap(section => section.slides);
       if (allSlides.length > 0) {
         const lastSlide = allSlides[allSlides.length - 1];
-        const lastSlideEndFrame = getSlideAbsoluteEndFrame(sections, lastSlide.id, fps);
+        const lastSlideEndFrame = getSlideAbsoluteEndFrame(allSlides, lastSlide.id, fps);
 
         if (data.detail.frame >= lastSlideEndFrame) {
           console.log(`[RemotionPlayer] Reached end of video at frame ${data.detail.frame}, pausing`);
@@ -87,8 +84,8 @@ export function useRemotionPlayerEvents({
 
       // Find all slides that are rendering at this frame (using internal rendering positions)
       for (const slide of allSlides) {
-        const slideStartFrame = getRealSlideStartFrame(sections, slide.id, fps);
-        const slideEndFrame = getSlideAbsoluteEndFrame(sections, slide.id, fps);
+        const slideStartFrame = getRealSlideStartFrame(allSlides, slide.id, fps);
+        const slideEndFrame = getSlideAbsoluteEndFrame(allSlides, slide.id, fps);
 
         // Check if frame is within this slide's range
         if (data.detail.frame >= slideStartFrame && data.detail.frame <= slideEndFrame) {
@@ -119,12 +116,12 @@ export function useRemotionPlayerEvents({
         }
 
         // Handle stack slide item tracking
-        if (currentSlide.type === "stack" && onStackItemChange) {
-          const content = currentSlide.content as any;
+        if (currentSlide.slide.type === SlideType.STACK && onStackItemChange) {
+          const content = currentSlide.slide.content.value as StackSlideContent;
           const items = content?.items || [];
 
           if (items.length > 0) {
-            const slideStartFrame = getRealSlideStartFrame(sections, currentSlide.id, fps);
+            const slideStartFrame = getRealSlideStartFrame(allSlides, currentSlide.id, fps);
             const frameInSlide = data.detail.frame - slideStartFrame;
             let itemFrameAccumulator = 0;
             let currentItemIndex = 0;
@@ -153,7 +150,7 @@ export function useRemotionPlayerEvents({
 
         // Handle preview slide end detection
         if (previewingSlideId === currentSlide.id) {
-          const slideEndFrame = getSlideAbsoluteEndFrame(sections, currentSlide.id, fps);
+          const slideEndFrame = getSlideAbsoluteEndFrame(allSlides, currentSlide.id, fps);
           if (data.detail.frame >= slideEndFrame) {
             console.log(`[RemotionPlayer] Preview reached end of slide ${currentSlide.id}, pausing at frame ${data.detail.frame}`);
             player.pause();
@@ -184,7 +181,6 @@ export function useRemotionPlayerEvents({
     setIsPlaying,
     setCurrentFrame,
     setPreviewingSlideId,
-    sections,
     isDragging
   ]);
 }

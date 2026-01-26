@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import SlideThumbnail from "./SlideThumbnail";
-import type { Slide, SlideType } from "@/types/slides";
+import { Slide, SlideType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 interface SortableSlideCardProps {
   slide: Slide;
@@ -24,12 +24,12 @@ interface SortableSlideCardProps {
 }
 
 const slideTypeIcons: Record<SlideType, React.ElementType> = {
-  "image": ImageIcon,
-  "text-animation": Type,
-  "infographic": BarChart3,
-  "visual-animation": Sparkles,
-  "video": Film,
-  "stack": Layers,
+  0: ImageIcon,
+  1: Type,
+  2: BarChart3,
+  3: Sparkles,
+  4: Film,
+  5: Layers,
 };
 
 const SortableSlideCard = ({
@@ -66,11 +66,10 @@ const SortableSlideCard = ({
     <div
       ref={setNodeRef}
       style={style}
-      className={`group cursor-pointer rounded-lg overflow-hidden transition-all border ${
-        isSelected
+      className={`group cursor-pointer rounded-lg overflow-hidden transition-all border ${isSelected
           ? "border-primary shadow-sm shadow-primary/10"
           : "border-border/50 hover:border-border"
-      } ${isDragging ? "shadow-lg" : ""}`}
+        } ${isDragging ? "shadow-lg" : ""}`}
       onClick={onSelect}
     >
       <div className="flex gap-2 p-1.5 bg-background">

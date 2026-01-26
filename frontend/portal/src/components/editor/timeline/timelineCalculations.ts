@@ -1,6 +1,5 @@
 // Timeline layout calculation utilities
-
-import { TransitionType } from "@/types/slides";
+import { TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import type {
   TimelineSlide,
   SlideItem,
@@ -81,19 +80,19 @@ function colorClassToHex(colorClass: string): string {
  * - Use PIXELS_PER_SECOND for tile positioning
  * 
  * @param slides - Array of timeline slides
- * @param pixelsPerSecond - Scale factor for time-to-pixels conversion
+ * @param _pixelsPerSecond - Scale factor for time-to-pixels conversion
  * @param fps - Frames per second (default 30)
  * @returns Array of slide items with overlapping regions
  */
 export function calculateRemotionSlideItems(
   slides: TimelineSlide[],
-  pixelsPerSecond: number = DEFAULT_PIXELS_PER_SECOND,
+  _pixelsPerSecond: number = DEFAULT_PIXELS_PER_SECOND,
   fps: number = 30
 ): SlideItem[] {
   const slideItems: SlideItem[] = [];
   let currentFramePosition = 0;
   
-  slides.forEach((slide, index) => {
+  slides.forEach((slide) => {
     // Convert slide duration to frames (source of truth)
     const slideDurationFrames = secondsToFrames(slide.duration, fps);
     
@@ -108,7 +107,7 @@ export function calculateRemotionSlideItems(
     const durationSeconds = framesToSeconds(slideDurationFrames, fps);
     
     // Check if this slide has a transition (creates overlap with next slide)
-    const hasTransition = slide.transition && slide.transition !== TransitionType.NONE;
+    const hasTransition = slide.transition !== TransitionType.TRANSITION_NONE;
     
     slideItems.push({
       type: 'slide',
@@ -210,7 +209,6 @@ export function calculateTransitionItems(
  */
 export function calculateOverlayItems(
   slides: TimelineSlide[],
-  pixelsPerSecond: number = DEFAULT_PIXELS_PER_SECOND
 ): OverlayItem[] {
   const overlays: OverlayItem[] = [];
   let cumulativeTime = 0;
@@ -221,38 +219,16 @@ export function calculateOverlayItems(
     // Process effects
     if (slide.effects && slide.effects.length > 0) {
       slide.effects.forEach((effect) => {
-        const startTime = effect.startTime ?? 0;
-        const endTime = effect.endTime ?? slide.duration;
+        const startTime = effect.effect.value?.startTime ?? 0;
+        const endTime = effect.effect.value?.endTime ?? slide.duration;
         const duration = endTime - startTime;
         
         overlays.push({
           type: 'overlay',
-          id: `overlay-${effect.id}`,
-          overlayId: effect.id,
+          id: `overlay-${effect.effect.value?.id}`,
+          overlayId: effect.effect.value?.id!,
           slideId: slide.id,
-          overlayType: effect.type,
-          startTime: slideStartTime + startTime,
-          duration,
-          trackIndex: 0, // Will be assigned by assignOverlayTracks
-        });
-      });
-    }
-    
-    // Process annotations
-    if (slide.annotations && slide.annotations.length > 0) {
-      slide.annotations.forEach((annotation) => {
-        // Annotations don't have startTime/endTime yet, so they span the entire slide
-        // Default: startTime = 0, endTime = slide.duration
-        const startTime = 0;
-        const endTime = slide.duration;
-        const duration = endTime - startTime;
-        
-        overlays.push({
-          type: 'overlay',
-          id: `overlay-${annotation.id}`,
-          overlayId: annotation.id,
-          slideId: slide.id,
-          overlayType: annotation.type,
+          overlayType: effect.effect.case!,
           startTime: slideStartTime + startTime,
           duration,
           trackIndex: 0, // Will be assigned by assignOverlayTracks
@@ -314,7 +290,7 @@ export function calculateTimelineLayout(
   const slideItems = calculateSlideItems(slides, pixelsPerSecond);
   const transitionItems = calculateTransitionItems(slides, pixelsPerSecond);
   const overlayItems = assignOverlayTracks(
-    calculateOverlayItems(slides, pixelsPerSecond)
+    calculateOverlayItems(slides)
   );
   
   // Group overlays by track index

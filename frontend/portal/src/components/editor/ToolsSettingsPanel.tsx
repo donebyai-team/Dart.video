@@ -5,9 +5,9 @@ import TextAnimationTemplateSettings from "@/components/editor/settings/TextAnim
 import StackSlideSettings from "@/components/editor/settings/StackSlideSettings";
 import VisualAnimationSelector from "@/components/editor/remotion/animations/suggester/VisualAnimationSelector";
 import TextAnimationSelector from "@/components/editor/remotion/animations/suggester/TextAnimationSelector";
-import { SlideType, type CanvasObject, type Section, type Slide, type SlideEffect, type AnnotationObject } from "@/types/slides";
 import { ActiveToolType } from "@/types/tools";
 import { useVideoStore } from "@/stores/video";
+import { AnnotationObject, CanvasObject, SlideEffect, SlideType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 interface ToolsSettingsPanelProps {
     onPreviewTemplate: () => void;
@@ -35,7 +35,6 @@ const ToolsSettingsPanel = ({
     const activeTool = useVideoStore(s => s.activeTool);
     const selectedSlide = useVideoStore(s => s.selectedSlide);
     const selectedObjectId = useVideoStore(s => s.selectedObjectId);
-    const effectiveCanvasObjects = useVideoStore(s => s.getEffectiveCanvasObjects);
     const globalBackgroundColor = useVideoStore(s => s.globalBackgroundColor);
     const handleCloseTool = useVideoStore(s => s.handleCloseTool);
     const getTextAnimationConfig = useVideoStore(s => s.getTextAnimationConfig);
@@ -48,13 +47,20 @@ const ToolsSettingsPanel = ({
 
     if (!activeTool) return null;
 
-    // Get the selected object for spotlight-specific handling
-    // Check both old canvasObjects and new effects/annotations
+    const effectiveCanvasObjects = useVideoStore(s => s.getEffectiveCanvasObjects);
     const selectedObject = selectedObjectId
-        ? effectiveCanvasObjects().find((o) => o.id === selectedObjectId) ||
-        selectedSlide?.slide.effects?.find((e) => e.id === selectedObjectId) ||
-        selectedSlide?.slide.annotations?.find((a) => a.id === selectedObjectId)
+        ? effectiveCanvasObjects().find(e => {
+            switch (e.effect.case) {
+                case "spotlight":
+                case "zoom":
+                    return e.effect.value.id === selectedObjectId;
+                default:
+                    return false;
+            }
+        })
         : undefined;
+
+
 
     return (
         <motion.div
@@ -79,12 +85,12 @@ const ToolsSettingsPanel = ({
                 (() => {
                     const textAnimConfig = getTextAnimationConfig();
                     if (!textAnimConfig) return null;
-                    
-                    const content = selectedSlide?.slide.content as any;            
+
+                    const content = selectedSlide?.slide.content as any;
                     const templateId = content?.template_id;
-                    const templateConfig = content?.template_config || {};                
+                    const templateConfig = content?.template_config || {};
                     if (!templateId) return null;
-                    
+
                     return (
                         <TextAnimationTemplateSettings
                             templateId={templateId}
@@ -93,7 +99,7 @@ const ToolsSettingsPanel = ({
                             onUpdateProps={onUpdateTemplateProps}
                             onClose={handleCloseTool}
                             onApply={onPreviewTemplate}
-                        />             
+                        />
                     );
                 })()}
 
@@ -116,7 +122,7 @@ const ToolsSettingsPanel = ({
                 if (!textAnimConfig) return null;
                 return (
                     <TextAnimationSelector
-                        selectedSlide={selectedSlide}
+                        selectedSlide={selectedSlide!}
                         config={textAnimConfig.templates}
                         onClose={handleCloseTool}
                         onApply={(templateId) => {
@@ -127,8 +133,8 @@ const ToolsSettingsPanel = ({
                 );
             })()}
 
-            {activeTool?.type === ActiveToolType.STACK_SETTINGS && 
-                selectedSlide?.slide.type === SlideType.STACK && 
+            {activeTool?.type === ActiveToolType.STACK_SETTINGS &&
+                selectedSlide?.slide.type === SlideType.STACK &&
                 onUpdateSlide && (
                     <StackSlideSettings
                         slide={selectedSlide?.slide}
@@ -139,7 +145,7 @@ const ToolsSettingsPanel = ({
                         onClose={handleCloseTool}
                         onPreview={onSpotlightPlay}
                     />
-            )}
+                )}
 
             {activeTool?.type === ActiveToolType.INSERT && selectedObjectId && (
                 <InsertSettings
@@ -171,8 +177,8 @@ const ToolsSettingsPanel = ({
                     // Spotlight-specific props
                     slideDuration={selectedSlide?.slide.duration}
                     slideStartTime={0}
-                    onApply={selectedObject?.type === "spotlight" ? onSpotlightApply : undefined}
-                    onPlay={selectedObject?.type === "spotlight" ? onSpotlightPlay : undefined}
+                    onApply={selectedObject?.effect.case === "spotlight" ? onSpotlightApply : undefined}
+                    onPlay={selectedObject?.effect.case === "spotlight" ? onSpotlightPlay : undefined}
                 />
             )}
         </motion.div>

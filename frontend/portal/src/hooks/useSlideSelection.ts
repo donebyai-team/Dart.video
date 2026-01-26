@@ -25,7 +25,7 @@ export function useSlideSelection({
   isDragging = false,
 }: UseSlideSelectionProps) {
   const prevSelectedSlideIdRef = useRef<string>(selectedSlideId);
-  
+  console.log("ewrfwefwef", selectedSlideId)
   useEffect(() => {
     // Skip slide selection logic during dragging
     if (isDragging) return;

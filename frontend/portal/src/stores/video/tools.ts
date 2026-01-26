@@ -1,4 +1,4 @@
-import { SlideType } from "@/types/slides";
+import { SlideType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { ActiveToolType } from "@/types/tools";
 
 export const createToolActions = (set, get) => ({

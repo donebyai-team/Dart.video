@@ -1,5 +1,5 @@
+import { Slide, SlideType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { useMemo } from "react";
-import type { Slide } from "@/types/slides";
 
 interface SlideThumbnailProps {
   slide: Slide;
@@ -7,20 +7,20 @@ interface SlideThumbnailProps {
 }
 
 // Mini version of slide preview for storyboard cards - matches RemotionSlideshow final state
-const SlideThumbnail = ({ slide, animationStyle = 0 }: SlideThumbnailProps) => {
+const SlideThumbnail = ({ slide}: SlideThumbnailProps) => {
   const renderContent = useMemo(() => {
     switch (slide.type) {
-      case "text-animation":
+      case SlideType.TEXT_ANIMATION:
         return <TextAnimationThumbnail slide={slide} />;
-      case "visual-animation":
+      case SlideType.VISUAL_ANIMATION:
         return <VisualAnimationThumbnail slide={slide} />;
-      case "infographic":
+      case SlideType.INFOGRAPHIC:
         return <InfographicThumbnail slide={slide} />;
-      case "video":
+      case SlideType.VIDEO:
         return <VideoThumbnail slide={slide} />;
-      case "stack":
+      case SlideType.STACK:
         return <StackThumbnail slide={slide} />;
-      case "image":
+      case SlideType.IMAGE:
       default:
         return <ImageThumbnail slide={slide} />;
     }

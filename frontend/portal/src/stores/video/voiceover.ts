@@ -1,4 +1,6 @@
-export const createVoiceoverActions = (set, get) => ({
+import { VideoStoreSet, VideoStoreGet } from "./types";
+
+export const createVoiceoverActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     handleGenerateSlideVoiceover() {
         const { selectedSlide, sections } = get();
         if (!selectedSlide) return;
@@ -24,9 +26,9 @@ export const createVoiceoverActions = (set, get) => ({
         }, 1500);
     },
 
-    setShowVoiceover: (show) => set({ showVoiceover: show }),
+    setShowVoiceover: (show: boolean) => set({ showVoiceover: show }),
 
-    handleGenerateSectionVoiceover(sectionId) {
+    handleGenerateSectionVoiceover(sectionId: string) {
         const { sections } = get();
         set({ generatingSectionVoiceover: sectionId });
 

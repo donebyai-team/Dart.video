@@ -21,11 +21,12 @@ import {
 import PlayerCanvas from "./PlayerCanvas";
 import PlayerTimeline from "../timeline/PlayerTimeline";
 import PlayerToolbar from "../PlayerToolbar";
-import {  usePlayerControls, type PlayerControls } from "@/hooks/usePlayerControls";
+import { usePlayerControls, type PlayerControls } from "@/hooks/usePlayerControls";
 import { useRemotionPlayerEvents } from "@/hooks/useRemotionPlayerEvents";
 import { useSlideSelection } from "@/hooks/useSlideSelection";
 import { calculateRealTotalFrames, calculateTotalFrames, getRealSlideStartFrame, getSlideVisualEndFrame } from "../frame_calculations";
 import { useVideoStore } from "@/stores/video";
+import { SlideType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 interface RemotionPlayerProps {
   onSlideChange?: (slideId: string) => void;
@@ -55,15 +56,15 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   const fullscreenContainerRef = useRef<HTMLDivElement>(null);
   const sections = useVideoStore(s => s.sections);
   const resolution = useVideoStore(s => s.resolution);
-  const selectedSlide = useVideoStore(s => s.selectedSlide).slide;
+  const selectedSlide = useVideoStore(s => s.selectedSlide)?.slide;
   const selectedStackItemId = useVideoStore(s => s.selectedStackItemId);
   const onSelectObject = useVideoStore(s => s.handleSelectObject);
   const onSelectTool = useVideoStore(s => s.handleSelectTool);
   const fps = useVideoStore(s => s.getFPS)();
-  const selectedSlideId = selectedSlide.id;
+  const selectedSlideId = selectedSlide?.id;
 
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentFrame, setCurrentFrame] = useState(getSlideVisualEndFrame(sections, selectedSlideId, fps));
+
   const [volume, setVolume] = useState([80]);
   const [isMuted, setIsMuted] = useState(false);
   const [scale, setScale] = useState(1);
@@ -71,16 +72,22 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isDraggingTimeline, setIsDraggingTimeline] = useState(false);
 
-  const totalFrames = calculateRealTotalFrames(sections, fps); // For Remotion player
-  const uiTotalFrames = calculateTotalFrames(sections, fps); // For UI timeline
+  // Get all slides flattened with section info and overlay data
+  const allSlides = useVideoStore(s => s.getTimelineSlides)()
+
+  const [currentFrame, setCurrentFrame] = useState(getSlideVisualEndFrame(allSlides, selectedSlideId, fps));
+  const totalFrames = calculateRealTotalFrames(allSlides, fps); // For Remotion player
+  const uiTotalFrames = calculateTotalFrames(allSlides, fps); // For UI timeline
+
   const totalDuration = totalFrames / fps;
   const uiTotalDuration = uiTotalFrames / fps;
   const currentTime = currentFrame / fps;
 
+
   // To start the video player from the first visible slide
-  useEffect(()=> {
+  useEffect(() => {
     controls.seekToFrame(currentFrame);
-  },[])
+  }, [])
 
   // Use centralized player controls
   const controls = usePlayerControls(
@@ -94,27 +101,6 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
     setPreviewingSlideId,
     fps,
   );
-
-  // Get all slides flattened with section info and overlay data
-  const allSlides = sections.flatMap(s => s.slides.map(slide => {
-    // For stack slides, calculate actual duration from nested items
-    let actualDuration = slide.duration;
-    if (slide.type === "stack" && slide.content) {
-      const stackContent = slide.content as any;
-      if (stackContent.items && Array.isArray(stackContent.items)) {
-        actualDuration = stackContent.items.reduce((sum: number, item: any) => sum + (item.duration || 0), 0);
-      }
-    }
-
-    return {
-      ...slide,
-      duration: actualDuration,
-      sectionColor: s.color,
-      sectionTitle: s.title,
-      effects: slide.effects || [],
-      annotations: slide.annotations || [],
-    };
-  }));
 
   // Use custom hooks for event handling and slide selection
   useRemotionPlayerEvents({
