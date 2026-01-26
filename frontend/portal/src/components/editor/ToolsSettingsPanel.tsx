@@ -7,7 +7,7 @@ import VisualAnimationSelector from "@/components/editor/remotion/animations/sug
 import TextAnimationSelector from "@/components/editor/remotion/animations/suggester/TextAnimationSelector";
 import { ActiveToolType } from "@/types/tools";
 import { useVideoStore } from "@/stores/video";
-import { AnnotationObject, CanvasObject, SlideEffect, SlideType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { AnimationSlideContent, AnnotationObject, CanvasObject, SlideEffect, SlideType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 interface ToolsSettingsPanelProps {
     onPreviewTemplate: () => void;
@@ -86,10 +86,12 @@ const ToolsSettingsPanel = ({
                     const textAnimConfig = getTextAnimationConfig();
                     if (!textAnimConfig) return null;
 
-                    const content = selectedSlide?.slide.content as any;
-                    const templateId = content?.template_id;
-                    const templateConfig = content?.template_config || {};
+                    const content = selectedSlide?.slide.content.value as AnimationSlideContent;
+                    const templateId = content?.templateId;
+                    const templateConfig = content?.templateConfig || {};
+                    console.log("ewrfwefwef tem", templateConfig)
                     if (!templateId) return null;
+                    console.log("ewrfwefwef tem", templateId)
 
                     return (
                         <TextAnimationTemplateSettings

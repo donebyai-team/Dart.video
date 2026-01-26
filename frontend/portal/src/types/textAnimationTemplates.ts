@@ -1,18 +1,17 @@
 // Re-export types from editor.ts for backward compatibility
 export type {
-  TextAnimationTemplateId,
   TemplateProperty,
   TextAnimationTemplate,
   TextAnimationTemplateConfig,
   TextAnimationTemplatesConfig,
 } from "./editor";
 
-import type { TextAnimationTemplate, TextAnimationTemplateId } from "./editor";
+import type { TextAnimationTemplate } from "./editor";
 
 // Helper to get template by ID from a templates array
 export const getTemplateById = (
   templates: TextAnimationTemplate[],
-  id: TextAnimationTemplateId
+  id: string
 ): TextAnimationTemplate | undefined => {
   return templates.find((t) => t.id === id);
 };
@@ -20,7 +19,7 @@ export const getTemplateById = (
 // Helper to get default props for a template
 export const getDefaultTemplateProps = (
   templates: TextAnimationTemplate[],
-  templateId: TextAnimationTemplateId
+  templateId: string
 ): Record<string, string | number> => {
   const template = getTemplateById(templates, templateId);
   if (!template) return {};

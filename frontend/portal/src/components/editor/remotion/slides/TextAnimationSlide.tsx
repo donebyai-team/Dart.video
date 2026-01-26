@@ -1,6 +1,5 @@
 import React from "react";
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
-import type { Slide } from "@/types/slides";
 import {
   WordRevealAnimation,
   LetterCascadeAnimation,
@@ -10,6 +9,8 @@ import {
 } from "../animations/TextAnimations";
 import { AnimatedBackground } from "../effects/AnimatedBackground";
 import { TemplateContainer } from "../components/TemplateContainer";
+import { AnimationSlideContent, Slide } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { TemplateConfig } from "./InfographicSlide";
 
 interface TextAnimationSlideProps {
   slide: Slide;
@@ -38,9 +39,9 @@ export const TextAnimationSlide: React.FC<TextAnimationSlideProps> = ({
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
 
-  const content = slide.content as any;
-  const templateId = content?.template_id || "text-reveal";
-  const templateConfig = content?.template_config || {};
+  const content = slide.content.value as AnimationSlideContent;
+  const templateId = content?.templateId || "text-reveal";
+  const templateConfig = (content?.templateConfig ?? {}) as TemplateConfig;
 
   // Use slide's background color or fall back to default
   const defaultGradients = [
@@ -66,10 +67,10 @@ export const TextAnimationSlide: React.FC<TextAnimationSlideProps> = ({
 
       {/* Template content in container */}
       <TemplateContainer
-        x={templateConfig.x}
-        y={templateConfig.y}
-        width={templateConfig.width}
-        height={templateConfig.height}
+        x={templateConfig.x as number}
+        y={templateConfig.y as number}
+        width={templateConfig.width as number}
+        height={templateConfig.height as number}
         canvasWidth={width}
         canvasHeight={height}
         isEditing={isEditing}
@@ -78,11 +79,12 @@ export const TextAnimationSlide: React.FC<TextAnimationSlideProps> = ({
           if (onUpdate && content) {
             onUpdate({
               content: {
-                ...content,
-                template_config: {
+                case: "animation",
+                value: {
+                  ...content,
                   ...templateConfig,
                   ...updates,
-                },
+                }
               },
             });
           }
@@ -96,7 +98,7 @@ export const TextAnimationSlide: React.FC<TextAnimationSlideProps> = ({
             templateConfig={templateConfig}
             frame={frame}
             fps={fps}
-            width={templateConfig.width || width * 0.8}
+            width={templateConfig.width as number || width * 0.8}
             durationInFrames={durationInFrames}
           />
         </div>
@@ -367,7 +369,7 @@ const TemplateTextAnimationRenderer: React.FC<{
       const text = readString("text", slide.transcript || "");
       const fontSize = readNumber("fontSize", 72);
       const color = readString("color", "#ffffff");
-      
+
       return (
         <div style={centerStyle}>
           <span

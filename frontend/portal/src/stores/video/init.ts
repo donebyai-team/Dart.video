@@ -5,18 +5,18 @@ import { EditorConfig, VideoConfig, EditorCallbacks } from "@/types/editor";
 
 export const createInitActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   initialize(config: EditorConfig, videoConfig: VideoConfig, callbacks?: EditorCallbacks) {
-    console.log("Store initialize called with:", { 
-      config: !!config, 
-      videoConfig: !!videoConfig, 
-      sections: videoConfig?.sections?.length 
+    console.log("Store initialize called with:", {
+      config: !!config,
+      videoConfig: !!videoConfig,
+      sections: videoConfig?.sections?.length
     });
 
     const currentState = get();
-    
+
     // Prevent double initialization in React Strict Mode
-    if (currentState.isInitialized && 
-        currentState.config === config && 
-        currentState.videoConfig === videoConfig) {
+    if (currentState.isInitialized &&
+      currentState.config === config &&
+      currentState.videoConfig === videoConfig) {
       console.log("Skipping duplicate initialization");
       return;
     }
@@ -30,8 +30,8 @@ export const createInitActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     const firstSection: Section | undefined = videoConfig.sections[0];
     const firstSlide: Slide | undefined = firstSection?.slides[0];
 
-    console.log("First section/slide:", { 
-      firstSection: !!firstSection, 
+    console.log("First section/slide:", {
+      firstSection: !!firstSection,
       firstSlide: !!firstSlide,
       sectionId: firstSection?.id,
       slideId: firstSlide?.id
@@ -39,11 +39,12 @@ export const createInitActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
 
     const defaultSlide: Slide = {
       id: "",
+      $typeName: "coasterai.core.v1.Slide",
       type: SlideType.TEXT_ANIMATION,
       transcript: "",
       duration: 2,
       content: {
-        case: "textAnimation",
+        case: "animation",
         value: {
           templateId: "text-reveal",
           templateConfig: {
@@ -57,13 +58,14 @@ export const createInitActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       },
       effects: [],
       annotations: [],
+      subSlides: [],
     };
 
     const selectedSlide = firstSlide
       ? { section: firstSection, slide: firstSlide }
       : firstSection
-      ? { section: firstSection, slide: defaultSlide }
-      : null;
+        ? { section: firstSection, slide: defaultSlide }
+        : null;
 
     console.log("Setting state with selectedSlide:", !!selectedSlide);
 

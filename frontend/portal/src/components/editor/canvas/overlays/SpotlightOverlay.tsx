@@ -1,5 +1,5 @@
+import { CanvasObject, Resolution } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { useState, useRef, useCallback, useEffect } from "react";
-import type { CanvasObject, Resolution } from "@/types/slides";
 
 interface SpotlightOverlayProps {
   spotlight: CanvasObject;
@@ -17,7 +17,6 @@ const SpotlightOverlay = ({
   spotlight,
   resolution,
   containerWidth,
-  containerHeight,
   isSelected,
   onSelect,
   onUpdate,

@@ -1,6 +1,6 @@
 
 import { ActiveToolType } from "@/types/tools";
-import { SlideType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { Slide, SlideType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { getSlideTypeConfig } from "./utils";
 import { getDefaultTemplateProps } from "@/types/textAnimationTemplates";
 import { VideoStoreSet, VideoStoreGet } from "./types";
@@ -65,10 +65,10 @@ export const createTextAnimationActions = (set: VideoStoreSet, get: VideoStoreGe
             value: {
               ...slide.content.value,
               templateId,
-              templateConfig: newTemplateConfig,
+              ...newTemplateConfig,
             },
           },
-        },
+        } as Slide,
       },
       activeTool: { type: ActiveToolType.TEXT_ANIMATION_TEMPLATE },
     });
@@ -121,7 +121,7 @@ export const createTextAnimationActions = (set: VideoStoreSet, get: VideoStoreGe
               templateConfig: newConfig,
             },
           },
-        },
+        } as Slide,
       },
     });
   }

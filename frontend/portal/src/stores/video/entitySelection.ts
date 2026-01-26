@@ -1,5 +1,5 @@
 import { parseEntityId } from "@/types/selection";
-import { SlideType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { SlideType, StackSlideContent } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { ActiveToolType } from "@/types/tools";
 import { VideoStoreGet, VideoStoreSet } from "./types";
 
@@ -104,7 +104,7 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
             if (foundSlide.type === SlideType.STACK) {
                 set({ activeTool: { type: ActiveToolType.STACK_SETTINGS } });
 
-                const items = (foundSlide.content as any)?.items || [];
+                const items = (foundSlide.content.value as StackSlideContent)?.items || [];
                 if (items[0] && !selectedStackItemId) {
                     set({ selectedStackItemId: items[0].id });
                 }
@@ -178,7 +178,7 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
                 set({ activeTool: { type: ActiveToolType.TEXT_ANIMATION_TEMPLATE } });
             } else if (slide?.type === SlideType.STACK) {
                 set({ activeTool: { type: ActiveToolType.STACK_SETTINGS } });
-                const first = (slide.content as any)?.items?.[0];
+                const first = (slide.content.value as StackSlideContent)?.items?.[0];
                 if (first && !selectedStackItemId) {
                     set({ selectedStackItemId: first.id });
                 }

@@ -111,18 +111,6 @@ export interface TextAnimationDefaults {
 // Text Animation Template Configuration
 // ==========================================
 
-export type TextAnimationTemplateId =
-  | "number-counter"
-  | "text-reveal"
-  | "typewriter"
-  | "word-by-word"
-  | "letter-cascade"
-  | "scale-bounce"
-  | "blur-in"
-  | "gradient-text"
-  | "split-text"
-  | "countdown";
-
 export interface TemplateProperty {
   key: string;
   label: string;
@@ -135,7 +123,7 @@ export interface TemplateProperty {
 }
 
 export interface TextAnimationTemplate {
-  id: TextAnimationTemplateId;
+  id: string;
   name: string;
   description: string;
   category: "numbers" | "text" | "effects";
@@ -144,13 +132,13 @@ export interface TextAnimationTemplate {
 }
 
 export interface TextAnimationTemplateConfig {
-  templateId: TextAnimationTemplateId;
+  templateId: string;
   props: Record<string, string | number>;
 }
 
 export interface TextAnimationTemplatesConfig {
   templates: TextAnimationTemplate[];
-  defaultTemplateId: TextAnimationTemplateId;
+  defaultTemplateId: string;
   categoryLabels: Record<string, string>;
   categoryIcons: Record<string, string>;
 }

@@ -1,4 +1,4 @@
-import { Slide, SlideType, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { Slide, SlideType, StackSlideContent, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { arrayMove } from "@dnd-kit/sortable";
 import { getSlideTypeConfig } from "./utils";
 import { createOverlayEntityId, createSlideEntityId, createStackItemEntityId, createStackItemOverlayEntityId } from "@/types/selection";
@@ -193,7 +193,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
             // For stack slides, calculate actual duration from nested items
             let actualDuration = slide.duration;
             if (slide.type === SlideType.STACK && slide.content) {
-                const stackContent = slide.content as any;
+                const stackContent = slide.content.value as StackSlideContent;
                 if (stackContent.items && Array.isArray(stackContent.items)) {
                     actualDuration = stackContent.items.reduce((sum: number, item: any) => sum + (item.duration || 0), 0);
                 }

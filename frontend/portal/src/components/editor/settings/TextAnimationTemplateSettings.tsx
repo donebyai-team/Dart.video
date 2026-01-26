@@ -12,7 +12,7 @@ import {
 } from "@/types/textAnimationTemplates";
 
 interface TextAnimationTemplateSettingsProps {
-  templateId: TextAnimationTemplateId;
+  templateId: string;
   templates: TextAnimationTemplate[];
   props: Record<string, string | number>;
   onUpdateProps: (props: Record<string, string | number>) => void;
@@ -29,6 +29,7 @@ const TextAnimationTemplateSettings = ({
   onApply,
 }: TextAnimationTemplateSettingsProps) => {
   const template = getTemplateById(templates, templateId);
+  console.log("template", template)
 
   if (!template) {
     return (

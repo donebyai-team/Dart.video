@@ -6,7 +6,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useState } from "react";
 import { InsertToolType, ActiveToolType } from "@/types/tools";
 import { useVideoStore } from "@/stores/video";
-import { SlideType, Slide } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { SlideType, Slide, StackSlideContent } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 interface PlayerToolbarProps {
   onDurationChange: (newDuration: number) => void;
@@ -47,7 +47,7 @@ const PlayerToolbar = ({
   if (!selectedSlide) return
   let slide = selectedSlide.slide;
   if (selectedSlide?.slide?.type === SlideType.STACK && selectedStackItemId) {
-    const content = selectedSlide.slide.content as any;
+    const content = selectedSlide.slide.content.value as StackSlideContent;
     const selectedItem = content?.items?.find((item: Slide) => item.id === selectedStackItemId);
     if (selectedItem) {
       slide = selectedItem;

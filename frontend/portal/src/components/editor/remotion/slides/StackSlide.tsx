@@ -1,4 +1,4 @@
-import { Slide, StackSlideContent, StackAnimationMode, SlideType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { Slide, StackSlideContent, StackAnimationMode, SlideType, ImageSlideContent } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import React from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
 
@@ -86,7 +86,7 @@ export const StackSlide: React.FC<StackSlideProps> = ({
         
         // Get image source from item's content
         // NEW ARCHITECTURE: Image slides have src directly in content
-        const itemContent = item.content as any;
+        const itemContent = item.content.value as ImageSlideContent;
         const imageSrc = itemContent?.src || "";
 
         if (animationMode === StackAnimationMode.STACK) {

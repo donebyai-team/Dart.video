@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import SortableSlideCard from "@/components/editor/SortableSlideCard";
 import AddSlideButton from "@/components/editor/AddSlideButton";
-import { Slide, Section, StackAnimationMode, StackSlideContent, SlideType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { Slide, Section, StackAnimationMode, StackSlideContent, SlideType, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 interface StackSlideSettingsProps {
   slide: Slide;
@@ -58,17 +58,15 @@ const StackSlideSettings: React.FC<StackSlideSettingsProps> = ({
   }, [items, selectedItemId, onSelectItem]);
 
   const updateContent = (updates: Partial<StackSlideContent>) => {
-//     onUpdateSlide({
-//       content: {
-//         case: "image",
-//         value: {
-// $typeName: "coasterai.core.v1.ImageSlideContent",
-//         animationMode: content?.animationMode || StackAnimationMode.STACK,
-//         items: content?.items || [],
-//         }      
-//         ...updates
-//       }
-//     });
+    onUpdateSlide({
+      content: {
+        case: "stack",
+        value: {
+          animationMode: content?.animationMode || StackAnimationMode.STACK,
+          ...updates
+        }
+      }
+    } as Slide);
   };
 
   const addItem = (type: SlideType) => {
@@ -84,6 +82,7 @@ const StackSlideSettings: React.FC<StackSlideSettingsProps> = ({
       annotations: [],
       subSlides: [],
       effects: [],
+      transition: TransitionType.TRANSITION_NONE,
       backgroundColor: slide.backgroundColor,
       content: type === SlideType.IMAGE ? {
         case: "image",
@@ -125,8 +124,11 @@ const StackSlideSettings: React.FC<StackSlideSettingsProps> = ({
       items: items.map((i: Slide) => i.id === itemId ? {
         ...i,
         content: {
-          ...(i.content as any),
-          src: imageSrc
+          case: "image",
+          value: {
+            ...i.content.value,
+            src: imageSrc
+          }
         }
       } as Slide : i)
     });

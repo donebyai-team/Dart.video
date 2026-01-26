@@ -46,7 +46,7 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({
     src: imageContent.src || '',
     x: imageContent.x ?? 0,
     y: imageContent.y ?? 0,
-    width: imageContent.width ?? width,
+    width: imageContent.width as number ?? width,
     height: imageContent.height ?? height,
     rotation: imageContent.rotation ?? 0,
   } : null;

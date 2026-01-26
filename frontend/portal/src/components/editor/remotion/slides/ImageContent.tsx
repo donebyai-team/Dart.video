@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { Img } from "remotion";
-import type { Resolution } from "@/types/slides";
 import React from "react";
+import { Resolution } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 interface ImageContentProps {
   image: {

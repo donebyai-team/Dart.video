@@ -54,14 +54,12 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
 }, ref) => {
   const playerRef = useRef<PlayerRef>(null);
   const fullscreenContainerRef = useRef<HTMLDivElement>(null);
-  const sections = useVideoStore(s => s.sections);
   const resolution = useVideoStore(s => s.resolution);
   const selectedSlide = useVideoStore(s => s.selectedSlide)?.slide;
   const selectedStackItemId = useVideoStore(s => s.selectedStackItemId);
   const onSelectObject = useVideoStore(s => s.handleSelectObject);
-  const onSelectTool = useVideoStore(s => s.handleSelectTool);
   const fps = useVideoStore(s => s.getFPS)();
-  const selectedSlideId = selectedSlide?.id;
+  const selectedSlideId = selectedSlide?.id || "";
 
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -92,8 +90,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   // Use centralized player controls
   const controls = usePlayerControls(
     playerRef,
-    sections,
-    selectedSlide.id,
+    allSlides,
     currentFrame,
     totalFrames,
     isPlaying,
@@ -105,7 +102,6 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   // Use custom hooks for event handling and slide selection
   useRemotionPlayerEvents({
     playerRef,
-    sections,
     allSlides,
     selectedSlideId,
     selectedStackItemId,
@@ -121,11 +117,12 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
 
   useSlideSelection({
     selectedSlideId,
-    sections,
+    allSlides,
     isPlaying,
     previewingSlideId,
     controls,
     setCurrentFrame,
+    fps,
     isDragging: isDraggingTimeline, // Pass dragging state to prevent interference
   });
 
@@ -206,7 +203,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   return (
     <div ref={fullscreenContainerRef} className="flex flex-col h-full">
       {/* Unified Player Toolbar - includes duration control and slide editing tools */}
-      {!isFullscreen && onDurationChange && onSelectTool && (
+      {!isFullscreen && onDurationChange && (
         <PlayerToolbar
           onDurationChange={(newDuration) => onDurationChange(selectedSlideId, newDuration)}
         />

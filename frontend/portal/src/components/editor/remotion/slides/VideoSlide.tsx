@@ -1,7 +1,7 @@
+import { Slide, SlideEffect, VideoSlideContent } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import React from "react";
 import { AbsoluteFill, Img, spring, useCurrentFrame, useVideoConfig } from "remotion";
-import type { Slide, VideoSlideContent, SpotlightEffect as SpotlightEffectType } from "@/types/slides";
-import { SpotlightEffect } from "../effects/SpotlightEffect";
+import { SpotlightEffect } from "../effects";
 
 interface VideoSlideProps {
   slide: Slide;
@@ -33,12 +33,16 @@ export const VideoSlide: React.FC<VideoSlideProps> = ({
   });
 
   // Extract content and effects directly
-  const videoContent = slide.content as VideoSlideContent | undefined;
-  const effects = slide.effects || [];
-  const spotlights = effects.filter((e) => e.type === "spotlight") as SpotlightEffectType[];
-
+  const videoContent = slide.content.value as VideoSlideContent;
+const effects = slide.effects || [];
+  const spotlightEffects = effects.flatMap((e: SlideEffect) => {
+    if (e.effect.case === "spotlight" && e.effect.value) {
+      return [e.effect.value];
+    }
+    return [];
+  });
   // Get video source from content (new architecture) or fallback to old structure
-  const videoSrc = videoContent?.src || (videoContent as any)?.video?.src || "";
+  const videoSrc = videoContent?.src
 
   return (
     <AbsoluteFill
@@ -66,7 +70,7 @@ export const VideoSlide: React.FC<VideoSlideProps> = ({
       </div>
 
       {/* Render spotlight effects at CANVAS level */}
-      {spotlights.map((spotlight) => (
+      {spotlightEffects.map((spotlight) => (
         <SpotlightEffect
           key={spotlight.id}
           spotlight={spotlight}

@@ -1,7 +1,7 @@
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { SlideType } from "@/types/slides";
+import { SlideType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 interface SlideTypeOption {
   id: SlideType;

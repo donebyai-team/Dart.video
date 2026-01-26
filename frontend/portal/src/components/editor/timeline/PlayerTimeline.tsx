@@ -154,21 +154,7 @@ const PlayerTimeline = ({
   }, [totalFrames, onSeek, onDraggingChange]);
 
   // Timeline width based on actual Remotion duration (with overlapping transitions)
-  const realTotalFrames = useMemo(() => {
-    // Convert slides to sections format for calculation
-    const sections = [{
-      id: 'timeline-section',
-      title: 'Timeline',
-      color: 'bg-primary',
-      slides: slides.map(s => ({
-        id: s.id,
-        duration: s.duration,
-        transition: s.transition,
-        type: SlideType.IMAGE,
-        transcript: '', // Required property
-        content: { type: 'image', src: '' } as any
-      }))
-    }];
+  const realTotalFrames = useMemo(() => {   
     return calculateRealTotalFrames(slides, fps);
   }, [slides, fps]);
 
