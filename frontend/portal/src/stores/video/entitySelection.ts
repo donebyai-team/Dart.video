@@ -1,5 +1,5 @@
 import { parseEntityId } from "@/types/selection";
-import { CanvasObjectType, SlideType, StackSlideContent } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { CanvasObjectType, SlideType, SpotlightEffect, StackSlideContent } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { ActiveToolType } from "@/types/tools";
 import { VideoStoreGet, VideoStoreSet } from "./types";
 
@@ -35,30 +35,15 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
                     selectedStackItemId: null,
                 });
 
-                const objects = get().getEffectiveCanvasObjects();
+                // TODO: Iterate over spotlights, zoom etc and set the tool accordingly
+                const objects = get().getSpotlights();
                 // Find the object by checking the inner IDs
-                const obj = objects.find((e) => {
-                    switch (e.effect.case) {
-                        case "spotlight":
-                        case "zoom":
-                            return e.effect.value.id === parsed.overlayId;
-                        default:
-                            return false;
-                    }
+                const obj = objects.find((e: SpotlightEffect) => {
+                    return e.id === parsed.overlayId;
                 });
 
                 if (obj) {
-                    // Determine the tool type based on the object
-                    let toolType = null;
-                    if (obj.effect.case === 'spotlight') {
-                        toolType = CanvasObjectType.CANVAS_SPOTLIGHT;
-                    } else if ('effect' in obj && obj.effect.case === 'zoom') {
-                        toolType = CanvasObjectType.CANVAS_CALLOUT;
-                    } 
-
-                    if (toolType) {
-                        set({ activeTool: { type: ActiveToolType.INSERT, tool: toolType } });
-                    }
+                    set({ activeTool: { type: ActiveToolType.INSERT, tool: CanvasObjectType.CANVAS_SPOTLIGHT } });
                 }
             } else if (parsed.type === "stack-item") {
                 set({
@@ -112,30 +97,14 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
                 set({ activeTool: { type: ActiveToolType.TEXT_ANIMATION_TEMPLATE } });
             }
         } else if (parsed.type === "overlay" || parsed.type === "stack-item-overlay") {
-            const objects = get().getEffectiveCanvasObjects();
-
+            const objects = get().getSpotlights();
             // Find the object by checking the inner IDs
-            const obj = objects.find((o) => {
-                if ('effect' in o && o.effect.case) {
-                    const effectInnerObj = o.effect.case === 'spotlight' ? o.effect.value :
-                        o.effect.case === 'zoom' ? o.effect.value : null;
-                    return effectInnerObj?.id === parsed.overlayId;
-                } 
-                return false;
+            const obj = objects.find((e: SpotlightEffect) => {
+                return e.id === parsed.overlayId;
             });
 
             if (obj) {
-                // Determine the tool type based on the object
-                 let toolType = null;
-                    if (obj.effect.case === 'spotlight') {
-                        toolType = CanvasObjectType.CANVAS_SPOTLIGHT;
-                    } else if ('effect' in obj && obj.effect.case === 'zoom') {
-                        toolType = CanvasObjectType.CANVAS_CALLOUT;
-                    } 
-
-                if (toolType) {
-                    set({ activeTool: { type: ActiveToolType.INSERT, tool: toolType } });
-                }
+                set({ activeTool: { type: ActiveToolType.INSERT, tool: CanvasObjectType.CANVAS_SPOTLIGHT } });
             }
         }
     },
@@ -148,29 +117,14 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
 
         if (id) {
             set({ selectedStackItemId: null });
-            const objects = get().getEffectiveCanvasObjects();
+            const objects = get().getSpotlights();
 
             // Find the object by checking the inner IDs
-            const obj = objects.find((o) => {
-                if ('effect' in o && o.effect.case) {
-                    const effectInnerObj = o.effect.case === 'spotlight' ? o.effect.value :
-                        o.effect.case === 'zoom' ? o.effect.value : null;
-                    return effectInnerObj?.id === id;
-                }
-                return false;
+            const obj = objects.find((e: SpotlightEffect) => {
+                return e.id === id;
             });
-
             if (obj) {
-                // Determine the tool type based on the object
-                let toolType = null;
-                    if (obj.effect.case === 'spotlight') {
-                        toolType = CanvasObjectType.CANVAS_SPOTLIGHT;
-                    } else if ('effect' in obj && obj.effect.case === 'zoom') {
-                        toolType = CanvasObjectType.CANVAS_CALLOUT;
-                    } 
-                if (toolType) {
-                    set({ activeTool: { type: ActiveToolType.INSERT, tool: toolType } });
-                }
+                set({ activeTool: { type: ActiveToolType.INSERT, tool: CanvasObjectType.CANVAS_SPOTLIGHT } });
             }
         } else {
             const slide = selectedSlide.slide;

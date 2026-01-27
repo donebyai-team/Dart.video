@@ -34,13 +34,6 @@ export const VideoSlide: React.FC<VideoSlideProps> = ({
 
   // Extract content and effects directly
   const videoContent = slide.content.value as VideoSlideContent;
-const effects = slide.effects || [];
-  const spotlightEffects = effects.flatMap((e: SlideEffect) => {
-    if (e.effect.case === "spotlight" && e.effect.value) {
-      return [e.effect.value];
-    }
-    return [];
-  });
   // Get video source from content (new architecture) or fallback to old structure
   const videoSrc = videoContent?.src
 
@@ -70,7 +63,7 @@ const effects = slide.effects || [];
       </div>
 
       {/* Render spotlight effects at CANVAS level */}
-      {spotlightEffects.map((spotlight) => (
+      {slide.spotlights.map((spotlight) => (
         <SpotlightEffect
           key={spotlight.id}
           spotlight={spotlight}

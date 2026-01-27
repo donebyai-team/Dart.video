@@ -1,5 +1,5 @@
 import { createSlideEntityId } from "@/types/selection";
-import { Slide, Section, SlideType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { Slide, Section, SlideType, MetaData, AnimationSlideContent, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { VideoStoreSet, VideoStoreGet } from "./types";
 import { EditorConfig, VideoConfig, EditorCallbacks } from "@/types/editor";
 
@@ -43,21 +43,25 @@ export const createInitActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       type: SlideType.TEXT_ANIMATION,
       transcript: "",
       duration: 2,
+      transition: TransitionType.TRANSITION_NONE,
       content: {
         case: "animation",
         value: {
+          $typeName: "coasterai.core.v1.AnimationSlideContent",
           templateId: "text-reveal",
-          templateConfig: {
-            text: "",
+          meta: {
             x: 192,
             y: 108,
             width: 1536,
             height: 864,
+          } as MetaData,
+          templateConfig: {
+            text: "Test"
           },
         },
       },
-      effects: [],
-      annotations: [],
+      spotlights: [],
+      zooms: [],
       subSlides: [],
     };
 

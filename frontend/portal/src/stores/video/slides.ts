@@ -23,7 +23,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
 
         // Create default content based on slide type
         let content: Slide['content'];
-        
+
         switch (type) {
             case SlideType.IMAGE:
                 content = {
@@ -39,7 +39,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
                     } as ImageSlideContent
                 };
                 break;
-                
+
             case SlideType.VIDEO:
                 content = {
                     case: "video",
@@ -51,7 +51,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
                     } as VideoSlideContent
                 };
                 break;
-                
+
             case SlideType.TEXT_ANIMATION:
             case SlideType.VISUAL_ANIMATION:
             case SlideType.INFOGRAPHIC:
@@ -65,7 +65,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
                     } as AnimationSlideContent
                 };
                 break;
-                
+
             case SlideType.STACK:
                 content = {
                     case: "stack",
@@ -76,7 +76,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
                     } as StackSlideContent
                 };
                 break;
-                
+
             default:
                 content = { case: undefined, value: undefined };
                 break;
@@ -92,8 +92,8 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
             backgroundColor: inheritedBg,
             transitionDuration: 0.3,
             content,
-            effects: [],
-            annotations: [],
+            spotlights: [],
+            zooms: [],
             subSlides: [],
         };
 
@@ -227,7 +227,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
         }
     },
 
-    updateSlide(updates: Partial<Slide>) {        
+    updateSlide(updates: Partial<Slide>) {
         const { sections, selectedSlide } = get();
         if (!selectedSlide) return;
 
@@ -271,8 +271,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
                 duration: actualDuration,
                 sectionColor: s.color,
                 sectionTitle: s.title,
-                effects: slide.effects || [],
-                annotations: slide.annotations || [],
+                spotlights: slide.spotlights || [],
             };
         }))
     },

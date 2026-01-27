@@ -1,5 +1,5 @@
 // Timeline layout calculation utilities
-import { TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { CanvasObjectType, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import type {
   TimelineSlide,
   SlideItem,
@@ -215,20 +215,19 @@ export function calculateOverlayItems(
   
   slides.forEach((slide) => {
     const slideStartTime = cumulativeTime;
-    
     // Process effects
-    if (slide.effects && slide.effects.length > 0) {
-      slide.effects.forEach((effect) => {
-        const startTime = effect.effect.value?.startTime ?? 0;
-        const endTime = effect.effect.value?.endTime ?? slide.duration;
+    if (slide.spotlights && slide.spotlights.length > 0) {
+      slide.spotlights.forEach((effect) => {
+        const startTime = effect.startTime ?? 0;
+        const endTime = effect.endTime ?? slide.duration;
         const duration = endTime - startTime;
         
         overlays.push({
           type: 'overlay',
-          id: `overlay-${effect.effect.value?.id}`,
-          overlayId: effect.effect.value?.id!,
+          id: `overlay-${effect.id}`,
+          overlayId: effect.id!,
           slideId: slide.id,
-          overlayType: effect.effect.case!,
+          overlayType: CanvasObjectType.CANVAS_SPOTLIGHT,
           startTime: slideStartTime + startTime,
           duration,
           trackIndex: 0, // Will be assigned by assignOverlayTracks

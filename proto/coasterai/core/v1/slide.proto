@@ -84,23 +84,6 @@ message ZoomEffect {
   float endTime = 6;
 }
 
-// ===================== ANNOTATIONS =====================
-
-message AnnotationObject {
-  oneof annotation {
-    CalloutAnnotation callout = 1;
-  }
-}
-
-message CalloutAnnotation {
-  string id = 1;
-  float x = 2;
-  float y = 3;
-  optional string color = 4;
-  optional float opacity = 5;
-  optional string calloutStyle = 6; // pointer, circle, box, numbered
-}
-
 // ===================== BACKWARD COMPAT TYPES =====================
 
 enum CanvasObjectType {
@@ -158,19 +141,11 @@ message Slide {
     StackSlideContent stack = 13;
   }
 
-  repeated AnnotationObject annotations = 14;
-
   optional bool voiceoverGenerated = 15;
   optional bool isNested = 16;
   repeated Slide subSlides = 17;
-  repeated SlideEffect effects = 18;
-}
-
-message SlideEffect {
-  oneof effect {
-    SpotlightEffect spotlight = 1;
-    ZoomEffect zoom = 2;
-  }
+  repeated SpotlightEffect spotlights = 18;
+  repeated ZoomEffect zooms = 19;
 }
 
 

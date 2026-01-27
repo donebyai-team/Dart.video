@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import type { OverlayItem } from "./types";
+import { getOverlayName } from "./OverlayTracks";
 
 interface OverlayTileProps {
   overlayItem: OverlayItem;
@@ -54,7 +55,7 @@ export function OverlayTile({
       onMouseLeave={handleMouseLeave}
     >
       <div className="px-2 py-1 text-xs font-semibold text-white truncate drop-shadow-sm">
-        {overlayItem.overlayType}
+        {getOverlayName(overlayItem.overlayType)}
       </div>
     </div>
   );

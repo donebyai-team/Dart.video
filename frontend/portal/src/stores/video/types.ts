@@ -1,3 +1,4 @@
+import { SpotlightEffect } from "@/components/editor/remotion/effects";
 import { TimelineSlide } from "@/components/editor/timeline/types";
 import type {
     EditorConfig, EditorCallbacks,
@@ -7,7 +8,7 @@ import type {
 import type { EntityId } from "@/types/selection";
 import { ActiveTool, LeftPanelTool } from "@/types/tools";
 import { JsonObject } from "@bufbuild/protobuf";
-import { AnnotationObject, CanvasObject, Resolution, Section, Slide, SlideEffect, SlideType, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { Section, Resolution, Slide, SlideType, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import type { StateCreator } from "zustand";
 
 // Zustand store types
@@ -63,15 +64,10 @@ export interface VideoActions {
     createOverlayEntityId: (slideId: string, overlayId: string) => EntityId;
 
     // Canvas
-    getEffectiveCanvasObjects: () => SlideEffect[];
-    addEffect: (effect: SlideEffect) => void;
-    addAnnotation: (annotation: AnnotationObject) => void;
-    updateEffect: (id: string, updates: Partial<SlideEffect>) => void;
-    updateAnnotation: (id: string, updates: Partial<AnnotationObject>) => void;
-    deleteEffect: (id: string) => void;
-    deleteAnnotation: (id: string) => void;
-    updateCanvasObject: (id: string, updates: Record<string, unknown>) => void;
-    deleteCanvasObject: (id: string) => void;
+    getSpotlights: () => SpotlightEffect[];
+    addSpotlight: (effect: SpotlightEffect) => void;
+    updateSpotlight: (id: string, updates: Partial<SpotlightEffect>) => void;
+    deleteSpotlight: (id: string) => void;
 
     // Entity selection
     handleSelectEntity: (entityId: EntityId) => void;

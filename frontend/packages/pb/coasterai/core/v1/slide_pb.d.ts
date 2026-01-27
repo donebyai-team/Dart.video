@@ -253,71 +253,6 @@ export declare type ZoomEffect = Message<"coasterai.core.v1.ZoomEffect"> & {
 export declare const ZoomEffectSchema: GenMessage<ZoomEffect>;
 
 /**
- * @generated from message coasterai.core.v1.AnnotationObject
- */
-export declare type AnnotationObject = Message<"coasterai.core.v1.AnnotationObject"> & {
-  /**
-   * @generated from oneof coasterai.core.v1.AnnotationObject.annotation
-   */
-  annotation: {
-    /**
-     * @generated from field: coasterai.core.v1.CalloutAnnotation callout = 1;
-     */
-    value: CalloutAnnotation;
-    case: "callout";
-  } | { case: undefined; value?: undefined };
-};
-
-/**
- * Describes the message coasterai.core.v1.AnnotationObject.
- * Use `create(AnnotationObjectSchema)` to create a new message.
- */
-export declare const AnnotationObjectSchema: GenMessage<AnnotationObject>;
-
-/**
- * @generated from message coasterai.core.v1.CalloutAnnotation
- */
-export declare type CalloutAnnotation = Message<"coasterai.core.v1.CalloutAnnotation"> & {
-  /**
-   * @generated from field: string id = 1;
-   */
-  id: string;
-
-  /**
-   * @generated from field: float x = 2;
-   */
-  x: number;
-
-  /**
-   * @generated from field: float y = 3;
-   */
-  y: number;
-
-  /**
-   * @generated from field: optional string color = 4;
-   */
-  color?: string;
-
-  /**
-   * @generated from field: optional float opacity = 5;
-   */
-  opacity?: number;
-
-  /**
-   * pointer, circle, box, numbered
-   *
-   * @generated from field: optional string calloutStyle = 6;
-   */
-  calloutStyle?: string;
-};
-
-/**
- * Describes the message coasterai.core.v1.CalloutAnnotation.
- * Use `create(CalloutAnnotationSchema)` to create a new message.
- */
-export declare const CalloutAnnotationSchema: GenMessage<CalloutAnnotation>;
-
-/**
  * @generated from message coasterai.core.v1.CanvasObject
  */
 export declare type CanvasObject = Message<"coasterai.core.v1.CanvasObject"> & {
@@ -532,11 +467,6 @@ export declare type Slide = Message<"coasterai.core.v1.Slide"> & {
   } | { case: undefined; value?: undefined };
 
   /**
-   * @generated from field: repeated coasterai.core.v1.AnnotationObject annotations = 14;
-   */
-  annotations: AnnotationObject[];
-
-  /**
    * @generated from field: optional bool voiceoverGenerated = 15;
    */
   voiceoverGenerated?: boolean;
@@ -552,9 +482,14 @@ export declare type Slide = Message<"coasterai.core.v1.Slide"> & {
   subSlides: Slide[];
 
   /**
-   * @generated from field: repeated coasterai.core.v1.SlideEffect effects = 18;
+   * @generated from field: repeated coasterai.core.v1.SpotlightEffect spotlights = 18;
    */
-  effects: SlideEffect[];
+  spotlights: SpotlightEffect[];
+
+  /**
+   * @generated from field: repeated coasterai.core.v1.ZoomEffect zooms = 19;
+   */
+  zooms: ZoomEffect[];
 };
 
 /**
@@ -562,34 +497,6 @@ export declare type Slide = Message<"coasterai.core.v1.Slide"> & {
  * Use `create(SlideSchema)` to create a new message.
  */
 export declare const SlideSchema: GenMessage<Slide>;
-
-/**
- * @generated from message coasterai.core.v1.SlideEffect
- */
-export declare type SlideEffect = Message<"coasterai.core.v1.SlideEffect"> & {
-  /**
-   * @generated from oneof coasterai.core.v1.SlideEffect.effect
-   */
-  effect: {
-    /**
-     * @generated from field: coasterai.core.v1.SpotlightEffect spotlight = 1;
-     */
-    value: SpotlightEffect;
-    case: "spotlight";
-  } | {
-    /**
-     * @generated from field: coasterai.core.v1.ZoomEffect zoom = 2;
-     */
-    value: ZoomEffect;
-    case: "zoom";
-  } | { case: undefined; value?: undefined };
-};
-
-/**
- * Describes the message coasterai.core.v1.SlideEffect.
- * Use `create(SlideEffectSchema)` to create a new message.
- */
-export declare const SlideEffectSchema: GenMessage<SlideEffect>;
 
 /**
  * @generated from message coasterai.core.v1.Section
