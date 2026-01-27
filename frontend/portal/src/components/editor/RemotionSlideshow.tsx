@@ -44,19 +44,53 @@ const SlideComponent: React.FC<{
 
     switch (slide.type) {
       case SlideType.TEXT_ANIMATION:
-        return <TextAnimationSlide slide={slide} width={width} height={height} isEditing={isEditing} isSelected={isSelected} onSelect={onSelect} onUpdate={onUpdate} />;
+        // Only render if content case matches or is undefined (for new slides)
+        if (!slide.content?.case || slide.content.case === "animation") {
+          return <TextAnimationSlide slide={slide} width={width} height={height} isEditing={isEditing} isSelected={isSelected} onSelect={onSelect} onUpdate={onUpdate} />;
+        }
+        break;
       case SlideType.VISUAL_ANIMATION:
-        return <VisualAnimationSlide slide={slide} width={width} height={height} isEditing={isEditing} isSelected={isSelected} onSelect={onSelect} onUpdate={onUpdate} />;
+        if (!slide.content?.case || slide.content.case === "animation") {
+          return <VisualAnimationSlide slide={slide} width={width} height={height} isEditing={isEditing} isSelected={isSelected} onSelect={onSelect} onUpdate={onUpdate} />;
+        }
+        break;
       case SlideType.INFOGRAPHIC:
-        return <InfographicSlide slide={slide} width={width} height={height} isEditing={isEditing} isSelected={isSelected} onSelect={onSelect} onUpdate={onUpdate} />;
+        if (!slide.content?.case || slide.content.case === "animation") {
+          return <InfographicSlide slide={slide} width={width} height={height} isEditing={isEditing} isSelected={isSelected} onSelect={onSelect} onUpdate={onUpdate} />;
+        }
+        break;
       case SlideType.VIDEO:
-        return <VideoSlide slide={slide} width={width} height={height} />;
+        if (!slide.content?.case || slide.content.case === "video") {
+          return <VideoSlide slide={slide} width={width} height={height} />;
+        }
+        break;
       case SlideType.STACK:
-        return <StackSlide slide={slide} width={width} height={height} selectedItemId={selectedStackItemId} isEditing={isEditing} />;
+        if (!slide.content?.case || slide.content.case === "stack") {
+          return <StackSlide slide={slide} width={width} height={height} selectedItemId={selectedStackItemId} isEditing={isEditing} />;
+        }
+        break;
       case SlideType.IMAGE:
       default:
-        return <ImageSlide slide={slide} width={width} height={height} isEditing={isEditing} onUpdate={onUpdate} />;
+        if (!slide.content?.case || slide.content.case === "image") {
+          return <ImageSlide slide={slide} width={width} height={height} isEditing={isEditing} onUpdate={onUpdate} />;
+        }
+        break;
     }
+
+    // Fallback for mismatched content - render a placeholder
+    return (
+      <AbsoluteFill style={{
+        backgroundColor: slide.backgroundColor || "#0f172a",
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'white',
+        fontSize: 18,
+        opacity: 0.7
+      }}>
+        Content type mismatch: {slide.type} slide with {slide.content?.case || 'undefined'} content
+      </AbsoluteFill>
+    );
   };
 
 // Get transition presentation based on transition type
@@ -100,10 +134,27 @@ export const Slideshow: React.FC<SlideshowProps> = ({
   const allSlides = sections.flatMap(section => section.slides);
   const transitionDurationFrames = Math.round(fps * TRANSITION_DURATION_SECONDS);
 
+  // Handle empty slides case
+  if (allSlides.length === 0) {
+    return (
+      <AbsoluteFill style={{ 
+        background: globalBackgroundColor || 'transparent',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'white',
+        fontSize: 24,
+        opacity: 0.5
+      }}>
+        No slides to display
+      </AbsoluteFill>
+    );
+  }
+
   return (
     <AbsoluteFill style={{ background: globalBackgroundColor || 'transparent' }}>
       <TransitionSeries>
-        {allSlides.map((slide, index) => {
+        {allSlides.map((slide) => {
           const isSelected = selectedTemplateId === slide.id;
 
           // Simple rule: slide duration = slide's actual duration
@@ -111,7 +162,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({
           const durationInFrames = Math.round(actualDuration * fps);
 
           // Check if this slide has a transition defined
-          const hasTransition = slide.transition && slide.transition !== TransitionType.TRANSITION_NONE;
+          const hasTransition = slide.transition !== TransitionType.TRANSITION_NONE;
 
           // Determine slide background: use slide's backgroundColor if set, otherwise transparent (so global shows through)
           const slideWithBackground = globalBackgroundColor && !slide.backgroundColor

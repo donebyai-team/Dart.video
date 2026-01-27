@@ -1,9 +1,10 @@
-import { Slide, SlideType, StackSlideContent, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { Slide, SlideType, StackSlideContent, TransitionType, ImageSlideContent, VideoSlideContent, AnimationSlideContent, StackAnimationMode } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { arrayMove } from "@dnd-kit/sortable";
 import { getSlideTypeConfig } from "./utils";
 import { createOverlayEntityId, createSlideEntityId, createStackItemEntityId, createStackItemOverlayEntityId } from "@/types/selection";
 import { VideoStoreSet, VideoStoreGet } from "./types";
 import { TimelineSlide } from "@/components/editor/timeline/types";
+import { slide } from "@remotion/transitions/slide";
 
 
 
@@ -20,6 +21,67 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
             slideTypeConfig?.defaultBackground ||
             config.background.defaultColor;
 
+        // Create default content based on slide type
+        let content: Slide['content'];
+        
+        switch (type) {
+            case SlideType.IMAGE:
+                content = {
+                    case: "image",
+                    value: {
+                        $typeName: "coasterai.core.v1.ImageSlideContent",
+                        src: "",
+                        x: 0,
+                        y: 0,
+                        width: 1920,
+                        height: 1080,
+                        rotation: 0,
+                    } as ImageSlideContent
+                };
+                break;
+                
+            case SlideType.VIDEO:
+                content = {
+                    case: "video",
+                    value: {
+                        $typeName: "coasterai.core.v1.VideoSlideContent",
+                        src: "",
+                        startTime: 0,
+                        endTime: 10,
+                    } as VideoSlideContent
+                };
+                break;
+                
+            case SlideType.TEXT_ANIMATION:
+            case SlideType.VISUAL_ANIMATION:
+            case SlideType.INFOGRAPHIC:
+                const defaultTemplateId = type === SlideType.TEXT_ANIMATION ? "number-counter" : "default";
+                content = {
+                    case: "animation",
+                    value: {
+                        $typeName: "coasterai.core.v1.AnimationSlideContent",
+                        templateId: defaultTemplateId,
+                        templateConfig: {},
+                    } as AnimationSlideContent
+                };
+                break;
+                
+            case SlideType.STACK:
+                content = {
+                    case: "stack",
+                    value: {
+                        $typeName: "coasterai.core.v1.StackSlideContent",
+                        animationMode: StackAnimationMode.STACK,
+                        items: [],
+                    } as StackSlideContent
+                };
+                break;
+                
+            default:
+                content = { case: undefined, value: undefined };
+                break;
+        }
+
         const newSlide: Slide = {
             $typeName: "coasterai.core.v1.Slide",
             id: `${sectionId}-${Date.now()}`,
@@ -29,7 +91,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
             transition: TransitionType.TRANSITION_NONE,
             backgroundColor: inheritedBg,
             transitionDuration: 0.3,
-            content: { case: undefined, value: undefined },
+            content,
             effects: [],
             annotations: [],
             subSlides: [],
@@ -46,6 +108,8 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
         if (section) {
             set({ selectedSlide: { section, slide: newSlide } });
         }
+
+        console.debug("added slide", section, slide)
     },
 
     createSlideEntityId: (slideId: string) => {
