@@ -1,6 +1,6 @@
+import { SlideType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { motion } from "framer-motion";
 import { ImageIcon, Type, BarChart3, Sparkles, Film, Layers } from "lucide-react";
-import { SlideType } from "@/types/slides";
 
 interface AddSlideMenuProps {
   onAddSlide: (type: SlideType) => void;

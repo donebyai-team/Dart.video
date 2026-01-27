@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import SortableSlideCard from "@/components/editor/SortableSlideCard";
 import AddSlideButton from "@/components/editor/AddSlideButton";
-import { StackAnimationMode, SlideType, type Slide, type StackSlideContent, type Section } from "@/types/slides";
+import { Slide, Section, StackAnimationMode, StackSlideContent, SlideType, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 interface StackSlideSettingsProps {
   slide: Slide;
@@ -22,11 +22,11 @@ const animationModes: {
   name: string;
   description: string;
 }[] = [{
-  id: StackAnimationMode.Stack,
+  id: StackAnimationMode.STACK,
   name: "Stack",
   description: "Images animate by stacking on top with overlap"
 }, {
-  id: StackAnimationMode.Reveal,
+  id: StackAnimationMode.REVEAL,
   name: "Reveal",
   description: "Images already stacked, revealed one by one"
 }];
@@ -41,9 +41,9 @@ const StackSlideSettings: React.FC<StackSlideSettingsProps> = ({
   onClose,
   onPreview
 }) => {
-  const content = slide.content as StackSlideContent | undefined;
+  const content = slide.content.value as StackSlideContent | undefined;
   const items = content?.items || [];
-  const animationMode = content?.animationMode || StackAnimationMode.Stack;
+  const animationMode = content?.animationMode || StackAnimationMode.STACK;
 
   const stackSlideTypes = [
     { id: SlideType.IMAGE, name: "Image/Screenshot", description: "Add screen with annotations", icon: ImageIcon },
@@ -60,12 +60,13 @@ const StackSlideSettings: React.FC<StackSlideSettingsProps> = ({
   const updateContent = (updates: Partial<StackSlideContent>) => {
     onUpdateSlide({
       content: {
-        type: "stack",
-        animationMode: content?.animationMode || StackAnimationMode.Stack,
-        items: content?.items || [],
-        ...updates
+        case: "stack",
+        value: {
+          animationMode: content?.animationMode || StackAnimationMode.STACK,
+          ...updates
+        }
       }
-    });
+    } as Slide);
   };
 
   const addItem = (type: SlideType) => {
@@ -77,21 +78,30 @@ const StackSlideSettings: React.FC<StackSlideSettingsProps> = ({
       type,
       transcript: `Slide ${items.length + 1}`,
       duration: 2.5,
+      $typeName: "coasterai.core.v1.Slide",
+      annotations: [],
+      subSlides: [],
+      effects: [],
+      transition: TransitionType.TRANSITION_NONE,
       backgroundColor: slide.backgroundColor,
       content: type === SlideType.IMAGE ? {
-        type: "image",
-        src: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&h=600&fit=crop",
-        x: 192,
-        y: 108,
-        width: 1536,
-        height: 864,
-        rotation: 0,
+        case: "image",
+        value: {
+          $typeName: "coasterai.core.v1.ImageSlideContent",
+          src: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&h=600&fit=crop",
+          x: 192,
+          y: 108,
+          width: 1536,
+          height: 864,
+          rotation: 0,
+        }
       } : {
-        type: "video",
-        src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+        case: "video",
+        value: {
+          $typeName: "coasterai.core.v1.VideoSlideContent",
+          src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+        }
       },
-      effects: [],
-      annotations: [],
     };
     updateContent({
       items: [...items, newItem]
@@ -114,8 +124,11 @@ const StackSlideSettings: React.FC<StackSlideSettingsProps> = ({
       items: items.map((i: Slide) => i.id === itemId ? {
         ...i,
         content: {
-          ...(i.content as any),
-          src: imageSrc
+          case: "image",
+          value: {
+            ...i.content.value,
+            src: imageSrc
+          }
         }
       } as Slide : i)
     });
@@ -211,7 +224,7 @@ const StackSlideSettings: React.FC<StackSlideSettingsProps> = ({
         <div className="grid grid-cols-2 gap-2">
           {animationModes.map(mode => <button key={mode.id} onClick={() => setAnimationMode(mode.id)} className={`flex flex-col items-center gap-1 p-3 rounded-lg border transition-all ${animationMode === mode.id ? "border-primary bg-primary/10" : "border-border hover:border-muted-foreground/50"}`}>
             <div className={`w-8 h-8 rounded-md flex items-center justify-center ${animationMode === mode.id ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
-              {mode.id === StackAnimationMode.Stack ? <Layers className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {mode.id === StackAnimationMode.STACK ? <Layers className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </div>
             <span className="text-xs font-medium">{mode.name}</span>
           </button>)}

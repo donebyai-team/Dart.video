@@ -1,11 +1,13 @@
-import type { Section } from "@/types/slides";
+import type { Section } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { VideoStoreSet, VideoStoreGet } from "./types";
 
-export const createSectionActions = (set, get) => ({
+export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   addSection() {
     const { sections, videoConfig } = get();
     if (!videoConfig) return;
 
     const newSection: Section = {
+      $typeName: "coasterai.core.v1.Section",
       id: `section-${Date.now()}`,
       title: videoConfig.sectionConfig.defaultTitle,
       color: videoConfig.sectionConfig.defaultColor,
@@ -20,18 +22,18 @@ export const createSectionActions = (set, get) => ({
     get().notifyConfigChange(newSections);
   },
 
-  setEditingSectionId: (sectionId) => set({ editingSectionId: sectionId }),
-  setEditingSectionTitle: (title) => set({ editingSectionTitle: title }),
+  setEditingSectionId: (sectionId: string | null) => set({ editingSectionId: sectionId }),
+  setEditingSectionTitle: (title: string) => set({ editingSectionTitle: title }),
 
   removeSection(sectionId: string) {
     const { sections, selectedSlide } = get();
-    const newSections = sections.filter((s) => s.id !== sectionId);
+    const newSections = sections.filter((s: Section) => s.id !== sectionId);
 
     set({ sections: newSections });
 
     // If selected section deleted, reselect fallback
     if (selectedSlide?.section.id === sectionId) {
-      const first = newSections.find((s) => s.slides.length > 0);
+      const first = newSections.find((s: Section) => s.slides.length > 0);
       if (first) {
         set({ selectedSlide: { section: first, slide: first.slides[0] } });
       } else {
@@ -68,7 +70,7 @@ export const createSectionActions = (set, get) => ({
     });
   },
 
-  handleSectionDragEnd(event) {
+  handleSectionDragEnd(event: { active: { id: string }; over: { id: string } | null }) {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
     const { sections } = get();

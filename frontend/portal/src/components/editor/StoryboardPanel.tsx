@@ -15,8 +15,8 @@ import {
 } from "@dnd-kit/sortable";
 import { Plus } from "lucide-react";
 import StoryboardSection from "./StoryboardSection";
-import { Section, Slide, SlideType } from "@/types/slides";
 import { useVideoStore } from "@/stores/video";
+import { Section, Slide } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 interface StoryboardPanelProps {    
     onSelectSlide: (section: Section, slide: Slide) => void;   
@@ -32,7 +32,7 @@ const StoryboardPanel = ({
     const storyboardRef = useRef<HTMLDivElement>(null);
 
     const sections = useVideoStore(s => s.sections);
-    const selectedSlideId = useVideoStore(s => s.selectedSlide.slide.id);
+    const selectedSlideId = useVideoStore(s => s.selectedSlide?.slide.id);
     const editingSectionId = useVideoStore(s => s.editingSectionId);
     const editingSectionTitle = useVideoStore(s => s.editingSectionTitle);
     const generatingSectionVoiceover = useVideoStore(s => s.generatingSectionVoiceover);
@@ -103,7 +103,7 @@ const StoryboardPanel = ({
                                 index={index}
                                 isFirstSection={index === 0}
                                 isOpen={openSections.includes(section.id)}
-                                selectedSlideId={selectedSlideId}
+                                selectedSlideId={selectedSlideId!}
                                 editingSectionId={editingSectionId}
                                 editingSectionTitle={editingSectionTitle}
                                 generatingSectionVoiceover={generatingSectionVoiceover}

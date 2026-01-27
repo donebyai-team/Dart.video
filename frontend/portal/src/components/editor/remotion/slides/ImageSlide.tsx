@@ -1,8 +1,8 @@
 import React from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
-import type { Slide, ImageSlideContent, SpotlightEffect as SpotlightEffectType } from "@/types/slides";
-import { SpotlightEffect } from "../effects/SpotlightEffect";
+import { SpotlightEffectComponent } from "../effects/SpotlightEffect";
 import { ImageContent } from "./ImageContent";
+import { Slide, ImageSlideContent, SpotlightEffect, SlideEffect, Resolution } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 interface ImageSlideProps {
   slide: Slide;
@@ -30,9 +30,15 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({
   const { fps } = useVideoConfig();
 
   // Extract content and effects directly
-  const imageContent = slide.content as ImageSlideContent | undefined;
+  const imageContent = slide.content.value as ImageSlideContent
   const effects = slide.effects || [];
-  const spotlights = effects.filter((e) => e.type === "spotlight") as SpotlightEffectType[];
+  const spotlightEffects = effects.flatMap((e: SlideEffect) => {
+    if (e.effect.case === "spotlight" && e.effect.value) {
+      return [e.effect.value];
+    }
+    return [];
+  });
+
 
   // Create image object for ImageContent component
   // NEW ARCHITECTURE: Image properties are directly in content (no template_config)
@@ -40,7 +46,7 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({
     src: imageContent.src || '',
     x: imageContent.x ?? 0,
     y: imageContent.y ?? 0,
-    width: imageContent.width ?? width,
+    width: imageContent.width as number ?? width,
     height: imageContent.height ?? height,
     rotation: imageContent.rotation ?? 0,
   } : null;
@@ -52,7 +58,7 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({
     aspect: `${width}/${height}`,
     width,
     height,
-  };
+  } as Resolution;
 
   return (
     <AbsoluteFill
@@ -70,19 +76,22 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({
             if (onUpdate && imageContent) {
               onUpdate({
                 content: {
-                  type: "image",
-                  src: imageContent.src,
-                  ...updates
-                } as ImageSlideContent
-              });
+                  case: "image",
+                  value: {
+                    ...imageContent,
+                    src: imageContent.src,
+                    ...updates
+                  } as ImageSlideContent
+                }
+              } as Slide);
             }
           }}
         />
       )}
 
       {/* Render spotlight effects at CANVAS level */}
-      {spotlights.map((spotlight) => (
-        <SpotlightEffect
+      {spotlightEffects.map((spotlight) => (
+        <SpotlightEffectComponent
           key={spotlight.id}
           spotlight={spotlight}
           frame={frame}

@@ -1,6 +1,6 @@
+import { Slide, StackSlideContent, StackAnimationMode, SlideType, ImageSlideContent } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import React from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, Easing } from "remotion";
-import { StackAnimationMode, type Slide, type StackSlideContent } from "@/types/slides";
 
 interface StackSlideProps {
   slide: Slide;
@@ -26,8 +26,10 @@ export const StackSlide: React.FC<StackSlideProps> = ({
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
 
-  const content = slide.content as StackSlideContent | undefined;
-  const animationMode = content?.animationMode || StackAnimationMode.Stack;
+  if ( slide.content.case != "stack") return;
+
+  const content = slide.content.value;
+  const animationMode = content?.animationMode || StackAnimationMode.STACK;
   const items = content?.items || [];
 
   // If no items, show placeholder
@@ -84,10 +86,10 @@ export const StackSlide: React.FC<StackSlideProps> = ({
         
         // Get image source from item's content
         // NEW ARCHITECTURE: Image slides have src directly in content
-        const itemContent = item.content as any;
+        const itemContent = item.content.value as ImageSlideContent;
         const imageSrc = itemContent?.src || "";
 
-        if (animationMode === StackAnimationMode.Stack) {
+        if (animationMode === StackAnimationMode.STACK) {
           // Stack mode: images fly in from bottom and stack with slight offset
           
           // In editing mode, show the selected item in its final position

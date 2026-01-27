@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState, useEffect } from "react";
-import { type Slide, type Section } from "@/types/slides";
+import { Section, Slide } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 interface VisualAnimationSelectorProps {
     selectedSlide: { slide: Slide; section: Section; };

@@ -4,9 +4,9 @@ import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useState } from "react";
-import { type Slide, type CanvasObjectType, SlideType } from "@/types/slides";
-import { InsertToolType, ActiveToolType } from "@/types/tools";
 import { useVideoStore } from "@/stores/video";
+import { SlideType, Slide, StackSlideContent, CanvasObjectType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { ActiveToolType } from "@/types/tools";
 
 interface PlayerToolbarProps {
   onDurationChange: (newDuration: number) => void;
@@ -23,35 +23,36 @@ const slideTypeLabels: Record<SlideType, { label: string; icon: React.ElementTyp
   [SlideType.STACK]: { label: "Stack", icon: Layers },
 };
 
-const insertTools: { id: InsertToolType; name: string; icon: React.ElementType }[] = [
-  { id: "callout", name: "Callout", icon: Focus },
-  { id: "spotlight", name: "Spotlight", icon: CircleDot },
+const insertTools: { id: CanvasObjectType; name: string; icon: React.ElementType }[] = [
+  { id: CanvasObjectType.CANVAS_CALLOUT, name: "Callout", icon: Focus },
+  { id: CanvasObjectType.CANVAS_SPOTLIGHT, name: "Spotlight", icon: CircleDot },
 ];
 
 const isMediaType = (type: SlideType) => type === SlideType.IMAGE || type === SlideType.VIDEO;
 
-const PlayerToolbar = ({ 
+const PlayerToolbar = ({
   onDurationChange,
   minDuration = 1,
   maxDuration = 60,
 }: PlayerToolbarProps) => {
 
-  const onChangeVisual = useVideoStore(s=>s.handleEditSlide);
-  const onChangeTextAnimation = useVideoStore(s=>s.handleEditSlide);
+  const onChangeVisual = useVideoStore(s => s.handleEditSlide);
+  const onChangeTextAnimation = useVideoStore(s => s.handleEditSlide);
   const activeTool = useVideoStore(s => s.activeTool);
   const onSelectTool = useVideoStore(s => s.handleSelectTool);
   const selectedSlide = useVideoStore(s => s.selectedSlide);
   const selectedStackItemId = useVideoStore(s => s.selectedStackItemId);
 
-   // Determine which slide to show in toolbar (could be a stack item)
-    let slide = selectedSlide.slide;
-    if (selectedSlide.slide?.type === "stack" && selectedStackItemId) {
-      const content = selectedSlide.slide.content as any;
-      const selectedItem = content?.items?.find((item: Slide) => item.id === selectedStackItemId);
-      if (selectedItem) {
-        slide = selectedItem;
-      }
+  // Determine which slide to show in toolbar (could be a stack item)
+  if (!selectedSlide) return
+  let slide = selectedSlide.slide;
+  if (selectedSlide?.slide?.type === SlideType.STACK && selectedStackItemId) {
+    const content = selectedSlide.slide.content.value as StackSlideContent;
+    const selectedItem = content?.items?.find((item: Slide) => item.id === selectedStackItemId);
+    if (selectedItem) {
+      slide = selectedItem;
     }
+  }
 
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(slide.duration.toString());

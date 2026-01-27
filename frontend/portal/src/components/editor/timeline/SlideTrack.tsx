@@ -6,7 +6,7 @@ import type { SlideItem, TransitionItem } from "./types";
 interface SlideTrackProps {
   slideItems: SlideItem[];
   transitionItems: TransitionItem[];
-  selectedSlideId: string;
+  selectedSlideId?: string;
   currentTime: number;
   pixelsPerSecond: number;
   onSelectSlide?: (slideId: string) => void;

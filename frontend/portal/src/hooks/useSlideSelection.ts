@@ -1,31 +1,30 @@
 import { useEffect, useRef } from "react";
-import type { Section } from "@/types/slides";
 import type { PlayerControls } from "./usePlayerControls";
 import { getSlideVisualEndFrame, getRealSlideStartFrame } from "@/components/editor/frame_calculations";
-
-const FPS = 30;
+import { TimelineSlide } from "@/components/editor/timeline/types";
 
 interface UseSlideSelectionProps {
   selectedSlideId: string;
-  sections: Section[];
+  allSlides: TimelineSlide[];
   isPlaying: boolean;
   previewingSlideId: string | null;
   controls: PlayerControls;
   setCurrentFrame: (frame: number) => void;
   isDragging?: boolean; // NEW: To prevent interference during dragging
+  fps: number
 }
 
 export function useSlideSelection({
   selectedSlideId,
-  sections,
+  allSlides,
   isPlaying,
   previewingSlideId,
   controls,
   setCurrentFrame,
+  fps,
   isDragging = false,
 }: UseSlideSelectionProps) {
   const prevSelectedSlideIdRef = useRef<string>(selectedSlideId);
-  
   useEffect(() => {
     // Skip slide selection logic during dragging
     if (isDragging) return;
@@ -38,13 +37,13 @@ export function useSlideSelection({
       if (!isPlaying) {
         if (previewingSlideId === selectedSlideId) {
           // Manual selection: seek to visual end frame (before transition region)
-          const visualEndFrame = getSlideVisualEndFrame(sections, selectedSlideId, FPS);
+          const visualEndFrame = getSlideVisualEndFrame(allSlides, selectedSlideId, fps);
           console.log(`[SlideSelection] Manual selection - Seeking to visual END frame ${visualEndFrame} for slide ${selectedSlideId}`);
           controls.seekToFrame(visualEndFrame);
           setCurrentFrame(visualEndFrame);
         } else {
           // Normal slide change: seek to REAL START frame (accounting for overlaps)
-          const startFrame = getRealSlideStartFrame(sections, selectedSlideId, FPS);
+          const startFrame = getRealSlideStartFrame(allSlides, selectedSlideId, fps);
           console.log(`[SlideSelection] Normal selection - Seeking to REAL START frame ${startFrame} for slide ${selectedSlideId}`);
           controls.seekToFrame(startFrame);
           setCurrentFrame(startFrame);
@@ -55,5 +54,5 @@ export function useSlideSelection({
       
       prevSelectedSlideIdRef.current = selectedSlideId;
     }
-  }, [selectedSlideId, sections, isPlaying, previewingSlideId, controls, setCurrentFrame, isDragging]);
+  }, [selectedSlideId, allSlides, isPlaying, previewingSlideId, controls, setCurrentFrame, isDragging]);
 }

@@ -1,5 +1,5 @@
+import { AnimationSlideContent, ImageSlideContent, Slide, SlideType, StackSlideContent, VideoSlideContent } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { useMemo } from "react";
-import type { Slide } from "@/types/slides";
 
 interface SlideThumbnailProps {
   slide: Slide;
@@ -7,20 +7,20 @@ interface SlideThumbnailProps {
 }
 
 // Mini version of slide preview for storyboard cards - matches RemotionSlideshow final state
-const SlideThumbnail = ({ slide, animationStyle = 0 }: SlideThumbnailProps) => {
+const SlideThumbnail = ({ slide}: SlideThumbnailProps) => {
   const renderContent = useMemo(() => {
     switch (slide.type) {
-      case "text-animation":
+      case SlideType.TEXT_ANIMATION:
         return <TextAnimationThumbnail slide={slide} />;
-      case "visual-animation":
+      case SlideType.VISUAL_ANIMATION:
         return <VisualAnimationThumbnail slide={slide} />;
-      case "infographic":
+      case SlideType.INFOGRAPHIC:
         return <InfographicThumbnail slide={slide} />;
-      case "video":
+      case SlideType.VIDEO:
         return <VideoThumbnail slide={slide} />;
-      case "stack":
+      case SlideType.STACK:
         return <StackThumbnail slide={slide} />;
-      case "image":
+      case SlideType.IMAGE:
       default:
         return <ImageThumbnail slide={slide} />;
     }
@@ -36,8 +36,8 @@ const SlideThumbnail = ({ slide, animationStyle = 0 }: SlideThumbnailProps) => {
 // Text Animation Thumbnail - shows final animated state with text
 const TextAnimationThumbnail = ({ slide }: { slide: Slide }) => {
   // Get text from content.template_config (new architecture)
-  const content = slide.content as any;
-  const displayText = content?.template_config?.text || slide.transcript;
+  const content = slide.content.value as AnimationSlideContent;
+  const displayText = content?.templateConfig?.text || slide.transcript;
   
   // Use slide's background color or fall back to default
   const background = slide.backgroundColor || "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)";
@@ -198,7 +198,7 @@ const LineGraphThumbnail = () => (
 // Image Thumbnail
 const ImageThumbnail = ({ slide }: { slide: Slide }) => {
   // Get image src from content directly (new architecture)
-  const content = slide.content as any;
+  const content = slide.content.value as ImageSlideContent;
   const imageSrc = content?.src;
   
   if (!imageSrc) {
@@ -223,7 +223,7 @@ const ImageThumbnail = ({ slide }: { slide: Slide }) => {
 // Video Thumbnail
 const VideoThumbnail = ({ slide }: { slide: Slide }) => {
   // Get video src from content directly (new architecture)
-  const content = slide.content as any;
+  const content = slide.content.value as VideoSlideContent;
   const videoSrc = content?.src;
   
   if (!videoSrc) {
@@ -250,7 +250,7 @@ const VideoThumbnail = ({ slide }: { slide: Slide }) => {
 // Stack Thumbnail - shows layered images
 const StackThumbnail = ({ slide }: { slide: Slide }) => {
   // Get stack items from content directly (new architecture)
-  const content = slide.content as any;
+  const content = slide.content.value as StackSlideContent;
   const stackItems = content?.items || [];
   const itemCount = Math.min(stackItems.length, 4);
   

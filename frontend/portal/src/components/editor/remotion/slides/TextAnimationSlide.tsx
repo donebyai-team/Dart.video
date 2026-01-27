@@ -1,6 +1,5 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion'
-import type { Slide } from '@/types/slides'
 import {
   WordRevealAnimation,
   LetterCascadeAnimation,
@@ -10,7 +9,10 @@ import {
 } from '../animations/TextAnimations'
 import { AnimatedBackground } from '../effects/AnimatedBackground'
 import { TemplateContainer } from '../components/TemplateContainer'
+import { AnimationSlideContent, MetaData, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { TemplateConfig } from './InfographicSlide'
 import { templateRegistry } from '../../../../../packages/template-registery'
+import { useEffect } from 'react'
 
 interface TextAnimationSlideProps {
   slide: Slide
@@ -43,21 +45,10 @@ export const TextAnimationSlide: React.FC<TextAnimationSlideProps> = ({
   const { fps, durationInFrames } = useVideoConfig()
   const [RemoteComponent, setRemoteComponent] = React.useState<TemplateModule | null>(null)
 
-  const content = slide.content as any
-  const templateId = content?.template_id || 'text-reveal'
-  const templateMeta = content?.meta || {}
-  const templateConfig = content?.template_config || {}
-
-  useEffect(() => {
-    ;(async () => {
-      const loader = templateRegistry[templateId as keyof typeof templateRegistry]
-      console.log(loader, 'loadr')
-      if (!loader) return
-
-      const mod = await loader()
-      setRemoteComponent(mod as TemplateModule)
-    })()
-  }, [templateId])
+  const content = slide.content.value as AnimationSlideContent
+  const templateId = content?.templateId || 'text-reveal'
+  const templateMeta = (content?.meta as MetaData) || {}
+  const templateConfig = (content?.templateConfig ?? {}) as TemplateConfig
 
   // Use slide's background color or fall back to default
   const defaultGradients = [
@@ -69,6 +60,17 @@ export const TextAnimationSlide: React.FC<TextAnimationSlideProps> = ({
   ]
   const bgIndex = slide.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
   const background = slide.backgroundColor || defaultGradients[bgIndex % defaultGradients.length]
+
+  useEffect(() => {
+    ;(async () => {
+      const loader = templateRegistry[templateId as keyof typeof templateRegistry]
+      console.log(loader, 'loadr')
+      if (!loader) return
+
+      const mod = await loader()
+      setRemoteComponent(mod as TemplateModule)
+    })()
+  }, [templateId])
 
   return (
     <AbsoluteFill
@@ -83,10 +85,10 @@ export const TextAnimationSlide: React.FC<TextAnimationSlideProps> = ({
 
       {/* Template content in container */}
       <TemplateContainer
-        x={templateMeta.x}
-        y={templateMeta.y}
-        width={templateMeta.width}
-        height={templateMeta.height}
+        x={templateMeta.x as number}
+        y={templateMeta.y as number}
+        width={templateMeta.width as number}
+        height={templateMeta.height as number}
         canvasWidth={width}
         canvasHeight={height}
         isEditing={isEditing}
@@ -94,14 +96,18 @@ export const TextAnimationSlide: React.FC<TextAnimationSlideProps> = ({
         onUpdate={updates => {
           if (onUpdate && content) {
             onUpdate({
+              ...slide,
               content: {
-                ...content,
-                meta: {
-                  ...templateMeta,
-                  ...updates
+                case: 'animation',
+                value: {
+                  ...content,
+                  meta: {
+                    ...templateMeta,
+                    ...updates
+                  }
                 }
               }
-            })
+            } as Slide)
           }
         }}
         onSelect={onSelect}
@@ -120,15 +126,19 @@ export const TextAnimationSlide: React.FC<TextAnimationSlideProps> = ({
             <RemoteComponent.RemoteComponent
               onChange={(props: any) => {
                 if (onUpdate && props) {
-                  onUpdate({
-                    content: {
-                      ...content,
-                      template_config: {
-                        ...templateConfig,
-                        ...props
+                   onUpdate({
+                      ...slide,
+                      content: {
+                        case: 'animation',
+                        value: {
+                          ...content,
+                          templateConfig: {
+                            ...templateConfig,
+                            ...props
+                          }
+                        }
                       }
-                    }
-                  })
+                    } as Slide)
                 }
               }}
               props={templateConfig}

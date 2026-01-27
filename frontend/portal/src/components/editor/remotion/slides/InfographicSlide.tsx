@@ -1,9 +1,9 @@
 import React from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
-import type { Slide } from "@/types/slides";
 import { AnimatedBarChart, AnimatedPieChart, AnimatedLineGraph } from "../animations/InfographicCharts";
 import { AnimatedBackground } from "../effects/AnimatedBackground";
 import { TemplateContainer } from "../components/TemplateContainer";
+import { AnimationSlideContent, Slide } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 interface InfographicSlideProps {
   slide: Slide;
@@ -14,6 +14,8 @@ interface InfographicSlideProps {
   onUpdate?: (updates: Partial<Slide>) => void;
   onSelect?: () => void;
 }
+
+export type TemplateConfig = Record<string, string | number | boolean | object>;
 
 /**
  * InfographicSlide Component
@@ -33,9 +35,9 @@ export const InfographicSlide: React.FC<InfographicSlideProps> = ({
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const content = slide.content as any;
-  const templateId = content?.template_id || "infographic-default";
-  const templateConfig = content?.template_config || {};
+  const content = slide.content.value as AnimationSlideContent;
+  const templateId = content?.templateId || "infographic-default";
+  const templateConfig = (content?.templateConfig ?? {}) as TemplateConfig;
 
   // TODO: Use templateId to select chart type
   // For now, use hash-based selection for backward compatibility
@@ -58,10 +60,10 @@ export const InfographicSlide: React.FC<InfographicSlideProps> = ({
 
       {/* Template content in container */}
       <TemplateContainer
-        x={templateConfig.x}
-        y={templateConfig.y}
-        width={templateConfig.width}
-        height={templateConfig.height}
+        x={templateConfig.x as number}
+        y={templateConfig.y as number}
+        width={templateConfig.width as number}
+        height={templateConfig.height as number}
         canvasWidth={width}
         canvasHeight={height}
         isEditing={isEditing}
@@ -69,14 +71,18 @@ export const InfographicSlide: React.FC<InfographicSlideProps> = ({
         onUpdate={(updates) => {
           if (onUpdate && content) {
             onUpdate({
+              ...slide,
               content: {
-                ...content,
-                template_config: {
-                  ...templateConfig,
-                  ...updates,
-                },
+                case: "animation",
+                value: {
+                  ...content,
+                  templateConfig: {
+                    ...templateConfig,
+                    ...updates
+                  }
+                }
               },
-            });
+            } as Slide);
           }
         }}
         onSelect={onSelect}

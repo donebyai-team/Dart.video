@@ -1,12 +1,11 @@
 import { useEffect } from "react";
 import { PlayerRef } from "@remotion/player";
-import type { Section } from "@/types/slides";
 import { getSlideAbsoluteEndFrame, getRealSlideStartFrame } from "@/components/editor/frame_calculations";
+import { SlideType, StackSlideContent } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { TimelineSlide } from "@/components/editor/timeline/types";
 
 interface UseRemotionPlayerEventsProps {
   playerRef: React.RefObject<PlayerRef | null>;
-  sections: Section[];
   allSlides: TimelineSlide[];
   selectedSlideId: string;
   selectedStackItemId?: string | null;
@@ -23,7 +22,6 @@ interface UseRemotionPlayerEventsProps {
 
 export function useRemotionPlayerEvents({
   playerRef,
-  sections,
   allSlides,
   selectedSlideId,
   selectedStackItemId,
@@ -43,12 +41,12 @@ export function useRemotionPlayerEvents({
     if (!player) return;
 
     const handlePlay = () => {
-      console.log(`[RemotionPlayer] Play event fired`);
+      console.debug(`[RemotionPlayer] Play event fired`);
       setIsPlaying(true);
     };
 
     const handlePause = () => {
-      console.log(`[RemotionPlayer] Pause event fired`);
+      console.debug(`[RemotionPlayer] Pause event fired`);
       setIsPlaying(false);
       // Don't clear previewingSlideId here - let the controls handle it
     };
@@ -57,22 +55,21 @@ export function useRemotionPlayerEvents({
       setCurrentFrame(data.detail.frame);
       onFrameChange?.(data.detail.frame);
 
-      console.log(`[RemotionPlayer] Frame: ${data.detail.frame}`);
+      console.debug(`[RemotionPlayer] Frame: ${data.detail.frame}`);
 
       // Skip slide detection logic during dragging to prevent jumping
       if (isDragging) {
-        console.log(`[RemotionPlayer] Skipping slide detection during drag`);
+        console.debug(`[RemotionPlayer] Skipping slide detection during drag`);
         return;
       }
 
       // Check if we've reached the end of the video and pause
-      const allSlides = sections.flatMap(section => section.slides);
       if (allSlides.length > 0) {
         const lastSlide = allSlides[allSlides.length - 1];
-        const lastSlideEndFrame = getSlideAbsoluteEndFrame(sections, lastSlide.id, fps);
+        const lastSlideEndFrame = getSlideAbsoluteEndFrame(allSlides, lastSlide.id, fps);
 
         if (data.detail.frame >= lastSlideEndFrame) {
-          console.log(`[RemotionPlayer] Reached end of video at frame ${data.detail.frame}, pausing`);
+          console.debug(`[RemotionPlayer] Reached end of video at frame ${data.detail.frame}, pausing`);
           player.pause();
           // Seek back to the last valid frame to avoid blank screen
           player.seekTo(lastSlideEndFrame);
@@ -87,8 +84,8 @@ export function useRemotionPlayerEvents({
 
       // Find all slides that are rendering at this frame (using internal rendering positions)
       for (const slide of allSlides) {
-        const slideStartFrame = getRealSlideStartFrame(sections, slide.id, fps);
-        const slideEndFrame = getSlideAbsoluteEndFrame(sections, slide.id, fps);
+        const slideStartFrame = getRealSlideStartFrame(allSlides, slide.id, fps);
+        const slideEndFrame = getSlideAbsoluteEndFrame(allSlides, slide.id, fps);
 
         // Check if frame is within this slide's range
         if (data.detail.frame >= slideStartFrame && data.detail.frame <= slideEndFrame) {
@@ -99,7 +96,7 @@ export function useRemotionPlayerEvents({
       if (overlappingSlides.length === 1) {
         // Only one slide is rendering - simple case
         currentSlide = overlappingSlides[0].slide;
-        console.log(`[RemotionPlayer] Frame ${data.detail.frame} is in slide ${currentSlide.id} (${overlappingSlides[0].startFrame}-${overlappingSlides[0].endFrame})`);
+        console.debug(`[RemotionPlayer] Frame ${data.detail.frame} is in slide ${currentSlide.id} (${overlappingSlides[0].startFrame}-${overlappingSlides[0].endFrame})`);
       } else if (overlappingSlides.length > 1) {
         // Multiple slides are rendering - choose the one that started later (incoming slide)
         const latestSlide = overlappingSlides.reduce((latest, current) =>
@@ -108,23 +105,23 @@ export function useRemotionPlayerEvents({
         currentSlide = latestSlide.slide;
 
         const slideNames = overlappingSlides.map(s => s.slide.id).join(' + ');
-        console.log(`[RemotionPlayer] Frame ${data.detail.frame} - Overlapping slides: ${slideNames}, choosing ${currentSlide.id}`);
+        console.debug(`[RemotionPlayer] Frame ${data.detail.frame} - Overlapping slides: ${slideNames}, choosing ${currentSlide.id}`);
       }
 
       if (currentSlide) {
         // Update selected slide if changed
         if (currentSlide.id !== selectedSlideId) {
-          console.log(`[RemotionPlayer] Auto slide change to: ${currentSlide.id} at frame ${data.detail.frame}`);
+          console.debug(`[RemotionPlayer] Auto slide change to: ${currentSlide.id} at frame ${data.detail.frame}`);
           onSlideChange?.(currentSlide.id);
         }
 
         // Handle stack slide item tracking
-        if (currentSlide.type === "stack" && onStackItemChange) {
-          const content = currentSlide.content as any;
+        if (currentSlide.slide.type === SlideType.STACK && onStackItemChange) {
+          const content = currentSlide.slide.content.value as StackSlideContent;
           const items = content?.items || [];
 
           if (items.length > 0) {
-            const slideStartFrame = getRealSlideStartFrame(sections, currentSlide.id, fps);
+            const slideStartFrame = getRealSlideStartFrame(allSlides, currentSlide.id, fps);
             const frameInSlide = data.detail.frame - slideStartFrame;
             let itemFrameAccumulator = 0;
             let currentItemIndex = 0;
@@ -153,9 +150,9 @@ export function useRemotionPlayerEvents({
 
         // Handle preview slide end detection
         if (previewingSlideId === currentSlide.id) {
-          const slideEndFrame = getSlideAbsoluteEndFrame(sections, currentSlide.id, fps);
+          const slideEndFrame = getSlideAbsoluteEndFrame(allSlides, currentSlide.id, fps);
           if (data.detail.frame >= slideEndFrame) {
-            console.log(`[RemotionPlayer] Preview reached end of slide ${currentSlide.id}, pausing at frame ${data.detail.frame}`);
+            console.debug(`[RemotionPlayer] Preview reached end of slide ${currentSlide.id}, pausing at frame ${data.detail.frame}`);
             player.pause();
             setPreviewingSlideId(null);
           }
@@ -184,7 +181,6 @@ export function useRemotionPlayerEvents({
     setIsPlaying,
     setCurrentFrame,
     setPreviewingSlideId,
-    sections,
     isDragging
   ]);
 }

@@ -1,8 +1,8 @@
+import { SpotlightEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import React from "react";
-import type { SpotlightEffect as SpotlightEffectType } from "@/types/slides";
 
 interface SpotlightEffectProps {
-  spotlight: SpotlightEffectType;
+  spotlight: SpotlightEffect;
   frame: number;
   fps: number;
   width: number;
@@ -17,7 +17,7 @@ interface SpotlightEffectProps {
  * Renders a spotlight overlay with blur effect on image/video slides at CANVAS level
  * Creates a clear spotlight area while darkening and optionally blurring the rest
  */
-export const SpotlightEffect: React.FC<SpotlightEffectProps> = ({
+export const SpotlightEffectComponent: React.FC<SpotlightEffectProps> = ({
   spotlight,
   frame,
   fps,
@@ -107,4 +107,4 @@ export const SpotlightEffect: React.FC<SpotlightEffectProps> = ({
   );
 };
 
-export default SpotlightEffect;
+export default SpotlightEffectComponent;

@@ -2,7 +2,7 @@
 // This configuration drives the entire editor
 
 import type { EditorConfig } from "@/types/editor";
-import { SlideType, TransitionType } from "@/types/slides";
+import { CanvasObjectType, SlideType, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 export const defaultEditorConfig: EditorConfig = {
     // ==========================================
@@ -104,8 +104,8 @@ export const defaultEditorConfig: EditorConfig = {
     // ==========================================
     insertTools: {
         tools: [
-            { id: "callout", name: "Callout", icon: "Focus" },
-            { id: "spotlight", name: "Spotlight", icon: "CircleDot" },
+            { id: CanvasObjectType.CANVAS_CALLOUT, name: "Callout", icon: "Focus" },
+            { id: CanvasObjectType.CANVAS_SPOTLIGHT, name: "Spotlight", icon: "CircleDot" },
         ],
         defaults: {
             callout: {
@@ -161,10 +161,10 @@ export const defaultEditorConfig: EditorConfig = {
     // ==========================================
     resolution: {
         options: [
-            { id: "16:9", name: "Landscape", aspect: "16/9", width: 1920, height: 1080 },
-            { id: "4:3", name: "Standard", aspect: "4/3", width: 1440, height: 1080 },
-            { id: "9:16", name: "Portrait", aspect: "9/16", width: 1080, height: 1920 },
-            { id: "1:1", name: "Square", aspect: "1/1", width: 1080, height: 1080 },
+            { $typeName: "coasterai.core.v1.Resolution", id: "16:9", name: "Landscape", aspect: "16/9", width: 1920, height: 1080 },
+            { $typeName: "coasterai.core.v1.Resolution", id: "4:3", name: "Standard", aspect: "4/3", width: 1440, height: 1080 },
+            { $typeName: "coasterai.core.v1.Resolution", id: "9:16", name: "Portrait", aspect: "9/16", width: 1080, height: 1920 },
+            { $typeName: "coasterai.core.v1.Resolution", id: "1:1", name: "Square", aspect: "1/1", width: 1080, height: 1080 },
         ],
         default: "16:9",
     },
@@ -174,13 +174,13 @@ export const defaultEditorConfig: EditorConfig = {
     // ==========================================
     transitions: {
         options: [
-            { id: TransitionType.NONE, name: "None", preview: "bg-muted" },
-            { id: TransitionType.FADE, name: "Fade", preview: "bg-gradient-to-r from-muted to-transparent" },
-            { id: TransitionType.SLIDE_LEFT, name: "Slide Left", preview: "bg-gradient-to-l from-muted via-primary/20 to-transparent" },
-            { id: TransitionType.SLIDE_RIGHT, name: "Slide Right", preview: "bg-gradient-to-r from-muted via-primary/20 to-transparent" },
-            { id: TransitionType.SLIDE_UP, name: "Slide Up", preview: "bg-gradient-to-t from-muted via-primary/20 to-transparent" },
+            { id: TransitionType.TRANSITION_NONE, name: "None", preview: "bg-muted" },
+            { id: TransitionType.TRANSITION_FADE, name: "Fade", preview: "bg-gradient-to-r from-muted to-transparent" },
+            { id: TransitionType.TRANSITION_SLIDE_LEFT, name: "Slide Left", preview: "bg-gradient-to-l from-muted via-primary/20 to-transparent" },
+            { id: TransitionType.TRANSITION_SLIDE_RIGHT, name: "Slide Right", preview: "bg-gradient-to-r from-muted via-primary/20 to-transparent" },
+            { id: TransitionType.TRANSITION_SLIDE_UP, name: "Slide Up", preview: "bg-gradient-to-t from-muted via-primary/20 to-transparent" },
         ],
-        default: TransitionType.FADE,
+        default: TransitionType.TRANSITION_FADE,
     },
 
     // ==========================================

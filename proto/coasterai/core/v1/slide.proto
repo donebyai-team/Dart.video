@@ -1,0 +1,190 @@
+syntax = "proto3";
+
+package coasterai.core.v1;
+option go_package = "github.com/shank318/coasterai/pb/coasterai/core/v1;pbcore";
+import "google/protobuf/struct.proto";
+
+// ===================== ENUMS =====================
+
+enum SlideType {
+  SLIDE_TYPE_IMAGE = 0;
+  SLIDE_TYPE_TEXT_ANIMATION = 1;
+  SLIDE_TYPE_INFOGRAPHIC = 2;
+  SLIDE_TYPE_VISUAL_ANIMATION = 3;
+  SLIDE_TYPE_VIDEO = 4;
+  SLIDE_TYPE_STACK = 5;
+}
+
+enum StackAnimationMode {
+  STACK_ANIMATION_MODE_STACK = 0;
+  STACK_ANIMATION_MODE_REVEAL = 1;
+}
+
+enum TransitionType {
+  TRANSITION_NONE = 0;
+  TRANSITION_FADE = 1;
+  TRANSITION_SLIDE_LEFT = 2;
+  TRANSITION_SLIDE_RIGHT = 3;
+  TRANSITION_SLIDE_UP = 4;
+}
+
+// ===================== CORE MESSAGES =====================
+
+message ImageSlideContent {
+  string src = 1;
+  optional float x = 2;
+  optional float y = 3;
+  optional float width = 4;
+  optional float height = 5;
+  optional float rotation = 6;
+}
+
+message VideoSlideContent {
+  string src = 1;
+  optional float startTime = 2;
+  optional float endTime = 3;
+}
+
+message AnimationSlideContent {
+  string templateId = 1;
+  google.protobuf.Struct templateConfig = 2;
+}
+
+message StackSlideContent {
+  StackAnimationMode animationMode = 1;
+  repeated Slide items = 2;
+}
+
+// ===================== EFFECTS =====================
+
+message SpotlightEffect {
+  string id = 1;
+  float x = 2;
+  float y = 3;
+  float width = 4;
+  float height = 5;
+  float blurAmount = 6;
+  float borderRadius = 7;
+  float startTime = 8;
+  float endTime = 9;
+}
+
+message ZoomEffect {
+  string id = 1;
+  float x = 2;
+  float y = 3;
+  float zoomLevel = 4;
+  float startTime = 5;
+  float endTime = 6;
+}
+
+// ===================== ANNOTATIONS =====================
+
+message AnnotationObject {
+  oneof annotation {
+    CalloutAnnotation callout = 1;
+  }
+}
+
+message CalloutAnnotation {
+  string id = 1;
+  float x = 2;
+  float y = 3;
+  optional string color = 4;
+  optional float opacity = 5;
+  optional string calloutStyle = 6; // pointer, circle, box, numbered
+}
+
+// ===================== BACKWARD COMPAT TYPES =====================
+
+enum CanvasObjectType {
+  CANVAS_CALLOUT = 0;
+  CANVAS_SPOTLIGHT = 1;
+}
+
+message CanvasObject {
+  string id = 1;
+  CanvasObjectType type = 2;
+  float x = 3;
+  float y = 4;
+
+  optional float width = 5;
+  optional float height = 6;
+  optional float rotation = 7;
+  optional string color = 8;
+  optional float opacity = 9;
+  optional float duration = 10;
+  optional string text = 11;
+  optional float fontSize = 12;
+  optional string fontFamily = 13;
+  optional string fontStyle = 14;
+  optional string animation = 15;
+  optional float borderWidth = 16;
+  optional float borderRadius = 17;
+  optional bool fill = 18;
+  repeated float points = 19;
+  optional float arrowSize = 20;
+  optional string arrowStyle = 21;
+  optional string calloutStyle = 22;
+  optional float spotlightRadius = 23;
+  optional float blurAmount = 24;
+  optional float spotlightStartTime = 25;
+  optional float spotlightEndTime = 26;
+  optional float zoomLevel = 27;
+}
+
+// ===================== SLIDE =====================
+
+message Slide {
+  string id = 1;
+  SlideType type = 2;
+  string transcript = 3;
+  float duration = 4;
+
+  TransitionType transition = 5;
+  optional float transitionDuration = 6;
+  optional string backgroundColor = 7;
+
+  oneof content {
+    ImageSlideContent image = 8;
+    VideoSlideContent video = 9;
+    AnimationSlideContent animation = 10;
+    StackSlideContent stack = 13;
+  }
+
+  repeated AnnotationObject annotations = 14;
+
+  optional bool voiceoverGenerated = 15;
+  optional bool isNested = 16;
+  repeated Slide subSlides = 17;
+  repeated SlideEffect effects = 18;
+}
+
+message SlideEffect {
+  oneof effect {
+    SpotlightEffect spotlight = 1;
+    ZoomEffect zoom = 2;
+  }
+}
+
+
+
+// ===================== SECTION =====================
+
+message Section {
+  string id = 1;
+  string title = 2;
+  string color = 3;
+  repeated Slide slides = 4;
+  optional bool voiceoverGenerated = 5;
+}
+
+// ===================== RESOLUTION =====================
+
+message Resolution {
+  string id = 1;
+  string name = 2;
+  string aspect = 3;
+  int32 width = 4;
+  int32 height = 5;
+}

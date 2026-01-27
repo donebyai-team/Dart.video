@@ -40,8 +40,8 @@ import {
 import AddSlideButton from "./AddSlideButton";
 import SortableSlideCard from "./SortableSlideCard";
 import TransitionPicker from "./TransitionPicker";
-import { Section, Slide, SlideType } from "@/types/slides";
 import { ImageIcon, Type, BarChart3, Sparkles, Film, Layers } from "lucide-react";
+import { Section, Slide, SlideType, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 interface StoryboardSectionProps {
     section: Section;
@@ -64,7 +64,7 @@ interface StoryboardSectionProps {
     onGenerateVoiceover: () => void;
     onPlayVoiceover: () => void;
     onShowTransitionPicker: (slideId: string | null) => void;
-    onUpdateTransition: (slideId: string, transitionId: string) => void;
+    onUpdateTransition: (slideId: string, transitionId: TransitionType) => void;
     onAddSlide: (type: SlideType) => void;
     onReorderSlides: (activeId: string, overId: string) => void;
 }
@@ -283,7 +283,7 @@ const StoryboardSection = ({
                                             {/* Transition Picker is rendered BEFORE the slide it controls */}
                                             {showTransition && (
                                                 <TransitionPicker
-                                                    currentTransitionId={slide.transition || "none"}
+                                                    currentTransitionType={slide.transition || TransitionType.TRANSITION_NONE}
                                                     isOpen={showTransitionPicker === slide.id}
                                                     onToggle={() =>
                                                         onShowTransitionPicker(

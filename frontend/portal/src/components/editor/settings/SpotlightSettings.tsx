@@ -2,7 +2,7 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Play } from "lucide-react";
-import type { CanvasObject } from "@/types/slides";
+import { CanvasObject } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 interface SpotlightSettingsProps {
   settings: Partial<CanvasObject>;
@@ -16,7 +16,6 @@ const SpotlightSettings = ({
   settings,
   onChange,
   slideDuration = 5,
-  slideStartTime = 0,
   onPlay
 }: SpotlightSettingsProps) => {
   const spotlightStart = settings.spotlightStartTime ?? 0;

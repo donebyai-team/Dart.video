@@ -341,8 +341,8 @@ Defaults are merged when LLM output is missing or omits optional fields.
   "title.style.size": "XL",
   "title.style.weight": "bold",
   "subtitle.value": "",
-  "features[0].text.value": "Fast performance",
-  "features[0].icon.value": "bolt",
+  "features[x].text.value": "Fast performance",
+  "features[x].icon.value": "bolt",
   "features.min": 1,
   "features.max": 6
 }

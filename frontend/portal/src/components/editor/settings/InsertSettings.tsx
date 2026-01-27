@@ -1,16 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
-import { X, Trash2, ZoomIn, Square, Type, ArrowRight, Focus, CircleDot } from "lucide-react";
+import { X, Trash2, Focus, CircleDot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CalloutSettings from "./CalloutSettings";
 import SpotlightSettings from "./SpotlightSettings";
-import type { CanvasObjectType, CanvasObject, SlideEffect, AnnotationObject } from "@/types/slides";
+import { CanvasObjectType, CanvasObject, SlideEffect, AnnotationObject } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
-export type InsertToolType = CanvasObjectType;
 
 interface InsertSettingsProps {
-  tool: InsertToolType;
-  // NEW ARCHITECTURE: currentObject can be effect or annotation
-  currentObject?: CanvasObject | SlideEffect | AnnotationObject;
+  tool: CanvasObjectType;
+  currentObject?: SlideEffect;
   // OLD ARCHITECTURE: Single onChange handler
   onChange: (settings: Partial<CanvasObject>) => void;
   // NEW ARCHITECTURE: Separate handlers for effects and annotations
@@ -26,9 +24,9 @@ interface InsertSettingsProps {
   onPlay?: () => void;
 }
 
-const toolInfo: Record<InsertToolType, { label: string; icon: React.ElementType }> = {
-  callout: { label: "Callout", icon: Focus },
-  spotlight: { label: "Spotlight", icon: CircleDot },
+const toolInfo: Record<CanvasObjectType, { label: string; icon: React.ElementType }> = {
+  0: { label: "Callout", icon: Focus },
+  1: { label: "Spotlight", icon: CircleDot },
 };
 
 const InsertSettings = ({
@@ -80,6 +78,7 @@ const InsertSettings = ({
     spotlightEndTime: getProperty(currentObject, 'spotlightEndTime', slideDuration),
   });
 
+  console.debug("insert settings", tool, currentObject)
   const ToolIcon = toolInfo[tool].icon;
 
   // Sync settings when currentObject changes
@@ -113,14 +112,14 @@ const InsertSettings = ({
         spotlightEndTime: getProperty(currentObject, 'spotlightEndTime', slideDuration),
       });
     }
-  }, [currentObject?.id, slideDuration]);
+  }, [currentObject?.effect.value?.id, slideDuration]);
 
   const updateSetting = useCallback((key: string, value: any) => {
     const newSettings = { ...settings, [key]: value };
     setSettings(newSettings);
 
     // Determine if we're updating an effect or annotation based on tool type
-    const isEffect = tool === "spotlight";
+    const isEffect = tool === CanvasObjectType.CANVAS_SPOTLIGHT;
 
     if (isEffect && onChangeEffect) {
       onChangeEffect({ [key]: value } as Partial<SlideEffect>);
@@ -131,9 +130,9 @@ const InsertSettings = ({
 
   const renderToolSpecificSettings = () => {
     switch (tool) {
-      case "callout":
+      case CanvasObjectType.CANVAS_CALLOUT:
         return <CalloutSettings settings={settings} onChange={updateSetting} />;
-      case "spotlight":
+      case CanvasObjectType.CANVAS_SPOTLIGHT:
         return (
           <SpotlightSettings
             settings={settings}

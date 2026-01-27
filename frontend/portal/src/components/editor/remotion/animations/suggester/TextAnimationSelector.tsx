@@ -4,12 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState, useEffect } from "react";
-import { type Slide, type Section } from "@/types/slides";
 import type {
     TextAnimationTemplate,
     TextAnimationTemplateId,
     TextAnimationTemplatesConfig,
 } from "@/types/editor";
+import { AnimationSlideContent, Section, Slide } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 interface TextAnimationSelectorProps {
     selectedSlide: { slide: Slide; section: Section };
@@ -63,8 +63,8 @@ const TextAnimationSelector = ({
     };
 
     // Get template ID from content (new architecture)
-    const textContent = selectedSlide.slide.content as { type: string; template_id?: string } | undefined;
-    const currentTemplateId = textContent?.type === 'text-animation' ? textContent.template_id : undefined;
+    const textContent = selectedSlide.slide.content.value as AnimationSlideContent
+    const currentTemplateId = textContent.templateId
 
     return (
         <div className="h-full flex flex-col">

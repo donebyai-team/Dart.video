@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { PlayerRef } from "@remotion/player";
-import { Section } from "@/types/slides";
 import { getSlideVisualEndFrame, getRealSlideStartFrame } from "@/components/editor/frame_calculations";
+import { TimelineSlide } from "@/components/editor/timeline/types";
 
 /**
  * Centralized playback control logic for the Remotion player
@@ -9,8 +9,7 @@ import { getSlideVisualEndFrame, getRealSlideStartFrame } from "@/components/edi
  */
 export const usePlayerControls = (
   playerRef: React.RefObject<PlayerRef | null>,
-  sections: Section[],
-  selectedSlideId: string,
+  sections: TimelineSlide[],
   currentFrame: number,
   totalFrames: number,
   isPlaying: boolean,

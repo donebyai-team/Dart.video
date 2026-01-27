@@ -9,11 +9,11 @@ import {
   assignOverlayTracks,
   DEFAULT_PIXELS_PER_SECOND,
 } from "./timelineCalculations";
-import { SlideType } from "@/types/slides";
 import type { TimelineSlide } from "./types";
 import { PlayHead } from "./PlayHead";
 import { calculateRealTotalFrames } from "../frame_calculations";
 import { useVideoStore } from "@/stores/video";
+import { SlideType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 interface PlayerTimelineProps {
   slides: TimelineSlide[];
@@ -24,7 +24,7 @@ interface PlayerTimelineProps {
   onSelectSlide?: (slideId: string) => void;
   onSelectOverlay?: (overlayId: string, slideId: string) => void;
   onSelectSlideManually?: (slideId: string) => void; // NEW: For manual slide selection
-  fps?: number;
+  fps: number;
   isDragging?: boolean; // NEW: To indicate when scrubbing is happening
   onDraggingChange?: (isDragging: boolean) => void; // NEW: To notify parent of drag state
 }
@@ -43,14 +43,14 @@ const PlayerTimeline = ({
   onDraggingChange,
 }: PlayerTimelineProps) => {
 
-  const selectedSlideId = useVideoStore(s=>s.selectedSlide).slide.id;
-  const selectedObjectId = useVideoStore(s=>s.selectedObjectId);
+  const selectedSlideId = useVideoStore(s => s.selectedSlide)?.slide.id;
+  const selectedObjectId = useVideoStore(s => s.selectedObjectId);
 
   const [hoveredTime, setHoveredTime] = useState<number | null>(null);
   const [internalIsDragging, setInternalIsDragging] = useState(false);
   const [dragFrame, setDragFrame] = useState<number | null>(null); // Track drag position separately
   const timelineContainerRef = useRef<HTMLDivElement>(null);
-  const prevSelectedSlideIdRef = useRef<string>(selectedSlideId);
+  const prevSelectedSlideIdRef = useRef<string>(selectedSlideId!);
 
   // Use external dragging state if provided, otherwise use internal
   const isDragging = externalIsDragging || internalIsDragging;
@@ -73,7 +73,7 @@ const PlayerTimeline = ({
     const slideItems = calculateRemotionSlideItems(slides, pixelsPerSecond, fps);
     const transitionItems = calculateTransitionOverlays(slides, pixelsPerSecond, fps);
     const overlayItems = assignOverlayTracks(
-      calculateOverlayItems(slides, pixelsPerSecond)
+      calculateOverlayItems(slides)
     );
 
     return { slideItems, transitionItems, overlayItems };
@@ -154,22 +154,8 @@ const PlayerTimeline = ({
   }, [totalFrames, onSeek, onDraggingChange]);
 
   // Timeline width based on actual Remotion duration (with overlapping transitions)
-  const realTotalFrames = useMemo(() => {
-    // Convert slides to sections format for calculation
-    const sections = [{
-      id: 'timeline-section',
-      title: 'Timeline',
-      color: 'bg-primary',
-      slides: slides.map(s => ({
-        id: s.id,
-        duration: s.duration,
-        transition: s.transition,
-        type: SlideType.IMAGE,
-        transcript: '', // Required property
-        content: { type: 'image', src: '' } as any
-      }))
-    }];
-    return calculateRealTotalFrames(sections, fps);
+  const realTotalFrames = useMemo(() => {   
+    return calculateRealTotalFrames(slides, fps);
   }, [slides, fps]);
 
   const realTotalDuration = realTotalFrames / fps;
@@ -206,7 +192,9 @@ const PlayerTimeline = ({
         });
       }
 
-      prevSelectedSlideIdRef.current = selectedSlideId;
+      if (selectedSlideId) {
+        prevSelectedSlideIdRef.current = selectedSlideId;
+      }
     }
   }, [selectedSlideId, slideItems, pixelsPerSecond]);
 
@@ -254,7 +242,7 @@ const PlayerTimeline = ({
           pixelsPerSecond={pixelsPerSecond}
           isDragging={isDragging}
           handleScrubberMouseDown={handleScrubberMouseDown}
-        /> 
+        />
         {/* Hover time indicator - only show when not dragging */}
         {/* {hoveredTime !== null && !isDragging && (
           <div

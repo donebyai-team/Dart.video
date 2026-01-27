@@ -1,6 +1,6 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ColorPickerInput from "@/components/editor/ColorPickerInput";
-import type { CanvasObject } from "@/types/slides";
+import { CanvasObject } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 interface CalloutSettingsProps {
   settings: Partial<CanvasObject>;

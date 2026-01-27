@@ -7,15 +7,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   getTemplateById,
   type TemplateProperty,
-  type TextAnimationTemplateId,
   type TextAnimationTemplate,
 } from "@/types/textAnimationTemplates";
+import { JsonObject } from "@bufbuild/protobuf";
 
 interface TextAnimationTemplateSettingsProps {
-  templateId: TextAnimationTemplateId;
+  templateId: string;
   templates: TextAnimationTemplate[];
-  props: Record<string, string | number>;
-  onUpdateProps: (props: Record<string, string | number>) => void;
+  props: JsonObject;
+  onUpdateProps: (props: JsonObject) => void;
   onClose: () => void;
   onApply?: () => void;
 }
@@ -48,11 +48,19 @@ const TextAnimationTemplateSettings = ({
   }
 
   const handlePropertyChange = (key: string, value: string | number) => {
-    onUpdateProps({ ...props, [key]: value });
+    // Creating a shallow copy with the updated key
+    console.debug("change", "key", key, "value", value)
+    const updatedProps: JsonObject = {
+      ...props,
+      [key]: value
+    };
+
+    onUpdateProps(updatedProps);
   };
 
   const renderPropertyInput = (property: TemplateProperty) => {
-    const currentValue = props[property.key] ?? property.default;
+    const plainProps = JSON.parse(JSON.stringify(props)) as Record<string, string | number>;;
+    const currentValue = plainProps[property.key] ?? property.default;
 
     switch (property.type) {
       case "number":

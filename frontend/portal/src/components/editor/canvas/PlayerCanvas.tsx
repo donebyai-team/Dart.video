@@ -38,7 +38,6 @@ const PlayerCanvas = ({
   const updateEffect = useVideoStore(s => s.updateEffect);
   const updateAnnotation = useVideoStore(s => s.updateAnnotation);
   const updateCanvasObject = useVideoStore(s => s.updateCanvasObject);
-  const getEffectiveCanvasObjects = useVideoStore(s => s.getEffectiveCanvasObjects);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Early return if no data
@@ -47,9 +46,7 @@ const PlayerCanvas = ({
   }
 
   // Get effective canvas objects from store
-  const effectiveCanvasObjects = getEffectiveCanvasObjects();
   const effects = selectedSlide.slide.effects || [];
-  const annotations = selectedSlide.slide.annotations || [];
 
   // Pinch to zoom handler
   useEffect(() => {
@@ -121,8 +118,6 @@ const PlayerCanvas = ({
             <CanvasOverlay
               resolution={resolution}
               effects={effects}
-              annotations={annotations}
-              canvasObjects={effectiveCanvasObjects}
               selectedObjectId={selectedObjectId || null}
               onSelectObject={handleSelectObject}
               onUpdateEffect={(id, updates) => updateEffect(id, updates)}

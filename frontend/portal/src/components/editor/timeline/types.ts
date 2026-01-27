@@ -1,6 +1,6 @@
 // Timeline-specific types for the layered timeline visualization
 
-import type { TransitionType, SlideEffect, AnnotationObject } from "@/types/slides";
+import { AnnotationObject, Slide, SlideEffect, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 /**
  * Timeline item types representing different elements on the timeline
@@ -69,6 +69,7 @@ export interface TimelineSlide {
   duration: number; // Exclusive duration
   sectionColor: string;
   sectionTitle: string;
+  slide: Slide;
   transition?: TransitionType;
   effects?: SlideEffect[]; // Canvas-level effects
   annotations?: AnnotationObject[]; // Overlay annotations

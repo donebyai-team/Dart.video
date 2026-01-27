@@ -1,19 +1,21 @@
 
 import { ActiveToolType } from "@/types/tools";
-import { SlideType } from "@/types/slides";
+import { Slide, SlideType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { getSlideTypeConfig } from "./utils";
 import { getDefaultTemplateProps } from "@/types/textAnimationTemplates";
+import { VideoStoreSet, VideoStoreGet } from "./types";
+import { JsonObject } from "@bufbuild/protobuf";
 
-export const createTextAnimationActions = (set, get) => ({
+export const createTextAnimationActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   getTextAnimationConfig() {
     const { config } = get();
     const slideConfig = getSlideTypeConfig(config, SlideType.TEXT_ANIMATION);
     return slideConfig?.id === SlideType.TEXT_ANIMATION ? slideConfig : undefined;
   },
 
-  setShowTransitionPicker: (slideId) => set({ showTransitionPicker: slideId }),
+  setShowTransitionPicker: (slideId: string| null) => set({ showTransitionPicker: slideId }),
 
-  handleSelectTextAnimationTemplate(templateId) {
+  handleSelectTextAnimationTemplate(templateId: string) {
     const { config, selectedSlide, sections } = get();
     if (!config || !selectedSlide) return;
 
@@ -21,33 +23,35 @@ export const createTextAnimationActions = (set, get) => ({
     const templates = textConfig?.templates.templates || [];
     const defaultProps = getDefaultTemplateProps(templates, templateId);
 
-    const currentContent = selectedSlide.slide.content || {};
-    const currentCfg = currentContent.template_config || {};
+    const slide = selectedSlide.slide;
+
+    if (slide.content.case !== "animation") return;
+
+    const newTemplateConfig = {
+      ...slide.content.value.templateConfig,
+      ...defaultProps,
+    };
 
     const newSections = sections.map((s) =>
       s.id === selectedSlide.section.id
         ? {
-            ...s,
-            slides: s.slides.map((sl) =>
-              sl.id === selectedSlide.slide.id
-                ? {
-                    ...sl,
-                    content: {
-                      type: "text-animation",
-                      template_id: templateId,
-                      template_config: {
-                        x: currentCfg.x,
-                        y: currentCfg.y,
-                        width: currentCfg.width,
-                        height: currentCfg.height,
-                        ...defaultProps,
-                        text: String(defaultProps.text || sl.transcript || ""),
-                      },
-                    },
-                  }
-                : sl
-            ),
-          }
+          ...s,
+          slides: s.slides.map((sl) =>
+            sl.id === slide.id
+              ? {
+                ...sl,
+                content: {
+                  case: "animation",
+                  value: {
+                    ...sl.content.value,
+                    templateId, // update template selection
+                    templateConfig: newTemplateConfig,
+                  },
+                },
+              } as Slide
+              : sl
+          ),
+        }
         : s
     );
 
@@ -56,49 +60,51 @@ export const createTextAnimationActions = (set, get) => ({
       selectedSlide: {
         ...selectedSlide,
         slide: {
-          ...selectedSlide.slide,
+          ...slide,
           content: {
-            type: SlideType.TEXT_ANIMATION,
-            template_id: templateId,
-            template_config: {
-              x: currentCfg.x,
-              y: currentCfg.y,
-              width: currentCfg.width,
-              height: currentCfg.height,
-              ...defaultProps,
-              text: String(defaultProps.text || selectedSlide.slide.transcript || ""),
+            case: "animation",
+            value: {
+              ...slide.content.value,
+              templateId,
+              ...newTemplateConfig,
             },
           },
-        },
+        } as Slide,
       },
       activeTool: { type: ActiveToolType.TEXT_ANIMATION_TEMPLATE },
     });
   },
 
-  handleUpdateTemplateProps(newProps) {
+
+  handleUpdateTemplateProps(newProps: JsonObject) {
     const { sections, selectedSlide } = get();
     if (!selectedSlide) return;
+    const slide = selectedSlide.slide;
 
-    const content = selectedSlide.slide.content;
-    if (!content?.template_id) return;
+    if (slide.content.case !== "animation") return;
 
-    const cfg = content.template_config || {};
-
-    const updatedCfg = { ...cfg, ...newProps };
-
+    const prev = slide.content.value;
+    const newConfig = { ...prev.templateConfig, ...newProps };
+    console.log("rewfwrfwe", prev.templateConfig, newConfig)
     const newSections = sections.map((s) =>
       s.id === selectedSlide.section.id
         ? {
-            ...s,
-            slides: s.slides.map((sl) =>
-              sl.id === selectedSlide.slide.id
-                ? {
-                    ...sl,
-                    content: { ...content, template_config: updatedCfg },
-                  }
-                : sl
-            ),
-          }
+          ...s,
+          slides: s.slides.map((sl) =>
+            sl.id === slide.id
+              ? {
+                ...sl,
+                content: {
+                  case: "animation",
+                  value: {
+                    ...prev,
+                    templateConfig: newConfig,
+                  },
+                },
+              } as Slide
+              : sl
+          ),
+        }
         : s
     );
 
@@ -107,10 +113,18 @@ export const createTextAnimationActions = (set, get) => ({
       selectedSlide: {
         ...selectedSlide,
         slide: {
-          ...selectedSlide.slide,
-          content: { ...content, template_config: updatedCfg },
-        },
+          ...slide,
+          content: {
+            case: "animation",
+            value: {
+              ...prev,
+              templateConfig: newConfig,
+            },
+          },
+        } as Slide,
       },
     });
-  },
+    console.debug("UPDATED slide props", newProps, selectedSlide)
+  }
+
 });

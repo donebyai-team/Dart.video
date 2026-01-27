@@ -13,11 +13,11 @@ import StoryboardPanel from "@/components/editor/StoryboardPanel";
 import ToolsSettingsPanel from "@/components/editor/ToolsSettingsPanel";
 import RemotionPlayer, { RemotionPlayerHandle } from "@/components/editor/canvas/RemotionPlayer";
 import { type EditorConfig, type EditorCallbacks, VideoConfig } from "@/types/editor";
-import { type Slide } from "@/types/slides";
 import { sampleVideoConfig } from "@/data/videoConfig";
 import { defaultEditorConfig } from "@/data/editorConfig";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useVideoStore } from "@/stores/video";
+import { Slide, SlideType, StackSlideContent } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 
 // Icon mapping for dynamic rendering
@@ -49,7 +49,7 @@ const EditorPage = ({
   // ---- Values (reactive) ----
   const initialize = useVideoStore(s => s.initialize);
   const isInitialized = useVideoStore(s => s.isInitialized);
-  
+
   const setShowVoiceover = useVideoStore(s => s.setShowVoiceover);
   const sections = useVideoStore(s => s.sections);
   const selectedSlide = useVideoStore(s => s.selectedSlide);
@@ -92,14 +92,14 @@ const EditorPage = ({
       return;
     }
 
-    console.log("EditorPage: Calling initialize with:", { 
-      config: !!config, 
-      videoConfig: !!videoConfig, 
-      sections: videoConfig?.sections?.length 
+    console.log("EditorPage: Calling initialize with:", {
+      config: !!config,
+      videoConfig: !!videoConfig,
+      sections: videoConfig?.sections?.length
     });
-    
+
     initialize(config, videoConfig, { onConfigChange });
-    
+
     // Store references to prevent re-initialization
     initializationRef.current = { config, videoConfig };
   }, [config, videoConfig, initialize, onConfigChange]);
@@ -253,10 +253,10 @@ const EditorPage = ({
                   // Use manual slide selection behavior - seek to end and prepare for restart
                   playerRef.current?.selectSlideManually(slide.id);
                   // For stack slides, auto-open settings (slide-level settings)
-                  if (slide.type === "stack") {
+                  if (slide.type === SlideType.STACK) {
                     openEntitySettings(entityId);
                   }
-                }}                
+                }}
                 onStartEditTitle={(id, title) => {
                   setEditingSectionId(id);
                   setEditingSectionTitle(title);
@@ -265,7 +265,7 @@ const EditorPage = ({
                   if (editingSectionId) {
                     updateSectionTitle(editingSectionId, editingSectionTitle);
                   }
-                }}                
+                }}
               />
             </motion.div>
           )}
@@ -284,7 +284,7 @@ const EditorPage = ({
             }}
             onStackItemChange={(itemId) => {
               // Update stack item selection during playback
-              if (itemId && selectedSlide.slide.type === "stack") {
+              if (itemId && selectedSlide.slide.type === SlideType.STACK) {
                 handleSelectEntity(createStackItemEntityId(selectedSlide.slide.id, itemId));
               }
             }}
@@ -313,8 +313,8 @@ const EditorPage = ({
                 let currentTranscript = selectedSlide.slide.transcript;
                 let handleTranscriptChange = updateSlideTranscript;
 
-                if (selectedSlide.slide.type === "stack" && selectedStackItemId) {
-                  const content = selectedSlide.slide.content as any;
+                if (selectedSlide.slide.type === SlideType.STACK && selectedStackItemId) {
+                  const content = selectedSlide.slide.content.value as StackSlideContent;
                   const items = content?.items || [];
                   const selectedItem = items.find((item: Slide) => item.id === selectedStackItemId);
                   if (selectedItem) {
@@ -328,8 +328,11 @@ const EditorPage = ({
                       );
                       updateSlide({
                         content: {
-                          ...content,
-                          items: updatedItems
+                          case: "stack",
+                          value: {
+                            ...content,
+                            items: updatedItems
+                          }
                         }
                       });
                     };
@@ -342,7 +345,7 @@ const EditorPage = ({
                       <Volume2 className="w-4 h-4 text-muted-foreground" />
                       <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                         Voiceover Script
-                        {selectedSlide.slide.type === "stack" && selectedStackItemId && " (Item)"}
+                        {selectedSlide.slide.type === SlideType.STACK && selectedStackItemId && " (Item)"}
                       </span>
                     </div>
                     <div className="flex items-center gap-3">

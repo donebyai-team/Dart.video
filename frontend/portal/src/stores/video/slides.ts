@@ -1,11 +1,14 @@
-import { Slide, SlideType, TransitionType } from "@/types/slides";
+import { Slide, SlideType, StackSlideContent, TransitionType, ImageSlideContent, VideoSlideContent, AnimationSlideContent, StackAnimationMode } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { arrayMove } from "@dnd-kit/sortable";
 import { getSlideTypeConfig } from "./utils";
 import { createOverlayEntityId, createSlideEntityId, createStackItemEntityId, createStackItemOverlayEntityId } from "@/types/selection";
+import { VideoStoreSet, VideoStoreGet } from "./types";
+import { TimelineSlide } from "@/components/editor/timeline/types";
+import { slide } from "@remotion/transitions/slide";
 
 
 
-export const createSlideActions = (set, get) => ({
+export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     addSlide(sectionId: string, type: SlideType) {
         const { sections, config } = get();
         if (!config) return;
@@ -18,15 +21,80 @@ export const createSlideActions = (set, get) => ({
             slideTypeConfig?.defaultBackground ||
             config.background.defaultColor;
 
-        const newSlide = {
+        // Create default content based on slide type
+        let content: Slide['content'];
+        
+        switch (type) {
+            case SlideType.IMAGE:
+                content = {
+                    case: "image",
+                    value: {
+                        $typeName: "coasterai.core.v1.ImageSlideContent",
+                        src: "",
+                        x: 0,
+                        y: 0,
+                        width: 1920,
+                        height: 1080,
+                        rotation: 0,
+                    } as ImageSlideContent
+                };
+                break;
+                
+            case SlideType.VIDEO:
+                content = {
+                    case: "video",
+                    value: {
+                        $typeName: "coasterai.core.v1.VideoSlideContent",
+                        src: "",
+                        startTime: 0,
+                        endTime: 10,
+                    } as VideoSlideContent
+                };
+                break;
+                
+            case SlideType.TEXT_ANIMATION:
+            case SlideType.VISUAL_ANIMATION:
+            case SlideType.INFOGRAPHIC:
+                const defaultTemplateId = type === SlideType.TEXT_ANIMATION ? "number-counter" : "default";
+                content = {
+                    case: "animation",
+                    value: {
+                        $typeName: "coasterai.core.v1.AnimationSlideContent",
+                        templateId: defaultTemplateId,
+                        templateConfig: {},
+                    } as AnimationSlideContent
+                };
+                break;
+                
+            case SlideType.STACK:
+                content = {
+                    case: "stack",
+                    value: {
+                        $typeName: "coasterai.core.v1.StackSlideContent",
+                        animationMode: StackAnimationMode.STACK,
+                        items: [],
+                    } as StackSlideContent
+                };
+                break;
+                
+            default:
+                content = { case: undefined, value: undefined };
+                break;
+        }
+
+        const newSlide: Slide = {
+            $typeName: "coasterai.core.v1.Slide",
             id: `${sectionId}-${Date.now()}`,
             type,
             transcript: slideTypeConfig?.defaultTranscript || "Add your script here...",
             duration: slideTypeConfig?.defaultDuration || 5,
-            transition: config.transitions.default as TransitionType,
+            transition: TransitionType.TRANSITION_NONE,
             backgroundColor: inheritedBg,
+            transitionDuration: 0.3,
+            content,
             effects: [],
             annotations: [],
+            subSlides: [],
         };
 
         const newSections = sections.map((s) =>
@@ -37,7 +105,11 @@ export const createSlideActions = (set, get) => ({
         get().notifyConfigChange(newSections);
 
         const section = newSections.find((s) => s.id === sectionId);
-        set({ selectedSlide: { section, slide: newSlide } });
+        if (section) {
+            set({ selectedSlide: { section, slide: newSlide } });
+        }
+
+        console.debug("added slide", section, slide)
     },
 
     createSlideEntityId: (slideId: string) => {
@@ -48,7 +120,7 @@ export const createSlideActions = (set, get) => ({
     createOverlayEntityId: (slideId: string, overlayId: string) => createOverlayEntityId(slideId, overlayId),
     createStackItemOverlayEntityId: (slideId: string, itemId: string, overlayId: string) => createStackItemOverlayEntityId(slideId, itemId, overlayId),
 
-    updateSlideBackground: (color, applyToAll = false) => {
+    updateSlideBackground: (color: string, applyToAll = false) => {
         const { sections, selectedSlide, videoConfig, config, onConfigChange } = get();
         if (!selectedSlide) return;
 
@@ -109,7 +181,7 @@ export const createSlideActions = (set, get) => ({
         }
     },
 
-    updateSlideTranscript: (transcript) => {
+    updateSlideTranscript: (transcript: string) => {
         const { sections, selectedSlide } = get();
         if (!selectedSlide) return;
 
@@ -155,7 +227,7 @@ export const createSlideActions = (set, get) => ({
         }
     },
 
-    updateSlide(updates: Partial<Slide>) {
+    updateSlide(updates: Partial<Slide>) {        
         const { sections, selectedSlide } = get();
         if (!selectedSlide) return;
 
@@ -177,9 +249,35 @@ export const createSlideActions = (set, get) => ({
                 slide: { ...selectedSlide.slide, ...updates },
             },
         });
+        console.debug("slide updated", "updates", updates)
     },
 
-    updateSlideContent(updates) {
+    getTimelineSlides(): TimelineSlide[] {
+        const { sections } = get();
+        return sections.flatMap(s => s.slides.map(slide => {
+            // For stack slides, calculate actual duration from nested items
+            let actualDuration = slide.duration;
+            if (slide.type === SlideType.STACK && slide.content) {
+                const stackContent = slide.content.value as StackSlideContent;
+                if (stackContent.items && Array.isArray(stackContent.items)) {
+                    actualDuration = stackContent.items.reduce((sum: number, item: any) => sum + (item.duration || 0), 0);
+                }
+            }
+
+            return {
+                ...slide,
+                id: slide.id,
+                slide: slide,
+                duration: actualDuration,
+                sectionColor: s.color,
+                sectionTitle: s.title,
+                effects: slide.effects || [],
+                annotations: slide.annotations || [],
+            };
+        }))
+    },
+
+    updateSlideContent(updates: Record<string, unknown>) {
         const { sections, selectedSlide } = get();
         if (!selectedSlide) return;
 
@@ -208,7 +306,7 @@ export const createSlideActions = (set, get) => ({
         });
     },
 
-    updateSlideTransition(sectionId: string, slideId: string, transitionId: string) {
+    updateSlideTransition(sectionId: string, slideId: string, transitionId: TransitionType) {
         const { sections } = get();
         const newSections = sections.map((s) =>
             s.id === sectionId
