@@ -3,17 +3,13 @@ import { X, Trash2, Focus, CircleDot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CalloutSettings from "./CalloutSettings";
 import SpotlightSettings from "./SpotlightSettings";
-import { CanvasObjectType, CanvasObject, SlideEffect, AnnotationObject } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { CanvasObjectType, CanvasObject, SpotlightEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 
 interface InsertSettingsProps {
   tool: CanvasObjectType;
-  currentObject?: SlideEffect;
-  // OLD ARCHITECTURE: Single onChange handler
-  onChange: (settings: Partial<CanvasObject>) => void;
-  // NEW ARCHITECTURE: Separate handlers for effects and annotations
-  onChangeEffect?: (settings: Partial<SlideEffect>) => void;
-  onChangeAnnotation?: (settings: Partial<AnnotationObject>) => void;
+  currentObject?: SpotlightEffect;
+  onChangeSpotlight?: (settings: Partial<SpotlightEffect>) => void;
   onDelete?: () => void;
   onClose: () => void;
   canDelete?: boolean;
@@ -32,9 +28,7 @@ const toolInfo: Record<CanvasObjectType, { label: string; icon: React.ElementTyp
 const InsertSettings = ({
   tool,
   currentObject,
-  onChange,
-  onChangeEffect,
-  onChangeAnnotation,
+  onChangeSpotlight,
   onDelete,
   onClose,
   canDelete = true,
@@ -112,7 +106,7 @@ const InsertSettings = ({
         spotlightEndTime: getProperty(currentObject, 'spotlightEndTime', slideDuration),
       });
     }
-  }, [currentObject?.effect.value?.id, slideDuration]);
+  }, [currentObject?.id, slideDuration]);
 
   const updateSetting = useCallback((key: string, value: any) => {
     const newSettings = { ...settings, [key]: value };
@@ -121,12 +115,10 @@ const InsertSettings = ({
     // Determine if we're updating an effect or annotation based on tool type
     const isEffect = tool === CanvasObjectType.CANVAS_SPOTLIGHT;
 
-    if (isEffect && onChangeEffect) {
-      onChangeEffect({ [key]: value } as Partial<SlideEffect>);
-    } else if (!isEffect && onChangeAnnotation) {
-      onChangeAnnotation({ [key]: value } as Partial<AnnotationObject>);
+    if (isEffect && onChangeSpotlight) {
+      onChangeSpotlight({ [key]: value } as Partial<SpotlightEffect>);
     }
-  }, [settings, tool, onChange, onChangeEffect, onChangeAnnotation]);
+  }, [settings, tool, onChangeSpotlight]);
 
   const renderToolSpecificSettings = () => {
     switch (tool) {

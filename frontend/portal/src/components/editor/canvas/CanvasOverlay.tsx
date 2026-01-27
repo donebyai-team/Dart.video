@@ -1,38 +1,27 @@
 import { useMemo } from "react";
 import SpotlightOverlay from "./overlays/SpotlightOverlay";
-import { Resolution, SlideEffect, AnnotationObject, CanvasObject } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { Resolution, CanvasObject, SpotlightEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 interface CanvasOverlayProps {
   resolution: Resolution;
-  effects?: SlideEffect[];
+  spotlights?: SpotlightEffect[];
   selectedObjectId: string | null;
   onSelectObject: (id: string | null) => void;
-  onUpdateObject?: (id: string, updates: Partial<CanvasObject>) => void;
-  // NEW ARCHITECTURE: Separate update handlers
-  onUpdateEffect?: (id: string, updates: Partial<SlideEffect>) => void;
-  onUpdateAnnotation?: (id: string, updates: Partial<AnnotationObject>) => void;
+  onUpdateSpotlight?: (id: string, updates: Partial<SpotlightEffect>) => void;
   containerWidth: number;
   containerHeight: number;
 }
 
 const CanvasOverlay = ({
   resolution,
-  effects = [],
+  spotlights = [],
   selectedObjectId,
   onSelectObject,
-  onUpdateObject,
-  onUpdateEffect,
-  onUpdateAnnotation,
+  onUpdateSpotlight,
   containerWidth,
   containerHeight,
 }: CanvasOverlayProps) => {
-  // Support both old and new architecture
-   const spotlightEffects = effects.flatMap((e: SlideEffect) => {
-      if (e.effect.case === "spotlight" && e.effect.value) {
-        return [e.effect.value];
-      }
-      return [];
-    });
+
   const { scale } = useMemo(() => {
     if (!containerWidth || !containerHeight) {
       return { scale: 1 };
@@ -71,7 +60,7 @@ const CanvasOverlay = ({
     <>   
 
       {/* Render spotlight effects using SpotlightOverlay for interactive editing */}
-      {spotlightEffects.map((spotlight) => (
+      {spotlights.map((spotlight) => (
         <SpotlightOverlay
           key={spotlight.id}
           spotlight={spotlight}
@@ -81,11 +70,8 @@ const CanvasOverlay = ({
           isSelected={selectedObjectId === spotlight.id}
           onSelect={() => onSelectObject(spotlight.id)}
           onUpdate={(updates) => {
-            if (onUpdateEffect) {
-              onUpdateEffect(spotlight.id, updates as Partial<SlideEffect>);
-            } else if (onUpdateObject) {
-              // Fallback for old architecture
-              onUpdateObject(spotlight.id, updates as Partial<CanvasObject>);
+            if (onUpdateSpotlight) {
+              onUpdateSpotlight(spotlight.id, updates as Partial<SpotlightEffect>);
             }
           }}
         />

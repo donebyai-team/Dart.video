@@ -1,4 +1,4 @@
-import { SlideType, SlideEffect, AnnotationObject, SpotlightEffect, CalloutAnnotation, CanvasObjectType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { SlideType, SpotlightEffect, CanvasObjectType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { ActiveToolType, LeftPanelTool } from "@/types/tools";
 import { VideoStoreSet, VideoStoreGet } from "./types";
 
@@ -26,40 +26,32 @@ export const createToolActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
           endTime: selectedSlide.slide.duration,
         };
 
-        const effect: SlideEffect = {
-          $typeName: "coasterai.core.v1.SlideEffect",
-          effect: {
-            case: "spotlight",
-            value: spotlightEffect,
-          },
-        };
-
-        get().addEffect(effect);
+        get().addSpotlight(spotlightEffect);
         set({ selectedObjectId: spotlightEffect.id });
       }
 
-      if (tool.tool === CanvasObjectType.CANVAS_CALLOUT) {
-        const calloutAnnotation: CalloutAnnotation = {
-          $typeName: "coasterai.core.v1.CalloutAnnotation",
-          id: objectId,
-          x: 100,
-          y: 100,
-          color: "#ef4444",
-          opacity: 1.0,
-          calloutStyle: "pointer",
-        };
+      // if (tool.tool === CanvasObjectType.CANVAS_CALLOUT) {
+      //   const calloutAnnotation: CalloutAnnotation = {
+      //     $typeName: "coasterai.core.v1.CalloutAnnotation",
+      //     id: objectId,
+      //     x: 100,
+      //     y: 100,
+      //     color: "#ef4444",
+      //     opacity: 1.0,
+      //     calloutStyle: "pointer",
+      //   };
 
-        const annotation: AnnotationObject = {
-          $typeName: "coasterai.core.v1.AnnotationObject",
-          annotation: {
-            case: "callout",
-            value: calloutAnnotation,
-          },
-        };
+      //   const annotation: AnnotationObject = {
+      //     $typeName: "coasterai.core.v1.AnnotationObject",
+      //     annotation: {
+      //       case: "callout",
+      //       value: calloutAnnotation,
+      //     },
+      //   };
 
-        get().addAnnotation(annotation);
-        set({ selectedObjectId: calloutAnnotation.id });
-      }
+      //   get().addAnnotation(annotation);
+      //   set({ selectedObjectId: calloutAnnotation.id });
+      // }
     }
   },
 

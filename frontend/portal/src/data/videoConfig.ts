@@ -5,9 +5,9 @@ import type { VideoConfig } from '@/types/editor'
 import {
   MetaData,
   SlideType,
+  SpotlightEffect,
   TransitionType
 } from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import { lineHeight } from '@mui/system'
 
 // Create stable date references
 const SAMPLE_CREATED_DATE = '2024-01-01T00:00:00.000Z'
@@ -46,9 +46,9 @@ export const sampleVideoConfig: VideoConfig = {
           duration: 2,
           transition: TransitionType.TRANSITION_FADE,
           transitionDuration: 0.3,
-          annotations: [],
           subSlides: [],
-          effects: [],
+          spotlights: [],
+          zooms: [],
           content: {
             case: 'animation',
             value: {
@@ -65,7 +65,7 @@ export const sampleVideoConfig: VideoConfig = {
                 direction: 'up',
                 fontSize: 72,
                 color: '#ffffff',
-                lineHeight:1.5
+                lineHeight: 1.5
 
               }
             }
@@ -79,9 +79,9 @@ export const sampleVideoConfig: VideoConfig = {
           duration: 2,
           transition: TransitionType.TRANSITION_FADE,
           transitionDuration: 0.3,
-          annotations: [],
+          spotlights: [],
+          zooms: [],
           subSlides: [],
-          effects: [],
           content: {
             case: 'animation',
             value: {
@@ -118,9 +118,9 @@ export const sampleVideoConfig: VideoConfig = {
           duration: 2.5,
           transition: TransitionType.TRANSITION_SLIDE_LEFT,
           transitionDuration: 0.3,
-          annotations: [],
+          spotlights: [],
+          zooms: [],
           subSlides: [],
-          effects: [],
           content: {
             case: 'animation',
             value: {
@@ -144,9 +144,9 @@ export const sampleVideoConfig: VideoConfig = {
           duration: 2.5,
           transition: TransitionType.TRANSITION_FADE,
           transitionDuration: 0.3,
-          annotations: [],
+          spotlights: [],
+          zooms: [],
           subSlides: [],
-          effects: [],
           content: {
             case: 'animation',
             value: {
@@ -178,9 +178,9 @@ export const sampleVideoConfig: VideoConfig = {
           duration: 2,
           transition: TransitionType.TRANSITION_FADE,
           transitionDuration: 0.3,
-          annotations: [],
+          spotlights: [],
+          zooms: [],
           subSlides: [],
-          effects: [],
           content: {
             case: 'animation',
             value: {
@@ -226,47 +226,28 @@ export const sampleVideoConfig: VideoConfig = {
               rotation: 0
             }
           },
-          effects: [
-            // First spotlight: appears at 0.5s, disappears at 1.5s (1 second duration)
-            {
-              $typeName: 'coasterai.core.v1.SlideEffect',
-              effect: {
-                case: 'spotlight',
-                value: {
-                  $typeName: 'coasterai.core.v1.SpotlightEffect',
-                  id: 'spotlight-1',
-                  x: 400,
-                  y: 200,
-                  width: 300,
-                  height: 250,
-                  blurAmount: 10,
-                  borderRadius: 8,
-                  startTime: 0.5,
-                  endTime: 1.5
-                }
-              }
-            },
-            // Second spotlight: appears at 2.5s, disappears at 3.5s (1 second duration)
-            {
-              $typeName: 'coasterai.core.v1.SlideEffect',
-              effect: {
-                case: 'spotlight',
-                value: {
-                  $typeName: 'coasterai.core.v1.SpotlightEffect',
-                  id: 'spotlight-2',
-                  x: 1100,
-                  y: 600,
-                  width: 400,
-                  height: 300,
-                  blurAmount: 10,
-                  borderRadius: 8,
-                  startTime: 2.5,
-                  endTime: 3.5
-                }
-              }
-            }
-          ],
-          annotations: []
+          spotlights: [{
+            id: 'spotlight-1',
+            x: 400,
+            y: 200,
+            width: 300,
+            height: 250,
+            blurAmount: 10,
+            borderRadius: 8,
+            startTime: 0.5,
+            endTime: 1.5
+          } as SpotlightEffect, {
+            id: 'spotlight-2',
+            x: 1100,
+            y: 600,
+            width: 400,
+            height: 300,
+            blurAmount: 10,
+            borderRadius: 8,
+            startTime: 2.5,
+            endTime: 3.5
+          } as SpotlightEffect],
+          zooms: [],
         }
       ]
     },
@@ -283,9 +264,9 @@ export const sampleVideoConfig: VideoConfig = {
           transcript: 'Our AI-powered search finds exactly what you need in seconds.',
           duration: 2.5,
           transition: TransitionType.TRANSITION_FADE,
-          annotations: [],
+          spotlights: [],
+          zooms: [],
           subSlides: [],
-          effects: [],
           transitionDuration: 0.3,
           content: {
             case: 'animation',
@@ -309,9 +290,9 @@ export const sampleVideoConfig: VideoConfig = {
           transcript: 'Just ask in natural language, like talking to a colleague.',
           duration: 2.5,
           transition: TransitionType.TRANSITION_SLIDE_LEFT,
-          annotations: [],
+          spotlights: [],
+          zooms: [],
           subSlides: [],
-          effects: [],
           content: {
             case: 'image',
             value: {
@@ -408,9 +389,9 @@ export const sampleVideoConfig: VideoConfig = {
           transcript: 'Collaboration has never been easier.',
           duration: 2,
           transition: TransitionType.TRANSITION_FADE,
-          annotations: [],
           subSlides: [],
-          effects: [],
+          spotlights: [],
+          zooms: [],
           transitionDuration: 0.3,
           content: {
             case: 'animation',
@@ -443,9 +424,9 @@ export const sampleVideoConfig: VideoConfig = {
           transcript: 'Edit together in real-time, leave comments, and track every change.',
           duration: 2.5,
           transition: TransitionType.TRANSITION_FADE,
-          annotations: [],
           subSlides: [],
-          effects: [],
+          spotlights: [],
+          zooms: [],
           transitionDuration: 0.3,
           content: {
             case: 'image',
@@ -475,9 +456,9 @@ export const sampleVideoConfig: VideoConfig = {
           transcript: 'Over ten thousand teams trust DocuFlow, including Stripe, Notion, and Linear.',
           duration: 3,
           transition: TransitionType.TRANSITION_SLIDE_UP,
-          annotations: [],
+          spotlights: [],
+          zooms: [],
           subSlides: [],
-          effects: [],
           transitionDuration: 0.3,
           content: {
             case: 'animation',
@@ -503,9 +484,9 @@ export const sampleVideoConfig: VideoConfig = {
           transcript: 'Ready to transform how your team works?',
           duration: 2,
           transition: TransitionType.TRANSITION_SLIDE_UP,
-          annotations: [],
+          spotlights: [],
+          zooms: [],
           subSlides: [],
-          effects: [],
           transitionDuration: 0.3,
           content: {
             case: 'animation',
@@ -533,9 +514,9 @@ export const sampleVideoConfig: VideoConfig = {
           transcript: 'Try DocuFlow free for 14 days. No credit card required.',
           duration: 2.5,
           transition: TransitionType.TRANSITION_NONE,
-          annotations: [],
+          spotlights: [],
+          zooms: [],
           subSlides: [],
-          effects: [],
           content: {
             case: 'animation',
             value: {

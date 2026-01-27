@@ -2,7 +2,7 @@ import React from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import { SpotlightEffectComponent } from "../effects/SpotlightEffect";
 import { ImageContent } from "./ImageContent";
-import { Slide, ImageSlideContent, SpotlightEffect, SlideEffect, Resolution } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { Slide, ImageSlideContent, SpotlightEffect, Resolution } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 interface ImageSlideProps {
   slide: Slide;
@@ -31,13 +31,6 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({
 
   // Extract content and effects directly
   const imageContent = slide.content.value as ImageSlideContent
-  const effects = slide.effects || [];
-  const spotlightEffects = effects.flatMap((e: SlideEffect) => {
-    if (e.effect.case === "spotlight" && e.effect.value) {
-      return [e.effect.value];
-    }
-    return [];
-  });
 
 
   // Create image object for ImageContent component
@@ -90,7 +83,7 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({
       )}
 
       {/* Render spotlight effects at CANVAS level */}
-      {spotlightEffects.map((spotlight) => (
+      {slide.spotlights.map((spotlight) => (
         <SpotlightEffectComponent
           key={spotlight.id}
           spotlight={spotlight}

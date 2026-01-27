@@ -7,14 +7,11 @@ import VisualAnimationSelector from "@/components/editor/remotion/animations/sug
 import TextAnimationSelector from "@/components/editor/remotion/animations/suggester/TextAnimationSelector";
 import { ActiveToolType } from "@/types/tools";
 import { useVideoStore } from "@/stores/video";
-import { AnimationSlideContent, AnnotationObject, CanvasObject, SlideEffect, SlideType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { AnimationSlideContent, CanvasObject, SlideType, SpotlightEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 interface ToolsSettingsPanelProps {
     onPreviewTemplate: () => void;
-    onUpdateCanvasObject: (updates: Partial<CanvasObject>) => void;
-    onUpdateEffect?: (updates: Partial<SlideEffect>) => void;
-    onUpdateAnnotation?: (updates: Partial<AnnotationObject>) => void;
-    onDeleteCanvasObject: () => void;
+    onUpdateSpotlight?: (updates: Partial<SpotlightEffect>) => void;
     onSpotlightApply?: () => void;
     onSpotlightPlay?: () => void;
     selectedStackItemId?: string | null;
@@ -23,10 +20,7 @@ interface ToolsSettingsPanelProps {
 
 const ToolsSettingsPanel = ({
     onPreviewTemplate,
-    onUpdateCanvasObject,
-    onUpdateEffect,
-    onUpdateAnnotation,
-    onDeleteCanvasObject,
+    onUpdateSpotlight,
     onSpotlightApply,
     onSpotlightPlay,
     selectedStackItemId,
@@ -38,28 +32,21 @@ const ToolsSettingsPanel = ({
     const globalBackgroundColor = useVideoStore(s => s.globalBackgroundColor);
     const handleCloseTool = useVideoStore(s => s.handleCloseTool);
     const getTextAnimationConfig = useVideoStore(s => s.getTextAnimationConfig);
-    const effectiveCanvasObjects = useVideoStore(s => s.getEffectiveCanvasObjects);
+    const spotlights = useVideoStore(s => s.getSpotlights);
 
     const updateSlideBackground = useVideoStore(s => s.updateSlideBackground);
     const onUpdateTemplateProps = useVideoStore(s => s.handleUpdateTemplateProps);
     const onUpdateSlide = useVideoStore(s => s.updateSlide);
     const onSelectTextAnimationTemplate = useVideoStore(s => s.handleSelectTextAnimationTemplate);
-    
+
     console.log("active tool", activeTool)
 
     if (!activeTool) return null;
     const selectedObject = selectedObjectId
-        ? effectiveCanvasObjects().find(e => {
-            switch (e.effect.case) {
-                case "spotlight":
-                case "zoom":
-                    return e.effect.value.id === selectedObjectId;
-                default:
-                    return false;
-            }
+        ? spotlights().find(e => {
+            return e.id === selectedObjectId;
         })
         : undefined;
-
 
 
     return (
@@ -150,35 +137,22 @@ const ToolsSettingsPanel = ({
             {activeTool?.type === ActiveToolType.INSERT && selectedObjectId && (
                 <InsertSettings
                     tool={activeTool?.tool}
-                    currentObject={selectedObject}
-                    onChange={(updates) => {
-                        if (selectedObjectId) {
-                            onUpdateCanvasObject(updates);
-                        }
-                    }}
-                    onChangeEffect={(updates) => {
-                        if (selectedObjectId && onUpdateEffect) {
-                            onUpdateEffect(updates);
-                        }
-                    }}
-                    onChangeAnnotation={(updates) => {
-                        if (selectedObjectId && onUpdateAnnotation) {
-                            onUpdateAnnotation(updates);
+                    currentObject={selectedObject}     
+                    onChangeSpotlight={(updates) => {
+                        if (selectedObjectId && onUpdateSpotlight) {
+                            onUpdateSpotlight(updates);
                         }
                     }}
                     onDelete={() => {
-                        if (selectedObjectId) {
-                            onDeleteCanvasObject();
-                            handleCloseTool();
-                        }
+                        // TODO: delete spotlight
                     }}
                     onClose={handleCloseTool}
                     canDelete={true}
                     // Spotlight-specific props
                     slideDuration={selectedSlide?.slide.duration}
                     slideStartTime={0}
-                    onApply={selectedObject?.effect.case === "spotlight" ? onSpotlightApply : undefined}
-                    onPlay={selectedObject?.effect.case === "spotlight" ? onSpotlightPlay : undefined}
+                    onApply={onSpotlightApply}
+                    onPlay={onSpotlightPlay}
                 />
             )}
         </motion.div>

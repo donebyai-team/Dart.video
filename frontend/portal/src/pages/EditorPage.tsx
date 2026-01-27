@@ -77,8 +77,7 @@ const EditorPage = ({
   const handleCloseTool = useVideoStore(s => s.handleCloseTool);
   const updateCanvasObject = useVideoStore(s => s.updateCanvasObject);
   const deleteCanvasObject = useVideoStore(s => s.deleteCanvasObject);
-  const updateEffect = useVideoStore(s => s.updateEffect);
-  const updateAnnotation = useVideoStore(s => s.updateAnnotation);
+  const updateSpotlight = useVideoStore(s => s.updateSpotlight);
   const updateSlide = useVideoStore(s => s.updateSlide);
   const handleSelectEntity = useVideoStore(s => s.handleSelectEntity);
   const openEntitySettings = useVideoStore(s => s.openEntitySettings);
@@ -199,16 +198,11 @@ const EditorPage = ({
                   updateCanvasObject(selectedObjectId, updates);
                 }
               }}
-              onUpdateEffect={(updates) => {
+              onUpdateSpotlight={(updates) => {
                 if (selectedObjectId) {
-                  updateEffect(selectedObjectId, updates);
+                  updateSpotlight(selectedObjectId, updates);
                 }
-              }}
-              onUpdateAnnotation={(updates) => {
-                if (selectedObjectId) {
-                  updateAnnotation(selectedObjectId, updates);
-                }
-              }}
+              }}             
               onDeleteCanvasObject={() => {
                 if (selectedObjectId) {
                   deleteCanvasObject(selectedObjectId);
