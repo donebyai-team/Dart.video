@@ -1,4 +1,4 @@
-import { Slide, SlideEffect, VideoSlideContent } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { Slide, VideoSlideContent } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import React from "react";
 import { AbsoluteFill, Img, spring, useCurrentFrame, useVideoConfig } from "remotion";
 import { SpotlightEffect } from "../effects";
