@@ -88,7 +88,6 @@ export const getSlideStartFrame = (allSlides: TimelineSlide[], slideId: string, 
 // Formula: Slide Start + Slide Duration - Transition Duration - 1
 export const getSlideVisualEndFrame = (allSlides: TimelineSlide[], slideId: string, fps: number): number => {
   const slide = allSlides.find(s => s.id === slideId);
-  console.log("erkjjkrebjkew", slide?.slide, slideId)
   if (!slide) return 0;
 
   const startFrame = getRealSlideStartFrame(allSlides, slideId, fps);
