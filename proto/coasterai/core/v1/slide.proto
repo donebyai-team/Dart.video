@@ -44,10 +44,16 @@ message VideoSlideContent {
   optional float startTime = 2;
   optional float endTime = 3;
 }
-
+message MetaData {
+  optional float x = 2;
+  optional float y = 3;
+  optional float width = 4;
+  optional float height = 5;
+}
 message AnimationSlideContent {
   string templateId = 1;
   google.protobuf.Struct templateConfig = 2;
+  MetaData meta = 3;
 }
 
 message StackSlideContent {
