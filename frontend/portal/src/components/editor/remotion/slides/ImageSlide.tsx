@@ -77,12 +77,13 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({
               onUpdate({
                 content: {
                   case: "image",
-                  "value": {
+                  value: {
+                    ...imageContent,
                     src: imageContent.src,
                     ...updates
                   } as ImageSlideContent
                 }
-              });
+              } as Slide);
             }
           }}
         />

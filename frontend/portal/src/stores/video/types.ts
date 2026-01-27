@@ -3,10 +3,10 @@ import type {
     EditorConfig, EditorCallbacks,
     VideoConfig,
     TextAnimationSlideConfig,
-    TextAnimationTemplateId,
 } from "@/types/editor";
 import type { EntityId } from "@/types/selection";
 import { ActiveTool, LeftPanelTool } from "@/types/tools";
+import { JsonObject } from "@bufbuild/protobuf";
 import { AnnotationObject, CanvasObject, Resolution, Section, Slide, SlideEffect, SlideType, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import type { StateCreator } from "zustand";
 
@@ -84,8 +84,8 @@ export interface VideoActions {
     handleEditSlide: () => void;
 
     // Text animation
-    handleSelectTextAnimationTemplate: (templateId: TextAnimationTemplateId) => void;
-    handleUpdateTemplateProps: (props: Record<string, string | number>) => void;
+    handleSelectTextAnimationTemplate: (templateId: string) => void;
+    handleUpdateTemplateProps: (props: JsonObject) => void;
     getTextAnimationConfig: () => TextAnimationSlideConfig | undefined;
 
     // Voiceover

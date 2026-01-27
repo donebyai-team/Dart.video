@@ -227,7 +227,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
         }
     },
 
-    updateSlide(updates: Partial<Slide>) {
+    updateSlide(updates: Partial<Slide>) {        
         const { sections, selectedSlide } = get();
         if (!selectedSlide) return;
 
@@ -249,6 +249,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
                 slide: { ...selectedSlide.slide, ...updates },
             },
         });
+        console.debug("slide updated", "updates", updates)
     },
 
     getTimelineSlides(): TimelineSlide[] {

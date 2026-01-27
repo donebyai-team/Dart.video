@@ -4,6 +4,7 @@ import { Slide, SlideType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { getSlideTypeConfig } from "./utils";
 import { getDefaultTemplateProps } from "@/types/textAnimationTemplates";
 import { VideoStoreSet, VideoStoreGet } from "./types";
+import { JsonObject } from "@bufbuild/protobuf";
 
 export const createTextAnimationActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   getTextAnimationConfig() {
@@ -75,16 +76,16 @@ export const createTextAnimationActions = (set: VideoStoreSet, get: VideoStoreGe
   },
 
 
-  handleUpdateTemplateProps(newProps: Record<string, string | number>) {
+  handleUpdateTemplateProps(newProps: JsonObject) {
     const { sections, selectedSlide } = get();
     if (!selectedSlide) return;
-    console.debug("UPDATE slide props", newProps, selectedSlide)
     const slide = selectedSlide.slide;
 
     if (slide.content.case !== "animation") return;
 
     const prev = slide.content.value;
     const newConfig = { ...prev.templateConfig, ...newProps };
+    console.log("rewfwrfwe", prev.templateConfig, newConfig)
     const newSections = sections.map((s) =>
       s.id === selectedSlide.section.id
         ? {
@@ -96,7 +97,7 @@ export const createTextAnimationActions = (set: VideoStoreSet, get: VideoStoreGe
                 content: {
                   case: "animation",
                   value: {
-                    ...sl.content.value,
+                    ...prev,
                     templateConfig: newConfig,
                   },
                 },
@@ -123,6 +124,7 @@ export const createTextAnimationActions = (set: VideoStoreSet, get: VideoStoreGe
         } as Slide,
       },
     });
+    console.debug("UPDATED slide props", newProps, selectedSlide)
   }
 
 });

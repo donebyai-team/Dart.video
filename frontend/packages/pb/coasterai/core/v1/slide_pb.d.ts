@@ -3,8 +3,7 @@
 /* eslint-disable */
 
 import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv1";
-import type { Message } from "@bufbuild/protobuf";
-import type { Any } from "@bufbuild/protobuf/wkt";
+import type { JsonObject, Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file coasterai/core/v1/slide.proto.
@@ -88,9 +87,9 @@ export declare type AnimationSlideContent = Message<"coasterai.core.v1.Animation
   templateId: string;
 
   /**
-   * @generated from field: google.protobuf.Any templateConfig = 2;
+   * @generated from field: google.protobuf.Struct templateConfig = 2;
    */
-  templateConfig?: Any;
+  templateConfig?: JsonObject;
 };
 
 /**

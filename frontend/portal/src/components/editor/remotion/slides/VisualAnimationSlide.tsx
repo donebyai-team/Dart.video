@@ -83,16 +83,18 @@ export const VisualAnimationSlide: React.FC<VisualAnimationSlideProps> = ({
         onUpdate={(updates) => {
           if (onUpdate && content) {
             onUpdate({
+              ...slide,
               content: {
                 case: "animation",
                 value: {
                   ...content,
-                  ...templateConfig,
-                  ...updates,
-
+                  templateConfig: {
+                    ...templateConfig,
+                    ...updates
+                  }
                 }
               },
-            });
+            } as Slide);
           }
         }}
         onSelect={onSelect}

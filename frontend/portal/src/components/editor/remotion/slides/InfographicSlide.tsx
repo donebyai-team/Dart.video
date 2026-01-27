@@ -71,15 +71,18 @@ export const InfographicSlide: React.FC<InfographicSlideProps> = ({
         onUpdate={(updates) => {
           if (onUpdate && content) {
             onUpdate({
+              ...slide,
               content: {
                 case: "animation",
                 value: {
                   ...content,
-                  ...templateConfig,
-                  ...updates,
+                  templateConfig: {
+                    ...templateConfig,
+                    ...updates
+                  }
                 }
               },
-            });
+            } as Slide);
           }
         }}
         onSelect={onSelect}

@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package coasterai.core.v1;
 option go_package = "github.com/shank318/coasterai/pb/coasterai/core/v1;pbcore";
-import "google/protobuf/any.proto";
+import "google/protobuf/struct.proto";
 
 // ===================== ENUMS =====================
 
@@ -47,7 +47,7 @@ message VideoSlideContent {
 
 message AnimationSlideContent {
   string templateId = 1;
-  google.protobuf.Any templateConfig = 2;
+  google.protobuf.Struct templateConfig = 2;
 }
 
 message StackSlideContent {
