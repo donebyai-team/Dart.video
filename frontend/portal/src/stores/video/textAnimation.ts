@@ -47,7 +47,7 @@ export const createTextAnimationActions = (set: VideoStoreSet, get: VideoStoreGe
                     templateConfig: newTemplateConfig,
                   },
                 },
-              }
+              } as Slide
               : sl
           ),
         }
@@ -55,7 +55,7 @@ export const createTextAnimationActions = (set: VideoStoreSet, get: VideoStoreGe
     );
 
     set({
-      sections: sections,
+      sections: newSections,
       selectedSlide: {
         ...selectedSlide,
         slide: {
@@ -78,14 +78,13 @@ export const createTextAnimationActions = (set: VideoStoreSet, get: VideoStoreGe
   handleUpdateTemplateProps(newProps: Record<string, string | number>) {
     const { sections, selectedSlide } = get();
     if (!selectedSlide) return;
-
+    console.debug("UPDATE slide props", newProps, selectedSlide)
     const slide = selectedSlide.slide;
 
     if (slide.content.case !== "animation") return;
 
     const prev = slide.content.value;
     const newConfig = { ...prev.templateConfig, ...newProps };
-
     const newSections = sections.map((s) =>
       s.id === selectedSlide.section.id
         ? {
@@ -101,7 +100,7 @@ export const createTextAnimationActions = (set: VideoStoreSet, get: VideoStoreGe
                     templateConfig: newConfig,
                   },
                 },
-              }
+              } as Slide
               : sl
           ),
         }
@@ -109,7 +108,7 @@ export const createTextAnimationActions = (set: VideoStoreSet, get: VideoStoreGe
     );
 
     set({
-      sections: sections,
+      sections: newSections,
       selectedSlide: {
         ...selectedSlide,
         slide: {

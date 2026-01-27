@@ -1,8 +1,8 @@
-import { CanvasObject, Resolution } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { CanvasObject, Resolution, SpotlightEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { useState, useRef, useCallback, useEffect } from "react";
 
 interface SpotlightOverlayProps {
-  spotlight: CanvasObject;
+  spotlight: SpotlightEffect;
   resolution: Resolution;
   containerWidth: number;
   containerHeight: number;

@@ -38,16 +38,16 @@ const ToolsSettingsPanel = ({
     const globalBackgroundColor = useVideoStore(s => s.globalBackgroundColor);
     const handleCloseTool = useVideoStore(s => s.handleCloseTool);
     const getTextAnimationConfig = useVideoStore(s => s.getTextAnimationConfig);
+    const effectiveCanvasObjects = useVideoStore(s => s.getEffectiveCanvasObjects);
 
     const updateSlideBackground = useVideoStore(s => s.updateSlideBackground);
     const onUpdateTemplateProps = useVideoStore(s => s.handleUpdateTemplateProps);
     const onUpdateSlide = useVideoStore(s => s.updateSlide);
     const onSelectTextAnimationTemplate = useVideoStore(s => s.handleSelectTextAnimationTemplate);
+    
     console.log("active tool", activeTool)
 
     if (!activeTool) return null;
-
-    const effectiveCanvasObjects = useVideoStore(s => s.getEffectiveCanvasObjects);
     const selectedObject = selectedObjectId
         ? effectiveCanvasObjects().find(e => {
             switch (e.effect.case) {
@@ -89,9 +89,7 @@ const ToolsSettingsPanel = ({
                     const content = selectedSlide?.slide.content.value as AnimationSlideContent;
                     const templateId = content?.templateId;
                     const templateConfig = content?.templateConfig || {};
-                    console.log("ewrfwefwef tem", templateConfig)
                     if (!templateId) return null;
-                    console.log("ewrfwefwef tem", templateId)
 
                     return (
                         <TextAnimationTemplateSettings

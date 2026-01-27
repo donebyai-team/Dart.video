@@ -1,5 +1,5 @@
 import { parseEntityId } from "@/types/selection";
-import { SlideType, StackSlideContent } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { CanvasObjectType, SlideType, StackSlideContent } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { ActiveToolType } from "@/types/tools";
 import { VideoStoreGet, VideoStoreSet } from "./types";
 
@@ -50,10 +50,10 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
                 if (obj) {
                     // Determine the tool type based on the object
                     let toolType = null;
-                    if ('effect' in obj && obj.effect.case === 'spotlight') {
-                        toolType = 'spotlight';
+                    if (obj.effect.case === 'spotlight') {
+                        toolType = CanvasObjectType.CANVAS_SPOTLIGHT;
                     } else if ('effect' in obj && obj.effect.case === 'zoom') {
-                        toolType = 'zoom';
+                        toolType = CanvasObjectType.CANVAS_CALLOUT;
                     } 
 
                     if (toolType) {
@@ -67,11 +67,11 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
                     activeTool: { type: ActiveToolType.STACK_SETTINGS },
                 });
             } else if (parsed.type === "stack-item-overlay") {
-                set({
-                    selectedObjectId: parsed.overlayId,
-                    selectedStackItemId: parsed.itemId,
-                    activeTool: { tool: ActiveToolType.INSERT, type: ActiveToolType.INSERT },
-                });
+                // set({
+                //     selectedObjectId: parsed.overlayId,
+                //     selectedStackItemId: parsed.itemId,
+                //     activeTool: { tool: ActiveToolType.INSERT, type: ActiveToolType.INSERT },
+                // });
             } else {
                 set({
                     selectedObjectId: null,
@@ -126,12 +126,12 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
 
             if (obj) {
                 // Determine the tool type based on the object
-                let toolType = null;
-                if ('effect' in obj && obj.effect.case === 'spotlight') {
-                    toolType = 'spotlight';
-                } else if ('effect' in obj && obj.effect.case === 'zoom') {
-                    toolType = 'zoom';
-                } 
+                 let toolType = null;
+                    if (obj.effect.case === 'spotlight') {
+                        toolType = CanvasObjectType.CANVAS_SPOTLIGHT;
+                    } else if ('effect' in obj && obj.effect.case === 'zoom') {
+                        toolType = CanvasObjectType.CANVAS_CALLOUT;
+                    } 
 
                 if (toolType) {
                     set({ activeTool: { type: ActiveToolType.INSERT, tool: toolType } });
@@ -163,11 +163,11 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
             if (obj) {
                 // Determine the tool type based on the object
                 let toolType = null;
-                if ('effect' in obj && obj.effect.case === 'spotlight') {
-                    toolType = 'spotlight';
-                } else if ('effect' in obj && obj.effect.case === 'zoom') {
-                    toolType = 'zoom';
-                }
+                    if (obj.effect.case === 'spotlight') {
+                        toolType = CanvasObjectType.CANVAS_SPOTLIGHT;
+                    } else if ('effect' in obj && obj.effect.case === 'zoom') {
+                        toolType = CanvasObjectType.CANVAS_CALLOUT;
+                    } 
                 if (toolType) {
                     set({ activeTool: { type: ActiveToolType.INSERT, tool: toolType } });
                 }

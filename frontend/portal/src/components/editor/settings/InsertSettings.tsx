@@ -6,10 +6,8 @@ import SpotlightSettings from "./SpotlightSettings";
 import { CanvasObjectType, CanvasObject, SlideEffect, AnnotationObject } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 
-export type InsertToolType = CanvasObjectType;
-
 interface InsertSettingsProps {
-  tool: InsertToolType;
+  tool: CanvasObjectType;
   currentObject?: SlideEffect;
   // OLD ARCHITECTURE: Single onChange handler
   onChange: (settings: Partial<CanvasObject>) => void;
@@ -26,7 +24,7 @@ interface InsertSettingsProps {
   onPlay?: () => void;
 }
 
-const toolInfo: Record<InsertToolType, { label: string; icon: React.ElementType }> = {
+const toolInfo: Record<CanvasObjectType, { label: string; icon: React.ElementType }> = {
   0: { label: "Callout", icon: Focus },
   1: { label: "Spotlight", icon: CircleDot },
 };
@@ -80,6 +78,7 @@ const InsertSettings = ({
     spotlightEndTime: getProperty(currentObject, 'spotlightEndTime', slideDuration),
   });
 
+  console.debug("insert settings", tool, currentObject)
   const ToolIcon = toolInfo[tool].icon;
 
   // Sync settings when currentObject changes

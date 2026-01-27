@@ -41,12 +41,12 @@ export function useRemotionPlayerEvents({
     if (!player) return;
 
     const handlePlay = () => {
-      console.log(`[RemotionPlayer] Play event fired`);
+      console.debug(`[RemotionPlayer] Play event fired`);
       setIsPlaying(true);
     };
 
     const handlePause = () => {
-      console.log(`[RemotionPlayer] Pause event fired`);
+      console.debug(`[RemotionPlayer] Pause event fired`);
       setIsPlaying(false);
       // Don't clear previewingSlideId here - let the controls handle it
     };
@@ -55,11 +55,11 @@ export function useRemotionPlayerEvents({
       setCurrentFrame(data.detail.frame);
       onFrameChange?.(data.detail.frame);
 
-      console.log(`[RemotionPlayer] Frame: ${data.detail.frame}`);
+      console.debug(`[RemotionPlayer] Frame: ${data.detail.frame}`);
 
       // Skip slide detection logic during dragging to prevent jumping
       if (isDragging) {
-        console.log(`[RemotionPlayer] Skipping slide detection during drag`);
+        console.debug(`[RemotionPlayer] Skipping slide detection during drag`);
         return;
       }
 
@@ -69,7 +69,7 @@ export function useRemotionPlayerEvents({
         const lastSlideEndFrame = getSlideAbsoluteEndFrame(allSlides, lastSlide.id, fps);
 
         if (data.detail.frame >= lastSlideEndFrame) {
-          console.log(`[RemotionPlayer] Reached end of video at frame ${data.detail.frame}, pausing`);
+          console.debug(`[RemotionPlayer] Reached end of video at frame ${data.detail.frame}, pausing`);
           player.pause();
           // Seek back to the last valid frame to avoid blank screen
           player.seekTo(lastSlideEndFrame);
@@ -96,7 +96,7 @@ export function useRemotionPlayerEvents({
       if (overlappingSlides.length === 1) {
         // Only one slide is rendering - simple case
         currentSlide = overlappingSlides[0].slide;
-        console.log(`[RemotionPlayer] Frame ${data.detail.frame} is in slide ${currentSlide.id} (${overlappingSlides[0].startFrame}-${overlappingSlides[0].endFrame})`);
+        console.debug(`[RemotionPlayer] Frame ${data.detail.frame} is in slide ${currentSlide.id} (${overlappingSlides[0].startFrame}-${overlappingSlides[0].endFrame})`);
       } else if (overlappingSlides.length > 1) {
         // Multiple slides are rendering - choose the one that started later (incoming slide)
         const latestSlide = overlappingSlides.reduce((latest, current) =>
@@ -105,13 +105,13 @@ export function useRemotionPlayerEvents({
         currentSlide = latestSlide.slide;
 
         const slideNames = overlappingSlides.map(s => s.slide.id).join(' + ');
-        console.log(`[RemotionPlayer] Frame ${data.detail.frame} - Overlapping slides: ${slideNames}, choosing ${currentSlide.id}`);
+        console.debug(`[RemotionPlayer] Frame ${data.detail.frame} - Overlapping slides: ${slideNames}, choosing ${currentSlide.id}`);
       }
 
       if (currentSlide) {
         // Update selected slide if changed
         if (currentSlide.id !== selectedSlideId) {
-          console.log(`[RemotionPlayer] Auto slide change to: ${currentSlide.id} at frame ${data.detail.frame}`);
+          console.debug(`[RemotionPlayer] Auto slide change to: ${currentSlide.id} at frame ${data.detail.frame}`);
           onSlideChange?.(currentSlide.id);
         }
 
@@ -152,7 +152,7 @@ export function useRemotionPlayerEvents({
         if (previewingSlideId === currentSlide.id) {
           const slideEndFrame = getSlideAbsoluteEndFrame(allSlides, currentSlide.id, fps);
           if (data.detail.frame >= slideEndFrame) {
-            console.log(`[RemotionPlayer] Preview reached end of slide ${currentSlide.id}, pausing at frame ${data.detail.frame}`);
+            console.debug(`[RemotionPlayer] Preview reached end of slide ${currentSlide.id}, pausing at frame ${data.detail.frame}`);
             player.pause();
             setPreviewingSlideId(null);
           }

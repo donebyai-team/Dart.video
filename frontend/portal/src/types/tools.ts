@@ -1,6 +1,4 @@
-import { CanvasObjectType } from "./slides";
-
-export type InsertToolType = CanvasObjectType;
+import { CanvasObjectType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 export enum ActiveToolType {
   BACKGROUND = "background",
@@ -17,7 +15,7 @@ export type ActiveTool =
   | { type: ActiveToolType.VISUAL_ANIMATION_SETTINGS }
   | { type: ActiveToolType.TEXT_ANIMATION_SETTINGS }
   | { type: ActiveToolType.STACK_SETTINGS }
-  | { type: ActiveToolType.INSERT; tool: InsertToolType }
+  | { type: ActiveToolType.INSERT; tool: CanvasObjectType }
   | null;
 
   export type LeftPanelTool =

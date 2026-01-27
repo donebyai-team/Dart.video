@@ -5,7 +5,7 @@ import { TimelineSlide } from "@/components/editor/timeline/types";
 
 interface UseSlideSelectionProps {
   selectedSlideId: string;
-  sections: TimelineSlide[];
+  allSlides: TimelineSlide[];
   isPlaying: boolean;
   previewingSlideId: string | null;
   controls: PlayerControls;
@@ -16,7 +16,7 @@ interface UseSlideSelectionProps {
 
 export function useSlideSelection({
   selectedSlideId,
-  sections,
+  allSlides,
   isPlaying,
   previewingSlideId,
   controls,
@@ -37,13 +37,13 @@ export function useSlideSelection({
       if (!isPlaying) {
         if (previewingSlideId === selectedSlideId) {
           // Manual selection: seek to visual end frame (before transition region)
-          const visualEndFrame = getSlideVisualEndFrame(sections, selectedSlideId, fps);
+          const visualEndFrame = getSlideVisualEndFrame(allSlides, selectedSlideId, fps);
           console.log(`[SlideSelection] Manual selection - Seeking to visual END frame ${visualEndFrame} for slide ${selectedSlideId}`);
           controls.seekToFrame(visualEndFrame);
           setCurrentFrame(visualEndFrame);
         } else {
           // Normal slide change: seek to REAL START frame (accounting for overlaps)
-          const startFrame = getRealSlideStartFrame(sections, selectedSlideId, fps);
+          const startFrame = getRealSlideStartFrame(allSlides, selectedSlideId, fps);
           console.log(`[SlideSelection] Normal selection - Seeking to REAL START frame ${startFrame} for slide ${selectedSlideId}`);
           controls.seekToFrame(startFrame);
           setCurrentFrame(startFrame);
@@ -54,5 +54,5 @@ export function useSlideSelection({
       
       prevSelectedSlideIdRef.current = selectedSlideId;
     }
-  }, [selectedSlideId, sections, isPlaying, previewingSlideId, controls, setCurrentFrame, isDragging]);
+  }, [selectedSlideId, allSlides, isPlaying, previewingSlideId, controls, setCurrentFrame, isDragging]);
 }

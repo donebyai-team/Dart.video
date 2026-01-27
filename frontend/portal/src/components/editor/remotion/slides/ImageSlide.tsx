@@ -2,7 +2,7 @@ import React from "react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import { SpotlightEffectComponent } from "../effects/SpotlightEffect";
 import { ImageContent } from "./ImageContent";
-import { Slide, ImageSlideContent, SpotlightEffect, SlideEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { Slide, ImageSlideContent, SpotlightEffect, SlideEffect, Resolution } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 interface ImageSlideProps {
   slide: Slide;
@@ -58,7 +58,7 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({
     aspect: `${width}/${height}`,
     width,
     height,
-  };
+  } as Resolution;
 
   return (
     <AbsoluteFill

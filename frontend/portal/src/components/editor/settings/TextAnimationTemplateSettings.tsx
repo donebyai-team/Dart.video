@@ -7,7 +7,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   getTemplateById,
   type TemplateProperty,
-  type TextAnimationTemplateId,
   type TextAnimationTemplate,
 } from "@/types/textAnimationTemplates";
 
@@ -29,7 +28,6 @@ const TextAnimationTemplateSettings = ({
   onApply,
 }: TextAnimationTemplateSettingsProps) => {
   const template = getTemplateById(templates, templateId);
-  console.log("template", template)
 
   if (!template) {
     return (

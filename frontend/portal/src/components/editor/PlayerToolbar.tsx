@@ -4,9 +4,9 @@ import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useState } from "react";
-import { InsertToolType, ActiveToolType } from "@/types/tools";
 import { useVideoStore } from "@/stores/video";
-import { SlideType, Slide, StackSlideContent } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { SlideType, Slide, StackSlideContent, CanvasObjectType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { ActiveToolType } from "@/types/tools";
 
 interface PlayerToolbarProps {
   onDurationChange: (newDuration: number) => void;
@@ -23,9 +23,9 @@ const slideTypeLabels: Record<SlideType, { label: string; icon: React.ElementTyp
   [SlideType.STACK]: { label: "Stack", icon: Layers },
 };
 
-const insertTools: { id: InsertToolType; name: string; icon: React.ElementType }[] = [
-  { id: "callout", name: "Callout", icon: Focus },
-  { id: "spotlight", name: "Spotlight", icon: CircleDot },
+const insertTools: { id: CanvasObjectType; name: string; icon: React.ElementType }[] = [
+  { id: CanvasObjectType.CANVAS_CALLOUT, name: "Callout", icon: Focus },
+  { id: CanvasObjectType.CANVAS_SPOTLIGHT, name: "Spotlight", icon: CircleDot },
 ];
 
 const isMediaType = (type: SlideType) => type === SlideType.IMAGE || type === SlideType.VIDEO;
