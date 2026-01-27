@@ -79,9 +79,9 @@ const StackSlideSettings: React.FC<StackSlideSettingsProps> = ({
       transcript: `Slide ${items.length + 1}`,
       duration: 2.5,
       $typeName: "coasterai.core.v1.Slide",
-      annotations: [],
       subSlides: [],
-      effects: [],
+      spotlights: [],
+      zooms: [],
       transition: TransitionType.TRANSITION_NONE,
       backgroundColor: slide.backgroundColor,
       content: type === SlideType.IMAGE ? {

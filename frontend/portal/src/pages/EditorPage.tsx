@@ -75,8 +75,6 @@ const EditorPage = ({
   const updateSlideTranscript = useVideoStore(s => s.updateSlideTranscript);
   const handleGenerateSlideVoiceover = useVideoStore(s => s.handleGenerateSlideVoiceover);
   const handleCloseTool = useVideoStore(s => s.handleCloseTool);
-  const updateCanvasObject = useVideoStore(s => s.updateCanvasObject);
-  const deleteCanvasObject = useVideoStore(s => s.deleteCanvasObject);
   const updateSpotlight = useVideoStore(s => s.updateSpotlight);
   const updateSlide = useVideoStore(s => s.updateSlide);
   const handleSelectEntity = useVideoStore(s => s.handleSelectEntity);
@@ -192,22 +190,12 @@ const EditorPage = ({
         <AnimatePresence mode="wait">
           {activeTool ? (
             <ToolsSettingsPanel
-              onPreviewTemplate={() => handlePreviewSlide(selectedSlide.slide.id)}
-              onUpdateCanvasObject={(updates) => {
-                if (selectedObjectId) {
-                  updateCanvasObject(selectedObjectId, updates);
-                }
-              }}
+              onPreviewTemplate={() => handlePreviewSlide(selectedSlide.slide.id)}           
               onUpdateSpotlight={(updates) => {
                 if (selectedObjectId) {
                   updateSpotlight(selectedObjectId, updates);
                 }
-              }}             
-              onDeleteCanvasObject={() => {
-                if (selectedObjectId) {
-                  deleteCanvasObject(selectedObjectId);
-                }
-              }}
+              }}                       
               onSpotlightApply={() => {
                 // Apply spotlight - just close the panel
                 handleCloseTool();
