@@ -78,6 +78,37 @@ export declare type VideoSlideContent = Message<"coasterai.core.v1.VideoSlideCon
 export declare const VideoSlideContentSchema: GenMessage<VideoSlideContent>;
 
 /**
+ * @generated from message coasterai.core.v1.MetaData
+ */
+export declare type MetaData = Message<"coasterai.core.v1.MetaData"> & {
+  /**
+   * @generated from field: optional float x = 2;
+   */
+  x?: number;
+
+  /**
+   * @generated from field: optional float y = 3;
+   */
+  y?: number;
+
+  /**
+   * @generated from field: optional float width = 4;
+   */
+  width?: number;
+
+  /**
+   * @generated from field: optional float height = 5;
+   */
+  height?: number;
+};
+
+/**
+ * Describes the message coasterai.core.v1.MetaData.
+ * Use `create(MetaDataSchema)` to create a new message.
+ */
+export declare const MetaDataSchema: GenMessage<MetaData>;
+
+/**
  * @generated from message coasterai.core.v1.AnimationSlideContent
  */
 export declare type AnimationSlideContent = Message<"coasterai.core.v1.AnimationSlideContent"> & {
@@ -90,6 +121,11 @@ export declare type AnimationSlideContent = Message<"coasterai.core.v1.Animation
    * @generated from field: google.protobuf.Struct templateConfig = 2;
    */
   templateConfig?: JsonObject;
+
+  /**
+   * @generated from field: coasterai.core.v1.MetaData meta = 3;
+   */
+  meta?: MetaData;
 };
 
 /**
