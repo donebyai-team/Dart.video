@@ -11,7 +11,7 @@ import { AnimatedBackground } from '../effects/AnimatedBackground'
 import { TemplateContainer } from '../components/TemplateContainer'
 import { AnimationSlideContent, MetaData, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { TemplateConfig } from './InfographicSlide'
-import { templateRegistry } from '../../../../../packages/template-registery'
+import { templateRegistry } from '../../../../../../packages/template-registery'
 import { useEffect } from 'react'
 
 interface TextAnimationSlideProps {

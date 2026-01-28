@@ -122,10 +122,10 @@
     "@fontsource/plus-jakarta-sans": "^5.2.8",   
     "@remotion/player": "^4.0.398",
     "@remotion/transitions": "^4.0.398",
+    "remotion": "^4.0.398",    
     "@tanstack/react-query": "^5.83.0",    
     "framer-motion": "^12.23.26",    
     "react-router-dom": "^6.30.1",
-    "remotion": "^4.0.398",    
     "zustand": "^5.0.10"
   },
   "devDependencies": {
