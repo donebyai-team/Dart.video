@@ -1,4 +1,4 @@
-import TextStyler from '@/components/editor/remotion/components/TextStyler'
+import TextStyler from "../../../portal/src/lib/TextStyler"
 import { useState, type SetStateAction } from 'react'
 
 interface Props {
