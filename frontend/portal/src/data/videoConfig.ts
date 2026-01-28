@@ -59,7 +59,6 @@ export const sampleVideoConfig: VideoConfig = {
                 centerText: {
                   keyName: 'centerText',
                   text: 'I am a center text',
-                  optional:false,
                   styles: {
                     fontSize: 72,
                     color: '#ffffff',
@@ -70,7 +69,6 @@ export const sampleVideoConfig: VideoConfig = {
                 topLeftText: {
                   keyName: 'topLeftText',
                   text: 'I am a top left text',
-                  optional:false,
                   styles: {
                     fontSize: 72,
                     color: '#ffffff',

@@ -1,11 +1,14 @@
 import React, { useState } from 'react'
 import { TextEditor } from './TextEditor'
 import TextStyler from './TextStyler'
+import { TextCascadeTemplateBlock, TextCascadeTemplateStyles } from '../text-animation/text-cascade/types'
+
 interface Props {
   children: React.ReactNode
-  props: any
-  onChange: (keyName: string, updatedProps: any) => void
+  props: TextCascadeTemplateBlock
+  onChange: (keyName: string, updatedProps: TextCascadeTemplateBlock) => void
 }
+
 export const EditableText: React.FC<Props> = ({ props, children, onChange }) => {
   const keyName = props.keyName
   const styles = props.styles
@@ -13,7 +16,7 @@ export const EditableText: React.FC<Props> = ({ props, children, onChange }) => 
   const [open, setOpen] = useState<boolean>(false)
   const [isEditing, setIsEditing] = useState<boolean>(false)
 
-  const onStylesChange = (newProps: any) => {
+  const onStylesChange = (newProps: Partial<TextCascadeTemplateStyles>) => {
     onChange(keyName, {
       ...props,
       styles: {
@@ -46,7 +49,7 @@ export const EditableText: React.FC<Props> = ({ props, children, onChange }) => 
 
   return (
     <TextStyler open={open} setOpen={setOpen} onChange={onStylesChange} value={styles}>
-      <div  onDoubleClick={() => setIsEditing(true)}>{children}</div>
+      <div onDoubleClick={() => setIsEditing(true)}>{children}</div>
     </TextStyler>
   )
 }

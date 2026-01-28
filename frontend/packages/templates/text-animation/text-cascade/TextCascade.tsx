@@ -1,34 +1,38 @@
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion'
 import { EditableText } from '../../lib/EditableText'
+import { TextCascadeTemplateBlock, TextCascadeTemplateConfigSchema, TextCascadeTemplateProps } from './types'
 
 interface Props {
-  props: any
-  onChange: (newProps: any) => void
+  props: TextCascadeTemplateProps
+  onChange: (newProps: TextCascadeTemplateProps) => void
 }
 
 const RemoteComponent = ({ props, onChange }: Props) => {
+  //schema check
+  TextCascadeTemplateConfigSchema.parse(props)
+
   const centerText = props.centerText
   const topLeftText = props.topLeftText
 
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
 
-  const onChangeTemplateConfig = (keyName: string, newProps: any) => {
+  const onChangeTemplateConfig = (keyName: string, newProps: TextCascadeTemplateBlock) => {
     onChange({
       ...props,
       [keyName]: {
-        ...props[keyName],
+        ...props[keyName as keyof TextCascadeTemplateProps],
         ...newProps
       }
     })
   }
 
-  console.log(props, "props")
+  console.log(props, 'props')
 
   return (
     <>
       {/* center text */}
-      <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)'}}>
+      <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
         <EditableText onChange={onChangeTemplateConfig} props={centerText}>
           {centerText.text.split('').map((letter: string, i: number) => {
             const delay = i * 1.5
@@ -60,7 +64,7 @@ const RemoteComponent = ({ props, onChange }: Props) => {
       </div>
 
       {/* top left text */}
-      <div style={{ position:"absolute", left: '10%', top: '10%'}}>
+      <div style={{ position: 'absolute', left: '10%', top: '10%' }}>
         <EditableText onChange={onChangeTemplateConfig} props={topLeftText}>
           {topLeftText.text.split('').map((letter: string, i: number) => {
             const delay = i * 1.5
