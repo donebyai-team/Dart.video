@@ -1,48 +1,49 @@
 {
-    "$typeName": "string",
-    "id": "string",
-    "type": "TEXT_ANIMATION",
-    "transcript": "string",
-    "duration": "number",
-    "transition": "TRANSITION_FADE",
-    "transitionDuration": "number",
-    "subSlides": "array",
-    "spotlights": "array",
-    "zooms": "array",
-    "content": {
-        "case": "animation",
-        "value": {
-            "$typeName": "string",
-            "templateId": "string",
-            "meta": {
-                "x": "number",
-                "y": "number",
-                "width": "number",
-                "height": "number"
+    "centerText": {
+        "keyName": {
+            "optional": false,
+            "enum": [
+                "centerText"
+            ],
+            "description": "Should match the object key name"
+        },
+        "description": "Main text displayed at the center of the slide",
+        "optional": false,
+        "style": {
+            "fontSize": {
+                "optional": false,
+                "type": "number"
             },
-            "templateConfig": {
-                "centerText": {
-                    "optional": true,
-                    "keyName": "string",
-                    "text": "string",
-                    "styles": {
-                      
-                        "fontSize": "number",
-                        "color": "string",
-                        "lineHeight": "number"
-                    }
-                },
-                "topLetfText": {
-                    "optional": true,
-                    "keyName": "string",
-                    "text": "string",
-                    "styles": {
-                        
-                        "fontSize": "number",
-                        "color": "string",
-                        "lineHeight": "number"
-                    }
-                }
+            "color": {
+                "optional": false,
+                "type": "string"
+            },
+            "lineHeight": {
+                "optional": true,
+                "type": "number"
+            }
+        }
+    },
+    "topLeftText": {
+        "keyName": {
+            "optional": false,
+            "enum": ["topLeftText"],
+            "description": "Should match the object key name"
+        },
+        "description": "Text displayed at the top-left of the slide",
+        "optional": false,
+        "style": {
+            "fontSize": {
+                "optional": false,
+                "type": "number"
+            },
+            "color": {
+                "optional": false,
+                "type": "string"
+            },
+            "lineHeight": {
+                "optional": false,
+                "type": "number"
             }
         }
     }

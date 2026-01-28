@@ -63,6 +63,7 @@
     "@amplitude/analytics-browser": "^2.17.8",
     "@remotion/player": "^4.0.398",
     "@remotion/transitions": "^4.0.398",
-    "remotion": "^4.0.398"
+    "remotion": "^4.0.398",
+    "zod": "^3.24.4"
   }
 }

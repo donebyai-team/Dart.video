@@ -1,45 +1,35 @@
 import React, { SetStateAction, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-
-export interface TextStyles {
-  fontSize: number
-  fontWeight: 'normal' | 'bold' | 'bolder' | 'lighter' | number
-  color: string
-  textAlign: 'left' | 'center' | 'right' | 'justify'
-  lineHeight: number
-  letterSpacing: number
-  fontFamily: string
-}
-
-const FONT_FAMILIES = ['Inter', 'Urbanist', 'Arial', 'Poppins', 'Roboto', 'Georgia', 'Times New Roman', 'Courier New']
-
+import {
+  TextCascadeFontFamily,
+  TextCascadeFontWeight,
+  TextCascadeTemplateStyles,
+  TextCascadeTextAlignments
+} from '../text-animation/text-cascade/types'
+import { FONT_FAMILIES, FONT_WEIGHTS, TEXT_ALIGNMENTS } from '../utils/constants'
 interface TextStylerProps {
   open: boolean
   setOpen: (open: boolean) => void
   className?: string
-  value: Record<string, any>
-  onChange: (styles: Partial<TextStyles>) => void
+  value: TextCascadeTemplateStyles
+  onChange: (styles: Partial<TextCascadeTemplateStyles>) => void
   children?: React.ReactNode
   setIsEditingToggle?: React.Dispatch<SetStateAction<boolean>>
 }
-
-
-
-
 
 export const TextStyler = ({ open, setOpen, onChange, value, className = '', children }: TextStylerProps) => {
   const popoverRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLDivElement>(null)
   const [position, setPosition] = useState({ top: 0, left: 0 })
 
-  const set = <K extends keyof TextStyles>(key: K, v: TextStyles[K]) => {
+  const set = <K extends keyof TextCascadeTemplateStyles>(key: K, v: TextCascadeTemplateStyles[K]) => {
     onChange({ ...value, [key]: v })
   }
 
   const styles = {
     fontSize: value.fontSize ?? 16,
-    fontWeight: value.fontWeight ?? 'normal',
     color: value.color ?? '#000000',
+    fontWeight: value.fontWeight ?? 'normal',
     textAlign: value.textAlign ?? 'left',
     lineHeight: value.lineHeight ?? 1.5,
     letterSpacing: value.letterSpacing ?? 0,
@@ -207,7 +197,7 @@ export const TextStyler = ({ open, setOpen, onChange, value, className = '', chi
             </label>
             <select
               value={styles.fontFamily}
-              onChange={e => set('fontFamily', e.target.value)}
+              onChange={e => set('fontFamily', e.target.value as TextCascadeFontFamily)}
               style={{
                 fontSize: '0.75rem',
                 padding: '6px 8px',
@@ -277,7 +267,7 @@ export const TextStyler = ({ open, setOpen, onChange, value, className = '', chi
               onChange={e => {
                 const v = e.target.value
 
-                set('fontWeight', v as any)
+                set('fontWeight', v as TextCascadeFontWeight)
               }}
               style={{
                 fontSize: '0.75rem',
@@ -288,16 +278,11 @@ export const TextStyler = ({ open, setOpen, onChange, value, className = '', chi
                 cursor: 'pointer'
               }}
             >
-              <option value='normal'>Normal</option>
-              <option value='bold'>Bold</option>
-              <option value='bolder'>Bolder</option>
-              <option value='lighter'>Lighter</option>
-              <option value='300'>300</option>
-              <option value='400'>400</option>
-              <option value='500'>500</option>
-              <option value='600'>600</option>
-              <option value='700'>700</option>
-              <option value='800'>800</option>
+              {FONT_WEIGHTS.map(fw => (
+                <option key={fw} value={fw}>
+                  {fw}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -357,7 +342,7 @@ export const TextStyler = ({ open, setOpen, onChange, value, className = '', chi
             </label>
             <select
               value={styles.textAlign}
-              onChange={e => set('textAlign', e.target.value as any)}
+              onChange={e => set('textAlign', e.target.value as TextCascadeTextAlignments)}
               style={{
                 fontSize: '0.75rem',
                 padding: '6px 8px',
@@ -367,10 +352,11 @@ export const TextStyler = ({ open, setOpen, onChange, value, className = '', chi
                 cursor: 'pointer'
               }}
             >
-              <option value='left'>Left</option>
-              <option value='center'>Center</option>
-              <option value='right'>Right</option>
-              <option value='justify'>Justify</option>
+              {TEXT_ALIGNMENTS.map(fw => (
+                <option key={fw} value={fw}>
+                  {fw}
+                </option>
+              ))}
             </select>
           </div>
 
