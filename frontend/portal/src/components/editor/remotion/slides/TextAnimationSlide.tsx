@@ -1,18 +1,17 @@
-import React from 'react'
-import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion'
-import {
-  WordRevealAnimation,
-  LetterCascadeAnimation,
-  TypewriterAnimation,
-  ScaleBounceAnimation,
-  BlurInAnimation
-} from '../animations/TextAnimations'
-import { AnimatedBackground } from '../effects/AnimatedBackground'
-import { TemplateContainer } from '../components/TemplateContainer'
 import { AnimationSlideContent, MetaData, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import { TemplateConfig } from './InfographicSlide'
+import React, { useEffect } from 'react'
+import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion'
 import { templateRegistry } from '../../../../../../packages/template-registery'
-import { useEffect } from 'react'
+import {
+  BlurInAnimation,
+  LetterCascadeAnimation,
+  ScaleBounceAnimation,
+  TypewriterAnimation,
+  WordRevealAnimation
+} from '../animations/TextAnimations'
+import { TemplateContainer } from '../components/TemplateContainer'
+import { AnimatedBackground } from '../effects/AnimatedBackground'
+import { TemplateConfig } from './InfographicSlide'
 
 interface TextAnimationSlideProps {
   slide: Slide
@@ -115,30 +114,26 @@ export const TextAnimationSlide: React.FC<TextAnimationSlideProps> = ({
         <div
           style={{
             width: '100%',
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 40
+            height: '100%'
           }}
         >
           {RemoteComponent ? (
             <RemoteComponent.RemoteComponent
               onChange={(props: any) => {
                 if (onUpdate && props) {
-                   onUpdate({
-                      ...slide,
-                      content: {
-                        case: 'animation',
-                        value: {
-                          ...content,
-                          templateConfig: {
-                            ...templateConfig,
-                            ...props
-                          }
+                  onUpdate({
+                    ...slide,
+                    content: {
+                      case: 'animation',
+                      value: {
+                        ...content,
+                        templateConfig: {
+                          ...templateConfig,
+                          ...props
                         }
                       }
-                    } as Slide)
+                    }
+                  } as Slide)
                 }
               }}
               props={templateConfig}

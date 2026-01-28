@@ -6,7 +6,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const config = {
   mode: 'production',
-  entry: path.resolve(__dirname, '../packages/templates/text-cascade/TextCascade.tsx'),
+  entry: path.resolve(__dirname, '../packages/templates/text-animation/text-cascade/TextCascade.tsx'),
   output: {
     path: path.resolve(__dirname, '../packages/build'),
     filename: 'TextCascade.mjs',
