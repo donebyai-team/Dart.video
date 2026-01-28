@@ -193,11 +193,13 @@ function MyTemplateAnimation(props, isEditing) {
 
   return (
     <>
-      <EditableText isEditing={isEditing}>
-        <span style={{ color: props.color, fontSize: props.size }}>
-          {props.text}
+      <EditableText style={props.left_title.style} onChange={onChange} isEditing={isEditing}>
+        <span>
+          {props.left_title.text}
         </span>
       </EditableText>
+
+      onChange should receive whatever changed in the left_title object
 
       <EditableIcon isEditing={isEditing}>
         <img src={props.icon} />
