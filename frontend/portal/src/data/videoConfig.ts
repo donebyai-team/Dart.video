@@ -2,12 +2,7 @@
 // This configuration drives the entire editor
 
 import type { VideoConfig } from '@/types/editor'
-import {
-  MetaData,
-  SlideType,
-  SpotlightEffect,
-  TransitionType
-} from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { MetaData, SlideType, SpotlightEffect, TransitionType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 
 // Create stable date references
 const SAMPLE_CREATED_DATE = '2024-01-01T00:00:00.000Z'
@@ -61,12 +56,23 @@ export const sampleVideoConfig: VideoConfig = {
                 height: 864
               } as MetaData,
               templateConfig: {
-                text: 'Your docs deserve better.',
-                direction: 'up',
-                fontSize: 72,
-                color: '#ffffff',
-                lineHeight: 1.5
+                centerText: {
+                  text: 'I am a center text',
+                  style: {
+                    fontSize: 72,
+                    color: '#ffffff',
+                    lineHeight: 1.5
+                  }
+                },
 
+                topLeftText: {
+                  text: 'I am a top left text',
+                  style: {
+                    fontSize: 72,
+                    color: '#ffffff',
+                    lineHeight: 1.5
+                  }
+                }
               }
             }
           }
@@ -98,66 +104,6 @@ export const sampleVideoConfig: VideoConfig = {
                 direction: 'up',
                 fontSize: 72,
                 color: '#ffffff'
-              }
-            }
-          }
-        }
-      ]
-    },
-    {
-      id: 'problem',
-      title: 'Problem',
-      color: 'bg-screen-problem',
-      $typeName: 'coasterai.core.v1.Section',
-      slides: [
-        {
-          id: 'problem-1',
-          $typeName: 'coasterai.core.v1.Slide',
-          type: SlideType.VISUAL_ANIMATION,
-          transcript: 'Teams waste over 5 hours every week just searching for files scattered across different tools.',
-          duration: 2.5,
-          transition: TransitionType.TRANSITION_SLIDE_LEFT,
-          transitionDuration: 0.3,
-          spotlights: [],
-          zooms: [],
-          subSlides: [],
-          content: {
-            case: 'animation',
-            value: {
-              $typeName: 'coasterai.core.v1.AnimationSlideContent',
-              templateId: 'visual-default',
-              templateConfig: {
-                // Template positioning (80% of 1920x1080, centered)
-                x: 192,
-                y: 108,
-                width: 1536,
-                height: 864
-              }
-            }
-          }
-        },
-        {
-          id: 'problem-2',
-          $typeName: 'coasterai.core.v1.Slide',
-          type: SlideType.INFOGRAPHIC,
-          transcript: 'In fact, 67% of projects get delayed because of lost or misplaced documents.',
-          duration: 2.5,
-          transition: TransitionType.TRANSITION_FADE,
-          transitionDuration: 0.3,
-          spotlights: [],
-          zooms: [],
-          subSlides: [],
-          content: {
-            case: 'animation',
-            value: {
-              $typeName: 'coasterai.core.v1.AnimationSlideContent',
-              templateId: 'infographic-default',
-              templateConfig: {
-                // Template positioning (80% of 1920x1080, centered)
-                x: 192,
-                y: 108,
-                width: 1536,
-                height: 864
               }
             }
           }
@@ -226,31 +172,95 @@ export const sampleVideoConfig: VideoConfig = {
               rotation: 0
             }
           },
-          spotlights: [{
-            id: 'spotlight-1',
-            x: 400,
-            y: 200,
-            width: 300,
-            height: 250,
-            blurAmount: 10,
-            borderRadius: 8,
-            startTime: 0.5,
-            endTime: 1.5
-          } as SpotlightEffect, {
-            id: 'spotlight-2',
-            x: 1100,
-            y: 600,
-            width: 400,
-            height: 300,
-            blurAmount: 10,
-            borderRadius: 8,
-            startTime: 2.5,
-            endTime: 3.5
-          } as SpotlightEffect],
-          zooms: [],
+          spotlights: [
+            {
+              id: 'spotlight-1',
+              x: 400,
+              y: 200,
+              width: 300,
+              height: 250,
+              blurAmount: 10,
+              borderRadius: 8,
+              startTime: 0.5,
+              endTime: 1.5
+            } as SpotlightEffect,
+            {
+              id: 'spotlight-2',
+              x: 1100,
+              y: 600,
+              width: 400,
+              height: 300,
+              blurAmount: 10,
+              borderRadius: 8,
+              startTime: 2.5,
+              endTime: 3.5
+            } as SpotlightEffect
+          ],
+          zooms: []
         }
       ]
     },
+    {
+      id: 'problem',
+      title: 'Problem',
+      color: 'bg-screen-problem',
+      $typeName: 'coasterai.core.v1.Section',
+      slides: [
+        {
+          id: 'problem-1',
+          $typeName: 'coasterai.core.v1.Slide',
+          type: SlideType.VISUAL_ANIMATION,
+          transcript: 'Teams waste over 5 hours every week just searching for files scattered across different tools.',
+          duration: 2.5,
+          transition: TransitionType.TRANSITION_SLIDE_LEFT,
+          transitionDuration: 0.3,
+          spotlights: [],
+          zooms: [],
+          subSlides: [],
+          content: {
+            case: 'animation',
+            value: {
+              $typeName: 'coasterai.core.v1.AnimationSlideContent',
+              templateId: 'visual-default',
+              templateConfig: {
+                // Template positioning (80% of 1920x1080, centered)
+                x: 192,
+                y: 108,
+                width: 1536,
+                height: 864
+              }
+            }
+          }
+        },
+        {
+          id: 'problem-2',
+          $typeName: 'coasterai.core.v1.Slide',
+          type: SlideType.INFOGRAPHIC,
+          transcript: 'In fact, 67% of projects get delayed because of lost or misplaced documents.',
+          duration: 2.5,
+          transition: TransitionType.TRANSITION_FADE,
+          transitionDuration: 0.3,
+          spotlights: [],
+          zooms: [],
+          subSlides: [],
+          content: {
+            case: 'animation',
+            value: {
+              $typeName: 'coasterai.core.v1.AnimationSlideContent',
+              templateId: 'infographic-default',
+              templateConfig: {
+                // Template positioning (80% of 1920x1080, centered)
+                x: 192,
+                y: 108,
+                width: 1536,
+                height: 864
+              }
+            }
+          }
+        }
+      ]
+    },
+
     {
       id: 'feature1',
       title: 'AI Search',
