@@ -2,13 +2,13 @@ import React, { SetStateAction, useEffect, useRef } from 'react'
 
 interface Props {
   value: string
-  styles: any
+  style: any
   isEditing: boolean
   onChange: (newProps: string) => void
   setIsEditing: React.Dispatch<SetStateAction<boolean>>
   children: React.ReactNode
 }
-export const TextEditor: React.FC<Props> = ({ value, onChange, setIsEditing, styles, isEditing, children }) => {
+export const TextEditor: React.FC<Props> = ({ value, onChange, setIsEditing, style, isEditing, children }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
@@ -36,7 +36,7 @@ export const TextEditor: React.FC<Props> = ({ value, onChange, setIsEditing, sty
           setIsEditing(false)
         }
       }}
-      style={{ ...styles, background: 'transparent', minHeight: '100px', padding: '8px' }}
+      style={{ ...style, background: 'transparent', minHeight: '100px', padding: '8px' }}
       value={value}
       onChange={e => onChange(e.target.value)}
     />

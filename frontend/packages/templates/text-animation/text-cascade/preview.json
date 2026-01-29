@@ -1,46 +1,20 @@
 {
-  "$typeName": "coasterai.core.v1.Slide",
-  "id": "hook-1",
-  "type": "TEXT_ANIMATION",
-  "transcript": "Are you tired of losing important files? Your documents deserve better.",
-  "duration": 2,
-  "transition": "TRANSITION_FADE",
-  "transitionDuration": 0.3,
-  "subSlides": [],
-  "spotlights": [],
-  "zooms": [],
-  "content": {
-    "case": "animation",
-    "value": {
-      "$typeName": "coasterai.core.v1.AnimationSlideContent",
-      "templateId": "textCascade",
-      "meta": {
-        "x": 192,
-        "y": 108,
-        "width": 1536,
-        "height": 864
-      },
-      "templateConfig": {
-        "centerText": {
-          "keyName": "centerText",
-          "text": "I am a center text",
-          "styles": {
+    "centerText": {
+        "keyName": "centerText",
+        "text": "I am a center text",
+        "style": {
             "fontSize": 72,
             "color": "#ffffff",
             "lineHeight": 1.5
-          }
-        },
-        "topLetfText": {
-          "keyName": "topLeftText",
-          "text": "I am a top left text",
-          "styles": {
-         
-            "fontSize": 72,
-            "color": "#ffffff",
-            "lineHeight": 1.5
-          }
         }
-      }
+    },
+    "topLetfText": {
+        "keyName": "topLeftText",
+        "text": "I am a top left text",
+        "style": {
+            "fontSize": 72,
+            "color": "#ffffff",
+            "lineHeight": 1.5
+        }
     }
-  }
 }

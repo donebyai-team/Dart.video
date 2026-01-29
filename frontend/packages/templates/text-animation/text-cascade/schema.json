@@ -1,12 +1,5 @@
 {
     "centerText": {
-        "keyName": {
-            "optional": false,
-            "enum": [
-                "centerText"
-            ],
-            "description": "Should match the object key name"
-        },
         "description": "Main text displayed at the center of the slide",
         "optional": false,
         "style": {
@@ -19,17 +12,52 @@
                 "type": "string"
             },
             "lineHeight": {
+                "optional": false,
+                "type": "number"
+            },
+            "textAlign": {
+                "optional": true,
+                "enum": [
+                    "left",
+                    "center",
+                    "right",
+                    "justify"
+                ]
+            },
+            "fontWeight": {
+                "optional": true,
+                "enum": [
+                    "normal",
+                    "bold",
+                    "bolder",
+                    "lighter",
+                    "300",
+                    "400",
+                    "500",
+                    "600",
+                    "700"
+                ]
+            },
+            "letterSpacing": {
                 "optional": true,
                 "type": "number"
+            },
+            "fontFamily": {
+                "optional": true,
+                "enum": [
+                    "Inter",
+                    "Urbanist",
+                    "Arial",
+                    "Poppins",
+                    "Roboto",
+                    "Georgia",
+                    "Times New Roman",
+                    "Courier New"
+                ]
             }
         }
     },
     "topLeftText": {
-        "keyName": {
-            "optional": false,
-            "enum": ["topLeftText"],
-            "description": "Should match the object key name"
-        },
         "description": "Text displayed at the top-left of the slide",
         "optional": false,
         "style": {
@@ -44,6 +72,46 @@
             "lineHeight": {
                 "optional": false,
                 "type": "number"
+            },
+            "textAlign": {
+                "optional": true,
+                "enum": [
+                    "left",
+                    "center",
+                    "right",
+                    "justify"
+                ]
+            },
+            "fontWeight": {
+                "optional": true,
+                "enum": [
+                    "normal",
+                    "bold",
+                    "bolder",
+                    "lighter",
+                    "300",
+                    "400",
+                    "500",
+                    "600",
+                    "700"
+                ]
+            },
+            "letterSpacing": {
+                "optional": true,
+                "type": "number"
+            },
+            "fontFamily": {
+                "optional": true,
+                "enum": [
+                    "Inter",
+                    "Urbanist",
+                    "Arial",
+                    "Poppins",
+                    "Roboto",
+                    "Georgia",
+                    "Times New Roman",
+                    "Courier New"
+                ]
             }
         }
     }

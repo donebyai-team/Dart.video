@@ -1,39 +1,51 @@
 import React, { SetStateAction, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import {
-  TextCascadeFontFamily,
-  TextCascadeFontWeight,
-  TextCascadeTemplateStyles,
-  TextCascadeTextAlignments
-} from '../text-animation/text-cascade/types'
-import { FONT_FAMILIES, FONT_WEIGHTS, TEXT_ALIGNMENTS } from '../utils/constants'
-interface TextStylerProps {
+import { FONT_FAMILIES, FONT_WEIGHTS, TEXT_ALIGNMENTS } from '../text-animation/text-cascade/constants'
+
+interface BaseTextStyles {
+  fontSize?: number
+  color?: string
+  fontWeight?: string | number
+  textAlign?: string
+  lineHeight?: number
+  letterSpacing?: number
+  fontFamily?: string
+}
+
+interface TextStylerProps<T extends BaseTextStyles> {
   open: boolean
   setOpen: (open: boolean) => void
   className?: string
-  value: TextCascadeTemplateStyles
-  onChange: (styles: Partial<TextCascadeTemplateStyles>) => void
+  value: T
+  onChange: (styles: Partial<T>) => void
   children?: React.ReactNode
   setIsEditingToggle?: React.Dispatch<SetStateAction<boolean>>
 }
 
-export const TextStyler = ({ open, setOpen, onChange, value, className = '', children }: TextStylerProps) => {
+export const TextStyler = <T extends BaseTextStyles>({
+  open,
+  setOpen,
+  onChange,
+  value,
+  className = '',
+  children
+}: TextStylerProps<T>) => {
   const popoverRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLDivElement>(null)
   const [position, setPosition] = useState({ top: 0, left: 0 })
 
-  const set = <K extends keyof TextCascadeTemplateStyles>(key: K, v: TextCascadeTemplateStyles[K]) => {
-    onChange({ ...value, [key]: v })
+  const set = <K extends keyof T>(key: K, v: T[K]) => {
+    onChange({ [key]: v } as unknown as Partial<T>)
   }
 
   const styles = {
     fontSize: value.fontSize ?? 16,
     color: value.color ?? '#000000',
     fontWeight: value.fontWeight ?? 'normal',
-    textAlign: value.textAlign ?? 'left',
     lineHeight: value.lineHeight ?? 1.5,
     letterSpacing: value.letterSpacing ?? 0,
-    fontFamily: value.fontFamily ?? 'Inter'
+    fontFamily: value.fontFamily ?? 'Inter',
+    textAlign: value.textAlign ?? 'left'
   }
 
   // Calculate optimal position
@@ -196,8 +208,8 @@ export const TextStyler = ({ open, setOpen, onChange, value, className = '', chi
               Font Family
             </label>
             <select
-              value={styles.fontFamily}
-              onChange={e => set('fontFamily', e.target.value as TextCascadeFontFamily)}
+              value={String(styles.fontFamily)}
+              onChange={e => set('fontFamily' as keyof T, e.target.value as T[keyof T])}
               style={{
                 fontSize: '0.75rem',
                 padding: '6px 8px',
@@ -239,7 +251,7 @@ export const TextStyler = ({ open, setOpen, onChange, value, className = '', chi
             <input
               type='range'
               value={styles.fontSize}
-              onChange={e => set('fontSize', Number(e.target.value))}
+              onChange={e => set('fontSize' as keyof T, Number(e.target.value) as T[keyof T])}
               min={8}
               max={120}
               step={1}
@@ -266,8 +278,7 @@ export const TextStyler = ({ open, setOpen, onChange, value, className = '', chi
               value={String(styles.fontWeight)}
               onChange={e => {
                 const v = e.target.value
-
-                set('fontWeight', v as TextCascadeFontWeight)
+                set('fontWeight' as keyof T, v as T[keyof T])
               }}
               style={{
                 fontSize: '0.75rem',
@@ -303,7 +314,7 @@ export const TextStyler = ({ open, setOpen, onChange, value, className = '', chi
               <input
                 type='text'
                 value={styles.color}
-                onChange={e => set('color', e.target.value)}
+                onChange={e => set('color' as keyof T, e.target.value as T[keyof T])}
                 placeholder='#000000'
                 style={{
                   flex: 1,
@@ -316,7 +327,7 @@ export const TextStyler = ({ open, setOpen, onChange, value, className = '', chi
               <input
                 type='color'
                 value={styles.color}
-                onChange={e => set('color', e.target.value)}
+                onChange={e => set('color' as keyof T, e.target.value as T[keyof T])}
                 style={{
                   width: '40px',
                   height: '32px',
@@ -341,8 +352,8 @@ export const TextStyler = ({ open, setOpen, onChange, value, className = '', chi
               Text Align
             </label>
             <select
-              value={styles.textAlign}
-              onChange={e => set('textAlign', e.target.value as TextCascadeTextAlignments)}
+              value={String(styles.textAlign)}
+              onChange={e => set('textAlign' as keyof T, e.target.value as T[keyof T])}
               style={{
                 fontSize: '0.75rem',
                 padding: '6px 8px',
@@ -384,7 +395,7 @@ export const TextStyler = ({ open, setOpen, onChange, value, className = '', chi
             <input
               type='range'
               value={styles.lineHeight}
-              onChange={e => set('lineHeight', Number(e.target.value))}
+              onChange={e => set('lineHeight' as keyof T, Number(e.target.value) as T[keyof T])}
               min={0.8}
               max={3}
               step={0.05}
@@ -419,7 +430,7 @@ export const TextStyler = ({ open, setOpen, onChange, value, className = '', chi
             <input
               type='range'
               value={styles.letterSpacing}
-              onChange={e => set('letterSpacing', Number(e.target.value))}
+              onChange={e => set('letterSpacing' as keyof T, Number(e.target.value) as T[keyof T])}
               min={-2}
               max={20}
               step={0.5}
