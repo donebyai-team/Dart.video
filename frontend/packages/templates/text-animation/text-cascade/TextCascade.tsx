@@ -1,6 +1,6 @@
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion'
 import { EditableText } from '../../lib/EditableText'
-import { TextCascadeTemplateBlock, TextCascadeTemplateConfigSchema, TextCascadeTemplateProps } from './types'
+import { TextCascadeTemplateConfigSchema, TextCascadeTemplateProps } from './types'
 
 interface Props {
   props: TextCascadeTemplateProps
@@ -13,11 +13,12 @@ const RemoteComponent = ({ props, onChange }: Props) => {
 
   const centerText = props.centerText
   const topLeftText = props.topLeftText
+  console.log(centerText, topLeftText)
 
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
 
-  const onChangeTemplateConfig = (keyName: string, newProps: TextCascadeTemplateBlock) => {
+  const onChangeTemplateConfig = (keyName: string, newProps: any) => {
     onChange({
       ...props,
       [keyName]: {
@@ -33,7 +34,7 @@ const RemoteComponent = ({ props, onChange }: Props) => {
     <>
       {/* center text */}
       <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
-        <EditableText onChange={onChangeTemplateConfig} props={centerText}>
+        <EditableText keyName='centerText' onChange={onChangeTemplateConfig} props={centerText}>
           {centerText.text.split('').map((letter: string, i: number) => {
             const delay = i * 1.5
             console.log(frame, i, 'frame')
@@ -50,7 +51,7 @@ const RemoteComponent = ({ props, onChange }: Props) => {
               <span
                 key={i}
                 style={{
-                  ...centerText.styles,
+                  ...centerText.style,
                   opacity,
                   transform: `translateX(${translateX}px)`,
                   textShadow: '0 2px 20px rgba(147, 51, 234, 0.4)'
@@ -65,7 +66,7 @@ const RemoteComponent = ({ props, onChange }: Props) => {
 
       {/* top left text */}
       <div style={{ position: 'absolute', left: '10%', top: '10%' }}>
-        <EditableText onChange={onChangeTemplateConfig} props={topLeftText}>
+        <EditableText keyName='topLeftText' onChange={onChangeTemplateConfig} props={topLeftText}>
           {topLeftText.text.split('').map((letter: string, i: number) => {
             const delay = i * 1.5
             console.log(frame, i, 'frame')
@@ -82,7 +83,7 @@ const RemoteComponent = ({ props, onChange }: Props) => {
               <span
                 key={i}
                 style={{
-                  ...topLeftText.styles,
+                  ...topLeftText.style,
                   opacity,
                   transform: `translateX(${translateX}px)`,
                   textShadow: '0 2px 20px rgba(147, 51, 234, 0.4)'

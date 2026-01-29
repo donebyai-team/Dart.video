@@ -1,26 +1,35 @@
 import React, { useState } from 'react'
 import { TextEditor } from './TextEditor'
 import TextStyler from './TextStyler'
-import { TextCascadeTemplateBlock, TextCascadeTemplateStyles } from '../text-animation/text-cascade/types'
+
+interface StyleProps {
+  [key: string]: any
+}
+
+interface BlockProps {
+  text: string
+  style: StyleProps
+  [key: string]: any
+}
 
 interface Props {
   children: React.ReactNode
-  props: TextCascadeTemplateBlock
-  onChange: (keyName: string, updatedProps: TextCascadeTemplateBlock) => void
+  props: BlockProps
+  onChange: (keyName: string, updatedProps: BlockProps) => void
+  keyName: string
 }
 
-export const EditableText: React.FC<Props> = ({ props, children, onChange }) => {
-  const keyName = props.keyName
-  const styles = props.styles
+export const EditableText: React.FC<Props> = ({ props, children, onChange, keyName }) => {
+  const style = props.style
   const text = props.text
   const [open, setOpen] = useState<boolean>(false)
   const [isEditing, setIsEditing] = useState<boolean>(false)
 
-  const onStylesChange = (newProps: Partial<TextCascadeTemplateStyles>) => {
+  const onStylesChange = (newProps: Partial<StyleProps>) => {
     onChange(keyName, {
       ...props,
-      styles: {
-        ...props.styles,
+      style: {
+        ...props.style,
         ...newProps
       }
     })
@@ -35,20 +44,14 @@ export const EditableText: React.FC<Props> = ({ props, children, onChange }) => 
 
   if (isEditing) {
     return (
-      <TextEditor
-        value={text}
-        styles={styles}
-        onChange={onChangeText}
-        isEditing={isEditing}
-        setIsEditing={setIsEditing}
-      >
+      <TextEditor value={text} style={style} onChange={onChangeText} isEditing={isEditing} setIsEditing={setIsEditing}>
         {children}
       </TextEditor>
     )
   }
 
   return (
-    <TextStyler open={open} setOpen={setOpen} onChange={onStylesChange} value={styles}>
+    <TextStyler open={open} setOpen={setOpen} onChange={onStylesChange} value={style}>
       <div onDoubleClick={() => setIsEditing(true)}>{children}</div>
     </TextStyler>
   )

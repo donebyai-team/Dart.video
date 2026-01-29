@@ -57,9 +57,8 @@ export const sampleVideoConfig: VideoConfig = {
               } as MetaData,
               templateConfig: {
                 centerText: {
-                  keyName: 'centerText',
                   text: 'I am a center text',
-                  styles: {
+                  style: {
                     fontSize: 72,
                     color: '#ffffff',
                     lineHeight: 1.5
@@ -67,9 +66,8 @@ export const sampleVideoConfig: VideoConfig = {
                 },
 
                 topLeftText: {
-                  keyName: 'topLeftText',
                   text: 'I am a top left text',
-                  styles: {
+                  style: {
                     fontSize: 72,
                     color: '#ffffff',
                     lineHeight: 1.5
