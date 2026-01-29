@@ -18,23 +18,22 @@ const RemoteComponent = ({ props, onChange }: Props) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
 
-  const onChangeTemplateConfig = (keyName: string, newProps: any) => {
-    onChange({
-      ...props,
-      [keyName]: {
-        ...props[keyName as keyof TextCascadeTemplateProps],
-        ...newProps
-      }
-    })
-  }
-
-  console.log(props, 'props')
-
   return (
     <>
       {/* center text */}
       <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}>
-        <EditableText keyName='centerText' onChange={onChangeTemplateConfig} props={centerText}>
+        <EditableText
+          onChange={newProps => {
+            onChange({
+              ...props,
+              centerText: {
+                ...props.centerText,
+                ...newProps
+              }
+            })
+          }}
+          props={centerText}
+        >
           {centerText.text.split('').map((letter: string, i: number) => {
             const delay = i * 1.5
             console.log(frame, i, 'frame')
@@ -66,7 +65,18 @@ const RemoteComponent = ({ props, onChange }: Props) => {
 
       {/* top left text */}
       <div style={{ position: 'absolute', left: '10%', top: '10%' }}>
-        <EditableText keyName='topLeftText' onChange={onChangeTemplateConfig} props={topLeftText}>
+        <EditableText
+          onChange={newProps => {
+            onChange({
+              ...props,
+              topLeftText: {
+                ...props.topLeftText,
+                ...newProps
+              }
+            })
+          }}
+          props={topLeftText}
+        >
           {topLeftText.text.split('').map((letter: string, i: number) => {
             const delay = i * 1.5
             console.log(frame, i, 'frame')

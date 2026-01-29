@@ -6,40 +6,41 @@ interface StyleProps {
   [key: string]: any
 }
 
-interface BlockProps {
-  text: string
-  style: StyleProps
-  [key: string]: any
-}
-
-interface Props {
+interface EditableTextProps<T extends Record<string, any>> {
   children: React.ReactNode
-  props: BlockProps
-  onChange: (keyName: string, updatedProps: BlockProps) => void
-  keyName: string
+  props: T
+  onChange: (updatedProps: T) => void
+  textKey?: keyof T // Which property contains the text
+  styleKey?: keyof T // Which property contains the style
 }
 
-export const EditableText: React.FC<Props> = ({ props, children, onChange, keyName }) => {
-  const style = props.style
-  const text = props.text
+export const EditableText = <T extends Record<string, any>>({
+  props,
+  children,
+  onChange,
+  textKey = 'text' as keyof T,
+  styleKey = 'style' as keyof T
+}: EditableTextProps<T>) => {
+  const style = (props[styleKey] as StyleProps) || {}
+  const text = (props[textKey] as string) || ''
   const [open, setOpen] = useState<boolean>(false)
   const [isEditing, setIsEditing] = useState<boolean>(false)
 
-  const onStylesChange = (newProps: Partial<StyleProps>) => {
-    onChange(keyName, {
+  const onStylesChange = (newStyles: Partial<StyleProps>) => {
+    onChange({
       ...props,
-      style: {
-        ...props.style,
-        ...newProps
+      [styleKey]: {
+        ...style,
+        ...newStyles
       }
-    })
+    } as T)
   }
 
   const onChangeText = (newText: string) => {
-    onChange(keyName, {
+    onChange({
       ...props,
-      text: newText
-    })
+      [textKey]: newText
+    } as T)
   }
 
   if (isEditing) {
