@@ -1,6 +1,5 @@
 {
     "centerText": {
-        "keyName": "centerText",
         "text": "I am a center text",
         "style": {
             "fontSize": 72,
@@ -9,7 +8,6 @@
         }
     },
     "topLetfText": {
-        "keyName": "topLeftText",
         "text": "I am a top left text",
         "style": {
             "fontSize": 72,

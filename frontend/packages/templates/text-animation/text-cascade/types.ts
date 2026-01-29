@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { FONT_FAMILIES, FONT_WEIGHTS, TEXT_ALIGNMENTS } from './constants'
+import { FONT_FAMILIES, FONT_WEIGHTS, TEXT_ALIGNMENTS } from '../../lib/constants'
 
 const TextStylesSchema = z.object({
   fontSize: z.number(),

@@ -1,6 +1,6 @@
 import React, { SetStateAction, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { FONT_FAMILIES, FONT_WEIGHTS, TEXT_ALIGNMENTS } from '../text-animation/text-cascade/constants'
+import { FONT_FAMILIES, FONT_WEIGHTS, TEXT_ALIGNMENTS } from './constants'
 
 interface BaseTextStyles {
   fontSize?: number
