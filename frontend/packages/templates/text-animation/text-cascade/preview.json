@@ -1,0 +1,18 @@
+{
+    "centerText": {
+        "text": "I am a center text",
+        "style": {
+            "fontSize": 72,
+            "color": "#ffffff",
+            "lineHeight": 1.5
+        }
+    },
+    "topLetfText": {
+        "text": "I am a top left text",
+        "style": {
+            "fontSize": 72,
+            "color": "#ffffff",
+            "lineHeight": 1.5
+        }
+    }
+}
