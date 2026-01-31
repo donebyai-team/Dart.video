@@ -6,10 +6,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const config = {
   mode: 'production',
-  entry: path.resolve(__dirname, '../packages/templates/text-animation/text-cascade/TextCascade.tsx'),
+  entry: path.resolve(__dirname, '../packages/templates/image-animation/image-fade/ImageFade.tsx'),
   output: {
     path: path.resolve(__dirname, '../packages/build'),
-    filename: 'TextCascade.mjs',
+    filename: 'ImageFade.mjs',
     library: {
       type: 'module'
     },

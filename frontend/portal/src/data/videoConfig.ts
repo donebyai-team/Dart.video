@@ -164,12 +164,18 @@ export const sampleVideoConfig: VideoConfig = {
             case: 'image',
             value: {
               $typeName: 'coasterai.core.v1.ImageSlideContent',
-              src: 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=400&h=240&fit=crop',
-              x: 192, // 10% margin (1920 * 0.1)
-              y: 108, // 10% margin (1080 * 0.1)
-              width: 1536, // 80% of 1920
-              height: 864, // 80% of 1080
-              rotation: 0
+              templateId:"imageFade",
+              meta: {
+                x: 192, // 10% margin (1920 * 0.1)
+                y: 108, // 10% margin (1080 * 0.1)
+                width: 1536, // 80% of 1920
+                height: 864, // 80% of 1080
+                scale: 1,
+                rotation: 0
+              } as MetaData,
+              templateConfig: {
+                src: 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=400&h=240&fit=crop'
+              }
             }
           },
           spotlights: [
@@ -306,13 +312,19 @@ export const sampleVideoConfig: VideoConfig = {
           content: {
             case: 'image',
             value: {
+              templateId:"imageFade",
               $typeName: 'coasterai.core.v1.ImageSlideContent',
-              src: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400&h=240&fit=crop',
-              x: 192,
-              y: 108,
-              width: 1536,
-              height: 864,
-              rotation: 0
+              meta: {
+                x: 192, // 10% margin (1920 * 0.1)
+                y: 108, // 10% margin (1080 * 0.1)
+                width: 1536, // 80% of 1920
+                height: 864, // 80% of 1080
+                scale: 1,
+                rotation: 0
+              } as MetaData,
+              templateConfig: {
+                src: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400&h=240&fit=crop'
+              }
             }
           }
         }
@@ -441,13 +453,19 @@ export const sampleVideoConfig: VideoConfig = {
           content: {
             case: 'image',
             value: {
+              templateId:"imageFade",
               $typeName: 'coasterai.core.v1.ImageSlideContent',
-              src: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400&h=240&fit=crop',
-              x: 192,
-              y: 108,
-              width: 1536,
-              height: 864,
-              rotation: 0
+              meta: {
+                x: 192,
+                y: 108,
+                width: 1536,
+                height: 864,
+                rotation: 0,
+                scale: 1
+              } as MetaData,
+              templateConfig: {
+                src: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400&h=240&fit=crop'
+              }
             }
           }
         }
