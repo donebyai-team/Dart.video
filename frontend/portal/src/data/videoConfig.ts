@@ -164,7 +164,6 @@ export const sampleVideoConfig: VideoConfig = {
             case: 'image',
             value: {
               $typeName: 'coasterai.core.v1.ImageSlideContent',
-              templateId:"imageFade",
               meta: {
                 x: 192, // 10% margin (1920 * 0.1)
                 y: 108, // 10% margin (1080 * 0.1)
@@ -312,7 +311,6 @@ export const sampleVideoConfig: VideoConfig = {
           content: {
             case: 'image',
             value: {
-              templateId:"imageFade",
               $typeName: 'coasterai.core.v1.ImageSlideContent',
               meta: {
                 x: 192, // 10% margin (1920 * 0.1)
@@ -453,7 +451,6 @@ export const sampleVideoConfig: VideoConfig = {
           content: {
             case: 'image',
             value: {
-              templateId:"imageFade",
               $typeName: 'coasterai.core.v1.ImageSlideContent',
               meta: {
                 x: 192,

@@ -1,31 +1,36 @@
-import React, { useState, useCallback } from 'react'
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Box,
-  Typography,
-  CircularProgress,
-  IconButton
-} from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
+import { Box, CircularProgress, Dialog, DialogContent, DialogTitle, IconButton, Typography } from '@mui/material'
+import React, { SetStateAction, useCallback, useEffect, useState } from 'react'
 
 interface ImageUploadModalProps {
   open: boolean
   onClose: () => void
   onUploadImage: (url: string) => void
-  test?: boolean
+  onUploadError: () => void
+  retry: boolean
+  setRetry: React.Dispatch<SetStateAction<boolean>>
+  setUploading: React.Dispatch<SetStateAction<boolean>>
 }
 
 export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   open,
   onClose,
   onUploadImage,
-  test = false
+  onUploadError,
+  retry,
+  setRetry,
+  setUploading
 }) => {
   const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
+  const [choosenFile, setChoosenFile] = useState<File | null>(null)
+
+  const uploadImage = async (file: File) => {
+    //implement your uploading function here and return the url
+
+    return URL.createObjectURL(file)
+  }
 
   const handleFile = useCallback(
     async (file: File) => {
@@ -33,22 +38,26 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
         alert('Please upload an image file')
         return
       }
+      setChoosenFile(file)
 
       setIsUploading(true)
 
       try {
         let imageUrl: string
 
-        if (test) {
-          // Test mode: use Object URL
-          imageUrl = URL.createObjectURL(file)
-        } else {
-          // Production mode: implement your upload logic here
-          // For now, using Object URL as fallback
-          imageUrl = URL.createObjectURL(file)
-        }
+        imageUrl = URL.createObjectURL(file)
 
         onUploadImage(imageUrl)
+
+        //async function to upload the update the image
+        uploadImage(file)
+          .then(cloudUrl => {
+            onUploadImage(cloudUrl)
+          })
+          .catch(() => {
+            onUploadError()
+          })
+
         onClose()
       } catch (error) {
         console.error('Upload error:', error)
@@ -57,8 +66,32 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
         setIsUploading(false)
       }
     },
-    [test, onUploadImage, onClose]
+    [ onUploadImage, onClose]
   )
+
+  useEffect(() => {
+    if (retry) {
+      if (choosenFile) {
+        setIsUploading(true)
+        uploadImage(choosenFile)
+          .then(cloudUrl => {
+            onUploadImage(cloudUrl)
+            setRetry(false)
+            setChoosenFile(null)
+            setIsUploading(false)
+          })
+          .catch(() => {
+            onUploadError()
+            setRetry(false)
+            setIsUploading(false)
+          })
+      }
+    }
+  }, [retry])
+
+  useEffect(() => {
+    setUploading(isUploading)
+  }, [isUploading])
 
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -95,7 +128,7 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     const input = document.createElement('input')
     input.type = 'file'
     input.accept = 'image/*'
-    input.onchange = (e) => {
+    input.onchange = e => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (file) {
         handleFile(file)
@@ -108,7 +141,7 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="sm"
+      maxWidth='sm'
       fullWidth
       PaperProps={{
         sx: {
@@ -117,12 +150,12 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
       }}
     >
       <DialogTitle sx={{ m: 0, p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Typography variant="h6">Upload Image</Typography>
+        <Typography variant='h6'>Upload Image</Typography>
         <IconButton
-          aria-label="close"
+          aria-label='close'
           onClick={onClose}
           sx={{
-            color: (theme) => theme.palette.grey[500]
+            color: theme => theme.palette.grey[500]
           }}
           disabled={isUploading}
         >
@@ -155,20 +188,20 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
           {isUploading ? (
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
               <CircularProgress />
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant='body2' color='text.secondary'>
                 Uploading...
               </Typography>
             </Box>
           ) : (
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
               <CloudUploadIcon sx={{ fontSize: 64, color: 'primary.main', opacity: 0.5 }} />
-              <Typography variant="h6" color="text.primary">
+              <Typography variant='h6' color='text.primary'>
                 Drag & Drop Image Here
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant='body2' color='text.secondary'>
                 or click to browse
               </Typography>
-              <Typography variant="caption" color="text.disabled">
+              <Typography variant='caption' color='text.disabled'>
                 Supports: JPG, PNG, GIF, WebP
               </Typography>
             </Box>

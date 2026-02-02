@@ -1,7 +1,6 @@
 import React, { SetStateAction, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { OBJECT_FIT_OPTIONS } from './constants'
-
+export const OBJECT_FIT_OPTIONS = ['contain', 'cover', 'fill', 'none', 'scale-down'] as const
 interface BaseImageStyles {
   width?: number
   height?: number
@@ -27,7 +26,7 @@ export const ImageStyler = <T extends BaseImageStyles>({
   value,
   className = '',
   children,
-  onImagechange
+  onImagechange,
 }: ImageStylerProps<T>) => {
   const popoverRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLDivElement>(null)

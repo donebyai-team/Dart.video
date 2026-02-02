@@ -1,12 +1,14 @@
 import { MetaData, Resolution } from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import React, { useCallback, useState } from 'react'
+import React, { RefObject, SetStateAction, useCallback, useEffect, useState } from 'react'
 
 interface ImageContentProps {
   image: MetaData
   resolution: Resolution
   isEditing?: boolean
+  setIsEditing: React.Dispatch<SetStateAction<boolean>>
   onUpdate?: (updates: Partial<MetaData>) => void
   children: React.ReactNode
+  imageRef: RefObject<HTMLImageElement>
 }
 
 type Corner = 'nw' | 'ne' | 'sw' | 'se'
@@ -15,10 +17,12 @@ export const ImageContent: React.FC<ImageContentProps> = ({
   image,
   resolution,
   isEditing = false,
+  setIsEditing,
   onUpdate,
-  children
+  children,
+  imageRef
 }) => {
-  const [isDragging, setIsDragging] = useState(false)
+  const [isDragging, setIsDragging] = useState(isEditing)
   const [isResizing, setIsResizing] = useState<Corner | null>(null)
   const [dragStart, setDragStart] = useState<{ x: number; y: number; imageX: number; imageY: number } | null>(null)
   const [resizeStart, setResizeStart] = useState<{
@@ -178,18 +182,30 @@ export const ImageContent: React.FC<ImageContentProps> = ({
     }
   }, [isDragging, isResizing, handleMouseMove, handleMouseUp])
 
+  // Close on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!isResizing && imageRef.current && !imageRef.current.contains(event.target as Node)) {
+        setIsEditing(false)
+      }
+    }
+
+    if (isEditing) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isEditing, setIsEditing, imageRef, isResizing])
+
   return (
     <div
       style={{
-        
         position: 'absolute',
         left: `${leftPercent}%`,
         top: `${topPercent}%`,
         width: `${widthPercent}%`,
         height: `${heightPercent}%`,
         transform: `rotate(${image.rotation || 0}deg)`,
-        cursor: isEditing ? (isDragging ? 'grabbing' : 'grab') : 'default',
-        pointerEvents: isEditing ? 'auto' : 'none'
+        cursor: isEditing ? (isDragging ? 'grabbing' : 'grab') : 'default'
       }}
       onMouseDown={isEditing ? handleDragStart : undefined}
     >
