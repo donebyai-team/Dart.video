@@ -1,15 +1,18 @@
-import React from "react";
-import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
-import { SpotlightEffectComponent } from "../effects/SpotlightEffect";
-import { ImageContent } from "./ImageContent";
-import { Slide, ImageSlideContent, SpotlightEffect, Resolution } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { ImageSlideContent, Resolution, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import React, { useRef, useState } from 'react'
+import { AbsoluteFill, useCurrentFrame, useVideoConfig } from 'remotion'
+import { ImagePreview } from '../components/ImagePreview'
+import ImageUploadModal from '../components/ImageUploadModal'
+import RetryButton from '../components/RetryButton'
+import { SpotlightEffectComponent } from '../effects/SpotlightEffect'
+import { ImageContent } from './ImageContent'
 
 interface ImageSlideProps {
-  slide: Slide;
-  width: number;
-  height: number;
-  isEditing?: boolean;
-  onUpdate?: (updates: Partial<Slide>) => void;
+  slide: Slide
+  width: number
+  height: number
+  isEditing?: boolean
+  onUpdate?: (updates: Partial<Slide>) => void
 }
 
 /**
@@ -19,85 +22,143 @@ interface ImageSlideProps {
  * - Canvas-level spotlight effects
  * - Separate from annotations (handled by CanvasOverlay)
  */
-export const ImageSlide: React.FC<ImageSlideProps> = ({
-  slide,
-  width,
-  height,
-  isEditing = false,
-  onUpdate,
-}) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
+export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, isEditing = false, onUpdate }) => {
+  const frame = useCurrentFrame()
+  const { fps } = useVideoConfig()
 
   // Extract content and effects directly
   const imageContent = slide.content.value as ImageSlideContent
-
-
-  // Create image object for ImageContent component
-  // NEW ARCHITECTURE: Image properties are directly in content (no template_config)
-  const imageData = imageContent ? {
-    src: imageContent.src || '',
-    x: imageContent.x ?? 0,
-    y: imageContent.y ?? 0,
-    width: imageContent.width as number ?? width,
-    height: imageContent.height ?? height,
-    rotation: imageContent.rotation ?? 0,
-  } : null;
+  const [openImageModal, setOpenImageModal] = useState<boolean>(false)
+  const [uploadError, setUploadError] = useState<boolean>(false)
+  const [retry, setRetry] = useState<boolean>(false)
+  const [uploading, setUploading] = useState<boolean>(false)
+  const [editing, setIsEditing] = useState<boolean>(false)
+  const imageRef = useRef<HTMLImageElement | null>(null)
+  const props = {
+    src:imageContent.src,
+    style:imageContent.style ?? {}
+  }
 
   // Create resolution object from dimensions
   const resolution = {
     id: `${width}x${height}`,
-    name: "Custom",
+    name: 'Custom',
     aspect: `${width}/${height}`,
     width,
-    height,
-  } as Resolution;
+    height
+  } as Resolution
 
   return (
     <AbsoluteFill
       style={{
-        backgroundColor: slide.backgroundColor || "#0f172a",
+        backgroundColor: slide.backgroundColor || '#0f172a'
       }}
     >
       {/* Render image content (resizable/draggable in edit mode) */}
-      {imageData && (
+      {imageContent.meta && (
         <ImageContent
-          image={imageData}
+          imageRef={imageRef}
+          setIsEditing={setIsEditing}
+          image={imageContent.meta}
           resolution={resolution}
-          isEditing={isEditing}
-          onUpdate={(updates) => {
+          isEditing={editing}
+          onUpdate={updates => {
             if (onUpdate && imageContent) {
               onUpdate({
                 content: {
-                  case: "image",
+                  case: 'image',
                   value: {
                     ...imageContent,
-                    src: imageContent.src,
-                    ...updates
+                    meta: {
+                      ...imageContent.meta,
+                      ...updates
+                    }
                   } as ImageSlideContent
                 }
-              } as Slide);
+              } as Slide)
             }
           }}
-        />
+        >
+          {uploadError && (
+            <div className=' absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] z-10'>
+              <RetryButton
+                isUploading={uploading}
+                onPressRetry={() => {
+                  setRetry(true)
+                }}
+              />
+            </div>
+          )}
+          <ImagePreview
+            onClickImage={() => {
+              console.log("clicked")
+              setIsEditing(true)
+            }}
+            imageRef={imageRef}
+            onImageChange={() => {
+              setOpenImageModal(!openImageModal)
+            }}
+            onChange={(newProps: any) => {
+              if (onUpdate && newProps) {
+                if (onUpdate && imageContent) {
+                  onUpdate({
+                    content: {
+                      case: 'image',
+                      value: {
+                        ...imageContent,
+                        ...newProps
+                      } as ImageSlideContent
+                    }
+                  } as Slide)
+                }
+              }
+            }}
+            props={props}
+          />
+          <ImageUploadModal
+            setUploading={setUploading}
+            setRetry={setRetry}
+            retry={retry}
+            open={openImageModal}
+            onClose={() => setOpenImageModal(false)}
+            onUploadError={() => {
+              setUploadError(true)
+            }}
+            onUploadImage={url => {
+              if (onUpdate && url) {
+                if (onUpdate && imageContent) {
+                  onUpdate({
+                    content: {
+                      case: 'image',
+                      value: {
+                        ...imageContent,
+                         src: url
+                      } as ImageSlideContent
+                    }
+                  } as Slide)
+                }
+              }
+            }}
+          />
+        </ImageContent>
       )}
 
       {/* Render spotlight effects at CANVAS level */}
-      {slide.spotlights.map((spotlight) => (
+      {slide.spotlights.map(spotlight => (
         <SpotlightEffectComponent
           key={spotlight.id}
           spotlight={spotlight}
           frame={frame}
           fps={fps}
-          width={width}           // Canvas dimensions
-          height={height}         // Canvas dimensions
+          width={width} // Canvas dimensions
+          height={height} // Canvas dimensions
           fullWidth={width}
           fullHeight={height}
           slideDuration={slide.duration}
         />
       ))}
     </AbsoluteFill>
-  );
-};
+  )
+}
 
-export default ImageSlide;
+export default ImageSlide

@@ -15,34 +15,19 @@ export declare const file_coasterai_core_v1_slide: GenFile;
  */
 export declare type ImageSlideContent = Message<"coasterai.core.v1.ImageSlideContent"> & {
   /**
-   * @generated from field: string src = 1;
+   * @generated from field: coasterai.core.v1.MetaData meta = 1;
+   */
+  meta?: MetaData;
+
+  /**
+   * @generated from field: string src = 2;
    */
   src: string;
 
   /**
-   * @generated from field: optional float x = 2;
+   * @generated from field: google.protobuf.Struct style = 3;
    */
-  x?: number;
-
-  /**
-   * @generated from field: optional float y = 3;
-   */
-  y?: number;
-
-  /**
-   * @generated from field: optional float width = 4;
-   */
-  width?: number;
-
-  /**
-   * @generated from field: optional float height = 5;
-   */
-  height?: number;
-
-  /**
-   * @generated from field: optional float rotation = 6;
-   */
-  rotation?: number;
+  style?: JsonObject;
 };
 
 /**
@@ -100,6 +85,16 @@ export declare type MetaData = Message<"coasterai.core.v1.MetaData"> & {
    * @generated from field: optional float height = 5;
    */
   height?: number;
+
+  /**
+   * @generated from field: optional float scale = 6;
+   */
+  scale?: number;
+
+  /**
+   * @generated from field: optional float rotation = 7;
+   */
+  rotation?: number;
 };
 
 /**
