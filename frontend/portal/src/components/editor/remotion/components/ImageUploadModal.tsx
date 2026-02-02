@@ -2,6 +2,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import { Box, CircularProgress, Dialog, DialogContent, DialogTitle, IconButton, Typography } from '@mui/material'
 import React, { SetStateAction, useCallback, useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
 
 interface ImageUploadModalProps {
   open: boolean
@@ -35,7 +36,7 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   const handleFile = useCallback(
     async (file: File) => {
       if (!file.type.startsWith('image/')) {
-        alert('Please upload an image file')
+        toast.error('Please upload an image file')
         return
       }
       setChoosenFile(file)
@@ -54,19 +55,21 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
           .then(cloudUrl => {
             onUploadImage(cloudUrl)
           })
-          .catch(() => {
+          .catch(error => {
+            console.error('Upload error:', error)
+            toast.error('Something went wrong')
             onUploadError()
           })
 
         onClose()
       } catch (error) {
         console.error('Upload error:', error)
-        alert('Failed to upload image')
+        toast.error('Failed to upload image')
       } finally {
         setIsUploading(false)
       }
     },
-    [ onUploadImage, onClose]
+    [onUploadImage, onClose]
   )
 
   useEffect(() => {
@@ -80,7 +83,9 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
             setChoosenFile(null)
             setIsUploading(false)
           })
-          .catch(() => {
+          .catch((error) => {
+            console.error('Upload error:', error)
+            toast.error('Something went wrong')
             onUploadError()
             setRetry(false)
             setIsUploading(false)
