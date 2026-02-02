@@ -3,24 +3,24 @@ import { Img } from 'remotion'
 import { z } from 'zod'
 import ImageStyler from './ImageStyler'
 
-const ImgFadeStyle = z.object({
+const ImgStyle = z.object({
   width: z.union([z.string(), z.number()]).optional(),
   height: z.union([z.string(), z.number()]).optional(),
   borderRadius: z.union([z.string(), z.number()]).optional(),
   objectFit: z.enum(['contain', 'cover', 'fill']).optional()
 })
 
-const ImgFadeSchema = z.object({
+const ImgSchema = z.object({
   src: z.string(),
-  style: ImgFadeStyle
+  style: ImgStyle
 })
 
-export type ImgFadeTemplateProps = z.infer<typeof ImgFadeSchema>
+export type ImgTemplateProps = z.infer<typeof ImgSchema>
 
 interface Props {
   imageRef: RefObject<HTMLImageElement>
-  props: ImgFadeTemplateProps
-  onChange: (newProps: Partial<ImgFadeTemplateProps>) => void
+  props: ImgTemplateProps
+  onChange: (newProps: Partial<ImgTemplateProps>) => void
   onImageChange: () => void
   onClickImage: () => void
 }

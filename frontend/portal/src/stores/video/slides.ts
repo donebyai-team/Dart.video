@@ -49,9 +49,8 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
               scale: 1,
               rotation: 0
             } as MetaData,
-            templateConfig: {
-              src: 'https://workwave.my.site.com/realgreen/servlet/rtaImage?eid=ka1dK0000001rzx&feoid=00N3000000CJYWp&refid=0EM4V000003uFYo'
-            }
+            src: 'https://workwave.my.site.com/realgreen/servlet/rtaImage?eid=ka1dK0000001rzx&feoid=00N3000000CJYWp&refid=0EM4V000003uFYo',
+            style: {}
           } as ImageSlideContent
         }
         break
