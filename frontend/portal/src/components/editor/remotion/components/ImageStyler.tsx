@@ -1,6 +1,6 @@
 import React, { SetStateAction, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-export const OBJECT_FIT_OPTIONS = ['contain', 'cover', 'fill', 'none', 'scale-down'] as const
+export const OBJECT_FIT_OPTIONS = ['contain', 'cover', 'fill'] as const
 interface BaseImageStyles {
   width?: number
   height?: number

@@ -1,7 +1,7 @@
 import { ImageSlideContent, Resolution, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import React, { useRef, useState } from 'react'
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from 'remotion'
-import { ImagePreview, ImgFadeTemplateProps } from '../components/ImagePreview'
+import { ImagePreview } from '../components/ImagePreview'
 import ImageUploadModal from '../components/ImageUploadModal'
 import RetryButton from '../components/RetryButton'
 import { SpotlightEffectComponent } from '../effects/SpotlightEffect'
@@ -28,13 +28,16 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, is
 
   // Extract content and effects directly
   const imageContent = slide.content.value as ImageSlideContent
-  const props = imageContent.templateConfig as ImgFadeTemplateProps
   const [openImageModal, setOpenImageModal] = useState<boolean>(false)
   const [uploadError, setUploadError] = useState<boolean>(false)
   const [retry, setRetry] = useState<boolean>(false)
   const [uploading, setUploading] = useState<boolean>(false)
   const [editing, setIsEditing] = useState<boolean>(false)
   const imageRef = useRef<HTMLImageElement | null>(null)
+  const props = {
+    src:imageContent.src,
+    style:imageContent.style ?? {}
+  }
 
   // Create resolution object from dimensions
   const resolution = {
@@ -103,10 +106,7 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, is
                       case: 'image',
                       value: {
                         ...imageContent,
-                        templateConfig: {
-                          ...imageContent.templateConfig,
-                          ...newProps
-                        }
+                        ...newProps
                       } as ImageSlideContent
                     }
                   } as Slide)
@@ -132,10 +132,7 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, is
                       case: 'image',
                       value: {
                         ...imageContent,
-                        templateConfig: {
-                          ...imageContent.templateConfig,
-                          src: url
-                        }
+                         src: url
                       } as ImageSlideContent
                     }
                   } as Slide)
