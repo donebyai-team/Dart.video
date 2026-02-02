@@ -1,12 +1,11 @@
-import React from 'react'
-import { AbsoluteFill, Img, useCurrentFrame, useVideoConfig } from 'remotion'
+import { ImageSlideContent, Resolution, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import React, { useRef, useState } from 'react'
+import { AbsoluteFill, useCurrentFrame, useVideoConfig } from 'remotion'
+import { ImagePreview, ImgFadeTemplateProps } from '../components/ImagePreview'
+import ImageUploadModal from '../components/ImageUploadModal'
+import RetryButton from '../components/RetryButton'
 import { SpotlightEffectComponent } from '../effects/SpotlightEffect'
 import { ImageContent } from './ImageContent'
-import { Slide, ImageSlideContent, SpotlightEffect, Resolution } from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import { templateRegistry } from '../../../../../../packages/template-registery'
-import { useEffect } from 'react'
-import ImageUploadModal from '../components/ImageUploadModal'
-import { useState } from 'react'
 
 interface ImageSlideProps {
   slide: Slide
@@ -16,9 +15,6 @@ interface ImageSlideProps {
   onUpdate?: (updates: Partial<Slide>) => void
 }
 
-type TemplateModule = {
-  RemoteComponent: React.ComponentType<any>
-}
 /**
  * ImageSlide Component (NEW ARCHITECTURE)
  * Renders an image slide with:
@@ -32,10 +28,13 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, is
 
   // Extract content and effects directly
   const imageContent = slide.content.value as ImageSlideContent
-  const templateId = imageContent.templateId
-  const props = imageContent.templateConfig
-  const [RemoteComponent, setRemoteComponent] = React.useState<TemplateModule | null>(null)
+  const props = imageContent.templateConfig as ImgFadeTemplateProps
   const [openImageModal, setOpenImageModal] = useState<boolean>(false)
+  const [uploadError, setUploadError] = useState<boolean>(false)
+  const [retry, setRetry] = useState<boolean>(false)
+  const [uploading, setUploading] = useState<boolean>(false)
+  const [editing, setIsEditing] = useState<boolean>(false)
+  const imageRef = useRef<HTMLImageElement | null>(null)
 
   // Create resolution object from dimensions
   const resolution = {
@@ -46,17 +45,6 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, is
     height
   } as Resolution
 
-  useEffect(() => {
-    ;(async () => {
-      const loader = templateRegistry[templateId as keyof typeof templateRegistry]
-      console.log(loader, 'loadr')
-      if (!loader) return
-
-      const mod = await loader()
-      setRemoteComponent(mod as TemplateModule)
-    })()
-  }, [templateId])
-
   return (
     <AbsoluteFill
       style={{
@@ -66,9 +54,11 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, is
       {/* Render image content (resizable/draggable in edit mode) */}
       {imageContent.meta && (
         <ImageContent
+          imageRef={imageRef}
+          setIsEditing={setIsEditing}
           image={imageContent.meta}
           resolution={resolution}
-          isEditing={isEditing}
+          isEditing={editing}
           onUpdate={updates => {
             if (onUpdate && imageContent) {
               onUpdate({
@@ -86,36 +76,54 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, is
             }
           }}
         >
-          {RemoteComponent && (
-            <RemoteComponent.RemoteComponent
-              onImageChange={() => {
-                setOpenImageModal(!openImageModal)
-              }}
-              onChange={(newProps: any) => {
-                if (onUpdate && newProps) {
-                  if (onUpdate && imageContent) {
-                    onUpdate({
-                      content: {
-                        case: 'image',
-                        value: {
-                          ...imageContent,
-                          templateConfig: {
-                            ...imageContent.templateConfig,
-                            ...newProps
-                          }
-                        } as ImageSlideContent
-                      }
-                    } as Slide)
-                  }
-                }
-              }}
-              props={props}
-            />
+          {uploadError && (
+            <div className=' absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] z-10'>
+              <RetryButton
+                isUploading={uploading}
+                onPressRetry={() => {
+                  setRetry(true)
+                }}
+              />
+            </div>
           )}
-
+          <ImagePreview
+            onClickImage={() => {
+              console.log("clicked")
+              setIsEditing(true)
+            }}
+            imageRef={imageRef}
+            onImageChange={() => {
+              setOpenImageModal(!openImageModal)
+            }}
+            onChange={(newProps: any) => {
+              if (onUpdate && newProps) {
+                if (onUpdate && imageContent) {
+                  onUpdate({
+                    content: {
+                      case: 'image',
+                      value: {
+                        ...imageContent,
+                        templateConfig: {
+                          ...imageContent.templateConfig,
+                          ...newProps
+                        }
+                      } as ImageSlideContent
+                    }
+                  } as Slide)
+                }
+              }
+            }}
+            props={props}
+          />
           <ImageUploadModal
+            setUploading={setUploading}
+            setRetry={setRetry}
+            retry={retry}
             open={openImageModal}
             onClose={() => setOpenImageModal(false)}
+            onUploadError={() => {
+              setUploadError(true)
+            }}
             onUploadImage={url => {
               if (onUpdate && url) {
                 if (onUpdate && imageContent) {

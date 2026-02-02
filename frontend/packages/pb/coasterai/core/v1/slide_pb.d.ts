@@ -23,11 +23,6 @@ export declare type ImageSlideContent = Message<"coasterai.core.v1.ImageSlideCon
    * @generated from field: google.protobuf.Struct templateConfig = 2;
    */
   templateConfig?: JsonObject;
-
-  /**
-   * @generated from field: string templateId = 3;
-   */
-  templateId: string;
 };
 
 /**

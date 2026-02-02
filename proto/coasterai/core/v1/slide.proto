@@ -33,7 +33,6 @@ enum TransitionType {
 message ImageSlideContent {
   MetaData meta = 1;
   google.protobuf.Struct templateConfig = 2;
-  string templateId = 3;
 }
 
 message VideoSlideContent {
