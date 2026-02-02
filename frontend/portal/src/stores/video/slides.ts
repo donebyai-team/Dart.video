@@ -49,7 +49,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
               scale: 1,
               rotation: 0
             } as MetaData,
-            src: 'https://placehold.co/',
+            src: 'https://placehold.co/600x400/EEE/31343C',
             style: {}
           } as ImageSlideContent
         }
