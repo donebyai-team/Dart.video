@@ -31,13 +31,11 @@ enum TransitionType {
 // ===================== CORE MESSAGES =====================
 
 message ImageSlideContent {
-  string src = 1;
-  optional float x = 2;
-  optional float y = 3;
-  optional float width = 4;
-  optional float height = 5;
-  optional float rotation = 6;
+  MetaData meta = 1;
+  string src = 2;
+  google.protobuf.Struct style = 3;
 }
+
 
 message VideoSlideContent {
   string src = 1;
@@ -49,6 +47,8 @@ message MetaData {
   optional float y = 3;
   optional float width = 4;
   optional float height = 5;
+  optional float scale = 6;
+  optional float rotation = 7;
 }
 message AnimationSlideContent {
   string templateId = 1;

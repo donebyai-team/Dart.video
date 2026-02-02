@@ -1,18 +1,14 @@
 import React, { SetStateAction, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { FONT_FAMILIES, FONT_WEIGHTS, TEXT_ALIGNMENTS } from './constants'
-
-interface BaseTextStyles {
-  fontSize?: number
-  color?: string
-  fontWeight?: string | number
-  textAlign?: string
-  lineHeight?: number
-  letterSpacing?: number
-  fontFamily?: string
+export const OBJECT_FIT_OPTIONS = ['contain', 'cover', 'fill'] as const
+interface BaseImageStyles {
+  width?: number
+  height?: number
+  borderRadius?: number
+  objectFit?: string
 }
 
-interface TextStylerProps<T extends BaseTextStyles> {
+interface ImageStylerProps<T extends BaseImageStyles> {
   open: boolean
   setOpen: (open: boolean) => void
   className?: string
@@ -20,16 +16,18 @@ interface TextStylerProps<T extends BaseTextStyles> {
   onChange: (styles: Partial<T>) => void
   children?: React.ReactNode
   setIsEditingToggle?: React.Dispatch<SetStateAction<boolean>>
+  onImagechange?: () => void
 }
 
-export const TextStyler = <T extends BaseTextStyles>({
+export const ImageStyler = <T extends BaseImageStyles>({
   open,
   setOpen,
   onChange,
   value,
   className = '',
-  children
-}: TextStylerProps<T>) => {
+  children,
+  onImagechange,
+}: ImageStylerProps<T>) => {
   const popoverRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLDivElement>(null)
   const [position, setPosition] = useState({ top: 0, left: 0 })
@@ -39,13 +37,10 @@ export const TextStyler = <T extends BaseTextStyles>({
   }
 
   const styles = {
-    fontSize: value.fontSize ?? 16,
-    color: value.color ?? '#000000',
-    fontWeight: value.fontWeight ?? 'normal',
-    lineHeight: value.lineHeight ?? 1.5,
-    letterSpacing: value.letterSpacing ?? 0,
-    fontFamily: value.fontFamily ?? 'Inter',
-    textAlign: value.textAlign ?? 'left'
+    width: value.width ?? 200,
+    height: value.height ?? 200,
+    borderRadius: value.borderRadius ?? 0,
+    objectFit: value.objectFit ?? 'cover'
   }
 
   // Calculate optimal position
@@ -60,7 +55,7 @@ export const TextStyler = <T extends BaseTextStyles>({
 
         const gap = 8
         const popoverWidth = 220
-        const popoverHeight = 420
+        const popoverHeight = 320
 
         let top = 0
         let left = 0
@@ -187,7 +182,7 @@ export const TextStyler = <T extends BaseTextStyles>({
       <div
         style={{
           padding: '12px',
-          maxHeight: '250px',
+          maxHeight: '300px',
           overflowY: 'auto'
         }}
       >
@@ -198,39 +193,99 @@ export const TextStyler = <T extends BaseTextStyles>({
             gap: '12px'
           }}
         >
-          {/* Font Family */}
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <label
+          {false && (
+            <>
+              {/* Width */}
+              <div>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '4px'
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: '0.75rem',
+
+                      fontWeight: 500,
+                      color: '#666'
+                    }}
+                  >
+                    Width
+                  </span>
+                  <span style={{ fontSize: '0.75rem', color: '#666' }}>{styles.width}px</span>
+                </div>
+                <input
+                  type='range'
+                  value={styles.width}
+                  onChange={e => set('width' as keyof T, Number(e.target.value) as T[keyof T])}
+                  min={50}
+                  max={1000}
+                  step={10}
+                  style={{
+                    width: '100%',
+                    cursor: 'pointer'
+                  }}
+                />
+              </div>
+
+              {/* Height */}
+              <div>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '4px'
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: '0.75rem',
+                      fontWeight: 500,
+                      color: '#666'
+                    }}
+                  >
+                    Height
+                  </span>
+                  <span style={{ fontSize: '0.75rem', color: '#666' }}>{styles.height}px</span>
+                </div>
+                <input
+                  type='range'
+                  value={styles.height}
+                  onChange={e => set('height' as keyof T, Number(e.target.value) as T[keyof T])}
+                  min={50}
+                  max={1000}
+                  step={10}
+                  style={{
+                    width: '100%',
+                    cursor: 'pointer'
+                  }}
+                />
+              </div>
+            </>
+          )}
+
+          {onImagechange && (
+            <button
+              onClick={onImagechange}
               style={{
                 fontSize: '0.75rem',
-                fontWeight: 500,
-                color: '#666',
-                marginBottom: '4px'
-              }}
-            >
-              Font Family
-            </label>
-            <select
-              value={String(styles.fontFamily)}
-              onChange={e => set('fontFamily' as keyof T, e.target.value as T[keyof T])}
-              style={{
-                fontSize: '0.75rem',
-                padding: '6px 8px',
+                padding: '8px 12px',
                 borderRadius: '4px',
                 border: '1px solid #ccc',
                 backgroundColor: '#fff',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                marginTop: '4px'
               }}
             >
-              {FONT_FAMILIES.map(f => (
-                <option key={f} value={f}>
-                  {f}
-                </option>
-              ))}
-            </select>
-          </div>
+              Change Image
+            </button>
+          )}
 
-          {/* Font Size */}
+          {/* Border Radius */}
           <div>
             <div
               style={{
@@ -247,16 +302,16 @@ export const TextStyler = <T extends BaseTextStyles>({
                   color: '#666'
                 }}
               >
-                Font Size
+                Border Radius
               </span>
-              <span style={{ fontSize: '0.75rem', color: '#666' }}>{styles.fontSize}px</span>
+              <span style={{ fontSize: '0.75rem', color: '#666' }}>{styles.borderRadius}px</span>
             </div>
             <input
               type='range'
-              value={styles.fontSize}
-              onChange={e => set('fontSize' as keyof T, Number(e.target.value) as T[keyof T])}
-              min={8}
-              max={120}
+              value={styles.borderRadius}
+              onChange={e => set('borderRadius' as keyof T, Number(e.target.value) as T[keyof T])}
+              min={0}
+              max={200}
               step={1}
               style={{
                 width: '100%',
@@ -265,7 +320,7 @@ export const TextStyler = <T extends BaseTextStyles>({
             />
           </div>
 
-          {/* Font Weight */}
+          {/* Object Fit */}
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <label
               style={{
@@ -275,14 +330,11 @@ export const TextStyler = <T extends BaseTextStyles>({
                 marginBottom: '4px'
               }}
             >
-              Font Weight
+              Object Fit
             </label>
             <select
-              value={String(styles.fontWeight)}
-              onChange={e => {
-                const v = e.target.value
-                set('fontWeight' as keyof T, v as T[keyof T])
-              }}
+              value={String(styles.objectFit)}
+              onChange={e => set('objectFit' as keyof T, e.target.value as T[keyof T])}
               style={{
                 fontSize: '0.75rem',
                 padding: '6px 8px',
@@ -292,156 +344,12 @@ export const TextStyler = <T extends BaseTextStyles>({
                 cursor: 'pointer'
               }}
             >
-              {FONT_WEIGHTS.map(fw => (
-                <option key={fw} value={fw}>
-                  {fw}
+              {OBJECT_FIT_OPTIONS.map(option => (
+                <option key={option} value={option}>
+                  {option}
                 </option>
               ))}
             </select>
-          </div>
-
-          {/* Color */}
-          <div>
-            <label
-              style={{
-                fontSize: '0.75rem',
-                fontWeight: 500,
-                color: '#666',
-                display: 'block',
-                marginBottom: '4px'
-              }}
-            >
-              Color
-            </label>
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <input
-                type='text'
-                value={styles.color}
-                onChange={e => set('color' as keyof T, e.target.value as T[keyof T])}
-                placeholder='#000000'
-                style={{
-                  flex: 1,
-                  fontSize: '0.75rem',
-                  padding: '6px 8px',
-                  borderRadius: '4px',
-                  border: '1px solid #ccc'
-                }}
-              />
-              <input
-                type='color'
-                value={styles.color}
-                onChange={e => set('color' as keyof T, e.target.value as T[keyof T])}
-                style={{
-                  width: '40px',
-                  height: '32px',
-                  cursor: 'pointer',
-                  borderRadius: '4px',
-                  border: '1px solid #ccc'
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Text Align */}
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <label
-              style={{
-                fontSize: '0.75rem',
-                fontWeight: 500,
-                color: '#666',
-                marginBottom: '4px'
-              }}
-            >
-              Text Align
-            </label>
-            <select
-              value={String(styles.textAlign)}
-              onChange={e => set('textAlign' as keyof T, e.target.value as T[keyof T])}
-              style={{
-                fontSize: '0.75rem',
-                padding: '6px 8px',
-                borderRadius: '4px',
-                border: '1px solid #ccc',
-                backgroundColor: '#fff',
-                cursor: 'pointer'
-              }}
-            >
-              {TEXT_ALIGNMENTS.map(fw => (
-                <option key={fw} value={fw}>
-                  {fw}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Line Height */}
-          <div>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '4px'
-              }}
-            >
-              <span
-                style={{
-                  fontSize: '0.75rem',
-                  fontWeight: 500,
-                  color: '#666'
-                }}
-              >
-                Line Height
-              </span>
-              <span style={{ fontSize: '0.75rem', color: '#666' }}>{styles.lineHeight.toFixed(2)}</span>
-            </div>
-            <input
-              type='range'
-              value={styles.lineHeight}
-              onChange={e => set('lineHeight' as keyof T, Number(e.target.value) as T[keyof T])}
-              min={0.8}
-              max={3}
-              step={0.05}
-              style={{
-                width: '100%',
-                cursor: 'pointer'
-              }}
-            />
-          </div>
-
-          {/* Letter Spacing */}
-          <div>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '4px'
-              }}
-            >
-              <span
-                style={{
-                  fontSize: '0.75rem',
-                  fontWeight: 500,
-                  color: '#666'
-                }}
-              >
-                Letter Spacing
-              </span>
-              <span style={{ fontSize: '0.75rem', color: '#666' }}>{styles.letterSpacing}px</span>
-            </div>
-            <input
-              type='range'
-              value={styles.letterSpacing}
-              onChange={e => set('letterSpacing' as keyof T, Number(e.target.value) as T[keyof T])}
-              min={-2}
-              max={20}
-              step={0.5}
-              style={{
-                width: '100%',
-                cursor: 'pointer'
-              }}
-            />
           </div>
         </div>
       </div>
@@ -451,7 +359,7 @@ export const TextStyler = <T extends BaseTextStyles>({
   return (
     <>
       {/* Trigger Button */}
-      <div ref={triggerRef} onClick={() => setOpen(!open)}>
+      <div style={{ width: '100%', height: '100%' }} ref={triggerRef} onClick={() => setOpen(!open)}>
         {children}
       </div>
 
@@ -461,4 +369,4 @@ export const TextStyler = <T extends BaseTextStyles>({
   )
 }
 
-export default TextStyler
+export default ImageStyler
