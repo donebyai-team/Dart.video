@@ -4,12 +4,82 @@
 
 import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv1";
 import type { Message } from "@bufbuild/protobuf";
+import type { Script, Video, VideoSchema } from "../../core/v1/video_pb";
 import type { EmptySchema, Timestamp } from "@bufbuild/protobuf/wkt";
 
 /**
  * Describes the file coasterai/portal/v1/portal.proto.
  */
 export declare const file_coasterai_portal_v1_portal: GenFile;
+
+/**
+ * @generated from message coasterai.portal.v1.GetVideoRequest
+ */
+export declare type GetVideoRequest = Message<"coasterai.portal.v1.GetVideoRequest"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.GetVideoRequest.
+ * Use `create(GetVideoRequestSchema)` to create a new message.
+ */
+export declare const GetVideoRequestSchema: GenMessage<GetVideoRequest>;
+
+/**
+ * @generated from message coasterai.portal.v1.GetVideosResponse
+ */
+export declare type GetVideosResponse = Message<"coasterai.portal.v1.GetVideosResponse"> & {
+  /**
+   * @generated from field: repeated coasterai.core.v1.Video videos = 1;
+   */
+  videos: Video[];
+};
+
+/**
+ * Describes the message coasterai.portal.v1.GetVideosResponse.
+ * Use `create(GetVideosResponseSchema)` to create a new message.
+ */
+export declare const GetVideosResponseSchema: GenMessage<GetVideosResponse>;
+
+/**
+ * @generated from message coasterai.portal.v1.CreateVideoRequest
+ */
+export declare type CreateVideoRequest = Message<"coasterai.portal.v1.CreateVideoRequest"> & {
+  /**
+   * @generated from field: coasterai.core.v1.Script script = 1;
+   */
+  script?: Script;
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name: string;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.CreateVideoRequest.
+ * Use `create(CreateVideoRequestSchema)` to create a new message.
+ */
+export declare const CreateVideoRequestSchema: GenMessage<CreateVideoRequest>;
+
+/**
+ * @generated from message coasterai.portal.v1.CreateVideoResponse
+ */
+export declare type CreateVideoResponse = Message<"coasterai.portal.v1.CreateVideoResponse"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.CreateVideoResponse.
+ * Use `create(CreateVideoResponseSchema)` to create a new message.
+ */
+export declare const CreateVideoResponseSchema: GenMessage<CreateVideoResponse>;
 
 /**
  * @generated from message coasterai.portal.v1.Config
@@ -702,6 +772,30 @@ export declare const PortalService: GenService<{
     methodKind: "unary";
     input: typeof EmptySchema;
     output: typeof IntegrationsSchema;
+  },
+  /**
+   * @generated from rpc coasterai.portal.v1.PortalService.CreateVideo
+   */
+  createVideo: {
+    methodKind: "unary";
+    input: typeof CreateVideoRequestSchema;
+    output: typeof CreateVideoResponseSchema;
+  },
+  /**
+   * @generated from rpc coasterai.portal.v1.PortalService.GetVideo
+   */
+  getVideo: {
+    methodKind: "server_streaming";
+    input: typeof GetVideoRequestSchema;
+    output: typeof VideoSchema;
+  },
+  /**
+   * @generated from rpc coasterai.portal.v1.PortalService.GetVideos
+   */
+  getVideos: {
+    methodKind: "unary";
+    input: typeof EmptySchema;
+    output: typeof GetVideosResponseSchema;
   },
 }>;
 

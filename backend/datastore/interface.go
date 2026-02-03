@@ -23,6 +23,7 @@ type Repository interface {
 	OrganizationRepository
 	IntegrationRepository
 	UserRepository
+	VideoRepository
 }
 
 type OrganizationRepository interface {
@@ -49,4 +50,11 @@ type UserRepository interface {
 	GetUserByAuth0Id(ctx context.Context, auth0ID string) (*models.User, error)
 	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
 	GetUsersByOrgID(ctx context.Context, orgID string) ([]*models.User, error)
+}
+
+type VideoRepository interface {
+	CreateVideo(ctx context.Context, video *models.Video) (*models.Video, error)
+	UpdateVideo(ctx context.Context, video *models.Video) error
+	GetVideoById(ctx context.Context, ID, organizationID string) (*models.Video, error)
+	GetVideos(ctx context.Context, organizationID string) ([]*models.Video, error)
 }
