@@ -1,4 +1,4 @@
-import { ImageSlideContent, Resolution, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { ImageSlideContent, MetaData, Resolution, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import React, { useRef, useState } from 'react'
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from 'remotion'
 import { ImagePreview } from '../components/ImagePreview'
@@ -35,8 +35,8 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, is
   const [editing, setIsEditing] = useState<boolean>(false)
   const imageRef = useRef<HTMLImageElement | null>(null)
   const props = {
-    src:imageContent.src,
-    style:imageContent.style ?? {}
+    src: imageContent.src,
+    style: imageContent.style ?? {}
   }
 
   // Create resolution object from dimensions
@@ -47,6 +47,7 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, is
     width,
     height
   } as Resolution
+
 
   return (
     <AbsoluteFill
@@ -91,7 +92,6 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, is
           )}
           <ImagePreview
             onClickImage={() => {
-              console.log("clicked")
               setIsEditing(true)
             }}
             imageRef={imageRef}
@@ -132,7 +132,7 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, is
                       case: 'image',
                       value: {
                         ...imageContent,
-                         src: url
+                        src: url
                       } as ImageSlideContent
                     }
                   } as Slide)
@@ -142,6 +142,7 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, is
           />
         </ImageContent>
       )}
+    
 
       {/* Render spotlight effects at CANVAS level */}
       {slide.spotlights.map(spotlight => (
@@ -153,8 +154,13 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, is
           width={width} // Canvas dimensions
           height={height} // Canvas dimensions
           fullWidth={width}
+          src={props.src}
           fullHeight={height}
           slideDuration={slide.duration}
+          meta={imageContent.meta as MetaData}
+          style={{
+            borderRadius:props.style.borderRadius as number
+          }}
         />
       ))}
     </AbsoluteFill>

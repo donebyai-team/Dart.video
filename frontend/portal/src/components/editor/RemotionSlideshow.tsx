@@ -41,7 +41,6 @@ const SlideComponent: React.FC<{
 }) => {
 
     const onUpdate = useVideoStore(s => s.updateSlide);
-
     switch (slide.type) {
       case SlideType.TEXT_ANIMATION:
         // Only render if content case matches or is undefined (for new slides)
