@@ -372,14 +372,14 @@ export declare type CanvasObject = Message<"coasterai.core.v1.CanvasObject"> & {
   blurAmount?: number;
 
   /**
-   * @generated from field: optional float spotlightStartTime = 25;
+   * @generated from field: optional float startTime = 25;
    */
-  spotlightStartTime?: number;
+  startTime?: number;
 
   /**
-   * @generated from field: optional float spotlightEndTime = 26;
+   * @generated from field: optional float endTime = 26;
    */
-  spotlightEndTime?: number;
+  endTime?: number;
 
   /**
    * @generated from field: optional float zoomLevel = 27;

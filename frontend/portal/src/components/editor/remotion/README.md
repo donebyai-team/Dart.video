@@ -41,7 +41,7 @@ remotion/
 - Supports custom positioning, sizing, and border radius
 - Includes fade-in/fade-out animations (0.3s each)
 - Scales coordinates from full resolution to container size
-- Timing controlled via `spotlightStartTime` and `spotlightEndTime`
+- Timing controlled via `startTime` and `endTime`
 
 ### Animations
 

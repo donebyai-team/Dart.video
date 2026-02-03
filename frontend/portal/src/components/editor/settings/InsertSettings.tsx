@@ -67,9 +67,6 @@ const InsertSettings = ({
     // NEW ARCHITECTURE: startTime/endTime for effects
     startTime: getProperty(currentObject, 'startTime', 0),
     endTime: getProperty(currentObject, 'endTime', slideDuration),
-    // OLD ARCHITECTURE: spotlightStartTime/spotlightEndTime
-    spotlightStartTime: getProperty(currentObject, 'spotlightStartTime', 0),
-    spotlightEndTime: getProperty(currentObject, 'spotlightEndTime', slideDuration),
   });
 
   console.debug("insert settings", tool, currentObject)
@@ -102,8 +99,6 @@ const InsertSettings = ({
         height: getProperty(currentObject, 'height', 150),
         startTime: getProperty(currentObject, 'startTime', 0),
         endTime: getProperty(currentObject, 'endTime', slideDuration),
-        spotlightStartTime: getProperty(currentObject, 'spotlightStartTime', 0),
-        spotlightEndTime: getProperty(currentObject, 'spotlightEndTime', slideDuration),
       });
     }
   }, [currentObject?.id, slideDuration]);
