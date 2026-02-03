@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package coasterai.core.v1;
+option go_package = "github.com/shank318/coasterai/pb/coasterai/core/v1;pbcore";
+import "google/protobuf/timestamp.proto";
+import "coasterai/core/v1/slide.proto";
+
+enum VideoStatus {
+  VIDEO_STATUS_UNSPECIFIED = 0;  
+  VIDEO_STATUS_PROCESSING = 1;
+  VIDEO_STATUS_COMPLETED = 2;
+  VIDEO_STATUS_FAILED = 3;
+}
+
+
+message VideoMetadata {
+    int64 fps = 1;
+}
+
+message Video {
+    string id = 1;
+    string name = 2;
+    VideoConfig config = 3;
+    VideoMetadata metadata = 4;
+    .google.protobuf.Timestamp created_at = 5;
+    VideoStatus status = 6;
+}
+
+message VideoConfig {
+  repeated Section slides = 1;
+}
+
+message Script {
+  repeated ScriptItem items = 1;
+}
+
+message ScriptItem {
+    string name = 1;
+    optional string voiceover = 2;
+    optional string reference = 3;
+}
