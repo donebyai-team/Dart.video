@@ -8,6 +8,7 @@ package pbportal
 
 import (
 	context "context"
+	v1 "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -31,6 +32,9 @@ const (
 	PortalService_OauthCallback_FullMethodName       = "/coasterai.portal.v1.PortalService/OauthCallback"
 	PortalService_SocialLoginCallback_FullMethodName = "/coasterai.portal.v1.PortalService/SocialLoginCallback"
 	PortalService_GetIntegrations_FullMethodName     = "/coasterai.portal.v1.PortalService/GetIntegrations"
+	PortalService_CreateVideo_FullMethodName         = "/coasterai.portal.v1.PortalService/CreateVideo"
+	PortalService_GetVideo_FullMethodName            = "/coasterai.portal.v1.PortalService/GetVideo"
+	PortalService_GetVideos_FullMethodName           = "/coasterai.portal.v1.PortalService/GetVideos"
 )
 
 // PortalServiceClient is the client API for PortalService service.
@@ -50,6 +54,9 @@ type PortalServiceClient interface {
 	OauthCallback(ctx context.Context, in *OauthCallbackRequest, opts ...grpc.CallOption) (*OauthCallbackResponse, error)
 	SocialLoginCallback(ctx context.Context, in *OauthCallbackRequest, opts ...grpc.CallOption) (*JWT, error)
 	GetIntegrations(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*Integrations, error)
+	CreateVideo(ctx context.Context, in *CreateVideoRequest, opts ...grpc.CallOption) (*CreateVideoResponse, error)
+	GetVideo(ctx context.Context, in *GetVideoRequest, opts ...grpc.CallOption) (PortalService_GetVideoClient, error)
+	GetVideos(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetVideosResponse, error)
 }
 
 type portalServiceClient struct {
@@ -159,6 +166,56 @@ func (c *portalServiceClient) GetIntegrations(ctx context.Context, in *emptypb.E
 	return out, nil
 }
 
+func (c *portalServiceClient) CreateVideo(ctx context.Context, in *CreateVideoRequest, opts ...grpc.CallOption) (*CreateVideoResponse, error) {
+	out := new(CreateVideoResponse)
+	err := c.cc.Invoke(ctx, PortalService_CreateVideo_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *portalServiceClient) GetVideo(ctx context.Context, in *GetVideoRequest, opts ...grpc.CallOption) (PortalService_GetVideoClient, error) {
+	stream, err := c.cc.NewStream(ctx, &PortalService_ServiceDesc.Streams[0], PortalService_GetVideo_FullMethodName, opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &portalServiceGetVideoClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type PortalService_GetVideoClient interface {
+	Recv() (*v1.Video, error)
+	grpc.ClientStream
+}
+
+type portalServiceGetVideoClient struct {
+	grpc.ClientStream
+}
+
+func (x *portalServiceGetVideoClient) Recv() (*v1.Video, error) {
+	m := new(v1.Video)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *portalServiceClient) GetVideos(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetVideosResponse, error) {
+	out := new(GetVideosResponse)
+	err := c.cc.Invoke(ctx, PortalService_GetVideos_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PortalServiceServer is the server API for PortalService service.
 // All implementations must embed UnimplementedPortalServiceServer
 // for forward compatibility
@@ -176,6 +233,9 @@ type PortalServiceServer interface {
 	OauthCallback(context.Context, *OauthCallbackRequest) (*OauthCallbackResponse, error)
 	SocialLoginCallback(context.Context, *OauthCallbackRequest) (*JWT, error)
 	GetIntegrations(context.Context, *emptypb.Empty) (*Integrations, error)
+	CreateVideo(context.Context, *CreateVideoRequest) (*CreateVideoResponse, error)
+	GetVideo(*GetVideoRequest, PortalService_GetVideoServer) error
+	GetVideos(context.Context, *emptypb.Empty) (*GetVideosResponse, error)
 	mustEmbedUnimplementedPortalServiceServer()
 }
 
@@ -215,6 +275,15 @@ func (UnimplementedPortalServiceServer) SocialLoginCallback(context.Context, *Oa
 }
 func (UnimplementedPortalServiceServer) GetIntegrations(context.Context, *emptypb.Empty) (*Integrations, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetIntegrations not implemented")
+}
+func (UnimplementedPortalServiceServer) CreateVideo(context.Context, *CreateVideoRequest) (*CreateVideoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateVideo not implemented")
+}
+func (UnimplementedPortalServiceServer) GetVideo(*GetVideoRequest, PortalService_GetVideoServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetVideo not implemented")
+}
+func (UnimplementedPortalServiceServer) GetVideos(context.Context, *emptypb.Empty) (*GetVideosResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetVideos not implemented")
 }
 func (UnimplementedPortalServiceServer) mustEmbedUnimplementedPortalServiceServer() {}
 
@@ -427,6 +496,63 @@ func _PortalService_GetIntegrations_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PortalService_CreateVideo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateVideoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PortalServiceServer).CreateVideo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PortalService_CreateVideo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PortalServiceServer).CreateVideo(ctx, req.(*CreateVideoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PortalService_GetVideo_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GetVideoRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(PortalServiceServer).GetVideo(m, &portalServiceGetVideoServer{stream})
+}
+
+type PortalService_GetVideoServer interface {
+	Send(*v1.Video) error
+	grpc.ServerStream
+}
+
+type portalServiceGetVideoServer struct {
+	grpc.ServerStream
+}
+
+func (x *portalServiceGetVideoServer) Send(m *v1.Video) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _PortalService_GetVideos_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PortalServiceServer).GetVideos(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PortalService_GetVideos_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PortalServiceServer).GetVideos(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PortalService_ServiceDesc is the grpc.ServiceDesc for PortalService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -478,7 +604,21 @@ var PortalService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "GetIntegrations",
 			Handler:    _PortalService_GetIntegrations_Handler,
 		},
+		{
+			MethodName: "CreateVideo",
+			Handler:    _PortalService_CreateVideo_Handler,
+		},
+		{
+			MethodName: "GetVideos",
+			Handler:    _PortalService_GetVideos_Handler,
+		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "GetVideo",
+			Handler:       _PortalService_GetVideo_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "coasterai/portal/v1/portal.proto",
 }
