@@ -7,6 +7,8 @@ option go_package = "github.com/shank318/coasterai/pb/coasterai/portal/v1;pbport
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 import "coasterai/core/v1/core.proto";
+import "coasterai/core/v1/slide.proto";
+import "coasterai/core/v1/video.proto";
 
 service PortalService {
   rpc GetConfig(.google.protobuf.Empty) returns (Config);
@@ -22,6 +24,26 @@ service PortalService {
   rpc OauthCallback(OauthCallbackRequest) returns (OauthCallbackResponse);
   rpc SocialLoginCallback(OauthCallbackRequest) returns (JWT);
   rpc GetIntegrations(.google.protobuf.Empty) returns (Integrations);
+  rpc CreateVideo(CreateVideoRequest) returns (CreateVideoResponse);
+  rpc GetVideo(GetVideoRequest) returns (stream core.v1.Video);
+  rpc GetVideos(.google.protobuf.Empty) returns (GetVideosResponse);
+}
+
+message GetVideoRequest {
+  string id = 1;
+}
+
+message GetVideosResponse {
+  repeated core.v1.Video videos = 1;
+}
+
+message CreateVideoRequest {
+  core.v1.Script script = 1;
+  string name = 2;  
+}
+
+message CreateVideoResponse {
+  string id = 1;
 }
 
 message Config {

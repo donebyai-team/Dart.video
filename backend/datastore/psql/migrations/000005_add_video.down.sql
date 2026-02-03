@@ -1,0 +1,6 @@
+BEGIN;
+DROP TABLE IF EXISTS videos;
+DROP INDEX IF EXISTS fk1_videos;
+COMMIT;
+
+

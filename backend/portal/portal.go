@@ -18,18 +18,19 @@ import (
 
 type Portal struct {
 	*shutter.Shutter
-	authUsecase       *services.AuthUsecase
-	isAppReady        func() bool
-	httpListenAddr    string
-	corsURLRegexAllow *regexp.Regexp
-	domainWhitelist   []*regexp.Regexp
-	db                datastore.Repository
-	config            *pbportal.Config
-	logger            *zap.Logger
-	tracer            logging.Tracer
-	authenticator     *auth.Authenticator
-	authStateStore    state.AuthStateStore
-	googleOauthClient *google2.OauthClient
+	authUsecase            *services.AuthUsecase
+	isAppReady             func() bool
+	httpListenAddr         string
+	corsURLRegexAllow      *regexp.Regexp
+	domainWhitelist        []*regexp.Regexp
+	db                     datastore.Repository
+	config                 *pbportal.Config
+	logger                 *zap.Logger
+	tracer                 logging.Tracer
+	authenticator          *auth.Authenticator
+	authStateStore         state.AuthStateStore
+	googleOauthClient      *google2.OauthClient
+	videoGenerationService services.VideoGeneration
 }
 
 func New(
@@ -38,6 +39,7 @@ func New(
 	authStateStore state.AuthStateStore,
 	authUsecase *services.AuthUsecase,
 	db datastore.Repository,
+	videoGenerationService services.VideoGeneration,
 	httpListenAddr string,
 	corsURLRegexAllow *regexp.Regexp,
 	config *pbportal.Config,
@@ -47,19 +49,20 @@ func New(
 	tracer logging.Tracer,
 ) *Portal {
 	return &Portal{
-		googleOauthClient: googleOauthClient,
-		authStateStore:    authStateStore,
-		authUsecase:       authUsecase,
-		Shutter:           shutter.New(),
-		config:            config,
-		authenticator:     authenticator,
-		db:                db,
-		httpListenAddr:    httpListenAddr,
-		corsURLRegexAllow: corsURLRegexAllow,
-		domainWhitelist:   domainWhitelist,
-		isAppReady:        isAppReady,
-		logger:            logger.Named("portal"),
-		tracer:            tracer,
+		googleOauthClient:      googleOauthClient,
+		authStateStore:         authStateStore,
+		authUsecase:            authUsecase,
+		Shutter:                shutter.New(),
+		config:                 config,
+		authenticator:          authenticator,
+		db:                     db,
+		httpListenAddr:         httpListenAddr,
+		corsURLRegexAllow:      corsURLRegexAllow,
+		domainWhitelist:        domainWhitelist,
+		isAppReady:             isAppReady,
+		logger:                 logger.Named("portal"),
+		tracer:                 tracer,
+		videoGenerationService: videoGenerationService,
 	}
 }
 
