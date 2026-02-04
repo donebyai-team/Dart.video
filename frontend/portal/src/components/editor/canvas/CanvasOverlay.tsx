@@ -1,13 +1,16 @@
 import { useMemo } from "react";
 import SpotlightOverlay from "./overlays/SpotlightOverlay";
-import { Resolution, CanvasObject, SpotlightEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { Resolution, CanvasObject, SpotlightEffect, CalloutEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import CalloutOverlay from "./overlays/CalloutOverlay";
 
 interface CanvasOverlayProps {
   resolution: Resolution;
   spotlights?: SpotlightEffect[];
+  callouts?:CalloutEffect[]
   selectedObjectId: string | null;
   onSelectObject: (id: string | null) => void;
   onUpdateSpotlight?: (id: string, updates: Partial<SpotlightEffect>) => void;
+  onUpdateCallout?: (id: string, updates: Partial<CalloutEffect>) => void;
   containerWidth: number;
   containerHeight: number;
 }
@@ -15,9 +18,11 @@ interface CanvasOverlayProps {
 const CanvasOverlay = ({
   resolution,
   spotlights = [],
+  callouts = [],
   selectedObjectId,
   onSelectObject,
   onUpdateSpotlight,
+  onUpdateCallout,
   containerWidth,
   containerHeight,
 }: CanvasOverlayProps) => {
@@ -72,6 +77,25 @@ const CanvasOverlay = ({
           onUpdate={(updates) => {
             if (onUpdateSpotlight) {
               onUpdateSpotlight(spotlight.id, updates as Partial<SpotlightEffect>);
+            }
+          }}
+        />
+      ))}
+
+        {/* Render callout effects using CalloutOverlay for interactive editing */}
+
+       {callouts.map((callout) => (
+        <CalloutOverlay
+          key={callout.id}
+          callout={callout}
+          resolution={resolution}
+          containerWidth={containerWidth}
+          containerHeight={containerHeight}
+          isSelected={selectedObjectId === callout.id}
+          onSelect={() => onSelectObject(callout.id)}
+          onUpdate={(updates) => {
+            if (onUpdateCallout) {
+              onUpdateCallout(callout.id, updates as Partial<CalloutEffect>);
             }
           }}
         />

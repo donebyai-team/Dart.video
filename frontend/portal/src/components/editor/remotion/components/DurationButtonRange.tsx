@@ -9,7 +9,7 @@ interface Props {
   step:number
 }
 
-const ButtonRange = ({ value, onValueChange, max, min, step }: Props) => {
+const DurationButtonRange = ({ value, onValueChange, max, min, step }: Props) => {
   const handleValueChange = (val: number) => {
     onValueChange(value + val)
   }
@@ -44,4 +44,4 @@ const ButtonRange = ({ value, onValueChange, max, min, step }: Props) => {
   )
 }
 
-export default ButtonRange
+export default DurationButtonRange

@@ -1,7 +1,5 @@
-import { useVideoStore } from '@/stores/video'
 import { MetaData, SpotlightEffect } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import React from 'react'
-import { useMemo } from 'react'
 
 interface SpotlightEffectProps {
   spotlight: SpotlightEffect
@@ -11,12 +9,12 @@ interface SpotlightEffectProps {
   height: number
   slideDuration: number
   fullWidth: number
-  src: string
+  src?: string
   fullHeight: number
   meta: MetaData
   style: {
     borderRadius: number
-    objectFit:"cover" | "contain" | "fill"
+    objectFit: 'cover' | 'contain' | 'fill'
   }
 }
 
@@ -87,16 +85,18 @@ export const SpotlightEffectComponent: React.FC<SpotlightEffectProps> = ({
     <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
       <svg width={width} height={height} style={{ position: 'absolute', inset: 0 }}>
         <defs>
-          <clipPath id={clipId}>
-            <rect
-              x={(meta.x || 1) * (meta.scale || 1)}
-              y={(meta.y || 1) * (meta.scale || 1)}
-              width={meta.width || 0}
-              height={meta.height || 0}
-              rx={style.borderRadius / (meta.scale || 1)}
-              ry={style.borderRadius / (meta.scale || 1)}
-            />
-          </clipPath>
+          {src && (
+            <clipPath id={clipId}>
+              <rect
+                x={(meta.x || 1) * (meta.scale || 1)}
+                y={(meta.y || 1) * (meta.scale || 1)}
+                width={meta.width || 0}
+                height={meta.height || 0}
+                rx={style.borderRadius / (meta.scale || 1)}
+                ry={style.borderRadius / (meta.scale || 1)}
+              />
+            </clipPath>
+          )}
 
           {/* Blur filter */}
           <filter id={filterId}>
@@ -112,17 +112,19 @@ export const SpotlightEffectComponent: React.FC<SpotlightEffectProps> = ({
           </mask>
         </defs>
 
-        <image
-          x={(meta.x || 1) * (meta.scale || 1)}
-          y={(meta.y || 1) * (meta.scale || 1)}
-          href={src}
-          width={meta.width || 0}
-          height={meta.height || 0}
-          preserveAspectRatio={preserveAspectRatio}
-          filter={`url(#${filterId})`}
-          mask={`url(#${maskId})`}
-          clipPath={`url(#${clipId})`}
-        />
+        {src && (
+          <image
+            x={(meta.x || 1) * (meta.scale || 1)}
+            y={(meta.y || 1) * (meta.scale || 1)}
+            href={src}
+            width={meta.width || 0}
+            height={meta.height || 0}
+            preserveAspectRatio={preserveAspectRatio}
+            filter={`url(#${filterId})`}
+            mask={`url(#${maskId})`}
+            clipPath={`url(#${clipId})`}
+          />
+        )}
 
         {/* Blurred overlay - covers everything except spotlight area */}
         <rect

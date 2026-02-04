@@ -4,6 +4,7 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig } from 'remotion'
 import { ImagePreview } from '../components/ImagePreview'
 import ImageUploadModal from '../components/ImageUploadModal'
 import RetryButton from '../components/RetryButton'
+import CalloutEffectComponent from '../effects/CalloutEffect'
 import { SpotlightEffectComponent } from '../effects/SpotlightEffect'
 import { ImageContent } from './ImageContent'
 
@@ -22,7 +23,7 @@ interface ImageSlideProps {
  * - Canvas-level spotlight effects
  * - Separate from annotations (handled by CanvasOverlay)
  */
-export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, isEditing = false, onUpdate }) => {
+export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, onUpdate }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
 
@@ -55,6 +56,7 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, is
       }}
     >
       {/* Render image content (resizable/draggable in edit mode) */}
+      {/* Use <AbsoluteFill> it will help you to adjust layers in future like Canva do */}
       <AbsoluteFill>
         {imageContent.meta && (
           <ImageContent
@@ -144,6 +146,31 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, is
         )}
       </AbsoluteFill>
 
+      {/* Render callout effects at CANVAS level */}
+      {slide.callouts.map(callout => (
+        <AbsoluteFill style={{ pointerEvents: 'none' }}>
+          <CalloutEffectComponent
+            key={callout.id}
+            callout={callout}
+            frame={frame}
+            // zooms helps to determine zoom level of cutout
+            fps={fps}
+            width={width} // Canvas dimensions
+            height={height} // Canvas dimensions
+            fullWidth={width}
+            src={props.src ?? ''}
+            fullHeight={height}
+            borderColor={callout.color}
+            slideDuration={slide.duration}
+            meta={imageContent.meta as MetaData}
+            style={{
+              borderRadius: props.style.borderRadius as number,
+              objectFit: props.style.objectFit as 'cover' | 'fill' | 'contain'
+            }}
+          />
+        </AbsoluteFill>
+      ))}
+
       {/* Render spotlight effects at CANVAS level */}
       {slide.spotlights.map(spotlight => (
         <AbsoluteFill style={{ pointerEvents: 'none' }}>
@@ -155,7 +182,7 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, is
             width={width} // Canvas dimensions
             height={height} // Canvas dimensions
             fullWidth={width}
-            src={props.src}
+            src={props.src ?? ''}
             fullHeight={height}
             slideDuration={slide.duration}
             meta={imageContent.meta as MetaData}

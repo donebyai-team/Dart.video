@@ -2,7 +2,7 @@
 // This configuration drives the entire editor
 
 import type { VideoConfig } from '@/types/editor'
-import { MetaData, SlideType, SpotlightEffect, TransitionType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { CanvasObjectType, MetaData, SlideType, SpotlightEffect, TransitionType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 
 // Create stable date references
 const SAMPLE_CREATED_DATE = '2024-01-01T00:00:00.000Z'
@@ -44,6 +44,7 @@ export const sampleVideoConfig: VideoConfig = {
           subSlides: [],
           spotlights: [],
           zooms: [],
+          callouts:[],
           content: {
             case: 'animation',
             value: {
@@ -86,6 +87,7 @@ export const sampleVideoConfig: VideoConfig = {
           transition: TransitionType.TRANSITION_FADE,
           transitionDuration: 0.3,
           spotlights: [],
+          callouts:[],
           zooms: [],
           subSlides: [],
           content: {
@@ -126,6 +128,7 @@ export const sampleVideoConfig: VideoConfig = {
           transitionDuration: 0.3,
           spotlights: [],
           zooms: [],
+          callouts:[],
           subSlides: [],
           content: {
             case: 'animation',
@@ -186,7 +189,8 @@ export const sampleVideoConfig: VideoConfig = {
               blurAmount: 10,
               borderRadius: 8,
               startTime: 0.5,
-              endTime: 1.5
+              endTime: 1.5,
+              type:CanvasObjectType.CANVAS_SPOTLIGHT
             } as SpotlightEffect,
             {
               id: 'spotlight-2',
@@ -197,10 +201,12 @@ export const sampleVideoConfig: VideoConfig = {
               blurAmount: 10,
               borderRadius: 8,
               startTime: 2.5,
-              endTime: 3.5
+              endTime: 3.5,
+              type:CanvasObjectType.CANVAS_SPOTLIGHT
             } as SpotlightEffect
           ],
-          zooms: []
+          zooms: [],
+          callouts:[]
         }
       ]
     },
@@ -219,6 +225,7 @@ export const sampleVideoConfig: VideoConfig = {
           transition: TransitionType.TRANSITION_SLIDE_LEFT,
           transitionDuration: 0.3,
           spotlights: [],
+          callouts:[],
           zooms: [],
           subSlides: [],
           content: {
@@ -247,6 +254,7 @@ export const sampleVideoConfig: VideoConfig = {
           spotlights: [],
           zooms: [],
           subSlides: [],
+          callouts:[],
           content: {
             case: 'animation',
             value: {
@@ -263,6 +271,7 @@ export const sampleVideoConfig: VideoConfig = {
           }
         }
       ]
+      
     },
 
     {
@@ -280,6 +289,7 @@ export const sampleVideoConfig: VideoConfig = {
           transition: TransitionType.TRANSITION_FADE,
           spotlights: [],
           zooms: [],
+          callouts:[],
           subSlides: [],
           transitionDuration: 0.3,
           content: {
@@ -306,6 +316,7 @@ export const sampleVideoConfig: VideoConfig = {
           transition: TransitionType.TRANSITION_SLIDE_LEFT,
           spotlights: [],
           zooms: [],
+          callouts:[],
           subSlides: [],
           content: {
             case: 'image',
@@ -409,6 +420,7 @@ export const sampleVideoConfig: VideoConfig = {
           transition: TransitionType.TRANSITION_FADE,
           subSlides: [],
           spotlights: [],
+          callouts:[],
           zooms: [],
           transitionDuration: 0.3,
           content: {
@@ -443,6 +455,7 @@ export const sampleVideoConfig: VideoConfig = {
           duration: 2.5,
           transition: TransitionType.TRANSITION_FADE,
           subSlides: [],
+          callouts:[],
           spotlights: [],
           zooms: [],
           transitionDuration: 0.3,
@@ -480,6 +493,7 @@ export const sampleVideoConfig: VideoConfig = {
           transition: TransitionType.TRANSITION_SLIDE_UP,
           spotlights: [],
           zooms: [],
+          callouts:[],
           subSlides: [],
           transitionDuration: 0.3,
           content: {
@@ -507,6 +521,7 @@ export const sampleVideoConfig: VideoConfig = {
           duration: 2,
           transition: TransitionType.TRANSITION_SLIDE_UP,
           spotlights: [],
+          callouts:[],
           zooms: [],
           subSlides: [],
           transitionDuration: 0.3,
@@ -537,6 +552,7 @@ export const sampleVideoConfig: VideoConfig = {
           duration: 2.5,
           transition: TransitionType.TRANSITION_NONE,
           spotlights: [],
+          callouts:[],
           zooms: [],
           subSlides: [],
           content: {
