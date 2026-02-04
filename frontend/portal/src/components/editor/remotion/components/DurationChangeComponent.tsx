@@ -9,7 +9,8 @@ interface Props {
   step:number
 }
 
-const DurationButtonRange = ({ value, onValueChange, max, min, step }: Props) => {
+
+const DurationChangeComponent = ({ value, onValueChange, max, min, step }: Props) => {
   const handleValueChange = (val: number) => {
     onValueChange(value + val)
   }
@@ -27,7 +28,7 @@ const DurationButtonRange = ({ value, onValueChange, max, min, step }: Props) =>
         <Minus className='w-3 h-3' />
       </Button>
 
-      <div className='h-7 w-16 text-center text-sm'>{value.toFixed(1)}</div>
+      <div className='h-5 text-center text-sm'>{value.toFixed(1)}</div>
 
       <Button
         variant='ghost'
@@ -44,4 +45,5 @@ const DurationButtonRange = ({ value, onValueChange, max, min, step }: Props) =>
   )
 }
 
-export default DurationButtonRange
+
+export default DurationChangeComponent
