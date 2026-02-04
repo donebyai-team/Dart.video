@@ -14,8 +14,9 @@ interface SpotlightEffectProps {
   src: string
   fullHeight: number
   meta: MetaData
-  style:{
-    borderRadius:number
+  style: {
+    borderRadius: number
+    objectFit:"cover" | "contain" | "fill"
   }
 }
 
@@ -42,6 +43,13 @@ export const SpotlightEffectComponent: React.FC<SpotlightEffectProps> = ({
 
   const startFrame = startTime * fps
   const endFrame = endTime * fps
+  const fitting = {
+    ['cover']: 'xMidYMid slice',
+    ['contain']: 'xMidYMid meet',
+    ['fill']: 'none'
+  }
+
+  const preserveAspectRatio = fitting[style.objectFit]
 
   // Check if spotlight is visible at current frame
   if (frame < startFrame || frame > endFrame) {
@@ -110,7 +118,7 @@ export const SpotlightEffectComponent: React.FC<SpotlightEffectProps> = ({
           href={src}
           width={meta.width || 0}
           height={meta.height || 0}
-          preserveAspectRatio='xMidYMid slice'
+          preserveAspectRatio={preserveAspectRatio}
           filter={`url(#${filterId})`}
           mask={`url(#${maskId})`}
           clipPath={`url(#${clipId})`}
