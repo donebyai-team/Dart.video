@@ -1,12 +1,12 @@
-import { Clock, Minus, Plus, Palette, Type, ChevronDown, RefreshCw, Wand2, Sparkles, BarChart3, ImageIcon, Film, Focus, CircleDot, Layers } from "lucide-react";
+import { Clock,  Palette, Type, ChevronDown, RefreshCw, Wand2, Sparkles, BarChart3, ImageIcon, Film, Focus, CircleDot, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useState } from "react";
 import { useVideoStore } from "@/stores/video";
 import { SlideType, Slide, StackSlideContent, CanvasObjectType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { ActiveToolType } from "@/types/tools";
+import DurationChangeComponent from "./remotion/components/DurationChangeComponent";
 
 interface PlayerToolbarProps {
   onDurationChange: (newDuration: number) => void;
@@ -54,7 +54,6 @@ const PlayerToolbar = ({
     }
   }
 
-  const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(slide.duration.toString());
 
   const TypeIcon = slideTypeLabels[slide.type].icon;
@@ -63,21 +62,6 @@ const PlayerToolbar = ({
   const activeInsertTool = activeTool?.type === ActiveToolType.INSERT ? activeTool.tool : null;
   const showChangeVisualButton = slide.type === SlideType.VISUAL_ANIMATION || slide.type === SlideType.INFOGRAPHIC;
   const changeButtonLabel = slide.type === SlideType.INFOGRAPHIC ? "Change Infographic" : "Change Visual";
-
-  const handleDecrease = () => {
-    const newDuration = Math.max(minDuration, slide.duration - 0.1);
-    onDurationChange(newDuration);
-  };
-
-  const handleIncrease = () => {
-    const newDuration = Math.min(maxDuration, slide.duration + 0.1);
-    onDurationChange(newDuration);
-  };
-
-  const handleEditStart = () => {
-    setIsEditing(true);
-    setEditValue(slide.duration.toString());
-  };
 
   const handleEditComplete = () => {
     const newDuration = parseFloat(editValue);
@@ -246,49 +230,15 @@ const PlayerToolbar = ({
           </Tooltip>
         </TooltipProvider>
 
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0"
-            onClick={handleDecrease}
-            disabled={slide.duration <= minDuration}
-          >
-            <Minus className="w-3 h-3" />
-          </Button>
-
-          {isEditing ? (
-            <Input
-              type="number"
-              value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
-              onBlur={handleEditComplete}
-              onKeyDown={handleKeyDown}
-              className="h-7 w-16 text-center text-sm"
-              min={minDuration}
-              max={maxDuration}
-              step={0.5}
-              autoFocus
-            />
-          ) : (
-            <button
-              onClick={handleEditStart}
-              className="h-7 px-2 rounded border border-input bg-background hover:bg-accent hover:text-accent-foreground text-sm font-mono min-w-[48px] text-center"
-            >
-              {slide.duration.toFixed(1)}s
-            </button>
-          )}
-
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0"
-            onClick={handleIncrease}
-            disabled={slide.duration >= maxDuration}
-          >
-            <Plus className="w-3 h-3" />
-          </Button>
-        </div>
+        <DurationChangeComponent
+          value={slide.duration}
+          onValueChange={val => {
+            onDurationChange(val);
+          }}
+          max={maxDuration}
+          min={minDuration}
+          step={0.1}
+        />
       </div>
     </div>
   );
