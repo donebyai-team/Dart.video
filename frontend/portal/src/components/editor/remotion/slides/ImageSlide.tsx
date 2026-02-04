@@ -48,7 +48,6 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, is
     height
   } as Resolution
 
-
   return (
     <AbsoluteFill
       style={{
@@ -142,7 +141,6 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, is
           />
         </ImageContent>
       )}
-    
 
       {/* Render spotlight effects at CANVAS level */}
       {slide.spotlights.map(spotlight => (
@@ -159,7 +157,8 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, is
           slideDuration={slide.duration}
           meta={imageContent.meta as MetaData}
           style={{
-            borderRadius:props.style.borderRadius as number
+            borderRadius: props.style.borderRadius as number,
+            objectFit: props.style.objectFit as 'cover' | 'fill' | 'contain'
           }}
         />
       ))}
