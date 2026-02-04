@@ -37,7 +37,7 @@ export function OverlayTile({
   return (
     <div
       className={cn(
-        "absolute top-0 h-8 rounded cursor-pointer transition-all",
+        "absolute top-0 h-8 cursor-pointer transition-all",
         "bg-gradient-to-r from-violet-500/70 to-purple-500/70",
         "border border-violet-400/40 shadow-sm",
         "hover:from-violet-500/90 hover:to-purple-500/90",

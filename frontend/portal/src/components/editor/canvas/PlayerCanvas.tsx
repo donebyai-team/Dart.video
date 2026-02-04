@@ -1,20 +1,20 @@
-import { useRef, useEffect } from "react";
-import { Player, PlayerRef } from "@remotion/player";
-import { motion } from "framer-motion";
-import CanvasOverlay from "./CanvasOverlay";
-import { Slideshow } from "../RemotionSlideshow";
-import { useVideoStore } from "@/stores/video";
+import { useRef, useEffect } from 'react'
+import { Player, PlayerRef } from '@remotion/player'
+import { motion } from 'framer-motion'
+import CanvasOverlay from './CanvasOverlay'
+import { Slideshow } from '../RemotionSlideshow'
+import { useVideoStore } from '@/stores/video'
 
 interface PlayerCanvasProps {
-  playerRef: React.RefObject<PlayerRef>;
-  totalFrames: number;
-  fps: number;
-  isFullscreen: boolean;
-  scale: number;
-  canvasSize: { width: number; height: number };
-  onSetScale: (scale: number) => void;
-  isPlaying?: boolean;
-  onSelectTemplate?: (slideId: string) => void;
+  playerRef: React.RefObject<PlayerRef>
+  totalFrames: number
+  fps: number
+  isFullscreen: boolean
+  scale: number
+  canvasSize: { width: number; height: number }
+  onSetScale: (scale: number) => void
+  isPlaying?: boolean
+  onSelectTemplate?: (slideId: string) => void
 }
 
 const PlayerCanvas = ({
@@ -26,93 +26,92 @@ const PlayerCanvas = ({
   canvasSize,
   onSetScale,
   onSelectTemplate,
-  isPlaying = false,
+  isPlaying = false
 }: PlayerCanvasProps) => {
-  const sections = useVideoStore(s => s.sections);
-  const resolution = useVideoStore(s => s.resolution);
+  const sections = useVideoStore(s => s.sections)
+  const resolution = useVideoStore(s => s.resolution)
 
-  const selectedSlide = useVideoStore(s => s.selectedSlide);
-  const selectedObjectId = useVideoStore(s => s.selectedObjectId);
-  const handleSelectObject = useVideoStore(s => s.handleSelectObject);
+  const selectedSlide = useVideoStore(s => s.selectedSlide)
+  const selectedObjectId = useVideoStore(s => s.selectedObjectId)
+  const handleSelectObject = useVideoStore(s => s.handleSelectObject)
 
-  const updateSpotlight = useVideoStore(s => s.updateSpotlight);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const updateSpotlight = useVideoStore(s => s.updateSpotlight)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   // Early return if no data
   if (!sections || !resolution || !selectedSlide) {
-    return <div className="flex items-center justify-center h-full text-muted-foreground">Loading...</div>;
+    return <div className='flex items-center justify-center h-full text-muted-foreground'>Loading...</div>
   }
 
   // Get effective canvas objects from store
-  const spotlights = selectedSlide.slide.spotlights || [];
+  const spotlights = selectedSlide.slide.spotlights || []
 
   // Pinch to zoom handler
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    const container = containerRef.current
+    if (!container) return
 
     const handleWheel = (e: WheelEvent) => {
       if (e.ctrlKey || e.metaKey) {
-        e.preventDefault();
-        const delta = e.deltaY > 0 ? -0.1 : 0.1;
-        onSetScale(Math.min(3, Math.max(0.25, scale + delta)));
+        e.preventDefault()
+        const delta = e.deltaY > 0 ? -0.1 : 0.1
+        onSetScale(Math.min(3, Math.max(0.25, scale + delta)))
       }
-    };
+    }
 
-    container.addEventListener("wheel", handleWheel, { passive: false });
-    return () => container.removeEventListener("wheel", handleWheel);
-  }, [scale, onSetScale]);
+    container.addEventListener('wheel', handleWheel, { passive: false })
+    return () => container.removeEventListener('wheel', handleWheel)
+  }, [scale, onSetScale])
 
   return (
     <div
       ref={containerRef}
-      className={`flex-1 flex items-center justify-center overflow-hidden touch-none min-h-0 ${isFullscreen ? "bg-black" : "bg-muted/50"
-        }`}
-      style={{ touchAction: "none" }}
+      className={`flex-1 flex items-center justify-center overflow-hidden touch-none min-h-0 ${
+        isFullscreen ? 'bg-black' : 'bg-muted/50'
+      }`}
+      style={{ touchAction: 'none' }}
     >
       <motion.div
-        className={`relative overflow-hidden ${isFullscreen ? "bg-transparent" : "bg-background shadow-2xl"
-          }`}
+        className={`relative overflow-hidden ${isFullscreen ? 'bg-transparent' : 'bg-background shadow-2xl'}`}
         style={{
           width: isFullscreen ? canvasSize.width : canvasSize.width * scale,
-          height: isFullscreen ? canvasSize.height : canvasSize.height * scale,
+          height: isFullscreen ? canvasSize.height : canvasSize.height * scale
         }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
         {/* Remotion Player */}
-        <div style={{
-          position: "relative",
-          zIndex: isPlaying ? 2 : 25,
-          width: "100%",
-          height: "100%",
-          pointerEvents: 'auto' // Always allow pointer events to reach templates
-        }}>
+        <div
+          style={{
+            position: 'relative',
+            zIndex: isPlaying ? 2 : 25,
+            width: '100%',
+            height: '100%',
+            pointerEvents: 'auto' // Always allow pointer events to reach templates
+          }}
+        >
           <Player
             ref={playerRef}
             component={Slideshow as any}
             inputProps={{
               fps,
               isEditing: !isPlaying, // Only enable editing when NOT playing
-              onSelectTemplate,
+              onSelectTemplate
             }}
             durationInFrames={totalFrames || 1}
             compositionWidth={resolution.width}
             compositionHeight={resolution.height}
             fps={fps}
             style={{
-              width: "100%",
-              height: "100%",
+              width: '100%',
+              height: '100%'
             }}
             playbackRate={1}
           />
         </div>
 
         {/* Canvas overlay - always rendered for click handling and displaying objects */}
-        {handleSelectObject && (
-          <div
-            className="absolute inset-0"
-            style={{ zIndex: 20, pointerEvents: "auto" }}
-          >
+        {!isPlaying && handleSelectObject && (
+          <div className='absolute inset-0' style={{ zIndex: 30, pointerEvents: 'none' }}>
             <CanvasOverlay
               resolution={resolution}
               spotlights={spotlights}
@@ -126,7 +125,7 @@ const PlayerCanvas = ({
         )}
       </motion.div>
     </div>
-  );
-};
+  )
+}
 
-export default PlayerCanvas;
+export default PlayerCanvas

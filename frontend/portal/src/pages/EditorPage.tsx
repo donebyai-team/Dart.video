@@ -76,6 +76,7 @@ const EditorPage = ({
   const handleGenerateSlideVoiceover = useVideoStore(s => s.handleGenerateSlideVoiceover);
   const handleCloseTool = useVideoStore(s => s.handleCloseTool);
   const updateSpotlight = useVideoStore(s => s.updateSpotlight);
+  const deleteSpotlight = useVideoStore(s => s.deleteSpotlight);
   const updateSlide = useVideoStore(s => s.updateSlide);
   const handleSelectEntity = useVideoStore(s => s.handleSelectEntity);
   const openEntitySettings = useVideoStore(s => s.openEntitySettings);
@@ -190,6 +191,7 @@ const EditorPage = ({
         <AnimatePresence mode="wait">
           {activeTool ? (
             <ToolsSettingsPanel
+            deleteSpotlight={deleteSpotlight}
               onPreviewTemplate={() => handlePreviewSlide(selectedSlide.slide.id)}           
               onUpdateSpotlight={(updates) => {
                 if (selectedObjectId) {

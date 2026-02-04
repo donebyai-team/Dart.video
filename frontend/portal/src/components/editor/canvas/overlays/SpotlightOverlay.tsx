@@ -123,6 +123,7 @@ const SpotlightOverlay = ({
   }, [isDragging, isResizing, handleMouseMove, handleMouseUp]);
 
   const handleSize = 10;
+  console.log(isSelected, "selected")
 
   return (
     <div

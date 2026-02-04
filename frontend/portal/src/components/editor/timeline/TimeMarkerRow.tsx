@@ -9,7 +9,7 @@ export function TimeMarkerRow({ totalDuration, pixelsPerSecond }: TimeMarkerRowP
   const totalMarkers = Math.ceil(totalDuration / markerInterval) + 1;
   
   return (
-    <div className="absolute inset-x-0 top-0 h-6 border-b border-border/50">
+    <div className="absolute inset-x-0 top-0 h-[20px] border-b border-border/50">
       {Array.from({ length: totalMarkers }, (_, i) => {
         const timeInSeconds = i * markerInterval;
         const isFullSecond = timeInSeconds % 1 === 0;
