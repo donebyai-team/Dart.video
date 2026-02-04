@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from "react";
-import { X, Trash2, Focus, CircleDot } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CanvasObjectType, SpotlightEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { CircleDot, Focus, Trash2, X } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import CalloutSettings from "./CalloutSettings";
 import SpotlightSettings from "./SpotlightSettings";
-import { CanvasObjectType, CanvasObject, SpotlightEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 
 interface InsertSettingsProps {
@@ -16,6 +16,7 @@ interface InsertSettingsProps {
   // Spotlight-specific props
   slideDuration?: number;
   slideStartTime?: number;
+  transitionDuration?:number
   onApply?: () => void;
   onPlay?: () => void;
 }
@@ -35,7 +36,8 @@ const InsertSettings = ({
   slideDuration = 5,
   slideStartTime = 0,
   onApply,
-  onPlay
+  onPlay,
+  transitionDuration = 0
 }: InsertSettingsProps) => {
   // Helper to safely get property with type guard
   const getProperty = <T,>(obj: any, key: string, defaultValue: T): T => {
@@ -67,9 +69,6 @@ const InsertSettings = ({
     // NEW ARCHITECTURE: startTime/endTime for effects
     startTime: getProperty(currentObject, 'startTime', 0),
     endTime: getProperty(currentObject, 'endTime', slideDuration),
-    // OLD ARCHITECTURE: spotlightStartTime/spotlightEndTime
-    spotlightStartTime: getProperty(currentObject, 'spotlightStartTime', 0),
-    spotlightEndTime: getProperty(currentObject, 'spotlightEndTime', slideDuration),
   });
 
   console.debug("insert settings", tool, currentObject)
@@ -102,8 +101,6 @@ const InsertSettings = ({
         height: getProperty(currentObject, 'height', 150),
         startTime: getProperty(currentObject, 'startTime', 0),
         endTime: getProperty(currentObject, 'endTime', slideDuration),
-        spotlightStartTime: getProperty(currentObject, 'spotlightStartTime', 0),
-        spotlightEndTime: getProperty(currentObject, 'spotlightEndTime', slideDuration),
       });
     }
   }, [currentObject?.id, slideDuration]);
@@ -131,6 +128,7 @@ const InsertSettings = ({
             onChange={updateSetting}
             slideDuration={slideDuration}
             slideStartTime={slideStartTime}
+            transitionDuration={transitionDuration}
             onPlay={onPlay}
           />
         );

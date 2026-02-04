@@ -117,8 +117,8 @@ message CanvasObject {
   optional string calloutStyle = 22;
   optional float spotlightRadius = 23;
   optional float blurAmount = 24;
-  optional float spotlightStartTime = 25;
-  optional float spotlightEndTime = 26;
+  optional float startTime = 25;
+  optional float endTime = 26;
   optional float zoomLevel = 27;
 }
 
