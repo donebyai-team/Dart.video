@@ -3,7 +3,7 @@ import { Slider } from '@/components/ui/slider'
 import { Button } from '@/components/ui/button'
 import { Play } from 'lucide-react'
 import { CanvasObject } from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import ButtonRange from '../remotion/components/ButtonRange'
+import DurationChangeComponent from '../remotion/components/DurationChangeComponent'
 
 interface SpotlightSettingsProps {
   settings: Partial<CanvasObject>
@@ -61,7 +61,7 @@ const SpotlightSettings = ({ settings, onChange, slideDuration = 5, onPlay, tran
         <div className='flex items-center gap-2'>
           <Label className='text-xs w-16'>Start</Label>
 
-          <ButtonRange
+          <DurationChangeComponent
             value={spotlightStart}
             onValueChange={val => {
               onChange('startTime', val)
@@ -73,7 +73,7 @@ const SpotlightSettings = ({ settings, onChange, slideDuration = 5, onPlay, tran
         </div>
         <div className='flex items-center gap-2'>
           <Label className='text-xs w-16'>End</Label>
-          <ButtonRange
+          <DurationChangeComponent
             value={spotlightEnd}
             onValueChange={val => {
               onChange('endTime', val)
