@@ -70,7 +70,7 @@ export function OverlayTracks({
   };
 
   return <div className="relative">
-    {tracks.map((trackOverlays, trackIndex) => <div key={trackIndex} className="relative h-8 mb-1 mt-[4px]">
+    {tracks.map((trackOverlays, trackIndex) => <div key={trackIndex} className="relative h-8 mb-1 mt-[-1px] ">
       {trackOverlays.map(overlayItem => <div key={overlayItem.id} onMouseMove={e => handleTileHover(e, {
         name: overlayItem.overlayType,
         timeRange: `${overlayItem.startTime.toFixed(1)}s - ${(overlayItem.startTime + overlayItem.duration).toFixed(1)}s`

@@ -22,7 +22,7 @@ const ButtonRange = ({ value, onValueChange, max, min, step }: Props) => {
         onClick={() => {
           handleValueChange(-step)
         }}
-        disabled={value <= min}
+        disabled={value.toFixed(1) <= min.toFixed(1)}
       >
         <Minus className='w-3 h-3' />
       </Button>
@@ -36,7 +36,7 @@ const ButtonRange = ({ value, onValueChange, max, min, step }: Props) => {
         onClick={() => {
           handleValueChange(+step)
         }}
-        disabled={value >= max}
+        disabled={value.toFixed(1) >= max.toFixed(1)}
       >
         <Plus className='w-3 h-3' />
       </Button>

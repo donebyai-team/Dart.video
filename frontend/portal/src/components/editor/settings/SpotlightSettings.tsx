@@ -9,11 +9,12 @@ interface SpotlightSettingsProps {
   settings: Partial<CanvasObject>
   onChange: <K extends keyof CanvasObject>(key: K, value: CanvasObject[K]) => void
   slideDuration?: number
+  transitionDuration?: number
   slideStartTime?: number
   onPlay?: () => void
 }
 
-const SpotlightSettings = ({ settings, onChange, slideDuration = 5, onPlay }: SpotlightSettingsProps) => {
+const SpotlightSettings = ({ settings, onChange, slideDuration = 5, onPlay, transitionDuration = 0 }: SpotlightSettingsProps) => {
   const spotlightStart = settings.startTime ?? 0
   const spotlightEnd = settings.endTime ?? slideDuration
 
@@ -66,7 +67,7 @@ const SpotlightSettings = ({ settings, onChange, slideDuration = 5, onPlay }: Sp
               onChange('startTime', val)
             }}
             max={spotlightEnd - 0.1}
-            min={0.1}
+            min={transitionDuration}
             step={0.1}
           />
         </div>
@@ -77,7 +78,7 @@ const SpotlightSettings = ({ settings, onChange, slideDuration = 5, onPlay }: Sp
             onValueChange={val => {
               onChange('endTime', val)
             }}
-            max={slideDuration}
+            max={slideDuration - transitionDuration}
             min={spotlightStart + 0.1}
             step={0.1}
           />

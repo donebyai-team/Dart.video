@@ -73,7 +73,7 @@ const PlayerTimeline = ({
     const slideItems = calculateRemotionSlideItems(slides, pixelsPerSecond, fps);
     const transitionItems = calculateTransitionOverlays(slides, pixelsPerSecond, fps);
     const overlayItems = assignOverlayTracks(
-      calculateOverlayItems(slides)
+      calculateOverlayItems(slides, fps)
     );
 
     return { slideItems, transitionItems, overlayItems };
@@ -221,7 +221,6 @@ const PlayerTimeline = ({
             onSeek={(time) => onSeek(Math.round(time * fps))}
           />
         </div>
-
         {/* Slide track */}
         <div className="absolute inset-x-0" style={{ top: `${timeMarkerHeight + (numOverlayTracks * overlayTrackHeight) + (numOverlayTracks > 0 ? 4 : 0)}px` }}>
           <SlideTrack
