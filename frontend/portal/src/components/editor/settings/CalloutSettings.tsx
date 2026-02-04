@@ -2,7 +2,7 @@ import ColorPickerInput from '@/components/editor/ColorPickerInput'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { CanvasObject } from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import DurationButtonRange from '../remotion/components/DurationButtonRange'
+import DurationButtonRange from '../remotion/components/DurationChangeComponent'
 
 interface CalloutSettingsProps {
   settings: Partial<CanvasObject>
