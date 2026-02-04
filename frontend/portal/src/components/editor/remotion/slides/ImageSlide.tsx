@@ -55,112 +55,116 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, is
       }}
     >
       {/* Render image content (resizable/draggable in edit mode) */}
-      {imageContent.meta && (
-        <ImageContent
-          imageRef={imageRef}
-          setIsEditing={setIsEditing}
-          image={imageContent.meta}
-          resolution={resolution}
-          isEditing={editing}
-          onUpdate={updates => {
-            if (onUpdate && imageContent) {
-              onUpdate({
-                content: {
-                  case: 'image',
-                  value: {
-                    ...imageContent,
-                    meta: {
-                      ...imageContent.meta,
-                      ...updates
-                    }
-                  } as ImageSlideContent
-                }
-              } as Slide)
-            }
-          }}
-        >
-          {uploadError && (
-            <div className=' absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] z-10'>
-              <RetryButton
-                isUploading={uploading}
-                onPressRetry={() => {
-                  setRetry(true)
-                }}
-              />
-            </div>
-          )}
-          <ImagePreview
-            onClickImage={() => {
-              setIsEditing(true)
-            }}
+      <AbsoluteFill>
+        {imageContent.meta && (
+          <ImageContent
             imageRef={imageRef}
-            onImageChange={() => {
-              setOpenImageModal(!openImageModal)
-            }}
-            onChange={(newProps: any) => {
-              if (onUpdate && newProps) {
-                if (onUpdate && imageContent) {
-                  onUpdate({
-                    content: {
-                      case: 'image',
-                      value: {
-                        ...imageContent,
-                        ...newProps
-                      } as ImageSlideContent
-                    }
-                  } as Slide)
-                }
+            setIsEditing={setIsEditing}
+            image={imageContent.meta}
+            resolution={resolution}
+            isEditing={editing}
+            onUpdate={updates => {
+              if (onUpdate && imageContent) {
+                onUpdate({
+                  content: {
+                    case: 'image',
+                    value: {
+                      ...imageContent,
+                      meta: {
+                        ...imageContent.meta,
+                        ...updates
+                      }
+                    } as ImageSlideContent
+                  }
+                } as Slide)
               }
             }}
-            props={props}
-          />
-          <ImageUploadModal
-            setUploading={setUploading}
-            setRetry={setRetry}
-            retry={retry}
-            open={openImageModal}
-            onClose={() => setOpenImageModal(false)}
-            onUploadError={() => {
-              setUploadError(true)
-            }}
-            onUploadImage={url => {
-              if (onUpdate && url) {
-                if (onUpdate && imageContent) {
-                  onUpdate({
-                    content: {
-                      case: 'image',
-                      value: {
-                        ...imageContent,
-                        src: url
-                      } as ImageSlideContent
-                    }
-                  } as Slide)
+          >
+            {uploadError && (
+              <div className=' absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] z-10'>
+                <RetryButton
+                  isUploading={uploading}
+                  onPressRetry={() => {
+                    setRetry(true)
+                  }}
+                />
+              </div>
+            )}
+            <ImagePreview
+              onClickImage={() => {
+                setIsEditing(true)
+              }}
+              imageRef={imageRef}
+              onImageChange={() => {
+                setOpenImageModal(!openImageModal)
+              }}
+              onChange={(newProps: any) => {
+                if (onUpdate && newProps) {
+                  if (onUpdate && imageContent) {
+                    onUpdate({
+                      content: {
+                        case: 'image',
+                        value: {
+                          ...imageContent,
+                          ...newProps
+                        } as ImageSlideContent
+                      }
+                    } as Slide)
+                  }
                 }
-              }
-            }}
-          />
-        </ImageContent>
-      )}
+              }}
+              props={props}
+            />
+            <ImageUploadModal
+              setUploading={setUploading}
+              setRetry={setRetry}
+              retry={retry}
+              open={openImageModal}
+              onClose={() => setOpenImageModal(false)}
+              onUploadError={() => {
+                setUploadError(true)
+              }}
+              onUploadImage={url => {
+                if (onUpdate && url) {
+                  if (onUpdate && imageContent) {
+                    onUpdate({
+                      content: {
+                        case: 'image',
+                        value: {
+                          ...imageContent,
+                          src: url
+                        } as ImageSlideContent
+                      }
+                    } as Slide)
+                  }
+                }
+              }}
+            />
+          </ImageContent>
+        )}
+      </AbsoluteFill>
 
       {/* Render spotlight effects at CANVAS level */}
       {slide.spotlights.map(spotlight => (
-        <SpotlightEffectComponent
-          key={spotlight.id}
-          spotlight={spotlight}
-          frame={frame}
-          fps={fps}
-          width={width} // Canvas dimensions
-          height={height} // Canvas dimensions
-          fullWidth={width}
-          src={props.src}
-          fullHeight={height}
-          slideDuration={slide.duration}
-          meta={imageContent.meta as MetaData}
-          style={{
-            borderRadius: props.style.borderRadius as number,
-            objectFit: props.style.objectFit as 'cover' | 'fill' | 'contain'
-          }}
-        />
+        <AbsoluteFill style={{ pointerEvents: 'none' }}>
+          <SpotlightEffectComponent
+            key={spotlight.id}
+            spotlight={spotlight}
+            frame={frame}
+            fps={fps}
+            width={width} // Canvas dimensions
+            height={height} // Canvas dimensions
+            fullWidth={width}
+            src={props.src}
+            fullHeight={height}
+            slideDuration={slide.duration}
+            meta={imageContent.meta as MetaData}
+            style={{
+              borderRadius: props.style.borderRadius as number,
+              objectFit: props.style.objectFit as 'cover' | 'fill' | 'contain'
+            }}
+          />
+        </AbsoluteFill>
       ))}
     </AbsoluteFill>
   )
