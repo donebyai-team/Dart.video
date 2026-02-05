@@ -37,11 +37,12 @@ func (r *Database) CreateVideo(ctx context.Context, video *models.Video) (*model
 func (r *Database) UpdateVideo(ctx context.Context, video *models.Video) error {
 	stmt := r.mustGetStmt("video/update_video.sql")
 	_, err := stmt.ExecContext(ctx, map[string]interface{}{
-		"config":              video.Name,
+		"config":              video.Config,
 		"status":              video.Status,
-		"ai_generated_config": video.Config,
+		"ai_generated_config": video.AIGeneratedConfig,
 		"organization_id":     video.OrganizationID,
 		"metadata":            video.Metadata,
+		"id":                  video.ID,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to update video %q: %w", video.ID, err)

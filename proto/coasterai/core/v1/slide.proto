@@ -7,12 +7,13 @@ import "google/protobuf/struct.proto";
 // ===================== ENUMS =====================
 
 enum SlideType {
-  SLIDE_TYPE_IMAGE = 0;
-  SLIDE_TYPE_TEXT_ANIMATION = 1;
-  SLIDE_TYPE_INFOGRAPHIC = 2;
-  SLIDE_TYPE_VISUAL_ANIMATION = 3;
-  SLIDE_TYPE_VIDEO = 4;
-  SLIDE_TYPE_STACK = 5;
+  SLIDE_TYPE_UNDEFINED = 0;
+  SLIDE_TYPE_IMAGE = 1;
+  SLIDE_TYPE_TEXT_ANIMATION = 2;
+  SLIDE_TYPE_INFOGRAPHIC = 3;
+  SLIDE_TYPE_VISUAL_ANIMATION = 4;
+  SLIDE_TYPE_VIDEO = 5;
+  SLIDE_TYPE_STACK = 6;
 }
 
 enum StackAnimationMode {

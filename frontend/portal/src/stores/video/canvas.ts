@@ -37,6 +37,7 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
         },
       },
     });
+    get().autoSyncSections(newSections);
   },
 
   updateSpotlight(effectId: string, updates: Partial<SpotlightEffect>) {
@@ -73,6 +74,7 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
         },
       },
     });
+    get().autoSyncSections(newSections);
   },
 
   deleteSpotlight(effectId: string) {
@@ -111,6 +113,6 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
       selectedObjectId: null,
     });
 
-    get().notifyConfigChange(newSections);
+    get().autoSyncSections(newSections);
   },
 });

@@ -3,6 +3,8 @@ package portal
 import (
 	"connectrpc.com/connect"
 	"context"
+	"database/sql"
+	"errors"
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
@@ -89,4 +91,25 @@ func (p *Portal) GetVideos(ctx context.Context, c *connect.Request[emptypb.Empty
 	}
 
 	return connect.NewResponse(&pbportal.GetVideosResponse{Videos: videoProtos}), nil
+}
+
+func (p *Portal) UpdateVideoConfig(ctx context.Context, c *connect.Request[pbportal.UpdateVideoConfigRequest]) (*connect.Response[emptypb.Empty], error) {
+	actor, err := p.gethAuthContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	err = p.videoGenerationService.UpdateVideoConfig(ctx, &models.Video{
+		ID:             c.Msg.Id,
+		OrganizationID: actor.OrganizationID,
+		Config:         c.Msg.Config,
+	})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, connect.NewError(connect.CodeNotFound, err)
+		}
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	return connect.NewResponse(&emptypb.Empty{}), nil
 }

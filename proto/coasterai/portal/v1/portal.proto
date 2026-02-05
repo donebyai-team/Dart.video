@@ -27,6 +27,12 @@ service PortalService {
   rpc CreateVideo(CreateVideoRequest) returns (CreateVideoResponse);
   rpc GetVideo(GetVideoRequest) returns (stream core.v1.Video);
   rpc GetVideos(.google.protobuf.Empty) returns (GetVideosResponse);
+  rpc UpdateVideoConfig(UpdateVideoConfigRequest) returns (.google.protobuf.Empty);
+}
+
+message UpdateVideoConfigRequest {
+  string id = 1;
+  core.v1.VideoConfig config = 2;
 }
 
 message GetVideoRequest {

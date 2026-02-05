@@ -570,34 +570,39 @@ export declare const ResolutionSchema: GenMessage<Resolution>;
  */
 export enum SlideType {
   /**
-   * @generated from enum value: SLIDE_TYPE_IMAGE = 0;
+   * @generated from enum value: SLIDE_TYPE_UNDEFINED = 0;
    */
-  IMAGE = 0,
+  UNDEFINED = 0,
 
   /**
-   * @generated from enum value: SLIDE_TYPE_TEXT_ANIMATION = 1;
+   * @generated from enum value: SLIDE_TYPE_IMAGE = 1;
    */
-  TEXT_ANIMATION = 1,
+  IMAGE = 1,
 
   /**
-   * @generated from enum value: SLIDE_TYPE_INFOGRAPHIC = 2;
+   * @generated from enum value: SLIDE_TYPE_TEXT_ANIMATION = 2;
    */
-  INFOGRAPHIC = 2,
+  TEXT_ANIMATION = 2,
 
   /**
-   * @generated from enum value: SLIDE_TYPE_VISUAL_ANIMATION = 3;
+   * @generated from enum value: SLIDE_TYPE_INFOGRAPHIC = 3;
    */
-  VISUAL_ANIMATION = 3,
+  INFOGRAPHIC = 3,
 
   /**
-   * @generated from enum value: SLIDE_TYPE_VIDEO = 4;
+   * @generated from enum value: SLIDE_TYPE_VISUAL_ANIMATION = 4;
    */
-  VIDEO = 4,
+  VISUAL_ANIMATION = 4,
 
   /**
-   * @generated from enum value: SLIDE_TYPE_STACK = 5;
+   * @generated from enum value: SLIDE_TYPE_VIDEO = 5;
    */
-  STACK = 5,
+  VIDEO = 5,
+
+  /**
+   * @generated from enum value: SLIDE_TYPE_STACK = 6;
+   */
+  STACK = 6,
 }
 
 /**

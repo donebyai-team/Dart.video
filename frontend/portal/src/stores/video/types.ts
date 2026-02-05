@@ -1,7 +1,7 @@
 import { SpotlightEffect } from "@/components/editor/remotion/effects";
 import { TimelineSlide } from "@/components/editor/timeline/types";
 import type {
-    EditorConfig, EditorCallbacks,
+    EditorConfig,
     VideoConfig,
     TextAnimationSlideConfig,
 } from "@/types/editor";
@@ -35,12 +35,17 @@ export interface VideoState {
     editingSectionId: string | null;
     editingSectionTitle: string;
     generatingSlideVoiceover: string | null;
-    onConfigChange?: EditorCallbacks["onConfigChange"];
 }
 
 export interface VideoActions {
-    initialize: (config: EditorConfig, videoConfig: VideoConfig, callbacks?: EditorCallbacks) => void;
-    notifyConfigChange: (sections: Section[]) => void;
+    initialize: (config: EditorConfig, videoConfig: VideoConfig) => void;
+
+    // Sync actions
+    initializeSync: (videoId: string) => void;
+    syncSections: () => void;
+    autoSyncSections: (sections: Section[]) => void;
+    getSyncStatus: () => 'idle' | 'syncing' | 'error';
+    forceSyncSections: () => void;
 
     // Sections
     addSection: () => void;

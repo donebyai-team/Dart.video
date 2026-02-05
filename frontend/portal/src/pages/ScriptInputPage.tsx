@@ -257,7 +257,9 @@ const ScriptInputPage = () => {
   };
 
   const handleGenerateStoryboard = () => {
-    router.push("/editor");
+    // For now, navigate to editor with a placeholder ID
+    // In a real app, you'd create a new video and get its ID
+    router.push("/editor/new");
   };
 
   const filledSections = sections.filter((s) => s.voiceover.trim()).length;

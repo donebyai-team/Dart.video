@@ -74,9 +74,9 @@ export declare const VideoSchema: GenMessage<Video>;
  */
 export declare type VideoConfig = Message<"coasterai.core.v1.VideoConfig"> & {
   /**
-   * @generated from field: repeated coasterai.core.v1.Section slides = 1;
+   * @generated from field: repeated coasterai.core.v1.Section sections = 1;
    */
-  slides: Section[];
+  sections: Section[];
 };
 
 /**

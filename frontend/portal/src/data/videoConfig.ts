@@ -2,7 +2,7 @@
 // This configuration drives the entire editor
 
 import type { VideoConfig } from '@/types/editor'
-import { MetaData, SlideType, SpotlightEffect, TransitionType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { AnimationSlideContent, MetaData, SlideType, SpotlightEffect, TransitionType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 
 // Create stable date references
 const SAMPLE_CREATED_DATE = '2024-01-01T00:00:00.000Z'
@@ -232,7 +232,13 @@ export const sampleVideoConfig: VideoConfig = {
                 y: 108,
                 width: 1536,
                 height: 864
-              }
+              },
+              meta: {
+                x: 192,
+                y: 108,
+                width: 1536,
+                height: 864
+              } as MetaData,
             }
           }
         },
@@ -258,7 +264,13 @@ export const sampleVideoConfig: VideoConfig = {
                 y: 108,
                 width: 1536,
                 height: 864
-              }
+              },
+              meta: {
+                x: 192,
+                y: 108,
+                width: 1536,
+                height: 864
+              } as MetaData,
             }
           }
         }
@@ -293,7 +305,13 @@ export const sampleVideoConfig: VideoConfig = {
                 y: 108,
                 width: 1536,
                 height: 864
-              }
+              },
+              meta: {
+                x: 192,
+                y: 108,
+                width: 1536,
+                height: 864
+              } as MetaData,
             }
           }
         },
@@ -487,7 +505,13 @@ export const sampleVideoConfig: VideoConfig = {
             value: {
               $typeName: 'coasterai.core.v1.AnimationSlideContent',
               templateId: 'infographic-default',
-              templateConfig: {}
+              templateConfig: {},
+              meta: {
+                x: 192,
+                y: 108,
+                width: 1536,
+                height: 864
+              } as MetaData,
             }
           }
         }
@@ -526,7 +550,7 @@ export const sampleVideoConfig: VideoConfig = {
                 fontSize: 96,
                 color: '#ffffff'
               }
-            }
+            } as AnimationSlideContent
           }
         },
         {
@@ -544,8 +568,14 @@ export const sampleVideoConfig: VideoConfig = {
             value: {
               $typeName: 'coasterai.core.v1.AnimationSlideContent',
               templateId: 'visual-default',
-              templateConfig: {}
-            }
+              templateConfig: {},
+              meta: {
+                x: 192,
+                y: 108,
+                width: 1536,
+                height: 864
+              } as MetaData,
+            } as AnimationSlideContent
           }
         }
       ]
