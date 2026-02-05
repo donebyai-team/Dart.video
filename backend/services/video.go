@@ -19,6 +19,10 @@ type videoGeneration struct {
 	logger *zap.Logger
 }
 
+func NewVideoGeneration(db datastore.Repository, logger *zap.Logger) VideoGeneration {
+	return &videoGeneration{db: db, logger: logger}
+}
+
 const defaultVideoFPS = 30
 
 func (v videoGeneration) CreateVideo(ctx context.Context, script *pbcore.Script, name, organizationID string) (*models.Video, error) {

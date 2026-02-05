@@ -21,3 +21,4 @@ frontend/extension/chrome/loadlogic-chrome-extension.*.zip
 backend/cmd/coasterai/coasterai
 backend/cmd/coasterai/coasterai/*
 redora-infra/.terraform
+.run/

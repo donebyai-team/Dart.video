@@ -1,6 +1,6 @@
 services:
   postgres:
-    container_name: postgres-doota
+    container_name: postgres-coasterai
     build:
       # We put an mostly empty existing folder since we actually need nothing from context
       context: .
@@ -35,16 +35,16 @@ services:
     environment:
       - REDIS_PORT=6379
       - REDIS_DATABASES=16
-  pgweb:
-    container_name: pgweb-doota
-    image: sosedoff/pgweb:0.15.0
-    restart: on-failure
-    ports:
-      - "8081:8081"
-    command: ["pgweb", "--bind=0.0.0.0", "--listen=8081", "--binary-codec=hex"]
-    links:
-      - postgres:postgres
-    environment:
-      - DATABASE_URL=postgres://dev-node:insecure-change-me-in-prod@postgres:5432/dev-node?sslmode=disable
-    depends_on:
-      - postgres
+#  pgweb:
+#    container_name: pgweb-doota
+#    image: sosedoff/pgweb:0.15.0
+#    restart: on-failure
+#    ports:
+#      - "8081:8081"
+#    command: ["pgweb", "--bind=0.0.0.0", "--listen=8081", "--binary-codec=hex"]
+#    links:
+#      - postgres:postgres
+#    environment:
+#      - DATABASE_URL=postgres://dev-node:insecure-change-me-in-prod@postgres:5432/dev-node?sslmode=disable
+#    depends_on:
+#      - postgres

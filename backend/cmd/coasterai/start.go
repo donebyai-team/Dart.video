@@ -210,6 +210,7 @@ func portalApp(cmd *cobra.Command, isAppReady func() bool) (App, error) {
 		state.NewRedisStore(redisAddr, zlog),
 		authUsecase,
 		deps.DataStore,
+		services.NewVideoGeneration(deps.DataStore, zlog),
 		sflags.MustGetString(cmd, "portal-http-listen-addr"),
 		deps.CorsURLRegexAllow,
 		config,
