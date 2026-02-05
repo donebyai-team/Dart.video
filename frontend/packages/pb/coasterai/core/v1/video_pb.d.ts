@@ -20,6 +20,11 @@ export declare type VideoMetadata = Message<"coasterai.core.v1.VideoMetadata"> &
    * @generated from field: int64 fps = 1;
    */
   fps: bigint;
+
+  /**
+   * @generated from field: string background_color = 2;
+   */
+  backgroundColor: string;
 };
 
 /**

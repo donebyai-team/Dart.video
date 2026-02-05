@@ -2,13 +2,13 @@ import { SpotlightEffect } from "@/components/editor/remotion/effects";
 import { TimelineSlide } from "@/components/editor/timeline/types";
 import type {
     EditorConfig,
-    VideoConfig,
     TextAnimationSlideConfig,
 } from "@/types/editor";
 import type { EntityId } from "@/types/selection";
 import { ActiveTool, LeftPanelTool } from "@/types/tools";
 import { JsonObject } from "@bufbuild/protobuf";
 import { Section, Resolution, Slide, SlideType, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { Video } from "@coasterai/pb/coasterai/core/v1/video_pb";
 import type { StateCreator } from "zustand";
 
 // Zustand store types
@@ -17,7 +17,7 @@ export type VideoStoreGet = Parameters<StateCreator<VideoState & VideoActions, [
 
 export interface VideoState {
     config: EditorConfig | null;
-    videoConfig: VideoConfig | null;
+    videoConfig: Video | null;
     sections: Section[];
     resolution: Resolution | null;
     globalBackgroundColor?: string;
@@ -38,7 +38,7 @@ export interface VideoState {
 }
 
 export interface VideoActions {
-    initialize: (config: EditorConfig, videoConfig: VideoConfig) => void;
+    initialize: (config: EditorConfig, videoConfig: Video) => void;
 
     // Sync actions
     initializeSync: (videoId: string) => void;

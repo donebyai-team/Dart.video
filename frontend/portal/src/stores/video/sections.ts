@@ -9,8 +9,8 @@ export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => 
     const newSection: Section = {
       $typeName: "coasterai.core.v1.Section",
       id: `section-${Date.now()}`,
-      title: videoConfig.sectionConfig.defaultTitle,
-      color: videoConfig.sectionConfig.defaultColor,
+      title: "New title",
+      color: "bg-primary",
       slides: [],
     };
 
