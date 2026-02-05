@@ -1,14 +1,15 @@
 import { createSlideEntityId } from "@/types/selection";
 import { Slide, Section, SlideType, MetaData, AnimationSlideContent, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { VideoStoreSet, VideoStoreGet } from "./types";
-import { EditorConfig, VideoConfig } from "@/types/editor";
+import { EditorConfig } from "@/types/editor";
+import { Video } from "@coasterai/pb/coasterai/core/v1/video_pb";
 
 export const createInitActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
-  initialize(config: EditorConfig, videoConfig: VideoConfig) {
+  initialize(config: EditorConfig, videoConfig: Video) {
     console.log("Store initialize called with:", {
       config: !!config,
       videoConfig: !!videoConfig,
-      sections: videoConfig?.sections?.length
+      sections: videoConfig?.config?.sections?.length
     });
 
     const currentState = get();
@@ -27,7 +28,7 @@ export const createInitActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       config.resolution.options.find((r: { id: string }) => r.id === config.resolution.default) ||
       config.resolution.options[0];
 
-    const firstSection: Section | undefined = videoConfig.sections[0];
+    const firstSection: Section | undefined = videoConfig.config?.sections[0];
     const firstSlide: Slide | undefined = firstSection?.slides[0];
 
     console.log("First section/slide:", {
@@ -76,14 +77,14 @@ export const createInitActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     set({
       config,
       videoConfig,
-      sections: videoConfig.sections,
+      sections: videoConfig.config?.sections,
       resolution: defaultResolution,
-      globalBackgroundColor: videoConfig.backgroundColor,
+      globalBackgroundColor: videoConfig.metadata?.backgroundColor,
       selectedEntityId: firstSlide
         ? createSlideEntityId(firstSlide.id)
         : createSlideEntityId(""),
       selectedSlide,
-      openSections: videoConfig.sections.map((s: Section) => s.id),
+      openSections: videoConfig.config?.sections.map((s: Section) => s.id),
       isInitialized: true,
     });
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { Menu, Mic2, Eye, Plus, Pencil, Volume2, RefreshCw, Video, Home, Settings, HelpCircle } from "lucide-react";
@@ -12,12 +12,16 @@ import ResolutionSelector from "@/components/editor/ResolutionSelector";
 import StoryboardPanel from "@/components/editor/StoryboardPanel";
 import ToolsSettingsPanel from "@/components/editor/ToolsSettingsPanel";
 import RemotionPlayer, { RemotionPlayerHandle } from "@/components/editor/canvas/RemotionPlayer";
-import { type EditorConfig, VideoConfig } from "@/types/editor";
+import { type EditorConfig } from "@/types/editor";
 import { sampleVideoConfig } from "@/data/videoConfig";
 import { defaultEditorConfig } from "@/data/editorConfig";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useVideoStore } from "@/stores/video";
 import { Slide, SlideType, StackSlideContent } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { portalClient } from "@/services/grpc";
+import toast from "react-hot-toast";
+import { getConnectError } from "@/utils/error";
+import { Video as VideoConfig } from "@coasterai/pb/coasterai/core/v1/video_pb";
 
 
 // Icon mapping for dynamic rendering
@@ -41,6 +45,10 @@ const EditorPage = ({
   const router = useRouter();
   const playerRef = useRef<RemotionPlayerHandle>(null);
   const initializationRef = useRef<{ config?: EditorConfig; videoConfig?: VideoConfig }>({});
+  
+  // State for loading video data
+  const [isLoadingVideo, setIsLoadingVideo] = useState(true);
+  const [actualVideoConfig, setActualVideoConfig] = useState<VideoConfig>(videoConfig);
 
   // ---- Values (reactive) ----
   const initialize = useVideoStore(s => s.initialize);
@@ -78,29 +86,64 @@ const EditorPage = ({
   const handleSelectEntity = useVideoStore(s => s.handleSelectEntity);
   const openEntitySettings = useVideoStore(s => s.openEntitySettings);
 
+  // Fetch video data from API
+  useEffect(() => {
+    const fetchVideoData = async () => {
+      try {
+        setIsLoadingVideo(true);
+        console.log('Fetching videos from API...');
+        
+        // Call getVideos API
+        const response = await portalClient.getVideos({});
+        
+        if (response.videos && response.videos.length > 0) {
+          const firstVideo = response.videos[0];
+          console.log('Fetched video:', firstVideo);                          
+          setActualVideoConfig(firstVideo);
+          console.log('Updated video config with API data:', firstVideo);
+        } else {
+          console.log('No videos found, using sample config');
+          setActualVideoConfig(sampleVideoConfig);
+        }
+      } catch (error) {
+        console.error('Failed to fetch video data:', error);
+        toast.error(getConnectError(error));
+        // Fallback to sample config on error
+        setActualVideoConfig(sampleVideoConfig);
+      } finally {
+        setIsLoadingVideo(false);
+      }
+    };
+
+    fetchVideoData();
+  }, [videoId]); // Re-fetch when videoId changes
+
 
   useEffect(() => {
+    // Don't initialize until video data is loaded
+    if (isLoadingVideo) return;
+    
     // Prevent re-initialization with the same configs
     const lastInit = initializationRef.current;
-    if (lastInit.config === config && lastInit.videoConfig === videoConfig) {
+    if (lastInit.config === config && lastInit.videoConfig === actualVideoConfig) {
       console.log("Skipping re-init - same configs");
       return;
     }
 
     console.log("EditorPage: Calling initialize with:", {
       config: !!config,
-      videoConfig: !!videoConfig,
-      sections: videoConfig?.sections?.length
+      videoConfig: !!actualVideoConfig,
+      sections: actualVideoConfig.config?.sections?.length
     });
 
-    initialize(config, videoConfig);
+    initialize(config, actualVideoConfig);
 
     // Initialize sync with video ID
     initializeSync(videoId);
 
     // Store references to prevent re-initialization
-    initializationRef.current = { config, videoConfig };
-  }, [config, videoConfig, initialize, initializeSync, videoId]);
+    initializationRef.current = { config, videoConfig: actualVideoConfig };
+  }, [config, actualVideoConfig, initialize, initializeSync, videoId, isLoadingVideo]);
 
   // Centralized preview handler - plays a slide from start and pauses at end
   const handlePreviewSlide = (slideId: string) => {
@@ -118,7 +161,18 @@ const EditorPage = ({
     }
   };
 
-  // Early return if not initialized
+  // Early return if loading video data or not initialized
+  if (isLoadingVideo) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-muted/30">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading video...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!isInitialized || !selectedSlide) {
     return (
       <div className="h-screen flex items-center justify-center bg-muted/30">
@@ -161,9 +215,9 @@ const EditorPage = ({
           </SheetContent>
         </Sheet>
         <div className="h-6 w-px bg-border" />
-        <span className="font-semibold">{videoConfig.project.name}</span>
+        <span className="font-semibold">{actualVideoConfig.name}</span>
         <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full capitalize">
-          {videoConfig.project.status}
+          {actualVideoConfig.status}
         </span>
       </div>
 

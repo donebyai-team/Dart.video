@@ -15,6 +15,7 @@ enum VideoStatus {
 
 message VideoMetadata {
     int64 fps = 1;
+    string background_color = 2;
 }
 
 message Video {
