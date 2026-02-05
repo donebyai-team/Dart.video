@@ -17,7 +17,6 @@ export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => 
     const newSections = [...sections, newSection];
     set({
       sections: newSections,
-      openSections: [...get().openSections, newSection.id],
     });
     get().autoSyncSections(newSections);
   },
@@ -63,16 +62,6 @@ export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => 
     }
 
     get().autoSyncSections(newSections);
-  },
-
-  toggleSection(sectionId: string) {
-    const { openSections } = get();
-    set({
-      openSections: openSections.includes(sectionId)
-        ? openSections.filter((id) => id !== sectionId)
-        : [...openSections, sectionId],
-    });
-    // Note: toggleSection doesn't modify sections data, so no sync needed
   },
 
   handleSectionDragEnd(event: { active: { id: string }; over: { id: string } | null }) {

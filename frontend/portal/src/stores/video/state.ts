@@ -23,4 +23,9 @@ export const initialState: VideoState = {
   editingSectionId: null,
   editingSectionTitle: "",
   generatingSlideVoiceover: null,
+
+  // Streaming state
+  isStreamingVideo: false,
+  streamingThinkingSummary: "",
+  streamingError: null,
 };

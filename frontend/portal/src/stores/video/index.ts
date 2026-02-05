@@ -10,12 +10,14 @@ import { createTextAnimationActions } from "./textAnimation";
 import { createSelectors } from "./selectors";
 import { createInitActions } from "./init";
 import { createSyncActions } from "./sync";
+import { createStreamingActions } from "./streaming";
 import { VideoState, VideoActions } from "./types";
 
 export const useVideoStore = create<VideoState & VideoActions>()((set, get) => ({
     ...initialState,
     ...createInitActions(set, get),
     ...createSyncActions(set, get),
+    ...createStreamingActions(set, get),
     ...createSectionActions(set, get),
     ...createSlideActions(set, get),
     ...createCanvasActions(set, get),

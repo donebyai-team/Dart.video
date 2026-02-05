@@ -46,14 +46,12 @@ import { Section, Slide, SlideType, TransitionType } from "@coasterai/pb/coaster
 interface StoryboardSectionProps {
     section: Section;
     index: number;
-    isOpen: boolean;
     selectedSlideId: string;
     editingSectionId: string | null;
     editingSectionTitle: string;
     generatingSectionVoiceover: string | null;
     showTransitionPicker: string | null;
     isFirstSection: boolean;
-    onToggle: () => void;
     onSelectSlide: (section: Section, slide: Slide) => void;
     onRemoveSection: () => void;
     onRemoveSlide: (slideId: string) => void;
@@ -71,15 +69,12 @@ interface StoryboardSectionProps {
 
 const StoryboardSection = ({
     section,
-    index,
-    isOpen,
     selectedSlideId,
     editingSectionId,
     editingSectionTitle,
     generatingSectionVoiceover,
     showTransitionPicker,
     isFirstSection,
-    onToggle,
     onSelectSlide,
     onRemoveSection,
     onRemoveSlide,
@@ -139,7 +134,7 @@ const StoryboardSection = ({
 
     return (
         <div ref={setNodeRef} style={style}>
-            <Collapsible open={isOpen} onOpenChange={onToggle}>
+            <Collapsible open={true}>
                 <div className="flex items-center gap-1">
                     {/* Section drag handle */}
                     <div
@@ -199,8 +194,7 @@ const StoryboardSection = ({
                                     {section.slides.length}
                                 </span>
                                 <ChevronDown
-                                    className={`w-3 h-3 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""
-                                        }`}
+                                    className={`w-3 h-3 text-muted-foreground transition-transform`}
                                 />
                             </div>
                         </CollapsibleTrigger>

@@ -8,7 +8,6 @@ package pbportal
 
 import (
 	context "context"
-	v1 "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -193,7 +192,7 @@ func (c *portalServiceClient) GetVideo(ctx context.Context, in *GetVideoRequest,
 }
 
 type PortalService_GetVideoClient interface {
-	Recv() (*v1.Video, error)
+	Recv() (*GetVideoResponse, error)
 	grpc.ClientStream
 }
 
@@ -201,8 +200,8 @@ type portalServiceGetVideoClient struct {
 	grpc.ClientStream
 }
 
-func (x *portalServiceGetVideoClient) Recv() (*v1.Video, error) {
-	m := new(v1.Video)
+func (x *portalServiceGetVideoClient) Recv() (*GetVideoResponse, error) {
+	m := new(GetVideoResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -538,7 +537,7 @@ func _PortalService_GetVideo_Handler(srv interface{}, stream grpc.ServerStream) 
 }
 
 type PortalService_GetVideoServer interface {
-	Send(*v1.Video) error
+	Send(*GetVideoResponse) error
 	grpc.ServerStream
 }
 
@@ -546,7 +545,7 @@ type portalServiceGetVideoServer struct {
 	grpc.ServerStream
 }
 
-func (x *portalServiceGetVideoServer) Send(m *v1.Video) error {
+func (x *portalServiceGetVideoServer) Send(m *GetVideoResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 

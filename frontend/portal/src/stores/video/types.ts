@@ -29,12 +29,16 @@ export interface VideoState {
     activeTool: LeftPanelTool;
     showScreenshots: boolean;
     showVoiceover: boolean;
-    openSections: string[];
     showTransitionPicker: string | null;
     generatingSectionVoiceover: string | null;
     editingSectionId: string | null;
     editingSectionTitle: string;
     generatingSlideVoiceover: string | null;
+
+    // Streaming state
+    isStreamingVideo: boolean;
+    streamingThinkingSummary: string;
+    streamingError: string | null;
 }
 
 export interface VideoActions {
@@ -47,11 +51,15 @@ export interface VideoActions {
     getSyncStatus: () => 'idle' | 'syncing' | 'error';
     forceSyncSections: () => void;
 
+    // Streaming actions
+    startVideoStream: (videoId: string) => Promise<Video | null>;
+    updateStreamingProgress: (thinkingSummary?: string) => void;
+    setStreamingError: (error: string | null) => void;
+
     // Sections
     addSection: () => void;
     removeSection: (sectionId: string) => void;
     updateSectionTitle: (sectionId: string, newTitle: string) => void;
-    toggleSection: (sectionId: string) => void;
     handleSectionDragEnd: (event: { active: { id: string }; over: { id: string } | null }) => void;
     setEditingSectionId: (sectionId: string | null) => void;
     setEditingSectionTitle: (title: string) => void;
