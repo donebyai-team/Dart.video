@@ -8,7 +8,6 @@ import (
 	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	v11 "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	v1 "github.com/shank318/coasterai/pb/coasterai/portal/v1"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
@@ -114,7 +113,7 @@ type PortalServiceClient interface {
 	SocialLoginCallback(context.Context, *connect.Request[v1.OauthCallbackRequest]) (*connect.Response[v1.JWT], error)
 	GetIntegrations(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.Integrations], error)
 	CreateVideo(context.Context, *connect.Request[v1.CreateVideoRequest]) (*connect.Response[v1.CreateVideoResponse], error)
-	GetVideo(context.Context, *connect.Request[v1.GetVideoRequest]) (*connect.ServerStreamForClient[v11.Video], error)
+	GetVideo(context.Context, *connect.Request[v1.GetVideoRequest]) (*connect.ServerStreamForClient[v1.GetVideoResponse], error)
 	GetVideos(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetVideosResponse], error)
 	UpdateVideoConfig(context.Context, *connect.Request[v1.UpdateVideoConfigRequest]) (*connect.Response[emptypb.Empty], error)
 }
@@ -201,7 +200,7 @@ func NewPortalServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(portalServiceCreateVideoMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
-		getVideo: connect.NewClient[v1.GetVideoRequest, v11.Video](
+		getVideo: connect.NewClient[v1.GetVideoRequest, v1.GetVideoResponse](
 			httpClient,
 			baseURL+PortalServiceGetVideoProcedure,
 			connect.WithSchema(portalServiceGetVideoMethodDescriptor),
@@ -236,7 +235,7 @@ type portalServiceClient struct {
 	socialLoginCallback *connect.Client[v1.OauthCallbackRequest, v1.JWT]
 	getIntegrations     *connect.Client[emptypb.Empty, v1.Integrations]
 	createVideo         *connect.Client[v1.CreateVideoRequest, v1.CreateVideoResponse]
-	getVideo            *connect.Client[v1.GetVideoRequest, v11.Video]
+	getVideo            *connect.Client[v1.GetVideoRequest, v1.GetVideoResponse]
 	getVideos           *connect.Client[emptypb.Empty, v1.GetVideosResponse]
 	updateVideoConfig   *connect.Client[v1.UpdateVideoConfigRequest, emptypb.Empty]
 }
@@ -302,7 +301,7 @@ func (c *portalServiceClient) CreateVideo(ctx context.Context, req *connect.Requ
 }
 
 // GetVideo calls coasterai.portal.v1.PortalService.GetVideo.
-func (c *portalServiceClient) GetVideo(ctx context.Context, req *connect.Request[v1.GetVideoRequest]) (*connect.ServerStreamForClient[v11.Video], error) {
+func (c *portalServiceClient) GetVideo(ctx context.Context, req *connect.Request[v1.GetVideoRequest]) (*connect.ServerStreamForClient[v1.GetVideoResponse], error) {
 	return c.getVideo.CallServerStream(ctx, req)
 }
 
@@ -332,7 +331,7 @@ type PortalServiceHandler interface {
 	SocialLoginCallback(context.Context, *connect.Request[v1.OauthCallbackRequest]) (*connect.Response[v1.JWT], error)
 	GetIntegrations(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.Integrations], error)
 	CreateVideo(context.Context, *connect.Request[v1.CreateVideoRequest]) (*connect.Response[v1.CreateVideoResponse], error)
-	GetVideo(context.Context, *connect.Request[v1.GetVideoRequest], *connect.ServerStream[v11.Video]) error
+	GetVideo(context.Context, *connect.Request[v1.GetVideoRequest], *connect.ServerStream[v1.GetVideoResponse]) error
 	GetVideos(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetVideosResponse], error)
 	UpdateVideoConfig(context.Context, *connect.Request[v1.UpdateVideoConfigRequest]) (*connect.Response[emptypb.Empty], error)
 }
@@ -522,7 +521,7 @@ func (UnimplementedPortalServiceHandler) CreateVideo(context.Context, *connect.R
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.CreateVideo is not implemented"))
 }
 
-func (UnimplementedPortalServiceHandler) GetVideo(context.Context, *connect.Request[v1.GetVideoRequest], *connect.ServerStream[v11.Video]) error {
+func (UnimplementedPortalServiceHandler) GetVideo(context.Context, *connect.Request[v1.GetVideoRequest], *connect.ServerStream[v1.GetVideoResponse]) error {
 	return connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.GetVideo is not implemented"))
 }
 

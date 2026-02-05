@@ -66,7 +66,7 @@ export const createInitActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       subSlides: [],
     };
 
-    const selectedSlide = firstSlide
+    const selectedSlide = firstSlide && firstSection
       ? { section: firstSection, slide: firstSlide }
       : firstSection
         ? { section: firstSection, slide: defaultSlide }
@@ -84,7 +84,6 @@ export const createInitActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
         ? createSlideEntityId(firstSlide.id)
         : createSlideEntityId(""),
       selectedSlide,
-      openSections: videoConfig.config?.sections.map((s: Section) => s.id),
       isInitialized: true,
     });
 
