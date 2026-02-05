@@ -19,7 +19,7 @@ export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => 
       sections: newSections,
       openSections: [...get().openSections, newSection.id],
     });
-    get().notifyConfigChange(newSections);
+    get().autoSyncSections(newSections);
   },
 
   setEditingSectionId: (sectionId: string | null) => set({ editingSectionId: sectionId }),
@@ -40,6 +40,8 @@ export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => 
         set({ selectedSlide: null });
       }
     }
+
+    get().autoSyncSections(newSections);
   },
 
   updateSectionTitle(sectionId: string, newTitle: string) {
@@ -59,6 +61,8 @@ export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => 
         },
       });
     }
+
+    get().autoSyncSections(newSections);
   },
 
   toggleSection(sectionId: string) {
@@ -68,6 +72,7 @@ export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => 
         ? openSections.filter((id) => id !== sectionId)
         : [...openSections, sectionId],
     });
+    // Note: toggleSection doesn't modify sections data, so no sync needed
   },
 
   handleSectionDragEnd(event: { active: { id: string }; over: { id: string } | null }) {
@@ -83,5 +88,6 @@ export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => 
     reordered.splice(newIdx, 0, moved);
 
     set({ sections: reordered });
+    get().autoSyncSections(reordered);
   },
 });

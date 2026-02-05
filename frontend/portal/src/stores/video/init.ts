@@ -1,10 +1,10 @@
 import { createSlideEntityId } from "@/types/selection";
 import { Slide, Section, SlideType, MetaData, AnimationSlideContent, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { VideoStoreSet, VideoStoreGet } from "./types";
-import { EditorConfig, VideoConfig, EditorCallbacks } from "@/types/editor";
+import { EditorConfig, VideoConfig } from "@/types/editor";
 
 export const createInitActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
-  initialize(config: EditorConfig, videoConfig: VideoConfig, callbacks?: EditorCallbacks) {
+  initialize(config: EditorConfig, videoConfig: VideoConfig) {
     console.log("Store initialize called with:", {
       config: !!config,
       videoConfig: !!videoConfig,
@@ -84,24 +84,9 @@ export const createInitActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
         : createSlideEntityId(""),
       selectedSlide,
       openSections: videoConfig.sections.map((s: Section) => s.id),
-      onConfigChange: callbacks?.onConfigChange,
       isInitialized: true,
     });
 
     console.log("Store initialization complete");
-  },
-
-  notifyConfigChange(newSections: Section[]) {
-    const { onConfigChange, config, videoConfig } = get();
-    if (!onConfigChange || !config || !videoConfig) return;
-
-    onConfigChange(config, {
-      ...videoConfig,
-      sections: newSections,
-      project: {
-        ...videoConfig.project,
-        updatedAt: new Date().toISOString(),
-      },
-    });
   },
 });

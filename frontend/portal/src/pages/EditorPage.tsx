@@ -12,7 +12,7 @@ import ResolutionSelector from "@/components/editor/ResolutionSelector";
 import StoryboardPanel from "@/components/editor/StoryboardPanel";
 import ToolsSettingsPanel from "@/components/editor/ToolsSettingsPanel";
 import RemotionPlayer, { RemotionPlayerHandle } from "@/components/editor/canvas/RemotionPlayer";
-import { type EditorConfig, type EditorCallbacks, VideoConfig } from "@/types/editor";
+import { type EditorConfig, VideoConfig } from "@/types/editor";
 import { sampleVideoConfig } from "@/data/videoConfig";
 import { defaultEditorConfig } from "@/data/editorConfig";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -28,18 +28,14 @@ const iconMap: Record<string, React.ElementType> = {
   Video
 };
 interface EditorPageProps {
+  videoId: string;
   config?: EditorConfig;
   videoConfig?: VideoConfig;
-  onConfigChange?: EditorCallbacks["onConfigChange"];
-  onSave?: EditorCallbacks["onSave"];
-  onExport?: EditorCallbacks["onExport"];
 }
 const EditorPage = ({
+  videoId,
   config = defaultEditorConfig,
-  videoConfig = sampleVideoConfig,
-  onConfigChange,
-  onSave,
-  onExport
+  videoConfig = sampleVideoConfig
 }: EditorPageProps) => {
 
   const router = useRouter();
@@ -48,6 +44,7 @@ const EditorPage = ({
 
   // ---- Values (reactive) ----
   const initialize = useVideoStore(s => s.initialize);
+  const initializeSync = useVideoStore(s => s.initializeSync);
   const isInitialized = useVideoStore(s => s.isInitialized);
 
   const setShowVoiceover = useVideoStore(s => s.setShowVoiceover);
@@ -96,11 +93,14 @@ const EditorPage = ({
       sections: videoConfig?.sections?.length
     });
 
-    initialize(config, videoConfig, { onConfigChange });
+    initialize(config, videoConfig);
+
+    // Initialize sync with video ID
+    initializeSync(videoId);
 
     // Store references to prevent re-initialization
     initializationRef.current = { config, videoConfig };
-  }, [config, videoConfig, initialize, onConfigChange]);
+  }, [config, videoConfig, initialize, initializeSync, videoId]);
 
   // Centralized preview handler - plays a slide from start and pauses at end
   const handlePreviewSlide = (slideId: string) => {

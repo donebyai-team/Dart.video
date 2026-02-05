@@ -27,7 +27,7 @@ message Video {
 }
 
 message VideoConfig {
-  repeated Section slides = 1;
+  repeated Section sections = 1;
 }
 
 message Script {

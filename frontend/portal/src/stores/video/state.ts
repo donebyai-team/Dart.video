@@ -23,6 +23,4 @@ export const initialState: VideoState = {
   editingSectionId: null,
   editingSectionTitle: "",
   generatingSlideVoiceover: null,
-
-  onConfigChange: undefined,
 };
