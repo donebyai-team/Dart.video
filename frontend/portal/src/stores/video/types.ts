@@ -78,12 +78,21 @@ export interface VideoActions {
   createOverlayEntityId: (slideId: string, overlayId: string) => EntityId
 
   // Canvas
+  // Define function interface here for effects to get in VideoActions
+
+   // Get effects interfaces
   getSpotlights: () => SpotlightEffect[]
   getCallouts: () => CalloutEffect[]
+
+  // Add effects interfaces
   addSpotlight: (effect: SpotlightEffect) => void
   addCallout: (effect: CalloutEffect) => void
+
+  // Update effects interfaces
   updateSpotlight: (id: string, updates: Partial<SpotlightEffect>) => void
   updateCallout:(id:string, updates:Partial<CalloutEffect>) => void
+
+  // Delete effects interfaces
   deleteSpotlight: (id: string) => void
   deleteCallout: (id: string) => void
 

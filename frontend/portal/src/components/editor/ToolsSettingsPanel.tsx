@@ -53,6 +53,8 @@ const ToolsSettingsPanel = ({
   console.log('active tool', activeTool)
 
   if (!activeTool) return null
+
+  // Get the selected object data based on selected type object
   const selectedObject =
     activeTool.type === ActiveToolType.INSERT && selectedObjectId
       ? activeTool.tool === CanvasObjectType.CANVAS_SPOTLIGHT
@@ -64,6 +66,8 @@ const ToolsSettingsPanel = ({
           })
       : undefined
 
+
+ // Use specific delete function based on active tool selection      
   const deleteFunction =
     activeTool.type === ActiveToolType.INSERT &&
     (activeTool.tool === CanvasObjectType.CANVAS_SPOTLIGHT
@@ -71,7 +75,7 @@ const ToolsSettingsPanel = ({
       : activeTool.tool === CanvasObjectType.CANVAS_CALLOUT
         ? deleteCallout
         : undefined)
-
+// Use specific update function based on active tool selection      
   const updateFunction =
     activeTool.type === ActiveToolType.INSERT &&
     (activeTool.tool === CanvasObjectType.CANVAS_SPOTLIGHT
@@ -173,12 +177,16 @@ const ToolsSettingsPanel = ({
           onUpdate={updates => {
 
             if (selectedObjectId && updateFunction) {
+              // Update the data of efftects
+              // @TODO in future you can more effect types
               updateFunction(updates as Partial<SpotlightEffect> & Partial<CalloutEffect>)
             }
           }}
           onDelete={() => {
             if (selectedObjectId && deleteFunction) {
               deleteFunction(selectedObjectId)
+
+              //Close the active tool sidebar once object deleted 
               handleCloseTool()
             }
           }}

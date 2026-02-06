@@ -2,6 +2,10 @@ import { CalloutEffect, SpotlightEffect } from '@coasterai/pb/coasterai/core/v1/
 import { VideoStoreGet, VideoStoreSet } from './types'
 
 export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
+
+  // For Spotlight Effetcts you can use these function to directly operate in slide data
+
+
   getSpotlights: () => {
     const { selectedSlide } = get()
     if (!selectedSlide) return []
@@ -114,6 +118,8 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
     get().autoSyncSections(newSections);
   },
 
+  // For Callout Effetcts you can use these function to directly operate in slide data
+
   getCallouts: () => {
     const { selectedSlide } = get()
     if (!selectedSlide) return []
@@ -223,4 +229,8 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
 
     get().notifyConfigChange(newSections)
   }
+
+
+  // @TODO 
+  // implement more function down here to for specific effects 
 })
