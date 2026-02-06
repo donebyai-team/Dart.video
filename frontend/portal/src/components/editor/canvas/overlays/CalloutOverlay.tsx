@@ -112,15 +112,17 @@ const CalloutOverlay = ({
   }, []);
 
   useEffect(() => {
-    if (isDragging || isResizing) {
-      window.addEventListener("mousemove", handleMouseMove);
-      window.addEventListener("mouseup", handleMouseUp);
-      return () => {
-        window.removeEventListener("mousemove", handleMouseMove);
-        window.removeEventListener("mouseup", handleMouseUp);
-      };
-    }
+    if (!isDragging && !isResizing) return;
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
   }, [isDragging, isResizing, handleMouseMove, handleMouseUp]);
+
 
   const handleSize = 10;
   console.log(isSelected, "selected")
@@ -149,8 +151,8 @@ const CalloutOverlay = ({
         style={{
           borderColor: isSelected ? "hsl(var(--primary))" : "rgba(255, 255, 255, 0.8)",
           borderRadius: scaledBorderRadius,
-          boxShadow: isSelected 
-            ? "0 0 0 2px hsl(var(--primary) / 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.3)" 
+          boxShadow: isSelected
+            ? "0 0 0 2px hsl(var(--primary) / 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.3)"
             : "0 0 20px rgba(255, 255, 255, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.2)",
         }}
       />
