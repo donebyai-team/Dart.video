@@ -6,7 +6,7 @@ import CalloutOverlay from "./overlays/CalloutOverlay";
 interface CanvasOverlayProps {
   resolution: Resolution;
   spotlights?: SpotlightEffect[];
-  callouts?:CalloutEffect[]
+  callouts?: CalloutEffect[]
   selectedObjectId: string | null;
   onSelectObject: (id: string | null) => void;
   onUpdateSpotlight?: (id: string, updates: Partial<SpotlightEffect>) => void;
@@ -62,7 +62,7 @@ const CanvasOverlay = ({
   }
 
   return (
-    <>   
+    <>
 
       {/* Render spotlight effects using SpotlightOverlay for interactive editing */}
       {spotlights.map((spotlight) => (
@@ -82,9 +82,9 @@ const CanvasOverlay = ({
         />
       ))}
 
-        {/* Render callout effects using CalloutOverlay for interactive editing */}
+      {/* Render callout effects using CalloutOverlay for interactive editing */}
 
-       {callouts.map((callout) => (
+      {callouts.map((callout) => (
         <CalloutOverlay
           key={callout.id}
           callout={callout}
