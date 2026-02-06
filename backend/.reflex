@@ -1,0 +1,1 @@
+-r '\.go$' -s -- sh -c 'go run ./cmd/coasterai'
