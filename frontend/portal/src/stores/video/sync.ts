@@ -1,7 +1,5 @@
 import { portalClient } from "@/services/grpc";
 import { Section } from "@coasterai/pb/coasterai/core/v1/slide_pb";
-import { create } from "@bufbuild/protobuf";
-import { UpdateVideoConfigRequestSchema } from "@coasterai/pb/coasterai/portal/v1/portal_pb";
 import { VideoStoreSet, VideoStoreGet } from "./types";
 import toast from "react-hot-toast";
 import { getConnectError } from "@/utils/error";

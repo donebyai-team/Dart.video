@@ -86,7 +86,6 @@ export const createTextAnimationActions = (set: VideoStoreSet, get: VideoStoreGe
 
     const prev = slide.content.value;
     const newConfig = { ...prev.templateConfig, ...newProps };
-    console.log("rewfwrfwe", prev.templateConfig, newConfig)
     const newSections = sections.map((s) =>
       s.id === selectedSlide.section.id
         ? {
