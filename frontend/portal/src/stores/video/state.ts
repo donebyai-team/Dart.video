@@ -17,7 +17,6 @@ export const initialState: VideoState = {
   activeTool: null,
   showScreenshots: false,
   showVoiceover: false,
-  openSections: [],
   showTransitionPicker: null,
   generatingSectionVoiceover: null,
   editingSectionId: null,
