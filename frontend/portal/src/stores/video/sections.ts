@@ -1,6 +1,6 @@
 import type { Section } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { VideoStoreSet, VideoStoreGet } from "./types";
-import { createNewSection } from "./utils";
+import { createNewSection } from "./defaults";
 
 export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   addSection() {
