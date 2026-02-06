@@ -109,7 +109,7 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
           })
         }
       },
-      selectedObjectId: null
+      selectedEffectId: null
     })
 
     get().autoSyncSections(newSections);
@@ -225,7 +225,7 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
           })
         }
       },
-      selectedObjectId: null
+      selectedEffectId: null
     })
 
     get().autoSyncSections(newSections);

@@ -17,12 +17,12 @@ export const createToolActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
         const spotlightEffect = createSpotlightEffect(resolution, startTime, endTime);
 
         get().addSpotlight(spotlightEffect)
-        set({ selectedObjectId: spotlightEffect.id })
+        set({ selectedEffectId: spotlightEffect.id })
       } else if (tool.tool === EffectType.CALLOUT) {
         const calloutEffect = createCalloutEffect(resolution, startTime, endTime);
 
         get().addCallout(calloutEffect)
-        set({ selectedObjectId: calloutEffect.id })
+        set({ selectedEffectId: calloutEffect.id })
       }
     }
   },

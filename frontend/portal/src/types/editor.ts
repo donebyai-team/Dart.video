@@ -344,7 +344,7 @@ export interface EditorConfig {
 export interface EditorState {
   selectedSlideId: string | null;
   selectedSectionId: string | null;
-  selectedObjectId: string | null;
+  selectedEffectId: string | null;
   activeTool: string | null;
   isPlaying: boolean;
   currentFrame: number;

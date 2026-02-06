@@ -36,7 +36,7 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
       set({ selectedSlide: { section: foundSection, slide: foundSlide } })
       if (parsed.type === 'overlay') {
         set({
-          selectedObjectId: parsed.overlayId,
+          selectedEffectId: parsed.overlayId,
           selectedStackItemId: null
         })
 
@@ -50,19 +50,19 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
         }
       } else if (parsed.type === 'stack-item') {
         set({
-          selectedObjectId: null,
+          selectedEffectId: null,
           selectedStackItemId: parsed.itemId,
           activeTool: { type: ActiveToolType.STACK_SETTINGS }
         })
       } else if (parsed.type === 'stack-item-overlay') {
         // set({
-        //     selectedObjectId: parsed.overlayId,
+        //     selectedEffectId: parsed.overlayId,
         //     selectedStackItemId: parsed.itemId,
         //     activeTool: { tool: ActiveToolType.INSERT, type: ActiveToolType.INSERT },
         // });
       } else {
         set({
-          selectedObjectId: null,
+          selectedEffectId: null,
           selectedStackItemId: null,
           activeTool: getDefaultSelectedTool()
         })
@@ -111,7 +111,7 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
   handleSelectObject(id: string | null) {
     const { selectedSlide, selectedStackItemId } = get()
     if (!selectedSlide) return
-    set({ selectedObjectId: id })
+    set({ selectedEffectId: id })
 
     if (id) {
       set({ selectedStackItemId: null })

@@ -32,7 +32,7 @@ const PlayerCanvas = ({
   const resolution = useVideoStore(s => s.resolution)
 
   const selectedSlide = useVideoStore(s => s.selectedSlide)
-  const selectedObjectId = useVideoStore(s => s.selectedObjectId)
+  const selectedEffectId = useVideoStore(s => s.selectedEffectId)
   const handleSelectObject = useVideoStore(s => s.handleSelectObject)
 
   const onUpdateSpotlight = useVideoStore(s => s.updateSpotlight)
@@ -118,7 +118,7 @@ const PlayerCanvas = ({
               resolution={resolution}
               spotlights={spotlights}
               callouts={callouts}
-              selectedObjectId={selectedObjectId || null}
+              selectedEffectId={selectedEffectId || null}
               onSelectObject={handleSelectObject}
               onUpdateSpotlight={(id, updates) => onUpdateSpotlight(id, updates)}
               onUpdateCallout={(id, updates) => onUpdateCallout(id, updates)}

@@ -3,7 +3,7 @@
  * 
  * This module provides a type-safe way to represent and work with selections
  * in the editor. Instead of managing multiple state variables (selectedSlide,
- * selectedObjectId, selectedStackItemId), we use a single EntityId that
+ * selectedEffectId, selectedStackItemId), we use a single EntityId that
  * encodes the type and hierarchy of the selected entity.
  */
 
