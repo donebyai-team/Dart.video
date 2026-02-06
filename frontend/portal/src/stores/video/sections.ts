@@ -1,19 +1,13 @@
 import type { Section } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { VideoStoreSet, VideoStoreGet } from "./types";
+import { createNewSection } from "./utils";
 
 export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   addSection() {
     const { sections, videoConfig } = get();
     if (!videoConfig) return;
 
-    const newSection: Section = {
-      $typeName: "coasterai.core.v1.Section",
-      id: `section-${Date.now()}`,
-      title: "New title",
-      color: "bg-primary",
-      slides: [],
-    };
-
+    const newSection = createNewSection();
     const newSections = [...sections, newSection];
     set({
       sections: newSections,
