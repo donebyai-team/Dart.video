@@ -3,12 +3,6 @@ import { createPortal } from "react-dom"
 import { FONT_FAMILIES } from "./constants"
 import { EditableTextStyle } from "./types"
 
-interface BaseTextStyles {
-  fontSize?: number
-  color?: string
-  fontFamily?: string
-}
-
 interface TextStylerProps {
   rect: DOMRect
   value: EditableTextStyle
