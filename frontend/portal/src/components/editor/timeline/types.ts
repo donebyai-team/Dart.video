@@ -1,6 +1,6 @@
 // Timeline-specific types for the layered timeline visualization
 
-import { CanvasObject, CanvasObjectType, Slide, SpotlightEffect, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { CalloutEffect, CanvasObject, CanvasObjectType, Slide, SpotlightEffect, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 /**
  * Timeline item types representing different elements on the timeline
@@ -72,6 +72,7 @@ export interface TimelineSlide {
   slide: Slide;
   transition?: TransitionType;
   spotlights?: SpotlightEffect[]; // Canvas-level effects
+  callouts?:CalloutEffect[]
 }
 
 /**

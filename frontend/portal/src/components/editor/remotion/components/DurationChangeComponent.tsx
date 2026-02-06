@@ -9,6 +9,7 @@ interface Props {
   step:number
 }
 
+
 const DurationChangeComponent = ({ value, onValueChange, max, min, step }: Props) => {
   const handleValueChange = (val: number) => {
     onValueChange(value + val)
@@ -43,5 +44,6 @@ const DurationChangeComponent = ({ value, onValueChange, max, min, step }: Props
     </div>
   )
 }
+
 
 export default DurationChangeComponent

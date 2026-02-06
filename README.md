@@ -79,7 +79,7 @@ Initialize the database:
 Run tests and start the backend:
 
 ```bash
-cd backend/cms/coasterai
+cd backend/cmd/coasterai
 go build -o coasterai && ./coasterai start
 ```
 

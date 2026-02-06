@@ -1,16 +1,23 @@
 // Default editor configuration - all hardcoded values as JSON
 // This configuration drives the entire editor
 
-import { AnimationSlideContent, MetaData, Section, SlideType, SpotlightEffect, TransitionType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import {
+  AnimationSlideContent,
+  CanvasObjectType,
+  MetaData,
+  Section,
+  SlideType,
+  SpotlightEffect,
+  TransitionType
+} from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Video, VideoConfig, VideoMetadata, VideoStatus } from '@coasterai/pb/coasterai/core/v1/video_pb'
-
 
 export const sampleVideoConfig: Video = {
   id: 'project-1',
   name: 'Product Launch Explainer',
   metadata: {
     fps: BigInt(30),
-    backgroundColor: ""
+    backgroundColor: ''
   } as VideoMetadata,
   status: VideoStatus.COMPLETED,
 
@@ -35,6 +42,7 @@ export const sampleVideoConfig: Video = {
             transitionDuration: 0.3,
             subSlides: [],
             spotlights: [],
+            callouts: [],
             zooms: [],
             content: {
               case: 'animation',
@@ -206,7 +214,8 @@ export const sampleVideoConfig: Video = {
             id: 'problem-1',
             $typeName: 'coasterai.core.v1.Slide',
             type: SlideType.VISUAL_ANIMATION,
-            transcript: 'Teams waste over 5 hours every week just searching for files scattered across different tools.',
+            transcript:
+              'Teams waste over 5 hours every week just searching for files scattered across different tools.',
             duration: 2.5,
             transition: TransitionType.TRANSITION_SLIDE_LEFT,
             transitionDuration: 0.3,
@@ -230,7 +239,7 @@ export const sampleVideoConfig: Video = {
                   y: 108,
                   width: 1536,
                   height: 864
-                } as MetaData,
+                } as MetaData
               }
             }
           },
@@ -262,7 +271,7 @@ export const sampleVideoConfig: Video = {
                   y: 108,
                   width: 1536,
                   height: 864
-                } as MetaData,
+                } as MetaData
               }
             }
           }
@@ -303,7 +312,7 @@ export const sampleVideoConfig: Video = {
                   y: 108,
                   width: 1536,
                   height: 864
-                } as MetaData,
+                } as MetaData
               }
             }
           },
@@ -503,7 +512,7 @@ export const sampleVideoConfig: Video = {
                   y: 108,
                   width: 1536,
                   height: 864
-                } as MetaData,
+                } as MetaData
               }
             }
           }
@@ -566,13 +575,13 @@ export const sampleVideoConfig: Video = {
                   y: 108,
                   width: 1536,
                   height: 864
-                } as MetaData,
+                } as MetaData
               } as AnimationSlideContent
             }
           }
         ]
       }
-    ] as Section[],
+    ] as Section[]
   } as VideoConfig
 } as Video
 

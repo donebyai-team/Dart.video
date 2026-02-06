@@ -1,25 +1,28 @@
-import { motion } from 'framer-motion'
+import TextAnimationSelector from '@/components/editor/remotion/animations/suggester/TextAnimationSelector'
+import VisualAnimationSelector from '@/components/editor/remotion/animations/suggester/VisualAnimationSelector'
 import BackgroundSettings from '@/components/editor/settings/BackgroundSettings'
 import InsertSettings from '@/components/editor/settings/InsertSettings'
-import TextAnimationTemplateSettings from '@/components/editor/settings/TextAnimationTemplateSettings'
 import StackSlideSettings from '@/components/editor/settings/StackSlideSettings'
-import VisualAnimationSelector from '@/components/editor/remotion/animations/suggester/VisualAnimationSelector'
-import TextAnimationSelector from '@/components/editor/remotion/animations/suggester/TextAnimationSelector'
-import { ActiveToolType } from '@/types/tools'
+import TextAnimationTemplateSettings from '@/components/editor/settings/TextAnimationTemplateSettings'
 import { useVideoStore } from '@/stores/video'
+import { ActiveToolType } from '@/types/tools'
 import {
   AnimationSlideContent,
-  CanvasObject,
+  CalloutEffect,
+  CanvasObjectType,
   SlideType,
   SpotlightEffect
 } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { motion } from 'framer-motion'
 
 interface ToolsSettingsPanelProps {
   onPreviewTemplate: () => void
   onUpdateSpotlight?: (updates: Partial<SpotlightEffect>) => void
+  onUpdateCallout?: (updates: Partial<CalloutEffect>) => void
   onSpotlightApply?: () => void
   onSpotlightPlay?: () => void
   deleteSpotlight?: (effectId: string) => void
+  deleteCallout?: (effectId: string) => void
   selectedStackItemId?: string | null
   onSelectStackItem?: (itemId: string) => void
 }
@@ -27,11 +30,12 @@ interface ToolsSettingsPanelProps {
 const ToolsSettingsPanel = ({
   onPreviewTemplate,
   onUpdateSpotlight,
-  onSpotlightApply,
+  onUpdateCallout,
   onSpotlightPlay,
   selectedStackItemId,
   onSelectStackItem,
-  deleteSpotlight
+  deleteSpotlight,
+  deleteCallout
 }: ToolsSettingsPanelProps) => {
   const activeTool = useVideoStore(s => s.activeTool)
   const selectedSlide = useVideoStore(s => s.selectedSlide)
@@ -40,7 +44,7 @@ const ToolsSettingsPanel = ({
   const handleCloseTool = useVideoStore(s => s.handleCloseTool)
   const getTextAnimationConfig = useVideoStore(s => s.getTextAnimationConfig)
   const spotlights = useVideoStore(s => s.getSpotlights)
-
+  const callouts = useVideoStore(s => s.getCallouts)
   const updateSlideBackground = useVideoStore(s => s.updateSlideBackground)
   const onUpdateTemplateProps = useVideoStore(s => s.handleUpdateTemplateProps)
   const onUpdateSlide = useVideoStore(s => s.updateSlide)
@@ -49,11 +53,36 @@ const ToolsSettingsPanel = ({
   console.log('active tool', activeTool)
 
   if (!activeTool) return null
-  const selectedObject = selectedObjectId
-    ? spotlights().find(e => {
-        return e.id === selectedObjectId
-      })
-    : undefined
+
+  // Get the selected object data based on selected type object
+  const selectedObject =
+    activeTool.type === ActiveToolType.INSERT && selectedObjectId
+      ? activeTool.tool === CanvasObjectType.CANVAS_SPOTLIGHT
+        ? spotlights().find(e => {
+            return e.id === selectedObjectId
+          })
+        : callouts().find(e => {
+            return e.id === selectedObjectId
+          })
+      : undefined
+
+
+ // Use specific delete function based on active tool selection      
+  const deleteFunction =
+    activeTool.type === ActiveToolType.INSERT &&
+    (activeTool.tool === CanvasObjectType.CANVAS_SPOTLIGHT
+      ? deleteSpotlight
+      : activeTool.tool === CanvasObjectType.CANVAS_CALLOUT
+        ? deleteCallout
+        : undefined)
+// Use specific update function based on active tool selection      
+  const updateFunction =
+    activeTool.type === ActiveToolType.INSERT &&
+    (activeTool.tool === CanvasObjectType.CANVAS_SPOTLIGHT
+      ? onUpdateSpotlight
+      : activeTool.tool === CanvasObjectType.CANVAS_CALLOUT
+        ? onUpdateCallout
+        : undefined)
 
   return (
     <motion.div
@@ -145,14 +174,19 @@ const ToolsSettingsPanel = ({
         <InsertSettings
           tool={activeTool?.tool}
           currentObject={selectedObject}
-          onChangeSpotlight={updates => {
-            if (selectedObjectId && onUpdateSpotlight) {
-              onUpdateSpotlight(updates)
+          onUpdate={updates => {
+
+            if (selectedObjectId && updateFunction) {
+              // Update the data of efftects
+              // @TODO in future you can more effect types
+              updateFunction(updates as Partial<SpotlightEffect> & Partial<CalloutEffect>)
             }
           }}
           onDelete={() => {
-            if (selectedObjectId && deleteSpotlight) {
-              deleteSpotlight(selectedObjectId)
+            if (selectedObjectId && deleteFunction) {
+              deleteFunction(selectedObjectId)
+
+              //Close the active tool sidebar once object deleted 
               handleCloseTool()
             }
           }}
@@ -162,7 +196,6 @@ const ToolsSettingsPanel = ({
           slideDuration={selectedSlide?.slide.duration}
           slideStartTime={0}
           transitionDuration={selectedSlide?.slide.transitionDuration}
-          onApply={onSpotlightApply}
           onPlay={onSpotlightPlay}
         />
       )}

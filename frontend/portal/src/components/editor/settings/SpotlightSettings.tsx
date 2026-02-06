@@ -66,8 +66,13 @@ const SpotlightSettings = ({ settings, onChange, slideDuration = 5, onPlay, tran
             onValueChange={val => {
               onChange('startTime', val)
             }}
+            // the max value of startTime will spotlightEnd seconds - 0.1 
+            // it will ensure that the start and end time doesn't become same
             max={spotlightEnd - 0.1}
+
+            // If there is transition in slide it will make sure the startTime start from transitionDuration
             min={transitionDuration}
+            // This step variable ensures the value will decrease/increase  by 0.1 only
             step={0.1}
           />
         </div>
@@ -78,8 +83,12 @@ const SpotlightSettings = ({ settings, onChange, slideDuration = 5, onPlay, tran
             onValueChange={val => {
               onChange('endTime', val)
             }}
+             // If there is transition in slide it will make sure the endTime ends before transitionDuration
             max={slideDuration - transitionDuration}
+             // the min value of endTime will spotlightStart seconds + 0.1 
+            // it will ensure that the start and end time doesn't become same
             min={spotlightStart + 0.1}
+             // This step variable ensures the value will decrease/increase  by 0.1 only
             step={0.1}
           />
         </div>
