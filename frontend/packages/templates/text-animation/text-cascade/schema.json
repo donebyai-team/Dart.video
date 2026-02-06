@@ -38,10 +38,6 @@
                     "700"
                 ]
             },
-            "letterSpacing": {
-                "optional": true,
-                "type": "number"
-            },
             "fontFamily": {
                 "optional": true,
                 "enum": [
@@ -95,10 +91,6 @@
                     "600",
                     "700"
                 ]
-            },
-            "letterSpacing": {
-                "optional": true,
-                "type": "number"
             },
             "fontFamily": {
                 "optional": true,
