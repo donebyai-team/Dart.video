@@ -1,6 +1,6 @@
 import { EditorConfig, SlideTypeConfig, TextAnimationSlideConfig } from "@/types/editor";
 import { create } from "@bufbuild/protobuf";
-import { AnimationSlideContentSchema, ImageSlideContentSchema, MetaData, MetaDataSchema, Slide, SlideSchema, SlideType, StackAnimationMode, StackSlideContentSchema, TransitionType, VideoSlideContentSchema } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { AnimationSlideContentSchema, ImageSlideContentSchema, MetaData, MetaDataSchema, Section, SectionSchema, Slide, SlideSchema, SlideType, StackAnimationMode, StackSlideContentSchema, TransitionType, VideoSlideContentSchema } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 // Helper functions (moved from useEditorState)
 export const getSlideTypeConfig = (config: EditorConfig | null, slideType: SlideType): SlideTypeConfig | undefined => {
@@ -108,6 +108,14 @@ export function createNewSlide(params: {
         subSlides: [],
     });
 }
+
+export const createNewSection = (): Section =>
+  create(SectionSchema, {
+    id: `section-${Date.now()}`,
+    title: "New title",
+    color: "bg-primary",
+    slides: [],
+  });
 
 
 
