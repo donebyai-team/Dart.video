@@ -2,8 +2,6 @@ import { parseEntityId } from '@/types/selection'
 import {
   EffectType,
   SlideType,
-  SpotlightEffect,
-  StackSlideContent
 } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { ActiveToolType } from '@/types/tools'
 import { VideoStoreGet, VideoStoreSet } from './types'
@@ -48,18 +46,6 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
         if (toolType) {
           set({ activeTool: { type: ActiveToolType.INSERT, tool: toolType } })
         }
-      } else if (parsed.type === 'stack-item') {
-        set({
-          selectedEffectId: null,
-          selectedStackItemId: parsed.itemId,
-          activeTool: { type: ActiveToolType.STACK_SETTINGS }
-        })
-      } else if (parsed.type === 'stack-item-overlay') {
-        // set({
-        //     selectedEffectId: parsed.overlayId,
-        //     selectedStackItemId: parsed.itemId,
-        //     activeTool: { tool: ActiveToolType.INSERT, type: ActiveToolType.INSERT },
-        // });
       } else {
         set({
           selectedEffectId: null,
@@ -73,7 +59,7 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
   },
 
   openEntitySettings(entityId: string) {
-    const { sections, selectedStackItemId } = get()
+    const { sections } = get()
     const parsed = parseEntityId(entityId)
 
     let foundSlide = null
@@ -89,14 +75,8 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
     console.log('Open settings for slide:', parsed, foundSlide)
 
     if (parsed.type === 'slide') {
-      if (foundSlide.type === SlideType.STACK) {
-        set({ activeTool: { type: ActiveToolType.STACK_SETTINGS } })
-
-        const items = (foundSlide.content.value as StackSlideContent)?.items || []
-        if (items[0] && !selectedStackItemId) {
-          set({ selectedStackItemId: items[0].id })
-        }
-      } else if (foundSlide.type === SlideType.TEXT_ANIMATION) {
+      // TODO: Add more as per slide type
+      if (foundSlide.type === SlideType.TEXT_ANIMATION) {
         set({ activeTool: { type: ActiveToolType.TEXT_ANIMATION_TEMPLATE } })
       }
     } else if (parsed.type === 'overlay' || parsed.type === 'stack-item-overlay') {
@@ -108,34 +88,16 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
     }
   },
 
-  handleSelectObject(id: string | null) {
-    const { selectedSlide, selectedStackItemId } = get()
+  handleSelectEffect(effectId: string | null) {
+    const { selectedSlide } = get()
     if (!selectedSlide) return
-    set({ selectedEffectId: id })
+    set({ selectedEffectId: effectId })
 
-    if (id) {
-      set({ selectedStackItemId: null })
-
-      // TODO: Check why the id is optional? It shouldn't be
-      const toolType = getEffectTypeFromID(id!, get);
-
-      // Set the toolType if it exist
-      if (toolType) {
-        set({ activeTool: { type: ActiveToolType.INSERT, tool: toolType } })
-      }
-    } else {
-      const slide = selectedSlide.slide
-      if (slide?.type === SlideType.TEXT_ANIMATION) {
-        set({ activeTool: { type: ActiveToolType.TEXT_ANIMATION_TEMPLATE } })
-      } else if (slide?.type === SlideType.STACK) {
-        set({ activeTool: { type: ActiveToolType.STACK_SETTINGS } })
-        const first = (slide.content.value as StackSlideContent)?.items?.[0]
-        if (first && !selectedStackItemId) {
-          set({ selectedStackItemId: first.id })
-        }
-      } else {
-        set({ activeTool: getDefaultSelectedTool() })
-      }
+    // TODO: Check why the id is optional? It shouldn't be
+    const toolType = getEffectTypeFromID(effectId!, get);
+    // Set the toolType if it exist
+    if (toolType) {
+      set({ activeTool: { type: ActiveToolType.INSERT, tool: toolType } })
     }
   }
 })

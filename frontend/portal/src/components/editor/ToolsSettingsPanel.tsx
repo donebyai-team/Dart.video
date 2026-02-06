@@ -2,7 +2,6 @@ import TextAnimationSelector from '@/components/editor/remotion/animations/sugge
 import VisualAnimationSelector from '@/components/editor/remotion/animations/suggester/VisualAnimationSelector'
 import BackgroundSettings from '@/components/editor/settings/BackgroundSettings'
 import InsertSettings from '@/components/editor/settings/InsertSettings'
-import StackSlideSettings from '@/components/editor/settings/StackSlideSettings'
 import TextAnimationTemplateSettings from '@/components/editor/settings/TextAnimationTemplateSettings'
 import { useVideoStore } from '@/stores/video'
 import { ActiveToolType } from '@/types/tools'
@@ -23,8 +22,6 @@ interface ToolsSettingsPanelProps {
   onSpotlightPlay?: () => void
   deleteSpotlight: (effectId: string) => void
   deleteCallout: (effectId: string) => void
-  selectedStackItemId?: string | null
-  onSelectStackItem?: (itemId: string) => void
 }
 
 const ToolsSettingsPanel = ({
@@ -32,8 +29,6 @@ const ToolsSettingsPanel = ({
   onUpdateSpotlight,
   onUpdateCallout,
   onSpotlightPlay,
-  selectedStackItemId,
-  onSelectStackItem,
   deleteSpotlight,
   deleteCallout
 }: ToolsSettingsPanelProps) => {
@@ -139,20 +134,6 @@ const ToolsSettingsPanel = ({
             />
           )
         })()}
-
-      {activeTool.type === ActiveToolType.STACK_SETTINGS &&
-        selectedSlide?.slide.type === SlideType.STACK &&
-        onUpdateSlide && (
-          <StackSlideSettings
-            slide={selectedSlide?.slide}
-            section={selectedSlide?.section}
-            onUpdateSlide={onUpdateSlide}
-            selectedItemId={selectedStackItemId}
-            onSelectItem={onSelectStackItem}
-            onClose={handleCloseTool}
-            onPreview={onSpotlightPlay}
-          />
-        )}
 
       {activeTool.type === ActiveToolType.INSERT 
       && selectedEffectId
