@@ -1,0 +1,1 @@
+-r '\.go$' -s -- sh -c 'go run ./cmd/coasterai start --portal-http-listen-addr :8787'

@@ -54,39 +54,46 @@ export const SpotlightEffectSchema = /*@__PURE__*/
   messageDesc(file_coasterai_core_v1_slide, 5);
 
 /**
+ * Describes the message coasterai.core.v1.CalloutEffect.
+ * Use `create(CalloutEffectSchema)` to create a new message.
+ */
+export const CalloutEffectSchema = /*@__PURE__*/
+  messageDesc(file_coasterai_core_v1_slide, 6);
+
+/**
  * Describes the message coasterai.core.v1.ZoomEffect.
  * Use `create(ZoomEffectSchema)` to create a new message.
  */
 export const ZoomEffectSchema = /*@__PURE__*/
-  messageDesc(file_coasterai_core_v1_slide, 6);
+  messageDesc(file_coasterai_core_v1_slide, 7);
 
 /**
  * Describes the message coasterai.core.v1.CanvasObject.
  * Use `create(CanvasObjectSchema)` to create a new message.
  */
 export const CanvasObjectSchema = /*@__PURE__*/
-  messageDesc(file_coasterai_core_v1_slide, 7);
+  messageDesc(file_coasterai_core_v1_slide, 8);
 
 /**
  * Describes the message coasterai.core.v1.Slide.
  * Use `create(SlideSchema)` to create a new message.
  */
 export const SlideSchema = /*@__PURE__*/
-  messageDesc(file_coasterai_core_v1_slide, 8);
+  messageDesc(file_coasterai_core_v1_slide, 9);
 
 /**
  * Describes the message coasterai.core.v1.Section.
  * Use `create(SectionSchema)` to create a new message.
  */
 export const SectionSchema = /*@__PURE__*/
-  messageDesc(file_coasterai_core_v1_slide, 9);
+  messageDesc(file_coasterai_core_v1_slide, 10);
 
 /**
  * Describes the message coasterai.core.v1.Resolution.
  * Use `create(ResolutionSchema)` to create a new message.
  */
 export const ResolutionSchema = /*@__PURE__*/
-  messageDesc(file_coasterai_core_v1_slide, 10);
+  messageDesc(file_coasterai_core_v1_slide, 11);
 
 /**
  * Describes the enum coasterai.core.v1.SlideType.

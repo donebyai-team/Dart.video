@@ -207,10 +207,11 @@ export function calculateTransitionItems(
 export function calculateOverlayItems(slides: TimelineSlide[], fps: number): OverlayItem[] {
   const overlays: OverlayItem[] = []
 
-  slides.forEach((slide) => {
+  slides.forEach(slide => {
     // Process effects
     if (slide.spotlights && slide.spotlights.length > 0) {
-      // Get the realSlide start frame using this function 
+      console.log(slide, 'slide')
+      // Get the realSlide start frame using this function
       const realSlideStartTimeFrame = getRealSlideStartFrame(slides, slide.id, fps)
       //convert it into seconds
       const realSlideStartTimeInSeconds = realSlideStartTimeFrame / 30
@@ -232,9 +233,37 @@ export function calculateOverlayItems(slides: TimelineSlide[], fps: number): Ove
         })
       })
     }
-
-   
   })
+
+  slides.forEach(slide => {
+    // Process effects
+    if (slide.callouts && slide.callouts.length > 0) {
+      console.log(slide, 'slide')
+      // Get the realSlide start frame using this function
+      const realSlideStartTimeFrame = getRealSlideStartFrame(slides, slide.id, fps)
+      //convert it into seconds
+      const realSlideStartTimeInSeconds = realSlideStartTimeFrame / 30
+
+      slide.callouts.forEach(effect => {
+        const startTime = effect.startTime ?? 0
+        const endTime = effect.endTime ?? slide.duration
+        const duration = endTime - startTime
+
+        overlays.push({
+          type: 'overlay',
+          id: `overlay-${effect.id}`,
+          overlayId: effect.id!,
+          slideId: slide.id,
+          overlayType: CanvasObjectType.CANVAS_CALLOUT,
+          startTime: realSlideStartTimeInSeconds + startTime,
+          duration,
+          trackIndex: 0 // Will be assigned by assignOverlayTracks
+        })
+      })
+    }
+  })
+
+  console.log(overlays, 'overlayes')
 
   return overlays
 }

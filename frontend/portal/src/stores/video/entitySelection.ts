@@ -1,144 +1,148 @@
-import { parseEntityId } from "@/types/selection";
-import { CanvasObjectType, SlideType, SpotlightEffect, StackSlideContent } from "@coasterai/pb/coasterai/core/v1/slide_pb";
-import { ActiveToolType } from "@/types/tools";
-import { VideoStoreGet, VideoStoreSet } from "./types";
+import { parseEntityId } from '@/types/selection'
+import {
+  CanvasObjectType,
+  SlideType,
+  SpotlightEffect,
+  StackSlideContent
+} from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { ActiveToolType } from '@/types/tools'
+import { VideoStoreGet, VideoStoreSet } from './types'
 
 export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
-    handleSelectEntity(entityId: string) {
-        console.debug("[VideoStore] handleSelectEntity", { entityId });
-        const { sections } = get();
-        set({ selectedEntityId: entityId });
+  handleSelectEntity(entityId: string) {
+    console.debug('[VideoStore] handleSelectEntity', { entityId })
+    const { sections } = get()
+    set({ selectedEntityId: entityId })
 
-        try {
-            const parsed = parseEntityId(entityId);
-            const slideId = parsed.slideId;
+    try {
+      const parsed = parseEntityId(entityId)
+      const slideId = parsed.slideId
 
-            let foundSlide = null;
-            let foundSection = null;
+      let foundSlide = null
+      let foundSection = null
 
-            for (const section of sections) {
-                const slide = section.slides.find((sl) => sl.id === slideId);
-                if (slide) {
-                    foundSlide = slide;
-                    foundSection = section;
-                    break;
-                }
-            }
-
-            if (!foundSlide || !foundSection) return;
-
-            set({ selectedSlide: { section: foundSection, slide: foundSlide } });
-
-            if (parsed.type === "overlay") {
-                set({
-                    selectedObjectId: parsed.overlayId,
-                    selectedStackItemId: null,
-                });
-
-                // TODO: Iterate over spotlights, zoom etc and set the tool accordingly
-                const objects = get().getSpotlights();
-                // Find the object by checking the inner IDs
-                const obj = objects.find((e: SpotlightEffect) => {
-                    return e.id === parsed.overlayId;
-                });
-
-                if (obj) {
-                    set({ activeTool: { type: ActiveToolType.INSERT, tool: CanvasObjectType.CANVAS_SPOTLIGHT } });
-                }
-            } else if (parsed.type === "stack-item") {
-                set({
-                    selectedObjectId: null,
-                    selectedStackItemId: parsed.itemId,
-                    activeTool: { type: ActiveToolType.STACK_SETTINGS },
-                });
-            } else if (parsed.type === "stack-item-overlay") {
-                // set({
-                //     selectedObjectId: parsed.overlayId,
-                //     selectedStackItemId: parsed.itemId,
-                //     activeTool: { tool: ActiveToolType.INSERT, type: ActiveToolType.INSERT },
-                // });
-            } else {
-                set({
-                    selectedObjectId: null,
-                    selectedStackItemId: null,
-                    activeTool: null,
-                });
-            }
-        } catch (err) {
-            console.error("Invalid entity", entityId, err);
+      for (const section of sections) {
+        const slide = section.slides.find(sl => sl.id === slideId)
+        if (slide) {
+          foundSlide = slide
+          foundSection = section
+          break
         }
-    },
+      }
 
-    openEntitySettings(entityId: string) {
-        const { sections, selectedStackItemId } = get();
-        const parsed = parseEntityId(entityId);
+      if (!foundSlide || !foundSection) return
 
-        let foundSlide = null;
-        for (const section of sections) {
-            const slide = section.slides.find((s) => s.id === parsed.slideId);
-            if (slide) {
-                foundSlide = slide;
-                break;
-            }
+      set({ selectedSlide: { section: foundSection, slide: foundSlide } })
+      if (parsed.type === 'overlay') {
+        set({
+          selectedObjectId: parsed.overlayId,
+          selectedStackItemId: null
+        })
+
+        // TODO: Iterate over spotlights, zoom etc and set the tool accordingly
+        const objects = [...get().getSpotlights(), ...get().getCallouts()]
+        // Find the object by checking the inner IDs
+        const obj = objects.find((e: SpotlightEffect) => {
+          return e.id === parsed.overlayId
+        })
+
+        if (obj) {
+          set({ activeTool: { type: ActiveToolType.INSERT, tool: obj.type } })
         }
-        if (!foundSlide) return;
+      } else if (parsed.type === 'stack-item') {
+        set({
+          selectedObjectId: null,
+          selectedStackItemId: parsed.itemId,
+          activeTool: { type: ActiveToolType.STACK_SETTINGS }
+        })
+      } else if (parsed.type === 'stack-item-overlay') {
+        // set({
+        //     selectedObjectId: parsed.overlayId,
+        //     selectedStackItemId: parsed.itemId,
+        //     activeTool: { tool: ActiveToolType.INSERT, type: ActiveToolType.INSERT },
+        // });
+      } else {
+        set({
+          selectedObjectId: null,
+          selectedStackItemId: null,
+          activeTool: null
+        })
+      }
+    } catch (err) {
+      console.error('Invalid entity', entityId, err)
+    }
+  },
 
-        console.log("Open settings for slide:", parsed, foundSlide)
+  openEntitySettings(entityId: string) {
+    const { sections, selectedStackItemId } = get()
+    const parsed = parseEntityId(entityId)
 
-        if (parsed.type === "slide") {
-            if (foundSlide.type === SlideType.STACK) {
-                set({ activeTool: { type: ActiveToolType.STACK_SETTINGS } });
+    let foundSlide = null
+    for (const section of sections) {
+      const slide = section.slides.find(s => s.id === parsed.slideId)
+      if (slide) {
+        foundSlide = slide
+        break
+      }
+    }
+    if (!foundSlide) return
 
-                const items = (foundSlide.content.value as StackSlideContent)?.items || [];
-                if (items[0] && !selectedStackItemId) {
-                    set({ selectedStackItemId: items[0].id });
-                }
-            } else if (foundSlide.type === SlideType.TEXT_ANIMATION) {
-                set({ activeTool: { type: ActiveToolType.TEXT_ANIMATION_TEMPLATE } });
-            }
-        } else if (parsed.type === "overlay" || parsed.type === "stack-item-overlay") {
-            const objects = get().getSpotlights();
-            // Find the object by checking the inner IDs
-            const obj = objects.find((e: SpotlightEffect) => {
-                return e.id === parsed.overlayId;
-            });
+    console.log('Open settings for slide:', parsed, foundSlide)
 
-            if (obj) {
-                set({ activeTool: { type: ActiveToolType.INSERT, tool: CanvasObjectType.CANVAS_SPOTLIGHT } });
-            }
+    if (parsed.type === 'slide') {
+      if (foundSlide.type === SlideType.STACK) {
+        set({ activeTool: { type: ActiveToolType.STACK_SETTINGS } })
+
+        const items = (foundSlide.content.value as StackSlideContent)?.items || []
+        if (items[0] && !selectedStackItemId) {
+          set({ selectedStackItemId: items[0].id })
         }
-    },
+      } else if (foundSlide.type === SlideType.TEXT_ANIMATION) {
+        set({ activeTool: { type: ActiveToolType.TEXT_ANIMATION_TEMPLATE } })
+      }
+    } else if (parsed.type === 'overlay' || parsed.type === 'stack-item-overlay') {
+      const objects = get().getSpotlights()
+      // Find the object by checking the inner IDs
+      const obj = objects.find((e: SpotlightEffect) => {
+        return e.id === parsed.overlayId
+      })
 
-    handleSelectObject(id: string | null) {
-        const { selectedSlide, selectedStackItemId } = get();
-        if (!selectedSlide) return;
+      if (obj) {
+        set({ activeTool: { type: ActiveToolType.INSERT, tool: CanvasObjectType.CANVAS_SPOTLIGHT } })
+      }
+    }
+  },
 
-        set({ selectedObjectId: id });
+  handleSelectObject(id: string | null) {
+    const { selectedSlide, selectedStackItemId } = get()
+    if (!selectedSlide) return
+    set({ selectedObjectId: id })
 
-        if (id) {
-            set({ selectedStackItemId: null });
-            const objects = get().getSpotlights();
+    if (id) {
+      set({ selectedStackItemId: null })
+      const objects = [...get().getSpotlights(), ...get().getCallouts()]
 
-            // Find the object by checking the inner IDs
-            const obj = objects.find((e: SpotlightEffect) => {
-                return e.id === id;
-            });
-            if (obj) {
-                set({ activeTool: { type: ActiveToolType.INSERT, tool: CanvasObjectType.CANVAS_SPOTLIGHT } });
-            }
-        } else {
-            const slide = selectedSlide.slide;
-            if (slide?.type === SlideType.TEXT_ANIMATION) {
-                set({ activeTool: { type: ActiveToolType.TEXT_ANIMATION_TEMPLATE } });
-            } else if (slide?.type === SlideType.STACK) {
-                set({ activeTool: { type: ActiveToolType.STACK_SETTINGS } });
-                const first = (slide.content.value as StackSlideContent)?.items?.[0];
-                if (first && !selectedStackItemId) {
-                    set({ selectedStackItemId: first.id });
-                }
-            } else {
-                set({ activeTool: null });
-            }
+      // Find the object by checking the inner IDs
+      const obj = objects.find(e => {
+        return e.id === id
+      })
+
+      if (obj) {
+        set({ activeTool: { type: ActiveToolType.INSERT, tool: obj.type } })
+      }
+    } else {
+      const slide = selectedSlide.slide
+      if (slide?.type === SlideType.TEXT_ANIMATION) {
+        set({ activeTool: { type: ActiveToolType.TEXT_ANIMATION_TEMPLATE } })
+      } else if (slide?.type === SlideType.STACK) {
+        set({ activeTool: { type: ActiveToolType.STACK_SETTINGS } })
+        const first = (slide.content.value as StackSlideContent)?.items?.[0]
+        if (first && !selectedStackItemId) {
+          set({ selectedStackItemId: first.id })
         }
-    },
-});
+      } else {
+        set({ activeTool: null })
+      }
+    }
+  }
+})

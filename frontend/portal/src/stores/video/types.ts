@@ -7,13 +7,13 @@ import type {
 import type { EntityId } from "@/types/selection";
 import { ActiveTool, LeftPanelTool } from "@/types/tools";
 import { JsonObject } from "@bufbuild/protobuf";
-import { Section, Resolution, Slide, SlideType, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { Section, Resolution, Slide, SlideType, TransitionType, CalloutEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { Video } from "@coasterai/pb/coasterai/core/v1/video_pb";
 import type { StateCreator } from "zustand";
 
 // Zustand store types
-export type VideoStoreSet = Parameters<StateCreator<VideoState & VideoActions, [], [], VideoState & VideoActions>>[0];
-export type VideoStoreGet = Parameters<StateCreator<VideoState & VideoActions, [], [], VideoState & VideoActions>>[1];
+export type VideoStoreSet = Parameters<StateCreator<VideoState & VideoActions, [], [], VideoState & VideoActions>>[0]
+export type VideoStoreGet = Parameters<StateCreator<VideoState & VideoActions, [], [], VideoState & VideoActions>>[1]
 
 export interface VideoState {
     config: EditorConfig | null;
@@ -48,6 +48,7 @@ export interface VideoActions {
     initializeSync: (videoId: string) => void;
     syncSections: () => void;
     autoSyncSections: (sections: Section[]) => void;
+    notifyConfigChange:(sections:Section[]) => void
     getSyncStatus: () => 'idle' | 'syncing' | 'error';
     forceSyncSections: () => void;
 
@@ -64,49 +65,62 @@ export interface VideoActions {
     setEditingSectionId: (sectionId: string | null) => void;
     setEditingSectionTitle: (title: string) => void;
 
-    // Slides
-    getTimelineSlides: () => TimelineSlide[];
-    createSlideEntityId: (slideId: string) => EntityId;
-    addSlide: (sectionId: string, type: SlideType) => void;
-    removeSlide: (sectionId: string, slideId: string) => void;
-    updateSlide: (updates: Partial<Slide>) => void;
-    updateSlideContent: (updates: Record<string, unknown>) => void;
-    updateSlideTransition: (sectionId: string, slideId: string, transitionId: TransitionType) => void;
-    reorderSlidesInSection: (sectionId: string, activeId: string, overId: string) => void;
-    createStackItemEntityId: (slideId: string, itemId: string) => EntityId;
-    createOverlayEntityId: (slideId: string, overlayId: string) => EntityId;
+  // Slides
+  getTimelineSlides: () => TimelineSlide[]
+  createSlideEntityId: (slideId: string) => EntityId
+  addSlide: (sectionId: string, type: SlideType) => void
+  removeSlide: (sectionId: string, slideId: string) => void
+  updateSlide: (updates: Partial<Slide>) => void
+  updateSlideContent: (updates: Record<string, unknown>) => void
+  updateSlideTransition: (sectionId: string, slideId: string, transitionId: TransitionType) => void
+  reorderSlidesInSection: (sectionId: string, activeId: string, overId: string) => void
+  createStackItemEntityId: (slideId: string, itemId: string) => EntityId
+  createOverlayEntityId: (slideId: string, overlayId: string) => EntityId
 
-    // Canvas
-    getSpotlights: () => SpotlightEffect[];
-    addSpotlight: (effect: SpotlightEffect) => void;
-    updateSpotlight: (id: string, updates: Partial<SpotlightEffect>) => void;
-    deleteSpotlight: (id: string) => void;
+  // Canvas
+  // Define function interface here for effects to get in VideoActions
 
-    // Entity selection
-    handleSelectEntity: (entityId: EntityId) => void;
-    handleSelectObject: (id: string | null) => void;
-    openEntitySettings: (id: EntityId) => void;
+   // Get effects interfaces
+  getSpotlights: () => SpotlightEffect[]
+  getCallouts: () => CalloutEffect[]
 
-    // Tools
-    handleSelectTool: (tool: ActiveTool) => void;
-    handleCloseTool: () => void;
-    handleEditSlide: () => void;
+  // Add effects interfaces
+  addSpotlight: (effect: SpotlightEffect) => void
+  addCallout: (effect: CalloutEffect) => void
 
-    // Text animation
-    handleSelectTextAnimationTemplate: (templateId: string) => void;
-    handleUpdateTemplateProps: (props: JsonObject) => void;
-    getTextAnimationConfig: () => TextAnimationSlideConfig | undefined;
+  // Update effects interfaces
+  updateSpotlight: (id: string, updates: Partial<SpotlightEffect>) => void
+  updateCallout:(id:string, updates:Partial<CalloutEffect>) => void
 
-    // Voiceover
-    handleGenerateSlideVoiceover: () => void;
-    handleGenerateSectionVoiceover: (sectionId: string) => void;
-    setShowVoiceover: (show: boolean) => void;
+  // Delete effects interfaces
+  deleteSpotlight: (id: string) => void
+  deleteCallout: (id: string) => void
 
-    updateSlideTranscript: (transcript: string) => void;
-    setResolution: (resolution: Resolution) => void;
-    // setShowScreenshots: (show: boolean) => void;
-    setShowTransitionPicker: (slideId: string | null) => void;
-    updateSlideBackground: (color: string, applyToAll?: boolean) => void;
+  // Entity selection
+  handleSelectEntity: (entityId: EntityId) => void
+  handleSelectObject: (id: string | null) => void
+  openEntitySettings: (id: EntityId) => void
 
-    getFPS: () => number;
+  // Tools
+  handleSelectTool: (tool: ActiveTool) => void
+  handleCloseTool: () => void
+  handleEditSlide: () => void
+
+  // Text animation
+  handleSelectTextAnimationTemplate: (templateId: string) => void
+  handleUpdateTemplateProps: (props: JsonObject) => void
+  getTextAnimationConfig: () => TextAnimationSlideConfig | undefined
+
+  // Voiceover
+  handleGenerateSlideVoiceover: () => void
+  handleGenerateSectionVoiceover: (sectionId: string) => void
+  setShowVoiceover: (show: boolean) => void
+
+  updateSlideTranscript: (transcript: string) => void
+  setResolution: (resolution: Resolution) => void
+  // setShowScreenshots: (show: boolean) => void;
+  setShowTransitionPicker: (slideId: string | null) => void
+  updateSlideBackground: (color: string, applyToAll?: boolean) => void
+
+  getFPS: () => number
 }

@@ -198,6 +198,11 @@ export declare type SpotlightEffect = Message<"coasterai.core.v1.SpotlightEffect
    * @generated from field: float endTime = 9;
    */
   endTime: number;
+
+  /**
+   * @generated from field: float type = 10;
+   */
+  type: number;
 };
 
 /**
@@ -205,6 +210,72 @@ export declare type SpotlightEffect = Message<"coasterai.core.v1.SpotlightEffect
  * Use `create(SpotlightEffectSchema)` to create a new message.
  */
 export declare const SpotlightEffectSchema: GenMessage<SpotlightEffect>;
+
+/**
+ * @generated from message coasterai.core.v1.CalloutEffect
+ */
+export declare type CalloutEffect = Message<"coasterai.core.v1.CalloutEffect"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: float x = 2;
+   */
+  x: number;
+
+  /**
+   * @generated from field: float y = 3;
+   */
+  y: number;
+
+  /**
+   * @generated from field: float width = 4;
+   */
+  width: number;
+
+  /**
+   * @generated from field: float height = 5;
+   */
+  height: number;
+
+  /**
+   * @generated from field: float blurAmount = 6;
+   */
+  blurAmount: number;
+
+  /**
+   * @generated from field: float borderRadius = 7;
+   */
+  borderRadius: number;
+
+  /**
+   * @generated from field: float startTime = 8;
+   */
+  startTime: number;
+
+  /**
+   * @generated from field: float endTime = 9;
+   */
+  endTime: number;
+
+  /**
+   * @generated from field: float type = 10;
+   */
+  type: number;
+
+  /**
+   * @generated from field: string color = 11;
+   */
+  color: string;
+};
+
+/**
+ * Describes the message coasterai.core.v1.CalloutEffect.
+ * Use `create(CalloutEffectSchema)` to create a new message.
+ */
+export declare const CalloutEffectSchema: GenMessage<CalloutEffect>;
 
 /**
  * @generated from message coasterai.core.v1.ZoomEffect
@@ -482,7 +553,12 @@ export declare type Slide = Message<"coasterai.core.v1.Slide"> & {
   spotlights: SpotlightEffect[];
 
   /**
-   * @generated from field: repeated coasterai.core.v1.ZoomEffect zooms = 19;
+   * @generated from field: repeated coasterai.core.v1.CalloutEffect callouts = 19;
+   */
+  callouts: CalloutEffect[];
+
+  /**
+   * @generated from field: repeated coasterai.core.v1.ZoomEffect zooms = 20;
    */
   zooms: ZoomEffect[];
 };

@@ -1,4 +1,4 @@
-import { SlideType, SpotlightEffect, CanvasObjectType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { SlideType, SpotlightEffect, CanvasObjectType, CalloutEffect } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { ActiveToolType, LeftPanelTool } from '@/types/tools'
 import { VideoStoreSet, VideoStoreGet } from './types'
 
@@ -6,6 +6,8 @@ export const createToolActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   handleSelectTool(tool: LeftPanelTool) {
     const { resolution, selectedSlide } = get()
     if (!resolution || !selectedSlide) return
+    const startTime = selectedSlide.slide.transitionDuration || 0
+    const endTime = selectedSlide.slide.duration - (selectedSlide.slide.transitionDuration || 0)
     console.debug('tool selected', tool)
     set({ activeTool: tool })
 
@@ -22,12 +24,31 @@ export const createToolActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
           height: 150,
           blurAmount: 10,
           borderRadius: 8,
-          startTime: selectedSlide.slide.transitionDuration || 0,
-          endTime: selectedSlide.slide.duration - (selectedSlide.slide.transitionDuration || 0)
+          startTime,
+          endTime,
+          type: CanvasObjectType.CANVAS_SPOTLIGHT
         }
 
         get().addSpotlight(spotlightEffect)
         set({ selectedObjectId: spotlightEffect.id })
+      } else if (tool.tool === CanvasObjectType.CANVAS_CALLOUT) {
+        const calloutEffect: CalloutEffect = {
+          $typeName: 'coasterai.core.v1.CalloutEffect',
+          id: objectId,
+          x: resolution.width / 2 - 100,
+          y: resolution.height / 2 - 75,
+          width: 200,
+          height: 150,
+          blurAmount: 10,
+          borderRadius: 8,
+          startTime,
+          endTime,
+          type: CanvasObjectType.CANVAS_CALLOUT,
+          color:"#22c55e"
+        }
+
+        get().addCallout(calloutEffect)
+        set({ selectedObjectId: calloutEffect.id })
       }
 
       // if (tool.tool === CanvasObjectType.CANVAS_CALLOUT) {
