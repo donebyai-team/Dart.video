@@ -7,7 +7,7 @@ import {
 } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { ActiveToolType } from '@/types/tools'
 import { VideoStoreGet, VideoStoreSet } from './types'
-import { getDefaultSelectedTool } from './utils'
+import { getDefaultSelectedTool } from './defaults'
 
 export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   handleSelectEntity(entityId: string) {

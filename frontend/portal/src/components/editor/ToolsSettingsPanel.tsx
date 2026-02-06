@@ -46,7 +46,7 @@ const ToolsSettingsPanel = ({
   const spotlights = useVideoStore(s => s.getSpotlights) || []
   const callouts = useVideoStore(s => s.getCallouts) || []
   const updateSlideBackground = useVideoStore(s => s.updateSlideBackground)
-  const onUpdateTemplateProps = useVideoStore(s => s.handleUpdateTemplateProps)
+  const onUpdateTemplateProps = useVideoStore(s => s.updateTextAnimationProps)
   const onUpdateSlide = useVideoStore(s => s.updateSlide)
   const onSelectTextAnimationTemplate = useVideoStore(s => s.handleSelectTextAnimationTemplate)
 

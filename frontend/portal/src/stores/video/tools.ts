@@ -1,7 +1,7 @@
 import { SlideType, EffectType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { ActiveToolType, SelectedTool } from '@/types/tools'
 import { VideoStoreSet, VideoStoreGet } from './types'
-import { createCalloutEffect, createSpotlightEffect, getDefaultSelectedTool } from './utils'
+import { createCalloutEffect, createSpotlightEffect, getDefaultSelectedTool } from './defaults'
 
 export const createToolActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   handleSelectTool(tool: SelectedTool) {

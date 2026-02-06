@@ -14,7 +14,7 @@ import {
 import { arrayMove } from '@dnd-kit/sortable'
 import { slide } from '@remotion/transitions/slide'
 import { VideoStoreGet, VideoStoreSet } from './types'
-import { createNewSlide, getSlideTypeConfig } from './utils'
+import { createNewSlide, getSlideTypeConfig } from './defaults'
 
 export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   addSlide(sectionId: string, type: SlideType) {
@@ -60,62 +60,63 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     createStackItemOverlayEntityId(slideId, itemId, overlayId),
 
   updateSlideBackground: (color: string, applyToAll = false) => {
-    const { sections, selectedSlide, videoConfig, config } = get()
-    if (!selectedSlide) return
+    const { sections, selectedSlide } = get();
+    if (!selectedSlide) return;
+
+    let newSections = sections;
 
     if (applyToAll) {
-      // Set global background color and clear individual slide backgrounds
-      set({ globalBackgroundColor: color })
-      const newSections = sections.map(section => ({
+      // Apply global background, clear per-slide backgrounds
+      newSections = sections.map(section => ({
         ...section,
         slides: section.slides.map(slide => ({
           ...slide,
-          backgroundColor: undefined // Clear individual backgrounds, global will apply
-        }))
-      }))
-      set({
-        sections: newSections,
-        selectedSlide: {
-          ...selectedSlide,
-          slide: {
-            ...selectedSlide.slide,
-            backgroundColor: undefined
-          }
-        }
-      })
-      get().autoSyncSections(newSections)
-    } else {
-      // Clear global background and set individual slide background
-      set({ globalBackgroundColor: undefined })
-      const newSections = sections.map(section =>
-        section.id === selectedSlide.section.id
-          ? {
-            ...section,
-            slides: section.slides.map(slide =>
-              slide.id === selectedSlide.slide.id
-                ? {
-                  ...slide,
-                  backgroundColor: color
-                }
-                : slide
-            )
-          }
-          : section
-      )
+          backgroundColor: undefined,
+        })),
+      }));
 
       set({
+        globalBackgroundColor: color,
         sections: newSections,
         selectedSlide: {
           ...selectedSlide,
           slide: {
             ...selectedSlide.slide,
-            backgroundColor: color
-          }
-        }
-      })
-      get().autoSyncSections(newSections)
+            backgroundColor: undefined,
+          },
+        },
+      });
+    } else {
+      // Apply only to selected slide, clear global
+      newSections = sections.map(section => {
+        if (section.id !== selectedSlide.section.id) return section;
+
+        return {
+          ...section,
+          slides: section.slides.map(slide =>
+            slide.id === selectedSlide.slide.id
+              ? { ...slide, backgroundColor: color }
+              : slide
+          ),
+        };
+      });
+
+      set({
+        globalBackgroundColor: undefined,
+        sections: newSections,
+        selectedSlide: {
+          ...selectedSlide,
+          slide: {
+            ...selectedSlide.slide,
+            backgroundColor: color,
+          },
+        },
+      });
     }
-  },
+
+    get().autoSyncSections(newSections);
+  }
+  ,
 
   updateSlideTranscript: (transcript: string) => {
     const { sections, selectedSlide } = get()
@@ -169,6 +170,8 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
         set({ selectedSlide: next ? { section: next, slide: next.slides[0] } : null })
       }
     }
+
+    get().autoSyncSections(newSections);
   },
 
   updateSlide(updates: Partial<Slide>) {

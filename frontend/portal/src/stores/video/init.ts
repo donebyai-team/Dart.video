@@ -2,7 +2,7 @@ import { createSlideEntityId } from "@/types/selection";
 import { VideoStoreSet, VideoStoreGet } from "./types";
 import { EditorConfig } from "@/types/editor";
 import { Video } from "@coasterai/pb/coasterai/core/v1/video_pb";
-import { getDefaultResolution, getInitialSelection } from "./utils";
+import { getDefaultResolution, getInitialSelection } from "./defaults";
 
 export const createInitActions = (
   set: VideoStoreSet,

@@ -107,7 +107,7 @@ export interface VideoActions {
 
   // Text animation
   handleSelectTextAnimationTemplate: (templateId: string) => void
-  handleUpdateTemplateProps: (props: JsonObject) => void
+  updateTextAnimationProps: (props: JsonObject) => void
   getTextAnimationConfig: () => TextAnimationSlideConfig | undefined
 
   // Voiceover

@@ -1,4 +1,4 @@
-import { CalloutEffect, CanvasObject, Resolution } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { CalloutEffect, Resolution, SpotlightEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 interface CalloutOverlayProps {
@@ -8,7 +8,7 @@ interface CalloutOverlayProps {
   containerHeight: number;
   isSelected: boolean;
   onSelect: () => void;
-  onUpdate: (updates: Partial<CanvasObject>) => void;
+  onUpdate: (updates: Partial<SpotlightEffect | CalloutEffect>) => void;
 }
 
 type ResizeHandle = "nw" | "ne" | "sw" | "se";
