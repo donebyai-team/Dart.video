@@ -68,20 +68,24 @@ Replace placeholders (`<value>`) with your actual secrets and keys.
 
 ---
 
+Initialize the database:
+
+```bash
+./backend/script/migrate.sh up
+```
+
 ### Backend Setup
 
 Run tests and start the backend:
 
 ```bash
 cd backend
-go test ./...
 go build -o redora && ./redora start
 ```
 
-Initialize the database:
-
+For tests
 ```bash
-./backend/script/migrate.sh up
+go test ./...
 ```
 
 Create a new migration:

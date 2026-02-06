@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import { Menu, Mic2, Eye, Plus, Pencil, Volume2, RefreshCw, Video, Home, Settings, HelpCircle } from 'lucide-react'
+import { Menu, Mic2, Eye, Volume2, RefreshCw, Video, Home, Settings, HelpCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -12,12 +12,13 @@ import ResolutionSelector from '@/components/editor/ResolutionSelector'
 import StoryboardPanel from '@/components/editor/StoryboardPanel'
 import ToolsSettingsPanel from '@/components/editor/ToolsSettingsPanel'
 import RemotionPlayer, { RemotionPlayerHandle } from '@/components/editor/canvas/RemotionPlayer'
-import { type EditorConfig, type EditorCallbacks, VideoConfig } from '@/types/editor'
-import { sampleVideoConfig } from '@/data/videoConfig'
+import { type EditorConfig } from '@/types/editor'
 import { defaultEditorConfig } from '@/data/editorConfig'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { useVideoStore } from '@/stores/video'
 import { Slide, SlideType, StackSlideContent } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { Video as VideoConfig } from '@coasterai/pb/coasterai/core/v1/video_pb'
+import toast from 'react-hot-toast'
 
 // Icon mapping for dynamic rendering
 const iconMap: Record<string, React.ElementType> = {
@@ -27,28 +28,34 @@ const iconMap: Record<string, React.ElementType> = {
   Video
 }
 interface EditorPageProps {
+  videoId: string
   config?: EditorConfig
-  videoConfig?: VideoConfig
-  onConfigChange?: EditorCallbacks['onConfigChange']
-  onSave?: EditorCallbacks['onSave']
-  onExport?: EditorCallbacks['onExport']
 }
-const EditorPage = ({
-  config = defaultEditorConfig,
-  videoConfig = sampleVideoConfig,
-  onConfigChange,
-}: EditorPageProps) => {
+const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) => {
   const router = useRouter()
   const playerRef = useRef<RemotionPlayerHandle>(null)
   const initializationRef = useRef<{ config?: EditorConfig; videoConfig?: VideoConfig }>({})
 
+  // State for loading video data
+  const [isLoadingVideo, setIsLoadingVideo] = useState(true)
+
   // ---- Values (reactive) ----
   const initialize = useVideoStore(s => s.initialize)
+  const initializeSync = useVideoStore(s => s.initializeSync)
   const isInitialized = useVideoStore(s => s.isInitialized)
 
-  const setShowVoiceover = useVideoStore(s => s.setShowVoiceover)
+  // Streaming state
+  const startVideoStream = useVideoStore(s => s.startVideoStream)
+  const isStreamingVideo = useVideoStore(s => s.isStreamingVideo)
+  const streamingThinkingSummary = useVideoStore(s => s.streamingThinkingSummary)
+  const streamingError = useVideoStore(s => s.streamingError)
+
+  // Video data from store (this is the single source of truth)
+  const videoConfigFromStore = useVideoStore(s => s.videoConfig)
   const sections = useVideoStore(s => s.sections)
   const selectedSlide = useVideoStore(s => s.selectedSlide)
+
+  const setShowVoiceover = useVideoStore(s => s.setShowVoiceover)
 
   const activeTool = useVideoStore(s => s.activeTool)
   const selectedObjectId = useVideoStore(s => s.selectedObjectId)
@@ -71,33 +78,64 @@ const EditorPage = ({
   const updateSlideTranscript = useVideoStore(s => s.updateSlideTranscript)
   const handleGenerateSlideVoiceover = useVideoStore(s => s.handleGenerateSlideVoiceover)
   const handleCloseTool = useVideoStore(s => s.handleCloseTool)
-  const onUpdateSpotlight = useVideoStore(s => s.updateSpotlight)
-  const onUpdateCallout = useVideoStore(s => s.updateCallout)
-  const onDeleteSpotSlight = useVideoStore(s => s.deleteSpotlight)
-  const onDeleteCallout = useVideoStore(s => s.deleteCallout)
+  const updateSpotlight = useVideoStore(s => s.updateSpotlight)
+  const deleteSpotlight = useVideoStore(s => s.deleteSpotlight)
   const updateSlide = useVideoStore(s => s.updateSlide)
   const handleSelectEntity = useVideoStore(s => s.handleSelectEntity)
   const openEntitySettings = useVideoStore(s => s.openEntitySettings)
 
+  // Start video streaming
   useEffect(() => {
+    const initializeStreaming = async () => {
+      try {
+        console.log('Starting video stream for videoId:', videoId)
+
+        // Start streaming immediately - the store will handle all updates
+        startVideoStream(videoId).catch(error => {
+          console.error('Stream failed:', error)
+          toast.error(error)
+          // Error handling is done in the streaming action
+        })
+
+        // Show editor immediately with sample config, real data will come from stream
+        setIsLoadingVideo(false)
+      } catch (error) {
+        console.error('Failed to start video stream:', error)
+        setIsLoadingVideo(false)
+      }
+    }
+
+    initializeStreaming()
+  }, [videoId, startVideoStream])
+
+  useEffect(() => {
+    // Use video config from store, fallback to sample config if not available
+    const currentVideoConfig = videoConfigFromStore
+
+    // Don't initialize until video data is loaded
+    if (isLoadingVideo || !currentVideoConfig) return
+
     // Prevent re-initialization with the same configs
     const lastInit = initializationRef.current
-    if (lastInit.config === config && lastInit.videoConfig === videoConfig) {
+    if (lastInit.config === config && lastInit.videoConfig === currentVideoConfig) {
       console.log('Skipping re-init - same configs')
       return
     }
 
     console.log('EditorPage: Calling initialize with:', {
       config: !!config,
-      videoConfig: !!videoConfig,
-      sections: videoConfig?.sections?.length
+      videoConfig: !!currentVideoConfig,
+      sections: currentVideoConfig?.config?.sections?.length
     })
 
-    initialize(config, videoConfig, { onConfigChange })
+    initialize(config, currentVideoConfig!)
+
+    // Initialize sync with video ID
+    initializeSync(videoId)
 
     // Store references to prevent re-initialization
-    initializationRef.current = { config, videoConfig }
-  }, [config, videoConfig, initialize, onConfigChange])
+    initializationRef.current = { config, videoConfig: currentVideoConfig! }
+  }, [config, videoConfigFromStore, initialize, initializeSync, videoId, isLoadingVideo])
 
   // Centralized preview handler - plays a slide from start and pauses at end
   const handlePreviewSlide = (slideId: string) => {
@@ -115,20 +153,56 @@ const EditorPage = ({
     }
   }
 
-  // Early return if not initialized
-  if (!isInitialized || !selectedSlide) {
+  // Early return if not initialized yet OR if streaming but no sections received yet
+  if (!isInitialized || (isStreamingVideo && sections.length === 0)) {
     return (
       <div className='h-screen flex items-center justify-center bg-muted/30'>
-        <div className='text-center'>
+        <div className='text-center max-w-md'>
           <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4'></div>
-          <p className='text-muted-foreground'>Loading editor...</p>
+          <p className='text-muted-foreground'>Loading...</p>
+
+          {streamingError && (
+            <div className='mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg'>
+              <p className='text-destructive text-sm'>{streamingError}</p>
+            </div>
+          )}
         </div>
       </div>
     )
   }
 
   return (
-    <div className='h-screen flex flex-col bg-muted/30'>
+    <div className='h-screen flex flex-col bg-muted/30 relative'>
+      {/* Thinking Summary Banner - Shows at top during streaming */}
+      {isStreamingVideo && streamingThinkingSummary && (
+        <div className='relative overflow-hidden border-b border-primary/30'>
+          {/* Highlighter base */}
+          <div className='bg-primary/15 backdrop-blur-sm px-4 py-3'>
+            <div className='flex items-center gap-3 relative z-10'>
+              <div className='h-3.5 w-3.5 rounded-full border-2 border-primary border-t-transparent animate-spin'></div>
+              <span className='text-sm text-foreground italic flex-1'>{streamingThinkingSummary}</span>
+            </div>
+          </div>
+
+          {/* Moving highlighter shimmer */}
+          <div className='pointer-events-none absolute inset-0'>
+            <div className='absolute top-0 left-[-40%] h-full w-[40%] bg-gradient-to-r from-transparent via-primary/25 to-transparent animate-[shimmer_2.5s_linear_infinite]' />
+          </div>
+
+          {/* Tailwind custom animation */}
+          <style jsx>{`
+            @keyframes shimmer {
+              0% {
+                transform: translateX(0);
+              }
+              100% {
+                transform: translateX(250%);
+              }
+            }
+          `}</style>
+        </div>
+      )}
+
       {/* Header */}
       <header className='h-14 bg-card border-b border-border flex items-center justify-between px-4 flex-shrink-0'>
         <div className='flex items-center gap-4'>
@@ -165,19 +239,24 @@ const EditorPage = ({
             </SheetContent>
           </Sheet>
           <div className='h-6 w-px bg-border' />
-          <span className='font-semibold'>{videoConfig.project.name}</span>
-          <span className='text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full capitalize'>
-            {videoConfig.project.status}
-          </span>
+          <div className='flex items-center gap-3'>
+            <span className='font-semibold'>{videoConfigFromStore?.name || 'Untitled Video'}</span>
+          </div>
         </div>
 
         <div className='flex items-center gap-2'>
           <ResolutionSelector />
-          <Button variant='outline' size='sm' onClick={() => setShowVoiceover(true)} className='gap-2'>
+          <Button
+            variant='outline'
+            size='sm'
+            onClick={() => setShowVoiceover(true)}
+            className='gap-2'
+            disabled={isStreamingVideo}
+          >
             <Mic2 className='w-4 h-4' />
             Voiceover
           </Button>
-          <Button className='btn-accent-gradient gap-2'>
+          <Button className='btn-accent-gradient gap-2' disabled={isStreamingVideo}>
             <Eye className='w-4 h-4' />
             Export
           </Button>
@@ -193,19 +272,13 @@ const EditorPage = ({
           className='w-96 bg-card border-r border-border flex flex-col'
         >
           <AnimatePresence mode='wait'>
-            {activeTool ? (
+            {activeTool && selectedSlide ? (
               <ToolsSettingsPanel
-                deleteSpotlight={onDeleteSpotSlight}
-                deleteCallout={onDeleteCallout}
+                deleteSpotlight={deleteSpotlight}
                 onPreviewTemplate={() => handlePreviewSlide(selectedSlide.slide.id)}
                 onUpdateSpotlight={updates => {
                   if (selectedObjectId) {
-                    onUpdateSpotlight(selectedObjectId, updates)
-                  }
-                }}
-                onUpdateCallout={updates => {
-                  if (selectedObjectId) {
-                    onUpdateCallout(selectedObjectId, updates)
+                    updateSpotlight(selectedObjectId, updates)
                   }
                 }}
                 onSpotlightApply={() => {
@@ -238,29 +311,32 @@ const EditorPage = ({
                   </div>
                 </div>
 
-                <StoryboardPanel
-                  onSelectSlide={(_, slide) => {
-                    console.log(`[EditorPage] Manual slide selection from slide card: ${slide.id}`)
-                    // Use unified selection handler
-                    const entityId = createSlideEntityId(slide.id)
-                    handleSelectEntity(entityId)
-                    // Use manual slide selection behavior - seek to end and prepare for restart
-                    playerRef.current?.selectSlideManually(slide.id)
-                    // For stack slides, auto-open settings (slide-level settings)
-                    if (slide.type === SlideType.STACK) {
-                      openEntitySettings(entityId)
-                    }
-                  }}
-                  onStartEditTitle={(id, title) => {
-                    setEditingSectionId(id)
-                    setEditingSectionTitle(title)
-                  }}
-                  onSaveTitle={() => {
-                    if (editingSectionId) {
-                      updateSectionTitle(editingSectionId, editingSectionTitle)
-                    }
-                  }}
-                />
+                {selectedSlide && (
+                  <StoryboardPanel
+                    isStreamingVideo={isStreamingVideo}
+                    onSelectSlide={(_section, slide) => {
+                      console.log(`[EditorPage] Manual slide selection from slide card: ${slide.id}`)
+                      // Use unified selection handler
+                      const entityId = createSlideEntityId(slide.id)
+                      handleSelectEntity(entityId)
+                      // Use manual slide selection behavior - seek to end and prepare for restart
+                      playerRef.current?.selectSlideManually(slide.id)
+                      // For stack slides, auto-open settings (slide-level settings)
+                      if (slide.type === SlideType.STACK) {
+                        openEntitySettings(entityId)
+                      }
+                    }}
+                    onStartEditTitle={(id, title) => {
+                      setEditingSectionId(id)
+                      setEditingSectionTitle(title)
+                    }}
+                    onSaveTitle={() => {
+                      if (editingSectionId) {
+                        updateSectionTitle(editingSectionId, editingSectionTitle)
+                      }
+                    }}
+                  />
+                )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -278,7 +354,7 @@ const EditorPage = ({
               }}
               onStackItemChange={itemId => {
                 // Update stack item selection during playback
-                if (itemId && selectedSlide.slide.type === SlideType.STACK) {
+                if (itemId && selectedSlide && selectedSlide.slide.type === SlideType.STACK) {
                   handleSelectEntity(createStackItemEntityId(selectedSlide.slide.id, itemId))
                 }
               }}
@@ -288,7 +364,7 @@ const EditorPage = ({
                 handleSelectEntity(createOverlayEntityId(slideId, overlayId))
               }}
               // Duration change handler
-              onDurationChange={(_, newDuration) => {
+              onDurationChange={(_slideId, newDuration) => {
                 updateSlide({ duration: newDuration })
               }}
               onSelectTemplate={slideId => {
@@ -299,8 +375,33 @@ const EditorPage = ({
                 openEntitySettings(entityId)
               }}
               transcriptPanel={(() => {
-                // Safety check - should not happen due to early return above
-                if (!selectedSlide) return null
+                // Handle case where no slide is selected yet (during streaming)
+                if (!selectedSlide) {
+                  return (
+                    <div className='space-y-2'>
+                      <div className='flex items-center gap-2'>
+                        <Volume2 className='w-4 h-4 text-muted-foreground' />
+                        <span className='text-xs font-medium text-muted-foreground uppercase tracking-wide'>
+                          Voiceover Script
+                        </span>
+                      </div>
+                      <div className='flex items-center gap-3'>
+                        <div className='flex-1 max-w-xl'>
+                          <Textarea
+                            value=''
+                            placeholder={isStreamingVideo ? 'Waiting for slides...' : 'No slide selected'}
+                            className='text-sm min-h-[40px] resize-none'
+                            rows={1}
+                            disabled={true}
+                          />
+                        </div>
+                        <Button variant='outline' size='icon' className='h-9 w-9 flex-shrink-0' disabled={true}>
+                          <Mic2 className='w-4 h-4' />
+                        </Button>
+                      </div>
+                    </div>
+                  )
+                }
 
                 // If a stack item is selected, show its transcript
                 let currentTranscript = selectedSlide.slide.transcript
@@ -342,7 +443,7 @@ const EditorPage = ({
                     <div className='flex items-center gap-3'>
                       <div className='flex-1 max-w-xl'>
                         <Textarea
-                          value={currentTranscript}
+                          value={currentTranscript || ''}
                           onChange={e => handleTranscriptChange(e.target.value)}
                           placeholder='Enter slide transcript...'
                           className='text-sm min-h-[40px] resize-none'
@@ -352,6 +453,7 @@ const EditorPage = ({
                             target.style.height = 'auto'
                             target.style.height = `${target.scrollHeight}px`
                           }}
+                          disabled={isStreamingVideo} // Disable editing during streaming
                         />
                       </div>
                       <TooltipProvider delayDuration={200}>
@@ -362,9 +464,13 @@ const EditorPage = ({
                               size='icon'
                               className='h-9 w-9 flex-shrink-0'
                               onClick={handleGenerateSlideVoiceover}
-                              disabled={generatingSlideVoiceover === selectedSlide.slide.id}
+                              disabled={
+                                !selectedSlide ||
+                                generatingSlideVoiceover === selectedSlide.slide.id ||
+                                isStreamingVideo
+                              }
                             >
-                              {generatingSlideVoiceover === selectedSlide.slide.id ? (
+                              {selectedSlide && generatingSlideVoiceover === selectedSlide.slide.id ? (
                                 <motion.div
                                   animate={{ rotate: 360 }}
                                   transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
@@ -377,7 +483,7 @@ const EditorPage = ({
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent className='text-xs'>
-                            {selectedSlide.slide.voiceoverGenerated ? 'Regenerate' : 'Generate'} voiceover
+                            {selectedSlide?.slide.voiceoverGenerated ? 'Regenerate' : 'Generate'} voiceover
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>

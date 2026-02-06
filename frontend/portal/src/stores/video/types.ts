@@ -1,58 +1,69 @@
-import { SpotlightEffect } from '@/components/editor/remotion/effects'
-import { TimelineSlide } from '@/components/editor/timeline/types'
-import type { EditorConfig, EditorCallbacks, VideoConfig, TextAnimationSlideConfig } from '@/types/editor'
-import type { EntityId } from '@/types/selection'
-import { ActiveTool, LeftPanelTool } from '@/types/tools'
-import { JsonObject } from '@bufbuild/protobuf'
-import {
-  Section,
-  Resolution,
-  Slide,
-  SlideType,
-  TransitionType,
-  CalloutEffect
-} from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import type { StateCreator } from 'zustand'
+import { SpotlightEffect } from "@/components/editor/remotion/effects";
+import { TimelineSlide } from "@/components/editor/timeline/types";
+import type {
+    EditorConfig,
+    TextAnimationSlideConfig,
+} from "@/types/editor";
+import type { EntityId } from "@/types/selection";
+import { ActiveTool, LeftPanelTool } from "@/types/tools";
+import { JsonObject } from "@bufbuild/protobuf";
+import { Section, Resolution, Slide, SlideType, TransitionType, CalloutEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { Video } from "@coasterai/pb/coasterai/core/v1/video_pb";
+import type { StateCreator } from "zustand";
 
 // Zustand store types
 export type VideoStoreSet = Parameters<StateCreator<VideoState & VideoActions, [], [], VideoState & VideoActions>>[0]
 export type VideoStoreGet = Parameters<StateCreator<VideoState & VideoActions, [], [], VideoState & VideoActions>>[1]
 
 export interface VideoState {
-  config: EditorConfig | null
-  videoConfig: VideoConfig | null
-  sections: Section[]
-  resolution: Resolution | null
-  globalBackgroundColor?: string
-  isInitialized: boolean
-  selectedEntityId: EntityId
-  selectedSlide: { section: Section; slide: Slide } | null
-  selectedObjectId: string | null
-  selectedStackItemId: string | null
-  activeTool: LeftPanelTool
-  showScreenshots: boolean
-  showVoiceover: boolean
-  openSections: string[]
-  showTransitionPicker: string | null
-  generatingSectionVoiceover: string | null
-  editingSectionId: string | null
-  editingSectionTitle: string
-  generatingSlideVoiceover: string | null
-  onConfigChange?: EditorCallbacks['onConfigChange']
+    config: EditorConfig | null;
+    videoConfig: Video | null;
+    sections: Section[];
+    resolution: Resolution | null;
+    globalBackgroundColor?: string;
+    isInitialized: boolean;
+    selectedEntityId: EntityId;
+    selectedSlide: { section: Section; slide: Slide } | null;
+    selectedObjectId: string | null;
+    selectedStackItemId: string | null;
+    activeTool: LeftPanelTool;
+    showScreenshots: boolean;
+    showVoiceover: boolean;
+    showTransitionPicker: string | null;
+    generatingSectionVoiceover: string | null;
+    editingSectionId: string | null;
+    editingSectionTitle: string;
+    generatingSlideVoiceover: string | null;
+
+    // Streaming state
+    isStreamingVideo: boolean;
+    streamingThinkingSummary: string;
+    streamingError: string | null;
 }
 
 export interface VideoActions {
-  initialize: (config: EditorConfig, videoConfig: VideoConfig, callbacks?: EditorCallbacks) => void
-  notifyConfigChange: (sections: Section[]) => void
+    initialize: (config: EditorConfig, videoConfig: Video) => void;
 
-  // Sections
-  addSection: () => void
-  removeSection: (sectionId: string) => void
-  updateSectionTitle: (sectionId: string, newTitle: string) => void
-  toggleSection: (sectionId: string) => void
-  handleSectionDragEnd: (event: { active: { id: string }; over: { id: string } | null }) => void
-  setEditingSectionId: (sectionId: string | null) => void
-  setEditingSectionTitle: (title: string) => void
+    // Sync actions
+    initializeSync: (videoId: string) => void;
+    syncSections: () => void;
+    autoSyncSections: (sections: Section[]) => void;
+    notifyConfigChange:(sections:Section[]) => void
+    getSyncStatus: () => 'idle' | 'syncing' | 'error';
+    forceSyncSections: () => void;
+
+    // Streaming actions
+    startVideoStream: (videoId: string) => Promise<Video | null>;
+    updateStreamingProgress: (thinkingSummary?: string) => void;
+    setStreamingError: (error: string | null) => void;
+
+    // Sections
+    addSection: () => void;
+    removeSection: (sectionId: string) => void;
+    updateSectionTitle: (sectionId: string, newTitle: string) => void;
+    handleSectionDragEnd: (event: { active: { id: string }; over: { id: string } | null }) => void;
+    setEditingSectionId: (sectionId: string | null) => void;
+    setEditingSectionTitle: (title: string) => void;
 
   // Slides
   getTimelineSlides: () => TimelineSlide[]

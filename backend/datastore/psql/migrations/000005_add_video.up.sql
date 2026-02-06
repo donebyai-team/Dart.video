@@ -10,8 +10,8 @@ CREATE TABLE videos
     created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     script jsonb DEFAULT '{}'::jsonb,
-    ai_generated_config jsonb DEFAULT '[]'::jsonb,
-    config jsonb DEFAULT '[]'::jsonb,  
+    ai_generated_config jsonb DEFAULT '{}'::jsonb,
+    config jsonb DEFAULT '{}'::jsonb,
     updated_at timestamp
 );
 

@@ -11,7 +11,8 @@ import {
   Film,
   Focus,
   CircleDot,
-  Layers
+  Layers,
+  HelpCircle
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
@@ -29,6 +30,7 @@ interface PlayerToolbarProps {
 }
 
 const slideTypeLabels: Record<SlideType, { label: string; icon: React.ElementType }> = {
+  [SlideType.UNDEFINED]: { label: 'Undefined', icon: HelpCircle }, // or any icon
   [SlideType.IMAGE]: { label: 'Image', icon: ImageIcon },
   [SlideType.TEXT_ANIMATION]: { label: 'Text Animation', icon: Type },
   [SlideType.INFOGRAPHIC]: { label: 'Infographic', icon: BarChart3 },
@@ -36,7 +38,6 @@ const slideTypeLabels: Record<SlideType, { label: string; icon: React.ElementTyp
   [SlideType.VIDEO]: { label: 'Video', icon: Film },
   [SlideType.STACK]: { label: 'Stack', icon: Layers }
 }
-
 const insertTools: { id: CanvasObjectType; name: string; icon: React.ElementType }[] = [
   { id: CanvasObjectType.CANVAS_CALLOUT, name: 'Callout', icon: Focus },
   { id: CanvasObjectType.CANVAS_SPOTLIGHT, name: 'Spotlight', icon: CircleDot }
