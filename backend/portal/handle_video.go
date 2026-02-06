@@ -3,6 +3,8 @@ package portal
 import (
 	"connectrpc.com/connect"
 	"context"
+	"database/sql"
+	"errors"
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
@@ -33,39 +35,76 @@ func (p *Portal) CreateVideo(ctx context.Context, c *connect.Request[pbportal.Cr
 }
 
 func (p *Portal) GetVideo(ctx context.Context,
-	c *connect.Request[pbportal.GetVideoRequest],
-	stream *connect.ServerStream[pbcore.Video]) error {
+	req *connect.Request[pbportal.GetVideoRequest],
+	stream *connect.ServerStream[pbportal.GetVideoResponse]) error {
 	actor, err := p.gethAuthContext(ctx)
 	if err != nil {
 		return err
 	}
 
-	videoID := c.Msg.Id
+	videoID := req.Msg.Id
 
-	for {
+	// Mock thinking steps for testing streaming behavior
+	thinkingSteps := []string{
+		"Fetching video data...",
+		"Loading configuration...",
+		"Processing sections...",
+		"Preparing response...",
+		"Finalizing...",
+	}
+
+	for stepIndex := range thinkingSteps {
+		// Simulate processing time between each step
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(2000 * time.Millisecond):
+		}
+
+		// Fetch video from database
 		video, err := p.videoGenerationService.GetVideo(ctx, videoID, actor.OrganizationID)
 		if err != nil {
 			return connect.NewError(connect.CodeInternal, err)
 		}
 
-		// 2. Stream snapshot to client
-		err = stream.Send(video.ToProto())
+		// Convert to proto
+		videoProto := video.ToProto()
+
+		// Progressively reveal sections to test streaming behavior
+		var sectionsToSend []*pbcore.Section
+		if videoProto.Config != nil && len(videoProto.Config.Sections) > 0 {
+			totalSections := len(videoProto.Config.Sections)
+			// Reveal sections progressively based on the step
+			numSectionsToReveal := (stepIndex + 1) * totalSections / len(thinkingSteps)
+			if numSectionsToReveal > totalSections {
+				numSectionsToReveal = totalSections
+			}
+			sectionsToSend = videoProto.Config.Sections[:numSectionsToReveal]
+		}
+
+		// Create response with staggered sections
+		response := &pbportal.GetVideoResponse{
+			ThinkingSummary: thinkingSteps[stepIndex],
+			Video: &pbcore.Video{
+				Id:       videoProto.Id,
+				Name:     videoProto.Name,
+				Config:   &pbcore.VideoConfig{Sections: sectionsToSend},
+				Metadata: videoProto.Metadata,
+				Status:   videoProto.Status,
+			},
+		}
+
+		// Send stream response
+		err = stream.Send(response)
 		if err != nil {
 			// client disconnected
 			return connect.NewError(connect.CodeInternal, err)
 		}
 
-		// 3. Exit condition
-		if video.Status == models.VideoStatusFAILED ||
-			video.Status == models.VideoStatusCOMPLETED {
+		// Exit condition: video is completed or failed, and we've sent all sections
+		if (video.Status == models.VideoStatusFAILED || video.Status == models.VideoStatusCOMPLETED) &&
+			stepIndex == len(thinkingSteps)-1 {
 			return nil
-		}
-
-		// 4. Backoff / polling interval
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case <-time.After(500 * time.Millisecond):
 		}
 	}
 
@@ -89,4 +128,25 @@ func (p *Portal) GetVideos(ctx context.Context, c *connect.Request[emptypb.Empty
 	}
 
 	return connect.NewResponse(&pbportal.GetVideosResponse{Videos: videoProtos}), nil
+}
+
+func (p *Portal) UpdateVideoConfig(ctx context.Context, c *connect.Request[pbportal.UpdateVideoConfigRequest]) (*connect.Response[emptypb.Empty], error) {
+	actor, err := p.gethAuthContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	err = p.videoGenerationService.UpdateVideoConfig(ctx, &models.Video{
+		ID:             c.Msg.Id,
+		OrganizationID: actor.OrganizationID,
+		Config:         c.Msg.Config,
+	})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, connect.NewError(connect.CodeNotFound, err)
+		}
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	return connect.NewResponse(&emptypb.Empty{}), nil
 }

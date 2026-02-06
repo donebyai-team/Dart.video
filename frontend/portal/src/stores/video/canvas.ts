@@ -31,10 +31,11 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
         ...selectedSlide,
         slide: {
           ...selectedSlide.slide,
-          spotlights: [...(selectedSlide.slide.spotlights || []), effect]
-        }
-      }
-    })
+          spotlights: [...(selectedSlide.slide.spotlights || []), effect],
+        },
+      },
+    });
+    get().autoSyncSections(newSections);
   },
 
   updateSpotlight(effectId: string, updates: Partial<SpotlightEffect>) {
@@ -65,12 +66,13 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
         ...selectedSlide,
         slide: {
           ...selectedSlide.slide,
-          spotlights: (selectedSlide.slide.spotlights || []).map(e => {
-            return e?.id === effectId ? { ...e, ...updates } : e
-          })
-        }
-      }
-    })
+          spotlights: (selectedSlide.slide.spotlights || []).map((e) => {
+            return e?.id === effectId ? { ...e, ...updates } : e;
+          }),
+        },
+      },
+    });
+    get().autoSyncSections(newSections);
   },
 
   deleteSpotlight(effectId: string) {
@@ -109,7 +111,7 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
       selectedObjectId: null
     })
 
-    get().notifyConfigChange(newSections)
+    get().autoSyncSections(newSections);
   },
 
   getCallouts: () => {

@@ -13,37 +13,37 @@ interface ConfigGuardProps {
 
 const ConfigGuard = (props: ConfigGuardProps) => {
   const { children, fallback } = props
-  // const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     const apiKey = process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY;
     initAmplitude(apiKey)
   }, [])
 
-  // useEffect(() => {
-  //   setLoading(true)
-  //   configProvider.bootstrap().finally(() => {
-  //     setLoading(false)
+  useEffect(() => {
+    setLoading(true)
+    configProvider.bootstrap().finally(() => {
+      setLoading(false)
 
-  //     if (configProvider.config.fullStoryOrgId === '') {
-  //       log.info('skipping fullstory setup')
-  //       return
-  //     }
+      if (configProvider.config.fullStoryOrgId === '') {
+        log.info('skipping fullstory setup')
+        return
+      }
 
-  //     if (isFullStoryInitialized()) {
-  //       log.info('fullstory already initialized')
-  //       return
-  //     }
+      if (isFullStoryInitialized()) {
+        log.info('fullstory already initialized')
+        return
+      }
 
-  //     initFullStory({ orgId: configProvider.config.fullStoryOrgId, debug: true }, ({ sessionUrl }) =>
-  //       log.info('fullstory started session %s', sessionUrl)
-  //     )
-  //   })
-  // }, [])
+      initFullStory({ orgId: configProvider.config.fullStoryOrgId, debug: true }, ({ sessionUrl }) =>
+        log.info('fullstory started session %s', sessionUrl)
+      )
+    })
+  }, [])
 
-  // if (loading) {
-  //   return fallback
-  // }
+  if (loading) {
+    return fallback
+  }
 
   return <>{children}</>
 }

@@ -20,6 +20,11 @@ export declare type VideoMetadata = Message<"coasterai.core.v1.VideoMetadata"> &
    * @generated from field: int64 fps = 1;
    */
   fps: bigint;
+
+  /**
+   * @generated from field: string background_color = 2;
+   */
+  backgroundColor: string;
 };
 
 /**
@@ -74,9 +79,9 @@ export declare const VideoSchema: GenMessage<Video>;
  */
 export declare type VideoConfig = Message<"coasterai.core.v1.VideoConfig"> & {
   /**
-   * @generated from field: repeated coasterai.core.v1.Section slides = 1;
+   * @generated from field: repeated coasterai.core.v1.Section sections = 1;
    */
-  slides: Section[];
+  sections: Section[];
 };
 
 /**

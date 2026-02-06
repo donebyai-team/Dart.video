@@ -4,13 +4,55 @@
 
 import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv1";
 import type { Message } from "@bufbuild/protobuf";
-import type { Script, Video, VideoSchema } from "../../core/v1/video_pb";
+import type { Script, Video, VideoConfig } from "../../core/v1/video_pb";
 import type { EmptySchema, Timestamp } from "@bufbuild/protobuf/wkt";
 
 /**
  * Describes the file coasterai/portal/v1/portal.proto.
  */
 export declare const file_coasterai_portal_v1_portal: GenFile;
+
+/**
+ * @generated from message coasterai.portal.v1.GetVideoResponse
+ */
+export declare type GetVideoResponse = Message<"coasterai.portal.v1.GetVideoResponse"> & {
+  /**
+   * @generated from field: coasterai.core.v1.Video video = 1;
+   */
+  video?: Video;
+
+  /**
+   * @generated from field: string thinking_summary = 2;
+   */
+  thinkingSummary: string;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.GetVideoResponse.
+ * Use `create(GetVideoResponseSchema)` to create a new message.
+ */
+export declare const GetVideoResponseSchema: GenMessage<GetVideoResponse>;
+
+/**
+ * @generated from message coasterai.portal.v1.UpdateVideoConfigRequest
+ */
+export declare type UpdateVideoConfigRequest = Message<"coasterai.portal.v1.UpdateVideoConfigRequest"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: coasterai.core.v1.VideoConfig config = 2;
+   */
+  config?: VideoConfig;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.UpdateVideoConfigRequest.
+ * Use `create(UpdateVideoConfigRequestSchema)` to create a new message.
+ */
+export declare const UpdateVideoConfigRequestSchema: GenMessage<UpdateVideoConfigRequest>;
 
 /**
  * @generated from message coasterai.portal.v1.GetVideoRequest
@@ -787,7 +829,7 @@ export declare const PortalService: GenService<{
   getVideo: {
     methodKind: "server_streaming";
     input: typeof GetVideoRequestSchema;
-    output: typeof VideoSchema;
+    output: typeof GetVideoResponseSchema;
   },
   /**
    * @generated from rpc coasterai.portal.v1.PortalService.GetVideos
@@ -796,6 +838,14 @@ export declare const PortalService: GenService<{
     methodKind: "unary";
     input: typeof EmptySchema;
     output: typeof GetVideosResponseSchema;
+  },
+  /**
+   * @generated from rpc coasterai.portal.v1.PortalService.UpdateVideoConfig
+   */
+  updateVideoConfig: {
+    methodKind: "unary";
+    input: typeof UpdateVideoConfigRequestSchema;
+    output: typeof EmptySchema;
   },
 }>;
 

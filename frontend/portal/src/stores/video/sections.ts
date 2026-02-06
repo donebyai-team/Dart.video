@@ -9,17 +9,16 @@ export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => 
     const newSection: Section = {
       $typeName: "coasterai.core.v1.Section",
       id: `section-${Date.now()}`,
-      title: videoConfig.sectionConfig.defaultTitle,
-      color: videoConfig.sectionConfig.defaultColor,
+      title: "New title",
+      color: "bg-primary",
       slides: [],
     };
 
     const newSections = [...sections, newSection];
     set({
       sections: newSections,
-      openSections: [...get().openSections, newSection.id],
     });
-    get().notifyConfigChange(newSections);
+    get().autoSyncSections(newSections);
   },
 
   setEditingSectionId: (sectionId: string | null) => set({ editingSectionId: sectionId }),
@@ -40,6 +39,8 @@ export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => 
         set({ selectedSlide: null });
       }
     }
+
+    get().autoSyncSections(newSections);
   },
 
   updateSectionTitle(sectionId: string, newTitle: string) {
@@ -59,15 +60,8 @@ export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => 
         },
       });
     }
-  },
 
-  toggleSection(sectionId: string) {
-    const { openSections } = get();
-    set({
-      openSections: openSections.includes(sectionId)
-        ? openSections.filter((id) => id !== sectionId)
-        : [...openSections, sectionId],
-    });
+    get().autoSyncSections(newSections);
   },
 
   handleSectionDragEnd(event: { active: { id: string }; over: { id: string } | null }) {
@@ -83,5 +77,6 @@ export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => 
     reordered.splice(newIdx, 0, moved);
 
     set({ sections: reordered });
+    get().autoSyncSections(reordered);
   },
 });

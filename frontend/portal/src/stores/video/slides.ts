@@ -76,7 +76,15 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
           value: {
             $typeName: 'coasterai.core.v1.AnimationSlideContent',
             templateId: defaultTemplateId,
-            templateConfig: {}
+            templateConfig: {},
+            meta: {
+              x: 192, // 10% margin (1920 * 0.1)
+              y: 108, // 10% margin (1080 * 0.1)
+              width: 1536, // 80% of 1920
+              height: 864, // 80% of 1080
+              scale: 1,
+              rotation: 0
+            } as MetaData,
           } as AnimationSlideContent
         }
         break
@@ -115,7 +123,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     const newSections = sections.map(s => (s.id === sectionId ? { ...s, slides: [...s.slides, newSlide] } : s))
 
     set({ sections: newSections })
-    get().notifyConfigChange(newSections)
+    get().autoSyncSections(newSections)
 
     const section = newSections.find(s => s.id === sectionId)
     if (section) {
@@ -135,7 +143,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     createStackItemOverlayEntityId(slideId, itemId, overlayId),
 
   updateSlideBackground: (color: string, applyToAll = false) => {
-    const { sections, selectedSlide, videoConfig, config, onConfigChange } = get()
+    const { sections, selectedSlide, videoConfig, config } = get()
     if (!selectedSlide) return
 
     if (applyToAll) {
@@ -158,19 +166,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
           }
         }
       })
-
-      // Notify parent with updated videoConfig
-      if (onConfigChange && config && videoConfig) {
-        onConfigChange(config, {
-          ...videoConfig,
-          backgroundColor: color,
-          sections: newSections,
-          project: {
-            ...videoConfig.project,
-            updatedAt: new Date().toISOString()
-          }
-        })
-      }
+      get().autoSyncSections(newSections)      
     } else {
       // Clear global background and set individual slide background
       set({ globalBackgroundColor: undefined })
@@ -200,6 +196,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
           }
         }
       })
+      get().autoSyncSections(newSections)
     }
   },
 
@@ -233,6 +230,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
         }
       }
     })
+    get().autoSyncSections(newSections)
   },
 
   removeSlide(sectionId: string, slideId: string) {
@@ -242,6 +240,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     )
 
     set({ sections: newSections })
+    get().autoSyncSections(newSections)
 
     if (selectedSlide?.slide.id === slideId) {
       const section = newSections.find(s => s.id === sectionId)
@@ -275,6 +274,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
         slide: { ...selectedSlide.slide, ...updates }
       }
     })
+    get().autoSyncSections(newSections)
     console.debug('slide updated', 'updates', updates)
   },
 
@@ -327,6 +327,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
         slide: { ...selectedSlide.slide, content: newContent }
       }
     })
+    get().autoSyncSections(newSections)
   },
 
   updateSlideTransition(sectionId: string, slideId: string, transitionId: TransitionType) {
@@ -340,6 +341,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
         : s
     )
     set({ sections: newSections, showTransitionPicker: null })
+    get().autoSyncSections(newSections)
   },
 
   reorderSlidesInSection(sectionId: string, activeId: string, overId: string) {
@@ -351,5 +353,6 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       return { ...s, slides: arrayMove(s.slides, oldIndex, newIndex) }
     })
     set({ sections: newSections })
+    get().autoSyncSections(newSections)
   }
 })

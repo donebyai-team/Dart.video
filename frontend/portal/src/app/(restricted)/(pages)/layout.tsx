@@ -1,5 +1,4 @@
 import AuthGuard from '@/components/guard/AuthGuard'
-import DashboardLayout from '@/components/layout/dashboard'
 import { AuthLoading } from '@/components/Loader/loader'
 
 export default function Layout({ children }: { children: React.ReactNode }) {

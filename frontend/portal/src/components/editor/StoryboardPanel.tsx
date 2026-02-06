@@ -19,12 +19,14 @@ import { useVideoStore } from "@/stores/video";
 import { Section, Slide } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 interface StoryboardPanelProps {    
+    isStreamingVideo?: boolean;
     onSelectSlide: (section: Section, slide: Slide) => void;   
     onStartEditTitle: (sectionId: string, title: string) => void;
     onSaveTitle: () => void;
 }
 
 const StoryboardPanel = ({
+    isStreamingVideo = false,
     onSelectSlide,
     onStartEditTitle,
     onSaveTitle,
@@ -38,10 +40,8 @@ const StoryboardPanel = ({
     const generatingSectionVoiceover = useVideoStore(s => s.generatingSectionVoiceover);
     const showTransitionPicker = useVideoStore(s => s.showTransitionPicker);
 
-    const openSections = useVideoStore(s => s.openSections);
     const onSectionDragEnd = useVideoStore(s => s.handleSectionDragEnd);
     const onReorderSlides = useVideoStore(s => s.reorderSlidesInSection);
-    const onToggleSection = useVideoStore(s => s.toggleSection);
 
     const onRemoveSection = useVideoStore(s => s.removeSection);
     const onRemoveSlide = useVideoStore(s => s.removeSlide);
@@ -84,7 +84,9 @@ const StoryboardPanel = ({
     return (
         <div className="flex-1 flex flex-col min-h-0 bg-muted/10">
             <div
-                className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-4"
+                className={`flex-1 overflow-x-hidden p-4 space-y-4 ${
+                    isStreamingVideo ? 'overflow-y-hidden' : 'overflow-y-auto'
+                }`}
                 ref={storyboardRef}
             >
                 <DndContext
@@ -102,14 +104,11 @@ const StoryboardPanel = ({
                                 section={section}
                                 index={index}
                                 isFirstSection={index === 0}
-                                isOpen={openSections.includes(section.id)}
                                 selectedSlideId={selectedSlideId!}
                                 editingSectionId={editingSectionId}
                                 editingSectionTitle={editingSectionTitle}
                                 generatingSectionVoiceover={generatingSectionVoiceover}
                                 showTransitionPicker={showTransitionPicker}
-
-                                onToggle={() => onToggleSection(section.id)}
                                 onSelectSlide={onSelectSlide}
                                 onRemoveSection={() => onRemoveSection(section.id)}
                                 onRemoveSlide={(slideId) => onRemoveSlide(section.id, slideId)}

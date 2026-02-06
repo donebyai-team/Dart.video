@@ -8,7 +8,6 @@ package pbportal
 
 import (
 	context "context"
-	v1 "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -35,6 +34,7 @@ const (
 	PortalService_CreateVideo_FullMethodName         = "/coasterai.portal.v1.PortalService/CreateVideo"
 	PortalService_GetVideo_FullMethodName            = "/coasterai.portal.v1.PortalService/GetVideo"
 	PortalService_GetVideos_FullMethodName           = "/coasterai.portal.v1.PortalService/GetVideos"
+	PortalService_UpdateVideoConfig_FullMethodName   = "/coasterai.portal.v1.PortalService/UpdateVideoConfig"
 )
 
 // PortalServiceClient is the client API for PortalService service.
@@ -57,6 +57,7 @@ type PortalServiceClient interface {
 	CreateVideo(ctx context.Context, in *CreateVideoRequest, opts ...grpc.CallOption) (*CreateVideoResponse, error)
 	GetVideo(ctx context.Context, in *GetVideoRequest, opts ...grpc.CallOption) (PortalService_GetVideoClient, error)
 	GetVideos(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetVideosResponse, error)
+	UpdateVideoConfig(ctx context.Context, in *UpdateVideoConfigRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type portalServiceClient struct {
@@ -191,7 +192,7 @@ func (c *portalServiceClient) GetVideo(ctx context.Context, in *GetVideoRequest,
 }
 
 type PortalService_GetVideoClient interface {
-	Recv() (*v1.Video, error)
+	Recv() (*GetVideoResponse, error)
 	grpc.ClientStream
 }
 
@@ -199,8 +200,8 @@ type portalServiceGetVideoClient struct {
 	grpc.ClientStream
 }
 
-func (x *portalServiceGetVideoClient) Recv() (*v1.Video, error) {
-	m := new(v1.Video)
+func (x *portalServiceGetVideoClient) Recv() (*GetVideoResponse, error) {
+	m := new(GetVideoResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -210,6 +211,15 @@ func (x *portalServiceGetVideoClient) Recv() (*v1.Video, error) {
 func (c *portalServiceClient) GetVideos(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetVideosResponse, error) {
 	out := new(GetVideosResponse)
 	err := c.cc.Invoke(ctx, PortalService_GetVideos_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *portalServiceClient) UpdateVideoConfig(ctx context.Context, in *UpdateVideoConfigRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, PortalService_UpdateVideoConfig_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -236,6 +246,7 @@ type PortalServiceServer interface {
 	CreateVideo(context.Context, *CreateVideoRequest) (*CreateVideoResponse, error)
 	GetVideo(*GetVideoRequest, PortalService_GetVideoServer) error
 	GetVideos(context.Context, *emptypb.Empty) (*GetVideosResponse, error)
+	UpdateVideoConfig(context.Context, *UpdateVideoConfigRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedPortalServiceServer()
 }
 
@@ -284,6 +295,9 @@ func (UnimplementedPortalServiceServer) GetVideo(*GetVideoRequest, PortalService
 }
 func (UnimplementedPortalServiceServer) GetVideos(context.Context, *emptypb.Empty) (*GetVideosResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetVideos not implemented")
+}
+func (UnimplementedPortalServiceServer) UpdateVideoConfig(context.Context, *UpdateVideoConfigRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateVideoConfig not implemented")
 }
 func (UnimplementedPortalServiceServer) mustEmbedUnimplementedPortalServiceServer() {}
 
@@ -523,7 +537,7 @@ func _PortalService_GetVideo_Handler(srv interface{}, stream grpc.ServerStream) 
 }
 
 type PortalService_GetVideoServer interface {
-	Send(*v1.Video) error
+	Send(*GetVideoResponse) error
 	grpc.ServerStream
 }
 
@@ -531,7 +545,7 @@ type portalServiceGetVideoServer struct {
 	grpc.ServerStream
 }
 
-func (x *portalServiceGetVideoServer) Send(m *v1.Video) error {
+func (x *portalServiceGetVideoServer) Send(m *GetVideoResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
@@ -549,6 +563,24 @@ func _PortalService_GetVideos_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PortalServiceServer).GetVideos(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PortalService_UpdateVideoConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateVideoConfigRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PortalServiceServer).UpdateVideoConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PortalService_UpdateVideoConfig_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PortalServiceServer).UpdateVideoConfig(ctx, req.(*UpdateVideoConfigRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -611,6 +643,10 @@ var PortalService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetVideos",
 			Handler:    _PortalService_GetVideos_Handler,
+		},
+		{
+			MethodName: "UpdateVideoConfig",
+			Handler:    _PortalService_UpdateVideoConfig_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

@@ -12,6 +12,7 @@ type VideoGeneration interface {
 	CreateVideo(ctx context.Context, script *pbcore.Script, name, organizationID string) (*models.Video, error)
 	GetVideo(ctx context.Context, id, organizationID string) (*models.Video, error)
 	GetVideos(ctx context.Context, organizationID string) ([]*models.Video, error)
+	UpdateVideoConfig(ctx context.Context, video *models.Video) error
 }
 
 type videoGeneration struct {
@@ -19,7 +20,21 @@ type videoGeneration struct {
 	logger *zap.Logger
 }
 
+func NewVideoGeneration(db datastore.Repository, logger *zap.Logger) VideoGeneration {
+	return &videoGeneration{db: db, logger: logger}
+}
+
 const defaultVideoFPS = 30
+
+func (v videoGeneration) UpdateVideoConfig(ctx context.Context, video *models.Video) error {
+	existingVideo, err := v.db.GetVideoById(ctx, video.ID, video.OrganizationID)
+	if err != nil {
+		return err
+	}
+
+	existingVideo.Config = video.Config
+	return v.db.UpdateVideo(ctx, existingVideo)
+}
 
 func (v videoGeneration) CreateVideo(ctx context.Context, script *pbcore.Script, name, organizationID string) (*models.Video, error) {
 	video, err := v.db.CreateVideo(ctx, &models.Video{

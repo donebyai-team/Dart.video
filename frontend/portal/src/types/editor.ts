@@ -8,6 +8,7 @@ import type {
   CanvasObjectType,
   TransitionType
 } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { Video } from "@coasterai/pb/coasterai/core/v1/video_pb";
 
 // ==========================================
 // Project & Metadata
@@ -287,17 +288,10 @@ export interface SlideTypesConfig {
 }
 
 // ==========================================
-// Section Colors Configuration
+// Section Configuration
 // ==========================================
 
-export interface SectionColorOption {
-  id: string;
-  name: string;
-  className: string; // Tailwind class
-}
-
 export interface SectionConfig {
-  colors: SectionColorOption[];
   defaultColor: string;
   defaultTitle: string;
 }
@@ -318,16 +312,6 @@ export interface NavigationConfig {
   menuItems: NavMenuItem[];
   brandName: string;
   brandIcon: string;
-}
-
-export interface VideoConfig {
-  // Project data
-  project: ProjectMetadata;
-  backgroundColor?: string; // if available it will be applied to all slides
-  fps: number // fps of the video  
-  // Content data
-  sections: Section[];
-  sectionConfig: SectionConfig;
 }
 
 // ==========================================
@@ -372,8 +356,8 @@ export interface EditorState {
 // ==========================================
 
 export interface EditorCallbacks {
-  onSave?: (config: EditorConfig, videoConfig: VideoConfig) => void;
+  onSave?: (config: EditorConfig, videoConfig: Video) => void;
   onExport?: (format: string) => void;
   onPublish?: () => void;
-  onConfigChange?: (config: EditorConfig, videoConfig: VideoConfig) => void;
+  onConfigChange?: (config: EditorConfig, videoConfig: Video) => void;
 }

@@ -4,7 +4,7 @@ import { VideoStoreSet, VideoStoreGet } from "./types";
 export const createSelectors = (set: VideoStoreSet, get: VideoStoreGet) => ({
   getFPS() {
     const { videoConfig } = get();
-    return videoConfig?.fps || 30;
+    return Number(videoConfig?.metadata?.fps) || 30;
   },
 
   setResolution: (resolution: Resolution) => set({ resolution }),

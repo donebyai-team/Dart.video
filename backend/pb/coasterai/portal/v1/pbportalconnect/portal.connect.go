@@ -8,7 +8,6 @@ import (
 	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	v11 "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	v1 "github.com/shank318/coasterai/pb/coasterai/portal/v1"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
@@ -73,6 +72,9 @@ const (
 	PortalServiceGetVideoProcedure = "/coasterai.portal.v1.PortalService/GetVideo"
 	// PortalServiceGetVideosProcedure is the fully-qualified name of the PortalService's GetVideos RPC.
 	PortalServiceGetVideosProcedure = "/coasterai.portal.v1.PortalService/GetVideos"
+	// PortalServiceUpdateVideoConfigProcedure is the fully-qualified name of the PortalService's
+	// UpdateVideoConfig RPC.
+	PortalServiceUpdateVideoConfigProcedure = "/coasterai.portal.v1.PortalService/UpdateVideoConfig"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
@@ -92,6 +94,7 @@ var (
 	portalServiceCreateVideoMethodDescriptor         = portalServiceServiceDescriptor.Methods().ByName("CreateVideo")
 	portalServiceGetVideoMethodDescriptor            = portalServiceServiceDescriptor.Methods().ByName("GetVideo")
 	portalServiceGetVideosMethodDescriptor           = portalServiceServiceDescriptor.Methods().ByName("GetVideos")
+	portalServiceUpdateVideoConfigMethodDescriptor   = portalServiceServiceDescriptor.Methods().ByName("UpdateVideoConfig")
 )
 
 // PortalServiceClient is a client for the coasterai.portal.v1.PortalService service.
@@ -110,8 +113,9 @@ type PortalServiceClient interface {
 	SocialLoginCallback(context.Context, *connect.Request[v1.OauthCallbackRequest]) (*connect.Response[v1.JWT], error)
 	GetIntegrations(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.Integrations], error)
 	CreateVideo(context.Context, *connect.Request[v1.CreateVideoRequest]) (*connect.Response[v1.CreateVideoResponse], error)
-	GetVideo(context.Context, *connect.Request[v1.GetVideoRequest]) (*connect.ServerStreamForClient[v11.Video], error)
+	GetVideo(context.Context, *connect.Request[v1.GetVideoRequest]) (*connect.ServerStreamForClient[v1.GetVideoResponse], error)
 	GetVideos(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetVideosResponse], error)
+	UpdateVideoConfig(context.Context, *connect.Request[v1.UpdateVideoConfigRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewPortalServiceClient constructs a client for the coasterai.portal.v1.PortalService service. By
@@ -196,7 +200,7 @@ func NewPortalServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(portalServiceCreateVideoMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
-		getVideo: connect.NewClient[v1.GetVideoRequest, v11.Video](
+		getVideo: connect.NewClient[v1.GetVideoRequest, v1.GetVideoResponse](
 			httpClient,
 			baseURL+PortalServiceGetVideoProcedure,
 			connect.WithSchema(portalServiceGetVideoMethodDescriptor),
@@ -206,6 +210,12 @@ func NewPortalServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			httpClient,
 			baseURL+PortalServiceGetVideosProcedure,
 			connect.WithSchema(portalServiceGetVideosMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
+		updateVideoConfig: connect.NewClient[v1.UpdateVideoConfigRequest, emptypb.Empty](
+			httpClient,
+			baseURL+PortalServiceUpdateVideoConfigProcedure,
+			connect.WithSchema(portalServiceUpdateVideoConfigMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
 	}
@@ -225,8 +235,9 @@ type portalServiceClient struct {
 	socialLoginCallback *connect.Client[v1.OauthCallbackRequest, v1.JWT]
 	getIntegrations     *connect.Client[emptypb.Empty, v1.Integrations]
 	createVideo         *connect.Client[v1.CreateVideoRequest, v1.CreateVideoResponse]
-	getVideo            *connect.Client[v1.GetVideoRequest, v11.Video]
+	getVideo            *connect.Client[v1.GetVideoRequest, v1.GetVideoResponse]
 	getVideos           *connect.Client[emptypb.Empty, v1.GetVideosResponse]
+	updateVideoConfig   *connect.Client[v1.UpdateVideoConfigRequest, emptypb.Empty]
 }
 
 // GetConfig calls coasterai.portal.v1.PortalService.GetConfig.
@@ -290,13 +301,18 @@ func (c *portalServiceClient) CreateVideo(ctx context.Context, req *connect.Requ
 }
 
 // GetVideo calls coasterai.portal.v1.PortalService.GetVideo.
-func (c *portalServiceClient) GetVideo(ctx context.Context, req *connect.Request[v1.GetVideoRequest]) (*connect.ServerStreamForClient[v11.Video], error) {
+func (c *portalServiceClient) GetVideo(ctx context.Context, req *connect.Request[v1.GetVideoRequest]) (*connect.ServerStreamForClient[v1.GetVideoResponse], error) {
 	return c.getVideo.CallServerStream(ctx, req)
 }
 
 // GetVideos calls coasterai.portal.v1.PortalService.GetVideos.
 func (c *portalServiceClient) GetVideos(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetVideosResponse], error) {
 	return c.getVideos.CallUnary(ctx, req)
+}
+
+// UpdateVideoConfig calls coasterai.portal.v1.PortalService.UpdateVideoConfig.
+func (c *portalServiceClient) UpdateVideoConfig(ctx context.Context, req *connect.Request[v1.UpdateVideoConfigRequest]) (*connect.Response[emptypb.Empty], error) {
+	return c.updateVideoConfig.CallUnary(ctx, req)
 }
 
 // PortalServiceHandler is an implementation of the coasterai.portal.v1.PortalService service.
@@ -315,8 +331,9 @@ type PortalServiceHandler interface {
 	SocialLoginCallback(context.Context, *connect.Request[v1.OauthCallbackRequest]) (*connect.Response[v1.JWT], error)
 	GetIntegrations(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.Integrations], error)
 	CreateVideo(context.Context, *connect.Request[v1.CreateVideoRequest]) (*connect.Response[v1.CreateVideoResponse], error)
-	GetVideo(context.Context, *connect.Request[v1.GetVideoRequest], *connect.ServerStream[v11.Video]) error
+	GetVideo(context.Context, *connect.Request[v1.GetVideoRequest], *connect.ServerStream[v1.GetVideoResponse]) error
 	GetVideos(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetVideosResponse], error)
+	UpdateVideoConfig(context.Context, *connect.Request[v1.UpdateVideoConfigRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewPortalServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -409,6 +426,12 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(portalServiceGetVideosMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	portalServiceUpdateVideoConfigHandler := connect.NewUnaryHandler(
+		PortalServiceUpdateVideoConfigProcedure,
+		svc.UpdateVideoConfig,
+		connect.WithSchema(portalServiceUpdateVideoConfigMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/coasterai.portal.v1.PortalService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case PortalServiceGetConfigProcedure:
@@ -439,6 +462,8 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 			portalServiceGetVideoHandler.ServeHTTP(w, r)
 		case PortalServiceGetVideosProcedure:
 			portalServiceGetVideosHandler.ServeHTTP(w, r)
+		case PortalServiceUpdateVideoConfigProcedure:
+			portalServiceUpdateVideoConfigHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -496,10 +521,14 @@ func (UnimplementedPortalServiceHandler) CreateVideo(context.Context, *connect.R
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.CreateVideo is not implemented"))
 }
 
-func (UnimplementedPortalServiceHandler) GetVideo(context.Context, *connect.Request[v1.GetVideoRequest], *connect.ServerStream[v11.Video]) error {
+func (UnimplementedPortalServiceHandler) GetVideo(context.Context, *connect.Request[v1.GetVideoRequest], *connect.ServerStream[v1.GetVideoResponse]) error {
 	return connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.GetVideo is not implemented"))
 }
 
 func (UnimplementedPortalServiceHandler) GetVideos(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetVideosResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.GetVideos is not implemented"))
+}
+
+func (UnimplementedPortalServiceHandler) UpdateVideoConfig(context.Context, *connect.Request[v1.UpdateVideoConfigRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.UpdateVideoConfig is not implemented"))
 }
