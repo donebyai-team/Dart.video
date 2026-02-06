@@ -1,6 +1,6 @@
 import { EditorConfig, SlideTypeConfig, TextAnimationSlideConfig } from "@/types/editor";
 import { create } from "@bufbuild/protobuf";
-import { AnimationSlideContentSchema, ImageSlideContentSchema, MetaData, MetaDataSchema, Section, SectionSchema, Slide, SlideSchema, SlideType, StackAnimationMode, StackSlideContentSchema, TransitionType, VideoSlideContentSchema } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { AnimationSlideContentSchema, CalloutEffect, CalloutEffectSchema, CanvasObjectType, ImageSlideContentSchema, MetaData, MetaDataSchema, Resolution, Section, SectionSchema, Slide, SlideSchema, SlideType, SpotlightEffect, SpotlightEffectSchema, StackAnimationMode, StackSlideContentSchema, TransitionType, VideoSlideContentSchema } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 // Helper functions (moved from useEditorState)
 export const getSlideTypeConfig = (config: EditorConfig | null, slideType: SlideType): SlideTypeConfig | undefined => {
@@ -110,12 +110,57 @@ export function createNewSlide(params: {
 }
 
 export const createNewSection = (): Section =>
-  create(SectionSchema, {
-    id: `section-${Date.now()}`,
-    title: "New title",
-    color: "bg-primary",
-    slides: [],
-  });
+    create(SectionSchema, {
+        id: `section-${Date.now()}`,
+        title: "New title",
+        color: "bg-primary",
+        slides: [],
+    });
+
+export const createSpotlightEffect = (
+    resolution: Resolution,
+    startTimeInSec: number,
+    endTimeInSec: number
+): SpotlightEffect => {
+    const width = 200;
+    const height = 150;
+
+    return create(SpotlightEffectSchema, {
+        id: `spotlight-effect-${Date.now()}`,
+        x: resolution.width / 2 - width / 2,
+        y: resolution.height / 2 - height / 2,
+        width,
+        height,
+        blurAmount: 10,
+        borderRadius: 8,
+        startTime: startTimeInSec,
+        endTime: endTimeInSec,
+        type: CanvasObjectType.CANVAS_SPOTLIGHT,
+    });
+};
+
+export const createCalloutEffect = (
+    resolution: Resolution,
+    startTimeInSec: number,
+    endTimeInSec: number
+): CalloutEffect => {
+    const width = 200;
+    const height = 150;
+
+    return create(CalloutEffectSchema, {
+        id: `spotlight-effect-${Date.now()}`,
+        x: resolution.width / 2 - width / 2,
+        y: resolution.height / 2 - height / 2,
+        width,
+        height,
+        blurAmount: 10,
+        borderRadius: 8,
+        startTime: startTimeInSec,
+        endTime: endTimeInSec,
+        type: CanvasObjectType.CANVAS_SPOTLIGHT,
+        color: "#22c55e"
+    });
+};
 
 
 
