@@ -19,6 +19,8 @@ interface InsertSettingsProps {
   onPlay?: () => void
 }
 
+
+// toolInfo will be feed to dropdown to render the effect options
 const toolInfo: Record<CanvasObjectType, { label: string; icon: React.ElementType }> = {
   0: { label: 'Callout', icon: Focus },
   1: { label: 'Spotlight', icon: CircleDot }
@@ -108,13 +110,16 @@ const InsertSettings = ({
       setSettings(newSettings)
 
       if (onUpdate) {
-        onUpdate({ [key]: value } as Partial<SpotlightEffect>)
+        // @TODO in future you can more effect types
+        onUpdate({ [key]: value } as Partial<SpotlightEffect & CalloutEffect>)
       }
     },
     [settings, tool, onUpdate]
   )
 
   const renderToolSpecificSettings = () => {
+
+    // Render the specfic effect setting in sidebar based on object and tool selection
     switch (tool) {
       case CanvasObjectType.CANVAS_CALLOUT:
         return (

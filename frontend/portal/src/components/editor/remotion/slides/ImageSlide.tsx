@@ -49,6 +49,10 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, on
     height
   } as Resolution
 
+  // check if these effects are available or not
+  const isCalloutEffectsAvailable = slide.callouts && slide.callouts.length > 0
+  const isSpotlightEffectsAvailable = slide.spotlights && slide.spotlights.length > 0
+
   return (
     <AbsoluteFill
       style={{
@@ -145,54 +149,56 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, on
           </ImageContent>
         )}
       </AbsoluteFill>
-
+      
       {/* Render callout effects at CANVAS level */}
-      {slide.callouts.map(callout => (
-        <AbsoluteFill style={{ pointerEvents: 'none' }}>
-          <CalloutEffectComponent
-            key={callout.id}
-            callout={callout}
-            frame={frame}
-            // zooms helps to determine zoom level of cutout
-            fps={fps}
-            width={width} // Canvas dimensions
-            height={height} // Canvas dimensions
-            fullWidth={width}
-            src={props.src ?? ''}
-            fullHeight={height}
-            borderColor={callout.color}
-            slideDuration={slide.duration}
-            meta={imageContent.meta as MetaData}
-            style={{
-              borderRadius: props.style.borderRadius as number,
-              objectFit: props.style.objectFit as 'cover' | 'fill' | 'contain'
-            }}
-          />
-        </AbsoluteFill>
-      ))}
+      {isCalloutEffectsAvailable &&
+        slide.callouts.map(callout => (
+          <AbsoluteFill style={{ pointerEvents: 'none' }}>
+            <CalloutEffectComponent
+              key={callout.id}
+              callout={callout}
+              frame={frame}
+              // zooms helps to determine zoom level of cutout
+              fps={fps}
+              width={width} // Canvas dimensions
+              height={height} // Canvas dimensions
+              fullWidth={width}
+              src={props.src ?? ''}
+              fullHeight={height}
+              borderColor={callout.color}
+              slideDuration={slide.duration}
+              meta={imageContent.meta as MetaData}
+              style={{
+                borderRadius: props.style.borderRadius as number,
+                objectFit: props.style.objectFit as 'cover' | 'fill' | 'contain'
+              }}
+            />
+          </AbsoluteFill>
+        ))}
 
       {/* Render spotlight effects at CANVAS level */}
-      {slide.spotlights.map(spotlight => (
-        <AbsoluteFill style={{ pointerEvents: 'none' }}>
-          <SpotlightEffectComponent
-            key={spotlight.id}
-            spotlight={spotlight}
-            frame={frame}
-            fps={fps}
-            width={width} // Canvas dimensions
-            height={height} // Canvas dimensions
-            fullWidth={width}
-            src={props.src ?? ''}
-            fullHeight={height}
-            slideDuration={slide.duration}
-            meta={imageContent.meta as MetaData}
-            style={{
-              borderRadius: props.style.borderRadius as number,
-              objectFit: props.style.objectFit as 'cover' | 'fill' | 'contain'
-            }}
-          />
-        </AbsoluteFill>
-      ))}
+      {isSpotlightEffectsAvailable &&
+        slide.spotlights.map(spotlight => (
+          <AbsoluteFill style={{ pointerEvents: 'none' }}>
+            <SpotlightEffectComponent
+              key={spotlight.id}
+              spotlight={spotlight}
+              frame={frame}
+              fps={fps}
+              width={width} // Canvas dimensions
+              height={height} // Canvas dimensions
+              fullWidth={width}
+              src={props.src ?? ''}
+              fullHeight={height}
+              slideDuration={slide.duration}
+              meta={imageContent.meta as MetaData}
+              style={{
+                borderRadius: props.style.borderRadius as number,
+                objectFit: props.style.objectFit as 'cover' | 'fill' | 'contain'
+              }}
+            />
+          </AbsoluteFill>
+        ))}
     </AbsoluteFill>
   )
 }
