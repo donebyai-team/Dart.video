@@ -1,9 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   Home,
-  Video,
   Plus,
   Settings,
   Users,
@@ -18,6 +17,7 @@ import {
   UserCircle,
   ChevronDown,
   ChevronRight,
+  Video,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -53,6 +53,10 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useClientsContext } from "@coasterai/ui-core/context/ClientContext";
+import { Video as VideoConfig } from "@coasterai/pb/coasterai/core/v1/video_pb";
+import toast from "react-hot-toast";
+import { getConnectError } from "@/utils/error";
 
 type NavItem = {
   title: string;
@@ -63,9 +67,9 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   { title: "Home", icon: Home, id: "home" },
-  { 
-    title: "Brand", 
-    icon: Palette, 
+  {
+    title: "Brand",
+    icon: Palette,
     id: "brand",
     children: [
       { title: "Brand Identity", icon: Fingerprint, id: "brand-identity" },
@@ -76,41 +80,7 @@ const navItems: NavItem[] = [
   { title: "Team", icon: Users, id: "team" },
 ];
 
-type VideoProject = {
-  id: string;
-  title: string;
-  thumbnail: string;
-  status: "draft" | "published";
-  duration: string;
-  updatedAt: string;
-};
 
-const mockVideos: VideoProject[] = [
-  {
-    id: "1",
-    title: "Product Launch Explainer",
-    thumbnail: "https://placehold.co/400x225/175a5a/ffffff?text=Product+Launch",
-    status: "draft",
-    duration: "2:34",
-    updatedAt: "2 hours ago",
-  },
-  {
-    id: "2",
-    title: "Feature Walkthrough",
-    thumbnail: "https://placehold.co/400x225/3b82f6/ffffff?text=Feature+Demo",
-    status: "published",
-    duration: "1:45",
-    updatedAt: "1 day ago",
-  },
-  {
-    id: "3",
-    title: "Onboarding Tutorial",
-    thumbnail: "https://placehold.co/400x225/8b5cf6/ffffff?text=Onboarding",
-    status: "draft",
-    duration: "3:12",
-    updatedAt: "3 days ago",
-  },
-];
 
 const DashboardPage = () => {
   const router = useRouter();
@@ -121,6 +91,25 @@ const DashboardPage = () => {
   const [videoName, setVideoName] = useState("");
   const [brandExpanded, setBrandExpanded] = useState(false);
   const [brandUrl, setBrandUrl] = useState("");
+  const [videos, setVideos] = useState<VideoConfig[]>([]);
+  const { portalClient } = useClientsContext()
+
+  useEffect(() => {
+    const fetchVideos = async () => {
+      try {
+        const res = await portalClient.getVideos({});
+        setVideos(res.videos);
+      } catch (err) {
+        console.error("Failed to fetch videos", err);
+        toast.error(getConnectError(err))
+      }
+    };
+
+    if (portalClient) {
+      fetchVideos();
+    }
+  }, [portalClient]);
+
 
   const handleNavClick = (id: string) => {
     setActiveNav(id);
@@ -142,13 +131,14 @@ const DashboardPage = () => {
     const type = selectedOption;
     setVideoName("");
     setSelectedOption(null);
-    
+
     if (type === "script") {
       // Navigate to script input page for script-based creation
       router.push("/script");
     } else {
       // Navigate directly to editor for upload-based creation
-      router.push("/editor");
+      // In a real app, you'd create a new video and get its ID
+      router.push("/editor/new");
     }
   };
 
@@ -249,6 +239,7 @@ const DashboardPage = () => {
           </SidebarFooter>
         </Sidebar>
 
+
         {/* Main Content */}
         <main className="flex-1 p-8 overflow-auto">
           {activeNav === "brand-identity" ? (
@@ -348,7 +339,7 @@ const DashboardPage = () => {
               <div>
                 <h2 className="text-xl font-semibold mb-4">Recent Videos</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {mockVideos.map((video) => (
+                  {videos.map((video) => (
                     <motion.div
                       key={video.id}
                       whileHover={{ y: -4 }}
@@ -356,12 +347,12 @@ const DashboardPage = () => {
                     >
                       <Card
                         className="card-elevated overflow-hidden cursor-pointer group"
-                        onClick={() => router.push("/editor")}
+                        onClick={() => router.push(`/editor/${video.id}`)}
                       >
                         <div className="relative aspect-video">
                           <img
-                            src={video.thumbnail}
-                            alt={video.title}
+                            src={"https://placehold.co/600x400.png"}
+                            alt={video.name}
                             className="w-full h-full object-cover"
                           />
                           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -370,15 +361,15 @@ const DashboardPage = () => {
                             </div>
                           </div>
                           <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-0.5 rounded">
-                            {video.duration}
+                            {2}
                           </div>
                         </div>
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0 flex-1">
-                              <h3 className="font-medium truncate">{video.title}</h3>
+                              <h3 className="font-medium truncate">{video.name}</h3>
                               <div className="flex items-center gap-2 mt-1">
-                                <span
+                                {/* <span
                                   className={`text-xs px-2 py-0.5 rounded-full ${
                                     video.status === "published"
                                       ? "bg-screen-solution/10 text-screen-solution"
@@ -386,10 +377,10 @@ const DashboardPage = () => {
                                   }`}
                                 >
                                   {video.status === "published" ? "Published" : "Draft"}
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  {video.updatedAt}
-                                </span>
+                                </span> */}
+                                {/* <span className="text-xs text-muted-foreground">
+                                  {video.createdAt}
+                                </span> */}
                               </div>
                             </div>
                             <DropdownMenu>
@@ -435,7 +426,7 @@ const DashboardPage = () => {
                 </DialogDescription>
               )}
             </DialogHeader>
-            
+
             {createStep === "choose" ? (
               <div className="grid gap-4 py-4">
                 <motion.div
