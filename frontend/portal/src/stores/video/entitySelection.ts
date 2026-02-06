@@ -39,15 +39,24 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
           selectedStackItemId: null
         })
 
-        // TODO: Iterate over spotlights, zoom etc and set the tool accordingly
-        const objects = [...get().getSpotlights(), ...get().getCallouts()]
-        // Find the object by checking the inner IDs
-        const obj = objects.find((e: SpotlightEffect) => {
-          return e.id === parsed.overlayId
-        })
+      // Collect all teh canvas object
+      const spotslights = get().getSpotlights() || []
+      const callouts = get().getCallouts() || []
 
-        if (obj) {
-          set({ activeTool: { type: ActiveToolType.INSERT, tool: obj.type } })
+      // Check if the parsed.overlayId belongs to one of them
+      const isCallout = callouts.find(e => e.id === parsed.overlayId)
+      const isSpotlight = spotslights.find(e => e.id === parsed.overlayId)
+
+      // Identify tooltype if any of above is true 
+        const toolType = isCallout
+          ? CanvasObjectType.CANVAS_CALLOUT
+          : isSpotlight
+            ? CanvasObjectType.CANVAS_SPOTLIGHT
+            : undefined
+
+      // Set the toolType if it exist
+        if (toolType) {
+          set({ activeTool: { type: ActiveToolType.INSERT, tool: toolType } })
         }
       } else if (parsed.type === 'stack-item') {
         set({
@@ -120,15 +129,25 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
 
     if (id) {
       set({ selectedStackItemId: null })
-      const objects = [...get().getSpotlights(), ...get().getCallouts()]
 
-      // Find the object by checking the inner IDs
-      const obj = objects.find(e => {
-        return e.id === id
-      })
+      // Collect all teh canvas object
+      const spotslights = get().getSpotlights() || []
+      const callouts = get().getCallouts() || []
 
-      if (obj) {
-        set({ activeTool: { type: ActiveToolType.INSERT, tool: obj.type } })
+      // Check if the id belongs to one of them
+      const isCallout = callouts.find(e => e.id === id)
+      const isSpotlight = spotslights.find(e => e.id === id)
+
+      // Identify tooltype if any of above is true 
+      const toolType = isCallout
+        ? CanvasObjectType.CANVAS_CALLOUT
+        : isSpotlight
+          ? CanvasObjectType.CANVAS_SPOTLIGHT
+          : undefined
+
+      // Set the toolType if it exist
+      if (toolType) {
+        set({ activeTool: { type: ActiveToolType.INSERT, tool: toolType } })
       }
     } else {
       const slide = selectedSlide.slide
