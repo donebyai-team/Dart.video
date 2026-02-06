@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { OverlayTile } from './OverlayTile'
 import type { OverlayItem } from './types'
-import { CanvasObjectType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { EffectType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 interface OverlayTracksProps {
   overlayItems: OverlayItem[]
   selectedObjectId?: string | null
@@ -11,10 +11,10 @@ interface OverlayTracksProps {
   onSeek?: (time: number) => void
 }
 
-export function getOverlayName(objType: CanvasObjectType): string {
-  if (objType == CanvasObjectType.CANVAS_SPOTLIGHT) {
+export function getOverlayName(objType: EffectType): string {
+  if (objType == EffectType.SPOTLIGHT) {
     return 'spotlight'
-  } else if (objType == CanvasObjectType.CANVAS_CALLOUT) {
+  } else if (objType == EffectType.CALLOUT) {
     return 'callout'
   } else {
     return 'zoom'
@@ -30,7 +30,7 @@ export function OverlayTracks({
   onSeek
 }: OverlayTracksProps) {
   const [hoverInfo, setHoverInfo] = useState<{
-    name: CanvasObjectType
+    name: EffectType
     timeRange: string
     x: number
   } | null>(null)
@@ -59,7 +59,7 @@ export function OverlayTracks({
   }
   const highlightedOverlays = getHighlightedOverlays()
 
-  const handleTileHover = (e: React.MouseEvent, info: { name: CanvasObjectType; timeRange: string } | null) => {
+  const handleTileHover = (e: React.MouseEvent, info: { name: EffectType; timeRange: string } | null) => {
     if (info) {
       const rect = e.currentTarget.getBoundingClientRect()
       const parentRect = e.currentTarget.closest('.relative')?.getBoundingClientRect()

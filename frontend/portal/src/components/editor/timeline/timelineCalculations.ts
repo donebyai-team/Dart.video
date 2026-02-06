@@ -1,5 +1,5 @@
 // Timeline layout calculation utilities
-import { CanvasObjectType, TransitionType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { EffectType, TransitionType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import type { TimelineSlide, SlideItem, TransitionItem, OverlayItem, TimelineLayout } from './types'
 import { getRealSlideStartFrame } from '../frame_calculations'
 
@@ -226,7 +226,7 @@ export function calculateOverlayItems(slides: TimelineSlide[], fps: number): Ove
           id: `overlay-${effect.id}`,
           overlayId: effect.id!,
           slideId: slide.id,
-          overlayType: CanvasObjectType.CANVAS_SPOTLIGHT,
+          overlayType: EffectType.SPOTLIGHT,
           startTime: realSlideStartTimeInSeconds + startTime,
           duration,
           trackIndex: 0 // Will be assigned by assignOverlayTracks
@@ -254,7 +254,7 @@ export function calculateOverlayItems(slides: TimelineSlide[], fps: number): Ove
           id: `overlay-${effect.id}`,
           overlayId: effect.id!,
           slideId: slide.id,
-          overlayType: CanvasObjectType.CANVAS_CALLOUT,
+          overlayType: EffectType.CALLOUT,
           startTime: realSlideStartTimeInSeconds + startTime,
           duration,
           trackIndex: 0 // Will be assigned by assignOverlayTracks

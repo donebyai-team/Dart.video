@@ -5,7 +5,7 @@ import type {
   Section,
   Resolution,
   SlideType,
-  CanvasObjectType,
+  EffectType,
   TransitionType
 } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { Video } from "@coasterai/pb/coasterai/core/v1/video_pb";
@@ -183,7 +183,7 @@ export interface ResolutionConfig {
 // ==========================================
 
 export interface InsertToolOption {
-  id: CanvasObjectType;
+  id: EffectType;
   name: string;
   icon: string; // Icon name (e.g., "Type", "Square")
 }

@@ -9,7 +9,7 @@ import { ActiveToolType } from '@/types/tools'
 import {
   AnimationSlideContent,
   CalloutEffect,
-  CanvasObjectType,
+  EffectType,
   SlideType,
   SpotlightEffect
 } from '@coasterai/pb/coasterai/core/v1/slide_pb'
@@ -17,12 +17,12 @@ import { motion } from 'framer-motion'
 
 interface ToolsSettingsPanelProps {
   onPreviewTemplate: () => void
-  onUpdateSpotlight?: (updates: Partial<SpotlightEffect>) => void
-  onUpdateCallout?: (updates: Partial<CalloutEffect>) => void
+  onUpdateSpotlight: (updates: Partial<SpotlightEffect>) => void
+  onUpdateCallout: (updates: Partial<CalloutEffect>) => void
   onSpotlightApply?: () => void
   onSpotlightPlay?: () => void
-  deleteSpotlight?: (effectId: string) => void
-  deleteCallout?: (effectId: string) => void
+  deleteSpotlight: (effectId: string) => void
+  deleteCallout: (effectId: string) => void
   selectedStackItemId?: string | null
   onSelectStackItem?: (itemId: string) => void
 }
@@ -50,40 +50,23 @@ const ToolsSettingsPanel = ({
   const onUpdateSlide = useVideoStore(s => s.updateSlide)
   const onSelectTextAnimationTemplate = useVideoStore(s => s.handleSelectTextAnimationTemplate)
 
-  console.log('active tool', activeTool)
+  console.log("active tool", activeTool);
 
-  if (!activeTool) return null
-  const spotlightsList = spotlights() || []
-  const calloutsList = callouts() || []
+  if (activeTool.type == ActiveToolType.NONE) return null;
 
-  // Get the selected object data based on selected type object
-  const selectedObject =
-    activeTool.type === ActiveToolType.INSERT && selectedObjectId
-      ? activeTool.tool === CanvasObjectType.CANVAS_SPOTLIGHT
-        ? spotlightsList.find(e => {
-            return e.id === selectedObjectId
-          })
-        : calloutsList.find(e => {
-            return e.id === selectedObjectId
-          })
-      : undefined
+  const spotlightsList = spotlights() ?? [];
+  const calloutsList = callouts() ?? [];
 
-  // Use specific delete function based on active tool selection
-  const deleteFunction =
-    activeTool.type === ActiveToolType.INSERT &&
-    (activeTool.tool === CanvasObjectType.CANVAS_SPOTLIGHT
-      ? deleteSpotlight
-      : activeTool.tool === CanvasObjectType.CANVAS_CALLOUT
-        ? deleteCallout
-        : undefined)
-  // Use specific update function based on active tool selection
-  const updateFunction =
-    activeTool.type === ActiveToolType.INSERT &&
-    (activeTool.tool === CanvasObjectType.CANVAS_SPOTLIGHT
-      ? onUpdateSpotlight
-      : activeTool.tool === CanvasObjectType.CANVAS_CALLOUT
-        ? onUpdateCallout
-        : undefined)
+  let selectedObject: SpotlightEffect | CalloutEffect | undefined;
+
+  if (activeTool.type === ActiveToolType.INSERT && selectedObjectId) {
+    if (activeTool.tool === EffectType.SPOTLIGHT) {
+      selectedObject = spotlightsList.find(e => e.id === selectedObjectId);
+    } else if (activeTool.tool === EffectType.CALLOUT) {
+      selectedObject = calloutsList.find(e => e.id === selectedObjectId);
+    }
+  }
+
 
   return (
     <motion.div
@@ -94,7 +77,7 @@ const ToolsSettingsPanel = ({
       transition={{ duration: 0.2 }}
       className='h-full'
     >
-      {activeTool?.type === ActiveToolType.BACKGROUND && (
+      {activeTool.type === ActiveToolType.BACKGROUND && (
         <BackgroundSettings
           currentColor={selectedSlide?.slide.backgroundColor || '#0f172a'}
           globalBackgroundColor={globalBackgroundColor}
@@ -103,7 +86,7 @@ const ToolsSettingsPanel = ({
         />
       )}
 
-      {activeTool?.type === ActiveToolType.TEXT_ANIMATION_TEMPLATE &&
+      {activeTool.type === ActiveToolType.TEXT_ANIMATION_TEMPLATE &&
         selectedSlide?.slide.type === SlideType.TEXT_ANIMATION &&
         (() => {
           const textAnimConfig = getTextAnimationConfig()
@@ -126,7 +109,7 @@ const ToolsSettingsPanel = ({
           )
         })()}
 
-      {activeTool?.type === ActiveToolType.VISUAL_ANIMATION_SETTINGS &&
+      {activeTool.type === ActiveToolType.VISUAL_ANIMATION_SETTINGS &&
         (selectedSlide?.slide.type === SlideType.VISUAL_ANIMATION ||
           selectedSlide?.slide.type === SlideType.INFOGRAPHIC) && (
           <VisualAnimationSelector
@@ -140,7 +123,7 @@ const ToolsSettingsPanel = ({
           />
         )}
       {/* suggestions */}
-      {activeTool?.type === ActiveToolType.TEXT_ANIMATION_SETTINGS &&
+      {activeTool.type === ActiveToolType.TEXT_ANIMATION_SETTINGS &&
         (() => {
           const textAnimConfig = getTextAnimationConfig()
           if (!textAnimConfig) return null
@@ -157,7 +140,7 @@ const ToolsSettingsPanel = ({
           )
         })()}
 
-      {activeTool?.type === ActiveToolType.STACK_SETTINGS &&
+      {activeTool.type === ActiveToolType.STACK_SETTINGS &&
         selectedSlide?.slide.type === SlideType.STACK &&
         onUpdateSlide && (
           <StackSlideSettings
@@ -171,23 +154,42 @@ const ToolsSettingsPanel = ({
           />
         )}
 
-      {activeTool?.type === ActiveToolType.INSERT && selectedObjectId && (
+      {activeTool.type === ActiveToolType.INSERT 
+      && selectedObjectId
+      && selectedObject
+      && activeTool.tool && (
         <InsertSettings
-          tool={activeTool?.tool}
+          tool={activeTool.tool}
           currentObject={selectedObject}
           onUpdate={updates => {
-            if (selectedObjectId && updateFunction) {
-              // Update the data of efftects
-              // @TODO in future you can more effect types
-              updateFunction(updates as Partial<SpotlightEffect> & Partial<CalloutEffect>)
+            if (!selectedObjectId || (activeTool.type != ActiveToolType.INSERT)) return;
+
+            // TODO: Move this out when we implement it genric EffectType
+            if (activeTool.tool === EffectType.SPOTLIGHT) {
+              onUpdateSpotlight(updates as Partial<SpotlightEffect>);
+              return;
+            }
+
+            if (activeTool.tool === EffectType.CALLOUT) {
+              onUpdateCallout(updates as Partial<CalloutEffect>)
+              return;
             }
           }}
-          onDelete={() => {
-            if (selectedObjectId && deleteFunction) {
-              deleteFunction(selectedObjectId)
 
-              //Close the active tool sidebar once object deleted
-              handleCloseTool()
+          onDelete={() => {
+            if (!selectedObjectId || (activeTool.type != ActiveToolType.INSERT)) return;
+
+            // TODO: Move this out when we implement it genric EffectType
+            if (activeTool.tool === EffectType.SPOTLIGHT) {
+              deleteSpotlight(selectedObjectId);
+              handleCloseTool();
+              return;
+            }
+
+            if (activeTool.tool === EffectType.CALLOUT) {
+              deleteCallout(selectedObjectId);
+              handleCloseTool();
+              return;
             }
           }}
           onClose={handleCloseTool}

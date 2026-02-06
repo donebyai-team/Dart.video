@@ -309,152 +309,6 @@ export declare type ZoomEffect = Message<"coasterai.core.v1.ZoomEffect"> & {
 export declare const ZoomEffectSchema: GenMessage<ZoomEffect>;
 
 /**
- * @generated from message coasterai.core.v1.CanvasObject
- */
-export declare type CanvasObject = Message<"coasterai.core.v1.CanvasObject"> & {
-  /**
-   * @generated from field: string id = 1;
-   */
-  id: string;
-
-  /**
-   * @generated from field: coasterai.core.v1.CanvasObjectType type = 2;
-   */
-  type: CanvasObjectType;
-
-  /**
-   * @generated from field: float x = 3;
-   */
-  x: number;
-
-  /**
-   * @generated from field: float y = 4;
-   */
-  y: number;
-
-  /**
-   * @generated from field: optional float width = 5;
-   */
-  width?: number;
-
-  /**
-   * @generated from field: optional float height = 6;
-   */
-  height?: number;
-
-  /**
-   * @generated from field: optional float rotation = 7;
-   */
-  rotation?: number;
-
-  /**
-   * @generated from field: optional string color = 8;
-   */
-  color?: string;
-
-  /**
-   * @generated from field: optional float opacity = 9;
-   */
-  opacity?: number;
-
-  /**
-   * @generated from field: optional float duration = 10;
-   */
-  duration?: number;
-
-  /**
-   * @generated from field: optional string text = 11;
-   */
-  text?: string;
-
-  /**
-   * @generated from field: optional float fontSize = 12;
-   */
-  fontSize?: number;
-
-  /**
-   * @generated from field: optional string fontFamily = 13;
-   */
-  fontFamily?: string;
-
-  /**
-   * @generated from field: optional string fontStyle = 14;
-   */
-  fontStyle?: string;
-
-  /**
-   * @generated from field: optional string animation = 15;
-   */
-  animation?: string;
-
-  /**
-   * @generated from field: optional float borderWidth = 16;
-   */
-  borderWidth?: number;
-
-  /**
-   * @generated from field: optional float borderRadius = 17;
-   */
-  borderRadius?: number;
-
-  /**
-   * @generated from field: optional bool fill = 18;
-   */
-  fill?: boolean;
-
-  /**
-   * @generated from field: repeated float points = 19;
-   */
-  points: number[];
-
-  /**
-   * @generated from field: optional float arrowSize = 20;
-   */
-  arrowSize?: number;
-
-  /**
-   * @generated from field: optional string arrowStyle = 21;
-   */
-  arrowStyle?: string;
-
-  /**
-   * @generated from field: optional string calloutStyle = 22;
-   */
-  calloutStyle?: string;
-
-  /**
-   * @generated from field: optional float spotlightRadius = 23;
-   */
-  spotlightRadius?: number;
-
-  /**
-   * @generated from field: optional float blurAmount = 24;
-   */
-  blurAmount?: number;
-
-  /**
-   * @generated from field: optional float startTime = 25;
-   */
-  startTime?: number;
-
-  /**
-   * @generated from field: optional float endTime = 26;
-   */
-  endTime?: number;
-
-  /**
-   * @generated from field: optional float zoomLevel = 27;
-   */
-  zoomLevel?: number;
-};
-
-/**
- * Describes the message coasterai.core.v1.CanvasObject.
- * Use `create(CanvasObjectSchema)` to create a new message.
- */
-export declare const CanvasObjectSchema: GenMessage<CanvasObject>;
-
-/**
  * @generated from message coasterai.core.v1.Slide
  */
 export declare type Slide = Message<"coasterai.core.v1.Slide"> & {
@@ -732,27 +586,27 @@ export enum TransitionType {
 export declare const TransitionTypeSchema: GenEnum<TransitionType>;
 
 /**
- * @generated from enum coasterai.core.v1.CanvasObjectType
+ * @generated from enum coasterai.core.v1.EffectType
  */
-export enum CanvasObjectType {
+export enum EffectType {
   /**
-   * @generated from enum value: CANVAS_UNDEFINED = 0;
+   * @generated from enum value: EFFECT_TYPE_UNDEFINED = 0;
    */
-  CANVAS_UNDEFINED = 0,
+  UNDEFINED = 0,
 
   /**
-   * @generated from enum value: CANVAS_CALLOUT = 1;
+   * @generated from enum value: EFFECT_TYPE_CALLOUT = 1;
    */
-  CANVAS_CALLOUT = 1,
+  CALLOUT = 1,
 
   /**
-   * @generated from enum value: CANVAS_SPOTLIGHT = 2;
+   * @generated from enum value: EFFECT_TYPE_SPOTLIGHT = 2;
    */
-  CANVAS_SPOTLIGHT = 2,
+  SPOTLIGHT = 2,
 }
 
 /**
- * Describes the enum coasterai.core.v1.CanvasObjectType.
+ * Describes the enum coasterai.core.v1.EffectType.
  */
-export declare const CanvasObjectTypeSchema: GenEnum<CanvasObjectType>;
+export declare const EffectTypeSchema: GenEnum<EffectType>;
 

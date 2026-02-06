@@ -1,14 +1,14 @@
 import { Button } from '@/components/ui/button'
-import { CalloutEffect, CanvasObjectType, SpotlightEffect } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { CalloutEffect, EffectType, SpotlightEffect } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { CircleDot, Focus, Trash2, X } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import CalloutSettings from './CalloutSettings'
 import SpotlightSettings from './SpotlightSettings'
 
 interface InsertSettingsProps {
-  tool: CanvasObjectType
-  currentObject?: SpotlightEffect
-  onUpdate?: (settings: Partial<SpotlightEffect | CalloutEffect>) => void
+  tool: EffectType
+  currentObject: SpotlightEffect | CalloutEffect;
+  onUpdate: (settings: Partial<SpotlightEffect | CalloutEffect>) => void
   onDelete?: () => void
   onClose: () => void
   canDelete?: boolean
@@ -21,20 +21,20 @@ interface InsertSettingsProps {
 
 
 export const toolMapping: Record<
-  CanvasObjectType,
+  EffectType,
   { label: string; icon: React.ElementType }
 > = {
-  [CanvasObjectType.CANVAS_UNDEFINED]: {
+  [EffectType.UNDEFINED]: {
     label: "Unknown",
     icon: CircleDot,
   },
 
-  [CanvasObjectType.CANVAS_CALLOUT]: {
+  [EffectType.CALLOUT]: {
     label: "Callout",
     icon: Focus,
   },
 
-  [CanvasObjectType.CANVAS_SPOTLIGHT]: {
+  [EffectType.SPOTLIGHT]: {
     label: "Spotlight",
     icon: CircleDot,
   },
@@ -52,103 +52,38 @@ const InsertSettings = ({
   onPlay,
   transitionDuration = 0
 }: InsertSettingsProps) => {
-  // Helper to safely get property with type guard
-  const getProperty = <T,>(obj: any, key: string, defaultValue: T): T => {
-    return obj && key in obj ? obj[key] : defaultValue
-  }
-
-  const [settings, setSettings] = useState<any>({
-    color: getProperty(currentObject, 'color', '#ef4444'),
-    animation: getProperty(currentObject, 'animation', 'fade-in'),
-    opacity: getProperty(currentObject, 'opacity', 100),
-    duration: getProperty(currentObject, 'duration', 2),
-    zoomLevel: getProperty(currentObject, 'zoomLevel', 2),
-    borderWidth: getProperty(currentObject, 'borderWidth', 3),
-    borderRadius: getProperty(currentObject, 'borderRadius', 0),
-    fill: getProperty(currentObject, 'fill', false),
-    text: getProperty(currentObject, 'text', 'Double-click to edit'),
-    fontSize: getProperty(currentObject, 'fontSize', 32),
-    fontFamily: getProperty(currentObject, 'fontFamily', 'Plus Jakarta Sans'),
-    fontStyle: getProperty(currentObject, 'fontStyle', 'normal'),
-    arrowSize: getProperty(currentObject, 'arrowSize', 24),
-    arrowStyle: getProperty(currentObject, 'arrowStyle', 'solid'),
-    calloutStyle: getProperty(currentObject, 'calloutStyle', 'pointer'),
-    spotlightRadius: getProperty(currentObject, 'spotlightRadius', 100),
-    blurAmount: getProperty(currentObject, 'blurAmount', 10),
-    x: getProperty(currentObject, 'x', 100),
-    y: getProperty(currentObject, 'y', 100),
-    width: getProperty(currentObject, 'width', 200),
-    height: getProperty(currentObject, 'height', 150),
-    // NEW ARCHITECTURE: startTime/endTime for effects
-    startTime: getProperty(currentObject, 'startTime', 0),
-    endTime: getProperty(currentObject, 'endTime', slideDuration)
-  })
+  const [settings, setSettings] = useState<SpotlightEffect | CalloutEffect>(currentObject);
 
   console.debug('insert settings', tool, currentObject)
   const ToolIcon = toolMapping[tool].icon
 
   // Sync settings when currentObject changes
   useEffect(() => {
-    if (currentObject) {
-      setSettings({
-        color: getProperty(currentObject, 'color', '#ef4444'),
-        opacity: getProperty(currentObject, 'opacity', 100),
-        duration: getProperty(currentObject, 'duration', 2),
-        zoomLevel: getProperty(currentObject, 'zoomLevel', 2),
-        borderWidth: getProperty(currentObject, 'borderWidth', 3),
-        borderRadius: getProperty(currentObject, 'borderRadius', 0),
-        fill: getProperty(currentObject, 'fill', false),
-        text: getProperty(currentObject, 'text', 'Double-click to edit'),
-        fontSize: getProperty(currentObject, 'fontSize', 32),
-        fontFamily: getProperty(currentObject, 'fontFamily', 'Plus Jakarta Sans'),
-        fontStyle: getProperty(currentObject, 'fontStyle', 'normal'),
-        arrowSize: getProperty(currentObject, 'arrowSize', 24),
-        arrowStyle: getProperty(currentObject, 'arrowStyle', 'solid'),
-        calloutStyle: getProperty(currentObject, 'calloutStyle', 'pointer'),
-        spotlightRadius: getProperty(currentObject, 'spotlightRadius', 100),
-        blurAmount: getProperty(currentObject, 'blurAmount', 10),
-        animation: getProperty(currentObject, 'animation', 'fade-in'),
-        x: getProperty(currentObject, 'x', 100),
-        y: getProperty(currentObject, 'y', 100),
-        width: getProperty(currentObject, 'width', 200),
-        height: getProperty(currentObject, 'height', 150),
-        startTime: getProperty(currentObject, 'startTime', 0),
-        endTime: getProperty(currentObject, 'endTime', slideDuration)
-      })
-    }
+    setSettings(currentObject);
   }, [currentObject?.id, slideDuration])
-
-  const updateSetting = useCallback(
-    (key: string, value: any) => {
-      const newSettings = { ...settings, [key]: value }
-      setSettings(newSettings)
-
-      if (onUpdate) {
-        // @TODO in future you can more effect types
-        onUpdate({ [key]: value } as Partial<SpotlightEffect & CalloutEffect>)
-      }
-    },
-    [settings, tool, onUpdate]
-  )
 
   const renderToolSpecificSettings = () => {
 
     // Render the specfic effect setting in sidebar based on object and tool selection
     switch (tool) {
-      case CanvasObjectType.CANVAS_CALLOUT:
+      case EffectType.CALLOUT:
         return (
           <CalloutSettings
-            settings={settings}
-            onChange={updateSetting}
+            settings={settings as CalloutEffect}
+            onChange={settings => {
+              onUpdate(settings);
+            }}
             slideDuration={slideDuration}
             transitionDuration={transitionDuration}
           />
         )
-      case CanvasObjectType.CANVAS_SPOTLIGHT:
+      case EffectType.SPOTLIGHT:
         return (
           <SpotlightSettings
-            settings={settings}
-            onChange={updateSetting}
+            settings={settings as SpotlightEffect}
+             onChange={settings => {
+              onUpdate(settings);
+            }}
             slideDuration={slideDuration}
             slideStartTime={slideStartTime}
             //We need transition duration to calculate accurate start and end time of spotlight

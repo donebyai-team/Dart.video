@@ -101,41 +101,10 @@ message ZoomEffect {
 
 // ===================== BACKWARD COMPAT TYPES =====================
 
-enum CanvasObjectType {
-  CANVAS_UNDEFINED = 0;
-  CANVAS_CALLOUT = 1;
-  CANVAS_SPOTLIGHT = 2;
-}
-
-message CanvasObject {
-  string id = 1;
-  CanvasObjectType type = 2;
-  float x = 3;
-  float y = 4;
-
-  optional float width = 5;
-  optional float height = 6;
-  optional float rotation = 7;
-  optional string color = 8;
-  optional float opacity = 9;
-  optional float duration = 10;
-  optional string text = 11;
-  optional float fontSize = 12;
-  optional string fontFamily = 13;
-  optional string fontStyle = 14;
-  optional string animation = 15;
-  optional float borderWidth = 16;
-  optional float borderRadius = 17;
-  optional bool fill = 18;
-  repeated float points = 19;
-  optional float arrowSize = 20;
-  optional string arrowStyle = 21;
-  optional string calloutStyle = 22;
-  optional float spotlightRadius = 23;
-  optional float blurAmount = 24;
-  optional float startTime = 25;
-  optional float endTime = 26;
-  optional float zoomLevel = 27;
+enum EffectType {
+  EFFECT_TYPE_UNDEFINED = 0;
+  EFFECT_TYPE_CALLOUT = 1;
+  EFFECT_TYPE_SPOTLIGHT = 2;
 }
 
 // ===================== SLIDE =====================

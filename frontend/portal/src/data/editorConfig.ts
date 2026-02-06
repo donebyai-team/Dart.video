@@ -2,7 +2,7 @@
 // This configuration drives the entire editor
 
 import type { EditorConfig } from "@/types/editor";
-import { CanvasObjectType, SlideType, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { EffectType, SlideType, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 export const defaultEditorConfig: EditorConfig = {
     // ==========================================
@@ -104,8 +104,8 @@ export const defaultEditorConfig: EditorConfig = {
     // ==========================================
     insertTools: {
         tools: [
-            { id: CanvasObjectType.CANVAS_CALLOUT, name: "Callout", icon: "Focus" },
-            { id: CanvasObjectType.CANVAS_SPOTLIGHT, name: "Spotlight", icon: "CircleDot" },
+            { id: EffectType.CALLOUT, name: "Callout", icon: "Focus" },
+            { id: EffectType.SPOTLIGHT, name: "Spotlight", icon: "CircleDot" },
         ],
         defaults: {
             callout: {

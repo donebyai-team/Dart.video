@@ -3,7 +3,6 @@
 
 import {
   AnimationSlideContent,
-  CanvasObjectType,
   MetaData,
   Section,
   SlideType,
