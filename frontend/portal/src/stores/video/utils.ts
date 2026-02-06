@@ -104,6 +104,7 @@ export function createNewSlide(params: {
         transitionDuration: 0.3,
         content: buildSlideContent(type),
         spotlights: [],
+        callouts: [],
         zooms: [],
         subSlides: [],
     });
