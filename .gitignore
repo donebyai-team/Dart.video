@@ -22,3 +22,4 @@ backend/cmd/coasterai/coasterai
 backend/cmd/coasterai/coasterai/*
 redora-infra/.terraform
 .run/
+backend/cmd/coasterai/.coasterai

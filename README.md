@@ -79,8 +79,8 @@ Initialize the database:
 Run tests and start the backend:
 
 ```bash
-cd backend
-go build -o redora && ./redora start
+cd backend/cms/coasterai
+go build -o coasterai && ./coasterai start
 ```
 
 For tests
