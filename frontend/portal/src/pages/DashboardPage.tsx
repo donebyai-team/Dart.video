@@ -292,49 +292,6 @@ const DashboardPage = () => {
                 </Button>
               </div>
 
-              {/* Quick Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                <Card className="card-elevated">
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                        <Video className="w-6 h-6 text-primary" />
-                      </div>
-                      <div>
-                        <p className="text-2xl font-bold">12</p>
-                        <p className="text-sm text-muted-foreground">Total Videos</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="card-elevated">
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
-                        <Clock className="w-6 h-6 text-accent" />
-                      </div>
-                      <div>
-                        <p className="text-2xl font-bold">3</p>
-                        <p className="text-sm text-muted-foreground">Drafts</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="card-elevated">
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-screen-solution/10 flex items-center justify-center">
-                        <Play className="w-6 h-6 text-screen-solution" />
-                      </div>
-                      <div>
-                        <p className="text-2xl font-bold">9</p>
-                        <p className="text-sm text-muted-foreground">Published</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
               {/* Recent Videos */}
               <div>
                 <h2 className="text-xl font-semibold mb-4">Recent Videos</h2>
