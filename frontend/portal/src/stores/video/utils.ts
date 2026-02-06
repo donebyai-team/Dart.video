@@ -136,7 +136,6 @@ export const createSpotlightEffect = (
         borderRadius: 8,
         startTime: startTimeInSec,
         endTime: endTimeInSec,
-        type: CanvasObjectType.CANVAS_SPOTLIGHT,
     });
 };
 
@@ -158,7 +157,6 @@ export const createCalloutEffect = (
         borderRadius: 8,
         startTime: startTimeInSec,
         endTime: endTimeInSec,
-        type: CanvasObjectType.CANVAS_SPOTLIGHT,
         color: "#22c55e"
     });
 };
