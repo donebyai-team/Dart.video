@@ -288,13 +288,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
                   // Apply spotlight - just close the panel
                   handleCloseTool()
                 }}
-                onSpotlightPlay={() => handlePreviewSlide(selectedSlide.slide.id)}
-                selectedStackItemId={selectedStackItemId}
-                onSelectStackItem={itemId => {
-                  // Use unified selection handler for stack items
-                  handleSelectEntity(createStackItemEntityId(selectedSlide.slide.id, itemId))
-                  // No need to seek - StackSlide will show the selected item when paused
-                }}
+                onSpotlightPlay={() => handlePreviewSlide(selectedSlide.slide.id)}                
               />
             ) : (
               <motion.div

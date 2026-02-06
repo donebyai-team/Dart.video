@@ -33,7 +33,7 @@ const PlayerCanvas = ({
 
   const selectedSlide = useVideoStore(s => s.selectedSlide)
   const selectedEffectId = useVideoStore(s => s.selectedEffectId)
-  const handleSelectObject = useVideoStore(s => s.handleSelectObject)
+  const handleSelectEffect = useVideoStore(s => s.handleSelectEffect)
 
   const onUpdateSpotlight = useVideoStore(s => s.updateSpotlight)
   const onUpdateCallout = useVideoStore(s => s.updateCallout)
@@ -112,14 +112,14 @@ const PlayerCanvas = ({
         </div>
 
         {/* Canvas overlay - always rendered for click handling and displaying objects */}
-        {!isPlaying && handleSelectObject && (
+        {!isPlaying && handleSelectEffect && (
           <div className='absolute inset-0' style={{ zIndex: 30, pointerEvents: 'none' }}>
             <CanvasOverlay
               resolution={resolution}
               spotlights={spotlights}
               callouts={callouts}
               selectedEffectId={selectedEffectId || null}
-              onSelectObject={handleSelectObject}
+              onSelectObject={handleSelectEffect}
               onUpdateSpotlight={(id, updates) => onUpdateSpotlight(id, updates)}
               onUpdateCallout={(id, updates) => onUpdateCallout(id, updates)}
               containerWidth={canvasSize.width * scale}

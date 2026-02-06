@@ -4,4 +4,3 @@ export { VideoSlide } from "./VideoSlide";
 export { TextAnimationSlide } from "./TextAnimationSlide";
 export { VisualAnimationSlide } from "./VisualAnimationSlide";
 export { InfographicSlide } from "./InfographicSlide";
-export { StackSlide } from "./StackSlide";

@@ -9,7 +9,6 @@ import {
   TextAnimationSlide,
   VisualAnimationSlide,
   InfographicSlide,
-  StackSlide,
 } from "./remotion/slides";
 import { getActualSlideDuration, TRANSITION_DURATION_SECONDS } from "./frame_calculations";
 import { useVideoStore } from "@/stores/video";
@@ -36,7 +35,6 @@ const SlideComponent: React.FC<{
   height,
   isEditing = false,
   isSelected = false,
-  selectedStackItemId = null,
   onSelect,
 }) => {
 
@@ -61,11 +59,6 @@ const SlideComponent: React.FC<{
       case SlideType.VIDEO:
         if (!slide.content?.case || slide.content.case === "video") {
           return <VideoSlide slide={slide} width={width} height={height} />;
-        }
-        break;
-      case SlideType.STACK:
-        if (!slide.content?.case || slide.content.case === "stack") {
-          return <StackSlide slide={slide} width={width} height={height} selectedItemId={selectedStackItemId} isEditing={isEditing} />;
         }
         break;
       case SlideType.IMAGE:

@@ -24,9 +24,8 @@ import PlayerToolbar from "../PlayerToolbar";
 import { usePlayerControls, type PlayerControls } from "@/hooks/usePlayerControls";
 import { useRemotionPlayerEvents } from "@/hooks/useRemotionPlayerEvents";
 import { useSlideSelection } from "@/hooks/useSlideSelection";
-import { calculateRealTotalFrames, calculateTotalFrames, getRealSlideStartFrame, getSlideVisualEndFrame } from "../frame_calculations";
+import { calculateRealTotalFrames, calculateTotalFrames, getSlideVisualEndFrame } from "../frame_calculations";
 import { useVideoStore } from "@/stores/video";
-import { SlideType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 interface RemotionPlayerProps {
   onSlideChange?: (slideId: string) => void;
@@ -57,7 +56,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   const resolution = useVideoStore(s => s.resolution);
   const selectedSlide = useVideoStore(s => s.selectedSlide)?.slide;
   const selectedStackItemId = useVideoStore(s => s.selectedStackItemId);
-  const onSelectObject = useVideoStore(s => s.handleSelectObject);
+  const onSelectOEffect = useVideoStore(s => s.handleSelectEffect);
   const fps = useVideoStore(s => s.getFPS)();
   const selectedSlideId = selectedSlide?.id || "";
 
@@ -250,7 +249,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
               // Fallback to old behavior
               onSlideChange?.(slideId);
               setTimeout(() => {
-                onSelectObject?.(overlayId);
+                onSelectOEffect?.(overlayId);
               }, 0);
             }
           }}
