@@ -7,10 +7,11 @@ import {
   VideoSlideContent,
   AnimationSlideContent,
   StackAnimationMode,
-  MetaData
+  MetaData,
+  SlideSchema
 } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { arrayMove } from '@dnd-kit/sortable'
-import { getSlideTypeConfig } from './utils'
+import { createNewSlide, getSlideTypeConfig } from './utils'
 import {
   createOverlayEntityId,
   createSlideEntityId,
@@ -20,6 +21,7 @@ import {
 import { VideoStoreSet, VideoStoreGet } from './types'
 import { TimelineSlide } from '@/components/editor/timeline/types'
 import { slide } from '@remotion/transitions/slide'
+import { create } from '@bufbuild/protobuf'
 
 export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   addSlide(sectionId: string, type: SlideType) {
@@ -33,92 +35,14 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       config.background.defaultColor
 
     // Create default content based on slide type
-    let content: Slide['content']
-
-    switch (type) {
-      case SlideType.IMAGE:
-        content = {
-          case: 'image',
-          value: {
-            $typeName: 'coasterai.core.v1.ImageSlideContent',
-            meta: {
-              x: 192, // 10% margin (1920 * 0.1)
-              y: 108, // 10% margin (1080 * 0.1)
-              width: 1536, // 80% of 1920
-              height: 864, // 80% of 1080
-              scale: 1,
-              rotation: 0
-            } as MetaData,
-            src: 'https://placehold.co/600x400/EEE/31343C',
-            style: {}
-          } as ImageSlideContent
-        }
-        break
-
-      case SlideType.VIDEO:
-        content = {
-          case: 'video',
-          value: {
-            $typeName: 'coasterai.core.v1.VideoSlideContent',
-            src: '',
-            startTime: 0,
-            endTime: 10
-          } as VideoSlideContent
-        }
-        break
-
-      case SlideType.TEXT_ANIMATION:
-      case SlideType.VISUAL_ANIMATION:
-      case SlideType.INFOGRAPHIC:
-        const defaultTemplateId = type === SlideType.TEXT_ANIMATION ? 'number-counter' : 'default'
-        content = {
-          case: 'animation',
-          value: {
-            $typeName: 'coasterai.core.v1.AnimationSlideContent',
-            templateId: defaultTemplateId,
-            templateConfig: {},
-            meta: {
-              x: 192, // 10% margin (1920 * 0.1)
-              y: 108, // 10% margin (1080 * 0.1)
-              width: 1536, // 80% of 1920
-              height: 864, // 80% of 1080
-              scale: 1,
-              rotation: 0
-            } as MetaData,
-          } as AnimationSlideContent
-        }
-        break
-
-      case SlideType.STACK:
-        content = {
-          case: 'stack',
-          value: {
-            $typeName: 'coasterai.core.v1.StackSlideContent',
-            animationMode: StackAnimationMode.STACK,
-            items: []
-          } as StackSlideContent
-        }
-        break
-
-      default:
-        content = { case: undefined, value: undefined }
-        break
-    }
-
-    const newSlide: Slide = {
-      $typeName: 'coasterai.core.v1.Slide',
-      id: `${sectionId}-${Date.now()}`,
+    const newSlide = createNewSlide({
+      sectionId,
       type,
-      transcript: slideTypeConfig?.defaultTranscript || 'Add your script here...',
-      duration: slideTypeConfig?.defaultDuration || 5,
-      transition: TransitionType.TRANSITION_NONE,
-      backgroundColor: inheritedBg,
-      transitionDuration: 0.3,
-      content,
-      spotlights: [],
-      zooms: [],
-      subSlides: []
-    }
+      inheritedBg,
+      defaultTranscript: slideTypeConfig?.defaultTranscript,
+      defaultDuration: slideTypeConfig?.defaultDuration,
+    });
+
 
     const newSections = sections.map(s => (s.id === sectionId ? { ...s, slides: [...s.slides, newSlide] } : s))
 
@@ -166,23 +90,23 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
           }
         }
       })
-      get().autoSyncSections(newSections)      
+      get().autoSyncSections(newSections)
     } else {
       // Clear global background and set individual slide background
       set({ globalBackgroundColor: undefined })
       const newSections = sections.map(section =>
         section.id === selectedSlide.section.id
           ? {
-              ...section,
-              slides: section.slides.map(slide =>
-                slide.id === selectedSlide.slide.id
-                  ? {
-                      ...slide,
-                      backgroundColor: color
-                    }
-                  : slide
-              )
-            }
+            ...section,
+            slides: section.slides.map(slide =>
+              slide.id === selectedSlide.slide.id
+                ? {
+                  ...slide,
+                  backgroundColor: color
+                }
+                : slide
+            )
+          }
           : section
       )
 
@@ -207,16 +131,16 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     const newSections = sections.map(section =>
       section.id === selectedSlide.section.id
         ? {
-            ...section,
-            slides: section.slides.map(slide =>
-              slide.id === selectedSlide.slide.id
-                ? {
-                    ...slide,
-                    transcript
-                  }
-                : slide
-            )
-          }
+          ...section,
+          slides: section.slides.map(slide =>
+            slide.id === selectedSlide.slide.id
+              ? {
+                ...slide,
+                transcript
+              }
+              : slide
+          )
+        }
         : section
     )
 
@@ -261,9 +185,9 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     const newSections = sections.map(s =>
       s.id === selectedSlide.section.id
         ? {
-            ...s,
-            slides: s.slides.map(sl => (sl.id === selectedSlide.slide.id ? { ...sl, ...updates } : sl))
-          }
+          ...s,
+          slides: s.slides.map(sl => (sl.id === selectedSlide.slide.id ? { ...sl, ...updates } : sl))
+        }
         : s
     )
 
@@ -314,9 +238,9 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     const newSections = sections.map(s =>
       s.id === selectedSlide.section.id
         ? {
-            ...s,
-            slides: s.slides.map(sl => (sl.id === selectedSlide.slide.id ? { ...sl, content: newContent } : sl))
-          }
+          ...s,
+          slides: s.slides.map(sl => (sl.id === selectedSlide.slide.id ? { ...sl, content: newContent } : sl))
+        }
         : s
     )
 
@@ -335,9 +259,9 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     const newSections = sections.map(s =>
       s.id === sectionId
         ? {
-            ...s,
-            slides: s.slides.map(sl => (sl.id === slideId ? { ...sl, transition: transitionId } : sl))
-          }
+          ...s,
+          slides: s.slides.map(sl => (sl.id === slideId ? { ...sl, transition: transitionId } : sl))
+        }
         : s
     )
     set({ sections: newSections, showTransitionPicker: null })
