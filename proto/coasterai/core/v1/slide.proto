@@ -74,7 +74,6 @@ message SpotlightEffect {
   float borderRadius = 7;
   float startTime = 8;
   float endTime = 9;
-  float type = 10;
 }
 
 message CalloutEffect {
@@ -87,8 +86,7 @@ message CalloutEffect {
   float borderRadius = 7;
   float startTime = 8;
   float endTime = 9;
-  float type = 10;
-  string color = 11;
+  string color = 10;
   
 }
 
@@ -104,8 +102,9 @@ message ZoomEffect {
 // ===================== BACKWARD COMPAT TYPES =====================
 
 enum CanvasObjectType {
-  CANVAS_CALLOUT = 0;
-  CANVAS_SPOTLIGHT = 1;
+  CANVAS_UNDEFINED = 0;
+  CANVAS_CALLOUT = 1;
+  CANVAS_SPOTLIGHT = 2;
 }
 
 message CanvasObject {

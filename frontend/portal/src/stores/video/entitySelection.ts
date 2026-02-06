@@ -39,22 +39,11 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
           selectedStackItemId: null
         })
 
-      // Collect all teh canvas object
-      const spotslights = get().getSpotlights() || []
-      const callouts = get().getCallouts() || []
+        // Identify tooltype if any of above is true 
+        // TODO: Check why the overlayId is optional? It shouldn't be
+        const toolType = getEffectTypeFromID(parsed.overlayId!, get);
 
-      // Check if the parsed.overlayId belongs to one of them
-      const isCallout = callouts.find(e => e.id === parsed.overlayId)
-      const isSpotlight = spotslights.find(e => e.id === parsed.overlayId)
-
-      // Identify tooltype if any of above is true 
-        const toolType = isCallout
-          ? CanvasObjectType.CANVAS_CALLOUT
-          : isSpotlight
-            ? CanvasObjectType.CANVAS_SPOTLIGHT
-            : undefined
-
-      // Set the toolType if it exist
+        // Set the toolType if it exist
         if (toolType) {
           set({ activeTool: { type: ActiveToolType.INSERT, tool: toolType } })
         }
@@ -110,14 +99,10 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
         set({ activeTool: { type: ActiveToolType.TEXT_ANIMATION_TEMPLATE } })
       }
     } else if (parsed.type === 'overlay' || parsed.type === 'stack-item-overlay') {
-      const objects = get().getSpotlights()
-      // Find the object by checking the inner IDs
-      const obj = objects.find((e: SpotlightEffect) => {
-        return e.id === parsed.overlayId
-      })
+      const toolType = getEffectTypeFromID(parsed.overlayId!, get);
 
-      if (obj) {
-        set({ activeTool: { type: ActiveToolType.INSERT, tool: CanvasObjectType.CANVAS_SPOTLIGHT } })
+      if (toolType) {
+        set({ activeTool: { type: ActiveToolType.INSERT, tool: toolType } })
       }
     }
   },
@@ -130,20 +115,8 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
     if (id) {
       set({ selectedStackItemId: null })
 
-      // Collect all teh canvas object
-      const spotslights = get().getSpotlights() || []
-      const callouts = get().getCallouts() || []
-
-      // Check if the id belongs to one of them
-      const isCallout = callouts.find(e => e.id === id)
-      const isSpotlight = spotslights.find(e => e.id === id)
-
-      // Identify tooltype if any of above is true 
-      const toolType = isCallout
-        ? CanvasObjectType.CANVAS_CALLOUT
-        : isSpotlight
-          ? CanvasObjectType.CANVAS_SPOTLIGHT
-          : undefined
+      // TODO: Check why the id is optional? It shouldn't be
+      const toolType = getEffectTypeFromID(id!, get);
 
       // Set the toolType if it exist
       if (toolType) {
@@ -165,3 +138,21 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
     }
   }
 })
+
+const getEffectTypeFromID = (
+  effectId: string,
+  get: VideoStoreGet
+): CanvasObjectType => {
+  const spotlights = get().getSpotlights() ?? [];
+  const callouts = get().getCallouts() ?? [];
+
+  const isCallout = callouts.some(e => e.id === effectId);
+  if (isCallout) return CanvasObjectType.CANVAS_CALLOUT;
+
+  const isSpotlight = spotlights.some(e => e.id === effectId);
+  if (isSpotlight) return CanvasObjectType.CANVAS_SPOTLIGHT;
+
+  // ideally this should never happen
+  return CanvasObjectType.CANVAS_UNDEFINED;
+};
+

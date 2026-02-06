@@ -20,11 +20,25 @@ interface InsertSettingsProps {
 }
 
 
-// toolInfo will be feed to dropdown to render the effect options
-const toolInfo: Record<CanvasObjectType, { label: string; icon: React.ElementType }> = {
-  0: { label: 'Callout', icon: Focus },
-  1: { label: 'Spotlight', icon: CircleDot }
-}
+export const toolMapping: Record<
+  CanvasObjectType,
+  { label: string; icon: React.ElementType }
+> = {
+  [CanvasObjectType.CANVAS_UNDEFINED]: {
+    label: "Unknown",
+    icon: CircleDot,
+  },
+
+  [CanvasObjectType.CANVAS_CALLOUT]: {
+    label: "Callout",
+    icon: Focus,
+  },
+
+  [CanvasObjectType.CANVAS_SPOTLIGHT]: {
+    label: "Spotlight",
+    icon: CircleDot,
+  },
+};
 
 const InsertSettings = ({
   tool,
@@ -71,7 +85,7 @@ const InsertSettings = ({
   })
 
   console.debug('insert settings', tool, currentObject)
-  const ToolIcon = toolInfo[tool].icon
+  const ToolIcon = toolMapping[tool].icon
 
   // Sync settings when currentObject changes
   useEffect(() => {
@@ -154,7 +168,7 @@ const InsertSettings = ({
       <div className='flex items-center justify-between px-3 py-2 border-b border-border'>
         <div className='flex items-center gap-2'>
           <ToolIcon className='w-3.5 h-3.5 text-muted-foreground' />
-          <h3 className='font-medium text-xs'>{toolInfo[tool].label}</h3>
+          <h3 className='font-medium text-xs'>{toolMapping[tool].label}</h3>
         </div>
         <div className='flex items-center gap-1'>
           {canDelete && onDelete && (

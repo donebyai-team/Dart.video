@@ -198,11 +198,6 @@ export declare type SpotlightEffect = Message<"coasterai.core.v1.SpotlightEffect
    * @generated from field: float endTime = 9;
    */
   endTime: number;
-
-  /**
-   * @generated from field: float type = 10;
-   */
-  type: number;
 };
 
 /**
@@ -261,12 +256,7 @@ export declare type CalloutEffect = Message<"coasterai.core.v1.CalloutEffect"> &
   endTime: number;
 
   /**
-   * @generated from field: float type = 10;
-   */
-  type: number;
-
-  /**
-   * @generated from field: string color = 11;
+   * @generated from field: string color = 10;
    */
   color: string;
 };
@@ -746,14 +736,19 @@ export declare const TransitionTypeSchema: GenEnum<TransitionType>;
  */
 export enum CanvasObjectType {
   /**
-   * @generated from enum value: CANVAS_CALLOUT = 0;
+   * @generated from enum value: CANVAS_UNDEFINED = 0;
    */
-  CANVAS_CALLOUT = 0,
+  CANVAS_UNDEFINED = 0,
 
   /**
-   * @generated from enum value: CANVAS_SPOTLIGHT = 1;
+   * @generated from enum value: CANVAS_CALLOUT = 1;
    */
-  CANVAS_SPOTLIGHT = 1,
+  CANVAS_CALLOUT = 1,
+
+  /**
+   * @generated from enum value: CANVAS_SPOTLIGHT = 2;
+   */
+  CANVAS_SPOTLIGHT = 2,
 }
 
 /**
