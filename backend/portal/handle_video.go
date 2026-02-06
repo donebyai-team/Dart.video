@@ -11,7 +11,6 @@ import (
 	"github.com/streamingfast/logging"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"time"
 )
 
 func (p *Portal) CreateVideo(ctx context.Context, c *connect.Request[pbportal.CreateVideoRequest]) (*connect.Response[pbportal.CreateVideoResponse], error) {
@@ -55,11 +54,11 @@ func (p *Portal) GetVideo(ctx context.Context,
 
 	for stepIndex := range thinkingSteps {
 		// Simulate processing time between each step
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case <-time.After(2000 * time.Millisecond):
-		}
+		//select {
+		//case <-ctx.Done():
+		//	return ctx.Err()
+		//case <-time.After(50 * time.Millisecond):
+		//}
 
 		// Fetch video from database
 		video, err := p.videoGenerationService.GetVideo(ctx, videoID, actor.OrganizationID)
