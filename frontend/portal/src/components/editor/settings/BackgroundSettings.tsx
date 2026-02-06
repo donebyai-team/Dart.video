@@ -46,6 +46,7 @@ const BackgroundSettings = ({ currentColor, globalBackgroundColor, onChange, onC
   // Determine initial state: if globalBackgroundColor is set, "apply to all" is enabled
   const initialApplyToAll = !!globalBackgroundColor;
   const initialColor = globalBackgroundColor || currentColor;
+  console.debug("open background setting")
   
   const [selectedColor, setSelectedColor] = useState(initialColor);
   const [applyToAll, setApplyToAll] = useState(initialApplyToAll);

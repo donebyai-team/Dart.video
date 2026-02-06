@@ -1,6 +1,6 @@
 // Timeline-specific types for the layered timeline visualization
 
-import { CalloutEffect, CanvasObject, CanvasObjectType, Slide, SpotlightEffect, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { CalloutEffect, EffectType, Slide, SpotlightEffect, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 /**
  * Timeline item types representing different elements on the timeline
@@ -55,7 +55,7 @@ export interface OverlayItem {
   id: string;
   overlayId: string; // ID of the effect or annotation
   slideId: string; // Parent slide ID
-  overlayType: CanvasObjectType; // 'spotlight', 'callout', etc.
+  overlayType: EffectType; // 'spotlight', 'callout', etc.
   startTime: number; // absolute time in timeline (seconds)
   duration: number; // seconds
   trackIndex: number; // for vertical stacking (0 = first overlay track)

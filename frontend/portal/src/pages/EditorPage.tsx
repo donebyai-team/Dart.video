@@ -20,6 +20,7 @@ import { Slide, SlideType, StackSlideContent } from '@coasterai/pb/coasterai/cor
 import { Video as VideoConfig } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import toast from 'react-hot-toast'
 import { getConnectError } from '@/utils/error';
+import { ActiveToolType } from '@/types/tools';
 
 // Icon mapping for dynamic rendering
 const iconMap: Record<string, React.ElementType> = {
@@ -80,7 +81,9 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
   const handleGenerateSlideVoiceover = useVideoStore(s => s.handleGenerateSlideVoiceover)
   const handleCloseTool = useVideoStore(s => s.handleCloseTool)
   const updateSpotlight = useVideoStore(s => s.updateSpotlight)
+  const updateCallout = useVideoStore(s => s.updateCallout)
   const deleteSpotlight = useVideoStore(s => s.deleteSpotlight)
+  const deleteCallout = useVideoStore(s => s.deleteCallout)
   const updateSlide = useVideoStore(s => s.updateSlide)
   const handleSelectEntity = useVideoStore(s => s.handleSelectEntity)
   const openEntitySettings = useVideoStore(s => s.openEntitySettings)
@@ -266,13 +269,19 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
           className='w-96 bg-card border-r border-border flex flex-col'
         >
           <AnimatePresence mode='wait'>
-            {activeTool && selectedSlide ? (
+            {activeTool.type != ActiveToolType.NONE && selectedSlide ? (
               <ToolsSettingsPanel
                 deleteSpotlight={deleteSpotlight}
+                deleteCallout={deleteCallout}
                 onPreviewTemplate={() => handlePreviewSlide(selectedSlide.slide.id)}
                 onUpdateSpotlight={updates => {
                   if (selectedObjectId) {
                     updateSpotlight(selectedObjectId, updates)
+                  }
+                }}
+                 onUpdateCallout={updates => {
+                  if (selectedObjectId) {
+                    updateCallout(selectedObjectId, updates)
                   }
                 }}
                 onSpotlightApply={() => {

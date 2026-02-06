@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import SpotlightOverlay from "./overlays/SpotlightOverlay";
-import { Resolution, CanvasObject, SpotlightEffect, CalloutEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { Resolution, SpotlightEffect, CalloutEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import CalloutOverlay from "./overlays/CalloutOverlay";
 
 interface CanvasOverlayProps {

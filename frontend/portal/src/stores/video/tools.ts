@@ -1,10 +1,10 @@
-import { SlideType, SpotlightEffect, CanvasObjectType, CalloutEffect } from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import { ActiveToolType, LeftPanelTool } from '@/types/tools'
+import { SlideType, EffectType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { ActiveToolType, SelectedTool } from '@/types/tools'
 import { VideoStoreSet, VideoStoreGet } from './types'
-import { createCalloutEffect, createSpotlightEffect } from './utils'
+import { createCalloutEffect, createSpotlightEffect, getDefaultSelectedTool } from './utils'
 
 export const createToolActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
-  handleSelectTool(tool: LeftPanelTool) {
+  handleSelectTool(tool: SelectedTool) {
     const { resolution, selectedSlide } = get()
     if (!resolution || !selectedSlide) return
     const startTime = selectedSlide.slide.transitionDuration || 0
@@ -13,45 +13,22 @@ export const createToolActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     set({ activeTool: tool })
 
     if (tool?.type === ActiveToolType.INSERT) {
-      if (tool.tool === CanvasObjectType.CANVAS_SPOTLIGHT) {
+      if (tool.tool === EffectType.SPOTLIGHT) {
         const spotlightEffect = createSpotlightEffect(resolution, startTime, endTime);
 
         get().addSpotlight(spotlightEffect)
         set({ selectedObjectId: spotlightEffect.id })
-      } else if (tool.tool === CanvasObjectType.CANVAS_CALLOUT) {
+      } else if (tool.tool === EffectType.CALLOUT) {
         const calloutEffect = createCalloutEffect(resolution, startTime, endTime);
 
         get().addCallout(calloutEffect)
         set({ selectedObjectId: calloutEffect.id })
       }
-
-      // if (tool.tool === CanvasObjectType.CANVAS_CALLOUT) {
-      //   const calloutAnnotation: CalloutAnnotation = {
-      //     $typeName: "coasterai.core.v1.CalloutAnnotation",
-      //     id: objectId,
-      //     x: 100,
-      //     y: 100,
-      //     color: "#ef4444",
-      //     opacity: 1.0,
-      //     calloutStyle: "pointer",
-      //   };
-
-      //   const annotation: AnnotationObject = {
-      //     $typeName: "coasterai.core.v1.AnnotationObject",
-      //     annotation: {
-      //       case: "callout",
-      //       value: calloutAnnotation,
-      //     },
-      //   };
-
-      //   get().addAnnotation(annotation);
-      //   set({ selectedObjectId: calloutAnnotation.id });
-      // }
     }
   },
 
   handleCloseTool() {
-    set({ activeTool: null })
+    set({ activeTool: getDefaultSelectedTool()})
   },
 
   handleEditSlide() {

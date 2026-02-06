@@ -19,7 +19,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useState } from 'react'
 import { useVideoStore } from '@/stores/video'
-import { SlideType, Slide, StackSlideContent, CanvasObjectType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { SlideType, Slide, StackSlideContent, EffectType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { ActiveToolType } from '@/types/tools'
 import DurationChangeComponent from './remotion/components/DurationChangeComponent'
 
@@ -38,9 +38,9 @@ const slideTypeLabels: Record<SlideType, { label: string; icon: React.ElementTyp
   [SlideType.VIDEO]: { label: 'Video', icon: Film },
   [SlideType.STACK]: { label: 'Stack', icon: Layers }
 }
-const insertTools: { id: CanvasObjectType; name: string; icon: React.ElementType }[] = [
-  { id: CanvasObjectType.CANVAS_CALLOUT, name: 'Callout', icon: Focus },
-  { id: CanvasObjectType.CANVAS_SPOTLIGHT, name: 'Spotlight', icon: CircleDot }
+const insertTools: { id: EffectType; name: string; icon: React.ElementType }[] = [
+  { id: EffectType.CALLOUT, name: 'Callout', icon: Focus },
+  { id: EffectType.SPOTLIGHT, name: 'Spotlight', icon: CircleDot }
 ]
 
 const isMediaType = (type: SlideType) => type === SlideType.IMAGE || type === SlideType.VIDEO
@@ -110,7 +110,7 @@ const PlayerToolbar = ({ onDurationChange, minDuration = 1, maxDuration = 60 }: 
                 variant={isBackgroundActive ? 'secondary' : 'ghost'}
                 size='sm'
                 className='gap-2 h-8'
-                onClick={() => onSelectTool(isBackgroundActive ? null : { type: ActiveToolType.BACKGROUND })}
+                onClick={() => onSelectTool(isBackgroundActive ? { type: ActiveToolType.NONE } : { type: ActiveToolType.BACKGROUND })}
               >
                 <div className='w-4 h-4 rounded border border-border' style={{ background: currentBg }} />
                 <Palette className='w-4 h-4' />

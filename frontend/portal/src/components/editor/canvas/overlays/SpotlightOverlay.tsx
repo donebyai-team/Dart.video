@@ -1,4 +1,4 @@
-import { CanvasObject, Resolution, SpotlightEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { Resolution, SpotlightEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { useState, useRef, useCallback, useEffect } from "react";
 
 interface SpotlightOverlayProps {
@@ -8,7 +8,7 @@ interface SpotlightOverlayProps {
   containerHeight: number;
   isSelected: boolean;
   onSelect: () => void;
-  onUpdate: (updates: Partial<CanvasObject>) => void;
+  onUpdate: (updates: Partial<SpotlightEffect>) => void;
 }
 
 type ResizeHandle = "nw" | "ne" | "sw" | "se";
@@ -123,7 +123,6 @@ const SpotlightOverlay = ({
   }, [isDragging, isResizing, handleMouseMove, handleMouseUp]);
 
   const handleSize = 10;
-  console.log(isSelected, "selected")
 
   return (
     <div

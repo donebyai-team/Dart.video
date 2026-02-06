@@ -1,6 +1,8 @@
 import { EditorConfig, SlideTypeConfig, TextAnimationSlideConfig } from "@/types/editor";
+import { ActiveToolType, SelectedTool } from "@/types/tools";
 import { create } from "@bufbuild/protobuf";
-import { AnimationSlideContentSchema, CalloutEffect, CalloutEffectSchema, CanvasObjectType, ImageSlideContentSchema, MetaData, MetaDataSchema, Resolution, Section, SectionSchema, Slide, SlideSchema, SlideType, SpotlightEffect, SpotlightEffectSchema, StackAnimationMode, StackSlideContentSchema, TransitionType, VideoSlideContentSchema } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { AnimationSlideContentSchema, CalloutEffect, CalloutEffectSchema, ImageSlideContentSchema, MetaData, MetaDataSchema, Resolution, Section, SectionSchema, Slide, SlideSchema, SlideType, SpotlightEffect, SpotlightEffectSchema, StackAnimationMode, StackSlideContentSchema, TransitionType, VideoSlideContentSchema } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { Video } from "@coasterai/pb/coasterai/core/v1/video_pb";
 
 // Helper functions (moved from useEditorState)
 export const getSlideTypeConfig = (config: EditorConfig | null, slideType: SlideType): SlideTypeConfig | undefined => {
@@ -160,6 +162,34 @@ export const createCalloutEffect = (
         color: "#22c55e"
     });
 };
+
+export const getDefaultSelectedTool = (): SelectedTool => {
+    return {type: ActiveToolType.NONE}
+}
+
+export const getDefaultResolution = (config: EditorConfig) => {
+  return (
+    config.resolution.options.find(
+      (r: { id: string }) => r.id === config.resolution.default
+    ) ?? config.resolution.options[0]
+  );
+}
+
+export const getInitialSelection = (videoConfig: Video) => {
+  const firstSection = videoConfig.config?.sections?.[0];
+  const firstSlide = firstSection?.slides?.[0];
+
+  if (!firstSection) return null;
+
+  if (firstSlide) {
+    return { section: firstSection, slide: firstSlide };
+  }
+
+  // Section exists but no slides
+  return null;
+}
+
+
 
 
 

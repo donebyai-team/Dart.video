@@ -3,9 +3,6 @@ import { VideoStoreGet, VideoStoreSet } from './types'
 
 export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
 
-  // For Spotlight Effetcts you can use these function to directly operate in slide data
-
-
   getSpotlights: () => {
     const { selectedSlide } = get()
     if (!selectedSlide) return []
@@ -153,6 +150,8 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
         }
       }
     })
+
+    get().autoSyncSections(newSections);
   },
 
   updateCallout(effectId: string, updates: Partial<CalloutEffect>) {
@@ -189,6 +188,8 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
         }
       }
     })
+
+    get().autoSyncSections(newSections);
   },
 
   deleteCallout(effectId: string) {
@@ -227,7 +228,7 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
       selectedObjectId: null
     })
 
-    get().notifyConfigChange(newSections)
+    get().autoSyncSections(newSections);
   }
 
 

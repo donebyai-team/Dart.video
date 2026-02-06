@@ -5,7 +5,7 @@ import type {
     TextAnimationSlideConfig,
 } from "@/types/editor";
 import type { EntityId } from "@/types/selection";
-import { ActiveTool, LeftPanelTool } from "@/types/tools";
+import { SelectedTool } from "@/types/tools";
 import { JsonObject } from "@bufbuild/protobuf";
 import { Section, Resolution, Slide, SlideType, TransitionType, CalloutEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { Video } from "@coasterai/pb/coasterai/core/v1/video_pb";
@@ -26,7 +26,7 @@ export interface VideoState {
     selectedSlide: { section: Section; slide: Slide } | null;
     selectedObjectId: string | null;
     selectedStackItemId: string | null;
-    activeTool: LeftPanelTool;
+    activeTool: SelectedTool;
     showScreenshots: boolean;
     showVoiceover: boolean;
     showTransitionPicker: string | null;
@@ -48,7 +48,6 @@ export interface VideoActions {
     initializeSync: (videoId: string) => void;
     syncSections: () => void;
     autoSyncSections: (sections: Section[]) => void;
-    notifyConfigChange:(sections:Section[]) => void
     getSyncStatus: () => 'idle' | 'syncing' | 'error';
     forceSyncSections: () => void;
 
@@ -102,7 +101,7 @@ export interface VideoActions {
   openEntitySettings: (id: EntityId) => void
 
   // Tools
-  handleSelectTool: (tool: ActiveTool) => void
+  handleSelectTool: (tool: SelectedTool) => void
   handleCloseTool: () => void
   handleEditSlide: () => void
 

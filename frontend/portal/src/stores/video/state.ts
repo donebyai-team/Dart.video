@@ -1,5 +1,6 @@
 import { createSlideEntityId } from "@/types/selection";
 import { VideoState } from "./types";
+import { getDefaultSelectedTool } from "./utils";
 
 export const initialState: VideoState = {
   config: null,
@@ -14,7 +15,7 @@ export const initialState: VideoState = {
   selectedObjectId: null,
   selectedStackItemId: null,
 
-  activeTool: null,
+  activeTool: getDefaultSelectedTool(),
   showScreenshots: false,
   showVoiceover: false,
   showTransitionPicker: null,

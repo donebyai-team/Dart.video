@@ -1,12 +1,13 @@
 import { parseEntityId } from '@/types/selection'
 import {
-  CanvasObjectType,
+  EffectType,
   SlideType,
   SpotlightEffect,
   StackSlideContent
 } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { ActiveToolType } from '@/types/tools'
 import { VideoStoreGet, VideoStoreSet } from './types'
+import { getDefaultSelectedTool } from './utils'
 
 export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   handleSelectEntity(entityId: string) {
@@ -63,7 +64,7 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
         set({
           selectedObjectId: null,
           selectedStackItemId: null,
-          activeTool: null
+          activeTool: getDefaultSelectedTool()
         })
       }
     } catch (err) {
@@ -133,7 +134,7 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
           set({ selectedStackItemId: first.id })
         }
       } else {
-        set({ activeTool: null })
+        set({ activeTool: getDefaultSelectedTool() })
       }
     }
   }
@@ -142,17 +143,17 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
 const getEffectTypeFromID = (
   effectId: string,
   get: VideoStoreGet
-): CanvasObjectType => {
+): EffectType => {
   const spotlights = get().getSpotlights() ?? [];
   const callouts = get().getCallouts() ?? [];
 
   const isCallout = callouts.some(e => e.id === effectId);
-  if (isCallout) return CanvasObjectType.CANVAS_CALLOUT;
+  if (isCallout) return EffectType.CALLOUT;
 
   const isSpotlight = spotlights.some(e => e.id === effectId);
-  if (isSpotlight) return CanvasObjectType.CANVAS_SPOTLIGHT;
+  if (isSpotlight) return EffectType.SPOTLIGHT;
 
   // ideally this should never happen
-  return CanvasObjectType.CANVAS_UNDEFINED;
+  return EffectType.UNDEFINED;
 };
 

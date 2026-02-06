@@ -2,12 +2,12 @@ import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 import { Button } from '@/components/ui/button'
 import { Play } from 'lucide-react'
-import { CanvasObject } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { SpotlightEffect } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import DurationChangeComponent from '../remotion/components/DurationChangeComponent'
 
 interface SpotlightSettingsProps {
-  settings: Partial<CanvasObject>
-  onChange: <K extends keyof CanvasObject>(key: K, value: CanvasObject[K]) => void
+  settings: Partial<SpotlightEffect>
+  onChange: (settings: Partial<SpotlightEffect>) => void
   slideDuration?: number
   transitionDuration?: number
   slideStartTime?: number
@@ -27,7 +27,10 @@ const SpotlightSettings = ({ settings, onChange, slideDuration = 5, onPlay, tran
           <Label className='text-xs w-16'>Amount</Label>
           <Slider
             value={[settings.blurAmount || 0]}
-            onValueChange={values => onChange('blurAmount', values[0])}
+            onValueChange={values => {
+              settings.blurAmount = values[0];
+              onChange(settings)
+            }}
             min={0}
             max={50}
             step={1}
@@ -41,7 +44,10 @@ const SpotlightSettings = ({ settings, onChange, slideDuration = 5, onPlay, tran
           <Label className='text-xs w-16'>Radius</Label>
           <Slider
             value={[settings.borderRadius || 8]}
-            onValueChange={values => onChange('borderRadius', values[0])}
+            onValueChange={values => {
+              settings.borderRadius = values[0];
+              onChange(settings)
+            }}
             min={0}
             max={50}
             step={2}
@@ -64,7 +70,8 @@ const SpotlightSettings = ({ settings, onChange, slideDuration = 5, onPlay, tran
           <DurationChangeComponent
             value={spotlightStart}
             onValueChange={val => {
-              onChange('startTime', val)
+              settings.startTime = val;
+              onChange(settings)
             }}
             // the max value of startTime will spotlightEnd seconds - 0.1 
             // it will ensure that the start and end time doesn't become same
@@ -81,14 +88,15 @@ const SpotlightSettings = ({ settings, onChange, slideDuration = 5, onPlay, tran
           <DurationChangeComponent
             value={spotlightEnd}
             onValueChange={val => {
-              onChange('endTime', val)
+              settings.endTime = val;
+              onChange(settings)
             }}
-             // If there is transition in slide it will make sure the endTime ends before transitionDuration
+            // If there is transition in slide it will make sure the endTime ends before transitionDuration
             max={slideDuration - transitionDuration}
-             // the min value of endTime will spotlightStart seconds + 0.1 
+            // the min value of endTime will spotlightStart seconds + 0.1 
             // it will ensure that the start and end time doesn't become same
             min={spotlightStart + 0.1}
-             // This step variable ensures the value will decrease/increase  by 0.1 only
+            // This step variable ensures the value will decrease/increase  by 0.1 only
             step={0.1}
           />
         </div>

@@ -1,12 +1,11 @@
 import ColorPickerInput from '@/components/editor/ColorPickerInput'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { CanvasObject } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import DurationButtonRange from '../remotion/components/DurationChangeComponent'
+import { CalloutEffect } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 
 interface CalloutSettingsProps {
-  settings: Partial<CanvasObject>
-  onChange: <K extends keyof CanvasObject>(key: K, value: CanvasObject[K]) => void
+  settings: Partial<CalloutEffect>
+  onChange: (settings: Partial<CalloutEffect>) => void
   slideDuration?: number
   transitionDuration?: number
 }
@@ -16,10 +15,13 @@ const CalloutSettings = ({ settings, onChange, slideDuration = 0, transitionDura
   const spotlightEnd = settings.endTime ?? slideDuration
   return (
     <div className='space-y-2'>
-       <Label className='text-xs font-medium text-muted-foreground uppercase tracking-wide'>
-          Border color
-        </Label>
-      <ColorPickerInput value={settings.color || '#ef4444'} onChange={color => onChange('color', color)} />
+      <Label className='text-xs font-medium text-muted-foreground uppercase tracking-wide'>
+        Border color
+      </Label>
+      <ColorPickerInput value={settings.color || '#ef4444'} onChange={color => {
+        settings.color = color;
+        onChange(settings)
+      }} />
       <div className='space-y-2'>
         <Label className='text-xs font-medium text-muted-foreground uppercase tracking-wide'>
           Timing (Slide: 0s - {slideDuration.toFixed(1)}s)
@@ -30,7 +32,8 @@ const CalloutSettings = ({ settings, onChange, slideDuration = 0, transitionDura
           <DurationButtonRange
             value={spotlightStart}
             onValueChange={val => {
-              onChange('startTime', val)
+              settings.startTime = val
+              onChange(settings)
             }}
             // the max value of startTime will spotlightEnd seconds - 0.1
             // it will ensure that the start and end time doesn't become same
@@ -46,7 +49,8 @@ const CalloutSettings = ({ settings, onChange, slideDuration = 0, transitionDura
           <DurationButtonRange
             value={spotlightEnd}
             onValueChange={val => {
-              onChange('endTime', val)
+              settings.endTime = val
+              onChange(settings)
             }}
             // If there is transition in slide it will make sure the endTime ends before transitionDuration
             max={slideDuration - transitionDuration}
@@ -59,21 +63,6 @@ const CalloutSettings = ({ settings, onChange, slideDuration = 0, transitionDura
         </div>
         <p className='text-xs text-muted-foreground'>Duration: {(spotlightEnd - spotlightStart).toFixed(1)}s</p>
       </div>
-
-      <Select
-        value={settings.calloutStyle}
-        onValueChange={value => onChange('calloutStyle', value as 'pointer' | 'circle' | 'box' | 'numbered')}
-      >
-        <SelectTrigger className='h-8 text-xs hidden'>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value='pointer'>Pointer</SelectItem>
-          <SelectItem value='circle'>Circle</SelectItem>
-          <SelectItem value='box'>Box</SelectItem>
-          <SelectItem value='numbered'>Numbered</SelectItem>
-        </SelectContent>
-      </Select>
     </div>
   )
 }
