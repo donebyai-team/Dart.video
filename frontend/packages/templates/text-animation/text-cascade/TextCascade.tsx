@@ -1,6 +1,7 @@
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion'
 import { EditableText } from '../../lib/EditableText'
 import { TextCascadeTemplateConfigSchema, TextCascadeTemplateProps } from './types'
+import { FallbackTemplate } from '../../lib/FallbackTemplate'
 
 interface Props {
   props: TextCascadeTemplateProps
@@ -8,12 +9,22 @@ interface Props {
 }
 
 const RemoteComponent = ({ props, onChange }: Props) => {
-  //schema check
-  TextCascadeTemplateConfigSchema.parse(props)
+  // validate the props
+  const result = TextCascadeTemplateConfigSchema.safeParse(props)
+  if (!result.success) {
+    console.error("Template validation failed:", result.error)
 
-  const centerText = props.centerText
-  const topLeftText = props.topLeftText
-  console.log(centerText, topLeftText)
+    return (
+      <FallbackTemplate message="Input props schema is incorrect for this template." />
+    )
+  }
+
+  const safeProps = result.data
+
+
+  const centerText = safeProps.centerText
+  const topLeftText = safeProps.topLeftText
+  console.debug("template input config:", safeProps)
 
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()

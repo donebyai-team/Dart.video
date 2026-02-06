@@ -1,59 +1,142 @@
-import React, { useState } from 'react'
-import { TextEditor } from './TextEditor'
+import React, { useEffect, useState } from 'react'
 import TextStyler from './TextStyler'
+import { useLayoutEffect, useRef } from "react"
+import { createPortal } from "react-dom"
+import { EditableTextData, EditableTextStyle } from './types'
 
-interface StyleProps {
-  [key: string]: any
-}
-
-interface EditableTextProps<T extends Record<string, any>> {
+interface EditableTextProps {
   children: React.ReactNode
-  props: T
-  onChange: (updatedProps: T) => void
-  textKey?: keyof T // Which property contains the text
-  styleKey?: keyof T // Which property contains the style
+  props: EditableTextData
+  onChange: (updatedProps: EditableTextData) => void
 }
 
-export const EditableText = <T extends Record<string, any>>({
+export const EditableText: React.FC<EditableTextProps> = ({
   props,
   children,
-  onChange,
-  textKey = 'text' as keyof T,
-  styleKey = 'style' as keyof T
-}: EditableTextProps<T>) => {
-  const style = (props[styleKey] as StyleProps) || {}
-  const text = (props[textKey] as string) || ''
-  const [open, setOpen] = useState<boolean>(false)
+  onChange
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [rect, setRect] = useState<DOMRect | null>(null)
+  const toolbarRef = useRef<HTMLDivElement | null>(null)
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null)
+
+  const style = props.style || {}
+  const text = props.text || ""
   const [isEditing, setIsEditing] = useState<boolean>(false)
 
-  const onStylesChange = (newStyles: Partial<StyleProps>) => {
+  useLayoutEffect(() => {
+    if (!isEditing || !containerRef.current) return
+    setRect(containerRef.current.getBoundingClientRect())
+  }, [isEditing, text])
+
+  useEffect(() => {
+    if (!isEditing) return
+
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node
+
+      if (
+        containerRef.current?.contains(target) ||
+        toolbarRef.current?.contains(target) ||
+        textareaRef.current?.contains(target)
+      ) return
+
+      setIsEditing(false)
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [isEditing])
+
+
+
+  const onStylesChange = (newStyles: Partial<EditableTextStyle>) => {
     onChange({
       ...props,
-      [styleKey]: {
-        ...style,
+      style: {
+        ...props.style,
         ...newStyles
       }
-    } as T)
+    })
   }
+
 
   const onChangeText = (newText: string) => {
     onChange({
       ...props,
-      [textKey]: newText
-    } as T)
+      text: newText
+    })
   }
 
-  if (isEditing) {
-    return (
-      <TextEditor value={text} style={style} onChange={onChangeText} isEditing={isEditing} setIsEditing={setIsEditing}>
-        {children}
-      </TextEditor>
-    )
-  }
 
   return (
-    <TextStyler open={open} setOpen={setOpen} onChange={onStylesChange} value={style}>
-      <div onDoubleClick={() => setIsEditing(true)}>{children}</div>
-    </TextStyler>
+    <>
+      <div
+        ref={containerRef}
+        style={{
+          display: "inline-flex",
+          width: "fit-content",
+          height: "fit-content",
+          position: "relative",
+          cursor: "text"
+        }}
+        onClick={() => setIsEditing(true)}
+      >
+        {children}
+      </div>
+
+      {isEditing && rect &&
+        createPortal(
+          <>
+            {/* Selection Rectangle */}
+            <div
+              style={{
+                position: "fixed",
+                top: rect.top - 4,
+                left: rect.left - 4,
+                width: rect.width + 8,
+                height: rect.height + 8,
+                border: "2px solid #6366f1",
+                borderRadius: 6,
+                pointerEvents: "none",
+                zIndex: 9998
+              }}
+            />
+
+            {/* Toolbar */}
+            <TextStyler
+              rect={rect}
+              value={style}
+              onChange={onStylesChange}
+              toolbarRef={toolbarRef}
+            />
+
+
+            {/* Overlay Textarea */}
+            <textarea
+              autoFocus
+              value={text}
+              ref={textareaRef}
+              onChange={e => onChangeText(e.target.value)}
+              style={{
+                padding: 4,
+                position: "fixed",
+                top: rect.top,
+                left: rect.left,
+                width: rect.width,
+                height: rect.height,
+                background: "transparent",
+                border: "none",
+                outline: "none",
+                resize: "none",
+                zIndex: 9999,
+                ...style
+              }}
+            />
+          </>,
+          document.body
+        )}
+    </>
   )
+
 }

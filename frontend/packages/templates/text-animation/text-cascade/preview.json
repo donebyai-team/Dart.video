@@ -4,7 +4,7 @@
         "style": {
             "fontSize": 72,
             "color": "#ffffff",
-            "lineHeight": 1.5
+            "fontFamily": "Inter"
         }
     },
     "topLetfText": {
@@ -12,7 +12,7 @@
         "style": {
             "fontSize": 72,
             "color": "#ffffff",
-            "lineHeight": 1.5
+            "fontFamily": "Arial"
         }
     }
 }
