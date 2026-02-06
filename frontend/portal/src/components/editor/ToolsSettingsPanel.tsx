@@ -43,8 +43,8 @@ const ToolsSettingsPanel = ({
   const globalBackgroundColor = useVideoStore(s => s.globalBackgroundColor)
   const handleCloseTool = useVideoStore(s => s.handleCloseTool)
   const getTextAnimationConfig = useVideoStore(s => s.getTextAnimationConfig)
-  const spotlights = useVideoStore(s => s.getSpotlights)
-  const callouts = useVideoStore(s => s.getCallouts)
+  const spotlights = useVideoStore(s => s.getSpotlights) || []
+  const callouts = useVideoStore(s => s.getCallouts) || []
   const updateSlideBackground = useVideoStore(s => s.updateSlideBackground)
   const onUpdateTemplateProps = useVideoStore(s => s.handleUpdateTemplateProps)
   const onUpdateSlide = useVideoStore(s => s.updateSlide)
@@ -53,21 +53,22 @@ const ToolsSettingsPanel = ({
   console.log('active tool', activeTool)
 
   if (!activeTool) return null
+  const spotlightsList = spotlights() || []
+  const calloutsList = callouts() || []
 
   // Get the selected object data based on selected type object
   const selectedObject =
     activeTool.type === ActiveToolType.INSERT && selectedObjectId
       ? activeTool.tool === CanvasObjectType.CANVAS_SPOTLIGHT
-        ? spotlights().find(e => {
+        ? spotlightsList.find(e => {
             return e.id === selectedObjectId
           })
-        : callouts().find(e => {
+        : calloutsList.find(e => {
             return e.id === selectedObjectId
           })
       : undefined
 
-
- // Use specific delete function based on active tool selection      
+  // Use specific delete function based on active tool selection
   const deleteFunction =
     activeTool.type === ActiveToolType.INSERT &&
     (activeTool.tool === CanvasObjectType.CANVAS_SPOTLIGHT
@@ -75,7 +76,7 @@ const ToolsSettingsPanel = ({
       : activeTool.tool === CanvasObjectType.CANVAS_CALLOUT
         ? deleteCallout
         : undefined)
-// Use specific update function based on active tool selection      
+  // Use specific update function based on active tool selection
   const updateFunction =
     activeTool.type === ActiveToolType.INSERT &&
     (activeTool.tool === CanvasObjectType.CANVAS_SPOTLIGHT
@@ -175,7 +176,6 @@ const ToolsSettingsPanel = ({
           tool={activeTool?.tool}
           currentObject={selectedObject}
           onUpdate={updates => {
-
             if (selectedObjectId && updateFunction) {
               // Update the data of efftects
               // @TODO in future you can more effect types
@@ -186,7 +186,7 @@ const ToolsSettingsPanel = ({
             if (selectedObjectId && deleteFunction) {
               deleteFunction(selectedObjectId)
 
-              //Close the active tool sidebar once object deleted 
+              //Close the active tool sidebar once object deleted
               handleCloseTool()
             }
           }}
