@@ -39,7 +39,7 @@ const ToolsSettingsPanel = ({
 }: ToolsSettingsPanelProps) => {
   const activeTool = useVideoStore(s => s.activeTool)
   const selectedSlide = useVideoStore(s => s.selectedSlide)
-  const selectedObjectId = useVideoStore(s => s.selectedObjectId)
+  const selectedEffectId = useVideoStore(s => s.selectedEffectId)
   const globalBackgroundColor = useVideoStore(s => s.globalBackgroundColor)
   const handleCloseTool = useVideoStore(s => s.handleCloseTool)
   const getTextAnimationConfig = useVideoStore(s => s.getTextAnimationConfig)
@@ -59,11 +59,11 @@ const ToolsSettingsPanel = ({
 
   let selectedObject: SpotlightEffect | CalloutEffect | undefined;
 
-  if (activeTool.type === ActiveToolType.INSERT && selectedObjectId) {
+  if (activeTool.type === ActiveToolType.INSERT && selectedEffectId) {
     if (activeTool.tool === EffectType.SPOTLIGHT) {
-      selectedObject = spotlightsList.find(e => e.id === selectedObjectId);
+      selectedObject = spotlightsList.find(e => e.id === selectedEffectId);
     } else if (activeTool.tool === EffectType.CALLOUT) {
-      selectedObject = calloutsList.find(e => e.id === selectedObjectId);
+      selectedObject = calloutsList.find(e => e.id === selectedEffectId);
     }
   }
 
@@ -155,14 +155,14 @@ const ToolsSettingsPanel = ({
         )}
 
       {activeTool.type === ActiveToolType.INSERT 
-      && selectedObjectId
+      && selectedEffectId
       && selectedObject
       && activeTool.tool && (
         <InsertSettings
           tool={activeTool.tool}
           currentObject={selectedObject}
           onUpdate={updates => {
-            if (!selectedObjectId || (activeTool.type != ActiveToolType.INSERT)) return;
+            if (!selectedEffectId || (activeTool.type != ActiveToolType.INSERT)) return;
 
             // TODO: Move this out when we implement it genric EffectType
             if (activeTool.tool === EffectType.SPOTLIGHT) {
@@ -177,17 +177,17 @@ const ToolsSettingsPanel = ({
           }}
 
           onDelete={() => {
-            if (!selectedObjectId || (activeTool.type != ActiveToolType.INSERT)) return;
+            if (!selectedEffectId || (activeTool.type != ActiveToolType.INSERT)) return;
 
             // TODO: Move this out when we implement it genric EffectType
             if (activeTool.tool === EffectType.SPOTLIGHT) {
-              deleteSpotlight(selectedObjectId);
+              deleteSpotlight(selectedEffectId);
               handleCloseTool();
               return;
             }
 
             if (activeTool.tool === EffectType.CALLOUT) {
-              deleteCallout(selectedObjectId);
+              deleteCallout(selectedEffectId);
               handleCloseTool();
               return;
             }

@@ -44,7 +44,7 @@ const PlayerTimeline = ({
 }: PlayerTimelineProps) => {
 
   const selectedSlideId = useVideoStore(s => s.selectedSlide)?.slide.id;
-  const selectedObjectId = useVideoStore(s => s.selectedObjectId);
+  const selectedEffectId = useVideoStore(s => s.selectedEffectId);
 
   const [hoveredTime, setHoveredTime] = useState<number | null>(null);
   const [internalIsDragging, setInternalIsDragging] = useState(false);
@@ -214,7 +214,7 @@ const PlayerTimeline = ({
         <div className="absolute inset-x-0" style={{ top: `${timeMarkerHeight}px` }}>
           <OverlayTracks
             overlayItems={overlayItems}
-            selectedObjectId={selectedObjectId}
+            selectedEffectId={selectedEffectId}
             currentTime={currentTime}
             pixelsPerSecond={pixelsPerSecond}
             onSelectOverlay={(overlayId, slideId) => onSelectOverlay?.(overlayId, slideId)}

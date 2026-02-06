@@ -4,7 +4,7 @@ import type { OverlayItem } from './types'
 import { EffectType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 interface OverlayTracksProps {
   overlayItems: OverlayItem[]
-  selectedObjectId?: string | null
+  selectedEffectId?: string | null
   currentTime: number
   pixelsPerSecond: number
   onSelectOverlay?: (overlayId: string, slideId: string) => void
@@ -23,7 +23,7 @@ export function getOverlayName(objType: EffectType): string {
 
 export function OverlayTracks({
   overlayItems,
-  selectedObjectId,
+  selectedEffectId,
   currentTime,
   pixelsPerSecond,
   onSelectOverlay,
@@ -87,7 +87,7 @@ export function OverlayTracks({
             >
               <OverlayTile
                 overlayItem={overlayItem}
-                isSelected={overlayItem.overlayId === selectedObjectId}
+                isSelected={overlayItem.overlayId === selectedEffectId}
                 isHighlighted={highlightedOverlays.has(overlayItem.overlayId)}
                 pixelsPerSecond={pixelsPerSecond}
                 onClick={() => {

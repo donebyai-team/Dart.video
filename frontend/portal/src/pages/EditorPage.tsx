@@ -60,7 +60,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
   const setShowVoiceover = useVideoStore(s => s.setShowVoiceover)
 
   const activeTool = useVideoStore(s => s.activeTool)
-  const selectedObjectId = useVideoStore(s => s.selectedObjectId)
+  const selectedEffectId = useVideoStore(s => s.selectedEffectId)
   const selectedStackItemId = useVideoStore(s => s.selectedStackItemId)
   const editingSectionId = useVideoStore(s => s.editingSectionId)
   const editingSectionTitle = useVideoStore(s => s.editingSectionTitle)
@@ -275,13 +275,13 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
                 deleteCallout={deleteCallout}
                 onPreviewTemplate={() => handlePreviewSlide(selectedSlide.slide.id)}
                 onUpdateSpotlight={updates => {
-                  if (selectedObjectId) {
-                    updateSpotlight(selectedObjectId, updates)
+                  if (selectedEffectId) {
+                    updateSpotlight(selectedEffectId, updates)
                   }
                 }}
                  onUpdateCallout={updates => {
-                  if (selectedObjectId) {
-                    updateCallout(selectedObjectId, updates)
+                  if (selectedEffectId) {
+                    updateCallout(selectedEffectId, updates)
                   }
                 }}
                 onSpotlightApply={() => {

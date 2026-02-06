@@ -7,7 +7,7 @@ interface CanvasOverlayProps {
   resolution: Resolution;
   spotlights?: SpotlightEffect[];
   callouts?: CalloutEffect[]
-  selectedObjectId: string | null;
+  selectedEffectId: string | null;
   onSelectObject: (id: string | null) => void;
   onUpdateSpotlight?: (id: string, updates: Partial<SpotlightEffect>) => void;
   onUpdateCallout?: (id: string, updates: Partial<CalloutEffect>) => void;
@@ -19,7 +19,7 @@ const CanvasOverlay = ({
   resolution,
   spotlights = [],
   callouts = [],
-  selectedObjectId,
+  selectedEffectId,
   onSelectObject,
   onUpdateSpotlight,
   onUpdateCallout,
@@ -49,18 +49,6 @@ const CanvasOverlay = ({
     return null;
   }
 
-  const handleBackgroundClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onSelectObject(null);
-    }
-  };
-
-  const selectObject = (e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
-    console.debug("[CanvasOverlay] selectObject", { id });
-    onSelectObject(id);
-  }
-
   return (
     <>
 
@@ -72,7 +60,7 @@ const CanvasOverlay = ({
           resolution={resolution}
           containerWidth={containerWidth}
           containerHeight={containerHeight}
-          isSelected={selectedObjectId === spotlight.id}
+          isSelected={selectedEffectId === spotlight.id}
           onSelect={() => onSelectObject(spotlight.id)}
           onUpdate={(updates) => {
             if (onUpdateSpotlight) {
@@ -91,7 +79,7 @@ const CanvasOverlay = ({
           resolution={resolution}
           containerWidth={containerWidth}
           containerHeight={containerHeight}
-          isSelected={selectedObjectId === callout.id}
+          isSelected={selectedEffectId === callout.id}
           onSelect={() => onSelectObject(callout.id)}
           onUpdate={(updates) => {
             if (onUpdateCallout) {

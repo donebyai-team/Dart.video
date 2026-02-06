@@ -24,7 +24,7 @@ export interface VideoState {
     isInitialized: boolean;
     selectedEntityId: EntityId;
     selectedSlide: { section: Section; slide: Slide } | null;
-    selectedObjectId: string | null;
+    selectedEffectId: string | null;
     selectedStackItemId: string | null;
     activeTool: SelectedTool;
     showScreenshots: boolean;
