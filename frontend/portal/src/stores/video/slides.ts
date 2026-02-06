@@ -1,27 +1,20 @@
-import {
-  Slide,
-  SlideType,
-  StackSlideContent,
-  TransitionType,
-  ImageSlideContent,
-  VideoSlideContent,
-  AnimationSlideContent,
-  StackAnimationMode,
-  MetaData,
-  SlideSchema
-} from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import { arrayMove } from '@dnd-kit/sortable'
-import { createNewSlide, getSlideTypeConfig } from './utils'
+import { TimelineSlide } from '@/components/editor/timeline/types'
 import {
   createOverlayEntityId,
   createSlideEntityId,
   createStackItemEntityId,
   createStackItemOverlayEntityId
 } from '@/types/selection'
-import { VideoStoreSet, VideoStoreGet } from './types'
-import { TimelineSlide } from '@/components/editor/timeline/types'
+import {
+  Slide,
+  SlideType,
+  StackSlideContent,
+  TransitionType
+} from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { arrayMove } from '@dnd-kit/sortable'
 import { slide } from '@remotion/transitions/slide'
-import { create } from '@bufbuild/protobuf'
+import { VideoStoreGet, VideoStoreSet } from './types'
+import { createNewSlide, getSlideTypeConfig } from './utils'
 
 export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   addSlide(sectionId: string, type: SlideType) {
