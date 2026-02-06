@@ -19,6 +19,7 @@ import { useVideoStore } from "@/stores/video";
 import { Slide, SlideType, StackSlideContent } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { Video as VideoConfig } from "@coasterai/pb/coasterai/core/v1/video_pb";
 import toast from "react-hot-toast";
+import { getConnectError } from "@/utils/error";
 
 
 // Icon mapping for dynamic rendering
@@ -98,8 +99,7 @@ const EditorPage = ({
         // Start streaming immediately - the store will handle all updates
         startVideoStream(videoId).catch(error => {
           console.error('Stream failed:', error);
-          toast.error(error);
-          // Error handling is done in the streaming action
+          toast.error(getConnectError(error));
         });
 
         // Show editor immediately with sample config, real data will come from stream
@@ -165,13 +165,7 @@ const EditorPage = ({
       <div className="h-screen flex items-center justify-center bg-muted/30">
         <div className="text-center max-w-md">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
-
-          {streamingError && (
-            <div className="mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-              <p className="text-destructive text-sm">{streamingError}</p>
-            </div>
-          )}
+          <p className="text-muted-foreground">Loading...</p>         
         </div>
       </div>
     );
