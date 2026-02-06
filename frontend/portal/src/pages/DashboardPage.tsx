@@ -360,9 +360,9 @@ const DashboardPage = () => {
                               <Play className="w-5 h-5 text-foreground ml-0.5" />
                             </div>
                           </div>
-                          <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-0.5 rounded">
+                          {/* <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-0.5 rounded">
                             {2}
-                          </div>
+                          </div> */}
                         </div>
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between gap-2">
@@ -395,7 +395,6 @@ const DashboardPage = () => {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
-                                <DropdownMenuItem>Edit</DropdownMenuItem>
                                 <DropdownMenuItem>Duplicate</DropdownMenuItem>
                                 <DropdownMenuItem className="text-destructive">
                                   Delete
