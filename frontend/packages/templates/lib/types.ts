@@ -1,5 +1,15 @@
 import { z } from "zod"
-import { FONT_FAMILIES } from "./constants"
+import { FONT_FAMILIES, FONT_SIZE_PRESETS } from "./constants"
+
+export type FontSizePreset = keyof typeof FONT_SIZE_PRESETS
+
+export function getPresetFromFontSize(size: number): FontSizePreset {
+
+  const entry = Object.entries(FONT_SIZE_PRESETS)
+    .find(([_, v]) => v === size)
+
+  return (entry?.[0] || "M") as FontSizePreset
+}
 
 export const EditableTextStyleSchema = z.object({
   fontSize: z.number(),
