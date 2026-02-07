@@ -155,10 +155,6 @@ export const EditableText: React.FC<EditableTextProps> = ({
     }
   }, [isEditing])
 
-  const onChangeText = (newText: string) => {
-    onChange({ ...props, text: newText })
-  }
-
   const onStylesChange = (newStyles: Partial<EditableTextStyle>) => {
     onChange({
       ...props,
