@@ -1,7 +1,7 @@
 import React from "react"
 import { createPortal } from "react-dom"
-import { FONT_FAMILIES } from "./constants"
-import { EditableTextStyle } from "./types"
+import { FONT_FAMILIES, FONT_SIZE_PRESETS } from "./constants"
+import { EditableTextStyle, FontSizePreset, getPresetFromFontSize } from "./types"
 
 interface TextStylerProps {
   rect: DOMRect
@@ -9,8 +9,6 @@ interface TextStylerProps {
   onChange: (styles: Partial<EditableTextStyle>) => void
   toolbarRef: React.RefObject<HTMLDivElement>
 }
-
-const FONT_SIZES = [24, 32, 40, 48, 56, 64, 72, 96]
 
 export const TextStyler: React.FC<TextStylerProps> = ({
   rect,
@@ -72,15 +70,17 @@ export const TextStyler: React.FC<TextStylerProps> = ({
 
       {/* SIZE DROPDOWN */}
       <select
-        value={fontSize}
+        value={getPresetFromFontSize(fontSize)}
         onChange={e =>
-          set("fontSize", Number(e.target.value))
+          set(
+            "fontSize",
+            FONT_SIZE_PRESETS[e.target.value as FontSizePreset]
+          )
         }
-
         style={dropdownStyle}
       >
-        {FONT_SIZES.map(size => (
-          <option key={size} value={size}>{size}px</option>
+        {Object.keys(FONT_SIZE_PRESETS).map(size => (
+          <option key={size} value={size}>{size}</option>
         ))}
       </select>
 
