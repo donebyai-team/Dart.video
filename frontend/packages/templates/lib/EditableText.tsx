@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useLayoutEffect, useRef } from 'react'
-import TextStyler from './TextStyler'
+import { TextStyler } from './TextStyler'
 import { createPortal } from "react-dom"
 import { EditableTextData, EditableTextStyle } from './types'
 
@@ -231,8 +231,8 @@ export const EditableText: React.FC<EditableTextProps> = ({
                 left: rect.left - 4,
                 width: rect.width + 8,
                 height: rect.height + 8,
-                border: "2px solid #6366f1",
-                borderRadius: 6,
+                border: "1px solid #6366f1",
+                borderRadius: 3,
                 pointerEvents: "none",
                 zIndex: 99999,
                 boxSizing: 'border-box'
