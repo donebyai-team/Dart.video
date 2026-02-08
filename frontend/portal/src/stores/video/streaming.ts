@@ -5,12 +5,12 @@ import { Video } from "@coasterai/pb/coasterai/core/v1/video_pb";
 import { createSlideEntityId } from "@/types/selection";
 import { getSections } from "./utils"; 
 import { ensureVideoResolution } from "./defaults";
+import defaultEditorConfig from "@/data/editorConfig";
 
 export const createStreamingActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
 
   startVideoStream: async (videoId: string): Promise<Video | null> => {
     const STREAM_TIMEOUT = 5 * 60 * 1000;
-    const { config} = get();
 
     try {
       set({
@@ -36,7 +36,7 @@ export const createStreamingActions = (set: VideoStoreSet, get: VideoStoreGet) =
           if (response.video) {
             latestVideo = response.video;
 
-            const safeVideo = ensureVideoResolution(response.video, config!);
+            const safeVideo = ensureVideoResolution(response.video, defaultEditorConfig);
 
             // ✅ Single source of truth
             set({ videoConfig: safeVideo });

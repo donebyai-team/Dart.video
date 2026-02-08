@@ -4,17 +4,16 @@ import { getSlideTypeConfig } from "./defaults";
 import { getDefaultTemplateProps } from "@/types/textAnimationTemplates";
 import { VideoStoreSet, VideoStoreGet } from "./types";
 import { JsonObject } from "@bufbuild/protobuf";
-import { getSections, updateVideoConfigSections, updateSelectedSlide } from "./utils";
+import { updateVideoConfigSections, updateSelectedSlide } from "./utils";
+import defaultEditorConfig from "@/data/editorConfig";
 
 export const createTextAnimationActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
 
   /* ================= CONFIG ================= */
 
   getTextAnimationConfig() {
-    const { config } = get();
-
     const slideConfig = getSlideTypeConfig(
-      config,
+      defaultEditorConfig,
       SlideType.TEXT_ANIMATION
     );
 

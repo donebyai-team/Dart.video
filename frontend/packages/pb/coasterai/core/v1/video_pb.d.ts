@@ -17,9 +17,9 @@ export declare const file_coasterai_core_v1_video: GenFile;
  */
 export declare type VideoMetadata = Message<"coasterai.core.v1.VideoMetadata"> & {
   /**
-   * @generated from field: int64 fps = 1;
+   * @generated from field: int32 fps = 1;
    */
-  fps: bigint;
+  fps: number;
 
   /**
    * @generated from field: string background_color = 2;

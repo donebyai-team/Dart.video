@@ -4,25 +4,26 @@ import { arrayMove } from "@dnd-kit/sortable"
 import { getSlideTypeConfig, createNewSlide } from "./defaults"
 import { VideoStoreSet, VideoStoreGet } from "./types"
 import { getSections, updateVideoConfigSections, updateSelectedSlide } from "./utils"
+import defaultEditorConfig from "@/data/editorConfig"
 
 export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
 
   /* ================= ADD ================= */
 
   addSlide(sectionId: string, type: SlideType) {
-    const { videoConfig, config } = get()
-    if (!videoConfig?.config || !config) return
+    const { videoConfig } = get()
+    if (!videoConfig?.config) return
 
     const sections = getSections(videoConfig)
 
-    const slideTypeConfig = getSlideTypeConfig(config, type)
+    const slideTypeConfig = getSlideTypeConfig(defaultEditorConfig, type)
 
     const inheritedBg =
       [...sections.flatMap(s => s.slides)]
         .reverse()
         .find(s => s.backgroundColor)?.backgroundColor ||
       slideTypeConfig?.defaultBackground ||
-      config.background.defaultColor
+      defaultEditorConfig.background.defaultColor
 
     const newSlide = createNewSlide({
       sectionId,
