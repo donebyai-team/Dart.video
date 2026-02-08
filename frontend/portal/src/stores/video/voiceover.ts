@@ -1,54 +1,85 @@
 import { VideoStoreSet, VideoStoreGet } from "./types";
+import { updateVideoConfigSections, updateSelectedSlide } from "./utils";
 
 export const createVoiceoverActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
-    handleGenerateSlideVoiceover() {
-        const { selectedSlide, sections } = get();
-        if (!selectedSlide) return;
 
-        set({ generatingSlideVoiceover: selectedSlide.slide.id });
+  /* ================= SLIDE VOICEOVER ================= */
 
-        setTimeout(() => {
-            const newSections = sections.map((s) => ({
-                ...s,
-                slides: s.slides.map((sl) =>
-                    sl.id === selectedSlide.slide.id ? { ...sl, voiceoverGenerated: true } : sl
-                ),
-            }));
+  handleGenerateSlideVoiceover() {
+    const { selectedSlide, videoConfig } = get();
+    if (!selectedSlide || !videoConfig) return;
 
-            set({
-                sections: newSections,
-                selectedSlide: {
-                    ...selectedSlide,
-                    slide: { ...selectedSlide.slide, voiceoverGenerated: true },
-                },
-                generatingSlideVoiceover: null,
-            });
-            get().autoSyncVideoConfig();
-        }, 1500);
-    },
+    set({ generatingSlideVoiceover: selectedSlide.slide.id });
 
-    setShowVoiceover: (show: boolean) => set({ showVoiceover: show }),
+    setTimeout(() => {
 
-    handleGenerateSectionVoiceover(sectionId: string) {
-        const { sections } = get();
-        set({ generatingSectionVoiceover: sectionId });
+      const newVideoConfig = updateVideoConfigSections(
+        videoConfig,
+        sections =>
+          sections.map(section => ({
+            ...section,
+            slides: section.slides.map(slide =>
+              slide.id === selectedSlide.slide.id
+                ? { ...slide, voiceoverGenerated: true }
+                : slide
+            ),
+          }))
+      );
 
-        setTimeout(() => {
-            const newSections = sections.map((s) =>
-                s.id === sectionId
-                    ? {
-                        ...s,
-                        voiceoverGenerated: true,
-                        slides: s.slides.map((sl) => ({ ...sl, voiceoverGenerated: true })),
-                    }
-                    : s
-            );
+      set({
+        videoConfig: newVideoConfig,
+        selectedSlide: updateSelectedSlide(selectedSlide, slide => ({
+          ...slide,
+          voiceoverGenerated: true,
+        })),
+        generatingSlideVoiceover: null,
+      });
 
-            set({
-                sections: newSections,
-                generatingSectionVoiceover: null,
-            });
-            get().autoSyncVideoConfig();
-        }, 2000);
-    },
+      get().autoSyncVideoConfig();
+
+    }, 1500);
+  },
+
+  /* ================= UI ================= */
+
+  setShowVoiceover: (show: boolean) =>
+    set({ showVoiceover: show }),
+
+  /* ================= SECTION VOICEOVER ================= */
+
+  handleGenerateSectionVoiceover(sectionId: string) {
+    const { videoConfig } = get();
+    if (!videoConfig) return;
+
+    set({ generatingSectionVoiceover: sectionId });
+
+    setTimeout(() => {
+
+      const newVideoConfig = updateVideoConfigSections(
+        videoConfig,
+        sections =>
+          sections.map(section =>
+            section.id === sectionId
+              ? {
+                  ...section,
+                  voiceoverGenerated: true,
+                  slides: section.slides.map(slide => ({
+                    ...slide,
+                    voiceoverGenerated: true,
+                  })),
+                }
+              : section
+          )
+      );
+
+      set({
+        videoConfig: newVideoConfig,
+        generatingSectionVoiceover: null,
+      });
+
+      get().autoSyncVideoConfig();
+
+    }, 2000);
+  },
+
 });

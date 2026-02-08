@@ -125,7 +125,6 @@ const CalloutOverlay = ({
 
 
   const handleSize = 10;
-  console.log(isSelected, "selected")
 
   return (
     <div

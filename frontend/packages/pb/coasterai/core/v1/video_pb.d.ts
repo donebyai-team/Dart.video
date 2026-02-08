@@ -4,8 +4,8 @@
 
 import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv1";
 import type { Message } from "@bufbuild/protobuf";
+import type { Resolution, Section } from "./slide_pb";
 import type { Timestamp } from "@bufbuild/protobuf/wkt";
-import type { Section } from "./slide_pb";
 
 /**
  * Describes the file coasterai/core/v1/video.proto.
@@ -25,6 +25,11 @@ export declare type VideoMetadata = Message<"coasterai.core.v1.VideoMetadata"> &
    * @generated from field: string background_color = 2;
    */
   backgroundColor: string;
+
+  /**
+   * @generated from field: coasterai.core.v1.Resolution resolution = 3;
+   */
+  resolution?: Resolution;
 };
 
 /**

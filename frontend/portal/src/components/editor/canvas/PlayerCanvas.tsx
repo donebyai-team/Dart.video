@@ -28,21 +28,19 @@ const PlayerCanvas = ({
   onSelectTemplate,
   isPlaying = false
 }: PlayerCanvasProps) => {
-  const sections = useVideoStore(s => s.sections)
-  const resolution = useVideoStore(s => s.resolution)
-
+  const videoConfigFromStore = useVideoStore(s => s.videoConfig);
   const selectedSlide = useVideoStore(s => s.selectedSlide)
+  
+    // Early return if no data
+  if (!videoConfigFromStore?.config?.sections || !videoConfigFromStore?.metadata?.resolution || !selectedSlide) {
+    return <div className='flex items-center justify-center h-full text-muted-foreground'>Loading...</div>
+  }
   const selectedEffectId = useVideoStore(s => s.selectedEffectId)
   const handleSelectEffect = useVideoStore(s => s.handleSelectEffect)
 
   const onUpdateSpotlight = useVideoStore(s => s.updateSpotlight)
   const onUpdateCallout = useVideoStore(s => s.updateCallout)
   const containerRef = useRef<HTMLDivElement>(null)
-
-  // Early return if no data
-  if (!sections || !resolution || !selectedSlide) {
-    return <div className='flex items-center justify-center h-full text-muted-foreground'>Loading...</div>
-  }
 
   // Get effective canvas objects from store
   const spotlights = selectedSlide.slide.spotlights || []
@@ -100,8 +98,8 @@ const PlayerCanvas = ({
               onSelectTemplate
             }}
             durationInFrames={totalFrames || 1}
-            compositionWidth={resolution.width}
-            compositionHeight={resolution.height}
+            compositionWidth={videoConfigFromStore?.metadata?.resolution.width}
+            compositionHeight={videoConfigFromStore?.metadata?.resolution.height}
             fps={fps}
             style={{
               width: '100%',
@@ -115,7 +113,7 @@ const PlayerCanvas = ({
         {!isPlaying && handleSelectEffect && (
           <div className='absolute inset-0' style={{ zIndex: 30, pointerEvents: 'none' }}>
             <CanvasOverlay
-              resolution={resolution}
+              resolution={videoConfigFromStore?.metadata?.resolution}
               spotlights={spotlights}
               callouts={callouts}
               selectedEffectId={selectedEffectId || null}

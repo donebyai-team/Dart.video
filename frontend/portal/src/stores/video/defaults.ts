@@ -1,8 +1,9 @@
 import { EditorConfig, SlideTypeConfig, TextAnimationSlideConfig } from "@/types/editor";
 import { ActiveToolType, SelectedTool } from "@/types/tools";
 import { create } from "@bufbuild/protobuf";
-import { AnimationSlideContentSchema, CalloutEffect, CalloutEffectSchema, ImageSlideContentSchema, MetaData, MetaDataSchema, Resolution, Section, SectionSchema, Slide, SlideSchema, SlideType, SpotlightEffect, SpotlightEffectSchema, StackAnimationMode, StackSlideContentSchema, TransitionType, VideoSlideContentSchema } from "@coasterai/pb/coasterai/core/v1/slide_pb";
-import { Video } from "@coasterai/pb/coasterai/core/v1/video_pb";
+import { AnimationSlideContentSchema, CalloutEffect, CalloutEffectSchema, ImageSlideContentSchema, MetaData, MetaDataSchema, Resolution, ResolutionSchema, Section, SectionSchema, Slide, SlideSchema, SlideType, SpotlightEffect, SpotlightEffectSchema, StackAnimationMode, StackSlideContentSchema, TransitionType, VideoSlideContentSchema } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { Video, VideoMetadata, VideoMetadataSchema } from "@coasterai/pb/coasterai/core/v1/video_pb";
+import { SelectedSection } from "./types";
 
 // Helper functions (moved from useEditorState)
 export const getSlideTypeConfig = (config: EditorConfig | null, slideType: SlideType): SlideTypeConfig | undefined => {
@@ -164,30 +165,82 @@ export const createCalloutEffect = (
 };
 
 export const getDefaultSelectedTool = (): SelectedTool => {
-    return {type: ActiveToolType.NONE}
+    return { type: ActiveToolType.NONE }
 }
 
-export const getDefaultResolution = (config: EditorConfig) => {
-  return (
-    config.resolution.options.find(
-      (r: { id: string }) => r.id === config.resolution.default
-    ) ?? config.resolution.options[0]
-  );
+export const getDefaultResolution = (config: EditorConfig): Resolution => {
+    const fallback = config?.resolution?.options?.[0];
+
+    const selected =
+        config?.resolution?.options?.find(
+            r => r.id === config?.resolution?.default
+        ) ?? fallback;
+
+    // Absolute last fallback (never return undefined)
+    const safe = selected ?? {
+        id: "16:9",
+        name: "Landscape",
+        aspect: "16/9",
+        width: 1920,
+        height: 1080,
+    };
+
+    return create(ResolutionSchema, safe);
+};
+
+
+export const getInitialSelection = (videoConfig: Video): SelectedSection | null => {
+    const firstSection = videoConfig.config?.sections?.[0];
+    const firstSlide = firstSection?.slides?.[0];
+
+    if (!firstSection) return null;
+
+    if (firstSlide) {
+        return { section: firstSection, slide: firstSlide };
+    }
+
+    // Section exists but no slides
+    return null;
 }
 
-export const getInitialSelection = (videoConfig: Video) => {
-  const firstSection = videoConfig.config?.sections?.[0];
-  const firstSlide = firstSection?.slides?.[0];
-
-  if (!firstSection) return null;
-
-  if (firstSlide) {
-    return { section: firstSection, slide: firstSlide };
-  }
-
-  // Section exists but no slides
-  return null;
+export const getDefaulVideotMetadata = (config: EditorConfig): VideoMetadata => {
+    return create(VideoMetadataSchema, {
+        fps: BigInt(30),
+        resolution: getDefaultResolution(config)
+    });
 }
+
+export const ensureVideoResolution = (
+    video: Video,
+    config: EditorConfig
+): Video => {
+
+    const defaultResolution = getDefaultResolution(config);
+
+    // If metadata missing → create full metadata
+    if (!video.metadata) {
+        return {
+            ...video,
+            metadata: getDefaulVideotMetadata(config),
+        };
+    }
+
+    // If resolution missing → clone + inject resolution
+    if (!video.metadata.resolution) {
+        return {
+            ...video,
+            metadata: create(VideoMetadataSchema, {
+                ...video.metadata,
+                resolution: defaultResolution,
+            }),
+        };
+    }
+
+    // Already valid → return original (important for avoiding extra renders)
+    return video;
+};
+
+
 
 
 
