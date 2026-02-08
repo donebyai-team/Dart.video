@@ -5,9 +5,6 @@ import { getDefaultSelectedTool } from "./defaults";
 export const initialState: VideoState = {
   config: null,
   videoConfig: null,
-  sections: [],
-  resolution: null,
-  globalBackgroundColor: undefined,
   isInitialized: false,
 
   selectedEntityId: createSlideEntityId(""),

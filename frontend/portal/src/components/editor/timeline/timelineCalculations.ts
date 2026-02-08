@@ -210,7 +210,6 @@ export function calculateOverlayItems(slides: TimelineSlide[], fps: number): Ove
   slides.forEach(slide => {
     // Process effects
     if (slide.spotlights && slide.spotlights.length > 0) {
-      console.log(slide, 'slide')
       // Get the realSlide start frame using this function
       const realSlideStartTimeFrame = getRealSlideStartFrame(slides, slide.id, fps)
       //convert it into seconds
@@ -238,7 +237,6 @@ export function calculateOverlayItems(slides: TimelineSlide[], fps: number): Ove
   slides.forEach(slide => {
     // Process effects
     if (slide.callouts && slide.callouts.length > 0) {
-      console.log(slide, 'slide')
       // Get the realSlide start frame using this function
       const realSlideStartTimeFrame = getRealSlideStartFrame(slides, slide.id, fps)
       //convert it into seconds
@@ -262,8 +260,6 @@ export function calculateOverlayItems(slides: TimelineSlide[], fps: number): Ove
       })
     }
   })
-
-  console.log(overlays, 'overlayes')
 
   return overlays
 }

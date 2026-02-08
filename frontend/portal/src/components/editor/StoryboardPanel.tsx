@@ -31,9 +31,11 @@ const StoryboardPanel = ({
     onStartEditTitle,
     onSaveTitle,
 }: StoryboardPanelProps) => {
+
     const storyboardRef = useRef<HTMLDivElement>(null);
 
-    const sections = useVideoStore(s => s.sections);
+    const videoConfig = useVideoStore(s => s.videoConfig);
+
     const selectedSlideId = useVideoStore(s => s.selectedSlide?.slide.id);
     const editingSectionId = useVideoStore(s => s.editingSectionId);
     const editingSectionTitle = useVideoStore(s => s.editingSectionTitle);
@@ -49,43 +51,54 @@ const StoryboardPanel = ({
 
     const onCancelEditTitle = useVideoStore(s => s.setEditingSectionId);
     const onGenerateVoiceover = useVideoStore(s => s.handleGenerateSectionVoiceover);
-      const onShowTransitionPicker = useVideoStore(s => s.setShowTransitionPicker);
+    const onShowTransitionPicker = useVideoStore(s => s.setShowTransitionPicker);
     const onUpdateTransition = useVideoStore(s => s.updateSlideTransition);
     const onAddSlide = useVideoStore(s => s.addSlide);
     const onAddSection = useVideoStore(s => s.addSection);
 
+    /* ================= GATE ================= */
+
+    if (!videoConfig?.config) {
+        return null;
+    }
+
+    const sections = videoConfig.config.sections ?? [];
+
+    /* ================= AUTO SCROLL ================= */
 
     const prevSectionsLength = useRef(sections.length);
 
-    // Auto-scroll to bottom directly in the panel when a new section is added
     useEffect(() => {
         if (sections.length > prevSectionsLength.current) {
             setTimeout(() => {
                 storyboardRef.current?.scrollTo({
                     top: storyboardRef.current.scrollHeight,
-                    behavior: "smooth"
+                    behavior: "smooth",
                 });
             }, 100);
         }
+
         prevSectionsLength.current = sections.length;
     }, [sections.length]);
 
+    /* ================= DND ================= */
+
     const sensors = useSensors(
         useSensor(PointerSensor, {
-            activationConstraint: {
-                distance: 5,
-            },
+            activationConstraint: { distance: 5 },
         }),
         useSensor(KeyboardSensor, {
             coordinateGetter: sortableKeyboardCoordinates,
         })
     );
 
+    /* ================= RENDER ================= */
+
     return (
         <div className="flex-1 flex flex-col min-h-0 bg-muted/10">
             <div
                 className={`flex-1 overflow-x-hidden p-4 space-y-4 ${
-                    isStreamingVideo ? 'overflow-y-hidden' : 'overflow-y-auto'
+                    isStreamingVideo ? "overflow-y-hidden" : "overflow-y-auto"
                 }`}
                 ref={storyboardRef}
             >
@@ -95,7 +108,7 @@ const StoryboardPanel = ({
                     onDragEnd={onSectionDragEnd}
                 >
                     <SortableContext
-                        items={sections.map((s) => s.id)}
+                        items={sections.map(s => s.id)}
                         strategy={verticalListSortingStrategy}
                     >
                         {sections.map((section, index) => (
@@ -109,28 +122,44 @@ const StoryboardPanel = ({
                                 editingSectionTitle={editingSectionTitle}
                                 generatingSectionVoiceover={generatingSectionVoiceover}
                                 showTransitionPicker={showTransitionPicker}
-                                onSelectSlide={onSelectSlide}
-                                onRemoveSection={() => onRemoveSection(section.id)}
-                                onRemoveSlide={(slideId) => onRemoveSlide(section.id, slideId)}
 
-                                onStartEditTitle={() => onStartEditTitle(section.id, section.title)}
+                                onSelectSlide={onSelectSlide}
+
+                                onRemoveSection={() => onRemoveSection(section.id)}
+                                onRemoveSlide={(slideId) =>
+                                    onRemoveSlide(section.id, slideId)
+                                }
+
+                                onStartEditTitle={() =>
+                                    onStartEditTitle(section.id, section.title)
+                                }
+
                                 onEditTitleChange={onEditTitleChange}
                                 onSaveTitle={onSaveTitle}
-                                onCancelEditTitle={()=> {
-                                    onCancelEditTitle(null)
-                                }}
+                                onCancelEditTitle={() => onCancelEditTitle(null)}
 
-                                onGenerateVoiceover={() => onGenerateVoiceover(section.id)}
-                                onPlayVoiceover={()=> {
-                                    console.log("NOT IMPLEMENTED")
+                                onGenerateVoiceover={() =>
+                                    onGenerateVoiceover(section.id)
+                                }
+
+                                onPlayVoiceover={() => {
+                                    console.log("NOT IMPLEMENTED");
                                 }}
 
                                 onShowTransitionPicker={onShowTransitionPicker}
+
                                 onUpdateTransition={(slideId, transitionId) =>
-                                    onUpdateTransition(section.id, slideId, transitionId)
+                                    onUpdateTransition(
+                                        section.id,
+                                        slideId,
+                                        transitionId
+                                    )
                                 }
 
-                                onAddSlide={(type) => onAddSlide(section.id, type)}
+                                onAddSlide={(type) =>
+                                    onAddSlide(section.id, type)
+                                }
+
                                 onReorderSlides={(activeId, overId) =>
                                     onReorderSlides(section.id, activeId, overId)
                                 }
@@ -152,5 +181,6 @@ const StoryboardPanel = ({
         </div>
     );
 };
+
 
 export default StoryboardPanel;

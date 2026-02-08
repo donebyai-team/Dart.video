@@ -15,15 +15,18 @@ import type { StateCreator } from "zustand";
 export type VideoStoreSet = Parameters<StateCreator<VideoState & VideoActions, [], [], VideoState & VideoActions>>[0]
 export type VideoStoreGet = Parameters<StateCreator<VideoState & VideoActions, [], [], VideoState & VideoActions>>[1]
 
+export interface SelectedSection {
+    section: Section
+    slide: Slide
+}
+
+
 export interface VideoState {
     config: EditorConfig | null;
     videoConfig: Video | null;
-    sections: Section[];
-    resolution: Resolution | null;
-    globalBackgroundColor?: string;
     isInitialized: boolean;
     selectedEntityId: EntityId;
-    selectedSlide: { section: Section; slide: Slide } | null;
+    selectedSlide: SelectedSection | null;
     selectedEffectId: string | null;
     selectedStackItemId: string | null;
     activeTool: SelectedTool;
@@ -63,15 +66,12 @@ export interface VideoActions {
 
     // Slides
     getTimelineSlides: () => TimelineSlide[]
-    createSlideEntityId: (slideId: string) => EntityId
     addSlide: (sectionId: string, type: SlideType) => void
     removeSlide: (sectionId: string, slideId: string) => void
     updateSlide: (updates: Partial<Slide>) => void
     updateSlideContent: (updates: Record<string, unknown>) => void
     updateSlideTransition: (sectionId: string, slideId: string, transitionId: TransitionType) => void
     reorderSlidesInSection: (sectionId: string, activeId: string, overId: string) => void
-    createStackItemEntityId: (slideId: string, itemId: string) => EntityId
-    createOverlayEntityId: (slideId: string, overlayId: string) => EntityId
 
     // Canvas
     // Define function interface here for effects to get in VideoActions

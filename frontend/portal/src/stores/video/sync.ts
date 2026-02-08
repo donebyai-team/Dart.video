@@ -75,15 +75,7 @@ export const createSyncActions = (_: VideoStoreSet, get: VideoStoreGet) => {
         // Auto-sync sections when they change
         autoSyncVideoConfig() {
             const videoConfig = get().videoConfig;
-            const globalBackgroundColor = get().globalBackgroundColor;
-            if (videoConfig && videoConfig.config) {
-                // TODO: Ideally the sections, color etc should be set directly in videoConfig
-                // instead of storing it separately
-                const sections = get().sections;
-                videoConfig.config.sections = sections;
-                if (videoConfig.metadata && globalBackgroundColor) {
-                    videoConfig.metadata.backgroundColor = globalBackgroundColor;
-                }
+            if (videoConfig && videoConfig.config) {               
                 debouncedSync(videoConfig);
             } else {
                 console.debug("[ERROR]", "video config is null or undefined")

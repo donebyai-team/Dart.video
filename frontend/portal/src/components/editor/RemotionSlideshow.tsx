@@ -116,53 +116,73 @@ export const Slideshow: React.FC<SlideshowProps> = ({
   isEditing = false,
   onSelectTemplate,
 }) => {
-  const sections = useVideoStore(s => s.sections);
-  const globalBackgroundColor = useVideoStore(s => s.globalBackgroundColor);
+
+  const videoConfig = useVideoStore(s => s.videoConfig);
   const selectedStackItemId = useVideoStore(s => s.selectedStackItemId);
+
   const selectedTemplateId = null;
 
   const { width, height } = useVideoConfig();
 
-  const allSlides = sections.flatMap(section => section.slides);
-  const transitionDurationFrames = Math.round(fps * TRANSITION_DURATION_SECONDS);
+  /* ================= GATE ================= */
 
-  // Handle empty slides case
+  if (!videoConfig?.config) {
+    return <AbsoluteFill style={{ background: "black" }} />;
+  }
+
+  const metadata = videoConfig.metadata;
+  const sections = videoConfig.config.sections ?? [];
+  const globalBackground = metadata?.backgroundColor ?? "transparent";
+
+  const allSlides = sections.flatMap(section => section.slides);
+
+  const transitionDurationFrames = Math.round(
+    fps * TRANSITION_DURATION_SECONDS
+  );
+
+  /* ================= EMPTY ================= */
+
   if (allSlides.length === 0) {
     return (
-      <AbsoluteFill style={{ 
-        background: globalBackgroundColor || 'transparent',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: 'white',
-        fontSize: 24,
-        opacity: 0.5
-      }}>
+      <AbsoluteFill
+        style={{
+          background: globalBackground,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "white",
+          fontSize: 24,
+          opacity: 0.5,
+        }}
+      >
         No slides to display
       </AbsoluteFill>
     );
   }
 
+  /* ================= RENDER ================= */
+
   return (
-    <AbsoluteFill style={{ background: globalBackgroundColor || 'transparent' }}>
+    <AbsoluteFill style={{ background: globalBackground }}>
       <TransitionSeries>
         {allSlides.map((slide) => {
+
           const isSelected = selectedTemplateId === slide.id;
 
-          // Simple rule: slide duration = slide's actual duration
           const actualDuration = getActualSlideDuration(slide);
           const durationInFrames = Math.round(actualDuration * fps);
 
-          // Check if this slide has a transition defined
-          const hasTransition = slide.transition !== TransitionType.TRANSITION_NONE;
+          const hasTransition =
+            slide.transition !== TransitionType.TRANSITION_NONE;
 
-          // Determine slide background: use slide's backgroundColor if set, otherwise transparent (so global shows through)
-          const slideWithBackground = globalBackgroundColor && !slide.backgroundColor
-            ? { ...slide, backgroundColor: 'transparent' }
-            : slide;
+          const slideWithBackground =
+            globalBackground && !slide.backgroundColor
+              ? { ...slide, backgroundColor: "transparent" }
+              : slide;
 
           return (
             <React.Fragment key={slide.id}>
+
               <TransitionSeries.Sequence durationInFrames={durationInFrames}>
                 <SlideComponent
                   slide={slideWithBackground}
@@ -170,18 +190,26 @@ export const Slideshow: React.FC<SlideshowProps> = ({
                   height={height}
                   isEditing={isEditing}
                   isSelected={isSelected}
-                  selectedStackItemId={slide.type === SlideType.STACK ? selectedStackItemId : null}
+                  selectedStackItemId={
+                    slide.type === SlideType.STACK
+                      ? selectedStackItemId
+                      : null
+                  }
                   onSelect={() => {
-                    onSelectTemplate?.(slide.id)
+                    onSelectTemplate?.(slide.id);
                   }}
                 />
               </TransitionSeries.Sequence>
+
               {hasTransition && (
                 <TransitionSeries.Transition
                   presentation={getTransitionPresentation(slide.transition)}
-                  timing={linearTiming({ durationInFrames: transitionDurationFrames })}
+                  timing={linearTiming({
+                    durationInFrames: transitionDurationFrames,
+                  })}
                 />
               )}
+
             </React.Fragment>
           );
         })}
@@ -189,5 +217,6 @@ export const Slideshow: React.FC<SlideshowProps> = ({
     </AbsoluteFill>
   );
 };
+
 
 export default Slideshow;

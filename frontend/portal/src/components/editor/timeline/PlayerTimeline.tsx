@@ -13,7 +13,6 @@ import type { TimelineSlide } from "./types";
 import { PlayHead } from "./PlayHead";
 import { calculateRealTotalFrames } from "../frame_calculations";
 import { useVideoStore } from "@/stores/video";
-import { SlideType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 interface PlayerTimelineProps {
   slides: TimelineSlide[];

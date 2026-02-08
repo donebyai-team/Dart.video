@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, forwardRef, useImperativeHandle } from "react";
+import { useRef, useEffect, useState, forwardRef, useImperativeHandle, useMemo } from "react";
 import { PlayerRef } from "@remotion/player";
 import {
   Play,
@@ -26,6 +26,7 @@ import { useRemotionPlayerEvents } from "@/hooks/useRemotionPlayerEvents";
 import { useSlideSelection } from "@/hooks/useSlideSelection";
 import { calculateRealTotalFrames, calculateTotalFrames, getSlideVisualEndFrame } from "../frame_calculations";
 import { useVideoStore } from "@/stores/video";
+import Loading from "@/app/loading";
 
 interface RemotionPlayerProps {
   onSlideChange?: (slideId: string) => void;
@@ -53,11 +54,17 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
 }, ref) => {
   const playerRef = useRef<PlayerRef>(null);
   const fullscreenContainerRef = useRef<HTMLDivElement>(null);
-  const resolution = useVideoStore(s => s.resolution);
+  const videoConfigFromStore = useVideoStore(s => s.videoConfig);
   const selectedSlide = useVideoStore(s => s.selectedSlide)?.slide;
   const selectedStackItemId = useVideoStore(s => s.selectedStackItemId);
   const onSelectOEffect = useVideoStore(s => s.handleSelectEffect);
-  const fps = useVideoStore(s => s.getFPS)();
+  const fps = useVideoStore(s => s.getFPS());
+
+  const resolution = videoConfigFromStore?.metadata?.resolution;
+
+  const getTimelineSlides = useVideoStore(s => s.getTimelineSlides);
+  const allSlides = getTimelineSlides();
+
   const selectedSlideId = selectedSlide?.id || "";
 
   const [isPlaying, setIsPlaying] = useState(false);
@@ -68,9 +75,6 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   const [previewingSlideId, setPreviewingSlideId] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isDraggingTimeline, setIsDraggingTimeline] = useState(false);
-
-  // Get all slides flattened with section info and overlay data
-  const allSlides = useVideoStore(s => s.getTimelineSlides)()
 
   const [currentFrame, setCurrentFrame] = useState(getSlideVisualEndFrame(allSlides, selectedSlideId, fps));
   const totalFrames = calculateRealTotalFrames(allSlides, fps); // For Remotion player
@@ -155,6 +159,10 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
     document.addEventListener("fullscreenchange", handleFullscreenChange);
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, [onFullscreenChange]);
+
+  if (!videoConfigFromStore?.config || !resolution) {
+    return <Loading />;
+  }
 
   const handleZoomIn = () => setScale(prev => Math.min(3, prev + 0.25));
   const handleZoomOut = () => setScale(prev => Math.max(0.25, prev - 0.25));
