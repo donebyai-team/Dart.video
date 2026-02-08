@@ -1,29 +1,42 @@
-
 import { ActiveToolType } from "@/types/tools";
-import { Slide, SlideType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { SlideType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { getSlideTypeConfig } from "./defaults";
 import { getDefaultTemplateProps } from "@/types/textAnimationTemplates";
 import { VideoStoreSet, VideoStoreGet } from "./types";
 import { JsonObject } from "@bufbuild/protobuf";
+import { updateVideoConfigSections, updateSelectedSlide } from "./utils";
+import defaultEditorConfig from "@/data/editorConfig";
 
 export const createTextAnimationActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
+
+  /* ================= CONFIG ================= */
+
   getTextAnimationConfig() {
-    const { config } = get();
-    const slideConfig = getSlideTypeConfig(config, SlideType.TEXT_ANIMATION);
-    return slideConfig?.id === SlideType.TEXT_ANIMATION ? slideConfig : undefined;
+    const slideConfig = getSlideTypeConfig(
+      defaultEditorConfig,
+      SlideType.TEXT_ANIMATION
+    );
+
+    return slideConfig?.id === SlideType.TEXT_ANIMATION
+      ? slideConfig
+      : undefined;
   },
 
-  setShowTransitionPicker: (slideId: string | null) => set({ showTransitionPicker: slideId }),
+  setShowTransitionPicker: (slideId: string | null) =>
+    set({ showTransitionPicker: slideId }),
+
+  /* ================= TEMPLATE SELECT ================= */
 
   handleSelectTextAnimationTemplate(templateId: string) {
-    const { config, selectedSlide, sections } = get();
-    if (!config || !selectedSlide) return;
+    const { videoConfig, selectedSlide } = get();
+    if (!videoConfig?.config || !selectedSlide) return;
 
     const slide = selectedSlide.slide;
     if (slide.content.case !== "animation") return;
 
     const textConfig = get().getTextAnimationConfig();
     const templates = textConfig?.templates.templates ?? [];
+
     const defaultProps = getDefaultTemplateProps(templates, templateId);
 
     const currentAnimation = slide.content.value;
@@ -42,42 +55,43 @@ export const createTextAnimationActions = (set: VideoStoreSet, get: VideoStoreGe
       },
     };
 
-    const newSections = sections.map(section =>
-      section.id !== selectedSlide.section.id
-        ? section
-        : {
-          ...section,
-          slides: section.slides.map(sl =>
-            sl.id !== slide.id
-              ? sl
-              : {
-                ...sl,
-                content: newAnimationContent,
+    const newVideoConfig = updateVideoConfigSections(
+      videoConfig,
+      sections =>
+        sections.map(section =>
+          section.id !== selectedSlide.section.id
+            ? section
+            : {
+                ...section,
+                slides: section.slides.map(sl =>
+                  sl.id !== slide.id
+                    ? sl
+                    : {
+                        ...sl,
+                        content: newAnimationContent,
+                      }
+                ),
               }
-          ),
-        }
+        )
     );
 
     set({
-      sections: newSections,
-      selectedSlide: {
-        ...selectedSlide,
-        slide: {
-          ...slide,
-          content: newAnimationContent,
-        },
-      },
+      videoConfig: newVideoConfig,
+      selectedSlide: updateSelectedSlide(selectedSlide, slide => ({
+        ...slide,
+        content: newAnimationContent,
+      })),
       activeTool: { type: ActiveToolType.TEXT_ANIMATION_TEMPLATE },
     });
 
-    get().autoSyncSections(newSections);
-  }
-  ,
+    get().autoSyncVideoConfig();
+  },
 
+  /* ================= PROP UPDATE ================= */
 
   updateTextAnimationProps(newProps: JsonObject) {
-    const { sections, selectedSlide } = get();
-    if (!selectedSlide) return;
+    const { videoConfig, selectedSlide } = get();
+    if (!videoConfig || !selectedSlide) return;
 
     const slide = selectedSlide.slide;
     if (slide.content.case !== "animation") return;
@@ -97,35 +111,37 @@ export const createTextAnimationActions = (set: VideoStoreSet, get: VideoStoreGe
       },
     };
 
-    const newSections = sections.map(section =>
-      section.id !== selectedSlide.section.id
-        ? section
-        : {
-          ...section,
-          slides: section.slides.map(sl =>
-            sl.id !== slide.id
-              ? sl
-              : {
-                ...sl,
-                content: newAnimationContent,
+    const newVideoConfig = updateVideoConfigSections(
+      videoConfig,
+      sections =>
+        sections.map(section =>
+          section.id !== selectedSlide.section.id
+            ? section
+            : {
+                ...section,
+                slides: section.slides.map(sl =>
+                  sl.id !== slide.id
+                    ? sl
+                    : {
+                        ...sl,
+                        content: newAnimationContent,
+                      }
+                ),
               }
-          ),
-        }
+        )
     );
 
     set({
-      sections: newSections,
-      selectedSlide: {
-        ...selectedSlide,
-        slide: {
-          ...slide,
-          content: newAnimationContent,
-        },
-      },
+      videoConfig: newVideoConfig,
+      selectedSlide: updateSelectedSlide(selectedSlide, slide => ({
+        ...slide,
+        content: newAnimationContent,
+      })),
     });
 
-    get().autoSyncSections(newSections);
+    get().autoSyncVideoConfig();
 
     console.debug("UPDATED slide props", newProps);
-  }
+  },
+
 });

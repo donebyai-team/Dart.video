@@ -3,13 +3,13 @@ import { VideoState } from "./types";
 import { getDefaultSelectedTool } from "./defaults";
 
 export const initialState: VideoState = {
-  config: null,
+  // main state
   videoConfig: null,
-  sections: [],
-  resolution: null,
-  globalBackgroundColor: undefined,
-  isInitialized: false,
 
+
+  // TODO: move these into a separate states maybe
+  // only needed while editing
+  isInitialized: false,
   selectedEntityId: createSlideEntityId(""),
   selectedSlide: null,
   selectedEffectId: null,

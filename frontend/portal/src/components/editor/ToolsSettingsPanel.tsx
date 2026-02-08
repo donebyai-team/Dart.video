@@ -32,10 +32,11 @@ const ToolsSettingsPanel = ({
   deleteSpotlight,
   deleteCallout
 }: ToolsSettingsPanelProps) => {
+
+  const videoConfigFromStore = useVideoStore(s => s.videoConfig);
   const activeTool = useVideoStore(s => s.activeTool)
   const selectedSlide = useVideoStore(s => s.selectedSlide)
   const selectedEffectId = useVideoStore(s => s.selectedEffectId)
-  const globalBackgroundColor = useVideoStore(s => s.globalBackgroundColor)
   const handleCloseTool = useVideoStore(s => s.handleCloseTool)
   const getTextAnimationConfig = useVideoStore(s => s.getTextAnimationConfig)
   const spotlights = useVideoStore(s => s.getSpotlights) || []
@@ -75,7 +76,7 @@ const ToolsSettingsPanel = ({
       {activeTool.type === ActiveToolType.BACKGROUND && (
         <BackgroundSettings
           currentColor={selectedSlide?.slide.backgroundColor || '#0f172a'}
-          globalBackgroundColor={globalBackgroundColor}
+          globalBackgroundColor={videoConfigFromStore?.metadata?.backgroundColor}
           onChange={updateSlideBackground}
           onClose={handleCloseTool}
         />

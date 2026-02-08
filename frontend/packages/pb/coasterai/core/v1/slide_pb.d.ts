@@ -348,7 +348,7 @@ export declare type Slide = Message<"coasterai.core.v1.Slide"> & {
   backgroundColor?: string;
 
   /**
-   * @generated from oneof coasterai.core.v1.Slide.content
+   * @generated from oneof coasterai.core.v1.slide.content
    */
   content: {
     /**

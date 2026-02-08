@@ -1,237 +1,225 @@
 import { CalloutEffect, SpotlightEffect } from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import { VideoStoreGet, VideoStoreSet } from './types'
+import { SelectedSection, VideoStoreGet, VideoStoreSet } from './types'
+import { Video } from '@coasterai/pb/coasterai/core/v1/video_pb'
+import { updateVideoConfigSections, updateSelectedSlide } from './utils'
 
 export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
 
+  /* ================= SPOTLIGHT ================= */
+
   getSpotlights: () => {
     const { selectedSlide } = get()
-    if (!selectedSlide) return []
-
-    const slide = selectedSlide.slide
-    return slide.spotlights
+    return selectedSlide?.slide?.spotlights || []
   },
 
   addSpotlight(effect: SpotlightEffect) {
-    const { sections, selectedSlide } = get()
-    if (!selectedSlide?.slide || !selectedSlide?.section) return
+    const { videoConfig, selectedSlide } = get()
+    if (!selectedSlide?.slide || !selectedSlide?.section || !videoConfig) return
 
-    const newSections = sections.map(s =>
-      s.id === selectedSlide.section!.id
-        ? {
-            ...s,
-            slides: s.slides.map(sl =>
-              sl.id === selectedSlide.slide!.id ? { ...sl, spotlights: [...(sl.spotlights || []), effect] } : sl
-            )
-          }
-        : s
+    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
+      sections.map(section =>
+        section.id === selectedSlide.section.id
+          ? {
+              ...section,
+              slides: section.slides.map(slide =>
+                slide.id === selectedSlide.slide.id
+                  ? { ...slide, spotlights: [...(slide.spotlights || []), effect] }
+                  : slide
+              ),
+            }
+          : section
+      )
     )
 
     set({
-      sections: newSections,
-      selectedSlide: {
-        ...selectedSlide,
-        slide: {
-          ...selectedSlide.slide,
-          spotlights: [...(selectedSlide.slide.spotlights || []), effect],
-        },
-      },
-    });
-    get().autoSyncSections(newSections);
+      videoConfig: newVideoConfig,
+      selectedSlide: updateSelectedSlide(selectedSlide, slide => ({
+        ...slide,
+        spotlights: [...(slide.spotlights || []), effect],
+      })),
+    })
+
+    get().autoSyncVideoConfig()
   },
 
   updateSpotlight(effectId: string, updates: Partial<SpotlightEffect>) {
-    const { sections, selectedSlide } = get()
-    if (!selectedSlide?.slide || !selectedSlide?.section) return
+    const { videoConfig, selectedSlide } = get()
+    if (!selectedSlide?.slide || !selectedSlide?.section || !videoConfig) return
 
-    const newSections = sections.map(s =>
-      s.id === selectedSlide.section!.id
-        ? {
-            ...s,
-            slides: s.slides.map(sl =>
-              sl.id === selectedSlide.slide!.id
-                ? {
-                    ...sl,
-                    spotlights: (sl.spotlights || []).map(e => {
-                      return e?.id === effectId ? { ...e, ...updates } : e
-                    })
-                  }
-                : sl
-            )
-          }
-        : s
+    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
+      sections.map(section =>
+        section.id === selectedSlide.section.id
+          ? {
+              ...section,
+              slides: section.slides.map(slide =>
+                slide.id === selectedSlide.slide.id
+                  ? {
+                      ...slide,
+                      spotlights: (slide.spotlights || []).map(e =>
+                        e?.id === effectId ? { ...e, ...updates } : e
+                      ),
+                    }
+                  : slide
+              ),
+            }
+          : section
+      )
     )
 
     set({
-      sections: newSections,
-      selectedSlide: {
-        ...selectedSlide,
-        slide: {
-          ...selectedSlide.slide,
-          spotlights: (selectedSlide.slide.spotlights || []).map((e) => {
-            return e?.id === effectId ? { ...e, ...updates } : e;
-          }),
-        },
-      },
-    });
-    get().autoSyncSections(newSections);
+      videoConfig: newVideoConfig,
+      selectedSlide: updateSelectedSlide(selectedSlide, slide => ({
+        ...slide,
+        spotlights: (slide.spotlights || []).map(e =>
+          e?.id === effectId ? { ...e, ...updates } : e
+        ),
+      })),
+    })
+
+    get().autoSyncVideoConfig()
   },
 
   deleteSpotlight(effectId: string) {
-    const { sections, selectedSlide } = get()
-    if (!selectedSlide?.slide || !selectedSlide?.section) return
+    const { videoConfig, selectedSlide } = get()
+    if (!selectedSlide?.slide || !selectedSlide?.section || !videoConfig) return
 
-    const newSections = sections.map(s =>
-      s.id === selectedSlide.section!.id
-        ? {
-            ...s,
-            slides: s.slides.map(sl =>
-              sl.id === selectedSlide.slide!.id
-                ? {
-                    ...sl,
-                    spotlights: (sl.spotlights || []).filter(e => {
-                      return e?.id !== effectId
-                    })
-                  }
-                : sl
-            )
-          }
-        : s
+    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
+      sections.map(section =>
+        section.id === selectedSlide.section.id
+          ? {
+              ...section,
+              slides: section.slides.map(slide =>
+                slide.id === selectedSlide.slide.id
+                  ? {
+                      ...slide,
+                      spotlights: (slide.spotlights || []).filter(e => e?.id !== effectId),
+                    }
+                  : slide
+              ),
+            }
+          : section
+      )
     )
 
     set({
-      sections: newSections,
-      selectedSlide: {
-        ...selectedSlide,
-        slide: {
-          ...selectedSlide.slide,
-          spotlights: (selectedSlide.slide.spotlights || []).filter(e => {
-            return e?.id !== effectId
-          })
-        }
-      },
-      selectedEffectId: null
+      videoConfig: newVideoConfig,
+      selectedSlide: updateSelectedSlide(selectedSlide, slide => ({
+        ...slide,
+        spotlights: (slide.spotlights || []).filter(e => e?.id !== effectId),
+      })),
+      selectedEffectId: null,
     })
 
-    get().autoSyncSections(newSections);
+    get().autoSyncVideoConfig()
   },
 
-  // For Callout Effetcts you can use these function to directly operate in slide data
+  /* ================= CALLOUT ================= */
 
   getCallouts: () => {
     const { selectedSlide } = get()
-    if (!selectedSlide) return []
-
-    const slide = selectedSlide.slide
-    return slide.callouts
+    return selectedSlide?.slide?.callouts || []
   },
 
   addCallout(effect: CalloutEffect) {
-    const { sections, selectedSlide } = get()
-    if (!selectedSlide?.slide || !selectedSlide?.section) return
+    const { videoConfig, selectedSlide } = get()
+    if (!selectedSlide?.slide || !selectedSlide?.section || !videoConfig) return
 
-    const newSections = sections.map(s =>
-      s.id === selectedSlide.section!.id
-        ? {
-            ...s,
-            slides: s.slides.map(sl =>
-              sl.id === selectedSlide.slide!.id ? { ...sl, callouts: [...(sl.callouts || []), effect] } : sl
-            )
-          }
-        : s
+    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
+      sections.map(section =>
+        section.id === selectedSlide.section.id
+          ? {
+              ...section,
+              slides: section.slides.map(slide =>
+                slide.id === selectedSlide.slide.id
+                  ? { ...slide, callouts: [...(slide.callouts || []), effect] }
+                  : slide
+              ),
+            }
+          : section
+      )
     )
 
     set({
-      sections: newSections,
-      selectedSlide: {
-        ...selectedSlide,
-        slide: {
-          ...selectedSlide.slide,
-          callouts: [...(selectedSlide.slide.callouts || []), effect]
-        }
-      }
+      videoConfig: newVideoConfig,
+      selectedSlide: updateSelectedSlide(selectedSlide, slide => ({
+        ...slide,
+        callouts: [...(slide.callouts || []), effect],
+      })),
     })
 
-    get().autoSyncSections(newSections);
+    get().autoSyncVideoConfig()
   },
 
   updateCallout(effectId: string, updates: Partial<CalloutEffect>) {
-    const { sections, selectedSlide } = get()
-    if (!selectedSlide?.slide || !selectedSlide?.section) return
+    const { videoConfig, selectedSlide } = get()
+    if (!selectedSlide?.slide || !selectedSlide?.section || !videoConfig) return
 
-    const newSections = sections.map(s =>
-      s.id === selectedSlide.section!.id
-        ? {
-            ...s,
-            slides: s.slides.map(sl =>
-              sl.id === selectedSlide.slide!.id
-                ? {
-                    ...sl,
-                    callouts: (sl.callouts || []).map(e => {
-                      return e?.id === effectId ? { ...e, ...updates } : e
-                    })
-                  }
-                : sl
-            )
-          }
-        : s
+    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
+      sections.map(section =>
+        section.id === selectedSlide.section.id
+          ? {
+              ...section,
+              slides: section.slides.map(slide =>
+                slide.id === selectedSlide.slide.id
+                  ? {
+                      ...slide,
+                      callouts: (slide.callouts || []).map(e =>
+                        e?.id === effectId ? { ...e, ...updates } : e
+                      ),
+                    }
+                  : slide
+              ),
+            }
+          : section
+      )
     )
 
     set({
-      sections: newSections,
-      selectedSlide: {
-        ...selectedSlide,
-        slide: {
-          ...selectedSlide.slide,
-          callouts: (selectedSlide.slide.callouts || []).map(e => {
-            return e?.id === effectId ? { ...e, ...updates } : e
-          })
-        }
-      }
+      videoConfig: newVideoConfig,
+      selectedSlide: updateSelectedSlide(selectedSlide, slide => ({
+        ...slide,
+        callouts: (slide.callouts || []).map(e =>
+          e?.id === effectId ? { ...e, ...updates } : e
+        ),
+      })),
     })
 
-    get().autoSyncSections(newSections);
+    get().autoSyncVideoConfig()
   },
 
   deleteCallout(effectId: string) {
-    const { sections, selectedSlide } = get()
-    if (!selectedSlide?.slide || !selectedSlide?.section) return
+    const { videoConfig, selectedSlide } = get()
+    if (!selectedSlide?.slide || !selectedSlide?.section || !videoConfig) return
 
-    const newSections = sections.map(s =>
-      s.id === selectedSlide.section!.id
-        ? {
-            ...s,
-            slides: s.slides.map(sl =>
-              sl.id === selectedSlide.slide!.id
-                ? {
-                    ...sl,
-                    callouts: (sl.callouts || []).filter(e => {
-                      return e?.id !== effectId
-                    })
-                  }
-                : sl
-            )
-          }
-        : s
+    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
+      sections.map(section =>
+        section.id === selectedSlide.section.id
+          ? {
+              ...section,
+              slides: section.slides.map(slide =>
+                slide.id === selectedSlide.slide.id
+                  ? {
+                      ...slide,
+                      callouts: (slide.callouts || []).filter(e => e?.id !== effectId),
+                    }
+                  : slide
+              ),
+            }
+          : section
+      )
     )
 
     set({
-      sections: newSections,
-      selectedSlide: {
-        ...selectedSlide,
-        slide: {
-          ...selectedSlide.slide,
-          callouts: (selectedSlide.slide.callouts || []).filter(e => {
-            return e?.id !== effectId
-          })
-        }
-      },
-      selectedEffectId: null
+      videoConfig: newVideoConfig,
+      selectedSlide: updateSelectedSlide(selectedSlide, slide => ({
+        ...slide,
+        callouts: (slide.callouts || []).filter(e => e?.id !== effectId),
+      })),
+      selectedEffectId: null,
     })
 
-    get().autoSyncSections(newSections);
-  }
+    get().autoSyncVideoConfig()
+  },
 
-
-  // @TODO 
-  // implement more function down here to for specific effects 
 })
+

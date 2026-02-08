@@ -4,7 +4,7 @@
 
 import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv1";
 import type { Message } from "@bufbuild/protobuf";
-import type { Script, Video, VideoConfig } from "../../core/v1/video_pb";
+import type { Script, Video, VideoConfig, VideoMetadata } from "../../core/v1/video_pb";
 import type { EmptySchema, Timestamp } from "@bufbuild/protobuf/wkt";
 
 /**
@@ -46,6 +46,16 @@ export declare type UpdateVideoConfigRequest = Message<"coasterai.portal.v1.Upda
    * @generated from field: coasterai.core.v1.VideoConfig config = 2;
    */
   config?: VideoConfig;
+
+  /**
+   * @generated from field: coasterai.core.v1.VideoMetadata metadata = 4;
+   */
+  metadata?: VideoMetadata;
+
+  /**
+   * @generated from field: string name = 5;
+   */
+  name: string;
 };
 
 /**

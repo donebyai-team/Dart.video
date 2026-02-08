@@ -1,278 +1,337 @@
-import { TimelineSlide } from '@/components/editor/timeline/types'
-import {
-  createOverlayEntityId,
-  createSlideEntityId,
-  createStackItemEntityId,
-  createStackItemOverlayEntityId
-} from '@/types/selection'
-import {
-  Slide,
-  SlideType,
-  StackSlideContent,
-  TransitionType
-} from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import { arrayMove } from '@dnd-kit/sortable'
-import { slide } from '@remotion/transitions/slide'
-import { VideoStoreGet, VideoStoreSet } from './types'
-import { createNewSlide, getSlideTypeConfig } from './defaults'
+import { TimelineSlide } from "@/components/editor/timeline/types"
+import { SlideType, Slide, StackSlideContent, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb"
+import { arrayMove } from "@dnd-kit/sortable"
+import { getSlideTypeConfig, createNewSlide } from "./defaults"
+import { VideoStoreSet, VideoStoreGet } from "./types"
+import { getSections, updateVideoConfigSections, updateSelectedSlide } from "./utils"
+import defaultEditorConfig from "@/data/editorConfig"
 
 export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
+
+  /* ================= ADD ================= */
+
   addSlide(sectionId: string, type: SlideType) {
-    const { sections, config } = get()
-    if (!config) return
+    const { videoConfig } = get()
+    if (!videoConfig?.config) return
 
-    const slideTypeConfig = getSlideTypeConfig(config, type)
+    const sections = getSections(videoConfig)
+
+    const slideTypeConfig = getSlideTypeConfig(defaultEditorConfig, type)
+
     const inheritedBg =
-      [...sections.flatMap(s => s.slides)].reverse().find(s => s.backgroundColor)?.backgroundColor ||
+      [...sections.flatMap(s => s.slides)]
+        .reverse()
+        .find(s => s.backgroundColor)?.backgroundColor ||
       slideTypeConfig?.defaultBackground ||
-      config.background.defaultColor
+      defaultEditorConfig.background.defaultColor
 
-    // Create default content based on slide type
     const newSlide = createNewSlide({
       sectionId,
       type,
       inheritedBg,
       defaultTranscript: slideTypeConfig?.defaultTranscript,
       defaultDuration: slideTypeConfig?.defaultDuration,
-    });
+    })
 
+    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
+      sections.map(s =>
+        s.id === sectionId
+          ? { ...s, slides: [...s.slides, newSlide] }
+          : s
+      )
+    )
 
-    const newSections = sections.map(s => (s.id === sectionId ? { ...s, slides: [...s.slides, newSlide] } : s))
+    set({ videoConfig: newVideoConfig })
 
-    set({ sections: newSections })
-    get().autoSyncSections(newSections)
-
-    const section = newSections.find(s => s.id === sectionId)
+    const section = getSections(newVideoConfig).find(s => s.id === sectionId)
     if (section) {
       set({ selectedSlide: { section, slide: newSlide } })
     }
 
-    console.debug('added slide', section, slide)
+    get().autoSyncVideoConfig()
   },
 
-  createSlideEntityId: (slideId: string) => {
-    return createSlideEntityId(slideId)
-  },
+  /* ================= BACKGROUND ================= */
 
-  createStackItemEntityId: (slideId: string, itemId: string) => createStackItemEntityId(slideId, itemId),
-  createOverlayEntityId: (slideId: string, overlayId: string) => createOverlayEntityId(slideId, overlayId),
-  createStackItemOverlayEntityId: (slideId: string, itemId: string, overlayId: string) =>
-    createStackItemOverlayEntityId(slideId, itemId, overlayId),
-
-  updateSlideBackground: (color: string, applyToAll = false) => {
-    const { sections, selectedSlide } = get();
-    if (!selectedSlide) return;
-
-    let newSections = sections;
-
+  updateSlideBackground(color: string, applyToAll = false) {
+    const { videoConfig, selectedSlide } = get()
+    if (!videoConfig || !videoConfig?.config || !selectedSlide) return
+    let newVideoConfig = videoConfig
     if (applyToAll) {
-      // Apply global background, clear per-slide backgrounds
-      newSections = sections.map(section => ({
-        ...section,
-        slides: section.slides.map(slide => ({
+      newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
+        sections.map(section => ({
+          ...section,
+          slides: section.slides.map(slide => ({
+            ...slide,
+            backgroundColor: undefined,
+          })),
+        }))
+      )
+
+      newVideoConfig.metadata!.backgroundColor = color
+
+      set({
+        videoConfig: newVideoConfig,
+        selectedSlide: updateSelectedSlide(selectedSlide, slide => ({
           ...slide,
           backgroundColor: undefined,
         })),
-      }));
+      })
 
-      set({
-        globalBackgroundColor: color,
-        sections: newSections,
-        selectedSlide: {
-          ...selectedSlide,
-          slide: {
-            ...selectedSlide.slide,
-            backgroundColor: undefined,
-          },
-        },
-      });
     } else {
-      // Apply only to selected slide, clear global
-      newSections = sections.map(section => {
-        if (section.id !== selectedSlide.section.id) return section;
 
-        return {
-          ...section,
-          slides: section.slides.map(slide =>
-            slide.id === selectedSlide.slide.id
-              ? { ...slide, backgroundColor: color }
-              : slide
-          ),
-        };
-      });
+      newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
+        sections.map(section =>
+          section.id !== selectedSlide.section.id
+            ? section
+            : {
+                ...section,
+                slides: section.slides.map(slide =>
+                  slide.id === selectedSlide.slide.id
+                    ? { ...slide, backgroundColor: color }
+                    : slide
+                ),
+              }
+        )
+      )
+
+      newVideoConfig.metadata!.backgroundColor = ""
 
       set({
-        globalBackgroundColor: undefined,
-        sections: newSections,
-        selectedSlide: {
-          ...selectedSlide,
-          slide: {
-            ...selectedSlide.slide,
-            backgroundColor: color,
-          },
-        },
-      });
+        videoConfig: newVideoConfig,
+        selectedSlide: updateSelectedSlide(selectedSlide, slide => ({
+          ...slide,
+          backgroundColor: color,
+        })),
+      })
     }
 
-    get().autoSyncSections(newSections);
-  }
-  ,
+    get().autoSyncVideoConfig()
+  },
 
-  updateSlideTranscript: (transcript: string) => {
-    const { sections, selectedSlide } = get()
-    if (!selectedSlide) return
+  /* ================= TRANSCRIPT ================= */
 
-    const newSections = sections.map(section =>
-      section.id === selectedSlide.section.id
-        ? {
-          ...section,
-          slides: section.slides.map(slide =>
-            slide.id === selectedSlide.slide.id
-              ? {
-                ...slide,
-                transcript
-              }
-              : slide
-          )
-        }
-        : section
+  updateSlideTranscript(transcript: string) {
+    const { videoConfig, selectedSlide } = get()
+    if (!videoConfig || !selectedSlide) return
+
+    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
+      sections.map(section =>
+        section.id === selectedSlide.section.id
+          ? {
+              ...section,
+              slides: section.slides.map(slide =>
+                slide.id === selectedSlide.slide.id
+                  ? { ...slide, transcript }
+                  : slide
+              ),
+            }
+          : section
+      )
     )
 
     set({
-      sections: newSections,
-      selectedSlide: {
-        ...selectedSlide,
-        slide: {
-          ...selectedSlide.slide,
-          transcript
-        }
-      }
+      videoConfig: newVideoConfig,
+      selectedSlide: updateSelectedSlide(selectedSlide, slide => ({
+        ...slide,
+        transcript,
+      })),
     })
-    get().autoSyncSections(newSections)
+
+    get().autoSyncVideoConfig()
   },
 
+  /* ================= REMOVE ================= */
+
   removeSlide(sectionId: string, slideId: string) {
-    const { sections, selectedSlide } = get()
-    const newSections = sections.map(s =>
-      s.id === sectionId ? { ...s, slides: s.slides.filter(sl => sl.id !== slideId) } : s
+    const { videoConfig, selectedSlide } = get()
+    if (!videoConfig) return
+
+    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
+      sections.map(section =>
+        section.id === sectionId
+          ? { ...section, slides: section.slides.filter(sl => sl.id !== slideId) }
+          : section
+      )
     )
 
-    set({ sections: newSections })
-    get().autoSyncSections(newSections)
+    set({ videoConfig: newVideoConfig })
 
     if (selectedSlide?.slide.id === slideId) {
-      const section = newSections.find(s => s.id === sectionId)
+      const sections = getSections(newVideoConfig)
+      const section = sections.find(s => s.id === sectionId)
       const fallback = section?.slides?.[0]
+
       if (fallback) {
         set({ selectedSlide: { section, slide: fallback } })
       } else {
-        const next = newSections.find(s => s.slides.length > 0)
-        set({ selectedSlide: next ? { section: next, slide: next.slides[0] } : null })
+        const next = sections.find(s => s.slides.length > 0)
+        set({
+          selectedSlide: next
+            ? { section: next, slide: next.slides[0] }
+            : null,
+        })
       }
     }
 
-    get().autoSyncSections(newSections);
+    get().autoSyncVideoConfig()
   },
 
-  updateSlide(updates: Partial<Slide>) {
-    const { sections, selectedSlide } = get()
-    if (!selectedSlide) return
+  /* ================= GENERIC UPDATE ================= */
 
-    const newSections = sections.map(s =>
-      s.id === selectedSlide.section.id
-        ? {
-          ...s,
-          slides: s.slides.map(sl => (sl.id === selectedSlide.slide.id ? { ...sl, ...updates } : sl))
-        }
-        : s
+  updateSlide(updates: Partial<Slide>) {
+    const { videoConfig, selectedSlide } = get()
+    if (!videoConfig || !selectedSlide) return
+
+    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
+      sections.map(section =>
+        section.id === selectedSlide.section.id
+          ? {
+              ...section,
+              slides: section.slides.map(sl =>
+                sl.id === selectedSlide.slide.id
+                  ? { ...sl, ...updates }
+                  : sl
+              ),
+            }
+          : section
+      )
     )
 
     set({
-      sections: newSections,
-      selectedSlide: {
-        ...selectedSlide,
-        slide: { ...selectedSlide.slide, ...updates }
-      }
+      videoConfig: newVideoConfig,
+      selectedSlide: updateSelectedSlide(selectedSlide, slide => ({
+        ...slide,
+        ...updates,
+      })),
     })
-    get().autoSyncSections(newSections)
-    console.debug('slide updated', 'updates', updates)
+
+    get().autoSyncVideoConfig()
   },
 
+  /* ================= TIMELINE ================= */
+
   getTimelineSlides(): TimelineSlide[] {
-    const { sections } = get()
-    return sections.flatMap(s =>
-      s.slides.map(slide => {
-        // For stack slides, calculate actual duration from nested items
+    const { videoConfig } = get()
+    if (!videoConfig) return []
+
+    const sections = getSections(videoConfig)
+
+    return sections.flatMap(section =>
+      section.slides.map(slide => {
         let actualDuration = slide.duration
+
         if (slide.type === SlideType.STACK && slide.content) {
           const stackContent = slide.content.value as StackSlideContent
-          if (stackContent.items && Array.isArray(stackContent.items)) {
-            actualDuration = stackContent.items.reduce((sum: number, item: any) => sum + (item.duration || 0), 0)
+          if (stackContent.items) {
+            actualDuration = stackContent.items.reduce(
+              (sum: number, item: any) => sum + (item.duration || 0),
+              0
+            )
           }
         }
 
         return {
           ...slide,
-          id: slide.id,
-          slide: slide,
+          slide,
           duration: actualDuration,
-          sectionColor: s.color,
-          sectionTitle: s.title,
-          spotlights: slide.spotlights || []
+          sectionColor: section.color,
+          sectionTitle: section.title,
+          spotlights: slide.spotlights || [],
         }
       })
     )
   },
 
+  /* ================= CONTENT ================= */
+
   updateSlideContent(updates: Record<string, unknown>) {
-    const { sections, selectedSlide } = get()
-    if (!selectedSlide) return
+    const { videoConfig, selectedSlide } = get()
+    if (!videoConfig || !selectedSlide) return
 
     const content = selectedSlide.slide.content || {}
     const newContent = { ...content, ...updates }
 
-    const newSections = sections.map(s =>
-      s.id === selectedSlide.section.id
-        ? {
-          ...s,
-          slides: s.slides.map(sl => (sl.id === selectedSlide.slide.id ? { ...sl, content: newContent } : sl))
-        }
-        : s
+    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
+      sections.map(section =>
+        section.id === selectedSlide.section.id
+          ? {
+              ...section,
+              slides: section.slides.map(sl =>
+                sl.id === selectedSlide.slide.id
+                  ? { ...sl, content: newContent }
+                  : sl
+              ),
+            }
+          : section
+      )
     )
 
     set({
-      sections: newSections,
-      selectedSlide: {
-        ...selectedSlide,
-        slide: { ...selectedSlide.slide, content: newContent }
-      }
+      videoConfig: newVideoConfig,
+      selectedSlide: updateSelectedSlide(selectedSlide, slide => ({
+        ...slide,
+        content: newContent,
+      })),
     })
-    get().autoSyncSections(newSections)
+
+    get().autoSyncVideoConfig()
   },
+
+  /* ================= TRANSITION ================= */
 
   updateSlideTransition(sectionId: string, slideId: string, transitionId: TransitionType) {
-    const { sections } = get()
-    const newSections = sections.map(s =>
-      s.id === sectionId
-        ? {
-          ...s,
-          slides: s.slides.map(sl => (sl.id === slideId ? { ...sl, transition: transitionId } : sl))
-        }
-        : s
+    const { videoConfig } = get()
+    if (!videoConfig) return
+
+    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
+      sections.map(section =>
+        section.id === sectionId
+          ? {
+              ...section,
+              slides: section.slides.map(sl =>
+                sl.id === slideId
+                  ? { ...sl, transition: transitionId }
+                  : sl
+              ),
+            }
+          : section
+      )
     )
-    set({ sections: newSections, showTransitionPicker: null })
-    get().autoSyncSections(newSections)
+
+    set({
+      videoConfig: newVideoConfig,
+      showTransitionPicker: null,
+    })
+
+    get().autoSyncVideoConfig()
   },
 
+  /* ================= REORDER ================= */
+
   reorderSlidesInSection(sectionId: string, activeId: string, overId: string) {
-    const { sections } = get()
-    const newSections = sections.map(s => {
-      if (s.id !== sectionId) return s
-      const oldIndex = s.slides.findIndex(sl => sl.id === activeId)
-      const newIndex = s.slides.findIndex(sl => sl.id === overId)
-      return { ...s, slides: arrayMove(s.slides, oldIndex, newIndex) }
-    })
-    set({ sections: newSections })
-    get().autoSyncSections(newSections)
-  }
+    const { videoConfig } = get()
+    if (!videoConfig) return
+
+    const sections = getSections(videoConfig)
+
+    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
+      sections.map(section => {
+        if (section.id !== sectionId) return section
+
+        const oldIndex = section.slides.findIndex(sl => sl.id === activeId)
+        const newIndex = section.slides.findIndex(sl => sl.id === overId)
+
+        return {
+          ...section,
+          slides: arrayMove(section.slides, oldIndex, newIndex),
+        }
+      })
+    )
+
+    set({ videoConfig: newVideoConfig })
+
+    get().autoSyncVideoConfig()
+  },
+
 })

@@ -64,7 +64,6 @@ export const TextAnimationSlide: React.FC<TextAnimationSlideProps> = ({
   useEffect(() => {
     ;(async () => {
       const loader = templateRegistry[templateId as keyof typeof templateRegistry]
-      console.log(loader, 'loadr')
       if (!loader) return
 
       const mod = await loader()

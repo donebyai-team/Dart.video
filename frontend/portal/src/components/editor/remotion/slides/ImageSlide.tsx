@@ -40,7 +40,7 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, on
     src: imageContent.src,
     style: imageContent.style ?? {}
   }
-
+console.log(props, "props")
   // Create resolution object from dimensions
   const resolution = {
     id: `${width}x${height}`,

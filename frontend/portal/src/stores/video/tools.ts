@@ -5,30 +5,40 @@ import { createCalloutEffect, createSpotlightEffect, getDefaultSelectedTool } fr
 
 export const createToolActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   handleSelectTool(tool: SelectedTool) {
-    const { resolution, selectedSlide } = get()
-    if (!resolution || !selectedSlide) return
-    const startTime = selectedSlide.slide.transitionDuration || 0
-    const endTime = selectedSlide.slide.duration - (selectedSlide.slide.transitionDuration || 0)
-    console.debug('tool selected', tool)
-    set({ activeTool: tool })
+    const { videoConfig } = get();
+    const { selectedSlide } = get();
+
+    if (!selectedSlide || !videoConfig) return;
+
+    const resolution = videoConfig.metadata?.resolution;
+    if (!resolution) return;
+
+    const startTime = selectedSlide.slide.transitionDuration || 0;
+    const endTime =
+      selectedSlide.slide.duration -
+      (selectedSlide.slide.transitionDuration || 0);
+
+    set({ activeTool: tool });
 
     if (tool?.type === ActiveToolType.INSERT) {
+
       if (tool.tool === EffectType.SPOTLIGHT) {
-        const spotlightEffect = createSpotlightEffect(resolution, startTime, endTime);
+        const effect = createSpotlightEffect(resolution, startTime, endTime);
+        get().addSpotlight(effect);
+        set({ selectedEffectId: effect.id });
 
-        get().addSpotlight(spotlightEffect)
-        set({ selectedEffectId: spotlightEffect.id })
       } else if (tool.tool === EffectType.CALLOUT) {
-        const calloutEffect = createCalloutEffect(resolution, startTime, endTime);
-
-        get().addCallout(calloutEffect)
-        set({ selectedEffectId: calloutEffect.id })
+        const effect = createCalloutEffect(resolution, startTime, endTime);
+        get().addCallout(effect);
+        set({ selectedEffectId: effect.id });
       }
+
     }
-  },
+  }
+  ,
 
   handleCloseTool() {
-    set({ activeTool: getDefaultSelectedTool()})
+    set({ activeTool: getDefaultSelectedTool() })
   },
 
   handleEditSlide() {

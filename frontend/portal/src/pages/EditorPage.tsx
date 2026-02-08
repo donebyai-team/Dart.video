@@ -21,6 +21,7 @@ import { Video as VideoConfig } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import toast from 'react-hot-toast'
 import { getConnectError } from '@/utils/error';
 import { ActiveToolType } from '@/types/tools';
+import { createSlideEntityId, createStackItemEntityId, createOverlayEntityId } from '@/types/selection';
 
 // Icon mapping for dynamic rendering
 const iconMap: Record<string, React.ElementType> = {
@@ -43,7 +44,6 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
 
   // ---- Values (reactive) ----
   const initialize = useVideoStore(s => s.initialize)
-  const initializeSync = useVideoStore(s => s.initializeSync)
   const isInitialized = useVideoStore(s => s.isInitialized)
 
   // Streaming state
@@ -53,8 +53,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
   const streamingError = useVideoStore(s => s.streamingError)
 
   // Video data from store (this is the single source of truth)
-  const videoConfigFromStore = useVideoStore(s => s.videoConfig)
-  const sections = useVideoStore(s => s.sections)
+  const videoConfigFromStore = useVideoStore(s => s.videoConfig);
   const selectedSlide = useVideoStore(s => s.selectedSlide)
 
   const setShowVoiceover = useVideoStore(s => s.setShowVoiceover)
@@ -65,11 +64,6 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
   const editingSectionId = useVideoStore(s => s.editingSectionId)
   const editingSectionTitle = useVideoStore(s => s.editingSectionTitle)
   const generatingSlideVoiceover = useVideoStore(s => s.generatingSlideVoiceover)
-
-  // ---- Getters (non-reactive functions) ----
-  const createSlideEntityId = useVideoStore(s => s.createSlideEntityId)
-  const createStackItemEntityId = useVideoStore(s => s.createStackItemEntityId)
-  const createOverlayEntityId = useVideoStore(s => s.createOverlayEntityId)
 
   // ---- Setters / Actions (stable functions) ----
   const setEditingSectionId = useVideoStore(s => s.setEditingSectionId)
@@ -112,33 +106,21 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
   }, [videoId, startVideoStream])
 
   useEffect(() => {
-    // Use video config from store, fallback to sample config if not available
-    const currentVideoConfig = videoConfigFromStore
+    if (isLoadingVideo || !videoConfigFromStore || isInitialized) return;
 
-    // Don't initialize until video data is loaded
-    if (isLoadingVideo || !currentVideoConfig) return
+    console.log("Initializing editor once", "name: ", videoConfigFromStore.name, videoConfigFromStore.id);
 
-    // Prevent re-initialization with the same configs
-    const lastInit = initializationRef.current
-    if (lastInit.config === config && lastInit.videoConfig === currentVideoConfig) {
-      console.log('Skipping re-init - same configs')
-      return
-    }
+    initialize(config, videoConfigFromStore);
 
-    console.log('EditorPage: Calling initialize with:', {
-      config: !!config,
-      videoConfig: !!currentVideoConfig,
-      sections: currentVideoConfig?.config?.sections?.length
-    })
+  }, [
+    isLoadingVideo,
+    videoConfigFromStore,
+    isInitialized,
+    config,
+    initialize
+  ]);
 
-    initialize(config, currentVideoConfig!)
 
-    // Initialize sync with video ID
-    initializeSync(videoId)
-
-    // Store references to prevent re-initialization
-    initializationRef.current = { config, videoConfig: currentVideoConfig! }
-  }, [config, videoConfigFromStore, initialize, initializeSync, videoId, isLoadingVideo])
 
   // Centralized preview handler - plays a slide from start and pauses at end
   const handlePreviewSlide = (slideId: string) => {
@@ -157,12 +139,12 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
   }
 
   // Early return if not initialized yet OR if streaming but no sections received yet
-  if (!isInitialized || (isStreamingVideo && sections.length === 0)) {
+  if (!isInitialized || (isStreamingVideo && videoConfigFromStore?.config?.sections.length === 0)) {
     return (
       <div className="h-screen flex items-center justify-center bg-muted/30">
         <div className="text-center max-w-md">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>         
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     )
@@ -279,7 +261,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
                     updateSpotlight(selectedEffectId, updates)
                   }
                 }}
-                 onUpdateCallout={updates => {
+                onUpdateCallout={updates => {
                   if (selectedEffectId) {
                     updateCallout(selectedEffectId, updates)
                   }
@@ -288,7 +270,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
                   // Apply spotlight - just close the panel
                   handleCloseTool()
                 }}
-                onSpotlightPlay={() => handlePreviewSlide(selectedSlide.slide.id)}                
+                onSpotlightPlay={() => handlePreviewSlide(selectedSlide.slide.id)}
               />
             ) : (
               <motion.div
@@ -302,9 +284,9 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
                 <div className='p-4 border-b border-border flex items-center justify-between'>
                   <h2 className='font-semibold'>Storyboard</h2>
                   <div className='flex items-center gap-2 text-xs text-muted-foreground'>
-                    <span>{sections.length} sections</span>
+                    <span>{videoConfigFromStore?.config?.sections.length} sections</span>
                     <span>•</span>
-                    <span>{sections.reduce((acc, s) => acc + s.slides.length, 0)} slides</span>
+                    <span>{videoConfigFromStore?.config?.sections.reduce((acc, s) => acc + s.slides.length, 0)} slides</span>
                   </div>
                 </div>
 

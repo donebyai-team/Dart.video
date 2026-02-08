@@ -1512,7 +1512,7 @@ var file_coasterai_core_v1_slide_proto_depIdxs = []int32{
 	2,  // 7: coasterai.core.v1.Slide.transition:type_name -> coasterai.core.v1.TransitionType
 	4,  // 8: coasterai.core.v1.Slide.image:type_name -> coasterai.core.v1.ImageSlideContent
 	5,  // 9: coasterai.core.v1.Slide.video:type_name -> coasterai.core.v1.VideoSlideContent
-	7,  // 10: coasterai.core.v1.Slide.animation:type_name -> coasterai.core.v1.AnimationSlideContent
+	7,  // 10: coasterai.core.v1.slide.content:type_name -> coasterai.core.v1.AnimationSlideContent
 	8,  // 11: coasterai.core.v1.Slide.stack:type_name -> coasterai.core.v1.StackSlideContent
 	12, // 12: coasterai.core.v1.Slide.subSlides:type_name -> coasterai.core.v1.Slide
 	9,  // 13: coasterai.core.v1.Slide.spotlights:type_name -> coasterai.core.v1.SpotlightEffect

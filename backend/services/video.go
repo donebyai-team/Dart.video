@@ -33,6 +33,13 @@ func (v videoGeneration) UpdateVideoConfig(ctx context.Context, video *models.Vi
 	}
 
 	existingVideo.Config = video.Config
+	// Only update when provided
+	if video.Metadata != nil {
+		existingVideo.Metadata = video.Metadata
+	}
+	if video.Name != existingVideo.Name {
+		existingVideo.Name = video.Name
+	}
 	return v.db.UpdateVideo(ctx, existingVideo)
 }
 

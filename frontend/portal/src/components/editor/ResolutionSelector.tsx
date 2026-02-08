@@ -25,16 +25,16 @@ const resolutions: Resolution[] = [
 
 
 const ResolutionSelector = () => {
-  const resolution = useVideoStore(s => s.resolution);
+  const videoConfigFromStore = useVideoStore(s => s.videoConfig);
   const setResolution = useVideoStore(s => s.setResolution);
-  const Icon = resolutionIcons[resolution?.id] || Monitor;
+  const Icon = resolutionIcons[videoConfigFromStore?.metadata?.resolution?.id!] || Monitor;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2 h-8 text-xs">
           <Icon className="w-3.5 h-3.5" />
-          {resolution?.id}
+          {videoConfigFromStore?.metadata?.resolution?.id}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

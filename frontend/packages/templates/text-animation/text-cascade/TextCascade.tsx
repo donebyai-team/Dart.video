@@ -47,7 +47,6 @@ const RemoteComponent = ({ props, onChange }: Props) => {
         >
           {centerText.text.split('').map((letter: string, i: number) => {
             const delay = i * 1.5
-            console.log(frame, i, 'frame')
             const animProgress = spring({
               frame: frame - delay,
               fps,
@@ -90,7 +89,6 @@ const RemoteComponent = ({ props, onChange }: Props) => {
         >
           {topLeftText.text.split('').map((letter: string, i: number) => {
             const delay = i * 1.5
-            console.log(frame, i, 'frame')
             const animProgress = spring({
               frame: frame - delay,
               fps,

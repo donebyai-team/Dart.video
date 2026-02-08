@@ -1,14 +1,14 @@
-import React from 'react'
-import { useVideoConfig, AbsoluteFill } from 'remotion'
-import { TransitionSeries, linearTiming } from '@remotion/transitions'
+import { useVideoStore } from '@/stores/video'
+import { fromJson, JsonObject } from '@bufbuild/protobuf'
+import { Slide, SlideType, TransitionType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { VideoSchema } from '@coasterai/pb/coasterai/core/v1/video_pb'
+import { linearTiming, TransitionSeries } from '@remotion/transitions'
 import { fade } from '@remotion/transitions/fade'
 import { slide } from '@remotion/transitions/slide'
-import { ImageSlide, VideoSlide, TextAnimationSlide, VisualAnimationSlide, InfographicSlide } from './remotion/slides'
+import React from 'react'
+import { AbsoluteFill, useVideoConfig } from 'remotion'
 import { getActualSlideDuration, TRANSITION_DURATION_SECONDS } from './frame_calculations'
-import { useVideoStore } from '@/stores/video'
-import { Section, Slide, SlideType, TransitionType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import { Video, VideoSchema } from '@coasterai/pb/coasterai/core/v1/video_pb'
-import { fromJson, JsonObject } from '@bufbuild/protobuf'
+import { ImageSlide, InfographicSlide, TextAnimationSlide, VideoSlide, VisualAnimationSlide } from './remotion/slides'
 
 interface SlideshowProps {
   fps: number
@@ -133,25 +133,40 @@ const getTransitionPresentation = (transitionType?: TransitionType) => {
 
 // Main slideshow composition using Remotion's TransitionSeries
 export const Slideshow: React.FC<SlideshowProps> = ({ fps, isEditing = false, onSelectTemplate, video }) => {
-  const sections = useVideoStore(s => s.sections)
-  const globalBackgroundColor = useVideoStore(s => s.globalBackgroundColor)
+  const videoConfig = useVideoStore(s => s.videoConfig)
   const selectedStackItemId = useVideoStore(s => s.selectedStackItemId)
+
   const selectedTemplateId = null
 
   const { width, height } = useVideoConfig()
   const protoObject = video ? fromJson(VideoSchema, video) : undefined
+
+  // Check if video object is passed from outside and assign sectins from it either zustand
   const allExternalSlidesData =
     protoObject && protoObject.config ? protoObject.config.sections.flatMap(section => section.slides) : undefined
 
+  /* ================= GATE ================= */
+
+  if (!videoConfig?.config) {
+    return <AbsoluteFill style={{ background: 'black' }} />
+  }
+
+  const metadata = videoConfig.metadata
+  const sections = videoConfig.config.sections ?? []
+  const globalBackground = metadata?.backgroundColor ?? 'transparent'
+
+  // if external video object exist use it or assign zustand video object
   const allSlides = allExternalSlidesData ? allExternalSlidesData : sections.flatMap(section => section.slides)
+
   const transitionDurationFrames = Math.round(fps * TRANSITION_DURATION_SECONDS)
 
-  // Handle empty slides case
+  /* ================= EMPTY ================= */
+
   if (allSlides.length === 0) {
     return (
       <AbsoluteFill
         style={{
-          background: globalBackgroundColor || 'transparent',
+          background: globalBackground,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -165,22 +180,21 @@ export const Slideshow: React.FC<SlideshowProps> = ({ fps, isEditing = false, on
     )
   }
 
+  /* ================= RENDER ================= */
+
   return (
-    <AbsoluteFill style={{ background: globalBackgroundColor || 'transparent' }}>
+    <AbsoluteFill style={{ background: globalBackground }}>
       <TransitionSeries>
         {allSlides.map(slide => {
           const isSelected = selectedTemplateId === slide.id
 
-          // Simple rule: slide duration = slide's actual duration
           const actualDuration = getActualSlideDuration(slide)
           const durationInFrames = Math.round(actualDuration * fps)
 
-          // Check if this slide has a transition defined
           const hasTransition = slide.transition !== TransitionType.TRANSITION_NONE
 
-          // Determine slide background: use slide's backgroundColor if set, otherwise transparent (so global shows through)
           const slideWithBackground =
-            globalBackgroundColor && !slide.backgroundColor ? { ...slide, backgroundColor: 'transparent' } : slide
+            globalBackground && !slide.backgroundColor ? { ...slide, backgroundColor: 'transparent' } : slide
 
           return (
             <React.Fragment key={slide.id}>
@@ -197,10 +211,13 @@ export const Slideshow: React.FC<SlideshowProps> = ({ fps, isEditing = false, on
                   }}
                 />
               </TransitionSeries.Sequence>
+
               {hasTransition && (
                 <TransitionSeries.Transition
                   presentation={getTransitionPresentation(slide.transition)}
-                  timing={linearTiming({ durationInFrames: transitionDurationFrames })}
+                  timing={linearTiming({
+                    durationInFrames: transitionDurationFrames
+                  })}
                 />
               )}
             </React.Fragment>

@@ -4,8 +4,8 @@
 
 import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv1";
 import type { Message } from "@bufbuild/protobuf";
+import type { Resolution, Section } from "./slide_pb";
 import type { Timestamp } from "@bufbuild/protobuf/wkt";
-import type { Section } from "./slide_pb";
 
 /**
  * Describes the file coasterai/core/v1/video.proto.
@@ -17,14 +17,19 @@ export declare const file_coasterai_core_v1_video: GenFile;
  */
 export declare type VideoMetadata = Message<"coasterai.core.v1.VideoMetadata"> & {
   /**
-   * @generated from field: int64 fps = 1;
+   * @generated from field: int32 fps = 1;
    */
-  fps: bigint;
+  fps: number;
 
   /**
    * @generated from field: string background_color = 2;
    */
   backgroundColor: string;
+
+  /**
+   * @generated from field: coasterai.core.v1.Resolution resolution = 3;
+   */
+  resolution?: Resolution;
 };
 
 /**
