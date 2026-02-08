@@ -42,6 +42,7 @@ func (r *Database) UpdateVideo(ctx context.Context, video *models.Video) error {
 		"ai_generated_config": video.AIGeneratedConfig,
 		"organization_id":     video.OrganizationID,
 		"metadata":            video.Metadata,
+		"name":                video.Name,
 		"id":                  video.ID,
 	})
 	if err != nil {

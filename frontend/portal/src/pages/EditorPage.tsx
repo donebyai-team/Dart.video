@@ -43,7 +43,6 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
 
   // ---- Values (reactive) ----
   const initialize = useVideoStore(s => s.initialize)
-  const initializeSync = useVideoStore(s => s.initializeSync)
   const isInitialized = useVideoStore(s => s.isInitialized)
 
   // Streaming state
@@ -133,12 +132,9 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
 
     initialize(config, currentVideoConfig!)
 
-    // Initialize sync with video ID
-    initializeSync(videoId)
-
     // Store references to prevent re-initialization
     initializationRef.current = { config, videoConfig: currentVideoConfig! }
-  }, [config, videoConfigFromStore, initialize, initializeSync, videoId, isLoadingVideo])
+  }, [config, videoConfigFromStore, initialize, videoId, isLoadingVideo])
 
   // Centralized preview handler - plays a slide from start and pauses at end
   const handlePreviewSlide = (slideId: string) => {

@@ -3,6 +3,7 @@ SET
     config = :config,
     ai_generated_config = :ai_generated_config,
     status = :status,
+    name = :name,
     metadata = :metadata
 WHERE
     id = :id

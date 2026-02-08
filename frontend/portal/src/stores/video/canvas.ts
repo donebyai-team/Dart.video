@@ -36,7 +36,7 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
         },
       },
     });
-    get().autoSyncSections(newSections);
+    get().autoSyncVideoConfig();
   },
 
   updateSpotlight(effectId: string, updates: Partial<SpotlightEffect>) {
@@ -73,11 +73,11 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
         },
       },
     });
-    get().autoSyncSections(newSections);
+    get().autoSyncVideoConfig();
   },
 
   deleteSpotlight(effectId: string) {
-    const { sections, selectedSlide } = get()
+    const { sections, selectedSlide, videoConfig } = get()
     if (!selectedSlide?.slide || !selectedSlide?.section) return
 
     const newSections = sections.map(s =>
@@ -112,7 +112,7 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
       selectedEffectId: null
     })
 
-    get().autoSyncSections(newSections);
+    get().autoSyncVideoConfig();
   },
 
   // For Callout Effetcts you can use these function to directly operate in slide data
@@ -151,7 +151,7 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
       }
     })
 
-    get().autoSyncSections(newSections);
+    get().autoSyncVideoConfig();
   },
 
   updateCallout(effectId: string, updates: Partial<CalloutEffect>) {
@@ -189,7 +189,7 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
       }
     })
 
-    get().autoSyncSections(newSections);
+    get().autoSyncVideoConfig();
   },
 
   deleteCallout(effectId: string) {
@@ -228,7 +228,7 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
       selectedEffectId: null
     })
 
-    get().autoSyncSections(newSections);
+    get().autoSyncVideoConfig();
   }
 
 
