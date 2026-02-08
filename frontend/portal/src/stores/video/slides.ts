@@ -21,6 +21,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     const { sections, config } = get()
     if (!config) return
 
+    
     const slideTypeConfig = getSlideTypeConfig(config, type)
     const inheritedBg =
       [...sections.flatMap(s => s.slides)].reverse().find(s => s.backgroundColor)?.backgroundColor ||
@@ -36,11 +37,13 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       defaultDuration: slideTypeConfig?.defaultDuration,
     });
 
+    newSlide
+
 
     const newSections = sections.map(s => (s.id === sectionId ? { ...s, slides: [...s.slides, newSlide] } : s))
 
     set({ sections: newSections })
-    get().autoSyncSections(newSections)
+    get().autoSyncVideoConfig()
 
     const section = newSections.find(s => s.id === sectionId)
     if (section) {
@@ -114,7 +117,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       });
     }
 
-    get().autoSyncSections(newSections);
+    get().autoSyncVideoConfig();
   }
   ,
 
@@ -148,7 +151,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
         }
       }
     })
-    get().autoSyncSections(newSections)
+    get().autoSyncVideoConfig()
   },
 
   removeSlide(sectionId: string, slideId: string) {
@@ -158,7 +161,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     )
 
     set({ sections: newSections })
-    get().autoSyncSections(newSections)
+    get().autoSyncVideoConfig()
 
     if (selectedSlide?.slide.id === slideId) {
       const section = newSections.find(s => s.id === sectionId)
@@ -171,7 +174,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       }
     }
 
-    get().autoSyncSections(newSections);
+    get().autoSyncVideoConfig();
   },
 
   updateSlide(updates: Partial<Slide>) {
@@ -194,7 +197,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
         slide: { ...selectedSlide.slide, ...updates }
       }
     })
-    get().autoSyncSections(newSections)
+    get().autoSyncVideoConfig()
     console.debug('slide updated', 'updates', updates)
   },
 
@@ -247,7 +250,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
         slide: { ...selectedSlide.slide, content: newContent }
       }
     })
-    get().autoSyncSections(newSections)
+    get().autoSyncVideoConfig()
   },
 
   updateSlideTransition(sectionId: string, slideId: string, transitionId: TransitionType) {
@@ -261,7 +264,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
         : s
     )
     set({ sections: newSections, showTransitionPicker: null })
-    get().autoSyncSections(newSections)
+    get().autoSyncVideoConfig()
   },
 
   reorderSlidesInSection(sectionId: string, activeId: string, overId: string) {
@@ -273,6 +276,6 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       return { ...s, slides: arrayMove(s.slides, oldIndex, newIndex) }
     })
     set({ sections: newSections })
-    get().autoSyncSections(newSections)
+    get().autoSyncVideoConfig()
   }
 })

@@ -70,7 +70,7 @@ export const createTextAnimationActions = (set: VideoStoreSet, get: VideoStoreGe
       activeTool: { type: ActiveToolType.TEXT_ANIMATION_TEMPLATE },
     });
 
-    get().autoSyncSections(newSections);
+    get().autoSyncVideoConfig();
   }
   ,
 
@@ -124,7 +124,7 @@ export const createTextAnimationActions = (set: VideoStoreSet, get: VideoStoreGe
       },
     });
 
-    get().autoSyncSections(newSections);
+    get().autoSyncVideoConfig();
 
     console.debug("UPDATED slide props", newProps);
   }

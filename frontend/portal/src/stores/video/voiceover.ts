@@ -23,7 +23,7 @@ export const createVoiceoverActions = (set: VideoStoreSet, get: VideoStoreGet) =
                 },
                 generatingSlideVoiceover: null,
             });
-            get().autoSyncSections(newSections);
+            get().autoSyncVideoConfig();
         }, 1500);
     },
 
@@ -48,7 +48,7 @@ export const createVoiceoverActions = (set: VideoStoreSet, get: VideoStoreGet) =
                 sections: newSections,
                 generatingSectionVoiceover: null,
             });
-            get().autoSyncSections(newSections);
+            get().autoSyncVideoConfig();
         }, 2000);
     },
 });

@@ -12,7 +12,7 @@ export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => 
     set({
       sections: newSections,
     });
-    get().autoSyncSections(newSections);
+    get().autoSyncVideoConfig();
   },
 
   setEditingSectionId: (sectionId: string | null) => set({ editingSectionId: sectionId }),
@@ -34,7 +34,7 @@ export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => 
       }
     }
 
-    get().autoSyncSections(newSections);
+    get().autoSyncVideoConfig();
   },
 
   updateSectionTitle(sectionId: string, newTitle: string) {
@@ -55,7 +55,7 @@ export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => 
       });
     }
 
-    get().autoSyncSections(newSections);
+    get().autoSyncVideoConfig();
   },
 
   handleSectionDragEnd(event: { active: { id: string }; over: { id: string } | null }) {
@@ -71,6 +71,6 @@ export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => 
     reordered.splice(newIdx, 0, moved);
 
     set({ sections: reordered });
-    get().autoSyncSections(reordered);
+    get().autoSyncVideoConfig();
   },
 });

@@ -38,6 +38,8 @@ message GetVideoResponse {
 message UpdateVideoConfigRequest {
   string id = 1;
   core.v1.VideoConfig config = 2;
+  core.v1.VideoMetadata metadata = 4;
+  string name = 5;
 }
 
 message GetVideoRequest {

@@ -139,6 +139,8 @@ func (p *Portal) UpdateVideoConfig(ctx context.Context, c *connect.Request[pbpor
 		ID:             c.Msg.Id,
 		OrganizationID: actor.OrganizationID,
 		Config:         c.Msg.Config,
+		Metadata:       c.Msg.Metadata,
+		Name:           c.Msg.Name,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
