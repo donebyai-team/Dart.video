@@ -9,7 +9,6 @@ export const initialState: VideoState = {
 
   // TODO: move these into a separate states maybe
   // only needed while editing
-  config: null,
   isInitialized: false,
   selectedEntityId: createSlideEntityId(""),
   selectedSlide: null,
