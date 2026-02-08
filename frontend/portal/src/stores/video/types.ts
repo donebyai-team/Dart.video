@@ -97,7 +97,7 @@ export interface VideoActions {
 
   // Entity selection
   handleSelectEntity: (entityId: EntityId) => void
-  handleSelectObject: (id: string | null) => void
+  handleSelectEffect:(id:string | null) => void 
   openEntitySettings: (id: EntityId) => void
 
   // Tools

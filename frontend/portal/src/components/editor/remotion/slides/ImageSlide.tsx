@@ -29,6 +29,7 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, on
 
   // Extract content and effects directly
   const imageContent = slide.content.value as ImageSlideContent
+  
   const [openImageModal, setOpenImageModal] = useState<boolean>(false)
   const [uploadError, setUploadError] = useState<boolean>(false)
   const [retry, setRetry] = useState<boolean>(false)
@@ -149,7 +150,7 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, on
           </ImageContent>
         )}
       </AbsoluteFill>
-      
+
       {/* Render callout effects at CANVAS level */}
       {isCalloutEffectsAvailable &&
         slide.callouts.map(callout => (

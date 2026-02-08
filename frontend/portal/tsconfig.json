@@ -15,7 +15,7 @@
         "./src/*"
       ],
       "@/store/*": [
-        "./store/*"
+        "./stores/*"
       ]
     },
     "strictNullChecks": true
