@@ -29,6 +29,8 @@ const slideTypeIcons: Record<SlideType, React.ElementType> = {
   [SlideType.VISUAL_ANIMATION]: BarChart3,
   [SlideType.VIDEO]: Film,
   [SlideType.STACK]: Layers,
+  [SlideType.INFOGRAPHIC]: Layers,
+  [SlideType.UNDEFINED]: Layers,
 };
 
 
@@ -67,8 +69,8 @@ const SortableSlideCard = ({
       ref={setNodeRef}
       style={style}
       className={`group cursor-pointer rounded-lg overflow-hidden transition-all border ${isSelected
-          ? "border-primary shadow-sm shadow-primary/10"
-          : "border-border/50 hover:border-border"
+        ? "border-primary shadow-sm shadow-primary/10"
+        : "border-border/50 hover:border-border"
         } ${isDragging ? "shadow-lg" : ""}`}
       onClick={onSelect}
     >

@@ -22,7 +22,6 @@ export interface SelectedSection {
 
 
 export interface VideoState {
-    config: EditorConfig | null;
     videoConfig: Video | null;
     isInitialized: boolean;
     selectedEntityId: EntityId;
@@ -117,6 +116,4 @@ export interface VideoActions {
     // setShowScreenshots: (show: boolean) => void;
     setShowTransitionPicker: (slideId: string | null) => void
     updateSlideBackground: (color: string, applyToAll?: boolean) => void
-
-    getFPS: () => number
 }

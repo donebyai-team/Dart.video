@@ -25,7 +25,6 @@ export const createInitActions = (
     const firstSlideId = selectedSlide?.slide?.id ?? "";
 
     set({
-      config,
       videoConfig: newVideoConfig,
       selectedEntityId: createSlideEntityId(firstSlideId),
       selectedSlide,

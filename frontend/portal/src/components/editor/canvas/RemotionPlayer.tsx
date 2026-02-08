@@ -58,9 +58,9 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   const selectedSlide = useVideoStore(s => s.selectedSlide)?.slide;
   const selectedStackItemId = useVideoStore(s => s.selectedStackItemId);
   const onSelectOEffect = useVideoStore(s => s.handleSelectEffect);
-  const fps = useVideoStore(s => s.getFPS());
 
   const resolution = videoConfigFromStore?.metadata?.resolution;
+  const fps = videoConfigFromStore?.metadata?.fps || 30;
 
   const getTimelineSlides = useVideoStore(s => s.getTimelineSlides);
   const allSlides = getTimelineSlides();
