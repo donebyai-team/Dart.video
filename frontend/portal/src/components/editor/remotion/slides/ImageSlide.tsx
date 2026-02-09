@@ -30,7 +30,7 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, on
 
   // Extract content and effects directly
   const imageContent = slide.content.value as ImageSlideContent
-  
+
   const [openImageModal, setOpenImageModal] = useState<boolean>(false)
   const [uploadError, setUploadError] = useState<boolean>(false)
   const [retry, setRetry] = useState<boolean>(false)
@@ -41,7 +41,6 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, on
     src: imageContent.src,
     style: imageContent.style ?? {}
   }
-console.log(props, "props")
   // Create resolution object from dimensions
   const resolution = {
     id: `${width}x${height}`,

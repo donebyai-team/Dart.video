@@ -43,7 +43,6 @@ export const TextAnimationSlide: React.FC<TextAnimationSlideProps> = ({
   const frame = useCurrentFrame()
   const { fps, durationInFrames } = useVideoConfig()
   const [RemoteComponent, setRemoteComponent] = React.useState<TemplateModule | null>(null)
-  console.log(slide, "slide")
 
   const content = slide.content.value as AnimationSlideContent
   const templateId = content?.templateId || 'text-reveal'
