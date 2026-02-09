@@ -1,8 +1,8 @@
 import { EditorConfig, SlideTypeConfig, TextAnimationSlideConfig } from "@/types/editor";
 import { ActiveToolType, SelectedTool } from "@/types/tools";
 import { create } from "@bufbuild/protobuf";
-import { AnimationSlideContentSchema, CalloutEffect, CalloutEffectSchema, ImageSlideContentSchema, MetaData, MetaDataSchema, Resolution, ResolutionSchema, Section, SectionSchema, Slide, SlideSchema, SlideType, SpotlightEffect, SpotlightEffectSchema, StackAnimationMode, StackSlideContentSchema, TransitionType, VideoSlideContentSchema } from "@coasterai/pb/coasterai/core/v1/slide_pb";
-import { Video, VideoMetadata, VideoMetadataSchema } from "@coasterai/pb/coasterai/core/v1/video_pb";
+import { AnimationSlideContentSchema, CalloutEffect, CalloutEffectSchema, ImageSlideContentSchema, MetaData, MetaDataSchema, Section, SectionSchema, Slide, SlideSchema, SlideType, SpotlightEffect, SpotlightEffectSchema, StackAnimationMode, StackSlideContentSchema, TransitionType, VideoSlideContentSchema } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { Resolution, ResolutionSchema, Video, VideoMetadata, VideoMetadataSchema } from "@coasterai/pb/coasterai/core/v1/video_pb";
 import { SelectedSection } from "./types";
 
 // Helper functions (moved from useEditorState)

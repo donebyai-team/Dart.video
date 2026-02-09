@@ -455,42 +455,6 @@ export declare type Section = Message<"coasterai.core.v1.Section"> & {
 export declare const SectionSchema: GenMessage<Section>;
 
 /**
- * @generated from message coasterai.core.v1.Resolution
- */
-export declare type Resolution = Message<"coasterai.core.v1.Resolution"> & {
-  /**
-   * @generated from field: string id = 1;
-   */
-  id: string;
-
-  /**
-   * @generated from field: string name = 2;
-   */
-  name: string;
-
-  /**
-   * @generated from field: string aspect = 3;
-   */
-  aspect: string;
-
-  /**
-   * @generated from field: int32 width = 4;
-   */
-  width: number;
-
-  /**
-   * @generated from field: int32 height = 5;
-   */
-  height: number;
-};
-
-/**
- * Describes the message coasterai.core.v1.Resolution.
- * Use `create(ResolutionSchema)` to create a new message.
- */
-export declare const ResolutionSchema: GenMessage<Resolution>;
-
-/**
  * @generated from enum coasterai.core.v1.SlideType
  */
 export enum SlideType {

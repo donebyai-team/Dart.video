@@ -7,8 +7,8 @@ import type {
 import type { EntityId } from "@/types/selection";
 import { SelectedTool } from "@/types/tools";
 import { JsonObject } from "@bufbuild/protobuf";
-import { Section, Resolution, Slide, SlideType, TransitionType, CalloutEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
-import { Video } from "@coasterai/pb/coasterai/core/v1/video_pb";
+import { Section, Slide, SlideType, TransitionType, CalloutEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { Resolution, Video } from "@coasterai/pb/coasterai/core/v1/video_pb";
 import type { StateCreator } from "zustand";
 
 // Zustand store types
