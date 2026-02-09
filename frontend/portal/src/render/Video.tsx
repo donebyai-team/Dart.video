@@ -1,4 +1,4 @@
-import Slideshow from '@/components/editor/RemotionSlideshow'
+import Slideshow from '../components/editor/RemotionSlideshow'
 import { Composition } from 'remotion'
 import video from './video.json'
 

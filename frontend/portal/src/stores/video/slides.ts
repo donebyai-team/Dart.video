@@ -5,6 +5,7 @@ import { getSlideTypeConfig, createNewSlide, getDefaulVideotMetadata } from './d
 import { VideoStoreSet, VideoStoreGet } from './types'
 import { getSections, updateVideoConfigSections, updateSelectedSlide, updateTotalDuration } from './utils'
 import defaultEditorConfig from '@/data/editorConfig'
+import { TRANSITION_DURATION_SECONDS } from '@/components/editor/frame_calculations'
 
 export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   /* ================= ADD ================= */
@@ -282,7 +283,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
 
   /* ================= TRANSITION ================= */
 
-  updateSlideTransition(sectionId: string, slideId: string, transitionId: TransitionType) {
+  updateSlideTransition(sectionId: string, slideId: string, transitionType: TransitionType) {
     const { videoConfig } = get()
     if (!videoConfig) return
 
@@ -295,9 +296,10 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
                 sl.id === slideId
                   ? {
                       ...sl,
-                      transition: transitionId,
-                      //0.3 is minimum transition time except TRANSITION_NONE
-                      transitionDuration: transitionId === TransitionType.TRANSITION_NONE ? 0 : 0.3
+                      transition: transitionType,
+                      //TRANSITION_DURATION_SECONDS is minimum transition time 
+                      transitionDuration:
+                        transitionType === TransitionType.TRANSITION_NONE ? 0 : TRANSITION_DURATION_SECONDS
                     }
                   : sl
               )
