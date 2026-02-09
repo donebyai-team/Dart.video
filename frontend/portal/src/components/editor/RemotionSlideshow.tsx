@@ -197,6 +197,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({ fps, isEditing = false, on
 
           return (
             <React.Fragment key={slide.id}>
+
               <TransitionSeries.Sequence durationInFrames={durationInFrames}>
                 <SlideComponent
                   slide={slideWithBackground}
@@ -204,9 +205,13 @@ export const Slideshow: React.FC<SlideshowProps> = ({ fps, isEditing = false, on
                   height={height}
                   isEditing={isEditing}
                   isSelected={isSelected}
-                  selectedStackItemId={slide.type === SlideType.STACK ? selectedStackItemId : null}
+                  selectedStackItemId={
+                    slide.type === SlideType.STACK
+                      ? selectedStackItemId
+                      : null
+                  }
                   onSelect={() => {
-                    onSelectTemplate?.(slide.id)
+                    onSelectTemplate?.(slide.id);
                   }}
                 />
               </TransitionSeries.Sequence>
@@ -219,6 +224,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({ fps, isEditing = false, on
                   })}
                 />
               )}
+
             </React.Fragment>
           )
         })}

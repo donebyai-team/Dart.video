@@ -150,7 +150,6 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, on
           </ImageContent>
         )}
       </AbsoluteFill>
-
       {/* Render callout effects at CANVAS level */}
       {isCalloutEffectsAvailable &&
         slide.callouts.map(callout => (

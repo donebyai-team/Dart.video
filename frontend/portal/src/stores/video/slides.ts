@@ -291,7 +291,16 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
         section.id === sectionId
           ? {
               ...section,
-              slides: section.slides.map(sl => (sl.id === slideId ? { ...sl, transition: transitionId } : sl))
+              slides: section.slides.map(sl =>
+                sl.id === slideId
+                  ? {
+                      ...sl,
+                      transition: transitionId,
+                      //0.3 is minimum transition time except TRANSITION_NONE
+                      transitionDuration: transitionId === TransitionType.TRANSITION_NONE ? 0 : 0.3
+                    }
+                  : sl
+              )
             }
           : section
       )
