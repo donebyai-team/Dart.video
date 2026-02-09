@@ -1,0 +1,450 @@
+{
+    "id": "5b6ea138-15e4-4da0-97e6-f8197f927142",
+    "metadata": {
+        "fps": 30,
+        "background_color": "#000000",
+        "resolution": {
+            "id": "16:9",
+            "name": "Landscape",
+            "aspect": "16/9",
+            "width": 1920,
+            "height": 1080
+        },
+        "duration": 32
+    },
+    "config": {
+        "sections": [
+            {
+                "id": "hook",
+                "title": "Hook",
+                "color": "bg-screen-hook",
+                "slides": [
+                    {
+                        "id": "hook-1",
+                        "type": 2,
+                        "transcript": "Are you tired of losing important files? Your documents deserve better.",
+                        "duration": 2,
+                        "transition": 1,
+                        "transitionDuration": 0.3,
+                        "subSlides": [],
+                        "spotlights": [],
+                        "callouts": [],
+                        "zooms": [],
+                        "animation": {
+                            "templateId": "textCascade",
+                            "meta": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864
+                            },
+                            "templateConfig": {
+                                "centerText": {
+                                    "text": "I am a center text",
+                                    "style": {
+                                        "fontSize": 72,
+                                        "color": "#ffffff",
+                                        "lineHeight": 1.5,
+                                        "fontFamily": "Inter"
+                                    }
+                                },
+                                "topLeftText": {
+                                    "text": "I am a top left text",
+                                    "style": {
+                                        "fontSize": 72,
+                                        "color": "#ffffff",
+                                        "lineHeight": 1.5,
+                                        "fontFamily": "Inter"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "id": "hook-2",
+                        "type": 2,
+                        "transcript": "Introducing DocuFlow, the smarter way to manage your teams knowledge.",
+                        "duration": 2,
+                        "transition": 1,
+                        "transitionDuration": 0.3,
+                        "spotlights": [],
+                        "zooms": [],
+                        "callouts": [],
+                        "subSlides": [],
+                        "animation": {
+                            "templateId": "text-reveal",
+                            "meta": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864
+                            },
+                            "templateConfig": {
+                                "text": "Meet DocuFlow",
+                                "direction": "up",
+                                "fontSize": 72,
+                                "color": "#ffffff"
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "solution",
+                "title": "Solution",
+                "color": "bg-screen-solution",
+                "slides": [
+                    {
+                        "id": "solution-1",
+                        "type": 2,
+                        "transcript": "DocuFlow brings everything together in one powerful platform.",
+                        "duration": 2,
+                        "transition": 1,
+                        "transitionDuration": 0.3,
+                        "spotlights": [],
+                        "zooms": [],
+                        "callouts": [],
+                        "subSlides": [],
+                        "animation": {
+                            "templateId": "word-by-word",
+                            "meta": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864
+                            },
+                            "templateConfig": {
+                                "text": "One platform. All your docs.",
+                                "fontSize": 64,
+                                "color": "#ffffff",
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864
+                            }
+                        }
+                    },
+                    {
+                        "id": "solution-2",
+                        "type": 1,
+                        "transcript": "Organize everything in smart folders that adapt to how your team works.",
+                        "duration": 4,
+                        "transition": 4,
+                        "transitionDuration": 0.3,
+                        "subSlides": [],
+                        "image": {
+                            "meta": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864,
+                                "scale": 1,
+                                "rotation": 0
+                            },
+                            "src": "https://images.unsplash.com/photo-1551434678-e076c223a692?w=400&h=240&fit=crop",
+                            "style": {}
+                        },
+                        "spotlights": [
+                            {
+                                "id": "spotlight-1",
+                                "x": 400,
+                                "y": 200,
+                                "width": 300,
+                                "height": 250,
+                                "blurAmount": 10,
+                                "borderRadius": 8,
+                                "startTime": 0.5,
+                                "endTime": 1.5
+                            },
+                            {
+                                "id": "spotlight-2",
+                                "x": 1100,
+                                "y": 600,
+                                "width": 400,
+                                "height": 300,
+                                "blurAmount": 10,
+                                "borderRadius": 8,
+                                "startTime": 2.5,
+                                "endTime": 3.5
+                            }
+                        ],
+                        "zooms": [],
+                        "callouts": []
+                    }
+                ]
+            },
+            {
+                "id": "problem",
+                "title": "Problem",
+                "color": "bg-screen-problem",
+                "slides": [
+                    {
+                        "id": "problem-1",
+                        "type": 4,
+                        "transcript": "Teams waste over 5 hours every week just searching for files scattered across different tools.",
+                        "duration": 2.5,
+                        "transition": 2,
+                        "transitionDuration": 0.3,
+                        "spotlights": [],
+                        "zooms": [],
+                        "callouts": [],
+                        "subSlides": [],
+                        "animation": {
+                            "templateId": "visual-default",
+                            "templateConfig": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864
+                            },
+                            "meta": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864,
+                                "scale": 1,
+                                "rotation": 0
+                            }
+                        }
+                    },
+                    {
+                        "id": "problem-2",
+                        "type": 3,
+                        "transcript": "In fact, 67% of projects get delayed because of lost or misplaced documents.",
+                        "duration": 2.5,
+                        "transition": 1,
+                        "transitionDuration": 0.3,
+                        "spotlights": [],
+                        "zooms": [],
+                        "callouts": [],
+                        "subSlides": [],
+                        "animation": {
+                            "templateId": "infographic-default",
+                            "templateConfig": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864
+                            },
+                            "meta": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864,
+                                "scale": 1,
+                                "rotation": 0
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "feature1",
+                "title": "AI Search",
+                "color": "bg-screen-feature",
+                "slides": [
+                    {
+                        "id": "feature1-1",
+                        "type": 4,
+                        "transcript": "Our AI-powered search finds exactly what you need in seconds.",
+                        "duration": 2.5,
+                        "transition": 1,
+                        "spotlights": [],
+                        "zooms": [],
+                        "callouts": [],
+                        "subSlides": [],
+                        "transitionDuration": 0.3,
+                        "animation": {
+                            "templateId": "visual-default",
+                            "templateConfig": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864
+                            },
+                            "meta": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864,
+                                "scale": 1,
+                                "rotation": 0
+                            }
+                        }
+                    },
+                    {
+                        "id": "feature1-2",
+                        "type": 1,
+                        "transcript": "Just ask in natural language, like talking to a colleague.",
+                        "duration": 2.5,
+                        "transition": 2,
+                        "spotlights": [],
+                        "zooms": [],
+                        "callouts": [],
+                        "subSlides": [],
+                        "image": {
+                            "meta": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864,
+                                "scale": 1,
+                                "rotation": 0
+                            },
+                            "src": "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400&h=240&fit=crop",
+                            "style": {}
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "feature2",
+                "title": "Collaboration",
+                "color": "bg-screen-feature",
+                "slides": [
+                    {
+                        "id": "feature2-1",
+                        "type": 2,
+                        "transcript": "Collaboration has never been easier.",
+                        "duration": 2,
+                        "transition": 1,
+                        "subSlides": [],
+                        "spotlights": [],
+                        "callouts": [],
+                        "zooms": [],
+                        "transitionDuration": 0.3,
+                        "animation": {
+                            "templateId": "letter-cascade",
+                            "meta": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864
+                            },
+                            "templateConfig": {
+                                "text": "Work together. Seamlessly.",
+                                "fontSize": 72,
+                                "color": "#ffffff",
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864
+                            }
+                        }
+                    },
+                    {
+                        "id": "feature2-2",
+                        "type": 1,
+                        "transcript": "Edit together in real-time, leave comments, and track every change.",
+                        "duration": 2.5,
+                        "transition": 1,
+                        "subSlides": [],
+                        "spotlights": [],
+                        "callouts": [],
+                        "zooms": [],
+                        "transitionDuration": 0.3,
+                        "image": {
+                            "meta": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864,
+                                "rotation": 0,
+                                "scale": 1
+                            },
+                            "src": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400&h=240&fit=crop",
+                            "style": {}
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "proof",
+                "title": "Social Proof",
+                "color": "bg-screen-proof",
+                "slides": [
+                    {
+                        "id": "proof-1",
+                        "type": 3,
+                        "transcript": "Over ten thousand teams trust DocuFlow, including Stripe, Notion, and Linear.",
+                        "duration": 3,
+                        "transition": 4,
+                        "spotlights": [],
+                        "zooms": [],
+                        "callouts": [],
+                        "subSlides": [],
+                        "transitionDuration": 0.3,
+                        "animation": {
+                            "templateId": "infographic-default",
+                            "templateConfig": {},
+                            "meta": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864,
+                                "scale": 1,
+                                "rotation": 0
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "id": "cta",
+                "title": "CTA",
+                "color": "bg-screen-cta",
+                "slides": [
+                    {
+                        "id": "cta-1",
+                        "type": 2,
+                        "transcript": "Ready to transform how your team works?",
+                        "duration": 2,
+                        "transition": 4,
+                        "spotlights": [],
+                        "zooms": [],
+                        "callouts": [],
+                        "subSlides": [],
+                        "transitionDuration": 0.3,
+                        "animation": {
+                            "templateId": "scale-bounce",
+                            "meta": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864
+                            },
+                            "templateConfig": {
+                                "text": "Start free today",
+                                "fontSize": 96,
+                                "color": "#ffffff"
+                            }
+                        }
+                    },
+                    {
+                        "id": "cta-2",
+                        "type": 4,
+                        "transcript": "Try DocuFlow free for 14 days. No credit card required.",
+                        "duration": 2.5,
+                        "transition": 0,
+                        "spotlights": [],
+                        "zooms": [],
+                        "callouts": [],
+                        "subSlides": [],
+                        "animation": {
+                            "templateId": "visual-default",
+                            "templateConfig": {},
+                            "meta": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864,
+                                "scale": 1,
+                                "rotation": 0
+                            }
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

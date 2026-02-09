@@ -32,3 +32,5 @@ npm-debug.log*
 *.tsbuildinfo
 .idea
 .env
+
+out.mp4

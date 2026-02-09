@@ -30,6 +30,11 @@ export declare type VideoMetadata = Message<"coasterai.core.v1.VideoMetadata"> &
    * @generated from field: coasterai.core.v1.Resolution resolution = 3;
    */
   resolution?: Resolution;
+
+  /**
+   * @generated from field: float duration = 4;
+   */
+  duration: number;
 };
 
 /**

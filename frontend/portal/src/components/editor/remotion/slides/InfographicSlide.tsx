@@ -34,9 +34,7 @@ export const InfographicSlide: React.FC<InfographicSlideProps> = ({
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-
   const content = slide.content.value as AnimationSlideContent;
-  const templateId = content?.templateId || "infographic-default";
   const templateConfig = (content?.templateConfig ?? {}) as TemplateConfig;
 
   // TODO: Use templateId to select chart type
