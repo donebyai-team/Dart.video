@@ -75,7 +75,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
           }),
         }))
       );
-
+  
       // Set global background 
       newVideoConfig = {
         ...videoConfig,

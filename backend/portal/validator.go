@@ -100,7 +100,7 @@ func validateSlide(slide *pbcore.Slide) error {
 		return fmt.Errorf("duration is invalid")
 	}
 
-	if slide.TransitionDuration != nil && *slide.TransitionDuration <= 0 {
+	if slide.TransitionDuration != nil && *slide.TransitionDuration < 0 {
 		return fmt.Errorf("transition duration is invalid")
 	}
 
@@ -111,10 +111,38 @@ func validateSlide(slide *pbcore.Slide) error {
 		}
 	}
 
+	if slide.GetVideo() != nil {
+		err := validateSlideVideo(slide.GetVideo())
+		if err != nil {
+			return err
+		}
+	}
+
 	if slide.GetAnimation() != nil {
 		err := validateSlideAnimation(slide.GetAnimation())
 		if err != nil {
 			return err
+		}
+	}
+
+	for _, spotlight := range slide.Spotlights {
+		err := validateSpotlightEffect(slide.Duration, spotlight)
+		if err != nil {
+			return errors.Wrap(err, fmt.Sprintf("spotlight id: %s", spotlight.Id))
+		}
+	}
+
+	for _, callout := range slide.Callouts {
+		err := validateCalloutEffect(slide.Duration, callout)
+		if err != nil {
+			return errors.Wrap(err, fmt.Sprintf("callout id: %s", callout.Id))
+		}
+	}
+
+	for _, zoom := range slide.Zooms {
+		err := validateZoomEffect(slide.Duration, zoom)
+		if err != nil {
+			return errors.Wrap(err, fmt.Sprintf("zoom id: %s", zoom.Id))
 		}
 	}
 
@@ -143,6 +171,78 @@ func validateSlideAnimation(content *pbcore.AnimationSlideContent) error {
 	return nil
 }
 
+func validateSpotlightEffect(slideDuration float32, effect *pbcore.SpotlightEffect) error {
+	if effect == nil {
+		return fmt.Errorf("effect is nil")
+	}
+
+	if utils.IsEmpty(&effect.Id) {
+		return fmt.Errorf("effect id is empty")
+	}
+
+	if effect.X < 0 || effect.Y < 0 {
+		return fmt.Errorf("effect.X or effect.Y is invalid")
+	}
+
+	if effect.StartTime < 0 {
+		return fmt.Errorf("effect.StartTime is invalid")
+	}
+
+	if effect.EndTime <= 0 || effect.EndTime > slideDuration {
+		return fmt.Errorf("effect endtime should be under slide duration")
+	}
+
+	return nil
+}
+
+func validateCalloutEffect(slideDuration float32, effect *pbcore.CalloutEffect) error {
+	if effect == nil {
+		return fmt.Errorf("effect is nil")
+	}
+
+	if utils.IsEmpty(&effect.Id) {
+		return fmt.Errorf("effect id is empty")
+	}
+
+	if effect.X < 0 || effect.Y < 0 {
+		return fmt.Errorf("effect.X or effect.Y is invalid")
+	}
+
+	if effect.StartTime < 0 {
+		return fmt.Errorf("effect.StartTime is invalid")
+	}
+
+	if effect.EndTime <= 0 || effect.EndTime > slideDuration {
+		return fmt.Errorf("effect endtime should be under slide duration")
+	}
+
+	return nil
+}
+
+func validateZoomEffect(slideDuration float32, effect *pbcore.ZoomEffect) error {
+	if effect == nil {
+		return fmt.Errorf("effect is nil")
+	}
+
+	if utils.IsEmpty(&effect.Id) {
+		return fmt.Errorf("effect id is empty")
+	}
+
+	if effect.X < 0 || effect.Y < 0 {
+		return fmt.Errorf("effect.X or effect.Y is invalid")
+	}
+
+	if effect.StartTime < 0 {
+		return fmt.Errorf("effect.StartTime is invalid")
+	}
+
+	if effect.EndTime <= 0 || effect.EndTime > slideDuration {
+		return fmt.Errorf("effect endtime should be under slide duration")
+	}
+
+	return nil
+}
+
 func validateSlideImage(content *pbcore.ImageSlideContent) error {
 	if content == nil {
 		return fmt.Errorf("content is nil")
@@ -161,7 +261,31 @@ func validateSlideImage(content *pbcore.ImageSlideContent) error {
 	}
 
 	if err := validateImageURL(src); err != nil {
-		return fmt.Errorf("invalid src: %w", err)
+		return fmt.Errorf("invalid image src: %w", err)
+	}
+
+	return nil
+}
+
+func validateSlideVideo(content *pbcore.VideoSlideContent) error {
+	if content == nil {
+		return fmt.Errorf("content is nil")
+	}
+
+	// ---- Meta Validation ----
+	err := validateContentMeta(content.GetMeta())
+	if err != nil {
+		return err
+	}
+
+	// ---- Src Validation ----
+	src := strings.TrimSpace(content.Src)
+	if src == "" {
+		return fmt.Errorf("src is required")
+	}
+
+	if _, err := validateURL(src); err != nil {
+		return fmt.Errorf("invalid video src: %w", err)
 	}
 
 	return nil
@@ -172,25 +296,12 @@ func validateContentMeta(meta *pbcore.MetaData) error {
 		return fmt.Errorf("content meta is nil")
 	}
 
-	if meta.X == nil {
-		return fmt.Errorf("content meta.x is required")
-	}
-	if meta.Y == nil {
-		return fmt.Errorf("content meta.y is required")
-	}
-	if meta.Width == nil {
-		return fmt.Errorf("content meta.width is required")
-	}
-	if meta.Height == nil {
-		return fmt.Errorf("content meta.height is required")
+	if meta.X < 0 || meta.Y < 0 {
+		return fmt.Errorf("content meta x,y coordinates are invalid")
 	}
 
-	// Optional sanity checks (recommended)
-	if *meta.Width <= 0 {
-		return fmt.Errorf("meta.width must be > 0")
-	}
-	if *meta.Height <= 0 {
-		return fmt.Errorf("meta.height must be > 0")
+	if meta.Width < 0 || meta.Height < 0 {
+		return fmt.Errorf("content meta width or height is invalid")
 	}
 
 	return nil
@@ -203,13 +314,9 @@ func isValidHexColor(s string) bool {
 }
 
 func validateImageURL(raw string) error {
-	u, err := url.ParseRequestURI(raw)
+	u, err := validateURL(raw)
 	if err != nil {
-		return fmt.Errorf("invalid url format")
-	}
-
-	if u.Scheme != "http" && u.Scheme != "https" {
-		return fmt.Errorf("url must be http or https")
+		return err
 	}
 
 	ext := strings.ToLower(path.Ext(u.Path))
@@ -219,4 +326,16 @@ func validateImageURL(raw string) error {
 	default:
 		return fmt.Errorf("unsupported image extension")
 	}
+}
+
+func validateURL(raw string) (*url.URL, error) {
+	u, err := url.ParseRequestURI(raw)
+	if err != nil {
+		return nil, fmt.Errorf("invalid url format")
+	}
+
+	if u.Scheme != "http" && u.Scheme != "https" {
+		return nil, fmt.Errorf("url must be http or https")
+	}
+	return u, nil
 }
