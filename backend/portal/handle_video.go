@@ -135,13 +135,20 @@ func (p *Portal) UpdateVideoConfig(ctx context.Context, c *connect.Request[pbpor
 		return nil, err
 	}
 
-	err = p.videoGenerationService.UpdateVideoConfig(ctx, &models.Video{
+	updateVideoInput := &models.Video{
 		ID:             c.Msg.Id,
 		OrganizationID: actor.OrganizationID,
 		Config:         c.Msg.Config,
 		Metadata:       c.Msg.Metadata,
 		Name:           c.Msg.Name,
-	})
+	}
+
+	err = validateVideoConfig(updateVideoInput)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+
+	err = p.videoGenerationService.UpdateVideoConfig(ctx, updateVideoInput)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, connect.NewError(connect.CodeNotFound, err)
