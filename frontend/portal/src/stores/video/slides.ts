@@ -1,7 +1,7 @@
 import { TimelineSlide } from "@/components/editor/timeline/types"
 import { SlideType, Slide, StackSlideContent, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb"
 import { arrayMove } from "@dnd-kit/sortable"
-import { getSlideTypeConfig, createNewSlide } from "./defaults"
+import { getSlideTypeConfig, createNewSlide, getDefaulVideotMetadata } from "./defaults"
 import { VideoStoreSet, VideoStoreGet } from "./types"
 import { getSections, updateVideoConfigSections, updateSelectedSlide } from "./utils"
 import defaultEditorConfig from "@/data/editorConfig"
@@ -54,48 +54,74 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   /* ================= BACKGROUND ================= */
 
   updateSlideBackground(color: string, applyToAll = false) {
-    const { videoConfig, selectedSlide } = get()
-    if (!videoConfig || !videoConfig?.config || !selectedSlide) return
-    let newVideoConfig = videoConfig
+    const { videoConfig, selectedSlide } = get();
+
+    if (!videoConfig || !videoConfig.config || !selectedSlide) return;
+
+    let newVideoConfig: typeof videoConfig;
+
     if (applyToAll) {
+      // Clear slide overrides
+      // remove backgroundColor from the slide
+      // TODO: We should not remove it as if user can click applyToAll ans then
+      // again disable, in this case the previous color should be back or slide
+      // will show white color
       newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
         sections.map(section => ({
           ...section,
-          slides: section.slides.map(slide => ({
-            ...slide,
-            backgroundColor: undefined,
-          })),
+          slides: section.slides.map(slide => {
+            const { backgroundColor, ...rest } = slide;
+            return rest;
+          }),
         }))
-      )
+      );
 
-      newVideoConfig.metadata!.backgroundColor = color
+      // Set global background 
+      newVideoConfig = {
+        ...videoConfig,
+        metadata: {
+          ...(videoConfig.metadata ??
+            getDefaulVideotMetadata(defaultEditorConfig)),
+          backgroundColor: color,
+        },
+      };
 
       set({
         videoConfig: newVideoConfig,
-        selectedSlide: updateSelectedSlide(selectedSlide, slide => ({
-          ...slide,
-          backgroundColor: undefined,
-        })),
-      })
+        selectedSlide: updateSelectedSlide(selectedSlide, slide => {
+          const { backgroundColor, ...rest } = slide;
+          return rest;
+        }),
+      });
 
     } else {
-
+      // Apply only to selected slide
       newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
         sections.map(section =>
           section.id !== selectedSlide.section.id
             ? section
             : {
-                ...section,
-                slides: section.slides.map(slide =>
-                  slide.id === selectedSlide.slide.id
-                    ? { ...slide, backgroundColor: color }
-                    : slide
-                ),
-              }
+              ...section,
+              slides: section.slides.map(slide =>
+                slide.id === selectedSlide.slide.id
+                  ? { ...slide, backgroundColor: color }
+                  : slide
+              ),
+            }
         )
-      )
+      );
 
-      newVideoConfig.metadata!.backgroundColor = ""
+      // Remove global background (PROTO SAFE = REMOVE FIELD)
+      const metadata =
+        newVideoConfig.metadata ??
+        getDefaulVideotMetadata(defaultEditorConfig);
+
+      const { backgroundColor, ...metadataWithoutBg } = metadata;
+
+      newVideoConfig = {
+        ...newVideoConfig,
+        metadata: metadataWithoutBg,
+      };
 
       set({
         videoConfig: newVideoConfig,
@@ -103,10 +129,10 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
           ...slide,
           backgroundColor: color,
         })),
-      })
+      });
     }
 
-    get().autoSyncVideoConfig()
+    get().autoSyncVideoConfig();
   },
 
   /* ================= TRANSCRIPT ================= */
@@ -119,13 +145,13 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       sections.map(section =>
         section.id === selectedSlide.section.id
           ? {
-              ...section,
-              slides: section.slides.map(slide =>
-                slide.id === selectedSlide.slide.id
-                  ? { ...slide, transcript }
-                  : slide
-              ),
-            }
+            ...section,
+            slides: section.slides.map(slide =>
+              slide.id === selectedSlide.slide.id
+                ? { ...slide, transcript }
+                : slide
+            ),
+          }
           : section
       )
     )
@@ -187,13 +213,13 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       sections.map(section =>
         section.id === selectedSlide.section.id
           ? {
-              ...section,
-              slides: section.slides.map(sl =>
-                sl.id === selectedSlide.slide.id
-                  ? { ...sl, ...updates }
-                  : sl
-              ),
-            }
+            ...section,
+            slides: section.slides.map(sl =>
+              sl.id === selectedSlide.slide.id
+                ? { ...sl, ...updates }
+                : sl
+            ),
+          }
           : section
       )
     )
@@ -256,13 +282,13 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       sections.map(section =>
         section.id === selectedSlide.section.id
           ? {
-              ...section,
-              slides: section.slides.map(sl =>
-                sl.id === selectedSlide.slide.id
-                  ? { ...sl, content: newContent }
-                  : sl
-              ),
-            }
+            ...section,
+            slides: section.slides.map(sl =>
+              sl.id === selectedSlide.slide.id
+                ? { ...sl, content: newContent }
+                : sl
+            ),
+          }
           : section
       )
     )
@@ -288,13 +314,13 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       sections.map(section =>
         section.id === sectionId
           ? {
-              ...section,
-              slides: section.slides.map(sl =>
-                sl.id === slideId
-                  ? { ...sl, transition: transitionId }
-                  : sl
-              ),
-            }
+            ...section,
+            slides: section.slides.map(sl =>
+              sl.id === slideId
+                ? { ...sl, transition: transitionId }
+                : sl
+            ),
+          }
           : section
       )
     )

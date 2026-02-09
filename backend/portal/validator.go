@@ -56,7 +56,7 @@ func validateMetadata(metadata *pbcore.VideoMetadata) error {
 		return fmt.Errorf("metadata.Fps is invalid")
 	}
 
-	if metadata.BackgroundColor != "" && !isValidHexColor(metadata.BackgroundColor) {
+	if metadata.BackgroundColor != nil && !isValidHexColor(*metadata.BackgroundColor) {
 		return fmt.Errorf("metadata.BackgroundColor is invalid")
 	}
 

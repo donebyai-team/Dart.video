@@ -205,7 +205,7 @@ export const getInitialSelection = (videoConfig: Video): SelectedSection | null 
 
 export const getDefaulVideotMetadata = (config: EditorConfig): VideoMetadata => {
     return create(VideoMetadataSchema, {
-        fps: BigInt(30),
+        fps: 30,
         resolution: getDefaultResolution(config)
     });
 }
