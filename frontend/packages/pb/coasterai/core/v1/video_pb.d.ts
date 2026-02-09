@@ -22,9 +22,9 @@ export declare type VideoMetadata = Message<"coasterai.core.v1.VideoMetadata"> &
   fps: number;
 
   /**
-   * @generated from field: string background_color = 2;
+   * @generated from field: optional string background_color = 2;
    */
-  backgroundColor: string;
+  backgroundColor?: string;
 
   /**
    * @generated from field: coasterai.core.v1.Resolution resolution = 3;

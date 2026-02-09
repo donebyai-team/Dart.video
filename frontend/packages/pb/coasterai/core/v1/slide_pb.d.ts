@@ -54,6 +54,11 @@ export declare type VideoSlideContent = Message<"coasterai.core.v1.VideoSlideCon
    * @generated from field: optional float endTime = 3;
    */
   endTime?: number;
+
+  /**
+   * @generated from field: coasterai.core.v1.MetaData meta = 4;
+   */
+  meta?: MetaData;
 };
 
 /**
@@ -67,24 +72,24 @@ export declare const VideoSlideContentSchema: GenMessage<VideoSlideContent>;
  */
 export declare type MetaData = Message<"coasterai.core.v1.MetaData"> & {
   /**
-   * @generated from field: optional float x = 2;
+   * @generated from field: float x = 2;
    */
-  x?: number;
+  x: number;
 
   /**
-   * @generated from field: optional float y = 3;
+   * @generated from field: float y = 3;
    */
-  y?: number;
+  y: number;
 
   /**
-   * @generated from field: optional float width = 4;
+   * @generated from field: float width = 4;
    */
-  width?: number;
+  width: number;
 
   /**
-   * @generated from field: optional float height = 5;
+   * @generated from field: float height = 5;
    */
-  height?: number;
+  height: number;
 
   /**
    * @generated from field: optional float scale = 6;
@@ -348,7 +353,7 @@ export declare type Slide = Message<"coasterai.core.v1.Slide"> & {
   backgroundColor?: string;
 
   /**
-   * @generated from oneof coasterai.core.v1.slide.content
+   * @generated from oneof coasterai.core.v1.Slide.content
    */
   content: {
     /**

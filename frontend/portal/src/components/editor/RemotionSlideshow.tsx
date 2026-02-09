@@ -133,17 +133,16 @@ const getTransitionPresentation = (transitionType?: TransitionType) => {
 
 // Main slideshow composition using Remotion's TransitionSeries
 export const Slideshow: React.FC<SlideshowProps> = ({ fps, isEditing = false, onSelectTemplate, video }) => {
-  const videoConfig = useVideoStore(s => s.videoConfig)
+  let videoConfig = useVideoStore(s => s.videoConfig)
   const selectedStackItemId = useVideoStore(s => s.selectedStackItemId)
 
   const selectedTemplateId = null
 
   const { width, height } = useVideoConfig()
-  const protoObject = video ? fromJson(VideoSchema, video) : undefined
-
-  // Check if video object is passed from outside and assign sectins from it either zustand
-  const allExternalSlidesData =
-    protoObject && protoObject.config ? protoObject.config.sections.flatMap(section => section.slides) : undefined
+  const videoProtoObject = video ? fromJson(VideoSchema, video) : undefined
+  if (videoProtoObject) {
+    videoConfig = videoProtoObject
+  }
 
   /* ================= GATE ================= */
 
@@ -156,7 +155,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({ fps, isEditing = false, on
   const globalBackground = metadata?.backgroundColor ?? 'transparent'
 
   // if external video object exist use it or assign zustand video object
-  const allSlides = allExternalSlidesData ? allExternalSlidesData : sections.flatMap(section => section.slides)
+  const allSlides = sections.flatMap(section => section.slides)
 
   const transitionDurationFrames = Math.round(fps * TRANSITION_DURATION_SECONDS)
 
