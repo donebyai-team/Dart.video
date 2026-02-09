@@ -3,7 +3,7 @@ import { SlideType, Slide, StackSlideContent, TransitionType } from '@coasterai/
 import { arrayMove } from '@dnd-kit/sortable'
 import { getSlideTypeConfig, createNewSlide, getDefaulVideotMetadata } from './defaults'
 import { VideoStoreSet, VideoStoreGet } from './types'
-import { getSections, updateVideoConfigSections, updateSelectedSlide, calculateTotalDuration } from './utils'
+import { getSections, updateVideoConfigSections, updateSelectedSlide, updateTotalDuration } from './utils'
 import defaultEditorConfig from '@/data/editorConfig'
 
 export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
@@ -34,7 +34,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       sections.map(s => (s.id === sectionId ? { ...s, slides: [...s.slides, newSlide] } : s))
     )
     // Calculate the total duration when slide is added
-    newVideoConfig = calculateTotalDuration(newVideoConfig)
+    newVideoConfig = updateTotalDuration(newVideoConfig)
 
     set({ videoConfig: newVideoConfig })
 
@@ -166,7 +166,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       )
     )
     // Calculate the total duration when slide is removed
-    newVideoConfig = calculateTotalDuration(newVideoConfig)
+    newVideoConfig = updateTotalDuration(newVideoConfig)
 
     set({ videoConfig: newVideoConfig })
 
@@ -205,7 +205,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       )
     )
 
-    newVideoConfig = calculateTotalDuration(newVideoConfig)
+    newVideoConfig = updateTotalDuration(newVideoConfig)
 
     set({
       videoConfig: newVideoConfig,
@@ -297,7 +297,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       )
     )
 
-    newVideoConfig = calculateTotalDuration(newVideoConfig)
+    newVideoConfig = updateTotalDuration(newVideoConfig)
 
     set({
       videoConfig: newVideoConfig,

@@ -28,7 +28,7 @@ export const updateSelectedSlide = (
   }
 }
 
-export const calculateTotalDuration = (videoConfig: Video): Video => {
+export const updateTotalDuration = (videoConfig: Video): Video => {
   if (!videoConfig?.config?.sections) return videoConfig
   const totalDuration = videoConfig.config.sections.reduce((total, section) => {
     const sectionDuration = (section.slides || []).reduce(
