@@ -17,6 +17,7 @@ message VideoMetadata {
     int32 fps = 1;
     optional string background_color = 2;
     Resolution resolution = 3;
+    float duration = 4;
 }
 
 message Video {

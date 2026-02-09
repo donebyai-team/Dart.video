@@ -1,5 +1,17 @@
 {
     "id": "5b6ea138-15e4-4da0-97e6-f8197f927142",
+    "metadata": {
+        "fps": 30,
+        "background_color": "#000000",
+        "resolution": {
+            "id": "16:9",
+            "name": "Landscape",
+            "aspect": "16/9",
+            "width": 1920,
+            "height": 1080
+        },
+        "duration": 1
+    },
     "config": {
         "sections": [
             {
@@ -16,7 +28,7 @@
                         "transitionDuration": 0.3,
                         "subSlides": [],
                         "spotlights": [],
-                        "callouts":[],
+                        "callouts": [],
                         "zooms": [],
                         "animation": {
                             "templateId": "textCascade",
@@ -33,7 +45,7 @@
                                         "fontSize": 72,
                                         "color": "#ffffff",
                                         "lineHeight": 1.5,
-                                        "fontFamily":"Inter"
+                                        "fontFamily": "Inter"
                                     }
                                 },
                                 "topLeftText": {
@@ -42,7 +54,7 @@
                                         "fontSize": 72,
                                         "color": "#ffffff",
                                         "lineHeight": 1.5,
-                                        "fontFamily":"Inter"
+                                        "fontFamily": "Inter"
                                     }
                                 }
                             }
@@ -57,7 +69,7 @@
                         "transitionDuration": 0.3,
                         "spotlights": [],
                         "zooms": [],
-                        "callouts":[],
+                        "callouts": [],
                         "subSlides": [],
                         "animation": {
                             "templateId": "text-reveal",
@@ -91,7 +103,7 @@
                         "transitionDuration": 0.3,
                         "spotlights": [],
                         "zooms": [],
-                        "callouts":[],
+                        "callouts": [],
                         "subSlides": [],
                         "animation": {
                             "templateId": "word-by-word",
@@ -157,7 +169,7 @@
                             }
                         ],
                         "zooms": [],
-                        "callouts":[]
+                        "callouts": []
                     }
                 ]
             },
@@ -175,7 +187,7 @@
                         "transitionDuration": 0.3,
                         "spotlights": [],
                         "zooms": [],
-                        "callouts":[],
+                        "callouts": [],
                         "subSlides": [],
                         "animation": {
                             "templateId": "visual-default",
@@ -204,7 +216,7 @@
                         "transitionDuration": 0.3,
                         "spotlights": [],
                         "zooms": [],
-                        "callouts":[],
+                        "callouts": [],
                         "subSlides": [],
                         "animation": {
                             "templateId": "infographic-default",
@@ -239,7 +251,7 @@
                         "transition": 1,
                         "spotlights": [],
                         "zooms": [],
-                        "callouts":[],
+                        "callouts": [],
                         "subSlides": [],
                         "transitionDuration": 0.3,
                         "animation": {
@@ -268,7 +280,7 @@
                         "transition": 2,
                         "spotlights": [],
                         "zooms": [],
-                        "callouts":[],
+                        "callouts": [],
                         "subSlides": [],
                         "image": {
                             "meta": {
@@ -298,7 +310,7 @@
                         "transition": 1,
                         "subSlides": [],
                         "spotlights": [],
-                        "callouts":[],
+                        "callouts": [],
                         "zooms": [],
                         "transitionDuration": 0.3,
                         "animation": {
@@ -328,7 +340,7 @@
                         "transition": 1,
                         "subSlides": [],
                         "spotlights": [],
-                        "callouts":[],
+                        "callouts": [],
                         "zooms": [],
                         "transitionDuration": 0.3,
                         "image": {
@@ -359,7 +371,7 @@
                         "transition": 4,
                         "spotlights": [],
                         "zooms": [],
-                        "callouts":[],
+                        "callouts": [],
                         "subSlides": [],
                         "transitionDuration": 0.3,
                         "animation": {
@@ -390,7 +402,7 @@
                         "transition": 4,
                         "spotlights": [],
                         "zooms": [],
-                        "callouts":[],
+                        "callouts": [],
                         "subSlides": [],
                         "transitionDuration": 0.3,
                         "animation": {
@@ -416,7 +428,7 @@
                         "transition": 0,
                         "spotlights": [],
                         "zooms": [],
-                        "callouts":[],
+                        "callouts": [],
                         "subSlides": [],
                         "animation": {
                             "templateId": "visual-default",

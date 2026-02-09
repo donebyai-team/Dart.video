@@ -3,17 +3,25 @@ import { Composition } from 'remotion'
 import video from './video.json'
 
 export const MyVideo = () => {
+  //Get video FPS and total frames of video
+  const fps = video.metadata.fps
+  const totalVideoFrames = video.metadata.duration * fps
+
+  // Get video resolution i.e width and height
+  const width = video.metadata.resolution.width
+  const height = video.metadata.resolution.height
+
   return (
     <>
       <Composition
         id='MyComposition'
         component={Slideshow as any}
-        durationInFrames={840}
-        fps={30}
-        width={1920}
-        height={1080}
+        durationInFrames={totalVideoFrames}
+        fps={fps}
+        width={width}
+        height={height}
         defaultProps={{
-          fps: 30,
+          fps,
           isEditing: false, // Only enable editing when NOT playing
           onSelectTemplate: undefined,
           video

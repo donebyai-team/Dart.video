@@ -1,13 +1,12 @@
-import { TimelineSlide } from "@/components/editor/timeline/types"
-import { SlideType, Slide, StackSlideContent, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb"
-import { arrayMove } from "@dnd-kit/sortable"
-import { getSlideTypeConfig, createNewSlide, getDefaulVideotMetadata } from "./defaults"
-import { VideoStoreSet, VideoStoreGet } from "./types"
-import { getSections, updateVideoConfigSections, updateSelectedSlide } from "./utils"
-import defaultEditorConfig from "@/data/editorConfig"
+import { TimelineSlide } from '@/components/editor/timeline/types'
+import { SlideType, Slide, StackSlideContent, TransitionType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { arrayMove } from '@dnd-kit/sortable'
+import { getSlideTypeConfig, createNewSlide, getDefaulVideotMetadata } from './defaults'
+import { VideoStoreSet, VideoStoreGet } from './types'
+import { getSections, updateVideoConfigSections, updateSelectedSlide, calculateTotalDuration } from './utils'
+import defaultEditorConfig from '@/data/editorConfig'
 
 export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
-
   /* ================= ADD ================= */
 
   addSlide(sectionId: string, type: SlideType) {
@@ -19,9 +18,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     const slideTypeConfig = getSlideTypeConfig(defaultEditorConfig, type)
 
     const inheritedBg =
-      [...sections.flatMap(s => s.slides)]
-        .reverse()
-        .find(s => s.backgroundColor)?.backgroundColor ||
+      [...sections.flatMap(s => s.slides)].reverse().find(s => s.backgroundColor)?.backgroundColor ||
       slideTypeConfig?.defaultBackground ||
       defaultEditorConfig.background.defaultColor
 
@@ -30,16 +27,14 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       type,
       inheritedBg,
       defaultTranscript: slideTypeConfig?.defaultTranscript,
-      defaultDuration: slideTypeConfig?.defaultDuration,
+      defaultDuration: slideTypeConfig?.defaultDuration
     })
 
-    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
-      sections.map(s =>
-        s.id === sectionId
-          ? { ...s, slides: [...s.slides, newSlide] }
-          : s
-      )
+    let newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
+      sections.map(s => (s.id === sectionId ? { ...s, slides: [...s.slides, newSlide] } : s))
     )
+    // Calculate the total duration when slide is added
+    newVideoConfig = calculateTotalDuration(newVideoConfig)
 
     set({ videoConfig: newVideoConfig })
 
@@ -54,11 +49,11 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   /* ================= BACKGROUND ================= */
 
   updateSlideBackground(color: string, applyToAll = false) {
-    const { videoConfig, selectedSlide } = get();
+    const { videoConfig, selectedSlide } = get()
 
-    if (!videoConfig || !videoConfig.config || !selectedSlide) return;
+    if (!videoConfig || !videoConfig.config || !selectedSlide) return
 
-    let newVideoConfig: typeof videoConfig;
+    let newVideoConfig: typeof videoConfig
 
     if (applyToAll) {
       // Clear slide overrides
@@ -70,30 +65,28 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
         sections.map(section => ({
           ...section,
           slides: section.slides.map(slide => {
-            const { backgroundColor, ...rest } = slide;
-            return rest;
-          }),
+            const { backgroundColor, ...rest } = slide
+            return rest
+          })
         }))
-      );
-  
-      // Set global background 
+      )
+
+      // Set global background
       newVideoConfig = {
         ...videoConfig,
         metadata: {
-          ...(videoConfig.metadata ??
-            getDefaulVideotMetadata(defaultEditorConfig)),
-          backgroundColor: color,
-        },
-      };
+          ...(videoConfig.metadata ?? getDefaulVideotMetadata(defaultEditorConfig)),
+          backgroundColor: color
+        }
+      }
 
       set({
         videoConfig: newVideoConfig,
         selectedSlide: updateSelectedSlide(selectedSlide, slide => {
-          const { backgroundColor, ...rest } = slide;
-          return rest;
-        }),
-      });
-
+          const { backgroundColor, ...rest } = slide
+          return rest
+        })
+      })
     } else {
       // Apply only to selected slide
       newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
@@ -101,38 +94,34 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
           section.id !== selectedSlide.section.id
             ? section
             : {
-              ...section,
-              slides: section.slides.map(slide =>
-                slide.id === selectedSlide.slide.id
-                  ? { ...slide, backgroundColor: color }
-                  : slide
-              ),
-            }
+                ...section,
+                slides: section.slides.map(slide =>
+                  slide.id === selectedSlide.slide.id ? { ...slide, backgroundColor: color } : slide
+                )
+              }
         )
-      );
+      )
 
       // Remove global background (PROTO SAFE = REMOVE FIELD)
-      const metadata =
-        newVideoConfig.metadata ??
-        getDefaulVideotMetadata(defaultEditorConfig);
+      const metadata = newVideoConfig.metadata ?? getDefaulVideotMetadata(defaultEditorConfig)
 
-      const { backgroundColor, ...metadataWithoutBg } = metadata;
+      const { backgroundColor, ...metadataWithoutBg } = metadata
 
       newVideoConfig = {
         ...newVideoConfig,
-        metadata: metadataWithoutBg,
-      };
+        metadata: metadataWithoutBg
+      }
 
       set({
         videoConfig: newVideoConfig,
         selectedSlide: updateSelectedSlide(selectedSlide, slide => ({
           ...slide,
-          backgroundColor: color,
-        })),
-      });
+          backgroundColor: color
+        }))
+      })
     }
 
-    get().autoSyncVideoConfig();
+    get().autoSyncVideoConfig()
   },
 
   /* ================= TRANSCRIPT ================= */
@@ -145,13 +134,11 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       sections.map(section =>
         section.id === selectedSlide.section.id
           ? {
-            ...section,
-            slides: section.slides.map(slide =>
-              slide.id === selectedSlide.slide.id
-                ? { ...slide, transcript }
-                : slide
-            ),
-          }
+              ...section,
+              slides: section.slides.map(slide =>
+                slide.id === selectedSlide.slide.id ? { ...slide, transcript } : slide
+              )
+            }
           : section
       )
     )
@@ -160,8 +147,8 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       videoConfig: newVideoConfig,
       selectedSlide: updateSelectedSlide(selectedSlide, slide => ({
         ...slide,
-        transcript,
-      })),
+        transcript
+      }))
     })
 
     get().autoSyncVideoConfig()
@@ -173,13 +160,13 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     const { videoConfig, selectedSlide } = get()
     if (!videoConfig) return
 
-    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
+    let newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
       sections.map(section =>
-        section.id === sectionId
-          ? { ...section, slides: section.slides.filter(sl => sl.id !== slideId) }
-          : section
+        section.id === sectionId ? { ...section, slides: section.slides.filter(sl => sl.id !== slideId) } : section
       )
     )
+    // Calculate the total duration when slide is removed
+    newVideoConfig = calculateTotalDuration(newVideoConfig)
 
     set({ videoConfig: newVideoConfig })
 
@@ -193,9 +180,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       } else {
         const next = sections.find(s => s.slides.length > 0)
         set({
-          selectedSlide: next
-            ? { section: next, slide: next.slides[0] }
-            : null,
+          selectedSlide: next ? { section: next, slide: next.slides[0] } : null
         })
       }
     }
@@ -209,27 +194,25 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     const { videoConfig, selectedSlide } = get()
     if (!videoConfig || !selectedSlide) return
 
-    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
+    let newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
       sections.map(section =>
         section.id === selectedSlide.section.id
           ? {
-            ...section,
-            slides: section.slides.map(sl =>
-              sl.id === selectedSlide.slide.id
-                ? { ...sl, ...updates }
-                : sl
-            ),
-          }
+              ...section,
+              slides: section.slides.map(sl => (sl.id === selectedSlide.slide.id ? { ...sl, ...updates } : sl))
+            }
           : section
       )
     )
+
+    newVideoConfig = calculateTotalDuration(newVideoConfig)
 
     set({
       videoConfig: newVideoConfig,
       selectedSlide: updateSelectedSlide(selectedSlide, slide => ({
         ...slide,
-        ...updates,
-      })),
+        ...updates
+      }))
     })
 
     get().autoSyncVideoConfig()
@@ -250,10 +233,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
         if (slide.type === SlideType.STACK && slide.content) {
           const stackContent = slide.content.value as StackSlideContent
           if (stackContent.items) {
-            actualDuration = stackContent.items.reduce(
-              (sum: number, item: any) => sum + (item.duration || 0),
-              0
-            )
+            actualDuration = stackContent.items.reduce((sum: number, item: any) => sum + (item.duration || 0), 0)
           }
         }
 
@@ -263,7 +243,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
           duration: actualDuration,
           sectionColor: section.color,
           sectionTitle: section.title,
-          spotlights: slide.spotlights || [],
+          spotlights: slide.spotlights || []
         }
       })
     )
@@ -282,13 +262,9 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       sections.map(section =>
         section.id === selectedSlide.section.id
           ? {
-            ...section,
-            slides: section.slides.map(sl =>
-              sl.id === selectedSlide.slide.id
-                ? { ...sl, content: newContent }
-                : sl
-            ),
-          }
+              ...section,
+              slides: section.slides.map(sl => (sl.id === selectedSlide.slide.id ? { ...sl, content: newContent } : sl))
+            }
           : section
       )
     )
@@ -297,8 +273,8 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       videoConfig: newVideoConfig,
       selectedSlide: updateSelectedSlide(selectedSlide, slide => ({
         ...slide,
-        content: newContent,
-      })),
+        content: newContent
+      }))
     })
 
     get().autoSyncVideoConfig()
@@ -310,24 +286,22 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     const { videoConfig } = get()
     if (!videoConfig) return
 
-    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
+    let newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
       sections.map(section =>
         section.id === sectionId
           ? {
-            ...section,
-            slides: section.slides.map(sl =>
-              sl.id === slideId
-                ? { ...sl, transition: transitionId }
-                : sl
-            ),
-          }
+              ...section,
+              slides: section.slides.map(sl => (sl.id === slideId ? { ...sl, transition: transitionId } : sl))
+            }
           : section
       )
     )
 
+    newVideoConfig = calculateTotalDuration(newVideoConfig)
+
     set({
       videoConfig: newVideoConfig,
-      showTransitionPicker: null,
+      showTransitionPicker: null
     })
 
     get().autoSyncVideoConfig()
@@ -350,7 +324,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
 
         return {
           ...section,
-          slides: arrayMove(section.slides, oldIndex, newIndex),
+          slides: arrayMove(section.slides, oldIndex, newIndex)
         }
       })
     )
@@ -358,6 +332,5 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     set({ videoConfig: newVideoConfig })
 
     get().autoSyncVideoConfig()
-  },
-
+  }
 })
