@@ -3,12 +3,11 @@
 
 import type {
   Section,
-  Resolution,
   SlideType,
   EffectType,
   TransitionType
 } from "@coasterai/pb/coasterai/core/v1/slide_pb";
-import { Video } from "@coasterai/pb/coasterai/core/v1/video_pb";
+import { Resolution, Video } from "@coasterai/pb/coasterai/core/v1/video_pb";
 
 // ==========================================
 // Project & Metadata
