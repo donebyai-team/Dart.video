@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import { Menu, Mic2, Eye, Volume2, RefreshCw, Video, Home, Settings, HelpCircle } from 'lucide-react'
+import { Menu, Mic2, Eye, Volume2, RefreshCw, Video, Home, Settings, HelpCircle, Timer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -224,6 +224,11 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
         </div>
 
         <div className='flex items-center gap-2'>
+          {/* Duration Badge (Non-clickable) */}
+          <div className="flex items-center gap-1 px-2 py-1 text-sm font-medium rounded-md border bg-muted text-muted-foreground">
+            <Timer className='w-4 h-4' />
+            {videoConfigFromStore?.metadata?.duration}s
+          </div>
           <ResolutionSelector />
           <Button
             variant='outline'
