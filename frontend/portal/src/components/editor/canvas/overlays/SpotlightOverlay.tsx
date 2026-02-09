@@ -1,4 +1,5 @@
-import { Resolution, SpotlightEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { SpotlightEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { Resolution } from "@coasterai/pb/coasterai/core/v1/video_pb";
 import { useState, useRef, useCallback, useEffect } from "react";
 
 interface SpotlightOverlayProps {

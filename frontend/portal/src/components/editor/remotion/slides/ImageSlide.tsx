@@ -1,4 +1,4 @@
-import { ImageSlideContent, MetaData, Resolution, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { ImageSlideContent, MetaData, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import React, { useRef, useState } from 'react'
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from 'remotion'
 import { ImagePreview } from '../components/ImagePreview'
@@ -7,6 +7,7 @@ import RetryButton from '../components/RetryButton'
 import CalloutEffectComponent from '../effects/CalloutEffect'
 import { SpotlightEffectComponent } from '../effects/SpotlightEffect'
 import { ImageContent } from './ImageContent'
+import { Resolution } from '@coasterai/pb/coasterai/core/v1/video_pb'
 
 interface ImageSlideProps {
   slide: Slide

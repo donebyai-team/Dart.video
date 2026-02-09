@@ -41,3 +41,13 @@ message ScriptItem {
     optional string voiceover = 2;
     optional string reference = 3;
 }
+
+// ===================== RESOLUTION =====================
+
+message Resolution {
+  string id = 1;
+  string name = 2;
+  string aspect = 3;
+  int32 width = 4;
+  int32 height = 5;
+}

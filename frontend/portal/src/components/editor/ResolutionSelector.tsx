@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useVideoStore } from "@/stores/video";
-import { Resolution } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { Resolution } from "@coasterai/pb/coasterai/core/v1/video_pb";
 
 const resolutionIcons: Record<string, React.ElementType> = {
   "16:9": Monitor,

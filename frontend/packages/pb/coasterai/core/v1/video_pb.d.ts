@@ -4,8 +4,8 @@
 
 import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv1";
 import type { Message } from "@bufbuild/protobuf";
-import type { Resolution, Section } from "./slide_pb";
 import type { Timestamp } from "@bufbuild/protobuf/wkt";
+import type { Section } from "./slide_pb";
 
 /**
  * Describes the file coasterai/core/v1/video.proto.
@@ -136,6 +136,42 @@ export declare type ScriptItem = Message<"coasterai.core.v1.ScriptItem"> & {
  * Use `create(ScriptItemSchema)` to create a new message.
  */
 export declare const ScriptItemSchema: GenMessage<ScriptItem>;
+
+/**
+ * @generated from message coasterai.core.v1.Resolution
+ */
+export declare type Resolution = Message<"coasterai.core.v1.Resolution"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name: string;
+
+  /**
+   * @generated from field: string aspect = 3;
+   */
+  aspect: string;
+
+  /**
+   * @generated from field: int32 width = 4;
+   */
+  width: number;
+
+  /**
+   * @generated from field: int32 height = 5;
+   */
+  height: number;
+};
+
+/**
+ * Describes the message coasterai.core.v1.Resolution.
+ * Use `create(ResolutionSchema)` to create a new message.
+ */
+export declare const ResolutionSchema: GenMessage<Resolution>;
 
 /**
  * @generated from enum coasterai.core.v1.VideoStatus

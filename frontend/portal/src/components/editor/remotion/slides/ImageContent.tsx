@@ -1,4 +1,5 @@
-import { MetaData, Resolution } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { MetaData } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { Resolution } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import React, { RefObject, SetStateAction, useCallback, useEffect, useState } from 'react'
 
 interface ImageContentProps {
