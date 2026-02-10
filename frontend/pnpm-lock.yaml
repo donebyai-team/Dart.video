@@ -47,15 +47,21 @@ importers:
       '@amplitude/analytics-browser':
         specifier: ^2.17.8
         version: 2.17.8
+      '@remotion/paths':
+        specifier: 4.0.419
+        version: 4.0.419
       '@remotion/player':
-        specifier: ^4.0.398
-        version: 4.0.409(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 4.0.419
+        version: 4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@remotion/shapes':
+        specifier: 4.0.419
+        version: 4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@remotion/transitions':
-        specifier: ^4.0.398
-        version: 4.0.409(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 4.0.419
+        version: 4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       remotion:
-        specifier: ^4.0.398
-        version: 4.0.409(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 4.0.419
+        version: 4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       zod:
         specifier: ^3.24.4
         version: 3.25.76
@@ -344,7 +350,7 @@ importers:
     dependencies:
       '@auth0/nextjs-auth0':
         specifier: ^3.5.0
-        version: 3.8.0(next@14.2.26(@babel/core@7.26.10)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
+        version: 3.8.0(next@14.2.26(@babel/core@7.26.10)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
       '@azure/identity':
         specifier: ^4.3.0
         version: 4.8.0
@@ -507,12 +513,18 @@ importers:
       '@reduxjs/toolkit':
         specifier: ^2.7.0
         version: 2.7.0(react-redux@9.2.0(@types/react@18.3.27)(react@18.3.1)(redux@5.0.1))(react@18.3.1)
+      '@remotion/paths':
+        specifier: 4.0.419
+        version: 4.0.419
       '@remotion/player':
-        specifier: ^4.0.398
-        version: 4.0.409(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 4.0.419
+        version: 4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@remotion/shapes':
+        specifier: 4.0.419
+        version: 4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@remotion/transitions':
-        specifier: ^4.0.398
-        version: 4.0.409(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 4.0.419
+        version: 4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@tanstack/react-query':
         specifier: ^5.83.0
         version: 5.90.19(react@18.3.1)
@@ -575,7 +587,7 @@ importers:
         version: 5.3.4(@mui/material@5.17.1(@emotion/react@11.14.0(@types/react@18.3.27)(react@18.3.1))(@emotion/styled@11.14.0(@emotion/react@11.14.0(@types/react@18.3.27)(react@18.3.1))(@types/react@18.3.27)(react@18.3.1))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@types/react@18.3.27)(react@18.3.1)
       next:
         specifier: ^14.2.5
-        version: 14.2.26(@babel/core@7.26.10)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 14.2.26(@babel/core@7.26.10)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -586,7 +598,7 @@ importers:
         specifier: ^9.2.0
         version: 9.6.0
       react:
-        specifier: 'catalog:'
+        specifier: 18.3.1
         version: 18.3.1
       react-apexcharts:
         specifier: ^1.3.7
@@ -598,7 +610,7 @@ importers:
         specifier: ^8.10.1
         version: 8.10.1(date-fns@3.6.0)(react@18.3.1)
       react-dom:
-        specifier: 'catalog:'
+        specifier: 18.3.1
         version: 18.3.1(react@18.3.1)
       react-dropzone:
         specifier: 14.2.3
@@ -646,8 +658,8 @@ importers:
         specifier: ^3.1.0
         version: 3.1.0(redux@5.0.1)
       remotion:
-        specifier: ^4.0.398
-        version: 4.0.409(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 4.0.419
+        version: 4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       sonner:
         specifier: ^2.0.3
         version: 2.0.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -673,8 +685,8 @@ importers:
         specifier: ^1.4.0
         version: 1.6.1
       zod:
-        specifier: ^3.24.4
-        version: 3.25.76
+        specifier: ^3.22.3
+        version: 3.22.3
       zustand:
         specifier: ^5.0.10
         version: 5.0.10(@types/react@18.3.27)(immer@10.1.1)(react@18.3.1)(use-sync-external-store@1.5.0(react@18.3.1))
@@ -690,7 +702,7 @@ importers:
         version: 9.39.2
       '@remotion/cli':
         specifier: ^4.0.419
-        version: 4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 4.0.419(@swc/core@1.15.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(webpack-cli@6.0.1(webpack@5.104.1))
       '@tailwindcss/typography':
         specifier: ^0.5.16
         version: 0.5.19(tailwindcss@3.4.17)
@@ -3261,14 +3273,8 @@ packages:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
 
-  '@remotion/paths@4.0.409':
-    resolution: {integrity: sha512-EZKCPu7jaf4Jhr4RVpm6InGNx8plvpljtm2pPR1I9dPyBuNukbZKCQct0n7M7/cWC5Cp13WiGZC2shBSnl48wg==}
-
-  '@remotion/player@4.0.409':
-    resolution: {integrity: sha512-MIIBLswIFkXoaT/1LtINkBsLMmgMTGxilUjx5g6QC4XABOCNprBF7psVHrlFT/PLfBZdXqgWGZ+QOjI/9DQCiA==}
-    peerDependencies:
-      react: '>=16.8.0'
-      react-dom: '>=16.8.0'
+  '@remotion/paths@4.0.419':
+    resolution: {integrity: sha512-qs641afasMgCD0kC/J7o1GPVTb3f/M/jVyVHZe0wa9MtEjbMvAIgPe1Te+JihCRNbPe4ENhoV5qMVV+CegIn/w==}
 
   '@remotion/player@4.0.419':
     resolution: {integrity: sha512-bG0K9rJifXs8iHKBq/cHIM+Ivzvk/tw75pKTK+rRZ6lGdTvriNBwx9dl4bGjhkcjqhUBzES1zkNzKfeoyEs/6g==}
@@ -3282,8 +3288,8 @@ packages:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
 
-  '@remotion/shapes@4.0.409':
-    resolution: {integrity: sha512-Nam7bD7pFn65vmqA5cym8QOOXW0Qk8fAJoJInahaficP9AULvSq4307df3q7bpB4C32EejPDQUgbMapIz6RAFQ==}
+  '@remotion/shapes@4.0.419':
+    resolution: {integrity: sha512-7Ndtx8WW5EY4eIoe2b+rXJ7uKy2KWHMjiQVDBKZ2df7W1xc0jQ32tAdcdGd9u/3zxkS/6h6az7tOqZY7qK5SzA==}
     peerDependencies:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
@@ -3303,8 +3309,8 @@ packages:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
 
-  '@remotion/transitions@4.0.409':
-    resolution: {integrity: sha512-b4TeoWOI1HAsovuYuSEZ/R3yG/QJ0mFWcZxh5BKCRZKfBVu06KmlTADUr1SmZwIaSafMw/eLvUbvFC734B7m7w==}
+  '@remotion/transitions@4.0.419':
+    resolution: {integrity: sha512-IEnBWvlzHNgVBvQOTaLx1pd1nsxqEY/RSiIuGgqmL/tNJBoZ6eu11dL2NW/s1bCSQ4nkuuwAr70+lek3QiYimg==}
     peerDependencies:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
@@ -7180,12 +7186,6 @@ packages:
   remark-rehype@11.1.2:
     resolution: {integrity: sha512-Dh7l57ianaEoIpzbp0PC9UKAdCSVklD8E5Rpw7ETfbTl3FqcOOgq5q2LVDhgGCkaBv7p24JXikPdvhhmHvKMsw==}
 
-  remotion@4.0.409:
-    resolution: {integrity: sha512-+NFkLJQcbxOKwosTuyvrQbxWOK+HpP+og3omznDB0S9hsX4BUGL0peanN/6uk4HtVXMHuFs7meUulKviyQ1Egw==}
-    peerDependencies:
-      react: '>=16.8.0'
-      react-dom: '>=16.8.0'
-
   remotion@4.0.419:
     resolution: {integrity: sha512-h00WpNrcksePPfpyC5RZhZKBIUqGWERN6RTtVjLWvHijTpGKgO0LkXkCpihzJ5y2l+V2CIOvRINl/KykcaQDRg==}
     peerDependencies:
@@ -8326,14 +8326,14 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
 
-  '@auth0/nextjs-auth0@3.8.0(next@14.2.26(@babel/core@7.26.10)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))':
+  '@auth0/nextjs-auth0@3.8.0(next@14.2.26(@babel/core@7.26.10)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))':
     dependencies:
       '@panva/hkdf': 1.2.1
       cookie: 0.7.2
       debug: 4.4.3
       joi: 17.13.3
       jose: 4.15.9
-      next: 14.2.26(@babel/core@7.26.10)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      next: 14.2.26(@babel/core@7.26.10)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       oauth4webapi: 2.17.0
       openid-client: 5.7.1
       tslib: 2.8.1
@@ -10868,20 +10868,20 @@ snapshots:
 
   '@remix-run/router@1.23.2': {}
 
-  '@remotion/bundler@4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@remotion/bundler@4.0.419(@swc/core@1.15.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(webpack-cli@6.0.1(webpack@5.104.1))':
     dependencies:
       '@remotion/media-parser': 4.0.419
       '@remotion/studio': 4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@remotion/studio-shared': 4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      css-loader: 5.2.7(webpack@5.96.1(esbuild@0.25.0))
+      css-loader: 5.2.7(webpack@5.96.1(@swc/core@1.15.11)(esbuild@0.25.0)(webpack-cli@6.0.1(webpack@5.104.1)))
       esbuild: 0.25.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       react-refresh: 0.9.0
       remotion: 4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       source-map: 0.7.3
-      style-loader: 4.0.0(webpack@5.96.1(esbuild@0.25.0))
-      webpack: 5.96.1(esbuild@0.25.0)
+      style-loader: 4.0.0(webpack@5.96.1(@swc/core@1.15.11)(esbuild@0.25.0)(webpack-cli@6.0.1(webpack@5.104.1)))
+      webpack: 5.96.1(@swc/core@1.15.11)(esbuild@0.25.0)(webpack-cli@6.0.1(webpack@5.104.1))
     transitivePeerDependencies:
       - '@swc/core'
       - bufferutil
@@ -10890,14 +10890,14 @@ snapshots:
       - utf-8-validate
       - webpack-cli
 
-  '@remotion/cli@4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@remotion/cli@4.0.419(@swc/core@1.15.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(webpack-cli@6.0.1(webpack@5.104.1))':
     dependencies:
-      '@remotion/bundler': 4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@remotion/bundler': 4.0.419(@swc/core@1.15.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(webpack-cli@6.0.1(webpack@5.104.1))
       '@remotion/media-utils': 4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@remotion/player': 4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@remotion/renderer': 4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@remotion/studio': 4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@remotion/studio-server': 4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@remotion/studio-server': 4.0.419(@swc/core@1.15.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(webpack-cli@6.0.1(webpack@5.104.1))
       '@remotion/studio-shared': 4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       dotenv: 9.0.2
       minimist: 1.2.6
@@ -10947,13 +10947,7 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
       remotion: 4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
-  '@remotion/paths@4.0.409': {}
-
-  '@remotion/player@4.0.409(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-      remotion: 4.0.409(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+  '@remotion/paths@4.0.419': {}
 
   '@remotion/player@4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
@@ -10985,18 +10979,18 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@remotion/shapes@4.0.409(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@remotion/shapes@4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@remotion/paths': 4.0.409
+      '@remotion/paths': 4.0.419
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
   '@remotion/streaming@4.0.419': {}
 
-  '@remotion/studio-server@4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@remotion/studio-server@4.0.419(@swc/core@1.15.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(webpack-cli@6.0.1(webpack@5.104.1))':
     dependencies:
       '@babel/parser': 7.24.1
-      '@remotion/bundler': 4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@remotion/bundler': 4.0.419(@swc/core@1.15.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(webpack-cli@6.0.1(webpack@5.104.1))
       '@remotion/renderer': 4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@remotion/studio-shared': 4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       memfs: 3.4.3
@@ -11044,13 +11038,13 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@remotion/transitions@4.0.409(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@remotion/transitions@4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@remotion/paths': 4.0.409
-      '@remotion/shapes': 4.0.409(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@remotion/paths': 4.0.419
+      '@remotion/shapes': 4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      remotion: 4.0.409(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      remotion: 4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
   '@remotion/web-renderer@4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
@@ -12540,7 +12534,7 @@ snapshots:
 
   crypto-js@4.2.0: {}
 
-  css-loader@5.2.7(webpack@5.96.1(esbuild@0.25.0)):
+  css-loader@5.2.7(webpack@5.96.1(@swc/core@1.15.11)(esbuild@0.25.0)(webpack-cli@6.0.1(webpack@5.104.1))):
     dependencies:
       icss-utils: 5.1.0(postcss@8.5.6)
       loader-utils: 2.0.4
@@ -12552,7 +12546,7 @@ snapshots:
       postcss-value-parser: 4.2.0
       schema-utils: 3.3.0
       semver: 7.7.3
-      webpack: 5.96.1(esbuild@0.25.0)
+      webpack: 5.96.1(@swc/core@1.15.11)(esbuild@0.25.0)(webpack-cli@6.0.1(webpack@5.104.1))
 
   css-select@5.1.0:
     dependencies:
@@ -13072,8 +13066,8 @@ snapshots:
       '@typescript-eslint/parser': 7.18.0(eslint@9.39.2(jiti@1.21.7))(typescript@5.9.3)
       eslint: 9.39.2(jiti@1.21.7)
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.10.0(eslint-plugin-import@2.31.0)(eslint@9.39.2(jiti@1.21.7))
-      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.53.1(eslint@9.39.2(jiti@1.21.7))(typescript@5.9.3))(eslint@9.39.2(jiti@1.21.7))
+      eslint-import-resolver-typescript: 3.10.0(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.53.1(eslint@9.39.2(jiti@1.21.7))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.0(eslint-plugin-import@2.31.0)(eslint@8.57.1))(eslint@9.39.2(jiti@1.21.7)))(eslint@9.39.2(jiti@1.21.7))
+      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@7.18.0(eslint@9.39.2(jiti@1.21.7))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.0(eslint-plugin-import@2.31.0)(eslint@8.57.1))(eslint@9.39.2(jiti@1.21.7))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.39.2(jiti@1.21.7))
       eslint-plugin-react: 7.37.5(eslint@9.39.2(jiti@1.21.7))
       eslint-plugin-react-hooks: 4.6.2(eslint@9.39.2(jiti@1.21.7))
@@ -13100,6 +13094,21 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  eslint-import-resolver-typescript@3.10.0(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.53.1(eslint@9.39.2(jiti@1.21.7))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.0(eslint-plugin-import@2.31.0)(eslint@8.57.1))(eslint@9.39.2(jiti@1.21.7)))(eslint@9.39.2(jiti@1.21.7)):
+    dependencies:
+      '@nolyfill/is-core-module': 1.0.39
+      debug: 4.4.0
+      eslint: 9.39.2(jiti@1.21.7)
+      get-tsconfig: 4.10.0
+      is-bun-module: 2.0.0
+      stable-hash: 0.0.5
+      tinyglobby: 0.2.12
+      unrs-resolver: 1.3.3
+    optionalDependencies:
+      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@7.18.0(eslint@9.39.2(jiti@1.21.7))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.0(eslint-plugin-import@2.31.0)(eslint@8.57.1))(eslint@9.39.2(jiti@1.21.7))
+    transitivePeerDependencies:
+      - supports-color
+
   eslint-import-resolver-typescript@3.10.0(eslint-plugin-import@2.31.0)(eslint@8.57.1):
     dependencies:
       '@nolyfill/is-core-module': 1.0.39
@@ -13115,21 +13124,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.10.0(eslint-plugin-import@2.31.0)(eslint@9.39.2(jiti@1.21.7)):
-    dependencies:
-      '@nolyfill/is-core-module': 1.0.39
-      debug: 4.4.0
-      eslint: 9.39.2(jiti@1.21.7)
-      get-tsconfig: 4.10.0
-      is-bun-module: 2.0.0
-      stable-hash: 0.0.5
-      tinyglobby: 0.2.12
-      unrs-resolver: 1.3.3
-    optionalDependencies:
-      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.53.1(eslint@9.39.2(jiti@1.21.7))(typescript@5.9.3))(eslint@9.39.2(jiti@1.21.7))
-    transitivePeerDependencies:
-      - supports-color
-
   eslint-module-utils@2.12.0(@typescript-eslint/parser@7.18.0(eslint@8.57.1)(typescript@5.8.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.0)(eslint@8.57.1):
     dependencies:
       debug: 3.2.7
@@ -13141,13 +13135,14 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.53.1(eslint@9.39.2(jiti@1.21.7))(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint@9.39.2(jiti@1.21.7)):
+  eslint-module-utils@2.12.0(@typescript-eslint/parser@7.18.0(eslint@9.39.2(jiti@1.21.7))(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.0(eslint-plugin-import@2.31.0)(eslint@8.57.1))(eslint@9.39.2(jiti@1.21.7)):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
-      '@typescript-eslint/parser': 8.53.1(eslint@9.39.2(jiti@1.21.7))(typescript@5.9.3)
+      '@typescript-eslint/parser': 7.18.0(eslint@9.39.2(jiti@1.21.7))(typescript@5.9.3)
       eslint: 9.39.2(jiti@1.21.7)
       eslint-import-resolver-node: 0.3.9
+      eslint-import-resolver-typescript: 3.10.0(eslint-plugin-import@2.31.0)(eslint@8.57.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -13180,7 +13175,7 @@ snapshots:
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.53.1(eslint@9.39.2(jiti@1.21.7))(typescript@5.9.3))(eslint@9.39.2(jiti@1.21.7)):
+  eslint-plugin-import@2.31.0(@typescript-eslint/parser@7.18.0(eslint@9.39.2(jiti@1.21.7))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.0(eslint-plugin-import@2.31.0)(eslint@8.57.1))(eslint@9.39.2(jiti@1.21.7)):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.8
@@ -13191,7 +13186,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.39.2(jiti@1.21.7)
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.53.1(eslint@9.39.2(jiti@1.21.7))(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint@9.39.2(jiti@1.21.7))
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@7.18.0(eslint@9.39.2(jiti@1.21.7))(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.0(eslint-plugin-import@2.31.0)(eslint@8.57.1))(eslint@9.39.2(jiti@1.21.7))
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
@@ -13203,7 +13198,7 @@ snapshots:
       string.prototype.trimend: 1.0.9
       tsconfig-paths: 3.15.0
     optionalDependencies:
-      '@typescript-eslint/parser': 8.53.1(eslint@9.39.2(jiti@1.21.7))(typescript@5.9.3)
+      '@typescript-eslint/parser': 7.18.0(eslint@9.39.2(jiti@1.21.7))(typescript@5.9.3)
     transitivePeerDependencies:
       - eslint-import-resolver-typescript
       - eslint-import-resolver-webpack
@@ -15060,7 +15055,7 @@ snapshots:
     dependencies:
       enhanced-resolve: 5.18.1
 
-  next@14.2.26(@babel/core@7.26.10)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  next@14.2.26(@babel/core@7.26.10)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@next/env': 14.2.26
       '@swc/helpers': 0.5.5
@@ -15070,7 +15065,7 @@ snapshots:
       postcss: 8.4.31
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      styled-jsx: 5.1.1(@babel/core@7.26.10)(react@18.3.1)
+      styled-jsx: 5.1.1(@babel/core@7.26.10)(babel-plugin-macros@3.1.0)(react@18.3.1)
     optionalDependencies:
       '@next/swc-darwin-arm64': 14.2.26
       '@next/swc-darwin-x64': 14.2.26
@@ -15759,11 +15754,6 @@ snapshots:
       unified: 11.0.5
       vfile: 6.0.3
 
-  remotion@4.0.409(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
-    dependencies:
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-
   remotion@4.0.419(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       react: 18.3.1
@@ -16151,9 +16141,9 @@ snapshots:
 
   strnum@2.0.5: {}
 
-  style-loader@4.0.0(webpack@5.96.1(esbuild@0.25.0)):
+  style-loader@4.0.0(webpack@5.96.1(@swc/core@1.15.11)(esbuild@0.25.0)(webpack-cli@6.0.1(webpack@5.104.1))):
     dependencies:
-      webpack: 5.96.1(esbuild@0.25.0)
+      webpack: 5.96.1(@swc/core@1.15.11)(esbuild@0.25.0)(webpack-cli@6.0.1(webpack@5.104.1))
 
   style-to-js@1.1.16:
     dependencies:
@@ -16163,12 +16153,13 @@ snapshots:
     dependencies:
       inline-style-parser: 0.2.4
 
-  styled-jsx@5.1.1(@babel/core@7.26.10)(react@18.3.1):
+  styled-jsx@5.1.1(@babel/core@7.26.10)(babel-plugin-macros@3.1.0)(react@18.3.1):
     dependencies:
       client-only: 0.0.1
       react: 18.3.1
     optionalDependencies:
       '@babel/core': 7.26.10
+      babel-plugin-macros: 3.1.0
 
   stylis@4.2.0: {}
 
@@ -16291,6 +16282,18 @@ snapshots:
 
   tapable@2.3.0: {}
 
+  terser-webpack-plugin@5.3.16(@swc/core@1.15.11)(esbuild@0.25.0)(webpack@5.96.1(@swc/core@1.15.11)(webpack-cli@6.0.1(webpack@5.104.1))):
+    dependencies:
+      '@jridgewell/trace-mapping': 0.3.25
+      jest-worker: 27.5.1
+      schema-utils: 4.3.3
+      serialize-javascript: 6.0.2
+      terser: 5.46.0
+      webpack: 5.96.1(@swc/core@1.15.11)(esbuild@0.25.0)(webpack-cli@6.0.1(webpack@5.104.1))
+    optionalDependencies:
+      '@swc/core': 1.15.11
+      esbuild: 0.25.0
+
   terser-webpack-plugin@5.3.16(@swc/core@1.15.11)(webpack@5.104.1):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.25
@@ -16301,17 +16304,6 @@ snapshots:
       webpack: 5.104.1(@swc/core@1.15.11)(webpack-cli@6.0.1)
     optionalDependencies:
       '@swc/core': 1.15.11
-
-  terser-webpack-plugin@5.3.16(esbuild@0.25.0)(webpack@5.96.1):
-    dependencies:
-      '@jridgewell/trace-mapping': 0.3.25
-      jest-worker: 27.5.1
-      schema-utils: 4.3.3
-      serialize-javascript: 6.0.2
-      terser: 5.46.0
-      webpack: 5.96.1(esbuild@0.25.0)
-    optionalDependencies:
-      esbuild: 0.25.0
 
   terser@5.46.0:
     dependencies:
@@ -16772,7 +16764,7 @@ snapshots:
       - esbuild
       - uglify-js
 
-  webpack@5.96.1(esbuild@0.25.0):
+  webpack@5.96.1(@swc/core@1.15.11)(esbuild@0.25.0)(webpack-cli@6.0.1(webpack@5.104.1)):
     dependencies:
       '@types/eslint-scope': 3.7.7
       '@types/estree': 1.0.8
@@ -16794,9 +16786,11 @@ snapshots:
       neo-async: 2.6.2
       schema-utils: 3.3.0
       tapable: 2.3.0
-      terser-webpack-plugin: 5.3.16(esbuild@0.25.0)(webpack@5.96.1)
+      terser-webpack-plugin: 5.3.16(@swc/core@1.15.11)(esbuild@0.25.0)(webpack@5.96.1(@swc/core@1.15.11)(webpack-cli@6.0.1(webpack@5.104.1)))
       watchpack: 2.5.1
       webpack-sources: 3.3.3
+    optionalDependencies:
+      webpack-cli: 6.0.1(webpack@5.104.1)
     transitivePeerDependencies:
       - '@swc/core'
       - esbuild
