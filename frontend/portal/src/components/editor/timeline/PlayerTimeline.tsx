@@ -54,8 +54,8 @@ const PlayerTimeline = ({
   // Use external dragging state if provided, otherwise use internal
   const isDragging = externalIsDragging || internalIsDragging;
 
-  // Use drag frame during dragging, otherwise use current frame
-  const displayFrame = isDragging && dragFrame !== null ? dragFrame : currentFrame;
+  // Use drag frame during dragging (or until currentFrame catches up after drag ends)
+  const displayFrame = dragFrame !== null ? dragFrame : currentFrame;
   const displayTime = displayFrame / fps;
 
   const formatTime = (seconds: number) => {
@@ -66,6 +66,14 @@ const PlayerTimeline = ({
 
   const pixelsPerSecond = DEFAULT_PIXELS_PER_SECOND;
   const currentTime = currentFrame / fps;
+
+  // Timeline width based on actual Remotion duration (with overlapping transitions)
+  const realTotalFrames = useMemo(() => {
+    return calculateRealTotalFrames(slides, fps);
+  }, [slides, fps]);
+
+  const realTotalDuration = realTotalFrames / fps;
+  const timelineWidth = Math.max(realTotalDuration * pixelsPerSecond, 400);
 
   // Calculate timeline items using Remotion-accurate calculations
   const { slideItems, transitionItems, overlayItems } = useMemo(() => {
@@ -82,11 +90,8 @@ const PlayerTimeline = ({
     // Don't handle clicks if we're dragging or just finished dragging
     if (isDragging) return;
 
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const percentage = x / e.currentTarget.offsetWidth;
-    const newFrame = Math.round(percentage * totalFrames);
-    onSeek(newFrame);
+    const frame = getFrameFromMouseEvent(e);
+    if (frame !== null) onSeek(frame);
   };
 
   const handleTimelineHover = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -96,6 +101,19 @@ const PlayerTimeline = ({
     setHoveredTime(percentage * totalDuration);
   };
 
+  // Convert a mouse event to a frame number, accounting for scroll offset
+  const getFrameFromMouseEvent = useCallback((e: MouseEvent | React.MouseEvent): number | null => {
+    if (!timelineContainerRef.current) return null;
+    const rect = timelineContainerRef.current.getBoundingClientRect();
+    const scrollLeft = timelineContainerRef.current.scrollLeft;
+    // Absolute pixel position within the scrollable content
+    const mouseX = e.clientX - rect.left + scrollLeft;
+    // Convert pixels to time, then to frame
+    const time = mouseX / pixelsPerSecond;
+    const clampedTime = Math.max(0, Math.min(realTotalDuration, time));
+    return Math.round(clampedTime * fps);
+  }, [pixelsPerSecond, realTotalDuration, fps]);
+
   // Handle scrubber drag functionality - direct cursor following
   const handleScrubberMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -103,62 +121,34 @@ const PlayerTimeline = ({
     setInternalIsDragging(true);
     onDraggingChange?.(true);
 
-    // Add global mouse event listeners
     const handleMouseMove = (e: MouseEvent) => {
-      if (!timelineContainerRef.current) return;
-
-      const rect = timelineContainerRef.current.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-
-      // Direct calculation - scrubber follows cursor exactly
-      const percentage = Math.max(0, Math.min(1, mouseX / rect.width));
-      const newFrame = Math.round(percentage * totalFrames);
-
-      // Only update visual position - no seeking at all during drag
-      setDragFrame(newFrame);
+      const frame = getFrameFromMouseEvent(e);
+      if (frame !== null) setDragFrame(frame);
     };
 
     const handleMouseUp = (e: MouseEvent) => {
-      if (!timelineContainerRef.current) return;
-
-      const rect = timelineContainerRef.current.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-
-      // Direct calculation for final position
-      const percentage = Math.max(0, Math.min(1, mouseX / rect.width));
-      const finalFrame = Math.round(percentage * totalFrames);
+      const frame = getFrameFromMouseEvent(e);
 
       setInternalIsDragging(false);
       onDraggingChange?.(false);
-      setDragFrame(null);
+      // Don't clear dragFrame here — keep it as visual position until currentFrame catches up
 
-      // Only seek once at the very end
-      onSeek(finalFrame);
+      if (frame !== null) {
+        setDragFrame(frame); // Ensure visual position matches final drag point
+        onSeek(frame);
+      }
 
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
 
     // Immediately update position to cursor on mouse down
-    const rect = timelineContainerRef.current?.getBoundingClientRect();
-    if (rect) {
-      const mouseX = e.clientX - rect.left;
-      const percentage = Math.max(0, Math.min(1, mouseX / rect.width));
-      const newFrame = Math.round(percentage * totalFrames);
-      setDragFrame(newFrame);
-    }
+    const frame = getFrameFromMouseEvent(e);
+    if (frame !== null) setDragFrame(frame);
 
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
-  }, [totalFrames, onSeek, onDraggingChange]);
-
-  // Timeline width based on actual Remotion duration (with overlapping transitions)
-  const realTotalFrames = useMemo(() => {   
-    return calculateRealTotalFrames(slides, fps);
-  }, [slides, fps]);
-
-  const realTotalDuration = realTotalFrames / fps;
-  const timelineWidth = Math.max(realTotalDuration * pixelsPerSecond, 400);
+  }, [getFrameFromMouseEvent, onSeek, onDraggingChange]);
 
   // Calculate total height based on overlay tracks
   const maxTrackIndex = overlayItems.length > 0
@@ -169,6 +159,17 @@ const PlayerTimeline = ({
   const overlayTrackHeight = 32;
   const timeMarkerHeight = 24;
   const totalHeight = timeMarkerHeight + slideTrackHeight + (numOverlayTracks * overlayTrackHeight);
+
+  // Clear dragFrame once currentFrame has actually changed (meaning parent processed the seek)
+  const prevCurrentFrameRef2 = useRef(currentFrame);
+  useEffect(() => {
+    const frameChanged = prevCurrentFrameRef2.current !== currentFrame;
+    prevCurrentFrameRef2.current = currentFrame;
+
+    if (frameChanged && !internalIsDragging && dragFrame !== null) {
+      setDragFrame(null);
+    }
+  }, [currentFrame, internalIsDragging, dragFrame]);
 
   // Auto-scroll to selected slide when it changes
   useEffect(() => {
@@ -201,7 +202,7 @@ const PlayerTimeline = ({
     <div className="overflow-x-auto" ref={timelineContainerRef}>
       <div
         className={`relative ${isDragging ? 'cursor-grabbing' : 'cursor-pointer'}`}
-        style={{ width: `${timelineWidth}px`, minWidth: "100%", height: `${totalHeight}px` }}
+        style={{ width: `${timelineWidth}px`, minWidth: "100%", height: `${totalHeight}px`, userSelect: isDragging ? 'none' : undefined }}
         onClick={handleTimelineClick}
         onMouseMove={!isDragging ? handleTimelineHover : undefined}
         onMouseLeave={!isDragging ? () => setHoveredTime(null) : undefined}

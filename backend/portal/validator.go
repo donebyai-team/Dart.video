@@ -8,6 +8,7 @@ import (
 	"github.com/shank318/coasterai/utils"
 	"net/url"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -307,6 +308,76 @@ func validateContentMeta(meta *pbcore.MetaData) error {
 }
 
 var hexColorRegex = regexp.MustCompile(`^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$`)
+var linearGradientRegex = regexp.MustCompile(
+	`^linear-gradient\(\s*([^)]+)\s*\)$`,
+)
+
+func IsValidBackground(s string) bool {
+
+	s = strings.TrimSpace(s)
+
+	if isValidHexColor(s) {
+		return true
+	}
+
+	if isValidLinearGradient(s) {
+		return true
+	}
+
+	return false
+}
+
+func isValidLinearGradient(s string) bool {
+
+	matches := linearGradientRegex.FindStringSubmatch(s)
+	if len(matches) < 2 {
+		return false
+	}
+
+	inside := matches[1]
+
+	parts := strings.Split(inside, ",")
+	if len(parts) < 3 {
+		return false // need angle + at least 2 stops
+	}
+
+	// Validate angle
+	angle := strings.TrimSpace(parts[0])
+	if !strings.HasSuffix(angle, "deg") {
+		return false
+	}
+
+	angleValue := strings.TrimSuffix(angle, "deg")
+	if _, err := strconv.Atoi(angleValue); err != nil {
+		return false
+	}
+
+	// Validate stops
+	for _, stop := range parts[1:] {
+
+		stop = strings.TrimSpace(stop)
+
+		tokens := strings.Fields(stop)
+		if len(tokens) == 0 {
+			return false
+		}
+
+		// first token must be hex
+		if !isValidHexColor(tokens[0]) {
+			return false
+		}
+
+		// optional position
+		if len(tokens) > 1 {
+			pos := strings.TrimSuffix(tokens[1], "%")
+			if _, err := strconv.Atoi(pos); err != nil {
+				return false
+			}
+		}
+	}
+
+	return true
+}
 
 func isValidHexColor(s string) bool {
 	return hexColorRegex.MatchString(s)

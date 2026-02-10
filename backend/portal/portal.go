@@ -3,6 +3,7 @@ package portal
 import (
 	"context"
 	google2 "github.com/shank318/coasterai/integrations/google"
+	"github.com/shank318/coasterai/portal/server/handlers"
 	"github.com/shank318/coasterai/portal/state"
 	"regexp"
 
@@ -30,10 +31,12 @@ type Portal struct {
 	authenticator          *auth.Authenticator
 	authStateStore         state.AuthStateStore
 	googleOauthClient      *google2.OauthClient
+	mediaService           services.MediaStore
 	videoGenerationService services.VideoGeneration
 }
 
 func New(
+	mediaService services.MediaStore,
 	googleOauthClient *google2.OauthClient,
 	authenticator *auth.Authenticator,
 	authStateStore state.AuthStateStore,
@@ -49,6 +52,7 @@ func New(
 	tracer logging.Tracer,
 ) *Portal {
 	return &Portal{
+		mediaService:           mediaService,
 		googleOauthClient:      googleOauthClient,
 		authStateStore:         authStateStore,
 		authUsecase:            authUsecase,
@@ -73,6 +77,6 @@ func (p *Portal) Run(ctx context.Context) error {
 		s.Shutdown(nil)
 	})
 
-	s.Run(p)
+	s.Run(p, handlers.NewUploadHandler(p.mediaService))
 	return nil
 }

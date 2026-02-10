@@ -3,10 +3,13 @@ package app
 import (
 	"context"
 	"fmt"
+	"github.com/imagekit-developer/imagekit-go/v2"
+	"github.com/imagekit-developer/imagekit-go/v2/option"
 	"github.com/shank318/coasterai/auth"
 	"github.com/shank318/coasterai/auth/crypto"
 	"github.com/shank318/coasterai/datastore"
 	google2 "github.com/shank318/coasterai/integrations/google"
+	"github.com/shank318/coasterai/services"
 	"golang.org/x/oauth2"
 	"regexp"
 	"strings"
@@ -26,6 +29,7 @@ type GoogleConfig struct {
 }
 
 type DependenciesBuilder struct {
+	imageKitKey        string
 	PGDSN              string
 	KMSKeyPath         string
 	CorsURLRegexAllow  string
@@ -103,6 +107,11 @@ func (b *DependenciesBuilder) WithAI(defaultLLMModel, liteLLMAPIKey string, open
 	return b
 }
 
+func (b *DependenciesBuilder) WithMediaStore(imageKitKey string) *DependenciesBuilder {
+	b.imageKitKey = "private_EqxvvcNCM0RMd/BKSF7LgG4ft20="
+	return b
+}
+
 func (b *DependenciesBuilder) WithKMSKeyPath(kmsKeyPath string) *DependenciesBuilder {
 	b.KMSKeyPath = kmsKeyPath
 	return b
@@ -164,11 +173,20 @@ func (b *DependenciesBuilder) Build(ctx context.Context, logger *zap.Logger, tra
 		out.GoogleClient = google2.NewOauthClient(b.GoogleConfig.ClientID, b.GoogleConfig.ClientSecret, b.GoogleConfig.RedirectURL, logger)
 	}
 
+	if b.imageKitKey != "" {
+		client := imagekit.NewClient(
+			option.WithPrivateKey(b.imageKitKey), // defaults to os.LookupEnv("IMAGEKIT_PRIVATE_KEY")
+		)
+
+		out.MediaStore = services.NewImagekitMediaStore(&client)
+	}
+
 	return out, nil
 }
 
 type Dependencies struct {
-	DataStore datastore.Repository
+	DataStore  datastore.Repository
+	MediaStore services.MediaStore
 
 	AuthSigningKeyGetter crypto.SigningKeyGetter
 	AuthTokenValidator   auth.TokenValidationFunc

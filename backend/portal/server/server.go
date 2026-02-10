@@ -9,6 +9,7 @@ import (
 	"github.com/shank318/coasterai/datastore"
 	"github.com/shank318/coasterai/errorx"
 	"github.com/shank318/coasterai/pb/coasterai/portal/v1/pbportalconnect"
+	"github.com/shank318/coasterai/portal/server/handlers"
 	"net/http"
 	"regexp"
 	"strings"
@@ -53,6 +54,7 @@ func New(
 // this is a blocking call
 func (s *Server) Run(
 	portalHandler pbportalconnect.PortalServiceHandler,
+	mediaHandler *handlers.UploadHandler,
 ) {
 	tracerProvider := otel.GetTracerProvider()
 	options := []dgrpcserver.Option{
@@ -88,6 +90,14 @@ func (s *Server) Run(
 		s.logger.Info("grpc server with plain text server")
 		options = append(options, dgrpcserver.WithPlainTextServer())
 	}
+
+	options = append(options,
+		dgrpcserver.WithConnectWebHTTPHandlers([]dgrpcserver.HTTPHandlerGetter{
+			func() (string, http.Handler) {
+				return "/media/upload", http.HandlerFunc(mediaHandler.UploadMedia)
+			},
+		}),
+	)
 
 	portalHandlerGetter := func(opts ...connect.HandlerOption) (string, http.Handler) {
 		return pbportalconnect.NewPortalServiceHandler(portalHandler, opts...)

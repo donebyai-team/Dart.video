@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import SlideThumbnail from "./SlideThumbnail";
 import { Slide, SlideType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { useVideoStore } from "@/stores/video";
 
 interface SortableSlideCardProps {
   slide: Slide;
@@ -41,6 +42,10 @@ const SortableSlideCard = ({
   onSelect,
   onDelete,
 }: SortableSlideCardProps) => {
+
+  const getSlideWithBackground = useVideoStore(s => s.getSlideWithBackground);
+  slide.backgroundColor = getSlideWithBackground(slide);
+
   const {
     attributes,
     listeners,
