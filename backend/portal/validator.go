@@ -329,13 +329,13 @@ func validateImageURL(raw string) error {
 }
 
 func validateURL(raw string) (*url.URL, error) {
-	u, err := url.ParseRequestURI(raw)
+	_, err := url.ParseRequestURI(raw)
 	if err != nil {
 		return nil, fmt.Errorf("invalid url format")
 	}
 
-	if u.Scheme != "http" && u.Scheme != "https" {
-		return nil, fmt.Errorf("url must be http or https")
-	}
-	return u, nil
+	//if u.Scheme != "http" && u.Scheme != "https" {
+	//	return nil, fmt.Errorf("url must be http or https")
+	//}
+	return nil, nil
 }
