@@ -36,6 +36,7 @@ var StartCmd = cli.Command(startCmdE,
 		flags.String("common-browserless-api-key", "", "Browserless api key")
 		flags.String("common-browserless-warmup-api-key", "2SIxpPBYG6XJqLj5ec45cd436c170abdbec8713fd1bbaffe4", "Browserless api key")
 		flags.String("common-steel-api-key", "", "Steel Browser api key")
+		flags.String("common-imagekit-api-key", "", "Imagekit api key")
 		flags.String("common-openai-api-key", "", "LiteLLM API key")
 		flags.String("common-openai-gpt-api-key", "", "OpenAI API key")
 		flags.String("common-openai-debug-store", "data/debugstore", "OpenAI debug store")
@@ -154,6 +155,7 @@ func portalApp(cmd *cobra.Command, isAppReady func() bool) (App, error) {
 	//}
 
 	deps, err := app.NewDependenciesBuilder().
+		WithMediaStore(sflags.MustGetString(cmd, "common-imagekit-api-key")).
 		WithDataStore(sflags.MustGetString(cmd, "pg-dsn")).
 		WithKMSKeyPath(sflags.MustGetString(cmd, "jwt-kms-keypath")).
 		WithCORSURLRegexAllow(sflags.MustGetString(cmd, "portal-cors-url-regex-allow")).
@@ -205,6 +207,7 @@ func portalApp(cmd *cobra.Command, isAppReady func() bool) (App, error) {
 	}
 
 	p := portal.New(
+		deps.MediaStore,
 		deps.GoogleClient,
 		authenticator,
 		state.NewRedisStore(redisAddr, zlog),
