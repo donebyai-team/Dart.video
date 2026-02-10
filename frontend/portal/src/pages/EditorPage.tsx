@@ -227,7 +227,8 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
           {/* Duration Badge (Non-clickable) */}
           <div className="flex items-center gap-1 px-2 py-1 text-sm font-medium rounded-md border bg-muted text-muted-foreground">
             <Timer className='w-4 h-4' />
-            {videoConfigFromStore?.metadata?.duration}s
+            {/* To fixed is used here to show only 2 decimal point to user for UX */}
+            {videoConfigFromStore?.metadata?.duration.toFixed(2)}s
           </div>
           <ResolutionSelector />
           <Button
