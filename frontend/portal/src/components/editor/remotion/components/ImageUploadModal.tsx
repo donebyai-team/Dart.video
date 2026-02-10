@@ -27,10 +27,13 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   const [isUploading, setIsUploading] = useState(false)
   const [choosenFile, setChoosenFile] = useState<File | null>(null)
 
+  //Remove this fallback url when you implement uploadImage function
+  const fallbackUrl = "https://picsum.photos/536/354"
+
   const uploadImage = async (file: File) => {
     //implement your uploading function here and return the url
 
-    return URL.createObjectURL(file)
+    return fallbackUrl
   }
 
   const handleFile = useCallback(
@@ -46,7 +49,7 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
       try {
         let imageUrl: string
 
-        imageUrl = URL.createObjectURL(file)
+        imageUrl = fallbackUrl
 
         onUploadImage(imageUrl)
 

@@ -185,6 +185,7 @@ const TemplateTextAnimationRenderer: React.FC<{
 
   const centerStyle: Record<string | number, string | number> = {
     width: '100%',
+    height:"100%",
     zIndex: 1,
     textAlign: 'center',
     display: 'flex',

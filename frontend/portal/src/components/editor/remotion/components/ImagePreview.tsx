@@ -32,7 +32,12 @@ const ImagePreview = ({ props, onChange, onImageChange, imageRef, onClickImage }
 
   return (
     <ImageStyler
-      onImagechange={onImageChange}
+      onImagechange={() => {
+        onImageChange()
+        
+        //Close the styler
+        setOpen(false)
+      }}
       onChange={props => {
         onChange({
           src,
