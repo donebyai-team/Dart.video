@@ -49,19 +49,10 @@ export const TextAnimationSlide: React.FC<TextAnimationSlideProps> = ({
   const templateMeta = (content?.meta as MetaData) || {}
   const templateConfig = (content?.templateConfig ?? {}) as TemplateConfig
 
-  // Use slide's background color or fall back to default
-  const defaultGradients = [
-    'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
-    'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-    'linear-gradient(135deg, #0d1b2a 0%, #1b263b 50%, #415a77 100%)',
-    'linear-gradient(135deg, #2d1b4e 0%, #1a1a2e 100%)',
-    'linear-gradient(135deg, #0c1821 0%, #1b2838 100%)'
-  ]
-  const bgIndex = slide.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
-  const background = slide.backgroundColor || defaultGradients[bgIndex % defaultGradients.length]
+  const background = slide.backgroundColor;
 
   useEffect(() => {
-    ;(async () => {
+    ; (async () => {
       const loader = templateRegistry[templateId as keyof typeof templateRegistry]
       if (!loader) return
 
@@ -185,7 +176,7 @@ const TemplateTextAnimationRenderer: React.FC<{
 
   const centerStyle: Record<string | number, string | number> = {
     width: '100%',
-    height:"100%",
+    height: "100%",
     zIndex: 1,
     textAlign: 'center',
     display: 'flex',

@@ -40,7 +40,7 @@ const TextAnimationThumbnail = ({ slide }: { slide: Slide }) => {
   const displayText = content?.templateConfig?.text as string || slide.transcript;
   
   // Use slide's background color or fall back to default
-  const background = slide.backgroundColor || "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)";
+  const background = slide.backgroundColor;
 
   return (
     <div

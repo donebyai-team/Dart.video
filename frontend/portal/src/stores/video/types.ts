@@ -64,6 +64,7 @@ export interface VideoActions {
     setEditingSectionTitle: (title: string) => void;
 
     // Slides
+    getSlideWithBackground: (slide : Slide) => string;
     getTimelineSlides: () => TimelineSlide[]
     addSlide: (sectionId: string, type: SlideType) => void
     removeSlide: (sectionId: string, slideId: string) => void

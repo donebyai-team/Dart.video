@@ -10,6 +10,17 @@ import { TRANSITION_DURATION_SECONDS } from '@/components/editor/frame_calculati
 export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   /* ================= ADD ================= */
 
+
+  // if global is available then use global or default to slide
+  getSlideWithBackground(slide: Slide): string {
+    const { videoConfig } = get()
+    if (!videoConfig?.config) return ''
+    const globalBackground = videoConfig.metadata?.backgroundColor;
+
+
+    return globalBackground ? globalBackground : slide.backgroundColor!;
+  },
+
   addSlide(sectionId: string, type: SlideType) {
     const { videoConfig } = get()
     if (!videoConfig?.config) return
@@ -95,11 +106,11 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
           section.id !== selectedSlide.section.id
             ? section
             : {
-                ...section,
-                slides: section.slides.map(slide =>
-                  slide.id === selectedSlide.slide.id ? { ...slide, backgroundColor: color } : slide
-                )
-              }
+              ...section,
+              slides: section.slides.map(slide =>
+                slide.id === selectedSlide.slide.id ? { ...slide, backgroundColor: color } : slide
+              )
+            }
         )
       )
 
@@ -135,11 +146,11 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       sections.map(section =>
         section.id === selectedSlide.section.id
           ? {
-              ...section,
-              slides: section.slides.map(slide =>
-                slide.id === selectedSlide.slide.id ? { ...slide, transcript } : slide
-              )
-            }
+            ...section,
+            slides: section.slides.map(slide =>
+              slide.id === selectedSlide.slide.id ? { ...slide, transcript } : slide
+            )
+          }
           : section
       )
     )
@@ -199,9 +210,9 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       sections.map(section =>
         section.id === selectedSlide.section.id
           ? {
-              ...section,
-              slides: section.slides.map(sl => (sl.id === selectedSlide.slide.id ? { ...sl, ...updates } : sl))
-            }
+            ...section,
+            slides: section.slides.map(sl => (sl.id === selectedSlide.slide.id ? { ...sl, ...updates } : sl))
+          }
           : section
       )
     )
@@ -263,9 +274,9 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       sections.map(section =>
         section.id === selectedSlide.section.id
           ? {
-              ...section,
-              slides: section.slides.map(sl => (sl.id === selectedSlide.slide.id ? { ...sl, content: newContent } : sl))
-            }
+            ...section,
+            slides: section.slides.map(sl => (sl.id === selectedSlide.slide.id ? { ...sl, content: newContent } : sl))
+          }
           : section
       )
     )
@@ -291,19 +302,19 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       sections.map(section =>
         section.id === sectionId
           ? {
-              ...section,
-              slides: section.slides.map(sl =>
-                sl.id === slideId
-                  ? {
-                      ...sl,
-                      transition: transitionType,
-                      //TRANSITION_DURATION_SECONDS is minimum transition time 
-                      transitionDuration:
-                        transitionType === TransitionType.TRANSITION_NONE ? 0 : TRANSITION_DURATION_SECONDS
-                    }
-                  : sl
-              )
-            }
+            ...section,
+            slides: section.slides.map(sl =>
+              sl.id === slideId
+                ? {
+                  ...sl,
+                  transition: transitionType,
+                  //TRANSITION_DURATION_SECONDS is minimum transition time 
+                  transitionDuration:
+                    transitionType === TransitionType.TRANSITION_NONE ? 0 : TRANSITION_DURATION_SECONDS
+                }
+                : sl
+            )
+          }
           : section
       )
     )

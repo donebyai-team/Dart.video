@@ -192,8 +192,10 @@ export const Slideshow: React.FC<SlideshowProps> = ({ fps, isEditing = false, on
 
           const hasTransition = slide.transition !== TransitionType.TRANSITION_NONE
 
+          // if global background is given , all slides background should be transparent
+          // else slide color
           const slideWithBackground =
-            globalBackground && !slide.backgroundColor ? { ...slide, backgroundColor: 'transparent' } : slide
+            globalBackground != 'transparent' ? { ...slide, backgroundColor: 'transparent' } : slide
 
           return (
             <React.Fragment key={slide.id}>
