@@ -7,7 +7,6 @@ import (
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/utils"
 	"net/url"
-	"path"
 	"regexp"
 	"strings"
 )
@@ -314,18 +313,19 @@ func isValidHexColor(s string) bool {
 }
 
 func validateImageURL(raw string) error {
-	u, err := validateURL(raw)
+	_, err := validateURL(raw)
 	if err != nil {
 		return err
 	}
 
-	ext := strings.ToLower(path.Ext(u.Path))
-	switch ext {
-	case ".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg":
-		return nil
-	default:
-		return fmt.Errorf("unsupported image extension")
-	}
+	return nil
+	//ext := strings.ToLower(path.Ext(u.Path))
+	//switch ext {
+	//case ".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg":
+	//	return nil
+	//default:
+	//	return fmt.Errorf("unsupported image extension")
+	//}
 }
 
 func validateURL(raw string) (*url.URL, error) {
