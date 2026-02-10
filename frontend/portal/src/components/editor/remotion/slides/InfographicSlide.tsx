@@ -1,21 +1,21 @@
-import React from "react";
-import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
-import { AnimatedBarChart, AnimatedPieChart, AnimatedLineGraph } from "../animations/InfographicCharts";
-import { AnimatedBackground } from "../effects/AnimatedBackground";
-import { TemplateContainer } from "../components/TemplateContainer";
-import { AnimationSlideContent, Slide } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { AnimationSlideContent, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import React, { useState } from 'react'
+import { AbsoluteFill, useCurrentFrame, useVideoConfig } from 'remotion'
+import { AnimatedBarChart, AnimatedLineGraph, AnimatedPieChart } from '../animations/InfographicCharts'
+import { TemplateContainer } from '../components/TemplateContainer'
+import { AnimatedBackground } from '../effects/AnimatedBackground'
 
 interface InfographicSlideProps {
-  slide: Slide;
-  width: number;
-  height: number;
-  isEditing?: boolean;
-  isSelected?: boolean;
-  onUpdate?: (updates: Partial<Slide>) => void;
-  onSelect?: () => void;
+  slide: Slide
+  width: number
+  height: number
+  isEditing?: boolean
+  isSelected?: boolean
+  onUpdate?: (updates: Partial<Slide>) => void
+  onSelect?: () => void
 }
 
-export type TemplateConfig = Record<string, string | number | boolean | object>;
+export type TemplateConfig = Record<string, string | number | boolean | object>
 
 /**
  * InfographicSlide Component
@@ -30,27 +30,28 @@ export const InfographicSlide: React.FC<InfographicSlideProps> = ({
   isEditing = false,
   isSelected = false,
   onUpdate,
-  onSelect,
+  onSelect
 }) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const content = slide.content.value as AnimationSlideContent;
-  const templateConfig = (content?.templateConfig ?? {}) as TemplateConfig;
+  const frame = useCurrentFrame()
+  const { fps } = useVideoConfig()
+  const content = slide.content.value as AnimationSlideContent
+  const templateConfig = (content?.templateConfig ?? {}) as TemplateConfig
+  const [editing, setEditing] = useState<boolean>(isEditing)
 
   // TODO: Use templateId to select chart type
   // For now, use hash-based selection for backward compatibility
-  const hash = slide.id.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const variant = hash % 3;
+  const hash = slide.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+  const variant = hash % 3
 
   // Use slide's background color or fall back to default
-  const background = slide.backgroundColor || "linear-gradient(180deg, #0f172a 0%, #1e293b 100%)";
+  const background = slide.backgroundColor || 'linear-gradient(180deg, #0f172a 0%, #1e293b 100%)'
 
   return (
     <AbsoluteFill
       style={{
         background,
-        justifyContent: "center",
-        alignItems: "center",
+        justifyContent: 'center',
+        alignItems: 'center'
       }}
     >
       {/* Animated background particles */}
@@ -58,20 +59,21 @@ export const InfographicSlide: React.FC<InfographicSlideProps> = ({
 
       {/* Template content in container */}
       <TemplateContainer
+        setEditing={setEditing}
         x={templateConfig.x as number}
         y={templateConfig.y as number}
         width={templateConfig.width as number}
         height={templateConfig.height as number}
         canvasWidth={width}
         canvasHeight={height}
-        isEditing={isEditing}
+        isEditing={editing}
         isSelected={isSelected}
-        onUpdate={(updates) => {
+        onUpdate={updates => {
           if (onUpdate && content) {
             onUpdate({
               ...slide,
               content: {
-                case: "animation",
+                case: 'animation',
                 value: {
                   ...content,
                   templateConfig: {
@@ -79,20 +81,29 @@ export const InfographicSlide: React.FC<InfographicSlideProps> = ({
                     ...updates
                   }
                 }
-              },
-            } as Slide);
+              }
+            } as Slide)
           }
         }}
         onSelect={onSelect}
       >
-        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 60 }}>
+        <div
+          style={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 60
+          }}
+        >
           {variant === 0 && <AnimatedBarChart frame={frame} fps={fps} />}
           {variant === 1 && <AnimatedPieChart frame={frame} fps={fps} />}
           {variant === 2 && <AnimatedLineGraph frame={frame} fps={fps} />}
         </div>
       </TemplateContainer>
     </AbsoluteFill>
-  );
-};
+  )
+}
 
-export default InfographicSlide;
+export default InfographicSlide

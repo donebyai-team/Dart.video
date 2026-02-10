@@ -1,25 +1,25 @@
-import React from "react";
-import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
+import { AnimationSlideContent, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import React, { useState } from 'react'
+import { AbsoluteFill, useCurrentFrame, useVideoConfig } from 'remotion'
 import {
-  RotatingSquares,
-  PulsingCircles,
   FloatingShapes,
   GrowingBars,
   OrbitingDots,
-} from "../animations/VisualAnimationVariants";
-import { AnimatedBackground } from "../effects/AnimatedBackground";
-import { TemplateContainer } from "../components/TemplateContainer";
-import { AnimationSlideContent, Slide } from "@coasterai/pb/coasterai/core/v1/slide_pb";
-import { TemplateConfig } from "./InfographicSlide";
+  PulsingCircles,
+  RotatingSquares
+} from '../animations/VisualAnimationVariants'
+import { TemplateContainer } from '../components/TemplateContainer'
+import { AnimatedBackground } from '../effects/AnimatedBackground'
+import { TemplateConfig } from './InfographicSlide'
 
 interface VisualAnimationSlideProps {
-  slide: Slide;
-  width: number;
-  height: number;
-  isEditing?: boolean;
-  isSelected?: boolean;
-  onUpdate?: (updates: Partial<Slide>) => void;
-  onSelect?: () => void;
+  slide: Slide
+  width: number
+  height: number
+  isEditing?: boolean
+  isSelected?: boolean
+  onUpdate?: (updates: Partial<Slide>) => void
+  onSelect?: () => void
 }
 
 /**
@@ -35,36 +35,36 @@ export const VisualAnimationSlide: React.FC<VisualAnimationSlideProps> = ({
   isEditing = false,
   isSelected = false,
   onUpdate,
-  onSelect,
+  onSelect
 }) => {
-  const frame = useCurrentFrame();
-  const { fps, durationInFrames } = useVideoConfig();
+  const frame = useCurrentFrame()
+  const { fps, durationInFrames } = useVideoConfig()
 
-  const content = slide.content.value as AnimationSlideContent;
-  const templateId = content?.templateId || "visual-default";
-  const templateConfig = (content?.templateConfig ?? {}) as TemplateConfig;
+  const content = slide.content.value as AnimationSlideContent
+  const templateConfig = (content?.templateConfig ?? {}) as TemplateConfig
+  const [editing, setEditing] = useState<boolean>(isEditing)
 
   // TODO: Use templateId to select animation variant
   // For now, use hash-based selection for backward compatibility
-  const hash = slide.id.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const variant = hash % 5;
+  const hash = slide.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+  const variant = hash % 5
 
   // Use slide's background color or fall back to default
   const defaultGradients = [
-    "linear-gradient(135deg, #581c87 0%, #7c3aed 50%, #4f46e5 100%)",
-    "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
-    "linear-gradient(135deg, #134e4a 0%, #14b8a6 100%)",
-    "linear-gradient(135deg, #7f1d1d 0%, #ef4444 50%, #f97316 100%)",
-    "linear-gradient(135deg, #713f12 0%, #f59e0b 100%)",
-  ];
-  const background = slide.backgroundColor || defaultGradients[variant];
+    'linear-gradient(135deg, #581c87 0%, #7c3aed 50%, #4f46e5 100%)',
+    'linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)',
+    'linear-gradient(135deg, #134e4a 0%, #14b8a6 100%)',
+    'linear-gradient(135deg, #7f1d1d 0%, #ef4444 50%, #f97316 100%)',
+    'linear-gradient(135deg, #713f12 0%, #f59e0b 100%)'
+  ]
+  const background = slide.backgroundColor || defaultGradients[variant]
 
   return (
     <AbsoluteFill
       style={{
         background,
-        justifyContent: "center",
-        alignItems: "center",
+        justifyContent: 'center',
+        alignItems: 'center'
       }}
     >
       {/* Animated background particles */}
@@ -72,20 +72,21 @@ export const VisualAnimationSlide: React.FC<VisualAnimationSlideProps> = ({
 
       {/* Template content in container */}
       <TemplateContainer
+        setEditing={setEditing}
         x={templateConfig.x as number}
         y={templateConfig.y as number}
         width={templateConfig.width as number}
         height={templateConfig.height as number}
         canvasWidth={width}
         canvasHeight={height}
-        isEditing={isEditing}
+        isEditing={editing}
         isSelected={isSelected}
-        onUpdate={(updates) => {
+        onUpdate={updates => {
           if (onUpdate && content) {
             onUpdate({
               ...slide,
               content: {
-                case: "animation",
+                case: 'animation',
                 value: {
                   ...content,
                   templateConfig: {
@@ -93,13 +94,22 @@ export const VisualAnimationSlide: React.FC<VisualAnimationSlideProps> = ({
                     ...updates
                   }
                 }
-              },
-            } as Slide);
+              }
+            } as Slide)
           }
         }}
         onSelect={onSelect}
       >
-        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+        <div
+          style={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'hidden'
+          }}
+        >
           {variant === 0 && <RotatingSquares frame={frame} durationInFrames={durationInFrames} />}
           {variant === 1 && <PulsingCircles frame={frame} fps={fps} />}
           {variant === 2 && <FloatingShapes frame={frame} durationInFrames={durationInFrames} />}
@@ -108,7 +118,7 @@ export const VisualAnimationSlide: React.FC<VisualAnimationSlideProps> = ({
         </div>
       </TemplateContainer>
     </AbsoluteFill>
-  );
-};
+  )
+}
 
-export default VisualAnimationSlide;
+export default VisualAnimationSlide

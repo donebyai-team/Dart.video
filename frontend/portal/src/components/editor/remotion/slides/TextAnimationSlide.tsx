@@ -1,5 +1,5 @@
 import { AnimationSlideContent, MetaData, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion'
 import { templateRegistry } from '../../../../../../packages/template-registery'
 import {
@@ -43,7 +43,7 @@ export const TextAnimationSlide: React.FC<TextAnimationSlideProps> = ({
   const frame = useCurrentFrame()
   const { fps, durationInFrames } = useVideoConfig()
   const [RemoteComponent, setRemoteComponent] = React.useState<TemplateModule | null>(null)
-
+  const [editing, setEditing] = useState<boolean>(isEditing)
   const content = slide.content.value as AnimationSlideContent
   const templateId = content?.templateId || 'text-reveal'
   const templateMeta = (content?.meta as MetaData) || {}
@@ -63,6 +63,9 @@ export const TextAnimationSlide: React.FC<TextAnimationSlideProps> = ({
 
   return (
     <AbsoluteFill
+      onMouseDown={() => {
+        setEditing(true)
+      }}
       style={{
         background,
         justifyContent: 'center',
@@ -74,13 +77,14 @@ export const TextAnimationSlide: React.FC<TextAnimationSlideProps> = ({
 
       {/* Template content in container */}
       <TemplateContainer
+        setEditing={setEditing}
         x={templateMeta.x as number}
         y={templateMeta.y as number}
         width={templateMeta.width as number}
         height={templateMeta.height as number}
         canvasWidth={width}
         canvasHeight={height}
-        isEditing={isEditing}
+        isEditing={editing}
         isSelected={isSelected}
         onUpdate={updates => {
           if (onUpdate && content) {
@@ -176,7 +180,7 @@ const TemplateTextAnimationRenderer: React.FC<{
 
   const centerStyle: Record<string | number, string | number> = {
     width: '100%',
-    height: "100%",
+    height: '100%',
     zIndex: 1,
     textAlign: 'center',
     display: 'flex',

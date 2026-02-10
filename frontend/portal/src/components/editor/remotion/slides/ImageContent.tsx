@@ -1,6 +1,6 @@
 import { MetaData } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Resolution } from '@coasterai/pb/coasterai/core/v1/video_pb'
-import React, { RefObject, SetStateAction, useCallback, useEffect, useState } from 'react'
+import React, { RefObject, SetStateAction, useCallback, useEffect, useRef, useState } from 'react'
 
 interface ImageContentProps {
   image: MetaData
@@ -23,17 +23,28 @@ export const ImageContent: React.FC<ImageContentProps> = ({
   children,
   imageRef
 }) => {
-  const [isDragging, setIsDragging] = useState(isEditing)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  const [isDragging, setIsDragging] = useState(false)
   const [isResizing, setIsResizing] = useState<Corner | null>(null)
-  const [dragStart, setDragStart] = useState<{ x: number; y: number; imageX: number; imageY: number } | null>(null)
-  const [resizeStart, setResizeStart] = useState<{
+
+  // Refs for drag state — avoids stale closures in mousemove handlers
+  const dragStartRef = useRef<{ x: number; y: number; startX: number; startY: number } | null>(null)
+  const resizeStartRef = useRef<{
     x: number
     y: number
-    imageX: number
-    imageY: number
-    imageWidth: number
-    imageHeight: number
+    startX: number
+    startY: number
+    startWidth: number
+    startHeight: number
   } | null>(null)
+
+  // Aspect ratio captured at the moment a resize begins
+  const aspectRatioRef = useRef<number>(1)
+
+  // RAF + pending update refs for throttled rendering
+  const rafRef = useRef<number | null>(null)
+  const pendingUpdateRef = useRef<Partial<MetaData> | null>(null)
 
   // Calculate percentage-based positioning for responsive scaling
   const leftPercent = ((image.x || 0) / resolution.width) * 100
@@ -41,149 +52,207 @@ export const ImageContent: React.FC<ImageContentProps> = ({
   const widthPercent = ((image.width || 0) / resolution.width) * 100
   const heightPercent = ((image.height || 0) / resolution.height) * 100
 
+  /**
+   * Reads the effective render scale of the canvas/slide container.
+   *
+   * Strategy: walk up from the image element's parent until we find an
+   * ancestor that has a [data-canvas] attribute, then compare its rendered
+   * size to the logical resolution. This gives us the true screen-px →
+   * resolution-px ratio so mouse deltas are always accurate regardless of
+   * zoom level.
+   *
+   * Fallback: accumulate CSS transform matrix scales up the ancestor chain.
+   */
+  const getCanvasScale = (): { x: number; y: number } => {
+    // Prefer an explicit [data-canvas] ancestor
+    const canvasEl = containerRef.current?.closest('[data-canvas]') as HTMLElement | null
+
+    if (canvasEl) {
+      const rect = canvasEl.getBoundingClientRect()
+      return {
+        x: rect.width / resolution.width,
+        y: rect.height / resolution.height
+      }
+    }
+
+    // Fallback: multiply any CSS transform scales found on the ancestor chain
+    let node: HTMLElement | null = containerRef.current?.parentElement ?? null
+    let sx = 1
+    let sy = 1
+    while (node && node !== document.body) {
+      const matrix = new DOMMatrix(window.getComputedStyle(node).transform)
+      // matrix.a = scaleX, matrix.d = scaleY for 2-D matrices
+      if (matrix.a && matrix.a !== 1) sx *= matrix.a
+      if (matrix.d && matrix.d !== 1) sy *= matrix.d
+      node = node.parentElement
+    }
+    return { x: sx, y: sy }
+  }
+
+  // ─── Drag ────────────────────────────────────────────────────────────────────
+
   const handleDragStart = useCallback(
     (e: React.MouseEvent) => {
       if (!isEditing || !onUpdate) return
       e.stopPropagation()
 
       setIsDragging(true)
-      setDragStart({
+      dragStartRef.current = {
         x: e.clientX,
         y: e.clientY,
-        imageX: image.x ?? 0,
-        imageY: image.y ?? 0
-      })
+        startX: image.x ?? 0,
+        startY: image.y ?? 0
+      }
     },
     [isEditing, onUpdate, image.x, image.y]
   )
+
+  // ─── Resize ──────────────────────────────────────────────────────────────────
 
   const handleResizeStart = useCallback(
     (corner: Corner, e: React.MouseEvent) => {
       if (!isEditing || !onUpdate) return
       e.stopPropagation()
 
+      // Lock aspect ratio at the moment the drag begins
+      const w = image.width ?? 0
+      const h = image.height ?? 0
+      aspectRatioRef.current = h > 0 ? w / h : 1
+
       setIsResizing(corner)
-      setResizeStart({
+      resizeStartRef.current = {
         x: e.clientX,
         y: e.clientY,
-        imageX: image.x ?? 0,
-        imageY: image.y ?? 0,
-        imageWidth: image.width ?? 0,
-        imageHeight: image.height ?? 0
-      })
+        startX: image.x ?? 0,
+        startY: image.y ?? 0,
+        startWidth: w,
+        startHeight: h
+      }
     },
     [isEditing, onUpdate, image.x, image.y, image.width, image.height]
   )
 
-  const handleMouseMove = useCallback(
-    (e: MouseEvent) => {
-      if (isDragging && dragStart && onUpdate && image.width && image.height) {
-        // Calculate delta in screen pixels
-        const deltaX = e.clientX - dragStart.x
-        const deltaY = e.clientY - dragStart.y
+  // ─── Mouse move / up ─────────────────────────────────────────────────────────
 
-        // Convert to resolution coordinates
-        // Assume we're rendering at some scale - we need to account for that
-        // For now, use a simple ratio based on the rendered size
-        const scaleX = resolution.width / (window.innerWidth * (widthPercent / 100))
-        const scaleY = resolution.height / (window.innerHeight * (heightPercent / 100))
+  useEffect(() => {
+    if (!isEditing) return
 
-        const newX = dragStart.imageX + deltaX * scaleX
-        const newY = dragStart.imageY + deltaY * scaleY
+    const handleMouseMove = (e: MouseEvent) => {
+      // Divide screen-pixel deltas by the canvas render scale so that
+      // 1 logical resolution pixel always corresponds to exactly 1 mouse pixel.
+      const scale = getCanvasScale()
 
-        // Clamp to canvas bounds
-        const clampedX = Math.max(0, Math.min(newX, resolution.width - image.width))
-        const clampedY = Math.max(0, Math.min(newY, resolution.height - image.height))
+      if (isDragging && dragStartRef.current) {
+        const deltaX = (e.clientX - dragStartRef.current.x) / scale.x
+        const deltaY = (e.clientY - dragStartRef.current.y) / scale.y
 
-        onUpdate({ x: clampedX, y: clampedY })
-      }
+        const w = image.width ?? 0
+        const h = image.height ?? 0
+        const newX = Math.max(0, Math.min(resolution.width - w, dragStartRef.current.startX + deltaX))
+        const newY = Math.max(0, Math.min(resolution.height - h, dragStartRef.current.startY + deltaY))
 
-      if (isResizing && resizeStart && onUpdate) {
-        const deltaX = e.clientX - resizeStart.x
-        const deltaY = e.clientY - resizeStart.y
+        pendingUpdateRef.current = { x: newX, y: newY }
 
-        // Convert to resolution coordinates
-        const scaleX = resolution.width / (window.innerWidth * (widthPercent / 100))
-        const scaleY = resolution.height / (window.innerHeight * (heightPercent / 100))
+        if (!rafRef.current) {
+          rafRef.current = requestAnimationFrame(() => {
+            if (pendingUpdateRef.current) {
+              onUpdate?.(pendingUpdateRef.current)
+              pendingUpdateRef.current = null
+            }
+            rafRef.current = null
+          })
+        }
+      } else if (isResizing && resizeStartRef.current) {
+        const deltaX = (e.clientX - resizeStartRef.current.x) / scale.x
+        const deltaY = (e.clientY - resizeStartRef.current.y) / scale.y
 
-        let newX = resizeStart.imageX
-        let newY = resizeStart.imageY
-        let newWidth = resizeStart.imageWidth
-        let newHeight = resizeStart.imageHeight
+        const ar = aspectRatioRef.current
+        const { startWidth, startHeight, startX, startY } = resizeStartRef.current
 
-        // Handle different corners
-        switch (isResizing) {
-          case 'nw':
-            newX = resizeStart.imageX + deltaX * scaleX
-            newY = resizeStart.imageY + deltaY * scaleY
-            newWidth = resizeStart.imageWidth - deltaX * scaleX
-            newHeight = resizeStart.imageHeight - deltaY * scaleY
-            break
-          case 'ne':
-            newY = resizeStart.imageY + deltaY * scaleY
-            newWidth = resizeStart.imageWidth + deltaX * scaleX
-            newHeight = resizeStart.imageHeight - deltaY * scaleY
-            break
-          case 'sw':
-            newX = resizeStart.imageX + deltaX * scaleX
-            newWidth = resizeStart.imageWidth - deltaX * scaleX
-            newHeight = resizeStart.imageHeight + deltaY * scaleY
-            break
-          case 'se':
-            newWidth = resizeStart.imageWidth + deltaX * scaleX
-            newHeight = resizeStart.imageHeight + deltaY * scaleY
-            break
+        let newWidth = startWidth
+        let newHeight = startHeight
+        let newX = startX
+        let newY = startY
+
+        // Each corner: pick the dominant axis delta to drive width,
+        // then derive height from the locked aspect ratio.
+        if (isResizing === 'se') {
+          const domDelta = Math.abs(deltaX) >= Math.abs(deltaY) ? deltaX : deltaY * ar
+          newWidth = Math.max(100, startWidth + domDelta)
+          newHeight = newWidth / ar
+        } else if (isResizing === 'sw') {
+          const domDelta = Math.abs(deltaX) >= Math.abs(deltaY) ? -deltaX : deltaY * ar
+          newWidth = Math.max(100, startWidth + domDelta)
+          newHeight = newWidth / ar
+          newX = startX + (startWidth - newWidth)
+        } else if (isResizing === 'ne') {
+          const domDelta = Math.abs(deltaX) >= Math.abs(deltaY) ? deltaX : -deltaY * ar
+          newWidth = Math.max(100, startWidth + domDelta)
+          newHeight = newWidth / ar
+          newY = startY + (startHeight - newHeight)
+        } else if (isResizing === 'nw') {
+          const domDelta = Math.abs(deltaX) >= Math.abs(deltaY) ? -deltaX : -deltaY * ar
+          newWidth = Math.max(100, startWidth + domDelta)
+          newHeight = newWidth / ar
+          newX = startX + (startWidth - newWidth)
+          newY = startY + (startHeight - newHeight)
         }
 
-        // Enforce minimum size
-        const minSize = 100
-        if (newWidth < minSize || newHeight < minSize) {
-          return
+        // Constrain to canvas bounds
+        newX = Math.max(0, Math.min(resolution.width - newWidth, newX))
+        newY = Math.max(0, Math.min(resolution.height - newHeight, newY))
+        newWidth = Math.min(resolution.width - newX, newWidth)
+        newHeight = Math.min(resolution.height - newY, newHeight)
+
+        pendingUpdateRef.current = { x: newX, y: newY, width: newWidth, height: newHeight }
+
+        if (!rafRef.current) {
+          rafRef.current = requestAnimationFrame(() => {
+            if (pendingUpdateRef.current) {
+              onUpdate?.(pendingUpdateRef.current)
+              pendingUpdateRef.current = null
+            }
+            rafRef.current = null
+          })
         }
-
-        // Clamp to canvas bounds
-        newX = Math.max(0, Math.min(newX, resolution.width - newWidth))
-        newY = Math.max(0, Math.min(newY, resolution.height - newHeight))
-        newWidth = Math.min(newWidth, resolution.width - newX)
-        newHeight = Math.min(newHeight, resolution.height - newY)
-
-        onUpdate({ x: newX, y: newY, width: newWidth, height: newHeight })
       }
-    },
-    [
-      isDragging,
-      isResizing,
-      dragStart,
-      resizeStart,
-      onUpdate,
-      resolution,
-      image.width,
-      image.height,
-      widthPercent,
-      heightPercent
-    ]
-  )
+    }
 
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false)
-    setIsResizing(null)
-    setDragStart(null)
-    setResizeStart(null)
-  }, [])
+    const handleMouseUp = () => {
+      if (isDragging || isResizing) {
+        // Flush any pending RAF update immediately
+        if (rafRef.current) {
+          cancelAnimationFrame(rafRef.current)
+          rafRef.current = null
+        }
+        if (pendingUpdateRef.current) {
+          onUpdate?.(pendingUpdateRef.current)
+          pendingUpdateRef.current = null
+        }
+      }
 
-  // Add event listeners for mouse move/up
-  React.useEffect(() => {
+      setIsDragging(false)
+      setIsResizing(null)
+      dragStartRef.current = null
+      resizeStartRef.current = null
+    }
+
     if (isDragging || isResizing) {
       document.addEventListener('mousemove', handleMouseMove)
       document.addEventListener('mouseup', handleMouseUp)
       return () => {
         document.removeEventListener('mousemove', handleMouseMove)
         document.removeEventListener('mouseup', handleMouseUp)
+        if (rafRef.current) {
+          cancelAnimationFrame(rafRef.current)
+          rafRef.current = null
+        }
       }
     }
-  }, [isDragging, isResizing, handleMouseMove, handleMouseUp])
+  }, [isDragging, isResizing, image.width, image.height, resolution, isEditing, onUpdate])
 
-  // Close on outside click
+  // ─── Click-outside to deselect ───────────────────────────────────────────────
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (!isResizing && imageRef.current && !imageRef.current.contains(event.target as Node)) {
@@ -197,8 +266,11 @@ export const ImageContent: React.FC<ImageContentProps> = ({
     }
   }, [isEditing, setIsEditing, imageRef, isResizing])
 
+  // ─── Render ──────────────────────────────────────────────────────────────────
+
   return (
     <div
+      ref={containerRef}
       style={{
         position: 'absolute',
         left: `${leftPercent}%`,
@@ -206,7 +278,8 @@ export const ImageContent: React.FC<ImageContentProps> = ({
         width: `${widthPercent}%`,
         height: `${heightPercent}%`,
         transform: `rotate(${image.rotation || 0}deg)`,
-        cursor: isEditing ? (isDragging ? 'grabbing' : 'grab') : 'default'
+        cursor: isEditing ? (isDragging ? 'grabbing' : 'grab') : 'default',
+        userSelect:"none"
       }}
       onMouseDown={isEditing ? handleDragStart : undefined}
     >
@@ -215,77 +288,32 @@ export const ImageContent: React.FC<ImageContentProps> = ({
       {isEditing && (
         <>
           {/* Resize handles at corners */}
-          <div
-            className='resize-handle'
-            style={{
-              position: 'absolute',
-              left: '-25px',
-              top: '-25px',
-              width: '50px',
-              height: '50px',
-              backgroundColor: 'hsl(var(--primary))',
-              border: '2px solid white',
-              borderRadius: '50%',
-              cursor: 'nw-resize',
-              pointerEvents: 'auto'
-            }}
-            onMouseDown={e => handleResizeStart('nw', e)}
-          />
-          <div
-            className='resize-handle'
-            style={{
-              position: 'absolute',
-              right: '-25px',
-              top: '-25px',
-              width: '50px',
-              height: '50px',
-              backgroundColor: 'hsl(var(--primary))',
-              border: '2px solid white',
-              borderRadius: '50%',
-              cursor: 'ne-resize',
-              pointerEvents: 'auto'
-            }}
-            onMouseDown={e => handleResizeStart('ne', e)}
-          />
-          <div
-            className='resize-handle'
-            style={{
-              position: 'absolute',
-              left: '-25px',
-              bottom: '-25px',
-              width: '50px',
-              height: '50px',
-              backgroundColor: 'hsl(var(--primary))',
-              border: '2px solid white',
-              borderRadius: '50%',
-              cursor: 'sw-resize',
-              pointerEvents: 'auto'
-            }}
-            onMouseDown={e => handleResizeStart('sw', e)}
-          />
-          <div
-            className='resize-handle'
-            style={{
-              position: 'absolute',
-              right: '-25px',
-              bottom: '-25px',
-              width: '50px',
-              height: '50px',
-              backgroundColor: 'hsl(var(--primary))',
-              border: '2px solid white',
-              borderRadius: '50%',
-              cursor: 'se-resize',
-              pointerEvents: 'auto'
-            }}
-            onMouseDown={e => handleResizeStart('se', e)}
-          />
+          {(['nw', 'ne', 'sw', 'se'] as Corner[]).map(corner => (
+            <div
+              key={corner}
+              className='resize-handle'
+              style={{
+                position: 'absolute',
+                ...(corner.includes('n') ? { top: '-25px' } : { bottom: '-25px' }),
+                ...(corner.includes('w') ? { left: '-25px' } : { right: '-25px' }),
+                width: '50px',
+                height: '50px',
+                backgroundColor: '#ffffff',
+                border: '10px solid #3b82f6',
+                borderRadius: '50%',
+                cursor: `${corner}-resize`,
+                pointerEvents: 'auto'
+              }}
+              onMouseDown={e => handleResizeStart(corner, e)}
+            />
+          ))}
 
-          {/* Border to show selection */}
+          {/* Selection border */}
           <div
             style={{
               position: 'absolute',
               inset: 0,
-              border: '2px solid hsl(var(--primary))',
+              border: '6px solid #3b82f6',
               borderRadius: '8px',
               pointerEvents: 'none'
             }}
