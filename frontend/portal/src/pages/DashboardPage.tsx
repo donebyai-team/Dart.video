@@ -57,6 +57,8 @@ import { useClientsContext } from "@coasterai/ui-core/context/ClientContext";
 import { Video as VideoConfig } from "@coasterai/pb/coasterai/core/v1/video_pb";
 import toast from "react-hot-toast";
 import { getConnectError } from "@/utils/error";
+import SlideThumbnail from "@/components/editor/SlideThumbnail";
+import { getFormattedDate, getSlideCount } from "@/utils/format";
 
 type NavItem = {
   title: string;
@@ -296,8 +298,11 @@ const DashboardPage = () => {
               <div>
                 <h2 className="text-xl font-semibold mb-4">Recent Videos</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {videos.map((video) => (
-                    <motion.div
+                  {videos.map((video) => {
+
+                    const firstSlide = video.config?.sections?.[0]?.slides?.[0];
+                    const isGenerating = !firstSlide;
+                    return (<motion.div
                       key={video.id}
                       whileHover={{ y: -4 }}
                       transition={{ duration: 0.2 }}
@@ -306,26 +311,36 @@ const DashboardPage = () => {
                         className="card-elevated overflow-hidden cursor-pointer group"
                         onClick={() => router.push(`/editor/${video.id}`)}
                       >
-                        <div className="relative aspect-video">
-                          <img
-                            src={"https://placehold.co/600x400.png"}
-                            alt={video.name}
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
-                              <Play className="w-5 h-5 text-foreground ml-0.5" />
+                        <div className="relative aspect-video bg-muted">
+                          {isGenerating ? (
+                            <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground">
+                              <div className="animate-pulse text-sm font-medium">
+                                Generating...
+                              </div>
                             </div>
-                          </div>
-                          {/* <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-0.5 rounded">
-                            {2}
-                          </div> */}
+                          ) : (
+                            <>
+                              <SlideThumbnail slide={firstSlide} />
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
+                                  <Play className="w-5 h-5 text-foreground ml-0.5" />
+                                </div>
+                              </div>
+                            </>
+                          )}
                         </div>
+
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0 flex-1">
                               <h3 className="font-medium truncate">{video.name}</h3>
-                              <div className="flex items-center gap-2 mt-1">
+                              <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                                <span>{getSlideCount(video)} slides</span>
+                                <span>•</span>
+                                <span>{video.metadata?.duration.toFixed(2)}s</span>
+                              </div>
+
+                              <div className="flex items-center gap-2 mt-2">
                                 {/* <span
                                   className={`text-xs px-2 py-0.5 rounded-full ${
                                     video.status === "published"
@@ -335,12 +350,12 @@ const DashboardPage = () => {
                                 >
                                   {video.status === "published" ? "Published" : "Draft"}
                                 </span> */}
-                                {/* <span className="text-xs text-muted-foreground">
-                                  {video.createdAt}
-                                </span> */}
+                                <span className="text-xs text-muted-foreground">
+                                  {getFormattedDate(video.createdAt)}
+                                </span>
                               </div>
                             </div>
-                            <DropdownMenu>
+                            {/* <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button
                                   variant="ghost"
@@ -357,12 +372,13 @@ const DashboardPage = () => {
                                   Delete
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
-                            </DropdownMenu>
+                            </DropdownMenu> */}
                           </div>
                         </CardContent>
                       </Card>
                     </motion.div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </motion.div>

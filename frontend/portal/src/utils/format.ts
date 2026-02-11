@@ -1,7 +1,7 @@
 // utils/format.ts
 
-import { SourceTyeps } from '@/store/Source/sourceSlice'
 import { Timestamp } from '@bufbuild/protobuf/wkt'
+import { Video } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import { formatDistanceToNow } from 'date-fns'
 
 export function getFormattedDate(timestamp: Timestamp | undefined): string {
@@ -61,7 +61,11 @@ export function formatTimestampToDate(timestamp?: Timestamp): Date {
 
 };
 
-export const getSubredditName = (list: SourceTyeps[], id: string) => {
-  const name = list?.find(reddit => reddit.id === id)?.name ?? "N/A";
-  return name;
-};
+export function getSlideCount(video: Video) {
+  return (
+    video.config?.sections?.reduce(
+      (acc: number, section: any) => acc + (section.slides?.length || 0),
+      0
+    ) || 0
+  );
+}

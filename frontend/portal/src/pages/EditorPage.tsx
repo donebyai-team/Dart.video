@@ -231,7 +231,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
             {videoConfigFromStore?.metadata?.duration.toFixed(2)}s
           </div>
           <ResolutionSelector />
-          <Button
+          {/* <Button
             variant='outline'
             size='sm'
             onClick={() => setShowVoiceover(true)}
@@ -240,7 +240,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
           >
             <Mic2 className='w-4 h-4' />
             Voiceover
-          </Button>
+          </Button> */}
           <Button className='btn-accent-gradient gap-2' disabled={isStreamingVideo}>
             <Eye className='w-4 h-4' />
             Export
@@ -485,7 +485,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
 
       {/* Modals */}
       {/* <ScreenshotLibrary /> */}
-      <VoiceoverPanel />
+      {/* <VoiceoverPanel /> */}
     </div>
   )
 }

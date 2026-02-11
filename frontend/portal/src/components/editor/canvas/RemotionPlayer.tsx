@@ -230,11 +230,11 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
       />
 
       {/* Transcript panel - below player, above timeline */}
-      {transcriptPanel && !isFullscreen && (
+      {/* {transcriptPanel && !isFullscreen && (
         <div className="bg-card border-t border-border p-3 flex-shrink-0">
           {transcriptPanel}
         </div>
-      )}
+      )} */}
 
       {/* Timeline */}
       <div className={`bg-card border-t border-border ${isFullscreen ? "hidden" : ""}`}>
