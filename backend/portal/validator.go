@@ -56,7 +56,7 @@ func validateMetadata(metadata *pbcore.VideoMetadata) error {
 		return fmt.Errorf("metadata.Fps is invalid")
 	}
 
-	if metadata.BackgroundColor != nil && !isValidHexColor(*metadata.BackgroundColor) {
+	if metadata.BackgroundColor != nil && !IsValidBackground(*metadata.BackgroundColor) {
 		return fmt.Errorf("metadata.BackgroundColor is invalid")
 	}
 
@@ -92,7 +92,7 @@ func validateSlide(slide *pbcore.Slide) error {
 		return fmt.Errorf("id is empty")
 	}
 
-	if slide.BackgroundColor != nil && !isValidHexColor(*slide.BackgroundColor) {
+	if slide.BackgroundColor != nil && !IsValidBackground(*slide.BackgroundColor) {
 		return fmt.Errorf("background color is invalid")
 	}
 
@@ -380,7 +380,7 @@ func isValidLinearGradient(s string) bool {
 }
 
 func isValidHexColor(s string) bool {
-	return hexColorRegex.MatchString(s)
+	return s == "transparent" || hexColorRegex.MatchString(s)
 }
 
 func validateImageURL(raw string) error {
