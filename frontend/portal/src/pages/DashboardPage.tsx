@@ -32,6 +32,7 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import VideoIntentComposer from "@/components/dashboard/VideoIntentComposer";
 import RecentVideos from "@/components/dashboard/RecentVideos";
+import { useOrganization } from "@coasterai/ui-core/hooks/useOrganization";
 
 /* ---------------- Existing Dashboard Code ---------------- */
 
@@ -60,9 +61,9 @@ const navItems: NavItem[] = [
 
 
 const DashboardPage = () => {
-  const router = useRouter();
   const [activeNav, setActiveNav] = useState("home");
   const [brandExpanded, setBrandExpanded] = useState(false);
+  const [currentOrg] = useOrganization();
 
 
   const handleNavClick = (id: string) => {
@@ -145,10 +146,10 @@ const DashboardPage = () => {
           <SidebarFooter className="p-4 border-t border-border">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
-                <span className="text-sm font-medium">JD</span>
+                <span className="text-sm font-medium"></span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">John Doe</p>
+                <p className="text-sm font-medium truncate">{currentOrg?.name}</p>
                 <p className="text-xs text-muted-foreground truncate">Pro Plan</p>
               </div>
             </div>
