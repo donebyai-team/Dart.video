@@ -35,6 +35,11 @@ export declare type VideoMetadata = Message<"coasterai.core.v1.VideoMetadata"> &
    * @generated from field: float duration = 4;
    */
   duration: number;
+
+  /**
+   * @generated from field: string prompt = 5;
+   */
+  prompt: string;
 };
 
 /**

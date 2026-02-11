@@ -6,10 +6,12 @@ import (
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"go.uber.org/zap"
+	"math/rand"
+	"time"
 )
 
 type VideoGeneration interface {
-	CreateVideo(ctx context.Context, script *pbcore.Script, name, organizationID string) (*models.Video, error)
+	CreateVideo(ctx context.Context, organizationID string, params CreateVideoParams) (*models.Video, error)
 	GetVideo(ctx context.Context, id, organizationID string) (*models.Video, error)
 	GetVideos(ctx context.Context, organizationID string) ([]*models.Video, error)
 	UpdateVideoConfig(ctx context.Context, video *models.Video) error
@@ -43,13 +45,39 @@ func (v videoGeneration) UpdateVideoConfig(ctx context.Context, video *models.Vi
 	return v.db.UpdateVideo(ctx, existingVideo)
 }
 
-func (v videoGeneration) CreateVideo(ctx context.Context, script *pbcore.Script, name, organizationID string) (*models.Video, error) {
+type CreateVideoParams struct {
+	Script     *pbcore.Script
+	Resolution *pbcore.Resolution
+	Prompt     string
+}
+
+const letters = "abcdefghijklmnopqrstuvwxyz"
+
+// GenerateRandomName generates a random name with first letter capitalized
+func GenerateRandomName(minLen, maxLen int) string {
+	rand.Seed(time.Now().UnixNano())
+
+	length := rand.Intn(maxLen-minLen+1) + minLen
+
+	name := make([]byte, length)
+
+	for i := 0; i < length; i++ {
+		name[i] = letters[rand.Intn(len(letters))]
+	}
+
+	// Capitalize first letter
+	name[0] = byte(name[0] - 32) // convert a-z → A-Z
+
+	return string(name)
+}
+
+func (v videoGeneration) CreateVideo(ctx context.Context, organizationID string, params CreateVideoParams) (*models.Video, error) {
 	video, err := v.db.CreateVideo(ctx, &models.Video{
-		Name:           name,
-		Script:         script,
+		Name:           GenerateRandomName(5, 10),
+		Script:         params.Script,
 		OrganizationID: organizationID,
 		Status:         models.VideoStatusPROCESSING,
-		Metadata:       &pbcore.VideoMetadata{Fps: defaultVideoFPS},
+		Metadata:       &pbcore.VideoMetadata{Fps: defaultVideoFPS, Prompt: params.Prompt},
 	})
 
 	if err != nil {

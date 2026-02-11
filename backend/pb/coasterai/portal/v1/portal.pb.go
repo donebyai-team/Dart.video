@@ -462,8 +462,10 @@ type CreateVideoRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Script *v1.Script `protobuf:"bytes,1,opt,name=script,proto3" json:"script,omitempty"`
-	Name   string     `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Script     *v1.Script     `protobuf:"bytes,1,opt,name=script,proto3" json:"script,omitempty"`
+	Prompt     string         `protobuf:"bytes,2,opt,name=prompt,proto3" json:"prompt,omitempty"`
+	Resolution *v1.Resolution `protobuf:"bytes,3,opt,name=resolution,proto3" json:"resolution,omitempty"`
+	Duration   float32        `protobuf:"fixed32,4,opt,name=duration,proto3" json:"duration,omitempty"`
 }
 
 func (x *CreateVideoRequest) Reset() {
@@ -505,11 +507,25 @@ func (x *CreateVideoRequest) GetScript() *v1.Script {
 	return nil
 }
 
-func (x *CreateVideoRequest) GetName() string {
+func (x *CreateVideoRequest) GetPrompt() string {
 	if x != nil {
-		return x.Name
+		return x.Prompt
 	}
 	return ""
+}
+
+func (x *CreateVideoRequest) GetResolution() *v1.Resolution {
+	if x != nil {
+		return x.Resolution
+	}
+	return nil
+}
+
+func (x *CreateVideoRequest) GetDuration() float32 {
+	if x != nil {
+		return x.Duration
+	}
+	return 0
 }
 
 type CreateVideoResponse struct {
@@ -1795,12 +1811,18 @@ var file_coasterai_portal_v1_portal_proto_rawDesc = []byte{
 	0x30, 0x0a, 0x06, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32,
 	0x18, 0x2e, 0x63, 0x6f, 0x61, 0x73, 0x74, 0x65, 0x72, 0x61, 0x69, 0x2e, 0x63, 0x6f, 0x72, 0x65,
 	0x2e, 0x76, 0x31, 0x2e, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x06, 0x76, 0x69, 0x64, 0x65, 0x6f,
-	0x73, 0x22, 0x5b, 0x0a, 0x12, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x56, 0x69, 0x64, 0x65, 0x6f,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x31, 0x0a, 0x06, 0x73, 0x63, 0x72, 0x69, 0x70,
-	0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x63, 0x6f, 0x61, 0x73, 0x74, 0x65,
-	0x72, 0x61, 0x69, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x63, 0x72, 0x69,
-	0x70, 0x74, 0x52, 0x06, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61,
-	0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x22, 0x25,
+	0x73, 0x22, 0xba, 0x01, 0x0a, 0x12, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x56, 0x69, 0x64, 0x65,
+	0x6f, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x31, 0x0a, 0x06, 0x73, 0x63, 0x72, 0x69,
+	0x70, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x63, 0x6f, 0x61, 0x73, 0x74,
+	0x65, 0x72, 0x61, 0x69, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x53, 0x63, 0x72,
+	0x69, 0x70, 0x74, 0x52, 0x06, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x70,
+	0x72, 0x6f, 0x6d, 0x70, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x70, 0x72, 0x6f,
+	0x6d, 0x70, 0x74, 0x12, 0x3d, 0x0a, 0x0a, 0x72, 0x65, 0x73, 0x6f, 0x6c, 0x75, 0x74, 0x69, 0x6f,
+	0x6e, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1d, 0x2e, 0x63, 0x6f, 0x61, 0x73, 0x74, 0x65,
+	0x72, 0x61, 0x69, 0x2e, 0x63, 0x6f, 0x72, 0x65, 0x2e, 0x76, 0x31, 0x2e, 0x52, 0x65, 0x73, 0x6f,
+	0x6c, 0x75, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x0a, 0x72, 0x65, 0x73, 0x6f, 0x6c, 0x75, 0x74, 0x69,
+	0x6f, 0x6e, 0x12, 0x1a, 0x0a, 0x08, 0x64, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x04,
+	0x20, 0x01, 0x28, 0x02, 0x52, 0x08, 0x64, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x22, 0x25,
 	0x0a, 0x13, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x73,
 	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
 	0x09, 0x52, 0x02, 0x69, 0x64, 0x22, 0x93, 0x02, 0x0a, 0x06, 0x43, 0x6f, 0x6e, 0x66, 0x69, 0x67,
@@ -2126,8 +2148,9 @@ var file_coasterai_portal_v1_portal_proto_goTypes = []interface{}{
 	(*v1.VideoConfig)(nil),           // 31: coasterai.core.v1.VideoConfig
 	(*v1.VideoMetadata)(nil),         // 32: coasterai.core.v1.VideoMetadata
 	(*v1.Script)(nil),                // 33: coasterai.core.v1.Script
-	(*timestamppb.Timestamp)(nil),    // 34: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),            // 35: google.protobuf.Empty
+	(*v1.Resolution)(nil),            // 34: coasterai.core.v1.Resolution
+	(*timestamppb.Timestamp)(nil),    // 35: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),            // 36: google.protobuf.Empty
 }
 var file_coasterai_portal_v1_portal_proto_depIdxs = []int32{
 	30, // 0: coasterai.portal.v1.GetVideoResponse.video:type_name -> coasterai.core.v1.Video
@@ -2135,53 +2158,54 @@ var file_coasterai_portal_v1_portal_proto_depIdxs = []int32{
 	32, // 2: coasterai.portal.v1.UpdateVideoConfigRequest.metadata:type_name -> coasterai.core.v1.VideoMetadata
 	30, // 3: coasterai.portal.v1.GetVideosResponse.videos:type_name -> coasterai.core.v1.Video
 	33, // 4: coasterai.portal.v1.CreateVideoRequest.script:type_name -> coasterai.core.v1.Script
-	1,  // 5: coasterai.portal.v1.User.role:type_name -> coasterai.portal.v1.UserRole
-	20, // 6: coasterai.portal.v1.User.organizations:type_name -> coasterai.portal.v1.Organization
-	34, // 7: coasterai.portal.v1.User.created_at:type_name -> google.protobuf.Timestamp
-	2,  // 8: coasterai.portal.v1.OauthAuthorizeRequest.integration_type:type_name -> coasterai.portal.v1.IntegrationType
-	21, // 9: coasterai.portal.v1.Organization.feature_flags:type_name -> coasterai.portal.v1.OrganizationFeatureFlags
-	34, // 10: coasterai.portal.v1.Organization.created_at:type_name -> google.protobuf.Timestamp
-	2,  // 11: coasterai.portal.v1.Integration.type:type_name -> coasterai.portal.v1.IntegrationType
-	3,  // 12: coasterai.portal.v1.Integration.status:type_name -> coasterai.portal.v1.IntegrationState
-	23, // 13: coasterai.portal.v1.Integration.reddit:type_name -> coasterai.portal.v1.RedditIntegration
-	22, // 14: coasterai.portal.v1.Integrations.integrations:type_name -> coasterai.portal.v1.Integration
-	23, // 15: coasterai.portal.v1.UpdateIntegrationRequest.reddit:type_name -> coasterai.portal.v1.RedditIntegration
-	2,  // 16: coasterai.portal.v1.GetIntegrationRequest.type:type_name -> coasterai.portal.v1.IntegrationType
-	35, // 17: coasterai.portal.v1.PortalService.GetConfig:input_type -> google.protobuf.Empty
-	35, // 18: coasterai.portal.v1.PortalService.Self:input_type -> google.protobuf.Empty
-	27, // 19: coasterai.portal.v1.PortalService.GetIntegration:input_type -> coasterai.portal.v1.GetIntegrationRequest
-	26, // 20: coasterai.portal.v1.PortalService.RevokeIntegration:input_type -> coasterai.portal.v1.RevokeIntegrationRequest
-	25, // 21: coasterai.portal.v1.PortalService.UpdateIntegration:input_type -> coasterai.portal.v1.UpdateIntegrationRequest
-	11, // 22: coasterai.portal.v1.PortalService.PasswordlessStart:input_type -> coasterai.portal.v1.PasswordlessStartRequest
-	12, // 23: coasterai.portal.v1.PortalService.PasswordlessVerify:input_type -> coasterai.portal.v1.PasswordlessStartVerify
-	16, // 24: coasterai.portal.v1.PortalService.OauthAuthorize:input_type -> coasterai.portal.v1.OauthAuthorizeRequest
-	28, // 25: coasterai.portal.v1.PortalService.OauthCallback:input_type -> coasterai.portal.v1.OauthCallbackRequest
-	28, // 26: coasterai.portal.v1.PortalService.SocialLoginCallback:input_type -> coasterai.portal.v1.OauthCallbackRequest
-	35, // 27: coasterai.portal.v1.PortalService.GetIntegrations:input_type -> google.protobuf.Empty
-	8,  // 28: coasterai.portal.v1.PortalService.CreateVideo:input_type -> coasterai.portal.v1.CreateVideoRequest
-	6,  // 29: coasterai.portal.v1.PortalService.GetVideo:input_type -> coasterai.portal.v1.GetVideoRequest
-	35, // 30: coasterai.portal.v1.PortalService.GetVideos:input_type -> google.protobuf.Empty
-	5,  // 31: coasterai.portal.v1.PortalService.UpdateVideoConfig:input_type -> coasterai.portal.v1.UpdateVideoConfigRequest
-	10, // 32: coasterai.portal.v1.PortalService.GetConfig:output_type -> coasterai.portal.v1.Config
-	15, // 33: coasterai.portal.v1.PortalService.Self:output_type -> coasterai.portal.v1.User
-	24, // 34: coasterai.portal.v1.PortalService.GetIntegration:output_type -> coasterai.portal.v1.Integrations
-	35, // 35: coasterai.portal.v1.PortalService.RevokeIntegration:output_type -> google.protobuf.Empty
-	35, // 36: coasterai.portal.v1.PortalService.UpdateIntegration:output_type -> google.protobuf.Empty
-	35, // 37: coasterai.portal.v1.PortalService.PasswordlessStart:output_type -> google.protobuf.Empty
-	19, // 38: coasterai.portal.v1.PortalService.PasswordlessVerify:output_type -> coasterai.portal.v1.JWT
-	17, // 39: coasterai.portal.v1.PortalService.OauthAuthorize:output_type -> coasterai.portal.v1.OauthAuthorizeResponse
-	29, // 40: coasterai.portal.v1.PortalService.OauthCallback:output_type -> coasterai.portal.v1.OauthCallbackResponse
-	19, // 41: coasterai.portal.v1.PortalService.SocialLoginCallback:output_type -> coasterai.portal.v1.JWT
-	24, // 42: coasterai.portal.v1.PortalService.GetIntegrations:output_type -> coasterai.portal.v1.Integrations
-	9,  // 43: coasterai.portal.v1.PortalService.CreateVideo:output_type -> coasterai.portal.v1.CreateVideoResponse
-	4,  // 44: coasterai.portal.v1.PortalService.GetVideo:output_type -> coasterai.portal.v1.GetVideoResponse
-	7,  // 45: coasterai.portal.v1.PortalService.GetVideos:output_type -> coasterai.portal.v1.GetVideosResponse
-	35, // 46: coasterai.portal.v1.PortalService.UpdateVideoConfig:output_type -> google.protobuf.Empty
-	32, // [32:47] is the sub-list for method output_type
-	17, // [17:32] is the sub-list for method input_type
-	17, // [17:17] is the sub-list for extension type_name
-	17, // [17:17] is the sub-list for extension extendee
-	0,  // [0:17] is the sub-list for field type_name
+	34, // 5: coasterai.portal.v1.CreateVideoRequest.resolution:type_name -> coasterai.core.v1.Resolution
+	1,  // 6: coasterai.portal.v1.User.role:type_name -> coasterai.portal.v1.UserRole
+	20, // 7: coasterai.portal.v1.User.organizations:type_name -> coasterai.portal.v1.Organization
+	35, // 8: coasterai.portal.v1.User.created_at:type_name -> google.protobuf.Timestamp
+	2,  // 9: coasterai.portal.v1.OauthAuthorizeRequest.integration_type:type_name -> coasterai.portal.v1.IntegrationType
+	21, // 10: coasterai.portal.v1.Organization.feature_flags:type_name -> coasterai.portal.v1.OrganizationFeatureFlags
+	35, // 11: coasterai.portal.v1.Organization.created_at:type_name -> google.protobuf.Timestamp
+	2,  // 12: coasterai.portal.v1.Integration.type:type_name -> coasterai.portal.v1.IntegrationType
+	3,  // 13: coasterai.portal.v1.Integration.status:type_name -> coasterai.portal.v1.IntegrationState
+	23, // 14: coasterai.portal.v1.Integration.reddit:type_name -> coasterai.portal.v1.RedditIntegration
+	22, // 15: coasterai.portal.v1.Integrations.integrations:type_name -> coasterai.portal.v1.Integration
+	23, // 16: coasterai.portal.v1.UpdateIntegrationRequest.reddit:type_name -> coasterai.portal.v1.RedditIntegration
+	2,  // 17: coasterai.portal.v1.GetIntegrationRequest.type:type_name -> coasterai.portal.v1.IntegrationType
+	36, // 18: coasterai.portal.v1.PortalService.GetConfig:input_type -> google.protobuf.Empty
+	36, // 19: coasterai.portal.v1.PortalService.Self:input_type -> google.protobuf.Empty
+	27, // 20: coasterai.portal.v1.PortalService.GetIntegration:input_type -> coasterai.portal.v1.GetIntegrationRequest
+	26, // 21: coasterai.portal.v1.PortalService.RevokeIntegration:input_type -> coasterai.portal.v1.RevokeIntegrationRequest
+	25, // 22: coasterai.portal.v1.PortalService.UpdateIntegration:input_type -> coasterai.portal.v1.UpdateIntegrationRequest
+	11, // 23: coasterai.portal.v1.PortalService.PasswordlessStart:input_type -> coasterai.portal.v1.PasswordlessStartRequest
+	12, // 24: coasterai.portal.v1.PortalService.PasswordlessVerify:input_type -> coasterai.portal.v1.PasswordlessStartVerify
+	16, // 25: coasterai.portal.v1.PortalService.OauthAuthorize:input_type -> coasterai.portal.v1.OauthAuthorizeRequest
+	28, // 26: coasterai.portal.v1.PortalService.OauthCallback:input_type -> coasterai.portal.v1.OauthCallbackRequest
+	28, // 27: coasterai.portal.v1.PortalService.SocialLoginCallback:input_type -> coasterai.portal.v1.OauthCallbackRequest
+	36, // 28: coasterai.portal.v1.PortalService.GetIntegrations:input_type -> google.protobuf.Empty
+	8,  // 29: coasterai.portal.v1.PortalService.CreateVideo:input_type -> coasterai.portal.v1.CreateVideoRequest
+	6,  // 30: coasterai.portal.v1.PortalService.GetVideo:input_type -> coasterai.portal.v1.GetVideoRequest
+	36, // 31: coasterai.portal.v1.PortalService.GetVideos:input_type -> google.protobuf.Empty
+	5,  // 32: coasterai.portal.v1.PortalService.UpdateVideoConfig:input_type -> coasterai.portal.v1.UpdateVideoConfigRequest
+	10, // 33: coasterai.portal.v1.PortalService.GetConfig:output_type -> coasterai.portal.v1.Config
+	15, // 34: coasterai.portal.v1.PortalService.Self:output_type -> coasterai.portal.v1.User
+	24, // 35: coasterai.portal.v1.PortalService.GetIntegration:output_type -> coasterai.portal.v1.Integrations
+	36, // 36: coasterai.portal.v1.PortalService.RevokeIntegration:output_type -> google.protobuf.Empty
+	36, // 37: coasterai.portal.v1.PortalService.UpdateIntegration:output_type -> google.protobuf.Empty
+	36, // 38: coasterai.portal.v1.PortalService.PasswordlessStart:output_type -> google.protobuf.Empty
+	19, // 39: coasterai.portal.v1.PortalService.PasswordlessVerify:output_type -> coasterai.portal.v1.JWT
+	17, // 40: coasterai.portal.v1.PortalService.OauthAuthorize:output_type -> coasterai.portal.v1.OauthAuthorizeResponse
+	29, // 41: coasterai.portal.v1.PortalService.OauthCallback:output_type -> coasterai.portal.v1.OauthCallbackResponse
+	19, // 42: coasterai.portal.v1.PortalService.SocialLoginCallback:output_type -> coasterai.portal.v1.JWT
+	24, // 43: coasterai.portal.v1.PortalService.GetIntegrations:output_type -> coasterai.portal.v1.Integrations
+	9,  // 44: coasterai.portal.v1.PortalService.CreateVideo:output_type -> coasterai.portal.v1.CreateVideoResponse
+	4,  // 45: coasterai.portal.v1.PortalService.GetVideo:output_type -> coasterai.portal.v1.GetVideoResponse
+	7,  // 46: coasterai.portal.v1.PortalService.GetVideos:output_type -> coasterai.portal.v1.GetVideosResponse
+	36, // 47: coasterai.portal.v1.PortalService.UpdateVideoConfig:output_type -> google.protobuf.Empty
+	33, // [33:48] is the sub-list for method output_type
+	18, // [18:33] is the sub-list for method input_type
+	18, // [18:18] is the sub-list for extension type_name
+	18, // [18:18] is the sub-list for extension extendee
+	0,  // [0:18] is the sub-list for field type_name
 }
 
 func init() { file_coasterai_portal_v1_portal_proto_init() }

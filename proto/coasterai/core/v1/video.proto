@@ -18,6 +18,7 @@ message VideoMetadata {
     optional string background_color = 2;
     Resolution resolution = 3;
     float duration = 4;
+    string prompt = 5;
 }
 
 message Video {

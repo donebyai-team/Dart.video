@@ -11,34 +11,83 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Script } from "@coasterai/pb/coasterai/core/v1/video_pb";
+import { Resolution, Script } from "@coasterai/pb/coasterai/core/v1/video_pb";
 import ScriptEditorDialog from "@/pages/ScriptInputPage";
+import { useClientsContext } from "@coasterai/ui-core/context/ClientContext";
+import { getConnectError } from "@/utils/error";
+import toast from "react-hot-toast";
+import defaultEditorConfig from "@/data/editorConfig";
+import { useRouter } from "next/navigation";
+import { getDefaultResolution } from "@/stores/video/defaults";
 
 
 /* ---------------- Video Intent Composer Component ---------------- */
 
-const RESOLUTIONS = [
-    { label: "Landscape (1920x1080)", value: "1920x1080" },
-    { label: "Square (1080x1080)", value: "1080x1080" },
-    { label: "Portrait (1080x1920)", value: "1080x1920" },
-];
+// const RESOLUTIONS = [
+//     { label: "Landscape (1920x1080)", value: "1920x1080" },
+//     { label: "Square (1080x1080)", value: "1080x1080" },
+//     { label: "Portrait (1080x1920)", value: "1080x1920" },
+// ];
 
 const DURATIONS = [
-    { label: "60s", value: "5" },
-    { label: "90s", value: "10" },
+    { label: "60s", value: "60" },
+    { label: "90s", value: "90" },
 ];
+
+const MIN_SCRIPT_SECTIONS = 3;
+const MIN_PROMPT_LENGTH = 10;
 
 const VideoIntentComposer = () => {
     const [prompt, setPrompt] = useState("");
-    const [resolution, setResolution] = useState("1920x1080");
-    const [duration, setDuration] = useState("5");
+    const [resolutionId, setResolutionId] = useState(defaultEditorConfig.resolution.default);
+
+    const [duration, setDuration] = useState("60");
     const [scriptDialogOpen, setScriptDialogOpen] = useState(false);
     const [script, setScript] = useState<Script | undefined>();
     const hasScript = !!script?.items?.length;
+    const router = useRouter();
+    const { portalClient } = useClientsContext();
+
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const removeScript = () => {
         setScript(undefined);
     };
 
+    const handleSubmit = async () => {
+        if (!canGenerate || isSubmitting) return;
+
+        try {
+            setIsSubmitting(true);
+            const selectedResolution =
+                defaultEditorConfig.resolution.options.find(
+                    r => r.id === resolutionId
+                ) ?? getDefaultResolution(defaultEditorConfig);
+
+            const res = await portalClient.createVideo({
+                prompt: prompt,
+                script: script,
+                resolution: selectedResolution,
+                duration: Number(duration),
+            });
+
+            router.push(`/editor/${res.id}`);
+
+        } catch (err: any) {
+            toast.error(getConnectError(err));
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+
+    const scriptVoiceoverCount =
+        script?.items?.filter(i => i.voiceover?.trim()).length ?? 0;
+
+    const hasValidScript = scriptVoiceoverCount >= MIN_SCRIPT_SECTIONS;
+
+    const hasPrompt = prompt.trim().length > MIN_PROMPT_LENGTH;
+
+    const canGenerate = hasPrompt || hasValidScript;
 
     return (
         <div className="w-full min-h-[70vh] flex flex-col items-center justify-center">
@@ -64,18 +113,20 @@ const VideoIntentComposer = () => {
                         <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                             <div className="flex items-center gap-2">
                                 <Film className="w-6 h-6" />
-                                <Select value={resolution} onValueChange={setResolution}>
+                                <Select value={resolutionId} onValueChange={setResolutionId}>
                                     <SelectTrigger className="h-8 text-xs bg-background">
                                         <SelectValue />
                                     </SelectTrigger>
+
                                     <SelectContent>
-                                        {RESOLUTIONS.map((r) => (
-                                            <SelectItem key={r.value} value={r.value}>
-                                                {r.label}
+                                        {defaultEditorConfig.resolution.options.map((r) => (
+                                            <SelectItem key={r.id} value={r.id}>
+                                                {r.name} ({r.height}x{r.width})
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
+
                             </div>
 
                             <div className="flex items-center gap-2">
@@ -180,11 +231,18 @@ const VideoIntentComposer = () => {
 
                                 {/* Bottom Toolbar */}
                                 <div className="absolute bottom-2 right-2 flex items-center justify-end">
-                                    <Button className="btn-accent-gradient h-9 w-9 rounded-xl flex items-center justify-center">
-                                        <Sparkles className="w-2 h-2" />
+                                    <Button
+                                        onClick={handleSubmit}
+                                        className="btn-accent-gradient h-9 w-9 rounded-xl flex items-center justify-center"
+                                        disabled={!canGenerate}
+                                    >
+                                        {isSubmitting ? (
+                                            <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                        ) : (
+                                            <Sparkles className="w-2 h-2" />
+                                        )}
                                     </Button>
                                 </div>
-
                             </div>
                         </div>
 
