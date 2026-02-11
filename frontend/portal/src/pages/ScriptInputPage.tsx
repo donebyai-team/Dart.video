@@ -1,355 +1,396 @@
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
+
+import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog";
+
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+
+import { Script, ScriptItem } from "@coasterai/pb/coasterai/core/v1/video_pb";
+
 import {
   DndContext,
   closestCenter,
-  KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
-  DragEndEvent,
 } from "@dnd-kit/core";
+
 import {
-  arrayMove,
   SortableContext,
-  sortableKeyboardCoordinates,
   verticalListSortingStrategy,
   useSortable,
+  arrayMove,
 } from "@dnd-kit/sortable";
+
 import { CSS } from "@dnd-kit/utilities";
-import {
-  ArrowLeft,
-  GripVertical,
-  Plus,
-  Trash2,
-  ChevronDown,
-  ChevronRight,
-  Video,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 
-interface ScriptSection {
-  id: string;
-  title: string;
-  voiceover: string;
-  referenceText: string;
-}
+import { GripVertical, Plus, X } from "lucide-react";
 
-const defaultSections: ScriptSection[] = [
-  { id: "hook", title: "Hook", voiceover: "", referenceText: "" },
-  { id: "challenge", title: "Challenge", voiceover: "", referenceText: "" },
-  { id: "outcome", title: "Outcome", voiceover: "", referenceText: "" },
-  { id: "category-intro", title: "Category Intro", voiceover: "", referenceText: "" },
-  { id: "product-intro", title: "Product Intro", voiceover: "", referenceText: "" },
-  { id: "x-factor-1", title: "X-Factor 1", voiceover: "", referenceText: "" },
-  { id: "x-factor-2", title: "X-Factor 2", voiceover: "", referenceText: "" },
-  { id: "x-factor-3", title: "X-Factor 3", voiceover: "", referenceText: "" },
-  { id: "x-factor-4", title: "X-Factor 4", voiceover: "", referenceText: "" },
-  { id: "social-proof", title: "Social Proof", voiceover: "", referenceText: "" },
-  { id: "cta", title: "CTA", voiceover: "", referenceText: "" },
+/* ---------------- Constants ---------------- */
+
+const MIN_SECTIONS = 3;
+
+/* ---------------- Default ---------------- */
+const defaultScriptItems: ScriptItem[] = [
+  { name: "Hook", voiceover: "", reference: "" } as ScriptItem,
+  { name: "Challenge", voiceover: "", reference: "" } as ScriptItem,
+  { name: "Outcome", voiceover: "", reference: "" } as ScriptItem,
+  { name: "Category Intro", voiceover: "", reference: "" } as ScriptItem,
+  { name: "Product Intro", voiceover: "", reference: "" } as ScriptItem,
+  { name: "X-Factor 1", voiceover: "", reference: "" } as ScriptItem,
+  { name: "X-Factor 2", voiceover: "", reference: "" } as ScriptItem,
+  { name: "Social Proof", voiceover: "", reference: "" } as ScriptItem,
+  { name: "CTA", voiceover: "", reference: "" } as ScriptItem,
 ];
 
-interface SortableSectionCardProps {
-  section: ScriptSection;
-  isOpen: boolean;
-  onToggle: () => void;
-  onRemove: () => void;
-  onUpdateField: (field: "voiceover" | "referenceText", value: string) => void;
-  onUpdateTitle: (title: string) => void;
-}
+/* ---------------- Sortable Item ---------------- */
 
-const SortableSectionCard = ({
-  section,
-  isOpen,
-  onToggle,
-  onRemove,
-  onUpdateField,
-  onUpdateTitle,
-}: SortableSectionCardProps) => {
+function SortableItem({
+  item,
+  index,
+  isActive,
+  onClick,
+  onDelete,
+  disableDelete,
+}: any) {
+
   const {
     attributes,
     listeners,
     setNodeRef,
     transform,
     transition,
-    isDragging,
-  } = useSortable({ id: section.id });
+  } = useSortable({ id: index });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
   };
+
+  const isFilled = !!item.voiceover?.trim();
 
   return (
     <div ref={setNodeRef} style={style}>
-      <Card className={`overflow-hidden ${isDragging ? "shadow-lg" : ""}`}>
-        <Collapsible open={isOpen} onOpenChange={onToggle}>
-          <div className="flex items-center gap-2 p-3 bg-muted/50 border-b border-border">
-            <button
-              {...attributes}
-              {...listeners}
-              className="cursor-grab hover:bg-muted p-1 rounded"
-            >
-              <GripVertical className="w-4 h-4 text-muted-foreground" />
-            </button>
-            <CollapsibleTrigger asChild>
-              <button className="p-1 hover:bg-muted rounded">
-                {isOpen ? (
-                  <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                ) : (
-                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                )}
-              </button>
-            </CollapsibleTrigger>
-            <Input
-              value={section.title}
-              onChange={(e) => onUpdateTitle(e.target.value)}
-              className="h-8 font-medium bg-transparent border-none shadow-none focus-visible:ring-1 px-2"
-            />
-            {section.voiceover.trim() && (
-              <span className="text-xs text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 px-2 py-0.5 rounded-full whitespace-nowrap">
-                Filled
-              </span>
-            )}
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-7 w-7 ml-auto">
-                  <Trash2 className="w-3.5 h-3.5 text-muted-foreground hover:text-destructive" />
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Remove Section</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure you want to remove "{section.title}"? This action cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={onRemove}>Remove</AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
-          <CollapsibleContent>
-            <CardContent className="p-4 space-y-4">
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-foreground">
-                  Voiceover Script <span className="text-destructive">*</span>
-                </label>
-                <Textarea
-                  placeholder="Enter the voiceover text for this section..."
-                  value={section.voiceover}
-                  onChange={(e) => onUpdateField("voiceover", e.target.value)}
-                  className="min-h-[100px] text-sm resize-none"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-foreground">
-                  Reference Design <span className="text-muted-foreground">(optional)</span>
-                </label>
-                <Textarea
-                  placeholder="Describe the visuals you want to show (e.g., 'Show product dashboard with key metrics highlighted')..."
-                  value={section.referenceText}
-                  onChange={(e) => onUpdateField("referenceText", e.target.value)}
-                  className="min-h-[80px] text-sm resize-none"
-                />
-              </div>
-            </CardContent>
-          </CollapsibleContent>
-        </Collapsible>
-      </Card>
+      <div
+        onClick={onClick}
+        className={`
+          group flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer
+          transition
+          ${isActive
+            ? "bg-primary/10 text-primary"
+            : "hover:bg-muted"
+          }
+        `}
+      >
+
+        {/* Drag Handle */}
+        <div
+          {...attributes}
+          {...listeners}
+          className="opacity-40 group-hover:opacity-100 cursor-grab"
+        >
+          <GripVertical className="w-4 h-4" />
+        </div>
+
+        {/* Name */}
+        <span className="flex-1 truncate text-sm font-medium">
+          {item.name}
+        </span>
+
+        {/* Filled Indicator */}
+        {isFilled && (
+          <span className="text-xs text-emerald-500">●</span>
+        )}
+
+        {/* Delete Button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(index);
+          }}
+          disabled={disableDelete}
+          className={`
+            ml-1 p-1 rounded-md transition
+            ${disableDelete
+              ? "opacity-30 cursor-not-allowed"
+              : "opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive"
+            }
+            ${isActive ? "opacity-100" : ""}
+          `}
+        >
+          <X className="w-3.5 h-3.5" />
+        </button>
+
+      </div>
     </div>
   );
+}
+
+
+const getVoiceoverHint = (name?: string) => {
+  if (!name) return "Write narration for this section.";
+
+  const key = name.toLowerCase();
+
+  if (key.includes("hook"))
+    return "Grab attention in the first 3 seconds. Ask a question, show a bold claim, or highlight a pain point.";
+
+  if (key.includes("challenge"))
+    return "Describe the user's problem or pain clearly and emotionally.";
+
+  if (key.includes("outcome") || key.includes("solution"))
+    return "Show the transformation or result after using the product.";
+
+  if (key.includes("cta"))
+    return "Tell the viewer exactly what to do next (Try now, Sign up, Learn more).";
+
+  return "Write clear narration for this section.";
 };
 
-const ScriptInputPage = () => {
-  const router = useRouter();
-  
-  const [sections, setSections] = useState<ScriptSection[]>(defaultSections);
-  const [openSections, setOpenSections] = useState<string[]>(["hook"]);
+
+/* ---------------- Component ---------------- */
+
+export default function ScriptEditorDialog({
+  open,
+  onOpenChange,
+  onSave,
+  initialScript,
+}: any) {
+
+  /* ---------------- State ---------------- */
+
+  const [script, setScript] = useState<Script>({
+    items: defaultScriptItems,
+  } as Script);
+
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  /* ---------------- Sensors ---------------- */
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 5,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
+      activationConstraint: { distance: 5 },
     })
   );
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (over && active.id !== over.id) {
-      setSections((prev) => {
-        const oldIndex = prev.findIndex((s) => s.id === active.id);
-        const newIndex = prev.findIndex((s) => s.id === over.id);
-        return arrayMove(prev, oldIndex, newIndex);
-      });
+  /* ---------------- Reset From Parent ---------------- */
+
+  useEffect(() => {
+    if (open) {
+      setScript({
+        items:
+          initialScript?.items?.length
+            ? [...initialScript.items]
+            : [...defaultScriptItems],
+      } as Script);
+
+      setSelectedIndex(0);
     }
-  };
+  }, [open, initialScript]);
 
-  const toggleSection = (sectionId: string) => {
-    setOpenSections((prev) =>
-      prev.includes(sectionId)
-        ? prev.filter((id) => id !== sectionId)
-        : [...prev, sectionId]
-    );
-  };
+  /* ---------------- Derived ---------------- */
 
-  const removeSection = (sectionId: string) => {
-    setSections((prev) => prev.filter((s) => s.id !== sectionId));
-    setOpenSections((prev) => prev.filter((id) => id !== sectionId));
-  };
+  const selectedItem = script.items[selectedIndex];
 
-  const updateSectionField = (
-    sectionId: string,
-    field: "voiceover" | "referenceText",
-    value: string
-  ) => {
-    setSections((prev) =>
-      prev.map((section) =>
-        section.id === sectionId ? { ...section, [field]: value } : section
-      )
-    );
-  };
+  const filledSections = script.items.filter(
+    (i) => i.voiceover?.trim()
+  ).length;
 
-  const updateSectionTitle = (sectionId: string, title: string) => {
-    setSections((prev) =>
-      prev.map((section) =>
-        section.id === sectionId ? { ...section, title } : section
-      )
-    );
+  const hasMinSections = script.items.length >= MIN_SECTIONS;
+
+  /* ---------------- Actions ---------------- */
+
+  const updateItem = (index: number, patch: Partial<ScriptItem>) => {
+    setScript((prev) => ({
+      ...prev,
+      items: prev.items.map((item, i) =>
+        i === index ? { ...item, ...patch } : item
+      ),
+    }));
   };
 
   const addSection = () => {
-    const newSection: ScriptSection = {
-      id: `section-${Date.now()}`,
-      title: "New Section",
+    const newItem: ScriptItem = {
+      name: "New Section",
       voiceover: "",
-      referenceText: "",
-    };
-    setSections((prev) => [...prev, newSection]);
-    setOpenSections((prev) => [...prev, newSection.id]);
+      reference: "",
+    } as ScriptItem;
+
+    setScript((prev) => ({
+      ...prev,
+      items: [...prev.items, newItem],
+    }));
+
+    setSelectedIndex(script.items.length);
   };
 
-  const handleGenerateStoryboard = () => {
-    // For now, navigate to editor with a placeholder ID
-    // In a real app, you'd create a new video and get its ID
-    router.push("/editor/new");
+  const handleDragEnd = (event: any) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = active.id;
+    const newIndex = over.id;
+
+    setScript((prev) => ({
+      ...prev,
+      items: arrayMove(prev.items, oldIndex, newIndex),
+    }));
+
+    if (selectedIndex === oldIndex) setSelectedIndex(newIndex);
   };
 
-  const filledSections = sections.filter((s) => s.voiceover.trim()).length;
+  const handleSave = () => {
+    if (!hasMinSections) {
+      toast.error(`Minimum ${MIN_SECTIONS} sections required`);
+      return;
+    }
+
+    onSave(script);
+    onOpenChange(false);
+  };
+
+  const removeSection = (index: number) => {
+    if (script.items.length <= MIN_SECTIONS) {
+      toast.error(`Minimum ${MIN_SECTIONS} sections required`);
+      return;
+    }
+
+    setScript((prev) => ({
+      ...prev,
+      items: prev.items.filter((_, i) => i !== index),
+    }));
+
+    // Fix selection
+    setSelectedIndex((prevIndex) => {
+      if (prevIndex > index) return prevIndex - 1;
+      if (prevIndex === index) return Math.max(0, prevIndex - 1);
+      return prevIndex;
+    });
+  };
+
+
+  /* ---------------- UI ---------------- */
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      {/* Header */}
-      <header className="h-14 bg-card border-b border-border flex items-center justify-between px-4 sticky top-0 z-10">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => router.push("/dashboard")}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </button>
-          <div className="h-6 w-px bg-border" />
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
-              <Video className="w-3.5 h-3.5 text-primary-foreground" />
-            </div>
-            <span className="font-semibold">CoasterAI</span>
-          </div>
-        </div>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl p-2 overflow-hidden">
 
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-muted-foreground">
-            {filledSections}/{sections.length} sections filled
-          </span>
-          <Button
-            className="btn-accent-gradient"
-            onClick={handleGenerateStoryboard}
-            disabled={filledSections === 0}
-          >
-            Generate Storyboard
-          </Button>
-        </div>
-      </header>
+        <div className="flex h-[500px]">
 
-      {/* Main Content */}
-      <main className="max-w-3xl mx-auto py-8 px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold">Script Editor</h1>
-            <p className="text-muted-foreground mt-1">
-              Define your video sections and voiceover script. We'll create the storyboard with slides automatically.
-            </p>
-          </div>
+          {/* Sidebar */}
+          <div className="w-64 border-r bg-muted/20 flex flex-col">
 
-          <div className="space-y-3">
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-            >
-              <SortableContext
-                items={sections.map((s) => s.id)}
-                strategy={verticalListSortingStrategy}
+            <div className="flex-1 overflow-y-auto p-3 space-y-1">
+
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
               >
-                {sections.map((section) => (
-                  <SortableSectionCard
-                    key={section.id}
-                    section={section}
-                    isOpen={openSections.includes(section.id)}
-                    onToggle={() => toggleSection(section.id)}
-                    onRemove={() => removeSection(section.id)}
-                    onUpdateField={(field, value) =>
-                      updateSectionField(section.id, field, value)
-                    }
-                    onUpdateTitle={(title) => updateSectionTitle(section.id, title)}
-                  />
-                ))}
-              </SortableContext>
-            </DndContext>
+                <SortableContext
+                  items={script.items.map((_, i) => i)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {script.items.map((item, index) => (
+                    <SortableItem
+                      key={index}
+                      item={item}
+                      index={index}
+                      isActive={index === selectedIndex}
+                      disableDelete={script.items.length <= MIN_SECTIONS}
+                      onClick={() => setSelectedIndex(index)}
+                      onDelete={removeSection}
+                    />
+                  ))}
+
+                </SortableContext>
+              </DndContext>
+
+            </div>
+
+            <div className="p-3 border-t">
+              <Button
+                variant="outline"
+                className="w-full gap-2"
+                onClick={addSection}
+              >
+                <Plus className="w-4 h-4" />
+                Add Section
+              </Button>
+            </div>
+
           </div>
 
-          <Button
-            variant="outline"
-            className="w-full mt-4 gap-2"
-            onClick={addSection}
-          >
-            <Plus className="w-4 h-4" />
-            Add Section
-          </Button>
-        </motion.div>
-      </main>
-    </div>
-  );
-};
+          {/* Editor */}
+          <div className="flex-1 flex flex-col">
 
-export default ScriptInputPage;
+            {selectedItem && (
+              <>
+                <div className="flex-1 overflow-y-auto px-8 py-8 space-y-6">
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">
+                      Voiceover Script
+                    </label>
+
+                    <Textarea
+                      className="min-h-[100px]"
+                      placeholder={getVoiceoverHint(selectedItem?.name)}
+                      value={selectedItem.voiceover ?? ""}
+                      onChange={(e) =>
+                        updateItem(selectedIndex, {
+                          voiceover: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">
+                      Visual Reference
+                    </label>
+
+                    <Textarea
+                      className="min-h-[100px]"
+                      placeholder="Any reference you may want to refer"
+                      value={selectedItem.reference ?? ""}
+                      onChange={(e) =>
+                        updateItem(selectedIndex, {
+                          reference: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+
+                </div>
+
+                <div className="px-8 py-5 border-t flex justify-between items-center bg-muted/10">
+
+                  <span className="text-sm text-muted-foreground">
+                    {filledSections}/{script.items.length} filled
+                  </span>
+
+                  <Button
+                    className="btn-accent-gradient px-6"
+                    disabled={!hasMinSections}
+                    onClick={handleSave}
+                  >
+                    Add Script
+                  </Button>
+
+                </div>
+              </>
+            )}
+
+          </div>
+
+        </div>
+
+      </DialogContent>
+    </Dialog>
+  );
+}

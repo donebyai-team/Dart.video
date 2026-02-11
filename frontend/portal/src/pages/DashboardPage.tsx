@@ -1,12 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   Home,
-  Plus,
   Settings,
   Users,
-  Play,
   Palette,
   Fingerprint,
   UserCircle,
@@ -16,13 +14,11 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -34,12 +30,6 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { useClientsContext } from "@coasterai/ui-core/context/ClientContext";
-import { Video as VideoConfig } from "@coasterai/pb/coasterai/core/v1/video_pb";
-import toast from "react-hot-toast";
-import { getConnectError } from "@/utils/error";
-import SlideThumbnail from "@/components/editor/SlideThumbnail";
-import { getFormattedDate, getSlideCount } from "@/utils/format";
 import VideoIntentComposer from "@/components/dashboard/VideoIntentComposer";
 import RecentVideos from "@/components/dashboard/RecentVideos";
 
@@ -94,10 +84,7 @@ const DashboardPage = () => {
           </SidebarHeader>
 
           <SidebarContent className="px-2 py-4">
-            <SidebarGroup>
-              <SidebarGroupLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-3 mb-2">
-                Menu
-              </SidebarGroupLabel>
+            <SidebarGroup>            
               <SidebarGroupContent>
                 <SidebarMenu>
                   {navItems.map((item) =>

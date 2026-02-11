@@ -4,11 +4,15 @@ import {
     Film,
     Clock,
     Sparkles,
+    TextIcon,
+    X
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Script } from "@coasterai/pb/coasterai/core/v1/video_pb";
+import ScriptEditorDialog from "@/pages/ScriptInputPage";
 
 
 /* ---------------- Video Intent Composer Component ---------------- */
@@ -28,9 +32,22 @@ const VideoIntentComposer = () => {
     const [prompt, setPrompt] = useState("");
     const [resolution, setResolution] = useState("1920x1080");
     const [duration, setDuration] = useState("5");
+    const [scriptDialogOpen, setScriptDialogOpen] = useState(false);
+    const [script, setScript] = useState<Script | undefined>();
+    const hasScript = !!script?.items?.length;
+    const removeScript = () => {
+        setScript(undefined);
+    };
+
 
     return (
         <div className="w-full min-h-[70vh] flex flex-col items-center justify-center">
+            <ScriptEditorDialog
+                open={scriptDialogOpen}
+                onOpenChange={setScriptDialogOpen}
+                initialScript={script}
+                onSave={(s: Script) => setScript(s)}
+            />
 
             {/* Header */}
             <div className="w-full max-w-3xl mb-8 text-center">
@@ -39,16 +56,7 @@ const VideoIntentComposer = () => {
                     Manage your videos and create new content
                 </p>
             </div>
-            <Card className="
-  mb-8
-  border-0
-  shadow-lg
-  rounded-2xl
-  bg-gradient-to-b from-background to-muted/40
-  w-full
-  max-w-3xl
-  mx-auto
-">
+            <Card className="mb-8 border-0 shadow-lg rounded-2xl bg-gradient-to-b from-background to-muted/40 w-full max-w-3xl mx-auto">
 
                 <CardContent className="p-6">
                     <div className="flex flex-col gap-4">
@@ -89,24 +97,84 @@ const VideoIntentComposer = () => {
 
                         {/* Prompt Box */}
                         <div className="relative">
-                            <div className="rounded-2xl border bg-background shadow-sm focus-within:ring-2 focus-within:ring-primary/30 transition">
+                            <div className="rounded-2xl border bg-background shadow-sm focus-within:ring-2 focus-within:ring-primary/30 transition overflow-hidden">
+
                                 {/* Tabs Row */}
                                 <div className="flex items-center gap-4 px-4 pt-3 pb-2 text-xs text-muted-foreground">
+                                    <div
+                                        className="flex items-center gap-2 hover:text-foreground cursor-pointer"
+                                        onClick={() => setScriptDialogOpen(true)}
+                                    >
+                                        <TextIcon className="w-3.5 h-3.5" />
+                                        {hasScript ? "Edit Script" : "Add Script"}
+                                    </div>
+
                                     <div className="flex items-center gap-2 hover:text-foreground cursor-pointer">
                                         <ImageIcon className="w-3.5 h-3.5" />
                                         Image reference
                                     </div>
+
                                     <div className="flex items-center gap-2 hover:text-foreground cursor-pointer">
                                         <Film className="w-3.5 h-3.5" />
                                         Video reference
                                     </div>
                                 </div>
 
+                                {/* ⭐ Script Attached Indicator */}
+                                {hasScript && (
+                                    <div
+                                        onClick={() => setScriptDialogOpen(true)}
+                                        className="
+          mx-4 mb-2 flex items-center justify-between
+          rounded-xl border bg-primary/5 border-primary/20
+          px-3 py-2 text-xs cursor-pointer
+          hover:bg-primary/10 transition
+        "
+                                    >
+                                        <div className="flex items-center gap-2 text-primary">
+                                            <span className="font-medium">
+                                                Script added
+                                            </span>
+                                            <span className="text-muted-foreground">
+                                                • {script.items.length} sections
+                                            </span>
+                                        </div>
+
+                                        {/* Right Actions */}
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-muted-foreground text-xs hidden sm:block">
+                                                Click to edit
+                                            </span>
+
+                                            {/* Remove Script */}
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();   // ⭐ Prevent opening dialog
+                                                    removeScript();
+                                                }}
+                                                className="
+          p-1 rounded-md
+          hover:bg-destructive/10
+          hover:text-destructive
+          transition
+        "
+                                            >
+                                                <X className="w-3.5 h-3.5" />
+                                            </button>
+
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* Text Area */}
                                 <textarea
                                     value={prompt}
                                     onChange={(e) => setPrompt(e.target.value)}
-                                    placeholder="Create a cinematic product launch video with floating UI elements and soft lighting..."
+                                    placeholder={
+                                        hasScript
+                                            ? "Add additional instructions or style notes (optional)..."
+                                            : "Create a cinematic product launch video with floating UI elements and soft lighting..."
+                                    }
                                     className="w-full min-h-[140px] resize-none bg-transparent px-4 pb-16 pt-2 text-sm focus:outline-none"
                                 />
 
@@ -116,8 +184,10 @@ const VideoIntentComposer = () => {
                                         <Sparkles className="w-2 h-2" />
                                     </Button>
                                 </div>
+
                             </div>
                         </div>
+
                     </div>
                 </CardContent>
             </Card>
