@@ -7,33 +7,16 @@ import {
   Settings,
   Users,
   Play,
-  MoreHorizontal,
-  Clock,
-  FileText,
-  Upload,
-  Search,
   Palette,
   Fingerprint,
   UserCircle,
   ChevronDown,
   ChevronRight,
   Video,
+  Image as ImageIcon,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Sidebar,
   SidebarContent,
@@ -51,14 +34,16 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useClientsContext } from "@coasterai/ui-core/context/ClientContext";
 import { Video as VideoConfig } from "@coasterai/pb/coasterai/core/v1/video_pb";
 import toast from "react-hot-toast";
 import { getConnectError } from "@/utils/error";
 import SlideThumbnail from "@/components/editor/SlideThumbnail";
 import { getFormattedDate, getSlideCount } from "@/utils/format";
+import VideoIntentComposer from "@/components/dashboard/VideoIntentComposer";
+import RecentVideos from "@/components/dashboard/RecentVideos";
+
+/* ---------------- Existing Dashboard Code ---------------- */
 
 type NavItem = {
   title: string;
@@ -69,6 +54,7 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   { title: "Home", icon: Home, id: "home" },
+  { title: "Recent Videos", icon: Video, id: "recent-videos" }, // NEW
   {
     title: "Brand",
     icon: Palette,
@@ -76,81 +62,22 @@ const navItems: NavItem[] = [
     children: [
       { title: "Brand Identity", icon: Fingerprint, id: "brand-identity" },
       { title: "Personas", icon: UserCircle, id: "personas" },
-    ]
+    ],
   },
   { title: "Settings", icon: Settings, id: "settings" },
   { title: "Team", icon: Users, id: "team" },
 ];
 
 
-
 const DashboardPage = () => {
   const router = useRouter();
   const [activeNav, setActiveNav] = useState("home");
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [createStep, setCreateStep] = useState<"choose" | "name">("choose");
-  const [selectedOption, setSelectedOption] = useState<"script" | "upload" | null>(null);
-  const [videoName, setVideoName] = useState("");
   const [brandExpanded, setBrandExpanded] = useState(false);
-  const [brandUrl, setBrandUrl] = useState("");
-  const [videos, setVideos] = useState<VideoConfig[]>([]);
-  const { portalClient } = useClientsContext()
-
-  useEffect(() => {
-    const fetchVideos = async () => {
-      try {
-        const res = await portalClient.getVideos({});
-        setVideos(res.videos);
-      } catch (err) {
-        console.error("Failed to fetch videos", err);
-        toast.error(getConnectError(err))
-      }
-    };
-
-    if (portalClient) {
-      fetchVideos();
-    }
-  }, [portalClient]);
 
 
   const handleNavClick = (id: string) => {
     setActiveNav(id);
-    if (id.startsWith("brand")) {
-      setBrandExpanded(true);
-    }
-  };
-
-  const handleCreateOption = (option: "script" | "upload") => {
-    setSelectedOption(option);
-    setCreateStep("name");
-  };
-
-  const handleCreateVideo = () => {
-    if (!videoName.trim()) return;
-    setShowCreateModal(false);
-    setCreateStep("choose");
-    const name = videoName.trim();
-    const type = selectedOption;
-    setVideoName("");
-    setSelectedOption(null);
-
-    if (type === "script") {
-      // Navigate to script input page for script-based creation
-      router.push("/script");
-    } else {
-      // Navigate directly to editor for upload-based creation
-      // In a real app, you'd create a new video and get its ID
-      router.push("/editor/new");
-    }
-  };
-
-  const handleModalClose = (open: boolean) => {
-    setShowCreateModal(open);
-    if (!open) {
-      setCreateStep("choose");
-      setVideoName("");
-      setSelectedOption(null);
-    }
+    if (id.startsWith("brand")) setBrandExpanded(true);
   };
 
   return (
@@ -173,7 +100,7 @@ const DashboardPage = () => {
               </SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {navItems.map((item) => (
+                  {navItems.map((item) =>
                     item.children ? (
                       <Collapsible
                         key={item.id}
@@ -222,7 +149,7 @@ const DashboardPage = () => {
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                     )
-                  ))}
+                  )}
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
@@ -241,242 +168,23 @@ const DashboardPage = () => {
           </SidebarFooter>
         </Sidebar>
 
-
         {/* Main Content */}
         <main className="flex-1 p-8 overflow-auto">
-          {activeNav === "brand-identity" ? (
-            <div className="h-full flex items-center justify-center">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="max-w-md w-full text-center"
-              >
-                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
-                  <Fingerprint className="w-8 h-8 text-primary" />
-                </div>
-                <h1 className="text-2xl font-bold mb-3">Analyze Personal Brand Identity</h1>
-                <p className="text-muted-foreground mb-8">
-                  CoasterAI scans your site to capture your logo, tone, and aesthetic — so you can apply your brand identity to every image and video automatically.
-                </p>
-                <div className="flex gap-3">
-                  <Input
-                    placeholder="Analyze url"
-                    value={brandUrl}
-                    onChange={(e) => setBrandUrl(e.target.value)}
-                    className="flex-1"
-                  />
-                  <Button className="btn-accent-gradient">
-                    Analyze brand
-                  </Button>
-                </div>
-              </motion.div>
-            </div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="max-w-6xl mx-auto"
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between mb-8">
-                <div>
-                  <h1 className="text-3xl font-bold">Welcome back, John</h1>
-                  <p className="text-muted-foreground mt-1">
-                    Manage your videos and create new content
-                  </p>
-                </div>
-                <Button
-                  onClick={() => setShowCreateModal(true)}
-                  className="btn-accent-gradient gap-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  Create New Video
-                </Button>
-              </div>
-
-              {/* Recent Videos */}
-              <div>
-                <h2 className="text-xl font-semibold mb-4">Recent Videos</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {videos.map((video) => {
-
-                    const firstSlide = video.config?.sections?.[0]?.slides?.[0];
-                    const isGenerating = !firstSlide;
-                    return (<motion.div
-                      key={video.id}
-                      whileHover={{ y: -4 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Card
-                        className="card-elevated overflow-hidden cursor-pointer group"
-                        onClick={() => router.push(`/editor/${video.id}`)}
-                      >
-                        <div className="relative aspect-video bg-muted">
-                          {isGenerating ? (
-                            <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground">
-                              <div className="animate-pulse text-sm font-medium">
-                                Generating...
-                              </div>
-                            </div>
-                          ) : (
-                            <>
-                              <SlideThumbnail slide={firstSlide} />
-                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
-                                  <Play className="w-5 h-5 text-foreground ml-0.5" />
-                                </div>
-                              </div>
-                            </>
-                          )}
-                        </div>
-
-                        <CardContent className="p-4">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="min-w-0 flex-1">
-                              <h3 className="font-medium truncate">{video.name}</h3>
-                              <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                                <span>{getSlideCount(video)} slides</span>
-                                <span>•</span>
-                                <span>{video.metadata?.duration.toFixed(2)}s</span>
-                              </div>
-
-                              <div className="flex items-center gap-2 mt-2">
-                                {/* <span
-                                  className={`text-xs px-2 py-0.5 rounded-full ${
-                                    video.status === "published"
-                                      ? "bg-screen-solution/10 text-screen-solution"
-                                      : "bg-muted text-muted-foreground"
-                                  }`}
-                                >
-                                  {video.status === "published" ? "Published" : "Draft"}
-                                </span> */}
-                                <span className="text-xs text-muted-foreground">
-                                  {getFormattedDate(video.createdAt)}
-                                </span>
-                              </div>
-                            </div>
-                            {/* <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 flex-shrink-0"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <MoreHorizontal className="w-4 h-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem>Duplicate</DropdownMenuItem>
-                                <DropdownMenuItem className="text-destructive">
-                                  Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu> */}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                    );
-                  })}
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </main>
-
-        {/* Create New Video Modal */}
-        <Dialog open={showCreateModal} onOpenChange={handleModalClose}>
-          <DialogContent className="sm:max-w-lg">
-            <DialogHeader>
-              <DialogTitle className="text-xl">
-                {createStep === "choose" ? "Create New Video" : "Name Your Video"}
-              </DialogTitle>
-              {createStep === "name" && (
-                <DialogDescription>
-                  Give your video a name to get started
-                </DialogDescription>
-              )}
-            </DialogHeader>
-
-            {createStep === "choose" ? (
-              <div className="grid gap-4 py-4">
-                <motion.div
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                >
-                  <Card
-                    className="cursor-pointer hover:border-primary/50 hover:shadow-md transition-all"
-                    onClick={() => handleCreateOption("script")}
-                  >
-                    <CardContent className="p-5 flex items-start gap-4">
-                      <div className="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <FileText className="w-5 h-5 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-sm">Start with a Script</h3>
-                        <p className="text-sm text-muted-foreground mt-0.5">
-                          Write or paste your script and let AI generate visuals
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-                <motion.div
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                >
-                  <Card
-                    className="cursor-pointer hover:border-primary/50 hover:shadow-md transition-all"
-                    onClick={() => handleCreateOption("upload")}
-                  >
-                    <CardContent className="p-5 flex items-start gap-4">
-                      <div className="w-11 h-11 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
-                        <Upload className="w-5 h-5 text-accent" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-sm">Upload a Walkthrough</h3>
-                        <p className="text-sm text-muted-foreground mt-0.5">
-                          Transform an existing video into a polished explainer
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              </div>
-            ) : (
-              <div className="py-4 space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="video-name">Video Name</Label>
-                  <Input
-                    id="video-name"
-                    placeholder="e.g., Product Launch Explainer"
-                    value={videoName}
-                    onChange={(e) => setVideoName(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleCreateVideo()}
-                    autoFocus
-                  />
-                </div>
-                <div className="flex gap-3 pt-2">
-                  <Button
-                    variant="outline"
-                    className="flex-1"
-                    onClick={() => setCreateStep("choose")}
-                  >
-                    Back
-                  </Button>
-                  <Button
-                    className="flex-1 btn-accent-gradient"
-                    onClick={handleCreateVideo}
-                    disabled={!videoName.trim()}
-                  >
-                    Create Video
-                  </Button>
-                </div>
-              </div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-6xl mx-auto"
+          >           
+            {activeNav === "home" && (
+              <>
+                <VideoIntentComposer />
+              </>
             )}
-          </DialogContent>
-        </Dialog>
+
+            {activeNav === "recent-videos" && <RecentVideos />}
+
+          </motion.div>
+        </main>
       </div>
     </SidebarProvider>
   );
