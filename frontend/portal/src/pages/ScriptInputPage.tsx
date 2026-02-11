@@ -200,7 +200,8 @@ export default function ScriptEditorDialog({
     (i) => i.voiceover?.trim()
   ).length;
 
-  const hasMinSections = script.items.length >= MIN_SECTIONS;
+  const hasMinSections = filledSections >= MIN_SECTIONS;
+
 
   /* ---------------- Actions ---------------- */
 
@@ -334,7 +335,7 @@ export default function ScriptEditorDialog({
 
                   <div className="space-y-2">
                     <label className="text-sm font-medium">
-                      Voiceover Script
+                      Voiceover Script*
                     </label>
 
                     <Textarea
@@ -371,7 +372,7 @@ export default function ScriptEditorDialog({
                 <div className="px-8 py-5 border-t flex justify-between items-center bg-muted/10">
 
                   <span className="text-sm text-muted-foreground">
-                    {filledSections}/{script.items.length} filled
+                    {filledSections}/{script.items.length} filled (Min 3 sections are required)
                   </span>
 
                   <Button
