@@ -103,7 +103,7 @@ export const TextAnimationSlide: React.FC<TextAnimationSlideProps> = ({
             } as Slide)
           }
         }}
-        onSelect={onSelect}
+        onSelect={!RemoteComponent ? onSelect : undefined} // don't open setting if its a remote component  
       >
         <div
           style={{
