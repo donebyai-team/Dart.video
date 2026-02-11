@@ -242,11 +242,13 @@ export const TemplateContainer: React.FC<TemplateContainerProps> = ({
         }
       }
     }
+
+    return;
   }, [isDragging, isResizing, resizeHandle, position, canvasWidth, canvasHeight, isEditing, onUpdate])
 
   const showBorder = isEditing
   const showHandles = isEditing
-  const showOutline = isEditing 
+  const showOutline = isEditing
 
   const HANDLE_VISUAL_PX = 10
 
@@ -272,16 +274,26 @@ export const TemplateContainer: React.FC<TemplateContainerProps> = ({
 
     useEffect(() => {
       const handleClickOutside = (event: MouseEvent) => {
-        if (!isResizing && containerRef && containerRef.current && !containerRef.current.contains(event.target as Node)) {
-          setEditing(false)
+        if (
+          !isResizing &&
+          containerRef?.current &&
+          !containerRef.current.contains(event.target as Node)
+        ) {
+          setEditing(false);
         }
-      }
+      };
 
       if (isEditing) {
-        document.addEventListener('mousedown', handleClickOutside)
-        return () => document.removeEventListener('mousedown', handleClickOutside)
+        document.addEventListener('mousedown', handleClickOutside);
+
+        return () => {
+          document.removeEventListener('mousedown', handleClickOutside);
+        };
       }
-    }, [isEditing, setEditing, containerRef, isResizing])
+
+      return; // 👈 fixes TS
+    }, [isEditing, setEditing, containerRef, isResizing]);
+
 
     return (
       <div
