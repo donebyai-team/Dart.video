@@ -49,6 +49,7 @@ type CreateVideoParams struct {
 	Script     *pbcore.Script
 	Resolution *pbcore.Resolution
 	Prompt     string
+	Duration   float32
 }
 
 const letters = "abcdefghijklmnopqrstuvwxyz"
@@ -77,7 +78,11 @@ func (v videoGeneration) CreateVideo(ctx context.Context, organizationID string,
 		Script:         params.Script,
 		OrganizationID: organizationID,
 		Status:         models.VideoStatusPROCESSING,
-		Metadata:       &pbcore.VideoMetadata{Fps: defaultVideoFPS, Prompt: params.Prompt},
+		Metadata: &pbcore.VideoMetadata{
+			Fps:      defaultVideoFPS,
+			Prompt:   params.Prompt,
+			Duration: params.Duration,
+		},
 	})
 
 	if err != nil {

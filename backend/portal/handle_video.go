@@ -23,8 +23,12 @@ func (p *Portal) CreateVideo(ctx context.Context, c *connect.Request[pbportal.Cr
 		return nil, err
 	}
 
-	if c.Msg.Resolution == nil {
+	if c.Msg.Resolution == nil || c.Msg.Resolution.Name == "" {
 		return nil, errors.New("resolution is required")
+	}
+
+	if c.Msg.Duration != 60 && c.Msg.Duration != 90 {
+		return nil, errors.New("invalid duration specified")
 	}
 
 	if c.Msg.Script == nil && len(strings.TrimSpace(c.Msg.Prompt)) < 10 {
@@ -39,6 +43,7 @@ func (p *Portal) CreateVideo(ctx context.Context, c *connect.Request[pbportal.Cr
 		Script:     c.Msg.Script,
 		Resolution: c.Msg.Resolution,
 		Prompt:     c.Msg.Prompt,
+		Duration:   c.Msg.Duration,
 	})
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
