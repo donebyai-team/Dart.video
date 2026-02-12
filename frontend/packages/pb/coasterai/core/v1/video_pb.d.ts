@@ -40,6 +40,16 @@ export declare type VideoMetadata = Message<"coasterai.core.v1.VideoMetadata"> &
    * @generated from field: string prompt = 5;
    */
   prompt: string;
+
+  /**
+   * @generated from field: string brand_library_id = 6;
+   */
+  brandLibraryId: string;
+
+  /**
+   * @generated from field: coasterai.core.v1.VideoLanguage language = 7;
+   */
+  language: VideoLanguage;
 };
 
 /**
@@ -212,4 +222,54 @@ export enum VideoStatus {
  * Describes the enum coasterai.core.v1.VideoStatus.
  */
 export declare const VideoStatusSchema: GenEnum<VideoStatus>;
+
+/**
+ * @generated from enum coasterai.core.v1.VideoLanguage
+ */
+export enum VideoLanguage {
+  /**
+   * @generated from enum value: VIDE_LANGUAGE_EN = 0;
+   */
+  VIDE_LANGUAGE_EN = 0,
+}
+
+/**
+ * Describes the enum coasterai.core.v1.VideoLanguage.
+ */
+export declare const VideoLanguageSchema: GenEnum<VideoLanguage>;
+
+/**
+ * @generated from enum coasterai.core.v1.ResolutionType
+ */
+export enum ResolutionType {
+  /**
+   * @generated from enum value: RESOLUTION_TYPE_UNSPECIFIED = 0;
+   */
+  RESOLUTION_TYPE_UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: RESOLUTION_16_9 = 1;
+   */
+  RESOLUTION_16_9 = 1,
+
+  /**
+   * @generated from enum value: RESOLUTION_4_3 = 2;
+   */
+  RESOLUTION_4_3 = 2,
+
+  /**
+   * @generated from enum value: RESOLUTION_9_16 = 3;
+   */
+  RESOLUTION_9_16 = 3,
+
+  /**
+   * @generated from enum value: RESOLUTION_1_1 = 4;
+   */
+  RESOLUTION_1_1 = 4,
+}
+
+/**
+ * Describes the enum coasterai.core.v1.ResolutionType.
+ */
+export declare const ResolutionTypeSchema: GenEnum<ResolutionType>;
 

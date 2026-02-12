@@ -5,13 +5,14 @@ import (
 	"github.com/shank318/coasterai/datastore"
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
+	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
 	"go.uber.org/zap"
 	"math/rand"
 	"time"
 )
 
 type VideoGeneration interface {
-	CreateVideo(ctx context.Context, organizationID string, params CreateVideoParams) (*models.Video, error)
+	CreateVideo(ctx context.Context, organizationID string, params *pbportal.CreateVideoRequest) (*models.Video, error)
 	GetVideo(ctx context.Context, id, organizationID string) (*models.Video, error)
 	GetVideos(ctx context.Context, organizationID string) ([]*models.Video, error)
 	UpdateVideoConfig(ctx context.Context, video *models.Video) error
@@ -45,13 +46,6 @@ func (v videoGeneration) UpdateVideoConfig(ctx context.Context, video *models.Vi
 	return v.db.UpdateVideo(ctx, existingVideo)
 }
 
-type CreateVideoParams struct {
-	Script     *pbcore.Script
-	Resolution *pbcore.Resolution
-	Prompt     string
-	Duration   float32
-}
-
 const letters = "abcdefghijklmnopqrstuvwxyz"
 
 // GenerateRandomName generates a random name with first letter capitalized
@@ -72,16 +66,18 @@ func GenerateRandomName(minLen, maxLen int) string {
 	return string(name)
 }
 
-func (v videoGeneration) CreateVideo(ctx context.Context, organizationID string, params CreateVideoParams) (*models.Video, error) {
+func (v videoGeneration) CreateVideo(ctx context.Context, organizationID string, params *pbportal.CreateVideoRequest) (*models.Video, error) {
 	video, err := v.db.CreateVideo(ctx, &models.Video{
 		Name:           GenerateRandomName(5, 10),
 		Script:         params.Script,
 		OrganizationID: organizationID,
 		Status:         models.VideoStatusPROCESSING,
 		Metadata: &pbcore.VideoMetadata{
-			Fps:      defaultVideoFPS,
-			Prompt:   params.Prompt,
-			Duration: params.Duration,
+			Fps:            defaultVideoFPS,
+			Prompt:         params.Prompt,
+			Duration:       params.Duration,
+			BrandLibraryId: params.BrandLibraryId,
+			Language:       params.Language,
 		},
 	})
 

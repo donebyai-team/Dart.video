@@ -4,7 +4,7 @@
 
 import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv1";
 import type { Message } from "@bufbuild/protobuf";
-import type { Resolution, Script, Video, VideoConfig, VideoMetadata } from "../../core/v1/video_pb";
+import type { Resolution, Script, Video, VideoConfig, VideoLanguage, VideoMetadata } from "../../core/v1/video_pb";
 import type { EmptySchema, Timestamp } from "@bufbuild/protobuf/wkt";
 
 /**
@@ -119,6 +119,16 @@ export declare type CreateVideoRequest = Message<"coasterai.portal.v1.CreateVide
    * @generated from field: float duration = 4;
    */
   duration: number;
+
+  /**
+   * @generated from field: string brand_library_id = 5;
+   */
+  brandLibraryId: string;
+
+  /**
+   * @generated from field: coasterai.core.v1.VideoLanguage language = 6;
+   */
+  language: VideoLanguage;
 };
 
 /**
