@@ -6,7 +6,8 @@ import {
     Sparkles,
     TextIcon,
     X,
-    Palette
+    Palette,
+    LanguagesIcon
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,10 @@ const DURATIONS = [
     { label: "90s", value: "90" },
 ];
 
+const LANGUAGES = [
+    { label: "English(UK)", value: "en" },
+];
+
 const brandLibraries = [
     { id: "brand1", name: "Acme Brand" },
     { id: "brand2", name: "Dark Mode Brand" },
@@ -48,6 +53,7 @@ const VideoIntentComposer = () => {
         useState<string | undefined>();
 
     const [duration, setDuration] = useState("60");
+    const [language, setLanguage] = useState("en");
     const [scriptDialogOpen, setScriptDialogOpen] = useState(false);
     const [script, setScript] = useState<Script | undefined>();
     const hasScript = !!script?.items?.length;
@@ -116,33 +122,62 @@ const VideoIntentComposer = () => {
                 <CardContent className="p-6">
                     <div className="flex flex-col gap-4">
                         {/* Top Controls */}
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-2">
-                                <Film className="w-6 h-6" />
-                                <Select value={resolutionId} onValueChange={setResolutionId}>
-                                    <SelectTrigger className="h-8 text-xs bg-background">
-                                        <SelectValue />
-                                    </SelectTrigger>
+                        <div className="flex items-center justify-between text-sm text-muted-foreground">
 
-                                    <SelectContent>
-                                        {defaultEditorConfig.resolution.options.map((r) => (
-                                            <SelectItem key={r.id} value={r.id}>
-                                                {r.name} ({r.height}x{r.width})
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                            {/* LEFT SIDE */}
+                            <div className="flex items-center gap-4">
+
+                                {/* Resolution */}
+                                <div className="flex items-center gap-2">
+                                    <Film className="w-6 h-6" />
+
+                                    <Select value={resolutionId} onValueChange={setResolutionId}>
+                                        <SelectTrigger className="h-8 text-xs bg-background">
+                                            <SelectValue />
+                                        </SelectTrigger>
+
+                                        <SelectContent>
+                                            {defaultEditorConfig.resolution.options.map((r) => (
+                                                <SelectItem key={r.id} value={r.id}>
+                                                    {r.name} ({r.height}x{r.width})
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {/* Duration */}
+                                <div className="flex items-center gap-2">
+                                    <Clock className="w-6 h-6" />
+
+                                    <Select value={duration} onValueChange={setDuration}>
+                                        <SelectTrigger className="h-8 text-xs bg-background">
+                                            <SelectValue />
+                                        </SelectTrigger>
+
+                                        <SelectContent>
+                                            {DURATIONS.map((d) => (
+                                                <SelectItem key={d.value} value={d.value}>
+                                                    {d.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
 
                             </div>
 
+                            {/* RIGHT SIDE — LANGUAGE */}
                             <div className="flex items-center gap-2">
-                                <Clock className="w-6 h-6" />
-                                <Select value={duration} onValueChange={setDuration}>
+                                <LanguagesIcon className="w-6 h-6" />
+
+                                <Select value={language} onValueChange={setLanguage}>
                                     <SelectTrigger className="h-8 text-xs bg-background">
                                         <SelectValue />
                                     </SelectTrigger>
+
                                     <SelectContent>
-                                        {DURATIONS.map((d) => (
+                                        {LANGUAGES.map((d) => (
                                             <SelectItem key={d.value} value={d.value}>
                                                 {d.label}
                                             </SelectItem>
