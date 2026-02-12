@@ -8,7 +8,6 @@ import (
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
-	"github.com/shank318/coasterai/services"
 	"github.com/streamingfast/logging"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -39,12 +38,7 @@ func (p *Portal) CreateVideo(ctx context.Context, c *connect.Request[pbportal.Cr
 		return nil, errors.New("script should have at least 3 items")
 	}
 
-	video, err := p.videoGenerationService.CreateVideo(ctx, actor.OrganizationID, services.CreateVideoParams{
-		Script:     c.Msg.Script,
-		Resolution: c.Msg.Resolution,
-		Prompt:     c.Msg.Prompt,
-		Duration:   c.Msg.Duration,
-	})
+	video, err := p.videoGenerationService.CreateVideo(ctx, actor.OrganizationID, c.Msg)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
