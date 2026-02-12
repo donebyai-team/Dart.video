@@ -5,7 +5,8 @@ import {
     Clock,
     Sparkles,
     TextIcon,
-    X
+    X,
+    Palette
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -23,16 +24,19 @@ import { getDefaultResolution } from "@/stores/video/defaults";
 
 /* ---------------- Video Intent Composer Component ---------------- */
 
-// const RESOLUTIONS = [
-//     { label: "Landscape (1920x1080)", value: "1920x1080" },
-//     { label: "Square (1080x1080)", value: "1080x1080" },
-//     { label: "Portrait (1080x1920)", value: "1080x1920" },
-// ];
-
 const DURATIONS = [
     { label: "60s", value: "60" },
     { label: "90s", value: "90" },
 ];
+
+const brandLibraries = [
+    { id: "brand1", name: "Acme Brand" },
+    { id: "brand2", name: "Dark Mode Brand" },
+];
+
+const NO_BRAND_VALUE = "none";
+
+
 
 const MIN_SCRIPT_SECTIONS = 3;
 const MIN_PROMPT_LENGTH = 10;
@@ -40,6 +44,8 @@ const MIN_PROMPT_LENGTH = 10;
 const VideoIntentComposer = () => {
     const [prompt, setPrompt] = useState("");
     const [resolutionId, setResolutionId] = useState(defaultEditorConfig.resolution.default);
+    const [selectedBrandLibraryId, setSelectedBrandLibraryId] =
+        useState<string | undefined>();
 
     const [duration, setDuration] = useState("60");
     const [scriptDialogOpen, setScriptDialogOpen] = useState(false);
@@ -151,24 +157,63 @@ const VideoIntentComposer = () => {
                             <div className="rounded-2xl border bg-background shadow-sm focus-within:ring-2 focus-within:ring-primary/30 transition overflow-hidden">
 
                                 {/* Tabs Row */}
-                                <div className="flex items-center gap-4 px-4 pt-3 pb-2 text-xs text-muted-foreground">
+                                <div className="flex items-center gap-2 px-4 pt-3 pb-2 text-xs text-muted-foreground">
                                     <div
-                                        className="flex items-center gap-2 hover:text-foreground cursor-pointer"
+                                        className="flex items-center gap-1.5 hover:text-foreground cursor-pointer"
                                         onClick={() => setScriptDialogOpen(true)}
                                     >
                                         <TextIcon className="w-3.5 h-3.5" />
                                         {hasScript ? "Edit Script" : "Add Script"}
                                     </div>
 
-                                    <div className="flex items-center gap-2 hover:text-foreground cursor-pointer">
-                                        <ImageIcon className="w-3.5 h-3.5" />
-                                        Image reference
+                                    {/* Brand library */}
+                                    <div className="flex items-center gap-1.5">
+
+                                        <Select
+                                            value={selectedBrandLibraryId ?? NO_BRAND_VALUE}
+                                            onValueChange={(v) =>
+                                                setSelectedBrandLibraryId(
+                                                    v === NO_BRAND_VALUE ? undefined : v
+                                                )
+                                            }
+                                        >
+
+                                            <SelectTrigger
+                                                className="
+    h-8 text-xs bg-background min-w-[120px]
+    flex items-center gap-1
+    border border-transparent
+    focus:ring-0 focus-visible:ring-0
+    focus:outline-none focus-visible:outline-none
+    ring-0 ring-offset-0
+    shadow-none
+  "
+                                            >
+
+                                                <Palette className="w-3.5 h-3.5 opacity-70" />
+                                                <SelectValue placeholder="Select brand library" />
+                                            </SelectTrigger>
+
+                                            <SelectContent>
+
+                                                {/* ONLY ONE "NONE" OPTION */}
+                                                <SelectItem value={NO_BRAND_VALUE}>
+                                                    Select brand
+                                                </SelectItem>
+
+                                                {brandLibraries.map((b) => (
+                                                    <SelectItem key={b.id} value={b.id}>
+                                                        {b.name}
+                                                    </SelectItem>
+                                                ))}
+
+                                            </SelectContent>
+
+                                        </Select>
+
                                     </div>
 
-                                    <div className="flex items-center gap-2 hover:text-foreground cursor-pointer">
-                                        <Film className="w-3.5 h-3.5" />
-                                        Video reference
-                                    </div>
+
                                 </div>
 
                                 {/* ⭐ Script Attached Indicator */}
