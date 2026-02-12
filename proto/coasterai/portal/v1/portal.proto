@@ -54,7 +54,7 @@ message CreateVideoRequest {
   core.v1.Script script = 1;
   string prompt = 2;
   core.v1.Resolution resolution = 3;
-  float duration = 4; 
+  float duration = 4;
 }
 
 message CreateVideoResponse {
