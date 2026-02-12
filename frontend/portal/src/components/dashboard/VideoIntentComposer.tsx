@@ -187,7 +187,7 @@ const VideoIntentComposer = () => {
                                                 Script added
                                             </span>
                                             <span className="text-muted-foreground">
-                                                • {script.items.length} sections
+                                                • {scriptVoiceoverCount} sections
                                             </span>
                                         </div>
 
