@@ -148,7 +148,7 @@ export const TRANSITION_DURATION_SECONDS = 0.3;
 export const getActualSlideDuration = (slide: Slide): number => {
   if (slide.type === SlideType.STACK && slide.content) {
     const stackContent = slide.content.value as StackSlideContent;
-    if (stackContent.items && Array.isArray(stackContent.items)) {
+    if (stackContent?.items && Array.isArray(stackContent.items)) {
       return stackContent.items.reduce((sum: number, item: any) => sum + (item.duration || 0), 0);
     }
   }

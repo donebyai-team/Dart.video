@@ -43,7 +43,10 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
   const mediaContent = slide.content.value as MediaSlideContent
 
   // Extract case of the slide to opt render blur effect on image/video
-  const isImage = slide.content.case === 'image'
+  // @TODO check if boolean is coming in data
+  const isImage = mediaContent.isImage
+
+  console.log(mediaContent, isImage, "isImage")
   const [retry, setRetry] = useState<boolean>(false)
   const [uploadError, setUploadError] = useState<boolean>(false)
   const [uploading, setUploading] = useState<boolean>(false)
@@ -75,7 +78,6 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
               if (onUpdate && mediaContent) {
                 onUpdate({
                   content: {
-                    case: isImage ? 'image' : 'video',
                     value: {
                       ...mediaContent,
                       meta: {
@@ -118,7 +120,6 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
                     if (onUpdate && mediaContent) {
                       onUpdate({
                         content: {
-                          case: isImage ? 'image' : 'video',
                           value: {
                             ...mediaContent,
                             ...newProps
@@ -144,7 +145,6 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
                     if (onUpdate && mediaContent) {
                       onUpdate({
                         content: {
-                          case: isImage ? 'image' : 'video',
                           value: {
                             ...mediaContent,
                             ...newProps
@@ -171,9 +171,9 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
                   if (onUpdate && mediaContent) {
                     onUpdate({
                       content: {
-                        case: isImage ? 'image' : 'video',
                         value: {
                           ...mediaContent,
+                          isImage,
                           src: data.url
                         } as MediaSlideContent
                       }

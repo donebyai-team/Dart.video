@@ -49,6 +49,11 @@ export declare type MediaSlideContent = Message<"coasterai.core.v1.MediaSlideCon
    * @generated from field: coasterai.core.v1.MediaSlideStyle style = 3;
    */
   style?: MediaSlideStyle;
+
+  /**
+   * @generated from field: bool is_image = 4;
+   */
+  isImage: boolean;
 };
 
 /**
@@ -347,25 +352,19 @@ export declare type Slide = Message<"coasterai.core.v1.Slide"> & {
    */
   content: {
     /**
-     * @generated from field: coasterai.core.v1.MediaSlideContent image = 8;
+     * @generated from field: coasterai.core.v1.MediaSlideContent media = 8;
      */
     value: MediaSlideContent;
-    case: "image";
+    case: "media";
   } | {
     /**
-     * @generated from field: coasterai.core.v1.MediaSlideContent video = 9;
-     */
-    value: MediaSlideContent;
-    case: "video";
-  } | {
-    /**
-     * @generated from field: coasterai.core.v1.AnimationSlideContent animation = 10;
+     * @generated from field: coasterai.core.v1.AnimationSlideContent animation = 9;
      */
     value: AnimationSlideContent;
     case: "animation";
   } | {
     /**
-     * @generated from field: coasterai.core.v1.StackSlideContent stack = 13;
+     * @generated from field: coasterai.core.v1.StackSlideContent stack = 10;
      */
     value: StackSlideContent;
     case: "stack";
@@ -454,29 +453,29 @@ export enum SlideType {
   UNDEFINED = 0,
 
   /**
-   * @generated from enum value: SLIDE_TYPE_MEDIA = 1;
+   * @generated from enum value: SLIDE_TYPE_TEXT_ANIMATION = 1;
    */
-  MEDIA = 1,
+  TEXT_ANIMATION = 1,
 
   /**
-   * @generated from enum value: SLIDE_TYPE_TEXT_ANIMATION = 2;
+   * @generated from enum value: SLIDE_TYPE_INFOGRAPHIC = 2;
    */
-  TEXT_ANIMATION = 2,
+  INFOGRAPHIC = 2,
 
   /**
-   * @generated from enum value: SLIDE_TYPE_INFOGRAPHIC = 3;
+   * @generated from enum value: SLIDE_TYPE_VISUAL_ANIMATION = 3;
    */
-  INFOGRAPHIC = 3,
+  VISUAL_ANIMATION = 3,
 
   /**
-   * @generated from enum value: SLIDE_TYPE_VISUAL_ANIMATION = 4;
+   * @generated from enum value: SLIDE_TYPE_STACK = 4;
    */
-  VISUAL_ANIMATION = 4,
+  STACK = 4,
 
   /**
-   * @generated from enum value: SLIDE_TYPE_STACK = 5;
+   * @generated from enum value: SLIDE_TYPE_MEDIA = 5;
    */
-  STACK = 5,
+  MEDIA = 5,
 }
 
 /**

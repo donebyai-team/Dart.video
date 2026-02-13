@@ -76,16 +76,13 @@ const SlideComponent: React.FC<{
       }
       break
     case SlideType.MEDIA:
-      if (!slide.content?.case || slide.content.case === 'video') {
+      if (!slide.content?.case || slide.content.case === 'media') {
         return <MediaSlide slide={slide} width={width} height={height} onUpdate={onUpdate} />
-      }
-      if (!slide.content?.case || slide.content.case === 'image') {
-        return <MediaSlide slide={slide} width={width} height={height} isEditing={isEditing} onUpdate={onUpdate} />
       }
       break
    
     default:
-      if (!slide.content?.case || slide.content.case === 'image') {
+      if (!slide.content?.case || slide.content.case === 'media') {
         return <MediaSlide slide={slide} width={width} height={height} isEditing={isEditing} onUpdate={onUpdate} />
       }
       break
@@ -104,7 +101,7 @@ const SlideComponent: React.FC<{
         opacity: 0.7
       }}
     >
-      
+
       Content type mismatch: {slide.type} slide with {slide.content?.case || 'undefined'} content
     </AbsoluteFill>
   )
