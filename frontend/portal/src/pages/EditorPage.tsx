@@ -7,7 +7,6 @@ import { Menu, Mic2, Eye, Volume2, RefreshCw, Video, Home, Settings, HelpCircle,
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import VoiceoverPanel from '@/components/editor/VoiceoverPanel'
 import ResolutionSelector from '@/components/editor/ResolutionSelector'
 import StoryboardPanel from '@/components/editor/StoryboardPanel'
 import ToolsSettingsPanel from '@/components/editor/ToolsSettingsPanel'
@@ -22,6 +21,7 @@ import toast from 'react-hot-toast'
 import { getConnectError } from '@/utils/error';
 import { ActiveToolType } from '@/types/tools';
 import { createSlideEntityId, createStackItemEntityId, createOverlayEntityId } from '@/types/selection';
+import Link from 'next/link';
 
 // Icon mapping for dynamic rendering
 const iconMap: Record<string, React.ElementType> = {
@@ -187,36 +187,15 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
         <div className='flex items-center gap-4'>
           <Sheet>
             <SheetTrigger asChild>
-              <button className='flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors'>
-                <Menu className='w-5 h-5' />
-              </button>
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-2 px-2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Home className="w-5 h-5" />
+              </Link>
             </SheetTrigger>
-            <SheetContent side='left' className='w-64 p-0'>
-              <SheetHeader className='p-4 border-b border-border'>
-                <div className='flex items-center gap-2'>
-                  <div className='w-8 h-8 rounded-lg bg-primary flex items-center justify-center'>
-                    <Video className='w-4 h-4 text-primary-foreground' />
-                  </div>
-                  <SheetTitle className='text-lg'>CoasterAI</SheetTitle>
-                </div>
-              </SheetHeader>
-              <nav className='p-4 space-y-1'>
-                {config.navigation.menuItems.map(item => {
-                  const Icon = iconMap[item.icon] || Home
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => item.path && router.push(item.path)}
-                      className='w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors'
-                    >
-                      <Icon className='w-4 h-4' />
-                      <span>{item.label}</span>
-                    </button>
-                  )
-                })}
-              </nav>
-            </SheetContent>
           </Sheet>
+
           <div className='h-6 w-px bg-border' />
           <div className='flex items-center gap-3'>
             <span className='font-semibold'>{videoConfigFromStore?.name || 'Untitled Video'}</span>

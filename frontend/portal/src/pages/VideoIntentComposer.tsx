@@ -1,3 +1,5 @@
+"use client"
+
 import { useState } from "react";
 import {
     Image as ImageIcon,
@@ -13,8 +15,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Resolution, Script } from "@coasterai/pb/coasterai/core/v1/video_pb";
-import ScriptEditorDialog from "@/pages/ScriptInputPage";
+import { Script } from "@coasterai/pb/coasterai/core/v1/video_pb";
+import ScriptEditorDialog from "@/components/dashboard/ScriptEditorDialog";
 import { useClientsContext } from "@coasterai/ui-core/context/ClientContext";
 import { getConnectError } from "@/utils/error";
 import toast from "react-hot-toast";
@@ -111,7 +113,7 @@ const VideoIntentComposer = () => {
             />
 
             {/* Header */}
-            <div className="w-full max-w-3xl mb-8 text-center">
+            <div className="w-full max-w-3xl mb-8 mt-[10%] text-center">
                 <h1 className="text-3xl font-bold">Your AI video designer</h1>
                 <p className="text-muted-foreground mt-1">
                     Manage your videos and create new content
