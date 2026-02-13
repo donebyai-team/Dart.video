@@ -1,4 +1,4 @@
-import { AnimationSlideContent, ImageSlideContent, Slide, SlideType, StackSlideContent, VideoSlideContent } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { AnimationSlideContent, Slide, SlideType, StackSlideContent, MediaSlideContent } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { useMemo } from "react";
 
 interface SlideThumbnailProps {
@@ -198,7 +198,7 @@ const LineGraphThumbnail = () => (
 // Image Thumbnail
 const ImageThumbnail = ({ slide }: { slide: Slide }) => {
   // Get image src from content directly (new architecture)
-  const content = slide.content.value as ImageSlideContent;
+  const content = slide.content.value as MediaSlideContent;
   const imageSrc = content?.src;
   
   if (!imageSrc) {
@@ -223,7 +223,7 @@ const ImageThumbnail = ({ slide }: { slide: Slide }) => {
 // Video Thumbnail
 const VideoThumbnail = ({ slide }: { slide: Slide }) => {
   // Get video src from content directly (new architecture)
-  const content = slide.content.value as VideoSlideContent;
+  const content = slide.content.value as MediaSlideContent;
   const videoSrc = content?.src;
   
   if (!videoSrc) {

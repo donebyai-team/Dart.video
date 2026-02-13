@@ -1,26 +1,12 @@
-import { RefObject, useState, useEffect } from 'react'
-import { z } from 'zod'
-import VideoStyler from './VideoStyler'
+import { MediaSlideContent } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { RefObject, useEffect, useState } from 'react'
 import { Video } from 'remotion'
-
-const VidStyle = z.object({
-  width: z.union([z.string(), z.number()]).optional(),
-  height: z.union([z.string(), z.number()]).optional(),
-  borderRadius: z.union([z.string(), z.number()]).optional(),
-  objectFit: z.enum(['contain', 'cover', 'fill']).optional()
-})
-
-const VidSchema = z.object({
-  src: z.string(),
-  style: VidStyle
-})
-
-export type VidTemplateProps = z.infer<typeof VidSchema>
+import MediaStyler from './MediaStyler'
 
 interface Props {
   videoRef: RefObject<HTMLVideoElement>
-  props: VidTemplateProps
-  onChange: (newProps: Partial<VidTemplateProps>) => void
+  props: MediaSlideContent
+  onChange: (newProps: Partial<MediaSlideContent>) => void
   onVideoChange: () => void
   onClickVideo: () => void
 }
@@ -75,20 +61,18 @@ const VideoPreview = ({ props, onChange, onVideoChange, videoRef, onClickVideo }
   }, [src, loadedSrc])
 
   return (
-    <VideoStyler
-      onVideochange={() => {
+    <MediaStyler
+      isImage = {false}
+      onMediaChange={() => {
         onVideoChange()
         setOpen(false)
       }}
-      onChange={props => {
-        onChange({
-          src,
-          style: { ...style, ...props }
-        })
+      onChange={updatedProps => {
+        onChange(updatedProps)
       }}
       open={open}
       setOpen={setOpen}
-      value={style as any}
+      value={props}
     >
       <div style={{ position: 'relative', width: '100%', height: '100%' }}>
         {/* Loading indicator */}
@@ -145,7 +129,7 @@ const VideoPreview = ({ props, onChange, onVideoChange, videoRef, onClickVideo }
           }
         `}</style>
       </div>
-    </VideoStyler>
+    </MediaStyler>
   )
 }
 

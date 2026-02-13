@@ -1,4 +1,4 @@
-import { configProvider } from '@/services/config'
+import { uploadMedia } from '@/services/utils'
 import { UploadMediaResponse } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
 import CloseIcon from '@mui/icons-material/Close'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
@@ -13,7 +13,7 @@ interface UploadModalProps {
   retry: boolean
   setRetry: React.Dispatch<SetStateAction<boolean>>
   setUploading: React.Dispatch<SetStateAction<boolean>>
-  setUploadError:React.Dispatch<SetStateAction<boolean>>
+  setUploadError: React.Dispatch<SetStateAction<boolean>>
   accept: string
 }
 
@@ -33,7 +33,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
 
   // Call upload to upload file
   const upload = async (file: File) => {
-    const data = await configProvider.uploadMedia(file)
+    const data = await uploadMedia(file)
     return data
   }
 

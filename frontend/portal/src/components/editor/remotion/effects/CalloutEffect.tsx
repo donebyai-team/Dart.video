@@ -13,7 +13,7 @@ interface CalloutEffectProps {
   fullHeight: number
   meta: MetaData
   borderColor: string
-  slideCase: string
+  isImage: boolean
   style: {
     borderRadius: number
     objectFit: 'cover' | 'contain' | 'fill'
@@ -38,7 +38,7 @@ export const CalloutEffectComponent: React.FC<CalloutEffectProps> = ({
   meta,
   style,
   borderColor,
-  slideCase
+  isImage
 }) => {
   const startTime = callout.startTime ?? 0
   const endTime = callout.endTime ?? slideDuration
@@ -157,7 +157,7 @@ export const CalloutEffectComponent: React.FC<CalloutEffectProps> = ({
         </defs>
 
         {/* Blurred background image */}
-        {slideCase === 'image' && (
+        {isImage && (
           <image
             x={(meta.x || 1) * (meta.scale || 1)}
             y={(meta.y || 1) * (meta.scale || 1)}
@@ -172,7 +172,7 @@ export const CalloutEffectComponent: React.FC<CalloutEffectProps> = ({
         )}
 
         {/* Zoomed image visible only in callout area */}
-        {slideCase === 'image' && (
+        {isImage && (
           <image
             x={zoomedImageX}
             y={zoomedImageY}

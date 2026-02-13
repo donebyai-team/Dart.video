@@ -267,7 +267,7 @@ func validateSlideImage(content *pbcore.ImageSlideContent) error {
 	return nil
 }
 
-func validateSlideVideo(content *pbcore.VideoSlideContent) error {
+func validateSlideVideo(content *pbcore.MediaSlideContent) error {
 	if content == nil {
 		return fmt.Errorf("content is nil")
 	}

@@ -32,7 +32,7 @@ export const createSyncActions = (_: VideoStoreSet, get: VideoStoreGet) => {
     const debouncedSync = debounce(async (video: Video) => {
         const videoId = video.id;
         if (!videoId || syncStatus === 'syncing') return;
-
+        console.log(lastSyncedSections, VideoSchema, "check")
         if (lastSyncedSections && equals(VideoSchema, lastSyncedSections, video)) {
             console.debug("No change in config, skipping sync")
             return

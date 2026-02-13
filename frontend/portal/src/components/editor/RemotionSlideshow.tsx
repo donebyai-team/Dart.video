@@ -8,7 +8,7 @@ import { slide } from '@remotion/transitions/slide'
 import React from 'react'
 import { AbsoluteFill, useVideoConfig } from 'remotion'
 import { getActualSlideDuration, TRANSITION_DURATION_SECONDS } from './frame_calculations'
-import { ImageSlide, InfographicSlide, TextAnimationSlide, VideoSlide, VisualAnimationSlide } from './remotion/slides'
+import { MediaSlide, InfographicSlide, TextAnimationSlide, VisualAnimationSlide } from './remotion/slides'
 
 interface SlideshowProps {
   fps: number
@@ -77,13 +77,13 @@ const SlideComponent: React.FC<{
       break
     case SlideType.VIDEO:
       if (!slide.content?.case || slide.content.case === 'video') {
-        return <VideoSlide slide={slide} width={width} height={height} onUpdate={onUpdate} />
+        return <MediaSlide slide={slide} width={width} height={height} onUpdate={onUpdate} />
       }
       break
     case SlideType.IMAGE:
     default:
       if (!slide.content?.case || slide.content.case === 'image') {
-        return <ImageSlide slide={slide} width={width} height={height} isEditing={isEditing} onUpdate={onUpdate} />
+        return <MediaSlide slide={slide} width={width} height={height} isEditing={isEditing} onUpdate={onUpdate} />
       }
       break
   }

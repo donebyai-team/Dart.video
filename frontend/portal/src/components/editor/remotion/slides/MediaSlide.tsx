@@ -1,4 +1,4 @@
-import { ImageSlideContent, MetaData, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { MediaSlideContent, MetaData, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Resolution } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import { Loader2 } from 'lucide-react'
 import React, { useRef, useState } from 'react'
@@ -6,11 +6,12 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig } from 'remotion'
 import { ImagePreview } from '../components/ImagePreview'
 import RetryButton from '../components/RetryButton'
 import UploadModal from '../components/UploadModal'
+import { VideoPreview } from '../components/VideoPreview'
 import CalloutEffectComponent from '../effects/CalloutEffect'
-import { SpotlightEffectComponent } from '../effects/SpotlightEffect'
-import { ImageContent } from './ImageContent'
+import SpotlightEffectComponent from '../effects/SpotlightEffect'
+import { MediaContainer } from './MediaContainer'
 
-interface ImageSlideProps {
+interface MediaSlideProps {
   slide: Slide
   width: number
   height: number
@@ -19,31 +20,17 @@ interface ImageSlideProps {
 }
 
 /**
- * ImageSlide Component (NEW ARCHITECTURE)
- * Renders an image slide with:
- * - Resizable/movable image content
+ * VideoSlide Component (NEW ARCHITECTURE)
+ * Renders a video slide with:
+ * - Video content (always fills canvas)
  * - Canvas-level spotlight effects
- * - Separate from annotations (handled by CanvasOverlay)
+ * - Play button overlay
  */
-export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, onUpdate }) => {
+export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, onUpdate }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
-
-  // Extract content and effects directly
-  const imageContent = slide.content.value as ImageSlideContent
-  // Extract case of the slide to opt render blur effect on image/video
-  const slideCase = slide.content.case
   const [openUploadModal, setOpenUploadModal] = useState<boolean>(false)
-  const [uploadError, setUploadError] = useState<boolean>(false)
-  const [retry, setRetry] = useState<boolean>(false)
-  const [uploading, setUploading] = useState<boolean>(false)
-  const [editing, setIsEditing] = useState<boolean>(false)
-  const imageRef = useRef<HTMLImageElement | null>(null)
-  const props = {
-    src: imageContent.src,
-    style: imageContent.style ?? {}
-  }
-  // Create resolution object from dimensions
+
   const resolution = {
     id: `${width}x${height}`,
     name: 'Custom',
@@ -52,6 +39,18 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, on
     height
   } as Resolution
 
+  // Extract content and effects directly
+  const mediaContent = slide.content.value as MediaSlideContent
+
+  // Extract case of the slide to opt render blur effect on image/video
+  const isImage = slide.content.case === 'image'
+  const [retry, setRetry] = useState<boolean>(false)
+  const [uploadError, setUploadError] = useState<boolean>(false)
+  const [uploading, setUploading] = useState<boolean>(false)
+  const [editing, setIsEditing] = useState<boolean>(false)
+  const videoRef = useRef<HTMLVideoElement | null>(null)
+  const imageRef = useRef<HTMLImageElement | null>(null)
+
   // check if these effects are available or not
   const isCalloutEffectsAvailable = slide.callouts && slide.callouts.length > 0
   const isSpotlightEffectsAvailable = slide.spotlights && slide.spotlights.length > 0
@@ -59,31 +58,31 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, on
   return (
     <AbsoluteFill
       style={{
-        backgroundColor: slide.backgroundColor || '#0f172a'
+        backgroundColor: '#000'
       }}
     >
-      {/* Render image content (resizable/draggable in edit mode) */}
-      {/* Use <AbsoluteFill> it will help you to adjust layers in future like Canva do */}
+      {/* Video fills canvas (no resizing/positioning) */}
       <AbsoluteFill>
-        {imageContent.meta && (
-          <ImageContent
+        {mediaContent.meta && (
+          <MediaContainer
+            videoRef={videoRef}
             imageRef={imageRef}
             setIsEditing={setIsEditing}
-            image={imageContent.meta}
+            media={mediaContent.meta}
             resolution={resolution}
             isEditing={editing}
             onUpdate={updates => {
-              if (onUpdate && imageContent) {
+              if (onUpdate && mediaContent) {
                 onUpdate({
                   content: {
-                    case: 'image',
+                    case: isImage ? 'image' : 'video',
                     value: {
-                      ...imageContent,
+                      ...mediaContent,
                       meta: {
-                        ...imageContent.meta,
+                        ...mediaContent.meta,
                         ...updates
                       }
-                    } as ImageSlideContent
+                    } as MediaSlideContent
                   }
                 } as Slide)
               }
@@ -95,7 +94,6 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, on
                   isUploading={uploading}
                   onPressRetry={() => {
                     setRetry(true)
-                    setUploadError(false)
                   }}
                 />
               </div>
@@ -105,64 +103,95 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, on
                 <Loader2 className=' w-32 h-32 text-white animate-spin' />
               </div>
             )}
-            <ImagePreview
-              onClickImage={() => {
-                setIsEditing(true)
-              }}
-              imageRef={imageRef}
-              onImageChange={() => {
-                setOpenUploadModal(!openUploadModal)
-              }}
-              onChange={(newProps: any) => {
-                if (onUpdate && newProps) {
-                  if (onUpdate && imageContent) {
-                    onUpdate({
-                      content: {
-                        case: 'image',
-                        value: {
-                          ...imageContent,
-                          ...newProps
-                        } as ImageSlideContent
-                      }
-                    } as Slide)
+
+            {isImage ? (
+              <ImagePreview
+                onClickImage={() => {
+                  setIsEditing(true)
+                }}
+                imageRef={imageRef}
+                onImageChange={() => {
+                  setOpenUploadModal(!openUploadModal)
+                }}
+                onChange={(newProps: any) => {
+                  if (onUpdate && newProps) {
+                    if (onUpdate && mediaContent) {
+                      onUpdate({
+                        content: {
+                          case: isImage ? 'image' : 'video',
+                          value: {
+                            ...mediaContent,
+                            ...newProps
+                          } as MediaSlideContent
+                        }
+                      } as Slide)
+                    }
                   }
-                }
-              }}
-              props={props}
-            />
+                }}
+                props={mediaContent}
+              />
+            ) : (
+              <VideoPreview
+                onClickVideo={() => {
+                  setIsEditing(true)
+                }}
+                videoRef={videoRef}
+                onVideoChange={() => {
+                  setOpenUploadModal(!openUploadModal)
+                }}
+                onChange={(newProps: any) => {
+                  if (onUpdate && newProps) {
+                    if (onUpdate && mediaContent) {
+                      onUpdate({
+                        content: {
+                          case: isImage ? 'image' : 'video',
+                          value: {
+                            ...mediaContent,
+                            ...newProps
+                          } as MediaSlideContent
+                        }
+                      } as Slide)
+                    }
+                  }
+                }}
+                props={mediaContent}
+              />
+            )}
+
             <UploadModal
-              setUploadError={setUploadError}
               setUploading={setUploading}
+              setUploadError={setUploadError}
               setRetry={setRetry}
-              accept='image/*'
+              accept={isImage ? 'image/*' : 'video/*'}
               retry={retry}
               open={openUploadModal}
               onClose={() => setOpenUploadModal(false)}
               onUpload={data => {
                 if (onUpdate && data) {
-                  if (onUpdate && imageContent) {
+                  if (onUpdate && mediaContent) {
                     onUpdate({
                       content: {
-                        case: 'image',
+                        case: isImage ? 'image' : 'video',
                         value: {
-                          ...imageContent,
+                          ...mediaContent,
                           src: data.url
-                        } as ImageSlideContent
+                        } as MediaSlideContent
                       }
                     } as Slide)
                   }
                 }
               }}
             />
-          </ImageContent>
+          </MediaContainer>
         )}
       </AbsoluteFill>
+
       {/* Render callout effects at CANVAS level */}
       {isCalloutEffectsAvailable &&
         slide.callouts.map(callout => (
           <AbsoluteFill style={{ pointerEvents: 'none' }}>
             <CalloutEffectComponent
-              slideCase={slideCase as string}
+              isImage={isImage}
               key={callout.id}
               callout={callout}
               frame={frame}
@@ -171,14 +200,14 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, on
               width={width} // Canvas dimensions
               height={height} // Canvas dimensions
               fullWidth={width}
-              src={props.src ?? ''}
+              src={mediaContent.src ?? ''}
               fullHeight={height}
               borderColor={callout.color}
               slideDuration={slide.duration}
-              meta={imageContent.meta as MetaData}
+              meta={mediaContent.meta as MetaData}
               style={{
-                borderRadius: props.style.borderRadius as number,
-                objectFit: props.style.objectFit as 'cover' | 'fill' | 'contain'
+                borderRadius: mediaContent.style?.borderRadius as number,
+                objectFit: mediaContent.style?.objectFit as 'cover' | 'fill' | 'contain'
               }}
             />
           </AbsoluteFill>
@@ -189,21 +218,21 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, on
         slide.spotlights.map(spotlight => (
           <AbsoluteFill style={{ pointerEvents: 'none' }}>
             <SpotlightEffectComponent
-              slideCase={slideCase as string}
               key={spotlight.id}
               spotlight={spotlight}
+              isImage={isImage}
               frame={frame}
               fps={fps}
               width={width} // Canvas dimensions
               height={height} // Canvas dimensions
               fullWidth={width}
-              src={props.src ?? ''}
+              src={mediaContent.src ?? ''}
               fullHeight={height}
               slideDuration={slide.duration}
-              meta={imageContent.meta as MetaData}
+              meta={mediaContent.meta as MetaData}
               style={{
-                borderRadius: props.style.borderRadius as number,
-                objectFit: props.style.objectFit as 'cover' | 'fill' | 'contain'
+                borderRadius: mediaContent.style?.borderRadius as number,
+                objectFit: mediaContent.style?.objectFit as 'cover' | 'fill' | 'contain'
               }}
             />
           </AbsoluteFill>

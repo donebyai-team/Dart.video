@@ -2,25 +2,27 @@ import { MetaData } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Resolution } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import React, { RefObject, SetStateAction, useCallback, useEffect, useRef, useState } from 'react'
 
-interface ImageContentProps {
-  image: MetaData
+interface MediaContainerProps {
+  media: MetaData
   resolution: Resolution
   isEditing?: boolean
   setIsEditing: React.Dispatch<SetStateAction<boolean>>
   onUpdate?: (updates: Partial<MetaData>) => void
   children: React.ReactNode
+  videoRef: RefObject<HTMLVideoElement>
   imageRef: RefObject<HTMLImageElement>
 }
 
 type Corner = 'nw' | 'ne' | 'sw' | 'se'
 
-export const ImageContent: React.FC<ImageContentProps> = ({
-  image,
+export const MediaContainer: React.FC<MediaContainerProps> = ({
+  media,
   resolution,
   isEditing = false,
   setIsEditing,
   onUpdate,
   children,
+  videoRef,
   imageRef
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -47,10 +49,10 @@ export const ImageContent: React.FC<ImageContentProps> = ({
   const pendingUpdateRef = useRef<Partial<MetaData> | null>(null)
 
   // Calculate percentage-based positioning for responsive scaling
-  const leftPercent = ((image.x || 0) / resolution.width) * 100
-  const topPercent = ((image.y || 0) / resolution.height) * 100
-  const widthPercent = ((image.width || 0) / resolution.width) * 100
-  const heightPercent = ((image.height || 0) / resolution.height) * 100
+  const leftPercent = ((media.x || 0) / resolution.width) * 100
+  const topPercent = ((media.y || 0) / resolution.height) * 100
+  const widthPercent = ((media.width || 0) / resolution.width) * 100
+  const heightPercent = ((media.height || 0) / resolution.height) * 100
 
   /**
    * Reads the effective render scale of the canvas/slide container.
@@ -100,11 +102,11 @@ export const ImageContent: React.FC<ImageContentProps> = ({
       dragStartRef.current = {
         x: e.clientX,
         y: e.clientY,
-        startX: image.x ?? 0,
-        startY: image.y ?? 0
+        startX: media.x ?? 0,
+        startY: media.y ?? 0
       }
     },
-    [isEditing, onUpdate, image.x, image.y]
+    [isEditing, onUpdate, media.x, media.y]
   )
 
   // ─── Resize ──────────────────────────────────────────────────────────────────
@@ -115,21 +117,21 @@ export const ImageContent: React.FC<ImageContentProps> = ({
       e.stopPropagation()
 
       // Lock aspect ratio at the moment the drag begins
-      const w = image.width ?? 0
-      const h = image.height ?? 0
+      const w = media.width ?? 0
+      const h = media.height ?? 0
       aspectRatioRef.current = h > 0 ? w / h : 1
 
       setIsResizing(corner)
       resizeStartRef.current = {
         x: e.clientX,
         y: e.clientY,
-        startX: image.x ?? 0,
-        startY: image.y ?? 0,
+        startX: media.x ?? 0,
+        startY: media.y ?? 0,
         startWidth: w,
         startHeight: h
       }
     },
-    [isEditing, onUpdate, image.x, image.y, image.width, image.height]
+    [isEditing, onUpdate, media.x, media.y, media.width, media.height]
   )
 
   // ─── Mouse move / up ─────────────────────────────────────────────────────────
@@ -146,8 +148,8 @@ export const ImageContent: React.FC<ImageContentProps> = ({
         const deltaX = (e.clientX - dragStartRef.current.x) / scale.x
         const deltaY = (e.clientY - dragStartRef.current.y) / scale.y
 
-        const w = image.width ?? 0
-        const h = image.height ?? 0
+        const w = media.width ?? 0
+        const h = media.height ?? 0
         const newX = Math.max(0, Math.min(resolution.width - w, dragStartRef.current.startX + deltaX))
         const newY = Math.max(0, Math.min(resolution.height - h, dragStartRef.current.startY + deltaY))
 
@@ -249,12 +251,15 @@ export const ImageContent: React.FC<ImageContentProps> = ({
         }
       }
     }
-  }, [isDragging, isResizing, image.width, image.height, resolution, isEditing, onUpdate])
+  }, [isDragging, isResizing, media.width, media.height, resolution, isEditing, onUpdate])
 
   // ─── Click-outside to deselect ───────────────────────────────────────────────
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      if (!isResizing && videoRef.current && !videoRef.current.contains(event.target as Node)) {
+        setIsEditing(false)
+      }
       if (!isResizing && imageRef.current && !imageRef.current.contains(event.target as Node)) {
         setIsEditing(false)
       }
@@ -264,7 +269,7 @@ export const ImageContent: React.FC<ImageContentProps> = ({
       document.addEventListener('mousedown', handleClickOutside)
       return () => document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [isEditing, setIsEditing, imageRef, isResizing])
+  }, [isEditing, setIsEditing, videoRef, imageRef, isResizing])
 
   // ─── Render ──────────────────────────────────────────────────────────────────
 
@@ -277,9 +282,9 @@ export const ImageContent: React.FC<ImageContentProps> = ({
         top: `${topPercent}%`,
         width: `${widthPercent}%`,
         height: `${heightPercent}%`,
-        transform: `rotate(${image.rotation || 0}deg)`,
+        transform: `rotate(${media.rotation || 0}deg)`,
         cursor: isEditing ? (isDragging ? 'grabbing' : 'grab') : 'default',
-        userSelect:"none"
+        userSelect: 'none'
       }}
       onMouseDown={isEditing ? handleDragStart : undefined}
     >

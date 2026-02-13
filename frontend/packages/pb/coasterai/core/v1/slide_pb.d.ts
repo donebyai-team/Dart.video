@@ -11,9 +11,30 @@ import type { JsonObject, Message } from "@bufbuild/protobuf";
 export declare const file_coasterai_core_v1_slide: GenFile;
 
 /**
- * @generated from message coasterai.core.v1.ImageSlideContent
+ * @generated from message coasterai.core.v1.MediaSlideStyle
  */
-export declare type ImageSlideContent = Message<"coasterai.core.v1.ImageSlideContent"> & {
+export declare type MediaSlideStyle = Message<"coasterai.core.v1.MediaSlideStyle"> & {
+  /**
+   * @generated from field: float borderRadius = 1;
+   */
+  borderRadius: number;
+
+  /**
+   * @generated from field: optional string objectFit = 2;
+   */
+  objectFit?: string;
+};
+
+/**
+ * Describes the message coasterai.core.v1.MediaSlideStyle.
+ * Use `create(MediaSlideStyleSchema)` to create a new message.
+ */
+export declare const MediaSlideStyleSchema: GenMessage<MediaSlideStyle>;
+
+/**
+ * @generated from message coasterai.core.v1.MediaSlideContent
+ */
+export declare type MediaSlideContent = Message<"coasterai.core.v1.MediaSlideContent"> & {
   /**
    * @generated from field: coasterai.core.v1.MetaData meta = 1;
    */
@@ -25,42 +46,16 @@ export declare type ImageSlideContent = Message<"coasterai.core.v1.ImageSlideCon
   src: string;
 
   /**
-   * @generated from field: google.protobuf.Struct style = 3;
+   * @generated from field: coasterai.core.v1.MediaSlideStyle style = 3;
    */
-  style?: JsonObject;
+  style?: MediaSlideStyle;
 };
 
 /**
- * Describes the message coasterai.core.v1.ImageSlideContent.
- * Use `create(ImageSlideContentSchema)` to create a new message.
+ * Describes the message coasterai.core.v1.MediaSlideContent.
+ * Use `create(MediaSlideContentSchema)` to create a new message.
  */
-export declare const ImageSlideContentSchema: GenMessage<ImageSlideContent>;
-
-/**
- * @generated from message coasterai.core.v1.VideoSlideContent
- */
-export declare type VideoSlideContent = Message<"coasterai.core.v1.VideoSlideContent"> & {
-  /**
-   * @generated from field: string src = 1;
-   */
-  src: string;
-
-  /**
-   * @generated from field: google.protobuf.Struct style = 2;
-   */
-  style?: JsonObject;
-
-  /**
-   * @generated from field: coasterai.core.v1.MetaData meta = 3;
-   */
-  meta?: MetaData;
-};
-
-/**
- * Describes the message coasterai.core.v1.VideoSlideContent.
- * Use `create(VideoSlideContentSchema)` to create a new message.
- */
-export declare const VideoSlideContentSchema: GenMessage<VideoSlideContent>;
+export declare const MediaSlideContentSchema: GenMessage<MediaSlideContent>;
 
 /**
  * @generated from message coasterai.core.v1.MetaData
@@ -352,15 +347,15 @@ export declare type Slide = Message<"coasterai.core.v1.Slide"> & {
    */
   content: {
     /**
-     * @generated from field: coasterai.core.v1.ImageSlideContent image = 8;
+     * @generated from field: coasterai.core.v1.MediaSlideContent image = 8;
      */
-    value: ImageSlideContent;
+    value: MediaSlideContent;
     case: "image";
   } | {
     /**
-     * @generated from field: coasterai.core.v1.VideoSlideContent video = 9;
+     * @generated from field: coasterai.core.v1.MediaSlideContent video = 9;
      */
-    value: VideoSlideContent;
+    value: MediaSlideContent;
     case: "video";
   } | {
     /**

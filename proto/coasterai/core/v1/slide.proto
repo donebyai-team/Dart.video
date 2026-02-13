@@ -31,18 +31,18 @@ enum TransitionType {
 
 // ===================== CORE MESSAGES =====================
 
-message ImageSlideContent {
+message MediaSlideStyle {
+  float borderRadius = 1;
+  optional string objectFit = 2;
+
+}
+
+message MediaSlideContent {
   MetaData meta = 1;
   string src = 2;
-  google.protobuf.Struct style = 3;
+  MediaSlideStyle style = 3;
 }
 
-
-message VideoSlideContent {
-  string src = 1;
-  google.protobuf.Struct style = 2;
-  MetaData meta = 3;
-}
 message MetaData {
   float x = 2;
   float y = 3;
@@ -119,8 +119,8 @@ message Slide {
   optional string backgroundColor = 7;
 
   oneof content {
-    ImageSlideContent image = 8;
-    VideoSlideContent video = 9;
+    MediaSlideContent image = 8;
+    MediaSlideContent video = 9;
     AnimationSlideContent animation = 10;
     StackSlideContent stack = 13;
   }
