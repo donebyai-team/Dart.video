@@ -77,7 +77,7 @@ const SlideComponent: React.FC<{
       break
     case SlideType.VIDEO:
       if (!slide.content?.case || slide.content.case === 'video') {
-        return <VideoSlide slide={slide} width={width} height={height} />
+        return <VideoSlide slide={slide} width={width} height={height} onUpdate={onUpdate} />
       }
       break
     case SlideType.IMAGE:

@@ -13,6 +13,7 @@ interface CalloutEffectProps {
   fullHeight: number
   meta: MetaData
   borderColor: string
+  slideCase: string
   style: {
     borderRadius: number
     objectFit: 'cover' | 'contain' | 'fill'
@@ -36,7 +37,8 @@ export const CalloutEffectComponent: React.FC<CalloutEffectProps> = ({
   src,
   meta,
   style,
-  borderColor
+  borderColor,
+  slideCase
 }) => {
   const startTime = callout.startTime ?? 0
   const endTime = callout.endTime ?? slideDuration
@@ -155,29 +157,33 @@ export const CalloutEffectComponent: React.FC<CalloutEffectProps> = ({
         </defs>
 
         {/* Blurred background image */}
-        <image
-          x={(meta.x || 1) * (meta.scale || 1)}
-          y={(meta.y || 1) * (meta.scale || 1)}
-          href={src}
-          width={meta.width || 0}
-          height={meta.height || 0}
-          preserveAspectRatio={preserveAspectRatio}
-          filter={`url(#${filterId})`}
-          mask={`url(#${maskId})`}
-          clipPath={`url(#${clipId})`}
-        />
+        {slideCase === 'image' && (
+          <image
+            x={(meta.x || 1) * (meta.scale || 1)}
+            y={(meta.y || 1) * (meta.scale || 1)}
+            href={src}
+            width={meta.width || 0}
+            height={meta.height || 0}
+            preserveAspectRatio={preserveAspectRatio}
+            filter={`url(#${filterId})`}
+            mask={`url(#${maskId})`}
+            clipPath={`url(#${clipId})`}
+          />
+        )}
 
         {/* Zoomed image visible only in callout area */}
-        <image
-          x={zoomedImageX}
-          y={zoomedImageY}
-          href={src}
-          width={zoomedImageWidth}
-          height={zoomedImageHeight}
-          preserveAspectRatio={preserveAspectRatio}
-          clipPath={`url(#${calloutClipId})`}
-          style={{ opacity }}
-        />
+        {slideCase === 'image' && (
+          <image
+            x={zoomedImageX}
+            y={zoomedImageY}
+            href={src}
+            width={zoomedImageWidth}
+            height={zoomedImageHeight}
+            preserveAspectRatio={preserveAspectRatio}
+            clipPath={`url(#${calloutClipId})`}
+            style={{ opacity }}
+          />
+        )}
 
         {/* Blurred overlay - covers everything except callout area */}
         <rect

@@ -1,13 +1,14 @@
 import { ImageSlideContent, MetaData, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { Resolution } from '@coasterai/pb/coasterai/core/v1/video_pb'
+import { Loader2 } from 'lucide-react'
 import React, { useRef, useState } from 'react'
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from 'remotion'
 import { ImagePreview } from '../components/ImagePreview'
-import ImageUploadModal from '../components/ImageUploadModal'
 import RetryButton from '../components/RetryButton'
+import UploadModal from '../components/UploadModal'
 import CalloutEffectComponent from '../effects/CalloutEffect'
 import { SpotlightEffectComponent } from '../effects/SpotlightEffect'
 import { ImageContent } from './ImageContent'
-import { Resolution } from '@coasterai/pb/coasterai/core/v1/video_pb'
 
 interface ImageSlideProps {
   slide: Slide
@@ -30,8 +31,9 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, on
 
   // Extract content and effects directly
   const imageContent = slide.content.value as ImageSlideContent
-
-  const [openImageModal, setOpenImageModal] = useState<boolean>(false)
+  // Extract case of the slide to opt render blur effect on image/video
+  const slideCase = slide.content.case
+  const [openUploadModal, setOpenUploadModal] = useState<boolean>(false)
   const [uploadError, setUploadError] = useState<boolean>(false)
   const [retry, setRetry] = useState<boolean>(false)
   const [uploading, setUploading] = useState<boolean>(false)
@@ -93,8 +95,14 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, on
                   isUploading={uploading}
                   onPressRetry={() => {
                     setRetry(true)
+                    setUploadError(false)
                   }}
                 />
+              </div>
+            )}
+            {uploading && (
+              <div className=' absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] z-10'>
+                <Loader2 className=' w-32 h-32 text-white animate-spin' />
               </div>
             )}
             <ImagePreview
@@ -103,7 +111,7 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, on
               }}
               imageRef={imageRef}
               onImageChange={() => {
-                setOpenImageModal(!openImageModal)
+                setOpenUploadModal(!openUploadModal)
               }}
               onChange={(newProps: any) => {
                 if (onUpdate && newProps) {
@@ -122,24 +130,23 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, on
               }}
               props={props}
             />
-            <ImageUploadModal
+            <UploadModal
+              setUploadError={setUploadError}
               setUploading={setUploading}
               setRetry={setRetry}
+              accept='image/*'
               retry={retry}
-              open={openImageModal}
-              onClose={() => setOpenImageModal(false)}
-              onUploadError={() => {
-                setUploadError(true)
-              }}
-              onUploadImage={url => {
-                if (onUpdate && url) {
+              open={openUploadModal}
+              onClose={() => setOpenUploadModal(false)}
+              onUpload={data => {
+                if (onUpdate && data) {
                   if (onUpdate && imageContent) {
                     onUpdate({
                       content: {
                         case: 'image',
                         value: {
                           ...imageContent,
-                          src: url
+                          src: data.url
                         } as ImageSlideContent
                       }
                     } as Slide)
@@ -155,6 +162,7 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, on
         slide.callouts.map(callout => (
           <AbsoluteFill style={{ pointerEvents: 'none' }}>
             <CalloutEffectComponent
+              slideCase={slideCase as string}
               key={callout.id}
               callout={callout}
               frame={frame}
@@ -181,6 +189,7 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, on
         slide.spotlights.map(spotlight => (
           <AbsoluteFill style={{ pointerEvents: 'none' }}>
             <SpotlightEffectComponent
+              slideCase={slideCase as string}
               key={spotlight.id}
               spotlight={spotlight}
               frame={frame}
@@ -202,5 +211,3 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({ slide, width, height, on
     </AbsoluteFill>
   )
 }
-
-export default ImageSlide
