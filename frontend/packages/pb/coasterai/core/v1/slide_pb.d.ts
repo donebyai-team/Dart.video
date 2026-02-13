@@ -347,25 +347,19 @@ export declare type Slide = Message<"coasterai.core.v1.Slide"> & {
    */
   content: {
     /**
-     * @generated from field: coasterai.core.v1.MediaSlideContent image = 8;
+     * @generated from field: coasterai.core.v1.MediaSlideContent media = 8;
      */
     value: MediaSlideContent;
-    case: "image";
+    case: "media";
   } | {
     /**
-     * @generated from field: coasterai.core.v1.MediaSlideContent video = 9;
-     */
-    value: MediaSlideContent;
-    case: "video";
-  } | {
-    /**
-     * @generated from field: coasterai.core.v1.AnimationSlideContent animation = 10;
+     * @generated from field: coasterai.core.v1.AnimationSlideContent animation = 9;
      */
     value: AnimationSlideContent;
     case: "animation";
   } | {
     /**
-     * @generated from field: coasterai.core.v1.StackSlideContent stack = 13;
+     * @generated from field: coasterai.core.v1.StackSlideContent stack = 10;
      */
     value: StackSlideContent;
     case: "stack";

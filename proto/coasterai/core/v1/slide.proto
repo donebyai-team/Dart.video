@@ -119,10 +119,9 @@ message Slide {
   optional string backgroundColor = 7;
 
   oneof content {
-    MediaSlideContent image = 8;
-    MediaSlideContent video = 9;
-    AnimationSlideContent animation = 10;
-    StackSlideContent stack = 13;
+    MediaSlideContent media = 8;
+    AnimationSlideContent animation = 9;
+    StackSlideContent stack = 10;
   }
 
   optional bool voiceoverGenerated = 15;

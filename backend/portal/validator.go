@@ -104,15 +104,8 @@ func validateSlide(slide *pbcore.Slide) error {
 		return fmt.Errorf("transition duration is invalid")
 	}
 
-	if slide.GetImage() != nil {
-		err := validateSlideImage(slide.GetImage())
-		if err != nil {
-			return err
-		}
-	}
-
-	if slide.GetVideo() != nil {
-		err := validateSlideVideo(slide.GetVideo())
+	if slide.GetMedia() != nil {
+		err := validateSlideMedia(slide.GetMedia())
 		if err != nil {
 			return err
 		}
@@ -243,7 +236,7 @@ func validateZoomEffect(slideDuration float32, effect *pbcore.ZoomEffect) error 
 	return nil
 }
 
-func validateSlideImage(content *pbcore.ImageSlideContent) error {
+func validateSlideMedia(content *pbcore.MediaSlideContent) error {
 	if content == nil {
 		return fmt.Errorf("content is nil")
 	}
