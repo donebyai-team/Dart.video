@@ -1,46 +1,39 @@
+import { MediaSlideContent, MediaSlideStyle, MetaData } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import React, { SetStateAction, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 export const OBJECT_FIT_OPTIONS = ['contain', 'cover', 'fill'] as const
-interface BaseImageStyles {
-  width?: number
-  height?: number
-  borderRadius?: number
-  objectFit?: string
-}
 
-interface ImageStylerProps<T extends BaseImageStyles> {
+interface MediaStylerProps {
   open: boolean
   setOpen: (open: boolean) => void
   className?: string
-  value: T
-  onChange: (styles: Partial<T>) => void
+  value: MediaSlideContent
+  onChange: (styles: Partial<MediaSlideContent>) => void
   children?: React.ReactNode
   setIsEditingToggle?: React.Dispatch<SetStateAction<boolean>>
-  onImagechange?: () => void
+  onMediaChange?: () => void
+  isImage?: boolean
 }
 
-export const ImageStyler = <T extends BaseImageStyles>({
+export const MediaStyler = ({
   open,
   setOpen,
   onChange,
   value,
   className = '',
   children,
-  onImagechange,
-}: ImageStylerProps<T>) => {
+  onMediaChange,
+  isImage
+}: MediaStylerProps) => {
   const popoverRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLDivElement>(null)
   const [position, setPosition] = useState({ top: 0, left: 0 })
 
-  const set = <K extends keyof T>(key: K, v: T[K]) => {
-    onChange({ [key]: v } as unknown as Partial<T>)
-  }
-
   const styles = {
-    width: value.width ?? 200,
-    height: value.height ?? 200,
-    borderRadius: value.borderRadius ?? 0,
-    objectFit: value.objectFit ?? 'cover'
+    width: value?.meta?.width ?? 200,
+    height: value?.meta?.height ?? 200,
+    borderRadius: value?.style?.borderRadius ?? 0,
+    objectFit: value?.style?.objectFit ?? 'cover'
   }
 
   // Calculate optimal position
@@ -220,7 +213,15 @@ export const ImageStyler = <T extends BaseImageStyles>({
                 <input
                   type='range'
                   value={styles.width}
-                  onChange={e => set('width' as keyof T, Number(e.target.value) as T[keyof T])}
+                  onChange={e => {
+                    onChange({
+                      ...value,
+                      meta: {
+                        ...value.meta,
+                        width: Number(e.target.value)
+                      } as MetaData
+                    })
+                  }}
                   min={50}
                   max={1000}
                   step={10}
@@ -255,7 +256,15 @@ export const ImageStyler = <T extends BaseImageStyles>({
                 <input
                   type='range'
                   value={styles.height}
-                  onChange={e => set('height' as keyof T, Number(e.target.value) as T[keyof T])}
+                  onChange={e => {
+                    onChange({
+                      ...value,
+                      meta: {
+                        ...value.meta,
+                        height: Number(e.target.value)
+                      } as MetaData
+                    })
+                  }}
                   min={50}
                   max={1000}
                   step={10}
@@ -268,9 +277,9 @@ export const ImageStyler = <T extends BaseImageStyles>({
             </>
           )}
 
-          {onImagechange && (
+          {onMediaChange && (
             <button
-              onClick={onImagechange}
+              onClick={onMediaChange}
               style={{
                 fontSize: '0.75rem',
                 padding: '8px 12px',
@@ -281,7 +290,7 @@ export const ImageStyler = <T extends BaseImageStyles>({
                 marginTop: '4px'
               }}
             >
-              Change Image
+              Change {isImage ? 'Image' : 'Video'}
             </button>
           )}
 
@@ -309,7 +318,15 @@ export const ImageStyler = <T extends BaseImageStyles>({
             <input
               type='range'
               value={styles.borderRadius}
-              onChange={e => set('borderRadius' as keyof T, Number(e.target.value) as T[keyof T])}
+              onChange={e => {
+                onChange({
+                  ...value,
+                  style: {
+                    ...value.style,
+                    borderRadius: Number(e.target.value)
+                  } as MediaSlideStyle
+                })
+              }}
               min={0}
               max={200}
               step={1}
@@ -321,7 +338,7 @@ export const ImageStyler = <T extends BaseImageStyles>({
           </div>
 
           {/* Object Fit */}
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: isImage ? 'flex' : 'none', flexDirection: 'column' }}>
             <label
               style={{
                 fontSize: '0.75rem',
@@ -334,7 +351,15 @@ export const ImageStyler = <T extends BaseImageStyles>({
             </label>
             <select
               value={String(styles.objectFit)}
-              onChange={e => set('objectFit' as keyof T, e.target.value as T[keyof T])}
+              onChange={e => {
+                onChange({
+                  ...value,
+                  style: {
+                    ...value.style,
+                    objectFit: e.target.value
+                  } as MediaSlideStyle
+                })
+              }}
               style={{
                 fontSize: '0.75rem',
                 padding: '6px 8px',
@@ -369,4 +394,4 @@ export const ImageStyler = <T extends BaseImageStyles>({
   )
 }
 
-export default ImageStyler
+export default MediaStyler

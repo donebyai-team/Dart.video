@@ -244,7 +244,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
 
         if (slide.type === SlideType.STACK && slide.content) {
           const stackContent = slide.content.value as StackSlideContent
-          if (stackContent.items) {
+          if (stackContent?.items) {
             actualDuration = stackContent.items.reduce((sum: number, item: any) => sum + (item.duration || 0), 0)
           }
         }

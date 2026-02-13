@@ -6,6 +6,7 @@ interface Props {
 }
 
 const RetryButton = ({ isUploading, onPressRetry }: Props) => {
+  if (isUploading) return null
   return (
     <button
       onClick={onPressRetry}

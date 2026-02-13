@@ -1,96 +1,97 @@
+import { uploadMedia } from '@/services/utils'
+import { UploadMediaResponse } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
 import CloseIcon from '@mui/icons-material/Close'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import { Box, CircularProgress, Dialog, DialogContent, DialogTitle, IconButton, Typography } from '@mui/material'
 import React, { SetStateAction, useCallback, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 
-interface ImageUploadModalProps {
+interface UploadModalProps {
   open: boolean
   onClose: () => void
-  onUploadImage: (url: string) => void
-  onUploadError: () => void
+  onUpload: (url: UploadMediaResponse) => void
   retry: boolean
   setRetry: React.Dispatch<SetStateAction<boolean>>
   setUploading: React.Dispatch<SetStateAction<boolean>>
+  setUploadError: React.Dispatch<SetStateAction<boolean>>
+  accept: string
 }
 
-export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
+export const UploadModal: React.FC<UploadModalProps> = ({
   open,
   onClose,
-  onUploadImage,
-  onUploadError,
+  onUpload,
   retry,
   setRetry,
-  setUploading
+  setUploading,
+  setUploadError,
+  accept
 }) => {
   const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [choosenFile, setChoosenFile] = useState<File | null>(null)
 
-  //Remove this fallback url when you implement uploadImage function
-  const fallbackUrl = "https://picsum.photos/536/354"
-
-  const uploadImage = async (file: File) => {
-    //implement your uploading function here and return the url
-
-    return fallbackUrl
+  // Call upload to upload file
+  const upload = async (file: File) => {
+    const data = await uploadMedia(file)
+    return data
   }
 
   const handleFile = useCallback(
     async (file: File) => {
-      if (!file.type.startsWith('image/')) {
-        toast.error('Please upload an image file')
+      if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+        toast.error('Please upload an image/video file')
         return
       }
+
+      // Set setChoosenFile to file to use it while you retry to upload
       setChoosenFile(file)
 
+      // Set setIsUploading true to show loader
       setIsUploading(true)
 
       try {
-        let imageUrl: string
-
-        imageUrl = fallbackUrl
-
-        onUploadImage(imageUrl)
-
-        //async function to upload the update the image
-        uploadImage(file)
+        //async function to upload the update
+        upload(file)
           .then(cloudUrl => {
-            onUploadImage(cloudUrl)
+            onUpload(cloudUrl)
+            setIsUploading(false)
+            setUploadError(false)
+            setRetry(false)
           })
           .catch(error => {
             console.error('Upload error:', error)
-            toast.error('Something went wrong')
-            onUploadError()
+            toast.error(error.message)
+            setIsUploading(false)
+            setUploadError(true)
           })
 
         onClose()
       } catch (error) {
         console.error('Upload error:', error)
-        toast.error('Failed to upload image')
-      } finally {
+        toast.error('Failed to upload media')
         setIsUploading(false)
       }
     },
-    [onUploadImage, onClose]
+    [onUpload, onClose]
   )
 
   useEffect(() => {
     if (retry) {
       if (choosenFile) {
         setIsUploading(true)
-        uploadImage(choosenFile)
+        upload(choosenFile)
           .then(cloudUrl => {
-            onUploadImage(cloudUrl)
+            onUpload(cloudUrl)
             setRetry(false)
             setChoosenFile(null)
             setIsUploading(false)
+            setUploadError(false)
           })
-          .catch((error) => {
+          .catch(error => {
             console.error('Upload error:', error)
-            toast.error('Something went wrong')
-            onUploadError()
-            setRetry(false)
+            toast.error(error.message)
+            setUploadError(true)
             setIsUploading(false)
           })
       }
@@ -135,7 +136,7 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   const handleClick = useCallback(() => {
     const input = document.createElement('input')
     input.type = 'file'
-    input.accept = 'image/*'
+    input.accept = accept
     input.onchange = e => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (file) {
@@ -158,7 +159,7 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
       }}
     >
       <DialogTitle sx={{ m: 0, p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Typography variant='h6'>Upload Image</Typography>
+        <Typography variant='h6'>Upload Media</Typography>
         <IconButton
           aria-label='close'
           onClick={onClose}
@@ -204,13 +205,17 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
               <CloudUploadIcon sx={{ fontSize: 64, color: 'primary.main', opacity: 0.5 }} />
               <Typography variant='h6' color='text.primary'>
-                Drag & Drop Image Here
+                Drag & Drop Media Here
               </Typography>
               <Typography variant='body2' color='text.secondary'>
                 or click to browse
               </Typography>
               <Typography variant='caption' color='text.disabled'>
-                Supports: JPG, PNG, GIF, WebP
+                {accept.includes('image')
+                  ? 'Supports: JPG, PNG, GIF, WebP'
+                  : accept.includes('video')
+                    ? 'Supports: MP4, WEBM'
+                    : ''}
               </Typography>
             </Box>
           )}
@@ -220,4 +225,4 @@ export const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
   )
 }
 
-export default ImageUploadModal
+export default UploadModal

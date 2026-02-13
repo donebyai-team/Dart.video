@@ -8,12 +8,11 @@ import "google/protobuf/struct.proto";
 
 enum SlideType {
   SLIDE_TYPE_UNDEFINED = 0;
-  SLIDE_TYPE_IMAGE = 1;
-  SLIDE_TYPE_TEXT_ANIMATION = 2;
-  SLIDE_TYPE_INFOGRAPHIC = 3;
-  SLIDE_TYPE_VISUAL_ANIMATION = 4;
-  SLIDE_TYPE_VIDEO = 5;
-  SLIDE_TYPE_STACK = 6;
+  SLIDE_TYPE_TEXT_ANIMATION = 1;
+  SLIDE_TYPE_INFOGRAPHIC = 2;
+  SLIDE_TYPE_VISUAL_ANIMATION = 3;
+  SLIDE_TYPE_STACK = 4;
+  SLIDE_TYPE_MEDIA = 5;
 }
 
 enum StackAnimationMode {
@@ -31,19 +30,19 @@ enum TransitionType {
 
 // ===================== CORE MESSAGES =====================
 
-message ImageSlideContent {
+message MediaSlideStyle {
+  float borderRadius = 1;
+  optional string objectFit = 2;
+
+}
+
+message MediaSlideContent {
   MetaData meta = 1;
   string src = 2;
-  google.protobuf.Struct style = 3;
+  MediaSlideStyle style = 3;
+  bool is_image = 4;
 }
 
-
-message VideoSlideContent {
-  string src = 1;
-  optional float startTime = 2;
-  optional float endTime = 3;
-  MetaData meta = 4;
-}
 message MetaData {
   float x = 2;
   float y = 3;
@@ -120,10 +119,9 @@ message Slide {
   optional string backgroundColor = 7;
 
   oneof content {
-    ImageSlideContent image = 8;
-    VideoSlideContent video = 9;
-    AnimationSlideContent animation = 10;
-    StackSlideContent stack = 13;
+    MediaSlideContent media = 8;
+    AnimationSlideContent animation = 9;
+    StackSlideContent stack = 10;
   }
 
   optional bool voiceoverGenerated = 15;

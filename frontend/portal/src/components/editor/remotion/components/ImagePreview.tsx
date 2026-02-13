@@ -1,26 +1,12 @@
+import { MediaSlideContent } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { RefObject, useState } from 'react'
 import { Img } from 'remotion'
-import { z } from 'zod'
-import ImageStyler from './ImageStyler'
-
-const ImgStyle = z.object({
-  width: z.union([z.string(), z.number()]).optional(),
-  height: z.union([z.string(), z.number()]).optional(),
-  borderRadius: z.union([z.string(), z.number()]).optional(),
-  objectFit: z.enum(['contain', 'cover', 'fill']).optional()
-})
-
-const ImgSchema = z.object({
-  src: z.string(),
-  style: ImgStyle
-})
-
-export type ImgTemplateProps = z.infer<typeof ImgSchema>
+import MediaStyler from './MediaStyler'
 
 interface Props {
   imageRef: RefObject<HTMLImageElement>
-  props: ImgTemplateProps
-  onChange: (newProps: Partial<ImgTemplateProps>) => void
+  props: MediaSlideContent
+  onChange: (newProps: Partial<MediaSlideContent>) => void
   onImageChange: () => void
   onClickImage: () => void
 }
@@ -31,22 +17,19 @@ const ImagePreview = ({ props, onChange, onImageChange, imageRef, onClickImage }
   const style = props.style || {}
 
   return (
-    <ImageStyler
-      onImagechange={() => {
+    <MediaStyler
+      isImage={true}
+      onMediaChange={() => {
         onImageChange()
-        
         //Close the styler
         setOpen(false)
       }}
-      onChange={props => {
-        onChange({
-          src,
-          style: { ...style, ...props }
-        })
+      onChange={updatedProps => {
+        onChange(updatedProps)
       }}
       open={open}
       setOpen={setOpen}
-      value={style as any}
+      value={props}
     >
       <Img
         ref={imageRef}
@@ -61,7 +44,7 @@ const ImagePreview = ({ props, onChange, onImageChange, imageRef, onClickImage }
           ...style
         }}
       ></Img>
-    </ImageStyler>
+    </MediaStyler>
   )
 }
 

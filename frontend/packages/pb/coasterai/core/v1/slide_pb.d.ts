@@ -11,9 +11,30 @@ import type { JsonObject, Message } from "@bufbuild/protobuf";
 export declare const file_coasterai_core_v1_slide: GenFile;
 
 /**
- * @generated from message coasterai.core.v1.ImageSlideContent
+ * @generated from message coasterai.core.v1.MediaSlideStyle
  */
-export declare type ImageSlideContent = Message<"coasterai.core.v1.ImageSlideContent"> & {
+export declare type MediaSlideStyle = Message<"coasterai.core.v1.MediaSlideStyle"> & {
+  /**
+   * @generated from field: float borderRadius = 1;
+   */
+  borderRadius: number;
+
+  /**
+   * @generated from field: optional string objectFit = 2;
+   */
+  objectFit?: string;
+};
+
+/**
+ * Describes the message coasterai.core.v1.MediaSlideStyle.
+ * Use `create(MediaSlideStyleSchema)` to create a new message.
+ */
+export declare const MediaSlideStyleSchema: GenMessage<MediaSlideStyle>;
+
+/**
+ * @generated from message coasterai.core.v1.MediaSlideContent
+ */
+export declare type MediaSlideContent = Message<"coasterai.core.v1.MediaSlideContent"> & {
   /**
    * @generated from field: coasterai.core.v1.MetaData meta = 1;
    */
@@ -25,47 +46,21 @@ export declare type ImageSlideContent = Message<"coasterai.core.v1.ImageSlideCon
   src: string;
 
   /**
-   * @generated from field: google.protobuf.Struct style = 3;
+   * @generated from field: coasterai.core.v1.MediaSlideStyle style = 3;
    */
-  style?: JsonObject;
+  style?: MediaSlideStyle;
+
+  /**
+   * @generated from field: bool is_image = 4;
+   */
+  isImage: boolean;
 };
 
 /**
- * Describes the message coasterai.core.v1.ImageSlideContent.
- * Use `create(ImageSlideContentSchema)` to create a new message.
+ * Describes the message coasterai.core.v1.MediaSlideContent.
+ * Use `create(MediaSlideContentSchema)` to create a new message.
  */
-export declare const ImageSlideContentSchema: GenMessage<ImageSlideContent>;
-
-/**
- * @generated from message coasterai.core.v1.VideoSlideContent
- */
-export declare type VideoSlideContent = Message<"coasterai.core.v1.VideoSlideContent"> & {
-  /**
-   * @generated from field: string src = 1;
-   */
-  src: string;
-
-  /**
-   * @generated from field: optional float startTime = 2;
-   */
-  startTime?: number;
-
-  /**
-   * @generated from field: optional float endTime = 3;
-   */
-  endTime?: number;
-
-  /**
-   * @generated from field: coasterai.core.v1.MetaData meta = 4;
-   */
-  meta?: MetaData;
-};
-
-/**
- * Describes the message coasterai.core.v1.VideoSlideContent.
- * Use `create(VideoSlideContentSchema)` to create a new message.
- */
-export declare const VideoSlideContentSchema: GenMessage<VideoSlideContent>;
+export declare const MediaSlideContentSchema: GenMessage<MediaSlideContent>;
 
 /**
  * @generated from message coasterai.core.v1.MetaData
@@ -357,25 +352,19 @@ export declare type Slide = Message<"coasterai.core.v1.Slide"> & {
    */
   content: {
     /**
-     * @generated from field: coasterai.core.v1.ImageSlideContent image = 8;
+     * @generated from field: coasterai.core.v1.MediaSlideContent media = 8;
      */
-    value: ImageSlideContent;
-    case: "image";
+    value: MediaSlideContent;
+    case: "media";
   } | {
     /**
-     * @generated from field: coasterai.core.v1.VideoSlideContent video = 9;
-     */
-    value: VideoSlideContent;
-    case: "video";
-  } | {
-    /**
-     * @generated from field: coasterai.core.v1.AnimationSlideContent animation = 10;
+     * @generated from field: coasterai.core.v1.AnimationSlideContent animation = 9;
      */
     value: AnimationSlideContent;
     case: "animation";
   } | {
     /**
-     * @generated from field: coasterai.core.v1.StackSlideContent stack = 13;
+     * @generated from field: coasterai.core.v1.StackSlideContent stack = 10;
      */
     value: StackSlideContent;
     case: "stack";
@@ -464,34 +453,29 @@ export enum SlideType {
   UNDEFINED = 0,
 
   /**
-   * @generated from enum value: SLIDE_TYPE_IMAGE = 1;
+   * @generated from enum value: SLIDE_TYPE_TEXT_ANIMATION = 1;
    */
-  IMAGE = 1,
+  TEXT_ANIMATION = 1,
 
   /**
-   * @generated from enum value: SLIDE_TYPE_TEXT_ANIMATION = 2;
+   * @generated from enum value: SLIDE_TYPE_INFOGRAPHIC = 2;
    */
-  TEXT_ANIMATION = 2,
+  INFOGRAPHIC = 2,
 
   /**
-   * @generated from enum value: SLIDE_TYPE_INFOGRAPHIC = 3;
+   * @generated from enum value: SLIDE_TYPE_VISUAL_ANIMATION = 3;
    */
-  INFOGRAPHIC = 3,
+  VISUAL_ANIMATION = 3,
 
   /**
-   * @generated from enum value: SLIDE_TYPE_VISUAL_ANIMATION = 4;
+   * @generated from enum value: SLIDE_TYPE_STACK = 4;
    */
-  VISUAL_ANIMATION = 4,
+  STACK = 4,
 
   /**
-   * @generated from enum value: SLIDE_TYPE_VIDEO = 5;
+   * @generated from enum value: SLIDE_TYPE_MEDIA = 5;
    */
-  VIDEO = 5,
-
-  /**
-   * @generated from enum value: SLIDE_TYPE_STACK = 6;
-   */
-  STACK = 6,
+  MEDIA = 5,
 }
 
 /**

@@ -1,7 +1,7 @@
+import { create } from '@bufbuild/protobuf'
 import { Config, ConfigSchema } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
 import { portalClient } from './grpc'
 import { log } from './logger'
-import { create } from '@bufbuild/protobuf'
 
 // this is present on build (i.e. http://api.freightstream.ai)
 export const CONFIG_API_URI = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8787'
@@ -31,6 +31,8 @@ export class ConfigProvider {
   async fetchFromBackend(): Promise<Config> {
     return portalClient.getConfig({})
   }
+
+ 
 
   async buildConfig(): Promise<Config> {
     const backendConfig = await this.fetchFromBackend()

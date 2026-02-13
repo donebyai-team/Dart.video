@@ -12,6 +12,7 @@ interface SpotlightEffectProps {
   src?: string
   fullHeight: number
   meta: MetaData
+  isImage:boolean
   style: {
     borderRadius: number
     objectFit: 'cover' | 'contain' | 'fill'
@@ -34,7 +35,8 @@ export const SpotlightEffectComponent: React.FC<SpotlightEffectProps> = ({
   fullHeight,
   src,
   meta,
-  style
+  style,
+  isImage
 }) => {
   const startTime = spotlight.startTime ?? 0
   const endTime = spotlight.endTime ?? slideDuration
@@ -112,7 +114,7 @@ export const SpotlightEffectComponent: React.FC<SpotlightEffectProps> = ({
           </mask>
         </defs>
 
-        {src && (
+        {src && isImage && (
           <image
             x={(meta.x || 1) * (meta.scale || 1)}
             y={(meta.y || 1) * (meta.scale || 1)}

@@ -264,8 +264,8 @@ Each slide type has specific capabilities defined in `editorConfig.ts`:
 
 ```typescript
 {
-  id: SlideType.IMAGE,
-  name: "Image/Screenshot",
+  id: SlideType.MEDIA,
+  name: "Image/video",
   availableTools: ["text", "rectangle", "arrow", "callout"],  // Annotations
   availableEffects: ["spotlight", "zoom"],                     // Effects
   supportsContent: true  // Image can be resized/repositioned
