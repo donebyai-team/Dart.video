@@ -190,7 +190,7 @@ export const defaultEditorConfig: EditorConfig = {
         defaultSlideType: SlideType.TEXT_ANIMATION,
         types: [
             {
-                id: SlideType.IMAGE,
+                id: SlideType.MEDIA,
                 name: "Image/Screenshot",
                 description: "Add screen with annotations",
                 icon: "ImageIcon",
@@ -407,9 +407,9 @@ export const defaultEditorConfig: EditorConfig = {
                 supportsContent: false,
             },
             {
-                id: SlideType.VIDEO,
+                id: SlideType.MEDIA,
                 name: "Video Clip",
-                description: "Add video content",
+                description: "Add media content",
                 icon: "Film",
                 color: "#ef4444",
                 defaultDuration: 10,

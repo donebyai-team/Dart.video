@@ -243,7 +243,7 @@ func validateZoomEffect(slideDuration float32, effect *pbcore.ZoomEffect) error 
 	return nil
 }
 
-func validateSlideImage(content *pbcore.ImageSlideContent) error {
+func validateSlideImage(content *pbcore.MediaSlideContent) error {
 	if content == nil {
 		return fmt.Errorf("content is nil")
 	}

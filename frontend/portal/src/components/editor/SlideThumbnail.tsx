@@ -16,11 +16,9 @@ const SlideThumbnail = ({ slide}: SlideThumbnailProps) => {
         return <VisualAnimationThumbnail slide={slide} />;
       case SlideType.INFOGRAPHIC:
         return <InfographicThumbnail slide={slide} />;
-      case SlideType.VIDEO:
-        return <VideoThumbnail slide={slide} />;
       case SlideType.STACK:
         return <StackThumbnail slide={slide} />;
-      case SlideType.IMAGE:
+      case SlideType.MEDIA:
       default:
         return <ImageThumbnail slide={slide} />;
     }

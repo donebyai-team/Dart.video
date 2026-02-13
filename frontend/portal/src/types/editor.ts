@@ -228,8 +228,8 @@ export interface SlideTypeBase {
 }
 
 // Image slide type config
-export interface ImageSlideConfig extends SlideTypeBase {
-  id: SlideType.IMAGE;
+export interface MediaSlideConfig extends SlideTypeBase {
+  id: SlideType.MEDIA;
   supportedFormats: string[];
   maxFileSize: number; // in MB
   canvasEnabled: boolean;
@@ -255,13 +255,6 @@ export interface VisualAnimationSlideConfig extends SlideTypeBase {
   generationPromptPlaceholder: string;
 }
 
-// Video slide type config
-export interface VideoSlideConfig extends SlideTypeBase {
-  id: SlideType.VIDEO;
-  supportedFormats: string[];
-  maxDuration: number; // in seconds
-  maxFileSize: number; // in MB
-}
 
 // Stack slide type config
 export interface StackSlideConfig extends SlideTypeBase {
@@ -274,11 +267,10 @@ export interface StackSlideConfig extends SlideTypeBase {
 
 // Union of all slide type configs
 export type SlideTypeConfig =
-  | ImageSlideConfig
+  | MediaSlideConfig
   | TextAnimationSlideConfig
   | InfographicSlideConfig
   | VisualAnimationSlideConfig
-  | VideoSlideConfig
   | StackSlideConfig;
 
 export interface SlideTypesConfig {

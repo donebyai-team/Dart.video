@@ -31,11 +31,10 @@ interface PlayerToolbarProps {
 
 const slideTypeLabels: Record<SlideType, { label: string; icon: React.ElementType }> = {
   [SlideType.UNDEFINED]: { label: 'Undefined', icon: HelpCircle }, // or any icon
-  [SlideType.IMAGE]: { label: 'Image', icon: ImageIcon },
+  [SlideType.MEDIA]: { label: 'Image', icon: ImageIcon },
   [SlideType.TEXT_ANIMATION]: { label: 'Text Animation', icon: Type },
   [SlideType.INFOGRAPHIC]: { label: 'Infographic', icon: BarChart3 },
   [SlideType.VISUAL_ANIMATION]: { label: 'Visual Animation', icon: Sparkles },
-  [SlideType.VIDEO]: { label: 'Video', icon: Film },
   [SlideType.STACK]: { label: 'Stack', icon: Layers }
 }
 const insertTools: { id: EffectType; name: string; icon: React.ElementType }[] = [
@@ -43,7 +42,7 @@ const insertTools: { id: EffectType; name: string; icon: React.ElementType }[] =
   { id: EffectType.SPOTLIGHT, name: 'Spotlight', icon: CircleDot }
 ]
 
-const isMediaType = (type: SlideType) => type === SlideType.IMAGE || type === SlideType.VIDEO
+const isMediaType = (type: SlideType) => type === SlideType.MEDIA
 
 const PlayerToolbar = ({ onDurationChange, minDuration = 1, maxDuration = 60 }: PlayerToolbarProps) => {
   const onChangeVisual = useVideoStore(s => s.handleEditSlide)

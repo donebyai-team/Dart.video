@@ -454,9 +454,9 @@ export enum SlideType {
   UNDEFINED = 0,
 
   /**
-   * @generated from enum value: SLIDE_TYPE_IMAGE = 1;
+   * @generated from enum value: SLIDE_TYPE_MEDIA = 1;
    */
-  IMAGE = 1,
+  MEDIA = 1,
 
   /**
    * @generated from enum value: SLIDE_TYPE_TEXT_ANIMATION = 2;
@@ -474,14 +474,9 @@ export enum SlideType {
   VISUAL_ANIMATION = 4,
 
   /**
-   * @generated from enum value: SLIDE_TYPE_VIDEO = 5;
+   * @generated from enum value: SLIDE_TYPE_STACK = 5;
    */
-  VIDEO = 5,
-
-  /**
-   * @generated from enum value: SLIDE_TYPE_STACK = 6;
-   */
-  STACK = 6,
+  STACK = 5,
 }
 
 /**

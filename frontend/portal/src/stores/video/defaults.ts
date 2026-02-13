@@ -30,23 +30,13 @@ export const getDefaultMetadata = (): MetaData =>
 
 export function buildSlideContent(type: SlideType): Slide["content"] {
     switch (type) {
-        case SlideType.IMAGE:
+        case SlideType.MEDIA:
             return {
                 case: "image",
                 value: create(ImageSlideContentSchema, {
                     meta: getDefaultMetadata(),
                     src: "https://placehold.co/600x400/EEE/31343C",
                     style: {},
-                }),
-            };
-
-        case SlideType.VIDEO:
-            return {
-                case: "video",
-                value: create(VideoSlideContentSchema, {
-                    src: "",
-                    startTime: 0,
-                    endTime: 10,
                 }),
             };
 
