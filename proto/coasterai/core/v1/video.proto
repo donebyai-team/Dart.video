@@ -12,12 +12,26 @@ enum VideoStatus {
   VIDEO_STATUS_FAILED = 3;
 }
 
+enum VideoLanguage {
+  VIDE_LANGUAGE_EN = 0;
+}
+
+enum ResolutionType {
+  RESOLUTION_TYPE_UNSPECIFIED = 0;
+  RESOLUTION_16_9 = 1;
+  RESOLUTION_4_3 = 2;
+  RESOLUTION_9_16 = 3;
+  RESOLUTION_1_1 = 4;
+}
 
 message VideoMetadata {
     int32 fps = 1;
     optional string background_color = 2;
     Resolution resolution = 3;
     float duration = 4;
+    string prompt = 5;
+    string brand_library_id = 6;
+    VideoLanguage language = 7;
 }
 
 message Video {

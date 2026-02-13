@@ -11,6 +11,7 @@ import (
 	"github.com/streamingfast/logging"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"strings"
 )
 
 func (p *Portal) CreateVideo(ctx context.Context, c *connect.Request[pbportal.CreateVideoRequest]) (*connect.Response[pbportal.CreateVideoResponse], error) {
@@ -21,7 +22,23 @@ func (p *Portal) CreateVideo(ctx context.Context, c *connect.Request[pbportal.Cr
 		return nil, err
 	}
 
-	video, err := p.videoGenerationService.CreateVideo(ctx, c.Msg.Script, c.Msg.Name, actor.OrganizationID)
+	if c.Msg.Resolution == nil || c.Msg.Resolution.Name == "" {
+		return nil, errors.New("resolution is required")
+	}
+
+	if c.Msg.Duration != 60 && c.Msg.Duration != 90 {
+		return nil, errors.New("invalid duration specified")
+	}
+
+	if c.Msg.Script == nil && len(strings.TrimSpace(c.Msg.Prompt)) < 10 {
+		return nil, errors.New("prompt is required")
+	}
+
+	if c.Msg.Script != nil && len(c.Msg.Script.Items) < 3 {
+		return nil, errors.New("script should have at least 3 items")
+	}
+
+	video, err := p.videoGenerationService.CreateVideo(ctx, actor.OrganizationID, c.Msg)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}

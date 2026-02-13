@@ -52,7 +52,11 @@ message GetVideosResponse {
 
 message CreateVideoRequest {
   core.v1.Script script = 1;
-  string name = 2;  
+  string prompt = 2;
+  core.v1.Resolution resolution = 3;
+  float duration = 4;
+  string brand_library_id = 5;
+  core.v1.VideoLanguage language = 6;
 }
 
 message CreateVideoResponse {
