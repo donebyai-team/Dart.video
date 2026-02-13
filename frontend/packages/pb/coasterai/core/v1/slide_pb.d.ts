@@ -46,17 +46,12 @@ export declare type VideoSlideContent = Message<"coasterai.core.v1.VideoSlideCon
   src: string;
 
   /**
-   * @generated from field: optional float startTime = 2;
+   * @generated from field: google.protobuf.Struct style = 2;
    */
-  startTime?: number;
+  style?: JsonObject;
 
   /**
-   * @generated from field: optional float endTime = 3;
-   */
-  endTime?: number;
-
-  /**
-   * @generated from field: coasterai.core.v1.MetaData meta = 4;
+   * @generated from field: coasterai.core.v1.MetaData meta = 3;
    */
   meta?: MetaData;
 };

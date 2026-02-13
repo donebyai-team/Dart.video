@@ -40,9 +40,8 @@ message ImageSlideContent {
 
 message VideoSlideContent {
   string src = 1;
-  optional float startTime = 2;
-  optional float endTime = 3;
-  MetaData meta = 4;
+  google.protobuf.Struct style = 2;
+  MetaData meta = 3;
 }
 message MetaData {
   float x = 2;

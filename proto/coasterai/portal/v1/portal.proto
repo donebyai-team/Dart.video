@@ -68,6 +68,13 @@ message Config {
   string google_auth0_callback_url = 6;
 }
 
+message UploadMediaResponse {
+  string url = 1;
+  string thumbnail = 2;
+  float width = 3;
+  float height =4;
+}
+
 message PasswordlessStartRequest {
   string redirect_uri = 1;
   string email = 2;
