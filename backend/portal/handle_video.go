@@ -50,6 +50,21 @@ func (p *Portal) CreateVideo(ctx context.Context, c *connect.Request[pbportal.Cr
 	}), nil
 }
 
+func (p *Portal) DeleteVideo(ctx context.Context, c *connect.Request[pbportal.DeleteVideoRequest]) (*connect.Response[emptypb.Empty], error) {
+	actor, err := p.gethAuthContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	videoID := c.Msg.VideoId
+
+	err = p.db.DeleteByID(ctx, videoID, actor.OrganizationID)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(&emptypb.Empty{}), nil
+}
+
 func (p *Portal) GetVideo(ctx context.Context,
 	req *connect.Request[pbportal.GetVideoRequest],
 	stream *connect.ServerStream[pbportal.GetVideoResponse]) error {

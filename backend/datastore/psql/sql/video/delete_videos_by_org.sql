@@ -1,0 +1,1 @@
+DELETE FROM videos WHERE organization_id = :organization_id and id = :id;

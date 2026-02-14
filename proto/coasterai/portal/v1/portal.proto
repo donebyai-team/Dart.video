@@ -27,7 +27,12 @@ service PortalService {
   rpc CreateVideo(CreateVideoRequest) returns (CreateVideoResponse);
   rpc GetVideo(GetVideoRequest) returns (stream GetVideoResponse);
   rpc GetVideos(.google.protobuf.Empty) returns (GetVideosResponse);
+  rpc DeleteVideo(DeleteVideoRequest) returns (.google.protobuf.Empty);
   rpc UpdateVideoConfig(UpdateVideoConfigRequest) returns (.google.protobuf.Empty);
+}
+
+message DeleteVideoRequest {
+  string video_id = 1;
 }
 
 message GetVideoResponse {

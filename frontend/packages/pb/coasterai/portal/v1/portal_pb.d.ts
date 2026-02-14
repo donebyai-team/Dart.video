@@ -13,6 +13,22 @@ import type { EmptySchema, Timestamp } from "@bufbuild/protobuf/wkt";
 export declare const file_coasterai_portal_v1_portal: GenFile;
 
 /**
+ * @generated from message coasterai.portal.v1.DeleteVideoRequest
+ */
+export declare type DeleteVideoRequest = Message<"coasterai.portal.v1.DeleteVideoRequest"> & {
+  /**
+   * @generated from field: string video_id = 1;
+   */
+  videoId: string;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.DeleteVideoRequest.
+ * Use `create(DeleteVideoRequestSchema)` to create a new message.
+ */
+export declare const DeleteVideoRequestSchema: GenMessage<DeleteVideoRequest>;
+
+/**
  * @generated from message coasterai.portal.v1.GetVideoResponse
  */
 export declare type GetVideoResponse = Message<"coasterai.portal.v1.GetVideoResponse"> & {
@@ -899,6 +915,14 @@ export declare const PortalService: GenService<{
     methodKind: "unary";
     input: typeof EmptySchema;
     output: typeof GetVideosResponseSchema;
+  },
+  /**
+   * @generated from rpc coasterai.portal.v1.PortalService.DeleteVideo
+   */
+  deleteVideo: {
+    methodKind: "unary";
+    input: typeof DeleteVideoRequestSchema;
+    output: typeof EmptySchema;
   },
   /**
    * @generated from rpc coasterai.portal.v1.PortalService.UpdateVideoConfig

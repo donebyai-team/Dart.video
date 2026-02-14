@@ -72,6 +72,9 @@ const (
 	PortalServiceGetVideoProcedure = "/coasterai.portal.v1.PortalService/GetVideo"
 	// PortalServiceGetVideosProcedure is the fully-qualified name of the PortalService's GetVideos RPC.
 	PortalServiceGetVideosProcedure = "/coasterai.portal.v1.PortalService/GetVideos"
+	// PortalServiceDeleteVideoProcedure is the fully-qualified name of the PortalService's DeleteVideo
+	// RPC.
+	PortalServiceDeleteVideoProcedure = "/coasterai.portal.v1.PortalService/DeleteVideo"
 	// PortalServiceUpdateVideoConfigProcedure is the fully-qualified name of the PortalService's
 	// UpdateVideoConfig RPC.
 	PortalServiceUpdateVideoConfigProcedure = "/coasterai.portal.v1.PortalService/UpdateVideoConfig"
@@ -94,6 +97,7 @@ var (
 	portalServiceCreateVideoMethodDescriptor         = portalServiceServiceDescriptor.Methods().ByName("CreateVideo")
 	portalServiceGetVideoMethodDescriptor            = portalServiceServiceDescriptor.Methods().ByName("GetVideo")
 	portalServiceGetVideosMethodDescriptor           = portalServiceServiceDescriptor.Methods().ByName("GetVideos")
+	portalServiceDeleteVideoMethodDescriptor         = portalServiceServiceDescriptor.Methods().ByName("DeleteVideo")
 	portalServiceUpdateVideoConfigMethodDescriptor   = portalServiceServiceDescriptor.Methods().ByName("UpdateVideoConfig")
 )
 
@@ -115,6 +119,7 @@ type PortalServiceClient interface {
 	CreateVideo(context.Context, *connect.Request[v1.CreateVideoRequest]) (*connect.Response[v1.CreateVideoResponse], error)
 	GetVideo(context.Context, *connect.Request[v1.GetVideoRequest]) (*connect.ServerStreamForClient[v1.GetVideoResponse], error)
 	GetVideos(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetVideosResponse], error)
+	DeleteVideo(context.Context, *connect.Request[v1.DeleteVideoRequest]) (*connect.Response[emptypb.Empty], error)
 	UpdateVideoConfig(context.Context, *connect.Request[v1.UpdateVideoConfigRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
@@ -212,6 +217,12 @@ func NewPortalServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(portalServiceGetVideosMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		deleteVideo: connect.NewClient[v1.DeleteVideoRequest, emptypb.Empty](
+			httpClient,
+			baseURL+PortalServiceDeleteVideoProcedure,
+			connect.WithSchema(portalServiceDeleteVideoMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 		updateVideoConfig: connect.NewClient[v1.UpdateVideoConfigRequest, emptypb.Empty](
 			httpClient,
 			baseURL+PortalServiceUpdateVideoConfigProcedure,
@@ -237,6 +248,7 @@ type portalServiceClient struct {
 	createVideo         *connect.Client[v1.CreateVideoRequest, v1.CreateVideoResponse]
 	getVideo            *connect.Client[v1.GetVideoRequest, v1.GetVideoResponse]
 	getVideos           *connect.Client[emptypb.Empty, v1.GetVideosResponse]
+	deleteVideo         *connect.Client[v1.DeleteVideoRequest, emptypb.Empty]
 	updateVideoConfig   *connect.Client[v1.UpdateVideoConfigRequest, emptypb.Empty]
 }
 
@@ -310,6 +322,11 @@ func (c *portalServiceClient) GetVideos(ctx context.Context, req *connect.Reques
 	return c.getVideos.CallUnary(ctx, req)
 }
 
+// DeleteVideo calls coasterai.portal.v1.PortalService.DeleteVideo.
+func (c *portalServiceClient) DeleteVideo(ctx context.Context, req *connect.Request[v1.DeleteVideoRequest]) (*connect.Response[emptypb.Empty], error) {
+	return c.deleteVideo.CallUnary(ctx, req)
+}
+
 // UpdateVideoConfig calls coasterai.portal.v1.PortalService.UpdateVideoConfig.
 func (c *portalServiceClient) UpdateVideoConfig(ctx context.Context, req *connect.Request[v1.UpdateVideoConfigRequest]) (*connect.Response[emptypb.Empty], error) {
 	return c.updateVideoConfig.CallUnary(ctx, req)
@@ -333,6 +350,7 @@ type PortalServiceHandler interface {
 	CreateVideo(context.Context, *connect.Request[v1.CreateVideoRequest]) (*connect.Response[v1.CreateVideoResponse], error)
 	GetVideo(context.Context, *connect.Request[v1.GetVideoRequest], *connect.ServerStream[v1.GetVideoResponse]) error
 	GetVideos(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetVideosResponse], error)
+	DeleteVideo(context.Context, *connect.Request[v1.DeleteVideoRequest]) (*connect.Response[emptypb.Empty], error)
 	UpdateVideoConfig(context.Context, *connect.Request[v1.UpdateVideoConfigRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
@@ -426,6 +444,12 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(portalServiceGetVideosMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	portalServiceDeleteVideoHandler := connect.NewUnaryHandler(
+		PortalServiceDeleteVideoProcedure,
+		svc.DeleteVideo,
+		connect.WithSchema(portalServiceDeleteVideoMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	portalServiceUpdateVideoConfigHandler := connect.NewUnaryHandler(
 		PortalServiceUpdateVideoConfigProcedure,
 		svc.UpdateVideoConfig,
@@ -462,6 +486,8 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 			portalServiceGetVideoHandler.ServeHTTP(w, r)
 		case PortalServiceGetVideosProcedure:
 			portalServiceGetVideosHandler.ServeHTTP(w, r)
+		case PortalServiceDeleteVideoProcedure:
+			portalServiceDeleteVideoHandler.ServeHTTP(w, r)
 		case PortalServiceUpdateVideoConfigProcedure:
 			portalServiceUpdateVideoConfigHandler.ServeHTTP(w, r)
 		default:
@@ -527,6 +553,10 @@ func (UnimplementedPortalServiceHandler) GetVideo(context.Context, *connect.Requ
 
 func (UnimplementedPortalServiceHandler) GetVideos(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetVideosResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.GetVideos is not implemented"))
+}
+
+func (UnimplementedPortalServiceHandler) DeleteVideo(context.Context, *connect.Request[v1.DeleteVideoRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.DeleteVideo is not implemented"))
 }
 
 func (UnimplementedPortalServiceHandler) UpdateVideoConfig(context.Context, *connect.Request[v1.UpdateVideoConfigRequest]) (*connect.Response[emptypb.Empty], error) {

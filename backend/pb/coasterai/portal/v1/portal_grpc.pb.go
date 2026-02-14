@@ -34,6 +34,7 @@ const (
 	PortalService_CreateVideo_FullMethodName         = "/coasterai.portal.v1.PortalService/CreateVideo"
 	PortalService_GetVideo_FullMethodName            = "/coasterai.portal.v1.PortalService/GetVideo"
 	PortalService_GetVideos_FullMethodName           = "/coasterai.portal.v1.PortalService/GetVideos"
+	PortalService_DeleteVideo_FullMethodName         = "/coasterai.portal.v1.PortalService/DeleteVideo"
 	PortalService_UpdateVideoConfig_FullMethodName   = "/coasterai.portal.v1.PortalService/UpdateVideoConfig"
 )
 
@@ -57,6 +58,7 @@ type PortalServiceClient interface {
 	CreateVideo(ctx context.Context, in *CreateVideoRequest, opts ...grpc.CallOption) (*CreateVideoResponse, error)
 	GetVideo(ctx context.Context, in *GetVideoRequest, opts ...grpc.CallOption) (PortalService_GetVideoClient, error)
 	GetVideos(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetVideosResponse, error)
+	DeleteVideo(ctx context.Context, in *DeleteVideoRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	UpdateVideoConfig(ctx context.Context, in *UpdateVideoConfigRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
@@ -217,6 +219,15 @@ func (c *portalServiceClient) GetVideos(ctx context.Context, in *emptypb.Empty, 
 	return out, nil
 }
 
+func (c *portalServiceClient) DeleteVideo(ctx context.Context, in *DeleteVideoRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, PortalService_DeleteVideo_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *portalServiceClient) UpdateVideoConfig(ctx context.Context, in *UpdateVideoConfigRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, PortalService_UpdateVideoConfig_FullMethodName, in, out, opts...)
@@ -246,6 +257,7 @@ type PortalServiceServer interface {
 	CreateVideo(context.Context, *CreateVideoRequest) (*CreateVideoResponse, error)
 	GetVideo(*GetVideoRequest, PortalService_GetVideoServer) error
 	GetVideos(context.Context, *emptypb.Empty) (*GetVideosResponse, error)
+	DeleteVideo(context.Context, *DeleteVideoRequest) (*emptypb.Empty, error)
 	UpdateVideoConfig(context.Context, *UpdateVideoConfigRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedPortalServiceServer()
 }
@@ -295,6 +307,9 @@ func (UnimplementedPortalServiceServer) GetVideo(*GetVideoRequest, PortalService
 }
 func (UnimplementedPortalServiceServer) GetVideos(context.Context, *emptypb.Empty) (*GetVideosResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetVideos not implemented")
+}
+func (UnimplementedPortalServiceServer) DeleteVideo(context.Context, *DeleteVideoRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteVideo not implemented")
 }
 func (UnimplementedPortalServiceServer) UpdateVideoConfig(context.Context, *UpdateVideoConfigRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateVideoConfig not implemented")
@@ -567,6 +582,24 @@ func _PortalService_GetVideos_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PortalService_DeleteVideo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteVideoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PortalServiceServer).DeleteVideo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PortalService_DeleteVideo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PortalServiceServer).DeleteVideo(ctx, req.(*DeleteVideoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _PortalService_UpdateVideoConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateVideoConfigRequest)
 	if err := dec(in); err != nil {
@@ -643,6 +676,10 @@ var PortalService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetVideos",
 			Handler:    _PortalService_GetVideos_Handler,
+		},
+		{
+			MethodName: "DeleteVideo",
+			Handler:    _PortalService_DeleteVideo_Handler,
 		},
 		{
 			MethodName: "UpdateVideoConfig",

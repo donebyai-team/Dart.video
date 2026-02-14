@@ -57,4 +57,5 @@ type VideoRepository interface {
 	UpdateVideo(ctx context.Context, video *models.Video) error
 	GetVideoById(ctx context.Context, ID, organizationID string) (*models.Video, error)
 	GetVideos(ctx context.Context, organizationID string) ([]*models.Video, error)
+	DeleteByID(ctx context.Context, id, organizationID string) error
 }

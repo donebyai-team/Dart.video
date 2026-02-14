@@ -13,6 +13,7 @@ func init() {
 		"video/update_video.sql",
 		"video/query_video_by_id.sql",
 		"video/query_video_by_org.sql",
+		"video/delete_videos_by_org.sql",
 	})
 }
 
@@ -47,6 +48,18 @@ func (r *Database) UpdateVideo(ctx context.Context, video *models.Video) error {
 	})
 	if err != nil {
 		return fmt.Errorf("failed to update video %q: %w", video.ID, err)
+	}
+	return nil
+}
+
+func (r *Database) DeleteByID(ctx context.Context, id, organizationID string) error {
+	stmt := r.mustGetStmt("video/delete_videos_by_org.sql")
+	_, err := stmt.ExecContext(ctx, map[string]interface{}{
+		"organization_id": organizationID,
+		"id":              id,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to delete videos %w", err)
 	}
 	return nil
 }
