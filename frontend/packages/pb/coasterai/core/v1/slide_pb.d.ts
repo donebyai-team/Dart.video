@@ -51,7 +51,7 @@ export declare type MediaSlideContent = Message<"coasterai.core.v1.MediaSlideCon
   style?: MediaSlideStyle;
 
   /**
-   * @generated from field: bool is_image = 4;
+   * @generated from field: bool isImage = 4;
    */
   isImage: boolean;
 };

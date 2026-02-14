@@ -40,7 +40,7 @@ message MediaSlideContent {
   MetaData meta = 1;
   string src = 2;
   MediaSlideStyle style = 3;
-  bool is_image = 4;
+  bool isImage = 4;
 }
 
 message MetaData {
