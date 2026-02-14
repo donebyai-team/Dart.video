@@ -1,5 +1,4 @@
 import { MediaSlideContent, MetaData, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import { Resolution } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import { Loader2 } from 'lucide-react'
 import React, { useRef, useState } from 'react'
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from 'remotion'
@@ -9,7 +8,7 @@ import UploadModal from '../components/UploadModal'
 import { VideoPreview } from '../components/VideoPreview'
 import CalloutEffectComponent from '../effects/CalloutEffect'
 import SpotlightEffectComponent from '../effects/SpotlightEffect'
-import { MediaContainer } from './MediaContainer'
+import { MediaContainer } from '../components/MediaContainer'
 
 interface MediaSlideProps {
   slide: Slide
@@ -23,14 +22,6 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
   const [openUploadModal, setOpenUploadModal] = useState<boolean>(false)
-
-  const resolution = {
-    id: `${width}x${height}`,
-    name: 'Custom',
-    aspect: `${width}/${height}`,
-    width,
-    height
-  } as Resolution
 
   // Extract content and effects directly
   const background = slide.backgroundColor;
@@ -65,7 +56,8 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
             mediaRef={isImage ? imageRef : videoRef}
             setIsEditing={setIsEditing}
             media={mediaContent.meta}
-            resolution={resolution}
+            width={width}
+            height={height}
             isEditing={editing}
             onUpdate={updates => {
               if (onUpdate && mediaContent) {

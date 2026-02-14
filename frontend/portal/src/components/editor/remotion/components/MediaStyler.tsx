@@ -118,6 +118,7 @@ export const MediaStyler = ({
         window.removeEventListener('scroll', updatePosition, true)
       }
     }
+    return
   }, [open])
 
   // Close on outside click
@@ -137,6 +138,7 @@ export const MediaStyler = ({
       document.addEventListener('mousedown', handleClickOutside)
       return () => document.removeEventListener('mousedown', handleClickOutside)
     }
+    return;
   }, [open, setOpen])
 
   // Close on escape

@@ -4,7 +4,8 @@ import React, { RefObject, SetStateAction, useCallback, useEffect, useRef, useSt
 
 interface MediaContainerProps {
   media: MetaData
-  resolution: Resolution
+  width: number
+  height: number
   isEditing?: boolean
   setIsEditing: React.Dispatch<SetStateAction<boolean>>
   onUpdate?: (updates: Partial<MetaData>) => void
@@ -16,7 +17,8 @@ type Corner = 'nw' | 'ne' | 'sw' | 'se'
 
 export const MediaContainer: React.FC<MediaContainerProps> = ({
   media,
-  resolution,
+  width,
+  height,
   isEditing = false,
   setIsEditing,
   onUpdate,
@@ -47,10 +49,10 @@ export const MediaContainer: React.FC<MediaContainerProps> = ({
   const pendingUpdateRef = useRef<Partial<MetaData> | null>(null)
 
   // Calculate percentage-based positioning for responsive scaling
-  const leftPercent = ((media.x || 0) / resolution.width) * 100
-  const topPercent = ((media.y || 0) / resolution.height) * 100
-  const widthPercent = ((media.width || 0) / resolution.width) * 100
-  const heightPercent = ((media.height || 0) / resolution.height) * 100
+  const leftPercent = ((media.x || 0) / width) * 100
+  const topPercent = ((media.y || 0) / height) * 100
+  const widthPercent = ((media.width || 0) / width) * 100
+  const heightPercent = ((media.height || 0) / height) * 100
 
   /**
    * Reads the effective render scale of the canvas/slide container.
@@ -70,8 +72,8 @@ export const MediaContainer: React.FC<MediaContainerProps> = ({
     if (canvasEl) {
       const rect = canvasEl.getBoundingClientRect()
       return {
-        x: rect.width / resolution.width,
-        y: rect.height / resolution.height
+        x: rect.width / width,
+        y: rect.height / height
       }
     }
 
@@ -148,8 +150,8 @@ export const MediaContainer: React.FC<MediaContainerProps> = ({
 
         const w = media.width ?? 0
         const h = media.height ?? 0
-        const newX = Math.max(0, Math.min(resolution.width - w, dragStartRef.current.startX + deltaX))
-        const newY = Math.max(0, Math.min(resolution.height - h, dragStartRef.current.startY + deltaY))
+        const newX = Math.max(0, Math.min(width - w, dragStartRef.current.startX + deltaX))
+        const newY = Math.max(0, Math.min(height - h, dragStartRef.current.startY + deltaY))
 
         pendingUpdateRef.current = { x: newX, y: newY }
 
@@ -199,10 +201,10 @@ export const MediaContainer: React.FC<MediaContainerProps> = ({
         }
 
         // Constrain to canvas bounds
-        newX = Math.max(0, Math.min(resolution.width - newWidth, newX))
-        newY = Math.max(0, Math.min(resolution.height - newHeight, newY))
-        newWidth = Math.min(resolution.width - newX, newWidth)
-        newHeight = Math.min(resolution.height - newY, newHeight)
+        newX = Math.max(0, Math.min(width - newWidth, newX))
+        newY = Math.max(0, Math.min(height - newHeight, newY))
+        newWidth = Math.min(width - newX, newWidth)
+        newHeight = Math.min(height - newY, newHeight)
 
         pendingUpdateRef.current = { x: newX, y: newY, width: newWidth, height: newHeight }
 
@@ -250,7 +252,7 @@ export const MediaContainer: React.FC<MediaContainerProps> = ({
       }
     }
     return
-  }, [isDragging, isResizing, media.width, media.height, resolution, isEditing, onUpdate])
+  }, [isDragging, isResizing, media.width, media.height, isEditing, onUpdate])
 
   // ─── Click-outside to deselect ───────────────────────────────────────────────
 
