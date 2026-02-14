@@ -19,13 +19,6 @@ interface MediaSlideProps {
   onUpdate?: (updates: Partial<Slide>) => void
 }
 
-/**
- * VideoSlide Component (NEW ARCHITECTURE)
- * Renders a video slide with:
- * - Video content (always fills canvas)
- * - Canvas-level spotlight effects
- * - Play button overlay
- */
 export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, onUpdate }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
@@ -40,13 +33,12 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
   } as Resolution
 
   // Extract content and effects directly
+  const background = slide.backgroundColor;
   const mediaContent = slide.content.value as MediaSlideContent
 
   // Extract case of the slide to opt render blur effect on image/video
-  // @TODO check if boolean is coming in data
   const isImage = mediaContent.isImage
 
-  console.log(mediaContent, isImage, "isImage")
   const [retry, setRetry] = useState<boolean>(false)
   const [uploadError, setUploadError] = useState<boolean>(false)
   const [uploading, setUploading] = useState<boolean>(false)
@@ -61,15 +53,16 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
   return (
     <AbsoluteFill
       style={{
-        backgroundColor: '#000'
+        backgroundColor: background,
+        justifyContent: 'center',
+        alignItems: 'center'
       }}
     >
       {/* Video fills canvas (no resizing/positioning) */}
       <AbsoluteFill>
         {mediaContent.meta && (
           <MediaContainer
-            videoRef={videoRef}
-            imageRef={imageRef}
+            mediaRef={isImage ? imageRef : videoRef}
             setIsEditing={setIsEditing}
             media={mediaContent.meta}
             resolution={resolution}
@@ -77,7 +70,9 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
             onUpdate={updates => {
               if (onUpdate && mediaContent) {
                 onUpdate({
+                  ...slide,
                   content: {
+                    case: "media",
                     value: {
                       ...mediaContent,
                       meta: {
@@ -119,7 +114,9 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
                   if (onUpdate && newProps) {
                     if (onUpdate && mediaContent) {
                       onUpdate({
+                        ...slide,
                         content: {
+                          case: "media",
                           value: {
                             ...mediaContent,
                             ...newProps
@@ -144,7 +141,9 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
                   if (onUpdate && newProps) {
                     if (onUpdate && mediaContent) {
                       onUpdate({
+                        ...slide,
                         content: {
+                          case: "media",
                           value: {
                             ...mediaContent,
                             ...newProps
@@ -170,7 +169,9 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
                 if (onUpdate && data) {
                   if (onUpdate && mediaContent) {
                     onUpdate({
+                      ...slide,
                       content: {
+                        case: "media",
                         value: {
                           ...mediaContent,
                           isImage,

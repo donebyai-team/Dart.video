@@ -9,8 +9,7 @@ interface MediaContainerProps {
   setIsEditing: React.Dispatch<SetStateAction<boolean>>
   onUpdate?: (updates: Partial<MetaData>) => void
   children: React.ReactNode
-  videoRef: RefObject<HTMLVideoElement>
-  imageRef: RefObject<HTMLImageElement>
+  mediaRef: RefObject<HTMLVideoElement | HTMLImageElement>
 }
 
 type Corner = 'nw' | 'ne' | 'sw' | 'se'
@@ -22,8 +21,7 @@ export const MediaContainer: React.FC<MediaContainerProps> = ({
   setIsEditing,
   onUpdate,
   children,
-  videoRef,
-  imageRef
+  mediaRef
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -251,25 +249,24 @@ export const MediaContainer: React.FC<MediaContainerProps> = ({
         }
       }
     }
+    return
   }, [isDragging, isResizing, media.width, media.height, resolution, isEditing, onUpdate])
 
   // ─── Click-outside to deselect ───────────────────────────────────────────────
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (!isResizing && videoRef.current && !videoRef.current.contains(event.target as Node)) {
+      if (!isResizing && mediaRef.current && !mediaRef.current.contains(event.target as Node)) {
         setIsEditing(false)
-      }
-      if (!isResizing && imageRef.current && !imageRef.current.contains(event.target as Node)) {
-        setIsEditing(false)
-      }
+      }      
     }
 
     if (isEditing) {
       document.addEventListener('mousedown', handleClickOutside)
       return () => document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [isEditing, setIsEditing, videoRef, imageRef, isResizing])
+    return
+  }, [isEditing, setIsEditing, mediaRef, isResizing])
 
   // ─── Render ──────────────────────────────────────────────────────────────────
 

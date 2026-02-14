@@ -1,7 +1,18 @@
 import { EditorConfig, SlideTypeConfig, TextAnimationSlideConfig } from "@/types/editor";
 import { ActiveToolType, SelectedTool } from "@/types/tools";
 import { create } from "@bufbuild/protobuf";
-import { AnimationSlideContentSchema, CalloutEffect, CalloutEffectSchema, ImageSlideContentSchema, MetaData, MetaDataSchema, Section, SectionSchema, Slide, SlideSchema, SlideType, SpotlightEffect, SpotlightEffectSchema, StackAnimationMode, StackSlideContentSchema, TransitionType, VideoSlideContentSchema } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { AnimationSlideContentSchema, 
+    CalloutEffect, 
+    CalloutEffectSchema, 
+    MediaSlideContentSchema, 
+    MetaData, MetaDataSchema, 
+    Section, SectionSchema, 
+    Slide, SlideSchema, SlideType, 
+    SpotlightEffect, SpotlightEffectSchema, 
+    StackAnimationMode, 
+    StackSlideContentSchema, 
+    TransitionType
+ } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { Resolution, ResolutionSchema, Video, VideoMetadata, VideoMetadataSchema } from "@coasterai/pb/coasterai/core/v1/video_pb";
 import { SelectedSection } from "./types";
 
@@ -32,8 +43,9 @@ export function buildSlideContent(type: SlideType): Slide["content"] {
     switch (type) {
         case SlideType.MEDIA:
             return {
-                case: "image",
-                value: create(ImageSlideContentSchema, {
+                case: "media",
+                value: create(MediaSlideContentSchema, {
+                    isImage: true,
                     meta: getDefaultMetadata(),
                     src: "https://placehold.co/600x400/EEE/31343C",
                     style: {},
