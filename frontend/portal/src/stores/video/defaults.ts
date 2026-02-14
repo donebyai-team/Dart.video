@@ -15,6 +15,7 @@ import { AnimationSlideContentSchema,
  } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { Resolution, ResolutionSchema, Video, VideoMetadata, VideoMetadataSchema } from "@coasterai/pb/coasterai/core/v1/video_pb";
 import { SelectedSection } from "./types";
+import { TRANSITION_DURATION_SECONDS } from "@/components/editor/frame_calculations";
 
 // Helper functions (moved from useEditorState)
 export const getSlideTypeConfig = (config: EditorConfig | null, slideType: SlideType): SlideTypeConfig | undefined => {
@@ -106,7 +107,7 @@ export function createNewSlide(params: {
         duration: defaultDuration ?? 5,
         transition: TransitionType.TRANSITION_NONE,
         backgroundColor: inheritedBg,
-        transitionDuration: 0.3,
+        transitionDuration: TRANSITION_DURATION_SECONDS,
         content: buildSlideContent(type),
         spotlights: [],
         callouts: [],
