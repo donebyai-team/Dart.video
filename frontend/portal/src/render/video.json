@@ -1,17 +1,6 @@
 {
-    "id": "5b6ea138-15e4-4da0-97e6-f8197f927142",
-    "metadata": {
-        "fps": 30,
-        "background_color": "#000000",
-        "resolution": {
-            "id": "16:9",
-            "name": "Landscape",
-            "aspect": "16/9",
-            "width": 1920,
-            "height": 1080
-        },
-        "duration": 32
-    },
+    "id": "42c11f82-ef38-4a67-a3cd-3a0a3174004b",
+    "name": "test",
     "config": {
         "sections": [
             {
@@ -21,69 +10,61 @@
                 "slides": [
                     {
                         "id": "hook-1",
-                        "type": 2,
+                        "type": "SLIDE_TYPE_TEXT_ANIMATION",
                         "transcript": "Are you tired of losing important files? Your documents deserve better.",
                         "duration": 2,
-                        "transition": 1,
+                        "transition": "TRANSITION_FADE",
                         "transitionDuration": 0.3,
-                        "subSlides": [],
-                        "spotlights": [],
-                        "callouts": [],
-                        "zooms": [],
+                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
                         "animation": {
                             "templateId": "textCascade",
+                            "templateConfig": {
+                                "centerText": {
+                                    "style": {
+                                        "color": "#ffffff",
+                                        "fontFamily": "Arial",
+                                        "fontSize": 64
+                                    },
+                                    "text": "I am a center text"
+                                },
+                                "topLeftText": {
+                                    "style": {
+                                        "color": "#ffffff",
+                                        "fontFamily": "Arial",
+                                        "fontSize": 64
+                                    },
+                                    "text": "I am a top left text"
+                                }
+                            },
                             "meta": {
                                 "x": 192,
                                 "y": 108,
                                 "width": 1536,
                                 "height": 864
-                            },
-                            "templateConfig": {
-                                "centerText": {
-                                    "text": "I am a center text",
-                                    "style": {
-                                        "fontSize": 72,
-                                        "color": "#ffffff",
-                                        "lineHeight": 1.5,
-                                        "fontFamily": "Inter"
-                                    }
-                                },
-                                "topLeftText": {
-                                    "text": "I am a top left text",
-                                    "style": {
-                                        "fontSize": 72,
-                                        "color": "#ffffff",
-                                        "lineHeight": 1.5,
-                                        "fontFamily": "Inter"
-                                    }
-                                }
                             }
                         }
                     },
                     {
                         "id": "hook-2",
-                        "type": 2,
+                        "type": "SLIDE_TYPE_TEXT_ANIMATION",
                         "transcript": "Introducing DocuFlow, the smarter way to manage your teams knowledge.",
                         "duration": 2,
-                        "transition": 1,
+                        "transition": "TRANSITION_FADE",
                         "transitionDuration": 0.3,
-                        "spotlights": [],
-                        "zooms": [],
-                        "callouts": [],
-                        "subSlides": [],
+                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
                         "animation": {
                             "templateId": "text-reveal",
+                            "templateConfig": {
+                                "color": "#ffffff",
+                                "direction": "up",
+                                "fontSize": 72,
+                                "text": "Meet DocuFlow"
+                            },
                             "meta": {
                                 "x": 192,
                                 "y": 108,
                                 "width": 1536,
                                 "height": 864
-                            },
-                            "templateConfig": {
-                                "text": "Meet DocuFlow",
-                                "direction": "up",
-                                "fontSize": 72,
-                                "color": "#ffffff"
                             }
                         }
                     }
@@ -96,27 +77,24 @@
                 "slides": [
                     {
                         "id": "solution-1",
-                        "type": 2,
+                        "type": "SLIDE_TYPE_INFOGRAPHIC",
                         "transcript": "DocuFlow brings everything together in one powerful platform.",
                         "duration": 2,
-                        "transition": 1,
+                        "transition": "TRANSITION_FADE",
                         "transitionDuration": 0.3,
-                        "spotlights": [],
-                        "zooms": [],
-                        "callouts": [],
-                        "subSlides": [],
+                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
                         "animation": {
                             "templateId": "word-by-word",
-                            "meta": {
-                                "x": 192,
-                                "y": 108,
-                                "width": 1536,
-                                "height": 864
-                            },
                             "templateConfig": {
-                                "text": "One platform. All your docs.",
-                                "fontSize": 64,
                                 "color": "#ffffff",
+                                "fontSize": 64,
+                                "height": 864,
+                                "text": "One platform. All your docs.",
+                                "width": 1536,
+                                "x": 192,
+                                "y": 108
+                            },
+                            "meta": {
                                 "x": 192,
                                 "y": 108,
                                 "width": 1536,
@@ -126,13 +104,13 @@
                     },
                     {
                         "id": "solution-2",
-                        "type": 1,
+                        "type": "SLIDE_TYPE_MEDIA",
                         "transcript": "Organize everything in smart folders that adapt to how your team works.",
                         "duration": 4,
-                        "transition": 4,
+                        "transition": "TRANSITION_SLIDE_UP",
                         "transitionDuration": 0.3,
-                        "subSlides": [],
-                        "image": {
+                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
+                        "media": {
                             "meta": {
                                 "x": 192,
                                 "y": 108,
@@ -141,8 +119,11 @@
                                 "scale": 1,
                                 "rotation": 0
                             },
-                            "src": "https://images.unsplash.com/photo-1551434678-e076c223a692?w=400&h=240&fit=crop",
-                            "style": {}
+                            "src": "https://ik.imagekit.io/coasterai/add_this_person_to_the_back_of_t-0_2E3f1Biuf.jpg",
+                            "style": {
+                                "borderRadius": 5
+                            },
+                            "isImage": true
                         },
                         "spotlights": [
                             {
@@ -167,9 +148,7 @@
                                 "startTime": 2.5,
                                 "endTime": 3.5
                             }
-                        ],
-                        "zooms": [],
-                        "callouts": []
+                        ]
                     }
                 ]
             },
@@ -180,22 +159,19 @@
                 "slides": [
                     {
                         "id": "problem-1",
-                        "type": 4,
+                        "type": "SLIDE_TYPE_VISUAL_ANIMATION",
                         "transcript": "Teams waste over 5 hours every week just searching for files scattered across different tools.",
                         "duration": 2.5,
-                        "transition": 2,
+                        "transition": "TRANSITION_SLIDE_LEFT",
                         "transitionDuration": 0.3,
-                        "spotlights": [],
-                        "zooms": [],
-                        "callouts": [],
-                        "subSlides": [],
+                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
                         "animation": {
                             "templateId": "visual-default",
                             "templateConfig": {
-                                "x": 192,
-                                "y": 108,
+                                "height": 864,
                                 "width": 1536,
-                                "height": 864
+                                "x": 192,
+                                "y": 108
                             },
                             "meta": {
                                 "x": 192,
@@ -209,22 +185,19 @@
                     },
                     {
                         "id": "problem-2",
-                        "type": 3,
+                        "type": "SLIDE_TYPE_VISUAL_ANIMATION",
                         "transcript": "In fact, 67% of projects get delayed because of lost or misplaced documents.",
                         "duration": 2.5,
-                        "transition": 1,
+                        "transition": "TRANSITION_FADE",
                         "transitionDuration": 0.3,
-                        "spotlights": [],
-                        "zooms": [],
-                        "callouts": [],
-                        "subSlides": [],
+                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
                         "animation": {
                             "templateId": "infographic-default",
                             "templateConfig": {
-                                "x": 192,
-                                "y": 108,
+                                "height": 864,
                                 "width": 1536,
-                                "height": 864
+                                "x": 192,
+                                "y": 108
                             },
                             "meta": {
                                 "x": 192,
@@ -245,22 +218,19 @@
                 "slides": [
                     {
                         "id": "feature1-1",
-                        "type": 4,
+                        "type": "SLIDE_TYPE_VISUAL_ANIMATION",
                         "transcript": "Our AI-powered search finds exactly what you need in seconds.",
                         "duration": 2.5,
-                        "transition": 1,
-                        "spotlights": [],
-                        "zooms": [],
-                        "callouts": [],
-                        "subSlides": [],
+                        "transition": "TRANSITION_FADE",
                         "transitionDuration": 0.3,
+                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
                         "animation": {
                             "templateId": "visual-default",
                             "templateConfig": {
-                                "x": 192,
-                                "y": 108,
+                                "height": 864,
                                 "width": 1536,
-                                "height": 864
+                                "x": 192,
+                                "y": 108
                             },
                             "meta": {
                                 "x": 192,
@@ -274,26 +244,11 @@
                     },
                     {
                         "id": "feature1-2",
-                        "type": 1,
+                        "type": "SLIDE_TYPE_TEXT_ANIMATION",
                         "transcript": "Just ask in natural language, like talking to a colleague.",
                         "duration": 2.5,
-                        "transition": 2,
-                        "spotlights": [],
-                        "zooms": [],
-                        "callouts": [],
-                        "subSlides": [],
-                        "image": {
-                            "meta": {
-                                "x": 192,
-                                "y": 108,
-                                "width": 1536,
-                                "height": 864,
-                                "scale": 1,
-                                "rotation": 0
-                            },
-                            "src": "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400&h=240&fit=crop",
-                            "style": {}
-                        }
+                        "transition": "TRANSITION_SLIDE_LEFT",
+                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)"
                     }
                 ]
             },
@@ -304,27 +259,24 @@
                 "slides": [
                     {
                         "id": "feature2-1",
-                        "type": 2,
+                        "type": "SLIDE_TYPE_INFOGRAPHIC",
                         "transcript": "Collaboration has never been easier.",
                         "duration": 2,
-                        "transition": 1,
-                        "subSlides": [],
-                        "spotlights": [],
-                        "callouts": [],
-                        "zooms": [],
+                        "transition": "TRANSITION_FADE",
                         "transitionDuration": 0.3,
+                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
                         "animation": {
                             "templateId": "letter-cascade",
-                            "meta": {
-                                "x": 192,
-                                "y": 108,
-                                "width": 1536,
-                                "height": 864
-                            },
                             "templateConfig": {
-                                "text": "Work together. Seamlessly.",
-                                "fontSize": 72,
                                 "color": "#ffffff",
+                                "fontSize": 72,
+                                "height": 864,
+                                "text": "Work together. Seamlessly.",
+                                "width": 1536,
+                                "x": 192,
+                                "y": 108
+                            },
+                            "meta": {
                                 "x": 192,
                                 "y": 108,
                                 "width": 1536,
@@ -334,27 +286,12 @@
                     },
                     {
                         "id": "feature2-2",
-                        "type": 1,
+                        "type": "SLIDE_TYPE_TEXT_ANIMATION",
                         "transcript": "Edit together in real-time, leave comments, and track every change.",
                         "duration": 2.5,
-                        "transition": 1,
-                        "subSlides": [],
-                        "spotlights": [],
-                        "callouts": [],
-                        "zooms": [],
+                        "transition": "TRANSITION_FADE",
                         "transitionDuration": 0.3,
-                        "image": {
-                            "meta": {
-                                "x": 192,
-                                "y": 108,
-                                "width": 1536,
-                                "height": 864,
-                                "rotation": 0,
-                                "scale": 1
-                            },
-                            "src": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400&h=240&fit=crop",
-                            "style": {}
-                        }
+                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)"
                     }
                 ]
             },
@@ -365,15 +302,12 @@
                 "slides": [
                     {
                         "id": "proof-1",
-                        "type": 3,
+                        "type": "SLIDE_TYPE_VISUAL_ANIMATION",
                         "transcript": "Over ten thousand teams trust DocuFlow, including Stripe, Notion, and Linear.",
                         "duration": 3,
-                        "transition": 4,
-                        "spotlights": [],
-                        "zooms": [],
-                        "callouts": [],
-                        "subSlides": [],
+                        "transition": "TRANSITION_SLIDE_UP",
                         "transitionDuration": 0.3,
+                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
                         "animation": {
                             "templateId": "infographic-default",
                             "templateConfig": {},
@@ -396,55 +330,50 @@
                 "slides": [
                     {
                         "id": "cta-1",
-                        "type": 2,
+                        "type": "SLIDE_TYPE_INFOGRAPHIC",
                         "transcript": "Ready to transform how your team works?",
                         "duration": 2,
-                        "transition": 4,
-                        "spotlights": [],
-                        "zooms": [],
-                        "callouts": [],
-                        "subSlides": [],
+                        "transition": "TRANSITION_SLIDE_UP",
                         "transitionDuration": 0.3,
+                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
                         "animation": {
                             "templateId": "scale-bounce",
+                            "templateConfig": {
+                                "color": "#ffffff",
+                                "fontSize": 96,
+                                "text": "Start free today"
+                            },
                             "meta": {
                                 "x": 192,
                                 "y": 108,
                                 "width": 1536,
                                 "height": 864
-                            },
-                            "templateConfig": {
-                                "text": "Start free today",
-                                "fontSize": 96,
-                                "color": "#ffffff"
                             }
                         }
                     },
                     {
                         "id": "cta-2",
-                        "type": 4,
+                        "type": "SLIDE_TYPE_VISUAL_ANIMATION",
                         "transcript": "Try DocuFlow free for 14 days. No credit card required.",
                         "duration": 2.5,
-                        "transition": 0,
-                        "spotlights": [],
-                        "zooms": [],
-                        "callouts": [],
-                        "subSlides": [],
-                        "animation": {
-                            "templateId": "visual-default",
-                            "templateConfig": {},
-                            "meta": {
-                                "x": 192,
-                                "y": 108,
-                                "width": 1536,
-                                "height": 864,
-                                "scale": 1,
-                                "rotation": 0
-                            }
-                        }
+                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)"
                     }
                 ]
             }
         ]
-    }
+    },
+    "metadata": {
+        "fps": 30,
+        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
+        "resolution": {
+            "id": "16:9",
+            "name": "Landscape",
+            "aspect": "16/9",
+            "width": 1920,
+            "height": 1080
+        },
+        "duration": 35.3
+    },
+    "createdAt": "2026-02-13T17:20:36.233561Z",
+    "status": "VIDEO_STATUS_PROCESSING"
 }

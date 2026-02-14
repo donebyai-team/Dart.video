@@ -151,6 +151,7 @@ export const MediaStyler = ({
       document.addEventListener('keydown', handleEscape)
       return () => document.removeEventListener('keydown', handleEscape)
     }
+    return
   }, [open, setOpen])
 
   const popoverContent = open ? (
@@ -263,7 +264,7 @@ export const MediaStyler = ({
                         ...value.meta,
                         height: Number(e.target.value)
                       } as MetaData
-                    })
+                    } as MediaSlideContent)
                   }}
                   min={50}
                   max={1000}
@@ -325,7 +326,7 @@ export const MediaStyler = ({
                     ...value.style,
                     borderRadius: Number(e.target.value)
                   } as MediaSlideStyle
-                })
+                }as MediaSlideContent)
               }}
               min={0}
               max={200}
@@ -358,7 +359,7 @@ export const MediaStyler = ({
                     ...value.style,
                     objectFit: e.target.value
                   } as MediaSlideStyle
-                })
+                }as MediaSlideContent)
               }}
               style={{
                 fontSize: '0.75rem',
