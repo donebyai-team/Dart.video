@@ -1,6 +1,5 @@
 import { uploadMedia } from '@/services/utils'
-import { UploadMediaResponse } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
-import CloseIcon from '@mui/icons-material/Close'
+import { UploadedMedia } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import { Box, CircularProgress, Dialog, DialogContent, DialogTitle, IconButton, Typography } from '@mui/material'
 import React, { SetStateAction, useCallback, useEffect, useState } from 'react'
@@ -9,7 +8,7 @@ import toast from 'react-hot-toast'
 interface UploadModalProps {
   open: boolean
   onClose: () => void
-  onUpload: (url: UploadMediaResponse) => void
+  onUpload: (url: UploadedMedia) => void
   retry: boolean
   setRetry: React.Dispatch<SetStateAction<boolean>>
   setUploading: React.Dispatch<SetStateAction<boolean>>
@@ -17,6 +16,7 @@ interface UploadModalProps {
   accept: string
 }
 
+// getVideoDurationFromUrl returns duration of video in seconds
 export const getVideoDurationFromUrl = (url: string): Promise<number> => {
   return new Promise((resolve, reject) => {
     const video = document.createElement('video')
@@ -55,6 +55,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
   const upload = async (file: File) => {
     const data = await uploadMedia(file)
     if (data.mimeType !== 'image') {
+      // TODO: handle it for other files
       const videoDuration = await getVideoDurationFromUrl(data.url)
       data.duration = videoDuration
     }
@@ -84,7 +85,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
             setRetry(false)
           })
           .catch(error => {
-            console.error('Upload error:', error)
+            console.debug("Failed to upload file", error);
             toast.error(error.message)
             setIsUploading(false)
             setUploadError(true)
@@ -92,9 +93,9 @@ export const UploadModal: React.FC<UploadModalProps> = ({
 
         onClose()
       } catch (error) {
-        console.error('Upload error:', error)
         toast.error('Failed to upload media')
         setIsUploading(false)
+        setUploadError(true);
       }
     },
     [onUpload, onClose]
@@ -113,7 +114,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
             setUploadError(false)
           })
           .catch(error => {
-            console.error('Upload error:', error)
+            console.debug("Failed to retry upload file", error);
             toast.error(error.message)
             setUploadError(true)
             setIsUploading(false)
@@ -181,20 +182,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
           borderRadius: 2
         }
       }}
-    >
-      <DialogTitle sx={{ m: 0, p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Typography variant='h6'>Upload Media</Typography>
-        <IconButton
-          aria-label='close'
-          onClick={onClose}
-          sx={{
-            color: theme => theme.palette.grey[500]
-          }}
-          disabled={isUploading}
-        >
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
+    >     
 
       <DialogContent dividers>
         <Box
@@ -235,7 +223,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
                 or click to browse
               </Typography>
               <Typography variant='caption' color='text.disabled'>
-                Supports: JPG, PNG, GIF, WebP MP4, WEBM
+                Supports: JPG, PNG, MP4, WEBM
               </Typography>
             </Box>
           )}

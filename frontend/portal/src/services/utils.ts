@@ -1,8 +1,9 @@
-import { UploadMediaResponse } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
 import { browserTokenStore } from '@coasterai/ui-core/provider/BrowserStores'
 import { CONFIG_API_URI } from './config'
+import { UploadedMedia, UploadedMediaSchema } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { create } from '@bufbuild/protobuf'
 
-export const uploadMedia = async (file: File): Promise<UploadMediaResponse> => {
+export const uploadMedia = async (file: File): Promise<UploadedMedia> => {
   // Check file size (10 MB = 10 * 1024 * 1024 bytes)
   const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10 MB in bytes
 
@@ -22,5 +23,5 @@ export const uploadMedia = async (file: File): Promise<UploadMediaResponse> => {
   })
   const data = await response.json()
 
-  return data
+  return create(UploadedMediaSchema, data)
 }

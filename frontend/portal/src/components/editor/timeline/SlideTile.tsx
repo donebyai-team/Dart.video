@@ -42,7 +42,7 @@ export function SlideTile({
   return (
     <div
       className={cn(
-        "absolute top-0 h-12 cursor-pointer transition-all overflow-hidden",
+        "absolute top-0 h-8 cursor-pointer transition-all overflow-hidden",
         "border border-white/20 shadow-sm",
         "hover:shadow-md hover:scale-[1.02] hover:z-10",
         isHighlighted && "opacity-100 shadow-lg",

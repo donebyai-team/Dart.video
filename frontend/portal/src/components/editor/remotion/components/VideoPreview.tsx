@@ -1,6 +1,6 @@
 import { MediaSlideContent } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { RefObject, useEffect, useState } from 'react'
-import { Html5Video, OffthreadVideo } from 'remotion'
+import { Html5Video } from 'remotion'
 import MediaStyler from './MediaStyler'
 
 interface Props {
