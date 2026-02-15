@@ -235,11 +235,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
                 or click to browse
               </Typography>
               <Typography variant='caption' color='text.disabled'>
-                {accept.includes('image')
-                  ? 'Supports: JPG, PNG, GIF, WebP'
-                  : accept.includes('video')
-                    ? 'Supports: MP4, WEBM'
-                    : ''}
+                Supports: JPG, PNG, GIF, WebP MP4, WEBM
               </Typography>
             </Box>
           )}
