@@ -191,6 +191,10 @@ export const Slideshow: React.FC<SlideshowProps> = ({ fps, isEditing = false, on
           src={videoConfig.metadata.backgroundAudioUrl}
           volume={0.5}
           loop
+          onError={error => {
+            console.log('Audio error:', error.message)
+            return 'fallback'
+          }}
         />
       )}
 

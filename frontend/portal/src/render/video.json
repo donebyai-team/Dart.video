@@ -489,7 +489,8 @@
             "width": 1920,
             "height": 1080
         },
-        "duration": 46.686
+        "duration": 46.686,
+        "backgroundAudioUrl": "https://ik.imagekit.io/coasterai/freepik-deep-calm_A4WXzk4Mk.mp3"
     },
     "createdAt": "2026-02-15T17:04:45.227907Z",
     "status": "VIDEO_STATUS_PROCESSING"
