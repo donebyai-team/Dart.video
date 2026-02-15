@@ -4,14 +4,14 @@ import { Video } from 'remotion'
 import MediaStyler from './MediaStyler'
 
 interface Props {
-  videoRef: RefObject<HTMLVideoElement>
+  mediaRef: RefObject<HTMLVideoElement>
   props: MediaSlideContent
   onChange: (newProps: Partial<MediaSlideContent>) => void
   onVideoChange: () => void
   onClickVideo: () => void
 }
 
-const VideoPreview = ({ props, onChange, onVideoChange, videoRef, onClickVideo }: Props) => {
+const VideoPreview = ({ props, onChange, onVideoChange, mediaRef, onClickVideo }: Props) => {
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [loadedSrc, setLoadedSrc] = useState<string | null>(null)
@@ -107,7 +107,9 @@ const VideoPreview = ({ props, onChange, onVideoChange, videoRef, onClickVideo }
         {/* Video with fade-in transition */}
         <Video
           poster={thumbnailUrl}
-          ref={videoRef}
+          ref={mediaRef}
+          playsInline={true}
+          playbackRate={1}
           onClick={() => onClickVideo()}
           draggable={false}
           src={src as string}

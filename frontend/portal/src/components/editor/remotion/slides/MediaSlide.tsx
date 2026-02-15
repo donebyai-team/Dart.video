@@ -1,6 +1,6 @@
 import { MediaSlideContent, MetaData, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Loader2 } from 'lucide-react'
-import React, { useRef, useState } from 'react'
+import React, { RefObject, useRef, useState } from 'react'
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from 'remotion'
 import { ImagePreview } from '../components/ImagePreview'
 import RetryButton from '../components/RetryButton'
@@ -24,7 +24,7 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
   const [openUploadModal, setOpenUploadModal] = useState<boolean>(false)
 
   // Extract content and effects directly
-  const background = slide.backgroundColor;
+  const background = slide.backgroundColor
   const mediaContent = slide.content.value as MediaSlideContent
 
   // Extract case of the slide to opt render blur effect on image/video
@@ -34,8 +34,7 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
   const [uploadError, setUploadError] = useState<boolean>(false)
   const [uploading, setUploading] = useState<boolean>(false)
   const [editing, setIsEditing] = useState<boolean>(false)
-  const videoRef = useRef<HTMLVideoElement | null>(null)
-  const imageRef = useRef<HTMLImageElement | null>(null)
+  const mediaRef = useRef<HTMLImageElement | HTMLVideoElement | null>(null)
 
   // check if these effects are available or not
   const isCalloutEffectsAvailable = slide.callouts && slide.callouts.length > 0
@@ -53,7 +52,7 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
       <AbsoluteFill>
         {mediaContent.meta && (
           <MediaContainer
-            mediaRef={isImage ? imageRef : videoRef}
+            mediaRef={mediaRef}
             setIsEditing={setIsEditing}
             media={mediaContent.meta}
             width={width}
@@ -64,7 +63,7 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
                 onUpdate({
                   ...slide,
                   content: {
-                    case: "media",
+                    case: 'media',
                     value: {
                       ...mediaContent,
                       meta: {
@@ -98,7 +97,7 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
                 onClickImage={() => {
                   setIsEditing(true)
                 }}
-                imageRef={imageRef}
+                mediaRef={mediaRef as RefObject<HTMLImageElement>}
                 onImageChange={() => {
                   setOpenUploadModal(!openUploadModal)
                 }}
@@ -108,7 +107,7 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
                       onUpdate({
                         ...slide,
                         content: {
-                          case: "media",
+                          case: 'media',
                           value: {
                             ...mediaContent,
                             ...newProps
@@ -125,7 +124,7 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
                 onClickVideo={() => {
                   setIsEditing(true)
                 }}
-                videoRef={videoRef}
+                mediaRef={mediaRef as RefObject<HTMLVideoElement>}
                 onVideoChange={() => {
                   setOpenUploadModal(!openUploadModal)
                 }}
@@ -135,7 +134,7 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
                       onUpdate({
                         ...slide,
                         content: {
-                          case: "media",
+                          case: 'media',
                           value: {
                             ...mediaContent,
                             ...newProps
@@ -153,7 +152,7 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
               setUploading={setUploading}
               setUploadError={setUploadError}
               setRetry={setRetry}
-              accept={isImage ? 'image/*' : 'video/*'}
+              accept={'image/*, video/*'}
               retry={retry}
               open={openUploadModal}
               onClose={() => setOpenUploadModal(false)}
@@ -162,11 +161,13 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
                   if (onUpdate && mediaContent) {
                     onUpdate({
                       ...slide,
+                      duration: data.duration ? data.duration : slide.duration,
                       content: {
-                        case: "media",
+                        case: 'media',
                         value: {
                           ...mediaContent,
-                          isImage,
+                          // mimeType can be "image" or "non-image"
+                          isImage: data.mimeType === 'image' ? true : false,
                           src: data.url
                         } as MediaSlideContent
                       }

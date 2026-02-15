@@ -17,6 +17,26 @@ interface UploadModalProps {
   accept: string
 }
 
+export const getVideoDurationFromUrl = (url: string): Promise<number> => {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement('video')
+
+    video.preload = 'metadata'
+    video.src = url
+    video.crossOrigin = 'anonymous' // important for CDN urls
+
+    video.onloadedmetadata = () => {
+      resolve(video.duration)
+      video.remove()
+    }
+
+    video.onerror = () => {
+      reject(new Error('Failed to load video metadata'))
+      video.remove()
+    }
+  })
+}
+
 export const UploadModal: React.FC<UploadModalProps> = ({
   open,
   onClose,
@@ -34,6 +54,10 @@ export const UploadModal: React.FC<UploadModalProps> = ({
   // Call upload to upload file
   const upload = async (file: File) => {
     const data = await uploadMedia(file)
+    if (data.mimeType !== 'image') {
+      const videoDuration = await getVideoDurationFromUrl(data.url)
+      data.duration = videoDuration
+    }
     return data
   }
 
