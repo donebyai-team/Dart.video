@@ -33,7 +33,6 @@ const CalloutSettings = ({ settings, onChange, slideDuration = 0, transitionDura
             value={calloutStart}
             onValueChange={val => {
               settings.startTime = val
-              console.log(val, calloutEnd, "endstart")
               onChange(settings)
             }}
             // the max value of startTime will calloutEnd seconds - 0.1

@@ -13,7 +13,6 @@ const DurationChangeComponent = ({ value, onValueChange, max, min, step }: Props
   const handleValueChange = (val: number) => {
     onValueChange(value + val)
   }
-  console.log(value.toFixed(1), max.toFixed(1), 'startEdnd')
   return (
     <div className='flex items-center gap-1'>
       <Button
