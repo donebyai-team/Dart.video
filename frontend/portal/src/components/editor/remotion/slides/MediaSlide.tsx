@@ -185,7 +185,7 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
         slide.callouts.map(callout => (
           <AbsoluteFill style={{ pointerEvents: 'none' }}>
             <CalloutEffectComponent
-              isImage={isImage}
+              mediaType={mediaType}
               key={callout.id}
               callout={callout}
               frame={frame}
@@ -214,7 +214,7 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
             <SpotlightEffectComponent
               key={spotlight.id}
               spotlight={spotlight}
-              isImage={isImage}
+              mediaType={mediaType}
               frame={frame}
               fps={fps}
               width={width} // Canvas dimensions
