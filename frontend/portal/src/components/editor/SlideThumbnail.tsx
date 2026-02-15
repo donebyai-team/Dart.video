@@ -7,7 +7,7 @@ interface SlideThumbnailProps {
 }
 
 // Mini version of slide preview for storyboard cards - matches RemotionSlideshow final state
-const SlideThumbnail = ({ slide}: SlideThumbnailProps) => {
+const SlideThumbnail = ({ slide }: SlideThumbnailProps) => {
   const renderContent = useMemo(() => {
     switch (slide.type) {
       case SlideType.TEXT_ANIMATION:
@@ -36,7 +36,7 @@ const TextAnimationThumbnail = ({ slide }: { slide: Slide }) => {
   // Get text from content.template_config (new architecture)
   const content = slide.content.value as AnimationSlideContent;
   const displayText = content?.templateConfig?.text as string || slide.transcript;
-  
+
   // Use slide's background color or fall back to default
   const background = slide.backgroundColor;
 
@@ -59,7 +59,7 @@ const TextAnimationThumbnail = ({ slide }: { slide: Slide }) => {
 const VisualAnimationThumbnail = ({ slide }: { slide: Slide }) => {
   const hash = slide.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   const variant = hash % 5;
-  
+
   // Use slide's background color or fall back to defaults
   const defaultGradients = [
     "linear-gradient(135deg, #581c87 0%, #7c3aed 50%, #4f46e5 100%)",
@@ -68,11 +68,11 @@ const VisualAnimationThumbnail = ({ slide }: { slide: Slide }) => {
     "linear-gradient(135deg, #7f1d1d 0%, #ef4444 50%, #f97316 100%)",
     "linear-gradient(135deg, #713f12 0%, #f59e0b 100%)",
   ];
-  
+
   const background = slide.backgroundColor || defaultGradients[variant];
 
   return (
-    <div 
+    <div
       className="w-full h-full flex items-center justify-center relative overflow-hidden"
       style={{ background }}
     >
@@ -147,7 +147,7 @@ const InfographicThumbnail = ({ slide }: { slide: Slide }) => {
   const background = slide.backgroundColor || "linear-gradient(180deg, #0f172a 0%, #1e293b 100%)";
 
   return (
-    <div 
+    <div
       className="w-full h-full flex items-center justify-center"
       style={{ background }}
     >
@@ -187,7 +187,7 @@ const LineGraphThumbnail = () => (
       strokeWidth="2"
       strokeLinecap="round"
     />
-    {[[2,14], [8,10], [14,16], [20,6], [26,12], [30,4]].map(([x, y], i) => (
+    {[[2, 14], [8, 10], [14, 16], [20, 6], [26, 12], [30, 4]].map(([x, y], i) => (
       <circle key={i} cx={x} cy={y} r="2" fill="#3b82f6" />
     ))}
   </svg>
@@ -197,8 +197,12 @@ const LineGraphThumbnail = () => (
 const ImageThumbnail = ({ slide }: { slide: Slide }) => {
   // Get image src from content directly (new architecture)
   const content = slide.content.value as MediaSlideContent;
-  const imageSrc = content?.src;
-  
+  const imageSrc =
+    content?.uploadedMedia?.thumbnailUrl ??
+    content?.src ??
+    "";
+
+
   if (!imageSrc) {
     return (
       <div className="w-full h-full bg-slate-900 flex items-center justify-center">
@@ -206,12 +210,12 @@ const ImageThumbnail = ({ slide }: { slide: Slide }) => {
       </div>
     );
   }
-  
+
   return (
     <div className="w-full h-full bg-slate-900">
-      <img 
-        src={imageSrc} 
-        alt="" 
+      <img
+        src={imageSrc}
+        alt=""
         className="w-full h-full object-cover"
       />
     </div>
@@ -223,7 +227,7 @@ const VideoThumbnail = ({ slide }: { slide: Slide }) => {
   // Get video src from content directly (new architecture)
   const content = slide.content.value as MediaSlideContent;
   const videoSrc = content?.src;
-  
+
   if (!videoSrc) {
     return (
       <div className="w-full h-full bg-black flex items-center justify-center">
@@ -233,7 +237,7 @@ const VideoThumbnail = ({ slide }: { slide: Slide }) => {
       </div>
     );
   }
-  
+
   return (
     <div className="w-full h-full bg-black relative">
       <div className="absolute inset-0 flex items-center justify-center">
@@ -251,12 +255,12 @@ const StackThumbnail = ({ slide }: { slide: Slide }) => {
   const content = slide.content.value as StackSlideContent;
   const stackItems = content?.items || [];
   const itemCount = Math.min(stackItems.length, 4);
-  
+
   // Use slide's background color or fall back to default
   const background = slide.backgroundColor || "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)";
-  
+
   return (
-    <div 
+    <div
       className="w-full h-full flex items-center justify-center relative overflow-hidden"
       style={{ background }}
     >

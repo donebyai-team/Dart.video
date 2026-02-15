@@ -1,4 +1,4 @@
-import { MediaSlideContent, MetaData, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { MediaSlideContent, MediaType, MetaData, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Loader2 } from 'lucide-react'
 import React, { RefObject, useRef, useState } from 'react'
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from 'remotion'
@@ -27,14 +27,12 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
   const background = slide.backgroundColor
   const mediaContent = slide.content.value as MediaSlideContent
 
-  // Extract case of the slide to opt render blur effect on image/video
-  const isImage = mediaContent.isImage
-
   const [retry, setRetry] = useState<boolean>(false)
   const [uploadError, setUploadError] = useState<boolean>(false)
   const [uploading, setUploading] = useState<boolean>(false)
   const [editing, setIsEditing] = useState<boolean>(false)
   const mediaRef = useRef<HTMLImageElement | HTMLVideoElement | null>(null)
+  const [mediaType, setMediaType] = useState<MediaType>(mediaContent.mediaType);
 
   // check if these effects are available or not
   const isCalloutEffectsAvailable = slide.callouts && slide.callouts.length > 0
@@ -92,7 +90,7 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
               </div>
             )}
 
-            {isImage ? (
+            {mediaType == MediaType.IMAGE ? (
               <ImagePreview
                 onClickImage={() => {
                   setIsEditing(true)
@@ -158,6 +156,8 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
               onClose={() => setOpenUploadModal(false)}
               onUpload={data => {
                 if (onUpdate && data) {
+                  const updatedMediaType = data.mimeType === 'image' ? MediaType.IMAGE : MediaType.VIDEO;
+                  setMediaType(updatedMediaType)
                   if (onUpdate && mediaContent) {
                     onUpdate({
                       ...slide,
@@ -166,8 +166,8 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
                         case: 'media',
                         value: {
                           ...mediaContent,
-                          // mimeType can be "image" or "non-image"
-                          isImage: data.mimeType === 'image' ? true : false,
+                          uploadedMedia: data,
+                          mediaType: updatedMediaType,
                           src: data.url
                         } as MediaSlideContent
                       }
@@ -185,7 +185,7 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
         slide.callouts.map(callout => (
           <AbsoluteFill style={{ pointerEvents: 'none' }}>
             <CalloutEffectComponent
-              isImage={isImage}
+              mediaType={mediaType}
               key={callout.id}
               callout={callout}
               frame={frame}
@@ -214,7 +214,7 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
             <SpotlightEffectComponent
               key={spotlight.id}
               spotlight={spotlight}
-              isImage={isImage}
+              mediaType={mediaType}
               frame={frame}
               fps={fps}
               width={width} // Canvas dimensions

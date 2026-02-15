@@ -5,6 +5,7 @@ import { AnimationSlideContentSchema,
     CalloutEffect, 
     CalloutEffectSchema, 
     MediaSlideContentSchema, 
+    MediaType, 
     MetaData, MetaDataSchema, 
     Section, SectionSchema, 
     Slide, SlideSchema, SlideType, 
@@ -46,9 +47,9 @@ export function buildSlideContent(type: SlideType): Slide["content"] {
             return {
                 case: "media",
                 value: create(MediaSlideContentSchema, {
-                    isImage: true,
-                    meta: getDefaultMetadata(),
-                    src: "https://placehold.co/600x400/EEE/31343C",
+                    mediaType: MediaType.IMAGE,
+                    meta: getDefaultMetadata(),                    
+                    src: "https://placehold.co/600x400?text=Upload+a+screenshot+or+short+clip+of+your+product&font=roboto",
                     style: {},
                 }),
             };
@@ -154,7 +155,7 @@ export const createCalloutEffect = (
     const height = 150;
 
     return create(CalloutEffectSchema, {
-        id: `spotlight-effect-${Date.now()}`,
+        id: `callout-effect-${Date.now()}`,
         x: resolution.width / 2 - width / 2,
         y: resolution.height / 2 - height / 2,
         width,

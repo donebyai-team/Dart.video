@@ -51,9 +51,14 @@ export declare type MediaSlideContent = Message<"coasterai.core.v1.MediaSlideCon
   style?: MediaSlideStyle;
 
   /**
-   * @generated from field: bool isImage = 4;
+   * @generated from field: coasterai.core.v1.MediaType mediaType = 4;
    */
-  isImage: boolean;
+  mediaType: MediaType;
+
+  /**
+   * @generated from field: optional coasterai.core.v1.UploadedMedia uploadedMedia = 5;
+   */
+  uploadedMedia?: UploadedMedia;
 };
 
 /**
@@ -149,6 +154,62 @@ export declare type StackSlideContent = Message<"coasterai.core.v1.StackSlideCon
  * Use `create(StackSlideContentSchema)` to create a new message.
  */
 export declare const StackSlideContentSchema: GenMessage<StackSlideContent>;
+
+/**
+ * @generated from message coasterai.core.v1.UploadedMedia
+ */
+export declare type UploadedMedia = Message<"coasterai.core.v1.UploadedMedia"> & {
+  /**
+   * @generated from field: string url = 1;
+   */
+  url: string;
+
+  /**
+   * @generated from field: string thumbnailUrl = 2;
+   */
+  thumbnailUrl: string;
+
+  /**
+   * @generated from field: float width = 3;
+   */
+  width: number;
+
+  /**
+   * @generated from field: float height = 4;
+   */
+  height: number;
+
+  /**
+   * @generated from field: string mimeType = 5;
+   */
+  mimeType: string;
+
+  /**
+   * @generated from field: optional float duration = 6;
+   */
+  duration?: number;
+
+  /**
+   * @generated from field: float size = 7;
+   */
+  size: number;
+
+  /**
+   * @generated from field: string fileId = 8;
+   */
+  fileId: string;
+
+  /**
+   * @generated from field: string fileName = 9;
+   */
+  fileName: string;
+};
+
+/**
+ * Describes the message coasterai.core.v1.UploadedMedia.
+ * Use `create(UploadedMediaSchema)` to create a new message.
+ */
+export declare const UploadedMediaSchema: GenMessage<UploadedMedia>;
 
 /**
  * @generated from message coasterai.core.v1.SpotlightEffect
@@ -482,6 +543,31 @@ export enum SlideType {
  * Describes the enum coasterai.core.v1.SlideType.
  */
 export declare const SlideTypeSchema: GenEnum<SlideType>;
+
+/**
+ * @generated from enum coasterai.core.v1.MediaType
+ */
+export enum MediaType {
+  /**
+   * @generated from enum value: MEDIA_TYPE_UNDEFINED = 0;
+   */
+  UNDEFINED = 0,
+
+  /**
+   * @generated from enum value: MEDIA_TYPE_IMAGE = 1;
+   */
+  IMAGE = 1,
+
+  /**
+   * @generated from enum value: MEDIA_TYPE_VIDEO = 2;
+   */
+  VIDEO = 2,
+}
+
+/**
+ * Describes the enum coasterai.core.v1.MediaType.
+ */
+export declare const MediaTypeSchema: GenEnum<MediaType>;
 
 /**
  * @generated from enum coasterai.core.v1.StackAnimationMode

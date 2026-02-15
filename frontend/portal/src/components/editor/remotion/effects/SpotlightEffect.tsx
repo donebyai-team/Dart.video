@@ -1,4 +1,4 @@
-import { MetaData, SpotlightEffect } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { MediaType, MetaData, SpotlightEffect } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import React from 'react'
 
 interface SpotlightEffectProps {
@@ -12,7 +12,7 @@ interface SpotlightEffectProps {
   src?: string
   fullHeight: number
   meta: MetaData
-  isImage:boolean
+  mediaType: MediaType
   style: {
     borderRadius: number
     objectFit: 'cover' | 'contain' | 'fill'
@@ -36,7 +36,7 @@ export const SpotlightEffectComponent: React.FC<SpotlightEffectProps> = ({
   src,
   meta,
   style,
-  isImage
+  mediaType
 }) => {
   const startTime = spotlight.startTime ?? 0
   const endTime = spotlight.endTime ?? slideDuration
@@ -114,7 +114,7 @@ export const SpotlightEffectComponent: React.FC<SpotlightEffectProps> = ({
           </mask>
         </defs>
 
-        {src && isImage && (
+        {src && mediaType == MediaType.IMAGE && (
           <image
             x={(meta.x || 1) * (meta.scale || 1)}
             y={(meta.y || 1) * (meta.scale || 1)}

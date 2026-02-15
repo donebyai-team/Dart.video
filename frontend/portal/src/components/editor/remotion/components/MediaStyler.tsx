@@ -96,6 +96,7 @@ export const MediaStyler = ({
       const timer = setTimeout(() => setIsAnimating(false), 200)
       return () => clearTimeout(timer)
     }
+    return
   }, [open])
 
   // Position border radius popup (Canva-style - stick to button)
@@ -157,6 +158,7 @@ export const MediaStyler = ({
         window.removeEventListener('scroll', handleUpdate, true)
       }
     }
+    return
   }, [showBorderRadiusPopup])
 
   // Calculate optimal position for main popover
@@ -184,6 +186,7 @@ export const MediaStyler = ({
         window.removeEventListener('scroll', handleUpdate, true)
       }
     }
+    return
   }, [open])
 
   // Close main popover on outside click
@@ -211,6 +214,7 @@ export const MediaStyler = ({
         document.removeEventListener('mousedown', handleClickOutside)
       }
     }
+    return
   }, [open, setOpen])
 
   // Close border radius popup when clicking outside
@@ -239,6 +243,7 @@ export const MediaStyler = ({
         document.removeEventListener('mousedown', handleClickOutside)
       }
     }
+    return
   }, [showBorderRadiusPopup])
 
   // Close on escape
@@ -257,6 +262,7 @@ export const MediaStyler = ({
       document.addEventListener('keydown', handleEscape)
       return () => document.removeEventListener('keydown', handleEscape)
     }
+    return
   }, [open, setOpen, showBorderRadiusPopup])
 
   const borderRadiusPopup = showBorderRadiusPopup ? (

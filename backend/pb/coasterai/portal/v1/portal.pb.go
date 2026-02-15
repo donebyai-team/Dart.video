@@ -725,93 +725,6 @@ func (x *Config) GetGoogleAuth0CallbackUrl() string {
 	return ""
 }
 
-type UploadMediaResponse struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Url       string   `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
-	Thumbnail string   `protobuf:"bytes,2,opt,name=thumbnail,proto3" json:"thumbnail,omitempty"`
-	Width     float32  `protobuf:"fixed32,3,opt,name=width,proto3" json:"width,omitempty"`
-	Height    float32  `protobuf:"fixed32,4,opt,name=height,proto3" json:"height,omitempty"`
-	MimeType  string   `protobuf:"bytes,5,opt,name=mimeType,proto3" json:"mimeType,omitempty"`
-	Duration  *float32 `protobuf:"fixed32,6,opt,name=duration,proto3,oneof" json:"duration,omitempty"`
-}
-
-func (x *UploadMediaResponse) Reset() {
-	*x = UploadMediaResponse{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[8]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *UploadMediaResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UploadMediaResponse) ProtoMessage() {}
-
-func (x *UploadMediaResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[8]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UploadMediaResponse.ProtoReflect.Descriptor instead.
-func (*UploadMediaResponse) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{8}
-}
-
-func (x *UploadMediaResponse) GetUrl() string {
-	if x != nil {
-		return x.Url
-	}
-	return ""
-}
-
-func (x *UploadMediaResponse) GetThumbnail() string {
-	if x != nil {
-		return x.Thumbnail
-	}
-	return ""
-}
-
-func (x *UploadMediaResponse) GetWidth() float32 {
-	if x != nil {
-		return x.Width
-	}
-	return 0
-}
-
-func (x *UploadMediaResponse) GetHeight() float32 {
-	if x != nil {
-		return x.Height
-	}
-	return 0
-}
-
-func (x *UploadMediaResponse) GetMimeType() string {
-	if x != nil {
-		return x.MimeType
-	}
-	return ""
-}
-
-func (x *UploadMediaResponse) GetDuration() float32 {
-	if x != nil && x.Duration != nil {
-		return *x.Duration
-	}
-	return 0
-}
-
 type PasswordlessStartRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -824,7 +737,7 @@ type PasswordlessStartRequest struct {
 func (x *PasswordlessStartRequest) Reset() {
 	*x = PasswordlessStartRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[9]
+		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -837,7 +750,7 @@ func (x *PasswordlessStartRequest) String() string {
 func (*PasswordlessStartRequest) ProtoMessage() {}
 
 func (x *PasswordlessStartRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[9]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -850,7 +763,7 @@ func (x *PasswordlessStartRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PasswordlessStartRequest.ProtoReflect.Descriptor instead.
 func (*PasswordlessStartRequest) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{9}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *PasswordlessStartRequest) GetRedirectUri() string {
@@ -879,7 +792,7 @@ type PasswordlessStartVerify struct {
 func (x *PasswordlessStartVerify) Reset() {
 	*x = PasswordlessStartVerify{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[10]
+		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[9]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -892,7 +805,7 @@ func (x *PasswordlessStartVerify) String() string {
 func (*PasswordlessStartVerify) ProtoMessage() {}
 
 func (x *PasswordlessStartVerify) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[10]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[9]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -905,7 +818,7 @@ func (x *PasswordlessStartVerify) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PasswordlessStartVerify.ProtoReflect.Descriptor instead.
 func (*PasswordlessStartVerify) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{10}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *PasswordlessStartVerify) GetEmail() string {
@@ -933,7 +846,7 @@ type AuthStateRequest struct {
 func (x *AuthStateRequest) Reset() {
 	*x = AuthStateRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[11]
+		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -946,7 +859,7 @@ func (x *AuthStateRequest) String() string {
 func (*AuthStateRequest) ProtoMessage() {}
 
 func (x *AuthStateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[11]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -959,7 +872,7 @@ func (x *AuthStateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AuthStateRequest.ProtoReflect.Descriptor instead.
 func (*AuthStateRequest) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{11}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *AuthStateRequest) GetRedirectUri() string {
@@ -981,7 +894,7 @@ type State struct {
 func (x *State) Reset() {
 	*x = State{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[12]
+		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[11]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -994,7 +907,7 @@ func (x *State) String() string {
 func (*State) ProtoMessage() {}
 
 func (x *State) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[12]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[11]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1007,7 +920,7 @@ func (x *State) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use State.ProtoReflect.Descriptor instead.
 func (*State) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{12}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *State) GetState() string {
@@ -1041,7 +954,7 @@ type User struct {
 func (x *User) Reset() {
 	*x = User{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[13]
+		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[12]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1054,7 +967,7 @@ func (x *User) String() string {
 func (*User) ProtoMessage() {}
 
 func (x *User) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[13]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[12]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1067,7 +980,7 @@ func (x *User) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use User.ProtoReflect.Descriptor instead.
 func (*User) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{13}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *User) GetId() string {
@@ -1131,7 +1044,7 @@ type OauthAuthorizeRequest struct {
 func (x *OauthAuthorizeRequest) Reset() {
 	*x = OauthAuthorizeRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[14]
+		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[13]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1144,7 +1057,7 @@ func (x *OauthAuthorizeRequest) String() string {
 func (*OauthAuthorizeRequest) ProtoMessage() {}
 
 func (x *OauthAuthorizeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[14]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[13]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1157,7 +1070,7 @@ func (x *OauthAuthorizeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OauthAuthorizeRequest.ProtoReflect.Descriptor instead.
 func (*OauthAuthorizeRequest) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{14}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *OauthAuthorizeRequest) GetIntegrationType() IntegrationType {
@@ -1185,7 +1098,7 @@ type OauthAuthorizeResponse struct {
 func (x *OauthAuthorizeResponse) Reset() {
 	*x = OauthAuthorizeResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[15]
+		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[14]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1198,7 +1111,7 @@ func (x *OauthAuthorizeResponse) String() string {
 func (*OauthAuthorizeResponse) ProtoMessage() {}
 
 func (x *OauthAuthorizeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[15]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[14]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1211,7 +1124,7 @@ func (x *OauthAuthorizeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OauthAuthorizeResponse.ProtoReflect.Descriptor instead.
 func (*OauthAuthorizeResponse) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{15}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *OauthAuthorizeResponse) GetAuthorizeUrl() string {
@@ -1233,7 +1146,7 @@ type IssueRequest struct {
 func (x *IssueRequest) Reset() {
 	*x = IssueRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[16]
+		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[15]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1246,7 +1159,7 @@ func (x *IssueRequest) String() string {
 func (*IssueRequest) ProtoMessage() {}
 
 func (x *IssueRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[16]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[15]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1259,7 +1172,7 @@ func (x *IssueRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IssueRequest.ProtoReflect.Descriptor instead.
 func (*IssueRequest) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{16}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *IssueRequest) GetCode() string {
@@ -1288,7 +1201,7 @@ type JWT struct {
 func (x *JWT) Reset() {
 	*x = JWT{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[17]
+		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[16]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1301,7 +1214,7 @@ func (x *JWT) String() string {
 func (*JWT) ProtoMessage() {}
 
 func (x *JWT) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[17]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[16]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1314,7 +1227,7 @@ func (x *JWT) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use JWT.ProtoReflect.Descriptor instead.
 func (*JWT) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{17}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *JWT) GetToken() string {
@@ -1345,7 +1258,7 @@ type Organization struct {
 func (x *Organization) Reset() {
 	*x = Organization{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[18]
+		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[17]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1358,7 +1271,7 @@ func (x *Organization) String() string {
 func (*Organization) ProtoMessage() {}
 
 func (x *Organization) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[18]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[17]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1371,7 +1284,7 @@ func (x *Organization) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Organization.ProtoReflect.Descriptor instead.
 func (*Organization) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{18}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *Organization) GetId() string {
@@ -1411,7 +1324,7 @@ type OrganizationFeatureFlags struct {
 func (x *OrganizationFeatureFlags) Reset() {
 	*x = OrganizationFeatureFlags{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[19]
+		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[18]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1424,7 +1337,7 @@ func (x *OrganizationFeatureFlags) String() string {
 func (*OrganizationFeatureFlags) ProtoMessage() {}
 
 func (x *OrganizationFeatureFlags) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[19]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[18]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1437,7 +1350,7 @@ func (x *OrganizationFeatureFlags) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OrganizationFeatureFlags.ProtoReflect.Descriptor instead.
 func (*OrganizationFeatureFlags) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{19}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{18}
 }
 
 type Integration struct {
@@ -1458,7 +1371,7 @@ type Integration struct {
 func (x *Integration) Reset() {
 	*x = Integration{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[20]
+		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[19]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1471,7 +1384,7 @@ func (x *Integration) String() string {
 func (*Integration) ProtoMessage() {}
 
 func (x *Integration) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[20]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[19]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1484,7 +1397,7 @@ func (x *Integration) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Integration.ProtoReflect.Descriptor instead.
 func (*Integration) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{20}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *Integration) GetId() string {
@@ -1552,7 +1465,7 @@ type RedditIntegration struct {
 func (x *RedditIntegration) Reset() {
 	*x = RedditIntegration{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[21]
+		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[20]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1565,7 +1478,7 @@ func (x *RedditIntegration) String() string {
 func (*RedditIntegration) ProtoMessage() {}
 
 func (x *RedditIntegration) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[21]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[20]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1578,7 +1491,7 @@ func (x *RedditIntegration) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RedditIntegration.ProtoReflect.Descriptor instead.
 func (*RedditIntegration) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{21}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *RedditIntegration) GetUserName() string {
@@ -1613,7 +1526,7 @@ type Integrations struct {
 func (x *Integrations) Reset() {
 	*x = Integrations{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[22]
+		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[21]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1626,7 +1539,7 @@ func (x *Integrations) String() string {
 func (*Integrations) ProtoMessage() {}
 
 func (x *Integrations) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[22]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[21]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1639,7 +1552,7 @@ func (x *Integrations) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Integrations.ProtoReflect.Descriptor instead.
 func (*Integrations) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{22}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *Integrations) GetIntegrations() []*Integration {
@@ -1664,7 +1577,7 @@ type UpdateIntegrationRequest struct {
 func (x *UpdateIntegrationRequest) Reset() {
 	*x = UpdateIntegrationRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[23]
+		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[22]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1677,7 +1590,7 @@ func (x *UpdateIntegrationRequest) String() string {
 func (*UpdateIntegrationRequest) ProtoMessage() {}
 
 func (x *UpdateIntegrationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[23]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[22]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1690,7 +1603,7 @@ func (x *UpdateIntegrationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateIntegrationRequest.ProtoReflect.Descriptor instead.
 func (*UpdateIntegrationRequest) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{23}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *UpdateIntegrationRequest) GetId() string {
@@ -1735,7 +1648,7 @@ type RevokeIntegrationRequest struct {
 func (x *RevokeIntegrationRequest) Reset() {
 	*x = RevokeIntegrationRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[24]
+		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[23]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1748,7 +1661,7 @@ func (x *RevokeIntegrationRequest) String() string {
 func (*RevokeIntegrationRequest) ProtoMessage() {}
 
 func (x *RevokeIntegrationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[24]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[23]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1761,7 +1674,7 @@ func (x *RevokeIntegrationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RevokeIntegrationRequest.ProtoReflect.Descriptor instead.
 func (*RevokeIntegrationRequest) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{24}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *RevokeIntegrationRequest) GetId() string {
@@ -1782,7 +1695,7 @@ type GetIntegrationRequest struct {
 func (x *GetIntegrationRequest) Reset() {
 	*x = GetIntegrationRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[25]
+		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[24]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1795,7 +1708,7 @@ func (x *GetIntegrationRequest) String() string {
 func (*GetIntegrationRequest) ProtoMessage() {}
 
 func (x *GetIntegrationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[25]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[24]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1808,7 +1721,7 @@ func (x *GetIntegrationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetIntegrationRequest.ProtoReflect.Descriptor instead.
 func (*GetIntegrationRequest) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{25}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *GetIntegrationRequest) GetType() IntegrationType {
@@ -1830,7 +1743,7 @@ type OauthCallbackRequest struct {
 func (x *OauthCallbackRequest) Reset() {
 	*x = OauthCallbackRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[26]
+		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[25]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1843,7 +1756,7 @@ func (x *OauthCallbackRequest) String() string {
 func (*OauthCallbackRequest) ProtoMessage() {}
 
 func (x *OauthCallbackRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[26]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[25]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1856,7 +1769,7 @@ func (x *OauthCallbackRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OauthCallbackRequest.ProtoReflect.Descriptor instead.
 func (*OauthCallbackRequest) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{26}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *OauthCallbackRequest) GetState() string {
@@ -1884,7 +1797,7 @@ type OauthCallbackResponse struct {
 func (x *OauthCallbackResponse) Reset() {
 	*x = OauthCallbackResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[27]
+		mi := &file_coasterai_portal_v1_portal_proto_msgTypes[26]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1897,7 +1810,7 @@ func (x *OauthCallbackResponse) String() string {
 func (*OauthCallbackResponse) ProtoMessage() {}
 
 func (x *OauthCallbackResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[27]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[26]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1910,7 +1823,7 @@ func (x *OauthCallbackResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OauthCallbackResponse.ProtoReflect.Descriptor instead.
 func (*OauthCallbackResponse) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{27}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *OauthCallbackResponse) GetRedirectUrl() string {
@@ -2002,19 +1915,7 @@ var file_coasterai_portal_v1_portal_proto_rawDesc = []byte{
 	0x67, 0x6c, 0x65, 0x5f, 0x61, 0x75, 0x74, 0x68, 0x30, 0x5f, 0x63, 0x61, 0x6c, 0x6c, 0x62, 0x61,
 	0x63, 0x6b, 0x5f, 0x75, 0x72, 0x6c, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x16, 0x67, 0x6f,
 	0x6f, 0x67, 0x6c, 0x65, 0x41, 0x75, 0x74, 0x68, 0x30, 0x43, 0x61, 0x6c, 0x6c, 0x62, 0x61, 0x63,
-	0x6b, 0x55, 0x72, 0x6c, 0x22, 0xbd, 0x01, 0x0a, 0x13, 0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x4d,
-	0x65, 0x64, 0x69, 0x61, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x10, 0x0a, 0x03,
-	0x75, 0x72, 0x6c, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x75, 0x72, 0x6c, 0x12, 0x1c,
-	0x0a, 0x09, 0x74, 0x68, 0x75, 0x6d, 0x62, 0x6e, 0x61, 0x69, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x09, 0x74, 0x68, 0x75, 0x6d, 0x62, 0x6e, 0x61, 0x69, 0x6c, 0x12, 0x14, 0x0a, 0x05,
-	0x77, 0x69, 0x64, 0x74, 0x68, 0x18, 0x03, 0x20, 0x01, 0x28, 0x02, 0x52, 0x05, 0x77, 0x69, 0x64,
-	0x74, 0x68, 0x12, 0x16, 0x0a, 0x06, 0x68, 0x65, 0x69, 0x67, 0x68, 0x74, 0x18, 0x04, 0x20, 0x01,
-	0x28, 0x02, 0x52, 0x06, 0x68, 0x65, 0x69, 0x67, 0x68, 0x74, 0x12, 0x1a, 0x0a, 0x08, 0x6d, 0x69,
-	0x6d, 0x65, 0x54, 0x79, 0x70, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x6d, 0x69,
-	0x6d, 0x65, 0x54, 0x79, 0x70, 0x65, 0x12, 0x1f, 0x0a, 0x08, 0x64, 0x75, 0x72, 0x61, 0x74, 0x69,
-	0x6f, 0x6e, 0x18, 0x06, 0x20, 0x01, 0x28, 0x02, 0x48, 0x00, 0x52, 0x08, 0x64, 0x75, 0x72, 0x61,
-	0x74, 0x69, 0x6f, 0x6e, 0x88, 0x01, 0x01, 0x42, 0x0b, 0x0a, 0x09, 0x5f, 0x64, 0x75, 0x72, 0x61,
-	0x74, 0x69, 0x6f, 0x6e, 0x22, 0x53, 0x0a, 0x18, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64,
+	0x6b, 0x55, 0x72, 0x6c, 0x22, 0x53, 0x0a, 0x18, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64,
 	0x6c, 0x65, 0x73, 0x73, 0x53, 0x74, 0x61, 0x72, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
 	0x12, 0x21, 0x0a, 0x0c, 0x72, 0x65, 0x64, 0x69, 0x72, 0x65, 0x63, 0x74, 0x5f, 0x75, 0x72, 0x69,
 	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x72, 0x65, 0x64, 0x69, 0x72, 0x65, 0x63, 0x74,
@@ -2289,7 +2190,7 @@ func file_coasterai_portal_v1_portal_proto_rawDescGZIP() []byte {
 }
 
 var file_coasterai_portal_v1_portal_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_coasterai_portal_v1_portal_proto_msgTypes = make([]protoimpl.MessageInfo, 28)
+var file_coasterai_portal_v1_portal_proto_msgTypes = make([]protoimpl.MessageInfo, 27)
 var file_coasterai_portal_v1_portal_proto_goTypes = []interface{}{
 	(OauthAuthorizeType)(0),          // 0: coasterai.portal.v1.OauthAuthorizeType
 	(UserRole)(0),                    // 1: coasterai.portal.v1.UserRole
@@ -2303,87 +2204,86 @@ var file_coasterai_portal_v1_portal_proto_goTypes = []interface{}{
 	(*CreateVideoRequest)(nil),       // 9: coasterai.portal.v1.CreateVideoRequest
 	(*CreateVideoResponse)(nil),      // 10: coasterai.portal.v1.CreateVideoResponse
 	(*Config)(nil),                   // 11: coasterai.portal.v1.Config
-	(*UploadMediaResponse)(nil),      // 12: coasterai.portal.v1.UploadMediaResponse
-	(*PasswordlessStartRequest)(nil), // 13: coasterai.portal.v1.PasswordlessStartRequest
-	(*PasswordlessStartVerify)(nil),  // 14: coasterai.portal.v1.PasswordlessStartVerify
-	(*AuthStateRequest)(nil),         // 15: coasterai.portal.v1.AuthStateRequest
-	(*State)(nil),                    // 16: coasterai.portal.v1.State
-	(*User)(nil),                     // 17: coasterai.portal.v1.User
-	(*OauthAuthorizeRequest)(nil),    // 18: coasterai.portal.v1.OauthAuthorizeRequest
-	(*OauthAuthorizeResponse)(nil),   // 19: coasterai.portal.v1.OauthAuthorizeResponse
-	(*IssueRequest)(nil),             // 20: coasterai.portal.v1.IssueRequest
-	(*JWT)(nil),                      // 21: coasterai.portal.v1.JWT
-	(*Organization)(nil),             // 22: coasterai.portal.v1.Organization
-	(*OrganizationFeatureFlags)(nil), // 23: coasterai.portal.v1.OrganizationFeatureFlags
-	(*Integration)(nil),              // 24: coasterai.portal.v1.Integration
-	(*RedditIntegration)(nil),        // 25: coasterai.portal.v1.RedditIntegration
-	(*Integrations)(nil),             // 26: coasterai.portal.v1.Integrations
-	(*UpdateIntegrationRequest)(nil), // 27: coasterai.portal.v1.UpdateIntegrationRequest
-	(*RevokeIntegrationRequest)(nil), // 28: coasterai.portal.v1.RevokeIntegrationRequest
-	(*GetIntegrationRequest)(nil),    // 29: coasterai.portal.v1.GetIntegrationRequest
-	(*OauthCallbackRequest)(nil),     // 30: coasterai.portal.v1.OauthCallbackRequest
-	(*OauthCallbackResponse)(nil),    // 31: coasterai.portal.v1.OauthCallbackResponse
-	(*v1.Video)(nil),                 // 32: coasterai.core.v1.Video
-	(*v1.VideoConfig)(nil),           // 33: coasterai.core.v1.VideoConfig
-	(*v1.VideoMetadata)(nil),         // 34: coasterai.core.v1.VideoMetadata
-	(*v1.Script)(nil),                // 35: coasterai.core.v1.Script
-	(*v1.Resolution)(nil),            // 36: coasterai.core.v1.Resolution
-	(v1.VideoLanguage)(0),            // 37: coasterai.core.v1.VideoLanguage
-	(*timestamppb.Timestamp)(nil),    // 38: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),            // 39: google.protobuf.Empty
+	(*PasswordlessStartRequest)(nil), // 12: coasterai.portal.v1.PasswordlessStartRequest
+	(*PasswordlessStartVerify)(nil),  // 13: coasterai.portal.v1.PasswordlessStartVerify
+	(*AuthStateRequest)(nil),         // 14: coasterai.portal.v1.AuthStateRequest
+	(*State)(nil),                    // 15: coasterai.portal.v1.State
+	(*User)(nil),                     // 16: coasterai.portal.v1.User
+	(*OauthAuthorizeRequest)(nil),    // 17: coasterai.portal.v1.OauthAuthorizeRequest
+	(*OauthAuthorizeResponse)(nil),   // 18: coasterai.portal.v1.OauthAuthorizeResponse
+	(*IssueRequest)(nil),             // 19: coasterai.portal.v1.IssueRequest
+	(*JWT)(nil),                      // 20: coasterai.portal.v1.JWT
+	(*Organization)(nil),             // 21: coasterai.portal.v1.Organization
+	(*OrganizationFeatureFlags)(nil), // 22: coasterai.portal.v1.OrganizationFeatureFlags
+	(*Integration)(nil),              // 23: coasterai.portal.v1.Integration
+	(*RedditIntegration)(nil),        // 24: coasterai.portal.v1.RedditIntegration
+	(*Integrations)(nil),             // 25: coasterai.portal.v1.Integrations
+	(*UpdateIntegrationRequest)(nil), // 26: coasterai.portal.v1.UpdateIntegrationRequest
+	(*RevokeIntegrationRequest)(nil), // 27: coasterai.portal.v1.RevokeIntegrationRequest
+	(*GetIntegrationRequest)(nil),    // 28: coasterai.portal.v1.GetIntegrationRequest
+	(*OauthCallbackRequest)(nil),     // 29: coasterai.portal.v1.OauthCallbackRequest
+	(*OauthCallbackResponse)(nil),    // 30: coasterai.portal.v1.OauthCallbackResponse
+	(*v1.Video)(nil),                 // 31: coasterai.core.v1.Video
+	(*v1.VideoConfig)(nil),           // 32: coasterai.core.v1.VideoConfig
+	(*v1.VideoMetadata)(nil),         // 33: coasterai.core.v1.VideoMetadata
+	(*v1.Script)(nil),                // 34: coasterai.core.v1.Script
+	(*v1.Resolution)(nil),            // 35: coasterai.core.v1.Resolution
+	(v1.VideoLanguage)(0),            // 36: coasterai.core.v1.VideoLanguage
+	(*timestamppb.Timestamp)(nil),    // 37: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),            // 38: google.protobuf.Empty
 }
 var file_coasterai_portal_v1_portal_proto_depIdxs = []int32{
-	32, // 0: coasterai.portal.v1.GetVideoResponse.video:type_name -> coasterai.core.v1.Video
-	33, // 1: coasterai.portal.v1.UpdateVideoConfigRequest.config:type_name -> coasterai.core.v1.VideoConfig
-	34, // 2: coasterai.portal.v1.UpdateVideoConfigRequest.metadata:type_name -> coasterai.core.v1.VideoMetadata
-	32, // 3: coasterai.portal.v1.GetVideosResponse.videos:type_name -> coasterai.core.v1.Video
-	35, // 4: coasterai.portal.v1.CreateVideoRequest.script:type_name -> coasterai.core.v1.Script
-	36, // 5: coasterai.portal.v1.CreateVideoRequest.resolution:type_name -> coasterai.core.v1.Resolution
-	37, // 6: coasterai.portal.v1.CreateVideoRequest.language:type_name -> coasterai.core.v1.VideoLanguage
+	31, // 0: coasterai.portal.v1.GetVideoResponse.video:type_name -> coasterai.core.v1.Video
+	32, // 1: coasterai.portal.v1.UpdateVideoConfigRequest.config:type_name -> coasterai.core.v1.VideoConfig
+	33, // 2: coasterai.portal.v1.UpdateVideoConfigRequest.metadata:type_name -> coasterai.core.v1.VideoMetadata
+	31, // 3: coasterai.portal.v1.GetVideosResponse.videos:type_name -> coasterai.core.v1.Video
+	34, // 4: coasterai.portal.v1.CreateVideoRequest.script:type_name -> coasterai.core.v1.Script
+	35, // 5: coasterai.portal.v1.CreateVideoRequest.resolution:type_name -> coasterai.core.v1.Resolution
+	36, // 6: coasterai.portal.v1.CreateVideoRequest.language:type_name -> coasterai.core.v1.VideoLanguage
 	1,  // 7: coasterai.portal.v1.User.role:type_name -> coasterai.portal.v1.UserRole
-	22, // 8: coasterai.portal.v1.User.organizations:type_name -> coasterai.portal.v1.Organization
-	38, // 9: coasterai.portal.v1.User.created_at:type_name -> google.protobuf.Timestamp
+	21, // 8: coasterai.portal.v1.User.organizations:type_name -> coasterai.portal.v1.Organization
+	37, // 9: coasterai.portal.v1.User.created_at:type_name -> google.protobuf.Timestamp
 	2,  // 10: coasterai.portal.v1.OauthAuthorizeRequest.integration_type:type_name -> coasterai.portal.v1.IntegrationType
-	23, // 11: coasterai.portal.v1.Organization.feature_flags:type_name -> coasterai.portal.v1.OrganizationFeatureFlags
-	38, // 12: coasterai.portal.v1.Organization.created_at:type_name -> google.protobuf.Timestamp
+	22, // 11: coasterai.portal.v1.Organization.feature_flags:type_name -> coasterai.portal.v1.OrganizationFeatureFlags
+	37, // 12: coasterai.portal.v1.Organization.created_at:type_name -> google.protobuf.Timestamp
 	2,  // 13: coasterai.portal.v1.Integration.type:type_name -> coasterai.portal.v1.IntegrationType
 	3,  // 14: coasterai.portal.v1.Integration.status:type_name -> coasterai.portal.v1.IntegrationState
-	25, // 15: coasterai.portal.v1.Integration.reddit:type_name -> coasterai.portal.v1.RedditIntegration
-	24, // 16: coasterai.portal.v1.Integrations.integrations:type_name -> coasterai.portal.v1.Integration
-	25, // 17: coasterai.portal.v1.UpdateIntegrationRequest.reddit:type_name -> coasterai.portal.v1.RedditIntegration
+	24, // 15: coasterai.portal.v1.Integration.reddit:type_name -> coasterai.portal.v1.RedditIntegration
+	23, // 16: coasterai.portal.v1.Integrations.integrations:type_name -> coasterai.portal.v1.Integration
+	24, // 17: coasterai.portal.v1.UpdateIntegrationRequest.reddit:type_name -> coasterai.portal.v1.RedditIntegration
 	2,  // 18: coasterai.portal.v1.GetIntegrationRequest.type:type_name -> coasterai.portal.v1.IntegrationType
-	39, // 19: coasterai.portal.v1.PortalService.GetConfig:input_type -> google.protobuf.Empty
-	39, // 20: coasterai.portal.v1.PortalService.Self:input_type -> google.protobuf.Empty
-	29, // 21: coasterai.portal.v1.PortalService.GetIntegration:input_type -> coasterai.portal.v1.GetIntegrationRequest
-	28, // 22: coasterai.portal.v1.PortalService.RevokeIntegration:input_type -> coasterai.portal.v1.RevokeIntegrationRequest
-	27, // 23: coasterai.portal.v1.PortalService.UpdateIntegration:input_type -> coasterai.portal.v1.UpdateIntegrationRequest
-	13, // 24: coasterai.portal.v1.PortalService.PasswordlessStart:input_type -> coasterai.portal.v1.PasswordlessStartRequest
-	14, // 25: coasterai.portal.v1.PortalService.PasswordlessVerify:input_type -> coasterai.portal.v1.PasswordlessStartVerify
-	18, // 26: coasterai.portal.v1.PortalService.OauthAuthorize:input_type -> coasterai.portal.v1.OauthAuthorizeRequest
-	30, // 27: coasterai.portal.v1.PortalService.OauthCallback:input_type -> coasterai.portal.v1.OauthCallbackRequest
-	30, // 28: coasterai.portal.v1.PortalService.SocialLoginCallback:input_type -> coasterai.portal.v1.OauthCallbackRequest
-	39, // 29: coasterai.portal.v1.PortalService.GetIntegrations:input_type -> google.protobuf.Empty
+	38, // 19: coasterai.portal.v1.PortalService.GetConfig:input_type -> google.protobuf.Empty
+	38, // 20: coasterai.portal.v1.PortalService.Self:input_type -> google.protobuf.Empty
+	28, // 21: coasterai.portal.v1.PortalService.GetIntegration:input_type -> coasterai.portal.v1.GetIntegrationRequest
+	27, // 22: coasterai.portal.v1.PortalService.RevokeIntegration:input_type -> coasterai.portal.v1.RevokeIntegrationRequest
+	26, // 23: coasterai.portal.v1.PortalService.UpdateIntegration:input_type -> coasterai.portal.v1.UpdateIntegrationRequest
+	12, // 24: coasterai.portal.v1.PortalService.PasswordlessStart:input_type -> coasterai.portal.v1.PasswordlessStartRequest
+	13, // 25: coasterai.portal.v1.PortalService.PasswordlessVerify:input_type -> coasterai.portal.v1.PasswordlessStartVerify
+	17, // 26: coasterai.portal.v1.PortalService.OauthAuthorize:input_type -> coasterai.portal.v1.OauthAuthorizeRequest
+	29, // 27: coasterai.portal.v1.PortalService.OauthCallback:input_type -> coasterai.portal.v1.OauthCallbackRequest
+	29, // 28: coasterai.portal.v1.PortalService.SocialLoginCallback:input_type -> coasterai.portal.v1.OauthCallbackRequest
+	38, // 29: coasterai.portal.v1.PortalService.GetIntegrations:input_type -> google.protobuf.Empty
 	9,  // 30: coasterai.portal.v1.PortalService.CreateVideo:input_type -> coasterai.portal.v1.CreateVideoRequest
 	7,  // 31: coasterai.portal.v1.PortalService.GetVideo:input_type -> coasterai.portal.v1.GetVideoRequest
-	39, // 32: coasterai.portal.v1.PortalService.GetVideos:input_type -> google.protobuf.Empty
+	38, // 32: coasterai.portal.v1.PortalService.GetVideos:input_type -> google.protobuf.Empty
 	4,  // 33: coasterai.portal.v1.PortalService.DeleteVideo:input_type -> coasterai.portal.v1.DeleteVideoRequest
 	6,  // 34: coasterai.portal.v1.PortalService.UpdateVideoConfig:input_type -> coasterai.portal.v1.UpdateVideoConfigRequest
 	11, // 35: coasterai.portal.v1.PortalService.GetConfig:output_type -> coasterai.portal.v1.Config
-	17, // 36: coasterai.portal.v1.PortalService.Self:output_type -> coasterai.portal.v1.User
-	26, // 37: coasterai.portal.v1.PortalService.GetIntegration:output_type -> coasterai.portal.v1.Integrations
-	39, // 38: coasterai.portal.v1.PortalService.RevokeIntegration:output_type -> google.protobuf.Empty
-	39, // 39: coasterai.portal.v1.PortalService.UpdateIntegration:output_type -> google.protobuf.Empty
-	39, // 40: coasterai.portal.v1.PortalService.PasswordlessStart:output_type -> google.protobuf.Empty
-	21, // 41: coasterai.portal.v1.PortalService.PasswordlessVerify:output_type -> coasterai.portal.v1.JWT
-	19, // 42: coasterai.portal.v1.PortalService.OauthAuthorize:output_type -> coasterai.portal.v1.OauthAuthorizeResponse
-	31, // 43: coasterai.portal.v1.PortalService.OauthCallback:output_type -> coasterai.portal.v1.OauthCallbackResponse
-	21, // 44: coasterai.portal.v1.PortalService.SocialLoginCallback:output_type -> coasterai.portal.v1.JWT
-	26, // 45: coasterai.portal.v1.PortalService.GetIntegrations:output_type -> coasterai.portal.v1.Integrations
+	16, // 36: coasterai.portal.v1.PortalService.Self:output_type -> coasterai.portal.v1.User
+	25, // 37: coasterai.portal.v1.PortalService.GetIntegration:output_type -> coasterai.portal.v1.Integrations
+	38, // 38: coasterai.portal.v1.PortalService.RevokeIntegration:output_type -> google.protobuf.Empty
+	38, // 39: coasterai.portal.v1.PortalService.UpdateIntegration:output_type -> google.protobuf.Empty
+	38, // 40: coasterai.portal.v1.PortalService.PasswordlessStart:output_type -> google.protobuf.Empty
+	20, // 41: coasterai.portal.v1.PortalService.PasswordlessVerify:output_type -> coasterai.portal.v1.JWT
+	18, // 42: coasterai.portal.v1.PortalService.OauthAuthorize:output_type -> coasterai.portal.v1.OauthAuthorizeResponse
+	30, // 43: coasterai.portal.v1.PortalService.OauthCallback:output_type -> coasterai.portal.v1.OauthCallbackResponse
+	20, // 44: coasterai.portal.v1.PortalService.SocialLoginCallback:output_type -> coasterai.portal.v1.JWT
+	25, // 45: coasterai.portal.v1.PortalService.GetIntegrations:output_type -> coasterai.portal.v1.Integrations
 	10, // 46: coasterai.portal.v1.PortalService.CreateVideo:output_type -> coasterai.portal.v1.CreateVideoResponse
 	5,  // 47: coasterai.portal.v1.PortalService.GetVideo:output_type -> coasterai.portal.v1.GetVideoResponse
 	8,  // 48: coasterai.portal.v1.PortalService.GetVideos:output_type -> coasterai.portal.v1.GetVideosResponse
-	39, // 49: coasterai.portal.v1.PortalService.DeleteVideo:output_type -> google.protobuf.Empty
-	39, // 50: coasterai.portal.v1.PortalService.UpdateVideoConfig:output_type -> google.protobuf.Empty
+	38, // 49: coasterai.portal.v1.PortalService.DeleteVideo:output_type -> google.protobuf.Empty
+	38, // 50: coasterai.portal.v1.PortalService.UpdateVideoConfig:output_type -> google.protobuf.Empty
 	35, // [35:51] is the sub-list for method output_type
 	19, // [19:35] is the sub-list for method input_type
 	19, // [19:19] is the sub-list for extension type_name
@@ -2494,18 +2394,6 @@ func file_coasterai_portal_v1_portal_proto_init() {
 			}
 		}
 		file_coasterai_portal_v1_portal_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*UploadMediaResponse); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_coasterai_portal_v1_portal_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*PasswordlessStartRequest); i {
 			case 0:
 				return &v.state
@@ -2517,7 +2405,7 @@ func file_coasterai_portal_v1_portal_proto_init() {
 				return nil
 			}
 		}
-		file_coasterai_portal_v1_portal_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+		file_coasterai_portal_v1_portal_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*PasswordlessStartVerify); i {
 			case 0:
 				return &v.state
@@ -2529,7 +2417,7 @@ func file_coasterai_portal_v1_portal_proto_init() {
 				return nil
 			}
 		}
-		file_coasterai_portal_v1_portal_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+		file_coasterai_portal_v1_portal_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*AuthStateRequest); i {
 			case 0:
 				return &v.state
@@ -2541,7 +2429,7 @@ func file_coasterai_portal_v1_portal_proto_init() {
 				return nil
 			}
 		}
-		file_coasterai_portal_v1_portal_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
+		file_coasterai_portal_v1_portal_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*State); i {
 			case 0:
 				return &v.state
@@ -2553,7 +2441,7 @@ func file_coasterai_portal_v1_portal_proto_init() {
 				return nil
 			}
 		}
-		file_coasterai_portal_v1_portal_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
+		file_coasterai_portal_v1_portal_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*User); i {
 			case 0:
 				return &v.state
@@ -2565,7 +2453,7 @@ func file_coasterai_portal_v1_portal_proto_init() {
 				return nil
 			}
 		}
-		file_coasterai_portal_v1_portal_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
+		file_coasterai_portal_v1_portal_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*OauthAuthorizeRequest); i {
 			case 0:
 				return &v.state
@@ -2577,7 +2465,7 @@ func file_coasterai_portal_v1_portal_proto_init() {
 				return nil
 			}
 		}
-		file_coasterai_portal_v1_portal_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
+		file_coasterai_portal_v1_portal_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*OauthAuthorizeResponse); i {
 			case 0:
 				return &v.state
@@ -2589,7 +2477,7 @@ func file_coasterai_portal_v1_portal_proto_init() {
 				return nil
 			}
 		}
-		file_coasterai_portal_v1_portal_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
+		file_coasterai_portal_v1_portal_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*IssueRequest); i {
 			case 0:
 				return &v.state
@@ -2601,7 +2489,7 @@ func file_coasterai_portal_v1_portal_proto_init() {
 				return nil
 			}
 		}
-		file_coasterai_portal_v1_portal_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
+		file_coasterai_portal_v1_portal_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*JWT); i {
 			case 0:
 				return &v.state
@@ -2613,7 +2501,7 @@ func file_coasterai_portal_v1_portal_proto_init() {
 				return nil
 			}
 		}
-		file_coasterai_portal_v1_portal_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
+		file_coasterai_portal_v1_portal_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Organization); i {
 			case 0:
 				return &v.state
@@ -2625,7 +2513,7 @@ func file_coasterai_portal_v1_portal_proto_init() {
 				return nil
 			}
 		}
-		file_coasterai_portal_v1_portal_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
+		file_coasterai_portal_v1_portal_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*OrganizationFeatureFlags); i {
 			case 0:
 				return &v.state
@@ -2637,7 +2525,7 @@ func file_coasterai_portal_v1_portal_proto_init() {
 				return nil
 			}
 		}
-		file_coasterai_portal_v1_portal_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
+		file_coasterai_portal_v1_portal_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Integration); i {
 			case 0:
 				return &v.state
@@ -2649,7 +2537,7 @@ func file_coasterai_portal_v1_portal_proto_init() {
 				return nil
 			}
 		}
-		file_coasterai_portal_v1_portal_proto_msgTypes[21].Exporter = func(v interface{}, i int) interface{} {
+		file_coasterai_portal_v1_portal_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*RedditIntegration); i {
 			case 0:
 				return &v.state
@@ -2661,7 +2549,7 @@ func file_coasterai_portal_v1_portal_proto_init() {
 				return nil
 			}
 		}
-		file_coasterai_portal_v1_portal_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
+		file_coasterai_portal_v1_portal_proto_msgTypes[21].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Integrations); i {
 			case 0:
 				return &v.state
@@ -2673,7 +2561,7 @@ func file_coasterai_portal_v1_portal_proto_init() {
 				return nil
 			}
 		}
-		file_coasterai_portal_v1_portal_proto_msgTypes[23].Exporter = func(v interface{}, i int) interface{} {
+		file_coasterai_portal_v1_portal_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*UpdateIntegrationRequest); i {
 			case 0:
 				return &v.state
@@ -2685,7 +2573,7 @@ func file_coasterai_portal_v1_portal_proto_init() {
 				return nil
 			}
 		}
-		file_coasterai_portal_v1_portal_proto_msgTypes[24].Exporter = func(v interface{}, i int) interface{} {
+		file_coasterai_portal_v1_portal_proto_msgTypes[23].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*RevokeIntegrationRequest); i {
 			case 0:
 				return &v.state
@@ -2697,7 +2585,7 @@ func file_coasterai_portal_v1_portal_proto_init() {
 				return nil
 			}
 		}
-		file_coasterai_portal_v1_portal_proto_msgTypes[25].Exporter = func(v interface{}, i int) interface{} {
+		file_coasterai_portal_v1_portal_proto_msgTypes[24].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetIntegrationRequest); i {
 			case 0:
 				return &v.state
@@ -2709,7 +2597,7 @@ func file_coasterai_portal_v1_portal_proto_init() {
 				return nil
 			}
 		}
-		file_coasterai_portal_v1_portal_proto_msgTypes[26].Exporter = func(v interface{}, i int) interface{} {
+		file_coasterai_portal_v1_portal_proto_msgTypes[25].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*OauthCallbackRequest); i {
 			case 0:
 				return &v.state
@@ -2721,7 +2609,7 @@ func file_coasterai_portal_v1_portal_proto_init() {
 				return nil
 			}
 		}
-		file_coasterai_portal_v1_portal_proto_msgTypes[27].Exporter = func(v interface{}, i int) interface{} {
+		file_coasterai_portal_v1_portal_proto_msgTypes[26].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*OauthCallbackResponse); i {
 			case 0:
 				return &v.state
@@ -2734,21 +2622,20 @@ func file_coasterai_portal_v1_portal_proto_init() {
 			}
 		}
 	}
-	file_coasterai_portal_v1_portal_proto_msgTypes[8].OneofWrappers = []interface{}{}
-	file_coasterai_portal_v1_portal_proto_msgTypes[20].OneofWrappers = []interface{}{
+	file_coasterai_portal_v1_portal_proto_msgTypes[19].OneofWrappers = []interface{}{
 		(*Integration_Reddit)(nil),
 	}
-	file_coasterai_portal_v1_portal_proto_msgTypes[23].OneofWrappers = []interface{}{
+	file_coasterai_portal_v1_portal_proto_msgTypes[22].OneofWrappers = []interface{}{
 		(*UpdateIntegrationRequest_Reddit)(nil),
 	}
-	file_coasterai_portal_v1_portal_proto_msgTypes[26].OneofWrappers = []interface{}{}
+	file_coasterai_portal_v1_portal_proto_msgTypes[25].OneofWrappers = []interface{}{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_coasterai_portal_v1_portal_proto_rawDesc,
 			NumEnums:      4,
-			NumMessages:   28,
+			NumMessages:   27,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

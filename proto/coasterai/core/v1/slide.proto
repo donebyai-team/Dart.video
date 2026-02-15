@@ -15,6 +15,12 @@ enum SlideType {
   SLIDE_TYPE_MEDIA = 5;
 }
 
+enum MediaType {
+  MEDIA_TYPE_UNDEFINED = 0;
+  MEDIA_TYPE_IMAGE = 1;
+  MEDIA_TYPE_VIDEO = 2;
+}
+
 enum StackAnimationMode {
   STACK_ANIMATION_MODE_STACK = 0;
   STACK_ANIMATION_MODE_REVEAL = 1;
@@ -33,14 +39,14 @@ enum TransitionType {
 message MediaSlideStyle {
   float borderRadius = 1;
   optional string objectFit = 2;
-
 }
 
 message MediaSlideContent {
   MetaData meta = 1;
   string src = 2;
   MediaSlideStyle style = 3;
-  bool isImage = 4;
+  MediaType mediaType = 4;
+  optional UploadedMedia uploadedMedia = 5;
 }
 
 message MetaData {
@@ -60,6 +66,18 @@ message AnimationSlideContent {
 message StackSlideContent {
   StackAnimationMode animationMode = 1;
   repeated Slide items = 2;
+}
+
+message UploadedMedia {
+  string url = 1;
+  string thumbnailUrl = 2;
+  float width = 3;
+  float height =4;
+  string mimeType = 5;
+  optional float duration = 6;
+  float size = 7;
+  string fileId = 8;
+  string fileName = 9;
 }
 
 // ===================== EFFECTS =====================

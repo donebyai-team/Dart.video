@@ -211,47 +211,6 @@ export declare type Config = Message<"coasterai.portal.v1.Config"> & {
 export declare const ConfigSchema: GenMessage<Config>;
 
 /**
- * @generated from message coasterai.portal.v1.UploadMediaResponse
- */
-export declare type UploadMediaResponse = Message<"coasterai.portal.v1.UploadMediaResponse"> & {
-  /**
-   * @generated from field: string url = 1;
-   */
-  url: string;
-
-  /**
-   * @generated from field: string thumbnail = 2;
-   */
-  thumbnail: string;
-
-  /**
-   * @generated from field: float width = 3;
-   */
-  width: number;
-
-  /**
-   * @generated from field: float height = 4;
-   */
-  height: number;
-
-  /**
-   * @generated from field: string mimeType = 5;
-   */
-  mimeType: string;
-
-  /**
-   * @generated from field: optional float duration = 6;
-   */
-  duration?: number;
-};
-
-/**
- * Describes the message coasterai.portal.v1.UploadMediaResponse.
- * Use `create(UploadMediaResponseSchema)` to create a new message.
- */
-export declare const UploadMediaResponseSchema: GenMessage<UploadMediaResponse>;
-
-/**
  * @generated from message coasterai.portal.v1.PasswordlessStartRequest
  */
 export declare type PasswordlessStartRequest = Message<"coasterai.portal.v1.PasswordlessStartRequest"> & {

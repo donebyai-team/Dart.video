@@ -11,7 +11,6 @@ export type TimelineItem = SlideItem | TransitionItem | OverlayItem;
  * Represents a slide tile on the timeline with Remotion overlapping support
  */
 export interface SlideItem {
-  type: 'slide';
   id: string;
   slideId: string;
   startTime: number; // seconds from timeline start (display)
@@ -42,9 +41,6 @@ export interface TransitionItem {
   // Visual styling for overlaps
   opacity?: number; // 0.3 for semi-transparent
   color?: string; // Gray color for transitions
-  // Legacy support
-  fromSlideId?: string;
-  toSlideId?: string;
 }
 
 /**

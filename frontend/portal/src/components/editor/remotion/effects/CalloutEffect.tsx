@@ -1,4 +1,4 @@
-import { CalloutEffect, MetaData } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { CalloutEffect, MediaType, MetaData } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import React from 'react'
 
 interface CalloutEffectProps {
@@ -13,7 +13,7 @@ interface CalloutEffectProps {
   fullHeight: number
   meta: MetaData
   borderColor: string
-  isImage: boolean
+  mediaType: MediaType
   style: {
     borderRadius: number
     objectFit: 'cover' | 'contain' | 'fill'
@@ -38,7 +38,7 @@ export const CalloutEffectComponent: React.FC<CalloutEffectProps> = ({
   meta,
   style,
   borderColor,
-  isImage
+  mediaType
 }) => {
   const startTime = callout.startTime ?? 0
   const endTime = callout.endTime ?? slideDuration
@@ -157,7 +157,7 @@ export const CalloutEffectComponent: React.FC<CalloutEffectProps> = ({
         </defs>
 
         {/* Blurred background image */}
-        {isImage && (
+        {mediaType == MediaType.IMAGE && (
           <image
             x={(meta.x || 1) * (meta.scale || 1)}
             y={(meta.y || 1) * (meta.scale || 1)}
@@ -172,7 +172,7 @@ export const CalloutEffectComponent: React.FC<CalloutEffectProps> = ({
         )}
 
         {/* Zoomed image visible only in callout area */}
-        {isImage && (
+        {mediaType == MediaType.IMAGE && (
           <image
             x={zoomedImageX}
             y={zoomedImageY}

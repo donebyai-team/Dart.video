@@ -32,7 +32,7 @@ export function TransitionTile({
   return (
     <div
       className={cn(
-        "absolute top-0 h-12 cursor-pointer transition-all",
+        "absolute top-0 h-8 cursor-pointer transition-all",
         "bg-gradient-to-r from-primary/30 via-primary/40 to-primary/30",
         "border-l-2 border-r-2 border-primary/50",
         "hover:from-primary/40 hover:via-primary/50 hover:to-primary/40",

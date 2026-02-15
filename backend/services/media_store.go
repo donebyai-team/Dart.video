@@ -2,24 +2,16 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"github.com/imagekit-developer/imagekit-go/v2"
 	"github.com/pkg/errors"
+	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
+	"github.com/shank318/coasterai/utils"
 	"io"
 )
 
-type Media struct {
-	URL          string  `json:"url"`
-	FileID       string  `json:"fileId"`
-	FileName     string  `json:"fileName"`
-	Size         float64 `json:"size"`
-	Height       float64 `json:"height,omitempty"`
-	Width        float64 `json:"width,omitempty"`
-	MimeType     string  `json:"mimeType,omitempty"`
-	ThumbnailURL string  `json:"thumbnailUrl,omitempty"`
-}
-
 type MediaStore interface {
-	Upload(ctx context.Context, file io.Reader, fileName string) (*Media, error)
+	Upload(ctx context.Context, file io.Reader, fileName string) (*pbcore.UploadedMedia, error)
 }
 
 type imagekitMediaStore struct {
@@ -34,7 +26,7 @@ func (g *imagekitMediaStore) Upload(
 	ctx context.Context,
 	file io.Reader,
 	fileName string,
-) (*Media, error) {
+) (*pbcore.UploadedMedia, error) {
 
 	response, err := g.ik.Files.Upload(context.TODO(), imagekit.FileUploadParams{
 		File:     file,
@@ -45,15 +37,22 @@ func (g *imagekitMediaStore) Upload(
 		return nil, errors.Wrap(err, "Upload failed")
 	}
 
-	result := &Media{
-		URL:          response.URL,
-		FileID:       response.FileID,
+	// create video thumbnail
+	// right now, we allow only image and video
+	if response.FileType != "image" {
+		response.ThumbnailURL = fmt.Sprintf("%s/ik-thumbnail.jpg", response.URL)
+	}
+
+	result := &pbcore.UploadedMedia{
+		Url:          response.URL,
+		FileId:       response.FileID,
 		FileName:     response.Name,
-		Size:         response.Size,
-		Height:       response.Height,
-		Width:        response.Width,
+		Size:         float32(response.Size),
+		Height:       float32(response.Height),
+		Width:        float32(response.Width),
 		MimeType:     response.FileType,
-		ThumbnailURL: response.ThumbnailURL,
+		ThumbnailUrl: response.ThumbnailURL,
+		Duration:     utils.Ptr(float32(response.Duration)),
 	}
 
 	return result, nil

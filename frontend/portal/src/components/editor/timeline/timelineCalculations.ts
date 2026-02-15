@@ -1,28 +1,17 @@
 // Timeline layout calculation utilities
 import { EffectType, TransitionType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import type { TimelineSlide, SlideItem, TransitionItem, OverlayItem, TimelineLayout } from './types'
-import { getRealSlideStartFrame } from '../frame_calculations'
+import { getRealSlideStartFrame, TRANSITION_DURATION_SECONDS } from '../frame_calculations'
 
 /**
  * REMOTION TIMELINE CALCULATIONS (2026)
  * Frames are the source of truth, seconds are for display
  * Shows actual Remotion behavior with overlapping slides
  */
-
-/**
- * Fixed transition duration in frames (30 FPS * 0.3s = 9 frames)
- */
-export const DEFAULT_TRANSITION_DURATION_FRAMES = 9
-
-/**
- * Fixed transition duration in seconds
- */
-export const DEFAULT_TRANSITION_DURATION = 0.3
-
 /**
  * Default pixels per second for timeline scaling
  */
-export const DEFAULT_PIXELS_PER_SECOND = 80
+export const DEFAULT_PIXELS_PER_SECOND = 60
 
 /**
  * Track heights
@@ -105,7 +94,6 @@ export function calculateRemotionSlideItems(
     const hasTransition = slide.transition !== TransitionType.TRANSITION_NONE
 
     slideItems.push({
-      type: 'slide',
       id: `slide-${slide.id}`,
       slideId: slide.id,
       startTime: startTimeSeconds,
@@ -118,7 +106,7 @@ export function calculateRemotionSlideItems(
       hasTransition,
       // Add overlap information for visual rendering
       overlapStart: hasTransition
-        ? framesToSeconds(absoluteEndFrame - DEFAULT_TRANSITION_DURATION_FRAMES + 1, fps)
+        ? framesToSeconds(absoluteEndFrame - (TRANSITION_DURATION_SECONDS * fps) + 1, fps)
         : null,
       overlapEnd: hasTransition ? framesToSeconds(absoluteEndFrame, fps) : null
     })
@@ -126,7 +114,7 @@ export function calculateRemotionSlideItems(
     // Move to next slide position
     // Next slide starts: Current Start + Current Duration - Transition Duration
     if (hasTransition) {
-      currentFramePosition = absoluteStartFrame + slideDurationFrames - DEFAULT_TRANSITION_DURATION_FRAMES
+      currentFramePosition = absoluteStartFrame + slideDurationFrames - (TRANSITION_DURATION_SECONDS * fps);
     } else {
       currentFramePosition = absoluteStartFrame + slideDurationFrames
     }
