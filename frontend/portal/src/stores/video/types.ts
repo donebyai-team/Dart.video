@@ -114,6 +114,8 @@ export interface VideoActions {
 
     updateSlideTranscript: (transcript: string) => void
     setResolution: (resolution: Resolution) => void
+    setBackgroundMusic: (url?: string)  => void
+
     // setShowScreenshots: (show: boolean) => void;
     setShowTransitionPicker: (slideId: string | null) => void
     updateSlideBackground: (color: string, applyToAll?: boolean) => void

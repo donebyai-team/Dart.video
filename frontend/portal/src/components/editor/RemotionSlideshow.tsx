@@ -6,7 +6,7 @@ import { linearTiming, TransitionSeries } from '@remotion/transitions'
 import { fade } from '@remotion/transitions/fade'
 import { slide } from '@remotion/transitions/slide'
 import React from 'react'
-import { AbsoluteFill, useVideoConfig } from 'remotion'
+import { AbsoluteFill, useVideoConfig, Html5Audio } from 'remotion'
 import { getActualSlideDuration, TRANSITION_DURATION_SECONDS } from './frame_calculations'
 import { MediaSlide, InfographicSlide, TextAnimationSlide, VisualAnimationSlide } from './remotion/slides'
 
@@ -80,7 +80,7 @@ const SlideComponent: React.FC<{
         return <MediaSlide slide={slide} width={width} height={height} onUpdate={onUpdate} />
       }
       break
-   
+
     default:
       if (!slide.content?.case || slide.content.case === 'media') {
         return <MediaSlide slide={slide} width={width} height={height} isEditing={isEditing} onUpdate={onUpdate} />
@@ -184,6 +184,16 @@ export const Slideshow: React.FC<SlideshowProps> = ({ fps, isEditing = false, on
 
   return (
     <AbsoluteFill style={{ background: globalBackground }}>
+
+      {/* 🎵 Background Audio from URL */}
+      {videoConfig.metadata?.backgroundAudioUrl && (
+        <Html5Audio
+          src={videoConfig.metadata.backgroundAudioUrl}
+          volume={0.5}
+          loop
+        />
+      )}
+
       <TransitionSeries>
         {allSlides.map(slide => {
           const isSelected = selectedTemplateId === slide.id

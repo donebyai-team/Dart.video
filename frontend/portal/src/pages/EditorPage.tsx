@@ -3,17 +3,17 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
-import { Menu, Mic2, Eye, Volume2, RefreshCw, Video, Home, Settings, HelpCircle, Timer } from 'lucide-react'
+import { Mic2, Eye, Volume2, RefreshCw, Video, Home, Settings, HelpCircle, Timer, Music2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import ResolutionSelector from '@/components/editor/ResolutionSelector'
+import ResolutionSelector from '@/components/editor/remotion/components/ResolutionSelector'
 import StoryboardPanel from '@/components/editor/StoryboardPanel'
 import ToolsSettingsPanel from '@/components/editor/ToolsSettingsPanel'
 import RemotionPlayer, { RemotionPlayerHandle } from '@/components/editor/canvas/RemotionPlayer'
 import { type EditorConfig } from '@/types/editor'
 import { defaultEditorConfig } from '@/data/editorConfig'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
+import { Sheet,SheetTrigger } from '@/components/ui/sheet'
 import { useVideoStore } from '@/stores/video'
 import { Slide, SlideType, StackSlideContent } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Video as VideoConfig } from '@coasterai/pb/coasterai/core/v1/video_pb'
@@ -22,14 +22,8 @@ import { getConnectError } from '@/utils/error';
 import { ActiveToolType } from '@/types/tools';
 import { createSlideEntityId, createStackItemEntityId, createOverlayEntityId } from '@/types/selection';
 import Link from 'next/link';
+import BackgroundMusicSelector from '@/components/editor/remotion/components/BackgroundMusicSelector';
 
-// Icon mapping for dynamic rendering
-const iconMap: Record<string, React.ElementType> = {
-  Home,
-  Settings,
-  HelpCircle,
-  Video
-}
 interface EditorPageProps {
   videoId: string
   config?: EditorConfig
@@ -50,7 +44,6 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
   const startVideoStream = useVideoStore(s => s.startVideoStream)
   const isStreamingVideo = useVideoStore(s => s.isStreamingVideo)
   const streamingThinkingSummary = useVideoStore(s => s.streamingThinkingSummary)
-  const streamingError = useVideoStore(s => s.streamingError)
 
   // Video data from store (this is the single source of truth)
   const videoConfigFromStore = useVideoStore(s => s.videoConfig);
@@ -210,6 +203,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
             {videoConfigFromStore?.metadata?.duration.toFixed(2)}s
           </div>
           <ResolutionSelector />
+          <BackgroundMusicSelector />          
           {/* <Button
             variant='outline'
             size='sm'

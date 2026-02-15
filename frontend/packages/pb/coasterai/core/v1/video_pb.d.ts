@@ -50,6 +50,11 @@ export declare type VideoMetadata = Message<"coasterai.core.v1.VideoMetadata"> &
    * @generated from field: coasterai.core.v1.VideoLanguage language = 7;
    */
   language: VideoLanguage;
+
+  /**
+   * @generated from field: optional string background_audio_url = 8;
+   */
+  backgroundAudioUrl?: string;
 };
 
 /**

@@ -31,7 +31,7 @@ interface PlayerToolbarProps {
 
 const slideTypeLabels: Record<SlideType, { label: string; icon: React.ElementType }> = {
   [SlideType.UNDEFINED]: { label: 'Undefined', icon: HelpCircle }, // or any icon
-  [SlideType.MEDIA]: { label: 'Image', icon: ImageIcon },
+  [SlideType.MEDIA]: { label: 'Media', icon: ImageIcon },
   [SlideType.TEXT_ANIMATION]: { label: 'Text Animation', icon: Type },
   [SlideType.INFOGRAPHIC]: { label: 'Infographic', icon: BarChart3 },
   [SlideType.VISUAL_ANIMATION]: { label: 'Visual Animation', icon: Sparkles },
@@ -42,9 +42,7 @@ const insertTools: { id: EffectType; name: string; icon: React.ElementType }[] =
   { id: EffectType.SPOTLIGHT, name: 'Spotlight', icon: CircleDot }
 ]
 
-const isMediaType = (type: SlideType) => type === SlideType.MEDIA
-
-const PlayerToolbar = ({ onDurationChange, minDuration = 1, maxDuration = 60 }: PlayerToolbarProps) => {
+const PlayerToolbar = ({ onDurationChange, minDuration = 1, maxDuration = 180 }: PlayerToolbarProps) => {
   const onChangeVisual = useVideoStore(s => s.handleEditSlide)
   const onChangeTextAnimation = useVideoStore(s => s.handleEditSlide)
   const activeTool = useVideoStore(s => s.activeTool)
@@ -63,31 +61,12 @@ const PlayerToolbar = ({ onDurationChange, minDuration = 1, maxDuration = 60 }: 
     }
   }
 
-  const [editValue, setEditValue] = useState(slide.duration.toString())
-
   const TypeIcon = slideTypeLabels[slide.type].icon
   const currentBg = slide.backgroundColor || '#0f172a'
   const isBackgroundActive = activeTool?.type === ActiveToolType.BACKGROUND
   const activeInsertTool = activeTool?.type === ActiveToolType.INSERT ? activeTool.tool : null
   const showChangeVisualButton = slide.type === SlideType.VISUAL_ANIMATION || slide.type === SlideType.INFOGRAPHIC
   const changeButtonLabel = slide.type === SlideType.INFOGRAPHIC ? 'Change Infographic' : 'Change Visual'
-
-  const handleEditComplete = () => {
-    const newDuration = parseFloat(editValue)
-    if (!isNaN(newDuration) && newDuration >= minDuration && newDuration <= maxDuration) {
-      onDurationChange(newDuration)
-    } else {
-      setEditValue(slide.duration.toString())
-    }
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleEditComplete()
-    } else if (e.key === 'Escape') {
-      setEditValue(slide.duration.toString())
-    }
-  }
 
   return (
     <div className='flex items-center justify-between gap-4 px-4 py-2 border-b border-border bg-background'>
@@ -143,7 +122,7 @@ const PlayerToolbar = ({ onDurationChange, minDuration = 1, maxDuration = 60 }: 
         )}
 
         {/* Insert Tools Dropdown - only for image/video slides */}
-        {isMediaType(slide.type) && (
+        {slide.type == SlideType.MEDIA && (
           <>
             <div className='h-4 w-px bg-border mx-1' />
             <DropdownMenu>

@@ -68,6 +68,13 @@ func validateMetadata(metadata *pbcore.VideoMetadata) error {
 		return fmt.Errorf("metadata.Resolution.Width or metadata.Resolution.Height is invalid")
 	}
 
+	if metadata.BackgroundAudioUrl != nil {
+		_, err := validateURL(*metadata.BackgroundAudioUrl)
+		if err != nil {
+			return fmt.Errorf("background audio url is invalid")
+		}
+	}
+
 	return nil
 }
 
@@ -253,32 +260,8 @@ func validateSlideMedia(content *pbcore.MediaSlideContent) error {
 		return fmt.Errorf("src is required")
 	}
 
-	if err := validateImageURL(src); err != nil {
-		return fmt.Errorf("invalid image src: %w", err)
-	}
-
-	return nil
-}
-
-func validateSlideVideo(content *pbcore.MediaSlideContent) error {
-	if content == nil {
-		return fmt.Errorf("content is nil")
-	}
-
-	// ---- Meta Validation ----
-	err := validateContentMeta(content.GetMeta())
-	if err != nil {
-		return err
-	}
-
-	// ---- Src Validation ----
-	src := strings.TrimSpace(content.Src)
-	if src == "" {
-		return fmt.Errorf("src is required")
-	}
-
 	if _, err := validateURL(src); err != nil {
-		return fmt.Errorf("invalid video src: %w", err)
+		return fmt.Errorf("invalid image src: %w", err)
 	}
 
 	return nil
@@ -374,22 +357,6 @@ func isValidLinearGradient(s string) bool {
 
 func isValidHexColor(s string) bool {
 	return s == "transparent" || hexColorRegex.MatchString(s)
-}
-
-func validateImageURL(raw string) error {
-	_, err := validateURL(raw)
-	if err != nil {
-		return err
-	}
-
-	return nil
-	//ext := strings.ToLower(path.Ext(u.Path))
-	//switch ext {
-	//case ".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg":
-	//	return nil
-	//default:
-	//	return fmt.Errorf("unsupported image extension")
-	//}
 }
 
 func validateURL(raw string) (*url.URL, error) {

@@ -32,6 +32,7 @@ message VideoMetadata {
     string prompt = 5;
     string brand_library_id = 6;
     VideoLanguage language = 7;
+    optional string background_audio_url = 8;
 }
 
 message Video {

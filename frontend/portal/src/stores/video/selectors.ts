@@ -20,4 +20,22 @@ export const createSelectors = (set: VideoStoreSet, get: VideoStoreGet) => ({
     get().autoSyncVideoConfig();
   },
 
+  setBackgroundMusic: (url?: string) => {
+    const { videoConfig } = get();
+    if (!videoConfig?.config) return;
+    console.debug("[Music changed to]", url)
+
+    const newVideoConfig = {
+        ...videoConfig,
+        metadata: {
+          ...videoConfig.metadata,
+          backgroundAudioUrl: url
+        } as VideoMetadata
+      }
+
+    set({ videoConfig: newVideoConfig });
+
+    get().autoSyncVideoConfig();
+  },
+
 });
