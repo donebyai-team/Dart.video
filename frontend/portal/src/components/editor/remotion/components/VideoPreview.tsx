@@ -121,21 +121,7 @@ const VideoPreview = ({ props, onChange, onVideoChange, mediaRef, onClickVideo }
           onError={error => {
             console.log('Video error:', error.message)
             // Return 'fail' to fail the render, or 'fallback' to use <OffthreadVideo>
-            return (
-              <OffthreadVideo
-                playbackRate={1}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'contain',
-                  objectPosition: 'center',
-                  ...style,
-                  opacity: isLoading ? 0 : 1,
-                  transition: 'opacity 0.3s ease-in-out'
-                }}
-                src={src as string}
-              />
-            )
+            return 'fallback'
           }}
         />
 
