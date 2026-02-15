@@ -14,7 +14,6 @@ interface MediaStylerProps {
   children?: React.ReactNode
   setIsEditingToggle?: React.Dispatch<SetStateAction<boolean>>
   onMediaChange?: () => void
-  isImage?: boolean
 }
 
 interface Position {
@@ -31,7 +30,6 @@ export const MediaStyler = ({
   className = '',
   children,
   onMediaChange,
-  isImage
 }: MediaStylerProps) => {
   const popoverRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLDivElement>(null)
@@ -519,7 +517,6 @@ export const MediaStyler = ({
       </button>
 
       {/* Object Fit Controls */}
-      {isImage && (
         <>
           <div className="divider-vertical" />
           
@@ -573,7 +570,6 @@ export const MediaStyler = ({
             </button>
           ))}
         </>
-      )}
     </div>
   ) : null
 

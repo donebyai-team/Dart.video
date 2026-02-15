@@ -18,7 +18,6 @@ const ImagePreview = ({ props, onChange, onImageChange, mediaRef, onClickImage }
 
   return (
     <MediaStyler
-      isImage={true}
       onMediaChange={() => {
         onImageChange()
         //Close the styler

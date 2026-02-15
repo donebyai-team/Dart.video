@@ -16,7 +16,7 @@ export const MyVideo = () => {
       <Composition
         id='MyComposition'
         component={Slideshow as any}
-        durationInFrames={totalVideoFrames}
+        durationInFrames={Math.ceil(totalVideoFrames)}
         fps={fps}
         width={width}
         height={height}
