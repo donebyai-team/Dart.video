@@ -82,6 +82,9 @@ message UploadMediaResponse {
   string thumbnail = 2;
   float width = 3;
   float height =4;
+  string mimeType = 5;
+  optional float duration = 6;
+  
 }
 
 message PasswordlessStartRequest {

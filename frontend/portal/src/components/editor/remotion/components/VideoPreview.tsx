@@ -1,24 +1,22 @@
 import { MediaSlideContent } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { RefObject, useEffect, useState } from 'react'
-import { Video } from 'remotion'
+import { Html5Video, OffthreadVideo } from 'remotion'
 import MediaStyler from './MediaStyler'
 
 interface Props {
-  videoRef: RefObject<HTMLVideoElement>
+  mediaRef: RefObject<HTMLVideoElement>
   props: MediaSlideContent
   onChange: (newProps: Partial<MediaSlideContent>) => void
   onVideoChange: () => void
   onClickVideo: () => void
 }
 
-const VideoPreview = ({ props, onChange, onVideoChange, videoRef, onClickVideo }: Props) => {
+const VideoPreview = ({ props, onChange, onVideoChange, mediaRef, onClickVideo }: Props) => {
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [loadedSrc, setLoadedSrc] = useState<string | null>(null)
   const src = props.src
   const style = props.style || {}
-  const ext = src.split('.')[1]
-  const thumbnailUrl = src.replace(`.${ext}`, `.${ext}/ik-thumbnail.jpg?tr=so-2'`)
 
   // Preload video when src changes
   useEffect(() => {
@@ -62,7 +60,6 @@ const VideoPreview = ({ props, onChange, onVideoChange, videoRef, onClickVideo }
 
   return (
     <MediaStyler
-      isImage = {false}
       onMediaChange={() => {
         onVideoChange()
         setOpen(false)
@@ -105,19 +102,26 @@ const VideoPreview = ({ props, onChange, onVideoChange, videoRef, onClickVideo }
         )}
 
         {/* Video with fade-in transition */}
-        <Video
-          poster={thumbnailUrl}
-          ref={videoRef}
+        <Html5Video
+          ref={mediaRef}
+          playsInline={true}
+          playbackRate={1}
           onClick={() => onClickVideo()}
           draggable={false}
           src={src as string}
           style={{
             width: '100%',
             height: '100%',
-            objectFit: 'cover',
+            objectFit: 'contain',
+            objectPosition: 'center',
             ...style,
             opacity: isLoading ? 0 : 1,
             transition: 'opacity 0.3s ease-in-out'
+          }}
+          onError={error => {
+            console.log('Video error:', error.message)
+            // Return 'fail' to fail the render, or 'fallback' to use <OffthreadVideo>
+            return 'fallback'
           }}
         />
 

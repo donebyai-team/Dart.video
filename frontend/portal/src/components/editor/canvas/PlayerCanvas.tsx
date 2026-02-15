@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useMemo } from 'react'
 import { Player, PlayerRef } from '@remotion/player'
 import { motion } from 'framer-motion'
 import CanvasOverlay from './CanvasOverlay'
@@ -28,10 +28,20 @@ const PlayerCanvas = ({
   onSelectTemplate,
   isPlaying = false
 }: PlayerCanvasProps) => {
-  const videoConfigFromStore = useVideoStore(s => s.videoConfig);
+  const videoConfigFromStore = useVideoStore(s => s.videoConfig)
   const selectedSlide = useVideoStore(s => s.selectedSlide)
+
+  // Memoization of inputProps before passing to <Player/>.
+  // Prevents regressions in playback behaviour of Video 
+  const inputProps = useMemo(() => {
+    return {
+      fps,
+      isEditing: !isPlaying, // Only enable editing when NOT playing
+      onSelectTemplate
+    }
+  }, [fps, isPlaying, onSelectTemplate])
   
-    // Early return if no data
+  // Early return if no data
   if (!videoConfigFromStore?.config?.sections || !videoConfigFromStore?.metadata?.resolution || !selectedSlide) {
     return <div className='flex items-center justify-center h-full text-muted-foreground'>Loading...</div>
   }
@@ -92,11 +102,7 @@ const PlayerCanvas = ({
           <Player
             ref={playerRef}
             component={Slideshow as any}
-            inputProps={{
-              fps,
-              isEditing: !isPlaying, // Only enable editing when NOT playing
-              onSelectTemplate
-            }}
+            inputProps={inputProps}
             durationInFrames={totalFrames || 1}
             compositionWidth={videoConfigFromStore?.metadata?.resolution.width}
             compositionHeight={videoConfigFromStore?.metadata?.resolution.height}

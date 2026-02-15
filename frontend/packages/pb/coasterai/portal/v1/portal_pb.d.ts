@@ -233,6 +233,16 @@ export declare type UploadMediaResponse = Message<"coasterai.portal.v1.UploadMed
    * @generated from field: float height = 4;
    */
   height: number;
+
+  /**
+   * @generated from field: string mimeType = 5;
+   */
+  mimeType: string;
+
+  /**
+   * @generated from field: optional float duration = 6;
+   */
+  duration?: number;
 };
 
 /**

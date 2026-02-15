@@ -1,5 +1,5 @@
 {
-    "id": "42c11f82-ef38-4a67-a3cd-3a0a3174004b",
+    "id": "00c203ef-2677-47c2-9721-f4a219650735",
     "name": "test",
     "config": {
         "sections": [
@@ -46,7 +46,7 @@
                     },
                     {
                         "id": "hook-2",
-                        "type": "SLIDE_TYPE_TEXT_ANIMATION",
+                        "type": "SLIDE_TYPE_INFOGRAPHIC",
                         "transcript": "Introducing DocuFlow, the smarter way to manage your teams knowledge.",
                         "duration": 2,
                         "transition": "TRANSITION_FADE",
@@ -66,6 +66,26 @@
                                 "width": 1536,
                                 "height": 864
                             }
+                        }
+                    },
+                    {
+                        "id": "hook-1771129160025",
+                        "type": "SLIDE_TYPE_MEDIA",
+                        "transcript": "Add your script here...",
+                        "duration": 15.089,
+                        "transitionDuration": 0.3,
+                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
+                        "media": {
+                            "meta": {
+                                "x": 200.96024,
+                                "y": 111.359856,
+                                "width": 1404.1602,
+                                "height": 789.8401,
+                                "scale": 1,
+                                "rotation": 0
+                            },
+                            "src": "https://ik.imagekit.io/coasterai/Video-600_QVjJijEiZ.mp4",
+                            "style": {}
                         }
                     }
                 ]
@@ -112,18 +132,65 @@
                         "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
                         "media": {
                             "meta": {
-                                "x": 192,
-                                "y": 108,
+                                "y": 104.16,
                                 "width": 1536,
                                 "height": 864,
                                 "scale": 1,
                                 "rotation": 0
                             },
-                            "src": "https://ik.imagekit.io/coasterai/add_this_person_to_the_back_of_t-0_2E3f1Biuf.jpg",
+                            "src": "https://ik.imagekit.io/coasterai/84548caf-226c-484f-863c-9a0dae679177_4J6xCrDit.jpeg",
                             "style": {
-                                "borderRadius": 5
+                                "borderRadius": 55,
+                                "objectFit": "contain"
                             },
                             "isImage": true
+                        },
+                        "spotlights": [
+                            {
+                                "id": "spotlight-1",
+                                "x": 400,
+                                "y": 200,
+                                "width": 300,
+                                "height": 250,
+                                "blurAmount": 10,
+                                "borderRadius": 8,
+                                "startTime": 0.5,
+                                "endTime": 1.5
+                            },
+                            {
+                                "id": "spotlight-2",
+                                "x": 1100,
+                                "y": 600,
+                                "width": 400,
+                                "height": 300,
+                                "blurAmount": 10,
+                                "borderRadius": 8,
+                                "startTime": 2.5,
+                                "endTime": 3.5
+                            }
+                        ]
+                    },
+                    {
+                        "id": "solution-3",
+                        "type": "SLIDE_TYPE_MEDIA",
+                        "transcript": "Organize everything in smart folders that adapt to how your team works.",
+                        "duration": 4,
+                        "transition": "TRANSITION_SLIDE_UP",
+                        "transitionDuration": 0.3,
+                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
+                        "media": {
+                            "meta": {
+                                "x": 426.23944,
+                                "y": 216.47974,
+                                "width": 913.49414,
+                                "height": 513.84045,
+                                "scale": 1,
+                                "rotation": 0
+                            },
+                            "src": "https://ik.imagekit.io/coasterai/Video-600_mOVrJzso8.mp4",
+                            "style": {
+                                "borderRadius": 153
+                            }
                         },
                         "spotlights": [
                             {
@@ -248,7 +315,20 @@
                         "transcript": "Just ask in natural language, like talking to a colleague.",
                         "duration": 2.5,
                         "transition": "TRANSITION_SLIDE_LEFT",
-                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)"
+                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
+                        "media": {
+                            "meta": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864,
+                                "scale": 1,
+                                "rotation": 0
+                            },
+                            "src": "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400&h=240&fit=crop",
+                            "style": {},
+                            "isImage": true
+                        }
                     }
                 ]
             },
@@ -291,7 +371,20 @@
                         "duration": 2.5,
                         "transition": "TRANSITION_FADE",
                         "transitionDuration": 0.3,
-                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)"
+                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
+                        "media": {
+                            "meta": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864,
+                                "scale": 1,
+                                "rotation": 0
+                            },
+                            "src": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400&h=240&fit=crop",
+                            "style": {},
+                            "isImage": true
+                        }
                     }
                 ]
             },
@@ -372,8 +465,8 @@
             "width": 1920,
             "height": 1080
         },
-        "duration": 35.3
+        "duration": 54.989
     },
-    "createdAt": "2026-02-13T17:20:36.233561Z",
+    "createdAt": "2026-02-14T15:15:46.737288Z",
     "status": "VIDEO_STATUS_PROCESSING"
 }
