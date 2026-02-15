@@ -6,9 +6,8 @@ interface Props {
   onValueChange: (value: number) => void
   max: number
   min: number
-  step:number
+  step: number
 }
-
 
 const DurationChangeComponent = ({ value, onValueChange, max, min, step }: Props) => {
   const handleValueChange = (val: number) => {
@@ -23,7 +22,7 @@ const DurationChangeComponent = ({ value, onValueChange, max, min, step }: Props
         onClick={() => {
           handleValueChange(-step)
         }}
-        disabled={value.toFixed(1) <= min.toFixed(1)}
+        disabled={Number(value.toFixed(1)) <= Number(min.toFixed(1))}
       >
         <Minus className='w-3 h-3' />
       </Button>
@@ -37,13 +36,12 @@ const DurationChangeComponent = ({ value, onValueChange, max, min, step }: Props
         onClick={() => {
           handleValueChange(+step)
         }}
-        disabled={value.toFixed(1) >= max.toFixed(1)}
+        disabled={Number(value.toFixed(1)) >= Number(max.toFixed(1))}
       >
         <Plus className='w-3 h-3' />
       </Button>
     </div>
   )
 }
-
 
 export default DurationChangeComponent
