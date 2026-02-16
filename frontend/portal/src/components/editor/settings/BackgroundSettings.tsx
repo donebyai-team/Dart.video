@@ -150,7 +150,7 @@ export default function BackgroundSettings({
   /* ---------- RENDER ---------- */
 
   return (
-    <div className="h-full flex flex-col bg-card">
+    <div className="h-full flex flex-col bg-card pb-10">
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-border">
         <h3 className="font-semibold text-sm tracking-tight">
@@ -180,16 +180,16 @@ export default function BackgroundSettings({
 
           <div className="grid grid-cols-8 gap-3">
             {solidPresets.map((color) => {
+
               const isActive =
                 activeCase === "solid" &&
                 safeValue.style?.value.hex?.toLowerCase() === color.toLowerCase();
-
               return (
                 <button
                   key={color}
                   onClick={() => updateStyle("solid", { hex: color })}
                   className={`w-8 h-8 rounded-full transition-all duration-200 hover:scale-110
-            ${isActive ? "ring-2 ring-white ring-offset-2 ring-offset-background" : ""}
+            ${isActive ? "ring-2 ring-primary ring-offset-1 ring-offset-card" : ""}
           `}
                   style={{ backgroundColor: color }}
                 />
@@ -238,7 +238,7 @@ export default function BackgroundSettings({
             Gradients
           </p>
 
-          <div className="grid grid-cols-6 gap-3">
+          <div className="grid grid-cols-8 gap-3">
             {modernGradients.map(([c1, c2], i) => {
               const preset = buildGradient(c1, c2, 135);
 
@@ -252,8 +252,8 @@ export default function BackgroundSettings({
                 <button
                   key={i}
                   onClick={() => updateStyle("gradient", preset)}
-                  className={`w-9 h-9 rounded-full transition-all duration-200 hover:scale-110
-            ${isActive ? "ring-2 ring-white ring-offset-2 ring-offset-background" : ""}
+                  className={`w-8 h-8 rounded-full transition-all duration-200 hover:scale-110
+            ${isActive ? "ring-2 ring-primary ring-offset-1 ring-offset-card" : ""}
           `}
                   style={{ background: gradientToCSS(preset) }}
                 />
@@ -264,56 +264,64 @@ export default function BackgroundSettings({
 
 
         {/* ---------------- CUSTOM GRADIENT BUILDER ---------------- */}
-
-        <div className="space-y-4">
+        <div className="space-y-3">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            Create Custom Gradient
+            Custom Gradient
           </p>
 
-          {/* Live Preview */}
-          <div
-            className="h-16 rounded-xl border border-border shadow-inner"
-            style={{ background: gradientToCSS(customGradient) }}
-          />
+          {/* Compact Card */}
+          <div className="p-3 rounded-xl border border-border bg-muted/20 space-y-3">
 
-          {/* Color Pickers */}
-          <div className="flex gap-3">
-            <input
-              type="color"
-              value={gradientColor1}
-              onChange={(e) => setGradientColor1(e.target.value)}
-              className="w-12 h-10 rounded-lg border border-border cursor-pointer bg-transparent"
+            {/* Small Preview */}
+            <div
+              className="h-10 rounded-lg"
+              style={{ background: gradientToCSS(customGradient) }}
             />
-            <input
-              type="color"
-              value={gradientColor2}
-              onChange={(e) => setGradientColor2(e.target.value)}
-              className="w-12 h-10 rounded-lg border border-border cursor-pointer bg-transparent"
-            />
+
+            {/* Controls Row */}
+            <div className="flex items-center gap-3">
+
+              {/* Color 1 */}
+              <input
+                type="color"
+                value={gradientColor1}
+                onChange={(e) => setGradientColor1(e.target.value)}
+                className="w-8 h-8 rounded-md border border-border cursor-pointer bg-transparent"
+              />
+
+              {/* Color 2 */}
+              <input
+                type="color"
+                value={gradientColor2}
+                onChange={(e) => setGradientColor2(e.target.value)}
+                className="w-8 h-8 rounded-md border border-border cursor-pointer bg-transparent"
+              />
+
+              {/* Angle Compact */}
+              <div className="flex items-center gap-2 flex-1">
+                <input
+                  type="range"
+                  min="0"
+                  max="360"
+                  value={gradientAngle}
+                  onChange={(e) => setGradientAngle(Number(e.target.value))}
+                  className="flex-1"
+                />
+                <span className="text-[11px] text-muted-foreground w-8 text-right">
+                  {gradientAngle}°
+                </span>
+              </div>
+
+              {/* Small Apply */}
+              <Button
+                size="sm"
+                onClick={() => updateStyle("gradient", customGradient)}
+              >
+                Apply
+              </Button>
+
+            </div>
           </div>
-
-          {/* Angle Slider */}
-          <div className="space-y-1">
-            <label className="text-xs text-muted-foreground">
-              Angle: {gradientAngle}°
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="360"
-              value={gradientAngle}
-              onChange={(e) => setGradientAngle(Number(e.target.value))}
-              className="w-full"
-            />
-          </div>
-
-          {/* Apply Button */}
-          <Button
-            className="w-full"
-            onClick={() => updateStyle("gradient", customGradient)}
-          >
-            Apply Gradient
-          </Button>
         </div>
 
       </div>
