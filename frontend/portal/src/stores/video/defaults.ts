@@ -124,7 +124,7 @@ export function createNewSlide(params: {
     return create(SlideSchema, {
         id: `${sectionId}-${Date.now()}`,
         type,
-        transcript: defaultTranscript ?? "Add your script here...",
+        transcript: "",
         duration: defaultDuration ?? 5,
         transition: TransitionType.TRANSITION_NONE,
         backgroundStyle: inheritedBg,

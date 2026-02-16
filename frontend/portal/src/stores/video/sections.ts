@@ -2,6 +2,7 @@ import type { Section } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { VideoStoreSet, VideoStoreGet } from "./types";
 import { createNewSection } from "./defaults";
 import { getSections, updateVideoConfigSections } from "./utils";
+import { DragEndEvent } from "@dnd-kit/core";
 
 export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
 
@@ -108,10 +109,7 @@ export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => 
 
   /* ================= DRAG ================= */
 
-  handleSectionDragEnd(event: {
-    active: { id: string };
-    over: { id: string } | null;
-  }) {
+  handleSectionDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 

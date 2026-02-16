@@ -190,7 +190,7 @@ const StoryboardSection = ({
                                     <Trash2 className="w-2.5 h-2.5" />
                                 </Button>
                                 <span className="text-[10px] text-muted-foreground mr-1">
-                                    {section.slides.length}
+                                    {section.slides.length} scenes
                                 </span>
                                 <ChevronDown
                                     className={`w-3 h-3 text-muted-foreground transition-transform`}
@@ -200,7 +200,7 @@ const StoryboardSection = ({
                     )}
 
                     {/* Section voiceover controls */}
-                    <TooltipProvider delayDuration={200}>
+                    {/* <TooltipProvider delayDuration={200}>
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button
@@ -254,7 +254,7 @@ const StoryboardSection = ({
                                 </TooltipContent>
                             </Tooltip>
                         )}
-                    </TooltipProvider>
+                    </TooltipProvider> */}
                 </div>
 
                 <CollapsibleContent>

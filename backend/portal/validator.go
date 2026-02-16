@@ -11,6 +11,20 @@ import (
 	"strings"
 )
 
+func registerID(idRegistry map[string]string, id, entityType string) error {
+	if id == "" {
+		return fmt.Errorf("%s id is empty", entityType)
+	}
+
+	if existingType, exists := idRegistry[id]; exists {
+		return fmt.Errorf("duplicate id '%s' found between %s and %s",
+			id, existingType, entityType)
+	}
+
+	idRegistry[id] = entityType
+	return nil
+}
+
 func validateVideoConfig(video *models.Video) error {
 	if video == nil || video.Config == nil {
 		return fmt.Errorf("video is nil")
@@ -24,21 +38,22 @@ func validateVideoConfig(video *models.Video) error {
 		return fmt.Errorf("video name is empty")
 	}
 
-	err := validateMetadata(video.Metadata)
-	if err != nil {
+	if err := validateMetadata(video.Metadata); err != nil {
 		return err
 	}
 
+	// Global ID registry
+	idRegistry := make(map[string]string)
+
 	for _, section := range video.Config.Sections {
-		err := validateSection(section)
-		if err != nil {
-			return errors.WithMessage(err, fmt.Sprintf("section %s is invalid", section))
+
+		if err := validateSection(section, idRegistry); err != nil {
+			return err
 		}
 
 		for _, slide := range section.Slides {
-			err = validateSlide(slide)
-			if err != nil {
-				return errors.Wrap(err, fmt.Sprintf("slide id: %s, type: %s: ", slide.GetId(), slide.Type.String()))
+			if err := validateSlide(slide, idRegistry); err != nil {
+				return errors.Wrapf(err, "slide id: %s", slide.GetId())
 			}
 		}
 	}
@@ -55,9 +70,9 @@ func validateMetadata(metadata *pbcore.VideoMetadata) error {
 		return fmt.Errorf("metadata.Fps is invalid")
 	}
 
-	//if metadata.BackgroundColor != nil && !IsValidBackground(*metadata.BackgroundColor) {
-	//	return fmt.Errorf("metadata.BackgroundColor is invalid")
-	//}
+	if metadata.BackgroundStyle != nil && !IsValidBackgroundStyle(metadata.BackgroundStyle) {
+		return fmt.Errorf("metadata.BackgroundStyle is invalid")
+	}
 
 	if metadata.Resolution == nil {
 		return fmt.Errorf("metadata.Resolution is nil")
@@ -77,9 +92,9 @@ func validateMetadata(metadata *pbcore.VideoMetadata) error {
 	return nil
 }
 
-func validateSection(section *pbcore.Section) error {
-	if utils.IsEmpty(&section.Id) {
-		return fmt.Errorf("section id is empty")
+func validateSection(section *pbcore.Section, idRegistry map[string]string) error {
+	if err := registerID(idRegistry, section.Id, "section"); err != nil {
+		return err
 	}
 
 	if utils.IsEmpty(&section.Title) {
@@ -93,56 +108,84 @@ func validateSection(section *pbcore.Section) error {
 	return nil
 }
 
-func validateSlide(slide *pbcore.Slide) error {
-	if utils.IsEmpty(&slide.Id) {
-		return fmt.Errorf("id is empty")
+func validateSlide(slide *pbcore.Slide, idRegistry map[string]string) error {
+	if err := registerID(idRegistry, slide.Id, "slide"); err != nil {
+		return err
 	}
 
 	if slide.BackgroundStyle != nil && !IsValidBackgroundStyle(slide.BackgroundStyle) {
-		return fmt.Errorf("background stype is invalid")
+		return fmt.Errorf("invalid background style")
 	}
 
 	if slide.Duration <= 0 {
-		return fmt.Errorf("duration is invalid")
+		return fmt.Errorf("invalid duration")
 	}
 
 	if slide.TransitionDuration != nil && *slide.TransitionDuration < 0 {
-		return fmt.Errorf("transition duration is invalid")
+		return fmt.Errorf("invalid transition duration")
 	}
 
 	if slide.GetMedia() != nil {
-		err := validateSlideMedia(slide.GetMedia())
-		if err != nil {
+		if err := validateSlideMedia(slide.GetMedia()); err != nil {
 			return err
 		}
 	}
 
 	if slide.GetAnimation() != nil {
-		err := validateSlideAnimation(slide.GetAnimation())
-		if err != nil {
+		if err := validateSlideAnimation(slide.GetAnimation()); err != nil {
 			return err
 		}
 	}
 
-	for _, spotlight := range slide.Spotlights {
-		err := validateSpotlightEffect(slide.Duration, spotlight)
-		if err != nil {
-			return errors.Wrap(err, fmt.Sprintf("spotlight id: %s", spotlight.Id))
+	// Effects
+	for _, s := range slide.Spotlights {
+		if err := validateEffect(slide.Duration, s.Id, s.X, s.Y, s.StartTime, s.EndTime, "spotlight", idRegistry); err != nil {
+			return err
 		}
 	}
 
-	for _, callout := range slide.Callouts {
-		err := validateCalloutEffect(slide.Duration, callout)
-		if err != nil {
-			return errors.Wrap(err, fmt.Sprintf("callout id: %s", callout.Id))
+	for _, c := range slide.Callouts {
+		if err := validateEffect(slide.Duration, c.Id, c.X, c.Y, c.StartTime, c.EndTime, "callout", idRegistry); err != nil {
+			return err
 		}
 	}
 
-	for _, zoom := range slide.Zooms {
-		err := validateZoomEffect(slide.Duration, zoom)
-		if err != nil {
-			return errors.Wrap(err, fmt.Sprintf("zoom id: %s", zoom.Id))
+	for _, z := range slide.Zooms {
+		if err := validateEffect(slide.Duration, z.Id, z.X, z.Y, z.StartTime, z.EndTime, "zoom", idRegistry); err != nil {
+			return err
 		}
+	}
+
+	return nil
+}
+
+func validateEffect(
+	slideDuration float32,
+	id string,
+	x, y float32,
+	startTime, endTime float32,
+	entityType string,
+	idRegistry map[string]string,
+) error {
+
+	if err := registerID(idRegistry, id, entityType); err != nil {
+		return err
+	}
+
+	if x < 0 || y < 0 {
+		return fmt.Errorf("%s coordinates are invalid", entityType)
+	}
+
+	if startTime < 0 {
+		return fmt.Errorf("%s start time is invalid", entityType)
+	}
+
+	if endTime <= 0 || endTime > slideDuration {
+		return fmt.Errorf("%s end time exceeds slide duration", entityType)
+	}
+
+	if startTime >= endTime {
+		return fmt.Errorf("%s start time must be less than end time", entityType)
 	}
 
 	return nil
@@ -165,78 +208,6 @@ func validateSlideAnimation(content *pbcore.AnimationSlideContent) error {
 	err := validateContentMeta(content.GetMeta())
 	if err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func validateSpotlightEffect(slideDuration float32, effect *pbcore.SpotlightEffect) error {
-	if effect == nil {
-		return fmt.Errorf("effect is nil")
-	}
-
-	if utils.IsEmpty(&effect.Id) {
-		return fmt.Errorf("effect id is empty")
-	}
-
-	if effect.X < 0 || effect.Y < 0 {
-		return fmt.Errorf("effect.X or effect.Y is invalid")
-	}
-
-	if effect.StartTime < 0 {
-		return fmt.Errorf("effect.StartTime is invalid")
-	}
-
-	if effect.EndTime <= 0 || effect.EndTime > slideDuration {
-		return fmt.Errorf("effect endtime should be under slide duration")
-	}
-
-	return nil
-}
-
-func validateCalloutEffect(slideDuration float32, effect *pbcore.CalloutEffect) error {
-	if effect == nil {
-		return fmt.Errorf("effect is nil")
-	}
-
-	if utils.IsEmpty(&effect.Id) {
-		return fmt.Errorf("effect id is empty")
-	}
-
-	if effect.X < 0 || effect.Y < 0 {
-		return fmt.Errorf("effect.X or effect.Y is invalid")
-	}
-
-	if effect.StartTime < 0 {
-		return fmt.Errorf("effect.StartTime is invalid")
-	}
-
-	if effect.EndTime <= 0 || effect.EndTime > slideDuration {
-		return fmt.Errorf("effect endtime should be under slide duration")
-	}
-
-	return nil
-}
-
-func validateZoomEffect(slideDuration float32, effect *pbcore.ZoomEffect) error {
-	if effect == nil {
-		return fmt.Errorf("effect is nil")
-	}
-
-	if utils.IsEmpty(&effect.Id) {
-		return fmt.Errorf("effect id is empty")
-	}
-
-	if effect.X < 0 || effect.Y < 0 {
-		return fmt.Errorf("effect.X or effect.Y is invalid")
-	}
-
-	if effect.StartTime < 0 {
-		return fmt.Errorf("effect.StartTime is invalid")
-	}
-
-	if effect.EndTime <= 0 || effect.EndTime > slideDuration {
-		return fmt.Errorf("effect endtime should be under slide duration")
 	}
 
 	return nil

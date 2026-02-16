@@ -1,4 +1,4 @@
-import { AnimationSlideContent, Slide, SlideType, StackSlideContent, MediaSlideContent } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { AnimationSlideContent, Slide, SlideType, StackSlideContent, MediaSlideContent, MediaType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { useMemo } from "react";
 import { backgroundStyleToCSS } from "./settings/BackgroundSettings";
 
@@ -187,15 +187,18 @@ const LineGraphThumbnail = () => (
 
 // Image Thumbnail
 const ImageThumbnail = ({ slide }: { slide: Slide }) => {
-  // Get image src from content directly (new architecture)
   const content = slide.content.value as MediaSlideContent;
+
+  const isImage = content?.mediaType === MediaType.IMAGE;
+
   const imageSrc =
     content?.uploadedMedia?.thumbnailUrl ??
     content?.src ??
     "";
 
+  const videoSrc = content?.src
 
-  if (!imageSrc) {
+  if (!imageSrc && !videoSrc) {
     return (
       <div className="w-full h-full bg-slate-900 flex items-center justify-center">
         <div className="w-4 h-4 border border-white/20 rounded" />
@@ -205,14 +208,24 @@ const ImageThumbnail = ({ slide }: { slide: Slide }) => {
 
   return (
     <div className="w-full h-full bg-slate-900">
-      <img
-        src={imageSrc}
-        alt=""
-        className="w-full h-full object-cover"
-      />
+      {isImage ? (
+        <img
+          src={imageSrc}
+          alt=""
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <video
+          src={videoSrc}
+          className="w-full h-full object-cover"
+          muted
+          playsInline
+        />
+      )}
     </div>
   );
 };
+
 
 // Video Thumbnail
 const VideoThumbnail = ({ slide }: { slide: Slide }) => {

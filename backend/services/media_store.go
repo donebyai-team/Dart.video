@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"fmt"
 	"github.com/imagekit-developer/imagekit-go/v2"
 	"github.com/pkg/errors"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
@@ -39,9 +38,9 @@ func (g *imagekitMediaStore) Upload(
 
 	// create video thumbnail
 	// right now, we allow only image and video
-	if response.FileType != "image" {
-		response.ThumbnailURL = fmt.Sprintf("%s/ik-thumbnail.jpg", response.URL)
-	}
+	//if response.FileType != "image" {
+	//	response.ThumbnailURL = fmt.Sprintf("%s/ik-thumbnail.jpg", response.URL)
+	//}
 
 	result := &pbcore.UploadedMedia{
 		Url:          response.URL,
