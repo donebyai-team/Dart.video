@@ -1,202 +1,322 @@
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { X } from "lucide-react";
+import { create } from "@bufbuild/protobuf";
+
+
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { BackgroundStyle, Gradient, GradientSchema, GradientType, GradientStopSchema, BackgroundStyleSchema } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 interface BackgroundSettingsProps {
-  currentColor: string;
-  globalBackgroundColor?: string; // Global background if "apply to all" is enabled
-  onChange: (color: string, applyToAll: boolean) => void;
+  value?: BackgroundStyle | null;
+  onChange: (style: BackgroundStyle) => void;
   onClose: () => void;
 }
 
-const presetColors = [
-  { name: "Slate Dark", value: "#0f172a" },
-  { name: "Slate", value: "#1e293b" },
-  { name: "Zinc Dark", value: "#18181b" },
-  { name: "Neutral", value: "#262626" },
-  { name: "Indigo", value: "#4f46e5" },
-  { name: "Purple", value: "#7c3aed" },
-  { name: "Blue", value: "#3b82f6" },
-  { name: "Cyan", value: "#06b6d4" },
-  { name: "Teal", value: "#14b8a6" },
-  { name: "Emerald", value: "#10b981" },
-  { name: "Green", value: "#22c55e" },
-  { name: "Yellow", value: "#eab308" },
-  { name: "Orange", value: "#f97316" },
-  { name: "Red", value: "#ef4444" },
-  { name: "Pink", value: "#ec4899" },
-  { name: "Rose", value: "#f43f5e" },
+/* ---------------- SOLID PRESETS ---------------- */
+
+const solidPresets = [
+  "#0f172a", "#1e293b", "#18181b", "#262626",
+  "#4f46e5", "#7c3aed", "#3b82f6", "#06b6d4",
+  "#14b8a6", "#10b981", "#22c55e", "#eab308",
+  "#f97316", "#ef4444", "#ec4899", "#f43f5e",
 ];
 
-const gradientPresets = [
-  { name: "Midnight", value: "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)" },
-  { name: "Purple Haze", value: "linear-gradient(135deg, #581c87 0%, #7c3aed 50%, #4f46e5 100%)" },
-  { name: "Ocean", value: "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)" },
-  { name: "Forest", value: "linear-gradient(135deg, #134e4a 0%, #14b8a6 100%)" },
-  { name: "Sunset", value: "linear-gradient(135deg, #7f1d1d 0%, #ef4444 50%, #f97316 100%)" },
-  { name: "Gold", value: "linear-gradient(135deg, #713f12 0%, #f59e0b 100%)" },
-  { name: "Rose", value: "linear-gradient(135deg, #831843 0%, #ec4899 100%)" },
-  { name: "Deep Blue", value: "linear-gradient(180deg, #0f172a 0%, #1e293b 100%)" },
+/* ---------------- MODERN GRADIENT PRESETS ---------------- */
+
+const modernGradients = [
+  ["#0f172a", "#1e293b"],        // Midnight
+  ["#6366f1", "#8b5cf6"],        // Aurora
+  ["#ec4899", "#f43f5e"],        // Candy
+  ["#06b6d4", "#3b82f6"],        // Sky
+  ["#10b981", "#84cc16"],        // Lime
+  ["#f97316", "#ef4444"],        // Sunset
+  ["#f59e0b", "#eab308"],        // Gold
+  ["#7c3aed", "#4f46e5"],        // Cosmic
+  ["#14b8a6", "#0ea5e9"],        // Ocean
+  ["#f43f5e", "#f59e0b"],        // Rose Gold
 ];
 
-const BackgroundSettings = ({ currentColor, globalBackgroundColor, onChange, onClose }: BackgroundSettingsProps) => {
-  // Determine initial state: if globalBackgroundColor is set, "apply to all" is enabled
-  const initialApplyToAll = !!globalBackgroundColor;
-  const initialColor = globalBackgroundColor || currentColor;
-  console.debug("open background setting")
-  
-  const [selectedColor, setSelectedColor] = useState(initialColor);
-  const [applyToAll, setApplyToAll] = useState(initialApplyToAll);
-  const [activeTab, setActiveTab] = useState<"solid" | "gradient">(initialColor.startsWith("linear") ? "gradient" : "solid");
-  const [hexInput, setHexInput] = useState(initialColor.startsWith("#") ? initialColor : "#0f172a");
+/* ---------------- HELPERS ---------------- */
 
-  // Apply changes immediately when color changes
-  useEffect(() => {
-    if (selectedColor !== currentColor) {
-      onChange(selectedColor, applyToAll);
-    }
-  }, [selectedColor, applyToAll, onChange, currentColor]);
+function buildGradient(c1: string, c2: string, angle: number): Gradient {
+  return create(GradientSchema, {
+    type: GradientType.LINEAR,
+    angle,
+    stops: [
+      create(GradientStopSchema, { color: c1, position: 0 }),
+      create(GradientStopSchema, { color: c2, position: 100 }),
+    ],
+  });
+}
 
-  const handleColorSelect = (color: string) => {
-    setSelectedColor(color);
-    if (color.startsWith("#")) {
-      setHexInput(color);
-    }
+/**
+ * Converts BackgroundStyle proto to a CSS background value.
+ */
+export function backgroundStyleToCSS(
+  style?: BackgroundStyle | null,
+  fallbackColor: string = "transparent"
+): string {
+  if (!style?.style?.case) {
+    return fallbackColor;
+  }
+
+  switch (style.style.case) {
+    case "solid":
+      return style.style.value.hex || fallbackColor;
+
+    case "gradient":
+      return gradientToCSS(style.style.value);
+
+    case "image":
+      return `url("${style.style.value.url}") center / cover no-repeat`;
+
+    default:
+      return fallbackColor;
+  }
+}
+
+function gradientToCSS(g: Gradient) {
+  const stops = g.stops.map((s) => `${s.color} ${s.position}%`).join(", ");
+  return `linear-gradient(${g.angle}deg, ${stops})`;
+}
+
+/* ---------------- COMPONENT ---------------- */
+
+export default function BackgroundSettings({
+  value,
+  onChange,
+  onClose,
+}: BackgroundSettingsProps) {
+
+  /* ---------- SAFE DEFAULT ---------- */
+
+  const safeValue =
+    value ??
+    create(BackgroundStyleSchema, {
+      style: { case: "solid", value: { hex: "transparent" } },
+      applyAll: false,
+    });
+
+  const activeCase = safeValue.style?.case;
+
+  /* ---------- CUSTOM GRADIENT STATE ---------- */
+
+  const initialGradient =
+    activeCase === "gradient"
+      ? safeValue.style?.value
+      : buildGradient("#6366f1", "#8b5cf6", 135);
+
+  const [gradientColor1, setGradientColor1] = useState(
+    initialGradient.stops[0]?.color ?? "#6366f1"
+  );
+  const [gradientColor2, setGradientColor2] = useState(
+    initialGradient.stops[1]?.color ?? "#8b5cf6"
+  );
+  const [gradientAngle, setGradientAngle] = useState(
+    initialGradient.angle ?? 135
+  );
+
+  /* ---------- UPDATE HELPERS ---------- */
+  const updateStyle = (
+    styleCase: "solid" | "gradient",
+    styleValue: any
+  ) => {
+    const updated = create(BackgroundStyleSchema, {
+      style: { case: styleCase, value: styleValue },
+      applyAll: safeValue.applyAll ?? false,
+    });
+
+    onChange(updated);
   };
 
-  const handleHexChange = (value: string) => {
-    setHexInput(value);
-    // Validate and apply hex color
-    if (/^#[0-9A-Fa-f]{6}$/.test(value) || /^#[0-9A-Fa-f]{3}$/.test(value)) {
-      setSelectedColor(value);
-    }
+
+  const updateApplyAll = (checked: boolean) => {
+    const updated = create(BackgroundStyleSchema, {
+      style: safeValue.style,
+      applyAll: checked,
+    });
+
+    console.debug("[Update apply all]", updated)
+    onChange(updated);
   };
 
-  const handleHexBlur = () => {
-    // On blur, if invalid hex, revert to last valid color
-    if (!/^#[0-9A-Fa-f]{6}$/.test(hexInput) && !/^#[0-9A-Fa-f]{3}$/.test(hexInput)) {
-      setHexInput(selectedColor.startsWith("#") ? selectedColor : "#0f172a");
-    }
-  };
+  const customGradient = useMemo(
+    () => buildGradient(gradientColor1, gradientColor2, gradientAngle),
+    [gradientColor1, gradientColor2, gradientAngle]
+  );
 
-  const handleApplyToAllChange = (checked: boolean) => {
-    setApplyToAll(checked);
-    // Re-apply current color with new applyToAll setting
-    onChange(selectedColor, checked);
-  };
+  /* ---------- RENDER ---------- */
 
   return (
     <div className="h-full flex flex-col bg-card">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-        <h3 className="font-semibold text-sm">Change Background</h3>
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClose}>
+      <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+        <h3 className="font-semibold text-sm tracking-tight">
+          Background
+        </h3>
+        <Button variant="ghost" size="icon" onClick={onClose}>
           <X className="w-4 h-4" />
         </Button>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
-        {/* Apply to all toggle */}
+      <div className="flex-1 overflow-y-auto px-5 py-6 space-y-10">
+
+        {/* Apply to all */}
         <div className="flex items-center justify-between">
-          <Label htmlFor="apply-all" className="text-sm">Apply to all slides</Label>
+          <Label className="text-sm">Apply to all slides</Label>
           <Switch
-            id="apply-all"
-            checked={applyToAll}
-            onCheckedChange={handleApplyToAllChange}
+            checked={safeValue.applyAll ?? false}
+            onCheckedChange={updateApplyAll}
           />
         </div>
 
-        {/* Tab selector */}
-        <div className="flex gap-1 p-1 bg-muted rounded-lg">
-          <button
-            onClick={() => setActiveTab("solid")}
-            className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-              activeTab === "solid"
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Solid Colors
-          </button>
-          <button
-            onClick={() => setActiveTab("gradient")}
-            className={`flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-              activeTab === "gradient"
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Gradients
-          </button>
-        </div>
+        {/* SOLID */}
+        <div className="space-y-4">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Solid
+          </p>
 
-        {/* Color grid */}
-        {activeTab === "solid" ? (
-          <div className="space-y-2">
-            <p className="text-xs text-muted-foreground">Select a color</p>
-            <div className="grid grid-cols-6 gap-1.5">
-              {presetColors.map((color) => (
-                <button
-                  key={color.value}
-                  onClick={() => handleColorSelect(color.value)}
-                  className={`w-8 h-8 rounded-md border-2 transition-all hover:scale-110 ${
-                    selectedColor === color.value
-                      ? "border-primary ring-1 ring-primary/30"
-                      : "border-transparent hover:border-border"
-                  }`}
-                  style={{ backgroundColor: color.value }}
-                  title={color.name}
-                />
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            <p className="text-xs text-muted-foreground">Select a gradient</p>
-            <div className="grid grid-cols-4 gap-1.5">
-              {gradientPresets.map((gradient) => (
-                <button
-                  key={gradient.name}
-                  onClick={() => handleColorSelect(gradient.value)}
-                  className={`h-8 rounded-md border-2 transition-all hover:scale-110 ${
-                    selectedColor === gradient.value
-                      ? "border-primary ring-1 ring-primary/30"
-                      : "border-transparent hover:border-border"
-                  }`}
-                  style={{ background: gradient.value }}
-                  title={gradient.name}
-                />
-              ))}
-            </div>
-          </div>
-        )}
+          <div className="grid grid-cols-8 gap-3">
+            {solidPresets.map((color) => {
+              const isActive =
+                activeCase === "solid" &&
+                safeValue.style?.value.hex?.toLowerCase() === color.toLowerCase();
 
-        {/* Custom color input with hex */}
-        <div className="space-y-2">
-          <p className="text-xs text-muted-foreground">Custom color</p>
-          <div className="flex gap-2">
+              return (
+                <button
+                  key={color}
+                  onClick={() => updateStyle("solid", { hex: color })}
+                  className={`w-8 h-8 rounded-full transition-all duration-200 hover:scale-110
+            ${isActive ? "ring-2 ring-white ring-offset-2 ring-offset-background" : ""}
+          `}
+                  style={{ backgroundColor: color }}
+                />
+              );
+            })}
+          </div>
+
+          {/* Custom Hex Input */}
+          <div className="flex items-center gap-3">
             <input
               type="color"
-              value={selectedColor.startsWith("#") ? selectedColor : "#0f172a"}
-              onChange={(e) => handleColorSelect(e.target.value)}
-              className="w-10 h-9 rounded border border-border cursor-pointer bg-transparent"
+              value={
+                activeCase === "solid"
+                  ? safeValue.style?.value.hex
+                  : "#0f172a"
+              }
+              onChange={(e) =>
+                updateStyle("solid", { hex: e.target.value })
+              }
+              className="w-9 h-9 rounded-md border border-border cursor-pointer"
             />
-            <Input
-              value={hexInput}
-              onChange={(e) => handleHexChange(e.target.value)}
-              onBlur={handleHexBlur}
+
+            <input
+              type="text"
+              value={
+                activeCase === "solid"
+                  ? safeValue.style?.value.hex
+                  : ""
+              }
+              onChange={(e) => {
+                const val = e.target.value;
+                if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+                  updateStyle("solid", { hex: val });
+                }
+              }}
               placeholder="#000000"
-              className="flex-1 font-mono text-sm h-9"
+              className="flex-1 px-3 py-1.5 text-sm rounded-md border border-border bg-transparent font-mono"
             />
           </div>
         </div>
+
+
+        {/* GRADIENT PRESETS */}
+        <div className="space-y-4">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Gradients
+          </p>
+
+          <div className="grid grid-cols-6 gap-3">
+            {modernGradients.map(([c1, c2], i) => {
+              const preset = buildGradient(c1, c2, 135);
+
+              const isActive =
+                activeCase === "gradient" &&
+                safeValue.style?.value?.angle === preset.angle &&
+                safeValue.style?.value?.stops?.[0]?.color === preset.stops[0].color &&
+                safeValue.style?.value?.stops?.[1]?.color === preset.stops[1].color;
+
+              return (
+                <button
+                  key={i}
+                  onClick={() => updateStyle("gradient", preset)}
+                  className={`w-9 h-9 rounded-full transition-all duration-200 hover:scale-110
+            ${isActive ? "ring-2 ring-white ring-offset-2 ring-offset-background" : ""}
+          `}
+                  style={{ background: gradientToCSS(preset) }}
+                />
+              );
+            })}
+          </div>
+        </div>
+
+
+        {/* ---------------- CUSTOM GRADIENT BUILDER ---------------- */}
+
+        <div className="space-y-4">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Create Custom Gradient
+          </p>
+
+          {/* Live Preview */}
+          <div
+            className="h-16 rounded-xl border border-border shadow-inner"
+            style={{ background: gradientToCSS(customGradient) }}
+          />
+
+          {/* Color Pickers */}
+          <div className="flex gap-3">
+            <input
+              type="color"
+              value={gradientColor1}
+              onChange={(e) => setGradientColor1(e.target.value)}
+              className="w-12 h-10 rounded-lg border border-border cursor-pointer bg-transparent"
+            />
+            <input
+              type="color"
+              value={gradientColor2}
+              onChange={(e) => setGradientColor2(e.target.value)}
+              className="w-12 h-10 rounded-lg border border-border cursor-pointer bg-transparent"
+            />
+          </div>
+
+          {/* Angle Slider */}
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground">
+              Angle: {gradientAngle}°
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="360"
+              value={gradientAngle}
+              onChange={(e) => setGradientAngle(Number(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
+          {/* Apply Button */}
+          <Button
+            className="w-full"
+            onClick={() => updateStyle("gradient", customGradient)}
+          >
+            Apply Gradient
+          </Button>
+        </div>
+
       </div>
     </div>
   );
-};
-
-export default BackgroundSettings;
+}

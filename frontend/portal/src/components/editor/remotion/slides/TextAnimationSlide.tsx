@@ -12,6 +12,7 @@ import {
 import { TemplateContainer } from '../components/TemplateContainer'
 import { AnimatedBackground } from '../effects/AnimatedBackground'
 import { TemplateConfig } from './InfographicSlide'
+import { backgroundStyleToCSS } from '../../settings/BackgroundSettings'
 
 interface TextAnimationSlideProps {
   slide: Slide
@@ -49,7 +50,7 @@ export const TextAnimationSlide: React.FC<TextAnimationSlideProps> = ({
   const templateMeta = (content?.meta as MetaData) || {}
   const templateConfig = (content?.templateConfig ?? {}) as TemplateConfig
 
-  const background = slide.backgroundColor;
+const background = backgroundStyleToCSS(slide.backgroundStyle);
 
   useEffect(() => {
     ; (async () => {

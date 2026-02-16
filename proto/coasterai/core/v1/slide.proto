@@ -134,7 +134,7 @@ message Slide {
 
   TransitionType transition = 5;
   optional float transitionDuration = 6;
-  optional string backgroundColor = 7;
+  optional BackgroundStyle background_style = 7;
 
   oneof content {
     MediaSlideContent media = 8;
@@ -148,6 +148,41 @@ message Slide {
   repeated SpotlightEffect spotlights = 18;
   repeated CalloutEffect callouts = 19;
   repeated ZoomEffect zooms = 20;
+}
+
+message BackgroundStyle {
+  oneof style {
+    SolidColor solid = 1;
+    Gradient gradient = 2;
+    BackgroundImage image = 3;
+  }
+
+  bool apply_all = 4;
+}
+
+message SolidColor {
+  string hex = 1; // Example: "#0f172a"
+}
+
+message BackgroundImage {
+  string url = 1; // CDN or storage URL
+}
+
+message Gradient {
+  GradientType type = 1;
+  int32 angle = 2; // 0–360 degrees
+
+  repeated GradientStop stops = 3;
+}
+
+message GradientStop {
+  string color = 1;   // "#ffffff"
+  int32 position = 2; // 0–100 (%)
+}
+
+enum GradientType {
+  GRADIENT_TYPE_LINEAR = 0;
+  GRADIENT_TYPE_RADIAL = 1;
 }
 
 

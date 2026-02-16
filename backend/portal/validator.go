@@ -56,9 +56,9 @@ func validateMetadata(metadata *pbcore.VideoMetadata) error {
 		return fmt.Errorf("metadata.Fps is invalid")
 	}
 
-	if metadata.BackgroundColor != nil && !IsValidBackground(*metadata.BackgroundColor) {
-		return fmt.Errorf("metadata.BackgroundColor is invalid")
-	}
+	//if metadata.BackgroundColor != nil && !IsValidBackground(*metadata.BackgroundColor) {
+	//	return fmt.Errorf("metadata.BackgroundColor is invalid")
+	//}
 
 	if metadata.Resolution == nil {
 		return fmt.Errorf("metadata.Resolution is nil")
@@ -99,9 +99,9 @@ func validateSlide(slide *pbcore.Slide) error {
 		return fmt.Errorf("id is empty")
 	}
 
-	if slide.BackgroundColor != nil && !IsValidBackground(*slide.BackgroundColor) {
-		return fmt.Errorf("background color is invalid")
-	}
+	//if slide.BackgroundColor != nil && !IsValidBackground(*slide.BackgroundColor) {
+	//	return fmt.Errorf("background color is invalid")
+	//}
 
 	if slide.Duration <= 0 {
 		return fmt.Errorf("duration is invalid")

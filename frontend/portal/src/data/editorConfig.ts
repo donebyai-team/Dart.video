@@ -6,41 +6,6 @@ import { EffectType, SlideType, TransitionType } from "@coasterai/pb/coasterai/c
 
 export const defaultEditorConfig: EditorConfig = {
     // ==========================================
-    // Background Configuration
-    // ==========================================
-    background: {
-        solidColors: [
-            { name: "Slate Dark", value: "#0f172a" },
-            { name: "Slate", value: "#1e293b" },
-            { name: "Zinc Dark", value: "#18181b" },
-            { name: "Neutral", value: "#262626" },
-            { name: "Indigo", value: "#4f46e5" },
-            { name: "Purple", value: "#7c3aed" },
-            { name: "Blue", value: "#3b82f6" },
-            { name: "Cyan", value: "#06b6d4" },
-            { name: "Teal", value: "#14b8a6" },
-            { name: "Emerald", value: "#10b981" },
-            { name: "Green", value: "#22c55e" },
-            { name: "Yellow", value: "#eab308" },
-            { name: "Orange", value: "#f97316" },
-            { name: "Red", value: "#ef4444" },
-            { name: "Pink", value: "#ec4899" },
-            { name: "Rose", value: "#f43f5e" },
-        ],
-        gradients: [
-            { name: "Midnight", value: "linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)" },
-            { name: "Purple Haze", value: "linear-gradient(135deg, #581c87 0%, #7c3aed 50%, #4f46e5 100%)" },
-            { name: "Ocean", value: "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)" },
-            { name: "Forest", value: "linear-gradient(135deg, #134e4a 0%, #14b8a6 100%)" },
-            { name: "Sunset", value: "linear-gradient(135deg, #7f1d1d 0%, #ef4444 50%, #f97316 100%)" },
-            { name: "Gold", value: "linear-gradient(135deg, #713f12 0%, #f59e0b 100%)" },
-            { name: "Rose", value: "linear-gradient(135deg, #831843 0%, #ec4899 100%)" },
-            { name: "Deep Blue", value: "linear-gradient(180deg, #0f172a 0%, #1e293b 100%)" },
-        ],
-        defaultColor: "#0f172a",
-    },
-
-    // ==========================================
     // Typography Configuration
     // ==========================================
     typography: {
@@ -405,23 +370,7 @@ export const defaultEditorConfig: EditorConfig = {
                 availableTools: [],
                 availableEffects: [],
                 supportsContent: false,
-            },
-            {
-                id: SlideType.MEDIA,
-                name: "Video Clip",
-                description: "Add media content",
-                icon: "Film",
-                color: "#ef4444",
-                defaultDuration: 10,
-                defaultTranscript: "Add your script here...",
-                defaultBackground: "#000000",
-                supportedFormats: ["mp4", "webm", "mov"],
-                maxDuration: 300,
-                maxFileSize: 100,
-                availableTools: ["callout"],
-                availableEffects: ["spotlight"],  // Spotlight works on video
-                supportsContent: false,  // Video always fills canvas
-            },
+            },           
             {
                 id: SlideType.STACK,
                 name: "Stack",

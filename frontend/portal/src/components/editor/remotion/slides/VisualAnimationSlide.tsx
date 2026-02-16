@@ -11,6 +11,7 @@ import {
 import { TemplateContainer } from '../components/TemplateContainer'
 import { AnimatedBackground } from '../effects/AnimatedBackground'
 import { TemplateConfig } from './InfographicSlide'
+import { backgroundStyleToCSS } from '../../settings/BackgroundSettings'
 
 interface VisualAnimationSlideProps {
   slide: Slide
@@ -49,15 +50,7 @@ export const VisualAnimationSlide: React.FC<VisualAnimationSlideProps> = ({
   const hash = slide.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
   const variant = hash % 5
 
-  // Use slide's background color or fall back to default
-  const defaultGradients = [
-    'linear-gradient(135deg, #581c87 0%, #7c3aed 50%, #4f46e5 100%)',
-    'linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)',
-    'linear-gradient(135deg, #134e4a 0%, #14b8a6 100%)',
-    'linear-gradient(135deg, #7f1d1d 0%, #ef4444 50%, #f97316 100%)',
-    'linear-gradient(135deg, #713f12 0%, #f59e0b 100%)'
-  ]
-  const background = slide.backgroundColor || defaultGradients[variant]
+  const background = backgroundStyleToCSS(slide.backgroundStyle);
 
   return (
     <AbsoluteFill

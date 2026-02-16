@@ -7,7 +7,7 @@ import type {
 import type { EntityId } from "@/types/selection";
 import { SelectedTool } from "@/types/tools";
 import { JsonObject } from "@bufbuild/protobuf";
-import { Section, Slide, SlideType, TransitionType, CalloutEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { Section, Slide, SlideType, TransitionType, CalloutEffect, BackgroundStyle } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { Resolution, Video } from "@coasterai/pb/coasterai/core/v1/video_pb";
 import type { StateCreator } from "zustand";
 
@@ -64,7 +64,7 @@ export interface VideoActions {
     setEditingSectionTitle: (title: string) => void;
 
     // Slides
-    getSlideWithBackground: (slide : Slide) => string;
+    getSlideWithBackground: (slide : Slide) => BackgroundStyle;
     getTimelineSlides: () => TimelineSlide[]
     addSlide: (sectionId: string, type: SlideType) => void
     removeSlide: (sectionId: string, slideId: string) => void
@@ -118,5 +118,5 @@ export interface VideoActions {
 
     // setShowScreenshots: (show: boolean) => void;
     setShowTransitionPicker: (slideId: string | null) => void
-    updateSlideBackground: (color: string, applyToAll?: boolean) => void
+    updateSlideBackground: (background: BackgroundStyle) => void
 }

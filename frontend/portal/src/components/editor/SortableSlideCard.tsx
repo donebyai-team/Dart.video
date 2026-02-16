@@ -26,7 +26,7 @@ const slideTypeIcons: Record<SlideType, React.ElementType> = {
 
 const SortableSlideCard = ({ slide, isSelected, index, onSelect, onDelete }: SortableSlideCardProps) => {
   const getSlideWithBackground = useVideoStore(s => s.getSlideWithBackground)
-  slide.backgroundColor = getSlideWithBackground(slide)
+  slide.backgroundStyle = getSlideWithBackground(slide)
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: slide.id })
 

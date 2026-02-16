@@ -34,6 +34,7 @@ const ToolsSettingsPanel = ({
 }: ToolsSettingsPanelProps) => {
 
   const videoConfigFromStore = useVideoStore(s => s.videoConfig);
+  const getSlideWithBackground = useVideoStore(s => s.getSlideWithBackground)
   const activeTool = useVideoStore(s => s.activeTool)
   const selectedSlide = useVideoStore(s => s.selectedSlide)
   const selectedEffectId = useVideoStore(s => s.selectedEffectId)
@@ -64,6 +65,7 @@ const ToolsSettingsPanel = ({
   }
 
 
+
   return (
     <motion.div
       key='settings'
@@ -75,8 +77,7 @@ const ToolsSettingsPanel = ({
     >
       {activeTool.type === ActiveToolType.BACKGROUND && (
         <BackgroundSettings
-          currentColor={selectedSlide?.slide.backgroundColor || '#0f172a'}
-          globalBackgroundColor={videoConfigFromStore?.metadata?.backgroundColor}
+          value={getSlideWithBackground(selectedSlide?.slide!)}
           onChange={updateSlideBackground}
           onClose={handleCloseTool}
         />

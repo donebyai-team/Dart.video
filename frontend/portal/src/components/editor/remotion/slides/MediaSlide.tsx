@@ -9,6 +9,7 @@ import { VideoPreview } from '../components/VideoPreview'
 import CalloutEffectComponent from '../effects/CalloutEffect'
 import SpotlightEffectComponent from '../effects/SpotlightEffect'
 import { MediaContainer } from '../components/MediaContainer'
+import { backgroundStyleToCSS } from '../../settings/BackgroundSettings'
 
 interface MediaSlideProps {
   slide: Slide
@@ -24,7 +25,7 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
   const [openUploadModal, setOpenUploadModal] = useState<boolean>(false)
 
   // Extract content and effects directly
-  const background = slide.backgroundColor
+  const background = backgroundStyleToCSS(slide.backgroundStyle);
   const mediaContent = slide.content.value as MediaSlideContent
 
   const [retry, setRetry] = useState<boolean>(false)

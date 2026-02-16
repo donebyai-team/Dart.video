@@ -4,6 +4,7 @@ import { AbsoluteFill, useCurrentFrame, useVideoConfig } from 'remotion'
 import { AnimatedBarChart, AnimatedLineGraph, AnimatedPieChart } from '../animations/InfographicCharts'
 import { TemplateContainer } from '../components/TemplateContainer'
 import { AnimatedBackground } from '../effects/AnimatedBackground'
+import { backgroundStyleToCSS } from '../../settings/BackgroundSettings'
 
 interface InfographicSlideProps {
   slide: Slide
@@ -44,7 +45,7 @@ export const InfographicSlide: React.FC<InfographicSlideProps> = ({
   const variant = hash % 3
 
   // Use slide's background color or fall back to default
-  const background = slide.backgroundColor || 'linear-gradient(180deg, #0f172a 0%, #1e293b 100%)'
+  const background = backgroundStyleToCSS(slide.backgroundStyle);
 
   return (
     <AbsoluteFill

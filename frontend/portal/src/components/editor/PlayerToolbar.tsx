@@ -22,6 +22,7 @@ import { useVideoStore } from '@/stores/video'
 import { SlideType, Slide, StackSlideContent, EffectType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { ActiveToolType } from '@/types/tools'
 import DurationChangeComponent from './remotion/components/DurationChangeComponent'
+import { backgroundStyleToCSS } from './settings/BackgroundSettings'
 
 interface PlayerToolbarProps {
   onDurationChange: (newDuration: number) => void
@@ -62,7 +63,7 @@ const PlayerToolbar = ({ onDurationChange, minDuration = 1, maxDuration = 180 }:
   }
 
   const TypeIcon = slideTypeLabels[slide.type].icon
-  const currentBg = slide.backgroundColor || '#0f172a'
+  const currentBg = backgroundStyleToCSS(slide.backgroundStyle);
   const isBackgroundActive = activeTool?.type === ActiveToolType.BACKGROUND
   const activeInsertTool = activeTool?.type === ActiveToolType.INSERT ? activeTool.tool : null
   const showChangeVisualButton = slide.type === SlideType.VISUAL_ANIMATION || slide.type === SlideType.INFOGRAPHIC

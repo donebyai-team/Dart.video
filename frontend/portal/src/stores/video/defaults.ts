@@ -2,6 +2,8 @@ import { EditorConfig, SlideTypeConfig, TextAnimationSlideConfig } from "@/types
 import { ActiveToolType, SelectedTool } from "@/types/tools";
 import { create } from "@bufbuild/protobuf";
 import { AnimationSlideContentSchema, 
+    BackgroundStyle, 
+    BackgroundStyleSchema, 
     CalloutEffect, 
     CalloutEffectSchema, 
     MediaSlideContentSchema, 
@@ -22,6 +24,24 @@ import { TRANSITION_DURATION_SECONDS } from "@/components/editor/frame_calculati
 export const getSlideTypeConfig = (config: EditorConfig | null, slideType: SlideType): SlideTypeConfig | undefined => {
     return config?.slideTypes.types.find(t => t.id === slideType);
 };
+
+/**
+ * Returns a default BackgroundStyle with a solid color.
+ */
+export function createDefaultBackgroundStyle(
+  hex: string = "transparent",
+  applyAll: boolean = false
+) {
+  return create(BackgroundStyleSchema, {
+    style: {
+      case: "solid",
+      value: {
+        hex,
+      },
+    },
+    applyAll,
+  });
+}
 
 export const getTextAnimationConfig = (config: EditorConfig): TextAnimationSlideConfig | undefined => {
     const slideConfig = getSlideTypeConfig(config, SlideType.TEXT_ANIMATION);
@@ -89,7 +109,7 @@ export function buildSlideContent(type: SlideType): Slide["content"] {
 export function createNewSlide(params: {
     sectionId: string;
     type: SlideType;
-    inheritedBg: string;
+    inheritedBg: BackgroundStyle;
     defaultTranscript?: string;
     defaultDuration?: number;
 }) {
@@ -107,7 +127,7 @@ export function createNewSlide(params: {
         transcript: defaultTranscript ?? "Add your script here...",
         duration: defaultDuration ?? 5,
         transition: TransitionType.TRANSITION_NONE,
-        backgroundColor: inheritedBg,
+        backgroundStyle: inheritedBg,
         transitionDuration: TRANSITION_DURATION_SECONDS,
         content: buildSlideContent(type),
         spotlights: [],

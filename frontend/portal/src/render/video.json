@@ -15,7 +15,6 @@
                         "duration": 2,
                         "transition": "TRANSITION_FADE",
                         "transitionDuration": 0.3,
-                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
                         "animation": {
                             "templateId": "textCascade",
                             "templateConfig": {
@@ -51,7 +50,6 @@
                         "duration": 2,
                         "transition": "TRANSITION_FADE",
                         "transitionDuration": 0.3,
-                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
                         "animation": {
                             "templateId": "text-reveal",
                             "templateConfig": {
@@ -74,7 +72,6 @@
                         "transcript": "Add your script here...",
                         "duration": 5.786,
                         "transitionDuration": 0.3,
-                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
                         "media": {
                             "meta": {
                                 "x": 192,
@@ -114,7 +111,6 @@
                         "duration": 2,
                         "transition": "TRANSITION_FADE",
                         "transitionDuration": 0.3,
-                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
                         "animation": {
                             "templateId": "word-by-word",
                             "templateConfig": {
@@ -141,7 +137,6 @@
                         "duration": 4,
                         "transition": "TRANSITION_SLIDE_UP",
                         "transitionDuration": 0.3,
-                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
                         "media": {
                             "meta": {
                                 "y": 104.16,
@@ -189,7 +184,6 @@
                         "duration": 5,
                         "transition": "TRANSITION_SLIDE_UP",
                         "transitionDuration": 0.3,
-                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
                         "media": {
                             "meta": {
                                 "x": 426.23944,
@@ -255,7 +249,6 @@
                         "duration": 2.5,
                         "transition": "TRANSITION_SLIDE_LEFT",
                         "transitionDuration": 0.3,
-                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
                         "animation": {
                             "templateId": "visual-default",
                             "templateConfig": {
@@ -281,7 +274,6 @@
                         "duration": 2.5,
                         "transition": "TRANSITION_FADE",
                         "transitionDuration": 0.3,
-                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
                         "animation": {
                             "templateId": "infographic-default",
                             "templateConfig": {
@@ -314,7 +306,6 @@
                         "duration": 2.5,
                         "transition": "TRANSITION_FADE",
                         "transitionDuration": 0.3,
-                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
                         "animation": {
                             "templateId": "visual-default",
                             "templateConfig": {
@@ -339,7 +330,6 @@
                         "transcript": "Just ask in natural language, like talking to a colleague.",
                         "duration": 2.5,
                         "transition": "TRANSITION_SLIDE_LEFT",
-                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
                         "media": {
                             "meta": {
                                 "x": 192,
@@ -368,7 +358,6 @@
                         "duration": 2,
                         "transition": "TRANSITION_FADE",
                         "transitionDuration": 0.3,
-                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
                         "animation": {
                             "templateId": "letter-cascade",
                             "templateConfig": {
@@ -395,7 +384,6 @@
                         "duration": 2.5,
                         "transition": "TRANSITION_FADE",
                         "transitionDuration": 0.3,
-                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
                         "media": {
                             "meta": {
                                 "x": 192,
@@ -424,7 +412,6 @@
                         "duration": 3,
                         "transition": "TRANSITION_SLIDE_UP",
                         "transitionDuration": 0.3,
-                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
                         "animation": {
                             "templateId": "infographic-default",
                             "templateConfig": {},
@@ -452,7 +439,6 @@
                         "duration": 2,
                         "transition": "TRANSITION_SLIDE_UP",
                         "transitionDuration": 0.3,
-                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
                         "animation": {
                             "templateId": "scale-bounce",
                             "templateConfig": {
@@ -472,8 +458,7 @@
                         "id": "cta-2",
                         "type": "SLIDE_TYPE_VISUAL_ANIMATION",
                         "transcript": "Try DocuFlow free for 14 days. No credit card required.",
-                        "duration": 2.5,
-                        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)"
+                        "duration": 2.5
                     }
                 ]
             }
@@ -481,7 +466,12 @@
     },
     "metadata": {
         "fps": 30,
-        "backgroundColor": "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
+        "backgroundStyle": {
+            "solid": {
+                "hex": "#ec4899"
+            },
+            "applyAll": true
+        },
         "resolution": {
             "id": "16:9",
             "name": "Landscape",

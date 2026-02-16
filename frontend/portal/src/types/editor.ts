@@ -45,26 +45,6 @@ export interface VoiceoverConfig {
 }
 
 // ==========================================
-// Color & Gradient Presets
-// ==========================================
-
-export interface ColorPreset {
-  name: string;
-  value: string; // hex color
-}
-
-export interface GradientPreset {
-  name: string;
-  value: string; // CSS gradient string
-}
-
-export interface BackgroundConfig {
-  solidColors: ColorPreset[];
-  gradients: GradientPreset[];
-  defaultColor: string;
-}
-
-// ==========================================
 // Typography Configuration
 // ==========================================
 
@@ -316,7 +296,6 @@ export interface EditorConfig {
   slideTypes: SlideTypesConfig;
 
   // Tool configurations
-  background: BackgroundConfig;
   typography: TypographyConfig;
   animation: AnimationConfig;
   insertTools: InsertToolConfig;

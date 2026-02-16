@@ -26,7 +26,7 @@ enum ResolutionType {
 
 message VideoMetadata {
     int32 fps = 1;
-    optional string background_color = 2;
+    optional BackgroundStyle background_style = 2;
     Resolution resolution = 3;
     float duration = 4;
     string prompt = 5;

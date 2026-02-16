@@ -9,6 +9,7 @@ import React from 'react'
 import { AbsoluteFill, useVideoConfig, Html5Audio } from 'remotion'
 import { getActualSlideDuration, TRANSITION_DURATION_SECONDS } from './frame_calculations'
 import { MediaSlide, InfographicSlide, TextAnimationSlide, VisualAnimationSlide } from './remotion/slides'
+import { backgroundStyleToCSS } from './settings/BackgroundSettings'
 
 interface SlideshowProps {
   fps: number
@@ -28,6 +29,9 @@ const SlideComponent: React.FC<{
   onSelect?: () => void
 }> = ({ slide, width, height, isEditing = false, isSelected = false, onSelect }) => {
   const onUpdate = useVideoStore(s => s.updateSlide)
+
+  const slideBackground = backgroundStyleToCSS(slide.backgroundStyle)
+
   switch (slide.type) {
     case SlideType.TEXT_ANIMATION:
       // Only render if content case matches or is undefined (for new slides)
@@ -92,7 +96,7 @@ const SlideComponent: React.FC<{
   return (
     <AbsoluteFill
       style={{
-        backgroundColor: slide.backgroundColor || '#0f172a',
+        backgroundColor: slideBackground,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -153,7 +157,8 @@ export const Slideshow: React.FC<SlideshowProps> = ({ fps, isEditing = false, on
 
   const metadata = videoConfig.metadata
   const sections = videoConfig.config.sections ?? []
-  const globalBackground = metadata?.backgroundColor ?? 'transparent'
+  const globalBackground = backgroundStyleToCSS(metadata?.backgroundStyle);
+  console.log("ewrfwefwef", globalBackground)
 
   // if external video object exist use it or assign zustand video object
   const allSlides = sections.flatMap(section => section.slides)

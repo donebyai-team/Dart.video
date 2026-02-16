@@ -404,9 +404,9 @@ export declare type Slide = Message<"coasterai.core.v1.Slide"> & {
   transitionDuration?: number;
 
   /**
-   * @generated from field: optional string backgroundColor = 7;
+   * @generated from field: optional coasterai.core.v1.BackgroundStyle background_style = 7;
    */
-  backgroundColor?: string;
+  backgroundStyle?: BackgroundStyle;
 
   /**
    * @generated from oneof coasterai.core.v1.Slide.content
@@ -467,6 +467,134 @@ export declare type Slide = Message<"coasterai.core.v1.Slide"> & {
  * Use `create(SlideSchema)` to create a new message.
  */
 export declare const SlideSchema: GenMessage<Slide>;
+
+/**
+ * @generated from message coasterai.core.v1.BackgroundStyle
+ */
+export declare type BackgroundStyle = Message<"coasterai.core.v1.BackgroundStyle"> & {
+  /**
+   * @generated from oneof coasterai.core.v1.BackgroundStyle.style
+   */
+  style: {
+    /**
+     * @generated from field: coasterai.core.v1.SolidColor solid = 1;
+     */
+    value: SolidColor;
+    case: "solid";
+  } | {
+    /**
+     * @generated from field: coasterai.core.v1.Gradient gradient = 2;
+     */
+    value: Gradient;
+    case: "gradient";
+  } | {
+    /**
+     * @generated from field: coasterai.core.v1.BackgroundImage image = 3;
+     */
+    value: BackgroundImage;
+    case: "image";
+  } | { case: undefined; value?: undefined };
+
+  /**
+   * @generated from field: bool apply_all = 4;
+   */
+  applyAll: boolean;
+};
+
+/**
+ * Describes the message coasterai.core.v1.BackgroundStyle.
+ * Use `create(BackgroundStyleSchema)` to create a new message.
+ */
+export declare const BackgroundStyleSchema: GenMessage<BackgroundStyle>;
+
+/**
+ * @generated from message coasterai.core.v1.SolidColor
+ */
+export declare type SolidColor = Message<"coasterai.core.v1.SolidColor"> & {
+  /**
+   * Example: "#0f172a"
+   *
+   * @generated from field: string hex = 1;
+   */
+  hex: string;
+};
+
+/**
+ * Describes the message coasterai.core.v1.SolidColor.
+ * Use `create(SolidColorSchema)` to create a new message.
+ */
+export declare const SolidColorSchema: GenMessage<SolidColor>;
+
+/**
+ * @generated from message coasterai.core.v1.BackgroundImage
+ */
+export declare type BackgroundImage = Message<"coasterai.core.v1.BackgroundImage"> & {
+  /**
+   * CDN or storage URL
+   *
+   * @generated from field: string url = 1;
+   */
+  url: string;
+};
+
+/**
+ * Describes the message coasterai.core.v1.BackgroundImage.
+ * Use `create(BackgroundImageSchema)` to create a new message.
+ */
+export declare const BackgroundImageSchema: GenMessage<BackgroundImage>;
+
+/**
+ * @generated from message coasterai.core.v1.Gradient
+ */
+export declare type Gradient = Message<"coasterai.core.v1.Gradient"> & {
+  /**
+   * @generated from field: coasterai.core.v1.GradientType type = 1;
+   */
+  type: GradientType;
+
+  /**
+   * 0–360 degrees
+   *
+   * @generated from field: int32 angle = 2;
+   */
+  angle: number;
+
+  /**
+   * @generated from field: repeated coasterai.core.v1.GradientStop stops = 3;
+   */
+  stops: GradientStop[];
+};
+
+/**
+ * Describes the message coasterai.core.v1.Gradient.
+ * Use `create(GradientSchema)` to create a new message.
+ */
+export declare const GradientSchema: GenMessage<Gradient>;
+
+/**
+ * @generated from message coasterai.core.v1.GradientStop
+ */
+export declare type GradientStop = Message<"coasterai.core.v1.GradientStop"> & {
+  /**
+   * "#ffffff"
+   *
+   * @generated from field: string color = 1;
+   */
+  color: string;
+
+  /**
+   * 0–100 (%)
+   *
+   * @generated from field: int32 position = 2;
+   */
+  position: number;
+};
+
+/**
+ * Describes the message coasterai.core.v1.GradientStop.
+ * Use `create(GradientStopSchema)` to create a new message.
+ */
+export declare const GradientStopSchema: GenMessage<GradientStop>;
 
 /**
  * @generated from message coasterai.core.v1.Section
@@ -648,4 +776,24 @@ export enum EffectType {
  * Describes the enum coasterai.core.v1.EffectType.
  */
 export declare const EffectTypeSchema: GenEnum<EffectType>;
+
+/**
+ * @generated from enum coasterai.core.v1.GradientType
+ */
+export enum GradientType {
+  /**
+   * @generated from enum value: GRADIENT_TYPE_LINEAR = 0;
+   */
+  LINEAR = 0,
+
+  /**
+   * @generated from enum value: GRADIENT_TYPE_RADIAL = 1;
+   */
+  RADIAL = 1,
+}
+
+/**
+ * Describes the enum coasterai.core.v1.GradientType.
+ */
+export declare const GradientTypeSchema: GenEnum<GradientType>;
 

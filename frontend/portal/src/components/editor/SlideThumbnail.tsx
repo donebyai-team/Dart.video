@@ -1,5 +1,6 @@
 import { AnimationSlideContent, Slide, SlideType, StackSlideContent, MediaSlideContent } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { useMemo } from "react";
+import { backgroundStyleToCSS } from "./settings/BackgroundSettings";
 
 interface SlideThumbnailProps {
   slide: Slide;
@@ -38,7 +39,7 @@ const TextAnimationThumbnail = ({ slide }: { slide: Slide }) => {
   const displayText = content?.templateConfig?.text as string || slide.transcript;
 
   // Use slide's background color or fall back to default
-  const background = slide.backgroundColor;
+  const background = backgroundStyleToCSS(slide.backgroundStyle);
 
   return (
     <div
@@ -60,16 +61,7 @@ const VisualAnimationThumbnail = ({ slide }: { slide: Slide }) => {
   const hash = slide.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   const variant = hash % 5;
 
-  // Use slide's background color or fall back to defaults
-  const defaultGradients = [
-    "linear-gradient(135deg, #581c87 0%, #7c3aed 50%, #4f46e5 100%)",
-    "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
-    "linear-gradient(135deg, #134e4a 0%, #14b8a6 100%)",
-    "linear-gradient(135deg, #7f1d1d 0%, #ef4444 50%, #f97316 100%)",
-    "linear-gradient(135deg, #713f12 0%, #f59e0b 100%)",
-  ];
-
-  const background = slide.backgroundColor || defaultGradients[variant];
+  const background = backgroundStyleToCSS(slide.backgroundStyle);
 
   return (
     <div
@@ -144,7 +136,7 @@ const InfographicThumbnail = ({ slide }: { slide: Slide }) => {
   const variant = hash % 3;
 
   // Use slide's background color or fall back to default
-  const background = slide.backgroundColor || "linear-gradient(180deg, #0f172a 0%, #1e293b 100%)";
+  const background = backgroundStyleToCSS(slide.backgroundStyle);
 
   return (
     <div
@@ -257,7 +249,7 @@ const StackThumbnail = ({ slide }: { slide: Slide }) => {
   const itemCount = Math.min(stackItems.length, 4);
 
   // Use slide's background color or fall back to default
-  const background = slide.backgroundColor || "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)";
+  const background = backgroundStyleToCSS(slide.backgroundStyle);
 
   return (
     <div
