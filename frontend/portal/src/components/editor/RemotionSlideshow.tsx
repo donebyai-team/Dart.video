@@ -158,7 +158,6 @@ export const Slideshow: React.FC<SlideshowProps> = ({ fps, isEditing = false, on
   const metadata = videoConfig.metadata
   const sections = videoConfig.config.sections ?? []
   const globalBackground = backgroundStyleToCSS(metadata?.backgroundStyle);
-  console.log("ewrfwefwef", globalBackground)
 
   // if external video object exist use it or assign zustand video object
   const allSlides = sections.flatMap(section => section.slides)
