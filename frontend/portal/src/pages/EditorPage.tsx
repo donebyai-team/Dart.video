@@ -265,7 +265,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
                   <div className='flex items-center gap-2 text-xs text-muted-foreground'>
                     <span>{videoConfigFromStore?.config?.sections.length} sections</span>
                     <span>•</span>
-                    <span>{videoConfigFromStore?.config?.sections.reduce((acc, s) => acc + s.slides.length, 0)} slides</span>
+                    <span>{videoConfigFromStore?.config?.sections.reduce((acc, s) => acc + s.slides.length, 0)} scenes</span>
                   </div>
                 </div>
 
