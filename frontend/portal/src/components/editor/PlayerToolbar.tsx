@@ -45,6 +45,7 @@ const insertTools: { id: EffectType; name: string; icon: React.ElementType }[] =
 
 const PlayerToolbar = ({ onDurationChange, minDuration = 1, maxDuration = 180 }: PlayerToolbarProps) => {
   const onChangeVisual = useVideoStore(s => s.handleEditSlide)
+  const getSlideWithBackground = useVideoStore(s => s.getSlideWithBackground)
   const onChangeTextAnimation = useVideoStore(s => s.handleEditSlide)
   const activeTool = useVideoStore(s => s.activeTool)
   const onSelectTool = useVideoStore(s => s.handleSelectTool)
@@ -63,7 +64,7 @@ const PlayerToolbar = ({ onDurationChange, minDuration = 1, maxDuration = 180 }:
   }
 
   const TypeIcon = slideTypeLabels[slide.type].icon
-  const currentBg = backgroundStyleToCSS(slide.backgroundStyle);
+  const currentBg = backgroundStyleToCSS(getSlideWithBackground(slide));
   const isBackgroundActive = activeTool?.type === ActiveToolType.BACKGROUND
   const activeInsertTool = activeTool?.type === ActiveToolType.INSERT ? activeTool.tool : null
   const showChangeVisualButton = slide.type === SlideType.VISUAL_ANIMATION || slide.type === SlideType.INFOGRAPHIC

@@ -8,7 +8,6 @@ import (
 	"github.com/shank318/coasterai/utils"
 	"net/url"
 	"regexp"
-	"strconv"
 	"strings"
 )
 
@@ -99,9 +98,9 @@ func validateSlide(slide *pbcore.Slide) error {
 		return fmt.Errorf("id is empty")
 	}
 
-	//if slide.BackgroundColor != nil && !IsValidBackground(*slide.BackgroundColor) {
-	//	return fmt.Errorf("background color is invalid")
-	//}
+	if slide.BackgroundStyle != nil && !IsValidBackgroundStyle(slide.BackgroundStyle) {
+		return fmt.Errorf("background stype is invalid")
+	}
 
 	if slide.Duration <= 0 {
 		return fmt.Errorf("duration is invalid")
@@ -284,79 +283,78 @@ func validateContentMeta(meta *pbcore.MetaData) error {
 }
 
 var hexColorRegex = regexp.MustCompile(`^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$`)
-var linearGradientRegex = regexp.MustCompile(
-	`^linear-gradient\(\s*([^)]+)\s*\)$`,
-)
 
-func IsValidBackground(s string) bool {
-
-	s = strings.TrimSpace(s)
-
-	if isValidHexColor(s) {
-		return true
-	}
-
-	if isValidLinearGradient(s) {
-		return true
-	}
-
-	return false
-}
-
-func isValidLinearGradient(s string) bool {
-
-	matches := linearGradientRegex.FindStringSubmatch(s)
-	if len(matches) < 2 {
+func IsValidBackgroundStyle(bg *pbcore.BackgroundStyle) bool {
+	if bg == nil {
 		return false
 	}
 
-	inside := matches[1]
+	switch style := bg.Style.(type) {
 
-	parts := strings.Split(inside, ",")
-	if len(parts) < 3 {
-		return false // need angle + at least 2 stops
-	}
+	case *pbcore.BackgroundStyle_Solid:
+		return isValidHexColor(style.Solid.Hex)
 
-	// Validate angle
-	angle := strings.TrimSpace(parts[0])
-	if !strings.HasSuffix(angle, "deg") {
+	case *pbcore.BackgroundStyle_Gradient:
+		return isValidGradient(style.Gradient)
+
+	//case *pbcore.BackgroundStyle_Image:
+	//	return isValidImage(style.Image.Url)
+
+	default:
 		return false
 	}
-
-	angleValue := strings.TrimSuffix(angle, "deg")
-	if _, err := strconv.Atoi(angleValue); err != nil {
-		return false
-	}
-
-	// Validate stops
-	for _, stop := range parts[1:] {
-
-		stop = strings.TrimSpace(stop)
-
-		tokens := strings.Fields(stop)
-		if len(tokens) == 0 {
-			return false
-		}
-
-		// first token must be hex
-		if !isValidHexColor(tokens[0]) {
-			return false
-		}
-
-		// optional position
-		if len(tokens) > 1 {
-			pos := strings.TrimSuffix(tokens[1], "%")
-			if _, err := strconv.Atoi(pos); err != nil {
-				return false
-			}
-		}
-	}
-
-	return true
 }
 
 func isValidHexColor(s string) bool {
+	s = strings.TrimSpace(s)
 	return s == "transparent" || hexColorRegex.MatchString(s)
+}
+
+func isValidGradient(g *pbcore.Gradient) bool {
+	if g == nil {
+		return false
+	}
+
+	// Validate type
+	if g.Type != pbcore.GradientType_GRADIENT_TYPE_LINEAR &&
+		g.Type != pbcore.GradientType_GRADIENT_TYPE_RADIAL {
+		return false
+	}
+
+	// Validate angle
+	if g.Angle < 0 || g.Angle > 360 {
+		return false
+	}
+
+	// Must have at least 2 stops
+	if len(g.Stops) < 2 {
+		return false
+	}
+
+	var prevPos int32 = -1
+
+	for _, stop := range g.Stops {
+		if stop == nil {
+			return false
+		}
+
+		if !isValidHexColor(stop.Color) {
+			return false
+		}
+
+		if stop.Position < 0 || stop.Position > 100 {
+			return false
+		}
+
+		// Ensure sorted ascending
+		if stop.Position < prevPos {
+			return false
+		}
+
+		prevPos = stop.Position
+	}
+
+	return true
 }
 
 func validateURL(raw string) (*url.URL, error) {
