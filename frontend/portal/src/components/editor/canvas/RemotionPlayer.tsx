@@ -54,6 +54,9 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
 }, ref) => {
   const playerRef = useRef<PlayerRef>(null);
   const fullscreenContainerRef = useRef<HTMLDivElement>(null);
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
+
+
   const videoConfigFromStore = useVideoStore(s => s.videoConfig);
   const selectedSlide = useVideoStore(s => s.selectedSlide)?.slide;
   const selectedStackItemId = useVideoStore(s => s.selectedStackItemId);
@@ -68,27 +71,37 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   const selectedSlideId = selectedSlide?.id || "";
 
   const [isPlaying, setIsPlaying] = useState(false);
+  const [containerSize, setContainerSize] = useState({
+    width: 0,
+    height: 0,
+  });
 
   const [volume, setVolume] = useState([80]);
   const [isMuted, setIsMuted] = useState(false);
-  const [scale, setScale] = useState(1);
+  const BASE_PREVIEW_SCALE = 0.75;
+  const [userZoom, setUserZoom] = useState(1);
+
   const [previewingSlideId, setPreviewingSlideId] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isDraggingTimeline, setIsDraggingTimeline] = useState(false);
 
   const [currentFrame, setCurrentFrame] = useState(getSlideVisualEndFrame(allSlides, selectedSlideId, fps));
-  const totalFrames = calculateRealTotalFrames(allSlides, fps); // For Remotion player
-  const uiTotalFrames = calculateTotalFrames(allSlides, fps); // For UI timeline
+
+  const totalFrames = useMemo(
+    () => calculateRealTotalFrames(allSlides, fps),
+    [allSlides, fps]
+  );
+
+  const uiTotalFrames = useMemo(
+    () => calculateTotalFrames(allSlides, fps),
+    [allSlides, fps]
+  );
+
 
   const totalDuration = totalFrames / fps;
   const uiTotalDuration = uiTotalFrames / fps;
   const currentTime = currentFrame / fps;
 
-
-  // To start the video player from the first visible slide
-  useEffect(() => {
-    controls.seekToFrame(currentFrame);
-  }, [])
 
   // Use centralized player controls
   const controls = usePlayerControls(
@@ -101,6 +114,28 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
     setPreviewingSlideId,
     fps,
   );
+
+  // To start the video player from the first visible slide
+  useEffect(() => {
+    controls.seekToFrame(currentFrame);
+  }, [])
+
+  useEffect(() => {
+    if (!canvasContainerRef.current) return;
+
+    const observer = new ResizeObserver((entries) => {
+      const rect = entries[0].contentRect;
+      setContainerSize({
+        width: rect.width,
+        height: rect.height,
+      });
+    });
+
+    observer.observe(canvasContainerRef.current);
+
+    return () => observer.disconnect();
+  }, []);
+
 
   // Use custom hooks for event handling and slide selection
   useRemotionPlayerEvents({
@@ -148,6 +183,25 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
     }
   };
 
+  const [viewport, setViewport] = useState(() => ({
+    width: typeof window !== "undefined" ? window.innerWidth : 0,
+    height: typeof window !== "undefined" ? window.innerHeight : 0,
+  }));
+
+
+  useEffect(() => {
+    const handleResize = () => {
+      setViewport({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+
   // Listen for fullscreen changes
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -164,48 +218,52 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
     return <Loading />;
   }
 
-  const handleZoomIn = () => setScale(prev => Math.min(3, prev + 0.25));
-  const handleZoomOut = () => setScale(prev => Math.max(0.25, prev - 0.25));
-  const handleZoomReset = () => setScale(1);
+  const handleZoomIn = () => setUserZoom(prev => Math.min(3, prev + 0.25));
+  const handleZoomOut = () => setUserZoom(prev => Math.max(0.25, prev - 0.25));
+  const handleZoomReset = () => setUserZoom(1);
 
-  // Calculate canvas size based on resolution
-  const getCanvasSize = () => {
-    // In fullscreen, maintain aspect ratio and fit within screen
-    if (isFullscreen && fullscreenContainerRef.current) {
-      const screenWidth = window.innerWidth;
-      const screenHeight = window.innerHeight;
-      const aspectRatio = resolution.width / resolution.height;
-      const screenAspectRatio = screenWidth / screenHeight;
 
-      if (aspectRatio > screenAspectRatio) {
-        // Video is wider than screen - fit to width
-        return {
-          width: screenWidth,
-          height: screenWidth / aspectRatio,
-        };
-      } else {
-        // Video is taller than screen - fit to height
-        return {
-          width: screenHeight * aspectRatio,
-          height: screenHeight,
-        };
-      }
-    }
+  const canvasSize = useMemo(() => {
+    if (!resolution) return { width: 0, height: 0 };
 
     const aspectRatio = resolution.width / resolution.height;
-    const isPortrait = aspectRatio < 1;
 
-    if (isPortrait) {
-      const height = 350;
-      const width = height * aspectRatio;
-      return { width, height };
+    // Fullscreen logic
+    if (isFullscreen) {
+      const screenWidth = viewport.width;
+      const screenHeight = viewport.height;
+
+      const widthRatio = screenWidth / resolution.width;
+      const heightRatio = screenHeight / resolution.height;
+
+      const fitScale = Math.min(widthRatio, heightRatio);
+
+      return {
+        width: resolution.width * fitScale,
+        height: resolution.height * fitScale,
+      };
     }
-    const width = 500;
-    const height = width / aspectRatio;
-    return { width, height };
-  };
 
-  const canvasSize = getCanvasSize();
+    // 🔥 Editor preview logic (non-fullscreen)
+
+    const widthRatio = containerSize.width / resolution.width;
+    const heightRatio = containerSize.height / resolution.height;
+
+    const fitScale = Math.min(widthRatio, heightRatio);
+
+    // 👇 Add clamp here
+    const MAX_SCALE = 0.75; // 75% of available area
+    const finalScale = Math.min(fitScale, MAX_SCALE);
+
+    return {
+      width: resolution.width * finalScale,
+      height: resolution.height * finalScale,
+    };
+
+  }, [resolution, isFullscreen, viewport, containerSize]);
+
+
+
 
   return (
     <div ref={fullscreenContainerRef} className="flex flex-col h-full">
@@ -217,17 +275,23 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
       )}
 
       {/* Player Canvas */}
-      <PlayerCanvas
-        playerRef={playerRef}
-        totalFrames={totalFrames}
-        fps={fps}
-        isFullscreen={isFullscreen}
-        scale={scale}
-        canvasSize={canvasSize}
-        onSetScale={setScale}
-        isPlaying={isPlaying}
-        onSelectTemplate={onSelectTemplate}
-      />
+      <div
+        ref={canvasContainerRef}
+        className="flex-1 flex items-center justify-center overflow-hidden"
+      >
+        <PlayerCanvas
+          playerRef={playerRef}
+          totalFrames={totalFrames}
+          fps={fps}
+          isFullscreen={isFullscreen}
+          canvasSize={canvasSize}
+          scale={isFullscreen ? userZoom : BASE_PREVIEW_SCALE * userZoom}
+          onSetScale={setUserZoom}
+          isPlaying={isPlaying}
+          onSelectTemplate={onSelectTemplate}
+        />
+      </div>
+
 
       {/* Transcript panel - below player, above timeline */}
       {/* {transcriptPanel && !isFullscreen && (
@@ -313,7 +377,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
             {/* Zoom */}
             <button
               onClick={handleZoomOut}
-              disabled={scale <= 0.25}
+              disabled={userZoom <= 0.25}
               className="w-8 h-8 rounded-lg hover:bg-muted flex items-center justify-center transition-colors disabled:opacity-40"
               title="Zoom out"
             >
@@ -324,11 +388,12 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
               className="h-8 px-2 rounded-lg hover:bg-muted flex items-center justify-center transition-colors text-xs font-medium min-w-[44px]"
               title="Reset zoom"
             >
-              {Math.round(scale * 100)}%
+              {Math.round(userZoom * 100)}%
+
             </button>
             <button
               onClick={handleZoomIn}
-              disabled={scale >= 3}
+            disabled={userZoom >= 3}
               className="w-8 h-8 rounded-lg hover:bg-muted flex items-center justify-center transition-colors disabled:opacity-40"
               title="Zoom in"
             >

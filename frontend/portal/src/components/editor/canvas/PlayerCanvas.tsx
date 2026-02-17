@@ -40,7 +40,7 @@ const PlayerCanvas = ({
       onSelectTemplate
     }
   }, [fps, isPlaying, onSelectTemplate])
-  
+
   // Early return if no data
   if (!videoConfigFromStore?.config?.sections || !videoConfigFromStore?.metadata?.resolution || !selectedSlide) {
     return <div className='flex items-center justify-center h-full text-muted-foreground'>Loading...</div>
@@ -76,19 +76,22 @@ const PlayerCanvas = ({
   return (
     <div
       ref={containerRef}
-      className={`flex-1 flex items-center justify-center overflow-hidden touch-none min-h-0 ${
-        isFullscreen ? 'bg-black' : 'bg-muted/50'
-      }`}
+      className={`flex-1 flex items-center justify-center overflow-hidden touch-none min-h-0 ${isFullscreen ? 'bg-black' : 'bg-muted/50'
+        }`}
       style={{ touchAction: 'none' }}
     >
       <motion.div
-        className={`relative overflow-hidden ${isFullscreen ? 'bg-transparent' : 'bg-background shadow-2xl'}`}
+        className={`relative overflow-hidden ${isFullscreen ? 'bg-transparent' : 'bg-background shadow-2xl'
+          }`}
         style={{
-          width: isFullscreen ? canvasSize.width : canvasSize.width * scale,
-          height: isFullscreen ? canvasSize.height : canvasSize.height * scale
+          width: canvasSize.width,
+          height: canvasSize.height,
+          transform: `scale(${scale})`,
+          transformOrigin: 'center',
         }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
+
         {/* Remotion Player */}
         <div
           style={{
@@ -126,8 +129,9 @@ const PlayerCanvas = ({
               onSelectObject={handleSelectEffect}
               onUpdateSpotlight={(id, updates) => onUpdateSpotlight(id, updates)}
               onUpdateCallout={(id, updates) => onUpdateCallout(id, updates)}
-              containerWidth={canvasSize.width * scale}
-              containerHeight={canvasSize.height * scale}
+              containerWidth={canvasSize.width}
+              containerHeight={canvasSize.height}
+
             />
           </div>
         )}
