@@ -6,4 +6,5 @@ import (
 
 var ToolsGroup = Group("tools", "coasterai admin & developer tools",
 	toolsIntegrationsGroup,
+	toolsTemplatesGroup,
 )

@@ -159,3 +159,8 @@ doota tools integrations slack_webhook create <org-id> '{"channel":"redora-alert
 ## 🛠️ Admin Interface
 
 There is no separate admin interface. Users assigned the role `PLATFORM_ADMIN` can view all organizations and have access to all accounts across the platform.
+
+## Sync Templates
+```
+ ./backend/coasterai tools templates sync frontend/packages/templates
+```

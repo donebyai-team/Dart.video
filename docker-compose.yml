@@ -23,18 +23,18 @@ services:
       interval: 30s
       timeout: 10s
       retries: 15
-  redis:
-    container_name: redis-doota
-    image: redis:7
-    restart: always
-    ports:
-      - "6379:6379"
-    volumes:
-      - ./devel/data/redis/dаta:/root/redis
-      - ./devel/data/redis/redis.conf:/usr/local/etc/redis/redis.conf
-    environment:
-      - REDIS_PORT=6379
-      - REDIS_DATABASES=16
+#  redis:
+#    container_name: redis-doota
+#    image: redis:7
+#    restart: always
+#    ports:
+#      - "6379:6379"
+#    volumes:
+#      - ./devel/data/redis/dаta:/root/redis
+#      - ./devel/data/redis/redis.conf:/usr/local/etc/redis/redis.conf
+#    environment:
+#      - REDIS_PORT=6379
+#      - REDIS_DATABASES=16
 #  pgweb:
 #    container_name: pgweb-doota
 #    image: sosedoff/pgweb:0.15.0

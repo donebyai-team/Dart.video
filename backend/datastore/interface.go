@@ -24,6 +24,7 @@ type Repository interface {
 	IntegrationRepository
 	UserRepository
 	VideoRepository
+	TemplateRepository
 }
 
 type OrganizationRepository interface {
@@ -58,4 +59,29 @@ type VideoRepository interface {
 	GetVideoById(ctx context.Context, ID, organizationID string) (*models.Video, error)
 	GetVideos(ctx context.Context, organizationID string) ([]*models.Video, error)
 	DeleteByID(ctx context.Context, id, organizationID string) error
+}
+
+type TemplateRepository interface {
+	CreateTemplateCategory(ctx context.Context, tc *models.TemplateCategory) (*models.TemplateCategory, error)
+	UpdateTemplateCategory(ctx context.Context, tc *models.TemplateCategory) error
+	GetTemplateCategoriesByAnimationType(
+		ctx context.Context,
+		animationType string,
+	) ([]*models.TemplateCategory, error)
+	GetTemplateCategoryByName(
+		ctx context.Context,
+		animationType string,
+		name string,
+	) (*models.TemplateCategory, error)
+	CreateTemplate(ctx context.Context, t *models.Template) (*models.Template, error)
+	UpdateTemplate(ctx context.Context, t *models.Template) error
+	GetTemplatesByCategory(
+		ctx context.Context,
+		category string,
+	) ([]*models.Template, error)
+	GetTemplateByName(
+		ctx context.Context,
+		animationType string,
+		name string,
+	) (*models.Template, error)
 }
