@@ -249,6 +249,30 @@ export function calculateOverlayItems(slides: TimelineSlide[], fps: number): Ove
     }
   })
 
+  slides.forEach(slide => {
+    if (slide.zooms && slide.zooms.length > 0) {
+      const realSlideStartTimeFrame = getRealSlideStartFrame(slides, slide.id, fps)
+      const realSlideStartTimeInSeconds = realSlideStartTimeFrame / 30
+
+      slide.zooms.forEach(effect => {
+        const startTime = effect.startTime ?? 0
+        const endTime = effect.endTime ?? slide.duration
+        const duration = endTime - startTime
+
+        overlays.push({
+          type: 'overlay',
+          id: `overlay-${effect.id}`,
+          overlayId: effect.id!,
+          slideId: slide.id,
+          overlayType: EffectType.ZOOM,
+          startTime: realSlideStartTimeInSeconds + startTime,
+          duration,
+          trackIndex: 0 // Will be assigned by assignOverlayTracks
+        })
+      })
+    }
+  })
+
   return overlays
 }
 

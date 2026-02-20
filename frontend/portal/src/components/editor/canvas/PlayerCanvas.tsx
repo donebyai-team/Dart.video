@@ -50,11 +50,13 @@ const PlayerCanvas = ({
 
   const onUpdateSpotlight = useVideoStore(s => s.updateSpotlight)
   const onUpdateCallout = useVideoStore(s => s.updateCallout)
+  const onUpdateZoom = useVideoStore(s => s.updateZoom)
   const containerRef = useRef<HTMLDivElement>(null)
 
   // Get effective canvas objects from store
   const spotlights = selectedSlide.slide.spotlights || []
   const callouts = selectedSlide.slide.callouts || []
+  const zooms = selectedSlide.slide.zooms || []
 
   // Pinch to zoom handler
   useEffect(() => {
@@ -125,13 +127,14 @@ const PlayerCanvas = ({
               resolution={videoConfigFromStore?.metadata?.resolution}
               spotlights={spotlights}
               callouts={callouts}
+              zooms={zooms}
               selectedEffectId={selectedEffectId || null}
               onSelectObject={handleSelectEffect}
               onUpdateSpotlight={(id, updates) => onUpdateSpotlight(id, updates)}
               onUpdateCallout={(id, updates) => onUpdateCallout(id, updates)}
+              onUpdateZoom={(id, updates) => onUpdateZoom(id, updates)}
               containerWidth={canvasSize.width}
               containerHeight={canvasSize.height}
-
             />
           </div>
         )}

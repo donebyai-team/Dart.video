@@ -10,7 +10,8 @@ import {
   CalloutEffect,
   EffectType,
   SlideType,
-  SpotlightEffect
+  SpotlightEffect,
+  ZoomEffect
 } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { motion } from 'framer-motion'
 
@@ -18,19 +19,23 @@ interface ToolsSettingsPanelProps {
   onPreviewTemplate: () => void
   onUpdateSpotlight: (updates: Partial<SpotlightEffect>) => void
   onUpdateCallout: (updates: Partial<CalloutEffect>) => void
+  onUpdateZoom: (updates: Partial<ZoomEffect>) => void
   onSpotlightApply?: () => void
   onSpotlightPlay?: () => void
   deleteSpotlight: (effectId: string) => void
   deleteCallout: (effectId: string) => void
+  deleteZoom: (effectId: string) => void
 }
 
 const ToolsSettingsPanel = ({
   onPreviewTemplate,
   onUpdateSpotlight,
   onUpdateCallout,
+  onUpdateZoom,
   onSpotlightPlay,
   deleteSpotlight,
-  deleteCallout
+  deleteCallout,
+  deleteZoom
 }: ToolsSettingsPanelProps) => {
 
   const videoConfigFromStore = useVideoStore(s => s.videoConfig);
@@ -42,6 +47,7 @@ const ToolsSettingsPanel = ({
   const getTextAnimationConfig = useVideoStore(s => s.getTextAnimationConfig)
   const spotlights = useVideoStore(s => s.getSpotlights) || []
   const callouts = useVideoStore(s => s.getCallouts) || []
+  const zooms = useVideoStore(s => s.getZooms) || []
   const updateSlideBackground = useVideoStore(s => s.updateSlideBackground)
   const onUpdateTemplateProps = useVideoStore(s => s.updateTextAnimationProps)
   const onUpdateSlide = useVideoStore(s => s.updateSlide)
@@ -53,14 +59,17 @@ const ToolsSettingsPanel = ({
 
   const spotlightsList = spotlights() ?? [];
   const calloutsList = callouts() ?? [];
+  const zoomsList = zooms() ?? [];
 
-  let selectedObject: SpotlightEffect | CalloutEffect | undefined;
+  let selectedObject: SpotlightEffect | CalloutEffect | ZoomEffect | undefined;
 
   if (activeTool.type === ActiveToolType.INSERT && selectedEffectId) {
     if (activeTool.tool === EffectType.SPOTLIGHT) {
       selectedObject = spotlightsList.find(e => e.id === selectedEffectId);
     } else if (activeTool.tool === EffectType.CALLOUT) {
       selectedObject = calloutsList.find(e => e.id === selectedEffectId);
+    } else if (activeTool.tool === EffectType.ZOOM) {
+      selectedObject = zoomsList.find(e => e.id === selectedEffectId);
     }
   }
 
@@ -137,7 +146,7 @@ const ToolsSettingsPanel = ({
           )
         })()}
 
-      {activeTool.type === ActiveToolType.INSERT 
+      {activeTool.type === ActiveToolType.INSERT
       && selectedEffectId
       && selectedObject
       && activeTool.tool && (
@@ -145,39 +154,30 @@ const ToolsSettingsPanel = ({
           tool={activeTool.tool}
           currentObject={selectedObject}
           onUpdate={updates => {
-            if (!selectedEffectId || (activeTool.type != ActiveToolType.INSERT)) return;
+            if (!selectedEffectId || activeTool.type !== ActiveToolType.INSERT) return;
 
-            // TODO: Move this out when we implement it genric EffectType
             if (activeTool.tool === EffectType.SPOTLIGHT) {
               onUpdateSpotlight(updates as Partial<SpotlightEffect>);
-              return;
-            }
-
-            if (activeTool.tool === EffectType.CALLOUT) {
-              onUpdateCallout(updates as Partial<CalloutEffect>)
-              return;
+            } else if (activeTool.tool === EffectType.CALLOUT) {
+              onUpdateCallout(updates as Partial<CalloutEffect>);
+            } else if (activeTool.tool === EffectType.ZOOM) {
+              onUpdateZoom(updates as Partial<ZoomEffect>);
             }
           }}
-
           onDelete={() => {
-            if (!selectedEffectId || (activeTool.type != ActiveToolType.INSERT)) return;
+            if (!selectedEffectId || activeTool.type !== ActiveToolType.INSERT) return;
 
-            // TODO: Move this out when we implement it genric EffectType
             if (activeTool.tool === EffectType.SPOTLIGHT) {
               deleteSpotlight(selectedEffectId);
-              handleCloseTool();
-              return;
-            }
-
-            if (activeTool.tool === EffectType.CALLOUT) {
+            } else if (activeTool.tool === EffectType.CALLOUT) {
               deleteCallout(selectedEffectId);
-              handleCloseTool();
-              return;
+            } else if (activeTool.tool === EffectType.ZOOM) {
+              deleteZoom(selectedEffectId);
             }
+            handleCloseTool();
           }}
           onClose={handleCloseTool}
           canDelete={true}
-          // Spotlight-specific props
           slideDuration={selectedSlide?.slide.duration}
           slideStartTime={0}
           transitionDuration={selectedSlide?.slide.transitionDuration}

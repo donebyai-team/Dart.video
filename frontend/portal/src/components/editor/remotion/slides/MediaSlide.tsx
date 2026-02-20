@@ -8,6 +8,7 @@ import UploadModal from '../components/UploadModal'
 import { VideoPreview } from '../components/VideoPreview'
 import CalloutEffectComponent from '../effects/CalloutEffect'
 import SpotlightEffectComponent from '../effects/SpotlightEffect'
+import { ZoomEffectComponent } from '../effects/ZoomEffect'
 import { MediaContainer } from '../components/MediaContainer'
 import { backgroundStyleToCSS } from '../../settings/BackgroundSettings'
 
@@ -38,6 +39,7 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
   // check if these effects are available or not
   const isCalloutEffectsAvailable = slide.callouts && slide.callouts.length > 0
   const isSpotlightEffectsAvailable = slide.spotlights && slide.spotlights.length > 0
+  const isZoomEffectsAvailable = slide.zooms && slide.zooms.length > 0
 
   return (
     <AbsoluteFill
@@ -223,6 +225,30 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
               fullWidth={width}
               src={mediaContent.src ?? ''}
               fullHeight={height}
+              slideDuration={slide.duration}
+              meta={mediaContent.meta as MetaData}
+              style={{
+                borderRadius: mediaContent.style?.borderRadius as number,
+                objectFit: mediaContent.style?.objectFit as 'cover' | 'fill' | 'contain'
+              }}
+            />
+          </AbsoluteFill>
+        ))}
+
+      {/* Render zoom effects at CANVAS level */}
+      {isZoomEffectsAvailable &&
+        slide.zooms.map(zoom => (
+          <AbsoluteFill key={zoom.id} style={{ pointerEvents: 'none' }}>
+            <ZoomEffectComponent
+              zoom={zoom}
+              mediaType={mediaType}
+              frame={frame}
+              fps={fps}
+              width={width}
+              height={height}
+              fullWidth={width}
+              fullHeight={height}
+              src={mediaContent.src ?? ''}
               slideDuration={slide.duration}
               meta={mediaContent.meta as MetaData}
               style={{

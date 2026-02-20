@@ -1,20 +1,22 @@
 import { EditorConfig, SlideTypeConfig, TextAnimationSlideConfig } from "@/types/editor";
 import { ActiveToolType, SelectedTool } from "@/types/tools";
 import { create } from "@bufbuild/protobuf";
-import { AnimationSlideContentSchema, 
-    BackgroundStyle, 
-    BackgroundStyleSchema, 
-    CalloutEffect, 
-    CalloutEffectSchema, 
-    MediaSlideContentSchema, 
-    MediaType, 
-    MetaData, MetaDataSchema, 
-    Section, SectionSchema, 
-    Slide, SlideSchema, SlideType, 
-    SpotlightEffect, SpotlightEffectSchema, 
-    StackAnimationMode, 
-    StackSlideContentSchema, 
-    TransitionType
+import { AnimationSlideContentSchema,
+    BackgroundStyle,
+    BackgroundStyleSchema,
+    CalloutEffect,
+    CalloutEffectSchema,
+    MediaSlideContentSchema,
+    MediaType,
+    MetaData, MetaDataSchema,
+    Section, SectionSchema,
+    Slide, SlideSchema, SlideType,
+    SpotlightEffect, SpotlightEffectSchema,
+    StackAnimationMode,
+    StackSlideContentSchema,
+    TransitionType,
+    ZoomEffect,
+    ZoomEffectSchema,
  } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { Resolution, ResolutionSchema, Video, VideoMetadata, VideoMetadataSchema } from "@coasterai/pb/coasterai/core/v1/video_pb";
 import { SelectedSection } from "./types";
@@ -185,6 +187,21 @@ export const createCalloutEffect = (
         startTime: startTimeInSec,
         endTime: endTimeInSec,
         color: "#22c55e"
+    });
+};
+
+export const createZoomEffect = (
+    resolution: Resolution,
+    startTimeInSec: number,
+    endTimeInSec: number
+): ZoomEffect => {
+    return create(ZoomEffectSchema, {
+        id: `zoom-effect-${Date.now()}`,
+        x: resolution.width / 2,
+        y: resolution.height / 2,
+        zoomLevel: 2,
+        startTime: startTimeInSec,
+        endTime: endTimeInSec,
     });
 };
 

@@ -289,7 +289,9 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
           duration: actualDuration,
           sectionColor: section.color,
           sectionTitle: section.title,
-          spotlights: slide.spotlights || []
+          spotlights: slide.spotlights || [],
+          callouts: slide.callouts || [],
+          zooms: slide.zooms || [],
         }
       })
     )

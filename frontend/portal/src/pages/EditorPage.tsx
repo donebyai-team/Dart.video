@@ -84,8 +84,10 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
   const handleCloseTool = useVideoStore(s => s.handleCloseTool)
   const updateSpotlight = useVideoStore(s => s.updateSpotlight)
   const updateCallout = useVideoStore(s => s.updateCallout)
+  const updateZoom = useVideoStore(s => s.updateZoom)
   const deleteSpotlight = useVideoStore(s => s.deleteSpotlight)
   const deleteCallout = useVideoStore(s => s.deleteCallout)
+  const deleteZoom = useVideoStore(s => s.deleteZoom)
   const updateSlide = useVideoStore(s => s.updateSlide)
   const handleSelectEntity = useVideoStore(s => s.handleSelectEntity)
   const openEntitySettings = useVideoStore(s => s.openEntitySettings)
@@ -366,6 +368,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
               <ToolsSettingsPanel
                 deleteSpotlight={deleteSpotlight}
                 deleteCallout={deleteCallout}
+                deleteZoom={deleteZoom}
                 onPreviewTemplate={() => handlePreviewSlide(selectedSlide.slide.id)}
                 onUpdateSpotlight={updates => {
                   if (selectedEffectId) {
@@ -375,6 +378,11 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
                 onUpdateCallout={updates => {
                   if (selectedEffectId) {
                     updateCallout(selectedEffectId, updates)
+                  }
+                }}
+                onUpdateZoom={updates => {
+                  if (selectedEffectId) {
+                    updateZoom(selectedEffectId, updates)
                   }
                 }}
                 onSpotlightApply={() => {

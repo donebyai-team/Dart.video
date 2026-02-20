@@ -1,7 +1,7 @@
 import { SlideType, EffectType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { ActiveToolType, SelectedTool } from '@/types/tools'
 import { VideoStoreSet, VideoStoreGet } from './types'
-import { createCalloutEffect, createSpotlightEffect, getDefaultSelectedTool } from './defaults'
+import { createCalloutEffect, createSpotlightEffect, createZoomEffect, getDefaultSelectedTool } from './defaults'
 
 export const createToolActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   handleSelectTool(tool: SelectedTool) {
@@ -30,6 +30,11 @@ export const createToolActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       } else if (tool.tool === EffectType.CALLOUT) {
         const effect = createCalloutEffect(resolution, startTime, endTime);
         get().addCallout(effect);
+        set({ selectedEffectId: effect.id });
+
+      } else if (tool.tool === EffectType.ZOOM) {
+        const effect = createZoomEffect(resolution, startTime, endTime);
+        get().addZoom(effect);
         set({ selectedEffectId: effect.id });
       }
 

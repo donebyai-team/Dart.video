@@ -12,12 +12,14 @@ interface OverlayTracksProps {
 }
 
 export function getOverlayName(objType: EffectType): string {
-  if (objType == EffectType.SPOTLIGHT) {
+  if (objType === EffectType.SPOTLIGHT) {
     return 'spotlight'
-  } else if (objType == EffectType.CALLOUT) {
+  } else if (objType === EffectType.CALLOUT) {
     return 'callout'
-  } else {
+  } else if (objType === EffectType.ZOOM) {
     return 'zoom'
+  } else {
+    return 'unknown'
   }
 }
 

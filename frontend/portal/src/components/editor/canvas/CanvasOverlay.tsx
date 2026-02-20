@@ -1,17 +1,20 @@
 import { useMemo } from "react";
 import SpotlightOverlay from "./overlays/SpotlightOverlay";
-import { SpotlightEffect, CalloutEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { SpotlightEffect, CalloutEffect, ZoomEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import CalloutOverlay from "./overlays/CalloutOverlay";
+import ZoomOverlay from "./overlays/ZoomOverlay";
 import { Resolution } from "@coasterai/pb/coasterai/core/v1/video_pb";
 
 interface CanvasOverlayProps {
   resolution: Resolution;
   spotlights?: SpotlightEffect[];
-  callouts?: CalloutEffect[]
+  callouts?: CalloutEffect[];
+  zooms?: ZoomEffect[];
   selectedEffectId: string | null;
   onSelectObject: (id: string | null) => void;
   onUpdateSpotlight?: (id: string, updates: Partial<SpotlightEffect>) => void;
   onUpdateCallout?: (id: string, updates: Partial<CalloutEffect>) => void;
+  onUpdateZoom?: (id: string, updates: Partial<ZoomEffect>) => void;
   containerWidth: number;
   containerHeight: number;
 }
@@ -20,10 +23,12 @@ const CanvasOverlay = ({
   resolution,
   spotlights = [],
   callouts = [],
+  zooms = [],
   selectedEffectId,
   onSelectObject,
   onUpdateSpotlight,
   onUpdateCallout,
+  onUpdateZoom,
   containerWidth,
   containerHeight,
 }: CanvasOverlayProps) => {
@@ -85,6 +90,24 @@ const CanvasOverlay = ({
           onUpdate={(updates) => {
             if (onUpdateCallout) {
               onUpdateCallout(callout.id, updates as Partial<CalloutEffect>);
+            }
+          }}
+        />
+      ))}
+
+      {/* Render zoom effects using ZoomOverlay for interactive editing */}
+      {zooms.map((zoom) => (
+        <ZoomOverlay
+          key={zoom.id}
+          zoom={zoom}
+          resolution={resolution}
+          containerWidth={containerWidth}
+          containerHeight={containerHeight}
+          isSelected={selectedEffectId === zoom.id}
+          onSelect={() => onSelectObject(zoom.id)}
+          onUpdate={(updates) => {
+            if (onUpdateZoom) {
+              onUpdateZoom(zoom.id, updates as Partial<ZoomEffect>);
             }
           }}
         />

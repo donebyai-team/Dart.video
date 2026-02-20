@@ -12,7 +12,8 @@ import {
   Focus,
   CircleDot,
   Layers,
-  HelpCircle
+  HelpCircle,
+  ZoomIn
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
@@ -40,7 +41,8 @@ const slideTypeLabels: Record<SlideType, { label: string; icon: React.ElementTyp
 }
 const insertTools: { id: EffectType; name: string; icon: React.ElementType }[] = [
   { id: EffectType.CALLOUT, name: 'Callout', icon: Focus },
-  { id: EffectType.SPOTLIGHT, name: 'Spotlight', icon: CircleDot }
+  { id: EffectType.SPOTLIGHT, name: 'Spotlight', icon: CircleDot },
+  { id: EffectType.ZOOM, name: 'Zoom', icon: ZoomIn },
 ]
 
 const PlayerToolbar = ({ onDurationChange, minDuration = 1, maxDuration = 180 }: PlayerToolbarProps) => {
@@ -151,7 +153,7 @@ const PlayerToolbar = ({ onDurationChange, minDuration = 1, maxDuration = 180 }:
               <DropdownMenuContent align='start' className='w-40 bg-popover'>
                 {insertTools.map(tool => (
                   <DropdownMenuItem
-                    key={tool.id}
+                    key={String(tool.id)}
                     onClick={() => onSelectTool({ type: ActiveToolType.INSERT, tool: tool.id })}
                     className='gap-2'
                   >

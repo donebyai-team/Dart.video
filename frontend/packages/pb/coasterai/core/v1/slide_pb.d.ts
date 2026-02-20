@@ -770,6 +770,11 @@ export enum EffectType {
    * @generated from enum value: EFFECT_TYPE_SPOTLIGHT = 2;
    */
   SPOTLIGHT = 2,
+
+  /**
+   * @generated from enum value: EFFECT_TYPE_ZOOM = 3;
+   */
+  ZOOM = 3,
 }
 
 /**

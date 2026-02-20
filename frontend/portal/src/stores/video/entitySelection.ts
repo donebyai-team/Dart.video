@@ -163,18 +163,23 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
 const getEffectTypeFromID = (
   effectId: string,
   get: VideoStoreGet
-): EffectType => {
+): EffectType | null => {
 
   const spotlights = get().getSpotlights?.() ?? []
   const callouts = get().getCallouts?.() ?? []
-
-  if (callouts.some(e => e.id === effectId)) {
-    return EffectType.CALLOUT
-  }
+  const zooms = get().getZooms?.() ?? []
 
   if (spotlights.some(e => e.id === effectId)) {
     return EffectType.SPOTLIGHT
   }
 
-  return EffectType.UNDEFINED
+  if (callouts.some(e => e.id === effectId)) {
+    return EffectType.CALLOUT
+  }
+
+  if (zooms.some(e => e.id === effectId)) {
+    return EffectType.ZOOM
+  }
+
+  return null
 }

@@ -1,42 +1,41 @@
 import { Button } from '@/components/ui/button'
-import { CalloutEffect, EffectType, SpotlightEffect } from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import { CircleDot, Focus, Trash2, X } from 'lucide-react'
+import { CalloutEffect, EffectType, SpotlightEffect, ZoomEffect } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { CircleDot, Focus, Trash2, X, ZoomIn } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import CalloutSettings from './CalloutSettings'
 import SpotlightSettings from './SpotlightSettings'
+import ZoomSettings from './ZoomSettings'
+
 
 interface InsertSettingsProps {
   tool: EffectType
-  currentObject: SpotlightEffect | CalloutEffect;
-  onUpdate: (settings: Partial<SpotlightEffect | CalloutEffect>) => void
+  currentObject: SpotlightEffect | CalloutEffect | ZoomEffect
+  onUpdate: (settings: Partial<SpotlightEffect | CalloutEffect | ZoomEffect>) => void
   onDelete?: () => void
   onClose: () => void
   canDelete?: boolean
-  // Spotlight-specific props
   slideDuration?: number
   slideStartTime?: number
   transitionDuration?: number
   onPlay?: () => void
 }
 
-
-export const toolMapping: Record<
-  EffectType,
-  { label: string; icon: React.ElementType }
-> = {
+export const toolMapping: Record<number, { label: string; icon: React.ElementType }> = {
   [EffectType.UNDEFINED]: {
     label: "Unknown",
     icon: CircleDot,
   },
-
   [EffectType.CALLOUT]: {
     label: "Callout",
     icon: Focus,
   },
-
   [EffectType.SPOTLIGHT]: {
     label: "Spotlight",
     icon: CircleDot,
+  },
+  [EffectType.ZOOM]: {
+    label: "Zoom",
+    icon: ZoomIn,
   },
 };
 
@@ -52,7 +51,7 @@ const InsertSettings = ({
   onPlay,
   transitionDuration = 0
 }: InsertSettingsProps) => {
-  const [settings, setSettings] = useState<SpotlightEffect | CalloutEffect>(currentObject);
+  const [settings, setSettings] = useState<SpotlightEffect | CalloutEffect | ZoomEffect>(currentObject);
 
   console.debug('insert settings', tool, currentObject)
   const ToolIcon = toolMapping[tool].icon
@@ -88,6 +87,18 @@ const InsertSettings = ({
             slideStartTime={slideStartTime}
             //We need transition duration to calculate accurate start and end time of spotlight
             //so that they don't overlap with transitions
+            transitionDuration={transitionDuration}
+            onPlay={onPlay}
+          />
+        )
+      case EffectType.ZOOM:
+        return (
+          <ZoomSettings
+            settings={settings as ZoomEffect}
+            onChange={settings => {
+              onUpdate(settings)
+            }}
+            slideDuration={slideDuration}
             transitionDuration={transitionDuration}
             onPlay={onPlay}
           />

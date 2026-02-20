@@ -122,6 +122,7 @@ enum EffectType {
   EFFECT_TYPE_UNDEFINED = 0;
   EFFECT_TYPE_CALLOUT = 1;
   EFFECT_TYPE_SPOTLIGHT = 2;
+  EFFECT_TYPE_ZOOM = 3;
 }
 
 // ===================== SLIDE =====================

@@ -1,4 +1,4 @@
-import { CalloutEffect, SpotlightEffect } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { CalloutEffect, SpotlightEffect, ZoomEffect } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { SelectedSection, VideoStoreGet, VideoStoreSet } from './types'
 import { Video } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import { updateVideoConfigSections, updateSelectedSlide } from './utils'
@@ -214,6 +214,114 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
       selectedSlide: updateSelectedSlide(selectedSlide, slide => ({
         ...slide,
         callouts: (slide.callouts || []).filter(e => e?.id !== effectId),
+      })),
+      selectedEffectId: null,
+    })
+
+    get().autoSyncVideoConfig()
+  },
+
+  /* ================= ZOOM ================= */
+
+  getZooms: () => {
+    const { selectedSlide } = get()
+    return selectedSlide?.slide?.zooms || []
+  },
+
+  addZoom(effect: ZoomEffect) {
+    const { videoConfig, selectedSlide } = get()
+    if (!selectedSlide?.slide || !selectedSlide?.section || !videoConfig) return
+
+    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
+      sections.map(section =>
+        section.id === selectedSlide.section.id
+          ? {
+              ...section,
+              slides: section.slides.map(slide =>
+                slide.id === selectedSlide.slide.id
+                  ? { ...slide, zooms: [...(slide.zooms || []), effect] }
+                  : slide
+              ),
+            }
+          : section
+      )
+    )
+
+    set({
+      videoConfig: newVideoConfig,
+      selectedSlide: updateSelectedSlide(selectedSlide, slide => ({
+        ...slide,
+        zooms: [...(slide.zooms || []), effect],
+      })),
+    })
+
+    get().autoSyncVideoConfig()
+  },
+
+  updateZoom(effectId: string, updates: Partial<ZoomEffect>) {
+    const { videoConfig, selectedSlide } = get()
+    if (!selectedSlide?.slide || !selectedSlide?.section || !videoConfig) return
+
+    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
+      sections.map(section =>
+        section.id === selectedSlide.section.id
+          ? {
+              ...section,
+              slides: section.slides.map(slide =>
+                slide.id === selectedSlide.slide.id
+                  ? {
+                      ...slide,
+                      zooms: (slide.zooms || []).map(e =>
+                        e?.id === effectId ? { ...e, ...updates } : e
+                      ),
+                    }
+                  : slide
+              ),
+            }
+          : section
+      )
+    )
+
+    set({
+      videoConfig: newVideoConfig,
+      selectedSlide: updateSelectedSlide(selectedSlide, slide => ({
+        ...slide,
+        zooms: (slide.zooms || []).map(e =>
+          e?.id === effectId ? { ...e, ...updates } : e
+        ),
+      })),
+    })
+
+    get().autoSyncVideoConfig()
+  },
+
+  deleteZoom(effectId: string) {
+    const { videoConfig, selectedSlide } = get()
+    if (!selectedSlide?.slide || !selectedSlide?.section || !videoConfig) return
+
+    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
+      sections.map(section =>
+        section.id === selectedSlide.section.id
+          ? {
+              ...section,
+              slides: section.slides.map(slide =>
+                slide.id === selectedSlide.slide.id
+                  ? {
+                      ...slide,
+                      zooms: (slide.zooms || []).filter(e => e?.id !== effectId),
+                    }
+                  : slide
+              ),
+            }
+          : section
+      )
+    )
+
+    set({
+      videoConfig: newVideoConfig,
+      selectedSlide: updateSelectedSlide(selectedSlide, slide => ({
+        ...slide,
+        zooms: (slide.zooms || []).filter(e => e?.id !== effectId),
       })),
       selectedEffectId: null,
     })
