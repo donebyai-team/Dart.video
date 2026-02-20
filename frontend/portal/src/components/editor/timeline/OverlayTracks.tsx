@@ -73,12 +73,17 @@ export function OverlayTracks({
   }
 
   return (
-    <div className='relative'>
+    <div className='relative border-t border-border/40'>
       {tracks.map((trackOverlays, trackIndex) => (
-        <div key={trackIndex} className='relative h-8 mb-1 mt-[-1px] '>
+        <div
+          key={trackIndex}
+          className='relative py-1.5 border-b border-border/40'
+          style={{ height: 40 }}
+        >
           {trackOverlays.map(overlayItem => (
             <div
               key={overlayItem.id}
+              className='absolute inset-y-1.5 left-0 right-0'
               onMouseMove={e =>
                 handleTileHover(e, {
                   name: overlayItem.overlayType,
@@ -94,7 +99,6 @@ export function OverlayTracks({
                 pixelsPerSecond={pixelsPerSecond}
                 onClick={() => {
                   onSelectOverlay?.(overlayItem.overlayId, overlayItem.slideId)
-                  // Seek to the start of the clicked overlay
                   if (onSeek) {
                     onSeek(overlayItem.startTime)
                   }

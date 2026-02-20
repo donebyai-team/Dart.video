@@ -156,9 +156,13 @@ const PlayerTimeline = ({
     : -1;
   const numOverlayTracks = maxTrackIndex + 1;
   const slideTrackHeight = 48;
-  const overlayTrackHeight = 32;
+  const overlayTrackHeight = 40;
   const timeMarkerHeight = 24;
-  const totalHeight = timeMarkerHeight + slideTrackHeight + (numOverlayTracks * overlayTrackHeight);
+  // Max visible overlay area: 2 tracks. Extra tracks scroll inside this section.
+  const MAX_OVERLAY_HEIGHT = 82; // 1px border-t + 2 * 40px tracks + 1px rounding
+  const actualOverlayHeight = numOverlayTracks > 0 ? 1 + numOverlayTracks * overlayTrackHeight : 0;
+  const visibleOverlayHeight = Math.min(actualOverlayHeight, MAX_OVERLAY_HEIGHT);
+  const totalHeight = timeMarkerHeight + visibleOverlayHeight + slideTrackHeight;
 
   // Clear dragFrame once currentFrame has actually changed (meaning parent processed the seek)
   const prevCurrentFrameRef2 = useRef(currentFrame);
@@ -210,8 +214,11 @@ const PlayerTimeline = ({
         {/* Time markers - use real Remotion duration */}
         <TimeMarkerRow totalDuration={realTotalDuration} pixelsPerSecond={pixelsPerSecond} />
 
-        {/* Overlay tracks */}
-        <div className="absolute inset-x-0" style={{ top: `${timeMarkerHeight}px` }}>
+        {/* Overlay tracks — capped height, scrolls vertically if more than 2 tracks */}
+        <div
+          className="absolute inset-x-0 overflow-y-auto"
+          style={{ top: `${timeMarkerHeight}px`, maxHeight: `${MAX_OVERLAY_HEIGHT}px` }}
+        >
           <OverlayTracks
             overlayItems={overlayItems}
             selectedEffectId={selectedEffectId}
@@ -221,8 +228,8 @@ const PlayerTimeline = ({
             onSeek={(time) => onSeek(Math.round(time * fps))}
           />
         </div>
-        {/* Slide track */}
-        <div className="absolute inset-x-0" style={{ top: `${timeMarkerHeight + (numOverlayTracks * overlayTrackHeight) + (numOverlayTracks > 0 ? 4 : 0)}px` }}>
+        {/* Slide track — always pinned below the overlay section */}
+        <div className="absolute inset-x-0" style={{ top: `${timeMarkerHeight + visibleOverlayHeight}px` }}>
           <SlideTrack
             slideItems={slideItems}
             transitionItems={transitionItems}

@@ -40,7 +40,7 @@ export function OverlayTile({
   return (
     <div
       className={cn(
-        "absolute top-0 h-8 cursor-pointer transition-all",
+        "absolute top-0 h-full rounded-md cursor-pointer transition-all",
         isZoom
           ? "bg-gradient-to-r from-cyan-500/70 to-teal-500/70 border border-cyan-400/40 hover:from-cyan-500/90 hover:to-teal-500/90 hover:border-cyan-400/60"
           : "bg-gradient-to-r from-violet-500/70 to-purple-500/70 border border-violet-400/40 hover:from-violet-500/90 hover:to-purple-500/90 hover:border-violet-400/60",

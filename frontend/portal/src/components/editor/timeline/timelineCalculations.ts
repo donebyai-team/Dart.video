@@ -277,35 +277,34 @@ export function calculateOverlayItems(slides: TimelineSlide[], fps: number): Ove
 }
 
 /**
- * Assign track indices to overlays to avoid visual overlap
- * Uses a greedy algorithm to find the first available track for each overlay
+ * Assign track indices so every effect gets its own dedicated row.
+ * Effects are grouped by type (SPOTLIGHT → CALLOUT → ZOOM) and each
+ * individual effect within a group gets the next available row.
  *
- * @param overlays - Array of overlay items (trackIndex will be modified)
- * @returns Array of overlay items with assigned trackIndex values
+ * Example: 2 spotlights + 1 zoom → 3 rows
+ *   Row 0: spotlight A
+ *   Row 1: spotlight B
+ *   Row 2: zoom A
  */
 export function assignOverlayTracks(overlays: OverlayItem[]): OverlayItem[] {
   if (overlays.length === 0) return []
 
-  // Sort by start time for greedy algorithm
-  const sorted = [...overlays].sort((a, b) => a.startTime - b.startTime)
+  const typeOrder = [EffectType.SPOTLIGHT, EffectType.CALLOUT, EffectType.ZOOM]
 
-  // Track end times for each track
-  const tracks: { endTime: number }[] = []
+  // Collect all overlays in type order
+  const ordered: OverlayItem[] = []
+  for (const effectType of typeOrder) {
+    ordered.push(...overlays.filter(o => o.overlayType === effectType))
+  }
 
-  return sorted.map(overlay => {
-    // Find first available track (where overlay doesn't overlap)
-    const trackIndex = tracks.findIndex(track => track.endTime <= overlay.startTime)
+  // Reverse so the most recently added effect (last in array) gets trackIndex 0 (top row)
+  const result: OverlayItem[] = []
+  let nextTrack = 0
+  for (const overlay of [...ordered].reverse()) {
+    result.push({ ...overlay, trackIndex: nextTrack++ })
+  }
 
-    if (trackIndex === -1) {
-      // Need new track
-      tracks.push({ endTime: overlay.startTime + overlay.duration })
-      return { ...overlay, trackIndex: tracks.length - 1 }
-    } else {
-      // Use existing track
-      tracks[trackIndex].endTime = overlay.startTime + overlay.duration
-      return { ...overlay, trackIndex }
-    }
-  })
+  return result
 }
 
 /**
