@@ -15,7 +15,7 @@ export type TemplateRegistryEntry = {
   }
 }
 
-const CDN_BASE = process.env.NEXT_PUBLIC_TEMPLATE_CDN_BASE ?? 'https://ik.imagekit.io/coasterai/templates'
+const CDN_BASE = process.env.NEXT_PUBLIC_TEMPLATE_CDN_BASE ?? 'https://ik.imagekit.io/coasterai'
 const LOCAL_BASE = '/templates'
 
 const sanitizeName = (name: string) => name.replace(/[^a-zA-Z0-9_$]/g, '')

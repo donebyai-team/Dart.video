@@ -61,4 +61,5 @@ type Template struct {
 	PreviewUrl    string             `db:"preview_url"`
 	CreatedAt     time.Time          `db:"created_at"`
 	UpdatedAt     *time.Time         `db:"updated_at"`
+	Repeatable    bool               `db:"repeatable"`
 }

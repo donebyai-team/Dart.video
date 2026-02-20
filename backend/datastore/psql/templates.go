@@ -90,6 +90,7 @@ func (r *Database) CreateTemplate(ctx context.Context, t *models.Template) (*mod
 		"schema":         t.Schema,
 		"preview":        t.Preview,
 		"cdn_url":        t.CDNUrl,
+		"repeatable":     t.Repeatable,
 		"preview_url":    t.PreviewUrl,
 	})
 	if err != nil {
@@ -109,6 +110,7 @@ func (r *Database) UpdateTemplate(ctx context.Context, t *models.Template) error
 		"schema":      t.Schema,
 		"preview":     t.Preview,
 		"cdn_url":     t.CDNUrl,
+		"repeatable":  t.Repeatable,
 		"preview_url": t.PreviewUrl,
 	})
 	if err != nil {

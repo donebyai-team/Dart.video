@@ -243,6 +243,7 @@ func syncTemplate(ctx context.Context, db datastore.TemplateRepository, template
 
 	var metadata struct {
 		Categories []string `json:"categories"`
+		Repeatable bool     `json:"repeatable"`
 	}
 	if err := json.Unmarshal(metadataBytes, &metadata); err != nil {
 		return fmt.Errorf("metadata.json malformed in template %s: %w", templateName, err)
@@ -263,7 +264,7 @@ func syncTemplate(ctx context.Context, db datastore.TemplateRepository, template
 		}
 	}
 
-	cdnURL := fmt.Sprintf("templates/%s/%s.mjs", animFolderName, templateName)
+	cdnURL := fmt.Sprintf("templates/%s/%s.cdn.js", animFolderName, templateName)
 
 	existing, err := db.GetTemplateByName(ctx, string(animType), templateName)
 	if err != nil && !errors.Is(err, datastore.NotFound) {
@@ -276,8 +277,9 @@ func syncTemplate(ctx context.Context, db datastore.TemplateRepository, template
 			AnimationType: animType,
 			Categories:    categories,
 			Description:   description,
-			Schema:        json.RawMessage(schemaBytes),
-			Preview:       json.RawMessage(previewBytes),
+			Repeatable:    metadata.Repeatable,
+			Schema:        schemaBytes,
+			Preview:       previewBytes,
 			CDNUrl:        cdnURL,
 			PreviewUrl:    "",
 		})
