@@ -1,31 +1,43 @@
-import type React from "react"
+import type React from 'react'
 
 export type TemplateModule = {
   RemoteComponent: React.ComponentType<any>
 }
 
 export type TemplateRegistryEntry = {
-  local?: () => Promise<TemplateModule>
+  local?: {
+    url: string
+    globalName: string
+  }
   cdn?: {
     url: string
     globalName: string
   }
 }
 
-// Set NEXT_PUBLIC_TEMPLATE_CDN_BASE to your CDN root, e.g.:
-// https://cdn.example.com/remotion-templates
-const CDN_BASE = process.env.NEXT_PUBLIC_TEMPLATE_CDN_BASE ?? ''
+const CDN_BASE = process.env.NEXT_PUBLIC_TEMPLATE_CDN_BASE ?? 'https://ik.imagekit.io/coasterai/templates'
+const LOCAL_BASE = '/templates'
 
-export const templateRegistry: Record<string, TemplateRegistryEntry> = {
-  textCascade: {
-    // Local fallback: keeps existing behavior while testing.
-    local: () => import('./build/TextCascade.mjs') as Promise<TemplateModule>,
-    // CDN file to manually upload from scripts/build-component.mjs output.
+const sanitizeName = (name: string) => name.replace(/[^a-zA-Z0-9_$]/g, '')
+const toGlobalName = (name: string) => `__COASTER_TEMPLATE__${sanitizeName(name)}`
+
+// Keep file names aligned with the template name passed in slide.content.templateId.
+// Example templateId: TextCascade -> TextCascade.cdn.js
+export const resolveTemplateEntry = (templateName: string): TemplateRegistryEntry => {
+  const fileName = `${templateName}.cdn.js`
+  const globalName = toGlobalName(templateName)
+  const localBase = LOCAL_BASE.replace(/\/$/, '')
+
+  return {
     cdn: CDN_BASE
       ? {
-          url: `https://ik.imagekit.io/coasterai/templates/TextCascade.cdn.js`,
-          globalName: '__COASTER_TEMPLATE__TextCascade'
+          url: `${CDN_BASE.replace(/\/$/, '')}/${fileName}`,
+          globalName
         }
-      : undefined
+      : undefined,
+    local: {
+      url: `${localBase}/${fileName}`,
+      globalName
+    }
   }
 }

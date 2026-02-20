@@ -4,7 +4,7 @@ import * as ReactDOM from 'react-dom'
 import * as ReactJsxRuntime from 'react/jsx-runtime'
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion'
 import * as Remotion from 'remotion'
-import { templateRegistry, TemplateModule } from '../../../../../../packages/template-registery'
+import { resolveTemplateEntry, TemplateModule } from '../../../../../../packages/template-registery'
 import {
   BlurInAnimation,
   LetterCascadeAnimation,
@@ -112,8 +112,8 @@ const background = backgroundStyleToCSS(slide.backgroundStyle);
     setRemoteComponent(null)
 
     ;(async () => {
-      const template = templateRegistry[templateId]
-      if (!template) return
+      const template = resolveTemplateEntry("TextCascade")
+      console.debug("[Resolved Template]", templateId, template)
 
       try {
         if (template.cdn?.url) {
@@ -122,17 +122,17 @@ const background = backgroundStyleToCSS(slide.backgroundStyle);
           return
         }
 
-        if (template.local) {
-          const mod = await template.local()
+        if (template.local?.url) {
+          const mod = await loadScriptTemplate(template.local.url, template.local.globalName)
           if (!disposed) setRemoteComponent(mod)
         }
       } catch (error) {
         console.error(`Failed to load template "${templateId}"`, error)
 
         // Fallback to local loader if CDN load fails.
-        if (template.local) {
+        if (template.local?.url) {
           try {
-            const mod = await template.local()
+            const mod = await loadScriptTemplate(template.local.url, template.local.globalName)
             if (!disposed) setRemoteComponent(mod)
           } catch (fallbackError) {
             console.error(`Fallback local load failed for template "${templateId}"`, fallbackError)

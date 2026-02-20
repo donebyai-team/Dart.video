@@ -169,7 +169,7 @@ func syncCategories(ctx context.Context, db datastore.TemplateRepository, catego
 			return fmt.Errorf("category file is empty: %s in %s", fileName, animFolderName)
 		}
 
-		existing, err := db.GetTemplateCategoryByName(ctx, string(animType), categoryName)
+		existing, err := db.GetTemplateCategoryByName(ctx, animType, categoryName)
 		if err != nil && !errors.Is(err, datastore.NotFound) {
 			return fmt.Errorf("failed to fetch category %s: %w", categoryName, err)
 		}
@@ -254,7 +254,7 @@ func syncTemplate(ctx context.Context, db datastore.TemplateRepository, template
 	}
 
 	for _, catName := range categories {
-		_, err := db.GetTemplateCategoryByName(ctx, string(animType), catName)
+		_, err := db.GetTemplateCategoryByName(ctx, animType, catName)
 		if err != nil {
 			if errors.Is(err, datastore.NotFound) {
 				return fmt.Errorf("unknown category %q referenced in template %s (not found for animation type %s)", catName, templateName, animFolderName)

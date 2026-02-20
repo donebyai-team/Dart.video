@@ -1,14 +1,30 @@
 import webpack from 'webpack'
 import path from 'path'
+import { copyFileSync, mkdirSync } from 'fs'
 import { fileURLToPath } from 'url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-// Simple one-template build. You can duplicate this config per template.
+const rawArgs = process.argv.slice(2).filter(arg => arg !== '--')
+const [templateFolderArg, templateNameArg, outArg] = rawArgs
+const toGlobalName = name => `__COASTER_TEMPLATE__${name.replace(/[^a-zA-Z0-9_$]/g, '')}`
+
+if (!templateFolderArg || !templateNameArg) {
+  console.error(
+    'Usage: pnpm build:template -- <template-folder> <template-name> [out-file]\nExample: pnpm build:template -- text-animation/text-cascade TextCascade'
+  )
+  process.exit(1)
+}
+
 const entry = path.resolve(
   __dirname,
-  '../packages/templates/text-animation/text-cascade/TextCascade.tsx'
+  '..',
+  'packages/templates',
+  templateFolderArg,
+  `${templateNameArg}.tsx`
 )
+const outFile = outArg ?? `${templateNameArg}.cdn.js`
+const globalName = toGlobalName(templateNameArg)
 
 const config = {
   mode: 'production',
@@ -17,11 +33,11 @@ const config = {
   output: {
     path: path.resolve(__dirname, '../packages/build'),
     // Upload this file to your CDN.
-    filename: 'TextCascade.cdn.js',
+    filename: outFile,
     library: {
       type: 'window',
       // The runtime loader reads this window key after loading script.
-      name: '__COASTER_TEMPLATE__TextCascade'
+      name: globalName
     },
     clean: false
   },
@@ -70,7 +86,15 @@ webpack(config, (err, stats) => {
     process.exit(1)
   }
 
-  console.log('Built CDN template file: packages/build/TextCascade.cdn.js')
-  console.log('Expose key: window.__COASTER_TEMPLATE__TextCascade')
+  const builtFile = path.resolve(__dirname, '../packages/build', outFile)
+  const localTemplatesDir = path.resolve(__dirname, '../portal/public/templates')
+  const localFile = path.resolve(localTemplatesDir, outFile)
+
+  mkdirSync(localTemplatesDir, { recursive: true })
+  copyFileSync(builtFile, localFile)
+
+  console.log(`Built CDN template file: packages/build/${outFile}`)
+  console.log(`Copied local test file: portal/public/templates/${outFile}`)
+  console.log(`Expose key: window.${globalName}`)
   console.log(stats?.toString({ colors: true, minimal: true }))
 })

@@ -54,7 +54,7 @@ func (r *Database) UpdateTemplateCategory(ctx context.Context, tc *models.Templa
 
 func (r *Database) GetTemplateCategoriesByAnimationType(
 	ctx context.Context,
-	animationType string,
+	animationType models.AnimationType,
 ) ([]*models.TemplateCategory, error) {
 	return getMany[models.TemplateCategory](
 		ctx,
@@ -68,7 +68,7 @@ func (r *Database) GetTemplateCategoriesByAnimationType(
 
 func (r *Database) GetTemplateCategoryByName(
 	ctx context.Context,
-	animationType string,
+	animationType models.AnimationType,
 	name string,
 ) (*models.TemplateCategory, error) {
 	return getOne[models.TemplateCategory](ctx, r, "templates/query_template_categories_by_name.sql", map[string]any{
