@@ -25,3 +25,53 @@ export const uploadMedia = async (file: File): Promise<UploadedMedia> => {
 
   return create(UploadedMediaSchema, data)
 }
+
+export type PollVideoRenderProgress = {
+  completed?: boolean
+  renderPhase?: string
+  renderCurrent?: number
+  renderTotal?: number
+  renderPercent?: number
+  renderEtaSeconds?: number
+}
+
+export type PollVideoRenderResult =
+  | { type: 'progress'; data: PollVideoRenderProgress }
+  | { type: 'file'; blob: Blob; fileName: string }
+
+const parseFileName = (contentDisposition: string | null, fallback: string) => {
+  if (!contentDisposition) return fallback
+  const match = contentDisposition.match(/filename="?([^"]+)"?/)
+  return match?.[1] ?? fallback
+}
+
+export const pollVideoRender = async (
+  jobId: string,
+  videoId: string,
+  version: string
+): Promise<PollVideoRenderResult> => {
+  const token = await browserTokenStore.Get()
+  const params = new URLSearchParams({ jobId, videoId, version })
+
+  const response = await fetch(`${CONFIG_API_URI}/video/render?${params.toString()}`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token?.token}`
+    }
+  })
+
+  if (!response.ok) {
+    const errText = await response.text()
+    throw new Error(errText || `Render polling failed (${response.status})`)
+  }
+
+  const contentType = response.headers.get('content-type') || ''
+  if (contentType.includes('video/mp4')) {
+    const blob = await response.blob()
+    const fileName = parseFileName(response.headers.get('content-disposition'), `${videoId}-${version}.mp4`)
+    return { type: 'file', blob, fileName }
+  }
+
+  const data = (await response.json()) as PollVideoRenderProgress
+  return { type: 'progress', data }
+}

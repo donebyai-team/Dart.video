@@ -1,15 +1,18 @@
 import Slideshow from '../components/editor/RemotionSlideshow'
-import { Composition } from 'remotion'
+import { Composition, getInputProps } from 'remotion'
 import video from './video.json'
 
 export const MyVideo = () => {
+  const inputProps = getInputProps() as { video?: typeof video } | undefined
+  const videoData = inputProps?.video ?? video
+
   //Get video FPS and total frames of video
-  const fps = video.metadata.fps
-  const totalVideoFrames = video.metadata.duration * fps
+  const fps = videoData.metadata.fps
+  const totalVideoFrames = videoData.metadata.duration * fps
 
   // Get video resolution i.e width and height
-  const width = video.metadata.resolution.width
-  const height = video.metadata.resolution.height
+  const width = videoData.metadata.resolution.width
+  const height = videoData.metadata.resolution.height
 
   return (
     <>
@@ -24,7 +27,7 @@ export const MyVideo = () => {
           fps,
           isEditing: false, // Only enable editing when NOT playing
           onSelectTemplate: undefined,
-          video
+          video: videoData
         }}
       />
     </>

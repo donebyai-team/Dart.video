@@ -1,5 +1,5 @@
 {
-    "id": "eafd7e6c-6d9c-496e-af4d-b7e4dce4884f",
+    "id": "8e295533-5763-4119-9a0f-dd7ca8b1a0eb",
     "name": "test",
     "config": {
         "sections": [
@@ -482,6 +482,7 @@
         "duration": 46.686,
         "backgroundAudioUrl": "https://ik.imagekit.io/coasterai/freepik-deep-calm_A4WXzk4Mk.mp3"
     },
+    "version": 2,
     "createdAt": "2026-02-15T17:04:45.227907Z",
     "status": "VIDEO_STATUS_PROCESSING"
 }

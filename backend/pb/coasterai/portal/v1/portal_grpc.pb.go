@@ -36,6 +36,7 @@ const (
 	PortalService_GetVideos_FullMethodName           = "/coasterai.portal.v1.PortalService/GetVideos"
 	PortalService_DeleteVideo_FullMethodName         = "/coasterai.portal.v1.PortalService/DeleteVideo"
 	PortalService_UpdateVideoConfig_FullMethodName   = "/coasterai.portal.v1.PortalService/UpdateVideoConfig"
+	PortalService_RenderVideo_FullMethodName         = "/coasterai.portal.v1.PortalService/RenderVideo"
 )
 
 // PortalServiceClient is the client API for PortalService service.
@@ -60,6 +61,7 @@ type PortalServiceClient interface {
 	GetVideos(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetVideosResponse, error)
 	DeleteVideo(ctx context.Context, in *DeleteVideoRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	UpdateVideoConfig(ctx context.Context, in *UpdateVideoConfigRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	RenderVideo(ctx context.Context, in *RenderVideoRequest, opts ...grpc.CallOption) (*RenderVideoResponse, error)
 }
 
 type portalServiceClient struct {
@@ -237,6 +239,15 @@ func (c *portalServiceClient) UpdateVideoConfig(ctx context.Context, in *UpdateV
 	return out, nil
 }
 
+func (c *portalServiceClient) RenderVideo(ctx context.Context, in *RenderVideoRequest, opts ...grpc.CallOption) (*RenderVideoResponse, error) {
+	out := new(RenderVideoResponse)
+	err := c.cc.Invoke(ctx, PortalService_RenderVideo_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PortalServiceServer is the server API for PortalService service.
 // All implementations must embed UnimplementedPortalServiceServer
 // for forward compatibility
@@ -259,6 +270,7 @@ type PortalServiceServer interface {
 	GetVideos(context.Context, *emptypb.Empty) (*GetVideosResponse, error)
 	DeleteVideo(context.Context, *DeleteVideoRequest) (*emptypb.Empty, error)
 	UpdateVideoConfig(context.Context, *UpdateVideoConfigRequest) (*emptypb.Empty, error)
+	RenderVideo(context.Context, *RenderVideoRequest) (*RenderVideoResponse, error)
 	mustEmbedUnimplementedPortalServiceServer()
 }
 
@@ -313,6 +325,9 @@ func (UnimplementedPortalServiceServer) DeleteVideo(context.Context, *DeleteVide
 }
 func (UnimplementedPortalServiceServer) UpdateVideoConfig(context.Context, *UpdateVideoConfigRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateVideoConfig not implemented")
+}
+func (UnimplementedPortalServiceServer) RenderVideo(context.Context, *RenderVideoRequest) (*RenderVideoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RenderVideo not implemented")
 }
 func (UnimplementedPortalServiceServer) mustEmbedUnimplementedPortalServiceServer() {}
 
@@ -618,6 +633,24 @@ func _PortalService_UpdateVideoConfig_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PortalService_RenderVideo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RenderVideoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PortalServiceServer).RenderVideo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PortalService_RenderVideo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PortalServiceServer).RenderVideo(ctx, req.(*RenderVideoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PortalService_ServiceDesc is the grpc.ServiceDesc for PortalService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -684,6 +717,10 @@ var PortalService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateVideoConfig",
 			Handler:    _PortalService_UpdateVideoConfig_Handler,
+		},
+		{
+			MethodName: "RenderVideo",
+			Handler:    _PortalService_RenderVideo_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

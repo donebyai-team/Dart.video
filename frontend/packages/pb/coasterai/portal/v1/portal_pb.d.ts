@@ -13,6 +13,38 @@ import type { EmptySchema, Timestamp } from "@bufbuild/protobuf/wkt";
 export declare const file_coasterai_portal_v1_portal: GenFile;
 
 /**
+ * @generated from message coasterai.portal.v1.RenderVideoRequest
+ */
+export declare type RenderVideoRequest = Message<"coasterai.portal.v1.RenderVideoRequest"> & {
+  /**
+   * @generated from field: string videoId = 1;
+   */
+  videoId: string;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.RenderVideoRequest.
+ * Use `create(RenderVideoRequestSchema)` to create a new message.
+ */
+export declare const RenderVideoRequestSchema: GenMessage<RenderVideoRequest>;
+
+/**
+ * @generated from message coasterai.portal.v1.RenderVideoResponse
+ */
+export declare type RenderVideoResponse = Message<"coasterai.portal.v1.RenderVideoResponse"> & {
+  /**
+   * @generated from field: string jobId = 1;
+   */
+  jobId: string;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.RenderVideoResponse.
+ * Use `create(RenderVideoResponseSchema)` to create a new message.
+ */
+export declare const RenderVideoResponseSchema: GenMessage<RenderVideoResponse>;
+
+/**
  * @generated from message coasterai.portal.v1.DeleteVideoRequest
  */
 export declare type DeleteVideoRequest = Message<"coasterai.portal.v1.DeleteVideoRequest"> & {
@@ -900,6 +932,14 @@ export declare const PortalService: GenService<{
     methodKind: "unary";
     input: typeof UpdateVideoConfigRequestSchema;
     output: typeof EmptySchema;
+  },
+  /**
+   * @generated from rpc coasterai.portal.v1.PortalService.RenderVideo
+   */
+  renderVideo: {
+    methodKind: "unary";
+    input: typeof RenderVideoRequestSchema;
+    output: typeof RenderVideoResponseSchema;
   },
 }>;
 

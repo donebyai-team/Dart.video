@@ -29,6 +29,15 @@ service PortalService {
   rpc GetVideos(.google.protobuf.Empty) returns (GetVideosResponse);
   rpc DeleteVideo(DeleteVideoRequest) returns (.google.protobuf.Empty);
   rpc UpdateVideoConfig(UpdateVideoConfigRequest) returns (.google.protobuf.Empty);
+  rpc RenderVideo(RenderVideoRequest) returns (RenderVideoResponse);
+}
+
+message RenderVideoRequest {
+  string videoId = 1;
+}
+
+message RenderVideoResponse {
+  string jobId = 1;
 }
 
 message DeleteVideoRequest {

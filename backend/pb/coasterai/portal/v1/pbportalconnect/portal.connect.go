@@ -78,6 +78,9 @@ const (
 	// PortalServiceUpdateVideoConfigProcedure is the fully-qualified name of the PortalService's
 	// UpdateVideoConfig RPC.
 	PortalServiceUpdateVideoConfigProcedure = "/coasterai.portal.v1.PortalService/UpdateVideoConfig"
+	// PortalServiceRenderVideoProcedure is the fully-qualified name of the PortalService's RenderVideo
+	// RPC.
+	PortalServiceRenderVideoProcedure = "/coasterai.portal.v1.PortalService/RenderVideo"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
@@ -99,6 +102,7 @@ var (
 	portalServiceGetVideosMethodDescriptor           = portalServiceServiceDescriptor.Methods().ByName("GetVideos")
 	portalServiceDeleteVideoMethodDescriptor         = portalServiceServiceDescriptor.Methods().ByName("DeleteVideo")
 	portalServiceUpdateVideoConfigMethodDescriptor   = portalServiceServiceDescriptor.Methods().ByName("UpdateVideoConfig")
+	portalServiceRenderVideoMethodDescriptor         = portalServiceServiceDescriptor.Methods().ByName("RenderVideo")
 )
 
 // PortalServiceClient is a client for the coasterai.portal.v1.PortalService service.
@@ -121,6 +125,7 @@ type PortalServiceClient interface {
 	GetVideos(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetVideosResponse], error)
 	DeleteVideo(context.Context, *connect.Request[v1.DeleteVideoRequest]) (*connect.Response[emptypb.Empty], error)
 	UpdateVideoConfig(context.Context, *connect.Request[v1.UpdateVideoConfigRequest]) (*connect.Response[emptypb.Empty], error)
+	RenderVideo(context.Context, *connect.Request[v1.RenderVideoRequest]) (*connect.Response[v1.RenderVideoResponse], error)
 }
 
 // NewPortalServiceClient constructs a client for the coasterai.portal.v1.PortalService service. By
@@ -229,6 +234,12 @@ func NewPortalServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(portalServiceUpdateVideoConfigMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		renderVideo: connect.NewClient[v1.RenderVideoRequest, v1.RenderVideoResponse](
+			httpClient,
+			baseURL+PortalServiceRenderVideoProcedure,
+			connect.WithSchema(portalServiceRenderVideoMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -250,6 +261,7 @@ type portalServiceClient struct {
 	getVideos           *connect.Client[emptypb.Empty, v1.GetVideosResponse]
 	deleteVideo         *connect.Client[v1.DeleteVideoRequest, emptypb.Empty]
 	updateVideoConfig   *connect.Client[v1.UpdateVideoConfigRequest, emptypb.Empty]
+	renderVideo         *connect.Client[v1.RenderVideoRequest, v1.RenderVideoResponse]
 }
 
 // GetConfig calls coasterai.portal.v1.PortalService.GetConfig.
@@ -332,6 +344,11 @@ func (c *portalServiceClient) UpdateVideoConfig(ctx context.Context, req *connec
 	return c.updateVideoConfig.CallUnary(ctx, req)
 }
 
+// RenderVideo calls coasterai.portal.v1.PortalService.RenderVideo.
+func (c *portalServiceClient) RenderVideo(ctx context.Context, req *connect.Request[v1.RenderVideoRequest]) (*connect.Response[v1.RenderVideoResponse], error) {
+	return c.renderVideo.CallUnary(ctx, req)
+}
+
 // PortalServiceHandler is an implementation of the coasterai.portal.v1.PortalService service.
 type PortalServiceHandler interface {
 	GetConfig(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.Config], error)
@@ -352,6 +369,7 @@ type PortalServiceHandler interface {
 	GetVideos(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetVideosResponse], error)
 	DeleteVideo(context.Context, *connect.Request[v1.DeleteVideoRequest]) (*connect.Response[emptypb.Empty], error)
 	UpdateVideoConfig(context.Context, *connect.Request[v1.UpdateVideoConfigRequest]) (*connect.Response[emptypb.Empty], error)
+	RenderVideo(context.Context, *connect.Request[v1.RenderVideoRequest]) (*connect.Response[v1.RenderVideoResponse], error)
 }
 
 // NewPortalServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -456,6 +474,12 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(portalServiceUpdateVideoConfigMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	portalServiceRenderVideoHandler := connect.NewUnaryHandler(
+		PortalServiceRenderVideoProcedure,
+		svc.RenderVideo,
+		connect.WithSchema(portalServiceRenderVideoMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/coasterai.portal.v1.PortalService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case PortalServiceGetConfigProcedure:
@@ -490,6 +514,8 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 			portalServiceDeleteVideoHandler.ServeHTTP(w, r)
 		case PortalServiceUpdateVideoConfigProcedure:
 			portalServiceUpdateVideoConfigHandler.ServeHTTP(w, r)
+		case PortalServiceRenderVideoProcedure:
+			portalServiceRenderVideoHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -561,4 +587,8 @@ func (UnimplementedPortalServiceHandler) DeleteVideo(context.Context, *connect.R
 
 func (UnimplementedPortalServiceHandler) UpdateVideoConfig(context.Context, *connect.Request[v1.UpdateVideoConfigRequest]) (*connect.Response[emptypb.Empty], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.UpdateVideoConfig is not implemented"))
+}
+
+func (UnimplementedPortalServiceHandler) RenderVideo(context.Context, *connect.Request[v1.RenderVideoRequest]) (*connect.Response[v1.RenderVideoResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.RenderVideo is not implemented"))
 }

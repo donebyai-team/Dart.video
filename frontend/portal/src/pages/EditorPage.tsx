@@ -13,7 +13,7 @@ import ToolsSettingsPanel from '@/components/editor/ToolsSettingsPanel'
 import RemotionPlayer, { RemotionPlayerHandle } from '@/components/editor/canvas/RemotionPlayer'
 import { type EditorConfig } from '@/types/editor'
 import { defaultEditorConfig } from '@/data/editorConfig'
-import { Sheet,SheetTrigger } from '@/components/ui/sheet'
+import { Sheet, SheetTrigger } from '@/components/ui/sheet'
 import { useVideoStore } from '@/stores/video'
 import { Slide, SlideType, StackSlideContent } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Video as VideoConfig } from '@coasterai/pb/coasterai/core/v1/video_pb'
@@ -23,18 +23,33 @@ import { ActiveToolType } from '@/types/tools';
 import { createSlideEntityId, createStackItemEntityId, createOverlayEntityId } from '@/types/selection';
 import Link from 'next/link';
 import BackgroundMusicSelector from '@/components/editor/remotion/components/BackgroundMusicSelector';
+import { useClientsContext } from '@coasterai/ui-core/context/ClientContext';
+import { pollVideoRender } from '@/services/utils';
 
 interface EditorPageProps {
   videoId: string
   config?: EditorConfig
 }
+
+type ExportProgressState = {
+  status: 'submitting' | 'processing' | 'downloading'
+  phase?: string
+  current?: number
+  total?: number
+  percent?: number
+  etaSeconds?: number
+}
+
 const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) => {
   const router = useRouter()
+  const { portalClient } = useClientsContext()
   const playerRef = useRef<RemotionPlayerHandle>(null)
   const initializationRef = useRef<{ config?: EditorConfig; videoConfig?: VideoConfig }>({})
 
   // State for loading video data
   const [isLoadingVideo, setIsLoadingVideo] = useState(true)
+  const [isExportingVideo, setIsExportingVideo] = useState(false)
+  const [exportProgress, setExportProgress] = useState<ExportProgressState | null>(null)
 
   // ---- Values (reactive) ----
   const initialize = useVideoStore(s => s.initialize)
@@ -74,6 +89,72 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
   const updateSlide = useVideoStore(s => s.updateSlide)
   const handleSelectEntity = useVideoStore(s => s.handleSelectEntity)
   const openEntitySettings = useVideoStore(s => s.openEntitySettings)
+
+  const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+
+  const downloadBlob = (blob: Blob, fileName: string) => {
+    const fileUrl = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = fileUrl
+    link.download = fileName
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    URL.revokeObjectURL(fileUrl)
+  }
+
+  const handleExportVideo = async () => {
+    if (!portalClient || !videoConfigFromStore) return
+
+    try {
+      setIsExportingVideo(true)
+      setExportProgress({ status: 'submitting', percent: 0 })
+
+      const renderResponse = await portalClient.renderVideo({ videoId })
+      const jobId = renderResponse.jobId
+      const version = videoConfigFromStore.version?.toString?.() ?? String(videoConfigFromStore.version ?? '')
+
+      if (!jobId || !version) {
+        throw new Error('Missing job id or version')
+      }
+
+      while (true) {
+        const renderStatus = await pollVideoRender(jobId, videoId, version)
+
+        if (renderStatus.type === 'file') {
+          setExportProgress({ status: 'downloading', percent: 100 })
+          downloadBlob(renderStatus.blob, renderStatus.fileName)
+          toast.success('Video export completed')
+          break
+        }
+
+        const { renderPhase, renderCurrent, renderTotal, renderPercent, renderEtaSeconds } = renderStatus.data
+        const resolvedPercent =
+          renderPercent !== undefined
+            ? Math.max(0, Math.min(100, renderPercent))
+            : (renderCurrent !== undefined && renderTotal !== undefined && renderTotal > 0
+              ? Math.max(0, Math.min(100, (renderCurrent / renderTotal) * 100))
+              : 0)
+
+        setExportProgress({
+          status: 'processing',
+          phase: renderPhase,
+          current: renderCurrent,
+          total: renderTotal,
+          percent: resolvedPercent,
+          etaSeconds: renderEtaSeconds
+        })
+
+        await wait(2000)
+      }
+    } catch (error) {
+      console.error('Video export failed', error)
+      toast.error(getConnectError(error))
+    } finally {
+      setIsExportingVideo(false)
+      setExportProgress(null)
+    }
+  }
 
   // Start video streaming
   useEffect(() => {
@@ -175,6 +256,49 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
         </div>
       )}
 
+      {/* Export Progress Overlay */}
+      {isExportingVideo && exportProgress && (
+        <div className='absolute top-16 right-4 z-50 w-80 rounded-xl border border-border bg-card/95 backdrop-blur-sm shadow-xl p-4'>
+          <div className='flex items-start justify-between mb-3'>
+            <div>
+              <p className='text-sm font-semibold'>Exporting Video</p>
+              <p className='text-xs text-muted-foreground capitalize'>
+                {exportProgress.status === 'submitting'
+                  ? 'Submitting job'
+                  : exportProgress.status === 'downloading'
+                    ? 'Preparing download'
+                    : exportProgress.phase || 'Processing'}
+              </p>
+            </div>
+            <span className='text-xs font-medium text-muted-foreground'>
+              {(exportProgress.percent ?? 0).toFixed(1)}%
+            </span>
+          </div>
+
+          <div className='h-2 w-full rounded-full bg-muted overflow-hidden'>
+            <div
+              className='h-full bg-gradient-to-r from-cyan-500 to-blue-600 transition-all duration-300 ease-out'
+              style={{ width: `${exportProgress.percent ?? 0}%` }}
+            />
+          </div>
+
+          <div className='mt-3 flex items-center justify-between text-xs text-muted-foreground'>
+            <span>
+              {exportProgress.current !== undefined && exportProgress.total !== undefined && exportProgress.total > 0
+                ? `${exportProgress.current}/${exportProgress.total}`
+                : 'Working...'}
+            </span>
+            <span>
+              {exportProgress.etaSeconds !== undefined && exportProgress.etaSeconds > 0
+                ? `ETA ${exportProgress.etaSeconds}s`
+                : exportProgress.status === 'downloading'
+                  ? 'Finalizing'
+                  : ''}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header className='h-14 bg-card border-b border-border flex items-center justify-between px-4 flex-shrink-0'>
         <div className='flex items-center gap-4'>
@@ -203,7 +327,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
             {videoConfigFromStore?.metadata?.duration.toFixed(2)}s
           </div>
           <ResolutionSelector />
-          <BackgroundMusicSelector />          
+          <BackgroundMusicSelector />
           {/* <Button
             variant='outline'
             size='sm'
@@ -214,7 +338,15 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
             <Mic2 className='w-4 h-4' />
             Voiceover
           </Button> */}
-          <Button className='btn-accent-gradient gap-2' disabled={isStreamingVideo}>
+          <Button
+            className='btn-accent-gradient gap-2'
+            disabled={isStreamingVideo ||
+               isExportingVideo || 
+               videoConfigFromStore?.config?.sections.length == 0 ||
+               videoConfigFromStore?.config?.sections[0].slides.length == 0
+              }
+            onClick={handleExportVideo}
+          >
             <Eye className='w-4 h-4' />
             Export
           </Button>

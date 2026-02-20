@@ -42,6 +42,7 @@ message Video {
     VideoMetadata metadata = 4;
     .google.protobuf.Timestamp created_at = 5;
     VideoStatus status = 6;
+    int64 version = 7;
 }
 
 message VideoConfig {

@@ -96,6 +96,11 @@ export declare type Video = Message<"coasterai.core.v1.Video"> & {
    * @generated from field: coasterai.core.v1.VideoStatus status = 6;
    */
   status: VideoStatus;
+
+  /**
+   * @generated from field: int64 version = 7;
+   */
+  version: bigint;
 };
 
 /**

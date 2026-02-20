@@ -16,6 +16,7 @@
     "dep-check": "turbo run dep-check",
     "dev:portal": "turbo -F=./portal/** -F=./packages/** dev",
     "build:template": "node ./scripts/build-component.mjs",
+    "deploy:remotion": "./scripts/deploy-remotion-cloudrun.sh",
     "lint": "turbo run lint",
     "prettier": "turbo run prettier",
     "type-check": "turbo run type-check",

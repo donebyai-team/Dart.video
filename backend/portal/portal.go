@@ -33,6 +33,7 @@ type Portal struct {
 	googleOauthClient      *google2.OauthClient
 	mediaService           services.MediaStore
 	videoGenerationService services.VideoGeneration
+	renderVideoService     services.RenderVideoService
 }
 
 func New(

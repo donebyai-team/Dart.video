@@ -96,6 +96,9 @@ func (s *Server) Run(
 			func() (string, http.Handler) {
 				return "/media/upload", http.HandlerFunc(mediaHandler.UploadMedia)
 			},
+			func() (string, http.Handler) {
+				return "/video/render", http.HandlerFunc(mediaHandler.PollVideoProgress)
+			},
 		}),
 	)
 
