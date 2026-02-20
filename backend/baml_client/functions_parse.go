@@ -25,8 +25,8 @@ type parse struct{}
 
 var Parse = &parse{}
 
-// / Parse version of ExtractResume (Takes in string and returns types.Resume)
-func (*parse) ExtractResume(text string, opts ...CallOptionFunc) (types.Resume, error) {
+// / Parse version of GeneratePlan (Takes in string and returns types.VideoGenerationPlan)
+func (*parse) GeneratePlan(text string, opts ...CallOptionFunc) (types.VideoGenerationPlan, error) {
 
 	var callOpts callOption
 	for _, opt := range opts {
@@ -58,16 +58,63 @@ func (*parse) ExtractResume(text string, opts ...CallOptionFunc) (types.Resume, 
 	if err != nil {
 		// This should never happen. if it does, please file an issue at https://github.com/boundaryml/baml/issues
 		// and include the type of the args you're passing in.
-		wrapped_err := fmt.Errorf("BAML INTERNAL ERROR: ExtractResume: %w", err)
+		wrapped_err := fmt.Errorf("BAML INTERNAL ERROR: GeneratePlan: %w", err)
 		panic(wrapped_err)
 	}
 
-	result, err := bamlRuntime.CallFunctionParse(context.Background(), "ExtractResume", encoded)
+	result, err := bamlRuntime.CallFunctionParse(context.Background(), "GeneratePlan", encoded)
 	if err != nil {
-		return types.Resume{}, err
+		return types.VideoGenerationPlan{}, err
 	}
 
-	casted := (result).(types.Resume)
+	casted := (result).(types.VideoGenerationPlan)
+
+	return casted, nil
+}
+
+// / Parse version of MatchCategories (Takes in string and returns types.MatchCategoriesResponse)
+func (*parse) MatchCategories(text string, opts ...CallOptionFunc) (types.MatchCategoriesResponse, error) {
+
+	var callOpts callOption
+	for _, opt := range opts {
+		opt(&callOpts)
+	}
+
+	args := baml.BamlFunctionArguments{
+		Kwargs: map[string]any{"text": text, "stream": false},
+		Env:    getEnvVars(callOpts.env),
+	}
+
+	if callOpts.clientRegistry != nil {
+		args.ClientRegistry = callOpts.clientRegistry
+	}
+
+	if callOpts.collectors != nil {
+		args.Collectors = callOpts.collectors
+	}
+
+	if callOpts.typeBuilder != nil {
+		args.TypeBuilder = callOpts.typeBuilder
+	}
+
+	if callOpts.tags != nil {
+		args.Tags = callOpts.tags
+	}
+
+	encoded, err := args.Encode()
+	if err != nil {
+		// This should never happen. if it does, please file an issue at https://github.com/boundaryml/baml/issues
+		// and include the type of the args you're passing in.
+		wrapped_err := fmt.Errorf("BAML INTERNAL ERROR: MatchCategories: %w", err)
+		panic(wrapped_err)
+	}
+
+	result, err := bamlRuntime.CallFunctionParse(context.Background(), "MatchCategories", encoded)
+	if err != nil {
+		return types.MatchCategoriesResponse{}, err
+	}
+
+	casted := (result).(types.MatchCategoriesResponse)
 
 	return casted, nil
 }

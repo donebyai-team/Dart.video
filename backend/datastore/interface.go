@@ -66,11 +66,11 @@ type TemplateRepository interface {
 	UpdateTemplateCategory(ctx context.Context, tc *models.TemplateCategory) error
 	GetTemplateCategoriesByAnimationType(
 		ctx context.Context,
-		animationType string,
+		animationType models.AnimationType,
 	) ([]*models.TemplateCategory, error)
 	GetTemplateCategoryByName(
 		ctx context.Context,
-		animationType string,
+		animationType models.AnimationType,
 		name string,
 	) (*models.TemplateCategory, error)
 	CreateTemplate(ctx context.Context, t *models.Template) (*models.Template, error)

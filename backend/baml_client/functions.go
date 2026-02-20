@@ -21,7 +21,7 @@ import (
 	"github.com/shank318/coasterai/baml_client/types"
 )
 
-func ExtractResume(ctx context.Context, resume string, opts ...CallOptionFunc) (types.Resume, error) {
+func GeneratePlan(ctx context.Context, resume types.VideoGenerationPlanRequest, opts ...CallOptionFunc) (types.VideoGenerationPlan, error) {
 
 	var callOpts callOption
 	for _, opt := range opts {
@@ -63,34 +63,108 @@ func ExtractResume(ctx context.Context, resume string, opts ...CallOptionFunc) (
 	}
 
 	if callOpts.onTick == nil {
-		result, err := bamlRuntime.CallFunction(ctx, "ExtractResume", encoded, callOpts.onTick)
+		result, err := bamlRuntime.CallFunction(ctx, "GeneratePlan", encoded, callOpts.onTick)
 		if err != nil {
-			return types.Resume{}, err
+			return types.VideoGenerationPlan{}, err
 		}
 
 		if result.Error != nil {
-			return types.Resume{}, result.Error
+			return types.VideoGenerationPlan{}, result.Error
 		}
 
-		casted := (result.Data).(types.Resume)
+		casted := (result.Data).(types.VideoGenerationPlan)
 
 		return casted, nil
 	} else {
-		channel, err := bamlRuntime.CallFunctionStream(ctx, "ExtractResume", encoded, callOpts.onTick)
+		channel, err := bamlRuntime.CallFunctionStream(ctx, "GeneratePlan", encoded, callOpts.onTick)
 		if err != nil {
-			return types.Resume{}, err
+			return types.VideoGenerationPlan{}, err
 		}
 
 		for result := range channel {
 			if result.Error != nil {
-				return types.Resume{}, result.Error
+				return types.VideoGenerationPlan{}, result.Error
 			}
 
 			if result.HasData {
-				return result.Data.(types.Resume), nil
+				return result.Data.(types.VideoGenerationPlan), nil
 			}
 		}
 
-		return types.Resume{}, fmt.Errorf("No data returned from stream")
+		return types.VideoGenerationPlan{}, fmt.Errorf("No data returned from stream")
+	}
+}
+
+func MatchCategories(ctx context.Context, resume types.MatchCategoriesRequest, opts ...CallOptionFunc) (types.MatchCategoriesResponse, error) {
+
+	var callOpts callOption
+	for _, opt := range opts {
+		opt(&callOpts)
+	}
+
+	// Resolve client option to clientRegistry (client takes precedence)
+	if callOpts.client != nil {
+		if callOpts.clientRegistry == nil {
+			callOpts.clientRegistry = baml.NewClientRegistry()
+		}
+		callOpts.clientRegistry.SetPrimaryClient(*callOpts.client)
+	}
+
+	args := baml.BamlFunctionArguments{
+		Kwargs: map[string]any{"resume": resume},
+		Env:    getEnvVars(callOpts.env),
+	}
+
+	if callOpts.clientRegistry != nil {
+		args.ClientRegistry = callOpts.clientRegistry
+	}
+
+	if callOpts.collectors != nil {
+		args.Collectors = callOpts.collectors
+	}
+
+	if callOpts.typeBuilder != nil {
+		args.TypeBuilder = callOpts.typeBuilder
+	}
+
+	if callOpts.tags != nil {
+		args.Tags = callOpts.tags
+	}
+
+	encoded, err := args.Encode()
+	if err != nil {
+		panic(err)
+	}
+
+	if callOpts.onTick == nil {
+		result, err := bamlRuntime.CallFunction(ctx, "MatchCategories", encoded, callOpts.onTick)
+		if err != nil {
+			return types.MatchCategoriesResponse{}, err
+		}
+
+		if result.Error != nil {
+			return types.MatchCategoriesResponse{}, result.Error
+		}
+
+		casted := (result.Data).(types.MatchCategoriesResponse)
+
+		return casted, nil
+	} else {
+		channel, err := bamlRuntime.CallFunctionStream(ctx, "MatchCategories", encoded, callOpts.onTick)
+		if err != nil {
+			return types.MatchCategoriesResponse{}, err
+		}
+
+		for result := range channel {
+			if result.Error != nil {
+				return types.MatchCategoriesResponse{}, result.Error
+			}
+
+			if result.HasData {
+				return result.Data.(types.MatchCategoriesResponse), nil
+			}
+		}
+
+		return types.MatchCategoriesResponse{}, fmt.Errorf("No data returned from stream")
 	}
 }

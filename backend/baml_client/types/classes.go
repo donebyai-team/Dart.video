@@ -20,20 +20,18 @@ import (
 	"github.com/boundaryml/baml/engine/language_client_go/pkg/cffi"
 )
 
-type Resume struct {
-	Name       string   `json:"name"`
-	Email      string   `json:"email"`
-	Experience []string `json:"experience"`
-	Skills     []string `json:"skills"`
+type Category struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
-func (c *Resume) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+func (c *Category) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
 	typeName := holder.Name
 	if typeName.Namespace != cffi.CFFITypeNamespace_TYPES {
 		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_TYPES, got %s", string(typeName.Namespace.String())))
 	}
-	if typeName.Name != "Resume" {
-		panic(fmt.Sprintf("expected Resume, got %s", typeName.Name))
+	if typeName.Name != "Category" {
+		panic(fmt.Sprintf("expected Category, got %s", typeName.Name))
 	}
 
 	for _, field := range holder.Fields {
@@ -44,38 +42,406 @@ func (c *Resume) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
 		case "name":
 			c.Name = baml.Decode(valueHolder).Interface().(string)
 
-		case "email":
-			c.Email = baml.Decode(valueHolder).Interface().(string)
-
-		case "experience":
-			c.Experience = baml.Decode(valueHolder).Interface().([]string)
-
-		case "skills":
-			c.Skills = baml.Decode(valueHolder).Interface().([]string)
+		case "description":
+			c.Description = baml.Decode(valueHolder).Interface().(string)
 
 		default:
 
-			panic(fmt.Sprintf("unexpected field: %s in class Resume", key))
+			panic(fmt.Sprintf("unexpected field: %s in class Category", key))
 
 		}
 	}
 
 }
 
-func (c Resume) Encode() (*cffi.HostValue, error) {
+func (c Category) Encode() (*cffi.HostValue, error) {
 	fields := map[string]any{}
 
 	fields["name"] = c.Name
 
-	fields["email"] = c.Email
+	fields["description"] = c.Description
 
-	fields["experience"] = c.Experience
-
-	fields["skills"] = c.Skills
-
-	return baml.EncodeClass("Resume", fields, nil)
+	return baml.EncodeClass("Category", fields, nil)
 }
 
-func (c Resume) BamlTypeName() string {
-	return "Resume"
+func (c Category) BamlTypeName() string {
+	return "Category"
+}
+
+type MatchCategoriesRequest struct {
+	Categories []Category `json:"categories"`
+	Query      string     `json:"query"`
+}
+
+func (c *MatchCategoriesRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "MatchCategoriesRequest" {
+		panic(fmt.Sprintf("expected MatchCategoriesRequest, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "categories":
+			c.Categories = baml.Decode(valueHolder).Interface().([]Category)
+
+		case "query":
+			c.Query = baml.Decode(valueHolder).Interface().(string)
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class MatchCategoriesRequest", key))
+
+		}
+	}
+
+}
+
+func (c MatchCategoriesRequest) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["categories"] = c.Categories
+
+	fields["query"] = c.Query
+
+	return baml.EncodeClass("MatchCategoriesRequest", fields, nil)
+}
+
+func (c MatchCategoriesRequest) BamlTypeName() string {
+	return "MatchCategoriesRequest"
+}
+
+type MatchCategoriesResponse struct {
+	Categories []Category `json:"categories"`
+}
+
+func (c *MatchCategoriesResponse) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "MatchCategoriesResponse" {
+		panic(fmt.Sprintf("expected MatchCategoriesResponse, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "categories":
+			c.Categories = baml.Decode(valueHolder).Interface().([]Category)
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class MatchCategoriesResponse", key))
+
+		}
+	}
+
+}
+
+func (c MatchCategoriesResponse) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["categories"] = c.Categories
+
+	return baml.EncodeClass("MatchCategoriesResponse", fields, nil)
+}
+
+func (c MatchCategoriesResponse) BamlTypeName() string {
+	return "MatchCategoriesResponse"
+}
+
+type ScriptItem struct {
+	Name      string  `json:"name"`
+	Voiceover *string `json:"voiceover"`
+	Reference *string `json:"reference"`
+}
+
+func (c *ScriptItem) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "ScriptItem" {
+		panic(fmt.Sprintf("expected ScriptItem, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "name":
+			c.Name = baml.Decode(valueHolder).Interface().(string)
+
+		case "voiceover":
+			c.Voiceover = baml.Decode(valueHolder).Interface().(*string)
+
+		case "reference":
+			c.Reference = baml.Decode(valueHolder).Interface().(*string)
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class ScriptItem", key))
+
+		}
+	}
+
+}
+
+func (c ScriptItem) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["name"] = c.Name
+
+	fields["voiceover"] = c.Voiceover
+
+	fields["reference"] = c.Reference
+
+	return baml.EncodeClass("ScriptItem", fields, nil)
+}
+
+func (c ScriptItem) BamlTypeName() string {
+	return "ScriptItem"
+}
+
+type Section struct {
+	Name   string  `json:"name"`
+	Slides []Slide `json:"slides"`
+}
+
+func (c *Section) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "Section" {
+		panic(fmt.Sprintf("expected Section, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "name":
+			c.Name = baml.Decode(valueHolder).Interface().(string)
+
+		case "slides":
+			c.Slides = baml.Decode(valueHolder).Interface().([]Slide)
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class Section", key))
+
+		}
+	}
+
+}
+
+func (c Section) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["name"] = c.Name
+
+	fields["slides"] = c.Slides
+
+	return baml.EncodeClass("Section", fields, nil)
+}
+
+func (c Section) BamlTypeName() string {
+	return "Section"
+}
+
+type Slide struct {
+	Index               int64          `json:"index"`
+	BeatDescription     string         `json:"beatDescription"`
+	Type                SideType       `json:"type"`
+	AnimationType       *AnimationType `json:"animationType"`
+	CategorySearchQuery string         `json:"categorySearchQuery"`
+	Duration            int64          `json:"duration"`
+}
+
+func (c *Slide) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "Slide" {
+		panic(fmt.Sprintf("expected Slide, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "index":
+			c.Index = baml.Decode(valueHolder).Int()
+
+		case "beatDescription":
+			c.BeatDescription = baml.Decode(valueHolder).Interface().(string)
+
+		case "type":
+			c.Type = baml.Decode(valueHolder).Interface().(SideType)
+
+		case "animationType":
+			c.AnimationType = baml.Decode(valueHolder).Interface().(*AnimationType)
+
+		case "categorySearchQuery":
+			c.CategorySearchQuery = baml.Decode(valueHolder).Interface().(string)
+
+		case "duration":
+			c.Duration = baml.Decode(valueHolder).Int()
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class Slide", key))
+
+		}
+	}
+
+}
+
+func (c Slide) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["index"] = c.Index
+
+	fields["beatDescription"] = c.BeatDescription
+
+	fields["type"] = c.Type
+
+	fields["animationType"] = c.AnimationType
+
+	fields["categorySearchQuery"] = c.CategorySearchQuery
+
+	fields["duration"] = c.Duration
+
+	return baml.EncodeClass("Slide", fields, nil)
+}
+
+func (c Slide) BamlTypeName() string {
+	return "Slide"
+}
+
+type VideoGenerationPlan struct {
+	Video_name string    `json:"video_name"`
+	Sections   []Section `json:"sections"`
+}
+
+func (c *VideoGenerationPlan) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "VideoGenerationPlan" {
+		panic(fmt.Sprintf("expected VideoGenerationPlan, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "video_name":
+			c.Video_name = baml.Decode(valueHolder).Interface().(string)
+
+		case "sections":
+			c.Sections = baml.Decode(valueHolder).Interface().([]Section)
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class VideoGenerationPlan", key))
+
+		}
+	}
+
+}
+
+func (c VideoGenerationPlan) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["video_name"] = c.Video_name
+
+	fields["sections"] = c.Sections
+
+	return baml.EncodeClass("VideoGenerationPlan", fields, nil)
+}
+
+func (c VideoGenerationPlan) BamlTypeName() string {
+	return "VideoGenerationPlan"
+}
+
+type VideoGenerationPlanRequest struct {
+	Duration   int64        `json:"Duration"`
+	Prompt     string       `json:"Prompt"`
+	Language   string       `json:"Language"`
+	Resolution string       `json:"Resolution"`
+	Script     []ScriptItem `json:"Script"`
+}
+
+func (c *VideoGenerationPlanRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "VideoGenerationPlanRequest" {
+		panic(fmt.Sprintf("expected VideoGenerationPlanRequest, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "Duration":
+			c.Duration = baml.Decode(valueHolder).Int()
+
+		case "Prompt":
+			c.Prompt = baml.Decode(valueHolder).Interface().(string)
+
+		case "Language":
+			c.Language = baml.Decode(valueHolder).Interface().(string)
+
+		case "Resolution":
+			c.Resolution = baml.Decode(valueHolder).Interface().(string)
+
+		case "Script":
+			c.Script = baml.Decode(valueHolder).Interface().([]ScriptItem)
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class VideoGenerationPlanRequest", key))
+
+		}
+	}
+
+}
+
+func (c VideoGenerationPlanRequest) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["Duration"] = c.Duration
+
+	fields["Prompt"] = c.Prompt
+
+	fields["Language"] = c.Language
+
+	fields["Resolution"] = c.Resolution
+
+	fields["Script"] = c.Script
+
+	return baml.EncodeClass("VideoGenerationPlanRequest", fields, nil)
+}
+
+func (c VideoGenerationPlanRequest) BamlTypeName() string {
+	return "VideoGenerationPlanRequest"
 }

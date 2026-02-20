@@ -12,3 +12,145 @@
 //  $ go install github.com/boundaryml/baml/baml-cli
 
 package types
+
+import (
+	"encoding/json"
+	"fmt"
+
+	baml "github.com/boundaryml/baml/engine/language_client_go/pkg"
+	"github.com/boundaryml/baml/engine/language_client_go/pkg/cffi"
+)
+
+type AnimationType string
+
+const (
+	AnimationTypeTEXT   AnimationType = "TEXT"
+	AnimationTypeVISUAL AnimationType = "VISUAL"
+	AnimationTypeSTATS  AnimationType = "STATS"
+	AnimationTypeCHART  AnimationType = "CHART"
+)
+
+// Values returns all allowed values for the AnimationType type.
+func (AnimationType) Values() []AnimationType {
+	return []AnimationType{
+		AnimationTypeTEXT,
+		AnimationTypeVISUAL,
+		AnimationTypeSTATS,
+		AnimationTypeCHART,
+	}
+}
+
+// IsValid checks whether the given AnimationType value is valid.
+func (e AnimationType) IsValid() bool {
+
+	for _, v := range e.Values() {
+		if e == v {
+			return true
+		}
+	}
+	return false
+
+}
+
+// MarshalJSON customizes JSON marshaling for AnimationType.
+func (e AnimationType) MarshalJSON() ([]byte, error) {
+	if !e.IsValid() {
+		return nil, fmt.Errorf("invalid AnimationType: %q", e)
+	}
+	return json.Marshal(string(e))
+}
+
+// UnmarshalJSON customizes JSON unmarshaling for AnimationType.
+func (e *AnimationType) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return err
+	}
+	*e = AnimationType(s)
+	if !e.IsValid() {
+		return fmt.Errorf("invalid AnimationType: %q", s)
+	}
+	return nil
+}
+
+func (e *AnimationType) Decode(holder *cffi.CFFIValueEnum, typeMap baml.TypeMap) {
+	name := holder.Name
+	if name.Name != "AnimationType" && name.Namespace != cffi.CFFITypeNamespace_TYPES {
+		panic(fmt.Sprintf("expected types.AnimationType, got %s.%s", string(name.Namespace.String()), string(name.Name)))
+	}
+	value := holder.Value
+	*e = AnimationType(value)
+}
+
+func (e AnimationType) Encode() (*cffi.HostValue, error) {
+	return baml.EncodeEnum("AnimationType", string(e), false)
+}
+
+func (e AnimationType) BamlTypeName() string {
+	return "AnimationType"
+}
+
+type SideType string
+
+const (
+	SideTypeANIMATION SideType = "ANIMATION"
+	SideTypeMEDIA     SideType = "MEDIA"
+)
+
+// Values returns all allowed values for the SideType type.
+func (SideType) Values() []SideType {
+	return []SideType{
+		SideTypeANIMATION,
+		SideTypeMEDIA,
+	}
+}
+
+// IsValid checks whether the given SideType value is valid.
+func (e SideType) IsValid() bool {
+
+	for _, v := range e.Values() {
+		if e == v {
+			return true
+		}
+	}
+	return false
+
+}
+
+// MarshalJSON customizes JSON marshaling for SideType.
+func (e SideType) MarshalJSON() ([]byte, error) {
+	if !e.IsValid() {
+		return nil, fmt.Errorf("invalid SideType: %q", e)
+	}
+	return json.Marshal(string(e))
+}
+
+// UnmarshalJSON customizes JSON unmarshaling for SideType.
+func (e *SideType) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return err
+	}
+	*e = SideType(s)
+	if !e.IsValid() {
+		return fmt.Errorf("invalid SideType: %q", s)
+	}
+	return nil
+}
+
+func (e *SideType) Decode(holder *cffi.CFFIValueEnum, typeMap baml.TypeMap) {
+	name := holder.Name
+	if name.Name != "SideType" && name.Namespace != cffi.CFFITypeNamespace_TYPES {
+		panic(fmt.Sprintf("expected types.SideType, got %s.%s", string(name.Namespace.String()), string(name.Name)))
+	}
+	value := holder.Value
+	*e = SideType(value)
+}
+
+func (e SideType) Encode() (*cffi.HostValue, error) {
+	return baml.EncodeEnum("SideType", string(e), false)
+}
+
+func (e SideType) BamlTypeName() string {
+	return "SideType"
+}

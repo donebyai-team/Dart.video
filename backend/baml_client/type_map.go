@@ -21,6 +21,23 @@ import (
 )
 
 var typeMap = map[string]reflect.Type{
-	"TYPES.Resume":        reflect.TypeOf(types.Resume{}),
-	"STREAM_TYPES.Resume": reflect.TypeOf(stream_types.Resume{}),
+	"TYPES.Category":                          reflect.TypeOf(types.Category{}),
+	"STREAM_TYPES.Category":                   reflect.TypeOf(stream_types.Category{}),
+	"TYPES.MatchCategoriesRequest":            reflect.TypeOf(types.MatchCategoriesRequest{}),
+	"STREAM_TYPES.MatchCategoriesRequest":     reflect.TypeOf(stream_types.MatchCategoriesRequest{}),
+	"TYPES.MatchCategoriesResponse":           reflect.TypeOf(types.MatchCategoriesResponse{}),
+	"STREAM_TYPES.MatchCategoriesResponse":    reflect.TypeOf(stream_types.MatchCategoriesResponse{}),
+	"TYPES.ScriptItem":                        reflect.TypeOf(types.ScriptItem{}),
+	"STREAM_TYPES.ScriptItem":                 reflect.TypeOf(stream_types.ScriptItem{}),
+	"TYPES.Section":                           reflect.TypeOf(types.Section{}),
+	"STREAM_TYPES.Section":                    reflect.TypeOf(stream_types.Section{}),
+	"TYPES.Slide":                             reflect.TypeOf(types.Slide{}),
+	"STREAM_TYPES.Slide":                      reflect.TypeOf(stream_types.Slide{}),
+	"TYPES.VideoGenerationPlan":               reflect.TypeOf(types.VideoGenerationPlan{}),
+	"STREAM_TYPES.VideoGenerationPlan":        reflect.TypeOf(stream_types.VideoGenerationPlan{}),
+	"TYPES.VideoGenerationPlanRequest":        reflect.TypeOf(types.VideoGenerationPlanRequest{}),
+	"STREAM_TYPES.VideoGenerationPlanRequest": reflect.TypeOf(stream_types.VideoGenerationPlanRequest{}),
+
+	"TYPES.AnimationType": reflect.TypeOf(types.AnimationType("")),
+	"TYPES.SideType":      reflect.TypeOf(types.SideType("")),
 }

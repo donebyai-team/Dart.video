@@ -4,27 +4,34 @@ import { fileURLToPath } from 'url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
+// Simple one-template build. You can duplicate this config per template.
+const entry = path.resolve(
+  __dirname,
+  '../packages/templates/text-animation/text-cascade/TextCascade.tsx'
+)
+
 const config = {
   mode: 'production',
-  entry: path.resolve(__dirname, '../packages/templates/text-animation/text-cascade/TextCascade.tsx'),
+  target: 'web',
+  entry,
   output: {
     path: path.resolve(__dirname, '../packages/build'),
-    filename: 'TextCascade.mjs',
+    // Upload this file to your CDN.
+    filename: 'TextCascade.cdn.js',
     library: {
-      type: 'module'
+      type: 'window',
+      // The runtime loader reads this window key after loading script.
+      name: '__COASTER_TEMPLATE__TextCascade'
     },
     clean: false
   },
-  experiments: {
-    outputModule: true
-  },
+  externalsType: 'window',
   externals: {
-    react: 'react',
-    'react-dom': 'react-dom',
-    'react/jsx-runtime': 'react/jsx-runtime',
-    remotion: 'remotion'
+    react: 'React',
+    'react-dom': 'ReactDOM',
+    'react/jsx-runtime': 'ReactJSXRuntime',
+    remotion: 'Remotion'
   },
-  externalsType: 'module',
   resolve: {
     extensions: ['.tsx', '.ts', '.js', '.jsx'],
     alias: {
@@ -58,10 +65,12 @@ const config = {
 }
 
 webpack(config, (err, stats) => {
-  if (err || stats.hasErrors()) {
-    console.error(err || stats.toString())
+  if (err || stats?.hasErrors()) {
+    console.error(err || stats?.toString({ colors: true }))
     process.exit(1)
   }
-  console.log('✅ Component built successfully!')
-  console.log(stats.toString({ colors: true, minimal: true }))
+
+  console.log('Built CDN template file: packages/build/TextCascade.cdn.js')
+  console.log('Expose key: window.__COASTER_TEMPLATE__TextCascade')
+  console.log(stats?.toString({ colors: true, minimal: true }))
 })

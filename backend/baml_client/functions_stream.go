@@ -42,8 +42,8 @@ func (s *StreamValue[TStream, TFinal]) Stream() *TStream {
 	return s.as_stream
 }
 
-// / Streaming version of ExtractResume
-func (*stream) ExtractResume(ctx context.Context, resume string, opts ...CallOptionFunc) (<-chan StreamValue[stream_types.Resume, types.Resume], error) {
+// / Streaming version of GeneratePlan
+func (*stream) GeneratePlan(ctx context.Context, resume types.VideoGenerationPlanRequest, opts ...CallOptionFunc) (<-chan StreamValue[stream_types.VideoGenerationPlan, types.VideoGenerationPlan], error) {
 
 	var callOpts callOption
 	for _, opt := range opts {
@@ -75,20 +75,20 @@ func (*stream) ExtractResume(ctx context.Context, resume string, opts ...CallOpt
 	if err != nil {
 		// This should never happen. if it does, please file an issue at https://github.com/boundaryml/baml/issues
 		// and include the type of the args you're passing in.
-		wrapped_err := fmt.Errorf("BAML INTERNAL ERROR: ExtractResume: %w", err)
+		wrapped_err := fmt.Errorf("BAML INTERNAL ERROR: GeneratePlan: %w", err)
 		panic(wrapped_err)
 	}
 
-	internal_channel, err := bamlRuntime.CallFunctionStream(ctx, "ExtractResume", encoded, callOpts.onTick)
+	internal_channel, err := bamlRuntime.CallFunctionStream(ctx, "GeneratePlan", encoded, callOpts.onTick)
 	if err != nil {
 		return nil, err
 	}
 
-	channel := make(chan StreamValue[stream_types.Resume, types.Resume])
+	channel := make(chan StreamValue[stream_types.VideoGenerationPlan, types.VideoGenerationPlan])
 	go func() {
 		for result := range internal_channel {
 			if result.Error != nil {
-				channel <- StreamValue[stream_types.Resume, types.Resume]{
+				channel <- StreamValue[stream_types.VideoGenerationPlan, types.VideoGenerationPlan]{
 					IsError: true,
 					Error:   result.Error,
 				}
@@ -96,14 +96,88 @@ func (*stream) ExtractResume(ctx context.Context, resume string, opts ...CallOpt
 				return
 			}
 			if result.HasData {
-				data := (result.Data).(types.Resume)
-				channel <- StreamValue[stream_types.Resume, types.Resume]{
+				data := (result.Data).(types.VideoGenerationPlan)
+				channel <- StreamValue[stream_types.VideoGenerationPlan, types.VideoGenerationPlan]{
 					IsFinal:  true,
 					as_final: &data,
 				}
 			} else {
-				data := (result.StreamData).(stream_types.Resume)
-				channel <- StreamValue[stream_types.Resume, types.Resume]{
+				data := (result.StreamData).(stream_types.VideoGenerationPlan)
+				channel <- StreamValue[stream_types.VideoGenerationPlan, types.VideoGenerationPlan]{
+					IsFinal:   false,
+					as_stream: &data,
+				}
+			}
+		}
+
+		// when internal_channel is closed, close the output too
+		close(channel)
+	}()
+	return channel, nil
+}
+
+// / Streaming version of MatchCategories
+func (*stream) MatchCategories(ctx context.Context, resume types.MatchCategoriesRequest, opts ...CallOptionFunc) (<-chan StreamValue[stream_types.MatchCategoriesResponse, types.MatchCategoriesResponse], error) {
+
+	var callOpts callOption
+	for _, opt := range opts {
+		opt(&callOpts)
+	}
+
+	args := baml.BamlFunctionArguments{
+		Kwargs: map[string]any{"resume": resume},
+		Env:    getEnvVars(callOpts.env),
+	}
+
+	if callOpts.clientRegistry != nil {
+		args.ClientRegistry = callOpts.clientRegistry
+	}
+
+	if callOpts.collectors != nil {
+		args.Collectors = callOpts.collectors
+	}
+
+	if callOpts.typeBuilder != nil {
+		args.TypeBuilder = callOpts.typeBuilder
+	}
+
+	if callOpts.tags != nil {
+		args.Tags = callOpts.tags
+	}
+
+	encoded, err := args.Encode()
+	if err != nil {
+		// This should never happen. if it does, please file an issue at https://github.com/boundaryml/baml/issues
+		// and include the type of the args you're passing in.
+		wrapped_err := fmt.Errorf("BAML INTERNAL ERROR: MatchCategories: %w", err)
+		panic(wrapped_err)
+	}
+
+	internal_channel, err := bamlRuntime.CallFunctionStream(ctx, "MatchCategories", encoded, callOpts.onTick)
+	if err != nil {
+		return nil, err
+	}
+
+	channel := make(chan StreamValue[stream_types.MatchCategoriesResponse, types.MatchCategoriesResponse])
+	go func() {
+		for result := range internal_channel {
+			if result.Error != nil {
+				channel <- StreamValue[stream_types.MatchCategoriesResponse, types.MatchCategoriesResponse]{
+					IsError: true,
+					Error:   result.Error,
+				}
+				close(channel)
+				return
+			}
+			if result.HasData {
+				data := (result.Data).(types.MatchCategoriesResponse)
+				channel <- StreamValue[stream_types.MatchCategoriesResponse, types.MatchCategoriesResponse]{
+					IsFinal:  true,
+					as_final: &data,
+				}
+			} else {
+				data := (result.StreamData).(stream_types.MatchCategoriesResponse)
+				channel <- StreamValue[stream_types.MatchCategoriesResponse, types.MatchCategoriesResponse]{
 					IsFinal:   false,
 					as_stream: &data,
 				}

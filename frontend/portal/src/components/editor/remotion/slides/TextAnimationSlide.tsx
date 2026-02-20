@@ -1,7 +1,10 @@
 import { AnimationSlideContent, MetaData, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import React, { useEffect, useState } from 'react'
+import * as ReactDOM from 'react-dom'
+import * as ReactJsxRuntime from 'react/jsx-runtime'
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion'
-import { templateRegistry } from '../../../../../../packages/template-registery'
+import * as Remotion from 'remotion'
+import { templateRegistry, TemplateModule } from '../../../../../../packages/template-registery'
 import {
   BlurInAnimation,
   LetterCascadeAnimation,
@@ -24,8 +27,60 @@ interface TextAnimationSlideProps {
   onSelect?: () => void
 }
 
-type TemplateModule = {
-  RemoteComponent: React.ComponentType<any>
+const templateLoadCache = new Map<string, Promise<TemplateModule>>()
+
+const loadScriptTemplate = async (url: string, globalName: string): Promise<TemplateModule> => {
+  const cacheKey = `${url}::${globalName}`
+  const cached = templateLoadCache.get(cacheKey)
+  if (cached) return cached
+
+  const loader = new Promise<TemplateModule>((resolve, reject) => {
+    if (typeof window === 'undefined') {
+      reject(new Error('CDN template loading is only available in browser runtime'))
+      return
+    }
+
+    ;(window as any).React = React
+    ;(window as any).ReactDOM = ReactDOM
+    ;(window as any).ReactJSXRuntime = ReactJsxRuntime
+    ;(window as any).Remotion = Remotion
+
+    const existingScript = document.querySelector<HTMLScriptElement>(
+      `script[data-template-url="${url}"]`
+    )
+
+    const resolveFromWindow = () => {
+      const moduleFromWindow = (window as any)[globalName]
+      if (!moduleFromWindow?.RemoteComponent) {
+        reject(new Error(`Template global "${globalName}" is missing RemoteComponent`))
+        return
+      }
+      resolve(moduleFromWindow as TemplateModule)
+    }
+
+    if (existingScript) {
+      if ((window as any)[globalName]) {
+        resolveFromWindow()
+        return
+      }
+      existingScript.addEventListener('load', resolveFromWindow, { once: true })
+      existingScript.addEventListener('error', () => reject(new Error(`Failed loading ${url}`)), {
+        once: true
+      })
+      return
+    }
+
+    const script = document.createElement('script')
+    script.src = url
+    script.async = true
+    script.dataset.templateUrl = url
+    script.onload = resolveFromWindow
+    script.onerror = () => reject(new Error(`Failed loading ${url}`))
+    document.head.appendChild(script)
+  })
+
+  templateLoadCache.set(cacheKey, loader)
+  return loader
 }
 /**
  * TextAnimationSlide Component
@@ -53,13 +108,42 @@ export const TextAnimationSlide: React.FC<TextAnimationSlideProps> = ({
 const background = backgroundStyleToCSS(slide.backgroundStyle);
 
   useEffect(() => {
-    ; (async () => {
-      const loader = templateRegistry[templateId as keyof typeof templateRegistry]
-      if (!loader) return
+    let disposed = false
+    setRemoteComponent(null)
 
-      const mod = await loader()
-      setRemoteComponent(mod as TemplateModule)
+    ;(async () => {
+      const template = templateRegistry[templateId]
+      if (!template) return
+
+      try {
+        if (template.cdn?.url) {
+          const mod = await loadScriptTemplate(template.cdn.url, template.cdn.globalName)
+          if (!disposed) setRemoteComponent(mod)
+          return
+        }
+
+        if (template.local) {
+          const mod = await template.local()
+          if (!disposed) setRemoteComponent(mod)
+        }
+      } catch (error) {
+        console.error(`Failed to load template "${templateId}"`, error)
+
+        // Fallback to local loader if CDN load fails.
+        if (template.local) {
+          try {
+            const mod = await template.local()
+            if (!disposed) setRemoteComponent(mod)
+          } catch (fallbackError) {
+            console.error(`Fallback local load failed for template "${templateId}"`, fallbackError)
+          }
+        }
+      }
     })()
+
+    return () => {
+      disposed = true
+    }
   }, [templateId])
 
   return (
