@@ -8,7 +8,7 @@ CREATE TABLE videos
     organization_id uuid  NOT NULL, 
     metadata jsonb DEFAULT '{}'::jsonb,
     created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
+    version int DEFAULT 0,
     script jsonb DEFAULT '{}'::jsonb,
     ai_generated_config jsonb DEFAULT '{}'::jsonb,
     config jsonb DEFAULT '{}'::jsonb,

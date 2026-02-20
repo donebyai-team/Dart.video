@@ -7,6 +7,7 @@ import (
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/proto"
 	"math/rand"
 	"time"
 )
@@ -35,14 +36,31 @@ func (v videoGeneration) UpdateVideoConfig(ctx context.Context, video *models.Vi
 		return err
 	}
 
-	existingVideo.Config = video.Config
-	// Only update when provided
+	configChanged := !proto.Equal(existingVideo.Config, video.Config)
+	nameChanged := video.Name != existingVideo.Name
+	metadataChanged := false
+
+	if video.Metadata != nil {
+		// Optional: compare metadata if needed
+		metadataChanged = !proto.Equal(existingVideo.Metadata, video.Metadata)
+	}
+
+	// Apply updates
+	if configChanged {
+		existingVideo.Config = video.Config
+	}
 	if video.Metadata != nil {
 		existingVideo.Metadata = video.Metadata
 	}
-	if video.Name != existingVideo.Name {
+	if nameChanged {
 		existingVideo.Name = video.Name
 	}
+
+	// Increment version only if something actually changed
+	if configChanged || metadataChanged {
+		existingVideo.Version++
+	}
+
 	return v.db.UpdateVideo(ctx, existingVideo)
 }
 

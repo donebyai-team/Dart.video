@@ -41,6 +41,7 @@ func (r *Database) UpdateVideo(ctx context.Context, video *models.Video) error {
 		"config":              video.Config,
 		"status":              video.Status,
 		"ai_generated_config": video.AIGeneratedConfig,
+		"version":             video.Version,
 		"organization_id":     video.OrganizationID,
 		"metadata":            video.Metadata,
 		"name":                video.Name,

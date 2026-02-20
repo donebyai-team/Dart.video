@@ -18,6 +18,7 @@ type Video struct {
 	OrganizationID    string                `db:"organization_id"`
 	Status            VideoStatus           `db:"status"`
 	Name              string                `db:"name"`
+	Version           int                   `db:"version"`
 	AIGeneratedConfig *pbcore.VideoConfig   `db:"ai_generated_config"`
 	Config            *pbcore.VideoConfig   `db:"config"`
 	Script            *pbcore.Script        `db:"script"`
@@ -40,6 +41,7 @@ func (r *Video) ToProto() *pbcore.Video {
 	return &pbcore.Video{
 		Id:        r.ID,
 		Name:      r.Name,
+		Version:   int64(r.Version),
 		Config:    r.Config,
 		Status:    r.Status.ToProto(),
 		Metadata:  r.Metadata,
