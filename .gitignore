@@ -24,3 +24,5 @@ redora-infra/.terraform
 .run/
 backend/cmd/coasterai/.coasterai
 *.mp4
+coasterai
+redora
