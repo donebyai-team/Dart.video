@@ -1,11 +1,12 @@
-package services
+package cache
 
 import (
 	"context"
 	"errors"
 	"fmt"
+	"go.uber.org/zap"
+	"log"
 	"net/url"
-	"strings"
 	"time"
 
 	"github.com/go-redis/redis"
@@ -18,23 +19,52 @@ var ErrCacheMiss = errors.New("cache key not found")
 type Cache interface {
 	SetKey(ctx context.Context, key, value string, ttl time.Duration) error
 	GetKey(ctx context.Context, key string) (string, error)
+	AuthStateStore
 }
 
 type redisCache struct {
 	redisClient *redis.Client
+	logger      *zap.Logger
 }
 
-func NewRedisCache(redisAddr string) (Cache, error) {
-	client, err := newRedisClient(redisAddr)
+func NewRedisStore(redisAddr string, logger *zap.Logger) Cache {
+	var redisClient *redis.Client
+	// Check if redisAddr starts with the redis:// scheme
+	if len(redisAddr) > 6 && redisAddr[:6] == "redis:" {
+		// Parse the Redis URL
+		parsedURL, err := url.Parse(redisAddr)
+		if err != nil {
+			log.Fatalf("Error parsing Redis URL: %v", err)
+		}
+
+		// Extracting user and password from the URL
+		password, _ := parsedURL.User.Password()
+
+		// Extracting the host and port
+		host := parsedURL.Hostname()
+		port := parsedURL.Port()
+
+		// Set up Redis client options
+		options := &redis.Options{
+			Addr:     fmt.Sprintf("%s:%s", host, port),
+			Password: password, // Password from the URL
+		}
+		redisClient = redis.NewClient(options)
+	} else {
+		// Use the simple address like localhost:6379
+		redisClient = redis.NewClient(&redis.Options{
+			Addr: redisAddr,
+		})
+	}
+
+	_, err := redisClient.Ping().Result()
 	if err != nil {
-		return nil, err
+		logger.Error("Error connecting to Redis", zap.Error(err))
 	}
-
-	if _, err := client.Ping().Result(); err != nil {
-		return nil, fmt.Errorf("redis ping: %w", err)
+	return &redisCache{
+		redisClient: redisClient,
+		logger:      logger,
 	}
-
-	return &redisCache{redisClient: client}, nil
 }
 
 func (r *redisCache) SetKey(ctx context.Context, key, value string, ttl time.Duration) error {
@@ -68,31 +98,4 @@ func (r *redisCache) GetKey(ctx context.Context, key string) (string, error) {
 
 func prefixedKey(key string) string {
 	return cachePrefix + key
-}
-
-func newRedisClient(redisAddr string) (*redis.Client, error) {
-	if strings.HasPrefix(redisAddr, "redis://") || strings.HasPrefix(redisAddr, "rediss://") {
-		parsedURL, err := url.Parse(redisAddr)
-		if err != nil {
-			return nil, fmt.Errorf("parse redis url: %w", err)
-		}
-
-		password, _ := parsedURL.User.Password()
-		host := parsedURL.Hostname()
-		port := parsedURL.Port()
-		if host == "" || port == "" {
-			return nil, fmt.Errorf("redis url must include host and port")
-		}
-
-		return redis.NewClient(&redis.Options{
-			Addr:     fmt.Sprintf("%s:%s", host, port),
-			Password: password,
-		}), nil
-	}
-
-	if strings.TrimSpace(redisAddr) == "" {
-		return nil, fmt.Errorf("redis address is required")
-	}
-
-	return redis.NewClient(&redis.Options{Addr: redisAddr}), nil
 }

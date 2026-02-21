@@ -25,5 +25,9 @@ func (p *Portal) RenderVideo(ctx context.Context, c *connect.Request[pbportal.Re
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	return connect.NewResponse(&pbportal.RenderVideoResponse{JobId: jobID}), nil
+	return connect.NewResponse(&pbportal.RenderVideoResponse{
+		JobId:   jobID,
+		VideoId: existingVideo.ID,
+		Version: int64(existingVideo.Version),
+	}), nil
 }

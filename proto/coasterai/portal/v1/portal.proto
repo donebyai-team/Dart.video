@@ -38,6 +38,8 @@ message RenderVideoRequest {
 
 message RenderVideoResponse {
   string jobId = 1;
+  string videoId = 2;
+  int64 version = 3;
 }
 
 message DeleteVideoRequest {

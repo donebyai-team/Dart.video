@@ -4,11 +4,11 @@ import (
 	"connectrpc.com/connect"
 	"context"
 	"fmt"
+	"github.com/shank318/coasterai/cache"
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
-	"github.com/shank318/coasterai/portal/state"
 )
 
-type IntegrationHandler func(ctx context.Context, p *Portal, code string, organizationID string, oauthState *state.State) error
+type IntegrationHandler func(ctx context.Context, p *Portal, code string, organizationID string, oauthState *cache.State) error
 
 var integrationsMap = map[pbportal.IntegrationType]IntegrationHandler{}
 
@@ -51,7 +51,7 @@ func (p *Portal) OauthCallback(ctx context.Context, c *connect.Request[pbportal.
 	return connect.NewResponse(&pbportal.OauthCallbackResponse{RedirectUrl: authState.RedirectUri}), nil
 }
 
-func (p *Portal) validateState(state string) (*state.State, error) {
+func (p *Portal) validateState(state string) (*cache.State, error) {
 	s, err := p.authStateStore.GetState(state)
 	if err != nil {
 		return nil, fmt.Errorf("unable to get state: %w", err)

@@ -28,11 +28,11 @@ export const uploadMedia = async (file: File): Promise<UploadedMedia> => {
 
 export type PollVideoRenderProgress = {
   completed?: boolean
-  renderPhase?: string
-  renderCurrent?: number
-  renderTotal?: number
-  renderPercent?: number
-  renderEtaSeconds?: number
+  render_phase?: string
+  render_current?: number
+  render_total?: number
+  render_percent?: number
+  render_eta_seconds?: number
 }
 
 export type PollVideoRenderResult =
@@ -48,10 +48,15 @@ const parseFileName = (contentDisposition: string | null, fallback: string) => {
 export const pollVideoRender = async (
   jobId: string,
   videoId: string,
-  version: string
+  version: number
 ): Promise<PollVideoRenderResult> => {
   const token = await browserTokenStore.Get()
-  const params = new URLSearchParams({ jobId, videoId, version })
+
+  const params = new URLSearchParams({
+    jobId,
+    videoId,
+    version: version.toString(),
+  })
 
   const response = await fetch(`${CONFIG_API_URI}/video/render?${params.toString()}`, {
     method: 'GET',

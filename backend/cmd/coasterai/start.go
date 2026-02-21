@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
+	"github.com/shank318/coasterai/cache"
 	"os"
 	"regexp"
 	"time"
@@ -10,7 +12,6 @@ import (
 	"github.com/shank318/coasterai/auth"
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
 	"github.com/shank318/coasterai/portal"
-	"github.com/shank318/coasterai/portal/state"
 	"github.com/shank318/coasterai/services"
 
 	"github.com/spf13/cobra"
@@ -115,36 +116,6 @@ func startCmdE(cmd *cobra.Command, args []string) error {
 	return main.WaitForTermination(zlog, shutdownUnreadyPeriod, shutdownGracePeriod)
 }
 
-func openAILangsmithLegacyHandling(cmd *cobra.Command, prefix string) (string, string, string, string, string) {
-	liteLLMKey, liteLLMKeyLegacyFlagPresent := sflags.MustGetStringProvided(cmd, prefix+"-openai-api-key")
-	openaiOrganization, openaiOrganizationLegacyFlagPresent := sflags.MustGetStringProvided(cmd, prefix+"-openai-organization")
-	openaiDebugStore, openaiDebugStoreLegacyFlagPresent := sflags.MustGetStringProvided(cmd, prefix+"-openai-debug-store")
-	langsmithApiKey, langsmithApiKeyLegacyFlagPresent := sflags.MustGetStringProvided(cmd, prefix+"-langsmith-api-key")
-	langsmithProject, langsmithProjectLegacyFlagPresent := sflags.MustGetStringProvided(cmd, prefix+"-langsmith-project")
-
-	if !liteLLMKeyLegacyFlagPresent {
-		liteLLMKey = sflags.MustGetString(cmd, "common-openai-api-key")
-	}
-
-	if !openaiOrganizationLegacyFlagPresent {
-		openaiOrganization = sflags.MustGetString(cmd, "common-openai-organization")
-	}
-
-	if !openaiDebugStoreLegacyFlagPresent {
-		openaiDebugStore = sflags.MustGetString(cmd, "common-openai-debug-store")
-	}
-
-	if !langsmithApiKeyLegacyFlagPresent {
-		langsmithApiKey = sflags.MustGetString(cmd, "common-langsmith-api-key")
-	}
-
-	if !langsmithProjectLegacyFlagPresent {
-		langsmithProject = sflags.MustGetString(cmd, "common-langsmith-project")
-	}
-
-	return liteLLMKey, openaiOrganization, openaiDebugStore, langsmithApiKey, langsmithProject
-}
-
 func portalApp(cmd *cobra.Command, isAppReady func() bool) (App, error) {
 	redisAddr := sflags.MustGetString(cmd, "redis-addr")
 
@@ -159,12 +130,6 @@ func portalApp(cmd *cobra.Command, isAppReady func() bool) (App, error) {
 		WithDataStore(sflags.MustGetString(cmd, "pg-dsn")).
 		WithKMSKeyPath(sflags.MustGetString(cmd, "jwt-kms-keypath")).
 		WithCORSURLRegexAllow(sflags.MustGetString(cmd, "portal-cors-url-regex-allow")).
-		WithConversationState(
-			sflags.MustGetDuration(cmd, "common-phone-call-ttl"),
-			redisAddr,
-			"redora",
-			"tracker",
-		).
 		WithGoogle(
 			sflags.MustGetString(cmd, "google-client-id"),
 			sflags.MustGetString(cmd, "google-client-secret"),
@@ -206,14 +171,21 @@ func portalApp(cmd *cobra.Command, isAppReady func() bool) (App, error) {
 		return nil, fmt.Errorf("unable to create auth usecase: %w", err)
 	}
 
+	cacheStore := cache.NewRedisStore(redisAddr, zlog)
+	videoRenderService, err := services.NewRenderVideoService(cmd.Context(), cacheStore, zlog)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to create render video service")
+	}
+
 	p := portal.New(
 		deps.MediaStore,
 		deps.GoogleClient,
 		authenticator,
-		state.NewRedisStore(redisAddr, zlog),
+		cacheStore,
 		authUsecase,
 		deps.DataStore,
 		services.NewVideoGeneration(deps.DataStore, zlog),
+		videoRenderService,
 		sflags.MustGetString(cmd, "portal-http-listen-addr"),
 		deps.CorsURLRegexAllow,
 		config,

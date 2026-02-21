@@ -36,6 +36,16 @@ export declare type RenderVideoResponse = Message<"coasterai.portal.v1.RenderVid
    * @generated from field: string jobId = 1;
    */
   jobId: string;
+
+  /**
+   * @generated from field: string videoId = 2;
+   */
+  videoId: string;
+
+  /**
+   * @generated from field: int64 version = 3;
+   */
+  version: bigint;
 };
 
 /**

@@ -10,14 +10,12 @@ import (
 	"github.com/shank318/coasterai/datastore"
 	google2 "github.com/shank318/coasterai/integrations/google"
 	"github.com/shank318/coasterai/services"
-	"golang.org/x/oauth2"
-	"regexp"
-	"strings"
-	"time"
-
 	"github.com/streamingfast/logging"
 	"go.uber.org/dig"
 	"go.uber.org/zap"
+	"golang.org/x/oauth2"
+	"regexp"
+	"strings"
 )
 
 type GoogleConfig struct {
@@ -37,7 +35,6 @@ type DependenciesBuilder struct {
 	PubsubGCPProject   string
 	Processor          bool
 	AIConfig           *AIConfig
-	ConversationState  *conversationState
 	GoogleConfig       *GoogleConfig
 	dig                *dig.Container
 }
@@ -46,12 +43,6 @@ func NewDependenciesBuilder() *DependenciesBuilder {
 	return &DependenciesBuilder{
 		dig: dig.New(),
 	}
-}
-
-type conversationState struct {
-	redisAddr         string
-	phoneCallStateTTL time.Duration
-	namespace, prefix string
 }
 
 type AIConfig struct {
@@ -82,15 +73,6 @@ func (b *DependenciesBuilder) WithGoogle(clientId, clientSecret, redirectUrl str
 		ClientID:     clientId,
 		ClientSecret: clientSecret,
 		RedirectURL:  redirectUrl,
-	}
-	return b
-}
-
-func (b *DependenciesBuilder) WithConversationState(phoneCallStateTTL time.Duration, redisAddr, namespace, prefix string) *DependenciesBuilder {
-	b.ConversationState = &conversationState{
-		redisAddr,
-		phoneCallStateTTL,
-		namespace, prefix,
 	}
 	return b
 }

@@ -2,9 +2,9 @@ package portal
 
 import (
 	"context"
+	"github.com/shank318/coasterai/cache"
 	google2 "github.com/shank318/coasterai/integrations/google"
 	"github.com/shank318/coasterai/portal/server/handlers"
-	"github.com/shank318/coasterai/portal/state"
 	"regexp"
 
 	"github.com/shank318/coasterai/auth"
@@ -29,7 +29,7 @@ type Portal struct {
 	logger                 *zap.Logger
 	tracer                 logging.Tracer
 	authenticator          *auth.Authenticator
-	authStateStore         state.AuthStateStore
+	authStateStore         cache.AuthStateStore
 	googleOauthClient      *google2.OauthClient
 	mediaService           services.MediaStore
 	videoGenerationService services.VideoGeneration
@@ -40,10 +40,11 @@ func New(
 	mediaService services.MediaStore,
 	googleOauthClient *google2.OauthClient,
 	authenticator *auth.Authenticator,
-	authStateStore state.AuthStateStore,
+	authStateStore cache.AuthStateStore,
 	authUsecase *services.AuthUsecase,
 	db datastore.Repository,
 	videoGenerationService services.VideoGeneration,
+	renderVideoService services.RenderVideoService,
 	httpListenAddr string,
 	corsURLRegexAllow *regexp.Regexp,
 	config *pbportal.Config,
@@ -68,6 +69,7 @@ func New(
 		logger:                 logger.Named("portal"),
 		tracer:                 tracer,
 		videoGenerationService: videoGenerationService,
+		renderVideoService:     renderVideoService,
 	}
 }
 
@@ -78,6 +80,6 @@ func (p *Portal) Run(ctx context.Context) error {
 		s.Shutdown(nil)
 	})
 
-	s.Run(p, handlers.NewUploadHandler(p.mediaService))
+	s.Run(p, handlers.NewUploadHandler(p.mediaService, p.renderVideoService))
 	return nil
 }

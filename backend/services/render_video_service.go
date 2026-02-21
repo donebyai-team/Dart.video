@@ -6,9 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/shank318/coasterai/cache"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/utils"
-	"os"
+	"io"
 	"regexp"
 	"strconv"
 	"strings"
@@ -23,7 +24,10 @@ import (
 const (
 	defaultRenderRegion  = "asia-east1"
 	defaultRenderJobName = "remotion-renderer"
-	defaultJobIDTTL      = 6 * time.Hour
+	defaultJobIDTTL      = 30 * time.Minute
+	defaultOutputBucket  = "redora-coasterai-videos"
+
+	projectName = "redora"
 )
 
 var (
@@ -34,25 +38,7 @@ var (
 type RenderVideoService interface {
 	SubmitJob(ctx context.Context, input *SubmitRenderJobInput) (jobID string, err error)
 	PollJob(ctx context.Context, input *PollRenderJobInput) (*PollRenderJobOutput, error)
-}
-
-type RenderVideoServiceConfig struct {
-	// Optional. If empty, loaded from firebase-config.json project_id.
-	ProjectID string
-	// Optional. Defaults to asia-east1.
-	Region string
-	// Optional. Defaults to remotion-renderer.
-	JobName string
-	// Optional. If empty, loaded from firebase-config.json storage_bucket/storageBucket.
-	OutputBucket string
-
-	// Optional. If nil, a gs:// store is created from OutputBucket.
-	OutputStore dstore.Store
-
-	// Optional. If set, used to dedupe submissions by videoId:version.
-	Cache Cache
-	// Optional. TTL for cached job IDs. Defaults to 6 hours.
-	JobIDTTL time.Duration
+	DownloadFile(ctx context.Context, filePath string) (io.ReadCloser, error)
 }
 
 type SubmitRenderJobInput struct {
@@ -60,100 +46,62 @@ type SubmitRenderJobInput struct {
 }
 
 type PollRenderJobInput struct {
-	JobID   string
-	VideoID string
-	Version string
+	JobID   string `json:"job_id"`
+	VideoID string `json:"video_id"`
+	Version string `json:"version"`
+}
+
+func (r PollRenderJobInput) Validate() error {
+	if r.JobID == "" {
+		return errors.New("jobId is required")
+	}
+
+	if r.VideoID == "" {
+		return errors.New("videoid is required")
+	}
+
+	if r.Version == "" {
+		return errors.New("version is required")
+	}
+
+	return nil
 }
 
 type PollRenderJobOutput struct {
-	JobID        string
-	Completed    bool
-	Succeeded    bool
-	VideoURL     string
-	VideoExists  bool
-	FailureCode  int
-	FailureError string
-
-	ExecutionName   string
-	ExecutionLogURL string
-	RunningCount    int64
-	SucceededCount  int64
-	FailedCount     int64
-	CancelledCount  int64
-	RetriedCount    int64
-	Progress        string
-
-	RenderPhase          string
-	RenderCurrent        int64
-	RenderTotal          int64
-	RenderPercent        float64
-	RenderETASeconds     int64
-	RenderHasETA         bool
-	RenderProgressSource string
+	JobID                string  `json:"job_id"`
+	Completed            bool    `json:"completed"`
+	Succeeded            bool    `json:"succeeded"`
+	VideoURL             string  `json:"video_url"`
+	VideoBaseURL         string  `json:"video_base_url"`
+	VideoExists          bool    `json:"video_exists"`
+	FailureCode          int     `json:"failure_code"`
+	FailureError         string  `json:"failure_error"`
+	ExecutionName        string  `json:"execution_name"`
+	ExecutionLogURL      string  `json:"execution_log_url"`
+	RunningCount         int64   `json:"running_count"`
+	SucceededCount       int64   `json:"succeeded_count"`
+	FailedCount          int64   `json:"failed_count"`
+	CancelledCount       int64   `json:"cancelled_count"`
+	RetriedCount         int64   `json:"retried_count"`
+	Progress             string  `json:"progress"`
+	RenderPhase          string  `json:"render_phase"`
+	RenderCurrent        int64   `json:"render_current"`
+	RenderTotal          int64   `json:"render_total"`
+	RenderPercent        float64 `json:"render_percent"`
+	RenderETASeconds     int64   `json:"render_eta_seconds"`
+	RenderHasETA         bool    `json:"render_has_eta"`
+	RenderProgressSource string  `json:"render_progress_source"`
 }
 
 type renderVideoService struct {
-	cfg            RenderVideoServiceConfig
 	logger         *zap.Logger
 	runService     *run.Service
 	loggingService *loggingapi.Service
 	outputStore    dstore.Store
-	cache          Cache
-	jobIDTTL       time.Duration
+	cache          cache.Cache
 }
 
-type firebaseConfig struct {
-	ProjectID      string `json:"project_id"`
-	StorageBucket  string `json:"storage_bucket"`
-	StorageBucket2 string `json:"storageBucket"`
-}
-
-func NewRenderVideoService(ctx context.Context, cfg RenderVideoServiceConfig, logger *zap.Logger) (RenderVideoService, error) {
-	if logger == nil {
-		logger = zap.NewNop()
-	}
-
-	resolvedProjectID := cfg.ProjectID
-	resolvedOutputBucket := cfg.OutputBucket
-
-	if resolvedProjectID == "" || resolvedOutputBucket == "" {
-		fbCfg, err := loadFirebaseConfig()
-		if err != nil {
-			return nil, fmt.Errorf("load firebase-config.json: %w", err)
-		}
-
-		if resolvedProjectID == "" {
-			resolvedProjectID = fbCfg.ProjectID
-		}
-		if resolvedOutputBucket == "" {
-			if fbCfg.StorageBucket != "" {
-				resolvedOutputBucket = fbCfg.StorageBucket
-			} else {
-				resolvedOutputBucket = fbCfg.StorageBucket2
-			}
-		}
-	}
-
-	if resolvedProjectID == "" {
-		return nil, fmt.Errorf("project id is required (set in config or firebase-config.json)")
-	}
-	if resolvedOutputBucket == "" {
-		return nil, fmt.Errorf("output bucket is required (set in config or firebase-config.json)")
-	}
-
-	if cfg.Region == "" {
-		cfg.Region = defaultRenderRegion
-	}
-	if cfg.JobName == "" {
-		cfg.JobName = defaultRenderJobName
-	}
-	if cfg.JobIDTTL <= 0 {
-		cfg.JobIDTTL = defaultJobIDTTL
-	}
-
-	cfg.ProjectID = resolvedProjectID
-	cfg.OutputBucket = resolvedOutputBucket
-
+func NewRenderVideoService(ctx context.Context, cache cache.Cache, logger *zap.Logger) (RenderVideoService, error) {
 	runService, err := run.NewService(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("create cloud run service client: %w", err)
@@ -164,24 +112,30 @@ func NewRenderVideoService(ctx context.Context, cfg RenderVideoServiceConfig, lo
 		return nil, fmt.Errorf("create cloud logging service client: %w", err)
 	}
 
-	store := cfg.OutputStore
-	if store == nil {
-		bucketStore, err := dstore.NewStore("gs://"+cfg.OutputBucket, "", "", false)
-		if err != nil {
-			return nil, fmt.Errorf("create output store: %w", err)
-		}
-		store = bucketStore
+	debugStore, err := dstore.NewStore(fmt.Sprintf("gs://%s", defaultOutputBucket), "", "", false)
+	if err != nil {
+		return nil, fmt.Errorf("create cloud video store: %w", err)
 	}
 
 	return &renderVideoService{
-		cfg:            cfg,
 		logger:         logger,
 		runService:     runService,
 		loggingService: loggingService,
-		outputStore:    store,
-		cache:          cfg.Cache,
-		jobIDTTL:       cfg.JobIDTTL,
+		outputStore:    debugStore,
+		cache:          cache,
 	}, nil
+}
+
+func (s *renderVideoService) DownloadFile(
+	ctx context.Context,
+	filePath string,
+) (io.ReadCloser, error) {
+	reader, err := s.outputStore.OpenObject(ctx, filePath)
+	if err != nil {
+		return nil, fmt.Errorf("open object %q: %w", filePath, err)
+	}
+
+	return reader, nil
 }
 
 func (s *renderVideoService) SubmitJob(ctx context.Context, input *SubmitRenderJobInput) (string, error) {
@@ -189,38 +143,57 @@ func (s *renderVideoService) SubmitJob(ctx context.Context, input *SubmitRenderJ
 		return "", fmt.Errorf("input is required")
 	}
 
-	cacheKey := fmt.Sprintf("%s:%s", input.Props.Id, input.Props.Version)
-	if s.cache != nil {
-		cachedJobID, err := s.cache.GetKey(ctx, cacheKey)
-		switch {
-		case err == nil && cachedJobID != "":
-			s.logger.Info("render job cache hit", zap.String("cache_key", cacheKey), zap.String("job_id", cachedJobID))
-			return cachedJobID, nil
-		case errors.Is(err, ErrCacheMiss):
-			// no-op
-		case err != nil:
-			s.logger.Warn("render job cache get failed", zap.String("cache_key", cacheKey), zap.Error(err))
-		}
+	cacheKey := fmt.Sprintf("%s:version:%d", input.Props.Id, input.Props.Version)
+
+	// ---- STRICT CACHE GET ----
+	cachedJobID, err := s.cache.GetKey(ctx, cacheKey)
+	if err == nil && cachedJobID != "" {
+		s.logger.Info("render job cache hit",
+			zap.String("cache_key", cacheKey),
+			zap.String("job_id", cachedJobID),
+		)
+		return cachedJobID, nil
 	}
 
+	if err != nil && !errors.Is(err, cache.ErrCacheMiss) {
+		return "", fmt.Errorf("cache get failed for key %s: %w", cacheKey, err)
+	}
+
+	// ---- PREPARE PAYLOAD ----
 	proto, err := utils.MarshalProto(input.Props)
 	if err != nil {
-		return "", errors.New(fmt.Sprintf("marshal proto: %w", err))
+		return "", fmt.Errorf("marshal proto: %w", err)
 	}
+
 	propsB64 := base64.StdEncoding.EncodeToString(proto)
 
 	request := &run.GoogleCloudRunV2RunJobRequest{
 		Overrides: &run.GoogleCloudRunV2Overrides{
 			ContainerOverrides: []*run.GoogleCloudRunV2ContainerOverride{
 				{
-					Env: []*run.GoogleCloudRunV2EnvVar{{Name: "RENDER_INPUT_PROPS_B64", Value: propsB64}},
+					Env: []*run.GoogleCloudRunV2EnvVar{
+						{Name: "RENDER_INPUT_PROPS_B64", Value: propsB64},
+					},
 				},
 			},
 		},
 	}
 
-	jobName := fmt.Sprintf("projects/%s/locations/%s/jobs/%s", s.cfg.ProjectID, s.cfg.Region, s.cfg.JobName)
-	op, err := s.runService.Projects.Locations.Jobs.Run(jobName, request).Context(ctx).Do()
+	jobPath := fmt.Sprintf(
+		"projects/%s/locations/%s/jobs/%s",
+		projectName,
+		defaultRenderRegion,
+		defaultRenderJobName,
+	)
+
+	op, err := s.runService.
+		Projects.
+		Locations.
+		Jobs.
+		Run(jobPath, request).
+		Context(ctx).
+		Do()
+
 	if err != nil {
 		return "", fmt.Errorf("submit cloud run job: %w", err)
 	}
@@ -228,18 +201,36 @@ func (s *renderVideoService) SubmitJob(ctx context.Context, input *SubmitRenderJ
 		return "", fmt.Errorf("submit response missing operation name")
 	}
 
-	if s.cache != nil {
-		if err := s.cache.SetKey(ctx, cacheKey, op.Name, s.jobIDTTL); err != nil {
-			s.logger.Warn("render job cache set failed", zap.String("cache_key", cacheKey), zap.Error(err))
-		}
+	// ---- EXTRACT EXECUTION ID ----
+	var execution struct {
+		Name string `json:"name"`
+	}
+
+	if err := json.Unmarshal(op.Metadata, &execution); err != nil {
+		return "", fmt.Errorf("parse execution metadata: %w", err)
+	}
+
+	executionID := execution.Name
+	if idx := strings.LastIndex(executionID, "/"); idx >= 0 {
+		executionID = executionID[idx+1:]
+	}
+
+	if executionID == "" {
+		return "", fmt.Errorf("execution id missing in metadata")
+	}
+
+	// ---- STRICT CACHE SET ----
+	if err := s.cache.SetKey(ctx, cacheKey, executionID, defaultJobIDTTL); err != nil {
+		return "", fmt.Errorf("cache set failed for key %s: %w", cacheKey, err)
 	}
 
 	s.logger.Info("submitted render job",
-		zap.String("operation_name", op.Name),
+		zap.String("job_id", executionID),
 		zap.String("video_id", input.Props.Id),
 		zap.Int("version", int(input.Props.Version)),
 	)
-	return op.Name, nil
+
+	return executionID, nil
 }
 
 func (s *renderVideoService) PollJob(ctx context.Context, input *PollRenderJobInput) (*PollRenderJobOutput, error) {
@@ -256,47 +247,75 @@ func (s *renderVideoService) PollJob(ctx context.Context, input *PollRenderJobIn
 		return nil, fmt.Errorf("version is required")
 	}
 
-	opName := input.JobID
-	const opPrefix = "https://run.googleapis.com/v2/"
-	if strings.HasPrefix(opName, opPrefix) {
-		opName = strings.TrimPrefix(opName, opPrefix)
-	}
+	executionPath := fmt.Sprintf(
+		"projects/%s/locations/%s/jobs/%s/executions/%s",
+		projectName,
+		defaultRenderRegion,
+		defaultRenderJobName,
+		input.JobID,
+	)
 
-	op, err := s.runService.Projects.Locations.Operations.Get(opName).Context(ctx).Do()
+	exec, err := s.runService.
+		Projects.
+		Locations.
+		Jobs.
+		Executions.
+		Get(executionPath).
+		Context(ctx).
+		Do()
+
 	if err != nil {
-		return nil, fmt.Errorf("poll cloud run job: %w", err)
+		return nil, fmt.Errorf("poll execution: %w", err)
 	}
 
 	out := &PollRenderJobOutput{
-		JobID:     input.JobID,
-		Completed: op.Done,
+		JobID:          input.JobID,
+		ExecutionName:  exec.Name,
+		RunningCount:   exec.RunningCount,
+		SucceededCount: exec.SucceededCount,
+		FailedCount:    exec.FailedCount,
+		CancelledCount: exec.CancelledCount,
+		RetriedCount:   exec.RetriedCount,
 	}
 
-	applyExecutionProgress(out, op.Metadata)
+	// Execution is complete when completionTime is set
+	out.Completed = exec.CompletionTime != ""
+
+	// Apply log-based render progress
 	if out.ExecutionName != "" {
 		s.applyRenderLogsProgress(ctx, out)
 	}
 
-	if !op.Done {
+	// If not completed yet, return early
+	if !out.Completed {
 		return out, nil
 	}
 
-	if op.Error != nil {
-		out.FailureCode = int(op.Error.Code)
-		out.FailureError = op.Error.Message
-		return out, nil
+	// Determine success/failure
+	if exec.SucceededCount > 0 {
+		out.Succeeded = true
+	} else if exec.FailedCount > 0 {
+		out.Succeeded = false
+		out.FailureCode = 1
+		out.FailureError = "execution failed"
 	}
 
+	// Check output file in GCS
 	fileBase := fmt.Sprintf("%s/%s.mp4", input.VideoID, input.Version)
+
 	exists, err := s.outputStore.FileExists(ctx, fileBase)
 	if err != nil {
 		return nil, fmt.Errorf("check rendered file existence: %w", err)
 	}
 
-	out.Succeeded = exists
 	out.VideoExists = exists
 	if exists {
-		out.VideoURL = fmt.Sprintf("https://storage.googleapis.com/%s/%s", s.cfg.OutputBucket, fileBase)
+		out.VideoURL = fmt.Sprintf(
+			"https://storage.googleapis.com/%s/%s",
+			defaultOutputBucket,
+			fileBase,
+		)
+		out.VideoBaseURL = fileBase
 	}
 
 	return out, nil
@@ -349,13 +368,13 @@ func (s *renderVideoService) applyRenderLogsProgress(ctx context.Context, out *P
 
 	filter := fmt.Sprintf(
 		`resource.type="cloud_run_job" resource.labels.job_name="%s" resource.labels.location="%s" labels."run.googleapis.com/execution_name"="%s" (textPayload:"Rendered " OR textPayload:"Encoded ")`,
-		s.cfg.JobName,
-		s.cfg.Region,
+		defaultRenderJobName,
+		defaultRenderRegion,
 		execID,
 	)
 
 	resp, err := s.loggingService.Entries.List(&loggingapi.ListLogEntriesRequest{
-		ResourceNames: []string{"projects/" + s.cfg.ProjectID},
+		ResourceNames: []string{"projects/" + projectName},
 		Filter:        filter,
 		OrderBy:       "timestamp desc",
 		PageSize:      50,
@@ -430,31 +449,4 @@ func (s *renderVideoService) tryApplyEncodedLine(out *PollRenderJobOutput, line 
 	out.RenderETASeconds = 0
 
 	return true
-}
-
-func loadFirebaseConfig() (*firebaseConfig, error) {
-	paths := []string{
-		"/app/firebase-config.json",
-		"firebase-config.json",
-	}
-
-	var lastErr error
-	for _, path := range paths {
-		content, err := os.ReadFile(path)
-		if err != nil {
-			lastErr = err
-			continue
-		}
-
-		cfg := &firebaseConfig{}
-		if err := json.Unmarshal(content, cfg); err != nil {
-			return nil, fmt.Errorf("parse %s: %w", path, err)
-		}
-		return cfg, nil
-	}
-
-	if lastErr != nil {
-		return nil, lastErr
-	}
-	return nil, fmt.Errorf("firebase-config.json not found")
 }

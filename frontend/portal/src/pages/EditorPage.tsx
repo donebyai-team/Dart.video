@@ -33,9 +33,7 @@ interface EditorPageProps {
 
 type ExportProgressState = {
   status: 'submitting' | 'processing' | 'downloading'
-  phase?: string
-  current?: number
-  total?: number
+  hasPhase: boolean
   percent?: number
   etaSeconds?: number
 }
@@ -50,6 +48,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
   const [isLoadingVideo, setIsLoadingVideo] = useState(true)
   const [isExportingVideo, setIsExportingVideo] = useState(false)
   const [exportProgress, setExportProgress] = useState<ExportProgressState | null>(null)
+  const prepareProgressRef = useRef(0)
 
   // ---- Values (reactive) ----
   const initialize = useVideoStore(s => s.initialize)
@@ -110,41 +109,54 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
 
     try {
       setIsExportingVideo(true)
-      setExportProgress({ status: 'submitting', percent: 0 })
+      prepareProgressRef.current = 2
+      setExportProgress({ status: 'submitting', hasPhase: false, percent: prepareProgressRef.current })
 
       const renderResponse = await portalClient.renderVideo({ videoId })
-      const jobId = renderResponse.jobId
-      const version = videoConfigFromStore.version?.toString?.() ?? String(videoConfigFromStore.version ?? '')
-
-      if (!jobId || !version) {
-        throw new Error('Missing job id or version')
-      }
-
       while (true) {
-        const renderStatus = await pollVideoRender(jobId, videoId, version)
+        if (prepareProgressRef.current < 22) {
+          // Optimistic progress while waiting for first meaningful polling response.
+          prepareProgressRef.current = Math.min(22, prepareProgressRef.current + 1.8)
+          setExportProgress(prev =>
+            prev && !prev.hasPhase
+              ? { ...prev, percent: prepareProgressRef.current }
+              : prev
+          )
+        }
+
+        const renderStatus = await pollVideoRender(renderResponse.jobId, 
+          renderResponse.videoId, Number(renderResponse.version))
 
         if (renderStatus.type === 'file') {
-          setExportProgress({ status: 'downloading', percent: 100 })
+          setExportProgress({ status: 'downloading', hasPhase: true, percent: 100 })
           downloadBlob(renderStatus.blob, renderStatus.fileName)
           toast.success('Video export completed')
           break
         }
 
-        const { renderPhase, renderCurrent, renderTotal, renderPercent, renderEtaSeconds } = renderStatus.data
-        const resolvedPercent =
-          renderPercent !== undefined
-            ? Math.max(0, Math.min(100, renderPercent))
-            : (renderCurrent !== undefined && renderTotal !== undefined && renderTotal > 0
-              ? Math.max(0, Math.min(100, (renderCurrent / renderTotal) * 100))
+        const { render_phase, render_current, render_total, render_percent, render_eta_seconds } = renderStatus.data
+        const hasPhase = Boolean(render_phase)
+        const rawPercent =
+          render_percent !== undefined
+            ? Math.max(0, Math.min(100, render_percent))
+            : (render_current !== undefined && render_total !== undefined && render_total > 0
+              ? Math.max(0, Math.min(100, (render_current / render_total) * 100))
               : 0)
+
+        // Blend render + encode into one continuous timeline to avoid a visible reset at 100%.
+        const phase = String(render_phase || '').toLowerCase()
+        const seamlessPercent =
+          !hasPhase ? 0
+            : phase.includes('render') ? rawPercent * 0.85
+              : phase.includes('encod') ? 85 + rawPercent * 0.15
+                : rawPercent
+        const adjustedPercent = hasPhase ? Math.max(seamlessPercent, prepareProgressRef.current) : prepareProgressRef.current
 
         setExportProgress({
           status: 'processing',
-          phase: renderPhase,
-          current: renderCurrent,
-          total: renderTotal,
-          percent: resolvedPercent,
-          etaSeconds: renderEtaSeconds
+          hasPhase,
+          percent: adjustedPercent,
+          etaSeconds: render_eta_seconds
         })
 
         await wait(2000)
@@ -265,11 +277,11 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
             <div>
               <p className='text-sm font-semibold'>Exporting Video</p>
               <p className='text-xs text-muted-foreground capitalize'>
-                {exportProgress.status === 'submitting'
-                  ? 'Submitting job'
+                {exportProgress.status === 'submitting' || !exportProgress.hasPhase
+                  ? 'Preparing'
                   : exportProgress.status === 'downloading'
                     ? 'Preparing download'
-                    : exportProgress.phase || 'Processing'}
+                    : 'Processing'}
               </p>
             </div>
             <span className='text-xs font-medium text-muted-foreground'>
@@ -285,13 +297,9 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
           </div>
 
           <div className='mt-3 flex items-center justify-between text-xs text-muted-foreground'>
+            <span>{exportProgress.hasPhase ? 'Working...' : 'Preparing assets...'}</span>
             <span>
-              {exportProgress.current !== undefined && exportProgress.total !== undefined && exportProgress.total > 0
-                ? `${exportProgress.current}/${exportProgress.total}`
-                : 'Working...'}
-            </span>
-            <span>
-              {exportProgress.etaSeconds !== undefined && exportProgress.etaSeconds > 0
+              {exportProgress.hasPhase && exportProgress.etaSeconds !== undefined && exportProgress.etaSeconds > 0
                 ? `ETA ${exportProgress.etaSeconds}s`
                 : exportProgress.status === 'downloading'
                   ? 'Finalizing'

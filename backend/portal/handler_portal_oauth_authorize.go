@@ -5,12 +5,12 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
+	"github.com/shank318/coasterai/cache"
 	"io"
 	"time"
 
 	"connectrpc.com/connect"
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
-	"github.com/shank318/coasterai/portal/state"
 	"github.com/streamingfast/logging"
 	"go.uber.org/zap"
 )
@@ -45,7 +45,7 @@ func (p *Portal) OauthAuthorize(ctx context.Context, req *connect.Request[pbport
 		return nil, fmt.Errorf("unable to generate nonce: %w", err)
 	}
 
-	state := &state.State{
+	state := &cache.State{
 		Hash:            stateHash,
 		Nonce:           nonce,
 		RedirectUri:     req.Msg.RedirectUrl,
