@@ -9,6 +9,7 @@ import { SelectedTool } from "@/types/tools";
 import { JsonObject } from "@bufbuild/protobuf";
 import { Section, Slide, SlideType, TransitionType, CalloutEffect, BackgroundStyle, ZoomEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { Resolution, Video } from "@coasterai/pb/coasterai/core/v1/video_pb";
+import { DragEndEvent } from "@dnd-kit/core";
 import type { StateCreator } from "zustand";
 
 // Zustand store types
@@ -59,7 +60,7 @@ export interface VideoActions {
     addSection: () => void;
     removeSection: (sectionId: string) => void;
     updateSectionTitle: (sectionId: string, newTitle: string) => void;
-    handleSectionDragEnd: (event: { active: { id: string }; over: { id: string } | null }) => void;
+    handleSectionDragEnd: (event: DragEndEvent) => void;
     setEditingSectionId: (sectionId: string | null) => void;
     setEditingSectionTitle: (title: string) => void;
 
@@ -79,23 +80,21 @@ export interface VideoActions {
     // Get effects interfaces
     getSpotlights: () => SpotlightEffect[]
     getCallouts: () => CalloutEffect[]
+    getZooms: () => ZoomEffect[]
 
     // Add effects interfaces
     addSpotlight: (effect: SpotlightEffect) => void
     addCallout: (effect: CalloutEffect) => void
+    addZoom: (effect: ZoomEffect) => void
 
     // Update effects interfaces
     updateSpotlight: (id: string, updates: Partial<SpotlightEffect>) => void
     updateCallout: (id: string, updates: Partial<CalloutEffect>) => void
+    updateZoom: (effectId: string, updates: Partial<ZoomEffect>) => void
 
     // Delete effects interfaces
     deleteSpotlight: (id: string) => void
     deleteCallout: (id: string) => void
-
-    // Zoom actions
-    getZooms: () => ZoomEffect[]
-    addZoom: (effect: ZoomEffect) => void
-    updateZoom: (id: string, updates: Partial<ZoomEffect>) => void
     deleteZoom: (id: string) => void
 
     // Entity selection

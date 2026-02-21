@@ -15,7 +15,7 @@ Use the idempotent deploy script at:
 Set env vars and run:
 
 ```bash
-export PROJECT_ID="redora"
+export PROJECT_ID="your-project-id"
 export REGION="us-central1"
 export OUTPUT_BUCKET="your-public-video-bucket"
 
