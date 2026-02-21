@@ -130,7 +130,6 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
         if (renderStatus.type === 'file') {
           setExportProgress({ status: 'downloading', hasPhase: true, percent: 100 })
           downloadBlob(renderStatus.blob, renderStatus.fileName)
-          toast.success('Video export completed')
           break
         }
 

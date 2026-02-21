@@ -68,29 +68,13 @@ func (r PollRenderJobInput) Validate() error {
 }
 
 type PollRenderJobOutput struct {
-	JobID                string  `json:"job_id"`
-	Completed            bool    `json:"completed"`
-	Succeeded            bool    `json:"succeeded"`
-	VideoURL             string  `json:"video_url"`
-	VideoBaseURL         string  `json:"video_base_url"`
-	VideoExists          bool    `json:"video_exists"`
-	FailureCode          int     `json:"failure_code"`
-	FailureError         string  `json:"failure_error"`
-	ExecutionName        string  `json:"execution_name"`
-	ExecutionLogURL      string  `json:"execution_log_url"`
-	RunningCount         int64   `json:"running_count"`
-	SucceededCount       int64   `json:"succeeded_count"`
-	FailedCount          int64   `json:"failed_count"`
-	CancelledCount       int64   `json:"cancelled_count"`
-	RetriedCount         int64   `json:"retried_count"`
-	Progress             string  `json:"progress"`
-	RenderPhase          string  `json:"render_phase"`
-	RenderCurrent        int64   `json:"render_current"`
-	RenderTotal          int64   `json:"render_total"`
-	RenderPercent        float64 `json:"render_percent"`
-	RenderETASeconds     int64   `json:"render_eta_seconds"`
-	RenderHasETA         bool    `json:"render_has_eta"`
-	RenderProgressSource string  `json:"render_progress_source"`
+	Completed        bool    `json:"completed"`
+	RenderPhase      string  `json:"render_phase,omitempty"`
+	RenderCurrent    int64   `json:"render_current,omitempty"`
+	RenderTotal      int64   `json:"render_total,omitempty"`
+	RenderPercent    float64 `json:"render_percent,omitempty"`
+	RenderETASeconds int64   `json:"render_eta_seconds,omitempty"`
+	FileBaseURL      string  `json:"file_base_url,omitempty"`
 }
 
 type renderVideoService struct {
@@ -233,18 +217,29 @@ func (s *renderVideoService) SubmitJob(ctx context.Context, input *SubmitRenderJ
 	return executionID, nil
 }
 
-func (s *renderVideoService) PollJob(ctx context.Context, input *PollRenderJobInput) (*PollRenderJobOutput, error) {
+func (s *renderVideoService) PollJob(
+	ctx context.Context,
+	input *PollRenderJobInput,
+) (*PollRenderJobOutput, error) {
+
 	if input == nil {
 		return nil, fmt.Errorf("input is required")
 	}
 	if input.JobID == "" {
 		return nil, fmt.Errorf("job id is required")
 	}
-	if input.VideoID == "" {
-		return nil, fmt.Errorf("video id is required")
+
+	out := &PollRenderJobOutput{}
+
+	// Check output file in GCS
+	fileBase := fmt.Sprintf("%s/%s.mp4", input.VideoID, input.Version)
+	exists, err := s.outputStore.FileExists(ctx, fileBase)
+	if err != nil {
+		return nil, fmt.Errorf("check rendered file existence: %w", err)
 	}
-	if input.Version == "" {
-		return nil, fmt.Errorf("version is required")
+	if exists {
+		out.FileBaseURL = fileBase
+		s.logger.Info("downloading rendered video", zap.String("url", fileBase))
 	}
 
 	executionPath := fmt.Sprintf(
@@ -263,102 +258,42 @@ func (s *renderVideoService) PollJob(ctx context.Context, input *PollRenderJobIn
 		Get(executionPath).
 		Context(ctx).
 		Do()
-
 	if err != nil {
 		return nil, fmt.Errorf("poll execution: %w", err)
 	}
 
-	out := &PollRenderJobOutput{
-		JobID:          input.JobID,
-		ExecutionName:  exec.Name,
-		RunningCount:   exec.RunningCount,
-		SucceededCount: exec.SucceededCount,
-		FailedCount:    exec.FailedCount,
-		CancelledCount: exec.CancelledCount,
-		RetriedCount:   exec.RetriedCount,
-	}
-
-	// Execution is complete when completionTime is set
 	out.Completed = exec.CompletionTime != ""
 
-	// Apply log-based render progress
-	if out.ExecutionName != "" {
-		s.applyRenderLogsProgress(ctx, out)
+	// 🔥 If execution failed → return error immediately
+	if exec.FailedCount > 0 {
+		return nil, fmt.Errorf("render job failed")
+	}
+	if exec.CancelledCount > 0 {
+		return nil, fmt.Errorf("render job cancelled")
 	}
 
-	// If not completed yet, return early
+	// If still running → try extract progress from logs
 	if !out.Completed {
+		s.applyRenderLogsProgress(ctx, exec.Name, out)
 		return out, nil
 	}
 
-	// Determine success/failure
-	if exec.SucceededCount > 0 {
-		out.Succeeded = true
-	} else if exec.FailedCount > 0 {
-		out.Succeeded = false
-		out.FailureCode = 1
-		out.FailureError = "execution failed"
-	}
-
-	// Check output file in GCS
-	fileBase := fmt.Sprintf("%s/%s.mp4", input.VideoID, input.Version)
-
-	exists, err := s.outputStore.FileExists(ctx, fileBase)
-	if err != nil {
-		return nil, fmt.Errorf("check rendered file existence: %w", err)
-	}
-
-	out.VideoExists = exists
-	if exists {
-		out.VideoURL = fmt.Sprintf(
-			"https://storage.googleapis.com/%s/%s",
-			defaultOutputBucket,
-			fileBase,
-		)
-		out.VideoBaseURL = fileBase
-	}
+	// If completed successfully → force 100%
+	out.RenderPhase = "encoding"
+	out.RenderPercent = 100
+	out.RenderCurrent = 1
+	out.RenderTotal = 1
+	out.RenderETASeconds = 0
 
 	return out, nil
 }
 
-func applyExecutionProgress(out *PollRenderJobOutput, metadata []byte) {
-	if len(metadata) == 0 {
-		return
-	}
-
-	var execution struct {
-		Name           string `json:"name"`
-		LogURI         string `json:"logUri"`
-		RunningCount   int64  `json:"runningCount"`
-		SucceededCount int64  `json:"succeededCount"`
-		FailedCount    int64  `json:"failedCount"`
-		CancelledCount int64  `json:"cancelledCount"`
-		RetriedCount   int64  `json:"retriedCount"`
-	}
-
-	if err := json.Unmarshal(metadata, &execution); err != nil {
-		return
-	}
-
-	out.ExecutionName = execution.Name
-	out.ExecutionLogURL = execution.LogURI
-	out.RunningCount = execution.RunningCount
-	out.SucceededCount = execution.SucceededCount
-	out.FailedCount = execution.FailedCount
-	out.CancelledCount = execution.CancelledCount
-	out.RetriedCount = execution.RetriedCount
-	out.Progress = fmt.Sprintf(
-		"running=%d succeeded=%d failed=%d cancelled=%d retried=%d",
-		execution.RunningCount,
-		execution.SucceededCount,
-		execution.FailedCount,
-		execution.CancelledCount,
-		execution.RetriedCount,
-	)
-}
-
-func (s *renderVideoService) applyRenderLogsProgress(ctx context.Context, out *PollRenderJobOutput) {
-	execID := out.ExecutionName
+func (s *renderVideoService) applyRenderLogsProgress(
+	ctx context.Context,
+	executionName string,
+	out *PollRenderJobOutput,
+) {
+	execID := executionName
 	if idx := strings.LastIndex(execID, "/"); idx >= 0 {
 		execID = execID[idx+1:]
 	}
@@ -367,7 +302,11 @@ func (s *renderVideoService) applyRenderLogsProgress(ctx context.Context, out *P
 	}
 
 	filter := fmt.Sprintf(
-		`resource.type="cloud_run_job" resource.labels.job_name="%s" resource.labels.location="%s" labels."run.googleapis.com/execution_name"="%s" (textPayload:"Rendered " OR textPayload:"Encoded ")`,
+		`resource.type="cloud_run_job"
+		 resource.labels.job_name="%s"
+		 resource.labels.location="%s"
+		 labels."run.googleapis.com/execution_name"="%s"
+		 (textPayload:"Rendered " OR textPayload:"Encoded ")`,
 		defaultRenderJobName,
 		defaultRenderRegion,
 		execID,
@@ -377,10 +316,11 @@ func (s *renderVideoService) applyRenderLogsProgress(ctx context.Context, out *P
 		ResourceNames: []string{"projects/" + projectName},
 		Filter:        filter,
 		OrderBy:       "timestamp desc",
-		PageSize:      50,
+		PageSize:      20,
 	}).Context(ctx).Do()
+
 	if err != nil {
-		s.logger.Debug("list log entries failed", zap.Error(err), zap.String("execution_id", execID))
+		s.logger.Debug("log fetch failed", zap.Error(err))
 		return
 	}
 
@@ -390,63 +330,57 @@ func (s *renderVideoService) applyRenderLogsProgress(ctx context.Context, out *P
 			continue
 		}
 
-		if s.tryApplyEncodedLine(out, line) {
-			out.RenderProgressSource = "cloud_logging"
-			return
-		}
-		if s.tryApplyRenderedLine(out, line) {
-			out.RenderProgressSource = "cloud_logging"
+		if progress, ok := parseProgressLine(line); ok {
+			out.RenderPhase = progress.Phase
+			out.RenderCurrent = progress.Current
+			out.RenderTotal = progress.Total
+			out.RenderPercent = progress.Percent
+			out.RenderETASeconds = progress.ETASeconds
 			return
 		}
 	}
 }
 
-func (s *renderVideoService) tryApplyRenderedLine(out *PollRenderJobOutput, line string) bool {
-	parts := renderLineRegex.FindStringSubmatch(line)
-	if len(parts) == 0 {
-		return false
+type progressInfo struct {
+	Phase      string
+	Current    int64
+	Total      int64
+	Percent    float64
+	ETASeconds int64
+}
+
+func parseProgressLine(line string) (*progressInfo, bool) {
+
+	if parts := renderLineRegex.FindStringSubmatch(line); len(parts) > 0 {
+		return buildProgress("rendering", parts)
 	}
 
+	if parts := encodeLineRegex.FindStringSubmatch(line); len(parts) > 0 {
+		return buildProgress("encoding", parts)
+	}
+
+	return nil, false
+}
+
+func buildProgress(phase string, parts []string) (*progressInfo, bool) {
 	current, err1 := strconv.ParseInt(parts[1], 10, 64)
 	total, err2 := strconv.ParseInt(parts[2], 10, 64)
 	if err1 != nil || err2 != nil || total <= 0 {
-		return false
+		return nil, false
 	}
 
-	out.RenderPhase = "rendering"
-	out.RenderCurrent = current
-	out.RenderTotal = total
-	out.RenderPercent = (float64(current) / float64(total)) * 100
+	info := &progressInfo{
+		Phase:   phase,
+		Current: current,
+		Total:   total,
+		Percent: (float64(current) / float64(total)) * 100,
+	}
 
 	if len(parts) >= 4 && parts[3] != "" {
-		eta, err := strconv.ParseInt(parts[3], 10, 64)
-		if err == nil {
-			out.RenderETASeconds = eta
-			out.RenderHasETA = true
+		if eta, err := strconv.ParseInt(parts[3], 10, 64); err == nil {
+			info.ETASeconds = eta
 		}
 	}
 
-	return true
-}
-
-func (s *renderVideoService) tryApplyEncodedLine(out *PollRenderJobOutput, line string) bool {
-	parts := encodeLineRegex.FindStringSubmatch(line)
-	if len(parts) == 0 {
-		return false
-	}
-
-	current, err1 := strconv.ParseInt(parts[1], 10, 64)
-	total, err2 := strconv.ParseInt(parts[2], 10, 64)
-	if err1 != nil || err2 != nil || total <= 0 {
-		return false
-	}
-
-	out.RenderPhase = "encoding"
-	out.RenderCurrent = current
-	out.RenderTotal = total
-	out.RenderPercent = (float64(current) / float64(total)) * 100
-	out.RenderHasETA = false
-	out.RenderETASeconds = 0
-
-	return true
+	return info, true
 }

@@ -53,8 +53,8 @@ func (h *UploadHandler) PollVideoProgress(w http.ResponseWriter, r *http.Request
 	}
 
 	// If video exists, stream it
-	if pollResult.VideoExists {
-		reader, err := h.renderVideoService.DownloadFile(r.Context(), pollResult.VideoBaseURL)
+	if pollResult.FileBaseURL != "" {
+		reader, err := h.renderVideoService.DownloadFile(r.Context(), pollResult.FileBaseURL)
 		if err != nil {
 			writeJSONError(w, http.StatusInternalServerError, "download rendered video failed: "+err.Error())
 			return
@@ -64,7 +64,7 @@ func (h *UploadHandler) PollVideoProgress(w http.ResponseWriter, r *http.Request
 		w.Header().Set("Content-Type", "video/mp4")
 		w.Header().Set(
 			"Content-Disposition",
-			fmt.Sprintf("attachment; filename=\"%s\"", pollResult.VideoURL),
+			fmt.Sprintf("attachment; filename=\"%s\"", pollResult.FileBaseURL),
 		)
 
 		if _, err := io.Copy(w, reader); err != nil {
