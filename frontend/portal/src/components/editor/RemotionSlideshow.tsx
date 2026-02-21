@@ -19,7 +19,7 @@ interface SlideshowProps {
 }
 
 // Main slide component router
-const SlideComponent: React.FC<{
+export const SlideComponent: React.FC<{
   slide: Slide
   width: number
   height: number
@@ -107,6 +107,25 @@ const SlideComponent: React.FC<{
     >
 
       Content type mismatch: {slide.type} slide with {slide.content?.case || 'undefined'} content
+    </AbsoluteFill>
+  )
+}
+
+export const SingleSlidePreview: React.FC<{
+  slide: Slide
+  isEditing?: boolean
+}> = ({ slide, isEditing = false }) => {
+  const { width, height } = useVideoConfig()
+
+  return (
+    <AbsoluteFill style={{ background: backgroundStyleToCSS(slide.backgroundStyle) }}>
+      <SlideComponent
+        slide={slide}
+        width={width}
+        height={height}
+        isEditing={isEditing}
+        isSelected={false}
+      />
     </AbsoluteFill>
   )
 }

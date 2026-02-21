@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { GripVertical, ImageIcon, Type, BarChart3, Sparkles, Film, Trash2, Layers } from 'lucide-react'
@@ -26,7 +27,10 @@ const slideTypeIcons: Record<SlideType, React.ElementType> = {
 
 const SortableSlideCard = ({ slide, isSelected, index, onSelect, onDelete }: SortableSlideCardProps) => {
   const getSlideWithBackground = useVideoStore(s => s.getSlideWithBackground)
-  slide.backgroundStyle = getSlideWithBackground(slide)
+  const slideWithBackground = useMemo(
+    () => ({ ...slide, backgroundStyle: getSlideWithBackground(slide) }),
+    [slide, getSlideWithBackground]
+  )
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: slide.id })
 
@@ -66,7 +70,7 @@ const SortableSlideCard = ({ slide, isSelected, index, onSelect, onDelete }: Sor
 
         {/* Thumbnail */}
         <div className='relative w-16 h-10 rounded overflow-hidden flex-shrink-0 bg-muted'>
-          <SlideThumbnail slide={slide} animationStyle={index} />
+          <SlideThumbnail slide={slideWithBackground} index={index} />
           {/* Slide type indicator */}
           <div className='absolute bottom-0.5 left-0.5 bg-foreground/80 text-background p-0.5 rounded'>
             <TypeIcon className='w-2 h-2' />
