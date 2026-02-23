@@ -30,19 +30,26 @@ func NewVideoGeneration(db datastore.Repository, logger *zap.Logger) VideoGenera
 
 const defaultVideoFPS = 30
 
+func isMetadataChanged(existing *pbcore.VideoMetadata, new *pbcore.VideoMetadata) bool {
+	backgroundChanged := proto.Equal(existing.BackgroundStyle, new.BackgroundStyle)
+	return !backgroundChanged
+}
+
 func (v videoGeneration) UpdateVideoConfig(ctx context.Context, video *models.Video) error {
 	existingVideo, err := v.db.GetVideoById(ctx, video.ID, video.OrganizationID)
 	if err != nil {
 		return err
 	}
 
+	existingVideo.AIGeneratedConfig = video.AIGeneratedConfig
 	configChanged := !proto.Equal(existingVideo.Config, video.Config)
 	nameChanged := video.Name != existingVideo.Name
 	metadataChanged := false
 
 	if video.Metadata != nil {
 		// Optional: compare metadata if needed
-		metadataChanged = !proto.Equal(existingVideo.Metadata, video.Metadata)
+		// only background can be changes
+		metadataChanged = isMetadataChanged(existingVideo.Metadata, video.Metadata)
 	}
 
 	// Apply updates
@@ -50,8 +57,9 @@ func (v videoGeneration) UpdateVideoConfig(ctx context.Context, video *models.Vi
 		existingVideo.Config = video.Config
 	}
 	if video.Metadata != nil {
-		existingVideo.Metadata = video.Metadata
+		existingVideo.Metadata.BackgroundStyle = video.Metadata.BackgroundStyle
 	}
+
 	if nameChanged {
 		existingVideo.Name = video.Name
 	}
@@ -59,6 +67,17 @@ func (v videoGeneration) UpdateVideoConfig(ctx context.Context, video *models.Vi
 	// Increment version only if something actually changed
 	if configChanged || metadataChanged {
 		existingVideo.Version++
+	}
+
+	// update duration
+	for _, section := range existingVideo.Config.Sections {
+		for _, slide := range section.Slides {
+			existingVideo.Metadata.Duration = existingVideo.Metadata.Duration + slide.Duration
+		}
+	}
+
+	if video.Status != "" {
+		existingVideo.Status = video.Status
 	}
 
 	return v.db.UpdateVideo(ctx, existingVideo)

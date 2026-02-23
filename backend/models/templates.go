@@ -4,21 +4,22 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"github.com/lib/pq"
+	"github.com/shank318/coasterai/baml_client/types"
 	"time"
 )
 
-//go:generate go-enum -f=$GOFILE
-
-// ENUM(TEXT, VISUAL, STATS, CHART)
-type AnimationType string
+////go:generate go-enum -f=$GOFILE
+//
+//// ENUM(TEXT, VISUAL, STATS, CHART)
+//type AnimationType string
 
 type TemplateCategory struct {
-	ID            string        `db:"id"`
-	AnimationType AnimationType `db:"animation_type"`
-	Name          string        `db:"name"`
-	Description   string        `db:"description"`
-	CreatedAt     time.Time     `db:"created_at"`
-	UpdatedAt     *time.Time    `db:"updated_at"`
+	ID            string              `db:"id"`
+	AnimationType types.AnimationType `db:"animation_type"`
+	Name          string              `db:"name"`
+	Description   string              `db:"description"`
+	CreatedAt     time.Time           `db:"created_at"`
+	UpdatedAt     *time.Time          `db:"updated_at"`
 }
 
 type TemplateCategories []string
@@ -50,16 +51,16 @@ func (a *TemplateCategories) Scan(src interface{}) error {
 }
 
 type Template struct {
-	ID            string             `db:"id"`
-	Name          string             `db:"name"`
-	AnimationType AnimationType      `db:"animation_type"`
-	Categories    TemplateCategories `db:"categories"`
-	Description   string             `db:"description"`
-	Schema        json.RawMessage    `db:"schema"`
-	Preview       json.RawMessage    `db:"preview"`
-	CDNUrl        string             `db:"cdn_url"`
-	PreviewUrl    string             `db:"preview_url"`
-	CreatedAt     time.Time          `db:"created_at"`
-	UpdatedAt     *time.Time         `db:"updated_at"`
-	Repeatable    bool               `db:"repeatable"`
+	ID            string              `db:"id"`
+	Name          string              `db:"name"`
+	AnimationType types.AnimationType `db:"animation_type"`
+	Categories    TemplateCategories  `db:"categories"`
+	Description   string              `db:"description"`
+	Schema        json.RawMessage     `db:"schema"`
+	Preview       json.RawMessage     `db:"preview"`
+	CDNUrl        string              `db:"cdn_url"`
+	PreviewUrl    string              `db:"preview_url"`
+	CreatedAt     time.Time           `db:"created_at"`
+	UpdatedAt     *time.Time          `db:"updated_at"`
+	Repeatable    bool                `db:"repeatable"`
 }

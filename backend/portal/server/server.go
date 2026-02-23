@@ -66,20 +66,20 @@ func (s *Server) Run(
 		// TODO: Uncomment when auth is implemented
 		dgrpcserver.WithConnectInterceptor(middleware.NewAuthInterceptor(s.authenticator, s.logger)),
 		dgrpcserver.WithConnectInterceptor(connectrpc.NewErrorsInterceptor(s.logger, connectrpc.WithErrorMapper(func(err error) error {
-
-			if baseError := (*errorx.BaseError)(nil); errors.As(err, &baseError) {
-				return errorx.BaseErrToConnectErr(baseError)
-			}
-
 			if errors.Is(err, datastore.NotFound) {
-				return connect.NewError(connect.CodeNotFound, err)
+				return errorx.ToConnect(errorx.New(errorx.CodeNotFound, "DATASTORE_NOT_FOUND", err.Error(), err))
 			}
 
 			if errors.Is(err, datastore.ErrMessageSourceAlreadyExists) {
-				return connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("Message Sources already configured for this user"))
+				return errorx.ToConnect(errorx.New(
+					errorx.CodeInvalidArgument,
+					"MESSAGE_SOURCE_ALREADY_EXISTS",
+					"Message Sources already configured for this user",
+					fmt.Errorf("message source already exists: %w", err),
+				))
 			}
 
-			return err
+			return errorx.ToConnect(err)
 		}))),
 		dgrpcserver.WithConnectCORS(s.corsOption()),
 	}

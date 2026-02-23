@@ -20,23 +20,24 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	PortalService_GetConfig_FullMethodName           = "/coasterai.portal.v1.PortalService/GetConfig"
-	PortalService_Self_FullMethodName                = "/coasterai.portal.v1.PortalService/Self"
-	PortalService_GetIntegration_FullMethodName      = "/coasterai.portal.v1.PortalService/GetIntegration"
-	PortalService_RevokeIntegration_FullMethodName   = "/coasterai.portal.v1.PortalService/RevokeIntegration"
-	PortalService_UpdateIntegration_FullMethodName   = "/coasterai.portal.v1.PortalService/UpdateIntegration"
-	PortalService_PasswordlessStart_FullMethodName   = "/coasterai.portal.v1.PortalService/PasswordlessStart"
-	PortalService_PasswordlessVerify_FullMethodName  = "/coasterai.portal.v1.PortalService/PasswordlessVerify"
-	PortalService_OauthAuthorize_FullMethodName      = "/coasterai.portal.v1.PortalService/OauthAuthorize"
-	PortalService_OauthCallback_FullMethodName       = "/coasterai.portal.v1.PortalService/OauthCallback"
-	PortalService_SocialLoginCallback_FullMethodName = "/coasterai.portal.v1.PortalService/SocialLoginCallback"
-	PortalService_GetIntegrations_FullMethodName     = "/coasterai.portal.v1.PortalService/GetIntegrations"
-	PortalService_CreateVideo_FullMethodName         = "/coasterai.portal.v1.PortalService/CreateVideo"
-	PortalService_GetVideo_FullMethodName            = "/coasterai.portal.v1.PortalService/GetVideo"
-	PortalService_GetVideos_FullMethodName           = "/coasterai.portal.v1.PortalService/GetVideos"
-	PortalService_DeleteVideo_FullMethodName         = "/coasterai.portal.v1.PortalService/DeleteVideo"
-	PortalService_UpdateVideoConfig_FullMethodName   = "/coasterai.portal.v1.PortalService/UpdateVideoConfig"
-	PortalService_RenderVideo_FullMethodName         = "/coasterai.portal.v1.PortalService/RenderVideo"
+	PortalService_GetConfig_FullMethodName             = "/coasterai.portal.v1.PortalService/GetConfig"
+	PortalService_Self_FullMethodName                  = "/coasterai.portal.v1.PortalService/Self"
+	PortalService_GetIntegration_FullMethodName        = "/coasterai.portal.v1.PortalService/GetIntegration"
+	PortalService_RevokeIntegration_FullMethodName     = "/coasterai.portal.v1.PortalService/RevokeIntegration"
+	PortalService_UpdateIntegration_FullMethodName     = "/coasterai.portal.v1.PortalService/UpdateIntegration"
+	PortalService_PasswordlessStart_FullMethodName     = "/coasterai.portal.v1.PortalService/PasswordlessStart"
+	PortalService_PasswordlessVerify_FullMethodName    = "/coasterai.portal.v1.PortalService/PasswordlessVerify"
+	PortalService_OauthAuthorize_FullMethodName        = "/coasterai.portal.v1.PortalService/OauthAuthorize"
+	PortalService_OauthCallback_FullMethodName         = "/coasterai.portal.v1.PortalService/OauthCallback"
+	PortalService_SocialLoginCallback_FullMethodName   = "/coasterai.portal.v1.PortalService/SocialLoginCallback"
+	PortalService_GetIntegrations_FullMethodName       = "/coasterai.portal.v1.PortalService/GetIntegrations"
+	PortalService_CreateVideo_FullMethodName           = "/coasterai.portal.v1.PortalService/CreateVideo"
+	PortalService_ContinueVideoPlanning_FullMethodName = "/coasterai.portal.v1.PortalService/ContinueVideoPlanning"
+	PortalService_GetVideo_FullMethodName              = "/coasterai.portal.v1.PortalService/GetVideo"
+	PortalService_GetVideos_FullMethodName             = "/coasterai.portal.v1.PortalService/GetVideos"
+	PortalService_DeleteVideo_FullMethodName           = "/coasterai.portal.v1.PortalService/DeleteVideo"
+	PortalService_UpdateVideoConfig_FullMethodName     = "/coasterai.portal.v1.PortalService/UpdateVideoConfig"
+	PortalService_RenderVideo_FullMethodName           = "/coasterai.portal.v1.PortalService/RenderVideo"
 )
 
 // PortalServiceClient is the client API for PortalService service.
@@ -56,7 +57,8 @@ type PortalServiceClient interface {
 	OauthCallback(ctx context.Context, in *OauthCallbackRequest, opts ...grpc.CallOption) (*OauthCallbackResponse, error)
 	SocialLoginCallback(ctx context.Context, in *OauthCallbackRequest, opts ...grpc.CallOption) (*JWT, error)
 	GetIntegrations(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*Integrations, error)
-	CreateVideo(ctx context.Context, in *CreateVideoRequest, opts ...grpc.CallOption) (*CreateVideoResponse, error)
+	CreateVideo(ctx context.Context, in *CreateVideoRequest, opts ...grpc.CallOption) (PortalService_CreateVideoClient, error)
+	ContinueVideoPlanning(ctx context.Context, in *ContinueVideoPlanningRequest, opts ...grpc.CallOption) (PortalService_ContinueVideoPlanningClient, error)
 	GetVideo(ctx context.Context, in *GetVideoRequest, opts ...grpc.CallOption) (PortalService_GetVideoClient, error)
 	GetVideos(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetVideosResponse, error)
 	DeleteVideo(ctx context.Context, in *DeleteVideoRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -171,17 +173,72 @@ func (c *portalServiceClient) GetIntegrations(ctx context.Context, in *emptypb.E
 	return out, nil
 }
 
-func (c *portalServiceClient) CreateVideo(ctx context.Context, in *CreateVideoRequest, opts ...grpc.CallOption) (*CreateVideoResponse, error) {
-	out := new(CreateVideoResponse)
-	err := c.cc.Invoke(ctx, PortalService_CreateVideo_FullMethodName, in, out, opts...)
+func (c *portalServiceClient) CreateVideo(ctx context.Context, in *CreateVideoRequest, opts ...grpc.CallOption) (PortalService_CreateVideoClient, error) {
+	stream, err := c.cc.NewStream(ctx, &PortalService_ServiceDesc.Streams[0], PortalService_CreateVideo_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &portalServiceCreateVideoClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type PortalService_CreateVideoClient interface {
+	Recv() (*CreateVideoResponse, error)
+	grpc.ClientStream
+}
+
+type portalServiceCreateVideoClient struct {
+	grpc.ClientStream
+}
+
+func (x *portalServiceCreateVideoClient) Recv() (*CreateVideoResponse, error) {
+	m := new(CreateVideoResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *portalServiceClient) ContinueVideoPlanning(ctx context.Context, in *ContinueVideoPlanningRequest, opts ...grpc.CallOption) (PortalService_ContinueVideoPlanningClient, error) {
+	stream, err := c.cc.NewStream(ctx, &PortalService_ServiceDesc.Streams[1], PortalService_ContinueVideoPlanning_FullMethodName, opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &portalServiceContinueVideoPlanningClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type PortalService_ContinueVideoPlanningClient interface {
+	Recv() (*CreateVideoResponse, error)
+	grpc.ClientStream
+}
+
+type portalServiceContinueVideoPlanningClient struct {
+	grpc.ClientStream
+}
+
+func (x *portalServiceContinueVideoPlanningClient) Recv() (*CreateVideoResponse, error) {
+	m := new(CreateVideoResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (c *portalServiceClient) GetVideo(ctx context.Context, in *GetVideoRequest, opts ...grpc.CallOption) (PortalService_GetVideoClient, error) {
-	stream, err := c.cc.NewStream(ctx, &PortalService_ServiceDesc.Streams[0], PortalService_GetVideo_FullMethodName, opts...)
+	stream, err := c.cc.NewStream(ctx, &PortalService_ServiceDesc.Streams[2], PortalService_GetVideo_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -265,7 +322,8 @@ type PortalServiceServer interface {
 	OauthCallback(context.Context, *OauthCallbackRequest) (*OauthCallbackResponse, error)
 	SocialLoginCallback(context.Context, *OauthCallbackRequest) (*JWT, error)
 	GetIntegrations(context.Context, *emptypb.Empty) (*Integrations, error)
-	CreateVideo(context.Context, *CreateVideoRequest) (*CreateVideoResponse, error)
+	CreateVideo(*CreateVideoRequest, PortalService_CreateVideoServer) error
+	ContinueVideoPlanning(*ContinueVideoPlanningRequest, PortalService_ContinueVideoPlanningServer) error
 	GetVideo(*GetVideoRequest, PortalService_GetVideoServer) error
 	GetVideos(context.Context, *emptypb.Empty) (*GetVideosResponse, error)
 	DeleteVideo(context.Context, *DeleteVideoRequest) (*emptypb.Empty, error)
@@ -311,8 +369,11 @@ func (UnimplementedPortalServiceServer) SocialLoginCallback(context.Context, *Oa
 func (UnimplementedPortalServiceServer) GetIntegrations(context.Context, *emptypb.Empty) (*Integrations, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetIntegrations not implemented")
 }
-func (UnimplementedPortalServiceServer) CreateVideo(context.Context, *CreateVideoRequest) (*CreateVideoResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateVideo not implemented")
+func (UnimplementedPortalServiceServer) CreateVideo(*CreateVideoRequest, PortalService_CreateVideoServer) error {
+	return status.Errorf(codes.Unimplemented, "method CreateVideo not implemented")
+}
+func (UnimplementedPortalServiceServer) ContinueVideoPlanning(*ContinueVideoPlanningRequest, PortalService_ContinueVideoPlanningServer) error {
+	return status.Errorf(codes.Unimplemented, "method ContinueVideoPlanning not implemented")
 }
 func (UnimplementedPortalServiceServer) GetVideo(*GetVideoRequest, PortalService_GetVideoServer) error {
 	return status.Errorf(codes.Unimplemented, "method GetVideo not implemented")
@@ -540,22 +601,46 @@ func _PortalService_GetIntegrations_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PortalService_CreateVideo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateVideoRequest)
-	if err := dec(in); err != nil {
-		return nil, err
+func _PortalService_CreateVideo_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(CreateVideoRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(PortalServiceServer).CreateVideo(ctx, in)
+	return srv.(PortalServiceServer).CreateVideo(m, &portalServiceCreateVideoServer{stream})
+}
+
+type PortalService_CreateVideoServer interface {
+	Send(*CreateVideoResponse) error
+	grpc.ServerStream
+}
+
+type portalServiceCreateVideoServer struct {
+	grpc.ServerStream
+}
+
+func (x *portalServiceCreateVideoServer) Send(m *CreateVideoResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _PortalService_ContinueVideoPlanning_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(ContinueVideoPlanningRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: PortalService_CreateVideo_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PortalServiceServer).CreateVideo(ctx, req.(*CreateVideoRequest))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(PortalServiceServer).ContinueVideoPlanning(m, &portalServiceContinueVideoPlanningServer{stream})
+}
+
+type PortalService_ContinueVideoPlanningServer interface {
+	Send(*CreateVideoResponse) error
+	grpc.ServerStream
+}
+
+type portalServiceContinueVideoPlanningServer struct {
+	grpc.ServerStream
+}
+
+func (x *portalServiceContinueVideoPlanningServer) Send(m *CreateVideoResponse) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 func _PortalService_GetVideo_Handler(srv interface{}, stream grpc.ServerStream) error {
@@ -703,10 +788,6 @@ var PortalService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _PortalService_GetIntegrations_Handler,
 		},
 		{
-			MethodName: "CreateVideo",
-			Handler:    _PortalService_CreateVideo_Handler,
-		},
-		{
 			MethodName: "GetVideos",
 			Handler:    _PortalService_GetVideos_Handler,
 		},
@@ -724,6 +805,16 @@ var PortalService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "CreateVideo",
+			Handler:       _PortalService_CreateVideo_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "ContinueVideoPlanning",
+			Handler:       _PortalService_ContinueVideoPlanning_Handler,
+			ServerStreams: true,
+		},
 		{
 			StreamName:    "GetVideo",
 			Handler:       _PortalService_GetVideo_Handler,

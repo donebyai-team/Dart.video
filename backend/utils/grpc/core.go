@@ -48,7 +48,7 @@ func loadLogicClientInterceptor() grpc.UnaryClientInterceptor {
 
 		err := otelUnaryInterceptorFunc(ctx, method, req, reply, cc, invoker, opts...)
 		if err != nil {
-			return errorx.GrpcErrToBase(err)
+			return errorx.FromGRPC(err)
 		}
 		return nil
 
@@ -65,7 +65,7 @@ func loadLogicStreamInterceptor() grpc.StreamClientInterceptor {
 
 		stream, err := otelStreamClientInterceptorFunc(ctx, desc, cc, method, streamer, opts...)
 		if err != nil {
-			return nil, errorx.GrpcErrToBase(err)
+			return nil, errorx.FromGRPC(err)
 		}
 		return stream, nil
 	}

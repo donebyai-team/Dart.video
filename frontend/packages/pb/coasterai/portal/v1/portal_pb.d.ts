@@ -203,6 +203,31 @@ export declare type CreateVideoResponse = Message<"coasterai.portal.v1.CreateVid
    * @generated from field: string id = 1;
    */
   id: string;
+
+  /**
+   * @generated from field: string thinking_summary = 2;
+   */
+  thinkingSummary: string;
+
+  /**
+   * @generated from field: coasterai.portal.v1.AskUserQuestion ask_user_question = 3;
+   */
+  askUserQuestion?: AskUserQuestion;
+
+  /**
+   * @generated from field: bool waiting_for_user_input = 4;
+   */
+  waitingForUserInput: boolean;
+
+  /**
+   * @generated from field: bool planning_completed = 5;
+   */
+  planningCompleted: boolean;
+
+  /**
+   * @generated from field: string error_message = 6;
+   */
+  errorMessage: string;
 };
 
 /**
@@ -210,6 +235,58 @@ export declare type CreateVideoResponse = Message<"coasterai.portal.v1.CreateVid
  * Use `create(CreateVideoResponseSchema)` to create a new message.
  */
 export declare const CreateVideoResponseSchema: GenMessage<CreateVideoResponse>;
+
+/**
+ * @generated from message coasterai.portal.v1.ContinueVideoPlanningRequest
+ */
+export declare type ContinueVideoPlanningRequest = Message<"coasterai.portal.v1.ContinueVideoPlanningRequest"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: string response = 2;
+   */
+  response: string;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.ContinueVideoPlanningRequest.
+ * Use `create(ContinueVideoPlanningRequestSchema)` to create a new message.
+ */
+export declare const ContinueVideoPlanningRequestSchema: GenMessage<ContinueVideoPlanningRequest>;
+
+/**
+ * @generated from message coasterai.portal.v1.AskUserQuestion
+ */
+export declare type AskUserQuestion = Message<"coasterai.portal.v1.AskUserQuestion"> & {
+  /**
+   * @generated from field: string tool_name = 1;
+   */
+  toolName: string;
+
+  /**
+   * @generated from field: string question_text = 2;
+   */
+  questionText: string;
+
+  /**
+   * @generated from field: repeated string options = 3;
+   */
+  options: string[];
+
+  /**
+   * @generated from field: optional bool allow_custom_entry = 4;
+   */
+  allowCustomEntry?: boolean;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.AskUserQuestion.
+ * Use `create(AskUserQuestionSchema)` to create a new message.
+ */
+export declare const AskUserQuestionSchema: GenMessage<AskUserQuestion>;
 
 /**
  * @generated from message coasterai.portal.v1.Config
@@ -907,8 +984,16 @@ export declare const PortalService: GenService<{
    * @generated from rpc coasterai.portal.v1.PortalService.CreateVideo
    */
   createVideo: {
-    methodKind: "unary";
+    methodKind: "server_streaming";
     input: typeof CreateVideoRequestSchema;
+    output: typeof CreateVideoResponseSchema;
+  },
+  /**
+   * @generated from rpc coasterai.portal.v1.PortalService.ContinueVideoPlanning
+   */
+  continueVideoPlanning: {
+    methodKind: "server_streaming";
+    input: typeof ContinueVideoPlanningRequestSchema;
     output: typeof CreateVideoResponseSchema;
   },
   /**

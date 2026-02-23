@@ -29,7 +29,7 @@ type Portal struct {
 	logger                 *zap.Logger
 	tracer                 logging.Tracer
 	authenticator          *auth.Authenticator
-	authStateStore         cache.AuthStateStore
+	authStateStore         cache.Cache
 	googleOauthClient      *google2.OauthClient
 	mediaService           services.MediaStore
 	videoGenerationService services.VideoGeneration
@@ -40,7 +40,7 @@ func New(
 	mediaService services.MediaStore,
 	googleOauthClient *google2.OauthClient,
 	authenticator *auth.Authenticator,
-	authStateStore cache.AuthStateStore,
+	authStateStore cache.Cache,
 	authUsecase *services.AuthUsecase,
 	db datastore.Repository,
 	videoGenerationService services.VideoGeneration,

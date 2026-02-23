@@ -1,9 +1,11 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 func MarshalProto(msg proto.Message) ([]byte, error) {
@@ -40,4 +42,14 @@ func UnmarshalProto(value any, msg proto.Message) error {
 	}
 
 	return protojson.Unmarshal(bs, msg)
+}
+
+func StringToStruct(jsonStr string) (*structpb.Struct, error) {
+	var data map[string]interface{}
+
+	if err := json.Unmarshal([]byte(jsonStr), &data); err != nil {
+		return nil, err
+	}
+
+	return structpb.NewStruct(data)
 }

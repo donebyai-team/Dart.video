@@ -24,7 +24,8 @@ service PortalService {
   rpc OauthCallback(OauthCallbackRequest) returns (OauthCallbackResponse);
   rpc SocialLoginCallback(OauthCallbackRequest) returns (JWT);
   rpc GetIntegrations(.google.protobuf.Empty) returns (Integrations);
-  rpc CreateVideo(CreateVideoRequest) returns (CreateVideoResponse);
+  rpc CreateVideo(CreateVideoRequest) returns (stream CreateVideoResponse);
+  rpc ContinueVideoPlanning(ContinueVideoPlanningRequest) returns (stream CreateVideoResponse);
   rpc GetVideo(GetVideoRequest) returns (stream GetVideoResponse);
   rpc GetVideos(.google.protobuf.Empty) returns (GetVideosResponse);
   rpc DeleteVideo(DeleteVideoRequest) returns (.google.protobuf.Empty);
@@ -77,6 +78,23 @@ message CreateVideoRequest {
 
 message CreateVideoResponse {
   string id = 1;
+  string thinking_summary = 2;
+  AskUserQuestion ask_user_question = 3;
+  bool waiting_for_user_input = 4;
+  bool planning_completed = 5;
+  string error_message = 6;
+}
+
+message ContinueVideoPlanningRequest {
+  string id = 1;
+  string response = 2;
+}
+
+message AskUserQuestion {
+  string tool_name = 1;
+  string question_text = 2;
+  repeated string options = 3;
+  optional bool allow_custom_entry = 4;
 }
 
 message Config {

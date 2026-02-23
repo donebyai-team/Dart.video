@@ -68,6 +68,9 @@ const (
 	// PortalServiceCreateVideoProcedure is the fully-qualified name of the PortalService's CreateVideo
 	// RPC.
 	PortalServiceCreateVideoProcedure = "/coasterai.portal.v1.PortalService/CreateVideo"
+	// PortalServiceContinueVideoPlanningProcedure is the fully-qualified name of the PortalService's
+	// ContinueVideoPlanning RPC.
+	PortalServiceContinueVideoPlanningProcedure = "/coasterai.portal.v1.PortalService/ContinueVideoPlanning"
 	// PortalServiceGetVideoProcedure is the fully-qualified name of the PortalService's GetVideo RPC.
 	PortalServiceGetVideoProcedure = "/coasterai.portal.v1.PortalService/GetVideo"
 	// PortalServiceGetVideosProcedure is the fully-qualified name of the PortalService's GetVideos RPC.
@@ -85,24 +88,25 @@ const (
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
 var (
-	portalServiceServiceDescriptor                   = v1.File_coasterai_portal_v1_portal_proto.Services().ByName("PortalService")
-	portalServiceGetConfigMethodDescriptor           = portalServiceServiceDescriptor.Methods().ByName("GetConfig")
-	portalServiceSelfMethodDescriptor                = portalServiceServiceDescriptor.Methods().ByName("Self")
-	portalServiceGetIntegrationMethodDescriptor      = portalServiceServiceDescriptor.Methods().ByName("GetIntegration")
-	portalServiceRevokeIntegrationMethodDescriptor   = portalServiceServiceDescriptor.Methods().ByName("RevokeIntegration")
-	portalServiceUpdateIntegrationMethodDescriptor   = portalServiceServiceDescriptor.Methods().ByName("UpdateIntegration")
-	portalServicePasswordlessStartMethodDescriptor   = portalServiceServiceDescriptor.Methods().ByName("PasswordlessStart")
-	portalServicePasswordlessVerifyMethodDescriptor  = portalServiceServiceDescriptor.Methods().ByName("PasswordlessVerify")
-	portalServiceOauthAuthorizeMethodDescriptor      = portalServiceServiceDescriptor.Methods().ByName("OauthAuthorize")
-	portalServiceOauthCallbackMethodDescriptor       = portalServiceServiceDescriptor.Methods().ByName("OauthCallback")
-	portalServiceSocialLoginCallbackMethodDescriptor = portalServiceServiceDescriptor.Methods().ByName("SocialLoginCallback")
-	portalServiceGetIntegrationsMethodDescriptor     = portalServiceServiceDescriptor.Methods().ByName("GetIntegrations")
-	portalServiceCreateVideoMethodDescriptor         = portalServiceServiceDescriptor.Methods().ByName("CreateVideo")
-	portalServiceGetVideoMethodDescriptor            = portalServiceServiceDescriptor.Methods().ByName("GetVideo")
-	portalServiceGetVideosMethodDescriptor           = portalServiceServiceDescriptor.Methods().ByName("GetVideos")
-	portalServiceDeleteVideoMethodDescriptor         = portalServiceServiceDescriptor.Methods().ByName("DeleteVideo")
-	portalServiceUpdateVideoConfigMethodDescriptor   = portalServiceServiceDescriptor.Methods().ByName("UpdateVideoConfig")
-	portalServiceRenderVideoMethodDescriptor         = portalServiceServiceDescriptor.Methods().ByName("RenderVideo")
+	portalServiceServiceDescriptor                     = v1.File_coasterai_portal_v1_portal_proto.Services().ByName("PortalService")
+	portalServiceGetConfigMethodDescriptor             = portalServiceServiceDescriptor.Methods().ByName("GetConfig")
+	portalServiceSelfMethodDescriptor                  = portalServiceServiceDescriptor.Methods().ByName("Self")
+	portalServiceGetIntegrationMethodDescriptor        = portalServiceServiceDescriptor.Methods().ByName("GetIntegration")
+	portalServiceRevokeIntegrationMethodDescriptor     = portalServiceServiceDescriptor.Methods().ByName("RevokeIntegration")
+	portalServiceUpdateIntegrationMethodDescriptor     = portalServiceServiceDescriptor.Methods().ByName("UpdateIntegration")
+	portalServicePasswordlessStartMethodDescriptor     = portalServiceServiceDescriptor.Methods().ByName("PasswordlessStart")
+	portalServicePasswordlessVerifyMethodDescriptor    = portalServiceServiceDescriptor.Methods().ByName("PasswordlessVerify")
+	portalServiceOauthAuthorizeMethodDescriptor        = portalServiceServiceDescriptor.Methods().ByName("OauthAuthorize")
+	portalServiceOauthCallbackMethodDescriptor         = portalServiceServiceDescriptor.Methods().ByName("OauthCallback")
+	portalServiceSocialLoginCallbackMethodDescriptor   = portalServiceServiceDescriptor.Methods().ByName("SocialLoginCallback")
+	portalServiceGetIntegrationsMethodDescriptor       = portalServiceServiceDescriptor.Methods().ByName("GetIntegrations")
+	portalServiceCreateVideoMethodDescriptor           = portalServiceServiceDescriptor.Methods().ByName("CreateVideo")
+	portalServiceContinueVideoPlanningMethodDescriptor = portalServiceServiceDescriptor.Methods().ByName("ContinueVideoPlanning")
+	portalServiceGetVideoMethodDescriptor              = portalServiceServiceDescriptor.Methods().ByName("GetVideo")
+	portalServiceGetVideosMethodDescriptor             = portalServiceServiceDescriptor.Methods().ByName("GetVideos")
+	portalServiceDeleteVideoMethodDescriptor           = portalServiceServiceDescriptor.Methods().ByName("DeleteVideo")
+	portalServiceUpdateVideoConfigMethodDescriptor     = portalServiceServiceDescriptor.Methods().ByName("UpdateVideoConfig")
+	portalServiceRenderVideoMethodDescriptor           = portalServiceServiceDescriptor.Methods().ByName("RenderVideo")
 )
 
 // PortalServiceClient is a client for the coasterai.portal.v1.PortalService service.
@@ -120,7 +124,8 @@ type PortalServiceClient interface {
 	OauthCallback(context.Context, *connect.Request[v1.OauthCallbackRequest]) (*connect.Response[v1.OauthCallbackResponse], error)
 	SocialLoginCallback(context.Context, *connect.Request[v1.OauthCallbackRequest]) (*connect.Response[v1.JWT], error)
 	GetIntegrations(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.Integrations], error)
-	CreateVideo(context.Context, *connect.Request[v1.CreateVideoRequest]) (*connect.Response[v1.CreateVideoResponse], error)
+	CreateVideo(context.Context, *connect.Request[v1.CreateVideoRequest]) (*connect.ServerStreamForClient[v1.CreateVideoResponse], error)
+	ContinueVideoPlanning(context.Context, *connect.Request[v1.ContinueVideoPlanningRequest]) (*connect.ServerStreamForClient[v1.CreateVideoResponse], error)
 	GetVideo(context.Context, *connect.Request[v1.GetVideoRequest]) (*connect.ServerStreamForClient[v1.GetVideoResponse], error)
 	GetVideos(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetVideosResponse], error)
 	DeleteVideo(context.Context, *connect.Request[v1.DeleteVideoRequest]) (*connect.Response[emptypb.Empty], error)
@@ -210,6 +215,12 @@ func NewPortalServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(portalServiceCreateVideoMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		continueVideoPlanning: connect.NewClient[v1.ContinueVideoPlanningRequest, v1.CreateVideoResponse](
+			httpClient,
+			baseURL+PortalServiceContinueVideoPlanningProcedure,
+			connect.WithSchema(portalServiceContinueVideoPlanningMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 		getVideo: connect.NewClient[v1.GetVideoRequest, v1.GetVideoResponse](
 			httpClient,
 			baseURL+PortalServiceGetVideoProcedure,
@@ -245,23 +256,24 @@ func NewPortalServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 
 // portalServiceClient implements PortalServiceClient.
 type portalServiceClient struct {
-	getConfig           *connect.Client[emptypb.Empty, v1.Config]
-	self                *connect.Client[emptypb.Empty, v1.User]
-	getIntegration      *connect.Client[v1.GetIntegrationRequest, v1.Integrations]
-	revokeIntegration   *connect.Client[v1.RevokeIntegrationRequest, emptypb.Empty]
-	updateIntegration   *connect.Client[v1.UpdateIntegrationRequest, emptypb.Empty]
-	passwordlessStart   *connect.Client[v1.PasswordlessStartRequest, emptypb.Empty]
-	passwordlessVerify  *connect.Client[v1.PasswordlessStartVerify, v1.JWT]
-	oauthAuthorize      *connect.Client[v1.OauthAuthorizeRequest, v1.OauthAuthorizeResponse]
-	oauthCallback       *connect.Client[v1.OauthCallbackRequest, v1.OauthCallbackResponse]
-	socialLoginCallback *connect.Client[v1.OauthCallbackRequest, v1.JWT]
-	getIntegrations     *connect.Client[emptypb.Empty, v1.Integrations]
-	createVideo         *connect.Client[v1.CreateVideoRequest, v1.CreateVideoResponse]
-	getVideo            *connect.Client[v1.GetVideoRequest, v1.GetVideoResponse]
-	getVideos           *connect.Client[emptypb.Empty, v1.GetVideosResponse]
-	deleteVideo         *connect.Client[v1.DeleteVideoRequest, emptypb.Empty]
-	updateVideoConfig   *connect.Client[v1.UpdateVideoConfigRequest, emptypb.Empty]
-	renderVideo         *connect.Client[v1.RenderVideoRequest, v1.RenderVideoResponse]
+	getConfig             *connect.Client[emptypb.Empty, v1.Config]
+	self                  *connect.Client[emptypb.Empty, v1.User]
+	getIntegration        *connect.Client[v1.GetIntegrationRequest, v1.Integrations]
+	revokeIntegration     *connect.Client[v1.RevokeIntegrationRequest, emptypb.Empty]
+	updateIntegration     *connect.Client[v1.UpdateIntegrationRequest, emptypb.Empty]
+	passwordlessStart     *connect.Client[v1.PasswordlessStartRequest, emptypb.Empty]
+	passwordlessVerify    *connect.Client[v1.PasswordlessStartVerify, v1.JWT]
+	oauthAuthorize        *connect.Client[v1.OauthAuthorizeRequest, v1.OauthAuthorizeResponse]
+	oauthCallback         *connect.Client[v1.OauthCallbackRequest, v1.OauthCallbackResponse]
+	socialLoginCallback   *connect.Client[v1.OauthCallbackRequest, v1.JWT]
+	getIntegrations       *connect.Client[emptypb.Empty, v1.Integrations]
+	createVideo           *connect.Client[v1.CreateVideoRequest, v1.CreateVideoResponse]
+	continueVideoPlanning *connect.Client[v1.ContinueVideoPlanningRequest, v1.CreateVideoResponse]
+	getVideo              *connect.Client[v1.GetVideoRequest, v1.GetVideoResponse]
+	getVideos             *connect.Client[emptypb.Empty, v1.GetVideosResponse]
+	deleteVideo           *connect.Client[v1.DeleteVideoRequest, emptypb.Empty]
+	updateVideoConfig     *connect.Client[v1.UpdateVideoConfigRequest, emptypb.Empty]
+	renderVideo           *connect.Client[v1.RenderVideoRequest, v1.RenderVideoResponse]
 }
 
 // GetConfig calls coasterai.portal.v1.PortalService.GetConfig.
@@ -320,8 +332,13 @@ func (c *portalServiceClient) GetIntegrations(ctx context.Context, req *connect.
 }
 
 // CreateVideo calls coasterai.portal.v1.PortalService.CreateVideo.
-func (c *portalServiceClient) CreateVideo(ctx context.Context, req *connect.Request[v1.CreateVideoRequest]) (*connect.Response[v1.CreateVideoResponse], error) {
-	return c.createVideo.CallUnary(ctx, req)
+func (c *portalServiceClient) CreateVideo(ctx context.Context, req *connect.Request[v1.CreateVideoRequest]) (*connect.ServerStreamForClient[v1.CreateVideoResponse], error) {
+	return c.createVideo.CallServerStream(ctx, req)
+}
+
+// ContinueVideoPlanning calls coasterai.portal.v1.PortalService.ContinueVideoPlanning.
+func (c *portalServiceClient) ContinueVideoPlanning(ctx context.Context, req *connect.Request[v1.ContinueVideoPlanningRequest]) (*connect.ServerStreamForClient[v1.CreateVideoResponse], error) {
+	return c.continueVideoPlanning.CallServerStream(ctx, req)
 }
 
 // GetVideo calls coasterai.portal.v1.PortalService.GetVideo.
@@ -364,7 +381,8 @@ type PortalServiceHandler interface {
 	OauthCallback(context.Context, *connect.Request[v1.OauthCallbackRequest]) (*connect.Response[v1.OauthCallbackResponse], error)
 	SocialLoginCallback(context.Context, *connect.Request[v1.OauthCallbackRequest]) (*connect.Response[v1.JWT], error)
 	GetIntegrations(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.Integrations], error)
-	CreateVideo(context.Context, *connect.Request[v1.CreateVideoRequest]) (*connect.Response[v1.CreateVideoResponse], error)
+	CreateVideo(context.Context, *connect.Request[v1.CreateVideoRequest], *connect.ServerStream[v1.CreateVideoResponse]) error
+	ContinueVideoPlanning(context.Context, *connect.Request[v1.ContinueVideoPlanningRequest], *connect.ServerStream[v1.CreateVideoResponse]) error
 	GetVideo(context.Context, *connect.Request[v1.GetVideoRequest], *connect.ServerStream[v1.GetVideoResponse]) error
 	GetVideos(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetVideosResponse], error)
 	DeleteVideo(context.Context, *connect.Request[v1.DeleteVideoRequest]) (*connect.Response[emptypb.Empty], error)
@@ -444,10 +462,16 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(portalServiceGetIntegrationsMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
-	portalServiceCreateVideoHandler := connect.NewUnaryHandler(
+	portalServiceCreateVideoHandler := connect.NewServerStreamHandler(
 		PortalServiceCreateVideoProcedure,
 		svc.CreateVideo,
 		connect.WithSchema(portalServiceCreateVideoMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
+	portalServiceContinueVideoPlanningHandler := connect.NewServerStreamHandler(
+		PortalServiceContinueVideoPlanningProcedure,
+		svc.ContinueVideoPlanning,
+		connect.WithSchema(portalServiceContinueVideoPlanningMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
 	portalServiceGetVideoHandler := connect.NewServerStreamHandler(
@@ -506,6 +530,8 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 			portalServiceGetIntegrationsHandler.ServeHTTP(w, r)
 		case PortalServiceCreateVideoProcedure:
 			portalServiceCreateVideoHandler.ServeHTTP(w, r)
+		case PortalServiceContinueVideoPlanningProcedure:
+			portalServiceContinueVideoPlanningHandler.ServeHTTP(w, r)
 		case PortalServiceGetVideoProcedure:
 			portalServiceGetVideoHandler.ServeHTTP(w, r)
 		case PortalServiceGetVideosProcedure:
@@ -569,8 +595,12 @@ func (UnimplementedPortalServiceHandler) GetIntegrations(context.Context, *conne
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.GetIntegrations is not implemented"))
 }
 
-func (UnimplementedPortalServiceHandler) CreateVideo(context.Context, *connect.Request[v1.CreateVideoRequest]) (*connect.Response[v1.CreateVideoResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.CreateVideo is not implemented"))
+func (UnimplementedPortalServiceHandler) CreateVideo(context.Context, *connect.Request[v1.CreateVideoRequest], *connect.ServerStream[v1.CreateVideoResponse]) error {
+	return connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.CreateVideo is not implemented"))
+}
+
+func (UnimplementedPortalServiceHandler) ContinueVideoPlanning(context.Context, *connect.Request[v1.ContinueVideoPlanningRequest], *connect.ServerStream[v1.CreateVideoResponse]) error {
+	return connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.ContinueVideoPlanning is not implemented"))
 }
 
 func (UnimplementedPortalServiceHandler) GetVideo(context.Context, *connect.Request[v1.GetVideoRequest], *connect.ServerStream[v1.GetVideoResponse]) error {

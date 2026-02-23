@@ -15,6 +15,102 @@ package type_builder
 
 import baml "github.com/boundaryml/baml/engine/language_client_go/pkg"
 
+type AnimationSlideClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *AnimationSlideClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *AnimationSlideClassView) PropertyIndex() (ClassPropertyView, error) {
+	return t.inner.Property("index")
+}
+
+func (t *AnimationSlideClassView) PropertyBeatDescription() (ClassPropertyView, error) {
+	return t.inner.Property("beatDescription")
+}
+
+func (t *AnimationSlideClassView) PropertyAnimationType() (ClassPropertyView, error) {
+	return t.inner.Property("animationType")
+}
+
+func (t *AnimationSlideClassView) PropertyCategorySearchQuery() (ClassPropertyView, error) {
+	return t.inner.Property("categorySearchQuery")
+}
+
+func (t *AnimationSlideClassView) PropertyDuration() (ClassPropertyView, error) {
+	return t.inner.Property("duration")
+}
+
+func (t *AnimationSlideClassView) PropertySelectedTemplateDescription() (ClassPropertyView, error) {
+	return t.inner.Property("selectedTemplateDescription")
+}
+
+func (t *TypeBuilder) AnimationSlide() (*AnimationSlideClassView, error) {
+	bld, err := t.inner.Class("AnimationSlide")
+	if err != nil {
+		return nil, err
+	}
+	return &AnimationSlideClassView{inner: bld}, nil
+}
+
+func (t *AnimationSlideClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
+type AskUserQuestionClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *AskUserQuestionClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *AskUserQuestionClassView) PropertyTool_name() (ClassPropertyView, error) {
+	return t.inner.Property("tool_name")
+}
+
+func (t *AskUserQuestionClassView) PropertyQuestion_text() (ClassPropertyView, error) {
+	return t.inner.Property("question_text")
+}
+
+func (t *AskUserQuestionClassView) PropertyOptions() (ClassPropertyView, error) {
+	return t.inner.Property("options")
+}
+
+func (t *AskUserQuestionClassView) PropertyAllow_custom_entry() (ClassPropertyView, error) {
+	return t.inner.Property("allow_custom_entry")
+}
+
+func (t *TypeBuilder) AskUserQuestion() (*AskUserQuestionClassView, error) {
+	bld, err := t.inner.Class("AskUserQuestion")
+	if err != nil {
+		return nil, err
+	}
+	return &AskUserQuestionClassView{inner: bld}, nil
+}
+
+func (t *AskUserQuestionClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
 type CategoryClassView struct {
 	inner baml.ClassBuilder
 }
@@ -48,6 +144,78 @@ func (t *TypeBuilder) Category() (*CategoryClassView, error) {
 }
 
 func (t *CategoryClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
+type GradientClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *GradientClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *GradientClassView) PropertyAngle() (ClassPropertyView, error) {
+	return t.inner.Property("angle")
+}
+
+func (t *GradientClassView) PropertyStops() (ClassPropertyView, error) {
+	return t.inner.Property("stops")
+}
+
+func (t *TypeBuilder) Gradient() (*GradientClassView, error) {
+	bld, err := t.inner.Class("Gradient")
+	if err != nil {
+		return nil, err
+	}
+	return &GradientClassView{inner: bld}, nil
+}
+
+func (t *GradientClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
+type GradientStopClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *GradientStopClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *GradientStopClassView) PropertyColor() (ClassPropertyView, error) {
+	return t.inner.Property("color")
+}
+
+func (t *GradientStopClassView) PropertyPosition() (ClassPropertyView, error) {
+	return t.inner.Property("position")
+}
+
+func (t *TypeBuilder) GradientStop() (*GradientStopClassView, error) {
+	bld, err := t.inner.Class("GradientStop")
+	if err != nil {
+		return nil, err
+	}
+	return &GradientStopClassView{inner: bld}, nil
+}
+
+func (t *GradientStopClassView) Type() (baml.Type, error) {
 	return t.inner.Type()
 }
 
@@ -116,6 +284,154 @@ func (t *TypeBuilder) MatchCategoriesResponse() (*MatchCategoriesResponseClassVi
 }
 
 func (t *MatchCategoriesResponseClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
+type MatchTemplateRequestClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *MatchTemplateRequestClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *MatchTemplateRequestClassView) PropertySections() (ClassPropertyView, error) {
+	return t.inner.Property("sections")
+}
+
+func (t *MatchTemplateRequestClassView) PropertyTemplates() (ClassPropertyView, error) {
+	return t.inner.Property("templates")
+}
+
+func (t *TypeBuilder) MatchTemplateRequest() (*MatchTemplateRequestClassView, error) {
+	bld, err := t.inner.Class("MatchTemplateRequest")
+	if err != nil {
+		return nil, err
+	}
+	return &MatchTemplateRequestClassView{inner: bld}, nil
+}
+
+func (t *MatchTemplateRequestClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
+type MatchTemplateResponseClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *MatchTemplateResponseClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *MatchTemplateResponseClassView) PropertyTemplates() (ClassPropertyView, error) {
+	return t.inner.Property("templates")
+}
+
+func (t *TypeBuilder) MatchTemplateResponse() (*MatchTemplateResponseClassView, error) {
+	bld, err := t.inner.Class("MatchTemplateResponse")
+	if err != nil {
+		return nil, err
+	}
+	return &MatchTemplateResponseClassView{inner: bld}, nil
+}
+
+func (t *MatchTemplateResponseClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
+type MediaSlideClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *MediaSlideClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *MediaSlideClassView) PropertyIndex() (ClassPropertyView, error) {
+	return t.inner.Property("index")
+}
+
+func (t *MediaSlideClassView) PropertyDescription() (ClassPropertyView, error) {
+	return t.inner.Property("description")
+}
+
+func (t *MediaSlideClassView) PropertyDuration() (ClassPropertyView, error) {
+	return t.inner.Property("duration")
+}
+
+func (t *TypeBuilder) MediaSlide() (*MediaSlideClassView, error) {
+	bld, err := t.inner.Class("MediaSlide")
+	if err != nil {
+		return nil, err
+	}
+	return &MediaSlideClassView{inner: bld}, nil
+}
+
+func (t *MediaSlideClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
+type MessageClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *MessageClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *MessageClassView) PropertyRole() (ClassPropertyView, error) {
+	return t.inner.Property("role")
+}
+
+func (t *MessageClassView) PropertyContent() (ClassPropertyView, error) {
+	return t.inner.Property("content")
+}
+
+func (t *MessageClassView) PropertyTool_call_id() (ClassPropertyView, error) {
+	return t.inner.Property("tool_call_id")
+}
+
+func (t *TypeBuilder) Message() (*MessageClassView, error) {
+	bld, err := t.inner.Class("Message")
+	if err != nil {
+		return nil, err
+	}
+	return &MessageClassView{inner: bld}, nil
+}
+
+func (t *MessageClassView) Type() (baml.Type, error) {
 	return t.inner.Type()
 }
 
@@ -195,11 +511,11 @@ func (t *SectionClassView) Type() (baml.Type, error) {
 	return t.inner.Type()
 }
 
-type SlideClassView struct {
+type SelectedTemplateClassView struct {
 	inner baml.ClassBuilder
 }
 
-func (t *SlideClassView) ListProperties() ([]ClassPropertyView, error) {
+func (t *SelectedTemplateClassView) ListProperties() ([]ClassPropertyView, error) {
 	result, err := t.inner.ListProperties()
 	if err != nil {
 		return nil, err
@@ -211,39 +527,207 @@ func (t *SlideClassView) ListProperties() ([]ClassPropertyView, error) {
 	return builders, nil
 }
 
-func (t *SlideClassView) PropertyIndex() (ClassPropertyView, error) {
-	return t.inner.Property("index")
+func (t *SelectedTemplateClassView) PropertyId() (ClassPropertyView, error) {
+	return t.inner.Property("id")
 }
 
-func (t *SlideClassView) PropertyBeatDescription() (ClassPropertyView, error) {
-	return t.inner.Property("beatDescription")
+func (t *SelectedTemplateClassView) PropertyName() (ClassPropertyView, error) {
+	return t.inner.Property("name")
 }
 
-func (t *SlideClassView) PropertyType() (ClassPropertyView, error) {
-	return t.inner.Property("type")
+func (t *SelectedTemplateClassView) PropertyUrl() (ClassPropertyView, error) {
+	return t.inner.Property("url")
 }
 
-func (t *SlideClassView) PropertyAnimationType() (ClassPropertyView, error) {
-	return t.inner.Property("animationType")
+func (t *SelectedTemplateClassView) PropertyConfig() (ClassPropertyView, error) {
+	return t.inner.Property("config")
 }
 
-func (t *SlideClassView) PropertyCategorySearchQuery() (ClassPropertyView, error) {
-	return t.inner.Property("categorySearchQuery")
-}
-
-func (t *SlideClassView) PropertyDuration() (ClassPropertyView, error) {
-	return t.inner.Property("duration")
-}
-
-func (t *TypeBuilder) Slide() (*SlideClassView, error) {
-	bld, err := t.inner.Class("Slide")
+func (t *TypeBuilder) SelectedTemplate() (*SelectedTemplateClassView, error) {
+	bld, err := t.inner.Class("SelectedTemplate")
 	if err != nil {
 		return nil, err
 	}
-	return &SlideClassView{inner: bld}, nil
+	return &SelectedTemplateClassView{inner: bld}, nil
 }
 
-func (t *SlideClassView) Type() (baml.Type, error) {
+func (t *SelectedTemplateClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
+type StreamingVideoGenerationPlanClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *StreamingVideoGenerationPlanClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *StreamingVideoGenerationPlanClassView) PropertyThinking() (ClassPropertyView, error) {
+	return t.inner.Property("thinking")
+}
+
+func (t *StreamingVideoGenerationPlanClassView) PropertyPlan() (ClassPropertyView, error) {
+	return t.inner.Property("plan")
+}
+
+func (t *TypeBuilder) StreamingVideoGenerationPlan() (*StreamingVideoGenerationPlanClassView, error) {
+	bld, err := t.inner.Class("StreamingVideoGenerationPlan")
+	if err != nil {
+		return nil, err
+	}
+	return &StreamingVideoGenerationPlanClassView{inner: bld}, nil
+}
+
+func (t *StreamingVideoGenerationPlanClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
+type TemplateConfigExtractorInputClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *TemplateConfigExtractorInputClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *TemplateConfigExtractorInputClassView) PropertySchema() (ClassPropertyView, error) {
+	return t.inner.Property("schema")
+}
+
+func (t *TemplateConfigExtractorInputClassView) PropertyBeatDescription() (ClassPropertyView, error) {
+	return t.inner.Property("beatDescription")
+}
+
+func (t *TemplateConfigExtractorInputClassView) PropertyTemplateDescription() (ClassPropertyView, error) {
+	return t.inner.Property("templateDescription")
+}
+
+func (t *TypeBuilder) TemplateConfigExtractorInput() (*TemplateConfigExtractorInputClassView, error) {
+	bld, err := t.inner.Class("TemplateConfigExtractorInput")
+	if err != nil {
+		return nil, err
+	}
+	return &TemplateConfigExtractorInputClassView{inner: bld}, nil
+}
+
+func (t *TemplateConfigExtractorInputClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
+type TemplateConfigExtractorOutputClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *TemplateConfigExtractorOutputClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *TemplateConfigExtractorOutputClassView) PropertyConfig() (ClassPropertyView, error) {
+	return t.inner.Property("config")
+}
+
+func (t *TypeBuilder) TemplateConfigExtractorOutput() (*TemplateConfigExtractorOutputClassView, error) {
+	bld, err := t.inner.Class("TemplateConfigExtractorOutput")
+	if err != nil {
+		return nil, err
+	}
+	return &TemplateConfigExtractorOutputClassView{inner: bld}, nil
+}
+
+func (t *TemplateConfigExtractorOutputClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
+type TemplateItemClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *TemplateItemClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *TemplateItemClassView) PropertyName() (ClassPropertyView, error) {
+	return t.inner.Property("name")
+}
+
+func (t *TemplateItemClassView) PropertyDescription() (ClassPropertyView, error) {
+	return t.inner.Property("description")
+}
+
+func (t *TypeBuilder) TemplateItem() (*TemplateItemClassView, error) {
+	bld, err := t.inner.Class("TemplateItem")
+	if err != nil {
+		return nil, err
+	}
+	return &TemplateItemClassView{inner: bld}, nil
+}
+
+func (t *TemplateItemClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
+type VideoBackgroundClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *VideoBackgroundClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *VideoBackgroundClassView) PropertyGradient() (ClassPropertyView, error) {
+	return t.inner.Property("gradient")
+}
+
+func (t *TypeBuilder) VideoBackground() (*VideoBackgroundClassView, error) {
+	bld, err := t.inner.Class("VideoBackground")
+	if err != nil {
+		return nil, err
+	}
+	return &VideoBackgroundClassView{inner: bld}, nil
+}
+
+func (t *VideoBackgroundClassView) Type() (baml.Type, error) {
 	return t.inner.Type()
 }
 
@@ -263,12 +747,16 @@ func (t *VideoGenerationPlanClassView) ListProperties() ([]ClassPropertyView, er
 	return builders, nil
 }
 
-func (t *VideoGenerationPlanClassView) PropertyVideo_name() (ClassPropertyView, error) {
-	return t.inner.Property("video_name")
+func (t *VideoGenerationPlanClassView) PropertyVideoName() (ClassPropertyView, error) {
+	return t.inner.Property("videoName")
 }
 
 func (t *VideoGenerationPlanClassView) PropertySections() (ClassPropertyView, error) {
 	return t.inner.Property("sections")
+}
+
+func (t *VideoGenerationPlanClassView) PropertyBackgroundStyle() (ClassPropertyView, error) {
+	return t.inner.Property("backgroundStyle")
 }
 
 func (t *TypeBuilder) VideoGenerationPlan() (*VideoGenerationPlanClassView, error) {
@@ -317,6 +805,10 @@ func (t *VideoGenerationPlanRequestClassView) PropertyResolution() (ClassPropert
 
 func (t *VideoGenerationPlanRequestClassView) PropertyScript() (ClassPropertyView, error) {
 	return t.inner.Property("Script")
+}
+
+func (t *VideoGenerationPlanRequestClassView) PropertyEnableThinking() (ClassPropertyView, error) {
+	return t.inner.Property("enableThinking")
 }
 
 func (t *TypeBuilder) VideoGenerationPlanRequest() (*VideoGenerationPlanRequestClassView, error) {

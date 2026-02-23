@@ -58,39 +58,3 @@ func (t *TypeBuilder) AnimationType() (*AnimationTypeEnumView, error) {
 func (t *AnimationTypeEnumView) Type() (baml.Type, error) {
 	return t.inner.Type()
 }
-
-type SideTypeEnumView struct {
-	inner baml.EnumBuilder
-}
-
-func (t *SideTypeEnumView) ListValues() ([]EnumValueView, error) {
-	result, err := t.inner.ListValues()
-	if err != nil {
-		return nil, err
-	}
-	builders := make([]EnumValueView, len(result))
-	for i, p := range result {
-		builders[i] = p
-	}
-	return builders, nil
-}
-
-func (t *SideTypeEnumView) ValueANIMATION() (EnumValueView, error) {
-	return t.inner.Value("ANIMATION")
-}
-
-func (t *SideTypeEnumView) ValueMEDIA() (EnumValueView, error) {
-	return t.inner.Value("MEDIA")
-}
-
-func (t *TypeBuilder) SideType() (*SideTypeEnumView, error) {
-	bld, err := t.inner.Enum("SideType")
-	if err != nil {
-		return nil, err
-	}
-	return &SideTypeEnumView{inner: bld}, nil
-}
-
-func (t *SideTypeEnumView) Type() (baml.Type, error) {
-	return t.inner.Type()
-}

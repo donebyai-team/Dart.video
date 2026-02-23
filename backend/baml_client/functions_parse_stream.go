@@ -25,8 +25,8 @@ type parse_stream struct{}
 
 var ParseStream = &parse_stream{}
 
-// / Parse version of GeneratePlan (Takes in string and returns stream_types.VideoGenerationPlan)
-func (*parse_stream) GeneratePlan(text string, opts ...CallOptionFunc) (stream_types.VideoGenerationPlan, error) {
+// / Parse version of ExtractTemplateConfig (Takes in string and returns stream_types.TemplateConfigExtractorOutput)
+func (*parse_stream) ExtractTemplateConfig(text string, opts ...CallOptionFunc) (stream_types.TemplateConfigExtractorOutput, error) {
 
 	var callOpts callOption
 	for _, opt := range opts {
@@ -58,16 +58,63 @@ func (*parse_stream) GeneratePlan(text string, opts ...CallOptionFunc) (stream_t
 	if err != nil {
 		// This should never happen. if it does, please file an issue at https://github.com/boundaryml/baml/issues
 		// and include the type of the args you're passing in.
-		wrapped_err := fmt.Errorf("BAML INTERNAL ERROR: GeneratePlan: %w", err)
+		wrapped_err := fmt.Errorf("BAML INTERNAL ERROR: ExtractTemplateConfig: %w", err)
 		panic(wrapped_err)
 	}
 
-	result, err := bamlRuntime.CallFunctionParse(context.Background(), "GeneratePlan", encoded)
+	result, err := bamlRuntime.CallFunctionParse(context.Background(), "ExtractTemplateConfig", encoded)
 	if err != nil {
-		return stream_types.VideoGenerationPlan{}, err
+		return stream_types.TemplateConfigExtractorOutput{}, err
 	}
 
-	casted := (result).(stream_types.VideoGenerationPlan)
+	casted := (result).(stream_types.TemplateConfigExtractorOutput)
+
+	return casted, nil
+}
+
+// / Parse version of GeneratePlanStreaming (Takes in string and returns stream_types.StreamingVideoGenerationPlan)
+func (*parse_stream) GeneratePlanStreaming(text string, opts ...CallOptionFunc) (stream_types.StreamingVideoGenerationPlan, error) {
+
+	var callOpts callOption
+	for _, opt := range opts {
+		opt(&callOpts)
+	}
+
+	args := baml.BamlFunctionArguments{
+		Kwargs: map[string]any{"text": text, "stream": true},
+		Env:    getEnvVars(callOpts.env),
+	}
+
+	if callOpts.clientRegistry != nil {
+		args.ClientRegistry = callOpts.clientRegistry
+	}
+
+	if callOpts.collectors != nil {
+		args.Collectors = callOpts.collectors
+	}
+
+	if callOpts.typeBuilder != nil {
+		args.TypeBuilder = callOpts.typeBuilder
+	}
+
+	if callOpts.tags != nil {
+		args.Tags = callOpts.tags
+	}
+
+	encoded, err := args.Encode()
+	if err != nil {
+		// This should never happen. if it does, please file an issue at https://github.com/boundaryml/baml/issues
+		// and include the type of the args you're passing in.
+		wrapped_err := fmt.Errorf("BAML INTERNAL ERROR: GeneratePlanStreaming: %w", err)
+		panic(wrapped_err)
+	}
+
+	result, err := bamlRuntime.CallFunctionParse(context.Background(), "GeneratePlanStreaming", encoded)
+	if err != nil {
+		return stream_types.StreamingVideoGenerationPlan{}, err
+	}
+
+	casted := (result).(stream_types.StreamingVideoGenerationPlan)
 
 	return casted, nil
 }
@@ -115,6 +162,53 @@ func (*parse_stream) MatchCategories(text string, opts ...CallOptionFunc) (strea
 	}
 
 	casted := (result).(stream_types.MatchCategoriesResponse)
+
+	return casted, nil
+}
+
+// / Parse version of MatchTemplate (Takes in string and returns stream_types.MatchTemplateResponse)
+func (*parse_stream) MatchTemplate(text string, opts ...CallOptionFunc) (stream_types.MatchTemplateResponse, error) {
+
+	var callOpts callOption
+	for _, opt := range opts {
+		opt(&callOpts)
+	}
+
+	args := baml.BamlFunctionArguments{
+		Kwargs: map[string]any{"text": text, "stream": true},
+		Env:    getEnvVars(callOpts.env),
+	}
+
+	if callOpts.clientRegistry != nil {
+		args.ClientRegistry = callOpts.clientRegistry
+	}
+
+	if callOpts.collectors != nil {
+		args.Collectors = callOpts.collectors
+	}
+
+	if callOpts.typeBuilder != nil {
+		args.TypeBuilder = callOpts.typeBuilder
+	}
+
+	if callOpts.tags != nil {
+		args.Tags = callOpts.tags
+	}
+
+	encoded, err := args.Encode()
+	if err != nil {
+		// This should never happen. if it does, please file an issue at https://github.com/boundaryml/baml/issues
+		// and include the type of the args you're passing in.
+		wrapped_err := fmt.Errorf("BAML INTERNAL ERROR: MatchTemplate: %w", err)
+		panic(wrapped_err)
+	}
+
+	result, err := bamlRuntime.CallFunctionParse(context.Background(), "MatchTemplate", encoded)
+	if err != nil {
+		return stream_types.MatchTemplateResponse{}, err
+	}
+
+	casted := (result).(stream_types.MatchTemplateResponse)
 
 	return casted, nil
 }

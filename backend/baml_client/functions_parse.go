@@ -25,8 +25,8 @@ type parse struct{}
 
 var Parse = &parse{}
 
-// / Parse version of GeneratePlan (Takes in string and returns types.VideoGenerationPlan)
-func (*parse) GeneratePlan(text string, opts ...CallOptionFunc) (types.VideoGenerationPlan, error) {
+// / Parse version of ExtractTemplateConfig (Takes in string and returns types.TemplateConfigExtractorOutput)
+func (*parse) ExtractTemplateConfig(text string, opts ...CallOptionFunc) (types.TemplateConfigExtractorOutput, error) {
 
 	var callOpts callOption
 	for _, opt := range opts {
@@ -58,16 +58,63 @@ func (*parse) GeneratePlan(text string, opts ...CallOptionFunc) (types.VideoGene
 	if err != nil {
 		// This should never happen. if it does, please file an issue at https://github.com/boundaryml/baml/issues
 		// and include the type of the args you're passing in.
-		wrapped_err := fmt.Errorf("BAML INTERNAL ERROR: GeneratePlan: %w", err)
+		wrapped_err := fmt.Errorf("BAML INTERNAL ERROR: ExtractTemplateConfig: %w", err)
 		panic(wrapped_err)
 	}
 
-	result, err := bamlRuntime.CallFunctionParse(context.Background(), "GeneratePlan", encoded)
+	result, err := bamlRuntime.CallFunctionParse(context.Background(), "ExtractTemplateConfig", encoded)
 	if err != nil {
-		return types.VideoGenerationPlan{}, err
+		return types.TemplateConfigExtractorOutput{}, err
 	}
 
-	casted := (result).(types.VideoGenerationPlan)
+	casted := (result).(types.TemplateConfigExtractorOutput)
+
+	return casted, nil
+}
+
+// / Parse version of GeneratePlanStreaming (Takes in string and returns types.StreamingVideoGenerationPlan)
+func (*parse) GeneratePlanStreaming(text string, opts ...CallOptionFunc) (types.StreamingVideoGenerationPlan, error) {
+
+	var callOpts callOption
+	for _, opt := range opts {
+		opt(&callOpts)
+	}
+
+	args := baml.BamlFunctionArguments{
+		Kwargs: map[string]any{"text": text, "stream": false},
+		Env:    getEnvVars(callOpts.env),
+	}
+
+	if callOpts.clientRegistry != nil {
+		args.ClientRegistry = callOpts.clientRegistry
+	}
+
+	if callOpts.collectors != nil {
+		args.Collectors = callOpts.collectors
+	}
+
+	if callOpts.typeBuilder != nil {
+		args.TypeBuilder = callOpts.typeBuilder
+	}
+
+	if callOpts.tags != nil {
+		args.Tags = callOpts.tags
+	}
+
+	encoded, err := args.Encode()
+	if err != nil {
+		// This should never happen. if it does, please file an issue at https://github.com/boundaryml/baml/issues
+		// and include the type of the args you're passing in.
+		wrapped_err := fmt.Errorf("BAML INTERNAL ERROR: GeneratePlanStreaming: %w", err)
+		panic(wrapped_err)
+	}
+
+	result, err := bamlRuntime.CallFunctionParse(context.Background(), "GeneratePlanStreaming", encoded)
+	if err != nil {
+		return types.StreamingVideoGenerationPlan{}, err
+	}
+
+	casted := (result).(types.StreamingVideoGenerationPlan)
 
 	return casted, nil
 }
@@ -115,6 +162,53 @@ func (*parse) MatchCategories(text string, opts ...CallOptionFunc) (types.MatchC
 	}
 
 	casted := (result).(types.MatchCategoriesResponse)
+
+	return casted, nil
+}
+
+// / Parse version of MatchTemplate (Takes in string and returns types.MatchTemplateResponse)
+func (*parse) MatchTemplate(text string, opts ...CallOptionFunc) (types.MatchTemplateResponse, error) {
+
+	var callOpts callOption
+	for _, opt := range opts {
+		opt(&callOpts)
+	}
+
+	args := baml.BamlFunctionArguments{
+		Kwargs: map[string]any{"text": text, "stream": false},
+		Env:    getEnvVars(callOpts.env),
+	}
+
+	if callOpts.clientRegistry != nil {
+		args.ClientRegistry = callOpts.clientRegistry
+	}
+
+	if callOpts.collectors != nil {
+		args.Collectors = callOpts.collectors
+	}
+
+	if callOpts.typeBuilder != nil {
+		args.TypeBuilder = callOpts.typeBuilder
+	}
+
+	if callOpts.tags != nil {
+		args.Tags = callOpts.tags
+	}
+
+	encoded, err := args.Encode()
+	if err != nil {
+		// This should never happen. if it does, please file an issue at https://github.com/boundaryml/baml/issues
+		// and include the type of the args you're passing in.
+		wrapped_err := fmt.Errorf("BAML INTERNAL ERROR: MatchTemplate: %w", err)
+		panic(wrapped_err)
+	}
+
+	result, err := bamlRuntime.CallFunctionParse(context.Background(), "MatchTemplate", encoded)
+	if err != nil {
+		return types.MatchTemplateResponse{}, err
+	}
+
+	casted := (result).(types.MatchTemplateResponse)
 
 	return casted, nil
 }

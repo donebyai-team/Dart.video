@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/shank318/coasterai/baml_client/types"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -31,11 +32,11 @@ var toolsSyncTemplates = Command(
 	"Synchronize animation categories and templates from the frontend filesystem into the backend database",
 )
 
-var animationFolderToType = map[string]models.AnimationType{
-	"text-animation":   models.AnimationTypeTEXT,
-	"visual-animation": models.AnimationTypeVISUAL,
-	"stats-animation":  models.AnimationTypeSTATS,
-	"chart-animation":  models.AnimationTypeCHART,
+var animationFolderToType = map[string]types.AnimationType{
+	"text-animation":   types.AnimationTypeTEXT,
+	"visual-animation": types.AnimationTypeVISUAL,
+	"stats-animation":  types.AnimationTypeSTATS,
+	"chart-animation":  types.AnimationTypeCHART,
 }
 
 var categoryFilePattern = regexp.MustCompile(`^[a-z0-9-]+\.md$`)
@@ -140,7 +141,7 @@ func toolsSyncTemplatesRunE(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func syncCategories(ctx context.Context, db datastore.TemplateRepository, categoriesDir string, animType models.AnimationType, animFolderName string, stats *syncStats) error {
+func syncCategories(ctx context.Context, db datastore.TemplateRepository, categoriesDir string, animType types.AnimationType, animFolderName string, stats *syncStats) error {
 	entries, err := os.ReadDir(categoriesDir)
 	if err != nil {
 		return fmt.Errorf("failed to read categories dir in %s: %w", animFolderName, err)
@@ -196,7 +197,7 @@ func syncCategories(ctx context.Context, db datastore.TemplateRepository, catego
 	return nil
 }
 
-func syncTemplate(ctx context.Context, db datastore.TemplateRepository, templateDir, templateName string, animType models.AnimationType, animFolderName string, stats *syncStats) error {
+func syncTemplate(ctx context.Context, db datastore.TemplateRepository, templateDir, templateName string, animType types.AnimationType, animFolderName string, stats *syncStats) error {
 	metadataPath := filepath.Join(templateDir, "metadata.json")
 	previewPath := filepath.Join(templateDir, "preview.json")
 	schemaPath := filepath.Join(templateDir, "schema.json")

@@ -15,11 +15,12 @@ import (
 type RetrievalService interface {
 	// MatchCategories takes a semantic query and returns ranked category matches.
 	// topK controls how many to return (e.g. 3 for fallback chain).
-	MatchCategories(ctx context.Context, animationType models.AnimationType, query string) ([]*models.TemplateCategory, error)
+	MatchCategories(ctx context.Context, animationType types.AnimationType, query string) ([]*models.TemplateCategory, error)
 
 	// FetchTemplates returns templates for a given category, applying filters.
-	// usedTemplateIDs: non-repeatable templates with these IDs are excluded.
-	FetchTemplates(ctx context.Context, animationType models.AnimationType) ([]*models.Template, error)
+	// usedTemplateIDs: non-repeatable templates with these IDs are excluded
+	// returns top k.
+	FetchTemplates(ctx context.Context, animationType types.AnimationType, category string, usedIds []string) ([]*models.Template, error)
 
 	// MatchTemplates takes a query and a pre-filtered pool, returns ranked candidates.
 	// topK controls shortlist size for the LLM selector.
@@ -34,7 +35,7 @@ func NewLlmRetrievalService(db datastore.Repository) RetrievalService {
 	return &llmRetrievalService{db: db}
 }
 
-func (l llmRetrievalService) MatchCategories(ctx context.Context, animationType models.AnimationType, query string) ([]*models.TemplateCategory, error) {
+func (l llmRetrievalService) MatchCategories(ctx context.Context, animationType types.AnimationType, query string) ([]*models.TemplateCategory, error) {
 	categories, err := l.db.GetTemplateCategoriesByAnimationType(ctx, animationType)
 	if err != nil {
 		return nil, err
@@ -75,7 +76,6 @@ func (l llmRetrievalService) MatchCategories(ctx context.Context, animationType 
 	return filteredCategories, nil
 }
 
-func (l llmRetrievalService) FetchTemplates(ctx context.Context, animationType models.AnimationType) ([]*models.Template, error) {
-	//TODO implement me
-	panic("implement me")
+func (l llmRetrievalService) FetchTemplates(ctx context.Context, animationType types.AnimationType, category string, usedIds []string) ([]*models.Template, error) {
+	return l.db.GetTemplatesByCategory(ctx, category, animationType, usedIds)
 }
