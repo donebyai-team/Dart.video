@@ -1,110 +1,71 @@
 {
-    "centerText": {
+  "name": "slide_center_text_schema",
+  "schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["centerText"],
+    "properties": {
+      "centerText": {
+        "type": "object",
         "description": "Main text displayed at the center of the slide",
-        "optional": false,
-        "style": {
-            "fontSize": {
-                "optional": false,
+        "additionalProperties": false,
+        "required": ["text", "style"],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Main text content displayed at the center",
+            "minLength": 10,
+            "maxLength": 200
+          },
+          "style": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["fontSize", "color", "lineHeight"],
+            "properties": {
+              "fontSize": {
                 "type": "number"
-            },
-            "color": {
-                "optional": false,
+              },
+              "color": {
                 "type": "string"
-            },
-            "lineHeight": {
-                "optional": false,
+              },
+              "lineHeight": {
                 "type": "number"
-            },
-            "textAlign": {
-                "optional": true,
+              },
+              "textAlign": {
+                "type": "string",
+                "enum": ["left", "center", "right", "justify"]
+              },
+              "fontWeight": {
+                "type": "string",
                 "enum": [
-                    "left",
-                    "center",
-                    "right",
-                    "justify"
+                  "normal",
+                  "bold",
+                  "bolder",
+                  "lighter",
+                  "300",
+                  "400",
+                  "500",
+                  "600",
+                  "700"
                 ]
-            },
-            "fontWeight": {
-                "optional": true,
+              },
+              "fontFamily": {
+                "type": "string",
                 "enum": [
-                    "normal",
-                    "bold",
-                    "bolder",
-                    "lighter",
-                    "300",
-                    "400",
-                    "500",
-                    "600",
-                    "700"
+                  "Inter",
+                  "Urbanist",
+                  "Arial",
+                  "Poppins",
+                  "Roboto",
+                  "Georgia",
+                  "Times New Roman",
+                  "Courier New"
                 ]
-            },
-            "fontFamily": {
-                "optional": true,
-                "enum": [
-                    "Inter",
-                    "Urbanist",
-                    "Arial",
-                    "Poppins",
-                    "Roboto",
-                    "Georgia",
-                    "Times New Roman",
-                    "Courier New"
-                ]
+              }
             }
+          }
         }
-    },
-    "topLeftText": {
-        "description": "Text displayed at the top-left of the slide",
-        "optional": false,
-        "style": {
-            "fontSize": {
-                "optional": false,
-                "type": "number"
-            },
-            "color": {
-                "optional": false,
-                "type": "string"
-            },
-            "lineHeight": {
-                "optional": false,
-                "type": "number"
-            },
-            "textAlign": {
-                "optional": true,
-                "enum": [
-                    "left",
-                    "center",
-                    "right",
-                    "justify"
-                ]
-            },
-            "fontWeight": {
-                "optional": true,
-                "enum": [
-                    "normal",
-                    "bold",
-                    "bolder",
-                    "lighter",
-                    "300",
-                    "400",
-                    "500",
-                    "600",
-                    "700"
-                ]
-            },
-            "fontFamily": {
-                "optional": true,
-                "enum": [
-                    "Inter",
-                    "Urbanist",
-                    "Arial",
-                    "Poppins",
-                    "Roboto",
-                    "Georgia",
-                    "Times New Roman",
-                    "Courier New"
-                ]
-            }
-        }
+      }
     }
+  }
 }

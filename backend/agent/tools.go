@@ -37,7 +37,7 @@ func (a *agentV1) handleToolCalls(
 	}
 
 	questionCopy := *question
-	if err := a.updateState(ctx, VideoState{
+	if err := a.updateState(ctx, VideoAgentState{
 		VideoID:         sessionID,
 		Thinking:        thinking,
 		State:           stateStatusWaiting,

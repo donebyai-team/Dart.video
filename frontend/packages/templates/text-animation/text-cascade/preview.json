@@ -6,13 +6,5 @@
             "color": "#ffffff",
             "fontFamily": "Inter"
         }
-    },
-    "topLetfText": {
-        "text": "I am a top left text",
-        "style": {
-            "fontSize": 72,
-            "color": "#ffffff",
-            "fontFamily": "Arial"
-        }
     }
 }

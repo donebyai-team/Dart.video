@@ -18,6 +18,7 @@ type LLMService interface {
 		conversationHistory []types.Message,
 		onThinking func(thinking string),
 	) (*types.Union2AskUserQuestionOrVideoGenerationPlan, error)
+	SelectTemplates(ctx context.Context, req *types.MatchTemplateRequest, onThinking func(thinking string)) ([]types.TemplateItem, error)
 }
 
 type llmService struct {
@@ -108,6 +109,94 @@ func (l llmService) PlanSlidesWithStreaming(
 			if value.IsFinal && value.Final() != nil {
 				final := *value.Final()
 				finalPlan = &final.Plan
+
+				// Send final thinking if we haven't sent it yet
+				if onThinking != nil && final.Thinking != nil && !thinkingComplete {
+					finalThinking := *final.Thinking
+					if len(finalThinking) > lastThinkingLen {
+						if lastThinkingLen == 0 {
+							onThinking(finalThinking)
+						} else {
+							newContent := finalThinking[lastThinkingLen:]
+							onThinking(newContent)
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+func (l llmService) SelectTemplates(ctx context.Context, req *types.MatchTemplateRequest, onThinking func(thinking string)) ([]types.TemplateItem, error) {
+	stream, err := baml_client.Stream.MatchTemplate(ctx, *req)
+	if err != nil {
+		return nil, handleInitialError(err)
+	}
+
+	var (
+		finalPlan        []types.TemplateItem
+		lastThinkingLen  int
+		thinkingComplete bool
+	)
+
+	for {
+		select {
+		case <-ctx.Done():
+			return nil, handleContextError(ctx.Err())
+
+		case value, ok := <-stream:
+			if !ok {
+				// Stream closed - return final result if we have it
+				if finalPlan == nil {
+					return nil, fmt.Errorf("stream closed without final result")
+				}
+				l.logger.Info("✅ Stream completed successfully")
+				return finalPlan, nil
+			}
+
+			// Handle stream-level errors
+			if value.IsError {
+				return nil, fmt.Errorf("stream error: %w", value.Error)
+			}
+
+			// Handle partial updates (streaming)
+			if !value.IsFinal && value.Stream() != nil {
+				partial := *value.Stream()
+
+				// Handle thinking updates
+				if onThinking != nil && partial.Thinking.Value != nil && !thinkingComplete {
+					currentThinking := *partial.Thinking.Value
+					currentLen := len(currentThinking)
+
+					// Only send new thinking content to avoid duplicates
+					if currentLen > lastThinkingLen {
+						if lastThinkingLen == 0 {
+							// First thinking update - send all
+							onThinking(currentThinking)
+							l.logger.Debug("🤔 Thinking started", zap.Int("length", currentLen))
+						} else {
+							// Send only new content
+							newContent := currentThinking[lastThinkingLen:]
+							onThinking(newContent)
+							l.logger.Debug("🤔 Thinking updated",
+								zap.Int("new_chars", len(newContent)),
+								zap.Int("total_chars", currentLen))
+						}
+						lastThinkingLen = currentLen
+					}
+
+					// Check if thinking seems complete (heuristic)
+					if currentLen > 100 && strings.Contains(strings.ToLower(currentThinking), "final") {
+						thinkingComplete = true
+						l.logger.Debug("🤔 Thinking appears complete")
+					}
+				}
+			}
+
+			// Handle final result
+			if value.IsFinal && value.Final() != nil {
+				final := *value.Final()
+				finalPlan = final.Templates
 
 				// Send final thinking if we haven't sent it yet
 				if onThinking != nil && final.Thinking != nil && !thinkingComplete {

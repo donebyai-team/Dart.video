@@ -3,8 +3,7 @@ import { EditableTextDataSchema } from "../../lib/types"
 
 export const TextCascadeTemplateConfigSchema = z
   .object({
-    centerText: EditableTextDataSchema,
-    topLeftText: EditableTextDataSchema
+    centerText: EditableTextDataSchema
   })
   .strict()
 

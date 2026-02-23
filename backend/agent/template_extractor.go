@@ -5,17 +5,20 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
+	"github.com/shank318/coasterai/agent/llm"
 	"github.com/shank318/coasterai/baml_client"
 	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/models"
 )
 
 type TemplateExtractor interface {
-	SelectTemplates(ctx context.Context, selectedTemplates []*models.Template, plan *types.VideoGenerationPlan) ([]*models.Template, error)
+	SelectTemplates(ctx context.Context, selectedTemplates []*models.Template, plan *types.VideoGenerationPlan, onThinking func(thinking string)) ([]*models.Template, error)
 	ExtractConfig(ctx context.Context, slide types.AnimationSlide, template *models.Template) (*types.TemplateConfigExtractorOutput, error)
 }
 
-type llmTemplateExtractor struct{}
+type llmTemplateExtractor struct {
+	llmService llm.LLMService
+}
 
 func (l llmTemplateExtractor) ExtractConfig(ctx context.Context, slide types.AnimationSlide, template *models.Template) (*types.TemplateConfigExtractorOutput, error) {
 	marshal, err := json.Marshal(template.Schema)
@@ -41,7 +44,10 @@ func (l llmTemplateExtractor) ExtractConfig(ctx context.Context, slide types.Ani
 	return &output, nil
 }
 
-func (l llmTemplateExtractor) SelectTemplates(ctx context.Context, selectedTemplates []*models.Template, plan *types.VideoGenerationPlan) ([]*models.Template, error) {
+func (l llmTemplateExtractor) SelectTemplates(ctx context.Context,
+	selectedTemplates []*models.Template,
+	plan *types.VideoGenerationPlan,
+	onThinking func(thinking string)) ([]*models.Template, error) {
 	templateMap := make(map[string]*models.Template)
 	matchTem := make([]types.TemplateItem, 0, len(selectedTemplates))
 	for _, temp := range selectedTemplates {
@@ -57,13 +63,13 @@ func (l llmTemplateExtractor) SelectTemplates(ctx context.Context, selectedTempl
 		Templates: matchTem,
 	}
 
-	matchedTemplates, err := baml_client.MatchTemplate(ctx, templateMaterInput)
+	matchedTemplates, err := l.llmService.SelectTemplates(ctx, &templateMaterInput, onThinking)
 	if err != nil {
 		return nil, err
 	}
 
 	filteredTemplates := make([]*models.Template, 0)
-	for _, temp := range matchedTemplates.Templates {
+	for _, temp := range matchedTemplates {
 		value, ok := templateMap[temp.Name]
 		if !ok {
 			filteredTemplates = append(filteredTemplates, value)

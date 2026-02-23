@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/shank318/coasterai/baml_client/types"
+	"github.com/shank318/coasterai/template_validator"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -232,6 +233,12 @@ func syncTemplate(ctx context.Context, db datastore.TemplateRepository, template
 	}
 	if !json.Valid(schemaBytes) {
 		return fmt.Errorf("schema.json invalid JSON in template %s", templateName)
+	}
+
+	// validate schema
+	_, err = template_validator.ValidateUserSchema(schemaBytes)
+	if err != nil {
+		return fmt.Errorf("failed to validate schema in template %s: %w", templateName, err)
 	}
 
 	metadataBytes, err := os.ReadFile(metadataPath)

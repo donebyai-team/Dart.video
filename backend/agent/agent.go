@@ -25,7 +25,7 @@ import (
 type VideoAgent interface {
 	Start(ctx context.Context, options StartSessionOptions) (*RunResult, error)
 	Continue(ctx context.Context, options ContinueSessionOptions) (*RunResult, error)
-	GetState(ctx context.Context, sessionID string) (*VideoState, error)
+	GetState(ctx context.Context, sessionID string) (*VideoAgentState, error)
 }
 
 type StartSessionOptions struct {
@@ -68,14 +68,15 @@ func NewAgentV1(
 	db datastore.Repository,
 	videoService services.VideoGeneration,
 	retrievalService RetrievalService) *agentV1 {
+	llmService := llm.NewLlmService(logger)
 	return &agentV1{
 		logger:            logger,
 		cache:             cache,
 		db:                db,
 		videoService:      videoService,
 		retrievalService:  retrievalService,
-		templateExtractor: llmTemplateExtractor{},
-		llmService:        llm.NewLlmService(logger),
+		templateExtractor: llmTemplateExtractor{llmService: llmService},
+		llmService:        llmService,
 	}
 }
 
@@ -91,7 +92,7 @@ const (
 
 const StateReadyForEditor = stateStatusReady
 
-type VideoState struct {
+type VideoAgentState struct {
 	VideoID          string                 `json:"video_id"`
 	Thinking         string                 `json:"thinking"`
 	State            string                 `json:"state"`
@@ -168,7 +169,7 @@ func (a *agentV1) Continue(ctx context.Context, options ContinueSessionOptions) 
 		return nil, err
 	}
 
-	if err := a.updateState(ctx, VideoState{
+	if err := a.updateState(ctx, VideoAgentState{
 		VideoID:          options.SessionID,
 		State:            stateStatusProcessing,
 		LastUserResponse: userResponse,
@@ -187,7 +188,7 @@ func (a *agentV1) runPlanning(ctx context.Context, sessionID string, session *pl
 
 	llmResponse, err := a.llmService.PlanSlidesWithStreaming(ctx, session.Request, session.ConversationHistory, func(chunk string) {
 		thinking += chunk
-		if err := a.updateState(ctx, VideoState{
+		if err := a.updateState(ctx, VideoAgentState{
 			VideoID:  sessionID,
 			Thinking: thinking,
 			State:    stateStatusProcessing,
@@ -221,7 +222,7 @@ func (a *agentV1) runPlanning(ctx context.Context, sessionID string, session *pl
 		return nil, err
 	}
 
-	if err := a.updateState(ctx, VideoState{
+	if err := a.updateState(ctx, VideoAgentState{
 		VideoID:  sessionID,
 		Thinking: thinking,
 		State:    stateStatusCompleted,
@@ -259,13 +260,22 @@ func (a *agentV1) applyPlan(
 		}
 		firstSlidePersisted = true
 
-		if stateErr := a.updateState(ctx, VideoState{
+		if stateErr := a.updateState(ctx, VideoAgentState{
 			VideoID: sessionID,
 			State:   stateStatusReady,
 		}); stateErr != nil {
 			a.logger.Warn("failed to set ready-for-editor state",
 				zap.Error(stateErr),
 			)
+		}
+	}
+	setGeneratingThinking := func() {
+		if stateErr := a.updateState(ctx, VideoAgentState{
+			VideoID:  sessionID,
+			Thinking: "Generating...",
+			State:    stateStatusProcessing,
+		}); stateErr != nil {
+			a.logger.Debug("failed to set generating thinking state", zap.Error(stateErr))
 		}
 	}
 
@@ -295,6 +305,9 @@ func (a *agentV1) applyPlan(
 
 			// ---------------- ANIMATION SLIDE ----------------
 			anim := slide.AsAnimationSlide()
+
+			// category matching
+			setGeneratingThinking()
 			categories, err := a.retrievalService.MatchCategories(
 				ctx,
 				anim.AnimationType,
@@ -314,7 +327,9 @@ func (a *agentV1) applyPlan(
 
 			var selected *models.Template
 
+			// Template matching
 			for _, category := range categories {
+				setGeneratingThinking()
 				templates, fetchErr := a.retrievalService.FetchTemplates(
 					ctx,
 					anim.AnimationType,
@@ -332,10 +347,20 @@ func (a *agentV1) applyPlan(
 					continue
 				}
 
+				setGeneratingThinking()
 				filtered, selectErr := a.templateExtractor.SelectTemplates(
 					ctx,
 					templates,
 					plan,
+					func(chunk string) {
+						if err := a.updateState(ctx, VideoAgentState{
+							VideoID:  sessionID,
+							Thinking: chunk,
+							State:    stateStatusProcessing,
+						}); err != nil {
+							a.logger.Warn("failed to update thinking state", zap.Error(err))
+						}
+					},
 				)
 				if selectErr != nil {
 					return agenterrors.TemplateSelectFailed(
@@ -393,7 +418,7 @@ func (a *agentV1) applyPlan(
 	return builder.Done(ctx)
 }
 
-func (a *agentV1) updateState(ctx context.Context, state VideoState) error {
+func (a *agentV1) updateState(ctx context.Context, state VideoAgentState) error {
 	jsonBytes, err := json.Marshal(state)
 	if err != nil {
 		return agenterrors.StateUnavailable("failed to encode state payload", err)
@@ -430,7 +455,7 @@ func (a *agentV1) savePlanningSession(ctx context.Context, sessionID string, ses
 	return nil
 }
 
-func (a *agentV1) GetState(ctx context.Context, sessionID string) (*VideoState, error) {
+func (a *agentV1) GetState(ctx context.Context, sessionID string) (*VideoAgentState, error) {
 	value, err := a.cache.GetKey(ctx, fmt.Sprintf("%s:%s", stateKeyPrefix, sessionID))
 	if err != nil {
 		if errors.Is(err, cache.ErrCacheMiss) {
@@ -439,7 +464,7 @@ func (a *agentV1) GetState(ctx context.Context, sessionID string) (*VideoState, 
 		return nil, agenterrors.StateUnavailable("failed to read agent state", err)
 	}
 
-	var state VideoState
+	var state VideoAgentState
 	if err := json.Unmarshal([]byte(value), &state); err != nil {
 		return nil, agenterrors.StateUnavailable("invalid agent state payload", err)
 	}

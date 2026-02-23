@@ -339,6 +339,10 @@ func (t *MatchTemplateResponseClassView) ListProperties() ([]ClassPropertyView, 
 	return builders, nil
 }
 
+func (t *MatchTemplateResponseClassView) PropertyThinking() (ClassPropertyView, error) {
+	return t.inner.Property("thinking")
+}
+
 func (t *MatchTemplateResponseClassView) PropertyTemplates() (ClassPropertyView, error) {
 	return t.inner.Property("templates")
 }

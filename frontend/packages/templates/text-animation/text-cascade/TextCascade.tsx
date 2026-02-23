@@ -72,48 +72,6 @@ const RemoteComponent = ({ props, onChange }: Props) => {
           })}
         </EditableText>
       </div>
-
-      {/* top left text */}
-      <div style={{ position: 'absolute', left: '10%', top: '10%' }}>
-        <EditableText
-          onChange={newProps => {
-            onChange({
-              ...props,
-              topLeftText: {
-                ...props.topLeftText,
-                ...newProps
-              }
-            })
-          }}
-          props={topLeftText}
-        >
-          {topLeftText.text.split('').map((letter: string, i: number) => {
-            const delay = i * 1.5
-            const animProgress = spring({
-              frame: frame - delay,
-              fps,
-              config: { damping: 20, stiffness: 150 }
-            })
-
-            const opacity = interpolate(animProgress, [0, 1], [0, 1])
-            const translateX = interpolate(animProgress, [0, 1], [-20, 0])
-
-            return (
-              <span
-                key={i}
-                style={{
-                  ...topLeftText.style,
-                  opacity,
-                  transform: `translateX(${translateX}px)`,
-                  textShadow: '0 2px 20px rgba(147, 51, 234, 0.4)'
-                }}
-              >
-                {letter === ' ' ? '\u00A0' : letter}
-              </span>
-            )
-          })}
-        </EditableText>
-      </div>
     </>
   )
 }

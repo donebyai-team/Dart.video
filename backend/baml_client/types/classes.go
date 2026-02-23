@@ -435,6 +435,7 @@ func (c MatchTemplateRequest) BamlTypeName() string {
 }
 
 type MatchTemplateResponse struct {
+	Thinking  *string        `json:"thinking"`
 	Templates []TemplateItem `json:"templates"`
 }
 
@@ -452,6 +453,9 @@ func (c *MatchTemplateResponse) Decode(holder *cffi.CFFIValueClass, typeMap baml
 		valueHolder := field.Value
 		switch key {
 
+		case "thinking":
+			c.Thinking = baml.Decode(valueHolder).Interface().(*string)
+
 		case "templates":
 			c.Templates = baml.Decode(valueHolder).Interface().([]TemplateItem)
 
@@ -466,6 +470,8 @@ func (c *MatchTemplateResponse) Decode(holder *cffi.CFFIValueClass, typeMap baml
 
 func (c MatchTemplateResponse) Encode() (*cffi.HostValue, error) {
 	fields := map[string]any{}
+
+	fields["thinking"] = c.Thinking
 
 	fields["templates"] = c.Templates
 
