@@ -12,7 +12,7 @@
                         "id": "hook-1",
                         "type": "SLIDE_TYPE_TEXT_ANIMATION",
                         "transcript": "Are you tired of losing important files? Your documents deserve better.",
-                        "duration": 2,
+                        "duration": 2.2,
                         "transition": "TRANSITION_FADE",
                         "transitionDuration": 0.3,
                         "animation": {
@@ -122,23 +122,30 @@
                         "id": "solution-2",
                         "type": "SLIDE_TYPE_MEDIA",
                         "transcript": "Organize everything in smart folders that adapt to how your team works.",
-                        "duration": 4,
+                        "duration": 13.96,
                         "transition": "TRANSITION_SLIDE_UP",
                         "transitionDuration": 0.3,
                         "media": {
                             "meta": {
-                                "y": 104.16,
+                                "x": 169.81418,
+                                "y": 107.55628,
                                 "width": 1536,
                                 "height": 864,
                                 "scale": 1,
                                 "rotation": 0
                             },
-                            "src": "https://ik.imagekit.io/coasterai/84548caf-226c-484f-863c-9a0dae679177_4J6xCrDit.jpeg",
+                            "src": "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1771920136-3195394-uhd_3840_2160_25fps.mp4",
                             "style": {
                                 "borderRadius": 55,
                                 "objectFit": "contain"
                             },
-                            "mediaType": "MEDIA_TYPE_IMAGE"
+                            "mediaType": "MEDIA_TYPE_VIDEO",
+                            "uploadedMedia": {
+                                "url": "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1771920136-3195394-uhd_3840_2160_25fps.mp4",
+                                "mimeType": "video/mp4",
+                                "duration": 13.96,
+                                "fileName": "3195394-uhd_3840_2160_25fps.mp4"
+                            }
                         },
                         "spotlights": [
                             {
@@ -163,63 +170,15 @@
                                 "startTime": 2.5,
                                 "endTime": 3.5
                             }
-                        ]
-                    },
-                    {
-                        "id": "solution-3",
-                        "type": "SLIDE_TYPE_MEDIA",
-                        "transcript": "Organize everything in smart folders that adapt to how your team works.",
-                        "duration": 5,
-                        "transition": "TRANSITION_SLIDE_UP",
-                        "transitionDuration": 0.3,
-                        "media": {
-                            "meta": {
-                                "x": 426.23944,
-                                "y": 216.47974,
-                                "width": 913.49414,
-                                "height": 513.84045,
-                                "scale": 1,
-                                "rotation": 0
-                            },
-                            "src": "https://ik.imagekit.io/coasterai/org_f021d205-4101-42bd-af46-86563420ff30_media_3d34485f-0805-4173-90c1-6554059117c7_1768345435_CMC7KVn-I.jpg",
-                            "style": {
-                                "borderRadius": 153
-                            },
-                            "mediaType": "MEDIA_TYPE_IMAGE",
-                            "uploadedMedia": {
-                                "url": "https://ik.imagekit.io/coasterai/org_f021d205-4101-42bd-af46-86563420ff30_media_3d34485f-0805-4173-90c1-6554059117c7_1768345435_CMC7KVn-I.jpg",
-                                "thumbnailUrl": "https://ik.imagekit.io/coasterai/tr:n-ik_ml_thumbnail/org_f021d205-4101-42bd-af46-86563420ff30_media_3d34485f-0805-4173-90c1-6554059117c7_1768345435_CMC7KVn-I.jpg",
-                                "width": 768,
-                                "height": 1376,
-                                "mimeType": "image",
-                                "duration": 0,
-                                "size": 87398,
-                                "fileId": "69920f1a5c7cd75eb8b20abb",
-                                "fileName": "org_f021d205-4101-42bd-af46-86563420ff30_media_3d34485f-0805-4173-90c1-6554059117c7_1768345435_CMC7KVn-I.jpg"
-                            }
-                        },
-                        "spotlights": [
+                        ],
+                        "zooms": [
                             {
-                                "id": "spotlight-3",
-                                "x": 400,
-                                "y": 200,
-                                "width": 300,
-                                "height": 250,
-                                "blurAmount": 10,
-                                "borderRadius": 8,
-                                "startTime": 0.5,
-                                "endTime": 1.5
-                            },
-                            {
-                                "id": "spotlight-4",
-                                "x": 1100,
-                                "y": 600,
-                                "width": 400,
-                                "height": 300,
-                                "blurAmount": 10,
-                                "borderRadius": 8,
-                                "startTime": 2.5,
-                                "endTime": 3.5
+                                "id": "zoom-effect-1771920157508",
+                                "x": 960,
+                                "y": 540,
+                                "zoomLevel": 2,
+                                "startTime": 4.3,
+                                "endTime": 13.66
                             }
                         ]
                     }
@@ -467,10 +426,10 @@
             "width": 1920,
             "height": 1080
         },
-        "duration": 431.63,
+        "duration": 51.52,
         "backgroundAudioUrl": "https://ik.imagekit.io/coasterai/freepik-deep-calm_A4WXzk4Mk.mp3"
     },
     "createdAt": "2026-02-20T09:08:01.471111Z",
     "status": "VIDEO_STATUS_COMPLETED",
-    "version": "47"
+    "version": "64"
 }

@@ -70,11 +70,13 @@ func (v videoGeneration) UpdateVideoConfig(ctx context.Context, video *models.Vi
 	}
 
 	// update duration
+	totalDuration := float32(0.0)
 	for _, section := range existingVideo.Config.Sections {
 		for _, slide := range section.Slides {
-			existingVideo.Metadata.Duration = existingVideo.Metadata.Duration + slide.Duration
+			totalDuration = totalDuration + slide.Duration
 		}
 	}
+	existingVideo.Metadata.Duration = totalDuration
 
 	if video.Status != "" {
 		existingVideo.Status = video.Status

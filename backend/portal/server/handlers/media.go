@@ -16,7 +16,7 @@ func NewUploadHandler(service services.MediaStore, renderService services.Render
 	return &UploadHandler{service: service, renderVideoService: renderService}
 }
 
-const maxUploadSize = 10 << 20 // 10MB
+const maxUploadSize = 25 << 20 // 25MB
 
 func (h *UploadHandler) UploadMedia(w http.ResponseWriter, r *http.Request) {
 	actor, ok := auth.FromContext(r.Context())
