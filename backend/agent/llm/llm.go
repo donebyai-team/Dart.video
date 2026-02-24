@@ -7,7 +7,6 @@ import (
 	"github.com/shank318/coasterai/baml_client/types"
 	"go.uber.org/zap"
 	"regexp"
-	"strings"
 	"time"
 )
 
@@ -187,30 +186,7 @@ func (l llmService) SelectTemplates(ctx context.Context, req *types.MatchTemplat
 				// Handle thinking updates
 				if onThinking != nil && partial.Thinking.Value != nil && !thinkingComplete {
 					currentThinking := stripThinkingTags(*partial.Thinking.Value)
-					currentLen := len(currentThinking)
-
-					// Only send new thinking content to avoid duplicates
-					if currentLen > lastThinkingLen {
-						if lastThinkingLen == 0 {
-							// First thinking update - send all
-							onThinking(currentThinking)
-							l.logger.Info("🤔 Thinking started", zap.Int("length", currentLen))
-						} else {
-							// Send only new content
-							newContent := currentThinking[lastThinkingLen:]
-							onThinking(newContent)
-							l.logger.Info("🤔 Thinking updated",
-								zap.Int("new_chars", len(newContent)),
-								zap.Int("total_chars", currentLen))
-						}
-						lastThinkingLen = currentLen
-					}
-
-					// Check if thinking seems complete (heuristic)
-					if currentLen > 100 && strings.Contains(strings.ToLower(currentThinking), "final") {
-						thinkingComplete = true
-						l.logger.Info("🤔 Thinking appears complete")
-					}
+					onThinking(currentThinking)
 				}
 			}
 

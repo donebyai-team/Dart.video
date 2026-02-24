@@ -354,7 +354,6 @@ func (a *agentV1) applyPlan(
 					continue
 				}
 
-				setGeneratingThinking()
 				filtered, selectErr := a.templateExtractor.SelectTemplates(
 					ctx,
 					templates,

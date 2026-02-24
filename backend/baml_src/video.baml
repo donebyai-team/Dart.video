@@ -81,7 +81,7 @@ class VideoBackground {
 }
 
 class VideoGenerationPlan {
-    videoName string @description("name of the video") @assert(length_video_name, {{ this|length >= 5 and this|length <= 15 }})
+    videoName string @description("name of the video, around 5 to 15 length")
     sections Section[]
     backgroundStyle VideoBackground @description("background style of all slides")
 }
