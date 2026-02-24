@@ -56,6 +56,7 @@ const VideoIntentComposer = () => {
 
   const [stage, setStage] = useState<ComposerStage>('compose')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [hasSubmitted, setHasSubmitted] = useState(false)
   const [videoId, setVideoId] = useState('')
   const [thinkingFeed, setThinkingFeed] = useState<string[]>([])
   const [activeQuestion, setActiveQuestion] = useState<AskUserQuestion | undefined>()
@@ -129,6 +130,7 @@ const VideoIntentComposer = () => {
 
     try {
       setIsSubmitting(true)
+      setHasSubmitted(true)
       setStage('planning')
       setThinkingFeed(['Initializing planning...'])
       setActiveQuestion(undefined)
@@ -175,7 +177,7 @@ const VideoIntentComposer = () => {
   const removeScript = () => setScript(undefined)
 
   return (
-    <div className='w-full min-h-[70vh] px-4 py-8 bg-[radial-gradient(circle_at_top_right,rgba(0,204,255,0.08),transparent_45%),radial-gradient(circle_at_bottom_left,rgba(255,149,0,0.08),transparent_50%)]'>
+    <div className='w-full min-h-[62vh] px-4 mt-[10%] py-8 bg-[radial-gradient(circle_at_top_right,rgba(0,204,255,0.08),transparent_45%),radial-gradient(circle_at_bottom_left,rgba(255,149,0,0.08),transparent_50%)]'>
       <ScriptEditorDialog
         open={scriptDialogOpen}
         onOpenChange={setScriptDialogOpen}
@@ -192,7 +194,7 @@ const VideoIntentComposer = () => {
 
       <Card className='border-0 shadow-xl rounded-3xl bg-gradient-to-b from-background to-muted/30 w-full max-w-4xl mx-auto overflow-hidden'>
         <CardContent className='p-0'>
-          <div className='grid md:grid-cols-[1.2fr_0.8fr]'>
+          <div className={hasSubmitted ? 'grid md:grid-cols-[1.2fr_0.8fr]' : 'grid'}>
             <div className='p-6 md:p-8 border-b md:border-b-0 md:border-r border-border/60'>
               <div className='flex items-center justify-between text-xs text-muted-foreground mb-4'>
                 <div className='flex items-center gap-3'>
@@ -306,11 +308,11 @@ const VideoIntentComposer = () => {
                       ? 'Add additional direction or style notes...'
                       : 'Describe the video you want to generate...'
                   }
-                  className='w-full min-h-[170px] resize-none bg-transparent px-4 pb-4 pt-2 text-sm focus:outline-none'
+                  className='w-full min-h-[130px] resize-none bg-transparent px-4 pb-3 pt-2 text-sm focus:outline-none'
                   disabled={stage !== 'compose'}
                 />
 
-                <div className='px-4 pb-4 flex justify-end'>
+                <div className='px-4 pb-3 flex justify-end'>
                   <Button
                     onClick={handleSubmit}
                     className='h-10 px-4 rounded-xl'
@@ -330,59 +332,64 @@ const VideoIntentComposer = () => {
               </div>
             </div>
 
-            <div className='p-6 md:p-8 bg-muted/20'>
-              <div className='flex items-center gap-2 text-sm font-medium mb-4'>
-                <MessageSquareText className='w-4 h-4' /> Agent Activity
-              </div>
-
-              <div className='rounded-2xl border bg-background p-4 min-h-[260px] max-h-[360px] overflow-auto space-y-3'>
-                {thinkingFeed.length === 0 && (
-                  <p className='text-sm text-muted-foreground'>
-                    No activity yet. Submit your request to start planning.
-                  </p>
-                )}
-                {thinkingFeed.map((line, idx) => (
-                  <div key={`${line}-${idx}`} className='text-sm leading-relaxed border-l-2 border-primary/30 pl-3'>
-                    {line}
-                  </div>
-                ))}
-              </div>
-
-              {stage === 'question' && activeQuestion && (
-                <div className='mt-5 rounded-2xl border bg-background p-4 space-y-3'>
-                  <p className='text-sm font-medium'>{activeQuestion.questionText}</p>
-
-                  {activeQuestion.options?.length > 0 && (
-                    <div className='flex flex-wrap gap-2'>
-                      {activeQuestion.options.map(option => (
-                        <button
-                          key={option}
-                          onClick={() => setSelectedAnswer(option)}
-                          className={`px-3 py-1.5 text-xs rounded-full border transition ${selectedAnswer === option ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-muted'}`}
-                        >
-                          {option}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
-                  {activeQuestion.allowCustomEntry && (
-                    <textarea
-                      value={customAnswer}
-                      onChange={e => setCustomAnswer(e.target.value)}
-                      placeholder='Or type your answer...'
-                      className='w-full min-h-[80px] resize-none bg-background border rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30'
-                    />
-                  )}
-
-                  <Button onClick={handleContinuePlanning} disabled={!answerInput || isSubmitting} className='w-full'>
-                    <span className='inline-flex items-center gap-2'>
-                      Continue planning <ChevronRight className='w-4 h-4' />
-                    </span>
-                  </Button>
+            {hasSubmitted && (
+              <div className='p-6 md:p-8 bg-muted/20'>
+                <div className='flex items-center gap-2 text-sm font-medium mb-4'>
+                  <MessageSquareText className='w-4 h-4' /> Agent Activity
                 </div>
-              )}
-            </div>
+
+                <div className='rounded-2xl border bg-background p-4 min-h-[260px] max-h-[360px] overflow-auto space-y-3'>
+                  {thinkingFeed.length === 0 && (
+                    <p className='text-sm text-muted-foreground'>
+                      No activity yet. Submit your request to start planning.
+                    </p>
+                  )}
+                  {thinkingFeed.map((line, idx) => (
+                    <div
+                      key={`${line}-${idx}`}
+                      className='text-sm leading-relaxed border-l-2 border-primary/30 pl-3'
+                    >
+                      {line}
+                    </div>
+                  ))}
+                </div>
+
+                {stage === 'question' && activeQuestion && (
+                  <div className='mt-5 rounded-2xl border bg-background p-4 space-y-3'>
+                    <p className='text-sm font-medium'>{activeQuestion.questionText}</p>
+
+                    {activeQuestion.options?.length > 0 && (
+                      <div className='flex flex-wrap gap-2'>
+                        {activeQuestion.options.map(option => (
+                          <button
+                            key={option}
+                            onClick={() => setSelectedAnswer(option)}
+                            className={`px-3 py-1.5 text-xs rounded-full border transition ${selectedAnswer === option ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-muted'}`}
+                          >
+                            {option}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {activeQuestion.allowCustomEntry && (
+                      <textarea
+                        value={customAnswer}
+                        onChange={e => setCustomAnswer(e.target.value)}
+                        placeholder='Or type your answer...'
+                        className='w-full min-h-[80px] resize-none bg-background border rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30'
+                      />
+                    )}
+
+                    <Button onClick={handleContinuePlanning} disabled={!answerInput || isSubmitting} className='w-full'>
+                      <span className='inline-flex items-center gap-2'>
+                        Continue planning <ChevronRight className='w-4 h-4' />
+                      </span>
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
