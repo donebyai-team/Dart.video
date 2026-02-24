@@ -137,7 +137,7 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
                   setIsEditing(true)
                 }}
                 mediaRef={mediaRef as RefObject<HTMLVideoElement>}
-                srcOverride={resolvedSrc}
+                props={mediaContent}
                 onVideoChange={() => {
                   setOpenUploadModal(!openUploadModal)
                 }}
@@ -157,7 +157,6 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
                     }
                   }
                 }}
-                props={mediaContent}
               />
             ) : (
               <ImagePreview
@@ -165,7 +164,6 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
                   setIsEditing(true)
                 }}
                 mediaRef={mediaRef as RefObject<HTMLImageElement>}
-                srcOverride={resolvedSrc}
                 onImageChange={() => {
                   setOpenUploadModal(!openUploadModal)
                 }}
