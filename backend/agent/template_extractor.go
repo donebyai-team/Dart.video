@@ -33,7 +33,7 @@ func (l llmTemplateExtractor) ExtractConfig(ctx context.Context, slide types.Ani
 	}
 	output, err := baml_client.ExtractTemplateConfig(ctx, input)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to extract template config from BAML : %s", err)
 	}
 
 	valid := json.Valid([]byte(output.Config))

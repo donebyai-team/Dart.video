@@ -22,9 +22,7 @@ type RetrievalService interface {
 	// returns top k.
 	FetchTemplates(ctx context.Context, animationType types.AnimationType, category string, usedIds []string) ([]*models.Template, error)
 
-	// MatchTemplates takes a query and a pre-filtered pool, returns ranked candidates.
-	// topK controls shortlist size for the LLM selector.
-	//MatchTemplates(ctx context.Context, query string, pool []Template, topK int) ([]TemplateCandidate, error)
+	GetFallbackTemplate(ctx context.Context) (*models.Template, error)
 }
 
 type llmRetrievalService struct {
@@ -33,6 +31,17 @@ type llmRetrievalService struct {
 
 func NewLlmRetrievalService(db datastore.Repository) RetrievalService {
 	return &llmRetrievalService{db: db}
+}
+
+const fallBackTemplateName = "text-cascade"
+
+func (l llmRetrievalService) GetFallbackTemplate(ctx context.Context) (*models.Template, error) {
+	template, err := l.db.GetTemplateByName(ctx, types.AnimationTypeTEXT, fallBackTemplateName)
+	if err != nil {
+		return nil, err
+	}
+
+	return template, nil
 }
 
 func (l llmRetrievalService) MatchCategories(ctx context.Context, animationType types.AnimationType, query string) ([]*models.TemplateCategory, error) {

@@ -483,9 +483,10 @@ func (c MatchTemplateResponse) BamlTypeName() string {
 }
 
 type MediaSlide struct {
-	Index       int64  `json:"index"`
-	Description string `json:"description"`
-	Duration    int64  `json:"duration"`
+	Index                       int64   `json:"index"`
+	Description                 string  `json:"description"`
+	Duration                    int64   `json:"duration"`
+	SelectedTemplateDescription *string `json:"selectedTemplateDescription"`
 }
 
 func (c *MediaSlide) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -511,6 +512,9 @@ func (c *MediaSlide) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
 		case "duration":
 			c.Duration = baml.Decode(valueHolder).Int()
 
+		case "selectedTemplateDescription":
+			c.SelectedTemplateDescription = baml.Decode(valueHolder).Interface().(*string)
+
 		default:
 
 			panic(fmt.Sprintf("unexpected field: %s in class MediaSlide", key))
@@ -528,6 +532,8 @@ func (c MediaSlide) Encode() (*cffi.HostValue, error) {
 	fields["description"] = c.Description
 
 	fields["duration"] = c.Duration
+
+	fields["selectedTemplateDescription"] = c.SelectedTemplateDescription
 
 	return baml.EncodeClass("MediaSlide", fields, nil)
 }

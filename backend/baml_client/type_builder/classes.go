@@ -387,6 +387,10 @@ func (t *MediaSlideClassView) PropertyDuration() (ClassPropertyView, error) {
 	return t.inner.Property("duration")
 }
 
+func (t *MediaSlideClassView) PropertySelectedTemplateDescription() (ClassPropertyView, error) {
+	return t.inner.Property("selectedTemplateDescription")
+}
+
 func (t *TypeBuilder) MediaSlide() (*MediaSlideClassView, error) {
 	bld, err := t.inner.Class("MediaSlide")
 	if err != nil {

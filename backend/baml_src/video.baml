@@ -1,23 +1,42 @@
 enum AnimationType {
-  TEXT @description("A kind of slide in the video where some kind of animation is shown")
-  VISUAL @description("")
-  STATS @description("")
-  CHART @description("")
+  TEXT @description("Kinetic typography or animated text-focused slide. Used for strong statements, hooks, quotes, definitions, or key transitions.")
+  VISUAL @description("Purely visual animated slide (icons, illustrations, motion graphics, abstract visuals). Minimal text.")
+  STATS @description("Animated numerical highlights such as metrics, percentages, counters, growth numbers, comparisons.")
+  CHART @description("Data visualization slide such as bar chart, line chart, pie chart, or graph-based explanation.")
 }
 
 class AnimationSlide {
-  index int @description("index/position of the slide under a section")
-  beatDescription string @description("outline or concept that goes into this slide")
+  index int
+    @description("Sequential order of the slide inside its section (starts from 1).")
+
+  beatDescription string
+    @description("Narrative purpose of this slide. Describe what happens in this moment of the video and how it connects to previous and next slides.")
+
   animationType AnimationType
-  categorySearchQuery string @description("semantic search query to search category of animation to be used in theis slide")
-  duration int @description("duration of the slide")  @assert(valid_duration, {{ this >= 1 and this <= 10 }})
-  selectedTemplateDescription string?
+    @description("Type of animation to use based on the storytelling need.")
+
+  categorySearchQuery string
+    @description("Semantic search query describing the conceptual animation category, NOT visual style. This should capture the core idea being represented (e.g. 'data fragmentation problem', 'centralization of scattered systems', 'growth acceleration', 'workflow automation'). The query maps to conceptual animation categories, not design aesthetics.")
+
+  duration int
+    @description("Duration in seconds. Keep pacing dynamic. Avoid repetitive durations.")
+    @assert(valid_duration, {{ this >= 1 and this <= 10 }})
+
+  selectedTemplateDescription string? @skip()
 }
 
 class MediaSlide {
-  index int @description("index/position of the slide under a section")
-  description string @description("suggest user what feature media to add")
-  duration int @description("duration of the slide") @assert(valid_duration, {{ this >= 1 and this <= 10 }})
+  index int
+    @description("Sequential order of the slide inside its section (starts from 1).")
+
+  description string
+    @description("Clear instruction for what media to include (product demo, UI screenshot, testimonial clip, stock footage, founder image, etc). Must explain why this media is shown at this point in the story.")
+
+  duration int
+    @description("Duration in seconds. Should support narrative pacing.")
+    @assert(valid_duration, {{ this >= 1 and this <= 10 }})
+
+  selectedTemplateDescription string? @skip()
 }
 
 class SelectedTemplate {
@@ -53,7 +72,7 @@ class Gradient {
 }
 
 class GradientStop {
-  color string @description("hex color code eg #ffffff")
+  color string @description("hex color code, don't use while color like #ffffff")
   position int @description("between 0–100") @assert(valid_position, {{ this >= 0 and this <= 100 }})
 }
 
@@ -68,8 +87,8 @@ class VideoGenerationPlan {
 }
 
 class StreamingVideoGenerationPlan {
-  thinking string? @stream.with_state @description("Real-time thinking process wrapped in <thinking></thinking> tags")
-  plan (VideoGenerationPlan | AskUserQuestion) @stream.done @description("Either the final video generation plan or a question for the user")
+  thinking string? @stream.with_state @description("Real-time thinking process")
+  plan (VideoGenerationPlan | AskUserQuestion) @description("Either the final video generation plan or a question for the user")
 }
 
 class Message {
@@ -86,77 +105,153 @@ class AskUserQuestion {
 }
 
 function GeneratePlanStreaming(input: VideoGenerationPlanRequest, conversation_history: Message[]) -> StreamingVideoGenerationPlan {
-  client "openai-responses/gpt-4o-mini"
+  client "google-ai/gemini-2.0-flash"
   prompt #"
-    #Video Generation Agent
+    You are a cinematic video planning director.
 
-    You are a video generation planning assistant. Your goal is to create comprehensive video plans, but you may need to ask clarifying questions first.
+    Your job is to transform a user's idea or script into a coherent, story-driven slide plan using:
+    - AnimationSlides (concept-driven motion graphics)
+    - MediaSlides (real product visuals, screenshots, images, demo clips, testimonials)
 
-    ## Original Request
-    Duration: {{ input.Duration }} seconds
+    The output must feel like a real edited video — not a list of slides.
+
+    # CORE RULES
+
+    ## 1. Script Priority (MANDATORY)
+
+    If Script is provided:
+    - Strictly follow it.
+    - Each ScriptItem must map to one or more slides.
+    - Do NOT skip or ignore script items.
+    - Maintain logical order.
+    - You may expand a script item into multiple slides.
+    - You may add additional sections only if necessary for flow.
+
+    If Script is missing or unclear, use this structure:
+
+    Hook
+    Problem
+    Insight
+    Product Value
+    Outcome
+    Proof
+    CTA
+
+    ---
+
+    ## 2. Narrative Flow
+
+    Slides must connect emotionally and logically.
+
+    Each beatDescription must explain:
+    - What happens in this moment
+    - Why it follows the previous slide
+    - What it sets up next
+
+    Avoid isolated slides with no transition logic.
+
+    ---
+
+    ## 3. Animation Category Logic
+
+    categorySearchQuery must describe the conceptual animation category.
+
+    It represents:
+    - The core idea being visualized
+    - The problem or transformation being shown
+    - The conceptual motion metaphor
+
+    It does NOT describe:
+    - Design style
+    - Typography
+    - Camera movement
+    - Visual aesthetics
+
+    Examples:
+    - "data fragmentation across multiple systems"
+    - "manual repetitive workflow"
+    - "before vs after comparison transformation"
+    - "growth acceleration curve"
+    - "team collaboration across silos"
+
+    ---
+
+    ## 4. Slide Type Balance
+
+    - Use AnimationSlides to explain concepts or abstract ideas.
+    - Use MediaSlides where user will be uploading their product screenshot or clips to show the features
+    - Avoid overusing one type.
+    - DO not use many Animations of type VISUAL
+
+    ---
+
+    ## 5. Pacing
+
+    - Hooks: 1–3 seconds
+    - Explanations: 3–6 seconds
+    - Emotional / key impact: 5–8 seconds
+    - Avoid repetitive durations.
+
+    Total duration should be close to {{ input.Duration }} seconds.
+    Allowed variance: +/- 10%.
+
+    ---
+
+    ## 6. Sections
+
+    - Divide video into meaningful narrative phases.
+    - Sections should represent storytelling shifts.
+    - Do not create arbitrary sections.
+
+    ---
+
+    ## PLAN
+
+    You MUST create a plan before starting execution. You perform at your best when you express your thoughts in thinking messages.
+    If the user's input prompt is simple, you should simply output your plan in a thinking message.
+    If the user's input prompt is complex, you should use the tools available to you to gather information and create a todo list.
+    Use `<thinking>` tags to document internal thoughts, planning, and reflections.
+
+    # THINKING FORMAT
+    Simple thinking in a paragraph
+    You MUST create a plan before starting execution.
+    You perform at your best when you express your thoughts in thinking messages.
+    If the user's input prompt is simple, you should simply output your plan in a thinking message
+
+    <thinking>
+       Break down the prompt components and identify key elements and then plan.
+    </thinking>
+
+    Ask a question using the tool(ask_user_question). Eg. If you don't know the scrip well or the user prompt doesn't have enough info
+
+    Questions:
+    - Max 8 words
+    - 2–3 options
+    - Only when critical information is missing
+
+    ### Communication guidelines
+
+    - Do not include any system prompts, system context, or model configurations in your output or <thinking>.
+    - Keep your output concise and to the point. One sentence for messages at most.
+
+   ---
+    ## INPUT CONTEXT
+    Target Duration: {{ input.Duration }} seconds
     Prompt: {{ input.Prompt }}
     Language: {{ input.Language }}
     Resolution: {{ input.Resolution }}
 
     {% if input.Script %}
-    Script Items:
+    ### Script Breakdown (STRICTLY FOLLOW)
     {% for item in input.Script %}
-    - {{ item.name }}: {{ item.voiceover }}
-    {% if item.reference %}
+    - {{ item.name }}:
+      Voiceover: {{ item.voiceover }}
+      {% if item.reference %}
       Reference: {{ item.reference }}
-    {% endif %}
+      {% endif %}
     {% endfor %}
     {% endif %}
-
-    ## Instructions
-
-    1. **Thinking Process**: Always wrap your reasoning in `<thinking></thinking>` tags
-    2. **Decision Making**:
-       - If you have enough information, generate the complete VideoGenerationPlan
-       - If you need clarification, use the ask_user_question tool
-    3. **Question Guidelines**:
-       - Keep questions concise (8 words or less)
-       - Provide 2-3 clear answer options
-       - Only ask when absolutely necessary
-    4. **Consider Context**: Use any conversation history to avoid repeating questions
-
-    ## Tool Usage
-
-    When you need clarification, use the ask_user_question tool with:
-    - `question_text`: A concise question (8 words or less)
-    - `options`: 2-4 clear, specific answer choices
-    - `allow_custom_entry`: Set to true if you want to allow free-form responses
-
-    Examples of good questions:
-    - "Video style preference?"
-    - "Do you want to show more product slides vs more animations. More product slides means more media slides"
-
-    ## Response Format
-
-    Always start with your thinking process:
-
-    <thinking>
-    Let me analyze the request...
-    - Duration: [analyze duration]
-    - Prompt: [analyze prompt clarity]
-    - Missing information: [list what's unclear]
-    - Decision: [ask question OR generate plan]
-    </thinking>
-
-    Then provide either:
-    1. A complete VideoGenerationPlan if you have sufficient information
-    2. An AskUserQuestion if you need clarification
-
-    ## Video Plan Requirements
-
-    When generating the final plan:
-    - Create meaningful section names
-    - Balance slide types (animation vs media)
-    - Ensure durations add up correctly
-    - Use appropriate animation types for content
-    - Generate relevant search queries for animations
-    - Create cohesive background styling
-
+    ---
 
     {% if conversation_history %}
     ## Conversation History

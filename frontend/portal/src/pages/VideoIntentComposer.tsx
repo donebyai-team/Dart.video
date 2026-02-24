@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Film,
   Clock,
@@ -42,6 +42,10 @@ const brandLibraries = [
 const NO_BRAND_VALUE = 'none'
 const MIN_SCRIPT_SECTIONS = 3
 const MIN_PROMPT_LENGTH = 10
+const THINKING_TYPING_STEP_MS = 70
+const THINKING_CHANGE_DELAY_MS = 220
+const THINKING_TYPING_SLIDE_DELAY_MS = 90
+const THINKING_LINE_VISIBLE_CHARS = 120
 
 type ComposerStage = 'compose' | 'planning' | 'question'
 
@@ -58,8 +62,16 @@ const VideoIntentComposer = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [hasSubmitted, setHasSubmitted] = useState(false)
   const [videoId, setVideoId] = useState('')
-  const [thinkingFeed, setThinkingFeed] = useState<string[]>([])
+  const [thinkingText, setThinkingText] = useState('')
+  const [displayedThinkingText, setDisplayedThinkingText] = useState('')
+  const [thinkingDots, setThinkingDots] = useState('')
+  const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const changeDelayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const displayedThinkingRef = useRef('')
+  const pendingThinkingTargetRef = useRef<string | null>(null)
+  const activeThinkingTargetRef = useRef('')
   const [activeQuestion, setActiveQuestion] = useState<AskUserQuestion | undefined>()
+  const [pendingQuestion, setPendingQuestion] = useState<AskUserQuestion | undefined>()
   const [selectedAnswer, setSelectedAnswer] = useState('')
   const [customAnswer, setCustomAnswer] = useState('')
 
@@ -79,14 +91,136 @@ const VideoIntentComposer = () => {
     if (allowsCustom) return customAnswer.trim()
     return ''
   }, [activeQuestion, customAnswer, selectedAnswer])
+  const hasThinking = thinkingText.trim().length > 0 || displayedThinkingText.trim().length > 0
+  const showAgentActivity = hasSubmitted && stage !== 'question' && hasThinking
+  const singleLineThinkingText = useMemo(() => {
+    const normalized = displayedThinkingText.replace(/\s+/g, ' ').trim()
+    if (!normalized) return ''
+    const parts = normalized.split(/(?<=[.!?])\s+/)
+    const line = parts[parts.length - 1] || normalized
+    if (line.length <= THINKING_LINE_VISIBLE_CHARS) return line
+    return line.slice(-THINKING_LINE_VISIBLE_CHARS)
+  }, [displayedThinkingText])
 
-  const appendThinking = (msg: string) => {
-    if (!msg) return
-    setThinkingFeed(prev => {
-      if (prev[prev.length - 1] === msg) return prev
-      return [...prev, msg].slice(-12)
-    })
-  }
+  useEffect(() => {
+    if (!pendingQuestion) return
+    if (displayedThinkingText !== thinkingText) return
+
+    setActiveQuestion(pendingQuestion)
+    setPendingQuestion(undefined)
+    setSelectedAnswer('')
+    setCustomAnswer('')
+    setStage('question')
+  }, [pendingQuestion, displayedThinkingText, thinkingText])
+
+  useEffect(() => {
+    if (!isSubmitting) {
+      setThinkingDots('')
+      return
+    }
+
+    const frames = ['.', '..', '...']
+    let idx = 0
+    const timer = setInterval(() => {
+      setThinkingDots(frames[idx % frames.length])
+      idx += 1
+    }, 320)
+
+    return () => clearInterval(timer)
+  }, [isSubmitting])
+
+  useEffect(() => {
+    displayedThinkingRef.current = displayedThinkingText
+  }, [displayedThinkingText])
+
+  useEffect(() => {
+    if (!thinkingText) {
+      if (typingTimerRef.current) {
+        clearTimeout(typingTimerRef.current)
+        typingTimerRef.current = null
+      }
+      if (changeDelayTimerRef.current) {
+        clearTimeout(changeDelayTimerRef.current)
+        changeDelayTimerRef.current = null
+      }
+      pendingThinkingTargetRef.current = null
+      activeThinkingTargetRef.current = ''
+      setDisplayedThinkingText('')
+      displayedThinkingRef.current = ''
+      return
+    }
+
+    if (typingTimerRef.current) {
+      pendingThinkingTargetRef.current = thinkingText
+      return
+    }
+
+    const beginTyping = (target: string) => {
+      activeThinkingTargetRef.current = target
+      const current = displayedThinkingRef.current
+      const base = target.startsWith(current) ? current : ''
+      const remaining = target.slice(base.length)
+      const chunks = remaining.match(/\S+\s*/g) ?? (remaining ? [remaining] : [])
+
+      if (base === '' && current !== '') {
+        setDisplayedThinkingText('')
+        displayedThinkingRef.current = ''
+      }
+
+      const flushPending = () => {
+        const pending = pendingThinkingTargetRef.current
+        if (!pending || pending === activeThinkingTargetRef.current) return
+        pendingThinkingTargetRef.current = null
+        changeDelayTimerRef.current = setTimeout(() => {
+          beginTyping(pending)
+          changeDelayTimerRef.current = null
+        }, THINKING_CHANGE_DELAY_MS)
+      }
+
+      if (chunks.length === 0) {
+        setDisplayedThinkingText(target)
+        displayedThinkingRef.current = target
+        typingTimerRef.current = null
+        flushPending()
+        return
+      }
+
+      let nextText = base
+      let idx = 0
+      const tick = () => {
+        nextText += chunks[idx]
+        idx += 1
+        setDisplayedThinkingText(nextText)
+        displayedThinkingRef.current = nextText
+        if (idx < chunks.length) {
+          const justTyped = chunks[idx - 1]?.trim() ?? ''
+          const punctuationDelay = /[.!?]$/.test(justTyped) ? THINKING_TYPING_SLIDE_DELAY_MS : 0
+          typingTimerRef.current = setTimeout(tick, THINKING_TYPING_STEP_MS + punctuationDelay)
+        } else {
+          typingTimerRef.current = null
+          flushPending()
+        }
+      }
+
+      typingTimerRef.current = setTimeout(tick, THINKING_TYPING_STEP_MS)
+    }
+
+    changeDelayTimerRef.current = setTimeout(() => {
+      beginTyping(thinkingText)
+      changeDelayTimerRef.current = null
+    }, THINKING_CHANGE_DELAY_MS)
+  }, [thinkingText])
+
+  useEffect(() => {
+    return () => {
+      if (typingTimerRef.current) {
+        clearTimeout(typingTimerRef.current)
+      }
+      if (changeDelayTimerRef.current) {
+        clearTimeout(changeDelayTimerRef.current)
+      }
+    }
+  }, [])
 
   const consumePlanningStream = async (stream: AsyncIterable<CreateVideoResponse>) => {
     for await (const event of stream) {
@@ -95,7 +229,7 @@ const VideoIntentComposer = () => {
       }
 
       if (event.thinkingSummary) {
-        appendThinking(event.thinkingSummary)
+        setThinkingText(event.thinkingSummary)
       }
 
       if (event.errorMessage) {
@@ -103,10 +237,7 @@ const VideoIntentComposer = () => {
       }
 
       if (event.waitingForUserInput && event.askUserQuestion) {
-        setActiveQuestion(event.askUserQuestion)
-        setSelectedAnswer('')
-        setCustomAnswer('')
-        setStage('question')
+        setPendingQuestion(event.askUserQuestion)
         return
       }
 
@@ -132,8 +263,9 @@ const VideoIntentComposer = () => {
       setIsSubmitting(true)
       setHasSubmitted(true)
       setStage('planning')
-      setThinkingFeed(['Initializing planning...'])
+      setThinkingText('Initializing planning...')
       setActiveQuestion(undefined)
+      setPendingQuestion(undefined)
 
       const stream = portalClient.createVideo({
         prompt,
@@ -152,17 +284,22 @@ const VideoIntentComposer = () => {
     }
   }
 
-  const handleContinuePlanning = async () => {
-    if (!videoId || !answerInput || isSubmitting) return
+  const handleContinuePlanning = async (responseOverride?: string) => {
+    const response = (responseOverride ?? answerInput).trim()
+    if (!videoId || !response || isSubmitting) return
 
     try {
       setIsSubmitting(true)
       setStage('planning')
-      appendThinking('Received your answer. Continuing planning...')
+      setActiveQuestion(undefined)
+      setPendingQuestion(undefined)
+      setSelectedAnswer('')
+      setCustomAnswer('')
+      setThinkingText('Received your answer. Continuing planning...')
 
       const stream = portalClient.continueVideoPlanning({
         id: videoId,
-        response: answerInput
+        response
       })
 
       await consumePlanningStream(stream)
@@ -177,7 +314,7 @@ const VideoIntentComposer = () => {
   const removeScript = () => setScript(undefined)
 
   return (
-    <div className='w-full min-h-[62vh] px-4 mt-[10%] py-8 bg-[radial-gradient(circle_at_top_right,rgba(0,204,255,0.08),transparent_45%),radial-gradient(circle_at_bottom_left,rgba(255,149,0,0.08),transparent_50%)]'>
+    <div className='w-full min-h-[62vh] px-4 mt-[10%] py-8'>
       <ScriptEditorDialog
         open={scriptDialogOpen}
         onOpenChange={setScriptDialogOpen}
@@ -194,8 +331,7 @@ const VideoIntentComposer = () => {
 
       <Card className='border-0 shadow-xl rounded-3xl bg-gradient-to-b from-background to-muted/30 w-full max-w-4xl mx-auto overflow-hidden'>
         <CardContent className='p-0'>
-          <div className={hasSubmitted ? 'grid md:grid-cols-[1.2fr_0.8fr]' : 'grid'}>
-            <div className='p-6 md:p-8 border-b md:border-b-0 md:border-r border-border/60'>
+          <div className='p-6 md:p-8'>
               <div className='flex items-center justify-between text-xs text-muted-foreground mb-4'>
                 <div className='flex items-center gap-3'>
                   <div className='flex items-center gap-2'>
@@ -330,69 +466,70 @@ const VideoIntentComposer = () => {
                   </Button>
                 </div>
               </div>
-            </div>
-
-            {hasSubmitted && (
-              <div className='p-6 md:p-8 bg-muted/20'>
-                <div className='flex items-center gap-2 text-sm font-medium mb-4'>
-                  <MessageSquareText className='w-4 h-4' /> Agent Activity
-                </div>
-
-                <div className='rounded-2xl border bg-background p-4 min-h-[260px] max-h-[360px] overflow-auto space-y-3'>
-                  {thinkingFeed.length === 0 && (
-                    <p className='text-sm text-muted-foreground'>
-                      No activity yet. Submit your request to start planning.
-                    </p>
-                  )}
-                  {thinkingFeed.map((line, idx) => (
-                    <div
-                      key={`${line}-${idx}`}
-                      className='text-sm leading-relaxed border-l-2 border-primary/30 pl-3'
-                    >
-                      {line}
-                    </div>
-                  ))}
-                </div>
-
-                {stage === 'question' && activeQuestion && (
-                  <div className='mt-5 rounded-2xl border bg-background p-4 space-y-3'>
-                    <p className='text-sm font-medium'>{activeQuestion.questionText}</p>
-
-                    {activeQuestion.options?.length > 0 && (
-                      <div className='flex flex-wrap gap-2'>
-                        {activeQuestion.options.map(option => (
-                          <button
-                            key={option}
-                            onClick={() => setSelectedAnswer(option)}
-                            className={`px-3 py-1.5 text-xs rounded-full border transition ${selectedAnswer === option ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-muted'}`}
-                          >
-                            {option}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-
-                    {activeQuestion.allowCustomEntry && (
-                      <textarea
-                        value={customAnswer}
-                        onChange={e => setCustomAnswer(e.target.value)}
-                        placeholder='Or type your answer...'
-                        className='w-full min-h-[80px] resize-none bg-background border rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30'
-                      />
-                    )}
-
-                    <Button onClick={handleContinuePlanning} disabled={!answerInput || isSubmitting} className='w-full'>
-                      <span className='inline-flex items-center gap-2'>
-                        Continue planning <ChevronRight className='w-4 h-4' />
-                      </span>
-                    </Button>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         </CardContent>
       </Card>
+
+      {showAgentActivity && (
+        <div className='w-full max-w-4xl mx-auto mt-4 rounded-2xl border bg-muted/20 p-4 md:p-5'>
+          <div className='flex items-center gap-2 text-sm font-medium mb-3'>
+            <MessageSquareText className='w-4 h-4' /> Agent Activity
+          </div>
+
+          <div className='rounded-xl border bg-background p-3 pr-6 min-h-[44px] overflow-hidden'>
+            <p className={`text-xs leading-relaxed text-muted-foreground/75 whitespace-nowrap ${isSubmitting ? 'animate-pulse' : ''}`}>
+              {singleLineThinkingText || 'Waiting for planning stream...'}
+              {isSubmitting && (
+                <span className='inline-block w-6 text-left ml-0.5' aria-hidden='true'>
+                  {thinkingDots}
+                </span>
+              )}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {stage === 'question' && activeQuestion && (
+        <div className='w-full max-w-4xl mx-auto mt-4 rounded-2xl border bg-background p-4 space-y-3'>
+          <p className='text-sm font-medium'>{activeQuestion.questionText}</p>
+
+          {activeQuestion.options?.length > 0 && (
+            <ul className='space-y-2'>
+              {activeQuestion.options.map(option => (
+                <li key={option}>
+                  <button
+                    onClick={() => {
+                      setSelectedAnswer(option)
+                      void handleContinuePlanning(option)
+                    }}
+                    disabled={isSubmitting}
+                    className='w-full text-left px-3 py-2 text-xs rounded-lg border transition hover:bg-muted disabled:opacity-60'
+                  >
+                    {option}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {activeQuestion.allowCustomEntry && (
+            <textarea
+              value={customAnswer}
+              onChange={e => setCustomAnswer(e.target.value)}
+              placeholder='Or type your answer...'
+              className='w-full min-h-[80px] resize-none bg-background border rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30'
+            />
+          )}
+
+          {activeQuestion.allowCustomEntry && (
+            <Button onClick={() => void handleContinuePlanning()} disabled={!answerInput || isSubmitting} className='w-full'>
+              <span className='inline-flex items-center gap-2'>
+                Continue planning <ChevronRight className='w-4 h-4' />
+              </span>
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   )
 }

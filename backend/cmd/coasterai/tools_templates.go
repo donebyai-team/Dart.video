@@ -274,7 +274,7 @@ func syncTemplate(ctx context.Context, db datastore.TemplateRepository, template
 
 	cdnURL := fmt.Sprintf("templates/%s/%s.cdn.js", animFolderName, templateName)
 
-	existing, err := db.GetTemplateByName(ctx, string(animType), templateName)
+	existing, err := db.GetTemplateByName(ctx, animType, templateName)
 	if err != nil && !errors.Is(err, datastore.NotFound) {
 		return fmt.Errorf("failed to fetch template %s: %w", templateName, err)
 	}

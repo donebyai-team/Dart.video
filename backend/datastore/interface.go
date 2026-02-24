@@ -84,7 +84,7 @@ type TemplateRepository interface {
 	) ([]*models.Template, error)
 	GetTemplateByName(
 		ctx context.Context,
-		animationType string,
+		animationType types.AnimationType,
 		name string,
 	) (*models.Template, error)
 }

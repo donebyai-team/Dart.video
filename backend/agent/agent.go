@@ -126,11 +126,12 @@ func (a *agentV1) Start(ctx context.Context, options StartSessionOptions) (*RunR
 	}
 
 	generatePlanRequest := types.VideoGenerationPlanRequest{
-		Duration:   int64(options.Input.Duration),
-		Prompt:     options.Input.Prompt,
-		Language:   "English",
-		Resolution: options.Input.Resolution.Id,
-		Script:     script,
+		Duration:       int64(options.Input.Duration),
+		Prompt:         options.Input.Prompt,
+		Language:       "English",
+		Resolution:     options.Input.Resolution.Id,
+		Script:         script,
+		EnableThinking: utils.Ptr(true),
 	}
 
 	session := &planningSession{
@@ -184,23 +185,20 @@ func (a *agentV1) Continue(ctx context.Context, options ContinueSessionOptions) 
 
 func (a *agentV1) runPlanning(ctx context.Context, sessionID string, session *planningSession) (*RunResult, error) {
 	logger := logging.Logger(ctx, a.logger)
-	thinking := ""
-
 	llmResponse, err := a.llmService.PlanSlidesWithStreaming(ctx, session.Request, session.ConversationHistory, func(chunk string) {
-		thinking += chunk
 		if err := a.updateState(ctx, VideoAgentState{
 			VideoID:  sessionID,
-			Thinking: thinking,
+			Thinking: chunk,
 			State:    stateStatusProcessing,
 		}); err != nil {
-			logger.Warn("failed to update thinking state", zap.Error(err))
+			logger.Error("failed to update thinking state", zap.Error(err))
 		}
 	})
 	if err != nil {
 		return nil, agenterrors.LLMPlanningFailed("failed to generate video plan", err)
 	}
 
-	handled, result, err := a.handleToolCalls(ctx, sessionID, session, llmResponse, thinking)
+	handled, result, err := a.handleToolCalls(ctx, sessionID, session, llmResponse, "")
 	if handled {
 		return result, err
 	}
@@ -224,7 +222,7 @@ func (a *agentV1) runPlanning(ctx context.Context, sessionID string, session *pl
 
 	if err := a.updateState(ctx, VideoAgentState{
 		VideoID:  sessionID,
-		Thinking: thinking,
+		Thinking: "",
 		State:    stateStatusCompleted,
 	}); err != nil {
 		logger.Warn("failed to update completed state", zap.Error(err))
@@ -288,6 +286,10 @@ func (a *agentV1) applyPlan(
 			// ---------------- MEDIA SLIDE ----------------
 			if slide.IsMediaSlide() {
 				media := slide.AsMediaSlide()
+				if media.Description != "" {
+					media.Description = "This is the media slide, user will be asked to upload their product screenshot or clip"
+				}
+				media.SelectedTemplateDescription = utils.Ptr(media.Description)
 				if err = builder.AddMediaSlide(
 					ctx,
 					sectionID,
@@ -320,12 +322,17 @@ func (a *agentV1) applyPlan(
 				)
 			}
 
-			// TODO: Handle fallback
-			if len(categories) == 0 {
-				continue
-			}
-
 			var selected *models.Template
+
+			// Handle fallback
+			if len(categories) == 0 {
+				template, err := a.retrievalService.GetFallbackTemplate(ctx)
+				if err != nil {
+					return agenterrors.NoTemplateFound("no fallback template found", err)
+				}
+
+				selected = template
+			}
 
 			// Template matching
 			for _, category := range categories {
@@ -377,9 +384,14 @@ func (a *agentV1) applyPlan(
 				break
 			}
 
-			// TODO: fallback
+			// Handle fallback
 			if selected == nil {
-				continue
+				template, err := a.retrievalService.GetFallbackTemplate(ctx)
+				if err != nil {
+					return agenterrors.NoTemplateFound("no fallback template found from any category", err)
+				}
+
+				selected = template
 			}
 
 			anim.SelectedTemplateDescription = utils.Ptr(selected.Description)

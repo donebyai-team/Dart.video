@@ -91,7 +91,7 @@ func (g *videoConfigGenerator) AddAnimationSlide(
 
 	section.Slides = append(section.Slides, newAnimationSlide(duration, selectedTemplate, toStruct))
 
-	return g.update(ctx, "")
+	return g.update(ctx, models.VideoStatusPROCESSING)
 }
 
 func (g *videoConfigGenerator) AddMediaSlide(
@@ -107,7 +107,7 @@ func (g *videoConfigGenerator) AddMediaSlide(
 
 	section.Slides = append(section.Slides, newMediaSlide(duration))
 
-	return g.update(ctx, "")
+	return g.update(ctx, models.VideoStatusPROCESSING)
 }
 
 /* -------------------- Private Helpers -------------------- */

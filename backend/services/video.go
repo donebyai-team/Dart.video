@@ -41,7 +41,15 @@ func (v videoGeneration) UpdateVideoConfig(ctx context.Context, video *models.Vi
 		return err
 	}
 
-	existingVideo.AIGeneratedConfig = video.AIGeneratedConfig
+	if video.AIGeneratedConfig != nil {
+		existingVideo.AIGeneratedConfig = video.AIGeneratedConfig
+		existingVideo.Config = video.AIGeneratedConfig
+		video.Config = video.AIGeneratedConfig
+	}
+
+	if video.Config != nil {
+		existingVideo.Config = video.Config
+	}
 	configChanged := !proto.Equal(existingVideo.Config, video.Config)
 	nameChanged := video.Name != existingVideo.Name
 	metadataChanged := false
@@ -91,9 +99,7 @@ func (v videoGeneration) UpdateVideoConfig(ctx context.Context, video *models.Vi
 	}
 
 	existingVideo.Metadata.Duration = totalDuration
-
-	existingVideo.Metadata.Duration = totalDuration
-
+	
 	if video.Status != "" {
 		existingVideo.Status = video.Status
 	}

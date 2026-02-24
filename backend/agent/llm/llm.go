@@ -6,7 +6,9 @@ import (
 	"github.com/shank318/coasterai/baml_client"
 	"github.com/shank318/coasterai/baml_client/types"
 	"go.uber.org/zap"
+	"regexp"
 	"strings"
+	"time"
 )
 
 // LLMService declares all LLM interactions in the pipeline.
@@ -51,12 +53,24 @@ func (l llmService) PlanSlidesWithStreaming(
 		thinkingComplete bool
 	)
 
+	// Add a timeout for stream operations
+	streamTimeout := 30 * time.Second
+	timer := time.NewTimer(streamTimeout)
+	defer timer.Stop()
+
 	for {
 		select {
 		case <-ctx.Done():
 			return nil, handleContextError(ctx.Err())
 
+		case <-timer.C:
+			// Stream timeout - this might be why your stream is "stopping"
+			l.logger.Error("⏰ Stream timeout - no data received within timeout period")
+			return nil, fmt.Errorf("stream timeout after %v", streamTimeout)
+
 		case value, ok := <-stream:
+			// Reset timer on each successful read
+			timer.Reset(streamTimeout)
 			if !ok {
 				// Stream closed - return final result if we have it
 				if finalPlan == nil {
@@ -77,31 +91,32 @@ func (l llmService) PlanSlidesWithStreaming(
 
 				// Handle thinking updates
 				if onThinking != nil && partial.Thinking.Value != nil && !thinkingComplete {
-					currentThinking := *partial.Thinking.Value
-					currentLen := len(currentThinking)
+					currentThinking := stripThinkingTags(*partial.Thinking.Value)
+					//currentLen := len(currentThinking)
+					onThinking(currentThinking)
 
-					// Only send new thinking content to avoid duplicates
-					if currentLen > lastThinkingLen {
-						if lastThinkingLen == 0 {
-							// First thinking update - send all
-							onThinking(currentThinking)
-							l.logger.Debug("🤔 Thinking started", zap.Int("length", currentLen))
-						} else {
-							// Send only new content
-							newContent := currentThinking[lastThinkingLen:]
-							onThinking(newContent)
-							l.logger.Debug("🤔 Thinking updated",
-								zap.Int("new_chars", len(newContent)),
-								zap.Int("total_chars", currentLen))
-						}
-						lastThinkingLen = currentLen
-					}
+					//// Only send new thinking content to avoid duplicates
+					//if currentLen > lastThinkingLen {
+					//	if lastThinkingLen == 0 {
+					//		// First thinking update - send all
+					//		onThinking(currentThinking)
+					//		l.logger.Info("🤔 Thinking started", zap.Int("length", currentLen))
+					//	} else {
+					//		// Send only new content
+					//		newContent := currentThinking[lastThinkingLen:]
+					//		onThinking(newContent)
+					//		l.logger.Info("🤔 Thinking updated",
+					//			zap.Int("new_chars", len(newContent)),
+					//			zap.Int("total_chars", currentLen))
+					//	}
+					//	lastThinkingLen = currentLen
+					//}
 
 					// Check if thinking seems complete (heuristic)
-					if currentLen > 100 && strings.Contains(strings.ToLower(currentThinking), "final") {
-						thinkingComplete = true
-						l.logger.Debug("🤔 Thinking appears complete")
-					}
+					//if currentLen > 100 && strings.Contains(strings.ToLower(currentThinking), "final") {
+					//	thinkingComplete = true
+					//	l.logger.Info("🤔 Thinking appears complete")
+					//}
 				}
 			}
 
@@ -125,6 +140,12 @@ func (l llmService) PlanSlidesWithStreaming(
 			}
 		}
 	}
+}
+
+var thinkingTagRegex = regexp.MustCompile(`(?i)</?thinking>`)
+
+func stripThinkingTags(s string) string {
+	return thinkingTagRegex.ReplaceAllString(s, "")
 }
 
 func (l llmService) SelectTemplates(ctx context.Context, req *types.MatchTemplateRequest, onThinking func(thinking string)) ([]types.TemplateItem, error) {
@@ -165,7 +186,7 @@ func (l llmService) SelectTemplates(ctx context.Context, req *types.MatchTemplat
 
 				// Handle thinking updates
 				if onThinking != nil && partial.Thinking.Value != nil && !thinkingComplete {
-					currentThinking := *partial.Thinking.Value
+					currentThinking := stripThinkingTags(*partial.Thinking.Value)
 					currentLen := len(currentThinking)
 
 					// Only send new thinking content to avoid duplicates
@@ -173,12 +194,12 @@ func (l llmService) SelectTemplates(ctx context.Context, req *types.MatchTemplat
 						if lastThinkingLen == 0 {
 							// First thinking update - send all
 							onThinking(currentThinking)
-							l.logger.Debug("🤔 Thinking started", zap.Int("length", currentLen))
+							l.logger.Info("🤔 Thinking started", zap.Int("length", currentLen))
 						} else {
 							// Send only new content
 							newContent := currentThinking[lastThinkingLen:]
 							onThinking(newContent)
-							l.logger.Debug("🤔 Thinking updated",
+							l.logger.Info("🤔 Thinking updated",
 								zap.Int("new_chars", len(newContent)),
 								zap.Int("total_chars", currentLen))
 						}
@@ -188,7 +209,7 @@ func (l llmService) SelectTemplates(ctx context.Context, req *types.MatchTemplat
 					// Check if thinking seems complete (heuristic)
 					if currentLen > 100 && strings.Contains(strings.ToLower(currentThinking), "final") {
 						thinkingComplete = true
-						l.logger.Debug("🤔 Thinking appears complete")
+						l.logger.Info("🤔 Thinking appears complete")
 					}
 				}
 			}

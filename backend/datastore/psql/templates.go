@@ -140,7 +140,7 @@ func (r *Database) GetTemplatesByCategory(
 
 func (r *Database) GetTemplateByName(
 	ctx context.Context,
-	animationType string,
+	animationType types.AnimationType,
 	name string,
 ) (*models.Template, error) {
 	return getOne[models.Template](

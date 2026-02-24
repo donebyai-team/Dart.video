@@ -5,6 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/shank318/coasterai/agent"
 	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/errorx"
@@ -18,8 +19,24 @@ import (
 	"time"
 )
 
-func (p *Portal) CreateVideo(ctx context.Context, c *connect.Request[pbportal.CreateVideoRequest], stream *connect.ServerStream[pbportal.CreateVideoResponse]) error {
+const streamHeartbeatInterval = 10 * time.Second
+
+func (p *Portal) CreateVideo(ctx context.Context, c *connect.Request[pbportal.CreateVideoRequest], stream *connect.ServerStream[pbportal.CreateVideoResponse]) (err error) {
 	logger := logging.Logger(ctx, p.logger)
+	startedAt := time.Now()
+	videoID := ""
+
+	defer func() {
+		fields := []zap.Field{
+			zap.String("video_id", videoID),
+			zap.Duration("elapsed", time.Since(startedAt)),
+		}
+		if err != nil {
+			logger.Error("CreateVideo stream failed", append(fields, zap.Error(err))...)
+			return
+		}
+		logger.Info("CreateVideo stream completed", fields...)
+	}()
 
 	actor, err := p.gethAuthContext(ctx)
 	if err != nil {
@@ -46,6 +63,7 @@ func (p *Portal) CreateVideo(ctx context.Context, c *connect.Request[pbportal.Cr
 	if err != nil {
 		return errorx.ToConnect(errorx.New(errorx.CodeInternal, "VIDEO_CREATE_FAILED", "failed to create video", err))
 	}
+	videoID = video.ID
 
 	if err := stream.Send(&pbportal.CreateVideoResponse{
 		Id:              video.ID,
@@ -60,9 +78,8 @@ func (p *Portal) CreateVideo(ctx context.Context, c *connect.Request[pbportal.Cr
 	}
 
 	logger.Info("created video successfully; starting interactive planning", zap.String("video_id", video.ID))
-	runCtx := context.WithoutCancel(ctx)
 
-	return p.streamAgentRun(ctx, stream, videoAgent, video.ID, func() (*agent.RunResult, error) {
+	return p.streamAgentRun(ctx, stream, videoAgent, video.ID, func(runCtx context.Context) (*agent.RunResult, error) {
 		return videoAgent.Start(runCtx, agent.StartSessionOptions{
 			SessionID: video.ID,
 			OrgID:     actor.OrganizationID,
@@ -71,7 +88,23 @@ func (p *Portal) CreateVideo(ctx context.Context, c *connect.Request[pbportal.Cr
 	})
 }
 
-func (p *Portal) ContinueVideoPlanning(ctx context.Context, c *connect.Request[pbportal.ContinueVideoPlanningRequest], stream *connect.ServerStream[pbportal.CreateVideoResponse]) error {
+func (p *Portal) ContinueVideoPlanning(ctx context.Context, c *connect.Request[pbportal.ContinueVideoPlanningRequest], stream *connect.ServerStream[pbportal.CreateVideoResponse]) (err error) {
+	logger := logging.Logger(ctx, p.logger)
+	startedAt := time.Now()
+	videoID := strings.TrimSpace(c.Msg.Id)
+
+	defer func() {
+		fields := []zap.Field{
+			zap.String("video_id", videoID),
+			zap.Duration("elapsed", time.Since(startedAt)),
+		}
+		if err != nil {
+			logger.Error("ContinueVideoPlanning stream failed", append(fields, zap.Error(err))...)
+			return
+		}
+		logger.Info("ContinueVideoPlanning stream completed", fields...)
+	}()
+
 	actor, err := p.gethAuthContext(ctx)
 	if err != nil {
 		return err
@@ -88,15 +121,19 @@ func (p *Portal) ContinueVideoPlanning(ctx context.Context, c *connect.Request[p
 	if err != nil {
 		return errorx.ToConnect(err)
 	}
-	runCtx := context.WithoutCancel(ctx)
-
-	return p.streamAgentRun(ctx, stream, videoAgent, c.Msg.Id, func() (*agent.RunResult, error) {
-		return videoAgent.Continue(runCtx, agent.ContinueSessionOptions{
-			SessionID:    c.Msg.Id,
-			OrgID:        actor.OrganizationID,
-			UserResponse: c.Msg.Response,
-		})
-	})
+	return p.streamAgentRun(
+		ctx,
+		stream,
+		videoAgent,
+		c.Msg.Id,
+		func(runCtx context.Context) (*agent.RunResult, error) {
+			return videoAgent.Continue(runCtx, agent.ContinueSessionOptions{
+				SessionID:    c.Msg.Id,
+				OrgID:        actor.OrganizationID,
+				UserResponse: c.Msg.Response,
+			})
+		},
+	)
 }
 
 func (p *Portal) newVideoAgent() (agent.VideoAgent, error) {
@@ -110,115 +147,269 @@ func (p *Portal) newVideoAgent() (agent.VideoAgent, error) {
 }
 
 func (p *Portal) streamAgentRun(
-	ctx context.Context,
+	ctx context.Context, // THIS is the Connect request context — do not cancel it
 	stream *connect.ServerStream[pbportal.CreateVideoResponse],
 	videoAgent agent.VideoAgent,
 	videoID string,
-	run func() (*agent.RunResult, error),
-) error {
+	run func(ctx context.Context) (*agent.RunResult, error), // run MUST accept ctx
+) (err error) {
+
 	logger := logging.Logger(ctx, p.logger)
-	done := make(chan struct {
+	startedAt := time.Now()
+	exitReason := "unknown"
+	logger.Info("starting agent stream loop", zap.String("video_id", videoID))
+	defer func() {
+		fields := []zap.Field{
+			zap.String("video_id", videoID),
+			zap.String("reason", exitReason),
+			zap.Duration("elapsed", time.Since(startedAt)),
+		}
+		if err != nil {
+			logger.Error("agent stream loop ended with error", append(fields, zap.Error(err))...)
+			return
+		}
+		logger.Info("agent stream loop ended", fields...)
+	}()
+
+	// ---------------------------------------------
+	// Create a SEPARATE context for background run
+	// ---------------------------------------------
+	runCtx, runCancel := context.WithCancel(context.Background())
+	defer runCancel()
+
+	type runOutput struct {
 		result *agent.RunResult
 		err    error
-	}, 1)
+	}
 
-	logger.Info("starting agent stream loop", zap.String("video_id", videoID))
+	done := make(chan runOutput, 1)
 
+	// ---------------------------------------------
+	// Start agent run in background
+	// ---------------------------------------------
 	go func() {
 		logger.Info("starting agent run goroutine", zap.String("video_id", videoID))
-		res, err := run()
-		if err != nil {
-			logger.Warn("agent run finished with error", zap.String("video_id", videoID), zap.Error(err))
-		} else if res != nil {
-			logger.Info("agent run finished", zap.String("video_id", videoID), zap.String("status", string(res.Status)))
-		} else {
-			logger.Info("agent run finished with nil result", zap.String("video_id", videoID))
+
+		defer func() {
+			if r := recover(); r != nil {
+				logger.Error("agent run panicked",
+					zap.String("video_id", videoID),
+					zap.Any("panic", r),
+				)
+
+				select {
+				case done <- runOutput{
+					err: fmt.Errorf("agent panic: %v", r),
+				}:
+				default:
+				}
+			}
+
+			logger.Info("agent run goroutine exited", zap.String("video_id", videoID))
+		}()
+
+		res, err := run(runCtx)
+
+		select {
+		case done <- runOutput{result: res, err: err}:
+		default:
+			// If stream exited already, don't block
 		}
-		done <- struct {
-			result *agent.RunResult
-			err    error
-		}{result: res, err: err}
 	}()
 
 	ticker := time.NewTicker(300 * time.Millisecond)
 	defer ticker.Stop()
 
 	lastThinking := ""
+	lastStreamSendAt := time.Now()
+
 	for {
 		select {
-		case <-ctx.Done():
-			logger.Info("agent stream cancelled by context", zap.String("video_id", videoID), zap.Error(ctx.Err()))
-			return ctx.Err()
 
+		// -------------------------------------------------
+		// Client disconnected (DO NOT return ctx.Err())
+		// -------------------------------------------------
+		case <-ctx.Done():
+			logger.Info("client disconnected",
+				zap.String("video_id", videoID),
+			)
+
+			// Stop background run
+			runCancel()
+
+			// Important: return nil, not ctx.Err()
+			exitReason = "client_disconnected"
+			return nil
+
+		// -------------------------------------------------
+		// Poll agent state for thinking updates
+		// -------------------------------------------------
 		case <-ticker.C:
-			state, err := videoAgent.GetState(ctx, videoID)
-			if err != nil || state == nil {
-				if err != nil {
-					logger.Debug("failed to fetch agent state", zap.String("video_id", videoID), zap.Error(err))
+			if time.Since(lastStreamSendAt) >= streamHeartbeatInterval {
+				if err := stream.Send(&pbportal.CreateVideoResponse{
+					Id: videoID,
+				}); err != nil {
+					logger.Warn("failed to stream heartbeat",
+						zap.String("video_id", videoID),
+						zap.Error(err),
+					)
+
+					runCancel()
+					exitReason = "heartbeat_send_failed"
+					return nil
+				}
+				lastStreamSendAt = time.Now()
+			}
+
+			state, errState := videoAgent.GetState(ctx, videoID)
+			if errState != nil || state == nil {
+				if errState != nil {
+					logger.Error("failed to fetch agent state",
+						zap.String("video_id", videoID),
+						zap.Error(errState),
+					)
 				}
 				continue
 			}
 
+			// Stream thinking updates
 			if state.Thinking != "" && state.Thinking != lastThinking {
 				lastThinking = state.Thinking
-				logger.Debug("streaming thinking update", zap.String("video_id", videoID), zap.Int("thinking_chars", len(state.Thinking)))
+
+				logger.Info("streaming thinking update",
+					zap.String("video_id", videoID),
+					zap.String("thinking", lastThinking),
+					zap.Int("thinking_chars", len(state.Thinking)),
+				)
+
 				if err := stream.Send(&pbportal.CreateVideoResponse{
 					Id:              videoID,
-					ThinkingSummary: state.Thinking,
+					ThinkingSummary: lastThinking,
 				}); err != nil {
-					logger.Warn("failed to stream thinking update", zap.String("video_id", videoID), zap.Error(err))
-					return errorx.ToConnect(errorx.New(errorx.CodeInternal, "STREAM_SEND_FAILED", "failed to stream thinking update", err))
+
+					logger.Warn("failed to stream thinking update",
+						zap.String("video_id", videoID),
+						zap.Error(err),
+					)
+
+					runCancel()
+					exitReason = "thinking_send_failed"
+					return nil // graceful close
 				}
+				lastStreamSendAt = time.Now()
 			}
 
+			// Early completion case
 			if state.State == agent.StateReadyForEditor {
-				logger.Info("first slide persisted; stream can hand off to editor", zap.String("video_id", videoID))
+				logger.Info("state ready for editor",
+					zap.String("video_id", videoID),
+				)
+
+				runCancel()
+
 				if err := stream.Send(&pbportal.CreateVideoResponse{
 					Id:                videoID,
 					PlanningCompleted: true,
 				}); err != nil {
-					logger.Warn("failed to stream ready-for-editor event", zap.String("video_id", videoID), zap.Error(err))
-					return errorx.ToConnect(errorx.New(errorx.CodeInternal, "STREAM_SEND_FAILED", "failed to stream ready-for-editor event", err))
+
+					logger.Warn("failed to stream ready-for-editor",
+						zap.String("video_id", videoID),
+						zap.Error(err),
+					)
+
+					exitReason = "ready_for_editor_send_failed"
+					return nil
 				}
+				lastStreamSendAt = time.Now()
+
+				exitReason = "ready_for_editor"
 				return nil
 			}
 
+		// -------------------------------------------------
+		// Agent run completed
+		// -------------------------------------------------
 		case out := <-done:
+
+			runCancel()
+
 			if out.err != nil {
-				logger.Error("agent run failed", zap.String("video_id", videoID), zap.Error(out.err))
+				logger.Error("agent run failed",
+					zap.String("video_id", videoID),
+					zap.Error(out.err),
+				)
+
 				_ = stream.Send(&pbportal.CreateVideoResponse{
 					Id:           videoID,
 					ErrorMessage: out.err.Error(),
 				})
-				return errorx.ToConnect(out.err)
+				lastStreamSendAt = time.Now()
+
+				exitReason = "agent_run_failed"
+				return nil
 			}
 
 			if out.result == nil {
-				logger.Error("agent returned nil result", zap.String("video_id", videoID))
-				return errorx.ToConnect(errorx.New(errorx.CodeInternal, "AGENT_EMPTY_RESULT", "agent returned empty result", nil))
+				logger.Error("agent returned nil result",
+					zap.String("video_id", videoID),
+				)
+
+				_ = stream.Send(&pbportal.CreateVideoResponse{
+					Id:           videoID,
+					ErrorMessage: "agent returned empty result",
+				})
+				lastStreamSendAt = time.Now()
+
+				exitReason = "agent_empty_result"
+				return nil
 			}
 
 			if out.result.Status == agent.RunStatusWaitingForUserInput {
-				logger.Info("agent waiting for user input", zap.String("video_id", videoID))
+
+				logger.Info("agent waiting for user input",
+					zap.String("video_id", videoID),
+				)
+
 				if err := stream.Send(&pbportal.CreateVideoResponse{
 					Id:                  videoID,
 					WaitingForUserInput: true,
 					AskUserQuestion:     toProtoQuestion(out.result.AskUserQuestion),
 				}); err != nil {
-					logger.Warn("failed to stream ask-user-question event", zap.String("video_id", videoID), zap.Error(err))
-					return errorx.ToConnect(errorx.New(errorx.CodeInternal, "STREAM_SEND_FAILED", "failed to stream ask-user-question event", err))
+
+					logger.Warn("failed to stream ask-user-question",
+						zap.String("video_id", videoID),
+						zap.Error(err),
+					)
+
+					exitReason = "question_send_failed"
+					return nil
 				}
+				lastStreamSendAt = time.Now()
+
+				exitReason = "waiting_for_user_input"
 				return nil
 			}
 
-			logger.Info("agent planning completed", zap.String("video_id", videoID))
+			logger.Info("agent planning completed",
+				zap.String("video_id", videoID),
+			)
+
 			if err := stream.Send(&pbportal.CreateVideoResponse{
 				Id:                videoID,
 				PlanningCompleted: true,
 			}); err != nil {
-				logger.Warn("failed to stream planning completed event", zap.String("video_id", videoID), zap.Error(err))
-				return errorx.ToConnect(errorx.New(errorx.CodeInternal, "STREAM_SEND_FAILED", "failed to stream planning completed event", err))
+
+				logger.Warn("failed to stream planning completed",
+					zap.String("video_id", videoID),
+					zap.Error(err),
+				)
+
+				exitReason = "planning_completed_send_failed"
+				return nil
 			}
+			lastStreamSendAt = time.Now()
+
+			exitReason = "planning_completed"
 			return nil
 		}
 	}

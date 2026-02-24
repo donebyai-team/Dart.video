@@ -88,7 +88,7 @@ func (b *DependenciesBuilder) WithAI(defaultLLMModel, liteLLMAPIKey string, open
 }
 
 func (b *DependenciesBuilder) WithMediaStore(imageKitKey string) *DependenciesBuilder {
-	b.imageKitKey = "private_EqxvvcNCM0RMd/BKSF7LgG4ft20="
+	b.imageKitKey = imageKitKey
 	return b
 }
 

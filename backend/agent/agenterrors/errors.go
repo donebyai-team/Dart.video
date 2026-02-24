@@ -7,7 +7,8 @@ const (
 	ReasonSessionUnavailable    = "AGENT_SESSION_UNAVAILABLE"
 	ReasonStateUnavailable      = "AGENT_STATE_UNAVAILABLE"
 	ReasonLLMPlanningFailed     = "AGENT_LLM_PLANNING_FAILED"
-	ReasonRetrievalFailed       = "AGENT_RETRIEVAL_FAILED"
+	ReasonRetrievalFailed       = "AGENT_NO_TEMPLATE_FOUND"
+	ReasonNoTemplate            = "AGENT_NO_TEMPLATE_FOUND"
 	ReasonTemplateSelectFailed  = "AGENT_TEMPLATE_SELECT_FAILED"
 	ReasonTemplateExtractFailed = "AGENT_TEMPLATE_EXTRACT_FAILED"
 	ReasonVideoPersistFailed    = "AGENT_VIDEO_PERSIST_FAILED"
@@ -32,6 +33,10 @@ func LLMPlanningFailed(message string, cause error) error {
 
 func RetrievalFailed(message string, cause error) error {
 	return errorx.New(errorx.CodeInternal, ReasonRetrievalFailed, message, cause)
+}
+
+func NoTemplateFound(message string, cause error) error {
+	return errorx.New(errorx.CodeInternal, ReasonNoTemplate, message, cause)
 }
 
 func TemplateSelectFailed(message string, cause error) error {
