@@ -61,6 +61,7 @@ message AnimationSlideContent {
   string templateId = 1;
   google.protobuf.Struct templateConfig = 2;
   MetaData meta = 3;
+  string templateUrl = 4;
 }
 
 message StackSlideContent {

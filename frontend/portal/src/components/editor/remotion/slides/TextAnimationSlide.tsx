@@ -29,8 +29,8 @@ interface TextAnimationSlideProps {
 
 const templateLoadCache = new Map<string, Promise<TemplateModule>>()
 
-const loadScriptTemplate = async (url: string, globalName: string): Promise<TemplateModule> => {
-  const cacheKey = `${url}::${globalName}`
+const loadScriptTemplate = async (url: string, globalNames: string[]): Promise<TemplateModule> => {
+  const cacheKey = `${url}::${globalNames.join(',')}`
   const cached = templateLoadCache.get(cacheKey)
   if (cached) return cached
 
@@ -50,16 +50,22 @@ const loadScriptTemplate = async (url: string, globalName: string): Promise<Temp
     )
 
     const resolveFromWindow = () => {
-      const moduleFromWindow = (window as any)[globalName]
+      const moduleFromWindow = globalNames
+        .map(globalName => (window as any)[globalName])
+        .find(mod => mod?.RemoteComponent)
       if (!moduleFromWindow?.RemoteComponent) {
-        reject(new Error(`Template global "${globalName}" is missing RemoteComponent`))
+        reject(
+          new Error(
+            `Template globals [${globalNames.join(', ')}] are missing RemoteComponent`
+          )
+        )
         return
       }
       resolve(moduleFromWindow as TemplateModule)
     }
 
     if (existingScript) {
-      if ((window as any)[globalName]) {
+      if (globalNames.some(globalName => (window as any)[globalName]?.RemoteComponent)) {
         resolveFromWindow()
         return
       }
@@ -101,7 +107,7 @@ export const TextAnimationSlide: React.FC<TextAnimationSlideProps> = ({
   const [RemoteComponent, setRemoteComponent] = React.useState<TemplateModule | null>(null)
   const [editing, setEditing] = useState<boolean>(isEditing)
   const content = slide.content.value as AnimationSlideContent
-  const templateId = content?.templateId || 'text-reveal'
+  const templatePath = content?.templateUrl
   const templateMeta = (content?.meta as MetaData) || {}
   const templateConfig = (content?.templateConfig ?? {}) as TemplateConfig
 
@@ -112,30 +118,30 @@ const background = backgroundStyleToCSS(slide.backgroundStyle);
     setRemoteComponent(null)
 
     ;(async () => {
-      const template = resolveTemplateEntry("TextCascade")
-      console.debug("[Resolved Template]", templateId, template)
+      const template = resolveTemplateEntry(templatePath)
+      console.debug("[Resolved Template]", templatePath, template.cdn?.url, template)
 
       try {
         if (template.cdn?.url) {
-          const mod = await loadScriptTemplate(template.cdn.url, template.cdn.globalName)
+          const mod = await loadScriptTemplate(template.cdn.url, template.cdn.globalNames)
           if (!disposed) setRemoteComponent(mod)
           return
         }
 
-        if (template.local?.url) {
-          const mod = await loadScriptTemplate(template.local.url, template.local.globalName)
-          if (!disposed) setRemoteComponent(mod)
-        }
+        // if (template.local?.url) {
+        //   const mod = await loadScriptTemplate(template.local.url, template.local.globalNames)
+        //   if (!disposed) setRemoteComponent(mod)
+        // }
       } catch (error) {
-        console.error(`Failed to load template "${templateId}"`, error)
+        console.error(`Failed to load template "${templatePath}"`, error)
 
         // Fallback to local loader if CDN load fails.
         if (template.local?.url) {
           try {
-            const mod = await loadScriptTemplate(template.local.url, template.local.globalName)
+            const mod = await loadScriptTemplate(template.local.url, template.local.globalNames)
             if (!disposed) setRemoteComponent(mod)
           } catch (fallbackError) {
-            console.error(`Fallback local load failed for template "${templateId}"`, fallbackError)
+            console.error(`Fallback local load failed for template "${templatePath}"`, fallbackError)
           }
         }
       }
@@ -144,7 +150,7 @@ const background = backgroundStyleToCSS(slide.backgroundStyle);
     return () => {
       disposed = true
     }
-  }, [templateId])
+  }, [templatePath])
 
   return (
     <AbsoluteFill
@@ -220,7 +226,7 @@ const background = backgroundStyleToCSS(slide.backgroundStyle);
           ) : (
             <TemplateTextAnimationRenderer
               slide={slide}
-              templateId={templateId}
+              templateId={templatePath}
               templateConfig={templateConfig}
               frame={frame}
               fps={fps}

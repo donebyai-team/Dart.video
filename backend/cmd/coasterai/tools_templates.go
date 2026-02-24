@@ -298,9 +298,10 @@ func syncTemplate(ctx context.Context, db datastore.TemplateRepository, template
 	} else if templateNeedsUpdate(existing, categories, description, schemaBytes, previewBytes, cdnURL) {
 		existing.Categories = categories
 		existing.Description = description
-		existing.Schema = json.RawMessage(schemaBytes)
-		existing.Preview = json.RawMessage(previewBytes)
+		existing.Schema = schemaBytes
+		existing.Preview = previewBytes
 		existing.CDNUrl = cdnURL
+		existing.Repeatable = metadata.Repeatable
 		if err = db.UpdateTemplate(ctx, existing); err != nil {
 			return fmt.Errorf("failed to update template %s: %w", templateName, err)
 		}

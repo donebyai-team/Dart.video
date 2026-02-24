@@ -1,1 +1,1 @@
-test2
+Center-aligned text animates into view one letter at a time with a cascading effect. Each character slides in smoothly from the left while fading from transparent to fully visible using a soft spring motion. The animation creates a sequential, flowing reveal of the full sentence, with subtle glow and shadow for emphasis.

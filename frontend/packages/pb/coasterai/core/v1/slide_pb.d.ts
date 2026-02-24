@@ -126,6 +126,11 @@ export declare type AnimationSlideContent = Message<"coasterai.core.v1.Animation
    * @generated from field: coasterai.core.v1.MetaData meta = 3;
    */
   meta?: MetaData;
+
+  /**
+   * @generated from field: string templateUrl = 4;
+   */
+  templateUrl: string;
 };
 
 /**

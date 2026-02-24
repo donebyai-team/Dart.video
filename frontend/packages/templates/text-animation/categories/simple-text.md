@@ -1,1 +1,1 @@
-test2
+Minimal text-only video slides designed to communicate a key idea, concept, thought, quote, announcement, or statement in one or two short lines. Used when the message needs to be delivered clearly and directly without visuals, graphics, or supporting design elements, emphasizing clarity and focus over decoration.

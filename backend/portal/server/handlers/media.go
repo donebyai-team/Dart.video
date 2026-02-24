@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"github.com/shank318/coasterai/auth"
 	"github.com/shank318/coasterai/services"
 	"net/http"
 )
@@ -18,6 +19,11 @@ func NewUploadHandler(service services.MediaStore, renderService services.Render
 const maxUploadSize = 10 << 20 // 10MB
 
 func (h *UploadHandler) UploadMedia(w http.ResponseWriter, r *http.Request) {
+	actor, ok := auth.FromContext(r.Context())
+	if !ok {
+		http.Error(w, "unauthenticated user access", http.StatusUnauthorized)
+		return
+	}
 
 	// Hard limit request body size
 	r.Body = http.MaxBytesReader(w, r.Body, maxUploadSize)
@@ -39,6 +45,7 @@ func (h *UploadHandler) UploadMedia(w http.ResponseWriter, r *http.Request) {
 	result, err := h.service.Upload(
 		r.Context(),
 		file,
+		actor.OrganizationID,
 		header.Filename,
 	)
 	if err != nil {

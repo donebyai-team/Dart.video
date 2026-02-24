@@ -400,7 +400,7 @@ func (a *agentV1) applyPlan(
 				ctx,
 				sectionID,
 				float32(anim.Duration),
-				selected.Name,
+				selected,
 				templateConfig.Config,
 			); err != nil {
 				return agenterrors.VideoPersistFailed(

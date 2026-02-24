@@ -71,7 +71,7 @@ func (g *videoConfigGenerator) AddAnimationSlide(
 	ctx context.Context,
 	sectionID string,
 	duration float32,
-	templateName string,
+	selectedTemplate *models.Template,
 	templateConfig string,
 ) error {
 
@@ -81,7 +81,7 @@ func (g *videoConfigGenerator) AddAnimationSlide(
 			zap.Error(err),
 			zap.String("template_config", templateConfig),
 		)
-		return errors.Wrapf(err, "invalid template config: %s", templateName)
+		return errors.Wrapf(err, "invalid template config: %s", selectedTemplate.Name)
 	}
 
 	section, err := g.findSection(sectionID)
@@ -89,7 +89,7 @@ func (g *videoConfigGenerator) AddAnimationSlide(
 		return err
 	}
 
-	section.Slides = append(section.Slides, newAnimationSlide(duration, templateName, toStruct))
+	section.Slides = append(section.Slides, newAnimationSlide(duration, selectedTemplate, toStruct))
 
 	return g.update(ctx, "")
 }
@@ -138,16 +138,16 @@ func (g *videoConfigGenerator) findSection(sectionID string) (*pbcore.Section, e
 
 func newAnimationSlide(
 	duration float32,
-	templateName string,
+	template *models.Template,
 	templateConfig *structpb.Struct,
 ) *pbcore.Slide {
-
 	return &pbcore.Slide{
 		Type:     pbcore.SlideType_SLIDE_TYPE_TEXT_ANIMATION,
 		Duration: duration,
 		Content: &pbcore.Slide_Animation{
 			Animation: &pbcore.AnimationSlideContent{
-				TemplateId:     templateName,
+				TemplateId:     template.Name,
+				TemplateUrl:    template.CDNUrl,
 				TemplateConfig: templateConfig,
 				Meta:           defaultMeta(),
 			},

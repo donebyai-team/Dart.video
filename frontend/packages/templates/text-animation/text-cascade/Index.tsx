@@ -21,10 +21,14 @@ const RemoteComponent = ({ props, onChange }: Props) => {
 
   const safeProps = result.data
 
-
   const centerText = safeProps.centerText
-  const topLeftText = safeProps.topLeftText
-  console.debug("template input config:", safeProps)
+  // const hasLoggedConfigRef = useRef(false)
+
+  // useEffect(() => {
+  //   if (hasLoggedConfigRef.current) return
+  //   console.debug('template input config:', safeProps)
+  //   hasLoggedConfigRef.current = true
+  // }, [safeProps])
 
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()

@@ -3,8 +3,6 @@ package app
 import (
 	"context"
 	"fmt"
-	"github.com/imagekit-developer/imagekit-go/v2"
-	"github.com/imagekit-developer/imagekit-go/v2/option"
 	"github.com/shank318/coasterai/auth"
 	"github.com/shank318/coasterai/auth/crypto"
 	"github.com/shank318/coasterai/datastore"
@@ -155,13 +153,15 @@ func (b *DependenciesBuilder) Build(ctx context.Context, logger *zap.Logger, tra
 		out.GoogleClient = google2.NewOauthClient(b.GoogleConfig.ClientID, b.GoogleConfig.ClientSecret, b.GoogleConfig.RedirectURL, logger)
 	}
 
-	if b.imageKitKey != "" {
-		client := imagekit.NewClient(
-			option.WithPrivateKey(b.imageKitKey), // defaults to os.LookupEnv("IMAGEKIT_PRIVATE_KEY")
-		)
+	out.MediaStore = services.NewGcpMediaStore()
 
-		out.MediaStore = services.NewImagekitMediaStore(&client)
-	}
+	//if b.imageKitKey != "" {
+	//	client := imagekit.NewClient(
+	//		option.WithPrivateKey(b.imageKitKey), // defaults to os.LookupEnv("IMAGEKIT_PRIVATE_KEY")
+	//	)
+	//
+	//	out.MediaStore = services.NewImagekitMediaStore(&client)
+	//}
 
 	return out, nil
 }

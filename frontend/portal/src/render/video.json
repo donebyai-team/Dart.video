@@ -16,7 +16,8 @@
                         "transition": "TRANSITION_FADE",
                         "transitionDuration": 0.3,
                         "animation": {
-                            "templateId": "textCascade",
+                            "templateId": "text-cascade",
+                            "templateUrl": "templates/text-animation/text-cascade.cdn.js",
                             "templateConfig": {
                                 "centerText": {
                                     "style": {

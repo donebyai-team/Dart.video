@@ -23,6 +23,8 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type Server struct {
@@ -94,7 +96,7 @@ func (s *Server) Run(
 	options = append(options,
 		dgrpcserver.WithConnectWebHTTPHandlers([]dgrpcserver.HTTPHandlerGetter{
 			func() (string, http.Handler) {
-				return "/media/upload", http.HandlerFunc(mediaHandler.UploadMedia)
+				return "/media/upload", s.withHTTPAuth("/media/upload", http.HandlerFunc(mediaHandler.UploadMedia))
 			},
 			func() (string, http.Handler) {
 				return "/video/render", http.HandlerFunc(mediaHandler.PollVideoProgress)
@@ -118,4 +120,46 @@ func (s *Server) Run(
 	addr := strings.ReplaceAll(s.httpListenAddr, "*", "")
 	srv.Launch(addr)
 	<-srv.Terminated()
+}
+
+func (s *Server) withHTTPAuth(path string, next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx, err := s.authenticator.Authenticate(r.Context(), path, r.Header, middleware.RealIP(r.RemoteAddr, r.Header))
+		if err != nil {
+			http.Error(w, mapAuthErrorMessage(err), mapAuthErrorCode(err))
+			return
+		}
+
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func mapAuthErrorCode(err error) int {
+	st, ok := status.FromError(err)
+	if !ok {
+		return http.StatusUnauthorized
+	}
+
+	switch st.Code() {
+	case codes.PermissionDenied:
+		return http.StatusForbidden
+	case codes.Unauthenticated:
+		return http.StatusUnauthorized
+	default:
+		return http.StatusUnauthorized
+	}
+}
+
+func mapAuthErrorMessage(err error) string {
+	st, ok := status.FromError(err)
+	if !ok {
+		return "Unauthorized"
+	}
+
+	switch st.Code() {
+	case codes.Internal, codes.Unavailable, codes.Unknown:
+		return "error with authentication service, please try again later"
+	default:
+		return st.Message()
+	}
 }

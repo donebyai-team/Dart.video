@@ -2,15 +2,55 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"github.com/imagekit-developer/imagekit-go/v2"
 	"github.com/pkg/errors"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/utils"
+	"github.com/streamingfast/dstore"
 	"io"
+	"time"
 )
 
 type MediaStore interface {
-	Upload(ctx context.Context, file io.Reader, fileName string) (*pbcore.UploadedMedia, error)
+	Upload(ctx context.Context, file io.Reader, orgId, fileName string) (*pbcore.UploadedMedia, error)
+}
+
+type gcpMediaStore struct {
+	dStore dstore.Store
+}
+
+func NewGcpMediaStore() MediaStore {
+	debugStore, err := dstore.NewStore(fmt.Sprintf("gs://%s", publicBucket), "", "", false)
+	if err != nil {
+		panic(fmt.Errorf("create gcp media store: %w", err))
+	}
+	return &gcpMediaStore{dStore: debugStore}
+}
+
+const (
+	publicBucket     = "coasterai-public"
+	assertFolder     = "assets"
+	baseGCPBucketURL = "https://storage.googleapis.com"
+)
+
+func (g gcpMediaStore) Upload(ctx context.Context, file io.Reader, orgId, fileName string) (*pbcore.UploadedMedia, error) {
+
+	fileBase := fmt.Sprintf("%s/%s/%s", assertFolder, orgId, fmt.Sprintf("%d-%s", time.Now().Unix(), fileName))
+	err := g.dStore.WriteObject(ctx, fileBase, file)
+	if err != nil {
+		return nil, fmt.Errorf("unable to upload file %s: %w", fileName, err)
+	}
+
+	return &pbcore.UploadedMedia{
+		Url:      fmt.Sprintf("%s/%s/%s", baseGCPBucketURL, publicBucket, fileBase),
+		Width:    0,
+		Height:   0,
+		MimeType: "",
+		Size:     0,
+		FileId:   "",
+		FileName: fileName,
+	}, nil
 }
 
 type imagekitMediaStore struct {
@@ -24,6 +64,7 @@ func NewImagekitMediaStore(ik *imagekit.Client) MediaStore {
 func (g *imagekitMediaStore) Upload(
 	ctx context.Context,
 	file io.Reader,
+	orgId string,
 	fileName string,
 ) (*pbcore.UploadedMedia, error) {
 
