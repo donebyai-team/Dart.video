@@ -30,13 +30,18 @@ Example:
 ## Build command
 
 ```bash
+pnpm build:template <template-folder> 
+
+or
 pnpm build:template <template-folder> <template-name> [out-file]
 ```
 
 Example:
 
 ```bash
-pnpm build:template text-animation/text-cascade TextCascade
+pnpm build:template text-animation/text-cascade. (will auto build Index.tsx)
+
+pnpm build:template text-animation/text-cascade Index text-cascade.cdn.js
 ```
 
 This does 2 things:

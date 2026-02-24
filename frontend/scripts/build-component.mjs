@@ -5,26 +5,47 @@ import { fileURLToPath } from 'url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
+// Remove standalone "--" if present
 const rawArgs = process.argv.slice(2).filter(arg => arg !== '--')
-const [templateFolderArg, templateNameArg, outArg] = rawArgs
-const toGlobalName = name => `__COASTER_TEMPLATE__${name.replace(/[^a-zA-Z0-9_$]/g, '')}`
 
-if (!templateFolderArg || !templateNameArg) {
+// Args:
+// 1. templateFolder (required)
+// 2. templateName (optional)
+// 3. outFile (optional)
+const [templateFolderArg, templateNameArg, outArg] = rawArgs
+
+const toGlobalName = name =>
+  `__COASTER_TEMPLATE__${name.replace(/[^a-zA-Z0-9_$]/g, '')}`
+
+if (!templateFolderArg) {
   console.error(
-    'Usage: pnpm build:template -- <template-folder> <template-name> [out-file]\nExample: pnpm build:template -- text-animation/text-cascade TextCascade'
+    'Usage:\n' +
+      'pnpm build:template <template-folder> [template-name] [out-file]\n\n' +
+      'Examples:\n' +
+      'pnpm build:template text-animation/text-cascade\n' +
+      'pnpm build:template text-animation/text-cascade TextCascade\n' +
+      'pnpm build:template text-animation/text-cascade TextCascade custom.js'
   )
   process.exit(1)
 }
 
+// Derive folder name (last segment)
+const folderParts = templateFolderArg.split(/[\\/]/)
+const lastFolderName = folderParts[folderParts.length - 1]
+
+// Defaults
+const templateName = templateNameArg ?? 'Index'
+const outFile = outArg ?? `${lastFolderName}.cdn.js`
+const globalName = toGlobalName(templateNameArg ?? lastFolderName)
+
+// Entry path
 const entry = path.resolve(
   __dirname,
   '..',
   'packages/templates',
   templateFolderArg,
-  `${templateNameArg}.tsx`
+  `${templateName}.tsx`
 )
-const outFile = outArg ?? `${templateNameArg}.cdn.js`
-const globalName = toGlobalName(templateNameArg)
 
 const config = {
   mode: 'production',
@@ -32,11 +53,9 @@ const config = {
   entry,
   output: {
     path: path.resolve(__dirname, '../packages/build'),
-    // Upload this file to your CDN.
     filename: outFile,
     library: {
       type: 'window',
-      // The runtime loader reads this window key after loading script.
       name: globalName
     },
     clean: false
