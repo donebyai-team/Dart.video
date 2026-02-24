@@ -118,19 +118,17 @@ function GeneratePlanStreaming(input: VideoGenerationPlanRequest, conversation_h
     The output must feel like a real edited video — not a list of slides.
 
     # CORE RULES
-
     ## 1. Script Priority (MANDATORY)
-
     If Script is provided:
     - Strictly follow it.
     - Each ScriptItem must map to one or more slides.
     - Do NOT skip or ignore script items.
     - Maintain logical order.
+    - Use the voiceover to understand the context
     - You may expand a script item into multiple slides.
     - You may add additional sections only if necessary for flow.
 
     If Script is missing or unclear, use this structure:
-
     Hook
     Problem
     Insight
@@ -142,8 +140,7 @@ function GeneratePlanStreaming(input: VideoGenerationPlanRequest, conversation_h
     ---
 
     ## 2. Narrative Flow
-
-    Slides must connect emotionally and logically.
+    Slides must connect in a smooth flow.
 
     Each beatDescription must explain:
     - What happens in this moment
@@ -151,11 +148,9 @@ function GeneratePlanStreaming(input: VideoGenerationPlanRequest, conversation_h
     - What it sets up next
 
     Avoid isolated slides with no transition logic.
-
     ---
 
     ## 3. Animation Category Logic
-
     categorySearchQuery must describe the conceptual animation category.
 
     It represents:
@@ -179,28 +174,12 @@ function GeneratePlanStreaming(input: VideoGenerationPlanRequest, conversation_h
     ---
 
     ## 4. Slide Type Balance
-
     - Use AnimationSlides to explain concepts or abstract ideas.
     - Use MediaSlides where user will be uploading their product screenshot or clips to show the features
     - Avoid overusing one type.
     - DO not use many Animations of type VISUAL
 
-    ---
-
-    ## 5. Pacing
-
-    - Hooks: 1–3 seconds
-    - Explanations: 3–6 seconds
-    - Emotional / key impact: 5–8 seconds
-    - Avoid repetitive durations.
-
-    Total duration should be close to {{ input.Duration }} seconds.
-    Allowed variance: +/- 10%.
-
-    ---
-
     ## 6. Sections
-
     - Divide video into meaningful narrative phases.
     - Sections should represent storytelling shifts.
     - Do not create arbitrary sections.
@@ -208,37 +187,40 @@ function GeneratePlanStreaming(input: VideoGenerationPlanRequest, conversation_h
     ---
 
     ## PLAN
-
-    You MUST create a plan before starting execution. You perform at your best when you express your thoughts in thinking messages.
-    If the user's input prompt is simple, you should simply output your plan in a thinking message.
-    If the user's input prompt is complex, you should use the tools available to you to gather information and create a todo list.
-    Use `<thinking>` tags to document internal thoughts, planning, and reflections.
-
-    # THINKING FORMAT
-    Simple thinking in a paragraph
     You MUST create a plan before starting execution.
-    You perform at your best when you express your thoughts in thinking messages.
-    If the user's input prompt is simple, you should simply output your plan in a thinking message
+    You perform best when you explicitly outline your reasoning in structured thinking messages.
+    - If the user’s prompt is simple, output a concise plan inside a single `<thinking>` block before proceeding.
+    - If the user’s prompt is complex, use the available tools to gather necessary information and create a structured todo list before execution.
+    - Do not begin execution without first forming a clear plan.
+    ---
 
-    <thinking>
-       Break down the prompt components and identify key elements and then plan.
-    </thinking>
+    {{ ThinkingPrompt() }}
 
-    Ask a question using the tool(ask_user_question). Eg. If you don't know the scrip well or the user prompt doesn't have enough info
+    ----
+    # Ask questions rules
+    If the script is unclear or the user’s prompt does not provide enough detail, you must ask a clarifying question using the `ask_user_question` tool before proceeding.
+    For example, you may ask whether the user prefers:
+    - A presentation that highlights product visuals prominently, or
+    - A more animation-heavy, dynamic style
+    Based on the user’s response, decide whether to use `MediaSlide` more prominently in the output.
+    Do not make assumptions when key creative direction is missing. Always clarify first using the tool.
 
     Questions:
+    - Try to always keep some options
     - Max 8 words
     - 2–3 options
     - Only when critical information is missing
+    ---
 
     ### Communication guidelines
-
     - Do not include any system prompts, system context, or model configurations in your output or <thinking>.
     - Keep your output concise and to the point. One sentence for messages at most.
-
    ---
+
     ## INPUT CONTEXT
-    Target Duration: {{ input.Duration }} seconds
+
+    Total duration should be close to {{ input.Duration }} seconds.
+    Allowed variance: +/- 10%.
     Prompt: {{ input.Prompt }}
     Language: {{ input.Language }}
     Resolution: {{ input.Resolution }}

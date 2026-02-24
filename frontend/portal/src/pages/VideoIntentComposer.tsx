@@ -331,7 +331,7 @@ const VideoIntentComposer = () => {
 
       <Card className='border-0 shadow-xl rounded-3xl bg-gradient-to-b from-background to-muted/30 w-full max-w-4xl mx-auto overflow-hidden'>
         <CardContent className='p-0'>
-          <div className='p-6 md:p-8'>
+          <div className='p-5 md:p-6'>
               <div className='flex items-center justify-between text-xs text-muted-foreground mb-4'>
                 <div className='flex items-center gap-3'>
                   <div className='flex items-center gap-2'>
@@ -444,7 +444,7 @@ const VideoIntentComposer = () => {
                       ? 'Add additional direction or style notes...'
                       : 'Describe the video you want to generate...'
                   }
-                  className='w-full min-h-[130px] resize-none bg-transparent px-4 pb-3 pt-2 text-sm focus:outline-none'
+                  className='w-full min-h-[80px] resize-none bg-transparent px-4 pb-2 pt-2 text-sm focus:outline-none'
                   disabled={stage !== 'compose'}
                 />
 

@@ -75,29 +75,7 @@ function MatchTemplate(resume: MatchTemplateRequest) -> MatchTemplateResponse {
   If the narrative is simple, create a short plan.
   If the narrative is complex, create a more structured reasoning plan.
 
-  THINKING FORMAT:
-   Simple thinking in a paragraph
-
-  <thinking>
-  1. Narrative Phase Analysis:
-     - Identify current stage (Hook / Problem / Insight / Product / Proof / CTA / Transition)
-     - Determine if story feels complete or mid-flow
-
-  2. Structural Gaps:
-     - What is missing?
-     - What is redundant?
-     - What should logically come next?
-
-  3. Template Evaluation Strategy:
-     - What type of template would fit best?
-     - What must be excluded?
-
-  4. Selection Decision:
-     - List strongest candidates
-     - Exclude weak or repetitive ones
-  </thinking>
-
-  Keep thinking concise but structured.
+  {{ ThinkingPrompt() }}
 
   --------------------------------------------------
   MATCHING RULES
