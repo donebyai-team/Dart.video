@@ -1,6 +1,8 @@
 package services
 
 import (
+	"bytes"
+	"cloud.google.com/go/storage"
 	"context"
 	"fmt"
 	"github.com/imagekit-developer/imagekit-go/v2"
@@ -9,7 +11,13 @@ import (
 	"github.com/shank318/coasterai/utils"
 	"github.com/streamingfast/dstore"
 	"io"
+	"mime"
+	"net/http"
+	"path/filepath"
+	"regexp"
+	"strings"
 	"time"
+	"unicode"
 )
 
 type MediaStore interface {
@@ -18,14 +26,28 @@ type MediaStore interface {
 
 type gcpMediaStore struct {
 	dStore dstore.Store
+	client *storage.Client
+	bucket *storage.BucketHandle
 }
 
 func NewGcpMediaStore() MediaStore {
+	ctx := context.Background()
+
 	debugStore, err := dstore.NewStore(fmt.Sprintf("gs://%s", publicBucket), "", "", false)
 	if err != nil {
 		panic(fmt.Errorf("create gcp media store: %w", err))
 	}
-	return &gcpMediaStore{dStore: debugStore}
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		panic(fmt.Errorf("create storage client: %w", err))
+	}
+
+	return &gcpMediaStore{
+		dStore: debugStore,
+		client: client,
+		bucket: client.Bucket(publicBucket),
+	}
 }
 
 const (
@@ -34,22 +56,81 @@ const (
 	baseGCPBucketURL = "https://storage.googleapis.com"
 )
 
-func (g gcpMediaStore) Upload(ctx context.Context, file io.Reader, orgId, fileName string) (*pbcore.UploadedMedia, error) {
+func normalizeFileName(name string) string {
+	// Extract only the base name (prevents ../../ attacks)
+	name = filepath.Base(name)
 
-	fileBase := fmt.Sprintf("%s/%s/%s", assertFolder, orgId, fmt.Sprintf("%d-%s", time.Now().Unix(), fileName))
-	err := g.dStore.WriteObject(ctx, fileBase, file)
-	if err != nil {
-		return nil, fmt.Errorf("unable to upload file %s: %w", fileName, err)
+	// Lowercase
+	name = strings.ToLower(name)
+
+	// Remove emojis & non-ascii characters
+	name = strings.Map(func(r rune) rune {
+		if r > unicode.MaxASCII {
+			return -1
+		}
+		return r
+	}, name)
+
+	// Replace spaces with dash
+	name = strings.ReplaceAll(name, " ", "-")
+
+	// Allow only a-z, 0-9, dot, dash, underscore
+	reg := regexp.MustCompile(`[^a-z0-9.\-_]`)
+	name = reg.ReplaceAllString(name, "")
+
+	return name
+}
+
+func (g gcpMediaStore) Upload(
+	ctx context.Context,
+	file io.Reader,
+	orgId,
+	fileName string,
+) (*pbcore.UploadedMedia, error) {
+
+	safeFileName := normalizeFileName(fileName)
+
+	objectPath := fmt.Sprintf("%s/%s/%d-%s",
+		assertFolder,
+		orgId,
+		time.Now().Unix(),
+		safeFileName,
+	)
+
+	// ---- Detect MIME ----
+	buffer := make([]byte, 512)
+	n, _ := file.Read(buffer)
+	contentType := http.DetectContentType(buffer[:n])
+
+	if contentType == "application/octet-stream" {
+		extType := mime.TypeByExtension(filepath.Ext(safeFileName))
+		if extType != "" {
+			contentType = extType
+		}
+	}
+
+	file = io.MultiReader(bytes.NewReader(buffer[:n]), file)
+
+	// ---- Upload using storage client ----
+	obj := g.bucket.Object(objectPath)
+	writer := obj.NewWriter(ctx)
+
+	writer.ContentType = contentType
+	writer.ContentDisposition = "inline"
+	writer.CacheControl = "public, max-age=31536000"
+
+	if _, err := io.Copy(writer, file); err != nil {
+		return nil, fmt.Errorf("upload copy failed: %w", err)
+	}
+
+	if err := writer.Close(); err != nil {
+		return nil, fmt.Errorf("writer close failed: %w", err)
 	}
 
 	return &pbcore.UploadedMedia{
-		Url:      fmt.Sprintf("%s/%s/%s", baseGCPBucketURL, publicBucket, fileBase),
-		Width:    0,
-		Height:   0,
-		MimeType: "",
-		Size:     0,
-		FileId:   "",
-		FileName: fileName,
+		Url:      fmt.Sprintf("%s/%s/%s", baseGCPBucketURL, publicBucket, objectPath),
+		FileName: safeFileName,
+		MimeType: contentType,
 	}, nil
 }
 

@@ -23,7 +23,6 @@ export const getVideoDurationFromUrl = (url: string): Promise<number> => {
 
     video.preload = 'metadata'
     video.src = url
-    video.crossOrigin = 'anonymous' // important for CDN urls
 
     video.onloadedmetadata = () => {
       resolve(video.duration)
@@ -54,10 +53,14 @@ export const UploadModal: React.FC<UploadModalProps> = ({
   // Call upload to upload file
   const upload = async (file: File) => {
     const data = await uploadMedia(file)
-    if (data.mimeType !== 'image') {
-      // TODO: handle it for other files
-      const videoDuration = await getVideoDurationFromUrl(data.url)
-      data.duration = videoDuration
+    if (!data.mimeType?.startsWith('image')) {
+      // Best effort: don't block upload if cross-origin metadata probing fails.
+      try {
+        const videoDuration = await getVideoDurationFromUrl(data.url)
+        data.duration = videoDuration
+      } catch (error) {
+        console.debug('Skipping video duration fetch:', error)
+      }
     }
     return data
   }

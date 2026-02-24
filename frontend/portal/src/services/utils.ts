@@ -22,7 +22,7 @@ export const uploadMedia = async (file: File): Promise<UploadedMedia> => {
     body: formData
   })
   const data = await response.json()
-
+  console.debug("[Uploaded media]", data)
   return create(UploadedMediaSchema, data)
 }
 

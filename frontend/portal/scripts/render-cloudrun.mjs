@@ -9,6 +9,7 @@ if (!bucket) {
 
 const compositionId = process.env.REMOTION_COMPOSITION_ID || 'MyComposition';
 const entryFile = process.env.REMOTION_ENTRY_FILE || 'src/render/index.ts';
+const renderTimeoutMs = Number(process.env.REMOTION_RENDER_TIMEOUT_MS || '180000');
 
 const encodedProps = process.env.RENDER_INPUT_PROPS_B64;
 const rawProps = process.env.RENDER_INPUT_PROPS_JSON;
@@ -45,6 +46,7 @@ const destination = `${videoId}/${version}.mp4`;
 console.log('Starting render', {
   compositionId,
   entryFile,
+  renderTimeoutMs,
   outputFile,
   videoId,
   version,
@@ -64,6 +66,8 @@ await new Promise((resolve, reject) => {
       outputFile,
       '--props',
       propsJson,
+      '--timeout',
+      String(renderTimeoutMs),
     ],
     {stdio: 'inherit'},
   );

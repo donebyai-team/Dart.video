@@ -12,8 +12,8 @@
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
     "test": "jest",
     "type-check": "tsc --noEmit",
-    "render": "pnpm exec remotion render src/render/index.ts MyComposition out.mp4",
-    "render:props": "pnpm exec remotion render src/render/index.ts MyComposition out.mp4 --props",
+    "render": "pnpm exec remotion render src/render/index.ts MyComposition out.mp4 --timeout 180000",
+    "render:props": "pnpm exec remotion render src/render/index.ts MyComposition out.mp4 --props --timeout 180000",
     "render:cloudrun": "node ./scripts/render-cloudrun.mjs"
   },
   "dependencies": {
@@ -74,6 +74,7 @@
     "@reduxjs/toolkit": "^2.7.0",
     "@remotion/paths": "4.0.419",
     "@remotion/player": "4.0.419",
+    "@remotion/preload": "4.0.419",
     "@remotion/shapes": "4.0.419",
     "@remotion/transitions": "4.0.419",
     "@tanstack/react-query": "^5.83.0",

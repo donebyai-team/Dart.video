@@ -3,32 +3,39 @@ import { RefObject, useEffect, useState } from 'react'
 import { Html5Video } from 'remotion'
 import MediaStyler from './MediaStyler'
 
+const loadedVideoSrcCache = new Set<string>()
+
 interface Props {
   mediaRef: RefObject<HTMLVideoElement>
   props: MediaSlideContent
+  srcOverride?: string
   onChange: (newProps: Partial<MediaSlideContent>) => void
   onVideoChange: () => void
   onClickVideo: () => void
 }
 
-const VideoPreview = ({ props, onChange, onVideoChange, mediaRef, onClickVideo }: Props) => {
+const VideoPreview = ({ props, srcOverride, onChange, onVideoChange, mediaRef, onClickVideo }: Props) => {
   const [open, setOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const [loadedSrc, setLoadedSrc] = useState<string | null>(null)
-  const src = props.src
+  const [isLoading, setIsLoading] = useState(false)
+  const [displaySrc, setDisplaySrc] = useState<string | null>(null)
+  const src = srcOverride ?? props.src
   const style = props.style || {}
 
   // Preload video when src changes
   useEffect(() => {
     if (!src) return
 
-    // Don't reload if it's the same source
-    if (src === loadedSrc) {
+    // Avoid reloading when this URL has already been loaded in this session.
+    if (loadedVideoSrcCache.has(src) || src === displaySrc) {
+      setDisplaySrc(src)
       setIsLoading(false)
       return
     }
 
-    setIsLoading(true)
+    // Keep current media visible while next source preloads.
+    if (!displaySrc) {
+      setIsLoading(true)
+    }
 
     // Create a temporary video element for preloading
     const preloadVideo = document.createElement('video')
@@ -36,7 +43,8 @@ const VideoPreview = ({ props, onChange, onVideoChange, mediaRef, onClickVideo }
     preloadVideo.src = src
 
     const handleCanPlay = () => {
-      setLoadedSrc(src)
+      loadedVideoSrcCache.add(src)
+      setDisplaySrc(src)
       setIsLoading(false)
     }
 
@@ -56,7 +64,7 @@ const VideoPreview = ({ props, onChange, onVideoChange, mediaRef, onClickVideo }
       preloadVideo.removeEventListener('error', handleError)
       preloadVideo.src = '' // Release memory
     }
-  }, [src, loadedSrc])
+  }, [src, displaySrc])
 
   return (
     <MediaStyler
@@ -106,22 +114,29 @@ const VideoPreview = ({ props, onChange, onVideoChange, mediaRef, onClickVideo }
           ref={mediaRef}
           playsInline={true}
           playbackRate={1}
+          delayRenderTimeoutInMilliseconds={120000}
+          delayRenderRetries={2}
           onClick={() => onClickVideo()}
           draggable={false}
-          src={src as string}
+          src={(displaySrc ?? src) as string}
           style={{
             width: '100%',
             height: '100%',
             objectFit: 'contain',
             objectPosition: 'center',
             ...style,
-            opacity: isLoading ? 0 : 1,
-            transition: 'opacity 0.3s ease-in-out'
+            opacity: 1
           }}
           onError={error => {
             console.log('Video error:', error.message)
-            // Return 'fail' to fail the render, or 'fallback' to use <OffthreadVideo>
             return 'fallback'
+          }}
+          onLoadedData={() => {
+            const activeSrc = displaySrc ?? src
+            if (!activeSrc) return
+            loadedVideoSrcCache.add(activeSrc)
+            setDisplaySrc(activeSrc)
+            setIsLoading(false)
           }}
         />
 

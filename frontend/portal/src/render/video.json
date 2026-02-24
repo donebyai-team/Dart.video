@@ -17,7 +17,6 @@
                         "transitionDuration": 0.3,
                         "animation": {
                             "templateId": "text-cascade",
-                            "templateUrl": "templates/text-animation/text-cascade.cdn.js",
                             "templateConfig": {
                                 "centerText": {
                                     "style": {
@@ -26,14 +25,6 @@
                                         "fontSize": 64
                                     },
                                     "text": "I am a center text"
-                                },
-                                "topLeftText": {
-                                    "style": {
-                                        "color": "#ffffff",
-                                        "fontFamily": "Arial",
-                                        "fontSize": 64
-                                    },
-                                    "text": "I am a top left text"
                                 }
                             },
                             "meta": {
@@ -41,7 +32,8 @@
                                 "y": 108,
                                 "width": 1536,
                                 "height": 864
-                            }
+                            },
+                            "templateUrl": "templates/text-animation/text-cascade.cdn.js"
                         }
                     },
                     {
@@ -71,7 +63,7 @@
                         "id": "hook-1771179509352",
                         "type": "SLIDE_TYPE_MEDIA",
                         "transcript": "Add your script here...",
-                        "duration": 5.786,
+                        "duration": 5.76,
                         "transitionDuration": 0.3,
                         "media": {
                             "meta": {
@@ -82,19 +74,14 @@
                                 "scale": 1,
                                 "rotation": 0
                             },
-                            "src": "https://ik.imagekit.io/coasterai/org_f021d205-4101-42bd-af46-86563420ff30_media_3d34485f-0805-4173-90c1-6554059117c7_1768345435_QdpqSqUv3.jpg",
+                            "src": "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1771916330-untitled-0.mp4",
                             "style": {},
-                            "mediaType": "MEDIA_TYPE_IMAGE",
+                            "mediaType": "MEDIA_TYPE_VIDEO",
                             "uploadedMedia": {
-                                "url": "https://ik.imagekit.io/coasterai/org_f021d205-4101-42bd-af46-86563420ff30_media_3d34485f-0805-4173-90c1-6554059117c7_1768345435_QdpqSqUv3.jpg",
-                                "thumbnailUrl": "https://ik.imagekit.io/coasterai/tr:n-ik_ml_thumbnail/org_f021d205-4101-42bd-af46-86563420ff30_media_3d34485f-0805-4173-90c1-6554059117c7_1768345435_QdpqSqUv3.jpg",
-                                "width": 768,
-                                "height": 1376,
-                                "mimeType": "image",
-                                "duration": 0,
-                                "size": 87398,
-                                "fileId": "69920f3d5c7cd75eb8b2c407",
-                                "fileName": "org_f021d205-4101-42bd-af46-86563420ff30_media_3d34485f-0805-4173-90c1-6554059117c7_1768345435_QdpqSqUv3.jpg"
+                                "url": "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1771916330-untitled-0.mp4",
+                                "mimeType": "video/mp4",
+                                "duration": 5.76,
+                                "fileName": "untitled-0.mp4"
                             }
                         }
                     }
@@ -480,10 +467,10 @@
             "width": 1920,
             "height": 1080
         },
-        "duration": 46.686,
+        "duration": 431.63,
         "backgroundAudioUrl": "https://ik.imagekit.io/coasterai/freepik-deep-calm_A4WXzk4Mk.mp3"
     },
-    "version": 2,
-    "createdAt": "2026-02-15T17:04:45.227907Z",
-    "status": "VIDEO_STATUS_PROCESSING"
+    "createdAt": "2026-02-20T09:08:01.471111Z",
+    "status": "VIDEO_STATUS_COMPLETED",
+    "version": "47"
 }

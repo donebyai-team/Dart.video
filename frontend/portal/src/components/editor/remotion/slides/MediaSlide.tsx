@@ -1,7 +1,8 @@
 import { MediaSlideContent, MediaType, MetaData, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Loader2 } from 'lucide-react'
-import React, { RefObject, useRef, useState } from 'react'
-import { AbsoluteFill, useCurrentFrame, useVideoConfig } from 'remotion'
+import React, { RefObject, useEffect, useRef, useState } from 'react'
+import { preloadImage, preloadVideo } from '@remotion/preload'
+import { AbsoluteFill, useCurrentFrame, useRemotionEnvironment, useVideoConfig } from 'remotion'
 import { ImagePreview } from '../components/ImagePreview'
 import RetryButton from '../components/RetryButton'
 import UploadModal from '../components/UploadModal'
@@ -23,6 +24,7 @@ interface MediaSlideProps {
 export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, onUpdate }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
+  const { isRendering } = useRemotionEnvironment()
   const [openUploadModal, setOpenUploadModal] = useState<boolean>(false)
 
   // Extract content and effects directly
@@ -34,7 +36,43 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
   const [uploading, setUploading] = useState<boolean>(false)
   const [editing, setIsEditing] = useState<boolean>(false)
   const mediaRef = useRef<HTMLImageElement | HTMLVideoElement | null>(null)
-  const [mediaType, setMediaType] = useState<MediaType>(mediaContent.mediaType);
+  const getMediaTypeFromSrc = (src?: string): MediaType | null => {
+    if (!src) return null
+
+    const normalized = src.toLowerCase().split('?')[0]
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg', '.avif']
+    const videoExtensions = ['.mp4', '.mov', '.webm', '.m4v', '.avi', '.mkv']
+
+    if (imageExtensions.some(ext => normalized.endsWith(ext))) return MediaType.IMAGE
+    if (videoExtensions.some(ext => normalized.endsWith(ext))) return MediaType.VIDEO
+    return null
+  }
+
+  const normalizedStoredMediaType =
+    mediaContent.mediaType === MediaType.IMAGE || mediaContent.mediaType === MediaType.VIDEO
+      ? mediaContent.mediaType
+      : null
+  const inferredMediaType = getMediaTypeFromSrc(mediaContent.src)
+  const resolvedMediaType = inferredMediaType ?? normalizedStoredMediaType ?? MediaType.IMAGE
+  const [mediaType, setMediaType] = useState<MediaType>(resolvedMediaType)
+  useEffect(() => {
+    if (resolvedMediaType !== mediaType) {
+      setMediaType(resolvedMediaType)
+    }
+  }, [resolvedMediaType, mediaType])
+
+  useEffect(() => {
+    const src = mediaContent.src
+    if (!src || isRendering) return
+
+    const unpreload =
+      resolvedMediaType === MediaType.VIDEO ? preloadVideo(src) : preloadImage(src)
+    return () => {
+      unpreload()
+    }
+  }, [mediaContent.src, isRendering, resolvedMediaType])
+
+  const resolvedSrc = mediaContent.src ?? ''
 
   // check if these effects are available or not
   const isCalloutEffectsAvailable = slide.callouts && slide.callouts.length > 0
@@ -93,13 +131,14 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
               </div>
             )}
 
-            {mediaType == MediaType.IMAGE ? (
-              <ImagePreview
-                onClickImage={() => {
+            {mediaType === MediaType.VIDEO ? (
+              <VideoPreview
+                onClickVideo={() => {
                   setIsEditing(true)
                 }}
-                mediaRef={mediaRef as RefObject<HTMLImageElement>}
-                onImageChange={() => {
+                mediaRef={mediaRef as RefObject<HTMLVideoElement>}
+                srcOverride={resolvedSrc}
+                onVideoChange={() => {
                   setOpenUploadModal(!openUploadModal)
                 }}
                 onChange={(newProps: any) => {
@@ -121,12 +160,13 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
                 props={mediaContent}
               />
             ) : (
-              <VideoPreview
-                onClickVideo={() => {
+              <ImagePreview
+                onClickImage={() => {
                   setIsEditing(true)
                 }}
-                mediaRef={mediaRef as RefObject<HTMLVideoElement>}
-                onVideoChange={() => {
+                mediaRef={mediaRef as RefObject<HTMLImageElement>}
+                srcOverride={resolvedSrc}
+                onImageChange={() => {
                   setOpenUploadModal(!openUploadModal)
                 }}
                 onChange={(newProps: any) => {
@@ -159,7 +199,9 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
               onClose={() => setOpenUploadModal(false)}
               onUpload={data => {
                 if (onUpdate && data) {
-                  const updatedMediaType = data.mimeType === 'image' ? MediaType.IMAGE : MediaType.VIDEO;
+                  const updatedMediaType = data.mimeType?.startsWith('image')
+                    ? MediaType.IMAGE
+                    : MediaType.VIDEO
                   setMediaType(updatedMediaType)
                   if (onUpdate && mediaContent) {
                     onUpdate({
@@ -197,7 +239,7 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
               width={width} // Canvas dimensions
               height={height} // Canvas dimensions
               fullWidth={width}
-              src={mediaContent.src ?? ''}
+              src={resolvedSrc}
               fullHeight={height}
               borderColor={callout.color}
               slideDuration={slide.duration}
@@ -223,7 +265,7 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
               width={width} // Canvas dimensions
               height={height} // Canvas dimensions
               fullWidth={width}
-              src={mediaContent.src ?? ''}
+              src={resolvedSrc}
               fullHeight={height}
               slideDuration={slide.duration}
               meta={mediaContent.meta as MetaData}
@@ -248,7 +290,7 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
               height={height}
               fullWidth={width}
               fullHeight={height}
-              src={mediaContent.src ?? ''}
+              src={resolvedSrc}
               slideDuration={slide.duration}
               meta={mediaContent.meta as MetaData}
               style={{
