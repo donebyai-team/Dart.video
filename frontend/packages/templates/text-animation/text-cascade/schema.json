@@ -15,12 +15,12 @@
             "type": "string",
             "description": "Main text content displayed at the center",
             "minLength": 10,
-            "maxLength": 200
+            "maxLength": 50
           },
           "style": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["fontSize", "color", "lineHeight"],
+            "required": ["fontSize", "color", "lineHeight", "fontFamily"],
             "properties": {
               "fontSize": {
                 "type": "number"

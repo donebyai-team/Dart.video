@@ -93,29 +93,6 @@ func (l llmService) PlanSlidesWithStreaming(
 					currentThinking := stripThinkingTags(*partial.Thinking.Value)
 					//currentLen := len(currentThinking)
 					onThinking(currentThinking)
-
-					//// Only send new thinking content to avoid duplicates
-					//if currentLen > lastThinkingLen {
-					//	if lastThinkingLen == 0 {
-					//		// First thinking update - send all
-					//		onThinking(currentThinking)
-					//		l.logger.Info("🤔 Thinking started", zap.Int("length", currentLen))
-					//	} else {
-					//		// Send only new content
-					//		newContent := currentThinking[lastThinkingLen:]
-					//		onThinking(newContent)
-					//		l.logger.Info("🤔 Thinking updated",
-					//			zap.Int("new_chars", len(newContent)),
-					//			zap.Int("total_chars", currentLen))
-					//	}
-					//	lastThinkingLen = currentLen
-					//}
-
-					// Check if thinking seems complete (heuristic)
-					//if currentLen > 100 && strings.Contains(strings.ToLower(currentThinking), "final") {
-					//	thinkingComplete = true
-					//	l.logger.Info("🤔 Thinking appears complete")
-					//}
 				}
 			}
 
@@ -159,12 +136,23 @@ func (l llmService) SelectTemplates(ctx context.Context, req *types.MatchTemplat
 		thinkingComplete bool
 	)
 
+	// Add a timeout for stream operations
+	streamTimeout := 30 * time.Second
+	timer := time.NewTimer(streamTimeout)
+	defer timer.Stop()
+
 	for {
 		select {
 		case <-ctx.Done():
 			return nil, handleContextError(ctx.Err())
 
+		case <-timer.C:
+			// Stream timeout - this might be why your stream is "stopping"
+			l.logger.Error("⏰ Stream timeout - no data received within timeout period")
+			return nil, fmt.Errorf("stream timeout after %v", streamTimeout)
+
 		case value, ok := <-stream:
+			timer.Reset(streamTimeout)
 			if !ok {
 				// Stream closed - return final result if we have it
 				if finalPlan == nil {

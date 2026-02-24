@@ -17,6 +17,8 @@ const (
 	VideoStatusCOMPLETED VideoStatus = "COMPLETED"
 	// VideoStatusFAILED is a VideoStatus of type FAILED.
 	VideoStatusFAILED VideoStatus = "FAILED"
+	// VideoStatusPLANNING is a VideoStatus of type PLANNING.
+	VideoStatusPLANNING VideoStatus = "PLANNING"
 )
 
 var ErrInvalidVideoStatus = errors.New("not a valid VideoStatus")
@@ -37,6 +39,7 @@ var _VideoStatusValue = map[string]VideoStatus{
 	"PROCESSING": VideoStatusPROCESSING,
 	"COMPLETED":  VideoStatusCOMPLETED,
 	"FAILED":     VideoStatusFAILED,
+	"PLANNING":   VideoStatusPLANNING,
 }
 
 // ParseVideoStatus attempts to convert a string to a VideoStatus.

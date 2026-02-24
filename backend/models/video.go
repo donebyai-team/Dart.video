@@ -10,7 +10,7 @@ import (
 
 //go:generate go-enum -f=$GOFILE
 
-// ENUM(PROCESSING, COMPLETED, FAILED)
+// ENUM(PROCESSING, COMPLETED, FAILED, PLANNING)
 type VideoStatus string
 
 type Video struct {

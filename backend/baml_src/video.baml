@@ -19,8 +19,10 @@ class AnimationSlide {
     @description("Semantic search query describing the conceptual animation category, NOT visual style. This should capture the core idea being represented (e.g. 'data fragmentation problem', 'centralization of scattered systems', 'growth acceleration', 'workflow automation'). The query maps to conceptual animation categories, not design aesthetics.")
 
   duration int
-    @description("Duration in seconds. Keep pacing dynamic. Avoid repetitive durations.")
+    @description("Duration in seconds. Average 3-4s per slide Keep pacing dynamic. Avoid repetitive durations.")
     @assert(valid_duration, {{ this >= 1 and this <= 10 }})
+
+  voiceover string? @description("voiceover to play at this slide, if you think its good to add")
 
   selectedTemplateDescription string? @skip()
 }
@@ -62,7 +64,7 @@ class VideoGenerationPlanRequest {
 }
 
 class Section {
-  name string @description("name of the section")
+  name string @description("name of the section, around one or two words")
   slides (AnimationSlide | MediaSlide)[]
 }
 

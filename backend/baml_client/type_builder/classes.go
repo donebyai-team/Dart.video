@@ -51,6 +51,10 @@ func (t *AnimationSlideClassView) PropertyDuration() (ClassPropertyView, error) 
 	return t.inner.Property("duration")
 }
 
+func (t *AnimationSlideClassView) PropertyVoiceover() (ClassPropertyView, error) {
+	return t.inner.Property("voiceover")
+}
+
 func (t *AnimationSlideClassView) PropertySelectedTemplateDescription() (ClassPropertyView, error) {
 	return t.inner.Property("selectedTemplateDescription")
 }

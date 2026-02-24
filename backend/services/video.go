@@ -99,7 +99,7 @@ func (v videoGeneration) UpdateVideoConfig(ctx context.Context, video *models.Vi
 	}
 
 	existingVideo.Metadata.Duration = totalDuration
-	
+
 	if video.Status != "" {
 		existingVideo.Status = video.Status
 	}
@@ -132,7 +132,7 @@ func (v videoGeneration) CreateVideo(ctx context.Context, organizationID string,
 		Name:           GenerateRandomName(5, 10),
 		Script:         params.Script,
 		OrganizationID: organizationID,
-		Status:         models.VideoStatusPROCESSING,
+		Status:         models.VideoStatusPLANNING,
 		Metadata: &pbcore.VideoMetadata{
 			Fps:            defaultVideoFPS,
 			Prompt:         params.Prompt,

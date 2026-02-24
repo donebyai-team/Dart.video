@@ -28,3 +28,5 @@ backend/cmd/coasterai/.coasterai
 *.mp4
 coasterai
 redora
+
+.gocache/

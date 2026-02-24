@@ -26,6 +26,7 @@ type AnimationSlide struct {
 	AnimationType               AnimationType `json:"animationType"`
 	CategorySearchQuery         string        `json:"categorySearchQuery"`
 	Duration                    int64         `json:"duration"`
+	Voiceover                   *string       `json:"voiceover"`
 	SelectedTemplateDescription *string       `json:"selectedTemplateDescription"`
 }
 
@@ -58,6 +59,9 @@ func (c *AnimationSlide) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMa
 		case "duration":
 			c.Duration = baml.Decode(valueHolder).Int()
 
+		case "voiceover":
+			c.Voiceover = baml.Decode(valueHolder).Interface().(*string)
+
 		case "selectedTemplateDescription":
 			c.SelectedTemplateDescription = baml.Decode(valueHolder).Interface().(*string)
 
@@ -82,6 +86,8 @@ func (c AnimationSlide) Encode() (*cffi.HostValue, error) {
 	fields["categorySearchQuery"] = c.CategorySearchQuery
 
 	fields["duration"] = c.Duration
+
+	fields["voiceover"] = c.Voiceover
 
 	fields["selectedTemplateDescription"] = c.SelectedTemplateDescription
 

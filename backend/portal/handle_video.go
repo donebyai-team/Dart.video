@@ -171,11 +171,7 @@ func (p *Portal) streamAgentRun(
 		logger.Info("agent stream loop ended", fields...)
 	}()
 
-	// ---------------------------------------------
-	// Create a SEPARATE context for background run
-	// ---------------------------------------------
-	runCtx, runCancel := context.WithCancel(context.Background())
-	defer runCancel()
+	runCtx := context.Background()
 
 	type runOutput struct {
 		result *agent.RunResult
@@ -217,11 +213,67 @@ func (p *Portal) streamAgentRun(
 		}
 	}()
 
-	ticker := time.NewTicker(300 * time.Millisecond)
-	defer ticker.Stop()
+	heartbeatTicker := time.NewTicker(streamHeartbeatInterval)
+	defer heartbeatTicker.Stop()
+
+	stateUpdates := videoAgent.StateUpdates()
 
 	lastThinking := ""
 	lastStreamSendAt := time.Now()
+	handleState := func(state *agent.VideoAgentState) (done bool) {
+		if state == nil {
+			return false
+		}
+
+		if state.Thinking != "" && state.Thinking != lastThinking {
+			lastThinking = state.Thinking
+
+			logger.Info("streaming thinking update",
+				zap.String("video_id", videoID),
+				zap.String("thinking", lastThinking),
+				zap.Int("thinking_chars", len(state.Thinking)),
+			)
+
+			if err := stream.Send(&pbportal.CreateVideoResponse{
+				Id:              videoID,
+				ThinkingSummary: lastThinking,
+			}); err != nil {
+				logger.Warn("failed to stream thinking update",
+					zap.String("video_id", videoID),
+					zap.Error(err),
+				)
+
+				exitReason = "thinking_send_failed"
+				return true
+			}
+			lastStreamSendAt = time.Now()
+		}
+
+		if state.State == agent.StateReadyForEditor {
+			logger.Info("state ready for editor",
+				zap.String("video_id", videoID),
+			)
+
+			if err := stream.Send(&pbportal.CreateVideoResponse{
+				Id:                videoID,
+				PlanningCompleted: true,
+			}); err != nil {
+				logger.Warn("failed to stream ready-for-editor",
+					zap.String("video_id", videoID),
+					zap.Error(err),
+				)
+
+				exitReason = "ready_for_editor_send_failed"
+				return true
+			}
+			lastStreamSendAt = time.Now()
+
+			exitReason = "ready_for_editor"
+			return true
+		}
+
+		return false
+	}
 
 	for {
 		select {
@@ -234,17 +286,14 @@ func (p *Portal) streamAgentRun(
 				zap.String("video_id", videoID),
 			)
 
-			// Stop background run
-			runCancel()
-
 			// Important: return nil, not ctx.Err()
 			exitReason = "client_disconnected"
 			return nil
 
 		// -------------------------------------------------
-		// Poll agent state for thinking updates
+		// Heartbeat
 		// -------------------------------------------------
-		case <-ticker.C:
+		case <-heartbeatTicker.C:
 			if time.Since(lastStreamSendAt) >= streamHeartbeatInterval {
 				if err := stream.Send(&pbportal.CreateVideoResponse{
 					Id: videoID,
@@ -254,75 +303,14 @@ func (p *Portal) streamAgentRun(
 						zap.Error(err),
 					)
 
-					runCancel()
 					exitReason = "heartbeat_send_failed"
 					return nil
 				}
 				lastStreamSendAt = time.Now()
 			}
 
-			state, errState := videoAgent.GetState(ctx, videoID)
-			if errState != nil || state == nil {
-				if errState != nil {
-					logger.Error("failed to fetch agent state",
-						zap.String("video_id", videoID),
-						zap.Error(errState),
-					)
-				}
-				continue
-			}
-
-			// Stream thinking updates
-			if state.Thinking != "" && state.Thinking != lastThinking {
-				lastThinking = state.Thinking
-
-				logger.Info("streaming thinking update",
-					zap.String("video_id", videoID),
-					zap.String("thinking", lastThinking),
-					zap.Int("thinking_chars", len(state.Thinking)),
-				)
-
-				if err := stream.Send(&pbportal.CreateVideoResponse{
-					Id:              videoID,
-					ThinkingSummary: lastThinking,
-				}); err != nil {
-
-					logger.Warn("failed to stream thinking update",
-						zap.String("video_id", videoID),
-						zap.Error(err),
-					)
-
-					runCancel()
-					exitReason = "thinking_send_failed"
-					return nil // graceful close
-				}
-				lastStreamSendAt = time.Now()
-			}
-
-			// Early completion case
-			if state.State == agent.StateReadyForEditor {
-				logger.Info("state ready for editor",
-					zap.String("video_id", videoID),
-				)
-
-				runCancel()
-
-				if err := stream.Send(&pbportal.CreateVideoResponse{
-					Id:                videoID,
-					PlanningCompleted: true,
-				}); err != nil {
-
-					logger.Warn("failed to stream ready-for-editor",
-						zap.String("video_id", videoID),
-						zap.Error(err),
-					)
-
-					exitReason = "ready_for_editor_send_failed"
-					return nil
-				}
-				lastStreamSendAt = time.Now()
-
-				exitReason = "ready_for_editor"
+		case state := <-stateUpdates:
+			if handleState(&state) {
 				return nil
 			}
 
@@ -330,8 +318,6 @@ func (p *Portal) streamAgentRun(
 		// Agent run completed
 		// -------------------------------------------------
 		case out := <-done:
-
-			runCancel()
 
 			if out.err != nil {
 				logger.Error("agent run failed",

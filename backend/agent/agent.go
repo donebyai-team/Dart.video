@@ -26,6 +26,7 @@ type VideoAgent interface {
 	Start(ctx context.Context, options StartSessionOptions) (*RunResult, error)
 	Continue(ctx context.Context, options ContinueSessionOptions) (*RunResult, error)
 	GetState(ctx context.Context, sessionID string) (*VideoAgentState, error)
+	StateUpdates() <-chan VideoAgentState
 }
 
 type StartSessionOptions struct {
@@ -60,6 +61,8 @@ type agentV1 struct {
 	videoService      services.VideoGeneration
 	cache             cache.Cache
 	logger            *zap.Logger
+
+	stateUpdates chan VideoAgentState
 }
 
 func NewAgentV1(
@@ -77,6 +80,7 @@ func NewAgentV1(
 		retrievalService:  retrievalService,
 		templateExtractor: llmTemplateExtractor{llmService: llmService},
 		llmService:        llmService,
+		stateUpdates:      make(chan VideoAgentState, 64),
 	}
 }
 
@@ -413,6 +417,7 @@ func (a *agentV1) applyPlan(
 				float32(anim.Duration),
 				selected,
 				templateConfig.Config,
+				anim.Voiceover,
 			); err != nil {
 				return agenterrors.VideoPersistFailed(
 					"failed to persist animation slide",
@@ -430,6 +435,8 @@ func (a *agentV1) applyPlan(
 }
 
 func (a *agentV1) updateState(ctx context.Context, state VideoAgentState) error {
+	a.publishState(state)
+
 	jsonBytes, err := json.Marshal(state)
 	if err != nil {
 		return agenterrors.StateUnavailable("failed to encode state payload", err)
@@ -439,6 +446,17 @@ func (a *agentV1) updateState(ctx context.Context, state VideoAgentState) error 
 		return agenterrors.StateUnavailable("failed to persist agent state", err)
 	}
 	return nil
+}
+
+func (a *agentV1) StateUpdates() <-chan VideoAgentState {
+	return a.stateUpdates
+}
+
+func (a *agentV1) publishState(state VideoAgentState) {
+	select {
+	case a.stateUpdates <- state:
+	default:
+	}
 }
 
 func (a *agentV1) getPlanningSession(ctx context.Context, sessionID string) (*planningSession, error) {

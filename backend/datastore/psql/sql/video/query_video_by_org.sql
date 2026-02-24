@@ -1,1 +1,1 @@
-SELECT * FROM videos WHERE organization_id = :organization_id;
+SELECT * FROM videos WHERE organization_id = :organization_id AND status != 'PLANNING'; ;

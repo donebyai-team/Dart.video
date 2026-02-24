@@ -73,6 +73,7 @@ func (g *videoConfigGenerator) AddAnimationSlide(
 	duration float32,
 	selectedTemplate *models.Template,
 	templateConfig string,
+	voiceover *string,
 ) error {
 
 	toStruct, err := utils.StringToStruct(templateConfig)
@@ -89,7 +90,7 @@ func (g *videoConfigGenerator) AddAnimationSlide(
 		return err
 	}
 
-	section.Slides = append(section.Slides, newAnimationSlide(duration, selectedTemplate, toStruct))
+	section.Slides = append(section.Slides, newAnimationSlide(duration, selectedTemplate, toStruct, voiceover))
 
 	return g.update(ctx, models.VideoStatusPROCESSING)
 }
@@ -140,10 +141,17 @@ func newAnimationSlide(
 	duration float32,
 	template *models.Template,
 	templateConfig *structpb.Struct,
+	voiceover *string,
 ) *pbcore.Slide {
+	transcript := ""
+	if voiceover != nil {
+		transcript = *voiceover
+	}
 	return &pbcore.Slide{
-		Type:     pbcore.SlideType_SLIDE_TYPE_TEXT_ANIMATION,
-		Duration: duration,
+		Id:         fmt.Sprintf("slide-%d", time.Now().UnixNano()),
+		Type:       pbcore.SlideType_SLIDE_TYPE_TEXT_ANIMATION,
+		Duration:   duration,
+		Transcript: transcript,
 		Content: &pbcore.Slide_Animation{
 			Animation: &pbcore.AnimationSlideContent{
 				TemplateId:     template.Name,
@@ -157,6 +165,7 @@ func newAnimationSlide(
 
 func newMediaSlide(duration float32) *pbcore.Slide {
 	return &pbcore.Slide{
+		Id:       fmt.Sprintf("slide-%d", time.Now().UnixNano()),
 		Type:     pbcore.SlideType_SLIDE_TYPE_MEDIA,
 		Duration: duration,
 		Content: &pbcore.Slide_Media{
