@@ -30,13 +30,26 @@ export const updateSelectedSlide = (
 
 export const updateTotalDuration = (videoConfig: Video): Video => {
   if (!videoConfig?.config?.sections) return videoConfig
+
   const totalDuration = videoConfig.config.sections.reduce((total, section) => {
-    const sectionDuration = (section.slides || []).reduce(
-      (sum, slide) => sum + (slide.duration + (slide.transitionDuration || 0) || 0),
+    const slides = section.slides || []
+
+    if (slides.length === 0) return total
+
+    const slidesDuration = slides.reduce(
+      (sum, slide) => sum + (slide.duration || 0),
       0
     )
+
+    const transitionsDuration = slides
+      .slice(0, -1) // exclude last slide (no transition after it)
+      .reduce((sum, slide) => sum + (slide.transitionDuration || 0), 0)
+
+    const sectionDuration = slidesDuration - transitionsDuration
+
     return total + sectionDuration
   }, 0)
+
   return {
     ...videoConfig,
     metadata: {

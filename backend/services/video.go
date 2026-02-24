@@ -69,13 +69,29 @@ func (v videoGeneration) UpdateVideoConfig(ctx context.Context, video *models.Vi
 		existingVideo.Version++
 	}
 
-	// update duration
 	totalDuration := float32(0.0)
+
 	for _, section := range existingVideo.Config.Sections {
-		for _, slide := range section.Slides {
-			totalDuration = totalDuration + slide.Duration
+		slides := section.Slides
+		if len(slides) == 0 {
+			continue
+		}
+
+		for i, slide := range slides {
+			totalDuration += slide.Duration
+
+			// subtract transition if NOT last slide
+			if i < len(slides)-1 &&
+				slide.TransitionDuration != nil &&
+				slide.Transition != pbcore.TransitionType_TRANSITION_NONE {
+
+				totalDuration -= *slide.TransitionDuration
+			}
 		}
 	}
+
+	existingVideo.Metadata.Duration = totalDuration
+
 	existingVideo.Metadata.Duration = totalDuration
 
 	if video.Status != "" {
