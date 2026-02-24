@@ -1,7 +1,7 @@
 import { MediaSlideContent } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { RefObject, useEffect, useState } from 'react'
-import { Html5Video } from 'remotion'
 import MediaStyler from './MediaStyler'
+import { Html5Video } from 'remotion'
 
 const loadedVideoSrcCache = new Set<string>()
 
@@ -114,8 +114,6 @@ const VideoPreview = ({ props, srcOverride, onChange, onVideoChange, mediaRef, o
           ref={mediaRef}
           playsInline={true}
           playbackRate={1}
-          delayRenderTimeoutInMilliseconds={120000}
-          delayRenderRetries={2}
           onClick={() => onClickVideo()}
           draggable={false}
           src={(displaySrc ?? src) as string}
