@@ -192,7 +192,7 @@ func portalApp(cmd *cobra.Command, isAppReady func() bool) (App, error) {
 		deps.DataStore,
 		services.NewVideoGeneration(deps.DataStore, zlog),
 		videoRenderService,
-		services.NewBrandIdentityService(deps.DataStore, sflags.MustGetString(cmd, "common-firecrawl-api-key")),
+		services.NewBrandIdentityService(deps.DataStore, deps.MediaStore, sflags.MustGetString(cmd, "common-firecrawl-api-key")),
 		sflags.MustGetString(cmd, "portal-http-listen-addr"),
 		deps.CorsURLRegexAllow,
 		config,

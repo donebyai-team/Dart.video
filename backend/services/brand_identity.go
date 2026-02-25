@@ -18,17 +18,18 @@ type BrandIdentity interface {
 }
 
 type brandIdentity struct {
-	db     datastore.Repository
-	logger *zap.Logger
-	app    *firecrawl.FirecrawlApp
+	db         datastore.Repository
+	logger     *zap.Logger
+	app        *firecrawl.FirecrawlApp
+	mediaStore MediaStore
 }
 
-func NewBrandIdentityService(db datastore.Repository, fireCrawlAPIKey string) BrandIdentity {
+func NewBrandIdentityService(db datastore.Repository, mediaStore MediaStore, fireCrawlAPIKey string) BrandIdentity {
 	app, err := firecrawl.NewFirecrawlApp(fireCrawlAPIKey, "")
 	if err != nil {
 		panic(err)
 	}
-	return &brandIdentity{db: db, app: app}
+	return &brandIdentity{db: db, app: app, mediaStore: mediaStore}
 }
 
 func extractDomain(rawURL string) (string, error) {
