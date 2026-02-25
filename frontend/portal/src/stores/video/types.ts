@@ -41,6 +41,7 @@ export interface VideoState {
     // Streaming state
     isStreamingVideo: boolean;
     streamingThinkingSummary: string;
+    streamingTotalSlides: number;
     streamingError: string | null;
 }
 
@@ -53,6 +54,7 @@ export interface VideoActions {
 
     // Streaming actions
     startVideoStream: (videoId: string) => Promise<Video | null>;
+    stopVideoStream: () => void;
     updateStreamingProgress: (thinkingSummary?: string) => void;
     setStreamingError: (error: string | null) => void;
 

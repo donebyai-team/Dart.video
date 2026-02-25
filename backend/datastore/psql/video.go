@@ -14,6 +14,7 @@ func init() {
 		"video/query_video_by_id.sql",
 		"video/query_video_by_org.sql",
 		"video/delete_videos_by_org.sql",
+		"video/update_video_status.sql",
 	})
 }
 
@@ -33,6 +34,18 @@ func (r *Database) CreateVideo(ctx context.Context, video *models.Video) (*model
 	}
 	video.ID = id
 	return video, nil
+}
+
+func (r *Database) UpdateVideoStatus(ctx context.Context, video *models.Video) error {
+	stmt := r.mustGetStmt("video/update_video_status.sql")
+	_, err := stmt.ExecContext(ctx, map[string]interface{}{
+		"status": video.Status,
+		"id":     video.ID,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to update video status %q: %w", video.ID, err)
+	}
+	return nil
 }
 
 func (r *Database) UpdateVideo(ctx context.Context, video *models.Video) error {

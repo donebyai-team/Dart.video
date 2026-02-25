@@ -60,6 +60,7 @@ type VideoRepository interface {
 	GetVideoById(ctx context.Context, ID, organizationID string) (*models.Video, error)
 	GetVideos(ctx context.Context, organizationID string) ([]*models.Video, error)
 	DeleteByID(ctx context.Context, id, organizationID string) error
+	UpdateVideoStatus(ctx context.Context, video *models.Video) error
 }
 
 type TemplateRepository interface {

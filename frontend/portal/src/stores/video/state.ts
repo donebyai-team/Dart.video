@@ -27,5 +27,6 @@ export const initialState: VideoState = {
   // Streaming state
   isStreamingVideo: false,
   streamingThinkingSummary: "",
+  streamingTotalSlides: 0,
   streamingError: null,
 };

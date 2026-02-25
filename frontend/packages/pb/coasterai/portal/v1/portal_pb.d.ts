@@ -55,6 +55,22 @@ export declare type RenderVideoResponse = Message<"coasterai.portal.v1.RenderVid
 export declare const RenderVideoResponseSchema: GenMessage<RenderVideoResponse>;
 
 /**
+ * @generated from message coasterai.portal.v1.StopVideoRequest
+ */
+export declare type StopVideoRequest = Message<"coasterai.portal.v1.StopVideoRequest"> & {
+  /**
+   * @generated from field: string video_id = 1;
+   */
+  videoId: string;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.StopVideoRequest.
+ * Use `create(StopVideoRequestSchema)` to create a new message.
+ */
+export declare const StopVideoRequestSchema: GenMessage<StopVideoRequest>;
+
+/**
  * @generated from message coasterai.portal.v1.DeleteVideoRequest
  */
 export declare type DeleteVideoRequest = Message<"coasterai.portal.v1.DeleteVideoRequest"> & {
@@ -83,6 +99,11 @@ export declare type GetVideoResponse = Message<"coasterai.portal.v1.GetVideoResp
    * @generated from field: string thinking_summary = 2;
    */
   thinkingSummary: string;
+
+  /**
+   * @generated from field: int32 total_slides = 3;
+   */
+  totalSlides: number;
 };
 
 /**
@@ -1003,6 +1024,14 @@ export declare const PortalService: GenService<{
     methodKind: "server_streaming";
     input: typeof GetVideoRequestSchema;
     output: typeof GetVideoResponseSchema;
+  },
+  /**
+   * @generated from rpc coasterai.portal.v1.PortalService.StopVideo
+   */
+  stopVideo: {
+    methodKind: "unary";
+    input: typeof StopVideoRequestSchema;
+    output: typeof EmptySchema;
   },
   /**
    * @generated from rpc coasterai.portal.v1.PortalService.GetVideos

@@ -27,6 +27,15 @@ type VideoAgent interface {
 	Continue(ctx context.Context, options ContinueSessionOptions) (*RunResult, error)
 	GetState(ctx context.Context, sessionID string) (*VideoAgentState, error)
 	StateUpdates() <-chan VideoAgentState
+
+	// StopAgent signals the agent to stop for a given video session.
+	// It inspects the current Redis state to decide the right stop strategy:
+	//   - If slides are already being generated (TotalSlides published or state == READY_FOR_EDITOR),
+	//     it writes stateStatusCancelled to Redis; the applyPlan loop detects this and exits cleanly.
+	//   - If we are still in the LLM-planning phase (no slides yet), context cancellation
+	//     (via the caller's runCtx) is sufficient — nothing extra needs to happen here.
+	// This is the single stop entry-point used by all HTTP handlers on client disconnect.
+	StopAgent(ctx context.Context, videoID string) error
 }
 
 type StartSessionOptions struct {
@@ -90,6 +99,7 @@ const (
 	stateStatusProcessing = "PROCESSING"
 	stateStatusWaiting    = "WAITING_FOR_USER_INPUT"
 	stateStatusReady      = "READY_FOR_EDITOR"
+	stateStatusCancelled  = "USER_CANCELLED"
 	stateStatusCompleted  = "COMPLETED"
 	stateTTL              = 30 * time.Minute
 )
@@ -100,6 +110,7 @@ type VideoAgentState struct {
 	VideoID          string                 `json:"video_id"`
 	Thinking         string                 `json:"thinking"`
 	State            string                 `json:"state"`
+	TotalSlides      int                    `json:"total_slides,omitempty"`
 	AskUserQuestion  *types.AskUserQuestion `json:"ask_user_question,omitempty"`
 	LastUserResponse string                 `json:"last_user_response,omitempty"`
 }
@@ -199,6 +210,17 @@ func (a *agentV1) runPlanning(ctx context.Context, sessionID string, session *pl
 		}
 	})
 	if err != nil {
+		status := models.VideoStatusFAILED
+		if ctx.Err() != nil {
+			status = models.VideoStatusUSERCANCELLED
+		}
+		failErr := a.videoService.UpdateVideoStatus(context.Background(), sessionID, status)
+		if failErr != nil {
+			a.logger.Error("failed to mark video as failed/cancelled",
+				zap.Error(failErr),
+			)
+		}
+
 		return nil, agenterrors.LLMPlanningFailed("failed to generate video plan", err)
 	}
 
@@ -244,40 +266,63 @@ func (a *agentV1) applyPlan(
 		Init(sessionID, plan.VideoName)
 	builder.AddVideoBackground(toBackgroundStyle(plan.BackgroundStyle))
 
+	// Compute total slides upfront so the UI can show progress.
+	totalSlides := 0
+	for _, section := range plan.Sections {
+		totalSlides += len(section.Slides)
+	}
+	if stateErr := a.updateState(ctx, VideoAgentState{
+		VideoID:     sessionID,
+		State:       stateStatusProcessing,
+		TotalSlides: totalSlides,
+	}); stateErr != nil {
+		a.logger.Warn("failed to publish total slides count", zap.Error(stateErr))
+	}
+
 	defer func() {
 		if err != nil {
-			if failErr := builder.Fail(ctx, err); failErr != nil {
-				a.logger.Error("failed to mark video as failed",
+			failStatus := models.VideoStatusFAILED
+			failCtx := ctx
+
+			// Treat both a hard context cancel (runCtx cancelled by the handler) and a
+			// soft Redis cancel (written by StopAgent) as user-initiated cancellations.
+			isUserCancel := ctx.Err() != nil || errors.Is(err, errUserSoftCancelled)
+			if isUserCancel {
+				failStatus = models.VideoStatusUSERCANCELLED
+				// The original ctx may already be done; use a fresh one for the DB write.
+				var cancelFn context.CancelFunc
+				failCtx, cancelFn = context.WithTimeout(context.Background(), 5*time.Second)
+				defer cancelFn()
+			}
+
+			a.logger.Info("applyPlan: marking video terminal",
+				zap.String("fail_status", string(failStatus)),
+				zap.Bool("user_cancel", isUserCancel),
+				zap.Error(err),
+			)
+
+			if failErr := builder.Fail(failCtx, err, failStatus); failErr != nil {
+				a.logger.Error("failed to mark video as failed/cancelled",
 					zap.Error(failErr),
-					zap.String("video_id", sessionID),
 				)
 			}
 		}
 	}()
 
 	firstSlidePersisted := false
+	// markReadyOnce transitions the state to READY_FOR_EDITOR on the first persisted slide.
+	// totalSlides is carried forward so the UI progress bar keeps its denominator.
 	markReadyOnce := func() {
 		if firstSlidePersisted {
 			return
 		}
 		firstSlidePersisted = true
-
 		if stateErr := a.updateState(ctx, VideoAgentState{
-			VideoID: sessionID,
-			State:   stateStatusReady,
+			VideoID:     sessionID,
+			State:       stateStatusReady,
+			TotalSlides: totalSlides, // preserve so GetVideo keeps streaming the count
 		}); stateErr != nil {
-			a.logger.Warn("failed to set ready-for-editor state",
-				zap.Error(stateErr),
-			)
-		}
-	}
-	setGeneratingThinking := func() {
-		if stateErr := a.updateState(ctx, VideoAgentState{
-			VideoID:  sessionID,
-			Thinking: "Generating...",
-			State:    stateStatusProcessing,
-		}); stateErr != nil {
-			a.logger.Debug("failed to set generating thinking state", zap.Error(stateErr))
+			a.logger.Warn("failed to set ready-for-editor state", zap.Error(stateErr))
 		}
 	}
 
@@ -287,6 +332,27 @@ func (a *agentV1) applyPlan(
 		sectionID := builder.AddSection(section.Name)
 
 		for _, slide := range section.Slides {
+			// ---- Cancellation check (runs before every slide) ----
+			//
+			// Hard cancel: runCtx was cancelled (e.g. client disconnected during planning).
+			if ctx.Err() != nil {
+				a.logger.Info("applyPlan: context cancelled, stopping slide generation",
+					zap.String("video_id", sessionID),
+				)
+				return ctx.Err()
+			}
+			// Soft cancel: StopAgent wrote stateStatusCancelled to Redis.
+			// This is the path taken when the client disconnects from the editor
+			// (GetVideo stream ends) — we do not cancel runCtx in that case so
+			// we rely on this Redis-based signal instead.
+			if currentState, stateErr := a.GetState(ctx, sessionID); stateErr == nil &&
+				currentState != nil && currentState.State == stateStatusCancelled {
+				a.logger.Info("applyPlan: soft-cancel signal detected in Redis, stopping slide generation",
+					zap.String("video_id", sessionID),
+				)
+				return errUserSoftCancelled
+			}
+
 			// ---------------- MEDIA SLIDE ----------------
 			if slide.IsMediaSlide() {
 				media := slide.AsMediaSlide()
@@ -294,17 +360,9 @@ func (a *agentV1) applyPlan(
 					media.Description = "This is the media slide, user will be asked to upload their product screenshot or clip"
 				}
 				media.SelectedTemplateDescription = utils.Ptr(media.Description)
-				if err = builder.AddMediaSlide(
-					ctx,
-					sectionID,
-					float32(media.Duration),
-				); err != nil {
-					return agenterrors.VideoPersistFailed(
-						"failed to persist media slide",
-						err,
-					)
+				if err = builder.AddMediaSlide(ctx, sectionID, float32(media.Duration)); err != nil {
+					return agenterrors.VideoPersistFailed("failed to persist media slide", err)
 				}
-
 				markReadyOnce()
 				continue
 			}
@@ -312,126 +370,147 @@ func (a *agentV1) applyPlan(
 			// ---------------- ANIMATION SLIDE ----------------
 			anim := slide.AsAnimationSlide()
 
-			// category matching
-			setGeneratingThinking()
-			categories, err := a.retrievalService.MatchCategories(
-				ctx,
-				anim.AnimationType,
-				anim.CategorySearchQuery,
-			)
+			// Always include TotalSlides so every Redis write preserves the denominator
+			// that the UI progress bar relies on.
+			if stateErr := a.updateState(ctx, VideoAgentState{
+				VideoID:     sessionID,
+				Thinking:    "Generating...",
+				State:       stateStatusProcessing,
+				TotalSlides: totalSlides,
+			}); stateErr != nil {
+				a.logger.Debug("failed to set generating thinking state", zap.Error(stateErr))
+			}
+
+			selected, err := a.selectTemplate(ctx, sessionID, anim, plan, selectedTemplateIDs, totalSlides)
 			if err != nil {
-				return agenterrors.RetrievalFailed(
-					"failed to match categories",
-					err,
-				)
-			}
-
-			var selected *models.Template
-
-			// Handle fallback
-			if len(categories) == 0 {
-				template, err := a.retrievalService.GetFallbackTemplate(ctx)
-				if err != nil {
-					return agenterrors.NoTemplateFound("no fallback template found", err)
-				}
-
-				selected = template
-			}
-
-			// Template matching
-			for _, category := range categories {
-				setGeneratingThinking()
-				templates, fetchErr := a.retrievalService.FetchTemplates(
-					ctx,
-					anim.AnimationType,
-					category.Name,
-					selectedTemplateIDs,
-				)
-				if fetchErr != nil {
-					return agenterrors.RetrievalFailed(
-						"failed to fetch templates",
-						fetchErr,
-					)
-				}
-
-				if len(templates) == 0 {
-					continue
-				}
-
-				filtered, selectErr := a.templateExtractor.SelectTemplates(
-					ctx,
-					templates,
-					plan,
-					func(chunk string) {
-						if err := a.updateState(ctx, VideoAgentState{
-							VideoID:  sessionID,
-							Thinking: chunk,
-							State:    stateStatusProcessing,
-						}); err != nil {
-							a.logger.Warn("failed to update thinking state", zap.Error(err))
-						}
-					},
-				)
-				if selectErr != nil {
-					return agenterrors.TemplateSelectFailed(
-						"failed to select templates",
-						selectErr,
-					)
-				}
-
-				if len(filtered) == 0 {
-					continue
-				}
-
-				selected = filtered[0]
-				break
-			}
-
-			// Handle fallback
-			if selected == nil {
-				template, err := a.retrievalService.GetFallbackTemplate(ctx)
-				if err != nil {
-					return agenterrors.NoTemplateFound("no fallback template found from any category", err)
-				}
-
-				selected = template
+				return err
 			}
 
 			anim.SelectedTemplateDescription = utils.Ptr(selected.Description)
 
-			templateConfig, err := a.templateExtractor.ExtractConfig(
-				ctx,
-				*anim,
-				selected,
-			)
+			templateConfig, err := a.templateExtractor.ExtractConfig(ctx, *anim, selected)
 			if err != nil {
-				return agenterrors.TemplateExtractFailed(
-					"failed to extract template config",
-					err,
-				)
+				return agenterrors.TemplateExtractFailed("failed to extract template config", err)
 			}
 
-			if err = builder.AddAnimationSlide(
-				ctx,
-				sectionID,
-				float32(anim.Duration),
-				selected,
-				templateConfig.Config,
-				anim.Voiceover,
-			); err != nil {
-				return agenterrors.VideoPersistFailed(
-					"failed to persist animation slide",
-					err,
-				)
+			if err = builder.AddAnimationSlide(ctx, sectionID, float32(anim.Duration), selected, templateConfig.Config, anim.Voiceover); err != nil {
+				return agenterrors.VideoPersistFailed("failed to persist animation slide", err)
 			}
 
 			selectedTemplateIDs = append(selectedTemplateIDs, selected.ID)
-
 			markReadyOnce()
 		}
 	}
 
 	return builder.Done(ctx)
+}
+
+// selectTemplate picks the best template for an animation slide by matching
+// categories and running LLM selection. Falls back to the default template when
+// no category match is found.
+// totalSlides is forwarded to every updateState call so the Redis state always
+// carries the denominator needed by the UI progress bar.
+func (a *agentV1) selectTemplate(
+	ctx context.Context,
+	sessionID string,
+	anim *types.AnimationSlide,
+	plan *types.VideoGenerationPlan,
+	usedTemplateIDs []string,
+	totalSlides int,
+) (*models.Template, error) {
+	categories, err := a.retrievalService.MatchCategories(ctx, anim.AnimationType, anim.CategorySearchQuery)
+	if err != nil {
+		return nil, agenterrors.RetrievalFailed("failed to match categories", err)
+	}
+
+	var selected *models.Template
+	for _, category := range categories {
+		templates, fetchErr := a.retrievalService.FetchTemplates(ctx, anim.AnimationType, category.Name, usedTemplateIDs)
+		if fetchErr != nil {
+			return nil, agenterrors.RetrievalFailed("failed to fetch templates", fetchErr)
+		}
+		if len(templates) == 0 {
+			continue
+		}
+
+		filtered, selectErr := a.templateExtractor.SelectTemplates(ctx, templates, plan, func(chunk string) {
+			if stateErr := a.updateState(ctx, VideoAgentState{
+				VideoID:     sessionID,
+				Thinking:    chunk,
+				State:       stateStatusProcessing,
+				TotalSlides: totalSlides, // preserve denominator on every thinking update
+			}); stateErr != nil {
+				a.logger.Warn("failed to update thinking state", zap.Error(stateErr))
+			}
+		})
+		if selectErr != nil {
+			return nil, agenterrors.TemplateSelectFailed("failed to select templates", selectErr)
+		}
+		if len(filtered) == 0 {
+			continue
+		}
+
+		selected = filtered[0]
+		break
+	}
+
+	// No category matched — use the fallback template.
+	if selected == nil {
+		fallback, err := a.retrievalService.GetFallbackTemplate(ctx)
+		if err != nil {
+			return nil, agenterrors.NoTemplateFound("no fallback template found", err)
+		}
+		selected = fallback
+	}
+
+	return selected, nil
+}
+
+// errUserSoftCancelled is returned by the applyPlan slide loop when a Redis-based
+// soft-cancel is detected (written by StopAgent). It is distinct from ctx.Err() so
+// the deferred error handler can tell the difference between a context cancel and a
+// user-initiated stop that arrived through the Redis state channel.
+var errUserSoftCancelled = errors.New("agent stopped via soft-cancel signal")
+
+// StopAgent decides the right stop strategy based on the current Redis state:
+//   - applyPlan phase  (TotalSlides > 0 or state == READY_FOR_EDITOR): writes
+//     stateStatusCancelled to Redis; the applyPlan slide loop checks for this flag
+//     on every iteration and exits cleanly without needing a context cancel.
+//   - LLM-planning phase (no slides yet): context cancellation (via the caller's
+//     runCtx) is enough — the LLM call respects ctx and will abort on its own.
+func (a *agentV1) StopAgent(ctx context.Context, videoID string) error {
+	state, err := a.GetState(ctx, videoID)
+	if err != nil {
+		a.logger.Error("StopAgent: failed to read agent state; cannot determine stop strategy",
+			zap.Error(err),
+		)
+		return err
+	}
+	if state == nil {
+		a.logger.Info("StopAgent: no Redis state found — agent is likely not running, nothing to do")
+		return nil
+	}
+
+	a.logger.Info("StopAgent: current agent state",
+		zap.String("state", state.State),
+		zap.Int("total_slides", state.TotalSlides),
+	)
+
+	// If slides are already being generated, use a Redis soft-cancel so the applyPlan
+	// loop can finish any in-flight persistence work before stopping.
+	if state.TotalSlides > 0 || state.State == stateStatusReady || state.State == stateStatusProcessing {
+		a.logger.Info("StopAgent: in applyPlan phase — writing soft-cancel to Redis")
+		return a.updateState(ctx, VideoAgentState{
+			VideoID:     videoID,
+			State:       stateStatusCancelled,
+			TotalSlides: state.TotalSlides,
+		})
+	}
+
+	// We are still in the LLM-planning phase (TotalSlides not yet published).
+	// The caller is responsible for cancelling runCtx which will abort the LLM call.
+	a.logger.Info("StopAgent: in LLM-planning phase — context cancellation by caller is sufficient")
+	return nil
 }
 
 func (a *agentV1) updateState(ctx context.Context, state VideoAgentState) error {

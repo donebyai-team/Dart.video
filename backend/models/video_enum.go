@@ -19,6 +19,8 @@ const (
 	VideoStatusFAILED VideoStatus = "FAILED"
 	// VideoStatusPLANNING is a VideoStatus of type PLANNING.
 	VideoStatusPLANNING VideoStatus = "PLANNING"
+	// VideoStatusUSERCANCELLED is a VideoStatus of type USER_CANCELLED.
+	VideoStatusUSERCANCELLED VideoStatus = "USER_CANCELLED"
 )
 
 var ErrInvalidVideoStatus = errors.New("not a valid VideoStatus")
@@ -36,10 +38,11 @@ func (x VideoStatus) IsValid() bool {
 }
 
 var _VideoStatusValue = map[string]VideoStatus{
-	"PROCESSING": VideoStatusPROCESSING,
-	"COMPLETED":  VideoStatusCOMPLETED,
-	"FAILED":     VideoStatusFAILED,
-	"PLANNING":   VideoStatusPLANNING,
+	"PROCESSING":     VideoStatusPROCESSING,
+	"COMPLETED":      VideoStatusCOMPLETED,
+	"FAILED":         VideoStatusFAILED,
+	"PLANNING":       VideoStatusPLANNING,
+	"USER_CANCELLED": VideoStatusUSERCANCELLED,
 }
 
 // ParseVideoStatus attempts to convert a string to a VideoStatus.

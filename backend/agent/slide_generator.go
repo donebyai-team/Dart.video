@@ -62,9 +62,9 @@ func (g *videoConfigGenerator) Done(ctx context.Context) error {
 	return g.update(ctx, models.VideoStatusCOMPLETED)
 }
 
-func (g *videoConfigGenerator) Fail(ctx context.Context, cause error) error {
+func (g *videoConfigGenerator) Fail(ctx context.Context, cause error, status models.VideoStatus) error {
 	g.logger.Error("video generation failed", zap.Error(cause))
-	return g.update(ctx, models.VideoStatusFAILED)
+	return g.update(ctx, status)
 }
 
 func (g *videoConfigGenerator) AddAnimationSlide(

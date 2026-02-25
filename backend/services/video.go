@@ -17,6 +17,7 @@ type VideoGeneration interface {
 	GetVideo(ctx context.Context, id, organizationID string) (*models.Video, error)
 	GetVideos(ctx context.Context, organizationID string) ([]*models.Video, error)
 	UpdateVideoConfig(ctx context.Context, video *models.Video) error
+	UpdateVideoStatus(ctx context.Context, ID string, status models.VideoStatus) error
 }
 
 type videoGeneration struct {
@@ -26,6 +27,10 @@ type videoGeneration struct {
 
 func NewVideoGeneration(db datastore.Repository, logger *zap.Logger) VideoGeneration {
 	return &videoGeneration{db: db, logger: logger}
+}
+
+func (v videoGeneration) UpdateVideoStatus(ctx context.Context, ID string, status models.VideoStatus) error {
+	return v.db.UpdateVideoStatus(ctx, &models.Video{Status: status, ID: ID})
 }
 
 const defaultVideoFPS = 30

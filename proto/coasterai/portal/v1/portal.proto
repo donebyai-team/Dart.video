@@ -27,6 +27,7 @@ service PortalService {
   rpc CreateVideo(CreateVideoRequest) returns (stream CreateVideoResponse);
   rpc ContinueVideoPlanning(ContinueVideoPlanningRequest) returns (stream CreateVideoResponse);
   rpc GetVideo(GetVideoRequest) returns (stream GetVideoResponse);
+  rpc StopVideo(StopVideoRequest) returns (.google.protobuf.Empty);
   rpc GetVideos(.google.protobuf.Empty) returns (GetVideosResponse);
   rpc DeleteVideo(DeleteVideoRequest) returns (.google.protobuf.Empty);
   rpc UpdateVideoConfig(UpdateVideoConfigRequest) returns (.google.protobuf.Empty);
@@ -43,6 +44,10 @@ message RenderVideoResponse {
   int64 version = 3;
 }
 
+message StopVideoRequest {
+  string video_id = 1;
+}
+
 message DeleteVideoRequest {
   string video_id = 1;
 }
@@ -50,6 +55,7 @@ message DeleteVideoRequest {
 message GetVideoResponse {
   core.v1.Video video = 1;
   string thinking_summary = 2;
+  int32 total_slides = 3;
 }
 
 message UpdateVideoConfigRequest {

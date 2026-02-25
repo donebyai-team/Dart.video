@@ -10,12 +10,10 @@ import {
   Palette,
   LanguagesIcon,
   CircleDashed,
-  MessageSquareText,
-  ChevronRight
+  Square
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Script } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import ScriptEditorDialog from '@/components/dashboard/ScriptEditorDialog'
@@ -26,6 +24,7 @@ import defaultEditorConfig from '@/data/editorConfig'
 import { useRouter } from 'next/navigation'
 import { getDefaultResolution } from '@/stores/video/defaults'
 import type { AskUserQuestion, CreateVideoResponse } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
+import QuestionPanel from '@/components/composer/QuestionPanel'
 
 const DURATIONS = [
   { label: '60s', value: '60' },
@@ -70,6 +69,7 @@ const VideoIntentComposer = () => {
   const displayedThinkingRef = useRef('')
   const pendingThinkingTargetRef = useRef<string | null>(null)
   const activeThinkingTargetRef = useRef('')
+  const abortControllerRef = useRef<AbortController | null>(null)
   const [activeQuestion, setActiveQuestion] = useState<AskUserQuestion | undefined>()
   const [pendingQuestion, setPendingQuestion] = useState<AskUserQuestion | undefined>()
   const [selectedAnswer, setSelectedAnswer] = useState('')
@@ -213,17 +213,16 @@ const VideoIntentComposer = () => {
 
   useEffect(() => {
     return () => {
-      if (typingTimerRef.current) {
-        clearTimeout(typingTimerRef.current)
-      }
-      if (changeDelayTimerRef.current) {
-        clearTimeout(changeDelayTimerRef.current)
-      }
+      if (typingTimerRef.current) clearTimeout(typingTimerRef.current)
+      if (changeDelayTimerRef.current) clearTimeout(changeDelayTimerRef.current)
+      abortControllerRef.current?.abort()
     }
   }, [])
 
-  const consumePlanningStream = async (stream: AsyncIterable<CreateVideoResponse>) => {
+  const consumePlanningStream = async (stream: AsyncIterable<CreateVideoResponse>, signal?: AbortSignal) => {
     for await (const event of stream) {
+      if (signal?.aborted) return
+
       if (event.id) {
         setVideoId(event.id)
       }
@@ -242,6 +241,7 @@ const VideoIntentComposer = () => {
       }
 
       if (event.planningCompleted) {
+        if (signal?.aborted) return
         const nextVideoID = event.id || videoId
         if (!nextVideoID) {
           throw new Error('missing video id after planning completion')
@@ -252,12 +252,39 @@ const VideoIntentComposer = () => {
     }
   }
 
+  const handleStop = () => {
+    // Cancel typing animation timers immediately so thinking text clears without waiting for useEffect
+    if (typingTimerRef.current) {
+      clearTimeout(typingTimerRef.current)
+      typingTimerRef.current = null
+    }
+    if (changeDelayTimerRef.current) {
+      clearTimeout(changeDelayTimerRef.current)
+      changeDelayTimerRef.current = null
+    }
+    pendingThinkingTargetRef.current = null
+    activeThinkingTargetRef.current = ''
+    displayedThinkingRef.current = ''
+
+    abortControllerRef.current?.abort()
+    abortControllerRef.current = null
+    setIsSubmitting(false)
+    setStage('compose')
+    setThinkingText('')
+    setDisplayedThinkingText('')
+    setActiveQuestion(undefined)
+    setPendingQuestion(undefined)
+  }
+
   const handleSubmit = async () => {
     if (!canGenerate || isSubmitting) return
 
     const selectedResolution =
       defaultEditorConfig.resolution.options.find(r => r.id === resolutionId) ??
       getDefaultResolution(defaultEditorConfig)
+
+    const controller = new AbortController()
+    abortControllerRef.current = controller
 
     try {
       setIsSubmitting(true)
@@ -273,20 +300,31 @@ const VideoIntentComposer = () => {
         resolution: selectedResolution,
         duration: Number(duration),
         brandLibraryId: selectedBrandLibraryId ?? ''
-      })
+      }, { signal: controller.signal })
 
-      await consumePlanningStream(stream)
+      await consumePlanningStream(stream, controller.signal)
     } catch (err: any) {
-      toast.error(getConnectError(err))
-      setStage('compose')
+      if (!controller.signal.aborted) {
+        toast.error(getConnectError(err))
+        setStage('compose')
+        setThinkingText('')
+      }
     } finally {
-      setIsSubmitting(false)
+      if (!controller.signal.aborted) {
+        setIsSubmitting(false)
+      }
+      if (abortControllerRef.current === controller) {
+        abortControllerRef.current = null
+      }
     }
   }
 
   const handleContinuePlanning = async (responseOverride?: string) => {
     const response = (responseOverride ?? answerInput).trim()
     if (!videoId || !response || isSubmitting) return
+
+    const controller = new AbortController()
+    abortControllerRef.current = controller
 
     try {
       setIsSubmitting(true)
@@ -300,21 +338,29 @@ const VideoIntentComposer = () => {
       const stream = portalClient.continueVideoPlanning({
         id: videoId,
         response
-      })
+      }, { signal: controller.signal })
 
-      await consumePlanningStream(stream)
+      await consumePlanningStream(stream, controller.signal)
     } catch (err: any) {
-      toast.error(getConnectError(err))
-      setStage(activeQuestion ? 'question' : 'compose')
+      if (!controller.signal.aborted) {
+        toast.error(getConnectError(err))
+        setStage(activeQuestion ? 'question' : 'compose')
+        setThinkingText('')
+      }
     } finally {
-      setIsSubmitting(false)
+      if (!controller.signal.aborted) {
+        setIsSubmitting(false)
+      }
+      if (abortControllerRef.current === controller) {
+        abortControllerRef.current = null
+      }
     }
   }
 
   const removeScript = () => setScript(undefined)
 
   return (
-    <div className='w-full min-h-[62vh] px-4 mt-[10%] py-8'>
+    <div className='flex flex-col w-full max-w-3xl mx-auto px-4 min-h-[calc(100vh-4rem)]'>
       <ScriptEditorDialog
         open={scriptDialogOpen}
         onOpenChange={setScriptDialogOpen}
@@ -322,214 +368,183 @@ const VideoIntentComposer = () => {
         onSave={(s: Script) => setScript(s)}
       />
 
-      <div className='w-full max-w-4xl mx-auto mb-8 text-center'>
-        <h1 className='text-3xl font-bold tracking-tight'>Plan your video with AI</h1>
-        <p className='text-muted-foreground mt-2'>
-          Submit intent, watch live planning, answer clarifications, then jump into editor.
-        </p>
+      {/* Center area — grows to push input to the bottom */}
+      <div className='flex-1 flex items-center justify-center py-8'>
+        <div className='text-center'>
+          <h1 className='text-2xl font-semibold tracking-tight'>Plan your video</h1>
+          <p className='text-sm text-muted-foreground mt-1.5'>
+            Describe your video, add a script, or both
+          </p>
+        </div>
       </div>
 
-      <Card className='border-0 shadow-xl rounded-3xl bg-gradient-to-b from-background to-muted/30 w-full max-w-4xl mx-auto overflow-hidden'>
-        <CardContent className='p-0'>
-          <div className='p-5 md:p-6'>
-              <div className='flex items-center justify-between text-xs text-muted-foreground mb-4'>
-                <div className='flex items-center gap-3'>
-                  <div className='flex items-center gap-2'>
-                    <Film className='w-4 h-4' />
-                    <Select value={resolutionId} onValueChange={setResolutionId}>
-                      <SelectTrigger className='h-8 text-xs bg-background w-[170px]'>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {defaultEditorConfig.resolution.options.map(r => (
-                          <SelectItem key={r.id} value={r.id}>
-                            {r.name} ({r.height}x{r.width})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+      {/* Bottom composite area */}
+      <div className='pb-6 space-y-2.5'>
 
-                  <div className='flex items-center gap-2'>
-                    <Clock className='w-4 h-4' />
-                    <Select value={duration} onValueChange={setDuration}>
-                      <SelectTrigger className='h-8 text-xs bg-background w-[90px]'>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {DURATIONS.map(d => (
-                          <SelectItem key={d.value} value={d.value}>
-                            {d.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className='flex items-center gap-2'>
-                  <LanguagesIcon className='w-4 h-4' />
-                  <Select value={language} onValueChange={setLanguage}>
-                    <SelectTrigger className='h-8 text-xs bg-background w-[130px]'>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {LANGUAGES.map(d => (
-                        <SelectItem key={d.value} value={d.value}>
-                          {d.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className='rounded-2xl border bg-background shadow-sm overflow-hidden'>
-                <div className='flex items-center gap-3 px-4 pt-3 pb-2 text-xs text-muted-foreground'>
-                  <button
-                    className='flex items-center gap-1.5 hover:text-foreground'
-                    onClick={() => setScriptDialogOpen(true)}
-                  >
-                    <TextIcon className='w-3.5 h-3.5' />
-                    {hasScript ? 'Edit Script' : 'Add Script'}
-                  </button>
-
-                  <div className='flex items-center gap-1.5'>
-                    <Palette className='w-3.5 h-3.5 opacity-70' />
-                    <Select
-                      value={selectedBrandLibraryId ?? NO_BRAND_VALUE}
-                      onValueChange={v => setSelectedBrandLibraryId(v === NO_BRAND_VALUE ? undefined : v)}
-                    >
-                      <SelectTrigger className='h-8 text-xs bg-background min-w-[130px] border-none shadow-none ring-0'>
-                        <SelectValue placeholder='Select brand' />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value={NO_BRAND_VALUE}>No brand</SelectItem>
-                        {brandLibraries.map(b => (
-                          <SelectItem key={b.id} value={b.id}>
-                            {b.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                {hasScript && (
-                  <div
-                    onClick={() => setScriptDialogOpen(true)}
-                    className='mx-4 mb-2 flex items-center justify-between rounded-xl border bg-primary/5 border-primary/20 px-3 py-2 text-xs cursor-pointer'
-                  >
-                    <div className='flex items-center gap-2 text-primary'>
-                      <span className='font-medium'>Script attached</span>
-                      <span className='text-muted-foreground'>• {scriptVoiceoverCount} sections</span>
-                    </div>
-                    <button
-                      onClick={e => {
-                        e.stopPropagation()
-                        removeScript()
-                      }}
-                      className='p-1 rounded-md hover:bg-destructive/10 hover:text-destructive'
-                    >
-                      <X className='w-3.5 h-3.5' />
-                    </button>
-                  </div>
-                )}
-
-                <textarea
-                  value={prompt}
-                  onChange={e => setPrompt(e.target.value)}
-                  placeholder={
-                    hasScript
-                      ? 'Add additional direction or style notes...'
-                      : 'Describe the video you want to generate...'
-                  }
-                  className='w-full min-h-[80px] resize-none bg-transparent px-4 pb-2 pt-2 text-sm focus:outline-none'
-                  disabled={stage !== 'compose'}
-                />
-
-                <div className='px-4 pb-3 flex justify-end'>
-                  <Button
-                    onClick={handleSubmit}
-                    className='h-10 px-4 rounded-xl'
-                    disabled={!canGenerate || stage !== 'compose' || isSubmitting}
-                  >
-                    {isSubmitting && stage === 'planning' ? (
-                      <span className='inline-flex items-center gap-2'>
-                        <CircleDashed className='w-4 h-4 animate-spin' /> Planning
-                      </span>
-                    ) : (
-                      <span className='inline-flex items-center gap-2'>
-                        Generate <Sparkles className='w-4 h-4' />
-                      </span>
-                    )}
-                  </Button>
-                </div>
-              </div>
+        {/* Thinking bar — appears above input when agent is active */}
+        {showAgentActivity && (
+          <div className='flex items-center gap-2.5 px-4 py-2.5 rounded-xl border bg-background/95 backdrop-blur-sm text-sm text-muted-foreground shadow-sm'>
+            <CircleDashed className='w-3.5 h-3.5 animate-spin flex-shrink-0' />
+            <span className='truncate flex-1'>{singleLineThinkingText || 'Thinking...'}</span>
+            {isSubmitting && (
+              <span className='text-xs opacity-50 tabular-nums'>{thinkingDots}</span>
+            )}
           </div>
-        </CardContent>
-      </Card>
+        )}
 
-      {showAgentActivity && (
-        <div className='w-full max-w-4xl mx-auto mt-4 rounded-2xl border bg-muted/20 p-4 md:p-5'>
-          <div className='flex items-center gap-2 text-sm font-medium mb-3'>
-            <MessageSquareText className='w-4 h-4' /> Agent Activity
+        {/* Question panel — appears above input when agent asks something */}
+        {stage === 'question' && activeQuestion && (
+          <QuestionPanel
+            question={activeQuestion}
+            isSubmitting={isSubmitting}
+            customAnswer={customAnswer}
+            answerInput={answerInput}
+            onOptionClick={option => {
+              setSelectedAnswer(option)
+              void handleContinuePlanning(option)
+            }}
+            onCustomAnswerChange={setCustomAnswer}
+            onContinue={() => void handleContinuePlanning()}
+          />
+        )}
+
+        {/* Main input card */}
+        <div className='rounded-2xl border bg-background shadow-sm overflow-hidden'>
+
+          {/* Toolbar row */}
+          <div className='flex items-center gap-1.5 px-4 pt-2.5 pb-2 text-xs text-muted-foreground border-b border-border/40 flex-wrap'>
+            <Film className='w-4 h-4 flex-shrink-0' />
+            <Select value={resolutionId} onValueChange={setResolutionId} disabled={stage !== 'compose'}>
+              <SelectTrigger className='h-7 text-xs bg-transparent border-none shadow-none ring-0 focus:ring-0 px-1 gap-1 w-auto min-w-0'>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {defaultEditorConfig.resolution.options.map(r => (
+                  <SelectItem key={r.id} value={r.id}>
+                    {r.name} ({r.height}x{r.width})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <span className='text-border/60 mx-0.5'>·</span>
+
+            <Clock className='w-4 h-4 flex-shrink-0' />
+            <Select value={duration} onValueChange={setDuration} disabled={stage !== 'compose'}>
+              <SelectTrigger className='h-7 text-xs bg-transparent border-none shadow-none ring-0 focus:ring-0 px-1 gap-1 w-auto min-w-0'>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {DURATIONS.map(d => (
+                  <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <span className='text-border/60 mx-0.5'>·</span>
+
+            <LanguagesIcon className='w-4 h-4 flex-shrink-0' />
+            <Select value={language} onValueChange={setLanguage} disabled={stage !== 'compose'}>
+              <SelectTrigger className='h-7 text-xs bg-transparent border-none shadow-none ring-0 focus:ring-0 px-1 gap-1 w-auto min-w-0'>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {LANGUAGES.map(d => (
+                  <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <div className='flex-1' />
+
+            <button
+              onClick={() => setScriptDialogOpen(true)}
+              className='flex items-center gap-1.5 hover:text-foreground rounded px-1.5 py-1 hover:bg-muted/50 transition-colors'
+            >
+              <TextIcon className='w-3.5 h-3.5' />
+              <span>{hasScript ? 'Edit script' : 'Script'}</span>
+            </button>
+
+            <span className='text-border/60 mx-0.5'>·</span>
+
+            <Palette className='w-4 h-4 flex-shrink-0 opacity-70' />
+            <Select
+              value={selectedBrandLibraryId ?? NO_BRAND_VALUE}
+              onValueChange={v => setSelectedBrandLibraryId(v === NO_BRAND_VALUE ? undefined : v)}
+              disabled={stage !== 'compose'}
+            >
+              <SelectTrigger className='h-7 text-xs bg-transparent border-none shadow-none ring-0 focus:ring-0 px-1 gap-1 w-auto min-w-0'>
+                <SelectValue placeholder='Brand' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NO_BRAND_VALUE}>No brand</SelectItem>
+                {brandLibraries.map(b => (
+                  <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
-          <div className='rounded-xl border bg-background p-3 pr-6 min-h-[44px] overflow-hidden'>
-            <p className={`text-xs leading-relaxed text-muted-foreground/75 whitespace-nowrap ${isSubmitting ? 'animate-pulse' : ''}`}>
-              {singleLineThinkingText || 'Waiting for planning stream...'}
-              {isSubmitting && (
-                <span className='inline-block w-6 text-left ml-0.5' aria-hidden='true'>
-                  {thinkingDots}
-                </span>
-              )}
-            </p>
+          {/* Script badge */}
+          {hasScript && (
+            <div
+              onClick={() => setScriptDialogOpen(true)}
+              className='mx-4 mt-2 flex items-center justify-between rounded-lg border bg-primary/5 border-primary/15 px-3 py-1.5 text-xs cursor-pointer hover:border-primary/30 transition-colors'
+            >
+              <div className='flex items-center gap-2 text-primary'>
+                <span className='font-medium'>Script attached</span>
+                <span className='text-muted-foreground'>· {scriptVoiceoverCount} sections</span>
+              </div>
+              <button
+                onClick={e => {
+                  e.stopPropagation()
+                  removeScript()
+                }}
+                className='p-0.5 rounded hover:bg-destructive/10 hover:text-destructive'
+              >
+                <X className='w-3.5 h-3.5' />
+              </button>
+            </div>
+          )}
+
+          {/* Textarea */}
+          <textarea
+            value={prompt}
+            onChange={e => setPrompt(e.target.value)}
+            placeholder={
+              hasScript
+                ? 'Add direction or style notes...'
+                : 'Describe the video you want to generate...'
+            }
+            rows={4}
+            className='w-full resize-none bg-transparent px-4 py-3 text-sm focus:outline-none placeholder:text-muted-foreground/60'
+            disabled={stage !== 'compose'}
+          />
+
+          {/* Action row */}
+          <div className='px-4 pb-3 flex justify-end'>
+            {isSubmitting || stage === 'question' ? (
+              <Button
+                onClick={handleStop}
+                variant='outline'
+                size='sm'
+                className='h-9 w-9 rounded-xl hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30'
+              >
+                <Square className='w-3.5 h-3.5 fill-current' />
+              </Button>
+            ) : (
+              <Button
+                onClick={handleSubmit}
+                size='sm'
+                className='h-9 w-9 rounded-xl'
+                disabled={!canGenerate || stage !== 'compose'}
+              >
+                <Sparkles className='w-4 h-4' />
+              </Button>
+            )}
           </div>
         </div>
-      )}
-
-      {stage === 'question' && activeQuestion && (
-        <div className='w-full max-w-4xl mx-auto mt-4 rounded-2xl border bg-background p-4 space-y-3'>
-          <p className='text-sm font-medium'>{activeQuestion.questionText}</p>
-
-          {activeQuestion.options?.length > 0 && (
-            <ul className='space-y-2'>
-              {activeQuestion.options.map(option => (
-                <li key={option}>
-                  <button
-                    onClick={() => {
-                      setSelectedAnswer(option)
-                      void handleContinuePlanning(option)
-                    }}
-                    disabled={isSubmitting}
-                    className='w-full text-left px-3 py-2 text-xs rounded-lg border transition hover:bg-muted disabled:opacity-60'
-                  >
-                    {option}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {activeQuestion.allowCustomEntry && (
-            <textarea
-              value={customAnswer}
-              onChange={e => setCustomAnswer(e.target.value)}
-              placeholder='Or type your answer...'
-              className='w-full min-h-[80px] resize-none bg-background border rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30'
-            />
-          )}
-
-          {activeQuestion.allowCustomEntry && (
-            <Button onClick={() => void handleContinuePlanning()} disabled={!answerInput || isSubmitting} className='w-full'>
-              <span className='inline-flex items-center gap-2'>
-                Continue planning <ChevronRight className='w-4 h-4' />
-              </span>
-            </Button>
-          )}
-        </div>
-      )}
+      </div>
     </div>
   )
 }

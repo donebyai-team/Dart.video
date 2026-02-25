@@ -25,6 +25,7 @@ import Link from 'next/link';
 import BackgroundMusicSelector from '@/components/editor/remotion/components/BackgroundMusicSelector';
 import { useClientsContext } from '@coasterai/ui-core/context/ClientContext';
 import { pollVideoRender } from '@/services/utils';
+import VideoGenerationProgress from '@/components/editor/VideoGenerationProgress';
 
 interface EditorPageProps {
   videoId: string
@@ -56,8 +57,10 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
 
   // Streaming state
   const startVideoStream = useVideoStore(s => s.startVideoStream)
+  const stopVideoStream = useVideoStore(s => s.stopVideoStream)
   const isStreamingVideo = useVideoStore(s => s.isStreamingVideo)
   const streamingThinkingSummary = useVideoStore(s => s.streamingThinkingSummary)
+  const streamingTotalSlides = useVideoStore(s => s.streamingTotalSlides)
 
   // Video data from store (this is the single source of truth)
   const videoConfigFromStore = useVideoStore(s => s.videoConfig);
@@ -175,7 +178,9 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
       try {
         console.log('Starting video stream for videoId:', videoId)
 
-        // Start streaming immediately - the store will handle all updates
+        // Start streaming immediately - the store will handle all updates.
+        // startVideoStream returns null (no throw) when stopped intentionally,
+        // so this .catch only fires on genuine errors.
         startVideoStream(videoId).catch(error => {
           console.error('Stream failed:', error);
           toast.error(getConnectError(error));
@@ -239,34 +244,14 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
 
   return (
     <div className='h-screen flex flex-col bg-muted/30 relative'>
-      {/* Thinking Summary Banner - Shows at top during streaming */}
-      {isStreamingVideo && streamingThinkingSummary && (
-        <div className='relative overflow-hidden border-b border-primary/30'>
-          {/* Highlighter base */}
-          <div className='bg-primary/15 backdrop-blur-sm px-4 py-3'>
-            <div className='flex items-center gap-3 relative z-10'>
-              <div className='h-3.5 w-3.5 rounded-full border-2 border-primary border-t-transparent animate-spin'></div>
-              <span className='text-sm text-foreground italic flex-1'>{streamingThinkingSummary}</span>
-            </div>
-          </div>
-
-          {/* Moving highlighter shimmer */}
-          <div className='pointer-events-none absolute inset-0'>
-            <div className='absolute top-0 left-[-40%] h-full w-[40%] bg-gradient-to-r from-transparent via-primary/25 to-transparent animate-[shimmer_2.5s_linear_infinite]' />
-          </div>
-
-          {/* Tailwind custom animation */}
-          <style jsx>{`
-            @keyframes shimmer {
-              0% {
-                transform: translateX(0);
-              }
-              100% {
-                transform: translateX(250%);
-              }
-            }
-          `}</style>
-        </div>
+      {/* Video Generation Progress — floating overlay while the agent generates slides */}
+      {isStreamingVideo && (
+        <VideoGenerationProgress
+          receivedSlides={videoConfigFromStore?.config?.sections.reduce((acc, s) => acc + s.slides.length, 0) ?? 0}
+          totalSlides={streamingTotalSlides}
+          thinkingSummary={streamingThinkingSummary}
+          onStop={stopVideoStream}
+        />
       )}
 
       {/* Export Progress Overlay */}
