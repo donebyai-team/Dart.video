@@ -34,7 +34,6 @@ JOB_SA="${JOB_SA:-remotion-job-sa}"
 TASK_TIMEOUT="${TASK_TIMEOUT:-3600s}"
 JOB_MEMORY="${JOB_MEMORY:-16Gi}"
 JOB_CPU="${JOB_CPU:-4}"
-TASK_DISK_SIZE="${TASK_DISK_SIZE:-10Gi}"
 PUBLIC_BUCKET="${PUBLIC_BUCKET:-false}"
 BUCKET_LOCATION="${BUCKET_LOCATION:-$REGION}"
 
@@ -129,7 +128,6 @@ if resource_exists gcloud run jobs describe "$JOB_NAME" --region="$REGION" --pro
     --task-timeout="$TASK_TIMEOUT" \
     --memory="$JOB_MEMORY" \
     --cpu="$JOB_CPU" \
-    --task-ephemeral-storage="$TASK_DISK_SIZE" \
     --set-env-vars="OUTPUT_BUCKET=$OUTPUT_BUCKET,REDIS_URL=$REDIS_URL,REMOTION_COMPOSITION_ID=MyComposition"
 else
   log "Creating Cloud Run Job: $JOB_NAME"
@@ -142,7 +140,6 @@ else
     --task-timeout="$TASK_TIMEOUT" \
     --memory="$JOB_MEMORY" \
     --cpu="$JOB_CPU" \
-    --task-ephemeral-storage="$TASK_DISK_SIZE" \
     --set-env-vars="OUTPUT_BUCKET=$OUTPUT_BUCKET,REDIS_URL=$REDIS_URL,REMOTION_COMPOSITION_ID=MyComposition"
 fi
 
