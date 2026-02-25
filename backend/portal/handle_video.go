@@ -5,7 +5,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"github.com/shank318/coasterai/agent"
 	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/errorx"
@@ -163,7 +162,7 @@ func (p *Portal) streamAgentRun(
 
 	startedAt := time.Now()
 	exitReason := "unknown"
-	logger.Info("starting agent stream loop", zap.String("video_id", videoID))
+	logger.Info("starting agent stream loop")
 	defer func() {
 		fields := []zap.Field{
 			zap.String("reason", exitReason),
@@ -206,26 +205,8 @@ func (p *Portal) streamAgentRun(
 	// ---------------------------------------------
 	go func() {
 		logger.Info("starting agent run goroutine")
-
-		defer func() {
-			if r := recover(); r != nil {
-				logger.Error("agent run panicked",
-					zap.Any("panic", r),
-				)
-
-				select {
-				case done <- runOutput{
-					err: fmt.Errorf("agent panic: %v", r),
-				}:
-				default:
-				}
-			}
-
-			logger.Info("agent run goroutine exited")
-		}()
-
 		res, err := run(runCtx)
-
+		logger.Info("agent run goroutine exited")
 		select {
 		case done <- runOutput{result: res, err: err}:
 		default:
@@ -247,7 +228,6 @@ func (p *Portal) streamAgentRun(
 
 		if state.Thinking != "" && state.Thinking != lastThinking {
 			lastThinking = state.Thinking
-
 			logger.Info("streaming thinking update",
 				zap.String("thinking", lastThinking),
 				zap.Int("thinking_chars", len(state.Thinking)),
@@ -260,7 +240,6 @@ func (p *Portal) streamAgentRun(
 				logger.Warn("failed to stream thinking update",
 					zap.Error(err),
 				)
-
 				exitReason = "thinking_send_failed"
 				return true
 			}
@@ -269,7 +248,6 @@ func (p *Portal) streamAgentRun(
 
 		if state.State == agent.StateReadyForEditor {
 			logger.Info("first slide ready — redirecting client to editor; agent keeps running")
-
 			if err := stream.Send(&pbportal.CreateVideoResponse{
 				Id:                videoID,
 				PlanningCompleted: true,
@@ -280,7 +258,6 @@ func (p *Portal) streamAgentRun(
 				return true
 			}
 			lastStreamSendAt = time.Now()
-
 			// The agent goroutine must keep running to generate the remaining slides.
 			// Do NOT cancel runCtx here — the editor will poll via GetVideo and
 			// StopAgent will be called if the user explicitly closes the editor.
@@ -288,13 +265,11 @@ func (p *Portal) streamAgentRun(
 			exitReason = "ready_for_editor"
 			return true
 		}
-
 		return false
 	}
 
 	for {
 		select {
-
 		// -------------------------------------------------
 		// Client disconnected during planning stream.
 		// -------------------------------------------------
@@ -351,7 +326,6 @@ func (p *Portal) streamAgentRun(
 					ErrorMessage: out.err.Error(),
 				})
 				lastStreamSendAt = time.Now()
-
 				exitReason = "agent_run_failed"
 				return nil
 			}
@@ -364,7 +338,6 @@ func (p *Portal) streamAgentRun(
 					ErrorMessage: "agent returned empty result",
 				})
 				lastStreamSendAt = time.Now()
-
 				exitReason = "agent_empty_result"
 				return nil
 			}
@@ -377,9 +350,7 @@ func (p *Portal) streamAgentRun(
 					WaitingForUserInput: true,
 					AskUserQuestion:     toProtoQuestion(out.result.AskUserQuestion),
 				}); err != nil {
-
 					logger.Error("failed to stream ask-user-question", zap.Error(err))
-
 					exitReason = "question_send_failed"
 					return nil
 				}
@@ -390,19 +361,15 @@ func (p *Portal) streamAgentRun(
 			}
 
 			logger.Info("agent planning completed")
-
 			if err := stream.Send(&pbportal.CreateVideoResponse{
 				Id:                videoID,
 				PlanningCompleted: true,
 			}); err != nil {
-
 				logger.Error("failed to stream planning completed", zap.Error(err))
-
 				exitReason = "planning_completed_send_failed"
 				return nil
 			}
 			lastStreamSendAt = time.Now()
-
 			exitReason = "planning_completed"
 			return nil
 		}
