@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/go-retryablehttp"
 )
 
 // BuildError is returned by TemplateCodeBuilder when the generated code
@@ -65,16 +67,36 @@ type ValidateAndBuildOutput struct {
 }
 
 type animationValidatorService struct {
-	client     *http.Client
+	client     *retryablehttp.Client
 	serviceURL string
 }
 
 // NewTemplateCodeBuilderService creates a client for the validator HTTP service.
 // serviceURL should be the base URL of the deployed Cloud Run Service,
 // e.g. "https://remotion-validator-xyz-uc.a.run.app".
+//
+// The client retries on 5xx and connection errors (up to 3 attempts) with
+// exponential backoff, which handles Cloud Run cold starts gracefully.
 func NewTemplateCodeBuilderService(serviceURL string) TemplateCodeBuilder {
+	rc := retryablehttp.NewClient()
+	rc.RetryMax = 3
+	rc.RetryWaitMin = 2 * time.Second
+	rc.RetryWaitMax = 10 * time.Second
+	// Only retry on connection errors and 5xx — never retry 4xx (build/render errors)
+	rc.CheckRetry = func(ctx context.Context, resp *http.Response, err error) (bool, error) {
+		if err != nil {
+			return retryablehttp.DefaultRetryPolicy(ctx, resp, err)
+		}
+		if resp.StatusCode == http.StatusUnprocessableEntity {
+			return false, nil // build_error / render_error — don't retry
+		}
+		return retryablehttp.DefaultRetryPolicy(ctx, resp, err)
+	}
+	rc.Logger = nil // silence retryablehttp's default stderr logger
+	rc.HTTPClient = &http.Client{Timeout: 5 * time.Minute}
+
 	return &animationValidatorService{
-		client:     &http.Client{Timeout: 5 * time.Minute},
+		client:     rc,
 		serviceURL: strings.TrimRight(serviceURL, "/"),
 	}
 }
@@ -148,7 +170,7 @@ func (s *animationValidatorService) ValidateAndBuild(
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
 
-	req, err := http.NewRequestWithContext(
+	req, err := retryablehttp.NewRequestWithContext(
 		ctx,
 		http.MethodPost,
 		s.serviceURL+"/validate",

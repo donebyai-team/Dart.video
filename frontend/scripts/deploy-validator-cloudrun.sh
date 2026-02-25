@@ -108,11 +108,15 @@ gcloud storage buckets add-iam-policy-binding "gs://$OUTPUT_BUCKET" \
 log "Configuring Docker auth for Artifact Registry"
 gcloud auth configure-docker "$REGION-docker.pkg.dev" --quiet >/dev/null
 
+CACHE_URI="$REGION-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$IMAGE_NAME:buildcache"
+
 log "Building and pushing linux/amd64 image: $IMAGE_URI"
 docker buildx build \
   --platform linux/amd64 \
   -f "$ROOT_DIR/Dockerfile.remotion-job" \
   -t "$IMAGE_URI" \
+  --cache-from "type=registry,ref=$CACHE_URI" \
+  --cache-to "type=registry,ref=$CACHE_URI,mode=max" \
   --push \
   "$ROOT_DIR"
 
@@ -126,7 +130,7 @@ gcloud run deploy "$SERVICE_NAME" \
   --cpu="$SERVICE_CPU" \
   --min-instances="$MIN_INSTANCES" \
   --max-instances="$MAX_INSTANCES" \
-  --no-allow-unauthenticated \
+  --allow-unauthenticated \
   --command="pnpm" \
   --args="run,validate:server" \
   --set-env-vars="OUTPUT_BUCKET=$OUTPUT_BUCKET"
