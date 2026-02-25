@@ -87,11 +87,7 @@ try {
     codec: 'h264',
     outputLocation: outputFile,
     inputProps,
-    chromiumOptions,
-    // Render one frame at a time to keep Chrome's memory footprint predictable.
-    // Cloud Run has no GPU so each tab runs SwiftShader (software OpenGL) which
-    // is heavier than hardware rendering; concurrency > 1 multiplies that cost.
-    concurrency: 1,
+    chromiumOptions,   
     onProgress: ({renderedFrames, encodedFrames, renderEstimatedRemainingTime, progress}) => {
       const phase = encodedFrames > 0 ? 'encoding' : 'rendering';
       const current = encodedFrames > 0 ? encodedFrames : renderedFrames;
