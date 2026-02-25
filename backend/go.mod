@@ -50,8 +50,10 @@ require (
 //replace github.com/VapiAI/server-sdk-go => github.com/shank318/server-sdk-go v0.0.1
 
 require (
+	cloud.google.com/go/storage v1.50.0
 	github.com/boundaryml/baml v0.218.1
 	github.com/imagekit-developer/imagekit-go/v2 v2.2.0
+	github.com/mendableai/firecrawl-go/v2 v2.4.0
 	github.com/streamingfast/dstore v0.1.2
 )
 
@@ -62,7 +64,6 @@ require (
 	cloud.google.com/go/auth/oauth2adapt v0.2.7 // indirect
 	cloud.google.com/go/iam v1.3.1 // indirect
 	cloud.google.com/go/monitoring v1.23.0 // indirect
-	cloud.google.com/go/storage v1.50.0 // indirect
 	connectrpc.com/grpchealth v1.3.0 // indirect
 	connectrpc.com/grpcreflect v1.2.0 // indirect
 	connectrpc.com/otelconnect v0.7.0 // indirect
@@ -220,7 +221,7 @@ require (
 	golang.org/x/sys v0.37.0 // indirect
 	golang.org/x/term v0.36.0 // indirect
 	golang.org/x/text v0.30.0
-	google.golang.org/api v0.218.0 // indirect
+	google.golang.org/api v0.218.0
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto v0.0.0-20250122153221-138b5a5a4fd4 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250124145028-65684f501c47 // indirect

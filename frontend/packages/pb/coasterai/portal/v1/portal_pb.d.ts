@@ -4,6 +4,7 @@
 
 import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv1";
 import type { Message } from "@bufbuild/protobuf";
+import type { BrandIdentity, BrandIdentitySchema } from "../../core/v1/brandkit_pb";
 import type { Resolution, Script, Video, VideoConfig, VideoLanguage, VideoMetadata } from "../../core/v1/video_pb";
 import type { EmptySchema, Timestamp } from "@bufbuild/protobuf/wkt";
 
@@ -11,6 +12,54 @@ import type { EmptySchema, Timestamp } from "@bufbuild/protobuf/wkt";
  * Describes the file coasterai/portal/v1/portal.proto.
  */
 export declare const file_coasterai_portal_v1_portal: GenFile;
+
+/**
+ * @generated from message coasterai.portal.v1.UpdateBrandIdentityRequest
+ */
+export declare type UpdateBrandIdentityRequest = Message<"coasterai.portal.v1.UpdateBrandIdentityRequest"> & {
+  /**
+   * @generated from field: coasterai.core.v1.BrandIdentity identity = 1;
+   */
+  identity?: BrandIdentity;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.UpdateBrandIdentityRequest.
+ * Use `create(UpdateBrandIdentityRequestSchema)` to create a new message.
+ */
+export declare const UpdateBrandIdentityRequestSchema: GenMessage<UpdateBrandIdentityRequest>;
+
+/**
+ * @generated from message coasterai.portal.v1.BrandIdentityRequest
+ */
+export declare type BrandIdentityRequest = Message<"coasterai.portal.v1.BrandIdentityRequest"> & {
+  /**
+   * @generated from field: string websiteUrl = 1;
+   */
+  websiteUrl: string;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.BrandIdentityRequest.
+ * Use `create(BrandIdentityRequestSchema)` to create a new message.
+ */
+export declare const BrandIdentityRequestSchema: GenMessage<BrandIdentityRequest>;
+
+/**
+ * @generated from message coasterai.portal.v1.BrandIdentityResponse
+ */
+export declare type BrandIdentityResponse = Message<"coasterai.portal.v1.BrandIdentityResponse"> & {
+  /**
+   * @generated from field: repeated coasterai.core.v1.BrandIdentity identities = 1;
+   */
+  identities: BrandIdentity[];
+};
+
+/**
+ * Describes the message coasterai.portal.v1.BrandIdentityResponse.
+ * Use `create(BrandIdentityResponseSchema)` to create a new message.
+ */
+export declare const BrandIdentityResponseSchema: GenMessage<BrandIdentityResponse>;
 
 /**
  * @generated from message coasterai.portal.v1.RenderVideoRequest
@@ -1064,6 +1113,32 @@ export declare const PortalService: GenService<{
     methodKind: "unary";
     input: typeof RenderVideoRequestSchema;
     output: typeof RenderVideoResponseSchema;
+  },
+  /**
+   * brand identity request
+   *
+   * @generated from rpc coasterai.portal.v1.PortalService.CreateBrandIdentity
+   */
+  createBrandIdentity: {
+    methodKind: "unary";
+    input: typeof BrandIdentityRequestSchema;
+    output: typeof BrandIdentitySchema;
+  },
+  /**
+   * @generated from rpc coasterai.portal.v1.PortalService.GetBrandIdentities
+   */
+  getBrandIdentities: {
+    methodKind: "unary";
+    input: typeof EmptySchema;
+    output: typeof BrandIdentityResponseSchema;
+  },
+  /**
+   * @generated from rpc coasterai.portal.v1.PortalService.UpdateBrandIdentity
+   */
+  updateBrandIdentity: {
+    methodKind: "unary";
+    input: typeof UpdateBrandIdentityRequestSchema;
+    output: typeof EmptySchema;
   },
 }>;
 

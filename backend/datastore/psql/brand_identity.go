@@ -1,0 +1,50 @@
+package psql
+
+import (
+	"context"
+	"fmt"
+	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
+)
+
+func init() {
+	registerFiles([]string{
+		"brand_identity/create_brand_identity.sql",
+		"brand_identity/update_brand_identity.sql",
+		"brand_identity/query_brand_identities_by_org.sql",
+	})
+}
+
+func (r *Database) CreateBrandIdentity(ctx context.Context, orgID string, identity *pbcore.BrandIdentity) (*pbcore.BrandIdentity, error) {
+	stmt := r.mustGetStmt("brand_identity/create_brand_identity.sql")
+	var id string
+
+	err := stmt.GetContext(ctx, &id, map[string]interface{}{
+		"name":            identity.Name,
+		"identity":        identity,
+		"organization_id": orgID,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create brand identity: %w", err)
+	}
+	identity.Id = id
+	return identity, nil
+}
+
+func (r *Database) UpdateBrandIdentity(ctx context.Context, orgID string, identity *pbcore.BrandIdentity) error {
+	stmt := r.mustGetStmt("brand_identity/update_brand_identity.sql")
+	_, err := stmt.ExecContext(ctx, map[string]interface{}{
+		"identity":        identity,
+		"organization_id": orgID,
+		"id":              identity.Id,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to update brand identity %q: %w", identity.Id, err)
+	}
+	return nil
+}
+
+func (r *Database) GetBrandIdentities(ctx context.Context, organizationID string) ([]*pbcore.BrandIdentity, error) {
+	return getMany[pbcore.BrandIdentity](ctx, r, "brand_identity/query_brand_identities_by_org.sql", map[string]any{
+		"organization_id": organizationID,
+	})
+}

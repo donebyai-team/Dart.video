@@ -8,6 +8,7 @@ package pbportal
 
 import (
 	context "context"
+	v1 "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -39,6 +40,9 @@ const (
 	PortalService_DeleteVideo_FullMethodName           = "/coasterai.portal.v1.PortalService/DeleteVideo"
 	PortalService_UpdateVideoConfig_FullMethodName     = "/coasterai.portal.v1.PortalService/UpdateVideoConfig"
 	PortalService_RenderVideo_FullMethodName           = "/coasterai.portal.v1.PortalService/RenderVideo"
+	PortalService_CreateBrandIdentity_FullMethodName   = "/coasterai.portal.v1.PortalService/CreateBrandIdentity"
+	PortalService_GetBrandIdentities_FullMethodName    = "/coasterai.portal.v1.PortalService/GetBrandIdentities"
+	PortalService_UpdateBrandIdentity_FullMethodName   = "/coasterai.portal.v1.PortalService/UpdateBrandIdentity"
 )
 
 // PortalServiceClient is the client API for PortalService service.
@@ -66,6 +70,10 @@ type PortalServiceClient interface {
 	DeleteVideo(ctx context.Context, in *DeleteVideoRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	UpdateVideoConfig(ctx context.Context, in *UpdateVideoConfigRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	RenderVideo(ctx context.Context, in *RenderVideoRequest, opts ...grpc.CallOption) (*RenderVideoResponse, error)
+	// brand identity request
+	CreateBrandIdentity(ctx context.Context, in *BrandIdentityRequest, opts ...grpc.CallOption) (*v1.BrandIdentity, error)
+	GetBrandIdentities(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*BrandIdentityResponse, error)
+	UpdateBrandIdentity(ctx context.Context, in *UpdateBrandIdentityRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type portalServiceClient struct {
@@ -316,6 +324,33 @@ func (c *portalServiceClient) RenderVideo(ctx context.Context, in *RenderVideoRe
 	return out, nil
 }
 
+func (c *portalServiceClient) CreateBrandIdentity(ctx context.Context, in *BrandIdentityRequest, opts ...grpc.CallOption) (*v1.BrandIdentity, error) {
+	out := new(v1.BrandIdentity)
+	err := c.cc.Invoke(ctx, PortalService_CreateBrandIdentity_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *portalServiceClient) GetBrandIdentities(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*BrandIdentityResponse, error) {
+	out := new(BrandIdentityResponse)
+	err := c.cc.Invoke(ctx, PortalService_GetBrandIdentities_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *portalServiceClient) UpdateBrandIdentity(ctx context.Context, in *UpdateBrandIdentityRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, PortalService_UpdateBrandIdentity_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PortalServiceServer is the server API for PortalService service.
 // All implementations must embed UnimplementedPortalServiceServer
 // for forward compatibility
@@ -341,6 +376,10 @@ type PortalServiceServer interface {
 	DeleteVideo(context.Context, *DeleteVideoRequest) (*emptypb.Empty, error)
 	UpdateVideoConfig(context.Context, *UpdateVideoConfigRequest) (*emptypb.Empty, error)
 	RenderVideo(context.Context, *RenderVideoRequest) (*RenderVideoResponse, error)
+	// brand identity request
+	CreateBrandIdentity(context.Context, *BrandIdentityRequest) (*v1.BrandIdentity, error)
+	GetBrandIdentities(context.Context, *emptypb.Empty) (*BrandIdentityResponse, error)
+	UpdateBrandIdentity(context.Context, *UpdateBrandIdentityRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedPortalServiceServer()
 }
 
@@ -404,6 +443,15 @@ func (UnimplementedPortalServiceServer) UpdateVideoConfig(context.Context, *Upda
 }
 func (UnimplementedPortalServiceServer) RenderVideo(context.Context, *RenderVideoRequest) (*RenderVideoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RenderVideo not implemented")
+}
+func (UnimplementedPortalServiceServer) CreateBrandIdentity(context.Context, *BrandIdentityRequest) (*v1.BrandIdentity, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateBrandIdentity not implemented")
+}
+func (UnimplementedPortalServiceServer) GetBrandIdentities(context.Context, *emptypb.Empty) (*BrandIdentityResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBrandIdentities not implemented")
+}
+func (UnimplementedPortalServiceServer) UpdateBrandIdentity(context.Context, *UpdateBrandIdentityRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateBrandIdentity not implemented")
 }
 func (UnimplementedPortalServiceServer) mustEmbedUnimplementedPortalServiceServer() {}
 
@@ -769,6 +817,60 @@ func _PortalService_RenderVideo_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PortalService_CreateBrandIdentity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BrandIdentityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PortalServiceServer).CreateBrandIdentity(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PortalService_CreateBrandIdentity_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PortalServiceServer).CreateBrandIdentity(ctx, req.(*BrandIdentityRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PortalService_GetBrandIdentities_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PortalServiceServer).GetBrandIdentities(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PortalService_GetBrandIdentities_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PortalServiceServer).GetBrandIdentities(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PortalService_UpdateBrandIdentity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateBrandIdentityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PortalServiceServer).UpdateBrandIdentity(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PortalService_UpdateBrandIdentity_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PortalServiceServer).UpdateBrandIdentity(ctx, req.(*UpdateBrandIdentityRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PortalService_ServiceDesc is the grpc.ServiceDesc for PortalService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -839,6 +941,18 @@ var PortalService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RenderVideo",
 			Handler:    _PortalService_RenderVideo_Handler,
+		},
+		{
+			MethodName: "CreateBrandIdentity",
+			Handler:    _PortalService_CreateBrandIdentity_Handler,
+		},
+		{
+			MethodName: "GetBrandIdentities",
+			Handler:    _PortalService_GetBrandIdentities_Handler,
+		},
+		{
+			MethodName: "UpdateBrandIdentity",
+			Handler:    _PortalService_UpdateBrandIdentity_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

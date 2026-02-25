@@ -8,6 +8,7 @@ import (
 	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
+	v11 "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	v1 "github.com/shank318/coasterai/pb/coasterai/portal/v1"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	http "net/http"
@@ -86,6 +87,15 @@ const (
 	// PortalServiceRenderVideoProcedure is the fully-qualified name of the PortalService's RenderVideo
 	// RPC.
 	PortalServiceRenderVideoProcedure = "/coasterai.portal.v1.PortalService/RenderVideo"
+	// PortalServiceCreateBrandIdentityProcedure is the fully-qualified name of the PortalService's
+	// CreateBrandIdentity RPC.
+	PortalServiceCreateBrandIdentityProcedure = "/coasterai.portal.v1.PortalService/CreateBrandIdentity"
+	// PortalServiceGetBrandIdentitiesProcedure is the fully-qualified name of the PortalService's
+	// GetBrandIdentities RPC.
+	PortalServiceGetBrandIdentitiesProcedure = "/coasterai.portal.v1.PortalService/GetBrandIdentities"
+	// PortalServiceUpdateBrandIdentityProcedure is the fully-qualified name of the PortalService's
+	// UpdateBrandIdentity RPC.
+	PortalServiceUpdateBrandIdentityProcedure = "/coasterai.portal.v1.PortalService/UpdateBrandIdentity"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
@@ -110,6 +120,9 @@ var (
 	portalServiceDeleteVideoMethodDescriptor           = portalServiceServiceDescriptor.Methods().ByName("DeleteVideo")
 	portalServiceUpdateVideoConfigMethodDescriptor     = portalServiceServiceDescriptor.Methods().ByName("UpdateVideoConfig")
 	portalServiceRenderVideoMethodDescriptor           = portalServiceServiceDescriptor.Methods().ByName("RenderVideo")
+	portalServiceCreateBrandIdentityMethodDescriptor   = portalServiceServiceDescriptor.Methods().ByName("CreateBrandIdentity")
+	portalServiceGetBrandIdentitiesMethodDescriptor    = portalServiceServiceDescriptor.Methods().ByName("GetBrandIdentities")
+	portalServiceUpdateBrandIdentityMethodDescriptor   = portalServiceServiceDescriptor.Methods().ByName("UpdateBrandIdentity")
 )
 
 // PortalServiceClient is a client for the coasterai.portal.v1.PortalService service.
@@ -135,6 +148,10 @@ type PortalServiceClient interface {
 	DeleteVideo(context.Context, *connect.Request[v1.DeleteVideoRequest]) (*connect.Response[emptypb.Empty], error)
 	UpdateVideoConfig(context.Context, *connect.Request[v1.UpdateVideoConfigRequest]) (*connect.Response[emptypb.Empty], error)
 	RenderVideo(context.Context, *connect.Request[v1.RenderVideoRequest]) (*connect.Response[v1.RenderVideoResponse], error)
+	// brand identity request
+	CreateBrandIdentity(context.Context, *connect.Request[v1.BrandIdentityRequest]) (*connect.Response[v11.BrandIdentity], error)
+	GetBrandIdentities(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.BrandIdentityResponse], error)
+	UpdateBrandIdentity(context.Context, *connect.Request[v1.UpdateBrandIdentityRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewPortalServiceClient constructs a client for the coasterai.portal.v1.PortalService service. By
@@ -261,6 +278,24 @@ func NewPortalServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(portalServiceRenderVideoMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		createBrandIdentity: connect.NewClient[v1.BrandIdentityRequest, v11.BrandIdentity](
+			httpClient,
+			baseURL+PortalServiceCreateBrandIdentityProcedure,
+			connect.WithSchema(portalServiceCreateBrandIdentityMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
+		getBrandIdentities: connect.NewClient[emptypb.Empty, v1.BrandIdentityResponse](
+			httpClient,
+			baseURL+PortalServiceGetBrandIdentitiesProcedure,
+			connect.WithSchema(portalServiceGetBrandIdentitiesMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
+		updateBrandIdentity: connect.NewClient[v1.UpdateBrandIdentityRequest, emptypb.Empty](
+			httpClient,
+			baseURL+PortalServiceUpdateBrandIdentityProcedure,
+			connect.WithSchema(portalServiceUpdateBrandIdentityMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -285,6 +320,9 @@ type portalServiceClient struct {
 	deleteVideo           *connect.Client[v1.DeleteVideoRequest, emptypb.Empty]
 	updateVideoConfig     *connect.Client[v1.UpdateVideoConfigRequest, emptypb.Empty]
 	renderVideo           *connect.Client[v1.RenderVideoRequest, v1.RenderVideoResponse]
+	createBrandIdentity   *connect.Client[v1.BrandIdentityRequest, v11.BrandIdentity]
+	getBrandIdentities    *connect.Client[emptypb.Empty, v1.BrandIdentityResponse]
+	updateBrandIdentity   *connect.Client[v1.UpdateBrandIdentityRequest, emptypb.Empty]
 }
 
 // GetConfig calls coasterai.portal.v1.PortalService.GetConfig.
@@ -382,6 +420,21 @@ func (c *portalServiceClient) RenderVideo(ctx context.Context, req *connect.Requ
 	return c.renderVideo.CallUnary(ctx, req)
 }
 
+// CreateBrandIdentity calls coasterai.portal.v1.PortalService.CreateBrandIdentity.
+func (c *portalServiceClient) CreateBrandIdentity(ctx context.Context, req *connect.Request[v1.BrandIdentityRequest]) (*connect.Response[v11.BrandIdentity], error) {
+	return c.createBrandIdentity.CallUnary(ctx, req)
+}
+
+// GetBrandIdentities calls coasterai.portal.v1.PortalService.GetBrandIdentities.
+func (c *portalServiceClient) GetBrandIdentities(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[v1.BrandIdentityResponse], error) {
+	return c.getBrandIdentities.CallUnary(ctx, req)
+}
+
+// UpdateBrandIdentity calls coasterai.portal.v1.PortalService.UpdateBrandIdentity.
+func (c *portalServiceClient) UpdateBrandIdentity(ctx context.Context, req *connect.Request[v1.UpdateBrandIdentityRequest]) (*connect.Response[emptypb.Empty], error) {
+	return c.updateBrandIdentity.CallUnary(ctx, req)
+}
+
 // PortalServiceHandler is an implementation of the coasterai.portal.v1.PortalService service.
 type PortalServiceHandler interface {
 	GetConfig(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.Config], error)
@@ -405,6 +458,10 @@ type PortalServiceHandler interface {
 	DeleteVideo(context.Context, *connect.Request[v1.DeleteVideoRequest]) (*connect.Response[emptypb.Empty], error)
 	UpdateVideoConfig(context.Context, *connect.Request[v1.UpdateVideoConfigRequest]) (*connect.Response[emptypb.Empty], error)
 	RenderVideo(context.Context, *connect.Request[v1.RenderVideoRequest]) (*connect.Response[v1.RenderVideoResponse], error)
+	// brand identity request
+	CreateBrandIdentity(context.Context, *connect.Request[v1.BrandIdentityRequest]) (*connect.Response[v11.BrandIdentity], error)
+	GetBrandIdentities(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.BrandIdentityResponse], error)
+	UpdateBrandIdentity(context.Context, *connect.Request[v1.UpdateBrandIdentityRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewPortalServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -527,6 +584,24 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(portalServiceRenderVideoMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	portalServiceCreateBrandIdentityHandler := connect.NewUnaryHandler(
+		PortalServiceCreateBrandIdentityProcedure,
+		svc.CreateBrandIdentity,
+		connect.WithSchema(portalServiceCreateBrandIdentityMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
+	portalServiceGetBrandIdentitiesHandler := connect.NewUnaryHandler(
+		PortalServiceGetBrandIdentitiesProcedure,
+		svc.GetBrandIdentities,
+		connect.WithSchema(portalServiceGetBrandIdentitiesMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
+	portalServiceUpdateBrandIdentityHandler := connect.NewUnaryHandler(
+		PortalServiceUpdateBrandIdentityProcedure,
+		svc.UpdateBrandIdentity,
+		connect.WithSchema(portalServiceUpdateBrandIdentityMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/coasterai.portal.v1.PortalService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case PortalServiceGetConfigProcedure:
@@ -567,6 +642,12 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 			portalServiceUpdateVideoConfigHandler.ServeHTTP(w, r)
 		case PortalServiceRenderVideoProcedure:
 			portalServiceRenderVideoHandler.ServeHTTP(w, r)
+		case PortalServiceCreateBrandIdentityProcedure:
+			portalServiceCreateBrandIdentityHandler.ServeHTTP(w, r)
+		case PortalServiceGetBrandIdentitiesProcedure:
+			portalServiceGetBrandIdentitiesHandler.ServeHTTP(w, r)
+		case PortalServiceUpdateBrandIdentityProcedure:
+			portalServiceUpdateBrandIdentityHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -650,4 +731,16 @@ func (UnimplementedPortalServiceHandler) UpdateVideoConfig(context.Context, *con
 
 func (UnimplementedPortalServiceHandler) RenderVideo(context.Context, *connect.Request[v1.RenderVideoRequest]) (*connect.Response[v1.RenderVideoResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.RenderVideo is not implemented"))
+}
+
+func (UnimplementedPortalServiceHandler) CreateBrandIdentity(context.Context, *connect.Request[v1.BrandIdentityRequest]) (*connect.Response[v11.BrandIdentity], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.CreateBrandIdentity is not implemented"))
+}
+
+func (UnimplementedPortalServiceHandler) GetBrandIdentities(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.BrandIdentityResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.GetBrandIdentities is not implemented"))
+}
+
+func (UnimplementedPortalServiceHandler) UpdateBrandIdentity(context.Context, *connect.Request[v1.UpdateBrandIdentityRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.UpdateBrandIdentity is not implemented"))
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/lib/pq"
 	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/models"
+	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 )
 
 var NotFound = errors.New("not found")
@@ -26,6 +27,7 @@ type Repository interface {
 	UserRepository
 	VideoRepository
 	TemplateRepository
+	BrandIdentityRepository
 }
 
 type OrganizationRepository interface {
@@ -61,6 +63,12 @@ type VideoRepository interface {
 	GetVideos(ctx context.Context, organizationID string) ([]*models.Video, error)
 	DeleteByID(ctx context.Context, id, organizationID string) error
 	UpdateVideoStatus(ctx context.Context, video *models.Video) error
+}
+
+type BrandIdentityRepository interface {
+	GetBrandIdentities(ctx context.Context, organizationID string) ([]*pbcore.BrandIdentity, error)
+	UpdateBrandIdentity(ctx context.Context, orgID string, identity *pbcore.BrandIdentity) error
+	CreateBrandIdentity(ctx context.Context, orgID string, identity *pbcore.BrandIdentity) (*pbcore.BrandIdentity, error)
 }
 
 type TemplateRepository interface {

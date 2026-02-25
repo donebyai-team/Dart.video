@@ -9,6 +9,7 @@ import "google/protobuf/empty.proto";
 import "coasterai/core/v1/core.proto";
 import "coasterai/core/v1/slide.proto";
 import "coasterai/core/v1/video.proto";
+import "coasterai/core/v1/brandkit.proto";
 
 service PortalService {
   rpc GetConfig(.google.protobuf.Empty) returns (Config);
@@ -32,6 +33,23 @@ service PortalService {
   rpc DeleteVideo(DeleteVideoRequest) returns (.google.protobuf.Empty);
   rpc UpdateVideoConfig(UpdateVideoConfigRequest) returns (.google.protobuf.Empty);
   rpc RenderVideo(RenderVideoRequest) returns (RenderVideoResponse);
+
+  // brand identity request
+  rpc CreateBrandIdentity(BrandIdentityRequest) returns (core.v1.BrandIdentity);
+  rpc GetBrandIdentities(.google.protobuf.Empty) returns (BrandIdentityResponse);
+  rpc UpdateBrandIdentity(UpdateBrandIdentityRequest) returns (.google.protobuf.Empty);
+}
+
+message UpdateBrandIdentityRequest {
+  core.v1.BrandIdentity identity = 1;
+}
+
+message BrandIdentityRequest {
+  string websiteUrl = 1;
+}
+
+message BrandIdentityResponse {
+  repeated core.v1.BrandIdentity identities = 1;
 }
 
 message RenderVideoRequest {
