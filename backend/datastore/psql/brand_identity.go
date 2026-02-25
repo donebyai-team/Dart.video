@@ -3,6 +3,7 @@ package psql
 import (
 	"context"
 	"fmt"
+	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 )
 
@@ -35,6 +36,7 @@ func (r *Database) UpdateBrandIdentity(ctx context.Context, orgID string, identi
 	_, err := stmt.ExecContext(ctx, map[string]interface{}{
 		"identity":        identity,
 		"organization_id": orgID,
+		"name":            identity.Name,
 		"id":              identity.Id,
 	})
 	if err != nil {
@@ -44,7 +46,19 @@ func (r *Database) UpdateBrandIdentity(ctx context.Context, orgID string, identi
 }
 
 func (r *Database) GetBrandIdentities(ctx context.Context, organizationID string) ([]*pbcore.BrandIdentity, error) {
-	return getMany[pbcore.BrandIdentity](ctx, r, "brand_identity/query_brand_identities_by_org.sql", map[string]any{
+	brandIdentities, err := getMany[models.BrandIdentity](ctx, r, "brand_identity/query_brand_identities_by_org.sql", map[string]any{
 		"organization_id": organizationID,
 	})
+	if err != nil {
+		return nil, err
+	}
+
+	identities := make([]*pbcore.BrandIdentity, 0, len(brandIdentities))
+	for _, brandIdentity := range brandIdentities {
+		pbIdentity := brandIdentity.BrandIdentity
+		pbIdentity.Id = brandIdentity.ID
+		identities = append(identities, pbIdentity)
+	}
+
+	return identities, nil
 }

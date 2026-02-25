@@ -34,6 +34,7 @@ type Portal struct {
 	mediaService           services.MediaStore
 	videoGenerationService services.VideoGeneration
 	renderVideoService     services.RenderVideoService
+	brandIdentityService   services.BrandIdentity
 }
 
 func New(
@@ -45,6 +46,7 @@ func New(
 	db datastore.Repository,
 	videoGenerationService services.VideoGeneration,
 	renderVideoService services.RenderVideoService,
+	brandIdentityService services.BrandIdentity,
 	httpListenAddr string,
 	corsURLRegexAllow *regexp.Regexp,
 	config *pbportal.Config,
@@ -54,6 +56,7 @@ func New(
 	tracer logging.Tracer,
 ) *Portal {
 	return &Portal{
+		brandIdentityService:   brandIdentityService,
 		mediaService:           mediaService,
 		googleOauthClient:      googleOauthClient,
 		authStateStore:         authStateStore,
