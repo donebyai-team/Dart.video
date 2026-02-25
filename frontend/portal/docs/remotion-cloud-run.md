@@ -4,7 +4,29 @@ This setup renders a Remotion video in a Cloud Run Job and uploads it to:
 
 `https://storage.googleapis.com/<OUTPUT_BUCKET>/<video_id>/<version>.mp4`
 
-The `video_id` and `version` come from input props.
+The `video_id` and `version` come from the `Video` proto passed by the Go backend.
+
+## Architecture
+
+```
+Go backend
+  └─ SubmitJob()          → submits Cloud Run Job with RENDER_INPUT_PROPS_B64
+       └─ Cloud Run Job
+            ├─ renderMedia()   (programmatic, no CLI)  → writes progress to Redis
+            └─ uploads MP4 to GCS
+
+Go backend
+  └─ PollJob()            → reads render:progress:{videoId}:{version} from Redis
+```
+
+**Key files:**
+
+- `portal/scripts/render-cloudrun.mjs` — job entrypoint (programmatic rendering + Redis progress)
+- `portal/scripts/prebundle.mjs` — bundles the composition at Docker build time
+- `portal/src/render/index.ts` — Remotion composition root
+- `backend/services/render_video_service.go` — SubmitJob / PollJob
+
+---
 
 ## Fast path (rerunnable single command)
 
@@ -12,12 +34,23 @@ Use the idempotent deploy script at:
 
 - `scripts/deploy-remotion-cloudrun.sh`
 
+**First time only** — update the lockfile after the new packages (`ioredis`,
+`@remotion/renderer`, `@remotion/bundler`) were added, then commit it:
+
+```bash
+# run from the frontend/ directory (where pnpm-workspace.yaml lives)
+cd frontend
+pnpm install
+git add pnpm-lock.yaml && git commit -m "add ioredis and remotion renderer deps"
+```
+
 Set env vars and run:
 
 ```bash
 export PROJECT_ID="your-project-id"
 export REGION="us-central1"
 export OUTPUT_BUCKET="your-public-video-bucket"
+export REDIS_URL="redis://your-redis-host:6379"
 
 # Optional overrides:
 # export JOB_NAME="remotion-renderer"
@@ -30,7 +63,8 @@ export OUTPUT_BUCKET="your-public-video-bucket"
 pnpm run deploy:remotion
 ```
 
-After any code change, run the same command again:
+After any code change, run the same command again (no `pnpm install` needed unless
+you add more packages):
 
 ```bash
 pnpm run deploy:remotion
@@ -42,8 +76,10 @@ The script will create/update all required resources:
 - Artifact Registry repo
 - GCS bucket (and public object read when `PUBLIC_BUCKET=true`)
 - Service account and bucket IAM
-- Container image build/push
+- Container image build/push (includes pre-bundling the Remotion composition)
 - Cloud Run Job create/update
+
+---
 
 ## 1) One-time GCP setup
 
@@ -69,9 +105,29 @@ gcloud artifacts repositories create "$REPO_NAME" \
   --description="Remotion render job images"
 ```
 
-## 2) Build and push the job image
+---
 
-Run from repository root (same folder as `Dockerfile.remotion-job`):
+## 2) Update the lockfile (once after adding new packages)
+
+The image build uses `pnpm install --frozen-lockfile`. After the `ioredis`,
+`@remotion/renderer`, and `@remotion/bundler` packages were added to
+`portal/package.json`, regenerate the lockfile from the workspace root:
+
+```bash
+pnpm install
+```
+
+Commit the updated `pnpm-lock.yaml` before building the image.
+
+---
+
+## 3) Build and push the job image
+
+Run from the repository root (same folder as `Dockerfile.remotion-job`).
+
+The build runs `pnpm node scripts/prebundle.mjs` inside the image, which
+webpack-bundles the Remotion composition to `/app/portal/remotion-bundle`.
+The job container starts rendering immediately with no webpack step at runtime.
 
 ```bash
 gcloud builds submit \
@@ -80,7 +136,9 @@ gcloud builds submit \
   --file Dockerfile.remotion-job
 ```
 
-## 3) Service account and bucket access
+---
+
+## 4) Service account and bucket access
 
 ```bash
 export JOB_SA="remotion-job-sa"
@@ -104,9 +162,17 @@ gcloud storage buckets add-iam-policy-binding "gs://$OUTPUT_BUCKET" \
   --role="roles/storage.objectViewer"
 ```
 
-## 4) Create (or update) the Cloud Run Job
+---
+
+## 5) Create (or update) the Cloud Run Job
+
+`REDIS_URL` must point to the same Redis instance the Go backend uses.
+The job writes progress under the key `coasterai:render:progress:{videoId}:{version}`
+with a 30-minute TTL.
 
 ```bash
+export REDIS_URL="redis://your-redis-host:6379"
+
 gcloud run jobs create "$JOB_NAME" \
   --project="$PROJECT_ID" \
   --region="$REGION" \
@@ -116,35 +182,40 @@ gcloud run jobs create "$JOB_NAME" \
   --task-timeout=3600s \
   --memory=4Gi \
   --cpu=2 \
-  --set-env-vars="OUTPUT_BUCKET=$OUTPUT_BUCKET,REMOTION_COMPOSITION_ID=MyComposition,REMOTION_ENTRY_FILE=src/render/index.ts"
+  --set-env-vars="OUTPUT_BUCKET=$OUTPUT_BUCKET,REDIS_URL=$REDIS_URL,REMOTION_COMPOSITION_ID=MyComposition"
 ```
 
-If job already exists:
+If the job already exists:
 
 ```bash
 gcloud run jobs update "$JOB_NAME" \
   --project="$PROJECT_ID" \
   --region="$REGION" \
   --image="$REGION-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$IMAGE_NAME:latest" \
-  --set-env-vars="OUTPUT_BUCKET=$OUTPUT_BUCKET,REMOTION_COMPOSITION_ID=MyComposition,REMOTION_ENTRY_FILE=src/render/index.ts"
+  --set-env-vars="OUTPUT_BUCKET=$OUTPUT_BUCKET,REDIS_URL=$REDIS_URL,REMOTION_COMPOSITION_ID=MyComposition"
 ```
 
-## 5) Trigger the job (manual test)
+---
 
-Create input props JSON. `videoId` and `version` are required by the runner.
+## 6) Trigger the job (manual test)
+
+Input props are the `Video` proto serialized as protojson (fields at the top level,
+`id` + `version` required). The script wraps them as `{ video: props }` internally
+before passing to Remotion.
 
 ```bash
 cat > /tmp/remotion-props.json <<'JSON'
 {
-  "videoId": "abc123",
-  "version": "v1",
-  "video": {
-    "metadata": {
-      "fps": 30,
-      "duration": 12,
-      "resolution": {"width": 1280, "height": 720}
-    },
-    "slides": []
+  "id": "abc123",
+  "version": "1",
+  "name": "Test video",
+  "metadata": {
+    "fps": 30,
+    "duration": 12,
+    "resolution": {"width": 1280, "height": 720}
+  },
+  "config": {
+    "sections": []
   }
 }
 JSON
@@ -161,12 +232,51 @@ gcloud run jobs execute "$JOB_NAME" \
 Expected output URL format:
 
 ```text
-https://storage.googleapis.com/<OUTPUT_BUCKET>/abc123/v1.mp4
+https://storage.googleapis.com/<OUTPUT_BUCKET>/abc123/1.mp4
 ```
 
-## 6) Trigger from backend (Go API call target)
+Progress is written to Redis at:
 
-Your backend should call Cloud Run Jobs `:run` API and pass env overrides.
+```text
+coasterai:render:progress:abc123:1
+```
+
+Value (JSON):
+
+```json
+{
+  "completed": false,
+  "render_phase": "rendering",
+  "render_current": 150,
+  "render_total": 360,
+  "render_percent": 41.67,
+  "render_eta_seconds": 12
+}
+```
+
+When done:
+
+```json
+{"completed": true, "render_phase": "encoding", "render_percent": 100, ...}
+```
+
+On error:
+
+```json
+{"completed": false, "error": "reason..."}
+```
+
+---
+
+## 7) Trigger from backend (Go API call target)
+
+The Go backend calls `SubmitJob()` in `render_video_service.go`, which:
+
+1. Base64-encodes the protojson-marshalled `Video` proto
+2. Submits the Cloud Run Job with `RENDER_INPUT_PROPS_B64` override
+3. Caches the execution ID in Redis for 30 minutes
+
+For a raw curl test:
 
 ```bash
 ACCESS_TOKEN="$(gcloud auth print-access-token)"
@@ -190,33 +300,16 @@ curl -X POST \
 JSON
 ```
 
-The cloud job runtime is implemented in:
+---
 
-- `portal/scripts/render-cloudrun.mjs`
+## 8) Polling progress from backend
 
-It renders via Remotion and uploads the MP4 to the bucket path `<videoId>/<version>.mp4`.
+`PollJob()` in `render_video_service.go`:
 
-## 7) Frontend trigger payload (to your Go API)
+1. Reads `render:progress:{videoId}:{version}` from Redis via the existing cache client
+2. If the key is missing (job starting up), returns empty progress
+3. If `error` field is set, returns an error to the caller
+4. Checks the Cloud Run execution status for `FailedCount`/`CancelledCount` (safety net for container crashes that bypass Redis)
+5. Checks GCS for the output file as a belt-and-suspenders completion fallback (handles expired Redis TTL)
 
-Your frontend only needs to send render input props to your backend endpoint.
-
-```ts
-await fetch('/api/render-video', {
-  method: 'POST',
-  headers: {'Content-Type': 'application/json'},
-  body: JSON.stringify({
-    videoId: 'abc123',
-    version: 'v1',
-    video: {
-      metadata: {
-        fps: 30,
-        duration: 12,
-        resolution: {width: 1280, height: 720},
-      },
-      slides: [],
-    },
-  }),
-});
-```
-
-Then your Go API can base64-encode this JSON and pass it as `RENDER_INPUT_PROPS_B64` in the Cloud Run Job execution request.
+No Cloud Logging queries are made.

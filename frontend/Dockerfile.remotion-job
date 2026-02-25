@@ -54,4 +54,8 @@ WORKDIR /app/portal
 ENV NODE_ENV=production
 RUN pnpm exec remotion browser ensure
 
+# Pre-bundle the Remotion composition so render-cloudrun.mjs skips webpack at runtime.
+# Output: /app/portal/remotion-bundle
+RUN pnpm node scripts/prebundle.mjs
+
 CMD ["pnpm", "run", "render:cloudrun"]

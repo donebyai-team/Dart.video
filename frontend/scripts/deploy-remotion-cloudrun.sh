@@ -29,12 +29,19 @@ REPO_NAME="${REPO_NAME:-remotion-jobs}"
 IMAGE_NAME="${IMAGE_NAME:-remotion-renderer}"
 IMAGE_TAG="${IMAGE_TAG:-latest}"
 OUTPUT_BUCKET="${OUTPUT_BUCKET:-${PROJECT_ID}-coasterai-videos}"
+REDIS_URL="${REDIS_URL:-redis://default:tStqIhSHLVXIYDpPcScDOVMSvSFltQIk@tramway.proxy.rlwy.net:46709}"
 JOB_SA="${JOB_SA:-remotion-job-sa}"
 TASK_TIMEOUT="${TASK_TIMEOUT:-3600s}"
-JOB_MEMORY="${JOB_MEMORY:-4Gi}"
-JOB_CPU="${JOB_CPU:-2}"
+JOB_MEMORY="${JOB_MEMORY:-16Gi}"
+JOB_CPU="${JOB_CPU:-4}"
+TASK_DISK_SIZE="${TASK_DISK_SIZE:-10Gi}"
 PUBLIC_BUCKET="${PUBLIC_BUCKET:-false}"
 BUCKET_LOCATION="${BUCKET_LOCATION:-$REGION}"
+
+if [[ -z "$REDIS_URL" ]]; then
+  echo "error: REDIS_URL is required (e.g. redis://host:6379)" >&2
+  exit 1
+fi
 
 IMAGE_URI="$REGION-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$IMAGE_NAME:$IMAGE_TAG"
 JOB_SA_EMAIL="$JOB_SA@$PROJECT_ID.iam.gserviceaccount.com"
@@ -47,7 +54,7 @@ resource_exists() {
   "$@" >/dev/null 2>&1
 }
 
-log "Using PROJECT_ID=$PROJECT_ID REGION=$REGION JOB_NAME=$JOB_NAME OUTPUT_BUCKET=$OUTPUT_BUCKET"
+log "Using PROJECT_ID=$PROJECT_ID REGION=$REGION JOB_NAME=$JOB_NAME OUTPUT_BUCKET=$OUTPUT_BUCKET REDIS_URL=$REDIS_URL"
 
 log "Enabling required APIs"
 gcloud services enable \
@@ -122,7 +129,8 @@ if resource_exists gcloud run jobs describe "$JOB_NAME" --region="$REGION" --pro
     --task-timeout="$TASK_TIMEOUT" \
     --memory="$JOB_MEMORY" \
     --cpu="$JOB_CPU" \
-    --set-env-vars="OUTPUT_BUCKET=$OUTPUT_BUCKET,REMOTION_COMPOSITION_ID=MyComposition,REMOTION_ENTRY_FILE=src/render/index.ts"
+    --task-ephemeral-storage="$TASK_DISK_SIZE" \
+    --set-env-vars="OUTPUT_BUCKET=$OUTPUT_BUCKET,REDIS_URL=$REDIS_URL,REMOTION_COMPOSITION_ID=MyComposition"
 else
   log "Creating Cloud Run Job: $JOB_NAME"
   gcloud run jobs create "$JOB_NAME" \
@@ -134,7 +142,8 @@ else
     --task-timeout="$TASK_TIMEOUT" \
     --memory="$JOB_MEMORY" \
     --cpu="$JOB_CPU" \
-    --set-env-vars="OUTPUT_BUCKET=$OUTPUT_BUCKET,REMOTION_COMPOSITION_ID=MyComposition,REMOTION_ENTRY_FILE=src/render/index.ts"
+    --task-ephemeral-storage="$TASK_DISK_SIZE" \
+    --set-env-vars="OUTPUT_BUCKET=$OUTPUT_BUCKET,REDIS_URL=$REDIS_URL,REMOTION_COMPOSITION_ID=MyComposition"
 fi
 
 log "Done. Execute renders with:"

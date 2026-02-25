@@ -10,14 +10,11 @@ import (
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/utils"
 	"io"
-	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/streamingfast/dstore"
 	"go.uber.org/zap"
-	loggingapi "google.golang.org/api/logging/v2"
 	run "google.golang.org/api/run/v2"
 )
 
@@ -28,11 +25,6 @@ const (
 	defaultOutputBucket  = "redora-coasterai-videos"
 
 	projectName = "redora"
-)
-
-var (
-	renderLineRegex = regexp.MustCompile(`Rendered\s+(\d+)\/(\d+)(?:,\s*time remaining:\s*(\d+)s)?`)
-	encodeLineRegex = regexp.MustCompile(`Encoded\s+(\d+)\/(\d+)`)
 )
 
 type RenderVideoService interface {
@@ -78,11 +70,10 @@ type PollRenderJobOutput struct {
 }
 
 type renderVideoService struct {
-	logger         *zap.Logger
-	runService     *run.Service
-	loggingService *loggingapi.Service
-	outputStore    dstore.Store
-	cache          cache.Cache
+	logger      *zap.Logger
+	runService  *run.Service
+	outputStore dstore.Store
+	cache       cache.Cache
 }
 
 func NewRenderVideoService(ctx context.Context, cache cache.Cache, logger *zap.Logger) (RenderVideoService, error) {
@@ -91,22 +82,16 @@ func NewRenderVideoService(ctx context.Context, cache cache.Cache, logger *zap.L
 		return nil, fmt.Errorf("create cloud run service client: %w", err)
 	}
 
-	loggingService, err := loggingapi.NewService(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("create cloud logging service client: %w", err)
-	}
-
 	debugStore, err := dstore.NewStore(fmt.Sprintf("gs://%s", defaultOutputBucket), "", "", false)
 	if err != nil {
 		return nil, fmt.Errorf("create cloud video store: %w", err)
 	}
 
 	return &renderVideoService{
-		logger:         logger,
-		runService:     runService,
-		loggingService: loggingService,
-		outputStore:    debugStore,
-		cache:          cache,
+		logger:      logger,
+		runService:  runService,
+		outputStore: debugStore,
+		cache:       cache,
 	}, nil
 }
 
@@ -231,17 +216,44 @@ func (s *renderVideoService) PollJob(
 
 	out := &PollRenderJobOutput{}
 
-	// Check output file in GCS
-	fileBase := fmt.Sprintf("%s/%s.mp4", input.VideoID, input.Version)
-	exists, err := s.outputStore.FileExists(ctx, fileBase)
-	if err != nil {
-		return nil, fmt.Errorf("check rendered file existence: %w", err)
-	}
-	if exists {
-		out.FileBaseURL = fileBase
-		s.logger.Info("downloading rendered video", zap.String("url", fileBase))
+	// --- Read progress from Redis ---
+	// The Cloud Run job writes to this key (with the coasterai: prefix baked in).
+	// s.cache.GetKey automatically prepends "coasterai:" so we pass the bare key.
+	progressKey := fmt.Sprintf("render:progress:%s:%s", input.VideoID, input.Version)
+	progressJSON, progressErr := s.cache.GetKey(ctx, progressKey)
+
+	if progressErr != nil && !errors.Is(progressErr, cache.ErrCacheMiss) {
+		return nil, fmt.Errorf("get render progress: %w", progressErr)
 	}
 
+	if progressErr == nil && progressJSON != "" {
+		var p struct {
+			Completed        bool    `json:"completed"`
+			RenderPhase      string  `json:"render_phase"`
+			RenderCurrent    int64   `json:"render_current"`
+			RenderTotal      int64   `json:"render_total"`
+			RenderPercent    float64 `json:"render_percent"`
+			RenderETASeconds int64   `json:"render_eta_seconds"`
+			Error            string  `json:"error"`
+		}
+		if err := json.Unmarshal([]byte(progressJSON), &p); err != nil {
+			return nil, fmt.Errorf("parse render progress: %w", err)
+		}
+
+		if p.Error != "" {
+			s.logger.Error("render progress", zap.String("error", p.Error))
+			return nil, fmt.Errorf("failed to render video")
+		}
+
+		out.Completed = p.Completed
+		out.RenderPhase = p.RenderPhase
+		out.RenderCurrent = p.RenderCurrent
+		out.RenderTotal = p.RenderTotal
+		out.RenderPercent = p.RenderPercent
+		out.RenderETASeconds = p.RenderETASeconds
+	}
+
+	// --- Check execution status (safety net for container crashes) ---
 	executionPath := fmt.Sprintf(
 		"projects/%s/locations/%s/jobs/%s/executions/%s",
 		projectName,
@@ -262,9 +274,6 @@ func (s *renderVideoService) PollJob(
 		return nil, fmt.Errorf("poll execution: %w", err)
 	}
 
-	out.Completed = exec.CompletionTime != ""
-
-	// 🔥 If execution failed → return error immediately
 	if exec.FailedCount > 0 {
 		return nil, fmt.Errorf("render job failed")
 	}
@@ -272,115 +281,22 @@ func (s *renderVideoService) PollJob(
 		return nil, fmt.Errorf("render job cancelled")
 	}
 
-	// If still running → try extract progress from logs
-	if !out.Completed {
-		s.applyRenderLogsProgress(ctx, exec.Name, out)
-		return out, nil
+	// --- Check output file (belt-and-suspenders: handles expired Redis TTL) ---
+	fileBase := fmt.Sprintf("%s/%s.mp4", input.VideoID, input.Version)
+	exists, err := s.outputStore.FileExists(ctx, fileBase)
+	if err != nil {
+		return nil, fmt.Errorf("check rendered file existence: %w", err)
 	}
-
-	// If completed successfully → force 100%
-	out.RenderPhase = "encoding"
-	out.RenderPercent = 100
-	out.RenderCurrent = 1
-	out.RenderTotal = 1
-	out.RenderETASeconds = 0
+	if exists {
+		out.FileBaseURL = fileBase
+		// Force completion if file is present even if Redis key expired
+		if !out.Completed {
+			out.Completed = true
+			out.RenderPhase = "encoding"
+			out.RenderPercent = 100
+		}
+		s.logger.Info("render file confirmed in GCS", zap.String("path", fileBase))
+	}
 
 	return out, nil
-}
-
-func (s *renderVideoService) applyRenderLogsProgress(
-	ctx context.Context,
-	executionName string,
-	out *PollRenderJobOutput,
-) {
-	execID := executionName
-	if idx := strings.LastIndex(execID, "/"); idx >= 0 {
-		execID = execID[idx+1:]
-	}
-	if execID == "" {
-		return
-	}
-
-	filter := fmt.Sprintf(
-		`resource.type="cloud_run_job"
-		 resource.labels.job_name="%s"
-		 resource.labels.location="%s"
-		 labels."run.googleapis.com/execution_name"="%s"
-		 (textPayload:"Rendered " OR textPayload:"Encoded ")`,
-		defaultRenderJobName,
-		defaultRenderRegion,
-		execID,
-	)
-
-	resp, err := s.loggingService.Entries.List(&loggingapi.ListLogEntriesRequest{
-		ResourceNames: []string{"projects/" + projectName},
-		Filter:        filter,
-		OrderBy:       "timestamp desc",
-		PageSize:      20,
-	}).Context(ctx).Do()
-
-	if err != nil {
-		s.logger.Debug("log fetch failed", zap.Error(err))
-		return
-	}
-
-	for _, entry := range resp.Entries {
-		line := strings.TrimSpace(entry.TextPayload)
-		if line == "" {
-			continue
-		}
-
-		if progress, ok := parseProgressLine(line); ok {
-			out.RenderPhase = progress.Phase
-			out.RenderCurrent = progress.Current
-			out.RenderTotal = progress.Total
-			out.RenderPercent = progress.Percent
-			out.RenderETASeconds = progress.ETASeconds
-			return
-		}
-	}
-}
-
-type progressInfo struct {
-	Phase      string
-	Current    int64
-	Total      int64
-	Percent    float64
-	ETASeconds int64
-}
-
-func parseProgressLine(line string) (*progressInfo, bool) {
-
-	if parts := renderLineRegex.FindStringSubmatch(line); len(parts) > 0 {
-		return buildProgress("rendering", parts)
-	}
-
-	if parts := encodeLineRegex.FindStringSubmatch(line); len(parts) > 0 {
-		return buildProgress("encoding", parts)
-	}
-
-	return nil, false
-}
-
-func buildProgress(phase string, parts []string) (*progressInfo, bool) {
-	current, err1 := strconv.ParseInt(parts[1], 10, 64)
-	total, err2 := strconv.ParseInt(parts[2], 10, 64)
-	if err1 != nil || err2 != nil || total <= 0 {
-		return nil, false
-	}
-
-	info := &progressInfo{
-		Phase:   phase,
-		Current: current,
-		Total:   total,
-		Percent: (float64(current) / float64(total)) * 100,
-	}
-
-	if len(parts) >= 4 && parts[3] != "" {
-		if eta, err := strconv.ParseInt(parts[3], 10, 64); err == nil {
-			info.ETASeconds = eta
-		}
-	}
-
-	return info, true
 }
