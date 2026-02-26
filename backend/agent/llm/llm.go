@@ -19,7 +19,7 @@ type LLMService interface {
 		conversationHistory []types.Message,
 		onThinking func(thinking string),
 	) (*types.Union2AskUserQuestionOrVideoGenerationPlan, error)
-	SelectTemplates(ctx context.Context, req *types.MatchTemplateRequest, onThinking func(thinking string)) ([]types.TemplateItem, error)
+	MatchTemplates(ctx context.Context, req *types.MatchTemplateRequest) ([]types.TemplateItem, error)
 }
 
 type llmService struct {
@@ -182,45 +182,13 @@ func (l llmService) PlanSlidesWithStreaming(
 	return finalPlan, nil
 }
 
-func (l llmService) SelectTemplates(ctx context.Context, req *types.MatchTemplateRequest, onThinking func(thinking string)) ([]types.TemplateItem, error) {
-	stream, err := baml_client.Stream.MatchTemplate(ctx, *req)
+func (l llmService) MatchTemplates(ctx context.Context, req *types.MatchTemplateRequest) ([]types.TemplateItem, error) {
+	template, err := baml_client.MatchTemplate(ctx, *req)
 	if err != nil {
 		return nil, handleInitialError(err)
 	}
 
-	var finalTemplates []types.TemplateItem
-
-	recv := func() (streamEvent, bool) {
-		value, ok := <-stream
-		if !ok {
-			return streamEvent{}, false
-		}
-		e := streamEvent{
-			isError: value.IsError,
-			isFinal: value.IsFinal,
-			err:     value.Error,
-		}
-		if !value.IsFinal && value.Stream() != nil {
-			partial := *value.Stream()
-			e.partialThinking = func() *string { return partial.Thinking.Value }
-		} else {
-			e.partialThinking = func() *string { return nil }
-		}
-		if value.IsFinal && value.Final() != nil {
-			final := *value.Final()
-			e.finalThinking = func() *string { return final.Thinking }
-			e.markDone = func() { finalTemplates = final.Templates }
-		} else {
-			e.finalThinking = func() *string { return nil }
-			e.markDone = func() {}
-		}
-		return e, true
-	}
-
-	if err := l.handleStream(ctx, recv, onThinking); err != nil {
-		return nil, err
-	}
-	return finalTemplates, nil
+	return template.Templates, nil
 }
 
 var thinkingTagRegex = regexp.MustCompile(`(?i)</?thinking>`)

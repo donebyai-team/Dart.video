@@ -11,7 +11,6 @@ import (
 
 func (a *agentV1) handleToolCalls(
 	ctx context.Context,
-	sessionID string,
 	session *planningSession,
 	llmResponse *types.Union2AskUserQuestionOrVideoGenerationPlan,
 	thinking string,
@@ -23,7 +22,6 @@ func (a *agentV1) handleToolCalls(
 
 	logger := logging.Logger(ctx, a.logger)
 	logger.Info("planning paused: waiting for user input",
-		zap.String("session_id", sessionID),
 		zap.String("question", question.Question_text),
 	)
 
@@ -32,13 +30,12 @@ func (a *agentV1) handleToolCalls(
 		Content: question.Question_text,
 	})
 
-	if err := a.savePlanningSession(ctx, sessionID, session); err != nil {
+	if err := a.savePlanningSession(ctx, session); err != nil {
 		return true, nil, agenterrors.SessionUnavailable("failed to save planning session with tool call", err)
 	}
 
 	questionCopy := *question
 	if err := a.updateState(ctx, VideoAgentState{
-		VideoID:         sessionID,
 		Thinking:        thinking,
 		State:           stateStatusWaiting,
 		AskUserQuestion: &questionCopy,

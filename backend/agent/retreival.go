@@ -2,6 +2,7 @@ package agent
 
 import (
 	"context"
+	"github.com/shank318/coasterai/agent/llm"
 	"github.com/shank318/coasterai/baml_client"
 	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/datastore"
@@ -17,20 +18,25 @@ type RetrievalService interface {
 	// topK controls how many to return (e.g. 3 for fallback chain).
 	MatchCategories(ctx context.Context, animationType types.AnimationType, query string) ([]*models.TemplateCategory, error)
 
-	// FetchTemplates returns templates for a given category, applying filters.
+	// MatchTemplates returns templates for a given category, applying filters.
 	// usedTemplateIDs: non-repeatable templates with these IDs are excluded
 	// returns top k.
-	FetchTemplates(ctx context.Context, animationType types.AnimationType, category string, usedIds []string) ([]*models.Template, error)
+	MatchTemplates(ctx context.Context,
+		animation *types.AnimationSlide,
+		category string,
+		usedIds []string,
+		plan *types.VideoGenerationPlan) ([]*models.Template, error)
 
 	GetFallbackTemplate(ctx context.Context) (*models.Template, error)
 }
 
 type llmRetrievalService struct {
-	db datastore.Repository
+	db         datastore.Repository
+	llmService llm.LLMService
 }
 
-func NewLlmRetrievalService(db datastore.Repository) RetrievalService {
-	return &llmRetrievalService{db: db}
+func NewLlmRetrievalService(db datastore.Repository, llmService llm.LLMService) RetrievalService {
+	return &llmRetrievalService{db: db, llmService: llmService}
 }
 
 const fallBackTemplateName = "text-cascade"
@@ -69,6 +75,7 @@ func (l llmRetrievalService) MatchCategories(ctx context.Context, animationType 
 		Query:      query,
 	}
 
+	// TODO: Replace it with semantic search
 	matchCategoriesResponse, err := baml_client.MatchCategories(ctx, matchCategoryReq)
 	if err != nil {
 		return nil, err
@@ -85,6 +92,44 @@ func (l llmRetrievalService) MatchCategories(ctx context.Context, animationType 
 	return filteredCategories, nil
 }
 
-func (l llmRetrievalService) FetchTemplates(ctx context.Context, animationType types.AnimationType, category string, usedIds []string) ([]*models.Template, error) {
-	return l.db.GetTemplatesByCategory(ctx, category, animationType, usedIds)
+func (l llmRetrievalService) MatchTemplates(ctx context.Context,
+	animation *types.AnimationSlide,
+	category string,
+	usedIds []string,
+	plan *types.VideoGenerationPlan) ([]*models.Template, error) {
+	templates, err := l.db.GetTemplatesByCategory(ctx, category, animation.AnimationType, usedIds)
+	if err != nil {
+		return nil, err
+	}
+
+	templateMap := make(map[string]*models.Template)
+	matchTem := make([]types.TemplateItem, 0, len(templates))
+	for _, temp := range templates {
+		matchTem = append(matchTem, types.TemplateItem{
+			Name:        temp.Name,
+			Description: temp.Description,
+		})
+		templateMap[temp.Name] = temp
+	}
+
+	templateMaterInput := types.MatchTemplateRequest{
+		PlanSoFar:   plan.Sections,
+		Templates:   matchTem,
+		CurrentBeat: animation.BeatDescription,
+	}
+
+	// TODO: Replace it with semantic search
+	matchedTemplates, err := l.llmService.MatchTemplates(ctx, &templateMaterInput)
+	if err != nil {
+		return nil, err
+	}
+
+	filteredTemplates := make([]*models.Template, 0)
+	for _, temp := range matchedTemplates {
+		value, ok := templateMap[temp.Name]
+		if !ok {
+			filteredTemplates = append(filteredTemplates, value)
+		}
+	}
+	return filteredTemplates, nil
 }

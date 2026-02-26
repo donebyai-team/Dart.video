@@ -20,7 +20,6 @@ class AnimationSlide {
 
   duration int
     @description("Duration in seconds. Average 3-4s per slide Keep pacing dynamic. Avoid repetitive durations.")
-    @assert(valid_duration, {{ this >= 1 and this <= 10 }})
 
   voiceover string? @description("voiceover to play at this slide, if you think its good to add")
 
@@ -31,21 +30,13 @@ class MediaSlide {
   index int
     @description("Sequential order of the slide inside its section (starts from 1).")
 
-  description string
+  beatDescription string
     @description("Clear instruction for what media to include (product demo, UI screenshot, testimonial clip, stock footage, founder image, etc). Must explain why this media is shown at this point in the story.")
 
   duration int
     @description("Duration in seconds. Should support narrative pacing.")
-    @assert(valid_duration, {{ this >= 1 and this <= 10 }})
 
   selectedTemplateDescription string? @skip()
-}
-
-class SelectedTemplate {
-  id string
-  name string
-  url string
-  config string
 }
 
 class ScriptItem {
@@ -68,6 +59,17 @@ class Section {
   slides (AnimationSlide | MediaSlide)[]
 }
 
+class BrandColors {
+  primary string @description("Primary brand color in hex format like #5B8CFF")
+  secondary string @description("Secondary support color in hex format")
+  accent string @description("Accent color for emphasis and motion highlights in hex")
+  text string @description("Readable text color in hex")
+}
+
+class VideoBranding {
+  colors BrandColors
+}
+
 class Gradient {
   angle int  @description("angle of the gradient") @assert(valid_angle, {{ this >= 0 and this <= 260 }})
   stops GradientStop[]
@@ -86,6 +88,7 @@ class VideoGenerationPlan {
     videoName string @description("name of the video, around 5 to 15 length")
     sections Section[]
     backgroundStyle VideoBackground @description("background style of all slides")
+    branding VideoBranding @description("visual identity for animations slides")
 }
 
 class StreamingVideoGenerationPlan {

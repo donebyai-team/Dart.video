@@ -25,7 +25,7 @@ import (
 type VideoAgent interface {
 	Start(ctx context.Context, options StartSessionOptions) (*RunResult, error)
 	Continue(ctx context.Context, options ContinueSessionOptions) (*RunResult, error)
-	GetState(ctx context.Context, sessionID string) (*VideoAgentState, error)
+	GetState(ctx context.Context) (*VideoAgentState, error)
 	StateUpdates() <-chan VideoAgentState
 
 	// StopAgent signals the agent to stop for a given video session.
@@ -39,13 +39,11 @@ type VideoAgent interface {
 }
 
 type StartSessionOptions struct {
-	SessionID string
-	OrgID     string
-	Input     *pbportal.CreateVideoRequest
+	OrgID string
+	Input *pbportal.CreateVideoRequest
 }
 
 type ContinueSessionOptions struct {
-	SessionID    string
 	OrgID        string
 	UserResponse string
 }
@@ -63,10 +61,11 @@ type RunResult struct {
 }
 
 type agentV1 struct {
+	sessionID         string
 	db                datastore.Repository
 	retrievalService  RetrievalService
 	llmService        llm.LLMService
-	templateExtractor TemplateExtractor
+	templateExtractor AnimationGenerator
 	videoService      services.VideoGeneration
 	cache             cache.Cache
 	logger            *zap.Logger
@@ -75,19 +74,21 @@ type agentV1 struct {
 }
 
 func NewAgentV1(
+	sessionID string,
 	logger *zap.Logger,
 	cache cache.Cache,
 	db datastore.Repository,
 	videoService services.VideoGeneration,
-	retrievalService RetrievalService) *agentV1 {
+) *agentV1 {
 	llmService := llm.NewLlmService(logger)
 	return &agentV1{
+		sessionID:         sessionID,
 		logger:            logger,
 		cache:             cache,
 		db:                db,
 		videoService:      videoService,
-		retrievalService:  retrievalService,
-		templateExtractor: llmTemplateExtractor{llmService: llmService},
+		retrievalService:  NewLlmRetrievalService(db, llmService),
+		templateExtractor: animationGenerator{llmService: llmService},
 		llmService:        llmService,
 		stateUpdates:      make(chan VideoAgentState, 64),
 	}
@@ -102,6 +103,10 @@ const (
 	stateStatusCancelled  = "USER_CANCELLED"
 	stateStatusCompleted  = "COMPLETED"
 	stateTTL              = 30 * time.Minute
+
+	// thinking tests
+	generating = "Generating..."
+	matching   = "Matching..."
 )
 
 const StateReadyForEditor = stateStatusReady
@@ -124,6 +129,15 @@ func (a *agentV1) Start(ctx context.Context, options StartSessionOptions) (*RunR
 	if options.Input == nil {
 		return nil, agenterrors.InvalidInput("input is required", nil)
 	}
+
+	if a.sessionID == "" {
+		return nil, agenterrors.InvalidInput("sessionID is required", nil)
+	}
+
+	if a.logger == nil {
+		return nil, agenterrors.InvalidInput("logger is not configured", nil)
+	}
+
 	if options.Input.Resolution == nil || strings.TrimSpace(options.Input.Resolution.Id) == "" {
 		return nil, agenterrors.InvalidInput("resolution is required", nil)
 	}
@@ -158,12 +172,12 @@ func (a *agentV1) Start(ctx context.Context, options StartSessionOptions) (*RunR
 		ConversationHistory: make([]types.Message, 0),
 	}
 
-	if err := a.savePlanningSession(ctx, options.SessionID, session); err != nil {
+	if err := a.savePlanningSession(ctx, session); err != nil {
 		return nil, err
 	}
 
-	a.logger.Info("started agent session", zap.String("session_id", options.SessionID))
-	return a.runPlanning(ctx, options.SessionID, session)
+	a.logger.Info("started agent session")
+	return a.runPlanning(ctx, session)
 }
 
 func (a *agentV1) Continue(ctx context.Context, options ContinueSessionOptions) (*RunResult, error) {
@@ -174,7 +188,7 @@ func (a *agentV1) Continue(ctx context.Context, options ContinueSessionOptions) 
 		return nil, agenterrors.InvalidInput("user response is required", nil)
 	}
 
-	session, err := a.getPlanningSession(ctx, options.SessionID)
+	session, err := a.getPlanningSession(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -185,12 +199,11 @@ func (a *agentV1) Continue(ctx context.Context, options ContinueSessionOptions) 
 		Content:      userResponse,
 	})
 
-	if err := a.savePlanningSession(ctx, options.SessionID, session); err != nil {
+	if err := a.savePlanningSession(ctx, session); err != nil {
 		return nil, err
 	}
 
 	if err := a.updateState(ctx, VideoAgentState{
-		VideoID:          options.SessionID,
 		State:            stateStatusProcessing,
 		LastUserResponse: userResponse,
 	}); err != nil {
@@ -199,14 +212,13 @@ func (a *agentV1) Continue(ctx context.Context, options ContinueSessionOptions) 
 
 	logger.Info("continuing agent session with user response", zap.String("response", userResponse))
 
-	return a.runPlanning(ctx, options.SessionID, session)
+	return a.runPlanning(ctx, session)
 }
 
-func (a *agentV1) runPlanning(ctx context.Context, sessionID string, session *planningSession) (*RunResult, error) {
+func (a *agentV1) runPlanning(ctx context.Context, session *planningSession) (*RunResult, error) {
 	logger := logging.Logger(ctx, a.logger)
 	llmResponse, err := a.llmService.PlanSlidesWithStreaming(ctx, session.Request, session.ConversationHistory, func(chunk string) {
 		if err := a.updateState(ctx, VideoAgentState{
-			VideoID:  sessionID,
 			Thinking: chunk,
 			State:    stateStatusProcessing,
 		}); err != nil {
@@ -218,7 +230,7 @@ func (a *agentV1) runPlanning(ctx context.Context, sessionID string, session *pl
 		if ctx.Err() != nil {
 			status = models.VideoStatusUSERCANCELLED
 		}
-		failErr := a.videoService.UpdateVideoStatus(context.Background(), sessionID, status)
+		failErr := a.videoService.UpdateVideoStatus(context.Background(), a.sessionID, status)
 		if failErr != nil {
 			a.logger.Error("failed to mark video as failed/cancelled",
 				zap.Error(failErr),
@@ -228,7 +240,7 @@ func (a *agentV1) runPlanning(ctx context.Context, sessionID string, session *pl
 		return nil, agenterrors.LLMPlanningFailed("failed to generate video plan", err)
 	}
 
-	handled, result, err := a.handleToolCalls(ctx, sessionID, session, llmResponse, "")
+	handled, result, err := a.handleToolCalls(ctx, session, llmResponse, "")
 	if handled {
 		return result, err
 	}
@@ -243,7 +255,7 @@ func (a *agentV1) runPlanning(ctx context.Context, sessionID string, session *pl
 		return nil, agenterrors.Internal(err.Error(), nil)
 	}
 
-	if err := a.applyPlan(ctx, sessionID, plan); err != nil {
+	if err := a.applyPlan(ctx, plan); err != nil {
 		return nil, err
 	}
 
@@ -251,12 +263,11 @@ func (a *agentV1) runPlanning(ctx context.Context, sessionID string, session *pl
 		Role:    types.Union3KassistantOrKtoolOrKuser__NewKassistant(),
 		Content: fmt.Sprintf("Generated plan: %s", plan.VideoName),
 	})
-	if err := a.savePlanningSession(ctx, sessionID, session); err != nil {
+	if err := a.savePlanningSession(ctx, session); err != nil {
 		return nil, err
 	}
 
 	if err := a.updateState(ctx, VideoAgentState{
-		VideoID:  sessionID,
 		Thinking: "",
 		State:    stateStatusCompleted,
 	}); err != nil {
@@ -268,11 +279,10 @@ func (a *agentV1) runPlanning(ctx context.Context, sessionID string, session *pl
 
 func (a *agentV1) applyPlan(
 	ctx context.Context,
-	sessionID string,
 	plan *types.VideoGenerationPlan,
 ) (err error) {
 	builder := NewVideoConfigGenerator(a.logger, a.videoService).
-		Init(sessionID, plan.VideoName)
+		Init(a.sessionID, plan.VideoName)
 	builder.AddVideoBackground(toBackgroundStyle(plan.BackgroundStyle))
 
 	// Compute total slides upfront so the UI can show progress.
@@ -281,7 +291,7 @@ func (a *agentV1) applyPlan(
 		totalSlides += len(section.Slides)
 	}
 	if stateErr := a.updateState(ctx, VideoAgentState{
-		VideoID:     sessionID,
+		Thinking:    generating,
 		State:       stateStatusProcessing,
 		TotalSlides: totalSlides,
 	}); stateErr != nil {
@@ -327,7 +337,6 @@ func (a *agentV1) applyPlan(
 		}
 		firstSlidePersisted = true
 		if stateErr := a.updateState(ctx, VideoAgentState{
-			VideoID:     sessionID,
 			State:       stateStatusReady,
 			TotalSlides: totalSlides, // preserve so GetVideo keeps streaming the count
 		}); stateErr != nil {
@@ -336,77 +345,95 @@ func (a *agentV1) applyPlan(
 	}
 
 	selectedTemplateIDs := make([]string, 0)
+	planExecutedSoFar := &types.VideoGenerationPlan{
+		Sections: make([]types.Section, 0, len(plan.Sections)),
+	}
 
-	for _, section := range plan.Sections {
+	for si, section := range plan.Sections {
 		sectionID := builder.AddSection(section.Name)
+
+		// mirror section in planExecutedSoFar
+		planExecutedSoFar.Sections = append(planExecutedSoFar.Sections, types.Section{
+			Name:   section.Name,
+			Slides: make([]types.Union2AnimationSlideOrMediaSlide, 0, len(section.Slides)),
+		})
 
 		for _, slide := range section.Slides {
 			// ---- Cancellation check (runs before every slide) ----
 			//
 			// Hard cancel: runCtx was cancelled (e.g. client disconnected during planning).
 			if ctx.Err() != nil {
-				a.logger.Info("applyPlan: context cancelled, stopping slide generation",
-					zap.String("video_id", sessionID),
-				)
+				a.logger.Info("applyPlan: context cancelled, stopping slide generation")
 				return ctx.Err()
 			}
 			// Soft cancel: StopAgent wrote stateStatusCancelled to Redis.
 			// This is the path taken when the client disconnects from the editor
 			// (GetVideo stream ends) — we do not cancel runCtx in that case so
 			// we rely on this Redis-based signal instead.
-			if currentState, stateErr := a.GetState(ctx, sessionID); stateErr == nil &&
+			if currentState, stateErr := a.GetState(ctx); stateErr == nil &&
 				currentState != nil && currentState.State == stateStatusCancelled {
-				a.logger.Info("applyPlan: soft-cancel signal detected in Redis, stopping slide generation",
-					zap.String("video_id", sessionID),
-				)
+				a.logger.Info("applyPlan: soft-cancel signal detected in Redis, stopping slide generation")
 				return errUserSoftCancelled
 			}
 
 			// ---------------- MEDIA SLIDE ----------------
 			if slide.IsMediaSlide() {
 				media := slide.AsMediaSlide()
-				if media.Description != "" {
-					media.Description = "This is the media slide, user will be asked to upload their product screenshot or clip"
+				if media.BeatDescription != "" {
+					media.BeatDescription = "This is the media slide, user will be asked to upload their product screenshot or clip"
 				}
-				media.SelectedTemplateDescription = utils.Ptr(media.Description)
+				media.SelectedTemplateDescription = utils.Ptr(media.BeatDescription)
 				if err = builder.AddMediaSlide(ctx, sectionID, float32(media.Duration)); err != nil {
 					return agenterrors.VideoPersistFailed("failed to persist media slide", err)
 				}
+
+				// ✅ append AFTER success
+				planExecutedSoFar.Sections[si].Slides = append(planExecutedSoFar.Sections[si].Slides, slide)
+
 				markReadyOnce()
 				continue
 			}
 
 			// ---------------- ANIMATION SLIDE ----------------
-			anim := slide.AsAnimationSlide()
+			currentSlide := slide.AsAnimationSlide()
 
 			// Always include TotalSlides so every Redis write preserves the denominator
 			// that the UI progress bar relies on.
 			if stateErr := a.updateState(ctx, VideoAgentState{
-				VideoID:     sessionID,
-				Thinking:    "Generating...",
+				Thinking:    matching,
 				State:       stateStatusProcessing,
 				TotalSlides: totalSlides,
 			}); stateErr != nil {
 				a.logger.Debug("failed to set generating thinking state", zap.Error(stateErr))
 			}
 
-			selected, err := a.selectTemplate(ctx, sessionID, anim, plan, selectedTemplateIDs, totalSlides)
+			selected, err := a.selectTemplate(ctx, currentSlide, planExecutedSoFar, selectedTemplateIDs)
 			if err != nil {
 				return err
 			}
 
-			anim.SelectedTemplateDescription = utils.Ptr(selected.Description)
+			currentSlide.SelectedTemplateDescription = utils.Ptr(selected.Description)
 
-			templateConfig, err := a.templateExtractor.ExtractConfig(ctx, *anim, selected)
+			if stateErr := a.updateState(ctx, VideoAgentState{
+				Thinking:    matching,
+				State:       stateStatusProcessing,
+				TotalSlides: totalSlides,
+			}); stateErr != nil {
+				a.logger.Debug("failed to set generating thinking state", zap.Error(stateErr))
+			}
+			templateConfig, err := a.templateExtractor.ExtractConfig(ctx, *currentSlide, selected)
 			if err != nil {
 				return agenterrors.TemplateExtractFailed("failed to extract template config", err)
 			}
 
-			if err = builder.AddAnimationSlide(ctx, sectionID, float32(anim.Duration), selected, templateConfig.Config, anim.Voiceover); err != nil {
+			if err = builder.AddAnimationSlide(ctx, sectionID, float32(currentSlide.Duration), selected, templateConfig.Config, currentSlide.Voiceover); err != nil {
 				return agenterrors.VideoPersistFailed("failed to persist animation slide", err)
 			}
 
 			selectedTemplateIDs = append(selectedTemplateIDs, selected.ID)
+
+			// ✅ append AFTER success
+			planExecutedSoFar.Sections[si].Slides = append(planExecutedSoFar.Sections[si].Slides, slide)
 			markReadyOnce()
 		}
 	}
@@ -421,11 +448,9 @@ func (a *agentV1) applyPlan(
 // carries the denominator needed by the UI progress bar.
 func (a *agentV1) selectTemplate(
 	ctx context.Context,
-	sessionID string,
 	anim *types.AnimationSlide,
 	plan *types.VideoGenerationPlan,
 	usedTemplateIDs []string,
-	totalSlides int,
 ) (*models.Template, error) {
 	categories, err := a.retrievalService.MatchCategories(ctx, anim.AnimationType, anim.CategorySearchQuery)
 	if err != nil {
@@ -434,24 +459,8 @@ func (a *agentV1) selectTemplate(
 
 	var selected *models.Template
 	for _, category := range categories {
-		templates, fetchErr := a.retrievalService.FetchTemplates(ctx, anim.AnimationType, category.Name, usedTemplateIDs)
-		if fetchErr != nil {
-			return nil, agenterrors.RetrievalFailed("failed to fetch templates", fetchErr)
-		}
-		if len(templates) == 0 {
-			continue
-		}
-
-		filtered, selectErr := a.templateExtractor.SelectTemplates(ctx, templates, plan, func(chunk string) {
-			if stateErr := a.updateState(ctx, VideoAgentState{
-				VideoID:     sessionID,
-				Thinking:    chunk,
-				State:       stateStatusProcessing,
-				TotalSlides: totalSlides, // preserve denominator on every thinking update
-			}); stateErr != nil {
-				a.logger.Warn("failed to update thinking state", zap.Error(stateErr))
-			}
-		})
+		// semantically match if we have a template available in our library
+		filtered, selectErr := a.retrievalService.MatchTemplates(ctx, anim, category.Name, usedTemplateIDs, plan)
 		if selectErr != nil {
 			return nil, agenterrors.TemplateSelectFailed("failed to select templates", selectErr)
 		}
@@ -488,7 +497,7 @@ var errUserSoftCancelled = errors.New("agent stopped via soft-cancel signal")
 //   - LLM-planning phase (no slides yet): context cancellation (via the caller's
 //     runCtx) is enough — the LLM call respects ctx and will abort on its own.
 func (a *agentV1) StopAgent(ctx context.Context, videoID string) error {
-	state, err := a.GetState(ctx, videoID)
+	state, err := a.GetState(ctx)
 	if err != nil {
 		a.logger.Error("StopAgent: failed to read agent state; cannot determine stop strategy",
 			zap.Error(err),
@@ -523,6 +532,7 @@ func (a *agentV1) StopAgent(ctx context.Context, videoID string) error {
 }
 
 func (a *agentV1) updateState(ctx context.Context, state VideoAgentState) error {
+	state.VideoID = a.sessionID
 	a.publishState(state)
 
 	jsonBytes, err := json.Marshal(state)
@@ -547,8 +557,8 @@ func (a *agentV1) publishState(state VideoAgentState) {
 	}
 }
 
-func (a *agentV1) getPlanningSession(ctx context.Context, sessionID string) (*planningSession, error) {
-	value, err := a.cache.GetKey(ctx, fmt.Sprintf("%s:%s", sessionKeyPrefix, sessionID))
+func (a *agentV1) getPlanningSession(ctx context.Context) (*planningSession, error) {
+	value, err := a.cache.GetKey(ctx, fmt.Sprintf("%s:%s", sessionKeyPrefix, a.sessionID))
 	if err != nil {
 		return nil, agenterrors.SessionUnavailable("failed to read planning session", err)
 	}
@@ -560,20 +570,20 @@ func (a *agentV1) getPlanningSession(ctx context.Context, sessionID string) (*pl
 	return &session, nil
 }
 
-func (a *agentV1) savePlanningSession(ctx context.Context, sessionID string, session *planningSession) error {
+func (a *agentV1) savePlanningSession(ctx context.Context, session *planningSession) error {
 	payload, err := json.Marshal(session)
 	if err != nil {
 		return agenterrors.SessionUnavailable("failed to encode planning session", err)
 	}
 
-	if err := a.cache.SetKey(ctx, fmt.Sprintf("%s:%s", sessionKeyPrefix, sessionID), string(payload), stateTTL); err != nil {
+	if err := a.cache.SetKey(ctx, fmt.Sprintf("%s:%s", sessionKeyPrefix, a.sessionID), string(payload), stateTTL); err != nil {
 		return agenterrors.SessionUnavailable("failed to persist planning session", err)
 	}
 	return nil
 }
 
-func (a *agentV1) GetState(ctx context.Context, sessionID string) (*VideoAgentState, error) {
-	value, err := a.cache.GetKey(ctx, fmt.Sprintf("%s:%s", stateKeyPrefix, sessionID))
+func (a *agentV1) GetState(ctx context.Context) (*VideoAgentState, error) {
+	value, err := a.cache.GetKey(ctx, fmt.Sprintf("%s:%s", stateKeyPrefix, a.sessionID))
 	if err != nil {
 		if errors.Is(err, cache.ErrCacheMiss) {
 			return nil, nil

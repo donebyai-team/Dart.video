@@ -1,4 +1,4 @@
-package template_generator
+package agent
 
 import (
 	"bytes"
@@ -56,7 +56,7 @@ type ValidateAndBuildInput struct {
 	OutputPath string `json:"output_path"`
 	// Config is the template config JSON passed as props to the component
 	// during renderStill validation.
-	Config map[string]any `json:"config,omitempty"`
+	Config json.RawMessage `json:"config,omitempty"`
 }
 
 // ValidateAndBuildOutput is the response from the validator service on success.
