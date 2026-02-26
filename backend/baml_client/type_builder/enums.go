@@ -55,6 +55,10 @@ func (t *AnimationTypeEnumView) ValueCHART() (EnumValueView, error) {
 	return t.inner.Value("CHART")
 }
 
+func (t *AnimationTypeEnumView) ValueSIMPLE_TEXT() (EnumValueView, error) {
+	return t.inner.Value("SIMPLE_TEXT")
+}
+
 func (t *TypeBuilder) AnimationType() (*AnimationTypeEnumView, error) {
 	bld, err := t.inner.Enum("AnimationType")
 	if err != nil {
