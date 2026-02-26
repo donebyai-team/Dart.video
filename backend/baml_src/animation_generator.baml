@@ -17,7 +17,7 @@ function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_hi
     You are a reusable animation template builder.
     Your job is to convert the animation blueprint into:
 
-    1. A RemoteComponent-based Remotion template
+    1. A RemoteComponent-based Remotion template in React tsx
     2. A JSON config for that template
 
     ---

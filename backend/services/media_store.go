@@ -22,6 +22,11 @@ import (
 
 type MediaStore interface {
 	Upload(ctx context.Context, file io.Reader, orgId, fileName string) (*pbcore.UploadedMedia, error)
+	UploadCode(
+		ctx context.Context,
+		code string,
+		fileName string,
+	) (*pbcore.UploadedMedia, error)
 }
 
 type gcpMediaStore struct {
@@ -53,6 +58,7 @@ func NewGcpMediaStore() MediaStore {
 const (
 	publicBucket     = "coasterai-public"
 	assertFolder     = "assets"
+	codeFolder       = "templates"
 	baseGCPBucketURL = "https://storage.googleapis.com"
 )
 
@@ -79,6 +85,36 @@ func normalizeFileName(name string) string {
 	name = reg.ReplaceAllString(name, "")
 
 	return name
+}
+
+func (g gcpMediaStore) UploadCode(
+	ctx context.Context,
+	code string,
+	filePath string,
+) (*pbcore.UploadedMedia, error) {
+
+	file := bytes.NewReader([]byte(code))
+
+	obj := g.bucket.Object(filePath)
+	writer := obj.NewWriter(ctx)
+
+	// Keep minimal metadata
+	writer.ContentDisposition = "inline"
+	writer.CacheControl = "public, max-age=31536000"
+
+	if _, err := io.Copy(writer, file); err != nil {
+		return nil, fmt.Errorf("upload copy failed: %w", err)
+	}
+
+	if err := writer.Close(); err != nil {
+		return nil, fmt.Errorf("writer close failed: %w", err)
+	}
+
+	return &pbcore.UploadedMedia{
+		Url:      fmt.Sprintf("%s/%s/%s", baseGCPBucketURL, publicBucket, filePath),
+		FileName: filePath,
+		MimeType: "",
+	}, nil
 }
 
 func (g gcpMediaStore) Upload(
@@ -136,6 +172,11 @@ func (g gcpMediaStore) Upload(
 
 type imagekitMediaStore struct {
 	ik *imagekit.Client
+}
+
+func (g *imagekitMediaStore) UploadCode(ctx context.Context, code string, fileName string) (*pbcore.UploadedMedia, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 func NewImagekitMediaStore(ik *imagekit.Client) MediaStore {
