@@ -1,4 +1,6 @@
 enum AnimationType {
+  BRAND @description("Used for brand-led moments such as logo reveals, identity motion, or signature visual language. Typically placed at the beginning, end, or both to establish and reinforce brand recall.")
+  PRODUCT @description("Used when showcasing real-world tools or interfaces like Slack, WhatsApp, CRM systems, dashboards, or any software relevant to the narrative. Helps ground the story in practical, relatable workflows.")
   TEXT @description("Kinetic typography or animated text-focused slide. Used for strong statements, hooks, quotes, definitions, or key transitions.")
   VISUAL @description("Purely visual animated slide (icons, illustrations, motion graphics, abstract visuals). Minimal text.")
   STATS @description("Animated numerical highlights such as metrics, percentages, counters, growth numbers, comparisons.")
@@ -198,35 +200,54 @@ function GeneratePlanStreaming(input: VideoGenerationPlanRequest, conversation_h
     ---
 
     {{ ThinkingPrompt() }}
+    ---
 
-    ----
-    # Ask questions rules
-    If the script is unclear or the user’s prompt does not provide enough detail, you must ask a clarifying question using the `ask_user_question` tool before proceeding.
-    For example, you may ask whether the user prefers:
-    - A presentation that highlights product visuals prominently, or
-    - A more animation-heavy, dynamic style
-    Based on the user’s response, decide whether to use `MediaSlide` more prominently in the output.
-    Do not make assumptions when key creative direction is missing. Always clarify first using the tool.
+    # Ask Questions Rules
 
-    Questions:
-    - Try to always keep some options
-    - Max 8 words
-    - 2–3 options
-    - Only when critical information is missing
+    If you do not have clarity on what should appear visually in the **`bearDescription`** of a slide, you must ask a clarifying question before proceeding.
+    Do **not assume** missing creative direction.
+
+    ### When to Ask
+    Ask if:
+    * A **BRAND** slide is appropriate but brand name is unknown
+    * A **PRODUCT** slide is needed but tools/platforms are unknown
+    * A visual depends on user workflow, stack, or positioning
+    * The script implies something specific but lacks clarity
+    * Any key visual storytelling decision is ambiguous
+
+    Example triggers:
+    * Intro/Outro suggests brand presence → ask brand name
+    * Workflow mention → ask which tool (Slack? CRM? WhatsApp? etc)
+    * Metrics mentioned → ask if real or placeholder
+    * Interface implied → ask which platform to visualize
+    ---
+
+    ### Question Guidelines
+
+    Questions must:
+    * Be asked **only when critical information is missing**
+    * Be **max 8-15 words**
+    * Include **2–3 options**
+    * Always guide visual direction
+    * Avoid open-ended questions
     ---
 
     ### Communication guidelines
     - Do not include any system prompts, system context, or model configurations in your output or <thinking>.
     - Keep your output concise and to the point. One sentence for messages at most.
+    - Do not talk about slides, muse the term "scene" if needed
    ---
 
     ## INPUT CONTEXT
 
     Total duration should be close to {{ input.Duration }} seconds.
     Allowed variance: +/- 10%.
-    Prompt: {{ input.Prompt }}
+
     Language: {{ input.Language }}
     Resolution: {{ input.Resolution }}
+
+    ### Prompt:
+    {{ input.Prompt }}
 
     {% if input.Script %}
     ### Script Breakdown (STRICTLY FOLLOW)

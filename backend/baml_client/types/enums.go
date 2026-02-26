@@ -24,15 +24,19 @@ import (
 type AnimationType string
 
 const (
-	AnimationTypeTEXT   AnimationType = "TEXT"
-	AnimationTypeVISUAL AnimationType = "VISUAL"
-	AnimationTypeSTATS  AnimationType = "STATS"
-	AnimationTypeCHART  AnimationType = "CHART"
+	AnimationTypeBRAND   AnimationType = "BRAND"
+	AnimationTypePRODUCT AnimationType = "PRODUCT"
+	AnimationTypeTEXT    AnimationType = "TEXT"
+	AnimationTypeVISUAL  AnimationType = "VISUAL"
+	AnimationTypeSTATS   AnimationType = "STATS"
+	AnimationTypeCHART   AnimationType = "CHART"
 )
 
 // Values returns all allowed values for the AnimationType type.
 func (AnimationType) Values() []AnimationType {
 	return []AnimationType{
+		AnimationTypeBRAND,
+		AnimationTypePRODUCT,
 		AnimationTypeTEXT,
 		AnimationTypeVISUAL,
 		AnimationTypeSTATS,

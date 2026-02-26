@@ -31,6 +31,14 @@ func (t *AnimationTypeEnumView) ListValues() ([]EnumValueView, error) {
 	return builders, nil
 }
 
+func (t *AnimationTypeEnumView) ValueBRAND() (EnumValueView, error) {
+	return t.inner.Value("BRAND")
+}
+
+func (t *AnimationTypeEnumView) ValuePRODUCT() (EnumValueView, error) {
+	return t.inner.Value("PRODUCT")
+}
+
 func (t *AnimationTypeEnumView) ValueTEXT() (EnumValueView, error) {
 	return t.inner.Value("TEXT")
 }
