@@ -128,6 +128,10 @@ func (a *agentV1) Start(ctx context.Context, options StartSessionOptions) (*RunR
 		return nil, agenterrors.InvalidInput("resolution is required", nil)
 	}
 
+	if err := ValidatePrompt(options.Input.Prompt); err != nil {
+		return nil, err
+	}
+
 	script := make([]types.ScriptItem, 0)
 	if options.Input.Script != nil {
 		script = make([]types.ScriptItem, len(options.Input.Script.Items))
@@ -232,6 +236,11 @@ func (a *agentV1) runPlanning(ctx context.Context, sessionID string, session *pl
 	plan := llmResponse.AsVideoGenerationPlan()
 	if plan == nil {
 		return nil, agenterrors.Internal("llm response did not include a plan", nil)
+	}
+
+	err = sanitizeAgentPlan(plan)
+	if err != nil {
+		return nil, agenterrors.Internal(err.Error(), nil)
 	}
 
 	if err := a.applyPlan(ctx, sessionID, plan); err != nil {
