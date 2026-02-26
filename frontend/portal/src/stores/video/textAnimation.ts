@@ -1,5 +1,5 @@
 import { ActiveToolType } from "@/types/tools";
-import { SlideType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { AnimationSlideContent, SlideType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { getSlideTypeConfig } from "./defaults";
 import { getDefaultTemplateProps } from "@/types/textAnimationTemplates";
 import { VideoStoreSet, VideoStoreGet } from "./types";
@@ -28,6 +28,7 @@ export const createTextAnimationActions = (set: VideoStoreSet, get: VideoStoreGe
   /* ================= TEMPLATE SELECT ================= */
 
   handleSelectTextAnimationTemplate(templateId: string) {
+    console.debug("local template changed to", templateId)
     const { videoConfig, selectedSlide } = get();
     if (!videoConfig?.config || !selectedSlide) return;
 
@@ -42,7 +43,7 @@ export const createTextAnimationActions = (set: VideoStoreSet, get: VideoStoreGe
     const currentAnimation = slide.content.value;
 
     const newTemplateConfig = {
-      ...currentAnimation.templateConfig,
+      // ...currentAnimation.templateConfig, // Remove it so that the previous config is removed
       ...defaultProps,
     };
 
@@ -51,8 +52,9 @@ export const createTextAnimationActions = (set: VideoStoreSet, get: VideoStoreGe
       value: {
         ...currentAnimation,
         templateId,
+        templateUrl: "", // IMP: set it to empty so that we don't search for invallid url
         templateConfig: newTemplateConfig,
-      },
+      } as AnimationSlideContent,
     };
 
     const newVideoConfig = updateVideoConfigSections(
@@ -99,7 +101,6 @@ export const createTextAnimationActions = (set: VideoStoreSet, get: VideoStoreGe
     const prevAnimation = slide.content.value;
 
     const newTemplateConfig = {
-      ...prevAnimation.templateConfig,
       ...newProps,
     };
 
@@ -108,7 +109,7 @@ export const createTextAnimationActions = (set: VideoStoreSet, get: VideoStoreGe
       value: {
         ...prevAnimation,
         templateConfig: newTemplateConfig,
-      },
+      } as AnimationSlideContent,
     };
 
     const newVideoConfig = updateVideoConfigSections(

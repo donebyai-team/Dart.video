@@ -100,9 +100,7 @@ const StoryboardSection = ({
 
     const allSlideTypes = [
         { id: SlideType.MEDIA, name: "Image/Video", description: "Add product screen or clip", icon: ImageIcon },
-        { id: SlideType.TEXT_ANIMATION, name: "Text Animation", description: "Animated typography", icon: Type },
-        { id: SlideType.INFOGRAPHIC, name: "Infographic", description: "Data-driven visuals", icon: BarChart3 },
-        { id: SlideType.VISUAL_ANIMATION, name: "Visual Animation", description: "AI-generated motion graphics", icon: Sparkles },
+        { id: SlideType.TEXT_ANIMATION, name: "Animation", description: "Animated scene", icon: Sparkles },
         // { id: SlideType.STACK, name: "Stack", description: "Layered image animations", icon: Layers },
     ];
 

@@ -34,7 +34,7 @@ const AddSlideButton = ({
             className={`w-full flex items-center justify-center gap-1 py-1.5 text-[10px] text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
           >
             <Plus className="w-3 h-3" />
-            Add slide
+            Add scene
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="center" className="w-48 bg-popover">

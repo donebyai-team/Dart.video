@@ -18,7 +18,6 @@ import {
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { useState } from 'react'
 import { useVideoStore } from '@/stores/video'
 import { SlideType, Slide, StackSlideContent, EffectType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { ActiveToolType } from '@/types/tools'
@@ -31,14 +30,6 @@ interface PlayerToolbarProps {
   maxDuration?: number
 }
 
-const slideTypeLabels: Record<SlideType, { label: string; icon: React.ElementType }> = {
-  [SlideType.UNDEFINED]: { label: 'Undefined', icon: HelpCircle }, // or any icon
-  [SlideType.MEDIA]: { label: 'Media', icon: ImageIcon },
-  [SlideType.TEXT_ANIMATION]: { label: 'Text Animation', icon: Type },
-  [SlideType.INFOGRAPHIC]: { label: 'Infographic', icon: BarChart3 },
-  [SlideType.VISUAL_ANIMATION]: { label: 'Visual Animation', icon: Sparkles },
-  [SlideType.STACK]: { label: 'Stack', icon: Layers }
-}
 const insertTools: { id: EffectType; name: string; icon: React.ElementType }[] = [
   { id: EffectType.CALLOUT, name: 'Callout', icon: Focus },
   { id: EffectType.SPOTLIGHT, name: 'Spotlight', icon: CircleDot },
@@ -65,7 +56,6 @@ const PlayerToolbar = ({ onDurationChange, minDuration = 1, maxDuration = 180 }:
     }
   }
 
-  const TypeIcon = slideTypeLabels[slide.type].icon
   const currentBg = backgroundStyleToCSS(getSlideWithBackground(slide));
   const isBackgroundActive = activeTool?.type === ActiveToolType.BACKGROUND
   const activeInsertTool = activeTool?.type === ActiveToolType.INSERT ? activeTool.tool : null
@@ -76,14 +66,7 @@ const PlayerToolbar = ({ onDurationChange, minDuration = 1, maxDuration = 180 }:
     <div className='flex items-center justify-between gap-4 px-4 py-2 border-b border-border bg-background'>
       {/* Left side: Slide info and editing tools */}
       <div className='flex items-center gap-2'>
-        {/* Slide type indicator */}
-        <div className='flex items-center gap-2 text-muted-foreground'>
-          <TypeIcon className='w-4 h-4' />
-          <span className='text-xs font-medium'>{slideTypeLabels[slide.type].label}</span>
-        </div>
-
-        <div className='h-4 w-px bg-border mx-1' />
-
+       
         {/* Background tool */}
         <TooltipProvider delayDuration={200}>
           <Tooltip>

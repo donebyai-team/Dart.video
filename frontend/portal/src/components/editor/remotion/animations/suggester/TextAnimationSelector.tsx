@@ -6,7 +6,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState, useEffect } from "react";
 import type {
     TextAnimationTemplate,
-    TextAnimationTemplateId,
     TextAnimationTemplatesConfig,
 } from "@/types/editor";
 import { AnimationSlideContent, Section, Slide } from "@coasterai/pb/coasterai/core/v1/slide_pb";
@@ -14,7 +13,7 @@ import { AnimationSlideContent, Section, Slide } from "@coasterai/pb/coasterai/c
 interface TextAnimationSelectorProps {
     selectedSlide: { slide: Slide; section: Section };
     onClose: () => void;
-    onApply: (templateId: TextAnimationTemplateId) => void;
+    onApply: (templateId: string) => void;
     config: TextAnimationTemplatesConfig;
 }
 
@@ -70,8 +69,8 @@ const TextAnimationSelector = ({
         <div className="h-full flex flex-col">
             <div className="p-4 border-b border-border flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                    <Type className="w-4 h-4 text-primary" />
-                    <h2 className="font-semibold text-sm">Edit Text Animation</h2>
+                    <Sparkles className="w-4 h-4 text-primary" />
+                    <h2 className="font-semibold text-sm">Edit Animation</h2>
                 </div>
                 <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">
                     <span className="sr-only">Close</span>
@@ -99,16 +98,16 @@ const TextAnimationSelector = ({
                     <div className="space-y-4">
                         <div className="space-y-2">
                             <label className="text-xs font-medium text-muted-foreground">
-                                Script
+                                Prompt
                             </label>
                             <Textarea
                                 value={script}
                                 onChange={(e) => setScript(e.target.value)}
                                 placeholder="Enter your script..."
-                                className="min-h-[100px] text-xs resize-none"
+                                className="min-h-[120px] text-xs resize-none"
                             />
                         </div>
-                        <div className="space-y-2">
+                        {/* <div className="space-y-2">
                             <label className="text-xs font-medium text-muted-foreground">
                                 References (Optional)
                             </label>
@@ -118,7 +117,7 @@ const TextAnimationSelector = ({
                                 placeholder="Add context or references..."
                                 className="min-h-[60px] text-xs resize-none"
                             />
-                        </div>
+                        </div> */}
 
                         <Button
                             onClick={handleRegenerate}
@@ -170,7 +169,7 @@ const TextAnimationSelector = ({
                                                         }`}
                                                 >
                                                     {/* Preview */}
-                                                    <div className={`h-20 ${template.preview} flex items-center justify-center bg-muted/50`}>
+                                                    <div className={`h-16 ${template.preview} flex items-center justify-center bg-muted/50`}>
                                                         <span className="text-foreground/80 font-bold text-sm drop-shadow-sm">
                                                             {template.name}
                                                         </span>

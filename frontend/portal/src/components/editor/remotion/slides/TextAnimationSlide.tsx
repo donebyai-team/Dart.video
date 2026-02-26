@@ -1,5 +1,6 @@
 import { AnimationSlideContent, MetaData, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import React, { useEffect, useState } from 'react'
+
 import * as ReactDOM from 'react-dom'
 import * as ReactJsxRuntime from 'react/jsx-runtime'
 import { AbsoluteFill, continueRender, delayRender } from 'remotion'
@@ -9,6 +10,7 @@ import { TemplateContainer } from '../components/TemplateContainer'
 import { AnimatedBackground } from '../effects/AnimatedBackground'
 import { TemplateConfig } from './InfographicSlide'
 import { backgroundStyleToCSS } from '../../settings/BackgroundSettings'
+import { TemplateRendrer } from '../animations/suggester/TemplateRenderer'
 
 interface TextAnimationSlideProps {
   slide: Slide
@@ -33,10 +35,10 @@ const loadScriptTemplate = async (url: string, globalNames: string[]): Promise<T
       return
     }
 
-    ;(window as any).React = React
-    ;(window as any).ReactDOM = ReactDOM
-    ;(window as any).ReactJSXRuntime = ReactJsxRuntime
-    ;(window as any).Remotion = Remotion
+    ; (window as any).React = React
+      ; (window as any).ReactDOM = ReactDOM
+      ; (window as any).ReactJSXRuntime = ReactJsxRuntime
+      ; (window as any).Remotion = Remotion
 
     const existingScript = document.querySelector<HTMLScriptElement>(
       `script[data-template-url="${url}"]`
@@ -95,22 +97,84 @@ export const TextAnimationSlide: React.FC<TextAnimationSlideProps> = ({
   isEditing = false,
   isSelected = false,
   onUpdate,
+  onSelect
 }) => {
   const [RemoteComponent, setRemoteComponent] = React.useState<TemplateModule | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [editing, setEditing] = useState<boolean>(isEditing)
 
   const content = slide.content.value as AnimationSlideContent
+  // template id of the hard coded templates
+  const localTemplateId = content?.templateId
+
   const templatePath = content?.templateUrl
   const templateMeta = (content?.meta as MetaData) || {}
   const templateConfig = (content?.templateConfig ?? {}) as TemplateConfig
 
   const background = backgroundStyleToCSS(slide.backgroundStyle)
 
-  // Pause Remotion rendering until the remote script has loaded.
-  const [renderHandle] = useState(() => delayRender(`Loading remote template: ${templatePath}`))
+
+  // 🚀 LOCAL TEMPLATE SHORT-CIRCUIT
+  if (!templatePath && localTemplateId) {
+    return (
+      <AbsoluteFill
+        onMouseDown={() => setEditing(true)}
+        style={{
+          background,
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}
+      >
+        <AnimatedBackground width={width} height={height} />
+
+        <TemplateContainer
+          setEditing={setEditing}
+          x={templateMeta.x as number}
+          y={templateMeta.y as number}
+          width={templateMeta.width as number}
+          height={templateMeta.height as number}
+          canvasWidth={width}
+          canvasHeight={height}
+          isEditing={editing}
+          isSelected={isSelected}
+          onSelect={onSelect}
+          onUpdate={updates => {
+            if (onUpdate && content) {
+              onUpdate({
+                ...slide,
+                content: {
+                  case: 'animation',
+                  value: {
+                    ...content,
+                    meta: {
+                      ...templateMeta,
+                      ...updates
+                    }
+                  }
+                }
+              } as Slide)
+            }
+          }}
+        >
+          <TemplateRendrer
+            slide={slide}
+            templateId={localTemplateId}
+            templateConfig={templateConfig}
+            width={templateMeta.width || width * 0.8}
+          />
+        </TemplateContainer>
+      </AbsoluteFill>
+    )
+  }
+
+  const [renderHandle] = useState(() => {
+    if (!templatePath) return null
+    return delayRender(`Loading remote template: ${templatePath}`)
+  })
 
   useEffect(() => {
+    if (!templatePath) return
+
     let disposed = false
     setRemoteComponent(null)
     setIsLoading(true)
@@ -119,38 +183,37 @@ export const TextAnimationSlide: React.FC<TextAnimationSlideProps> = ({
       if (disposed) return
       setRemoteComponent(mod)
       setIsLoading(false)
-      continueRender(renderHandle)
+      if (renderHandle) continueRender(renderHandle)
     }
 
-    ;(async () => {
-      const template = resolveTemplateEntry(templatePath)
-      console.debug('[Resolved Template]', templatePath, template.cdn?.url, template)
+      ; (async () => {
+        const template = resolveTemplateEntry(templatePath)
+        console.debug('[Resolved Template]', templatePath, template.cdn?.url, template)
 
-      try {
-        if (template.cdn?.url) {
-          const mod = await loadScriptTemplate(template.cdn.url, template.cdn.globalNames)
-          finish(mod)
-          return
-        }
-        // No CDN url configured – nothing to load.
-        finish(null)
-      } catch (error) {
-        console.error(`Failed to load template "${templatePath}"`, error)
-
-        // Fallback to local loader if CDN load fails.
-        if (template.local?.url) {
-          try {
-            const mod = await loadScriptTemplate(template.local.url, template.local.globalNames)
+        try {
+          if (template.cdn?.url) {
+            const mod = await loadScriptTemplate(template.cdn.url, template.cdn.globalNames)
             finish(mod)
-          } catch (fallbackError) {
-            console.error(`Fallback local load failed for template "${templatePath}"`, fallbackError)
+            return
+          }
+
+          finish(null)
+        } catch (error) {
+          console.error(`Failed to load template "${templatePath}"`, error)
+
+          if (template.local?.url) {
+            try {
+              const mod = await loadScriptTemplate(template.local.url, template.local.globalNames)
+              finish(mod)
+            } catch (fallbackError) {
+              console.error(`Fallback local load failed for template "${templatePath}"`, fallbackError)
+              finish(null)
+            }
+          } else {
             finish(null)
           }
-        } else {
-          finish(null)
         }
-      }
-    })()
+      })()
 
     return () => {
       disposed = true
@@ -159,19 +222,15 @@ export const TextAnimationSlide: React.FC<TextAnimationSlideProps> = ({
 
   return (
     <AbsoluteFill
-      onMouseDown={() => {
-        setEditing(true)
-      }}
+      onMouseDown={() => setEditing(true)}
       style={{
         background,
         justifyContent: 'center',
         alignItems: 'center'
       }}
     >
-      {/* Animated background particles */}
       <AnimatedBackground width={width} height={height} />
 
-      {/* Template content in container */}
       <TemplateContainer
         setEditing={setEditing}
         x={templateMeta.x as number}
