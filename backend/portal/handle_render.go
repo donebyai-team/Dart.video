@@ -3,6 +3,8 @@ package portal
 import (
 	"connectrpc.com/connect"
 	"context"
+	"errors"
+	"github.com/shank318/coasterai/models"
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
 	"github.com/shank318/coasterai/services"
 )
@@ -16,6 +18,10 @@ func (p *Portal) RenderVideo(ctx context.Context, c *connect.Request[pbportal.Re
 	existingVideo, err := p.db.GetVideoById(ctx, c.Msg.VideoId, actor.OrganizationID)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+
+	if existingVideo.Status != models.VideoStatusCOMPLETED {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("video generation is still processing"))
 	}
 
 	jobID, err := p.renderVideoService.SubmitJob(ctx, &services.SubmitRenderJobInput{

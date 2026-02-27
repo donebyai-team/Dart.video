@@ -451,7 +451,8 @@ func (p *Portal) GetVideo(ctx context.Context, req *connect.Request[pbportal.Get
 
 			var generatedSlides []*pbcore.Slide
 			for _, slide := range section.Slides {
-				if slide.SlideStatus == pbcore.SlideStatus_SLIDE_STATUS_GENERATED {
+				if slide.SlideStatus == pbcore.SlideStatus_SLIDE_STATUS_GENERATED ||
+					slide.SlideStatus == pbcore.SlideStatus_SLIDE_STATUS_UNDEFINED {
 					generatedSlides = append(generatedSlides, slide)
 				}
 			}

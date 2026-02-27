@@ -374,19 +374,15 @@ func (a *agentV1) applyPlan(
 
 			// ---------------- MEDIA SLIDE ----------------
 			if slide.Type == pbcore.SlideType_SLIDE_TYPE_MEDIA {
-				media := slide.GetMedia().Plan
-				if media.BeatDescription != "" {
-					media.BeatDescription = "This is the media slide, user will be asked to upload their product screenshot or clip"
-				}
-				media.SelectedTemplateDescription = utils.Ptr(media.BeatDescription)
+				media := slide.GetMedia()
 
-				if err = builder.UpdateMediaSlide(ctx, slide); err != nil {
+				if err = builder.UpdateMediaSlide(ctx, slide.Id); err != nil {
 					return agenterrors.VideoPersistFailed("failed to persist media slide", err)
 				}
 
 				// ✅ append AFTER success
 				planExecutedSoFar.Sections[si].Slides = append(planExecutedSoFar.Sections[si].Slides,
-					types.Union2AnimationSlideOrMediaSlide__NewMediaSlide(*media.ToModel()),
+					types.Union2AnimationSlideOrMediaSlide__NewMediaSlide(*media.Plan.ToModel()),
 				)
 
 				markReadyOnce()
@@ -410,10 +406,6 @@ func (a *agentV1) applyPlan(
 				return err
 			}
 
-			// update the selected template description
-			// for future slides to know what's being selected so far
-			currentSlide.Plan.SelectedTemplateDescription = utils.Ptr(selected.Description)
-
 			if stateErr := a.updateState(ctx, VideoAgentState{
 				Thinking: extracting,
 				State:    stateStatusProcessing,
@@ -425,7 +417,7 @@ func (a *agentV1) applyPlan(
 				return agenterrors.TemplateExtractFailed("failed to extract template config", err)
 			}
 
-			if err = builder.UpdateAnimationSlide(ctx, slide, selected, templateConfig.Config); err != nil {
+			if err = builder.UpdateAnimationSlide(ctx, slide.Id, selected, templateConfig.Config); err != nil {
 				return agenterrors.VideoPersistFailed("failed to persist animation slide", err)
 			}
 

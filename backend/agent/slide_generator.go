@@ -150,7 +150,7 @@ func (g *videoConfigGenerator) CreatePendingSlides(ctx context.Context,
 
 func (g *videoConfigGenerator) UpdateAnimationSlide(
 	ctx context.Context,
-	slide *pbcore.Slide,
+	slideID string,
 	selectedTemplate *models.Template,
 	templateConfig string,
 ) error {
@@ -164,19 +164,44 @@ func (g *videoConfigGenerator) UpdateAnimationSlide(
 		return errors.Wrapf(err, "invalid template config: %s", selectedTemplate.Name)
 	}
 
-	slide.SlideStatus = pbcore.SlideStatus_SLIDE_STATUS_GENERATED
-	slide.GetAnimation().TemplateId = selectedTemplate.Name
-	slide.GetAnimation().TemplateUrl = selectedTemplate.CDNUrl
-	slide.GetAnimation().TemplateConfig = toStruct
+	for _, section := range g.video.Config.Sections {
+		for _, slide := range section.Slides {
+			if slide.Id == slideID {
+				animation := slide.GetAnimation()
+				slide.SlideStatus = pbcore.SlideStatus_SLIDE_STATUS_GENERATED
+				animation.TemplateId = selectedTemplate.Name
+				animation.TemplateUrl = selectedTemplate.CDNUrl
+				animation.TemplateConfig = toStruct
+
+				// update the selected template description
+				// for future slides to know what's being selected so far
+				animation.Plan.SelectedTemplateDescription = utils.Ptr(selectedTemplate.Description)
+			}
+		}
+	}
 
 	return g.update(ctx, models.VideoStatusPROCESSING)
 }
 
 func (g *videoConfigGenerator) UpdateMediaSlide(
 	ctx context.Context,
-	slide *pbcore.Slide,
+	slideID string,
 ) error {
-	slide.SlideStatus = pbcore.SlideStatus_SLIDE_STATUS_GENERATED
+	for _, section := range g.video.Config.Sections {
+		for _, slide := range section.Slides {
+			if slide.Id == slideID {
+				mediaPlan := slide.GetMedia().Plan
+				if mediaPlan.BeatDescription != "" {
+					mediaPlan.BeatDescription = "This is the media slide, user will be asked to upload their product screenshot or clip"
+				}
+
+				// update the selected template description
+				// for future slides to know what's being selected so far
+				mediaPlan.SelectedTemplateDescription = utils.Ptr(mediaPlan.BeatDescription)
+				slide.SlideStatus = pbcore.SlideStatus_SLIDE_STATUS_GENERATED
+			}
+		}
+	}
 	return g.update(ctx, models.VideoStatusPROCESSING)
 }
 
