@@ -3,13 +3,15 @@ class GenerateAnimationPromptRequest {
   currentBeat string @description("Narrative intent of the slide that needs a new visual structure")
   planSoFar Section[] @description("Sections and slides already generated")
   voiceover string?
+  branding VideoBranding
+  slideBackground string
 }
 
 class GenerateAnimationPromptResponse {
   prompt string @description("detailed prompt to generate remotion/react code animation")
 }
 function GenerateAnimationPrompt(resume: GenerateAnimationPromptRequest) -> GenerateAnimationPromptResponse {
-  client "google-ai/gemini-2.0-flash"
+  client "anthropic/claude-opus-4-6"
   prompt #"
     # Visual Narrative Gap Filler
 
@@ -58,6 +60,14 @@ function GenerateAnimationPrompt(resume: GenerateAnimationPromptRequest) -> Gene
     - Adds new visual meaning
     - Feels cohesive with existing tone
 
+    4. What does each type of animation mean
+      BRAND @description("Used for brand-led moments such as logo reveals, identity motion, or signature visual language. Typically placed at the beginning, end, or both to establish and reinforce brand recall.")
+      PRODUCT @description("Used when showcasing real-world tools or interfaces like Slack, WhatsApp, CRM systems, dashboards, or any software relevant to the narrative. Helps ground the story in practical, relatable workflows.")
+      TEXT @description("Kinetic typography or animated text-focused slide with icons, sections etc. Used for strong statements, hooks, quotes, definitions, or key transitions.")
+      VISUAL @description("Purely visual animated slide (icons, illustrations, motion graphics, abstract visuals). Minimal text.")
+      STATS @description("Animated numerical highlights such as metrics, percentages, counters, growth numbers, comparisons.")
+      CHART @description("Data visualization slide such as bar chart, line chart, pie chart, or graph-based explanation.")
+      SIMPLE_TEXT @description("Used when you need to show a short 1–2 line message without heavy animation. Ideal for pauses, emphasis, or clean statements.")
     --------------------------------------------------
     OUTPUT REQUIREMENTS
     --------------------------------------------------
@@ -75,6 +85,11 @@ function GenerateAnimationPrompt(resume: GenerateAnimationPromptRequest) -> Gene
     Do NOT reference previous templates directly.
     Do NOT output code.
     Output ONLY the animation design prompt.
+
+    IMP:
+    - Whole animation Background must remain transparent[Must have] as we will be placing it over a canvas with existing background
+    - If sections inside the animations needs background, it should be visible on the slide background given below
+
 
     --------------------------------------------------
     INPUT
@@ -103,6 +118,16 @@ function GenerateAnimationPrompt(resume: GenerateAnimationPromptRequest) -> Gene
     Voiceover that will be played in this slide
     {{ resume.voiceover }}
     {% endif %}
+
+    Slide Background:
+    {{ resume.slideBackground }}
+
+    Brand Colors:
+    Primary: {{ resume.branding.colors.primary }}
+    Secondary: {{ resume.branding.colors.secondary }}
+    Accent: {{ resume.branding.colors.accent }}
+    Text: {{ resume.branding.colors.text }}
+    ---
 
     --------------------------------------------------
 

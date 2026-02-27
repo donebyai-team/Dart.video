@@ -16,24 +16,64 @@
                         "transition": "TRANSITION_FADE",
                         "transitionDuration": 0.3,
                         "animation": {
-                            "templateId": "text-cascade",
+                            "templateId": "letter-cascade",
+                            "templateUrl": "templates/generated/test1/SimpleText2.cdn.js",
                             "templateConfig": {
-                                "centerText": {
-                                    "style": {
-                                        "color": "#ffffff",
-                                        "fontFamily": "Arial",
-                                        "fontSize": 64
-                                    },
-                                    "text": "I am a center text"
-                                }
+                                "mainQuestion": [
+                                    "Struggling",
+                                    "to",
+                                    "find",
+                                    "relevant",
+                                    "leads",
+                                    "on",
+                                    "Reddit?"
+                                ],
+                                "emphasisWord": "Struggling",
+                                "noiseFragments": [
+                                    "[advice needed]",
+                                    "anyone tried…",
+                                    "looking for a tool…",
+                                    "random meme",
+                                    "off-topic rant",
+                                    "just venting",
+                                    "hot take",
+                                    "unpopular opinion",
+                                    "[help]",
+                                    "is it just me or…",
+                                    "ELI5 request",
+                                    "TIFU post",
+                                    "shower thought",
+                                    "rate my setup",
+                                    "need recommendations",
+                                    "daily thread",
+                                    "[serious]",
+                                    "meta discussion",
+                                    "weekly roundup",
+                                    "first post here",
+                                    "can confirm",
+                                    "this is the way",
+                                    "check out my blog",
+                                    "self-promo",
+                                    "AMA request",
+                                    "what do you think?",
+                                    "PSA:",
+                                    "TIL something",
+                                    "controversial take",
+                                    "unpopular opinion",
+                                    "lost redditor",
+                                    "repost alert",
+                                    "link in bio",
+                                    "mod post",
+                                    "[deleted]",
+                                    "[removed]"
+                                ]
                             },
                             "meta": {
-                                "x": 192,
-                                "y": 108,
+                                "x": 300.47525,
+                                "y": 79.21945,
                                 "width": 1536,
                                 "height": 864
-                            },
-                            "templateUrl": "templates/text-animation/text-cascade.cdn.js"
+                            }
                         }
                     },
                     {
@@ -82,6 +122,29 @@
                                 "mimeType": "video/mp4",
                                 "duration": 5.76,
                                 "fileName": "untitled-0.mp4"
+                            }
+                        }
+                    },
+                    {
+                        "id": "hook-1772090347760",
+                        "type": "SLIDE_TYPE_TEXT_ANIMATION",
+                        "duration": 5,
+                        "transitionDuration": 0.3,
+                        "backgroundStyle": {
+                            "solid": {
+                                "hex": "transparent"
+                            }
+                        },
+                        "animation": {
+                            "templateId": "number-counter",
+                            "templateConfig": {},
+                            "meta": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864,
+                                "scale": 1,
+                                "rotation": 0
                             }
                         }
                     }
@@ -426,10 +489,10 @@
             "width": 1920,
             "height": 1080
         },
-        "duration": 51.52,
+        "duration": 50.820004,
         "backgroundAudioUrl": "https://ik.imagekit.io/coasterai/freepik-deep-calm_A4WXzk4Mk.mp3"
     },
     "createdAt": "2026-02-20T09:08:01.471111Z",
     "status": "VIDEO_STATUS_COMPLETED",
-    "version": "64"
+    "version": "83"
 }

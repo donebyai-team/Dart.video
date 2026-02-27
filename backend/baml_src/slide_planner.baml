@@ -70,7 +70,7 @@ class BrandColors {
 }
 
 class VideoBranding {
-  colors BrandColors
+  colors BrandColors @description("make sure the brand colors are visible and does not get blended with *background* gradient")
 }
 
 class Gradient {
@@ -84,7 +84,7 @@ class GradientStop {
 }
 
 class VideoBackground {
-  gradient Gradient @description("gradient to apply to all slides background")
+  gradient Gradient @description("gradient to apply to all slides *background*")
 }
 
 class VideoGenerationPlan {

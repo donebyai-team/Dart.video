@@ -18,30 +18,6 @@ client<llm> CustomClaudeOpusWithSkills {
   options {
     model "claude-opus-4-6"
     api_key env.ANTHROPIC_API_KEY
-
-    // Enable skills and code execution beta features
-    headers {
-      "anthropic-beta" "code-execution-2025-08-25,skills-2025-10-02"
-    }
-
-    // Configure the container with custom skills
-    container {
-      skills [
-        {
-          type "custom"
-          skill_id "skill_01Cw4WKUTCdXebhg45GnnZ1Q"
-          version "1772108625690649"
-        }
-      ]
-    }
-
-    // Add code execution tool
-    tools [
-      {
-        type "code_execution_20250825"
-        name "code_execution"
-      }
-    ]
   }
 }
 

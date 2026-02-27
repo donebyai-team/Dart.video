@@ -272,6 +272,7 @@ type GenerateAnimationCodeRequest struct {
 	Duration        int64         `json:"duration"`
 	Voiceover       *string       `json:"voiceover"`
 	Branding        VideoBranding `json:"branding"`
+	SlideBackground string        `json:"slideBackground"`
 }
 
 func (c *GenerateAnimationCodeRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -303,6 +304,9 @@ func (c *GenerateAnimationCodeRequest) Decode(holder *cffi.CFFIValueClass, typeM
 		case "branding":
 			c.Branding = baml.Decode(valueHolder).Interface().(VideoBranding)
 
+		case "slideBackground":
+			c.SlideBackground = baml.Decode(valueHolder).Interface().(string)
+
 		default:
 
 			panic(fmt.Sprintf("unexpected field: %s in class GenerateAnimationCodeRequest", key))
@@ -325,6 +329,8 @@ func (c GenerateAnimationCodeRequest) Encode() (*cffi.HostValue, error) {
 
 	fields["branding"] = c.Branding
 
+	fields["slideBackground"] = c.SlideBackground
+
 	return baml.EncodeClass("GenerateAnimationCodeRequest", fields, nil)
 }
 
@@ -333,8 +339,8 @@ func (c GenerateAnimationCodeRequest) BamlTypeName() string {
 }
 
 type GenerateAnimationCodeResponse struct {
-	Code   string `json:"code"`
-	Config string `json:"config"`
+	Code   string  `json:"code"`
+	Config *string `json:"config"`
 }
 
 func (c *GenerateAnimationCodeResponse) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -355,7 +361,7 @@ func (c *GenerateAnimationCodeResponse) Decode(holder *cffi.CFFIValueClass, type
 			c.Code = baml.Decode(valueHolder).Interface().(string)
 
 		case "config":
-			c.Config = baml.Decode(valueHolder).Interface().(string)
+			c.Config = baml.Decode(valueHolder).Interface().(*string)
 
 		default:
 
@@ -381,10 +387,12 @@ func (c GenerateAnimationCodeResponse) BamlTypeName() string {
 }
 
 type GenerateAnimationPromptRequest struct {
-	AnimationType AnimationType `json:"animationType"`
-	CurrentBeat   string        `json:"currentBeat"`
-	PlanSoFar     []Section     `json:"planSoFar"`
-	Voiceover     *string       `json:"voiceover"`
+	AnimationType   AnimationType `json:"animationType"`
+	CurrentBeat     string        `json:"currentBeat"`
+	PlanSoFar       []Section     `json:"planSoFar"`
+	Voiceover       *string       `json:"voiceover"`
+	Branding        VideoBranding `json:"branding"`
+	SlideBackground string        `json:"slideBackground"`
 }
 
 func (c *GenerateAnimationPromptRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -413,6 +421,12 @@ func (c *GenerateAnimationPromptRequest) Decode(holder *cffi.CFFIValueClass, typ
 		case "voiceover":
 			c.Voiceover = baml.Decode(valueHolder).Interface().(*string)
 
+		case "branding":
+			c.Branding = baml.Decode(valueHolder).Interface().(VideoBranding)
+
+		case "slideBackground":
+			c.SlideBackground = baml.Decode(valueHolder).Interface().(string)
+
 		default:
 
 			panic(fmt.Sprintf("unexpected field: %s in class GenerateAnimationPromptRequest", key))
@@ -432,6 +446,10 @@ func (c GenerateAnimationPromptRequest) Encode() (*cffi.HostValue, error) {
 	fields["planSoFar"] = c.PlanSoFar
 
 	fields["voiceover"] = c.Voiceover
+
+	fields["branding"] = c.Branding
+
+	fields["slideBackground"] = c.SlideBackground
 
 	return baml.EncodeClass("GenerateAnimationPromptRequest", fields, nil)
 }

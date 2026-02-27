@@ -341,7 +341,9 @@ func (a *agentV1) applyPlan(
 
 	selectedTemplateIDs := make([]string, 0)
 	planExecutedSoFar := &types.VideoGenerationPlan{
-		Sections: make([]types.Section, 0, len(plan.Sections)),
+		Sections:        make([]types.Section, 0, len(plan.Sections)),
+		Branding:        aiPlan.Branding, // TODO: Store this in metadata
+		BackgroundStyle: aiPlan.BackgroundStyle,
 	}
 
 	for si, section := range plan.Sections {
@@ -400,16 +402,7 @@ func (a *agentV1) applyPlan(
 				return err
 			}
 
-			a.updateState(ctx, VideoAgentState{
-				Thinking: extracting,
-				State:    stateStatusProcessing,
-			})
-			templateConfig, err := a.animationGenerator.ExtractConfig(ctx, currentSlide.Plan.ToModel(), selected)
-			if err != nil {
-				return agenterrors.TemplateExtractFailed("failed to extract template config", err)
-			}
-
-			if err = builder.UpdateAnimationSlide(ctx, slide.Id, selected, templateConfig.Config); err != nil {
+			if err = builder.UpdateAnimationSlide(ctx, slide.Id, selected); err != nil {
 				return agenterrors.VideoPersistFailed("failed to persist animation slide", err)
 			}
 
@@ -455,6 +448,23 @@ func (a *agentV1) selectTemplate(
 		}
 
 		selected = filtered[0]
+
+		a.logger.Info("found a matching template",
+			zap.String("category_name", category.Name),
+			zap.String("template_name", selected.Name),
+			zap.String("template_nid", selected.ID),
+		)
+
+		// Extract config
+		a.updateState(ctx, VideoAgentState{
+			Thinking: extracting,
+			State:    stateStatusProcessing,
+		})
+		templateConfig, err := a.animationGenerator.ExtractConfig(ctx, anim, selected)
+		if err != nil {
+			return nil, agenterrors.TemplateExtractFailed("failed to extract template config", err)
+		}
+		selected.GeneratedConfig = json.RawMessage(templateConfig.Config)
 		break
 	}
 

@@ -44,10 +44,14 @@ func UnmarshalProto(value any, msg proto.Message) error {
 	return protojson.Unmarshal(bs, msg)
 }
 
-func StringToStruct(jsonStr string) (*structpb.Struct, error) {
+func RawMessageToStruct(raw json.RawMessage) (*structpb.Struct, error) {
 	var data map[string]interface{}
 
-	if err := json.Unmarshal([]byte(jsonStr), &data); err != nil {
+	if len(raw) == 0 {
+		return structpb.NewStruct(map[string]interface{}{})
+	}
+
+	if err := json.Unmarshal(raw, &data); err != nil {
 		return nil, err
 	}
 

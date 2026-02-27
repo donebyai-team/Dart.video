@@ -152,14 +152,13 @@ func (g *videoConfigGenerator) UpdateAnimationSlide(
 	ctx context.Context,
 	slideID string,
 	selectedTemplate *models.Template,
-	templateConfig string,
 ) error {
 
-	toStruct, err := utils.StringToStruct(templateConfig)
+	toStruct, err := utils.RawMessageToStruct(selectedTemplate.GeneratedConfig)
 	if err != nil {
 		g.logger.Error("failed to convert template config",
 			zap.Error(err),
-			zap.String("template_config", templateConfig),
+			zap.Any("template_config", selectedTemplate.GeneratedConfig),
 		)
 		return errors.Wrapf(err, "invalid template config: %s", selectedTemplate.Name)
 	}

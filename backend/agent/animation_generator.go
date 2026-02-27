@@ -128,10 +128,12 @@ func (l animationGenerator) Generate(
 	})
 
 	input := types.GenerateAnimationPromptRequest{
-		CurrentBeat:   animation.BeatDescription,
-		PlanSoFar:     planSoFar.Sections,
-		AnimationType: animation.AnimationType,
-		Voiceover:     animation.Voiceover,
+		CurrentBeat:     animation.BeatDescription,
+		PlanSoFar:       planSoFar.Sections,
+		AnimationType:   animation.AnimationType,
+		Voiceover:       animation.Voiceover,
+		Branding:        planSoFar.Branding,
+		SlideBackground: gradientToCSS(planSoFar.BackgroundStyle.Gradient),
 	}
 
 	output, err := baml_client.GenerateAnimationPrompt(ctx, input)
@@ -145,6 +147,7 @@ func (l animationGenerator) Generate(
 		Voiceover:       animation.Voiceover,
 		Branding:        planSoFar.Branding,
 		AnimationType:   animation.AnimationType,
+		SlideBackground: gradientToCSS(planSoFar.BackgroundStyle.Gradient),
 	}
 
 	conversationHistory := make([]types.Message, 0)
@@ -163,11 +166,15 @@ func (l animationGenerator) Generate(
 			return nil, agenterrors.AnimationGenerationFailed("failed to generate animation", err)
 		}
 
-		config, err := json.Marshal(generatedAnimation.Config)
-		if err != nil {
-			return nil, agenterrors.AnimationGenerationFailed("failed to marshal animation config", err)
+		// Default
+		generatedConfig := json.RawMessage(`{}`)
+		if generatedAnimation.Config != nil {
+			config, err := json.Marshal(generatedAnimation.Config)
+			if err != nil {
+				return nil, agenterrors.AnimationGenerationFailed("failed to marshal animation config", err)
+			}
+			generatedConfig = config
 		}
-
 		indentedCode := indentCode(generatedAnimation.Code)
 		codeFilePath := fmt.Sprintf("templates/generated/%s/%s", params.OrgID, params.SessionID)
 
@@ -195,7 +202,7 @@ func (l animationGenerator) Generate(
 			Code:          indentedCode,
 			ComponentName: componentName,
 			OutputPath:    fmt.Sprintf("templates/generated/%s/%s", params.OrgID, params.SessionID),
-			Config:        config,
+			Config:        generatedConfig,
 		})
 
 		if err == nil {
@@ -203,12 +210,13 @@ func (l animationGenerator) Generate(
 				Message: CreativeStageMessage(StageReady, 0),
 			})
 			return &models.Template{
-				ID:            uuid.New().String(),
-				Name:          componentName,
-				AnimationType: types.AnimationTypeTEXT,
-				Schema:        nil,
-				CDNUrl:        validateCodeResponse.JSPath,
-				Repeatable:    false,
+				ID:              uuid.New().String(),
+				Name:            componentName,
+				AnimationType:   types.AnimationTypeTEXT,
+				Schema:          nil,
+				CDNUrl:          validateCodeResponse.JSPath,
+				Repeatable:      false,
+				GeneratedConfig: generatedConfig,
 			}, nil
 		}
 
@@ -218,7 +226,7 @@ func (l animationGenerator) Generate(
 
 			conversationHistory = append(conversationHistory,
 				types.Message{
-					Role:    types.Union3KassistantOrKtoolOrKuser__NewKassistant(),
+					Role:    types.Union3KassistantOrKtoolOrKuser__NewKuser(),
 					Content: "Build failed with error:\n" + buildErr.Error(),
 				},
 			)
@@ -286,6 +294,20 @@ func (l animationGenerator) ExtractConfig(ctx context.Context, slide *types.Anim
 	}
 
 	return &output, nil
+}
+
+func gradientToCSS(g types.Gradient) string {
+	if len(g.Stops) == 0 {
+		return ""
+	}
+
+	var parts []string
+
+	for _, s := range g.Stops {
+		parts = append(parts, fmt.Sprintf("%s %d%%", s.Color, s.Position))
+	}
+
+	return fmt.Sprintf("linear-gradient(%ddeg, %s)", g.Angle, strings.Join(parts, ", "))
 }
 
 func indentCode(code string) string {

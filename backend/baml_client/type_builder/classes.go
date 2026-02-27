@@ -231,6 +231,10 @@ func (t *GenerateAnimationCodeRequestClassView) PropertyBranding() (ClassPropert
 	return t.inner.Property("branding")
 }
 
+func (t *GenerateAnimationCodeRequestClassView) PropertySlideBackground() (ClassPropertyView, error) {
+	return t.inner.Property("slideBackground")
+}
+
 func (t *TypeBuilder) GenerateAnimationCodeRequest() (*GenerateAnimationCodeRequestClassView, error) {
 	bld, err := t.inner.Class("GenerateAnimationCodeRequest")
 	if err != nil {
@@ -309,6 +313,14 @@ func (t *GenerateAnimationPromptRequestClassView) PropertyPlanSoFar() (ClassProp
 
 func (t *GenerateAnimationPromptRequestClassView) PropertyVoiceover() (ClassPropertyView, error) {
 	return t.inner.Property("voiceover")
+}
+
+func (t *GenerateAnimationPromptRequestClassView) PropertyBranding() (ClassPropertyView, error) {
+	return t.inner.Property("branding")
+}
+
+func (t *GenerateAnimationPromptRequestClassView) PropertySlideBackground() (ClassPropertyView, error) {
+	return t.inner.Property("slideBackground")
 }
 
 func (t *TypeBuilder) GenerateAnimationPromptRequest() (*GenerateAnimationPromptRequestClassView, error) {

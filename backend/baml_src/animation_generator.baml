@@ -4,20 +4,21 @@ class GenerateAnimationCodeRequest {
   duration int @description("Duration of the slide in seconds")
   voiceover string? @description("Optional narration text for timing alignment")
   branding VideoBranding
+  slideBackground string
 }
 
 class GenerateAnimationCodeResponse {
   code string @description("Typescript code")
-  config string @description("JSON config to drive the animation template")
+  config string? @description("JSON config to drive the animation template")
 }
 
 function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_history: Message[]) -> GenerateAnimationCodeResponse {
-  client "google-ai/gemini-2.0-flash"
+  client "anthropic/claude-opus-4-6"
   prompt #"
     You are a reusable animation template builder.Your job is to convert an animation blueprint into:
 
     1. A RemoteComponent-based Remotion template (React TSX)
-    2. A JSON config for that template
+    2. A JSON config for that template to let user change text values
 
     ---
     ## CONTEXT
@@ -127,12 +128,14 @@ function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_hi
     ---
 
     ## IMPLEMENTATION RULES
-    - Background must remain transparent
+    - Whole animation Background must remain transparent[Must have] as we will be placing it over a canvas with existing background
+    - If sections inside the animations needs background, it should be visible on the slide background given below
     - Maintain resolution-based layout
     - Only text comes from props
     - Repeatable text must use arrays
     - Use spring for motion
     - Use interpolate for transforms
+    - The Remotion tsx code should be props/config driven for text values.
 
     ---
 
@@ -154,6 +157,9 @@ function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_hi
     Voiceover that will be played in this slide:
     {{ resume.voiceover }}
     {% endif %}
+
+    Slide Background:
+    {{ resume.slideBackground }}
 
     Brand Colors:
     Primary: {{ resume.branding.colors.primary }}
