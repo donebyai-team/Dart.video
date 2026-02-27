@@ -267,6 +267,7 @@ func (c Category) BamlTypeName() string {
 }
 
 type GenerateAnimationCodeRequest struct {
+	AnimationType   AnimationType `json:"animationType"`
 	AnimationPrompt string        `json:"animationPrompt"`
 	Duration        int64         `json:"duration"`
 	Voiceover       *string       `json:"voiceover"`
@@ -286,6 +287,9 @@ func (c *GenerateAnimationCodeRequest) Decode(holder *cffi.CFFIValueClass, typeM
 		key := field.Key
 		valueHolder := field.Value
 		switch key {
+
+		case "animationType":
+			c.AnimationType = baml.Decode(valueHolder).Interface().(AnimationType)
 
 		case "animationPrompt":
 			c.AnimationPrompt = baml.Decode(valueHolder).Interface().(string)
@@ -310,6 +314,8 @@ func (c *GenerateAnimationCodeRequest) Decode(holder *cffi.CFFIValueClass, typeM
 
 func (c GenerateAnimationCodeRequest) Encode() (*cffi.HostValue, error) {
 	fields := map[string]any{}
+
+	fields["animationType"] = c.AnimationType
 
 	fields["animationPrompt"] = c.AnimationPrompt
 
@@ -375,8 +381,10 @@ func (c GenerateAnimationCodeResponse) BamlTypeName() string {
 }
 
 type GenerateAnimationPromptRequest struct {
-	CurrentBeat string    `json:"currentBeat"`
-	PlanSoFar   []Section `json:"planSoFar"`
+	AnimationType AnimationType `json:"animationType"`
+	CurrentBeat   string        `json:"currentBeat"`
+	PlanSoFar     []Section     `json:"planSoFar"`
+	Voiceover     *string       `json:"voiceover"`
 }
 
 func (c *GenerateAnimationPromptRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -393,11 +401,17 @@ func (c *GenerateAnimationPromptRequest) Decode(holder *cffi.CFFIValueClass, typ
 		valueHolder := field.Value
 		switch key {
 
+		case "animationType":
+			c.AnimationType = baml.Decode(valueHolder).Interface().(AnimationType)
+
 		case "currentBeat":
 			c.CurrentBeat = baml.Decode(valueHolder).Interface().(string)
 
 		case "planSoFar":
 			c.PlanSoFar = baml.Decode(valueHolder).Interface().([]Section)
+
+		case "voiceover":
+			c.Voiceover = baml.Decode(valueHolder).Interface().(*string)
 
 		default:
 
@@ -411,9 +425,13 @@ func (c *GenerateAnimationPromptRequest) Decode(holder *cffi.CFFIValueClass, typ
 func (c GenerateAnimationPromptRequest) Encode() (*cffi.HostValue, error) {
 	fields := map[string]any{}
 
+	fields["animationType"] = c.AnimationType
+
 	fields["currentBeat"] = c.CurrentBeat
 
 	fields["planSoFar"] = c.PlanSoFar
+
+	fields["voiceover"] = c.Voiceover
 
 	return baml.EncodeClass("GenerateAnimationPromptRequest", fields, nil)
 }

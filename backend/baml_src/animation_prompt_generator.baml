@@ -1,6 +1,8 @@
 class GenerateAnimationPromptRequest {
+  animationType AnimationType
   currentBeat string @description("Narrative intent of the slide that needs a new visual structure")
   planSoFar Section[] @description("Sections and slides already generated")
+  voiceover string?
 }
 
 class GenerateAnimationPromptResponse {
@@ -39,7 +41,7 @@ function GenerateAnimationPrompt(resume: GenerateAnimationPromptRequest) -> Gene
     EVALUATION STEPS
     --------------------------------------------------
 
-    1. Understand story so far
+    1. Understand story so far and provided AnimationType
     - What has already been introduced?
     - What visual styles have been used?
 
@@ -59,7 +61,6 @@ function GenerateAnimationPrompt(resume: GenerateAnimationPromptRequest) -> Gene
     --------------------------------------------------
     OUTPUT REQUIREMENTS
     --------------------------------------------------
-
     Return a production-ready animation design prompt that describes:
 
     - Scene structure
@@ -92,8 +93,16 @@ function GenerateAnimationPrompt(resume: GenerateAnimationPromptRequest) -> Gene
     {% endfor %}
 
     ## Next Beat To Visualize
-
+    Concept outline/beat:
     {{ resume.currentBeat }}
+
+    Animation type to generate
+    {{ resume.animationType }}
+
+    {% if resume.voiceover %}
+    Voiceover that will be played in this slide
+    {{ resume.voiceover }}
+    {% endif %}
 
     --------------------------------------------------
 

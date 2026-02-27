@@ -128,8 +128,10 @@ func (l animationGenerator) Generate(
 	})
 
 	input := types.GenerateAnimationPromptRequest{
-		CurrentBeat: animation.BeatDescription,
-		PlanSoFar:   planSoFar.Sections,
+		CurrentBeat:   animation.BeatDescription,
+		PlanSoFar:     planSoFar.Sections,
+		AnimationType: animation.AnimationType,
+		Voiceover:     animation.Voiceover,
 	}
 
 	output, err := baml_client.GenerateAnimationPrompt(ctx, input)
@@ -142,6 +144,7 @@ func (l animationGenerator) Generate(
 		Duration:        animation.Duration,
 		Voiceover:       animation.Voiceover,
 		Branding:        planSoFar.Branding,
+		AnimationType:   animation.AnimationType,
 	}
 
 	conversationHistory := make([]types.Message, 0)

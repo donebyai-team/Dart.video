@@ -211,6 +211,10 @@ func (t *GenerateAnimationCodeRequestClassView) ListProperties() ([]ClassPropert
 	return builders, nil
 }
 
+func (t *GenerateAnimationCodeRequestClassView) PropertyAnimationType() (ClassPropertyView, error) {
+	return t.inner.Property("animationType")
+}
+
 func (t *GenerateAnimationCodeRequestClassView) PropertyAnimationPrompt() (ClassPropertyView, error) {
 	return t.inner.Property("animationPrompt")
 }
@@ -291,12 +295,20 @@ func (t *GenerateAnimationPromptRequestClassView) ListProperties() ([]ClassPrope
 	return builders, nil
 }
 
+func (t *GenerateAnimationPromptRequestClassView) PropertyAnimationType() (ClassPropertyView, error) {
+	return t.inner.Property("animationType")
+}
+
 func (t *GenerateAnimationPromptRequestClassView) PropertyCurrentBeat() (ClassPropertyView, error) {
 	return t.inner.Property("currentBeat")
 }
 
 func (t *GenerateAnimationPromptRequestClassView) PropertyPlanSoFar() (ClassPropertyView, error) {
 	return t.inner.Property("planSoFar")
+}
+
+func (t *GenerateAnimationPromptRequestClassView) PropertyVoiceover() (ClassPropertyView, error) {
+	return t.inner.Property("voiceover")
 }
 
 func (t *TypeBuilder) GenerateAnimationPromptRequest() (*GenerateAnimationPromptRequestClassView, error) {

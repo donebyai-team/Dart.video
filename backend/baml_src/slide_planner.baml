@@ -184,13 +184,15 @@ function GeneratePlanStreaming(input: VideoGenerationPlanRequest, conversation_h
     - Use MediaSlides where user will be uploading their product screenshot or clips to show the features
     - Avoid overusing one type.
     - DO not use many Animations of type VISUAL
+    - Not each slide needs a voiceover, the flow should feel continuous
+    - More than 50% of the total slides should be MediaSlides so that we don't end up generating a full motion video
 
     ## 6. Sections
     - Divide video into meaningful narrative phases.
     - Sections should represent storytelling shifts.
     - Do not create arbitrary sections.
 
-    ## 7. Slide Repeatability Rules
+    ## 7. Animation Slide Repeatability Rules
      - BRAND: Should not be overused. Use at the start, end, or both. Avoid repeating frequently and do not insert mid-story unless intentional brand recall is needed.
      - PRODUCT: Not more than once, used only when showcasing different tools, workflows, or steps across the narrative.
      - TEXT: Can be used multiple times throughout the story for hooks, transitions, and key statements.
