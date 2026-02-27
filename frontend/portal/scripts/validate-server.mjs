@@ -161,6 +161,8 @@ async function handleValidate(req, res) {
     return;
   }
 
+  console.log("CONFIG RECEIVED:", config)
+
   const uuid = randomUUID();
   // Place at generated/_tmp_<uuid>/ — two levels deep from packages/templates/,
   // matching existing templates (text-animation/text-cascade/) so that
@@ -222,6 +224,7 @@ async function handleValidate(req, res) {
 
     await writeFile(resolve(templatesDir, 'root.tsx'), rootEntry, 'utf8');
 
+    console.log("bundelling..")
     const bundleDir = await bundle({
       entryPoint: resolve(templatesDir, 'root.tsx'),
       webpackOverride: (cfg) => ({
@@ -229,10 +232,16 @@ async function handleValidate(req, res) {
         resolve: {
           ...cfg.resolve,
           alias: {...cfg.resolve?.alias, '@': PORTAL_SRC_DIR},
+          modules: [
+            ...(cfg.resolve?.modules ?? ['node_modules']),
+            resolve(__dirname, '../node_modules'),
+            resolve(__dirname, '../../node_modules'),
+          ],
         },
       }),
     });
 
+    console.log("rendering..")
     const composition = await selectComposition({
       serveUrl: bundleDir,
       id: 'ValidatorComp',

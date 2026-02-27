@@ -223,6 +223,10 @@ func (l animationGenerator) Generate(
 		// Retry only on build errors
 		var buildErr *services.BuildError
 		if errors.As(err, &buildErr) {
+			conversationHistory = append(conversationHistory, types.Message{
+				Role:    types.Union3KassistantOrKtoolOrKuser__NewKassistant(),
+				Content: indentedCode,
+			})
 
 			conversationHistory = append(conversationHistory,
 				types.Message{
