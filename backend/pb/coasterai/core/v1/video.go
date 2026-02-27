@@ -3,6 +3,7 @@ package pbcore
 import (
 	"database/sql/driver"
 	"github.com/pkg/errors"
+	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/utils"
 )
 
@@ -52,4 +53,25 @@ func (v *Script) Scan(value any) error {
 		return errors.Wrap(err, "video metadata")
 	}
 	return nil
+}
+
+func (v *AnimationSlidePlan) ToModel() *types.AnimationSlide {
+	return &types.AnimationSlide{
+		Index:                       v.Index,
+		BeatDescription:             v.BeatDescription,
+		AnimationType:               types.AnimationType(v.AnimationType),
+		CategorySearchQuery:         v.CategorySearcQquery,
+		Duration:                    v.Duration,
+		Voiceover:                   v.Voiceover,
+		SelectedTemplateDescription: v.SelectedTemplateDescription,
+	}
+}
+
+func (v *MediaSlidePlan) ToModel() *types.MediaSlide {
+	return &types.MediaSlide{
+		Index:                       v.Index,
+		BeatDescription:             v.BeatDescription,
+		Duration:                    v.Duration,
+		SelectedTemplateDescription: v.SelectedTemplateDescription,
+	}
 }

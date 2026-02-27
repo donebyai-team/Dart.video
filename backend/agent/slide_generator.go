@@ -3,7 +3,7 @@ package agent
 import (
 	"context"
 	"fmt"
-	"google.golang.org/protobuf/types/known/structpb"
+	"github.com/shank318/coasterai/baml_client/types"
 	"time"
 
 	"github.com/pkg/errors"
@@ -67,13 +67,92 @@ func (g *videoConfigGenerator) Fail(ctx context.Context, cause error, status mod
 	return g.update(ctx, status)
 }
 
-func (g *videoConfigGenerator) AddAnimationSlide(
+// CreatePendingSlides created slides with pending status
+// and each slide plan is stored so that it can be resumed
+func (g *videoConfigGenerator) CreatePendingSlides(ctx context.Context,
+	plan *types.VideoGenerationPlan,
+) (*pbcore.Video, error) {
+	// save background
+	g.AddVideoBackground(toBackgroundStyle(plan.BackgroundStyle))
+
+	// save slides
+	sections := make([]*pbcore.Section, 0, len(plan.Sections))
+	for _, pendingSection := range plan.Sections {
+		section := &pbcore.Section{
+			Id:     fmt.Sprintf("section-%d", time.Now().UnixNano()),
+			Title:  pendingSection.Name,
+			Color:  pickRandomColor(),
+			Slides: []*pbcore.Slide{},
+		}
+		for _, pendingSlide := range pendingSection.Slides {
+			slide := &pbcore.Slide{
+				Id:          fmt.Sprintf("slide-%d", time.Now().UnixNano()),
+				SlideStatus: pbcore.SlideStatus_SLIDE_STATUS_PENDING,
+			}
+
+			if pendingSlide.IsMediaSlide() {
+				mediaPlan := pendingSlide.AsMediaSlide()
+				slide.Type = pbcore.SlideType_SLIDE_TYPE_MEDIA
+				slide.Duration = float32(mediaPlan.Duration)
+				slide.Content = &pbcore.Slide_Media{
+					Media: &pbcore.MediaSlideContent{
+						Meta:      defaultMeta(),
+						Src:       "https://placehold.co/600x400?text=Upload+a+screenshot+or+short+clip+of+your+product&font=roboto",
+						Style:     &pbcore.MediaSlideStyle{},
+						MediaType: pbcore.MediaType_MEDIA_TYPE_IMAGE,
+						Plan: &pbcore.MediaSlidePlan{
+							Index:                       mediaPlan.Index,
+							BeatDescription:             mediaPlan.BeatDescription,
+							Duration:                    mediaPlan.Duration,
+							SelectedTemplateDescription: mediaPlan.SelectedTemplateDescription,
+						},
+					},
+				}
+			}
+
+			if pendingSlide.IsAnimationSlide() {
+				animationPlan := pendingSlide.AsAnimationSlide()
+				slide.Type = pbcore.SlideType_SLIDE_TYPE_TEXT_ANIMATION
+				slide.Duration = float32(animationPlan.Duration)
+				if animationPlan.Voiceover != nil {
+					slide.Transcript = *animationPlan.Voiceover
+				}
+				slide.Content = &pbcore.Slide_Animation{
+					Animation: &pbcore.AnimationSlideContent{
+						Meta: defaultMeta(),
+						Plan: &pbcore.AnimationSlidePlan{
+							Index:                       animationPlan.Index,
+							BeatDescription:             animationPlan.BeatDescription,
+							AnimationType:               string(animationPlan.AnimationType),
+							CategorySearcQquery:         animationPlan.CategorySearchQuery,
+							Duration:                    animationPlan.Duration,
+							Voiceover:                   animationPlan.Voiceover,
+							SelectedTemplateDescription: animationPlan.SelectedTemplateDescription,
+						},
+					},
+				}
+			}
+
+			section.Slides = append(section.Slides, slide)
+		}
+		sections = append(sections, section)
+	}
+
+	g.video.Config.Sections = sections
+
+	err := g.update(ctx, models.VideoStatusPROCESSING)
+	if err != nil {
+		return nil, err
+	}
+
+	return g.video, nil
+}
+
+func (g *videoConfigGenerator) UpdateAnimationSlide(
 	ctx context.Context,
-	sectionID string,
-	duration float32,
+	slide *pbcore.Slide,
 	selectedTemplate *models.Template,
 	templateConfig string,
-	voiceover *string,
 ) error {
 
 	toStruct, err := utils.StringToStruct(templateConfig)
@@ -85,29 +164,19 @@ func (g *videoConfigGenerator) AddAnimationSlide(
 		return errors.Wrapf(err, "invalid template config: %s", selectedTemplate.Name)
 	}
 
-	section, err := g.findSection(sectionID)
-	if err != nil {
-		return err
-	}
-
-	section.Slides = append(section.Slides, newAnimationSlide(duration, selectedTemplate, toStruct, voiceover))
+	slide.SlideStatus = pbcore.SlideStatus_SLIDE_STATUS_GENERATED
+	slide.GetAnimation().TemplateId = selectedTemplate.Name
+	slide.GetAnimation().TemplateUrl = selectedTemplate.CDNUrl
+	slide.GetAnimation().TemplateConfig = toStruct
 
 	return g.update(ctx, models.VideoStatusPROCESSING)
 }
 
-func (g *videoConfigGenerator) AddMediaSlide(
+func (g *videoConfigGenerator) UpdateMediaSlide(
 	ctx context.Context,
-	sectionID string,
-	duration float32,
+	slide *pbcore.Slide,
 ) error {
-
-	section, err := g.findSection(sectionID)
-	if err != nil {
-		return err
-	}
-
-	section.Slides = append(section.Slides, newMediaSlide(duration))
-
+	slide.SlideStatus = pbcore.SlideStatus_SLIDE_STATUS_GENERATED
 	return g.update(ctx, models.VideoStatusPROCESSING)
 }
 
@@ -135,48 +204,6 @@ func (g *videoConfigGenerator) findSection(sectionID string) (*pbcore.Section, e
 		}
 	}
 	return nil, fmt.Errorf("section not found: %s", sectionID)
-}
-
-func newAnimationSlide(
-	duration float32,
-	template *models.Template,
-	templateConfig *structpb.Struct,
-	voiceover *string,
-) *pbcore.Slide {
-	transcript := ""
-	if voiceover != nil {
-		transcript = *voiceover
-	}
-	return &pbcore.Slide{
-		Id:         fmt.Sprintf("slide-%d", time.Now().UnixNano()),
-		Type:       pbcore.SlideType_SLIDE_TYPE_TEXT_ANIMATION,
-		Duration:   duration,
-		Transcript: transcript,
-		Content: &pbcore.Slide_Animation{
-			Animation: &pbcore.AnimationSlideContent{
-				TemplateId:     template.Name,
-				TemplateUrl:    template.CDNUrl,
-				TemplateConfig: templateConfig,
-				Meta:           defaultMeta(),
-			},
-		},
-	}
-}
-
-func newMediaSlide(duration float32) *pbcore.Slide {
-	return &pbcore.Slide{
-		Id:       fmt.Sprintf("slide-%d", time.Now().UnixNano()),
-		Type:     pbcore.SlideType_SLIDE_TYPE_MEDIA,
-		Duration: duration,
-		Content: &pbcore.Slide_Media{
-			Media: &pbcore.MediaSlideContent{
-				Meta:      defaultMeta(),
-				Src:       "https://placehold.co/600x400?text=Upload+a+screenshot+or+short+clip+of+your+product&font=roboto",
-				Style:     &pbcore.MediaSlideStyle{},
-				MediaType: pbcore.MediaType_MEDIA_TYPE_IMAGE,
-			},
-		},
-	}
 }
 
 func defaultMeta() *pbcore.MetaData {

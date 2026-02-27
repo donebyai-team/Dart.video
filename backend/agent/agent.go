@@ -107,6 +107,7 @@ const (
 	// thinking tests
 	generating = "Generating..."
 	matching   = "Matching..."
+	extracting = "Extracting..."
 )
 
 const StateReadyForEditor = stateStatusReady
@@ -115,7 +116,6 @@ type VideoAgentState struct {
 	VideoID          string                 `json:"video_id"`
 	Thinking         string                 `json:"thinking"`
 	State            string                 `json:"state"`
-	TotalSlides      int                    `json:"total_slides,omitempty"`
 	AskUserQuestion  *types.AskUserQuestion `json:"ask_user_question,omitempty"`
 	LastUserResponse string                 `json:"last_user_response,omitempty"`
 }
@@ -279,21 +279,20 @@ func (a *agentV1) runPlanning(ctx context.Context, session *planningSession) (*R
 
 func (a *agentV1) applyPlan(
 	ctx context.Context,
-	plan *types.VideoGenerationPlan,
+	aiPlan *types.VideoGenerationPlan,
 ) (err error) {
+	// save config with pending items
 	builder := NewVideoConfigGenerator(a.logger, a.videoService).
-		Init(a.sessionID, plan.VideoName)
-	builder.AddVideoBackground(toBackgroundStyle(plan.BackgroundStyle))
-
-	// Compute total slides upfront so the UI can show progress.
-	totalSlides := 0
-	for _, section := range plan.Sections {
-		totalSlides += len(section.Slides)
+		Init(a.sessionID, aiPlan.VideoName)
+	pendingVideo, err := builder.CreatePendingSlides(ctx, aiPlan)
+	if err != nil {
+		return fmt.Errorf("creating pending slides: %w", err)
 	}
+
+	plan := pendingVideo.Config
 	if stateErr := a.updateState(ctx, VideoAgentState{
-		Thinking:    generating,
-		State:       stateStatusProcessing,
-		TotalSlides: totalSlides,
+		Thinking: generating,
+		State:    stateStatusProcessing,
 	}); stateErr != nil {
 		a.logger.Warn("failed to publish total slides count", zap.Error(stateErr))
 	}
@@ -337,8 +336,7 @@ func (a *agentV1) applyPlan(
 		}
 		firstSlidePersisted = true
 		if stateErr := a.updateState(ctx, VideoAgentState{
-			State:       stateStatusReady,
-			TotalSlides: totalSlides, // preserve so GetVideo keeps streaming the count
+			State: stateStatusReady,
 		}); stateErr != nil {
 			a.logger.Warn("failed to set ready-for-editor state", zap.Error(stateErr))
 		}
@@ -350,11 +348,9 @@ func (a *agentV1) applyPlan(
 	}
 
 	for si, section := range plan.Sections {
-		sectionID := builder.AddSection(section.Name)
-
 		// mirror section in planExecutedSoFar
 		planExecutedSoFar.Sections = append(planExecutedSoFar.Sections, types.Section{
-			Name:   section.Name,
+			Name:   section.Title,
 			Slides: make([]types.Union2AnimationSlideOrMediaSlide, 0, len(section.Slides)),
 		})
 
@@ -377,63 +373,69 @@ func (a *agentV1) applyPlan(
 			}
 
 			// ---------------- MEDIA SLIDE ----------------
-			if slide.IsMediaSlide() {
-				media := slide.AsMediaSlide()
+			if slide.Type == pbcore.SlideType_SLIDE_TYPE_MEDIA {
+				media := slide.GetMedia().Plan
 				if media.BeatDescription != "" {
 					media.BeatDescription = "This is the media slide, user will be asked to upload their product screenshot or clip"
 				}
 				media.SelectedTemplateDescription = utils.Ptr(media.BeatDescription)
-				if err = builder.AddMediaSlide(ctx, sectionID, float32(media.Duration)); err != nil {
+
+				if err = builder.UpdateMediaSlide(ctx, slide); err != nil {
 					return agenterrors.VideoPersistFailed("failed to persist media slide", err)
 				}
 
 				// ✅ append AFTER success
-				planExecutedSoFar.Sections[si].Slides = append(planExecutedSoFar.Sections[si].Slides, slide)
+				planExecutedSoFar.Sections[si].Slides = append(planExecutedSoFar.Sections[si].Slides,
+					types.Union2AnimationSlideOrMediaSlide__NewMediaSlide(*media.ToModel()),
+				)
 
 				markReadyOnce()
 				continue
 			}
 
 			// ---------------- ANIMATION SLIDE ----------------
-			currentSlide := slide.AsAnimationSlide()
+			currentSlide := slide.GetAnimation()
 
 			// Always include TotalSlides so every Redis write preserves the denominator
 			// that the UI progress bar relies on.
 			if stateErr := a.updateState(ctx, VideoAgentState{
-				Thinking:    matching,
-				State:       stateStatusProcessing,
-				TotalSlides: totalSlides,
+				Thinking: matching,
+				State:    stateStatusProcessing,
 			}); stateErr != nil {
 				a.logger.Debug("failed to set generating thinking state", zap.Error(stateErr))
 			}
 
-			selected, err := a.selectTemplate(ctx, currentSlide, planExecutedSoFar, selectedTemplateIDs)
+			selected, err := a.selectTemplate(ctx, currentSlide.Plan.ToModel(), planExecutedSoFar, selectedTemplateIDs)
 			if err != nil {
 				return err
 			}
 
-			currentSlide.SelectedTemplateDescription = utils.Ptr(selected.Description)
+			// update the selected template description
+			// for future slides to know what's being selected so far
+			currentSlide.Plan.SelectedTemplateDescription = utils.Ptr(selected.Description)
 
 			if stateErr := a.updateState(ctx, VideoAgentState{
-				Thinking:    matching,
-				State:       stateStatusProcessing,
-				TotalSlides: totalSlides,
+				Thinking: extracting,
+				State:    stateStatusProcessing,
 			}); stateErr != nil {
 				a.logger.Debug("failed to set generating thinking state", zap.Error(stateErr))
 			}
-			templateConfig, err := a.templateExtractor.ExtractConfig(ctx, *currentSlide, selected)
+			templateConfig, err := a.templateExtractor.ExtractConfig(ctx, currentSlide.Plan.ToModel(), selected)
 			if err != nil {
 				return agenterrors.TemplateExtractFailed("failed to extract template config", err)
 			}
 
-			if err = builder.AddAnimationSlide(ctx, sectionID, float32(currentSlide.Duration), selected, templateConfig.Config, currentSlide.Voiceover); err != nil {
+			if err = builder.UpdateAnimationSlide(ctx, slide, selected, templateConfig.Config); err != nil {
 				return agenterrors.VideoPersistFailed("failed to persist animation slide", err)
 			}
 
 			selectedTemplateIDs = append(selectedTemplateIDs, selected.ID)
 
 			// ✅ append AFTER success
-			planExecutedSoFar.Sections[si].Slides = append(planExecutedSoFar.Sections[si].Slides, slide)
+			planExecutedSoFar.Sections[si].Slides = append(
+				planExecutedSoFar.Sections[si].Slides,
+				types.Union2AnimationSlideOrMediaSlide__NewAnimationSlide(*currentSlide.Plan.ToModel()),
+			)
 			markReadyOnce()
 		}
 	}
@@ -449,7 +451,7 @@ func (a *agentV1) applyPlan(
 func (a *agentV1) selectTemplate(
 	ctx context.Context,
 	anim *types.AnimationSlide,
-	plan *types.VideoGenerationPlan,
+	planExecutedSoFar *types.VideoGenerationPlan,
 	usedTemplateIDs []string,
 ) (*models.Template, error) {
 	categories, err := a.retrievalService.MatchCategories(ctx, anim.AnimationType, anim.CategorySearchQuery)
@@ -460,7 +462,7 @@ func (a *agentV1) selectTemplate(
 	var selected *models.Template
 	for _, category := range categories {
 		// semantically match if we have a template available in our library
-		filtered, selectErr := a.retrievalService.MatchTemplates(ctx, anim, category.Name, usedTemplateIDs, plan)
+		filtered, selectErr := a.retrievalService.MatchTemplates(ctx, anim, category.Name, usedTemplateIDs, planExecutedSoFar)
 		if selectErr != nil {
 			return nil, agenterrors.TemplateSelectFailed("failed to select templates", selectErr)
 		}
@@ -511,17 +513,15 @@ func (a *agentV1) StopAgent(ctx context.Context, videoID string) error {
 
 	a.logger.Info("StopAgent: current agent state",
 		zap.String("state", state.State),
-		zap.Int("total_slides", state.TotalSlides),
 	)
 
 	// If slides are already being generated, use a Redis soft-cancel so the applyPlan
 	// loop can finish any in-flight persistence work before stopping.
-	if state.TotalSlides > 0 || state.State == stateStatusReady || state.State == stateStatusProcessing {
+	if state.State == stateStatusReady || state.State == stateStatusProcessing {
 		a.logger.Info("StopAgent: in applyPlan phase — writing soft-cancel to Redis")
 		return a.updateState(ctx, VideoAgentState{
-			VideoID:     videoID,
-			State:       stateStatusCancelled,
-			TotalSlides: state.TotalSlides,
+			VideoID: videoID,
+			State:   stateStatusCancelled,
 		})
 	}
 

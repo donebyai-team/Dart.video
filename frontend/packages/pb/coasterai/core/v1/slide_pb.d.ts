@@ -11,6 +11,83 @@ import type { JsonObject, Message } from "@bufbuild/protobuf";
 export declare const file_coasterai_core_v1_slide: GenFile;
 
 /**
+ * @generated from message coasterai.core.v1.AnimationSlidePlan
+ */
+export declare type AnimationSlidePlan = Message<"coasterai.core.v1.AnimationSlidePlan"> & {
+  /**
+   * @generated from field: int64 index = 1;
+   */
+  index: bigint;
+
+  /**
+   * @generated from field: string beatDescription = 2;
+   */
+  beatDescription: string;
+
+  /**
+   * @generated from field: string animationType = 3;
+   */
+  animationType: string;
+
+  /**
+   * @generated from field: string categorySearcQquery = 4;
+   */
+  categorySearcQquery: string;
+
+  /**
+   * @generated from field: int64 duration = 5;
+   */
+  duration: bigint;
+
+  /**
+   * @generated from field: optional string voiceover = 6;
+   */
+  voiceover?: string;
+
+  /**
+   * @generated from field: optional string selectedTemplateDescription = 7;
+   */
+  selectedTemplateDescription?: string;
+};
+
+/**
+ * Describes the message coasterai.core.v1.AnimationSlidePlan.
+ * Use `create(AnimationSlidePlanSchema)` to create a new message.
+ */
+export declare const AnimationSlidePlanSchema: GenMessage<AnimationSlidePlan>;
+
+/**
+ * @generated from message coasterai.core.v1.MediaSlidePlan
+ */
+export declare type MediaSlidePlan = Message<"coasterai.core.v1.MediaSlidePlan"> & {
+  /**
+   * @generated from field: int64 index = 1;
+   */
+  index: bigint;
+
+  /**
+   * @generated from field: string beatDescription = 2;
+   */
+  beatDescription: string;
+
+  /**
+   * @generated from field: int64 duration = 3;
+   */
+  duration: bigint;
+
+  /**
+   * @generated from field: optional string selectedTemplateDescription = 4;
+   */
+  selectedTemplateDescription?: string;
+};
+
+/**
+ * Describes the message coasterai.core.v1.MediaSlidePlan.
+ * Use `create(MediaSlidePlanSchema)` to create a new message.
+ */
+export declare const MediaSlidePlanSchema: GenMessage<MediaSlidePlan>;
+
+/**
  * @generated from message coasterai.core.v1.MediaSlideStyle
  */
 export declare type MediaSlideStyle = Message<"coasterai.core.v1.MediaSlideStyle"> & {
@@ -59,6 +136,11 @@ export declare type MediaSlideContent = Message<"coasterai.core.v1.MediaSlideCon
    * @generated from field: optional coasterai.core.v1.UploadedMedia uploadedMedia = 5;
    */
   uploadedMedia?: UploadedMedia;
+
+  /**
+   * @generated from field: optional coasterai.core.v1.MediaSlidePlan plan = 6;
+   */
+  plan?: MediaSlidePlan;
 };
 
 /**
@@ -131,6 +213,11 @@ export declare type AnimationSlideContent = Message<"coasterai.core.v1.Animation
    * @generated from field: string templateUrl = 4;
    */
   templateUrl: string;
+
+  /**
+   * @generated from field: optional coasterai.core.v1.AnimationSlidePlan plan = 5;
+   */
+  plan?: AnimationSlidePlan;
 };
 
 /**
@@ -465,6 +552,16 @@ export declare type Slide = Message<"coasterai.core.v1.Slide"> & {
    * @generated from field: repeated coasterai.core.v1.ZoomEffect zooms = 20;
    */
   zooms: ZoomEffect[];
+
+  /**
+   * @generated from field: google.protobuf.Struct plan = 21;
+   */
+  plan?: JsonObject;
+
+  /**
+   * @generated from field: coasterai.core.v1.SlideStatus slideStatus = 22;
+   */
+  slideStatus: SlideStatus;
 };
 
 /**
@@ -636,6 +733,31 @@ export declare type Section = Message<"coasterai.core.v1.Section"> & {
  * Use `create(SectionSchema)` to create a new message.
  */
 export declare const SectionSchema: GenMessage<Section>;
+
+/**
+ * @generated from enum coasterai.core.v1.SlideStatus
+ */
+export enum SlideStatus {
+  /**
+   * @generated from enum value: SLIDE_STATUS_UNDEFINED = 0;
+   */
+  UNDEFINED = 0,
+
+  /**
+   * @generated from enum value: SLIDE_STATUS_GENERATED = 1;
+   */
+  GENERATED = 1,
+
+  /**
+   * @generated from enum value: SLIDE_STATUS_PENDING = 2;
+   */
+  PENDING = 2,
+}
+
+/**
+ * Describes the enum coasterai.core.v1.SlideStatus.
+ */
+export declare const SlideStatusSchema: GenEnum<SlideStatus>;
 
 /**
  * @generated from enum coasterai.core.v1.SlideType

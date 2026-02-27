@@ -442,21 +442,41 @@ func (p *Portal) GetVideo(ctx context.Context, req *connect.Request[pbportal.Get
 			return nil, err
 		}
 
+		// Compute total slides upfront so the UI can show progress.
+		// only send generated slides
+		totalSlides := 0
+		var filteredSections []*pbcore.Section
+		for _, section := range video.Config.Sections {
+			totalSlides += len(section.Slides)
+
+			var generatedSlides []*pbcore.Slide
+			for _, slide := range section.Slides {
+				if slide.SlideStatus == pbcore.SlideStatus_SLIDE_STATUS_GENERATED {
+					generatedSlides = append(generatedSlides, slide)
+				}
+			}
+
+			if len(generatedSlides) > 0 {
+				section.Slides = generatedSlides
+				filteredSections = append(filteredSections, section)
+			}
+		}
+
+		video.Config.Sections = filteredSections
+
 		state, err := videoAgent.GetState(ctx)
 		if err != nil {
 			logger.Debug("failed to load agent state in GetVideo", zap.String("video_id", videoID), zap.Error(err))
 		}
 
 		thinking := ""
-		var totalSlides int32
 		if video.Status != models.VideoStatusCOMPLETED && state != nil {
 			thinking = state.Thinking
-			totalSlides = int32(state.TotalSlides)
 		}
 
 		if err := stream.Send(&pbportal.GetVideoResponse{
 			ThinkingSummary: thinking,
-			TotalSlides:     totalSlides,
+			TotalSlides:     int32(totalSlides),
 			Video:           video.ToProto(),
 		}); err != nil {
 			return nil, err

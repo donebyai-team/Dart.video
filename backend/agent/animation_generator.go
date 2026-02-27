@@ -19,7 +19,7 @@ import (
 )
 
 type AnimationGenerator interface {
-	ExtractConfig(ctx context.Context, slide types.AnimationSlide, template *models.Template) (*types.TemplateConfigExtractorOutput, error)
+	ExtractConfig(ctx context.Context, slide *types.AnimationSlide, template *models.Template) (*types.TemplateConfigExtractorOutput, error)
 	Generate(ctx context.Context,
 		animation *types.AnimationSlide,
 		plan *types.VideoGenerationPlan) (*models.Template, error)
@@ -153,7 +153,7 @@ func RandomComponentName() string {
 	return a + b
 }
 
-func (l animationGenerator) ExtractConfig(ctx context.Context, slide types.AnimationSlide, template *models.Template) (*types.TemplateConfigExtractorOutput, error) {
+func (l animationGenerator) ExtractConfig(ctx context.Context, slide *types.AnimationSlide, template *models.Template) (*types.TemplateConfigExtractorOutput, error) {
 	marshal, err := json.Marshal(template.Schema)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to marshal template schema of template : %s", template.ID)

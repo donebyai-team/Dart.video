@@ -6,6 +6,12 @@ import "google/protobuf/struct.proto";
 
 // ===================== ENUMS =====================
 
+enum SlideStatus {
+  SLIDE_STATUS_UNDEFINED = 0;
+  SLIDE_STATUS_GENERATED = 1;
+  SLIDE_STATUS_PENDING = 2;
+}
+
 enum SlideType {
   SLIDE_TYPE_UNDEFINED = 0;
   SLIDE_TYPE_TEXT_ANIMATION = 1;
@@ -36,6 +42,23 @@ enum TransitionType {
 
 // ===================== CORE MESSAGES =====================
 
+message AnimationSlidePlan {
+  int64 index = 1;
+  string beatDescription = 2;
+  string animationType = 3;
+  string categorySearcQquery = 4;
+  int64 duration = 5;
+  optional string voiceover = 6;
+  optional string selectedTemplateDescription = 7;
+}
+
+message MediaSlidePlan {
+  int64 index = 1;
+  string beatDescription = 2;
+  int64 duration = 3;
+  optional string selectedTemplateDescription = 4;
+}
+
 message MediaSlideStyle {
   float borderRadius = 1;
   optional string objectFit = 2;
@@ -47,6 +70,7 @@ message MediaSlideContent {
   MediaSlideStyle style = 3;
   MediaType mediaType = 4;
   optional UploadedMedia uploadedMedia = 5;
+  optional MediaSlidePlan plan = 6;
 }
 
 message MetaData {
@@ -62,6 +86,7 @@ message AnimationSlideContent {
   google.protobuf.Struct templateConfig = 2;
   MetaData meta = 3;
   string templateUrl = 4;
+  optional AnimationSlidePlan plan = 5;
 }
 
 message StackSlideContent {
@@ -150,6 +175,8 @@ message Slide {
   repeated SpotlightEffect spotlights = 18;
   repeated CalloutEffect callouts = 19;
   repeated ZoomEffect zooms = 20;
+  google.protobuf.Struct plan = 21;
+  SlideStatus slideStatus = 22;
 }
 
 message BackgroundStyle {
