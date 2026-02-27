@@ -18,31 +18,118 @@ import (
 	"time"
 )
 
+type GenerationStage string
+
+const (
+	StageUnderstanding GenerationStage = "understanding"
+	StagePrompting     GenerationStage = "prompting"
+	StageDesigning     GenerationStage = "designing"
+	StageCoding        GenerationStage = "coding"
+	StageSaving        GenerationStage = "saving"
+	StageBuilding      GenerationStage = "building"
+	StageRefining      GenerationStage = "refining"
+	StageReady         GenerationStage = "ready"
+)
+
+func retryTone(attempt int) string {
+	switch attempt {
+	case 0:
+		return ""
+	case 1:
+		return "Refining the motion..."
+	case 2:
+		return "Polishing the animation..."
+	case 3:
+		return "Adding final touches..."
+	default:
+		return "Stabilizing the performance..."
+	}
+}
+
+func CreativeStageMessage(stage GenerationStage, attempt int) string {
+	if tone := retryTone(attempt); tone != "" && stage == StageDesigning {
+		return tone
+	}
+
+	switch stage {
+
+	case StageUnderstanding:
+		return "Understanding the scene..."
+
+	case StagePrompting:
+		return "Crafting motion direction..."
+
+	case StageDesigning:
+		return "Designing the animation..."
+
+	case StageCoding:
+		return "Translating motion into code..."
+
+	case StageSaving:
+		return "Saving creative draft..."
+
+	case StageBuilding:
+		return "Bringing animation to life..."
+
+	case StageRefining:
+		return "Smoothing out rough edges..."
+
+	case StageReady:
+		return "Animation ready ✨"
+
+	default:
+		return "Working on it..."
+	}
+}
+
+type GenerationParams struct {
+	SessionID string
+	OrgID     string
+}
+
 type AnimationGenerator interface {
 	ExtractConfig(ctx context.Context, slide *types.AnimationSlide, template *models.Template) (*types.TemplateConfigExtractorOutput, error)
 	Generate(ctx context.Context,
 		animation *types.AnimationSlide,
-		plan *types.VideoGenerationPlan) (*models.Template, error)
+		planSoFar *types.VideoGenerationPlan,
+		callback TemplateGenerationCallback,
+		params GenerationParams) (*models.Template, error)
 }
 
 type animationGenerator struct {
 	mediaStore  services.MediaStore
 	llmService  llm.LLMService
-	codeBuilder TemplateCodeBuilder
+	codeBuilder services.TemplateCodeBuilder
 	logger      *zap.Logger
+}
+
+func NewAnimationGenerator(mediaStore services.MediaStore, llmService llm.LLMService, codeBuilder services.TemplateCodeBuilder, logger *zap.Logger) *animationGenerator {
+	return &animationGenerator{mediaStore: mediaStore, llmService: llmService, codeBuilder: codeBuilder, logger: logger}
 }
 
 const maxAttempts = 5
 
+type TemplateGenerationCallback func(TemplateGenerationProgress)
+
+type TemplateGenerationProgress struct {
+	Message string
+}
+
 func (l animationGenerator) Generate(
 	ctx context.Context,
 	animation *types.AnimationSlide,
-	plan *types.VideoGenerationPlan,
+	planSoFar *types.VideoGenerationPlan,
+	callback TemplateGenerationCallback,
+	params GenerationParams,
 ) (*models.Template, error) {
+
+	callback(TemplateGenerationProgress{
+		Message: CreativeStageMessage(StageUnderstanding, 0),
+	})
 
 	input := types.GenerateAnimationPromptRequest{
 		CurrentBeat: animation.BeatDescription,
-		PlanSoFar:   plan.Sections,
+		PlanSoFar:   planSoFar.Sections,
 	}
 
 	output, err := baml_client.GenerateAnimationPrompt(ctx, input)
@@ -54,7 +141,7 @@ func (l animationGenerator) Generate(
 		AnimationPrompt: output.Prompt,
 		Duration:        animation.Duration,
 		Voiceover:       animation.Voiceover,
-		Branding:        plan.Branding,
+		Branding:        planSoFar.Branding,
 	}
 
 	conversationHistory := make([]types.Message, 0)
@@ -62,6 +149,12 @@ func (l animationGenerator) Generate(
 
 	for attempt := 0; attempt < maxAttempts; attempt++ {
 
+		// 🎨 Designing
+		callback(TemplateGenerationProgress{
+			Message: CreativeStageMessage(StageDesigning, attempt),
+		})
+
+		l.logger.Info("generating code")
 		generatedAnimation, err := baml_client.GenerateAnimation(ctx, inptCodeGeneration, conversationHistory)
 		if err != nil {
 			return nil, agenterrors.AnimationGenerationFailed("failed to generate animation", err)
@@ -73,9 +166,13 @@ func (l animationGenerator) Generate(
 		}
 
 		indentedCode := indentCode(generatedAnimation.Code)
-		codeFilePath := fmt.Sprintf("templates/generated/%s/%s", "org_id", "video_id")
+		codeFilePath := fmt.Sprintf("templates/generated/%s/%s", params.OrgID, params.SessionID)
 
-		// upload generated code at templates/generated/org/video/component{attempt}.tsx
+		// 💾 Saving draft
+		callback(TemplateGenerationProgress{
+			Message: CreativeStageMessage(StageSaving, attempt),
+		})
+
 		uploadedMedia, err := l.mediaStore.UploadCode(ctx,
 			indentedCode,
 			fmt.Sprintf("%s/%s%d.tsx", codeFilePath, componentName, attempt))
@@ -86,14 +183,22 @@ func (l animationGenerator) Generate(
 
 		l.logger.Info("uploaded generated code", zap.String("url", uploadedMedia.Url))
 
-		validateCodeResponse, err := l.codeBuilder.ValidateAndBuild(ctx, &ValidateAndBuildInput{
+		// ⚙️ Bringing to life (BUILD STAGE)
+		callback(TemplateGenerationProgress{
+			Message: CreativeStageMessage(StageBuilding, attempt),
+		})
+
+		validateCodeResponse, err := l.codeBuilder.ValidateAndBuild(ctx, &services.ValidateAndBuildInput{
 			Code:          indentedCode,
 			ComponentName: componentName,
-			OutputPath:    fmt.Sprintf("templates/generated/%s/%s", "org_id", "video_id"),
+			OutputPath:    fmt.Sprintf("templates/generated/%s/%s", params.OrgID, params.SessionID),
 			Config:        config,
 		})
 
 		if err == nil {
+			callback(TemplateGenerationProgress{
+				Message: CreativeStageMessage(StageReady, 0),
+			})
 			return &models.Template{
 				ID:            uuid.New().String(),
 				Name:          componentName,
@@ -105,10 +210,9 @@ func (l animationGenerator) Generate(
 		}
 
 		// Retry only on build errors
-		var buildErr *BuildError
+		var buildErr *services.BuildError
 		if errors.As(err, &buildErr) {
 
-			// Feed error back into conversation
 			conversationHistory = append(conversationHistory,
 				types.Message{
 					Role:    types.Union3KassistantOrKtoolOrKuser__NewKassistant(),
@@ -119,10 +223,14 @@ func (l animationGenerator) Generate(
 			l.logger.Error("failed to build animation",
 				zap.Int("attempt_left", maxAttempts-attempt),
 				zap.Error(buildErr))
+
+			// 🔧 Refinement loop
+			callback(TemplateGenerationProgress{
+				Message: CreativeStageMessage(StageRefining, attempt),
+			})
 			continue
 		}
 
-		// Any other error → fail immediately
 		return nil, agenterrors.AnimationGenerationFailed("failed to build animation", err)
 	}
 

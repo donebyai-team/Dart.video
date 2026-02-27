@@ -61,36 +61,45 @@ type RunResult struct {
 }
 
 type agentV1 struct {
-	sessionID         string
-	db                datastore.Repository
-	retrievalService  RetrievalService
-	llmService        llm.LLMService
-	templateExtractor AnimationGenerator
-	videoService      services.VideoGeneration
-	cache             cache.Cache
-	logger            *zap.Logger
+	sessionID          string
+	orgID              string
+	db                 datastore.Repository
+	retrievalService   RetrievalService
+	llmService         llm.LLMService
+	videoService       services.VideoGeneration
+	animationGenerator AnimationGenerator
+	cache              cache.Cache
+	logger             *zap.Logger
 
 	stateUpdates chan VideoAgentState
 }
 
 func NewAgentV1(
 	sessionID string,
+	orgID string,
 	logger *zap.Logger,
 	cache cache.Cache,
 	db datastore.Repository,
+	mediaStore services.MediaStore,
+	codeBuilder services.TemplateCodeBuilder,
 	videoService services.VideoGeneration,
 ) *agentV1 {
 	llmService := llm.NewLlmService(logger)
 	return &agentV1{
-		sessionID:         sessionID,
-		logger:            logger,
-		cache:             cache,
-		db:                db,
-		videoService:      videoService,
-		retrievalService:  NewLlmRetrievalService(db, llmService),
-		templateExtractor: animationGenerator{llmService: llmService},
-		llmService:        llmService,
-		stateUpdates:      make(chan VideoAgentState, 64),
+		sessionID:        sessionID,
+		logger:           logger,
+		cache:            cache,
+		db:               db,
+		videoService:     videoService,
+		retrievalService: NewLlmRetrievalService(db, llmService),
+		llmService:       llmService,
+		stateUpdates:     make(chan VideoAgentState, 64),
+		animationGenerator: NewAnimationGenerator(
+			mediaStore,
+			llmService,
+			codeBuilder,
+			logger,
+		),
 	}
 }
 
@@ -203,12 +212,10 @@ func (a *agentV1) Continue(ctx context.Context, options ContinueSessionOptions) 
 		return nil, err
 	}
 
-	if err := a.updateState(ctx, VideoAgentState{
+	a.updateState(ctx, VideoAgentState{
 		State:            stateStatusProcessing,
 		LastUserResponse: userResponse,
-	}); err != nil {
-		logger.Warn("failed to update state after user response", zap.Error(err))
-	}
+	})
 
 	logger.Info("continuing agent session with user response", zap.String("response", userResponse))
 
@@ -216,14 +223,11 @@ func (a *agentV1) Continue(ctx context.Context, options ContinueSessionOptions) 
 }
 
 func (a *agentV1) runPlanning(ctx context.Context, session *planningSession) (*RunResult, error) {
-	logger := logging.Logger(ctx, a.logger)
 	llmResponse, err := a.llmService.PlanSlidesWithStreaming(ctx, session.Request, session.ConversationHistory, func(chunk string) {
-		if err := a.updateState(ctx, VideoAgentState{
+		a.updateState(ctx, VideoAgentState{
 			Thinking: chunk,
 			State:    stateStatusProcessing,
-		}); err != nil {
-			logger.Error("failed to update thinking state", zap.Error(err))
-		}
+		})
 	})
 	if err != nil {
 		status := models.VideoStatusFAILED
@@ -267,12 +271,10 @@ func (a *agentV1) runPlanning(ctx context.Context, session *planningSession) (*R
 		return nil, err
 	}
 
-	if err := a.updateState(ctx, VideoAgentState{
+	a.updateState(ctx, VideoAgentState{
 		Thinking: "",
 		State:    stateStatusCompleted,
-	}); err != nil {
-		logger.Warn("failed to update completed state", zap.Error(err))
-	}
+	})
 
 	return &RunResult{Status: RunStatusCompleted}, nil
 }
@@ -290,13 +292,10 @@ func (a *agentV1) applyPlan(
 	}
 
 	plan := pendingVideo.Config
-	if stateErr := a.updateState(ctx, VideoAgentState{
+	a.updateState(ctx, VideoAgentState{
 		Thinking: generating,
 		State:    stateStatusProcessing,
-	}); stateErr != nil {
-		a.logger.Warn("failed to publish total slides count", zap.Error(stateErr))
-	}
-
+	})
 	defer func() {
 		if err != nil {
 			failStatus := models.VideoStatusFAILED
@@ -335,11 +334,9 @@ func (a *agentV1) applyPlan(
 			return
 		}
 		firstSlidePersisted = true
-		if stateErr := a.updateState(ctx, VideoAgentState{
+		a.updateState(ctx, VideoAgentState{
 			State: stateStatusReady,
-		}); stateErr != nil {
-			a.logger.Warn("failed to set ready-for-editor state", zap.Error(stateErr))
-		}
+		})
 	}
 
 	selectedTemplateIDs := make([]string, 0)
@@ -394,25 +391,20 @@ func (a *agentV1) applyPlan(
 
 			// Always include TotalSlides so every Redis write preserves the denominator
 			// that the UI progress bar relies on.
-			if stateErr := a.updateState(ctx, VideoAgentState{
+			a.updateState(ctx, VideoAgentState{
 				Thinking: matching,
 				State:    stateStatusProcessing,
-			}); stateErr != nil {
-				a.logger.Debug("failed to set generating thinking state", zap.Error(stateErr))
-			}
-
+			})
 			selected, err := a.selectTemplate(ctx, currentSlide.Plan.ToModel(), planExecutedSoFar, selectedTemplateIDs)
 			if err != nil {
 				return err
 			}
 
-			if stateErr := a.updateState(ctx, VideoAgentState{
+			a.updateState(ctx, VideoAgentState{
 				Thinking: extracting,
 				State:    stateStatusProcessing,
-			}); stateErr != nil {
-				a.logger.Debug("failed to set generating thinking state", zap.Error(stateErr))
-			}
-			templateConfig, err := a.templateExtractor.ExtractConfig(ctx, currentSlide.Plan.ToModel(), selected)
+			})
+			templateConfig, err := a.animationGenerator.ExtractConfig(ctx, currentSlide.Plan.ToModel(), selected)
 			if err != nil {
 				return agenterrors.TemplateExtractFailed("failed to extract template config", err)
 			}
@@ -466,13 +458,28 @@ func (a *agentV1) selectTemplate(
 		break
 	}
 
-	// No category matched — use the fallback template.
+	// No category matched — use the fallback template or generate a new animation.
 	if selected == nil {
-		fallback, err := a.retrievalService.GetFallbackTemplate(ctx)
+		template, err := a.animationGenerator.Generate(ctx, anim, planExecutedSoFar, func(progress TemplateGenerationProgress) {
+			a.updateState(ctx, VideoAgentState{
+				Thinking: progress.Message,
+				State:    stateStatusProcessing,
+			})
+		}, GenerationParams{
+			OrgID:     a.orgID,
+			SessionID: a.sessionID,
+		})
 		if err != nil {
-			return nil, agenterrors.NoTemplateFound("no fallback template found", err)
+			return nil, err
 		}
-		selected = fallback
+
+		return template, nil
+		////fallback, err := a.retrievalService.GetFallbackTemplate(ctx)
+		////if err != nil {
+		////	return nil, agenterrors.NoTemplateFound("no fallback template found", err)
+		////}
+		////return fallback, nil
+		//return nil, agenterrors.NoTemplateFound("unable to generate animation", err)
 	}
 
 	return selected, nil
@@ -529,11 +536,15 @@ func (a *agentV1) updateState(ctx context.Context, state VideoAgentState) error 
 
 	jsonBytes, err := json.Marshal(state)
 	if err != nil {
-		return agenterrors.StateUnavailable("failed to encode state payload", err)
+		errUpdated := agenterrors.StateUnavailable("failed to encode state payload", err)
+		a.logger.Error("failed to update state", zap.Error(errUpdated))
+		return errUpdated
 	}
 
 	if err := a.cache.SetKey(ctx, fmt.Sprintf("%s:%s", stateKeyPrefix, state.VideoID), string(jsonBytes), stateTTL); err != nil {
-		return agenterrors.StateUnavailable("failed to persist agent state", err)
+		errUpdated := agenterrors.StateUnavailable("failed to persist agent state", err)
+		a.logger.Error("failed to update state", zap.Error(errUpdated))
+		return errUpdated
 	}
 	return nil
 }

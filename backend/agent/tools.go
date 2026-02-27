@@ -40,7 +40,8 @@ func (a *agentV1) handleToolCalls(
 		State:           stateStatusWaiting,
 		AskUserQuestion: &questionCopy,
 	}); err != nil {
-		logger.Warn("failed to update waiting-for-user-input state", zap.Error(err))
+		logger.Error("failed to update waiting-for-user-input state", zap.Error(err))
+		return true, nil, err
 	}
 
 	return true, &RunResult{

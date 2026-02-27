@@ -32,6 +32,7 @@ type Portal struct {
 	authStateStore         cache.Cache
 	googleOauthClient      *google2.OauthClient
 	mediaService           services.MediaStore
+	codeBuilderService     services.TemplateCodeBuilder
 	videoGenerationService services.VideoGeneration
 	renderVideoService     services.RenderVideoService
 	brandIdentityService   services.BrandIdentity
@@ -47,6 +48,7 @@ func New(
 	videoGenerationService services.VideoGeneration,
 	renderVideoService services.RenderVideoService,
 	brandIdentityService services.BrandIdentity,
+	codeBuilderService services.TemplateCodeBuilder,
 	httpListenAddr string,
 	corsURLRegexAllow *regexp.Regexp,
 	config *pbportal.Config,
@@ -58,6 +60,7 @@ func New(
 	return &Portal{
 		brandIdentityService:   brandIdentityService,
 		mediaService:           mediaService,
+		codeBuilderService:     codeBuilderService,
 		googleOauthClient:      googleOauthClient,
 		authStateStore:         authStateStore,
 		authUsecase:            authUsecase,

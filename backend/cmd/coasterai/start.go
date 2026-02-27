@@ -39,6 +39,7 @@ var StartCmd = cli.Command(startCmdE,
 		flags.String("common-steel-api-key", "", "Steel Browser api key")
 		flags.String("common-imagekit-api-key", "", "Imagekit api key")
 		flags.String("common-firecrawl-api-key", "", "Firecrawl api key")
+		flags.String("common-code-builder-service", "", "Code builder service")
 		flags.String("common-google-api-key", "", "Google api key")
 		flags.String("common-openai-api-key", "", "LiteLLM API key")
 		flags.String("common-openai-gpt-api-key", "", "OpenAI API key")
@@ -193,6 +194,7 @@ func portalApp(cmd *cobra.Command, isAppReady func() bool) (App, error) {
 		services.NewVideoGeneration(deps.DataStore, zlog),
 		videoRenderService,
 		services.NewBrandIdentityService(deps.DataStore, deps.MediaStore, sflags.MustGetString(cmd, "common-firecrawl-api-key")),
+		services.NewTemplateCodeBuilderService(sflags.MustGetString(cmd, "common-code-builder-service")),
 		sflags.MustGetString(cmd, "portal-http-listen-addr"),
 		deps.CorsURLRegexAllow,
 		config,

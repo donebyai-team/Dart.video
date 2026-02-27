@@ -72,7 +72,7 @@ func (p *Portal) CreateVideo(ctx context.Context, c *connect.Request[pbportal.Cr
 		return errorx.ToConnect(errorx.New(errorx.CodeInternal, "STREAM_SEND_FAILED", "failed to send initial planning event", err))
 	}
 
-	videoAgent := p.newVideoAgent(videoID, logger)
+	videoAgent := p.newVideoAgent(logger, videoID, actor.OrganizationID)
 
 	logger.Info("created video successfully; starting interactive planning", zap.String("video_id", video.ID))
 
@@ -117,7 +117,7 @@ func (p *Portal) ContinueVideoPlanning(ctx context.Context, c *connect.Request[p
 		return errorx.ToConnect(errorx.New(errorx.CodeInvalidArgument, "USER_RESPONSE_REQUIRED", "response is required", nil))
 	}
 
-	videoAgent := p.newVideoAgent(videoID, logger)
+	videoAgent := p.newVideoAgent(logger, videoID, actor.OrganizationID)
 
 	return p.streamAgentRun(
 		ctx,
@@ -134,12 +134,15 @@ func (p *Portal) ContinueVideoPlanning(ctx context.Context, c *connect.Request[p
 	)
 }
 
-func (p *Portal) newVideoAgent(sessionID string, logger *zap.Logger) agent.VideoAgent {
+func (p *Portal) newVideoAgent(logger *zap.Logger, sessionID, orgID string) agent.VideoAgent {
 	return agent.NewAgentV1(
 		sessionID,
+		orgID,
 		logger,
 		p.authStateStore,
 		p.db,
+		p.mediaService,
+		p.codeBuilderService,
 		p.videoGenerationService,
 	)
 }
@@ -402,7 +405,8 @@ func (p *Portal) DeleteVideo(ctx context.Context, c *connect.Request[pbportal.De
 // Redis state (soft Redis cancel for applyPlan phase, no-op for planning phase since
 // the planning stream's context cancel already handles that case).
 func (p *Portal) StopVideo(ctx context.Context, req *connect.Request[pbportal.StopVideoRequest]) (*connect.Response[emptypb.Empty], error) {
-	if _, err := p.gethAuthContext(ctx); err != nil {
+	actor, err := p.gethAuthContext(ctx)
+	if err != nil {
 		return nil, err
 	}
 
@@ -415,7 +419,7 @@ func (p *Portal) StopVideo(ctx context.Context, req *connect.Request[pbportal.St
 
 	logger.Info("StopVideo: user requested agent stop")
 
-	videoAgent := p.newVideoAgent(videoID, logger)
+	videoAgent := p.newVideoAgent(logger, videoID, actor.OrganizationID)
 
 	if err := videoAgent.StopAgent(ctx, videoID); err != nil {
 		logger.Error("StopVideo: StopAgent failed", zap.String("video_id", videoID), zap.Error(err))
@@ -434,7 +438,7 @@ func (p *Portal) GetVideo(ctx context.Context, req *connect.Request[pbportal.Get
 
 	videoID := req.Msg.Id
 	logger := logging.Logger(ctx, p.logger).With(zap.String("session_id", videoID))
-	videoAgent := p.newVideoAgent(videoID, logger)
+	videoAgent := p.newVideoAgent(logger, videoID, actor.OrganizationID)
 
 	sendCurrent := func() (*models.Video, error) {
 		video, err := p.videoGenerationService.GetVideo(ctx, videoID, actor.OrganizationID)

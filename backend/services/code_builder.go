@@ -1,4 +1,4 @@
-package agent
+package services
 
 import (
 	"bytes"
@@ -66,7 +66,7 @@ type ValidateAndBuildOutput struct {
 	JSPath string `json:"js_path"`
 }
 
-type animationValidatorService struct {
+type codeBuilderService struct {
 	client     *retryablehttp.Client
 	serviceURL string
 }
@@ -95,7 +95,7 @@ func NewTemplateCodeBuilderService(serviceURL string) TemplateCodeBuilder {
 	rc.Logger = nil // silence retryablehttp's default stderr logger
 	rc.HTTPClient = &http.Client{Timeout: 5 * time.Minute}
 
-	return &animationValidatorService{
+	return &codeBuilderService{
 		client:     rc,
 		serviceURL: strings.TrimRight(serviceURL, "/"),
 	}
@@ -144,7 +144,7 @@ func staticValidateCode(code string) *BuildError {
 	return nil
 }
 
-func (s *animationValidatorService) ValidateAndBuild(
+func (s *codeBuilderService) ValidateAndBuild(
 	ctx context.Context,
 	input *ValidateAndBuildInput,
 ) (*ValidateAndBuildOutput, error) {
