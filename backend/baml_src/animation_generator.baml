@@ -13,7 +13,7 @@ class GenerateAnimationCodeResponse {
 }
 
 function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_history: Message[]) -> GenerateAnimationCodeResponse {
-  client "anthropic/claude-opus-4-6"
+  client CustomClaudeOpus
   prompt #"
     You are a reusable animation template builder.Your job is to convert an animation blueprint into:
 
@@ -91,7 +91,6 @@ function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_hi
 
     ```ts
     import { useCurrentFrame, useVideoConfig } from 'remotion'
-    import { EditableText } from '../../lib/EditableText'
     // add imports as needed
 
     type TemplateProps {

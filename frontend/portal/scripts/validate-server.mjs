@@ -80,6 +80,7 @@ function buildComponentCDN(templateFolder, componentName, outFile) {
       resolve: {
         extensions: ['.tsx', '.ts', '.js', '.jsx'],
         alias: {'@': PORTAL_SRC_DIR},
+        modules: ['node_modules', resolve(__dirname, '../node_modules'), resolve(__dirname, '../../node_modules')],
       },
       module: {
         rules: [
@@ -107,9 +108,11 @@ function buildComponentCDN(templateFolder, componentName, outFile) {
       }
       if (stats?.hasErrors()) {
         const info = stats.toJson({errors: true, errorDetails: false});
-        const errors = (info.errors ?? []).map((e) =>
-          typeof e === 'string' ? e : (e.message ?? stats.toString({colors: false})),
-        );
+        const errors = (info.errors ?? []).map((e) => {
+          if (typeof e === 'string') return e;
+          const parts = [e.message, e.details].filter(Boolean);
+          return parts.length ? parts.join('\n') : stats.toString({colors: false});
+        });
         rej({type: 'build_error', errors: errors.length ? errors : ['Unknown build error']});
         return;
       }
@@ -261,7 +264,12 @@ async function handleValidate(req, res) {
     } catch (renderErr) {
       console.log('render failed', renderErr);
       res.writeHead(422, {'Content-Type': 'application/json'});
-      res.end(JSON.stringify({error_type: 'render_error', errors: [renderErr.message]}));
+      const rawStack = renderErr.stack || renderErr.message;
+      const cleanedStack = rawStack
+        .split('\n')
+        .map((line) => line.replace(/\s*\(https?:\/\/[^)]*bundle\.js[^)]*\)/, ''))
+        .join('\n');
+      res.end(JSON.stringify({error_type: 'render_error', errors: [cleanedStack]}));
       return;
     }
 

@@ -32,12 +32,13 @@ function GenerateAnimationPrompt(resume: GenerateAnimationPromptRequest) -> Gene
     GOAL
     --------------------------------------------------
 
-    Create a detailed animation prompt that:
+    Create a concise animation prompt that:
 
-    ✔ Continues the narrative progression
-    ✔ Introduces a new visual storytelling mechanism
-    ✔ Avoids repeating past visual structures
-    ✔ Matches the tone and flow of the video
+    - Continues the narrative progression
+    - Introduces a new visual storytelling mechanism
+    - Avoids repeating past visual structures
+    - Matches the tone and flow of the video
+    - This will be fed to LLM to generate the code of the remotion animation
 
     --------------------------------------------------
     EVALUATION STEPS
