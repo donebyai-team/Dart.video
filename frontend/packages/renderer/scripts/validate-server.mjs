@@ -3,42 +3,47 @@
  * Runs as a Cloud Run Service (HTTP server).
  *
  * POST /validate
- *   Body: { code, component_name, output_path, config }
- *   - code:           Generated TSX component source
- *   - component_name: PascalCase name (used as file + export name, e.g. "TextCascade")
- *   - output_path:    GCS path prefix where the compiled JS will be uploaded
- *   - config:         JSON template config passed as props to the component during renderStill
+ *   Body: { code, config }
+ *   - code:   LLM-generated TSX source that exports RemoteComponent({ props, onChange })
+ *   - config: JSON template config passed as props during the renderStill check
  *
- * Responses:
- *   200 { js_path }             — success, CDN JS uploaded to GCS
- *   422 { error_type, errors }  — build_error or render_error (feed to LLM)
- *   400                         — bad request (missing fields)
- *   500                         — internal server error (do NOT feed to LLM)
+ * Validation happens in two sequential steps so errors are caught early and
+ * reported with enough detail for the LLM to self-correct:
  *
- * NOTE: Generated components should import from '../lib/...' (one level up from their
- * folder). The temp folder is placed at packages/templates/generated/_tmp_<uuid>/
- * which mirrors the two-level depth of existing templates (e.g. text-animation/text-cascade/).
+ *   Step 1 — Compile check (Node.js, Babel)
+ *     Strips imports/exports and runs Babel transform. Catches syntax errors,
+ *     invalid JSX, TypeScript parse errors, etc. before any bundling starts.
+ *     → 422 { error_type: "compile_error", errors: [...] }
+ *
+ *   Step 2 — Render check (Remotion renderStill)
+ *     Bundles the renderer (which includes compileRemoteComponent) and renders
+ *     a single still frame. The validator composition calls compileRemoteComponent
+ *     synchronously and THROWS on any error so renderStill captures it. This
+ *     catches runtime errors: invalid hook usage, undefined references, bad JSX
+ *     output, etc.
+ *     → 422 { error_type: "render_error", errors: [...] }
+ *
+ *   Success:
+ *     → 200 {}
+ *
+ * Error codes:
+ *   400  Bad request (missing required fields) — do NOT feed to LLM
+ *   500  Internal server error                 — do NOT feed to LLM
  */
 
-import {Storage} from '@google-cloud/storage';
+import * as Babel from '@babel/standalone';
 import {bundle} from '@remotion/bundler';
 import {renderStill, selectComposition} from '@remotion/renderer';
 import {randomUUID} from 'node:crypto';
 import {existsSync} from 'node:fs';
-import {mkdir, readFile, rm, writeFile} from 'node:fs/promises';
+import {mkdir, rm, writeFile} from 'node:fs/promises';
 import {createServer} from 'node:http';
 import {dirname, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import webpack from 'webpack';
 
-const storage = new Storage();
-
-// __dirname = frontend/portal/scripts/ (local) or /app/portal/scripts/ (Docker)
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const PORT = parseInt(process.env.PORT || '8085', 10);
-const OUTPUT_BUCKET = process.env.OUTPUT_BUCKET || 'coasterai-public';
-if (!OUTPUT_BUCKET) throw new Error('Missing required env var OUTPUT_BUCKET');
 
 // Cloud Run has no GPU — use SwiftShader (software OpenGL)
 const chromiumOptions = {
@@ -46,92 +51,94 @@ const chromiumOptions = {
   disableWebSecurity: true,
 };
 
-// Paths relative to portal/scripts/ — works identically locally and in Docker
-// local:  frontend/portal/scripts/ → ../../packages/... = frontend/packages/...
-// Docker: /app/portal/scripts/     → ../../packages/... = /app/packages/...
-const TEMPLATES_DIR = resolve(__dirname, '../../packages/templates');
-const BUILD_DIR = resolve(__dirname, '../../packages/build');
-const PORTAL_SRC_DIR = resolve(__dirname, '../src');
+// Path layout (relative to packages/renderer/scripts/):
+//   ../src            → packages/renderer/src/
+//   ../../templates   → packages/templates/
+const RENDERER_SRC_DIR = resolve(__dirname, '../src');
+const TEMPLATES_DIR = resolve(__dirname, '../../templates');
 
-// ---- Webpack CDN build (mirrors build-component.mjs logic) ----
-// templateFolder is relative to TEMPLATES_DIR (e.g. "generated/_tmp_<uuid>")
-function buildComponentCDN(templateFolder, componentName, outFile) {
-  return new Promise((res, rej) => {
-    const entry = resolve(TEMPLATES_DIR, templateFolder, `${componentName}.tsx`);
-    const globalName = `__COASTER_TEMPLATE__${componentName.replace(/[^a-zA-Z0-9_$]/g, '')}`;
+// ── Step 1: Compile check (Node.js / Babel) ───────────────────────────────────
 
-    const config = {
-      mode: 'production',
-      target: 'web',
-      entry,
-      output: {
-        path: BUILD_DIR,
-        filename: outFile,
-        library: {type: 'window', name: globalName},
-        clean: false,
-      },
-      externalsType: 'window',
-      externals: {
-        react: 'React',
-        'react-dom': 'ReactDOM',
-        'react/jsx-runtime': 'ReactJSXRuntime',
-        remotion: 'Remotion',
-      },
-      resolve: {
-        extensions: ['.tsx', '.ts', '.js', '.jsx'],
-        alias: {'@': PORTAL_SRC_DIR},
-        modules: ['node_modules', resolve(__dirname, '../node_modules'), resolve(__dirname, '../../node_modules')],
-      },
-      module: {
-        rules: [
-          {
-            test: /\.(ts|tsx)$/,
-            exclude: /node_modules/,
-            use: {
-              loader: 'swc-loader',
-              options: {
-                jsc: {
-                  parser: {syntax: 'typescript', tsx: true},
-                  transform: {react: {runtime: 'automatic'}},
-                },
-              },
-            },
-          },
-        ],
-      },
-    };
-
-    webpack(config, (err, stats) => {
-      if (err) {
-        rej({type: 'build_error', errors: [err.message]});
-        return;
-      }
-      if (stats?.hasErrors()) {
-        const info = stats.toJson({errors: true, errorDetails: false});
-        const errors = (info.errors ?? []).map((e) => {
-          if (typeof e === 'string') return e;
-          const parts = [e.message, e.details].filter(Boolean);
-          return parts.length ? parts.join('\n') : stats.toString({colors: false});
-        });
-        rej({type: 'build_error', errors: errors.length ? errors : ['Unknown build error']});
-        return;
-      }
-      res(resolve(BUILD_DIR, outFile));
+/**
+ * Fast pre-validate using Babel in Node.js (no bundling / browser spin-up).
+ * Returns null on success, or the full Babel error string on failure.
+ *
+ * We pass the raw LLM code with sourceType "module" so Babel handles
+ * import/export statements natively — no need to duplicate the stripImports
+ * logic from compiler.ts. We only care whether Babel throws, not the output.
+ * The error includes Babel's codeFrame pointing at the exact problem line.
+ * Feed this directly to the LLM.
+ */
+function preValidateWithBabel(code) {
+  try {
+    const result = Babel.transform(code, {
+      presets: ['react', 'typescript'],
+      filename: 'remote-component.tsx',
+      sourceType: 'module',
     });
-  });
+    if (!result?.code) {
+      return 'Babel produced no output — the code may be empty or malformed';
+    }
+    return null; // success
+  } catch (err) {
+    // err.message contains Babel's human-readable error + codeFrame
+    return err.stack || err.message;
+  }
 }
 
-// ---- GCS helpers ----
-async function uploadToGCS(bucket, gcsPath, fileBuffer) {
-  await storage.bucket(bucket).file(gcsPath).save(fileBuffer, {
-    metadata: {
-      contentType: 'application/javascript',
-      cacheControl: 'public, max-age=31536000, immutable',
-    },
-  });
+// ── Step 2: Render check root entry ──────────────────────────────────────────
+
+/**
+ * Build root.tsx for the validator composition.
+ *
+ * ValidatorComp compiles the LLM code SYNCHRONOUSLY during render and THROWS
+ * on any error. This is critical: DynamicComp (used in the editor) catches
+ * errors and shows an error UI — renderStill would succeed and we would never
+ * know something was wrong. ValidatorComp throws instead, causing renderStill
+ * to fail and surface the full stack trace.
+ *
+ * Compile errors are tagged "[compile_error]" so the server can set the correct
+ * error_type even if the Babel pre-check somehow missed them. Runtime errors
+ * (bad hooks, undefined vars in JSX, etc.) propagate naturally.
+ */
+function buildRootEntry(safeCode, safeConfig) {
+  return [
+    `import React from 'react';`,
+    `import { Composition, getInputProps, registerRoot } from 'remotion';`,
+    `import { compileRemoteComponent } from '../../../renderer/src/compiler';`,
+    ``,
+    `const ValidatorComp = () => {`,
+    `  const { code, config } = getInputProps();`,
+    ``,
+    `  // Synchronous JIT compile — throws on syntax / Babel / missing-export errors`,
+    `  const result = compileRemoteComponent(code);`,
+    `  if (result.error) {`,
+    `    throw new Error('[compile_error] ' + result.error);`,
+    `  }`,
+    ``,
+    `  // Runtime render — throws on invalid hooks, bad JSX, undefined refs, etc.`,
+    `  const Comp = result.Component;`,
+    `  return React.createElement(Comp, { props: config ?? {}, onChange: () => {} });`,
+    `};`,
+    ``,
+    `const ValidatorRoot = () => (`,
+    `  React.createElement(Composition, {`,
+    `    id: 'ValidatorComp',`,
+    `    component: ValidatorComp,`,
+    `    durationInFrames: 30,`,
+    `    fps: 30,`,
+    `    width: 1280,`,
+    `    height: 720,`,
+    `    defaultProps: { code: ${safeCode}, config: ${safeConfig} },`,
+    `  })`,
+    `);`,
+    ``,
+    `registerRoot(ValidatorRoot);`,
+  ].join('\n');
 }
 
-// ---- HTTP helpers ----
+// ── HTTP helpers ──────────────────────────────────────────────────────────────
+
 function readBody(req) {
   return new Promise((res, rej) => {
     const chunks = [];
@@ -141,7 +148,17 @@ function readBody(req) {
   });
 }
 
-// ---- Request handler ----
+// Strip Remotion bundle URLs from stack traces so the LLM sees source-level
+// context rather than cryptic bundle offsets like "(https://...bundle.js:1:234567)".
+function cleanStack(rawStack) {
+  return rawStack
+    .split('\n')
+    .map((line) => line.replace(/\s*\(https?:\/\/[^)]*bundle\.js[^)]*\)/, ''))
+    .join('\n');
+}
+
+// ── Request handler ───────────────────────────────────────────────────────────
+
 async function handleValidate(req, res) {
   let body;
   try {
@@ -152,103 +169,72 @@ async function handleValidate(req, res) {
     return;
   }
 
-  let code, component_name, output_path, config;
+  let code, config;
   try {
-    ({code, component_name, output_path, config} = JSON.parse(body));
+    ({code, config} = JSON.parse(body));
     if (!code) throw new Error('code is required');
-    if (!component_name) throw new Error('component_name is required');
-    if (!output_path) throw new Error('output_path is required');
   } catch (err) {
     res.writeHead(400);
     res.end(err.message);
     return;
   }
 
-  console.log("CONFIG RECEIVED:", config)
+  console.log(
+    `[validate] received code (${code.length} chars), ` +
+    `config keys: ${Object.keys(config || {}).join(', ') || 'none'}`,
+  );
 
+  // ── Step 1: Fast compile check ───────────────────────────────────────────
+  console.log('[validate] step 1 — compile check (Babel/Node.js)');
+  const compileError = preValidateWithBabel(code);
+  if (compileError) {
+    console.log('[validate] compile check FAILED:\n', compileError);
+    res.writeHead(422, {'Content-Type': 'application/json'});
+    res.end(JSON.stringify({error_type: 'compile_error', errors: [compileError]}));
+    return;
+  }
+  console.log('[validate] compile check passed');
+
+  // ── Step 2: Render check via Remotion renderStill ────────────────────────
   const uuid = randomUUID();
-  // Place at generated/_tmp_<uuid>/ — two levels deep from packages/templates/,
-  // matching existing templates (text-animation/text-cascade/) so that
-  // '../../lib/EditableText' imports resolve to packages/templates/lib/.
   const tmpFolder = `generated/_tmp_${uuid}`;
   const templatesDir = resolve(TEMPLATES_DIR, tmpFolder);
   const stillOutput = `/tmp/${uuid}.png`;
 
   try {
     await mkdir(templatesDir, {recursive: true});
-    await writeFile(resolve(templatesDir, `${component_name}.tsx`), code, 'utf8');
 
-    // ---- Step 1: CDN webpack build ----
-    const outFile = `${uuid}.cdn.js`;
-    let builtFilePath;
-    try {
-      builtFilePath = await buildComponentCDN(tmpFolder, component_name, outFile);
-    } catch (buildErr) {
-      console.log('build failed', buildErr);
-      res.writeHead(422, {'Content-Type': 'application/json'});
-      res.end(JSON.stringify({error_type: buildErr.type, errors: buildErr.errors}));
-      return;
-    }
-    console.log('build passed');
-
-    // ---- Step 2: Remotion renderStill ----
-    // Generate a minimal Remotion root that imports the validated component.
-    // The component API is: RemoteComponent({ props, onChange }) where
-    // 'props' is the template config JSON.
+    const safeCode = JSON.stringify(code);
     const safeConfig = JSON.stringify(config || {});
-    const rootEntry = [
-      `import {Composition, getInputProps, registerRoot} from 'remotion';`,
-      `import {RemoteComponent} from './${component_name}';`,
-      ``,
-      `const _defaultConfig = ${safeConfig};`,
-      ``,
-      `const WrappedComponent = ({config}) => (`,
-      `  <RemoteComponent props={config} onChange={() => {}} />`,
-      `);`,
-      ``,
-      `const ValidatorRoot = () => {`,
-      `  const ip = getInputProps();`,
-      `  const config = ip?.config ?? _defaultConfig;`,
-      `  return (`,
-      `    <Composition`,
-      `      id="ValidatorComp"`,
-      `      component={WrappedComponent}`,
-      `      durationInFrames={30}`,
-      `      fps={30}`,
-      `      width={1280}`,
-      `      height={720}`,
-      `      defaultProps={{config}}`,
-      `    />`,
-      `  );`,
-      `};`,
-      ``,
-      `registerRoot(ValidatorRoot);`,
-    ].join('\n');
+    await writeFile(
+      resolve(templatesDir, 'root.tsx'),
+      buildRootEntry(safeCode, safeConfig),
+      'utf8',
+    );
 
-    await writeFile(resolve(templatesDir, 'root.tsx'), rootEntry, 'utf8');
-
-    console.log("bundelling..")
+    console.log('[validate] step 2 — bundling for render check');
     const bundleDir = await bundle({
       entryPoint: resolve(templatesDir, 'root.tsx'),
       webpackOverride: (cfg) => ({
         ...cfg,
         resolve: {
           ...cfg.resolve,
-          alias: {...cfg.resolve?.alias, '@': PORTAL_SRC_DIR},
+          // '@' alias lets compiler.ts resolve '@/...' imports from renderer/src/
+          alias: {...cfg.resolve?.alias, '@': RENDERER_SRC_DIR},
           modules: [
             ...(cfg.resolve?.modules ?? ['node_modules']),
-            resolve(__dirname, '../node_modules'),
-            resolve(__dirname, '../../node_modules'),
+            resolve(__dirname, '../node_modules'),       // packages/renderer/node_modules
+            resolve(__dirname, '../../../node_modules'), // frontend root node_modules
           ],
         },
       }),
     });
 
-    console.log("rendering..")
+    console.log('[validate] bundling complete — rendering still frame');
     const composition = await selectComposition({
       serveUrl: bundleDir,
       id: 'ValidatorComp',
-      inputProps: {config: config || {}},
+      inputProps: {code, config: config || {}},
       chromiumOptions,
     });
 
@@ -257,33 +243,33 @@ async function handleValidate(req, res) {
         composition,
         serveUrl: bundleDir,
         output: stillOutput,
-        inputProps: {config: config || {}},
+        inputProps: {code, config: config || {}},
         chromiumOptions,
         frame: 0,
       });
     } catch (renderErr) {
-      console.log('render failed', renderErr);
+      // renderStill throws when ValidatorComp throws during rendering.
+      // Covers both late compile errors and runtime rendering errors.
+      const rawStack = renderErr.stack || renderErr.message || String(renderErr);
+      const cleaned = cleanStack(rawStack);
+
+      // ValidatorComp tags compile failures with "[compile_error]"
+      const errorType = cleaned.includes('[compile_error]') ? 'compile_error' : 'render_error';
+
+      console.log(`[validate] render check FAILED (${errorType}):\n`, cleaned);
       res.writeHead(422, {'Content-Type': 'application/json'});
-      const rawStack = renderErr.stack || renderErr.message;
-      const cleanedStack = rawStack
-        .split('\n')
-        .map((line) => line.replace(/\s*\(https?:\/\/[^)]*bundle\.js[^)]*\)/, ''))
-        .join('\n');
-      res.end(JSON.stringify({error_type: 'render_error', errors: [cleanedStack]}));
+      res.end(JSON.stringify({error_type: errorType, errors: [cleaned]}));
       return;
     }
 
-    console.log('render complete');
-    // ---- Step 3: Upload CDN JS to GCS ----
-    const fileBuffer = await readFile(builtFilePath);
-    const gcsPath = `${output_path}/${component_name}.cdn.js`;
-    await uploadToGCS(OUTPUT_BUCKET, gcsPath, fileBuffer);
-
-    console.log('Validation complete', {component_name, gcsPath});
+    console.log('[validate] render check passed — validation complete');
     res.writeHead(200, {'Content-Type': 'application/json'});
-    res.end(JSON.stringify({js_path: gcsPath}));
+    res.end(JSON.stringify({}));
+
   } catch (err) {
-    console.error('Validator internal error', err);
+    // Unexpected internal errors (bundler crash, fs failure, etc.)
+    // Do NOT feed these to the LLM.
+    console.error('[validate] internal server error', err);
     res.writeHead(500);
     res.end('Internal server error');
   } finally {
@@ -292,7 +278,8 @@ async function handleValidate(req, res) {
   }
 }
 
-// ---- Server ----
+// ── Server ────────────────────────────────────────────────────────────────────
+
 const server = createServer(async (req, res) => {
   if (req.method === 'POST' && req.url === '/validate') {
     await handleValidate(req, res);
@@ -308,5 +295,5 @@ const server = createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Validator service listening on port ${PORT}`);
+  console.log(`[validate] server listening on port ${PORT}`);
 });

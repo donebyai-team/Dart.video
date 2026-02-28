@@ -1,11 +1,8 @@
 import { AnimationSlideContent, MetaData, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import React, { useEffect, useState } from 'react'
 
-import * as ReactDOM from 'react-dom'
-import * as ReactJsxRuntime from 'react/jsx-runtime'
 import { AbsoluteFill, continueRender, delayRender } from 'remotion'
-import * as Remotion from 'remotion'
-import { resolveTemplateEntry, TemplateModule } from '../../../template-registery'
+import { compileRemoteComponent } from '../compiler'
 import { TemplateContainer } from '../components/TemplateContainer'
 import { AnimatedBackground } from '../effects/AnimatedBackground'
 import { TemplateRendrer } from '../components/TemplateRenderer'
@@ -22,73 +19,14 @@ interface TextAnimationSlideProps {
 }
 export type TemplateConfig = Record<string, string | number | boolean | object>
 
-const templateLoadCache = new Map<string, Promise<TemplateModule>>()
-
-const loadScriptTemplate = async (url: string, globalNames: string[]): Promise<TemplateModule> => {
-  const cacheKey = `${url}::${globalNames.join(',')}`
-  const cached = templateLoadCache.get(cacheKey)
-  if (cached) return cached
-
-  const loader = new Promise<TemplateModule>((resolve, reject) => {
-    if (typeof window === 'undefined') {
-      reject(new Error('CDN template loading is only available in browser runtime'))
-      return
-    }
-
-    ; (window as any).React = React
-      ; (window as any).ReactDOM = ReactDOM
-      ; (window as any).ReactJSXRuntime = ReactJsxRuntime
-      ; (window as any).Remotion = Remotion
-
-    const existingScript = document.querySelector<HTMLScriptElement>(
-      `script[data-template-url="${url}"]`
-    )
-
-    const resolveFromWindow = () => {
-      const moduleFromWindow = globalNames
-        .map(globalName => (window as any)[globalName])
-        .find(mod => mod?.RemoteComponent)
-      if (!moduleFromWindow?.RemoteComponent) {
-        reject(
-          new Error(
-            `Template globals [${globalNames.join(', ')}] are missing RemoteComponent`
-          )
-        )
-        return
-      }
-      resolve(moduleFromWindow as TemplateModule)
-    }
-
-    if (existingScript) {
-      if (globalNames.some(globalName => (window as any)[globalName]?.RemoteComponent)) {
-        resolveFromWindow()
-        return
-      }
-      existingScript.addEventListener('load', resolveFromWindow, { once: true })
-      existingScript.addEventListener('error', () => reject(new Error(`Failed loading ${url}`)), {
-        once: true
-      })
-      return
-    }
-
-    const script = document.createElement('script')
-    script.src = url
-    script.async = true
-    script.dataset.templateUrl = url
-    script.onload = resolveFromWindow
-    script.onerror = () => reject(new Error(`Failed loading ${url}`))
-    document.head.appendChild(script)
-  })
-
-  templateLoadCache.set(cacheKey, loader)
-  return loader
-}
+// Cache fetched + compiled components by URL to avoid re-fetching on re-renders
+const compiledComponentCache = new Map<string, React.ComponentType<any> | null>()
 
 /**
- * TextAnimationSlide Component
- * Renders text animation slides using remotely-loaded template components.
- * Uses delayRender/continueRender so Remotion waits for the async script load
- * before capturing any frames.
+ * AnimationSlide Component
+ * Renders animation slides by fetching LLM-generated TSX source from templateUrl,
+ * compiling it JIT at runtime, then rendering the RemoteComponent.
+ * Falls back to local hard-coded templates when only templateId is present.
  */
 export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
   slide,
@@ -99,15 +37,16 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
   onUpdate,
   onSelect
 }) => {
-  const [RemoteComponent, setRemoteComponent] = React.useState<TemplateModule | null>(null)
+  const [CompiledComponent, setCompiledComponent] = React.useState<React.ComponentType<any> | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [editing, setEditing] = useState<boolean>(isEditing)
 
   const content = slide.content.value as AnimationSlideContent
-  // template id of the hard coded templates
+  // template id for hard-coded local templates
   const localTemplateId = content?.templateId
 
-  const templatePath = content?.templateUrl
+  // URL to fetch LLM-generated TSX source from
+  const templateUrl = content?.templateUrl
   const templateMeta = (content?.meta as MetaData) || {}
   const templateConfig = (content?.templateConfig ?? {}) as TemplateConfig
 
@@ -115,7 +54,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
 
 
   // 🚀 LOCAL TEMPLATE SHORT-CIRCUIT
-  if (!templatePath && localTemplateId) {
+  if (!templateUrl && localTemplateId) {
     return (
       <AbsoluteFill
         onMouseDown={() => setEditing(true)}
@@ -168,57 +107,64 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
   }
 
   const [renderHandle] = useState(() => {
-    if (!templatePath) return null
-    return delayRender(`Loading remote template: ${templatePath}`)
+    if (!templateUrl) return null
+    return delayRender(`Loading remote template: ${templateUrl}`)
   })
 
   useEffect(() => {
-    if (!templatePath) return
+    if (!templateUrl) return
 
-    let disposed = false
-    setRemoteComponent(null)
-    setIsLoading(true)
-
-    const finish = (mod: TemplateModule | null) => {
-      if (disposed) return
-      setRemoteComponent(mod)
+    // Return cached compiled component immediately if available
+    if (compiledComponentCache.has(templateUrl)) {
+      setCompiledComponent(compiledComponentCache.get(templateUrl) ?? null)
       setIsLoading(false)
       if (renderHandle) continueRender(renderHandle)
+      return
     }
 
-      ; (async () => {
-        const template = resolveTemplateEntry(templatePath)
-        console.debug('[Resolved Template]', templatePath, template.cdn?.url, template)
+    let disposed = false
+    setCompiledComponent(null)
+    setIsLoading(true)
 
-        try {
-          if (template.cdn?.url) {
-            const mod = await loadScriptTemplate(template.cdn.url, template.cdn.globalNames)
-            finish(mod)
-            return
+    ;(async () => {
+      try {
+        const response = await fetch(templateUrl)
+        if (!response.ok) {
+          throw new Error(`Failed to fetch template: ${response.status} ${response.statusText}`)
+        }
+        const code = await response.text()
+
+        const result = compileRemoteComponent(code)
+        if (result.error) {
+          console.error(`Failed to compile template "${templateUrl}": ${result.error}`)
+          compiledComponentCache.set(templateUrl, null)
+          if (!disposed) {
+            setCompiledComponent(null)
           }
-
-          finish(null)
-        } catch (error) {
-          console.error(`Failed to load template "${templatePath}"`, error)
-
-          if (template.local?.url) {
-            try {
-              const mod = await loadScriptTemplate(template.local.url, template.local.globalNames)
-              finish(mod)
-            } catch (fallbackError) {
-              console.error(`Fallback local load failed for template "${templatePath}"`, fallbackError)
-              finish(null)
-            }
-          } else {
-            finish(null)
+        } else {
+          compiledComponentCache.set(templateUrl, result.Component)
+          if (!disposed) {
+            setCompiledComponent(() => result.Component)
           }
         }
-      })()
+      } catch (error) {
+        console.error(`Failed to load template "${templateUrl}"`, error)
+        compiledComponentCache.set(templateUrl, null)
+        if (!disposed) {
+          setCompiledComponent(null)
+        }
+      } finally {
+        if (!disposed) {
+          setIsLoading(false)
+          if (renderHandle) continueRender(renderHandle)
+        }
+      }
+    })()
 
     return () => {
       disposed = true
     }
-  }, [templatePath])
+  }, [templateUrl])
 
   return (
     <AbsoluteFill
@@ -262,8 +208,8 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
         <div style={{ width: '100%', height: '100%' }}>
           {isLoading ? (
             <TemplateLoadingPlaceholder />
-          ) : RemoteComponent ? (
-            <RemoteComponent.RemoteComponent
+          ) : CompiledComponent ? (
+            <CompiledComponent
               onChange={(props: any) => {
                 if (onUpdate && props) {
                   onUpdate({
