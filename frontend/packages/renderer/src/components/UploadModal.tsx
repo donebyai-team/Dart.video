@@ -1,6 +1,7 @@
 import { UploadedMedia } from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import { CloudUpload, Loader2 } from 'lucide-react'
+import { CloudUpload } from 'lucide-react'
 import React, { SetStateAction, useCallback, useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import toast from 'react-hot-toast'
 
 interface UploadModalProps {
@@ -72,34 +73,23 @@ export const UploadModal: React.FC<UploadModalProps> = ({
         return
       }
 
-      // Set setChoosenFile to file to use it while you retry to upload
       setChoosenFile(file)
-
-      // Set setIsUploading true to show loader
+      onClose()
       setIsUploading(true)
 
-      try {
-        //async function to upload the update
-        upload(file)
-          .then(cloudUrl => {
-            onUpload(cloudUrl)
-            setIsUploading(false)
-            setUploadError(false)
-            setRetry(false)
-          })
-          .catch(error => {
-            console.debug('Failed to upload file', error)
-            toast.error(error.message)
-            setIsUploading(false)
-            setUploadError(true)
-          })
-
-        onClose()
-      } catch (error) {
-        toast.error('Failed to upload media')
-        setIsUploading(false)
-        setUploadError(true)
-      }
+      upload(file)
+        .then(cloudUrl => {
+          onUpload(cloudUrl)
+          setIsUploading(false)
+          setUploadError(false)
+          setRetry(false)
+        })
+        .catch(error => {
+          console.debug('Failed to upload file', error)
+          toast.error(error.message)
+          setIsUploading(false)
+          setUploadError(true)
+        })
     },
     [onUpload, onClose]
   )
@@ -176,47 +166,52 @@ export const UploadModal: React.FC<UploadModalProps> = ({
 
   if (!open) return null
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
       {/* Dialog */}
-      <div className="relative w-full max-w-sm rounded-lg bg-white shadow-xl mx-4">
-        <div className="p-4">
+      <div className="relative w-96 rounded-2xl bg-white shadow-2xl">
+        <div className="p-6">
+          {/* Title */}
+          <p className="text-sm font-semibold text-gray-900 mb-1">Upload Media</p>
+          <p className="text-xs text-gray-400 mb-4">JPG, PNG, MP4 or WEBM</p>
+
+          {/* Drop zone */}
           <div
             onDragEnter={handleDragEnter}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            onClick={!isUploading ? handleClick : undefined}
+            onClick={handleClick}
             className={[
-              'flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed p-12 text-center transition-all duration-300',
-              isUploading ? 'cursor-default' : 'cursor-pointer',
+              'flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed p-10 cursor-pointer transition-all duration-200',
               isDragging
-                ? 'border-blue-500 bg-blue-50'
-                : isUploading
-                  ? 'border-gray-300 bg-white'
-                  : 'border-gray-300 bg-white hover:border-blue-500 hover:bg-gray-50'
+                ? 'border-indigo-400 bg-indigo-50'
+                : 'border-gray-200 hover:border-indigo-300 hover:bg-gray-50'
             ].join(' ')}
           >
-            {isUploading ? (
-              <>
-                <Loader2 className="h-10 w-10 animate-spin text-blue-500" />
-                <p className="text-sm text-gray-500">Uploading...</p>
-              </>
-            ) : (
-              <>
-                <CloudUpload className="h-16 w-16 text-blue-500 opacity-50" />
-                <p className="text-base font-semibold text-gray-800">Drag &amp; Drop Media Here</p>
-                <p className="text-sm text-gray-500">or click to browse</p>
-                <p className="text-xs text-gray-400">Supports: JPG, PNG, MP4, WEBM</p>
-              </>
-            )}
+            <div className={[
+              'flex h-11 w-11 items-center justify-center rounded-full transition-colors duration-200',
+              isDragging ? 'bg-indigo-100' : 'bg-gray-100'
+            ].join(' ')}>
+              <CloudUpload className={[
+                'h-5 w-5 transition-colors duration-200',
+                isDragging ? 'text-indigo-500' : 'text-gray-400'
+              ].join(' ')} />
+            </div>
+            <div className="text-center">
+              <p className="text-xs font-medium text-gray-700">
+                Drop file here, or{' '}
+                <span className="text-indigo-500 underline underline-offset-2">browse</span>
+              </p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 

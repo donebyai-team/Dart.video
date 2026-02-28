@@ -21,6 +21,10 @@ export const uploadMedia = async (file: File): Promise<UploadedMedia> => {
     },
     body: formData
   })
+  if (!response.ok) {
+    const text = await response.text()
+    throw new Error(text || `Upload failed (${response.status})`)
+  }
   const data = await response.json()
   console.debug("[Uploaded media]", data)
   return create(UploadedMediaSchema, data)
