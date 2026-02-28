@@ -6,9 +6,9 @@ import * as ReactJsxRuntime from 'react/jsx-runtime'
 import { AbsoluteFill, continueRender, delayRender } from 'remotion'
 import * as Remotion from 'remotion'
 import { resolveTemplateEntry, TemplateModule } from '../../../template-registery'
-import { TemplateContainer } from '../../../../portal/src/components/editor/remotion/components/TemplateContainer'
-import { AnimatedBackground } from '../../../../portal/src/components/editor/remotion/effects/AnimatedBackground'
-import { TemplateRendrer } from '../../../../portal/src/components/editor/remotion/animations/suggester/TemplateRenderer'
+import { TemplateContainer } from '../components/TemplateContainer'
+import { AnimatedBackground } from '../effects/AnimatedBackground'
+import { TemplateRendrer } from '../components/TemplateRenderer'
 import { backgroundStyleToCSS } from '../backgroundUtils'
 
 interface TextAnimationSlideProps {

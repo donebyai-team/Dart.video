@@ -5,7 +5,8 @@ set -euo pipefail
 # Re-run this script after code changes.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+RENDERER_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
 if ! command -v gcloud >/dev/null 2>&1; then
   echo "error: gcloud is required" >&2
@@ -114,7 +115,7 @@ CACHE_URI="$REGION-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$IMAGE_NAME:buildcache"
 log "Building and pushing linux/amd64 image: $IMAGE_URI"
 docker buildx build \
   --platform linux/amd64 \
-  -f "$ROOT_DIR/Dockerfile.remotion-job" \
+  -f "$RENDERER_DIR/Dockerfile.remotion-job" \
   -t "$IMAGE_URI" \
   --cache-from "type=registry,ref=$CACHE_URI" \
   --cache-to "type=registry,ref=$CACHE_URI,mode=max" \

@@ -1,6 +1,6 @@
 import { Slide } from "@coasterai/pb/coasterai/core/v1/slide_pb"
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion"
-import { TypewriterAnimation, WordRevealAnimation, LetterCascadeAnimation, ScaleBounceAnimation, BlurInAnimation } from "../TextAnimations"
+import { TypewriterAnimation, WordRevealAnimation, LetterCascadeAnimation, ScaleBounceAnimation, BlurInAnimation } from "./TextAnimations"
 
 // Template-based renderer (driven by slide.content.template_id and template_config)
 export const TemplateRendrer: React.FC<{

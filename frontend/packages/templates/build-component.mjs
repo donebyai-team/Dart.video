@@ -41,8 +41,6 @@ const globalName = toGlobalName(templateNameArg ?? lastFolderName)
 // Entry path
 const entry = path.resolve(
   __dirname,
-  '..',
-  'packages/templates',
   templateFolderArg,
   `${templateName}.tsx`
 )
@@ -52,7 +50,7 @@ const config = {
   target: 'web',
   entry,
   output: {
-    path: path.resolve(__dirname, '../packages/build'),
+    path: path.resolve(__dirname, './build'),
     filename: outFile,
     library: {
       type: 'window',

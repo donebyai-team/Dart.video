@@ -1,7 +1,5 @@
-import { uploadMedia } from '@/services/utils'
 import { UploadedMedia } from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import CloudUploadIcon from '@mui/icons-material/CloudUpload'
-import { Box, CircularProgress, Dialog, DialogContent, DialogTitle, IconButton, Typography } from '@mui/material'
+import { CloudUpload, Loader2 } from 'lucide-react'
 import React, { SetStateAction, useCallback, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 
@@ -14,6 +12,7 @@ interface UploadModalProps {
   setUploading: React.Dispatch<SetStateAction<boolean>>
   setUploadError: React.Dispatch<SetStateAction<boolean>>
   accept: string
+  uploadMedia: (file: File) => Promise<UploadedMedia>
 }
 
 // getVideoDurationFromUrl returns duration of video in seconds
@@ -44,7 +43,8 @@ export const UploadModal: React.FC<UploadModalProps> = ({
   setRetry,
   setUploading,
   setUploadError,
-  accept
+  accept,
+  uploadMedia
 }) => {
   const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
@@ -88,7 +88,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
             setRetry(false)
           })
           .catch(error => {
-            console.debug("Failed to upload file", error);
+            console.debug('Failed to upload file', error)
             toast.error(error.message)
             setIsUploading(false)
             setUploadError(true)
@@ -98,7 +98,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
       } catch (error) {
         toast.error('Failed to upload media')
         setIsUploading(false)
-        setUploadError(true);
+        setUploadError(true)
       }
     },
     [onUpload, onClose]
@@ -117,7 +117,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
             setUploadError(false)
           })
           .catch(error => {
-            console.debug("Failed to retry upload file", error);
+            console.debug('Failed to retry upload file', error)
             toast.error(error.message)
             setUploadError(true)
             setIsUploading(false)
@@ -174,65 +174,49 @@ export const UploadModal: React.FC<UploadModalProps> = ({
     input.click()
   }, [handleFile])
 
-  return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth='sm'
-      fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: 2
-        }
-      }}
-    >     
+  if (!open) return null
 
-      <DialogContent dividers>
-        <Box
-          onDragEnter={handleDragEnter}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          onClick={!isUploading ? handleClick : undefined}
-          sx={{
-            border: '2px dashed',
-            borderColor: isDragging ? 'primary.main' : 'grey.300',
-            borderRadius: 2,
-            p: 6,
-            textAlign: 'center',
-            cursor: isUploading ? 'default' : 'pointer',
-            bgcolor: isDragging ? 'action.hover' : 'background.paper',
-            transition: 'all 0.3s ease',
-            '&:hover': {
-              borderColor: isUploading ? 'grey.300' : 'primary.main',
-              bgcolor: isUploading ? 'background.paper' : 'action.hover'
-            }
-          }}
-        >
-          {isUploading ? (
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-              <CircularProgress />
-              <Typography variant='body2' color='text.secondary'>
-                Uploading...
-              </Typography>
-            </Box>
-          ) : (
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-              <CloudUploadIcon sx={{ fontSize: 64, color: 'primary.main', opacity: 0.5 }} />
-              <Typography variant='h6' color='text.primary'>
-                Drag & Drop Media Here
-              </Typography>
-              <Typography variant='body2' color='text.secondary'>
-                or click to browse
-              </Typography>
-              <Typography variant='caption' color='text.disabled'>
-                Supports: JPG, PNG, MP4, WEBM
-              </Typography>
-            </Box>
-          )}
-        </Box>
-      </DialogContent>
-    </Dialog>
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+
+      {/* Dialog */}
+      <div className="relative w-full max-w-sm rounded-lg bg-white shadow-xl mx-4">
+        <div className="p-4">
+          <div
+            onDragEnter={handleDragEnter}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClick={!isUploading ? handleClick : undefined}
+            className={[
+              'flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed p-12 text-center transition-all duration-300',
+              isUploading ? 'cursor-default' : 'cursor-pointer',
+              isDragging
+                ? 'border-blue-500 bg-blue-50'
+                : isUploading
+                  ? 'border-gray-300 bg-white'
+                  : 'border-gray-300 bg-white hover:border-blue-500 hover:bg-gray-50'
+            ].join(' ')}
+          >
+            {isUploading ? (
+              <>
+                <Loader2 className="h-10 w-10 animate-spin text-blue-500" />
+                <p className="text-sm text-gray-500">Uploading...</p>
+              </>
+            ) : (
+              <>
+                <CloudUpload className="h-16 w-16 text-blue-500 opacity-50" />
+                <p className="text-base font-semibold text-gray-800">Drag &amp; Drop Media Here</p>
+                <p className="text-sm text-gray-500">or click to browse</p>
+                <p className="text-xs text-gray-400">Supports: JPG, PNG, MP4, WEBM</p>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
 

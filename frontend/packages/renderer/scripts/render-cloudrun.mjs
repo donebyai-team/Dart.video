@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 import Redis from 'ioredis';
 
 // Bundle is pre-built at Docker image build time by scripts/prebundle.mjs
-const BUNDLE_DIR = '/app/portal/remotion-bundle';
+const BUNDLE_DIR = '/app/renderer/remotion-bundle';
 const PROGRESS_TTL_SECONDS = 30 * 60; // 30 minutes
 const KEY_PREFIX = 'coasterai:';
 

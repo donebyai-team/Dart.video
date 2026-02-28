@@ -15,9 +15,7 @@
   "scripts": {
     "dep-check": "turbo run dep-check",
     "dev:portal": "turbo -F=./portal/** -F=./packages/** dev",
-    "build:template": "node ./scripts/build-component.mjs",
-    "deploy:remotion": "./scripts/deploy-remotion-cloudrun.sh",
-    "deploy:validator": "./scripts/deploy-validator-cloudrun.sh",
+    "build:template": "node ./packages/templates/build-component.mjs",    
     "lint": "turbo run lint",
     "prettier": "turbo run prettier",
     "type-check": "turbo run type-check",
@@ -63,11 +61,11 @@
   },
   "dependencies": {
     "@amplitude/analytics-browser": "^2.17.8",
-    "remotion": "4.0.421",
-    "@remotion/player": "4.0.421",
-    "@remotion/paths": "4.0.421",
-    "@remotion/shapes": "4.0.421",
-    "@remotion/transitions": "4.0.421",
+    "remotion": "4.0.419",
+    "@remotion/player": "4.0.419",
+    "@remotion/paths": "4.0.419",
+    "@remotion/shapes": "4.0.419",
+    "@remotion/transitions": "4.0.419",
     "zod": "^3.24.4"
   }
 }

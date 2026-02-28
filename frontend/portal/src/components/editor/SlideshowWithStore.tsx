@@ -1,4 +1,5 @@
 import { useVideoStore } from '@/stores/video'
+import { uploadMedia } from '@/services/utils'
 import { Slideshow } from '@coasterai/renderer'
 import type { ComponentProps } from 'react'
 
@@ -19,6 +20,7 @@ export const SlideshowWithStore: React.FC<Omit<SlideshowProps, 'videoConfig' | '
       videoConfig={videoConfig ?? undefined}
       selectedStackItemId={selectedStackItemId}
       onUpdate={onUpdate}
+      uploadMedia={uploadMedia}
     />
   )
 }

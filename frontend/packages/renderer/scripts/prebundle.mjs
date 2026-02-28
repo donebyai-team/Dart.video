@@ -10,31 +10,13 @@ import {fileURLToPath} from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-// scripts/ → renderer/ → packages/ → app/ → portal/
-const portalSrc = resolve(__dirname, '../../../portal/src');
-const portalNodeModules = resolve(__dirname, '../../../portal/node_modules');
-
-const BUNDLE_OUTPUT = '/app/portal/remotion-bundle';
+const BUNDLE_OUTPUT = '/app/renderer/remotion-bundle';
 
 console.log('Pre-bundling Remotion composition...');
 
 const bundlePath = await bundle({
   entryPoint: resolve(__dirname, '../src/remotion-entry.ts'),
   onProgress: (p) => process.stdout.write(`  ${p}%\r`),
-  webpackOverride: (config) => ({
-    ...config,
-    resolve: {
-      ...config.resolve,
-      alias: {
-        ...config.resolve?.alias,
-        '@': portalSrc,
-      },
-      modules: [
-        ...(config.resolve?.modules ?? ['node_modules']),
-        portalNodeModules,
-      ],
-    },
-  }),
 });
 
 console.log(`\nBundle created at: ${bundlePath}`);

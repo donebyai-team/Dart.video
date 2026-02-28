@@ -1,5 +1,5 @@
 import { fromJson, JsonObject } from '@bufbuild/protobuf'
-import { Slide, SlideType, TransitionType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { Slide, SlideType, TransitionType, UploadedMedia } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Video, VideoSchema } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import { linearTiming, TransitionSeries } from '@remotion/transitions'
 import { fade } from '@remotion/transitions/fade'
@@ -19,6 +19,7 @@ interface SlideshowProps {
   videoConfig?: Video
   selectedStackItemId?: string | null
   onUpdate?: (updates: Partial<Slide>) => void
+  uploadMedia?: (file: File) => Promise<UploadedMedia>
 }
 
 // Main slide component router
@@ -31,7 +32,8 @@ export const SlideComponent: React.FC<{
   selectedStackItemId?: string | null
   onSelect?: () => void
   onUpdate?: (updates: Partial<Slide>) => void
-}> = ({ slide, width, height, isEditing = false, isSelected = false, onSelect, onUpdate = () => {} }) => {
+  uploadMedia?: (file: File) => Promise<UploadedMedia>
+}> = ({ slide, width, height, isEditing = false, isSelected = false, onSelect, onUpdate = () => {}, uploadMedia }) => {
 
   const slideBackground = backgroundStyleToCSS(slide.backgroundStyle)
 
@@ -54,13 +56,13 @@ export const SlideComponent: React.FC<{
       break
     case SlideType.MEDIA:
       if (!slide.content?.case || slide.content.case === 'media') {
-        return <MediaSlide slide={slide} width={width} height={height} onUpdate={onUpdate} />
+        return <MediaSlide slide={slide} width={width} height={height} onUpdate={onUpdate} uploadMedia={uploadMedia} />
       }
       break
 
     default:
       if (!slide.content?.case || slide.content.case === 'media') {
-        return <MediaSlide slide={slide} width={width} height={height} isEditing={isEditing} onUpdate={onUpdate} />
+        return <MediaSlide slide={slide} width={width} height={height} isEditing={isEditing} onUpdate={onUpdate} uploadMedia={uploadMedia} />
       }
       break
   }
@@ -129,7 +131,7 @@ const getTransitionPresentation = (transitionType?: TransitionType) => {
  */
 
 // Main slideshow composition using Remotion's TransitionSeries
-export const Slideshow: React.FC<SlideshowProps> = ({ fps, isEditing = false, onSelectTemplate, video, videoConfig: videoConfigProp, selectedStackItemId = null, onUpdate = () => {} }) => {
+export const Slideshow: React.FC<SlideshowProps> = ({ fps, isEditing = false, onSelectTemplate, video, videoConfig: videoConfigProp, selectedStackItemId = null, onUpdate = () => {}, uploadMedia }) => {
   const selectedTemplateId = null
 
   const { width, height } = useVideoConfig()
@@ -219,6 +221,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({ fps, isEditing = false, on
                       : null
                   }
                   onUpdate={onUpdate}
+                  uploadMedia={uploadMedia}
                   onSelect={() => {
                     onSelectTemplate?.(slide.id);
                   }}

@@ -1,7 +1,8 @@
 import { MediaSlideContent } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { RefObject, useState } from 'react'
 import { Img } from 'remotion'
-import MediaStyler from './MediaStyler'
+import { MediaStyler } from './MediaStyler'
+
 
 interface Props {
   mediaRef: RefObject<HTMLImageElement>

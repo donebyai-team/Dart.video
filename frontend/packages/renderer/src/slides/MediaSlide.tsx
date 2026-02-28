@@ -1,16 +1,16 @@
-import { MediaSlideContent, MediaType, MetaData, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { MediaSlideContent, MediaType, MetaData, Slide, UploadedMedia } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Loader2 } from 'lucide-react'
 import React, { RefObject, useEffect, useRef, useState } from 'react'
 import { preloadImage, preloadVideo } from '@remotion/preload'
 import { AbsoluteFill, useCurrentFrame, useRemotionEnvironment, useVideoConfig } from 'remotion'
-import { ImagePreview } from '../../../../portal/src/components/editor/remotion/components/ImagePreview'
-import RetryButton from '../../../../portal/src/components/editor/remotion/components/RetryButton'
-import UploadModal from '../../../../portal/src/components/editor/remotion/components/UploadModal'
-import { VideoPreview } from '../../../../portal/src/components/editor/remotion/components/VideoPreview'
-import CalloutEffectComponent from '../../../../portal/src/components/editor/remotion/effects/CalloutEffect'
-import SpotlightEffectComponent from '../../../../portal/src/components/editor/remotion/effects/SpotlightEffect'
-import { ZoomEffectComponent } from '../../../../portal/src/components/editor/remotion/effects/ZoomEffect'
-import { MediaContainer } from '../../../../portal/src/components/editor/remotion/components/MediaContainer'
+import { ImagePreview } from '../components/ImagePreview'
+import RetryButton from '../components/RetryButton'
+import UploadModal from '../components/UploadModal'
+import { VideoPreview } from '../components/VideoPreview'
+import CalloutEffectComponent from '../effects/CalloutEffect'
+import SpotlightEffectComponent from '../effects/SpotlightEffect'
+import { ZoomEffectComponent } from '../effects/ZoomEffect'
+import { MediaContainer } from '../components/MediaContainer'
 import { backgroundStyleToCSS } from '../backgroundUtils'
 
 
@@ -20,9 +20,10 @@ interface MediaSlideProps {
   height: number
   isEditing?: boolean
   onUpdate?: (updates: Partial<Slide>) => void
+  uploadMedia?: (file: File) => Promise<UploadedMedia>
 }
 
-export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, onUpdate }) => {
+export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, onUpdate, uploadMedia }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
   const { isRendering } = useRemotionEnvironment()
@@ -196,6 +197,7 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
               retry={retry}
               open={openUploadModal}
               onClose={() => setOpenUploadModal(false)}
+              uploadMedia={uploadMedia ?? (() => Promise.reject(new Error('uploadMedia not provided')))}
               onUpload={data => {
                 if (onUpdate && data) {
                   const updatedMediaType = data.mimeType?.startsWith('image')

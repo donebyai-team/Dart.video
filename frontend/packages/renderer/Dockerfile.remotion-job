@@ -45,8 +45,24 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY packages ./packages
-COPY portal ./portal
+
+# Full source for packages the renderer actually depends on
+COPY packages/renderer ./packages/renderer
+COPY packages/pb ./packages/pb
+COPY packages/ts-config ./packages/ts-config
+COPY packages/template-registery.ts ./packages/template-registery.ts
+
+# package.json only for remaining workspace packages (pnpm lockfile resolution)
+COPY packages/client/package.json ./packages/client/package.json
+COPY packages/mui-config/package.json ./packages/mui-config/package.json
+COPY packages/store/package.json ./packages/store/package.json
+COPY packages/tailwind-config/package.json ./packages/tailwind-config/package.json
+COPY packages/ui-core/package.json ./packages/ui-core/package.json
+COPY packages/vitejs-config/package.json ./packages/vitejs-config/package.json
+
+# pnpm workspace requires portal/package.json to exist for dep resolution,
+# but we don't need portal source code in this image
+COPY portal/package.json ./portal/package.json
 
 RUN pnpm install --frozen-lockfile
 
