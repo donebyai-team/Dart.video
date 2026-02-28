@@ -132,8 +132,7 @@ gcloud run deploy "$SERVICE_NAME" \
   --max-instances="$MAX_INSTANCES" \
   --allow-unauthenticated \
   --command="pnpm" \
-  --args="run,validate:server" \
-  --set-env-vars="OUTPUT_BUCKET=$OUTPUT_BUCKET"
+  --args="run,validate:server"
 
 SERVICE_URL="$(gcloud run services describe "$SERVICE_NAME" \
   --region="$REGION" \
