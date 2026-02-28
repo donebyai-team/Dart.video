@@ -157,6 +157,59 @@ function cleanStack(rawStack) {
     .join('\n');
 }
 
+function dedupe(items) {
+  const out = [];
+  const seen = new Set();
+  for (const item of items) {
+    if (seen.has(item)) continue;
+    seen.add(item);
+    out.push(item);
+  }
+  return out;
+}
+
+function isLikelyNoiseFrame(frameLine) {
+  // Minified React/Remotion internals often appear as `at Nh`, `at J`, `at MessagePort.R`.
+  const match = frameLine.match(/^\s*at\s+([^\s(]+)/);
+  if (!match) return false;
+  const fn = match[1];
+  if (/^(MessagePort\.)?[A-Z][A-Za-z0-9_$]{0,2}$/.test(fn)) return true;
+  return false;
+}
+
+function formatRenderErrorForLlm(err) {
+  const rawStack = err?.stack || err?.message || String(err);
+  const cleaned = cleanStack(rawStack)
+    .split('\n')
+    .map((line) => line.trimEnd())
+    .filter(Boolean);
+
+  if (cleaned.length === 0) return String(err);
+
+  const headline = cleaned[0];
+  const frames = cleaned.slice(1).filter((line) => /^\s*at\s+/.test(line));
+
+  const relevantFrames = dedupe(
+    frames.filter((line) => {
+      if (isLikelyNoiseFrame(line)) return false;
+      return (
+        /eval at evalWithScope/.test(line) ||
+        /RemoteComponent/.test(line) ||
+        /compileRemoteComponent/.test(line) ||
+        /Array\.map/.test(line) ||
+        /<anonymous>:\d+:\d+/.test(line) ||
+        /ValidatorComp/.test(line)
+      );
+    }),
+  ).slice(0, 12);
+
+  if (relevantFrames.length === 0) {
+    return cleaned.join('\n');
+  }
+
+  return [headline, 'Relevant stack:', ...relevantFrames].join('\n');
+}
+
 // ── Request handler ───────────────────────────────────────────────────────────
 
 async function handleValidate(req, res) {
@@ -181,7 +234,8 @@ async function handleValidate(req, res) {
 
   console.log(
     `[validate] received code (${code.length} chars), ` +
-    `config keys: ${Object.keys(config || {}).join(', ') || 'none'}`,
+    `config keys: ${Object.keys(config || {}).join(', ') || 'none'}, ` +
+    `config: ${JSON.stringify(config ?? {}, null, 2)}`,
   );
 
   // ── Step 1: Fast compile check ───────────────────────────────────────────
@@ -250,15 +304,14 @@ async function handleValidate(req, res) {
     } catch (renderErr) {
       // renderStill throws when ValidatorComp throws during rendering.
       // Covers both late compile errors and runtime rendering errors.
-      const rawStack = renderErr.stack || renderErr.message || String(renderErr);
-      const cleaned = cleanStack(rawStack);
+      const formatted = formatRenderErrorForLlm(renderErr);
 
       // ValidatorComp tags compile failures with "[compile_error]"
-      const errorType = cleaned.includes('[compile_error]') ? 'compile_error' : 'render_error';
+      const errorType = formatted.includes('[compile_error]') ? 'compile_error' : 'render_error';
 
-      console.log(`[validate] render check FAILED (${errorType}):\n`, cleaned);
+      console.log(`[validate] render check FAILED (${errorType}):\n`, formatted);
       res.writeHead(422, {'Content-Type': 'application/json'});
-      res.end(JSON.stringify({error_type: errorType, errors: [cleaned]}));
+      res.end(JSON.stringify({error_type: errorType, errors: [formatted]}));
       return;
     }
 

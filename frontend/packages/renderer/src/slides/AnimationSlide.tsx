@@ -8,6 +8,9 @@ import { AnimatedBackground } from '../effects/AnimatedBackground'
 import { TemplateRendrer } from '../components/TemplateRenderer'
 import { backgroundStyleToCSS } from '../backgroundUtils'
 
+// While testing in local, just replace this with the component to test
+// import { RemoteComponent as HardcodedShankTemplate } from '../../../templates/text-animation/Shank'
+
 interface TextAnimationSlideProps {
   slide: Slide
   width: number
@@ -49,6 +52,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
   const templateUrl = content?.templateUrl
   const templateMeta = (content?.meta as MetaData) || {}
   const templateConfig = (content?.templateConfig ?? {}) as TemplateConfig
+
 
   const background = backgroundStyleToCSS(slide.backgroundStyle)
 
@@ -112,6 +116,13 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
   })
 
   useEffect(() => {
+    if (!templateUrl) {
+      setIsLoading(false)
+      setCompiledComponent(null)
+    }
+  }, [templateUrl])
+
+  useEffect(() => {
     if (!templateUrl) return
 
     // Return cached compiled component immediately if available
@@ -127,7 +138,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
     setIsLoading(true)
 
     ;(async () => {
-      try {
+      try {        
         const response = await fetch(templateUrl)
         if (!response.ok) {
           throw new Error(`Failed to fetch template: ${response.status} ${response.statusText}`)
@@ -148,7 +159,15 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
           }
         }
       } catch (error) {
-        console.error(`Failed to load template "${templateUrl}"`, error)
+        if (error instanceof TypeError) {
+          console.error(`Failed to load template "${templateUrl}" (network/CORS/blocked request)`, {
+            error,
+            templateUrlJson: JSON.stringify(templateUrl),
+            length: templateUrl.length
+          })
+        } else {
+          console.error(`Failed to load template "${templateUrl}"`, error)
+        }
         compiledComponentCache.set(templateUrl, null)
         if (!disposed) {
           setCompiledComponent(null)

@@ -16,6 +16,7 @@ import { wipe } from "@remotion/transitions/wipe";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   AbsoluteFill,
+  Easing,
   Img,
   Sequence,
   interpolate,
@@ -54,6 +55,7 @@ const SHARED_PARAM_NAMES: string[] = [
   "interpolate",
   "useCurrentFrame",
   "useVideoConfig",
+  "Easing",
   "spring",
   "Sequence",
   "Img",
@@ -104,6 +106,7 @@ const SHARED_PARAM_VALUES: unknown[] = [
   interpolate,
   useCurrentFrame,
   useVideoConfig,
+  Easing,
   spring,
   Sequence,
   Img,

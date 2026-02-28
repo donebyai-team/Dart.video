@@ -169,9 +169,23 @@ func (l animationGenerator) Generate(
 		// Default
 		generatedConfig := json.RawMessage(`{}`)
 		if generatedAnimation.Config != nil {
-			config, err := json.Marshal(generatedAnimation.Config)
+			config, err := normalizeGeneratedConfig(*generatedAnimation.Config)
 			if err != nil {
-				return nil, agenterrors.AnimationGenerationFailed("failed to marshal animation config", err)
+				conversationHistory = appendRetryConversation(
+					conversationHistory,
+					generatedAnimation.Code,
+					"Config is invalid. It must be a valid JSON object only (no markdown/code fences, no array/string root). "+
+						"Return config as plain JSON object.\nValidation error: "+err.Error(),
+				)
+
+				l.logger.Error("invalid generated animation config, retrying",
+					zap.Int("attempt", attempt),
+					zap.Error(err))
+
+				callback(TemplateGenerationProgress{
+					Message: CreativeStageMessage(StageRefining, attempt),
+				})
+				continue
 			}
 			generatedConfig = config
 		}
@@ -198,11 +212,9 @@ func (l animationGenerator) Generate(
 			Message: CreativeStageMessage(StageBuilding, attempt),
 		})
 
-		validateCodeResponse, err := l.codeBuilder.ValidateAndBuild(ctx, &services.ValidateAndBuildInput{
-			Code:          indentedCode,
-			ComponentName: componentName,
-			OutputPath:    fmt.Sprintf("templates/generated/%s/%s", params.OrgID, params.SessionID),
-			Config:        generatedConfig,
+		_, err = l.codeBuilder.ValidateAndBuild(ctx, &services.ValidateAndBuildInput{
+			Code:   indentedCode,
+			Config: generatedConfig,
 		})
 
 		if err == nil {
@@ -214,7 +226,7 @@ func (l animationGenerator) Generate(
 				Name:            componentName,
 				AnimationType:   types.AnimationTypeTEXT,
 				Schema:          nil,
-				CDNUrl:          validateCodeResponse.JSPath,
+				CDNUrl:          uploadedMedia.Url,
 				Repeatable:      false,
 				GeneratedConfig: generatedConfig,
 			}, nil
@@ -223,16 +235,10 @@ func (l animationGenerator) Generate(
 		// Retry only on build errors
 		var buildErr *services.BuildError
 		if errors.As(err, &buildErr) {
-			conversationHistory = append(conversationHistory, types.Message{
-				Role:    types.Union3KassistantOrKtoolOrKuser__NewKassistant(),
-				Content: indentedCode,
-			})
-
-			conversationHistory = append(conversationHistory,
-				types.Message{
-					Role:    types.Union3KassistantOrKtoolOrKuser__NewKuser(),
-					Content: "Build failed with error:\n" + buildErr.Error(),
-				},
+			conversationHistory = appendRetryConversation(
+				conversationHistory,
+				indentedCode,
+				"Build failed with error:\n"+buildErr.Error(),
 			)
 
 			l.logger.Error("failed to build animation",
@@ -348,4 +354,67 @@ func indentCode(code string) string {
 	}
 
 	return strings.Join(result, "\n")
+}
+
+func appendRetryConversation(history []types.Message, assistantCode string, feedback string) []types.Message {
+	history = append(history, types.Message{
+		Role:    types.Union3KassistantOrKtoolOrKuser__NewKassistant(),
+		Content: assistantCode,
+	})
+	history = append(history, types.Message{
+		Role:    types.Union3KassistantOrKtoolOrKuser__NewKuser(),
+		Content: feedback,
+	})
+	return history
+}
+
+func normalizeGeneratedConfig(raw string) (json.RawMessage, error) {
+	trimmed := strings.TrimSpace(raw)
+	if trimmed == "" || trimmed == "null" {
+		return json.RawMessage(`{}`), nil
+	}
+
+	// Remove optional markdown fences: ```json ... ```
+	if strings.HasPrefix(trimmed, "```") {
+		lines := strings.Split(trimmed, "\n")
+		if len(lines) >= 2 {
+			if strings.HasPrefix(strings.TrimSpace(lines[0]), "```") {
+				lines = lines[1:]
+			}
+			if len(lines) > 0 && strings.HasPrefix(strings.TrimSpace(lines[len(lines)-1]), "```") {
+				lines = lines[:len(lines)-1]
+			}
+			trimmed = strings.TrimSpace(strings.Join(lines, "\n"))
+		}
+	}
+
+	if !json.Valid([]byte(trimmed)) {
+		return nil, fmt.Errorf("config is not valid JSON")
+	}
+
+	// Decode once to verify shape and to support double-encoded JSON strings.
+	var decoded any
+	if err := json.Unmarshal([]byte(trimmed), &decoded); err != nil {
+		return nil, err
+	}
+
+	if nested, ok := decoded.(string); ok {
+		nested = strings.TrimSpace(nested)
+		if nested == "" || !json.Valid([]byte(nested)) {
+			return nil, fmt.Errorf("config JSON string does not contain valid JSON")
+		}
+		if err := json.Unmarshal([]byte(nested), &decoded); err != nil {
+			return nil, err
+		}
+	}
+
+	if _, ok := decoded.(map[string]any); !ok {
+		return nil, fmt.Errorf("config root must be a JSON object")
+	}
+
+	normalized, err := json.Marshal(decoded)
+	if err != nil {
+		return nil, err
+	}
+	return json.RawMessage(normalized), nil
 }

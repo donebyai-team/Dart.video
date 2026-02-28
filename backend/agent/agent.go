@@ -87,6 +87,7 @@ func NewAgentV1(
 	llmService := llm.NewLlmService(logger)
 	return &agentV1{
 		sessionID:        sessionID,
+		orgID:            orgID,
 		logger:           logger,
 		cache:            cache,
 		db:               db,
