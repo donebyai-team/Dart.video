@@ -22,7 +22,7 @@ import { useVideoStore } from '@/stores/video'
 import { SlideType, Slide, StackSlideContent, EffectType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { ActiveToolType } from '@/types/tools'
 import DurationChangeComponent from './remotion/components/DurationChangeComponent'
-import { backgroundStyleToCSS } from './settings/BackgroundSettings'
+import { backgroundStyleToCSS } from '@coasterai/renderer'
 
 interface PlayerToolbarProps {
   onDurationChange: (newDuration: number) => void

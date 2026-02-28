@@ -11,10 +11,7 @@
     "lint": "eslint --fix \"src/**/*.{js,jsx,ts,tsx}\"",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
     "test": "jest",
-    "type-check": "tsc --noEmit",
-    "render": "pnpm exec remotion render src/render/index.ts MyComposition out.mp4 --timeout 180000",
-    "render:cloudrun": "node ./scripts/render-cloudrun.mjs",
-    "validate:server": "node ./scripts/validate-server.mjs"
+    "type-check": "tsc --noEmit"    
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^3.5.0",
@@ -25,6 +22,7 @@
     "@coasterai/client": "workspace:*",
     "@coasterai/mui-config": "workspace:*",
     "@coasterai/pb": "workspace:*",
+    "@coasterai/renderer": "workspace:*",
     "@coasterai/ui-core": "workspace:*",
     "@connectrpc/connect": "catalog:",
     "@connectrpc/connect-web": "catalog:",

@@ -1,6 +1,6 @@
-import Slideshow from '../components/editor/RemotionSlideshow'
 import { Composition, getInputProps } from 'remotion'
 import video from './video.json'
+import Slideshow from './RemotionSlideshow'
 
 export const MyVideo = () => {
   const inputProps = getInputProps() as { video?: typeof video } | undefined

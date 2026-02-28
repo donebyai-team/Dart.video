@@ -5,25 +5,34 @@
  */
 import {bundle} from '@remotion/bundler';
 import {cpSync, mkdirSync} from 'node:fs';
-import {resolve} from 'node:path';
+import {dirname, resolve} from 'node:path';
+import {fileURLToPath} from 'node:url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+// scripts/ → renderer/ → packages/ → app/ → portal/
+const portalSrc = resolve(__dirname, '../../../portal/src');
+const portalNodeModules = resolve(__dirname, '../../../portal/node_modules');
 
 const BUNDLE_OUTPUT = '/app/portal/remotion-bundle';
 
 console.log('Pre-bundling Remotion composition...');
 
 const bundlePath = await bundle({
-  entryPoint: resolve('./src/render/index.ts'),
+  entryPoint: resolve(__dirname, '../src/remotion-entry.ts'),
   onProgress: (p) => process.stdout.write(`  ${p}%\r`),
-  // Replicate the TypeScript `@/*` path alias so webpack can resolve
-  // imports like `@/stores/video` → `src/stores/video`
   webpackOverride: (config) => ({
     ...config,
     resolve: {
       ...config.resolve,
       alias: {
         ...config.resolve?.alias,
-        '@': resolve('./src'),
+        '@': portalSrc,
       },
+      modules: [
+        ...(config.resolve?.modules ?? ['node_modules']),
+        portalNodeModules,
+      ],
     },
   }),
 });

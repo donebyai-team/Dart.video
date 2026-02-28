@@ -2,7 +2,7 @@ import { useRef, useEffect, useMemo } from 'react'
 import { Player, PlayerRef } from '@remotion/player'
 import { motion } from 'framer-motion'
 import CanvasOverlay from './CanvasOverlay'
-import { Slideshow } from '../RemotionSlideshow'
+import { SlideshowWithStore as Slideshow } from '../SlideshowWithStore'
 import { useVideoStore } from '@/stores/video'
 
 interface PlayerCanvasProps {

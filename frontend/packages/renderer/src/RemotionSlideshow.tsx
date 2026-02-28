@@ -1,21 +1,24 @@
-import { useVideoStore } from '@/stores/video'
 import { fromJson, JsonObject } from '@bufbuild/protobuf'
 import { Slide, SlideType, TransitionType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import { VideoSchema } from '@coasterai/pb/coasterai/core/v1/video_pb'
+import { Video, VideoSchema } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import { linearTiming, TransitionSeries } from '@remotion/transitions'
 import { fade } from '@remotion/transitions/fade'
 import { slide } from '@remotion/transitions/slide'
 import React from 'react'
 import { AbsoluteFill, useVideoConfig, Html5Audio } from 'remotion'
-import { getActualSlideDuration, TRANSITION_DURATION_SECONDS } from './frame_calculations'
-import { MediaSlide, InfographicSlide, TextAnimationSlide, VisualAnimationSlide } from './remotion/slides'
-import { backgroundStyleToCSS } from './settings/BackgroundSettings'
+import { getActualSlideDuration, TRANSITION_DURATION_SECONDS } from './frameUtils'
+import { AnimationSlide, MediaSlide } from './slides'
+import { backgroundStyleToCSS } from './backgroundUtils'
+
 
 interface SlideshowProps {
   fps: number
   isEditing?: boolean
   onSelectTemplate?: (slideId: string) => void
   video?: JsonObject
+  videoConfig?: Video
+  selectedStackItemId?: string | null
+  onUpdate?: (updates: Partial<Slide>) => void
 }
 
 // Main slide component router
@@ -27,8 +30,8 @@ export const SlideComponent: React.FC<{
   isSelected?: boolean
   selectedStackItemId?: string | null
   onSelect?: () => void
-}> = ({ slide, width, height, isEditing = false, isSelected = false, onSelect }) => {
-  const onUpdate = useVideoStore(s => s.updateSlide)
+  onUpdate?: (updates: Partial<Slide>) => void
+}> = ({ slide, width, height, isEditing = false, isSelected = false, onSelect, onUpdate = () => {} }) => {
 
   const slideBackground = backgroundStyleToCSS(slide.backgroundStyle)
 
@@ -37,37 +40,7 @@ export const SlideComponent: React.FC<{
       // Only render if content case matches or is undefined (for new slides)
       if (!slide.content?.case || slide.content.case === 'animation') {
         return (
-          <TextAnimationSlide
-            slide={slide}
-            width={width}
-            height={height}
-            isEditing={isEditing}
-            isSelected={isSelected}
-            onSelect={onSelect}
-            onUpdate={onUpdate}
-          />
-        )
-      }
-      break
-    case SlideType.VISUAL_ANIMATION:
-      if (!slide.content?.case || slide.content.case === 'animation') {
-        return (
-          <VisualAnimationSlide
-            slide={slide}
-            width={width}
-            height={height}
-            isEditing={isEditing}
-            isSelected={isSelected}
-            onSelect={onSelect}
-            onUpdate={onUpdate}
-          />
-        )
-      }
-      break
-    case SlideType.INFOGRAPHIC:
-      if (!slide.content?.case || slide.content.case === 'animation') {
-        return (
-          <InfographicSlide
+          <AnimationSlide
             slide={slide}
             width={width}
             height={height}
@@ -156,17 +129,12 @@ const getTransitionPresentation = (transitionType?: TransitionType) => {
  */
 
 // Main slideshow composition using Remotion's TransitionSeries
-export const Slideshow: React.FC<SlideshowProps> = ({ fps, isEditing = false, onSelectTemplate, video }) => {
-  let videoConfig = useVideoStore(s => s.videoConfig)
-  const selectedStackItemId = useVideoStore(s => s.selectedStackItemId)
-
+export const Slideshow: React.FC<SlideshowProps> = ({ fps, isEditing = false, onSelectTemplate, video, videoConfig: videoConfigProp, selectedStackItemId = null, onUpdate = () => {} }) => {
   const selectedTemplateId = null
 
   const { width, height } = useVideoConfig()
   const videoProtoObject = video ? fromJson(VideoSchema, video) : undefined
-  if (videoProtoObject) {
-    videoConfig = videoProtoObject
-  }
+  const videoConfig = videoProtoObject ?? videoConfigProp
 
   /* ================= GATE ================= */
 
@@ -250,6 +218,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({ fps, isEditing = false, on
                       ? selectedStackItemId
                       : null
                   }
+                  onUpdate={onUpdate}
                   onSelect={() => {
                     onSelectTemplate?.(slide.id);
                   }}

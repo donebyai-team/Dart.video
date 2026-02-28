@@ -50,7 +50,7 @@ COPY portal ./portal
 
 RUN pnpm install --frozen-lockfile
 
-WORKDIR /app/portal
+WORKDIR /app/packages/renderer
 ENV NODE_ENV=production
 RUN pnpm exec remotion browser ensure
 

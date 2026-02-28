@@ -25,7 +25,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts"
-, "../packages/template-registery.ts", "remotion.config.js"  ],
+, "../packages/template-registery.ts", "remotion.config.js", "../packages/renderer/src/RemotionSlideshow.tsx", "../packages/renderer/src/Video.tsx"  ],
   "exclude": [
     "node_modules"
   ]

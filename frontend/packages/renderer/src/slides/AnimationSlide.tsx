@@ -5,12 +5,11 @@ import * as ReactDOM from 'react-dom'
 import * as ReactJsxRuntime from 'react/jsx-runtime'
 import { AbsoluteFill, continueRender, delayRender } from 'remotion'
 import * as Remotion from 'remotion'
-import { resolveTemplateEntry, TemplateModule } from '../../../../../../packages/template-registery'
-import { TemplateContainer } from '../components/TemplateContainer'
-import { AnimatedBackground } from '../effects/AnimatedBackground'
-import { TemplateConfig } from './InfographicSlide'
-import { backgroundStyleToCSS } from '../../settings/BackgroundSettings'
-import { TemplateRendrer } from '../animations/suggester/TemplateRenderer'
+import { resolveTemplateEntry, TemplateModule } from '../../../template-registery'
+import { TemplateContainer } from '../../../../portal/src/components/editor/remotion/components/TemplateContainer'
+import { AnimatedBackground } from '../../../../portal/src/components/editor/remotion/effects/AnimatedBackground'
+import { TemplateRendrer } from '../../../../portal/src/components/editor/remotion/animations/suggester/TemplateRenderer'
+import { backgroundStyleToCSS } from '../backgroundUtils'
 
 interface TextAnimationSlideProps {
   slide: Slide
@@ -21,6 +20,7 @@ interface TextAnimationSlideProps {
   onUpdate?: (updates: Partial<Slide>) => void
   onSelect?: () => void
 }
+export type TemplateConfig = Record<string, string | number | boolean | object>
 
 const templateLoadCache = new Map<string, Promise<TemplateModule>>()
 
@@ -90,7 +90,7 @@ const loadScriptTemplate = async (url: string, globalNames: string[]): Promise<T
  * Uses delayRender/continueRender so Remotion waits for the async script load
  * before capturing any frames.
  */
-export const TextAnimationSlide: React.FC<TextAnimationSlideProps> = ({
+export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
   slide,
   width,
   height,
@@ -307,4 +307,4 @@ const TemplateLoadingPlaceholder: React.FC = () => (
   </div>
 )
 
-export default TextAnimationSlide
+export default AnimationSlide
