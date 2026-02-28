@@ -42,6 +42,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
 }) => {
   const [CompiledComponent, setCompiledComponent] = React.useState<React.ComponentType<any> | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [templateError, setTemplateError] = useState<string | null>(null)
   const [editing, setEditing] = useState<boolean>(isEditing)
 
   const content = slide.content.value as AnimationSlideContent
@@ -119,6 +120,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
     if (!templateUrl) {
       setIsLoading(false)
       setCompiledComponent(null)
+      setTemplateError(null)
     }
   }, [templateUrl])
 
@@ -129,6 +131,11 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
     if (compiledComponentCache.has(templateUrl)) {
       setCompiledComponent(compiledComponentCache.get(templateUrl) ?? null)
       setIsLoading(false)
+      if (!compiledComponentCache.get(templateUrl)) {
+        setTemplateError('Template failed to compile or load (cached failure).')
+      } else {
+        setTemplateError(null)
+      }
       if (renderHandle) continueRender(renderHandle)
       return
     }
@@ -136,6 +143,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
     let disposed = false
     setCompiledComponent(null)
     setIsLoading(true)
+    setTemplateError(null)
 
     ;(async () => {
       try {        
@@ -151,11 +159,13 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
           compiledComponentCache.set(templateUrl, null)
           if (!disposed) {
             setCompiledComponent(null)
+            setTemplateError(`Compilation failed: ${result.error}`)
           }
         } else {
           compiledComponentCache.set(templateUrl, result.Component)
           if (!disposed) {
             setCompiledComponent(() => result.Component)
+            setTemplateError(null)
           }
         }
       } catch (error) {
@@ -171,6 +181,9 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
         compiledComponentCache.set(templateUrl, null)
         if (!disposed) {
           setCompiledComponent(null)
+          setTemplateError(
+            `Failed to load template: ${error instanceof Error ? error.message : String(error)}`
+          )
         }
       } finally {
         if (!disposed) {
@@ -248,6 +261,8 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
               }}
               props={templateConfig}
             />
+          ) : templateError ? (
+            <TemplateErrorFallback message={templateError} />
           ) : null}
         </div>
       </TemplateContainer>
@@ -269,6 +284,32 @@ const TemplateLoadingPlaceholder: React.FC = () => (
     }}
   >
     Loading template…
+  </div>
+)
+
+const TemplateErrorFallback: React.FC<{ message: string }> = ({ message }) => (
+  <div
+    style={{
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: 24,
+      textAlign: 'center',
+      color: '#fecaca',
+      background: 'rgba(127, 29, 29, 0.22)',
+      border: '1px solid rgba(248, 113, 113, 0.45)',
+      borderRadius: 10,
+      fontFamily: 'system-ui, sans-serif'
+    }}
+  >
+    <div>
+      <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>
+        Template Compilation Failed
+      </div>
+      <div style={{ fontSize: 12, opacity: 0.95, wordBreak: 'break-word' }}>{message}</div>
+    </div>
   </div>
 )
 

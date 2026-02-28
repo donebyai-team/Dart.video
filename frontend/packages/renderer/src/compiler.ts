@@ -245,74 +245,7 @@ function evalWithScope(body: string): unknown {
   return fn(...SHARED_PARAM_VALUES);
 }
 
-// ─── extractComponentBody (compileCode only) ──────────────────────────────────
-
-// For the legacy DynamicAnimation pattern:
-// Strip imports and try to extract just the function body so we can wrap it
-// in `const DynamicAnimation = () => { ... }`.
-function extractComponentBody(code: string): string {
-  const cleaned = stripImports(code);
-
-  // Match: [optional helper code] export const SomeName = () => { body };
-  const match = cleaned.match(
-    /^([\s\S]*?)export\s+const\s+\w+\s*=\s*\(\s*\)\s*=>\s*\{([\s\S]*)\};?\s*$/,
-  );
-
-  if (match) {
-    const helpers = match[1].trim();
-    const body = match[2].trim();
-    return helpers ? `${helpers}\n\n${body}` : body;
-  }
-
-  return cleaned;
-}
-
 // ─── Public API ───────────────────────────────────────────────────────────────
-
-/**
- * Compile legacy LLM-generated animation code that has no props.
- * The LLM is expected to produce a self-contained animation body or a
- * zero-argument arrow function export.
- */
-export function compileCode(code: string): CompilationResult {
-  if (!code?.trim()) {
-    return { Component: null, error: "No code provided" };
-  }
-
-  try {
-    const lucideImports = extractLucideImports(code);
-    const lucideDestructure = buildLucideDestructure(lucideImports);
-
-    const componentBody = extractComponentBody(code);
-    // lucideDestructure goes at the top of the outer scope so icons are
-    // available inside DynamicAnimation via closure.
-    const source = [
-      lucideDestructure,
-      `const DynamicAnimation = () => {`,
-      componentBody,
-      `};`,
-    ]
-      .filter(Boolean)
-      .join("\n");
-
-    const transpiled = babelTransform(source, "dynamic-animation.tsx");
-    const Component = evalWithScope(`${transpiled}\nreturn DynamicAnimation;`);
-
-    if (typeof Component !== "function") {
-      return {
-        Component: null,
-        error: "Code must be a function that returns a React component",
-      };
-    }
-
-    return { Component: Component as React.ComponentType<any>, error: null };
-  } catch (error) {
-    return {
-      Component: null,
-      error: error instanceof Error ? error.message : "Unknown compilation error",
-    };
-  }
-}
 
 /**
  * Compile LLM-generated code that exports `RemoteComponent({ props, onChange })`.
