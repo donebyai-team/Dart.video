@@ -14,15 +14,11 @@ import {
     sortableKeyboardCoordinates,
     verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { motion } from "framer-motion";
 import {
     ChevronDown,
     GripVertical,
     Pencil,
-    Play,
-    RefreshCw,
     Trash2,
-    Volume2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,12 +27,6 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from "@/components/ui/tooltip";
 import AddSlideButton from "./AddSlideButton";
 import SortableSlideCard from "./SortableSlideCard";
 import TransitionPicker from "./TransitionPicker";
@@ -159,42 +149,44 @@ const StoryboardSection = ({
                             />
                         </div>
                     ) : (
-                        <CollapsibleTrigger className="flex-1">
-                            <div className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-muted/50 transition-colors group">
-                                <div className={`w-2 h-2 rounded-full ${section.color}`} />
-                                <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground flex-1 text-left">
-                                    {section.title}
-                                </span>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onStartEditTitle();
-                                    }}
-                                >
-                                    <Pencil className="w-2.5 h-2.5" />
-                                </Button>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onRemoveSection();
-                                    }}
-                                >
-                                    <Trash2 className="w-2.5 h-2.5" />
-                                </Button>
-                                <span className="text-[10px] text-muted-foreground mr-1">
-                                    {section.slides.length} scenes
-                                </span>
-                                <ChevronDown
-                                    className={`w-3 h-3 text-muted-foreground transition-transform`}
-                                />
-                            </div>
-                        </CollapsibleTrigger>
+                        <div className="flex-1 flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-muted/50 transition-colors group">
+                            <CollapsibleTrigger asChild>
+                                <button type="button" className="flex-1 flex items-center gap-2 min-w-0">
+                                    <div className={`w-2 h-2 rounded-full ${section.color}`} />
+                                    <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground flex-1 text-left truncate">
+                                        {section.title}
+                                    </span>
+                                    <span className="text-[10px] text-muted-foreground mr-1">
+                                        {section.slides.length} scenes
+                                    </span>
+                                    <ChevronDown
+                                        className={`w-3 h-3 text-muted-foreground transition-transform`}
+                                    />
+                                </button>
+                            </CollapsibleTrigger>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onStartEditTitle();
+                                }}
+                            >
+                                <Pencil className="w-2.5 h-2.5" />
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onRemoveSection();
+                                }}
+                            >
+                                <Trash2 className="w-2.5 h-2.5" />
+                            </Button>
+                        </div>
                     )}
 
                     {/* Section voiceover controls */}
