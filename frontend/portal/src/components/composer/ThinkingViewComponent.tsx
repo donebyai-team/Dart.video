@@ -27,6 +27,7 @@ const ThinkingViewComponent = ({
 
   const latestTargetRef = useRef('')
   const lastThinkingChunkRef = useRef('')
+  const [showShimmer, setShowShimmer] = useState(false)
 
   const typingIndexRef = useRef(0)
   const typingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -35,6 +36,31 @@ const ThinkingViewComponent = ({
     setIsThinkingBusy(busy)
     onBusyChange?.(busy)
   }
+
+  const NON_TYPED_STATES = [
+    'Generating...',
+    'Matching...',
+    'Extracting...',
+    'Searching...',
+    'Processing...',
+    'Starting planning...',
+    // Retry tones
+    "Refining the motion...",
+    "Polishing the animation...",
+    "Adding final touches...",
+    "Stabilizing the performance...",
+
+    // Creative stages
+    "Understanding the scene...",
+    "Crafting motion direction...",
+    "Designing the animation...",
+    "Translating motion into code...",
+    "Saving creative draft...",
+    "Bringing animation to life...",
+    "Smoothing out rough edges...",
+    "Animation ready ✨",
+    "Working on it..."
+  ]
 
   const clearTyping = () => {
     typingIndexRef.current = 0
@@ -72,9 +98,13 @@ const ThinkingViewComponent = ({
     const normalized = chunk.replace(/\s+/g, ' ').trim()
     if (!normalized) return
 
+    const isNonTyped = NON_TYPED_STATES.some(state =>
+      normalized.toLowerCase().startsWith(state.toLowerCase())
+    )
+
     const prev = lastThinkingChunkRef.current
 
-    // New thought detected → reset typing
+    // New thought → reset typing
     if (prev && !normalized.startsWith(prev)) {
       clearTyping()
     }
@@ -82,7 +112,26 @@ const ThinkingViewComponent = ({
     lastThinkingChunkRef.current = normalized
     latestTargetRef.current = normalized
     setBusy(true)
-    ensureTypingLoop()
+
+    if (isNonTyped) {
+      // Stop typing loop
+      if (typingTimerRef.current) {
+        clearInterval(typingTimerRef.current)
+        typingTimerRef.current = null
+      }
+
+      latestTargetRef.current = normalized   // ⭐ REQUIRED
+      typingIndexRef.current = normalized.length
+
+      setShowShimmer(true)
+      setTypedText(normalized)
+
+      return   // ⭐ prevents typing restart
+    } else {
+      setShowShimmer(false)
+      latestTargetRef.current = normalized
+      ensureTypingLoop()
+    }
   }
 
   useEffect(() => {
@@ -132,10 +181,10 @@ const ThinkingViewComponent = ({
         ref={thinkingContainerRef}
         className='flex-1 whitespace-pre-wrap break-words pr-1 leading-snug'
         style={{
-          maxHeight: '4.2rem',       // 3 lines
+          maxHeight: '4.0rem',       // 3 lines
           overflowY: 'auto',
-          scrollbarWidth: 'none',    // Firefox
-          msOverflowStyle: 'none'    // IE/Edge
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none'
         }}
       >
         <style>
@@ -143,9 +192,35 @@ const ThinkingViewComponent = ({
       div::-webkit-scrollbar {
         display: none;
       }
+
+      @keyframes thinkingShimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+      }
     `}
         </style>
-        {typedText}
+
+        <span
+          style={
+            false
+              ? {
+                opacity: 0.75,
+                background:
+                  'linear-gradient(110deg, rgba(255,255,255,0.25) 20%, rgba(255,255,255,0.9) 40%, rgba(255,255,255,0.25) 60%)',
+                backgroundSize: '200% 100%',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                color: 'rgba(255,255,255,0.35)',   // 👈 key fix
+                animation: 'thinkingShimmer 2s linear infinite'
+              }
+              : {
+                opacity: 0.65,
+                color: 'inherit'
+              }
+          }
+        >
+          {typedText}
+        </span>
       </div>
 
       {isSubmitting && (
