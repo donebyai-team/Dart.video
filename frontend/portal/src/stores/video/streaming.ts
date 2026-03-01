@@ -6,6 +6,7 @@ import { createSlideEntityId } from "@/types/selection";
 import { getSections } from "./utils";
 import { ensureVideoResolution } from "./defaults";
 import defaultEditorConfig from "@/data/editorConfig";
+import toast from "react-hot-toast";
 
 // Module-level controller for the active GetVideo stream.
 // Replaced on every startVideoStream call; aborted by stopVideoStream.
@@ -157,7 +158,7 @@ export const createStreamingActions = (set: VideoStoreSet, get: VideoStoreGet) =
   stopVideoStream: () => {
     // Resolve videoId from current config before we clear state.
     const videoId = get().videoConfig?.id;
-
+  
     // Abort the GetVideo poll stream so the backend ctx.Done() fires and
     // the poll loop exits. The agent itself is NOT stopped by the disconnect —
     // it is stopped only by the explicit StopVideo RPC call below.
@@ -175,6 +176,7 @@ export const createStreamingActions = (set: VideoStoreSet, get: VideoStoreGet) =
     if (videoId) {
       portalClient.stopVideo({ videoId }).catch(err => {
         console.warn('StopVideo RPC failed (agent may still be running):', err);
+        toast.error(getConnectError(err));
       });
     }
   },
