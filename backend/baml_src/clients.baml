@@ -20,9 +20,26 @@ client<llm> CustomClaudeOpus {
     api_key env.ANTHROPIC_API_KEY
     max_tokens 12000
     temperature 0.1
-    thinking {
-       type "adaptive"
-    }
+  }
+}
+
+client<llm> CustomOpenAI {
+  provider "openai-responses"
+  retry_policy Exponential
+  options {
+    model "gpt-5.2-codex"
+    api_key env.OPENAI_API_KEY
+    //max_completion_tokens 12000
+  }
+}
+
+client<llm> CustomOpenAI2 {
+  provider "openai"
+  retry_policy Exponential
+  options {
+    model "gpt-5.2"
+    api_key env.OPENAI_API_KEY
+    //max_completion_tokens 12000
   }
 }
 

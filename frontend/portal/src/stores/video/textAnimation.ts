@@ -14,10 +14,10 @@ export const createTextAnimationActions = (set: VideoStoreSet, get: VideoStoreGe
   getTextAnimationConfig() {
     const slideConfig = getSlideTypeConfig(
       defaultEditorConfig,
-      SlideType.TEXT_ANIMATION
+      SlideType.ANIMATION
     );
 
-    return slideConfig?.id === SlideType.TEXT_ANIMATION
+    return slideConfig?.id === SlideType.ANIMATION
       ? slideConfig
       : undefined;
   },

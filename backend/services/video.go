@@ -14,8 +14,8 @@ import (
 
 type VideoGeneration interface {
 	CreateVideo(ctx context.Context, organizationID string, params *pbportal.CreateVideoRequest) (*models.Video, error)
-	GetVideo(ctx context.Context, id, organizationID string) (*models.Video, error)
-	GetVideos(ctx context.Context, organizationID string) ([]*models.Video, error)
+	GetVideo(ctx context.Context, id, organizationID string, includePending bool) (*models.Video, int, error)
+	GetVideos(ctx context.Context, organizationID string, includePending bool) ([]*models.Video, error)
 	UpdateVideoConfig(ctx context.Context, video *models.Video) error
 	UpdateVideoStatus(ctx context.Context, ID string, status models.VideoStatus) error
 }
@@ -51,7 +51,7 @@ func (v videoGeneration) UpdateVideoConfig(ctx context.Context, video *models.Vi
 		existingVideo.Config = video.AIGeneratedConfig
 		video.Config = video.AIGeneratedConfig
 	}
-	
+
 	configChanged := !proto.Equal(existingVideo.Config, video.Config)
 	nameChanged := video.Name != existingVideo.Name
 	metadataChanged := false
@@ -68,6 +68,7 @@ func (v videoGeneration) UpdateVideoConfig(ctx context.Context, video *models.Vi
 	}
 	if video.Metadata != nil {
 		existingVideo.Metadata.BackgroundStyle = video.Metadata.BackgroundStyle
+		existingVideo.Metadata.BackgroundAudioUrl = video.Metadata.BackgroundAudioUrl
 	}
 
 	if nameChanged {
@@ -141,6 +142,7 @@ func (v videoGeneration) CreateVideo(ctx context.Context, organizationID string,
 			Duration:       params.Duration,
 			BrandLibraryId: params.BrandLibraryId,
 			Language:       params.Language,
+			Resolution:     params.Resolution,
 		},
 	})
 
@@ -148,15 +150,62 @@ func (v videoGeneration) CreateVideo(ctx context.Context, organizationID string,
 		return nil, err
 	}
 
-	// start the agent here
-
 	return video, nil
 }
 
-func (v videoGeneration) GetVideo(ctx context.Context, id, organizationID string) (*models.Video, error) {
-	return v.db.GetVideoById(ctx, id, organizationID)
+func filterGeneratedSections(video *models.Video, includePending bool) int {
+	if video == nil || video.Config == nil {
+		return 0
+	}
+
+	shouldInclude := func(slide *pbcore.Slide) bool {
+		if includePending {
+			return true
+		}
+		return slide.SlideStatus == pbcore.SlideStatus_SLIDE_STATUS_GENERATED ||
+			slide.SlideStatus == pbcore.SlideStatus_SLIDE_STATUS_UNDEFINED
+	}
+
+	totalSlides := 0
+	var filteredSections []*pbcore.Section
+	for _, section := range video.Config.Sections {
+		var filteredSlides []*pbcore.Slide
+
+		for _, slide := range section.Slides {
+			totalSlides++
+			if shouldInclude(slide) {
+				filteredSlides = append(filteredSlides, slide)
+			}
+		}
+
+		if len(filteredSlides) > 0 {
+			section.Slides = filteredSlides
+			filteredSections = append(filteredSections, section)
+		}
+	}
+
+	video.Config.Sections = filteredSections
+	return totalSlides
 }
 
-func (v videoGeneration) GetVideos(ctx context.Context, organizationID string) ([]*models.Video, error) {
-	return v.db.GetVideos(ctx, organizationID)
+func (v videoGeneration) GetVideo(ctx context.Context, id, organizationID string, includePending bool) (*models.Video, int, error) {
+	video, err := v.db.GetVideoById(ctx, id, organizationID)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	totalSlides := filterGeneratedSections(video, includePending)
+
+	return video, totalSlides, nil
+}
+
+func (v videoGeneration) GetVideos(ctx context.Context, organizationID string, includePending bool) ([]*models.Video, error) {
+	videos, err := v.db.GetVideos(ctx, organizationID)
+	if err != nil {
+		return nil, err
+	}
+	for _, video := range videos {
+		filterGeneratedSections(video, includePending)
+	}
+	return videos, nil
 }

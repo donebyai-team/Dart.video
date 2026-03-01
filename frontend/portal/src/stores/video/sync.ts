@@ -3,7 +3,7 @@ import { VideoStoreSet, VideoStoreGet } from "./types";
 import toast from "react-hot-toast";
 import { getConnectError } from "@/utils/error";
 import { equals } from "@bufbuild/protobuf"
-import { Video, VideoSchema } from "@coasterai/pb/coasterai/core/v1/video_pb";
+import { Video, VideoSchema, VideoStatus } from "@coasterai/pb/coasterai/core/v1/video_pb";
 
 // Debounce utility
 function debounce<T extends (...args: any[]) => any>(
@@ -31,7 +31,10 @@ export const createSyncActions = (_: VideoStoreSet, get: VideoStoreGet) => {
     // Debounced sync function
     const debouncedSync = debounce(async (video: Video) => {
         const videoId = video.id;
-        if (!videoId || syncStatus === 'syncing') return;
+        if (!videoId || syncStatus === 'syncing' || video.status == VideoStatus.PROCESSING) {
+            console.debug("sync skipped.")
+            return
+        };
         if (lastSyncedSections && equals(VideoSchema, lastSyncedSections, video)) {
             console.debug("No change in config, skipping sync")
             return

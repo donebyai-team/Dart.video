@@ -1,5 +1,4 @@
 import TextAnimationSelector from '@/components/editor/remotion/animations/suggester/TextAnimationSelector'
-import VisualAnimationSelector from '@/components/editor/remotion/animations/suggester/VisualAnimationSelector'
 import BackgroundSettings from '@/components/editor/settings/BackgroundSettings'
 import InsertSettings from '@/components/editor/settings/InsertSettings'
 import TextAnimationTemplateSettings from '@/components/editor/settings/TextAnimationTemplateSettings'
@@ -93,7 +92,7 @@ const ToolsSettingsPanel = ({
       )}
 
       {activeTool.type === ActiveToolType.TEXT_ANIMATION_TEMPLATE &&
-        selectedSlide?.slide.type === SlideType.TEXT_ANIMATION &&
+        selectedSlide?.slide.type === SlideType.ANIMATION &&
         (() => {
           const textAnimConfig = getTextAnimationConfig()
           if (!textAnimConfig) return null
@@ -114,20 +113,6 @@ const ToolsSettingsPanel = ({
             />
           )
         })()}
-
-      {activeTool.type === ActiveToolType.VISUAL_ANIMATION_SETTINGS &&
-        (selectedSlide?.slide.type === SlideType.VISUAL_ANIMATION ||
-          selectedSlide?.slide.type === SlideType.INFOGRAPHIC) && (
-          <VisualAnimationSelector
-            selectedSlide={selectedSlide}
-            onClose={handleCloseTool}
-            onApply={animationId => {
-              console.log('Applied animation:', animationId)
-              // TODO: Implement actual animation application logic here
-              // For now we just close the panel or verify the selection
-            }}
-          />
-        )}
       {/* suggestions */}
       {activeTool.type === ActiveToolType.TEXT_ANIMATION_SETTINGS &&
         (() => {

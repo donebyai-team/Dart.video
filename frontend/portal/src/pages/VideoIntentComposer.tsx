@@ -41,10 +41,8 @@ const brandLibraries = [
 const NO_BRAND_VALUE = 'none'
 const MIN_SCRIPT_SECTIONS = 3
 const MIN_PROMPT_LENGTH = 10
-const THINKING_TYPING_STEP_MS = 70
-const THINKING_CHANGE_DELAY_MS = 220
-const THINKING_TYPING_SLIDE_DELAY_MS = 90
 const THINKING_LINE_VISIBLE_CHARS = 120
+const THINKING_LINE_PAUSE_MS = 700
 
 type ComposerStage = 'compose' | 'planning' | 'question'
 
@@ -61,14 +59,15 @@ const VideoIntentComposer = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [hasSubmitted, setHasSubmitted] = useState(false)
   const [videoId, setVideoId] = useState('')
-  const [thinkingText, setThinkingText] = useState('')
-  const [displayedThinkingText, setDisplayedThinkingText] = useState('')
+  const [displayedThinkingLine, setDisplayedThinkingLine] = useState('')
+  const [isThinkingBusy, setIsThinkingBusy] = useState(false)
   const [thinkingDots, setThinkingDots] = useState('')
-  const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const changeDelayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const displayedThinkingRef = useRef('')
-  const pendingThinkingTargetRef = useRef<string | null>(null)
-  const activeThinkingTargetRef = useRef('')
+  const linePauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const thinkingQueueRef = useRef<string[]>([])
+  const isThinkingDrainingRef = useRef(false)
+  const currentThinkingLineRef = useRef('')
+  const lastThinkingChunkRef = useRef('')
+  const streamSessionRef = useRef(0)
   const abortControllerRef = useRef<AbortController | null>(null)
   const [activeQuestion, setActiveQuestion] = useState<AskUserQuestion | undefined>()
   const [pendingQuestion, setPendingQuestion] = useState<AskUserQuestion | undefined>()
@@ -91,27 +90,20 @@ const VideoIntentComposer = () => {
     if (allowsCustom) return customAnswer.trim()
     return ''
   }, [activeQuestion, customAnswer, selectedAnswer])
-  const hasThinking = thinkingText.trim().length > 0 || displayedThinkingText.trim().length > 0
+  const hasThinking = displayedThinkingLine.trim().length > 0 || isThinkingBusy
   const showAgentActivity = hasSubmitted && stage !== 'question' && hasThinking
-  const singleLineThinkingText = useMemo(() => {
-    const normalized = displayedThinkingText.replace(/\s+/g, ' ').trim()
-    if (!normalized) return ''
-    const parts = normalized.split(/(?<=[.!?])\s+/)
-    const line = parts[parts.length - 1] || normalized
-    if (line.length <= THINKING_LINE_VISIBLE_CHARS) return line
-    return line.slice(-THINKING_LINE_VISIBLE_CHARS)
-  }, [displayedThinkingText])
+  const singleLineThinkingText = displayedThinkingLine
 
   useEffect(() => {
     if (!pendingQuestion) return
-    if (displayedThinkingText !== thinkingText) return
+    if (isThinkingBusy) return
 
     setActiveQuestion(pendingQuestion)
     setPendingQuestion(undefined)
     setSelectedAnswer('')
     setCustomAnswer('')
     setStage('question')
-  }, [pendingQuestion, displayedThinkingText, thinkingText])
+  }, [pendingQuestion, isThinkingBusy])
 
   useEffect(() => {
     if (!isSubmitting) {
@@ -129,106 +121,103 @@ const VideoIntentComposer = () => {
     return () => clearInterval(timer)
   }, [isSubmitting])
 
-  useEffect(() => {
-    displayedThinkingRef.current = displayedThinkingText
-  }, [displayedThinkingText])
+  const clearThinkingPlayback = () => {
+    if (linePauseTimerRef.current) {
+      clearTimeout(linePauseTimerRef.current)
+      linePauseTimerRef.current = null
+    }
+    thinkingQueueRef.current = []
+    isThinkingDrainingRef.current = false
+    currentThinkingLineRef.current = ''
+    lastThinkingChunkRef.current = ''
+    setDisplayedThinkingLine('')
+    setIsThinkingBusy(false)
+  }
 
-  useEffect(() => {
-    if (!thinkingText) {
-      if (typingTimerRef.current) {
-        clearTimeout(typingTimerRef.current)
-        typingTimerRef.current = null
-      }
-      if (changeDelayTimerRef.current) {
-        clearTimeout(changeDelayTimerRef.current)
-        changeDelayTimerRef.current = null
-      }
-      pendingThinkingTargetRef.current = null
-      activeThinkingTargetRef.current = ''
-      setDisplayedThinkingText('')
-      displayedThinkingRef.current = ''
+  const drainThinkingQueue = () => {
+    if (isThinkingDrainingRef.current) return
+    if (thinkingQueueRef.current.length === 0) {
+      setIsThinkingBusy(false)
+      setDisplayedThinkingLine(currentThinkingLineRef.current)
       return
     }
 
-    if (typingTimerRef.current) {
-      pendingThinkingTargetRef.current = thinkingText
-      return
-    }
+    isThinkingDrainingRef.current = true
+    setIsThinkingBusy(true)
 
-    const beginTyping = (target: string) => {
-      activeThinkingTargetRef.current = target
-      const current = displayedThinkingRef.current
-      const base = target.startsWith(current) ? current : ''
-      const remaining = target.slice(base.length)
-      const chunks = remaining.match(/\S+\s*/g) ?? (remaining ? [remaining] : [])
-
-      if (base === '' && current !== '') {
-        setDisplayedThinkingText('')
-        displayedThinkingRef.current = ''
-      }
-
-      const flushPending = () => {
-        const pending = pendingThinkingTargetRef.current
-        if (!pending || pending === activeThinkingTargetRef.current) return
-        pendingThinkingTargetRef.current = null
-        changeDelayTimerRef.current = setTimeout(() => {
-          beginTyping(pending)
-          changeDelayTimerRef.current = null
-        }, THINKING_CHANGE_DELAY_MS)
-      }
-
-      if (chunks.length === 0) {
-        setDisplayedThinkingText(target)
-        displayedThinkingRef.current = target
-        typingTimerRef.current = null
-        flushPending()
+    const next = () => {
+      const line = thinkingQueueRef.current.shift()
+      if (!line) {
+        isThinkingDrainingRef.current = false
+        setIsThinkingBusy(false)
+        setDisplayedThinkingLine(currentThinkingLineRef.current)
         return
       }
-
-      let nextText = base
-      let idx = 0
-      const tick = () => {
-        nextText += chunks[idx]
-        idx += 1
-        setDisplayedThinkingText(nextText)
-        displayedThinkingRef.current = nextText
-        if (idx < chunks.length) {
-          const justTyped = chunks[idx - 1]?.trim() ?? ''
-          const punctuationDelay = /[.!?]$/.test(justTyped) ? THINKING_TYPING_SLIDE_DELAY_MS : 0
-          typingTimerRef.current = setTimeout(tick, THINKING_TYPING_STEP_MS + punctuationDelay)
-        } else {
-          typingTimerRef.current = null
-          flushPending()
-        }
-      }
-
-      typingTimerRef.current = setTimeout(tick, THINKING_TYPING_STEP_MS)
+      setDisplayedThinkingLine(line)
+      linePauseTimerRef.current = setTimeout(next, THINKING_LINE_PAUSE_MS)
     }
 
-    changeDelayTimerRef.current = setTimeout(() => {
-      beginTyping(thinkingText)
-      changeDelayTimerRef.current = null
-    }, THINKING_CHANGE_DELAY_MS)
-  }, [thinkingText])
+    next()
+  }
+
+  const enqueueThinking = (chunk: string) => {
+    const normalized = chunk.replace(/\s+/g, ' ').trim()
+    if (!normalized) return
+
+    let delta = normalized
+    const prev = lastThinkingChunkRef.current
+    if (prev && normalized.startsWith(prev)) {
+      delta = normalized.slice(prev.length)
+    } else if (prev !== normalized) {
+      // Stream restarted or rewound; reset line tracking for the new flow.
+      thinkingQueueRef.current = []
+      currentThinkingLineRef.current = ''
+      isThinkingDrainingRef.current = false
+      setIsThinkingBusy(false)
+      setDisplayedThinkingLine('')
+    }
+    lastThinkingChunkRef.current = normalized
+    if (!delta) return
+
+    currentThinkingLineRef.current = `${currentThinkingLineRef.current}${delta}`.replace(/\s+/g, ' ').trim()
+
+    while (currentThinkingLineRef.current.length > THINKING_LINE_VISIBLE_CHARS) {
+      const raw = currentThinkingLineRef.current
+      let splitIndex = raw.lastIndexOf(' ', THINKING_LINE_VISIBLE_CHARS)
+      if (splitIndex <= 0) splitIndex = THINKING_LINE_VISIBLE_CHARS
+
+      const completed = raw.slice(0, splitIndex).trim()
+      if (completed) {
+        thinkingQueueRef.current.push(completed)
+      }
+      currentThinkingLineRef.current = raw.slice(splitIndex).trimStart()
+    }
+
+    if (isThinkingDrainingRef.current || thinkingQueueRef.current.length > 0) {
+      drainThinkingQueue()
+      return
+    }
+    setDisplayedThinkingLine(currentThinkingLineRef.current)
+  }
 
   useEffect(() => {
     return () => {
-      if (typingTimerRef.current) clearTimeout(typingTimerRef.current)
-      if (changeDelayTimerRef.current) clearTimeout(changeDelayTimerRef.current)
+      clearThinkingPlayback()
       abortControllerRef.current?.abort()
     }
   }, [])
 
-  const consumePlanningStream = async (stream: AsyncIterable<CreateVideoResponse>, signal?: AbortSignal) => {
+  const consumePlanningStream = async (stream: AsyncIterable<CreateVideoResponse>, signal?: AbortSignal, streamSession?: number) => {
     for await (const event of stream) {
       if (signal?.aborted) return
+      if (streamSession && streamSessionRef.current !== streamSession) return
 
       if (event.id) {
         setVideoId(event.id)
       }
 
       if (event.thinkingSummary) {
-        setThinkingText(event.thinkingSummary)
+        enqueueThinking(event.thinkingSummary)
       }
 
       if (event.errorMessage) {
@@ -253,25 +242,14 @@ const VideoIntentComposer = () => {
   }
 
   const handleStop = () => {
-    // Cancel typing animation timers immediately so thinking text clears without waiting for useEffect
-    if (typingTimerRef.current) {
-      clearTimeout(typingTimerRef.current)
-      typingTimerRef.current = null
-    }
-    if (changeDelayTimerRef.current) {
-      clearTimeout(changeDelayTimerRef.current)
-      changeDelayTimerRef.current = null
-    }
-    pendingThinkingTargetRef.current = null
-    activeThinkingTargetRef.current = ''
-    displayedThinkingRef.current = ''
+    streamSessionRef.current += 1
 
     abortControllerRef.current?.abort()
     abortControllerRef.current = null
+    clearThinkingPlayback()
     setIsSubmitting(false)
+    setHasSubmitted(false)
     setStage('compose')
-    setThinkingText('')
-    setDisplayedThinkingText('')
     setActiveQuestion(undefined)
     setPendingQuestion(undefined)
   }
@@ -285,12 +263,15 @@ const VideoIntentComposer = () => {
 
     const controller = new AbortController()
     abortControllerRef.current = controller
+    const streamSession = streamSessionRef.current + 1
+    streamSessionRef.current = streamSession
 
     try {
+      clearThinkingPlayback()
       setIsSubmitting(true)
       setHasSubmitted(true)
       setStage('planning')
-      setThinkingText('Initializing planning...')
+      enqueueThinking('Initializing planning...')
       setActiveQuestion(undefined)
       setPendingQuestion(undefined)
 
@@ -302,15 +283,15 @@ const VideoIntentComposer = () => {
         brandLibraryId: selectedBrandLibraryId ?? ''
       }, { signal: controller.signal })
 
-      await consumePlanningStream(stream, controller.signal)
+      await consumePlanningStream(stream, controller.signal, streamSession)
     } catch (err: any) {
       if (!controller.signal.aborted) {
         toast.error(getConnectError(err))
         setStage('compose')
-        setThinkingText('')
+        clearThinkingPlayback()
       }
     } finally {
-      if (!controller.signal.aborted) {
+      if (!controller.signal.aborted && streamSessionRef.current === streamSession) {
         setIsSubmitting(false)
       }
       if (abortControllerRef.current === controller) {
@@ -325,30 +306,33 @@ const VideoIntentComposer = () => {
 
     const controller = new AbortController()
     abortControllerRef.current = controller
+    const streamSession = streamSessionRef.current + 1
+    streamSessionRef.current = streamSession
 
     try {
+      clearThinkingPlayback()
       setIsSubmitting(true)
       setStage('planning')
       setActiveQuestion(undefined)
       setPendingQuestion(undefined)
       setSelectedAnswer('')
       setCustomAnswer('')
-      setThinkingText('Received your answer. Continuing planning...')
+      enqueueThinking('Received your answer. Continuing planning...')
 
       const stream = portalClient.continueVideoPlanning({
         id: videoId,
         response
       }, { signal: controller.signal })
 
-      await consumePlanningStream(stream, controller.signal)
+      await consumePlanningStream(stream, controller.signal, streamSession)
     } catch (err: any) {
       if (!controller.signal.aborted) {
         toast.error(getConnectError(err))
         setStage(activeQuestion ? 'question' : 'compose')
-        setThinkingText('')
+        clearThinkingPlayback()
       }
     } finally {
-      if (!controller.signal.aborted) {
+      if (!controller.signal.aborted && streamSessionRef.current === streamSession) {
         setIsSubmitting(false)
       }
       if (abortControllerRef.current === controller) {
@@ -385,7 +369,7 @@ const VideoIntentComposer = () => {
         {showAgentActivity && (
           <div className='flex items-center gap-2.5 px-4 py-2.5 rounded-xl border bg-background/95 backdrop-blur-sm text-sm text-muted-foreground shadow-sm'>
             <CircleDashed className='w-3.5 h-3.5 animate-spin flex-shrink-0' />
-            <span className='truncate flex-1'>{singleLineThinkingText || 'Thinking...'}</span>
+            <span className='flex-1 whitespace-normal break-words'>{singleLineThinkingText || 'Thinking...'}</span>
             {isSubmitting && (
               <span className='text-xs opacity-50 tabular-nums'>{thinkingDots}</span>
             )}

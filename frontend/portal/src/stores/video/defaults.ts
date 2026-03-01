@@ -46,8 +46,8 @@ export function createDefaultBackgroundStyle(
 }
 
 export const getTextAnimationConfig = (config: EditorConfig): TextAnimationSlideConfig | undefined => {
-    const slideConfig = getSlideTypeConfig(config, SlideType.TEXT_ANIMATION);
-    if (slideConfig?.id === SlideType.TEXT_ANIMATION) {
+    const slideConfig = getSlideTypeConfig(config, SlideType.ANIMATION);
+    if (slideConfig?.id === SlideType.ANIMATION) {
         return slideConfig as TextAnimationSlideConfig;
     }
     return undefined;
@@ -76,24 +76,16 @@ export function buildSlideContent(type: SlideType): Slide["content"] {
                 }),
             };
 
-        case SlideType.TEXT_ANIMATION:
-        case SlideType.VISUAL_ANIMATION:
-        case SlideType.INFOGRAPHIC: {
-            const defaultTemplateId =
-                type === SlideType.TEXT_ANIMATION
-                    ? "number-counter"
-                    : "default";
-
+        case SlideType.ANIMATION:
             return {
                 case: "animation",
                 value: create(AnimationSlideContentSchema, {
-                    templateId: defaultTemplateId,
+                    templateId: "typewriter",
                     templateConfig: {},
                     meta: getDefaultMetadata(),
                 }),
             };
-        }
-
+        
         case SlideType.STACK:
             return {
                 case: "stack",

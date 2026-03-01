@@ -270,7 +270,6 @@ export function compileRemoteComponent(code: string): CompilationResult {
     cleaned = cleaned.trim();
 
     const source = lucideDestructure ? `${lucideDestructure}\n${cleaned}` : cleaned;
-
     const transpiled = babelTransform(source, "remote-component.tsx");
     const Component = evalWithScope(`${transpiled}\nreturn RemoteComponent;`);
 
@@ -283,7 +282,7 @@ export function compileRemoteComponent(code: string): CompilationResult {
 
     return { Component: Component as React.ComponentType<any>, error: null };
   } catch (error) {
-    return {
+    return {        
       Component: null,
       error: error instanceof Error ? error.message : "Unknown compilation error",
     };

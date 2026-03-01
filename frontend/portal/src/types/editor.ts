@@ -217,22 +217,8 @@ export interface MediaSlideConfig extends SlideTypeBase {
 
 // Text animation slide type config
 export interface TextAnimationSlideConfig extends SlideTypeBase {
-  id: SlideType.TEXT_ANIMATION;
+  id: SlideType.ANIMATION;
   templates: TextAnimationTemplatesConfig;
-}
-
-// Infographic slide type config
-export interface InfographicSlideConfig extends SlideTypeBase {
-  id: SlideType.INFOGRAPHIC;
-  chartTypes: { id: string; name: string; icon: string }[];
-  dataSourceTypes: string[];
-}
-
-// Visual animation slide type config
-export interface VisualAnimationSlideConfig extends SlideTypeBase {
-  id: SlideType.VISUAL_ANIMATION;
-  aiEnabled: boolean;
-  generationPromptPlaceholder: string;
 }
 
 
@@ -249,8 +235,6 @@ export interface StackSlideConfig extends SlideTypeBase {
 export type SlideTypeConfig =
   | MediaSlideConfig
   | TextAnimationSlideConfig
-  | InfographicSlideConfig
-  | VisualAnimationSlideConfig
   | StackSlideConfig;
 
 export interface SlideTypesConfig {

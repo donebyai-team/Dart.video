@@ -18,10 +18,8 @@ interface SortableSlideCardProps {
 
 const slideTypeIcons: Record<SlideType, React.ElementType> = {
   [SlideType.MEDIA]: ImageIcon,
-  [SlideType.TEXT_ANIMATION]: Type,
-  [SlideType.VISUAL_ANIMATION]: BarChart3,
+  [SlideType.ANIMATION]: Type,
   [SlideType.STACK]: Layers,
-  [SlideType.INFOGRAPHIC]: Layers,
   [SlideType.UNDEFINED]: Layers
 }
 

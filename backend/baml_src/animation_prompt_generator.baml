@@ -11,7 +11,7 @@ class GenerateAnimationPromptResponse {
   prompt string @description("detailed prompt to generate remotion/react code animation")
 }
 function GenerateAnimationPrompt(resume: GenerateAnimationPromptRequest) -> GenerateAnimationPromptResponse {
-  client "anthropic/claude-opus-4-6"
+  client CustomOpenAI
   prompt #"
     # Visual Narrative Gap Filler
 
@@ -32,65 +32,27 @@ function GenerateAnimationPrompt(resume: GenerateAnimationPromptRequest) -> Gene
     GOAL
     --------------------------------------------------
 
-    Create a concise animation prompt that:
+    Create a concise animation prompt(around 5-6 lines max) that tells LLM on what to generate:
 
     - Continues the narrative progression
+    - The same prompt will be used to for future slides to know what templates has been generated so far
     - Introduces a new visual storytelling mechanism
     - Avoids repeating past visual structures
     - Matches the tone and flow of the video
     - This will be fed to LLM to generate the code of the remotion animation
 
-    --------------------------------------------------
-    EVALUATION STEPS
-    --------------------------------------------------
-
-    1. Understand story so far and provided AnimationType
-    - What has already been introduced?
-    - What visual styles have been used?
-
-    2. Understand next beat
-    - Is this escalation?
-    - Clarification?
-    - Contrast?
-    - Transformation?
-    - Proof?
-    - Resolution?
-
-    3. Design a visual structure that:
-    - Moves story forward
-    - Adds new visual meaning
-    - Feels cohesive with existing tone
-
-    4. What does each type of animation mean
-      BRAND @description("Used for brand-led moments such as logo reveals, identity motion, or signature visual language. Typically placed at the beginning, end, or both to establish and reinforce brand recall.")
-      PRODUCT @description("Used when showcasing real-world tools or interfaces like Slack, WhatsApp, CRM systems, dashboards, or any software relevant to the narrative. Helps ground the story in practical, relatable workflows.")
-      TEXT @description("Kinetic typography or animated text-focused slide with icons, sections etc. Used for strong statements, hooks, quotes, definitions, or key transitions.")
-      VISUAL @description("Purely visual animated slide (icons, illustrations, motion graphics, abstract visuals). Minimal text.")
-      STATS @description("Animated numerical highlights such as metrics, percentages, counters, growth numbers, comparisons.")
-      CHART @description("Data visualization slide such as bar chart, line chart, pie chart, or graph-based explanation.")
-      SIMPLE_TEXT @description("Used when you need to show a short 1–2 line message without heavy animation. Ideal for pauses, emphasis, or clean statements.")
-    --------------------------------------------------
-    OUTPUT REQUIREMENTS
-    --------------------------------------------------
-    Return a production-ready animation design prompt that describes:
-
-    - Scene structure
-    - Motion logic
-    - Visual metaphor
-    - Layout behavior
-    - Transition logic
-    - Emphasis style
-
-    This prompt will be used to generate Remotion animation code.
+    What does each type of animation mean
+      BRAND = Used for brand-led moments such as logo reveals, identity motion, or signature visual language.
+      PRODUCT = Used when showcasing real-world tools or interfaces like Slack, WhatsApp, CRM systems, dashboards, or any software relevant to the narrative. Helps ground the story in practical, relatable workflows
+      TEXT = kinetic text, typewriter effects, text animations, word carousels, animated titles, text-heavy content slide with icons, sections etc. Used for strong statements, hooks, quotes, definitions, or key transitions
+      VISUAL = Purely visual animated slide (icons, illustrations, motion graphics, abstract visuals). Minimal text
+      STATS = Animated numerical highlights such as metrics, percentages, counters, growth numbers, comparisons
+      CHART = Data visualization slide such as data visualizations, graphs, histograms, bar charts, pie charts, progress bars, statistics, metrics
+      SIMPLE_TEXT= Used when you need to show a short 1–2 line message without heavy animation. Ideal for pauses, emphasis, or clean statements
 
     Do NOT reference previous templates directly.
     Do NOT output code.
-    Output ONLY the animation design prompt.
-
-    IMP:
-    - Whole animation Background must remain transparent[Must have] as we will be placing it over a canvas with existing background
-    - If sections inside the animations needs background, it should be visible on the slide background given below
-
+    Output ONLY the animation design prompt based on the input especially the voiceover and beat to visualize
 
     --------------------------------------------------
     INPUT
@@ -108,15 +70,15 @@ function GenerateAnimationPrompt(resume: GenerateAnimationPromptRequest) -> Gene
       {% endif %}
     {% endfor %}
 
-    ## Next Beat To Visualize
+    ## Outline/Beat To Visualize
     Concept outline/beat:
     {{ resume.currentBeat }}
 
-    Animation type to generate
+    Animation type to generate:
     {{ resume.animationType }}
 
     {% if resume.voiceover %}
-    Voiceover that will be played in this slide
+    Voiceover that will be played in this slide:
     {{ resume.voiceover }}
     {% endif %}
 

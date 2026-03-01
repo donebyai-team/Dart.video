@@ -51,10 +51,8 @@ export const createToolActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     if (!selectedSlide) return
 
     const slide = selectedSlide.slide
-    if (slide.type === SlideType.TEXT_ANIMATION) {
+    if (slide.type === SlideType.ANIMATION) {
       set({ activeTool: { type: ActiveToolType.TEXT_ANIMATION_SETTINGS } })
-    } else if (slide.type === SlideType.VISUAL_ANIMATION || slide.type === SlideType.INFOGRAPHIC) {
-      set({ activeTool: { type: ActiveToolType.VISUAL_ANIMATION_SETTINGS } })
-    }
+    } 
   }
 })

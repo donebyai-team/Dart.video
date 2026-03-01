@@ -226,6 +226,21 @@ export enum VideoStatus {
    * @generated from enum value: VIDEO_STATUS_FAILED = 3;
    */
   FAILED = 3,
+
+  /**
+   * @generated from enum value: VIDEO_STATUS_PLANNING = 4;
+   */
+  PLANNING = 4,
+
+  /**
+   * @generated from enum value: VIDEO_STATUS_PLANNING_CANCELLED = 5;
+   */
+  PLANNING_CANCELLED = 5,
+
+  /**
+   * @generated from enum value: VIDEO_STATUS_USER_CANCELLED = 6;
+   */
+  USER_CANCELLED = 6,
 }
 
 /**

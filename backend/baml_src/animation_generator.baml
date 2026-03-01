@@ -13,7 +13,7 @@ class GenerateAnimationCodeResponse {
 }
 
 function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_history: Message[]) -> GenerateAnimationCodeResponse {
-  client CustomClaudeOpus
+  client CustomOpenAI
   prompt #"
     You are a reusable animation template builder.Your job is to convert an animation blueprint into:
 
@@ -32,9 +32,7 @@ function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_hi
     - does not assume full-video control
     - works alongside other slides
     - Do NOT control scene transitions
-    - Do NOT animate entry/exit of the entire video
-    - Do NOT assume global layout
-    Your animation must exist fully within its own bounds.
+    - Your animation must exist fully within its own bounds.
 
     ---
     ## HARD STRUCTURE RULES
@@ -46,6 +44,8 @@ function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_hi
     - Use transparent background
     - Maintain resolution integrity
     - Be container-safe (scales but does not reflow as per the provided resolution and canvas size)
+    - The animation should cover 80% of the given canvas/resolution size
+    - Generated animation should always be center to the canvas/resolution
     - For Logos or <Img>, You should use placeholders. Eg. https://placehold.co/{width}x{height}?text=Logo
     - eg. https://placehold.co/600x400?text=Logo
 
@@ -73,24 +73,16 @@ function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_hi
     ````
     ---
 
-    ## STYLING RULES
-    - Use Tailwind CSS for layout
-    - Use lucide-react for icons
-    ---
-
-    ## CODE BLUEPRINT (MANDATORY STRUCTURE)
-    Generated animation MUST follow this structure.
-    Do NOT modify:
-
-    ✔ Component name
-    ✔ Editable pattern
-    ✔ Motion hooks
-    ✔ Export
-
-    ---
+    ## COMPONENT STRUCTURE
+    1. Start with ES6 imports
+    2. Export as: export const RemoteComponent = ({ props, onChange }: Props);
+    3. Component body order:
+       - Multi-line comment description (2-3 sentences)
+       - Hooks (useCurrentFrame, useVideoConfig, etc.)
+       - Calculations and derived values
+       - return JSX
 
     ```ts
-    import { useCurrentFrame, useVideoConfig } from 'remotion'
     // add imports as needed
 
     type TemplateProps {
@@ -102,7 +94,7 @@ function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_hi
       onChange: (newProps: TemplateProps) => void
     }
 
-    const RemoteComponent = ({ props, onChange }: Props) => {
+    export const RemoteComponent = ({ props, onChange }: Props) => {
       // add code as needed
       const frame = useCurrentFrame()
       const { fps } = useVideoConfig()
@@ -120,21 +112,62 @@ function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_hi
         </>
       )
     }
-
-    export { RemoteComponent }
     ```
 
-    ---
+    ## LAYOUT RULES
 
-    ## IMPLEMENTATION RULES
+    - Use full width of container with appropriate padding
+    - Never constrain content to a small centered box
+    - Use Math.max(minValue, Math.round(width * percentage)) for responsive sizing
+
+    ## ANIMATION RULES
+
+    - Prefer spring() for organic motion (entrances, bounces, scaling)
+    - Use interpolate() for linear progress (progress bars, opacity fades)
+    - Always use { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+    - Add stagger delays for multiple elements
+
+    ## AVAILABLE IMPORTS
+
+    \`\`\`tsx
+    import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate, spring, Sequence } from "remotion";
+    import { TransitionSeries, linearTiming, springTiming } from "@remotion/transitions";
+    import { fade } from "@remotion/transitions/fade";
+    import { slide } from "@remotion/transitions/slide";
+    import { Circle, Rect, Triangle, Star, Ellipse, Pie } from "@remotion/shapes";
+    import { useState, useEffect } from "react";
+    \`\`\`
+
+    ## RESERVED NAMES (CRITICAL)
+
+    NEVER use these as variable names - they shadow imports:
+    - spring, interpolate, useCurrentFrame, useVideoConfig, AbsoluteFill, Sequence
+
+    ## STYLING RULES
+
+    - Use inline styles only
+    - Use Tailwind CSS
+    - Use lucide-react for icons
+    - ALWAYS use fontFamily: 'Inter, sans-serif'
+    - Keep colors minimal (2-4 max)
+    - For Logos or <Img>, You should use placeholders. Eg. https://placehold.co/{width}x{height}?text=Logo
+    - eg. https://placehold.co/600x400?text=Logo
     - Whole animation Background must remain transparent[Must have] as we will be placing it over a canvas with existing background
     - If sections inside the animations needs background, it should be visible on the slide background given below
+
+    ## OUTPUT FORMAT (CRITICAL)
+
+    - Output ONLY code - no explanations, no questions
+    - Response must start with "import" and end with "};"
+    - If prompt is ambiguous, make a reasonable choice - do not ask for clarification
     - Maintain resolution-based layout
     - Only text comes from props
     - Repeatable text must use arrays
-    - Use spring for motion
-    - Use interpolate for transforms
     - The Remotion tsx code should be props/config driven for text values.
+    - The animation should cover 80% of the given canvas/resolution size
+    - Generated animation should always be center to the canvas/resolution
+    - Do NOT animate entry/exit of the entire video
+    - Do NOT assume global layout
 
     ---
 
@@ -146,10 +179,10 @@ function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_hi
     Duration:
     {{ resume.duration }}
 
-    Animation Blueprint:
+    Animation Instructions:
     {{ resume.animationPrompt }}
 
-    Animation type to generate"
+    Animation type to generate:
     {{ resume.animationType }}
 
     {% if resume.voiceover %}

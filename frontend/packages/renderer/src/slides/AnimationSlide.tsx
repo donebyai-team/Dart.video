@@ -20,10 +20,7 @@ interface TextAnimationSlideProps {
   onUpdate?: (updates: Partial<Slide>) => void
   onSelect?: () => void
 }
-export type TemplateConfig = Record<string, string | number | boolean | object>
-
-// Cache fetched + compiled components by URL to avoid re-fetching on re-renders
-const compiledComponentCache = new Map<string, React.ComponentType<any> | null>()
+export type TemplateConfig = Record<string, unknown>
 
 /**
  * AnimationSlide Component
@@ -52,7 +49,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
   // URL to fetch LLM-generated TSX source from
   const templateUrl = content?.templateUrl
   const templateMeta = (content?.meta as MetaData) || {}
-  const templateConfig = (content?.templateConfig ?? {}) as TemplateConfig
+  const templateConfig = content?.templateConfig
 
 
   const background = backgroundStyleToCSS(slide.backgroundStyle)
@@ -127,19 +124,6 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
   useEffect(() => {
     if (!templateUrl) return
 
-    // Return cached compiled component immediately if available
-    if (compiledComponentCache.has(templateUrl)) {
-      setCompiledComponent(compiledComponentCache.get(templateUrl) ?? null)
-      setIsLoading(false)
-      if (!compiledComponentCache.get(templateUrl)) {
-        setTemplateError('Template failed to compile or load (cached failure).')
-      } else {
-        setTemplateError(null)
-      }
-      if (renderHandle) continueRender(renderHandle)
-      return
-    }
-
     let disposed = false
     setCompiledComponent(null)
     setIsLoading(true)
@@ -147,7 +131,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
 
     ;(async () => {
       try {        
-        const response = await fetch(templateUrl)
+        const response = await fetch(templateUrl, { cache: 'no-store' })
         if (!response.ok) {
           throw new Error(`Failed to fetch template: ${response.status} ${response.statusText}`)
         }
@@ -156,13 +140,11 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
         const result = compileRemoteComponent(code)
         if (result.error) {
           console.error(`Failed to compile template "${templateUrl}": ${result.error}`)
-          compiledComponentCache.set(templateUrl, null)
           if (!disposed) {
             setCompiledComponent(null)
             setTemplateError(`Compilation failed: ${result.error}`)
           }
         } else {
-          compiledComponentCache.set(templateUrl, result.Component)
           if (!disposed) {
             setCompiledComponent(() => result.Component)
             setTemplateError(null)
@@ -178,7 +160,6 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
         } else {
           console.error(`Failed to load template "${templateUrl}"`, error)
         }
-        compiledComponentCache.set(templateUrl, null)
         if (!disposed) {
           setCompiledComponent(null)
           setTemplateError(

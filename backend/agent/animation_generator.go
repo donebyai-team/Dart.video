@@ -229,6 +229,7 @@ func (l animationGenerator) Generate(
 				CDNUrl:          uploadedMedia.Url,
 				Repeatable:      false,
 				GeneratedConfig: generatedConfig,
+				Description:     output.Prompt,
 			}, nil
 		}
 

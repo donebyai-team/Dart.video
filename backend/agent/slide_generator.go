@@ -44,6 +44,7 @@ func (g *videoConfigGenerator) Init(videoID, name string) *videoConfigGenerator 
 
 func (g *videoConfigGenerator) AddVideoBackground(style *pbcore.BackgroundStyle) {
 	g.video.Metadata.BackgroundStyle = style
+	g.video.Metadata.BackgroundAudioUrl = utils.Ptr("https://ik.imagekit.io/coasterai/freepik-deep-calm_A4WXzk4Mk.mp3")
 }
 
 func (g *videoConfigGenerator) AddSection(name string) string {
@@ -63,7 +64,7 @@ func (g *videoConfigGenerator) Done(ctx context.Context) error {
 }
 
 func (g *videoConfigGenerator) Fail(ctx context.Context, cause error, status models.VideoStatus) error {
-	g.logger.Error("video generation failed", zap.Error(cause))
+	g.logger.Error("video generation failed", zap.Error(cause), zap.String("status", status.String()))
 	return g.update(ctx, status)
 }
 
@@ -77,6 +78,8 @@ func (g *videoConfigGenerator) CreatePendingSlides(ctx context.Context,
 
 	// save slides
 	sections := make([]*pbcore.Section, 0, len(plan.Sections))
+	totalAnimationSlides := 0
+	totalMediaSlides := 0
 	for _, pendingSection := range plan.Sections {
 		section := &pbcore.Section{
 			Id:     fmt.Sprintf("section-%d", time.Now().UnixNano()),
@@ -91,6 +94,7 @@ func (g *videoConfigGenerator) CreatePendingSlides(ctx context.Context,
 			}
 
 			if pendingSlide.IsMediaSlide() {
+				totalMediaSlides++
 				mediaPlan := pendingSlide.AsMediaSlide()
 				slide.Type = pbcore.SlideType_SLIDE_TYPE_MEDIA
 				slide.Duration = float32(mediaPlan.Duration)
@@ -111,8 +115,9 @@ func (g *videoConfigGenerator) CreatePendingSlides(ctx context.Context,
 			}
 
 			if pendingSlide.IsAnimationSlide() {
+				totalAnimationSlides++
 				animationPlan := pendingSlide.AsAnimationSlide()
-				slide.Type = pbcore.SlideType_SLIDE_TYPE_TEXT_ANIMATION
+				slide.Type = pbcore.SlideType_SLIDE_TYPE_ANIMATION
 				slide.Duration = float32(animationPlan.Duration)
 				if animationPlan.Voiceover != nil {
 					slide.Transcript = *animationPlan.Voiceover
@@ -137,6 +142,11 @@ func (g *videoConfigGenerator) CreatePendingSlides(ctx context.Context,
 		}
 		sections = append(sections, section)
 	}
+
+	g.logger.Info("pending slides summary",
+		zap.Int("total_sections", len(sections)),
+		zap.Int("total_animation_slides", totalAnimationSlides),
+		zap.Int("total_media_slides", totalMediaSlides))
 
 	g.video.Config.Sections = sections
 
@@ -168,7 +178,6 @@ func (g *videoConfigGenerator) UpdateAnimationSlide(
 			if slide.Id == slideID {
 				animation := slide.GetAnimation()
 				slide.SlideStatus = pbcore.SlideStatus_SLIDE_STATUS_GENERATED
-				animation.TemplateId = selectedTemplate.Name
 				animation.TemplateUrl = selectedTemplate.CDNUrl
 				animation.TemplateConfig = toStruct
 

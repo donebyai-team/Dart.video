@@ -152,7 +152,7 @@ export const defaultEditorConfig: EditorConfig = {
     // Slide Types Configuration (Unified)
     // ==========================================
     slideTypes: {
-        defaultSlideType: SlideType.TEXT_ANIMATION,
+        defaultSlideType: SlideType.ANIMATION,
         types: [
             {
                 id: SlideType.MEDIA,
@@ -171,7 +171,7 @@ export const defaultEditorConfig: EditorConfig = {
                 supportsContent: true,  // Image can be resized/repositioned
             },
             {
-                id: SlideType.TEXT_ANIMATION,
+                id: SlideType.ANIMATION,
                 name: "Text Animation",
                 description: "Animated typography",
                 icon: "Type",
@@ -336,41 +336,7 @@ export const defaultEditorConfig: EditorConfig = {
                     ],
                 },
             },
-            {
-                id: SlideType.INFOGRAPHIC,
-                name: "Infographic",
-                description: "Data-driven visuals",
-                icon: "BarChart3",
-                color: "#f97316",
-                defaultDuration: 5,
-                defaultTranscript: "Add your script here...",
-                defaultBackground: "#0f172a",
-                chartTypes: [
-                    { id: "bar", name: "Bar Chart", icon: "BarChart3" },
-                    { id: "line", name: "Line Chart", icon: "LineChart" },
-                    { id: "pie", name: "Pie Chart", icon: "PieChart" },
-                    { id: "donut", name: "Donut Chart", icon: "CircleDot" },
-                ],
-                dataSourceTypes: ["manual", "csv", "api"],
-                availableTools: [],
-                availableEffects: [],
-                supportsContent: false,
-            },
-            {
-                id: SlideType.VISUAL_ANIMATION,
-                name: "Visual Animation",
-                description: "AI-generated motion graphics",
-                icon: "Sparkles",
-                color: "#8b5cf6",
-                defaultDuration: 5,
-                defaultTranscript: "Add your script here...",
-                defaultBackground: "#0f172a",
-                aiEnabled: true,
-                generationPromptPlaceholder: "Describe the animation you want to create...",
-                availableTools: [],
-                availableEffects: [],
-                supportsContent: false,
-            },           
+                            
             {
                 id: SlideType.STACK,
                 name: "Stack",

@@ -196,9 +196,9 @@ func validateSlideAnimation(content *pbcore.AnimationSlideContent) error {
 		return fmt.Errorf("content is nil")
 	}
 
-	if utils.IsEmpty(&content.TemplateId) {
-		return fmt.Errorf("template id is empty")
-	}
+	//if utils.IsEmpty(&content.TemplateId) {
+	//	return fmt.Errorf("template id is empty")
+	//}
 
 	if content.TemplateConfig == nil {
 		return fmt.Errorf("template config is nil")

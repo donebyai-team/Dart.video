@@ -1,4 +1,3 @@
-import { SpotlightEffect } from "@/components/editor/remotion/effects";
 import { TimelineSlide } from "@/components/editor/timeline/types";
 import type {
     EditorConfig,
@@ -7,7 +6,7 @@ import type {
 import type { EntityId } from "@/types/selection";
 import { SelectedTool } from "@/types/tools";
 import { JsonObject } from "@bufbuild/protobuf";
-import { Section, Slide, SlideType, TransitionType, CalloutEffect, BackgroundStyle, ZoomEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { Section, Slide, SlideType, TransitionType, CalloutEffect, BackgroundStyle, ZoomEffect, SpotlightEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { Resolution, Video } from "@coasterai/pb/coasterai/core/v1/video_pb";
 import { DragEndEvent } from "@dnd-kit/core";
 import type { StateCreator } from "zustand";

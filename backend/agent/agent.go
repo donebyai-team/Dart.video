@@ -28,13 +28,9 @@ type VideoAgent interface {
 	GetState(ctx context.Context) (*VideoAgentState, error)
 	StateUpdates() <-chan VideoAgentState
 
-	// StopAgent signals the agent to stop for a given video session.
-	// It inspects the current Redis state to decide the right stop strategy:
-	//   - If slides are already being generated (TotalSlides published or state == READY_FOR_EDITOR),
-	//     it writes stateStatusCancelled to Redis; the applyPlan loop detects this and exits cleanly.
-	//   - If we are still in the LLM-planning phase (no slides yet), context cancellation
-	//     (via the caller's runCtx) is sufficient — nothing extra needs to happen here.
-	// This is the single stop entry-point used by all HTTP handlers on client disconnect.
+	// StopAgent is the single stop entry-point used by HTTP handlers.
+	// It writes stateStatusCancelled to Redis (so applyPlan exits) and marks
+	// video status as USER_CANCELLED.
 	StopAgent(ctx context.Context, videoID string) error
 }
 
@@ -213,7 +209,7 @@ func (a *agentV1) Continue(ctx context.Context, options ContinueSessionOptions) 
 		return nil, err
 	}
 
-	a.updateState(ctx, VideoAgentState{
+	a.publishTransientState(VideoAgentState{
 		State:            stateStatusProcessing,
 		LastUserResponse: userResponse,
 	})
@@ -223,25 +219,28 @@ func (a *agentV1) Continue(ctx context.Context, options ContinueSessionOptions) 
 	return a.runPlanning(ctx, session)
 }
 
-func (a *agentV1) runPlanning(ctx context.Context, session *planningSession) (*RunResult, error) {
+func (a *agentV1) runPlanning(ctx context.Context, session *planningSession) (result *RunResult, retErr error) {
+	defer func() {
+		if retErr == nil {
+			return
+		}
+
+		if ctx.Err() != nil || errors.Is(retErr, context.Canceled) || errors.Is(retErr, context.DeadlineExceeded) {
+			return
+		}
+
+		if failErr := a.videoService.UpdateVideoStatus(context.Background(), a.sessionID, models.VideoStatusFAILED); failErr != nil {
+			a.logger.Error("failed to mark video as failed/cancelled", zap.Error(failErr))
+		}
+	}()
+
 	llmResponse, err := a.llmService.PlanSlidesWithStreaming(ctx, session.Request, session.ConversationHistory, func(chunk string) {
-		a.updateState(ctx, VideoAgentState{
+		a.publishTransientState(VideoAgentState{
 			Thinking: chunk,
 			State:    stateStatusProcessing,
 		})
 	})
 	if err != nil {
-		status := models.VideoStatusFAILED
-		if ctx.Err() != nil {
-			status = models.VideoStatusUSERCANCELLED
-		}
-		failErr := a.videoService.UpdateVideoStatus(context.Background(), a.sessionID, status)
-		if failErr != nil {
-			a.logger.Error("failed to mark video as failed/cancelled",
-				zap.Error(failErr),
-			)
-		}
-
 		return nil, agenterrors.LLMPlanningFailed("failed to generate video plan", err)
 	}
 
@@ -260,29 +259,62 @@ func (a *agentV1) runPlanning(ctx context.Context, session *planningSession) (*R
 		return nil, agenterrors.Internal(err.Error(), nil)
 	}
 
-	if err := a.applyPlan(ctx, plan); err != nil {
-		return nil, err
-	}
-
+	// update the conversation
 	session.ConversationHistory = append(session.ConversationHistory, types.Message{
 		Role:    types.Union3KassistantOrKtoolOrKuser__NewKassistant(),
 		Content: fmt.Sprintf("Generated plan: %s", plan.VideoName),
 	})
-	if err := a.savePlanningSession(ctx, session); err != nil {
+	if err = a.savePlanningSession(ctx, session); err != nil {
 		return nil, err
 	}
 
-	a.updateState(ctx, VideoAgentState{
-		Thinking: "",
-		State:    stateStatusCompleted,
-	})
+	// Planning is complete; execute applyPlan asynchronously so Create/Continue
+	// can return after the first slide is persisted while generation continues.
+	if ctx.Err() != nil {
+		return nil, ctx.Err()
+	}
 
-	return &RunResult{Status: RunStatusCompleted}, nil
+	// We wait for the first slide to be generated as its a part of the planning phase
+	// once first slide is generated, we let the applyPlan run async which can be cancelled via StopAgent
+	firstSlideReady := make(chan struct{}, 1)
+	applyPlanDone := make(chan error, 1)
+	applyPlanCtx, cancelBeforeFirstSlide := context.WithCancel(context.Background())
+
+	go func() {
+		defer cancelBeforeFirstSlide()
+		if err := a.applyPlan(applyPlanCtx, plan, firstSlideReady); err != nil {
+			a.logger.Error("applyPlan async run failed", zap.Error(err))
+			applyPlanDone <- err
+			return
+		}
+		applyPlanDone <- nil
+	}()
+
+	select {
+	case <-firstSlideReady:
+		return &RunResult{Status: RunStatusCompleted}, nil
+	case err := <-applyPlanDone:
+		if err != nil {
+			return nil, err
+		}
+		return &RunResult{Status: RunStatusCompleted}, nil
+	case <-ctx.Done():
+		// If first slide is not ready yet, treat this as planning cancellation and
+		// stop applyPlan. If first slide is already ready, allow applyPlan to continue.
+		select {
+		case <-firstSlideReady:
+			return &RunResult{Status: RunStatusCompleted}, nil
+		default:
+			cancelBeforeFirstSlide()
+		}
+		return nil, ctx.Err()
+	}
 }
 
 func (a *agentV1) applyPlan(
 	ctx context.Context,
 	aiPlan *types.VideoGenerationPlan,
+	firstSlideReady chan<- struct{},
 ) (err error) {
 	// save config with pending items
 	builder := NewVideoConfigGenerator(a.logger, a.videoService).
@@ -297,6 +329,7 @@ func (a *agentV1) applyPlan(
 		Thinking: generating,
 		State:    stateStatusProcessing,
 	})
+
 	defer func() {
 		if err != nil {
 			failStatus := models.VideoStatusFAILED
@@ -335,9 +368,12 @@ func (a *agentV1) applyPlan(
 			return
 		}
 		firstSlidePersisted = true
-		a.updateState(ctx, VideoAgentState{
-			State: stateStatusReady,
-		})
+		if firstSlideReady != nil {
+			select {
+			case firstSlideReady <- struct{}{}:
+			default:
+			}
+		}
 	}
 
 	selectedTemplateIDs := make([]string, 0)
@@ -502,42 +538,20 @@ func (a *agentV1) selectTemplate(
 // user-initiated stop that arrived through the Redis state channel.
 var errUserSoftCancelled = errors.New("agent stopped via soft-cancel signal")
 
-// StopAgent decides the right stop strategy based on the current Redis state:
-//   - applyPlan phase  (TotalSlides > 0 or state == READY_FOR_EDITOR): writes
-//     stateStatusCancelled to Redis; the applyPlan slide loop checks for this flag
-//     on every iteration and exits cleanly without needing a context cancel.
-//   - LLM-planning phase (no slides yet): context cancellation (via the caller's
-//     runCtx) is enough — the LLM call respects ctx and will abort on its own.
+// StopAgent writes a Redis soft-cancel signal consumed by applyPlan and marks
+// the video as USER_CANCELLED.
 func (a *agentV1) StopAgent(ctx context.Context, videoID string) error {
-	state, err := a.GetState(ctx)
-	if err != nil {
-		a.logger.Error("StopAgent: failed to read agent state; cannot determine stop strategy",
-			zap.Error(err),
-		)
+	if err := a.updateState(ctx, VideoAgentState{
+		VideoID: videoID,
+		State:   stateStatusCancelled,
+	}); err != nil {
 		return err
 	}
-	if state == nil {
-		a.logger.Info("StopAgent: no Redis state found — agent is likely not running, nothing to do")
-		return nil
+
+	if err := a.videoService.UpdateVideoStatus(ctx, videoID, models.VideoStatusUSERCANCELLED); err != nil {
+		return err
 	}
 
-	a.logger.Info("StopAgent: current agent state",
-		zap.String("state", state.State),
-	)
-
-	// If slides are already being generated, use a Redis soft-cancel so the applyPlan
-	// loop can finish any in-flight persistence work before stopping.
-	if state.State == stateStatusReady || state.State == stateStatusProcessing {
-		a.logger.Info("StopAgent: in applyPlan phase — writing soft-cancel to Redis")
-		return a.updateState(ctx, VideoAgentState{
-			VideoID: videoID,
-			State:   stateStatusCancelled,
-		})
-	}
-
-	// We are still in the LLM-planning phase (TotalSlides not yet published).
-	// The caller is responsible for cancelling runCtx which will abort the LLM call.
-	a.logger.Info("StopAgent: in LLM-planning phase — context cancellation by caller is sufficient")
 	return nil
 }
 
@@ -558,6 +572,11 @@ func (a *agentV1) updateState(ctx context.Context, state VideoAgentState) error 
 		return errUpdated
 	}
 	return nil
+}
+
+func (a *agentV1) publishTransientState(state VideoAgentState) {
+	state.VideoID = a.sessionID
+	a.publishState(state)
 }
 
 func (a *agentV1) StateUpdates() <-chan VideoAgentState {

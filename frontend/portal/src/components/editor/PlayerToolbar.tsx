@@ -5,14 +5,8 @@ import {
   ChevronDown,
   RefreshCw,
   Wand2,
-  Sparkles,
-  BarChart3,
-  ImageIcon,
-  Film,
   Focus,
   CircleDot,
-  Layers,
-  HelpCircle,
   ZoomIn
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -59,8 +53,6 @@ const PlayerToolbar = ({ onDurationChange, minDuration = 1, maxDuration = 180 }:
   const currentBg = backgroundStyleToCSS(getSlideWithBackground(slide));
   const isBackgroundActive = activeTool?.type === ActiveToolType.BACKGROUND
   const activeInsertTool = activeTool?.type === ActiveToolType.INSERT ? activeTool.tool : null
-  const showChangeVisualButton = slide.type === SlideType.VISUAL_ANIMATION || slide.type === SlideType.INFOGRAPHIC
-  const changeButtonLabel = slide.type === SlideType.INFOGRAPHIC ? 'Change Infographic' : 'Change Visual'
 
   return (
     <div className='flex items-center justify-between gap-4 px-4 py-2 border-b border-border bg-background'>
@@ -89,7 +81,7 @@ const PlayerToolbar = ({ onDurationChange, minDuration = 1, maxDuration = 180 }:
         </TooltipProvider>
 
         {/* Change Animation button for text-animation slides */}
-        {slide.type === SlideType.TEXT_ANIMATION && onChangeTextAnimation && (
+        {slide.type === SlideType.ANIMATION && onChangeTextAnimation && (
           <>
             <div className='h-4 w-px bg-border mx-1' />
             <TooltipProvider delayDuration={200}>
@@ -147,27 +139,7 @@ const PlayerToolbar = ({ onDurationChange, minDuration = 1, maxDuration = 180 }:
               </DropdownMenuContent>
             </DropdownMenu>
           </>
-        )}
-
-        {/* Change Visual/Infographic button */}
-        {showChangeVisualButton && onChangeVisual && (
-          <>
-            <div className='h-4 w-px bg-border mx-1' />
-            <TooltipProvider delayDuration={200}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant='ghost' size='sm' className='gap-2 h-8' onClick={onChangeVisual}>
-                    <RefreshCw className='w-4 h-4' />
-                    <span className='text-xs'>{changeButtonLabel}</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side='bottom' className='text-xs'>
-                  {changeButtonLabel}
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </>
-        )}
+        )}        
       </div>
 
       {/* Right side: Duration control */}

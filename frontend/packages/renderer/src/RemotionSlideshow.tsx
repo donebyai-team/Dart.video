@@ -37,8 +37,8 @@ export const SlideComponent: React.FC<{
 
   const slideBackground = backgroundStyleToCSS(slide.backgroundStyle)
 
-  switch (slide.type) {
-    case SlideType.TEXT_ANIMATION:
+  switch (slide.type) { 
+    case SlideType.ANIMATION:
       // Only render if content case matches or is undefined (for new slides)
       if (!slide.content?.case || slide.content.case === 'animation') {
         return (
