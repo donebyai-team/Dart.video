@@ -16,6 +16,7 @@ import { motion } from 'framer-motion'
 
 interface ToolsSettingsPanelProps {
   onPreviewTemplate: () => void
+  isPreviewPlaying?: boolean
   onUpdateSpotlight: (updates: Partial<SpotlightEffect>) => void
   onUpdateCallout: (updates: Partial<CalloutEffect>) => void
   onUpdateZoom: (updates: Partial<ZoomEffect>) => void
@@ -28,6 +29,7 @@ interface ToolsSettingsPanelProps {
 
 const ToolsSettingsPanel = ({
   onPreviewTemplate,
+  isPreviewPlaying = false,
   onUpdateSpotlight,
   onUpdateCallout,
   onUpdateZoom,
@@ -167,6 +169,7 @@ const ToolsSettingsPanel = ({
           slideStartTime={0}
           transitionDuration={selectedSlide?.slide.transitionDuration}
           onPlay={onSpotlightPlay}
+          isPreviewPlaying={isPreviewPlaying}
         />
       )}
     </motion.div>

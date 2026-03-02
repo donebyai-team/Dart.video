@@ -32,6 +32,7 @@ interface RemotionPlayerProps {
   onSlideChange?: (slideId: string) => void;
   onStackItemChange?: (itemId: string | null) => void;
   onFullscreenChange?: (isFullscreen: boolean) => void;
+  onPlaybackStateChange?: (isPlaying: boolean) => void;
   transcriptPanel?: React.ReactNode;
   onSelectOverlayFromTimeline?: (overlayId: string, slideId: string) => void;
   onDurationChange?: (slideId: string, newDuration: number) => void;
@@ -47,6 +48,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   onSlideChange,
   onStackItemChange,
   onFullscreenChange,
+  onPlaybackStateChange,
   transcriptPanel,
   onSelectOverlayFromTimeline,
   onDurationChange,
@@ -215,6 +217,10 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
     document.addEventListener("fullscreenchange", handleFullscreenChange);
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, [onFullscreenChange]);
+
+  useEffect(() => {
+    onPlaybackStateChange?.(isPlaying);
+  }, [isPlaying, onPlaybackStateChange]);
 
   if (!videoConfigFromStore?.config || !resolution) {
     return <Loading />;

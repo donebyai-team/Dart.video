@@ -1,7 +1,7 @@
 import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 import { Button } from '@/components/ui/button'
-import { Play } from 'lucide-react'
+import { Pause, Play } from 'lucide-react'
 import { ZoomEffect } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import DurationChangeComponent from '../remotion/components/DurationChangeComponent'
 
@@ -11,6 +11,7 @@ interface ZoomSettingsProps {
   slideDuration?: number
   transitionDuration?: number
   onPlay?: () => void
+  isPreviewPlaying?: boolean
 }
 
 const ZoomSettings = ({
@@ -19,6 +20,7 @@ const ZoomSettings = ({
   slideDuration = 5,
   transitionDuration = 0,
   onPlay,
+  isPreviewPlaying = false,
 }: ZoomSettingsProps) => {
   const zoomStart = settings.startTime ?? 0
   const zoomEnd = settings.endTime ?? slideDuration
@@ -83,8 +85,8 @@ const ZoomSettings = ({
       {/* Preview */}
       <div className='pt-2'>
         <Button variant='default' size='sm' className='w-full gap-2' onClick={onPlay}>
-          <Play className='w-3.5 h-3.5' />
-          Preview
+          {isPreviewPlaying ? <Pause className='w-3.5 h-3.5' /> : <Play className='w-3.5 h-3.5' />}
+          {isPreviewPlaying ? 'Stop Preview' : 'Preview'}
         </Button>
       </div>
     </div>

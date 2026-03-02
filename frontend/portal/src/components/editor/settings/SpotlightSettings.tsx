@@ -1,7 +1,7 @@
 import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 import { Button } from '@/components/ui/button'
-import { Play } from 'lucide-react'
+import { Pause, Play } from 'lucide-react'
 import { SpotlightEffect } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import DurationChangeComponent from '../remotion/components/DurationChangeComponent'
 
@@ -12,9 +12,10 @@ interface SpotlightSettingsProps {
   transitionDuration?: number
   slideStartTime?: number
   onPlay?: () => void
+  isPreviewPlaying?: boolean
 }
 
-const SpotlightSettings = ({ settings, onChange, slideDuration = 5, onPlay, transitionDuration = 0 }: SpotlightSettingsProps) => {
+const SpotlightSettings = ({ settings, onChange, slideDuration = 5, onPlay, transitionDuration = 0, isPreviewPlaying = false }: SpotlightSettingsProps) => {
   const spotlightStart = settings.startTime ?? 0
   const spotlightEnd = settings.endTime ?? slideDuration
 
@@ -106,8 +107,8 @@ const SpotlightSettings = ({ settings, onChange, slideDuration = 5, onPlay, tran
       {/* Action Button */}
       <div className='pt-2'>
         <Button variant='default' size='sm' className='w-full gap-2' onClick={onPlay}>
-          <Play className='w-3.5 h-3.5' />
-          Preview
+          {isPreviewPlaying ? <Pause className='w-3.5 h-3.5' /> : <Play className='w-3.5 h-3.5' />}
+          {isPreviewPlaying ? 'Stop Preview' : 'Preview'}
         </Button>
       </div>
     </div>

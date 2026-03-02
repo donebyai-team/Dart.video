@@ -18,6 +18,7 @@ interface InsertSettingsProps {
   slideStartTime?: number
   transitionDuration?: number
   onPlay?: () => void
+  isPreviewPlaying?: boolean
 }
 
 export const toolMapping: Record<number, { label: string; icon: React.ElementType }> = {
@@ -49,6 +50,7 @@ const InsertSettings = ({
   slideDuration = 5,
   slideStartTime = 0,
   onPlay,
+  isPreviewPlaying = false,
   transitionDuration = 0
 }: InsertSettingsProps) => {
   const [settings, setSettings] = useState<SpotlightEffect | CalloutEffect | ZoomEffect>(currentObject);
@@ -89,6 +91,7 @@ const InsertSettings = ({
             //so that they don't overlap with transitions
             transitionDuration={transitionDuration}
             onPlay={onPlay}
+            isPreviewPlaying={isPreviewPlaying}
           />
         )
       case EffectType.ZOOM:
@@ -101,6 +104,7 @@ const InsertSettings = ({
             slideDuration={slideDuration}
             transitionDuration={transitionDuration}
             onPlay={onPlay}
+            isPreviewPlaying={isPreviewPlaying}
           />
         )
       default:

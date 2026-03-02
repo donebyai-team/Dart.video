@@ -48,6 +48,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
   // State for loading video data
   const [isLoadingVideo, setIsLoadingVideo] = useState(true)
   const [isExportingVideo, setIsExportingVideo] = useState(false)
+  const [isPlayerPlaying, setIsPlayerPlaying] = useState(false)
   const [exportProgress, setExportProgress] = useState<ExportProgressState | null>(null)
   const prepareProgressRef = useRef(0)
 
@@ -220,6 +221,17 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
     playerRef.current?.playFromSlideStart(slideId)
   }
 
+  const handleTogglePreviewSlide = (slideId: string) => {
+    const currentlyPlaying = playerRef.current?.isPlaying() ?? false
+
+    if (currentlyPlaying) {
+      playerRef.current?.pause()
+      return
+    }
+
+    handlePreviewSlide(slideId)
+  }
+
   // Centralized fullscreen handler
   const handleFullscreenChange = (isFullscreen: boolean) => {
     if (isFullscreen) {
@@ -357,11 +369,12 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
         >
           <AnimatePresence mode='wait'>
             {activeTool.type != ActiveToolType.NONE && selectedSlide ? (
-              <ToolsSettingsPanel
-                deleteSpotlight={deleteSpotlight}
-                deleteCallout={deleteCallout}
-                deleteZoom={deleteZoom}
-                onPreviewTemplate={() => handlePreviewSlide(selectedSlide.slide.id)}
+                <ToolsSettingsPanel
+                  deleteSpotlight={deleteSpotlight}
+                  deleteCallout={deleteCallout}
+                  deleteZoom={deleteZoom}
+                  isPreviewPlaying={isPlayerPlaying}
+                  onPreviewTemplate={() => handlePreviewSlide(selectedSlide.slide.id)}
                 onUpdateSpotlight={updates => {
                   if (selectedEffectId) {
                     updateSpotlight(selectedEffectId, updates)
@@ -381,7 +394,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
                   // Apply spotlight - just close the panel
                   handleCloseTool()
                 }}
-                onSpotlightPlay={() => handlePreviewSlide(selectedSlide.slide.id)}
+                onSpotlightPlay={() => handleTogglePreviewSlide(selectedSlide.slide.id)}
               />
             ) : (
               <motion.div
@@ -449,6 +462,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
                 }
               }}
               onFullscreenChange={handleFullscreenChange}
+              onPlaybackStateChange={setIsPlayerPlaying}
               onSelectOverlayFromTimeline={(overlayId, slideId) => {
                 // Use unified selection handler
                 handleSelectEntity(createOverlayEntityId(slideId, overlayId))
