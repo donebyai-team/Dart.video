@@ -30,7 +30,6 @@ import Loading from "@/app/loading";
 
 interface RemotionPlayerProps {
   onSlideChange?: (slideId: string) => void;
-  onStackItemChange?: (itemId: string | null) => void;
   onFullscreenChange?: (isFullscreen: boolean) => void;
   onPlaybackStateChange?: (isPlaying: boolean) => void;
   transcriptPanel?: React.ReactNode;
@@ -46,7 +45,6 @@ export interface RemotionPlayerHandle extends PlayerControls {
 
 const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerProps>(({
   onSlideChange,
-  onStackItemChange,
   onFullscreenChange,
   onPlaybackStateChange,
   transcriptPanel,
@@ -61,7 +59,6 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
 
   const videoConfigFromStore = useVideoStore(s => s.videoConfig);
   const selectedSlide = useVideoStore(s => s.selectedSlide)?.slide;
-  const selectedStackItemId = useVideoStore(s => s.selectedStackItemId);
   const onSelectOEffect = useVideoStore(s => s.handleSelectEffect);
 
   const resolution = videoConfigFromStore?.metadata?.resolution;
@@ -146,10 +143,8 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
     playerRef,
     allSlides,
     selectedSlideId,
-    selectedStackItemId,
     previewingSlideId,
     onSlideChange,
-    onStackItemChange,
     setIsPlaying,
     setCurrentFrame,
     setPreviewingSlideId,

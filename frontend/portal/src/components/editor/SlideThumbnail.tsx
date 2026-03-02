@@ -2,8 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Player } from '@remotion/player'
 import { Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { useVideoStore } from '@/stores/video'
-import { getActualSlideDuration } from './frame_calculations'
 import { SingleSlidePreview } from '@coasterai/renderer'
+import { getActualSlideDuration } from '@coasterai/renderer/src/frameUtils'
 
 interface SlideThumbnailProps {
   slide: Slide

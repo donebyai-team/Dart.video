@@ -13,7 +13,6 @@ export const initialState: VideoState = {
   selectedEntityId: createSlideEntityId(""),
   selectedSlide: null,
   selectedEffectId: null,
-  selectedStackItemId: null,
 
   activeTool: getDefaultSelectedTool(),
   showScreenshots: false,

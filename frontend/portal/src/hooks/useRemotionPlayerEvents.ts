@@ -1,17 +1,14 @@
 import { useEffect } from "react";
 import { PlayerRef } from "@remotion/player";
 import { getSlideAbsoluteEndFrame, getRealSlideStartFrame } from "@/components/editor/frame_calculations";
-import { SlideType, StackSlideContent } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { TimelineSlide } from "@/components/editor/timeline/types";
 
 interface UseRemotionPlayerEventsProps {
   playerRef: React.RefObject<PlayerRef | null>;
   allSlides: TimelineSlide[];
   selectedSlideId: string;
-  selectedStackItemId?: string | null;
   previewingSlideId: string | null;
   onSlideChange?: (slideId: string) => void;
-  onStackItemChange?: (itemId: string | null) => void;
   onFrameChange?: (frame: number) => void;
   setIsPlaying: (playing: boolean) => void;
   setCurrentFrame: (frame: number) => void;
@@ -24,10 +21,8 @@ export function useRemotionPlayerEvents({
   playerRef,
   allSlides,
   selectedSlideId,
-  selectedStackItemId,
   previewingSlideId,
   onSlideChange,
-  onStackItemChange,
   onFrameChange,
   setIsPlaying,
   setCurrentFrame,
@@ -113,40 +108,7 @@ export function useRemotionPlayerEvents({
         if (currentSlide.id !== selectedSlideId) {
           console.debug(`[RemotionPlayer] Auto slide change to: ${currentSlide.id} at frame ${data.detail.frame}`);
           onSlideChange?.(currentSlide.id);
-        }
-
-        // Handle stack slide item tracking
-        if (currentSlide.slide.type === SlideType.STACK && onStackItemChange) {
-          const content = currentSlide.slide.content.value as StackSlideContent;
-          const items = content?.items || [];
-
-          if (items.length > 0) {
-            const slideStartFrame = getRealSlideStartFrame(allSlides, currentSlide.id, fps);
-            const frameInSlide = data.detail.frame - slideStartFrame;
-            let itemFrameAccumulator = 0;
-            let currentItemIndex = 0;
-
-            for (let j = 0; j < items.length; j++) {
-              const itemDuration = items[j].duration || 0;
-              const itemFrames = Math.round(itemDuration * fps);
-              itemFrameAccumulator += itemFrames;
-
-              if (frameInSlide < itemFrameAccumulator) {
-                currentItemIndex = j;
-                break;
-              }
-            }
-
-            if (currentItemIndex >= 0 && currentItemIndex < items.length) {
-              const currentItem = items[currentItemIndex];
-              if (currentItem.id !== selectedStackItemId) {
-                onStackItemChange(currentItem.id);
-              }
-            }
-          }
-        } else if (selectedStackItemId) {
-          onStackItemChange?.(null);
-        }
+        }      
 
         // Handle preview slide end detection
         if (previewingSlideId === currentSlide.id) {
@@ -173,10 +135,8 @@ export function useRemotionPlayerEvents({
     playerRef,
     allSlides,
     selectedSlideId,
-    selectedStackItemId,
     previewingSlideId,
     onSlideChange,
-    onStackItemChange,
     onFrameChange,
     setIsPlaying,
     setCurrentFrame,

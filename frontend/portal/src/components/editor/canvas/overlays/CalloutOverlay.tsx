@@ -1,4 +1,5 @@
-import { CalloutEffect, Resolution, SpotlightEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { CalloutEffect, SpotlightEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { Resolution } from "@coasterai/pb/coasterai/core/v1/video_pb";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 interface CalloutOverlayProps {

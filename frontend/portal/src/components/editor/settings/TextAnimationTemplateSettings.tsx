@@ -1,4 +1,4 @@
-import { X, Play } from "lucide-react";
+import { X, Play, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +18,7 @@ interface TextAnimationTemplateSettingsProps {
   onUpdateProps: (props: JsonObject) => void;
   onClose: () => void;
   onApply?: () => void;
+  isPreviewPlaying?: boolean;
 }
 
 const TextAnimationTemplateSettings = ({
@@ -27,6 +28,7 @@ const TextAnimationTemplateSettings = ({
   onUpdateProps,
   onClose,
   onApply,
+  isPreviewPlaying = false,
 }: TextAnimationTemplateSettingsProps) => {
   const template = getTemplateById(templates, templateId);
 
@@ -153,9 +155,9 @@ const TextAnimationTemplateSettings = ({
 
       {/* Preview button */}
       <div className="p-4 border-t border-border">
-        <Button className="w-full gap-2" onClick={onApply}>
-          <Play className="w-4 h-4" />
-          Preview
+        <Button variant="default" size="sm" className="w-full gap-2" onClick={onApply}>
+          {isPreviewPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+          {isPreviewPlaying ? "Stop Preview" : "Preview"}
         </Button>
       </div>
     </div>

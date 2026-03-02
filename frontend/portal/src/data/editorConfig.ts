@@ -2,126 +2,11 @@
 // This configuration drives the entire editor
 
 import type { EditorConfig } from "@/types/editor";
-import { EffectType, SlideType, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { SlideType, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { TRANSITION_OPTIONS } from "@coasterai/renderer";
 
-export const defaultEditorConfig: EditorConfig = {
-    // ==========================================
-    // Typography Configuration
-    // ==========================================
-    typography: {
-        fonts: [
-            { value: "Inter", label: "Inter" },
-            { value: "Plus Jakarta Sans", label: "Plus Jakarta Sans" },
-            { value: "Roboto", label: "Roboto" },
-            { value: "Open Sans", label: "Open Sans" },
-            { value: "Montserrat", label: "Montserrat" },
-            { value: "Poppins", label: "Poppins" },
-            { value: "Playfair Display", label: "Playfair Display" },
-            { value: "Space Grotesk", label: "Space Grotesk" },
-        ],
-        styles: [
-            { value: "normal", label: "Normal" },
-            { value: "bold", label: "Bold" },
-            { value: "italic", label: "Italic" },
-            { value: "bold-italic", label: "Bold Italic" },
-        ],
-        defaultFont: "Plus Jakarta Sans",
-        defaultStyle: "bold",
-        defaultSize: 48,
-        minSize: 12,
-        maxSize: 120,
-    },
+export const defaultEditorConfig: EditorConfig = { 
 
-    // ==========================================
-    // Animation Configuration
-    // ==========================================
-    animation: {
-        textAnimations: [
-            { value: "fade-in", label: "Fade In" },
-            { value: "slide-up", label: "Slide Up" },
-            { value: "slide-down", label: "Slide Down" },
-            { value: "slide-left", label: "Slide Left" },
-            { value: "slide-right", label: "Slide Right" },
-            { value: "scale-up", label: "Scale Up" },
-            { value: "scale-down", label: "Scale Down" },
-            { value: "typewriter", label: "Typewriter" },
-            { value: "bounce", label: "Bounce" },
-            { value: "blur-in", label: "Blur In" },
-            { value: "letter-by-letter", label: "Letter by Letter" },
-            { value: "word-by-word", label: "Word by Word" },
-        ],
-        defaultTextAnimation: {
-            fontFamily: "Plus Jakarta Sans",
-            fontStyle: "bold",
-            fontSize: 48,
-            animation: "fade-in",
-            duration: 1,
-        },
-        transitionDuration: {
-            min: 0.1,
-            max: 5,
-            default: 1,
-        },
-    },
-
-    // ==========================================
-    // Insert Tools Configuration
-    // ==========================================
-    insertTools: {
-        tools: [
-            { id: EffectType.CALLOUT, name: "Callout", icon: "Focus" },
-            { id: EffectType.SPOTLIGHT, name: "Spotlight", icon: "CircleDot" },
-        ],
-        defaults: {
-            callout: {
-                calloutStyle: "pointer",
-                color: "#ef4444",
-            },
-            spotlight: {
-                spotlightRadius: 60,
-                blurAmount: 10,
-                color: "#ffffff",
-            }
-        },
-        colorPresets: [
-            "#ef4444", "#f97316", "#eab308", "#22c55e", "#06b6d4",
-            "#3b82f6", "#8b5cf6", "#ec4899", "#ffffff", "#000000",
-        ],
-        opacityDefault: 100,
-        durationDefault: 2,
-    },
-
-    // ==========================================
-    // Voiceover Configuration
-    // ==========================================
-    voiceover: {
-        enabled: true,
-        defaultVoice: "alloy",
-        voices: [
-            { id: "alloy", name: "Alloy", language: "en-US", gender: "neutral" },
-            { id: "echo", name: "Echo", language: "en-US", gender: "male" },
-            { id: "fable", name: "Fable", language: "en-GB", gender: "neutral" },
-            { id: "onyx", name: "Onyx", language: "en-US", gender: "male" },
-            { id: "nova", name: "Nova", language: "en-US", gender: "female" },
-            { id: "shimmer", name: "Shimmer", language: "en-US", gender: "female" },
-        ],
-        speed: 1.0,
-        pitch: 1.0,
-    },
-
-    // ==========================================
-    // Navigation Configuration
-    // ==========================================
-    navigation: {
-        menuItems: [
-            { id: "dashboard", label: "Dashboard", icon: "Home", path: "/" },
-            { id: "settings", label: "Settings", icon: "Settings" },
-            { id: "help", label: "Help", icon: "HelpCircle" },
-        ],
-        brandName: "CoasterAI",
-        brandIcon: "Video",
-    },
     // ==========================================
     // Resolution Configuration
     // ==========================================
@@ -133,15 +18,6 @@ export const defaultEditorConfig: EditorConfig = {
             // { $typeName: "coasterai.core.v1.Resolution", id: "1:1", name: "Square", aspect: "1/1", width: 1080, height: 1080 },
         ],
         default: "16:9",
-    },
-
-    // ==========================================
-    // Transitions Configuration
-    // ==========================================
-    transitions: {
-        // Single source of truth shared with picker + renderer.
-        options: TRANSITION_OPTIONS.map(({ id, name, preview }) => ({ id, name, preview })),
-        default: TransitionType.TRANSITION_FADE,
     },
 
     // ==========================================
@@ -331,40 +207,9 @@ export const defaultEditorConfig: EditorConfig = {
                         },
                     ],
                 },
-            },
-                            
-            {
-                id: SlideType.STACK,
-                name: "Stack",
-                description: "Layered image animation",
-                icon: "Layers",
-                color: "#06b6d4",
-                defaultDuration: 5,
-                defaultTranscript: "Add your script here...",
-                defaultBackground: "linear-gradient(135deg, #1e3a5f 0%, #3b82f6 100%)",
-                minItems: 2,
-                maxItems: 4,
-                animationModes: ["Stack", "Reveal"],
-                defaultAnimationMode: "Stack",
-                availableTools: [],
-                availableEffects: [],
-                supportsContent: true,
-            },
+            },           
         ],
     },
 };
-
-// // Helper to create a new empty project config
-// export const createEmptyProjectConfig = (name: string): EditorConfig => ({
-//   ...defaultEditorConfig,
-//   project: {
-//     ...defaultEditorConfig.project,
-//     id: `project-${Date.now()}`,
-//     name,
-//     createdAt: new Date().toISOString(),
-//     updatedAt: new Date().toISOString(),
-//   },
-//   sections: [],
-// });
 
 export default defaultEditorConfig;

@@ -10,7 +10,6 @@ interface AddSlideMenuProps {
 const slideTypeOptions: { id: SlideType; name: string; description: string; icon: React.ElementType }[] = [
   { id: SlideType.ANIMATION, name: "Text Animation", description: "Animated typography", icon: Type },
   { id: SlideType.MEDIA, name: "Video Clip", description: "Add video content", icon: Film },
-  { id: SlideType.STACK, name: "Stack", description: "Layered image animations", icon: Layers },
 ];
 
 const AddSlideMenu = ({ onAddSlide, onClose }: AddSlideMenuProps) => {

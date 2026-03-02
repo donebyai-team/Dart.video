@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useVideoStore } from '@/stores/video'
-import { SlideType, Slide, StackSlideContent, EffectType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { SlideType, Slide, EffectType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { ActiveToolType } from '@/types/tools'
 import DurationChangeComponent from './remotion/components/DurationChangeComponent'
 import { backgroundStyleToCSS } from '@coasterai/renderer'
@@ -31,24 +31,14 @@ const insertTools: { id: EffectType; name: string; icon: React.ElementType }[] =
 ]
 
 const PlayerToolbar = ({ onDurationChange, minDuration = 1, maxDuration = 180 }: PlayerToolbarProps) => {
-  const onChangeVisual = useVideoStore(s => s.handleEditSlide)
   const getSlideWithBackground = useVideoStore(s => s.getSlideWithBackground)
   const onChangeTextAnimation = useVideoStore(s => s.handleEditSlide)
   const activeTool = useVideoStore(s => s.activeTool)
   const onSelectTool = useVideoStore(s => s.handleSelectTool)
   const selectedSlide = useVideoStore(s => s.selectedSlide)
-  const selectedStackItemId = useVideoStore(s => s.selectedStackItemId)
 
-  // Determine which slide to show in toolbar (could be a stack item)
   if (!selectedSlide) return
-  let slide = selectedSlide.slide
-  if (selectedSlide?.slide?.type === SlideType.STACK && selectedStackItemId) {
-    const content = selectedSlide.slide.content.value as StackSlideContent
-    const selectedItem = content?.items?.find((item: Slide) => item.id === selectedStackItemId)
-    if (selectedItem) {
-      slide = selectedItem
-    }
-  }
+  let slide = selectedSlide.slide 
 
   const currentBg = backgroundStyleToCSS(getSlideWithBackground(slide));
   const isBackgroundActive = activeTool?.type === ActiveToolType.BACKGROUND

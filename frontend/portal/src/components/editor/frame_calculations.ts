@@ -1,24 +1,24 @@
 
 
-// Calculate total duration in frames for Remotion rendering (with overlapping transitions)
-import { Slide, SlideType, StackSlideContent, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+// Calculate total duration in frames for Remotion rendering
+import { Slide, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { TimelineSlide } from "./timeline/types";
+import { getActualSlideDuration, TRANSITION_DURATION_SECONDS } from "@coasterai/renderer/src/frameUtils";
 
-// Formula: Sum of slide durations - Sum of transition durations
+// Formula: Sum of slide durations +/- Sum of transition durations (based on TRANSITIONS_ADD_DURATION)
 export const calculateRealTotalFrames = (allSlides: TimelineSlide[], fps: number): number => {
   if (allSlides.length === 0) return 0;
 
   let totalFrames = 0;
 
-  // Add all slide durations
-  for (let i = 0; i < allSlides.length; i++) {
-    const slide = allSlides[i];
-    const isLastSlide = i === allSlides.length - 1;
+  for (const slide of allSlides) {
     const actualDuration = getActualSlideDuration(slide.slide);
     totalFrames += Math.round(actualDuration * fps);
-    // Subtract transition overlap only when a next slide exists.
-    if (!isLastSlide && slide.transition !== TransitionType.TRANSITION_NONE) {
-      totalFrames -= Math.round(TRANSITION_DURATION_SECONDS * fps);
+    
+    // Add or subtract transition duration based on configuration
+    if (slide.transition !== TransitionType.TRANSITION_NONE) {
+      const transitionFrames = Math.round(TRANSITION_DURATION_SECONDS * fps);
+      totalFrames += TRANSITIONS_ADD_DURATION ? transitionFrames : -transitionFrames;
     }
   }
 
@@ -41,14 +41,12 @@ export const calculateTotalFrames = (allSlides: TimelineSlide[], fps: number): n
   return totalFrames;
 };
 
-// Get slide start frame in Remotion rendering (with overlapping transitions)
-// Formula: Previous slide start + Previous slide duration - Previous slide transition duration
+// Get slide start frame in Remotion rendering
+// Formula: Previous slide start + Previous slide duration +/- Previous slide transition duration
 export const getRealSlideStartFrame = (allSlides: TimelineSlide[], slideId: string, fps: number): number => {
   let frame = 0;
 
-  for (let i = 0; i < allSlides.length; i++) {
-    const slide = allSlides[i];
-
+  for (const slide of allSlides) {
     if (slide.id === slideId) {
       return frame;
     }
@@ -57,10 +55,10 @@ export const getRealSlideStartFrame = (allSlides: TimelineSlide[], slideId: stri
     const actualDuration = getActualSlideDuration(slide.slide);
     frame += Math.round(actualDuration * fps);
 
-    // Subtract transition overlap if this slide transitions into the next slide.
-    const isLastSlide = i === allSlides.length - 1;
-    if (!isLastSlide && slide.transition !== TransitionType.TRANSITION_NONE) {
-      frame -= Math.round(TRANSITION_DURATION_SECONDS * fps);
+    // Add or subtract transition duration based on configuration
+    if (slide.transition !== TransitionType.TRANSITION_NONE) {
+      const transitionFrames = Math.round(TRANSITION_DURATION_SECONDS * fps);
+      frame += TRANSITIONS_ADD_DURATION ? transitionFrames : -transitionFrames;
     }
   }
 
@@ -85,7 +83,9 @@ export const getSlideStartFrame = (allSlides: TimelineSlide[], slideId: string, 
 };
 
 // Get the visual end frame for previews (last frame before transition starts)
-// Formula: Slide Start + Slide Duration - Transition Duration - 1
+// Formula depends on TRANSITIONS_ADD_DURATION:
+// - If true (sequential): Slide Start + Slide Duration - 1
+// - If false (overlapping): Slide Start + Slide Duration - Transition Duration - 1
 export const getSlideVisualEndFrame = (allSlides: TimelineSlide[], slideId: string, fps: number): number => {
   const slide = allSlides.find(s => s.id === slideId);
   if (!slide) return 0;
@@ -94,12 +94,16 @@ export const getSlideVisualEndFrame = (allSlides: TimelineSlide[], slideId: stri
   const actualDuration = getActualSlideDuration(slide.slide);
   const slideDurationFrames = Math.round(actualDuration * fps);
 
-  // For slides with transitions, visual end is before transition starts
-  const slideIndex = allSlides.findIndex(s => s.id === slideId);
-  const isLastSlide = slideIndex === allSlides.length - 1;
-  if (!isLastSlide && slide.transition !== TransitionType.TRANSITION_NONE) {
-    const transitionFrames = Math.round(TRANSITION_DURATION_SECONDS * fps);
-    return startFrame + slideDurationFrames - transitionFrames - 1;
+  // For slides with transitions
+  if (slide.transition !== TransitionType.TRANSITION_NONE) {
+    if (TRANSITIONS_ADD_DURATION) {
+      // Sequential: visual end is at the end of slide content
+      return startFrame + slideDurationFrames - 1;
+    } else {
+      // Overlapping: visual end is before transition starts
+      const transitionFrames = Math.round(TRANSITION_DURATION_SECONDS * fps);
+      return startFrame + slideDurationFrames - transitionFrames - 1;
+    }
   }
 
   // For slides without transitions, visual end is the actual end
@@ -139,20 +143,7 @@ export const getSlideContentEndFrame = (allSlides: TimelineSlide[], slideId: str
   return startFrame + slideDurationFrames - 1;
 };
 
-// Transition duration in seconds
-export const TRANSITION_DURATION_SECONDS = 0.3;
-
-/**
- * Get the actual duration of a slide
- * For stack slides, calculates duration from nested items
- * For other slides, returns the slide's duration property
- */
-export const getActualSlideDuration = (slide: Slide): number => {
-  if (slide.type === SlideType.STACK && slide.content) {
-    const stackContent = slide.content.value as StackSlideContent;
-    if (stackContent?.items && Array.isArray(stackContent.items)) {
-      return stackContent.items.reduce((sum: number, item: any) => sum + (item.duration || 0), 0);
-    }
-  }
-  return slide.duration;
-};
+// Control whether transitions add to total duration (true) or overlap with slides (false)
+// true: Transitions extend the video duration (sequential)
+// false: Transitions overlap with slides (concurrent, reduces total duration)
+export const TRANSITIONS_ADD_DURATION = false;

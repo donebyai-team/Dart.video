@@ -27,7 +27,6 @@ export interface VideoState {
     selectedEntityId: EntityId;
     selectedSlide: SelectedSection | null;
     selectedEffectId: string | null;
-    selectedStackItemId: string | null;
     activeTool: SelectedTool;
     showScreenshots: boolean;
     showVoiceover: boolean;

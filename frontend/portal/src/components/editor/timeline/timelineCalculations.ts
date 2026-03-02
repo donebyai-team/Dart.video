@@ -1,7 +1,8 @@
 // Timeline layout calculation utilities
 import { EffectType, TransitionType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import type { TimelineSlide, SlideItem, TransitionItem, OverlayItem, TimelineLayout } from './types'
-import { getRealSlideStartFrame, TRANSITION_DURATION_SECONDS } from '../frame_calculations'
+import { getRealSlideStartFrame } from '../frame_calculations'
+import { TRANSITION_DURATION_SECONDS } from '@coasterai/renderer/src/frameUtils'
 
 /**
  * REMOTION TIMELINE CALCULATIONS (2026)

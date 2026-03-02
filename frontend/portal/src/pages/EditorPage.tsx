@@ -15,12 +15,11 @@ import { type EditorConfig } from '@/types/editor'
 import { defaultEditorConfig } from '@/data/editorConfig'
 import { Sheet, SheetTrigger } from '@/components/ui/sheet'
 import { useVideoStore } from '@/stores/video'
-import { Slide, SlideType, StackSlideContent } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Video as VideoConfig } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import toast from 'react-hot-toast'
 import { getConnectError } from '@/utils/error';
 import { ActiveToolType } from '@/types/tools';
-import { createSlideEntityId, createStackItemEntityId, createOverlayEntityId } from '@/types/selection';
+import { createSlideEntityId, createOverlayEntityId } from '@/types/selection';
 import Link from 'next/link';
 import BackgroundMusicSelector from '@/components/editor/remotion/components/BackgroundMusicSelector';
 import { useClientsContext } from '@coasterai/ui-core/context/ClientContext';
@@ -71,7 +70,6 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
 
   const activeTool = useVideoStore(s => s.activeTool)
   const selectedEffectId = useVideoStore(s => s.selectedEffectId)
-  const selectedStackItemId = useVideoStore(s => s.selectedStackItemId)
   const editingSectionId = useVideoStore(s => s.editingSectionId)
   const editingSectionTitle = useVideoStore(s => s.editingSectionTitle)
   const generatingSlideVoiceover = useVideoStore(s => s.generatingSlideVoiceover)
@@ -374,7 +372,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
                   deleteCallout={deleteCallout}
                   deleteZoom={deleteZoom}
                   isPreviewPlaying={isPlayerPlaying}
-                  onPreviewTemplate={() => handlePreviewSlide(selectedSlide.slide.id)}
+                  onPreviewTemplate={() => handleTogglePreviewSlide(selectedSlide.slide.id)}
                 onUpdateSpotlight={updates => {
                   if (selectedEffectId) {
                     updateSpotlight(selectedEffectId, updates)
@@ -423,11 +421,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
                       const entityId = createSlideEntityId(slide.id)
                       handleSelectEntity(entityId)
                       // Use manual slide selection behavior - seek to end and prepare for restart
-                      playerRef.current?.selectSlideManually(slide.id)
-                      // For stack slides, auto-open settings (slide-level settings)
-                      if (slide.type === SlideType.STACK) {
-                        openEntitySettings(entityId)
-                      }
+                      playerRef.current?.selectSlideManually(slide.id)                      
                     }}
                     onStartEditTitle={(id, title) => {
                       setEditingSectionId(id)
@@ -454,13 +448,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
               onSlideChange={slideId => {
                 // Use unified selection handler
                 handleSelectEntity(createSlideEntityId(slideId))
-              }}
-              onStackItemChange={itemId => {
-                // Update stack item selection during playback
-                if (itemId && selectedSlide && selectedSlide.slide.type === SlideType.STACK) {
-                  handleSelectEntity(createStackItemEntityId(selectedSlide.slide.id, itemId))
-                }
-              }}
+              }}             
               onFullscreenChange={handleFullscreenChange}
               onPlaybackStateChange={setIsPlayerPlaying}
               onSelectOverlayFromTimeline={(overlayId, slideId) => {
@@ -507,33 +495,8 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
                   )
                 }
 
-                // If a stack item is selected, show its transcript
                 let currentTranscript = selectedSlide.slide.transcript
-                let handleTranscriptChange = updateSlideTranscript
-
-                if (selectedSlide.slide.type === SlideType.STACK && selectedStackItemId) {
-                  const content = selectedSlide.slide.content.value as StackSlideContent
-                  const items = content?.items || []
-                  const selectedItem = items.find((item: Slide) => item.id === selectedStackItemId)
-                  if (selectedItem) {
-                    currentTranscript = selectedItem.transcript
-                    handleTranscriptChange = (newTranscript: string) => {
-                      // Update the specific item's transcript
-                      const updatedItems = items.map((item: Slide) =>
-                        item.id === selectedStackItemId ? { ...item, transcript: newTranscript } : item
-                      )
-                      updateSlide({
-                        content: {
-                          case: 'stack',
-                          value: {
-                            ...content,
-                            items: updatedItems
-                          }
-                        }
-                      })
-                    }
-                  }
-                }
+                let handleTranscriptChange = updateSlideTranscript               
 
                 return (
                   <div className='space-y-2'>
@@ -541,7 +504,6 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
                       <Volume2 className='w-4 h-4 text-muted-foreground' />
                       <span className='text-xs font-medium text-muted-foreground uppercase tracking-wide'>
                         Voiceover Script
-                        {selectedSlide.slide.type === SlideType.STACK && selectedStackItemId && ' (Item)'}
                       </span>
                     </div>
                     <div className='flex items-center gap-3'>

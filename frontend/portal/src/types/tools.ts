@@ -12,7 +12,6 @@ export enum ActiveToolType {
   TEXT_ANIMATION_TEMPLATE = "text-animation-template",
   VISUAL_ANIMATION_SETTINGS = "visual-animation-settings",
   TEXT_ANIMATION_SETTINGS = "text-animation-settings",
-  STACK_SETTINGS = "stack-settings",
 }
 
 export type SelectedTools =
@@ -20,7 +19,6 @@ export type SelectedTools =
   | { type: ActiveToolType.TEXT_ANIMATION_TEMPLATE }
   | { type: ActiveToolType.VISUAL_ANIMATION_SETTINGS }
   | { type: ActiveToolType.TEXT_ANIMATION_SETTINGS }
-  | { type: ActiveToolType.STACK_SETTINGS }
   | { type: ActiveToolType.INSERT; tool: EffectType }
   | { type: ActiveToolType.TEXT_ANIMATION_TEMPLATE }
   | { type: ActiveToolType.VISUAL_ANIMATION_SETTINGS }

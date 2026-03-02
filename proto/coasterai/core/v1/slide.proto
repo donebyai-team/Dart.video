@@ -15,7 +15,6 @@ enum SlideStatus {
 enum SlideType {
   SLIDE_TYPE_UNDEFINED = 0;
   SLIDE_TYPE_ANIMATION = 1;
-  SLIDE_TYPE_STACK = 4;
   SLIDE_TYPE_MEDIA = 5;
 }
 
@@ -112,11 +111,6 @@ message AnimationSlideContent {
   optional AnimationSlidePlan plan = 5;
 }
 
-message StackSlideContent {
-  StackAnimationMode animationMode = 1;
-  repeated Slide items = 2;
-}
-
 message UploadedMedia {
   string url = 1;
   string thumbnailUrl = 2;
@@ -190,7 +184,6 @@ message Slide {
   oneof content {
     MediaSlideContent media = 8;
     AnimationSlideContent animation = 9;
-    StackSlideContent stack = 10;
   }
 
   optional bool voiceoverGenerated = 15;

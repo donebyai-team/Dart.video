@@ -4,11 +4,12 @@ import { Video, VideoSchema } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import { linearTiming, TransitionSeries } from '@remotion/transitions'
 import React from 'react'
 import { AbsoluteFill, useVideoConfig, Html5Audio } from 'remotion'
-import { getActualSlideDuration, TRANSITION_DURATION_SECONDS } from './frameUtils'
 import { AnimationSlide, MediaSlide } from './slides'
 import { backgroundStyleToCSS } from './backgroundUtils'
 import { getTransitionPresentation } from './transitions/presentation'
 import { getSlideTransitionDirectionValue } from './transitions/config'
+import { getActualSlideDuration, TRANSITION_DURATION_SECONDS } from './frameUtils'
+
 
 
 interface SlideshowProps {
@@ -17,7 +18,6 @@ interface SlideshowProps {
   onSelectTemplate?: (slideId: string) => void
   video?: JsonObject
   videoConfig?: Video
-  selectedStackItemId?: string | null
   onUpdate?: (updates: Partial<Slide>) => void
   uploadMedia?: (file: File) => Promise<UploadedMedia>
 }
@@ -29,7 +29,6 @@ export const SlideComponent: React.FC<{
   height: number
   isEditing?: boolean
   isSelected?: boolean
-  selectedStackItemId?: string | null
   onSelect?: () => void
   onUpdate?: (updates: Partial<Slide>) => void
   uploadMedia?: (file: File) => Promise<UploadedMedia>
@@ -115,7 +114,7 @@ export const SingleSlidePreview: React.FC<{
  */
 
 // Main slideshow composition using Remotion's TransitionSeries
-export const Slideshow: React.FC<SlideshowProps> = ({ fps, isEditing = false, onSelectTemplate, video, videoConfig: videoConfigProp, selectedStackItemId = null, onUpdate = () => { }, uploadMedia }) => {
+export const Slideshow: React.FC<SlideshowProps> = ({ fps, isEditing = false, onSelectTemplate, video, videoConfig: videoConfigProp, onUpdate = () => { }, uploadMedia }) => {
   const selectedTemplateId = null
 
   const { width, height } = useVideoConfig()
@@ -201,12 +200,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({ fps, isEditing = false, on
                   width={width}
                   height={height}
                   isEditing={isEditing}
-                  isSelected={isSelected}
-                  selectedStackItemId={
-                    slide.type === SlideType.STACK
-                      ? selectedStackItemId
-                      : null
-                  }
+                  isSelected={isSelected}              
                   onUpdate={onUpdate}
                   uploadMedia={uploadMedia}
                   onSelect={() => {

@@ -227,27 +227,6 @@ export declare type AnimationSlideContent = Message<"coasterai.core.v1.Animation
 export declare const AnimationSlideContentSchema: GenMessage<AnimationSlideContent>;
 
 /**
- * @generated from message coasterai.core.v1.StackSlideContent
- */
-export declare type StackSlideContent = Message<"coasterai.core.v1.StackSlideContent"> & {
-  /**
-   * @generated from field: coasterai.core.v1.StackAnimationMode animationMode = 1;
-   */
-  animationMode: StackAnimationMode;
-
-  /**
-   * @generated from field: repeated coasterai.core.v1.Slide items = 2;
-   */
-  items: Slide[];
-};
-
-/**
- * Describes the message coasterai.core.v1.StackSlideContent.
- * Use `create(StackSlideContentSchema)` to create a new message.
- */
-export declare const StackSlideContentSchema: GenMessage<StackSlideContent>;
-
-/**
  * @generated from message coasterai.core.v1.UploadedMedia
  */
 export declare type UploadedMedia = Message<"coasterai.core.v1.UploadedMedia"> & {
@@ -520,12 +499,6 @@ export declare type Slide = Message<"coasterai.core.v1.Slide"> & {
      */
     value: AnimationSlideContent;
     case: "animation";
-  } | {
-    /**
-     * @generated from field: coasterai.core.v1.StackSlideContent stack = 10;
-     */
-    value: StackSlideContent;
-    case: "stack";
   } | { case: undefined; value?: undefined };
 
   /**
@@ -777,11 +750,6 @@ export enum SlideType {
    * @generated from enum value: SLIDE_TYPE_ANIMATION = 1;
    */
   ANIMATION = 1,
-
-  /**
-   * @generated from enum value: SLIDE_TYPE_STACK = 4;
-   */
-  STACK = 4,
 
   /**
    * @generated from enum value: SLIDE_TYPE_MEDIA = 5;

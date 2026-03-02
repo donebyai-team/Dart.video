@@ -48,10 +48,7 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
       })
 
       if (parsed.type === 'overlay') {
-        set({
-          selectedEffectId: parsed.overlayId,
-          selectedStackItemId: null
-        })
+        set({selectedEffectId: parsed.overlayId,})
 
         const toolType = getEffectTypeFromID(parsed.overlayId!, get)
 
@@ -68,7 +65,6 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
 
         set({
           selectedEffectId: null,
-          selectedStackItemId: null,
           activeTool: getDefaultSelectedTool()
         })
 
@@ -105,7 +101,7 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
 
     if (parsed.type === 'slide') {
 
-      if (foundSlide.type === SlideType.TEXT_ANIMATION) {
+      if (foundSlide.type === SlideType.ANIMATION) {
         set({
           activeTool: {
             type: ActiveToolType.TEXT_ANIMATION_TEMPLATE
@@ -114,8 +110,7 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
       }
 
     } else if (
-      parsed.type === 'overlay' ||
-      parsed.type === 'stack-item-overlay'
+      parsed.type === 'overlay'
     ) {
 
       const toolType = getEffectTypeFromID(parsed.overlayId!, get)

@@ -112,6 +112,7 @@ const ToolsSettingsPanel = ({
               onUpdateProps={onUpdateTemplateProps}
               onClose={handleCloseTool}
               onApply={onPreviewTemplate}
+              isPreviewPlaying={isPreviewPlaying}
             />
           )
         })()}

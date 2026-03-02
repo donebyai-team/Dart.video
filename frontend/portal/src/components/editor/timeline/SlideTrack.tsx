@@ -37,8 +37,12 @@ export function SlideTrack({
     
     if (activeTransition) {
       // Highlight both outgoing and incoming slides during transition
-      highlighted.add(activeTransition.fromSlideId);
-      highlighted.add(activeTransition.toSlideId);
+      if (activeTransition.fromSlide) {
+        highlighted.add(activeTransition.fromSlide);
+      }
+      if (activeTransition.toSlide) {
+        highlighted.add(activeTransition.toSlide);
+      }
     } else {
       // Highlight the slide containing current time
       const activeSlide = slideItems.find(
@@ -93,7 +97,9 @@ export function SlideTrack({
           />
           
           {/* Render overlap region if this slide has a transition */}
-          {slideItem.hasTransition && slideItem.overlapStart !== null && slideItem.overlapEnd !== null && (
+          {slideItem.hasTransition && 
+           slideItem.overlapStart != null && 
+           slideItem.overlapEnd != null && (
             <div
               className="absolute top-0 h-full bg-yellow-400/20 pointer-events-none"
               style={{
@@ -117,8 +123,8 @@ export function SlideTrack({
             transitionItem={transitionItem}
             pixelsPerSecond={pixelsPerSecond}
             onClick={() => {
-              console.log(`[SlideTrack] Transition tile clicked, selecting target slide: ${transitionItem.toSlide || transitionItem.toSlideId}`);
-              const targetSlide = transitionItem.toSlide || transitionItem.toSlideId;
+              console.log(`[SlideTrack] Transition tile clicked, selecting target slide: ${transitionItem.toSlide}`);
+              const targetSlide = transitionItem.toSlide;
               if (targetSlide) {
                 onSelectSlide?.(targetSlide);
                 // Use manual selection behavior for the target slide

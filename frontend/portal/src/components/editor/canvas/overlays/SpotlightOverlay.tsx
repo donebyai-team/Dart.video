@@ -121,6 +121,7 @@ const SpotlightOverlay = ({
         window.removeEventListener("mouseup", handleMouseUp);
       };
     }
+    return
   }, [isDragging, isResizing, handleMouseMove, handleMouseUp]);
 
   const handleSize = 10;

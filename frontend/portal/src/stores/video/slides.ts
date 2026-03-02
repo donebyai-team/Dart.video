@@ -1,11 +1,11 @@
 import { TimelineSlide } from '@/components/editor/timeline/types'
-import { SlideType, Slide, StackSlideContent, TransitionDirection, TransitionType, BackgroundStyle } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { SlideType, Slide, TransitionDirection, TransitionType, BackgroundStyle } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { arrayMove } from '@dnd-kit/sortable'
-import { getSlideTypeConfig, createNewSlide, getDefaulVideotMetadata, createDefaultBackgroundStyle } from './defaults'
+import { createNewSlide, getDefaulVideotMetadata, createDefaultBackgroundStyle } from './defaults'
 import { VideoStoreSet, VideoStoreGet } from './types'
 import { getSections, updateVideoConfigSections, updateSelectedSlide, updateTotalDuration } from './utils'
 import defaultEditorConfig from '@/data/editorConfig'
-import { TRANSITION_DURATION_SECONDS } from '@/components/editor/frame_calculations'
+import { TRANSITION_DURATION_SECONDS } from '@coasterai/renderer/src/frameUtils'
 
 export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   /* ================= ADD ================= */
@@ -275,13 +275,6 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     return sections.flatMap(section =>
       section.slides.map(slide => {
         let actualDuration = slide.duration
-
-        if (slide.type === SlideType.STACK && slide.content) {
-          const stackContent = slide.content.value as StackSlideContent
-          if (stackContent?.items) {
-            actualDuration = stackContent.items.reduce((sum: number, item: any) => sum + (item.duration || 0), 0)
-          }
-        }
 
         return {
           ...slide,

@@ -12,15 +12,13 @@ import { AnimationSlideContentSchema,
     Section, SectionSchema,
     Slide, SlideSchema, SlideStatus, SlideType,
     SpotlightEffect, SpotlightEffectSchema,
-    StackAnimationMode,
-    StackSlideContentSchema,
     TransitionType,
     ZoomEffect,
     ZoomEffectSchema,
  } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { Resolution, ResolutionSchema, Video, VideoMetadata, VideoMetadataSchema } from "@coasterai/pb/coasterai/core/v1/video_pb";
 import { SelectedSection } from "./types";
-import { TRANSITION_DURATION_SECONDS } from "@/components/editor/frame_calculations";
+import { TRANSITION_DURATION_SECONDS } from "@coasterai/renderer/src/frameUtils";
 
 // Helper functions (moved from useEditorState)
 export const getSlideTypeConfig = (config: EditorConfig | null, slideType: SlideType): SlideTypeConfig | undefined => {
@@ -84,17 +82,7 @@ export function buildSlideContent(type: SlideType): Slide["content"] {
                     templateConfig: {},
                     meta: getDefaultMetadata(),
                 }),
-            };
-        
-        case SlideType.STACK:
-            return {
-                case: "stack",
-                value: create(StackSlideContentSchema, {
-                    animationMode: StackAnimationMode.STACK,
-                    items: [],
-                }),
-            };
-
+            };    
         default:
             return { case: undefined };
     }

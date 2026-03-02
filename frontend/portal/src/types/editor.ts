@@ -221,21 +221,10 @@ export interface TextAnimationSlideConfig extends SlideTypeBase {
   templates: TextAnimationTemplatesConfig;
 }
 
-
-// Stack slide type config
-export interface StackSlideConfig extends SlideTypeBase {
-  id: SlideType.STACK;
-  minItems: number;
-  maxItems: number;
-  animationModes: string[];
-  defaultAnimationMode: string;
-}
-
 // Union of all slide type configs
 export type SlideTypeConfig =
   | MediaSlideConfig
   | TextAnimationSlideConfig
-  | StackSlideConfig;
 
 export interface SlideTypesConfig {
   types: SlideTypeConfig[];
@@ -276,19 +265,7 @@ export interface NavigationConfig {
 export interface EditorConfig {
   // Settings & Options
   resolution: ResolutionConfig;
-  transitions: TransitionsConfig;
   slideTypes: SlideTypesConfig;
-
-  // Tool configurations
-  typography: TypographyConfig;
-  animation: AnimationConfig;
-  insertTools: InsertToolConfig;
-
-  // Voiceover
-  voiceover: VoiceoverConfig;
-
-  // Navigation
-  navigation: NavigationConfig;
 }
 
 // ==========================================
