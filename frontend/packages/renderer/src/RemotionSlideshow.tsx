@@ -2,18 +2,13 @@ import { fromJson, JsonObject } from '@bufbuild/protobuf'
 import { Slide, SlideType, TransitionType, UploadedMedia } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Video, VideoSchema } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import { linearTiming, TransitionSeries } from '@remotion/transitions'
-import { fade } from '@remotion/transitions/fade'
-import { slide } from '@remotion/transitions/slide'
-import { wipe } from '@remotion/transitions/wipe'
-import { flip } from '@remotion/transitions/flip'
-import { clockWipe } from '@remotion/transitions/clock-wipe'
-import { iris } from '@remotion/transitions/iris'
-import { none } from '@remotion/transitions/none'
 import React from 'react'
 import { AbsoluteFill, useVideoConfig, Html5Audio } from 'remotion'
 import { getActualSlideDuration, TRANSITION_DURATION_SECONDS } from './frameUtils'
 import { AnimationSlide, MediaSlide } from './slides'
 import { backgroundStyleToCSS } from './backgroundUtils'
+import { getTransitionPresentation } from './transitions/presentation'
+import { getSlideTransitionDirectionValue } from './transitions/config'
 
 
 interface SlideshowProps {
@@ -110,46 +105,6 @@ export const SingleSlidePreview: React.FC<{
   )
 }
 
-// Get transition presentation based on transition type
-const getTransitionPresentation = (transitionType?: TransitionType, width?: number, height?: number): any => {
-  switch (transitionType) {
-    case TransitionType.TRANSITION_FADE:
-      return fade() // Smooth opacity fade between slides
-    case TransitionType.TRANSITION_SLIDE_LEFT:
-      return slide({ direction: 'from-right' }) // Slide enters from right side
-    case TransitionType.TRANSITION_SLIDE_RIGHT:
-      return slide({ direction: 'from-left' }) // Slide enters from left side
-    case TransitionType.TRANSITION_SLIDE_UP:
-      return slide({ direction: 'from-bottom' }) // Slide enters from bottom
-    case TransitionType.TRANSITION_SLIDE_DOWN:
-      return slide({ direction: 'from-top' }) // Slide enters from top
-    case TransitionType.TRANSITION_WIPE_LEFT:
-      return wipe({ direction: 'from-right' }) // Wipe reveals content from right to left
-    case TransitionType.TRANSITION_WIPE_RIGHT:
-      return wipe({ direction: 'from-left' }) // Wipe reveals content from left to right
-    case TransitionType.TRANSITION_WIPE_UP:
-      return wipe({ direction: 'from-bottom' }) // Wipe reveals content from bottom to top
-    case TransitionType.TRANSITION_WIPE_DOWN:
-      return wipe({ direction: 'from-top' }) // Wipe reveals content from top to bottom
-    case TransitionType.TRANSITION_FLIP_LEFT:
-      return flip({ direction: 'from-left' }) // 3D flip effect rotating from left
-    case TransitionType.TRANSITION_FLIP_RIGHT:
-      return flip({ direction: 'from-right' }) // 3D flip effect rotating from right
-    case TransitionType.TRANSITION_FLIP_UP:
-      return flip({ direction: 'from-top' }) // 3D flip effect rotating from top
-    case TransitionType.TRANSITION_FLIP_DOWN:
-      return flip({ direction: 'from-bottom' }) // 3D flip effect rotating from bottom
-    case TransitionType.TRANSITION_CLOCK_WIPE:
-      return clockWipe({ width: width || 1920, height: height || 1080 }) // Circular wipe that sweeps like a clock hand
-    case TransitionType.TRANSITION_IRIS:
-      return iris({ width: width || 1920, height: height || 1080 }) // Circular iris expand/contract effect
-    case TransitionType.TRANSITION_NONE:
-      return none() // Instant cut with no transition effect
-    default:
-      return fade()
-  }
-}
-
 /**
  * REMOTION TRANSITION CALCULATIONS (2026)
  * Based on TransitionSeries overlapping behavior:
@@ -221,13 +176,16 @@ export const Slideshow: React.FC<SlideshowProps> = ({ fps, isEditing = false, on
       )}
 
       <TransitionSeries>
-        {allSlides.map(slide => {
+        {allSlides.map((slide, index) => {
           const isSelected = selectedTemplateId === slide.id
 
           const actualDuration = getActualSlideDuration(slide)
           const durationInFrames = Math.round(actualDuration * fps)
 
-          const hasTransition = slide.transition !== TransitionType.TRANSITION_NONE
+          // Last slide never transitions out because there is no following slide.
+          const hasTransition =
+            index < allSlides.length - 1 &&
+            slide.transition !== TransitionType.TRANSITION_NONE
 
           // if global background is given , all slides background should be transparent
           // else slide color
@@ -259,7 +217,12 @@ export const Slideshow: React.FC<SlideshowProps> = ({ fps, isEditing = false, on
 
               {hasTransition && (
                 <TransitionSeries.Transition
-                  presentation={getTransitionPresentation(slide.transition, width, height)}
+                  presentation={getTransitionPresentation(
+                    slide.transition,
+                    getSlideTransitionDirectionValue(slide),
+                    width,
+                    height
+                  ) as any}
                   timing={linearTiming({
                     durationInFrames: transitionDurationFrames
                   })}

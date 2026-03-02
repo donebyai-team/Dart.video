@@ -76,7 +76,7 @@ export function calculateRemotionSlideItems(
   const slideItems: SlideItem[] = []
   let currentFramePosition = 0
 
-  slides.forEach(slide => {
+  slides.forEach((slide, index) => {
     // Convert slide duration to frames (source of truth)
     const slideDurationFrames = secondsToFrames(slide.duration, fps)
 
@@ -91,7 +91,9 @@ export function calculateRemotionSlideItems(
     const durationSeconds = framesToSeconds(slideDurationFrames, fps)
 
     // Check if this slide has a transition (creates overlap with next slide)
-    const hasTransition = slide.transition !== TransitionType.TRANSITION_NONE
+    const hasTransition =
+      index < slides.length - 1 &&
+      slide.transition !== TransitionType.TRANSITION_NONE
 
     slideItems.push({
       id: `slide-${slide.id}`,

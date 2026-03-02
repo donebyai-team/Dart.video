@@ -41,7 +41,7 @@ export class ConfigProvider {
       throw new Error('No backend configuration found')
     }
 
-    log.info('retrieve config', { config: backendConfig })
+    // log.info('retrieve config', { config: backendConfig })
 
     return backendConfig
   }

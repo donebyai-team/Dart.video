@@ -501,6 +501,11 @@ export declare type Slide = Message<"coasterai.core.v1.Slide"> & {
   backgroundStyle?: BackgroundStyle;
 
   /**
+   * @generated from field: optional coasterai.core.v1.TransitionDirection direction = 23;
+   */
+  direction?: TransitionDirection;
+
+  /**
    * @generated from oneof coasterai.core.v1.Slide.content
    */
   content: {
@@ -933,6 +938,41 @@ export enum TransitionType {
  * Describes the enum coasterai.core.v1.TransitionType.
  */
 export declare const TransitionTypeSchema: GenEnum<TransitionType>;
+
+/**
+ * @generated from enum coasterai.core.v1.TransitionDirection
+ */
+export enum TransitionDirection {
+  /**
+   * @generated from enum value: TRANSITION_DIRECTION_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: TRANSITION_DIRECTION_FROM_LEFT = 1;
+   */
+  FROM_LEFT = 1,
+
+  /**
+   * @generated from enum value: TRANSITION_DIRECTION_FROM_RIGHT = 2;
+   */
+  FROM_RIGHT = 2,
+
+  /**
+   * @generated from enum value: TRANSITION_DIRECTION_FROM_TOP = 3;
+   */
+  FROM_TOP = 3,
+
+  /**
+   * @generated from enum value: TRANSITION_DIRECTION_FROM_BOTTOM = 4;
+   */
+  FROM_BOTTOM = 4,
+}
+
+/**
+ * Describes the enum coasterai.core.v1.TransitionDirection.
+ */
+export declare const TransitionDirectionSchema: GenEnum<TransitionDirection>;
 
 /**
  * @generated from enum coasterai.core.v1.EffectType

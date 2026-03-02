@@ -39,7 +39,6 @@ const StoryboardPanel = ({
     const selectedSlideId = useVideoStore(s => s.selectedSlide?.slide.id);
     const editingSectionId = useVideoStore(s => s.editingSectionId);
     const editingSectionTitle = useVideoStore(s => s.editingSectionTitle);
-    const generatingSectionVoiceover = useVideoStore(s => s.generatingSectionVoiceover);
     const showTransitionPicker = useVideoStore(s => s.showTransitionPicker);
 
     const onSectionDragEnd = useVideoStore(s => s.handleSectionDragEnd);
@@ -50,7 +49,6 @@ const StoryboardPanel = ({
     const onEditTitleChange = useVideoStore(s => s.setEditingSectionTitle);
 
     const onCancelEditTitle = useVideoStore(s => s.setEditingSectionId);
-    const onGenerateVoiceover = useVideoStore(s => s.handleGenerateSectionVoiceover);
     const onShowTransitionPicker = useVideoStore(s => s.setShowTransitionPicker);
     const onUpdateTransition = useVideoStore(s => s.updateSlideTransition);
     const onAddSlide = useVideoStore(s => s.addSlide);
@@ -116,11 +114,10 @@ const StoryboardPanel = ({
                                 key={section.id}
                                 section={section}
                                 index={index}
-                                isFirstSection={index === 0}
+                                isLastSection={index === sections.length - 1}
                                 selectedSlideId={selectedSlideId!}
                                 editingSectionId={editingSectionId}
                                 editingSectionTitle={editingSectionTitle}
-                                generatingSectionVoiceover={generatingSectionVoiceover}
                                 showTransitionPicker={showTransitionPicker}
 
                                 onSelectSlide={onSelectSlide}
@@ -138,21 +135,14 @@ const StoryboardPanel = ({
                                 onSaveTitle={onSaveTitle}
                                 onCancelEditTitle={() => onCancelEditTitle(null)}
 
-                                onGenerateVoiceover={() =>
-                                    onGenerateVoiceover(section.id)
-                                }
-
-                                onPlayVoiceover={() => {
-                                    console.log("NOT IMPLEMENTED");
-                                }}
-
                                 onShowTransitionPicker={onShowTransitionPicker}
 
-                                onUpdateTransition={(slideId, transitionId) =>
+                                onUpdateTransition={(slideId, transitionId, direction) =>
                                     onUpdateTransition(
                                         section.id,
                                         slideId,
-                                        transitionId
+                                        transitionId,
+                                        direction
                                     )
                                 }
 

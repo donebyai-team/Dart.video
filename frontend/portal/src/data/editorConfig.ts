@@ -3,6 +3,7 @@
 
 import type { EditorConfig } from "@/types/editor";
 import { EffectType, SlideType, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { TRANSITION_OPTIONS } from "@coasterai/renderer";
 
 export const defaultEditorConfig: EditorConfig = {
     // ==========================================
@@ -138,13 +139,8 @@ export const defaultEditorConfig: EditorConfig = {
     // Transitions Configuration
     // ==========================================
     transitions: {
-        options: [
-            { id: TransitionType.TRANSITION_NONE, name: "None", preview: "bg-muted" },
-            { id: TransitionType.TRANSITION_FADE, name: "Fade", preview: "bg-gradient-to-r from-muted to-transparent" },
-            { id: TransitionType.TRANSITION_SLIDE_LEFT, name: "Slide Left", preview: "bg-gradient-to-l from-muted via-primary/20 to-transparent" },
-            { id: TransitionType.TRANSITION_SLIDE_RIGHT, name: "Slide Right", preview: "bg-gradient-to-r from-muted via-primary/20 to-transparent" },
-            { id: TransitionType.TRANSITION_SLIDE_UP, name: "Slide Up", preview: "bg-gradient-to-t from-muted via-primary/20 to-transparent" },
-        ],
+        // Single source of truth shared with picker + renderer.
+        options: TRANSITION_OPTIONS.map(({ id, name, preview }) => ({ id, name, preview })),
         default: TransitionType.TRANSITION_FADE,
     },
 

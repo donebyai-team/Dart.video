@@ -31,7 +31,17 @@ import AddSlideButton from "./AddSlideButton";
 import SortableSlideCard from "./SortableSlideCard";
 import TransitionPicker from "./TransitionPicker";
 import { ImageIcon, Type, BarChart3, Sparkles, Film, Layers } from "lucide-react";
-import { Section, Slide, SlideType, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import {
+    Section,
+    Slide,
+    SlideType,
+    TransitionDirection,
+    TransitionType
+} from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import {
+    getSlideTransitionDirectionValue,
+    isDirectionSupportedTransition
+} from "@coasterai/renderer";
 
 interface StoryboardSectionProps {
     section: Section;
@@ -39,9 +49,8 @@ interface StoryboardSectionProps {
     selectedSlideId: string;
     editingSectionId: string | null;
     editingSectionTitle: string;
-    generatingSectionVoiceover: string | null;
     showTransitionPicker: string | null;
-    isFirstSection: boolean;
+    isLastSection: boolean;
     onSelectSlide: (section: Section, slide: Slide) => void;
     onRemoveSection: () => void;
     onRemoveSlide: (slideId: string) => void;
@@ -49,10 +58,8 @@ interface StoryboardSectionProps {
     onEditTitleChange: (value: string) => void;
     onSaveTitle: () => void;
     onCancelEditTitle: () => void;
-    onGenerateVoiceover: () => void;
-    onPlayVoiceover: () => void;
     onShowTransitionPicker: (slideId: string | null) => void;
-    onUpdateTransition: (slideId: string, transitionId: TransitionType) => void;
+    onUpdateTransition: (slideId: string, transitionId: TransitionType, direction?: TransitionDirection) => void;
     onAddSlide: (type: SlideType) => void;
     onReorderSlides: (activeId: string, overId: string) => void;
 }
@@ -62,9 +69,8 @@ const StoryboardSection = ({
     selectedSlideId,
     editingSectionId,
     editingSectionTitle,
-    generatingSectionVoiceover,
     showTransitionPicker,
-    isFirstSection,
+    isLastSection,
     onSelectSlide,
     onRemoveSection,
     onRemoveSlide,
@@ -72,8 +78,6 @@ const StoryboardSection = ({
     onEditTitleChange,
     onSaveTitle,
     onCancelEditTitle,
-    onGenerateVoiceover,
-    onPlayVoiceover,
     onShowTransitionPicker,
     onUpdateTransition,
     onAddSlide,
@@ -259,27 +263,12 @@ const StoryboardSection = ({
                                 strategy={verticalListSortingStrategy}
                             >
                                 {section.slides.map((slide, slideIndex) => {
-                                    const showTransition = !isFirstSection || slideIndex > 0;
+                                    const isLastSlideInSection = slideIndex === section.slides.length - 1;
+                                    const showTransition = !(isLastSection && isLastSlideInSection);
+                                    const currentDirection = getSlideTransitionDirectionValue(slide);
 
                                     return (
                                         <div key={slide.id} className="space-y-1">
-                                            {/* Transition Picker is rendered BEFORE the slide it controls */}
-                                            {showTransition && (
-                                                <TransitionPicker
-                                                    currentTransitionType={slide.transition || TransitionType.TRANSITION_NONE}
-                                                    isOpen={showTransitionPicker === slide.id}
-                                                    onToggle={() =>
-                                                        onShowTransitionPicker(
-                                                            showTransitionPicker === slide.id ? null : slide.id
-                                                        )
-                                                    }
-                                                    onSelect={(transitionId) =>
-                                                        onUpdateTransition(slide.id, transitionId)
-                                                    }
-                                                    onClose={() => onShowTransitionPicker(null)}
-                                                />
-                                            )}
-
                                             <SortableSlideCard
                                                 slide={slide}
                                                 isSelected={selectedSlideId === slide.id}
@@ -287,6 +276,31 @@ const StoryboardSection = ({
                                                 onSelect={() => onSelectSlide(section, slide)}
                                                 onDelete={() => onRemoveSlide(slide.id)}
                                             />
+
+                                            {/* Transition controls apply to this slide's outgoing transition. */}
+                                            {showTransition && (
+                                                <TransitionPicker
+                                                    currentTransitionType={slide.transition || TransitionType.TRANSITION_NONE}
+                                                    currentDirection={currentDirection}
+                                                    isOpen={showTransitionPicker === slide.id}
+                                                    onToggle={() =>
+                                                        onShowTransitionPicker(
+                                                            showTransitionPicker === slide.id ? null : slide.id
+                                                        )
+                                                    }
+                                                    onSelectTransition={(transitionId) => {
+                                                        const defaultDirection =
+                                                            isDirectionSupportedTransition(transitionId)
+                                                                ? (currentDirection ?? TransitionDirection.FROM_RIGHT)
+                                                                : undefined;
+                                                        onUpdateTransition(slide.id, transitionId, defaultDirection);
+                                                    }}
+                                                    onSelectDirection={(direction) =>
+                                                        onUpdateTransition(slide.id, slide.transition, direction)
+                                                    }
+                                                    onClose={() => onShowTransitionPicker(null)}
+                                                />
+                                            )}
                                         </div>
                                     );
                                 })}

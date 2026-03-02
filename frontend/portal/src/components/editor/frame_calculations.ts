@@ -11,14 +11,13 @@ export const calculateRealTotalFrames = (allSlides: TimelineSlide[], fps: number
   let totalFrames = 0;
 
   // Add all slide durations
-  for (const slide of allSlides) {
+  for (let i = 0; i < allSlides.length; i++) {
+    const slide = allSlides[i];
+    const isLastSlide = i === allSlides.length - 1;
     const actualDuration = getActualSlideDuration(slide.slide);
     totalFrames += Math.round(actualDuration * fps);
-  }
-
-  // Subtract all transition durations (they overlap with slide content)
-  for (const slide of allSlides) {
-    if (slide.transition !== TransitionType.TRANSITION_NONE) {
+    // Subtract transition overlap only when a next slide exists.
+    if (!isLastSlide && slide.transition !== TransitionType.TRANSITION_NONE) {
       totalFrames -= Math.round(TRANSITION_DURATION_SECONDS * fps);
     }
   }
@@ -58,8 +57,9 @@ export const getRealSlideStartFrame = (allSlides: TimelineSlide[], slideId: stri
     const actualDuration = getActualSlideDuration(slide.slide);
     frame += Math.round(actualDuration * fps);
 
-    // Subtract transition duration if this slide has a transition (overlap)
-    if (slide.transition !== TransitionType.TRANSITION_NONE) {
+    // Subtract transition overlap if this slide transitions into the next slide.
+    const isLastSlide = i === allSlides.length - 1;
+    if (!isLastSlide && slide.transition !== TransitionType.TRANSITION_NONE) {
       frame -= Math.round(TRANSITION_DURATION_SECONDS * fps);
     }
   }
@@ -95,7 +95,9 @@ export const getSlideVisualEndFrame = (allSlides: TimelineSlide[], slideId: stri
   const slideDurationFrames = Math.round(actualDuration * fps);
 
   // For slides with transitions, visual end is before transition starts
-  if (slide.transition !== TransitionType.TRANSITION_NONE) {
+  const slideIndex = allSlides.findIndex(s => s.id === slideId);
+  const isLastSlide = slideIndex === allSlides.length - 1;
+  if (!isLastSlide && slide.transition !== TransitionType.TRANSITION_NONE) {
     const transitionFrames = Math.round(TRANSITION_DURATION_SECONDS * fps);
     return startFrame + slideDurationFrames - transitionFrames - 1;
   }

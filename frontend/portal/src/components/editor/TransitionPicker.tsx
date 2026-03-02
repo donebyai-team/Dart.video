@@ -1,34 +1,34 @@
-import { useRef } from "react";
-import { Check, ChevronRight } from "lucide-react";
+import { Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { TransitionDirection, TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import {
+    isDirectionSupportedTransition,
+    TRANSITION_OPTIONS
+} from "@coasterai/renderer";
+import TransitionDirectionPicker from "./TransitionDirectionPicker";
 
 interface TransitionPickerProps {
     currentTransitionType: TransitionType;
+    currentDirection?: TransitionDirection;
     isOpen: boolean;
     onToggle: () => void;
-    onSelect: (transitionId: TransitionType) => void;
+    onSelectTransition: (transitionId: TransitionType) => void;
+    onSelectDirection: (direction: TransitionDirection) => void;
     onClose: () => void;
 }
-
-const transitions = [
-    { id: TransitionType.TRANSITION_NONE, name: "None", preview: "bg-muted" },
-    { id: TransitionType.TRANSITION_FADE, name: "Fade", preview: "bg-gradient-to-r from-muted to-transparent" },
-    { id: TransitionType.TRANSITION_SLIDE_LEFT, name: "Slide Left", preview: "bg-gradient-to-l from-muted via-primary/20 to-transparent" },
-    { id: TransitionType.TRANSITION_SLIDE_RIGHT, name: "Slide Right", preview: "bg-gradient-to-r from-muted via-primary/20 to-transparent" },
-    { id: TransitionType.TRANSITION_SLIDE_UP, name: "Slide Up", preview: "bg-gradient-to-t from-muted via-primary/20 to-transparent" },
-
-];
 
 
 const TransitionPicker = ({
     currentTransitionType,
+    currentDirection,
     isOpen,
     onToggle,
-    onSelect,
+    onSelectTransition,
+    onSelectDirection,
     onClose,
 }: TransitionPickerProps) => {
-    const currentTransition = transitions.find((t) => t.id === currentTransitionType);
+    const currentTransition = TRANSITION_OPTIONS.find((t) => t.id === currentTransitionType);
+    const supportsDirection = isDirectionSupportedTransition(currentTransitionType);
 
     return (
         <div className="relative flex items-center justify-center py-1">
@@ -58,12 +58,13 @@ const TransitionPicker = ({
                         className="absolute top-full mt-1 left-1/2 -translate-x-1/2 z-50 bg-card border border-border rounded-lg shadow-xl p-2 min-w-[140px]"
                     >
                         <div className="space-y-0.5">
-                            {transitions.map((t) => (
+                            {/* Transition options are sourced from shared config. */}
+                            {TRANSITION_OPTIONS.map((t) => (
                                 <button
                                     key={t.id}
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        onSelect(t.id);
+                                        onSelectTransition(t.id);
                                     }}
                                     className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-xs transition-colors ${currentTransitionType === t.id
                                         ? "bg-primary/10 text-primary"
@@ -75,6 +76,16 @@ const TransitionPicker = ({
                                     {currentTransitionType === t.id && <Check className="w-3 h-3" />}
                                 </button>
                             ))}
+
+                            {supportsDirection && (
+                                <>
+                                    <div className="h-px bg-border my-1" />
+                                    <TransitionDirectionPicker
+                                        currentDirection={currentDirection}
+                                        onSelect={onSelectDirection}
+                                    />
+                                </>
+                            )}
                         </div>
                     </motion.div>
                 )}

@@ -1,5 +1,5 @@
 import { TimelineSlide } from '@/components/editor/timeline/types'
-import { SlideType, Slide, StackSlideContent, TransitionType, BackgroundStyle } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { SlideType, Slide, StackSlideContent, TransitionDirection, TransitionType, BackgroundStyle } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { arrayMove } from '@dnd-kit/sortable'
 import { getSlideTypeConfig, createNewSlide, getDefaulVideotMetadata, createDefaultBackgroundStyle } from './defaults'
 import { VideoStoreSet, VideoStoreGet } from './types'
@@ -330,8 +330,8 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
 
   /* ================= TRANSITION ================= */
 
-  updateSlideTransition(sectionId: string, slideId: string, transitionType: TransitionType) {
-    const { videoConfig } = get()
+  updateSlideTransition(sectionId: string, slideId: string, transitionType: TransitionType, direction?: TransitionDirection) {
+    const { videoConfig, selectedSlide } = get()
     if (!videoConfig) return
 
     let newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
@@ -341,13 +341,24 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
             ...section,
             slides: section.slides.map(sl =>
               sl.id === slideId
-                ? {
-                  ...sl,
-                  transition: transitionType,
-                  //TRANSITION_DURATION_SECONDS is minimum transition time 
-                  transitionDuration:
-                    transitionType === TransitionType.TRANSITION_NONE ? 0 : TRANSITION_DURATION_SECONDS
-                }
+                ? (() => {
+                  const updatedSlide: any = {
+                    ...sl,
+                    transition: transitionType,
+                    direction: direction,
+                    //TRANSITION_DURATION_SECONDS is minimum transition time 
+                    transitionDuration:
+                      transitionType === TransitionType.TRANSITION_NONE ? 0 : TRANSITION_DURATION_SECONDS
+                  }
+
+                  if (direction !== undefined) {
+                    updatedSlide.direction = direction
+                  } else {
+                    delete updatedSlide.direction
+                  }
+
+                  return updatedSlide
+                })()
                 : sl
             )
           }
@@ -359,6 +370,25 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
 
     set({
       videoConfig: newVideoConfig,
+      // Keep selectedSlide in sync when transition is edited from storyboard controls.
+      selectedSlide:
+        selectedSlide?.slide.id === slideId
+          ? updateSelectedSlide(selectedSlide, slide => {
+            const updatedSlide: any = {
+              ...slide,
+              transition: transitionType,
+              transitionDuration: transitionType === TransitionType.TRANSITION_NONE ? 0 : TRANSITION_DURATION_SECONDS
+            }
+
+            if (direction !== undefined) {
+              updatedSlide.direction = direction
+            } else {
+              delete updatedSlide.direction
+            }
+
+            return updatedSlide
+          })
+          : selectedSlide,
       showTransitionPicker: null
     })
 

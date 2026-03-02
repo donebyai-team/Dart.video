@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/shank318/coasterai/baml_client/types"
+	"math/rand"
 	"time"
 
 	"github.com/pkg/errors"
@@ -98,6 +99,7 @@ func (g *videoConfigGenerator) CreatePendingSlides(ctx context.Context,
 				mediaPlan := pendingSlide.AsMediaSlide()
 				slide.Type = pbcore.SlideType_SLIDE_TYPE_MEDIA
 				slide.Duration = float32(mediaPlan.Duration)
+				assignRandomTransitionAndDirection(slide)
 				slide.Content = &pbcore.Slide_Media{
 					Media: &pbcore.MediaSlideContent{
 						Meta:      defaultMeta(),
@@ -119,6 +121,7 @@ func (g *videoConfigGenerator) CreatePendingSlides(ctx context.Context,
 				animationPlan := pendingSlide.AsAnimationSlide()
 				slide.Type = pbcore.SlideType_SLIDE_TYPE_ANIMATION
 				slide.Duration = float32(animationPlan.Duration)
+				assignRandomTransitionAndDirection(slide)
 				if animationPlan.Voiceover != nil {
 					slide.Transcript = *animationPlan.Voiceover
 				}
@@ -247,4 +250,32 @@ func defaultMeta() *pbcore.MetaData {
 		Height: 864,
 		Scale:  utils.Ptr(float32(1)),
 	}
+}
+
+var pendingSlideTransitionOptions = []pbcore.TransitionType{
+	pbcore.TransitionType_TRANSITION_FADE,
+	pbcore.TransitionType_TRANSITION_SLIDE_LEFT,
+	pbcore.TransitionType_TRANSITION_WIPE_LEFT,
+	pbcore.TransitionType_TRANSITION_FLIP_LEFT,
+	pbcore.TransitionType_TRANSITION_CLOCK_WIPE,
+	pbcore.TransitionType_TRANSITION_IRIS,
+}
+
+var pendingSlideDirectionOptions = []pbcore.TransitionDirection{
+	pbcore.TransitionDirection_TRANSITION_DIRECTION_FROM_LEFT,
+	pbcore.TransitionDirection_TRANSITION_DIRECTION_FROM_RIGHT,
+	pbcore.TransitionDirection_TRANSITION_DIRECTION_FROM_TOP,
+	pbcore.TransitionDirection_TRANSITION_DIRECTION_FROM_BOTTOM,
+}
+
+func assignRandomTransitionAndDirection(slide *pbcore.Slide) {
+	if slide == nil {
+		return
+	}
+
+	slide.Transition = pendingSlideTransitionOptions[rand.Intn(len(pendingSlideTransitionOptions))]
+	slide.TransitionDuration = utils.Ptr(float32(transitionDuration))
+	slide.Direction = pendingSlideDirectionOptions[rand.Intn(len(pendingSlideDirectionOptions))].Enum()
+
+	// TODO: Generate transition and direction via LLM instead of random defaults.
 }

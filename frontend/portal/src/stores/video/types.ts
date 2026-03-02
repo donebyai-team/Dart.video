@@ -6,7 +6,7 @@ import type {
 import type { EntityId } from "@/types/selection";
 import { SelectedTool } from "@/types/tools";
 import { JsonObject } from "@bufbuild/protobuf";
-import { Section, Slide, SlideType, TransitionType, CalloutEffect, BackgroundStyle, ZoomEffect, SpotlightEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { Section, Slide, SlideType, TransitionDirection, TransitionType, CalloutEffect, BackgroundStyle, ZoomEffect, SpotlightEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { Resolution, Video } from "@coasterai/pb/coasterai/core/v1/video_pb";
 import { DragEndEvent } from "@dnd-kit/core";
 import type { StateCreator } from "zustand";
@@ -72,7 +72,7 @@ export interface VideoActions {
     removeSlide: (sectionId: string, slideId: string) => void
     updateSlide: (updates: Partial<Slide>) => void
     updateSlideContent: (updates: Record<string, unknown>) => void
-    updateSlideTransition: (sectionId: string, slideId: string, transitionId: TransitionType) => void
+    updateSlideTransition: (sectionId: string, slideId: string, transitionId: TransitionType, direction?: TransitionDirection) => void
     reorderSlidesInSection: (sectionId: string, activeId: string, overId: string) => void
 
     // Canvas
