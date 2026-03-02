@@ -1,15 +1,13 @@
 import { MetaData } from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import React, { RefObject, SetStateAction, useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 interface MediaContainerProps {
   media: MetaData
   width: number
   height: number
   isEditing?: boolean
-  setIsEditing: React.Dispatch<SetStateAction<boolean>>
   onUpdate?: (updates: Partial<MetaData>) => void
   children: React.ReactNode
-  mediaRef: RefObject<HTMLVideoElement | HTMLImageElement>
 }
 
 type Corner = 'nw' | 'ne' | 'sw' | 'se'
@@ -18,16 +16,15 @@ export const MediaContainer: React.FC<MediaContainerProps> = ({
   media,
   width,
   height,
-  isEditing = false,
-  setIsEditing,
+  isEditing,
   onUpdate,
-  children,
-  mediaRef
+  children
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
 
   const [isDragging, setIsDragging] = useState(false)
   const [isResizing, setIsResizing] = useState<Corner | null>(null)
+  const [isActive, setIsActive] = useState(false)
 
   // Refs for drag state — avoids stale closures in mousemove handlers
   const dragStartRef = useRef<{ x: number; y: number; startX: number; startY: number } | null>(null)
@@ -96,6 +93,7 @@ export const MediaContainer: React.FC<MediaContainerProps> = ({
     (e: React.MouseEvent) => {
       if (!isEditing || !onUpdate) return
       e.stopPropagation()
+      setIsActive(true)
 
       setIsDragging(true)
       dragStartRef.current = {
@@ -114,6 +112,7 @@ export const MediaContainer: React.FC<MediaContainerProps> = ({
     (corner: Corner, e: React.MouseEvent) => {
       if (!isEditing || !onUpdate) return
       e.stopPropagation()
+      setIsActive(true)
 
       // Lock aspect ratio at the moment the drag begins
       const w = media.width ?? 0
@@ -253,21 +252,25 @@ export const MediaContainer: React.FC<MediaContainerProps> = ({
     return
   }, [isDragging, isResizing, media.width, media.height, isEditing, onUpdate])
 
-  // ─── Click-outside to deselect ───────────────────────────────────────────────
+  useEffect(() => {
+    if (!isEditing) {
+      setIsActive(false)
+    }
+  }, [isEditing])
 
   useEffect(() => {
+    if (!isEditing || !isActive) return
+
     const handleClickOutside = (event: MouseEvent) => {
-      if (!isResizing && mediaRef.current && !mediaRef.current.contains(event.target as Node)) {
-        setIsEditing(false)
-      }      
+      if (!containerRef.current) return
+      if (containerRef.current.contains(event.target as Node)) return
+      if (isDragging || isResizing) return
+      setIsActive(false)
     }
 
-    if (isEditing) {
-      document.addEventListener('mousedown', handleClickOutside)
-      return () => document.removeEventListener('mousedown', handleClickOutside)
-    }
-    return
-  }, [isEditing, setIsEditing, mediaRef, isResizing])
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [isEditing, isActive, isDragging, isResizing])
 
   // ─── Render ──────────────────────────────────────────────────────────────────
 
@@ -281,14 +284,14 @@ export const MediaContainer: React.FC<MediaContainerProps> = ({
         width: `${widthPercent}%`,
         height: `${heightPercent}%`,
         transform: `rotate(${media.rotation || 0}deg)`,
-        cursor: isEditing ? (isDragging ? 'grabbing' : 'grab') : 'default',
+        cursor: isEditing && isActive ? (isDragging ? 'grabbing' : 'grab') : 'default',
         userSelect: 'none'
       }}
       onMouseDown={isEditing ? handleDragStart : undefined}
     >
       {children}
 
-      {isEditing && (
+      {isEditing && isActive && (
         <>
           {/* Resize handles at corners */}
           {(['nw', 'ne', 'sw', 'se'] as Corner[]).map(corner => (
@@ -305,7 +308,8 @@ export const MediaContainer: React.FC<MediaContainerProps> = ({
                 border: '10px solid #3b82f6',
                 borderRadius: '50%',
                 cursor: `${corner}-resize`,
-                pointerEvents: 'auto'
+                pointerEvents: 'auto',
+                zIndex: 10
               }}
               onMouseDown={e => handleResizeStart(corner, e)}
             />
@@ -318,7 +322,8 @@ export const MediaContainer: React.FC<MediaContainerProps> = ({
               inset: 0,
               border: '6px solid #3b82f6',
               borderRadius: '8px',
-              pointerEvents: 'none'
+              pointerEvents: 'none',
+              zIndex: 5
             }}
           />
         </>

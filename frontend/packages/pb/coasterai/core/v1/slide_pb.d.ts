@@ -862,6 +862,71 @@ export enum TransitionType {
    * @generated from enum value: TRANSITION_SLIDE_UP = 4;
    */
   TRANSITION_SLIDE_UP = 4,
+
+  /**
+   * @generated from enum value: TRANSITION_SLIDE_DOWN = 5;
+   */
+  TRANSITION_SLIDE_DOWN = 5,
+
+  /**
+   * @generated from enum value: TRANSITION_WIPE_LEFT = 6;
+   */
+  TRANSITION_WIPE_LEFT = 6,
+
+  /**
+   * @generated from enum value: TRANSITION_WIPE_RIGHT = 7;
+   */
+  TRANSITION_WIPE_RIGHT = 7,
+
+  /**
+   * @generated from enum value: TRANSITION_WIPE_UP = 8;
+   */
+  TRANSITION_WIPE_UP = 8,
+
+  /**
+   * @generated from enum value: TRANSITION_WIPE_DOWN = 9;
+   */
+  TRANSITION_WIPE_DOWN = 9,
+
+  /**
+   * @generated from enum value: TRANSITION_FLIP_HORIZONTAL = 10;
+   */
+  TRANSITION_FLIP_HORIZONTAL = 10,
+
+  /**
+   * @generated from enum value: TRANSITION_FLIP_VERTICAL = 11;
+   */
+  TRANSITION_FLIP_VERTICAL = 11,
+
+  /**
+   * @generated from enum value: TRANSITION_CLOCK_WIPE = 12;
+   */
+  TRANSITION_CLOCK_WIPE = 12,
+
+  /**
+   * @generated from enum value: TRANSITION_FLIP_LEFT = 13;
+   */
+  TRANSITION_FLIP_LEFT = 13,
+
+  /**
+   * @generated from enum value: TRANSITION_FLIP_RIGHT = 14;
+   */
+  TRANSITION_FLIP_RIGHT = 14,
+
+  /**
+   * @generated from enum value: TRANSITION_FLIP_UP = 15;
+   */
+  TRANSITION_FLIP_UP = 15,
+
+  /**
+   * @generated from enum value: TRANSITION_FLIP_DOWN = 16;
+   */
+  TRANSITION_FLIP_DOWN = 16,
+
+  /**
+   * @generated from enum value: TRANSITION_IRIS = 17;
+   */
+  TRANSITION_IRIS = 17,
 }
 
 /**

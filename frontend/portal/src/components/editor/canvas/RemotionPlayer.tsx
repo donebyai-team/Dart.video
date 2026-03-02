@@ -284,6 +284,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
           totalFrames={totalFrames}
           fps={fps}
           isFullscreen={isFullscreen}
+          isEditing={!isFullscreen}
           canvasSize={canvasSize}
           scale={isFullscreen ? userZoom : BASE_PREVIEW_SCALE * userZoom}
           onSetScale={setUserZoom}

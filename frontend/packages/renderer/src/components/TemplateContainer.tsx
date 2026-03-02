@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { SetStateAction } from 'react'
 
 interface TemplateContainerProps {
   children: React.ReactNode
@@ -13,7 +12,6 @@ interface TemplateContainerProps {
   isSelected?: boolean
   onUpdate?: (updates: { x: number; y: number; width: number; height: number }) => void
   onSelect?: () => void
-  setEditing: React.Dispatch<SetStateAction<boolean>>
   /** Pass the canvas DOM element so we can read its actual rendered scale */
   canvasRef?: React.RefObject<HTMLElement>
 }
@@ -35,7 +33,6 @@ export const TemplateContainer: React.FC<TemplateContainerProps> = ({
   isSelected = false,
   onUpdate,
   onSelect,
-  setEditing,
   canvasRef
 }) => {
   // Default to 80% of canvas, centered
@@ -54,6 +51,7 @@ export const TemplateContainer: React.FC<TemplateContainerProps> = ({
   const [isDragging, setIsDragging] = useState(false)
   const [isResizing, setIsResizing] = useState(false)
   const [resizeHandle, setResizeHandle] = useState<string | null>(null)
+  const [isActive, setIsActive] = useState(false)
   const dragStartRef = useRef({ x: 0, y: 0, startX: 0, startY: 0 })
   const resizeStartRef = useRef({ x: 0, y: 0, startWidth: 0, startHeight: 0, startX: 0, startY: 0 })
   const rafRef = useRef<number | null>(null)
@@ -100,6 +98,7 @@ export const TemplateContainer: React.FC<TemplateContainerProps> = ({
     if (!isEditing) return
     e.stopPropagation()
 
+    setIsActive(true)
     onSelect?.()
 
     setIsDragging(true)
@@ -114,6 +113,7 @@ export const TemplateContainer: React.FC<TemplateContainerProps> = ({
   const handleResizeMouseDown = (e: React.MouseEvent, handle: string) => {
     if (!isEditing) return
     e.stopPropagation()
+    setIsActive(true)
 
     // Capture aspect ratio at the moment resize begins
     aspectRatioRef.current = position.width / position.height
@@ -246,9 +246,29 @@ export const TemplateContainer: React.FC<TemplateContainerProps> = ({
     return;
   }, [isDragging, isResizing, resizeHandle, position, canvasWidth, canvasHeight, isEditing, onUpdate])
 
-  const showBorder = isEditing
-  const showHandles = isEditing
-  const showOutline = isEditing
+  useEffect(() => {
+    if (!isEditing) {
+      setIsActive(false)
+    }
+  }, [isEditing])
+
+  useEffect(() => {
+    if (!isEditing || !isActive) return
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!containerRef.current) return
+      if (containerRef.current.contains(event.target as Node)) return
+      if (isDragging || isResizing) return
+      setIsActive(false)
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [isEditing, isActive, isDragging, isResizing])
+
+  const showBorder = isEditing && isActive
+  const showHandles = isEditing && isActive
+  const showOutline = isEditing && isActive
 
   const HANDLE_VISUAL_PX = 10
 
@@ -271,29 +291,6 @@ export const TemplateContainer: React.FC<TemplateContainerProps> = ({
     if (handle.includes('e')) posStyle.right = -hw
 
     const hitPad = 8 * Math.max(scaleCompX, scaleCompY)
-
-    useEffect(() => {
-      const handleClickOutside = (event: MouseEvent) => {
-        if (
-          !isResizing &&
-          containerRef?.current &&
-          !containerRef.current.contains(event.target as Node)
-        ) {
-          setEditing(false);
-        }
-      };
-
-      if (isEditing) {
-        document.addEventListener('mousedown', handleClickOutside);
-
-        return () => {
-          document.removeEventListener('mousedown', handleClickOutside);
-        };
-      }
-
-      return; // 👈 fixes TS
-    }, [isEditing, setEditing, containerRef, isResizing]);
-
 
     return (
       <div

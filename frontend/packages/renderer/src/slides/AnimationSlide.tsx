@@ -40,7 +40,6 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
   const [CompiledComponent, setCompiledComponent] = React.useState<React.ComponentType<any> | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [templateError, setTemplateError] = useState<string | null>(null)
-  const [editing, setEditing] = useState<boolean>(isEditing)
 
   const content = slide.content.value as AnimationSlideContent
   // template id for hard-coded local templates
@@ -59,7 +58,6 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
   if (!templateUrl && localTemplateId) {
     return (
       <AbsoluteFill
-        onMouseDown={() => setEditing(true)}
         style={{
           background,
           justifyContent: 'center',
@@ -69,14 +67,13 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
         <AnimatedBackground width={width} height={height} />
 
         <TemplateContainer
-          setEditing={setEditing}
           x={templateMeta.x as number}
           y={templateMeta.y as number}
           width={templateMeta.width as number}
           height={templateMeta.height as number}
           canvasWidth={width}
           canvasHeight={height}
-          isEditing={editing}
+          isEditing={isEditing}
           isSelected={isSelected}
           onSelect={onSelect}
           onUpdate={updates => {
@@ -181,7 +178,6 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
 
   return (
     <AbsoluteFill
-      onMouseDown={() => setEditing(true)}
       style={{
         background,
         justifyContent: 'center',
@@ -191,14 +187,13 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
       <AnimatedBackground width={width} height={height} />
 
       <TemplateContainer
-        setEditing={setEditing}
         x={templateMeta.x as number}
         y={templateMeta.y as number}
         width={templateMeta.width as number}
         height={templateMeta.height as number}
         canvasWidth={width}
         canvasHeight={height}
-        isEditing={editing}
+        isEditing={isEditing}
         isSelected={isSelected}
         onUpdate={updates => {
           if (onUpdate && content) {

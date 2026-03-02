@@ -23,7 +23,7 @@ interface MediaSlideProps {
   uploadMedia?: (file: File) => Promise<UploadedMedia>
 }
 
-export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, onUpdate, uploadMedia }) => {
+export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, isEditing = false, onUpdate, uploadMedia }) => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
   const { isRendering } = useRemotionEnvironment()
@@ -36,7 +36,6 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
   const [retry, setRetry] = useState<boolean>(false)
   const [uploadError, setUploadError] = useState<boolean>(false)
   const [uploading, setUploading] = useState<boolean>(false)
-  const [editing, setIsEditing] = useState<boolean>(false)
   const mediaRef = useRef<HTMLImageElement | HTMLVideoElement | null>(null)
   const getMediaTypeFromSrc = (src?: string): MediaType | null => {
     if (!src) return null
@@ -93,12 +92,10 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
       <AbsoluteFill>
         {mediaContent.meta && (
           <MediaContainer
-            mediaRef={mediaRef}
-            setIsEditing={setIsEditing}
             media={mediaContent.meta}
             width={width}
             height={height}
-            isEditing={editing}
+            isEditing={isEditing}
             onUpdate={updates => {
               if (onUpdate && mediaContent) {
                 onUpdate({
@@ -135,9 +132,7 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
 
             {mediaType === MediaType.VIDEO ? (
               <VideoPreview
-                onClickVideo={() => {
-                  setIsEditing(true)
-                }}
+                onClickVideo={() => {}}
                 mediaRef={mediaRef as RefObject<HTMLVideoElement>}
                 props={mediaContent}
                 onVideoChange={() => {
@@ -162,9 +157,7 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, on
               />
             ) : (
               <ImagePreview
-                onClickImage={() => {
-                  setIsEditing(true)
-                }}
+                onClickImage={() => {}}
                 mediaRef={mediaRef as RefObject<HTMLImageElement>}
                 onImageChange={() => {
                   setOpenUploadModal(!openUploadModal)

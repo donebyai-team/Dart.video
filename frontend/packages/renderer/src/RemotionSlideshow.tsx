@@ -4,6 +4,11 @@ import { Video, VideoSchema } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import { linearTiming, TransitionSeries } from '@remotion/transitions'
 import { fade } from '@remotion/transitions/fade'
 import { slide } from '@remotion/transitions/slide'
+import { wipe } from '@remotion/transitions/wipe'
+import { flip } from '@remotion/transitions/flip'
+import { clockWipe } from '@remotion/transitions/clock-wipe'
+import { iris } from '@remotion/transitions/iris'
+import { none } from '@remotion/transitions/none'
 import React from 'react'
 import { AbsoluteFill, useVideoConfig, Html5Audio } from 'remotion'
 import { getActualSlideDuration, TRANSITION_DURATION_SECONDS } from './frameUtils'
@@ -33,11 +38,11 @@ export const SlideComponent: React.FC<{
   onSelect?: () => void
   onUpdate?: (updates: Partial<Slide>) => void
   uploadMedia?: (file: File) => Promise<UploadedMedia>
-}> = ({ slide, width, height, isEditing = false, isSelected = false, onSelect, onUpdate = () => {}, uploadMedia }) => {
+}> = ({ slide, width, height, isEditing = false, isSelected = false, onSelect, onUpdate = () => { }, uploadMedia }) => {
 
   const slideBackground = backgroundStyleToCSS(slide.backgroundStyle)
 
-  switch (slide.type) { 
+  switch (slide.type) {
     case SlideType.ANIMATION:
       // Only render if content case matches or is undefined (for new slides)
       if (!slide.content?.case || slide.content.case === 'animation') {
@@ -56,7 +61,7 @@ export const SlideComponent: React.FC<{
       break
     case SlideType.MEDIA:
       if (!slide.content?.case || slide.content.case === 'media') {
-        return <MediaSlide slide={slide} width={width} height={height} onUpdate={onUpdate} uploadMedia={uploadMedia} />
+        return <MediaSlide slide={slide} width={width} height={height} isEditing={isEditing} onUpdate={onUpdate} uploadMedia={uploadMedia} />
       }
       break
 
@@ -106,16 +111,40 @@ export const SingleSlidePreview: React.FC<{
 }
 
 // Get transition presentation based on transition type
-const getTransitionPresentation = (transitionType?: TransitionType) => {
+const getTransitionPresentation = (transitionType?: TransitionType, width?: number, height?: number): any => {
   switch (transitionType) {
     case TransitionType.TRANSITION_FADE:
-      return fade()
+      return fade() // Smooth opacity fade between slides
     case TransitionType.TRANSITION_SLIDE_LEFT:
-      return slide({ direction: 'from-right' }) // Enter from right
+      return slide({ direction: 'from-right' }) // Slide enters from right side
     case TransitionType.TRANSITION_SLIDE_RIGHT:
-      return slide({ direction: 'from-left' }) // Enter from left
+      return slide({ direction: 'from-left' }) // Slide enters from left side
     case TransitionType.TRANSITION_SLIDE_UP:
-      return slide({ direction: 'from-bottom' }) // Enter from bottom
+      return slide({ direction: 'from-bottom' }) // Slide enters from bottom
+    case TransitionType.TRANSITION_SLIDE_DOWN:
+      return slide({ direction: 'from-top' }) // Slide enters from top
+    case TransitionType.TRANSITION_WIPE_LEFT:
+      return wipe({ direction: 'from-right' }) // Wipe reveals content from right to left
+    case TransitionType.TRANSITION_WIPE_RIGHT:
+      return wipe({ direction: 'from-left' }) // Wipe reveals content from left to right
+    case TransitionType.TRANSITION_WIPE_UP:
+      return wipe({ direction: 'from-bottom' }) // Wipe reveals content from bottom to top
+    case TransitionType.TRANSITION_WIPE_DOWN:
+      return wipe({ direction: 'from-top' }) // Wipe reveals content from top to bottom
+    case TransitionType.TRANSITION_FLIP_LEFT:
+      return flip({ direction: 'from-left' }) // 3D flip effect rotating from left
+    case TransitionType.TRANSITION_FLIP_RIGHT:
+      return flip({ direction: 'from-right' }) // 3D flip effect rotating from right
+    case TransitionType.TRANSITION_FLIP_UP:
+      return flip({ direction: 'from-top' }) // 3D flip effect rotating from top
+    case TransitionType.TRANSITION_FLIP_DOWN:
+      return flip({ direction: 'from-bottom' }) // 3D flip effect rotating from bottom
+    case TransitionType.TRANSITION_CLOCK_WIPE:
+      return clockWipe({ width: width || 1920, height: height || 1080 }) // Circular wipe that sweeps like a clock hand
+    case TransitionType.TRANSITION_IRIS:
+      return iris({ width: width || 1920, height: height || 1080 }) // Circular iris expand/contract effect
+    case TransitionType.TRANSITION_NONE:
+      return none() // Instant cut with no transition effect
     default:
       return fade()
   }
@@ -131,7 +160,7 @@ const getTransitionPresentation = (transitionType?: TransitionType) => {
  */
 
 // Main slideshow composition using Remotion's TransitionSeries
-export const Slideshow: React.FC<SlideshowProps> = ({ fps, isEditing = false, onSelectTemplate, video, videoConfig: videoConfigProp, selectedStackItemId = null, onUpdate = () => {}, uploadMedia }) => {
+export const Slideshow: React.FC<SlideshowProps> = ({ fps, isEditing = false, onSelectTemplate, video, videoConfig: videoConfigProp, selectedStackItemId = null, onUpdate = () => { }, uploadMedia }) => {
   const selectedTemplateId = null
 
   const { width, height } = useVideoConfig()
@@ -230,7 +259,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({ fps, isEditing = false, on
 
               {hasTransition && (
                 <TransitionSeries.Transition
-                  presentation={getTransitionPresentation(slide.transition)}
+                  presentation={getTransitionPresentation(slide.transition, width, height)}
                   timing={linearTiming({
                     durationInFrames: transitionDurationFrames
                   })}

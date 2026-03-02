@@ -10,6 +10,7 @@ interface PlayerCanvasProps {
   totalFrames: number
   fps: number
   isFullscreen: boolean
+  isEditing: boolean
   scale: number
   canvasSize: { width: number; height: number }
   onSetScale: (scale: number) => void
@@ -22,6 +23,7 @@ const PlayerCanvas = ({
   totalFrames,
   fps,
   isFullscreen,
+  isEditing,
   scale,
   canvasSize,
   onSetScale,
@@ -36,10 +38,10 @@ const PlayerCanvas = ({
   const inputProps = useMemo(() => {
     return {
       fps,
-      isEditing: !isPlaying, // Only enable editing when NOT playing
+      isEditing,
       onSelectTemplate
     }
-  }, [fps, isPlaying, onSelectTemplate])
+  }, [fps, isEditing, onSelectTemplate])
 
   // Early return if no data
   if (!videoConfigFromStore?.config?.sections || !videoConfigFromStore?.metadata?.resolution || !selectedSlide) {
@@ -121,7 +123,7 @@ const PlayerCanvas = ({
         </div>
 
         {/* Canvas overlay - always rendered for click handling and displaying objects */}
-        {!isPlaying && handleSelectEffect && (
+        {!isPlaying && isEditing && handleSelectEffect && (
           <div className='absolute inset-0' style={{ zIndex: 30, pointerEvents: 'none' }}>
             <CanvasOverlay
               resolution={videoConfigFromStore?.metadata?.resolution}
