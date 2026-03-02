@@ -1,5 +1,5 @@
-import RecentVideos from "@/pages/RecentVideos";
+import BrandPage from "@/pages/BrandPage";
 
 export default function Page() {
-    return (<RecentVideos />);
+    return (<BrandPage />);
 }
