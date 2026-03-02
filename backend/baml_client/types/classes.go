@@ -1047,9 +1047,11 @@ func (c StreamingVideoGenerationPlan) BamlTypeName() string {
 }
 
 type TemplateConfigExtractorInput struct {
-	Schema              string `json:"schema"`
-	BeatDescription     string `json:"beatDescription"`
-	TemplateDescription string `json:"templateDescription"`
+	Schema              string        `json:"schema"`
+	BeatDescription     string        `json:"beatDescription"`
+	TemplateDescription string        `json:"templateDescription"`
+	Branding            VideoBranding `json:"branding"`
+	SlideBackground     string        `json:"slideBackground"`
 }
 
 func (c *TemplateConfigExtractorInput) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -1075,6 +1077,12 @@ func (c *TemplateConfigExtractorInput) Decode(holder *cffi.CFFIValueClass, typeM
 		case "templateDescription":
 			c.TemplateDescription = baml.Decode(valueHolder).Interface().(string)
 
+		case "branding":
+			c.Branding = baml.Decode(valueHolder).Interface().(VideoBranding)
+
+		case "slideBackground":
+			c.SlideBackground = baml.Decode(valueHolder).Interface().(string)
+
 		default:
 
 			panic(fmt.Sprintf("unexpected field: %s in class TemplateConfigExtractorInput", key))
@@ -1092,6 +1100,10 @@ func (c TemplateConfigExtractorInput) Encode() (*cffi.HostValue, error) {
 	fields["beatDescription"] = c.BeatDescription
 
 	fields["templateDescription"] = c.TemplateDescription
+
+	fields["branding"] = c.Branding
+
+	fields["slideBackground"] = c.SlideBackground
 
 	return baml.EncodeClass("TemplateConfigExtractorInput", fields, nil)
 }

@@ -803,6 +803,14 @@ func (t *TemplateConfigExtractorInputClassView) PropertyTemplateDescription() (C
 	return t.inner.Property("templateDescription")
 }
 
+func (t *TemplateConfigExtractorInputClassView) PropertyBranding() (ClassPropertyView, error) {
+	return t.inner.Property("branding")
+}
+
+func (t *TemplateConfigExtractorInputClassView) PropertySlideBackground() (ClassPropertyView, error) {
+	return t.inner.Property("slideBackground")
+}
+
 func (t *TypeBuilder) TemplateConfigExtractorInput() (*TemplateConfigExtractorInputClassView, error) {
 	bld, err := t.inner.Class("TemplateConfigExtractorInput")
 	if err != nil {

@@ -15,9 +15,9 @@ class MatchCategoriesResponse {
 function MatchCategories(resume: MatchCategoriesRequest) -> MatchCategoriesResponse {
   // Specify a client as provider/model-name
   // You can also use custom LLM params with a custom client name from clients.baml like "client CustomGPT5" or "client CustomSonnet4"
-  client "google-ai/gemini-2.0-flash"
+  client CustomOpenAI2
   prompt #"
-  # Category Matching Engine
+  Category Matching Engine
 
   You are a strict semantic classification engine.
 

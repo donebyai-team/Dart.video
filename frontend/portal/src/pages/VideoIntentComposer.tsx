@@ -121,6 +121,7 @@ const VideoIntentComposer = () => {
 
       if (event.waitingForUserInput && event.askUserQuestion) {
         setPendingQuestion(event.askUserQuestion)
+        setIsThinkingBusy(false)
         return
       }
 

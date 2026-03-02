@@ -14,6 +14,8 @@ import { flip } from "@remotion/transitions/flip";
 import { slide } from "@remotion/transitions/slide";
 import { wipe } from "@remotion/transitions/wipe";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { EditableText } from '../../templates/lib/EditableText'
+
 import {
   AbsoluteFill,
   Easing,
@@ -223,6 +225,7 @@ const SafeRemotionShapes = Object.fromEntries(
 // Parameter names injected into every compiled component's scope.
 // Order must exactly match SHARED_PARAM_VALUES below.
 const SHARED_PARAM_NAMES: string[] = [
+  "EditableText",
   "React",
   "Remotion",
   "RemotionShapes",
@@ -276,6 +279,7 @@ function getSharedParamValues(validateShapePropsOption: boolean): unknown[] {
   const injectedShapes = validateShapePropsOption ? SafeRemotionShapes : RemotionShapes;
 
   return [
+    EditableText,
     React,
     RemotionBundle,
     injectedShapes,

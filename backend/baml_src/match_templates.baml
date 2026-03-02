@@ -14,7 +14,7 @@ class MatchTemplateResponse {
 }
 
 function MatchTemplate(resume: MatchTemplateRequest) -> MatchTemplateResponse {
-  client "google-ai/gemini-2.0-flash"
+  client CustomOpenAI2
   prompt #"
     ## Narrative Template Continuation Engine
 

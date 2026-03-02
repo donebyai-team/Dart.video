@@ -88,7 +88,7 @@ type GenerationParams struct {
 }
 
 type AnimationGenerator interface {
-	ExtractConfig(ctx context.Context, slide *types.AnimationSlide, template *models.Template) (*types.TemplateConfigExtractorOutput, error)
+	ExtractConfig(ctx context.Context, planSoFar *types.VideoGenerationPlan, slide *types.AnimationSlide, template *models.Template) (*types.TemplateConfigExtractorOutput, error)
 	Generate(ctx context.Context,
 		animation *types.AnimationSlide,
 		planSoFar *types.VideoGenerationPlan,
@@ -103,7 +103,7 @@ type animationGenerator struct {
 	logger      *zap.Logger
 }
 
-func NewAnimationGenerator(mediaStore services.MediaStore, llmService llm.LLMService, codeBuilder services.TemplateCodeBuilder, logger *zap.Logger) *animationGenerator {
+func NewAnimationGenerator(mediaStore services.MediaStore, llmService llm.LLMService, codeBuilder services.TemplateCodeBuilder, logger *zap.Logger) AnimationGenerator {
 	return &animationGenerator{mediaStore: mediaStore, llmService: llmService, codeBuilder: codeBuilder, logger: logger}
 }
 
@@ -283,7 +283,10 @@ func RandomComponentName() string {
 	return a + b
 }
 
-func (l animationGenerator) ExtractConfig(ctx context.Context, slide *types.AnimationSlide, template *models.Template) (*types.TemplateConfigExtractorOutput, error) {
+func (l animationGenerator) ExtractConfig(ctx context.Context,
+	planSoFar *types.VideoGenerationPlan,
+	slide *types.AnimationSlide,
+	template *models.Template) (*types.TemplateConfigExtractorOutput, error) {
 	marshal, err := json.Marshal(template.Schema)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to marshal template schema of template : %s", template.ID)
@@ -293,6 +296,8 @@ func (l animationGenerator) ExtractConfig(ctx context.Context, slide *types.Anim
 		Schema:              string(marshal),
 		BeatDescription:     slide.BeatDescription,
 		TemplateDescription: template.Description,
+		Branding:            planSoFar.Branding,
+		SlideBackground:     gradientToCSS(planSoFar.BackgroundStyle.Gradient),
 	}
 	output, err := baml_client.ExtractTemplateConfig(ctx, input)
 	if err != nil {

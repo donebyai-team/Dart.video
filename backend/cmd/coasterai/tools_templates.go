@@ -198,6 +198,8 @@ func syncCategories(ctx context.Context, db datastore.TemplateRepository, catego
 	return nil
 }
 
+const publicTemplateURl = "https://storage.googleapis.com/coasterai-public"
+
 func syncTemplate(ctx context.Context, db datastore.TemplateRepository, templateDir, templateName string, animType types.AnimationType, animFolderName string, stats *syncStats) error {
 	metadataPath := filepath.Join(templateDir, "metadata.json")
 	previewPath := filepath.Join(templateDir, "preview.json")
@@ -272,7 +274,7 @@ func syncTemplate(ctx context.Context, db datastore.TemplateRepository, template
 		}
 	}
 
-	cdnURL := fmt.Sprintf("templates/%s/%s.cdn.js", animFolderName, templateName)
+	cdnURL := fmt.Sprintf("%s/templates/%s/%s.tsx", publicTemplateURl, animFolderName, templateName)
 
 	existing, err := db.GetTemplateByName(ctx, animType, templateName)
 	if err != nil && !errors.Is(err, datastore.NotFound) {
