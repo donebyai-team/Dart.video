@@ -111,7 +111,7 @@ function buildRootEntry(safeCode, safeConfig) {
     `  const { code, config } = getInputProps();`,
     ``,
     `  // Synchronous JIT compile — throws on syntax / Babel / missing-export errors`,
-    `  const result = compileRemoteComponent(code);`,
+    `  const result = compileRemoteComponent(code, { validateShapeProps: true });`,
     `  if (result.error) {`,
     `    throw new Error('[compile_error] ' + result.error);`,
     `  }`,

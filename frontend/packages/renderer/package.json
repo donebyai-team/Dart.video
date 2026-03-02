@@ -8,6 +8,7 @@
   "types": "./src/index.ts",
   "scripts": {
     "type-check": "tsc --noEmit",
+    "generate:shape-props": "node ./scripts/generate-remotion-shapes-props.mjs",
     "deploy:remotion": "./scripts/deploy-remotion-cloudrun.sh",
     "deploy:validator": "./scripts/deploy-validator-cloudrun.sh",
     "render": "pnpm exec remotion render src/remotion-entry.ts MyComposition out.mp4 --timeout 180000",
