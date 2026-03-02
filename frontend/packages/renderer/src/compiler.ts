@@ -14,7 +14,7 @@ import { flip } from "@remotion/transitions/flip";
 import { slide } from "@remotion/transitions/slide";
 import { wipe } from "@remotion/transitions/wipe";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { EditableText } from '../../templates/lib/EditableText'
+import { EditableText } from './lib/EditableText'
 
 import {
   AbsoluteFill,

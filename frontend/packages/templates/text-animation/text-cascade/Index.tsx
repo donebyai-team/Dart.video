@@ -1,5 +1,5 @@
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion'
-import { EditableText } from '../../lib/EditableText'
+import { EditableText } from '../../../renderer/src/lib/EditableText'
 import { TextCascadeTemplateProps } from './types'
 
 interface Props {

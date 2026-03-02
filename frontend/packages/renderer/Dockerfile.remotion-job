@@ -47,6 +47,7 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
 # Full source for packages the renderer actually depends on
+COPY packages/templates ./packages/templates
 COPY packages/renderer ./packages/renderer
 COPY packages/pb ./packages/pb
 COPY packages/ts-config ./packages/ts-config

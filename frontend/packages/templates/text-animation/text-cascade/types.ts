@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { EditableTextDataSchema } from "../../lib/types"
+import { EditableTextDataSchema } from "../../../renderer/src/lib/types"
 
 export const TextCascadeTemplateConfigSchema = z
   .object({
