@@ -85,7 +85,9 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isDraggingTimeline, setIsDraggingTimeline] = useState(false);
 
-  const [currentFrame, setCurrentFrame] = useState(getSlideVisualEndFrame(allSlides, selectedSlideId, fps));
+  // set starting frame to a bit 1 frame after the 0
+  // so user don't see blank screen
+  const [currentFrame, setCurrentFrame] = useState(1);
 
   const totalFrames = useMemo(
     () => calculateRealTotalFrames(allSlides, fps),
