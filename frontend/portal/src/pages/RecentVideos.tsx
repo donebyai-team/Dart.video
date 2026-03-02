@@ -12,26 +12,35 @@ import toast from "react-hot-toast";
 import { getConnectError } from "@/utils/error";
 import SlideThumbnail from "@/components/editor/SlideThumbnail";
 import { getFormattedDate, getSlideCount } from "@/utils/format";
+import { AuthLoading } from "@/components/Loader/loader";
 
 const RecentVideos = () => {
   const router = useRouter();
   const { portalClient } = useClientsContext();
 
   const [videos, setVideos] = useState<VideoConfig[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchVideos = async () => {
       try {
+        setIsLoading(true);
         const res = await portalClient.getVideos({});
         setVideos(res.videos);
       } catch (err) {
         console.error("Failed to fetch videos", err);
         toast.error(getConnectError(err));
+      } finally {
+        setIsLoading(false);
       }
     };
 
     if (portalClient) fetchVideos();
   }, [portalClient]);
+
+  if (isLoading) {
+    return <AuthLoading />;
+  }
 
   return (
     <div className="p-8">

@@ -37,19 +37,19 @@ export function AppSidebar() {
             title: "Home",
             icon: Home,
             path: "/dashboard",
-            active: isActive("/dashboard"),
+            active: location === "/dashboard",
         },
         {
             title: "Recent Videos",
             icon: Video,
             path: "/dashboard/videos",
-            active: isActive("/videos"),
+            active: isActive("/dashboard/videos"),
         },
         {
             title: "Brand Identity",
             icon: Palette,
             path: "/dashboard/brand",
-            active: isActive("/brand"),
+            active: isActive("/dashboard/brand"),
         }
     ];
 
