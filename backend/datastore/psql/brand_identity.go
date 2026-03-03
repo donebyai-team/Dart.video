@@ -12,12 +12,13 @@ func init() {
 		"brand_identity/create_brand_identity.sql",
 		"brand_identity/update_brand_identity.sql",
 		"brand_identity/query_by_domain.sql",
+		"brand_identity/query_by_id.sql",
 		"brand_identity/query_brand_identities_by_org.sql",
 	})
 }
 
 func (r *Database) GetBrandIdentityByID(ctx context.Context, ID string) (*models.BrandIdentity, error) {
-	brandIdentity, err := getOne[models.BrandIdentity](ctx, r, "brand_identity/query_by_domain.sql", map[string]any{
+	brandIdentity, err := getOne[models.BrandIdentity](ctx, r, "brand_identity/query_by_id.sql", map[string]any{
 		"id": ID,
 	})
 	if err != nil {

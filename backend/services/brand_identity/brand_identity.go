@@ -93,6 +93,8 @@ func (b brandIdentity) CreateBrandIdentity(ctx context.Context, orgID string, we
 			Name:       identityName,
 			WebsiteUrl: identityName,
 		}
+	} else {
+		brandIdentity = existingIdentity.BrandIdentity
 	}
 
 	maxTimeout := 300000 // 5 minutes, Firecrawl's maximum
@@ -136,7 +138,9 @@ func (b brandIdentity) CreateBrandIdentity(ctx context.Context, orgID string, we
 	logos, _ := b.extractMediaImages(ctx, resp.Data.Branding.Images, orgID)
 	// Add logos to identity.Logos (append to existing if any)
 	if len(logos) > 0 {
-		brandIdentity.Logos = append(brandIdentity.Logos, logos...)
+		brandIdentity.Logos = logos
+	} else {
+		brandIdentity.Logos = make([]*pbcore.BrandMedia, 0)
 	}
 
 	if existingIdentity != nil {
@@ -193,9 +197,12 @@ func extractColors(colors map[string]string) []*pbcore.BrandColor {
 
 	// Map color names to priorities
 	priorityMap := map[string]pbcore.BrandAssetPriority{
-		"primary":   pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_PRIMARY,
-		"secondary": pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_SECONDARY,
-		"accent":    pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_ACCENT,
+		"primary":       pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_PRIMARY,
+		"secondary":     pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_SECONDARY,
+		"accent":        pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_ACCENT,
+		"background":    pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_BACKGROUND,
+		"textPrimary":   pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_TEXT_PRIMARY,
+		"textSecondary": pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_TEXT_SECONDARY,
 	}
 
 	// Extract colors in priority order
@@ -297,9 +304,9 @@ func FormatBrandDetails(b *pbcore.BrandIdentity) string {
 	}
 
 	writeLine(0, "Brand Identity:")
-	writeLine(1, "ID: %s", b.Id)
-	writeLine(1, "Name: %s", b.Name)
-	writeLine(1, "Website: <%s>", b.WebsiteUrl)
+	//writeLine(1, "ID: %s", b.Id)
+	writeLine(1, "Name: %s", b.Name) // Name is sam as website, skip for now
+	//writeLine(1, "Website: <%s>", b.WebsiteUrl)
 
 	if b.Tagline != nil && b.Tagline.Value != "" {
 		writeLine(1, "Tagline: %s", b.Tagline.Value)
@@ -310,20 +317,24 @@ func FormatBrandDetails(b *pbcore.BrandIdentity) string {
 	}
 
 	// ---- Logos / Media ----
-	//if len(b.Logos) > 0 {
-	//	writeLine(1, "Media:")
-	//	for _, m := range b.Logos {
-	//		writeLine(2, "- Type: %s", m.Type.String())
-	//		writeLine(3, "Priority: %s", m.Priority.String())
-	//		writeLine(3, "URL: <%s>", m.Url)
-	//	}
-	//}
+	if len(b.Logos) > 0 {
+		writeLine(1, "Media:")
+		for _, m := range b.Logos {
+			writeLine(2, "- Type: %s", m.Type.String())
+			writeLine(3, "Priority: %s", m.Priority.String())
+			writeLine(3, "URL: <%s>", m.Url)
+		}
+	}
 
 	// ---- Colors ----
 	if len(b.Colors) > 0 {
 		writeLine(1, "Colors:")
 		for _, c := range b.Colors {
-			writeLine(2, "- %s (%s)", c.ColorHexCode, c.Priority.String())
+			if c.Priority == pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_UNSPECIFIED {
+				writeLine(2, "- %s", c.ColorHexCode)
+			} else {
+				writeLine(2, "- %s (%s)", c.ColorHexCode, c.Priority.String())
+			}
 		}
 	}
 
@@ -332,10 +343,11 @@ func FormatBrandDetails(b *pbcore.BrandIdentity) string {
 		writeLine(1, "Fonts:")
 		for _, f := range b.Fonts {
 			if f.GoogleFontsName != nil && f.GoogleFontsName.Value != "" {
-				writeLine(2, "- %s (Google: %s)", f.Name, f.GoogleFontsName.Value)
-			} else {
-				writeLine(2, "- %s", f.Name)
+				writeLine(2, "- %s", f.GoogleFontsName.Value)
 			}
+			//else {
+			//	writeLine(2, "- %s", f.Name)
+			//}
 		}
 	}
 

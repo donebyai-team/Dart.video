@@ -30,11 +30,11 @@ template_string BrandGuidelines(resume: VideoBranding) #"
     {% if resume.brandGuideLines %}
     Brand Guidelines:
     {{ resume.brandGuideLines }}
-    {% else %}
-    Brand Colors:
-    Primary: {{ resume.colors.primary }}
-    Secondary: {{ resume.colors.secondary }}
-    Accent: {{ resume.colors.accent }}
-    Text: {{ resume.colors.text }}
     {% endif %}
+
+    Brand Colors:
+      Primary: {{ resume.colors.primary }}
+      Secondary: {{ resume.colors.secondary }}
+      Accent: {{ resume.colors.accent }}
+      Text: {{ resume.colors.text }}
 "#

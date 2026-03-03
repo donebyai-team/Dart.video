@@ -80,7 +80,10 @@ const VideoIntentComposer = () => {
    const fetchBrandIdentities = async () => {
         try {
             const res = await portalClient.getBrandIdentities({})
-            setIdentities(res.identities)            
+            setIdentities(res.identities)
+            if (res.identities.length > 0)          {
+              setSelectedBrandLibraryId(res.identities[0].id);
+            }
         } catch (err) {
             console.error("Failed to fetch brand identities", err)
             toast.error(getConnectError(err))
