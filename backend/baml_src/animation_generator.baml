@@ -193,11 +193,8 @@ function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_hi
     Slide Background:
     {{ resume.slideBackground }}
 
-    Brand Colors:
-    Primary: {{ resume.branding.colors.primary }}
-    Secondary: {{ resume.branding.colors.secondary }}
-    Accent: {{ resume.branding.colors.accent }}
-    Text: {{ resume.branding.colors.text }}
+    {{ BrandGuidelines(resume.branding) }}
+
     ---
 
     {% if conversation_history %}

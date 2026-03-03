@@ -1245,7 +1245,8 @@ func (c VideoBackground) BamlTypeName() string {
 }
 
 type VideoBranding struct {
-	Colors BrandColors `json:"colors"`
+	BrandGuideLines *string     `json:"brandGuideLines"`
+	Colors          BrandColors `json:"colors"`
 }
 
 func (c *VideoBranding) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -1262,6 +1263,9 @@ func (c *VideoBranding) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap
 		valueHolder := field.Value
 		switch key {
 
+		case "brandGuideLines":
+			c.BrandGuideLines = baml.Decode(valueHolder).Interface().(*string)
+
 		case "colors":
 			c.Colors = baml.Decode(valueHolder).Interface().(BrandColors)
 
@@ -1276,6 +1280,8 @@ func (c *VideoBranding) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap
 
 func (c VideoBranding) Encode() (*cffi.HostValue, error) {
 	fields := map[string]any{}
+
+	fields["brandGuideLines"] = c.BrandGuideLines
 
 	fields["colors"] = c.Colors
 
@@ -1347,12 +1353,13 @@ func (c VideoGenerationPlan) BamlTypeName() string {
 }
 
 type VideoGenerationPlanRequest struct {
-	Duration       int64        `json:"Duration"`
-	Prompt         string       `json:"Prompt"`
-	Language       string       `json:"Language"`
-	Resolution     string       `json:"Resolution"`
-	Script         []ScriptItem `json:"Script"`
-	EnableThinking *bool        `json:"enableThinking"`
+	Duration        int64        `json:"Duration"`
+	Prompt          string       `json:"Prompt"`
+	Language        string       `json:"Language"`
+	Resolution      string       `json:"Resolution"`
+	Script          []ScriptItem `json:"Script"`
+	EnableThinking  *bool        `json:"enableThinking"`
+	BrandGuidelines *string      `json:"BrandGuidelines"`
 }
 
 func (c *VideoGenerationPlanRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -1387,6 +1394,9 @@ func (c *VideoGenerationPlanRequest) Decode(holder *cffi.CFFIValueClass, typeMap
 		case "enableThinking":
 			c.EnableThinking = baml.Decode(valueHolder).Interface().(*bool)
 
+		case "BrandGuidelines":
+			c.BrandGuidelines = baml.Decode(valueHolder).Interface().(*string)
+
 		default:
 
 			panic(fmt.Sprintf("unexpected field: %s in class VideoGenerationPlanRequest", key))
@@ -1410,6 +1420,8 @@ func (c VideoGenerationPlanRequest) Encode() (*cffi.HostValue, error) {
 	fields["Script"] = c.Script
 
 	fields["enableThinking"] = c.EnableThinking
+
+	fields["BrandGuidelines"] = c.BrandGuidelines
 
 	return baml.EncodeClass("VideoGenerationPlanRequest", fields, nil)
 }

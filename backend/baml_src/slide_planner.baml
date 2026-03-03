@@ -55,6 +55,14 @@ class VideoGenerationPlanRequest {
     Resolution string
     Script  ScriptItem[]
     enableThinking bool? @description("Whether to include step-by-step reasoning in the response")
+    BrandGuidelines string?
+}
+
+class VideoGenerationPlan {
+    videoName string @description("name of the video, around 5 to 15 length")
+    sections Section[]
+    backgroundStyle VideoBackground @description("background style of all slides")
+    branding VideoBranding @description("visual identity for animations slides")
 }
 
 class Section {
@@ -70,6 +78,7 @@ class BrandColors {
 }
 
 class VideoBranding {
+  brandGuideLines string? @skip @description("user provided brand guidelines")
   colors BrandColors @description("make sure the brand colors are visible and does not get blended with *background* gradient")
 }
 
@@ -85,13 +94,6 @@ class GradientStop {
 
 class VideoBackground {
   gradient Gradient @description("gradient to apply to all slides *background*")
-}
-
-class VideoGenerationPlan {
-    videoName string @description("name of the video, around 5 to 15 length")
-    sections Section[]
-    backgroundStyle VideoBackground @description("background style of all slides")
-    branding VideoBranding @description("visual identity for animations slides")
 }
 
 class StreamingVideoGenerationPlan {
@@ -247,8 +249,9 @@ function GeneratePlanStreaming(input: VideoGenerationPlanRequest, conversation_h
     - Keep your output concise and to the point. One sentence for messages at most.
 
     ### Branding guidelines
-    - Always use subtle, light colors unless specified
-    - Never use black or white in the background color
+    - If Brand Guidelines always use that for brand name, background color or any branding related stuff
+    - If Brand Guidelines not given, Always use subtle, light colors unless specified
+    - Never use black or white in the background color unless specified
     - Follow modern and minimilist branding colors
     - Follow slide type balance
    ---
@@ -263,6 +266,11 @@ function GeneratePlanStreaming(input: VideoGenerationPlanRequest, conversation_h
 
     ### Prompt:
     {{ input.Prompt }}
+
+    {% if input.BrandGuidelines %}
+    ### Brand Guidelines (STRICTLY FOLLOW) :
+    {{ input.BrandGuidelines }}
+    {% endif %}
 
     {% if input.Script %}
     ### Script Breakdown (STRICTLY FOLLOW)

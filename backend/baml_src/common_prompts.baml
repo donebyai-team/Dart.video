@@ -24,3 +24,17 @@ Break down the prompt into core components, identify the objective, clarify cons
 Execution should begin only after this planning step is complete.
 ----
 "#
+
+
+template_string BrandGuidelines(resume: VideoBranding) #"
+    {% if resume.brandGuideLines %}
+    Brand Guidelines:
+    {{ resume.brandGuideLines }}
+    {% else %}
+    Brand Colors:
+    Primary: {{ resume.colors.primary }}
+    Secondary: {{ resume.colors.secondary }}
+    Accent: {{ resume.colors.accent }}
+    Text: {{ resume.colors.text }}
+    {% endif %}
+"#

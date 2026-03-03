@@ -189,7 +189,7 @@ const VideoIntentComposer = () => {
         script,
         resolution: selectedResolution,
         duration: Number(duration),
-        brandLibraryId: selectedBrandLibraryId ?? ''
+        brandLibraryId: selectedBrandLibraryId
       }, { signal: controller.signal })
 
       await consumePlanningStream(stream, controller.signal, streamSession)

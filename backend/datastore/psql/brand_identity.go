@@ -16,6 +16,16 @@ func init() {
 	})
 }
 
+func (r *Database) GetBrandIdentityByID(ctx context.Context, ID string) (*models.BrandIdentity, error) {
+	brandIdentity, err := getOne[models.BrandIdentity](ctx, r, "brand_identity/query_by_domain.sql", map[string]any{
+		"id": ID,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return brandIdentity, nil
+}
+
 func (r *Database) GetBrandIdentityByDomain(ctx context.Context, orgID string, domain string) (*models.BrandIdentity, error) {
 	brandIdentity, err := getOne[models.BrandIdentity](ctx, r, "brand_identity/query_by_domain.sql", map[string]any{
 		"organization_id": orgID,

@@ -1,0 +1,1 @@
+SELECT * FROM brand_identity WHERE id = :id;

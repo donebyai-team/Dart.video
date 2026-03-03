@@ -254,9 +254,9 @@ export declare type CreateVideoRequest = Message<"coasterai.portal.v1.CreateVide
   duration: number;
 
   /**
-   * @generated from field: string brand_library_id = 5;
+   * @generated from field: optional string brand_library_id = 5;
    */
-  brandLibraryId: string;
+  brandLibraryId?: string;
 
   /**
    * @generated from field: coasterai.core.v1.VideoLanguage language = 6;

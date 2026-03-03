@@ -42,9 +42,9 @@ export declare type VideoMetadata = Message<"coasterai.core.v1.VideoMetadata"> &
   prompt: string;
 
   /**
-   * @generated from field: string brand_library_id = 6;
+   * @generated from field: optional string brand_library_id = 6;
    */
-  brandLibraryId: string;
+  brandLibraryId?: string;
 
   /**
    * @generated from field: coasterai.core.v1.VideoLanguage language = 7;

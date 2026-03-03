@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/shank318/coasterai/services/brand_identity"
 	"strings"
 	"time"
 
@@ -57,15 +58,16 @@ type RunResult struct {
 }
 
 type agentV1 struct {
-	sessionID          string
-	orgID              string
-	db                 datastore.Repository
-	retrievalService   RetrievalService
-	llmService         llm.LLMService
-	videoService       services.VideoGeneration
-	animationGenerator AnimationGenerator
-	cache              cache.Cache
-	logger             *zap.Logger
+	sessionID            string
+	orgID                string
+	db                   datastore.Repository
+	brandIdentityService brand_identity.BrandIdentity
+	retrievalService     RetrievalService
+	llmService           llm.LLMService
+	videoService         services.VideoGeneration
+	animationGenerator   AnimationGenerator
+	cache                cache.Cache
+	logger               *zap.Logger
 
 	stateUpdates chan VideoAgentState
 }
@@ -79,18 +81,20 @@ func NewAgentV1(
 	mediaStore services.MediaStore,
 	codeBuilder services.TemplateCodeBuilder,
 	videoService services.VideoGeneration,
+	brandIdentityService brand_identity.BrandIdentity,
 ) *agentV1 {
 	llmService := llm.NewLlmService(logger)
 	return &agentV1{
-		sessionID:        sessionID,
-		orgID:            orgID,
-		logger:           logger,
-		cache:            cache,
-		db:               db,
-		videoService:     videoService,
-		retrievalService: NewLlmRetrievalService(db, llmService),
-		llmService:       llmService,
-		stateUpdates:     make(chan VideoAgentState, 64),
+		sessionID:            sessionID,
+		orgID:                orgID,
+		logger:               logger,
+		cache:                cache,
+		db:                   db,
+		videoService:         videoService,
+		brandIdentityService: brandIdentityService,
+		retrievalService:     NewLlmRetrievalService(db, llmService),
+		llmService:           llmService,
+		stateUpdates:         make(chan VideoAgentState, 64),
 		animationGenerator: NewAnimationGenerator(
 			mediaStore,
 			llmService,
@@ -152,6 +156,22 @@ func (a *agentV1) Start(ctx context.Context, options StartSessionOptions) (*RunR
 		return nil, err
 	}
 
+	var brandDetails string
+
+	if options.Input.BrandLibraryId != nil {
+		brandIdentity, err := a.brandIdentityService.GetBrandIdentityByID(ctx, *options.Input.BrandLibraryId)
+		if err != nil {
+			if errors.Is(err, datastore.NotFound) {
+				return nil, agenterrors.InvalidInput("brand_identity not found", nil)
+			}
+			return nil, err
+		}
+
+		if brandIdentity != nil {
+			brandDetails = brand_identity.FormatBrandDetails(brandIdentity.BrandIdentity)
+		}
+	}
+
 	script := make([]types.ScriptItem, 0)
 	if options.Input.Script != nil {
 		script = make([]types.ScriptItem, len(options.Input.Script.Items))
@@ -171,6 +191,11 @@ func (a *agentV1) Start(ctx context.Context, options StartSessionOptions) (*RunR
 		Resolution:     options.Input.Resolution.Id,
 		Script:         script,
 		EnableThinking: utils.Ptr(true),
+	}
+
+	// use brand guidelines only when specified
+	if brandDetails != "" {
+		generatePlanRequest.BrandGuidelines = utils.Ptr(brandDetails)
 	}
 
 	session := &planningSession{
@@ -252,6 +277,11 @@ func (a *agentV1) runPlanning(ctx context.Context, session *planningSession) (re
 	plan := llmResponse.AsVideoGenerationPlan()
 	if plan == nil {
 		return nil, agenterrors.Internal("llm response did not include a plan", nil)
+	}
+
+	// set branding guidelines for it to propogate further
+	if session.Request.BrandGuidelines != nil {
+		plan.Branding.BrandGuideLines = session.Request.BrandGuidelines
 	}
 
 	err = sanitizeAgentPlan(plan)

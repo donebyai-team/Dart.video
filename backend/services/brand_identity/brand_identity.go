@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/shank318/coasterai/datastore"
+	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/services"
 	"go.uber.org/zap"
@@ -18,6 +19,7 @@ type BrandIdentity interface {
 	UpdateBrandIdentity(ctx context.Context, orgID string, identity *pbcore.BrandIdentity) error
 	GetBrandIdentities(ctx context.Context, orgID string) ([]*pbcore.BrandIdentity, error)
 	GetSupportedFonts(ctx context.Context, orgID string) []string
+	GetBrandIdentityByID(ctx context.Context, ID string) (*models.BrandIdentity, error)
 }
 
 type brandIdentity struct {
@@ -26,6 +28,10 @@ type brandIdentity struct {
 	fireCrawlClient  *Client
 	mediaStore       services.MediaStore
 	googleFontLoader fontLoader
+}
+
+func (b brandIdentity) GetBrandIdentityByID(ctx context.Context, ID string) (*models.BrandIdentity, error) {
+	return b.db.GetBrandIdentityByID(ctx, ID)
 }
 
 func (b brandIdentity) GetSupportedFonts(ctx context.Context, orgID string) []string {
@@ -254,4 +260,84 @@ func (b brandIdentity) UpdateBrandIdentity(ctx context.Context, orgID string, id
 
 func (b brandIdentity) GetBrandIdentities(ctx context.Context, orgID string) ([]*pbcore.BrandIdentity, error) {
 	return b.db.GetBrandIdentities(ctx, orgID)
+}
+
+/*
+Brand Identity:
+
+	ID: brand_123
+	Name: Stripe
+	Website: <https://stripe.com>
+	Tagline: Payments infrastructure for the internet
+	Description: Stripe builds economic infrastructure...
+
+	Media:
+	  - Type: BRAND_MEDIA_TYPE_LOGO
+	    Priority: BRAND_ASSET_PRIORITY_PRIMARY
+	    URL: <https://stripe.com/logo.png>
+
+	Colors:
+	  - #635BFF (BRAND_ASSET_PRIORITY_PRIMARY)
+	  - #0A2540 (BRAND_ASSET_PRIORITY_SECONDARY)
+
+	Fonts:
+	  - Inter (Google: Inter)
+*/
+func FormatBrandDetails(b *pbcore.BrandIdentity) string {
+	if b == nil {
+		return ""
+	}
+
+	var sb strings.Builder
+
+	writeLine := func(indent int, format string, args ...interface{}) {
+		sb.WriteString(strings.Repeat("  ", indent))
+		sb.WriteString(fmt.Sprintf(format, args...))
+		sb.WriteString("\n")
+	}
+
+	writeLine(0, "Brand Identity:")
+	writeLine(1, "ID: %s", b.Id)
+	writeLine(1, "Name: %s", b.Name)
+	writeLine(1, "Website: <%s>", b.WebsiteUrl)
+
+	if b.Tagline != nil && b.Tagline.Value != "" {
+		writeLine(1, "Tagline: %s", b.Tagline.Value)
+	}
+
+	if b.Description != nil && b.Description.Value != "" {
+		writeLine(1, "Description: %s", b.Description.Value)
+	}
+
+	// ---- Logos / Media ----
+	//if len(b.Logos) > 0 {
+	//	writeLine(1, "Media:")
+	//	for _, m := range b.Logos {
+	//		writeLine(2, "- Type: %s", m.Type.String())
+	//		writeLine(3, "Priority: %s", m.Priority.String())
+	//		writeLine(3, "URL: <%s>", m.Url)
+	//	}
+	//}
+
+	// ---- Colors ----
+	if len(b.Colors) > 0 {
+		writeLine(1, "Colors:")
+		for _, c := range b.Colors {
+			writeLine(2, "- %s (%s)", c.ColorHexCode, c.Priority.String())
+		}
+	}
+
+	// ---- Fonts ----
+	if len(b.Fonts) > 0 {
+		writeLine(1, "Fonts:")
+		for _, f := range b.Fonts {
+			if f.GoogleFontsName != nil && f.GoogleFontsName.Value != "" {
+				writeLine(2, "- %s (Google: %s)", f.Name, f.GoogleFontsName.Value)
+			} else {
+				writeLine(2, "- %s", f.Name)
+			}
+		}
+	}
+
+	return sb.String()
 }

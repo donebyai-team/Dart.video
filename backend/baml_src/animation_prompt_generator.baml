@@ -85,13 +85,9 @@ function GenerateAnimationPrompt(resume: GenerateAnimationPromptRequest) -> Gene
     Slide Background:
     {{ resume.slideBackground }}
 
-    Brand Colors:
-    Primary: {{ resume.branding.colors.primary }}
-    Secondary: {{ resume.branding.colors.secondary }}
-    Accent: {{ resume.branding.colors.accent }}
-    Text: {{ resume.branding.colors.text }}
-    ---
+    {{ BrandGuidelines(resume.branding) }}
 
+    ---
     --------------------------------------------------
 
     {{ ctx.output_format }}

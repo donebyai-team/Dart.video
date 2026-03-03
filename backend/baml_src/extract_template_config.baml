@@ -77,11 +77,7 @@ function ExtractTemplateConfig(input: TemplateConfigExtractorInput) -> TemplateC
     Slide Background:
     {{ input.slideBackground }}
 
-    Brand Colors:
-    Primary: {{ input.branding.colors.primary }}
-    Secondary: {{ input.branding.colors.secondary }}
-    Accent: {{ input.branding.colors.accent }}
-    Text: {{ input.branding.colors.text }}
+    {{ BrandGuidelines(input.branding) }}
 
   --------------------------------------------------
   OUTPUT FORMAT

@@ -939,6 +939,10 @@ func (t *VideoBrandingClassView) ListProperties() ([]ClassPropertyView, error) {
 	return builders, nil
 }
 
+func (t *VideoBrandingClassView) PropertyBrandGuideLines() (ClassPropertyView, error) {
+	return t.inner.Property("brandGuideLines")
+}
+
 func (t *VideoBrandingClassView) PropertyColors() (ClassPropertyView, error) {
 	return t.inner.Property("colors")
 }
@@ -1037,6 +1041,10 @@ func (t *VideoGenerationPlanRequestClassView) PropertyScript() (ClassPropertyVie
 
 func (t *VideoGenerationPlanRequestClassView) PropertyEnableThinking() (ClassPropertyView, error) {
 	return t.inner.Property("enableThinking")
+}
+
+func (t *VideoGenerationPlanRequestClassView) PropertyBrandGuidelines() (ClassPropertyView, error) {
+	return t.inner.Property("BrandGuidelines")
 }
 
 func (t *TypeBuilder) VideoGenerationPlanRequest() (*VideoGenerationPlanRequestClassView, error) {

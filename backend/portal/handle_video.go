@@ -143,6 +143,7 @@ func (p *Portal) newVideoAgent(logger *zap.Logger, sessionID, orgID string) agen
 		p.mediaService,
 		p.codeBuilderService,
 		p.videoGenerationService,
+		p.brandIdentityService,
 	)
 }
 
