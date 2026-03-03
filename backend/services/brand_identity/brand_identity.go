@@ -11,6 +11,7 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 	"net/url"
+	"path"
 	"strings"
 )
 
@@ -295,6 +296,25 @@ func FormatBrandDetails(b *pbcore.BrandIdentity) string {
 		return ""
 	}
 
+	getMimeType := func(url string) string {
+		ext := strings.ToLower(path.Ext(url))
+
+		switch ext {
+		case ".svg":
+			return "image/svg+xml"
+		case ".png":
+			return "image/png"
+		case ".jpg", ".jpeg":
+			return "image/jpeg"
+		case ".webp":
+			return "image/webp"
+		case ".gif":
+			return "image/gif"
+		default:
+			return "unknown"
+		}
+	}
+
 	var sb strings.Builder
 
 	writeLine := func(indent int, format string, args ...interface{}) {
@@ -317,12 +337,27 @@ func FormatBrandDetails(b *pbcore.BrandIdentity) string {
 	}
 
 	// ---- Logos / Media ----
+	// ---- Logos / Media ----
 	if len(b.Logos) > 0 {
 		writeLine(1, "Media:")
 		for _, m := range b.Logos {
+			mimeType := getMimeType(m.Url)
+
 			writeLine(2, "- Type: %s", m.Type.String())
-			writeLine(3, "Priority: %s", m.Priority.String())
+
+			if m.Priority != pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_UNSPECIFIED {
+				writeLine(3, "Priority: %s", m.Priority.String())
+			}
+
 			writeLine(3, "URL: <%s>", m.Url)
+			writeLine(3, "MIME Type: %s", mimeType)
+
+			// Optional: Help LLM explicitly
+			if mimeType == "image/svg+xml" {
+				writeLine(3, "Render Hint: Use <object> tag")
+			} else if strings.HasPrefix(mimeType, "image/") {
+				writeLine(3, "Render Hint: Use <img> tag")
+			}
 		}
 	}
 
