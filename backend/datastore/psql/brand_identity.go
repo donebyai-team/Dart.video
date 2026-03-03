@@ -11,8 +11,20 @@ func init() {
 	registerFiles([]string{
 		"brand_identity/create_brand_identity.sql",
 		"brand_identity/update_brand_identity.sql",
+		"brand_identity/query_by_domain.sql",
 		"brand_identity/query_brand_identities_by_org.sql",
 	})
+}
+
+func (r *Database) GetBrandIdentityByDomain(ctx context.Context, orgID string, domain string) (*models.BrandIdentity, error) {
+	brandIdentity, err := getOne[models.BrandIdentity](ctx, r, "brand_identity/query_by_domain.sql", map[string]any{
+		"organization_id": orgID,
+		"domain":          domain,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return brandIdentity, nil
 }
 
 func (r *Database) CreateBrandIdentity(ctx context.Context, orgID string, identity *pbcore.BrandIdentity) (*pbcore.BrandIdentity, error) {
@@ -21,6 +33,7 @@ func (r *Database) CreateBrandIdentity(ctx context.Context, orgID string, identi
 
 	err := stmt.GetContext(ctx, &id, map[string]interface{}{
 		"name":            identity.Name,
+		"domain":          identity.WebsiteUrl,
 		"identity":        identity,
 		"organization_id": orgID,
 	})

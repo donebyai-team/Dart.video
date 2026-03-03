@@ -53,6 +53,11 @@ export declare type BrandIdentityResponse = Message<"coasterai.portal.v1.BrandId
    * @generated from field: repeated coasterai.core.v1.BrandIdentity identities = 1;
    */
   identities: BrandIdentity[];
+
+  /**
+   * @generated from field: repeated string supportedFonts = 2;
+   */
+  supportedFonts: string[];
 };
 
 /**

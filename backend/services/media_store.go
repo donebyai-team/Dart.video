@@ -145,6 +145,11 @@ func (g gcpMediaStore) Upload(
 		}
 	}
 
+	// After DetectContentType
+	if strings.HasSuffix(strings.ToLower(safeFileName), ".svg") {
+		contentType = "image/svg+xml"
+	}
+
 	file = io.MultiReader(bytes.NewReader(buffer[:n]), file)
 
 	// ---- Upload using storage client ----

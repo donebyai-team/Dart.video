@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"net/url"
 	"regexp"
 	"strings"
 
@@ -106,4 +107,18 @@ func SanitizeKeyword(input string) string {
 	input = strings.ToLower(input)
 
 	return input
+}
+
+func IsValidURL(rawURL string) bool {
+	u, err := url.ParseRequestURI(rawURL)
+	if err != nil {
+		return false
+	}
+
+	// Ensure scheme and host are present
+	if u.Scheme == "" || u.Host == "" {
+		return false
+	}
+
+	return true
 }

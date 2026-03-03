@@ -50,6 +50,7 @@ message BrandIdentityRequest {
 
 message BrandIdentityResponse {
   repeated core.v1.BrandIdentity identities = 1;
+  repeated string supportedFonts = 2;
 }
 
 message RenderVideoRequest {

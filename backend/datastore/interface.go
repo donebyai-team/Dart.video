@@ -66,6 +66,7 @@ type VideoRepository interface {
 }
 
 type BrandIdentityRepository interface {
+	GetBrandIdentityByDomain(ctx context.Context, orgID string, domain string) (*models.BrandIdentity, error)
 	GetBrandIdentities(ctx context.Context, organizationID string) ([]*pbcore.BrandIdentity, error)
 	UpdateBrandIdentity(ctx context.Context, orgID string, identity *pbcore.BrandIdentity) error
 	CreateBrandIdentity(ctx context.Context, orgID string, identity *pbcore.BrandIdentity) (*pbcore.BrandIdentity, error)

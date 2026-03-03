@@ -25,6 +25,7 @@ import { getDefaultResolution } from '@/stores/video/defaults'
 import type { AskUserQuestion, CreateVideoResponse } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
 import QuestionPanel from '@/components/composer/QuestionPanel'
 import ThinkingViewComponent from '@/components/composer/ThinkingViewComponent'
+import { BrandIdentity } from '@coasterai/pb/coasterai/core/v1/brandkit_pb'
 
 const DURATIONS = [
   { label: '60s', value: '60' },
@@ -32,11 +33,6 @@ const DURATIONS = [
 ]
 
 const LANGUAGES = [{ label: 'English(UK)', value: 'en' }]
-
-const brandLibraries = [
-  { id: 'brand1', name: 'Acme Brand' },
-  { id: 'brand2', name: 'Dark Mode Brand' }
-]
 
 const NO_BRAND_VALUE = 'none'
 const MIN_SCRIPT_SECTIONS = 3
@@ -75,6 +71,21 @@ const VideoIntentComposer = () => {
   const hasValidScript = scriptVoiceoverCount >= MIN_SCRIPT_SECTIONS
   const hasPrompt = prompt.trim().length > MIN_PROMPT_LENGTH
   const canGenerate = hasPrompt || hasValidScript
+  const [identities, setIdentities] = useState<BrandIdentity[]>([])
+
+   useEffect(() => {
+        fetchBrandIdentities();
+    }, [portalClient])
+
+   const fetchBrandIdentities = async () => {
+        try {
+            const res = await portalClient.getBrandIdentities({})
+            setIdentities(res.identities)            
+        } catch (err) {
+            console.error("Failed to fetch brand identities", err)
+            toast.error(getConnectError(err))
+        }
+    }
 
   const answerInput = useMemo(() => {
     if (!activeQuestion) return ''
@@ -360,7 +371,7 @@ const VideoIntentComposer = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value={NO_BRAND_VALUE}>No brand</SelectItem>
-                {brandLibraries.map(b => (
+                {identities.map(b => (
                   <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
                 ))}
               </SelectContent>

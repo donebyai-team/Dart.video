@@ -5,6 +5,7 @@ import (
 	"github.com/shank318/coasterai/cache"
 	google2 "github.com/shank318/coasterai/integrations/google"
 	"github.com/shank318/coasterai/portal/server/handlers"
+	"github.com/shank318/coasterai/services/brand_identity"
 	"regexp"
 
 	"github.com/shank318/coasterai/auth"
@@ -35,7 +36,7 @@ type Portal struct {
 	codeBuilderService     services.TemplateCodeBuilder
 	videoGenerationService services.VideoGeneration
 	renderVideoService     services.RenderVideoService
-	brandIdentityService   services.BrandIdentity
+	brandIdentityService   brand_identity.BrandIdentity
 }
 
 func New(
@@ -47,7 +48,7 @@ func New(
 	db datastore.Repository,
 	videoGenerationService services.VideoGeneration,
 	renderVideoService services.RenderVideoService,
-	brandIdentityService services.BrandIdentity,
+	brandIdentityService brand_identity.BrandIdentity,
 	codeBuilderService services.TemplateCodeBuilder,
 	httpListenAddr string,
 	corsURLRegexAllow *regexp.Regexp,

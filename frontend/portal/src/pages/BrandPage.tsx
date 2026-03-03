@@ -45,12 +45,12 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
-import googleFonts from "../../../data/supported_google_fonts.json"
 
 const BrandPage = () => {
     const { portalClient } = useClientsContext()
 
     const [identities, setIdentities] = useState<BrandIdentity[]>([])
+    const [availableFonts, setAvailableFonts] = useState<string[]>([])
     const [selectedIdentity, setSelectedIdentity] = useState<BrandIdentity | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [isCreating, setIsCreating] = useState(false)
@@ -66,6 +66,7 @@ const BrandPage = () => {
             setIsLoading(true)
             const res = await portalClient.getBrandIdentities({})
             setIdentities(res.identities)
+            setAvailableFonts(res.supportedFonts)
             if (res.identities.length > 0 && !selectedIdentity) {
                 setSelectedIdentity(res.identities[0])
             }
@@ -220,16 +221,16 @@ const BrandPage = () => {
                                             whileHover={{ x: 4 }}
                                             onClick={() => setSelectedIdentity(identity)}
                                             className={`p-2.5 rounded-md cursor-pointer transition-colors ${selectedIdentity?.id === identity.id
-                                                    ? "bg-primary text-primary-foreground"
-                                                    : "hover:bg-muted"
+                                                ? "bg-primary text-primary-foreground"
+                                                : "hover:bg-muted"
                                                 }`}
                                         >
                                             <div className="font-medium text-sm truncate">{identity.name}</div>
-                                            {identity.websiteUrl && (
+                                            {/* {identity.websiteUrl && (
                                                 <div className="text-xs opacity-70 truncate mt-0.5">
                                                     {identity.websiteUrl}
                                                 </div>
-                                            )}
+                                            )} */}
                                         </motion.div>
                                     ))}
                                 </div>
@@ -241,6 +242,7 @@ const BrandPage = () => {
                     {selectedIdentity && (
                         <div className="lg:col-span-3">
                             <BrandIdentityEditor
+                                availableFonts={availableFonts}
                                 identity={selectedIdentity}
                                 onUpdate={handleUpdateIdentity}
                                 onLogoUpload={handleLogoUpload}
@@ -259,9 +261,10 @@ interface BrandIdentityEditorProps {
     onUpdate: (identity: BrandIdentity) => void
     onLogoUpload: (file: File) => void
     isUploading: boolean
+    availableFonts: string[]
 }
 
-const BrandIdentityEditor = ({ identity, onUpdate, onLogoUpload, isUploading }: BrandIdentityEditorProps) => {
+const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onLogoUpload, isUploading }: BrandIdentityEditorProps) => {
     const [localIdentity, setLocalIdentity] = useState(identity)
 
     useEffect(() => {
@@ -303,6 +306,14 @@ const BrandIdentityEditor = ({ identity, onUpdate, onLogoUpload, isUploading }: 
             colors: updated
         })
         await onUpdate(updatedIdentity)
+    }
+
+    const isSvg = (url: string) => {
+        if (!url) return false
+
+        // Strip query params before checking
+        const cleanUrl = url.split("?")[0].toLowerCase()
+        return cleanUrl.endsWith(".svg")
     }
 
     const removeColor = async (index: number) => {
@@ -399,9 +410,10 @@ const BrandIdentityEditor = ({ identity, onUpdate, onLogoUpload, isUploading }: 
                         />
                     </div>
 
-                    <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
-                        <AnimatePresence>
-                            {localIdentity.logos.map((logo, index) => (
+                    <AnimatePresence>
+                        {localIdentity.logos.map((logo, index) => {
+                            const svg = isSvg(logo.url)
+                            return (
                                 <motion.div
                                     key={index}
                                     initial={{ opacity: 0, scale: 0.8 }}
@@ -409,13 +421,22 @@ const BrandIdentityEditor = ({ identity, onUpdate, onLogoUpload, isUploading }: 
                                     exit={{ opacity: 0, scale: 0.8 }}
                                     className="relative group"
                                 >
-                                    <div className="w-24 h-24 aspect-square rounded-md border bg-muted overflow-hidden">
-                                        <img
-                                            src={logo.url}
-                                            alt={`Logo ${index + 1}`}
-                                            className="w-full h-full object-contain p-1.5"
-                                        />
+                                    <div className="w-24 h-24 aspect-square rounded-md border bg-muted overflow-hidden flex items-center justify-center">
+                                        {svg ? (
+                                            <object
+                                                type="image/svg+xml"
+                                                data={logo.url}
+                                                className="w-full h-full p-1.5"
+                                            />
+                                        ) : (
+                                            <img
+                                                src={logo.url}
+                                                alt={`Logo ${index + 1}`}
+                                                className="w-full h-full object-contain p-1.5"
+                                            />
+                                        )}
                                     </div>
+
                                     <Button
                                         size="icon"
                                         variant="destructive"
@@ -425,9 +446,9 @@ const BrandIdentityEditor = ({ identity, onUpdate, onLogoUpload, isUploading }: 
                                         <X className="w-2.5 h-2.5" />
                                     </Button>
                                 </motion.div>
-                            ))}
-                        </AnimatePresence>
-                    </div>
+                            )
+                        })}
+                    </AnimatePresence>
 
                     {localIdentity.logos.length === 0 && (
                         <div className="text-center py-6 text-sm text-muted-foreground">
@@ -531,6 +552,7 @@ const BrandIdentityEditor = ({ identity, onUpdate, onLogoUpload, isUploading }: 
                                             <div className="flex-1 min-w-0">
                                                 <FontSelector
                                                     value={font.googleFontsName || ""}
+                                                    availableFonts={availableFonts}
                                                     onSelect={(value) => updateFontAndSave(index, value)}
                                                 />
                                             </div>
@@ -648,17 +670,18 @@ const BrandIdentityEditor = ({ identity, onUpdate, onLogoUpload, isUploading }: 
 interface FontSelectorProps {
     value: string
     onSelect: (value: string) => void
+    availableFonts: string[]
 }
 
-const FontSelector = ({ value, onSelect }: FontSelectorProps) => {
+const FontSelector = ({ value, onSelect, availableFonts }: FontSelectorProps) => {
     const [open, setOpen] = useState(false)
     const [searchQuery, setSearchQuery] = useState("")
 
     const filteredFonts = useMemo(() => {
-        if (!searchQuery) return googleFonts.slice(0, 100)
-        return googleFonts
-            .filter((font) =>
-                font.family.toLowerCase().includes(searchQuery.toLowerCase())
+        if (!searchQuery) return availableFonts.slice(0, 100)
+        return availableFonts
+            .filter((font: string) =>
+                font.toLowerCase().includes(searchQuery.toLowerCase())
             )
             .slice(0, 100)
     }, [searchQuery])
@@ -696,10 +719,10 @@ const FontSelector = ({ value, onSelect }: FontSelectorProps) => {
                         <CommandGroup className="max-h-[300px] overflow-auto p-2">
                             {filteredFonts.map((font) => (
                                 <CommandItem
-                                    key={font.family}
-                                    value={font.family}
+                                    key={font}
+                                    value={font}
                                     onSelect={() => {
-                                        onSelect(font.family)
+                                        onSelect(font)
                                         setOpen(false)
                                     }}
                                     className="flex items-center gap-3 px-3 py-2.5 rounded-md cursor-pointer aria-selected:bg-accent"
@@ -707,14 +730,14 @@ const FontSelector = ({ value, onSelect }: FontSelectorProps) => {
                                     <Check
                                         className={cn(
                                             "h-4 w-4 shrink-0",
-                                            value === font.family ? "opacity-100 text-primary" : "opacity-0"
+                                            value === font ? "opacity-100 text-primary" : "opacity-0"
                                         )}
                                     />
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-medium truncate">{font.family}</p>
+                                        <p className="text-sm font-medium truncate">{font}</p>
                                         <p
                                             className="text-xs text-muted-foreground truncate mt-0.5"
-                                            style={{ fontFamily: font.family }}
+                                            style={{ fontFamily: font }}
                                         >
                                             The quick brown fox jumps
                                         </p>

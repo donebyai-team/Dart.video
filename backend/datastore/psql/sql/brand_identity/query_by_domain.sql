@@ -1,0 +1,1 @@
+SELECT * FROM brand_identity WHERE organization_id = :organization_id AND website = :domain;

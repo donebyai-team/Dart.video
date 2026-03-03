@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/shank318/coasterai/cache"
+	"github.com/shank318/coasterai/services/brand_identity"
 	"os"
 	"regexp"
 	"time"
@@ -193,7 +194,7 @@ func portalApp(cmd *cobra.Command, isAppReady func() bool) (App, error) {
 		deps.DataStore,
 		services.NewVideoGeneration(deps.DataStore, zlog),
 		videoRenderService,
-		services.NewBrandIdentityService(deps.DataStore, deps.MediaStore, sflags.MustGetString(cmd, "common-firecrawl-api-key")),
+		brand_identity.NewBrandIdentityService(zlog, deps.DataStore, deps.MediaStore, sflags.MustGetString(cmd, "common-firecrawl-api-key")),
 		services.NewTemplateCodeBuilderService(sflags.MustGetString(cmd, "common-code-builder-service")),
 		sflags.MustGetString(cmd, "portal-http-listen-addr"),
 		deps.CorsURLRegexAllow,

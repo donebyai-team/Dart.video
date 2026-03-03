@@ -6,6 +6,7 @@ import (
 	"fmt"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
+	"github.com/shank318/coasterai/utils"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -15,8 +16,8 @@ func (p *Portal) CreateBrandIdentity(ctx context.Context, c *connect.Request[pbp
 		return nil, err
 	}
 
-	if c.Msg.WebsiteUrl == "" {
-		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("no website url"))
+	if !utils.IsValidURL(c.Msg.WebsiteUrl) {
+		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("invalid url"))
 	}
 
 	identity, err := p.brandIdentityService.CreateBrandIdentity(ctx, actor.OrganizationID, c.Msg.WebsiteUrl)
@@ -39,7 +40,10 @@ func (p *Portal) GetBrandIdentities(ctx context.Context, c *connect.Request[empt
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	return connect.NewResponse(&pbportal.BrandIdentityResponse{Identities: identities}), nil
+	return connect.NewResponse(&pbportal.BrandIdentityResponse{
+		Identities:     identities,
+		SupportedFonts: p.brandIdentityService.GetSupportedFonts(ctx, actor.OrganizationID),
+	}), nil
 }
 
 func (p *Portal) UpdateBrandIdentity(ctx context.Context, c *connect.Request[pbportal.UpdateBrandIdentityRequest]) (*connect.Response[emptypb.Empty], error) {

@@ -8,6 +8,7 @@ import (
 type BrandIdentity struct {
 	ID             string                `db:"id"`
 	Name           string                `db:"name"`
+	Website        string                `db:"website"`
 	BrandIdentity  *pbcore.BrandIdentity `db:"identity"`
 	OrganizationID string                `db:"organization_id"`
 	CreatedAt      time.Time             `db:"created_at"`
