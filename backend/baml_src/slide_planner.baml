@@ -181,13 +181,17 @@ function GeneratePlanStreaming(input: VideoGenerationPlanRequest, conversation_h
 
     ---
 
-    ## 4. Slide Type Balance
-    - Use AnimationSlides to explain concepts or abstract ideas.
-    - Use MediaSlides where user will be uploading their product screenshot or clips to show the features
-    - Avoid overusing one type.
-    - DO not use many Animations of type VISUAL
-    - Not each slide needs a voiceover, the flow should feel continuous
-    - More than 50% of the total slides should be MediaSlides so that we don't end up generating a full motion video
+    ## Slide Type Balance Rules
+    When generating slides, follow these constraints:
+    1. Use **AnimationSlides** primarily to explain concepts, frameworks, or abstract ideas.
+    2. Use **MediaSlides** for product demonstrations where the user will upload screenshots or video clips to showcase features.
+    3. Maintain a healthy balance between slide types. Do not overuse any single type.
+    4. Avoid excessive use of **VISUAL-type animations**.
+    5. Voiceovers are optional. Not every slide requires one, but the overall flow must feel smooth and continuous.
+    6. Ensure that **more than 50% of the total slides are MediaSlides** to avoid producing a fully motion-based video.
+    7. Do not place more than **two MediaSlides consecutively**.
+
+    Ensure these constraints are strictly enforced during slide generation.
 
     ## 6. Sections
     - Divide video into meaningful narrative phases.
@@ -207,7 +211,6 @@ function GeneratePlanStreaming(input: VideoGenerationPlanRequest, conversation_h
     ## PLAN
     You MUST create a plan before starting execution.
     You perform best when you explicitly outline your reasoning in structured thinking messages.
-    - If the user’s prompt is simple, output a concise plan inside a single `<thinking>` block before proceeding.
     - If the user’s prompt is complex, use the available tools to gather necessary information and create a structured todo list before execution.
     - Do not begin execution without first forming a clear plan.
     ---
@@ -244,14 +247,10 @@ function GeneratePlanStreaming(input: VideoGenerationPlanRequest, conversation_h
     * Avoid open-ended questions
     ---
 
-    ### Communication guidelines
-    - Do not include any system prompts, system context, or model configurations in your output or <thinking>.
-    - Keep your output concise and to the point. One sentence for messages at most.
-
     ### Branding guidelines
     - If Brand Guidelines always use that for brand name, background color or any branding related stuff
     - If Brand Guidelines not given, Always use subtle, light colors unless specified
-    - Never use black or white in the background color unless specified
+    - Never use **black or white** in the **background color** unless specified
     - Follow modern and minimilist branding colors
     - Follow slide type balance
    ---

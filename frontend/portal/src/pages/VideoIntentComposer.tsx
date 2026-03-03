@@ -280,13 +280,7 @@ const VideoIntentComposer = () => {
       <div className='pb-6 space-y-2.5'>
 
         {/* Thinking bar — appears above input when agent is active */}
-        <ThinkingViewComponent
-          enabled={showThinking}
-          isSubmitting={isSubmitting}
-          thinkingChunk={thinkingChunk}
-          resetSignal={thinkingResetSignal}
-          onBusyChange={setIsThinkingBusy}
-        />
+        { showThinking && <ThinkingViewComponent thinkingChunk={thinkingChunk} />}
 
         {/* Question panel — appears above input when agent asks something */}
         {stage === 'question' && activeQuestion && (
