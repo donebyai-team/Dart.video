@@ -64,7 +64,8 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, is
 
   useEffect(() => {
     const src = mediaContent.src
-    if (!src || isRendering) return
+    // Only preload during rendering, not in editing mode
+    if (!src || !isRendering) return
 
     const unpreload =
       resolvedMediaType === MediaType.VIDEO ? preloadVideo(src) : preloadImage(src)
@@ -92,6 +93,7 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, is
       <AbsoluteFill>
         {mediaContent.meta && (
           <MediaContainer
+          slideId={slide.id}
             media={mediaContent.meta}
             width={width}
             height={height}

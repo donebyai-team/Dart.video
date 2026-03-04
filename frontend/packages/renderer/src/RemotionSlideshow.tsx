@@ -22,6 +22,21 @@ interface SlideshowProps {
   uploadMedia?: (file: File) => Promise<UploadedMedia>
 }
 
+type SlideComponentConfig = {
+  component: React.ComponentType<any>
+  contentCase: string
+}
+
+const componentMap: Partial<Record<SlideType, SlideComponentConfig>> = {
+  [SlideType.ANIMATION]: {
+    component: AnimationSlide,
+    contentCase: "animation"
+  },
+  [SlideType.MEDIA]: {
+    component: MediaSlide,
+    contentCase: "media"
+  }
+}
 // Main slide component router
 export const SlideComponent: React.FC<{
   slide: Slide
@@ -32,58 +47,53 @@ export const SlideComponent: React.FC<{
   onSelect?: () => void
   onUpdate?: (updates: Partial<Slide>) => void
   uploadMedia?: (file: File) => Promise<UploadedMedia>
-}> = ({ slide, width, height, isEditing = false, isSelected = false, onSelect, onUpdate = () => { }, uploadMedia }) => {
+}> = ({
+  slide,
+  width,
+  height,
+  isEditing,
+  isSelected = false,
+  onSelect,
+  onUpdate = () => { },
+  uploadMedia
+}) => {
+    const slideBackground = backgroundStyleToCSS(slide.backgroundStyle)
+    const config = componentMap[slide.type]
 
-  const slideBackground = backgroundStyleToCSS(slide.backgroundStyle)
+    if (config && (!slide.content?.case || slide.content.case === config.contentCase)) {
+      const Component = config.component
 
-  switch (slide.type) {
-    case SlideType.ANIMATION:
-      // Only render if content case matches or is undefined (for new slides)
-      if (!slide.content?.case || slide.content.case === 'animation') {
-        return (
-          <AnimationSlide
-            slide={slide}
-            width={width}
-            height={height}
-            isEditing={isEditing}
-            isSelected={isSelected}
-            onSelect={onSelect}
-            onUpdate={onUpdate}
-          />
-        )
-      }
-      break
-    case SlideType.MEDIA:
-      if (!slide.content?.case || slide.content.case === 'media') {
-        return <MediaSlide slide={slide} width={width} height={height} isEditing={isEditing} onUpdate={onUpdate} uploadMedia={uploadMedia} />
-      }
-      break
+      return (
+        <Component
+          slide={slide}
+          width={width}
+          height={height}
+          isEditing={isEditing}
+          isSelected={isSelected}
+          onSelect={onSelect}
+          onUpdate={onUpdate}
+          uploadMedia={uploadMedia}
+        />
+      )
+    }
 
-    default:
-      if (!slide.content?.case || slide.content.case === 'media') {
-        return <MediaSlide slide={slide} width={width} height={height} isEditing={isEditing} onUpdate={onUpdate} uploadMedia={uploadMedia} />
-      }
-      break
+    // fallback
+    return (
+      <AbsoluteFill
+        style={{
+          backgroundColor: slideBackground,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "white",
+          fontSize: 18,
+          opacity: 0.7
+        }}
+      >
+        Content type mismatch: {slide.type} slide with {slide.content?.case || "undefined"} content
+      </AbsoluteFill>
+    )
   }
-
-  // Fallback for mismatched content - render a placeholder
-  return (
-    <AbsoluteFill
-      style={{
-        backgroundColor: slideBackground,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: 'white',
-        fontSize: 18,
-        opacity: 0.7
-      }}
-    >
-
-      Content type mismatch: {slide.type} slide with {slide.content?.case || 'undefined'} content
-    </AbsoluteFill>
-  )
-}
 
 export const SingleSlidePreview: React.FC<{
   slide: Slide
@@ -114,7 +124,14 @@ export const SingleSlidePreview: React.FC<{
  */
 
 // Main slideshow composition using Remotion's TransitionSeries
-export const Slideshow: React.FC<SlideshowProps> = ({ fps, isEditing = false, onSelectTemplate, video, videoConfig: videoConfigProp, onUpdate = () => { }, uploadMedia }) => {
+export const Slideshow: React.FC<SlideshowProps> = ({
+  fps,
+  isEditing,
+  onSelectTemplate,
+  video,
+  videoConfig: videoConfigProp,
+  onUpdate = () => { },
+  uploadMedia }) => {
   const selectedTemplateId = null
 
   const { width, height } = useVideoConfig()
@@ -200,7 +217,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({ fps, isEditing = false, on
                   width={width}
                   height={height}
                   isEditing={isEditing}
-                  isSelected={isSelected}              
+                  isSelected={isSelected}
                   onUpdate={onUpdate}
                   uploadMedia={uploadMedia}
                   onSelect={() => {

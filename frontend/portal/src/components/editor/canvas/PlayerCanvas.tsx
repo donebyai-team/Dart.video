@@ -31,7 +31,7 @@ const PlayerCanvas = ({
   isPlaying = false
 }: PlayerCanvasProps) => {
   const videoConfigFromStore = useVideoStore(s => s.videoConfig)
-  const selectedSlide = useVideoStore(s => s.selectedSlide)
+  const selectedSlide = useVideoStore(s => s.selectedSlide)  
 
   // Memoization of inputProps before passing to <Player/>.
   // Prevents regressions in playback behaviour of Video 
@@ -108,7 +108,7 @@ const PlayerCanvas = ({
         >
           <Player
             ref={playerRef}
-            component={Slideshow as any}
+            component={Slideshow}
             inputProps={inputProps}
             durationInFrames={totalFrames || 1}
             compositionWidth={videoConfigFromStore?.metadata?.resolution.width}

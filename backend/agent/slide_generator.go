@@ -48,18 +48,6 @@ func (g *videoConfigGenerator) AddVideoBackground(style *pbcore.BackgroundStyle)
 	g.video.Metadata.BackgroundAudioUrl = utils.Ptr("https://ik.imagekit.io/coasterai/freepik-deep-calm_A4WXzk4Mk.mp3")
 }
 
-func (g *videoConfigGenerator) AddSection(name string) string {
-	section := &pbcore.Section{
-		Id:     fmt.Sprintf("section-%d", time.Now().UnixNano()),
-		Title:  name,
-		Color:  pickRandomColor(),
-		Slides: []*pbcore.Slide{},
-	}
-
-	g.video.Config.Sections = append(g.video.Config.Sections, section)
-	return section.Id
-}
-
 func (g *videoConfigGenerator) Done(ctx context.Context) error {
 	return g.update(ctx, models.VideoStatusCOMPLETED)
 }

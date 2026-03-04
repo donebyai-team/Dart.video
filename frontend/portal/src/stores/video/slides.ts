@@ -1,9 +1,9 @@
 import { TimelineSlide } from '@/components/editor/timeline/types'
 import { SlideType, Slide, TransitionDirection, TransitionType, BackgroundStyle } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { arrayMove } from '@dnd-kit/sortable'
-import { createNewSlide, getDefaulVideotMetadata, createDefaultBackgroundStyle } from './defaults'
+import { createNewSlide, getDefaulVideotMetadata, createDefaultBackgroundStyle, resolveBackgroundStyle } from './defaults'
 import { VideoStoreSet, VideoStoreGet } from './types'
-import { getSections, updateVideoConfigSections, updateSelectedSlide, updateTotalDuration } from './utils'
+import { getSections, updateVideoConfigSections, updateSelectedSlide, updateTotalDuration, getPreviousSlide } from './utils'
 import defaultEditorConfig from '@/data/editorConfig'
 import { TRANSITION_DURATION_SECONDS } from '@coasterai/renderer/src/frameUtils'
 
@@ -13,48 +13,55 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
 
   // if global is available then use global or default to slide
   getSlideWithBackground(slide: Slide): BackgroundStyle {
-    const { videoConfig } = get()
-    if (!videoConfig?.config) return createDefaultBackgroundStyle();
+    const { videoConfig } = get();
+
+    if (!videoConfig?.config) {
+      return createDefaultBackgroundStyle();
+    }
+
     const globalBackground = videoConfig.metadata?.backgroundStyle;
 
-
-    return globalBackground ? globalBackground : slide.backgroundStyle!;
+    return resolveBackgroundStyle(slide, globalBackground);
   },
 
   addSlide(sectionId: string, type: SlideType) {
-    const { videoConfig } = get()
-    if (!videoConfig?.config) return
+    const { videoConfig } = get();
+    if (!videoConfig?.config) return;
 
-    const sections = getSections(videoConfig)
+    const sections = getSections(videoConfig);
+    const previousSlide = getPreviousSlide(sections, sectionId);
+
+    const globalBackground = videoConfig.metadata?.backgroundStyle;
 
     const inheritedBg =
-      [...sections.flatMap((s) => s.slides)]
-        .reverse()
-        .find((s) => s.backgroundStyle)?.backgroundStyle
-      ??
+      globalBackground ??
+      previousSlide?.backgroundStyle ??
       createDefaultBackgroundStyle();
 
-
     const newSlide = createNewSlide({
-      sectionId,
       type,
       inheritedBg,
-    })
+    });
 
     let newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
-      sections.map(s => (s.id === sectionId ? { ...s, slides: [...s.slides, newSlide] } : s))
-    )
-    // Calculate the total duration when slide is added
-    newVideoConfig = updateTotalDuration(newVideoConfig)
+      sections.map(s =>
+        s.id === sectionId
+          ? { ...s, slides: [...s.slides, newSlide] }
+          : s
+      )
+    );
 
-    set({ videoConfig: newVideoConfig })
+    newVideoConfig = updateTotalDuration(newVideoConfig);
 
-    const section = getSections(newVideoConfig).find(s => s.id === sectionId)
+    set({ videoConfig: newVideoConfig });
+
+    const section = getSections(newVideoConfig).find(s => s.id === sectionId);
+
     if (section) {
-      set({ selectedSlide: { section, slide: newSlide } })
+      set({ selectedSlide: { section, slide: newSlide } });
     }
 
-    get().autoSyncVideoConfig()
+    get().autoSyncVideoConfig();
   },
 
   /* ================= BACKGROUND ================= */

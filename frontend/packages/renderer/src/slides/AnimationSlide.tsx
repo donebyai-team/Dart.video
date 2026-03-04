@@ -186,7 +186,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
     >
       <AnimatedBackground width={width} height={height} />
 
-      <TemplateContainer
+      {/* <TemplateContainer
         x={templateMeta.x as number}
         y={templateMeta.y as number}
         width={templateMeta.width as number}
@@ -212,7 +212,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
             } as Slide)
           }
         }}
-      >
+      > */}
         <div style={{ width: '100%', height: '100%' }}>
           {isLoading ? (
             <TemplateLoadingPlaceholder />
@@ -241,7 +241,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
             <TemplateErrorFallback message={templateError} />
           ) : null}
         </div>
-      </TemplateContainer>
+      {/* </TemplateContainer> */}
     </AbsoluteFill>
   )
 }

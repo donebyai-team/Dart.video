@@ -460,7 +460,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
                 updateSlide({ duration: newDuration })
               }}
               onSelectTemplate={slideId => {
-                console.log('DEBUG', 'selected templated slide: ', slideId)
+                console.debug('selected templated slide: ', slideId)
                 const entityId = createSlideEntityId(slideId)
                 handleSelectEntity(entityId)
                 // Open template settings when clicking on template

@@ -13,8 +13,6 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
   /* ================= SELECT ENTITY ================= */
 
   handleSelectEntity(entityId: string) {
-    console.debug('[VideoStore] handleSelectEntity', { entityId })
-
     const { videoConfig } = get()
     if (!videoConfig) return
 
