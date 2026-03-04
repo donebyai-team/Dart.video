@@ -15,7 +15,8 @@ import (
 	"go.uber.org/zap"
 )
 
-const transitionDuration = 0.3
+// Default transition time for all slides, same in frontend
+const transitionDuration = 0.5
 
 type videoConfigGenerator struct {
 	video                 *pbcore.Video

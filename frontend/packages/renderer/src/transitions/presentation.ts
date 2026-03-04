@@ -26,7 +26,6 @@ export const getTransitionPresentation = (
   height: number = 1080
 ) => {
   const resolvedDirection = getDirection(direction)
-
   switch (transitionType) {
     case TransitionType.TRANSITION_FADE:
       return fade()
@@ -39,7 +38,7 @@ export const getTransitionPresentation = (
     case TransitionType.TRANSITION_WIPE_RIGHT:
     case TransitionType.TRANSITION_WIPE_UP:
     case TransitionType.TRANSITION_WIPE_DOWN:
-      return wipe({ direction: resolvedDirection || 'from-right' })
+      return wipe()
     case TransitionType.TRANSITION_FLIP_LEFT:
     case TransitionType.TRANSITION_FLIP_RIGHT:
     case TransitionType.TRANSITION_FLIP_UP:
