@@ -9,7 +9,6 @@ import { wipe } from '@remotion/transitions/wipe'
 import { RemotionTransitionDirection, protoDirectionToRemotion } from './config'
 
 const getDirection = (
-  transitionType: TransitionType,
   direction?: TransitionDirection
 ): RemotionTransitionDirection | undefined => {
   // If slide has an explicit direction, it wins.
@@ -17,38 +16,7 @@ const getDirection = (
   if (mapped) {
     return mapped
   }
-
-  // Fallback keeps backward compatibility for existing transition values.
-  switch (transitionType) {
-    case TransitionType.TRANSITION_SLIDE_LEFT:
-      return 'from-right'
-    case TransitionType.TRANSITION_SLIDE_RIGHT:
-      return 'from-left'
-    case TransitionType.TRANSITION_SLIDE_UP:
-      return 'from-bottom'
-    case TransitionType.TRANSITION_SLIDE_DOWN:
-      return 'from-top'
-    case TransitionType.TRANSITION_WIPE_LEFT:
-      return 'from-right'
-    case TransitionType.TRANSITION_WIPE_RIGHT:
-      return 'from-left'
-    case TransitionType.TRANSITION_WIPE_UP:
-      return 'from-bottom'
-    case TransitionType.TRANSITION_WIPE_DOWN:
-      return 'from-top'
-    case TransitionType.TRANSITION_FLIP_LEFT:
-    case TransitionType.TRANSITION_FLIP_HORIZONTAL:
-      return 'from-left'
-    case TransitionType.TRANSITION_FLIP_RIGHT:
-      return 'from-right'
-    case TransitionType.TRANSITION_FLIP_UP:
-    case TransitionType.TRANSITION_FLIP_VERTICAL:
-      return 'from-top'
-    case TransitionType.TRANSITION_FLIP_DOWN:
-      return 'from-bottom'
-    default:
-      return undefined
-  }
+  return undefined
 }
 
 export const getTransitionPresentation = (
@@ -57,7 +25,7 @@ export const getTransitionPresentation = (
   width: number = 1920,
   height: number = 1080
 ) => {
-  const resolvedDirection = getDirection(transitionType, direction)
+  const resolvedDirection = getDirection(direction)
 
   switch (transitionType) {
     case TransitionType.TRANSITION_FADE:

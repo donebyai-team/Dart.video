@@ -18,6 +18,7 @@ interface SlideshowProps {
   onSelectTemplate?: (slideId: string) => void
   video?: JsonObject
   videoConfig?: Video
+  isPlaying: boolean
   onUpdate?: (updates: Partial<Slide>) => void
   uploadMedia?: (file: File) => Promise<UploadedMedia>
 }
@@ -127,6 +128,7 @@ export const SingleSlidePreview: React.FC<{
 export const Slideshow: React.FC<SlideshowProps> = ({
   fps,
   isEditing,
+  isPlaying,
   onSelectTemplate,
   video,
   videoConfig: videoConfigProp,
@@ -226,7 +228,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({
                 />
               </TransitionSeries.Sequence>
 
-              {hasTransition && (
+              {hasTransition && isPlaying && (
                 <TransitionSeries.Transition
                   presentation={getTransitionPresentation(
                     slide.transition,

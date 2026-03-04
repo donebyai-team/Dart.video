@@ -39,9 +39,10 @@ const PlayerCanvas = ({
     return {
       fps,
       isEditing,
-      onSelectTemplate
+      onSelectTemplate,
+      isPlaying,
     }
-  }, [fps, isEditing, onSelectTemplate])
+  }, [fps, isEditing, onSelectTemplate, isPlaying])
 
   // Early return if no data
   if (!videoConfigFromStore?.config?.sections || !videoConfigFromStore?.metadata?.resolution || !selectedSlide) {
