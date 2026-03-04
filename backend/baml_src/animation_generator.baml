@@ -150,7 +150,7 @@ function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_hi
     - Use lucide-react for icons
     - ALWAYS use fontFamily: 'Inter, sans-serif'
     - Keep colors minimal (2-4 max)
-    - For Logos or <Img>, You should use placeholders. Eg. https://placehold.co/{width}x{height}?text=Logo
+    - For Logos or <Img>, You should use placeholders[Unless specified in brand guidelines]. Eg. https://placehold.co/{width}x{height}?text=Logo
     - eg. https://placehold.co/600x400?text=Logo
     - Whole animation Background must remain transparent[Must have] as we will be placing it over a canvas with existing background
     - If sections inside the animations needs background, it should be visible on the slide background given below
