@@ -537,32 +537,32 @@ func (a *agentV1) selectTemplate(
 
 	// No category matched — use the fallback template or generate a new animation.
 	if selected == nil {
-		//template, err := a.animationGenerator.Generate(ctx, anim, planExecutedSoFar, func(progress TemplateGenerationProgress) {
-		//	a.updateState(ctx, VideoAgentState{
-		//		Thinking: progress.Message,
-		//		State:    stateStatusProcessing,
-		//	})
-		//}, GenerationParams{
-		//	OrgID:     a.orgID,
-		//	SessionID: a.sessionID,
-		//})
+		template, err := a.animationGenerator.Generate(ctx, anim, planExecutedSoFar, func(progress TemplateGenerationProgress) {
+			a.updateState(ctx, VideoAgentState{
+				Thinking: progress.Message,
+				State:    stateStatusProcessing,
+			})
+		}, GenerationParams{
+			OrgID:     a.orgID,
+			SessionID: a.sessionID,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		return template, nil
+		//fallback, err := a.retrievalService.GetFallbackTemplate(ctx)
 		//if err != nil {
-		//	return nil, err
+		//	return nil, agenterrors.NoTemplateFound("no fallback template found", err)
 		//}
-
-		//return template, nil
-		fallback, err := a.retrievalService.GetFallbackTemplate(ctx)
-		if err != nil {
-			return nil, agenterrors.NoTemplateFound("no fallback template found", err)
-		}
-
-		templateConfig, err := a.animationGenerator.ExtractConfig(ctx, planExecutedSoFar, anim, fallback)
-		if err != nil {
-			return nil, agenterrors.TemplateExtractFailed("failed to extract template config", err)
-		}
-		fallback.GeneratedConfig = json.RawMessage(templateConfig.Config)
-
-		return fallback, nil
+		//
+		//templateConfig, err := a.animationGenerator.ExtractConfig(ctx, planExecutedSoFar, anim, fallback)
+		//if err != nil {
+		//	return nil, agenterrors.TemplateExtractFailed("failed to extract template config", err)
+		//}
+		//fallback.GeneratedConfig = json.RawMessage(templateConfig.Config)
+		//
+		//return fallback, nil
 	}
 
 	return selected, nil

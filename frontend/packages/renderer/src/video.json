@@ -1,110 +1,135 @@
 {
-    "id": "8e295533-5763-4119-9a0f-dd7ca8b1a0eb",
-    "name": "test",
+    "id": "d313b2a5-7794-42b2-b678-a9b51c903ab9",
+    "name": "Ship UI Changes Confidently with Percy",
     "config": {
         "sections": [
             {
-                "id": "hook",
+                "id": "section-1772600926330352000",
                 "title": "Hook",
-                "color": "bg-screen-hook",
+                "color": "#FFEAA7",
                 "slides": [
                     {
-                        "id": "hook-1",
-                        "type": "SLIDE_TYPE_TEXT_ANIMATION",
-                        "transcript": "Are you tired of losing important files? Your documents deserve better.",
-                        "duration": 2.2,
-                        "transition": "TRANSITION_FADE",
+                        "id": "slide-1772600926330378000",
+                        "type": "SLIDE_TYPE_ANIMATION",
+                        "transcript": "A tiny UI change can create a big production surprise.",
+                        "duration": 4,
+                        "transition": "TRANSITION_WIPE_LEFT",
                         "transitionDuration": 0.3,
+                        "direction": "TRANSITION_DIRECTION_FROM_BOTTOM",
                         "animation": {
-                            "templateId": "letter-cascade",
-                            "templateUrl": "templates/generated/test1/SimpleText2.cdn.js",
                             "templateConfig": {
-                                "mainQuestion": [
-                                    "Struggling",
-                                    "to",
-                                    "find",
-                                    "relevant",
-                                    "leads",
-                                    "on",
-                                    "Reddit?"
-                                ],
-                                "emphasisWord": "Struggling",
-                                "noiseFragments": [
-                                    "[advice needed]",
-                                    "anyone tried…",
-                                    "looking for a tool…",
-                                    "random meme",
-                                    "off-topic rant",
-                                    "just venting",
-                                    "hot take",
-                                    "unpopular opinion",
-                                    "[help]",
-                                    "is it just me or…",
-                                    "ELI5 request",
-                                    "TIFU post",
-                                    "shower thought",
-                                    "rate my setup",
-                                    "need recommendations",
-                                    "daily thread",
-                                    "[serious]",
-                                    "meta discussion",
-                                    "weekly roundup",
-                                    "first post here",
-                                    "can confirm",
-                                    "this is the way",
-                                    "check out my blog",
-                                    "self-promo",
-                                    "AMA request",
-                                    "what do you think?",
-                                    "PSA:",
-                                    "TIL something",
-                                    "controversial take",
-                                    "unpopular opinion",
-                                    "lost redditor",
-                                    "repost alert",
-                                    "link in bio",
-                                    "mod post",
-                                    "[deleted]",
-                                    "[removed]"
-                                ]
+                                "centerText": {
+                                    "style": {
+                                        "color": "#111827",
+                                        "fontFamily": "Inter",
+                                        "fontSize": 48,
+                                        "fontWeight": "bold",
+                                        "lineHeight": 1.2,
+                                        "textAlign": "center"
+                                    },
+                                    "text": "Small UI changes can break production."
+                                }
                             },
-                            "meta": {
-                                "x": 300.47525,
-                                "y": 79.21945,
-                                "width": 1536,
-                                "height": 864
-                            }
-                        }
-                    },                 
-                    {
-                        "id": "hook-1771179509352",
-                        "type": "SLIDE_TYPE_MEDIA",
-                        "transcript": "Add your script here...",
-                        "duration": 5.76,
-                        "transitionDuration": 0.3,
-                        "media": {
                             "meta": {
                                 "x": 192,
                                 "y": 108,
                                 "width": 1536,
                                 "height": 864,
+                                "scale": 1
+                            },
+                            "templateUrl": "https://storage.googleapis.com/coasterai-public/templates/text-animation/text-cascade.tsx",
+                            "plan": {
+                                "index": "1",
+                                "beatDescription": "Open with BrowserStack brand presence and immediately frame the stakes: small UI changes can break production. This sets urgency and tees up the need for visual testing.",
+                                "animationType": "BRAND",
+                                "categorySearcQquery": "brand introduction leading into product reliability promise",
+                                "duration": "4",
+                                "voiceover": "A tiny UI change can create a big production surprise.",
+                                "selectedTemplateDescription": "Center-aligned text animates into view one letter at a time with a cascading effect. Each character slides in smoothly from the left while fading from transparent to fully visible using a soft spring motion. The animation creates a sequential, flowing reveal of the full sentence, with subtle glow and shadow for emphasis."
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED"
+                    },
+                    {
+                        "id": "slide-1772600926330440000",
+                        "type": "SLIDE_TYPE_ANIMATION",
+                        "transcript": "Percy helps you catch visual regressions before your customers do.",
+                        "duration": 3,
+                        "transition": "TRANSITION_FADE",
+                        "transitionDuration": 0.3,
+                        "direction": "TRANSITION_DIRECTION_FROM_TOP",
+                        "animation": {
+                            "templateConfig": {
+                                "centerText": {
+                                    "style": {
+                                        "color": "#111827",
+                                        "fontFamily": "Inter",
+                                        "fontSize": 60,
+                                        "fontWeight": "600",
+                                        "lineHeight": 1.2,
+                                        "textAlign": "center"
+                                    },
+                                    "text": "Catch visual bugs before users do"
+                                }
+                            },
+                            "meta": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864,
+                                "scale": 1
+                            },
+                            "templateUrl": "https://storage.googleapis.com/coasterai-public/templates/text-animation/text-cascade.tsx",
+                            "plan": {
+                                "index": "2",
+                                "beatDescription": "A fast, punchy statement lands the core promise—catch visual bugs before users do—bridging from the hook into the pain teams feel today.",
+                                "animationType": "TEXT",
+                                "categorySearcQquery": "preventing visual regressions before release",
+                                "duration": "3",
+                                "voiceover": "Percy helps you catch visual regressions before your customers do.",
+                                "selectedTemplateDescription": "Center-aligned text animates into view one letter at a time with a cascading effect. Each character slides in smoothly from the left while fading from transparent to fully visible using a soft spring motion. The animation creates a sequential, flowing reveal of the full sentence, with subtle glow and shadow for emphasis."
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED"
+                    },
+                    {
+                        "id": "slide-1772601064012",
+                        "type": "SLIDE_TYPE_MEDIA",
+                        "duration": 5,
+                        "transitionDuration": 0.3,
+                        "media": {
+                            "meta": {
+                                "x": 182.46352,
+                                "y": 101.64235,
+                                "width": 1536,
+                                "height": 864,
                                 "scale": 1,
                                 "rotation": 0
                             },
-                            "src": "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1771916330-untitled-0.mp4",
+                            "src": "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1772601145-add_this_person_to_the_back_of_t-0.jpg",
                             "style": {},
-                            "mediaType": "MEDIA_TYPE_VIDEO",
+                            "mediaType": "MEDIA_TYPE_IMAGE",
                             "uploadedMedia": {
-                                "url": "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1771916330-untitled-0.mp4",
-                                "mimeType": "video/mp4",
-                                "duration": 5.76,
-                                "fileName": "untitled-0.mp4"
+                                "url": "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1772601145-add_this_person_to_the_back_of_t-0.jpg",
+                                "mimeType": "image/jpeg",
+                                "fileName": "add_this_person_to_the_back_of_t-0.jpg"
                             }
-                        }
+                        },
+                        "zooms": [
+                            {
+                                "id": "zoom-effect-1772601158213",
+                                "x": 1216.8932,
+                                "y": 374.85437,
+                                "zoomLevel": 2,
+                                "startTime": 2.2,
+                                "endTime": 4.7
+                            }
+                        ],
+                        "slideStatus": "SLIDE_STATUS_GENERATED"
                     },
                     {
-                        "id": "hook-1772090347760",
-                        "type": "SLIDE_TYPE_TEXT_ANIMATION",
+                        "id": "slide-1772602222143",
+                        "type": "SLIDE_TYPE_ANIMATION",
                         "duration": 5,
                         "transitionDuration": 0.3,
                         "backgroundStyle": {
@@ -113,8 +138,13 @@
                             }
                         },
                         "animation": {
-                            "templateId": "number-counter",
-                            "templateConfig": {},
+                            "templateId": "text-reveal",
+                            "templateConfig": {
+                                "color": "#ffffff",
+                                "direction": "up",
+                                "fontSize": 72,
+                                "text": "Hello World"
+                            },
                             "meta": {
                                 "x": 192,
                                 "y": 108,
@@ -122,144 +152,505 @@
                                 "height": 864,
                                 "scale": 1,
                                 "rotation": 0
-                            }
-                        }
-                    }
-                ]
-            },
-            {
-                "id": "solution",
-                "title": "Solution",
-                "color": "bg-screen-solution",
-                "slides": [                    
-                    {
-                        "id": "solution-2",
-                        "type": "SLIDE_TYPE_MEDIA",
-                        "transcript": "Organize everything in smart folders that adapt to how your team works.",
-                        "duration": 13.96,
-                        "transition": "TRANSITION_SLIDE_UP",
-                        "transitionDuration": 0.3,
-                        "media": {
-                            "meta": {
-                                "x": 169.81418,
-                                "y": 107.55628,
-                                "width": 1536,
-                                "height": 864,
-                                "scale": 1,
-                                "rotation": 0
-                            },
-                            "src": "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1771920136-3195394-uhd_3840_2160_25fps.mp4",
-                            "style": {
-                                "borderRadius": 55,
-                                "objectFit": "contain"
-                            },
-                            "mediaType": "MEDIA_TYPE_VIDEO",
-                            "uploadedMedia": {
-                                "url": "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1771920136-3195394-uhd_3840_2160_25fps.mp4",
-                                "mimeType": "video/mp4",
-                                "duration": 13.96,
-                                "fileName": "3195394-uhd_3840_2160_25fps.mp4"
                             }
                         },
-                        "spotlights": [
-                            {
-                                "id": "spotlight-1",
-                                "x": 400,
-                                "y": 200,
-                                "width": 300,
-                                "height": 250,
-                                "blurAmount": 10,
-                                "borderRadius": 8,
-                                "startTime": 0.5,
-                                "endTime": 1.5
-                            },
-                            {
-                                "id": "spotlight-2",
-                                "x": 1100,
-                                "y": 600,
-                                "width": 400,
-                                "height": 300,
-                                "blurAmount": 10,
-                                "borderRadius": 8,
-                                "startTime": 2.5,
-                                "endTime": 3.5
-                            }
-                        ],
-                        "zooms": [
-                            {
-                                "id": "zoom-effect-1771920157508",
-                                "x": 960,
-                                "y": 540,
-                                "zoomLevel": 2,
-                                "startTime": 4.3,
-                                "endTime": 13.66
-                            }
-                        ]
-                    }
-                ]
-            },            
-            {
-                "id": "feature1",
-                "title": "AI Search",
-                "color": "bg-screen-feature",
-                "slides": [                   
-                    {
-                        "id": "feature1-2",
-                        "type": "SLIDE_TYPE_TEXT_ANIMATION",
-                        "transcript": "Just ask in natural language, like talking to a colleague.",
-                        "duration": 2.5,
-                        "transition": "TRANSITION_SLIDE_LEFT",
-                        "media": {
-                            "meta": {
-                                "x": 192,
-                                "y": 108,
-                                "width": 1536,
-                                "height": 864,
-                                "scale": 1,
-                                "rotation": 0
-                            },
-                            "src": "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400&h=240&fit=crop",
-                            "style": {},
-                            "mediaType": "MEDIA_TYPE_IMAGE"
-                        }
+                        "slideStatus": "SLIDE_STATUS_GENERATED"
                     }
                 ]
             },
             {
-                "id": "feature2",
-                "title": "Collaboration",
-                "color": "bg-screen-feature",
-                "slides": [                   
+                "id": "section-1772600926330443000",
+                "title": "Problem",
+                "color": "#0984E3",
+                "slides": [
                     {
-                        "id": "feature2-2",
-                        "type": "SLIDE_TYPE_TEXT_ANIMATION",
-                        "transcript": "Edit together in real-time, leave comments, and track every change.",
-                        "duration": 2.5,
-                        "transition": "TRANSITION_FADE",
+                        "id": "slide-1772600926330443000",
+                        "type": "SLIDE_TYPE_ANIMATION",
+                        "transcript": "Manual UI reviews don’t scale across browsers, viewports, and components.",
+                        "duration": 4,
+                        "transition": "TRANSITION_WIPE_LEFT",
                         "transitionDuration": 0.3,
+                        "direction": "TRANSITION_DIRECTION_FROM_RIGHT",
+                        "animation": {
+                            "templateConfig": {
+                                "centerText": {
+                                    "style": {
+                                        "color": "#111827",
+                                        "fontFamily": "Inter",
+                                        "fontSize": 48,
+                                        "fontWeight": "500",
+                                        "lineHeight": 1.2,
+                                        "textAlign": "center"
+                                    },
+                                    "text": "Everyday chaos: multiple breakpoints drift."
+                                }
+                            },
+                            "meta": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864,
+                                "scale": 1
+                            },
+                            "templateUrl": "https://storage.googleapis.com/coasterai-public/templates/text-animation/text-cascade.tsx",
+                            "plan": {
+                                "index": "1",
+                                "beatDescription": "Show the everyday chaos: multiple breakpoints, browsers, and components drift. This follows the promise by showing why manual checking fails and sets up automation.",
+                                "animationType": "VISUAL",
+                                "categorySearcQquery": "manual cross-browser UI checking across many viewports",
+                                "duration": "4",
+                                "voiceover": "Manual UI reviews don’t scale across browsers, viewports, and components.",
+                                "selectedTemplateDescription": "Center-aligned text animates into view one letter at a time with a cascading effect. Each character slides in smoothly from the left while fading from transparent to fully visible using a soft spring motion. The animation creates a sequential, flowing reveal of the full sentence, with subtle glow and shadow for emphasis."
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED"
+                    },
+                    {
+                        "id": "slide-1772600926330352000-1772601064013",
+                        "type": "SLIDE_TYPE_MEDIA",
+                        "duration": 4,
+                        "transitionDuration": 0.3,
+                        "media": {
+                            "meta": {
+                                "x": 182.46352,
+                                "y": 101.64235,
+                                "width": 1536,
+                                "height": 864,
+                                "scale": 1,
+                                "rotation": 0
+                            },
+                            "src": "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1772601145-add_this_person_to_the_back_of_t-0.jpg",
+                            "style": {},
+                            "mediaType": "MEDIA_TYPE_IMAGE",
+                            "uploadedMedia": {
+                                "url": "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1772601145-add_this_person_to_the_back_of_t-0.jpg",
+                                "mimeType": "image/jpeg",
+                                "fileName": "add_this_person_to_the_back_of_t-0.jpg"
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED"
+                    },
+                    {
+                        "id": "slide-1772600926330448000",
+                        "type": "SLIDE_TYPE_ANIMATION",
+                        "transcript": "And when something slips… you lose hours chasing it down.",
+                        "duration": 3,
+                        "transition": "TRANSITION_CLOCK_WIPE",
+                        "transitionDuration": 0.3,
+                        "direction": "TRANSITION_DIRECTION_FROM_LEFT",
+                        "animation": {
+                            "templateConfig": {
+                                "centerText": {
+                                    "style": {
+                                        "color": "#111827",
+                                        "fontFamily": "Inter",
+                                        "fontSize": 42,
+                                        "fontWeight": "500",
+                                        "lineHeight": 1.2,
+                                        "textAlign": "center"
+                                    },
+                                    "text": "Regressions slip, teams lose time."
+                                }
+                            },
+                            "meta": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864,
+                                "scale": 1
+                            },
+                            "templateUrl": "https://storage.googleapis.com/coasterai-public/templates/text-animation/text-cascade.tsx",
+                            "plan": {
+                                "index": "3",
+                                "beatDescription": "Bring it to the consequence: regressions slip, teams lose time in back-and-forth. This transitions into the ‘here’s the better way’ reveal.",
+                                "animationType": "SIMPLE_TEXT",
+                                "categorySearcQquery": "release delays caused by missed UI regressions",
+                                "duration": "3",
+                                "voiceover": "And when something slips… you lose hours chasing it down.",
+                                "selectedTemplateDescription": "Center-aligned text animates into view one letter at a time with a cascading effect. Each character slides in smoothly from the left while fading from transparent to fully visible using a soft spring motion. The animation creates a sequential, flowing reveal of the full sentence, with subtle glow and shadow for emphasis."
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED"
+                    }
+                ]
+            },
+            {
+                "id": "section-1772600926330450000",
+                "title": "Solution",
+                "color": "#4ECDC4",
+                "slides": [
+                    {
+                        "id": "slide-1772600926330450000",
+                        "type": "SLIDE_TYPE_ANIMATION",
+                        "transcript": "Percy takes visual snapshots and compares every change to a trusted baseline.",
+                        "duration": 4,
+                        "transition": "TRANSITION_FLIP_LEFT",
+                        "transitionDuration": 0.3,
+                        "direction": "TRANSITION_DIRECTION_FROM_LEFT",
+                        "animation": {
+                            "templateConfig": {
+                                "centerText": {
+                                    "style": {
+                                        "color": "#111827",
+                                        "fontFamily": "Inter",
+                                        "fontSize": 42,
+                                        "fontWeight": "500",
+                                        "lineHeight": 1.2,
+                                        "textAlign": "center"
+                                    },
+                                    "text": "Percy compares baseline snapshots against changes."
+                                }
+                            },
+                            "meta": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864,
+                                "scale": 1
+                            },
+                            "templateUrl": "https://storage.googleapis.com/coasterai-public/templates/text-animation/text-cascade.tsx",
+                            "plan": {
+                                "index": "1",
+                                "beatDescription": "Introduce Percy’s core mechanic: baseline snapshots compared against every change. This follows the pain and sets up the actual product flow scenes.",
+                                "animationType": "VISUAL",
+                                "categorySearcQquery": "baseline versus new build visual comparison workflow",
+                                "duration": "4",
+                                "voiceover": "Percy takes visual snapshots and compares every change to a trusted baseline.",
+                                "selectedTemplateDescription": "Center-aligned text animates into view one letter at a time with a cascading effect. Each character slides in smoothly from the left while fading from transparent to fully visible using a soft spring motion. The animation creates a sequential, flowing reveal of the full sentence, with subtle glow and shadow for emphasis."
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED"
+                    },
+                    {
+                        "id": "slide-1772600926330452000",
+                        "type": "SLIDE_TYPE_MEDIA",
+                        "duration": 4,
+                        "transition": "TRANSITION_FLIP_LEFT",
+                        "transitionDuration": 0.3,
+                        "direction": "TRANSITION_DIRECTION_FROM_LEFT",
                         "media": {
                             "meta": {
                                 "x": 192,
                                 "y": 108,
                                 "width": 1536,
                                 "height": 864,
-                                "scale": 1,
-                                "rotation": 0
+                                "scale": 1
                             },
-                            "src": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400&h=240&fit=crop",
+                            "src": "https://placehold.co/600x400?text=Upload+a+screenshot+or+short+clip+of+your+product&font=roboto",
                             "style": {},
-                            "mediaType": "MEDIA_TYPE_IMAGE"
-                        }
+                            "mediaType": "MEDIA_TYPE_IMAGE",
+                            "plan": {
+                                "index": "2",
+                                "beatDescription": "This is the media slide, user will be asked to upload their product screenshot or clip",
+                                "duration": "4",
+                                "selectedTemplateDescription": "This is the media slide, user will be asked to upload their product screenshot or clip"
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED"
+                    },
+                    {
+                        "id": "slide-1772600926330453000",
+                        "type": "SLIDE_TYPE_MEDIA",
+                        "duration": 5,
+                        "transition": "TRANSITION_CLOCK_WIPE",
+                        "transitionDuration": 0.3,
+                        "direction": "TRANSITION_DIRECTION_FROM_TOP",
+                        "media": {
+                            "meta": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864,
+                                "scale": 1
+                            },
+                            "src": "https://placehold.co/600x400?text=Upload+a+screenshot+or+short+clip+of+your+product&font=roboto",
+                            "style": {},
+                            "mediaType": "MEDIA_TYPE_IMAGE",
+                            "plan": {
+                                "index": "3",
+                                "beatDescription": "This is the media slide, user will be asked to upload their product screenshot or clip",
+                                "duration": "5",
+                                "selectedTemplateDescription": "This is the media slide, user will be asked to upload their product screenshot or clip"
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED"
+                    },
+                    {
+                        "id": "slide-1772600926330455000",
+                        "type": "SLIDE_TYPE_ANIMATION",
+                        "transcript": "Review what changed, approve what’s expected, and catch what’s not.",
+                        "duration": 3,
+                        "transition": "TRANSITION_SLIDE_LEFT",
+                        "transitionDuration": 0.3,
+                        "direction": "TRANSITION_DIRECTION_FROM_RIGHT",
+                        "animation": {
+                            "templateConfig": {
+                                "centerText": {
+                                    "style": {
+                                        "color": "#111827",
+                                        "fontFamily": "Inter",
+                                        "fontSize": 42,
+                                        "fontWeight": "500",
+                                        "lineHeight": 1.2,
+                                        "textAlign": "center"
+                                    },
+                                    "text": "Reviewers approve changes and flag regressions."
+                                }
+                            },
+                            "meta": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864,
+                                "scale": 1
+                            },
+                            "templateUrl": "https://storage.googleapis.com/coasterai-public/templates/text-animation/text-cascade.tsx",
+                            "plan": {
+                                "index": "4",
+                                "beatDescription": "A quick conceptual bridge: reviewers can approve intended changes and flag real regressions fast. This sets up a final product view showing approvals/comments.",
+                                "animationType": "TEXT",
+                                "categorySearcQquery": "faster code review decisions with clear visual diffs",
+                                "duration": "3",
+                                "voiceover": "Review what changed, approve what’s expected, and catch what’s not.",
+                                "selectedTemplateDescription": "Center-aligned text animates into view one letter at a time with a cascading effect. Each character slides in smoothly from the left while fading from transparent to fully visible using a soft spring motion. The animation creates a sequential, flowing reveal of the full sentence, with subtle glow and shadow for emphasis."
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED"
                     }
                 ]
-            }            
+            },
+            {
+                "id": "section-1772600926330456000",
+                "title": "Workflow",
+                "color": "#96CEB4",
+                "slides": [
+                    {
+                        "id": "slide-1772600926330456000",
+                        "type": "SLIDE_TYPE_MEDIA",
+                        "duration": 4,
+                        "transition": "TRANSITION_WIPE_LEFT",
+                        "transitionDuration": 0.3,
+                        "direction": "TRANSITION_DIRECTION_FROM_TOP",
+                        "media": {
+                            "meta": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864,
+                                "scale": 1
+                            },
+                            "src": "https://placehold.co/600x400?text=Upload+a+screenshot+or+short+clip+of+your+product&font=roboto",
+                            "style": {},
+                            "mediaType": "MEDIA_TYPE_IMAGE",
+                            "plan": {
+                                "index": "1",
+                                "beatDescription": "This is the media slide, user will be asked to upload their product screenshot or clip",
+                                "duration": "4",
+                                "selectedTemplateDescription": "This is the media slide, user will be asked to upload their product screenshot or clip"
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED"
+                    },
+                    {
+                        "id": "slide-1772600926330458000",
+                        "type": "SLIDE_TYPE_ANIMATION",
+                        "transcript": "Every pull request gets a visual check—automatically.",
+                        "duration": 3,
+                        "transition": "TRANSITION_IRIS",
+                        "transitionDuration": 0.3,
+                        "direction": "TRANSITION_DIRECTION_FROM_TOP",
+                        "animation": {
+                            "templateConfig": {
+                                "centerText": {
+                                    "style": {
+                                        "color": "#111827",
+                                        "fontFamily": "Inter",
+                                        "fontSize": 48,
+                                        "fontWeight": "500",
+                                        "lineHeight": 1.2,
+                                        "textAlign": "center"
+                                    },
+                                    "text": "Summarize the end-to-end flow in one kinetic line."
+                                }
+                            },
+                            "meta": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864,
+                                "scale": 1
+                            },
+                            "templateUrl": "https://storage.googleapis.com/coasterai-public/templates/text-animation/text-cascade.tsx",
+                            "plan": {
+                                "index": "2",
+                                "beatDescription": "Summarize the end-to-end flow in one kinetic line—commit to confidence. This transitions into outcome/proof.",
+                                "animationType": "SIMPLE_TEXT",
+                                "categorySearcQquery": "continuous delivery confidence from automated visual checks",
+                                "duration": "3",
+                                "voiceover": "Every pull request gets a visual check—automatically.",
+                                "selectedTemplateDescription": "Center-aligned text animates into view one letter at a time with a cascading effect. Each character slides in smoothly from the left while fading from transparent to fully visible using a soft spring motion. The animation creates a sequential, flowing reveal of the full sentence, with subtle glow and shadow for emphasis."
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED"
+                    }
+                ]
+            },
+            {
+                "id": "section-1772600926330462000",
+                "title": "Outcome",
+                "color": "#96CEB4",
+                "slides": [
+                    {
+                        "id": "slide-1772600926330463000",
+                        "type": "SLIDE_TYPE_ANIMATION",
+                        "transcript": "Ship UI updates faster—without the fear of breaking layouts.",
+                        "duration": 4,
+                        "transition": "TRANSITION_WIPE_LEFT",
+                        "transitionDuration": 0.3,
+                        "direction": "TRANSITION_DIRECTION_FROM_LEFT",
+                        "animation": {
+                            "templateConfig": {
+                                "centerText": {
+                                    "style": {
+                                        "color": "#111827",
+                                        "fontFamily": "Inter",
+                                        "fontSize": 48,
+                                        "fontWeight": "500",
+                                        "lineHeight": 1.2,
+                                        "textAlign": "center"
+                                    },
+                                    "text": "Fewer surprises, faster merges, cleaner releases."
+                                }
+                            },
+                            "meta": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864,
+                                "scale": 1
+                            },
+                            "templateUrl": "https://storage.googleapis.com/coasterai-public/templates/text-animation/text-cascade.tsx",
+                            "plan": {
+                                "index": "1",
+                                "beatDescription": "Show outcome visually: fewer surprises, faster merges, cleaner releases. This follows the workflow and sets up a lightweight metric moment.",
+                                "animationType": "VISUAL",
+                                "categorySearcQquery": "reduced production UI bugs and faster release cycles",
+                                "duration": "4",
+                                "voiceover": "Ship UI updates faster—without the fear of breaking layouts.",
+                                "selectedTemplateDescription": "Center-aligned text animates into view one letter at a time with a cascading effect. Each character slides in smoothly from the left while fading from transparent to fully visible using a soft spring motion. The animation creates a sequential, flowing reveal of the full sentence, with subtle glow and shadow for emphasis."
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED"
+                    },
+                    {
+                        "id": "slide-1772600926330464000",
+                        "type": "SLIDE_TYPE_ANIMATION",
+                        "transcript": "Less manual review. Fewer regressions. More confident releases.",
+                        "duration": 4,
+                        "transition": "TRANSITION_FADE",
+                        "transitionDuration": 0.3,
+                        "direction": "TRANSITION_DIRECTION_FROM_RIGHT",
+                        "animation": {
+                            "templateConfig": {
+                                "centerText": {
+                                    "style": {
+                                        "color": "#111827",
+                                        "fontFamily": "Inter",
+                                        "fontSize": 48,
+                                        "fontWeight": "500",
+                                        "lineHeight": 1.2,
+                                        "textAlign": "center"
+                                    },
+                                    "text": "Qualitative stats beat leads to the CTA."
+                                }
+                            },
+                            "meta": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864,
+                                "scale": 1
+                            },
+                            "templateUrl": "https://storage.googleapis.com/coasterai-public/templates/text-animation/text-cascade.tsx",
+                            "plan": {
+                                "index": "2",
+                                "beatDescription": "A stats beat to add credibility without over-claiming specifics. If real numbers aren’t available, keep it qualitative. This leads into the CTA.",
+                                "animationType": "STATS",
+                                "categorySearcQquery": "time savings from automated visual regression testing",
+                                "duration": "4",
+                                "voiceover": "Less manual review. Fewer regressions. More confident releases.",
+                                "selectedTemplateDescription": "Center-aligned text animates into view one letter at a time with a cascading effect. Each character slides in smoothly from the left while fading from transparent to fully visible using a soft spring motion. The animation creates a sequential, flowing reveal of the full sentence, with subtle glow and shadow for emphasis."
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED"
+                    }
+                ]
+            },
+            {
+                "id": "section-1772600926330465000",
+                "title": "CTA",
+                "color": "#45B7D1",
+                "slides": [
+                    {
+                        "id": "slide-1772600926330466000",
+                        "type": "SLIDE_TYPE_ANIMATION",
+                        "transcript": "Try BrowserStack Percy—visual testing that fits your pull request workflow. Get a free trial.",
+                        "duration": 5,
+                        "transition": "TRANSITION_FADE",
+                        "transitionDuration": 0.3,
+                        "direction": "TRANSITION_DIRECTION_FROM_TOP",
+                        "animation": {
+                            "templateConfig": {
+                                "centerText": {
+                                    "style": {
+                                        "color": "#111827",
+                                        "fontFamily": "Inter",
+                                        "fontSize": 48,
+                                        "fontWeight": "500",
+                                        "lineHeight": 1.2,
+                                        "textAlign": "center"
+                                    },
+                                    "text": "Start a free BrowserStack trial today"
+                                }
+                            },
+                            "meta": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864,
+                                "scale": 1
+                            },
+                            "templateUrl": "https://storage.googleapis.com/coasterai-public/templates/text-animation/text-cascade.tsx",
+                            "plan": {
+                                "index": "1",
+                                "beatDescription": "Close with BrowserStack + Percy connection and a clear action: start a free trial. This follows the benefits and ends with brand recall.",
+                                "animationType": "BRAND",
+                                "categorySearcQquery": "call to action for starting free trial of visual testing platform",
+                                "duration": "5",
+                                "voiceover": "Try BrowserStack Percy—visual testing that fits your pull request workflow. Get a free trial.",
+                                "selectedTemplateDescription": "Center-aligned text animates into view one letter at a time with a cascading effect. Each character slides in smoothly from the left while fading from transparent to fully visible using a soft spring motion. The animation creates a sequential, flowing reveal of the full sentence, with subtle glow and shadow for emphasis."
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED"
+                    }
+                ]
+            }
         ]
     },
     "metadata": {
         "fps": 30,
         "backgroundStyle": {
-            "solid": {
-                "hex": "#ec4899"
+            "gradient": {
+                "angle": 135,
+                "stops": [
+                    {
+                        "color": "#EAF2FF"
+                    },
+                    {
+                        "color": "#929eaf",
+                        "position": 100
+                    }
+                ]
             },
             "applyAll": true
         },
@@ -270,10 +661,12 @@
             "width": 1920,
             "height": 1080
         },
-        "duration": 50.820004,
+        "duration": 61.300003,
+        "prompt": "Hey, help me create a video",
+        "brandLibraryId": "9b9f3bad-0851-49e2-b4db-5b84aae5b8bf",
         "backgroundAudioUrl": "https://ik.imagekit.io/coasterai/freepik-deep-calm_A4WXzk4Mk.mp3"
     },
-    "createdAt": "2026-02-20T09:08:01.471111Z",
+    "createdAt": "2026-03-04T05:07:53.063353Z",
     "status": "VIDEO_STATUS_COMPLETED",
-    "version": "83"
+    "version": "11"
 }
