@@ -22,6 +22,8 @@ enum MediaType {
   MEDIA_TYPE_UNDEFINED = 0;
   MEDIA_TYPE_IMAGE = 1;
   MEDIA_TYPE_VIDEO = 2;
+  MEDIA_TYPE_SVG = 3;
+  MEDIA_TYPE_CODE = 4;
 }
 
 enum StackAnimationMode {
@@ -91,7 +93,7 @@ message MediaSlideContent {
   string src = 2;
   MediaSlideStyle style = 3;
   MediaType mediaType = 4;
-  optional UploadedMedia uploadedMedia = 5;
+  optional MediaAsset uploadedMedia = 5;
   optional MediaSlidePlan plan = 6;
 }
 
@@ -111,16 +113,18 @@ message AnimationSlideContent {
   optional AnimationSlidePlan plan = 5;
 }
 
-message UploadedMedia {
+message MediaAsset {
   string url = 1;
   string thumbnailUrl = 2;
   float width = 3;
-  float height =4;
+  float height = 4;
   string mimeType = 5;
-  optional float duration = 6;
-  float size = 7;
-  string fileId = 8;
-  string fileName = 9;
+  float size = 6;
+  string fileId = 7;
+  string fileName = 8;
+  string id = 9;
+  MediaType mediaType = 10;
+  optional float duration = 11;
 }
 
 // ===================== EFFECTS =====================

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
+	"strings"
 )
 
 func init() {
@@ -30,7 +31,7 @@ func (r *Database) GetBrandIdentityByID(ctx context.Context, ID string) (*models
 func (r *Database) GetBrandIdentityByDomain(ctx context.Context, orgID string, domain string) (*models.BrandIdentity, error) {
 	brandIdentity, err := getOne[models.BrandIdentity](ctx, r, "brand_identity/query_by_domain.sql", map[string]any{
 		"organization_id": orgID,
-		"domain":          domain,
+		"domain":          strings.ToLower(domain),
 	})
 	if err != nil {
 		return nil, err
@@ -44,7 +45,7 @@ func (r *Database) CreateBrandIdentity(ctx context.Context, orgID string, identi
 
 	err := stmt.GetContext(ctx, &id, map[string]interface{}{
 		"name":            identity.Name,
-		"domain":          identity.WebsiteUrl,
+		"domain":          strings.ToLower(identity.WebsiteUrl),
 		"identity":        identity,
 		"organization_id": orgID,
 	})

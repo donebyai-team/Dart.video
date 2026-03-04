@@ -123,7 +123,7 @@ const BrandPage = () => {
 
             if (selectedIdentity) {
                 const newLogo = create(BrandMediaSchema, {
-                    url: uploadedMedia.url,
+                    asset: uploadedMedia,
                     type: BrandMediaType.LOGO,
                     priority: BrandAssetPriority.PRIMARY
                 })
@@ -412,7 +412,7 @@ const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onLogoUpload,
 
                     <AnimatePresence>
                         {localIdentity.logos.map((logo, index) => {
-                            const svg = isSvg(logo.url)
+                            const svg = logo.asset && isSvg(logo.asset.url)
                             return (
                                 <motion.div
                                     key={index}
@@ -425,12 +425,12 @@ const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onLogoUpload,
                                         {svg ? (
                                             <object
                                                 type="image/svg+xml"
-                                                data={logo.url}
+                                                data={logo.asset?.url}
                                                 className="w-full h-full p-1.5"
                                             />
                                         ) : (
                                             <img
-                                                src={logo.url}
+                                                src={logo.asset?.url}
                                                 alt={`Logo ${index + 1}`}
                                                 className="w-full h-full object-contain p-1.5"
                                             />

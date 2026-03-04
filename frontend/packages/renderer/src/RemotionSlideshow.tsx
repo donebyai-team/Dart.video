@@ -1,5 +1,5 @@
 import { fromJson, JsonObject } from '@bufbuild/protobuf'
-import { Slide, SlideType, TransitionType, UploadedMedia } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { Slide, SlideType, TransitionType, MediaAsset } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Video, VideoSchema } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import { linearTiming, TransitionSeries } from '@remotion/transitions'
 import React from 'react'
@@ -20,7 +20,7 @@ interface SlideshowProps {
   videoConfig?: Video
   isPlaying: boolean
   onUpdate?: (updates: Partial<Slide>) => void
-  uploadMedia?: (file: File) => Promise<UploadedMedia>
+  uploadMedia?: (file: File) => Promise<MediaAsset>
 }
 
 type SlideComponentConfig = {
@@ -47,7 +47,7 @@ export const SlideComponent: React.FC<{
   isSelected?: boolean
   onSelect?: () => void
   onUpdate?: (updates: Partial<Slide>) => void
-  uploadMedia?: (file: File) => Promise<UploadedMedia>
+  uploadMedia?: (file: File) => Promise<MediaAsset>
 }> = ({
   slide,
   width,

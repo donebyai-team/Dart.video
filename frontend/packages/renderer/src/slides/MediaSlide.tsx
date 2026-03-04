@@ -1,4 +1,4 @@
-import { MediaSlideContent, MediaType, MetaData, Slide, UploadedMedia } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { MediaSlideContent, MediaType, MetaData, Slide, MediaAsset } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Loader2 } from 'lucide-react'
 import React, { RefObject, useEffect, useRef, useState } from 'react'
 import { preloadImage, preloadVideo } from '@remotion/preload'
@@ -20,7 +20,7 @@ interface MediaSlideProps {
   height: number
   isEditing?: boolean
   onUpdate?: (updates: Partial<Slide>) => void
-  uploadMedia?: (file: File) => Promise<UploadedMedia>
+  uploadMedia?: (file: File) => Promise<MediaAsset>
 }
 
 export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, isEditing = false, onUpdate, uploadMedia }) => {
@@ -93,7 +93,6 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, is
       <AbsoluteFill>
         {mediaContent.meta && (
           <MediaContainer
-          slideId={slide.id}
             media={mediaContent.meta}
             width={width}
             height={height}

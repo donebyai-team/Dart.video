@@ -1,9 +1,9 @@
 import { browserTokenStore } from '@coasterai/ui-core/provider/BrowserStores'
 import { CONFIG_API_URI } from './config'
-import { UploadedMedia, UploadedMediaSchema } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { MediaAsset, MediaAssetSchema } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { create } from '@bufbuild/protobuf'
 
-export const uploadMedia = async (file: File): Promise<UploadedMedia> => {
+export const uploadMedia = async (file: File): Promise<MediaAsset> => {
   // // Check file size (10 MB = 10 * 1024 * 1024 bytes)
   // const MAX_FILE_SIZE = 30 * 1024 * 1024 // 10 MB in bytes
 
@@ -27,7 +27,7 @@ export const uploadMedia = async (file: File): Promise<UploadedMedia> => {
   }
   const data = await response.json()
   console.debug("[Uploaded media]", data)
-  return create(UploadedMediaSchema, data)
+  return create(MediaAssetSchema, data)
 }
 
 export type PollVideoRenderProgress = {

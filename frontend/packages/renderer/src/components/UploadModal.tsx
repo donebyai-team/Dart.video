@@ -1,4 +1,4 @@
-import { UploadedMedia } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { MediaAsset } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { CloudUpload } from 'lucide-react'
 import React, { SetStateAction, useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -7,13 +7,13 @@ import toast from 'react-hot-toast'
 interface UploadModalProps {
   open: boolean
   onClose: () => void
-  onUpload: (url: UploadedMedia) => void
+  onUpload: (url: MediaAsset) => void
   retry: boolean
   setRetry: React.Dispatch<SetStateAction<boolean>>
   setUploading: React.Dispatch<SetStateAction<boolean>>
   setUploadError: React.Dispatch<SetStateAction<boolean>>
   accept: string
-  uploadMedia: (file: File) => Promise<UploadedMedia>
+  uploadMedia: (file: File) => Promise<MediaAsset>
 }
 
 // getVideoDurationFromUrl returns duration of video in seconds

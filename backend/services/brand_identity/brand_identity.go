@@ -11,7 +11,6 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 	"net/url"
-	"path"
 	"strings"
 )
 
@@ -168,7 +167,7 @@ func (a *brandIdentity) extractMediaImages(ctx context.Context, images map[strin
 		if err != nil {
 			a.logger.Info("Skipping logo", zap.Error(err), zap.String("logo", logo))
 		} else {
-			logos = append(logos, createBrandMediaFromAsset(ctx, asset.Url, pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_PRIMARY, pbcore.BrandMediaType_BRAND_MEDIA_TYPE_LOGO))
+			logos = append(logos, createBrandMediaFromAsset(ctx, asset, pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_PRIMARY, pbcore.BrandMediaType_BRAND_MEDIA_TYPE_LOGO))
 		}
 	}
 
@@ -177,16 +176,16 @@ func (a *brandIdentity) extractMediaImages(ctx context.Context, images map[strin
 		if err != nil {
 			a.logger.Info("Skipping logo", zap.Error(err), zap.String("logo", logo))
 		} else {
-			logos = append(logos, createBrandMediaFromAsset(ctx, asset.Url, pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_PRIMARY, pbcore.BrandMediaType_BRAND_MEDIA_TYPE_LOGO))
+			logos = append(logos, createBrandMediaFromAsset(ctx, asset, pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_PRIMARY, pbcore.BrandMediaType_BRAND_MEDIA_TYPE_LOGO))
 		}
 	}
 
 	return logos, media
 }
 
-func createBrandMediaFromAsset(_ context.Context, url string, priority pbcore.BrandAssetPriority, mediaType pbcore.BrandMediaType) *pbcore.BrandMedia {
+func createBrandMediaFromAsset(_ context.Context, asset *pbcore.MediaAsset, priority pbcore.BrandAssetPriority, mediaType pbcore.BrandMediaType) *pbcore.BrandMedia {
 	return &pbcore.BrandMedia{
-		Url:      url,
+		Asset:    asset,
 		Priority: priority,
 		Type:     mediaType,
 	}
@@ -273,46 +272,31 @@ func (b brandIdentity) GetBrandIdentities(ctx context.Context, orgID string) ([]
 /*
 Brand Identity:
 
-	ID: brand_123
-	Name: Stripe
-	Website: <https://stripe.com>
-	Tagline: Payments infrastructure for the internet
-	Description: Stripe builds economic infrastructure...
+		ID: brand_123
+		Name: Stripe
+		Website: <https://stripe.com>
+		Tagline: Payments infrastructure for the internet
+		Description: Stripe builds economic infrastructure...
 
-	Media:
-	  - Type: BRAND_MEDIA_TYPE_LOGO
-	    Priority: BRAND_ASSET_PRIORITY_PRIMARY
-	    URL: <https://stripe.com/logo.png>
+		Media:
+		 - Type: BRAND_MEDIA_TYPE_LOGO
+	   		Priority: BRAND_ASSET_PRIORITY_PRIMARY
+	   		URL: <https://cdn.example.com/logo.png>
+	   		MIME Type: image/png
+	   		Asset Type: MEDIA_TYPE_IMAGE
+	   		Dimensions: 1024x256
+	   		Render Hint: Use <img> tag
 
-	Colors:
-	  - #635BFF (BRAND_ASSET_PRIORITY_PRIMARY)
-	  - #0A2540 (BRAND_ASSET_PRIORITY_SECONDARY)
+		Colors:
+		  - #635BFF (BRAND_ASSET_PRIORITY_PRIMARY)
+		  - #0A2540 (BRAND_ASSET_PRIORITY_SECONDARY)
 
-	Fonts:
-	  - Inter (Google: Inter)
+		Fonts:
+		  - Inter (Google: Inter)
 */
 func FormatBrandDetails(b *pbcore.BrandIdentity) string {
 	if b == nil {
 		return ""
-	}
-
-	getMimeType := func(url string) string {
-		ext := strings.ToLower(path.Ext(url))
-
-		switch ext {
-		case ".svg":
-			return "image/svg+xml"
-		case ".png":
-			return "image/png"
-		case ".jpg", ".jpeg":
-			return "image/jpeg"
-		case ".webp":
-			return "image/webp"
-		case ".gif":
-			return "image/gif"
-		default:
-			return "unknown"
-		}
 	}
 
 	var sb strings.Builder
@@ -341,22 +325,37 @@ func FormatBrandDetails(b *pbcore.BrandIdentity) string {
 	if len(b.Logos) > 0 {
 		writeLine(1, "Media:")
 		for _, m := range b.Logos {
-			mimeType := getMimeType(m.Url)
-
+			if m.Asset == nil {
+				continue
+			}
+			a := m.Asset
 			writeLine(2, "- Type: %s", m.Type.String())
-
 			if m.Priority != pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_UNSPECIFIED {
 				writeLine(3, "Priority: %s", m.Priority.String())
 			}
-
-			writeLine(3, "URL: <%s>", m.Url)
-			writeLine(3, "MIME Type: %s", mimeType)
-
-			// Optional: Help LLM explicitly
-			if mimeType == "image/svg+xml" {
+			writeLine(3, "URL: <%s>", a.Url)
+			if a.MimeType != "" {
+				writeLine(3, "MIME Type: %s", a.MimeType)
+			}
+			if a.MediaType != pbcore.MediaType_MEDIA_TYPE_UNDEFINED {
+				writeLine(3, "Asset Type: %s", a.MediaType.String())
+			}
+			// Image metadata
+			if a.MediaType == pbcore.MediaType_MEDIA_TYPE_IMAGE {
+				if a.Width > 0 && a.Height > 0 {
+					writeLine(3, "Dimensions: %.0fx%.0f", a.Width, a.Height)
+				}
+			}
+			// Render hints
+			switch a.MediaType {
+			case pbcore.MediaType_MEDIA_TYPE_SVG:
 				writeLine(3, "Render Hint: Use <object> tag")
-			} else if strings.HasPrefix(mimeType, "image/") {
+
+			case pbcore.MediaType_MEDIA_TYPE_IMAGE:
 				writeLine(3, "Render Hint: Use <img> tag")
+
+			case pbcore.MediaType_MEDIA_TYPE_VIDEO:
+				writeLine(3, "Render Hint: Use <video> tag")
 			}
 		}
 	}

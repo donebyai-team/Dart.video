@@ -133,9 +133,9 @@ export declare type MediaSlideContent = Message<"coasterai.core.v1.MediaSlideCon
   mediaType: MediaType;
 
   /**
-   * @generated from field: optional coasterai.core.v1.UploadedMedia uploadedMedia = 5;
+   * @generated from field: optional coasterai.core.v1.MediaAsset uploadedMedia = 5;
    */
-  uploadedMedia?: UploadedMedia;
+  uploadedMedia?: MediaAsset;
 
   /**
    * @generated from field: optional coasterai.core.v1.MediaSlidePlan plan = 6;
@@ -227,9 +227,9 @@ export declare type AnimationSlideContent = Message<"coasterai.core.v1.Animation
 export declare const AnimationSlideContentSchema: GenMessage<AnimationSlideContent>;
 
 /**
- * @generated from message coasterai.core.v1.UploadedMedia
+ * @generated from message coasterai.core.v1.MediaAsset
  */
-export declare type UploadedMedia = Message<"coasterai.core.v1.UploadedMedia"> & {
+export declare type MediaAsset = Message<"coasterai.core.v1.MediaAsset"> & {
   /**
    * @generated from field: string url = 1;
    */
@@ -256,31 +256,41 @@ export declare type UploadedMedia = Message<"coasterai.core.v1.UploadedMedia"> &
   mimeType: string;
 
   /**
-   * @generated from field: optional float duration = 6;
-   */
-  duration?: number;
-
-  /**
-   * @generated from field: float size = 7;
+   * @generated from field: float size = 6;
    */
   size: number;
 
   /**
-   * @generated from field: string fileId = 8;
+   * @generated from field: string fileId = 7;
    */
   fileId: string;
 
   /**
-   * @generated from field: string fileName = 9;
+   * @generated from field: string fileName = 8;
    */
   fileName: string;
+
+  /**
+   * @generated from field: string id = 9;
+   */
+  id: string;
+
+  /**
+   * @generated from field: coasterai.core.v1.MediaType mediaType = 10;
+   */
+  mediaType: MediaType;
+
+  /**
+   * @generated from field: optional float duration = 11;
+   */
+  duration?: number;
 };
 
 /**
- * Describes the message coasterai.core.v1.UploadedMedia.
- * Use `create(UploadedMediaSchema)` to create a new message.
+ * Describes the message coasterai.core.v1.MediaAsset.
+ * Use `create(MediaAssetSchema)` to create a new message.
  */
-export declare const UploadedMediaSchema: GenMessage<UploadedMedia>;
+export declare const MediaAssetSchema: GenMessage<MediaAsset>;
 
 /**
  * @generated from message coasterai.core.v1.SpotlightEffect
@@ -780,6 +790,16 @@ export enum MediaType {
    * @generated from enum value: MEDIA_TYPE_VIDEO = 2;
    */
   VIDEO = 2,
+
+  /**
+   * @generated from enum value: MEDIA_TYPE_SVG = 3;
+   */
+  SVG = 3,
+
+  /**
+   * @generated from enum value: MEDIA_TYPE_CODE = 4;
+   */
+  CODE = 4,
 }
 
 /**
