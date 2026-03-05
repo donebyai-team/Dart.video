@@ -70,17 +70,19 @@ func (g *videoConfigGenerator) CreatePendingSlides(ctx context.Context,
 	sections := make([]*pbcore.Section, 0, len(plan.Sections))
 	totalAnimationSlides := 0
 	totalMediaSlides := 0
-	for _, pendingSection := range plan.Sections {
+	for index, pendingSection := range plan.Sections {
 		section := &pbcore.Section{
 			Id:     fmt.Sprintf("section-%d", time.Now().UnixNano()),
 			Title:  pendingSection.Name,
 			Color:  pickRandomColor(),
 			Slides: []*pbcore.Slide{},
+			Index:  int32(index),
 		}
-		for _, pendingSlide := range pendingSection.Slides {
+		for slideIndex, pendingSlide := range pendingSection.Slides {
 			slide := &pbcore.Slide{
 				Id:          fmt.Sprintf("slide-%d", time.Now().UnixNano()),
 				SlideStatus: pbcore.SlideStatus_SLIDE_STATUS_PENDING,
+				Index:       int32(slideIndex),
 			}
 
 			if pendingSlide.IsMediaSlide() {

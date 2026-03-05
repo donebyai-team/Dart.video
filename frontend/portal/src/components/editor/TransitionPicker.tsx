@@ -15,6 +15,8 @@ interface TransitionPickerProps {
     onSelectTransition: (transitionId: TransitionType) => void;
     onSelectDirection: (direction: TransitionDirection) => void;
     onClose: () => void;
+    /** When true, renders without the outer wrapper (no relative container, no line). */
+    inline?: boolean;
 }
 
 
@@ -26,13 +28,13 @@ const TransitionPicker = ({
     onSelectTransition,
     onSelectDirection,
     onClose,
+    inline = false,
 }: TransitionPickerProps) => {
     const currentTransition = TRANSITION_OPTIONS.find((t) => t.id === currentTransitionType);
     const supportsDirection = isDirectionSupportedTransition(currentTransitionType);
 
-    return (
-        <div className="relative flex items-center justify-center py-1">
-            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-border" />
+    const content = (
+        <>
             <button
                 onClick={(e) => {
                     e.stopPropagation();
@@ -90,6 +92,17 @@ const TransitionPicker = ({
                     </motion.div>
                 )}
             </AnimatePresence>
+        </>
+    );
+
+    if (inline) {
+        return <div className="relative">{content}</div>;
+    }
+
+    return (
+        <div className="relative flex items-center justify-center py-1">
+            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-border" />
+            {content}
         </div>
     );
 };

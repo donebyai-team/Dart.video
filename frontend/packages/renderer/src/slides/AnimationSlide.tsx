@@ -126,50 +126,50 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
     setIsLoading(true)
     setTemplateError(null)
 
-    ;(async () => {
-      try {        
-        const response = await fetch(templateUrl, { cache: 'no-store' })
-        if (!response.ok) {
-          throw new Error(`Failed to fetch template: ${response.status} ${response.statusText}`)
-        }
-        const code = await response.text()
+      ; (async () => {
+        try {
+          const response = await fetch(templateUrl, { cache: 'no-store' })
+          if (!response.ok) {
+            throw new Error(`Failed to fetch template: ${response.status} ${response.statusText}`)
+          }
+          const code = await response.text()
 
-        const result = compileRemoteComponent(code)
-        if (result.error) {
-          console.error(`Failed to compile template "${templateUrl}": ${result.error}`)
+          const result = compileRemoteComponent(code)
+          if (result.error) {
+            console.error(`Failed to compile template "${templateUrl}": ${result.error}`)
+            if (!disposed) {
+              setCompiledComponent(null)
+              setTemplateError(`Compilation failed: ${result.error}`)
+            }
+          } else {
+            if (!disposed) {
+              setCompiledComponent(() => result.Component)
+              setTemplateError(null)
+            }
+          }
+        } catch (error) {
+          if (error instanceof TypeError) {
+            console.error(`Failed to load template "${templateUrl}" (network/CORS/blocked request)`, {
+              error,
+              templateUrlJson: JSON.stringify(templateUrl),
+              length: templateUrl.length
+            })
+          } else {
+            console.error(`Failed to load template "${templateUrl}"`, error)
+          }
           if (!disposed) {
             setCompiledComponent(null)
-            setTemplateError(`Compilation failed: ${result.error}`)
+            setTemplateError(
+              `Failed to load template: ${error instanceof Error ? error.message : String(error)}`
+            )
           }
-        } else {
+        } finally {
           if (!disposed) {
-            setCompiledComponent(() => result.Component)
-            setTemplateError(null)
+            setIsLoading(false)
+            if (renderHandle) continueRender(renderHandle)
           }
         }
-      } catch (error) {
-        if (error instanceof TypeError) {
-          console.error(`Failed to load template "${templateUrl}" (network/CORS/blocked request)`, {
-            error,
-            templateUrlJson: JSON.stringify(templateUrl),
-            length: templateUrl.length
-          })
-        } else {
-          console.error(`Failed to load template "${templateUrl}"`, error)
-        }
-        if (!disposed) {
-          setCompiledComponent(null)
-          setTemplateError(
-            `Failed to load template: ${error instanceof Error ? error.message : String(error)}`
-          )
-        }
-      } finally {
-        if (!disposed) {
-          setIsLoading(false)
-          if (renderHandle) continueRender(renderHandle)
-        }
-      }
-    })()
+      })()
 
     return () => {
       disposed = true
@@ -185,62 +185,15 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
       }}
     >
       <AnimatedBackground width={width} height={height} />
-
-      {/* <TemplateContainer
-        x={templateMeta.x as number}
-        y={templateMeta.y as number}
-        width={templateMeta.width as number}
-        height={templateMeta.height as number}
-        canvasWidth={width}
-        canvasHeight={height}
-        isEditing={isEditing}
-        isSelected={isSelected}
-        onUpdate={updates => {
-          if (onUpdate && content) {
-            onUpdate({
-              ...slide,
-              content: {
-                case: 'animation',
-                value: {
-                  ...content,
-                  meta: {
-                    ...templateMeta,
-                    ...updates
-                  }
-                }
-              }
-            } as Slide)
-          }
-        }}
-      > */}
-        <div style={{ width: '100%', height: '100%' }}>
-          {isLoading ? (
-            <TemplateLoadingPlaceholder />
-          ) : CompiledComponent ? (
-            <CompiledComponent
-              onChange={(props: any) => {
-                if (onUpdate && props) {
-                  onUpdate({
-                    ...slide,
-                    content: {
-                      case: 'animation',
-                      value: {
-                        ...content,
-                        templateConfig: {
-                          ...templateConfig,
-                          ...props
-                        }
-                      }
-                    }
-                  } as Slide)
-                }
-              }}
-            />
-          ) : templateError ? (
-            <TemplateErrorFallback message={templateError} />
-          ) : null}
-        </div>
-      {/* </TemplateContainer> */}
+      <div style={{ width: '100%', height: '100%' }}>
+        {isLoading ? (
+          <TemplateLoadingPlaceholder />
+        ) : CompiledComponent ? (
+          <CompiledComponent />
+        ) : templateError ? (
+          <TemplateErrorFallback message={templateError} />
+        ) : null}
+      </div>
     </AbsoluteFill>
   )
 }

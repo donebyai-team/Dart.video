@@ -555,6 +555,11 @@ export declare type Slide = Message<"coasterai.core.v1.Slide"> & {
    * @generated from field: coasterai.core.v1.SlideStatus slideStatus = 22;
    */
   slideStatus: SlideStatus;
+
+  /**
+   * @generated from field: int32 index = 24;
+   */
+  index: number;
 };
 
 /**
@@ -719,6 +724,11 @@ export declare type Section = Message<"coasterai.core.v1.Section"> & {
    * @generated from field: optional bool voiceoverGenerated = 5;
    */
   voiceoverGenerated?: boolean;
+
+  /**
+   * @generated from field: int32 index = 6;
+   */
+  index: number;
 };
 
 /**

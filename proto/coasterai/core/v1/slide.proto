@@ -199,6 +199,7 @@ message Slide {
   repeated ZoomEffect zooms = 20;
   google.protobuf.Struct plan = 21;
   SlideStatus slideStatus = 22;
+  int32 index = 24;
 }
 
 message BackgroundStyle {
@@ -246,4 +247,5 @@ message Section {
   string color = 3;
   repeated Slide slides = 4;
   optional bool voiceoverGenerated = 5;
+  int32 index = 6;
 }

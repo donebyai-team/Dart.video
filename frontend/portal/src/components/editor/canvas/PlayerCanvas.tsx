@@ -1,14 +1,11 @@
-import { useRef, useEffect, useState, useCallback, useMemo } from 'react'
+import { useRef, useEffect, useMemo } from 'react'
 import { Player, PlayerRef } from '@remotion/player'
 import { motion } from 'framer-motion'
 import CanvasOverlay from './CanvasOverlay'
 import { SlideshowWithStore as Slideshow } from '../SlideshowWithStore'
 import { useVideoStore } from '@/stores/video'
 import { AnimationEditLayer } from '../animation/AnimationEditLayer'
-import type { ElementEdit } from '../animation/AnimationToolbar'
-import type { RegistryEntry } from '@coasterai/renderer'
-import { AnimationSlideContent } from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import { JsonObject } from '@bufbuild/protobuf'
+import { useAnimationEdit } from '../animation/useAnimationEdit'
 
 interface PlayerCanvasProps {
   playerRef: React.RefObject<PlayerRef>
@@ -42,71 +39,15 @@ const PlayerCanvas = ({
   const onUpdateSpotlight = useVideoStore(s => s.updateSpotlight)
   const onUpdateCallout = useVideoStore(s => s.updateCallout)
   const onUpdateZoom = useVideoStore(s => s.updateZoom)
-  const updateSlide = useVideoStore(s => s.updateSlide)
 
-  // ── Animation element editing ─────────────────────────────────────────────
-  const content = selectedSlide?.slide?.content
-  // Keep a ref so applyEdit can access latest slide content without stale closure
-  const selectedSlideRef = useRef(selectedSlide)
-  useEffect(() => { selectedSlideRef.current = selectedSlide }, [selectedSlide])
-  const isAnimationSlide = content?.case === 'animation'
-  const animRegistry: Record<string, RegistryEntry> = isAnimationSlide
-  ? ((content.value as AnimationSlideContent)?.templateConfig ?? {}) as unknown as Record<
-      string,
-      RegistryEntry
-    >
-  : {}
-
-  const [selectedEid, setSelectedEid] = useState<string | null>(null)
-  const [editStore, setEditStore] = useState<Record<string, ElementEdit>>({})
-  const [animEditVersion, setAnimEditVersion] = useState(0)
-
-  // Load saved edits when slide changes
-  useEffect(() => {
-    setSelectedEid(null)
-    setAnimEditVersion(0)
-
-    const savedEdits = isAnimationSlide
-      ? ((content.value as AnimationSlideContent)?.edits ?? {}) as Record<string, ElementEdit>
-      : {}
-
-    setEditStore(savedEdits)
-    ;(window as any).__EDIT_STORE__ = savedEdits
-  }, [selectedSlide?.slide?.id]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  const applyEdit = useCallback((eid: string, patch: Partial<ElementEdit>) => {
-    setEditStore(prev => {
-      const existing = prev[eid] ?? {}
-      const next: Record<string, ElementEdit> = {
-        ...prev,
-        [eid]: {
-          ...existing,
-          ...(patch.style ? { style: { ...(existing.style ?? {}), ...patch.style } } : {}),
-          ...(patch.text !== undefined ? { text: patch.text } : {}),
-          ...(patch.asset !== undefined ? { asset: patch.asset } : {}),
-          ...(patch.icon !== undefined ? { icon: patch.icon } : {}),
-        },
-      }
-      ;(window as any).__EDIT_STORE__ = next
-      return next
-    })
-    setAnimEditVersion(v => v + 1)
-  }, [])
-
-  // ── Persist editStore to slide when it changes ───────────────────────────
-  useEffect(() => {
-    if (!isAnimationSlide) return
-    const slideContent = selectedSlideRef.current?.slide?.content
-    if (slideContent?.case !== 'animation') return
-    const edits = editStore as unknown as JsonObject
-    console.log("updating edits", edits)
-    updateSlide({
-      content: {
-        case: 'animation',
-        value: { ...slideContent.value, edits: edits },
-      },
-    })
-  }, [editStore]) // eslint-disable-line react-hooks/exhaustive-deps
+  const { isAnimationSlide, 
+    animRegistry, 
+    selectedEid, 
+    setSelectedEid, 
+    editStore, 
+    animEditVersion, 
+    applyEdit 
+  } = useAnimationEdit()
 
   // ── Refs ──────────────────────────────────────────────────────────────────
   const containerRef = useRef<HTMLDivElement>(null)
