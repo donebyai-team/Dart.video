@@ -28,7 +28,7 @@ function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_hi
     You are generating ONE such slide.
 
     Your output must behave as a self-contained visual unit that:
-    - fits inside a slide
+    - fits inside a slide of provided resolution
     - does not assume full-video control
     - works alongside other slides
     - Do NOT control scene transitions

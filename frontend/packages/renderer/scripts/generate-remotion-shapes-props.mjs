@@ -77,7 +77,7 @@ function buildOutput(propsMap) {
 }
 
 async function main() {
-  const remotionShapes = await import("@remotion/shapes");
+  const remotionShapes = await import("@remotion/layout-utils");
   const componentNames = getComponentNames(remotionShapes);
 
   if (componentNames.length === 0) {
