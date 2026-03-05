@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, forwardRef, useImperativeHandle, useMemo } from "react";
+import { useRef, useEffect, useState, useCallback, forwardRef, useImperativeHandle, useMemo } from "react";
 import { PlayerRef } from "@remotion/player";
 import {
   Play,
@@ -21,6 +21,7 @@ import {
 import PlayerCanvas from "./PlayerCanvas";
 import PlayerTimeline from "../timeline/PlayerTimeline";
 import PlayerToolbar from "../PlayerToolbar";
+import { AnimationToolbar, type ElementEdit, type RegistryEntry } from "../animation/AnimationToolbar";
 import { usePlayerControls, type PlayerControls } from "@/hooks/usePlayerControls";
 import { useRemotionPlayerEvents } from "@/hooks/useRemotionPlayerEvents";
 import { useSlideSelection } from "@/hooks/useSlideSelection";
@@ -60,6 +61,19 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   const videoConfigFromStore = useVideoStore(s => s.videoConfig);
   const selectedSlide = useVideoStore(s => s.selectedSlide)?.slide;
   const onSelectOEffect = useVideoStore(s => s.handleSelectEffect);
+
+  // Animation element editing state
+  const [selectedEid, setSelectedEid] = useState<string | null>(null)
+  const [editStore, setEditStore] = useState<Record<string, ElementEdit>>({})
+  const [animEditVersion, setAnimEditVersion] = useState(0)
+
+  // Reset editing state when slide changes
+  useEffect(() => {
+    setSelectedEid(null)
+    setEditStore({})
+    setAnimEditVersion(0)
+    ;(window as any).__EDIT_STORE__ = {}
+  }, [selectedSlide?.id])
 
   const resolution = videoConfigFromStore?.metadata?.resolution;
   const fps = videoConfigFromStore?.metadata?.fps || 30;
@@ -166,6 +180,24 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   // Expose methods via ref - delegate to centralized controls
   useImperativeHandle(ref, () => controls, [controls]);
 
+  const applyEdit = useCallback((eid: string, patch: Partial<ElementEdit>) => {
+    console.log('applyEdit', eid, patch)
+    setEditStore(prev => {
+      const existing = prev[eid] || {}
+      const next: Record<string, ElementEdit> = {
+        ...prev,
+        [eid]: {
+          ...existing,
+          ...(patch.style ? { style: { ...(existing.style || {}), ...patch.style } } : {}),
+          ...(patch.text !== undefined ? { text: patch.text } : {}),
+        },
+      }
+      ;(window as any).__EDIT_STORE__ = next
+      return next
+    })
+    setAnimEditVersion(v => v + 1)
+  }, [])
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
@@ -268,12 +300,30 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
 
 
 
+  const isAnimationSlide = selectedSlide?.content?.case === 'animation'
+  const animationTemplateConfig = isAnimationSlide
+    ? ((selectedSlide?.content?.value as any)?.templateConfig ?? {})
+    : {}
+  // Registry is stored in templateConfig.registry by the AST transform service
+  const animRegistry = (animationTemplateConfig ?? {}) as Record<string, RegistryEntry>
+
   return (
     <div ref={fullscreenContainerRef} className="flex flex-col h-full">
       {/* Unified Player Toolbar - includes duration control and slide editing tools */}
       {!isFullscreen && onDurationChange && (
         <PlayerToolbar
           onDurationChange={(newDuration) => onDurationChange(selectedSlideId, newDuration)}
+        />
+      )}
+
+      {/* Animation element editing toolbar */}
+      {!isFullscreen && isAnimationSlide && !isPlaying && (
+        <AnimationToolbar
+          selectedEid={selectedEid}
+          registry={animRegistry}
+          editStore={editStore}
+          onEdit={applyEdit}
+          onDeselect={() => setSelectedEid(null)}
         />
       )}
 
@@ -293,6 +343,8 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
           onSetScale={setUserZoom}
           isPlaying={isPlaying}
           onSelectTemplate={onSelectTemplate}
+          onSelectElement={isAnimationSlide ? setSelectedEid : undefined}
+          animEditVersion={isAnimationSlide ? animEditVersion : undefined}
         />
       </div>
 

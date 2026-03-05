@@ -16,6 +16,8 @@ interface PlayerCanvasProps {
   onSetScale: (scale: number) => void
   isPlaying?: boolean
   onSelectTemplate?: (slideId: string) => void
+  onSelectElement?: (eid: string | null) => void
+  animEditVersion?: number
 }
 
 const PlayerCanvas = ({
@@ -28,21 +30,24 @@ const PlayerCanvas = ({
   canvasSize,
   onSetScale,
   onSelectTemplate,
+  onSelectElement,
+  animEditVersion,
   isPlaying = false
 }: PlayerCanvasProps) => {
   const videoConfigFromStore = useVideoStore(s => s.videoConfig)
   const selectedSlide = useVideoStore(s => s.selectedSlide)  
 
   // Memoization of inputProps before passing to <Player/>.
-  // Prevents regressions in playback behaviour of Video 
+  // Prevents regressions in playback behaviour of Video
   const inputProps = useMemo(() => {
     return {
       fps,
       isEditing,
       onSelectTemplate,
       isPlaying,
+      animEditVersion,
     }
-  }, [fps, isEditing, onSelectTemplate, isPlaying])
+  }, [fps, isEditing, onSelectTemplate, isPlaying, animEditVersion])
 
   // Early return if no data
   if (!videoConfigFromStore?.config?.sections || !videoConfigFromStore?.metadata?.resolution || !selectedSlide) {
@@ -106,6 +111,18 @@ const PlayerCanvas = ({
             height: '100%',
             pointerEvents: 'auto' // Always allow pointer events to reach templates
           }}
+          onClick={isEditing && onSelectElement ? (e) => {
+            // Walk up from click target to find a data-eid element
+            let el = e.target as HTMLElement | null
+            while (el && el !== e.currentTarget) {
+              if (el.dataset?.eid) {
+                onSelectElement(el.dataset.eid)
+                return
+              }
+              el = el.parentElement
+            }
+            onSelectElement(null)
+          } : undefined}
         >
           <Player
             ref={playerRef}

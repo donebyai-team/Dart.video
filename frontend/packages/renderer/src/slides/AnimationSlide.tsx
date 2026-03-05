@@ -235,7 +235,6 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
                   } as Slide)
                 }
               }}
-              props={templateConfig}
             />
           ) : templateError ? (
             <TemplateErrorFallback message={templateError} />
