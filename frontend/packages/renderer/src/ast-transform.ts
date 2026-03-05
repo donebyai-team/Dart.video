@@ -598,6 +598,8 @@ function createTransformPlugin(registry: Record<string, RegistryEntry>) {
           // Route to element-specific handler
           if (elementName === "img" || elementName === "Img") {
             handleImg(openingEl, eidNode, varMap, entry);
+            // Also patch style so width/height edits are applied via __patch
+            handleStyleProp(openingEl, eid, eidNode, varMap, entry);
           } else {
             handleStyleProp(openingEl, eid, eidNode, varMap, entry);
             const newChildren = wrapTextChildren(

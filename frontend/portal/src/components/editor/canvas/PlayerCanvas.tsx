@@ -83,6 +83,8 @@ const PlayerCanvas = ({
           ...existing,
           ...(patch.style ? { style: { ...(existing.style ?? {}), ...patch.style } } : {}),
           ...(patch.text !== undefined ? { text: patch.text } : {}),
+          ...(patch.asset !== undefined ? { asset: patch.asset } : {}),
+          ...(patch.icon !== undefined ? { icon: patch.icon } : {}),
         },
       }
       ;(window as any).__EDIT_STORE__ = next
@@ -96,10 +98,12 @@ const PlayerCanvas = ({
     if (!isAnimationSlide) return
     const slideContent = selectedSlideRef.current?.slide?.content
     if (slideContent?.case !== 'animation') return
+    const edits = editStore as unknown as JsonObject
+    console.log("updating edits", edits)
     updateSlide({
       content: {
         case: 'animation',
-        value: { ...slideContent.value, edits: editStore as unknown as JsonObject },
+        value: { ...slideContent.value, edits: edits },
       },
     })
   }, [editStore]) // eslint-disable-line react-hooks/exhaustive-deps
