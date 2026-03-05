@@ -1,7 +1,7 @@
 import { AnimationSlideContent, MetaData, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import React, { useEffect, useState } from 'react'
 
-import { AbsoluteFill, continueRender, delayRender } from 'remotion'
+import { AbsoluteFill, continueRender, delayRender, useRemotionEnvironment } from 'remotion'
 import { compileRemoteComponent } from '../compiler'
 import { TemplateContainer } from '../components/TemplateContainer'
 import { AnimatedBackground } from '../effects/AnimatedBackground'
@@ -41,6 +41,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
   const [isLoading, setIsLoading] = useState(true)
   const [templateError, setTemplateError] = useState<string | null>(null)
 
+  const { isRendering } = useRemotionEnvironment()
   const content = slide.content.value as AnimationSlideContent
   // template id for hard-coded local templates
   const localTemplateId = content?.templateId
@@ -175,6 +176,14 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
       disposed = true
     }
   }, [templateUrl])
+
+  // During rendering, useAnimationEdit is not mounted so window.__EDIT_STORE__
+  // is never populated. Seed it from content.edits so the AST-transformed
+  // compiled component can read persisted edits.
+  // edits should be of type ElementEdit
+  if (isRendering && content?.edits) {
+    ;(window as any).__EDIT_STORE__ = content.edits
+  }
 
   return (
     <AbsoluteFill

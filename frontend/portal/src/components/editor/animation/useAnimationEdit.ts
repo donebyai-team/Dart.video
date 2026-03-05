@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import type { RegistryEntry } from '@coasterai/renderer'
-import type { ElementEdit } from './AnimationToolbar'
 import { AnimationSlideContent } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { JsonObject } from '@bufbuild/protobuf'
 import { useVideoStore } from '@/stores/video'
 import { debounce } from '@/stores/video/sync'
+import { ElementEdit } from '@coasterai/renderer/src/types/ast'
 
 interface UseAnimationEditReturn {
   isAnimationSlide: boolean
@@ -14,6 +14,7 @@ interface UseAnimationEditReturn {
   editStore:        Record<string, ElementEdit>
   animEditVersion:  number
   applyEdit:        (eid: string, patch: Partial<ElementEdit>) => void
+  flushPersist:     () => void
 }
 
 export function useAnimationEdit(): UseAnimationEditReturn {
@@ -41,6 +42,9 @@ export function useAnimationEdit(): UseAnimationEditReturn {
   // ── State ────────────────────────────────────────────────────────────────────
   const [selectedEid,     setSelectedEid]     = useState<string | null>(null)
   const [editStore,       setEditStore]       = useState<Record<string, ElementEdit>>({})
+  // Ref kept in sync inside the setEditStore updater (runs synchronously), so
+  // flushPersist can read the latest value right after applyEdit is called.
+  const editStoreRef = useRef<Record<string, ElementEdit>>({})
   const [animEditVersion, setAnimEditVersion] = useState(0)
 
   // Tracks whether the current editStore value came from loading (not a user edit).
@@ -62,6 +66,7 @@ export function useAnimationEdit(): UseAnimationEditReturn {
       ? ((content?.value as AnimationSlideContent)?.edits ?? {}) as Record<string, ElementEdit>
       : {}
 
+    editStoreRef.current = savedEdits
     setEditStore(savedEdits)
   }, [slideId]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -70,7 +75,7 @@ export function useAnimationEdit(): UseAnimationEditReturn {
     console.log('applying edits', eid, patch)
     setEditStore(prev => {
       const existing = prev[eid] ?? {}
-      return {
+      const next = {
         ...prev,
         [eid]: {
           ...existing,
@@ -80,6 +85,8 @@ export function useAnimationEdit(): UseAnimationEditReturn {
           ...(patch.icon  !== undefined ? { icon:  patch.icon  } : {}),
         },
       }
+      editStoreRef.current = next
+      return next
     })
     setAnimEditVersion(v => v + 1)
   }, [])
@@ -121,6 +128,18 @@ export function useAnimationEdit(): UseAnimationEditReturn {
     debouncedPersist(editStore)
   }, [editStore, isAnimationSlide, debouncedPersist])
 
+  const flushPersist = useCallback(() => {
+    debouncedPersist.cancel?.()
+    const slideContent = selectedSlideRef.current?.slide?.content
+    if (slideContent?.case !== 'animation') return
+    updateSlide({
+      content: {
+        case: 'animation',
+        value: { ...slideContent.value, edits: editStoreRef.current as unknown as JsonObject },
+      },
+    })
+  }, [debouncedPersist, updateSlide])
+
   return {
     isAnimationSlide,
     animRegistry,
@@ -129,5 +148,6 @@ export function useAnimationEdit(): UseAnimationEditReturn {
     editStore,
     animEditVersion,
     applyEdit,
+    flushPersist,
   }
 }

@@ -3,13 +3,8 @@ import type { RegistryEntry } from '@coasterai/renderer'
 import { TextToolbar } from './toolbars/TextToolbar'
 import { ImageToolbar } from './toolbars/ImageToolbar'
 import { IconToolbar } from './toolbars/IconToolbar'
+import { ElementEdit } from '@coasterai/renderer/src/types/ast'
 
-export interface ElementEdit {
-  style?: Record<string, string | number>
-  text?: string
-  asset?: string
-  icon?: string
-}
 
 interface AnimationToolbarProps {
   selectedEid: string | null

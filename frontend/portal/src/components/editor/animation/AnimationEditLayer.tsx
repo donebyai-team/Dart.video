@@ -9,9 +9,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimationToolbar } from './AnimationToolbar'
-import type { ElementEdit } from './AnimationToolbar'
 import type { RegistryEntry } from '@coasterai/renderer'
 import { TextEditOverlay } from './TextEditOverlay'
+import { ElementEdit } from '@coasterai/renderer/src/types/ast'
 
 interface FRect { left: number; top: number; width: number; height: number }
 
@@ -23,6 +23,7 @@ interface AnimationEditLayerProps {
   animEditVersion?: number
   onSelectElement: (eid: string | null) => void
   onEdit: (eid: string, patch: Partial<ElementEdit>) => void
+  onTextCommit?: () => void
 }
 
 export function AnimationEditLayer({
@@ -33,6 +34,7 @@ export function AnimationEditLayer({
   animEditVersion,
   onSelectElement,
   onEdit,
+  onTextCommit,
 }: AnimationEditLayerProps) {
   const toolbarRef = useRef<HTMLDivElement>(null)
 
@@ -126,7 +128,8 @@ export function AnimationEditLayer({
       })
     }
     setIsInlineEditing(false)
-  }, [selectedEid, onEdit])
+    onTextCommit?.()
+  }, [selectedEid, onEdit, onTextCommit])
 
   const handleEditorHeightChange = useCallback((h: number) => {
     setEditorHeight(h)

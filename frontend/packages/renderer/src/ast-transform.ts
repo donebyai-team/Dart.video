@@ -1,49 +1,5 @@
 import * as Babel from "@babel/standalone";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-type VarEntry =
-  | { type: "interpolate"; frameRange: number[]; outputRange: unknown[]; raw: unknown }
-  | { type: "spring"; config: Record<string, unknown>; raw: unknown }
-  | { type: "static"; value: string | number; raw: unknown }
-  | { type: "computed" }
-  | { type: "unknown" };
-
-export interface AnimatedPropInfo {
-  type: "interpolate" | "spring";
-  outputRange?: unknown[];
-  frameRange?: number[];
-  config?: Record<string, unknown>;
-}
-
-export interface EditablePropInfo {
-  editable: boolean;
-  confidence: "high" | "low";
-  staticValue: unknown;
-}
-
-export interface RegistryEntry {
-  eid: string;
-  elementType: string;
-  label: string;
-  isLoopItem: boolean;
-  parentEid?: string;
-  editableProps: Record<string, EditablePropInfo>;
-  staticStyle: Record<string, unknown>;
-  animatedProps: Record<string, AnimatedPropInfo>;
-  nonEditable: string[];
-  lowConfidence: string[];
-  textType: "static" | "dynamic" | "animated" | "mixed" | "none";
-  staticText?: string;
-  assetType: "image" | "icon" | "none";
-  staticSrc?: string;
-  iconName?: string;
-}
-
-export interface TransformResult {
-  transformedCode: string;
-  registry: Record<string, RegistryEntry>;
-}
+import { VarEntry, RegistryEntry, TransformResult } from "./types/ast";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 

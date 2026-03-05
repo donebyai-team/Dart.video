@@ -41,12 +41,13 @@ const PlayerCanvas = ({
   const onUpdateZoom = useVideoStore(s => s.updateZoom)
 
   const { isAnimationSlide, 
-    animRegistry, 
-    selectedEid, 
-    setSelectedEid, 
-    editStore, 
-    animEditVersion, 
-    applyEdit 
+    animRegistry,
+    selectedEid,
+    setSelectedEid,
+    editStore,
+    animEditVersion,
+    applyEdit,
+    flushPersist,
   } = useAnimationEdit()
 
   // ── Refs ──────────────────────────────────────────────────────────────────
@@ -148,6 +149,7 @@ const PlayerCanvas = ({
           animEditVersion={animEditVersion}
           onSelectElement={setSelectedEid}
           onEdit={applyEdit}
+          onTextCommit={flushPersist}
         />
       )}
     </div>
