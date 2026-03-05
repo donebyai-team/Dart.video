@@ -1,14 +1,5 @@
-import { X } from 'lucide-react'
-
-export interface RegistryEntry {
-  eid: string
-  elementType: string
-  textType: 'static' | 'dynamic' | 'animated' | 'mixed' | 'none'
-  staticText?: string
-  staticStyle: Record<string, any>
-  nonEditable?: string[]
-  assetType?: 'image' | 'icon' | 'none'
-}
+import { RegistryEntry } from '@coasterai/renderer'
+import { X, Bold, Italic, AlignLeft, AlignCenter, AlignRight } from 'lucide-react'
 
 export interface ElementEdit {
   style?: Record<string, string | number>
@@ -30,160 +21,195 @@ export function AnimationToolbar({
   onEdit,
   onDeselect,
 }: AnimationToolbarProps) {
-  // Empty state
-  if (!selectedEid) {
-    return (
-      <div className="h-10 border-b border-border flex items-center px-3 text-sm text-muted-foreground select-none">
-        Click an element to edit
-      </div>
-    )
-  }
+
+  if (!selectedEid) return null
 
   const entry = registry[selectedEid]
-  if (!entry) {
-    return (
-      <div className="h-10 border-b border-border flex items-center px-3 text-sm text-muted-foreground select-none">
-        <span>Unknown element</span>
-        <div className="flex-1" />
-        <DeselectButton onDeselect={onDeselect} />
-      </div>
-    )
-  }
+  if (!entry) return null
 
-  const currentStyle = { ...entry.staticStyle, ...(editStore[selectedEid]?.style ?? {}) }
-  const currentText = editStore[selectedEid]?.text ?? entry.staticText ?? ''
+  const merged = { ...entry.staticStyle, ...(editStore[selectedEid]?.style ?? {}) }
+  const isText = entry.textType === 'static'
 
-  function onStyleChange(prop: string, value: string | number) {
+  function setStyle(prop: string, value: string | number) {
     onEdit(selectedEid!, { style: { [prop]: value } })
   }
 
-  // Text element controls
-  if (entry.textType === 'static') {
-    const fontSize = parseFloat(String(currentStyle.fontSize)) || 16
-    const isBold =
-      currentStyle.fontWeight === 700 ||
-      currentStyle.fontWeight === '700' ||
-      currentStyle.fontWeight === 'bold'
-    const color = toHex(currentStyle.color)
+  const isBold = merged.fontWeight === 700 || merged.fontWeight === 'bold'
+  const isItalic = merged.fontStyle === 'italic'
 
-    return (
-      <div className="h-10 border-b border-border flex items-center px-3 gap-2 bg-background">
-        {/* Text content */}
-        <input
-          type="text"
-          value={currentText}
-          onChange={e => onEdit(selectedEid!, { text: e.target.value })}
-          className="h-7 px-2 text-sm bg-muted rounded border border-border w-48 focus:outline-none focus:ring-1 focus:ring-ring"
-          placeholder="Text content"
-        />
-
-        <Divider />
-
-        {/* Font size */}
-        {'fontSize' in currentStyle && (
-          <label className="flex items-center gap-1 text-xs text-muted-foreground">
-            Size
-            <input
-              type="number"
-              value={fontSize}
-              onChange={e => onStyleChange('fontSize', Number(e.target.value))}
-              className="h-7 w-14 px-2 text-sm bg-muted rounded border border-border focus:outline-none focus:ring-1 focus:ring-ring"
-              min={8}
-              max={300}
-            />
-          </label>
-        )}
-
-        {/* Bold */}
-        {'fontWeight' in currentStyle && (
-          <button
-            onClick={() => onStyleChange('fontWeight', isBold ? 400 : 700)}
-            title="Bold"
-            className={`h-7 w-7 flex items-center justify-center rounded text-sm font-bold transition-colors ${
-              isBold ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-foreground'
-            }`}
-          >
-            B
-          </button>
-        )}
-
-        {/* Color */}
-        {'color' in currentStyle && (
-          <label className="flex items-center gap-1 text-xs text-muted-foreground cursor-pointer">
-            Color
-            <span
-              className="h-5 w-5 rounded border border-border overflow-hidden"
-              style={{ background: currentStyle.color }}
-            >
-              <input
-                type="color"
-                value={color}
-                onChange={e => onStyleChange('color', e.target.value)}
-                className="opacity-0 w-full h-full cursor-pointer"
-              />
-            </span>
-          </label>
-        )}
-
-        <div className="flex-1" />
-
-        <DeselectButton onDeselect={onDeselect} />
-      </div>
-    )
-  }
-
-  // Fallback: non-text / prompt-only
   return (
-    <div className="h-10 border-b border-border flex items-center px-3 gap-2 bg-background">
-      <span className="text-sm text-muted-foreground">
-        {entry.elementType}
-      </span>
-      <span className="text-xs text-muted-foreground/50">prompt-only editing</span>
-      <div className="flex-1" />
-      <DeselectButton onDeselect={onDeselect} />
+    <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-background/95 backdrop-blur-lg border border-border shadow-xl text-sm select-none">
+
+      {isText && (
+        <>
+          {/* FONT FAMILY */}
+          <select
+            value={String(merged.fontFamily ?? "Inter")}
+            onChange={e => setStyle('fontFamily', e.target.value)}
+            className="h-8 px-2 rounded-md border border-border bg-muted text-xs"
+          >
+            <option>Inter</option>
+            <option>Arial</option>
+            <option>Roboto</option>
+            <option>Georgia</option>
+            <option>Courier New</option>
+          </select>
+
+          {/* FONT SIZE */}
+          {'fontSize' in merged && (
+            <div className="flex items-center gap-1">
+              <input
+                type="number"
+                value={parseFloat(String(merged.fontSize)) || 16}
+                onChange={e => setStyle('fontSize', Number(e.target.value))}
+                className="h-8 w-14 text-center rounded-md border border-border bg-muted text-xs"
+                min={8}
+                max={300}
+              />
+              <span className="text-muted-foreground text-xs">px</span>
+            </div>
+          )}
+
+          <Sep />
+
+          {/* BOLD */}
+          <IconBtn
+            active={isBold}
+            onClick={() => setStyle('fontWeight', isBold ? 400 : 700)}
+            title="Bold"
+          >
+            <Bold size={14} />
+          </IconBtn>
+
+          {/* ITALIC */}
+          <IconBtn
+            active={isItalic}
+            onClick={() =>
+              setStyle('fontStyle', isItalic ? 'normal' : 'italic')
+            }
+            title="Italic"
+          >
+            <Italic size={14} />
+          </IconBtn>
+
+          <Sep />
+
+          {/* ALIGNMENT */}
+          <IconBtn
+            active={merged.textAlign === 'left'}
+            onClick={() => setStyle('textAlign', 'left')}
+            title="Align left"
+          >
+            <AlignLeft size={14} />
+          </IconBtn>
+
+          <IconBtn
+            active={merged.textAlign === 'center'}
+            onClick={() => setStyle('textAlign', 'center')}
+            title="Align center"
+          >
+            <AlignCenter size={14} />
+          </IconBtn>
+
+          <IconBtn
+            active={merged.textAlign === 'right'}
+            onClick={() => setStyle('textAlign', 'right')}
+            title="Align right"
+          >
+            <AlignRight size={14} />
+          </IconBtn>
+
+          <Sep />
+
+          {/* COLOR */}
+          {'color' in merged && (
+            <ColorSwatch
+              color={merged.color}
+              title="Text color"
+              onChange={v => setStyle('color', v)}
+            />
+          )}
+        </>
+      )}
+
+      <Sep />
+
+      {/* <IconBtn onClick={onDeselect} title="Close">
+        <X size={14} />
+      </IconBtn> */}
     </div>
   )
 }
 
-function Divider() {
-  return <div className="w-px h-5 bg-border shrink-0" />
+function Sep() {
+  return <div className="w-px h-5 bg-border/60 mx-1" />
 }
 
-function DeselectButton({ onDeselect }: { onDeselect: () => void }) {
+function IconBtn({
+  children,
+  active,
+  onClick,
+  title,
+}: {
+  children: React.ReactNode
+  active?: boolean
+  onClick: () => void
+  title?: string
+}) {
   return (
     <button
-      onClick={onDeselect}
-      className="h-7 w-7 flex items-center justify-center rounded hover:bg-muted transition-colors"
-      title="Deselect"
+      onClick={onClick}
+      title={title}
+      className={`h-8 w-8 flex items-center justify-center rounded-md transition
+        ${active
+          ? 'bg-primary text-primary-foreground'
+          : 'hover:bg-muted text-foreground'
+        }`}
     >
-      <X className="w-3.5 h-3.5" />
+      {children}
     </button>
   )
 }
 
-/**
- * Convert any CSS color to #rrggbb for <input type="color">.
- * Only handles hex reliably; rgb/named colors fall back to white.
- */
+function ColorSwatch({
+  color,
+  title,
+  onChange,
+}: {
+  color: unknown
+  title?: string
+  onChange: (v: string) => void
+}) {
+  return (
+    <label className="relative cursor-pointer" title={title}>
+      <span
+        className="w-6 h-6 rounded-md border border-border shadow-sm block"
+        style={{ background: typeof color === 'string' ? color : '#fff' }}
+      />
+      <input
+        type="color"
+        value={toHex(color)}
+        onChange={e => onChange(e.target.value)}
+        className="absolute inset-0 opacity-0 cursor-pointer"
+      />
+    </label>
+  )
+}
+
 function toHex(color: unknown): string {
   if (!color || typeof color !== 'string') return '#ffffff'
   const c = color.trim()
-  if (c.startsWith('#')) {
-    if (c.length === 4) {
-      // #abc → #aabbcc
-      return `#${c[1]}${c[1]}${c[2]}${c[2]}${c[3]}${c[3]}`
-    }
-    return c.slice(0, 7)
-  }
-  // rgb(...) — parse and convert
+
+  if (c.startsWith('#')) return c.slice(0, 7)
+
   const m = c.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/)
-  if (m) {
+  if (m)
     return (
       '#' +
       [m[1], m[2], m[3]]
         .map(n => parseInt(n).toString(16).padStart(2, '0'))
         .join('')
     )
-  }
+
   return '#ffffff'
 }

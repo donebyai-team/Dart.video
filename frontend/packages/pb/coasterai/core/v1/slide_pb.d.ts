@@ -218,6 +218,11 @@ export declare type AnimationSlideContent = Message<"coasterai.core.v1.Animation
    * @generated from field: optional coasterai.core.v1.AnimationSlidePlan plan = 5;
    */
   plan?: AnimationSlidePlan;
+
+  /**
+   * @generated from field: google.protobuf.Struct edits = 6;
+   */
+  edits?: JsonObject;
 };
 
 /**

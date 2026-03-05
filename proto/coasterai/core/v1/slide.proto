@@ -111,6 +111,7 @@ message AnimationSlideContent {
   MetaData meta = 3;
   string templateUrl = 4;
   optional AnimationSlidePlan plan = 5;
+  google.protobuf.Struct edits = 6;
 }
 
 message MediaAsset {
