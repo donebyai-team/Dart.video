@@ -1,4 +1,5 @@
 template_string RemotionSkillChart() ##"
+{% raw %}
 ---
 name: charts
 description: Chart and data visualization patterns for Remotion. Use when creating bar charts, pie charts, line charts, stock graphs, or any data-driven animations.
@@ -104,12 +105,10 @@ import {
   getPointAtLength,
   getTangentAtLength,
 } from "@remotion/paths";
-
 const pathLength = getLength(path);
 const point = getPointAtLength(path, progress * pathLength);
 const tangent = getTangentAtLength(path, progress * pathLength);
 const angle = Math.atan2(tangent.y, tangent.x);
-
 <g
   style={{
     transform: `translate(${point.x}px, ${point.y}px) rotate(${angle}rad)`,
@@ -118,10 +117,11 @@ const angle = Math.atan2(tangent.y, tangent.x);
 >
   <polygon points="0,0 -20,-10 -20,10" fill="#FF3232" />
 </g>;
-```
+{% endraw %}
 "##
 
-template_string RemotionSkillMeasureDOMNode() ##"
+template_string RemotionSkillMeasureDOMNode() #"
+{% raw %}
 ---
 name: measuring-dom-nodes
 description: Measuring DOM element dimensions in Remotion
@@ -156,9 +156,11 @@ export const MyComponent = () => {
   return <div ref={ref}>Content to measure</div>;
 };
 ```
-"##
+{% endraw %}
+"#
 
-template_string RemotionSkillMeasureText() ##"
+template_string RemotionSkillMeasureText() #"
+{% raw %}
 ---
 name: measuring-text
 description: Measuring text dimensions, fitting text to containers, and checking overflow
@@ -167,13 +169,6 @@ metadata:
 ---
 
 # Measuring text in Remotion
-
-## Prerequisites
-
-Install @remotion/layout-utils if it is not already installed:
-
-```bash
-npx remotion add @remotion/layout-utils
 ```
 
 ## Measuring text dimensions
@@ -199,14 +194,12 @@ Use `fitText()` to find the optimal font size for a container:
 
 ```tsx
 import { fitText } from "@remotion/layout-utils";
-
 const { fontSize } = fitText({
   text: "Hello World",
   withinWidth: 600,
   fontFamily: "Inter",
   fontWeight: "bold",
 });
-
 return (
   <div
     style={{
@@ -218,7 +211,6 @@ return (
     Hello World
   </div>
 );
-```
 
 ## Checking text overflow
 
@@ -299,9 +291,11 @@ return <div style={fontStyle}>Hello</div>;
 ```tsx
 <div style={{ outline: "2px solid red" }}>Text</div>
 ```
-"##
+{% endraw %}
+"#
 
-template_string RemotionSkillSequencing() ##"
+template_string RemotionSkillSequencing() #"
+{% raw %}
 ---
 name: sequencing
 description: Sequencing patterns for Remotion - delay, trim, limit duration of items
@@ -420,4 +414,5 @@ To add a composition within another composition, you can use the `<Sequence>` co
   </Sequence>
 </AbsoluteFill>
 ```
-"##
+{% endraw %}
+"#

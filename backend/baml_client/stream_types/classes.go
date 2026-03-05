@@ -341,8 +341,7 @@ func (c GenerateAnimationCodeRequest) BamlTypeName() string {
 }
 
 type GenerateAnimationCodeResponse struct {
-	Code   *string `json:"code"`
-	Config *string `json:"config"`
+	Code *string `json:"code"`
 }
 
 func (c *GenerateAnimationCodeResponse) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -362,9 +361,6 @@ func (c *GenerateAnimationCodeResponse) Decode(holder *cffi.CFFIValueClass, type
 		case "code":
 			c.Code = baml.Decode(valueHolder).Interface().(*string)
 
-		case "config":
-			c.Config = baml.Decode(valueHolder).Interface().(*string)
-
 		default:
 
 			panic(fmt.Sprintf("unexpected field: %s in class GenerateAnimationCodeResponse", key))
@@ -378,8 +374,6 @@ func (c GenerateAnimationCodeResponse) Encode() (*cffi.HostValue, error) {
 	fields := map[string]any{}
 
 	fields["code"] = c.Code
-
-	fields["config"] = c.Config
 
 	return baml.EncodeClass("GenerateAnimationCodeResponse", fields, nil)
 }

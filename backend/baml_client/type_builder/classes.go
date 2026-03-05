@@ -267,10 +267,6 @@ func (t *GenerateAnimationCodeResponseClassView) PropertyCode() (ClassPropertyVi
 	return t.inner.Property("code")
 }
 
-func (t *GenerateAnimationCodeResponseClassView) PropertyConfig() (ClassPropertyView, error) {
-	return t.inner.Property("config")
-}
-
 func (t *TypeBuilder) GenerateAnimationCodeResponse() (*GenerateAnimationCodeResponseClassView, error) {
 	bld, err := t.inner.Class("GenerateAnimationCodeResponse")
 	if err != nil {

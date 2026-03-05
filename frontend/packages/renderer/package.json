@@ -13,7 +13,7 @@
     "deploy:validator": "./scripts/deploy-validator-cloudrun.sh",
     "render": "pnpm exec remotion render src/remotion-entry.ts MyComposition out.mp4 --timeout 180000",
     "render:cloudrun": "node ./scripts/render-cloudrun.mjs",
-    "validate:server": "node ./scripts/validate-server.mjs",
+    "validate:server": "tsx ./scripts/validate-server.mjs",
     "test": "jest --config jest.config.cjs"
   },
   "dependencies": {
@@ -30,7 +30,8 @@
     "react": "catalog:",
     "react-dom": "18.3.1",
     "react-hot-toast": "2.4.1",
-    "swc-loader": "^0.2.7"
+    "swc-loader": "^0.2.7",
+    "tsx": "^4.19.0"
   },
   "peerDependencies": {
     "@remotion/transitions": "*",

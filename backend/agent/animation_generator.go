@@ -167,28 +167,6 @@ func (l animationGenerator) Generate(
 		}
 
 		// Default
-		generatedConfig := json.RawMessage(`{}`)
-		if generatedAnimation.Config != nil {
-			config, err := normalizeGeneratedConfig(*generatedAnimation.Config)
-			if err != nil {
-				conversationHistory = appendRetryConversation(
-					conversationHistory,
-					generatedAnimation.Code,
-					"Config is invalid. It must be a valid JSON object only (no markdown/code fences, no array/string root). "+
-						"Return config as plain JSON object.\nValidation error: "+err.Error(),
-				)
-
-				l.logger.Error("invalid generated animation config, retrying",
-					zap.Int("attempt", attempt),
-					zap.Error(err))
-
-				callback(TemplateGenerationProgress{
-					Message: CreativeStageMessage(StageRefining, attempt),
-				})
-				continue
-			}
-			generatedConfig = config
-		}
 		indentedCode := indentCode(generatedAnimation.Code)
 		codeFilePath := fmt.Sprintf("templates/generated/%s/%s", params.OrgID, params.SessionID)
 
@@ -212,9 +190,10 @@ func (l animationGenerator) Generate(
 			Message: CreativeStageMessage(StageBuilding, attempt),
 		})
 
-		_, err = l.codeBuilder.ValidateAndBuild(ctx, &services.ValidateAndBuildInput{
-			Code:   indentedCode,
-			Config: generatedConfig,
+		buildOutput, err := l.codeBuilder.ValidateAndBuild(ctx, &services.ValidateAndBuildInput{
+			Code:          indentedCode,
+			ComponentName: fmt.Sprintf("Transformed%s", componentName),
+			OutputPath:    fmt.Sprintf("templates/generated/%s/%s", params.OrgID, params.SessionID),
 		})
 
 		if err == nil {
@@ -225,10 +204,9 @@ func (l animationGenerator) Generate(
 				ID:              uuid.New().String(),
 				Name:            componentName,
 				AnimationType:   types.AnimationTypeTEXT,
-				Schema:          nil,
-				CDNUrl:          uploadedMedia.Url,
+				CDNUrl:          buildOutput.JSPath,
 				Repeatable:      false,
-				GeneratedConfig: generatedConfig,
+				GeneratedConfig: buildOutput.Registry,
 				Description:     output.Prompt,
 			}, nil
 		}
