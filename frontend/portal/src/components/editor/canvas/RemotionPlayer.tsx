@@ -265,9 +265,6 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
 
   }, [resolution, isFullscreen, viewport, containerSize]);
 
-
-
-
   return (
     <div ref={fullscreenContainerRef} className="flex flex-col h-full">
       {/* Unified Player Toolbar - includes duration control and slide editing tools */}
@@ -277,7 +274,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
         />
       )}
 
-      {/* Player Canvas */}
+      {/* Player Canvas — AnimationEditLayer (toolbar + overlay) is rendered inside PlayerCanvas */}
       <div
         ref={canvasContainerRef}
         className="flex-1 flex items-center justify-center overflow-hidden"
@@ -292,7 +289,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
           scale={isFullscreen ? userZoom : BASE_PREVIEW_SCALE * userZoom}
           onSetScale={setUserZoom}
           isPlaying={isPlaying}
-          onSelectTemplate={onSelectTemplate}
+          onSelectTemplate={onSelectTemplate}         
         />
       </div>
 

@@ -60,7 +60,7 @@ interface StoryboardSectionProps {
     onCancelEditTitle: () => void;
     onShowTransitionPicker: (slideId: string | null) => void;
     onUpdateTransition: (slideId: string, transitionId: TransitionType, direction?: TransitionDirection) => void;
-    onAddSlide: (type: SlideType) => void;
+    onAddSlide: (type: SlideType, afterSlideId?: string) => void;
     onReorderSlides: (activeId: string, overId: string) => void;
 }
 
@@ -276,29 +276,43 @@ const StoryboardSection = ({
                                                 onDelete={() => onRemoveSlide(slide.id)}
                                             />
 
-                                            {/* Transition controls apply to this slide's outgoing transition. */}
+                                            {/* Between-slide controls: transition + add slide */}
                                             {showTransition && (
-                                                <TransitionPicker
-                                                    currentTransitionType={slide.transition || TransitionType.TRANSITION_NONE}
-                                                    currentDirection={currentDirection}
-                                                    isOpen={showTransitionPicker === slide.id}
-                                                    onToggle={() =>
-                                                        onShowTransitionPicker(
-                                                            showTransitionPicker === slide.id ? null : slide.id
-                                                        )
-                                                    }
-                                                    onSelectTransition={(transitionId) => {
-                                                        const defaultDirection =
-                                                            isDirectionSupportedTransition(transitionId)
-                                                                ? (currentDirection ?? TransitionDirection.FROM_RIGHT)
-                                                                : undefined;
-                                                        onUpdateTransition(slide.id, transitionId, defaultDirection);
-                                                    }}
-                                                    onSelectDirection={(direction) =>
-                                                        onUpdateTransition(slide.id, slide.transition, direction)
-                                                    }
-                                                    onClose={() => onShowTransitionPicker(null)}
-                                                />
+                                                <div className="relative flex items-center justify-center py-2">
+                                                    {/* Vertical connector line */}
+                                                    {/* <div className="absolute left-1/2 right-1/2 top-0 bottom-0 w-px bg-border" /> */}
+
+                                                    {/* Add slide button (left of center) */}
+                                                    <AddSlideButton
+                                                        slideTypes={allSlideTypes}
+                                                        onAddSlide={(type) => onAddSlide(type, slide.id)}
+                                                        variant="between"
+                                                    />
+
+                                                    {/* Transition picker (right of center) */}
+                                                    <TransitionPicker
+                                                        currentTransitionType={slide.transition || TransitionType.TRANSITION_NONE}
+                                                        currentDirection={currentDirection}
+                                                        isOpen={showTransitionPicker === slide.id}
+                                                        onToggle={() =>
+                                                            onShowTransitionPicker(
+                                                                showTransitionPicker === slide.id ? null : slide.id
+                                                            )
+                                                        }
+                                                        onSelectTransition={(transitionId) => {
+                                                            const defaultDirection =
+                                                                isDirectionSupportedTransition(transitionId)
+                                                                    ? (currentDirection ?? TransitionDirection.FROM_RIGHT)
+                                                                    : undefined;
+                                                            onUpdateTransition(slide.id, transitionId, defaultDirection);
+                                                        }}
+                                                        onSelectDirection={(direction) =>
+                                                            onUpdateTransition(slide.id, slide.transition, direction)
+                                                        }
+                                                        onClose={() => onShowTransitionPicker(null)}
+                                                        inline
+                                                    />
+                                                </div>
                                             )}
                                         </div>
                                     );

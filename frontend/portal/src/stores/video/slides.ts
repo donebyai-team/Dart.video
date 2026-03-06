@@ -24,7 +24,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     return resolveBackgroundStyle(slide, globalBackground);
   },
 
-  addSlide(sectionId: string, type: SlideType) {
+  addSlide(sectionId: string, type: SlideType, afterSlideId?: string) {
     const { videoConfig } = get();
     if (!videoConfig?.config) return;
 
@@ -44,11 +44,15 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     });
 
     let newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
-      sections.map(s =>
-        s.id === sectionId
-          ? { ...s, slides: [...s.slides, newSlide] }
-          : s
-      )
+      sections.map(s => {
+        if (s.id !== sectionId) return s;
+        if (!afterSlideId) return { ...s, slides: [...s.slides, newSlide] };
+        const idx = s.slides.findIndex(sl => sl.id === afterSlideId);
+        const insertAt = idx === -1 ? s.slides.length : idx + 1;
+        const updated = [...s.slides];
+        updated.splice(insertAt, 0, newSlide);
+        return { ...s, slides: updated };
+      })
     );
 
     newVideoConfig = updateTotalDuration(newVideoConfig);

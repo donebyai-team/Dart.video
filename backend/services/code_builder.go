@@ -47,13 +47,20 @@ type TemplateCodeBuilder interface {
 type ValidateAndBuildInput struct {
 	// Code is the generated TSX source of the Remotion component.
 	Code string `json:"code"`
-	// Config is the template config JSON passed as props to the component
-	// during renderStill validation.
-	Config json.RawMessage `json:"config,omitempty"`
+	// ComponentName is the PascalCase export name (e.g. "TextCascade").
+	// Used as the filename and CDN output name.
+	ComponentName string `json:"component_name"`
+	// OutputPath is the GCS path prefix for the uploaded CDN JS
+	// (e.g. "templates/abc123"). The uploaded file will be at
+	// "<OutputPath>/<ComponentName>.cdn.js".
+	OutputPath string `json:"output_path"`
 }
 
 // ValidateAndBuildOutput is the response from the validator service on success.
-type ValidateAndBuildOutput struct{}
+type ValidateAndBuildOutput struct {
+	JSPath   string          `json:"gcsPath"`
+	Registry json.RawMessage `json:"registry"`
+}
 
 type codeBuilderService struct {
 	client     *retryablehttp.Client
@@ -142,6 +149,12 @@ func (s *codeBuilderService) ValidateAndBuild(
 	}
 	if input.Code == "" {
 		return nil, fmt.Errorf("code is required")
+	}
+	if input.ComponentName == "" {
+		return nil, fmt.Errorf("component_name is required")
+	}
+	if input.OutputPath == "" {
+		return nil, fmt.Errorf("output_path is required")
 	}
 
 	if buildErr := staticValidateCode(input.Code); buildErr != nil {

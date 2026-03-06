@@ -200,11 +200,6 @@ export declare type AnimationSlideContent = Message<"coasterai.core.v1.Animation
   templateId: string;
 
   /**
-   * @generated from field: google.protobuf.Struct templateConfig = 2;
-   */
-  templateConfig?: JsonObject;
-
-  /**
    * @generated from field: coasterai.core.v1.MetaData meta = 3;
    */
   meta?: MetaData;
@@ -218,6 +213,16 @@ export declare type AnimationSlideContent = Message<"coasterai.core.v1.Animation
    * @generated from field: optional coasterai.core.v1.AnimationSlidePlan plan = 5;
    */
   plan?: AnimationSlidePlan;
+
+  /**
+   * @generated from field: google.protobuf.Struct edits = 6;
+   */
+  edits?: JsonObject;
+
+  /**
+   * @generated from field: google.protobuf.Struct registry = 7;
+   */
+  registry?: JsonObject;
 };
 
 /**
@@ -550,6 +555,11 @@ export declare type Slide = Message<"coasterai.core.v1.Slide"> & {
    * @generated from field: coasterai.core.v1.SlideStatus slideStatus = 22;
    */
   slideStatus: SlideStatus;
+
+  /**
+   * @generated from field: int32 index = 24;
+   */
+  index: number;
 };
 
 /**
@@ -714,6 +724,11 @@ export declare type Section = Message<"coasterai.core.v1.Section"> & {
    * @generated from field: optional bool voiceoverGenerated = 5;
    */
   voiceoverGenerated?: boolean;
+
+  /**
+   * @generated from field: int32 index = 6;
+   */
+  index: number;
 };
 
 /**

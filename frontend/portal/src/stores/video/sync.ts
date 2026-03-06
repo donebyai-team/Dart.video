@@ -6,7 +6,7 @@ import { equals } from "@bufbuild/protobuf"
 import { Video, VideoSchema, VideoStatus } from "@coasterai/pb/coasterai/core/v1/video_pb";
 
 // Debounce utility
-function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: any[]) => any>(
     func: T,
     wait: number
 ): ((...args: Parameters<T>) => void) & { cancel?: () => void } {

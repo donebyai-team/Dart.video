@@ -3,10 +3,11 @@
  * Runs as a Cloud Run Service (HTTP server).
  *
  * POST /validate
- *   Body: { code, config }
- *   - code:   LLM-generated TSX source that exports RemoteComponent({ props, onChange })
- *   - config: JSON template config passed as props during the renderStill check
- *
+ *   Body: { code, component_name, output_path, config }
+ *   - code:           Generated TSX component source
+ *   - component_name: PascalCase name (used as file + export name, e.g. "TextCascade")
+ *   - output_path:    GCS path prefix where the compiled JS will be uploaded
+*
  * Validation happens in two sequential steps so errors are caught early and
  * reported with enough detail for the LLM to self-correct:
  *
@@ -32,8 +33,11 @@
  */
 
 import * as Babel from '@babel/standalone';
+import {Storage} from '@google-cloud/storage';
 import {bundle} from '@remotion/bundler';
 import {renderStill, selectComposition} from '@remotion/renderer';
+import {transformAnimation} from '../src/ast-transform.ts'
+import {compileRemoteComponent} from '../src/compiler.ts'
 import {randomUUID} from 'node:crypto';
 import {existsSync} from 'node:fs';
 import {mkdir, rm, writeFile} from 'node:fs/promises';
@@ -41,7 +45,10 @@ import {createServer} from 'node:http';
 import {dirname, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
+const storage = new Storage();
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const OUTPUT_BUCKET = process.env.OUTPUT_BUCKET || 'coasterai-public';
+if (!OUTPUT_BUCKET) throw new Error('Missing required env var OUTPUT_BUCKET');
 
 const PORT = parseInt(process.env.PORT || '8085', 10);
 
@@ -101,40 +108,43 @@ function preValidateWithBabel(code) {
  * error_type even if the Babel pre-check somehow missed them. Runtime errors
  * (bad hooks, undefined vars in JSX, etc.) propagate naturally.
  */
-function buildRootEntry(safeCode, safeConfig) {
+function buildRootEntry(code) {
   return [
     `import React from 'react';`,
-    `import { Composition, getInputProps, registerRoot } from 'remotion';`,
-    `import { compileRemoteComponent } from '../../../renderer/src/compiler';`,
+    `import { Composition, registerRoot } from 'remotion';`,
+    `import { compileRemoteComponent } from '@/compiler';`,
     ``,
-    `const ValidatorComp = () => {`,
-    `  const { code, config } = getInputProps();`,
+    `const __CODE__ = ${JSON.stringify(code)};`,
     ``,
-    `  // Synchronous JIT compile — throws on syntax / Babel / missing-export errors`,
-    `  const result = compileRemoteComponent(code, { validateShapeProps: true });`,
-    `  if (result.error) {`,
-    `    throw new Error('[compile_error] ' + result.error);`,
+    `const ValidatorRoot = () => {`,
+    `  const { Component, error } = compileRemoteComponent(__CODE__, { validateShapeProps: true });`,
+    `  if (error || !Component) {`,
+    `    throw new Error('[compile_error] ' + (error || 'Unknown compilation error'));`,
     `  }`,
     ``,
-    `  // Runtime render — throws on invalid hooks, bad JSX, undefined refs, etc.`,
-    `  const Comp = result.Component;`,
-    `  return React.createElement(Comp, { props: config ?? {}, onChange: () => {} });`,
-    `};`,
-    ``,
-    `const ValidatorRoot = () => (`,
-    `  React.createElement(Composition, {`,
+    `  return React.createElement(Composition, {`,
     `    id: 'ValidatorComp',`,
-    `    component: ValidatorComp,`,
+    `    component: Component,`,
     `    durationInFrames: 30,`,
     `    fps: 30,`,
     `    width: 1280,`,
     `    height: 720,`,
-    `    defaultProps: { code: ${safeCode}, config: ${safeConfig} },`,
-    `  })`,
-    `);`,
+    `  });`,
+    `};`,
     ``,
     `registerRoot(ValidatorRoot);`,
   ].join('\n');
+}
+
+// ---- GCS helpers ----
+async function uploadToGCS(bucket, gcsPath, fileBuffer) {
+  await storage.bucket(bucket).file(gcsPath).save(fileBuffer, {
+    metadata: {
+      contentType: 'text/plain',
+      cacheControl: 'public, max-age=31536000, immutable',
+      contentDisposition: 'inline'
+    },
+  });
 }
 
 // ── HTTP helpers ──────────────────────────────────────────────────────────────
@@ -222,10 +232,12 @@ async function handleValidate(req, res) {
     return;
   }
 
-  let code, config;
+   let code, component_name, output_path;
   try {
-    ({code, config} = JSON.parse(body));
+    ({code, component_name, output_path} = JSON.parse(body));
     if (!code) throw new Error('code is required');
+    if (!component_name) throw new Error('component_name is required');
+    if (!output_path) throw new Error('output_path is required');
   } catch (err) {
     res.writeHead(400);
     res.end(err.message);
@@ -234,8 +246,8 @@ async function handleValidate(req, res) {
 
   console.log(
     `[validate] received code (${code.length} chars), ` +
-    `config keys: ${Object.keys(config || {}).join(', ') || 'none'}, ` +
-    `config: ${JSON.stringify(config ?? {}, null, 2)}`,
+    `component_name: ${component_name}, ` +
+    `output_path: ${output_path}`,
   );
 
   // ── Step 1: Fast compile check ───────────────────────────────────────────
@@ -249,6 +261,18 @@ async function handleValidate(req, res) {
   }
   console.log('[validate] compile check passed');
 
+  console.log('Generating AST and building element registry...');
+  // Generate AST and build element registry
+  const { transformedCode, registry } = transformAnimation(code);
+  
+  const result = compileRemoteComponent(transformedCode, { validateShapeProps: true });
+  if (result.error) {
+    console.log('[validate] remote compile check FAILED:\n', result.error);
+    res.writeHead(422, {'Content-Type': 'application/json'});
+    res.end(JSON.stringify({error_type: 'compile_error', errors: [result.error]}));
+    return;
+   }
+
   // ── Step 2: Render check via Remotion renderStill ────────────────────────
   const uuid = randomUUID();
   const tmpFolder = `generated/_tmp_${uuid}`;
@@ -258,11 +282,9 @@ async function handleValidate(req, res) {
   try {
     await mkdir(templatesDir, {recursive: true});
 
-    const safeCode = JSON.stringify(code);
-    const safeConfig = JSON.stringify(config || {});
     await writeFile(
       resolve(templatesDir, 'root.tsx'),
-      buildRootEntry(safeCode, safeConfig),
+      buildRootEntry(transformedCode),
       'utf8',
     );
 
@@ -288,7 +310,7 @@ async function handleValidate(req, res) {
     const composition = await selectComposition({
       serveUrl: bundleDir,
       id: 'ValidatorComp',
-      inputProps: {code, config: config || {}},
+      inputProps: {},
       chromiumOptions,
     });
 
@@ -297,7 +319,7 @@ async function handleValidate(req, res) {
         composition,
         serveUrl: bundleDir,
         output: stillOutput,
-        inputProps: {code, config: config || {}},
+        inputProps: {},
         chromiumOptions,
         frame: 0,
       });
@@ -315,9 +337,16 @@ async function handleValidate(req, res) {
       return;
     }
 
+    // ---- Upload transformedCode to GCS ----
+    const gcsPath = `${output_path}/${component_name}.tsx`;
+    await uploadToGCS(OUTPUT_BUCKET, gcsPath, Buffer.from(transformedCode, 'utf8'));
+
     console.log('[validate] render check passed — validation complete');
     res.writeHead(200, {'Content-Type': 'application/json'});
-    res.end(JSON.stringify({}));
+    res.end(JSON.stringify({
+      registry: registry,
+      gcsPath: gcsPath
+    }));
 
   } catch (err) {
     // Unexpected internal errors (bundler crash, fs failure, etc.)

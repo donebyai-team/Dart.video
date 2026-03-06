@@ -200,10 +200,10 @@ func validateSlideAnimation(content *pbcore.AnimationSlideContent) error {
 	//	return fmt.Errorf("template id is empty")
 	//}
 
-	if content.TemplateConfig == nil {
-		return fmt.Errorf("template config is nil")
+	if content.Registry == nil {
+		return fmt.Errorf("template registry is nil")
 	}
-
+	
 	// ---- Meta Validation ----
 	err := validateContentMeta(content.GetMeta())
 	if err != nil {

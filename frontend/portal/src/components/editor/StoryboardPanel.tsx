@@ -146,8 +146,8 @@ const StoryboardPanel = ({
                                     )
                                 }
 
-                                onAddSlide={(type) =>
-                                    onAddSlide(section.id, type)
+                                onAddSlide={(type, afterSlideId) =>
+                                    onAddSlide(section.id, type, afterSlideId)
                                 }
 
                                 onReorderSlides={(activeId, overId) =>

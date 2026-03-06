@@ -2,6 +2,8 @@ import * as Babel from "@babel/standalone";
 import * as LucideReact from "lucide-react";
 // import { Lottie } from "@remotion/lottie";
 import * as RemotionShapes from "@remotion/shapes";
+import * as RemotionLayoutUtils from "@remotion/layout-utils"
+import * as RemotionPaths from "@remotion/paths"
 // import { ThreeCanvas } from "@remotion/three";
 import {
   TransitionSeries,
@@ -225,6 +227,8 @@ const SafeRemotionShapes = Object.fromEntries(
 // Parameter names injected into every compiled component's scope.
 // Order must exactly match SHARED_PARAM_VALUES below.
 const SHARED_PARAM_NAMES: string[] = [
+  "RemotionPaths",
+  "RemotionLayoutUtils",
   "EditableText",
   "React",
   "Remotion",
@@ -279,6 +283,8 @@ function getSharedParamValues(validateShapePropsOption: boolean): unknown[] {
   const injectedShapes = validateShapePropsOption ? SafeRemotionShapes : RemotionShapes;
 
   return [
+    RemotionPaths,
+    RemotionLayoutUtils,
     EditableText,
     React,
     RemotionBundle,
@@ -459,6 +465,7 @@ export function compileRemoteComponent(
 
     const source = lucideDestructure ? `${lucideDestructure}\n${cleaned}` : cleaned;
     const transpiled = babelTransform(source, "remote-component.tsx");
+
     const Component = evalWithScope(
       `${transpiled}\nreturn RemoteComponent;`,
       Boolean(options.validateShapeProps),
