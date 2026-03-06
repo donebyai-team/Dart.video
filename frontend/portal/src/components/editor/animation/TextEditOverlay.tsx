@@ -109,11 +109,14 @@ export function TextEditOverlay({
     const visualWidth = elementRect.width
     const scale = layoutWidth > 0 ? visualWidth / layoutWidth : 1
 
-    // Font size
-    const rawFontSize = parseFloat(cs.fontSize)
-    const fontSize    = isNaN(rawFontSize) ? undefined : `${rawFontSize * scale}px`
+    // Font size — scale to match visual size, but enforce a minimum so the
+    // overlay is always readable even when the player is heavily scaled down.
+    const MIN_FONT_PX = 14
+    const rawFontSize   = parseFloat(cs.fontSize)
+    const scaledFont    = isNaN(rawFontSize) ? MIN_FONT_PX : rawFontSize * scale
+    const fontSize      = `${Math.max(scaledFont, MIN_FONT_PX)}px`
 
-    // Line height — can be unitless multiplier or px value
+    // Line height — scale proportionally, keep readable
     const rawLineHeight = parseFloat(cs.lineHeight)
     const lineHeight    = isNaN(rawLineHeight) ? cs.lineHeight : `${rawLineHeight * scale}px`
 
@@ -179,7 +182,9 @@ export function TextEditOverlay({
         position:  'fixed',
         left:      elementRect.left,
         top:       elementRect.top,
-        minHeight: elementRect.height,
+        // Enforce a minimum usable height — the element may be tiny in the
+        // composition (e.g. overflow:visible text in a 4px div).
+        minHeight: Math.max(elementRect.height, 32),
         zIndex:    9999,
 
         // Matched styles (includes width/maxWidth/minWidth)

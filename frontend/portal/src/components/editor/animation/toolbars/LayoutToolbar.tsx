@@ -14,6 +14,7 @@ import React from 'react'
 import type { RegistryEntry } from '@coasterai/renderer'
 import type { ElementEdit } from '@coasterai/renderer/src/types/ast'
 import { Sep, ColorSwatch, NumberStepper, SliderInput, LowConfidenceDot } from './shared'
+import { CircleDashed, PaintBucket, Radius } from 'lucide-react'
 
 interface LayoutToolbarProps {
   eid: string
@@ -49,53 +50,63 @@ export function LayoutToolbar({ eid, registry, editStore, onEdit }: LayoutToolba
 
   return (
     <>
-      {/* ── Background color ────────────────────────────────────────────── */}
-      {hasBg && (
-        <div className="flex items-center gap-1">
-          <ColorSwatch
-            color={bgColor}
-            label="▨"
-            title="Background color"
-            onChange={v => setStyle(bgProp, v)}
-          />
-          {(lowConf.has('background') || lowConf.has('backgroundColor')) && <LowConfidenceDot />}
-        </div>
-      )}
+      {/* Background color */}
+  {hasBg && (
+    <div className="flex items-center gap-1">
+      <ColorSwatch
+        color={bgColor}
+        title="Background color"
+        onChange={v => setStyle(bgProp, v)}
+      />
 
-      {hasBg && (hasRadius || hasOpacity) && <Sep />}
+      {(lowConf.has('background') || lowConf.has('backgroundColor')) && <LowConfidenceDot />}
+    </div>
+  )}
 
-      {/* ── Border radius ───────────────────────────────────────────────── */}
-      {hasRadius && (
-        <div className="flex items-center gap-1">
-          <span className="text-muted-foreground text-xs">⬡</span>
-          <NumberStepper
-            value={radius}
-            onChange={v => setStyle('borderRadius', v)}
-            min={0}
-            step={1}
-            unit="px"
-            inputWidth="w-10"
-          />
-          {lowConf.has('borderRadius') && <LowConfidenceDot />}
-        </div>
-      )}
+  {hasBg && (hasRadius || hasOpacity) && <Sep />}
 
-      {hasRadius && hasOpacity && <Sep />}
+  {/* Border radius */}
+  {hasRadius && (
+    <div
+      className="flex items-center gap-1"
+      onClick={e => e.stopPropagation()}
+    >
+      <Radius className="w-5 h-5 text-muted-foreground" />
 
-      {/* ── Opacity ─────────────────────────────────────────────────────── */}
-      {hasOpacity && (
-        <div className="flex items-center gap-1">
-          <SliderInput
-            value={isNaN(opacity) ? 1 : opacity}
-            onChange={v => setStyle('opacity', v)}
-            min={0}
-            max={1}
-            step={0.01}
-            label="◎"
-          />
-          {lowConf.has('opacity') && <LowConfidenceDot />}
-        </div>
-      )}
+      <NumberStepper
+        value={radius}
+        onChange={v => setStyle('borderRadius', v)}
+        min={0}
+        step={1}
+        unit="px"
+        inputWidth="w-10"
+      />
+
+      {lowConf.has('borderRadius') && <LowConfidenceDot />}
+    </div>
+  )}
+
+  {hasRadius && hasOpacity && <Sep />}
+
+  {/* Opacity */}
+  {hasOpacity && (
+    <div
+      className="flex items-center gap-1"
+      onClick={e => e.stopPropagation()}
+    >
+      <CircleDashed className="w-5 h-5 text-muted-foreground" />
+
+      <SliderInput
+        value={isNaN(opacity) ? 1 : opacity}
+        onChange={v => setStyle('opacity', v)}
+        min={0}
+        max={1}
+        step={0.01}
+      />
+
+      {lowConf.has('opacity') && <LowConfidenceDot />}
+    </div>
+  )}
     </>
   )
 }

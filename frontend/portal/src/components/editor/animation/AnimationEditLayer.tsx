@@ -43,11 +43,14 @@ export function AnimationEditLayer({
   onTextCommit,
 }: AnimationEditLayerProps) {
   const toolbarRef = useRef<HTMLDivElement>(null)
+  // Tracks the actual DOM data-eid (may include loop index, e.g. "el-11-1")
+  // separately from the registry key (e.g. "el-11") stored in selectedEid.
+  const domEidRef = useRef<string | null>(null)
 
-  const [canvasRect,      setCanvasRect]      = useState<FRect | null>(null)
-  const [elementRect,     setElementRect]     = useState<FRect | null>(null)
+  const [canvasRect, setCanvasRect] = useState<FRect | null>(null)
+  const [elementRect, setElementRect] = useState<FRect | null>(null)
   const [isInlineEditing, setIsInlineEditing] = useState(false)
-  const [editorHeight,    setEditorHeight]    = useState(0)
+  const [editorHeight, setEditorHeight] = useState(0)
   const inlineInitTextRef = useRef('')
 
   // ── Track canvas fixed position ─────────────────────────────────────────────
@@ -74,7 +77,8 @@ export function AnimationEditLayer({
   useEffect(() => {
     if (!selectedEid || !animEditVersion) return
     requestAnimationFrame(() => {
-      const el = playerRef.current?.querySelector(`[data-eid="${selectedEid}"]`) as HTMLElement | null
+      const queryEid = domEidRef.current ?? selectedEid
+      const el = playerRef.current?.querySelector(`[data-eid="${queryEid}"]`) as HTMLElement | null
       if (!el) return
       const r = el.getBoundingClientRect()
       setElementRect({ left: r.left, top: r.top, width: r.width, height: r.height })
@@ -86,6 +90,7 @@ export function AnimationEditLayer({
     if (!selectedEid) {
       setElementRect(null)
       setIsInlineEditing(false)
+      domEidRef.current = null
     }
   }, [selectedEid])
 
@@ -110,40 +115,143 @@ export function AnimationEditLayer({
   // ── Helpers ─────────────────────────────────────────────────────────────────
 
   /**
-   * Returns true if the registry entry has at least one editable control to show.
+   * Resolves the registry key for a DOM eid.
+   * Loop items bake the index into the DOM eid ("el-11-1") but the registry
+   * stores only the base key ("el-11"). Strips the trailing numeric suffix.
+   * This handles:
+   * el-9-2    → strips to el-9   → registry["el-9"] exists  → returns "el-9"  ✓
+   *  el-11-0   → strips to el-11  → registry["el-11"] exists → returns "el-11" ✓
+   *  el-12     → strips to el     → registry["el"] undefined
+          → strips to ""     → loop ends
+          → returns "el-12"  ✓  (exact match was already checked)
+      el-9-0-1  → strips to el-9-0 → not found
+          → strips to el-9   → found  ✓
+   */
+  function resolveRegistryKey(domEid: string): string {
+    // Exact match first
+    if (registry[domEid]) return domEid
+
+    // Strip trailing -N suffixes one at a time until we find a registry entry
+    // el-9-2   → el-9   → check
+    // el-11-0  → el-11  → check
+    let current = domEid
+    while (current.includes('-')) {
+      const stripped = current.replace(/-\d+$/, '')
+      if (stripped === current) break          // no numeric suffix found — stop
+      if (registry[stripped]) return stripped  // found a match
+      current = stripped
+    }
+
+    // Nothing found — return original and let caller handle missing registry entry
+    return domEid
+  }
+
+
+
+  /**
+   * Returns true if the registry entry has at least one editable control.
    * Mirrors the routing logic in AnimationToolbar / sub-toolbars.
    */
   function hasEditableControls(entry: RegistryEntry): boolean {
+    // Text types
     if (entry.textType === 'static') return true
+    if (entry.textType === 'counter') return true
+    if (entry.textType === 'typewriter') return true
+    if (entry.textType === 'word-cycle') return true
+
+    // Asset types
     if (entry.assetType === 'image') return true
-    if (entry.assetType === 'icon')  return true
+    if (entry.assetType === 'icon') return true
 
-    // Layout element — only show if at least one layout prop is present
-    const s = entry.staticStyle
-    return 'background' in s || 'backgroundColor' in s ||
-           'borderRadius' in s || 'opacity' in s
-  }
-
-  /** Punch through the overlay to find which data-eid element is under the cursor. */
-  function eidAtPoint(
-    clientX: number,
-    clientY: number,
-    overlay: HTMLElement,
-  ): { eid: string; el: HTMLElement } | null {
-    overlay.style.pointerEvents = 'none'
-    const hit = document.elementFromPoint(clientX, clientY) as HTMLElement | null
-    overlay.style.pointerEvents = 'auto'
-    let el = hit
-    while (el) {
-      if (el.dataset?.eid) {
-        console.log('[AnimationEditLayer] eidAtPoint hit:', el.dataset.eid, el.tagName)
-        return { eid: el.dataset.eid, el }
-      }
-      el = el.parentElement
+    // Any editable style prop
+    if (Object.values(entry.editableProps ?? {}).some((def: any) => def.editable)) {
+      return true
     }
-    console.log('[AnimationEditLayer] eidAtPoint — no data-eid found under cursor')
-    return null
+
+    // Any animated prop (range or spring editor)
+    if (Object.keys(entry.animatedProps ?? {}).length > 0) return true
+
+    return false
   }
+
+  /**
+   * Find the best clickable element at the cursor position.
+   *
+   * Pass 1 — DOM walk-up from the topmost hit element.
+   *   Handles overflow:visible text whose bounding box is tiny (e.g. a 4px div
+   *   whose text visually overflows). The click lands on a child or even outside
+   *   the parent's box, but walking up the DOM tree finds the owning data-eid.
+   *
+   * Pass 2 — z-stack scan via elementsFromPoint.
+   *   Handles non-editable elements sitting on top of editable ones (e.g. a
+   *   decorative 4x4 img). If pass 1 finds a data-eid with no editable controls,
+   *   we fall through and keep searching deeper in the stack.
+   */
+function eidAtPoint(
+  clientX: number,
+  clientY: number,
+  overlay: HTMLElement,
+): { eid: string; registryKey: string; el: HTMLElement } | null {
+  overlay.style.pointerEvents = 'none'
+  const topEl       = document.elementFromPoint(clientX, clientY) as HTMLElement | null
+  const allElements = document.elementsFromPoint(clientX, clientY) as HTMLElement[]
+  overlay.style.pointerEvents = 'auto'
+
+  const cRect = overlay.getBoundingClientRect()
+
+  // ── Pass 1: walk up the DOM from the hit element ─────────────────────────
+  let walkEl = topEl
+  while (walkEl && walkEl !== overlay) {
+    if (walkEl.dataset?.eid) {
+      const r = walkEl.getBoundingClientRect()
+
+      // Same canvas size check as Pass 2 — don't select full-canvas elements
+      const coversCanvas =
+        r.width  > cRect.width  * 0.9 &&
+        r.height > cRect.height * 0.9
+
+      if (coversCanvas) {
+        console.log(`[eidAtPoint] pass1 skipping eid=${walkEl.dataset.eid} (full canvas)`)
+        break   // stop walking — fall through to Pass 2
+      }
+
+      const registryKey = resolveRegistryKey(walkEl.dataset.eid)
+      const entry       = registry[registryKey]
+
+      if (entry && hasEditableControls(entry)) {
+        console.log(`[eidAtPoint] pass1 hit eid=${walkEl.dataset.eid} key=${registryKey}`)
+        return { eid: walkEl.dataset.eid, registryKey, el: walkEl }
+      }
+
+      // Has data-eid but no editable controls — stop walking, try pass 2
+      console.log(`[eidAtPoint] pass1 skipping eid=${walkEl.dataset.eid} (no controls), trying pass2`)
+      break
+    }
+    walkEl = walkEl.parentElement
+  }
+
+  // ── Pass 2: z-stack scan ──────────────────────────────────────────────────
+  for (const el of allElements) {
+    if (!el.dataset?.eid) continue
+    if (el === overlay) continue
+
+    const r = el.getBoundingClientRect()
+    const coversCanvas =
+      r.width  > cRect.width  * 0.9 &&
+      r.height > cRect.height * 0.9
+    if (coversCanvas) continue
+
+    const registryKey = resolveRegistryKey(el.dataset.eid)
+    const entry       = registry[registryKey]
+    if (!entry || !hasEditableControls(entry)) continue
+
+    console.log(`[eidAtPoint] pass2 hit eid=${el.dataset.eid} key=${registryKey}`)
+    return { eid: el.dataset.eid, registryKey, el }
+  }
+
+  console.log('  → no valid eid found')
+  return null
+}
 
   const deselect = useCallback(() => {
     console.log('[AnimationEditLayer] Deselecting')
@@ -159,27 +267,22 @@ export function AnimationEditLayer({
     const hit = eidAtPoint(e.clientX, e.clientY, e.currentTarget)
     if (!hit) { deselect(); return }
 
-    const { eid, el } = hit
-    const entry = registry[eid]
+    const { eid: domEid, registryKey, el } = hit
+    const entry = registry[registryKey]
     if (!entry) { deselect(); return }
 
-    if (!hasEditableControls(entry)) {
-      console.log('[AnimationEditLayer] No controls for element — ignoring click:', eid, entry.label)
-      deselect()
-      return
-    }
+    domEidRef.current = domEid  // store actual DOM eid for future querySelectorAll
 
-    console.log('[AnimationEditLayer] Click — selecting element:', eid, entry.label)
+    console.log('[AnimationEditLayer] Click — selecting element:', registryKey, entry.label)
 
-    const r    = el.getBoundingClientRect()
-    const rect: FRect = { left: r.left, top: r.top, width: r.width, height: r.height }
-    setElementRect(rect)
-    onSelectElement(eid)
+    const r = el.getBoundingClientRect()
+    setElementRect({ left: r.left, top: r.top, width: r.width, height: r.height })
+    onSelectElement(registryKey)
 
     // Immediately open inline editor for text elements
     if (entry.textType === 'static') {
       console.log('[AnimationEditLayer] Text element — activating inline edit')
-      inlineInitTextRef.current = editStore[eid]?.text ?? entry.staticText ?? ''
+      inlineInitTextRef.current = editStore[registryKey]?.text ?? entry.staticText ?? ''
       setIsInlineEditing(false)
       setTimeout(() => setIsInlineEditing(true), 0)
     } else {
@@ -187,14 +290,17 @@ export function AnimationEditLayer({
     }
   }
 
-  const handleTextCommit = useCallback((text: string, height: number) => {
-    if (selectedEid && text) {
-      onEdit(selectedEid, {
-        text,
-        style: height > 0 ? { height, overflow: 'visible' } : {},
-      })
+  const handleTextCommit = useCallback((text: string, _height: number) => {
+    // Only persist if text actually changed — avoids spurious saves on click-without-edit
+    const originalText = inlineInitTextRef.current
+    if (selectedEid && text && text !== originalText) {
+      console.log('[AnimationEditLayer] Text changed — saving:', { from: originalText, to: text })
+      onEdit(selectedEid, { text })
+    } else {
+      console.log('[AnimationEditLayer] Text unchanged — skipping save')
     }
     setIsInlineEditing(false)
+    setEditorHeight(0)
     onTextCommit?.()
   }, [selectedEid, onEdit, onTextCommit])
 
@@ -208,36 +314,36 @@ export function AnimationEditLayer({
 
   return createPortal(
     <>
-      {/* ── Click capture — covers entire canvas ──────────────────────── */}
-      {!isInlineEditing && (
-        <div
-          style={{
-            position: 'fixed',
-            left:     canvasRect.left,
-            top:      canvasRect.top,
-            width:    canvasRect.width,
-            height:   canvasRect.height,
-            zIndex:   40,
-            cursor:   'default',
-          }}
-          onClick={handleCanvasClick}
-        />
-      )}
+      {/* ── Click capture — always covers entire canvas ───────────────── */}
+      {/* TextEditOverlay sits at z:9999 so clicks on the text editor go  */}
+      {/* directly to it; clicks elsewhere on the canvas hit this overlay. */}
+      <div
+        style={{
+          position: 'fixed',
+          left: canvasRect.left,
+          top: canvasRect.top,
+          width: canvasRect.width,
+          height: canvasRect.height,
+          zIndex: 40,
+          cursor: 'default',
+        }}
+        onClick={handleCanvasClick}
+      />
 
       {/* ── Selection highlight ───────────────────────────────────────── */}
       {elementRect && (
         <div
           style={{
-            position:      'fixed',
-            left:          elementRect.left - 2,
-            top:           elementRect.top - 2,
-            width:         elementRect.width + 4,
-            height:        (isInlineEditing && editorHeight > 0 ? editorHeight : elementRect.height) + 4,
-            border:        '2px dashed rgba(99,102,241,0.8)',
-            borderRadius:  3,
-            boxSizing:     'border-box',
+            position: 'fixed',
+            left: elementRect.left - 2,
+            top: elementRect.top - 2,
+            width: elementRect.width + 4,
+            height: (isInlineEditing && editorHeight > 0 ? editorHeight : elementRect.height) + 4,
+            border: '2px dashed rgba(99,102,241,0.8)',
+            borderRadius: 3,
+            boxSizing: 'border-box',
             pointerEvents: 'none',
-            zIndex:        41,
+            zIndex: 41,
           }}
         />
       )}
@@ -246,13 +352,14 @@ export function AnimationEditLayer({
       {isInlineEditing && elementRect && selectedEid && (
         <TextEditOverlay
           elementRect={elementRect}
-          selectedEid={selectedEid}
+          selectedEid={domEidRef.current ?? selectedEid}
           playerRef={playerRef}
           initText={inlineInitTextRef.current}
           onCommit={handleTextCommit}
           onCancel={() => {
             console.log('[AnimationEditLayer] Inline edit cancelled')
             setIsInlineEditing(false)
+            setEditorHeight(0)
           }}
           onHeightChange={handleEditorHeightChange}
         />
@@ -263,11 +370,11 @@ export function AnimationEditLayer({
         <div
           ref={toolbarRef}
           style={{
-            position:  'fixed',
-            top:       canvasRect.top + 8,
-            left:      canvasRect.left + canvasRect.width / 2,
+            position: 'fixed',
+            top: canvasRect.top + 8,
+            left: canvasRect.left + canvasRect.width / 2,
             transform: 'translateX(-50%)',
-            zIndex:    50,
+            zIndex: 50,
           }}
         >
           <AnimationToolbar

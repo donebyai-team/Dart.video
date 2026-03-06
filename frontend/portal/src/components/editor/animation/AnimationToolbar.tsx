@@ -58,14 +58,6 @@ export function AnimationToolbar({
 
   const hasNonEditable = SHOW_PROMPT_HINT && entry.nonEditable.length > 0
 
-  console.log('[AnimationToolbar] Rendering for eid:', selectedEid, {
-    label: entry.label,
-    isText,
-    isImage,
-    isIcon,
-    isLayout,
-    nonEditable: entry.nonEditable,
-  })
 
   return (
     <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-background/95 backdrop-blur-lg border border-border shadow-xl text-sm select-none">
