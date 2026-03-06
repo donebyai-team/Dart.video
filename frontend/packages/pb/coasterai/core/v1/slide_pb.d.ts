@@ -195,32 +195,22 @@ export declare const MetaDataSchema: GenMessage<MetaData>;
  */
 export declare type AnimationSlideContent = Message<"coasterai.core.v1.AnimationSlideContent"> & {
   /**
-   * @generated from field: string templateId = 1;
+   * @generated from field: coasterai.core.v1.CodeRegistry codeRegistry = 1;
    */
-  templateId: string;
+  codeRegistry?: CodeRegistry;
 
   /**
-   * @generated from field: coasterai.core.v1.MetaData meta = 3;
-   */
-  meta?: MetaData;
-
-  /**
-   * @generated from field: string templateUrl = 4;
-   */
-  templateUrl: string;
-
-  /**
-   * @generated from field: optional coasterai.core.v1.AnimationSlidePlan plan = 5;
+   * @generated from field: optional coasterai.core.v1.AnimationSlidePlan plan = 2;
    */
   plan?: AnimationSlidePlan;
 
   /**
-   * @generated from field: google.protobuf.Struct edits = 6;
+   * @generated from field: google.protobuf.Struct edits = 3;
    */
   edits?: JsonObject;
 
   /**
-   * @generated from field: google.protobuf.Struct registry = 7;
+   * @generated from field: google.protobuf.Struct registry = 4;
    */
   registry?: JsonObject;
 };
@@ -230,6 +220,27 @@ export declare type AnimationSlideContent = Message<"coasterai.core.v1.Animation
  * Use `create(AnimationSlideContentSchema)` to create a new message.
  */
 export declare const AnimationSlideContentSchema: GenMessage<AnimationSlideContent>;
+
+/**
+ * @generated from message coasterai.core.v1.CodeRegistry
+ */
+export declare type CodeRegistry = Message<"coasterai.core.v1.CodeRegistry"> & {
+  /**
+   * @generated from field: string mUrl = 1;
+   */
+  mUrl: string;
+
+  /**
+   * @generated from field: string tUrl = 2;
+   */
+  tUrl: string;
+};
+
+/**
+ * Describes the message coasterai.core.v1.CodeRegistry.
+ * Use `create(CodeRegistrySchema)` to create a new message.
+ */
+export declare const CodeRegistrySchema: GenMessage<CodeRegistry>;
 
 /**
  * @generated from message coasterai.core.v1.MediaAsset

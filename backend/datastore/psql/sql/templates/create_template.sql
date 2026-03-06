@@ -4,7 +4,7 @@ INSERT INTO templates (
     categories,
     description,
     schema,
-    cdn_url,
+    code_registry,
     preview_url,
     repeatable,
     element_registry
@@ -15,7 +15,7 @@ VALUES (
            :categories,
            :description,
            :schema,
-           :cdn_url,
+           :code_registry,
            :preview_url,
            :repeatable,
            :element_registry

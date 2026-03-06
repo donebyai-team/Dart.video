@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/shank318/coasterai/baml_client/types"
+	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/template_validator"
 	"os"
 	"path/filepath"
@@ -274,11 +275,17 @@ func syncTemplate(ctx context.Context, db datastore.TemplateRepository, template
 		}
 	}
 
-	cdnURL := fmt.Sprintf("%s/templates/%s/%s.tsx", publicTemplateURl, animFolderName, templateName)
+	tURL := fmt.Sprintf("%s/templates/%s/Transformed%s.tsx", publicTemplateURl, animFolderName, templateName)
+	mURL := fmt.Sprintf("%s/templates/%s/%s.tsx", publicTemplateURl, animFolderName, templateName)
 
 	existing, err := db.GetTemplateByName(ctx, animType, templateName)
 	if err != nil && !errors.Is(err, datastore.NotFound) {
 		return fmt.Errorf("failed to fetch template %s: %w", templateName, err)
+	}
+
+	codeRegistry := &pbcore.CodeRegistry{
+		TUrl: tURL,
+		MUrl: mURL,
 	}
 
 	if existing == nil {
@@ -290,19 +297,22 @@ func syncTemplate(ctx context.Context, db datastore.TemplateRepository, template
 			ElementRegistry: registryBytes,
 			Repeatable:      metadata.Repeatable,
 			Schema:          schemaBytes,
-			CDNUrl:          cdnURL,
+			CodeRegistry:    codeRegistry,
 			PreviewUrl:      "",
 		})
 		if err != nil {
 			return fmt.Errorf("failed to create template %s: %w", templateName, err)
 		}
 		stats.templatesInserted++
-	} else if templateNeedsUpdate(existing, categories, description, schemaBytes, registryBytes, cdnURL) {
+	} else if templateNeedsUpdate(existing, categories, description, schemaBytes, registryBytes, codeRegistry) {
 		existing.Categories = categories
 		existing.Description = description
 		existing.Schema = schemaBytes
 		existing.ElementRegistry = registryBytes
-		existing.CDNUrl = cdnURL
+		existing.CodeRegistry = &pbcore.CodeRegistry{
+			TUrl: tURL,
+			MUrl: mURL,
+		}
 		existing.Repeatable = metadata.Repeatable
 		if err = db.UpdateTemplate(ctx, existing); err != nil {
 			return fmt.Errorf("failed to update template %s: %w", templateName, err)
@@ -313,11 +323,14 @@ func syncTemplate(ctx context.Context, db datastore.TemplateRepository, template
 	return nil
 }
 
-func templateNeedsUpdate(existing *models.Template, categories []string, description string, schema, preview []byte, cdnURL string) bool {
+func templateNeedsUpdate(existing *models.Template, categories []string, description string, schema, preview []byte, codeRegistry *pbcore.CodeRegistry) bool {
 	if existing.Description != description {
 		return true
 	}
-	if existing.CDNUrl != cdnURL {
+	if existing.CodeRegistry.MUrl != codeRegistry.MUrl {
+		return true
+	}
+	if existing.CodeRegistry.TUrl != codeRegistry.TUrl {
 		return true
 	}
 	if !jsonRawEqual(existing.Schema, schema) {

@@ -203,12 +203,6 @@ func validateSlideAnimation(content *pbcore.AnimationSlideContent) error {
 	if content.Registry == nil {
 		return fmt.Errorf("template registry is nil")
 	}
-	
-	// ---- Meta Validation ----
-	err := validateContentMeta(content.GetMeta())
-	if err != nil {
-		return err
-	}
 
 	return nil
 }

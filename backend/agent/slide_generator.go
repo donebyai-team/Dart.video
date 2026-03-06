@@ -118,7 +118,6 @@ func (g *videoConfigGenerator) CreatePendingSlides(ctx context.Context,
 				}
 				slide.Content = &pbcore.Slide_Animation{
 					Animation: &pbcore.AnimationSlideContent{
-						Meta: defaultMeta(),
 						Plan: &pbcore.AnimationSlidePlan{
 							Index:                       animationPlan.Index,
 							BeatDescription:             animationPlan.BeatDescription,
@@ -180,7 +179,7 @@ func (g *videoConfigGenerator) UpdateAnimationSlide(
 			if slide.Id == slideID {
 				animation := slide.GetAnimation()
 				slide.SlideStatus = pbcore.SlideStatus_SLIDE_STATUS_GENERATED
-				animation.TemplateUrl = selectedTemplate.CDNUrl
+				animation.CodeRegistry = selectedTemplate.CodeRegistry
 				animation.Registry = toStructRegistry
 				animation.Edits = toStructConfig
 

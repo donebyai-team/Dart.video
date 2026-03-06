@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/lib/pq"
 	"github.com/shank318/coasterai/baml_client/types"
+	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"time"
 )
 
@@ -51,18 +52,18 @@ func (a *TemplateCategories) Scan(src interface{}) error {
 }
 
 type Template struct {
-	ID              string              `db:"id"`
-	Name            string              `db:"name"`
-	AnimationType   types.AnimationType `db:"animation_type"`
-	Categories      TemplateCategories  `db:"categories"`
-	Description     string              `db:"description"`
-	Schema          json.RawMessage     `db:"schema"`
-	CDNUrl          string              `db:"cdn_url"`
-	PreviewUrl      string              `db:"preview_url"`
-	CreatedAt       time.Time           `db:"created_at"`
-	UpdatedAt       *time.Time          `db:"updated_at"`
-	Repeatable      bool                `db:"repeatable"`
-	ElementRegistry json.RawMessage     `db:"element_registry"`
+	ID              string               `db:"id"`
+	Name            string               `db:"name"`
+	AnimationType   types.AnimationType  `db:"animation_type"`
+	Categories      TemplateCategories   `db:"categories"`
+	Description     string               `db:"description"`
+	Schema          json.RawMessage      `db:"schema"`
+	CodeRegistry    *pbcore.CodeRegistry `db:"code_registry"`
+	PreviewUrl      string               `db:"preview_url"`
+	CreatedAt       time.Time            `db:"created_at"`
+	UpdatedAt       *time.Time           `db:"updated_at"`
+	Repeatable      bool                 `db:"repeatable"`
+	ElementRegistry json.RawMessage      `db:"element_registry"`
 
 	GeneratedConfig json.RawMessage `db:"-"`
 }

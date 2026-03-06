@@ -9,7 +9,7 @@ CREATE TABLE templates
     description text,
     schema jsonb NOT NULL DEFAULT '{}'::jsonb,
     element_registry jsonb NOT NULL DEFAULT '{}'::jsonb,
-    cdn_url text NOT NULL,
+    code_registry jsonb NOT NULL DEFAULT '{}'::jsonb,
     repeatable bool DEFAULT false,
     preview_url text,
     created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,

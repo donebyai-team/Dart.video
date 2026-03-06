@@ -1,11 +1,9 @@
-import { AnimationSlideContent, MetaData, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { AnimationSlideContent, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import React, { useEffect, useState } from 'react'
 
 import { AbsoluteFill, continueRender, delayRender, useRemotionEnvironment } from 'remotion'
 import { compileRemoteComponent } from '../compiler'
-import { TemplateContainer } from '../components/TemplateContainer'
 import { AnimatedBackground } from '../effects/AnimatedBackground'
-import { TemplateRendrer } from '../components/TemplateRenderer'
 import { backgroundStyleToCSS } from '../backgroundUtils'
 
 // While testing in local, just replace this with the component to test
@@ -44,11 +42,10 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
   const { isRendering } = useRemotionEnvironment()
   const content = slide.content.value as AnimationSlideContent
   // template id for hard-coded local templates
-  const localTemplateId = content?.templateId
+  // const localTemplateId = content?.templateId
 
   // URL to fetch LLM-generated TSX source from
-  const templateUrl = content?.templateUrl
-  const templateMeta = (content?.meta as MetaData) || {}
+  const templateUrl = content?.codeRegistry?.tUrl
 
   const background = backgroundStyleToCSS(slide.backgroundStyle)
 

@@ -42,18 +42,18 @@ export const createTextAnimationActions = (set: VideoStoreSet, get: VideoStoreGe
 
     const currentAnimation = slide.content.value;
 
-    const newTemplateConfig = {
-      // ...currentAnimation.templateConfig, // Remove it so that the previous config is removed
-      ...defaultProps,
-    };
+    // const newTemplateConfig = {
+    //   // ...currentAnimation.templateConfig, // Remove it so that the previous config is removed
+    //   ...defaultProps,
+    // };
 
     const newAnimationContent = {
       case: "animation" as const,
       value: {
         ...currentAnimation,
-        templateId,
-        templateUrl: "", // IMP: set it to empty so that we don't search for invallid url
-        templateConfig: newTemplateConfig,
+        codeRegistry: {},
+        edits: {},
+        registry: {},
       } as AnimationSlideContent,
     };
 

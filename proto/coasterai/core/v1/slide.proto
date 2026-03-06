@@ -106,12 +106,15 @@ message MetaData {
   optional float rotation = 7;
 }
 message AnimationSlideContent {
-  string templateId = 1;
-  MetaData meta = 3;
-  string templateUrl = 4;
-  optional AnimationSlidePlan plan = 5;
-  google.protobuf.Struct edits = 6;
-  google.protobuf.Struct registry = 7;
+  CodeRegistry codeRegistry = 1;
+  optional AnimationSlidePlan plan = 2;
+  google.protobuf.Struct edits = 3;
+  google.protobuf.Struct registry = 4;
+}
+
+message CodeRegistry {
+  string mUrl = 1;
+  string tUrl = 2;
 }
 
 message MediaAsset {

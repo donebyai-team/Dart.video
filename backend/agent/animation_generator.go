@@ -11,6 +11,7 @@ import (
 	"github.com/shank318/coasterai/baml_client"
 	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/models"
+	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/services"
 	"go.uber.org/zap"
 	"math/rand"
@@ -200,12 +201,14 @@ func (l animationGenerator) Generate(
 			callback(TemplateGenerationProgress{
 				Message: CreativeStageMessage(StageReady, 0),
 			})
-			// TODO: Save the uploadedMedia as well as we need when we do AI edits
 			return &models.Template{
-				ID:              uuid.New().String(),
-				Name:            componentName,
+				ID:   uuid.New().String(),
+				Name: componentName,
+				CodeRegistry: &pbcore.CodeRegistry{
+					MUrl: uploadedMedia.Url,
+					TUrl: buildOutput.JSPath,
+				},
 				AnimationType:   types.AnimationTypeTEXT,
-				CDNUrl:          buildOutput.JSPath,
 				Repeatable:      false,
 				ElementRegistry: buildOutput.Registry,
 				Description:     output.Prompt,

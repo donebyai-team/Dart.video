@@ -55,6 +55,22 @@ func (v *Script) Scan(value any) error {
 	return nil
 }
 
+func (v *CodeRegistry) Value() (driver.Value, error) {
+	b, err := utils.MarshalProto(v)
+	if err != nil {
+		return nil, errors.Wrap(err, "CodeRegistry metadata")
+	}
+	return b, nil
+}
+
+func (v *CodeRegistry) Scan(value any) error {
+	err := utils.UnmarshalProto(value, v)
+	if err != nil {
+		return errors.Wrap(err, "CodeRegistry metadata")
+	}
+	return nil
+}
+
 func (v *AnimationSlidePlan) ToModel() *types.AnimationSlide {
 	return &types.AnimationSlide{
 		Index:                       v.Index,
