@@ -200,11 +200,6 @@ export declare type AnimationSlideContent = Message<"coasterai.core.v1.Animation
   templateId: string;
 
   /**
-   * @generated from field: google.protobuf.Struct templateConfig = 2;
-   */
-  templateConfig?: JsonObject;
-
-  /**
    * @generated from field: coasterai.core.v1.MetaData meta = 3;
    */
   meta?: MetaData;
@@ -223,6 +218,11 @@ export declare type AnimationSlideContent = Message<"coasterai.core.v1.Animation
    * @generated from field: google.protobuf.Struct edits = 6;
    */
   edits?: JsonObject;
+
+  /**
+   * @generated from field: google.protobuf.Struct registry = 7;
+   */
+  registry?: JsonObject;
 };
 
 /**

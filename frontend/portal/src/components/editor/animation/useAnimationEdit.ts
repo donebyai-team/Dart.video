@@ -30,7 +30,7 @@ export function useAnimationEdit(): UseAnimationEditReturn {
   // Runtime guard instead of double-cast to catch schema mismatches early.
   const animRegistry = useMemo<Record<string, RegistryEntry>>(() => {
     if (!isAnimationSlide) return {}
-    const config = (content?.value as AnimationSlideContent)?.templateConfig
+    const config = (content?.value as AnimationSlideContent)?.registry
     if (typeof config !== 'object' || config === null) return {}
     return config as unknown as Record<string, RegistryEntry>
   }, [isAnimationSlide, content])

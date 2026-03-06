@@ -3,64 +3,36 @@
   "schema": {
     "type": "object",
     "additionalProperties": false,
-    "required": ["centerText"],
+    "required": ["el-2", "el-3"],
     "properties": {
-      "centerText": {
+      "el-2": {
         "type": "object",
-        "description": "Main text displayed at the center of the slide",
+        "description": "The animated text block. Edit the text content here.",
         "additionalProperties": false,
-        "required": ["text", "style"],
+        "required": ["text"],
         "properties": {
           "text": {
             "type": "string",
-            "description": "Main text content displayed at the center",
-            "minLength": 10,
+            "description": "The text that animates in letter by letter. Keep it short and punchy.",
+            "minLength": 5,
             "maxLength": 50
-          },
+          }
+        }
+      },
+      "el-3": {
+        "type": "object",
+        "description": "Style of each letter. Changes apply to all letters.",
+        "additionalProperties": false,
+        "required": ["style"],
+        "properties": {
           "style": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["fontSize", "color", "lineHeight", "fontFamily"],
+            "required": ["color"],
             "properties": {
-              "fontSize": {
-                "type": "number"
-              },
               "color": {
-                "type": "string"
-              },
-              "lineHeight": {
-                "type": "number"
-              },
-              "textAlign": {
                 "type": "string",
-                "enum": ["left", "center", "right", "justify"]
-              },
-              "fontWeight": {
-                "type": "string",
-                "enum": [
-                  "normal",
-                  "bold",
-                  "bolder",
-                  "lighter",
-                  "300",
-                  "400",
-                  "500",
-                  "600",
-                  "700"
-                ]
-              },
-              "fontFamily": {
-                "type": "string",
-                "enum": [
-                  "Inter",
-                  "Urbanist",
-                  "Arial",
-                  "Poppins",
-                  "Roboto",
-                  "Georgia",
-                  "Times New Roman",
-                  "Courier New"
-                ]
+                "description": "Color of the letters. Use a hex color e.g. #ffffff"
               }
             }
           }

@@ -84,15 +84,15 @@ func (r *Database) CreateTemplate(ctx context.Context, t *models.Template) (*mod
 	var id string
 
 	err := stmt.GetContext(ctx, &id, map[string]interface{}{
-		"name":           t.Name,
-		"animation_type": t.AnimationType,
-		"categories":     pq.Array(t.Categories),
-		"description":    t.Description,
-		"schema":         t.Schema,
-		"preview":        t.Preview,
-		"cdn_url":        t.CDNUrl,
-		"repeatable":     t.Repeatable,
-		"preview_url":    t.PreviewUrl,
+		"name":             t.Name,
+		"animation_type":   t.AnimationType,
+		"categories":       pq.Array(t.Categories),
+		"description":      t.Description,
+		"schema":           t.Schema,
+		"cdn_url":          t.CDNUrl,
+		"repeatable":       t.Repeatable,
+		"preview_url":      t.PreviewUrl,
+		"element_registry": t.ElementRegistry,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create template: %w", err)
@@ -105,14 +105,14 @@ func (r *Database) CreateTemplate(ctx context.Context, t *models.Template) (*mod
 func (r *Database) UpdateTemplate(ctx context.Context, t *models.Template) error {
 	stmt := r.mustGetStmt("templates/update_template.sql")
 	_, err := stmt.ExecContext(ctx, map[string]interface{}{
-		"id":          t.ID,
-		"categories":  pq.Array(t.Categories),
-		"description": t.Description,
-		"schema":      t.Schema,
-		"preview":     t.Preview,
-		"cdn_url":     t.CDNUrl,
-		"repeatable":  t.Repeatable,
-		"preview_url": t.PreviewUrl,
+		"id":               t.ID,
+		"categories":       pq.Array(t.Categories),
+		"description":      t.Description,
+		"schema":           t.Schema,
+		"cdn_url":          t.CDNUrl,
+		"repeatable":       t.Repeatable,
+		"preview_url":      t.PreviewUrl,
+		"element_registry": t.ElementRegistry,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to update template: %w", err)

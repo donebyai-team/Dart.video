@@ -8,7 +8,7 @@ CREATE TABLE templates
     categories text[] NOT NULL DEFAULT '{}',
     description text,
     schema jsonb NOT NULL DEFAULT '{}'::jsonb,
-    preview jsonb NOT NULL DEFAULT '{}'::jsonb,
+    element_registry jsonb NOT NULL DEFAULT '{}'::jsonb,
     cdn_url text NOT NULL,
     repeatable bool DEFAULT false,
     preview_url text,

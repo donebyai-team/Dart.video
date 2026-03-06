@@ -49,62 +49,60 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
   // URL to fetch LLM-generated TSX source from
   const templateUrl = content?.templateUrl
   const templateMeta = (content?.meta as MetaData) || {}
-  const templateConfig = content?.templateConfig
-
 
   const background = backgroundStyleToCSS(slide.backgroundStyle)
 
 
   // 🚀 LOCAL TEMPLATE SHORT-CIRCUIT
-  if (!templateUrl && localTemplateId) {
-    return (
-      <AbsoluteFill
-        style={{
-          background,
-          justifyContent: 'center',
-          alignItems: 'center'
-        }}
-      >
-        <AnimatedBackground width={width} height={height} />
+  // if (!templateUrl && localTemplateId) {
+  //   return (
+  //     <AbsoluteFill
+  //       style={{
+  //         background,
+  //         justifyContent: 'center',
+  //         alignItems: 'center'
+  //       }}
+  //     >
+  //       <AnimatedBackground width={width} height={height} />
 
-        <TemplateContainer
-          x={templateMeta.x as number}
-          y={templateMeta.y as number}
-          width={templateMeta.width as number}
-          height={templateMeta.height as number}
-          canvasWidth={width}
-          canvasHeight={height}
-          isEditing={isEditing}
-          isSelected={isSelected}
-          onSelect={onSelect}
-          onUpdate={updates => {
-            if (onUpdate && content) {
-              onUpdate({
-                ...slide,
-                content: {
-                  case: 'animation',
-                  value: {
-                    ...content,
-                    meta: {
-                      ...templateMeta,
-                      ...updates
-                    }
-                  }
-                }
-              } as Slide)
-            }
-          }}
-        >
-          <TemplateRendrer
-            slide={slide}
-            templateId={localTemplateId}
-            templateConfig={templateConfig}
-            width={templateMeta.width || width * 0.8}
-          />
-        </TemplateContainer>
-      </AbsoluteFill>
-    )
-  }
+  //       <TemplateContainer
+  //         x={templateMeta.x as number}
+  //         y={templateMeta.y as number}
+  //         width={templateMeta.width as number}
+  //         height={templateMeta.height as number}
+  //         canvasWidth={width}
+  //         canvasHeight={height}
+  //         isEditing={isEditing}
+  //         isSelected={isSelected}
+  //         onSelect={onSelect}
+  //         onUpdate={updates => {
+  //           if (onUpdate && content) {
+  //             onUpdate({
+  //               ...slide,
+  //               content: {
+  //                 case: 'animation',
+  //                 value: {
+  //                   ...content,
+  //                   meta: {
+  //                     ...templateMeta,
+  //                     ...updates
+  //                   }
+  //                 }
+  //               }
+  //             } as Slide)
+  //           }
+  //         }}
+  //       >
+  //         <TemplateRendrer
+  //           slide={slide}
+  //           templateId={localTemplateId}
+  //           templateConfig={templateConfig}
+  //           width={templateMeta.width || width * 0.8}
+  //         />
+  //       </TemplateContainer>
+  //     </AbsoluteFill>
+  //   )
+  // }
 
   const [renderHandle] = useState(() => {
     if (!templateUrl) return null

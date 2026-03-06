@@ -107,11 +107,11 @@ message MetaData {
 }
 message AnimationSlideContent {
   string templateId = 1;
-  google.protobuf.Struct templateConfig = 2;
   MetaData meta = 3;
   string templateUrl = 4;
   optional AnimationSlidePlan plan = 5;
   google.protobuf.Struct edits = 6;
+  google.protobuf.Struct registry = 7;
 }
 
 message MediaAsset {

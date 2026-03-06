@@ -192,7 +192,7 @@ func (l animationGenerator) Generate(
 
 		buildOutput, err := l.codeBuilder.ValidateAndBuild(ctx, &services.ValidateAndBuildInput{
 			Code:          indentedCode,
-			ComponentName: fmt.Sprintf("Transformed%s", componentName),
+			ComponentName: fmt.Sprintf("Transformed%s%d", componentName, attempt),
 			OutputPath:    fmt.Sprintf("templates/generated/%s/%s", params.OrgID, params.SessionID),
 		})
 
@@ -200,13 +200,14 @@ func (l animationGenerator) Generate(
 			callback(TemplateGenerationProgress{
 				Message: CreativeStageMessage(StageReady, 0),
 			})
+			// TODO: Save the uploadedMedia as well as we need when we do AI edits
 			return &models.Template{
 				ID:              uuid.New().String(),
 				Name:            componentName,
 				AnimationType:   types.AnimationTypeTEXT,
 				CDNUrl:          buildOutput.JSPath,
 				Repeatable:      false,
-				GeneratedConfig: buildOutput.Registry,
+				ElementRegistry: buildOutput.Registry,
 				Description:     output.Prompt,
 			}, nil
 		}
@@ -253,12 +254,10 @@ var nouns = []string{
 }
 
 func RandomComponentName() string {
-	rand.Seed(time.Now().UnixNano())
-
 	a := adjectives[rand.Intn(len(adjectives))]
 	b := nouns[rand.Intn(len(nouns))]
 
-	return a + b
+	return fmt.Sprintf("%s%s_%d", a, b, time.Now().UnixNano())
 }
 
 func (l animationGenerator) ExtractConfig(ctx context.Context,

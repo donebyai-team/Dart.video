@@ -202,11 +202,11 @@ const publicTemplateURl = "https://storage.googleapis.com/coasterai-public"
 
 func syncTemplate(ctx context.Context, db datastore.TemplateRepository, templateDir, templateName string, animType types.AnimationType, animFolderName string, stats *syncStats) error {
 	metadataPath := filepath.Join(templateDir, "metadata.json")
-	previewPath := filepath.Join(templateDir, "preview.json")
+	registryPath := filepath.Join(templateDir, "registry.json")
 	schemaPath := filepath.Join(templateDir, "schema.json")
 	embeddingPath := filepath.Join(templateDir, "embedding.md")
 
-	for _, path := range []string{metadataPath, previewPath, schemaPath, embeddingPath} {
+	for _, path := range []string{metadataPath, registryPath, schemaPath, embeddingPath} {
 		if _, err := os.Stat(path); os.IsNotExist(err) {
 			return fmt.Errorf("required file missing in template %s: %s", templateName, filepath.Base(path))
 		}
@@ -221,12 +221,12 @@ func syncTemplate(ctx context.Context, db datastore.TemplateRepository, template
 		return fmt.Errorf("embedding.md empty in template %s", templateName)
 	}
 
-	previewBytes, err := os.ReadFile(previewPath)
+	registryBytes, err := os.ReadFile(registryPath)
 	if err != nil {
 		return fmt.Errorf("failed to read preview.json in template %s: %w", templateName, err)
 	}
-	if !json.Valid(previewBytes) {
-		return fmt.Errorf("preview.json invalid JSON in template %s", templateName)
+	if !json.Valid(registryBytes) {
+		return fmt.Errorf("registry.json invalid JSON in template %s", templateName)
 	}
 
 	schemaBytes, err := os.ReadFile(schemaPath)
@@ -283,25 +283,25 @@ func syncTemplate(ctx context.Context, db datastore.TemplateRepository, template
 
 	if existing == nil {
 		_, err = db.CreateTemplate(ctx, &models.Template{
-			Name:          templateName,
-			AnimationType: animType,
-			Categories:    categories,
-			Description:   description,
-			Repeatable:    metadata.Repeatable,
-			Schema:        schemaBytes,
-			Preview:       previewBytes,
-			CDNUrl:        cdnURL,
-			PreviewUrl:    "",
+			Name:            templateName,
+			AnimationType:   animType,
+			Categories:      categories,
+			Description:     description,
+			ElementRegistry: registryBytes,
+			Repeatable:      metadata.Repeatable,
+			Schema:          schemaBytes,
+			CDNUrl:          cdnURL,
+			PreviewUrl:      "",
 		})
 		if err != nil {
 			return fmt.Errorf("failed to create template %s: %w", templateName, err)
 		}
 		stats.templatesInserted++
-	} else if templateNeedsUpdate(existing, categories, description, schemaBytes, previewBytes, cdnURL) {
+	} else if templateNeedsUpdate(existing, categories, description, schemaBytes, registryBytes, cdnURL) {
 		existing.Categories = categories
 		existing.Description = description
 		existing.Schema = schemaBytes
-		existing.Preview = previewBytes
+		existing.ElementRegistry = registryBytes
 		existing.CDNUrl = cdnURL
 		existing.Repeatable = metadata.Repeatable
 		if err = db.UpdateTemplate(ctx, existing); err != nil {
@@ -323,7 +323,7 @@ func templateNeedsUpdate(existing *models.Template, categories []string, descrip
 	if !jsonRawEqual(existing.Schema, schema) {
 		return true
 	}
-	if !jsonRawEqual(existing.Preview, preview) {
+	if !jsonRawEqual(existing.ElementRegistry, preview) {
 		return true
 	}
 

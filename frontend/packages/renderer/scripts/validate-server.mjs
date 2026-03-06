@@ -140,8 +140,9 @@ function buildRootEntry(code) {
 async function uploadToGCS(bucket, gcsPath, fileBuffer) {
   await storage.bucket(bucket).file(gcsPath).save(fileBuffer, {
     metadata: {
-      contentType: 'application/javascript',
+      contentType: 'text/plain',
       cacheControl: 'public, max-age=31536000, immutable',
+      contentDisposition: 'inline'
     },
   });
 }

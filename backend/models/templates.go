@@ -57,11 +57,12 @@ type Template struct {
 	Categories      TemplateCategories  `db:"categories"`
 	Description     string              `db:"description"`
 	Schema          json.RawMessage     `db:"schema"`
-	Preview         json.RawMessage     `db:"preview"`
 	CDNUrl          string              `db:"cdn_url"`
 	PreviewUrl      string              `db:"preview_url"`
 	CreatedAt       time.Time           `db:"created_at"`
 	UpdatedAt       *time.Time          `db:"updated_at"`
 	Repeatable      bool                `db:"repeatable"`
-	GeneratedConfig json.RawMessage     `db:"-"`
+	ElementRegistry json.RawMessage     `db:"element_registry"`
+
+	GeneratedConfig json.RawMessage `db:"-"`
 }

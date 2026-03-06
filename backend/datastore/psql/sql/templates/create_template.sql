@@ -4,10 +4,10 @@ INSERT INTO templates (
     categories,
     description,
     schema,
-    preview,
     cdn_url,
     preview_url,
-    repeatable
+    repeatable,
+    element_registry
 )
 VALUES (
         lower(:name),
@@ -15,9 +15,9 @@ VALUES (
            :categories,
            :description,
            :schema,
-           :preview,
            :cdn_url,
            :preview_url,
-           :repeatable
+           :repeatable,
+           :element_registry
        )
     RETURNING id;
