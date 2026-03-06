@@ -21,13 +21,13 @@ import React, { useRef, useLayoutEffect, useEffect } from 'react'
 interface FRect { left: number; top: number; width: number; height: number }
 
 interface TextEditOverlayProps {
-  elementRect:    FRect
-  selectedEid:    string
-  playerRef:      React.RefObject<HTMLDivElement>
-  initText:       string
-  onCommit:       (text: string, height: number) => void
-  onCancel:       () => void
-  onHeightChange: (h: number) => void
+  elementRect:       FRect
+  selectedEid:       string
+  playerRef:         React.RefObject<HTMLDivElement>
+  initText:          string
+  onCommit:          (text: string, height: number) => void
+  onCancel:          () => void
+  onHeightChange:    (h: number) => void
 }
 
 export function TextEditOverlay({
@@ -64,6 +64,8 @@ export function TextEditOverlay({
     range.collapse(false)        // collapse to end — cursor at end of text
     sel?.removeAllRanges()
     sel?.addRange(range)
+
+
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Track height changes so the selection highlight can follow ─────────────
