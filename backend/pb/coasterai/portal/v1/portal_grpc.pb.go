@@ -21,28 +21,29 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	PortalService_GetConfig_FullMethodName             = "/coasterai.portal.v1.PortalService/GetConfig"
-	PortalService_Self_FullMethodName                  = "/coasterai.portal.v1.PortalService/Self"
-	PortalService_GetIntegration_FullMethodName        = "/coasterai.portal.v1.PortalService/GetIntegration"
-	PortalService_RevokeIntegration_FullMethodName     = "/coasterai.portal.v1.PortalService/RevokeIntegration"
-	PortalService_UpdateIntegration_FullMethodName     = "/coasterai.portal.v1.PortalService/UpdateIntegration"
-	PortalService_PasswordlessStart_FullMethodName     = "/coasterai.portal.v1.PortalService/PasswordlessStart"
-	PortalService_PasswordlessVerify_FullMethodName    = "/coasterai.portal.v1.PortalService/PasswordlessVerify"
-	PortalService_OauthAuthorize_FullMethodName        = "/coasterai.portal.v1.PortalService/OauthAuthorize"
-	PortalService_OauthCallback_FullMethodName         = "/coasterai.portal.v1.PortalService/OauthCallback"
-	PortalService_SocialLoginCallback_FullMethodName   = "/coasterai.portal.v1.PortalService/SocialLoginCallback"
-	PortalService_GetIntegrations_FullMethodName       = "/coasterai.portal.v1.PortalService/GetIntegrations"
-	PortalService_CreateVideo_FullMethodName           = "/coasterai.portal.v1.PortalService/CreateVideo"
-	PortalService_ContinueVideoPlanning_FullMethodName = "/coasterai.portal.v1.PortalService/ContinueVideoPlanning"
-	PortalService_GetVideo_FullMethodName              = "/coasterai.portal.v1.PortalService/GetVideo"
-	PortalService_StopVideo_FullMethodName             = "/coasterai.portal.v1.PortalService/StopVideo"
-	PortalService_GetVideos_FullMethodName             = "/coasterai.portal.v1.PortalService/GetVideos"
-	PortalService_DeleteVideo_FullMethodName           = "/coasterai.portal.v1.PortalService/DeleteVideo"
-	PortalService_UpdateVideoConfig_FullMethodName     = "/coasterai.portal.v1.PortalService/UpdateVideoConfig"
-	PortalService_RenderVideo_FullMethodName           = "/coasterai.portal.v1.PortalService/RenderVideo"
-	PortalService_CreateBrandIdentity_FullMethodName   = "/coasterai.portal.v1.PortalService/CreateBrandIdentity"
-	PortalService_GetBrandIdentities_FullMethodName    = "/coasterai.portal.v1.PortalService/GetBrandIdentities"
-	PortalService_UpdateBrandIdentity_FullMethodName   = "/coasterai.portal.v1.PortalService/UpdateBrandIdentity"
+	PortalService_GetConfig_FullMethodName                    = "/coasterai.portal.v1.PortalService/GetConfig"
+	PortalService_Self_FullMethodName                         = "/coasterai.portal.v1.PortalService/Self"
+	PortalService_GetIntegration_FullMethodName               = "/coasterai.portal.v1.PortalService/GetIntegration"
+	PortalService_RevokeIntegration_FullMethodName            = "/coasterai.portal.v1.PortalService/RevokeIntegration"
+	PortalService_UpdateIntegration_FullMethodName            = "/coasterai.portal.v1.PortalService/UpdateIntegration"
+	PortalService_PasswordlessStart_FullMethodName            = "/coasterai.portal.v1.PortalService/PasswordlessStart"
+	PortalService_PasswordlessVerify_FullMethodName           = "/coasterai.portal.v1.PortalService/PasswordlessVerify"
+	PortalService_OauthAuthorize_FullMethodName               = "/coasterai.portal.v1.PortalService/OauthAuthorize"
+	PortalService_OauthCallback_FullMethodName                = "/coasterai.portal.v1.PortalService/OauthCallback"
+	PortalService_SocialLoginCallback_FullMethodName          = "/coasterai.portal.v1.PortalService/SocialLoginCallback"
+	PortalService_GetIntegrations_FullMethodName              = "/coasterai.portal.v1.PortalService/GetIntegrations"
+	PortalService_CreateVideo_FullMethodName                  = "/coasterai.portal.v1.PortalService/CreateVideo"
+	PortalService_ContinueVideoPlanning_FullMethodName        = "/coasterai.portal.v1.PortalService/ContinueVideoPlanning"
+	PortalService_GetVideo_FullMethodName                     = "/coasterai.portal.v1.PortalService/GetVideo"
+	PortalService_StopVideo_FullMethodName                    = "/coasterai.portal.v1.PortalService/StopVideo"
+	PortalService_GetVideos_FullMethodName                    = "/coasterai.portal.v1.PortalService/GetVideos"
+	PortalService_DeleteVideo_FullMethodName                  = "/coasterai.portal.v1.PortalService/DeleteVideo"
+	PortalService_UpdateVideoConfig_FullMethodName            = "/coasterai.portal.v1.PortalService/UpdateVideoConfig"
+	PortalService_RenderVideo_FullMethodName                  = "/coasterai.portal.v1.PortalService/RenderVideo"
+	PortalService_CreateBrandIdentity_FullMethodName          = "/coasterai.portal.v1.PortalService/CreateBrandIdentity"
+	PortalService_GetBrandIdentities_FullMethodName           = "/coasterai.portal.v1.PortalService/GetBrandIdentities"
+	PortalService_UpdateBrandIdentity_FullMethodName          = "/coasterai.portal.v1.PortalService/UpdateBrandIdentity"
+	PortalService_GenerateOrEditAnimationSlide_FullMethodName = "/coasterai.portal.v1.PortalService/GenerateOrEditAnimationSlide"
 )
 
 // PortalServiceClient is the client API for PortalService service.
@@ -74,6 +75,8 @@ type PortalServiceClient interface {
 	CreateBrandIdentity(ctx context.Context, in *BrandIdentityRequest, opts ...grpc.CallOption) (*v1.BrandIdentity, error)
 	GetBrandIdentities(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*BrandIdentityResponse, error)
 	UpdateBrandIdentity(ctx context.Context, in *UpdateBrandIdentityRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Edit animations
+	GenerateOrEditAnimationSlide(ctx context.Context, in *GenerateOrEditAnimationRequest, opts ...grpc.CallOption) (PortalService_GenerateOrEditAnimationSlideClient, error)
 }
 
 type portalServiceClient struct {
@@ -351,6 +354,38 @@ func (c *portalServiceClient) UpdateBrandIdentity(ctx context.Context, in *Updat
 	return out, nil
 }
 
+func (c *portalServiceClient) GenerateOrEditAnimationSlide(ctx context.Context, in *GenerateOrEditAnimationRequest, opts ...grpc.CallOption) (PortalService_GenerateOrEditAnimationSlideClient, error) {
+	stream, err := c.cc.NewStream(ctx, &PortalService_ServiceDesc.Streams[3], PortalService_GenerateOrEditAnimationSlide_FullMethodName, opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &portalServiceGenerateOrEditAnimationSlideClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type PortalService_GenerateOrEditAnimationSlideClient interface {
+	Recv() (*GenerateOrEditAnimationResponse, error)
+	grpc.ClientStream
+}
+
+type portalServiceGenerateOrEditAnimationSlideClient struct {
+	grpc.ClientStream
+}
+
+func (x *portalServiceGenerateOrEditAnimationSlideClient) Recv() (*GenerateOrEditAnimationResponse, error) {
+	m := new(GenerateOrEditAnimationResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // PortalServiceServer is the server API for PortalService service.
 // All implementations must embed UnimplementedPortalServiceServer
 // for forward compatibility
@@ -380,6 +415,8 @@ type PortalServiceServer interface {
 	CreateBrandIdentity(context.Context, *BrandIdentityRequest) (*v1.BrandIdentity, error)
 	GetBrandIdentities(context.Context, *emptypb.Empty) (*BrandIdentityResponse, error)
 	UpdateBrandIdentity(context.Context, *UpdateBrandIdentityRequest) (*emptypb.Empty, error)
+	// Edit animations
+	GenerateOrEditAnimationSlide(*GenerateOrEditAnimationRequest, PortalService_GenerateOrEditAnimationSlideServer) error
 	mustEmbedUnimplementedPortalServiceServer()
 }
 
@@ -452,6 +489,9 @@ func (UnimplementedPortalServiceServer) GetBrandIdentities(context.Context, *emp
 }
 func (UnimplementedPortalServiceServer) UpdateBrandIdentity(context.Context, *UpdateBrandIdentityRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateBrandIdentity not implemented")
+}
+func (UnimplementedPortalServiceServer) GenerateOrEditAnimationSlide(*GenerateOrEditAnimationRequest, PortalService_GenerateOrEditAnimationSlideServer) error {
+	return status.Errorf(codes.Unimplemented, "method GenerateOrEditAnimationSlide not implemented")
 }
 func (UnimplementedPortalServiceServer) mustEmbedUnimplementedPortalServiceServer() {}
 
@@ -871,6 +911,27 @@ func _PortalService_UpdateBrandIdentity_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PortalService_GenerateOrEditAnimationSlide_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GenerateOrEditAnimationRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(PortalServiceServer).GenerateOrEditAnimationSlide(m, &portalServiceGenerateOrEditAnimationSlideServer{stream})
+}
+
+type PortalService_GenerateOrEditAnimationSlideServer interface {
+	Send(*GenerateOrEditAnimationResponse) error
+	grpc.ServerStream
+}
+
+type portalServiceGenerateOrEditAnimationSlideServer struct {
+	grpc.ServerStream
+}
+
+func (x *portalServiceGenerateOrEditAnimationSlideServer) Send(m *GenerateOrEditAnimationResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // PortalService_ServiceDesc is the grpc.ServiceDesc for PortalService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -969,6 +1030,11 @@ var PortalService_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "GetVideo",
 			Handler:       _PortalService_GetVideo_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "GenerateOrEditAnimationSlide",
+			Handler:       _PortalService_GenerateOrEditAnimationSlide_Handler,
 			ServerStreams: true,
 		},
 	},

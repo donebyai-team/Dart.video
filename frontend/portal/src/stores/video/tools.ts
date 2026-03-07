@@ -46,13 +46,13 @@ export const createToolActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     set({ activeTool: getDefaultSelectedTool() })
   },
 
-  handleEditSlide() {
+  handleEditAnimation() {
     const { selectedSlide } = get()
     if (!selectedSlide) return
 
     const slide = selectedSlide.slide
     if (slide.type === SlideType.ANIMATION) {
-      set({ activeTool: { type: ActiveToolType.TEXT_ANIMATION_SETTINGS } })
+      set({ activeTool: { type: ActiveToolType.ADD_OR_EDIT_ANIMATION, settings: { slideToEdit: selectedSlide } } })
     } 
   }
 })

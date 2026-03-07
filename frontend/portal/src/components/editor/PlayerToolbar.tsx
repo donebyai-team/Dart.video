@@ -32,7 +32,7 @@ const insertTools: { id: EffectType; name: string; icon: React.ElementType }[] =
 
 const PlayerToolbar = ({ onDurationChange, minDuration = 1, maxDuration = 180 }: PlayerToolbarProps) => {
   const getSlideWithBackground = useVideoStore(s => s.getSlideWithBackground)
-  const onChangeTextAnimation = useVideoStore(s => s.handleEditSlide)
+  const onChangeTextAnimation = useVideoStore(s => s.handleEditAnimation)
   const activeTool = useVideoStore(s => s.activeTool)
   const onSelectTool = useVideoStore(s => s.handleSelectTool)
   const selectedSlide = useVideoStore(s => s.selectedSlide)
@@ -79,11 +79,11 @@ const PlayerToolbar = ({ onDurationChange, minDuration = 1, maxDuration = 180 }:
                 <TooltipTrigger asChild>
                   <Button variant='ghost' size='sm' className='gap-2 h-8' onClick={onChangeTextAnimation}>
                     <Wand2 className='w-4 h-4' />
-                    <span className='text-xs'>Change Animation</span>
+                    <span className='text-xs'>Edit Animation</span>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent side='bottom' className='text-xs'>
-                  Choose text animation template
+                  Editing this animation
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

@@ -4,6 +4,8 @@
 
 import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv1";
 import type { Message } from "@bufbuild/protobuf";
+import type { Slide } from "../../core/v1/slide_pb";
+import type { AnimationTemplate } from "../../core/v1/template_pb";
 import type { BrandIdentity, BrandIdentitySchema } from "../../core/v1/brandkit_pb";
 import type { Resolution, Script, Video, VideoConfig, VideoLanguage, VideoMetadata } from "../../core/v1/video_pb";
 import type { EmptySchema, Timestamp } from "@bufbuild/protobuf/wkt";
@@ -12,6 +14,70 @@ import type { EmptySchema, Timestamp } from "@bufbuild/protobuf/wkt";
  * Describes the file coasterai/portal/v1/portal.proto.
  */
 export declare const file_coasterai_portal_v1_portal: GenFile;
+
+/**
+ * @generated from message coasterai.portal.v1.GenerateOrEditAnimationRequest
+ */
+export declare type GenerateOrEditAnimationRequest = Message<"coasterai.portal.v1.GenerateOrEditAnimationRequest"> & {
+  /**
+   * @generated from field: optional string slideId = 1;
+   */
+  slideId?: string;
+
+  /**
+   * @generated from field: string prompt = 2;
+   */
+  prompt: string;
+
+  /**
+   * used when creating new animation
+   *
+   * @generated from field: bool suggestions = 3;
+   */
+  suggestions: boolean;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.GenerateOrEditAnimationRequest.
+ * Use `create(GenerateOrEditAnimationRequestSchema)` to create a new message.
+ */
+export declare const GenerateOrEditAnimationRequestSchema: GenMessage<GenerateOrEditAnimationRequest>;
+
+/**
+ * @generated from message coasterai.portal.v1.GenerateOrEditAnimationResponse
+ */
+export declare type GenerateOrEditAnimationResponse = Message<"coasterai.portal.v1.GenerateOrEditAnimationResponse"> & {
+  /**
+   * @generated from field: coasterai.core.v1.Slide slide = 1;
+   */
+  slide?: Slide;
+
+  /**
+   * @generated from field: string thinking_summary = 2;
+   */
+  thinkingSummary: string;
+
+  /**
+   * @generated from field: coasterai.portal.v1.AskUserQuestion ask_user_question = 3;
+   */
+  askUserQuestion?: AskUserQuestion;
+
+  /**
+   * @generated from field: bool waiting_for_user_input = 4;
+   */
+  waitingForUserInput: boolean;
+
+  /**
+   * @generated from field: repeated coasterai.core.v1.AnimationTemplate suggestions = 5;
+   */
+  suggestions: AnimationTemplate[];
+};
+
+/**
+ * Describes the message coasterai.portal.v1.GenerateOrEditAnimationResponse.
+ * Use `create(GenerateOrEditAnimationResponseSchema)` to create a new message.
+ */
+export declare const GenerateOrEditAnimationResponseSchema: GenMessage<GenerateOrEditAnimationResponse>;
 
 /**
  * @generated from message coasterai.portal.v1.UpdateBrandIdentityRequest
@@ -1144,6 +1210,16 @@ export declare const PortalService: GenService<{
     methodKind: "unary";
     input: typeof UpdateBrandIdentityRequestSchema;
     output: typeof EmptySchema;
+  },
+  /**
+   * Edit animations
+   *
+   * @generated from rpc coasterai.portal.v1.PortalService.GenerateOrEditAnimationSlide
+   */
+  generateOrEditAnimationSlide: {
+    methodKind: "server_streaming";
+    input: typeof GenerateOrEditAnimationRequestSchema;
+    output: typeof GenerateOrEditAnimationResponseSchema;
   },
 }>;
 

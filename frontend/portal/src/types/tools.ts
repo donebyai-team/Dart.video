@@ -1,8 +1,16 @@
+import { SelectedSection } from "@/stores/video/types";
 import { EffectType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+
+
+export interface AddOrEditAnimationSettings {
+  slideToEdit?: SelectedSection // if provided, we're editing an existing animation
+  previousSlide?: SelectedSection // if provided, we're adding an animation to a new slide after this previous slide
+}
 
 export interface SelectedTool {
   type: ActiveToolType
   tool?: EffectType
+  settings?: AddOrEditAnimationSettings
 }
 
 export enum ActiveToolType {
@@ -12,6 +20,7 @@ export enum ActiveToolType {
   TEXT_ANIMATION_TEMPLATE = "text-animation-template",
   VISUAL_ANIMATION_SETTINGS = "visual-animation-settings",
   TEXT_ANIMATION_SETTINGS = "text-animation-settings",
+  ADD_OR_EDIT_ANIMATION = "add-or-edit-animation",
 }
 
 export type SelectedTools =
@@ -23,4 +32,5 @@ export type SelectedTools =
   | { type: ActiveToolType.TEXT_ANIMATION_TEMPLATE }
   | { type: ActiveToolType.VISUAL_ANIMATION_SETTINGS }
   | { type: ActiveToolType.TEXT_ANIMATION_SETTINGS }
+  | { type: ActiveToolType.ADD_OR_EDIT_ANIMATION; settings: AddOrEditAnimationSettings }
   | { type: ActiveToolType.NONE };

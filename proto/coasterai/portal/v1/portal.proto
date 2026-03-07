@@ -10,6 +10,7 @@ import "coasterai/core/v1/core.proto";
 import "coasterai/core/v1/slide.proto";
 import "coasterai/core/v1/video.proto";
 import "coasterai/core/v1/brandkit.proto";
+import "coasterai/core/v1/template.proto";
 
 service PortalService {
   rpc GetConfig(.google.protobuf.Empty) returns (Config);
@@ -38,6 +39,23 @@ service PortalService {
   rpc CreateBrandIdentity(BrandIdentityRequest) returns (core.v1.BrandIdentity);
   rpc GetBrandIdentities(.google.protobuf.Empty) returns (BrandIdentityResponse);
   rpc UpdateBrandIdentity(UpdateBrandIdentityRequest) returns (.google.protobuf.Empty);
+
+  // Edit animations
+  rpc GenerateOrEditAnimationSlide(GenerateOrEditAnimationRequest) returns (stream GenerateOrEditAnimationResponse);
+}
+
+message GenerateOrEditAnimationRequest {
+  optional string slideId = 1;
+  string prompt = 2;
+  bool suggestions = 3; // used when creating new animation
+}
+
+message GenerateOrEditAnimationResponse {
+  core.v1.Slide slide = 1;
+  string thinking_summary = 2;
+  AskUserQuestion ask_user_question = 3;
+  bool waiting_for_user_input = 4;
+  repeated core.v1.AnimationTemplate suggestions = 5;
 }
 
 message UpdateBrandIdentityRequest {

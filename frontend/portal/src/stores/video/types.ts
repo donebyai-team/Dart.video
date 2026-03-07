@@ -105,7 +105,7 @@ export interface VideoActions {
     // Tools
     handleSelectTool: (tool: SelectedTool) => void
     handleCloseTool: () => void
-    handleEditSlide: () => void
+    handleEditAnimation: () => void
 
     // Text animation
     handleSelectTextAnimationTemplate: (templateId: string) => void

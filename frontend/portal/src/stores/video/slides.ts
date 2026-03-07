@@ -1,11 +1,12 @@
 import { TimelineSlide } from '@/components/editor/timeline/types'
-import { SlideType, Slide, TransitionDirection, TransitionType, BackgroundStyle } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { SlideType, Slide, TransitionDirection, TransitionType, BackgroundStyle, Section } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { arrayMove } from '@dnd-kit/sortable'
 import { createNewSlide, getDefaulVideotMetadata, createDefaultBackgroundStyle, resolveBackgroundStyle } from './defaults'
 import { VideoStoreSet, VideoStoreGet } from './types'
 import { getSections, updateVideoConfigSections, updateSelectedSlide, updateTotalDuration, getPreviousSlide } from './utils'
 import defaultEditorConfig from '@/data/editorConfig'
 import { TRANSITION_DURATION_SECONDS } from '@coasterai/renderer/src/frameUtils'
+import { ActiveToolType } from '@/types/tools'
 
 export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   /* ================= ADD ================= */
@@ -25,6 +26,23 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   },
 
   addSlide(sectionId: string, type: SlideType, afterSlideId?: string) {
+    // if we are trying to add a Animation slide, we just open the AnimationEditor
+    // by setting the active tool to ADD_ANIMATION
+    if (type === SlideType.ANIMATION) {
+      set({
+        activeTool: {
+          type: ActiveToolType.ADD_OR_EDIT_ANIMATION,
+          settings: {
+            previousSlide: {
+              section: { id: sectionId } as Section,
+              slide: { id: afterSlideId || '' } as Slide
+            }
+          }
+        }
+      })
+      return
+    }
+
     const { videoConfig } = get();
     if (!videoConfig?.config) return;
 

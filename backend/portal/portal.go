@@ -1,6 +1,7 @@
 package portal
 
 import (
+	"connectrpc.com/connect"
 	"context"
 	"github.com/shank318/coasterai/cache"
 	google2 "github.com/shank318/coasterai/integrations/google"
