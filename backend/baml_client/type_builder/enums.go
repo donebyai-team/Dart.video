@@ -15,6 +15,42 @@ package type_builder
 
 import baml "github.com/boundaryml/baml/engine/language_client_go/pkg"
 
+type AnimationCodeEditTypeEnumView struct {
+	inner baml.EnumBuilder
+}
+
+func (t *AnimationCodeEditTypeEnumView) ListValues() ([]EnumValueView, error) {
+	result, err := t.inner.ListValues()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]EnumValueView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *AnimationCodeEditTypeEnumView) ValueTARGETED_EDITS() (EnumValueView, error) {
+	return t.inner.Value("TARGETED_EDITS")
+}
+
+func (t *AnimationCodeEditTypeEnumView) ValueFULL_REWRITE() (EnumValueView, error) {
+	return t.inner.Value("FULL_REWRITE")
+}
+
+func (t *TypeBuilder) AnimationCodeEditType() (*AnimationCodeEditTypeEnumView, error) {
+	bld, err := t.inner.Enum("AnimationCodeEditType")
+	if err != nil {
+		return nil, err
+	}
+	return &AnimationCodeEditTypeEnumView{inner: bld}, nil
+}
+
+func (t *AnimationCodeEditTypeEnumView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
 type AnimationTypeEnumView struct {
 	inner baml.EnumBuilder
 }

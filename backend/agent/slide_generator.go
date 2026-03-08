@@ -65,6 +65,19 @@ func (g *videoConfigGenerator) CreatePendingSlides(ctx context.Context,
 ) (*pbcore.Video, error) {
 	// save background
 	g.AddVideoBackground(toBackgroundStyle(plan.BackgroundStyle))
+	g.video.Metadata.GeneratedBranding = &pbcore.GeneratedVideoBranding{
+		BrandLibraryID: plan.Branding.BrandLibraryID,
+		Colors: &pbcore.GeneratedBrandColors{
+			Primary:   plan.Branding.Colors.Primary,
+			Secondary: plan.Branding.Colors.Secondary,
+			Accent:    plan.Branding.Colors.Accent,
+			Text:      plan.Branding.Colors.Text,
+		},
+	}
+
+	if plan.Branding.BrandGuideLines != nil {
+		g.video.Metadata.GeneratedBranding.BrandGuideLines = *plan.Branding.BrandGuideLines
+	}
 
 	// save slides
 	sections := make([]*pbcore.Section, 0, len(plan.Sections))

@@ -1,17 +1,17 @@
-class GenerateAnimationCodeRequest {
+class ReGenerateAnimationCodeRequest {
+  code string
   animationType AnimationType
-  animationPrompt string @description("Visual animation blueprint generated earlier")
-  duration int @description("Duration of the animation in seconds")
-  voiceover string? @description("Optional narration text for timing alignment")
+  prompt string
+  duration int
   branding VideoBranding
   slideBackground string
 }
 
-class GenerateAnimationCodeResponse {
+class ReGenerateAnimationCodeResponse {
   code string @description("Typescript code")
 }
 
-function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_history: Message[]) -> GenerateAnimationCodeResponse {
+function ReGenerateAnimation(resume: ReGenerateAnimationCodeRequest, conversation_history: Message[]) -> ReGenerateAnimationCodeResponse {
   client CustomOpenAI
   prompt #"
     You are an expert in generating React components for Remotion animations.
@@ -67,23 +67,6 @@ function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_hi
        - Never compute these from width or height
        - These will be editable from the toolbar
 
-    4. Separation example — follow this pattern exactly:
-    {% raw %}
-       <div style={{
-         /* LAYOUT — inline responsive expressions */
-         width:      Math.max(600, Math.round(width * 0.5)),
-         paddingLeft: Math.max(40, Math.round(width * 0.05)),
-         gap:         Math.max(12, Math.round(height * 0.015)),
-
-         /* VISUAL — fixed static values only */
-         background:   '#ffffff',
-         borderRadius: 16,
-         fontFamily:   'Inter, sans-serif',
-         fontSize:     48,
-         color:        '#111827',
-       }}>
-    {% endraw %}
-
    ## ANIMATION RULES
    - Prefer spring() for organic motion (entrances, bounces, scaling)
    - Use interpolate() for linear progress (opacity fades, position)
@@ -127,65 +110,6 @@ function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_hi
    ---
    {% endif %}
 
-
-   ## EXAMPLE STRUCTURE
-   {% raw %}
-   ```tsx
-    export const RemoteComponent = () => {
-      /* One sentence describing what this slide shows. */
-      const frame = useCurrentFrame();
-      const { fps, width, height } = useVideoConfig();
-
-      // One variable per animated prop — never inline, never in arrays
-      const titleOpacity = interpolate(frame, [0, 20], [0, 1],
-        { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-      const titleScale = spring({ frame, fps, config: { damping: 14 } });
-
-      // Data arrays drive content — never if/else inside map
-      const items = [
-        { label: 'First',  color: '#0070F0' },
-        { label: 'Second', color: '#111827' },
-      ];
-
-      return (
-        <div style={{ width: '100%', height: '100%', position: 'relative', background: 'transparent' }}>
-
-          {/* Background in its own div — never on root */}
-          <div style={{ position: 'absolute', inset: 0, background: '#EAF2FF' }} />
-
-          {/* LAYOUT values inline responsive, VISUAL values fixed static */}
-          <div style={{
-            paddingLeft: Math.max(40, Math.round(width * 0.05)),  // layout — inline
-            fontSize: 48,                                          // visual — fixed
-            color: '#111827',                                      // visual — fixed
-          }}>
-
-            {/* Animated values used directly — no string concat */}
-            <span style={{ opacity: titleOpacity, transform: `scale(${titleScale})`, fontSize: 48, color: '#111827' }}>
-              Title Text
-            </span>
-
-            {/* Animation constants declared inside callback */}
-            {items.map((item, i) => {
-              const itemOpacity = interpolate(frame, [i * 5, i * 5 + 15], [0, 1],
-                { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-              return (
-                <div key={i} style={{ opacity: itemOpacity, background: '#fff', color: item.color }}>
-                  {item.label}
-                </div>
-              );
-            })}
-
-            {/* SVG and images always via img tag */}
-            <img src="https://placehold.co/120x120?text=Logo" style={{ width: 120, height: 120 }} />
-
-          </div>
-        </div>
-      );
-    };
-   ```
-   {% endraw %}
-
     ## RESERVED NAMES (CRITICAL)
 
     NEVER use these as variable names - they shadow imports:
@@ -208,24 +132,19 @@ function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_hi
     Resolution and Canvas Size:
     16x9(1920x1080)
 
-    Duration:
+   Slide Background:
+   {{ resume.slideBackground }}
+
+   {{ BrandGuidelines(resume.branding) }}
+
+    Animation Duration:
     {{ resume.duration }}
 
-    Animation Instructions:
-    {{ resume.animationPrompt }}
+    Edits needs to be done:
+    {{ resume.prompt }}
 
-    Animation type to generate:
-    {{ resume.animationType }}
-
-    {% if resume.voiceover %}
-    Voiceover that will be played in this slide:
-    {{ resume.voiceover }}
-    {% endif %}
-
-    Slide Background:
-    {{ resume.slideBackground }}
-
-    {{ BrandGuidelines(resume.branding) }}
+    Code to be edited
+    {{ resume.code }}
 
     ---
 

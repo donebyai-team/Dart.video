@@ -159,6 +159,144 @@ func (u *Union2AnimationSlideOrMediaSlide) AsMediaSlide() *MediaSlide {
 	return u.variant_MediaSlide
 }
 
+type Union2AskUserQuestionOrEnhancedAnimationPrompt struct {
+	variant string
+
+	variant_EnhancedAnimationPrompt *EnhancedAnimationPrompt
+
+	variant_AskUserQuestion *AskUserQuestion
+}
+
+func (u *Union2AskUserQuestionOrEnhancedAnimationPrompt) Decode(holder *cffi.CFFIValueUnionVariant, typeMap baml.TypeMap) {
+	valueHolder := holder.Value
+	variantName := holder.ValueOptionName
+	switch variantName {
+	case "EnhancedAnimationPrompt":
+		u.variant = "EnhancedAnimationPrompt"
+		value := baml.Decode(valueHolder).Interface().(EnhancedAnimationPrompt)
+		u.variant_EnhancedAnimationPrompt = &value
+	case "AskUserQuestion":
+		u.variant = "AskUserQuestion"
+		value := baml.Decode(valueHolder).Interface().(AskUserQuestion)
+		u.variant_AskUserQuestion = &value
+
+	default:
+		panic(fmt.Sprintf("invalid union variant: %s", variantName))
+	}
+}
+
+func (u Union2AskUserQuestionOrEnhancedAnimationPrompt) Encode() (*cffi.HostValue, error) {
+	switch u.variant {
+
+	case "EnhancedAnimationPrompt":
+		return baml.EncodeValue(*u.variant_EnhancedAnimationPrompt)
+
+	case "AskUserQuestion":
+		return baml.EncodeValue(*u.variant_AskUserQuestion)
+
+	case "":
+		return nil, fmt.Errorf("invalid union variant: [unset]")
+	}
+
+	return nil, fmt.Errorf("invalid union variant: %s", u.variant)
+}
+
+func (u Union2AskUserQuestionOrEnhancedAnimationPrompt) BamlTypeName() string {
+	return "Union2AskUserQuestionOrEnhancedAnimationPrompt"
+}
+
+func (u Union2AskUserQuestionOrEnhancedAnimationPrompt) MarshalJSON() ([]byte, error) {
+	switch u.variant {
+
+	case "EnhancedAnimationPrompt":
+		return json.Marshal(u.variant_EnhancedAnimationPrompt)
+
+	case "AskUserQuestion":
+		return json.Marshal(u.variant_AskUserQuestion)
+
+	}
+
+	return nil, fmt.Errorf("invalid union variant: %s", u.variant)
+}
+
+func (u *Union2AskUserQuestionOrEnhancedAnimationPrompt) UnmarshalJSON(data []byte) error {
+	var err error
+
+	err = json.Unmarshal(data, &u.variant_EnhancedAnimationPrompt)
+	if err == nil {
+		u.variant = "EnhancedAnimationPrompt"
+		return nil
+	} else {
+		u.variant_EnhancedAnimationPrompt = nil
+	}
+
+	err = json.Unmarshal(data, &u.variant_AskUserQuestion)
+	if err == nil {
+		u.variant = "AskUserQuestion"
+		return nil
+	} else {
+		u.variant_AskUserQuestion = nil
+	}
+
+	return fmt.Errorf("invalid union variant: %s", string(data))
+}
+
+func Union2AskUserQuestionOrEnhancedAnimationPrompt__NewEnhancedAnimationPrompt(v EnhancedAnimationPrompt) Union2AskUserQuestionOrEnhancedAnimationPrompt {
+
+	return Union2AskUserQuestionOrEnhancedAnimationPrompt{
+		variant:                         "EnhancedAnimationPrompt",
+		variant_EnhancedAnimationPrompt: &v,
+	}
+}
+
+func (u *Union2AskUserQuestionOrEnhancedAnimationPrompt) SetEnhancedAnimationPrompt(v EnhancedAnimationPrompt) {
+
+	u.variant = "EnhancedAnimationPrompt"
+	u.variant_EnhancedAnimationPrompt = &v
+
+	u.variant_AskUserQuestion = nil
+
+}
+
+func (u *Union2AskUserQuestionOrEnhancedAnimationPrompt) IsEnhancedAnimationPrompt() bool {
+	return u.variant == "EnhancedAnimationPrompt"
+}
+
+func (u *Union2AskUserQuestionOrEnhancedAnimationPrompt) AsEnhancedAnimationPrompt() *EnhancedAnimationPrompt {
+	if u.variant != "EnhancedAnimationPrompt" {
+		return nil
+	}
+	return u.variant_EnhancedAnimationPrompt
+}
+
+func Union2AskUserQuestionOrEnhancedAnimationPrompt__NewAskUserQuestion(v AskUserQuestion) Union2AskUserQuestionOrEnhancedAnimationPrompt {
+
+	return Union2AskUserQuestionOrEnhancedAnimationPrompt{
+		variant:                 "AskUserQuestion",
+		variant_AskUserQuestion: &v,
+	}
+}
+
+func (u *Union2AskUserQuestionOrEnhancedAnimationPrompt) SetAskUserQuestion(v AskUserQuestion) {
+
+	u.variant = "AskUserQuestion"
+	u.variant_AskUserQuestion = &v
+
+	u.variant_EnhancedAnimationPrompt = nil
+
+}
+
+func (u *Union2AskUserQuestionOrEnhancedAnimationPrompt) IsAskUserQuestion() bool {
+	return u.variant == "AskUserQuestion"
+}
+
+func (u *Union2AskUserQuestionOrEnhancedAnimationPrompt) AsAskUserQuestion() *AskUserQuestion {
+	if u.variant != "AskUserQuestion" {
+		return nil
+	}
+	return u.variant_AskUserQuestion
+}
+
 type Union2AskUserQuestionOrVideoGenerationPlan struct {
 	variant string
 

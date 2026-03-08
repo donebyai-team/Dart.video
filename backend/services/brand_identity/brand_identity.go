@@ -10,8 +10,10 @@ import (
 	"github.com/shank318/coasterai/services"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/wrapperspb"
+	"math/rand"
 	"net/url"
 	"strings"
+	"time"
 )
 
 type BrandIdentity interface {
@@ -20,6 +22,7 @@ type BrandIdentity interface {
 	GetBrandIdentities(ctx context.Context, orgID string) ([]*pbcore.BrandIdentity, error)
 	GetSupportedFonts(ctx context.Context, orgID string) []string
 	GetBrandIdentityByID(ctx context.Context, ID string) (*models.BrandIdentity, error)
+	GetBrandIdentity(ctx context.Context, ID string) (*BrandIdentityRegistry, error)
 }
 
 type brandIdentity struct {
@@ -28,6 +31,15 @@ type brandIdentity struct {
 	fireCrawlClient  *Client
 	mediaStore       services.MediaStore
 	googleFontLoader fontLoader
+}
+
+func (b brandIdentity) GetBrandIdentity(ctx context.Context, ID string) (*BrandIdentityRegistry, error) {
+	brandIdentity, err := b.db.GetBrandIdentityByID(ctx, ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewBrandIdentityRegistry(brandIdentity.BrandIdentity), nil
 }
 
 func (b brandIdentity) GetBrandIdentityByID(ctx context.Context, ID string) (*models.BrandIdentity, error) {
@@ -157,7 +169,7 @@ func (b brandIdentity) CreateBrandIdentity(ctx context.Context, orgID string, we
 // extractMediaImages extracts images from the branding response
 // Returns logos and other media separately - logos should be added to identity.Logos, media to identity.Media
 // Only processes images with PNG, JPEG, or WebP extensions
-func (a *brandIdentity) extractMediaImages(ctx context.Context, images map[string]string, orgId string) (logos []*pbcore.BrandMedia, media []*pbcore.BrandMedia) {
+func (a brandIdentity) extractMediaImages(ctx context.Context, images map[string]string, orgId string) (logos []*pbcore.BrandMedia, media []*pbcore.BrandMedia) {
 	logos = make([]*pbcore.BrandMedia, 0)
 	media = make([]*pbcore.BrandMedia, 0)
 
@@ -227,7 +239,7 @@ func extractColors(colors map[string]string) []*pbcore.BrandColor {
 	return result
 }
 
-func (a *brandIdentity) extractFonts(fonts []FontInfo) []*pbcore.BrandFont {
+func (a brandIdentity) extractFonts(fonts []FontInfo) []*pbcore.BrandFont {
 	result := make([]*pbcore.BrandFont, 0, len(fonts))
 	seen := make(map[string]struct{})
 
@@ -269,36 +281,40 @@ func (b brandIdentity) GetBrandIdentities(ctx context.Context, orgID string) ([]
 	return b.db.GetBrandIdentities(ctx, orgID)
 }
 
+type BrandIdentityRegistry struct {
+	assetMapper map[string]*pbcore.MediaAsset
+	identity    *pbcore.BrandIdentity
+}
+
+func NewBrandIdentityRegistry(identity *pbcore.BrandIdentity) *BrandIdentityRegistry {
+	return &BrandIdentityRegistry{identity: identity, assetMapper: make(map[string]*pbcore.MediaAsset)}
+}
+
+func (registry BrandIdentityRegistry) ResolveMediaHandles(code string) string {
+	for handleID, asset := range registry.assetMapper {
+		code = strings.ReplaceAll(code, handleID, asset.Url)
+	}
+	return code
+}
+
 /*
 Brand Identity:
 
-		ID: brand_123
-		Name: Stripe
-		Website: <https://stripe.com>
-		Tagline: Payments infrastructure for the internet
-		Description: Stripe builds economic infrastructure...
+	ID: brand_123
+	Name: Stripe
+	Website: <https://stripe.com>
+	Tagline: Payments infrastructure for the internet
+	Description: Stripe builds economic infrastructure...
 
-		Media:
-		 - Type: BRAND_MEDIA_TYPE_LOGO
-	   		Priority: BRAND_ASSET_PRIORITY_PRIMARY
-	   		URL: <https://cdn.example.com/logo.png>
-	   		MIME Type: image/png
-	   		Asset Type: MEDIA_TYPE_IMAGE
-	   		Dimensions: 1024x256
-	   		Render Hint: Use <img> tag
+	Colors:
+	  - #635BFF (BRAND_ASSET_PRIORITY_PRIMARY)
+	  - #0A2540 (BRAND_ASSET_PRIORITY_SECONDARY)
 
-		Colors:
-		  - #635BFF (BRAND_ASSET_PRIORITY_PRIMARY)
-		  - #0A2540 (BRAND_ASSET_PRIORITY_SECONDARY)
-
-		Fonts:
-		  - Inter (Google: Inter)
+	Fonts:
+	  - Inter (Google: Inter)
 */
-func FormatBrandDetails(b *pbcore.BrandIdentity) string {
-	if b == nil {
-		return ""
-	}
-
+func (registry BrandIdentityRegistry) FormatBrandDetails() string {
+	b := registry.identity
 	var sb strings.Builder
 
 	writeLine := func(indent int, format string, args ...interface{}) {
@@ -320,46 +336,6 @@ func FormatBrandDetails(b *pbcore.BrandIdentity) string {
 		writeLine(1, "Description: %s", b.Description.Value)
 	}
 
-	// ---- Logos / Media ----
-	// ---- Logos / Media ----
-	if len(b.Logos) > 0 {
-		writeLine(1, "Media:")
-		for _, m := range b.Logos {
-			if m.Asset == nil {
-				continue
-			}
-			a := m.Asset
-			writeLine(2, "- Type: %s", m.Type.String())
-			if m.Priority != pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_UNSPECIFIED {
-				writeLine(3, "Priority: %s", m.Priority.String())
-			}
-			writeLine(3, "URL: <%s>", a.Url)
-			if a.MimeType != "" {
-				writeLine(3, "MIME Type: %s", a.MimeType)
-			}
-			if a.MediaType != pbcore.MediaType_MEDIA_TYPE_UNDEFINED {
-				writeLine(3, "Asset Type: %s", a.MediaType.String())
-			}
-			// Image metadata
-			if a.MediaType == pbcore.MediaType_MEDIA_TYPE_IMAGE {
-				if a.Width > 0 && a.Height > 0 {
-					writeLine(3, "Dimensions: %.0fx%.0f", a.Width, a.Height)
-				}
-			}
-			// Render hints
-			switch a.MediaType {
-			case pbcore.MediaType_MEDIA_TYPE_SVG:
-				writeLine(3, "Render Hint: Use <object> tag")
-
-			case pbcore.MediaType_MEDIA_TYPE_IMAGE:
-				writeLine(3, "Render Hint: Use <img> tag")
-
-			case pbcore.MediaType_MEDIA_TYPE_VIDEO:
-				writeLine(3, "Render Hint: Use <video> tag")
-			}
-		}
-	}
-
 	// ---- Colors ----
 	if len(b.Colors) > 0 {
 		writeLine(1, "Colors:")
@@ -379,11 +355,92 @@ func FormatBrandDetails(b *pbcore.BrandIdentity) string {
 			if f.GoogleFontsName != nil && f.GoogleFontsName.Value != "" {
 				writeLine(2, "- %s", f.GoogleFontsName.Value)
 			}
-			//else {
-			//	writeLine(2, "- %s", f.Name)
-			//}
 		}
 	}
 
 	return sb.String()
+}
+
+/*
+		Media:
+		 - Type: BRAND_MEDIA_TYPE_LOGO
+	   		Priority: BRAND_ASSET_PRIORITY_PRIMARY
+	   		URL: <https://cdn.example.com/logo.png>
+	   		MIME Type: image/png
+	   		Asset Type: MEDIA_TYPE_IMAGE
+	   		Dimensions: 1024x256
+	   		Render Hint: Use <img> tag
+*/
+func (registry BrandIdentityRegistry) FormatBrandAndAssetDetails() string {
+	b := registry.identity
+	var sb strings.Builder
+
+	sb.WriteString(registry.FormatBrandDetails())
+
+	writeLine := func(indent int, format string, args ...interface{}) {
+		sb.WriteString(strings.Repeat("  ", indent))
+		sb.WriteString(fmt.Sprintf(format, args...))
+		sb.WriteString("\n")
+	}
+
+	// ---- Logos / Media ----
+	if len(b.Logos) > 0 {
+		writeLine(1, "Media:")
+		for index, m := range b.Logos {
+			if m.Asset == nil {
+				continue
+			}
+			a := m.Asset
+
+			// create a asset handle mapping
+			handleID := fmt.Sprintf(
+				"@generated/%s/%d.%s",
+				generateRandomID(),
+				index,
+				a.MediaType.Extension(),
+			)
+
+			registry.assetMapper[handleID] = a
+			writeLine(2, "- Type: %s", m.Type.String())
+			if m.Priority != pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_UNSPECIFIED {
+				writeLine(3, "Priority: %s", m.Priority.String())
+			}
+			writeLine(3, "URL: <%s>", handleID)
+			if a.MimeType != "" {
+				writeLine(3, "MIME Type: %s", a.MimeType)
+			}
+			if a.MediaType != pbcore.MediaType_MEDIA_TYPE_UNDEFINED {
+				writeLine(3, "Asset Type: %s", a.MediaType.String())
+			}
+			// Image metadata
+			if a.MediaType == pbcore.MediaType_MEDIA_TYPE_IMAGE {
+				if a.Width > 0 && a.Height > 0 {
+					writeLine(3, "Dimensions: %.0fx%.0f", a.Width, a.Height)
+				}
+			}
+			// Render hints
+			switch a.MediaType {
+			case pbcore.MediaType_MEDIA_TYPE_SVG:
+				writeLine(3, "Render Hint: Use <img> tag")
+
+			case pbcore.MediaType_MEDIA_TYPE_IMAGE:
+				writeLine(3, "Render Hint: Use <img> tag")
+
+			case pbcore.MediaType_MEDIA_TYPE_VIDEO:
+				writeLine(3, "Render Hint: Use <video> tag")
+			}
+		}
+	}
+
+	return sb.String()
+}
+
+func generateRandomID() string {
+	const letters = "abcdefghijklmnopqrstuvwxyzx"
+	rand.Seed(time.Now().UnixNano())
+	id := make([]byte, 6)
+	for i := range id {
+		id[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(id)
 }

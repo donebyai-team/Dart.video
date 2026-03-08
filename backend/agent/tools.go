@@ -49,3 +49,44 @@ func (a *agentV1) handleToolCalls(
 		AskUserQuestion: &questionCopy,
 	}, nil
 }
+
+func (a *agentV1) handleAnimationGenerationToolCalls(
+	ctx context.Context,
+	session *generateOrEditAnimationSession,
+	llmResponse *types.Union2AskUserQuestionOrEnhancedAnimationPrompt,
+	thinking string,
+) (bool, *RunResult, error) {
+	question := llmResponse.AsAskUserQuestion()
+	if question == nil {
+		return false, nil, nil
+	}
+
+	logger := logging.Logger(ctx, a.logger)
+	logger.Info("animation generation paused: waiting for user input",
+		zap.String("question", question.Question_text),
+	)
+
+	session.ConversationHistory = append(session.ConversationHistory, types.Message{
+		Role:    types.Union3KassistantOrKtoolOrKuser__NewKassistant(),
+		Content: question.Question_text,
+	})
+
+	if err := a.saveGenerateOrEditAnimationSession(ctx, session); err != nil {
+		return true, nil, agenterrors.SessionUnavailable("failed to save animation generation session with tool call", err)
+	}
+
+	questionCopy := *question
+	if err := a.updateState(ctx, VideoAgentState{
+		Thinking:        thinking,
+		State:           stateStatusWaiting,
+		AskUserQuestion: &questionCopy,
+	}); err != nil {
+		logger.Error("failed to update waiting-for-user-input state", zap.Error(err))
+		return true, nil, err
+	}
+
+	return true, &RunResult{
+		Status:          RunStatusWaitingForUserInput,
+		AskUserQuestion: &questionCopy,
+	}, nil
+}

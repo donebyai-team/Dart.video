@@ -22,10 +22,10 @@ type RetrievalService interface {
 	// usedTemplateIDs: non-repeatable templates with these IDs are excluded
 	// returns top k.
 	MatchTemplates(ctx context.Context,
-		animation *types.AnimationSlide,
+		animationType types.AnimationType,
+		beatDescription string,
 		category string,
-		usedIds []string,
-		plan *types.VideoGenerationPlan) ([]*models.Template, error)
+		options MatchTemplatesOptions) ([]*models.Template, error)
 
 	GetFallbackTemplate(ctx context.Context) (*models.Template, error)
 }
@@ -92,12 +92,17 @@ func (l llmRetrievalService) MatchCategories(ctx context.Context, animationType 
 	return filteredCategories, nil
 }
 
+type MatchTemplatesOptions struct {
+	plan    *types.VideoGenerationPlan
+	usedIds []string
+}
+
 func (l llmRetrievalService) MatchTemplates(ctx context.Context,
-	animation *types.AnimationSlide,
+	animationType types.AnimationType,
+	beatDescription string,
 	category string,
-	usedIds []string,
-	plan *types.VideoGenerationPlan) ([]*models.Template, error) {
-	templates, err := l.db.GetTemplatesByCategory(ctx, category, animation.AnimationType, usedIds)
+	options MatchTemplatesOptions) ([]*models.Template, error) {
+	templates, err := l.db.GetTemplatesByCategory(ctx, category, animationType, options.usedIds)
 	if err != nil {
 		return nil, err
 	}
@@ -113,9 +118,12 @@ func (l llmRetrievalService) MatchTemplates(ctx context.Context,
 	}
 
 	templateMaterInput := types.MatchTemplateRequest{
-		PlanSoFar:   plan.Sections,
 		Templates:   matchTem,
-		CurrentBeat: animation.BeatDescription,
+		CurrentBeat: beatDescription,
+	}
+
+	if options.plan != nil {
+		templateMaterInput.PlanSoFar = options.plan.Sections
 	}
 
 	// TODO: Replace it with semantic search

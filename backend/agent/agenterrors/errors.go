@@ -16,6 +16,10 @@ const (
 	ReasonAnimationGenerationFailed = "AGENT_ANIMATION_GENERATION_FAILED"
 )
 
+func EditAnimationCodeFailed(message string, cause error) error {
+	return errorx.New(errorx.CodeFailedPrecond, ReasonAnimationGenerationFailed, message, cause)
+}
+
 func InvalidInput(message string, cause error) error {
 	return errorx.New(errorx.CodeInvalidArgument, ReasonInvalidInput, message, cause)
 }

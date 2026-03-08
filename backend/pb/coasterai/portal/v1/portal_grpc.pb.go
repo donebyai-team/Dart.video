@@ -44,6 +44,7 @@ const (
 	PortalService_GetBrandIdentities_FullMethodName           = "/coasterai.portal.v1.PortalService/GetBrandIdentities"
 	PortalService_UpdateBrandIdentity_FullMethodName          = "/coasterai.portal.v1.PortalService/UpdateBrandIdentity"
 	PortalService_GenerateOrEditAnimationSlide_FullMethodName = "/coasterai.portal.v1.PortalService/GenerateOrEditAnimationSlide"
+	PortalService_ContinueEditAnimationSlide_FullMethodName   = "/coasterai.portal.v1.PortalService/ContinueEditAnimationSlide"
 )
 
 // PortalServiceClient is the client API for PortalService service.
@@ -77,6 +78,7 @@ type PortalServiceClient interface {
 	UpdateBrandIdentity(ctx context.Context, in *UpdateBrandIdentityRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// Edit animations
 	GenerateOrEditAnimationSlide(ctx context.Context, in *GenerateOrEditAnimationRequest, opts ...grpc.CallOption) (PortalService_GenerateOrEditAnimationSlideClient, error)
+	ContinueEditAnimationSlide(ctx context.Context, in *ContinueEditAnimationRequest, opts ...grpc.CallOption) (PortalService_ContinueEditAnimationSlideClient, error)
 }
 
 type portalServiceClient struct {
@@ -386,6 +388,38 @@ func (x *portalServiceGenerateOrEditAnimationSlideClient) Recv() (*GenerateOrEdi
 	return m, nil
 }
 
+func (c *portalServiceClient) ContinueEditAnimationSlide(ctx context.Context, in *ContinueEditAnimationRequest, opts ...grpc.CallOption) (PortalService_ContinueEditAnimationSlideClient, error) {
+	stream, err := c.cc.NewStream(ctx, &PortalService_ServiceDesc.Streams[4], PortalService_ContinueEditAnimationSlide_FullMethodName, opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &portalServiceContinueEditAnimationSlideClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type PortalService_ContinueEditAnimationSlideClient interface {
+	Recv() (*GenerateOrEditAnimationResponse, error)
+	grpc.ClientStream
+}
+
+type portalServiceContinueEditAnimationSlideClient struct {
+	grpc.ClientStream
+}
+
+func (x *portalServiceContinueEditAnimationSlideClient) Recv() (*GenerateOrEditAnimationResponse, error) {
+	m := new(GenerateOrEditAnimationResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // PortalServiceServer is the server API for PortalService service.
 // All implementations must embed UnimplementedPortalServiceServer
 // for forward compatibility
@@ -417,6 +451,7 @@ type PortalServiceServer interface {
 	UpdateBrandIdentity(context.Context, *UpdateBrandIdentityRequest) (*emptypb.Empty, error)
 	// Edit animations
 	GenerateOrEditAnimationSlide(*GenerateOrEditAnimationRequest, PortalService_GenerateOrEditAnimationSlideServer) error
+	ContinueEditAnimationSlide(*ContinueEditAnimationRequest, PortalService_ContinueEditAnimationSlideServer) error
 	mustEmbedUnimplementedPortalServiceServer()
 }
 
@@ -492,6 +527,9 @@ func (UnimplementedPortalServiceServer) UpdateBrandIdentity(context.Context, *Up
 }
 func (UnimplementedPortalServiceServer) GenerateOrEditAnimationSlide(*GenerateOrEditAnimationRequest, PortalService_GenerateOrEditAnimationSlideServer) error {
 	return status.Errorf(codes.Unimplemented, "method GenerateOrEditAnimationSlide not implemented")
+}
+func (UnimplementedPortalServiceServer) ContinueEditAnimationSlide(*ContinueEditAnimationRequest, PortalService_ContinueEditAnimationSlideServer) error {
+	return status.Errorf(codes.Unimplemented, "method ContinueEditAnimationSlide not implemented")
 }
 func (UnimplementedPortalServiceServer) mustEmbedUnimplementedPortalServiceServer() {}
 
@@ -932,6 +970,27 @@ func (x *portalServiceGenerateOrEditAnimationSlideServer) Send(m *GenerateOrEdit
 	return x.ServerStream.SendMsg(m)
 }
 
+func _PortalService_ContinueEditAnimationSlide_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(ContinueEditAnimationRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(PortalServiceServer).ContinueEditAnimationSlide(m, &portalServiceContinueEditAnimationSlideServer{stream})
+}
+
+type PortalService_ContinueEditAnimationSlideServer interface {
+	Send(*GenerateOrEditAnimationResponse) error
+	grpc.ServerStream
+}
+
+type portalServiceContinueEditAnimationSlideServer struct {
+	grpc.ServerStream
+}
+
+func (x *portalServiceContinueEditAnimationSlideServer) Send(m *GenerateOrEditAnimationResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // PortalService_ServiceDesc is the grpc.ServiceDesc for PortalService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1035,6 +1094,11 @@ var PortalService_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "GenerateOrEditAnimationSlide",
 			Handler:       _PortalService_GenerateOrEditAnimationSlide_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "ContinueEditAnimationSlide",
+			Handler:       _PortalService_ContinueEditAnimationSlide_Handler,
 			ServerStreams: true,
 		},
 	},

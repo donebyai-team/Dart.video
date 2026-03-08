@@ -56,6 +56,7 @@ class VideoGenerationPlanRequest {
     Script  ScriptItem[]
     enableThinking bool? @description("Whether to include step-by-step reasoning in the response")
     BrandGuidelines string?
+    BrandLibraryID string? @skip
 }
 
 class VideoGenerationPlan {
@@ -78,6 +79,7 @@ class BrandColors {
 }
 
 class VideoBranding {
+  brandLibraryID string? @skip
   brandGuideLines string? @skip @description("user provided brand guidelines")
   colors BrandColors @description("make sure the brand colors are visible and does not get blended with *background* gradient")
 }
@@ -237,14 +239,7 @@ function GeneratePlanStreaming(input: VideoGenerationPlanRequest, conversation_h
     * Interface implied → ask which platform to visualize
     ---
 
-    ### Question Guidelines
-
-    Questions must:
-    * Be asked **only when critical information is missing**
-    * Be **max 8-15 words**
-    * Include **2–3 options**
-    * Always guide visual direction
-    * Avoid open-ended questions
+    {{ AskQuestionGuidelines() }}
     ---
 
     ### Branding guidelines

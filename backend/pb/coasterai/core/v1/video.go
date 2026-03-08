@@ -91,3 +91,31 @@ func (v *MediaSlidePlan) ToModel() *types.MediaSlide {
 		SelectedTemplateDescription: v.SelectedTemplateDescription,
 	}
 }
+
+func (v *GeneratedVideoBranding) ToModel() types.VideoBranding {
+	return types.VideoBranding{
+		BrandLibraryID: v.BrandLibraryID,
+		Colors: types.BrandColors{
+			Primary:   v.Colors.Primary,
+			Secondary: v.Colors.Secondary,
+			Accent:    v.Colors.Accent,
+			Text:      v.Colors.Text,
+		},
+	}
+}
+
+func (v *BackgroundStyle) ToModel() types.VideoBackground {
+	gradientStops := make([]types.GradientStop, 0, len(v.GetGradient().Stops))
+	for _, g := range v.GetGradient().Stops {
+		gradientStops = append(gradientStops, types.GradientStop{
+			Color:    g.Color,
+			Position: int64(g.Position),
+		})
+	}
+	return types.VideoBackground{
+		Gradient: types.Gradient{
+			Angle: int64(v.GetGradient().Angle),
+			Stops: gradientStops,
+		},
+	}
+}

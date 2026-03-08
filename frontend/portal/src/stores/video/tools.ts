@@ -52,7 +52,7 @@ export const createToolActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
 
     const slide = selectedSlide.slide
     if (slide.type === SlideType.ANIMATION) {
-      set({ activeTool: { type: ActiveToolType.ADD_OR_EDIT_ANIMATION, settings: { slideToEdit: selectedSlide } } })
+      set({ activeTool: { type: ActiveToolType.ADD_OR_EDIT_ANIMATION, settings: {} } })
     } 
   }
 })

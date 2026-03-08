@@ -19,7 +19,6 @@ import (
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
 	"github.com/shank318/coasterai/services"
 	"github.com/shank318/coasterai/utils"
-	"github.com/streamingfast/logging"
 	"go.uber.org/zap"
 )
 
@@ -97,6 +96,7 @@ func NewAgentV1(
 		stateUpdates:         make(chan VideoAgentState, 64),
 		animationGenerator: NewAnimationGenerator(
 			mediaStore,
+			brandIdentityService,
 			llmService,
 			codeBuilder,
 			logger,
@@ -159,7 +159,7 @@ func (a *agentV1) Start(ctx context.Context, options StartSessionOptions) (*RunR
 	var brandDetails string
 
 	if options.Input.BrandLibraryId != nil {
-		brandIdentity, err := a.brandIdentityService.GetBrandIdentityByID(ctx, *options.Input.BrandLibraryId)
+		brandIdentityRegistry, err := a.brandIdentityService.GetBrandIdentity(ctx, *options.Input.BrandLibraryId)
 		if err != nil {
 			if errors.Is(err, datastore.NotFound) {
 				return nil, agenterrors.InvalidInput("brand_identity not found", nil)
@@ -167,8 +167,8 @@ func (a *agentV1) Start(ctx context.Context, options StartSessionOptions) (*RunR
 			return nil, err
 		}
 
-		if brandIdentity != nil {
-			brandDetails = brand_identity.FormatBrandDetails(brandIdentity.BrandIdentity)
+		if brandIdentityRegistry != nil {
+			brandDetails = brandIdentityRegistry.FormatBrandDetails()
 		}
 	}
 
@@ -191,6 +191,7 @@ func (a *agentV1) Start(ctx context.Context, options StartSessionOptions) (*RunR
 		Resolution:     options.Input.Resolution.Id,
 		Script:         script,
 		EnableThinking: utils.Ptr(true),
+		BrandLibraryID: options.Input.BrandLibraryId,
 	}
 
 	// use brand guidelines only when specified
@@ -212,8 +213,6 @@ func (a *agentV1) Start(ctx context.Context, options StartSessionOptions) (*RunR
 }
 
 func (a *agentV1) Continue(ctx context.Context, options ContinueSessionOptions) (*RunResult, error) {
-	logger := logging.Logger(ctx, a.logger)
-
 	userResponse := strings.TrimSpace(options.UserResponse)
 	if userResponse == "" {
 		return nil, agenterrors.InvalidInput("user response is required", nil)
@@ -239,7 +238,7 @@ func (a *agentV1) Continue(ctx context.Context, options ContinueSessionOptions) 
 		LastUserResponse: userResponse,
 	})
 
-	logger.Info("continuing agent session with user response", zap.String("response", userResponse))
+	a.logger.Info("continuing agent session with user response", zap.String("response", userResponse))
 
 	return a.runPlanning(ctx, session)
 }
@@ -280,8 +279,8 @@ func (a *agentV1) runPlanning(ctx context.Context, session *planningSession) (re
 	}
 
 	// set branding guidelines for it to propogate further
-	if session.Request.BrandGuidelines != nil {
-		plan.Branding.BrandGuideLines = session.Request.BrandGuidelines
+	if session.Request.BrandLibraryID != nil {
+		plan.Branding.BrandLibraryID = session.Request.BrandLibraryID
 	}
 
 	err = sanitizeAgentPlan(plan)
@@ -409,7 +408,7 @@ func (a *agentV1) applyPlan(
 	selectedTemplateIDs := make([]string, 0)
 	planExecutedSoFar := &types.VideoGenerationPlan{
 		Sections:        make([]types.Section, 0, len(plan.Sections)),
-		Branding:        aiPlan.Branding, // TODO: Store this in metadata
+		Branding:        aiPlan.Branding,
 		BackgroundStyle: aiPlan.BackgroundStyle,
 	}
 
@@ -503,10 +502,24 @@ func (a *agentV1) selectTemplate(
 		return nil, agenterrors.RetrievalFailed("failed to match categories", err)
 	}
 
+	generatorOptions := GenerationParams{
+		OrgID:           a.orgID,
+		SessionID:       a.sessionID,
+		VideoBranding:   &planExecutedSoFar.Branding,
+		VideoBackground: &planExecutedSoFar.BackgroundStyle,
+	}
+
 	var selected *models.Template
 	for _, category := range categories {
 		// semantically match if we have a template available in our library
-		filtered, selectErr := a.retrievalService.MatchTemplates(ctx, anim, category.Name, usedTemplateIDs, planExecutedSoFar)
+		filtered, selectErr := a.retrievalService.MatchTemplates(ctx,
+			anim.AnimationType,
+			anim.BeatDescription,
+			category.Name,
+			MatchTemplatesOptions{
+				plan:    planExecutedSoFar,
+				usedIds: usedTemplateIDs,
+			})
 		if selectErr != nil {
 			return nil, agenterrors.TemplateSelectFailed("failed to select templates", selectErr)
 		}
@@ -527,7 +540,7 @@ func (a *agentV1) selectTemplate(
 			Thinking: extracting,
 			State:    stateStatusProcessing,
 		})
-		templateConfig, err := a.animationGenerator.ExtractConfig(ctx, planExecutedSoFar, anim, selected)
+		templateConfig, err := a.animationGenerator.ExtractConfig(ctx, anim.BeatDescription, selected, generatorOptions)
 		if err != nil {
 			return nil, agenterrors.TemplateExtractFailed("failed to extract template config", err)
 		}
@@ -537,15 +550,12 @@ func (a *agentV1) selectTemplate(
 
 	// No category matched — use the fallback template or generate a new animation.
 	if selected == nil {
-		template, err := a.animationGenerator.Generate(ctx, anim, planExecutedSoFar, func(progress TemplateGenerationProgress) {
+		template, err := a.animationGenerator.Generate(ctx, anim, func(progress TemplateGenerationProgress) {
 			a.updateState(ctx, VideoAgentState{
 				Thinking: progress.Message,
 				State:    stateStatusProcessing,
 			})
-		}, GenerationParams{
-			OrgID:     a.orgID,
-			SessionID: a.sessionID,
-		})
+		}, generatorOptions)
 		if err != nil {
 			return nil, err
 		}

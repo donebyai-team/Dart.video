@@ -25,14 +25,19 @@ export declare type GenerateOrEditAnimationRequest = Message<"coasterai.portal.v
   slideId?: string;
 
   /**
-   * @generated from field: string prompt = 2;
+   * @generated from field: string videoId = 2;
+   */
+  videoId: string;
+
+  /**
+   * @generated from field: string prompt = 3;
    */
   prompt: string;
 
   /**
    * used when creating new animation
    *
-   * @generated from field: bool suggestions = 3;
+   * @generated from field: bool suggestions = 4;
    */
   suggestions: boolean;
 };
@@ -382,6 +387,8 @@ export declare const CreateVideoResponseSchema: GenMessage<CreateVideoResponse>;
  */
 export declare type ContinueVideoPlanningRequest = Message<"coasterai.portal.v1.ContinueVideoPlanningRequest"> & {
   /**
+   * video id
+   *
    * @generated from field: string id = 1;
    */
   id: string;
@@ -397,6 +404,34 @@ export declare type ContinueVideoPlanningRequest = Message<"coasterai.portal.v1.
  * Use `create(ContinueVideoPlanningRequestSchema)` to create a new message.
  */
 export declare const ContinueVideoPlanningRequestSchema: GenMessage<ContinueVideoPlanningRequest>;
+
+/**
+ * @generated from message coasterai.portal.v1.ContinueEditAnimationRequest
+ */
+export declare type ContinueEditAnimationRequest = Message<"coasterai.portal.v1.ContinueEditAnimationRequest"> & {
+  /**
+   * video id
+   *
+   * @generated from field: string videoId = 1;
+   */
+  videoId: string;
+
+  /**
+   * @generated from field: string slideId = 2;
+   */
+  slideId: string;
+
+  /**
+   * @generated from field: string response = 3;
+   */
+  response: string;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.ContinueEditAnimationRequest.
+ * Use `create(ContinueEditAnimationRequestSchema)` to create a new message.
+ */
+export declare const ContinueEditAnimationRequestSchema: GenMessage<ContinueEditAnimationRequest>;
 
 /**
  * @generated from message coasterai.portal.v1.AskUserQuestion
@@ -1219,6 +1254,14 @@ export declare const PortalService: GenService<{
   generateOrEditAnimationSlide: {
     methodKind: "server_streaming";
     input: typeof GenerateOrEditAnimationRequestSchema;
+    output: typeof GenerateOrEditAnimationResponseSchema;
+  },
+  /**
+   * @generated from rpc coasterai.portal.v1.PortalService.ContinueEditAnimationSlide
+   */
+  continueEditAnimationSlide: {
+    methodKind: "server_streaming";
+    input: typeof ContinueEditAnimationRequestSchema;
     output: typeof GenerateOrEditAnimationResponseSchema;
   },
 }>;

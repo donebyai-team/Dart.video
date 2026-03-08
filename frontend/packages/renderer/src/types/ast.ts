@@ -1,16 +1,37 @@
+/*
+## Which Field Maps to Which textType
+```
+textType          edit field written       __patch function reads
+──────────────────────────────────────────────────────────────────
+static            text                     __patchText
+letter-cascade    text                     __patchVar('eid', 'text', ...)
+typewriter        typewriterSource         __patchVar('eid', 'text', ...)
+word-cycle        words                    __patchWords
+counter           counter.start/end        __patchCounter
+animated          —                        (no text edit)
+*/
 export interface ElementEdit {
     style?: Record<string, string | number>   // CSS property overrides
-    text?: string;                   // static text replacement
-    asset?: string;                   // image src replacement (CDN URL)
-    icon?: string;                   // icon component name
-    ranges?: Record<string, any[]>;    // interpolate output range overrides
-    springs?: Record<string, Record<string, number>>; // spring config overrides
-    transform?: {                       // position/size from drag handles
-        translateX?: number;
-        translateY?: number;
-        scaleX?: number;
-        scaleY?: number;
-    };
+    text?: string                             // static text / letter-cascade / typewriter source
+    asset?: string                            // image src replacement (CDN URL)
+    icon?: string                             // icon component name
+    ranges?: Record<string, any[]>            // interpolate output range overrides
+    springs?: Record<string, Record<string, number>> // spring config overrides
+    transform?: {                             // position/size from drag handles
+        translateX?: number
+        translateY?: number
+        scaleX?: number
+        scaleY?: number
+    }
+    // counter
+    counter?: {
+        start?: number
+        end?:   number
+    }
+    // word-cycle
+    words?: string[]
+    // typewriter source text
+    typewriterSource?: string
 }
 
 export interface RegistryEntry {

@@ -10,9 +10,12 @@ import (
 	"github.com/shank318/coasterai/agent/llm"
 	"github.com/shank318/coasterai/baml_client"
 	"github.com/shank318/coasterai/baml_client/types"
+	"github.com/shank318/coasterai/datastore"
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/services"
+	"github.com/shank318/coasterai/services/brand_identity"
+	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
 	"math/rand"
 	"strings"
@@ -84,28 +87,42 @@ func CreativeStageMessage(stage GenerationStage, attempt int) string {
 }
 
 type GenerationParams struct {
-	SessionID string
-	OrgID     string
+	SessionID       string
+	OrgID           string
+	SlideID         string
+	VideoBranding   *types.VideoBranding
+	VideoBackground *types.VideoBackground
+	Sections        []types.Section
 }
 
 type AnimationGenerator interface {
-	ExtractConfig(ctx context.Context, planSoFar *types.VideoGenerationPlan, slide *types.AnimationSlide, template *models.Template) (*types.TemplateConfigExtractorOutput, error)
-	Generate(ctx context.Context,
+	ExtractConfig(
+		ctx context.Context,
+		beatDescription string,
+		template *models.Template,
+		params GenerationParams) (*types.TemplateConfigExtractorOutput, error)
+	Generate(
+		ctx context.Context,
 		animation *types.AnimationSlide,
-		planSoFar *types.VideoGenerationPlan,
 		callback TemplateGenerationCallback,
-		params GenerationParams) (*models.Template, error)
+		params GenerationParams,
+	) (*models.Template, error)
 }
 
 type animationGenerator struct {
-	mediaStore  services.MediaStore
-	llmService  llm.LLMService
-	codeBuilder services.TemplateCodeBuilder
-	logger      *zap.Logger
+	mediaStore           services.MediaStore
+	llmService           llm.LLMService
+	codeBuilder          services.TemplateCodeBuilder
+	brandIdentityService brand_identity.BrandIdentity
+	logger               *zap.Logger
 }
 
-func NewAnimationGenerator(mediaStore services.MediaStore, llmService llm.LLMService, codeBuilder services.TemplateCodeBuilder, logger *zap.Logger) AnimationGenerator {
-	return &animationGenerator{mediaStore: mediaStore, llmService: llmService, codeBuilder: codeBuilder, logger: logger}
+func NewAnimationGenerator(mediaStore services.MediaStore,
+	brandIdentityService brand_identity.BrandIdentity,
+	llmService llm.LLMService, codeBuilder services.TemplateCodeBuilder, logger *zap.Logger) AnimationGenerator {
+	return &animationGenerator{mediaStore: mediaStore,
+		brandIdentityService: brandIdentityService,
+		llmService:           llmService, codeBuilder: codeBuilder, logger: logger}
 }
 
 const maxAttempts = 5
@@ -119,7 +136,6 @@ type TemplateGenerationProgress struct {
 func (l animationGenerator) Generate(
 	ctx context.Context,
 	animation *types.AnimationSlide,
-	planSoFar *types.VideoGenerationPlan,
 	callback TemplateGenerationCallback,
 	params GenerationParams,
 ) (*models.Template, error) {
@@ -128,13 +144,38 @@ func (l animationGenerator) Generate(
 		Message: CreativeStageMessage(StageUnderstanding, 0),
 	})
 
+	var brandIdentityRegistry *brand_identity.BrandIdentityRegistry
+	if params.VideoBranding != nil && params.VideoBranding.BrandLibraryID != nil {
+		_brandIdentityRegistry, err := l.brandIdentityService.GetBrandIdentity(ctx, *params.VideoBranding.BrandLibraryID)
+		if err != nil {
+			if errors.Is(err, datastore.NotFound) {
+				return nil, agenterrors.InvalidInput("brand_identity not found", nil)
+			}
+			return nil, err
+		}
+
+		if _brandIdentityRegistry != nil {
+			brandIdentityRegistry = _brandIdentityRegistry
+			params.VideoBranding.BrandGuideLines = utils.Ptr(_brandIdentityRegistry.FormatBrandAndAssetDetails())
+		}
+	}
+
 	input := types.GenerateAnimationPromptRequest{
-		CurrentBeat:     animation.BeatDescription,
-		PlanSoFar:       planSoFar.Sections,
-		AnimationType:   animation.AnimationType,
-		Voiceover:       animation.Voiceover,
-		Branding:        planSoFar.Branding,
-		SlideBackground: gradientToCSS(planSoFar.BackgroundStyle.Gradient),
+		CurrentBeat:   animation.BeatDescription,
+		AnimationType: animation.AnimationType,
+		Voiceover:     animation.Voiceover,
+	}
+
+	if params.VideoBranding != nil {
+		input.Branding = *params.VideoBranding
+	}
+
+	if params.VideoBackground != nil {
+		input.SlideBackground = gradientToCSS(params.VideoBackground.Gradient)
+	}
+
+	if len(params.Sections) > 0 {
+		input.PlanSoFar = params.Sections
 	}
 
 	output, err := baml_client.GenerateAnimationPrompt(ctx, input)
@@ -142,13 +183,27 @@ func (l animationGenerator) Generate(
 		return nil, agenterrors.AnimationGenerationFailed("failed to generate prompt", err)
 	}
 
+	return l.GenerateCode(ctx, output.Prompt, animation, callback, brandIdentityRegistry, params)
+}
+
+func (l animationGenerator) GenerateCode(ctx context.Context,
+	prompt string,
+	animation *types.AnimationSlide,
+	callback TemplateGenerationCallback,
+	brandIdentityRegistry *brand_identity.BrandIdentityRegistry,
+	params GenerationParams) (*models.Template, error) {
 	inptCodeGeneration := types.GenerateAnimationCodeRequest{
-		AnimationPrompt: output.Prompt,
+		AnimationPrompt: prompt,
 		Duration:        animation.Duration,
 		Voiceover:       animation.Voiceover,
-		Branding:        planSoFar.Branding,
 		AnimationType:   animation.AnimationType,
-		SlideBackground: gradientToCSS(planSoFar.BackgroundStyle.Gradient),
+	}
+
+	if params.VideoBranding != nil {
+		inptCodeGeneration.Branding = *params.VideoBranding
+	}
+	if params.VideoBackground != nil {
+		inptCodeGeneration.SlideBackground = gradientToCSS(params.VideoBackground.Gradient)
 	}
 
 	conversationHistory := make([]types.Message, 0)
@@ -165,6 +220,11 @@ func (l animationGenerator) Generate(
 		generatedAnimation, err := baml_client.GenerateAnimation(ctx, inptCodeGeneration, conversationHistory)
 		if err != nil {
 			return nil, agenterrors.AnimationGenerationFailed("failed to generate animation", err)
+		}
+
+		// resolve the asset handles
+		if brandIdentityRegistry != nil {
+			generatedAnimation.Code = brandIdentityRegistry.ResolveMediaHandles(generatedAnimation.Code)
 		}
 
 		// Default
@@ -211,7 +271,7 @@ func (l animationGenerator) Generate(
 				AnimationType:   types.AnimationTypeTEXT,
 				Repeatable:      false,
 				ElementRegistry: buildOutput.Registry,
-				Description:     output.Prompt,
+				Description:     prompt,
 			}, nil
 		}
 
@@ -244,6 +304,345 @@ func (l animationGenerator) Generate(
 	)
 }
 
+func (l animationGenerator) EditAnimationCode(
+	ctx context.Context,
+	animationSlide *pbcore.Slide,
+	prompt string,
+	params GenerationParams,
+) (*models.Template, error) {
+
+	slideContent := animationSlide.GetAnimation()
+	if slideContent.Plan == nil {
+		return nil, agenterrors.EditAnimationCodeFailed(
+			"failed to edit animation",
+			errors.New("animation has no plan"),
+		)
+	}
+
+	code, err := l.loadExistingCode(ctx, slideContent)
+	if err != nil {
+		return nil, err
+	}
+
+	// 1️⃣ Attempt targeted edits first
+	template, err := l.tryTargetedEdits(
+		ctx,
+		code,
+		prompt,
+		params,
+	)
+
+	if err == nil {
+		return template, nil
+	}
+
+	// 2️⃣ fallback to regeneration
+	return l.tryRegenerateAnimation(
+		ctx,
+		code,
+		animationSlide,
+		slideContent,
+		prompt,
+		params,
+	)
+}
+
+func (l animationGenerator) loadExistingCode(
+	ctx context.Context,
+	slideContent *pbcore.AnimationSlideContent,
+) (string, error) {
+
+	code, err := l.mediaStore.DownloadCode(ctx, slideContent.CodeRegistry.MUrl)
+	if err != nil {
+		return "", fmt.Errorf("failed to download code: %w", err)
+	}
+
+	return indentCode(code), nil
+}
+
+func (l animationGenerator) tryTargetedEdits(
+	ctx context.Context,
+	code string,
+	prompt string,
+	params GenerationParams,
+) (*models.Template, error) {
+
+	input := types.EditAnimationCodeRequest{
+		Code:   code,
+		Prompt: prompt,
+	}
+
+	conversationHistory := []types.Message{}
+
+	for attempt := 0; attempt < maxAttempts; attempt++ {
+
+		l.logger.Info("trying targeted edits", zap.Int("attempt", attempt))
+		response, err := baml_client.EditAnimationCode(ctx, input, conversationHistory)
+		if err != nil {
+			return nil, agenterrors.EditAnimationCodeFailed("failed to edit animation", err)
+		}
+
+		if response.Type != types.AnimationCodeEditTypeTARGETED_EDITS {
+			return nil, fmt.Errorf("model switched to regeneration")
+		}
+
+		if len(response.Edits) == 0 {
+			conversationHistory = appendRetryConversation(
+				conversationHistory,
+				stringify(response),
+				"no edits are suggested",
+			)
+			continue
+		}
+
+		newCode, retryReason := applyEdits(code, response.Edits)
+
+		if retryReason != "" {
+			conversationHistory = appendRetryConversation(
+				conversationHistory,
+				stringify(response),
+				retryReason,
+			)
+			continue
+		}
+
+		code = newCode
+		codeFilePath := fmt.Sprintf(
+			"templates/generated/%s/%s/%s",
+			params.OrgID,
+			params.SessionID,
+			params.SlideID,
+		)
+
+		template, buildErr := l.uploadAndBuild(
+			ctx,
+			code,
+			codeFilePath,
+			attempt,
+		)
+
+		if buildErr == nil {
+			return template, nil
+		}
+
+		var buildError *services.BuildError
+		if errors.As(buildErr, &buildError) {
+			conversationHistory = appendRetryConversation(
+				conversationHistory,
+				stringify(response),
+				"Build failed with error:\n"+buildError.Error(),
+			)
+
+			l.logger.Error("failed to build animation",
+				zap.Int("attempt_left", maxAttempts-attempt),
+				zap.Error(buildErr))
+
+			continue
+		}
+
+		return nil, buildErr
+	}
+
+	return nil, fmt.Errorf("targeted edit attempts exhausted")
+}
+
+func applyEdits(code string, edits []types.EditString) (string, string) {
+	for _, edit := range edits {
+
+		oldStr := strings.TrimSpace(edit.OldString)
+		newStr := strings.TrimSpace(edit.NewString)
+
+		if oldStr == "" || newStr == "" {
+			return code, "one of the suggested edit string is empty"
+		}
+
+		if !strings.Contains(code, oldStr) {
+			return code, fmt.Sprintf(
+				"oldString not found in code: %s",
+				oldStr,
+			)
+		}
+
+		code = strings.ReplaceAll(code, oldStr, newStr)
+	}
+
+	return code, ""
+}
+
+func stringify(v any) string {
+	b, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		return fmt.Sprintf("%v", v)
+	}
+	return string(b)
+}
+
+func (l animationGenerator) uploadAndBuild(
+	ctx context.Context,
+	code string,
+	codeFilePath string,
+	attempt int,
+) (*models.Template, error) {
+
+	componentName := RandomComponentName()
+
+	uploadedMedia, err := l.mediaStore.UploadCode(
+		ctx,
+		code,
+		fmt.Sprintf("%s/%s%d.tsx", codeFilePath, componentName, attempt),
+	)
+	if err != nil {
+		return nil, agenterrors.AnimationGenerationFailed("failed to upload code", err)
+	}
+
+	buildOutput, err := l.codeBuilder.ValidateAndBuild(ctx, &services.ValidateAndBuildInput{
+		Code:          code,
+		ComponentName: fmt.Sprintf("Transformed%s%d", componentName, attempt),
+		OutputPath:    codeFilePath,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.Template{
+		ID:   uuid.New().String(),
+		Name: componentName,
+		CodeRegistry: &pbcore.CodeRegistry{
+			MUrl: uploadedMedia.Url,
+			TUrl: buildOutput.JSPath,
+		},
+		Repeatable:      false,
+		ElementRegistry: buildOutput.Registry,
+	}, nil
+}
+
+func (l animationGenerator) tryRegenerateAnimation(
+	ctx context.Context,
+	code string,
+	animationSlide *pbcore.Slide,
+	slideContent *pbcore.AnimationSlideContent,
+	prompt string,
+	params GenerationParams,
+) (*models.Template, error) {
+
+	conversationHistory := []types.Message{}
+	for attempt := 0; attempt < maxAttempts; attempt++ {
+		input := l.buildRegenInput(
+			ctx,
+			code,
+			animationSlide,
+			slideContent,
+			prompt,
+			params,
+		)
+
+		l.logger.Info("fallback to regeneration animation", zap.Int("attempt", attempt))
+		response, err := baml_client.ReGenerateAnimation(ctx, input, conversationHistory)
+		if err != nil {
+			return nil, agenterrors.EditAnimationCodeFailed("failed to re-generate animation", err)
+		}
+
+		indentedCode := indentCode(response.Code)
+
+		codeFilePath := fmt.Sprintf(
+			"templates/generated/%s/%s/%s",
+			params.OrgID,
+			params.SessionID,
+			params.SlideID,
+		)
+
+		template, err := l.uploadAndBuild(
+			ctx,
+			indentedCode,
+			codeFilePath,
+			attempt,
+		)
+
+		if err == nil {
+			return template, nil
+		}
+
+		var buildErr *services.BuildError
+		if errors.As(err, &buildErr) {
+			conversationHistory = appendRetryConversation(
+				conversationHistory,
+				indentedCode,
+				"Build failed with error:\n"+buildErr.Error(),
+			)
+
+			l.logger.Error("failed to build animation",
+				zap.Int("attempt_left", maxAttempts-attempt),
+				zap.Error(buildErr))
+
+			continue
+		}
+
+		return nil, err
+	}
+
+	return nil, agenterrors.EditAnimationCodeFailed(
+		"edit animation generation failed after max retries",
+		fmt.Errorf("max build attempts reached"),
+	)
+}
+
+func (l animationGenerator) buildRegenInput(
+	ctx context.Context,
+	code string,
+	animationSlide *pbcore.Slide,
+	slideContent *pbcore.AnimationSlideContent,
+	prompt string,
+	params GenerationParams,
+) types.ReGenerateAnimationCodeRequest {
+
+	input := types.ReGenerateAnimationCodeRequest{
+		Code:          code,
+		AnimationType: types.AnimationType(slideContent.Plan.AnimationType),
+		Prompt:        prompt,
+		Duration:      int64(animationSlide.Duration),
+	}
+
+	if params.VideoBranding != nil {
+		input.Branding = *params.VideoBranding
+	}
+
+	if params.VideoBackground != nil {
+		input.SlideBackground = gradientToCSS(params.VideoBackground.Gradient)
+	}
+
+	// Inject brand guidelines
+	if params.VideoBranding != nil && params.VideoBranding.BrandLibraryID != nil {
+
+		brandIdentity, err := l.brandIdentityService.GetBrandIdentity(
+			ctx,
+			*params.VideoBranding.BrandLibraryID,
+		)
+
+		if err != nil {
+
+			if errors.Is(err, datastore.NotFound) {
+				return input
+			}
+
+			l.logger.Error(
+				"failed to load brand identity",
+				zap.Error(err),
+			)
+
+			return input
+		}
+
+		if brandIdentity != nil {
+			input.Branding.BrandGuideLines = utils.Ptr(
+				brandIdentity.FormatBrandDetails(),
+			)
+		}
+	}
+
+	return input
+}
+
 var adjectives = []string{
 	"Text", "Motion", "Flip", "Reveal", "Pulse",
 	"Cascade", "Flow", "Wave", "Glow", "Shift",
@@ -263,10 +662,11 @@ func RandomComponentName() string {
 	return fmt.Sprintf("%s%s_%d", a, b, time.Now().UnixNano())
 }
 
-func (l animationGenerator) ExtractConfig(ctx context.Context,
-	planSoFar *types.VideoGenerationPlan,
-	slide *types.AnimationSlide,
-	template *models.Template) (*types.TemplateConfigExtractorOutput, error) {
+func (l animationGenerator) ExtractConfig(
+	ctx context.Context,
+	beatDescription string,
+	template *models.Template,
+	params GenerationParams) (*types.TemplateConfigExtractorOutput, error) {
 	marshal, err := json.Marshal(template.Schema)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to marshal template schema of template : %s", template.ID)
@@ -274,11 +674,33 @@ func (l animationGenerator) ExtractConfig(ctx context.Context,
 
 	input := types.TemplateConfigExtractorInput{
 		Schema:              string(marshal),
-		BeatDescription:     slide.BeatDescription,
+		BeatDescription:     beatDescription,
 		TemplateDescription: template.Description,
-		Branding:            planSoFar.Branding,
-		SlideBackground:     gradientToCSS(planSoFar.BackgroundStyle.Gradient),
 	}
+
+	if params.VideoBranding != nil {
+		input.Branding = *params.VideoBranding
+	}
+	if params.VideoBackground != nil {
+		input.SlideBackground = gradientToCSS(params.VideoBackground.Gradient)
+	}
+
+	var brandIdentityRegistry *brand_identity.BrandIdentityRegistry
+	if params.VideoBranding != nil && params.VideoBranding.BrandLibraryID != nil {
+		_brandIdentityRegistry, err := l.brandIdentityService.GetBrandIdentity(ctx, *params.VideoBranding.BrandLibraryID)
+		if err != nil {
+			if errors.Is(err, datastore.NotFound) {
+				return nil, agenterrors.InvalidInput("brand_identity not found", nil)
+			}
+			return nil, err
+		}
+
+		if _brandIdentityRegistry != nil {
+			brandIdentityRegistry = _brandIdentityRegistry
+			input.Branding.BrandGuideLines = utils.Ptr(_brandIdentityRegistry.FormatBrandAndAssetDetails())
+		}
+	}
+
 	output, err := baml_client.ExtractTemplateConfig(ctx, input)
 	if err != nil {
 		return nil, fmt.Errorf("failed to extract template config from BAML : %s", err)
@@ -287,6 +709,10 @@ func (l animationGenerator) ExtractConfig(ctx context.Context,
 	valid := json.Valid([]byte(output.Config))
 	if !valid {
 		return nil, errors.New(fmt.Sprintf("template config validation failed for template : %s", template.ID))
+	}
+
+	if brandIdentityRegistry != nil {
+		output.Config = brandIdentityRegistry.ResolveMediaHandles(output.Config)
 	}
 
 	return &output, nil
@@ -352,55 +778,4 @@ func appendRetryConversation(history []types.Message, assistantCode string, feed
 		Content: feedback,
 	})
 	return history
-}
-
-func normalizeGeneratedConfig(raw string) (json.RawMessage, error) {
-	trimmed := strings.TrimSpace(raw)
-	if trimmed == "" || trimmed == "null" {
-		return json.RawMessage(`{}`), nil
-	}
-
-	// Remove optional markdown fences: ```json ... ```
-	if strings.HasPrefix(trimmed, "```") {
-		lines := strings.Split(trimmed, "\n")
-		if len(lines) >= 2 {
-			if strings.HasPrefix(strings.TrimSpace(lines[0]), "```") {
-				lines = lines[1:]
-			}
-			if len(lines) > 0 && strings.HasPrefix(strings.TrimSpace(lines[len(lines)-1]), "```") {
-				lines = lines[:len(lines)-1]
-			}
-			trimmed = strings.TrimSpace(strings.Join(lines, "\n"))
-		}
-	}
-
-	if !json.Valid([]byte(trimmed)) {
-		return nil, fmt.Errorf("config is not valid JSON")
-	}
-
-	// Decode once to verify shape and to support double-encoded JSON strings.
-	var decoded any
-	if err := json.Unmarshal([]byte(trimmed), &decoded); err != nil {
-		return nil, err
-	}
-
-	if nested, ok := decoded.(string); ok {
-		nested = strings.TrimSpace(nested)
-		if nested == "" || !json.Valid([]byte(nested)) {
-			return nil, fmt.Errorf("config JSON string does not contain valid JSON")
-		}
-		if err := json.Unmarshal([]byte(nested), &decoded); err != nil {
-			return nil, err
-		}
-	}
-
-	if _, ok := decoded.(map[string]any); !ok {
-		return nil, fmt.Errorf("config root must be a JSON object")
-	}
-
-	normalized, err := json.Marshal(decoded)
-	if err != nil {
-		return nil, err
-	}
-	return json.RawMessage(normalized), nil
 }

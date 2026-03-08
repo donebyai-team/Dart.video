@@ -49,8 +49,13 @@ function __patchIcon(eid, defaultEl) {
 function __patchVar(eid, key, defaultValue) {
   var _s = (typeof window !== 'undefined') ? window.__EDIT_STORE__ : null;
   if (!_s || !_s[eid]) return defaultValue;
-  if (key === 'text' && _s[eid].text != null) return _s[eid].text;
-  if (_s[eid].style && _s[eid].style[key] != null) return _s[eid].style[key];
+  var edit = _s[eid];
+  if (key === 'text') {
+    // letter-cascade and typewriter both stored differently
+    if (edit.typewriterSource != null) return edit.typewriterSource;
+    if (edit.text != null) return edit.text;
+  }
+  if (edit.style && edit.style[key] != null) return edit.style[key];
   return defaultValue;
 }
 function __patchWords(eid, defaultWords) {

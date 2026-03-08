@@ -21,6 +21,71 @@ import (
 	"github.com/boundaryml/baml/engine/language_client_go/pkg/cffi"
 )
 
+type AnimationCodeEditType string
+
+const (
+	AnimationCodeEditTypeTARGETED_EDITS AnimationCodeEditType = "TARGETED_EDITS"
+	AnimationCodeEditTypeFULL_REWRITE   AnimationCodeEditType = "FULL_REWRITE"
+)
+
+// Values returns all allowed values for the AnimationCodeEditType type.
+func (AnimationCodeEditType) Values() []AnimationCodeEditType {
+	return []AnimationCodeEditType{
+		AnimationCodeEditTypeTARGETED_EDITS,
+		AnimationCodeEditTypeFULL_REWRITE,
+	}
+}
+
+// IsValid checks whether the given AnimationCodeEditType value is valid.
+func (e AnimationCodeEditType) IsValid() bool {
+
+	for _, v := range e.Values() {
+		if e == v {
+			return true
+		}
+	}
+	return false
+
+}
+
+// MarshalJSON customizes JSON marshaling for AnimationCodeEditType.
+func (e AnimationCodeEditType) MarshalJSON() ([]byte, error) {
+	if !e.IsValid() {
+		return nil, fmt.Errorf("invalid AnimationCodeEditType: %q", e)
+	}
+	return json.Marshal(string(e))
+}
+
+// UnmarshalJSON customizes JSON unmarshaling for AnimationCodeEditType.
+func (e *AnimationCodeEditType) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return err
+	}
+	*e = AnimationCodeEditType(s)
+	if !e.IsValid() {
+		return fmt.Errorf("invalid AnimationCodeEditType: %q", s)
+	}
+	return nil
+}
+
+func (e *AnimationCodeEditType) Decode(holder *cffi.CFFIValueEnum, typeMap baml.TypeMap) {
+	name := holder.Name
+	if name.Name != "AnimationCodeEditType" && name.Namespace != cffi.CFFITypeNamespace_TYPES {
+		panic(fmt.Sprintf("expected types.AnimationCodeEditType, got %s.%s", string(name.Namespace.String()), string(name.Name)))
+	}
+	value := holder.Value
+	*e = AnimationCodeEditType(value)
+}
+
+func (e AnimationCodeEditType) Encode() (*cffi.HostValue, error) {
+	return baml.EncodeEnum("AnimationCodeEditType", string(e), false)
+}
+
+func (e AnimationCodeEditType) BamlTypeName() string {
+	return "AnimationCodeEditType"
+}
+
 type AnimationType string
 
 const (

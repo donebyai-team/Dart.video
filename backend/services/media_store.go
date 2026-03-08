@@ -35,6 +35,7 @@ type MediaStore interface {
 		code string,
 		fileName string,
 	) (*pbcore.MediaAsset, error)
+	DownloadCode(ctx context.Context, url string) (string, error)
 }
 
 type gcpMediaStore struct {
@@ -144,6 +145,30 @@ func DetectMediaType(contentType string) pbcore.MediaType {
 	default:
 		return pbcore.MediaType_MEDIA_TYPE_UNDEFINED
 	}
+}
+
+func (g gcpMediaStore) DownloadCode(ctx context.Context, url string) (string, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return "", err
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("failed to download code: status %d", resp.StatusCode)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	return string(body), nil
 }
 
 func (g gcpMediaStore) UploadFromURL(

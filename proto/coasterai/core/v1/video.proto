@@ -27,15 +27,28 @@ enum ResolutionType {
   RESOLUTION_1_1 = 4;
 }
 
+message GeneratedVideoBranding {
+  string brandGuideLines = 1;
+  GeneratedBrandColors colors = 2;
+  optional string brandLibraryID = 3;
+}
+
+message GeneratedBrandColors {
+  string primary = 1;
+  string secondary = 2;
+  string accent = 3;
+  string text = 4;
+}
+
 message VideoMetadata {
     int32 fps = 1;
     optional BackgroundStyle background_style = 2;
     Resolution resolution = 3;
     float duration = 4;
-    string prompt = 5;
-    optional string brand_library_id = 6;
+    string prompt = 5;;
     VideoLanguage language = 7;
     optional string background_audio_url = 8;
+    optional GeneratedVideoBranding generatedBranding = 9;
 }
 
 message Video {

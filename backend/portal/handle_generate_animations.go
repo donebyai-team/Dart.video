@@ -10,3 +10,8 @@ func (p *Portal) GenerateOrEditAnimationSlide(ctx context.Context, c *connect.Re
 	//TODO implement me
 	panic("implement me")
 }
+
+func (p *Portal) ContinueEditAnimationSlide(ctx context.Context, c *connect.Request[pbportal.ContinueEditAnimationRequest], c2 *connect.ServerStream[pbportal.GenerateOrEditAnimationResponse]) error {
+	//TODO implement me
+	panic("implement me")
+}

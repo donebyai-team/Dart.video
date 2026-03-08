@@ -21,6 +21,154 @@ import (
 	"github.com/shank318/coasterai/baml_client/types"
 )
 
+func EditAnimationCode(ctx context.Context, resume types.EditAnimationCodeRequest, conversation_history []types.Message, opts ...CallOptionFunc) (types.EditAnimationCodeResponse, error) {
+
+	var callOpts callOption
+	for _, opt := range opts {
+		opt(&callOpts)
+	}
+
+	// Resolve client option to clientRegistry (client takes precedence)
+	if callOpts.client != nil {
+		if callOpts.clientRegistry == nil {
+			callOpts.clientRegistry = baml.NewClientRegistry()
+		}
+		callOpts.clientRegistry.SetPrimaryClient(*callOpts.client)
+	}
+
+	args := baml.BamlFunctionArguments{
+		Kwargs: map[string]any{"resume": resume, "conversation_history": conversation_history},
+		Env:    getEnvVars(callOpts.env),
+	}
+
+	if callOpts.clientRegistry != nil {
+		args.ClientRegistry = callOpts.clientRegistry
+	}
+
+	if callOpts.collectors != nil {
+		args.Collectors = callOpts.collectors
+	}
+
+	if callOpts.typeBuilder != nil {
+		args.TypeBuilder = callOpts.typeBuilder
+	}
+
+	if callOpts.tags != nil {
+		args.Tags = callOpts.tags
+	}
+
+	encoded, err := args.Encode()
+	if err != nil {
+		panic(err)
+	}
+
+	if callOpts.onTick == nil {
+		result, err := bamlRuntime.CallFunction(ctx, "EditAnimationCode", encoded, callOpts.onTick)
+		if err != nil {
+			return types.EditAnimationCodeResponse{}, err
+		}
+
+		if result.Error != nil {
+			return types.EditAnimationCodeResponse{}, result.Error
+		}
+
+		casted := (result.Data).(types.EditAnimationCodeResponse)
+
+		return casted, nil
+	} else {
+		channel, err := bamlRuntime.CallFunctionStream(ctx, "EditAnimationCode", encoded, callOpts.onTick)
+		if err != nil {
+			return types.EditAnimationCodeResponse{}, err
+		}
+
+		for result := range channel {
+			if result.Error != nil {
+				return types.EditAnimationCodeResponse{}, result.Error
+			}
+
+			if result.HasData {
+				return result.Data.(types.EditAnimationCodeResponse), nil
+			}
+		}
+
+		return types.EditAnimationCodeResponse{}, fmt.Errorf("No data returned from stream")
+	}
+}
+
+func EnhanceAnimationPrompt(ctx context.Context, request types.EnhanceAnimationPromptRequest, conversation_history []types.Message, opts ...CallOptionFunc) (types.EnhanceAnimationPromptResponse, error) {
+
+	var callOpts callOption
+	for _, opt := range opts {
+		opt(&callOpts)
+	}
+
+	// Resolve client option to clientRegistry (client takes precedence)
+	if callOpts.client != nil {
+		if callOpts.clientRegistry == nil {
+			callOpts.clientRegistry = baml.NewClientRegistry()
+		}
+		callOpts.clientRegistry.SetPrimaryClient(*callOpts.client)
+	}
+
+	args := baml.BamlFunctionArguments{
+		Kwargs: map[string]any{"request": request, "conversation_history": conversation_history},
+		Env:    getEnvVars(callOpts.env),
+	}
+
+	if callOpts.clientRegistry != nil {
+		args.ClientRegistry = callOpts.clientRegistry
+	}
+
+	if callOpts.collectors != nil {
+		args.Collectors = callOpts.collectors
+	}
+
+	if callOpts.typeBuilder != nil {
+		args.TypeBuilder = callOpts.typeBuilder
+	}
+
+	if callOpts.tags != nil {
+		args.Tags = callOpts.tags
+	}
+
+	encoded, err := args.Encode()
+	if err != nil {
+		panic(err)
+	}
+
+	if callOpts.onTick == nil {
+		result, err := bamlRuntime.CallFunction(ctx, "EnhanceAnimationPrompt", encoded, callOpts.onTick)
+		if err != nil {
+			return types.EnhanceAnimationPromptResponse{}, err
+		}
+
+		if result.Error != nil {
+			return types.EnhanceAnimationPromptResponse{}, result.Error
+		}
+
+		casted := (result.Data).(types.EnhanceAnimationPromptResponse)
+
+		return casted, nil
+	} else {
+		channel, err := bamlRuntime.CallFunctionStream(ctx, "EnhanceAnimationPrompt", encoded, callOpts.onTick)
+		if err != nil {
+			return types.EnhanceAnimationPromptResponse{}, err
+		}
+
+		for result := range channel {
+			if result.Error != nil {
+				return types.EnhanceAnimationPromptResponse{}, result.Error
+			}
+
+			if result.HasData {
+				return result.Data.(types.EnhanceAnimationPromptResponse), nil
+			}
+		}
+
+		return types.EnhanceAnimationPromptResponse{}, fmt.Errorf("No data returned from stream")
+	}
+}
+
 func ExtractTemplateConfig(ctx context.Context, input types.TemplateConfigExtractorInput, opts ...CallOptionFunc) (types.TemplateConfigExtractorOutput, error) {
 
 	var callOpts callOption
@@ -462,5 +610,79 @@ func MatchTemplate(ctx context.Context, resume types.MatchTemplateRequest, opts 
 		}
 
 		return types.MatchTemplateResponse{}, fmt.Errorf("No data returned from stream")
+	}
+}
+
+func ReGenerateAnimation(ctx context.Context, resume types.ReGenerateAnimationCodeRequest, conversation_history []types.Message, opts ...CallOptionFunc) (types.ReGenerateAnimationCodeResponse, error) {
+
+	var callOpts callOption
+	for _, opt := range opts {
+		opt(&callOpts)
+	}
+
+	// Resolve client option to clientRegistry (client takes precedence)
+	if callOpts.client != nil {
+		if callOpts.clientRegistry == nil {
+			callOpts.clientRegistry = baml.NewClientRegistry()
+		}
+		callOpts.clientRegistry.SetPrimaryClient(*callOpts.client)
+	}
+
+	args := baml.BamlFunctionArguments{
+		Kwargs: map[string]any{"resume": resume, "conversation_history": conversation_history},
+		Env:    getEnvVars(callOpts.env),
+	}
+
+	if callOpts.clientRegistry != nil {
+		args.ClientRegistry = callOpts.clientRegistry
+	}
+
+	if callOpts.collectors != nil {
+		args.Collectors = callOpts.collectors
+	}
+
+	if callOpts.typeBuilder != nil {
+		args.TypeBuilder = callOpts.typeBuilder
+	}
+
+	if callOpts.tags != nil {
+		args.Tags = callOpts.tags
+	}
+
+	encoded, err := args.Encode()
+	if err != nil {
+		panic(err)
+	}
+
+	if callOpts.onTick == nil {
+		result, err := bamlRuntime.CallFunction(ctx, "ReGenerateAnimation", encoded, callOpts.onTick)
+		if err != nil {
+			return types.ReGenerateAnimationCodeResponse{}, err
+		}
+
+		if result.Error != nil {
+			return types.ReGenerateAnimationCodeResponse{}, result.Error
+		}
+
+		casted := (result.Data).(types.ReGenerateAnimationCodeResponse)
+
+		return casted, nil
+	} else {
+		channel, err := bamlRuntime.CallFunctionStream(ctx, "ReGenerateAnimation", encoded, callOpts.onTick)
+		if err != nil {
+			return types.ReGenerateAnimationCodeResponse{}, err
+		}
+
+		for result := range channel {
+			if result.Error != nil {
+				return types.ReGenerateAnimationCodeResponse{}, result.Error
+			}
+
+			if result.HasData {
+				return result.Data.(types.ReGenerateAnimationCodeResponse), nil
+			}
+		}
+
+		return types.ReGenerateAnimationCodeResponse{}, fmt.Errorf("No data returned from stream")
 	}
 }

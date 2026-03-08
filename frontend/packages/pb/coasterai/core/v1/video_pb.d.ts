@@ -13,6 +13,63 @@ import type { Timestamp } from "@bufbuild/protobuf/wkt";
 export declare const file_coasterai_core_v1_video: GenFile;
 
 /**
+ * @generated from message coasterai.core.v1.GeneratedVideoBranding
+ */
+export declare type GeneratedVideoBranding = Message<"coasterai.core.v1.GeneratedVideoBranding"> & {
+  /**
+   * @generated from field: string brandGuideLines = 1;
+   */
+  brandGuideLines: string;
+
+  /**
+   * @generated from field: coasterai.core.v1.GeneratedBrandColors colors = 2;
+   */
+  colors?: GeneratedBrandColors;
+
+  /**
+   * @generated from field: optional string brandLibraryID = 3;
+   */
+  brandLibraryID?: string;
+};
+
+/**
+ * Describes the message coasterai.core.v1.GeneratedVideoBranding.
+ * Use `create(GeneratedVideoBrandingSchema)` to create a new message.
+ */
+export declare const GeneratedVideoBrandingSchema: GenMessage<GeneratedVideoBranding>;
+
+/**
+ * @generated from message coasterai.core.v1.GeneratedBrandColors
+ */
+export declare type GeneratedBrandColors = Message<"coasterai.core.v1.GeneratedBrandColors"> & {
+  /**
+   * @generated from field: string primary = 1;
+   */
+  primary: string;
+
+  /**
+   * @generated from field: string secondary = 2;
+   */
+  secondary: string;
+
+  /**
+   * @generated from field: string accent = 3;
+   */
+  accent: string;
+
+  /**
+   * @generated from field: string text = 4;
+   */
+  text: string;
+};
+
+/**
+ * Describes the message coasterai.core.v1.GeneratedBrandColors.
+ * Use `create(GeneratedBrandColorsSchema)` to create a new message.
+ */
+export declare const GeneratedBrandColorsSchema: GenMessage<GeneratedBrandColors>;
+
+/**
  * @generated from message coasterai.core.v1.VideoMetadata
  */
 export declare type VideoMetadata = Message<"coasterai.core.v1.VideoMetadata"> & {
@@ -42,11 +99,6 @@ export declare type VideoMetadata = Message<"coasterai.core.v1.VideoMetadata"> &
   prompt: string;
 
   /**
-   * @generated from field: optional string brand_library_id = 6;
-   */
-  brandLibraryId?: string;
-
-  /**
    * @generated from field: coasterai.core.v1.VideoLanguage language = 7;
    */
   language: VideoLanguage;
@@ -55,6 +107,11 @@ export declare type VideoMetadata = Message<"coasterai.core.v1.VideoMetadata"> &
    * @generated from field: optional string background_audio_url = 8;
    */
   backgroundAudioUrl?: string;
+
+  /**
+   * @generated from field: optional coasterai.core.v1.GeneratedVideoBranding generatedBranding = 9;
+   */
+  generatedBranding?: GeneratedVideoBranding;
 };
 
 /**

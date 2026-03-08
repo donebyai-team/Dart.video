@@ -266,6 +266,318 @@ func (c Category) BamlTypeName() string {
 	return "Category"
 }
 
+type EditAnimationCodeRequest struct {
+	Code   string `json:"code"`
+	Prompt string `json:"prompt"`
+}
+
+func (c *EditAnimationCodeRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "EditAnimationCodeRequest" {
+		panic(fmt.Sprintf("expected EditAnimationCodeRequest, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "code":
+			c.Code = baml.Decode(valueHolder).Interface().(string)
+
+		case "prompt":
+			c.Prompt = baml.Decode(valueHolder).Interface().(string)
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class EditAnimationCodeRequest", key))
+
+		}
+	}
+
+}
+
+func (c EditAnimationCodeRequest) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["code"] = c.Code
+
+	fields["prompt"] = c.Prompt
+
+	return baml.EncodeClass("EditAnimationCodeRequest", fields, nil)
+}
+
+func (c EditAnimationCodeRequest) BamlTypeName() string {
+	return "EditAnimationCodeRequest"
+}
+
+type EditAnimationCodeResponse struct {
+	Type  AnimationCodeEditType `json:"type"`
+	Edits []EditString          `json:"edits"`
+}
+
+func (c *EditAnimationCodeResponse) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "EditAnimationCodeResponse" {
+		panic(fmt.Sprintf("expected EditAnimationCodeResponse, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "type":
+			c.Type = baml.Decode(valueHolder).Interface().(AnimationCodeEditType)
+
+		case "edits":
+			c.Edits = baml.Decode(valueHolder).Interface().([]EditString)
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class EditAnimationCodeResponse", key))
+
+		}
+	}
+
+}
+
+func (c EditAnimationCodeResponse) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["type"] = c.Type
+
+	fields["edits"] = c.Edits
+
+	return baml.EncodeClass("EditAnimationCodeResponse", fields, nil)
+}
+
+func (c EditAnimationCodeResponse) BamlTypeName() string {
+	return "EditAnimationCodeResponse"
+}
+
+type EditString struct {
+	Description string `json:"description"`
+	OldString   string `json:"oldString"`
+	NewString   string `json:"newString"`
+}
+
+func (c *EditString) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "EditString" {
+		panic(fmt.Sprintf("expected EditString, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "description":
+			c.Description = baml.Decode(valueHolder).Interface().(string)
+
+		case "oldString":
+			c.OldString = baml.Decode(valueHolder).Interface().(string)
+
+		case "newString":
+			c.NewString = baml.Decode(valueHolder).Interface().(string)
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class EditString", key))
+
+		}
+	}
+
+}
+
+func (c EditString) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["description"] = c.Description
+
+	fields["oldString"] = c.OldString
+
+	fields["newString"] = c.NewString
+
+	return baml.EncodeClass("EditString", fields, nil)
+}
+
+func (c EditString) BamlTypeName() string {
+	return "EditString"
+}
+
+type EnhanceAnimationPromptRequest struct {
+	Prompt          string        `json:"prompt"`
+	Branding        VideoBranding `json:"branding"`
+	SlideBackground string        `json:"slideBackground"`
+}
+
+func (c *EnhanceAnimationPromptRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "EnhanceAnimationPromptRequest" {
+		panic(fmt.Sprintf("expected EnhanceAnimationPromptRequest, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "prompt":
+			c.Prompt = baml.Decode(valueHolder).Interface().(string)
+
+		case "branding":
+			c.Branding = baml.Decode(valueHolder).Interface().(VideoBranding)
+
+		case "slideBackground":
+			c.SlideBackground = baml.Decode(valueHolder).Interface().(string)
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class EnhanceAnimationPromptRequest", key))
+
+		}
+	}
+
+}
+
+func (c EnhanceAnimationPromptRequest) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["prompt"] = c.Prompt
+
+	fields["branding"] = c.Branding
+
+	fields["slideBackground"] = c.SlideBackground
+
+	return baml.EncodeClass("EnhanceAnimationPromptRequest", fields, nil)
+}
+
+func (c EnhanceAnimationPromptRequest) BamlTypeName() string {
+	return "EnhanceAnimationPromptRequest"
+}
+
+type EnhanceAnimationPromptResponse struct {
+	Plan Union2AskUserQuestionOrEnhancedAnimationPrompt `json:"plan"`
+}
+
+func (c *EnhanceAnimationPromptResponse) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "EnhanceAnimationPromptResponse" {
+		panic(fmt.Sprintf("expected EnhanceAnimationPromptResponse, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "plan":
+			c.Plan = baml.Decode(valueHolder).Interface().(Union2AskUserQuestionOrEnhancedAnimationPrompt)
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class EnhanceAnimationPromptResponse", key))
+
+		}
+	}
+
+}
+
+func (c EnhanceAnimationPromptResponse) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["plan"] = c.Plan
+
+	return baml.EncodeClass("EnhanceAnimationPromptResponse", fields, nil)
+}
+
+func (c EnhanceAnimationPromptResponse) BamlTypeName() string {
+	return "EnhanceAnimationPromptResponse"
+}
+
+type EnhancedAnimationPrompt struct {
+	Prompt              string        `json:"prompt"`
+	AnimationIntent     string        `json:"animationIntent"`
+	AnimationType       AnimationType `json:"animationType"`
+	CategorySearchQuery string        `json:"categorySearchQuery"`
+	Duration            int64         `json:"duration"`
+}
+
+func (c *EnhancedAnimationPrompt) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "EnhancedAnimationPrompt" {
+		panic(fmt.Sprintf("expected EnhancedAnimationPrompt, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "prompt":
+			c.Prompt = baml.Decode(valueHolder).Interface().(string)
+
+		case "animationIntent":
+			c.AnimationIntent = baml.Decode(valueHolder).Interface().(string)
+
+		case "animationType":
+			c.AnimationType = baml.Decode(valueHolder).Interface().(AnimationType)
+
+		case "categorySearchQuery":
+			c.CategorySearchQuery = baml.Decode(valueHolder).Interface().(string)
+
+		case "duration":
+			c.Duration = baml.Decode(valueHolder).Int()
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class EnhancedAnimationPrompt", key))
+
+		}
+	}
+
+}
+
+func (c EnhancedAnimationPrompt) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["prompt"] = c.Prompt
+
+	fields["animationIntent"] = c.AnimationIntent
+
+	fields["animationType"] = c.AnimationType
+
+	fields["categorySearchQuery"] = c.CategorySearchQuery
+
+	fields["duration"] = c.Duration
+
+	return baml.EncodeClass("EnhancedAnimationPrompt", fields, nil)
+}
+
+func (c EnhancedAnimationPrompt) BamlTypeName() string {
+	return "EnhancedAnimationPrompt"
+}
+
 type GenerateAnimationCodeRequest struct {
 	AnimationType   AnimationType `json:"animationType"`
 	AnimationPrompt string        `json:"animationPrompt"`
@@ -890,6 +1202,120 @@ func (c Message) BamlTypeName() string {
 	return "Message"
 }
 
+type ReGenerateAnimationCodeRequest struct {
+	Code            string        `json:"code"`
+	AnimationType   AnimationType `json:"animationType"`
+	Prompt          string        `json:"prompt"`
+	Duration        int64         `json:"duration"`
+	Branding        VideoBranding `json:"branding"`
+	SlideBackground string        `json:"slideBackground"`
+}
+
+func (c *ReGenerateAnimationCodeRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "ReGenerateAnimationCodeRequest" {
+		panic(fmt.Sprintf("expected ReGenerateAnimationCodeRequest, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "code":
+			c.Code = baml.Decode(valueHolder).Interface().(string)
+
+		case "animationType":
+			c.AnimationType = baml.Decode(valueHolder).Interface().(AnimationType)
+
+		case "prompt":
+			c.Prompt = baml.Decode(valueHolder).Interface().(string)
+
+		case "duration":
+			c.Duration = baml.Decode(valueHolder).Int()
+
+		case "branding":
+			c.Branding = baml.Decode(valueHolder).Interface().(VideoBranding)
+
+		case "slideBackground":
+			c.SlideBackground = baml.Decode(valueHolder).Interface().(string)
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class ReGenerateAnimationCodeRequest", key))
+
+		}
+	}
+
+}
+
+func (c ReGenerateAnimationCodeRequest) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["code"] = c.Code
+
+	fields["animationType"] = c.AnimationType
+
+	fields["prompt"] = c.Prompt
+
+	fields["duration"] = c.Duration
+
+	fields["branding"] = c.Branding
+
+	fields["slideBackground"] = c.SlideBackground
+
+	return baml.EncodeClass("ReGenerateAnimationCodeRequest", fields, nil)
+}
+
+func (c ReGenerateAnimationCodeRequest) BamlTypeName() string {
+	return "ReGenerateAnimationCodeRequest"
+}
+
+type ReGenerateAnimationCodeResponse struct {
+	Code string `json:"code"`
+}
+
+func (c *ReGenerateAnimationCodeResponse) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "ReGenerateAnimationCodeResponse" {
+		panic(fmt.Sprintf("expected ReGenerateAnimationCodeResponse, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "code":
+			c.Code = baml.Decode(valueHolder).Interface().(string)
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class ReGenerateAnimationCodeResponse", key))
+
+		}
+	}
+
+}
+
+func (c ReGenerateAnimationCodeResponse) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["code"] = c.Code
+
+	return baml.EncodeClass("ReGenerateAnimationCodeResponse", fields, nil)
+}
+
+func (c ReGenerateAnimationCodeResponse) BamlTypeName() string {
+	return "ReGenerateAnimationCodeResponse"
+}
+
 type ScriptItem struct {
 	Name      string  `json:"name"`
 	Voiceover *string `json:"voiceover"`
@@ -1239,6 +1665,7 @@ func (c VideoBackground) BamlTypeName() string {
 }
 
 type VideoBranding struct {
+	BrandLibraryID  *string     `json:"brandLibraryID"`
 	BrandGuideLines *string     `json:"brandGuideLines"`
 	Colors          BrandColors `json:"colors"`
 }
@@ -1257,6 +1684,9 @@ func (c *VideoBranding) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap
 		valueHolder := field.Value
 		switch key {
 
+		case "brandLibraryID":
+			c.BrandLibraryID = baml.Decode(valueHolder).Interface().(*string)
+
 		case "brandGuideLines":
 			c.BrandGuideLines = baml.Decode(valueHolder).Interface().(*string)
 
@@ -1274,6 +1704,8 @@ func (c *VideoBranding) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap
 
 func (c VideoBranding) Encode() (*cffi.HostValue, error) {
 	fields := map[string]any{}
+
+	fields["brandLibraryID"] = c.BrandLibraryID
 
 	fields["brandGuideLines"] = c.BrandGuideLines
 
@@ -1354,6 +1786,7 @@ type VideoGenerationPlanRequest struct {
 	Script          []ScriptItem `json:"Script"`
 	EnableThinking  *bool        `json:"enableThinking"`
 	BrandGuidelines *string      `json:"BrandGuidelines"`
+	BrandLibraryID  *string      `json:"BrandLibraryID"`
 }
 
 func (c *VideoGenerationPlanRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -1391,6 +1824,9 @@ func (c *VideoGenerationPlanRequest) Decode(holder *cffi.CFFIValueClass, typeMap
 		case "BrandGuidelines":
 			c.BrandGuidelines = baml.Decode(valueHolder).Interface().(*string)
 
+		case "BrandLibraryID":
+			c.BrandLibraryID = baml.Decode(valueHolder).Interface().(*string)
+
 		default:
 
 			panic(fmt.Sprintf("unexpected field: %s in class VideoGenerationPlanRequest", key))
@@ -1416,6 +1852,8 @@ func (c VideoGenerationPlanRequest) Encode() (*cffi.HostValue, error) {
 	fields["enableThinking"] = c.EnableThinking
 
 	fields["BrandGuidelines"] = c.BrandGuidelines
+
+	fields["BrandLibraryID"] = c.BrandLibraryID
 
 	return baml.EncodeClass("VideoGenerationPlanRequest", fields, nil)
 }

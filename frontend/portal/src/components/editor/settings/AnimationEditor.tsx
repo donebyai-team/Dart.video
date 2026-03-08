@@ -8,9 +8,10 @@ import { useVideoStore } from '@/stores/video'
 import { AddOrEditAnimationSettings } from '@/types/tools'
 import type { AskUserQuestion, GenerateOrEditAnimationResponse } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
 import type { AnimationTemplate } from '@coasterai/pb/coasterai/core/v1/template_pb'
-import type { Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import type { AnimationSlideContent, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { getConnectError } from '@/utils/error'
 import toast from 'react-hot-toast'
+import { reconcileEdits } from '../animation/reconcileEdits'
 
 interface AnimationEditorProps {
     settings: AddOrEditAnimationSettings
@@ -26,11 +27,10 @@ function addGeneratedSlide(_slide: Slide, _sectionId: string, _afterSlideId: str
 
 export default function AnimationEditor({ settings }: AnimationEditorProps) {
     const updateSlide = useVideoStore(s => s.updateSlide)
+    const selectedSlide = useVideoStore(s => s.selectedSlide)
     const { portalClient } = useClientsContext()
 
-    const isEditing = !!settings.slideToEdit
-    // Track the active slide ID for edits — may update after first add
-    const activeSlideIdRef = useRef<string | undefined>(settings.slideToEdit?.slide.id)
+    const isAdding = !!settings.previousSlide
 
     const [prompt, setPrompt] = useState('')
     const [stage, setStage] = useState<Stage>('compose')
@@ -70,17 +70,39 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
     }, [])
 
     const applySlideToStore = (slide: Slide) => {
-        if (activeSlideIdRef.current) {
-            // Editing: update the existing slide in the store
-            updateSlide(slide)
-        } else {
-            // Adding: insert the new slide after the previous one
-            const previousSlide = settings.previousSlide
-            if (previousSlide) {
-                addGeneratedSlide(slide, previousSlide.section.id, previousSlide.slide.id)
-                activeSlideIdRef.current = slide.id
-            }
+        if (isAdding) {
+            addGeneratedSlide(slide, settings.previousSlide!.section.id, settings.previousSlide!.slide.id)
+            return
         }
+
+        // Editing: only update registry, codeRegistry, edits on the current selected slide.
+        // Always read existingContent from the store so any concurrent manual edits are preserved.
+        const updatedContent = slide.content?.case === 'animation' ? slide.content.value : undefined
+        if (!updatedContent) return
+
+        const existingContent = selectedSlide?.slide.content?.case === 'animation'
+            ? selectedSlide.slide.content.value
+            : undefined
+
+        const existingEdits = (existingContent?.edits ?? {}) as unknown as Parameters<typeof reconcileEdits>[2]
+        const reconciledEdits = reconcileEdits(
+            (existingContent?.registry ?? {}) as unknown as Parameters<typeof reconcileEdits>[0],
+            (updatedContent.registry ?? {}) as unknown as Parameters<typeof reconcileEdits>[1],
+            existingEdits
+        )
+        console.debug('[AnimationEditor] Reconciling edits', existingContent?.edits, reconciledEdits)
+
+        updateSlide({
+            content: {
+                case: 'animation' as const,
+                value: {
+                    ...(existingContent ?? {}),
+                    registry: updatedContent.registry,
+                    codeRegistry: updatedContent.codeRegistry,
+                    edits: reconciledEdits as unknown as AnimationSlideContent['edits'],
+                } as AnimationSlideContent
+            }
+        })
     }
 
     const consumeStream = async (
@@ -137,7 +159,7 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
             setIsThinkingBusy(true)
 
             const stream = portalClient.generateOrEditAnimationSlide({
-                slideId: activeSlideIdRef.current,
+                slideId: isAdding ? undefined : selectedSlide?.slide.id,
                 prompt: finalPrompt,
                 suggestions: withSuggestions,
             }, { signal: controller.signal })
@@ -158,7 +180,7 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
         }
     }
 
-    const handleSubmit = () => startStream(undefined, !isEditing)
+    const handleSubmit = () => startStream(undefined, isAdding)
 
     const handleStop = () => {
         streamSessionRef.current++
@@ -191,7 +213,7 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
             setIsThinkingBusy(true)
 
             const stream = portalClient.generateOrEditAnimationSlide({
-                slideId: activeSlideIdRef.current,
+                slideId: isAdding ? undefined : selectedSlide?.slide.id,
                 prompt: response,
                 suggestions: false,
             }, { signal: controller.signal })
@@ -214,10 +236,17 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
 
     const handleSelectSuggestion = (index: number) => {
         setSelectedSuggestionIndex(index)
-        // Update the slide with the selected template's code registry
         const template = suggestions[index]
-        if (!template || !activeSlideIdRef.current) return
-        updateSlide({ content: { case: 'animation', value: { codeRegistry: template.registry } } as any })
+        if (!template) return
+        const existingContent = selectedSlide?.slide.content?.case === 'animation'
+            ? selectedSlide.slide.content.value
+            : undefined
+        updateSlide({
+            content: {
+                case: 'animation' as const,
+                value: { ...(existingContent ?? {}), codeRegistry: template.registry } as AnimationSlideContent
+            }
+        })
     }
 
     const handleDislikeSuggestions = () => {
@@ -230,7 +259,7 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
     return (
         <div className='flex flex-col h-full p-4 gap-3'>
             <div className='text-sm font-medium text-foreground'>
-                {isEditing ? 'Edit Animation' : 'Generate Animation'}
+                {isAdding ? 'Generate Animation' : 'Edit Animation'}
             </div>
 
             <div className='flex flex-col gap-2.5 flex-1'>
@@ -307,7 +336,7 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
                                 void handleSubmit()
                             }
                         }}
-                        placeholder={isEditing ? 'Describe changes to make...' : 'Describe the animation you want...'}
+                        placeholder={isAdding ? 'Describe the animation you want...' : 'Describe changes to make...'}
                         rows={3}
                         disabled={isSubmitting}
                         className='w-full resize-none bg-transparent px-3 py-2.5 text-sm focus:outline-none placeholder:text-muted-foreground/60 disabled:opacity-50'
