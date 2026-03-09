@@ -88,7 +88,6 @@ export function useRemotionPlayerEvents({
       if (overlappingSlides.length === 1) {
         // Only one slide is rendering - simple case
         currentSlide = overlappingSlides[0].slide;
-        console.debug(`[RemotionPlayer] Frame ${data.detail.frame} is in slide ${currentSlide.id} (${overlappingSlides[0].startFrame}-${overlappingSlides[0].endFrame})`);
       } else if (overlappingSlides.length > 1) {
         // Multiple slides are rendering - choose the one that started later (incoming slide)
         const latestSlide = overlappingSlides.reduce((latest, current) =>
@@ -97,7 +96,6 @@ export function useRemotionPlayerEvents({
         currentSlide = latestSlide.slide;
 
         const slideNames = overlappingSlides.map(s => s.slide.id).join(' + ');
-        console.debug(`[RemotionPlayer] Frame ${data.detail.frame} - Overlapping slides: ${slideNames}, choosing ${currentSlide.id}`);
       }
 
       if (currentSlide) {

@@ -74,7 +74,7 @@ const SortableSlideCard = ({ slide, isSelected, index, onSelect, onDelete }: Sor
           </div>
           {/* Duration */}
           <div className='absolute bottom-0.5 right-0.5 bg-foreground/80 text-background text-[7px] px-0.5 rounded'>
-            {slide.duration}s
+            {slide.duration.toFixed(2)}s
           </div>
           {/* Play overlay */}
           <div className='absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors flex items-center justify-center'>

@@ -4,6 +4,8 @@ import { ElementEdit } from "@coasterai/renderer/src/types/ast"
 /*
 ## All Cases Now
 ```
+fontWeight in prev + next, prev value matches with edit value, user edited it and hence keep it
+so no llm override allowed
 fontWeight in prev + next, same type   →  kept
 fontWeight in prev, gone from next     →  dropped (LLM removed it)
 fontWeight not in prev, not in next    →  kept   (user manually added)
@@ -87,14 +89,21 @@ export function reconcileEdits(
                 }
 
                 // Prop exists in new registry — apply normal reconcile
+                // Prop exists in new registry — apply normal reconcile
                 if (!nextProp.editable) continue
+
+                // if the prev style matches the edit store style
+                // user edited it, llm should not override it
+                const prevDefault = prevEntry?.staticStyle?.[prop]
+                if (prevDefault !== undefined && value === prevDefault) continue
 
                 const prevIsAnimated = !!prevEntry?.animatedProps?.[prop]
                 const nextIsAnimated = !!nextEntry.animatedProps?.[prop]
                 if (prevIsAnimated !== nextIsAnimated) continue
 
+
                 reconciledStyle[prop] = value
-            }
+            }            
             if (Object.keys(reconciledStyle).length > 0) {
                 reconciledEdit.style = reconciledStyle
             }
