@@ -51,7 +51,6 @@ COPY packages/templates ./packages/templates
 COPY packages/renderer ./packages/renderer
 COPY packages/pb ./packages/pb
 COPY packages/ts-config ./packages/ts-config
-COPY packages/template-registery.ts ./packages/template-registery.ts
 
 # package.json only for remaining workspace packages (pnpm lockfile resolution)
 COPY packages/client/package.json ./packages/client/package.json
