@@ -2,15 +2,16 @@
  * AnimationToolbar
  *
  * Router component: reads the selected element's registry entry and renders
- * the appropriate sub-toolbar (Text / Image / Icon / Layout).
+ * the appropriate sub-toolbar (Text / Image / Icon / Layout / Counter / WordCycle).
  *
  * Also appends a nonEditable "prompt-hint" section if the element has
  * properties that can only be changed via the AI prompt.
  *
  * Props:
- *  - selectedEid       — currently selected element id (null = nothing selected)
+ *  - selectedEid       — registry key for the selected element (null = nothing selected)
+ *  - editEid           — actual DOM eid to use for edits (may differ from selectedEid for loop items)
  *  - registry          — full element registry from the renderer
- *  - editStore         — current edit overrides keyed by eid
+ *  - editStore         — current edit overrides keyed by DOM eid
  *  - onEdit            — write a patch to the edit store
  *  - onDeselect        — close selection
  */
@@ -18,15 +19,18 @@
 import React from 'react'
 import type { RegistryEntry } from '@coasterai/renderer'
 import type { ElementEdit } from '@coasterai/renderer/src/types/ast'
-import { TextToolbar }   from './toolbars/TextToolbar'
-import { ImageToolbar }  from './toolbars/ImageToolbar'
-import { IconToolbar }   from './toolbars/IconToolbar'
-import { LayoutToolbar } from './toolbars/LayoutToolbar'
-import { Sep }           from './toolbars/shared'
+import { TextToolbar }      from './toolbars/TextToolbar'
+import { ImageToolbar }     from './toolbars/ImageToolbar'
+import { IconToolbar }      from './toolbars/IconToolbar'
+import { LayoutToolbar }    from './toolbars/LayoutToolbar'
+import { CounterToolbar }   from './toolbars/CounterToolbar'
+import { WordCycleToolbar } from './toolbars/WordCycleToolbar'
+import { Sep }              from './toolbars/shared'
 import { AlertTriangle, MessageSquarePlus } from 'lucide-react'
 
 interface AnimationToolbarProps {
   selectedEid: string | null
+  editEid?: string
   registry: Record<string, RegistryEntry>
   editStore: Record<string, ElementEdit>
   onEdit: (eid: string, patch: Partial<ElementEdit>) => void
@@ -35,6 +39,7 @@ interface AnimationToolbarProps {
 
 export function AnimationToolbar({
   selectedEid,
+  editEid,
   registry,
   editStore,
   onEdit,
@@ -42,16 +47,32 @@ export function AnimationToolbar({
 }: AnimationToolbarProps) {
   if (!selectedEid) return null
 
+  // editEid is the actual DOM eid used for edits (e.g. 'el-9-0' for a loop item).
+  // selectedEid is the registry key (e.g. 'el-9'). Falls back to selectedEid if not provided.
+  const activeEid = editEid ?? selectedEid
+
   const entry = registry[selectedEid]
   if (!entry) {
     console.warn('[AnimationToolbar] No registry entry for eid:', selectedEid)
     return null
   }
 
-  const isText    = entry.textType === 'static'
-  const isImage   = entry.assetType === 'image'
-  const isIcon    = entry.assetType === 'icon'
-  const isLayout  = !isText && !isImage && !isIcon
+  const isText      = entry.textType === 'static' || entry.textType === 'letter-cascade' || entry.textType === 'typewriter'
+  const isWordCycle = entry.textType === 'word-cycle'
+  const isCounter   = entry.textType === 'counter'
+  const isImage     = entry.assetType === 'image'
+  const isIcon      = entry.assetType === 'icon'
+  const isLayout    = !isText && !isWordCycle && !isCounter && !isImage && !isIcon
+
+  // Don't show the toolbar if there's nothing editable to display.
+  // Elements with special content always have controls; layout elements only
+  // show if staticStyle contains props that LayoutToolbar can render controls for.
+  const hasSpecialContent = isText || isWordCycle || isCounter || isImage || isIcon
+  if (!hasSpecialContent) {
+    const s = entry.staticStyle
+    const hasLayoutControls = 'background' in s || 'backgroundColor' in s || 'borderRadius' in s || 'opacity' in s
+    if (!hasLayoutControls) return null
+  }
 
   // Set to true to show the "Use prompt" hint for non-editable animated properties
   const SHOW_PROMPT_HINT = false
@@ -66,6 +87,7 @@ export function AnimationToolbar({
       {isText && (
         <TextToolbar
           eid={selectedEid}
+          editEid={activeEid}
           registry={registry}
           editStore={editStore}
           onEdit={onEdit}
@@ -75,6 +97,7 @@ export function AnimationToolbar({
       {isImage && (
         <ImageToolbar
           eid={selectedEid}
+          editEid={activeEid}
           registry={registry}
           editStore={editStore}
           onEdit={onEdit}
@@ -84,6 +107,27 @@ export function AnimationToolbar({
       {isIcon && (
         <IconToolbar
           eid={selectedEid}
+          editEid={activeEid}
+          registry={registry}
+          editStore={editStore}
+          onEdit={onEdit}
+        />
+      )}
+
+      {isCounter && (
+        <CounterToolbar
+          eid={selectedEid}
+          editEid={activeEid}
+          registry={registry}
+          editStore={editStore}
+          onEdit={onEdit}
+        />
+      )}
+
+      {isWordCycle && (
+        <WordCycleToolbar
+          eid={selectedEid}
+          editEid={activeEid}
           registry={registry}
           editStore={editStore}
           onEdit={onEdit}
@@ -93,6 +137,7 @@ export function AnimationToolbar({
       {isLayout && (
         <LayoutToolbar
           eid={selectedEid}
+          editEid={activeEid}
           registry={registry}
           editStore={editStore}
           onEdit={onEdit}

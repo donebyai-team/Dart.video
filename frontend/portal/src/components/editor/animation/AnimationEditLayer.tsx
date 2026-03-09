@@ -51,6 +51,7 @@ export function AnimationEditLayer({
   const [elementRect, setElementRect] = useState<FRect | null>(null)
   const [isInlineEditing, setIsInlineEditing] = useState(false)
   const [editorHeight, setEditorHeight] = useState(0)
+  const [hoverCursor, setHoverCursor] = useState<'default' | 'pointer'>('default')
   const inlineInitTextRef = useRef('')
 
   // ── Track canvas fixed position ─────────────────────────────────────────────
@@ -153,23 +154,20 @@ export function AnimationEditLayer({
    * Mirrors the routing logic in AnimationToolbar / sub-toolbars.
    */
   function hasEditableControls(entry: RegistryEntry): boolean {
-    // Text types
+    // Text types with toolbar support (must match AnimationToolbar routing)
     if (entry.textType === 'static') return true
-    if (entry.textType === 'counter') return true
+    if (entry.textType === 'letter-cascade') return true
     if (entry.textType === 'typewriter') return true
     if (entry.textType === 'word-cycle') return true
+    if (entry.textType === 'counter') return true
 
     // Asset types
     if (entry.assetType === 'image') return true
     if (entry.assetType === 'icon') return true
 
-    // Any editable style prop
-    if (Object.values(entry.editableProps ?? {}).some((def: any) => def.editable)) {
-      return true
-    }
-
-    // Any animated prop (range or spring editor)
-    if (Object.keys(entry.animatedProps ?? {}).length > 0) return true
+    // Layout: same keys LayoutToolbar and AnimationToolbar guard check
+    const s = entry.staticStyle ?? {}
+    if ('background' in s || 'backgroundColor' in s || 'borderRadius' in s || 'opacity' in s) return true
 
     return false
   }
@@ -178,14 +176,14 @@ export function AnimationEditLayer({
    * Find the best clickable element at the cursor position.
    *
    * Pass 1 — DOM walk-up from the topmost hit element.
-   *   Handles overflow:visible text whose bounding box is tiny (e.g. a 4px div
-   *   whose text visually overflows). The click lands on a child or even outside
-   *   the parent's box, but walking up the DOM tree finds the owning data-eid.
+   *   Walks all the way up past non-editable data-eid nodes until it finds an
+   *   ancestor with editable controls. Handles deeply nested structures where
+   *   the clickable element is a child of the editable container.
+   *   Stops only when it hits a full-canvas element (don't select the root).
    *
    * Pass 2 — z-stack scan via elementsFromPoint.
-   *   Handles non-editable elements sitting on top of editable ones (e.g. a
-   *   decorative 4x4 img). If pass 1 finds a data-eid with no editable controls,
-   *   we fall through and keep searching deeper in the stack.
+   *   Runs if pass 1 found nothing. Handles decorative elements sitting on top
+   *   of editable ones (e.g. a transparent overlay above a styled div).
    */
 function eidAtPoint(
   clientX: number,
@@ -205,14 +203,14 @@ function eidAtPoint(
     if (walkEl.dataset?.eid) {
       const r = walkEl.getBoundingClientRect()
 
-      // Same canvas size check as Pass 2 — don't select full-canvas elements
+      // Don't select full-canvas elements — stop the walk
       const coversCanvas =
         r.width  > cRect.width  * 0.9 &&
         r.height > cRect.height * 0.9
 
       if (coversCanvas) {
-        console.log(`[eidAtPoint] pass1 skipping eid=${walkEl.dataset.eid} (full canvas)`)
-        break   // stop walking — fall through to Pass 2
+        // console.log(`[eidAtPoint] pass1 stopping at eid=${walkEl.dataset.eid} (full canvas)`)
+        break
       }
 
       const registryKey = resolveRegistryKey(walkEl.dataset.eid)
@@ -223,9 +221,8 @@ function eidAtPoint(
         return { eid: walkEl.dataset.eid, registryKey, el: walkEl }
       }
 
-      // Has data-eid but no editable controls — stop walking, try pass 2
-      console.log(`[eidAtPoint] pass1 skipping eid=${walkEl.dataset.eid} (no controls), trying pass2`)
-      break
+      // No editable controls on this node — keep walking up to find an ancestor
+      console.log(`[eidAtPoint] pass1 skipping eid=${walkEl.dataset.eid} (no controls)`)
     }
     walkEl = walkEl.parentElement
   }
@@ -325,9 +322,14 @@ function eidAtPoint(
           width: canvasRect.width,
           height: canvasRect.height,
           zIndex: 40,
-          cursor: 'default',
+          cursor: hoverCursor,
         }}
         onClick={handleCanvasClick}
+        onMouseMove={(e: React.MouseEvent<HTMLDivElement>) => {
+          const hit = eidAtPoint(e.clientX, e.clientY, e.currentTarget)
+          setHoverCursor(hit ? 'pointer' : 'default')
+        }}
+        onMouseLeave={() => setHoverCursor('default')}
       />
 
       {/* ── Selection highlight ───────────────────────────────────────── */}
@@ -379,6 +381,7 @@ function eidAtPoint(
         >
           <AnimationToolbar
             selectedEid={selectedEid}
+            editEid={domEidRef.current ?? selectedEid ?? undefined}
             registry={registry}
             editStore={editStore}
             onEdit={onEdit}

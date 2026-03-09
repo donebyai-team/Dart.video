@@ -1,9 +1,10 @@
 /**
  * TextToolbar
  *
- * Shown when registry[eid].textType === 'static'.
+ * Shown when registry[eid].textType is 'static', 'letter-cascade', or 'typewriter'.
  *
  * Controls:
+ *  - Text content input (editable text / source text)
  *  - Font family (dropdown)
  *  - Font size (number stepper)
  *  - Bold / Italic / Underline / Strikethrough toggles
@@ -25,26 +26,35 @@ import {
 } from './shared'
 
 interface TextToolbarProps {
-  eid: string
+  eid: string       // registry key — for entry lookup only
+  editEid?: string  // DOM eid — for onEdit and editStore reads (defaults to eid)
   registry: Record<string, RegistryEntry>
   editStore: Record<string, ElementEdit>
   onEdit: (eid: string, patch: Partial<ElementEdit>) => void
 }
 
-export function TextToolbar({ eid, registry, editStore, onEdit }: TextToolbarProps) {
+export function TextToolbar({ eid, editEid, registry, editStore, onEdit }: TextToolbarProps) {
   const entry = registry[eid]
   if (!entry) return null
 
+  const eeid = editEid ?? eid
+
   // Merge static style with any user overrides — overrides take precedence
-  const merged = { ...entry.staticStyle, ...(editStore[eid]?.style ?? {}) }
+  const merged = { ...entry.staticStyle, ...(editStore[eeid]?.style ?? {}) }
 
   // Low-confidence props (came from spread / ternary in the source AST)
   const lowConf = new Set(entry.lowConfidence ?? [])
 
   function setStyle(prop: string, value: string | number) {
-    console.log('[TextToolbar] setStyle', { eid, prop, value })
-    onEdit(eid, { style: { [prop]: value } })
+    console.log('[TextToolbar] setStyle', { eeid, prop, value })
+    onEdit(eeid, { style: { [prop]: value } })
   }
+
+  // ── Text content (static / letter-cascade / typewriter) ─────────────────
+  const textType = entry.textType
+  const hasTextContent = textType === 'static' || textType === 'letter-cascade' || textType === 'typewriter'
+  const contentLabel   = textType === 'typewriter' ? 'Source text' : 'Text'
+  const currentText    = editStore[eeid]?.text ?? entry.sourceText ?? entry.staticText ?? ''
 
   // ── Derive toggle states ─────────────────────────────────────────────────
   const isBold      = merged.fontWeight === 700 || merged.fontWeight === '700' || merged.fontWeight === 'bold'
@@ -66,6 +76,21 @@ export function TextToolbar({ eid, registry, editStore, onEdit }: TextToolbarPro
 
   return (
     <>
+      {/* ── Text content ────────────────────────────────────────────────── */}
+      {hasTextContent && (
+        <>
+          <input
+            type="text"
+            value={currentText}
+            onChange={e => onEdit(eeid, { text: e.target.value })}
+            placeholder={contentLabel}
+            title={contentLabel}
+            className="h-7 w-28 px-2 rounded-md border border-border bg-muted text-xs focus:outline-none focus:ring-1 focus:ring-ring/50"
+          />
+          <Sep />
+        </>
+      )}
+
       {/* ── Font family ─────────────────────────────────────────────────── */}
       <div className="flex items-center gap-1">
         <FontFamilySelect value={fontFamily} onChange={v => setStyle('fontFamily', v)} />

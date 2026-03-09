@@ -17,7 +17,8 @@ import { Sep, NumberStepper, SelectInput } from './shared'
 import { uploadMedia } from '@/services/utils'
 
 interface ImageToolbarProps {
-  eid: string
+  eid: string       // registry key — for entry lookup only
+  editEid?: string  // DOM eid — for onEdit and editStore reads (defaults to eid)
   registry: Record<string, RegistryEntry>
   editStore: Record<string, ElementEdit>
   onEdit: (eid: string, patch: Partial<ElementEdit>) => void
@@ -32,18 +33,19 @@ const OBJECT_FIT_OPTIONS: { label: string; value: ObjectFit }[] = [
   { label: 'None',    value: 'none'    },
 ]
 
-export function ImageToolbar({ eid, registry, editStore, onEdit }: ImageToolbarProps) {
+export function ImageToolbar({ eid, editEid, registry, editStore, onEdit }: ImageToolbarProps) {
   const entry = registry[eid]
   if (!entry) return null
 
-  const merged = { ...entry.staticStyle, ...(editStore[eid]?.style ?? {}) }
+  const eeid   = editEid ?? eid
+  const merged = { ...entry.staticStyle, ...(editStore[eeid]?.style ?? {}) }
 
   const fileRef   = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
 
   function setStyle(prop: string, value: string | number) {
-    console.log('[ImageToolbar] setStyle', { eid, prop, value })
-    onEdit(eid, { style: { [prop]: value } })
+    console.log('[ImageToolbar] setStyle', { eeid, prop, value })
+    onEdit(eeid, { style: { [prop]: value } })
   }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -55,7 +57,7 @@ export function ImageToolbar({ eid, registry, editStore, onEdit }: ImageToolbarP
     try {
       const asset = await uploadMedia(file)
       console.log('[ImageToolbar] Upload complete:', asset.url)
-      onEdit(eid, { asset: asset.url })
+      onEdit(eeid, { asset: asset.url })
     } catch (err) {
       console.error('[ImageToolbar] Upload failed:', err)
     } finally {

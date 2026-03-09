@@ -15,25 +15,27 @@ import type { ElementEdit } from '@coasterai/renderer/src/types/ast'
 import { Sep, ColorSwatch, NumberStepper } from './shared'
 
 interface IconToolbarProps {
-  eid: string
+  eid: string       // registry key — for entry lookup only
+  editEid?: string  // DOM eid — for onEdit and editStore reads (defaults to eid)
   registry: Record<string, RegistryEntry>
   editStore: Record<string, ElementEdit>
   onEdit: (eid: string, patch: Partial<ElementEdit>) => void
 }
 
-export function IconToolbar({ eid, registry, editStore, onEdit }: IconToolbarProps) {
+export function IconToolbar({ eid, editEid, registry, editStore, onEdit }: IconToolbarProps) {
   const entry = registry[eid]
   if (!entry) return null
 
-  const merged = { ...entry.staticStyle, ...(editStore[eid]?.style ?? {}) }
+  const eeid   = editEid ?? eid
+  const merged = { ...entry.staticStyle, ...(editStore[eeid]?.style ?? {}) }
 
   function setStyle(prop: string, value: string | number) {
-    console.log('[IconToolbar] setStyle', { eid, prop, value })
-    onEdit(eid, { style: { [prop]: value } })
+    console.log('[IconToolbar] setStyle', { eeid, prop, value })
+    onEdit(eeid, { style: { [prop]: value } })
   }
 
   // Current icon name (from editStore override or registry)
-  const iconName  = editStore[eid]?.icon ?? entry.iconName ?? '—'
+  const iconName  = editStore[eeid]?.icon ?? entry.iconName ?? '—'
   const iconColor = merged.color
   const iconSize  = parseFloat(String(merged.fontSize ?? merged.width ?? 24)) || 24
 

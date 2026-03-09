@@ -17,22 +17,24 @@ import { Sep, ColorSwatch, NumberStepper, SliderInput, LowConfidenceDot } from '
 import { CircleDashed, PaintBucket, Radius } from 'lucide-react'
 
 interface LayoutToolbarProps {
-  eid: string
+  eid: string       // registry key — for entry lookup only
+  editEid?: string  // DOM eid — for onEdit and editStore reads (defaults to eid)
   registry: Record<string, RegistryEntry>
   editStore: Record<string, ElementEdit>
   onEdit: (eid: string, patch: Partial<ElementEdit>) => void
 }
 
-export function LayoutToolbar({ eid, registry, editStore, onEdit }: LayoutToolbarProps) {
+export function LayoutToolbar({ eid, editEid, registry, editStore, onEdit }: LayoutToolbarProps) {
   const entry = registry[eid]
   if (!entry) return null
 
-  const merged  = { ...entry.staticStyle, ...(editStore[eid]?.style ?? {}) }
+  const eeid    = editEid ?? eid
+  const merged  = { ...entry.staticStyle, ...(editStore[eeid]?.style ?? {}) }
   const lowConf = new Set(entry.lowConfidence ?? [])
 
   function setStyle(prop: string, value: string | number) {
-    console.log('[LayoutToolbar] setStyle', { eid, prop, value })
-    onEdit(eid, { style: { [prop]: value } })
+    console.log('[LayoutToolbar] setStyle', { eeid, prop, value })
+    onEdit(eeid, { style: { [prop]: value } })
   }
 
   const hasBg    = 'background' in merged || 'backgroundColor' in merged
