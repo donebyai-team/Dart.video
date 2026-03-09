@@ -138,7 +138,7 @@ export declare type MediaSlideContent = Message<"coasterai.core.v1.MediaSlideCon
   uploadedMedia?: MediaAsset;
 
   /**
-   * @generated from field: optional coasterai.core.v1.MediaSlidePlan plan = 6;
+   * @generated from field: coasterai.core.v1.MediaSlidePlan plan = 6;
    */
   plan?: MediaSlidePlan;
 };
@@ -200,7 +200,7 @@ export declare type AnimationSlideContent = Message<"coasterai.core.v1.Animation
   codeRegistry?: CodeRegistry;
 
   /**
-   * @generated from field: optional coasterai.core.v1.AnimationSlidePlan plan = 2;
+   * @generated from field: coasterai.core.v1.AnimationSlidePlan plan = 2;
    */
   plan?: AnimationSlidePlan;
 

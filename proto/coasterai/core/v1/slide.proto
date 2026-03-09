@@ -94,7 +94,7 @@ message MediaSlideContent {
   MediaSlideStyle style = 3;
   MediaType mediaType = 4;
   optional MediaAsset uploadedMedia = 5;
-  optional MediaSlidePlan plan = 6;
+  MediaSlidePlan plan = 6;
 }
 
 message MetaData {
@@ -107,7 +107,7 @@ message MetaData {
 }
 message AnimationSlideContent {
   CodeRegistry codeRegistry = 1;
-  optional AnimationSlidePlan plan = 2;
+  AnimationSlidePlan plan = 2;
   google.protobuf.Struct edits = 3;
   google.protobuf.Struct registry = 4;
 }
