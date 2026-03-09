@@ -196,12 +196,20 @@ func validateSlideAnimation(content *pbcore.AnimationSlideContent) error {
 		return fmt.Errorf("content is nil")
 	}
 
-	//if utils.IsEmpty(&content.TemplateId) {
-	//	return fmt.Errorf("template id is empty")
-	//}
-
 	if content.Registry == nil {
-		return fmt.Errorf("template registry is nil")
+		return fmt.Errorf("registry can't be empty")
+	}
+
+	if content.CodeRegistry == nil {
+		return fmt.Errorf("code registry can't be empty")
+	}
+
+	if content.Edits == nil {
+		return fmt.Errorf("edits can't be empty")
+	}
+
+	if content.Plan == nil {
+		return fmt.Errorf("content plan is required")
 	}
 
 	return nil
@@ -226,6 +234,10 @@ func validateSlideMedia(content *pbcore.MediaSlideContent) error {
 
 	if _, err := validateURL(src); err != nil {
 		return fmt.Errorf("invalid image src: %w", err)
+	}
+
+	if content.Plan == nil {
+		return fmt.Errorf("content plan is required")
 	}
 
 	return nil

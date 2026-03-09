@@ -98,11 +98,8 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
         })
     }
 
-    const randomSlideId = () => {
-        if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-            return crypto.randomUUID()
-        }
-        return `slide_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+    const randomSlideId = () => {       
+        return `slide-${Date.now()}`
     }
 
     const buildSlideWithTemplate = (baseSlide: Slide, template: AnimationTemplate): Slide => {
@@ -194,7 +191,9 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
     const startStream = async (overridePrompt?: string, withSuggestions = true) => {
         const finalPrompt = (overridePrompt ?? prompt).trim()
         if (!videoId || !finalPrompt || isSubmitting) return
-        if (!isAdding && !selectedSlide?.slide.id) return
+        const activeSlideId = createdSlideIdRef.current ?? selectedSlide?.slide.id
+        const shouldEditExisting = !isAdding || !!createdSlideIdRef.current
+        if (shouldEditExisting && !activeSlideId) return
 
         const controller = new AbortController()
         abortControllerRef.current = controller
@@ -209,13 +208,13 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
             setIsThinkingBusy(true)
 
             const stream = portalClient.generateOrEditAnimationSlide(
-                isAdding
+                shouldEditExisting
                     ? {
                         videoId,
                         input: {
-                            case: 'createNewAnimationInput',
+                            case: 'editAnimationUserInput',
                             value: {
-                                suggestions: withSuggestions,
+                                slideId: activeSlideId ?? '',
                                 prompt: finalPrompt,
                             },
                         },
@@ -223,9 +222,9 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
                     : {
                         videoId,
                         input: {
-                            case: 'editAnimationUserInput',
+                            case: 'createNewAnimationInput',
                             value: {
-                                slideId: selectedSlide?.slide.id ?? '',
+                                suggestions: withSuggestions,
                                 prompt: finalPrompt,
                             },
                         },
@@ -249,7 +248,7 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
         }
     }
 
-    const handleSubmit = () => startStream(undefined, isAdding)
+    const handleSubmit = () => startStream(undefined, isAdding && !createdSlideIdRef.current)
 
     const handleStop = () => {
         streamSessionRef.current++
@@ -286,7 +285,7 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
                 input: {
                     case: 'askUserInput',
                     value: {
-                        slideId: isAdding ? undefined : selectedSlide?.slide.id,
+                        slideId: createdSlideIdRef.current ?? (isAdding ? undefined : selectedSlide?.slide.id),
                         response,
                     },
                 },
