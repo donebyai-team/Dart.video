@@ -354,7 +354,7 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
 
     const showThinking = stage === 'thinking'
     const showSuggestions = suggestions.length > 0
-    const showEmptyState = !showThinking && stage !== 'question' && !showSuggestions
+    const showEmptyState = !showSuggestions
 
     return (
         <div className='flex flex-col h-full p-4 gap-3'>
@@ -363,9 +363,7 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
             </div> */}
 
             <div className='flex flex-col flex-1 min-h-0'>
-                <div className='flex-1 min-h-0 rounded-xl border bg-background/60 backdrop-blur-sm p-3 overflow-auto'>
-                    {showThinking && <ThinkingViewComponent thinkingChunk={thinkingChunk} />}
-
+                <div className='flex-1 min-h-0 rounded-xl bg-background/60 backdrop-blur-sm p-3 overflow-auto'>
                     {stage === 'question' && activeQuestion && (
                         <QuestionPanel
                             question={activeQuestion}
@@ -436,6 +434,12 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
                         </div>
                     )}
                 </div>
+
+                {showThinking && (
+                    <div className='mt-3'>
+                        <ThinkingViewComponent thinkingChunk={thinkingChunk} />
+                    </div>
+                )}
 
                 <div className='mt-3 rounded-xl border bg-background shadow-sm overflow-hidden'>
                     <textarea
