@@ -285,7 +285,7 @@ func (l *agentAnimationEditor) GetAnimationSuggestions(
 
 		// To be used as edits
 		template.GeneratedConfig = json.RawMessage(templateConfig.Config)
-
+		template.Duration = duration
 		// Save plan for debugging
 		template.GeneratedPlan = &pbcore.AnimationSlidePlan{
 			BeatDescription:             beatDescription,

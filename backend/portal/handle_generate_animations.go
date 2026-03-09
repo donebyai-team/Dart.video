@@ -270,7 +270,7 @@ func buildAnimationGenerationParams(videoID, orgID, slideID string, slide *pbcor
 func newPendingAnimationSlide() *pbcore.Slide {
 	return &pbcore.Slide{
 		Id:          uuid.New().String(),
-		SlideStatus: pbcore.SlideStatus_SLIDE_STATUS_PENDING,
+		SlideStatus: pbcore.SlideStatus_SLIDE_STATUS_GENERATED,
 		Content: &pbcore.Slide_Animation{
 			Animation: &pbcore.AnimationSlideContent{},
 		},
@@ -282,6 +282,7 @@ func applyTemplateToSlide(slide *pbcore.Slide, template *models.Template, preser
 		return nil
 	}
 
+	slide.Duration = float32(template.Duration)
 	toStructRegistry, err := utils.RawMessageToStruct(template.ElementRegistry)
 	if err != nil {
 		return fmt.Errorf("invalid template registry: %s", template.Name)

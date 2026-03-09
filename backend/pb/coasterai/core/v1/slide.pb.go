@@ -467,6 +467,10 @@ func (GradientType) EnumDescriptor() ([]byte, []int) {
 	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{7}
 }
 
+// Mostly be used for debugging what AI created
+// Useful for rerunning the generation
+// selectedTemplateDescription is basically the prompt generated to created the animation
+// in case of existing template selectedTemplateDescription = template description
 type AnimationSlidePlan struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

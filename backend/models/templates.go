@@ -67,4 +67,5 @@ type Template struct {
 
 	GeneratedConfig json.RawMessage            `db:"-"` // Maps to edits in slide
 	GeneratedPlan   *pbcore.AnimationSlidePlan `db:"-"`
+	Duration        int64                      `db:"-"`
 }

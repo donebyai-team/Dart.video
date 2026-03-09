@@ -279,6 +279,7 @@ func (l animationGenerator) GenerateCode(ctx context.Context,
 				Repeatable:      false,
 				ElementRegistry: buildOutput.Registry,
 				Description:     prompt,
+				Duration:        animation.Duration,
 			}, nil
 		}
 

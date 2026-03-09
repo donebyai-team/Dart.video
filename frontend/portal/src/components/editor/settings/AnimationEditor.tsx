@@ -345,6 +345,7 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
                     ...(existingContent ?? {}),
                     codeRegistry: template.codeRegistry,
                     registry: template.registry,
+                    duration: template.duration,
                     edits: template.edits ?? existingContent?.edits,
                 } as AnimationSlideContent
             }

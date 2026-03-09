@@ -11,6 +11,11 @@ import type { JsonObject, Message } from "@bufbuild/protobuf";
 export declare const file_coasterai_core_v1_slide: GenFile;
 
 /**
+ * Mostly be used for debugging what AI created
+ * Useful for rerunning the generation
+ * selectedTemplateDescription is basically the prompt generated to created the animation
+ * in case of existing template selectedTemplateDescription = template description
+ *
  * @generated from message coasterai.core.v1.AnimationSlidePlan
  */
 export declare type AnimationSlidePlan = Message<"coasterai.core.v1.AnimationSlidePlan"> & {
