@@ -16,11 +16,12 @@ import {
 import { Plus } from "lucide-react";
 import StoryboardSection from "./StoryboardSection";
 import { useVideoStore } from "@/stores/video";
-import { Section, Slide } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { Section, Slide, SlideType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { ActiveToolType } from "@/types/tools";
 
-interface StoryboardPanelProps {    
+interface StoryboardPanelProps {
     isStreamingVideo?: boolean;
-    onSelectSlide: (section: Section, slide: Slide) => void;   
+    onSelectSlide: (section: Section, slide: Slide) => void;
     onStartEditTitle: (sectionId: string, title: string) => void;
     onSaveTitle: () => void;
 }
@@ -52,6 +53,7 @@ const StoryboardPanel = ({
     const onShowTransitionPicker = useVideoStore(s => s.setShowTransitionPicker);
     const onUpdateTransition = useVideoStore(s => s.updateSlideTransition);
     const onAddSlide = useVideoStore(s => s.addSlide);
+    const handleAddAnimation = useVideoStore(s => s.handleAddAnimation);
     const onAddSection = useVideoStore(s => s.addSection);
 
     /* ================= GATE ================= */
@@ -95,9 +97,8 @@ const StoryboardPanel = ({
     return (
         <div className="flex-1 flex flex-col min-h-0 bg-muted/10">
             <div
-                className={`flex-1 overflow-x-hidden p-4 space-y-4 ${
-                    isStreamingVideo ? "overflow-y-hidden" : "overflow-y-auto"
-                }`}
+                className={`flex-1 overflow-x-hidden p-4 space-y-4 ${isStreamingVideo ? "overflow-y-hidden" : "overflow-y-auto"
+                    }`}
                 ref={storyboardRef}
             >
                 <DndContext
@@ -146,9 +147,14 @@ const StoryboardPanel = ({
                                     )
                                 }
 
-                                onAddSlide={(type, afterSlideId) =>
+                                onAddSlide={(type, afterSlideId) => {
+                                    if (type === SlideType.ANIMATION) {
+                                       handleAddAnimation(section.id, afterSlideId)
+                                        return
+                                    }
+
                                     onAddSlide(section.id, type, afterSlideId)
-                                }
+                                }}
 
                                 onReorderSlides={(activeId, overId) =>
                                     onReorderSlides(section.id, activeId, overId)

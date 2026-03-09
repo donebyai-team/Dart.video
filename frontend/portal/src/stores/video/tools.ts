@@ -1,4 +1,4 @@
-import { SlideType, EffectType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { SlideType, EffectType, Section, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { ActiveToolType, SelectedTool } from '@/types/tools'
 import { VideoStoreSet, VideoStoreGet } from './types'
 import { createCalloutEffect, createSpotlightEffect, createZoomEffect, getDefaultSelectedTool } from './defaults'
@@ -53,6 +53,20 @@ export const createToolActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     const slide = selectedSlide.slide
     if (slide.type === SlideType.ANIMATION) {
       set({ activeTool: { type: ActiveToolType.ADD_OR_EDIT_ANIMATION, settings: {} } })
-    } 
+    }
+  },
+
+  handleAddAnimation(sectionId: string, afterSlideId?: string) {
+    set({
+      activeTool: {
+        type: ActiveToolType.ADD_OR_EDIT_ANIMATION,
+        settings: {
+          previousSlide: {
+            section: { id: sectionId } as Section,
+            slide: { id: afterSlideId || '' } as Slide
+          }
+        }
+      }
+    })
   }
 })

@@ -137,12 +137,11 @@ func (v videoGeneration) CreateVideo(ctx context.Context, organizationID string,
 		OrganizationID: organizationID,
 		Status:         models.VideoStatusPLANNING,
 		Metadata: &pbcore.VideoMetadata{
-			Fps:            defaultVideoFPS,
-			Prompt:         params.Prompt,
-			Duration:       params.Duration,
-			BrandLibraryId: params.BrandLibraryId,
-			Language:       params.Language,
-			Resolution:     params.Resolution,
+			Fps:        defaultVideoFPS,
+			Prompt:     params.Prompt,
+			Duration:   params.Duration,
+			Language:   params.Language,
+			Resolution: params.Resolution,
 		},
 	})
 

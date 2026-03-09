@@ -20,26 +20,32 @@ export declare const file_coasterai_portal_v1_portal: GenFile;
  */
 export declare type GenerateOrEditAnimationRequest = Message<"coasterai.portal.v1.GenerateOrEditAnimationRequest"> & {
   /**
-   * @generated from field: optional string slideId = 1;
-   */
-  slideId?: string;
-
-  /**
-   * @generated from field: string videoId = 2;
+   * @generated from field: string videoId = 1;
    */
   videoId: string;
 
   /**
-   * @generated from field: string prompt = 3;
+   * @generated from oneof coasterai.portal.v1.GenerateOrEditAnimationRequest.input
    */
-  prompt: string;
-
-  /**
-   * used when creating new animation
-   *
-   * @generated from field: bool suggestions = 4;
-   */
-  suggestions: boolean;
+  input: {
+    /**
+     * @generated from field: coasterai.portal.v1.EditAnimationUserInput edit_animation_user_input = 2;
+     */
+    value: EditAnimationUserInput;
+    case: "editAnimationUserInput";
+  } | {
+    /**
+     * @generated from field: coasterai.portal.v1.CreateNewAnimationInput create_new_animation_input = 3;
+     */
+    value: CreateNewAnimationInput;
+    case: "createNewAnimationInput";
+  } | {
+    /**
+     * @generated from field: coasterai.portal.v1.AskUserInput ask_user_input = 4;
+     */
+    value: AskUserInput;
+    case: "askUserInput";
+  } | { case: undefined; value?: undefined };
 };
 
 /**
@@ -47,6 +53,71 @@ export declare type GenerateOrEditAnimationRequest = Message<"coasterai.portal.v
  * Use `create(GenerateOrEditAnimationRequestSchema)` to create a new message.
  */
 export declare const GenerateOrEditAnimationRequestSchema: GenMessage<GenerateOrEditAnimationRequest>;
+
+/**
+ * @generated from message coasterai.portal.v1.EditAnimationUserInput
+ */
+export declare type EditAnimationUserInput = Message<"coasterai.portal.v1.EditAnimationUserInput"> & {
+  /**
+   * @generated from field: string slide_id = 1;
+   */
+  slideId: string;
+
+  /**
+   * @generated from field: string prompt = 2;
+   */
+  prompt: string;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.EditAnimationUserInput.
+ * Use `create(EditAnimationUserInputSchema)` to create a new message.
+ */
+export declare const EditAnimationUserInputSchema: GenMessage<EditAnimationUserInput>;
+
+/**
+ * @generated from message coasterai.portal.v1.CreateNewAnimationInput
+ */
+export declare type CreateNewAnimationInput = Message<"coasterai.portal.v1.CreateNewAnimationInput"> & {
+  /**
+   * @generated from field: bool suggestions = 1;
+   */
+  suggestions: boolean;
+
+  /**
+   * @generated from field: string prompt = 2;
+   */
+  prompt: string;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.CreateNewAnimationInput.
+ * Use `create(CreateNewAnimationInputSchema)` to create a new message.
+ */
+export declare const CreateNewAnimationInputSchema: GenMessage<CreateNewAnimationInput>;
+
+/**
+ * @generated from message coasterai.portal.v1.AskUserInput
+ */
+export declare type AskUserInput = Message<"coasterai.portal.v1.AskUserInput"> & {
+  /**
+   * optional on purpose. when omitted, backend can resume create flow by session key.
+   *
+   * @generated from field: optional string slide_id = 1;
+   */
+  slideId?: string;
+
+  /**
+   * @generated from field: string response = 2;
+   */
+  response: string;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.AskUserInput.
+ * Use `create(AskUserInputSchema)` to create a new message.
+ */
+export declare const AskUserInputSchema: GenMessage<AskUserInput>;
 
 /**
  * @generated from message coasterai.portal.v1.GenerateOrEditAnimationResponse
@@ -404,34 +475,6 @@ export declare type ContinueVideoPlanningRequest = Message<"coasterai.portal.v1.
  * Use `create(ContinueVideoPlanningRequestSchema)` to create a new message.
  */
 export declare const ContinueVideoPlanningRequestSchema: GenMessage<ContinueVideoPlanningRequest>;
-
-/**
- * @generated from message coasterai.portal.v1.ContinueEditAnimationRequest
- */
-export declare type ContinueEditAnimationRequest = Message<"coasterai.portal.v1.ContinueEditAnimationRequest"> & {
-  /**
-   * video id
-   *
-   * @generated from field: string videoId = 1;
-   */
-  videoId: string;
-
-  /**
-   * @generated from field: string slideId = 2;
-   */
-  slideId: string;
-
-  /**
-   * @generated from field: string response = 3;
-   */
-  response: string;
-};
-
-/**
- * Describes the message coasterai.portal.v1.ContinueEditAnimationRequest.
- * Use `create(ContinueEditAnimationRequestSchema)` to create a new message.
- */
-export declare const ContinueEditAnimationRequestSchema: GenMessage<ContinueEditAnimationRequest>;
 
 /**
  * @generated from message coasterai.portal.v1.AskUserQuestion
@@ -1254,14 +1297,6 @@ export declare const PortalService: GenService<{
   generateOrEditAnimationSlide: {
     methodKind: "server_streaming";
     input: typeof GenerateOrEditAnimationRequestSchema;
-    output: typeof GenerateOrEditAnimationResponseSchema;
-  },
-  /**
-   * @generated from rpc coasterai.portal.v1.PortalService.ContinueEditAnimationSlide
-   */
-  continueEditAnimationSlide: {
-    methodKind: "server_streaming";
-    input: typeof ContinueEditAnimationRequestSchema;
     output: typeof GenerateOrEditAnimationResponseSchema;
   },
 }>;

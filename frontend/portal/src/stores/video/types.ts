@@ -67,6 +67,7 @@ export interface VideoActions {
     // Slides
     getSlideWithBackground: (slide : Slide) => BackgroundStyle;
     getTimelineSlides: () => TimelineSlide[]
+    addAnimationSlide: (sectionId: string, newSlide: Slide, afterSlideId?: string) => void
     addSlide: (sectionId: string, type: SlideType, afterSlideId?: string) => void
     removeSlide: (sectionId: string, slideId: string) => void
     updateSlide: (updates: Partial<Slide>) => void

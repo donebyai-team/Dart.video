@@ -8,7 +8,7 @@ import { useVideoStore } from '@/stores/video'
 import { AddOrEditAnimationSettings } from '@/types/tools'
 import type { AskUserQuestion, GenerateOrEditAnimationResponse } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
 import type { AnimationTemplate } from '@coasterai/pb/coasterai/core/v1/template_pb'
-import type { AnimationSlideContent, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { SlideType, type AnimationSlideContent, type Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { getConnectError } from '@/utils/error'
 import toast from 'react-hot-toast'
 import { reconcileEdits } from '../animation/reconcileEdits'
@@ -19,15 +19,11 @@ interface AnimationEditorProps {
 
 type Stage = 'compose' | 'thinking' | 'question'
 
-// Stub for adding a generated slide — not yet implemented
-function addGeneratedSlide(_slide: Slide, _sectionId: string, _afterSlideId: string) {
-    // TODO: implement adding a new animation slide to the video config
-    console.warn('addGeneratedSlide not implemented', _slide, _sectionId, _afterSlideId)
-}
-
 export default function AnimationEditor({ settings }: AnimationEditorProps) {
     const updateSlide = useVideoStore(s => s.updateSlide)
     const selectedSlide = useVideoStore(s => s.selectedSlide)
+    const addAnimationSlide = useVideoStore(s => s.addAnimationSlide)
+    const videoId = useVideoStore(s => s.videoConfig?.id)
     const { portalClient } = useClientsContext()
 
     const isAdding = !!settings.previousSlide
@@ -46,6 +42,8 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
 
     const abortControllerRef = useRef<AbortController | null>(null)
     const streamSessionRef = useRef(0)
+    const createdSlideIdRef = useRef<string | null>(null)
+    const pendingGeneratedSlideRef = useRef<Slide | null>(null)
 
     const canSubmit = prompt.trim().length > 0
 
@@ -70,11 +68,6 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
     }, [])
 
     const applySlideToStore = (slide: Slide) => {
-        if (isAdding) {
-            addGeneratedSlide(slide, settings.previousSlide!.section.id, settings.previousSlide!.slide.id)
-            return
-        }
-
         // Editing: only update registry, codeRegistry, edits on the current selected slide.
         // Always read existingContent from the store so any concurrent manual edits are preserved.
         const updatedContent = slide.content?.case === 'animation' ? slide.content.value : undefined
@@ -105,6 +98,54 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
         })
     }
 
+    const randomSlideId = () => {
+        if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+            return crypto.randomUUID()
+        }
+        return `slide_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+    }
+
+    const buildSlideWithTemplate = (baseSlide: Slide, template: AnimationTemplate): Slide => {
+        const baseAnimation = baseSlide.content?.case === 'animation'
+            ? baseSlide.content.value
+            : undefined
+
+        return {
+            ...baseSlide,
+            id: baseSlide.id || randomSlideId(),
+            type: SlideType.ANIMATION,
+            content: {
+                case: 'animation',
+                value: {
+                    ...(baseAnimation ?? {}),
+                    codeRegistry: template.codeRegistry,
+                    registry: template.registry,
+                    edits: template.edits,
+                    plan: template.plan,
+                } as AnimationSlideContent
+            },
+        }
+    }
+
+    const createOrUpdateAddedSlide = (slide: Slide) => {
+        if (!isAdding || !settings.previousSlide) return
+
+        if (!createdSlideIdRef.current) {
+            addAnimationSlide(settings.previousSlide.section.id, slide, settings.previousSlide.slide.id)
+            createdSlideIdRef.current = slide.id
+            pendingGeneratedSlideRef.current = slide
+            return
+        }
+
+        if (selectedSlide?.slide.id !== createdSlideIdRef.current) return
+        updateSlide({
+            duration: slide.duration,
+            transcript: slide.transcript,
+            backgroundStyle: slide.backgroundStyle,
+            content: slide.content,
+        })
+    }
+
     const consumeStream = async (
         stream: AsyncIterable<GenerateOrEditAnimationResponse>,
         signal: AbortSignal,
@@ -119,13 +160,21 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
             }
 
             if (event.slide) {
-                applySlideToStore(event.slide)
+                pendingGeneratedSlideRef.current = event.slide
+                if (isAdding) {
+                    if (event.suggestions.length === 0) {
+                        createOrUpdateAddedSlide(event.slide)
+                    }
+                } else {
+                    applySlideToStore(event.slide)
+                }
                 setIsThinkingBusy(false)
             }
 
             if (event.suggestions.length > 0) {
                 setSuggestions(event.suggestions)
                 setSelectedSuggestionIndex(0)
+                handleSelectSuggestion(0, event.suggestions)
             }
 
             if (event.waitingForUserInput && event.askUserQuestion) {
@@ -144,7 +193,8 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
 
     const startStream = async (overridePrompt?: string, withSuggestions = true) => {
         const finalPrompt = (overridePrompt ?? prompt).trim()
-        if (!finalPrompt || isSubmitting) return
+        if (!videoId || !finalPrompt || isSubmitting) return
+        if (!isAdding && !selectedSlide?.slide.id) return
 
         const controller = new AbortController()
         abortControllerRef.current = controller
@@ -158,11 +208,30 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
             setPendingQuestion(undefined)
             setIsThinkingBusy(true)
 
-            const stream = portalClient.generateOrEditAnimationSlide({
-                slideId: isAdding ? undefined : selectedSlide?.slide.id,
-                prompt: finalPrompt,
-                suggestions: withSuggestions,
-            }, { signal: controller.signal })
+            const stream = portalClient.generateOrEditAnimationSlide(
+                isAdding
+                    ? {
+                        videoId,
+                        input: {
+                            case: 'createNewAnimationInput',
+                            value: {
+                                suggestions: withSuggestions,
+                                prompt: finalPrompt,
+                            },
+                        },
+                    }
+                    : {
+                        videoId,
+                        input: {
+                            case: 'editAnimationUserInput',
+                            value: {
+                                slideId: selectedSlide?.slide.id ?? '',
+                                prompt: finalPrompt,
+                            },
+                        },
+                    },
+                { signal: controller.signal }
+            )
 
             await consumeStream(stream, controller.signal, streamSession)
         } catch (err: any) {
@@ -196,7 +265,7 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
 
     const handleContinuePlanning = async (responseOverride?: string) => {
         const response = (responseOverride ?? answerInput).trim()
-        if (!response || isSubmitting) return
+        if (!videoId || !response || isSubmitting) return
 
         const controller = new AbortController()
         abortControllerRef.current = controller
@@ -213,9 +282,14 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
             setIsThinkingBusy(true)
 
             const stream = portalClient.generateOrEditAnimationSlide({
-                slideId: isAdding ? undefined : selectedSlide?.slide.id,
-                prompt: response,
-                suggestions: false,
+                videoId,
+                input: {
+                    case: 'askUserInput',
+                    value: {
+                        slideId: isAdding ? undefined : selectedSlide?.slide.id,
+                        response,
+                    },
+                },
             }, { signal: controller.signal })
 
             await consumeStream(stream, controller.signal, streamSession)
@@ -234,17 +308,41 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
         }
     }
 
-    const handleSelectSuggestion = (index: number) => {
+    const handleSelectSuggestion = (index: number, sourceSuggestions?: AnimationTemplate[]) => {
         setSelectedSuggestionIndex(index)
-        const template = suggestions[index]
+        const template = (sourceSuggestions ?? suggestions)[index]
         if (!template) return
+
+        if (isAdding && settings.previousSlide) {
+            if (!createdSlideIdRef.current) {
+                const baseSlide = pendingGeneratedSlideRef.current ?? {
+                    ...settings.previousSlide.slide,
+                    id: randomSlideId(),
+                    type: SlideType.ANIMATION,
+                    content: {
+                        case: 'animation',
+                        value: {
+                            plan: template.plan,
+                        } as AnimationSlideContent,
+                    },
+                }
+                createOrUpdateAddedSlide(buildSlideWithTemplate(baseSlide, template))
+                return
+            }
+        }
+
         const existingContent = selectedSlide?.slide.content?.case === 'animation'
             ? selectedSlide.slide.content.value
             : undefined
         updateSlide({
             content: {
                 case: 'animation' as const,
-                value: { ...(existingContent ?? {}), codeRegistry: template.registry } as AnimationSlideContent
+                value: {
+                    ...(existingContent ?? {}),
+                    codeRegistry: template.codeRegistry,
+                    registry: template.registry,
+                    edits: template.edits ?? existingContent?.edits,
+                } as AnimationSlideContent
             }
         })
     }
@@ -255,78 +353,91 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
     }
 
     const showThinking = stage === 'thinking'
+    const showSuggestions = suggestions.length > 0
+    const showEmptyState = !showThinking && stage !== 'question' && !showSuggestions
 
     return (
         <div className='flex flex-col h-full p-4 gap-3'>
-            <div className='text-sm font-medium text-foreground'>
+            {/* <div className='text-sm font-medium text-foreground'>
                 {isAdding ? 'Generate Animation' : 'Edit Animation'}
-            </div>
+            </div> */}
 
-            <div className='flex flex-col gap-2.5 flex-1'>
-                {/* Thinking bar */}
-                {showThinking && <ThinkingViewComponent thinkingChunk={thinkingChunk} />}
+            <div className='flex flex-col flex-1 min-h-0'>
+                <div className='flex-1 min-h-0 rounded-xl border bg-background/60 backdrop-blur-sm p-3 overflow-auto'>
+                    {showThinking && <ThinkingViewComponent thinkingChunk={thinkingChunk} />}
 
-                {/* Question panel */}
-                {stage === 'question' && activeQuestion && (
-                    <QuestionPanel
-                        question={activeQuestion}
-                        isSubmitting={isSubmitting}
-                        customAnswer={customAnswer}
-                        answerInput={answerInput}
-                        onOptionClick={option => {
-                            setSelectedAnswer(option)
-                            void handleContinuePlanning(option)
-                        }}
-                        onCustomAnswerChange={setCustomAnswer}
-                        onContinue={() => void handleContinuePlanning()}
-                    />
-                )}
+                    {stage === 'question' && activeQuestion && (
+                        <QuestionPanel
+                            question={activeQuestion}
+                            isSubmitting={isSubmitting}
+                            customAnswer={customAnswer}
+                            answerInput={answerInput}
+                            onOptionClick={option => {
+                                setSelectedAnswer(option)
+                                void handleContinuePlanning(option)
+                            }}
+                            onCustomAnswerChange={setCustomAnswer}
+                            onContinue={() => void handleContinuePlanning()}
+                        />
+                    )}
 
-                {/* Suggestions grid */}
-                {suggestions.length > 0 && (
-                    <div className='flex flex-col gap-2'>
-                        <p className='text-xs text-muted-foreground font-medium'>Choose a style</p>
-                        <div className='grid grid-cols-2 gap-2'>
-                            {suggestions.map((template, index) => (
-                                <button
-                                    key={template.id}
-                                    onClick={() => handleSelectSuggestion(index)}
-                                    className={`relative rounded-lg overflow-hidden border-2 transition-colors aspect-video bg-muted ${
-                                        selectedSuggestionIndex === index
-                                            ? 'border-primary'
-                                            : 'border-transparent hover:border-border'
-                                    }`}
-                                >
-                                    {template.previewUrl ? (
-                                        <img
-                                            src={template.previewUrl}
-                                            alt={template.name}
-                                            className='w-full h-full object-cover'
-                                        />
-                                    ) : (
-                                        <div className='w-full h-full flex items-center justify-center text-xs text-muted-foreground'>
-                                            {template.name}
-                                        </div>
-                                    )}
-                                    {selectedSuggestionIndex === index && (
-                                        <div className='absolute inset-0 bg-primary/10' />
-                                    )}
-                                </button>
-                            ))}
+                    {showSuggestions && (
+                        <div className='flex flex-col gap-2'>
+                            <p className='text-xs text-muted-foreground font-medium'>Choose a style</p>
+                            <div className='grid grid-cols-2 gap-2'>
+                                {suggestions.map((template, index) => (
+                                    <button
+                                        key={template.id}
+                                        onClick={() => handleSelectSuggestion(index)}
+                                        className={`relative rounded-lg overflow-hidden border-2 transition-colors aspect-video bg-muted ${
+                                            selectedSuggestionIndex === index
+                                                ? 'border-primary'
+                                                : 'border-transparent hover:border-border'
+                                        }`}
+                                    >
+                                        {template.previewUrl ? (
+                                            <img
+                                                src={template.previewUrl}
+                                                alt={template.name}
+                                                className='w-full h-full object-cover'
+                                            />
+                                        ) : (
+                                            <div className='w-full h-full flex items-center justify-center text-xs text-muted-foreground'>
+                                                {template.name}
+                                            </div>
+                                        )}
+                                        {selectedSuggestionIndex === index && (
+                                            <div className='absolute inset-0 bg-primary/10' />
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+                            <button
+                                onClick={handleDislikeSuggestions}
+                                disabled={isSubmitting}
+                                className='flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 self-start'
+                            >
+                                <X className='w-3 h-3' />
+                                I don't like any of these
+                            </button>
                         </div>
-                        <button
-                            onClick={handleDislikeSuggestions}
-                            disabled={isSubmitting}
-                            className='flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 self-start'
-                        >
-                            <X className='w-3 h-3' />
-                            I don't like any of these
-                        </button>
-                    </div>
-                )}
+                    )}
 
-                {/* Input card */}
-                <div className='rounded-xl border bg-background shadow-sm overflow-hidden'>
+                    {showEmptyState && (
+                        <div className='h-full flex flex-col items-center justify-center text-center px-4'>
+                            <h3 className='text-base font-semibold text-foreground'>
+                                {isAdding ? 'Add Animation' : 'Edit Animation'}
+                            </h3>
+                            <p className='mt-1 text-sm text-muted-foreground max-w-md'>
+                                {isAdding
+                                    ? 'Describe the motion style, pacing, and visual direction to generate a new animation'
+                                    : 'Describe the changes you want in this animation (e.g., change text, colors, timing, or layout)'}
+                            </p>
+                        </div>
+                    )}
+                </div>
+
+                <div className='mt-3 rounded-xl border bg-background shadow-sm overflow-hidden'>
                     <textarea
                         value={prompt}
                         onChange={e => setPrompt(e.target.value)}

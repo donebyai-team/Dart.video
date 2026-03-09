@@ -14,14 +14,23 @@ class ReGenerateAnimationCodeResponse {
 function ReGenerateAnimation(resume: ReGenerateAnimationCodeRequest, conversation_history: Message[]) -> ReGenerateAnimationCodeResponse {
   client CustomOpenAI
   prompt #"
-    You are an expert in generating React components for Remotion animations.
+    You are an expert in editing and improving existing Remotion React animation components.
+    You will receive an existing animation component and a set of requested edits.
+    Your job is to MODIFY the existing code while preserving the structure, layout, and animation patterns wherever possible.
 
     ---
-    ## CONTEXT
-    We are building an automated video generation pipeline. A video is composed of multiple slides.
-    Each slide is rendered as a Remotion component inside:
-    <TransitionSeries> and <TransitionSeries.Sequence>
-    You are generating ONE such slide.
+    ## EDITING RULES
+    You will receive existing code.
+    You MUST modify that code instead of rewriting it from scratch.
+
+    Follow these rules:
+    1. Preserve the existing structure whenever possible.
+    2. Only change the parts required by the edit instructions.
+    3. Do not rename the exported component.
+    4. Do not remove existing animation logic unless the edit requires it.
+    5. Maintain all existing style and animation rules defined above.
+    6. If the edit requires adding elements, integrate them naturally into the existing layout.
+    7. Keep existing constants and animation variables unless they conflict with the requested change.
 
     ## COMPONENT STRUCTURE
     1. Start with ES6 imports
@@ -140,10 +149,10 @@ function ReGenerateAnimation(resume: ReGenerateAnimationCodeRequest, conversatio
     Animation Duration:
     {{ resume.duration }}
 
-    Edits needs to be done:
+    ## Requested Edits
     {{ resume.prompt }}
 
-    Code to be edited
+    ## Existing Animation Code
     {{ resume.code }}
 
     ---

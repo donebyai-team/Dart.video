@@ -25,24 +25,47 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     return resolveBackgroundStyle(slide, globalBackground);
   },
 
-  addSlide(sectionId: string, type: SlideType, afterSlideId?: string) {
-    // if we are trying to add a Animation slide, we just open the AnimationEditor
-    // by setting the active tool to ADD_ANIMATION
-    if (type === SlideType.ANIMATION) {
-      set({
-        activeTool: {
-          type: ActiveToolType.ADD_OR_EDIT_ANIMATION,
-          settings: {
-            previousSlide: {
-              section: { id: sectionId } as Section,
-              slide: { id: afterSlideId || '' } as Slide
-            }
-          }
-        }
+  addAnimationSlide: (sectionId: string, newSlide: Slide, afterSlideId?: string) => {
+    const { videoConfig } = get();
+    if (!videoConfig?.config) return;
+
+    const sections = getSections(videoConfig);
+    const previousSlide = getPreviousSlide(sections, sectionId);
+
+    const globalBackground = videoConfig.metadata?.backgroundStyle;
+
+    const inheritedBg =
+      globalBackground ??
+      previousSlide?.backgroundStyle ??
+      createDefaultBackgroundStyle();
+
+
+    let newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
+      sections.map(s => {
+        if (s.id !== sectionId) return s;
+        if (!afterSlideId) return { ...s, slides: [...s.slides, newSlide] };
+        const idx = s.slides.findIndex(sl => sl.id === afterSlideId);
+        const insertAt = idx === -1 ? s.slides.length : idx + 1;
+        const updated = [...s.slides];
+        updated.splice(insertAt, 0, newSlide);
+        return { ...s, slides: updated };
       })
-      return
+    );
+
+    newVideoConfig = updateTotalDuration(newVideoConfig);
+
+    set({ videoConfig: newVideoConfig });
+
+    const section = getSections(newVideoConfig).find(s => s.id === sectionId);
+
+    if (section) {
+      set({ selectedSlide: { section, slide: newSlide } });
     }
 
+    get().autoSyncVideoConfig();
+  },
+
+  addSlide(sectionId: string, type: SlideType, afterSlideId?: string) {
     const { videoConfig } = get();
     if (!videoConfig?.config) return;
 

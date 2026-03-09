@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/docker/docker/daemon/logger"
 	"github.com/shank318/coasterai/agent/agenterrors"
 	"github.com/shank318/coasterai/agent/llm"
 	"github.com/shank318/coasterai/baml_client"
@@ -14,7 +13,6 @@ import (
 	"github.com/shank318/coasterai/datastore"
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
-	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
 	"github.com/shank318/coasterai/services"
 	"github.com/shank318/coasterai/services/brand_identity"
 	"github.com/shank318/coasterai/utils"
@@ -23,10 +21,45 @@ import (
 	"time"
 )
 
+type AnimationGenerationAgentRunResult struct {
+	Status             RunStatus
+	AskUserQuestion    *types.AskUserQuestion
+	Suggestions        []*models.Template
+	GeneratedAnimation *models.Template
+}
+
 const (
 	generateOrEditAnimationSessionKeyPrefix = "generateOrEditAnimationSessionKeyPrefix:session"
 	maxSuggestions                          = 3
 )
+
+type AnimationGeneratorAgentState struct {
+	VideoID          string                 `json:"video_id"`
+	Thinking         string                 `json:"thinking"`
+	State            string                 `json:"state"`
+	AskUserQuestion  *types.AskUserQuestion `json:"ask_user_question,omitempty"`
+	LastUserResponse string                 `json:"last_user_response,omitempty"`
+}
+
+type AnimationGeneratorAgent interface {
+	EditAnimation(
+		ctx context.Context,
+		animationSlide *pbcore.Slide,
+		prompt string,
+		params GenerationParams) (*models.Template, error)
+	CreateAnimation(
+		ctx context.Context,
+		prompt string,
+		suggestions bool,
+		params GenerationParams,
+	) (*AnimationGenerationAgentRunResult, error)
+	ContinueAnimation(
+		ctx context.Context,
+		options ContinueSessionOptions,
+		params GenerationParams,
+	) (*AnimationGenerationAgentRunResult, error)
+	StateUpdates() <-chan AnimationGeneratorAgentState
+}
 
 type agentAnimationEditor struct {
 	sessionID            string
@@ -40,7 +73,11 @@ type agentAnimationEditor struct {
 	videoService         services.VideoGeneration
 	animationGenerator   AnimationGenerator
 	logger               *zap.Logger
-	stateUpdates         chan VideoAgentState
+	stateUpdates         chan AnimationGeneratorAgentState
+}
+
+func (a *agentAnimationEditor) StateUpdates() <-chan AnimationGeneratorAgentState {
+	return a.stateUpdates
 }
 
 func NewAgentAnimationEditor(
@@ -67,7 +104,7 @@ func NewAgentAnimationEditor(
 		brandIdentityService: brandIdentityService,
 		retrievalService:     NewLlmRetrievalService(db, llmService),
 		llmService:           llmService,
-		stateUpdates:         make(chan VideoAgentState, 64),
+		stateUpdates:         make(chan AnimationGeneratorAgentState, 64),
 		animationGenerator: NewAnimationGenerator(
 			mediaStore,
 			brandIdentityService,
@@ -79,8 +116,10 @@ func NewAgentAnimationEditor(
 }
 
 type generateOrEditAnimationSession struct {
-	Request             types.EnhanceAnimationPromptRequest `json:"request"`
-	ConversationHistory []types.Message                     `json:"conversation_history"`
+	Prompt              string          `json:"prompt"`
+	Suggestions         bool            `json:"suggestions"`
+	AwaitingUserInput   bool            `json:"awaiting_user_input"`
+	ConversationHistory []types.Message `json:"conversation_history"`
 }
 
 func (a *agentAnimationEditor) saveGenerateOrEditAnimationSession(ctx context.Context, session *generateOrEditAnimationSession) error {
@@ -108,7 +147,11 @@ func (a *agentAnimationEditor) getGenerateOrEditAnimationSession(ctx context.Con
 	return &session, nil
 }
 
-func (a *agentAnimationEditor) ContinueEditAnimationSlide(ctx context.Context, options ContinueSessionOptions) (*RunResult, error) {
+func (a *agentAnimationEditor) ContinueAnimation(
+	ctx context.Context,
+	options ContinueSessionOptions,
+	params GenerationParams,
+) (*AnimationGenerationAgentRunResult, error) {
 	userResponse := strings.TrimSpace(options.UserResponse)
 	if userResponse == "" {
 		return nil, agenterrors.InvalidInput("user response is required", nil)
@@ -118,65 +161,67 @@ func (a *agentAnimationEditor) ContinueEditAnimationSlide(ctx context.Context, o
 	if err != nil {
 		return nil, err
 	}
+	if !session.AwaitingUserInput {
+		return nil, cache.ErrCacheMiss
+	}
 
 	session.ConversationHistory = append(session.ConversationHistory, types.Message{
 		Tool_call_id: utils.Ptr(fmt.Sprintf("call_%d", time.Now().Unix())),
 		Role:         types.Union3KassistantOrKtoolOrKuser__NewKtool(),
 		Content:      userResponse,
 	})
+	session.AwaitingUserInput = false
 
 	if err := a.saveGenerateOrEditAnimationSession(ctx, session); err != nil {
 		return nil, err
 	}
 
+	a.publishTransientState(AnimationGeneratorAgentState{
+		State:            stateStatusProcessing,
+		LastUserResponse: userResponse,
+	})
+
 	a.logger.Info("continuing agent animation session with user response", zap.String("response", userResponse))
 
-	return a.runPlanning(ctx, session)
+	return a.runGenerateAnimationFromPrompt(ctx, session, params)
 }
 
 func (l *agentAnimationEditor) EditAnimation(
 	ctx context.Context,
 	animationSlide *pbcore.Slide,
-	userRequest *pbportal.GenerateOrEditAnimationRequest,
-	params GenerationParams) (*pbportal.GenerateOrEditAnimationResponse, error) {
-	// Download exiting code
-	//animationSlide.CodeRegistry.MUrl
+	prompt string,
+	params GenerationParams) (*models.Template, error) {
+	if err := ValidatePrompt(prompt); err != nil {
+		return nil, err
+	}
 
+	template, err := l.animationGenerator.EditAnimationCode(ctx, animationSlide, prompt, func(progress TemplateGenerationProgress) {
+		l.publishTransientState(AnimationGeneratorAgentState{
+			State:    stateStatusProcessing,
+			Thinking: progress.Message,
+		})
+	}, params)
+	if err != nil {
+		return nil, err
+	}
+	return template, nil
 }
 
-func (l *agentAnimationEditor) GenerateFromUserPrompt(
+func (l *agentAnimationEditor) CreateAnimation(
 	ctx context.Context,
-	userRequest *pbportal.GenerateOrEditAnimationRequest,
+	prompt string,
+	suggestions bool,
 	params GenerationParams,
-) (*models.Template, error) {
-	input := types.EnhanceAnimationPromptRequest{
-		Prompt: userRequest.Prompt,
-	}
+) (*AnimationGenerationAgentRunResult, error) {
 
-	if params.VideoBranding != nil {
-		input.Branding = *params.VideoBranding
-	}
-
-	if params.VideoBackground != nil {
-		input.SlideBackground = gradientToCSS(params.VideoBackground.Gradient)
-	}
-
-	if params.VideoBranding != nil && params.VideoBranding.BrandLibraryID != nil {
-		_brandIdentityRegistry, err := l.brandIdentityService.GetBrandIdentity(ctx, *params.VideoBranding.BrandLibraryID)
-		if err != nil {
-			if errors.Is(err, datastore.NotFound) {
-				return nil, agenterrors.InvalidInput("brand_identity not found", nil)
-			}
-			return nil, err
-		}
-
-		if _brandIdentityRegistry != nil {
-			input.Branding.BrandGuideLines = utils.Ptr(_brandIdentityRegistry.FormatBrandDetails())
-		}
+	if err := ValidatePrompt(prompt); err != nil {
+		return nil, err
 	}
 
 	session := &generateOrEditAnimationSession{
-		Request:             input,
+		Prompt:              prompt,
+		Suggestions:         suggestions,
+		AwaitingUserInput:   false,
 		ConversationHistory: make([]types.Message, 0),
 	}
 
@@ -184,7 +229,12 @@ func (l *agentAnimationEditor) GenerateFromUserPrompt(
 		return nil, err
 	}
 
-	return template, nil
+	l.publishTransientState(AnimationGeneratorAgentState{
+		State:    stateStatusProcessing,
+		Thinking: generating,
+	})
+
+	return l.runGenerateAnimationFromPrompt(ctx, session, params)
 }
 
 func (l *agentAnimationEditor) GetAnimationSuggestions(
@@ -223,17 +273,63 @@ func (l *agentAnimationEditor) GetAnimationSuggestions(
 
 	// Extract Config
 	for _, template := range suggestedTemplates {
+		l.publishTransientState(AnimationGeneratorAgentState{
+			State:    stateStatusProcessing,
+			Thinking: extracting,
+		})
 		templateConfig, err := l.animationGenerator.ExtractConfig(ctx, beatDescription, template, params)
 		if err != nil {
 			return nil, agenterrors.TemplateExtractFailed("failed to extract template config", err)
 		}
+
+		// To be used as edits
 		template.GeneratedConfig = json.RawMessage(templateConfig.Config)
+
+		// Save plan for debugging
+		template.GeneratedPlan = &pbcore.AnimationSlidePlan{
+			BeatDescription:             beatDescription,
+			AnimationType:               string(animationType),
+			CategorySearcQquery:         categorySearchQuery,
+			Duration:                    4, // TODO, should come from template
+			SelectedTemplateDescription: utils.Ptr(template.Description),
+		}
 	}
 	return suggestedTemplates, nil
 }
 
-func (l *agentV1) runGenerateAnimationFromPrompt(ctx context.Context, session *generateOrEditAnimationSession) (result *RunResult, retErr error) {
-	llmResponse, err := baml_client.EnhanceAnimationPrompt(ctx, session.Request, session.ConversationHistory)
+func (l *agentAnimationEditor) runGenerateAnimationFromPrompt(ctx context.Context, session *generateOrEditAnimationSession, params GenerationParams) (result *AnimationGenerationAgentRunResult, retErr error) {
+	l.publishTransientState(AnimationGeneratorAgentState{
+		State:    stateStatusProcessing,
+		Thinking: "Understanding your animation prompt...",
+	})
+
+	input := types.EnhanceAnimationPromptRequest{
+		Prompt: session.Prompt,
+	}
+
+	if params.VideoBranding != nil {
+		input.Branding = *params.VideoBranding
+	}
+
+	if params.VideoBackground != nil {
+		input.SlideBackground = gradientToCSS(params.VideoBackground.Gradient)
+	}
+
+	if params.VideoBranding != nil && params.VideoBranding.BrandLibraryID != nil {
+		_brandIdentityRegistry, err := l.brandIdentityService.GetBrandIdentity(ctx, *params.VideoBranding.BrandLibraryID)
+		if err != nil {
+			if errors.Is(err, datastore.NotFound) {
+				return nil, agenterrors.InvalidInput("brand_identity not found", nil)
+			}
+			return nil, err
+		}
+
+		if _brandIdentityRegistry != nil {
+			input.Branding.BrandGuideLines = utils.Ptr(_brandIdentityRegistry.FormatBrandDetails())
+		}
+	}
+
+	llmResponse, err := baml_client.EnhanceAnimationPrompt(ctx, input, session.ConversationHistory)
 	if err != nil {
 		return nil, agenterrors.LLMPlanningFailed("failed to enhance animation prompt", err)
 	}
@@ -256,17 +352,59 @@ func (l *agentV1) runGenerateAnimationFromPrompt(ctx context.Context, session *g
 		Duration:            enhancedPrompt.Duration,
 	}
 
-	if session.Request.Suggestions {
+	if session.Suggestions {
+		l.publishTransientState(AnimationGeneratorAgentState{
+			State:    stateStatusProcessing,
+			Thinking: matching,
+		})
+
 		// Return GetAnimationSuggestions
+		suggestions, err := l.GetAnimationSuggestions(ctx,
+			animationSlide.AnimationType,
+			animationSlide.CategorySearchQuery,
+			animationSlide.BeatDescription,
+			params)
+		if err != nil {
+			return nil, err
+		}
+
+		if len(suggestions) > 0 {
+			return &AnimationGenerationAgentRunResult{
+				Status:      RunStatusCompleted,
+				Suggestions: suggestions,
+			}, nil
+		}
 	}
 
-	// Generate
-	// Generate new animation
+	// fallback to Generate new animation
 	template, err := l.animationGenerator.Generate(ctx, animationSlide, func(progress TemplateGenerationProgress) {
-
+		l.publishTransientState(AnimationGeneratorAgentState{
+			State:    stateStatusProcessing,
+			Thinking: progress.Message,
+		})
 	}, params)
 	if err != nil {
 		return nil, err
 	}
 
+	// Save plan for debugging
+	template.GeneratedPlan = &pbcore.AnimationSlidePlan{
+		BeatDescription:             animationSlide.BeatDescription,
+		AnimationType:               string(animationSlide.AnimationType),
+		CategorySearcQquery:         animationSlide.CategorySearchQuery,
+		Duration:                    animationSlide.Duration,
+		SelectedTemplateDescription: utils.Ptr(template.Description),
+	}
+
+	return &AnimationGenerationAgentRunResult{
+		Status:             RunStatusCompleted,
+		GeneratedAnimation: template,
+	}, nil
+}
+
+func (a *agentAnimationEditor) publishTransientState(state AnimationGeneratorAgentState) {
+	select {
+	case a.stateUpdates <- state:
+	default:
+	}
 }

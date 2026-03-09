@@ -125,7 +125,6 @@ func (p *Portal) ContinueVideoPlanning(ctx context.Context, c *connect.Request[p
 		c.Msg.Id,
 		func(runCtx context.Context) (*agent.RunResult, error) {
 			return videoAgent.Continue(runCtx, agent.ContinueSessionOptions{
-				OrgID:        actor.OrganizationID,
 				UserResponse: c.Msg.Response,
 			})
 		},

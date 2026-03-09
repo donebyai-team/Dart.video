@@ -50,12 +50,12 @@ func (a *agentV1) handleToolCalls(
 	}, nil
 }
 
-func (a *agentV1) handleAnimationGenerationToolCalls(
+func (a *agentAnimationEditor) handleAnimationGenerationToolCalls(
 	ctx context.Context,
 	session *generateOrEditAnimationSession,
 	llmResponse *types.Union2AskUserQuestionOrEnhancedAnimationPrompt,
 	thinking string,
-) (bool, *RunResult, error) {
+) (bool, *AnimationGenerationAgentRunResult, error) {
 	question := llmResponse.AsAskUserQuestion()
 	if question == nil {
 		return false, nil, nil
@@ -70,22 +70,20 @@ func (a *agentV1) handleAnimationGenerationToolCalls(
 		Role:    types.Union3KassistantOrKtoolOrKuser__NewKassistant(),
 		Content: question.Question_text,
 	})
+	session.AwaitingUserInput = true
 
 	if err := a.saveGenerateOrEditAnimationSession(ctx, session); err != nil {
 		return true, nil, agenterrors.SessionUnavailable("failed to save animation generation session with tool call", err)
 	}
 
 	questionCopy := *question
-	if err := a.updateState(ctx, VideoAgentState{
+	a.publishTransientState(AnimationGeneratorAgentState{
 		Thinking:        thinking,
 		State:           stateStatusWaiting,
 		AskUserQuestion: &questionCopy,
-	}); err != nil {
-		logger.Error("failed to update waiting-for-user-input state", zap.Error(err))
-		return true, nil, err
-	}
+	})
 
-	return true, &RunResult{
+	return true, &AnimationGenerationAgentRunResult{
 		Status:          RunStatusWaitingForUserInput,
 		AskUserQuestion: &questionCopy,
 	}, nil

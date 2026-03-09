@@ -65,5 +65,6 @@ type Template struct {
 	Repeatable      bool                 `db:"repeatable"`
 	ElementRegistry json.RawMessage      `db:"element_registry"`
 
-	GeneratedConfig json.RawMessage `db:"-"`
+	GeneratedConfig json.RawMessage            `db:"-"` // Maps to edits in slide
+	GeneratedPlan   *pbcore.AnimationSlidePlan `db:"-"`
 }

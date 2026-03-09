@@ -40,7 +40,6 @@ type StartSessionOptions struct {
 }
 
 type ContinueSessionOptions struct {
-	OrgID        string
 	UserResponse string
 }
 

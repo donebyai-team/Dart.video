@@ -107,6 +107,13 @@ type AnimationGenerator interface {
 		callback TemplateGenerationCallback,
 		params GenerationParams,
 	) (*models.Template, error)
+	EditAnimationCode(
+		ctx context.Context,
+		animationSlide *pbcore.Slide,
+		prompt string,
+		callback TemplateGenerationCallback,
+		params GenerationParams,
+	) (*models.Template, error)
 }
 
 type animationGenerator struct {
@@ -308,6 +315,7 @@ func (l animationGenerator) EditAnimationCode(
 	ctx context.Context,
 	animationSlide *pbcore.Slide,
 	prompt string,
+	callback TemplateGenerationCallback,
 	params GenerationParams,
 ) (*models.Template, error) {
 
@@ -321,14 +329,18 @@ func (l animationGenerator) EditAnimationCode(
 
 	code, err := l.loadExistingCode(ctx, slideContent)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to load existing code: %w", err)
 	}
 
+	callback(TemplateGenerationProgress{
+		Message: CreativeStageMessage(StageUnderstanding, 0),
+	})
 	// 1️⃣ Attempt targeted edits first
 	template, err := l.tryTargetedEdits(
 		ctx,
 		code,
 		prompt,
+		callback,
 		params,
 	)
 
@@ -343,6 +355,7 @@ func (l animationGenerator) EditAnimationCode(
 		animationSlide,
 		slideContent,
 		prompt,
+		callback,
 		params,
 	)
 }
@@ -364,6 +377,7 @@ func (l animationGenerator) tryTargetedEdits(
 	ctx context.Context,
 	code string,
 	prompt string,
+	callback TemplateGenerationCallback,
 	params GenerationParams,
 ) (*models.Template, error) {
 
@@ -419,6 +433,7 @@ func (l animationGenerator) tryTargetedEdits(
 			code,
 			codeFilePath,
 			attempt,
+			callback,
 		)
 
 		if buildErr == nil {
@@ -436,6 +451,10 @@ func (l animationGenerator) tryTargetedEdits(
 			l.logger.Error("failed to build animation",
 				zap.Int("attempt_left", maxAttempts-attempt),
 				zap.Error(buildErr))
+
+			callback(TemplateGenerationProgress{
+				Message: CreativeStageMessage(StageRefining, attempt),
+			})
 
 			continue
 		}
@@ -482,10 +501,13 @@ func (l animationGenerator) uploadAndBuild(
 	code string,
 	codeFilePath string,
 	attempt int,
+	callback TemplateGenerationCallback,
 ) (*models.Template, error) {
 
 	componentName := RandomComponentName()
-
+	callback(TemplateGenerationProgress{
+		Message: CreativeStageMessage(StageSaving, attempt),
+	})
 	uploadedMedia, err := l.mediaStore.UploadCode(
 		ctx,
 		code,
@@ -495,6 +517,9 @@ func (l animationGenerator) uploadAndBuild(
 		return nil, agenterrors.AnimationGenerationFailed("failed to upload code", err)
 	}
 
+	callback(TemplateGenerationProgress{
+		Message: CreativeStageMessage(StageBuilding, attempt),
+	})
 	buildOutput, err := l.codeBuilder.ValidateAndBuild(ctx, &services.ValidateAndBuildInput{
 		Code:          code,
 		ComponentName: fmt.Sprintf("Transformed%s%d", componentName, attempt),
@@ -504,6 +529,10 @@ func (l animationGenerator) uploadAndBuild(
 	if err != nil {
 		return nil, err
 	}
+
+	callback(TemplateGenerationProgress{
+		Message: CreativeStageMessage(StageReady, attempt),
+	})
 
 	return &models.Template{
 		ID:   uuid.New().String(),
@@ -523,6 +552,7 @@ func (l animationGenerator) tryRegenerateAnimation(
 	animationSlide *pbcore.Slide,
 	slideContent *pbcore.AnimationSlideContent,
 	prompt string,
+	callback TemplateGenerationCallback,
 	params GenerationParams,
 ) (*models.Template, error) {
 
@@ -536,6 +566,10 @@ func (l animationGenerator) tryRegenerateAnimation(
 			prompt,
 			params,
 		)
+
+		callback(TemplateGenerationProgress{
+			Message: CreativeStageMessage(StageDesigning, attempt),
+		})
 
 		l.logger.Info("fallback to regeneration animation", zap.Int("attempt", attempt))
 		response, err := baml_client.ReGenerateAnimation(ctx, input, conversationHistory)
@@ -557,6 +591,7 @@ func (l animationGenerator) tryRegenerateAnimation(
 			indentedCode,
 			codeFilePath,
 			attempt,
+			callback,
 		)
 
 		if err == nil {
@@ -574,6 +609,10 @@ func (l animationGenerator) tryRegenerateAnimation(
 			l.logger.Error("failed to build animation",
 				zap.Int("attempt_left", maxAttempts-attempt),
 				zap.Error(buildErr))
+
+			callback(TemplateGenerationProgress{
+				Message: CreativeStageMessage(StageRefining, attempt),
+			})
 
 			continue
 		}

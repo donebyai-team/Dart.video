@@ -16,9 +16,27 @@ Its available in the portal.proto
 rpc GenerateOrEditAnimationSlide(GenerateOrEditAnimationRequest) returns (stream GenerateOrEditAnimationResponse);
 
 message GenerateOrEditAnimationRequest {
-  optional string slideId = 1; // pass slideId if editing existing animation
+  string videoId = 1;
+  oneof input {
+    EditAnimationUserInput edit_animation_user_input = 2;
+    CreateNewAnimationInput create_new_animation_input = 3;
+    AskUserInput ask_user_input = 4;
+  }
+}
+
+message EditAnimationUserInput {
+  string slide_id = 1;
   string prompt = 2;
-  bool suggestions = 3; // true only when creating new animation
+}
+
+message CreateNewAnimationInput {
+  bool suggestions = 1;
+  string prompt = 2;
+}
+
+message AskUserInput {
+  optional string slide_id = 1;
+  string response = 2;
 }
 
 message GenerateOrEditAnimationResponse {

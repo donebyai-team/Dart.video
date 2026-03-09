@@ -42,14 +42,31 @@ service PortalService {
 
   // Edit animations
   rpc GenerateOrEditAnimationSlide(GenerateOrEditAnimationRequest) returns (stream GenerateOrEditAnimationResponse);
-  rpc ContinueEditAnimationSlide(ContinueEditAnimationRequest) returns (stream GenerateOrEditAnimationResponse);
 }
 
 message GenerateOrEditAnimationRequest {
-  optional string slideId = 1;
-  string videoId = 2;
-  string prompt = 3;
-  bool suggestions = 4; // used when creating new animation
+  string videoId = 1;
+  oneof input {
+    EditAnimationUserInput edit_animation_user_input = 2;
+    CreateNewAnimationInput create_new_animation_input = 3;
+    AskUserInput ask_user_input = 4;
+  }
+}
+
+message EditAnimationUserInput {
+  string slide_id = 1;
+  string prompt = 2;
+}
+
+message CreateNewAnimationInput {
+  bool suggestions = 1;
+  string prompt = 2;
+}
+
+message AskUserInput {
+  // optional on purpose. when omitted, backend can resume create flow by session key.
+  optional string slide_id = 1;
+  string response = 2;
 }
 
 message GenerateOrEditAnimationResponse {
@@ -133,12 +150,6 @@ message CreateVideoResponse {
 message ContinueVideoPlanningRequest {
   string id = 1; // video id
   string response = 2;
-}
-
-message ContinueEditAnimationRequest {
-  string videoId = 1; // video id
-  string slideId = 2;
-  string response = 3;
 }
 
 message AskUserQuestion {

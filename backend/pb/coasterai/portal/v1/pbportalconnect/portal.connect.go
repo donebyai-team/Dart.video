@@ -99,9 +99,6 @@ const (
 	// PortalServiceGenerateOrEditAnimationSlideProcedure is the fully-qualified name of the
 	// PortalService's GenerateOrEditAnimationSlide RPC.
 	PortalServiceGenerateOrEditAnimationSlideProcedure = "/coasterai.portal.v1.PortalService/GenerateOrEditAnimationSlide"
-	// PortalServiceContinueEditAnimationSlideProcedure is the fully-qualified name of the
-	// PortalService's ContinueEditAnimationSlide RPC.
-	PortalServiceContinueEditAnimationSlideProcedure = "/coasterai.portal.v1.PortalService/ContinueEditAnimationSlide"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
@@ -130,7 +127,6 @@ var (
 	portalServiceGetBrandIdentitiesMethodDescriptor           = portalServiceServiceDescriptor.Methods().ByName("GetBrandIdentities")
 	portalServiceUpdateBrandIdentityMethodDescriptor          = portalServiceServiceDescriptor.Methods().ByName("UpdateBrandIdentity")
 	portalServiceGenerateOrEditAnimationSlideMethodDescriptor = portalServiceServiceDescriptor.Methods().ByName("GenerateOrEditAnimationSlide")
-	portalServiceContinueEditAnimationSlideMethodDescriptor   = portalServiceServiceDescriptor.Methods().ByName("ContinueEditAnimationSlide")
 )
 
 // PortalServiceClient is a client for the coasterai.portal.v1.PortalService service.
@@ -162,7 +158,6 @@ type PortalServiceClient interface {
 	UpdateBrandIdentity(context.Context, *connect.Request[v1.UpdateBrandIdentityRequest]) (*connect.Response[emptypb.Empty], error)
 	// Edit animations
 	GenerateOrEditAnimationSlide(context.Context, *connect.Request[v1.GenerateOrEditAnimationRequest]) (*connect.ServerStreamForClient[v1.GenerateOrEditAnimationResponse], error)
-	ContinueEditAnimationSlide(context.Context, *connect.Request[v1.ContinueEditAnimationRequest]) (*connect.ServerStreamForClient[v1.GenerateOrEditAnimationResponse], error)
 }
 
 // NewPortalServiceClient constructs a client for the coasterai.portal.v1.PortalService service. By
@@ -313,12 +308,6 @@ func NewPortalServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(portalServiceGenerateOrEditAnimationSlideMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
-		continueEditAnimationSlide: connect.NewClient[v1.ContinueEditAnimationRequest, v1.GenerateOrEditAnimationResponse](
-			httpClient,
-			baseURL+PortalServiceContinueEditAnimationSlideProcedure,
-			connect.WithSchema(portalServiceContinueEditAnimationSlideMethodDescriptor),
-			connect.WithClientOptions(opts...),
-		),
 	}
 }
 
@@ -347,7 +336,6 @@ type portalServiceClient struct {
 	getBrandIdentities           *connect.Client[emptypb.Empty, v1.BrandIdentityResponse]
 	updateBrandIdentity          *connect.Client[v1.UpdateBrandIdentityRequest, emptypb.Empty]
 	generateOrEditAnimationSlide *connect.Client[v1.GenerateOrEditAnimationRequest, v1.GenerateOrEditAnimationResponse]
-	continueEditAnimationSlide   *connect.Client[v1.ContinueEditAnimationRequest, v1.GenerateOrEditAnimationResponse]
 }
 
 // GetConfig calls coasterai.portal.v1.PortalService.GetConfig.
@@ -466,11 +454,6 @@ func (c *portalServiceClient) GenerateOrEditAnimationSlide(ctx context.Context, 
 	return c.generateOrEditAnimationSlide.CallServerStream(ctx, req)
 }
 
-// ContinueEditAnimationSlide calls coasterai.portal.v1.PortalService.ContinueEditAnimationSlide.
-func (c *portalServiceClient) ContinueEditAnimationSlide(ctx context.Context, req *connect.Request[v1.ContinueEditAnimationRequest]) (*connect.ServerStreamForClient[v1.GenerateOrEditAnimationResponse], error) {
-	return c.continueEditAnimationSlide.CallServerStream(ctx, req)
-}
-
 // PortalServiceHandler is an implementation of the coasterai.portal.v1.PortalService service.
 type PortalServiceHandler interface {
 	GetConfig(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.Config], error)
@@ -500,7 +483,6 @@ type PortalServiceHandler interface {
 	UpdateBrandIdentity(context.Context, *connect.Request[v1.UpdateBrandIdentityRequest]) (*connect.Response[emptypb.Empty], error)
 	// Edit animations
 	GenerateOrEditAnimationSlide(context.Context, *connect.Request[v1.GenerateOrEditAnimationRequest], *connect.ServerStream[v1.GenerateOrEditAnimationResponse]) error
-	ContinueEditAnimationSlide(context.Context, *connect.Request[v1.ContinueEditAnimationRequest], *connect.ServerStream[v1.GenerateOrEditAnimationResponse]) error
 }
 
 // NewPortalServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -647,12 +629,6 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(portalServiceGenerateOrEditAnimationSlideMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
-	portalServiceContinueEditAnimationSlideHandler := connect.NewServerStreamHandler(
-		PortalServiceContinueEditAnimationSlideProcedure,
-		svc.ContinueEditAnimationSlide,
-		connect.WithSchema(portalServiceContinueEditAnimationSlideMethodDescriptor),
-		connect.WithHandlerOptions(opts...),
-	)
 	return "/coasterai.portal.v1.PortalService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case PortalServiceGetConfigProcedure:
@@ -701,8 +677,6 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 			portalServiceUpdateBrandIdentityHandler.ServeHTTP(w, r)
 		case PortalServiceGenerateOrEditAnimationSlideProcedure:
 			portalServiceGenerateOrEditAnimationSlideHandler.ServeHTTP(w, r)
-		case PortalServiceContinueEditAnimationSlideProcedure:
-			portalServiceContinueEditAnimationSlideHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -802,8 +776,4 @@ func (UnimplementedPortalServiceHandler) UpdateBrandIdentity(context.Context, *c
 
 func (UnimplementedPortalServiceHandler) GenerateOrEditAnimationSlide(context.Context, *connect.Request[v1.GenerateOrEditAnimationRequest], *connect.ServerStream[v1.GenerateOrEditAnimationResponse]) error {
 	return connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.GenerateOrEditAnimationSlide is not implemented"))
-}
-
-func (UnimplementedPortalServiceHandler) ContinueEditAnimationSlide(context.Context, *connect.Request[v1.ContinueEditAnimationRequest], *connect.ServerStream[v1.GenerateOrEditAnimationResponse]) error {
-	return connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.ContinueEditAnimationSlide is not implemented"))
 }
