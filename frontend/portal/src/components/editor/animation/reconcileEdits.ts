@@ -15,6 +15,13 @@ export function reconcileEdits(
     nextRegistry: Record<string, RegistryEntry>,
     currentEdits: Record<string, ElementEdit>
 ): Record<string, ElementEdit> {
+    // console.debug(
+    //     "reconciling",
+    //     JSON.stringify(prevRegistry, null, 2),
+    //     JSON.stringify(nextRegistry, null, 2),
+    //     JSON.stringify(currentEdits, null, 2)
+    // )
+
     const result: Record<string, ElementEdit> = {}
 
     for (const [eid, edit] of Object.entries(currentEdits)) {
@@ -31,10 +38,34 @@ export function reconcileEdits(
 
         // Reconcile text
         if (edit.text != null) {
-            if (nextEntry.textType === prevEntry?.textType) {
-                reconciledEdit.text = edit.text
+            if (nextEntry.textType === 'static' ||
+                nextEntry.textType === 'letter-cascade' ||
+                nextEntry.textType === 'typewriter') {
+
+                // Drop if sourceText changed — LLM wrote new text
+                if (prevEntry?.sourceText === nextEntry.sourceText) {
+                    reconciledEdit.text = edit.text
+                }
             }
-            // textType changed (e.g. static → counter) — drop text edit
+        }
+
+        // if (edit.typewriterSource != null) {
+        //     if (nextEntry.textType === 'typewriter') {
+        //         if (prevEntry?.sourceText === nextEntry.sourceText) {
+        //             reconciledEdit.typewriterSource = edit.typewriterSource
+        //         }
+        //     }
+        // }
+
+        if (edit.words != null) {
+            if (nextEntry.textType === 'word-cycle') {
+                // Drop if word list changed in new code
+                const prevWords = JSON.stringify(prevEntry?.words ?? [])
+                const nextWords = JSON.stringify(nextEntry.words ?? [])
+                if (prevWords === nextWords) {
+                    reconciledEdit.words = edit.words
+                }
+            }
         }
 
         // Reconcile style — keep only props that exist in new registry

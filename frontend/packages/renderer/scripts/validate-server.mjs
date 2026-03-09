@@ -345,7 +345,7 @@ async function handleValidate(req, res) {
     res.writeHead(200, {'Content-Type': 'application/json'});
     res.end(JSON.stringify({
       registry: registry,
-      gcsPath: gcsPath
+      gcsPath: `https://storage.googleapis.com/${OUTPUT_BUCKET}/${gcsPath}`
     }));
 
   } catch (err) {

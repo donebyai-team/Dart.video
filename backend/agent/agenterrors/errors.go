@@ -14,7 +14,12 @@ const (
 	ReasonVideoPersistFailed        = "AGENT_VIDEO_PERSIST_FAILED"
 	ReasonInternal                  = "AGENT_INTERNAL"
 	ReasonAnimationGenerationFailed = "AGENT_ANIMATION_GENERATION_FAILED"
+	ReasonNoEditsFound              = "NO_EDITS_FOUND"
 )
+
+func NoEditsApplied(message string, cause error) error {
+	return errorx.New(errorx.CodeFailedPrecond, ReasonNoEditsFound, message, cause)
+}
 
 func EditAnimationCodeFailed(message string, cause error) error {
 	return errorx.New(errorx.CodeFailedPrecond, ReasonAnimationGenerationFailed, message, cause)

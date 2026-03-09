@@ -8,22 +8,23 @@ import { ElementEdit } from '@coasterai/renderer/src/types/ast'
 
 interface UseAnimationEditReturn {
   isAnimationSlide: boolean
-  animRegistry:     Record<string, RegistryEntry>
-  selectedEid:      string | null
-  setSelectedEid:   (eid: string | null) => void
-  editStore:        Record<string, ElementEdit>
-  animEditVersion:  number
-  applyEdit:        (eid: string, patch: Partial<ElementEdit>) => void
-  flushPersist:     () => void
+  animRegistry: Record<string, RegistryEntry>
+  selectedEid: string | null
+  setSelectedEid: (eid: string | null) => void
+  editStore: Record<string, ElementEdit>
+  animEditVersion: number
+  applyEdit: (eid: string, patch: Partial<ElementEdit>) => void
+  applyEdits: (edits: Record<string, ElementEdit>) => void
+  flushPersist: () => void
 }
 
 export function useAnimationEdit(): UseAnimationEditReturn {
   const selectedSlide = useVideoStore(s => s.selectedSlide)
-  const updateSlide   = useVideoStore(s => s.updateSlide)
+  const updateSlide = useVideoStore(s => s.updateSlide)
 
-  const content          = selectedSlide?.slide?.content
+  const content = selectedSlide?.slide?.content
   const isAnimationSlide = content?.case === 'animation'
-  const slideId          = selectedSlide?.slide?.id
+  const slideId = selectedSlide?.slide?.id
 
   // ── Registry ────────────────────────────────────────────────────────────────
   // useMemo so it's not recomputed on every render.
@@ -40,8 +41,8 @@ export function useAnimationEdit(): UseAnimationEditReturn {
   useEffect(() => { selectedSlideRef.current = selectedSlide }, [selectedSlide])
 
   // ── State ────────────────────────────────────────────────────────────────────
-  const [selectedEid,     setSelectedEid]     = useState<string | null>(null)
-  const [editStore,       setEditStore]       = useState<Record<string, ElementEdit>>({})
+  const [selectedEid, setSelectedEid] = useState<string | null>(null)
+  const [editStore, setEditStore] = useState<Record<string, ElementEdit>>({})
   // Ref kept in sync inside the setEditStore updater (runs synchronously), so
   // flushPersist can read the latest value right after applyEdit is called.
   const editStoreRef = useRef<Record<string, ElementEdit>>({})
@@ -53,7 +54,7 @@ export function useAnimationEdit(): UseAnimationEditReturn {
 
   // ── Keep window.__EDIT_STORE__ in sync — single source of truth ─────────────
   useEffect(() => {
-    ;(window as any).__EDIT_STORE__ = editStore
+    ; (window as any).__EDIT_STORE__ = editStore
   }, [editStore])
 
   // ── Load saved edits when slide changes ─────────────────────────────────────
@@ -70,7 +71,26 @@ export function useAnimationEdit(): UseAnimationEditReturn {
     setEditStore(savedEdits)
   }, [slideId]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  const applyEdits = useCallback((edits: Record<string, ElementEdit>) => {
+    setEditStore(edits)
+    setAnimEditVersion(v => v + 1)
+  }, [])
+
+
   // ── Apply an edit ────────────────────────────────────────────────────────────
+  /*
+Key merge decisions:
+```
+style     → merged (add/override individual props)
+ranges    → merged (add/override individual props)
+springs   → merged (add/override individual props)
+counter   → merged (start and end can be patched independently)
+transform → merged (translateX can be patched without touching translateY)
+text      → replaced (whole string, no merge concept)
+words     → replaced (whole array, no merge concept)
+asset     → replaced
+icon      → replaced
+  */
   const applyEdit = useCallback((eid: string, patch: Partial<ElementEdit>) => {
     console.log('applying edits', eid, patch)
     setEditStore(prev => {
@@ -80,9 +100,14 @@ export function useAnimationEdit(): UseAnimationEditReturn {
         [eid]: {
           ...existing,
           ...(patch.style ? { style: { ...(existing.style ?? {}), ...patch.style } } : {}),
-          ...(patch.text  !== undefined ? { text:  patch.text  } : {}),
+          ...(patch.text !== undefined ? { text: patch.text } : {}),
           ...(patch.asset !== undefined ? { asset: patch.asset } : {}),
-          ...(patch.icon  !== undefined ? { icon:  patch.icon  } : {}),
+          ...(patch.icon !== undefined ? { icon: patch.icon } : {}),
+          ...(patch.words !== undefined ? { words: patch.words } : {}),
+          ...(patch.ranges ? { ranges: { ...(existing.ranges ?? {}), ...patch.ranges } } : {}),
+          ...(patch.springs ? { springs: { ...(existing.springs ?? {}), ...patch.springs } } : {}),
+          ...(patch.counter ? { counter: { ...(existing.counter ?? {}), ...patch.counter } } : {}),
+          ...(patch.transform ? { transform: { ...(existing.transform ?? {}), ...patch.transform } } : {}),
         },
       }
       editStoreRef.current = next
@@ -98,7 +123,7 @@ export function useAnimationEdit(): UseAnimationEditReturn {
     () =>
       debounce((edits: Record<string, ElementEdit>) => {
         const slideContent = selectedSlideRef.current?.slide?.content
-        if (slideContent?.case !== 'animation') return        
+        if (slideContent?.case !== 'animation') return
         updateSlide({
           content: {
             case: 'animation',
@@ -149,5 +174,6 @@ export function useAnimationEdit(): UseAnimationEditReturn {
     animEditVersion,
     applyEdit,
     flushPersist,
+    applyEdits,
   }
 }

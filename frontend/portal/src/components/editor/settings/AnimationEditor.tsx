@@ -12,6 +12,7 @@ import { SlideType, type AnimationSlideContent, type Slide } from '@coasterai/pb
 import { getConnectError } from '@/utils/error'
 import toast from 'react-hot-toast'
 import { reconcileEdits } from '../animation/reconcileEdits'
+import { useAnimationEdit } from '../animation/useAnimationEdit'
 
 interface AnimationEditorProps {
     settings: AddOrEditAnimationSettings
@@ -25,6 +26,7 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
     const addAnimationSlide = useVideoStore(s => s.addAnimationSlide)
     const videoId = useVideoStore(s => s.videoConfig?.id)
     const { portalClient } = useClientsContext()
+    const { applyEdits } = useAnimationEdit()
 
     const isAdding = !!settings.previousSlide
 
@@ -85,6 +87,9 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
         )
         console.debug('[AnimationEditor] Reconciling edits', existingContent?.edits, reconciledEdits)
 
+        // apply edits
+        applyEdits(reconciledEdits)
+
         updateSlide({
             content: {
                 case: 'animation' as const,
@@ -98,7 +103,7 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
         })
     }
 
-    const randomSlideId = () => {       
+    const randomSlideId = () => {
         return `slide-${Date.now()}`
     }
 
@@ -386,11 +391,10 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
                                     <button
                                         key={template.id}
                                         onClick={() => handleSelectSuggestion(index)}
-                                        className={`relative rounded-lg overflow-hidden border-2 transition-colors aspect-video bg-muted ${
-                                            selectedSuggestionIndex === index
+                                        className={`relative rounded-lg overflow-hidden border-2 transition-colors aspect-video bg-muted ${selectedSuggestionIndex === index
                                                 ? 'border-primary'
                                                 : 'border-transparent hover:border-border'
-                                        }`}
+                                            }`}
                                     >
                                         {template.previewUrl ? (
                                             <img

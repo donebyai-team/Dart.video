@@ -50,8 +50,6 @@ export function useRemotionPlayerEvents({
       setCurrentFrame(data.detail.frame);
       onFrameChange?.(data.detail.frame);
 
-      console.debug(`[RemotionPlayer] Frame: ${data.detail.frame}`);
-
       // Skip slide detection logic during dragging to prevent jumping
       if (isDragging) {
         console.debug(`[RemotionPlayer] Skipping slide detection during drag`);
@@ -64,7 +62,6 @@ export function useRemotionPlayerEvents({
         const lastSlideEndFrame = getSlideAbsoluteEndFrame(allSlides, lastSlide.id, fps);
 
         if (data.detail.frame >= lastSlideEndFrame) {
-          console.debug(`[RemotionPlayer] Reached end of video at frame ${data.detail.frame}, pausing`);
           player.pause();
           // Seek back to the last valid frame to avoid blank screen
           player.seekTo(lastSlideEndFrame);

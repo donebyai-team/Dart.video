@@ -31,7 +31,7 @@ export interface ElementEdit {
     // word-cycle
     words?: string[]
     // typewriter source text
-    typewriterSource?: string
+    // typewriterSource?: string
 }
 
 export interface RegistryEntry {

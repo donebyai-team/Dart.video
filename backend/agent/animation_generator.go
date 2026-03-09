@@ -401,12 +401,7 @@ func (l animationGenerator) tryTargetedEdits(
 		}
 
 		if len(response.Edits) == 0 {
-			conversationHistory = appendRetryConversation(
-				conversationHistory,
-				stringify(response),
-				"no edits are suggested",
-			)
-			continue
+			return nil, agenterrors.NoEditsApplied("no reasonable edits applied", nil)
 		}
 
 		newCode, retryReason := applyEdits(code, response.Edits)
