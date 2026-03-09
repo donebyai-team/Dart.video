@@ -66,6 +66,10 @@ enum TransitionDirection {
 
 // ===================== CORE MESSAGES =====================
 
+// Mostly be used for debugging what AI created
+// Useful for rerunning the generation
+// selectedTemplateDescription is basically the prompt generated to created the animation
+// in case of existing template selectedTemplateDescription = template description
 message AnimationSlidePlan {
   int64 index = 1;
   string beatDescription = 2;

@@ -353,8 +353,8 @@ func (l animationGenerator) EditAnimationCode(
 		ctx,
 		code,
 		animationSlide,
-		slideContent,
 		prompt,
+		types.AnimationType(slideContent.Plan.AnimationType),
 		callback,
 		params,
 	)
@@ -550,8 +550,8 @@ func (l animationGenerator) tryRegenerateAnimation(
 	ctx context.Context,
 	code string,
 	animationSlide *pbcore.Slide,
-	slideContent *pbcore.AnimationSlideContent,
 	prompt string,
+	animationType types.AnimationType,
 	callback TemplateGenerationCallback,
 	params GenerationParams,
 ) (*models.Template, error) {
@@ -562,7 +562,7 @@ func (l animationGenerator) tryRegenerateAnimation(
 			ctx,
 			code,
 			animationSlide,
-			slideContent,
+			animationType,
 			prompt,
 			params,
 		)
@@ -630,14 +630,14 @@ func (l animationGenerator) buildRegenInput(
 	ctx context.Context,
 	code string,
 	animationSlide *pbcore.Slide,
-	slideContent *pbcore.AnimationSlideContent,
+	animationType types.AnimationType,
 	prompt string,
 	params GenerationParams,
 ) types.ReGenerateAnimationCodeRequest {
 
 	input := types.ReGenerateAnimationCodeRequest{
 		Code:          code,
-		AnimationType: types.AnimationType(slideContent.Plan.AnimationType),
+		AnimationType: animationType,
 		Prompt:        prompt,
 		Duration:      int64(animationSlide.Duration),
 	}

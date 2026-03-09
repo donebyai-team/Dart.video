@@ -242,6 +242,7 @@ func (l *agentAnimationEditor) GetAnimationSuggestions(
 	animationType types.AnimationType,
 	categorySearchQuery string,
 	beatDescription string,
+	duration int64,
 	params GenerationParams) ([]*models.Template, error) {
 	categories, err := l.retrievalService.MatchCategories(ctx, animationType, categorySearchQuery)
 	if err != nil {
@@ -290,7 +291,7 @@ func (l *agentAnimationEditor) GetAnimationSuggestions(
 			BeatDescription:             beatDescription,
 			AnimationType:               string(animationType),
 			CategorySearcQquery:         categorySearchQuery,
-			Duration:                    4, // TODO, should come from template
+			Duration:                    duration,
 			SelectedTemplateDescription: utils.Ptr(template.Description),
 		}
 	}
@@ -363,6 +364,7 @@ func (l *agentAnimationEditor) runGenerateAnimationFromPrompt(ctx context.Contex
 			animationSlide.AnimationType,
 			animationSlide.CategorySearchQuery,
 			animationSlide.BeatDescription,
+			animationSlide.Duration,
 			params)
 		if err != nil {
 			return nil, err
