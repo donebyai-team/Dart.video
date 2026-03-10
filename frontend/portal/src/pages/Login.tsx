@@ -12,6 +12,7 @@ import { toast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { useAuth } from "@coasterai/ui-core/hooks/useAuth";
 
 type Props = {
   onPasswordlessStarted: (message: string) => void
@@ -344,4 +345,28 @@ export const LoginPanel: FC<Props> = ({
       </div>
     </div>
   );
-}
+};
+
+const LoginPage: FC = () => {
+  const { login } = useAuth();
+
+  return (
+    <LoginPanel
+      onPasswordlessStarted={(message: string) => {
+        toast({ title: message });
+      }}
+      onPasswordlessStartError={(message: string, _error: unknown) => {
+        toast({ title: message, variant: "destructive" });
+      }}
+      onPasswordlessVerified={async (jwt: JWT) => {
+        await login(jwt);
+        window.location.href = routes.app.home;
+      }}
+      onPasswordlessVerifyError={(message: string, _error: unknown) => {
+        toast({ title: message, variant: "destructive" });
+      }}
+    />
+  );
+};
+
+export default LoginPage;
