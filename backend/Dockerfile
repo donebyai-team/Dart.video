@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM --platform=$TARGETPLATFORM golang:1.23-bullseye AS builder
+FROM --platform=$TARGETPLATFORM golang:1.24-bullseye AS builder
 
 WORKDIR /src
 
