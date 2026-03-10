@@ -35,6 +35,7 @@ const DURATIONS = [
 const LANGUAGES = [{ label: 'English(UK)', value: 'en' }]
 
 const NO_BRAND_VALUE = 'none'
+const ADD_BRAND_VALUE = '__add_brand__'
 const MIN_SCRIPT_SECTIONS = 3
 const MIN_PROMPT_LENGTH = 10
 
@@ -359,15 +360,29 @@ const VideoIntentComposer = () => {
 
             <Palette className='w-4 h-4 flex-shrink-0 opacity-70' />
             <Select
-              value={selectedBrandLibraryId ?? NO_BRAND_VALUE}
-              onValueChange={v => setSelectedBrandLibraryId(v === NO_BRAND_VALUE ? undefined : v)}
+              value={selectedBrandLibraryId ?? ADD_BRAND_VALUE}
+              onValueChange={v => {
+                if (v === ADD_BRAND_VALUE) {
+                  router.push('/dashboard/brand')
+                  return
+                }
+                setSelectedBrandLibraryId(v === NO_BRAND_VALUE ? undefined : v)
+              }}
               disabled={stage !== 'compose'}
             >
               <SelectTrigger className='h-7 text-xs bg-transparent border-none shadow-none ring-0 focus:ring-0 px-1 gap-1 w-auto min-w-0'>
                 <SelectValue placeholder='Brand' />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={NO_BRAND_VALUE}>No brand</SelectItem>
+                <SelectItem
+                  value={ADD_BRAND_VALUE}
+                  onPointerDown={e => {
+                    e.preventDefault()
+                    router.push('/dashboard/brand')
+                  }}
+                >
+                  Add brand
+                </SelectItem>
                 {identities.map(b => (
                   <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
                 ))}
