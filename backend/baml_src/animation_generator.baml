@@ -91,6 +91,18 @@ function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_hi
    - Always include { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
    - Add stagger delays for multiple elements
 
+   ## COMMON IMPORTS(For more, check skills section)
+   For icons - use "lucide-react"
+
+   \`\`\`tsx
+   import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate, spring, Sequence } from "remotion";
+   import { TransitionSeries, linearTiming, springTiming } from "@remotion/transitions";
+   import { fade } from "@remotion/transitions/fade";
+   import { slide } from "@remotion/transitions/slide";
+   import { Circle, Rect, Triangle, Star, Ellipse, Pie } from "@remotion/shapes";
+   import { useState, useEffect } from "react";
+   \`\`\`
+
     ## CONSTANTS & PATTERNS
     - Declare ALL constants inside the component body before return. Never at module level.
     - interpolate() output range must be inline numeric literals: [0, 1] never a variable.

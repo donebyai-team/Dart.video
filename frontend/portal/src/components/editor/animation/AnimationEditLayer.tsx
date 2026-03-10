@@ -16,7 +16,6 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimationToolbar } from './AnimationToolbar'
 import type { RegistryEntry } from '@coasterai/renderer'
-import { TextEditOverlay } from './TextEditOverlay'
 import { ElementEdit } from '@coasterai/renderer/src/types/ast'
 
 interface FRect { left: number; top: number; width: number; height: number }
@@ -29,7 +28,6 @@ interface AnimationEditLayerProps {
   animEditVersion?: number
   onSelectElement: (eid: string | null) => void
   onEdit: (eid: string, patch: Partial<ElementEdit>) => void
-  onTextCommit?: () => void
 }
 
 export function AnimationEditLayer({
@@ -40,7 +38,6 @@ export function AnimationEditLayer({
   animEditVersion,
   onSelectElement,
   onEdit,
-  onTextCommit,
 }: AnimationEditLayerProps) {
   const toolbarRef = useRef<HTMLDivElement>(null)
   // Tracks the actual DOM data-eid (may include loop index, e.g. "el-11-1")
@@ -49,10 +46,7 @@ export function AnimationEditLayer({
 
   const [canvasRect, setCanvasRect] = useState<FRect | null>(null)
   const [elementRect, setElementRect] = useState<FRect | null>(null)
-  const [isInlineEditing, setIsInlineEditing] = useState(false)
-  const [editorHeight, setEditorHeight] = useState(0)
   const [hoverCursor, setHoverCursor] = useState<'default' | 'pointer'>('default')
-  const inlineInitTextRef = useRef('')
 
   // ── Track canvas fixed position ─────────────────────────────────────────────
   useEffect(() => {
@@ -90,7 +84,6 @@ export function AnimationEditLayer({
   useEffect(() => {
     if (!selectedEid) {
       setElementRect(null)
-      setIsInlineEditing(false)
       domEidRef.current = null
     }
   }, [selectedEid])
@@ -256,9 +249,7 @@ function eidAtPoint(
   }, [onSelectElement])
 
   /**
-   * Click handler:
-   *  - Selects the element and draws the highlight rectangle.
-   *  - For static-text elements: immediately activates inline editing.
+   * Click handler: selects the element and draws the highlight rectangle.
    */
   function handleCanvasClick(e: React.MouseEvent<HTMLDivElement>) {
     const hit = eidAtPoint(e.clientX, e.clientY, e.currentTarget)
@@ -275,35 +266,7 @@ function eidAtPoint(
     const r = el.getBoundingClientRect()
     setElementRect({ left: r.left, top: r.top, width: r.width, height: r.height })
     onSelectElement(registryKey)
-
-    // Immediately open inline editor for text elements
-    if (entry.textType === 'static') {
-      console.log('[AnimationEditLayer] Text element — activating inline edit')
-      inlineInitTextRef.current = editStore[registryKey]?.text ?? entry.staticText ?? ''
-      setIsInlineEditing(false)
-      setTimeout(() => setIsInlineEditing(true), 0)
-    } else {
-      setIsInlineEditing(false)
-    }
   }
-
-  const handleTextCommit = useCallback((text: string, _height: number) => {
-    // Only persist if text actually changed — avoids spurious saves on click-without-edit
-    const originalText = inlineInitTextRef.current
-    if (selectedEid && text && text !== originalText) {
-      console.log('[AnimationEditLayer] Text changed — saving:', { from: originalText, to: text })
-      onEdit(selectedEid, { text })
-    } else {
-      console.log('[AnimationEditLayer] Text unchanged — skipping save')
-    }
-    setIsInlineEditing(false)
-    setEditorHeight(0)
-    onTextCommit?.()
-  }, [selectedEid, onEdit, onTextCommit])
-
-  const handleEditorHeightChange = useCallback((h: number) => {
-    setEditorHeight(h)
-  }, [])
 
   if (!canvasRect) return null
 
@@ -312,8 +275,6 @@ function eidAtPoint(
   return createPortal(
     <>
       {/* ── Click capture — always covers entire canvas ───────────────── */}
-      {/* TextEditOverlay sits at z:9999 so clicks on the text editor go  */}
-      {/* directly to it; clicks elsewhere on the canvas hit this overlay. */}
       <div
         style={{
           position: 'fixed',
@@ -340,30 +301,13 @@ function eidAtPoint(
             left: elementRect.left - 2,
             top: elementRect.top - 2,
             width: elementRect.width + 4,
-            height: (isInlineEditing && editorHeight > 0 ? editorHeight : elementRect.height) + 4,
+            height: elementRect.height + 4,
             border: '2px dashed rgba(99,102,241,0.8)',
             borderRadius: 3,
             boxSizing: 'border-box',
             pointerEvents: 'none',
             zIndex: 41,
           }}
-        />
-      )}
-
-      {/* ── Inline text editor ────────────────────────────────────────── */}
-      {isInlineEditing && elementRect && selectedEid && (
-        <TextEditOverlay
-          elementRect={elementRect}
-          selectedEid={domEidRef.current ?? selectedEid}
-          playerRef={playerRef}
-          initText={inlineInitTextRef.current}
-          onCommit={handleTextCommit}
-          onCancel={() => {
-            console.log('[AnimationEditLayer] Inline edit cancelled')
-            setIsInlineEditing(false)
-            setEditorHeight(0)
-          }}
-          onHeightChange={handleEditorHeightChange}
         />
       )}
 

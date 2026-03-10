@@ -16,7 +16,6 @@ import { flip } from "@remotion/transitions/flip";
 import { slide } from "@remotion/transitions/slide";
 import { wipe } from "@remotion/transitions/wipe";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { EditableText } from './lib/EditableText'
 
 import {
   AbsoluteFill,
@@ -27,6 +26,7 @@ import {
   spring,
   useCurrentFrame,
   useVideoConfig,
+  Series,
 } from "remotion";
 import {
   REMOTION_SHAPES_PROP_MAP,
@@ -229,7 +229,6 @@ const SafeRemotionShapes = Object.fromEntries(
 const SHARED_PARAM_NAMES: string[] = [
   "RemotionPaths",
   "RemotionLayoutUtils",
-  "EditableText",
   "React",
   "Remotion",
   "RemotionShapes",
@@ -241,6 +240,7 @@ const SHARED_PARAM_NAMES: string[] = [
   "useCurrentFrame",
   "useVideoConfig",
   "Easing",
+  "Series",
   "spring",
   "Sequence",
   "Img",
@@ -285,7 +285,6 @@ function getSharedParamValues(validateShapePropsOption: boolean): unknown[] {
   return [
     RemotionPaths,
     RemotionLayoutUtils,
-    EditableText,
     React,
     RemotionBundle,
     injectedShapes,
@@ -297,6 +296,7 @@ function getSharedParamValues(validateShapePropsOption: boolean): unknown[] {
     useCurrentFrame,
     useVideoConfig,
     Easing,
+    Series,
     spring,
     Sequence,
     Img,
