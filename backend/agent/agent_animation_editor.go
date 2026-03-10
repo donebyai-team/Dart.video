@@ -314,6 +314,7 @@ func (l *agentAnimationEditor) runGenerateAnimationFromPrompt(ctx context.Contex
 		input.SlideBackground = gradientToCSS(params.VideoBackground.Gradient)
 	}
 
+	var brandIdentityRegistry *brand_identity.BrandIdentityRegistry
 	if params.VideoBranding != nil && params.VideoBranding.BrandLibraryID != nil {
 		_brandIdentityRegistry, err := l.brandIdentityService.GetBrandIdentity(ctx, *params.VideoBranding.BrandLibraryID)
 		if err != nil {
@@ -324,7 +325,9 @@ func (l *agentAnimationEditor) runGenerateAnimationFromPrompt(ctx context.Contex
 		}
 
 		if _brandIdentityRegistry != nil {
-			input.Branding.BrandGuideLines = utils.Ptr(_brandIdentityRegistry.FormatBrandDetails())
+			brandIdentityRegistry = _brandIdentityRegistry
+			params.VideoBranding.BrandGuideLines = utils.Ptr(_brandIdentityRegistry.FormatBrandAndAssetDetails())
+			input.Branding.BrandGuideLines = params.VideoBranding.BrandGuideLines
 		}
 	}
 
@@ -349,6 +352,14 @@ func (l *agentAnimationEditor) runGenerateAnimationFromPrompt(ctx context.Contex
 		AnimationType:       enhancedPrompt.AnimationType,
 		CategorySearchQuery: enhancedPrompt.CategorySearchQuery,
 		Duration:            enhancedPrompt.Duration,
+	}
+
+	if !IsValidDuration(animationSlide.Duration) {
+		l.logger.Info("Received invalid duration from anhanced prompt, defaulting to 5",
+			zap.Int("generated_duration", int(animationSlide.Duration)),
+			zap.Int("default", DefaultDuration),
+		)
+		animationSlide.Duration = DefaultDuration
 	}
 
 	if session.Suggestions {
@@ -376,12 +387,12 @@ func (l *agentAnimationEditor) runGenerateAnimationFromPrompt(ctx context.Contex
 	}
 
 	// fallback to Generate new animation
-	template, err := l.animationGenerator.Generate(ctx, animationSlide, func(progress TemplateGenerationProgress) {
+	template, err := l.animationGenerator.GenerateCode(ctx, enhancedPrompt.Prompt, animationSlide, func(progress TemplateGenerationProgress) {
 		l.publishTransientState(AnimationGeneratorAgentState{
 			State:    stateStatusProcessing,
 			Thinking: progress.Message,
 		})
-	}, params)
+	}, brandIdentityRegistry, params)
 	if err != nil {
 		return nil, err
 	}

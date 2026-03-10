@@ -85,7 +85,7 @@ func (p *Portal) GenerateOrEditAnimationSlide(ctx context.Context, c *connect.Re
 
 	targetSlide := existingSlide
 	if targetSlide == nil {
-		targetSlide = newPendingAnimationSlide(rawSlideID)
+		targetSlide = createNewSlide(rawSlideID)
 	}
 
 	logger := logging.Logger(ctx, p.logger).With(
@@ -97,13 +97,13 @@ func (p *Portal) GenerateOrEditAnimationSlide(ctx context.Context, c *connect.Re
 	params := buildAnimationGenerationParams(videoID, actor.OrganizationID, targetSlide.Id, targetSlide, video)
 	animationAgent := p.newAnimationGeneratorAgent(logger, videoID, targetSlide.Id, actor.OrganizationID)
 
-	preserveExistingEdits := existingSlide != nil
+	isExistingSlide := existingSlide != nil
 	return p.streamAnimationGenerationRun(
 		ctx,
 		stream,
 		animationAgent,
 		targetSlide,
-		preserveExistingEdits,
+		isExistingSlide,
 		func(runCtx context.Context) (*agent.AnimationGenerationAgentRunResult, error) {
 			if existingSlide != nil {
 				template, runErr := animationAgent.EditAnimation(runCtx, existingSlide, prompt, params)
@@ -130,7 +130,7 @@ func (p *Portal) streamAnimationGenerationRun(
 	stream *connect.ServerStream[pbportal.GenerateOrEditAnimationResponse],
 	animationAgent agent.AnimationGeneratorAgent,
 	targetSlide *pbcore.Slide,
-	preserveExistingEdits bool,
+	isExistingSlide bool,
 	run func(context.Context) (*agent.AnimationGenerationAgentRunResult, error),
 ) error {
 	type runOutput struct {
@@ -171,7 +171,7 @@ func (p *Portal) streamAnimationGenerationRun(
 			if out.err != nil {
 				return out.err
 			}
-			return sendAnimationResult(stream, targetSlide, preserveExistingEdits, out.result)
+			return sendAnimationResult(stream, targetSlide, isExistingSlide, out.result)
 		}
 	}
 }
@@ -179,7 +179,7 @@ func (p *Portal) streamAnimationGenerationRun(
 func sendAnimationResult(
 	stream *connect.ServerStream[pbportal.GenerateOrEditAnimationResponse],
 	slide *pbcore.Slide,
-	preserveExistingEdits bool,
+	isExistingSlide bool,
 	runResult *agent.AnimationGenerationAgentRunResult,
 ) error {
 	if runResult == nil {
@@ -198,7 +198,7 @@ func sendAnimationResult(
 	}
 
 	if runResult.GeneratedAnimation != nil {
-		if err := applyTemplateToSlide(slide, runResult.GeneratedAnimation, preserveExistingEdits); err != nil {
+		if err := applyTemplateToSlide(slide, runResult.GeneratedAnimation, isExistingSlide); err != nil {
 			return err
 		}
 	}
@@ -268,7 +268,7 @@ func buildAnimationGenerationParams(videoID, orgID, slideID string, slide *pbcor
 	return params
 }
 
-func newPendingAnimationSlide(slideID string) *pbcore.Slide {
+func createNewSlide(slideID string) *pbcore.Slide {
 	return &pbcore.Slide{
 		Id:          slideID,
 		Type:        pbcore.SlideType_SLIDE_TYPE_ANIMATION,
@@ -279,7 +279,7 @@ func newPendingAnimationSlide(slideID string) *pbcore.Slide {
 	}
 }
 
-func applyTemplateToSlide(slide *pbcore.Slide, template *models.Template, preserveExistingEdits bool) error {
+func applyTemplateToSlide(slide *pbcore.Slide, template *models.Template, isExistingSlide bool) error {
 	if slide == nil || template == nil {
 		return nil
 	}
@@ -291,15 +291,15 @@ func applyTemplateToSlide(slide *pbcore.Slide, template *models.Template, preser
 	}
 
 	animationContent := slide.GetAnimation()
-	animationContent.Plan = template.GeneratedPlan
 	animationContent.CodeRegistry = template.CodeRegistry
 	animationContent.Registry = toStructRegistry
 
-	if !preserveExistingEdits {
-		emptyEdits, structErr := utils.RawMessageToStruct(json.RawMessage(`{}`))
-		if structErr != nil {
-			return fmt.Errorf("failed to initialize animation edits: %w", structErr)
+	// only if creating a new slide
+	if !isExistingSlide {
+		if template.GeneratedPlan != nil {
+			animationContent.Plan = template.GeneratedPlan
 		}
+		emptyEdits, _ := utils.RawMessageToStruct(json.RawMessage(`{}`))
 		animationContent.Edits = emptyEdits
 	}
 

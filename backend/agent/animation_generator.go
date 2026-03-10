@@ -107,6 +107,12 @@ type AnimationGenerator interface {
 		callback TemplateGenerationCallback,
 		params GenerationParams,
 	) (*models.Template, error)
+	GenerateCode(ctx context.Context,
+		prompt string,
+		animation *types.AnimationSlide,
+		callback TemplateGenerationCallback,
+		brandIdentityRegistry *brand_identity.BrandIdentityRegistry,
+		params GenerationParams) (*models.Template, error)
 	EditAnimationCode(
 		ctx context.Context,
 		animationSlide *pbcore.Slide,
@@ -224,7 +230,7 @@ func (l animationGenerator) GenerateCode(ctx context.Context,
 		})
 
 		l.logger.Info("generating code")
-		generatedAnimation, err := baml_client.GenerateAnimation(ctx, inptCodeGeneration, conversationHistory)
+		generatedAnimation, err := baml_client.GenerateAngitimation(ctx, inptCodeGeneration, conversationHistory)
 		if err != nil {
 			return nil, agenterrors.AnimationGenerationFailed("failed to generate animation", err)
 		}
@@ -270,6 +276,15 @@ func (l animationGenerator) GenerateCode(ctx context.Context,
 			callback(TemplateGenerationProgress{
 				Message: CreativeStageMessage(StageReady, 0),
 			})
+
+			updatedDuration := generatedAnimation.IdealDuration
+			if !IsValidDuration(updatedDuration) {
+				l.logger.Info("Received invalid duration from generated code, moving to animation from prompt",
+					zap.Int("generated_duration", int(generatedAnimation.IdealDuration)),
+					zap.Int("default", int(animation.Duration)))
+				updatedDuration = animation.Duration
+			}
+
 			return &models.Template{
 				ID:   uuid.New().String(),
 				Name: componentName,
@@ -281,7 +296,7 @@ func (l animationGenerator) GenerateCode(ctx context.Context,
 				Repeatable:      false,
 				ElementRegistry: buildOutput.Registry,
 				Description:     prompt,
-				Duration:        animation.Duration,
+				Duration:        updatedDuration,
 			}, nil
 		}
 

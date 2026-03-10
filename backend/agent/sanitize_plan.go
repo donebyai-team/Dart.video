@@ -7,7 +7,7 @@ import (
 
 const (
 	maxSlides       = 30
-	defaultDuration = 5
+	DefaultDuration = 5
 	maxDuration     = 10
 	minDuration     = 1
 )
@@ -33,7 +33,7 @@ func sanitizeDuration(slide *types.Union2AnimationSlideOrMediaSlide) {
 	if slide.IsMediaSlide() {
 		media := slide.AsMediaSlide()
 		if !isValidDuration(media.Duration, minDuration, maxDuration) {
-			media.Duration = defaultDuration
+			media.Duration = DefaultDuration
 		}
 		return
 	}
@@ -41,7 +41,7 @@ func sanitizeDuration(slide *types.Union2AnimationSlideOrMediaSlide) {
 	if slide.IsAnimationSlide() {
 		anim := slide.AsAnimationSlide()
 		if !isValidDuration(anim.Duration, minDuration, maxDuration) {
-			anim.Duration = defaultDuration
+			anim.Duration = DefaultDuration
 		}
 		return
 	}
@@ -49,4 +49,8 @@ func sanitizeDuration(slide *types.Union2AnimationSlideOrMediaSlide) {
 
 func isValidDuration(d, min, max int64) bool {
 	return d > min && d <= max
+}
+
+func IsValidDuration(d int64) bool {
+	return d > minDuration && d <= maxDuration
 }
