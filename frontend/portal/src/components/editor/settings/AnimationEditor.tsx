@@ -45,6 +45,10 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
     const abortControllerRef = useRef<AbortController | null>(null)
     const streamSessionRef = useRef(0)
     const createdSlideIdRef = useRef<string | null>(null)
+    // Tracks whether the new slide has been committed to the store yet.
+    // createdSlideIdRef can be set earlier (from a waitingForUserInput event) without the slide
+    // being in the store — this flag distinguishes the two states.
+    const slideInStoreRef = useRef(false)
     const pendingGeneratedSlideRef = useRef<Slide | null>(null)
 
     const canSubmit = prompt.trim().length > 0
@@ -132,9 +136,10 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
     const createOrUpdateAddedSlide = (slide: Slide) => {
         if (!isAdding || !settings.previousSlide) return
 
-        if (!createdSlideIdRef.current) {
+        if (!slideInStoreRef.current) {
             addAnimationSlide(settings.previousSlide.section.id, slide, settings.previousSlide.slide.id)
             createdSlideIdRef.current = slide.id
+            slideInStoreRef.current = true
             pendingGeneratedSlideRef.current = slide
             return
         }
@@ -186,6 +191,7 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
                     }
                 }
 
+                setPrompt('')
                 setStage('compose')
                 setIsSubmitting(false)
                 abortControllerRef.current?.abort()
@@ -353,7 +359,7 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
         if (!template) return
 
         if (isAdding && settings.previousSlide) {
-            if (!createdSlideIdRef.current) {
+            if (!slideInStoreRef.current) {
                 const baseSlide = pendingGeneratedSlideRef.current ?? {
                     ...settings.previousSlide.slide,
                     id: randomSlideId(),
@@ -392,7 +398,7 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
         startStream(undefined, false)
     }
 
-    const showThinking = stage === 'thinking'
+    const showThinking = !!thinkingChunk
     const showSuggestions = suggestions.length > 0
     const showEmptyState = !showSuggestions
 
@@ -492,7 +498,7 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
                         }}
                         placeholder={isAdding ? 'Describe the animation you want...' : 'Describe changes to make...'}
                         rows={3}
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || stage === 'question'}
                         className='w-full resize-none bg-transparent px-3 py-2.5 text-sm focus:outline-none placeholder:text-muted-foreground/60 disabled:opacity-50'
                     />
                     <div className='px-3 pb-2.5 flex justify-end'>

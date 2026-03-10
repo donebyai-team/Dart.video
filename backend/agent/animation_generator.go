@@ -258,6 +258,8 @@ func (l animationGenerator) GenerateCode(ctx context.Context,
 			Message: CreativeStageMessage(StageBuilding, attempt),
 		})
 
+		l.logger.Info("building code")
+
 		buildOutput, err := l.codeBuilder.ValidateAndBuild(ctx, &services.ValidateAndBuildInput{
 			Code:          indentedCode,
 			ComponentName: fmt.Sprintf("Transformed%s%d", componentName, attempt),

@@ -294,7 +294,9 @@ func applyTemplateToSlide(slide *pbcore.Slide, template *models.Template, preser
 		animationContent = &pbcore.AnimationSlideContent{
 			Plan: template.GeneratedPlan,
 		}
-		slide.Content = &pbcore.Slide_Animation{Animation: animationContent}
+		slide.Content = &pbcore.Slide_Animation{
+			Animation: animationContent,
+		}
 	}
 
 	animationContent.CodeRegistry = template.CodeRegistry

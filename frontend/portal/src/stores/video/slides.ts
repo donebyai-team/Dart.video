@@ -28,16 +28,19 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   addAnimationSlide: (sectionId: string, newSlide: Slide, afterSlideId?: string) => {
     const { videoConfig } = get();
     if (!videoConfig?.config) return;
+    console.log("Added new slide", newSlide, sectionId)
 
     const sections = getSections(videoConfig);
     const previousSlide = getPreviousSlide(sections, sectionId);
-
     const globalBackground = videoConfig.metadata?.backgroundStyle;
 
+    
     const inheritedBg =
       globalBackground ??
       previousSlide?.backgroundStyle ??
       createDefaultBackgroundStyle();
+
+    newSlide.backgroundStyle = { ...inheritedBg };
 
 
     let newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
