@@ -2,5 +2,6 @@
     "categories": [
         "simple-text"
     ],
-    "repeatable": true
+    "repeatable": true,
+    "duration": 5
 }

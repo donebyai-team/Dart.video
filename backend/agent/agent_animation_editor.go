@@ -242,7 +242,6 @@ func (l *agentAnimationEditor) GetAnimationSuggestions(
 	animationType types.AnimationType,
 	categorySearchQuery string,
 	beatDescription string,
-	duration int64,
 	params GenerationParams) ([]*models.Template, error) {
 	categories, err := l.retrievalService.MatchCategories(ctx, animationType, categorySearchQuery)
 	if err != nil {
@@ -285,13 +284,12 @@ func (l *agentAnimationEditor) GetAnimationSuggestions(
 
 		// To be used as edits
 		template.GeneratedConfig = json.RawMessage(templateConfig.Config)
-		template.Duration = duration
 		// Save plan for debugging
 		template.GeneratedPlan = &pbcore.AnimationSlidePlan{
 			BeatDescription:             beatDescription,
 			AnimationType:               string(animationType),
 			CategorySearcQquery:         categorySearchQuery,
-			Duration:                    duration,
+			Duration:                    template.Duration,
 			SelectedTemplateDescription: utils.Ptr(template.Description),
 		}
 	}
@@ -364,7 +362,6 @@ func (l *agentAnimationEditor) runGenerateAnimationFromPrompt(ctx context.Contex
 			animationSlide.AnimationType,
 			animationSlide.CategorySearchQuery,
 			animationSlide.BeatDescription,
-			animationSlide.Duration,
 			params)
 		if err != nil {
 			return nil, err

@@ -7,7 +7,8 @@ INSERT INTO templates (
     code_registry,
     preview_url,
     repeatable,
-    element_registry
+    element_registry,
+    duration
 )
 VALUES (
         lower(:name),
@@ -18,6 +19,7 @@ VALUES (
            :code_registry,
            :preview_url,
            :repeatable,
-           :element_registry
+           :element_registry,
+           :duration
        )
     RETURNING id;

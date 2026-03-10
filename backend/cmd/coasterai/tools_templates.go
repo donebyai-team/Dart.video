@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/shank318/coasterai/baml_client/types"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
+	"github.com/shank318/coasterai/services"
 	"github.com/shank318/coasterai/template_validator"
 	"os"
 	"path/filepath"
@@ -199,8 +200,6 @@ func syncCategories(ctx context.Context, db datastore.TemplateRepository, catego
 	return nil
 }
 
-const publicTemplateURl = "https://storage.googleapis.com/coasterai-public"
-
 func syncTemplate(ctx context.Context, db datastore.TemplateRepository, templateDir, templateName string, animType types.AnimationType, animFolderName string, stats *syncStats) error {
 	metadataPath := filepath.Join(templateDir, "metadata.json")
 	registryPath := filepath.Join(templateDir, "registry.json")
@@ -255,9 +254,15 @@ func syncTemplate(ctx context.Context, db datastore.TemplateRepository, template
 	var metadata struct {
 		Categories []string `json:"categories"`
 		Repeatable bool     `json:"repeatable"`
+		Duration   int64    `json:"duration"`
 	}
 	if err := json.Unmarshal(metadataBytes, &metadata); err != nil {
 		return fmt.Errorf("metadata.json malformed in template %s: %w", templateName, err)
+	}
+
+	// validations
+	if metadata.Duration <= 0 {
+		return fmt.Errorf("metadata.json invalid duration in template %s", templateName)
 	}
 
 	categories := metadata.Categories
@@ -275,8 +280,8 @@ func syncTemplate(ctx context.Context, db datastore.TemplateRepository, template
 		}
 	}
 
-	tURL := fmt.Sprintf("%s/templates/%s/Transformed%s.tsx", publicTemplateURl, animFolderName, templateName)
-	mURL := fmt.Sprintf("%s/templates/%s/%s.tsx", publicTemplateURl, animFolderName, templateName)
+	tURL := fmt.Sprintf("%s/templates/%s/Transformed%s.tsx", services.GetPublicBucketURL(), animFolderName, templateName)
+	mURL := fmt.Sprintf("%s/templates/%s/%s.tsx", services.GetPublicBucketURL(), animFolderName, templateName)
 
 	existing, err := db.GetTemplateByName(ctx, animType, templateName)
 	if err != nil && !errors.Is(err, datastore.NotFound) {
@@ -299,16 +304,18 @@ func syncTemplate(ctx context.Context, db datastore.TemplateRepository, template
 			Schema:          schemaBytes,
 			CodeRegistry:    codeRegistry,
 			PreviewUrl:      "",
+			Duration:        metadata.Duration,
 		})
 		if err != nil {
 			return fmt.Errorf("failed to create template %s: %w", templateName, err)
 		}
 		stats.templatesInserted++
-	} else if templateNeedsUpdate(existing, categories, description, schemaBytes, registryBytes, codeRegistry) {
+	} else if templateNeedsUpdate(existing, categories, description, schemaBytes, registryBytes, codeRegistry, metadata.Duration, metadata.Repeatable) {
 		existing.Categories = categories
 		existing.Description = description
 		existing.Schema = schemaBytes
 		existing.ElementRegistry = registryBytes
+		existing.Duration = metadata.Duration
 		existing.CodeRegistry = &pbcore.CodeRegistry{
 			TUrl: tURL,
 			MUrl: mURL,
@@ -323,11 +330,19 @@ func syncTemplate(ctx context.Context, db datastore.TemplateRepository, template
 	return nil
 }
 
-func templateNeedsUpdate(existing *models.Template, categories []string, description string, schema, preview []byte, codeRegistry *pbcore.CodeRegistry) bool {
+func templateNeedsUpdate(existing *models.Template, categories []string, description string, schema, preview []byte, codeRegistry *pbcore.CodeRegistry, duration int64, repeatable bool) bool {
 	if existing.Description != description {
 		return true
 	}
 	if existing.CodeRegistry.MUrl != codeRegistry.MUrl {
+		return true
+	}
+
+	if existing.Duration != duration {
+		return true
+	}
+
+	if existing.Repeatable != repeatable {
 		return true
 	}
 	if existing.CodeRegistry.TUrl != codeRegistry.TUrl {

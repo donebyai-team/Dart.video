@@ -213,5 +213,19 @@ func (s *codeBuilderService) ValidateAndBuild(
 		return nil, fmt.Errorf("parse validator response: %w", err)
 	}
 
+	out.NormalizeJSPath()
+
 	return &out, nil
+}
+
+func (v *ValidateAndBuildOutput) NormalizeJSPath() {
+	if v.JSPath == "" {
+		return
+	}
+
+	prefix := GetPublicBucketURL()
+
+	if !strings.HasPrefix(v.JSPath, prefix) {
+		v.JSPath = fmt.Sprintf("%s/%s", prefix, strings.TrimPrefix(v.JSPath, "/"))
+	}
 }

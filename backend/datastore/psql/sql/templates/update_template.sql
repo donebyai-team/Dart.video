@@ -5,5 +5,6 @@ SET categories  = :categories,
     code_registry     = :code_registry,
     repeatable  = :repeatable,
     preview_url = :preview_url,
-    element_registry = :element_registry
+    element_registry = :element_registry,
+    duration = :duration
 WHERE id = :id;

@@ -93,6 +93,7 @@ func (r *Database) CreateTemplate(ctx context.Context, t *models.Template) (*mod
 		"repeatable":       t.Repeatable,
 		"preview_url":      t.PreviewUrl,
 		"element_registry": t.ElementRegistry,
+		"duration":         t.Duration,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create template: %w", err)
@@ -113,6 +114,7 @@ func (r *Database) UpdateTemplate(ctx context.Context, t *models.Template) error
 		"repeatable":       t.Repeatable,
 		"preview_url":      t.PreviewUrl,
 		"element_registry": t.ElementRegistry,
+		"duration":         t.Duration,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to update template: %w", err)

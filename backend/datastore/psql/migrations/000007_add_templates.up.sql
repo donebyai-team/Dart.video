@@ -10,6 +10,7 @@ CREATE TABLE templates
     schema jsonb NOT NULL DEFAULT '{}'::jsonb,
     element_registry jsonb NOT NULL DEFAULT '{}'::jsonb,
     code_registry jsonb NOT NULL DEFAULT '{}'::jsonb,
+    duration INT NOT NULL,
     repeatable bool DEFAULT false,
     preview_url text,
     created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,

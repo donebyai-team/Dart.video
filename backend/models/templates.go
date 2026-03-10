@@ -64,8 +64,8 @@ type Template struct {
 	UpdatedAt       *time.Time           `db:"updated_at"`
 	Repeatable      bool                 `db:"repeatable"`
 	ElementRegistry json.RawMessage      `db:"element_registry"`
+	Duration        int64                `db:"duration"`
 
 	GeneratedConfig json.RawMessage            `db:"-"` // Maps to edits in slide
 	GeneratedPlan   *pbcore.AnimationSlidePlan `db:"-"`
-	Duration        int64                      `db:"-"`
 }

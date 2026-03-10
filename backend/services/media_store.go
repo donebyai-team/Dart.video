@@ -71,6 +71,10 @@ const (
 	baseGCPBucketURL = "https://storage.googleapis.com"
 )
 
+func GetPublicBucketURL() string {
+	return fmt.Sprintf("%s/%s", baseGCPBucketURL, publicBucket)
+}
+
 func normalizeFileName(name string) string {
 	// Extract only the base name (prevents ../../ attacks)
 	name = filepath.Base(name)
@@ -243,7 +247,7 @@ func (g gcpMediaStore) UploadCode(
 	}
 
 	return &pbcore.MediaAsset{
-		Url:       fmt.Sprintf("%s/%s/%s", baseGCPBucketURL, publicBucket, filePath),
+		Url:       fmt.Sprintf("%s/%s", GetPublicBucketURL(), filePath),
 		FileName:  filepath.Base(filePath),
 		MimeType:  "text/plain",
 		Size:      float32(len(data)),
@@ -328,7 +332,7 @@ func (g gcpMediaStore) Upload(
 	}
 
 	return &pbcore.MediaAsset{
-		Url:       fmt.Sprintf("%s/%s/%s", baseGCPBucketURL, publicBucket, objectPath),
+		Url:       fmt.Sprintf("%s/%s", GetPublicBucketURL(), objectPath),
 		FileName:  safeFileName,
 		MimeType:  contentType,
 		Size:      float32(size),
