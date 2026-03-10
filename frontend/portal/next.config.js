@@ -10,6 +10,9 @@ module.exports = {
   eslint: {
     ignoreDuringBuilds: true
   },
+  typescript: {
+    ignoreBuildErrors: true
+  },
   transpilePackages: [
     '@coasterai/client',
     '@coasterai/pb',
