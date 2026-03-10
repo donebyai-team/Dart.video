@@ -1,6 +1,6 @@
 version: v1
 plugins:
-  - plugin: buf.build/protocolbuffers/go:v1.31.0
+  - plugin: buf.build/protocolbuffers/go:v1.36.6
     out: backend/pb
     opt: paths=source_relative
 
