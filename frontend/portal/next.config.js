@@ -10,6 +10,14 @@ module.exports = {
   eslint: {
     ignoreDuringBuilds: true
   },
+  transpilePackages: [
+    '@coasterai/client',
+    '@coasterai/pb',
+    '@coasterai/store',
+    '@coasterai/ui-core',
+    '@coasterai/renderer',
+    '@coasterai/mui-config',
+  ],
   swcMinify: true,
   modularizeImports: {
     '@mui/icons-material': {

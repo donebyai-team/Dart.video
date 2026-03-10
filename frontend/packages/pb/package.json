@@ -3,6 +3,12 @@
   "version": "1.0.15",
   "description": "Tailwind ESM Protobuf shared across all packages",
   "private": true,
+  "files": [
+    "coasterai/**/*.js",
+    "coasterai/**/*.d.ts",
+    "coasterai/**/*.map",
+    "package.json"
+  ],
   "packageManager": "pnpm@9.15.5",
   "scripts": {
     "dep-check": "depcheck --ignores='@types/chrome'",
