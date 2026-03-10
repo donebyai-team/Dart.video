@@ -280,8 +280,8 @@ func syncTemplate(ctx context.Context, db datastore.TemplateRepository, template
 		}
 	}
 
-	tURL := fmt.Sprintf("%s/templates/%s/Transformed%s.tsx", services.GetPublicBucketURL(), animFolderName, templateName)
-	mURL := fmt.Sprintf("%s/templates/%s/%s.tsx", services.GetPublicBucketURL(), animFolderName, templateName)
+	tURL := fmt.Sprintf("%s/templates/%s/%s/Transformed.tsx", services.GetPublicBucketURL(), animFolderName, templateName)
+	mURL := fmt.Sprintf("%s/templates/%s/%s/Index.tsx", services.GetPublicBucketURL(), animFolderName, templateName)
 
 	existing, err := db.GetTemplateByName(ctx, animType, templateName)
 	if err != nil && !errors.Is(err, datastore.NotFound) {
