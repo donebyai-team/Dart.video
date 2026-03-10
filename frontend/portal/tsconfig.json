@@ -25,7 +25,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts"
-, "../packages/template-registery.ts", "remotion.config.js", "../packages/renderer/src/RemotionSlideshow.tsx", "../packages/renderer/src/Video.tsx", "../packages/renderer/src/components/TemplateContainer.tsx", "../packages/renderer/src/components/TemplateRenderer.tsx", "../packages/renderer/src/components/TextAnimations.tsx", "../packages/renderer/src/components/VideoPreview.tsx", "../packages/renderer/src/components/UploadModal.tsx", "../packages/renderer/src/components/RetryButton.tsx", "../packages/renderer/src/components/MediaContainer.tsx", "../packages/renderer/src/components/MediaStyler.tsx"  ],
+  ],
   "exclude": [
     "node_modules"
   ]
