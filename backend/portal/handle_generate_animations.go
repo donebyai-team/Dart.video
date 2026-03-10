@@ -6,10 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/shank318/coasterai/services"
 	"strings"
 
-	"github.com/google/uuid"
 	"github.com/shank318/coasterai/agent"
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
@@ -48,6 +48,7 @@ func (p *Portal) GenerateOrEditAnimationSlide(ctx context.Context, c *connect.Re
 		}
 		prompt = strings.TrimSpace(input.CreateNewAnimationInput.GetPrompt())
 		suggestions = input.CreateNewAnimationInput.GetSuggestions()
+		rawSlideID = uuid.New().String()
 	case *pbportal.GenerateOrEditAnimationRequest_AskUserInput:
 		requestKind = "ask"
 		isAskUserInput = true
@@ -55,6 +56,9 @@ func (p *Portal) GenerateOrEditAnimationSlide(ctx context.Context, c *connect.Re
 			return connect.NewError(connect.CodeInvalidArgument, errors.New("ask_user_input is required"))
 		}
 		rawSlideID = strings.TrimSpace(input.AskUserInput.GetSlideId())
+		if rawSlideID == "" {
+			return connect.NewError(connect.CodeInvalidArgument, errors.New("slide_id is required for edit"))
+		}
 		prompt = strings.TrimSpace(input.AskUserInput.GetResponse())
 	default:
 		return connect.NewError(connect.CodeInvalidArgument, errors.New("input is required"))
@@ -79,14 +83,9 @@ func (p *Portal) GenerateOrEditAnimationSlide(ctx context.Context, c *connect.Re
 		return connect.NewError(connect.CodeNotFound, errors.New("slide not found"))
 	}
 
-	requestedSlideID := rawSlideID
-	if requestedSlideID == "" {
-		requestedSlideID = uuid.New().String()
-	}
-
 	targetSlide := existingSlide
 	if targetSlide == nil {
-		targetSlide = newPendingAnimationSlide()
+		targetSlide = newPendingAnimationSlide(rawSlideID)
 	}
 
 	logger := logging.Logger(ctx, p.logger).With(
@@ -96,7 +95,7 @@ func (p *Portal) GenerateOrEditAnimationSlide(ctx context.Context, c *connect.Re
 	)
 
 	params := buildAnimationGenerationParams(videoID, actor.OrganizationID, targetSlide.Id, targetSlide, video)
-	animationAgent := p.newAnimationGeneratorAgent(logger, videoID, requestedSlideID, actor.OrganizationID)
+	animationAgent := p.newAnimationGeneratorAgent(logger, videoID, targetSlide.Id, actor.OrganizationID)
 
 	preserveExistingEdits := existingSlide != nil
 	return p.streamAnimationGenerationRun(
@@ -212,6 +211,7 @@ func sendAnimationResult(
 	if err := stream.Send(&pbportal.GenerateOrEditAnimationResponse{
 		Slide:       slide,
 		Suggestions: protoSuggestions,
+		Completed:   true,
 	}); err != nil {
 		return nil
 	}
@@ -268,9 +268,9 @@ func buildAnimationGenerationParams(videoID, orgID, slideID string, slide *pbcor
 	return params
 }
 
-func newPendingAnimationSlide() *pbcore.Slide {
+func newPendingAnimationSlide(slideID string) *pbcore.Slide {
 	return &pbcore.Slide{
-		Id:          uuid.New().String(),
+		Id:          slideID,
 		SlideStatus: pbcore.SlideStatus_SLIDE_STATUS_GENERATED,
 		Content: &pbcore.Slide_Animation{
 			Animation: &pbcore.AnimationSlideContent{},

@@ -64,9 +64,9 @@ message CreateNewAnimationInput {
 }
 
 message AskUserInput {
-  // optional on purpose. when omitted, backend can resume create flow by session key.
-  optional string slide_id = 1;
+  string slide_id = 1;
   string response = 2;
+  string video_id = 3;
 }
 
 message GenerateOrEditAnimationResponse {
@@ -75,6 +75,8 @@ message GenerateOrEditAnimationResponse {
   AskUserQuestion ask_user_question = 3;
   bool waiting_for_user_input = 4;
   repeated core.v1.AnimationTemplate suggestions = 5;
+  bool completed = 6;
+  string error_message = 7;
 }
 
 message UpdateBrandIdentityRequest {

@@ -101,16 +101,19 @@ export declare const CreateNewAnimationInputSchema: GenMessage<CreateNewAnimatio
  */
 export declare type AskUserInput = Message<"coasterai.portal.v1.AskUserInput"> & {
   /**
-   * optional on purpose. when omitted, backend can resume create flow by session key.
-   *
-   * @generated from field: optional string slide_id = 1;
+   * @generated from field: string slide_id = 1;
    */
-  slideId?: string;
+  slideId: string;
 
   /**
    * @generated from field: string response = 2;
    */
   response: string;
+
+  /**
+   * @generated from field: string video_id = 3;
+   */
+  videoId: string;
 };
 
 /**
@@ -147,6 +150,16 @@ export declare type GenerateOrEditAnimationResponse = Message<"coasterai.portal.
    * @generated from field: repeated coasterai.core.v1.AnimationTemplate suggestions = 5;
    */
   suggestions: AnimationTemplate[];
+
+  /**
+   * @generated from field: bool completed = 6;
+   */
+  completed: boolean;
+
+  /**
+   * @generated from field: string error_message = 7;
+   */
+  errorMessage: string;
 };
 
 /**

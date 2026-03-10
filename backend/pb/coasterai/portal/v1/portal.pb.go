@@ -451,10 +451,10 @@ func (x *CreateNewAnimationInput) GetPrompt() string {
 }
 
 type AskUserInput struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// optional on purpose. when omitted, backend can resume create flow by session key.
-	SlideId       *string `protobuf:"bytes,1,opt,name=slide_id,json=slideId,proto3,oneof" json:"slide_id,omitempty"`
-	Response      string  `protobuf:"bytes,2,opt,name=response,proto3" json:"response,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SlideId       string                 `protobuf:"bytes,1,opt,name=slide_id,json=slideId,proto3" json:"slide_id,omitempty"`
+	Response      string                 `protobuf:"bytes,2,opt,name=response,proto3" json:"response,omitempty"`
+	VideoId       string                 `protobuf:"bytes,3,opt,name=video_id,json=videoId,proto3" json:"video_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -490,8 +490,8 @@ func (*AskUserInput) Descriptor() ([]byte, []int) {
 }
 
 func (x *AskUserInput) GetSlideId() string {
-	if x != nil && x.SlideId != nil {
-		return *x.SlideId
+	if x != nil {
+		return x.SlideId
 	}
 	return ""
 }
@@ -503,6 +503,13 @@ func (x *AskUserInput) GetResponse() string {
 	return ""
 }
 
+func (x *AskUserInput) GetVideoId() string {
+	if x != nil {
+		return x.VideoId
+	}
+	return ""
+}
+
 type GenerateOrEditAnimationResponse struct {
 	state               protoimpl.MessageState  `protogen:"open.v1"`
 	Slide               *v1.Slide               `protobuf:"bytes,1,opt,name=slide,proto3" json:"slide,omitempty"`
@@ -510,6 +517,8 @@ type GenerateOrEditAnimationResponse struct {
 	AskUserQuestion     *AskUserQuestion        `protobuf:"bytes,3,opt,name=ask_user_question,json=askUserQuestion,proto3" json:"ask_user_question,omitempty"`
 	WaitingForUserInput bool                    `protobuf:"varint,4,opt,name=waiting_for_user_input,json=waitingForUserInput,proto3" json:"waiting_for_user_input,omitempty"`
 	Suggestions         []*v1.AnimationTemplate `protobuf:"bytes,5,rep,name=suggestions,proto3" json:"suggestions,omitempty"`
+	Completed           bool                    `protobuf:"varint,6,opt,name=completed,proto3" json:"completed,omitempty"`
+	ErrorMessage        string                  `protobuf:"bytes,7,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
 }
@@ -577,6 +586,20 @@ func (x *GenerateOrEditAnimationResponse) GetSuggestions() []*v1.AnimationTempla
 		return x.Suggestions
 	}
 	return nil
+}
+
+func (x *GenerateOrEditAnimationResponse) GetCompleted() bool {
+	if x != nil {
+		return x.Completed
+	}
+	return false
+}
+
+func (x *GenerateOrEditAnimationResponse) GetErrorMessage() string {
+	if x != nil {
+		return x.ErrorMessage
+	}
+	return ""
 }
 
 type UpdateBrandIdentityRequest struct {
@@ -2571,17 +2594,19 @@ const file_coasterai_portal_v1_portal_proto_rawDesc = "" +
 	"\x06prompt\x18\x02 \x01(\tR\x06prompt\"S\n" +
 	"\x17CreateNewAnimationInput\x12 \n" +
 	"\vsuggestions\x18\x01 \x01(\bR\vsuggestions\x12\x16\n" +
-	"\x06prompt\x18\x02 \x01(\tR\x06prompt\"W\n" +
-	"\fAskUserInput\x12\x1e\n" +
-	"\bslide_id\x18\x01 \x01(\tH\x00R\aslideId\x88\x01\x01\x12\x1a\n" +
-	"\bresponse\x18\x02 \x01(\tR\bresponseB\v\n" +
-	"\t_slide_id\"\xcb\x02\n" +
+	"\x06prompt\x18\x02 \x01(\tR\x06prompt\"`\n" +
+	"\fAskUserInput\x12\x19\n" +
+	"\bslide_id\x18\x01 \x01(\tR\aslideId\x12\x1a\n" +
+	"\bresponse\x18\x02 \x01(\tR\bresponse\x12\x19\n" +
+	"\bvideo_id\x18\x03 \x01(\tR\avideoId\"\x8e\x03\n" +
 	"\x1fGenerateOrEditAnimationResponse\x12.\n" +
 	"\x05slide\x18\x01 \x01(\v2\x18.coasterai.core.v1.SlideR\x05slide\x12)\n" +
 	"\x10thinking_summary\x18\x02 \x01(\tR\x0fthinkingSummary\x12P\n" +
 	"\x11ask_user_question\x18\x03 \x01(\v2$.coasterai.portal.v1.AskUserQuestionR\x0faskUserQuestion\x123\n" +
 	"\x16waiting_for_user_input\x18\x04 \x01(\bR\x13waitingForUserInput\x12F\n" +
-	"\vsuggestions\x18\x05 \x03(\v2$.coasterai.core.v1.AnimationTemplateR\vsuggestions\"Z\n" +
+	"\vsuggestions\x18\x05 \x03(\v2$.coasterai.core.v1.AnimationTemplateR\vsuggestions\x12\x1c\n" +
+	"\tcompleted\x18\x06 \x01(\bR\tcompleted\x12#\n" +
+	"\rerror_message\x18\a \x01(\tR\ferrorMessage\"Z\n" +
 	"\x1aUpdateBrandIdentityRequest\x12<\n" +
 	"\bidentity\x18\x01 \x01(\v2 .coasterai.core.v1.BrandIdentityR\bidentity\"6\n" +
 	"\x14BrandIdentityRequest\x12\x1e\n" +
@@ -2926,7 +2951,6 @@ func file_coasterai_portal_v1_portal_proto_init() {
 		(*GenerateOrEditAnimationRequest_CreateNewAnimationInput)(nil),
 		(*GenerateOrEditAnimationRequest_AskUserInput)(nil),
 	}
-	file_coasterai_portal_v1_portal_proto_msgTypes[3].OneofWrappers = []any{}
 	file_coasterai_portal_v1_portal_proto_msgTypes[16].OneofWrappers = []any{}
 	file_coasterai_portal_v1_portal_proto_msgTypes[19].OneofWrappers = []any{}
 	file_coasterai_portal_v1_portal_proto_msgTypes[32].OneofWrappers = []any{

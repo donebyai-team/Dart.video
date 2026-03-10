@@ -114,7 +114,7 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
 
         return {
             ...baseSlide,
-            id: baseSlide.id || randomSlideId(),
+            id: baseSlide.id,
             type: SlideType.ANIMATION,
             content: {
                 case: 'animation',
@@ -161,29 +161,58 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
                 setIsThinkingBusy(true)
             }
 
-            if (event.slide) {
-                pendingGeneratedSlideRef.current = event.slide
-                if (isAdding) {
-                    if (event.suggestions.length === 0) {
-                        createOrUpdateAddedSlide(event.slide)
-                    }
-                } else {
-                    applySlideToStore(event.slide)
+            // completed=true means work is fully done; the event always includes a slide with its id.
+            // If suggestions are present, auto-select the first one (user can switch via the grid).
+            // If no suggestions, apply the slide directly to the store.
+            // Either way, abort the stream and return to compose stage.
+            if (event.completed) {
+                setIsThinkingBusy(false)
+
+                if (event.slide) {
+                    pendingGeneratedSlideRef.current = event.slide
                 }
-                setIsThinkingBusy(false)
-            }
 
-            if (event.suggestions.length > 0) {
-                setSuggestions(event.suggestions)
-                setSelectedSuggestionIndex(0)
-                handleSelectSuggestion(0, event.suggestions)
-            }
+                if (event.suggestions.length > 0) {
+                    // Show the suggestion grid and apply the first option automatically
+                    setSuggestions(event.suggestions)
+                    setSelectedSuggestionIndex(0)
+                    handleSelectSuggestion(0, event.suggestions)
+                } else if (event.slide) {
+                    // No suggestions — commit the slide directly
+                    if (isAdding) {
+                        createOrUpdateAddedSlide(event.slide)
+                    } else {
+                        applySlideToStore(event.slide)
+                    }
+                }
 
-            if (event.waitingForUserInput && event.askUserQuestion) {
-                setPendingQuestion(event.askUserQuestion)
-                setIsThinkingBusy(false)
+                setStage('compose')
+                setIsSubmitting(false)
+                abortControllerRef.current?.abort()
                 return
             }
+
+            // completed=false + waitingForUserInput means the backend needs more info before finishing.
+            // The event includes the in-progress slide (with its id) so we can reference it in the
+            // follow-up askUserInput call. Abort the current stream; it will be restarted via
+            // handleContinuePlanning once the user answers.
+            if (!event.completed && event.waitingForUserInput && event.askUserQuestion) {
+                if (event.slide) {
+                    // Only store the id for the follow-up askUserInput — do NOT add this partial
+                    // slide to the store, it has no renderable content yet
+                    pendingGeneratedSlideRef.current = event.slide
+                    if (isAdding && !createdSlideIdRef.current) {
+                        createdSlideIdRef.current = event.slide.id
+                    }
+                }
+
+                setPendingQuestion(event.askUserQuestion)
+                setIsThinkingBusy(false)
+                setIsSubmitting(false)
+                abortControllerRef.current?.abort()
+                return
+            }
+
         }
 
         if (!signal.aborted && streamSessionRef.current === streamSession) {
@@ -244,12 +273,16 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
                 setStage('compose')
                 setThinkingChunk('')
                 setIsThinkingBusy(false)
-                setIsSubmitting(false)
+                setIsSubmitting(false)                
             }
         } finally {
+            if (!controller.signal.aborted && streamSessionRef.current === streamSession) {
+                setIsSubmitting(false)
+            }
             if (abortControllerRef.current === controller) {
                 abortControllerRef.current = null
             }
+
         }
     }
 
@@ -290,7 +323,9 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
                 input: {
                     case: 'askUserInput',
                     value: {
-                        slideId: createdSlideIdRef.current ?? (isAdding ? undefined : selectedSlide?.slide.id),
+                        // slideId is always required: for new slides it comes from createdSlideIdRef
+                        // (set when the waitingForUserInput event arrived), for edits it's the selected slide
+                        slideId: createdSlideIdRef.current!,
                         response,
                     },
                 },
@@ -393,8 +428,8 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
                                         key={template.id}
                                         onClick={() => handleSelectSuggestion(index)}
                                         className={`relative rounded-lg overflow-hidden border-2 transition-colors aspect-video bg-muted ${selectedSuggestionIndex === index
-                                                ? 'border-primary'
-                                                : 'border-transparent hover:border-border'
+                                            ? 'border-primary'
+                                            : 'border-transparent hover:border-border'
                                             }`}
                                     >
                                         {template.previewUrl ? (
