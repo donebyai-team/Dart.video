@@ -230,7 +230,7 @@ func (l animationGenerator) GenerateCode(ctx context.Context,
 		})
 
 		l.logger.Info("generating code")
-		generatedAnimation, err := baml_client.GenerateAngitimation(ctx, inptCodeGeneration, conversationHistory)
+		generatedAnimation, err := baml_client.GenerateAnimation(ctx, inptCodeGeneration, conversationHistory)
 		if err != nil {
 			return nil, agenterrors.AnimationGenerationFailed("failed to generate animation", err)
 		}
