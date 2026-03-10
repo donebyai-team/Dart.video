@@ -15,7 +15,10 @@ func (p *Portal) RenderVideo(ctx context.Context, c *connect.Request[pbportal.Re
 		return nil, err
 	}
 
-	existingVideo, err := p.db.GetVideoById(ctx, c.Msg.VideoId, actor.OrganizationID)
+	existingVideo, _, err := p.videoGenerationService.GetVideo(ctx, c.Msg.VideoId, actor.OrganizationID, services.VideoOptions{
+		IncludePending: false,
+		Render:         true,
+	})
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}

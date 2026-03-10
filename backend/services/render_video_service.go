@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -22,9 +21,14 @@ const (
 	defaultRenderRegion  = "asia-east1"
 	defaultRenderJobName = "remotion-renderer"
 	defaultJobIDTTL      = 30 * time.Minute
+	defaultInputPropsTTL = 2 * time.Hour
 	defaultOutputBucket  = "redora-coasterai-videos"
 
 	projectName = "redora"
+
+	renderJobIDKeyPrefix    = "render:job"
+	renderInputKeyPrefix    = "render:input"
+	renderProgressKeyPrefix = "render:progress"
 )
 
 type RenderVideoService interface {
@@ -76,6 +80,18 @@ type renderVideoService struct {
 	cache       cache.Cache
 }
 
+func renderJobIDKey(videoID string, version int64) string {
+	return fmt.Sprintf("%s:%s:%d", renderJobIDKeyPrefix, videoID, version)
+}
+
+func renderInputPropsKey(videoID string, version int64, nonce int64) string {
+	return fmt.Sprintf("%s:%s:%d:%d", renderInputKeyPrefix, videoID, version, nonce)
+}
+
+func renderProgressKey(videoID, version string) string {
+	return fmt.Sprintf("%s:%s:%s", renderProgressKeyPrefix, videoID, version)
+}
+
 func NewRenderVideoService(ctx context.Context, cache cache.Cache, logger *zap.Logger) (RenderVideoService, error) {
 	runService, err := run.NewService(ctx)
 	if err != nil {
@@ -112,7 +128,7 @@ func (s *renderVideoService) SubmitJob(ctx context.Context, input *SubmitRenderJ
 		return "", fmt.Errorf("input is required")
 	}
 
-	cacheKey := fmt.Sprintf("%s:version:%d", input.Props.Id, input.Props.Version)
+	cacheKey := renderJobIDKey(input.Props.Id, input.Props.Version)
 
 	// ---- STRICT CACHE GET ----
 	cachedJobID, err := s.cache.GetKey(ctx, cacheKey)
@@ -134,14 +150,17 @@ func (s *renderVideoService) SubmitJob(ctx context.Context, input *SubmitRenderJ
 		return "", fmt.Errorf("marshal proto: %w", err)
 	}
 
-	propsB64 := base64.StdEncoding.EncodeToString(proto)
+	propsRedisKey := renderInputPropsKey(input.Props.Id, input.Props.Version, time.Now().UnixNano())
+	if err := s.cache.SetKey(ctx, propsRedisKey, string(proto), defaultInputPropsTTL); err != nil {
+		return "", fmt.Errorf("cache set failed for input props key %s: %w", propsRedisKey, err)
+	}
 
 	request := &run.GoogleCloudRunV2RunJobRequest{
 		Overrides: &run.GoogleCloudRunV2Overrides{
 			ContainerOverrides: []*run.GoogleCloudRunV2ContainerOverride{
 				{
 					Env: []*run.GoogleCloudRunV2EnvVar{
-						{Name: "RENDER_INPUT_PROPS_B64", Value: propsB64},
+						{Name: "RENDER_INPUT_PROPS_REDIS_KEY", Value: propsRedisKey},
 					},
 				},
 			},
@@ -219,7 +238,7 @@ func (s *renderVideoService) PollJob(
 	// --- Read progress from Redis ---
 	// The Cloud Run job writes to this key (with the coasterai: prefix baked in).
 	// s.cache.GetKey automatically prepends "coasterai:" so we pass the bare key.
-	progressKey := fmt.Sprintf("render:progress:%s:%s", input.VideoID, input.Version)
+	progressKey := renderProgressKey(input.VideoID, input.Version)
 	progressJSON, progressErr := s.cache.GetKey(ctx, progressKey)
 
 	if progressErr != nil && !errors.Is(progressErr, cache.ErrCacheMiss) {

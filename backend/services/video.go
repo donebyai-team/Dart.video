@@ -14,10 +14,15 @@ import (
 
 type VideoGeneration interface {
 	CreateVideo(ctx context.Context, organizationID string, params *pbportal.CreateVideoRequest) (*models.Video, error)
-	GetVideo(ctx context.Context, id, organizationID string, includePending bool) (*models.Video, int, error)
-	GetVideos(ctx context.Context, organizationID string, includePending bool) ([]*models.Video, error)
+	GetVideo(ctx context.Context, id, organizationID string, options VideoOptions) (*models.Video, int, error)
+	GetVideos(ctx context.Context, organizationID string, options VideoOptions) ([]*models.Video, error)
 	UpdateVideoConfig(ctx context.Context, video *models.Video) error
 	UpdateVideoStatus(ctx context.Context, ID string, status models.VideoStatus) error
+}
+
+type VideoOptions struct {
+	IncludePending bool
+	Render         bool
 }
 
 type videoGeneration struct {
@@ -152,13 +157,13 @@ func (v videoGeneration) CreateVideo(ctx context.Context, organizationID string,
 	return video, nil
 }
 
-func filterGeneratedSections(video *models.Video, includePending bool) int {
+func filterGeneratedSections(video *models.Video, options VideoOptions) int {
 	if video == nil || video.Config == nil {
 		return 0
 	}
 
 	shouldInclude := func(slide *pbcore.Slide) bool {
-		if includePending {
+		if options.IncludePending {
 			return true
 		}
 		return slide.SlideStatus == pbcore.SlideStatus_SLIDE_STATUS_GENERATED ||
@@ -167,14 +172,22 @@ func filterGeneratedSections(video *models.Video, includePending bool) int {
 
 	totalSlides := 0
 	var filteredSections []*pbcore.Section
+
 	for _, section := range video.Config.Sections {
 		var filteredSlides []*pbcore.Slide
 
 		for _, slide := range section.Slides {
 			totalSlides++
-			if shouldInclude(slide) {
-				filteredSlides = append(filteredSlides, slide)
+
+			if !shouldInclude(slide) {
+				continue
 			}
+
+			if options.Render {
+				stripSlideForRender(slide)
+			}
+
+			filteredSlides = append(filteredSlides, slide)
 		}
 
 		if len(filteredSlides) > 0 {
@@ -187,24 +200,42 @@ func filterGeneratedSections(video *models.Video, includePending bool) int {
 	return totalSlides
 }
 
-func (v videoGeneration) GetVideo(ctx context.Context, id, organizationID string, includePending bool) (*models.Video, int, error) {
+func stripSlideForRender(slide *pbcore.Slide) {
+	if slide == nil {
+		return
+	}
+
+	// remove fields not needed for rendering
+	slide.Plan = nil
+	if slide.GetAnimation() != nil {
+		slide.GetAnimation().Plan = nil
+		slide.GetAnimation().Registry = nil
+		slide.GetAnimation().CodeRegistry.MUrl = ""
+	}
+
+	if slide.GetMedia() != nil {
+		slide.GetMedia().Plan = nil
+	}
+}
+
+func (v videoGeneration) GetVideo(ctx context.Context, id, organizationID string, options VideoOptions) (*models.Video, int, error) {
 	video, err := v.db.GetVideoById(ctx, id, organizationID)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	totalSlides := filterGeneratedSections(video, includePending)
+	totalSlides := filterGeneratedSections(video, options)
 
 	return video, totalSlides, nil
 }
 
-func (v videoGeneration) GetVideos(ctx context.Context, organizationID string, includePending bool) ([]*models.Video, error) {
+func (v videoGeneration) GetVideos(ctx context.Context, organizationID string, options VideoOptions) ([]*models.Video, error) {
 	videos, err := v.db.GetVideos(ctx, organizationID)
 	if err != nil {
 		return nil, err
 	}
 	for _, video := range videos {
-		filterGeneratedSections(video, includePending)
+		filterGeneratedSections(video, options)
 	}
 	return videos, nil
 }

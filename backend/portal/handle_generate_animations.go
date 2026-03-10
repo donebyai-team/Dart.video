@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/shank318/coasterai/services"
 	"strings"
 
 	"github.com/google/uuid"
@@ -68,7 +69,7 @@ func (p *Portal) GenerateOrEditAnimationSlide(ctx context.Context, c *connect.Re
 		return err
 	}
 
-	video, _, err := p.videoGenerationService.GetVideo(ctx, videoID, actor.OrganizationID, false)
+	video, _, err := p.videoGenerationService.GetVideo(ctx, videoID, actor.OrganizationID, services.VideoOptions{IncludePending: false})
 	if err != nil {
 		return err
 	}

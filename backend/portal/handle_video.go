@@ -11,6 +11,7 @@ import (
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
+	"github.com/shank318/coasterai/services"
 	"github.com/streamingfast/logging"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -311,7 +312,7 @@ func (p *Portal) GetVideo(
 	var videoAgent agent.VideoAgent // lazy init
 
 	sendCurrent := func() (*models.Video, error) {
-		video, totalSlides, err := p.videoGenerationService.GetVideo(ctx, videoID, actor.OrganizationID, false)
+		video, totalSlides, err := p.videoGenerationService.GetVideo(ctx, videoID, actor.OrganizationID, services.VideoOptions{IncludePending: false})
 		if err != nil {
 			return nil, err
 		}
@@ -391,7 +392,7 @@ func (p *Portal) GetVideos(ctx context.Context, c *connect.Request[emptypb.Empty
 		return nil, err
 	}
 
-	videos, err := p.videoGenerationService.GetVideos(ctx, actor.OrganizationID, false)
+	videos, err := p.videoGenerationService.GetVideos(ctx, actor.OrganizationID, services.VideoOptions{IncludePending: false})
 	if err != nil {
 		return nil, errorx.ToConnect(errorx.New(errorx.CodeInternal, "VIDEO_LIST_FAILED", "failed to list videos", err))
 	}

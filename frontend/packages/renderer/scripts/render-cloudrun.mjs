@@ -16,16 +16,27 @@ const redisUrl = process.env.REDIS_URL;
 if (!redisUrl) throw new Error('Missing required env var REDIS_URL');
 
 const compositionId = process.env.REMOTION_COMPOSITION_ID || 'MyComposition';
+const propsRedisKey = process.env.RENDER_INPUT_PROPS_REDIS_KEY;
+if (!propsRedisKey) throw new Error('Missing required env var RENDER_INPUT_PROPS_REDIS_KEY');
 
-// --- Decode input props ---
-const encodedProps = process.env.RENDER_INPUT_PROPS_B64;
-if (!encodedProps) throw new Error('Missing required env var RENDER_INPUT_PROPS_B64');
+// --- Redis setup ---
+const redis = new Redis(redisUrl, {lazyConnect: false, enableReadyCheck: true});
+
+// --- Load input props from Redis ---
+const namespacedPropsKey = propsRedisKey.startsWith(KEY_PREFIX)
+  ? propsRedisKey
+  : `${KEY_PREFIX}${propsRedisKey}`;
+
+const propsJSON = await redis.get(namespacedPropsKey);
+if (!propsJSON) {
+  throw new Error(`Missing render props in Redis key ${namespacedPropsKey}`);
+}
 
 let protoProps;
 try {
-  protoProps = JSON.parse(Buffer.from(encodedProps, 'base64').toString('utf8'));
+  protoProps = JSON.parse(propsJSON);
 } catch (e) {
-  throw new Error(`Invalid render props JSON: ${e.message}`);
+  throw new Error(`Invalid render props JSON from Redis: ${e.message}`);
 }
 
 // protoProps is the Video proto JSON (id, name, config, metadata, version, ...)
@@ -42,8 +53,6 @@ const destination = `${videoId}/${version}.mp4`;
 // Wrap proto as { video: ... } so Video.tsx getInputProps()?.video resolves correctly
 const inputProps = {video: protoProps};
 
-// --- Redis setup ---
-const redis = new Redis(redisUrl, {lazyConnect: false, enableReadyCheck: true});
 const progressKey = `${KEY_PREFIX}render:progress:${videoId}:${version}`;
 
 async function writeProgress(data) {

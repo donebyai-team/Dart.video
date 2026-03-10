@@ -1,26 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Idempotent deploy for the Remotion Validator Cloud Run Service using local Docker build/push.
-# Uses the same Docker image as deploy-remotion-cloudrun.sh (Dockerfile.remotion-job).
-# Re-run this script after code changes.
+# Idempotent deploy for the Remotion Validator Cloud Run Service.
+# Reuses the image built and pushed by deploy-remotion-cloudrun.sh — no Docker build needed here.
+# Run deploy-remotion-cloudrun.sh first to push the image, then re-run this script to update the service.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT_DIR="$(cd "$SCRIPT_DIR/../../.." && pwd)"
-RENDERER_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 if ! command -v gcloud >/dev/null 2>&1; then
   echo "error: gcloud is required" >&2
-  exit 1
-fi
-
-if ! command -v docker >/dev/null 2>&1; then
-  echo "error: docker is required" >&2
-  exit 1
-fi
-
-if ! docker buildx version >/dev/null 2>&1; then
-  echo "error: docker buildx is required" >&2
   exit 1
 fi
 
@@ -105,21 +93,6 @@ gcloud storage buckets add-iam-policy-binding "gs://$OUTPUT_BUCKET" \
   --member="serviceAccount:$JOB_SA_EMAIL" \
   --role="roles/storage.objectAdmin" \
   --project="$PROJECT_ID" >/dev/null
-
-log "Configuring Docker auth for Artifact Registry"
-gcloud auth configure-docker "$REGION-docker.pkg.dev" --quiet >/dev/null
-
-CACHE_URI="$REGION-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/$IMAGE_NAME:buildcache"
-
-log "Building and pushing linux/amd64 image: $IMAGE_URI"
-docker buildx build \
-  --platform linux/amd64 \
-  -f "$RENDERER_DIR/Dockerfile.remotion-job" \
-  -t "$IMAGE_URI" \
-  --cache-from "type=registry,ref=$CACHE_URI" \
-  --cache-to "type=registry,ref=$CACHE_URI,mode=max" \
-  --push \
-  "$ROOT_DIR"
 
 log "Deploying Cloud Run Service: $SERVICE_NAME"
 gcloud run deploy "$SERVICE_NAME" \
