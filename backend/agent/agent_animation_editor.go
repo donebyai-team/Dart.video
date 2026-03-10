@@ -328,6 +328,9 @@ func (l *agentAnimationEditor) runGenerateAnimationFromPrompt(ctx context.Contex
 			brandIdentityRegistry = _brandIdentityRegistry
 			params.VideoBranding.BrandGuideLines = utils.Ptr(_brandIdentityRegistry.FormatBrandAndAssetDetails())
 			input.Branding.BrandGuideLines = params.VideoBranding.BrandGuideLines
+			l.logger.Info("using brand-identity",
+				zap.String("brand-identity-id", *params.VideoBranding.BrandLibraryID),
+			)
 		}
 	}
 

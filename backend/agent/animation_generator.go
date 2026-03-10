@@ -168,6 +168,9 @@ func (l animationGenerator) Generate(
 		}
 
 		if _brandIdentityRegistry != nil {
+			l.logger.Info("using brand-identity",
+				zap.String("brand-identity-id", *params.VideoBranding.BrandLibraryID),
+			)
 			brandIdentityRegistry = _brandIdentityRegistry
 			params.VideoBranding.BrandGuideLines = utils.Ptr(_brandIdentityRegistry.FormatBrandAndAssetDetails())
 		}
@@ -219,6 +222,12 @@ func (l animationGenerator) GenerateCode(ctx context.Context,
 		inptCodeGeneration.SlideBackground = gradientToCSS(params.VideoBackground.Gradient)
 	}
 
+	if inptCodeGeneration.Branding.BrandGuideLines != nil {
+		l.logger.Info("using brand-identity guidelines",
+			zap.String("guidelines", *inptCodeGeneration.Branding.BrandGuideLines),
+		)
+	}
+
 	conversationHistory := make([]types.Message, 0)
 	componentName := RandomComponentName()
 
@@ -237,6 +246,7 @@ func (l animationGenerator) GenerateCode(ctx context.Context,
 
 		// resolve the asset handles
 		if brandIdentityRegistry != nil {
+			l.logger.Info("using brand-identity mapping for resolving media handles")
 			generatedAnimation.Code = brandIdentityRegistry.ResolveMediaHandles(generatedAnimation.Code)
 		}
 
@@ -727,6 +737,7 @@ func (l animationGenerator) ExtractConfig(
 	beatDescription string,
 	template *models.Template,
 	params GenerationParams) (*types.TemplateConfigExtractorOutput, error) {
+	l.logger.Info("extracting template config")
 	marshal, err := json.Marshal(template.Schema)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to marshal template schema of template : %s", template.ID)
@@ -758,6 +769,10 @@ func (l animationGenerator) ExtractConfig(
 		if _brandIdentityRegistry != nil {
 			brandIdentityRegistry = _brandIdentityRegistry
 			input.Branding.BrandGuideLines = utils.Ptr(_brandIdentityRegistry.FormatBrandAndAssetDetails())
+			l.logger.Info("using brand-identity",
+				zap.String("brand-identity-id", *params.VideoBranding.BrandLibraryID),
+				zap.String("guidelines", *input.Branding.BrandGuideLines),
+			)
 		}
 	}
 
@@ -772,6 +787,7 @@ func (l animationGenerator) ExtractConfig(
 	}
 
 	if brandIdentityRegistry != nil {
+		l.logger.Info("using brand-identity mapping for resolving media handles")
 		output.Config = brandIdentityRegistry.ResolveMediaHandles(output.Config)
 	}
 
