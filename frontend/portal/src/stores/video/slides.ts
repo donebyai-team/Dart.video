@@ -28,7 +28,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   addAnimationSlide: (sectionId: string, newSlide: Slide, afterSlideId?: string) => {
     const { videoConfig } = get();
     if (!videoConfig?.config) return;
-    console.log("Added new slide", newSlide, sectionId)
+    console.log("Added new slide", newSlide, sectionId, afterSlideId)
 
     const sections = getSections(videoConfig);
     const previousSlide = getPreviousSlide(sections, sectionId);

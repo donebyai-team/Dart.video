@@ -271,6 +271,7 @@ func buildAnimationGenerationParams(videoID, orgID, slideID string, slide *pbcor
 func newPendingAnimationSlide(slideID string) *pbcore.Slide {
 	return &pbcore.Slide{
 		Id:          slideID,
+		Type:        pbcore.SlideType_SLIDE_TYPE_ANIMATION,
 		SlideStatus: pbcore.SlideStatus_SLIDE_STATUS_GENERATED,
 		Content: &pbcore.Slide_Animation{
 			Animation: &pbcore.AnimationSlideContent{},
@@ -290,15 +291,7 @@ func applyTemplateToSlide(slide *pbcore.Slide, template *models.Template, preser
 	}
 
 	animationContent := slide.GetAnimation()
-	if animationContent == nil {
-		animationContent = &pbcore.AnimationSlideContent{
-			Plan: template.GeneratedPlan,
-		}
-		slide.Content = &pbcore.Slide_Animation{
-			Animation: animationContent,
-		}
-	}
-
+	animationContent.Plan = template.GeneratedPlan
 	animationContent.CodeRegistry = template.CodeRegistry
 	animationContent.Registry = toStructRegistry
 
