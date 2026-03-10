@@ -16,11 +16,12 @@ import { useAnimationEdit } from '../animation/useAnimationEdit'
 
 interface AnimationEditorProps {
     settings: AddOrEditAnimationSettings
+    onClose: () => void
 }
 
 type Stage = 'compose' | 'thinking' | 'question'
 
-export default function AnimationEditor({ settings }: AnimationEditorProps) {
+export default function AnimationEditor({ settings, onClose }: AnimationEditorProps) {
     const updateSlide = useVideoStore(s => s.updateSlide)
     const selectedSlide = useVideoStore(s => s.selectedSlide)
     const addAnimationSlide = useVideoStore(s => s.addAnimationSlide)
@@ -404,9 +405,14 @@ export default function AnimationEditor({ settings }: AnimationEditorProps) {
 
     return (
         <div className='flex flex-col h-full p-4 gap-3'>
-            {/* <div className='text-sm font-medium text-foreground'>
-                {isAdding ? 'Generate Animation' : 'Edit Animation'}
-            </div> */}
+            <div className='flex items-center justify-between'>
+                <span className='text-sm font-medium text-foreground'>
+                    {/* {isAdding ? 'Generate Animation' : 'Edit Animation'} */}
+                </span>
+                <Button variant='ghost' size='sm' className='h-6 w-6 p-0' onClick={onClose}>
+                    <X className='w-4 h-4' />
+                </Button>
+            </div>
 
             <div className='flex flex-col flex-1 min-h-0'>
                 <div className='flex-1 min-h-0 rounded-xl bg-background/60 backdrop-blur-sm p-3 overflow-auto'>

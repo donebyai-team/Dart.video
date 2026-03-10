@@ -95,6 +95,7 @@ const ToolsSettingsPanel = ({
        activeTool.settings && (
         <AnimationEditor
           settings={activeTool.settings}
+          onClose={handleCloseTool}
         />
       )}
 
