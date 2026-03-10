@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+import "google/protobuf/wrappers.proto";
+package coasterai.core.v1;
+option go_package = "github.com/shank318/coasterai/pb/coasterai/core/v1;pbcore";
+import "coasterai/core/v1/slide.proto";
+
+enum BrandMediaType {
+  BRAND_MEDIA_TYPE_UNSPECIFIED = 0;
+  BRAND_MEDIA_TYPE_LOGO = 1;
+  BRAND_MEDIA_TYPE_ICON = 2;
+  BRAND_MEDIA_TYPE_WORDMARK = 3;
+  BRAND_MEDIA_TYPE_IMAGE = 4;
+  BRAND_MEDIA_TYPE_VIDEO = 5;
+  BRAND_MEDIA_TYPE_MOOD_BOARD = 6;
+}
+
+enum BrandAssetPriority {
+  BRAND_ASSET_PRIORITY_UNSPECIFIED = 0;
+  BRAND_ASSET_PRIORITY_PRIMARY = 1;
+  BRAND_ASSET_PRIORITY_SECONDARY = 2;
+  BRAND_ASSET_PRIORITY_ACCENT = 3;
+  BRAND_ASSET_PRIORITY_BACKGROUND = 4;
+  BRAND_ASSET_PRIORITY_TEXT_PRIMARY = 5;
+  BRAND_ASSET_PRIORITY_TEXT_SECONDARY = 6;
+}
+
+message BrandMedia {
+  MediaAsset asset = 1;
+  BrandAssetPriority priority = 2;
+  BrandMediaType type = 3;
+}
+
+message BrandColor {
+  string color_hex_code = 1;
+  BrandAssetPriority priority = 2;
+}
+
+message BrandSocialMedia {
+  string id = 1;
+  string platform = 2;
+  string url = 3;
+}
+
+message BrandFont {
+  google.protobuf.StringValue google_fonts_name = 1;
+  string name = 2;
+}
+
+
+message BrandIdentity {
+  string id = 1;
+  string name = 2;
+  string website_url = 3;
+  google.protobuf.StringValue tagline = 4;
+  google.protobuf.StringValue description = 5;
+  repeated BrandMedia logos = 6;
+  repeated BrandSocialMedia socials = 7;
+  repeated BrandFont fonts = 8;
+  repeated BrandColor colors = 9;
+}

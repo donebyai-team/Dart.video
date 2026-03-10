@@ -26,7 +26,7 @@ redora-infra/.terraform
 .run/
 backend/cmd/coasterai/.coasterai
 *.mp4
-coasterai
+#coasterai
 redora
 
 .gocache/
