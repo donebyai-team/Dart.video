@@ -16,10 +16,10 @@ RUN apt-get update && apt-get install -y \
 RUN go env -w GOMODCACHE=/root/.cache/go-build
 
 COPY go.mod go.sum ./
-RUN --mount=type=cache,id=s/173fddb5-d411-4982-b2fa-9d04f96c13e1-/root/.cache/go-build,target=/root/.cache/go-build go mod download
+RUN --mount=type=cache,id=s/90787016-4716-4812-82da-75b26360bada-/root/.cache/go-build,target=/root/.cache/go-build go mod download
 
 COPY . .
-RUN --mount=type=cache,id=s/173fddb5-d411-4982-b2fa-9d04f96c13e1-/root/.cache/go-build,target=/root/.cache/go-build \
+RUN --mount=type=cache,id=s/90787016-4716-4812-82da-75b26360bada-/root/.cache/go-build,target=/root/.cache/go-build \
     GOOS=$TARGETOS GOARCH=$TARGETARCH go build -ldflags="-s -w -X main.version=${VERSION}" -o /app/coasterai ./cmd/coasterai
 
 FROM debian:bullseye-slim as bullseye-base
