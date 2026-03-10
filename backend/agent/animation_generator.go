@@ -273,6 +273,7 @@ func (l animationGenerator) GenerateCode(ctx context.Context,
 		})
 
 		if err == nil {
+			l.logger.Info("build passed and animation generated", zap.String("output_path", buildOutput.JSPath))
 			callback(TemplateGenerationProgress{
 				Message: CreativeStageMessage(StageReady, 0),
 			})
@@ -425,6 +426,10 @@ func (l animationGenerator) tryTargetedEdits(
 		newCode, retryReason := applyEdits(code, response.Edits)
 
 		if retryReason != "" {
+			l.logger.Error("failed to apply edits, trying again",
+				zap.String("error", retryReason),
+				zap.Int("attempt_left", maxAttempts-attempt))
+
 			conversationHistory = appendRetryConversation(
 				conversationHistory,
 				stringify(response),
@@ -530,6 +535,8 @@ func (l animationGenerator) uploadAndBuild(
 		return nil, agenterrors.AnimationGenerationFailed("failed to upload code", err)
 	}
 
+	l.logger.Info("uploaded generated code", zap.String("url", uploadedMedia.Url))
+
 	callback(TemplateGenerationProgress{
 		Message: CreativeStageMessage(StageBuilding, attempt),
 	})
@@ -540,9 +547,10 @@ func (l animationGenerator) uploadAndBuild(
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to build animation: %w", err)
 	}
 
+	l.logger.Info("build passed animation generated", zap.String("output_path", buildOutput.JSPath))
 	callback(TemplateGenerationProgress{
 		Message: CreativeStageMessage(StageReady, attempt),
 	})
