@@ -82,6 +82,11 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   // Set whenever the user manually selects a slide (from timeline or settings panel).
   const [playFromSlideId, setPlayFromSlideId] = useState<string | null>(null);
 
+  // Pause on drag start; stay paused when drag ends (user presses play to resume)
+  const handleDraggingChange = useCallback((dragging: boolean) => {
+    if (dragging) playerRef.current?.pause();
+  }, []);
+
   const totalFrames = useMemo(
     () => calculateRealTotalFrames(allSlides, fps),
     [allSlides, fps]
@@ -250,6 +255,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
           currentFrame={currentFrame}
           onSeek={(frame) => controls.seekToFrame(frame)}
           onSelectSlide={handleSlideSelect}
+          onDraggingChange={handleDraggingChange}
           onSelectOverlay={(overlayId, slideId) => {
             if (onSelectOverlayFromTimeline) {
               onSelectOverlayFromTimeline(overlayId, slideId);
