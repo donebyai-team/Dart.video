@@ -65,7 +65,9 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   const fps = videoConfigFromStore?.metadata?.fps || 30;
 
   const getTimelineSlides = useVideoStore(s => s.getTimelineSlides);
-  const allSlides = getTimelineSlides();
+  // Recompute allSlides whenever videoConfig changes (e.g. slide duration update).
+  // getTimelineSlides is a stable function ref so we depend on videoConfigFromStore directly.
+  const allSlides = useMemo(() => getTimelineSlides(), [videoConfigFromStore]);
 
   const selectedSlideId = selectedSlide?.id || "";
 
@@ -77,6 +79,9 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   const [userZoom, setUserZoom] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [currentFrame, setCurrentFrame] = useState(1);
+  // Auto-hide controls in fullscreen after 3s of no mouse movement
+  const [controlsVisible, setControlsVisible] = useState(true);
+  const controlsHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // When set, pressing play seeks to this slide's start before playing.
   // Set whenever the user manually selects a slide (from timeline or settings panel).
@@ -201,6 +206,26 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
     onPlaybackStateChange?.(isPlaying);
   }, [isPlaying, onPlaybackStateChange]);
 
+  // Show controls on mouse move in fullscreen; hide after 3s of inactivity
+  const handleMouseMove = useCallback(() => {
+    if (!isFullscreen) return;
+    setControlsVisible(true);
+    if (controlsHideTimerRef.current) clearTimeout(controlsHideTimerRef.current);
+    controlsHideTimerRef.current = setTimeout(() => setControlsVisible(false), 3000);
+  }, [isFullscreen]);
+
+  // Reset hide timer when entering/leaving fullscreen
+  useEffect(() => {
+    if (!isFullscreen) {
+      setControlsVisible(true);
+      if (controlsHideTimerRef.current) clearTimeout(controlsHideTimerRef.current);
+    } else {
+      // Start the hide timer immediately on entering fullscreen
+      controlsHideTimerRef.current = setTimeout(() => setControlsVisible(false), 3000);
+    }
+    return () => { if (controlsHideTimerRef.current) clearTimeout(controlsHideTimerRef.current); };
+  }, [isFullscreen]);
+
   if (!videoConfigFromStore?.config || !resolution) {
     return <Loading />;
   }
@@ -222,8 +247,116 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
     return { width: resolution.width * finalScale, height: resolution.height * finalScale };
   }, [resolution, isFullscreen, viewport, containerSize]);
 
+  // Controls bar — shared between normal and fullscreen mode
+  const controlsBar = (
+    <div className={`h-14 px-4 flex items-center gap-4 ${isFullscreen ? "bg-black/60 backdrop-blur-sm text-white" : "border-t border-border/50"}`}>
+      {/* Playback controls */}
+      <div className="flex items-center gap-1">
+        <button
+          onClick={() => controls.skipBackward()}
+          className="w-9 h-9 rounded-lg hover:bg-white/10 flex items-center justify-center transition-colors"
+          title="Skip back 5s"
+        >
+          <SkipBack className="w-4 h-4" />
+        </button>
+
+        <button
+          onClick={() => controls.togglePlayPause()}
+          className="w-11 h-11 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors"
+        >
+          {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
+        </button>
+
+        <button
+          onClick={() => controls.skipForward()}
+          className="w-9 h-9 rounded-lg hover:bg-white/10 flex items-center justify-center transition-colors"
+          title="Skip forward 5s"
+        >
+          <SkipForward className="w-4 h-4" />
+        </button>
+      </div>
+
+      {/* Time display */}
+      <div className={`text-sm font-mono min-w-[100px] ${isFullscreen ? "text-white/70" : "text-muted-foreground"}`}>
+        <span className={isFullscreen ? "text-white" : "text-foreground"}>{formatTime(currentTime)}</span>
+        <span className="mx-1">/</span>
+        <span>{formatTime(totalDuration)}</span>
+      </div>
+
+      <div className="flex-1" />
+
+      {/* Zoom + Volume + Fullscreen */}
+      <div className="flex items-center gap-1">
+        {!isFullscreen && (
+          <>
+            <button
+              onClick={handleZoomOut}
+              disabled={userZoom <= 0.25}
+              className="w-8 h-8 rounded-lg hover:bg-muted flex items-center justify-center transition-colors disabled:opacity-40"
+              title="Zoom out"
+            >
+              <Minus className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={handleZoomReset}
+              className="h-8 px-2 rounded-lg hover:bg-muted flex items-center justify-center transition-colors text-xs font-medium min-w-[44px]"
+              title="Reset zoom"
+            >
+              {Math.round(userZoom * 100)}%
+            </button>
+            <button
+              onClick={handleZoomIn}
+              disabled={userZoom >= 3}
+              className="w-8 h-8 rounded-lg hover:bg-muted flex items-center justify-center transition-colors disabled:opacity-40"
+              title="Zoom in"
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </button>
+            <Separator orientation="vertical" className="h-5 mx-1" />
+          </>
+        )}
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <button className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isFullscreen ? "hover:bg-white/10" : "hover:bg-muted"}`}>
+              {isMuted || volume[0] === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-36 p-3" side="top">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setIsMuted(!isMuted)}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+              </button>
+              <Slider
+                value={isMuted ? [0] : volume}
+                onValueChange={(v) => {
+                  setVolume(v);
+                  if (v[0] > 0) setIsMuted(false);
+                }}
+                max={100}
+                step={1}
+                className="flex-1"
+              />
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        <button
+          onClick={handleFullscreen}
+          className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isFullscreen ? "hover:bg-white/10" : "hover:bg-muted"}`}
+          title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+        >
+          <Maximize className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  );
+
   return (
-    <div ref={fullscreenContainerRef} className="flex flex-col h-full">
+    <div ref={fullscreenContainerRef} className="flex flex-col h-full" onMouseMove={handleMouseMove}>
       {!isFullscreen && onDurationChange && (
         <PlayerToolbar
           onDurationChange={(newDuration) => onDurationChange(selectedSlideId, newDuration)}
@@ -248,128 +381,38 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
         />
       </div>
 
-      {/* Timeline */}
-      <div className={`bg-card border-t border-border ${isFullscreen ? "hidden" : ""}`}>
-        <PlayerTimeline
-          slides={allSlides}
-          currentFrame={currentFrame}
-          onSeek={(frame) => controls.seekToFrame(frame)}
-          onSelectSlide={handleSlideSelect}
-          onDraggingChange={handleDraggingChange}
-          onSelectOverlay={(overlayId, slideId) => {
-            if (onSelectOverlayFromTimeline) {
-              onSelectOverlayFromTimeline(overlayId, slideId);
-            } else {
-              onSlideChange?.(slideId);
-              setTimeout(() => onSelectOEffect?.(overlayId), 0);
-            }
-          }}
-          fps={fps}
-        />
-
-        {/* Controls bar */}
-        <div className="h-14 px-4 flex items-center gap-4 border-t border-border/50">
-          {/* Playback controls */}
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => controls.skipBackward()}
-              className="w-9 h-9 rounded-lg hover:bg-muted flex items-center justify-center transition-colors"
-              title="Skip back 5s"
-            >
-              <SkipBack className="w-4 h-4" />
-            </button>
-
-            <button
-              onClick={() => controls.togglePlayPause()}
-              className="w-11 h-11 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors"
-            >
-              {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
-            </button>
-
-            <button
-              onClick={() => controls.skipForward()}
-              className="w-9 h-9 rounded-lg hover:bg-muted flex items-center justify-center transition-colors"
-              title="Skip forward 5s"
-            >
-              <SkipForward className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* Time display */}
-          <div className="text-sm font-mono text-muted-foreground min-w-[100px]">
-            <span className="text-foreground">{formatTime(currentTime)}</span>
-            <span className="mx-1">/</span>
-            <span>{formatTime(totalDuration)}</span>
-          </div>
-
-          <div className="flex-1" />
-
-          {/* Zoom + Volume + Fullscreen */}
-          <div className="flex items-center gap-1">
-            <button
-              onClick={handleZoomOut}
-              disabled={userZoom <= 0.25}
-              className="w-8 h-8 rounded-lg hover:bg-muted flex items-center justify-center transition-colors disabled:opacity-40"
-              title="Zoom out"
-            >
-              <Minus className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={handleZoomReset}
-              className="h-8 px-2 rounded-lg hover:bg-muted flex items-center justify-center transition-colors text-xs font-medium min-w-[44px]"
-              title="Reset zoom"
-            >
-              {Math.round(userZoom * 100)}%
-            </button>
-            <button
-              onClick={handleZoomIn}
-              disabled={userZoom >= 3}
-              className="w-8 h-8 rounded-lg hover:bg-muted flex items-center justify-center transition-colors disabled:opacity-40"
-              title="Zoom in"
-            >
-              <Plus className="w-3.5 h-3.5" />
-            </button>
-
-            <Separator orientation="vertical" className="h-5 mx-1" />
-
-            <Popover>
-              <PopoverTrigger asChild>
-                <button className="w-8 h-8 rounded-lg hover:bg-muted flex items-center justify-center transition-colors">
-                  {isMuted || volume[0] === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-36 p-3" side="top">
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setIsMuted(!isMuted)}
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-                  </button>
-                  <Slider
-                    value={isMuted ? [0] : volume}
-                    onValueChange={(v) => {
-                      setVolume(v);
-                      if (v[0] > 0) setIsMuted(false);
-                    }}
-                    max={100}
-                    step={1}
-                    className="flex-1"
-                  />
-                </div>
-              </PopoverContent>
-            </Popover>
-
-            <button
-              onClick={handleFullscreen}
-              className="w-8 h-8 rounded-lg hover:bg-muted flex items-center justify-center transition-colors"
-              title="Fullscreen"
-            >
-              <Maximize className="w-4 h-4" />
-            </button>
-          </div>
+      {/* Timeline — hidden in fullscreen */}
+      {!isFullscreen && (
+        <div className="bg-card border-t border-border">
+          <PlayerTimeline
+            slides={allSlides}
+            currentFrame={currentFrame}
+            onSeek={(frame) => controls.seekToFrame(frame)}
+            onSelectSlide={handleSlideSelect}
+            onDraggingChange={handleDraggingChange}
+            onSelectOverlay={(overlayId, slideId) => {
+              if (onSelectOverlayFromTimeline) {
+                onSelectOverlayFromTimeline(overlayId, slideId);
+              } else {
+                onSlideChange?.(slideId);
+                setTimeout(() => onSelectOEffect?.(overlayId), 0);
+              }
+            }}
+            fps={fps}
+          />
+          {controlsBar}
         </div>
-      </div>
+      )}
+
+      {/* Fullscreen controls overlay — fades out after 3s of inactivity */}
+      {isFullscreen && (
+        <div
+          className="absolute bottom-0 inset-x-0 transition-opacity duration-500"
+          style={{ opacity: controlsVisible ? 1 : 0, pointerEvents: controlsVisible ? "auto" : "none" }}
+        >
+          {controlsBar}
+        </div>
+      )}
     </div>
   );
 });

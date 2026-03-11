@@ -56,23 +56,15 @@ export const updateSelectedSlide = (
 export const updateTotalDuration = (videoConfig: Video): Video => {
   if (!videoConfig?.config?.sections) return videoConfig
 
-  const totalDuration = videoConfig.config.sections.reduce((total, section) => {
-    const slides = section.slides || []
+  // Flatten all slides across all sections — transitions can cross section boundaries
+  // in the Remotion timeline, so we must treat slides as one continuous sequence.
+  const allSlides = videoConfig.config.sections.flatMap(s => s.slides || [])
 
-    if (slides.length === 0) return total
-
-    const slidesDuration = slides.reduce(
-      (sum, slide) => sum + (slide.duration || 0),
-      0
-    )
-
-    const transitionsDuration = slides
-      .slice(0, -1) // exclude last slide (no transition after it)
-      .reduce((sum, slide) => sum + (slide.transitionDuration || 0), 0)
-
-    const sectionDuration = slidesDuration - transitionsDuration
-
-    return total + sectionDuration
+  const totalDuration = allSlides.reduce((sum, slide, index) => {
+    const slideDuration = slide.duration || 0
+    // Last slide never transitions out, so don't subtract its transitionDuration
+    const transitionDuration = index < allSlides.length - 1 ? (slide.transitionDuration || 0) : 0
+    return sum + slideDuration - transitionDuration
   }, 0)
 
   return {
