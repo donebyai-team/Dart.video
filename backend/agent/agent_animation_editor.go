@@ -3,7 +3,6 @@ package agent
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/shank318/coasterai/agent/agenterrors"
 	"github.com/shank318/coasterai/agent/llm"
@@ -14,7 +13,6 @@ import (
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/services"
-	"github.com/shank318/coasterai/services/brand_identity"
 	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
 	"strings"
@@ -45,35 +43,33 @@ type AnimationGeneratorAgent interface {
 	EditAnimation(
 		ctx context.Context,
 		animationSlide *pbcore.Slide,
-		prompt string,
-		params GenerationParams) (*models.Template, error)
+		prompt string) (*models.Template, error)
 	CreateAnimation(
 		ctx context.Context,
 		prompt string,
 		suggestions bool,
-		params GenerationParams,
 	) (*AnimationGenerationAgentRunResult, error)
 	ContinueAnimation(
 		ctx context.Context,
 		options ContinueSessionOptions,
-		params GenerationParams,
 	) (*AnimationGenerationAgentRunResult, error)
+	ApplyGenerationOptions(options AnimationGenerationOptions)
 	StateUpdates() <-chan AnimationGeneratorAgentState
 }
 
 type agentAnimationEditor struct {
-	sessionID            string
-	slideID              string
-	orgID                string
-	db                   datastore.Repository
-	brandIdentityService brand_identity.BrandIdentity
-	retrievalService     RetrievalService
-	llmService           llm.LLMService
-	cache                cache.Cache
-	videoService         services.VideoGeneration
-	animationGenerator   AnimationGenerator
-	logger               *zap.Logger
-	stateUpdates         chan AnimationGeneratorAgentState
+	sessionID          string
+	slideID            string
+	orgID              string
+	db                 datastore.Repository
+	retrievalService   RetrievalService
+	llmService         llm.LLMService
+	cache              cache.Cache
+	videoService       services.VideoGeneration
+	animationGenerator AnimationGenerator
+	generationOptions  AnimationGenerationOptions
+	logger             *zap.Logger
+	stateUpdates       chan AnimationGeneratorAgentState
 }
 
 func (a *agentAnimationEditor) StateUpdates() <-chan AnimationGeneratorAgentState {
@@ -90,29 +86,33 @@ func NewAgentAnimationEditor(
 	mediaStore services.MediaStore,
 	codeBuilder services.TemplateCodeBuilder,
 	videoService services.VideoGeneration,
-	brandIdentityService brand_identity.BrandIdentity,
 ) AnimationGeneratorAgent {
 	llmService := llm.NewLlmService(logger)
 	return &agentAnimationEditor{
-		sessionID:            sessionID,
-		orgID:                orgID,
-		slideID:              slideID,
-		logger:               logger,
-		cache:                cache,
-		db:                   db,
-		videoService:         videoService,
-		brandIdentityService: brandIdentityService,
-		retrievalService:     NewLlmRetrievalService(db, llmService),
-		llmService:           llmService,
-		stateUpdates:         make(chan AnimationGeneratorAgentState, 64),
+		sessionID:        sessionID,
+		orgID:            orgID,
+		slideID:          slideID,
+		logger:           logger,
+		cache:            cache,
+		db:               db,
+		videoService:     videoService,
+		retrievalService: NewLlmRetrievalService(db, llmService),
+		llmService:       llmService,
+		stateUpdates:     make(chan AnimationGeneratorAgentState, 64),
 		animationGenerator: NewAnimationGenerator(
+			sessionID,
+			orgID,
+			slideID,
 			mediaStore,
-			brandIdentityService,
-			llmService,
 			codeBuilder,
 			logger,
 		),
 	}
+}
+
+func (a *agentAnimationEditor) ApplyGenerationOptions(options AnimationGenerationOptions) {
+	a.generationOptions = options
+	a.animationGenerator.ApplyGenerationOptions(options)
 }
 
 type generateOrEditAnimationSession struct {
@@ -150,7 +150,6 @@ func (a *agentAnimationEditor) getGenerateOrEditAnimationSession(ctx context.Con
 func (a *agentAnimationEditor) ContinueAnimation(
 	ctx context.Context,
 	options ContinueSessionOptions,
-	params GenerationParams,
 ) (*AnimationGenerationAgentRunResult, error) {
 	userResponse := strings.TrimSpace(options.UserResponse)
 	if userResponse == "" {
@@ -183,14 +182,13 @@ func (a *agentAnimationEditor) ContinueAnimation(
 
 	a.logger.Info("continuing agent animation session with user response", zap.String("response", userResponse))
 
-	return a.runGenerateAnimationFromPrompt(ctx, session, params)
+	return a.runGenerateAnimationFromPrompt(ctx, session)
 }
 
 func (l *agentAnimationEditor) EditAnimation(
 	ctx context.Context,
 	animationSlide *pbcore.Slide,
-	prompt string,
-	params GenerationParams) (*models.Template, error) {
+	prompt string) (*models.Template, error) {
 	if err := ValidatePrompt(prompt); err != nil {
 		return nil, err
 	}
@@ -200,7 +198,7 @@ func (l *agentAnimationEditor) EditAnimation(
 			State:    stateStatusProcessing,
 			Thinking: progress.Message,
 		})
-	}, params)
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -211,7 +209,6 @@ func (l *agentAnimationEditor) CreateAnimation(
 	ctx context.Context,
 	prompt string,
 	suggestions bool,
-	params GenerationParams,
 ) (*AnimationGenerationAgentRunResult, error) {
 
 	if err := ValidatePrompt(prompt); err != nil {
@@ -234,7 +231,7 @@ func (l *agentAnimationEditor) CreateAnimation(
 		Thinking: generating,
 	})
 
-	return l.runGenerateAnimationFromPrompt(ctx, session, params)
+	return l.runGenerateAnimationFromPrompt(ctx, session)
 }
 
 func (l *agentAnimationEditor) GetAnimationSuggestions(
@@ -242,7 +239,7 @@ func (l *agentAnimationEditor) GetAnimationSuggestions(
 	animationType types.AnimationType,
 	categorySearchQuery string,
 	beatDescription string,
-	params GenerationParams) ([]*models.Template, error) {
+) ([]*models.Template, error) {
 	categories, err := l.retrievalService.MatchCategories(ctx, animationType, categorySearchQuery)
 	if err != nil {
 		return nil, agenterrors.RetrievalFailed("failed to match categories", err)
@@ -277,7 +274,7 @@ func (l *agentAnimationEditor) GetAnimationSuggestions(
 			State:    stateStatusProcessing,
 			Thinking: extracting,
 		})
-		templateConfig, err := l.animationGenerator.ExtractConfig(ctx, beatDescription, template, params)
+		templateConfig, err := l.animationGenerator.ExtractConfig(ctx, beatDescription, template)
 		if err != nil {
 			return nil, agenterrors.TemplateExtractFailed("failed to extract template config", err)
 		}
@@ -296,7 +293,7 @@ func (l *agentAnimationEditor) GetAnimationSuggestions(
 	return suggestedTemplates, nil
 }
 
-func (l *agentAnimationEditor) runGenerateAnimationFromPrompt(ctx context.Context, session *generateOrEditAnimationSession, params GenerationParams) (result *AnimationGenerationAgentRunResult, retErr error) {
+func (l *agentAnimationEditor) runGenerateAnimationFromPrompt(ctx context.Context, session *generateOrEditAnimationSession) (result *AnimationGenerationAgentRunResult, retErr error) {
 	l.publishTransientState(AnimationGeneratorAgentState{
 		State:    stateStatusProcessing,
 		Thinking: "Understanding your animation prompt...",
@@ -306,32 +303,17 @@ func (l *agentAnimationEditor) runGenerateAnimationFromPrompt(ctx context.Contex
 		Prompt: session.Prompt,
 	}
 
-	if params.VideoBranding != nil {
-		input.Branding = *params.VideoBranding
+	if l.generationOptions.VideoBranding != nil {
+		input.Branding = *l.generationOptions.VideoBranding
+
+		if l.generationOptions.BrandIdentityMapper != nil {
+			input.Branding.BrandGuideLines = utils.Ptr(l.generationOptions.BrandIdentityMapper.FormatBrandAndAssetDetails())
+			l.logger.Info("using injected brand-identity mapper")
+		}
 	}
 
-	if params.VideoBackground != nil {
-		input.SlideBackground = gradientToCSS(params.VideoBackground.Gradient)
-	}
-
-	var brandIdentityRegistry *brand_identity.BrandIdentityRegistry
-	if params.VideoBranding != nil && params.VideoBranding.BrandLibraryID != nil {
-		_brandIdentityRegistry, err := l.brandIdentityService.GetBrandIdentity(ctx, *params.VideoBranding.BrandLibraryID)
-		if err != nil {
-			if errors.Is(err, datastore.NotFound) {
-				return nil, agenterrors.InvalidInput("brand_identity not found", nil)
-			}
-			return nil, err
-		}
-
-		if _brandIdentityRegistry != nil {
-			brandIdentityRegistry = _brandIdentityRegistry
-			params.VideoBranding.BrandGuideLines = utils.Ptr(_brandIdentityRegistry.FormatBrandAndAssetDetails())
-			input.Branding.BrandGuideLines = params.VideoBranding.BrandGuideLines
-			l.logger.Info("using brand-identity",
-				zap.String("brand-identity-id", *params.VideoBranding.BrandLibraryID),
-			)
-		}
+	if l.generationOptions.VideoBackground != nil {
+		input.SlideBackground = gradientToCSS(l.generationOptions.VideoBackground.Gradient)
 	}
 
 	llmResponse, err := baml_client.EnhanceAnimationPrompt(ctx, input, session.ConversationHistory)
@@ -376,7 +358,7 @@ func (l *agentAnimationEditor) runGenerateAnimationFromPrompt(ctx context.Contex
 			animationSlide.AnimationType,
 			animationSlide.CategorySearchQuery,
 			animationSlide.BeatDescription,
-			params)
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -395,7 +377,7 @@ func (l *agentAnimationEditor) runGenerateAnimationFromPrompt(ctx context.Contex
 			State:    stateStatusProcessing,
 			Thinking: progress.Message,
 		})
-	}, brandIdentityRegistry, params)
+	})
 	if err != nil {
 		return nil, err
 	}

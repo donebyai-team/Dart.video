@@ -60,6 +60,7 @@ type agentV1 struct {
 	orgID                string
 	db                   datastore.Repository
 	brandIdentityService brand_identity.BrandIdentity
+	brandIdentityMapper  *brand_identity.BrandIdentityRegistry
 	retrievalService     RetrievalService
 	llmService           llm.LLMService
 	videoService         services.VideoGeneration
@@ -94,9 +95,10 @@ func NewAgentV1(
 		llmService:           llmService,
 		stateUpdates:         make(chan VideoAgentState, 64),
 		animationGenerator: NewAnimationGenerator(
+			sessionID,
+			orgID,
+			"",
 			mediaStore,
-			brandIdentityService,
-			llmService,
 			codeBuilder,
 			logger,
 		),
@@ -155,20 +157,9 @@ func (a *agentV1) Start(ctx context.Context, options StartSessionOptions) (*RunR
 		return nil, err
 	}
 
-	var brandDetails string
-
-	if options.Input.BrandLibraryId != nil {
-		brandIdentityRegistry, err := a.brandIdentityService.GetBrandIdentity(ctx, *options.Input.BrandLibraryId)
-		if err != nil {
-			if errors.Is(err, datastore.NotFound) {
-				return nil, agenterrors.InvalidInput("brand_identity not found", nil)
-			}
-			return nil, err
-		}
-
-		if brandIdentityRegistry != nil {
-			brandDetails = brandIdentityRegistry.FormatBrandDetails()
-		}
+	err := a.injectBrandIdentityMapper(ctx, options.Input.BrandLibraryId)
+	if err != nil {
+		return nil, err
 	}
 
 	script := make([]types.ScriptItem, 0)
@@ -194,8 +185,8 @@ func (a *agentV1) Start(ctx context.Context, options StartSessionOptions) (*RunR
 	}
 
 	// use brand guidelines only when specified
-	if brandDetails != "" {
-		generatePlanRequest.BrandGuidelines = utils.Ptr(brandDetails)
+	if a.brandIdentityMapper != nil {
+		generatePlanRequest.BrandGuidelines = utils.Ptr(a.brandIdentityMapper.FormatBrandDetails())
 	}
 
 	session := &planningSession{
@@ -222,6 +213,10 @@ func (a *agentV1) Continue(ctx context.Context, options ContinueSessionOptions) 
 		return nil, err
 	}
 
+	if err = a.injectBrandIdentityMapper(ctx, session.Request.BrandLibraryID); err != nil {
+		return nil, err
+	}
+
 	session.ConversationHistory = append(session.ConversationHistory, types.Message{
 		Tool_call_id: utils.Ptr(fmt.Sprintf("call_%d", time.Now().Unix())),
 		Role:         types.Union3KassistantOrKtoolOrKuser__NewKtool(),
@@ -240,6 +235,24 @@ func (a *agentV1) Continue(ctx context.Context, options ContinueSessionOptions) 
 	a.logger.Info("continuing agent session with user response", zap.String("response", userResponse))
 
 	return a.runPlanning(ctx, session)
+}
+
+func (a *agentV1) injectBrandIdentityMapper(ctx context.Context, brandLibraryID *string) error {
+	if brandLibraryID == nil {
+		return nil
+	}
+
+	brandIdentityMapper, err := a.brandIdentityService.GetBrandIdentity(ctx, *brandLibraryID)
+	if err != nil {
+		if errors.Is(err, datastore.NotFound) {
+			return agenterrors.InvalidInput("brand_identity not found", nil)
+		}
+		return err
+	}
+
+	a.brandIdentityMapper = brandIdentityMapper
+
+	return nil
 }
 
 func (a *agentV1) runPlanning(ctx context.Context, session *planningSession) (result *RunResult, retErr error) {
@@ -344,6 +357,16 @@ func (a *agentV1) applyPlan(
 	aiPlan *types.VideoGenerationPlan,
 	firstSlideReady chan<- struct{},
 ) (err error) {
+
+	// inject dependencies for generator
+	optionsBuilder := NewAnimationGenerationOptionsBuilder().
+		WithVideoBranding(&aiPlan.Branding).
+		WithVideoBackground(&aiPlan.BackgroundStyle)
+	if a.brandIdentityMapper != nil {
+		optionsBuilder.WithBrandIdentityMapper(a.brandIdentityMapper)
+	}
+	a.animationGenerator.ApplyGenerationOptions(optionsBuilder.Build())
+
 	// save config with pending items
 	builder := NewVideoConfigGenerator(a.logger, a.videoService).
 		Init(a.sessionID, aiPlan.VideoName)
@@ -406,9 +429,7 @@ func (a *agentV1) applyPlan(
 
 	selectedTemplateIDs := make([]string, 0)
 	planExecutedSoFar := &types.VideoGenerationPlan{
-		Sections:        make([]types.Section, 0, len(plan.Sections)),
-		Branding:        aiPlan.Branding,
-		BackgroundStyle: aiPlan.BackgroundStyle,
+		Sections: make([]types.Section, 0, len(plan.Sections)),
 	}
 
 	for si, section := range plan.Sections {
@@ -501,13 +522,6 @@ func (a *agentV1) selectTemplate(
 		return nil, agenterrors.RetrievalFailed("failed to match categories", err)
 	}
 
-	generatorOptions := GenerationParams{
-		OrgID:           a.orgID,
-		SessionID:       a.sessionID,
-		VideoBranding:   &planExecutedSoFar.Branding,
-		VideoBackground: &planExecutedSoFar.BackgroundStyle,
-	}
-
 	var selected *models.Template
 	for _, category := range categories {
 		// semantically match if we have a template available in our library
@@ -539,7 +553,7 @@ func (a *agentV1) selectTemplate(
 			Thinking: extracting,
 			State:    stateStatusProcessing,
 		})
-		templateConfig, err := a.animationGenerator.ExtractConfig(ctx, anim.BeatDescription, selected, generatorOptions)
+		templateConfig, err := a.animationGenerator.ExtractConfig(ctx, anim.BeatDescription, selected)
 		if err != nil {
 			return nil, agenterrors.TemplateExtractFailed("failed to extract template config", err)
 		}
@@ -549,12 +563,12 @@ func (a *agentV1) selectTemplate(
 
 	// No category matched — use the fallback template or generate a new animation.
 	if selected == nil {
-		template, err := a.animationGenerator.Generate(ctx, anim, func(progress TemplateGenerationProgress) {
+		template, err := a.animationGenerator.Generate(ctx, anim, planExecutedSoFar, func(progress TemplateGenerationProgress) {
 			a.updateState(ctx, VideoAgentState{
 				Thinking: progress.Message,
 				State:    stateStatusProcessing,
 			})
-		}, generatorOptions)
+		})
 		if err != nil {
 			return nil, err
 		}

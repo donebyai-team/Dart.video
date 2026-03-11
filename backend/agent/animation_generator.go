@@ -7,14 +7,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/shank318/coasterai/agent/agenterrors"
-	"github.com/shank318/coasterai/agent/llm"
 	"github.com/shank318/coasterai/baml_client"
 	"github.com/shank318/coasterai/baml_client/types"
-	"github.com/shank318/coasterai/datastore"
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/services"
-	"github.com/shank318/coasterai/services/brand_identity"
 	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
 	"math/rand"
@@ -86,56 +83,54 @@ func CreativeStageMessage(stage GenerationStage, attempt int) string {
 	}
 }
 
-type GenerationParams struct {
-	SessionID       string
-	OrgID           string
-	SlideID         string
-	VideoBranding   *types.VideoBranding
-	VideoBackground *types.VideoBackground
-	Sections        []types.Section
-}
-
 type AnimationGenerator interface {
 	ExtractConfig(
 		ctx context.Context,
 		beatDescription string,
-		template *models.Template,
-		params GenerationParams) (*types.TemplateConfigExtractorOutput, error)
+		template *models.Template) (*types.TemplateConfigExtractorOutput, error)
 	Generate(
 		ctx context.Context,
 		animation *types.AnimationSlide,
+		planSoFar *types.VideoGenerationPlan,
 		callback TemplateGenerationCallback,
-		params GenerationParams,
 	) (*models.Template, error)
 	GenerateCode(ctx context.Context,
 		prompt string,
 		animation *types.AnimationSlide,
 		callback TemplateGenerationCallback,
-		brandIdentityRegistry *brand_identity.BrandIdentityRegistry,
-		params GenerationParams) (*models.Template, error)
+	) (*models.Template, error)
 	EditAnimationCode(
 		ctx context.Context,
 		animationSlide *pbcore.Slide,
 		prompt string,
 		callback TemplateGenerationCallback,
-		params GenerationParams,
 	) (*models.Template, error)
+	ApplyGenerationOptions(options AnimationGenerationOptions)
 }
 
 type animationGenerator struct {
-	mediaStore           services.MediaStore
-	llmService           llm.LLMService
-	codeBuilder          services.TemplateCodeBuilder
-	brandIdentityService brand_identity.BrandIdentity
-	logger               *zap.Logger
+	sessionID         string
+	orgID             string
+	slideID           string
+	mediaStore        services.MediaStore
+	codeBuilder       services.TemplateCodeBuilder
+	generationOptions AnimationGenerationOptions
+	logger            *zap.Logger
 }
 
-func NewAnimationGenerator(mediaStore services.MediaStore,
-	brandIdentityService brand_identity.BrandIdentity,
-	llmService llm.LLMService, codeBuilder services.TemplateCodeBuilder, logger *zap.Logger) AnimationGenerator {
-	return &animationGenerator{mediaStore: mediaStore,
-		brandIdentityService: brandIdentityService,
-		llmService:           llmService, codeBuilder: codeBuilder, logger: logger}
+func NewAnimationGenerator(sessionID string,
+	orgID string,
+	slideID string,
+	mediaStore services.MediaStore,
+	codeBuilder services.TemplateCodeBuilder, logger *zap.Logger) AnimationGenerator {
+	return &animationGenerator{
+		sessionID:   sessionID,
+		orgID:       orgID,
+		slideID:     slideID,
+		mediaStore:  mediaStore,
+		codeBuilder: codeBuilder,
+		logger:      logger,
+	}
 }
 
 const maxAttempts = 5
@@ -146,35 +141,20 @@ type TemplateGenerationProgress struct {
 	Message string
 }
 
-func (l animationGenerator) Generate(
+func (l *animationGenerator) ApplyGenerationOptions(options AnimationGenerationOptions) {
+	l.generationOptions = options
+}
+
+func (l *animationGenerator) Generate(
 	ctx context.Context,
 	animation *types.AnimationSlide,
+	planSoFar *types.VideoGenerationPlan,
 	callback TemplateGenerationCallback,
-	params GenerationParams,
 ) (*models.Template, error) {
 
 	callback(TemplateGenerationProgress{
 		Message: CreativeStageMessage(StageUnderstanding, 0),
 	})
-
-	var brandIdentityRegistry *brand_identity.BrandIdentityRegistry
-	if params.VideoBranding != nil && params.VideoBranding.BrandLibraryID != nil {
-		_brandIdentityRegistry, err := l.brandIdentityService.GetBrandIdentity(ctx, *params.VideoBranding.BrandLibraryID)
-		if err != nil {
-			if errors.Is(err, datastore.NotFound) {
-				return nil, agenterrors.InvalidInput("brand_identity not found", nil)
-			}
-			return nil, err
-		}
-
-		if _brandIdentityRegistry != nil {
-			l.logger.Info("using brand-identity",
-				zap.String("brand-identity-id", *params.VideoBranding.BrandLibraryID),
-			)
-			brandIdentityRegistry = _brandIdentityRegistry
-			params.VideoBranding.BrandGuideLines = utils.Ptr(_brandIdentityRegistry.FormatBrandAndAssetDetails())
-		}
-	}
 
 	input := types.GenerateAnimationPromptRequest{
 		CurrentBeat:   animation.BeatDescription,
@@ -182,16 +162,21 @@ func (l animationGenerator) Generate(
 		Voiceover:     animation.Voiceover,
 	}
 
-	if params.VideoBranding != nil {
-		input.Branding = *params.VideoBranding
+	if l.generationOptions.VideoBranding != nil {
+		input.Branding = *l.generationOptions.VideoBranding
+
+		if l.generationOptions.BrandIdentityMapper != nil {
+			input.Branding.BrandGuideLines = utils.Ptr(l.generationOptions.BrandIdentityMapper.FormatBrandAndAssetDetails())
+			l.logger.Info("using injected brand-identity mapper")
+		}
 	}
 
-	if params.VideoBackground != nil {
-		input.SlideBackground = gradientToCSS(params.VideoBackground.Gradient)
+	if l.generationOptions.VideoBackground != nil {
+		input.SlideBackground = gradientToCSS(l.generationOptions.VideoBackground.Gradient)
 	}
 
-	if len(params.Sections) > 0 {
-		input.PlanSoFar = params.Sections
+	if len(planSoFar.Sections) > 0 {
+		input.PlanSoFar = planSoFar.Sections
 	}
 
 	output, err := baml_client.GenerateAnimationPrompt(ctx, input)
@@ -199,15 +184,14 @@ func (l animationGenerator) Generate(
 		return nil, agenterrors.AnimationGenerationFailed("failed to generate prompt", err)
 	}
 
-	return l.GenerateCode(ctx, output.Prompt, animation, callback, brandIdentityRegistry, params)
+	return l.GenerateCode(ctx, output.Prompt, animation, callback)
 }
 
-func (l animationGenerator) GenerateCode(ctx context.Context,
+func (l *animationGenerator) GenerateCode(ctx context.Context,
 	prompt string,
 	animation *types.AnimationSlide,
 	callback TemplateGenerationCallback,
-	brandIdentityRegistry *brand_identity.BrandIdentityRegistry,
-	params GenerationParams) (*models.Template, error) {
+) (*models.Template, error) {
 	inptCodeGeneration := types.GenerateAnimationCodeRequest{
 		AnimationPrompt: prompt,
 		Duration:        animation.Duration,
@@ -215,17 +199,17 @@ func (l animationGenerator) GenerateCode(ctx context.Context,
 		AnimationType:   animation.AnimationType,
 	}
 
-	if params.VideoBranding != nil {
-		inptCodeGeneration.Branding = *params.VideoBranding
-	}
-	if params.VideoBackground != nil {
-		inptCodeGeneration.SlideBackground = gradientToCSS(params.VideoBackground.Gradient)
+	if l.generationOptions.VideoBranding != nil {
+		inptCodeGeneration.Branding = *l.generationOptions.VideoBranding
+
+		if l.generationOptions.BrandIdentityMapper != nil {
+			inptCodeGeneration.Branding.BrandGuideLines = utils.Ptr(l.generationOptions.BrandIdentityMapper.FormatBrandAndAssetDetails())
+			l.logger.Info("using injected brand-identity mapper", zap.String("guidelines", *inptCodeGeneration.Branding.BrandGuideLines))
+		}
 	}
 
-	if inptCodeGeneration.Branding.BrandGuideLines != nil {
-		l.logger.Info("using brand-identity guidelines",
-			zap.String("guidelines", *inptCodeGeneration.Branding.BrandGuideLines),
-		)
+	if l.generationOptions.VideoBackground != nil {
+		inptCodeGeneration.SlideBackground = gradientToCSS(l.generationOptions.VideoBackground.Gradient)
 	}
 
 	conversationHistory := make([]types.Message, 0)
@@ -245,14 +229,14 @@ func (l animationGenerator) GenerateCode(ctx context.Context,
 		}
 
 		// resolve the asset handles
-		if brandIdentityRegistry != nil {
+		if l.generationOptions.BrandIdentityMapper != nil {
 			l.logger.Info("using brand-identity mapping for resolving media handles")
-			generatedAnimation.Code = brandIdentityRegistry.ResolveMediaHandles(generatedAnimation.Code)
+			generatedAnimation.Code = l.generationOptions.BrandIdentityMapper.ResolveMediaHandles(generatedAnimation.Code)
 		}
 
 		// Default
 		indentedCode := indentCode(generatedAnimation.Code)
-		codeFilePath := fmt.Sprintf("templates/generated/%s/%s", params.OrgID, params.SessionID)
+		codeFilePath := fmt.Sprintf("templates/generated/%s/%s", l.orgID, l.sessionID)
 
 		// 💾 Saving draft
 		callback(TemplateGenerationProgress{
@@ -279,7 +263,7 @@ func (l animationGenerator) GenerateCode(ctx context.Context,
 		buildOutput, err := l.codeBuilder.ValidateAndBuild(ctx, &services.ValidateAndBuildInput{
 			Code:          indentedCode,
 			ComponentName: fmt.Sprintf("Transformed%s%d", componentName, attempt),
-			OutputPath:    fmt.Sprintf("templates/generated/%s/%s", params.OrgID, params.SessionID),
+			OutputPath:    fmt.Sprintf("templates/generated/%s/%s", l.orgID, l.sessionID),
 		})
 
 		if err == nil {
@@ -340,12 +324,11 @@ func (l animationGenerator) GenerateCode(ctx context.Context,
 	)
 }
 
-func (l animationGenerator) EditAnimationCode(
+func (l *animationGenerator) EditAnimationCode(
 	ctx context.Context,
 	animationSlide *pbcore.Slide,
 	prompt string,
 	callback TemplateGenerationCallback,
-	params GenerationParams,
 ) (*models.Template, error) {
 
 	slideContent := animationSlide.GetAnimation()
@@ -370,7 +353,6 @@ func (l animationGenerator) EditAnimationCode(
 		code,
 		prompt,
 		callback,
-		params,
 	)
 
 	if err == nil {
@@ -389,11 +371,10 @@ func (l animationGenerator) EditAnimationCode(
 		prompt,
 		types.AnimationType(slideContent.Plan.AnimationType),
 		callback,
-		params,
 	)
 }
 
-func (l animationGenerator) loadExistingCode(
+func (l *animationGenerator) loadExistingCode(
 	ctx context.Context,
 	slideContent *pbcore.AnimationSlideContent,
 ) (string, error) {
@@ -406,12 +387,11 @@ func (l animationGenerator) loadExistingCode(
 	return indentCode(code), nil
 }
 
-func (l animationGenerator) tryTargetedEdits(
+func (l *animationGenerator) tryTargetedEdits(
 	ctx context.Context,
 	code string,
 	prompt string,
 	callback TemplateGenerationCallback,
-	params GenerationParams,
 ) (*models.Template, error) {
 
 	input := types.EditAnimationCodeRequest{
@@ -455,9 +435,9 @@ func (l animationGenerator) tryTargetedEdits(
 		code = newCode
 		codeFilePath := fmt.Sprintf(
 			"templates/generated/%s/%s/%s",
-			params.OrgID,
-			params.SessionID,
-			params.SlideID,
+			l.orgID,
+			l.sessionID,
+			l.slideID,
 		)
 
 		template, buildErr := l.uploadAndBuild(
@@ -528,7 +508,7 @@ func stringify(v any) string {
 	return string(b)
 }
 
-func (l animationGenerator) uploadAndBuild(
+func (l *animationGenerator) uploadAndBuild(
 	ctx context.Context,
 	code string,
 	codeFilePath string,
@@ -581,36 +561,14 @@ func (l animationGenerator) uploadAndBuild(
 	}, nil
 }
 
-func (l animationGenerator) tryRegenerateAnimation(
+func (l *animationGenerator) tryRegenerateAnimation(
 	ctx context.Context,
 	code string,
 	animationSlide *pbcore.Slide,
 	prompt string,
 	animationType types.AnimationType,
 	callback TemplateGenerationCallback,
-	params GenerationParams,
 ) (*models.Template, error) {
-
-	// Inject brand guidelines
-	var brandIdentityRegistry *brand_identity.BrandIdentityRegistry
-	if params.VideoBranding != nil && params.VideoBranding.BrandLibraryID != nil {
-		_brandIdentityRegistry, err := l.brandIdentityService.GetBrandIdentity(ctx, *params.VideoBranding.BrandLibraryID)
-		if err != nil {
-			if errors.Is(err, datastore.NotFound) {
-				return nil, agenterrors.InvalidInput("brand_identity not found", nil)
-			}
-			return nil, err
-		}
-
-		if _brandIdentityRegistry != nil {
-			l.logger.Info("using brand-identity",
-				zap.String("brand-identity-id", *params.VideoBranding.BrandLibraryID),
-			)
-			brandIdentityRegistry = _brandIdentityRegistry
-			params.VideoBranding.BrandGuideLines = utils.Ptr(_brandIdentityRegistry.FormatBrandAndAssetDetails())
-		}
-	}
-
 	conversationHistory := []types.Message{}
 	for attempt := 0; attempt < maxAttempts; attempt++ {
 		input := l.buildRegenInput(
@@ -618,7 +576,6 @@ func (l animationGenerator) tryRegenerateAnimation(
 			animationSlide,
 			animationType,
 			prompt,
-			params,
 		)
 
 		callback(TemplateGenerationProgress{
@@ -639,18 +596,18 @@ func (l animationGenerator) tryRegenerateAnimation(
 			updatedDuration = int64(animationSlide.Duration)
 		}
 
-		if brandIdentityRegistry != nil {
+		if l.generationOptions.BrandIdentityMapper != nil {
 			l.logger.Info("using brand-identity mapping for resolving media handles")
-			response.Code = brandIdentityRegistry.ResolveMediaHandles(response.Code)
+			response.Code = l.generationOptions.BrandIdentityMapper.ResolveMediaHandles(response.Code)
 		}
 
 		indentedCode := indentCode(response.Code)
 
 		codeFilePath := fmt.Sprintf(
 			"templates/generated/%s/%s/%s",
-			params.OrgID,
-			params.SessionID,
-			params.SlideID,
+			l.orgID,
+			l.sessionID,
+			l.slideID,
 		)
 
 		template, err := l.uploadAndBuild(
@@ -695,12 +652,11 @@ func (l animationGenerator) tryRegenerateAnimation(
 	)
 }
 
-func (l animationGenerator) buildRegenInput(
+func (l *animationGenerator) buildRegenInput(
 	code string,
 	animationSlide *pbcore.Slide,
 	animationType types.AnimationType,
 	prompt string,
-	params GenerationParams,
 ) types.ReGenerateAnimationCodeRequest {
 
 	input := types.ReGenerateAnimationCodeRequest{
@@ -710,12 +666,16 @@ func (l animationGenerator) buildRegenInput(
 		Duration:      int64(animationSlide.Duration),
 	}
 
-	if params.VideoBranding != nil {
-		input.Branding = *params.VideoBranding
+	if l.generationOptions.VideoBranding != nil {
+		input.Branding = *l.generationOptions.VideoBranding
+		if l.generationOptions.BrandIdentityMapper != nil {
+			input.Branding.BrandGuideLines = utils.Ptr(l.generationOptions.BrandIdentityMapper.FormatBrandAndAssetDetails())
+			l.logger.Info("using injected brand-identity mapper")
+		}
 	}
 
-	if params.VideoBackground != nil {
-		input.SlideBackground = gradientToCSS(params.VideoBackground.Gradient)
+	if l.generationOptions.VideoBackground != nil {
+		input.SlideBackground = gradientToCSS(l.generationOptions.VideoBackground.Gradient)
 	}
 	return input
 }
@@ -739,11 +699,11 @@ func RandomComponentName() string {
 	return fmt.Sprintf("%s%s_%d", a, b, time.Now().UnixNano())
 }
 
-func (l animationGenerator) ExtractConfig(
+func (l *animationGenerator) ExtractConfig(
 	ctx context.Context,
 	beatDescription string,
 	template *models.Template,
-	params GenerationParams) (*types.TemplateConfigExtractorOutput, error) {
+) (*types.TemplateConfigExtractorOutput, error) {
 	l.logger.Info("extracting template config")
 	marshal, err := json.Marshal(template.Schema)
 	if err != nil {
@@ -756,31 +716,17 @@ func (l animationGenerator) ExtractConfig(
 		TemplateDescription: template.Description,
 	}
 
-	if params.VideoBranding != nil {
-		input.Branding = *params.VideoBranding
-	}
-	if params.VideoBackground != nil {
-		input.SlideBackground = gradientToCSS(params.VideoBackground.Gradient)
-	}
-
-	var brandIdentityRegistry *brand_identity.BrandIdentityRegistry
-	if params.VideoBranding != nil && params.VideoBranding.BrandLibraryID != nil {
-		_brandIdentityRegistry, err := l.brandIdentityService.GetBrandIdentity(ctx, *params.VideoBranding.BrandLibraryID)
-		if err != nil {
-			if errors.Is(err, datastore.NotFound) {
-				return nil, agenterrors.InvalidInput("brand_identity not found", nil)
-			}
-			return nil, err
-		}
-
-		if _brandIdentityRegistry != nil {
-			brandIdentityRegistry = _brandIdentityRegistry
-			input.Branding.BrandGuideLines = utils.Ptr(_brandIdentityRegistry.FormatBrandAndAssetDetails())
-			l.logger.Info("using brand-identity",
-				zap.String("brand-identity-id", *params.VideoBranding.BrandLibraryID),
+	if l.generationOptions.VideoBranding != nil {
+		input.Branding = *l.generationOptions.VideoBranding
+		if l.generationOptions.BrandIdentityMapper != nil {
+			input.Branding.BrandGuideLines = utils.Ptr(l.generationOptions.BrandIdentityMapper.FormatBrandAndAssetDetails())
+			l.logger.Info("using injected brand-identity mapper",
 				zap.String("guidelines", *input.Branding.BrandGuideLines),
 			)
 		}
+	}
+	if l.generationOptions.VideoBackground != nil {
+		input.SlideBackground = gradientToCSS(l.generationOptions.VideoBackground.Gradient)
 	}
 
 	output, err := baml_client.ExtractTemplateConfig(ctx, input)
@@ -793,9 +739,9 @@ func (l animationGenerator) ExtractConfig(
 		return nil, errors.New(fmt.Sprintf("template config validation failed for template : %s", template.ID))
 	}
 
-	if brandIdentityRegistry != nil {
+	if l.generationOptions.BrandIdentityMapper != nil {
 		l.logger.Info("using brand-identity mapping for resolving media handles")
-		output.Config = brandIdentityRegistry.ResolveMediaHandles(output.Config)
+		output.Config = l.generationOptions.BrandIdentityMapper.ResolveMediaHandles(output.Config)
 	}
 
 	return &output, nil

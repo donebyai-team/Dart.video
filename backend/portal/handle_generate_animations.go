@@ -7,7 +7,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/shank318/coasterai/baml_client/types"
+	"github.com/shank318/coasterai/datastore"
 	"github.com/shank318/coasterai/services"
+	"github.com/shank318/coasterai/services/brand_identity"
 	"strings"
 
 	"github.com/shank318/coasterai/agent"
@@ -94,8 +97,10 @@ func (p *Portal) GenerateOrEditAnimationSlide(ctx context.Context, c *connect.Re
 		zap.String("slide_id", targetSlide.Id),
 	)
 
-	params := buildAnimationGenerationParams(videoID, actor.OrganizationID, targetSlide.Id, targetSlide, video)
 	animationAgent := p.newAnimationGeneratorAgent(logger, videoID, targetSlide.Id, actor.OrganizationID)
+	if err := p.injectAnimationGenerationContext(ctx, animationAgent, targetSlide, video); err != nil {
+		return err
+	}
 
 	isExistingSlide := existingSlide != nil
 	return p.streamAnimationGenerationRun(
@@ -106,7 +111,7 @@ func (p *Portal) GenerateOrEditAnimationSlide(ctx context.Context, c *connect.Re
 		isExistingSlide,
 		func(runCtx context.Context) (*agent.AnimationGenerationAgentRunResult, error) {
 			if existingSlide != nil {
-				template, runErr := animationAgent.EditAnimation(runCtx, existingSlide, prompt, params)
+				template, runErr := animationAgent.EditAnimation(runCtx, existingSlide, prompt)
 				if runErr != nil {
 					return nil, runErr
 				}
@@ -117,10 +122,10 @@ func (p *Portal) GenerateOrEditAnimationSlide(ctx context.Context, c *connect.Re
 			}
 
 			if isAskUserInput {
-				return animationAgent.ContinueAnimation(runCtx, agent.ContinueSessionOptions{UserResponse: prompt}, params)
+				return animationAgent.ContinueAnimation(runCtx, agent.ContinueSessionOptions{UserResponse: prompt})
 			}
 
-			return animationAgent.CreateAnimation(runCtx, prompt, suggestions, params)
+			return animationAgent.CreateAnimation(runCtx, prompt, suggestions)
 		},
 	)
 }
@@ -234,38 +239,72 @@ func findSlideByID(video *models.Video, slideID string) *pbcore.Slide {
 	return nil
 }
 
-func buildAnimationGenerationParams(videoID, orgID, slideID string, slide *pbcore.Slide, video *models.Video) agent.GenerationParams {
-	params := agent.GenerationParams{
-		SessionID: videoID,
-		OrgID:     orgID,
-		SlideID:   slideID,
-	}
-
+func buildAnimationGenerationContext(slide *pbcore.Slide, video *models.Video) (*types.VideoBranding, *types.VideoBackground) {
+	var videoBranding *types.VideoBranding
+	var videoBackground *types.VideoBackground
 	if video != nil && video.Metadata != nil {
 		if video.Metadata.GeneratedBranding != nil {
-			params.VideoBranding = video.Metadata.GeneratedBranding.ToModel()
+			videoBranding = video.Metadata.GeneratedBranding.ToModel()
 		}
 		if video.Metadata.BackgroundStyle != nil {
-			params.VideoBackground = video.Metadata.BackgroundStyle.ToModel()
+			videoBackground = video.Metadata.BackgroundStyle.ToModel()
 		}
 	}
 
-	if params.VideoBackground == nil && slide != nil && slide.BackgroundStyle != nil {
-		params.VideoBackground = slide.BackgroundStyle.ToModel()
+	if videoBackground == nil && slide != nil && slide.BackgroundStyle != nil {
+		videoBackground = slide.BackgroundStyle.ToModel()
 	}
 
-	if params.VideoBackground == nil && video != nil && video.Config != nil {
+	if videoBackground == nil && video != nil && video.Config != nil {
 		for _, section := range video.Config.Sections {
 			for _, candidate := range section.Slides {
 				if candidate.BackgroundStyle != nil {
-					params.VideoBackground = candidate.BackgroundStyle.ToModel()
-					return params
+					videoBackground = candidate.BackgroundStyle.ToModel()
+					return videoBranding, videoBackground
 				}
 			}
 		}
 	}
 
-	return params
+	return videoBranding, videoBackground
+}
+
+func (p *Portal) injectAnimationGenerationContext(
+	ctx context.Context,
+	animationAgent agent.AnimationGeneratorAgent,
+	slide *pbcore.Slide,
+	video *models.Video,
+) error {
+	videoBranding, videoBackground := buildAnimationGenerationContext(slide, video)
+
+	brandIdentityMapper, err := p.loadBrandIdentityMapper(ctx, videoBranding)
+	if err != nil {
+		return err
+	}
+	options := agent.NewAnimationGenerationOptionsBuilder().
+		WithVideoBranding(videoBranding).
+		WithVideoBackground(videoBackground).
+		WithBrandIdentityMapper(brandIdentityMapper).
+		Build()
+	animationAgent.ApplyGenerationOptions(options)
+
+	return nil
+}
+
+func (p *Portal) loadBrandIdentityMapper(ctx context.Context, videoBranding *types.VideoBranding) (*brand_identity.BrandIdentityRegistry, error) {
+	if videoBranding == nil || videoBranding.BrandLibraryID == nil {
+		return nil, nil
+	}
+
+	brandIdentityMapper, err := p.brandIdentityService.GetBrandIdentity(ctx, *videoBranding.BrandLibraryID)
+	if err != nil {
+		if errors.Is(err, datastore.NotFound) {
+			return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("brand_identity not found"))
+		}
+		return nil, err
+	}
+
+	return brandIdentityMapper, nil
 }
 
 func createNewSlide(slideID string) *pbcore.Slide {
@@ -343,6 +382,5 @@ func (p *Portal) newAnimationGeneratorAgent(logger *zap.Logger, sessionID, slide
 		p.mediaService,
 		p.codeBuilderService,
 		p.videoGenerationService,
-		p.brandIdentityService,
 	)
 }
