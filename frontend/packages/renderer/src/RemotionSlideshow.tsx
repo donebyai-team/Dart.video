@@ -209,6 +209,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({
           // else slide color
           const slideWithBackground =
             globalBackground != 'transparent' ? { ...slide, backgroundColor: 'transparent' } : slide
+            
 
           return (
             <React.Fragment key={slide.id}>

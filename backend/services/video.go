@@ -177,11 +177,12 @@ func filterGeneratedSections(video *models.Video, options VideoOptions) int {
 
 	totalSlides := 0
 	var filteredSections []*pbcore.Section
-
+	var lastSlide *pbcore.Slide
 	for _, section := range video.Config.Sections {
 		var filteredSlides []*pbcore.Slide
 
 		for _, slide := range section.Slides {
+			lastSlide = slide
 			totalSlides++
 
 			if !shouldInclude(slide) {
@@ -199,6 +200,12 @@ func filterGeneratedSections(video *models.Video, options VideoOptions) int {
 			section.Slides = filteredSlides
 			filteredSections = append(filteredSections, section)
 		}
+	}
+
+	if lastSlide != nil {
+		lastSlide.Transition = pbcore.TransitionType_TRANSITION_NONE
+		lastSlide.TransitionDuration = nil
+		lastSlide.Direction = nil
 	}
 
 	video.Config.Sections = filteredSections
