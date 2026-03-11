@@ -17,7 +17,6 @@ type VideoGeneration interface {
 	GetVideo(ctx context.Context, id, organizationID string, options VideoOptions) (*models.Video, int, error)
 	GetVideos(ctx context.Context, organizationID string, options VideoOptions) ([]*models.Video, error)
 	UpdateVideoConfig(ctx context.Context, video *models.Video) error
-	UpdateGeneratedVideoConfig(ctx context.Context, video *models.Video) error
 	UpdateVideoStatus(ctx context.Context, ID string, status models.VideoStatus) error
 }
 
@@ -29,34 +28,6 @@ type VideoOptions struct {
 type videoGeneration struct {
 	db     datastore.Repository
 	logger *zap.Logger
-}
-
-func (v videoGeneration) UpdateGeneratedVideoConfig(ctx context.Context, video *models.Video) error {
-	video.Config = video.AIGeneratedConfig
-	totalDuration := float32(0.0)
-
-	for _, section := range video.Config.Sections {
-		slides := section.Slides
-		if len(slides) == 0 {
-			continue
-		}
-
-		for i, slide := range slides {
-			totalDuration += slide.Duration
-
-			// subtract transition if NOT last slide
-			if i < len(slides)-1 &&
-				slide.TransitionDuration != nil &&
-				slide.Transition != pbcore.TransitionType_TRANSITION_NONE {
-
-				totalDuration -= *slide.TransitionDuration
-			}
-		}
-	}
-
-	video.Metadata.Duration = totalDuration
-
-	return v.db.UpdateVideo(ctx, video)
 }
 
 func NewVideoGeneration(db datastore.Repository, logger *zap.Logger) VideoGeneration {
@@ -103,6 +74,11 @@ func (v videoGeneration) UpdateVideoConfig(ctx context.Context, video *models.Vi
 	if video.Metadata != nil {
 		existingVideo.Metadata.BackgroundStyle = video.Metadata.BackgroundStyle
 		existingVideo.Metadata.BackgroundAudioUrl = video.Metadata.BackgroundAudioUrl
+
+		// Coming from slide generator
+		if video.Metadata.GeneratedBranding != nil {
+			existingVideo.Metadata.GeneratedBranding = video.Metadata.GeneratedBranding
+		}
 	}
 
 	if nameChanged {
