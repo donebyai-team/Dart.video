@@ -51,6 +51,13 @@ func (l llmRetrievalService) GetFallbackTemplate(ctx context.Context) (*models.T
 }
 
 func (l llmRetrievalService) MatchCategories(ctx context.Context, animationType types.AnimationType, query string) ([]*models.TemplateCategory, error) {
+	// TODO: Handle it properly
+	isSimpleText := false
+	if animationType == types.AnimationTypeSIMPLE_TEXT {
+		animationType = types.AnimationTypeTEXT
+		isSimpleText = true
+	}
+
 	categories, err := l.db.GetTemplateCategoriesByAnimationType(ctx, animationType)
 	if err != nil {
 		return nil, err
@@ -58,6 +65,10 @@ func (l llmRetrievalService) MatchCategories(ctx context.Context, animationType 
 
 	if len(categories) == 0 {
 		return nil, nil
+	}
+
+	if isSimpleText {
+		return categories, nil
 	}
 
 	categoryMap := make(map[string]*models.TemplateCategory)
@@ -102,9 +113,21 @@ func (l llmRetrievalService) MatchTemplates(ctx context.Context,
 	beatDescription string,
 	category string,
 	options MatchTemplatesOptions) ([]*models.Template, error) {
+
+	// TODO: Handle it properly
+	isSimpleText := false
+	if animationType == types.AnimationTypeSIMPLE_TEXT {
+		animationType = types.AnimationTypeTEXT
+		isSimpleText = true
+	}
+
 	templates, err := l.db.GetTemplatesByCategory(ctx, category, animationType, options.usedIds)
 	if err != nil {
 		return nil, err
+	}
+
+	if isSimpleText {
+		return templates, nil
 	}
 
 	templateMap := make(map[string]*models.Template)

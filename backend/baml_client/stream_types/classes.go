@@ -1793,14 +1793,15 @@ func (c VideoGenerationPlan) BamlTypeName() string {
 }
 
 type VideoGenerationPlanRequest struct {
-	Duration        *int64       `json:"Duration"`
-	Prompt          *string      `json:"Prompt"`
-	Language        *string      `json:"Language"`
-	Resolution      *string      `json:"Resolution"`
-	Script          []ScriptItem `json:"Script"`
-	EnableThinking  *bool        `json:"enableThinking"`
-	BrandGuidelines *string      `json:"BrandGuidelines"`
-	BrandLibraryID  *string      `json:"BrandLibraryID"`
+	Duration                *int64                `json:"Duration"`
+	Prompt                  *string               `json:"Prompt"`
+	Language                *string               `json:"Language"`
+	Resolution              *string               `json:"Resolution"`
+	Script                  []ScriptItem          `json:"Script"`
+	EnableThinking          *bool                 `json:"enableThinking"`
+	BrandGuidelines         *string               `json:"BrandGuidelines"`
+	BrandLibraryID          *string               `json:"BrandLibraryID"`
+	AvailableAnimationTypes []types.AnimationType `json:"AvailableAnimationTypes"`
 }
 
 func (c *VideoGenerationPlanRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -1841,6 +1842,9 @@ func (c *VideoGenerationPlanRequest) Decode(holder *cffi.CFFIValueClass, typeMap
 		case "BrandLibraryID":
 			c.BrandLibraryID = baml.Decode(valueHolder).Interface().(*string)
 
+		case "AvailableAnimationTypes":
+			c.AvailableAnimationTypes = baml.Decode(valueHolder).Interface().([]types.AnimationType)
+
 		default:
 
 			panic(fmt.Sprintf("unexpected field: %s in class VideoGenerationPlanRequest", key))
@@ -1868,6 +1872,8 @@ func (c VideoGenerationPlanRequest) Encode() (*cffi.HostValue, error) {
 	fields["BrandGuidelines"] = c.BrandGuidelines
 
 	fields["BrandLibraryID"] = c.BrandLibraryID
+
+	fields["AvailableAnimationTypes"] = c.AvailableAnimationTypes
 
 	return baml.EncodeClass("VideoGenerationPlanRequest", fields, nil)
 }

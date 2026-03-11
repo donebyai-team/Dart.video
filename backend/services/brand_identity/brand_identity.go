@@ -282,19 +282,28 @@ func (b brandIdentity) GetBrandIdentities(ctx context.Context, orgID string) ([]
 }
 
 type BrandIdentityRegistry struct {
-	assetMapper map[string]*pbcore.MediaAsset
-	identity    *pbcore.BrandIdentity
+	assetMapper  map[string]*pbcore.MediaAsset
+	identity     *pbcore.BrandIdentity
+	assetHandles []string
 }
 
-func NewBrandIdentityRegistry(identity *pbcore.BrandIdentity) *BrandIdentityRegistry {
-	return &BrandIdentityRegistry{identity: identity, assetMapper: make(map[string]*pbcore.MediaAsset)}
-}
+func (registry *BrandIdentityRegistry) ResolveMediaHandles(code string) string {
+	replacements := make([]string, 0, len(registry.assetMapper)*4)
 
-func (registry BrandIdentityRegistry) ResolveMediaHandles(code string) string {
 	for handleID, asset := range registry.assetMapper {
-		code = strings.ReplaceAll(code, handleID, asset.Url)
+		if asset == nil || asset.Url == "" {
+			continue
+		}
+
+		// Handle <@generated/...>
+		replacements = append(replacements, "<"+handleID+">", asset.Url)
+
+		// Handle @generated/...
+		replacements = append(replacements, handleID, asset.Url)
 	}
-	return code
+
+	replacer := strings.NewReplacer(replacements...)
+	return replacer.Replace(code)
 }
 
 /*
@@ -313,7 +322,7 @@ Brand Identity:
 	Fonts:
 	  - Inter (Google: Inter)
 */
-func (registry BrandIdentityRegistry) FormatBrandDetails() string {
+func (registry *BrandIdentityRegistry) FormatBrandDetails() string {
 	b := registry.identity
 	var sb strings.Builder
 
@@ -361,6 +370,34 @@ func (registry BrandIdentityRegistry) FormatBrandDetails() string {
 	return sb.String()
 }
 
+func NewBrandIdentityRegistry(identity *pbcore.BrandIdentity) *BrandIdentityRegistry {
+	registry := &BrandIdentityRegistry{
+		identity:     identity,
+		assetMapper:  make(map[string]*pbcore.MediaAsset),
+		assetHandles: []string{},
+	}
+
+	for index, m := range identity.Logos {
+		if m.Asset == nil {
+			continue
+		}
+
+		a := m.Asset
+
+		handleID := fmt.Sprintf(
+			"@generated/%s/%d.%s",
+			generateRandomID(),
+			index,
+			a.MediaType.Extension(),
+		)
+
+		registry.assetMapper[handleID] = a
+		registry.assetHandles = append(registry.assetHandles, handleID)
+	}
+
+	return registry
+}
+
 /*
 		Media:
 		 - Type: BRAND_MEDIA_TYPE_LOGO
@@ -371,7 +408,7 @@ func (registry BrandIdentityRegistry) FormatBrandDetails() string {
 	   		Dimensions: 1024x256
 	   		Render Hint: Use <img> tag
 */
-func (registry BrandIdentityRegistry) FormatBrandAndAssetDetails() string {
+func (registry *BrandIdentityRegistry) FormatBrandAndAssetDetails() string {
 	b := registry.identity
 	var sb strings.Builder
 
@@ -383,47 +420,42 @@ func (registry BrandIdentityRegistry) FormatBrandAndAssetDetails() string {
 		sb.WriteString("\n")
 	}
 
-	// ---- Logos / Media ----
 	if len(b.Logos) > 0 {
 		writeLine(1, "Media:")
+
 		for index, m := range b.Logos {
 			if m.Asset == nil {
 				continue
 			}
+
 			a := m.Asset
+			handleID := registry.assetHandles[index]
 
-			// create a asset handle mapping
-			handleID := fmt.Sprintf(
-				"@generated/%s/%d.%s",
-				generateRandomID(),
-				index,
-				a.MediaType.Extension(),
-			)
-
-			registry.assetMapper[handleID] = a
 			writeLine(2, "- Type: %s", m.Type.String())
+
 			if m.Priority != pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_UNSPECIFIED {
 				writeLine(3, "Priority: %s", m.Priority.String())
 			}
+
 			writeLine(3, "URL: <%s>", handleID)
+
 			if a.MimeType != "" {
 				writeLine(3, "MIME Type: %s", a.MimeType)
 			}
+
 			if a.MediaType != pbcore.MediaType_MEDIA_TYPE_UNDEFINED {
 				writeLine(3, "Asset Type: %s", a.MediaType.String())
 			}
-			// Image metadata
+
 			if a.MediaType == pbcore.MediaType_MEDIA_TYPE_IMAGE {
 				if a.Width > 0 && a.Height > 0 {
 					writeLine(3, "Dimensions: %.0fx%.0f", a.Width, a.Height)
 				}
 			}
-			// Render hints
-			switch a.MediaType {
-			case pbcore.MediaType_MEDIA_TYPE_SVG:
-				writeLine(3, "Render Hint: Use <img> tag")
 
-			case pbcore.MediaType_MEDIA_TYPE_IMAGE:
+			switch a.MediaType {
+			case pbcore.MediaType_MEDIA_TYPE_SVG,
+				pbcore.MediaType_MEDIA_TYPE_IMAGE:
 				writeLine(3, "Render Hint: Use <img> tag")
 
 			case pbcore.MediaType_MEDIA_TYPE_VIDEO:

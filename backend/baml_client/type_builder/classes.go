@@ -1375,6 +1375,10 @@ func (t *VideoGenerationPlanRequestClassView) PropertyBrandLibraryID() (ClassPro
 	return t.inner.Property("BrandLibraryID")
 }
 
+func (t *VideoGenerationPlanRequestClassView) PropertyAvailableAnimationTypes() (ClassPropertyView, error) {
+	return t.inner.Property("AvailableAnimationTypes")
+}
+
 func (t *TypeBuilder) VideoGenerationPlanRequest() (*VideoGenerationPlanRequestClassView, error) {
 	bld, err := t.inner.Class("VideoGenerationPlanRequest")
 	if err != nil {

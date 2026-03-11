@@ -22,7 +22,7 @@ class AnimationSlide {
     @description("Semantic search query describing the conceptual animation category, NOT visual style. This should capture the core idea being represented (e.g. 'data fragmentation problem', 'centralization of scattered systems', 'growth acceleration', 'workflow automation'). The query maps to conceptual animation categories, not design aesthetics.")
 
   duration int
-    @description("Duration in seconds. Average 3-4s per slide Keep pacing dynamic. Avoid repetitive durations.")
+    @description("Duration in seconds. Average 4-8s per slide Keep pacing dynamic. Avoid repetitive durations.")
 
   voiceover string? @description("voiceover to play at this slide, if you think its good to add")
 
@@ -57,6 +57,7 @@ class VideoGenerationPlanRequest {
     enableThinking bool? @description("Whether to include step-by-step reasoning in the response")
     BrandGuidelines string?
     BrandLibraryID string? @skip
+    AvailableAnimationTypes AnimationType[]
 }
 
 class VideoGenerationPlan {
@@ -201,7 +202,7 @@ function GeneratePlanStreaming(input: VideoGenerationPlanRequest, conversation_h
     - Do not create arbitrary sections.
 
     ## 7. Animation Slide Repeatability Rules
-     - BRAND: Should not be overused. Use at the start, end, or both. Avoid repeating frequently and do not insert mid-story unless intentional brand recall is needed.
+     - BRAND: Should not be overused. Use either at start, end, or both. Avoid repeating frequently and do not insert mid-story unless intentional brand recall is needed.
      - PRODUCT: Not more than once, used only when showcasing different tools, workflows, or steps across the narrative.
      - TEXT: Can be used multiple times throughout the story for hooks, transitions, and key statements.
      - SIMPLE_TEXT: Can be used multiple times for short 1–2 line emphasis moments or pauses.
@@ -276,6 +277,16 @@ function GeneratePlanStreaming(input: VideoGenerationPlanRequest, conversation_h
       {% endif %}
     {% endfor %}
     {% endif %}
+
+
+    {% if input.AvailableAnimationTypes|length > 0 %}
+    ### IMPORTANT: User wants to only have these animations, You must ONLY use these animation types:
+    {% for animType in input.AvailableAnimationTypes %}
+     - {{ animType }}
+    {% endfor %}
+    {% endif %}
+
+
     ---
 
     {% if conversation_history %}

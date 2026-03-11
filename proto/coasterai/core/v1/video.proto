@@ -27,6 +27,11 @@ enum ResolutionType {
   RESOLUTION_1_1 = 4;
 }
 
+enum StyleType {
+  STYLE_TYPE_UNDEFINED = 0;
+  STYLE_TYPE_SIMPLE = 1;
+}
+
 message GeneratedVideoBranding {
   string brandGuideLines = 1; // just for reference purpose, not used for logic
   GeneratedBrandColors colors = 2;

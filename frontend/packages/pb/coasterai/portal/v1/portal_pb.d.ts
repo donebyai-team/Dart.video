@@ -7,7 +7,7 @@ import type { Message } from "@bufbuild/protobuf";
 import type { Slide } from "../../core/v1/slide_pb";
 import type { AnimationTemplate } from "../../core/v1/template_pb";
 import type { BrandIdentity, BrandIdentitySchema } from "../../core/v1/brandkit_pb";
-import type { Resolution, Script, Video, VideoConfig, VideoLanguage, VideoMetadata } from "../../core/v1/video_pb";
+import type { Resolution, Script, StyleType, Video, VideoConfig, VideoLanguage, VideoMetadata } from "../../core/v1/video_pb";
 import type { EmptySchema, Timestamp } from "@bufbuild/protobuf/wkt";
 
 /**
@@ -417,6 +417,11 @@ export declare type CreateVideoRequest = Message<"coasterai.portal.v1.CreateVide
    * @generated from field: coasterai.core.v1.VideoLanguage language = 6;
    */
   language: VideoLanguage;
+
+  /**
+   * @generated from field: coasterai.core.v1.StyleType styleType = 7;
+   */
+  styleType: StyleType;
 };
 
 /**

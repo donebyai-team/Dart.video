@@ -184,6 +184,13 @@ func (a *agentV1) Start(ctx context.Context, options StartSessionOptions) (*RunR
 		BrandLibraryID: options.Input.BrandLibraryId,
 	}
 
+	if options.Input.StyleType == pbcore.StyleType_STYLE_TYPE_SIMPLE {
+		generatePlanRequest.AvailableAnimationTypes = []types.AnimationType{
+			types.AnimationTypeSIMPLE_TEXT,
+			types.AnimationTypeBRAND,
+		}
+	}
+
 	// use brand guidelines only when specified
 	if a.brandIdentityMapper != nil {
 		generatePlanRequest.BrandGuidelines = utils.Ptr(a.brandIdentityMapper.FormatBrandDetails())

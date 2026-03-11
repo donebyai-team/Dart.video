@@ -357,3 +357,23 @@ export enum ResolutionType {
  */
 export declare const ResolutionTypeSchema: GenEnum<ResolutionType>;
 
+/**
+ * @generated from enum coasterai.core.v1.StyleType
+ */
+export enum StyleType {
+  /**
+   * @generated from enum value: STYLE_TYPE_UNDEFINED = 0;
+   */
+  UNDEFINED = 0,
+
+  /**
+   * @generated from enum value: STYLE_TYPE_SIMPLE = 1;
+   */
+  SIMPLE = 1,
+}
+
+/**
+ * Describes the enum coasterai.core.v1.StyleType.
+ */
+export declare const StyleTypeSchema: GenEnum<StyleType>;
+

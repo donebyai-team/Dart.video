@@ -131,6 +131,8 @@ message GetVideosResponse {
   repeated core.v1.Video videos = 1;
 }
 
+
+
 message CreateVideoRequest {
   core.v1.Script script = 1;
   string prompt = 2;
@@ -138,6 +140,7 @@ message CreateVideoRequest {
   float duration = 4;
   optional string brand_library_id = 5;
   core.v1.VideoLanguage language = 6;
+  core.v1.StyleType styleType = 7;
 }
 
 message CreateVideoResponse {

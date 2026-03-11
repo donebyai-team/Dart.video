@@ -9,7 +9,9 @@ import {
   X,
   Palette,
   LanguagesIcon,
-  Square
+  Square,
+  Wand2,
+  ChevronDown
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -26,6 +28,8 @@ import type { AskUserQuestion, CreateVideoResponse } from '@coasterai/pb/coaster
 import QuestionPanel from '@/components/composer/QuestionPanel'
 import ThinkingViewComponent from '@/components/composer/ThinkingViewComponent'
 import { BrandIdentity } from '@coasterai/pb/coasterai/core/v1/brandkit_pb'
+import { StyleType } from '@coasterai/pb/coasterai/core/v1/video_pb'
+import StylePickerDialog from '@/components/composer/StylePickerDialog'
 
 const DURATIONS = [
   { label: '60s', value: '60' },
@@ -33,6 +37,10 @@ const DURATIONS = [
 ]
 
 const LANGUAGES = [{ label: 'English(UK)', value: 'en' }]
+
+const STYLE_LABELS: Record<number, string> = {
+  1: 'Simple Text',
+}
 
 const NO_BRAND_VALUE = 'none'
 const ADD_BRAND_VALUE = '__add_brand__'
@@ -48,6 +56,8 @@ const VideoIntentComposer = () => {
   const [duration, setDuration] = useState('60')
   const [language, setLanguage] = useState('en')
   const [scriptDialogOpen, setScriptDialogOpen] = useState(false)
+  const [styleDialogOpen, setStyleDialogOpen] = useState(false)
+  const [selectedStyle, setSelectedStyle] = useState<StyleType>(StyleType.UNDEFINED)
   const [script, setScript] = useState<Script | undefined>()
 
   const [stage, setStage] = useState<ComposerStage>('compose')
@@ -193,7 +203,8 @@ const VideoIntentComposer = () => {
         script,
         resolution: selectedResolution,
         duration: Number(duration),
-        brandLibraryId: selectedBrandLibraryId
+        brandLibraryId: selectedBrandLibraryId,
+        styleType: selectedStyle
       }, { signal: controller.signal })
 
       await consumePlanningStream(stream, controller.signal, streamSession)
@@ -267,6 +278,13 @@ const VideoIntentComposer = () => {
         onSave={(s: Script) => setScript(s)}
       />
 
+      <StylePickerDialog
+        open={styleDialogOpen}
+        onOpenChange={setStyleDialogOpen}
+        selectedStyle={selectedStyle}
+        onSelect={setSelectedStyle}
+      />
+
       {/* Center area — grows to push input to the bottom */}
       <div className='flex-1 flex items-center justify-center py-8'>
         <div className='text-center'>
@@ -304,53 +322,59 @@ const VideoIntentComposer = () => {
 
           {/* Toolbar row */}
           <div className='flex items-center gap-1.5 px-4 pt-2.5 pb-2 text-xs text-muted-foreground border-b border-border/40 flex-wrap'>
-            <Film className='w-4 h-4 flex-shrink-0' />
-            <Select value={resolutionId} onValueChange={setResolutionId} disabled={stage !== 'compose'}>
-              <SelectTrigger className='h-7 text-xs bg-transparent border-none shadow-none ring-0 focus:ring-0 px-1 gap-1 w-auto min-w-0'>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {defaultEditorConfig.resolution.options.map(r => (
-                  <SelectItem key={r.id} value={r.id}>
-                    {r.name} ({r.width}x{r.height})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <span className='flex items-center gap-1 flex-shrink-0'>
+              <Film className='w-4 h-4' />
+              <Select value={resolutionId} onValueChange={setResolutionId} disabled={stage !== 'compose'}>
+                <SelectTrigger className='h-7 text-xs bg-transparent border-none shadow-none ring-0 focus:ring-0 px-1 gap-1 w-auto min-w-0'>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {defaultEditorConfig.resolution.options.map(r => (
+                    <SelectItem key={r.id} value={r.id}>
+                      {r.name} ({r.width}x{r.height})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </span>
 
             <span className='text-border/60 mx-0.5'>·</span>
 
-            <Clock className='w-4 h-4 flex-shrink-0' />
-            <Select value={duration} onValueChange={setDuration} disabled={stage !== 'compose'}>
-              <SelectTrigger className='h-7 text-xs bg-transparent border-none shadow-none ring-0 focus:ring-0 px-1 gap-1 w-auto min-w-0'>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {DURATIONS.map(d => (
-                  <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <span className='flex items-center gap-1 flex-shrink-0'>
+              <Clock className='w-4 h-4' />
+              <Select value={duration} onValueChange={setDuration} disabled={stage !== 'compose'}>
+                <SelectTrigger className='h-7 text-xs bg-transparent border-none shadow-none ring-0 focus:ring-0 px-1 gap-1 w-auto min-w-0'>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {DURATIONS.map(d => (
+                    <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </span>
 
             <span className='text-border/60 mx-0.5'>·</span>
 
-            <LanguagesIcon className='w-4 h-4 flex-shrink-0' />
-            <Select value={language} onValueChange={setLanguage} disabled={stage !== 'compose'}>
-              <SelectTrigger className='h-7 text-xs bg-transparent border-none shadow-none ring-0 focus:ring-0 px-1 gap-1 w-auto min-w-0'>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {LANGUAGES.map(d => (
-                  <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <span className='flex items-center gap-1 flex-shrink-0'>
+              <LanguagesIcon className='w-4 h-4' />
+              <Select value={language} onValueChange={setLanguage} disabled={stage !== 'compose'}>
+                <SelectTrigger className='h-7 text-xs bg-transparent border-none shadow-none ring-0 focus:ring-0 px-1 gap-1 w-auto min-w-0'>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {LANGUAGES.map(d => (
+                    <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </span>
 
             <div className='flex-1' />
 
             <button
               onClick={() => setScriptDialogOpen(true)}
-              className='flex items-center gap-1.5 hover:text-foreground rounded px-1.5 py-1 hover:bg-muted/50 transition-colors'
+              className='flex items-center gap-1.5 flex-shrink-0 hover:text-foreground rounded px-1.5 py-1 hover:bg-muted/50 transition-colors'
             >
               <TextIcon className='w-3.5 h-3.5' />
               <span>{hasScript ? 'Edit script' : 'Script'}</span>
@@ -358,36 +382,50 @@ const VideoIntentComposer = () => {
 
             <span className='text-border/60 mx-0.5'>·</span>
 
-            <Palette className='w-4 h-4 flex-shrink-0 opacity-70' />
-            <Select
-              value={selectedBrandLibraryId ?? ADD_BRAND_VALUE}
-              onValueChange={v => {
-                if (v === ADD_BRAND_VALUE) {
-                  router.push('/dashboard/brand')
-                  return
-                }
-                setSelectedBrandLibraryId(v === NO_BRAND_VALUE ? undefined : v)
-              }}
+            <button
+              onClick={() => setStyleDialogOpen(true)}
               disabled={stage !== 'compose'}
+              className='flex items-center gap-1.5 flex-shrink-0 hover:text-foreground rounded px-1.5 py-1 hover:bg-muted/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed'
             >
-              <SelectTrigger className='h-7 text-xs bg-transparent border-none shadow-none ring-0 focus:ring-0 px-1 gap-1 w-auto min-w-0'>
-                <SelectValue placeholder='Brand' />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem
-                  value={ADD_BRAND_VALUE}
-                  onPointerDown={e => {
-                    e.preventDefault()
+              <Wand2 className='w-3.5 h-3.5' />
+              <span>{STYLE_LABELS[selectedStyle] ?? 'Style'}</span>
+              <ChevronDown className='w-3 h-3 opacity-60' />
+            </button>
+
+            <span className='text-border/60 mx-0.5'>·</span>
+
+            <span className='flex items-center gap-1 flex-shrink-0'>
+              <Palette className='w-4 h-4 opacity-70' />
+              <Select
+                value={selectedBrandLibraryId ?? ADD_BRAND_VALUE}
+                onValueChange={v => {
+                  if (v === ADD_BRAND_VALUE) {
                     router.push('/dashboard/brand')
-                  }}
-                >
-                  Add brand
-                </SelectItem>
-                {identities.map(b => (
-                  <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                    return
+                  }
+                  setSelectedBrandLibraryId(v === NO_BRAND_VALUE ? undefined : v)
+                }}
+                disabled={stage !== 'compose'}
+              >
+                <SelectTrigger className='h-7 text-xs bg-transparent border-none shadow-none ring-0 focus:ring-0 px-1 gap-1 w-auto min-w-0'>
+                  <SelectValue placeholder='Brand' />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    value={ADD_BRAND_VALUE}
+                    onPointerDown={e => {
+                      e.preventDefault()
+                      router.push('/dashboard/brand')
+                    }}
+                  >
+                    Add brand
+                  </SelectItem>
+                  {identities.map(b => (
+                    <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </span>
           </div>
 
           {/* Script badge */}

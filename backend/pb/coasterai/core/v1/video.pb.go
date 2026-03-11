@@ -181,6 +181,52 @@ func (ResolutionType) EnumDescriptor() ([]byte, []int) {
 	return file_coasterai_core_v1_video_proto_rawDescGZIP(), []int{2}
 }
 
+type StyleType int32
+
+const (
+	StyleType_STYLE_TYPE_UNDEFINED StyleType = 0
+	StyleType_STYLE_TYPE_SIMPLE    StyleType = 1
+)
+
+// Enum value maps for StyleType.
+var (
+	StyleType_name = map[int32]string{
+		0: "STYLE_TYPE_UNDEFINED",
+		1: "STYLE_TYPE_SIMPLE",
+	}
+	StyleType_value = map[string]int32{
+		"STYLE_TYPE_UNDEFINED": 0,
+		"STYLE_TYPE_SIMPLE":    1,
+	}
+)
+
+func (x StyleType) Enum() *StyleType {
+	p := new(StyleType)
+	*p = x
+	return p
+}
+
+func (x StyleType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (StyleType) Descriptor() protoreflect.EnumDescriptor {
+	return file_coasterai_core_v1_video_proto_enumTypes[3].Descriptor()
+}
+
+func (StyleType) Type() protoreflect.EnumType {
+	return &file_coasterai_core_v1_video_proto_enumTypes[3]
+}
+
+func (x StyleType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use StyleType.Descriptor instead.
+func (StyleType) EnumDescriptor() ([]byte, []int) {
+	return file_coasterai_core_v1_video_proto_rawDescGZIP(), []int{3}
+}
+
 type GeneratedVideoBranding struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	BrandGuideLines string                 `protobuf:"bytes,1,opt,name=brandGuideLines,proto3" json:"brandGuideLines,omitempty"` // just for reference purpose, not used for logic
@@ -798,7 +844,10 @@ const file_coasterai_core_v1_video_proto_rawDesc = "" +
 	"\x0fRESOLUTION_16_9\x10\x01\x12\x12\n" +
 	"\x0eRESOLUTION_4_3\x10\x02\x12\x13\n" +
 	"\x0fRESOLUTION_9_16\x10\x03\x12\x12\n" +
-	"\x0eRESOLUTION_1_1\x10\x04B;Z9github.com/shank318/coasterai/pb/coasterai/core/v1;pbcoreb\x06proto3"
+	"\x0eRESOLUTION_1_1\x10\x04*<\n" +
+	"\tStyleType\x12\x18\n" +
+	"\x14STYLE_TYPE_UNDEFINED\x10\x00\x12\x15\n" +
+	"\x11STYLE_TYPE_SIMPLE\x10\x01B;Z9github.com/shank318/coasterai/pb/coasterai/core/v1;pbcoreb\x06proto3"
 
 var (
 	file_coasterai_core_v1_video_proto_rawDescOnce sync.Once
@@ -812,36 +861,37 @@ func file_coasterai_core_v1_video_proto_rawDescGZIP() []byte {
 	return file_coasterai_core_v1_video_proto_rawDescData
 }
 
-var file_coasterai_core_v1_video_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_coasterai_core_v1_video_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
 var file_coasterai_core_v1_video_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_coasterai_core_v1_video_proto_goTypes = []any{
 	(VideoStatus)(0),               // 0: coasterai.core.v1.VideoStatus
 	(VideoLanguage)(0),             // 1: coasterai.core.v1.VideoLanguage
 	(ResolutionType)(0),            // 2: coasterai.core.v1.ResolutionType
-	(*GeneratedVideoBranding)(nil), // 3: coasterai.core.v1.GeneratedVideoBranding
-	(*GeneratedBrandColors)(nil),   // 4: coasterai.core.v1.GeneratedBrandColors
-	(*VideoMetadata)(nil),          // 5: coasterai.core.v1.VideoMetadata
-	(*Video)(nil),                  // 6: coasterai.core.v1.Video
-	(*VideoConfig)(nil),            // 7: coasterai.core.v1.VideoConfig
-	(*Script)(nil),                 // 8: coasterai.core.v1.Script
-	(*ScriptItem)(nil),             // 9: coasterai.core.v1.ScriptItem
-	(*Resolution)(nil),             // 10: coasterai.core.v1.Resolution
-	(*BackgroundStyle)(nil),        // 11: coasterai.core.v1.BackgroundStyle
-	(*timestamppb.Timestamp)(nil),  // 12: google.protobuf.Timestamp
-	(*Section)(nil),                // 13: coasterai.core.v1.Section
+	(StyleType)(0),                 // 3: coasterai.core.v1.StyleType
+	(*GeneratedVideoBranding)(nil), // 4: coasterai.core.v1.GeneratedVideoBranding
+	(*GeneratedBrandColors)(nil),   // 5: coasterai.core.v1.GeneratedBrandColors
+	(*VideoMetadata)(nil),          // 6: coasterai.core.v1.VideoMetadata
+	(*Video)(nil),                  // 7: coasterai.core.v1.Video
+	(*VideoConfig)(nil),            // 8: coasterai.core.v1.VideoConfig
+	(*Script)(nil),                 // 9: coasterai.core.v1.Script
+	(*ScriptItem)(nil),             // 10: coasterai.core.v1.ScriptItem
+	(*Resolution)(nil),             // 11: coasterai.core.v1.Resolution
+	(*BackgroundStyle)(nil),        // 12: coasterai.core.v1.BackgroundStyle
+	(*timestamppb.Timestamp)(nil),  // 13: google.protobuf.Timestamp
+	(*Section)(nil),                // 14: coasterai.core.v1.Section
 }
 var file_coasterai_core_v1_video_proto_depIdxs = []int32{
-	4,  // 0: coasterai.core.v1.GeneratedVideoBranding.colors:type_name -> coasterai.core.v1.GeneratedBrandColors
-	11, // 1: coasterai.core.v1.VideoMetadata.background_style:type_name -> coasterai.core.v1.BackgroundStyle
-	10, // 2: coasterai.core.v1.VideoMetadata.resolution:type_name -> coasterai.core.v1.Resolution
+	5,  // 0: coasterai.core.v1.GeneratedVideoBranding.colors:type_name -> coasterai.core.v1.GeneratedBrandColors
+	12, // 1: coasterai.core.v1.VideoMetadata.background_style:type_name -> coasterai.core.v1.BackgroundStyle
+	11, // 2: coasterai.core.v1.VideoMetadata.resolution:type_name -> coasterai.core.v1.Resolution
 	1,  // 3: coasterai.core.v1.VideoMetadata.language:type_name -> coasterai.core.v1.VideoLanguage
-	3,  // 4: coasterai.core.v1.VideoMetadata.generatedBranding:type_name -> coasterai.core.v1.GeneratedVideoBranding
-	7,  // 5: coasterai.core.v1.Video.config:type_name -> coasterai.core.v1.VideoConfig
-	5,  // 6: coasterai.core.v1.Video.metadata:type_name -> coasterai.core.v1.VideoMetadata
-	12, // 7: coasterai.core.v1.Video.created_at:type_name -> google.protobuf.Timestamp
+	4,  // 4: coasterai.core.v1.VideoMetadata.generatedBranding:type_name -> coasterai.core.v1.GeneratedVideoBranding
+	8,  // 5: coasterai.core.v1.Video.config:type_name -> coasterai.core.v1.VideoConfig
+	6,  // 6: coasterai.core.v1.Video.metadata:type_name -> coasterai.core.v1.VideoMetadata
+	13, // 7: coasterai.core.v1.Video.created_at:type_name -> google.protobuf.Timestamp
 	0,  // 8: coasterai.core.v1.Video.status:type_name -> coasterai.core.v1.VideoStatus
-	13, // 9: coasterai.core.v1.VideoConfig.sections:type_name -> coasterai.core.v1.Section
-	9,  // 10: coasterai.core.v1.Script.items:type_name -> coasterai.core.v1.ScriptItem
+	14, // 9: coasterai.core.v1.VideoConfig.sections:type_name -> coasterai.core.v1.Section
+	10, // 10: coasterai.core.v1.Script.items:type_name -> coasterai.core.v1.ScriptItem
 	11, // [11:11] is the sub-list for method output_type
 	11, // [11:11] is the sub-list for method input_type
 	11, // [11:11] is the sub-list for extension type_name
@@ -863,7 +913,7 @@ func file_coasterai_core_v1_video_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_coasterai_core_v1_video_proto_rawDesc), len(file_coasterai_core_v1_video_proto_rawDesc)),
-			NumEnums:      3,
+			NumEnums:      4,
 			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   0,
