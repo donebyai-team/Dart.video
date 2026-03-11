@@ -89,6 +89,10 @@ func validateMetadata(metadata *pbcore.VideoMetadata) error {
 		}
 	}
 
+	if metadata.GeneratedBranding == nil || metadata.GeneratedBranding.Colors == nil {
+		return fmt.Errorf("branding details is invalid")
+	}
+
 	return nil
 }
 

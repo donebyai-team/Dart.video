@@ -183,7 +183,7 @@ func (ResolutionType) EnumDescriptor() ([]byte, []int) {
 
 type GeneratedVideoBranding struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
-	BrandGuideLines string                 `protobuf:"bytes,1,opt,name=brandGuideLines,proto3" json:"brandGuideLines,omitempty"`
+	BrandGuideLines string                 `protobuf:"bytes,1,opt,name=brandGuideLines,proto3" json:"brandGuideLines,omitempty"` // just for reference purpose, not used for logic
 	Colors          *GeneratedBrandColors  `protobuf:"bytes,2,opt,name=colors,proto3" json:"colors,omitempty"`
 	BrandLibraryID  *string                `protobuf:"bytes,3,opt,name=brandLibraryID,proto3,oneof" json:"brandLibraryID,omitempty"`
 	unknownFields   protoimpl.UnknownFields

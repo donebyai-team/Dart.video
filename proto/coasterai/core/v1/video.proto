@@ -28,7 +28,7 @@ enum ResolutionType {
 }
 
 message GeneratedVideoBranding {
-  string brandGuideLines = 1;
+  string brandGuideLines = 1; // just for reference purpose, not used for logic
   GeneratedBrandColors colors = 2;
   optional string brandLibraryID = 3;
 }

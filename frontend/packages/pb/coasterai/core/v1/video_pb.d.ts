@@ -17,6 +17,8 @@ export declare const file_coasterai_core_v1_video: GenFile;
  */
 export declare type GeneratedVideoBranding = Message<"coasterai.core.v1.GeneratedVideoBranding"> & {
   /**
+   * just for reference purpose, not used for logic
+   *
    * @generated from field: string brandGuideLines = 1;
    */
   brandGuideLines: string;

@@ -65,6 +65,8 @@ func (g *videoConfigGenerator) CreatePendingSlides(ctx context.Context,
 ) (*pbcore.Video, error) {
 	// save background
 	g.AddVideoBackground(toBackgroundStyle(plan.BackgroundStyle))
+
+	// this will be used for followup edits/generation
 	g.video.Metadata.GeneratedBranding = &pbcore.GeneratedVideoBranding{
 		BrandLibraryID: plan.Branding.BrandLibraryID,
 		Colors: &pbcore.GeneratedBrandColors{
@@ -75,6 +77,7 @@ func (g *videoConfigGenerator) CreatePendingSlides(ctx context.Context,
 		},
 	}
 
+	// store it for reference, not used for any further usage
 	if plan.Branding.BrandGuideLines != nil {
 		g.video.Metadata.GeneratedBranding.BrandGuideLines = *plan.Branding.BrandGuideLines
 	}
