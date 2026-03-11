@@ -146,6 +146,7 @@ const PlayerCanvas = ({
           registry={animRegistry}
           editStore={editStore}
           animEditVersion={animEditVersion}
+          compositionScale={scale * canvasSize.width / videoConfigFromStore.metadata!.resolution.width}
           onSelectElement={setSelectedEid}
           onEdit={applyEdit}
         />

@@ -9,6 +9,7 @@ class ReGenerateAnimationCodeRequest {
 
 class ReGenerateAnimationCodeResponse {
   code string @description("Typescript code")
+  idealDuration int @description("Recommended animation duration in seconds if the provided duration does not fit the animation content or voiceover pacing. Return the duration that allows the animation to play smoothly without rushing or unnecessary delays.")
 }
 
 function ReGenerateAnimation(resume: ReGenerateAnimationCodeRequest, conversation_history: Message[]) -> ReGenerateAnimationCodeResponse {
@@ -81,6 +82,18 @@ function ReGenerateAnimation(resume: ReGenerateAnimationCodeRequest, conversatio
    - Use interpolate() for linear progress (opacity fades, position)
    - Always include { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
    - Add stagger delays for multiple elements
+
+   ## COMMON IMPORTS(For more, check skills section)
+   For icons - use "lucide-react"
+
+   \`\`\`tsx
+   import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate, spring, Sequence } from "remotion";
+   import { TransitionSeries, linearTiming, springTiming } from "@remotion/transitions";
+   import { fade } from "@remotion/transitions/fade";
+   import { slide } from "@remotion/transitions/slide";
+   import { Circle, Rect, Triangle, Star, Ellipse, Pie } from "@remotion/shapes";
+   import { useState, useEffect } from "react";
+   \`\`\`
 
     ## CONSTANTS & PATTERNS
     - Declare ALL constants inside the component body before return. Never at module level.

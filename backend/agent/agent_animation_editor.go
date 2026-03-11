@@ -91,7 +91,7 @@ func NewAgentAnimationEditor(
 	codeBuilder services.TemplateCodeBuilder,
 	videoService services.VideoGeneration,
 	brandIdentityService brand_identity.BrandIdentity,
-) *agentAnimationEditor {
+) AnimationGeneratorAgent {
 	llmService := llm.NewLlmService(logger)
 	return &agentAnimationEditor{
 		sessionID:            sessionID,

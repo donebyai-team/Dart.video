@@ -17,6 +17,7 @@ import { createPortal } from 'react-dom'
 import { AnimationToolbar } from './AnimationToolbar'
 import type { RegistryEntry } from '@coasterai/renderer'
 import { ElementEdit } from '@coasterai/renderer/src/types/ast'
+import { useDragToMove } from './useDragToMove'
 
 interface FRect { left: number; top: number; width: number; height: number }
 
@@ -26,6 +27,8 @@ interface AnimationEditLayerProps {
   registry: Record<string, RegistryEntry>
   editStore: Record<string, ElementEdit>
   animEditVersion?: number
+  /** viewport-px ÷ compositionScale = composition-px (scale × canvasWidth / compositionWidth) */
+  compositionScale: number
   onSelectElement: (eid: string | null) => void
   onEdit: (eid: string, patch: Partial<ElementEdit>) => void
 }
@@ -36,6 +39,7 @@ export function AnimationEditLayer({
   registry,
   editStore,
   animEditVersion,
+  compositionScale,
   onSelectElement,
   onEdit,
 }: AnimationEditLayerProps) {
@@ -46,7 +50,14 @@ export function AnimationEditLayer({
 
   const [canvasRect, setCanvasRect] = useState<FRect | null>(null)
   const [elementRect, setElementRect] = useState<FRect | null>(null)
-  const [hoverCursor, setHoverCursor] = useState<'default' | 'pointer'>('default')
+  const [hoverCursor, setHoverCursor] = useState<'default' | 'pointer' | 'grab'>('default')
+
+  const { isDragging, didDragRef, visualOffset, onDragStart } = useDragToMove({
+    selectedEid,
+    editStore,
+    compositionScale,
+    onEdit,
+  })
 
   // ── Track canvas fixed position ─────────────────────────────────────────────
   useEffect(() => {
@@ -249,9 +260,21 @@ function eidAtPoint(
   }, [onSelectElement])
 
   /**
+   * MouseDown handler: starts a drag if the pointer is over the already-selected element.
+   */
+  function handleCanvasMouseDown(e: React.MouseEvent<HTMLDivElement>) {
+    if (!selectedEid) return
+    const hit = eidAtPoint(e.clientX, e.clientY, e.currentTarget)
+    if (hit?.registryKey === selectedEid) onDragStart(e)
+  }
+
+  /**
    * Click handler: selects the element and draws the highlight rectangle.
+   * Skipped when the mousedown was actually a drag.
    */
   function handleCanvasClick(e: React.MouseEvent<HTMLDivElement>) {
+    if (didDragRef.current) { didDragRef.current = false; return }
+
     const hit = eidAtPoint(e.clientX, e.clientY, e.currentTarget)
     if (!hit) { deselect(); return }
 
@@ -283,12 +306,15 @@ function eidAtPoint(
           width: canvasRect.width,
           height: canvasRect.height,
           zIndex: 40,
-          cursor: hoverCursor,
+          cursor: isDragging ? 'grabbing' : hoverCursor,
         }}
+        onMouseDown={handleCanvasMouseDown}
         onClick={handleCanvasClick}
         onMouseMove={(e: React.MouseEvent<HTMLDivElement>) => {
+          if (isDragging) return
           const hit = eidAtPoint(e.clientX, e.clientY, e.currentTarget)
-          setHoverCursor(hit ? 'pointer' : 'default')
+          if (!hit) { setHoverCursor('default'); return }
+          setHoverCursor(hit.registryKey === selectedEid ? 'grab' : 'pointer')
         }}
         onMouseLeave={() => setHoverCursor('default')}
       />
@@ -298,8 +324,8 @@ function eidAtPoint(
         <div
           style={{
             position: 'fixed',
-            left: elementRect.left - 2,
-            top: elementRect.top - 2,
+            left: elementRect.left + visualOffset.dx - 2,
+            top: elementRect.top + visualOffset.dy - 2,
             width: elementRect.width + 4,
             height: elementRect.height + 4,
             border: '2px dashed rgba(99,102,241,0.8)',

@@ -967,6 +967,10 @@ func (t *ReGenerateAnimationCodeResponseClassView) PropertyCode() (ClassProperty
 	return t.inner.Property("code")
 }
 
+func (t *ReGenerateAnimationCodeResponseClassView) PropertyIdealDuration() (ClassPropertyView, error) {
+	return t.inner.Property("idealDuration")
+}
+
 func (t *TypeBuilder) ReGenerateAnimationCodeResponse() (*ReGenerateAnimationCodeResponseClassView, error) {
 	bld, err := t.inner.Class("ReGenerateAnimationCodeResponse")
 	if err != nil {

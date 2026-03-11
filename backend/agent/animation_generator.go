@@ -374,8 +374,12 @@ func (l animationGenerator) EditAnimationCode(
 	)
 
 	if err == nil {
+		// set its duration
+		template.Duration = int64(animationSlide.Duration)
 		return template, nil
 	}
+
+	l.logger.Error("targeted edits failed", zap.Error(err))
 
 	// 2️⃣ fallback to regeneration
 	return l.tryRegenerateAnimation(
@@ -587,10 +591,29 @@ func (l animationGenerator) tryRegenerateAnimation(
 	params GenerationParams,
 ) (*models.Template, error) {
 
+	// Inject brand guidelines
+	var brandIdentityRegistry *brand_identity.BrandIdentityRegistry
+	if params.VideoBranding != nil && params.VideoBranding.BrandLibraryID != nil {
+		_brandIdentityRegistry, err := l.brandIdentityService.GetBrandIdentity(ctx, *params.VideoBranding.BrandLibraryID)
+		if err != nil {
+			if errors.Is(err, datastore.NotFound) {
+				return nil, agenterrors.InvalidInput("brand_identity not found", nil)
+			}
+			return nil, err
+		}
+
+		if _brandIdentityRegistry != nil {
+			l.logger.Info("using brand-identity",
+				zap.String("brand-identity-id", *params.VideoBranding.BrandLibraryID),
+			)
+			brandIdentityRegistry = _brandIdentityRegistry
+			params.VideoBranding.BrandGuideLines = utils.Ptr(_brandIdentityRegistry.FormatBrandAndAssetDetails())
+		}
+	}
+
 	conversationHistory := []types.Message{}
 	for attempt := 0; attempt < maxAttempts; attempt++ {
 		input := l.buildRegenInput(
-			ctx,
 			code,
 			animationSlide,
 			animationType,
@@ -606,6 +629,19 @@ func (l animationGenerator) tryRegenerateAnimation(
 		response, err := baml_client.ReGenerateAnimation(ctx, input, conversationHistory)
 		if err != nil {
 			return nil, agenterrors.EditAnimationCodeFailed("failed to re-generate animation", err)
+		}
+
+		updatedDuration := response.IdealDuration
+		if !IsValidDuration(updatedDuration) {
+			l.logger.Info("Received invalid duration from re-generated code, moving to animation from prompt",
+				zap.Int("generated_duration", int(response.IdealDuration)),
+				zap.Int("default", int(animationSlide.Duration)))
+			updatedDuration = int64(animationSlide.Duration)
+		}
+
+		if brandIdentityRegistry != nil {
+			l.logger.Info("using brand-identity mapping for resolving media handles")
+			response.Code = brandIdentityRegistry.ResolveMediaHandles(response.Code)
 		}
 
 		indentedCode := indentCode(response.Code)
@@ -626,6 +662,8 @@ func (l animationGenerator) tryRegenerateAnimation(
 		)
 
 		if err == nil {
+			// update duration
+			template.Duration = updatedDuration
 			return template, nil
 		}
 
@@ -658,7 +696,6 @@ func (l animationGenerator) tryRegenerateAnimation(
 }
 
 func (l animationGenerator) buildRegenInput(
-	ctx context.Context,
 	code string,
 	animationSlide *pbcore.Slide,
 	animationType types.AnimationType,
@@ -680,36 +717,6 @@ func (l animationGenerator) buildRegenInput(
 	if params.VideoBackground != nil {
 		input.SlideBackground = gradientToCSS(params.VideoBackground.Gradient)
 	}
-
-	// Inject brand guidelines
-	if params.VideoBranding != nil && params.VideoBranding.BrandLibraryID != nil {
-
-		brandIdentity, err := l.brandIdentityService.GetBrandIdentity(
-			ctx,
-			*params.VideoBranding.BrandLibraryID,
-		)
-
-		if err != nil {
-
-			if errors.Is(err, datastore.NotFound) {
-				return input
-			}
-
-			l.logger.Error(
-				"failed to load brand identity",
-				zap.Error(err),
-			)
-
-			return input
-		}
-
-		if brandIdentity != nil {
-			input.Branding.BrandGuideLines = utils.Ptr(
-				brandIdentity.FormatBrandDetails(),
-			)
-		}
-	}
-
 	return input
 }
 
