@@ -117,7 +117,7 @@ export function calculateRemotionSlideItems(
     // Move to next slide position
     // Next slide starts: Current Start + Current Duration - Transition Duration
     if (hasTransition) {
-      currentFramePosition = absoluteStartFrame + slideDurationFrames - (TRANSITION_DURATION_SECONDS * fps);
+      currentFramePosition = absoluteStartFrame + slideDurationFrames - Math.round(TRANSITION_DURATION_SECONDS * fps);
     } else {
       currentFramePosition = absoluteStartFrame + slideDurationFrames
     }
@@ -204,7 +204,7 @@ export function calculateOverlayItems(slides: TimelineSlide[], fps: number): Ove
       // Get the realSlide start frame using this function
       const realSlideStartTimeFrame = getRealSlideStartFrame(slides, slide.id, fps)
       //convert it into seconds
-      const realSlideStartTimeInSeconds = realSlideStartTimeFrame / 30
+      const realSlideStartTimeInSeconds = realSlideStartTimeFrame / fps
 
       slide.spotlights.forEach(effect => {
         const startTime = effect.startTime ?? 0
@@ -231,7 +231,7 @@ export function calculateOverlayItems(slides: TimelineSlide[], fps: number): Ove
       // Get the realSlide start frame using this function
       const realSlideStartTimeFrame = getRealSlideStartFrame(slides, slide.id, fps)
       //convert it into seconds
-      const realSlideStartTimeInSeconds = realSlideStartTimeFrame / 30
+      const realSlideStartTimeInSeconds = realSlideStartTimeFrame / fps
 
       slide.callouts.forEach(effect => {
         const startTime = effect.startTime ?? 0
@@ -255,7 +255,7 @@ export function calculateOverlayItems(slides: TimelineSlide[], fps: number): Ove
   slides.forEach(slide => {
     if (slide.zooms && slide.zooms.length > 0) {
       const realSlideStartTimeFrame = getRealSlideStartFrame(slides, slide.id, fps)
-      const realSlideStartTimeInSeconds = realSlideStartTimeFrame / 30
+      const realSlideStartTimeInSeconds = realSlideStartTimeFrame / fps
 
       slide.zooms.forEach(effect => {
         const startTime = effect.startTime ?? 0

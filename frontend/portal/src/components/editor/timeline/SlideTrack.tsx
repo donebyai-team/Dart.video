@@ -11,7 +11,6 @@ interface SlideTrackProps {
   pixelsPerSecond: number;
   onSelectSlide?: (slideId: string) => void;
   onSeek?: (time: number) => void;
-  onSelectSlideManually?: (slideId: string) => void; // NEW: For manual slide selection
 }
 
 export function SlideTrack({
@@ -22,7 +21,6 @@ export function SlideTrack({
   pixelsPerSecond,
   onSelectSlide,
   onSeek,
-  onSelectSlideManually,
 }: SlideTrackProps) {
   const [hoverInfo, setHoverInfo] = useState<{ name: string; timeRange: string; x: number } | null>(null);
 
@@ -82,17 +80,7 @@ export function SlideTrack({
             isSelected={slideItem.slideId === selectedSlideId}
             isHighlighted={highlightedSlides.has(slideItem.slideId)}
             pixelsPerSecond={pixelsPerSecond}
-            onClick={() => {
-              console.log(`[SlideTrack] Slide tile clicked: ${slideItem.slideId}`);
-              onSelectSlide?.(slideItem.slideId);
-              // Use manual selection behavior - seek to end frame and prepare for restart
-              if (onSelectSlideManually) {
-                onSelectSlideManually(slideItem.slideId);
-              } else if (onSeek) {
-                // Fallback to old behavior
-                onSeek(slideItem.startTime);
-              }
-            }}
+            onClick={() => onSelectSlide?.(slideItem.slideId)}
             onHover={() => {}}
           />
           
@@ -123,18 +111,8 @@ export function SlideTrack({
             transitionItem={transitionItem}
             pixelsPerSecond={pixelsPerSecond}
             onClick={() => {
-              console.log(`[SlideTrack] Transition tile clicked, selecting target slide: ${transitionItem.toSlide}`);
               const targetSlide = transitionItem.toSlide;
-              if (targetSlide) {
-                onSelectSlide?.(targetSlide);
-                // Use manual selection behavior for the target slide
-                if (onSelectSlideManually) {
-                  onSelectSlideManually(targetSlide);
-                } else if (onSeek) {
-                  // Fallback to old behavior
-                  onSeek(transitionItem.startTime);
-                }
-              }
+              if (targetSlide) onSelectSlide?.(targetSlide);
             }}
             onHover={() => {}}
           />

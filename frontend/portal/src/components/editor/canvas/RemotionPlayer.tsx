@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, forwardRef, useImperativeHandle, useMemo } from "react";
+import { useRef, useEffect, useState, forwardRef, useImperativeHandle, useMemo, useCallback } from "react";
 import { PlayerRef } from "@remotion/player";
 import {
   Play,
@@ -23,8 +23,7 @@ import PlayerTimeline from "../timeline/PlayerTimeline";
 import PlayerToolbar from "../PlayerToolbar";
 import { usePlayerControls, type PlayerControls } from "@/hooks/usePlayerControls";
 import { useRemotionPlayerEvents } from "@/hooks/useRemotionPlayerEvents";
-import { useSlideSelection } from "@/hooks/useSlideSelection";
-import { calculateRealTotalFrames, calculateTotalFrames, getSlideVisualEndFrame } from "../frame_calculations";
+import { calculateRealTotalFrames, getSlideVisualEndFrame } from "../frame_calculations";
 import { useVideoStore } from "@/stores/video";
 import Loading from "@/app/loading";
 
@@ -43,19 +42,20 @@ export interface RemotionPlayerHandle extends PlayerControls {
   isPlaying: () => boolean;
 }
 
-const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerProps>(({
-  onSlideChange,
-  onFullscreenChange,
-  onPlaybackStateChange,
-  transcriptPanel,
-  onSelectOverlayFromTimeline,
-  onDurationChange,
-  onSelectTemplate,
-}, ref) => {
+const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerProps>((
+  {
+    onSlideChange,
+    onFullscreenChange,
+    onPlaybackStateChange,
+    onSelectOverlayFromTimeline,
+    onDurationChange,
+    onSelectTemplate,
+  },
+  ref
+) => {
   const playerRef = useRef<PlayerRef>(null);
   const fullscreenContainerRef = useRef<HTMLDivElement>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
-
 
   const videoConfigFromStore = useVideoStore(s => s.videoConfig);
   const selectedSlide = useVideoStore(s => s.selectedSlide)?.slide;
@@ -70,100 +70,89 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   const selectedSlideId = selectedSlide?.id || "";
 
   const [isPlaying, setIsPlaying] = useState(false);
-  const [containerSize, setContainerSize] = useState({
-    width: 0,
-    height: 0,
-  });
-
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
   const [volume, setVolume] = useState([80]);
   const [isMuted, setIsMuted] = useState(false);
   const BASE_PREVIEW_SCALE = 0.75;
   const [userZoom, setUserZoom] = useState(1);
-
-  const [previewingSlideId, setPreviewingSlideId] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isDraggingTimeline, setIsDraggingTimeline] = useState(false);
-
-  // set starting frame to a bit 1 frame after the 0
-  // so user don't see blank screen
   const [currentFrame, setCurrentFrame] = useState(1);
+
+  // When set, pressing play seeks to this slide's start before playing.
+  // Set whenever the user manually selects a slide (from timeline or settings panel).
+  const [playFromSlideId, setPlayFromSlideId] = useState<string | null>(null);
 
   const totalFrames = useMemo(
     () => calculateRealTotalFrames(allSlides, fps),
     [allSlides, fps]
   );
-
-  const uiTotalFrames = useMemo(
-    () => calculateTotalFrames(allSlides, fps),
-    [allSlides, fps]
-  );
-
-
   const totalDuration = totalFrames / fps;
-  const uiTotalDuration = uiTotalFrames / fps;
   const currentTime = currentFrame / fps;
 
-
-  // Use centralized player controls
   const controls = usePlayerControls(
     playerRef,
     allSlides,
     currentFrame,
     totalFrames,
     isPlaying,
-    previewingSlideId,
-    setPreviewingSlideId,
+    playFromSlideId,
+    setPlayFromSlideId,
     fps,
   );
 
-  // To start the video player from the first visible slide
+  // Seek to frame 1 on mount to avoid blank screen at frame 0
   useEffect(() => {
-    controls.seekToFrame(currentFrame);
-  }, [])
+    controls.seekToFrame(1);
+  }, []);
 
   useEffect(() => {
     if (!canvasContainerRef.current) return;
-
     const observer = new ResizeObserver((entries) => {
       const rect = entries[0].contentRect;
-      setContainerSize({
-        width: rect.width,
-        height: rect.height,
-      });
+      setContainerSize({ width: rect.width, height: rect.height });
     });
-
     observer.observe(canvasContainerRef.current);
-
     return () => observer.disconnect();
   }, []);
 
-
-  // Use custom hooks for event handling and slide selection
   useRemotionPlayerEvents({
     playerRef,
     allSlides,
     selectedSlideId,
-    previewingSlideId,
     onSlideChange,
     setIsPlaying,
     setCurrentFrame,
-    setPreviewingSlideId,
-    isDragging: isDraggingTimeline, // Pass dragging state to prevent interference
     fps,
   });
 
-  useSlideSelection({
-    selectedSlideId,
-    allSlides,
-    isPlaying,
-    previewingSlideId,
-    controls,
-    setCurrentFrame,
-    fps,
-    isDragging: isDraggingTimeline, // Pass dragging state to prevent interference
-  });
+  // Ref to track which slide changes were already handled to prevent double-seeking.
+  // handleSlideSelect sets this before calling onSlideChange so the effect below skips it.
+  const lastHandledSlideRef = useRef(selectedSlideId);
 
-  // Expose methods via ref - delegate to centralized controls
+  // Handle external slide changes (e.g. from settings panel) when not playing
+  useEffect(() => {
+    if (selectedSlideId === lastHandledSlideRef.current) return;
+    lastHandledSlideRef.current = selectedSlideId;
+
+    if (!isPlaying && selectedSlideId) {
+      const frame = getSlideVisualEndFrame(allSlides, selectedSlideId, fps);
+      playerRef.current?.seekTo(frame);
+      setPlayFromSlideId(selectedSlideId);
+    }
+  }, [selectedSlideId, isPlaying, allSlides, fps]);
+
+  // Called when user clicks a slide tile in the timeline.
+  // Pauses playback and seeks to the visual end of the slide (last frame before transition).
+  // Sets playFromSlideId so that pressing play restarts from the slide's beginning.
+  const handleSlideSelect = useCallback((slideId: string) => {
+    lastHandledSlideRef.current = slideId;
+    playerRef.current?.pause();
+    const frame = getSlideVisualEndFrame(allSlides, slideId, fps);
+    playerRef.current?.seekTo(frame);
+    setPlayFromSlideId(slideId);
+    onSlideChange?.(slideId);
+  }, [allSlides, fps, onSlideChange]);
+
   useImperativeHandle(ref, () => controls, [controls]);
 
   const formatTime = (seconds: number) => {
@@ -187,28 +176,18 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
     height: typeof window !== "undefined" ? window.innerHeight : 0,
   }));
 
-
   useEffect(() => {
-    const handleResize = () => {
-      setViewport({
-        width: window.innerWidth,
-        height: window.innerHeight
-      });
-    };
-
+    const handleResize = () => setViewport({ width: window.innerWidth, height: window.innerHeight });
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-
-  // Listen for fullscreen changes
   useEffect(() => {
     const handleFullscreenChange = () => {
       const isNowFullscreen = !!document.fullscreenElement;
       setIsFullscreen(isNowFullscreen);
       onFullscreenChange?.(isNowFullscreen);
     };
-
     document.addEventListener("fullscreenchange", handleFullscreenChange);
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, [onFullscreenChange]);
@@ -225,56 +204,27 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   const handleZoomOut = () => setUserZoom(prev => Math.max(0.25, prev - 0.25));
   const handleZoomReset = () => setUserZoom(1);
 
-
   const canvasSize = useMemo(() => {
     if (!resolution) return { width: 0, height: 0 };
 
-    const aspectRatio = resolution.width / resolution.height;
-
-    // Fullscreen logic
     if (isFullscreen) {
-      const screenWidth = viewport.width;
-      const screenHeight = viewport.height;
-
-      const widthRatio = screenWidth / resolution.width;
-      const heightRatio = screenHeight / resolution.height;
-
-      const fitScale = Math.min(widthRatio, heightRatio);
-
-      return {
-        width: resolution.width * fitScale,
-        height: resolution.height * fitScale,
-      };
+      const fitScale = Math.min(viewport.width / resolution.width, viewport.height / resolution.height);
+      return { width: resolution.width * fitScale, height: resolution.height * fitScale };
     }
 
-    // 🔥 Editor preview logic (non-fullscreen)
-
-    const widthRatio = containerSize.width / resolution.width;
-    const heightRatio = containerSize.height / resolution.height;
-
-    const fitScale = Math.min(widthRatio, heightRatio);
-
-    // 👇 Add clamp here
-    const MAX_SCALE = 0.75; // 75% of available area
-    const finalScale = Math.min(fitScale, MAX_SCALE);
-
-    return {
-      width: resolution.width * finalScale,
-      height: resolution.height * finalScale,
-    };
-
+    const fitScale = Math.min(containerSize.width / resolution.width, containerSize.height / resolution.height);
+    const finalScale = Math.min(fitScale, 0.75);
+    return { width: resolution.width * finalScale, height: resolution.height * finalScale };
   }, [resolution, isFullscreen, viewport, containerSize]);
 
   return (
     <div ref={fullscreenContainerRef} className="flex flex-col h-full">
-      {/* Unified Player Toolbar - includes duration control and slide editing tools */}
       {!isFullscreen && onDurationChange && (
         <PlayerToolbar
           onDurationChange={(newDuration) => onDurationChange(selectedSlideId, newDuration)}
         />
       )}
 
-      {/* Player Canvas — AnimationEditLayer (toolbar + overlay) is rendered inside PlayerCanvas */}
       <div
         ref={canvasContainerRef}
         className="flex-1 flex items-center justify-center overflow-hidden"
@@ -289,51 +239,31 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
           scale={isFullscreen ? userZoom : BASE_PREVIEW_SCALE * userZoom}
           onSetScale={setUserZoom}
           isPlaying={isPlaying}
-          onSelectTemplate={onSelectTemplate}         
+          onSelectTemplate={onSelectTemplate}
         />
       </div>
-
-
-      {/* Transcript panel - below player, above timeline */}
-      {/* {transcriptPanel && !isFullscreen && (
-        <div className="bg-card border-t border-border p-3 flex-shrink-0">
-          {transcriptPanel}
-        </div>
-      )} */}
 
       {/* Timeline */}
       <div className={`bg-card border-t border-border ${isFullscreen ? "hidden" : ""}`}>
         <PlayerTimeline
           slides={allSlides}
-          totalDuration={uiTotalDuration}
-          totalFrames={uiTotalFrames}
           currentFrame={currentFrame}
           onSeek={(frame) => controls.seekToFrame(frame)}
-          onSelectSlide={onSlideChange}
-          onSelectSlideManually={(slideId) => {
-            console.log(`[RemotionPlayer] Manual slide selection from timeline: ${slideId}`);
-            controls.selectSlideManually(slideId);
-            onSlideChange?.(slideId);
-          }}
+          onSelectSlide={handleSlideSelect}
           onSelectOverlay={(overlayId, slideId) => {
             if (onSelectOverlayFromTimeline) {
               onSelectOverlayFromTimeline(overlayId, slideId);
             } else {
-              // Fallback to old behavior
               onSlideChange?.(slideId);
-              setTimeout(() => {
-                onSelectOEffect?.(overlayId);
-              }, 0);
+              setTimeout(() => onSelectOEffect?.(overlayId), 0);
             }
           }}
           fps={fps}
-          isDragging={isDraggingTimeline}
-          onDraggingChange={setIsDraggingTimeline}
         />
 
         {/* Controls bar */}
         <div className="h-14 px-4 flex items-center gap-4 border-t border-border/50">
-          {/* Left: Playback controls */}
+          {/* Playback controls */}
           <div className="flex items-center gap-1">
             <button
               onClick={() => controls.skipBackward()}
@@ -347,11 +277,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
               onClick={() => controls.togglePlayPause()}
               className="w-11 h-11 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors"
             >
-              {isPlaying ? (
-                <Pause className="w-5 h-5" />
-              ) : (
-                <Play className="w-5 h-5 ml-0.5" />
-              )}
+              {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
             </button>
 
             <button
@@ -370,12 +296,10 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
             <span>{formatTime(totalDuration)}</span>
           </div>
 
-          {/* Spacer */}
           <div className="flex-1" />
 
-          {/* Right: Zoom, Volume, Fullscreen */}
+          {/* Zoom + Volume + Fullscreen */}
           <div className="flex items-center gap-1">
-            {/* Zoom */}
             <button
               onClick={handleZoomOut}
               disabled={userZoom <= 0.25}
@@ -390,11 +314,10 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
               title="Reset zoom"
             >
               {Math.round(userZoom * 100)}%
-
             </button>
             <button
               onClick={handleZoomIn}
-            disabled={userZoom >= 3}
+              disabled={userZoom >= 3}
               className="w-8 h-8 rounded-lg hover:bg-muted flex items-center justify-center transition-colors disabled:opacity-40"
               title="Zoom in"
             >
@@ -403,17 +326,10 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
 
             <Separator orientation="vertical" className="h-5 mx-1" />
 
-            {/* Volume */}
             <Popover>
               <PopoverTrigger asChild>
-                <button
-                  className="w-8 h-8 rounded-lg hover:bg-muted flex items-center justify-center transition-colors"
-                >
-                  {isMuted || volume[0] === 0 ? (
-                    <VolumeX className="w-4 h-4" />
-                  ) : (
-                    <Volume2 className="w-4 h-4" />
-                  )}
+                <button className="w-8 h-8 rounded-lg hover:bg-muted flex items-center justify-center transition-colors">
+                  {isMuted || volume[0] === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
                 </button>
               </PopoverTrigger>
               <PopoverContent className="w-36 p-3" side="top">
@@ -438,7 +354,6 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
               </PopoverContent>
             </Popover>
 
-            {/* Fullscreen */}
             <button
               onClick={handleFullscreen}
               className="w-8 h-8 rounded-lg hover:bg-muted flex items-center justify-center transition-colors"

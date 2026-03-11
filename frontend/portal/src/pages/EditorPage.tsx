@@ -215,8 +215,8 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
 
   // Centralized preview handler - plays a slide from start and pauses at end
   const handlePreviewSlide = (slideId: string) => {
-    console.log('DEBUG', 'playing preview slide:', slideId, playerRef.current)
-    playerRef.current?.playFromSlideStart(slideId)
+    playerRef.current?.seekToSlide(slideId)
+    setTimeout(() => playerRef.current?.play(), 100)
   }
 
   const handleTogglePreviewSlide = (slideId: string) => {
@@ -416,12 +416,8 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
                   <StoryboardPanel
                     isStreamingVideo={isStreamingVideo}
                     onSelectSlide={(_section, slide) => {
-                      console.log(`[EditorPage] Manual slide selection from slide card: ${slide.id}`)
-                      // Use unified selection handler
-                      const entityId = createSlideEntityId(slide.id)
-                      handleSelectEntity(entityId)
-                      // Use manual slide selection behavior - seek to end and prepare for restart
-                      playerRef.current?.selectSlideManually(slide.id)                      
+                      // Update store — RemotionPlayer's useEffect reacts and seeks to visual end
+                      handleSelectEntity(createSlideEntityId(slide.id))
                     }}
                     onStartEditTitle={(id, title) => {
                       setEditingSectionId(id)
