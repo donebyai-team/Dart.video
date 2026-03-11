@@ -22,6 +22,7 @@ import {
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@coasterai/ui-core/hooks/useAuth";
+import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
 
 export function AppSidebar() {
     const { isMobile, toggleSidebar, openMobile } = useSidebar();
@@ -100,6 +101,7 @@ export function AppSidebar() {
 
             {/* ---------------- Footer ---------------- */}
             <SidebarFooter className="p-4 border-t border-border">
+                 <WorkspaceSwitcher />  
                 <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
                         <span className="text-sm font-medium"></span>
