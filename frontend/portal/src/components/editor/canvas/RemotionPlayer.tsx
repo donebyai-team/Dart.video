@@ -406,12 +406,20 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
 
       {/* Fullscreen controls overlay — fades out after 3s of inactivity */}
       {isFullscreen && (
-        <div
-          className="absolute bottom-0 inset-x-0 transition-opacity duration-500"
-          style={{ opacity: controlsVisible ? 1 : 0, pointerEvents: controlsVisible ? "auto" : "none" }}
-        >
-          {controlsBar}
-        </div>
+        <>
+          <div
+            className="absolute top-0 inset-x-0 transition-opacity duration-500"
+            style={{ opacity: controlsVisible ? 1 : 0, pointerEvents: controlsVisible ? "auto" : "none" }}
+          >
+            {controlsBar}
+          </div>
+          {/* Click anywhere on canvas (below controls) to toggle play/pause */}
+          <div
+            className="absolute inset-x-0 bottom-0"
+            style={{ top: "56px", pointerEvents: "auto" }}
+            onClick={() => controls.togglePlayPause()}
+          />
+        </>
       )}
     </div>
   );

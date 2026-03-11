@@ -90,24 +90,23 @@ func (v videoGeneration) UpdateVideoConfig(ctx context.Context, video *models.Vi
 		existingVideo.Version++
 	}
 
-	totalDuration := float32(0.0)
-
+	// Flatten all slides across sections — transitions can cross section boundaries,
+	// so we must treat slides as one continuous sequence (mirrors frontend updateTotalDuration).
+	var allSlides []*pbcore.Slide
 	for _, section := range existingVideo.Config.Sections {
-		slides := section.Slides
-		if len(slides) == 0 {
-			continue
-		}
+		allSlides = append(allSlides, section.Slides...)
+	}
 
-		for i, slide := range slides {
-			totalDuration += slide.Duration
+	totalDuration := float32(0.0)
+	for i, slide := range allSlides {
+		totalDuration += slide.Duration
 
-			// subtract transition if NOT last slide
-			if i < len(slides)-1 &&
-				slide.TransitionDuration != nil &&
-				slide.Transition != pbcore.TransitionType_TRANSITION_NONE {
+		// subtract transition for every slide except the last one globally
+		if i < len(allSlides)-1 &&
+			slide.TransitionDuration != nil &&
+			slide.Transition != pbcore.TransitionType_TRANSITION_NONE {
 
-				totalDuration -= *slide.TransitionDuration
-			}
+			totalDuration -= *slide.TransitionDuration
 		}
 	}
 
