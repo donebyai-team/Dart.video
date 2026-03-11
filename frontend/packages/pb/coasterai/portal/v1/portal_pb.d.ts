@@ -4,7 +4,7 @@
 
 import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv1";
 import type { Message } from "@bufbuild/protobuf";
-import type { Slide } from "../../core/v1/slide_pb";
+import type { MediaAsset, Slide } from "../../core/v1/slide_pb";
 import type { AnimationTemplate } from "../../core/v1/template_pb";
 import type { BrandIdentity, BrandIdentitySchema } from "../../core/v1/brandkit_pb";
 import type { Resolution, Script, StyleType, Video, VideoConfig, VideoLanguage, VideoMetadata } from "../../core/v1/video_pb";
@@ -262,6 +262,146 @@ export declare type RenderVideoResponse = Message<"coasterai.portal.v1.RenderVid
  * Use `create(RenderVideoResponseSchema)` to create a new message.
  */
 export declare const RenderVideoResponseSchema: GenMessage<RenderVideoResponse>;
+
+/**
+ * @generated from message coasterai.portal.v1.ListFigmaFramesRequest
+ */
+export declare type ListFigmaFramesRequest = Message<"coasterai.portal.v1.ListFigmaFramesRequest"> & {
+  /**
+   * @generated from field: string file_key = 1;
+   */
+  fileKey: string;
+
+  /**
+   * @generated from field: string file_url = 2;
+   */
+  fileUrl: string;
+
+  /**
+   * @generated from field: optional string query = 3;
+   */
+  query?: string;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.ListFigmaFramesRequest.
+ * Use `create(ListFigmaFramesRequestSchema)` to create a new message.
+ */
+export declare const ListFigmaFramesRequestSchema: GenMessage<ListFigmaFramesRequest>;
+
+/**
+ * @generated from message coasterai.portal.v1.FigmaFrame
+ */
+export declare type FigmaFrame = Message<"coasterai.portal.v1.FigmaFrame"> & {
+  /**
+   * @generated from field: string file_key = 1;
+   */
+  fileKey: string;
+
+  /**
+   * @generated from field: string file_name = 2;
+   */
+  fileName: string;
+
+  /**
+   * @generated from field: string node_id = 3;
+   */
+  nodeId: string;
+
+  /**
+   * @generated from field: string name = 4;
+   */
+  name: string;
+
+  /**
+   * @generated from field: string thumbnail_url = 5;
+   */
+  thumbnailUrl: string;
+
+  /**
+   * @generated from field: float width = 6;
+   */
+  width: number;
+
+  /**
+   * @generated from field: float height = 7;
+   */
+  height: number;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.FigmaFrame.
+ * Use `create(FigmaFrameSchema)` to create a new message.
+ */
+export declare const FigmaFrameSchema: GenMessage<FigmaFrame>;
+
+/**
+ * @generated from message coasterai.portal.v1.ListFigmaFramesResponse
+ */
+export declare type ListFigmaFramesResponse = Message<"coasterai.portal.v1.ListFigmaFramesResponse"> & {
+  /**
+   * @generated from field: string file_key = 1;
+   */
+  fileKey: string;
+
+  /**
+   * @generated from field: string file_name = 2;
+   */
+  fileName: string;
+
+  /**
+   * @generated from field: repeated coasterai.portal.v1.FigmaFrame frames = 3;
+   */
+  frames: FigmaFrame[];
+};
+
+/**
+ * Describes the message coasterai.portal.v1.ListFigmaFramesResponse.
+ * Use `create(ListFigmaFramesResponseSchema)` to create a new message.
+ */
+export declare const ListFigmaFramesResponseSchema: GenMessage<ListFigmaFramesResponse>;
+
+/**
+ * @generated from message coasterai.portal.v1.ImportFigmaFrameRequest
+ */
+export declare type ImportFigmaFrameRequest = Message<"coasterai.portal.v1.ImportFigmaFrameRequest"> & {
+  /**
+   * @generated from field: string file_key = 1;
+   */
+  fileKey: string;
+
+  /**
+   * @generated from field: string node_id = 2;
+   */
+  nodeId: string;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.ImportFigmaFrameRequest.
+ * Use `create(ImportFigmaFrameRequestSchema)` to create a new message.
+ */
+export declare const ImportFigmaFrameRequestSchema: GenMessage<ImportFigmaFrameRequest>;
+
+/**
+ * @generated from message coasterai.portal.v1.ImportFigmaFrameResponse
+ */
+export declare type ImportFigmaFrameResponse = Message<"coasterai.portal.v1.ImportFigmaFrameResponse"> & {
+  /**
+   * @generated from field: coasterai.core.v1.MediaAsset asset = 1;
+   */
+  asset?: MediaAsset;
+
+  /**
+   * @generated from field: coasterai.portal.v1.FigmaFrame frame = 2;
+   */
+  frame?: FigmaFrame;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.ImportFigmaFrameResponse.
+ * Use `create(ImportFigmaFrameResponseSchema)` to create a new message.
+ */
+export declare const ImportFigmaFrameResponseSchema: GenMessage<ImportFigmaFrameResponse>;
 
 /**
  * @generated from message coasterai.portal.v1.StopVideoRequest
@@ -846,6 +986,12 @@ export declare type Integration = Message<"coasterai.portal.v1.Integration"> & {
      */
     value: RedditIntegration;
     case: "reddit";
+  } | {
+    /**
+     * @generated from field: coasterai.portal.v1.FigmaIntegration figma = 7;
+     */
+    value: FigmaIntegration;
+    case: "figma";
   } | { case: undefined; value?: undefined };
 };
 
@@ -880,6 +1026,32 @@ export declare type RedditIntegration = Message<"coasterai.portal.v1.RedditInteg
  * Use `create(RedditIntegrationSchema)` to create a new message.
  */
 export declare const RedditIntegrationSchema: GenMessage<RedditIntegration>;
+
+/**
+ * @generated from message coasterai.portal.v1.FigmaIntegration
+ */
+export declare type FigmaIntegration = Message<"coasterai.portal.v1.FigmaIntegration"> & {
+  /**
+   * @generated from field: string user_id = 1;
+   */
+  userId: string;
+
+  /**
+   * @generated from field: string handle = 2;
+   */
+  handle: string;
+
+  /**
+   * @generated from field: string email = 3;
+   */
+  email: string;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.FigmaIntegration.
+ * Use `create(FigmaIntegrationSchema)` to create a new message.
+ */
+export declare const FigmaIntegrationSchema: GenMessage<FigmaIntegration>;
 
 /**
  * @generated from message coasterai.portal.v1.Integrations
@@ -1071,6 +1243,11 @@ export enum IntegrationType {
    * @generated from enum value: INTEGRATION_TYPE_REDDIT_DM_LOGIN = 4;
    */
   REDDIT_DM_LOGIN = 4,
+
+  /**
+   * @generated from enum value: INTEGRATION_TYPE_FIGMA = 5;
+   */
+  FIGMA = 5,
 }
 
 /**
@@ -1280,6 +1457,22 @@ export declare const PortalService: GenService<{
     methodKind: "unary";
     input: typeof RenderVideoRequestSchema;
     output: typeof RenderVideoResponseSchema;
+  },
+  /**
+   * @generated from rpc coasterai.portal.v1.PortalService.ListFigmaFrames
+   */
+  listFigmaFrames: {
+    methodKind: "unary";
+    input: typeof ListFigmaFramesRequestSchema;
+    output: typeof ListFigmaFramesResponseSchema;
+  },
+  /**
+   * @generated from rpc coasterai.portal.v1.PortalService.ImportFigmaFrame
+   */
+  importFigmaFrame: {
+    methodKind: "unary";
+    input: typeof ImportFigmaFrameRequestSchema;
+    output: typeof ImportFigmaFrameResponseSchema;
   },
   /**
    * brand identity request

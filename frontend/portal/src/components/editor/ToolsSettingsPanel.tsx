@@ -1,5 +1,6 @@
 import TextAnimationSelector from '@/components/editor/remotion/animations/suggester/TextAnimationSelector'
 import BackgroundSettings from '@/components/editor/settings/BackgroundSettings'
+import FigmaImportSettings from '@/components/editor/settings/FigmaImportSettings'
 import InsertSettings from '@/components/editor/settings/InsertSettings'
 import TextAnimationTemplateSettings from '@/components/editor/settings/TextAnimationTemplateSettings'
 import { useVideoStore } from '@/stores/video'
@@ -97,6 +98,10 @@ const ToolsSettingsPanel = ({
           settings={activeTool.settings}
           onClose={handleCloseTool}
         />
+      )}
+
+      {activeTool.type === ActiveToolType.FIGMA_IMPORT && (
+        <FigmaImportSettings onClose={handleCloseTool} />
       )}
 
       {/* {activeTool.type === ActiveToolType.TEXT_ANIMATION_TEMPLATE &&

@@ -55,6 +55,7 @@ var StartCmd = cli.Command(startCmdE,
 		flags.String("portal-reddit-redirect-url", "http://localhost:3000/auth/callback", "Reddit App Client ID")
 		flags.String("portal-reddit-client-id", "", "Reddit App Client ID")
 		flags.String("portal-reddit-client-secret", "", "Reddit App Client Secret")
+		flags.String("portal-figma-redirect-url", "http://localhost:3000/auth/callback", "Figma OAuth callback URL")
 
 		flags.String("portal-cors-url-regex-allow", "^.*", "Regex to allow CORS origin requests from, matched on the full URL (scheme, host, port, path, etc.), defaults to allow all")
 		flags.String("portal-http-listen-addr", ":8787", "http listen address")
@@ -143,6 +144,11 @@ func portalApp(cmd *cobra.Command, isAppReady func() bool) (App, error) {
 			sflags.MustGetString(cmd, "google-client-secret"),
 			sflags.MustGetString(cmd, "portal-reddit-redirect-url"),
 		).
+		WithFigma(
+			sflags.MustGetString(cmd, "figma-client-id"),
+			sflags.MustGetString(cmd, "figma-client-secret"),
+			sflags.MustGetString(cmd, "portal-figma-redirect-url"),
+		).
 		Build(cmd.Context(), zlog, tracer)
 	if err != nil {
 		return nil, err
@@ -188,6 +194,7 @@ func portalApp(cmd *cobra.Command, isAppReady func() bool) (App, error) {
 	p := portal.New(
 		deps.MediaStore,
 		deps.GoogleClient,
+		deps.FigmaClient,
 		authenticator,
 		cacheStore,
 		authUsecase,

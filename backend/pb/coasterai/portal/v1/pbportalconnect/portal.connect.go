@@ -87,6 +87,12 @@ const (
 	// PortalServiceRenderVideoProcedure is the fully-qualified name of the PortalService's RenderVideo
 	// RPC.
 	PortalServiceRenderVideoProcedure = "/coasterai.portal.v1.PortalService/RenderVideo"
+	// PortalServiceListFigmaFramesProcedure is the fully-qualified name of the PortalService's
+	// ListFigmaFrames RPC.
+	PortalServiceListFigmaFramesProcedure = "/coasterai.portal.v1.PortalService/ListFigmaFrames"
+	// PortalServiceImportFigmaFrameProcedure is the fully-qualified name of the PortalService's
+	// ImportFigmaFrame RPC.
+	PortalServiceImportFigmaFrameProcedure = "/coasterai.portal.v1.PortalService/ImportFigmaFrame"
 	// PortalServiceCreateBrandIdentityProcedure is the fully-qualified name of the PortalService's
 	// CreateBrandIdentity RPC.
 	PortalServiceCreateBrandIdentityProcedure = "/coasterai.portal.v1.PortalService/CreateBrandIdentity"
@@ -123,6 +129,8 @@ var (
 	portalServiceDeleteVideoMethodDescriptor                  = portalServiceServiceDescriptor.Methods().ByName("DeleteVideo")
 	portalServiceUpdateVideoConfigMethodDescriptor            = portalServiceServiceDescriptor.Methods().ByName("UpdateVideoConfig")
 	portalServiceRenderVideoMethodDescriptor                  = portalServiceServiceDescriptor.Methods().ByName("RenderVideo")
+	portalServiceListFigmaFramesMethodDescriptor              = portalServiceServiceDescriptor.Methods().ByName("ListFigmaFrames")
+	portalServiceImportFigmaFrameMethodDescriptor             = portalServiceServiceDescriptor.Methods().ByName("ImportFigmaFrame")
 	portalServiceCreateBrandIdentityMethodDescriptor          = portalServiceServiceDescriptor.Methods().ByName("CreateBrandIdentity")
 	portalServiceGetBrandIdentitiesMethodDescriptor           = portalServiceServiceDescriptor.Methods().ByName("GetBrandIdentities")
 	portalServiceUpdateBrandIdentityMethodDescriptor          = portalServiceServiceDescriptor.Methods().ByName("UpdateBrandIdentity")
@@ -152,6 +160,8 @@ type PortalServiceClient interface {
 	DeleteVideo(context.Context, *connect.Request[v1.DeleteVideoRequest]) (*connect.Response[emptypb.Empty], error)
 	UpdateVideoConfig(context.Context, *connect.Request[v1.UpdateVideoConfigRequest]) (*connect.Response[emptypb.Empty], error)
 	RenderVideo(context.Context, *connect.Request[v1.RenderVideoRequest]) (*connect.Response[v1.RenderVideoResponse], error)
+	ListFigmaFrames(context.Context, *connect.Request[v1.ListFigmaFramesRequest]) (*connect.Response[v1.ListFigmaFramesResponse], error)
+	ImportFigmaFrame(context.Context, *connect.Request[v1.ImportFigmaFrameRequest]) (*connect.Response[v1.ImportFigmaFrameResponse], error)
 	// brand identity request
 	CreateBrandIdentity(context.Context, *connect.Request[v1.BrandIdentityRequest]) (*connect.Response[v11.BrandIdentity], error)
 	GetBrandIdentities(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.BrandIdentityResponse], error)
@@ -284,6 +294,18 @@ func NewPortalServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(portalServiceRenderVideoMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		listFigmaFrames: connect.NewClient[v1.ListFigmaFramesRequest, v1.ListFigmaFramesResponse](
+			httpClient,
+			baseURL+PortalServiceListFigmaFramesProcedure,
+			connect.WithSchema(portalServiceListFigmaFramesMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
+		importFigmaFrame: connect.NewClient[v1.ImportFigmaFrameRequest, v1.ImportFigmaFrameResponse](
+			httpClient,
+			baseURL+PortalServiceImportFigmaFrameProcedure,
+			connect.WithSchema(portalServiceImportFigmaFrameMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 		createBrandIdentity: connect.NewClient[v1.BrandIdentityRequest, v11.BrandIdentity](
 			httpClient,
 			baseURL+PortalServiceCreateBrandIdentityProcedure,
@@ -332,6 +354,8 @@ type portalServiceClient struct {
 	deleteVideo                  *connect.Client[v1.DeleteVideoRequest, emptypb.Empty]
 	updateVideoConfig            *connect.Client[v1.UpdateVideoConfigRequest, emptypb.Empty]
 	renderVideo                  *connect.Client[v1.RenderVideoRequest, v1.RenderVideoResponse]
+	listFigmaFrames              *connect.Client[v1.ListFigmaFramesRequest, v1.ListFigmaFramesResponse]
+	importFigmaFrame             *connect.Client[v1.ImportFigmaFrameRequest, v1.ImportFigmaFrameResponse]
 	createBrandIdentity          *connect.Client[v1.BrandIdentityRequest, v11.BrandIdentity]
 	getBrandIdentities           *connect.Client[emptypb.Empty, v1.BrandIdentityResponse]
 	updateBrandIdentity          *connect.Client[v1.UpdateBrandIdentityRequest, emptypb.Empty]
@@ -433,6 +457,16 @@ func (c *portalServiceClient) RenderVideo(ctx context.Context, req *connect.Requ
 	return c.renderVideo.CallUnary(ctx, req)
 }
 
+// ListFigmaFrames calls coasterai.portal.v1.PortalService.ListFigmaFrames.
+func (c *portalServiceClient) ListFigmaFrames(ctx context.Context, req *connect.Request[v1.ListFigmaFramesRequest]) (*connect.Response[v1.ListFigmaFramesResponse], error) {
+	return c.listFigmaFrames.CallUnary(ctx, req)
+}
+
+// ImportFigmaFrame calls coasterai.portal.v1.PortalService.ImportFigmaFrame.
+func (c *portalServiceClient) ImportFigmaFrame(ctx context.Context, req *connect.Request[v1.ImportFigmaFrameRequest]) (*connect.Response[v1.ImportFigmaFrameResponse], error) {
+	return c.importFigmaFrame.CallUnary(ctx, req)
+}
+
 // CreateBrandIdentity calls coasterai.portal.v1.PortalService.CreateBrandIdentity.
 func (c *portalServiceClient) CreateBrandIdentity(ctx context.Context, req *connect.Request[v1.BrandIdentityRequest]) (*connect.Response[v11.BrandIdentity], error) {
 	return c.createBrandIdentity.CallUnary(ctx, req)
@@ -477,6 +511,8 @@ type PortalServiceHandler interface {
 	DeleteVideo(context.Context, *connect.Request[v1.DeleteVideoRequest]) (*connect.Response[emptypb.Empty], error)
 	UpdateVideoConfig(context.Context, *connect.Request[v1.UpdateVideoConfigRequest]) (*connect.Response[emptypb.Empty], error)
 	RenderVideo(context.Context, *connect.Request[v1.RenderVideoRequest]) (*connect.Response[v1.RenderVideoResponse], error)
+	ListFigmaFrames(context.Context, *connect.Request[v1.ListFigmaFramesRequest]) (*connect.Response[v1.ListFigmaFramesResponse], error)
+	ImportFigmaFrame(context.Context, *connect.Request[v1.ImportFigmaFrameRequest]) (*connect.Response[v1.ImportFigmaFrameResponse], error)
 	// brand identity request
 	CreateBrandIdentity(context.Context, *connect.Request[v1.BrandIdentityRequest]) (*connect.Response[v11.BrandIdentity], error)
 	GetBrandIdentities(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.BrandIdentityResponse], error)
@@ -605,6 +641,18 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(portalServiceRenderVideoMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	portalServiceListFigmaFramesHandler := connect.NewUnaryHandler(
+		PortalServiceListFigmaFramesProcedure,
+		svc.ListFigmaFrames,
+		connect.WithSchema(portalServiceListFigmaFramesMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
+	portalServiceImportFigmaFrameHandler := connect.NewUnaryHandler(
+		PortalServiceImportFigmaFrameProcedure,
+		svc.ImportFigmaFrame,
+		connect.WithSchema(portalServiceImportFigmaFrameMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	portalServiceCreateBrandIdentityHandler := connect.NewUnaryHandler(
 		PortalServiceCreateBrandIdentityProcedure,
 		svc.CreateBrandIdentity,
@@ -669,6 +717,10 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 			portalServiceUpdateVideoConfigHandler.ServeHTTP(w, r)
 		case PortalServiceRenderVideoProcedure:
 			portalServiceRenderVideoHandler.ServeHTTP(w, r)
+		case PortalServiceListFigmaFramesProcedure:
+			portalServiceListFigmaFramesHandler.ServeHTTP(w, r)
+		case PortalServiceImportFigmaFrameProcedure:
+			portalServiceImportFigmaFrameHandler.ServeHTTP(w, r)
 		case PortalServiceCreateBrandIdentityProcedure:
 			portalServiceCreateBrandIdentityHandler.ServeHTTP(w, r)
 		case PortalServiceGetBrandIdentitiesProcedure:
@@ -760,6 +812,14 @@ func (UnimplementedPortalServiceHandler) UpdateVideoConfig(context.Context, *con
 
 func (UnimplementedPortalServiceHandler) RenderVideo(context.Context, *connect.Request[v1.RenderVideoRequest]) (*connect.Response[v1.RenderVideoResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.RenderVideo is not implemented"))
+}
+
+func (UnimplementedPortalServiceHandler) ListFigmaFrames(context.Context, *connect.Request[v1.ListFigmaFramesRequest]) (*connect.Response[v1.ListFigmaFramesResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.ListFigmaFrames is not implemented"))
+}
+
+func (UnimplementedPortalServiceHandler) ImportFigmaFrame(context.Context, *connect.Request[v1.ImportFigmaFrameRequest]) (*connect.Response[v1.ImportFigmaFrameResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.ImportFigmaFrame is not implemented"))
 }
 
 func (UnimplementedPortalServiceHandler) CreateBrandIdentity(context.Context, *connect.Request[v1.BrandIdentityRequest]) (*connect.Response[v11.BrandIdentity], error) {

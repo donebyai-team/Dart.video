@@ -136,8 +136,22 @@ func (p *Portal) protoIntegration(integration *models.Integration) *pbportal.Int
 			}
 		}
 		return resp
-	//case models.IntegrationTypeGOOGLE:
-	//	return p.resolveGoogleIntegration(ctx, integration)
+	case models.IntegrationTypeFIGMA:
+		config := integration.GetFigmaConfig()
+		resp := &pbportal.Integration{
+			Id:             integration.ID,
+			OrganizationId: integration.OrganizationID,
+			Type:           pbportal.IntegrationType_INTEGRATION_TYPE_FIGMA,
+			Status:         mapIntegrationState(integration.State),
+			Details: &pbportal.Integration_Figma{
+				Figma: &pbportal.FigmaIntegration{
+					UserId: config.UserID,
+					Handle: config.Handle,
+					Email:  config.Email,
+				},
+			},
+		}
+		return resp
 	default:
 		p.logger.Error("unsupported integration type", zap.String("integration", integration.Type.String()))
 		return nil

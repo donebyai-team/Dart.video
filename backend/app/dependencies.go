@@ -6,6 +6,7 @@ import (
 	"github.com/shank318/coasterai/auth"
 	"github.com/shank318/coasterai/auth/crypto"
 	"github.com/shank318/coasterai/datastore"
+	figma2 "github.com/shank318/coasterai/integrations/figma"
 	google2 "github.com/shank318/coasterai/integrations/google"
 	"github.com/shank318/coasterai/services"
 	"github.com/streamingfast/logging"
@@ -24,6 +25,12 @@ type GoogleConfig struct {
 	Endpoint     oauth2.Endpoint
 }
 
+type FigmaConfig struct {
+	ClientID     string
+	ClientSecret string
+	RedirectURL  string
+}
+
 type DependenciesBuilder struct {
 	imageKitKey        string
 	PGDSN              string
@@ -34,6 +41,7 @@ type DependenciesBuilder struct {
 	Processor          bool
 	AIConfig           *AIConfig
 	GoogleConfig       *GoogleConfig
+	FigmaConfig        *FigmaConfig
 	dig                *dig.Container
 }
 
@@ -68,6 +76,18 @@ func (b *DependenciesBuilder) WithGoogle(clientId, clientSecret, redirectUrl str
 	redirectUrl = strings.Replace(redirectUrl, "auth/callback", "callback/login", 1)
 
 	b.GoogleConfig = &GoogleConfig{
+		ClientID:     clientId,
+		ClientSecret: clientSecret,
+		RedirectURL:  redirectUrl,
+	}
+	return b
+}
+
+func (b *DependenciesBuilder) WithFigma(clientId, clientSecret, redirectUrl string) *DependenciesBuilder {
+	if clientId == "" || clientSecret == "" {
+		return b
+	}
+	b.FigmaConfig = &FigmaConfig{
 		ClientID:     clientId,
 		ClientSecret: clientSecret,
 		RedirectURL:  redirectUrl,
@@ -153,6 +173,13 @@ func (b *DependenciesBuilder) Build(ctx context.Context, logger *zap.Logger, tra
 		out.GoogleClient = google2.NewOauthClient(b.GoogleConfig.ClientID, b.GoogleConfig.ClientSecret, b.GoogleConfig.RedirectURL, logger)
 	}
 
+	if b.FigmaConfig != nil {
+		logger.Info("setting up figma",
+			zap.Reflect("client_id", b.FigmaConfig.ClientID),
+		)
+		out.FigmaClient = figma2.NewOauthClient(b.FigmaConfig.ClientID, b.FigmaConfig.ClientSecret, b.FigmaConfig.RedirectURL, logger)
+	}
+
 	out.MediaStore = services.NewGcpMediaStore()
 
 	//if b.imageKitKey != "" {
@@ -178,4 +205,5 @@ type Dependencies struct {
 	coasteraiDepMissing []string
 
 	GoogleClient *google2.OauthClient
+	FigmaClient  *figma2.OauthClient
 }

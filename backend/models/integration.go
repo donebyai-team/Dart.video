@@ -9,7 +9,7 @@ import (
 
 //go:generate go-enum -f=$GOFILE
 
-// ENUM(VOICE_MILLIS, VOICE_VAPI, REDDIT, SLACK_WEBHOOK, REDDIT_DM_LOGIN)
+// ENUM(VOICE_MILLIS, VOICE_VAPI, REDDIT, SLACK_WEBHOOK, REDDIT_DM_LOGIN, FIGMA)
 type IntegrationType string
 
 // ENUM(ACTIVE, AUTH_REVOKED, ACCOUNT_SUSPENDED, AUTH_EXPIRED, NOT_ESTABLISHED)
@@ -82,6 +82,70 @@ var _ Serializable = (*VAPIConfig)(nil)
 
 var _ Serializable = (*RedditConfig)(nil)
 var _ Serializable = (*RedditDMLoginConfig)(nil)
+var _ Serializable = (*FigmaConfig)(nil)
+
+type FigmaConfig struct {
+	UserID       string    `json:"user_id"`
+	Handle       string    `json:"handle"`
+	Email        string    `json:"email"`
+	AccessToken  string    `json:"-"`
+	RefreshToken string    `json:"-"`
+	ExpiresAt    time.Time `json:"expires_at"`
+}
+
+func (i *FigmaConfig) GetUniqID() *string {
+	if i.UserID == "" {
+		panic(fmt.Errorf("figma user id cannot be empty"))
+	}
+	return &i.UserID
+}
+
+func (i *FigmaConfig) EncryptedData() []byte {
+	toEncrypt := struct {
+		AccessToken  string `json:"access_token"`
+		RefreshToken string `json:"refresh_token"`
+	}{
+		AccessToken:  i.AccessToken,
+		RefreshToken: i.RefreshToken,
+	}
+	data, err := json.Marshal(toEncrypt)
+	if err != nil {
+		panic(err)
+	}
+	return data
+}
+
+func (i *FigmaConfig) PlainTextData() []byte {
+	data, err := json.Marshal(i)
+	if err != nil {
+		panic(err)
+	}
+	return data
+}
+
+func (i *Integration) GetFigmaConfig() *FigmaConfig {
+	if i.Type != IntegrationTypeFIGMA {
+		panic(fmt.Errorf("integration is not a figma integration"))
+	}
+
+	out := FigmaConfig{}
+	if err := json.Unmarshal([]byte(i.PlainTextConfig), &out); err != nil {
+		panic(fmt.Errorf("unable to unmarshal figma config: %w", err))
+	}
+
+	encryptedData := struct {
+		AccessToken  string `json:"access_token"`
+		RefreshToken string `json:"refresh_token"`
+	}{}
+
+	if err := json.Unmarshal([]byte(i.EncryptedConfig), &encryptedData); err != nil {
+		panic(fmt.Errorf("unable to unmarshal figma config: %w", err))
+	}
+
+	out.AccessToken = encryptedData.AccessToken
+	out.RefreshToken = encryptedData.RefreshToken
+	return &out
+}
 
 type RedditDMLoginConfig struct {
 	Username          string  `json:"username"`

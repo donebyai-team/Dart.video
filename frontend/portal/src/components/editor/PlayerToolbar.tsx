@@ -3,14 +3,14 @@ import {
   Palette,
   Type,
   ChevronDown,
-  RefreshCw,
   Wand2,
   Focus,
   CircleDot,
-  ZoomIn
+  ZoomIn,
+  Figma
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useVideoStore } from '@/stores/video'
 import { SlideType, Slide, EffectType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
@@ -126,6 +126,11 @@ const PlayerToolbar = ({ onDurationChange, minDuration = 1, maxDuration = 180 }:
                     {tool.name}
                   </DropdownMenuItem>
                 ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => onSelectTool({ type: ActiveToolType.FIGMA_IMPORT })} className='gap-2'>
+                  <Figma className='w-4 h-4' />
+                  Import from Figma
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </>

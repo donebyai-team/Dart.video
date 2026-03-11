@@ -65,6 +65,8 @@ const (
 	IntegrationTypeSLACKWEBHOOK IntegrationType = "SLACK_WEBHOOK"
 	// IntegrationTypeREDDITDMLOGIN is a IntegrationType of type REDDIT_DM_LOGIN.
 	IntegrationTypeREDDITDMLOGIN IntegrationType = "REDDIT_DM_LOGIN"
+	// IntegrationTypeFIGMA is a IntegrationType of type FIGMA.
+	IntegrationTypeFIGMA IntegrationType = "FIGMA"
 )
 
 var ErrInvalidIntegrationType = errors.New("not a valid IntegrationType")
@@ -87,6 +89,7 @@ var _IntegrationTypeValue = map[string]IntegrationType{
 	"REDDIT":          IntegrationTypeREDDIT,
 	"SLACK_WEBHOOK":   IntegrationTypeSLACKWEBHOOK,
 	"REDDIT_DM_LOGIN": IntegrationTypeREDDITDMLOGIN,
+	"FIGMA":           IntegrationTypeFIGMA,
 }
 
 // ParseIntegrationType attempts to convert a string to a IntegrationType.

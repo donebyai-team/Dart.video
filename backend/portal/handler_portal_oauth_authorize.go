@@ -60,6 +60,11 @@ func (p *Portal) OauthAuthorize(ctx context.Context, req *connect.Request[pbport
 	switch req.Msg.IntegrationType {
 	case pbportal.IntegrationType_INTEGRATION_TYPE_GOOGLE:
 		authorizeURL = p.googleOauthClient.AuthorizeURL(state.Hash)
+	case pbportal.IntegrationType_INTEGRATION_TYPE_FIGMA:
+		if p.figmaOauthClient == nil {
+			return nil, fmt.Errorf("figma oauth client is not configured")
+		}
+		authorizeURL = p.figmaOauthClient.AuthorizeURL(state.Hash)
 	default:
 		return nil, fmt.Errorf("unknown integration: %s", req.Msg.IntegrationType)
 	}

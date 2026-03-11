@@ -3,9 +3,11 @@ package portal
 import (
 	"context"
 	"github.com/shank318/coasterai/cache"
+	figma2 "github.com/shank318/coasterai/integrations/figma"
 	google2 "github.com/shank318/coasterai/integrations/google"
 	"github.com/shank318/coasterai/portal/server/handlers"
 	"github.com/shank318/coasterai/services/brand_identity"
+	figmasvc "github.com/shank318/coasterai/services/figma"
 	"regexp"
 
 	"github.com/shank318/coasterai/auth"
@@ -32,6 +34,8 @@ type Portal struct {
 	authenticator          *auth.Authenticator
 	authStateStore         cache.Cache
 	googleOauthClient      *google2.OauthClient
+	figmaOauthClient       *figma2.OauthClient
+	figmaService           figmasvc.Service
 	mediaService           services.MediaStore
 	codeBuilderService     services.TemplateCodeBuilder
 	videoGenerationService services.VideoGeneration
@@ -42,6 +46,7 @@ type Portal struct {
 func New(
 	mediaService services.MediaStore,
 	googleOauthClient *google2.OauthClient,
+	figmaOauthClient *figma2.OauthClient,
 	authenticator *auth.Authenticator,
 	authStateStore cache.Cache,
 	authUsecase *services.AuthUsecase,
@@ -63,6 +68,8 @@ func New(
 		mediaService:           mediaService,
 		codeBuilderService:     codeBuilderService,
 		googleOauthClient:      googleOauthClient,
+		figmaOauthClient:       figmaOauthClient,
+		figmaService:           figmasvc.NewService(figmaOauthClient, mediaService),
 		authStateStore:         authStateStore,
 		authUsecase:            authUsecase,
 		Shutter:                shutter.New(),

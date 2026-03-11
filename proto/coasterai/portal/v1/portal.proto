@@ -34,6 +34,8 @@ service PortalService {
   rpc DeleteVideo(DeleteVideoRequest) returns (.google.protobuf.Empty);
   rpc UpdateVideoConfig(UpdateVideoConfigRequest) returns (.google.protobuf.Empty);
   rpc RenderVideo(RenderVideoRequest) returns (RenderVideoResponse);
+  rpc ListFigmaFrames(ListFigmaFramesRequest) returns (ListFigmaFramesResponse);
+  rpc ImportFigmaFrame(ImportFigmaFrameRequest) returns (ImportFigmaFrameResponse);
 
   // brand identity request
   rpc CreateBrandIdentity(BrandIdentityRequest) returns (core.v1.BrandIdentity);
@@ -100,6 +102,38 @@ message RenderVideoResponse {
   string jobId = 1;
   string videoId = 2;
   int64 version = 3;
+}
+
+message ListFigmaFramesRequest {
+  string file_key = 1;
+  string file_url = 2;
+  optional string query = 3;
+}
+
+message FigmaFrame {
+  string file_key = 1;
+  string file_name = 2;
+  string node_id = 3;
+  string name = 4;
+  string thumbnail_url = 5;
+  float width = 6;
+  float height = 7;
+}
+
+message ListFigmaFramesResponse {
+  string file_key = 1;
+  string file_name = 2;
+  repeated FigmaFrame frames = 3;
+}
+
+message ImportFigmaFrameRequest {
+  string file_key = 1;
+  string node_id = 2;
+}
+
+message ImportFigmaFrameResponse {
+  core.v1.MediaAsset asset = 1;
+  FigmaFrame frame = 2;
 }
 
 message StopVideoRequest {
@@ -245,6 +279,7 @@ message Integration {
   IntegrationState status = 4;
   oneof details {
     RedditIntegration reddit = 6;
+    FigmaIntegration figma = 7;
   }
 }
 
@@ -252,6 +287,12 @@ message RedditIntegration {
   string user_name = 1;
   string reason = 2;
   string alpha2_country_code =3;
+}
+
+message FigmaIntegration {
+  string user_id = 1;
+  string handle = 2;
+  string email = 3;
 }
 
 message Integrations {
@@ -277,6 +318,7 @@ enum IntegrationType {
   INTEGRATION_TYPE_GOOGLE = 2;
   INTEGRATION_TYPE_REDDIT = 3;
   INTEGRATION_TYPE_REDDIT_DM_LOGIN = 4;
+  INTEGRATION_TYPE_FIGMA = 5;
 }
 
 enum IntegrationState {

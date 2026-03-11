@@ -15,6 +15,7 @@ export enum ActiveToolType {
   NONE = "none",
   BACKGROUND = "background",
   INSERT = "insert",
+  FIGMA_IMPORT = "figma-import",
   TEXT_ANIMATION_TEMPLATE = "text-animation-template",
   VISUAL_ANIMATION_SETTINGS = "visual-animation-settings",
   TEXT_ANIMATION_SETTINGS = "text-animation-settings",
@@ -27,6 +28,7 @@ export type SelectedTools =
   | { type: ActiveToolType.VISUAL_ANIMATION_SETTINGS }
   | { type: ActiveToolType.TEXT_ANIMATION_SETTINGS }
   | { type: ActiveToolType.INSERT; tool: EffectType }
+  | { type: ActiveToolType.FIGMA_IMPORT }
   | { type: ActiveToolType.TEXT_ANIMATION_TEMPLATE }
   | { type: ActiveToolType.VISUAL_ANIMATION_SETTINGS }
   | { type: ActiveToolType.TEXT_ANIMATION_SETTINGS }

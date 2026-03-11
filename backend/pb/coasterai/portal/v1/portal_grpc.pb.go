@@ -40,6 +40,8 @@ const (
 	PortalService_DeleteVideo_FullMethodName                  = "/coasterai.portal.v1.PortalService/DeleteVideo"
 	PortalService_UpdateVideoConfig_FullMethodName            = "/coasterai.portal.v1.PortalService/UpdateVideoConfig"
 	PortalService_RenderVideo_FullMethodName                  = "/coasterai.portal.v1.PortalService/RenderVideo"
+	PortalService_ListFigmaFrames_FullMethodName              = "/coasterai.portal.v1.PortalService/ListFigmaFrames"
+	PortalService_ImportFigmaFrame_FullMethodName             = "/coasterai.portal.v1.PortalService/ImportFigmaFrame"
 	PortalService_CreateBrandIdentity_FullMethodName          = "/coasterai.portal.v1.PortalService/CreateBrandIdentity"
 	PortalService_GetBrandIdentities_FullMethodName           = "/coasterai.portal.v1.PortalService/GetBrandIdentities"
 	PortalService_UpdateBrandIdentity_FullMethodName          = "/coasterai.portal.v1.PortalService/UpdateBrandIdentity"
@@ -71,6 +73,8 @@ type PortalServiceClient interface {
 	DeleteVideo(ctx context.Context, in *DeleteVideoRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	UpdateVideoConfig(ctx context.Context, in *UpdateVideoConfigRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	RenderVideo(ctx context.Context, in *RenderVideoRequest, opts ...grpc.CallOption) (*RenderVideoResponse, error)
+	ListFigmaFrames(ctx context.Context, in *ListFigmaFramesRequest, opts ...grpc.CallOption) (*ListFigmaFramesResponse, error)
+	ImportFigmaFrame(ctx context.Context, in *ImportFigmaFrameRequest, opts ...grpc.CallOption) (*ImportFigmaFrameResponse, error)
 	// brand identity request
 	CreateBrandIdentity(ctx context.Context, in *BrandIdentityRequest, opts ...grpc.CallOption) (*v1.BrandIdentity, error)
 	GetBrandIdentities(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*BrandIdentityResponse, error)
@@ -327,6 +331,24 @@ func (c *portalServiceClient) RenderVideo(ctx context.Context, in *RenderVideoRe
 	return out, nil
 }
 
+func (c *portalServiceClient) ListFigmaFrames(ctx context.Context, in *ListFigmaFramesRequest, opts ...grpc.CallOption) (*ListFigmaFramesResponse, error) {
+	out := new(ListFigmaFramesResponse)
+	err := c.cc.Invoke(ctx, PortalService_ListFigmaFrames_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *portalServiceClient) ImportFigmaFrame(ctx context.Context, in *ImportFigmaFrameRequest, opts ...grpc.CallOption) (*ImportFigmaFrameResponse, error) {
+	out := new(ImportFigmaFrameResponse)
+	err := c.cc.Invoke(ctx, PortalService_ImportFigmaFrame_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *portalServiceClient) CreateBrandIdentity(ctx context.Context, in *BrandIdentityRequest, opts ...grpc.CallOption) (*v1.BrandIdentity, error) {
 	out := new(v1.BrandIdentity)
 	err := c.cc.Invoke(ctx, PortalService_CreateBrandIdentity_FullMethodName, in, out, opts...)
@@ -411,6 +433,8 @@ type PortalServiceServer interface {
 	DeleteVideo(context.Context, *DeleteVideoRequest) (*emptypb.Empty, error)
 	UpdateVideoConfig(context.Context, *UpdateVideoConfigRequest) (*emptypb.Empty, error)
 	RenderVideo(context.Context, *RenderVideoRequest) (*RenderVideoResponse, error)
+	ListFigmaFrames(context.Context, *ListFigmaFramesRequest) (*ListFigmaFramesResponse, error)
+	ImportFigmaFrame(context.Context, *ImportFigmaFrameRequest) (*ImportFigmaFrameResponse, error)
 	// brand identity request
 	CreateBrandIdentity(context.Context, *BrandIdentityRequest) (*v1.BrandIdentity, error)
 	GetBrandIdentities(context.Context, *emptypb.Empty) (*BrandIdentityResponse, error)
@@ -480,6 +504,12 @@ func (UnimplementedPortalServiceServer) UpdateVideoConfig(context.Context, *Upda
 }
 func (UnimplementedPortalServiceServer) RenderVideo(context.Context, *RenderVideoRequest) (*RenderVideoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RenderVideo not implemented")
+}
+func (UnimplementedPortalServiceServer) ListFigmaFrames(context.Context, *ListFigmaFramesRequest) (*ListFigmaFramesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListFigmaFrames not implemented")
+}
+func (UnimplementedPortalServiceServer) ImportFigmaFrame(context.Context, *ImportFigmaFrameRequest) (*ImportFigmaFrameResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ImportFigmaFrame not implemented")
 }
 func (UnimplementedPortalServiceServer) CreateBrandIdentity(context.Context, *BrandIdentityRequest) (*v1.BrandIdentity, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateBrandIdentity not implemented")
@@ -857,6 +887,42 @@ func _PortalService_RenderVideo_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PortalService_ListFigmaFrames_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListFigmaFramesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PortalServiceServer).ListFigmaFrames(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PortalService_ListFigmaFrames_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PortalServiceServer).ListFigmaFrames(ctx, req.(*ListFigmaFramesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PortalService_ImportFigmaFrame_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ImportFigmaFrameRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PortalServiceServer).ImportFigmaFrame(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PortalService_ImportFigmaFrame_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PortalServiceServer).ImportFigmaFrame(ctx, req.(*ImportFigmaFrameRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _PortalService_CreateBrandIdentity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(BrandIdentityRequest)
 	if err := dec(in); err != nil {
@@ -1002,6 +1068,14 @@ var PortalService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RenderVideo",
 			Handler:    _PortalService_RenderVideo_Handler,
+		},
+		{
+			MethodName: "ListFigmaFrames",
+			Handler:    _PortalService_ListFigmaFrames_Handler,
+		},
+		{
+			MethodName: "ImportFigmaFrame",
+			Handler:    _PortalService_ImportFigmaFrame_Handler,
 		},
 		{
 			MethodName: "CreateBrandIdentity",
