@@ -7,6 +7,7 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": {
+    "studio": "remotion studio src/remotion-entry.ts",
     "type-check": "tsc --noEmit",
     "generate:shape-props": "node ./scripts/generate-remotion-shapes-props.mjs",
     "deploy:remotion": "./scripts/deploy-remotion-cloudrun.sh",
@@ -19,6 +20,7 @@
   "dependencies": {
     "@babel/standalone": "7.28.5",
     "@bufbuild/protobuf": "catalog:",
+    "@coasterai/animation": "workspace:*",
     "@coasterai/pb": "workspace:*",
     "@google-cloud/storage": "^7.15.2",
     "@remotion/bundler": "4.0.421",

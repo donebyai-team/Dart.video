@@ -30,3 +30,5 @@ backend/cmd/coasterai/.coasterai
 redora
 
 .gocache/
+
+**/remotion-ui/

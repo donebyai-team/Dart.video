@@ -16,6 +16,8 @@ import { flip } from "@remotion/transitions/flip";
 import { slide } from "@remotion/transitions/slide";
 import { wipe } from "@remotion/transitions/wipe";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import * as AnimationPrimitives from "@coasterai/animation";
+import { REGISTERED_COMPONENT_NAMES } from "@coasterai/animation";
 
 import {
   AbsoluteFill,
@@ -34,9 +36,13 @@ import {
 } from "./generated/remotion-shapes-props";
 // import * as THREE from "three";
 
+import { assignPrimitiveIds, PrimitiveIdRegistry } from "./primitive-ast-pass";
+
 export interface CompilationResult {
   Component: React.ComponentType<any> | null;
   error: string | null;
+  /** Registry of primitive element IDs assigned during compilation. */
+  primitiveIds?: PrimitiveIdRegistry;
 }
 
 export interface CompileRemoteComponentOptions {
@@ -277,6 +283,10 @@ const SHARED_PARAM_NAMES: string[] = [
   // Lucide icons — injected as the full module; individual icons are
   // destructured from this via buildLucideDestructure()
   "__LucideReact__",
+  // Animation primitives — all registered components injected as named bindings.
+  // Derived from @coasterai/animation registry; adding a component there makes it
+  // automatically available here. LLM writes <FadeIn> and this scope has FadeIn.
+  ...Array.from(REGISTERED_COMPONENT_NAMES),
 ];
 
 function getSharedParamValues(validateShapePropsOption: boolean): unknown[] {
@@ -329,7 +339,32 @@ function getSharedParamValues(validateShapePropsOption: boolean): unknown[] {
     flip,
     clockWipe,
     LucideReact,
+    // Animation primitive values — each registered component name maps to its implementation.
+    // Order must match the names appended to SHARED_PARAM_NAMES above.
+    ...Array.from(REGISTERED_COMPONENT_NAMES).map((name) => {
+      const val = (AnimationPrimitives as Record<string, unknown>)[name];
+      return val;
+    }),
   ];
+}
+
+// ─── Reserved name conflict detection ────────────────────────────────────────
+
+// Detect local variable or function declarations that shadow a registered
+// animation primitive name. Throws a descriptive error — never silently renames.
+function checkReservedNameConflicts(code: string): void {
+  // Match: const FadeIn = ..., function SlideIn(...), let Counter = ..., var Text = ...
+  const declPattern = /(?:const|let|var|function)\s+([A-Z][a-zA-Z0-9]*)/g;
+  let match: RegExpExecArray | null;
+  while ((match = declPattern.exec(code)) !== null) {
+    const name = match[1];
+    if (name && REGISTERED_COMPONENT_NAMES.has(name)) {
+      throw new Error(
+        `Reserved component name conflict: "${name}" is a registered animation primitive and cannot be redeclared as a local variable or function. ` +
+        `Rename your local declaration to avoid shadowing the primitive.`
+      );
+    }
+  }
 }
 
 // ─── Import stripping ────────────────────────────────────────────────────────
@@ -453,6 +488,9 @@ export function compileRemoteComponent(
   }
 
   try {
+    // Check for reserved component name shadowing before any transformation.
+    checkReservedNameConflicts(code);
+
     const lucideImports = extractLucideImports(code);
     const lucideDestructure = buildLucideDestructure(lucideImports);
 
@@ -464,7 +502,12 @@ export function compileRemoteComponent(
     cleaned = cleaned.trim();
 
     const source = lucideDestructure ? `${lucideDestructure}\n${cleaned}` : cleaned;
-    const transpiled = babelTransform(source, "remote-component.tsx");
+
+    // Run primitive ID assignment pass on the pre-transpile source.
+    // This pass injects id="fadein-0" etc. on registered component usages.
+    const { code: sourceWithIds, registry: primitiveIds } = assignPrimitiveIds(source);
+
+    const transpiled = babelTransform(sourceWithIds, "remote-component.tsx");
 
     const Component = evalWithScope(
       `${transpiled}\nreturn RemoteComponent;`,
@@ -478,7 +521,7 @@ export function compileRemoteComponent(
       };
     }
 
-    return { Component: Component as React.ComponentType<any>, error: null };
+    return { Component: Component as React.ComponentType<any>, error: null, primitiveIds };
   } catch (error) {
     return {        
       Component: null,
