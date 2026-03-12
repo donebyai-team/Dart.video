@@ -32,6 +32,7 @@ export default function AnimationEditor({ settings, onClose }: AnimationEditorPr
     const isAdding = !!settings.previousSlide
 
     const [prompt, setPrompt] = useState('')
+
     const [stage, setStage] = useState<Stage>('compose')
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [thinkingChunk, setThinkingChunk] = useState('')
@@ -53,6 +54,16 @@ export default function AnimationEditor({ settings, onClose }: AnimationEditorPr
     const pendingGeneratedSlideRef = useRef<Slide | null>(null)
 
     const canSubmit = prompt.trim().length > 0
+
+    useEffect(() => {
+        if (selectedSlide
+            && selectedSlide.slide.content.case == "animation") {
+            setPrompt(
+                (selectedSlide.slide.content.value as AnimationSlideContent)
+                    .plan?.selectedTemplateDescription || ''
+            );
+        }
+    }, [selectedSlide]);
 
     const answerInput = useMemo(() => {
         if (!activeQuestion) return ''
@@ -280,7 +291,7 @@ export default function AnimationEditor({ settings, onClose }: AnimationEditorPr
                 setStage('compose')
                 setThinkingChunk('')
                 setIsThinkingBusy(false)
-                setIsSubmitting(false)                
+                setIsSubmitting(false)
             }
         } finally {
             if (!controller.signal.aborted && streamSessionRef.current === streamSession) {
@@ -492,7 +503,7 @@ export default function AnimationEditor({ settings, onClose }: AnimationEditorPr
                     </div>
                 )}
 
-                <div className='mt-3 rounded-xl border bg-background shadow-sm overflow-hidden'>
+                <div className="mt-3 rounded-xl border bg-background shadow-sm overflow-hidden relative">
                     <textarea
                         value={prompt}
                         onChange={e => setPrompt(e.target.value)}
@@ -503,28 +514,29 @@ export default function AnimationEditor({ settings, onClose }: AnimationEditorPr
                             }
                         }}
                         placeholder={isAdding ? 'Describe the animation you want...' : 'Describe changes to make...'}
-                        rows={3}
+                        rows={5}
                         disabled={isSubmitting || stage === 'question'}
-                        className='w-full resize-none bg-transparent px-3 py-2.5 text-sm focus:outline-none placeholder:text-muted-foreground/60 disabled:opacity-50'
+                        className="w-full resize-none bg-transparent px-3 py-2.5 pr-12 text-sm focus:outline-none placeholder:text-muted-foreground/60 disabled:opacity-50"
                     />
-                    <div className='px-3 pb-2.5 flex justify-end'>
+
+                    <div className="absolute bottom-2 right-2">
                         {isSubmitting || stage === 'question' ? (
                             <Button
                                 onClick={handleStop}
-                                variant='outline'
-                                size='sm'
-                                className='h-8 w-8 rounded-lg hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30'
+                                variant="outline"
+                                size="sm"
+                                className="h-8 w-8 rounded-lg hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
                             >
-                                <Square className='w-3 h-3 fill-current' />
+                                <Square className="w-3 h-3 fill-current" />
                             </Button>
                         ) : (
                             <Button
                                 onClick={handleSubmit}
-                                size='sm'
+                                size="sm"
                                 disabled={!canSubmit}
-                                className='h-8 w-8 rounded-lg'
+                                className="h-8 w-8 rounded-lg"
                             >
-                                <Sparkles className='w-3.5 h-3.5' />
+                                <Sparkles className="w-3.5 h-3.5" />
                             </Button>
                         )}
                     </div>
