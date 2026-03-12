@@ -321,11 +321,11 @@ const StoryboardSection = ({
                         </DndContext>
 
                         {/* Add slide button */}
-                        <AddSlideButton
+                        {/* <AddSlideButton
                             slideTypes={allSlideTypes}
                             onAddSlide={onAddSlide}
                             variant="inline"
-                        />
+                        /> */}
                     </div>
                 </CollapsibleContent>
             </Collapsible>
