@@ -208,9 +208,9 @@ func validateSlideAnimation(content *pbcore.AnimationSlideContent) error {
 		return fmt.Errorf("edits can't be empty")
 	}
 
-	if content.Plan == nil {
-		return fmt.Errorf("content plan is required")
-	}
+	//if content.Plan == nil {
+	//	return fmt.Errorf("content plan is required")
+	//}
 
 	return nil
 }
