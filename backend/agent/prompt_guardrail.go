@@ -10,14 +10,11 @@ var (
 	// XML / HTML tag detection
 	htmlTagRegex = regexp.MustCompile(`</?([a-zA-Z][a-zA-Z0-9]*)[^>]*>`)
 
-	// Common code patterns
+	// Common code patterns that are unlikely to occur in normal prose
 	codePatterns = []string{
 		"```",
 		"function(",
 		"func(",
-		"class ",
-		"import ",
-		"package ",
 		"console.log",
 		"eval(",
 		"exec(",
@@ -25,6 +22,13 @@ var (
 		"sys.",
 		"<?xml",
 		"<script",
+	}
+
+	// Language keywords that need syntax context to avoid false positives in prose.
+	codeKeywordPatterns = []*regexp.Regexp{
+		regexp.MustCompile(`\bclass\s+[a-zA-Z_][a-zA-Z0-9_]*\s*(\{|extends\b|implements\b|:)`),
+		regexp.MustCompile(`\bimport\s+["'({a-zA-Z0-9_]`),
+		regexp.MustCompile(`\bpackage\s+[a-zA-Z_][a-zA-Z0-9_]*\b`),
 	}
 
 	// Prompt injection attempts
@@ -86,6 +90,12 @@ func ValidatePrompt(prompt string) error {
 	// -------- Code Injection --------
 	for _, pattern := range codePatterns {
 		if strings.Contains(lower, pattern) {
+			return errors.New("prompt appears to contain code which is not allowed")
+		}
+	}
+
+	for _, pattern := range codeKeywordPatterns {
+		if pattern.MatchString(lower) {
 			return errors.New("prompt appears to contain code which is not allowed")
 		}
 	}
