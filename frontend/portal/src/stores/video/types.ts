@@ -67,8 +67,8 @@ export interface VideoActions {
     // Slides
     getSlideWithBackground: (slide : Slide) => BackgroundStyle;
     getTimelineSlides: () => TimelineSlide[]
-    addAnimationSlide: (sectionId: string, newSlide: Slide, afterSlideId?: string) => void
     addSlide: (sectionId: string, type: SlideType, afterSlideId?: string) => void
+    addAnimationSlide: (sectionId: string, slide: Slide,afterSlideId?: string) => void
     removeSlide: (sectionId: string, slideId: string) => void
     updateSlide: (updates: Partial<Slide>) => void
     updateSlideContent: (updates: Record<string, unknown>) => void
@@ -107,6 +107,7 @@ export interface VideoActions {
     handleSelectTool: (tool: SelectedTool) => void
     handleCloseTool: () => void
     handleEditAnimation: () => void
+    handleAddAnimation: (sectionId: string, afterSlideId?: string) => void                                          
 
     // Text animation
     handleSelectTextAnimationTemplate: (templateId: string) => void

@@ -1,4 +1,5 @@
 # Toolbar Editing — Feature Specification
+Once the AST is generated with data id 
 
 ---
 
@@ -23,6 +24,255 @@ When a user clicks any element in the animation preview, a toolbar appears above
 ```
 
 ---
+
+## 7.1 How It Works
+
+The Remotion Player renders into a container div. You place a transparent overlay div on top of the entire player at the same size. All clicks are captured by the overlay, not the player.
+
+```typescript
+function EditorContainer() {
+  const playerRef = useRef();
+  const overlayRef = useRef();
+  const [selected, setSelected] = useState(null);
+  const [registry, setRegistry] = useState({});
+  const [elementRects, setElementRects] = useState({});
+
+  return (
+    <div style={{ position: "relative" }}>
+      <Player ref={playerRef} ... />
+
+      {/* Transparent overlay — captures all pointer events */}
+      <div
+        ref={overlayRef}
+        onClick={handleOverlayClick}
+        onMouseMove={handleMouseMove}
+        style={{
+          position: "absolute", inset: 0,
+          cursor: "crosshair",
+        }}
+      />
+
+      {/* Dotted borders on hoverable/selected elements */}
+      <ElementOverlay
+        rects={elementRects}
+        selected={selected}
+        onSelect={setSelected}
+      />
+    </div>
+  );
+}
+```
+
+## 7.2 Hit Detection on Click
+
+```typescript
+function handleOverlayClick(e: MouseEvent) {
+  const playerContainer = playerRef.current.getContainerNode();
+
+  // Temporarily disable the overlay so elementFromPoint
+  // hits the actual Remotion DOM
+  overlayRef.current.style.pointerEvents = "none";
+  const target = document.elementFromPoint(e.clientX, e.clientY);
+  overlayRef.current.style.pointerEvents = "auto";
+
+  if (!target || !playerContainer.contains(target)) return;
+
+  // Walk up DOM until we find a data-eid
+  let el = target;
+  while (el && el !== playerContainer) {
+    const eid = el.getAttribute("data-eid");
+    if (eid) {
+      setSelected(eid);
+      return;
+    }
+    el = el.parentElement;
+  }
+}
+```
+
+## 7.3 Building Element Rects for Overlay Borders
+
+```typescript
+// Rebuild rects on every frame tick and on resize
+function rebuildRects() {
+  const playerContainer = playerRef.current.getContainerNode();
+  const playerRect = playerContainer.getBoundingClientRect();
+  const rects = {};
+
+  playerContainer.querySelectorAll("[data-eid]").forEach(el => {
+    const eid = el.getAttribute("data-eid");
+    const r = el.getBoundingClientRect();
+    // Normalise to player-local coordinates
+    rects[eid] = {
+      x:      r.left   - playerRect.left,
+      y:      r.top    - playerRect.top,
+      width:  r.width,
+      height: r.height,
+    };
+  });
+
+  setElementRects(rects);
+}
+
+// Re-run on each animation frame while in edit mode
+useEffect(() => {
+  let raf;
+  const tick = () => { rebuildRects(); raf = requestAnimationFrame(tick); };
+  raf = requestAnimationFrame(tick);
+  return () => cancelAnimationFrame(raf);
+}, [editMode]);
+```
+
+---
+
+# 8. Overlay: Dotted Borders, Selection & Drag
+
+## 8.1 Rendering the Overlay
+
+```typescript
+function ElementOverlay({ rects, selected, hovering, onSelect }) {
+  return (
+    <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
+      {Object.entries(rects).map(([eid, rect]) => {
+        const isSelected = eid === selected;
+        const isHovered  = eid === hovering;
+        if (!isSelected && !isHovered) return null;
+
+        return (
+          <div
+            key={eid}
+            style={{
+              position:  "absolute",
+              left:      rect.x,
+              top:       rect.y,
+              width:     rect.width,
+              height:    rect.height,
+              border:    isSelected
+                           ? "2px solid #4f46e5"
+                           : "2px dashed rgba(79,70,229,0.5)",
+              boxSizing: "border-box",
+              pointerEvents: "none",
+            }}
+          >
+            {/* Label badge */}
+            <span style={{
+              position: "absolute", top: -22, left: 0,
+              background: "#4f46e5", color: "#fff",
+              fontSize: 11, padding: "2px 6px", borderRadius: 3,
+              whiteSpace: "nowrap",
+            }}>
+              {registry[eid]?.label ?? eid}
+            </span>
+
+            {/* Corner drag handles — shown only when selected */}
+            {isSelected && <DragHandles eid={eid} rect={rect} />}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+```
+
+## 8.2 Corner Drag Handles — Position & Resize
+
+```typescript
+const HANDLES = ["nw", "ne", "sw", "se"]; // corners only for resize
+const MOVE_HANDLE = "move";                // center for translate
+
+function DragHandles({ eid, rect }) {
+  return (
+    <>
+      {/* Move handle — full element surface */}
+      <div
+        data-handle={MOVE_HANDLE}
+        data-eid={eid}
+        style={{
+          position: "absolute", inset: 0,
+          cursor: "move",
+          pointerEvents: "all",
+        }}
+        onMouseDown={e => startDrag(e, eid, "move")}
+      />
+
+      {/* Corner resize handles */}
+      {HANDLES.map(corner => (
+        <div
+          key={corner}
+          data-handle={corner}
+          onMouseDown={e => startDrag(e, eid, corner)}
+          style={{
+            position:  "absolute",
+            width: 8, height: 8,
+            background: "#4f46e5",
+            border: "2px solid #fff",
+            borderRadius: "50%",
+            pointerEvents: "all",
+            cursor: cornerCursor(corner), // nw-resize, ne-resize, etc.
+            ...cornerPosition(corner),     // top/left/right/bottom offsets
+          }}
+        />
+      ))}
+    </>
+  );
+}
+```
+
+## 8.3 Drag Logic
+
+```typescript
+function startDrag(e, eid, handleType) {
+  e.stopPropagation();
+  e.preventDefault();
+
+  const startX   = e.clientX;
+  const startY   = e.clientY;
+  const startRect = elementRects[eid];
+  const currentEdit = editStore[eid] ?? {};
+  const startTransform = currentEdit.transform ?? { translateX: 0, translateY: 0 };
+
+  function onMouseMove(e) {
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+
+    if (handleType === "move") {
+      // Translate the element
+      applyEdit(eid, {
+        transform: {
+          ...startTransform,
+          translateX: (startTransform.translateX ?? 0) + dx,
+          translateY: (startTransform.translateY ?? 0) + dy,
+        }
+      });
+    } else {
+      // Resize via corner handle
+      const resize = computeResize(handleType, dx, dy, startRect);
+      applyEdit(eid, { style: resize });
+    }
+  }
+
+  function onMouseUp() {
+    window.removeEventListener("mousemove", onMouseMove);
+    window.removeEventListener("mouseup",   onMouseUp);
+  }
+
+  window.addEventListener("mousemove", onMouseMove);
+  window.addEventListener("mouseup",   onMouseUp);
+}
+
+// How __patch handles transform edits:
+function __patch(eid, style) {
+  const edit = __edits[eid];
+  if (!edit) return style;
+  const patched = { ...style, ...(edit.style ?? {}) };
+  if (edit.transform) {
+    const { translateX = 0, translateY = 0 } = edit.transform;
+    const existing = patched.transform ?? "";
+    patched.transform = `translate(${translateX}px, ${translateY}px) ${existing}`;
+  }
+  return patched;
+}
+```
 
 ## Toolbar States
 
