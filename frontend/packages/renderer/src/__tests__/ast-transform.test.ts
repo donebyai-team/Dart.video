@@ -1,15 +1,10 @@
-import { transformAnimation } from "../ast-transform";
+import { transformAnimation, computeAnimationDuration } from "../ast-transform";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 /** Strip all whitespace for compact comparisons */
 function compact(s: string) {
   return s.replace(/\s+/g, " ").trim();
-}
-
-/** Count occurrences of a substring */
-function count(s: string, sub: string) {
-  return (s.match(new RegExp(sub.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g")) ?? []).length;
 }
 
 // ── Basic cases ───────────────────────────────────────────────────────────────
@@ -331,5 +326,156 @@ describe("transformAnimation — SVG", () => {
     // circle and path should NOT be in the registry
     expect(types).not.toContain("circle");
     expect(types).not.toContain("path");
+  });
+});
+
+// ── computeAnimationDuration ──────────────────────────────────────────────────
+
+const TAIL = 20; // must match TAIL_BUFFER in ast-transform.ts
+
+describe("computeAnimationDuration — primitives", () => {
+  test("single FadeIn: startAt + durationInFrames + tail", () => {
+    const code = `
+      export default function R() {
+        return <FadeIn startAt={10} durationInFrames={40}><div>Hi</div></FadeIn>;
+      }
+    `;
+    expect(computeAnimationDuration(code)).toBe(10 + 40 + TAIL);
+  });
+
+  test("uses defaults (startAt=0, durationInFrames=30) when props are absent", () => {
+    const code = `
+      export default function R() {
+        return <FadeIn><div>Hi</div></FadeIn>;
+      }
+    `;
+    expect(computeAnimationDuration(code)).toBe(0 + 30 + TAIL);
+  });
+
+  test("returns max across multiple primitives", () => {
+    const code = `
+      export default function R() {
+        return (
+          <div>
+            <SlideIn startAt={0} durationInFrames={25}><span>A</span></SlideIn>
+            <FadeIn  startAt={20} durationInFrames={20}><span>B</span></FadeIn>
+            <Counter startAt={60} durationInFrames={60} from={0} to={100} />
+          </div>
+        );
+      }
+    `;
+    // max endFrame = 60+60=120; with tail = 140
+    expect(computeAnimationDuration(code)).toBe(60 + 60 + TAIL);
+  });
+
+  test("handles SlideIn, ScaleIn, FadeOut, SlideOut, ScaleOut, Typewriter, WordCycle", () => {
+    const snippets: [string, number][] = [
+      [`<SlideIn   startAt={5}  durationInFrames={15} from="bottom"><div/></SlideIn>`,  5  + 15],
+      [`<ScaleIn   startAt={0}  durationInFrames={20}><div/></ScaleIn>`,                0  + 20],
+      [`<FadeOut   startAt={30} durationInFrames={10}><div/></FadeOut>`,                30 + 10],
+      [`<SlideOut  startAt={40} durationInFrames={10} to="top"><div/></SlideOut>`,      40 + 10],
+      [`<ScaleOut  startAt={50} durationInFrames={10}><div/></ScaleOut>`,               50 + 10],
+      [`<Typewriter startAt={0} durationInFrames={45} text="hello" />`,                0  + 45],
+    ];
+    for (const [jsx, expectedEnd] of snippets) {
+      const code = `export default function R() { return (${jsx}); }`;
+      expect(computeAnimationDuration(code)).toBe(expectedEnd + TAIL);
+    }
+  });
+});
+
+describe("computeAnimationDuration — Stagger", () => {
+  test("propagates startAt + staggerDelay to each child", () => {
+    // 3 children: last starts at 100 + 2*12 = 124; ends at 124+20 = 144; +tail = 164
+    const code = `
+      export default function R() {
+        return (
+          <Stagger startAt={100} staggerDelay={12}>
+            <SlideIn durationInFrames={20} from="bottom"><span>A</span></SlideIn>
+            <SlideIn durationInFrames={20} from="bottom"><span>B</span></SlideIn>
+            <SlideIn durationInFrames={20} from="bottom"><span>C</span></SlideIn>
+          </Stagger>
+        );
+      }
+    `;
+    expect(computeAnimationDuration(code)).toBe(100 + 2 * 12 + 20 + TAIL);
+  });
+
+  test("Stagger with varying child durations uses per-child duration", () => {
+    // child 0: 0+0*10+10=10; child 1: 0+1*10+30=40; max=40+tail
+    const code = `
+      export default function R() {
+        return (
+          <Stagger startAt={0} staggerDelay={10}>
+            <FadeIn durationInFrames={10}><div/></FadeIn>
+            <FadeIn durationInFrames={30}><div/></FadeIn>
+          </Stagger>
+        );
+      }
+    `;
+    expect(computeAnimationDuration(code)).toBe(0 + 1 * 10 + 30 + TAIL);
+  });
+
+  test("Stagger uses default staggerDelay=12 when prop is absent", () => {
+    const code = `
+      export default function R() {
+        return (
+          <Stagger startAt={50}>
+            <FadeIn durationInFrames={20}><div/></FadeIn>
+            <FadeIn durationInFrames={20}><div/></FadeIn>
+          </Stagger>
+        );
+      }
+    `;
+    // child 1: 50 + 1*12 + 20 = 82; +tail = 102
+    expect(computeAnimationDuration(code)).toBe(50 + 1 * 12 + 20 + TAIL);
+  });
+});
+
+describe("computeAnimationDuration — edge cases", () => {
+  test("returns 150 when code has no animation primitives", () => {
+    const code = `
+      export default function R() {
+        return <div><span>Hello</span></div>;
+      }
+    `;
+    expect(computeAnimationDuration(code)).toBe(150);
+  });
+
+  test("returns 150 on parse failure", () => {
+    expect(computeAnimationDuration("%%% not valid jsx %%%")).toBe(150);
+  });
+
+  test("full example: matches expected total", () => {
+    // Mirrors example-animation-code.ts
+    const code = `
+      export default function RemoteComponent({ data }) {
+        return (
+          <SafeArea>
+            <AbsoluteCenter axis="both">
+              <Stack gap={16} align="center">
+                <SlideIn startAt={0}  durationInFrames={25} from="bottom"><div/></SlideIn>
+                <FadeIn  startAt={20} durationInFrames={20}><div/></FadeIn>
+                <FadeIn  startAt={45} durationInFrames={20}>
+                  <Counter startAt={50} durationInFrames={60} from={0} to={17} />
+                  <Counter startAt={60} durationInFrames={60} from={0} to={5}  />
+                </FadeIn>
+                <Stagger startAt={100} staggerDelay={12}>
+                  <SlideIn durationInFrames={20} from="bottom"><div/></SlideIn>
+                  <SlideIn durationInFrames={20} from="bottom"><div/></SlideIn>
+                  <SlideIn durationInFrames={20} from="bottom"><div/></SlideIn>
+                  <SlideIn durationInFrames={20} from="bottom"><div/></SlideIn>
+                  <SlideIn durationInFrames={20} from="bottom"><div/></SlideIn>
+                </Stagger>
+              </Stack>
+            </AbsoluteCenter>
+          </SafeArea>
+        );
+      }
+    `;
+    // Stagger: last child = 100 + 4*12 + 20 = 168
+    // Counter: 60+60=120
+    // max = 168; +tail = 188
+    expect(computeAnimationDuration(code)).toBe(168 + TAIL);
   });
 });

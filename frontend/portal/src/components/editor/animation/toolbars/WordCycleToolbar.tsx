@@ -1,44 +1,41 @@
 /**
  * WordCycleToolbar
  *
- * Shown when registry[eid].textType === 'word-cycle'.
+ * Shown for: WordCycle
  *
  * Controls:
  *  - Editable word chips (click × to remove)
  *  - Input + add button to append new words
+ *  - Transition type dropdown
  */
 
 import React, { useState } from 'react'
 import { X, Plus } from 'lucide-react'
-import type { RegistryEntry } from '@coasterai/renderer'
-import type { ElementEdit } from '@coasterai/renderer/src/types/ast'
+import type { ToolbarProps } from './types'
+import { Sep, SelectInput } from './shared'
 
-interface WordCycleToolbarProps {
-  eid: string       // registry key — for entry lookup only
-  editEid?: string  // DOM eid — for onEdit and editStore reads (defaults to eid)
-  registry: Record<string, RegistryEntry>
-  editStore: Record<string, ElementEdit>
-  onEdit: (eid: string, patch: Partial<ElementEdit>) => void
-}
+const TRANSITION_OPTIONS = [
+  { label: 'Fade Swap', value: 'fadeSwap' },
+  { label: 'Slide Up', value: 'slideUp' },
+  { label: 'Flip Y', value: 'flipY' },
+]
 
-export function WordCycleToolbar({ eid, editEid, registry, editStore, onEdit }: WordCycleToolbarProps) {
-  const entry = registry[eid]
-  if (!entry) return null
-
-  const eeid  = editEid ?? eid
-  const words: string[] = editStore[eeid]?.words ?? entry.words ?? []
+export function WordCycleToolbar({
+  currentProps,
+  onValuePatch,
+}: ToolbarProps) {
+  const words: string[] = Array.isArray(currentProps.words) ? currentProps.words as string[] : []
+  const transition = String(currentProps.transition ?? 'fadeSwap')
   const [draft, setDraft] = useState('')
 
   function removeWord(i: number) {
-    console.log('[WordCycleToolbar] removeWord', { eeid, i })
-    onEdit(eeid, { words: words.filter((_: string, idx: number) => idx !== i) })
+    onValuePatch('words', words.filter((_: string, idx: number) => idx !== i))
   }
 
   function addWord() {
     const w = draft.trim()
     if (!w) return
-    console.log('[WordCycleToolbar] addWord', { eeid, w })
-    onEdit(eeid, { words: [...words, w] })
+    onValuePatch('words', [...words, w])
     setDraft('')
   }
 
@@ -48,7 +45,7 @@ export function WordCycleToolbar({ eid, editEid, registry, editStore, onEdit }: 
 
   return (
     <>
-      {/* ── Word chips ──────────────────────────────────────────────────── */}
+      {/* Word chips */}
       {words.map((w: string, i: number) => (
         <span
           key={i}
@@ -65,7 +62,7 @@ export function WordCycleToolbar({ eid, editEid, registry, editStore, onEdit }: 
         </span>
       ))}
 
-      {/* ── Add word input ───────────────────────────────────────────────── */}
+      {/* Add word input */}
       <div className="flex items-center gap-1">
         <input
           type="text"
@@ -84,6 +81,16 @@ export function WordCycleToolbar({ eid, editEid, registry, editStore, onEdit }: 
           <Plus size={12} />
         </button>
       </div>
+
+      <Sep />
+
+      {/* Transition type */}
+      <SelectInput
+        value={transition}
+        options={TRANSITION_OPTIONS}
+        onChange={v => onValuePatch('transition', v)}
+        width="w-24"
+      />
     </>
   )
 }

@@ -1,23 +1,60 @@
-import { MotionConfig, SpringConfig, StaggerMotionConfig } from './types';
+import { interpolate, Easing as RemotionEasing } from 'remotion';
+import { Easing, MotionConfig, StaggerMotionConfig } from './types';
 
-/** The spring-based primitive categories. */
 export type PrimitiveMotionCategory = 'entrance' | 'exit' | 'counter' | 'typewriter' | 'wordcycle';
 
 /**
- * Returns the spring config for a given primitive category from a style's motion config.
- * Each primitive type knows its own category and calls this with it — never a global string.
+ * Returns the easing for a given primitive category from the style's motion config.
  */
-export function getSpringConfig(
-  motion: MotionConfig,
-  category: PrimitiveMotionCategory,
-): SpringConfig {
+export function getEasing(motion: MotionConfig, category: PrimitiveMotionCategory): Easing {
   return motion[category];
 }
 
 /**
  * Returns the stagger timing config from a style's motion config.
- * Used by Stagger to read style-driven defaults before LLM prop overrides.
  */
 export function getStaggerConfig(motion: MotionConfig): StaggerMotionConfig {
   return motion.stagger;
+}
+
+const easingFnMap: Record<Easing, (t: number) => number> = {
+  'linear':            RemotionEasing.linear,
+  'ease-in':           RemotionEasing.in(RemotionEasing.ease),
+  'ease-out':          RemotionEasing.out(RemotionEasing.ease),
+  'ease-in-out':       RemotionEasing.inOut(RemotionEasing.ease),
+  'ease-in-quad':      RemotionEasing.in(RemotionEasing.quad),
+  'ease-out-quad':     RemotionEasing.out(RemotionEasing.quad),
+  'ease-in-out-quad':  RemotionEasing.inOut(RemotionEasing.quad),
+  'ease-in-cubic':     RemotionEasing.in(RemotionEasing.cubic),
+  'ease-out-cubic':    RemotionEasing.out(RemotionEasing.cubic),
+  'ease-in-out-cubic': RemotionEasing.inOut(RemotionEasing.cubic),
+  'ease-in-quart':     RemotionEasing.in(RemotionEasing.cubic),
+  'ease-out-quart':    RemotionEasing.out(RemotionEasing.cubic),
+  'ease-in-out-quart': RemotionEasing.inOut(RemotionEasing.cubic),
+  'ease-in-expo':      RemotionEasing.in(RemotionEasing.exp),
+  'ease-out-expo':     RemotionEasing.out(RemotionEasing.exp),
+  'ease-in-out-expo':  RemotionEasing.inOut(RemotionEasing.exp),
+  'ease-in-back':      RemotionEasing.in(RemotionEasing.bezier(0.36, 0, 0.66, -0.56)),
+  'ease-out-back':     RemotionEasing.out(RemotionEasing.bezier(0.36, 0, 0.66, -0.56)),
+  'ease-in-out-back':  RemotionEasing.inOut(RemotionEasing.bezier(0.36, 0, 0.66, -0.56)),
+  'ease-in-circ':      RemotionEasing.in(RemotionEasing.bezier(0.55, 0, 1, 0.45)),
+  'ease-out-circ':     RemotionEasing.out(RemotionEasing.bezier(0.55, 0, 1, 0.45)),
+  'ease-in-out-circ':  RemotionEasing.inOut(RemotionEasing.bezier(0.55, 0, 1, 0.45)),
+};
+
+/**
+ * Interpolates between outputRange values over inputRange frames using the named easing.
+ * Clamps output to the outputRange so primitives don't need extra Math.max/min guards.
+ */
+export function interpolateWithEasing(
+  frame: number,
+  inputRange: [number, number],
+  outputRange: [number, number],
+  easing: Easing = 'linear',
+): number {
+  return interpolate(frame, inputRange, outputRange, {
+    easing: easingFnMap[easing] ?? RemotionEasing.linear,
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
 }

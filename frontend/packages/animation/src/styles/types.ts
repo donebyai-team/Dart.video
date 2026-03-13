@@ -1,31 +1,47 @@
-/** Spring physics config for a single motion category. */
-export interface SpringConfig {
-  damping: number;
-  stiffness: number;
-  mass?: number;
-  overshoot?: boolean;
-}
+export type Easing =
+  | 'linear'
+  | 'ease-in'
+  | 'ease-out'
+  | 'ease-in-out'
+  | 'ease-in-quad'
+  | 'ease-out-quad'
+  | 'ease-in-out-quad'
+  | 'ease-in-cubic'
+  | 'ease-out-cubic'
+  | 'ease-in-out-cubic'
+  | 'ease-in-quart'
+  | 'ease-out-quart'
+  | 'ease-in-out-quart'
+  | 'ease-in-expo'
+  | 'ease-out-expo'
+  | 'ease-in-out-expo'
+  | 'ease-in-back'
+  | 'ease-out-back'
+  | 'ease-in-out-back'
+  | 'ease-in-circ'
+  | 'ease-out-circ'
+  | 'ease-in-out-circ';
 
-/** Timing config for Stagger — not spring-based, just frame offsets. */
+/** Timing config for Stagger — frame offsets only. */
 export interface StaggerMotionConfig {
   /** Frames between each child's start. LLM can override; this is the style default. */
-  delayBetween: number;
+  staggerDelay: number;
   /** Frames before the first child starts. */
-  startOffset: number;
+  startAt: number;
 }
 
-/** Per-primitive-type spring configs within a style's motion definition. */
+/** Per-primitive easing and stagger timing within a style's motion definition. */
 export interface MotionConfig {
   /** Slide, Fade, Scale entrance animations */
-  entrance: SpringConfig;
+  entrance: Easing;
   /** Slide, Fade, Scale exit animations */
-  exit: SpringConfig;
+  exit: Easing;
   /** Counter animated number */
-  counter: SpringConfig;
+  counter: Easing;
   /** Typewriter text reveal */
-  typewriter: SpringConfig;
+  typewriter: Easing;
   /** WordCycle word transition */
-  wordcycle: SpringConfig;
+  wordcycle: Easing;
   /** Stagger list orchestration timing */
   stagger: StaggerMotionConfig;
 }

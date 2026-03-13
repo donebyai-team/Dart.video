@@ -5,9 +5,10 @@ import { PatchOverlay, createEmptyPatchOverlay } from './types';
  * PatchContext holds the active PatchOverlay for the current animation.
  * Every primitive reads from this to apply user edits non-destructively.
  *
- * The overlay contains two things primitives care about:
- *   1. Element-specific patches (value, swap, position, size) keyed by element id
- *   2. A global speed patch that scales all delay/duration across all elements
+ * The overlay is a flat object keyed by element ID. Each entry contains:
+ *   - value: prop value overrides
+ *   - styleOverride: CSS property overrides (always wins)
+ *   - swap: component replacement target
  */
 export const PatchContext = createContext<PatchOverlay>(createEmptyPatchOverlay());
 
@@ -29,28 +30,20 @@ export function PatchContextProvider({ overlay, children }: PatchContextProvider
 }
 
 export interface TimingDefaults {
-  delay: number;
-  duration: number;
+  startAt: number;
+  durationInFrames: number;
 }
 
 export interface ResolvedTiming {
-  /** delay after element-specific patch + global speed factor applied */
-  effectiveDelay: number;
-  /** duration after element-specific patch + global speed factor applied */
-  effectiveDuration: number;
+  /** startAt after patch applied */
+  effectiveStartAt: number;
+  /** durationInFrames after patch applied */
+  effectiveDurationInFrames: number;
 }
 
 /**
- * Returns effective delay and duration for a primitive, accounting for:
- *   1. Element-specific value patches (user changed this element's delay/duration)
- *   2. Global speed patch (user changed overall animation speed)
- *
- * Formula:
- *   effectiveDelay    = (elementPatch.delay    ?? defaults.delay)    / speedFactor
- *   effectiveDuration = (elementPatch.duration ?? defaults.duration) / speedFactor
- *
- * This replaces calling applySpeedFactor directly in primitives —
- * primitives that have an id should use this hook instead.
+ * Returns effective startAt and durationInFrames for a primitive,
+ * accounting for user value patches on these timing props.
  */
 export function usePrimitivePatches(
   id: string | undefined,
@@ -58,34 +51,22 @@ export function usePrimitivePatches(
 ): ResolvedTiming {
   const overlay = useContext(PatchContext);
 
-  const speedFactor = overlay.speed?.factor ?? 1;
+  if (!id) return { effectiveStartAt: defaults.startAt, effectiveDurationInFrames: defaults.durationInFrames };
 
-  let patchedDelay = defaults.delay;
-  let patchedDuration = defaults.duration;
-
-  if (id) {
-    const elementPatches = overlay.elements[id] ?? [];
-    for (const patch of elementPatches) {
-      if (patch.type === 'value') {
-        if (patch.prop === 'delay' && typeof patch.value === 'number') {
-          patchedDelay = patch.value;
-        }
-        if (patch.prop === 'duration' && typeof patch.value === 'number') {
-          patchedDuration = patch.value;
-        }
-      }
-    }
-  }
+  const entry = overlay[id];
+  if (!entry?.value) return { effectiveStartAt: defaults.startAt, effectiveDurationInFrames: defaults.durationInFrames };
 
   return {
-    effectiveDelay: speedFactor === 1 ? patchedDelay : Math.round(patchedDelay / speedFactor),
-    effectiveDuration: speedFactor === 1 ? patchedDuration : Math.round(patchedDuration / speedFactor),
+    effectiveStartAt:
+      typeof entry.value.startAt === 'number' ? entry.value.startAt : defaults.startAt,
+    effectiveDurationInFrames:
+      typeof entry.value.durationInFrames === 'number' ? entry.value.durationInFrames : defaults.durationInFrames,
   };
 }
 
 /**
- * Returns patched value for any non-timing prop on an element.
- * Returns the default if no patch exists.
+ * Returns the patched value for any prop on an element.
+ * If no patch exists, returns the default.
  */
 export function usePatchedProp<T>(
   id: string | undefined,
@@ -95,11 +76,17 @@ export function usePatchedProp<T>(
   const overlay = useContext(PatchContext);
   if (!id) return defaultValue;
 
-  const elementPatches = overlay.elements[id] ?? [];
-  for (const patch of elementPatches) {
-    if (patch.type === 'value' && patch.prop === prop) {
-      return patch.value as T;
-    }
-  }
+  const entry = overlay[id];
+  if (entry?.value && prop in entry.value) return entry.value[prop] as T;
   return defaultValue;
+}
+
+/**
+ * Returns the style override object for an element.
+ * Merge this on top of component style — user overrides always win.
+ */
+export function useStyleOverride(id: string | undefined): Record<string, string | number> {
+  const overlay = useContext(PatchContext);
+  if (!id) return {};
+  return overlay[id]?.styleOverride ?? {};
 }

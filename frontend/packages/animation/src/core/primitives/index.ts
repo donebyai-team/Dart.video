@@ -1,3 +1,4 @@
+export * from './FrameOffsetContext';
 export * from './FadeIn';
 export * from './FadeOut';
 export * from './SlideIn';

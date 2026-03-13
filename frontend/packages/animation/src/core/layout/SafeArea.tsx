@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAspectPreset } from '../styles/AspectPresetContext';
+import { useAspectPreset } from '../../styles/AspectPresetContext';
 
 export interface SafeAreaProps {
   children: React.ReactNode;

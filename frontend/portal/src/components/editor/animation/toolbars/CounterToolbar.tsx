@@ -1,62 +1,64 @@
 /**
  * CounterToolbar
  *
- * Shown when registry[eid].textType === 'counter'.
+ * Shown for: Counter
  *
  * Controls:
- *  - Start value (number stepper)
- *  - End value (number stepper)
+ *  - From value (number stepper)
+ *  - To value (number stepper)
+ *  - Prefix (text input)
+ *  - Suffix (text input)
  */
 
 import React from 'react'
 import { Hash } from 'lucide-react'
-import type { RegistryEntry } from '@coasterai/renderer'
-import type { ElementEdit } from '@coasterai/renderer/src/types/ast'
-import { NumberStepper } from './shared'
+import type { ToolbarProps } from './types'
+import { NumberStepper, Sep } from './shared'
 
-interface CounterToolbarProps {
-  eid: string       // registry key — for entry lookup only
-  editEid?: string  // DOM eid — for onEdit and editStore reads (defaults to eid)
-  registry: Record<string, RegistryEntry>
-  editStore: Record<string, ElementEdit>
-  onEdit: (eid: string, patch: Partial<ElementEdit>) => void
-}
-
-export function CounterToolbar({ eid, editEid, registry, editStore, onEdit }: CounterToolbarProps) {
-  const entry = registry[eid]
-  if (!entry) return null
-
-  const eeid           = editEid ?? eid
-  const currentCounter = editStore[eeid]?.counter ?? {}
-  const start = currentCounter.start ?? entry.counterStart ?? 0
-  const end   = currentCounter.end   ?? entry.counterEnd   ?? 100
-
-  function setStart(v: number) {
-    console.log('[CounterToolbar] setStart', { eeid, v })
-    onEdit(eeid, { counter: { start: v, end } })
-  }
-
-  function setEnd(v: number) {
-    console.log('[CounterToolbar] setEnd', { eeid, v })
-    onEdit(eeid, { counter: { start, end: v } })
-  }
+export function CounterToolbar({
+  currentProps,
+  onValuePatch,
+}: ToolbarProps) {
+  const from = Number(currentProps.from ?? 0)
+  const to = Number(currentProps.to ?? 100)
+  const prefix = String(currentProps.prefix ?? '')
+  const suffix = String(currentProps.suffix ?? '')
 
   return (
     <>
       <Hash size={13} className="text-muted-foreground shrink-0" />
       <span className="text-xs text-muted-foreground shrink-0">From</span>
       <NumberStepper
-        value={start}
-        onChange={setStart}
+        value={from}
+        onChange={v => onValuePatch('from', v)}
         step={1}
         inputWidth="w-14"
       />
       <span className="text-xs text-muted-foreground shrink-0">to</span>
       <NumberStepper
-        value={end}
-        onChange={setEnd}
+        value={to}
+        onChange={v => onValuePatch('to', v)}
         step={1}
         inputWidth="w-14"
+      />
+
+      {/* Prefix / Suffix */}
+      <Sep />
+      <input
+        type="text"
+        value={prefix}
+        onChange={e => onValuePatch('prefix', e.target.value || undefined)}
+        placeholder="Prefix"
+        title="Prefix"
+        className="h-7 w-14 px-1.5 rounded-md border border-border bg-muted text-xs focus:outline-none focus:ring-1 focus:ring-ring/50"
+      />
+      <input
+        type="text"
+        value={suffix}
+        onChange={e => onValuePatch('suffix', e.target.value || undefined)}
+        placeholder="Suffix"
+        title="Suffix"
+        className="h-7 w-14 px-1.5 rounded-md border border-border bg-muted text-xs focus:outline-none focus:ring-1 focus:ring-ring/50"
       />
     </>
   )

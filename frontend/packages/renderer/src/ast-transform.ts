@@ -998,6 +998,110 @@ function createTransformPlugin(registry: Record<string, RegistryEntry>) {
   };
 }
 
+// ─── Duration computation ─────────────────────────────────────────────────────
+
+const ANIMATION_PRIMITIVES = new Set([
+  'FadeIn', 'FadeOut', 'SlideIn', 'SlideOut', 'ScaleIn', 'ScaleOut',
+  'Counter', 'Typewriter', 'WordCycle',
+]);
+
+const DURATION_DEFAULTS = {
+  startAt: 0,
+  durationInFrames: 30,
+  staggerDelay: 12,
+};
+
+const TAIL_BUFFER = 20;
+
+/**
+ * Statically estimate the total duration (in frames) of LLM-generated animation code.
+ *
+ * Walk the JSX AST to find every animation primitive and read its `startAt` +
+ * `durationInFrames` numeric props. `Stagger` is handled specially: its
+ * `startAt` + (childIndex × staggerDelay) + childDuration is propagated to
+ * each direct JSX-element child.
+ *
+ * Returns  max(endFrame across all primitives) + TAIL_BUFFER (20 frames).
+ * Falls back to 150 if the code cannot be parsed or contains no primitives.
+ */
+export function computeAnimationDuration(code: string): number {
+  const endFrames: number[] = [];
+
+  function numericAttr(attrs: any[], name: string, t: any): number | null {
+    const attr = attrs.find(
+      (a: any) => t.isJSXAttribute(a) && t.isJSXIdentifier(a.name, { name }),
+    );
+    if (!attr) return null;
+    const val = attr.value;
+    if (t.isJSXExpressionContainer(val) && t.isNumericLiteral(val.expression))
+      return val.expression.value;
+    if (t.isNumericLiteral(val)) return val.value;
+    return null;
+  }
+
+  function jsxElementChildren(node: any, t: any): any[] {
+    return node.children.filter((c: any) => t.isJSXElement(c));
+  }
+
+  try {
+    Babel.transform(code, {
+      presets: ['react', 'typescript'],
+      plugins: [
+        function durationPlugin(babel: any) {
+          const t = babel.types;
+          return {
+            visitor: {
+              JSXElement(path: any) {
+                const openingEl = path.node.openingElement;
+                const name: string =
+                  t.isJSXIdentifier(openingEl.name) ? openingEl.name.name : '';
+                const attrs = openingEl.attributes;
+
+                if (ANIMATION_PRIMITIVES.has(name)) {
+                  const startAt =
+                    numericAttr(attrs, 'startAt', t) ?? DURATION_DEFAULTS.startAt;
+                  const duration =
+                    numericAttr(attrs, 'durationInFrames', t) ?? DURATION_DEFAULTS.durationInFrames;
+                  endFrames.push(startAt + duration);
+                  return;
+                }
+
+                if (name === 'Stagger') {
+                  const staggerStart =
+                    numericAttr(attrs, 'startAt', t) ?? DURATION_DEFAULTS.startAt;
+                  const staggerDelay =
+                    numericAttr(attrs, 'staggerDelay', t) ?? DURATION_DEFAULTS.staggerDelay;
+                  const children = jsxElementChildren(path.node, t);
+                  children.forEach((child: any, i: number) => {
+                    const childName: string =
+                      t.isJSXIdentifier(child.openingElement.name)
+                        ? child.openingElement.name.name
+                        : '';
+                    if (!ANIMATION_PRIMITIVES.has(childName)) return;
+                    const childDuration =
+                      numericAttr(child.openingElement.attributes, 'durationInFrames', t) ??
+                      DURATION_DEFAULTS.durationInFrames;
+                    endFrames.push(staggerStart + i * staggerDelay + childDuration);
+                  });
+                  // skip default child-visiting so each child isn't also counted
+                  // with startAt=0 (which would still be dominated by the values above)
+                }
+              },
+            },
+          };
+        },
+      ],
+      filename: 'animation.tsx',
+      sourceType: 'module',
+    } as any);
+  } catch {
+    return 150;
+  }
+
+  if (endFrames.length === 0) return 150;
+  return Math.max(...endFrames) + TAIL_BUFFER;
+}
+
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 /**

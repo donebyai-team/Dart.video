@@ -3,12 +3,12 @@ import { StyleConfig } from '../types';
 export const boldStyle: StyleConfig = {
   id: 'bold',
   motion: {
-    entrance:   { damping: 100, stiffness: 200, overshoot: false },
-    exit:       { damping: 100, stiffness: 200, overshoot: false },
-    counter:    { damping: 100, stiffness: 200, overshoot: false },
-    typewriter: { damping: 100, stiffness: 200, overshoot: false },
-    wordcycle:  { damping: 100, stiffness: 200, overshoot: false },
-    stagger:    { delayBetween: 6, startOffset: 0 },
+    entrance:   'ease-out-back',
+    exit:       'ease-in-back',
+    counter:    'ease-out',
+    typewriter: 'linear',
+    wordcycle:  'ease-out-back',
+    stagger:    { staggerDelay: 6, startAt: 0 },
   },
   shape: {
     radii: { sm: '0px', md: '0px', lg: '0px', xl: '0px', full: '0px' },

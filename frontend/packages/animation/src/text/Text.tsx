@@ -1,4 +1,5 @@
 import React from 'react';
+import { usePatchedProp, useStyleOverride } from '../patches/PatchContext';
 import { useStyleContext } from '../styles/StyleContext';
 import { useAspectPreset } from '../styles/AspectPresetContext';
 import { useTheme } from '../theme/ThemeContext';
@@ -31,13 +32,17 @@ export function Text({
   const theme = useTheme();
   const preset = useAspectPreset();
 
+  const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', variant);
+  const patchedChildren = usePatchedProp<React.ReactNode>(id, 'children', children);
+  const styleOverride = useStyleOverride(id);
+
   return (
     <span
       id={id}
       className={className}
-      style={{ ...resolveTypography(variant, styleConfig, theme, preset), ...style }}
+      style={{ ...resolveTypography(patchedVariant, styleConfig, theme, preset), ...style, ...styleOverride }}
     >
-      {children}
+      {patchedChildren}
     </span>
   );
 }

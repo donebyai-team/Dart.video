@@ -1,5 +1,5 @@
 import React from 'react';
-import { SpacingValue } from '../tokens/spacing';
+import { SpacingValue } from '../../tokens/spacing';
 
 export type RowAlign = 'flex-start' | 'center' | 'flex-end' | 'stretch';
 export type RowJustify = 'flex-start' | 'center' | 'flex-end' | 'space-between' | 'space-around';

@@ -1,173 +1,62 @@
-import { RegistryEntry } from "@coasterai/renderer"
-import { ElementEdit } from "@coasterai/renderer/src/types/ast"
+import type { PrimitiveElement, PatchOverlay, ElementPatchEntry } from '@coasterai/renderer'
 
-/*
-## All Cases Now
-```
-fontWeight in prev + next, prev value matches with edit value, user edited it and hence keep it
-so no llm override allowed
-fontWeight in prev + next, same type   →  kept
-fontWeight in prev, gone from next     →  dropped (LLM removed it)
-fontWeight not in prev, not in next    →  kept   (user manually added)
-fontWeight not in prev, in next        →  kept   (LLM added it, user edited it)
-fontWeight animated→static             →  dropped (type changed)
-*/
+/**
+ * Reconcile user edits across code regeneration.
+ *
+ * Rules:
+ * - Patch survives if the new code has an element with the same ID and same component type.
+ * - Patch is dropped if the element ID disappears from the new code.
+ * - Patch is dropped if the component type changes (e.g. FadeIn replaced by SlideIn).
+ * - Style override patches survive type changes (style is component-agnostic).
+ */
 export function reconcileEdits(
-    prevRegistry: Record<string, RegistryEntry>,
-    nextRegistry: Record<string, RegistryEntry>,
-    currentEdits: Record<string, ElementEdit>
-): Record<string, ElementEdit> {
-    // console.debug(
-    //     "reconciling",
-    //     JSON.stringify(prevRegistry, null, 2),
-    //     JSON.stringify(nextRegistry, null, 2),
-    //     JSON.stringify(currentEdits, null, 2)
-    // )
+  prevRegistry: Record<string, PrimitiveElement>,
+  nextRegistry: Record<string, PrimitiveElement>,
+  currentEdits: PatchOverlay,
+): PatchOverlay {
+  const result: PatchOverlay = {}
 
-    const result: Record<string, ElementEdit> = {}
+  for (const [id, entry] of Object.entries(currentEdits)) {
+    const prevEntry = prevRegistry[id]
+    const nextEntry = nextRegistry[id]
 
-    for (const [eid, edit] of Object.entries(currentEdits)) {
-        const prevEntry = prevRegistry[eid]
-        const nextEntry = nextRegistry[eid]
+    // Element no longer exists in new code — drop it
+    if (!nextEntry) continue
 
-        // Element no longer exists in new code — drop it
-        if (!nextEntry) continue
+    const reconciled: ElementPatchEntry = {}
 
-        // Element type changed — drop entire edit
-        if (prevEntry?.elementType !== nextEntry.elementType) continue
-
-        const reconciledEdit: ElementEdit = {}
-
-        // Reconcile text
-        if (edit.text != null) {
-            if (nextEntry.textType === 'static' ||
-                nextEntry.textType === 'letter-cascade' ||
-                nextEntry.textType === 'typewriter') {
-
-                // Drop if sourceText changed — LLM wrote new text
-                if (prevEntry?.sourceText === nextEntry.sourceText) {
-                    reconciledEdit.text = edit.text
-                }
-            }
+    // Value patches: keep if same component type, drop if type changed
+    if (entry.value && Object.keys(entry.value).length > 0) {
+      if (prevEntry?.componentName === nextEntry.componentName) {
+        // Keep value patches only for props that the new component still has in editorProps
+        const validProps = new Set(nextEntry.editorProps)
+        const reconciledValues: Record<string, unknown> = {}
+        for (const [prop, val] of Object.entries(entry.value)) {
+          // Timing props (startAt, durationInFrames) are always valid
+          if (prop === 'startAt' || prop === 'durationInFrames' || validProps.has(prop)) {
+            reconciledValues[prop] = val
+          }
         }
-
-        // if (edit.typewriterSource != null) {
-        //     if (nextEntry.textType === 'typewriter') {
-        //         if (prevEntry?.sourceText === nextEntry.sourceText) {
-        //             reconciledEdit.typewriterSource = edit.typewriterSource
-        //         }
-        //     }
-        // }
-
-        if (edit.words != null) {
-            if (nextEntry.textType === 'word-cycle') {
-                // Drop if word list changed in new code
-                const prevWords = JSON.stringify(prevEntry?.words ?? [])
-                const nextWords = JSON.stringify(nextEntry.words ?? [])
-                if (prevWords === nextWords) {
-                    reconciledEdit.words = edit.words
-                }
-            }
+        if (Object.keys(reconciledValues).length > 0) {
+          reconciled.value = reconciledValues
         }
-
-        // Reconcile style — keep only props that exist in new registry
-        // with the same type (editable/animated/nonEditable)
-        if (edit.style) {
-            const reconciledStyle: Record<string, string | number> = {}
-            for (const [prop, value] of Object.entries(edit.style)) {
-                const prevProp = prevEntry?.editableProps?.[prop]
-                const nextProp = nextEntry.editableProps?.[prop]
-
-                // Prop existed in prev code but gone from new code — drop it
-                if (prevProp && !nextProp) continue
-
-                // Prop not in new code AND not in prev code
-                // → was manually added by user → always keep it
-                if (!prevProp && !nextProp) {
-                    reconciledStyle[prop] = value
-                    continue
-                }
-
-                // Prop exists in new registry — apply normal reconcile
-                // Prop exists in new registry — apply normal reconcile
-                if (!nextProp.editable) continue
-
-                // if the prev style matches the edit store style
-                // user edited it, llm should not override it
-                const prevDefault = prevEntry?.staticStyle?.[prop]
-                if (prevDefault !== undefined && value === prevDefault) continue
-
-                const prevIsAnimated = !!prevEntry?.animatedProps?.[prop]
-                const nextIsAnimated = !!nextEntry.animatedProps?.[prop]
-                if (prevIsAnimated !== nextIsAnimated) continue
-
-
-                reconciledStyle[prop] = value
-            }            
-            if (Object.keys(reconciledStyle).length > 0) {
-                reconciledEdit.style = reconciledStyle
-            }
-        }
-
-        // Reconcile ranges
-        if (edit.ranges) {
-            const reconciledRanges: Record<string, any[]> = {}
-            for (const [prop, range] of Object.entries(edit.ranges)) {
-                const nextAnimated = nextEntry.animatedProps?.[prop]
-                if (nextAnimated?.type === 'interpolate') {
-                    reconciledRanges[prop] = range
-                }
-            }
-            if (Object.keys(reconciledRanges).length > 0) {
-                reconciledEdit.ranges = reconciledRanges
-            }
-        }
-
-        // Reconcile springs
-        if (edit.springs) {
-            const reconciledSprings: Record<string, Record<string, number>> = {}
-            for (const [prop, spring] of Object.entries(edit.springs)) {
-                const nextAnimated = nextEntry.animatedProps?.[prop]
-                if (nextAnimated?.type === 'spring') {
-                    reconciledSprings[prop] = spring
-                }
-            }
-            if (Object.keys(reconciledSprings).length > 0) {
-                reconciledEdit.springs = reconciledSprings
-            }
-        }
-
-        // Reconcile counter
-        if (edit.counter != null) {
-            if (nextEntry.textType === 'counter') {
-                reconciledEdit.counter = edit.counter
-            }
-        }
-
-        // Reconcile transform — keep if element still exists and same type
-        if (edit.transform != null) {
-            reconciledEdit.transform = edit.transform
-        }
-
-        // Reconcile asset
-        if (edit.asset != null) {
-            if (nextEntry.assetType === prevEntry?.assetType && nextEntry.assetType === 'image') {
-                reconciledEdit.asset = edit.asset
-            }
-        }
-
-        // Reconcile words
-        if (edit.words != null) {
-            if (nextEntry.textType === 'word-cycle') {
-                reconciledEdit.words = edit.words
-            }
-        }
-
-        // Only keep eid if there's something left
-        if (Object.keys(reconciledEdit).length > 0) {
-            result[eid] = reconciledEdit
-        }
+      }
     }
 
-    return result
+    // Style overrides: always survive (component-agnostic)
+    if (entry.styleOverride && Object.keys(entry.styleOverride).length > 0) {
+      reconciled.styleOverride = entry.styleOverride
+    }
+
+    // Swap: drop if component type changed
+    if (entry.swap && prevEntry?.componentName === nextEntry.componentName) {
+      reconciled.swap = entry.swap
+    }
+
+    if (Object.keys(reconciled).length > 0) {
+      result[id] = reconciled
+    }
+  }
+
+  return result
 }

@@ -4,15 +4,37 @@
  * Compiles example LLM-generated code and wraps it in the full provider stack:
  *   ThemeProvider → AspectPresetProvider → StyleContextProvider → SpeedFactorProvider
  *
- * ThemeProvider  — brand identity (colors, font). Set once, wraps everything.
- * StyleContextProvider — animation style (motion, shape, surface). Set per animation.
+ * ─── DurationCollector system ────────────────────────────────────────────────
+ * Every animation primitive calls  registerEndFrame(startAt + durationInFrames)
+ * via DurationCollectorContext. Outside a DurationCollectorProvider this is a
+ * no-op, so primitives work fine in normal rendering.
  *
- * This is a Remotion composition root — frame is read via useCurrentFrame()
- * and passed down as a prop (per the frame contract).
+ * To AUTO-COMPUTE total composition duration from the animation content:
+ *
+ *   const { onRegister, getMaxEndFrame, reset } = useDurationCollection();
+ *
+ *   // 1. Render the tree inside DurationCollectorProvider
+ *   //    (Remotion renders frame 0 first, which triggers all registerEndFrame calls)
+ *   //
+ *   // 2. In a useEffect / after first render, call getMaxEndFrame()
+ *   //    That value is startAt + durationInFrames of the last-ending primitive.
+ *   //
+ *   // 3. Add a tail buffer (e.g. +20 frames) so the last frame isn't cut off.
+ *
+ *   return (
+ *     <DurationCollectorProvider onRegister={onRegister}>
+ *       <CompiledComponent data={data} />
+ *     </DurationCollectorProvider>
+ *   );
+ *
+ *   // After render:  const totalFrames = getMaxEndFrame() + 20;
+ *
+ * ─── Frame contract ──────────────────────────────────────────────────────────
+ * Primitives call useCurrentFrame() internally — no frame prop needed on the
+ * compiled component. The provider stack handles all context injection.
  */
 
 import React, { useMemo } from 'react';
-import { useCurrentFrame } from 'remotion';
 import {
   ThemeProvider,
   StyleContextProvider,
@@ -46,10 +68,8 @@ if (compileError) {
   console.error('[AnimationPreview] Compile error:', compileError);
 }
 
-/** Inner component that reads frame and renders the compiled animation. */
+/** Inner component that renders the compiled animation. Primitives read frame internally. */
 function AnimationInner(): React.ReactElement {
-  const frame = useCurrentFrame();
-
   if (!CompiledComponent) {
     return (
       <div style={{
@@ -69,7 +89,9 @@ function AnimationInner(): React.ReactElement {
     );
   }
 
-  return <CompiledComponent frame={frame} fps={30} data={null} />;
+  // No frame/fps props — primitives call useCurrentFrame() / useVideoConfig() themselves.
+  // Pass only data (slide content); all timing/visuals come from the provider stack.
+  return <CompiledComponent data={null} />;
 }
 
 /** Full Remotion composition root for the animation example. */
@@ -93,5 +115,11 @@ export function AnimationPreview(): React.ReactElement {
   );
 }
 
-/** Duration for the example composition. */
+/**
+ * Duration for the example composition.
+ *
+ * For dynamic duration derived from the animation itself, wrap the component
+ * tree in <DurationCollectorProvider onRegister={onRegister}> and call
+ * getMaxEndFrame() after the first render (see the header comment above).
+ */
 export const ANIMATION_PREVIEW_DURATION_FRAMES = 300; // 10 seconds at 30fps

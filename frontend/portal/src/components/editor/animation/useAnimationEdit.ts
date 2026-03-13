@@ -1,20 +1,27 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
-import type { RegistryEntry } from '@coasterai/renderer'
+import type { PrimitiveElement, PrimitiveIdRegistry, PatchOverlay } from '@coasterai/renderer'
 import { AnimationSlideContent } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { JsonObject } from '@bufbuild/protobuf'
 import { useVideoStore } from '@/stores/video'
 import { debounce } from '@/stores/video/sync'
-import { ElementEdit } from '@coasterai/renderer/src/types/ast'
 
 interface UseAnimationEditReturn {
   isAnimationSlide: boolean
-  animRegistry: Record<string, RegistryEntry>
+  /** Registry of primitive elements: id → PrimitiveElement */
+  primitiveRegistry: Record<string, PrimitiveElement>
   selectedEid: string | null
   setSelectedEid: (eid: string | null) => void
-  editStore: Record<string, ElementEdit>
+  /** PatchOverlay: element edits keyed by primitive ID */
+  editOverlay: PatchOverlay
   animEditVersion: number
-  applyEdit: (eid: string, patch: Partial<ElementEdit>) => void
-  applyEdits: (edits: Record<string, ElementEdit>) => void
+  /** Apply a value patch to a primitive prop */
+  applyValuePatch: (id: string, prop: string, value: unknown) => void
+  /** Apply multiple value patches at once */
+  applyValuePatches: (id: string, values: Record<string, unknown>) => void
+  /** Apply a style override */
+  applyStyleOverride: (id: string, style: Record<string, string | number>) => void
+  /** Replace the entire overlay (e.g. after reconciliation) */
+  setOverlay: (overlay: PatchOverlay) => void
   flushPersist: () => void
 }
 
@@ -27,13 +34,14 @@ export function useAnimationEdit(): UseAnimationEditReturn {
   const slideId = selectedSlide?.slide?.id
 
   // ── Registry ────────────────────────────────────────────────────────────────
-  // useMemo so it's not recomputed on every render.
-  // Runtime guard instead of double-cast to catch schema mismatches early.
-  const animRegistry = useMemo<Record<string, RegistryEntry>>(() => {
+  const primitiveRegistry = useMemo<Record<string, PrimitiveElement>>(() => {
     if (!isAnimationSlide) return {}
-    const config = (content?.value as AnimationSlideContent)?.registry
-    if (typeof config !== 'object' || config === null) return {}
-    return config as unknown as Record<string, RegistryEntry>
+    const raw = (content?.value as AnimationSlideContent)?.registry
+    if (typeof raw !== 'object' || raw === null) return {}
+    // The registry is now PrimitiveIdRegistry.elements
+    const reg = raw as unknown as PrimitiveIdRegistry | Record<string, PrimitiveElement>
+    if ('elements' in reg) return (reg as PrimitiveIdRegistry).elements
+    return reg as Record<string, PrimitiveElement>
   }, [isAnimationSlide, content])
 
   // ── Stable ref to latest slide — prevents stale closures in callbacks ───────
@@ -42,86 +50,93 @@ export function useAnimationEdit(): UseAnimationEditReturn {
 
   // ── State ────────────────────────────────────────────────────────────────────
   const [selectedEid, setSelectedEid] = useState<string | null>(null)
-  const [editStore, setEditStore] = useState<Record<string, ElementEdit>>({})
-  // Ref kept in sync inside the setEditStore updater (runs synchronously), so
-  // flushPersist can read the latest value right after applyEdit is called.
-  const editStoreRef = useRef<Record<string, ElementEdit>>({})
+  const [editOverlay, setEditOverlay] = useState<PatchOverlay>({})
+  const editOverlayRef = useRef<PatchOverlay>({})
   const [animEditVersion, setAnimEditVersion] = useState(0)
 
-  // Tracks whether the current editStore value came from loading (not a user edit).
-  // Prevents the persist effect from firing a redundant updateSlide on slide switch.
   const isLoadingRef = useRef(false)
 
-  // ── Keep window.__EDIT_STORE__ in sync — single source of truth ─────────────
+  // ── Keep window.__PATCH_OVERLAY__ in sync ──────────────────────────────────
   useEffect(() => {
-    ; (window as any).__EDIT_STORE__ = editStore
-  }, [editStore])
+    ;(window as any).__PATCH_OVERLAY__ = editOverlay
+  }, [editOverlay])
 
-  // ── Load saved edits when slide changes ─────────────────────────────────────
+  // ── Load saved edits when slide changes ───────────────────────────────────
   useEffect(() => {
     isLoadingRef.current = true
     setSelectedEid(null)
     setAnimEditVersion(0)
 
     const savedEdits = isAnimationSlide
-      ? ((content?.value as AnimationSlideContent)?.edits ?? {}) as Record<string, ElementEdit>
+      ? ((content?.value as AnimationSlideContent)?.edits ?? {}) as PatchOverlay
       : {}
 
-    editStoreRef.current = savedEdits
-    setEditStore(savedEdits)
+    editOverlayRef.current = savedEdits
+    setEditOverlay(savedEdits)
   }, [slideId]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const applyEdits = useCallback((edits: Record<string, ElementEdit>) => {
-    setEditStore(edits)
-    setAnimEditVersion(v => v + 1)
-  }, [])
-
-
-  // ── Apply an edit ────────────────────────────────────────────────────────────
-  /*
-Key merge decisions:
-```
-style     → merged (add/override individual props)
-ranges    → merged (add/override individual props)
-springs   → merged (add/override individual props)
-counter   → merged (start and end can be patched independently)
-transform → merged (translateX can be patched without touching translateY)
-text      → replaced (whole string, no merge concept)
-words     → replaced (whole array, no merge concept)
-asset     → replaced
-icon      → replaced
-  */
-  const applyEdit = useCallback((eid: string, patch: Partial<ElementEdit>) => {
-    console.log('applying edits', eid, patch)
-    setEditStore(prev => {
-      const existing = prev[eid] ?? {}
-      const next = {
+  // ── Apply a single value patch ────────────────────────────────────────────
+  const applyValuePatch = useCallback((id: string, prop: string, value: unknown) => {
+    setEditOverlay(prev => {
+      const entry = prev[id] ?? {}
+      const next: PatchOverlay = {
         ...prev,
-        [eid]: {
-          ...existing,
-          ...(patch.style ? { style: { ...(existing.style ?? {}), ...patch.style } } : {}),
-          ...(patch.text !== undefined ? { text: patch.text } : {}),
-          ...(patch.asset !== undefined ? { asset: patch.asset } : {}),
-          ...(patch.icon !== undefined ? { icon: patch.icon } : {}),
-          ...(patch.words !== undefined ? { words: patch.words } : {}),
-          ...(patch.ranges ? { ranges: { ...(existing.ranges ?? {}), ...patch.ranges } } : {}),
-          ...(patch.springs ? { springs: { ...(existing.springs ?? {}), ...patch.springs } } : {}),
-          ...(patch.counter ? { counter: { ...(existing.counter ?? {}), ...patch.counter } } : {}),
-          ...(patch.transform ? { transform: { ...(existing.transform ?? {}), ...patch.transform } } : {}),
+        [id]: {
+          ...entry,
+          value: { ...(entry.value ?? {}), [prop]: value },
         },
       }
-      editStoreRef.current = next
+      editOverlayRef.current = next
       return next
     })
     setAnimEditVersion(v => v + 1)
   }, [])
 
+  // ── Apply multiple value patches at once ──────────────────────────────────
+  const applyValuePatches = useCallback((id: string, values: Record<string, unknown>) => {
+    setEditOverlay(prev => {
+      const entry = prev[id] ?? {}
+      const next: PatchOverlay = {
+        ...prev,
+        [id]: {
+          ...entry,
+          value: { ...(entry.value ?? {}), ...values },
+        },
+      }
+      editOverlayRef.current = next
+      return next
+    })
+    setAnimEditVersion(v => v + 1)
+  }, [])
+
+  // ── Apply style override ──────────────────────────────────────────────────
+  const applyStyleOverride = useCallback((id: string, style: Record<string, string | number>) => {
+    setEditOverlay(prev => {
+      const entry = prev[id] ?? {}
+      const next: PatchOverlay = {
+        ...prev,
+        [id]: {
+          ...entry,
+          styleOverride: { ...(entry.styleOverride ?? {}), ...style },
+        },
+      }
+      editOverlayRef.current = next
+      return next
+    })
+    setAnimEditVersion(v => v + 1)
+  }, [])
+
+  // ── Replace entire overlay ────────────────────────────────────────────────
+  const setOverlay = useCallback((overlay: PatchOverlay) => {
+    editOverlayRef.current = overlay
+    setEditOverlay(overlay)
+    setAnimEditVersion(v => v + 1)
+  }, [])
+
   // ── Debounced persist ────────────────────────────────────────────────────────
-  // Debounced so rapid edits (e.g. typing) don't fire an API call on every keystroke.
-  // useMemo so the debounced function is stable across renders.
   const debouncedPersist = useMemo(
     () =>
-      debounce((edits: Record<string, ElementEdit>) => {
+      debounce((overlay: PatchOverlay) => {
         const slideContent = selectedSlideRef.current?.slide?.content
         if (slideContent?.case !== 'animation') return
         updateSlide({
@@ -129,7 +144,7 @@ icon      → replaced
             case: 'animation',
             value: {
               ...slideContent.value,
-              edits: edits as unknown as JsonObject,
+              edits: overlay as unknown as JsonObject,
             },
           },
         })
@@ -137,21 +152,16 @@ icon      → replaced
     [updateSlide]
   )
 
-  // Cancel any in-flight debounced persist when the component unmounts
   useEffect(() => () => debouncedPersist?.cancel?.(), [debouncedPersist])
 
-  // ── Trigger persist when editStore changes ───────────────────────────────────
   useEffect(() => {
     if (!isAnimationSlide) return
-
-    // Skip the run caused by loading saved edits on slide switch
     if (isLoadingRef.current) {
       isLoadingRef.current = false
       return
     }
-
-    debouncedPersist(editStore)
-  }, [editStore, isAnimationSlide, debouncedPersist])
+    debouncedPersist(editOverlay)
+  }, [editOverlay, isAnimationSlide, debouncedPersist])
 
   const flushPersist = useCallback(() => {
     debouncedPersist.cancel?.()
@@ -160,20 +170,22 @@ icon      → replaced
     updateSlide({
       content: {
         case: 'animation',
-        value: { ...slideContent.value, edits: editStoreRef.current as unknown as JsonObject },
+        value: { ...slideContent.value, edits: editOverlayRef.current as unknown as JsonObject },
       },
     })
   }, [debouncedPersist, updateSlide])
 
   return {
     isAnimationSlide,
-    animRegistry,
+    primitiveRegistry,
     selectedEid,
     setSelectedEid,
-    editStore,
+    editOverlay,
     animEditVersion,
-    applyEdit,
+    applyValuePatch,
+    applyValuePatches,
+    applyStyleOverride,
+    setOverlay,
     flushPersist,
-    applyEdits,
   }
 }

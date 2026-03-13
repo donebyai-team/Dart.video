@@ -2,182 +2,96 @@
  * AnimationToolbar
  *
  * Router component: reads the selected element's registry entry and renders
- * the appropriate sub-toolbar (Text / Image / Icon / Layout / Counter / WordCycle).
+ * the appropriate sub-toolbar based on the primitive's component type.
  *
- * Also appends a nonEditable "prompt-hint" section if the element has
- * properties that can only be changed via the AI prompt.
- *
- * Props:
- *  - selectedEid       — registry key for the selected element (null = nothing selected)
- *  - editEid           — actual DOM eid to use for edits (may differ from selectedEid for loop items)
- *  - registry          — full element registry from the renderer
- *  - editStore         — current edit overrides keyed by DOM eid
- *  - onEdit            — write a patch to the edit store
- *  - onDeselect        — close selection
+ * Routing:
+ *   - Text          → TextToolbar (text content, variant, styling)
+ *   - Counter       → CounterToolbar (from, to, format, prefix, suffix)
+ *   - WordCycle     → WordCycleToolbar (words, transition)
+ *   - Typewriter    → TypewriterToolbar (text, mode)
+ *   - TitleCard     → TitleCardToolbar (heading, subheading, eyebrow)
+ *   - FadeIn/SlideIn/ScaleIn/FadeOut/SlideOut/ScaleOut → AnimationPropToolbar (timing + direction)
+ *   - Stagger/TimelineGate → TimingToolbar (startAt, delayBetween, etc.)
+ *   - Layout types  → no toolbar (not selectable per spec)
  */
 
 import React from 'react'
-import type { RegistryEntry } from '@coasterai/renderer'
-import type { ElementEdit } from '@coasterai/renderer/src/types/ast'
-import { TextToolbar }      from './toolbars/TextToolbar'
-import { ImageToolbar }     from './toolbars/ImageToolbar'
-import { IconToolbar }      from './toolbars/IconToolbar'
-import { LayoutToolbar }    from './toolbars/LayoutToolbar'
-import { CounterToolbar }   from './toolbars/CounterToolbar'
+import type { PrimitiveElement, PatchOverlay } from '@coasterai/renderer'
+import { TextToolbar } from './toolbars/TextToolbar'
+import { CounterToolbar } from './toolbars/CounterToolbar'
 import { WordCycleToolbar } from './toolbars/WordCycleToolbar'
-import { Sep }              from './toolbars/shared'
-import { AlertTriangle, MessageSquarePlus } from 'lucide-react'
+import { TimingToolbar } from './toolbars/TimingToolbar'
+import { StyleOverrideSection } from './toolbars/shared'
 
 interface AnimationToolbarProps {
-  selectedEid: string | null
-  editEid?: string
-  registry: Record<string, RegistryEntry>
-  editStore: Record<string, ElementEdit>
-  onEdit: (eid: string, patch: Partial<ElementEdit>) => void
+  selectedId: string
+  registry: Record<string, PrimitiveElement>
+  editOverlay: PatchOverlay
+  onValuePatch: (id: string, prop: string, value: unknown) => void
+  onValuePatches: (id: string, values: Record<string, unknown>) => void
+  onStyleOverride: (id: string, style: Record<string, string | number>) => void
   onDeselect: () => void
 }
 
 export function AnimationToolbar({
-  selectedEid,
-  editEid,
+  selectedId,
   registry,
-  editStore,
-  onEdit,
+  editOverlay,
+  onValuePatch,
+  onValuePatches,
+  onStyleOverride,
   onDeselect: _onDeselect,
 }: AnimationToolbarProps) {
-  if (!selectedEid) return null
+  const entry = registry[selectedId]
+  if (!entry) return null
 
-  // editEid is the actual DOM eid used for edits (e.g. 'el-9-0' for a loop item).
-  // selectedEid is the registry key (e.g. 'el-9'). Falls back to selectedEid if not provided.
-  const activeEid = editEid ?? selectedEid
+  const { componentName } = entry
 
-  const entry = registry[selectedEid]
-  if (!entry) {
-    console.warn('[AnimationToolbar] No registry entry for eid:', selectedEid)
-    return null
+  // Merge original props with value patches for current values
+  const patches = editOverlay[selectedId]?.value ?? {}
+  const currentProps = { ...entry.props, ...patches }
+  const styleOverride = editOverlay[selectedId]?.styleOverride ?? {}
+
+  const onStyleOverrideFn = (style: Record<string, string | number>) => onStyleOverride(selectedId, style)
+
+  const commonProps = {
+    id: selectedId,
+    componentName,
+    currentProps,
+    styleOverride,
+    onValuePatch: (prop: string, value: unknown) => onValuePatch(selectedId, prop, value),
+    onValuePatches: (values: Record<string, unknown>) => onValuePatches(selectedId, values),
+    onStyleOverride: onStyleOverrideFn,
   }
 
-  const isText      = entry.textType === 'static' || entry.textType === 'letter-cascade' || entry.textType === 'typewriter'
-  const isWordCycle = entry.textType === 'word-cycle'
-  const isCounter   = entry.textType === 'counter'
-  const isImage     = entry.assetType === 'image'
-  const isIcon      = entry.assetType === 'icon'
-  const isLayout    = !isText && !isWordCycle && !isCounter && !isImage && !isIcon
-
-  // Don't show the toolbar if there's nothing editable to display.
-  // Elements with special content always have controls; layout elements only
-  // show if staticStyle contains props that LayoutToolbar can render controls for.
-  const hasSpecialContent = isText || isWordCycle || isCounter || isImage || isIcon
-  if (!hasSpecialContent) {
-    const s = entry.staticStyle
-    const hasLayoutControls = 'background' in s || 'backgroundColor' in s || 'borderRadius' in s || 'opacity' in s
-    if (!hasLayoutControls) return null
-  }
-
-  // Set to true to show the "Use prompt" hint for non-editable animated properties
-  const SHOW_PROMPT_HINT = false
-
-  const hasNonEditable = SHOW_PROMPT_HINT && entry.nonEditable.length > 0
-
+  // Content components that render text — show style override section
+  const isTextContent = componentName === 'Text' || componentName === 'Typewriter' ||
+    componentName === 'Counter' || componentName === 'WordCycle' || componentName === 'TitleCard'
 
   return (
     <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-background/95 backdrop-blur-lg border border-border shadow-xl text-sm select-none">
+      {/* Content primitives — component-specific controls */}
+      {componentName === 'Text' && <TextToolbar {...commonProps} />}
+      {componentName === 'Counter' && <CounterToolbar {...commonProps} />}
+      {componentName === 'WordCycle' && <WordCycleToolbar {...commonProps} />}
+      {componentName === 'Typewriter' && <TextToolbar {...commonProps} />}
+      {componentName === 'TitleCard' && <TextToolbar {...commonProps} />}
 
-      {/* ── Sub-toolbar for this element type ──────────────────────────── */}
-      {isText && (
-        <TextToolbar
-          eid={selectedEid}
-          editEid={activeEid}
-          registry={registry}
-          editStore={editStore}
-          onEdit={onEdit}
+      {/* Animation primitives — timing + direction controls */}
+      {(componentName === 'FadeIn' || componentName === 'FadeOut' ||
+        componentName === 'SlideIn' || componentName === 'SlideOut' ||
+        componentName === 'ScaleIn' || componentName === 'ScaleOut' ||
+        componentName === 'Stagger' || componentName === 'TimelineGate') && (
+        <TimingToolbar {...commonProps} />
+      )}
+
+      {/* Style override section — always shown for text content, collapsed by default */}
+      {isTextContent && (
+        <StyleOverrideSection
+          styleOverride={styleOverride}
+          onStyleOverride={onStyleOverrideFn}
         />
       )}
-
-      {isImage && (
-        <ImageToolbar
-          eid={selectedEid}
-          editEid={activeEid}
-          registry={registry}
-          editStore={editStore}
-          onEdit={onEdit}
-        />
-      )}
-
-      {isIcon && (
-        <IconToolbar
-          eid={selectedEid}
-          editEid={activeEid}
-          registry={registry}
-          editStore={editStore}
-          onEdit={onEdit}
-        />
-      )}
-
-      {isCounter && (
-        <CounterToolbar
-          eid={selectedEid}
-          editEid={activeEid}
-          registry={registry}
-          editStore={editStore}
-          onEdit={onEdit}
-        />
-      )}
-
-      {isWordCycle && (
-        <WordCycleToolbar
-          eid={selectedEid}
-          editEid={activeEid}
-          registry={registry}
-          editStore={editStore}
-          onEdit={onEdit}
-        />
-      )}
-
-      {isLayout && (
-        <LayoutToolbar
-          eid={selectedEid}
-          editEid={activeEid}
-          registry={registry}
-          editStore={editStore}
-          onEdit={onEdit}
-        />
-      )}
-
-      {/* ── NonEditable prompt-hint ─────────────────────────────────────── */}
-      {hasNonEditable && (
-        <>
-          <Sep />
-          <PromptHint props={entry.nonEditable} />
-        </>
-      )}
-    </div>
-  )
-}
-
-// ─── Prompt Hint ─────────────────────────────────────────────────────────────
-// Lists props that are animated / non-editable, with a "Use prompt" button.
-
-function PromptHint({ props }: { props: string[] }) {
-  function handleClick() {
-    // TODO: open the prompt input scoped to the selected element
-    console.log('[AnimationToolbar] Prompt hint clicked — non-editable props:', props)
-  }
-
-  return (
-    <div className="flex items-center gap-1.5 text-xs">
-      <AlertTriangle size={12} className="text-yellow-400 shrink-0" />
-      <span className="text-muted-foreground/80 max-w-[140px] truncate" title={props.join(', ')}>
-        {props.join(' · ')}
-      </span>
-      <button
-        onClick={handleClick}
-        className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-muted hover:bg-accent text-foreground/70 hover:text-foreground transition-colors"
-        title="Open prompt input to edit these properties"
-      >
-        <MessageSquarePlus size={11} />
-        Use prompt
-      </button>
     </div>
   )
 }

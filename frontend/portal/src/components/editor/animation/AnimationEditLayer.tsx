@@ -4,60 +4,52 @@
  * Portal-based overlay (position:fixed) over the Remotion canvas.
  *
  * Responsibilities:
- *  - Intercept pointer events on the canvas to select elements.
+ *  - Intercept pointer events on the canvas to select primitive elements.
  *  - Show a dashed selection highlight around the selected element.
- *  - For text elements: immediately activate inline editing on click.
  *  - Show the context-sensitive AnimationToolbar above the player.
  *
- * Coordinate system: all positions are in fixed viewport coordinates.
+ * Selection works by walking up the DOM from the click target to find
+ * the nearest element with an `id` attribute that matches a registered primitive
+ * (e.g. "fadein-0", "text-1", "counter-0").
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimationToolbar } from './AnimationToolbar'
-import type { RegistryEntry } from '@coasterai/renderer'
-import { ElementEdit } from '@coasterai/renderer/src/types/ast'
-import { useDragToMove } from './useDragToMove'
+import type { PrimitiveElement, PatchOverlay } from '@coasterai/renderer'
 
 interface FRect { left: number; top: number; width: number; height: number }
 
 interface AnimationEditLayerProps {
   playerRef: React.RefObject<HTMLDivElement>
   selectedEid: string | null
-  registry: Record<string, RegistryEntry>
-  editStore: Record<string, ElementEdit>
+  registry: Record<string, PrimitiveElement>
+  editOverlay: PatchOverlay
   animEditVersion?: number
-  /** viewport-px ÷ compositionScale = composition-px (scale × canvasWidth / compositionWidth) */
   compositionScale: number
   onSelectElement: (eid: string | null) => void
-  onEdit: (eid: string, patch: Partial<ElementEdit>) => void
+  onValuePatch: (id: string, prop: string, value: unknown) => void
+  onValuePatches: (id: string, values: Record<string, unknown>) => void
+  onStyleOverride: (id: string, style: Record<string, string | number>) => void
 }
 
 export function AnimationEditLayer({
   playerRef,
   selectedEid,
   registry,
-  editStore,
+  editOverlay,
   animEditVersion,
   compositionScale,
   onSelectElement,
-  onEdit,
+  onValuePatch,
+  onValuePatches,
+  onStyleOverride,
 }: AnimationEditLayerProps) {
   const toolbarRef = useRef<HTMLDivElement>(null)
-  // Tracks the actual DOM data-eid (may include loop index, e.g. "el-11-1")
-  // separately from the registry key (e.g. "el-11") stored in selectedEid.
-  const domEidRef = useRef<string | null>(null)
 
   const [canvasRect, setCanvasRect] = useState<FRect | null>(null)
   const [elementRect, setElementRect] = useState<FRect | null>(null)
-  const [hoverCursor, setHoverCursor] = useState<'default' | 'pointer' | 'grab'>('default')
-
-  const { isDragging, didDragRef, visualOffset, onDragStart } = useDragToMove({
-    selectedEid,
-    editStore,
-    compositionScale,
-    onEdit,
-  })
+  const [hoverCursor, setHoverCursor] = useState<'default' | 'pointer'>('default')
 
   // ── Track canvas fixed position ─────────────────────────────────────────────
   useEffect(() => {
@@ -83,8 +75,7 @@ export function AnimationEditLayer({
   useEffect(() => {
     if (!selectedEid || !animEditVersion) return
     requestAnimationFrame(() => {
-      const queryEid = domEidRef.current ?? selectedEid
-      const el = playerRef.current?.querySelector(`[data-eid="${queryEid}"]`) as HTMLElement | null
+      const el = playerRef.current?.querySelector(`[id="${selectedEid}"]`) as HTMLElement | null
       if (!el) return
       const r = el.getBoundingClientRect()
       setElementRect({ left: r.left, top: r.top, width: r.width, height: r.height })
@@ -93,10 +84,7 @@ export function AnimationEditLayer({
 
   // ── Clear state when deselected ─────────────────────────────────────────────
   useEffect(() => {
-    if (!selectedEid) {
-      setElementRect(null)
-      domEidRef.current = null
-    }
+    if (!selectedEid) setElementRect(null)
   }, [selectedEid])
 
   // ── Click-outside to deselect ───────────────────────────────────────────────
@@ -110,185 +98,104 @@ export function AnimationEditLayer({
         const { clientX: x, clientY: y } = e
         if (x >= left && x <= left + width && y >= top && y <= top + height) return
       }
-      console.log('[AnimationEditLayer] Click outside — deselecting')
       onSelectElement(null)
     }
     document.addEventListener('mousedown', handleMouseDown)
     return () => document.removeEventListener('mousedown', handleMouseDown)
   }, [selectedEid, canvasRect, onSelectElement])
 
-  // ── Helpers ─────────────────────────────────────────────────────────────────
+  // ── Hit testing ─────────────────────────────────────────────────────────────
+
+  /** Layout primitives have no editable props — skip them during selection. */
+  const LAYOUT_COMPONENTS = new Set(['SafeArea', 'Stack', 'Row', 'AbsoluteCenter'])
+
+  function isSelectableEntry(entry: PrimitiveElement): boolean {
+    return !LAYOUT_COMPONENTS.has(entry.componentName)
+  }
 
   /**
-   * Resolves the registry key for a DOM eid.
-   * Loop items bake the index into the DOM eid ("el-11-1") but the registry
-   * stores only the base key ("el-11"). Strips the trailing numeric suffix.
-   * This handles:
-   * el-9-2    → strips to el-9   → registry["el-9"] exists  → returns "el-9"  ✓
-   *  el-11-0   → strips to el-11  → registry["el-11"] exists → returns "el-11" ✓
-   *  el-12     → strips to el     → registry["el"] undefined
-          → strips to ""     → loop ends
-          → returns "el-12"  ✓  (exact match was already checked)
-      el-9-0-1  → strips to el-9-0 → not found
-          → strips to el-9   → found  ✓
+   * Find all primitive elements at the cursor position, ordered from
+   * deepest (closest to click target) to shallowest (closest to root).
    */
-  function resolveRegistryKey(domEid: string): string {
-    // Exact match first
-    if (registry[domEid]) return domEid
+  function primitiveStackAtPoint(
+    clientX: number,
+    clientY: number,
+    overlay: HTMLElement,
+  ): { id: string; el: HTMLElement }[] {
+    overlay.style.pointerEvents = 'none'
+    const topEl = document.elementFromPoint(clientX, clientY) as HTMLElement | null
+    overlay.style.pointerEvents = 'auto'
 
-    // Strip trailing -N suffixes one at a time until we find a registry entry
-    // el-9-2   → el-9   → check
-    // el-11-0  → el-11  → check
-    let current = domEid
-    while (current.includes('-')) {
-      const stripped = current.replace(/-\d+$/, '')
-      if (stripped === current) break          // no numeric suffix found — stop
-      if (registry[stripped]) return stripped  // found a match
-      current = stripped
+    const cRect = overlay.getBoundingClientRect()
+    const hits: { id: string; el: HTMLElement }[] = []
+
+    // Walk up DOM from hit element, collecting all registered primitives
+    let walkEl = topEl
+    while (walkEl && walkEl !== overlay) {
+      const elId = walkEl.getAttribute('id')
+      if (elId && registry[elId]) {
+        const r = walkEl.getBoundingClientRect()
+        // Don't include full-canvas elements
+        const coversCanvas = r.width > cRect.width * 0.9 && r.height > cRect.height * 0.9
+        if (coversCanvas) break
+
+        const entry = registry[elId]
+        if (entry && isSelectableEntry(entry)) {
+          hits.push({ id: elId, el: walkEl })
+        }
+      }
+      walkEl = walkEl.parentElement
     }
 
-    // Nothing found — return original and let caller handle missing registry entry
-    return domEid
+    return hits
   }
-
-
-
-  /**
-   * Returns true if the registry entry has at least one editable control.
-   * Mirrors the routing logic in AnimationToolbar / sub-toolbars.
-   */
-  function hasEditableControls(entry: RegistryEntry): boolean {
-    // Text types with toolbar support (must match AnimationToolbar routing)
-    if (entry.textType === 'static') return true
-    if (entry.textType === 'letter-cascade') return true
-    if (entry.textType === 'typewriter') return true
-    if (entry.textType === 'word-cycle') return true
-    if (entry.textType === 'counter') return true
-
-    // Asset types
-    if (entry.assetType === 'image') return true
-    if (entry.assetType === 'icon') return true
-
-    // Layout: same keys LayoutToolbar and AnimationToolbar guard check
-    const s = entry.staticStyle ?? {}
-    if ('background' in s || 'backgroundColor' in s || 'borderRadius' in s || 'opacity' in s) return true
-
-    return false
-  }
-
-  /**
-   * Find the best clickable element at the cursor position.
-   *
-   * Pass 1 — DOM walk-up from the topmost hit element.
-   *   Walks all the way up past non-editable data-eid nodes until it finds an
-   *   ancestor with editable controls. Handles deeply nested structures where
-   *   the clickable element is a child of the editable container.
-   *   Stops only when it hits a full-canvas element (don't select the root).
-   *
-   * Pass 2 — z-stack scan via elementsFromPoint.
-   *   Runs if pass 1 found nothing. Handles decorative elements sitting on top
-   *   of editable ones (e.g. a transparent overlay above a styled div).
-   */
-function eidAtPoint(
-  clientX: number,
-  clientY: number,
-  overlay: HTMLElement,
-): { eid: string; registryKey: string; el: HTMLElement } | null {
-  overlay.style.pointerEvents = 'none'
-  const topEl       = document.elementFromPoint(clientX, clientY) as HTMLElement | null
-  const allElements = document.elementsFromPoint(clientX, clientY) as HTMLElement[]
-  overlay.style.pointerEvents = 'auto'
-
-  const cRect = overlay.getBoundingClientRect()
-
-  // ── Pass 1: walk up the DOM from the hit element ─────────────────────────
-  let walkEl = topEl
-  while (walkEl && walkEl !== overlay) {
-    if (walkEl.dataset?.eid) {
-      const r = walkEl.getBoundingClientRect()
-
-      // Don't select full-canvas elements — stop the walk
-      const coversCanvas =
-        r.width  > cRect.width  * 0.9 &&
-        r.height > cRect.height * 0.9
-
-      if (coversCanvas) {
-        // console.log(`[eidAtPoint] pass1 stopping at eid=${walkEl.dataset.eid} (full canvas)`)
-        break
-      }
-
-      const registryKey = resolveRegistryKey(walkEl.dataset.eid)
-      const entry       = registry[registryKey]
-
-      if (entry && hasEditableControls(entry)) {
-        console.log(`[eidAtPoint] pass1 hit eid=${walkEl.dataset.eid} key=${registryKey}`)
-        return { eid: walkEl.dataset.eid, registryKey, el: walkEl }
-      }
-
-      // No editable controls on this node — keep walking up to find an ancestor
-      console.log(`[eidAtPoint] pass1 skipping eid=${walkEl.dataset.eid} (no controls)`)
-    }
-    walkEl = walkEl.parentElement
-  }
-
-  // ── Pass 2: z-stack scan ──────────────────────────────────────────────────
-  for (const el of allElements) {
-    if (!el.dataset?.eid) continue
-    if (el === overlay) continue
-
-    const r = el.getBoundingClientRect()
-    const coversCanvas =
-      r.width  > cRect.width  * 0.9 &&
-      r.height > cRect.height * 0.9
-    if (coversCanvas) continue
-
-    const registryKey = resolveRegistryKey(el.dataset.eid)
-    const entry       = registry[registryKey]
-    if (!entry || !hasEditableControls(entry)) continue
-
-    console.log(`[eidAtPoint] pass2 hit eid=${el.dataset.eid} key=${registryKey}`)
-    return { eid: el.dataset.eid, registryKey, el }
-  }
-
-  console.log('  → no valid eid found')
-  return null
-}
 
   const deselect = useCallback(() => {
-    console.log('[AnimationEditLayer] Deselecting')
     onSelectElement(null)
   }, [onSelectElement])
 
   /**
-   * MouseDown handler: starts a drag if the pointer is over the already-selected element.
-   */
-  function handleCanvasMouseDown(e: React.MouseEvent<HTMLDivElement>) {
-    if (!selectedEid) return
-    const hit = eidAtPoint(e.clientX, e.clientY, e.currentTarget)
-    if (hit?.registryKey === selectedEid) onDragStart(e)
-  }
-
-  /**
-   * Click handler: selects the element and draws the highlight rectangle.
-   * Skipped when the mousedown was actually a drag.
+   * Click handler with parent-walk behavior:
+   *   - First click: select deepest primitive at cursor.
+   *   - Click again on already-selected element: walk up to parent primitive.
+   *   - If already at the topmost, deselect.
+   * This mirrors standard design tool behavior (Figma, Sketch).
    */
   function handleCanvasClick(e: React.MouseEvent<HTMLDivElement>) {
-    if (didDragRef.current) { didDragRef.current = false; return }
+    const hits = primitiveStackAtPoint(e.clientX, e.clientY, e.currentTarget)
+    if (hits.length === 0) { deselect(); return }
 
-    const hit = eidAtPoint(e.clientX, e.clientY, e.currentTarget)
-    if (!hit) { deselect(); return }
+    // If nothing is selected, select the deepest
+    if (!selectedEid) {
+      const hit = hits[0]
+      const r = hit.el.getBoundingClientRect()
+      setElementRect({ left: r.left, top: r.top, width: r.width, height: r.height })
+      onSelectElement(hit.id)
+      return
+    }
 
-    const { eid: domEid, registryKey, el } = hit
-    const entry = registry[registryKey]
-    if (!entry) { deselect(); return }
+    // If clicking on the currently selected element, walk up to parent
+    const currentIdx = hits.findIndex(h => h.id === selectedEid)
+    if (currentIdx !== -1 && currentIdx < hits.length - 1) {
+      // Select the next parent in the stack
+      const parent = hits[currentIdx + 1]
+      const r = parent.el.getBoundingClientRect()
+      setElementRect({ left: r.left, top: r.top, width: r.width, height: r.height })
+      onSelectElement(parent.id)
+      return
+    }
 
-    domEidRef.current = domEid  // store actual DOM eid for future querySelectorAll
+    if (currentIdx === hits.length - 1) {
+      // Already at topmost — deselect
+      deselect()
+      return
+    }
 
-    console.log('[AnimationEditLayer] Click — selecting element:', registryKey, entry.label)
-
-    const r = el.getBoundingClientRect()
+    // Clicking on a different element — select deepest
+    const hit = hits[0]
+    const r = hit.el.getBoundingClientRect()
     setElementRect({ left: r.left, top: r.top, width: r.width, height: r.height })
-    onSelectElement(registryKey)
+    onSelectElement(hit.id)
   }
 
   if (!canvasRect) return null
@@ -297,7 +204,7 @@ function eidAtPoint(
 
   return createPortal(
     <>
-      {/* ── Click capture — always covers entire canvas ───────────────── */}
+      {/* Click capture — covers entire canvas */}
       <div
         style={{
           position: 'fixed',
@@ -306,26 +213,23 @@ function eidAtPoint(
           width: canvasRect.width,
           height: canvasRect.height,
           zIndex: 40,
-          cursor: isDragging ? 'grabbing' : hoverCursor,
+          cursor: hoverCursor,
         }}
-        onMouseDown={handleCanvasMouseDown}
         onClick={handleCanvasClick}
         onMouseMove={(e: React.MouseEvent<HTMLDivElement>) => {
-          if (isDragging) return
-          const hit = eidAtPoint(e.clientX, e.clientY, e.currentTarget)
-          if (!hit) { setHoverCursor('default'); return }
-          setHoverCursor(hit.registryKey === selectedEid ? 'grab' : 'pointer')
+          const hits = primitiveStackAtPoint(e.clientX, e.clientY, e.currentTarget)
+          setHoverCursor(hits.length > 0 ? 'pointer' : 'default')
         }}
         onMouseLeave={() => setHoverCursor('default')}
       />
 
-      {/* ── Selection highlight ───────────────────────────────────────── */}
+      {/* Selection highlight */}
       {elementRect && (
         <div
           style={{
             position: 'fixed',
-            left: elementRect.left + visualOffset.dx - 2,
-            top: elementRect.top + visualOffset.dy - 2,
+            left: elementRect.left - 2,
+            top: elementRect.top - 2,
             width: elementRect.width + 4,
             height: elementRect.height + 4,
             border: '2px dashed rgba(99,102,241,0.8)',
@@ -337,7 +241,7 @@ function eidAtPoint(
         />
       )}
 
-      {/* ── Toolbar ───────────────────────────────────────────────────── */}
+      {/* Toolbar */}
       {selectedEid && selectedEntry && (
         <div
           ref={toolbarRef}
@@ -350,11 +254,12 @@ function eidAtPoint(
           }}
         >
           <AnimationToolbar
-            selectedEid={selectedEid}
-            editEid={domEidRef.current ?? selectedEid ?? undefined}
+            selectedId={selectedEid}
             registry={registry}
-            editStore={editStore}
-            onEdit={onEdit}
+            editOverlay={editOverlay}
+            onValuePatch={onValuePatch}
+            onValuePatches={onValuePatches}
+            onStyleOverride={onStyleOverride}
             onDeselect={deselect}
           />
         </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { AspectPreset } from '../styles/AspectPresetContext';
+import { AspectPreset } from '../../styles/AspectPresetContext';
 
 export interface FramePresetProps {
   preset: AspectPreset;

@@ -1,27 +1,23 @@
 /**
- * Example LLM-generated animation code.
+ * Example code string as served from a slide's templateUrl.
  *
- * Rules the LLM follows:
- * - No Remotion imports — useCurrentFrame/useVideoConfig are called internally by primitives
- * - No hardcoded colors, px values, or brand references
- * - No styleConfig or theme references — components own all visual decisions
- * - Only semantic props: variant, from/to direction, startAt, durationInFrames, easing
+ * This is the raw TSX code that AnimationSlide fetches from a URL,
+ * compiles via compileRemoteComponent(), and renders inside its
+ * provider stack (ThemeProvider → AspectPresetProvider → StyleContextProvider).
  *
- * Prop reference:
- *   startAt          — absolute frame when the animation begins (default 0)
- *   durationInFrames — how many frames the animation runs (default 30)
- *   easing           — optional override; falls back to StyleContext.motion.<category>
+ * Key points:
+ *   - No frame/fps props — primitives call useCurrentFrame() / useVideoConfig() internally
+ *   - Props: startAt, durationInFrames, easing (matching remotion-ui pattern)
+ *   - Stagger passes startAt to each child via cloneElement; no prop drilling needed
+ *   - All colors/fonts/motion fall back to StyleContext — LLM only controls timing/content
  *
- * Stagger behaviour:
- *   Stagger clones each child injecting startAt = startAt + index * staggerDelay,
- *   so children don't need explicit startAt props.
- *
- * Duration is collected automatically:
- *   Every primitive calls registerEndFrame(startAt + durationInFrames) via DurationCollector.
- *   A probe render wrapped in DurationCollectorProvider collects the max end frame —
- *   see AnimationPreview.tsx for the pattern.
+ * How it gets compiled (compiler.ts pipeline):
+ *   1. stripImports()         — removes all import/export statements
+ *   2. assignPrimitiveIds()   — injects id="slidein-0" etc. (see example-element-registry.json)
+ *   3. babelTransform()       — JSX + TypeScript → plain JS
+ *   4. new Function(scope)    — evaluates in shared scope with all primitives injected
  */
-export const EXAMPLE_ANIMATION_CODE = `
+export const EXAMPLE_SLIDE_CODE = `
 export default function RemoteComponent({ data }) {
   return (
     <SafeArea>
@@ -29,11 +25,11 @@ export default function RemoteComponent({ data }) {
         <Stack gap={16} align="center">
 
           <SlideIn startAt={0} durationInFrames={25} from="bottom">
-            <Text variant="display">Phase 2 Complete</Text>
+            <Text variant="display">{data?.heading ?? 'Phase 1 Complete'}</Text>
           </SlideIn>
 
           <FadeIn startAt={20} durationInFrames={20}>
-            <Text variant="subheading">Animation system built on primitives</Text>
+            <Text variant="subheading">{data?.subheading ?? 'Animation system built on primitives'}</Text>
           </FadeIn>
 
           <FadeIn startAt={45} durationInFrames={20}>
@@ -43,7 +39,7 @@ export default function RemoteComponent({ data }) {
                   startAt={50}
                   durationInFrames={60}
                   from={0}
-                  to={17}
+                  to={data?.stat1 ?? 17}
                   suffix=" components"
                   variant="heading"
                 />
@@ -55,7 +51,7 @@ export default function RemoteComponent({ data }) {
                   startAt={60}
                   durationInFrames={60}
                   from={0}
-                  to={5}
+                  to={data?.stat2 ?? 5}
                   suffix=" types"
                   variant="heading"
                 />

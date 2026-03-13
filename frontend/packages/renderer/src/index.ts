@@ -4,7 +4,9 @@ export type { TransformResult, RegistryEntry, AnimatedPropInfo, EditablePropInfo
 export { Slideshow, SlideComponent, SingleSlidePreview } from './RemotionSlideshow';
 export { assignPrimitiveIds } from './primitive-ast-pass';
 export { probeRender } from './probeRender';
-export type { PrimitiveIdRegistry } from './primitive-ast-pass';
+export type { PrimitiveIdRegistry, PrimitiveElement } from './primitive-ast-pass';
+// Re-export patch types from animation for portal consumers
+export type { PatchOverlay, ElementPatchEntry } from '@coasterai/animation';
 export { compileRemoteComponent, stripImports } from './compiler';
 export type { CompilationResult, CompileRemoteComponentOptions } from './compiler';
 export {

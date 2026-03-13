@@ -11,16 +11,16 @@ export * from './styles';
 export * from './duration';
 
 // Layout primitives
-export * from './layout';
+export * from './core/layout';
 
 // Animation primitives
-export * from './primitives';
+export * from './core/primitives';
 
-// Content primitives
-export * from './content';
+// Content primitives (Counter, Text, Typewriter, WordCycle)
+export * from './text';
 
-// Scene components
-export * from './scenes';
+// Scene components (TitleCard, etc.)
+export * from './components';
 
 // Registry
 export * from './registry';

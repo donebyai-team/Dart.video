@@ -1,166 +1,115 @@
 /**
  * TextToolbar
  *
- * Shown when registry[eid].textType is 'static', 'letter-cascade', or 'typewriter'.
+ * Shown for: Text, Typewriter, TitleCard
  *
  * Controls:
- *  - Text content input (editable text / source text)
- *  - Font family (dropdown)
- *  - Font size (number stepper)
- *  - Bold / Italic / Underline / Strikethrough toggles
- *  - Text color (color swatch with "A" label)
- *  - Background color (color swatch with "▨" label)
+ *  - Text content input
+ *  - Variant dropdown (for Text/Typewriter)
+ *  - Heading/subheading/eyebrow (for TitleCard)
+ *  - Style overrides: color
  */
 
 import React from 'react'
-import { Bold, Italic, Underline, Strikethrough } from 'lucide-react'
-import type { RegistryEntry } from '@coasterai/renderer'
-import type { ElementEdit } from '@coasterai/renderer/src/types/ast'
-import {
-  Sep,
-  IconBtn,
-  ColorSwatch,
-  NumberStepper,
-  FontFamilySelect,
-  LowConfidenceDot,
-} from './shared'
+import type { ToolbarProps } from './types'
+import { Sep, SelectInput } from './shared'
 
-interface TextToolbarProps {
-  eid: string       // registry key — for entry lookup only
-  editEid?: string  // DOM eid — for onEdit and editStore reads (defaults to eid)
-  registry: Record<string, RegistryEntry>
-  editStore: Record<string, ElementEdit>
-  onEdit: (eid: string, patch: Partial<ElementEdit>) => void
-}
+const VARIANT_OPTIONS = [
+  { label: 'Caption', value: 'caption' },
+  { label: 'Label', value: 'label' },
+  { label: 'Body', value: 'body' },
+  { label: 'Subheading', value: 'subheading' },
+  { label: 'Heading', value: 'heading' },
+  { label: 'Display', value: 'display' },
+]
 
-export function TextToolbar({ eid, editEid, registry, editStore, onEdit }: TextToolbarProps) {
-  const entry = registry[eid]
-  if (!entry) return null
+export function TextToolbar({
+  componentName,
+  currentProps,
+  styleOverride,
+  onValuePatch,
+  onStyleOverride,
+}: ToolbarProps) {
+  // ── TitleCard ──────────────────────────────────────────────────────────
+  if (componentName === 'TitleCard') {
+    const heading = String(currentProps.heading ?? '')
+    const subheading = String(currentProps.subheading ?? '')
+    const eyebrow = String(currentProps.eyebrow ?? '')
 
-  const eeid = editEid ?? eid
-
-  // Merge static style with any user overrides — overrides take precedence
-  const merged = { ...entry.staticStyle, ...(editStore[eeid]?.style ?? {}) }
-
-  // Low-confidence props (came from spread / ternary in the source AST)
-  const lowConf = new Set(entry.lowConfidence ?? [])
-
-  function setStyle(prop: string, value: string | number) {
-    console.log('[TextToolbar] setStyle', { eeid, prop, value })
-    onEdit(eeid, { style: { [prop]: value } })
+    return (
+      <>
+        <input
+          type="text"
+          value={heading}
+          onChange={e => onValuePatch('heading', e.target.value)}
+          placeholder="Heading"
+          title="Heading"
+          className="h-7 w-36 px-2 rounded-md border border-border bg-muted text-xs focus:outline-none focus:ring-1 focus:ring-ring/50"
+        />
+        <input
+          type="text"
+          value={subheading}
+          onChange={e => onValuePatch('subheading', e.target.value || undefined)}
+          placeholder="Subheading"
+          title="Subheading"
+          className="h-7 w-28 px-2 rounded-md border border-border bg-muted text-xs focus:outline-none focus:ring-1 focus:ring-ring/50"
+        />
+        <input
+          type="text"
+          value={eyebrow}
+          onChange={e => onValuePatch('eyebrow', e.target.value || undefined)}
+          placeholder="Eyebrow"
+          title="Eyebrow"
+          className="h-7 w-24 px-2 rounded-md border border-border bg-muted text-xs focus:outline-none focus:ring-1 focus:ring-ring/50"
+        />
+      </>
+    )
   }
 
-  // ── Text content (static / letter-cascade / typewriter) ─────────────────
-  const textType = entry.textType
-  const hasTextContent = textType === 'static' || textType === 'letter-cascade' || textType === 'typewriter'
-  const contentLabel   = textType === 'typewriter' ? 'Source text' : 'Text'
-  const currentText    = editStore[eeid]?.text ?? entry.sourceText ?? entry.staticText ?? ''
-
-  // ── Derive toggle states ─────────────────────────────────────────────────
-  const isBold      = merged.fontWeight === 700 || merged.fontWeight === '700' || merged.fontWeight === 'bold'
-  const isItalic    = merged.fontStyle === 'italic'
-  const isUnderline = String(merged.textDecoration ?? '').includes('underline')
-  const isStrike    = String(merged.textDecoration ?? '').includes('line-through')
-
-  function toggleDecoration(token: 'underline' | 'line-through') {
-    // textDecoration can hold multiple tokens: "underline line-through"
-    const current = String(merged.textDecoration ?? '')
-    const parts   = current.split(' ').filter(Boolean)
-    const has     = parts.includes(token)
-    const next    = has ? parts.filter(p => p !== token) : [...parts, token]
-    setStyle('textDecoration', next.join(' ') || 'none')
-  }
-
-  const fontFamily = String(merged.fontFamily ?? 'Inter')
-  const fontSize   = parseFloat(String(merged.fontSize ?? 16)) || 16
+  // ── Text / Typewriter ──────────────────────────────────────────────────
+  const isTypewriter = componentName === 'Typewriter'
+  const textProp = isTypewriter ? 'text' : 'children'
+  const currentText = String(currentProps[textProp] ?? '')
+  const currentVariant = String(currentProps.variant ?? 'body')
 
   return (
     <>
-      {/* ── Text content ────────────────────────────────────────────────── */}
-      {hasTextContent && (
+      {/* Text content */}
+      <input
+        type="text"
+        value={currentText}
+        onChange={e => onValuePatch(textProp, e.target.value)}
+        placeholder={isTypewriter ? 'Source text' : 'Text'}
+        title={isTypewriter ? 'Source text' : 'Text'}
+        className="h-7 w-28 px-2 rounded-md border border-border bg-muted text-xs focus:outline-none focus:ring-1 focus:ring-ring/50"
+      />
+
+      <Sep />
+
+      {/* Variant */}
+      <SelectInput
+        value={currentVariant}
+        options={VARIANT_OPTIONS}
+        onChange={v => onValuePatch('variant', v)}
+        width="w-24"
+      />
+
+      {/* Typewriter mode */}
+      {isTypewriter && (
         <>
-          <input
-            type="text"
-            value={currentText}
-            onChange={e => onEdit(eeid, { text: e.target.value })}
-            placeholder={contentLabel}
-            title={contentLabel}
-            className="h-7 w-28 px-2 rounded-md border border-border bg-muted text-xs focus:outline-none focus:ring-1 focus:ring-ring/50"
-          />
           <Sep />
+          <SelectInput
+            value={String(currentProps.mode ?? 'char')}
+            options={[
+              { label: 'Char', value: 'char' },
+              { label: 'Word', value: 'word' },
+              { label: 'Line', value: 'line' },
+            ]}
+            onChange={v => onValuePatch('mode', v)}
+            width="w-16"
+          />
         </>
       )}
-
-      {/* ── Font family ─────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-1">
-        <FontFamilySelect value={fontFamily} onChange={v => setStyle('fontFamily', v)} />
-        {lowConf.has('fontFamily') && <LowConfidenceDot />}
-      </div>
-
-      {/* ── Font size ───────────────────────────────────────────────────── */}
-      {'fontSize' in merged && (
-        <div className="flex items-center gap-1">
-          <NumberStepper
-            value={fontSize}
-            onChange={v => setStyle('fontSize', v)}
-            min={8}
-            max={300}
-            step={1}
-            unit="px"
-            inputWidth="w-10"
-          />
-          {lowConf.has('fontSize') && <LowConfidenceDot />}
-        </div>
-      )}
-
-      <Sep />
-
-      {/* ── Decoration toggles ──────────────────────────────────────────── */}
-      <IconBtn active={isBold}      onClick={() => setStyle('fontWeight', isBold ? 400 : 700)} title="Bold">
-        <Bold size={13} strokeWidth={isBold ? 3 : 2} />
-      </IconBtn>
-
-      <IconBtn active={isItalic}    onClick={() => setStyle('fontStyle', isItalic ? 'normal' : 'italic')} title="Italic">
-        <Italic size={13} />
-      </IconBtn>
-
-      <IconBtn active={isUnderline} onClick={() => toggleDecoration('underline')} title="Underline">
-        <Underline size={13} />
-      </IconBtn>
-
-      <IconBtn active={isStrike}    onClick={() => toggleDecoration('line-through')} title="Strikethrough">
-        <Strikethrough size={13} />
-      </IconBtn>
-
-      <Sep />
-
-      {/* ── Text color ──────────────────────────────────────────────────── */}
-      {'color' in merged && (
-        <div className="flex items-center gap-1">
-          <ColorSwatch
-            color={merged.color}
-            label="A"
-            title="Text color"
-            onChange={v => setStyle('color', v)}
-          />
-          {lowConf.has('color') && <LowConfidenceDot />}
-        </div>
-      )}
-
-      {/* ── Background color ────────────────────────────────────────────── */}
-      {'background' in merged && (
-        <div className="flex items-center gap-1">
-          <ColorSwatch
-            color={merged.background}
-            label="▨"
-            title="Background color"
-            onChange={v => setStyle('background', v)}
-          />
-          {lowConf.has('background') && <LowConfidenceDot />}
-        </div>
-      )}
-
-
     </>
   )
 }

@@ -1,7 +1,19 @@
 import { AnimationSlideContent, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
 import { AbsoluteFill, continueRender, delayRender, useRemotionEnvironment } from 'remotion'
+import {
+  ThemeProvider,
+  AspectPresetProvider,
+  StyleContextProvider,
+  SpeedFactorProvider,
+  PatchContextProvider,
+  defaultTheme,
+  resolveStyle,
+  type AspectPreset,
+  type PatchOverlay,
+} from '@coasterai/animation'
+
 import { compileRemoteComponent } from '../compiler'
 import { AnimatedBackground } from '../effects/AnimatedBackground'
 import { backgroundStyleToCSS } from '../backgroundUtils'
@@ -41,6 +53,17 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
 
   const { isRendering } = useRemotionEnvironment()
   const content = slide.content.value as AnimationSlideContent
+
+  // Build AspectPreset from slide dimensions
+  const aspectPreset = useMemo<AspectPreset>(() => ({
+    id: 'slide',
+    width,
+    height,
+    safeArea: { top: 0, right: 0, bottom: 0, left: 0 },
+  }), [width, height])
+
+  // Style preset — could come from slide data in the future
+  const styleConfig = useMemo(() => resolveStyle('clean'), [])
   // template id for hard-coded local templates
   // const localTemplateId = content?.templateId
 
@@ -49,57 +72,6 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
 
   const background = backgroundStyleToCSS(slide.backgroundStyle)
 
-
-  // 🚀 LOCAL TEMPLATE SHORT-CIRCUIT
-  // if (!templateUrl && localTemplateId) {
-  //   return (
-  //     <AbsoluteFill
-  //       style={{
-  //         background,
-  //         justifyContent: 'center',
-  //         alignItems: 'center'
-  //       }}
-  //     >
-  //       <AnimatedBackground width={width} height={height} />
-
-  //       <TemplateContainer
-  //         x={templateMeta.x as number}
-  //         y={templateMeta.y as number}
-  //         width={templateMeta.width as number}
-  //         height={templateMeta.height as number}
-  //         canvasWidth={width}
-  //         canvasHeight={height}
-  //         isEditing={isEditing}
-  //         isSelected={isSelected}
-  //         onSelect={onSelect}
-  //         onUpdate={updates => {
-  //           if (onUpdate && content) {
-  //             onUpdate({
-  //               ...slide,
-  //               content: {
-  //                 case: 'animation',
-  //                 value: {
-  //                   ...content,
-  //                   meta: {
-  //                     ...templateMeta,
-  //                     ...updates
-  //                   }
-  //                 }
-  //               }
-  //             } as Slide)
-  //           }
-  //         }}
-  //       >
-  //         <TemplateRendrer
-  //           slide={slide}
-  //           templateId={localTemplateId}
-  //           templateConfig={templateConfig}
-  //           width={templateMeta.width || width * 0.8}
-  //         />
-  //       </TemplateContainer>
-  //     </AbsoluteFill>
-  //   )
-  // }
 
   const [renderHandle] = useState(() => {
     if (!templateUrl) return null
@@ -172,13 +144,14 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
     }
   }, [templateUrl])
 
-  // During rendering, useAnimationEdit is not mounted so window.__EDIT_STORE__
-  // is never populated. Seed it from content.edits so the AST-transformed
-  // compiled component can read persisted edits.
-  // edits should be of type ElementEdit
-  if (isRendering && content?.edits) {
-    ;(window as any).__EDIT_STORE__ = content.edits
-  }
+  // During rendering, read persisted edits as PatchOverlay.
+  // The editor also writes to window.__PATCH_OVERLAY__ for live editing.
+  const patchOverlay: PatchOverlay = useMemo(() => {
+    if (typeof window !== 'undefined' && (window as any).__PATCH_OVERLAY__) {
+      return (window as any).__PATCH_OVERLAY__ as PatchOverlay
+    }
+    return (content?.edits ?? {}) as unknown as PatchOverlay
+  }, [content?.edits, isRendering])
 
   return (
     <AbsoluteFill
@@ -193,7 +166,17 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
         {isLoading ? (
           <TemplateLoadingPlaceholder />
         ) : CompiledComponent ? (
-          <CompiledComponent />
+          <ThemeProvider theme={defaultTheme}>
+            <AspectPresetProvider preset={aspectPreset}>
+              <StyleContextProvider style={styleConfig}>
+                <SpeedFactorProvider factor={1}>
+                  <PatchContextProvider overlay={patchOverlay}>
+                    <CompiledComponent />
+                  </PatchContextProvider>
+                </SpeedFactorProvider>
+              </StyleContextProvider>
+            </AspectPresetProvider>
+          </ThemeProvider>
         ) : templateError ? (
           <TemplateErrorFallback message={templateError} />
         ) : null}

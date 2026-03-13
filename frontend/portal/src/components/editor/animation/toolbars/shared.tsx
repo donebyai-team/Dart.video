@@ -263,6 +263,114 @@ export function FontFamilySelect({
   )
 }
 
+// ─── Style Override Section ──────────────────────────────────────────────────
+// Collapsible section that shows common style controls for any visual element.
+// Always available for text-related components. Collapsed by default per spec.
+//
+// Token values sourced from @coasterai/animation/tokens:
+//   FontWeightToken: thin=100, light=300, normal=400, medium=500, semibold=600, bold=700, extrabold=800
+//   LetterSpacing:   tight=-0.025em, normal=0, wide=0.025em (maps to StyleConfig.type.tracking)
+
+/** Font weight options matching animation token FontWeightToken values. */
+const FONT_WEIGHT_OPTIONS = [
+  { label: 'Thin',      value: '100' },
+  { label: 'Light',     value: '300' },
+  { label: 'Normal',    value: '400' },
+  { label: 'Medium',    value: '500' },
+  { label: 'Semibold',  value: '600' },
+  { label: 'Bold',      value: '700' },
+  { label: 'Extrabold', value: '800' },
+]
+
+/** Letter spacing options matching StyleConfig.type.tracking token. */
+const LETTER_SPACING_OPTIONS = [
+  { label: 'Tight',  value: '-0.025em' },
+  { label: 'Normal', value: '0em' },
+  { label: 'Wide',   value: '0.025em' },
+]
+
+export function StyleOverrideSection({
+  styleOverride,
+  onStyleOverride,
+}: {
+  styleOverride: Record<string, string | number>
+  onStyleOverride: (style: Record<string, string | number>) => void
+}) {
+  const [expanded, setExpanded] = React.useState(false)
+
+  const color = styleOverride.color as string | undefined
+  const backgroundColor = styleOverride.backgroundColor as string | undefined
+  const fontWeight = styleOverride.fontWeight as string | number | undefined
+  const letterSpacing = styleOverride.letterSpacing as string | undefined
+  const opacity = styleOverride.opacity as number | undefined
+
+  return (
+    <>
+      <Sep />
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors shrink-0"
+        title="Style overrides"
+      >
+        <span className="text-[10px]">{expanded ? '▾' : '▸'}</span>
+        Style
+      </button>
+
+      {/* Always-visible: text color swatch */}
+      <ColorSwatch
+        color={color ?? '#ffffff'}
+        label="A"
+        title="Text color"
+        onChange={v => onStyleOverride({ color: v })}
+      />
+
+      {/* Expanded controls */}
+      {expanded && (
+        <>
+          {/* Background color */}
+          <ColorSwatch
+            color={backgroundColor ?? '#000000'}
+            label="▨"
+            title="Background color"
+            onChange={v => onStyleOverride({ backgroundColor: v })}
+          />
+
+          <Sep />
+
+          {/* Font weight — uses animation FontWeightToken values */}
+          <SelectInput
+            value={String(fontWeight ?? '400')}
+            options={FONT_WEIGHT_OPTIONS}
+            onChange={v => onStyleOverride({ fontWeight: parseInt(v) })}
+            width="w-24"
+          />
+
+          {/* Letter spacing — uses StyleConfig tracking tokens */}
+          <SelectInput
+            value={String(letterSpacing ?? '0em')}
+            options={LETTER_SPACING_OPTIONS}
+            onChange={v => onStyleOverride({ letterSpacing: v })}
+            width="w-20"
+          />
+
+          <Sep />
+
+          {/* Opacity */}
+          <SliderInput
+            value={opacity ?? 1}
+            onChange={v => onStyleOverride({ opacity: v })}
+            min={0}
+            max={1}
+            step={0.05}
+            label="Opacity"
+            width="w-16"
+          />
+        </>
+      )}
+    </>
+  )
+}
+
 // ─── Low Confidence Indicator ─────────────────────────────────────────────────
 // Shown as a small warning dot on a control when confidence is "low".
 

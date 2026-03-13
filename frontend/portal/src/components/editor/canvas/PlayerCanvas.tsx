@@ -40,18 +40,20 @@ const PlayerCanvas = ({
   const onUpdateCallout = useVideoStore(s => s.updateCallout)
   const onUpdateZoom = useVideoStore(s => s.updateZoom)
 
-  const { isAnimationSlide,
-    animRegistry,
+  const {
+    isAnimationSlide,
+    primitiveRegistry,
     selectedEid,
     setSelectedEid,
-    editStore,
+    editOverlay,
     animEditVersion,
-    applyEdit,
+    applyValuePatch,
+    applyValuePatches,
+    applyStyleOverride,
   } = useAnimationEdit()
 
   // ── Refs ──────────────────────────────────────────────────────────────────
   const containerRef = useRef<HTMLDivElement>(null)
-  // canvasRef — the scaled motion.div, used as coordinate origin by AnimationEditLayer
   const canvasRef = useRef<HTMLDivElement>(null)
 
   // ── inputProps for Remotion Player ───────────────────────────────────────
@@ -143,12 +145,14 @@ const PlayerCanvas = ({
         <AnimationEditLayer
           playerRef={canvasRef}
           selectedEid={selectedEid}
-          registry={animRegistry}
-          editStore={editStore}
+          registry={primitiveRegistry}
+          editOverlay={editOverlay}
           animEditVersion={animEditVersion}
           compositionScale={scale * canvasSize.width / videoConfigFromStore.metadata!.resolution.width}
           onSelectElement={setSelectedEid}
-          onEdit={applyEdit}
+          onValuePatch={applyValuePatch}
+          onValuePatches={applyValuePatches}
+          onStyleOverride={applyStyleOverride}
         />
       )}
     </div>

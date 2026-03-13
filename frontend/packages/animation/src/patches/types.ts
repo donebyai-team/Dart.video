@@ -1,77 +1,92 @@
-/** Change a single prop value on a primitive-backed element. */
-export interface ValuePatch {
-  type: 'value';
-  /** Element ID in format {componentType}-{index}, e.g. "fadein-0" */
-  id: string;
-  prop: string;
-  value: unknown;
+/** Per-element patch entry. Keyed by element ID in the PatchOverlay. */
+export interface ElementPatchEntry {
+  /** Prop value overrides — e.g. { delay: 20, from: 'left' } */
+  value?: Record<string, unknown>;
+  /** CSS style overrides — always wins over component style */
+  styleOverride?: Record<string, string | number>;
+  /** Swap to a different component type */
+  swap?: string;
 }
 
-/** Replace one component type with another via a defined swap rule. */
-export interface SwapPatch {
-  type: 'swap';
-  id: string;
-  swapTo: string;
-  /** Props to set on the new component. */
-  props: Record<string, unknown>;
-}
-
-/** Override absolute position of a top-level element. */
-export interface PositionPatch {
-  type: 'position';
-  id: string;
-  x: number;
-  y: number;
-}
-
-/** Override width/height of a scene component or layout container. */
-export interface SizePatch {
-  type: 'size';
-  id: string;
-  width: number;
-  height: number;
-}
-
-/** Global timing multiplier. speedFactor > 1 = faster, < 1 = slower. */
-export interface SpeedPatch {
-  type: 'speed';
-  factor: number;
-}
-
-export type AnimationPatch = ValuePatch | SwapPatch | PositionPatch | SizePatch | SpeedPatch;
-
-/** All patches for a single animation, keyed by element ID for fast lookup. */
-export interface PatchOverlay {
-  /** Per-element patches. Key: element ID. */
-  elements: Record<string, (ValuePatch | SwapPatch | PositionPatch | SizePatch)[]>;
-  /** Global speed patch (at most one). */
-  speed?: SpeedPatch;
-}
+/**
+ * Full patch overlay — a flat object keyed by element ID.
+ *
+ * Example:
+ * ```
+ * {
+ *   'text-0':    { value: { variant: 'heading' }, styleOverride: { color: '#6366f1' } },
+ *   'slidein-0': { value: { durationInFrames: 40 } },
+ *   'counter-0': { value: { to: 23 } },
+ * }
+ * ```
+ */
+export type PatchOverlay = Record<string, ElementPatchEntry>;
 
 export function createEmptyPatchOverlay(): PatchOverlay {
-  return { elements: {} };
+  return {};
 }
 
-export function applyPatchToOverlay(overlay: PatchOverlay, patch: AnimationPatch): PatchOverlay {
-  if (patch.type === 'speed') {
-    return { ...overlay, speed: patch };
-  }
-
-  const existing = overlay.elements[patch.id] ?? [];
-  // Replace existing patch of same type+prop, or append
-  const filtered = existing.filter((p) => {
-    if (p.type !== patch.type) return true;
-    if (p.type === 'value' && patch.type === 'value') {
-      return p.prop !== patch.prop;
-    }
-    return false;
-  });
-
+/** Apply a single prop value override to the overlay. */
+export function applyValuePatch(
+  overlay: PatchOverlay,
+  id: string,
+  prop: string,
+  value: unknown,
+): PatchOverlay {
+  const entry = overlay[id] ?? {};
   return {
     ...overlay,
-    elements: {
-      ...overlay.elements,
-      [patch.id]: [...filtered, patch],
+    [id]: {
+      ...entry,
+      value: { ...(entry.value ?? {}), [prop]: value },
+    },
+  };
+}
+
+/** Merge a set of value overrides onto the overlay. */
+export function applyValuePatches(
+  overlay: PatchOverlay,
+  id: string,
+  values: Record<string, unknown>,
+): PatchOverlay {
+  const entry = overlay[id] ?? {};
+  return {
+    ...overlay,
+    [id]: {
+      ...entry,
+      value: { ...(entry.value ?? {}), ...values },
+    },
+  };
+}
+
+/** Merge CSS style overrides onto the overlay. */
+export function applyStyleOverride(
+  overlay: PatchOverlay,
+  id: string,
+  style: Record<string, string | number>,
+): PatchOverlay {
+  const entry = overlay[id] ?? {};
+  return {
+    ...overlay,
+    [id]: {
+      ...entry,
+      styleOverride: { ...(entry.styleOverride ?? {}), ...style },
+    },
+  };
+}
+
+/** Set a component swap on the overlay. */
+export function applySwapPatch(
+  overlay: PatchOverlay,
+  id: string,
+  newComponent: string,
+): PatchOverlay {
+  const entry = overlay[id] ?? {};
+  return {
+    ...overlay,
+    [id]: {
+      ...entry,
+      swap: newComponent,
     },
   };
 }

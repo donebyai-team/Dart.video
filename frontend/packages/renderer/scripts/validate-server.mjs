@@ -36,7 +36,7 @@ import * as Babel from '@babel/standalone';
 import {Storage} from '@google-cloud/storage';
 import {bundle} from '@remotion/bundler';
 import {renderStill, selectComposition} from '@remotion/renderer';
-import {transformAnimation} from '../src/ast-transform.ts'
+import {computeAnimationDuration} from '../src/ast-transform.ts'
 import {compileRemoteComponent} from '../src/compiler.ts'
 import {randomUUID} from 'node:crypto';
 import {existsSync} from 'node:fs';
@@ -261,17 +261,19 @@ async function handleValidate(req, res) {
   }
   console.log('[validate] compile check passed');
 
-  console.log('Generating AST and building element registry...');
-  // Generate AST and build element registry
-  const { transformedCode, registry } = transformAnimation(code);
-  
-  const result = compileRemoteComponent(transformedCode, { validateShapeProps: true });
+  console.log('Compiling and assigning primitive IDs...');
+  const durationInFrames = computeAnimationDuration(code);
+
+  // compileRemoteComponent strips imports, runs primitive ID pass, and transpiles
+  const result = compileRemoteComponent(code, { validateShapeProps: true });
   if (result.error) {
-    console.log('[validate] remote compile check FAILED:\n', result.error);
+    console.log('[validate] compile check FAILED:\n', result.error);
     res.writeHead(422, {'Content-Type': 'application/json'});
     res.end(JSON.stringify({error_type: 'compile_error', errors: [result.error]}));
     return;
-   }
+  }
+
+  const registry = result.primitiveIds ?? { elements: {} };
 
   // ── Step 2: Render check via Remotion renderStill ────────────────────────
   const uuid = randomUUID();
@@ -284,7 +286,7 @@ async function handleValidate(req, res) {
 
     await writeFile(
       resolve(templatesDir, 'root.tsx'),
-      buildRootEntry(transformedCode),
+      buildRootEntry(code),
       'utf8',
     );
 
@@ -337,15 +339,16 @@ async function handleValidate(req, res) {
       return;
     }
 
-    // ---- Upload transformedCode to GCS ----
+    // ---- Upload original code to GCS (primitive IDs are injected at compile time) ----
     const gcsPath = `${output_path}/${component_name}.tsx`;
-    await uploadToGCS(OUTPUT_BUCKET, gcsPath, Buffer.from(transformedCode, 'utf8'));
+    await uploadToGCS(OUTPUT_BUCKET, gcsPath, Buffer.from(code, 'utf8'));
 
     console.log('[validate] render check passed — validation complete');
     res.writeHead(200, {'Content-Type': 'application/json'});
     res.end(JSON.stringify({
       registry: registry,
-      gcsPath: `https://storage.googleapis.com/${OUTPUT_BUCKET}/${gcsPath}`
+      gcsPath: `https://storage.googleapis.com/${OUTPUT_BUCKET}/${gcsPath}`,
+      durationInFrames,
     }));
 
   } catch (err) {
