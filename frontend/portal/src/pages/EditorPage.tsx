@@ -451,9 +451,9 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
                 // Use unified selection handler
                 handleSelectEntity(createOverlayEntityId(slideId, overlayId))
               }}
-              // Duration change handler
+              // Duration change handler — newDuration is in seconds, store as frames
               onDurationChange={(_slideId, newDuration) => {
-                updateSlide({ duration: newDuration })
+                updateSlide({ durationInFrames: Math.round(newDuration * 30) })
               }}
               onSelectTemplate={slideId => {
                 console.debug('selected templated slide: ', slideId)

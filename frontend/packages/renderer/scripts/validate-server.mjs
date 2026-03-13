@@ -36,7 +36,6 @@ import * as Babel from '@babel/standalone';
 import {Storage} from '@google-cloud/storage';
 import {bundle} from '@remotion/bundler';
 import {renderStill, selectComposition} from '@remotion/renderer';
-import {computeAnimationDuration} from '../src/ast-transform.ts'
 import {compileRemoteComponent} from '../src/compiler.ts'
 import {randomUUID} from 'node:crypto';
 import {existsSync} from 'node:fs';
@@ -108,27 +107,74 @@ function preValidateWithBabel(code) {
  * error_type even if the Babel pre-check somehow missed them. Runtime errors
  * (bad hooks, undefined vars in JSX, etc.) propagate naturally.
  */
+const TAIL_BUFFER = 20;
+
 function buildRootEntry(code) {
   return [
-    `import React from 'react';`,
+    `import React, { useEffect } from 'react';`,
     `import { Composition, registerRoot } from 'remotion';`,
     `import { compileRemoteComponent } from '@/compiler';`,
+    `import {`,
+    `  DurationCollectorProvider,`,
+    `  ThemeProvider,`,
+    `  AspectPresetProvider,`,
+    `  StyleContextProvider,`,
+    `  SpeedFactorProvider,`,
+    `  defaultTheme,`,
+    `  resolveStyle,`,
+    `} from '@coasterai/animation';`,
     ``,
     `const __CODE__ = ${JSON.stringify(code)};`,
+    `const __TAIL_BUFFER__ = ${TAIL_BUFFER};`,
     ``,
-    `const ValidatorRoot = () => {`,
+    `// Probe component: renders the animation to collect duration via DurationCollector.`,
+    `const ProbeComp = () => {`,
+    `  const endFrames = React.useRef([]);`,
+    `  const onRegister = (endFrame) => { endFrames.current.push(endFrame); };`,
+    ``,
     `  const { Component, error } = compileRemoteComponent(__CODE__, { validateShapeProps: true });`,
     `  if (error || !Component) {`,
     `    throw new Error('[compile_error] ' + (error || 'Unknown compilation error'));`,
     `  }`,
     ``,
+    `  useEffect(() => {`,
+    `    const frames = endFrames.current;`,
+    `    const settledFrame = frames.length > 0 ? Math.max(...frames) : 90;`,
+    `    window.__ANIMATION_DURATION__ = {`,
+    `      settledFrame,`,
+    `      durationInFrames: settledFrame + __TAIL_BUFFER__,`,
+    `    };`,
+    `  }, []);`,
+    ``,
+    `  const preset = { id: 'probe', width: 1280, height: 720, safeArea: { top: 0, right: 0, bottom: 0, left: 0 } };`,
+    ``,
+    `  return (`,
+    `    React.createElement(ThemeProvider, { theme: defaultTheme },`,
+    `      React.createElement(AspectPresetProvider, { preset },`,
+    `        React.createElement(StyleContextProvider, { style: resolveStyle('clean') },`,
+    `          React.createElement(SpeedFactorProvider, { factor: 1 },`,
+    `            React.createElement(DurationCollectorProvider, { onRegister },`,
+    `              React.createElement(Component, null)`,
+    `            )`,
+    `          )`,
+    `        )`,
+    `      )`,
+    `    )`,
+    `  );`,
+    `};`,
+    ``,
+    `const ValidatorRoot = () => {`,
     `  return React.createElement(Composition, {`,
     `    id: 'ValidatorComp',`,
-    `    component: Component,`,
-    `    durationInFrames: 30,`,
+    `    component: ProbeComp,`,
+    `    durationInFrames: 300,`,
     `    fps: 30,`,
     `    width: 1280,`,
     `    height: 720,`,
+    `    calculateMetadata: async () => {`,
+    `      const dur = typeof window !== 'undefined' && window.__ANIMATION_DURATION__;`,
+    `      return { durationInFrames: dur ? dur.durationInFrames : 150 };`,
+    `    },`,
     `  });`,
     `};`,
     ``,
@@ -262,7 +308,6 @@ async function handleValidate(req, res) {
   console.log('[validate] compile check passed');
 
   console.log('Compiling and assigning primitive IDs...');
-  const durationInFrames = computeAnimationDuration(code);
 
   // compileRemoteComponent strips imports, runs primitive ID pass, and transpiles
   const result = compileRemoteComponent(code, { validateShapeProps: true });
@@ -273,7 +318,7 @@ async function handleValidate(req, res) {
     return;
   }
 
-  const registry = result.primitiveIds ?? { elements: {} };
+  const initialOverlay = result.initialOverlay ?? {};
 
   // ── Step 2: Render check via Remotion renderStill ────────────────────────
   const uuid = randomUUID();
@@ -308,13 +353,19 @@ async function handleValidate(req, res) {
       }),
     });
 
-    console.log('[validate] bundling complete — rendering still frame');
+    console.log('[validate] bundling complete — selecting composition (triggers duration probe)');
     const composition = await selectComposition({
       serveUrl: bundleDir,
       id: 'ValidatorComp',
       inputProps: {},
       chromiumOptions,
     });
+
+    // Duration was computed by DurationCollector during selectComposition's
+    // calculateMetadata call. The composition now has the correct durationInFrames.
+    const settledFrame = composition.durationInFrames - TAIL_BUFFER;
+    const durationInFrames = composition.durationInFrames;
+    console.log(`[validate] duration detected: settledFrame=${settledFrame}, durationInFrames=${durationInFrames}`);
 
     try {
       await renderStill({
@@ -346,9 +397,12 @@ async function handleValidate(req, res) {
     console.log('[validate] render check passed — validation complete');
     res.writeHead(200, {'Content-Type': 'application/json'});
     res.end(JSON.stringify({
-      registry: registry,
+      initialOverlay,
       gcsPath: `https://storage.googleapis.com/${OUTPUT_BUCKET}/${gcsPath}`,
-      durationInFrames,
+      duration: {
+        settledFrame,
+        durationInFrames,
+      },
     }));
 
   } catch (err) {

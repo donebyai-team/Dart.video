@@ -154,7 +154,7 @@ const PlayerToolbar = ({ onDurationChange, minDuration = 1, maxDuration = 180 }:
         </TooltipProvider>
 
         <DurationChangeComponent
-          value={slide.duration}
+          value={slide.durationInFrames > 0 ? slide.durationInFrames / 30 : slide.duration}
           onValueChange={val => {
             onDurationChange(val)
           }}

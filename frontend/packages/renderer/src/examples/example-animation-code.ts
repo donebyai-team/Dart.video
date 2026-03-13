@@ -64,10 +64,10 @@ export default function RemoteComponent({ data }) {
             </Row>
           </FadeIn>
 
-          <TimelineGate showAfter={100}>
+           <Stack gap={32} align="center">
             <Stagger startAt={100} staggerDelay={12}>
               <SlideIn durationInFrames={20} from="bottom">
-                <Text variant="label">✓ Tokens and Theming</Text>
+                <Text variant="label"> Tokens and Theming</Text>
               </SlideIn>
               <SlideIn durationInFrames={20} from="bottom">
                 <Text variant="label">✓ Layout Primitives</Text>
@@ -82,7 +82,7 @@ export default function RemoteComponent({ data }) {
                 <Text variant="label">✓ Compiler Integration</Text>
               </SlideIn>
             </Stagger>
-          </TimelineGate>
+          </Stack>
 
         </Stack>
       </AbsoluteCenter>

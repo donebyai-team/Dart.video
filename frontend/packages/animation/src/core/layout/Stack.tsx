@@ -1,40 +1,51 @@
 import React from 'react';
 import { SpacingValue } from '../../tokens/spacing';
 
-export type StackAlign = 'flex-start' | 'center' | 'flex-end' | 'stretch';
-export type StackJustify = 'flex-start' | 'center' | 'flex-end' | 'space-between' | 'space-around';
+export type StackAlign = 'start' | 'center' | 'end' | 'stretch';
+export type StackJustify = 'start' | 'center' | 'end' | 'between' | 'around' | 'evenly';
 
 export interface StackProps {
+  /** Gap between children — must come from spacing tokens. */
+  children: React.ReactNode;
+  direction?: 'row' | 'column';
+  wrap?: boolean;
+  className?: string;
+  style?: React.CSSProperties;
+
   /** Gap between children — must come from spacing tokens. */
   gap?: SpacingValue;
   align?: StackAlign;
   justify?: StackJustify;
-  style?: React.CSSProperties;
-  children: React.ReactNode;
 }
 
 /**
  * Vertical flex layout. Gap must use spacing token values.
  */
 export function Stack({
+  direction = 'column',
   gap = 0,
-  align = 'flex-start',
-  justify = 'flex-start',
+  align = 'stretch',
+  justify = 'start',
+  wrap = false,
+  className,
   style,
   children,
 }: StackProps): React.ReactElement {
   return (
     <div
+      className={className}
       style={{
         display: 'flex',
-        flexDirection: 'column',
-        gap: `${gap * 4}px`,
+        flexDirection: direction,
+        gap: `${gap}px`,
         alignItems: align,
         justifyContent: justify,
+        flexWrap: wrap ? 'wrap' : 'nowrap',
         ...style,
       }}
     >
       {children}
     </div>
+
   );
 }

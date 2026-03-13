@@ -1,48 +1,45 @@
 /**
  * AnimationEditLayer
  *
- * Portal-based overlay (position:fixed) over the Remotion canvas.
+ * Portal-based overlay over the Remotion canvas.
+ * Selects elements by walking up the DOM to find the nearest element
+ * with an `id` attribute, then routes to the appropriate toolbar.
  *
- * Responsibilities:
- *  - Intercept pointer events on the canvas to select primitive elements.
- *  - Show a dashed selection highlight around the selected element.
- *  - Show the context-sensitive AnimationToolbar above the player.
- *
- * Selection works by walking up the DOM from the click target to find
- * the nearest element with an `id` attribute that matches a registered primitive
- * (e.g. "fadein-0", "text-1", "counter-0").
+ * Element types determined by ID prefix:
+ *   "fadein-0"  → primitive (full toolbar from COMPONENT_REGISTRY)
+ *   "el-0"      → raw HTML (style-only toolbar)
+ *   "custom-0"  → custom component (style-only toolbar)
+ *   no id       → not selectable (layout primitives)
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimationToolbar } from './AnimationToolbar'
-import type { PrimitiveElement, PatchOverlay } from '@coasterai/renderer'
+import {
+  resolveComponentFromId,
+  getElementTypeFromId,
+  type PatchOverlay,
+} from '@coasterai/renderer'
 
 interface FRect { left: number; top: number; width: number; height: number }
 
 interface AnimationEditLayerProps {
   playerRef: React.RefObject<HTMLDivElement>
   selectedEid: string | null
-  registry: Record<string, PrimitiveElement>
-  editOverlay: PatchOverlay
+  overlay: PatchOverlay
   animEditVersion?: number
-  compositionScale: number
   onSelectElement: (eid: string | null) => void
   onValuePatch: (id: string, prop: string, value: unknown) => void
-  onValuePatches: (id: string, values: Record<string, unknown>) => void
   onStyleOverride: (id: string, style: Record<string, string | number>) => void
 }
 
 export function AnimationEditLayer({
   playerRef,
   selectedEid,
-  registry,
-  editOverlay,
+  overlay,
   animEditVersion,
-  compositionScale,
   onSelectElement,
   onValuePatch,
-  onValuePatches,
   onStyleOverride,
 }: AnimationEditLayerProps) {
   const toolbarRef = useRef<HTMLDivElement>(null)
@@ -51,7 +48,7 @@ export function AnimationEditLayer({
   const [elementRect, setElementRect] = useState<FRect | null>(null)
   const [hoverCursor, setHoverCursor] = useState<'default' | 'pointer'>('default')
 
-  // ── Track canvas fixed position ─────────────────────────────────────────────
+  // ── Track canvas position ─────────────────────────────────────────────────
   useEffect(() => {
     if (!playerRef.current) return
     const update = () => {
@@ -71,7 +68,7 @@ export function AnimationEditLayer({
     }
   }, [playerRef])
 
-  // ── Recompute element rect after edits ──────────────────────────────────────
+  // ── Recompute element rect after edits ────────────────────────────────────
   useEffect(() => {
     if (!selectedEid || !animEditVersion) return
     requestAnimationFrame(() => {
@@ -82,12 +79,11 @@ export function AnimationEditLayer({
     })
   }, [animEditVersion, selectedEid, playerRef])
 
-  // ── Clear state when deselected ─────────────────────────────────────────────
   useEffect(() => {
     if (!selectedEid) setElementRect(null)
   }, [selectedEid])
 
-  // ── Click-outside to deselect ───────────────────────────────────────────────
+  // ── Click-outside to deselect ─────────────────────────────────────────────
   useEffect(() => {
     if (!selectedEid) return
     const handleMouseDown = (e: MouseEvent) => {
@@ -104,45 +100,39 @@ export function AnimationEditLayer({
     return () => document.removeEventListener('mousedown', handleMouseDown)
   }, [selectedEid, canvasRect, onSelectElement])
 
-  // ── Hit testing ─────────────────────────────────────────────────────────────
+  // ── Hit testing ───────────────────────────────────────────────────────────
 
-  /** Layout primitives have no editable props — skip them during selection. */
-  const LAYOUT_COMPONENTS = new Set(['SafeArea', 'Stack', 'Row', 'AbsoluteCenter'])
-
-  function isSelectableEntry(entry: PrimitiveElement): boolean {
-    return !LAYOUT_COMPONENTS.has(entry.componentName)
+  /** Check if an element ID is selectable (has a toolbar). */
+  function isSelectable(id: string): boolean {
+    const elType = getElementTypeFromId(id)
+    if (elType === 'html' || elType === 'custom') return true
+    // Primitive — selectable unless it resolved to nothing (shouldn't happen)
+    return resolveComponentFromId(id) !== null
   }
 
   /**
-   * Find all primitive elements at the cursor position, ordered from
-   * deepest (closest to click target) to shallowest (closest to root).
+   * Collect all selectable elements at the cursor, deepest first.
+   * Used for click-to-select and parent-walk-on-reclick.
    */
-  function primitiveStackAtPoint(
+  function selectableStackAtPoint(
     clientX: number,
     clientY: number,
-    overlay: HTMLElement,
+    overlayEl: HTMLElement,
   ): { id: string; el: HTMLElement }[] {
-    overlay.style.pointerEvents = 'none'
+    overlayEl.style.pointerEvents = 'none'
     const topEl = document.elementFromPoint(clientX, clientY) as HTMLElement | null
-    overlay.style.pointerEvents = 'auto'
+    overlayEl.style.pointerEvents = 'auto'
 
-    const cRect = overlay.getBoundingClientRect()
+    const cRect = overlayEl.getBoundingClientRect()
     const hits: { id: string; el: HTMLElement }[] = []
 
-    // Walk up DOM from hit element, collecting all registered primitives
     let walkEl = topEl
-    while (walkEl && walkEl !== overlay) {
+    while (walkEl && walkEl !== overlayEl) {
       const elId = walkEl.getAttribute('id')
-      if (elId && registry[elId]) {
+      if (elId && isSelectable(elId)) {
         const r = walkEl.getBoundingClientRect()
-        // Don't include full-canvas elements
-        const coversCanvas = r.width > cRect.width * 0.9 && r.height > cRect.height * 0.9
-        if (coversCanvas) break
-
-        const entry = registry[elId]
-        if (entry && isSelectableEntry(entry)) {
-          hits.push({ id: elId, el: walkEl })
-        }
+        if (r.width > cRect.width * 0.9 && r.height > cRect.height * 0.9) break
+        hits.push({ id: elId, el: walkEl })
       }
       walkEl = walkEl.parentElement
     }
@@ -150,61 +140,45 @@ export function AnimationEditLayer({
     return hits
   }
 
-  const deselect = useCallback(() => {
-    onSelectElement(null)
-  }, [onSelectElement])
+  const deselect = useCallback(() => onSelectElement(null), [onSelectElement])
 
   /**
-   * Click handler with parent-walk behavior:
-   *   - First click: select deepest primitive at cursor.
-   *   - Click again on already-selected element: walk up to parent primitive.
-   *   - If already at the topmost, deselect.
-   * This mirrors standard design tool behavior (Figma, Sketch).
+   * Click handler with parent-walk:
+   *   - First click: select deepest element.
+   *   - Click again on selected: walk up to parent.
+   *   - At topmost: deselect.
    */
   function handleCanvasClick(e: React.MouseEvent<HTMLDivElement>) {
-    const hits = primitiveStackAtPoint(e.clientX, e.clientY, e.currentTarget)
+    const hits = selectableStackAtPoint(e.clientX, e.clientY, e.currentTarget)
     if (hits.length === 0) { deselect(); return }
 
-    // If nothing is selected, select the deepest
     if (!selectedEid) {
       const hit = hits[0]
-      const r = hit.el.getBoundingClientRect()
-      setElementRect({ left: r.left, top: r.top, width: r.width, height: r.height })
+      setElementRect(hit.el.getBoundingClientRect())
       onSelectElement(hit.id)
       return
     }
 
-    // If clicking on the currently selected element, walk up to parent
-    const currentIdx = hits.findIndex(h => h.id === selectedEid)
-    if (currentIdx !== -1 && currentIdx < hits.length - 1) {
-      // Select the next parent in the stack
-      const parent = hits[currentIdx + 1]
-      const r = parent.el.getBoundingClientRect()
-      setElementRect({ left: r.left, top: r.top, width: r.width, height: r.height })
+    const idx = hits.findIndex(h => h.id === selectedEid)
+    if (idx !== -1 && idx < hits.length - 1) {
+      const parent = hits[idx + 1]
+      setElementRect(parent.el.getBoundingClientRect())
       onSelectElement(parent.id)
       return
     }
 
-    if (currentIdx === hits.length - 1) {
-      // Already at topmost — deselect
-      deselect()
-      return
-    }
+    if (idx === hits.length - 1) { deselect(); return }
 
-    // Clicking on a different element — select deepest
     const hit = hits[0]
-    const r = hit.el.getBoundingClientRect()
-    setElementRect({ left: r.left, top: r.top, width: r.width, height: r.height })
+    setElementRect(hit.el.getBoundingClientRect())
     onSelectElement(hit.id)
   }
 
   if (!canvasRect) return null
 
-  const selectedEntry = selectedEid ? registry[selectedEid] : null
-
   return createPortal(
     <>
-      {/* Click capture — covers entire canvas */}
+      {/* Click capture */}
       <div
         style={{
           position: 'fixed',
@@ -217,14 +191,14 @@ export function AnimationEditLayer({
         }}
         onClick={handleCanvasClick}
         onMouseMove={(e: React.MouseEvent<HTMLDivElement>) => {
-          const hits = primitiveStackAtPoint(e.clientX, e.clientY, e.currentTarget)
+          const hits = selectableStackAtPoint(e.clientX, e.clientY, e.currentTarget)
           setHoverCursor(hits.length > 0 ? 'pointer' : 'default')
         }}
         onMouseLeave={() => setHoverCursor('default')}
       />
 
       {/* Selection highlight */}
-      {elementRect && (
+      {elementRect && selectedEid && (
         <div
           style={{
             position: 'fixed',
@@ -242,7 +216,7 @@ export function AnimationEditLayer({
       )}
 
       {/* Toolbar */}
-      {selectedEid && selectedEntry && (
+      {selectedEid && (
         <div
           ref={toolbarRef}
           style={{
@@ -255,10 +229,8 @@ export function AnimationEditLayer({
         >
           <AnimationToolbar
             selectedId={selectedEid}
-            registry={registry}
-            editOverlay={editOverlay}
+            overlay={overlay}
             onValuePatch={onValuePatch}
-            onValuePatches={onValuePatches}
             onStyleOverride={onStyleOverride}
             onDeselect={deselect}
           />

@@ -1,71 +1,69 @@
 /**
- * Primitive AST ID Assignment + Prop Extraction Pass
+ * AST ID Injection + Initial Overlay Extraction
  *
- * Walks LLM-generated JSX code and:
- *   1. Injects a structured `id` prop on every registered primitive
- *   2. Extracts static prop values for the editor toolbar
+ * Single-pass Babel transform that walks LLM-generated JSX and:
  *
- * ID format: {componentType}-{index}  (e.g. "fadein-0", "counter-2", "titlecard-0")
- * Index is per-component-type, assigned in depth-first document order.
+ *   1. Injects `id` on every element (except layout primitives)
+ *   2. Extracts initial prop values into PatchOverlay format
+ *   3. Injects style spread on raw HTML for runtime patch application
  *
- * Also extracts JSX attribute values so the editor knows the current prop values
- * without re-parsing. Only literal values are extracted — expressions are skipped.
+ * ID format by element type:
+ *   Registered primitive   → id="fadein-0", id="counter-1", id="text-3"
+ *   Raw HTML element       → id="el-0", id="el-4"
+ *   Unknown custom comp    → id="custom-0"
+ *   Layout primitives      → no id (SafeArea, Stack, Row, AbsoluteCenter)
+ *
+ * The component name is derived from the ID prefix at runtime via
+ * resolveComponentFromId() — no idToComponent mapping stored.
+ *
+ * COMPONENT_REGISTRY is the single source for component metadata.
  */
 
 import * as Babel from "@babel/standalone";
-import { REGISTERED_COMPONENT_NAMES, getComponentRegistration } from "@coasterai/animation";
+import {
+  REGISTERED_COMPONENT_NAMES,
+  LAYOUT_COMPONENT_NAMES,
+} from "@coasterai/animation";
+import type { PatchOverlay } from "@coasterai/animation";
 
-/** Info about a single primitive element in the component tree. */
-export interface PrimitiveElement {
-  /** Assigned ID, e.g. "fadein-0" */
-  id: string;
-  /** Component name, e.g. "FadeIn" */
-  componentName: string;
-  /** Component type from registry: layout | animation | content | scene | headless */
-  componentType: string;
-  /** Static prop values extracted from JSX attributes */
-  props: Record<string, unknown>;
-  /** Editor-visible prop names (from COMPONENT_REGISTRY.editorProps) */
-  editorProps: string[];
-}
-
-export interface PrimitiveIdRegistry {
-  /** Map from element ID to element info */
-  elements: Record<string, PrimitiveElement>;
-}
+/** Preamble injected at top — gives raw HTML elements access to patches. */
+const PREAMBLE = `var __patches = (typeof window !== 'undefined' && window.__PATCH_OVERLAY__) || {};`;
 
 /**
- * Runs the primitive ID assignment + prop extraction Babel pass over
- * already-stripped (no imports) JSX source. Returns the transformed code
- * and the registry.
+ * Runs the AST pass. Returns transformed code + initial PatchOverlay.
  */
 export function assignPrimitiveIds(code: string): {
   code: string;
-  registry: PrimitiveIdRegistry;
+  initialOverlay: PatchOverlay;
 } {
-  const registry: PrimitiveIdRegistry = { elements: {} };
+  const initialOverlay: PatchOverlay = {};
 
-  // Per-component-type index counter. Reset for each call.
-  const counters: Record<string, number> = {};
+  const counters = { primitive: {} as Record<string, number>, el: 0, custom: 0 };
 
-  function nextId(componentName: string): string {
+  function nextPrimitiveId(componentName: string): string {
     const key = componentName.toLowerCase();
-    const idx = counters[key] ?? 0;
-    counters[key] = idx + 1;
+    const idx = counters.primitive[key] ?? 0;
+    counters.primitive[key] = idx + 1;
     return `${key}-${idx}`;
   }
 
-  function createPrimitiveIdPlugin(babel: { types: any }) {
+  function nextElId(): string {
+    return `el-${counters.el++}`;
+  }
+
+  function nextCustomId(): string {
+    return `custom-${counters.custom++}`;
+  }
+
+  function createPlugin(babel: { types: any }) {
     const t = babel.types;
 
     /** Extract a static value from a JSX attribute value node. */
     function extractAttrValue(node: any): unknown | undefined {
-      if (!node) return true; // boolean attribute with no value: <Foo bar /> → bar=true
+      if (!node) return true; // boolean attr: <Foo bar />
 
-      // value="string"
       if (t.isStringLiteral(node)) return node.value;
 
-      // value={expression}
       if (t.isJSXExpressionContainer(node)) {
         const expr = node.expression;
         if (t.isNumericLiteral(expr)) return expr.value;
@@ -81,85 +79,166 @@ export function assignPrimitiveIds(code: string): {
           for (const el of expr.elements) {
             if (t.isStringLiteral(el)) values.push(el.value);
             else if (t.isNumericLiteral(el)) values.push(el.value);
-            else return undefined; // non-literal element — bail
+            else return undefined;
           }
           return values;
         }
-        return undefined; // complex expression — can't extract
+        return undefined; // complex expression
       }
 
       return undefined;
+    }
+
+    /** Extract all literal props from JSX attributes. */
+    function extractProps(attrs: any[]): Record<string, unknown> {
+      const props: Record<string, unknown> = {};
+      for (const attr of attrs) {
+        if (!t.isJSXAttribute(attr) || !t.isJSXIdentifier(attr.name)) continue;
+        const name: string = attr.name.name;
+        if (name === 'id' || name === 'key' || name === 'ref' || name === 'style' || name === 'className') continue;
+        const val = extractAttrValue(attr.value);
+        if (val !== undefined) props[name] = val;
+      }
+      return props;
+    }
+
+    /** Extract text content from JSX children (single text child only). */
+    function extractTextChildren(parent: any): string | undefined {
+      if (!parent || !t.isJSXElement(parent)) return undefined;
+      const children = parent.children;
+      if (!children || children.length !== 1) return undefined;
+      const child = children[0];
+      if (t.isJSXText(child)) {
+        const text = (child.value as string).trim();
+        return text || undefined;
+      }
+      if (t.isJSXExpressionContainer(child) && t.isStringLiteral(child.expression)) {
+        return child.expression.value;
+      }
+      return undefined;
+    }
+
+    /** Check if element already has an id attribute. */
+    function hasIdAttr(attrs: any[]): boolean {
+      return attrs.some(
+        (attr: any) =>
+          t.isJSXAttribute(attr) &&
+          t.isJSXIdentifier(attr.name) &&
+          attr.name.name === "id"
+      );
+    }
+
+    /** Inject id="value" as first attribute. */
+    function injectId(openingEl: any, id: string): void {
+      openingEl.attributes.unshift(
+        t.jsxAttribute(t.jsxIdentifier("id"), t.stringLiteral(id))
+      );
+    }
+
+    /**
+     * Inject `...__patches['el-0']?.styleOverride` spread into the style prop.
+     * If no style prop exists, creates one: style={{ ...__patches['el-0']?.styleOverride }}
+     */
+    function injectStyleSpread(openingEl: any, id: string): void {
+      // Build: __patches['el-0']?.styleOverride
+      const patchExpr = t.optionalMemberExpression(
+        t.memberExpression(
+          t.identifier("__patches"),
+          t.stringLiteral(id),
+          true, // computed
+        ),
+        t.identifier("styleOverride"),
+        false,
+        true, // optional
+      );
+
+      const spreadElement = t.spreadElement(
+        t.logicalExpression("||", patchExpr, t.objectExpression([]))
+      );
+
+      const styleAttr = openingEl.attributes.find(
+        (a: any) => t.isJSXAttribute(a) && t.isJSXIdentifier(a.name, { name: "style" }),
+      );
+
+      if (styleAttr && t.isJSXExpressionContainer(styleAttr.value)) {
+        const expr = styleAttr.value.expression;
+        if (t.isObjectExpression(expr)) {
+          // Append spread to existing style object
+          expr.properties.push(spreadElement);
+        } else {
+          // Style is a variable/expression — wrap: { ...existingStyle, ...patches }
+          styleAttr.value = t.jsxExpressionContainer(
+            t.objectExpression([
+              t.spreadElement(t.cloneNode(expr, true)),
+              spreadElement,
+            ])
+          );
+        }
+      } else if (!styleAttr) {
+        // No style prop — create one with just the patch spread
+        openingEl.attributes.push(
+          t.jsxAttribute(
+            t.jsxIdentifier("style"),
+            t.jsxExpressionContainer(
+              t.objectExpression([spreadElement])
+            )
+          )
+        );
+      }
+    }
+
+    /** Is this a lowercase HTML element name? */
+    function isHtmlElement(name: string): boolean {
+      return name[0] === name[0].toLowerCase() && name[0] !== name[0].toUpperCase();
     }
 
     return {
       visitor: {
         JSXOpeningElement(path: { node: any; parent: any }) {
           const nameNode = path.node.name;
-
-          // Only handle simple identifier names (not member expressions like Foo.Bar)
           if (!t.isJSXIdentifier(nameNode)) return;
 
-          const componentName: string = nameNode.name;
+          const name: string = nameNode.name;
+          const attrs = path.node.attributes;
 
-          // Only process registered primitives
-          if (!REGISTERED_COMPONENT_NAMES.has(componentName)) return;
+          // Skip if already has id (double-pass safety)
+          if (hasIdAttr(attrs)) return;
 
-          // Check if an id prop already exists (in case of double-pass)
-          const hasId = path.node.attributes.some(
-            (attr: any) =>
-              t.isJSXAttribute(attr) &&
-              t.isJSXIdentifier(attr.name) &&
-              attr.name.name === "id"
-          );
-          if (hasId) return;
+          // ── Layout primitives → no id ─────────────────────────────────
+          if (LAYOUT_COMPONENT_NAMES.has(name)) return;
 
-          const id = nextId(componentName);
-          const registration = getComponentRegistration(componentName);
+          // ── Registered primitive → id="{name}-{n}" ────────────────────
+          if (REGISTERED_COMPONENT_NAMES.has(name)) {
+            const id = nextPrimitiveId(name);
+            injectId(path.node, id);
 
-          // Extract prop values from JSX attributes
-          const props: Record<string, unknown> = {};
-          for (const attr of path.node.attributes) {
-            if (!t.isJSXAttribute(attr) || !t.isJSXIdentifier(attr.name)) continue;
-            const propName: string = attr.name.name;
-            // Skip internal props
-            if (propName === 'id' || propName === 'key' || propName === 'ref') continue;
-            const value = extractAttrValue(attr.value);
-            if (value !== undefined) {
-              props[propName] = value;
+            // Extract props into overlay as value patches
+            const props = extractProps(attrs);
+
+            // Also grab text children for content components (Text, etc.)
+            const textContent = extractTextChildren(path.parent);
+            if (textContent !== undefined) props['children'] = textContent;
+
+            if (Object.keys(props).length > 0) {
+              initialOverlay[id] = { value: props };
             }
+            return;
           }
 
-          // Also extract text children for content components
-          if (path.parent && t.isJSXElement(path.parent)) {
-            const children = path.parent.children;
-            if (children?.length === 1) {
-              const child = children[0];
-              if (t.isJSXText(child)) {
-                const text = (child.value as string).trim();
-                if (text) props['children'] = text;
-              } else if (t.isJSXExpressionContainer(child)) {
-                const expr = child.expression;
-                if (t.isStringLiteral(expr)) props['children'] = expr.value;
-              }
-            }
+          // ── Raw HTML element → id="el-{n}" ────────────────────────────
+          if (isHtmlElement(name)) {
+            const id = nextElId();
+            injectId(path.node, id);
+            injectStyleSpread(path.node, id);
+            // No initial overlay entry — styleOverride starts empty
+            return;
           }
 
-          // Record in registry
-          registry.elements[id] = {
-            id,
-            componentName,
-            componentType: registration?.type ?? 'unknown',
-            props,
-            editorProps: registration?.editorProps ?? [],
-          };
-
-          // Inject id prop: id="fadein-0"
-          const idAttr = t.jsxAttribute(
-            t.jsxIdentifier("id"),
-            t.stringLiteral(id)
-          );
-
-          path.node.attributes.unshift(idAttr);
+          // ── Unknown custom component → id="custom-{n}" ────────────────
+          const id = nextCustomId();
+          injectId(path.node, id);
+          injectStyleSpread(path.node, id);
+          // No initial overlay entry — styleOverride starts empty
         },
       },
     };
@@ -167,20 +246,25 @@ export function assignPrimitiveIds(code: string): {
 
   try {
     const result = Babel.transform(code, {
-      plugins: [createPrimitiveIdPlugin],
+      plugins: [createPlugin],
       presets: ["react", "typescript"],
-      filename: "primitive-id-pass.tsx",
+      filename: "ast-pass.tsx",
       sourceType: "script",
     } as Parameters<typeof Babel.transform>[1]);
 
     if (!result?.code) {
-      return { code, registry };
+      return { code, initialOverlay };
     }
 
-    return { code: result.code, registry };
+    // Prepend __patches variable for raw HTML style spreads
+    const hasRawHtml = counters.el > 0 || counters.custom > 0;
+    const finalCode = hasRawHtml
+      ? PREAMBLE + "\n" + result.code
+      : result.code;
+
+    return { code: finalCode, initialOverlay };
   } catch (err) {
-    // ID pass failure is non-fatal — return original code with empty registry
-    console.warn("[primitive-ast-pass] ID assignment failed:", err);
-    return { code, registry };
+    console.warn("[ast-pass] Transform failed:", err);
+    return { code, initialOverlay };
   }
 }

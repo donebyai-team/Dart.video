@@ -144,14 +144,21 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
     }
   }, [templateUrl])
 
-  // During rendering, read persisted edits as PatchOverlay.
-  // The editor also writes to window.__PATCH_OVERLAY__ for live editing.
+  // PatchOverlay — used by both PatchContextProvider (for primitives) and
+  // window.__PATCH_OVERLAY__ (for raw HTML style spreads injected by AST pass).
+  // In the editor, useAnimationEdit keeps window.__PATCH_OVERLAY__ in sync.
+  // During Remotion rendering, we seed it from persisted edits.
   const patchOverlay: PatchOverlay = useMemo(() => {
     if (typeof window !== 'undefined' && (window as any).__PATCH_OVERLAY__) {
       return (window as any).__PATCH_OVERLAY__ as PatchOverlay
     }
     return (content?.edits ?? {}) as unknown as PatchOverlay
   }, [content?.edits, isRendering])
+
+  // Seed window.__PATCH_OVERLAY__ for raw HTML elements (read by __patches preamble)
+  if (typeof window !== 'undefined') {
+    (window as any).__PATCH_OVERLAY__ = patchOverlay
+  }
 
   return (
     <AbsoluteFill
@@ -169,7 +176,11 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
           <ThemeProvider theme={defaultTheme}>
             <AspectPresetProvider preset={aspectPreset}>
               <StyleContextProvider style={styleConfig}>
-                <SpeedFactorProvider factor={1}>
+                <SpeedFactorProvider factor={
+                  slide.settledFrame > 0 && slide.durationInFrames > 0
+                    ? slide.settledFrame / slide.durationInFrames
+                    : 1
+                }>
                   <PatchContextProvider overlay={patchOverlay}>
                     <CompiledComponent />
                   </PatchContextProvider>

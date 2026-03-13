@@ -1,5 +1,6 @@
 import React, { createContext, useContext } from 'react';
 import { PatchOverlay, createEmptyPatchOverlay } from './types';
+import { useSpeedFactor } from '../duration/speedFactor';
 
 /**
  * PatchContext holds the active PatchOverlay for the current animation.
@@ -43,25 +44,35 @@ export interface ResolvedTiming {
 
 /**
  * Returns effective startAt and durationInFrames for a primitive,
- * accounting for user value patches on these timing props.
+ * accounting for:
+ *   1. User value patches on these timing props
+ *   2. Global speed factor (> 1 = faster, < 1 = slower)
  */
 export function usePrimitivePatches(
   id: string | undefined,
   defaults: TimingDefaults,
 ): ResolvedTiming {
   const overlay = useContext(PatchContext);
+  const speedFactor = useSpeedFactor();
 
-  if (!id) return { effectiveStartAt: defaults.startAt, effectiveDurationInFrames: defaults.durationInFrames };
+  let startAt = defaults.startAt;
+  let duration = defaults.durationInFrames;
 
-  const entry = overlay[id];
-  if (!entry?.value) return { effectiveStartAt: defaults.startAt, effectiveDurationInFrames: defaults.durationInFrames };
+  if (id) {
+    const entry = overlay[id];
+    if (entry?.value) {
+      if (typeof entry.value.startAt === 'number') startAt = entry.value.startAt;
+      if (typeof entry.value.durationInFrames === 'number') duration = entry.value.durationInFrames;
+    }
+  }
 
-  return {
-    effectiveStartAt:
-      typeof entry.value.startAt === 'number' ? entry.value.startAt : defaults.startAt,
-    effectiveDurationInFrames:
-      typeof entry.value.durationInFrames === 'number' ? entry.value.durationInFrames : defaults.durationInFrames,
-  };
+  // Apply speed factor — scales all timing proportionally
+  if (speedFactor !== 1) {
+    startAt = Math.round(startAt / speedFactor);
+    duration = Math.round(duration / speedFactor);
+  }
+
+  return { effectiveStartAt: startAt, effectiveDurationInFrames: duration };
 }
 
 /**

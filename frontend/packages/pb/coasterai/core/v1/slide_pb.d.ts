@@ -516,6 +516,16 @@ export declare type Slide = Message<"coasterai.core.v1.Slide"> & {
   direction?: TransitionDirection;
 
   /**
+   * @generated from field: int32 durationInFrames = 25;
+   */
+  durationInFrames: number;
+
+  /**
+   * @generated from field: int32 settledFrame = 26;
+   */
+  settledFrame: number;
+
+  /**
    * @generated from oneof coasterai.core.v1.Slide.content
    */
   content: {

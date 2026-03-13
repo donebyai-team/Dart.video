@@ -26,9 +26,7 @@ const VARIANT_OPTIONS = [
 export function TextToolbar({
   componentName,
   currentProps,
-  styleOverride,
   onValuePatch,
-  onStyleOverride,
 }: ToolbarProps) {
   // ── TitleCard ──────────────────────────────────────────────────────────
   if (componentName === 'TitleCard') {

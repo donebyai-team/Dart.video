@@ -1414,6 +1414,8 @@ type Slide struct {
 	TransitionDuration *float32               `protobuf:"fixed32,6,opt,name=transitionDuration,proto3,oneof" json:"transitionDuration,omitempty"`
 	BackgroundStyle    *BackgroundStyle       `protobuf:"bytes,7,opt,name=background_style,json=backgroundStyle,proto3,oneof" json:"background_style,omitempty"`
 	Direction          *TransitionDirection   `protobuf:"varint,23,opt,name=direction,proto3,enum=coasterai.core.v1.TransitionDirection,oneof" json:"direction,omitempty"`
+	DurationInFrames   int32                  `protobuf:"varint,25,opt,name=durationInFrames,proto3" json:"durationInFrames,omitempty"`
+	SettledFrame       int32                  `protobuf:"varint,26,opt,name=settledFrame,proto3" json:"settledFrame,omitempty"`
 	// Types that are valid to be assigned to Content:
 	//
 	//	*Slide_Media
@@ -1516,6 +1518,20 @@ func (x *Slide) GetDirection() TransitionDirection {
 		return *x.Direction
 	}
 	return TransitionDirection_TRANSITION_DIRECTION_UNSPECIFIED
+}
+
+func (x *Slide) GetDurationInFrames() int32 {
+	if x != nil {
+		return x.DurationInFrames
+	}
+	return 0
+}
+
+func (x *Slide) GetSettledFrame() int32 {
+	if x != nil {
+		return x.SettledFrame
+	}
+	return 0
 }
 
 func (x *Slide) GetContent() isSlide_Content {
@@ -2112,7 +2128,7 @@ const file_coasterai_core_v1_slide_proto_rawDesc = "" +
 	"\x01y\x18\x03 \x01(\x02R\x01y\x12\x1c\n" +
 	"\tzoomLevel\x18\x04 \x01(\x02R\tzoomLevel\x12\x1c\n" +
 	"\tstartTime\x18\x05 \x01(\x02R\tstartTime\x12\x18\n" +
-	"\aendTime\x18\x06 \x01(\x02R\aendTime\"\xd7\b\n" +
+	"\aendTime\x18\x06 \x01(\x02R\aendTime\"\xa7\t\n" +
 	"\x05Slide\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x120\n" +
 	"\x04type\x18\x02 \x01(\x0e2\x1c.coasterai.core.v1.SlideTypeR\x04type\x12\x1e\n" +
@@ -2125,7 +2141,9 @@ const file_coasterai_core_v1_slide_proto_rawDesc = "" +
 	"transition\x123\n" +
 	"\x12transitionDuration\x18\x06 \x01(\x02H\x01R\x12transitionDuration\x88\x01\x01\x12R\n" +
 	"\x10background_style\x18\a \x01(\v2\".coasterai.core.v1.BackgroundStyleH\x02R\x0fbackgroundStyle\x88\x01\x01\x12I\n" +
-	"\tdirection\x18\x17 \x01(\x0e2&.coasterai.core.v1.TransitionDirectionH\x03R\tdirection\x88\x01\x01\x12<\n" +
+	"\tdirection\x18\x17 \x01(\x0e2&.coasterai.core.v1.TransitionDirectionH\x03R\tdirection\x88\x01\x01\x12*\n" +
+	"\x10durationInFrames\x18\x19 \x01(\x05R\x10durationInFrames\x12\"\n" +
+	"\fsettledFrame\x18\x1a \x01(\x05R\fsettledFrame\x12<\n" +
 	"\x05media\x18\b \x01(\v2$.coasterai.core.v1.MediaSlideContentH\x00R\x05media\x12H\n" +
 	"\tanimation\x18\t \x01(\v2(.coasterai.core.v1.AnimationSlideContentH\x00R\tanimation\x123\n" +
 	"\x12voiceoverGenerated\x18\x0f \x01(\bH\x04R\x12voiceoverGenerated\x88\x01\x01\x12\x1f\n" +

@@ -192,6 +192,8 @@ message Slide {
   optional float transitionDuration = 6;
   optional BackgroundStyle background_style = 7;
   optional TransitionDirection direction = 23;
+  int32 durationInFrames = 25;
+  int32 settledFrame = 26;
 
   oneof content {
     MediaSlideContent media = 8;

@@ -42,21 +42,17 @@ const PlayerCanvas = ({
 
   const {
     isAnimationSlide,
-    primitiveRegistry,
+    overlay,
     selectedEid,
     setSelectedEid,
-    editOverlay,
     animEditVersion,
     applyValuePatch,
-    applyValuePatches,
     applyStyleOverride,
   } = useAnimationEdit()
 
-  // ── Refs ──────────────────────────────────────────────────────────────────
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
 
-  // ── inputProps for Remotion Player ───────────────────────────────────────
   const inputProps = useMemo(() => ({
     fps,
     isEditing,
@@ -65,7 +61,7 @@ const PlayerCanvas = ({
     animEditVersion,
   }), [fps, isEditing, onSelectTemplate, isPlaying, animEditVersion])
 
-  // ── Pinch-to-zoom ────────────────────────────────────────────────────────
+  // Pinch-to-zoom
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
@@ -91,15 +87,12 @@ const PlayerCanvas = ({
   return (
     <div
       ref={containerRef}
-      className={`relative flex-1 flex items-center justify-center overflow-hidden touch-none min-h-0 ${isFullscreen ? 'bg-black' : 'bg-muted/50'
-        }`}
+      className={`relative flex-1 flex items-center justify-center overflow-hidden touch-none min-h-0 ${isFullscreen ? 'bg-black' : 'bg-muted/50'}`}
       style={{ touchAction: 'none' }}
     >
-      {/* Scaled canvas */}
       <motion.div
         ref={canvasRef}
-        className={`relative overflow-hidden ${isFullscreen ? 'bg-transparent' : 'bg-background shadow-2xl'
-          }`}
+        className={`relative overflow-hidden ${isFullscreen ? 'bg-transparent' : 'bg-background shadow-2xl'}`}
         style={{
           width: canvasSize.width,
           height: canvasSize.height,
@@ -120,7 +113,6 @@ const PlayerCanvas = ({
           playbackRate={1}
         />
 
-        {/* Effects overlay (spotlights, callouts, zooms — media slides only) */}
         {!isPlaying && isEditing && handleSelectEffect && (
           <div className="absolute inset-0" style={{ zIndex: 30, pointerEvents: 'none' }}>
             <CanvasOverlay
@@ -140,18 +132,15 @@ const PlayerCanvas = ({
         )}
       </motion.div>
 
-      {/* Animation edit layer — animation slides only, outside the scaled div */}
+      {/* Animation edit layer */}
       {isEditing && !isPlaying && isAnimationSlide && (
         <AnimationEditLayer
           playerRef={canvasRef}
           selectedEid={selectedEid}
-          registry={primitiveRegistry}
-          editOverlay={editOverlay}
+          overlay={overlay}
           animEditVersion={animEditVersion}
-          compositionScale={scale * canvasSize.width / videoConfigFromStore.metadata!.resolution.width}
           onSelectElement={setSelectedEid}
           onValuePatch={applyValuePatch}
-          onValuePatches={applyValuePatches}
           onStyleOverride={applyStyleOverride}
         />
       )}

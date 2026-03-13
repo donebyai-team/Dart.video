@@ -36,13 +36,14 @@ import {
 } from "./generated/remotion-shapes-props";
 // import * as THREE from "three";
 
-import { assignPrimitiveIds, PrimitiveIdRegistry } from "./primitive-ast-pass";
+import { assignPrimitiveIds } from "./primitive-ast-pass";
+import type { PatchOverlay } from "@coasterai/animation";
 
 export interface CompilationResult {
   Component: React.ComponentType<any> | null;
   error: string | null;
-  /** Registry of primitive element IDs assigned during compilation. */
-  primitiveIds?: PrimitiveIdRegistry;
+  /** Initial PatchOverlay with LLM prop values, keyed by element ID. */
+  initialOverlay?: PatchOverlay;
 }
 
 export interface CompileRemoteComponentOptions {
@@ -503,9 +504,8 @@ export function compileRemoteComponent(
 
     const source = lucideDestructure ? `${lucideDestructure}\n${cleaned}` : cleaned;
 
-    // Run primitive ID assignment pass on the pre-transpile source.
-    // This pass injects id="fadein-0" etc. on registered component usages.
-    const { code: sourceWithIds, registry: primitiveIds } = assignPrimitiveIds(source);
+    // Run AST pass: injects ids on all elements + extracts initial prop values.
+    const { code: sourceWithIds, initialOverlay } = assignPrimitiveIds(source);
 
     const transpiled = babelTransform(sourceWithIds, "remote-component.tsx");
 
@@ -521,7 +521,7 @@ export function compileRemoteComponent(
       };
     }
 
-    return { Component: Component as React.ComponentType<any>, error: null, primitiveIds };
+    return { Component: Component as React.ComponentType<any>, error: null, initialOverlay };
   } catch (error) {
     return {        
       Component: null,
