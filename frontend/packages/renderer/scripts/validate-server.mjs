@@ -36,7 +36,8 @@ import * as Babel from '@babel/standalone';
 import {Storage} from '@google-cloud/storage';
 import {bundle} from '@remotion/bundler';
 import {renderStill, selectComposition} from '@remotion/renderer';
-import {compileRemoteComponent} from '../src/compiler.ts'
+import {compileRemoteComponent, stripImports} from '../src/compiler.ts'
+import {assignPrimitiveIds} from '../src/primitive-ast-pass.ts'
 import {randomUUID} from 'node:crypto';
 import {existsSync} from 'node:fs';
 import {mkdir, rm, writeFile} from 'node:fs/promises';
@@ -307,18 +308,31 @@ async function handleValidate(req, res) {
   }
   console.log('[validate] compile check passed');
 
-  console.log('Compiling and assigning primitive IDs...');
+  // ── AST pass: assign IDs + extract initial overlay ─────────────────────
+  // Run on import-stripped code so the AST pass sees clean JSX.
+  console.log('[validate] running AST pass (ID assignment + prop extraction)');
+  let stripped = code;
+  stripped = stripped.replace(/import\s+type\s*\{[\s\S]*?\}\s*from\s*["'][^"']+["'];?/g, '');
+  stripped = stripped.replace(/import\s+\w+\s*,\s*\{[\s\S]*?\}\s*from\s*["'][^"']+["'];?/g, '');
+  stripped = stripped.replace(/import\s*\{[\s\S]*?\}\s*from\s*["'][^"']+["'];?/g, '');
+  stripped = stripped.replace(/import\s+\*\s+as\s+\w+\s+from\s*["'][^"']+["'];?/g, '');
+  stripped = stripped.replace(/import\s+\w+\s+from\s*["'][^"']+["'];?/g, '');
+  stripped = stripped.replace(/import\s*["'][^"']+["'];?/g, '');
+  stripped = stripped.replace(/^export\s+default\s+/gm, '');
+  stripped = stripped.replace(/^export\s+/gm, '');
+  stripped = stripped.trim();
 
-  // compileRemoteComponent strips imports, runs primitive ID pass, and transpiles
-  const result = compileRemoteComponent(code, { validateShapeProps: true });
+  const { code: transformedCode, initialOverlay } = assignPrimitiveIds(stripped);
+
+  // ── Compile check (validates the transformed code runs without errors) ──
+  console.log('[validate] compiling transformed code for validation...');
+  const result = compileRemoteComponent(transformedCode);
   if (result.error) {
     console.log('[validate] compile check FAILED:\n', result.error);
     res.writeHead(422, {'Content-Type': 'application/json'});
     res.end(JSON.stringify({error_type: 'compile_error', errors: [result.error]}));
     return;
   }
-
-  const initialOverlay = result.initialOverlay ?? {};
 
   // ── Step 2: Render check via Remotion renderStill ────────────────────────
   const uuid = randomUUID();
@@ -390,11 +404,11 @@ async function handleValidate(req, res) {
       return;
     }
 
-    // ---- Upload original code to GCS ----
-    // The editor's compileRemoteComponent re-runs the AST pass which injects
-    // IDs and style spreads. Uploading original code keeps the source clean.
+    // ---- Upload transformed code to GCS ----
+    // IDs injected + style spreads already in the code.
+    // The editor just compiles this directly — no AST pass needed.
     const gcsPath = `${output_path}/${component_name}.tsx`;
-    await uploadToGCS(OUTPUT_BUCKET, gcsPath, Buffer.from(code, 'utf8'));
+    await uploadToGCS(OUTPUT_BUCKET, gcsPath, Buffer.from(transformedCode, 'utf8'));
 
     console.log('[validate] render check passed — validation complete');
     res.writeHead(200, {'Content-Type': 'application/json'});

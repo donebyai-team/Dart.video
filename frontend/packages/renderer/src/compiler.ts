@@ -4,14 +4,10 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as AnimationPrimitives from "@coasterai/animation";
 import { REGISTERED_COMPONENT_NAMES } from "@coasterai/animation";
 
-import { assignPrimitiveIds } from "./primitive-ast-pass";
-import type { PatchOverlay } from "@coasterai/animation";
 
 export interface CompilationResult {
   Component: React.ComponentType<any> | null;
   error: string | null;
-  /** Initial PatchOverlay with LLM prop values, keyed by element ID. */
-  initialOverlay?: PatchOverlay;
 }
 
 export interface CompileRemoteComponentOptions {
@@ -210,10 +206,7 @@ export function compileRemoteComponent(
 
     const source = lucideDestructure ? `${lucideDestructure}\n${cleaned}` : cleaned;
 
-    // Run AST pass: injects ids on all elements + extracts initial prop values.
-    const { code: sourceWithIds, initialOverlay } = assignPrimitiveIds(source);
-
-    const transpiled = babelTransform(sourceWithIds, "remote-component.tsx");
+    const transpiled = babelTransform(source, "remote-component.tsx");
 
     const Component = evalWithScope(
       `${transpiled}\nreturn RemoteComponent;`,
@@ -227,7 +220,7 @@ export function compileRemoteComponent(
       };
     }
 
-    return { Component: Component as React.ComponentType<any>, error: null, initialOverlay };
+    return { Component: Component as React.ComponentType<any>, error: null };
   } catch (error) {
     return {        
       Component: null,
