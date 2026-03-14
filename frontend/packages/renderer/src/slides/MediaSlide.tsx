@@ -12,6 +12,7 @@ import SpotlightEffectComponent from '../effects/SpotlightEffect'
 import { ZoomEffectComponent } from '../effects/ZoomEffect'
 import { MediaContainer } from '../components/MediaContainer'
 import { backgroundStyleToCSS } from '../backgroundUtils'
+import { convertFramesToSeconds, convertSecondsToFrames } from '../frameUtils'
 
 
 interface MediaSlideProps {
@@ -201,7 +202,7 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, is
                   if (onUpdate && mediaContent) {
                     onUpdate({
                       ...slide,
-                      duration: data.duration ? data.duration : slide.duration,
+                      durationInFrames: data.duration ? convertSecondsToFrames(data.duration, fps) : slide.durationInFrames,
                       content: {
                         case: 'media',
                         value: {
@@ -237,7 +238,7 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, is
               src={resolvedSrc}
               fullHeight={height}
               borderColor={callout.color}
-              slideDuration={slide.duration}
+              slideDuration={convertFramesToSeconds(slide.durationInFrames, fps)}
               meta={mediaContent.meta as MetaData}
               style={{
                 borderRadius: mediaContent.style?.borderRadius as number,
@@ -262,7 +263,7 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, is
               fullWidth={width}
               src={resolvedSrc}
               fullHeight={height}
-              slideDuration={slide.duration}
+              slideDuration={convertFramesToSeconds(slide.durationInFrames, fps)}
               meta={mediaContent.meta as MetaData}
               style={{
                 borderRadius: mediaContent.style?.borderRadius as number,
@@ -286,7 +287,7 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, is
               fullWidth={width}
               fullHeight={height}
               src={resolvedSrc}
-              slideDuration={slide.duration}
+              slideDuration={convertFramesToSeconds(slide.durationInFrames, fps)}
               meta={mediaContent.meta as MetaData}
               style={{
                 borderRadius: mediaContent.style?.borderRadius as number,

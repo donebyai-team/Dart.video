@@ -14,7 +14,7 @@ interface InsertSettingsProps {
   onDelete?: () => void
   onClose: () => void
   canDelete?: boolean
-  slideDuration?: number
+  slideDurationInSecond?: number
   slideStartTime?: number
   transitionDuration?: number
   onPlay?: () => void
@@ -47,7 +47,7 @@ const InsertSettings = ({
   onDelete,
   onClose,
   canDelete = true,
-  slideDuration = 5,
+  slideDurationInSecond = 5,
   slideStartTime = 0,
   onPlay,
   isPreviewPlaying = false,
@@ -61,7 +61,7 @@ const InsertSettings = ({
   // Sync settings when currentObject changes
   useEffect(() => {
     setSettings(currentObject);
-  }, [currentObject?.id, slideDuration])
+  }, [currentObject?.id, slideDurationInSecond])
 
   const renderToolSpecificSettings = () => {
 
@@ -74,7 +74,7 @@ const InsertSettings = ({
             onChange={settings => {
               onUpdate(settings);
             }}
-            slideDuration={slideDuration}
+            slideDuration={slideDurationInSecond}
             transitionDuration={transitionDuration}
           />
         )
@@ -85,7 +85,7 @@ const InsertSettings = ({
              onChange={settings => {
               onUpdate(settings);
             }}
-            slideDuration={slideDuration}
+            slideDuration={slideDurationInSecond}
             slideStartTime={slideStartTime}
             //We need transition duration to calculate accurate start and end time of spotlight
             //so that they don't overlap with transitions
@@ -101,7 +101,7 @@ const InsertSettings = ({
             onChange={settings => {
               onUpdate(settings)
             }}
-            slideDuration={slideDuration}
+            slideDuration={slideDurationInSecond}
             transitionDuration={transitionDuration}
             onPlay={onPlay}
             isPreviewPlaying={isPreviewPlaying}

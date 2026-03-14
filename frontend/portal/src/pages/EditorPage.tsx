@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useRouter } from 'next/navigation'
 import { Mic2, Eye, Volume2, RefreshCw, Video, Home, Settings, HelpCircle, Timer, Music2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -39,10 +38,8 @@ type ExportProgressState = {
 }
 
 const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) => {
-  const router = useRouter()
   const { portalClient } = useClientsContext()
   const playerRef = useRef<RemotionPlayerHandle>(null)
-  const initializationRef = useRef<{ config?: EditorConfig; videoConfig?: VideoConfig }>({})
 
   // State for loading video data
   const [isLoadingVideo, setIsLoadingVideo] = useState(true)
@@ -92,6 +89,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
   const updateSlide = useVideoStore(s => s.updateSlide)
   const handleSelectEntity = useVideoStore(s => s.handleSelectEntity)
   const openEntitySettings = useVideoStore(s => s.openEntitySettings)
+  const fps = useVideoStore(s => s.getFPS)
 
   const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -452,8 +450,8 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
                 handleSelectEntity(createOverlayEntityId(slideId, overlayId))
               }}
               // Duration change handler — newDuration is in seconds, store as frames
-              onDurationChange={(_slideId, newDuration) => {
-                updateSlide({ durationInFrames: Math.round(newDuration * 30) })
+              onDurationChange={(_slideId, newDurationInSeconds) => {
+                updateSlide({ durationInFrames: Math.round(newDurationInSeconds * fps()) })
               }}
               onSelectTemplate={slideId => {
                 console.debug('selected templated slide: ', slideId)

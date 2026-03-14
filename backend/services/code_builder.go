@@ -58,8 +58,16 @@ type ValidateAndBuildInput struct {
 
 // ValidateAndBuildOutput is the response from the validator service on success.
 type ValidateAndBuildOutput struct {
-	JSPath   string          `json:"gcsPath"`
-	Registry json.RawMessage `json:"registry"`
+	JSPath       string          `json:"gcsPath"`
+	Registry     json.RawMessage `json:"initialOverlay"`
+	CodeDuration CodeDuration    `json:"duration"`
+}
+
+type CodeDuration struct {
+	Duration struct {
+		SettledFrame     int `json:"settledFrame"`
+		DurationInFrames int `json:"durationInFrames"`
+	} `json:"duration"`
 }
 
 type codeBuilderService struct {

@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { GripVertical, ImageIcon, Type, BarChart3, Sparkles, Film, Trash2, Layers } from 'lucide-react'
+import { GripVertical, ImageIcon, Type, Trash2, Layers } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import SlideThumbnail from './SlideThumbnail'
@@ -26,8 +26,9 @@ const SortableSlideCard = ({ slide, isSelected, index, onSelect, onDelete }: Sor
   const getSlideWithBackground = useVideoStore(s => s.getSlideWithBackground)
   const slideWithBackground = useMemo(
     () => ({ ...slide, backgroundStyle: getSlideWithBackground(slide) }),
-    [slide, getSlideWithBackground]
+    [slide, getSlideWithBackground]    
   )
+  const getSlideDurationInSeconds = useVideoStore(s => s.getSlideDurationInSeconds)
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: slide.id })
 
@@ -74,7 +75,7 @@ const SortableSlideCard = ({ slide, isSelected, index, onSelect, onDelete }: Sor
           </div>
           {/* Duration */}
           <div className='absolute bottom-0.5 right-0.5 bg-foreground/80 text-background text-[7px] px-0.5 rounded'>
-            {slide.duration.toFixed(2)}s
+            {getSlideDurationInSeconds(slide).toFixed(2)}s
           </div>
           {/* Play overlay */}
           <div className='absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors flex items-center justify-center'>

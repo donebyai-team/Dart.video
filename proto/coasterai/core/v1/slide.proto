@@ -186,14 +186,12 @@ message Slide {
   string id = 1;
   SlideType type = 2;
   string transcript = 3;
-  float duration = 4;
-
   TransitionType transition = 5;
   optional float transitionDuration = 6;
   optional BackgroundStyle background_style = 7;
   optional TransitionDirection direction = 23;
-  int32 durationInFrames = 25;
-  int32 settledFrame = 26;
+  float durationInFrames = 25;
+  float settledFrame = 26;
 
   oneof content {
     MediaSlideContent media = 8;

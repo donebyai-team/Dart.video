@@ -32,3 +32,4 @@ redora
 .gocache/
 
 **/remotion-ui/
+**/generated/

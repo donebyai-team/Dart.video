@@ -139,4 +139,9 @@ export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => 
     get().autoSyncVideoConfig();
   },
 
+  getFPS: () => {
+    const { videoConfig } = get();
+    return videoConfig?.metadata?.fps ?? 30;
+  },
+
 });

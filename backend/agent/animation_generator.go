@@ -357,7 +357,7 @@ func (l *animationGenerator) EditAnimationCode(
 
 	if err == nil {
 		// set its duration
-		template.Duration = int64(animationSlide.Duration)
+		template.Duration = int64(animationSlide.DurationInFrames)
 		return template, nil
 	}
 
@@ -592,8 +592,8 @@ func (l *animationGenerator) tryRegenerateAnimation(
 		if !IsValidDuration(updatedDuration) {
 			l.logger.Info("Received invalid duration from re-generated code, moving to animation from prompt",
 				zap.Int("generated_duration", int(response.IdealDuration)),
-				zap.Int("default", int(animationSlide.Duration)))
-			updatedDuration = int64(animationSlide.Duration)
+				zap.Int("default", int(animationSlide.DurationInFrames)))
+			updatedDuration = int64(animationSlide.DurationInFrames)
 		}
 
 		if l.generationOptions.BrandIdentityMapper != nil {
@@ -663,7 +663,7 @@ func (l *animationGenerator) buildRegenInput(
 		Code:          code,
 		AnimationType: animationType,
 		Prompt:        prompt,
-		Duration:      int64(animationSlide.Duration),
+		Duration:      int64(animationSlide.DurationInFrames),
 	}
 
 	if l.generationOptions.VideoBranding != nil {

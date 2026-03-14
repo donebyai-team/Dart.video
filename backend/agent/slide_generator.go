@@ -105,7 +105,7 @@ func (g *videoConfigGenerator) CreatePendingSlides(ctx context.Context,
 				totalMediaSlides++
 				mediaPlan := pendingSlide.AsMediaSlide()
 				slide.Type = pbcore.SlideType_SLIDE_TYPE_MEDIA
-				slide.Duration = float32(mediaPlan.Duration)
+				slide.DurationInFrames = float32(mediaPlan.Duration)
 				assignRandomTransitionAndDirection(slide)
 				slide.Content = &pbcore.Slide_Media{
 					Media: &pbcore.MediaSlideContent{
@@ -127,7 +127,7 @@ func (g *videoConfigGenerator) CreatePendingSlides(ctx context.Context,
 				totalAnimationSlides++
 				animationPlan := pendingSlide.AsAnimationSlide()
 				slide.Type = pbcore.SlideType_SLIDE_TYPE_ANIMATION
-				slide.Duration = float32(animationPlan.Duration)
+				slide.DurationInFrames = float32(animationPlan.Duration)
 				assignRandomTransitionAndDirection(slide)
 				if animationPlan.Voiceover != nil {
 					slide.Transcript = *animationPlan.Voiceover

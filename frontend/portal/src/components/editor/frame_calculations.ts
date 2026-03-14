@@ -1,7 +1,7 @@
 // Calculate total duration in frames for Remotion rendering
 import { TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { TimelineSlide } from "./timeline/types";
-import { getActualSlideDuration, TRANSITION_DURATION_SECONDS } from "@coasterai/renderer/src/frameUtils";
+import { TRANSITION_DURATION_SECONDS } from "@coasterai/renderer/src/frameUtils";
 
 // Total frames accounting for transition overlaps (source of truth for Remotion player)
 export const calculateRealTotalFrames = (allSlides: TimelineSlide[], fps: number): number => {
@@ -10,8 +10,7 @@ export const calculateRealTotalFrames = (allSlides: TimelineSlide[], fps: number
   let totalFrames = 0;
 
   for (const slide of allSlides) {
-    const actualDuration = getActualSlideDuration(slide.slide);
-    totalFrames += Math.round(actualDuration * fps);
+    totalFrames += slide.slide.durationInFrames;
 
     if (slide.transition !== TransitionType.TRANSITION_NONE) {
       totalFrames -= Math.round(TRANSITION_DURATION_SECONDS * fps);
@@ -27,9 +26,7 @@ export const getRealSlideStartFrame = (allSlides: TimelineSlide[], slideId: stri
 
   for (const slide of allSlides) {
     if (slide.id === slideId) return frame;
-
-    const actualDuration = getActualSlideDuration(slide.slide);
-    frame += Math.round(actualDuration * fps);
+    frame += slide.slide.durationInFrames;
 
     if (slide.transition !== TransitionType.TRANSITION_NONE) {
       frame -= Math.round(TRANSITION_DURATION_SECONDS * fps);
@@ -46,7 +43,7 @@ export const getSlideVisualEndFrame = (allSlides: TimelineSlide[], slideId: stri
   if (!slide) return 0;
 
   const startFrame = getRealSlideStartFrame(allSlides, slideId, fps);
-  const slideDurationFrames = Math.round(getActualSlideDuration(slide.slide) * fps);
+  const slideDurationFrames = slide.slide.durationInFrames
 
   if (slide.transition !== TransitionType.TRANSITION_NONE) {
     return startFrame + slideDurationFrames - Math.round(TRANSITION_DURATION_SECONDS * fps) - 1;
@@ -61,7 +58,7 @@ export const getSlideAbsoluteEndFrame = (allSlides: TimelineSlide[], slideId: st
   const slide = allSlides.find(s => s.id === slideId);
   if (!slide) return startFrame;
 
-  const slideDurationFrames = Math.round(getActualSlideDuration(slide.slide) * fps);
+  const slideDurationFrames = slide.slide.durationInFrames
   return startFrame + slideDurationFrames - 1;
 };
 

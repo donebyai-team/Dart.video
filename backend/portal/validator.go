@@ -117,7 +117,7 @@ func validateSlide(slide *pbcore.Slide, idRegistry map[string]string) error {
 		return fmt.Errorf("invalid background style")
 	}
 
-	if slide.Duration <= 0 {
+	if slide.DurationInFrames <= 0 {
 		return fmt.Errorf("invalid duration")
 	}
 
@@ -139,19 +139,19 @@ func validateSlide(slide *pbcore.Slide, idRegistry map[string]string) error {
 
 	// Effects
 	for _, s := range slide.Spotlights {
-		if err := validateEffect(slide.Duration, s.Id, s.X, s.Y, s.StartTime, s.EndTime, "spotlight", idRegistry); err != nil {
+		if err := validateEffect(slide.DurationInFrames, s.Id, s.X, s.Y, s.StartTime, s.EndTime, "spotlight", idRegistry); err != nil {
 			return err
 		}
 	}
 
 	for _, c := range slide.Callouts {
-		if err := validateEffect(slide.Duration, c.Id, c.X, c.Y, c.StartTime, c.EndTime, "callout", idRegistry); err != nil {
+		if err := validateEffect(slide.DurationInFrames, c.Id, c.X, c.Y, c.StartTime, c.EndTime, "callout", idRegistry); err != nil {
 			return err
 		}
 	}
 
 	for _, z := range slide.Zooms {
-		if err := validateEffect(slide.Duration, z.Id, z.X, z.Y, z.StartTime, z.EndTime, "zoom", idRegistry); err != nil {
+		if err := validateEffect(slide.DurationInFrames, z.Id, z.X, z.Y, z.StartTime, z.EndTime, "zoom", idRegistry); err != nil {
 			return err
 		}
 	}
@@ -196,9 +196,9 @@ func validateSlideAnimation(content *pbcore.AnimationSlideContent) error {
 		return fmt.Errorf("content is nil")
 	}
 
-	if content.Registry == nil {
-		return fmt.Errorf("registry can't be empty")
-	}
+	//if content.Registry == nil {
+	//	return fmt.Errorf("registry can't be empty")
+	//}
 
 	if content.CodeRegistry == nil {
 		return fmt.Errorf("code registry can't be empty")

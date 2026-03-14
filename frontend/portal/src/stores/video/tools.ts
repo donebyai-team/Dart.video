@@ -15,7 +15,7 @@ export const createToolActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
 
     const startTime = selectedSlide.slide.transitionDuration || 0;
     const endTime =
-      selectedSlide.slide.duration -
+      get().getSlideDurationInSeconds(selectedSlide.slide) -
       (selectedSlide.slide.transitionDuration || 0);
 
     set({ activeTool: tool });

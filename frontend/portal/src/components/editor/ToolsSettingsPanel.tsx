@@ -1,15 +1,11 @@
-import TextAnimationSelector from '@/components/editor/remotion/animations/suggester/TextAnimationSelector'
 import BackgroundSettings from '@/components/editor/settings/BackgroundSettings'
 import FigmaImportSettings from '@/components/editor/settings/FigmaImportSettings'
 import InsertSettings from '@/components/editor/settings/InsertSettings'
-import TextAnimationTemplateSettings from '@/components/editor/settings/TextAnimationTemplateSettings'
 import { useVideoStore } from '@/stores/video'
 import { ActiveToolType } from '@/types/tools'
 import {
-  AnimationSlideContent,
   CalloutEffect,
   EffectType,
-  SlideType,
   SpotlightEffect,
   ZoomEffect
 } from '@coasterai/pb/coasterai/core/v1/slide_pb'
@@ -52,6 +48,7 @@ const ToolsSettingsPanel = ({
   const zooms = useVideoStore(s => s.getZooms) || []
   const updateSlideBackground = useVideoStore(s => s.updateSlideBackground)
   const updateSlide = useVideoStore(s => s.updateSlide)
+  const getSlideDurationInSeconds = useVideoStore(s => s.getSlideDurationInSeconds)
  
   console.log("active tool", activeTool);
 
@@ -178,7 +175,7 @@ const ToolsSettingsPanel = ({
             }}
             onClose={handleCloseTool}
             canDelete={true}
-            slideDuration={selectedSlide?.slide.duration}
+            slideDurationInSecond={getSlideDurationInSeconds(selectedSlide?.slide!)}
             slideStartTime={0}
             transitionDuration={selectedSlide?.slide.transitionDuration}
             onPlay={onSpotlightPlay}

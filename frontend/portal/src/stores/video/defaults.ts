@@ -89,11 +89,7 @@ export function buildSlideContent(type: SlideType): Slide["content"] {
         case SlideType.ANIMATION:
             return {
                 case: "animation",
-                value: create(AnimationSlideContentSchema, {
-                    templateId: "typewriter",
-                    templateConfig: {},
-                    meta: getDefaultMetadata(),
-                }),
+                value: create(AnimationSlideContentSchema, {}),
             };
         default:
             return { case: undefined };
@@ -114,7 +110,7 @@ export function createNewSlide(params: {
         type,
         transcript: "",
         slideStatus: SlideStatus.GENERATED,
-        duration: 5,
+        durationInFrames: 5*30,
         transition: TransitionType.TRANSITION_NONE,
         backgroundStyle: inheritedBg,
         transitionDuration: TRANSITION_DURATION_SECONDS,

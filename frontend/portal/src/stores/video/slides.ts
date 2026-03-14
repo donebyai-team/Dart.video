@@ -319,6 +319,10 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     get().autoSyncVideoConfig()
   },
 
+  getSlideDurationInSeconds: (slide: Slide) => {
+    return slide.durationInFrames / get().getFPS()
+  },
+
   /* ================= TIMELINE ================= */
 
   getTimelineSlides(): TimelineSlide[] {
@@ -329,7 +333,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
 
     return sections.flatMap(section =>
       section.slides.map(slide => {
-        let actualDuration = slide.duration
+        let actualDuration = get().getSlideDurationInSeconds(slide)
 
         return {
           ...slide,

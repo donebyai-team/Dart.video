@@ -8,7 +8,7 @@ import { AnimationSlide, MediaSlide } from './slides'
 import { backgroundStyleToCSS } from './backgroundUtils'
 import { getTransitionPresentation } from './transitions/presentation'
 import { getSlideTransitionDirectionValue } from './transitions/config'
-import { getActualSlideDuration, TRANSITION_DURATION_SECONDS } from './frameUtils'
+import { TRANSITION_DURATION_SECONDS } from './frameUtils'
 
 
 
@@ -196,8 +196,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({
         {allSlides.map((slide, index) => {
           const isSelected = selectedTemplateId === slide.id
 
-          const actualDuration = getActualSlideDuration(slide)
-          const durationInFrames = Math.round(actualDuration * fps)
+          const durationInFrames = slide.durationInFrames;
 
           // Last slide never transitions out because there is no following slide.
           const hasTransition =

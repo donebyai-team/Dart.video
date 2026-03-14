@@ -16,6 +16,8 @@ interface UseAnimationEditReturn {
   applyValuePatch: (id: string, prop: string, value: unknown) => void
   /** Apply a style override. */
   applyStyleOverride: (id: string, style: Record<string, string | number>) => void
+  /** Replace the entire overlay (e.g. after reconciliation). */
+  setOverlay: (overlay: PatchOverlay) => void
   flushPersist: () => void
 }
 
@@ -42,7 +44,7 @@ export function useAnimationEdit(): UseAnimationEditReturn {
     ;(window as any).__PATCH_OVERLAY__ = overlay
   }, [overlay])
 
-  // ── Load saved overlay when slide changes ─────────────────────────────────
+  // ── Load saved overlay when slide changes and set initial overlay─────────────────────────────────
   useEffect(() => {
     isLoadingRef.current = true
     setSelectedEid(null)
@@ -54,7 +56,7 @@ export function useAnimationEdit(): UseAnimationEditReturn {
 
     overlayRef.current = saved
     setOverlay(saved)
-  }, [slideId]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [slideId])
 
   // ── Apply a single value patch ────────────────────────────────────────────
   const applyValuePatch = useCallback((id: string, prop: string, value: unknown) => {
@@ -87,6 +89,13 @@ export function useAnimationEdit(): UseAnimationEditReturn {
       overlayRef.current = next
       return next
     })
+    setAnimEditVersion(v => v + 1)
+  }, [])
+
+  // ── Replace entire overlay ─────────────────────────────────────────────────
+  const setOverlayFn = useCallback((newOverlay: PatchOverlay) => {
+    overlayRef.current = newOverlay
+    setOverlay(newOverlay)
     setAnimEditVersion(v => v + 1)
   }, [])
 
@@ -140,6 +149,7 @@ export function useAnimationEdit(): UseAnimationEditReturn {
     animEditVersion,
     applyValuePatch,
     applyStyleOverride,
+    setOverlay: setOverlayFn,
     flushPersist,
   }
 }

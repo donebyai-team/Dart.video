@@ -3,7 +3,6 @@ import { Player } from '@remotion/player'
 import { Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { useVideoStore } from '@/stores/video'
 import { SingleSlidePreview } from '@coasterai/renderer'
-import { getActualSlideDuration } from '@coasterai/renderer/src/frameUtils'
 
 interface SlideThumbnailProps {
   slide: Slide
@@ -54,9 +53,8 @@ const SlideThumbnail = ({ slide, index = 0 }: SlideThumbnailProps) => {
   }, [slide, index])
 
   const durationInFrames = useMemo(() => {
-    const duration = Math.max(0.25, getActualSlideDuration(debouncedSlide))
-    return Math.max(1, Math.round(duration * fps))
-  }, [debouncedSlide, fps])
+    return debouncedSlide.durationInFrames
+  }, [debouncedSlide])
 
   const initialFrame = Math.max(0, durationInFrames - 1)
 

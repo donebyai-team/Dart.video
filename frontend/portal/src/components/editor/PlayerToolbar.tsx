@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useVideoStore } from '@/stores/video'
-import { SlideType, Slide, EffectType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { SlideType, EffectType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { ActiveToolType } from '@/types/tools'
 import DurationChangeComponent from './remotion/components/DurationChangeComponent'
 import { backgroundStyleToCSS } from '@coasterai/renderer'
@@ -36,6 +36,7 @@ const PlayerToolbar = ({ onDurationChange, minDuration = 1, maxDuration = 180 }:
   const activeTool = useVideoStore(s => s.activeTool)
   const onSelectTool = useVideoStore(s => s.handleSelectTool)
   const selectedSlide = useVideoStore(s => s.selectedSlide)
+  const getSlideDurationInSeconds = useVideoStore(s => s.getSlideDurationInSeconds)
 
   if (!selectedSlide) return
   let slide = selectedSlide.slide 
@@ -154,7 +155,7 @@ const PlayerToolbar = ({ onDurationChange, minDuration = 1, maxDuration = 180 }:
         </TooltipProvider>
 
         <DurationChangeComponent
-          value={slide.durationInFrames > 0 ? slide.durationInFrames / 30 : slide.duration}
+          value={getSlideDurationInSeconds(slide)}
           onValueChange={val => {
             onDurationChange(val)
           }}

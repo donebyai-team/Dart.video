@@ -144,21 +144,13 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
     }
   }, [templateUrl])
 
-  // PatchOverlay — used by both PatchContextProvider (for primitives) and
-  // window.__PATCH_OVERLAY__ (for raw HTML style spreads injected by AST pass).
-  // In the editor, useAnimationEdit keeps window.__PATCH_OVERLAY__ in sync.
-  // During Remotion rendering, we seed it from persisted edits.
-  const patchOverlay: PatchOverlay = useMemo(() => {
-    if (typeof window !== 'undefined' && (window as any).__PATCH_OVERLAY__) {
-      return (window as any).__PATCH_OVERLAY__ as PatchOverlay
-    }
-    return (content?.edits ?? {}) as unknown as PatchOverlay
-  }, [content?.edits, isRendering])
-
-  // Seed window.__PATCH_OVERLAY__ for raw HTML elements (read by __patches preamble)
-  if (typeof window !== 'undefined') {
-    (window as any).__PATCH_OVERLAY__ = patchOverlay
-  }
+  // PatchOverlay — read from window (set by useAnimationEdit in editor)
+  // or fall back to persisted edits (during Remotion rendering).
+  // No useMemo — must re-read on every render to pick up live edits.
+  const patchOverlay: PatchOverlay =
+    (typeof window !== 'undefined' && (window as any).__PATCH_OVERLAY__)
+      ? (window as any).__PATCH_OVERLAY__ as PatchOverlay
+      : (content?.edits ?? {}) as unknown as PatchOverlay
 
   return (
     <AbsoluteFill
@@ -176,11 +168,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
           <ThemeProvider theme={defaultTheme}>
             <AspectPresetProvider preset={aspectPreset}>
               <StyleContextProvider style={styleConfig}>
-                <SpeedFactorProvider factor={
-                  slide.settledFrame > 0 && slide.durationInFrames > 0
-                    ? slide.settledFrame / slide.durationInFrames
-                    : 1
-                }>
+                <SpeedFactorProvider factor={slide.settledFrame / slide.durationInFrames}>
                   <PatchContextProvider overlay={patchOverlay}>
                     <CompiledComponent />
                   </PatchContextProvider>

@@ -323,7 +323,7 @@ func applyTemplateToSlide(slide *pbcore.Slide, template *models.Template, isExis
 		return nil
 	}
 
-	slide.Duration = float32(template.Duration)
+	slide.DurationInFrames = float32(template.Duration)
 	toStructRegistry, err := utils.RawMessageToStruct(template.ElementRegistry)
 	if err != nil {
 		return fmt.Errorf("invalid template registry: %s", template.Name)

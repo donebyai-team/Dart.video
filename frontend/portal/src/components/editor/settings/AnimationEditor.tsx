@@ -27,7 +27,7 @@ export default function AnimationEditor({ settings, onClose }: AnimationEditorPr
     const addAnimationSlide = useVideoStore(s => s.addAnimationSlide)
     const videoId = useVideoStore(s => s.videoConfig?.id)
     const { portalClient } = useClientsContext()
-    const { applyEdits } = useAnimationEdit()
+    const { setOverlay } = useAnimationEdit()
 
     const isAdding = !!settings.previousSlide
 
@@ -86,8 +86,8 @@ export default function AnimationEditor({ settings, onClose }: AnimationEditorPr
     }, [])
 
     const applySlideToStore = (slide: Slide) => {
-        // Editing: only update registry, codeRegistry, edits on the current selected slide.
-        // Always read existingContent from the store so any concurrent manual edits are preserved.
+        // Editing: update codeRegistry + reconcile edits (overlay) on the current selected slide.
+        // edits IS the PatchOverlay — contains both initial LLM values and user overrides.
         const updatedContent = slide.content?.case === 'animation' ? slide.content.value : undefined
         if (!updatedContent) return
 
@@ -95,25 +95,26 @@ export default function AnimationEditor({ settings, onClose }: AnimationEditorPr
             ? selectedSlide.slide.content.value
             : undefined
 
-        const existingEdits = (existingContent?.edits ?? {}) as unknown as Parameters<typeof reconcileEdits>[2]
-        const reconciledEdits = reconcileEdits(
-            (existingContent?.registry ?? {}) as unknown as Parameters<typeof reconcileEdits>[0],
-            (updatedContent.registry ?? {}) as unknown as Parameters<typeof reconcileEdits>[1],
-            existingEdits
-        )
-        console.debug('[AnimationEditor] Reconciling edits', existingContent?.edits, reconciledEdits)
+        // Reconcile: merge user's existing edits with the new code's initial overlay.
+        // prevOverlay = what the editor currently has (initial + user edits)
+        // nextInitialOverlay = fresh initial values from the new code
+        const prevOverlay = (existingContent?.edits ?? {}) as unknown as Parameters<typeof reconcileEdits>[0]
+        const nextInitialOverlay = (updatedContent.edits ?? {}) as unknown as Parameters<typeof reconcileEdits>[1]
+        const reconciledOverlay = reconcileEdits(prevOverlay, nextInitialOverlay)
+        console.debug('[AnimationEditor] Reconciled overlay', reconciledOverlay)
 
-        // apply edits
-        applyEdits(reconciledEdits)
+        // Update editor state
+        setOverlay(reconciledOverlay)
 
         updateSlide({
+            durationInFrames: slide.durationInFrames,
+            settledFrame: slide.settledFrame,
             content: {
                 case: 'animation' as const,
                 value: {
                     ...(existingContent ?? {}),
-                    registry: updatedContent.registry,
                     codeRegistry: updatedContent.codeRegistry,
-                    edits: reconciledEdits as unknown as AnimationSlideContent['edits'],
+                    edits: reconciledOverlay as unknown as AnimationSlideContent['edits'],
                 } as AnimationSlideContent
             }
         })
@@ -137,7 +138,6 @@ export default function AnimationEditor({ settings, onClose }: AnimationEditorPr
                 value: {
                     ...(baseAnimation ?? {}),
                     codeRegistry: template.codeRegistry,
-                    registry: template.registry,
                     edits: template.edits,
                     plan: template.plan,
                 } as AnimationSlideContent
@@ -158,7 +158,7 @@ export default function AnimationEditor({ settings, onClose }: AnimationEditorPr
 
         if (selectedSlide?.slide.id !== createdSlideIdRef.current) return
         updateSlide({
-            duration: slide.duration,
+            durationInFrames: slide.durationInFrames,
             transcript: slide.transcript,
             backgroundStyle: slide.backgroundStyle,
             content: slide.content,
@@ -397,8 +397,6 @@ export default function AnimationEditor({ settings, onClose }: AnimationEditorPr
                 value: {
                     ...(existingContent ?? {}),
                     codeRegistry: template.codeRegistry,
-                    registry: template.registry,
-                    duration: template.duration,
                     edits: template.edits ?? existingContent?.edits,
                 } as AnimationSlideContent
             }

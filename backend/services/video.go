@@ -99,7 +99,7 @@ func (v videoGeneration) UpdateVideoConfig(ctx context.Context, video *models.Vi
 
 	totalDuration := float32(0.0)
 	for i, slide := range allSlides {
-		totalDuration += slide.Duration
+		totalDuration += slide.DurationInFrames / float32(video.Metadata.Fps)
 
 		// subtract transition for every slide except the last one globally
 		if i < len(allSlides)-1 &&

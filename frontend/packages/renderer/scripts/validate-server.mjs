@@ -390,7 +390,9 @@ async function handleValidate(req, res) {
       return;
     }
 
-    // ---- Upload original code to GCS (primitive IDs are injected at compile time) ----
+    // ---- Upload original code to GCS ----
+    // The editor's compileRemoteComponent re-runs the AST pass which injects
+    // IDs and style spreads. Uploading original code keeps the source clean.
     const gcsPath = `${output_path}/${component_name}.tsx`;
     await uploadToGCS(OUTPUT_BUCKET, gcsPath, Buffer.from(code, 'utf8'));
 

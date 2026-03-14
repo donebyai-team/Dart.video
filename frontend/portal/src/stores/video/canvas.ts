@@ -1,6 +1,6 @@
 import { CalloutEffect, SpotlightEffect, ZoomEffect } from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import { SelectedSection, VideoStoreGet, VideoStoreSet } from './types'
-import { Video } from '@coasterai/pb/coasterai/core/v1/video_pb'
+import { VideoStoreGet, VideoStoreSet } from './types'
+
 import { updateVideoConfigSections, updateSelectedSlide } from './utils'
 
 export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
@@ -20,13 +20,13 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
       sections.map(section =>
         section.id === selectedSlide.section.id
           ? {
-              ...section,
-              slides: section.slides.map(slide =>
-                slide.id === selectedSlide.slide.id
-                  ? { ...slide, spotlights: [...(slide.spotlights || []), effect] }
-                  : slide
-              ),
-            }
+            ...section,
+            slides: section.slides.map(slide =>
+              slide.id === selectedSlide.slide.id
+                ? { ...slide, spotlights: [...(slide.spotlights || []), effect] }
+                : slide
+            ),
+          }
           : section
       )
     )
@@ -50,18 +50,18 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
       sections.map(section =>
         section.id === selectedSlide.section.id
           ? {
-              ...section,
-              slides: section.slides.map(slide =>
-                slide.id === selectedSlide.slide.id
-                  ? {
-                      ...slide,
-                      spotlights: (slide.spotlights || []).map(e =>
-                        e?.id === effectId ? { ...e, ...updates } : e
-                      ),
-                    }
-                  : slide
-              ),
-            }
+            ...section,
+            slides: section.slides.map(slide =>
+              slide.id === selectedSlide.slide.id
+                ? {
+                  ...slide,
+                  spotlights: (slide.spotlights || []).map(e =>
+                    e?.id === effectId ? { ...e, ...updates } : e
+                  ),
+                }
+                : slide
+            ),
+          }
           : section
       )
     )
@@ -87,16 +87,16 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
       sections.map(section =>
         section.id === selectedSlide.section.id
           ? {
-              ...section,
-              slides: section.slides.map(slide =>
-                slide.id === selectedSlide.slide.id
-                  ? {
-                      ...slide,
-                      spotlights: (slide.spotlights || []).filter(e => e?.id !== effectId),
-                    }
-                  : slide
-              ),
-            }
+            ...section,
+            slides: section.slides.map(slide =>
+              slide.id === selectedSlide.slide.id
+                ? {
+                  ...slide,
+                  spotlights: (slide.spotlights || []).filter(e => e?.id !== effectId),
+                }
+                : slide
+            ),
+          }
           : section
       )
     )
@@ -128,13 +128,13 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
       sections.map(section =>
         section.id === selectedSlide.section.id
           ? {
-              ...section,
-              slides: section.slides.map(slide =>
-                slide.id === selectedSlide.slide.id
-                  ? { ...slide, callouts: [...(slide.callouts || []), effect] }
-                  : slide
-              ),
-            }
+            ...section,
+            slides: section.slides.map(slide =>
+              slide.id === selectedSlide.slide.id
+                ? { ...slide, callouts: [...(slide.callouts || []), effect] }
+                : slide
+            ),
+          }
           : section
       )
     )
@@ -158,18 +158,18 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
       sections.map(section =>
         section.id === selectedSlide.section.id
           ? {
-              ...section,
-              slides: section.slides.map(slide =>
-                slide.id === selectedSlide.slide.id
-                  ? {
-                      ...slide,
-                      callouts: (slide.callouts || []).map(e =>
-                        e?.id === effectId ? { ...e, ...updates } : e
-                      ),
-                    }
-                  : slide
-              ),
-            }
+            ...section,
+            slides: section.slides.map(slide =>
+              slide.id === selectedSlide.slide.id
+                ? {
+                  ...slide,
+                  callouts: (slide.callouts || []).map(e =>
+                    e?.id === effectId ? { ...e, ...updates } : e
+                  ),
+                }
+                : slide
+            ),
+          }
           : section
       )
     )
@@ -195,16 +195,16 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
       sections.map(section =>
         section.id === selectedSlide.section.id
           ? {
-              ...section,
-              slides: section.slides.map(slide =>
-                slide.id === selectedSlide.slide.id
-                  ? {
-                      ...slide,
-                      callouts: (slide.callouts || []).filter(e => e?.id !== effectId),
-                    }
-                  : slide
-              ),
-            }
+            ...section,
+            slides: section.slides.map(slide =>
+              slide.id === selectedSlide.slide.id
+                ? {
+                  ...slide,
+                  callouts: (slide.callouts || []).filter(e => e?.id !== effectId),
+                }
+                : slide
+            ),
+          }
           : section
       )
     )
@@ -236,13 +236,13 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
       sections.map(section =>
         section.id === selectedSlide.section.id
           ? {
-              ...section,
-              slides: section.slides.map(slide =>
-                slide.id === selectedSlide.slide.id
-                  ? { ...slide, zooms: [...(slide.zooms || []), effect] }
-                  : slide
-              ),
-            }
+            ...section,
+            slides: section.slides.map(slide =>
+              slide.id === selectedSlide.slide.id
+                ? { ...slide, zooms: [...(slide.zooms || []), effect] }
+                : slide
+            ),
+          }
           : section
       )
     )
@@ -266,18 +266,18 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
       sections.map(section =>
         section.id === selectedSlide.section.id
           ? {
-              ...section,
-              slides: section.slides.map(slide =>
-                slide.id === selectedSlide.slide.id
-                  ? {
-                      ...slide,
-                      zooms: (slide.zooms || []).map(e =>
-                        e?.id === effectId ? { ...e, ...updates } : e
-                      ),
-                    }
-                  : slide
-              ),
-            }
+            ...section,
+            slides: section.slides.map(slide =>
+              slide.id === selectedSlide.slide.id
+                ? {
+                  ...slide,
+                  zooms: (slide.zooms || []).map(e =>
+                    e?.id === effectId ? { ...e, ...updates } : e
+                  ),
+                }
+                : slide
+            ),
+          }
           : section
       )
     )
@@ -303,16 +303,16 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
       sections.map(section =>
         section.id === selectedSlide.section.id
           ? {
-              ...section,
-              slides: section.slides.map(slide =>
-                slide.id === selectedSlide.slide.id
-                  ? {
-                      ...slide,
-                      zooms: (slide.zooms || []).filter(e => e?.id !== effectId),
-                    }
-                  : slide
-              ),
-            }
+            ...section,
+            slides: section.slides.map(slide =>
+              slide.id === selectedSlide.slide.id
+                ? {
+                  ...slide,
+                  zooms: (slide.zooms || []).filter(e => e?.id !== effectId),
+                }
+                : slide
+            ),
+          }
           : section
       )
     )
