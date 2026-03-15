@@ -29,6 +29,7 @@ function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_hi
     ---
 
     {{ CodeGeneration() }}
+    {{ CodeGenerationExamples() }}
 
     ---
     ## INPUT

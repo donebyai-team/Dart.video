@@ -228,12 +228,11 @@ func (StyleType) EnumDescriptor() ([]byte, []int) {
 }
 
 type GeneratedVideoBranding struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	BrandGuideLines string                 `protobuf:"bytes,1,opt,name=brandGuideLines,proto3" json:"brandGuideLines,omitempty"` // just for reference purpose, not used for logic
-	Colors          []*BrandColor          `protobuf:"bytes,2,rep,name=colors,proto3" json:"colors,omitempty"`
-	BrandLibraryID  *string                `protobuf:"bytes,3,opt,name=brandLibraryID,proto3,oneof" json:"brandLibraryID,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Colors         []*BrandColor          `protobuf:"bytes,1,rep,name=colors,proto3" json:"colors,omitempty"`
+	BrandLibraryID *string                `protobuf:"bytes,2,opt,name=brandLibraryID,proto3,oneof" json:"brandLibraryID,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *GeneratedVideoBranding) Reset() {
@@ -264,13 +263,6 @@ func (x *GeneratedVideoBranding) ProtoReflect() protoreflect.Message {
 // Deprecated: Use GeneratedVideoBranding.ProtoReflect.Descriptor instead.
 func (*GeneratedVideoBranding) Descriptor() ([]byte, []int) {
 	return file_coasterai_core_v1_video_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *GeneratedVideoBranding) GetBrandGuideLines() string {
-	if x != nil {
-		return x.BrandGuideLines
-	}
-	return ""
 }
 
 func (x *GeneratedVideoBranding) GetColors() []*BrandColor {
@@ -707,11 +699,10 @@ var File_coasterai_core_v1_video_proto protoreflect.FileDescriptor
 
 const file_coasterai_core_v1_video_proto_rawDesc = "" +
 	"\n" +
-	"\x1dcoasterai/core/v1/video.proto\x12\x11coasterai.core.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1dcoasterai/core/v1/slide.proto\x1a coasterai/core/v1/brandkit.proto\"\xb9\x01\n" +
-	"\x16GeneratedVideoBranding\x12(\n" +
-	"\x0fbrandGuideLines\x18\x01 \x01(\tR\x0fbrandGuideLines\x125\n" +
-	"\x06colors\x18\x02 \x03(\v2\x1d.coasterai.core.v1.BrandColorR\x06colors\x12+\n" +
-	"\x0ebrandLibraryID\x18\x03 \x01(\tH\x00R\x0ebrandLibraryID\x88\x01\x01B\x11\n" +
+	"\x1dcoasterai/core/v1/video.proto\x12\x11coasterai.core.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1dcoasterai/core/v1/slide.proto\x1a coasterai/core/v1/brandkit.proto\"\x8f\x01\n" +
+	"\x16GeneratedVideoBranding\x125\n" +
+	"\x06colors\x18\x01 \x03(\v2\x1d.coasterai.core.v1.BrandColorR\x06colors\x12+\n" +
+	"\x0ebrandLibraryID\x18\x02 \x01(\tH\x00R\x0ebrandLibraryID\x88\x01\x01B\x11\n" +
 	"\x0f_brandLibraryID\"\xff\x03\n" +
 	"\rVideoMetadata\x12\x10\n" +
 	"\x03fps\x18\x01 \x01(\x05R\x03fps\x12R\n" +

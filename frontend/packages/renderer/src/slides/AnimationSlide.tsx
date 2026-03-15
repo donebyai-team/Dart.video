@@ -1,16 +1,10 @@
 import { AnimationSlideContent, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { AbsoluteFill, continueRender, delayRender, useRemotionEnvironment } from 'remotion'
 import {
-  ThemeProvider,
-  AspectPresetProvider,
-  StyleContextProvider,
   SpeedFactorProvider,
   PatchContextProvider,
-  defaultTheme,
-  resolveStyle,
-  type AspectPreset,
   type PatchOverlay,
 } from '@coasterai/animation'
 
@@ -30,7 +24,6 @@ interface TextAnimationSlideProps {
   onUpdate?: (updates: Partial<Slide>) => void
   onSelect?: () => void
 }
-export type TemplateConfig = Record<string, unknown>
 
 /**
  * AnimationSlide Component
@@ -54,16 +47,6 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
   const { isRendering } = useRemotionEnvironment()
   const content = slide.content.value as AnimationSlideContent
 
-  // Build AspectPreset from slide dimensions
-  const aspectPreset = useMemo<AspectPreset>(() => ({
-    id: 'slide',
-    width,
-    height,
-    safeArea: { top: 0, right: 0, bottom: 0, left: 0 },
-  }), [width, height])
-
-  // Style preset — could come from slide data in the future
-  const styleConfig = useMemo(() => resolveStyle('clean'), [])
   // template id for hard-coded local templates
   // const localTemplateId = content?.templateId
 
@@ -165,17 +148,15 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
         {isLoading ? (
           <TemplateLoadingPlaceholder />
         ) : CompiledComponent ? (
-          <ThemeProvider theme={defaultTheme}>
-            <AspectPresetProvider preset={aspectPreset}>
-              <StyleContextProvider style={styleConfig}>
-                <SpeedFactorProvider factor={slide.settledFrame / slide.durationInFrames}>
-                  <PatchContextProvider overlay={patchOverlay}>
-                    <CompiledComponent />
-                  </PatchContextProvider>
-                </SpeedFactorProvider>
-              </StyleContextProvider>
-            </AspectPresetProvider>
-          </ThemeProvider>
+          <SpeedFactorProvider factor={
+            slide.settledFrame > 0 && slide.durationInFrames > 0
+              ? slide.settledFrame / slide.durationInFrames
+              : 1
+          }>
+            <PatchContextProvider overlay={patchOverlay}>
+              <CompiledComponent />
+            </PatchContextProvider>
+          </SpeedFactorProvider>
         ) : templateError ? (
           <TemplateErrorFallback message={templateError} />
         ) : null}

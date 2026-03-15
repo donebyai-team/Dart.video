@@ -2,13 +2,22 @@ import { fromJson, JsonObject } from '@bufbuild/protobuf'
 import { Slide, SlideType, TransitionType, MediaAsset } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Video, VideoSchema } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import { linearTiming, TransitionSeries } from '@remotion/transitions'
-import React from 'react'
+import React, { useMemo } from 'react'
 import { AbsoluteFill, useVideoConfig, Html5Audio } from 'remotion'
+import {
+  ThemeProvider,
+  AspectPresetProvider,
+  StyleContextProvider,
+  resolveStyle,
+  type AspectPreset,
+  ASPECT_PRESETS,
+} from '@coasterai/animation'
 import { AnimationSlide, MediaSlide } from './slides'
 import { backgroundStyleToCSS } from './backgroundUtils'
 import { getTransitionPresentation } from './transitions/presentation'
 import { getSlideTransitionDirectionValue } from './transitions/config'
 import { TRANSITION_DURATION_SECONDS } from './frameUtils'
+import { brandingToTheme } from './utils'
 
 
 
@@ -139,6 +148,11 @@ export const Slideshow: React.FC<SlideshowProps> = ({
   const videoProtoObject = video ? fromJson(VideoSchema, video) : undefined
   const videoConfig = videoProtoObject ?? videoConfigProp
 
+  const styleConfig = useMemo(() => resolveStyle('clean'), [])
+  // TODO: Make this dynamic based on the video resolution
+  const aspectPreset = useMemo<AspectPreset>(() => (ASPECT_PRESETS["web"]), [width, height])
+  const brandTheme = useMemo(() => brandingToTheme(videoConfig?.metadata?.generatedBranding), [videoConfig?.metadata?.generatedBranding])
+
   /* ================= GATE ================= */
 
   if (!videoConfig?.config) {
@@ -177,75 +191,81 @@ export const Slideshow: React.FC<SlideshowProps> = ({
   /* ================= RENDER ================= */
 
   return (
-    <AbsoluteFill style={{ background: globalBackground }}>
+    <ThemeProvider theme={brandTheme}>
+      <AspectPresetProvider preset={aspectPreset}>
+        <StyleContextProvider style={styleConfig}>
+          <AbsoluteFill style={{ background: globalBackground }}>
 
-      {/* 🎵 Background Audio from URL */}
-      {videoConfig.metadata?.backgroundAudioUrl && (
-        <Html5Audio
-          src={videoConfig.metadata.backgroundAudioUrl}
-          volume={0.5}
-          loop
-          onError={error => {
-            console.log('Audio error:', error.message)
-            return 'fallback'
-          }}
-        />
-      )}
+            {/* 🎵 Background Audio from URL */}
+            {videoConfig.metadata?.backgroundAudioUrl && (
+              <Html5Audio
+                src={videoConfig.metadata.backgroundAudioUrl}
+                volume={0.5}
+                loop
+                onError={error => {
+                  console.log('Audio error:', error.message)
+                  return 'fallback'
+                }}
+              />
+            )}
 
-      <TransitionSeries>
-        {allSlides.map((slide, index) => {
-          const isSelected = selectedTemplateId === slide.id
+            <TransitionSeries>
+              {allSlides.map((slide, index) => {
+                const isSelected = selectedTemplateId === slide.id
 
-          const durationInFrames = slide.durationInFrames;
+                const durationInFrames = slide.durationInFrames;
 
-          // Last slide never transitions out because there is no following slide.
-          const hasTransition =
-            index < allSlides.length - 1 &&
-            slide.transition !== TransitionType.TRANSITION_NONE
+                // Last slide never transitions out because there is no following slide.
+                const hasTransition =
+                  index < allSlides.length - 1 &&
+                  slide.transition !== TransitionType.TRANSITION_NONE
 
-          // if global background is given , all slides background should be transparent
-          // else slide color
-          const slideWithBackground =
-            globalBackground != 'transparent' ? { ...slide, backgroundColor: 'transparent' } : slide
-            
+                // if global background is given , all slides background should be transparent
+                // else slide color
+                const slideWithBackground =
+                  globalBackground != 'transparent' ? { ...slide, backgroundColor: 'transparent' } : slide
 
-          return (
-            <React.Fragment key={slide.id}>
 
-              <TransitionSeries.Sequence durationInFrames={durationInFrames}>
-                <SlideComponent
-                  slide={slideWithBackground}
-                  width={width}
-                  height={height}
-                  isEditing={isEditing}
-                  isSelected={isSelected}
-                  onUpdate={onUpdate}
-                  uploadMedia={uploadMedia}
-                  onSelect={() => {
-                    onSelectTemplate?.(slide.id);
-                  }}
-                />
-              </TransitionSeries.Sequence>
+                return (
+                  <React.Fragment key={slide.id}>
 
-              {hasTransition && (
-                <TransitionSeries.Transition
-                  presentation={getTransitionPresentation(
-                    slide.transition,
-                    getSlideTransitionDirectionValue(slide),
-                    width,
-                    height
-                  ) as any}
-                  timing={linearTiming({
-                    durationInFrames: transitionDurationFrames
-                  })}
-                />
-              )}
+                    <TransitionSeries.Sequence durationInFrames={durationInFrames}>
+                      <SlideComponent
+                        slide={slideWithBackground}
+                        width={width}
+                        height={height}
+                        isEditing={isEditing}
+                        isSelected={isSelected}
+                        onUpdate={onUpdate}
+                        uploadMedia={uploadMedia}
+                        onSelect={() => {
+                          onSelectTemplate?.(slide.id);
+                        }}
+                      />
+                    </TransitionSeries.Sequence>
 
-            </React.Fragment>
-          )
-        })}
-      </TransitionSeries>
-    </AbsoluteFill>
+                    {hasTransition && (
+                      <TransitionSeries.Transition
+                        presentation={getTransitionPresentation(
+                          slide.transition,
+                          getSlideTransitionDirectionValue(slide),
+                          width,
+                          height
+                        ) as any}
+                        timing={linearTiming({
+                          durationInFrames: transitionDurationFrames
+                        })}
+                      />
+                    )}
+
+                  </React.Fragment>
+                )
+              })}
+            </TransitionSeries>
+          </AbsoluteFill>
+        </StyleContextProvider>
+      </AspectPresetProvider>
+    </ThemeProvider>
   )
 }
 

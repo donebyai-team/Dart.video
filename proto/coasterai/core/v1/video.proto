@@ -34,9 +34,8 @@ enum StyleType {
 }
 
 message GeneratedVideoBranding {
-  string brandGuideLines = 1; // just for reference purpose, not used for logic
-  repeated BrandColor colors = 2;
-  optional string brandLibraryID = 3;
+  repeated BrandColor colors = 1;
+  optional string brandLibraryID = 2;
 }
 
 message VideoMetadata {

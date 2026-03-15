@@ -7,7 +7,7 @@ import { PROMPT_SPACING_VALUES } from '../tokens/spacing';
 export function frameContractFragment(): string {
   return [
     '## FRAME CONTRACT:',
-    'Your component receives {} as props.',
+    'Your component receives no props.',
     'Never call useCurrentFrame(), interpolate(), spring(), or any Remotion hook.',
     'Never import from "remotion" or any other library.',
     'Plain React is allowed for static layout and positioning.',

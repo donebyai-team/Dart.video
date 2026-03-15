@@ -18,19 +18,12 @@ export declare const file_coasterai_core_v1_video: GenFile;
  */
 export declare type GeneratedVideoBranding = Message<"coasterai.core.v1.GeneratedVideoBranding"> & {
   /**
-   * just for reference purpose, not used for logic
-   *
-   * @generated from field: string brandGuideLines = 1;
-   */
-  brandGuideLines: string;
-
-  /**
-   * @generated from field: repeated coasterai.core.v1.BrandColor colors = 2;
+   * @generated from field: repeated coasterai.core.v1.BrandColor colors = 1;
    */
   colors: BrandColor[];
 
   /**
-   * @generated from field: optional string brandLibraryID = 3;
+   * @generated from field: optional string brandLibraryID = 2;
    */
   brandLibraryID?: string;
 };
