@@ -113,7 +113,6 @@ message AnimationSlideContent {
   CodeRegistry codeRegistry = 1;
   AnimationSlidePlan plan = 2;
   google.protobuf.Struct edits = 3;
-  google.protobuf.Struct registry = 4;
 }
 
 message CodeRegistry {

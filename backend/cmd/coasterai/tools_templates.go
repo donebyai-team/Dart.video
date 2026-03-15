@@ -202,11 +202,10 @@ func syncCategories(ctx context.Context, db datastore.TemplateRepository, catego
 
 func syncTemplate(ctx context.Context, db datastore.TemplateRepository, templateDir, templateName string, animType types.AnimationType, animFolderName string, stats *syncStats) error {
 	metadataPath := filepath.Join(templateDir, "metadata.json")
-	registryPath := filepath.Join(templateDir, "registry.json")
 	schemaPath := filepath.Join(templateDir, "schema.json")
 	embeddingPath := filepath.Join(templateDir, "embedding.md")
 
-	for _, path := range []string{metadataPath, registryPath, schemaPath, embeddingPath} {
+	for _, path := range []string{metadataPath, schemaPath, embeddingPath} {
 		if _, err := os.Stat(path); os.IsNotExist(err) {
 			return fmt.Errorf("required file missing in template %s: %s", templateName, filepath.Base(path))
 		}
@@ -219,14 +218,6 @@ func syncTemplate(ctx context.Context, db datastore.TemplateRepository, template
 	description := strings.TrimSpace(string(embeddingBytes))
 	if description == "" {
 		return fmt.Errorf("embedding.md empty in template %s", templateName)
-	}
-
-	registryBytes, err := os.ReadFile(registryPath)
-	if err != nil {
-		return fmt.Errorf("failed to read preview.json in template %s: %w", templateName, err)
-	}
-	if !json.Valid(registryBytes) {
-		return fmt.Errorf("registry.json invalid JSON in template %s", templateName)
 	}
 
 	schemaBytes, err := os.ReadFile(schemaPath)
@@ -251,21 +242,17 @@ func syncTemplate(ctx context.Context, db datastore.TemplateRepository, template
 		return fmt.Errorf("metadata.json invalid JSON in template %s", templateName)
 	}
 
-	var metadata struct {
-		Categories []string `json:"categories"`
-		Repeatable bool     `json:"repeatable"`
-		Duration   int64    `json:"duration"`
-	}
-	if err := json.Unmarshal(metadataBytes, &metadata); err != nil {
+	var config models.TemplateConfig
+	if err := json.Unmarshal(metadataBytes, &config); err != nil {
 		return fmt.Errorf("metadata.json malformed in template %s: %w", templateName, err)
 	}
 
 	// validations
-	if metadata.Duration <= 0 {
+	if config.TotalDuration <= 0 || config.VisibleDuration <= 0 {
 		return fmt.Errorf("metadata.json invalid duration in template %s", templateName)
 	}
 
-	categories := metadata.Categories
+	categories := config.Categories
 	if categories == nil {
 		categories = []string{}
 	}
@@ -288,39 +275,36 @@ func syncTemplate(ctx context.Context, db datastore.TemplateRepository, template
 		return fmt.Errorf("failed to fetch template %s: %w", templateName, err)
 	}
 
-	codeRegistry := &pbcore.CodeRegistry{
+	config.CodeRegistry = &pbcore.CodeRegistry{
 		TUrl: tURL,
 		MUrl: mURL,
 	}
 
+	if config.CodeRegistry == nil || config.CodeRegistry.MUrl == "" || config.CodeRegistry.TUrl == "" {
+		return fmt.Errorf("metadata.json missing code_registry in template %s", templateName)
+	}
+
 	if existing == nil {
 		_, err = db.CreateTemplate(ctx, &models.Template{
-			Name:            templateName,
-			AnimationType:   animType,
-			Categories:      categories,
-			Description:     description,
-			ElementRegistry: registryBytes,
-			Repeatable:      metadata.Repeatable,
-			Schema:          schemaBytes,
-			CodeRegistry:    codeRegistry,
-			PreviewUrl:      "",
-			Duration:        metadata.Duration,
+			Name:          templateName,
+			AnimationType: animType,
+			Categories:    categories,
+			Description:   description,
+			Repeatable:    config.Repeatable,
+			Schema:        schemaBytes,
+			PreviewUrl:    "",
+			Config:        &config,
 		})
 		if err != nil {
 			return fmt.Errorf("failed to create template %s: %w", templateName, err)
 		}
 		stats.templatesInserted++
-	} else if templateNeedsUpdate(existing, categories, description, schemaBytes, registryBytes, codeRegistry, metadata.Duration, metadata.Repeatable) {
+	} else if templateNeedsUpdate(existing, categories, description, schemaBytes, config) {
 		existing.Categories = categories
 		existing.Description = description
 		existing.Schema = schemaBytes
-		existing.ElementRegistry = registryBytes
-		existing.Duration = metadata.Duration
-		existing.CodeRegistry = &pbcore.CodeRegistry{
-			TUrl: tURL,
-			MUrl: mURL,
-		}
-		existing.Repeatable = metadata.Repeatable
+		existing.Config = &config
+		existing.Repeatable = config.Repeatable
 		if err = db.UpdateTemplate(ctx, existing); err != nil {
 			return fmt.Errorf("failed to update template %s: %w", templateName, err)
 		}
@@ -330,28 +314,31 @@ func syncTemplate(ctx context.Context, db datastore.TemplateRepository, template
 	return nil
 }
 
-func templateNeedsUpdate(existing *models.Template, categories []string, description string, schema, preview []byte, codeRegistry *pbcore.CodeRegistry, duration int64, repeatable bool) bool {
+func templateNeedsUpdate(existing *models.Template, categories []string, description string, schema json.RawMessage, config models.TemplateConfig) bool {
 	if existing.Description != description {
 		return true
 	}
-	if existing.CodeRegistry.MUrl != codeRegistry.MUrl {
+	if existing.Config.CodeRegistry.MUrl != config.CodeRegistry.MUrl {
 		return true
 	}
 
-	if existing.Duration != duration {
+	if existing.Config.CodeRegistry.TUrl != config.CodeRegistry.TUrl {
 		return true
 	}
 
-	if existing.Repeatable != repeatable {
+	if existing.Config.TotalDuration != config.TotalDuration {
 		return true
 	}
-	if existing.CodeRegistry.TUrl != codeRegistry.TUrl {
+
+	if existing.Config.VisibleDuration != config.VisibleDuration {
 		return true
 	}
+
+	if existing.Repeatable != config.Repeatable {
+		return true
+	}
+
 	if !jsonRawEqual(existing.Schema, schema) {
-		return true
-	}
-	if !jsonRawEqual(existing.ElementRegistry, preview) {
 		return true
 	}
 

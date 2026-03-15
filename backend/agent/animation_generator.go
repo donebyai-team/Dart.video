@@ -281,17 +281,22 @@ func (l *animationGenerator) GenerateCode(ctx context.Context,
 			}
 
 			return &models.Template{
-				ID:   uuid.New().String(),
-				Name: componentName,
-				CodeRegistry: &pbcore.CodeRegistry{
-					MUrl: uploadedMedia.Url,
-					TUrl: buildOutput.JSPath,
+				ID:            uuid.New().String(),
+				Name:          componentName,
+				AnimationType: types.AnimationTypeTEXT,
+				Repeatable:    false,
+				Description:   prompt,
+				Config: &models.TemplateConfig{
+					CodeRegistry: &pbcore.CodeRegistry{
+						MUrl: uploadedMedia.Url,
+						TUrl: buildOutput.JSPath,
+					},
+					VisibleDuration: int64(buildOutput.CodeDuration.SettledFrame),
+					TotalDuration:   int64(buildOutput.CodeDuration.DurationInFrames),
+					Repeatable:      false,
+					Categories:      nil,
 				},
-				AnimationType:   types.AnimationTypeTEXT,
-				Repeatable:      false,
-				ElementRegistry: buildOutput.Registry,
-				Description:     prompt,
-				Duration:        updatedDuration,
+				GeneratedPatches: buildOutput.Registry,
 			}, nil
 		}
 
@@ -356,8 +361,6 @@ func (l *animationGenerator) EditAnimationCode(
 	)
 
 	if err == nil {
-		// set its duration
-		template.Duration = int64(animationSlide.DurationInFrames)
 		return template, nil
 	}
 
@@ -552,12 +555,18 @@ func (l *animationGenerator) uploadAndBuild(
 	return &models.Template{
 		ID:   uuid.New().String(),
 		Name: componentName,
-		CodeRegistry: &pbcore.CodeRegistry{
-			MUrl: uploadedMedia.Url,
-			TUrl: buildOutput.JSPath,
+		Config: &models.TemplateConfig{
+			CodeRegistry: &pbcore.CodeRegistry{
+				MUrl: uploadedMedia.Url,
+				TUrl: buildOutput.JSPath,
+			},
+			VisibleDuration: int64(buildOutput.CodeDuration.SettledFrame),
+			TotalDuration:   int64(buildOutput.CodeDuration.DurationInFrames),
+			Repeatable:      false,
+			Categories:      nil,
 		},
-		Repeatable:      false,
-		ElementRegistry: buildOutput.Registry,
+		Repeatable:       false,
+		GeneratedPatches: buildOutput.Registry,
 	}, nil
 }
 
@@ -588,14 +597,6 @@ func (l *animationGenerator) tryRegenerateAnimation(
 			return nil, agenterrors.EditAnimationCodeFailed("failed to re-generate animation", err)
 		}
 
-		updatedDuration := response.IdealDuration
-		if !IsValidDuration(updatedDuration) {
-			l.logger.Info("Received invalid duration from re-generated code, moving to animation from prompt",
-				zap.Int("generated_duration", int(response.IdealDuration)),
-				zap.Int("default", int(animationSlide.DurationInFrames)))
-			updatedDuration = int64(animationSlide.DurationInFrames)
-		}
-
 		if l.generationOptions.BrandIdentityMapper != nil {
 			l.logger.Info("using brand-identity mapping for resolving media handles")
 			response.Code = l.generationOptions.BrandIdentityMapper.ResolveMediaHandles(response.Code)
@@ -619,8 +620,6 @@ func (l *animationGenerator) tryRegenerateAnimation(
 		)
 
 		if err == nil {
-			// update duration
-			template.Duration = updatedDuration
 			return template, nil
 		}
 

@@ -3,7 +3,6 @@ package portal
 import (
 	"connectrpc.com/connect"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/google/uuid"
@@ -323,23 +322,23 @@ func applyTemplateToSlide(slide *pbcore.Slide, template *models.Template, isExis
 		return nil
 	}
 
-	slide.DurationInFrames = float32(template.Duration)
-	toStructRegistry, err := utils.RawMessageToStruct(template.ElementRegistry)
+	// TODO: multify with real fps
+	slide.DurationInFrames = float32(template.Config.TotalDuration * 30)
+	slide.SettledFrame = float32(template.Config.VisibleDuration * 30)
+	toPatches, err := utils.RawMessageToStruct(template.GeneratedPatches)
 	if err != nil {
 		return fmt.Errorf("invalid template registry: %s", template.Name)
 	}
 
 	animationContent := slide.GetAnimation()
-	animationContent.CodeRegistry = template.CodeRegistry
-	animationContent.Registry = toStructRegistry
+	animationContent.CodeRegistry = template.Config.CodeRegistry
+	animationContent.Edits = toPatches
 
 	// only if creating a new slide
 	if !isExistingSlide {
 		if template.GeneratedPlan != nil {
 			animationContent.Plan = template.GeneratedPlan
 		}
-		emptyEdits, _ := utils.RawMessageToStruct(json.RawMessage(`{}`))
-		animationContent.Edits = emptyEdits
 	}
 
 	return nil
@@ -348,22 +347,17 @@ func applyTemplateToSlide(slide *pbcore.Slide, template *models.Template, isExis
 func toProtoSuggestions(templates []*models.Template) ([]*pbcore.AnimationTemplate, error) {
 	protoTemplates := make([]*pbcore.AnimationTemplate, 0, len(templates))
 	for _, suggestion := range templates {
-		toStructRegistry, err := utils.RawMessageToStruct(suggestion.ElementRegistry)
-		if err != nil {
-			return nil, fmt.Errorf("invalid template registry: %s", suggestion.Name)
-		}
 
-		toStructConfig, err := utils.RawMessageToStruct(suggestion.GeneratedConfig)
+		toStructConfig, err := utils.RawMessageToStruct(suggestion.GeneratedPatches)
 		if err != nil {
 			return nil, fmt.Errorf("invalid template config: %s", suggestion.Name)
 		}
 
 		protoTemplates = append(protoTemplates, &pbcore.AnimationTemplate{
 			Id:           suggestion.ID,
-			CodeRegistry: suggestion.CodeRegistry,
+			CodeRegistry: suggestion.Config.CodeRegistry,
 			Name:         suggestion.Name,
 			PreviewUrl:   suggestion.PreviewUrl,
-			Registry:     toStructRegistry,
 			Edits:        toStructConfig,
 			Plan:         suggestion.GeneratedPlan,
 		})

@@ -280,13 +280,12 @@ func (l *agentAnimationEditor) GetAnimationSuggestions(
 		}
 
 		// To be used as edits
-		template.GeneratedConfig = json.RawMessage(templateConfig.Config)
+		template.GeneratedPatches = json.RawMessage(templateConfig.Config)
 		// Save plan for debugging
 		template.GeneratedPlan = &pbcore.AnimationSlidePlan{
 			BeatDescription:             beatDescription,
 			AnimationType:               string(animationType),
 			CategorySearcQquery:         categorySearchQuery,
-			Duration:                    template.Duration,
 			SelectedTemplateDescription: utils.Ptr(template.Description),
 		}
 	}

@@ -564,7 +564,7 @@ func (a *agentV1) selectTemplate(
 		if err != nil {
 			return nil, agenterrors.TemplateExtractFailed("failed to extract template config", err)
 		}
-		selected.GeneratedConfig = json.RawMessage(templateConfig.Config)
+		selected.GeneratedPatches = json.RawMessage(templateConfig.Config)
 		break
 	}
 

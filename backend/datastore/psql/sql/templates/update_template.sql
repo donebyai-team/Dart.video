@@ -2,9 +2,7 @@ UPDATE templates
 SET categories  = :categories,
     description = :description,
     schema      = :schema,
-    code_registry     = :code_registry,
+    config     = :config,
     repeatable  = :repeatable,
-    preview_url = :preview_url,
-    element_registry = :element_registry,
-    duration = :duration
+    preview_url = :preview_url
 WHERE id = :id;

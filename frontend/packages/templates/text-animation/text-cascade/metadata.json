@@ -3,5 +3,10 @@
         "simple-text"
     ],
     "repeatable": true,
-    "duration": 5
+    "visible_duration": 5,
+    "total_duration": 5,
+    "code_registey": {
+        "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d/3b190117-781b-4dea-bd66-35119f29d0a0/WaveReveal_17732202755455010000.tsx",
+        "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/TransformedFlipShank6.tsx"
+    }
 }

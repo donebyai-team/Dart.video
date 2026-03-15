@@ -172,20 +172,11 @@ func (g *videoConfigGenerator) UpdateAnimationSlide(
 	slideID string,
 	selectedTemplate *models.Template,
 ) error {
-	toStructRegistry, err := utils.RawMessageToStruct(selectedTemplate.ElementRegistry)
-	if err != nil {
-		g.logger.Error("failed to convert template registry",
-			zap.Error(err),
-			zap.Any("registry", selectedTemplate.ElementRegistry),
-		)
-		return errors.Wrapf(err, "invalid template config: %s", selectedTemplate.Name)
-	}
-
-	toStructConfig, err := utils.RawMessageToStruct(selectedTemplate.GeneratedConfig)
+	toStructConfig, err := utils.RawMessageToStruct(selectedTemplate.GeneratedPatches)
 	if err != nil {
 		g.logger.Error("failed to convert template config",
 			zap.Error(err),
-			zap.Any("template_config", selectedTemplate.GeneratedConfig),
+			zap.Any("template_config", selectedTemplate.GeneratedPatches),
 		)
 		return errors.Wrapf(err, "invalid template config: %s", selectedTemplate.Name)
 	}
@@ -195,8 +186,7 @@ func (g *videoConfigGenerator) UpdateAnimationSlide(
 			if slide.Id == slideID {
 				animation := slide.GetAnimation()
 				slide.SlideStatus = pbcore.SlideStatus_SLIDE_STATUS_GENERATED
-				animation.CodeRegistry = selectedTemplate.CodeRegistry
-				animation.Registry = toStructRegistry
+				animation.CodeRegistry = selectedTemplate.Config.CodeRegistry
 				animation.Edits = toStructConfig
 
 				// update the selected template description

@@ -4,6 +4,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"github.com/lib/pq"
+	"github.com/pkg/errors"
 	"github.com/shank318/coasterai/baml_client/types"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"time"
@@ -52,20 +53,58 @@ func (a *TemplateCategories) Scan(src interface{}) error {
 }
 
 type Template struct {
-	ID              string               `db:"id"`
-	Name            string               `db:"name"`
-	AnimationType   types.AnimationType  `db:"animation_type"`
-	Categories      TemplateCategories   `db:"categories"`
-	Description     string               `db:"description"`
-	Schema          json.RawMessage      `db:"schema"`
-	CodeRegistry    *pbcore.CodeRegistry `db:"code_registry"`
-	PreviewUrl      string               `db:"preview_url"`
-	CreatedAt       time.Time            `db:"created_at"`
-	UpdatedAt       *time.Time           `db:"updated_at"`
-	Repeatable      bool                 `db:"repeatable"`
-	ElementRegistry json.RawMessage      `db:"element_registry"`
-	Duration        int64                `db:"duration"`
+	ID            string              `db:"id"`
+	Name          string              `db:"name"`
+	AnimationType types.AnimationType `db:"animation_type"`
+	Categories    TemplateCategories  `db:"categories"`
+	Description   string              `db:"description"`
+	Schema        json.RawMessage     `db:"schema"`
+	PreviewUrl    string              `db:"preview_url"`
+	CreatedAt     time.Time           `db:"created_at"`
+	UpdatedAt     *time.Time          `db:"updated_at"`
+	Repeatable    bool                `db:"repeatable"`
+	Config        *TemplateConfig     `db:"config"`
 
-	GeneratedConfig json.RawMessage            `db:"-"` // Maps to edits in slide
-	GeneratedPlan   *pbcore.AnimationSlidePlan `db:"-"`
+	GeneratedPatches json.RawMessage            `db:"-"` // Maps to edits in slide
+	GeneratedPlan    *pbcore.AnimationSlidePlan `db:"-"`
+}
+
+type TemplateConfig struct {
+	CodeRegistry    *pbcore.CodeRegistry `json:"code_registry"`
+	VisibleDuration int64                `json:"visible_duration"`
+	TotalDuration   int64                `json:"total_duration"`
+	Repeatable      bool                 `json:"repeatable"`
+	Categories      TemplateCategories   `json:"categories"`
+}
+
+func (v *TemplateConfig) Value() (driver.Value, error) {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return nil, errors.Wrap(err, "TemplateConfig metadata")
+	}
+	return b, nil
+}
+
+func (v *TemplateConfig) Scan(value any) error {
+	if value == nil {
+		*v = TemplateConfig{}
+		return nil
+	}
+
+	var data []byte
+
+	switch val := value.(type) {
+	case []byte:
+		data = val
+	case string:
+		data = []byte(val)
+	default:
+		return errors.Errorf("unsupported type for TemplateConfig: %T", value)
+	}
+
+	if err := json.Unmarshal(data, v); err != nil {
+		return errors.Wrap(err, "TemplateConfig metadata")
+	}
+
+	return nil
 }

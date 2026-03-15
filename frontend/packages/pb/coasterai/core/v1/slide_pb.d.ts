@@ -213,11 +213,6 @@ export declare type AnimationSlideContent = Message<"coasterai.core.v1.Animation
    * @generated from field: google.protobuf.Struct edits = 3;
    */
   edits?: JsonObject;
-
-  /**
-   * @generated from field: google.protobuf.Struct registry = 4;
-   */
-  registry?: JsonObject;
 };
 
 /**

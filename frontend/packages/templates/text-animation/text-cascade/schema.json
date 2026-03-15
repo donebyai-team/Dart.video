@@ -2,42 +2,35 @@
   "name": "slide_center_text_schema",
   "schema": {
     "type": "object",
-    "additionalProperties": false,
-    "required": ["el-2", "el-3"],
     "properties": {
-      "el-2": {
+      "text-0": {
         "type": "object",
-        "description": "The animated text block. Edit the text content here.",
-        "additionalProperties": false,
-        "required": ["text"],
         "properties": {
-          "text": {
-            "type": "string",
-            "description": "The text that animates in letter by letter. Keep it short and punchy.",
-            "minLength": 5,
-            "maxLength": 50
-          }
-        }
-      },
-      "el-3": {
-        "type": "object",
-        "description": "Style of each letter. Changes apply to all letters.",
-        "additionalProperties": false,
-        "required": ["style"],
-        "properties": {
-          "style": {
+          "value": {
             "type": "object",
-            "additionalProperties": false,
-            "required": ["color"],
             "properties": {
-              "color": {
+              "children": {
                 "type": "string",
-                "description": "Color of the letters. Use a hex color e.g. #ffffff"
+                "description": "A text that animates in letter by letter.",
+                "minLength": 50,
+                "maxLength": 70
               }
-            }
+            },
+            "required": [
+              "children"
+            ],
+            "additionalProperties": false
           }
-        }
+        },
+        "required": [
+          "value"
+        ],
+        "additionalProperties": false
       }
-    }
+    },
+    "required": [
+      "text-0"
+    ],
+    "additionalProperties": false
   }
 }

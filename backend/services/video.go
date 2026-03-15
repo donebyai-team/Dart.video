@@ -220,7 +220,6 @@ func stripSlideForRender(slide *pbcore.Slide) {
 	slide.Plan = nil
 	if slide.GetAnimation() != nil {
 		slide.GetAnimation().Plan = nil
-		slide.GetAnimation().Registry = nil
 		slide.GetAnimation().CodeRegistry.MUrl = ""
 	}
 
