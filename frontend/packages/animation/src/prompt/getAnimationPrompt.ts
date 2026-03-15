@@ -1,4 +1,4 @@
-import { AspectPreset } from '../styles/AspectPresetContext';
+import { ASPECT_PRESETS, AspectPreset } from '../styles/AspectPresetContext';
 import { BrandTheme as BrandObject } from '../theme/types';
 import { AnimationTypeName, ANIMATION_TYPE_DEFINITIONS, getComponentsForType } from '../registry/animationTypes';
 import {
@@ -7,34 +7,27 @@ import {
   componentListFragment,
   spacingFragment,
   typographyFragment,
-  brandTokensFragment,
   timingGuidanceFragment,
   globalRulesFragment,
-  typeSpecificRulesFragment,
+  exampleFragment,
 } from './fragments';
+import { COMPONENT_REGISTRY } from '../registry';
 
-/**
- * Generates a complete LLM system prompt for the given animation configuration.
- * Never hand-written — always generated from the registry and token system.
- * Approximately 150-200 tokens for the structural parts, plus brand token values.
- */
 export function getAnimationPrompt(
-  animationType: AnimationTypeName,
-  aspectPreset: AspectPreset,
 ): string {
-  const components = getComponentsForType(animationType);
-  const typeDef = ANIMATION_TYPE_DEFINITIONS[animationType];
+  // const typeDef = ANIMATION_TYPE_DEFINITIONS[animationType];
 
   const sections = [
     frameContractFragment(),
-    canvasDimensionsFragment(aspectPreset),
-    componentListFragment(components),
+    canvasDimensionsFragment(ASPECT_PRESETS['web']),
+    componentListFragment(COMPONENT_REGISTRY),
     spacingFragment(),
     typographyFragment(),
     // brandTokensFragment(brand),
     timingGuidanceFragment(),
     globalRulesFragment(),
-    typeSpecificRulesFragment(typeDef),
+    // typeSpecificRulesFragment(typeDef),
+    exampleFragment(), 
   ];
 
   return sections.join('\n\n');

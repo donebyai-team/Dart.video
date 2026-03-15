@@ -23,7 +23,6 @@ export interface ComponentRegistration {
 // ── Schemas ────────────────────────────────────────────────────────────────
 
 const frameTimingSchema = {
-  frame: z.number().describe('Current frame'),
   delay: z.number().optional().describe('Frames before animation starts'),
   duration: z.number().optional().describe('Animation duration in frames'),
 };
@@ -77,14 +76,12 @@ export const ScaleOutSchema = z.object({
 });
 
 export const StaggerSchema = z.object({
-  frame: z.number(),
   startAt: z.number().optional(),
   delayBetween: z.number().optional(),
   children: z.any().optional(),
 });
 
 export const TimelineGateSchema = z.object({
-  frame: z.number(),
   showAfter: z.number(),
   hideAfter: z.number().optional(),
   children: z.any().optional(),
@@ -144,7 +141,6 @@ export const TypewriterSchema = z.object({
 });
 
 export const WordCycleSchema = z.object({
-  frame: z.number(),
   delay: z.number().optional(),
   words: z.array(z.string()),
   holdDuration: z.number().optional(),
@@ -156,7 +152,6 @@ export const WordCycleSchema = z.object({
 });
 
 export const TitleCardSchema = z.object({
-  frame: z.number(),
   heading: z.string(),
   subheading: z.string().optional(),
   eyebrow: z.string().optional(),

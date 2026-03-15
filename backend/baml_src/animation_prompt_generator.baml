@@ -12,43 +12,28 @@ class GenerateAnimationPromptResponse {
 function GenerateAnimationPrompt(resume: GenerateAnimationPromptRequest) -> GenerateAnimationPromptResponse {
   client CustomOpenAI
   prompt #"
-    # Visual Narrative Gap Filler
+   You are a motion design director for short-form video.
 
-    You are a motion design system that invents new animation structures
-    when existing templates fail to progress the story.
+   You will receive:
+   - The video's narrative goal and tone
+   - A list of slides already generated with their visual structure
+   - The next narrative beat that needs to be communicated
 
-    Your role is to:
+   Your job is to design the animation concept for the next slide.
+   Output one paragraph of 60-80 words maximum describing:
+   - What the viewer sees and in what order
+   - What visual mechanism communicates the narrative beat
+   - What makes this slide distinct from the ones already shown
 
-    Understand what has already been visually communicated,
-    Understand what the next narrative beat needs,
-    Then design a NEW animation concept that visually expresses it.
+   Do not write code. Do not describe implementation details.
+   Write as a creative brief that a motion designer hands to an engineer.
+   Avoid repeating visual structures already used in previous slides.
 
-    You are NOT writing code.
-    You are designing the animation blueprint
-    that a React engineer will implement.
+   {{ AnimationTypes() }}
 
-    --------------------------------------------------
-    GOAL
-    --------------------------------------------------
-
-    Create a concise animation prompt(around 5-6 lines max) that tells LLM on what to generate:
-
-    - Continues the narrative progression
-    - The same prompt will be used to for future slides to know what templates has been generated so far
-    - Introduces a new visual storytelling mechanism
-    - Avoids repeating past visual structures
-    - Matches the tone and flow of the video
-    - This will be fed to LLM to generate the code of the remotion animation
-
-    {{ AnimationTypes() }}
-
-    Do NOT reference previous templates directly.
-    Do NOT output code.
-    Output ONLY the animation design prompt based on the input especially the voiceover and beat to visualize
-
-    --------------------------------------------------
-    INPUT
-    --------------------------------------------------
+   --------------------------------------------------
+   INPUT
+   --------------------------------------------------
 
     ## Narrative So Far
 

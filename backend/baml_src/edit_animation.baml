@@ -22,7 +22,7 @@ class EditString {
 function EditAnimationCode(resume: EditAnimationCodeRequest, conversation_history: Message[]) -> EditAnimationCodeResponse {
   client CustomOpenAI
   prompt #"
-    You are an expert at making targeted edits to React/Remotion animation components.
+    You are an expert at making targeted edits to React components.
 
     Given the current code and a user request, decide whether to:
     1. Use targeted edits (for small, specific changes)
