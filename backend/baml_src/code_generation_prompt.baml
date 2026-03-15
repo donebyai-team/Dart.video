@@ -13,125 +13,125 @@ Animation timing must always use the provided primitives.
 Only use the components listed below. Do not invent new ones.
 
 ### SafeArea
-Description: Outermost content wrapper — applies safe area insets from the active aspect preset
+Outermost content wrapper that applies safe area insets from the active aspect preset
 Props:
 
 ### Stack
-Description: Vertical flex layout — gap must use spacing token values (4|8|12|16|24|32|48|64|96)
+Vertical flex layout with spacing token values for gap
 Props:
-- gap (optional)
-- align (optional)
-- justify (optional)
+- gap: number (optional)
+- align: string (optional)
+- justify: string (optional)
 
 ### Row
-Description: Horizontal flex layout — gap must use spacing token values
+Horizontal flex layout with spacing token values for gap
 Props:
-- gap (optional)
-- align (optional)
-- justify (optional)
+- gap: number (optional)
+- align: string (optional)
+- justify: string (optional)
 
 ### AbsoluteCenter
-Description: Centers child absolutely within nearest positioned parent — axis: x|y|both
+Centers child absolutely within nearest positioned parent
 Props:
-- axis (optional)
+- axis: enum(x|y|both) (optional)
 
 ### FadeIn
-Description: Opacity 0→1 entrance — frame delay? duration?
+Fade-in entrance animation (opacity 0 to 1)
 Props:
-- delay (optional)
-- duration (optional)
+- delay: number (optional)
+- duration: number (optional)
 
 ### FadeOut
-Description: Opacity 1→0 exit — frame delay? duration?
+Fade-out exit animation (opacity 1 to 0)
 Props:
-- delay (optional)
-- duration (optional)
+- delay: number (optional)
+- duration: number (optional)
 
 ### SlideIn
-Description: Translate+fade entrance — frame delay? duration? direction?(up|down|left|right) distance?
+Slide-in entrance with translation and fade
 Props:
-- delay (optional)
-- duration (optional)
-- direction (optional)
-- distance (optional)
+- delay: number (optional)
+- duration: number (optional)
+- direction: enum(up|down|left|right) (optional)
+- distance: number (optional)
 
 ### SlideOut
-Description: Translate+fade exit — frame delay? duration? direction?(up|down|left|right) distance?
+Slide-out exit with translation and fade
 Props:
-- delay (optional)
-- duration (optional)
-- direction (optional)
-- distance (optional)
+- delay: number (optional)
+- duration: number (optional)
+- direction: enum(up|down|left|right) (optional)
+- distance: number (optional)
 
 ### ScaleIn
-Description: Scale 0→1 entrance — frame delay? duration? origin?(center|top|bottom|left|right)
+Scale-in entrance animation (scale 0 to 1)
 Props:
-- delay (optional)
-- duration (optional)
-- origin (optional)
+- delay: number (optional)
+- duration: number (optional)
+- origin: enum(center|top|bottom|left|right) (optional)
 
 ### ScaleOut
-Description: Scale 1→0 exit — frame delay? duration? origin?(center|top|bottom|left|right)
+Scale-out exit animation (scale 1 to 0)
 Props:
-- delay (optional)
-- duration (optional)
-- origin (optional)
+- delay: number (optional)
+- duration: number (optional)
+- origin: enum(center|top|bottom|left|right) (optional)
 
 ### Stagger
-Description: List timing orchestrator — frame startAt? delayBetween? — clones children with increasing frame offset
+Staggers children animations with increasing delay offsets
 Props:
-- startAt (optional)
-- delayBetween (optional)
+- startAt: number (optional)
+- delayBetween: number (optional)
 
 ### TimelineGate
-Description: Mount/unmount children in frame window — frame showAfter hideAfter? — use instead of JSX conditionals
+Mounts/unmounts children within a frame window, use instead of JSX conditionals
 Props:
-- showAfter (optional)
-- hideAfter (optional)
+- showAfter: number (required)
+- hideAfter: number (optional)
 
 ### Text
-Description: Static text — variant?(caption|label|body|subheading|heading|display) — wrap in FadeIn/SlideIn to animate
+Static text element, wrap in FadeIn/SlideIn to animate
 Props:
-- variant (optional)
+- variant: enum(caption|label|body|subheading|heading|display) (optional)
 
 ### Counter
-Description: Animated number — frame to delay? duration? from? format? prefix? suffix?
+Animated number counter that tweens between values
 Props:
-- delay (optional)
-- duration (optional)
-- from (optional)
-- to (required)
-- format (optional)
-- prefix (optional)
-- suffix (optional)
-- variant (optional)
+- delay: number (optional)
+- duration: number (optional)
+- from: number (optional)
+- to: number (required)
+- format: string (optional)
+- prefix: string (optional)
+- suffix: string (optional)
+- variant: enum(caption|label|body|subheading|heading|display) (optional)
 
 ### Typewriter
-Description: Progressive text reveal — frame text delay? duration? mode?(char|word|line)
+Progressively reveals text character by character, word, or line
 Props:
-- delay (optional)
-- duration (optional)
-- text (required)
-- mode (optional)
-- variant (optional)
+- delay: number (optional)
+- duration: number (optional)
+- text: string (required)
+- mode: enum(char|word|line) (optional)
+- variant: enum(caption|label|body|subheading|heading|display) (optional)
 
 ### WordCycle
-Description: Cycling word array — frame words holdDuration? transitionDuration? transition?(flipY|fadeSwap|slideUp)
+Cycles through an array of words with animated transitions
 Props:
-- delay (optional)
-- words (required)
-- holdDuration (optional)
-- transitionDuration (optional)
-- transition (optional)
-- variant (optional)
+- delay: number (optional)
+- words: array (required)
+- holdDuration: number (optional)
+- transitionDuration: number (optional)
+- transition: enum(flipY|fadeSwap|slideUp) (optional)
+- variant: enum(caption|label|body|subheading|heading|display) (optional)
 
 ### TitleCard
-Description: Hero composition — frame heading subheading? eyebrow? delay?
+Pre-built hero title card composition with heading, subheading, and eyebrow
 Props:
-- heading (required)
-- subheading (optional)
-- eyebrow (optional)
-- delay (optional)
+- heading: string (required)
+- subheading: string (optional)
+- eyebrow: string (optional)
+- delay: number (optional)
 
 
 ## SPACING (use these values for gap/padding/margin):

@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { AspectPreset } from '../styles/AspectPresetContext';
 import { BrandTheme as BrandObject } from '../theme/types';
 import { ComponentRegistration } from '../registry/components';
@@ -22,6 +23,34 @@ export function canvasDimensionsFragment(preset: AspectPreset): string {
   ].join('\n');
 }
 
+/**
+ * Unwrap Zod wrappers (ZodOptional, ZodDefault, ZodNullable) to get the inner type.
+ */
+function unwrapZod(schema: z.ZodTypeAny): z.ZodTypeAny {
+  if (schema instanceof z.ZodOptional || schema instanceof z.ZodNullable) {
+    return unwrapZod(schema._def.innerType);
+  }
+  if (schema instanceof z.ZodDefault) {
+    return unwrapZod(schema._def.innerType);
+  }
+  return schema;
+}
+
+/**
+ * Extract a human-readable type hint from a Zod schema field.
+ * Returns strings like "number", "string", or "enum(up|down|left|right)".
+ */
+function describeZodType(schema: z.ZodTypeAny): string {
+  const inner = unwrapZod(schema);
+  if (inner instanceof z.ZodEnum) {
+    return `enum(${(inner._def.values as string[]).join('|')})`;
+  }
+  if (inner instanceof z.ZodNumber) return 'number';
+  if (inner instanceof z.ZodString) return 'string';
+  if (inner instanceof z.ZodArray) return 'array';
+  return 'any';
+}
+
 export function componentListFragment(components: ComponentRegistration[]): string {
   const lines: string[] = [];
 
@@ -30,22 +59,18 @@ export function componentListFragment(components: ComponentRegistration[]): stri
   lines.push("");
 
   for (const c of components) {
-    const schema = c.fullSchema.shape;
+    const shape = c.fullSchema.shape;
 
     lines.push(`### ${c.name}`);
-    lines.push(`Description: ${c.description}`);
+    lines.push(`${c.description}`);
     lines.push("Props:");
 
-    for (const [key] of Object.entries(schema)) {
+    for (const [key, field] of Object.entries(shape)) {
       if (key === "children" || key === "style" || key === "className") continue;
 
-      const isOptional =
-        key !== "to" &&
-        key !== "text" &&
-        key !== "words" &&
-        key !== "heading";
-
-      lines.push(`- ${key} (${isOptional ? "optional" : "required"})`);
+      const isOptional = (field as z.ZodTypeAny).isOptional();
+      const typeHint = describeZodType(field as z.ZodTypeAny);
+      lines.push(`- ${key}: ${typeHint} (${isOptional ? "optional" : "required"})`);
     }
 
     lines.push("");

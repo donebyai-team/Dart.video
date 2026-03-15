@@ -171,7 +171,7 @@ export const COMPONENT_REGISTRY: ComponentRegistration[] = [
     fullSchema: SafeAreaSchema,
     editorProps: [],
     animationTypes: LAYOUT_TYPES,
-    description: 'Outermost content wrapper — applies safe area insets from the active aspect preset',
+    description: 'Outermost content wrapper that applies safe area insets from the active aspect preset',
   },
   {
     name: 'Stack',
@@ -179,7 +179,7 @@ export const COMPONENT_REGISTRY: ComponentRegistration[] = [
     fullSchema: StackSchema,
     editorProps: ['gap', 'align', 'justify'],
     animationTypes: LAYOUT_TYPES,
-    description: 'Vertical flex layout — gap must use spacing token values (4|8|12|16|24|32|48|64|96)',
+    description: 'Vertical flex layout with spacing token values for gap',
   },
   {
     name: 'Row',
@@ -187,7 +187,7 @@ export const COMPONENT_REGISTRY: ComponentRegistration[] = [
     fullSchema: RowSchema,
     editorProps: ['gap', 'align', 'justify'],
     animationTypes: LAYOUT_TYPES,
-    description: 'Horizontal flex layout — gap must use spacing token values',
+    description: 'Horizontal flex layout with spacing token values for gap',
   },
   {
     name: 'AbsoluteCenter',
@@ -195,7 +195,7 @@ export const COMPONENT_REGISTRY: ComponentRegistration[] = [
     fullSchema: AbsoluteCenterSchema,
     editorProps: ['axis'],
     animationTypes: LAYOUT_TYPES,
-    description: 'Centers child absolutely within nearest positioned parent — axis: x|y|both',
+    description: 'Centers child absolutely within nearest positioned parent',
   },
   // Animation primitives
   {
@@ -204,7 +204,7 @@ export const COMPONENT_REGISTRY: ComponentRegistration[] = [
     fullSchema: FadeInSchema,
     editorProps: ['delay', 'duration'],
     animationTypes: ALL_TYPES,
-    description: 'Opacity 0→1 entrance — frame delay? duration?',
+    description: 'Fade-in entrance animation (opacity 0 to 1)',
   },
   {
     name: 'FadeOut',
@@ -212,7 +212,7 @@ export const COMPONENT_REGISTRY: ComponentRegistration[] = [
     fullSchema: FadeOutSchema,
     editorProps: ['delay', 'duration'],
     animationTypes: ALL_TYPES,
-    description: 'Opacity 1→0 exit — frame delay? duration?',
+    description: 'Fade-out exit animation (opacity 1 to 0)',
   },
   {
     name: 'SlideIn',
@@ -220,7 +220,7 @@ export const COMPONENT_REGISTRY: ComponentRegistration[] = [
     fullSchema: SlideInSchema,
     editorProps: ['delay', 'duration', 'direction', 'distance'],
     animationTypes: ALL_TYPES,
-    description: 'Translate+fade entrance — frame delay? duration? direction?(up|down|left|right) distance?',
+    description: 'Slide-in entrance with translation and fade',
   },
   {
     name: 'SlideOut',
@@ -228,7 +228,7 @@ export const COMPONENT_REGISTRY: ComponentRegistration[] = [
     fullSchema: SlideOutSchema,
     editorProps: ['delay', 'duration', 'direction', 'distance'],
     animationTypes: ALL_TYPES,
-    description: 'Translate+fade exit — frame delay? duration? direction?(up|down|left|right) distance?',
+    description: 'Slide-out exit with translation and fade',
   },
   {
     name: 'ScaleIn',
@@ -236,7 +236,7 @@ export const COMPONENT_REGISTRY: ComponentRegistration[] = [
     fullSchema: ScaleInSchema,
     editorProps: ['delay', 'duration', 'origin'],
     animationTypes: ALL_TYPES,
-    description: 'Scale 0→1 entrance — frame delay? duration? origin?(center|top|bottom|left|right)',
+    description: 'Scale-in entrance animation (scale 0 to 1)',
   },
   {
     name: 'ScaleOut',
@@ -244,7 +244,7 @@ export const COMPONENT_REGISTRY: ComponentRegistration[] = [
     fullSchema: ScaleOutSchema,
     editorProps: ['delay', 'duration', 'origin'],
     animationTypes: ALL_TYPES,
-    description: 'Scale 1→0 exit — frame delay? duration? origin?(center|top|bottom|left|right)',
+    description: 'Scale-out exit animation (scale 1 to 0)',
   },
   {
     name: 'Stagger',
@@ -252,7 +252,7 @@ export const COMPONENT_REGISTRY: ComponentRegistration[] = [
     fullSchema: StaggerSchema,
     editorProps: ['startAt', 'delayBetween'],
     animationTypes: ALL_TYPES,
-    description: 'List timing orchestrator — frame startAt? delayBetween? — clones children with increasing frame offset',
+    description: 'Staggers children animations with increasing delay offsets',
   },
   {
     name: 'TimelineGate',
@@ -260,7 +260,7 @@ export const COMPONENT_REGISTRY: ComponentRegistration[] = [
     fullSchema: TimelineGateSchema,
     editorProps: ['showAfter', 'hideAfter'],
     animationTypes: ALL_TYPES,
-    description: 'Mount/unmount children in frame window — frame showAfter hideAfter? — use instead of JSX conditionals',
+    description: 'Mounts/unmounts children within a frame window, use instead of JSX conditionals',
   },
   // Content
   {
@@ -269,7 +269,7 @@ export const COMPONENT_REGISTRY: ComponentRegistration[] = [
     fullSchema: TextSchema,
     editorProps: ['variant'],
     animationTypes: ALL_TYPES,
-    description: 'Static text — variant?(caption|label|body|subheading|heading|display) — wrap in FadeIn/SlideIn to animate',
+    description: 'Static text element, wrap in FadeIn/SlideIn to animate',
   },
   {
     name: 'Counter',
@@ -277,7 +277,7 @@ export const COMPONENT_REGISTRY: ComponentRegistration[] = [
     fullSchema: CounterSchema,
     editorProps: ['from', 'to', 'format', 'prefix', 'suffix', 'delay', 'duration'],
     animationTypes: ['text', 'data', 'presentation', 'custom'],
-    description: 'Animated number — frame to delay? duration? from? format? prefix? suffix?',
+    description: 'Animated number counter that tweens between values',
   },
   {
     name: 'Typewriter',
@@ -285,7 +285,7 @@ export const COMPONENT_REGISTRY: ComponentRegistration[] = [
     fullSchema: TypewriterSchema,
     editorProps: ['text', 'mode', 'delay', 'duration'],
     animationTypes: ['text', 'presentation', 'social', 'custom'],
-    description: 'Progressive text reveal — frame text delay? duration? mode?(char|word|line)',
+    description: 'Progressively reveals text character by character, word, or line',
   },
   {
     name: 'WordCycle',
@@ -293,7 +293,7 @@ export const COMPONENT_REGISTRY: ComponentRegistration[] = [
     fullSchema: WordCycleSchema,
     editorProps: ['words', 'holdDuration', 'transitionDuration', 'transition'],
     animationTypes: ['text', 'social', 'custom'],
-    description: 'Cycling word array — frame words holdDuration? transitionDuration? transition?(flipY|fadeSwap|slideUp)',
+    description: 'Cycles through an array of words with animated transitions',
   },
   // Scenes
   {
@@ -302,7 +302,7 @@ export const COMPONENT_REGISTRY: ComponentRegistration[] = [
     fullSchema: TitleCardSchema,
     editorProps: ['heading', 'subheading', 'eyebrow', 'delay'],
     animationTypes: ['text', 'data', 'presentation', 'custom'],
-    description: 'Hero composition — frame heading subheading? eyebrow? delay?',
+    description: 'Pre-built hero title card composition with heading, subheading, and eyebrow',
   },
 ];
 
