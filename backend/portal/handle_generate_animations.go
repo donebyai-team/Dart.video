@@ -6,10 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/datastore"
 	"github.com/shank318/coasterai/services"
-	"github.com/shank318/coasterai/services/brand_identity"
 	"strings"
 
 	"github.com/shank318/coasterai/agent"
@@ -97,7 +95,7 @@ func (p *Portal) GenerateOrEditAnimationSlide(ctx context.Context, c *connect.Re
 	)
 
 	animationAgent := p.newAnimationGeneratorAgent(logger, videoID, targetSlide.Id, actor.OrganizationID)
-	if err := p.injectAnimationGenerationContext(ctx, animationAgent, targetSlide, video); err != nil {
+	if err := p.injectAnimationGenerationContext(ctx, animationAgent, video); err != nil {
 		return err
 	}
 
@@ -238,72 +236,30 @@ func findSlideByID(video *models.Video, slideID string) *pbcore.Slide {
 	return nil
 }
 
-func buildAnimationGenerationContext(slide *pbcore.Slide, video *models.Video) (*types.VideoBranding, *types.VideoBackground) {
-	var videoBranding *types.VideoBranding
-	var videoBackground *types.VideoBackground
-	if video != nil && video.Metadata != nil {
-		if video.Metadata.GeneratedBranding != nil {
-			videoBranding = video.Metadata.GeneratedBranding.ToModel()
-		}
-		if video.Metadata.BackgroundStyle != nil {
-			videoBackground = video.Metadata.BackgroundStyle.ToModel()
-		}
-	}
-
-	if videoBackground == nil && slide != nil && slide.BackgroundStyle != nil {
-		videoBackground = slide.BackgroundStyle.ToModel()
-	}
-
-	if videoBackground == nil && video != nil && video.Config != nil {
-		for _, section := range video.Config.Sections {
-			for _, candidate := range section.Slides {
-				if candidate.BackgroundStyle != nil {
-					videoBackground = candidate.BackgroundStyle.ToModel()
-					return videoBranding, videoBackground
-				}
-			}
-		}
-	}
-
-	return videoBranding, videoBackground
-}
-
 func (p *Portal) injectAnimationGenerationContext(
 	ctx context.Context,
 	animationAgent agent.AnimationGeneratorAgent,
-	slide *pbcore.Slide,
 	video *models.Video,
 ) error {
-	videoBranding, videoBackground := buildAnimationGenerationContext(slide, video)
+	brandLibraryID := video.Metadata.GeneratedBranding.BrandLibraryID
+	if brandLibraryID == nil {
+		return nil
+	}
 
-	brandIdentityMapper, err := p.loadBrandIdentityMapper(ctx, videoBranding)
+	brandIdentityMapper, err := p.brandIdentityService.GetBrandIdentity(ctx, *brandLibraryID)
 	if err != nil {
+		if errors.Is(err, datastore.NotFound) {
+			return connect.NewError(connect.CodeInvalidArgument, errors.New("brand_identity not found"))
+		}
 		return err
 	}
+
 	options := agent.NewAnimationGenerationOptionsBuilder().
-		WithVideoBranding(videoBranding).
-		WithVideoBackground(videoBackground).
 		WithBrandIdentityMapper(brandIdentityMapper).
 		Build()
 	animationAgent.ApplyGenerationOptions(options)
 
 	return nil
-}
-
-func (p *Portal) loadBrandIdentityMapper(ctx context.Context, videoBranding *types.VideoBranding) (*brand_identity.BrandIdentityRegistry, error) {
-	if videoBranding == nil || videoBranding.BrandLibraryID == nil {
-		return nil, nil
-	}
-
-	brandIdentityMapper, err := p.brandIdentityService.GetBrandIdentity(ctx, *videoBranding.BrandLibraryID)
-	if err != nil {
-		if errors.Is(err, datastore.NotFound) {
-			return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("brand_identity not found"))
-		}
-		return nil, err
-	}
-
-	return brandIdentityMapper, nil
 }
 
 func createNewSlide(slideID string) *pbcore.Slide {

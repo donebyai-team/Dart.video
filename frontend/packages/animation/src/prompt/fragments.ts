@@ -7,7 +7,7 @@ import { PROMPT_SPACING_VALUES } from '../tokens/spacing';
 export function frameContractFragment(): string {
   return [
     'FRAME CONTRACT:',
-    'Your component receives { frame, fps, brand, data } as props.',
+    'Your component receives {} as props.',
     'fps is always 30. frame counts from 0.',
     'Never call useCurrentFrame(), interpolate(), spring(), or any Remotion hook.',
     'Never import from "remotion" or any other library.',

@@ -164,15 +164,11 @@ func (l *animationGenerator) Generate(
 
 	if l.generationOptions.VideoBranding != nil {
 		input.Branding = *l.generationOptions.VideoBranding
-
-		if l.generationOptions.BrandIdentityMapper != nil {
-			input.Branding.BrandGuideLines = utils.Ptr(l.generationOptions.BrandIdentityMapper.FormatBrandAndAssetDetails())
-			l.logger.Info("using injected brand-identity mapper")
-		}
 	}
 
-	if l.generationOptions.VideoBackground != nil {
-		input.SlideBackground = gradientToCSS(l.generationOptions.VideoBackground.Gradient)
+	if l.generationOptions.BrandIdentityMapper != nil {
+		input.Branding.BrandGuideLines = utils.Ptr(l.generationOptions.BrandIdentityMapper.FormatBrandAndAssetDetails())
+		l.logger.Info("using injected brand-identity mapper")
 	}
 
 	if len(planSoFar.Sections) > 0 {
@@ -201,15 +197,11 @@ func (l *animationGenerator) GenerateCode(ctx context.Context,
 
 	if l.generationOptions.VideoBranding != nil {
 		inptCodeGeneration.Branding = *l.generationOptions.VideoBranding
-
-		if l.generationOptions.BrandIdentityMapper != nil {
-			inptCodeGeneration.Branding.BrandGuideLines = utils.Ptr(l.generationOptions.BrandIdentityMapper.FormatBrandAndAssetDetails())
-			l.logger.Info("using injected brand-identity mapper", zap.String("guidelines", *inptCodeGeneration.Branding.BrandGuideLines))
-		}
 	}
 
-	if l.generationOptions.VideoBackground != nil {
-		inptCodeGeneration.SlideBackground = gradientToCSS(l.generationOptions.VideoBackground.Gradient)
+	if l.generationOptions.BrandIdentityMapper != nil {
+		inptCodeGeneration.Branding.BrandGuideLines = utils.Ptr(l.generationOptions.BrandIdentityMapper.FormatBrandAndAssetDetails())
+		l.logger.Info("using injected brand-identity mapper", zap.String("guidelines", *inptCodeGeneration.Branding.BrandGuideLines))
 	}
 
 	conversationHistory := make([]types.Message, 0)
@@ -271,14 +263,6 @@ func (l *animationGenerator) GenerateCode(ctx context.Context,
 			callback(TemplateGenerationProgress{
 				Message: CreativeStageMessage(StageReady, 0),
 			})
-
-			updatedDuration := generatedAnimation.IdealDuration
-			if !IsValidDuration(updatedDuration) {
-				l.logger.Info("Received invalid duration from generated code, moving to animation from prompt",
-					zap.Int("generated_duration", int(generatedAnimation.IdealDuration)),
-					zap.Int("default", int(animation.Duration)))
-				updatedDuration = animation.Duration
-			}
 
 			return &models.Template{
 				ID:            uuid.New().String(),
@@ -667,15 +651,13 @@ func (l *animationGenerator) buildRegenInput(
 
 	if l.generationOptions.VideoBranding != nil {
 		input.Branding = *l.generationOptions.VideoBranding
-		if l.generationOptions.BrandIdentityMapper != nil {
-			input.Branding.BrandGuideLines = utils.Ptr(l.generationOptions.BrandIdentityMapper.FormatBrandAndAssetDetails())
-			l.logger.Info("using injected brand-identity mapper")
-		}
 	}
 
-	if l.generationOptions.VideoBackground != nil {
-		input.SlideBackground = gradientToCSS(l.generationOptions.VideoBackground.Gradient)
+	if l.generationOptions.BrandIdentityMapper != nil {
+		input.Branding.BrandGuideLines = utils.Ptr(l.generationOptions.BrandIdentityMapper.FormatBrandAndAssetDetails())
+		l.logger.Info("using injected brand-identity mapper")
 	}
+
 	return input
 }
 
@@ -717,15 +699,13 @@ func (l *animationGenerator) ExtractConfig(
 
 	if l.generationOptions.VideoBranding != nil {
 		input.Branding = *l.generationOptions.VideoBranding
-		if l.generationOptions.BrandIdentityMapper != nil {
-			input.Branding.BrandGuideLines = utils.Ptr(l.generationOptions.BrandIdentityMapper.FormatBrandAndAssetDetails())
-			l.logger.Info("using injected brand-identity mapper",
-				zap.String("guidelines", *input.Branding.BrandGuideLines),
-			)
-		}
 	}
-	if l.generationOptions.VideoBackground != nil {
-		input.SlideBackground = gradientToCSS(l.generationOptions.VideoBackground.Gradient)
+
+	if l.generationOptions.BrandIdentityMapper != nil {
+		input.Branding.BrandGuideLines = utils.Ptr(l.generationOptions.BrandIdentityMapper.FormatBrandAndAssetDetails())
+		l.logger.Info("using injected brand-identity mapper",
+			zap.String("guidelines", *input.Branding.BrandGuideLines),
+		)
 	}
 
 	output, err := baml_client.ExtractTemplateConfig(ctx, input)
@@ -744,20 +724,6 @@ func (l *animationGenerator) ExtractConfig(
 	}
 
 	return &output, nil
-}
-
-func gradientToCSS(g types.Gradient) string {
-	if len(g.Stops) == 0 {
-		return ""
-	}
-
-	var parts []string
-
-	for _, s := range g.Stops {
-		parts = append(parts, fmt.Sprintf("%s %d%%", s.Color, s.Position))
-	}
-
-	return fmt.Sprintf("linear-gradient(%ddeg, %s)", g.Angle, strings.Join(parts, ", "))
 }
 
 func indentCode(code string) string {

@@ -193,7 +193,9 @@ func (a *agentV1) Start(ctx context.Context, options StartSessionOptions) (*RunR
 
 	// use brand guidelines only when specified
 	if a.brandIdentityMapper != nil {
-		generatePlanRequest.BrandGuidelines = utils.Ptr(a.brandIdentityMapper.FormatBrandDetails())
+		generatePlanRequest.VideoBranding = types.VideoBranding{
+			BrandGuideLines: utils.Ptr(a.brandIdentityMapper.FormatBrandDetails()),
+		}
 	}
 
 	session := &planningSession{
@@ -297,11 +299,6 @@ func (a *agentV1) runPlanning(ctx context.Context, session *planningSession) (re
 		return nil, agenterrors.Internal("llm response did not include a plan", nil)
 	}
 
-	// set branding guidelines for it to propogate further
-	if session.Request.BrandLibraryID != nil {
-		plan.Branding.BrandLibraryID = session.Request.BrandLibraryID
-	}
-
 	err = sanitizeAgentPlan(plan)
 	if err != nil {
 		return nil, agenterrors.Internal(err.Error(), nil)
@@ -366,9 +363,7 @@ func (a *agentV1) applyPlan(
 ) (err error) {
 
 	// inject dependencies for generator
-	optionsBuilder := NewAnimationGenerationOptionsBuilder().
-		WithVideoBranding(&aiPlan.Branding).
-		WithVideoBackground(&aiPlan.BackgroundStyle)
+	optionsBuilder := NewAnimationGenerationOptionsBuilder()
 	if a.brandIdentityMapper != nil {
 		optionsBuilder.WithBrandIdentityMapper(a.brandIdentityMapper)
 	}
@@ -377,7 +372,7 @@ func (a *agentV1) applyPlan(
 	// save config with pending items
 	builder := NewVideoConfigGenerator(a.logger, a.videoService).
 		Init(a.sessionID, aiPlan.VideoName)
-	pendingVideo, err := builder.CreatePendingSlides(ctx, aiPlan)
+	pendingVideo, err := builder.CreatePendingSlides(ctx, a.brandIdentityMapper, aiPlan)
 	if err != nil {
 		return fmt.Errorf("creating pending slides: %w", err)
 	}
@@ -697,23 +692,23 @@ func (a *agentV1) GetState(ctx context.Context) (*VideoAgentState, error) {
 	return &state, nil
 }
 
-func toBackgroundStyle(bc types.VideoBackground) *pbcore.BackgroundStyle {
-	gradientStops := make([]*pbcore.GradientStop, 0)
-	for _, item := range bc.Gradient.Stops {
-		gradientStops = append(gradientStops, &pbcore.GradientStop{
-			Color:    item.Color,
-			Position: int32(item.Position),
-		})
-	}
-
-	return &pbcore.BackgroundStyle{
-		Style: &pbcore.BackgroundStyle_Gradient{
-			Gradient: &pbcore.Gradient{
-				Type:  pbcore.GradientType_GRADIENT_TYPE_LINEAR,
-				Angle: int32(bc.Gradient.Angle),
-				Stops: gradientStops,
-			},
-		},
-		ApplyAll: true,
-	}
-}
+//func toBackgroundStyle(bc types.VideoBackground) *pbcore.BackgroundStyle {
+//	gradientStops := make([]*pbcore.GradientStop, 0)
+//	for _, item := range bc.Gradient.Stops {
+//		gradientStops = append(gradientStops, &pbcore.GradientStop{
+//			Color:    item.Color,
+//			Position: int32(item.Position),
+//		})
+//	}
+//
+//	return &pbcore.BackgroundStyle{
+//		Style: &pbcore.BackgroundStyle_Gradient{
+//			Gradient: &pbcore.Gradient{
+//				Type:  pbcore.GradientType_GRADIENT_TYPE_LINEAR,
+//				Angle: int32(bc.Gradient.Angle),
+//				Stops: gradientStops,
+//			},
+//		},
+//		ApplyAll: true,
+//	}
+//}

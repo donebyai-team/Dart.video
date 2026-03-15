@@ -311,10 +311,6 @@ func (l *agentAnimationEditor) runGenerateAnimationFromPrompt(ctx context.Contex
 		}
 	}
 
-	if l.generationOptions.VideoBackground != nil {
-		input.SlideBackground = gradientToCSS(l.generationOptions.VideoBackground.Gradient)
-	}
-
 	llmResponse, err := baml_client.EnhanceAnimationPrompt(ctx, input, session.ConversationHistory)
 	if err != nil {
 		return nil, agenterrors.LLMPlanningFailed("failed to enhance animation prompt", err)

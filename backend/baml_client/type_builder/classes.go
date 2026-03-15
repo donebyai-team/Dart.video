@@ -115,50 +115,6 @@ func (t *AskUserQuestionClassView) Type() (baml.Type, error) {
 	return t.inner.Type()
 }
 
-type BrandColorsClassView struct {
-	inner baml.ClassBuilder
-}
-
-func (t *BrandColorsClassView) ListProperties() ([]ClassPropertyView, error) {
-	result, err := t.inner.ListProperties()
-	if err != nil {
-		return nil, err
-	}
-	builders := make([]ClassPropertyView, len(result))
-	for i, p := range result {
-		builders[i] = p
-	}
-	return builders, nil
-}
-
-func (t *BrandColorsClassView) PropertyPrimary() (ClassPropertyView, error) {
-	return t.inner.Property("primary")
-}
-
-func (t *BrandColorsClassView) PropertySecondary() (ClassPropertyView, error) {
-	return t.inner.Property("secondary")
-}
-
-func (t *BrandColorsClassView) PropertyAccent() (ClassPropertyView, error) {
-	return t.inner.Property("accent")
-}
-
-func (t *BrandColorsClassView) PropertyText() (ClassPropertyView, error) {
-	return t.inner.Property("text")
-}
-
-func (t *TypeBuilder) BrandColors() (*BrandColorsClassView, error) {
-	bld, err := t.inner.Class("BrandColors")
-	if err != nil {
-		return nil, err
-	}
-	return &BrandColorsClassView{inner: bld}, nil
-}
-
-func (t *BrandColorsClassView) Type() (baml.Type, error) {
-	return t.inner.Type()
-}
-
 type CategoryClassView struct {
 	inner baml.ClassBuilder
 }
@@ -331,10 +287,6 @@ func (t *EnhanceAnimationPromptRequestClassView) PropertyBranding() (ClassProper
 	return t.inner.Property("branding")
 }
 
-func (t *EnhanceAnimationPromptRequestClassView) PropertySlideBackground() (ClassPropertyView, error) {
-	return t.inner.Property("slideBackground")
-}
-
 func (t *TypeBuilder) EnhanceAnimationPromptRequest() (*EnhanceAnimationPromptRequestClassView, error) {
 	bld, err := t.inner.Class("EnhanceAnimationPromptRequest")
 	if err != nil {
@@ -463,10 +415,6 @@ func (t *GenerateAnimationCodeRequestClassView) PropertyBranding() (ClassPropert
 	return t.inner.Property("branding")
 }
 
-func (t *GenerateAnimationCodeRequestClassView) PropertySlideBackground() (ClassPropertyView, error) {
-	return t.inner.Property("slideBackground")
-}
-
 func (t *TypeBuilder) GenerateAnimationCodeRequest() (*GenerateAnimationCodeRequestClassView, error) {
 	bld, err := t.inner.Class("GenerateAnimationCodeRequest")
 	if err != nil {
@@ -497,10 +445,6 @@ func (t *GenerateAnimationCodeResponseClassView) ListProperties() ([]ClassProper
 
 func (t *GenerateAnimationCodeResponseClassView) PropertyCode() (ClassPropertyView, error) {
 	return t.inner.Property("code")
-}
-
-func (t *GenerateAnimationCodeResponseClassView) PropertyIdealDuration() (ClassPropertyView, error) {
-	return t.inner.Property("idealDuration")
 }
 
 func (t *TypeBuilder) GenerateAnimationCodeResponse() (*GenerateAnimationCodeResponseClassView, error) {
@@ -551,10 +495,6 @@ func (t *GenerateAnimationPromptRequestClassView) PropertyBranding() (ClassPrope
 	return t.inner.Property("branding")
 }
 
-func (t *GenerateAnimationPromptRequestClassView) PropertySlideBackground() (ClassPropertyView, error) {
-	return t.inner.Property("slideBackground")
-}
-
 func (t *TypeBuilder) GenerateAnimationPromptRequest() (*GenerateAnimationPromptRequestClassView, error) {
 	bld, err := t.inner.Class("GenerateAnimationPromptRequest")
 	if err != nil {
@@ -596,78 +536,6 @@ func (t *TypeBuilder) GenerateAnimationPromptResponse() (*GenerateAnimationPromp
 }
 
 func (t *GenerateAnimationPromptResponseClassView) Type() (baml.Type, error) {
-	return t.inner.Type()
-}
-
-type GradientClassView struct {
-	inner baml.ClassBuilder
-}
-
-func (t *GradientClassView) ListProperties() ([]ClassPropertyView, error) {
-	result, err := t.inner.ListProperties()
-	if err != nil {
-		return nil, err
-	}
-	builders := make([]ClassPropertyView, len(result))
-	for i, p := range result {
-		builders[i] = p
-	}
-	return builders, nil
-}
-
-func (t *GradientClassView) PropertyAngle() (ClassPropertyView, error) {
-	return t.inner.Property("angle")
-}
-
-func (t *GradientClassView) PropertyStops() (ClassPropertyView, error) {
-	return t.inner.Property("stops")
-}
-
-func (t *TypeBuilder) Gradient() (*GradientClassView, error) {
-	bld, err := t.inner.Class("Gradient")
-	if err != nil {
-		return nil, err
-	}
-	return &GradientClassView{inner: bld}, nil
-}
-
-func (t *GradientClassView) Type() (baml.Type, error) {
-	return t.inner.Type()
-}
-
-type GradientStopClassView struct {
-	inner baml.ClassBuilder
-}
-
-func (t *GradientStopClassView) ListProperties() ([]ClassPropertyView, error) {
-	result, err := t.inner.ListProperties()
-	if err != nil {
-		return nil, err
-	}
-	builders := make([]ClassPropertyView, len(result))
-	for i, p := range result {
-		builders[i] = p
-	}
-	return builders, nil
-}
-
-func (t *GradientStopClassView) PropertyColor() (ClassPropertyView, error) {
-	return t.inner.Property("color")
-}
-
-func (t *GradientStopClassView) PropertyPosition() (ClassPropertyView, error) {
-	return t.inner.Property("position")
-}
-
-func (t *TypeBuilder) GradientStop() (*GradientStopClassView, error) {
-	bld, err := t.inner.Class("GradientStop")
-	if err != nil {
-		return nil, err
-	}
-	return &GradientStopClassView{inner: bld}, nil
-}
-
-func (t *GradientStopClassView) Type() (baml.Type, error) {
 	return t.inner.Type()
 }
 
@@ -931,10 +799,6 @@ func (t *ReGenerateAnimationCodeRequestClassView) PropertyBranding() (ClassPrope
 	return t.inner.Property("branding")
 }
 
-func (t *ReGenerateAnimationCodeRequestClassView) PropertySlideBackground() (ClassPropertyView, error) {
-	return t.inner.Property("slideBackground")
-}
-
 func (t *TypeBuilder) ReGenerateAnimationCodeRequest() (*ReGenerateAnimationCodeRequestClassView, error) {
 	bld, err := t.inner.Class("ReGenerateAnimationCodeRequest")
 	if err != nil {
@@ -965,10 +829,6 @@ func (t *ReGenerateAnimationCodeResponseClassView) ListProperties() ([]ClassProp
 
 func (t *ReGenerateAnimationCodeResponseClassView) PropertyCode() (ClassPropertyView, error) {
 	return t.inner.Property("code")
-}
-
-func (t *ReGenerateAnimationCodeResponseClassView) PropertyIdealDuration() (ClassPropertyView, error) {
-	return t.inner.Property("idealDuration")
 }
 
 func (t *TypeBuilder) ReGenerateAnimationCodeResponse() (*ReGenerateAnimationCodeResponseClassView, error) {
@@ -1075,10 +935,6 @@ func (t *StreamingVideoGenerationPlanClassView) ListProperties() ([]ClassPropert
 	return builders, nil
 }
 
-func (t *StreamingVideoGenerationPlanClassView) PropertyThinking() (ClassPropertyView, error) {
-	return t.inner.Property("thinking")
-}
-
 func (t *StreamingVideoGenerationPlanClassView) PropertyPlan() (ClassPropertyView, error) {
 	return t.inner.Property("plan")
 }
@@ -1125,10 +981,6 @@ func (t *TemplateConfigExtractorInputClassView) PropertyTemplateDescription() (C
 
 func (t *TemplateConfigExtractorInputClassView) PropertyBranding() (ClassPropertyView, error) {
 	return t.inner.Property("branding")
-}
-
-func (t *TemplateConfigExtractorInputClassView) PropertySlideBackground() (ClassPropertyView, error) {
-	return t.inner.Property("slideBackground")
 }
 
 func (t *TypeBuilder) TemplateConfigExtractorInput() (*TemplateConfigExtractorInputClassView, error) {
@@ -1211,38 +1063,6 @@ func (t *TemplateItemClassView) Type() (baml.Type, error) {
 	return t.inner.Type()
 }
 
-type VideoBackgroundClassView struct {
-	inner baml.ClassBuilder
-}
-
-func (t *VideoBackgroundClassView) ListProperties() ([]ClassPropertyView, error) {
-	result, err := t.inner.ListProperties()
-	if err != nil {
-		return nil, err
-	}
-	builders := make([]ClassPropertyView, len(result))
-	for i, p := range result {
-		builders[i] = p
-	}
-	return builders, nil
-}
-
-func (t *VideoBackgroundClassView) PropertyGradient() (ClassPropertyView, error) {
-	return t.inner.Property("gradient")
-}
-
-func (t *TypeBuilder) VideoBackground() (*VideoBackgroundClassView, error) {
-	bld, err := t.inner.Class("VideoBackground")
-	if err != nil {
-		return nil, err
-	}
-	return &VideoBackgroundClassView{inner: bld}, nil
-}
-
-func (t *VideoBackgroundClassView) Type() (baml.Type, error) {
-	return t.inner.Type()
-}
-
 type VideoBrandingClassView struct {
 	inner baml.ClassBuilder
 }
@@ -1259,16 +1079,8 @@ func (t *VideoBrandingClassView) ListProperties() ([]ClassPropertyView, error) {
 	return builders, nil
 }
 
-func (t *VideoBrandingClassView) PropertyBrandLibraryID() (ClassPropertyView, error) {
-	return t.inner.Property("brandLibraryID")
-}
-
 func (t *VideoBrandingClassView) PropertyBrandGuideLines() (ClassPropertyView, error) {
 	return t.inner.Property("brandGuideLines")
-}
-
-func (t *VideoBrandingClassView) PropertyColors() (ClassPropertyView, error) {
-	return t.inner.Property("colors")
 }
 
 func (t *TypeBuilder) VideoBranding() (*VideoBrandingClassView, error) {
@@ -1305,14 +1117,6 @@ func (t *VideoGenerationPlanClassView) PropertyVideoName() (ClassPropertyView, e
 
 func (t *VideoGenerationPlanClassView) PropertySections() (ClassPropertyView, error) {
 	return t.inner.Property("sections")
-}
-
-func (t *VideoGenerationPlanClassView) PropertyBackgroundStyle() (ClassPropertyView, error) {
-	return t.inner.Property("backgroundStyle")
-}
-
-func (t *VideoGenerationPlanClassView) PropertyBranding() (ClassPropertyView, error) {
-	return t.inner.Property("branding")
 }
 
 func (t *TypeBuilder) VideoGenerationPlan() (*VideoGenerationPlanClassView, error) {
@@ -1367,8 +1171,8 @@ func (t *VideoGenerationPlanRequestClassView) PropertyEnableThinking() (ClassPro
 	return t.inner.Property("enableThinking")
 }
 
-func (t *VideoGenerationPlanRequestClassView) PropertyBrandGuidelines() (ClassPropertyView, error) {
-	return t.inner.Property("BrandGuidelines")
+func (t *VideoGenerationPlanRequestClassView) PropertyVideoBranding() (ClassPropertyView, error) {
+	return t.inner.Property("VideoBranding")
 }
 
 func (t *VideoGenerationPlanRequestClassView) PropertyBrandLibraryID() (ClassPropertyView, error) {

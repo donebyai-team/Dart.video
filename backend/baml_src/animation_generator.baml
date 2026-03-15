@@ -4,12 +4,10 @@ class GenerateAnimationCodeRequest {
   duration int @description("Target duration in seconds requested for the animation. The model may suggest a better value via idealDuration if this timing does not suit the animation.")
   voiceover string? @description("Optional narration text for timing alignment")
   branding VideoBranding
-  slideBackground string
 }
 
 class GenerateAnimationCodeResponse {
   code string @description("Typescript code")
-  idealDuration int @description("Recommended animation duration in seconds if the provided duration does not fit the animation content or voiceover pacing. Return the duration that allows the animation to play smoothly without rushing or unnecessary delays.")
 }
 
 function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_history: Message[]) -> GenerateAnimationCodeResponse {
@@ -234,9 +232,6 @@ function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_hi
     Voiceover that will be played in this slide:
     {{ resume.voiceover }}
     {% endif %}
-
-    Slide Background:
-    {{ resume.slideBackground }}
 
     {{ BrandGuidelines(resume.branding) }}
 

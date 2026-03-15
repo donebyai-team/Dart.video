@@ -38,7 +38,7 @@ func (b brandIdentity) GetBrandIdentity(ctx context.Context, ID string) (*BrandI
 	if err != nil {
 		return nil, err
 	}
-
+	brandIdentity.BrandIdentity.Id = brandIdentity.ID
 	return NewBrandIdentityRegistry(brandIdentity.BrandIdentity), nil
 }
 
@@ -141,7 +141,7 @@ func (b brandIdentity) CreateBrandIdentity(ctx context.Context, orgID string, we
 	}
 
 	// Extract colors from branding response
-	brandIdentity.Colors = extractColors(resp.Data.Branding.Colors)
+	brandIdentity.Colors = ExtractOrGenerateColors(resp.Data.Branding.Colors)
 
 	// Extract fonts from branding response
 	brandIdentity.Fonts = b.extractFonts(resp.Data.Branding.Fonts)
@@ -203,42 +203,6 @@ func createBrandMediaFromAsset(_ context.Context, asset *pbcore.MediaAsset, prio
 	}
 }
 
-func extractColors(colors map[string]string) []*pbcore.BrandColor {
-	result := make([]*pbcore.BrandColor, 0)
-	seen := make(map[string]bool)
-
-	// Map color names to priorities
-	priorityMap := map[string]pbcore.BrandAssetPriority{
-		"primary":       pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_PRIMARY,
-		"secondary":     pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_SECONDARY,
-		"accent":        pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_ACCENT,
-		"background":    pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_BACKGROUND,
-		"textPrimary":   pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_TEXT_PRIMARY,
-		"textSecondary": pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_TEXT_SECONDARY,
-	}
-
-	// Extract colors in priority order
-	for _, colorName := range []string{"primary", "secondary", "accent", "background", "textPrimary", "textSecondary"} {
-		if hex, ok := colors[colorName]; ok && hex != "" {
-			// Use lowercase for case-insensitive duplicate detection
-			hexLower := strings.ToLower(strings.TrimSpace(hex))
-			if !seen[hexLower] {
-				priority := pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_UNSPECIFIED
-				if p, exists := priorityMap[colorName]; exists {
-					priority = p
-				}
-				result = append(result, &pbcore.BrandColor{
-					ColorHexCode: hex,
-					Priority:     priority,
-				})
-				seen[hexLower] = true
-			}
-		}
-	}
-
-	return result
-}
-
 func (a brandIdentity) extractFonts(fonts []FontInfo) []*pbcore.BrandFont {
 	result := make([]*pbcore.BrandFont, 0, len(fonts))
 	seen := make(map[string]struct{})
@@ -287,6 +251,10 @@ type BrandIdentityRegistry struct {
 	assetHandles []string
 }
 
+func (registry *BrandIdentityRegistry) GetIdentity() *pbcore.BrandIdentity {
+	return registry.identity
+}
+
 func (registry *BrandIdentityRegistry) ResolveMediaHandles(code string) string {
 	replacements := make([]string, 0, len(registry.assetMapper)*4)
 
@@ -314,13 +282,6 @@ Brand Identity:
 	Website: <https://stripe.com>
 	Tagline: Payments infrastructure for the internet
 	Description: Stripe builds economic infrastructure...
-
-	Colors:
-	  - #635BFF (BRAND_ASSET_PRIORITY_PRIMARY)
-	  - #0A2540 (BRAND_ASSET_PRIORITY_SECONDARY)
-
-	Fonts:
-	  - Inter (Google: Inter)
 */
 func (registry *BrandIdentityRegistry) FormatBrandDetails() string {
 	b := registry.identity
@@ -346,26 +307,26 @@ func (registry *BrandIdentityRegistry) FormatBrandDetails() string {
 	}
 
 	// ---- Colors ----
-	if len(b.Colors) > 0 {
-		writeLine(1, "Colors:")
-		for _, c := range b.Colors {
-			if c.Priority == pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_UNSPECIFIED {
-				writeLine(2, "- %s", c.ColorHexCode)
-			} else {
-				writeLine(2, "- %s (%s)", c.ColorHexCode, c.Priority.String())
-			}
-		}
-	}
-
-	// ---- Fonts ----
-	if len(b.Fonts) > 0 {
-		writeLine(1, "Fonts:")
-		for _, f := range b.Fonts {
-			if f.GoogleFontsName != nil && f.GoogleFontsName.Value != "" {
-				writeLine(2, "- %s", f.GoogleFontsName.Value)
-			}
-		}
-	}
+	//if len(b.Colors) > 0 {
+	//	writeLine(1, "Colors:")
+	//	for _, c := range b.Colors {
+	//		if c.Priority == pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_UNSPECIFIED {
+	//			writeLine(2, "- %s", c.ColorHexCode)
+	//		} else {
+	//			writeLine(2, "- %s (%s)", c.ColorHexCode, c.Priority.String())
+	//		}
+	//	}
+	//}
+	//
+	//// ---- Fonts ----
+	//if len(b.Fonts) > 0 {
+	//	writeLine(1, "Fonts:")
+	//	for _, f := range b.Fonts {
+	//		if f.GoogleFontsName != nil && f.GoogleFontsName.Value != "" {
+	//			writeLine(2, "- %s", f.GoogleFontsName.Value)
+	//		}
+	//	}
+	//}
 
 	return sb.String()
 }

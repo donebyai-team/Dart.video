@@ -9,7 +9,6 @@ class TemplateConfigExtractorInput {
     @description("Explanation of how this template behaves, including expected config fields, animation logic, and customization options.")
 
   branding VideoBranding
-  slideBackground string
 }
 
 class TemplateConfigExtractorOutput {
@@ -74,10 +73,7 @@ function ExtractTemplateConfig(input: TemplateConfigExtractorInput) -> TemplateC
   - No trailing commas.
   - Must be parseable JSON.
 
-    Slide Background:
-    {{ input.slideBackground }}
-
-    {{ BrandGuidelines(input.branding) }}
+  {{ BrandGuidelines(input.branding) }}
 
   --------------------------------------------------
   OUTPUT FORMAT

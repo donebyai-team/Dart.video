@@ -230,7 +230,7 @@ func (StyleType) EnumDescriptor() ([]byte, []int) {
 type GeneratedVideoBranding struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	BrandGuideLines string                 `protobuf:"bytes,1,opt,name=brandGuideLines,proto3" json:"brandGuideLines,omitempty"` // just for reference purpose, not used for logic
-	Colors          *GeneratedBrandColors  `protobuf:"bytes,2,opt,name=colors,proto3" json:"colors,omitempty"`
+	Colors          []*BrandColor          `protobuf:"bytes,2,rep,name=colors,proto3" json:"colors,omitempty"`
 	BrandLibraryID  *string                `protobuf:"bytes,3,opt,name=brandLibraryID,proto3,oneof" json:"brandLibraryID,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
@@ -273,7 +273,7 @@ func (x *GeneratedVideoBranding) GetBrandGuideLines() string {
 	return ""
 }
 
-func (x *GeneratedVideoBranding) GetColors() *GeneratedBrandColors {
+func (x *GeneratedVideoBranding) GetColors() []*BrandColor {
 	if x != nil {
 		return x.Colors
 	}
@@ -283,74 +283,6 @@ func (x *GeneratedVideoBranding) GetColors() *GeneratedBrandColors {
 func (x *GeneratedVideoBranding) GetBrandLibraryID() string {
 	if x != nil && x.BrandLibraryID != nil {
 		return *x.BrandLibraryID
-	}
-	return ""
-}
-
-type GeneratedBrandColors struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Primary       string                 `protobuf:"bytes,1,opt,name=primary,proto3" json:"primary,omitempty"`
-	Secondary     string                 `protobuf:"bytes,2,opt,name=secondary,proto3" json:"secondary,omitempty"`
-	Accent        string                 `protobuf:"bytes,3,opt,name=accent,proto3" json:"accent,omitempty"`
-	Text          string                 `protobuf:"bytes,4,opt,name=text,proto3" json:"text,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GeneratedBrandColors) Reset() {
-	*x = GeneratedBrandColors{}
-	mi := &file_coasterai_core_v1_video_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GeneratedBrandColors) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GeneratedBrandColors) ProtoMessage() {}
-
-func (x *GeneratedBrandColors) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_core_v1_video_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GeneratedBrandColors.ProtoReflect.Descriptor instead.
-func (*GeneratedBrandColors) Descriptor() ([]byte, []int) {
-	return file_coasterai_core_v1_video_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *GeneratedBrandColors) GetPrimary() string {
-	if x != nil {
-		return x.Primary
-	}
-	return ""
-}
-
-func (x *GeneratedBrandColors) GetSecondary() string {
-	if x != nil {
-		return x.Secondary
-	}
-	return ""
-}
-
-func (x *GeneratedBrandColors) GetAccent() string {
-	if x != nil {
-		return x.Accent
-	}
-	return ""
-}
-
-func (x *GeneratedBrandColors) GetText() string {
-	if x != nil {
-		return x.Text
 	}
 	return ""
 }
@@ -371,7 +303,7 @@ type VideoMetadata struct {
 
 func (x *VideoMetadata) Reset() {
 	*x = VideoMetadata{}
-	mi := &file_coasterai_core_v1_video_proto_msgTypes[2]
+	mi := &file_coasterai_core_v1_video_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -383,7 +315,7 @@ func (x *VideoMetadata) String() string {
 func (*VideoMetadata) ProtoMessage() {}
 
 func (x *VideoMetadata) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_core_v1_video_proto_msgTypes[2]
+	mi := &file_coasterai_core_v1_video_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -396,7 +328,7 @@ func (x *VideoMetadata) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VideoMetadata.ProtoReflect.Descriptor instead.
 func (*VideoMetadata) Descriptor() ([]byte, []int) {
-	return file_coasterai_core_v1_video_proto_rawDescGZIP(), []int{2}
+	return file_coasterai_core_v1_video_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *VideoMetadata) GetFps() int32 {
@@ -470,7 +402,7 @@ type Video struct {
 
 func (x *Video) Reset() {
 	*x = Video{}
-	mi := &file_coasterai_core_v1_video_proto_msgTypes[3]
+	mi := &file_coasterai_core_v1_video_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -482,7 +414,7 @@ func (x *Video) String() string {
 func (*Video) ProtoMessage() {}
 
 func (x *Video) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_core_v1_video_proto_msgTypes[3]
+	mi := &file_coasterai_core_v1_video_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -495,7 +427,7 @@ func (x *Video) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Video.ProtoReflect.Descriptor instead.
 func (*Video) Descriptor() ([]byte, []int) {
-	return file_coasterai_core_v1_video_proto_rawDescGZIP(), []int{3}
+	return file_coasterai_core_v1_video_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *Video) GetId() string {
@@ -556,7 +488,7 @@ type VideoConfig struct {
 
 func (x *VideoConfig) Reset() {
 	*x = VideoConfig{}
-	mi := &file_coasterai_core_v1_video_proto_msgTypes[4]
+	mi := &file_coasterai_core_v1_video_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -568,7 +500,7 @@ func (x *VideoConfig) String() string {
 func (*VideoConfig) ProtoMessage() {}
 
 func (x *VideoConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_core_v1_video_proto_msgTypes[4]
+	mi := &file_coasterai_core_v1_video_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -581,7 +513,7 @@ func (x *VideoConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VideoConfig.ProtoReflect.Descriptor instead.
 func (*VideoConfig) Descriptor() ([]byte, []int) {
-	return file_coasterai_core_v1_video_proto_rawDescGZIP(), []int{4}
+	return file_coasterai_core_v1_video_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *VideoConfig) GetSections() []*Section {
@@ -600,7 +532,7 @@ type Script struct {
 
 func (x *Script) Reset() {
 	*x = Script{}
-	mi := &file_coasterai_core_v1_video_proto_msgTypes[5]
+	mi := &file_coasterai_core_v1_video_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -612,7 +544,7 @@ func (x *Script) String() string {
 func (*Script) ProtoMessage() {}
 
 func (x *Script) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_core_v1_video_proto_msgTypes[5]
+	mi := &file_coasterai_core_v1_video_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -625,7 +557,7 @@ func (x *Script) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Script.ProtoReflect.Descriptor instead.
 func (*Script) Descriptor() ([]byte, []int) {
-	return file_coasterai_core_v1_video_proto_rawDescGZIP(), []int{5}
+	return file_coasterai_core_v1_video_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *Script) GetItems() []*ScriptItem {
@@ -646,7 +578,7 @@ type ScriptItem struct {
 
 func (x *ScriptItem) Reset() {
 	*x = ScriptItem{}
-	mi := &file_coasterai_core_v1_video_proto_msgTypes[6]
+	mi := &file_coasterai_core_v1_video_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -658,7 +590,7 @@ func (x *ScriptItem) String() string {
 func (*ScriptItem) ProtoMessage() {}
 
 func (x *ScriptItem) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_core_v1_video_proto_msgTypes[6]
+	mi := &file_coasterai_core_v1_video_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -671,7 +603,7 @@ func (x *ScriptItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ScriptItem.ProtoReflect.Descriptor instead.
 func (*ScriptItem) Descriptor() ([]byte, []int) {
-	return file_coasterai_core_v1_video_proto_rawDescGZIP(), []int{6}
+	return file_coasterai_core_v1_video_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ScriptItem) GetName() string {
@@ -708,7 +640,7 @@ type Resolution struct {
 
 func (x *Resolution) Reset() {
 	*x = Resolution{}
-	mi := &file_coasterai_core_v1_video_proto_msgTypes[7]
+	mi := &file_coasterai_core_v1_video_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -720,7 +652,7 @@ func (x *Resolution) String() string {
 func (*Resolution) ProtoMessage() {}
 
 func (x *Resolution) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_core_v1_video_proto_msgTypes[7]
+	mi := &file_coasterai_core_v1_video_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -733,7 +665,7 @@ func (x *Resolution) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Resolution.ProtoReflect.Descriptor instead.
 func (*Resolution) Descriptor() ([]byte, []int) {
-	return file_coasterai_core_v1_video_proto_rawDescGZIP(), []int{7}
+	return file_coasterai_core_v1_video_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *Resolution) GetId() string {
@@ -775,17 +707,12 @@ var File_coasterai_core_v1_video_proto protoreflect.FileDescriptor
 
 const file_coasterai_core_v1_video_proto_rawDesc = "" +
 	"\n" +
-	"\x1dcoasterai/core/v1/video.proto\x12\x11coasterai.core.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1dcoasterai/core/v1/slide.proto\"\xc3\x01\n" +
+	"\x1dcoasterai/core/v1/video.proto\x12\x11coasterai.core.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1dcoasterai/core/v1/slide.proto\x1a coasterai/core/v1/brandkit.proto\"\xb9\x01\n" +
 	"\x16GeneratedVideoBranding\x12(\n" +
-	"\x0fbrandGuideLines\x18\x01 \x01(\tR\x0fbrandGuideLines\x12?\n" +
-	"\x06colors\x18\x02 \x01(\v2'.coasterai.core.v1.GeneratedBrandColorsR\x06colors\x12+\n" +
+	"\x0fbrandGuideLines\x18\x01 \x01(\tR\x0fbrandGuideLines\x125\n" +
+	"\x06colors\x18\x02 \x03(\v2\x1d.coasterai.core.v1.BrandColorR\x06colors\x12+\n" +
 	"\x0ebrandLibraryID\x18\x03 \x01(\tH\x00R\x0ebrandLibraryID\x88\x01\x01B\x11\n" +
-	"\x0f_brandLibraryID\"z\n" +
-	"\x14GeneratedBrandColors\x12\x18\n" +
-	"\aprimary\x18\x01 \x01(\tR\aprimary\x12\x1c\n" +
-	"\tsecondary\x18\x02 \x01(\tR\tsecondary\x12\x16\n" +
-	"\x06accent\x18\x03 \x01(\tR\x06accent\x12\x12\n" +
-	"\x04text\x18\x04 \x01(\tR\x04text\"\xff\x03\n" +
+	"\x0f_brandLibraryID\"\xff\x03\n" +
 	"\rVideoMetadata\x12\x10\n" +
 	"\x03fps\x18\x01 \x01(\x05R\x03fps\x12R\n" +
 	"\x10background_style\x18\x02 \x01(\v2\".coasterai.core.v1.BackgroundStyleH\x00R\x0fbackgroundStyle\x88\x01\x01\x12=\n" +
@@ -862,36 +789,36 @@ func file_coasterai_core_v1_video_proto_rawDescGZIP() []byte {
 }
 
 var file_coasterai_core_v1_video_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_coasterai_core_v1_video_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_coasterai_core_v1_video_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_coasterai_core_v1_video_proto_goTypes = []any{
 	(VideoStatus)(0),               // 0: coasterai.core.v1.VideoStatus
 	(VideoLanguage)(0),             // 1: coasterai.core.v1.VideoLanguage
 	(ResolutionType)(0),            // 2: coasterai.core.v1.ResolutionType
 	(StyleType)(0),                 // 3: coasterai.core.v1.StyleType
 	(*GeneratedVideoBranding)(nil), // 4: coasterai.core.v1.GeneratedVideoBranding
-	(*GeneratedBrandColors)(nil),   // 5: coasterai.core.v1.GeneratedBrandColors
-	(*VideoMetadata)(nil),          // 6: coasterai.core.v1.VideoMetadata
-	(*Video)(nil),                  // 7: coasterai.core.v1.Video
-	(*VideoConfig)(nil),            // 8: coasterai.core.v1.VideoConfig
-	(*Script)(nil),                 // 9: coasterai.core.v1.Script
-	(*ScriptItem)(nil),             // 10: coasterai.core.v1.ScriptItem
-	(*Resolution)(nil),             // 11: coasterai.core.v1.Resolution
+	(*VideoMetadata)(nil),          // 5: coasterai.core.v1.VideoMetadata
+	(*Video)(nil),                  // 6: coasterai.core.v1.Video
+	(*VideoConfig)(nil),            // 7: coasterai.core.v1.VideoConfig
+	(*Script)(nil),                 // 8: coasterai.core.v1.Script
+	(*ScriptItem)(nil),             // 9: coasterai.core.v1.ScriptItem
+	(*Resolution)(nil),             // 10: coasterai.core.v1.Resolution
+	(*BrandColor)(nil),             // 11: coasterai.core.v1.BrandColor
 	(*BackgroundStyle)(nil),        // 12: coasterai.core.v1.BackgroundStyle
 	(*timestamppb.Timestamp)(nil),  // 13: google.protobuf.Timestamp
 	(*Section)(nil),                // 14: coasterai.core.v1.Section
 }
 var file_coasterai_core_v1_video_proto_depIdxs = []int32{
-	5,  // 0: coasterai.core.v1.GeneratedVideoBranding.colors:type_name -> coasterai.core.v1.GeneratedBrandColors
+	11, // 0: coasterai.core.v1.GeneratedVideoBranding.colors:type_name -> coasterai.core.v1.BrandColor
 	12, // 1: coasterai.core.v1.VideoMetadata.background_style:type_name -> coasterai.core.v1.BackgroundStyle
-	11, // 2: coasterai.core.v1.VideoMetadata.resolution:type_name -> coasterai.core.v1.Resolution
+	10, // 2: coasterai.core.v1.VideoMetadata.resolution:type_name -> coasterai.core.v1.Resolution
 	1,  // 3: coasterai.core.v1.VideoMetadata.language:type_name -> coasterai.core.v1.VideoLanguage
 	4,  // 4: coasterai.core.v1.VideoMetadata.generatedBranding:type_name -> coasterai.core.v1.GeneratedVideoBranding
-	8,  // 5: coasterai.core.v1.Video.config:type_name -> coasterai.core.v1.VideoConfig
-	6,  // 6: coasterai.core.v1.Video.metadata:type_name -> coasterai.core.v1.VideoMetadata
+	7,  // 5: coasterai.core.v1.Video.config:type_name -> coasterai.core.v1.VideoConfig
+	5,  // 6: coasterai.core.v1.Video.metadata:type_name -> coasterai.core.v1.VideoMetadata
 	13, // 7: coasterai.core.v1.Video.created_at:type_name -> google.protobuf.Timestamp
 	0,  // 8: coasterai.core.v1.Video.status:type_name -> coasterai.core.v1.VideoStatus
 	14, // 9: coasterai.core.v1.VideoConfig.sections:type_name -> coasterai.core.v1.Section
-	10, // 10: coasterai.core.v1.Script.items:type_name -> coasterai.core.v1.ScriptItem
+	9,  // 10: coasterai.core.v1.Script.items:type_name -> coasterai.core.v1.ScriptItem
 	11, // [11:11] is the sub-list for method output_type
 	11, // [11:11] is the sub-list for method input_type
 	11, // [11:11] is the sub-list for extension type_name
@@ -905,16 +832,17 @@ func file_coasterai_core_v1_video_proto_init() {
 		return
 	}
 	file_coasterai_core_v1_slide_proto_init()
+	file_coasterai_core_v1_brandkit_proto_init()
 	file_coasterai_core_v1_video_proto_msgTypes[0].OneofWrappers = []any{}
-	file_coasterai_core_v1_video_proto_msgTypes[2].OneofWrappers = []any{}
-	file_coasterai_core_v1_video_proto_msgTypes[6].OneofWrappers = []any{}
+	file_coasterai_core_v1_video_proto_msgTypes[1].OneofWrappers = []any{}
+	file_coasterai_core_v1_video_proto_msgTypes[5].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_coasterai_core_v1_video_proto_rawDesc), len(file_coasterai_core_v1_video_proto_rawDesc)),
 			NumEnums:      4,
-			NumMessages:   8,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

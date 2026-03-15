@@ -4,6 +4,7 @@ package coasterai.core.v1;
 option go_package = "github.com/shank318/coasterai/pb/coasterai/core/v1;pbcore";
 import "google/protobuf/timestamp.proto";
 import "coasterai/core/v1/slide.proto";
+import "coasterai/core/v1/brandkit.proto";
 
 enum VideoStatus {
   VIDEO_STATUS_UNSPECIFIED = 0;  
@@ -34,15 +35,8 @@ enum StyleType {
 
 message GeneratedVideoBranding {
   string brandGuideLines = 1; // just for reference purpose, not used for logic
-  GeneratedBrandColors colors = 2;
+  repeated BrandColor colors = 2;
   optional string brandLibraryID = 3;
-}
-
-message GeneratedBrandColors {
-  string primary = 1;
-  string secondary = 2;
-  string accent = 3;
-  string text = 4;
 }
 
 message VideoMetadata {

@@ -18,8 +18,6 @@ import (
 
 	"github.com/shank318/coasterai/baml_client/stream_types"
 	"github.com/shank318/coasterai/baml_client/types"
-
-	baml "github.com/boundaryml/baml/engine/language_client_go/pkg"
 )
 
 var typeMap = map[string]reflect.Type{
@@ -27,8 +25,6 @@ var typeMap = map[string]reflect.Type{
 	"STREAM_TYPES.AnimationSlide":                  reflect.TypeOf(stream_types.AnimationSlide{}),
 	"TYPES.AskUserQuestion":                        reflect.TypeOf(types.AskUserQuestion{}),
 	"STREAM_TYPES.AskUserQuestion":                 reflect.TypeOf(stream_types.AskUserQuestion{}),
-	"TYPES.BrandColors":                            reflect.TypeOf(types.BrandColors{}),
-	"STREAM_TYPES.BrandColors":                     reflect.TypeOf(stream_types.BrandColors{}),
 	"TYPES.Category":                               reflect.TypeOf(types.Category{}),
 	"STREAM_TYPES.Category":                        reflect.TypeOf(stream_types.Category{}),
 	"TYPES.EditAnimationCodeRequest":               reflect.TypeOf(types.EditAnimationCodeRequest{}),
@@ -51,10 +47,6 @@ var typeMap = map[string]reflect.Type{
 	"STREAM_TYPES.GenerateAnimationPromptRequest":  reflect.TypeOf(stream_types.GenerateAnimationPromptRequest{}),
 	"TYPES.GenerateAnimationPromptResponse":        reflect.TypeOf(types.GenerateAnimationPromptResponse{}),
 	"STREAM_TYPES.GenerateAnimationPromptResponse": reflect.TypeOf(stream_types.GenerateAnimationPromptResponse{}),
-	"TYPES.Gradient":                               reflect.TypeOf(types.Gradient{}),
-	"STREAM_TYPES.Gradient":                        reflect.TypeOf(stream_types.Gradient{}),
-	"TYPES.GradientStop":                           reflect.TypeOf(types.GradientStop{}),
-	"STREAM_TYPES.GradientStop":                    reflect.TypeOf(stream_types.GradientStop{}),
 	"TYPES.MatchCategoriesRequest":                 reflect.TypeOf(types.MatchCategoriesRequest{}),
 	"STREAM_TYPES.MatchCategoriesRequest":          reflect.TypeOf(stream_types.MatchCategoriesRequest{}),
 	"TYPES.MatchCategoriesResponse":                reflect.TypeOf(types.MatchCategoriesResponse{}),
@@ -83,8 +75,6 @@ var typeMap = map[string]reflect.Type{
 	"STREAM_TYPES.TemplateConfigExtractorOutput":   reflect.TypeOf(stream_types.TemplateConfigExtractorOutput{}),
 	"TYPES.TemplateItem":                           reflect.TypeOf(types.TemplateItem{}),
 	"STREAM_TYPES.TemplateItem":                    reflect.TypeOf(stream_types.TemplateItem{}),
-	"TYPES.VideoBackground":                        reflect.TypeOf(types.VideoBackground{}),
-	"STREAM_TYPES.VideoBackground":                 reflect.TypeOf(stream_types.VideoBackground{}),
 	"TYPES.VideoBranding":                          reflect.TypeOf(types.VideoBranding{}),
 	"STREAM_TYPES.VideoBranding":                   reflect.TypeOf(stream_types.VideoBranding{}),
 	"TYPES.VideoGenerationPlan":                    reflect.TypeOf(types.VideoGenerationPlan{}),
@@ -103,6 +93,4 @@ var typeMap = map[string]reflect.Type{
 	"STREAM_TYPES.AnimationSlide__MediaSlide":               reflect.TypeOf(stream_types.Union2AnimationSlideOrMediaSlide{}),
 	"STREAM_TYPES.AskUserQuestion__EnhancedAnimationPrompt": reflect.TypeOf(stream_types.Union2AskUserQuestionOrEnhancedAnimationPrompt{}),
 	"STREAM_TYPES.AskUserQuestion__VideoGenerationPlan":     reflect.TypeOf(stream_types.Union2AskUserQuestionOrVideoGenerationPlan{}),
-
-	"STREAM_STATE_TYPES.Optional__string": reflect.TypeOf(baml.StreamState[*string]{}),
 }

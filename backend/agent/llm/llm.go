@@ -6,6 +6,7 @@ import (
 	"github.com/shank318/coasterai/baml_client"
 	"github.com/shank318/coasterai/baml_client/types"
 	"go.uber.org/zap"
+	"math/rand"
 	"regexp"
 	"time"
 )
@@ -138,48 +139,76 @@ func (l llmService) PlanSlidesWithStreaming(
 	conversationHistory []types.Message,
 	onThinking func(thinking string),
 ) (*types.Union2AskUserQuestionOrVideoGenerationPlan, error) {
-	l.logger.Info("🚀 Starting video plan generation..",
-		zap.Bool("thinking", req.EnableThinking != nil && *req.EnableThinking),
-	)
+	l.logger.Info("🚀 Starting video plan generation..")
 
-	stream, err := baml_client.Stream.GeneratePlanStreaming(ctx, req, conversationHistory)
+	thinkingMessages := []string{
+		"Thinking...",
+		"Understanding the request...",
+		"Planning the video structure...",
+		"Designing flow...",
+		"Organizing the storyline...",
+		"Finalizing the plan...",
+	}
+
+	done := make(chan struct{})
+	defer close(done)
+	// Background thinking loop
+	go func() {
+		for {
+			select {
+
+			case <-ctx.Done():
+				return
+
+			case <-done:
+				return
+
+			case <-time.After(time.Duration(rand.Intn(1500)+800) * time.Millisecond):
+				msg := thinkingMessages[rand.Intn(len(thinkingMessages))]
+				onThinking(msg)
+			}
+		}
+	}()
+
+	stream, err := baml_client.GeneratePlanStreaming(ctx, req, conversationHistory)
 	if err != nil {
 		return nil, handleInitialError(err)
 	}
 
-	var finalPlan *types.Union2AskUserQuestionOrVideoGenerationPlan
+	//var finalPlan *types.Union2AskUserQuestionOrVideoGenerationPlan
+	//
+	//recv := func() (streamEvent, bool) {
+	//	value, ok := <-stream
+	//	if !ok {
+	//		return streamEvent{}, false
+	//	}
+	//	e := streamEvent{
+	//		isError: value.IsError,
+	//		isFinal: value.IsFinal,
+	//		err:     value.Error,
+	//	}
+	//	if !value.IsFinal && value.Stream() != nil {
+	//		partial := *value.Stream()
+	//		e.partialThinking = func() *string { return partial.Thinking.Value }
+	//	} else {
+	//		e.partialThinking = func() *string { return nil }
+	//	}
+	//	if value.IsFinal && value.Final() != nil {
+	//		final := *value.Final()
+	//		e.finalThinking = func() *string { return final.Thinking }
+	//		e.markDone = func() { finalPlan = &final.Plan }
+	//	} else {
+	//		e.finalThinking = func() *string { return nil }
+	//		e.markDone = func() {}
+	//	}
+	//	return e, true
+	//}
+	//
+	//if err := l.handleStream(ctx, recv, onThinking); err != nil {
+	//	return nil, err
+	//}
 
-	recv := func() (streamEvent, bool) {
-		value, ok := <-stream
-		if !ok {
-			return streamEvent{}, false
-		}
-		e := streamEvent{
-			isError: value.IsError,
-			isFinal: value.IsFinal,
-			err:     value.Error,
-		}
-		if !value.IsFinal && value.Stream() != nil {
-			partial := *value.Stream()
-			e.partialThinking = func() *string { return partial.Thinking.Value }
-		} else {
-			e.partialThinking = func() *string { return nil }
-		}
-		if value.IsFinal && value.Final() != nil {
-			final := *value.Final()
-			e.finalThinking = func() *string { return final.Thinking }
-			e.markDone = func() { finalPlan = &final.Plan }
-		} else {
-			e.finalThinking = func() *string { return nil }
-			e.markDone = func() {}
-		}
-		return e, true
-	}
-
-	if err := l.handleStream(ctx, recv, onThinking); err != nil {
-		return nil, err
-	}
-	return finalPlan, nil
+	return &stream.Plan, nil
 }
 
 func (l llmService) MatchTemplates(ctx context.Context, req *types.MatchTemplateRequest) ([]types.TemplateItem, error) {

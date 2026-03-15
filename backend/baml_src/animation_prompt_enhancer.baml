@@ -1,12 +1,11 @@
 class EnhanceAnimationPromptRequest {
   prompt string
   branding VideoBranding
-  slideBackground string
 }
 
 class EnhancedAnimationPrompt {
   prompt string
-      @description("Detailed prompt to generate Remotion/React animation code")
+      @description("Detailed prompt to generate animation code")
   animationIntent string
       @description("Conceptual meaning of the animation used for semantic matching with templates. Describe the idea or transformation being visualized (e.g. 'scattered data merging into one system', 'rapid metric growth', 'automation replacing manual work').")
   animationType AnimationType
@@ -24,9 +23,9 @@ class EnhanceAnimationPromptResponse {
 function EnhanceAnimationPrompt(request: EnhanceAnimationPromptRequest, conversation_history: Message[]) -> EnhanceAnimationPromptResponse {
   client CustomOpenAI
   prompt #"
-    # Remotion Animation Prompt Designer
+    # Animation Prompt Designer
     You are a motion design planner that converts a short idea into a clear animation blueprint
-    that another AI will later implement using **Remotion (React video framework)**.
+    that another AI will later implement using **(A Custom React video framework)**.
 
     You do NOT write code.
 
@@ -38,7 +37,7 @@ function EnhanceAnimationPrompt(request: EnhanceAnimationPromptRequest, conversa
     • Visual hierarchy
     • Motion style
 
-    The output must help a Remotion engineer generate the animation.
+    The output must help a react engineer generate the animation.
     ---
 
     ## Goals
@@ -49,7 +48,7 @@ function EnhanceAnimationPrompt(request: EnhanceAnimationPromptRequest, conversa
     • Be visually clear and engaging
     • Match the brand style
     • Work on the provided slide background
-    • Be implementable with React + Remotion
+    • Be implementable with React
     • Be short (2–5 seconds)
 
     ---
@@ -62,7 +61,6 @@ function EnhanceAnimationPrompt(request: EnhanceAnimationPromptRequest, conversa
     • Describe **visual actions and timing**
     • Avoid vague terms like "nice animation"
     • Focus on **what appears, moves, fades, or transforms**
-    • Be implementable in Remotion
 
     Example style:
 
@@ -105,9 +103,6 @@ function EnhanceAnimationPrompt(request: EnhanceAnimationPromptRequest, conversa
 
     User Prompt:
     {{ request.prompt }}
-
-    Slide Background:
-    {{ request.slideBackground }}
 
     Brand Guidelines:
     {{ BrandGuidelines(request.branding) }}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/shank318/coasterai/baml_client/types"
+	"github.com/shank318/coasterai/services/brand_identity"
 	"math/rand"
 	"time"
 
@@ -58,29 +59,34 @@ func (g *videoConfigGenerator) Fail(ctx context.Context, cause error, status mod
 	return g.update(ctx, status)
 }
 
+func (g *videoConfigGenerator) AddBranding(brandIdentityRegistry *brand_identity.BrandIdentityRegistry) {
+	if brandIdentityRegistry == nil {
+		randomColors := brand_identity.ExtractOrGenerateColors(nil)
+		g.video.Metadata.GeneratedBranding = &pbcore.GeneratedVideoBranding{
+			Colors: randomColors,
+		}
+		g.AddVideoBackground(&pbcore.BackgroundStyle{Style: &pbcore.BackgroundStyle_Gradient{Gradient: brand_identity.GenerateGradient(randomColors)}})
+		return
+	}
+
+	brandIdentity := brandIdentityRegistry.GetIdentity()
+	g.video.Metadata.GeneratedBranding = &pbcore.GeneratedVideoBranding{
+		BrandLibraryID: utils.Ptr(brandIdentity.Id),
+		Colors:         brandIdentity.Colors,
+	}
+
+	g.AddVideoBackground(&pbcore.BackgroundStyle{Style: &pbcore.BackgroundStyle_Gradient{Gradient: brand_identity.GenerateGradient(brandIdentity.Colors)}})
+}
+
 // CreatePendingSlides created slides with pending status
 // and each slide plan is stored so that it can be resumed
-func (g *videoConfigGenerator) CreatePendingSlides(ctx context.Context,
+func (g *videoConfigGenerator) CreatePendingSlides(
+	ctx context.Context,
+	brandIdentityRegistry *brand_identity.BrandIdentityRegistry,
 	plan *types.VideoGenerationPlan,
 ) (*pbcore.Video, error) {
 	// save background
-	g.AddVideoBackground(toBackgroundStyle(plan.BackgroundStyle))
-
-	// this will be used for followup edits/generation
-	g.video.Metadata.GeneratedBranding = &pbcore.GeneratedVideoBranding{
-		BrandLibraryID: plan.Branding.BrandLibraryID,
-		Colors: &pbcore.GeneratedBrandColors{
-			Primary:   plan.Branding.Colors.Primary,
-			Secondary: plan.Branding.Colors.Secondary,
-			Accent:    plan.Branding.Colors.Accent,
-			Text:      plan.Branding.Colors.Text,
-		},
-	}
-
-	// store it for reference, not used for any further usage
-	if plan.Branding.BrandGuideLines != nil {
-		g.video.Metadata.GeneratedBranding.BrandGuideLines = *plan.Branding.BrandGuideLines
-	}
+	g.AddBranding(brandIdentityRegistry)
 
 	// save slides
 	sections := make([]*pbcore.Section, 0, len(plan.Sections))

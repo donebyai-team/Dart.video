@@ -4,12 +4,10 @@ class ReGenerateAnimationCodeRequest {
   prompt string
   duration int
   branding VideoBranding
-  slideBackground string
 }
 
 class ReGenerateAnimationCodeResponse {
   code string @description("Typescript code")
-  idealDuration int @description("Recommended animation duration in seconds if the provided duration does not fit the animation content or voiceover pacing. Return the duration that allows the animation to play smoothly without rushing or unnecessary delays.")
 }
 
 function ReGenerateAnimation(resume: ReGenerateAnimationCodeRequest, conversation_history: Message[]) -> ReGenerateAnimationCodeResponse {
@@ -153,9 +151,6 @@ function ReGenerateAnimation(resume: ReGenerateAnimationCodeRequest, conversatio
 
     Resolution and Canvas Size:
     16x9(1920x1080)
-
-   Slide Background:
-   {{ resume.slideBackground }}
 
    {{ BrandGuidelines(resume.branding) }}
 

@@ -7,7 +7,6 @@ import (
 
 type AnimationGenerationOptions struct {
 	VideoBranding       *types.VideoBranding
-	VideoBackground     *types.VideoBackground
 	BrandIdentityMapper *brand_identity.BrandIdentityRegistry
 }
 
@@ -21,11 +20,6 @@ func NewAnimationGenerationOptionsBuilder() *AnimationGenerationOptionsBuilder {
 
 func (b *AnimationGenerationOptionsBuilder) WithVideoBranding(videoBranding *types.VideoBranding) *AnimationGenerationOptionsBuilder {
 	b.options.VideoBranding = videoBranding
-	return b
-}
-
-func (b *AnimationGenerationOptionsBuilder) WithVideoBackground(videoBackground *types.VideoBackground) *AnimationGenerationOptionsBuilder {
-	b.options.VideoBackground = videoBackground
 	return b
 }
 

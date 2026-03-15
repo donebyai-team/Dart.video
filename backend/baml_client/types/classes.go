@@ -158,66 +158,6 @@ func (c AskUserQuestion) BamlTypeName() string {
 	return "AskUserQuestion"
 }
 
-type BrandColors struct {
-	Primary   string `json:"primary"`
-	Secondary string `json:"secondary"`
-	Accent    string `json:"accent"`
-	Text      string `json:"text"`
-}
-
-func (c *BrandColors) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
-	typeName := holder.Name
-	if typeName.Namespace != cffi.CFFITypeNamespace_TYPES {
-		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_TYPES, got %s", string(typeName.Namespace.String())))
-	}
-	if typeName.Name != "BrandColors" {
-		panic(fmt.Sprintf("expected BrandColors, got %s", typeName.Name))
-	}
-
-	for _, field := range holder.Fields {
-		key := field.Key
-		valueHolder := field.Value
-		switch key {
-
-		case "primary":
-			c.Primary = baml.Decode(valueHolder).Interface().(string)
-
-		case "secondary":
-			c.Secondary = baml.Decode(valueHolder).Interface().(string)
-
-		case "accent":
-			c.Accent = baml.Decode(valueHolder).Interface().(string)
-
-		case "text":
-			c.Text = baml.Decode(valueHolder).Interface().(string)
-
-		default:
-
-			panic(fmt.Sprintf("unexpected field: %s in class BrandColors", key))
-
-		}
-	}
-
-}
-
-func (c BrandColors) Encode() (*cffi.HostValue, error) {
-	fields := map[string]any{}
-
-	fields["primary"] = c.Primary
-
-	fields["secondary"] = c.Secondary
-
-	fields["accent"] = c.Accent
-
-	fields["text"] = c.Text
-
-	return baml.EncodeClass("BrandColors", fields, nil)
-}
-
-func (c BrandColors) BamlTypeName() string {
-	return "BrandColors"
-}
-
 type Category struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
@@ -417,9 +357,8 @@ func (c EditString) BamlTypeName() string {
 }
 
 type EnhanceAnimationPromptRequest struct {
-	Prompt          string        `json:"prompt"`
-	Branding        VideoBranding `json:"branding"`
-	SlideBackground string        `json:"slideBackground"`
+	Prompt   string        `json:"prompt"`
+	Branding VideoBranding `json:"branding"`
 }
 
 func (c *EnhanceAnimationPromptRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -442,9 +381,6 @@ func (c *EnhanceAnimationPromptRequest) Decode(holder *cffi.CFFIValueClass, type
 		case "branding":
 			c.Branding = baml.Decode(valueHolder).Interface().(VideoBranding)
 
-		case "slideBackground":
-			c.SlideBackground = baml.Decode(valueHolder).Interface().(string)
-
 		default:
 
 			panic(fmt.Sprintf("unexpected field: %s in class EnhanceAnimationPromptRequest", key))
@@ -460,8 +396,6 @@ func (c EnhanceAnimationPromptRequest) Encode() (*cffi.HostValue, error) {
 	fields["prompt"] = c.Prompt
 
 	fields["branding"] = c.Branding
-
-	fields["slideBackground"] = c.SlideBackground
 
 	return baml.EncodeClass("EnhanceAnimationPromptRequest", fields, nil)
 }
@@ -584,7 +518,6 @@ type GenerateAnimationCodeRequest struct {
 	Duration        int64         `json:"duration"`
 	Voiceover       *string       `json:"voiceover"`
 	Branding        VideoBranding `json:"branding"`
-	SlideBackground string        `json:"slideBackground"`
 }
 
 func (c *GenerateAnimationCodeRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -616,9 +549,6 @@ func (c *GenerateAnimationCodeRequest) Decode(holder *cffi.CFFIValueClass, typeM
 		case "branding":
 			c.Branding = baml.Decode(valueHolder).Interface().(VideoBranding)
 
-		case "slideBackground":
-			c.SlideBackground = baml.Decode(valueHolder).Interface().(string)
-
 		default:
 
 			panic(fmt.Sprintf("unexpected field: %s in class GenerateAnimationCodeRequest", key))
@@ -641,8 +571,6 @@ func (c GenerateAnimationCodeRequest) Encode() (*cffi.HostValue, error) {
 
 	fields["branding"] = c.Branding
 
-	fields["slideBackground"] = c.SlideBackground
-
 	return baml.EncodeClass("GenerateAnimationCodeRequest", fields, nil)
 }
 
@@ -651,8 +579,7 @@ func (c GenerateAnimationCodeRequest) BamlTypeName() string {
 }
 
 type GenerateAnimationCodeResponse struct {
-	Code          string `json:"code"`
-	IdealDuration int64  `json:"idealDuration"`
+	Code string `json:"code"`
 }
 
 func (c *GenerateAnimationCodeResponse) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -672,9 +599,6 @@ func (c *GenerateAnimationCodeResponse) Decode(holder *cffi.CFFIValueClass, type
 		case "code":
 			c.Code = baml.Decode(valueHolder).Interface().(string)
 
-		case "idealDuration":
-			c.IdealDuration = baml.Decode(valueHolder).Int()
-
 		default:
 
 			panic(fmt.Sprintf("unexpected field: %s in class GenerateAnimationCodeResponse", key))
@@ -689,8 +613,6 @@ func (c GenerateAnimationCodeResponse) Encode() (*cffi.HostValue, error) {
 
 	fields["code"] = c.Code
 
-	fields["idealDuration"] = c.IdealDuration
-
 	return baml.EncodeClass("GenerateAnimationCodeResponse", fields, nil)
 }
 
@@ -699,12 +621,11 @@ func (c GenerateAnimationCodeResponse) BamlTypeName() string {
 }
 
 type GenerateAnimationPromptRequest struct {
-	AnimationType   AnimationType `json:"animationType"`
-	CurrentBeat     string        `json:"currentBeat"`
-	PlanSoFar       []Section     `json:"planSoFar"`
-	Voiceover       *string       `json:"voiceover"`
-	Branding        VideoBranding `json:"branding"`
-	SlideBackground string        `json:"slideBackground"`
+	AnimationType AnimationType `json:"animationType"`
+	CurrentBeat   string        `json:"currentBeat"`
+	PlanSoFar     []Section     `json:"planSoFar"`
+	Voiceover     *string       `json:"voiceover"`
+	Branding      VideoBranding `json:"branding"`
 }
 
 func (c *GenerateAnimationPromptRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -736,9 +657,6 @@ func (c *GenerateAnimationPromptRequest) Decode(holder *cffi.CFFIValueClass, typ
 		case "branding":
 			c.Branding = baml.Decode(valueHolder).Interface().(VideoBranding)
 
-		case "slideBackground":
-			c.SlideBackground = baml.Decode(valueHolder).Interface().(string)
-
 		default:
 
 			panic(fmt.Sprintf("unexpected field: %s in class GenerateAnimationPromptRequest", key))
@@ -760,8 +678,6 @@ func (c GenerateAnimationPromptRequest) Encode() (*cffi.HostValue, error) {
 	fields["voiceover"] = c.Voiceover
 
 	fields["branding"] = c.Branding
-
-	fields["slideBackground"] = c.SlideBackground
 
 	return baml.EncodeClass("GenerateAnimationPromptRequest", fields, nil)
 }
@@ -810,102 +726,6 @@ func (c GenerateAnimationPromptResponse) Encode() (*cffi.HostValue, error) {
 
 func (c GenerateAnimationPromptResponse) BamlTypeName() string {
 	return "GenerateAnimationPromptResponse"
-}
-
-type Gradient struct {
-	Angle int64          `json:"angle"`
-	Stops []GradientStop `json:"stops"`
-}
-
-func (c *Gradient) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
-	typeName := holder.Name
-	if typeName.Namespace != cffi.CFFITypeNamespace_TYPES {
-		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_TYPES, got %s", string(typeName.Namespace.String())))
-	}
-	if typeName.Name != "Gradient" {
-		panic(fmt.Sprintf("expected Gradient, got %s", typeName.Name))
-	}
-
-	for _, field := range holder.Fields {
-		key := field.Key
-		valueHolder := field.Value
-		switch key {
-
-		case "angle":
-			c.Angle = baml.Decode(valueHolder).Int()
-
-		case "stops":
-			c.Stops = baml.Decode(valueHolder).Interface().([]GradientStop)
-
-		default:
-
-			panic(fmt.Sprintf("unexpected field: %s in class Gradient", key))
-
-		}
-	}
-
-}
-
-func (c Gradient) Encode() (*cffi.HostValue, error) {
-	fields := map[string]any{}
-
-	fields["angle"] = c.Angle
-
-	fields["stops"] = c.Stops
-
-	return baml.EncodeClass("Gradient", fields, nil)
-}
-
-func (c Gradient) BamlTypeName() string {
-	return "Gradient"
-}
-
-type GradientStop struct {
-	Color    string `json:"color"`
-	Position int64  `json:"position"`
-}
-
-func (c *GradientStop) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
-	typeName := holder.Name
-	if typeName.Namespace != cffi.CFFITypeNamespace_TYPES {
-		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_TYPES, got %s", string(typeName.Namespace.String())))
-	}
-	if typeName.Name != "GradientStop" {
-		panic(fmt.Sprintf("expected GradientStop, got %s", typeName.Name))
-	}
-
-	for _, field := range holder.Fields {
-		key := field.Key
-		valueHolder := field.Value
-		switch key {
-
-		case "color":
-			c.Color = baml.Decode(valueHolder).Interface().(string)
-
-		case "position":
-			c.Position = baml.Decode(valueHolder).Int()
-
-		default:
-
-			panic(fmt.Sprintf("unexpected field: %s in class GradientStop", key))
-
-		}
-	}
-
-}
-
-func (c GradientStop) Encode() (*cffi.HostValue, error) {
-	fields := map[string]any{}
-
-	fields["color"] = c.Color
-
-	fields["position"] = c.Position
-
-	return baml.EncodeClass("GradientStop", fields, nil)
-}
-
-func (c GradientStop) BamlTypeName() string {
-	return "GradientStop"
 }
 
 type MatchCategoriesRequest struct {
@@ -1209,12 +1029,11 @@ func (c Message) BamlTypeName() string {
 }
 
 type ReGenerateAnimationCodeRequest struct {
-	Code            string        `json:"code"`
-	AnimationType   AnimationType `json:"animationType"`
-	Prompt          string        `json:"prompt"`
-	Duration        int64         `json:"duration"`
-	Branding        VideoBranding `json:"branding"`
-	SlideBackground string        `json:"slideBackground"`
+	Code          string        `json:"code"`
+	AnimationType AnimationType `json:"animationType"`
+	Prompt        string        `json:"prompt"`
+	Duration      int64         `json:"duration"`
+	Branding      VideoBranding `json:"branding"`
 }
 
 func (c *ReGenerateAnimationCodeRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -1246,9 +1065,6 @@ func (c *ReGenerateAnimationCodeRequest) Decode(holder *cffi.CFFIValueClass, typ
 		case "branding":
 			c.Branding = baml.Decode(valueHolder).Interface().(VideoBranding)
 
-		case "slideBackground":
-			c.SlideBackground = baml.Decode(valueHolder).Interface().(string)
-
 		default:
 
 			panic(fmt.Sprintf("unexpected field: %s in class ReGenerateAnimationCodeRequest", key))
@@ -1271,8 +1087,6 @@ func (c ReGenerateAnimationCodeRequest) Encode() (*cffi.HostValue, error) {
 
 	fields["branding"] = c.Branding
 
-	fields["slideBackground"] = c.SlideBackground
-
 	return baml.EncodeClass("ReGenerateAnimationCodeRequest", fields, nil)
 }
 
@@ -1281,8 +1095,7 @@ func (c ReGenerateAnimationCodeRequest) BamlTypeName() string {
 }
 
 type ReGenerateAnimationCodeResponse struct {
-	Code          string `json:"code"`
-	IdealDuration int64  `json:"idealDuration"`
+	Code string `json:"code"`
 }
 
 func (c *ReGenerateAnimationCodeResponse) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -1302,9 +1115,6 @@ func (c *ReGenerateAnimationCodeResponse) Decode(holder *cffi.CFFIValueClass, ty
 		case "code":
 			c.Code = baml.Decode(valueHolder).Interface().(string)
 
-		case "idealDuration":
-			c.IdealDuration = baml.Decode(valueHolder).Int()
-
 		default:
 
 			panic(fmt.Sprintf("unexpected field: %s in class ReGenerateAnimationCodeResponse", key))
@@ -1318,8 +1128,6 @@ func (c ReGenerateAnimationCodeResponse) Encode() (*cffi.HostValue, error) {
 	fields := map[string]any{}
 
 	fields["code"] = c.Code
-
-	fields["idealDuration"] = c.IdealDuration
 
 	return baml.EncodeClass("ReGenerateAnimationCodeResponse", fields, nil)
 }
@@ -1431,8 +1239,7 @@ func (c Section) BamlTypeName() string {
 }
 
 type StreamingVideoGenerationPlan struct {
-	Thinking *string                                    `json:"thinking"`
-	Plan     Union2AskUserQuestionOrVideoGenerationPlan `json:"plan"`
+	Plan Union2AskUserQuestionOrVideoGenerationPlan `json:"plan"`
 }
 
 func (c *StreamingVideoGenerationPlan) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -1449,9 +1256,6 @@ func (c *StreamingVideoGenerationPlan) Decode(holder *cffi.CFFIValueClass, typeM
 		valueHolder := field.Value
 		switch key {
 
-		case "thinking":
-			c.Thinking = baml.Decode(valueHolder).Interface().(*string)
-
 		case "plan":
 			c.Plan = baml.Decode(valueHolder).Interface().(Union2AskUserQuestionOrVideoGenerationPlan)
 
@@ -1467,8 +1271,6 @@ func (c *StreamingVideoGenerationPlan) Decode(holder *cffi.CFFIValueClass, typeM
 func (c StreamingVideoGenerationPlan) Encode() (*cffi.HostValue, error) {
 	fields := map[string]any{}
 
-	fields["thinking"] = c.Thinking
-
 	fields["plan"] = c.Plan
 
 	return baml.EncodeClass("StreamingVideoGenerationPlan", fields, nil)
@@ -1483,7 +1285,6 @@ type TemplateConfigExtractorInput struct {
 	BeatDescription     string        `json:"beatDescription"`
 	TemplateDescription string        `json:"templateDescription"`
 	Branding            VideoBranding `json:"branding"`
-	SlideBackground     string        `json:"slideBackground"`
 }
 
 func (c *TemplateConfigExtractorInput) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -1512,9 +1313,6 @@ func (c *TemplateConfigExtractorInput) Decode(holder *cffi.CFFIValueClass, typeM
 		case "branding":
 			c.Branding = baml.Decode(valueHolder).Interface().(VideoBranding)
 
-		case "slideBackground":
-			c.SlideBackground = baml.Decode(valueHolder).Interface().(string)
-
 		default:
 
 			panic(fmt.Sprintf("unexpected field: %s in class TemplateConfigExtractorInput", key))
@@ -1534,8 +1332,6 @@ func (c TemplateConfigExtractorInput) Encode() (*cffi.HostValue, error) {
 	fields["templateDescription"] = c.TemplateDescription
 
 	fields["branding"] = c.Branding
-
-	fields["slideBackground"] = c.SlideBackground
 
 	return baml.EncodeClass("TemplateConfigExtractorInput", fields, nil)
 }
@@ -1634,52 +1430,8 @@ func (c TemplateItem) BamlTypeName() string {
 	return "TemplateItem"
 }
 
-type VideoBackground struct {
-	Gradient Gradient `json:"gradient"`
-}
-
-func (c *VideoBackground) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
-	typeName := holder.Name
-	if typeName.Namespace != cffi.CFFITypeNamespace_TYPES {
-		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_TYPES, got %s", string(typeName.Namespace.String())))
-	}
-	if typeName.Name != "VideoBackground" {
-		panic(fmt.Sprintf("expected VideoBackground, got %s", typeName.Name))
-	}
-
-	for _, field := range holder.Fields {
-		key := field.Key
-		valueHolder := field.Value
-		switch key {
-
-		case "gradient":
-			c.Gradient = baml.Decode(valueHolder).Interface().(Gradient)
-
-		default:
-
-			panic(fmt.Sprintf("unexpected field: %s in class VideoBackground", key))
-
-		}
-	}
-
-}
-
-func (c VideoBackground) Encode() (*cffi.HostValue, error) {
-	fields := map[string]any{}
-
-	fields["gradient"] = c.Gradient
-
-	return baml.EncodeClass("VideoBackground", fields, nil)
-}
-
-func (c VideoBackground) BamlTypeName() string {
-	return "VideoBackground"
-}
-
 type VideoBranding struct {
-	BrandLibraryID  *string     `json:"brandLibraryID"`
-	BrandGuideLines *string     `json:"brandGuideLines"`
-	Colors          BrandColors `json:"colors"`
+	BrandGuideLines *string `json:"brandGuideLines"`
 }
 
 func (c *VideoBranding) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -1696,14 +1448,8 @@ func (c *VideoBranding) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap
 		valueHolder := field.Value
 		switch key {
 
-		case "brandLibraryID":
-			c.BrandLibraryID = baml.Decode(valueHolder).Interface().(*string)
-
 		case "brandGuideLines":
 			c.BrandGuideLines = baml.Decode(valueHolder).Interface().(*string)
-
-		case "colors":
-			c.Colors = baml.Decode(valueHolder).Interface().(BrandColors)
 
 		default:
 
@@ -1717,11 +1463,7 @@ func (c *VideoBranding) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap
 func (c VideoBranding) Encode() (*cffi.HostValue, error) {
 	fields := map[string]any{}
 
-	fields["brandLibraryID"] = c.BrandLibraryID
-
 	fields["brandGuideLines"] = c.BrandGuideLines
-
-	fields["colors"] = c.Colors
 
 	return baml.EncodeClass("VideoBranding", fields, nil)
 }
@@ -1731,10 +1473,8 @@ func (c VideoBranding) BamlTypeName() string {
 }
 
 type VideoGenerationPlan struct {
-	VideoName       string          `json:"videoName"`
-	Sections        []Section       `json:"sections"`
-	BackgroundStyle VideoBackground `json:"backgroundStyle"`
-	Branding        VideoBranding   `json:"branding"`
+	VideoName string    `json:"videoName"`
+	Sections  []Section `json:"sections"`
 }
 
 func (c *VideoGenerationPlan) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -1757,12 +1497,6 @@ func (c *VideoGenerationPlan) Decode(holder *cffi.CFFIValueClass, typeMap baml.T
 		case "sections":
 			c.Sections = baml.Decode(valueHolder).Interface().([]Section)
 
-		case "backgroundStyle":
-			c.BackgroundStyle = baml.Decode(valueHolder).Interface().(VideoBackground)
-
-		case "branding":
-			c.Branding = baml.Decode(valueHolder).Interface().(VideoBranding)
-
 		default:
 
 			panic(fmt.Sprintf("unexpected field: %s in class VideoGenerationPlan", key))
@@ -1779,10 +1513,6 @@ func (c VideoGenerationPlan) Encode() (*cffi.HostValue, error) {
 
 	fields["sections"] = c.Sections
 
-	fields["backgroundStyle"] = c.BackgroundStyle
-
-	fields["branding"] = c.Branding
-
 	return baml.EncodeClass("VideoGenerationPlan", fields, nil)
 }
 
@@ -1797,7 +1527,7 @@ type VideoGenerationPlanRequest struct {
 	Resolution              string          `json:"Resolution"`
 	Script                  []ScriptItem    `json:"Script"`
 	EnableThinking          *bool           `json:"enableThinking"`
-	BrandGuidelines         *string         `json:"BrandGuidelines"`
+	VideoBranding           VideoBranding   `json:"VideoBranding"`
 	BrandLibraryID          *string         `json:"BrandLibraryID"`
 	AvailableAnimationTypes []AnimationType `json:"AvailableAnimationTypes"`
 }
@@ -1834,8 +1564,8 @@ func (c *VideoGenerationPlanRequest) Decode(holder *cffi.CFFIValueClass, typeMap
 		case "enableThinking":
 			c.EnableThinking = baml.Decode(valueHolder).Interface().(*bool)
 
-		case "BrandGuidelines":
-			c.BrandGuidelines = baml.Decode(valueHolder).Interface().(*string)
+		case "VideoBranding":
+			c.VideoBranding = baml.Decode(valueHolder).Interface().(VideoBranding)
 
 		case "BrandLibraryID":
 			c.BrandLibraryID = baml.Decode(valueHolder).Interface().(*string)
@@ -1867,7 +1597,7 @@ func (c VideoGenerationPlanRequest) Encode() (*cffi.HostValue, error) {
 
 	fields["enableThinking"] = c.EnableThinking
 
-	fields["BrandGuidelines"] = c.BrandGuidelines
+	fields["VideoBranding"] = c.VideoBranding
 
 	fields["BrandLibraryID"] = c.BrandLibraryID
 

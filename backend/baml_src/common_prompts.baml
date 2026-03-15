@@ -23,15 +23,9 @@ Execution should begin only after this planning step is complete.
 
 template_string BrandGuidelines(resume: VideoBranding) #"
     {% if resume.brandGuideLines %}
-    Brand Guidelines:
+    ### Brand Details:
     {{ resume.brandGuideLines }}
     {% endif %}
-
-    Brand Colors:
-      Primary: {{ resume.colors.primary }}
-      Secondary: {{ resume.colors.secondary }}
-      Accent: {{ resume.colors.accent }}
-      Text: {{ resume.colors.text }}
 "#
 
 template_string AnimationTypes() #"

@@ -4,7 +4,6 @@ class GenerateAnimationPromptRequest {
   planSoFar Section[] @description("Sections and slides already generated")
   voiceover string?
   branding VideoBranding
-  slideBackground string
 }
 
 class GenerateAnimationPromptResponse {
@@ -26,7 +25,7 @@ function GenerateAnimationPrompt(resume: GenerateAnimationPromptRequest) -> Gene
 
     You are NOT writing code.
     You are designing the animation blueprint
-    that a Remotion / React engineer will implement.
+    that a React engineer will implement.
 
     --------------------------------------------------
     GOAL
@@ -74,9 +73,6 @@ function GenerateAnimationPrompt(resume: GenerateAnimationPromptRequest) -> Gene
     Voiceover that will be played in this slide:
     {{ resume.voiceover }}
     {% endif %}
-
-    Slide Background:
-    {{ resume.slideBackground }}
 
     {{ BrandGuidelines(resume.branding) }}
 

@@ -4,6 +4,7 @@
 
 import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv1";
 import type { Message } from "@bufbuild/protobuf";
+import type { BrandColor } from "./brandkit_pb";
 import type { BackgroundStyle, Section } from "./slide_pb";
 import type { Timestamp } from "@bufbuild/protobuf/wkt";
 
@@ -24,9 +25,9 @@ export declare type GeneratedVideoBranding = Message<"coasterai.core.v1.Generate
   brandGuideLines: string;
 
   /**
-   * @generated from field: coasterai.core.v1.GeneratedBrandColors colors = 2;
+   * @generated from field: repeated coasterai.core.v1.BrandColor colors = 2;
    */
-  colors?: GeneratedBrandColors;
+  colors: BrandColor[];
 
   /**
    * @generated from field: optional string brandLibraryID = 3;
@@ -39,37 +40,6 @@ export declare type GeneratedVideoBranding = Message<"coasterai.core.v1.Generate
  * Use `create(GeneratedVideoBrandingSchema)` to create a new message.
  */
 export declare const GeneratedVideoBrandingSchema: GenMessage<GeneratedVideoBranding>;
-
-/**
- * @generated from message coasterai.core.v1.GeneratedBrandColors
- */
-export declare type GeneratedBrandColors = Message<"coasterai.core.v1.GeneratedBrandColors"> & {
-  /**
-   * @generated from field: string primary = 1;
-   */
-  primary: string;
-
-  /**
-   * @generated from field: string secondary = 2;
-   */
-  secondary: string;
-
-  /**
-   * @generated from field: string accent = 3;
-   */
-  accent: string;
-
-  /**
-   * @generated from field: string text = 4;
-   */
-  text: string;
-};
-
-/**
- * Describes the message coasterai.core.v1.GeneratedBrandColors.
- * Use `create(GeneratedBrandColorsSchema)` to create a new message.
- */
-export declare const GeneratedBrandColorsSchema: GenMessage<GeneratedBrandColors>;
 
 /**
  * @generated from message coasterai.core.v1.VideoMetadata

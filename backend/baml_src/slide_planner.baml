@@ -55,16 +55,14 @@ class VideoGenerationPlanRequest {
     Resolution string
     Script  ScriptItem[]
     enableThinking bool? @description("Whether to include step-by-step reasoning in the response")
-    BrandGuidelines string?
-    BrandLibraryID string? @skip
+    VideoBranding VideoBranding
+    BrandLibraryID string? @skip // Just needed to store the request as it is
     AvailableAnimationTypes AnimationType[]
 }
 
 class VideoGenerationPlan {
     videoName string @description("name of the video, around 5 to 15 length")
     sections Section[]
-    backgroundStyle VideoBackground @description("background style of all slides")
-    branding VideoBranding @description("visual identity for animations slides")
 }
 
 class Section {
@@ -72,35 +70,11 @@ class Section {
   slides (AnimationSlide | MediaSlide)[]
 }
 
-class BrandColors {
-  primary string @description("Primary brand color in hex format like #5B8CFF")
-  secondary string @description("Secondary support color in hex format")
-  accent string @description("Accent color for emphasis and motion highlights in hex")
-  text string @description("Readable text color in hex")
-}
-
 class VideoBranding {
-  brandLibraryID string? @skip
   brandGuideLines string? @skip @description("user provided brand guidelines")
-  colors BrandColors @description("make sure the brand colors are visible and does not get blended with *background* gradient")
-}
-
-class Gradient {
-  angle int  @description("angle of the gradient") @assert(valid_angle, {{ this >= 0 and this <= 260 }})
-  stops GradientStop[]
-}
-
-class GradientStop {
-  color string @description("hex color code, don't use while color like #ffffff")
-  position int @description("between 0–100") @assert(valid_position, {{ this >= 0 and this <= 100 }})
-}
-
-class VideoBackground {
-  gradient Gradient @description("gradient to apply to all slides *background*")
 }
 
 class StreamingVideoGenerationPlan {
-  thinking string? @stream.with_state @description("Real-time thinking process")
   plan (VideoGenerationPlan | AskUserQuestion) @description("Either the final video generation plan or a question for the user")
 }
 
@@ -240,17 +214,6 @@ function GeneratePlanStreaming(input: VideoGenerationPlanRequest, conversation_h
     * Interface implied → ask which platform to visualize
     ---
 
-    {{ AskQuestionGuidelines() }}
-    ---
-
-    ### Branding guidelines
-    - If Brand Guidelines always use that for brand name, background color or any branding related stuff
-    - If Brand Guidelines not given, Always use subtle, light colors unless specified
-    - Never use **black or white** in the **background color** unless specified
-    - Follow modern and minimilist branding colors
-    - Follow slide type balance
-   ---
-
     ## INPUT CONTEXT
 
     Total duration should be close to {{ input.Duration }} seconds.
@@ -259,13 +222,10 @@ function GeneratePlanStreaming(input: VideoGenerationPlanRequest, conversation_h
     Language: {{ input.Language }}
     Resolution: {{ input.Resolution }}
 
+    {{ BrandGuidelines(input.VideoBranding) }}
+
     ### Prompt:
     {{ input.Prompt }}
-
-    {% if input.BrandGuidelines %}
-    ### Brand Guidelines (STRICTLY FOLLOW) :
-    {{ input.BrandGuidelines }}
-    {% endif %}
 
     {% if input.Script %}
     ### Script Breakdown (STRICTLY FOLLOW)

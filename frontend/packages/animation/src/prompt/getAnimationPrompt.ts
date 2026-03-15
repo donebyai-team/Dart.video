@@ -20,8 +20,6 @@ import {
  */
 export function getAnimationPrompt(
   animationType: AnimationTypeName,
-  brand: BrandObject,
-  _styleId: string,
   aspectPreset: AspectPreset,
 ): string {
   const components = getComponentsForType(animationType);
@@ -33,7 +31,7 @@ export function getAnimationPrompt(
     componentListFragment(components),
     spacingFragment(),
     typographyFragment(),
-    brandTokensFragment(brand),
+    // brandTokensFragment(brand),
     timingGuidanceFragment(),
     globalRulesFragment(),
     typeSpecificRulesFragment(typeDef),
