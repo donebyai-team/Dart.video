@@ -125,7 +125,7 @@ func (l llmRetrievalService) MatchTemplates(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
-
+	
 	if isSimpleText {
 		return templates, nil
 	}

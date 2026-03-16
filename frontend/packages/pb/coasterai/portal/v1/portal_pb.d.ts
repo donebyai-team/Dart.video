@@ -562,6 +562,11 @@ export declare type CreateVideoRequest = Message<"coasterai.portal.v1.CreateVide
    * @generated from field: coasterai.core.v1.StyleType styleType = 7;
    */
   styleType: StyleType;
+
+  /**
+   * @generated from field: int32 fps = 8;
+   */
+  fps: number;
 };
 
 /**

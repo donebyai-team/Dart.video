@@ -48,6 +48,7 @@ type RunStatus string
 const (
 	RunStatusCompleted           RunStatus = "COMPLETED"
 	RunStatusWaitingForUserInput RunStatus = "WAITING_FOR_USER_INPUT"
+	defaultFPS                             = 30
 )
 
 type RunResult struct {
@@ -67,6 +68,7 @@ type agentV1 struct {
 	animationGenerator   AnimationGenerator
 	cache                cache.Cache
 	logger               *zap.Logger
+	fps                  int64
 
 	stateUpdates chan VideoAgentState
 }
@@ -84,6 +86,7 @@ func NewAgentV1(
 ) *agentV1 {
 	llmService := llm.NewLlmService(logger)
 	return &agentV1{
+		fps:                  defaultFPS,
 		sessionID:            sessionID,
 		orgID:                orgID,
 		logger:               logger,
@@ -576,19 +579,9 @@ func (a *agentV1) selectTemplate(
 		}
 
 		return template, nil
-		//fallback, err := a.retrievalService.GetFallbackTemplate(ctx)
-		//if err != nil {
-		//	return nil, agenterrors.NoTemplateFound("no fallback template found", err)
-		//}
-		//
-		//templateConfig, err := a.animationGenerator.ExtractConfig(ctx, planExecutedSoFar, anim, fallback)
-		//if err != nil {
-		//	return nil, agenterrors.TemplateExtractFailed("failed to extract template config", err)
-		//}
-		//fallback.GeneratedConfig = json.RawMessage(templateConfig.Config)
-		//
-		//return fallback, nil
 	}
+
+	selected.Config.ConvertDurationToFrames(a.fps)
 
 	return selected, nil
 }

@@ -70,6 +70,7 @@ type agentAnimationEditor struct {
 	generationOptions  AnimationGenerationOptions
 	logger             *zap.Logger
 	stateUpdates       chan AnimationGeneratorAgentState
+	fps                int64
 }
 
 func (a *agentAnimationEditor) StateUpdates() <-chan AnimationGeneratorAgentState {
@@ -89,6 +90,7 @@ func NewAgentAnimationEditor(
 ) AnimationGeneratorAgent {
 	llmService := llm.NewLlmService(logger)
 	return &agentAnimationEditor{
+		fps:              defaultFPS,
 		sessionID:        sessionID,
 		orgID:            orgID,
 		slideID:          slideID,
@@ -278,6 +280,8 @@ func (l *agentAnimationEditor) GetAnimationSuggestions(
 		if err != nil {
 			return nil, agenterrors.TemplateExtractFailed("failed to extract template config", err)
 		}
+
+		template.Config.ConvertDurationToFrames(l.fps)
 
 		// To be used as edits
 		template.GeneratedPatches = json.RawMessage(templateConfig.Config)

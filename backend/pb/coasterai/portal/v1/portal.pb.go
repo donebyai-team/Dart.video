@@ -1478,6 +1478,7 @@ type CreateVideoRequest struct {
 	BrandLibraryId *string                `protobuf:"bytes,5,opt,name=brand_library_id,json=brandLibraryId,proto3,oneof" json:"brand_library_id,omitempty"`
 	Language       v1.VideoLanguage       `protobuf:"varint,6,opt,name=language,proto3,enum=coasterai.core.v1.VideoLanguage" json:"language,omitempty"`
 	StyleType      v1.StyleType           `protobuf:"varint,7,opt,name=styleType,proto3,enum=coasterai.core.v1.StyleType" json:"styleType,omitempty"`
+	Fps            int32                  `protobuf:"varint,8,opt,name=fps,proto3" json:"fps,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -1559,6 +1560,13 @@ func (x *CreateVideoRequest) GetStyleType() v1.StyleType {
 		return x.StyleType
 	}
 	return v1.StyleType(0)
+}
+
+func (x *CreateVideoRequest) GetFps() int32 {
+	if x != nil {
+		return x.Fps
+	}
+	return 0
 }
 
 type CreateVideoResponse struct {
@@ -3067,7 +3075,7 @@ const file_coasterai_portal_v1_portal_proto_rawDesc = "" +
 	"\x0fGetVideoRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"E\n" +
 	"\x11GetVideosResponse\x120\n" +
-	"\x06videos\x18\x01 \x03(\v2\x18.coasterai.core.v1.VideoR\x06videos\"\xf8\x02\n" +
+	"\x06videos\x18\x01 \x03(\v2\x18.coasterai.core.v1.VideoR\x06videos\"\x8a\x03\n" +
 	"\x12CreateVideoRequest\x121\n" +
 	"\x06script\x18\x01 \x01(\v2\x19.coasterai.core.v1.ScriptR\x06script\x12\x16\n" +
 	"\x06prompt\x18\x02 \x01(\tR\x06prompt\x12=\n" +
@@ -3077,7 +3085,8 @@ const file_coasterai_portal_v1_portal_proto_rawDesc = "" +
 	"\bduration\x18\x04 \x01(\x02R\bduration\x12-\n" +
 	"\x10brand_library_id\x18\x05 \x01(\tH\x00R\x0ebrandLibraryId\x88\x01\x01\x12<\n" +
 	"\blanguage\x18\x06 \x01(\x0e2 .coasterai.core.v1.VideoLanguageR\blanguage\x12:\n" +
-	"\tstyleType\x18\a \x01(\x0e2\x1c.coasterai.core.v1.StyleTypeR\tstyleTypeB\x13\n" +
+	"\tstyleType\x18\a \x01(\x0e2\x1c.coasterai.core.v1.StyleTypeR\tstyleType\x12\x10\n" +
+	"\x03fps\x18\b \x01(\x05R\x03fpsB\x13\n" +
 	"\x11_brand_library_id\"\xab\x02\n" +
 	"\x13CreateVideoResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12)\n" +

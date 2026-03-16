@@ -77,6 +77,11 @@ type TemplateConfig struct {
 	Categories      TemplateCategories   `json:"categories"`
 }
 
+func (v *TemplateConfig) ConvertDurationToFrames(fps int64) {
+	v.TotalDuration = v.TotalDuration * fps
+	v.VisibleDuration = v.VisibleDuration * fps
+}
+
 func (v *TemplateConfig) Value() (driver.Value, error) {
 	b, err := json.Marshal(v)
 	if err != nil {

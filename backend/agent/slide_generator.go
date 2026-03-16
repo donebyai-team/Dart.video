@@ -79,6 +79,11 @@ func (g *videoConfigGenerator) AddBranding(brandIdentityRegistry *brand_identity
 	g.AddVideoBackground(&pbcore.BackgroundStyle{Style: &pbcore.BackgroundStyle_Gradient{Gradient: brand_identity.GenerateGradient(brandIdentity.Colors)}})
 }
 
+func (g *videoConfigGenerator) convertDurationToFrames(durationInSeconds int64) float32 {
+	fps := g.video.Metadata.Fps
+	return float32(durationInSeconds) * float32(fps)
+}
+
 // CreatePendingSlides created slides with pending status
 // and each slide plan is stored so that it can be resumed
 func (g *videoConfigGenerator) CreatePendingSlides(
@@ -112,7 +117,9 @@ func (g *videoConfigGenerator) CreatePendingSlides(
 				totalMediaSlides++
 				mediaPlan := pendingSlide.AsMediaSlide()
 				slide.Type = pbcore.SlideType_SLIDE_TYPE_MEDIA
-				slide.DurationInFrames = float32(mediaPlan.Duration)
+				slide.DurationInFrames = g.convertDurationToFrames(mediaPlan.Duration)
+				// for media slides, both durations are same
+				slide.SettledFrame = slide.DurationInFrames
 				assignRandomTransitionAndDirection(slide)
 				slide.Content = &pbcore.Slide_Media{
 					Media: &pbcore.MediaSlideContent{
@@ -134,7 +141,7 @@ func (g *videoConfigGenerator) CreatePendingSlides(
 				totalAnimationSlides++
 				animationPlan := pendingSlide.AsAnimationSlide()
 				slide.Type = pbcore.SlideType_SLIDE_TYPE_ANIMATION
-				slide.DurationInFrames = float32(animationPlan.Duration)
+				slide.DurationInFrames = g.convertDurationToFrames(animationPlan.Duration)
 				assignRandomTransitionAndDirection(slide)
 				if animationPlan.Voiceover != nil {
 					slide.Transcript = *animationPlan.Voiceover
@@ -191,6 +198,10 @@ func (g *videoConfigGenerator) UpdateAnimationSlide(
 	for _, section := range g.video.Config.Sections {
 		for _, slide := range section.Slides {
 			if slide.Id == slideID {
+				// update durations, here we receive in frames, no need to convert
+				slide.DurationInFrames = float32(selectedTemplate.Config.TotalDuration)
+				slide.SettledFrame = float32(selectedTemplate.Config.VisibleDuration)
+
 				animation := slide.GetAnimation()
 				slide.SlideStatus = pbcore.SlideStatus_SLIDE_STATUS_GENERATED
 				animation.CodeRegistry = selectedTemplate.Config.CodeRegistry
