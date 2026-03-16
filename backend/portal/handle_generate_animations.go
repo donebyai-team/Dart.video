@@ -146,7 +146,10 @@ func (p *Portal) streamAnimationGenerationRun(
 	done := make(chan runOutput, 1)
 	go func() {
 		result, err := run(runCtx)
-		done <- runOutput{result: result, err: err}
+		select {
+		case done <- runOutput{result: result, err: err}:
+		default:
+		}
 	}()
 
 	stateUpdates := animationAgent.StateUpdates()
@@ -155,9 +158,14 @@ func (p *Portal) streamAnimationGenerationRun(
 	for {
 		select {
 		case <-ctx.Done():
+			cancelRun()
 			return nil
 
-		case state := <-stateUpdates:
+		case state, ok := <-stateUpdates:
+			if !ok {
+				stateUpdates = nil
+				continue
+			}
 			thinking := strings.TrimSpace(state.Thinking)
 			if thinking == "" || thinking == lastThinking {
 				continue
@@ -166,6 +174,7 @@ func (p *Portal) streamAnimationGenerationRun(
 			if err := stream.Send(&pbportal.GenerateOrEditAnimationResponse{
 				ThinkingSummary: thinking,
 			}); err != nil {
+				cancelRun()
 				return nil
 			}
 
