@@ -201,3 +201,16 @@ The following rules are strict and must always be followed when generating the c
 - Only use primitives, layout components from the AVAILABLE list. Never invent new component names.
 - Never use className for layout or styling — it is not supported in the animation runtime.
 "#
+
+template_string CodeGenerationMustHave() #"
+## ANIMATION QUALITY
+
+- Keep text minimal — one or two key messages per animation, never more than five text elements total.
+- Stagger reveals rather than showing everything at once — give each element room to breathe.
+- Prefer slow, deliberate timing — entrances at 20-25 frames feel confident, rushed animations at 8-10 frames feel cheap.
+- Leave generous hold time between sections — do not animate continuously from frame 0 to the end.
+- Never stack more than three animation layers deep — avoid wrapping FadeIn inside SlideIn inside ScaleIn.
+- ** One dominant visual element per animation — a single Counter, a single heading, a single logo. Supporting elements should feel secondary.**
+- Prefer a single focal point centered on the canvas over busy multi-column layouts.
+- Whitespace is intentional — a centered heading with room around it reads better than content filling the full canvas.`;
+"#

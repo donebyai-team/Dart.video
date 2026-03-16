@@ -39,6 +39,7 @@ function ReGenerateAnimation(resume: ReGenerateAnimationCodeRequest, conversatio
     ---
 
     {{ CodeGeneration() }}
+    {{ CodeGenerationMustHave() }}
     ---
 
     ## INPUT
