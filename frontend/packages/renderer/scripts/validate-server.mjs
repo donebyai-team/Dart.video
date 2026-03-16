@@ -3,10 +3,9 @@
  * Runs as a Cloud Run Service (HTTP server).
  *
  * POST /validate
- *   Body: { code, component_name, output_path, config }
+ *   Body: { code, output_path, config }
  *   - code:           Generated TSX component source
- *   - component_name: PascalCase name (used as file + export name, e.g. "TextCascade")
- *   - output_path:    GCS path prefix where the compiled JS will be uploaded
+ *   - output_path:    GCS path prefix where the generated files will be uploaded
 *
  * Validation happens in two sequential steps so errors are caught early and
  * reported with enough detail for the LLM to self-correct:
@@ -37,7 +36,7 @@ import {Storage} from '@google-cloud/storage';
 import {bundle} from '@remotion/bundler';
 import {renderStill, selectComposition} from '@remotion/renderer';
 import {compileRemoteComponent, stripImports} from '../src/compiler.ts'
-import {assignPrimitiveIds} from '../src/primitive-ast-pass.ts'
+import {assignPrimitiveIds, transformAssignedPrimitiveIds} from '../src/primitive-ast-pass.ts'
 import {randomUUID} from 'node:crypto';
 import {existsSync} from 'node:fs';
 import {mkdir, rm, writeFile} from 'node:fs/promises';
@@ -279,11 +278,10 @@ async function handleValidate(req, res) {
     return;
   }
 
-   let code, component_name, output_path;
+   let code, output_path;
   try {
-    ({code, component_name, output_path} = JSON.parse(body));
+    ({code, output_path} = JSON.parse(body));
     if (!code) throw new Error('code is required');
-    if (!component_name) throw new Error('component_name is required');
     if (!output_path) throw new Error('output_path is required');
   } catch (err) {
     res.writeHead(400);
@@ -293,7 +291,6 @@ async function handleValidate(req, res) {
 
   console.log(
     `[validate] received code (${code.length} chars), ` +
-    `component_name: ${component_name}, ` +
     `output_path: ${output_path}`,
   );
 
@@ -307,6 +304,10 @@ async function handleValidate(req, res) {
     return;
   }
   console.log('[validate] compile check passed');
+
+  const uniqueComponentName = `Component${randomUUID().replace(/-/g, '')}`;
+  const idsGcsPath = `${output_path}/${uniqueComponentName}.tsx`;
+  const transformedGcsPath = `${output_path}/Transformed${uniqueComponentName}.tsx`;
 
   // ── AST pass: assign IDs + extract initial overlay ─────────────────────
   // Run on import-stripped code so the AST pass sees clean JSX.
@@ -322,10 +323,11 @@ async function handleValidate(req, res) {
   stripped = stripped.replace(/^export\s+/gm, '');
   stripped = stripped.trim();
 
-  const { code: transformedCode, initialOverlay } = assignPrimitiveIds(stripped);
+  const { code: codeWithAssignedIds, initialOverlay } = assignPrimitiveIds(stripped);
+  const transformedCode = transformAssignedPrimitiveIds(codeWithAssignedIds);
 
   // ── Compile check (validates the transformed code runs without errors) ──
-  console.log('[validate] compiling transformed code for validation...');
+  console.log('[validate] compiling transformed code for validation...', transformedCode);
   const result = compileRemoteComponent(transformedCode);
   if (result.error) {
     console.log('[validate] compile check FAILED:\n', result.error);
@@ -404,17 +406,16 @@ async function handleValidate(req, res) {
       return;
     }
 
-    // ---- Upload transformed code to GCS ----
-    // IDs injected + style spreads already in the code.
-    // The editor just compiles this directly — no AST pass needed.
-    const gcsPath = `${output_path}/${component_name}.tsx`;
-    await uploadToGCS(OUTPUT_BUCKET, gcsPath, Buffer.from(transformedCode, 'utf8'));
+    await uploadToGCS(OUTPUT_BUCKET, idsGcsPath, Buffer.from(codeWithAssignedIds, 'utf8'));
+    await uploadToGCS(OUTPUT_BUCKET, transformedGcsPath, Buffer.from(transformedCode, 'utf8'));
 
     console.log('[validate] render check passed — validation complete');
     res.writeHead(200, {'Content-Type': 'application/json'});
     res.end(JSON.stringify({
       initialOverlay,
-      gcsPath: `https://storage.googleapis.com/${OUTPUT_BUCKET}/${gcsPath}`,
+      componentName: uniqueComponentName,
+      codeWithAssignedIdsPath: `https://storage.googleapis.com/${OUTPUT_BUCKET}/${idsGcsPath}`,
+      transformedCodePath: `https://storage.googleapis.com/${OUTPUT_BUCKET}/${transformedGcsPath}`,
       duration: {
         settledFrame,
         durationInFrames,

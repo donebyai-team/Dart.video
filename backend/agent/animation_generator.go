@@ -14,9 +14,7 @@ import (
 	"github.com/shank318/coasterai/services"
 	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
-	"math/rand"
 	"strings"
-	"time"
 )
 
 type GenerationStage string
@@ -205,8 +203,6 @@ func (l *animationGenerator) GenerateCode(ctx context.Context,
 	}
 
 	conversationHistory := make([]types.Message, 0)
-	componentName := RandomComponentName()
-
 	for attempt := 0; attempt < maxAttempts; attempt++ {
 
 		// 🎨 Designing
@@ -228,22 +224,11 @@ func (l *animationGenerator) GenerateCode(ctx context.Context,
 
 		// Default
 		indentedCode := indentCode(generatedAnimation.Code)
-		codeFilePath := fmt.Sprintf("templates/generated/%s/%s", l.orgID, l.sessionID)
 
 		// 💾 Saving draft
 		callback(TemplateGenerationProgress{
 			Message: CreativeStageMessage(StageSaving, attempt),
 		})
-
-		uploadedMedia, err := l.mediaStore.UploadCode(ctx,
-			indentedCode,
-			fmt.Sprintf("%s/%s%d.tsx", codeFilePath, componentName, attempt))
-
-		if err != nil {
-			return nil, agenterrors.AnimationGenerationFailed("failed to upload code", err)
-		}
-
-		l.logger.Info("uploaded generated code", zap.String("url", uploadedMedia.Url))
 
 		// ⚙️ Bringing to life (BUILD STAGE)
 		callback(TemplateGenerationProgress{
@@ -253,27 +238,29 @@ func (l *animationGenerator) GenerateCode(ctx context.Context,
 		l.logger.Info("building code")
 
 		buildOutput, err := l.codeBuilder.ValidateAndBuild(ctx, &services.ValidateAndBuildInput{
-			Code:          indentedCode,
-			ComponentName: fmt.Sprintf("Transformed%s%d", componentName, attempt),
-			OutputPath:    fmt.Sprintf("templates/generated/%s/%s", l.orgID, l.sessionID),
+			Code:       indentedCode,
+			OutputPath: fmt.Sprintf("templates/generated/%s/%s", l.orgID, l.sessionID),
 		})
 
 		if err == nil {
-			l.logger.Info("build passed and animation generated", zap.String("output_path", buildOutput.JSPath))
 			callback(TemplateGenerationProgress{
 				Message: CreativeStageMessage(StageReady, 0),
 			})
 
+			l.logger.Info("uploaded generated code",
+				zap.String("transformed_url", buildOutput.TransformedCodePath),
+				zap.String("assigned_ids_url", buildOutput.CodeWithAssignedIdsPath))
+
 			return &models.Template{
 				ID:            uuid.New().String(),
-				Name:          componentName,
+				Name:          buildOutput.ComponentName,
 				AnimationType: types.AnimationTypeTEXT,
 				Repeatable:    false,
 				Description:   prompt,
 				Config: &models.TemplateConfig{
 					CodeRegistry: &pbcore.CodeRegistry{
-						MUrl: uploadedMedia.Url,
-						TUrl: buildOutput.JSPath,
+						MUrl: buildOutput.CodeWithAssignedIdsPath,
+						TUrl: buildOutput.TransformedCodePath,
 					},
 					VisibleDuration: int64(buildOutput.CodeDuration.SettledFrame),
 					TotalDuration:   int64(buildOutput.CodeDuration.DurationInFrames),
@@ -503,46 +490,37 @@ func (l *animationGenerator) uploadAndBuild(
 	callback TemplateGenerationCallback,
 ) (*models.Template, error) {
 
-	componentName := RandomComponentName()
 	callback(TemplateGenerationProgress{
 		Message: CreativeStageMessage(StageSaving, attempt),
 	})
-	uploadedMedia, err := l.mediaStore.UploadCode(
-		ctx,
-		code,
-		fmt.Sprintf("%s/%s%d.tsx", codeFilePath, componentName, attempt),
-	)
-	if err != nil {
-		return nil, agenterrors.AnimationGenerationFailed("failed to upload code", err)
-	}
-
-	l.logger.Info("uploaded generated code", zap.String("url", uploadedMedia.Url))
 
 	callback(TemplateGenerationProgress{
 		Message: CreativeStageMessage(StageBuilding, attempt),
 	})
 	buildOutput, err := l.codeBuilder.ValidateAndBuild(ctx, &services.ValidateAndBuildInput{
-		Code:          code,
-		ComponentName: fmt.Sprintf("Transformed%s%d", componentName, attempt),
-		OutputPath:    codeFilePath,
+		Code:       code,
+		OutputPath: codeFilePath,
 	})
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to build animation: %w", err)
 	}
 
-	l.logger.Info("build passed animation generated", zap.String("output_path", buildOutput.JSPath))
+	l.logger.Info("uploaded generated code",
+		zap.String("transformed_url", buildOutput.TransformedCodePath),
+		zap.String("assigned_ids_url", buildOutput.CodeWithAssignedIdsPath))
+
 	callback(TemplateGenerationProgress{
 		Message: CreativeStageMessage(StageReady, attempt),
 	})
 
 	return &models.Template{
 		ID:   uuid.New().String(),
-		Name: componentName,
+		Name: buildOutput.ComponentName,
 		Config: &models.TemplateConfig{
 			CodeRegistry: &pbcore.CodeRegistry{
-				MUrl: uploadedMedia.Url,
-				TUrl: buildOutput.JSPath,
+				MUrl: buildOutput.CodeWithAssignedIdsPath,
+				TUrl: buildOutput.TransformedCodePath,
 			},
 			VisibleDuration: int64(buildOutput.CodeDuration.SettledFrame),
 			TotalDuration:   int64(buildOutput.CodeDuration.DurationInFrames),
@@ -671,13 +649,6 @@ var nouns = []string{
 	"Block", "Stack", "Cascade", "Sequence",
 	"Frame", "Flow", "Layer", "Reveal",
 	"Highlight", "Motion", "Cluster",
-}
-
-func RandomComponentName() string {
-	a := adjectives[rand.Intn(len(adjectives))]
-	b := nouns[rand.Intn(len(nouns))]
-
-	return fmt.Sprintf("%s%s_%d", a, b, time.Now().UnixNano())
 }
 
 func (l *animationGenerator) ExtractConfig(

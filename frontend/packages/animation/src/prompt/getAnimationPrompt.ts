@@ -7,7 +7,6 @@ import {
   spacingFragment,
   typographyFragment,
   timingGuidanceFragment,
-  globalRulesFragment,
   exampleFragment,
 } from './fragments';
 import {
@@ -34,7 +33,6 @@ export function getAnimationPrompt(
     typographyFragment(),
     // brandTokensFragment(brand),
     timingGuidanceFragment(),
-    globalRulesFragment(),
     // typeSpecificRulesFragment(typeDef),
     exampleFragment(), 
   ];
