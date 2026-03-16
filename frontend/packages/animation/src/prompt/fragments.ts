@@ -8,11 +8,12 @@ import { PROMPT_SPACING_VALUES } from '../tokens/spacing';
 export function frameContractFragment(): string {
   return [
     '## FRAME CONTRACT:',
-    'Your component receives no props.',
-    'Never call useCurrentFrame(), interpolate(), spring(), or any Remotion hook.',
-    'Never import from "remotion" or any other library.',
-    'Plain React is allowed for static layout and positioning.',
-    'Animation timing must always use the provided primitives.',
+    '',
+    '- Your component receives no props.',
+    '- Never call useCurrentFrame(), interpolate(), spring(), or any Remotion hook.',
+    '- Never import from "remotion" or any other library.',
+    '- Plain React is allowed for static layout and positioning.',
+    '- Animation timing must always use the provided primitives.',
   ].join('\n');
 }
 
@@ -51,11 +52,10 @@ function describeZodType(schema: z.ZodTypeAny): string {
   return 'any';
 }
 
-export function componentListFragment(components: ComponentRegistration[]): string {
+export function componentListFragment(sectionName: string, components: ComponentRegistration[]): string {
   const lines: string[] = [];
 
-  lines.push("## AVAILABLE COMPONENTS");
-  lines.push("Only use the components listed below. Do not invent new ones.");
+  lines.push(`## ${sectionName}`);
   lines.push("");
 
   for (const c of components) {
@@ -66,6 +66,7 @@ export function componentListFragment(components: ComponentRegistration[]): stri
     lines.push("Props:");
 
     for (const [key, field] of Object.entries(shape)) {
+      // Remove styling props that are handled by the renderer
       if (key === "children" || key === "style" || key === "className") continue;
 
       const isOptional = (field as z.ZodTypeAny).isOptional();
@@ -102,30 +103,32 @@ export function brandTokensFragment(brand: BrandObject): string {
 export function timingGuidanceFragment(): string {
   return [
     '## TIMING GUIDANCE (fps=30, so 30 frames = 1 second):',
-    '  Typical entrance: 15-25 frames',
-    '  Typical exit: 10-15 frames',
-    '  Stagger between items: 6-10 frames',
-    '  Counter animation: 30-60 frames',
-    '  Typewriter per character: 2-3 frames (set duration = text.length * 2)',
-    '  Hold before next section: 10-20 frames',
+    '',
+    '- Typical entrance: 15-25 frames',
+    '- Typical exit: 10-15 frames',
+    '- Stagger between items: 6-10 frames',
+    '- Counter animation: 30-60 frames',
+    '- Typewriter per character: 2-3 frames (set duration = text.length * 2)',
+    '- Hold before next section: 10-20 frames',
   ].join('\n');
 }
 
 export function globalRulesFragment(): string {
   return [
     '## RULES:',
-    ' component receives no props.',
-    '  Never import from "remotion" or any library.',
-    '  Never use useCurrentFrame, interpolate, spring directly.',
-    '  Never hardcode hex colors — use brand.primary, brand.secondary, brand.bg, brand.text.',
-    '  Never use arbitrary px values — use spacing token values for gap/padding.',
-    '  Never hardcode font sizes — use Text variant prop.',
-    '  SafeArea must always be the outermost content wrapper.',
-    '  Never use JSX conditionals for animated elements — use TimelineGate showAfter instead.',
-    '  Export as: export default function RemoteComponent() { ... }',
-    '  Never set color, fontSize, fontWeight, letterSpacing, or fontFamily in style props.',
-    '  These are controlled by the design system automatically.',
-    '  style props are only for layout: position, margin, padding, maxWidth, width, height.',
+    '',
+    '- component receives no props.',
+    '- Never import from "remotion" or any library.',
+    '- Never use useCurrentFrame, interpolate, spring directly.',
+    '- Never hardcode hex colors — use brand.primary, brand.secondary, brand.bg, brand.text.',
+    '- Never use arbitrary px values — use spacing token values for gap/padding.',
+    '- Never hardcode font sizes — use Text variant prop.',
+    '- SafeArea must always be the outermost content wrapper.',
+    '- Never use JSX conditionals for animated elements — use TimelineGate showAfter instead.',
+    '- Export as: export default function RemoteComponent() { ... }',
+    '- Never set color, fontSize, fontWeight, letterSpacing, or fontFamily in style props.',
+    '- These are controlled by the design system automatically.',
+    '- style props are only for layout: position, margin, padding, maxWidth, width, height.',
   ].join('\n');
 }
 

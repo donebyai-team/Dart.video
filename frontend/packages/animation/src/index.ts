@@ -16,10 +16,10 @@ export * from './core/layout';
 // Animation primitives
 export * from './core/primitives';
 
-// Content primitives (Counter, Text, Typewriter, WordCycle)
+// Content primitives
 export * from './text';
 
-// Scene components (TitleCard, etc.)
+// Scene components
 export * from './components';
 
 // Registry
@@ -33,3 +33,6 @@ export * from './patches';
 
 // Assets
 export * from './assets';
+
+// Brand
+export * from './core/brand';

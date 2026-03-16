@@ -17,7 +17,7 @@ export const MyVideo = () => {
 
   return (
     <>
-      <Composition
+      {/* <Composition
         id='MyComposition'
         component={Slideshow as any}
         durationInFrames={Math.ceil(totalVideoFrames)}
@@ -30,7 +30,7 @@ export const MyVideo = () => {
           onSelectTemplate: undefined,
           video: videoData
         }}
-      />
+      /> */}
       {/* Animation system example — renders compiled LLM-generated primitives */}
       <Composition
         id='AnimationExample'

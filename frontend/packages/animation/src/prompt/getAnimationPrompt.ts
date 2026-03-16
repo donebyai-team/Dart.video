@@ -1,6 +1,5 @@
 import { ASPECT_PRESETS, AspectPreset } from '../styles/AspectPresetContext';
 import { BrandTheme as BrandObject } from '../theme/types';
-import { AnimationTypeName, ANIMATION_TYPE_DEFINITIONS, getComponentsForType } from '../registry/animationTypes';
 import {
   frameContractFragment,
   canvasDimensionsFragment,
@@ -11,7 +10,13 @@ import {
   globalRulesFragment,
   exampleFragment,
 } from './fragments';
-import { COMPONENT_REGISTRY } from '../registry';
+import {
+  LAYOUT_COMPONENTS,
+  ANIMATION_PRIMITIVE_COMPONENTS,
+  CONTENT_COMPONENTS,
+  SCENE_COMPONENTS,
+  BRAND_COMPONENTS,
+} from '../registry';
 
 export function getAnimationPrompt(
 ): string {
@@ -20,7 +25,11 @@ export function getAnimationPrompt(
   const sections = [
     frameContractFragment(),
     canvasDimensionsFragment(ASPECT_PRESETS['web']),
-    componentListFragment(COMPONENT_REGISTRY),
+    componentListFragment('LAYOUT', LAYOUT_COMPONENTS),
+    componentListFragment('ANIMATION PRIMITIVES', ANIMATION_PRIMITIVE_COMPONENTS),
+    componentListFragment('CONTENT', CONTENT_COMPONENTS),
+    componentListFragment('SCENES', SCENE_COMPONENTS),
+    componentListFragment('BRAND', BRAND_COMPONENTS),
     spacingFragment(),
     typographyFragment(),
     // brandTokensFragment(brand),

@@ -28,7 +28,11 @@ export default function RemoteComponent({ data }) {
       <AbsoluteCenter axis="both">
         <Stack gap={16} align="center">
 
-          <SlideIn startAt={0} durationInFrames={25} from="bottom">
+          <ScaleIn delay={10} duration={20} origin="center">
+            <LogoAsset/>
+          </ScaleIn>
+
+          <SlideIn startAt={20} durationInFrames={25} from="bottom">
             <Text variant="display">Phase 2 Complete</Text>
           </SlideIn>
 
@@ -67,7 +71,7 @@ export default function RemoteComponent({ data }) {
            <Stack gap={32} align="center">
             <Stagger startAt={100} staggerDelay={12}>
               <SlideIn durationInFrames={20} from="bottom">
-                <Text variant="label"> Tokens and Theming</Text>
+                <Text variant="label">✓ Tokens and Theming</Text>
               </SlideIn>
               <SlideIn durationInFrames={20} from="bottom">
                 <Text variant="label">✓ Layout Primitives</Text>

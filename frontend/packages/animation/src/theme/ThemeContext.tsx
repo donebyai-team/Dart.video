@@ -36,6 +36,7 @@ export function ThemeProvider({ theme, children }: ThemeProviderProps): React.Re
   const resolved = useMemo<ResolvedTheme>(() => ({
     colors: derivePalette(theme),
     ...resolveFonts(theme),
+    ...theme
   }), [theme]);
 
   return (

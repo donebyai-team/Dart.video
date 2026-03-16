@@ -1,5 +1,11 @@
 import { ColorTokens } from '../tokens/colors';
 
+export interface BrandAsset {
+  url: string;
+  width: number;
+  height: number;
+}
+
 /**
  * Brand identity provided by the user/client.
  * Minimal by design — only what changes per client.
@@ -20,8 +26,8 @@ export interface BrandTheme {
   fontMono?: string;
   /** Brand serif font (e.g. "Playfair Display"). Falls back to Georgia, serif. */
   fontSerif?: string;
-  /** Optional brand logo URL */
-  logo?: string;
+  /** Optional brand logo asset */
+  logo?: BrandAsset;
 }
 
 /**
@@ -38,4 +44,5 @@ export interface ResolvedTheme {
   fontMono: string;
   /** Resolved serif font stack (brand serif font + system fallbacks) */
   fontSerif: string;
+  logo?: BrandAsset;
 }

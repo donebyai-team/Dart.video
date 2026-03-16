@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 /** Component taxonomy types. */
-export type ComponentType = 'layout' | 'animation' | 'content' | 'scene' | 'headless';
+export type ComponentType = 'layout' | 'animation' | 'content' | 'scene' | 'headless' | 'brand';
 
 /** Which animation types include this component. */
 export type AnimationTypeName = 'text' | 'data' | 'presentation' | 'social' | 'custom';
@@ -158,13 +158,19 @@ export const TitleCardSchema = z.object({
   delay: z.number().optional(),
 });
 
+export const LogoAssetSchema = z.object({
+  width: z.number().optional(),
+  height: z.number().optional(),
+  style: z.any().optional(),
+  className: z.string().optional(),
+});
+
 // ── Registry ───────────────────────────────────────────────────────────────
 
 const ALL_TYPES: AnimationTypeName[] = ['text', 'data', 'presentation', 'social', 'custom'];
 const LAYOUT_TYPES: AnimationTypeName[] = ['text', 'data', 'presentation', 'social', 'custom'];
 
-export const COMPONENT_REGISTRY: ComponentRegistration[] = [
-  // Layout
+export const LAYOUT_COMPONENTS: ComponentRegistration[] = [
   {
     name: 'SafeArea',
     type: 'layout',
@@ -197,7 +203,9 @@ export const COMPONENT_REGISTRY: ComponentRegistration[] = [
     animationTypes: LAYOUT_TYPES,
     description: 'Centers child absolutely within nearest positioned parent',
   },
-  // Animation primitives
+];
+
+export const ANIMATION_PRIMITIVE_COMPONENTS: ComponentRegistration[] = [
   {
     name: 'FadeIn',
     type: 'animation',
@@ -262,7 +270,9 @@ export const COMPONENT_REGISTRY: ComponentRegistration[] = [
     animationTypes: ALL_TYPES,
     description: 'Mounts/unmounts children within a frame window, use instead of JSX conditionals',
   },
-  // Content
+];
+
+export const CONTENT_COMPONENTS: ComponentRegistration[] = [
   {
     name: 'Text',
     type: 'content',
@@ -295,7 +305,9 @@ export const COMPONENT_REGISTRY: ComponentRegistration[] = [
     animationTypes: ['text', 'social', 'custom'],
     description: 'Cycles through an array of words with animated transitions',
   },
-  // Scenes
+];
+
+export const SCENE_COMPONENTS: ComponentRegistration[] = [
   {
     name: 'TitleCard',
     type: 'scene',
@@ -304,6 +316,25 @@ export const COMPONENT_REGISTRY: ComponentRegistration[] = [
     animationTypes: ['text', 'data', 'presentation', 'custom'],
     description: 'Pre-built hero title card composition with heading, subheading, and eyebrow',
   },
+];
+
+export const BRAND_COMPONENTS: ComponentRegistration[] = [
+  {
+    name: 'LogoAsset',
+    type: 'brand',
+    fullSchema: LogoAssetSchema,
+    editorProps: ['width', 'height'],
+    animationTypes: ALL_TYPES,
+    description: 'Brand logo from ThemeProvider. Falls back to a placeholder if no logo is configured. Wrap in any animation primitive (FadeIn, SlideIn, ScaleIn etc.) to animate. Set only width or height to constrain size while preserving aspect ratio — never set both.',
+  },
+];
+
+export const COMPONENT_REGISTRY: ComponentRegistration[] = [
+  ...LAYOUT_COMPONENTS,
+  ...ANIMATION_PRIMITIVE_COMPONENTS,
+  ...CONTENT_COMPONENTS,
+  ...SCENE_COMPONENTS,
+  ...BRAND_COMPONENTS,
 ];
 
 /** Set of all registered component names. Used for AST ID pass and scope injection. */
