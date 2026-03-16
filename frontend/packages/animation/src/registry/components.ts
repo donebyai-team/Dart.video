@@ -166,6 +166,14 @@ export const LogoAssetSchema = z.object({
   className: z.string().optional(),
 });
 
+export const ImageAssetSchema = z.object({
+  src: z.string().optional(),
+  width: z.number().optional(),
+  height: z.number().optional(),
+  style: z.any().optional(),
+  className: z.string().optional(),
+});
+
 // ── Registry ───────────────────────────────────────────────────────────────
 
 const ALL_TYPES: AnimationTypeName[] = ['text', 'data', 'presentation', 'social', 'custom'];
@@ -327,6 +335,14 @@ export const BRAND_COMPONENTS: ComponentRegistration[] = [
     editorProps: ['src', 'width', 'height'],
     animationTypes: ALL_TYPES,
     description: 'Brand logo from ThemeProvider. Falls back to a placeholder if no logo is configured. Wrap in any animation primitive (FadeIn, SlideIn, ScaleIn etc.) to animate. Width and height define the bounding box; the logo always keeps its aspect ratio.',
+  },
+  {
+    name: 'ImageAsset',
+    type: 'brand',
+    fullSchema: ImageAssetSchema,
+    editorProps: ['src', 'width', 'height'],
+    animationTypes: ALL_TYPES,
+    description: 'Generic image primitive for uploaded or remote media. Width and height define the rendered box; the image fills that box according to objectFit and can be edited from the animation toolbar.',
   },
 ];
 
