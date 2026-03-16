@@ -31,18 +31,18 @@
  *   500  Internal server error                 — do NOT feed to LLM
  */
 
-import * as Babel from '@babel/standalone';
 import {Storage} from '@google-cloud/storage';
 import {bundle} from '@remotion/bundler';
 import {renderStill, selectComposition} from '@remotion/renderer';
-import {compileRemoteComponent, stripImports} from '../src/compiler.ts'
+import {compileRemoteComponent} from '../src/compiler.ts'
 import {assignPrimitiveIds, transformAssignedPrimitiveIds} from '../src/primitive-ast-pass.ts'
+import {parseValidateRequestBody, validateGeneratedCode} from '../src/validate-request.ts';
 import {randomUUID} from 'node:crypto';
 import {existsSync} from 'node:fs';
 import {mkdir, rm, writeFile} from 'node:fs/promises';
 import {createServer} from 'node:http';
 import {dirname, resolve} from 'node:path';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath, pathToFileURL} from 'node:url';
 
 const storage = new Storage();
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -62,35 +62,6 @@ const chromiumOptions = {
 //   ../../templates   → packages/templates/
 const RENDERER_SRC_DIR = resolve(__dirname, '../src');
 const TEMPLATES_DIR = resolve(__dirname, '../../templates');
-
-// ── Step 1: Compile check (Node.js / Babel) ───────────────────────────────────
-
-/**
- * Fast pre-validate using Babel in Node.js (no bundling / browser spin-up).
- * Returns null on success, or the full Babel error string on failure.
- *
- * We pass the raw LLM code with sourceType "module" so Babel handles
- * import/export statements natively — no need to duplicate the stripImports
- * logic from compiler.ts. We only care whether Babel throws, not the output.
- * The error includes Babel's codeFrame pointing at the exact problem line.
- * Feed this directly to the LLM.
- */
-function preValidateWithBabel(code) {
-  try {
-    const result = Babel.transform(code, {
-      presets: ['react', 'typescript'],
-      filename: 'remote-component.tsx',
-      sourceType: 'module',
-    });
-    if (!result?.code) {
-      return 'Babel produced no output — the code may be empty or malformed';
-    }
-    return null; // success
-  } catch (err) {
-    // err.message contains Babel's human-readable error + codeFrame
-    return err.stack || err.message;
-  }
-}
 
 // ── Step 2: Render check root entry ──────────────────────────────────────────
 
@@ -278,16 +249,14 @@ async function handleValidate(req, res) {
     return;
   }
 
-   let code, output_path;
-  try {
-    ({code, output_path} = JSON.parse(body));
-    if (!code) throw new Error('code is required');
-    if (!output_path) throw new Error('output_path is required');
-  } catch (err) {
-    res.writeHead(400);
-    res.end(err.message);
+  const parsedRequest = parseValidateRequestBody(body);
+  if (!parsedRequest.ok) {
+    res.writeHead(parsedRequest.status);
+    res.end(parsedRequest.body);
     return;
   }
+
+  const {code, outputPath: output_path} = parsedRequest;
 
   console.log(
     `[validate] received code (${code.length} chars), ` +
@@ -296,11 +265,11 @@ async function handleValidate(req, res) {
 
   // ── Step 1: Fast compile check ───────────────────────────────────────────
   console.log('[validate] step 1 — compile check (Babel/Node.js)');
-  const compileError = preValidateWithBabel(code);
-  if (compileError) {
-    console.log('[validate] compile check FAILED:\n', compileError);
-    res.writeHead(422, {'Content-Type': 'application/json'});
-    res.end(JSON.stringify({error_type: 'compile_error', errors: [compileError]}));
+  const validationFailure = validateGeneratedCode(code);
+  if (validationFailure) {
+    console.log('[validate] compile/static validation FAILED:\n', validationFailure.payload.errors);
+    res.writeHead(validationFailure.status, {'Content-Type': 'application/json'});
+    res.end(JSON.stringify(validationFailure.payload));
     return;
   }
   console.log('[validate] compile check passed');
@@ -436,7 +405,7 @@ async function handleValidate(req, res) {
 
 // ── Server ────────────────────────────────────────────────────────────────────
 
-const server = createServer(async (req, res) => {
+export async function handleValidatorRequest(req, res) {
   if (req.method === 'POST' && req.url === '/validate') {
     await handleValidate(req, res);
     return;
@@ -448,8 +417,18 @@ const server = createServer(async (req, res) => {
   }
   res.writeHead(404);
   res.end('Not found');
-});
+}
 
-server.listen(PORT, () => {
-  console.log(`[validate] server listening on port ${PORT}`);
-});
+export function createValidatorServer() {
+  return createServer(async (req, res) => {
+    await handleValidatorRequest(req, res);
+  });
+}
+
+const server = createValidatorServer();
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  server.listen(PORT, () => {
+    console.log(`[validate] server listening on port ${PORT}`);
+  });
+}

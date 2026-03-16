@@ -26,10 +26,35 @@ function GenerateAnimationPrompt(resume: GenerateAnimationPromptRequest) -> Gene
    - What makes this slide distinct from the ones already shown
 
    Do not write code. Do not describe implementation details.
-   Write as a creative brief that a motion designer hands to an engineer.
    Avoid repeating visual structures already used in previous slides.
 
    {{ AnimationTypes() }}
+
+   {{ AllComponentsList() }}
+
+   {{ CodeGenerationMustHave() }}
+
+    ## Example Output
+
+    Headline appears using FadeIn inside AbsoluteCenter.
+    A supporting subheading slides upward with SlideIn, followed by three short benefit lines revealed sequentially using Stagger inside a Stack layout.
+    A soft highlight word cycles using WordCycle to emphasize the key idea. Motion settles into a readable hold before the headline exits with FadeOut. Total duration: 6 seconds.
+
+
+    ## Design Thinking
+
+    Before writing the final paragraph, think step-by-step about the animation concept:
+
+    • identify the primary visual element
+    • choose the layout and focal point
+    • decide how elements enter
+    • plan the sequencing of motion
+    • determine how the animation holds or exits
+    • choose an appropriate duration (4–8 seconds)
+
+    Then write the final paragraph following the Output Rules.
+
+    ---
 
    --------------------------------------------------
    INPUT

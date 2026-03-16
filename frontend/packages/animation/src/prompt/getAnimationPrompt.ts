@@ -18,8 +18,23 @@ import {
 } from '../registry';
 
 export function getAnimationPrompt(
+  opts?: {
+    mode?: 'only_components_description';
+  }
 ): string {
   // const typeDef = ANIMATION_TYPE_DEFINITIONS[animationType];
+
+  if (opts?.mode === 'only_components_description') {
+    const componentSections = [
+      componentListFragment('LAYOUT', LAYOUT_COMPONENTS, { onlyDescriptions: true }),
+      componentListFragment('ANIMATION PRIMITIVES', ANIMATION_PRIMITIVE_COMPONENTS, { onlyDescriptions: true }),
+      componentListFragment('CONTENT', CONTENT_COMPONENTS, { onlyDescriptions: true }),
+      componentListFragment('SCENES', SCENE_COMPONENTS, { onlyDescriptions: true }),
+      componentListFragment('BRAND', BRAND_COMPONENTS, { onlyDescriptions: true }),
+    ];
+
+    return componentSections.join('\n');
+  }
 
   const sections = [
     frameContractFragment(),

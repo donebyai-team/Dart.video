@@ -20,7 +20,8 @@ import (
 // Internal/infrastructure failures are returned as plain errors and must NOT
 // be fed to the LLM.
 type BuildError struct {
-	// ErrorType is either "build_error" or "render_error".
+	// ErrorType is the validator's error_type, currently "compile_error",
+	// "rule_not_enforced", or "render_error".
 	ErrorType string
 	// Errors contains the compiler or runtime error messages.
 	Errors []string
@@ -36,7 +37,7 @@ type TemplateCodeBuilder interface {
 	// ValidateAndBuild compiles the component, renders frame 0, and uploads
 	// the resulting CDN JS bundle to GCS.
 	//
-	// On build/render failure it returns *BuildError — extract with errors.As
+	// On compile/rule/render failure it returns *BuildError — extract with errors.As
 	// and feed BuildError.Errors back to the LLM.
 	//
 	// On infrastructure failure it returns a plain error — do NOT feed to LLM.
@@ -114,21 +115,15 @@ func staticValidateCode(code string) *BuildError {
 	checks := []check{
 		{
 			ok: func(c string) bool {
-				return strings.Contains(c, "from 'remotion'") || strings.Contains(c, `from "remotion"`)
+				return strings.Contains(c, "export default function RemoteComponent")
 			},
-			message: "missing remotion import: code must import from 'remotion' (e.g. `import { useCurrentFrame } from 'remotion'`)",
+			message: "missing RemoteComponent contract: code must declare `export default function RemoteComponent()`",
 		},
 		{
 			ok: func(c string) bool {
-				return strings.Contains(c, "RemoteComponent")
+				return !strings.Contains(c, "import ")
 			},
-			message: "missing RemoteComponent: code must define and export a function named RemoteComponent",
-		},
-		{
-			ok: func(c string) bool {
-				return strings.Contains(c, "export")
-			},
-			message: "missing export statement: RemoteComponent must be exported (e.g. `export { RemoteComponent }` or `export const RemoteComponent`)",
+			message: "imports are not allowed: remove all import statements and use only the provided runtime components",
 		},
 	}
 
@@ -140,7 +135,7 @@ func staticValidateCode(code string) *BuildError {
 	}
 
 	if len(errs) > 0 {
-		return &BuildError{ErrorType: "build_error", Errors: errs}
+		return &BuildError{ErrorType: "rule_not_enforced", Errors: errs}
 	}
 	return nil
 }
@@ -191,7 +186,7 @@ func (s *codeBuilderService) ValidateAndBuild(
 		return nil, fmt.Errorf("read validator response: %w", err)
 	}
 
-	// 422 = build_error or render_error — feed back to LLM
+	// 422 = compile_error, rule_not_enforced, or render_error — feed back to LLM
 	if resp.StatusCode == http.StatusUnprocessableEntity {
 		var errResp struct {
 			ErrorType string   `json:"error_type"`

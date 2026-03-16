@@ -8,7 +8,8 @@
   "types": "./src/index.ts",
   "scripts": {
     "type-check": "tsc --noEmit",
-    "prompt": "tsx scripts/print-prompt.ts"
+    "prompt": "tsx scripts/print-prompt.ts",
+    "prompt-only-components": "tsx scripts/print-prompt.ts --mode only_components_description"
   },
   "dependencies": {
     "remotion": "4.0.421",

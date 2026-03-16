@@ -51,8 +51,21 @@ function describeZodType(schema: z.ZodTypeAny): string {
   return 'any';
 }
 
-export function componentListFragment(sectionName: string, components: ComponentRegistration[]): string {
+export function componentListFragment(
+  sectionName: string,
+  components: ComponentRegistration[],
+  opts?: {
+    onlyDescriptions?: boolean;
+  }
+): string {
   const lines: string[] = [];
+
+  if (opts?.onlyDescriptions) {
+    for (const c of components) {
+      lines.push(`## ${c.name} - ${c.description}`);
+    }
+    return lines.join("\n");
+  }
 
   lines.push(`## ${sectionName}`);
   lines.push("");

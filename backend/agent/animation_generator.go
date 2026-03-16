@@ -139,6 +139,19 @@ type TemplateGenerationProgress struct {
 	Message string
 }
 
+func buildFailureMessage(buildErr *services.BuildError) string {
+	switch buildErr.ErrorType {
+	case "compile_error":
+		return "Compile failed with error:\n" + buildErr.Error()
+	case "rule_not_enforced":
+		return "Generated code violated required animation rules:\n" + buildErr.Error() + "\nReview the generation rules and rewrite the component to follow them exactly."
+	case "render_error":
+		return "Render failed with error:\n" + buildErr.Error()
+	default:
+		return "Build failed with error:\n" + buildErr.Error()
+	}
+}
+
 func (l *animationGenerator) ApplyGenerationOptions(options AnimationGenerationOptions) {
 	l.generationOptions = options
 }
@@ -277,7 +290,7 @@ func (l *animationGenerator) GenerateCode(ctx context.Context,
 			conversationHistory = appendRetryConversation(
 				conversationHistory,
 				indentedCode,
-				"Build failed with error:\n"+buildErr.Error(),
+				buildFailureMessage(buildErr),
 			)
 
 			l.logger.Error("failed to build animation",
@@ -431,7 +444,7 @@ func (l *animationGenerator) tryTargetedEdits(
 			conversationHistory = appendRetryConversation(
 				conversationHistory,
 				stringify(response),
-				"Build failed with error:\n"+buildError.Error(),
+				buildFailureMessage(buildError),
 			)
 
 			l.logger.Error("failed to build animation",
@@ -590,7 +603,7 @@ func (l *animationGenerator) tryRegenerateAnimation(
 			conversationHistory = appendRetryConversation(
 				conversationHistory,
 				indentedCode,
-				"Build failed with error:\n"+buildErr.Error(),
+				buildFailureMessage(buildErr),
 			)
 
 			l.logger.Error("failed to build animation",
