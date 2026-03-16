@@ -12,6 +12,7 @@ const DEFAULT_LOGO_SVG = `data:image/svg+xml,${encodeURIComponent(`
 `)}`;
 
 export interface LogoAssetProps {
+    src?: string;
     width?: number;
     height?: number;
     style?: React.CSSProperties;
@@ -20,6 +21,7 @@ export interface LogoAssetProps {
 }
 
 export function LogoAsset({
+    src,
     width,
     height,
     style,
@@ -29,9 +31,11 @@ export function LogoAsset({
     const { logo } = useTheme();
     const preset = useAspectPreset();
     const styleOverride = useStyleOverride(id);
+    const { objectFit, ...wrapperStyleOverride } = styleOverride;
     const patchedWidth = usePatchedProp<number | undefined>(id, 'width', width);
     const patchedHeight = usePatchedProp<number | undefined>(id, 'height', height);
-    const patchedSrc = usePatchedProp<string | undefined>(id, 'src', logo?.url ?? DEFAULT_LOGO_SVG);
+    const defaultSrc = src ?? logo?.url ?? DEFAULT_LOGO_SVG;
+    const patchedSrc = usePatchedProp<string | undefined>(id, 'src', defaultSrc);
     // Use a frame-relative default so logos feel consistent across presets
     // without requiring callers to pass explicit dimensions.
     const defaultBoxSize = Math.min(Math.max(Math.min(preset.width, preset.height) * 0.2, 160), 260);
@@ -42,8 +46,11 @@ export function LogoAsset({
     // Raster assets can provide a stable intrinsic ratio up front; SVG uploads
     // may come through as 0x0, so ignore invalid metadata and let the browser fit
     // the asset inside the wrapper box instead.
-    const hasIntrinsicSize = (logo?.width ?? 0) > 0 && (logo?.height ?? 0) > 0;
+    const canUseThemeLogoMetadata = !!logo?.url && patchedSrc === logo.url;
+    const hasIntrinsicSize = canUseThemeLogoMetadata && (logo?.width ?? 0) > 0 && (logo?.height ?? 0) > 0;
     const intrinsicAspectRatio = hasIntrinsicSize ? `${logo!.width} / ${logo!.height}` : undefined;
+    const resolvedObjectFit: React.CSSProperties['objectFit'] =
+        typeof objectFit === 'string' ? objectFit as React.CSSProperties['objectFit'] : 'contain';
 
     return (
         <span
@@ -56,7 +63,7 @@ export function LogoAsset({
                 width: resolvedBoxWidth,
                 height: resolvedBoxHeight,
                 ...style,
-                ...styleOverride,
+                ...wrapperStyleOverride,
             }}
         >
             {/* The wrapper owns sizing; the image always scales to fill that box
@@ -69,7 +76,7 @@ export function LogoAsset({
                     display: 'block',
                     width: '100%',
                     height: '100%',
-                    objectFit: 'contain',
+                    objectFit: resolvedObjectFit,
                     aspectRatio: intrinsicAspectRatio,
                 }}
             />

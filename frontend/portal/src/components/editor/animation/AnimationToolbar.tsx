@@ -26,6 +26,7 @@ import {
   SliderInput,
   ColorSwatch,
 } from './toolbars/shared'
+import { MediaToolbar } from './toolbars/MediaToolbar'
 
 // ─── Options ────────────────────────────────────────────────────────────────
 
@@ -123,6 +124,17 @@ export function AnimationToolbar({
 
   // WordCycle draft state
   const [wcDraft, setWcDraft] = useState('')
+
+  if (componentName === 'LogoAsset') {
+    return (
+      <MediaToolbar
+        currentProps={currentProps}
+        styleOverride={styleOverride}
+        onValuePatch={vp}
+        onStyleOverride={so}
+      />
+    )
+  }
 
   return (
     <div className="flex flex-wrap items-center gap-1.5 px-3 py-1.5 rounded-xl bg-background/95 backdrop-blur-lg border border-border shadow-xl text-sm select-none max-w-[700px]">
@@ -398,7 +410,7 @@ export function AnimationToolbar({
 
       {/* ═══ STYLE CONTROLS (all elements) ═══ */}
       {/* Color/font controls are self-explanatory — no icons needed */}
-      {(componentName || elType === 'html' || elType === 'custom') && (
+      {componentName !== 'LogoAsset' && (componentName || elType === 'html' || elType === 'custom') && (
         <>
           <Div />
           {/* Text color */}

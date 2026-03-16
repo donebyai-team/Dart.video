@@ -333,9 +333,8 @@ export default function RemoteComponent() {
     );
   });
 
-  it("rejects LogoAsset with both dimensions", () => {
-    expectSingleRule(
-      `
+  it("accepts LogoAsset with both dimensions", () => {
+    const code = `
 export default function RemoteComponent() {
   return (
     <SafeArea>
@@ -345,9 +344,8 @@ export default function RemoteComponent() {
     </SafeArea>
   );
 }
-`,
-      "logo-both-dimensions",
-    );
+`;
+    expect(validatePromptRules(code)).toEqual([]);
   });
 
   it("accepts decorative div usage", () => {

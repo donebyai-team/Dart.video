@@ -159,6 +159,7 @@ export const TitleCardSchema = z.object({
 });
 
 export const LogoAssetSchema = z.object({
+  src: z.string().optional(),
   width: z.number().optional(),
   height: z.number().optional(),
   style: z.any().optional(),
@@ -323,7 +324,7 @@ export const BRAND_COMPONENTS: ComponentRegistration[] = [
     name: 'LogoAsset',
     type: 'brand',
     fullSchema: LogoAssetSchema,
-    editorProps: ['width', 'height'],
+    editorProps: ['src', 'width', 'height'],
     animationTypes: ALL_TYPES,
     description: 'Brand logo from ThemeProvider. Falls back to a placeholder if no logo is configured. Wrap in any animation primitive (FadeIn, SlideIn, ScaleIn etc.) to animate. Width and height define the bounding box; the logo always keeps its aspect ratio.',
   },

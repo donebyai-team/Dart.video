@@ -146,6 +146,7 @@ Props:
 ### LogoAsset
 Brand logo from ThemeProvider. Falls back to a placeholder if no logo is configured. Wrap in any animation primitive (FadeIn, SlideIn, ScaleIn etc.) to animate. Width and height define the bounding box; the logo always keeps its aspect ratio.
 Props:
+- src: string (optional)
 - width: number (optional)
 - height: number (optional)
 

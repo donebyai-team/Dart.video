@@ -380,17 +380,6 @@ export function validatePromptRules(code: string): PromptRuleViolation[] {
         );
       }
 
-      if (name === "LogoAsset" && widthAttr && getJsxAttribute(openingElement, "height")) {
-        pushViolation(
-          createViolation(
-            "logo-both-dimensions",
-            "LogoAsset cannot set both width and height because that distorts the aspect ratio.",
-            "Set only width or only height on LogoAsset.",
-            openingElement,
-          ),
-        );
-      }
-
       if (ANIMATION_COMPONENT_NAMES.has(name)) {
         const meaningfulChildren = getMeaningfulJsxChildren(path.node);
         if (meaningfulChildren.length === 0) {
