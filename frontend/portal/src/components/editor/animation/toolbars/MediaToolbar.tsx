@@ -28,6 +28,7 @@ function Div() {
 }
 
 interface MediaToolbarProps {
+  mediaKind?: 'image' | 'video';
   currentProps: Record<string, unknown>
   styleOverride: Record<string, string | number>
   onValuePatch: (prop: string, value: unknown) => void
@@ -35,6 +36,7 @@ interface MediaToolbarProps {
 }
 
 export function MediaToolbar({
+  mediaKind = 'image',
   currentProps,
   styleOverride,
   onValuePatch,
@@ -58,7 +60,7 @@ export function MediaToolbar({
 
   return (
     <div className="flex flex-wrap items-center gap-1.5 px-3 py-1.5 rounded-xl bg-background/95 backdrop-blur-lg border border-border shadow-xl text-sm select-none max-w-[700px]">
-      <CtrlGroup icon={<ImageUp size={13} />} tooltip="Upload a replacement image">
+      <CtrlGroup icon={<ImageUp size={13} />} tooltip={mediaKind === 'video' ? 'Upload a replacement video' : 'Upload a replacement image'}>
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
@@ -70,7 +72,7 @@ export function MediaToolbar({
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/*"
+          accept={mediaKind === 'video' ? 'video/*' : 'image/*'}
           className="hidden"
           onChange={async (e) => {
             const file = e.target.files?.[0]
@@ -104,16 +106,20 @@ export function MediaToolbar({
         />
       </CtrlGroup>
 
-      <Div />
+      {mediaKind === 'image' && (
+        <>
+          <Div />
 
-      <CtrlGroup icon={<ImageUp size={13} />} tooltip="How the image fits inside its box">
-        <SelectInput
-          value={typeof styleOverride.objectFit === 'string' ? styleOverride.objectFit as 'contain' | 'cover' | 'fill' : 'contain'}
-          options={OBJECT_FIT_OPTIONS}
-          onChange={value => onStyleOverride({ objectFit: value })}
-          width="w-24"
-        />
-      </CtrlGroup>
+          <CtrlGroup icon={<ImageUp size={13} />} tooltip="How the image fits inside its box">
+            <SelectInput
+              value={typeof styleOverride.objectFit === 'string' ? styleOverride.objectFit as 'contain' | 'cover' | 'fill' : 'contain'}
+              options={OBJECT_FIT_OPTIONS}
+              onChange={value => onStyleOverride({ objectFit: value })}
+              width="w-24"
+            />
+          </CtrlGroup>
+        </>
+      )}
 
       {/* TODO: Add explicit reset actions once patch removal helpers exist so
           src/width/height/objectFit can revert to component defaults. */}

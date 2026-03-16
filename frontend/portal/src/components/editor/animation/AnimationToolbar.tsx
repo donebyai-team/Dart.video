@@ -125,9 +125,10 @@ export function AnimationToolbar({
   // WordCycle draft state
   const [wcDraft, setWcDraft] = useState('')
 
-  if (componentName === 'LogoAsset' || componentName === 'ImageAsset') {
+  if (componentName === 'LogoAsset' || componentName === 'ImageAsset' || componentName === 'VideoAsset') {
     return (
       <MediaToolbar
+        mediaKind={componentName === 'VideoAsset' ? 'video' : 'image'}
         currentProps={currentProps}
         styleOverride={styleOverride}
         onValuePatch={vp}

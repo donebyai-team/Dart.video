@@ -174,6 +174,14 @@ export const ImageAssetSchema = z.object({
   className: z.string().optional(),
 });
 
+export const VideoAssetSchema = z.object({
+  src: z.string().optional(),
+  width: z.number().optional(),
+  height: z.number().optional(),
+  style: z.any().optional(),
+  className: z.string().optional(),
+});
+
 // ── Registry ───────────────────────────────────────────────────────────────
 
 const ALL_TYPES: AnimationTypeName[] = ['text', 'data', 'presentation', 'social', 'custom'];
@@ -343,6 +351,14 @@ export const BRAND_COMPONENTS: ComponentRegistration[] = [
     editorProps: ['src', 'width', 'height'],
     animationTypes: ALL_TYPES,
     description: 'Generic image primitive for uploaded or remote media. Width and height define the rendered box; the image fills that box according to objectFit and can be edited from the animation toolbar.',
+  },
+  {
+    name: 'VideoAsset',
+    type: 'brand',
+    fullSchema: VideoAssetSchema,
+    editorProps: ['src', 'width', 'height'],
+    animationTypes: ALL_TYPES,
+    description: 'Generic video primitive for uploaded media. Width and height define the rendered box; the video always preserves aspect ratio and stays fully visible.',
   },
 ];
 
