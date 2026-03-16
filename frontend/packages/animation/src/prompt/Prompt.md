@@ -144,7 +144,7 @@ Props:
 ## BRAND
 
 ### LogoAsset
-Brand logo from ThemeProvider. Falls back to a placeholder if no logo is configured. Wrap in any animation primitive (FadeIn, SlideIn, ScaleIn etc.) to animate. Set only width or height to constrain size while preserving aspect ratio — never set both.
+Brand logo from ThemeProvider. Falls back to a placeholder if no logo is configured. Wrap in any animation primitive (FadeIn, SlideIn, ScaleIn etc.) to animate. Width and height define the bounding box; the logo always keeps its aspect ratio.
 Props:
 - width: number (optional)
 - height: number (optional)
@@ -194,7 +194,7 @@ The following rules are strict and must always be followed when generating the c
 - Never use JSX conditionals for animated elements — use TimelineGate instead.
 - Never animate an empty or invisible element.
 - Always wrap content in an animation primitive to animate it — content primitives (Text, Counter, LogoAsset) never animate themselves.
-- Only set width OR height on LogoAsset — never both, as this distorts the aspect ratio.
+- Width and height on LogoAsset define its bounding box; the logo remains contained without distortion.
 
 ## Safety
 - Only use primitives, layout components from the AVAILABLE list. Never invent new component names.

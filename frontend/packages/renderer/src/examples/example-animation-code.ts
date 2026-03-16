@@ -29,7 +29,7 @@ export default function RemoteComponent({ data }) {
         <Stack gap={16} align="center">
 
           <ScaleIn delay={10} duration={20} origin="center">
-            <LogoAsset width={100} />
+            <LogoAsset />
           </ScaleIn>
 
           <SlideIn startAt={20} durationInFrames={25} from="bottom">

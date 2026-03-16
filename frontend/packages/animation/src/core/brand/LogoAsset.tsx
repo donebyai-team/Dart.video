@@ -1,4 +1,5 @@
 import { usePatchedProp, useStyleOverride } from "../../patches/PatchContext";
+import { useAspectPreset } from "../../styles/AspectPresetContext";
 import { useTheme } from "../../theme";
 
 const DEFAULT_LOGO_SVG = `data:image/svg+xml,${encodeURIComponent(`
@@ -26,27 +27,52 @@ export function LogoAsset({
     id,
 }: LogoAssetProps): React.ReactElement {
     const { logo } = useTheme();
+    const preset = useAspectPreset();
     const styleOverride = useStyleOverride(id);
-    const isDefaultLogo = !logo?.url;
     const patchedWidth = usePatchedProp<number | undefined>(id, 'width', width);
     const patchedHeight = usePatchedProp<number | undefined>(id, 'height', height);
     const patchedSrc = usePatchedProp<string | undefined>(id, 'src', logo?.url ?? DEFAULT_LOGO_SVG);
-
-    const resolvedWidth = patchedWidth ?? (isDefaultLogo ? 220 : undefined);
-    const resolvedHeight = patchedHeight ?? (isDefaultLogo ? 220 : undefined);
+    // Use a frame-relative default so logos feel consistent across presets
+    // without requiring callers to pass explicit dimensions.
+    const defaultBoxSize = Math.min(Math.max(Math.min(preset.width, preset.height) * 0.2, 160), 260);
+    // Width/height define the bounding box. If only one is provided, mirror it
+    // so the logo still gets a deterministic square box to fit into.
+    const resolvedBoxWidth = patchedWidth ?? patchedHeight ?? defaultBoxSize;
+    const resolvedBoxHeight = patchedHeight ?? patchedWidth ?? defaultBoxSize;
+    // Raster assets can provide a stable intrinsic ratio up front; SVG uploads
+    // may come through as 0x0, so ignore invalid metadata and let the browser fit
+    // the asset inside the wrapper box instead.
+    const hasIntrinsicSize = (logo?.width ?? 0) > 0 && (logo?.height ?? 0) > 0;
+    const intrinsicAspectRatio = hasIntrinsicSize ? `${logo!.width} / ${logo!.height}` : undefined;
 
     return (
-        <img
+        <span
             id={id}
-            src={patchedSrc}
             className={className}
             style={{
-                width: resolvedWidth ?? 'auto',
-                height: resolvedHeight ?? 'auto',
-                objectFit: 'contain',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: resolvedBoxWidth,
+                height: resolvedBoxHeight,
                 ...style,
                 ...styleOverride,
             }}
-        />
+        >
+            {/* The wrapper owns sizing; the image always scales to fill that box
+                while remaining fully visible via object-fit: contain. */}
+            <img
+                src={patchedSrc}
+                width={hasIntrinsicSize ? logo?.width : undefined}
+                height={hasIntrinsicSize ? logo?.height : undefined}
+                style={{
+                    display: 'block',
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain',
+                    aspectRatio: intrinsicAspectRatio,
+                }}
+            />
+        </span>
     );
 }

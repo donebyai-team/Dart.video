@@ -8,6 +8,7 @@
   "types": "./src/index.ts",
   "scripts": {
     "type-check": "tsc --noEmit",
+    "test": "jest --config jest.config.cjs",
     "prompt": "tsx scripts/print-prompt.ts",
     "prompt-only-components": "tsx scripts/print-prompt.ts --mode only_components_description"
   },

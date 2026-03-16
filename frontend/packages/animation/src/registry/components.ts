@@ -325,7 +325,7 @@ export const BRAND_COMPONENTS: ComponentRegistration[] = [
     fullSchema: LogoAssetSchema,
     editorProps: ['width', 'height'],
     animationTypes: ALL_TYPES,
-    description: 'Brand logo from ThemeProvider. Falls back to a placeholder if no logo is configured. Wrap in any animation primitive (FadeIn, SlideIn, ScaleIn etc.) to animate. Set only width or height to constrain size while preserving aspect ratio — never set both.',
+    description: 'Brand logo from ThemeProvider. Falls back to a placeholder if no logo is configured. Wrap in any animation primitive (FadeIn, SlideIn, ScaleIn etc.) to animate. Width and height define the bounding box; the logo always keeps its aspect ratio.',
   },
 ];
 
