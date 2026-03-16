@@ -1,11 +1,10 @@
 template_string CodeGeneration() #"
 ## FRAME CONTRACT:
 
-- Your component receives no props.
-- Never call useCurrentFrame(), interpolate(), spring(), or any Remotion hook.
-- Never import from "remotion" or any other library.
-- Plain React is allowed for static layout and positioning.
-- Animation timing must always use the provided primitives.
+- Your component runs inside a managed animation runtime.
+- It receives no props.
+- Export as: export default function RemoteComponent() { ... }
+- Remotion and all animation libraries are provided by the runtime — never import them.
 
 ## Available CANVAS size:
 1920px × 1080px (web)
@@ -167,6 +166,10 @@ caption | label | body | subheading | heading | display — never hardcode font 
 - Typewriter per character: 2-3 frames (set duration = text.length * 2)
 - Hold before next section: 10-20 frames
 
+## RULES:
+
+The following rules are strict and must always be followed when generating the component.
+
 ## Component contract
 - Component receives no props — export as: export default function RemoteComponent() { ... }
 - Never import from "remotion" or any other library.
@@ -195,6 +198,6 @@ caption | label | body | subheading | heading | display — never hardcode font 
 - Only set width OR height on LogoAsset — never both, as this distorts the aspect ratio.
 
 ## Safety
-- Only use primitives, layout, components etc from the above AVAILABLE list. Never invent new component names.
+- Only use primitives, layout components from the AVAILABLE list. Never invent new component names.
 - Never use className for layout or styling — it is not supported in the animation runtime.
 "#

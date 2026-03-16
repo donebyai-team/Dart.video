@@ -9,11 +9,10 @@ export function frameContractFragment(): string {
   return [
     '## FRAME CONTRACT:',
     '',
-    '- Your component receives no props.',
-    '- Never call useCurrentFrame(), interpolate(), spring(), or any Remotion hook.',
-    '- Never import from "remotion" or any other library.',
-    '- Plain React is allowed for static layout and positioning.',
-    '- Animation timing must always use the provided primitives.',
+    '- Your component runs inside a managed animation runtime.',
+    '- It receives no props.',
+    '- Export as: export default function RemoteComponent() { ... }',
+    '- Remotion and all animation libraries are provided by the runtime — never import them.',
   ].join('\n');
 }
 
@@ -115,6 +114,10 @@ export function timingGuidanceFragment(): string {
 
 export function globalRulesFragment(): string {
   return [
+    '## RULES:', 
+    '',
+    'The following rules are strict and must always be followed when generating the component.',
+    '',
     '## Component contract',
     '- Component receives no props — export as: export default function RemoteComponent() { ... }',
     '- Never import from "remotion" or any other library.',
