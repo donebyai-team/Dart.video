@@ -4,7 +4,7 @@
 
 import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv1";
 import type { Message } from "@bufbuild/protobuf";
-import type { BrandColor } from "./brandkit_pb";
+import type { BrandColor, BrandIdentity } from "./brandkit_pb";
 import type { BackgroundStyle, Section } from "./slide_pb";
 import type { Timestamp } from "@bufbuild/protobuf/wkt";
 
@@ -18,6 +18,8 @@ export declare const file_coasterai_core_v1_video: GenFile;
  */
 export declare type GeneratedVideoBranding = Message<"coasterai.core.v1.GeneratedVideoBranding"> & {
   /**
+   * always there, extracted while generating video
+   *
    * @generated from field: repeated coasterai.core.v1.BrandColor colors = 1;
    */
   colors: BrandColor[];
@@ -26,6 +28,13 @@ export declare type GeneratedVideoBranding = Message<"coasterai.core.v1.Generate
    * @generated from field: optional string brandLibraryID = 2;
    */
   brandLibraryID?: string;
+
+  /**
+   * will be injected dynamically
+   *
+   * @generated from field: optional coasterai.core.v1.BrandIdentity brandIdentity = 3;
+   */
+  brandIdentity?: BrandIdentity;
 };
 
 /**

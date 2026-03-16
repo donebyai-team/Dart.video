@@ -310,11 +310,23 @@ func (p *Portal) GetVideo(
 	logger := logging.Logger(ctx, p.logger).With(zap.String("session_id", videoID))
 
 	var videoAgent agent.VideoAgent // lazy init
+	var brandIdentity *pbcore.BrandIdentity
 
 	sendCurrent := func() (*models.Video, error) {
 		video, totalSlides, err := p.videoGenerationService.GetVideo(ctx, videoID, actor.OrganizationID, services.VideoOptions{IncludePending: false})
 		if err != nil {
 			return nil, err
+		}
+
+		// inject brand identity
+		if video.Metadata.GeneratedBranding.BrandLibraryID != nil &&
+			brandIdentity == nil {
+			_brandIdentity, err := p.brandIdentityService.GetBrandIdentityByID(ctx, *video.Metadata.GeneratedBranding.BrandLibraryID)
+			if err != nil {
+				return nil, err
+			}
+
+			brandIdentity = _brandIdentity.BrandIdentity
 		}
 
 		thinking := ""

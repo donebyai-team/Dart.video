@@ -7,12 +7,13 @@ import (
 	"strings"
 )
 
+// Same as DEFAULT_THEME in frontend
 var defaultColors = map[string]string{
-	"primary":       "#2563EB",
-	"secondary":     "#64748B",
+	"primary":       "#6366f1",
+	"secondary":     "#a5b4fc",
 	"accent":        "#F59E0B",
-	"background":    "#FFFFFF",
-	"textPrimary":   "#111827",
+	"background":    "#ffffff",
+	"textPrimary":   "#0a0a0a",
 	"textSecondary": "#6B7280",
 }
 

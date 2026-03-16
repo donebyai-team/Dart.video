@@ -34,8 +34,9 @@ enum StyleType {
 }
 
 message GeneratedVideoBranding {
-  repeated BrandColor colors = 1;
+  repeated BrandColor colors = 1; // always there, extracted while generating video
   optional string brandLibraryID = 2;
+  optional BrandIdentity brandIdentity = 3; // will be injected dynamically
 }
 
 message VideoMetadata {

@@ -11,6 +11,7 @@ import {
   resolveStyle,
   type AspectPreset,
   ASPECT_PRESETS,
+  defaultTheme,
 } from '@coasterai/animation'
 import { AnimationSlide, MediaSlide } from './slides'
 import { backgroundStyleToCSS } from './backgroundUtils'
@@ -151,7 +152,15 @@ export const Slideshow: React.FC<SlideshowProps> = ({
   const styleConfig = useMemo(() => resolveStyle('clean'), [])
   // TODO: Make this dynamic based on the video resolution
   const aspectPreset = useMemo<AspectPreset>(() => (ASPECT_PRESETS["web"]), [width, height])
-  const brandTheme = useMemo(() => brandingToTheme(videoConfig?.metadata?.generatedBranding), [videoConfig?.metadata?.generatedBranding])
+
+  // Use the one that is generated from backend or default
+  const brandTheme = useMemo(
+  () =>
+    videoConfig?.metadata?.generatedBranding
+      ? brandingToTheme(videoConfig.metadata.generatedBranding)
+      : defaultTheme,
+  [videoConfig?.metadata?.generatedBranding]
+);
 
   /* ================= GATE ================= */
 

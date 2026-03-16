@@ -61,6 +61,7 @@ func (g *videoConfigGenerator) Fail(ctx context.Context, cause error, status mod
 
 func (g *videoConfigGenerator) AddBranding(brandIdentityRegistry *brand_identity.BrandIdentityRegistry) {
 	if brandIdentityRegistry == nil {
+		// Extract default theme to start with
 		randomColors := brand_identity.ExtractOrGenerateColors(nil)
 		g.video.Metadata.GeneratedBranding = &pbcore.GeneratedVideoBranding{
 			Colors: randomColors,

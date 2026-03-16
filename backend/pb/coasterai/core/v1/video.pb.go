@@ -229,8 +229,9 @@ func (StyleType) EnumDescriptor() ([]byte, []int) {
 
 type GeneratedVideoBranding struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
-	Colors         []*BrandColor          `protobuf:"bytes,1,rep,name=colors,proto3" json:"colors,omitempty"`
+	Colors         []*BrandColor          `protobuf:"bytes,1,rep,name=colors,proto3" json:"colors,omitempty"` // always there, extracted while generating video
 	BrandLibraryID *string                `protobuf:"bytes,2,opt,name=brandLibraryID,proto3,oneof" json:"brandLibraryID,omitempty"`
+	BrandIdentity  *BrandIdentity         `protobuf:"bytes,3,opt,name=brandIdentity,proto3,oneof" json:"brandIdentity,omitempty"` // will be injected dynamically
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -277,6 +278,13 @@ func (x *GeneratedVideoBranding) GetBrandLibraryID() string {
 		return *x.BrandLibraryID
 	}
 	return ""
+}
+
+func (x *GeneratedVideoBranding) GetBrandIdentity() *BrandIdentity {
+	if x != nil {
+		return x.BrandIdentity
+	}
+	return nil
 }
 
 type VideoMetadata struct {
@@ -699,11 +707,13 @@ var File_coasterai_core_v1_video_proto protoreflect.FileDescriptor
 
 const file_coasterai_core_v1_video_proto_rawDesc = "" +
 	"\n" +
-	"\x1dcoasterai/core/v1/video.proto\x12\x11coasterai.core.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1dcoasterai/core/v1/slide.proto\x1a coasterai/core/v1/brandkit.proto\"\x8f\x01\n" +
+	"\x1dcoasterai/core/v1/video.proto\x12\x11coasterai.core.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1dcoasterai/core/v1/slide.proto\x1a coasterai/core/v1/brandkit.proto\"\xee\x01\n" +
 	"\x16GeneratedVideoBranding\x125\n" +
 	"\x06colors\x18\x01 \x03(\v2\x1d.coasterai.core.v1.BrandColorR\x06colors\x12+\n" +
-	"\x0ebrandLibraryID\x18\x02 \x01(\tH\x00R\x0ebrandLibraryID\x88\x01\x01B\x11\n" +
-	"\x0f_brandLibraryID\"\xff\x03\n" +
+	"\x0ebrandLibraryID\x18\x02 \x01(\tH\x00R\x0ebrandLibraryID\x88\x01\x01\x12K\n" +
+	"\rbrandIdentity\x18\x03 \x01(\v2 .coasterai.core.v1.BrandIdentityH\x01R\rbrandIdentity\x88\x01\x01B\x11\n" +
+	"\x0f_brandLibraryIDB\x10\n" +
+	"\x0e_brandIdentity\"\xff\x03\n" +
 	"\rVideoMetadata\x12\x10\n" +
 	"\x03fps\x18\x01 \x01(\x05R\x03fps\x12R\n" +
 	"\x10background_style\x18\x02 \x01(\v2\".coasterai.core.v1.BackgroundStyleH\x00R\x0fbackgroundStyle\x88\x01\x01\x12=\n" +
@@ -794,27 +804,29 @@ var file_coasterai_core_v1_video_proto_goTypes = []any{
 	(*ScriptItem)(nil),             // 9: coasterai.core.v1.ScriptItem
 	(*Resolution)(nil),             // 10: coasterai.core.v1.Resolution
 	(*BrandColor)(nil),             // 11: coasterai.core.v1.BrandColor
-	(*BackgroundStyle)(nil),        // 12: coasterai.core.v1.BackgroundStyle
-	(*timestamppb.Timestamp)(nil),  // 13: google.protobuf.Timestamp
-	(*Section)(nil),                // 14: coasterai.core.v1.Section
+	(*BrandIdentity)(nil),          // 12: coasterai.core.v1.BrandIdentity
+	(*BackgroundStyle)(nil),        // 13: coasterai.core.v1.BackgroundStyle
+	(*timestamppb.Timestamp)(nil),  // 14: google.protobuf.Timestamp
+	(*Section)(nil),                // 15: coasterai.core.v1.Section
 }
 var file_coasterai_core_v1_video_proto_depIdxs = []int32{
 	11, // 0: coasterai.core.v1.GeneratedVideoBranding.colors:type_name -> coasterai.core.v1.BrandColor
-	12, // 1: coasterai.core.v1.VideoMetadata.background_style:type_name -> coasterai.core.v1.BackgroundStyle
-	10, // 2: coasterai.core.v1.VideoMetadata.resolution:type_name -> coasterai.core.v1.Resolution
-	1,  // 3: coasterai.core.v1.VideoMetadata.language:type_name -> coasterai.core.v1.VideoLanguage
-	4,  // 4: coasterai.core.v1.VideoMetadata.generatedBranding:type_name -> coasterai.core.v1.GeneratedVideoBranding
-	7,  // 5: coasterai.core.v1.Video.config:type_name -> coasterai.core.v1.VideoConfig
-	5,  // 6: coasterai.core.v1.Video.metadata:type_name -> coasterai.core.v1.VideoMetadata
-	13, // 7: coasterai.core.v1.Video.created_at:type_name -> google.protobuf.Timestamp
-	0,  // 8: coasterai.core.v1.Video.status:type_name -> coasterai.core.v1.VideoStatus
-	14, // 9: coasterai.core.v1.VideoConfig.sections:type_name -> coasterai.core.v1.Section
-	9,  // 10: coasterai.core.v1.Script.items:type_name -> coasterai.core.v1.ScriptItem
-	11, // [11:11] is the sub-list for method output_type
-	11, // [11:11] is the sub-list for method input_type
-	11, // [11:11] is the sub-list for extension type_name
-	11, // [11:11] is the sub-list for extension extendee
-	0,  // [0:11] is the sub-list for field type_name
+	12, // 1: coasterai.core.v1.GeneratedVideoBranding.brandIdentity:type_name -> coasterai.core.v1.BrandIdentity
+	13, // 2: coasterai.core.v1.VideoMetadata.background_style:type_name -> coasterai.core.v1.BackgroundStyle
+	10, // 3: coasterai.core.v1.VideoMetadata.resolution:type_name -> coasterai.core.v1.Resolution
+	1,  // 4: coasterai.core.v1.VideoMetadata.language:type_name -> coasterai.core.v1.VideoLanguage
+	4,  // 5: coasterai.core.v1.VideoMetadata.generatedBranding:type_name -> coasterai.core.v1.GeneratedVideoBranding
+	7,  // 6: coasterai.core.v1.Video.config:type_name -> coasterai.core.v1.VideoConfig
+	5,  // 7: coasterai.core.v1.Video.metadata:type_name -> coasterai.core.v1.VideoMetadata
+	14, // 8: coasterai.core.v1.Video.created_at:type_name -> google.protobuf.Timestamp
+	0,  // 9: coasterai.core.v1.Video.status:type_name -> coasterai.core.v1.VideoStatus
+	15, // 10: coasterai.core.v1.VideoConfig.sections:type_name -> coasterai.core.v1.Section
+	9,  // 11: coasterai.core.v1.Script.items:type_name -> coasterai.core.v1.ScriptItem
+	12, // [12:12] is the sub-list for method output_type
+	12, // [12:12] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_coasterai_core_v1_video_proto_init() }
