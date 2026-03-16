@@ -1,3 +1,6 @@
+import { preloadImage } from "@remotion/preload";
+import { useEffect } from "react";
+import { useRemotionEnvironment } from "remotion";
 import { usePatchedProp, useStyleOverride } from "../../patches/PatchContext";
 import { useAspectPreset } from "../../styles/AspectPresetContext";
 import { useTheme } from "../../theme";
@@ -29,6 +32,7 @@ export function LogoAsset({
     id,
 }: LogoAssetProps): React.ReactElement {
     const { logo } = useTheme();
+    const { isRendering } = useRemotionEnvironment();
     const preset = useAspectPreset();
     const styleOverride = useStyleOverride(id);
     const { objectFit, ...wrapperStyleOverride } = styleOverride;
@@ -51,6 +55,14 @@ export function LogoAsset({
     const intrinsicAspectRatio = hasIntrinsicSize ? `${logo!.width} / ${logo!.height}` : undefined;
     const resolvedObjectFit: React.CSSProperties['objectFit'] =
         typeof objectFit === 'string' ? objectFit as React.CSSProperties['objectFit'] : 'contain';
+
+    useEffect(() => {
+        if (!patchedSrc || !isRendering) return;
+        const unpreload = preloadImage(patchedSrc);
+        return () => {
+            unpreload();
+        };
+    }, [patchedSrc, isRendering]);
 
     return (
         <span

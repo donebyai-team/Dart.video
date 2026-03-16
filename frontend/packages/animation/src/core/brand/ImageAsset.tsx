@@ -1,3 +1,6 @@
+import { preloadImage } from "@remotion/preload";
+import { useEffect } from "react";
+import { useRemotionEnvironment } from "remotion";
 import { usePatchedProp, useStyleOverride } from "../../patches/PatchContext";
 import { useAspectPreset } from "../../styles/AspectPresetContext";
 
@@ -26,6 +29,7 @@ export function ImageAsset({
     className,
     id,
 }: ImageAssetProps): React.ReactElement {
+    const { isRendering } = useRemotionEnvironment();
     const preset = useAspectPreset();
     const styleOverride = useStyleOverride(id);
     const { objectFit, ...wrapperStyleOverride } = styleOverride;
@@ -39,6 +43,14 @@ export function ImageAsset({
     const resolvedBoxHeight = patchedHeight ?? defaultBoxHeight;
     const resolvedObjectFit: React.CSSProperties['objectFit'] =
         typeof objectFit === 'string' ? objectFit as React.CSSProperties['objectFit'] : 'cover';
+
+    useEffect(() => {
+        if (!patchedSrc || !isRendering) return;
+        const unpreload = preloadImage(patchedSrc);
+        return () => {
+            unpreload();
+        };
+    }, [patchedSrc, isRendering]);
 
     return (
         <span

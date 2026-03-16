@@ -13,6 +13,7 @@
     "prompt-only-components": "tsx scripts/print-prompt.ts --mode only_components_description"
   },
   "dependencies": {
+    "@remotion/preload": "4.0.421",
     "remotion": "4.0.421",
     "zod": "^3.24.4",
     "react": "^18.3.1"
