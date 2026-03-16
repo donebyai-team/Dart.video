@@ -167,18 +167,34 @@ caption | label | body | subheading | heading | display — never hardcode font 
 - Typewriter per character: 2-3 frames (set duration = text.length * 2)
 - Hold before next section: 10-20 frames
 
-## RULES:
+## Component contract
+- Component receives no props — export as: export default function RemoteComponent() { ... }
+- Never import from "remotion" or any other library.
+- Never use useCurrentFrame, interpolate, spring, or any Remotion hook directly.
 
-- component receives no props.
-- Never import from "remotion" or any library.
-- Never use useCurrentFrame, interpolate, spring directly.
-- Never hardcode hex colors — use brand.primary, brand.secondary, brand.bg, brand.text.
-- Never use arbitrary px values — use spacing token values for gap/padding.
-- Never hardcode font sizes — use Text variant prop.
-- SafeArea must always be the outermost content wrapper.
-- Never use JSX conditionals for animated elements — use TimelineGate showAfter instead.
-- Export as: export default function RemoteComponent() { ... }
-- Never set color, fontSize, fontWeight, letterSpacing, or fontFamily in style props.
-- These are controlled by the design system automatically.
-- style props are only for layout: position, margin, padding, maxWidth, width, height.
+## Layout
+- SafeArea must always be the outermost wrapper. Nothing renders outside it.
+- Every visible element must be a direct child of Stack, Row, or AbsoluteCenter — never place components as siblings without a layout primitive.
+- Use Stack for vertical arrangement, Row for horizontal. Nest them for complex layouts.
+- Never use position:absolute, position:fixed, or position:relative — AbsoluteCenter is the only component that handles absolute positioning.
+- Never create wrapper divs purely for layout — use Stack and Row instead.
+- Never animate an empty div — every animation primitive must wrap visible content.
+- Plain React divs are allowed only for geometric shapes and decorative elements (circles, dividers, lines). Never for layout.
+- Spacing values for gap, padding, margin must be token values only mentioned above
+
+## Styling
+- Never set color, fontSize, fontWeight, letterSpacing, or fontFamily in style props — the design system controls these automatically.
+- Never hardcode hex colors or rgba color values.
+- Never hardcode font sizes — use Text variant prop instead.
+- style props are for geometry and layout only: width, height, maxWidth, borderRadius, overflow, padding, margin.
+
+## Animation
+- Never use JSX conditionals for animated elements — use TimelineGate instead.
+- Never animate an empty or invisible element.
+- Always wrap content in an animation primitive to animate it — content primitives (Text, Counter, LogoAsset) never animate themselves.
+- Only set width OR height on LogoAsset — never both, as this distorts the aspect ratio.
+
+## Safety
+- Only use primitives, layout, components etc from the above AVAILABLE list. Never invent new component names.
+- Never use className for layout or styling — it is not supported in the animation runtime.
 "#
