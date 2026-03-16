@@ -20,13 +20,25 @@ function GenerateAnimationPrompt(resume: GenerateAnimationPromptRequest) -> Gene
    - The next narrative beat that needs to be communicated
 
    Your job is to design the animation concept for the next slide.
-   Output one paragraph of 60-80 words maximum describing:
-   - What the viewer sees and in what order
-   - What visual mechanism communicates the narrative beat
-   - What makes this slide distinct from the ones already shown
-
    Do not write code. Do not describe implementation details.
    Avoid repeating visual structures already used in previous slides.
+
+   ## Output Rules
+
+   Write exactly ONE paragraph (60–80 words).
+
+   The paragraph must clearly describe:
+
+   • the main visual element
+   • how elements enter the screen
+   • the sequence of motion
+   • the focal point of the composition
+   • how the animation ends or holds
+   • the total duration (4–8 seconds)
+   • stay within the capabilities implied by the available visual mechanisms
+   • describe motion in natural visual language
+   • do not mention component names unless needed for unusual precision
+
 
    {{ AnimationTypes() }}
 
@@ -36,9 +48,9 @@ function GenerateAnimationPrompt(resume: GenerateAnimationPromptRequest) -> Gene
 
     ## Example Output
 
-    Headline appears using FadeIn inside AbsoluteCenter.
-    A supporting subheading slides upward with SlideIn, followed by three short benefit lines revealed sequentially using Stagger inside a Stack layout.
-    A soft highlight word cycles using WordCycle to emphasize the key idea. Motion settles into a readable hold before the headline exits with FadeOut. Total duration: 6 seconds.
+    A strong headline lands first in the center, with a supporting line rising into place just after it.
+    Three short proof points appear in sequence to create rhythm, while one changing keyword adds emphasis without overwhelming the frame.
+    The slide feels distinct by keeping everything focused on a single central message, then holds long enough to read before easing out. Total duration: 6 seconds.
 
 
     ## Design Thinking
@@ -92,4 +104,3 @@ function GenerateAnimationPrompt(resume: GenerateAnimationPromptRequest) -> Gene
     {{ ctx.output_format }}
   "#
 }
-

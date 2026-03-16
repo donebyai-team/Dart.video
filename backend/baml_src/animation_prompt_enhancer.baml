@@ -13,7 +13,7 @@ class EnhancedAnimationPrompt {
   categorySearchQuery string
       @description("Semantic search query describing the conceptual animation category, NOT visual style. Example: 'data fragmentation problem', 'centralization of scattered systems', 'growth acceleration', 'workflow automation'.")
   duration int
-      @description("Duration of the animation in seconds, between 2–5s")
+      @description("Duration of the animation in seconds")
 }
 
 class EnhanceAnimationPromptResponse {
@@ -46,6 +46,9 @@ function EnhanceAnimationPrompt(request: EnhanceAnimationPromptRequest, conversa
    • the focal point of the composition
    • how the animation ends or holds
    • the total duration (4–8 seconds)
+   • stay within the capabilities implied by the available visual mechanisms
+   • describe motion in natural visual language
+   • do not mention component names unless needed for unusual precision
 
     {{ CodeGenerationMustHave() }}
 
@@ -55,9 +58,9 @@ function EnhanceAnimationPrompt(request: EnhanceAnimationPromptRequest, conversa
 
     ## Example Output
 
-    Headline appears using FadeIn inside AbsoluteCenter.
-    A supporting subheading slides upward with SlideIn, followed by three short benefit lines revealed sequentially using Stagger inside a Stack layout.
-    A soft highlight word cycles using WordCycle to emphasize the key idea. Motion settles into a readable hold before the headline exits with FadeOut. Total duration: 6 seconds.
+    A bold headline appears at the center of the frame, followed by a short supporting line rising gently beneath it.
+    Three quick benefit statements reveal one after another to build momentum, while a single key word updates to sharpen the message.
+    The composition stays centered and easy to read, then settles into a clean hold before fading away. Total duration: 6 seconds.
 
     ---
 
@@ -115,4 +118,3 @@ function EnhanceAnimationPrompt(request: EnhanceAnimationPromptRequest, conversa
     {{ ctx.output_format }}
   "#
 }
-
