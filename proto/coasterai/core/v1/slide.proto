@@ -75,7 +75,7 @@ message AnimationSlidePlan {
   string beatDescription = 2;
   string animationType = 3;
   string categorySearcQquery = 4;
-  int64 duration = 5;
+  int64 durationInFrames = 5;
   optional string voiceover = 6;
   optional string selectedTemplateDescription = 7;
 }
@@ -83,7 +83,7 @@ message AnimationSlidePlan {
 message MediaSlidePlan {
   int64 index = 1;
   string beatDescription = 2;
-  int64 duration = 3;
+  int64 durationInFrames = 3;
   optional string selectedTemplateDescription = 4;
 }
 

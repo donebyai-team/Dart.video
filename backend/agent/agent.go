@@ -302,7 +302,7 @@ func (a *agentV1) runPlanning(ctx context.Context, session *planningSession) (re
 		return nil, agenterrors.Internal("llm response did not include a plan", nil)
 	}
 
-	err = sanitizeAgentPlan(plan)
+	err = sanitizeAgentPlanAndDuration(plan, a.fps)
 	if err != nil {
 		return nil, agenterrors.Internal(err.Error(), nil)
 	}
@@ -359,6 +359,8 @@ func (a *agentV1) runPlanning(ctx context.Context, session *planningSession) (re
 	}
 }
 
+// aiPlan is sanitized to duration in frames
+// apply should always work on frames
 func (a *agentV1) applyPlan(
 	ctx context.Context,
 	aiPlan *types.VideoGenerationPlan,
@@ -465,7 +467,6 @@ func (a *agentV1) applyPlan(
 			// ---------------- MEDIA SLIDE ----------------
 			if slide.Type == pbcore.SlideType_SLIDE_TYPE_MEDIA {
 				media := slide.GetMedia()
-
 				if err = builder.UpdateMediaSlide(ctx, slide.Id); err != nil {
 					return agenterrors.VideoPersistFailed("failed to persist media slide", err)
 				}
@@ -553,6 +554,9 @@ func (a *agentV1) selectTemplate(
 			zap.String("template_nid", selected.ID),
 		)
 
+		// update duration to frames as templates are always in seconds.
+		selected.Config.ConvertDurationToFrames(a.fps)
+
 		// Extract config
 		a.updateState(ctx, VideoAgentState{
 			Thinking: extracting,
@@ -580,8 +584,6 @@ func (a *agentV1) selectTemplate(
 
 		return template, nil
 	}
-
-	selected.Config.ConvertDurationToFrames(a.fps)
 
 	return selected, nil
 }

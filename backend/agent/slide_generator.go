@@ -79,11 +79,6 @@ func (g *videoConfigGenerator) AddBranding(brandIdentityRegistry *brand_identity
 	g.AddVideoBackground(&pbcore.BackgroundStyle{Style: &pbcore.BackgroundStyle_Gradient{Gradient: brand_identity.GenerateGradient(brandIdentity.Colors)}})
 }
 
-func (g *videoConfigGenerator) convertDurationToFrames(durationInSeconds int64) float32 {
-	fps := g.video.Metadata.Fps
-	return float32(durationInSeconds) * float32(fps)
-}
-
 // CreatePendingSlides created slides with pending status
 // and each slide plan is stored so that it can be resumed
 func (g *videoConfigGenerator) CreatePendingSlides(
@@ -117,7 +112,7 @@ func (g *videoConfigGenerator) CreatePendingSlides(
 				totalMediaSlides++
 				mediaPlan := pendingSlide.AsMediaSlide()
 				slide.Type = pbcore.SlideType_SLIDE_TYPE_MEDIA
-				slide.DurationInFrames = g.convertDurationToFrames(mediaPlan.Duration)
+				slide.DurationInFrames = float32(mediaPlan.Duration)
 				// for media slides, both durations are same
 				slide.SettledFrame = slide.DurationInFrames
 				assignRandomTransitionAndDirection(slide)
@@ -130,7 +125,7 @@ func (g *videoConfigGenerator) CreatePendingSlides(
 						Plan: &pbcore.MediaSlidePlan{
 							Index:                       mediaPlan.Index,
 							BeatDescription:             mediaPlan.BeatDescription,
-							Duration:                    mediaPlan.Duration,
+							DurationInFrames:            mediaPlan.Duration,
 							SelectedTemplateDescription: mediaPlan.SelectedTemplateDescription,
 						},
 					},
@@ -141,7 +136,6 @@ func (g *videoConfigGenerator) CreatePendingSlides(
 				totalAnimationSlides++
 				animationPlan := pendingSlide.AsAnimationSlide()
 				slide.Type = pbcore.SlideType_SLIDE_TYPE_ANIMATION
-				slide.DurationInFrames = g.convertDurationToFrames(animationPlan.Duration)
 				assignRandomTransitionAndDirection(slide)
 				if animationPlan.Voiceover != nil {
 					slide.Transcript = *animationPlan.Voiceover
@@ -153,7 +147,7 @@ func (g *videoConfigGenerator) CreatePendingSlides(
 							BeatDescription:             animationPlan.BeatDescription,
 							AnimationType:               string(animationPlan.AnimationType),
 							CategorySearcQquery:         animationPlan.CategorySearchQuery,
-							Duration:                    animationPlan.Duration,
+							DurationInFrames:            animationPlan.Duration,
 							Voiceover:                   animationPlan.Voiceover,
 							SelectedTemplateDescription: animationPlan.SelectedTemplateDescription,
 						},

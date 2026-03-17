@@ -27,38 +27,23 @@ client<llm> CustomOpenAI {
   provider "openai-responses"
   retry_policy Exponential
   options {
-    model "gpt-5.2-codex"
+    model "gpt-5.4"
     api_key env.OPENAI_API_KEY
     //max_completion_tokens 12000
+    thinking "medium"
   }
 }
 
-client<llm> CustomOpenAI2 {
-  provider "openai"
+client<llm> CustomOpenAI5 {
+  provider "openai-responses"
   retry_policy Exponential
   options {
-    model "gpt-5.2"
+    model "gpt-5.4"
     api_key env.OPENAI_API_KEY
     //max_completion_tokens 12000
-  }
-}
-
-
-client<llm> CustomGPT5Mini {
-  provider openai-responses
-  retry_policy Exponential
-  options {
-    model "gpt-5-mini"
-    api_key env.OPENAI_API_KEY
-  }
-}
-
-// https://docs.boundaryml.com/docs/snippets/clients/fallback
-client<llm> OpenaiFallback {
-  provider fallback
-  options {
-    // This will try the clients in order until one succeeds
-    strategy [CustomGPT5Mini]
+    reasoning {
+      effort "medium"
+    }
   }
 }
 

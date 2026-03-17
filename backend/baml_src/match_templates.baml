@@ -14,7 +14,7 @@ class MatchTemplateResponse {
 }
 
 function MatchTemplate(resume: MatchTemplateRequest) -> MatchTemplateResponse {
-  client CustomOpenAI2
+  client CustomOpenAI5
   prompt #"
     ## Narrative Template Continuation Engine
 

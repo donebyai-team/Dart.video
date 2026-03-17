@@ -92,7 +92,7 @@ class AskUserQuestion {
 }
 
 function GeneratePlanStreaming(input: VideoGenerationPlanRequest, conversation_history: Message[]) -> StreamingVideoGenerationPlan {
-  client CustomOpenAI2
+  client CustomOpenAI5
   prompt #"
     You are a cinematic video planning director.
 

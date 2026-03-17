@@ -1,4 +1,5 @@
 import { formatPromptRuleViolations, validatePromptRules } from "../prompt-rule-validator";
+import { formatTimingRuleViolations, validateTimingRules } from "../timing-rules-validator";
 import { parseValidateRequestBody, validateGeneratedCode } from "../validate-request";
 
 const validComponent = `
@@ -395,5 +396,41 @@ export default function RemoteComponent() {
 
     expect(errors[0]).toContain("[safe-area-root]");
     expect(errors[0]).toContain("Fix:");
+  });
+
+  it("returns framerules_not_enforced payload for timing-rule violations", () => {
+    const failure = validateGeneratedCode(`
+export default function RemoteComponent() {
+  return (
+    <SafeArea>
+      <Stack>
+        <Typewriter text="Hello" mode="char" durationInFrames={6} />
+      </Stack>
+    </SafeArea>
+  );
+}
+`);
+
+    expect(failure).not.toBeNull();
+    expect(failure?.status).toBe(422);
+    expect(failure?.payload.error_type).toBe("framerules_not_enforced");
+    expect(failure?.payload.errors[0]).toBe("Review the FRAME DURATION RULES and feed the error back");
+    expect(failure?.payload.errors[1]).toContain("[typewriter-duration-char]");
+  });
+
+  it("formats timing violations into LLM-facing error strings", () => {
+    const errors = formatTimingRuleViolations(validateTimingRules(`
+export default function RemoteComponent() {
+  return (
+    <SafeArea>
+      <Stack>
+        <Typewriter text="Hello world" mode="word" durationInFrames={15} />
+      </Stack>
+    </SafeArea>
+  );
+}
+`));
+
+    expect(errors[0]).toContain("[typewriter-duration-word]");
   });
 });

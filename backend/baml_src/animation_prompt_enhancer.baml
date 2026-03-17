@@ -12,8 +12,8 @@ class EnhancedAnimationPrompt {
       @description("Type of animation to use based on storytelling needs.")
   categorySearchQuery string
       @description("Semantic search query describing the conceptual animation category, NOT visual style. Example: 'data fragmentation problem', 'centralization of scattered systems', 'growth acceleration', 'workflow automation'.")
-  duration int
-      @description("Duration of the animation in seconds")
+  durationInFrames int
+      @description("Duration of the animation in frames(fps = 30)")
 }
 
 class EnhanceAnimationPromptResponse {
@@ -21,7 +21,7 @@ class EnhanceAnimationPromptResponse {
 }
 
 function EnhanceAnimationPrompt(request: EnhanceAnimationPromptRequest, conversation_history: Message[]) -> EnhanceAnimationPromptResponse {
-  client CustomOpenAI
+  client CustomOpenAI5
   prompt #"
    # Animation Prompt Designer
 
@@ -45,7 +45,8 @@ function EnhanceAnimationPrompt(request: EnhanceAnimationPromptRequest, conversa
    • the sequence of motion
    • the focal point of the composition
    • how the animation ends or holds
-   • the total duration (4–8 seconds)
+   • *All timing values are in frames (fps=30)*
+   • Never use decimal values for duration or startAt.
    • stay within the capabilities implied by the available visual mechanisms
    • describe motion in natural visual language
    • do not mention component names unless needed for unusual precision
@@ -60,7 +61,7 @@ function EnhanceAnimationPrompt(request: EnhanceAnimationPromptRequest, conversa
 
     A bold headline appears at the center of the frame, followed by a short supporting line rising gently beneath it.
     Three quick benefit statements reveal one after another to build momentum, while a single key word updates to sharpen the message.
-    The composition stays centered and easy to read, then settles into a clean hold before fading away. Total duration: 6 seconds.
+    The composition stays centered and easy to read, then settles into a clean hold before fading away. Total duration: 180 frames (6 seconds).
 
     ---
 
@@ -93,7 +94,7 @@ function EnhanceAnimationPrompt(request: EnhanceAnimationPromptRequest, conversa
     • decide how elements enter
     • plan the sequencing of motion
     • determine how the animation holds or exits
-    • choose an appropriate duration (4–8 seconds)
+    • choose an appropriate duration (120–240 frames/4-8s)
 
     Then write the final paragraph following the Output Rules.
 

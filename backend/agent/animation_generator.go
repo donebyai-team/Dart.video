@@ -147,6 +147,8 @@ func buildFailureMessage(buildErr *services.BuildError) string {
 		return "Generated code violated required animation rules:\n" + buildErr.Error() + "\nReview the generation rules and rewrite the component to follow them exactly."
 	case "render_error":
 		return "Render failed with error:\n" + buildErr.Error()
+	case "framerules_not_enforced":
+		return "Generated code violated required frame duration rules:\n" + buildErr.Error() + "\nReview the FRAME DURATION RULES rules and rewrite the component to follow them exactly."
 	default:
 		return "Build failed with error:\n" + buildErr.Error()
 	}
@@ -200,10 +202,10 @@ func (l *animationGenerator) GenerateCode(ctx context.Context,
 	callback TemplateGenerationCallback,
 ) (*models.Template, error) {
 	inptCodeGeneration := types.GenerateAnimationCodeRequest{
-		AnimationPrompt: prompt,
-		Duration:        animation.Duration,
-		Voiceover:       animation.Voiceover,
-		AnimationType:   animation.AnimationType,
+		AnimationPrompt:  prompt,
+		DurationInFrames: animation.Duration, // was converted to frames while sanitization
+		Voiceover:        animation.Voiceover,
+		AnimationType:    animation.AnimationType,
 	}
 
 	if l.generationOptions.VideoBranding != nil {
@@ -634,10 +636,10 @@ func (l *animationGenerator) buildRegenInput(
 ) types.ReGenerateAnimationCodeRequest {
 
 	input := types.ReGenerateAnimationCodeRequest{
-		Code:          code,
-		AnimationType: animationType,
-		Prompt:        prompt,
-		Duration:      int64(animationSlide.DurationInFrames),
+		Code:             code,
+		AnimationType:    animationType,
+		Prompt:           prompt,
+		DurationInFrames: int64(animationSlide.DurationInFrames),
 	}
 
 	if l.generationOptions.VideoBranding != nil {

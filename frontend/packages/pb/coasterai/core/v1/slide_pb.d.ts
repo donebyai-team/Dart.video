@@ -40,9 +40,9 @@ export declare type AnimationSlidePlan = Message<"coasterai.core.v1.AnimationSli
   categorySearcQquery: string;
 
   /**
-   * @generated from field: int64 duration = 5;
+   * @generated from field: int64 durationInFrames = 5;
    */
-  duration: bigint;
+  durationInFrames: bigint;
 
   /**
    * @generated from field: optional string voiceover = 6;
@@ -76,9 +76,9 @@ export declare type MediaSlidePlan = Message<"coasterai.core.v1.MediaSlidePlan">
   beatDescription: string;
 
   /**
-   * @generated from field: int64 duration = 3;
+   * @generated from field: int64 durationInFrames = 3;
    */
-  duration: bigint;
+  durationInFrames: bigint;
 
   /**
    * @generated from field: optional string selectedTemplateDescription = 4;

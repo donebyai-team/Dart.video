@@ -1,7 +1,7 @@
 class GenerateAnimationCodeRequest {
   animationType AnimationType
   animationPrompt string @description("Visual animation blueprint generated earlier")
-  duration int @description("Target duration in seconds requested for the animation. The model may suggest a better value via idealDuration if this timing does not suit the animation.")
+  durationInFrames int @description("Target duration in frames requested for the animation.")
   voiceover string? @description("Optional narration text for timing alignment")
   branding VideoBranding
 }
@@ -11,7 +11,7 @@ class GenerateAnimationCodeResponse {
 }
 
 function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_history: Message[]) -> GenerateAnimationCodeResponse {
-  client CustomOpenAI
+  client CustomOpenAI5
   prompt #"
     You are generating a React animation component for a video slide.
     ---
@@ -31,14 +31,12 @@ function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_hi
     {{ CodeGeneration() }}
     {{ CodeGenerationExamples() }}
     {{ CodeGenerationMustHave() }}
+    {{ FrameDurationRules() }}
 
     ---
     ## INPUT
 
-    Resolution and Canvas Size:
-    16x9(1920x1080)
-
-    Duration:
+    ## Animation Duration In Frames:
     {{ resume.duration }}
 
     ## ANIMATION BRIEF:

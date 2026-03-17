@@ -478,7 +478,7 @@ type AnimationSlidePlan struct {
 	BeatDescription             string                 `protobuf:"bytes,2,opt,name=beatDescription,proto3" json:"beatDescription,omitempty"`
 	AnimationType               string                 `protobuf:"bytes,3,opt,name=animationType,proto3" json:"animationType,omitempty"`
 	CategorySearcQquery         string                 `protobuf:"bytes,4,opt,name=categorySearcQquery,proto3" json:"categorySearcQquery,omitempty"`
-	Duration                    int64                  `protobuf:"varint,5,opt,name=duration,proto3" json:"duration,omitempty"`
+	DurationInFrames            int64                  `protobuf:"varint,5,opt,name=durationInFrames,proto3" json:"durationInFrames,omitempty"`
 	Voiceover                   *string                `protobuf:"bytes,6,opt,name=voiceover,proto3,oneof" json:"voiceover,omitempty"`
 	SelectedTemplateDescription *string                `protobuf:"bytes,7,opt,name=selectedTemplateDescription,proto3,oneof" json:"selectedTemplateDescription,omitempty"`
 	unknownFields               protoimpl.UnknownFields
@@ -543,9 +543,9 @@ func (x *AnimationSlidePlan) GetCategorySearcQquery() string {
 	return ""
 }
 
-func (x *AnimationSlidePlan) GetDuration() int64 {
+func (x *AnimationSlidePlan) GetDurationInFrames() int64 {
 	if x != nil {
-		return x.Duration
+		return x.DurationInFrames
 	}
 	return 0
 }
@@ -568,7 +568,7 @@ type MediaSlidePlan struct {
 	state                       protoimpl.MessageState `protogen:"open.v1"`
 	Index                       int64                  `protobuf:"varint,1,opt,name=index,proto3" json:"index,omitempty"`
 	BeatDescription             string                 `protobuf:"bytes,2,opt,name=beatDescription,proto3" json:"beatDescription,omitempty"`
-	Duration                    int64                  `protobuf:"varint,3,opt,name=duration,proto3" json:"duration,omitempty"`
+	DurationInFrames            int64                  `protobuf:"varint,3,opt,name=durationInFrames,proto3" json:"durationInFrames,omitempty"`
 	SelectedTemplateDescription *string                `protobuf:"bytes,4,opt,name=selectedTemplateDescription,proto3,oneof" json:"selectedTemplateDescription,omitempty"`
 	unknownFields               protoimpl.UnknownFields
 	sizeCache                   protoimpl.SizeCache
@@ -618,9 +618,9 @@ func (x *MediaSlidePlan) GetBeatDescription() string {
 	return ""
 }
 
-func (x *MediaSlidePlan) GetDuration() int64 {
+func (x *MediaSlidePlan) GetDurationInFrames() int64 {
 	if x != nil {
-		return x.Duration
+		return x.DurationInFrames
 	}
 	return 0
 }
@@ -2016,22 +2016,22 @@ var File_coasterai_core_v1_slide_proto protoreflect.FileDescriptor
 
 const file_coasterai_core_v1_slide_proto_rawDesc = "" +
 	"\n" +
-	"\x1dcoasterai/core/v1/slide.proto\x12\x11coasterai.core.v1\x1a\x1cgoogle/protobuf/struct.proto\"\xe0\x02\n" +
+	"\x1dcoasterai/core/v1/slide.proto\x12\x11coasterai.core.v1\x1a\x1cgoogle/protobuf/struct.proto\"\xf0\x02\n" +
 	"\x12AnimationSlidePlan\x12\x14\n" +
 	"\x05index\x18\x01 \x01(\x03R\x05index\x12(\n" +
 	"\x0fbeatDescription\x18\x02 \x01(\tR\x0fbeatDescription\x12$\n" +
 	"\ranimationType\x18\x03 \x01(\tR\ranimationType\x120\n" +
-	"\x13categorySearcQquery\x18\x04 \x01(\tR\x13categorySearcQquery\x12\x1a\n" +
-	"\bduration\x18\x05 \x01(\x03R\bduration\x12!\n" +
+	"\x13categorySearcQquery\x18\x04 \x01(\tR\x13categorySearcQquery\x12*\n" +
+	"\x10durationInFrames\x18\x05 \x01(\x03R\x10durationInFrames\x12!\n" +
 	"\tvoiceover\x18\x06 \x01(\tH\x00R\tvoiceover\x88\x01\x01\x12E\n" +
 	"\x1bselectedTemplateDescription\x18\a \x01(\tH\x01R\x1bselectedTemplateDescription\x88\x01\x01B\f\n" +
 	"\n" +
 	"_voiceoverB\x1e\n" +
-	"\x1c_selectedTemplateDescription\"\xd3\x01\n" +
+	"\x1c_selectedTemplateDescription\"\xe3\x01\n" +
 	"\x0eMediaSlidePlan\x12\x14\n" +
 	"\x05index\x18\x01 \x01(\x03R\x05index\x12(\n" +
-	"\x0fbeatDescription\x18\x02 \x01(\tR\x0fbeatDescription\x12\x1a\n" +
-	"\bduration\x18\x03 \x01(\x03R\bduration\x12E\n" +
+	"\x0fbeatDescription\x18\x02 \x01(\tR\x0fbeatDescription\x12*\n" +
+	"\x10durationInFrames\x18\x03 \x01(\x03R\x10durationInFrames\x12E\n" +
 	"\x1bselectedTemplateDescription\x18\x04 \x01(\tH\x00R\x1bselectedTemplateDescription\x88\x01\x01B\x1e\n" +
 	"\x1c_selectedTemplateDescription\"f\n" +
 	"\x0fMediaSlideStyle\x12\"\n" +

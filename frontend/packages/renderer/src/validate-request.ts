@@ -1,5 +1,6 @@
 import * as Babel from "@babel/standalone";
 import { formatPromptRuleViolations, validatePromptRules } from "./prompt-rule-validator";
+import { formatTimingRuleViolations, validateTimingRules } from "./timing-rules-validator";
 
 export type ValidateRequestParseResult =
   | {
@@ -18,7 +19,7 @@ export type ValidationFailureResult =
   | {
       status: number;
       payload: {
-        error_type: "compile_error" | "rule_not_enforced";
+        error_type: "compile_error" | "rule_not_enforced" | "framerules_not_enforced";
         errors: string[];
       };
     };
@@ -79,6 +80,20 @@ export function validateGeneratedCode(code: string): ValidationFailureResult {
       payload: {
         error_type: "rule_not_enforced",
         errors: formatPromptRuleViolations(ruleViolations),
+      },
+    };
+  }
+
+  const timingViolations = validateTimingRules(code);
+  if (timingViolations.length > 0) {
+    return {
+      status: 422,
+      payload: {
+        error_type: "framerules_not_enforced",
+        errors: [
+          "Review the FRAME DURATION RULES and feed the error back",
+          ...formatTimingRuleViolations(timingViolations),
+        ],
       },
     };
   }

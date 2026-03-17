@@ -77,7 +77,7 @@ func (v *AnimationSlidePlan) ToModel() *types.AnimationSlide {
 		BeatDescription:             v.BeatDescription,
 		AnimationType:               types.AnimationType(v.AnimationType),
 		CategorySearchQuery:         v.CategorySearcQquery,
-		Duration:                    v.Duration,
+		Duration:                    v.DurationInFrames,
 		Voiceover:                   v.Voiceover,
 		SelectedTemplateDescription: v.SelectedTemplateDescription,
 	}
@@ -87,7 +87,7 @@ func (v *MediaSlidePlan) ToModel() *types.MediaSlide {
 	return &types.MediaSlide{
 		Index:                       v.Index,
 		BeatDescription:             v.BeatDescription,
-		Duration:                    v.Duration,
+		Duration:                    v.DurationInFrames,
 		SelectedTemplateDescription: v.SelectedTemplateDescription,
 	}
 }

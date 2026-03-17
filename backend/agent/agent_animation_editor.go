@@ -335,16 +335,10 @@ func (l *agentAnimationEditor) runGenerateAnimationFromPrompt(ctx context.Contex
 		BeatDescription:     enhancedPrompt.AnimationIntent,
 		AnimationType:       enhancedPrompt.AnimationType,
 		CategorySearchQuery: enhancedPrompt.CategorySearchQuery,
-		Duration:            enhancedPrompt.Duration,
+		Duration:            enhancedPrompt.DurationInFrames,
 	}
 
-	if !IsValidDuration(animationSlide.Duration) {
-		l.logger.Info("Received invalid duration from anhanced prompt, defaulting to 5",
-			zap.Int("generated_duration", int(animationSlide.Duration)),
-			zap.Int("default", DefaultDuration),
-		)
-		animationSlide.Duration = DefaultDuration
-	}
+	// TODO: Validate output duration
 
 	if session.Suggestions {
 		l.publishTransientState(AnimationGeneratorAgentState{
@@ -386,7 +380,7 @@ func (l *agentAnimationEditor) runGenerateAnimationFromPrompt(ctx context.Contex
 		BeatDescription:             animationSlide.BeatDescription,
 		AnimationType:               string(animationSlide.AnimationType),
 		CategorySearcQquery:         animationSlide.CategorySearchQuery,
-		Duration:                    animationSlide.Duration,
+		DurationInFrames:            animationSlide.Duration,
 		SelectedTemplateDescription: utils.Ptr(template.Description),
 	}
 

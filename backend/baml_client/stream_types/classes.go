@@ -453,7 +453,7 @@ type EnhancedAnimationPrompt struct {
 	AnimationIntent     *string              `json:"animationIntent"`
 	AnimationType       *types.AnimationType `json:"animationType"`
 	CategorySearchQuery *string              `json:"categorySearchQuery"`
-	Duration            *int64               `json:"duration"`
+	DurationInFrames    *int64               `json:"durationInFrames"`
 }
 
 func (c *EnhancedAnimationPrompt) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -482,8 +482,8 @@ func (c *EnhancedAnimationPrompt) Decode(holder *cffi.CFFIValueClass, typeMap ba
 		case "categorySearchQuery":
 			c.CategorySearchQuery = baml.Decode(valueHolder).Interface().(*string)
 
-		case "duration":
-			c.Duration = baml.Decode(valueHolder).Interface().(*int64)
+		case "durationInFrames":
+			c.DurationInFrames = baml.Decode(valueHolder).Interface().(*int64)
 
 		default:
 
@@ -505,7 +505,7 @@ func (c EnhancedAnimationPrompt) Encode() (*cffi.HostValue, error) {
 
 	fields["categorySearchQuery"] = c.CategorySearchQuery
 
-	fields["duration"] = c.Duration
+	fields["durationInFrames"] = c.DurationInFrames
 
 	return baml.EncodeClass("EnhancedAnimationPrompt", fields, nil)
 }
@@ -515,11 +515,11 @@ func (c EnhancedAnimationPrompt) BamlTypeName() string {
 }
 
 type GenerateAnimationCodeRequest struct {
-	AnimationType   *types.AnimationType `json:"animationType"`
-	AnimationPrompt *string              `json:"animationPrompt"`
-	Duration        *int64               `json:"duration"`
-	Voiceover       *string              `json:"voiceover"`
-	Branding        *VideoBranding       `json:"branding"`
+	AnimationType    *types.AnimationType `json:"animationType"`
+	AnimationPrompt  *string              `json:"animationPrompt"`
+	DurationInFrames *int64               `json:"durationInFrames"`
+	Voiceover        *string              `json:"voiceover"`
+	Branding         *VideoBranding       `json:"branding"`
 }
 
 func (c *GenerateAnimationCodeRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -542,8 +542,8 @@ func (c *GenerateAnimationCodeRequest) Decode(holder *cffi.CFFIValueClass, typeM
 		case "animationPrompt":
 			c.AnimationPrompt = baml.Decode(valueHolder).Interface().(*string)
 
-		case "duration":
-			c.Duration = baml.Decode(valueHolder).Interface().(*int64)
+		case "durationInFrames":
+			c.DurationInFrames = baml.Decode(valueHolder).Interface().(*int64)
 
 		case "voiceover":
 			c.Voiceover = baml.Decode(valueHolder).Interface().(*string)
@@ -567,7 +567,7 @@ func (c GenerateAnimationCodeRequest) Encode() (*cffi.HostValue, error) {
 
 	fields["animationPrompt"] = c.AnimationPrompt
 
-	fields["duration"] = c.Duration
+	fields["durationInFrames"] = c.DurationInFrames
 
 	fields["voiceover"] = c.Voiceover
 
@@ -1031,11 +1031,11 @@ func (c Message) BamlTypeName() string {
 }
 
 type ReGenerateAnimationCodeRequest struct {
-	Code          *string              `json:"code"`
-	AnimationType *types.AnimationType `json:"animationType"`
-	Prompt        *string              `json:"prompt"`
-	Duration      *int64               `json:"duration"`
-	Branding      *VideoBranding       `json:"branding"`
+	Code             *string              `json:"code"`
+	AnimationType    *types.AnimationType `json:"animationType"`
+	Prompt           *string              `json:"prompt"`
+	DurationInFrames *int64               `json:"durationInFrames"`
+	Branding         *VideoBranding       `json:"branding"`
 }
 
 func (c *ReGenerateAnimationCodeRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -1061,8 +1061,8 @@ func (c *ReGenerateAnimationCodeRequest) Decode(holder *cffi.CFFIValueClass, typ
 		case "prompt":
 			c.Prompt = baml.Decode(valueHolder).Interface().(*string)
 
-		case "duration":
-			c.Duration = baml.Decode(valueHolder).Interface().(*int64)
+		case "durationInFrames":
+			c.DurationInFrames = baml.Decode(valueHolder).Interface().(*int64)
 
 		case "branding":
 			c.Branding = baml.Decode(valueHolder).Interface().(*VideoBranding)
@@ -1085,7 +1085,7 @@ func (c ReGenerateAnimationCodeRequest) Encode() (*cffi.HostValue, error) {
 
 	fields["prompt"] = c.Prompt
 
-	fields["duration"] = c.Duration
+	fields["durationInFrames"] = c.DurationInFrames
 
 	fields["branding"] = c.Branding
 

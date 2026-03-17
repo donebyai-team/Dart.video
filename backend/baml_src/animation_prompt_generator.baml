@@ -10,7 +10,7 @@ class GenerateAnimationPromptResponse {
   prompt string @description("detailed prompt to generate remotion/react code animation")
 }
 function GenerateAnimationPrompt(resume: GenerateAnimationPromptRequest) -> GenerateAnimationPromptResponse {
-  client CustomOpenAI
+  client CustomOpenAI5
   prompt #"
    You are a motion design director for short-form video.
 
@@ -34,7 +34,6 @@ function GenerateAnimationPrompt(resume: GenerateAnimationPromptRequest) -> Gene
    • the sequence of motion
    • the focal point of the composition
    • how the animation ends or holds
-   • the total duration (4–8 seconds)
    • stay within the capabilities implied by the available visual mechanisms
    • describe motion in natural visual language
    • do not mention component names unless needed for unusual precision
@@ -50,7 +49,7 @@ function GenerateAnimationPrompt(resume: GenerateAnimationPromptRequest) -> Gene
 
     A strong headline lands first in the center, with a supporting line rising into place just after it.
     Three short proof points appear in sequence to create rhythm, while one changing keyword adds emphasis without overwhelming the frame.
-    The slide feels distinct by keeping everything focused on a single central message, then holds long enough to read before easing out. Total duration: 6 seconds.
+    The slide feels distinct by keeping everything focused on a single central message, then holds long enough to read before easing out.
 
 
     ## Design Thinking
@@ -62,7 +61,6 @@ function GenerateAnimationPrompt(resume: GenerateAnimationPromptRequest) -> Gene
     • decide how elements enter
     • plan the sequencing of motion
     • determine how the animation holds or exits
-    • choose an appropriate duration (4–8 seconds)
 
     Then write the final paragraph following the Output Rules.
 

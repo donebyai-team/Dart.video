@@ -39,12 +39,14 @@ const LAYOUT_STYLE_KEYS = new Set([
 ]);
 
 type NodeLike = {
-  loc?: {
-    start?: {
-      line?: number;
-      column?: number;
-    };
-  };
+  loc?:
+    | {
+        start?: {
+          line?: number;
+          column?: number;
+        };
+      }
+    | null;
 };
 
 function createViolation(

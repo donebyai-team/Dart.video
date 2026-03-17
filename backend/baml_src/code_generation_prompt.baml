@@ -251,3 +251,49 @@ LogoAsset — the brand logo
 ### Pre-built
 TitleCard — a full hero title composition with heading and subheading
 "#
+
+template_string FrameDurationRules() #"
+## FRAME DURATION RULES
+
+**All timing values are in frames (fps=30).**
+Never use decimal values for duration or startAt.
+Always use whole numbers: durationInFrames={20} not durationInFrames={0.7}
+
+Build the timeline element by element. Each element's startAt is:
+  startAt = previous element's (startAt + duration) + hold
+
+Default hold between elements: 6 frames
+Hold between sections (topic changes): 15 frames
+Hold at end after last element: 20 frames minimum
+
+## Sequential example
+
+Logo fades in
+  startAt=0  duration=20  ends=20
+
+Heading slides in (6 frame hold)
+  startAt=26  duration=20  ends=46
+
+Subheading fades in (6 frame hold)
+  startAt=52  duration=20  ends=72
+
+## Elements that form one visual unit — start together
+
+Counter and its label    → same startAt
+Heading and eyebrow      → same startAt
+Logo and company name    → same startAt
+
+## Stagger end frame
+
+last child ends at: startAt + ((childCount - 1) × delayBetween) + childDuration
+next element startAt = stagger end frame + hold
+
+## Typewriter duration
+
+char mode:  durationInFrames = text.length × 2
+word mode:  durationInFrames = wordCount × 10
+next element startAt = Typewriter startAt + durationInFrames + hold
+
+## Total duration targets
+Never exceed 240 frames for a single slide.
+"#

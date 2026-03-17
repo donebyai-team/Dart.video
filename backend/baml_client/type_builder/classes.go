@@ -363,8 +363,8 @@ func (t *EnhancedAnimationPromptClassView) PropertyCategorySearchQuery() (ClassP
 	return t.inner.Property("categorySearchQuery")
 }
 
-func (t *EnhancedAnimationPromptClassView) PropertyDuration() (ClassPropertyView, error) {
-	return t.inner.Property("duration")
+func (t *EnhancedAnimationPromptClassView) PropertyDurationInFrames() (ClassPropertyView, error) {
+	return t.inner.Property("durationInFrames")
 }
 
 func (t *TypeBuilder) EnhancedAnimationPrompt() (*EnhancedAnimationPromptClassView, error) {
@@ -403,8 +403,8 @@ func (t *GenerateAnimationCodeRequestClassView) PropertyAnimationPrompt() (Class
 	return t.inner.Property("animationPrompt")
 }
 
-func (t *GenerateAnimationCodeRequestClassView) PropertyDuration() (ClassPropertyView, error) {
-	return t.inner.Property("duration")
+func (t *GenerateAnimationCodeRequestClassView) PropertyDurationInFrames() (ClassPropertyView, error) {
+	return t.inner.Property("durationInFrames")
 }
 
 func (t *GenerateAnimationCodeRequestClassView) PropertyVoiceover() (ClassPropertyView, error) {
@@ -791,8 +791,8 @@ func (t *ReGenerateAnimationCodeRequestClassView) PropertyPrompt() (ClassPropert
 	return t.inner.Property("prompt")
 }
 
-func (t *ReGenerateAnimationCodeRequestClassView) PropertyDuration() (ClassPropertyView, error) {
-	return t.inner.Property("duration")
+func (t *ReGenerateAnimationCodeRequestClassView) PropertyDurationInFrames() (ClassPropertyView, error) {
+	return t.inner.Property("durationInFrames")
 }
 
 func (t *ReGenerateAnimationCodeRequestClassView) PropertyBranding() (ClassPropertyView, error) {

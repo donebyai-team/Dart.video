@@ -15,7 +15,7 @@ class MatchCategoriesResponse {
 function MatchCategories(resume: MatchCategoriesRequest) -> MatchCategoriesResponse {
   // Specify a client as provider/model-name
   // You can also use custom LLM params with a custom client name from clients.baml like "client CustomGPT5" or "client CustomSonnet4"
-  client CustomOpenAI2
+  client CustomOpenAI5
   prompt #"
   Category Matching Engine
 

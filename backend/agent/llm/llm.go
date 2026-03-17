@@ -3,11 +3,11 @@ package llm
 import (
 	"context"
 	"fmt"
+	baml "github.com/boundaryml/baml/engine/language_client_go/pkg"
 	"github.com/shank318/coasterai/baml_client"
 	"github.com/shank318/coasterai/baml_client/types"
 	"go.uber.org/zap"
 	"math/rand"
-	"regexp"
 	"time"
 )
 
@@ -106,7 +106,7 @@ func (l *llmService) handleStream(
 			// Partial thinking update.
 			if !e.isFinal && onThinking != nil && !thinkingComplete {
 				if t := e.partialThinking(); t != nil {
-					onThinking(stripThinkingTags(*t))
+					onThinking(*t)
 				}
 			}
 
@@ -131,6 +131,10 @@ func (l *llmService) handleStream(
 			}
 		}
 	}
+}
+
+func extractThinking(ctx context.Context, reason baml.TickReason, log baml.FunctionLog) baml.FunctionSignal {
+	return nil
 }
 
 func (l llmService) PlanSlidesWithStreaming(
@@ -170,45 +174,40 @@ func (l llmService) PlanSlidesWithStreaming(
 		}
 	}()
 
-	stream, err := baml_client.GeneratePlanStreaming(ctx, req, conversationHistory)
+	stream, err := baml_client.Stream.GeneratePlanStreaming(ctx, req, conversationHistory, baml_client.WithOnTick(extractThinking))
 	if err != nil {
 		return nil, handleInitialError(err)
 	}
 
-	//var finalPlan *types.Union2AskUserQuestionOrVideoGenerationPlan
-	//
-	//recv := func() (streamEvent, bool) {
-	//	value, ok := <-stream
-	//	if !ok {
-	//		return streamEvent{}, false
-	//	}
-	//	e := streamEvent{
-	//		isError: value.IsError,
-	//		isFinal: value.IsFinal,
-	//		err:     value.Error,
-	//	}
-	//	if !value.IsFinal && value.Stream() != nil {
-	//		partial := *value.Stream()
-	//		e.partialThinking = func() *string { return partial.Thinking.Value }
-	//	} else {
-	//		e.partialThinking = func() *string { return nil }
-	//	}
-	//	if value.IsFinal && value.Final() != nil {
-	//		final := *value.Final()
-	//		e.finalThinking = func() *string { return final.Thinking }
-	//		e.markDone = func() { finalPlan = &final.Plan }
-	//	} else {
-	//		e.finalThinking = func() *string { return nil }
-	//		e.markDone = func() {}
-	//	}
-	//	return e, true
-	//}
-	//
-	//if err := l.handleStream(ctx, recv, onThinking); err != nil {
-	//	return nil, err
-	//}
+	// Ensure stream is properly closed on exit
+	defer func() {
+		if stream != nil {
+			// Note: In practice, range automatically handles closing
+			// but explicit cleanup is shown here for demonstration
+			l.logger.Info("Stream completed")
+		}
+	}()
 
-	return &stream.Plan, nil
+	for value := range stream {
+		// Handle context cancellation
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		default:
+		}
+		// Handle streaming errors
+		if value.IsError {
+			return nil, handleContextError(value.Error)
+		}
+
+		// Process final result
+		if value.IsFinal && value.Final() != nil {
+			final := *value.Final()
+			return &final.Plan, nil
+		}
+	}
+
+	return nil, fmt.Errorf("stream closed without final result")
 }
 
 func (l llmService) MatchTemplates(ctx context.Context, req *types.MatchTemplateRequest) ([]types.TemplateItem, error) {
@@ -218,10 +217,4 @@ func (l llmService) MatchTemplates(ctx context.Context, req *types.MatchTemplate
 	}
 
 	return template.Templates, nil
-}
-
-var thinkingTagRegex = regexp.MustCompile(`(?i)</?thinking>`)
-
-func stripThinkingTags(s string) string {
-	return thinkingTagRegex.ReplaceAllString(s, "")
 }

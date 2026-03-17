@@ -2,7 +2,7 @@ class ReGenerateAnimationCodeRequest {
   code string
   animationType AnimationType
   prompt string
-  duration int
+  durationInFrames int
   branding VideoBranding
 }
 
@@ -11,7 +11,7 @@ class ReGenerateAnimationCodeResponse {
 }
 
 function ReGenerateAnimation(resume: ReGenerateAnimationCodeRequest, conversation_history: Message[]) -> ReGenerateAnimationCodeResponse {
-  client CustomOpenAI
+  client CustomOpenAI5
   prompt #"
     You are modifying an existing React animation component for a video slide.
 
@@ -40,6 +40,7 @@ function ReGenerateAnimation(resume: ReGenerateAnimationCodeRequest, conversatio
 
     {{ CodeGeneration() }}
     {{ CodeGenerationMustHave() }}
+    {{ FrameDurationRules() }}
     ---
 
     ## INPUT
@@ -49,7 +50,7 @@ function ReGenerateAnimation(resume: ReGenerateAnimationCodeRequest, conversatio
 
    {{ BrandGuidelines(resume.branding) }}
 
-    Animation Duration:
+    Animation Duration In Frames:
     {{ resume.duration }}
 
     ## Requested Edits

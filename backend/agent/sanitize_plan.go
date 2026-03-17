@@ -6,19 +6,21 @@ import (
 )
 
 const (
-	maxSlides       = 30
+	maxSlides = 30
+
+	// In seconds
 	DefaultDuration = 5
 	maxDuration     = 10
 	minDuration     = 1
 )
 
-func sanitizeAgentPlan(plan *types.VideoGenerationPlan) error {
+func sanitizeAgentPlanAndDuration(plan *types.VideoGenerationPlan, fps int64) error {
 	totalSlides := 0
 
 	for _, section := range plan.Sections {
 		for _, slide := range section.Slides {
 			totalSlides++
-			sanitizeDuration(&slide)
+			sanitizeDuration(&slide, fps)
 		}
 	}
 
@@ -29,12 +31,14 @@ func sanitizeAgentPlan(plan *types.VideoGenerationPlan) error {
 	return nil
 }
 
-func sanitizeDuration(slide *types.Union2AnimationSlideOrMediaSlide) {
+func sanitizeDuration(slide *types.Union2AnimationSlideOrMediaSlide, fps int64) {
 	if slide.IsMediaSlide() {
 		media := slide.AsMediaSlide()
 		if !isValidDuration(media.Duration, minDuration, maxDuration) {
 			media.Duration = DefaultDuration
 		}
+
+		media.Duration = media.Duration * fps
 		return
 	}
 
@@ -43,14 +47,12 @@ func sanitizeDuration(slide *types.Union2AnimationSlideOrMediaSlide) {
 		if !isValidDuration(anim.Duration, minDuration, maxDuration) {
 			anim.Duration = DefaultDuration
 		}
+
+		anim.Duration = anim.Duration * fps
 		return
 	}
 }
 
 func isValidDuration(d, min, max int64) bool {
 	return d > min && d <= max
-}
-
-func IsValidDuration(d int64) bool {
-	return d > minDuration && d <= maxDuration
 }
