@@ -1167,10 +1167,6 @@ func (t *VideoGenerationPlanRequestClassView) PropertyScript() (ClassPropertyVie
 	return t.inner.Property("Script")
 }
 
-func (t *VideoGenerationPlanRequestClassView) PropertyEnableThinking() (ClassPropertyView, error) {
-	return t.inner.Property("enableThinking")
-}
-
 func (t *VideoGenerationPlanRequestClassView) PropertyVideoBranding() (ClassPropertyView, error) {
 	return t.inner.Property("VideoBranding")
 }

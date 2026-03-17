@@ -1,13 +1,7 @@
 class TemplateConfigExtractorInput {
   schema string
-    @description("JSON Schema definition describing the exact structure, fields, types, and constraints required in the output configuration.")
-
   beatDescription string
-    @description("Narrative intent of this slide. Explains what happens in this moment of the video and what message it conveys.")
-
   templateDescription string
-    @description("Explanation of how this template behaves, including expected config fields, animation logic, and customization options.")
-
   branding VideoBranding
 }
 
@@ -17,63 +11,110 @@ class TemplateConfigExtractorOutput {
 }
 
 function ExtractTemplateConfig(input: TemplateConfigExtractorInput) -> TemplateConfigExtractorOutput {
-  client "google-ai/gemini-2.0-flash"
+  client CustomOpenAI5
   prompt #"
-  # Template Configuration Generator
-
+  ```markdown
+  # Template Configuration Generator (Strict Mode)
   You are a strict JSON configuration generator.
 
-  Your task is to generate a JSON configuration object that:
-  - EXACTLY follows the provided JSON schema
-  - Uses values derived from the beat description
-  - Aligns with the template description
-  - Contains NO extra fields
-  - Contains NO explanations
-  - Is valid JSON
-  - Is a single JSON object
+  Your task is to transform a **beat description** into a **valid configuration object** for a given template.
 
-  --------------------------------------------------
-  INPUT
-  --------------------------------------------------
+  The output must:
+  - EXACTLY conform to the provided JSON schema
+  - Contain ONLY fields defined in the schema
+  - Be fully valid, parseable JSON
+  - Contain NO explanations or extra text
 
-  Schema:
+  ---
+
+  ## Definitions
+
+  **Beat Description**
+  Describes the narrative intent of the slide — what is happening, what message is conveyed, and what should be emphasized.
+
+  **Template Description**
+  Describes how the template behaves — including layout, animation logic, supported fields, and how configuration values affect rendering.
+
+  ---
+
+  ## Input
+
+  **Schema:**
+  ```
+
   {{ input.schema }}
 
-  Beat Description:
+  ```
+
+  **Beat Description:**
+  ```
+
   {{ input.beatDescription }}
 
-  Template Description:
+  ```
+
+  **Template Description(how the template looks like in behavior):**
+  ```
+
   {{ input.templateDescription }}
 
-  --------------------------------------------------
-  GENERATION RULES
-  --------------------------------------------------
-
-  1. The output MUST strictly conform to the provided schema.
-  2. Do NOT add properties not defined in the schema.
-  3. Do NOT omit required fields.
-  4. Respect field types (string, number, boolean, array, object).
-  5. Respect enum constraints if present.
-  6. Respect required/optional definitions.
-  7. If the schema defines nested objects, generate valid nested objects.
-  8. If arrays are required, generate valid array entries.
-  9. Use values derived from the beatDescription narrative intent.
-  10. Ensure values logically align with templateDescription behavior.
-
-  --------------------------------------------------
-  STRICT OUTPUT RULES
-  --------------------------------------------------
-
-  - Output ONLY a valid JSON object.
-  - No markdown.
-  - No backticks.
-  - No commentary.
-  - No explanation.
-  - No thinking.
-  - No trailing commas.
-  - Must be parseable JSON.
+  ```
 
   {{ BrandGuidelines(input.branding) }}
+
+  ---
+
+  ## Generation Strategy (IMPORTANT)
+
+  Follow this exact order:
+
+  1. **Understand the template first**
+     - Identify what each schema field represents visually or behaviorally
+     - Use templateDescription as the primary source of truth
+
+  2. **Extract intent from the beat**
+     - Identify key message, tone, emphasis, and content elements
+     - Ignore irrelevant narrative details
+
+  3. **Map beat → schema fields**
+     - Every field must be populated using:
+       - Direct content from beatDescription, OR
+       - Logical inference based on templateDescription
+
+  4. **Resolve ambiguity**
+     - If the beat does not specify a value:
+       - Use reasonable defaults consistent with template behavior
+       - Do NOT invent unrelated content
+
+  5. **Respect constraints strictly**
+     - Follow types, enums, required fields, nesting, and array structures exactly
+
+  ---
+
+  ## 🔹 Hard Rules
+
+  1. Do NOT add fields not in the schema
+  2. Do NOT omit required fields
+  3. Do NOT change field names
+  4. Do NOT output null unless schema allows it
+  5. Do NOT include placeholder text like "TBD"
+  6. Keep values concise and presentation-ready
+  7. Ensure output aligns with BOTH:
+     - beatDescription (content)
+     - templateDescription (behavior)
+
+  ---
+
+  ## Output Rules (Strict)
+
+  - Output ONLY a JSON object
+  - No markdown
+  - No backticks
+  - No comments
+  - No explanations
+  - No trailing commas
+  - Must be valid JSON
+  ```
 
   --------------------------------------------------
   OUTPUT FORMAT

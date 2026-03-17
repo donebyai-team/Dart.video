@@ -1528,7 +1528,6 @@ type VideoGenerationPlanRequest struct {
 	Language                *string               `json:"Language"`
 	Resolution              *string               `json:"Resolution"`
 	Script                  []ScriptItem          `json:"Script"`
-	EnableThinking          *bool                 `json:"enableThinking"`
 	VideoBranding           *VideoBranding        `json:"VideoBranding"`
 	BrandLibraryID          *string               `json:"BrandLibraryID"`
 	AvailableAnimationTypes []types.AnimationType `json:"AvailableAnimationTypes"`
@@ -1563,9 +1562,6 @@ func (c *VideoGenerationPlanRequest) Decode(holder *cffi.CFFIValueClass, typeMap
 		case "Script":
 			c.Script = baml.Decode(valueHolder).Interface().([]ScriptItem)
 
-		case "enableThinking":
-			c.EnableThinking = baml.Decode(valueHolder).Interface().(*bool)
-
 		case "VideoBranding":
 			c.VideoBranding = baml.Decode(valueHolder).Interface().(*VideoBranding)
 
@@ -1596,8 +1592,6 @@ func (c VideoGenerationPlanRequest) Encode() (*cffi.HostValue, error) {
 	fields["Resolution"] = c.Resolution
 
 	fields["Script"] = c.Script
-
-	fields["enableThinking"] = c.EnableThinking
 
 	fields["VideoBranding"] = c.VideoBranding
 

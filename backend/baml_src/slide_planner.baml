@@ -54,7 +54,6 @@ class VideoGenerationPlanRequest {
     Language string
     Resolution string
     Script  ScriptItem[]
-    enableThinking bool? @description("Whether to include step-by-step reasoning in the response")
     VideoBranding VideoBranding
     BrandLibraryID string? @skip // Just needed to store the request as it is
     AvailableAnimationTypes AnimationType[]

@@ -183,7 +183,6 @@ func (a *agentV1) Start(ctx context.Context, options StartSessionOptions) (*RunR
 		Language:       "English",
 		Resolution:     options.Input.Resolution.Id,
 		Script:         script,
-		EnableThinking: utils.Ptr(true),
 		BrandLibraryID: options.Input.BrandLibraryId,
 	}
 
