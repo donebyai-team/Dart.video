@@ -71,24 +71,8 @@ func (t *AnimationTypeEnumView) ValueBRAND() (EnumValueView, error) {
 	return t.inner.Value("BRAND")
 }
 
-func (t *AnimationTypeEnumView) ValuePRODUCT() (EnumValueView, error) {
-	return t.inner.Value("PRODUCT")
-}
-
 func (t *AnimationTypeEnumView) ValueTEXT() (EnumValueView, error) {
 	return t.inner.Value("TEXT")
-}
-
-func (t *AnimationTypeEnumView) ValueVISUAL() (EnumValueView, error) {
-	return t.inner.Value("VISUAL")
-}
-
-func (t *AnimationTypeEnumView) ValueSTATS() (EnumValueView, error) {
-	return t.inner.Value("STATS")
-}
-
-func (t *AnimationTypeEnumView) ValueCHART() (EnumValueView, error) {
-	return t.inner.Value("CHART")
 }
 
 func (t *AnimationTypeEnumView) ValueSIMPLE_TEXT() (EnumValueView, error) {

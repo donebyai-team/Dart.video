@@ -36,10 +36,10 @@ var toolsSyncTemplates = Command(
 )
 
 var animationFolderToType = map[string]types.AnimationType{
-	"text-animation":   types.AnimationTypeTEXT,
-	"visual-animation": types.AnimationTypeVISUAL,
-	"stats-animation":  types.AnimationTypeSTATS,
-	"chart-animation":  types.AnimationTypeCHART,
+	"text-animation": types.AnimationTypeTEXT,
+	//"visual-animation": types.AnimationTypeVISUAL,
+	//"stats-animation":  types.AnimationTypeSTATS,
+	//"chart-animation":  types.AnimationTypeCHART,
 }
 
 var categoryFilePattern = regexp.MustCompile(`^[a-z0-9-]+\.md$`)

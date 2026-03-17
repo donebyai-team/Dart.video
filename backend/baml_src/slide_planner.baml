@@ -1,10 +1,10 @@
 enum AnimationType {
   BRAND @description("Used for brand-led moments such as logo reveals, identity motion, or signature visual language. Typically placed at the beginning, end, or both to establish and reinforce brand recall.")
-  PRODUCT @description("Used when showcasing real-world tools or interfaces like Slack, WhatsApp, CRM systems, dashboards, or any software relevant to the narrative. Helps ground the story in practical, relatable workflows.")
+  // PRODUCT @description("Used when showcasing real-world tools or interfaces like Slack, WhatsApp, CRM systems, dashboards, or any software relevant to the narrative. Helps ground the story in practical, relatable workflows.")
   TEXT @description("kinetic text, typewriter effects, text animations, word carousels, animated titles, text-heavy content slide. Used for strong statements, hooks, quotes, definitions, or key transitions.")
-  VISUAL @description("Purely visual animated slide (icons, illustrations, motion graphics, abstract visuals). Minimal text.")
-  STATS @description("Animated numerical highlights such as metrics, percentages, counters, growth numbers, comparisons.")
-  CHART @description("Data visualization slide such as data visualizations, graphs, histograms, bar charts, pie charts, progress bars, statistics, metrics.")
+  // VISUAL @description("Purely visual animated slide (icons, illustrations, motion graphics, abstract visuals). Minimal text.")
+  // STATS @description("Animated numerical highlights such as metrics, percentages, counters, growth numbers, comparisons.")
+  // CHART @description("Data visualization slide such as data visualizations, graphs, histograms, bar charts, pie charts, progress bars, statistics, metrics.")
   SIMPLE_TEXT @description("Used when you need to show a short 1–2 line message without heavy animation. Ideal for pauses, emphasis, or clean statements.")
 }
 

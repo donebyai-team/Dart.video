@@ -296,7 +296,7 @@ async function handleValidate(req, res) {
   const transformedCode = transformAssignedPrimitiveIds(codeWithAssignedIds);
 
   // ── Compile check (validates the transformed code runs without errors) ──
-  console.log('[validate] compiling transformed code for validation...', transformedCode);
+  console.log('[validate] compiling transformed code for validation...');
   const result = compileRemoteComponent(transformedCode);
   if (result.error) {
     console.log('[validate] compile check FAILED:\n', result.error);

@@ -90,11 +90,7 @@ type AnimationType string
 
 const (
 	AnimationTypeBRAND       AnimationType = "BRAND"
-	AnimationTypePRODUCT     AnimationType = "PRODUCT"
 	AnimationTypeTEXT        AnimationType = "TEXT"
-	AnimationTypeVISUAL      AnimationType = "VISUAL"
-	AnimationTypeSTATS       AnimationType = "STATS"
-	AnimationTypeCHART       AnimationType = "CHART"
 	AnimationTypeSIMPLE_TEXT AnimationType = "SIMPLE_TEXT"
 )
 
@@ -102,11 +98,7 @@ const (
 func (AnimationType) Values() []AnimationType {
 	return []AnimationType{
 		AnimationTypeBRAND,
-		AnimationTypePRODUCT,
 		AnimationTypeTEXT,
-		AnimationTypeVISUAL,
-		AnimationTypeSTATS,
-		AnimationTypeCHART,
 		AnimationTypeSIMPLE_TEXT,
 	}
 }

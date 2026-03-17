@@ -31,6 +31,12 @@ template_string BrandGuidelines(resume: VideoBranding) #"
 template_string AnimationTypes() #"
     ## Available Animation types
     BRAND = Used for brand-led moments such as logo reveals, identity motion, or signature visual language.
+    TEXT = kinetic text, typewriter effects, text animations, word carousels, animated titles, text-heavy content slide with icons, sections etc. Used for strong statements, hooks, quotes, definitions, or key transitions
+"#
+
+template_string AllAnimationTypes() #"
+    ## Available Animation types
+    BRAND = Used for brand-led moments such as logo reveals, identity motion, or signature visual language.
     PRODUCT = Used when showcasing real-world tools or interfaces like Slack, WhatsApp, CRM systems, dashboards, or any software relevant to the narrative. Helps ground the story in practical, relatable workflows
     TEXT = kinetic text, typewriter effects, text animations, word carousels, animated titles, text-heavy content slide with icons, sections etc. Used for strong statements, hooks, quotes, definitions, or key transitions
     VISUAL = Purely visual animated slide (icons, illustrations, motion graphics, abstract visuals). Minimal text
