@@ -3,7 +3,7 @@ import { Slide, SlideType, TransitionType, MediaAsset } from '@coasterai/pb/coas
 import { Video, VideoSchema } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import { linearTiming, TransitionSeries } from '@remotion/transitions'
 import React, { useMemo } from 'react'
-import { AbsoluteFill, useVideoConfig, Html5Audio } from 'remotion'
+import { AbsoluteFill, useVideoConfig, Html5Audio, Series } from 'remotion'
 import {
   ThemeProvider,
   AspectPresetProvider,
@@ -199,6 +199,27 @@ export const Slideshow: React.FC<SlideshowProps> = ({
 
   /* ================= RENDER ================= */
 
+  const renderSlide = (slide: Slide) => {
+    const isSelected = selectedTemplateId === slide.id
+    const slideWithBackground =
+      globalBackground != 'transparent' ? { ...slide, backgroundColor: 'transparent' } : slide
+
+    return (
+      <SlideComponent
+        slide={slideWithBackground}
+        width={width}
+        height={height}
+        isEditing={isEditing}
+        isSelected={isSelected}
+        onUpdate={onUpdate}
+        uploadMedia={uploadMedia}
+        onSelect={() => {
+          onSelectTemplate?.(slide.id);
+        }}
+      />
+    )
+  }
+
   return (
     <ThemeProvider theme={brandTheme}>
       <AspectPresetProvider preset={aspectPreset}>
@@ -218,59 +239,62 @@ export const Slideshow: React.FC<SlideshowProps> = ({
               />
             )}
 
-            <TransitionSeries>
-              {allSlides.map((slide, index) => {
-                const isSelected = selectedTemplateId === slide.id
+            {isEditing ? (
+              // In paused editor mode, avoid TransitionSeries overlap so only one slide's
+              // DOM is mounted for hit-testing. We keep timeline sync by shortening each
+              // transitioning slide by the overlap duration instead of rendering the overlap.
+              <Series>
+                {allSlides.map((slide, index) => {
+                  const hasTransition =
+                    index < allSlides.length - 1 &&
+                    slide.transition !== TransitionType.TRANSITION_NONE
+                  const visibleDuration = hasTransition
+                    ? Math.max(1, slide.durationInFrames - transitionDurationFrames)
+                    : slide.durationInFrames
 
-                const durationInFrames = slide.durationInFrames;
+                  return (
+                    <React.Fragment key={slide.id}>
+                      <Series.Sequence durationInFrames={visibleDuration}>
+                        {renderSlide(slide)}
+                      </Series.Sequence>
+                    </React.Fragment>
+                  )
+                })}
+              </Series>
+            ) : (
+              <TransitionSeries>
+                {allSlides.map((slide, index) => {
+                  const durationInFrames = slide.durationInFrames;
+                  const hasTransition =
+                    index < allSlides.length - 1 &&
+                    slide.transition !== TransitionType.TRANSITION_NONE
 
-                // Last slide never transitions out because there is no following slide.
-                const hasTransition =
-                  index < allSlides.length - 1 &&
-                  slide.transition !== TransitionType.TRANSITION_NONE
+                  return (
+                    <React.Fragment key={slide.id}>
 
-                // if global background is given , all slides background should be transparent
-                // else slide color
-                const slideWithBackground =
-                  globalBackground != 'transparent' ? { ...slide, backgroundColor: 'transparent' } : slide
+                      <TransitionSeries.Sequence durationInFrames={durationInFrames}>
+                        {renderSlide(slide)}
+                      </TransitionSeries.Sequence>
 
+                      {hasTransition && (
+                        <TransitionSeries.Transition
+                          presentation={getTransitionPresentation(
+                            slide.transition,
+                            getSlideTransitionDirectionValue(slide),
+                            width,
+                            height
+                          ) as any}
+                          timing={linearTiming({
+                            durationInFrames: transitionDurationFrames
+                          })}
+                        />
+                      )}
 
-                return (
-                  <React.Fragment key={slide.id}>
-
-                    <TransitionSeries.Sequence durationInFrames={durationInFrames}>
-                      <SlideComponent
-                        slide={slideWithBackground}
-                        width={width}
-                        height={height}
-                        isEditing={isEditing}
-                        isSelected={isSelected}
-                        onUpdate={onUpdate}
-                        uploadMedia={uploadMedia}
-                        onSelect={() => {
-                          onSelectTemplate?.(slide.id);
-                        }}
-                      />
-                    </TransitionSeries.Sequence>
-
-                    {hasTransition && !isEditing && (
-                      <TransitionSeries.Transition
-                        presentation={getTransitionPresentation(
-                          slide.transition,
-                          getSlideTransitionDirectionValue(slide),
-                          width,
-                          height
-                        ) as any}
-                        timing={linearTiming({
-                          durationInFrames: transitionDurationFrames
-                        })}
-                      />
-                    )}
-
-                  </React.Fragment>
-                )
-              })}
-            </TransitionSeries>
+                    </React.Fragment>
+                  )
+                })}
+              </TransitionSeries>
+            )}
           </AbsoluteFill>
         </StyleContextProvider>
       </AspectPresetProvider>

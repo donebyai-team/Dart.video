@@ -23,7 +23,11 @@ import PlayerTimeline from "../timeline/PlayerTimeline";
 import PlayerToolbar from "../PlayerToolbar";
 import { usePlayerControls, type PlayerControls } from "@/hooks/usePlayerControls";
 import { useRemotionPlayerEvents } from "@/hooks/useRemotionPlayerEvents";
-import { calculateRealTotalFrames, getSlideVisualEndFrame } from "../frame_calculations";
+import {
+  calculateRealTotalFrames,
+  getSlideEditPreviewFrame,
+  getSlideVisualEndFrame,
+} from "../frame_calculations";
 import { useVideoStore } from "@/stores/video";
 import Loading from "@/app/loading";
 
@@ -145,7 +149,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
     lastHandledSlideRef.current = selectedSlideId;
 
     if (!isPlaying && selectedSlideId) {
-      const frame = getSlideVisualEndFrame(allSlides, selectedSlideId, fps);
+      const frame = getSlideEditPreviewFrame(allSlides, selectedSlideId, fps);
       playerRef.current?.seekTo(frame);
       setPlayFromSlideId(selectedSlideId);
     }
@@ -157,11 +161,13 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   const handleSlideSelect = useCallback((slideId: string) => {
     lastHandledSlideRef.current = slideId;
     playerRef.current?.pause();
-    const frame = getSlideVisualEndFrame(allSlides, slideId, fps);
+    const frame = isPlaying
+      ? getSlideVisualEndFrame(allSlides, slideId, fps)
+      : getSlideEditPreviewFrame(allSlides, slideId, fps);
     playerRef.current?.seekTo(frame);
     setPlayFromSlideId(slideId);
     onSlideChange?.(slideId);
-  }, [allSlides, fps, onSlideChange]);
+  }, [allSlides, fps, isPlaying, onSlideChange]);
 
   useImperativeHandle(ref, () => controls, [controls]);
 

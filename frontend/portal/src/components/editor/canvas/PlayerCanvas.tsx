@@ -55,7 +55,7 @@ const PlayerCanvas = ({
 
   const inputProps = useMemo(() => ({
     fps,
-    isEditing,
+    isEditing: isEditing && !isPlaying,
     onSelectTemplate,
     isPlaying,
     animEditVersion,
