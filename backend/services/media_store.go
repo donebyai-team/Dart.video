@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"cloud.google.com/go/storage"
 	"context"
+	"encoding/xml"
 	"fmt"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/streamingfast/dstore"
@@ -18,6 +19,7 @@ import (
 	"net/url"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 	"unicode"
@@ -302,19 +304,7 @@ func (g gcpMediaStore) Upload(
 
 	mediaType := DetectMediaType(contentType)
 
-	var width, height float32
-
-	// Only extract dimensions for images
-	if mediaType == pbcore.MediaType_MEDIA_TYPE_IMAGE &&
-		!strings.Contains(contentType, "svg") {
-		cfg, _, err := image.DecodeConfig(reader)
-		if err == nil {
-			width = float32(cfg.Width)
-			height = float32(cfg.Height)
-		}
-
-		reader.Seek(0, io.SeekStart)
-	}
+	width, height := extractMediaDimensions(reader, mediaType, contentType)
 
 	obj := g.bucket.Object(objectPath)
 	writer := obj.NewWriter(ctx)
@@ -340,6 +330,116 @@ func (g gcpMediaStore) Upload(
 		Height:    height,
 		MediaType: mediaType,
 	}, nil
+}
+
+func extractMediaDimensions(reader io.ReadSeeker, mediaType pbcore.MediaType, contentType string) (float32, float32) {
+	defer reader.Seek(0, io.SeekStart)
+
+	switch mediaType {
+	case pbcore.MediaType_MEDIA_TYPE_IMAGE:
+		cfg, _, err := image.DecodeConfig(reader)
+		if err != nil {
+			return 0, 0
+		}
+		return float32(cfg.Width), float32(cfg.Height)
+	case pbcore.MediaType_MEDIA_TYPE_SVG:
+		if !strings.Contains(contentType, "svg") {
+			return 0, 0
+		}
+		return extractSVGDimensions(reader)
+	default:
+		return 0, 0
+	}
+}
+
+func extractSVGDimensions(reader io.Reader) (float32, float32) {
+	decoder := xml.NewDecoder(reader)
+
+	for {
+		token, err := decoder.Token()
+		if err != nil {
+			return 0, 0
+		}
+
+		start, ok := token.(xml.StartElement)
+		if !ok || start.Name.Local != "svg" {
+			continue
+		}
+
+		var width, height float32
+		var okWidth, okHeight bool
+		var viewBox string
+
+		for _, attr := range start.Attr {
+			switch attr.Name.Local {
+			case "width":
+				width, okWidth = parseSVGLength(attr.Value)
+			case "height":
+				height, okHeight = parseSVGLength(attr.Value)
+			case "viewBox":
+				viewBox = attr.Value
+			}
+		}
+
+		if okWidth && okHeight {
+			return width, height
+		}
+
+		if viewBox != "" {
+			viewBoxWidth, viewBoxHeight, ok := parseSVGViewBox(viewBox)
+			if ok {
+				if !okWidth {
+					width = viewBoxWidth
+				}
+				if !okHeight {
+					height = viewBoxHeight
+				}
+			}
+		}
+
+		if width > 0 && height > 0 {
+			return width, height
+		}
+
+		return 0, 0
+	}
+}
+
+var svgLengthPattern = regexp.MustCompile(`^[+-]?(?:\d+(?:\.\d+)?|\.\d+)`)
+
+func parseSVGLength(raw string) (float32, bool) {
+	match := svgLengthPattern.FindString(strings.TrimSpace(raw))
+	if match == "" {
+		return 0, false
+	}
+
+	value, err := strconv.ParseFloat(match, 32)
+	if err != nil || value <= 0 {
+		return 0, false
+	}
+
+	return float32(value), true
+}
+
+func parseSVGViewBox(raw string) (float32, float32, bool) {
+	parts := strings.FieldsFunc(strings.TrimSpace(raw), func(r rune) bool {
+		return r == ',' || unicode.IsSpace(r)
+	})
+	if len(parts) != 4 {
+		return 0, 0, false
+	}
+
+	width, err := strconv.ParseFloat(parts[2], 32)
+	if err != nil || width <= 0 {
+		return 0, 0, false
+	}
+
+	height, err := strconv.ParseFloat(parts[3], 32)
+	if err != nil || height <= 0 {
+		return 0, 0, false
+	}
+
+	return float32(width), float32(height), true
 }
 
 //type imagekitMediaStore struct {
