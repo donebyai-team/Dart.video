@@ -253,7 +253,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({
                       />
                     </TransitionSeries.Sequence>
 
-                    {hasTransition && (
+                    {hasTransition && !isEditing && (
                       <TransitionSeries.Transition
                         presentation={getTransitionPresentation(
                           slide.transition,
