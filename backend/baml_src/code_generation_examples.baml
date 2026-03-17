@@ -2,49 +2,19 @@ template_string CodeGenerationExamples() #"
 ## EXAMPLES:
 
 {% raw %}
-### Example 1 — primitives only
+### Example 1 — title with sequential reveals
 ```tsx
 export default function RemoteComponent() {
   return (
     <SafeArea>
       <AbsoluteCenter axis="both">
-        <Stack gap={24} align="center">
-
+        <Stack gap={16} align="center">
           <SlideIn delay={0} duration={20} direction="up">
             <Text variant="display">Q4 Results</Text>
           </SlideIn>
-
-          <FadeIn delay={15} duration={20}>
+          <FadeIn delay={26} duration={20}>
             <Text variant="subheading">Revenue up this quarter</Text>
           </FadeIn>
-
-          <FadeIn delay={30} duration={20}>
-            <Row gap={48} align="center">
-              <Stack gap={8} align="center">
-                <Counter to={9800} delay={35} duration={60} suffix="+" variant="heading" />
-                <Text variant="label">new users</Text>
-              </Stack>
-              <Stack gap={8} align="center">
-                <Counter to={94} delay={45} duration={60} suffix="%" variant="heading" />
-                <Text variant="label">retention</Text>
-              </Stack>
-            </Row>
-          </FadeIn>
-
-          <TimelineGate showAfter={120}>
-            <Stagger startAt={120} delayBetween={8}>
-              <SlideIn duration={20} direction="up">
-                <Text variant="label">✓ Revenue target hit</Text>
-              </SlideIn>
-              <SlideIn duration={20} direction="up">
-                <Text variant="label">✓ User growth 40%</Text>
-              </SlideIn>
-              <SlideIn duration={20} direction="up">
-                <Text variant="label">✓ Churn reduced</Text>
-              </SlideIn>
-            </Stagger>
-          </TimelineGate>
-
         </Stack>
       </AbsoluteCenter>
     </SafeArea>
@@ -52,35 +22,86 @@ export default function RemoteComponent() {
 }
 ```
 
-### Example 2 — primitives with plain React for geometry
+### Example 2 — two stats side by side
 ```tsx
 export default function RemoteComponent() {
   return (
     <SafeArea>
       <AbsoluteCenter axis="both">
-        <Stack gap={32} align="center">
-
-          <ScaleIn delay={0} duration={20} origin="center">
-            <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(255,255,255,0.8)' }} />
-            </div>
-          </ScaleIn>
-
-          <SlideIn delay={20} duration={25} direction="up">
+        <Row gap={48} align="center">
+          <FadeIn delay={0} duration={20}>
             <Stack gap={8} align="center">
-              <Text variant="heading">Acme Inc</Text>
-              <Text variant="body">Building the future</Text>
+              <Counter to={9800} delay={0} duration={60} suffix="+" variant="heading" />
+              <Text variant="label">new users</Text>
             </Stack>
+          </FadeIn>
+          <FadeIn delay={10} duration={20}>
+            <Stack gap={8} align="center">
+              <Counter to={94} delay={10} duration={60} suffix="%" variant="heading" />
+              <Text variant="label">retention</Text>
+            </Stack>
+          </FadeIn>
+        </Row>
+      </AbsoluteCenter>
+    </SafeArea>
+  );
+}
+```
+
+### Example 3 — staggered list
+```tsx
+export default function RemoteComponent() {
+  return (
+    <SafeArea>
+      <AbsoluteCenter axis="both">
+        <Stack gap={12} align="center">
+          <SlideIn delay={0} duration={20} direction="up">
+            <Text variant="heading">What we shipped</Text>
           </SlideIn>
+          <TimelineGate showAfter={26}>
+            <Stagger startAt={26} delayBetween={8}>
+              <SlideIn duration={20} direction="up">
+                <Text variant="body">Faster build times</Text>
+              </SlideIn>
+              <SlideIn duration={20} direction="up">
+                <Text variant="body">Improved test coverage</Text>
+              </SlideIn>
+              <SlideIn duration={20} direction="up">
+                <Text variant="body">Zero downtime deploys</Text>
+              </SlideIn>
+            </Stagger>
+          </TimelineGate>
+        </Stack>
+      </AbsoluteCenter>
+    </SafeArea>
+  );
+}
+```
 
-          <FadeIn delay={50} duration={20}>
-            <div style={{ width: 320, height: 1, background: 'rgba(255,255,255,0.15)' }} />
+### Example 4 — word cycle resolving to final word
+```tsx
+export default function RemoteComponent() {
+  return (
+    <SafeArea>
+      <AbsoluteCenter axis="both">
+        <Stack gap={16} align="center" style={{ maxWidth: 700 }}>
+          <FadeIn delay={0} duration={20}>
+            <Text variant="subheading">We protect your</Text>
           </FadeIn>
-
-          <FadeIn delay={60} duration={20}>
-            <Text variant="label">est. 2024</Text>
-          </FadeIn>
-
+          <TimelineGate showAfter={26} hideAfter={130}>
+            <WordCycle
+              words={["layouts", "spacing", "colors", "trust"]}
+              holdDuration={18}
+              transitionDuration={10}
+              transition="fadeSwap"
+              variant="display"
+            />
+          </TimelineGate>
+          <TimelineGate showAfter={136}>
+            <ScaleIn delay={0} duration={20} origin="center">
+              <Text variant="display">trust</Text>
+            </ScaleIn>
+          </TimelineGate>
         </Stack>
       </AbsoluteCenter>
     </SafeArea>
