@@ -367,7 +367,6 @@ func NewBrandIdentityRegistry(identity *pbcore.BrandIdentity) *BrandIdentityRegi
 	   		MIME Type: image/png
 	   		Asset Type: MEDIA_TYPE_IMAGE
 	   		Dimensions: 1024x256
-	   		Render Hint: Use <img> tag
 */
 func (registry *BrandIdentityRegistry) FormatBrandAndAssetDetails() string {
 	b := registry.identity
