@@ -24,71 +24,13 @@
 export const EXAMPLE_ANIMATION_CODE = `
 export default function RemoteComponent({ data }) {
   return (
-    <SafeArea>
+   <SafeArea>
       <AbsoluteCenter axis="both">
-        <Stack gap={16} align="center">
-
-          <ScaleIn delay={10} duration={20} origin="center">
-            <LogoAsset />
-          </ScaleIn>
-
-          <SlideIn startAt={20} durationInFrames={25} from="bottom">
-            <Text variant="display">Phase 2 Complete</Text>
-          </SlideIn>
-
-          <FadeIn startAt={20} durationInFrames={20}>
-            <Text variant="subheading">Animation system built on primitives</Text>
-          </FadeIn>
-
-          <FadeIn startAt={45} durationInFrames={20}>
-            <Row gap={32} align="center">
-              <Stack gap={4} align="center">
-                <Counter
-                  startAt={50}
-                  durationInFrames={60}
-                  from={0}
-                  to={17}
-                  suffix=" components"
-                  variant="heading"
-                />
-                <Text variant="label">registered</Text>
-              </Stack>
-
-              <Stack gap={4} align="center">
-                <Counter
-                  startAt={60}
-                  durationInFrames={60}
-                  from={0}
-                  to={5}
-                  suffix=" types"
-                  variant="heading"
-                />
-                <Text variant="label">animation types</Text>
-              </Stack>
-            </Row>
-          </FadeIn>
-
-           <Stack gap={32} align="center">
-            <Stagger startAt={100} staggerDelay={12}>
-              <SlideIn durationInFrames={20} from="bottom">
-                <Text variant="label">✓ Tokens and Theming</Text>
-              </SlideIn>
-              <SlideIn durationInFrames={20} from="bottom">
-                <Text variant="label">✓ Layout Primitives</Text>
-              </SlideIn>
-              <SlideIn durationInFrames={20} from="bottom">
-                <Text variant="label">✓ Animation Primitives</Text>
-              </SlideIn>
-              <SlideIn durationInFrames={20} from="bottom">
-                <Text variant="label">✓ Content Primitives</Text>
-              </SlideIn>
-              <SlideIn durationInFrames={20} from="bottom">
-                <Text variant="label">✓ Compiler Integration</Text>
-              </SlideIn>
-            </Stagger>
-          </Stack>
-
-        </Stack>
+     <Stack gap={24} align="center">
+  <SlideIn id="slidein-0" delay={0} duration={24} direction="up" distance={24}>
+  <Text id="text-0" variant="display">Tiny UI changes slip through.</Text>
+  </SlideIn>
+  </Stack>
       </AbsoluteCenter>
     </SafeArea>
   );

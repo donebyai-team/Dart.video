@@ -1,6 +1,10 @@
 import * as Babel from "@babel/standalone";
 import { formatPromptRuleViolations, validatePromptRules } from "./prompt-rule-validator";
 import { formatTimingRuleViolations, validateTimingRules } from "./timing-rules-validator";
+import {
+  formatVisualConsistancyRuleViolations,
+  validateVisualConsistancyRules,
+} from "./visual-consistancy-validator";
 
 export type ValidateRequestParseResult =
   | {
@@ -94,6 +98,17 @@ export function validateGeneratedCode(code: string): ValidationFailureResult {
           "Review the FRAME DURATION RULES and feed the error back",
           ...formatTimingRuleViolations(timingViolations),
         ],
+      },
+    };
+  }
+
+  const visualConsistancyViolations = validateVisualConsistancyRules(code);
+  if (visualConsistancyViolations.length > 0) {
+    return {
+      status: 422,
+      payload: {
+        error_type: "rule_not_enforced",
+        errors: formatVisualConsistancyRuleViolations(visualConsistancyViolations),
       },
     };
   }

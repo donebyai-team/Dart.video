@@ -1,6 +1,10 @@
-import { formatPromptRuleViolations, validatePromptRules } from "../prompt-rule-validator";
-import { formatTimingRuleViolations, validateTimingRules } from "../timing-rules-validator";
-import { parseValidateRequestBody, validateGeneratedCode } from "../validate-request";
+import { formatPromptRuleViolations, validatePromptRules } from "../code_rules_validators/prompt-rule-validator";
+import { formatTimingRuleViolations, validateTimingRules } from "../code_rules_validators/timing-rules-validator";
+import { parseValidateRequestBody, validateGeneratedCode } from "../code_rules_validators/validate-request";
+import {
+  formatVisualConsistancyRuleViolations,
+  validateVisualConsistancyRules,
+} from "../code_rules_validators/visual-consistancy-validator";
 
 const validComponent = `
 export default function RemoteComponent() {
@@ -432,5 +436,61 @@ export default function RemoteComponent() {
 `));
 
     expect(errors[0]).toContain("[typewriter-duration-word]");
+  });
+
+  it("returns rule_not_enforced payload for visual consistency violations", () => {
+    const failure = validateGeneratedCode(`
+export default function RemoteComponent() {
+  return (
+    <SafeArea>
+      <Row>
+        <Text variant="caption">Small</Text>
+        <Counter variant="display" value={42} />
+      </Row>
+    </SafeArea>
+  );
+}
+`);
+
+    expect(failure).not.toBeNull();
+    expect(failure?.status).toBe(422);
+    expect(failure?.payload.error_type).toBe("rule_not_enforced");
+    expect(failure?.payload.errors[0]).toContain("[variant-jump-in-row]");
+  });
+
+  it("formats visual consistency violations into LLM-facing error strings", () => {
+    const errors = formatVisualConsistancyRuleViolations(validateVisualConsistancyRules(`
+export default function RemoteComponent() {
+  return (
+    <SafeArea>
+      <Row>
+        <Text variant="caption">Small</Text>
+        <WordCycle variant="display" words={["Big"]} />
+      </Row>
+    </SafeArea>
+  );
+}
+`));
+
+    expect(errors[0]).toContain("[variant-jump-in-row]");
+    expect(errors[0]).toContain("Fix:");
+  });
+
+  it("allows similar typography variants inside a Row", () => {
+    const errors = validateVisualConsistancyRules(`
+export default function RemoteComponent() {
+  return (
+    <SafeArea>
+      <Row>
+        <Text variant="body">Body</Text>
+        <Counter variant="subheading" value={42} />
+        <Typewriter variant="heading" text="Hello" durationInFrames={10} mode="word" />
+      </Row>
+    </SafeArea>
+  );
+}
+`);
+
+    expect(errors).toEqual([]);
   });
 });

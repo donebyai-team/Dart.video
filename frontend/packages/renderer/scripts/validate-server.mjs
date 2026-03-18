@@ -36,7 +36,7 @@ import {bundle} from '@remotion/bundler';
 import {renderStill, selectComposition} from '@remotion/renderer';
 import {compileRemoteComponent} from '../src/compiler.ts'
 import {assignPrimitiveIds, transformAssignedPrimitiveIds} from '../src/primitive-ast-pass.ts'
-import {parseValidateRequestBody, validateGeneratedCode} from '../src/validate-request.ts';
+import {parseValidateRequestBody, validateGeneratedCode} from '../src/code_rules_validators/validate-request.ts';
 import {randomUUID} from 'node:crypto';
 import {existsSync} from 'node:fs';
 import {mkdir, rm, writeFile} from 'node:fs/promises';
