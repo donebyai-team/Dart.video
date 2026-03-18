@@ -187,6 +187,7 @@ func (a *agentAnimationEditor) ContinueAnimation(
 	return a.runGenerateAnimationFromPrompt(ctx, session)
 }
 
+// EditAnimation changes either existing code or regenerate but no change in the plan
 func (l *agentAnimationEditor) EditAnimation(
 	ctx context.Context,
 	animationSlide *pbcore.Slide,

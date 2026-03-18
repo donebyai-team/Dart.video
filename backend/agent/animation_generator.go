@@ -568,6 +568,8 @@ func (l *animationGenerator) tryRegenerateAnimation(
 			Message: CreativeStageMessage(StageDesigning, attempt),
 		})
 
+		// TODO: Feed LLM the existing patches to keep existing user edits
+		// We may want to compare the original with the latest patch to know the user edits
 		l.logger.Info("fallback to regeneration animation", zap.Int("attempt", attempt))
 		response, err := baml_client.ReGenerateAnimation(ctx, input, conversationHistory)
 		if err != nil {

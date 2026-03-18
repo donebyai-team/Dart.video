@@ -287,9 +287,8 @@ func applyTemplateToSlide(slide *pbcore.Slide, template *models.Template, isExis
 		return nil
 	}
 
-	// TODO: multify with real fps
-	slide.DurationInFrames = float32(template.Config.TotalDuration * 30)
-	slide.SettledFrame = float32(template.Config.VisibleDuration * 30)
+	slide.DurationInFrames = float32(template.Config.TotalDuration)
+	slide.SettledFrame = float32(template.Config.VisibleDuration)
 	toPatches, err := utils.RawMessageToStruct(template.GeneratedPatches)
 	if err != nil {
 		return fmt.Errorf("invalid template registry: %s", template.Name)
