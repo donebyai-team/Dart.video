@@ -281,7 +281,9 @@ async function handleValidate(req, res) {
   // ── AST pass: assign IDs + extract initial overlay ─────────────────────
   // Run on import-stripped code so the AST pass sees clean JSX.
   console.log('[validate] running AST pass (ID assignment + prop extraction)');
-  let stripped = code;
+
+  const { code: codeWithAssignedIds, initialOverlay } = assignPrimitiveIds(code);
+  let stripped = codeWithAssignedIds;
   stripped = stripped.replace(/import\s+type\s*\{[\s\S]*?\}\s*from\s*["'][^"']+["'];?/g, '');
   stripped = stripped.replace(/import\s+\w+\s*,\s*\{[\s\S]*?\}\s*from\s*["'][^"']+["'];?/g, '');
   stripped = stripped.replace(/import\s*\{[\s\S]*?\}\s*from\s*["'][^"']+["'];?/g, '');
@@ -292,8 +294,7 @@ async function handleValidate(req, res) {
   stripped = stripped.replace(/^export\s+/gm, '');
   stripped = stripped.trim();
 
-  const { code: codeWithAssignedIds, initialOverlay } = assignPrimitiveIds(stripped);
-  const transformedCode = transformAssignedPrimitiveIds(codeWithAssignedIds);
+  const transformedCode = transformAssignedPrimitiveIds(stripped);
 
   // ── Compile check (validates the transformed code runs without errors) ──
   console.log('[validate] compiling transformed code for validation...');
