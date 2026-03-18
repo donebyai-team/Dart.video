@@ -18,6 +18,7 @@ export interface BrandTheme {
   secondary: string;
   /** Canvas / slide background (e.g. "#0f0f0f") */
   bg: string;
+  accent: string;
   /** Primary text color (e.g. "#f8fafc") */
   text: string;
   /** Brand sans-serif font (e.g. "Inter"). Falls back to system-ui. */

@@ -33,9 +33,26 @@ function mix(a: string, b: string, t: number): string {
   return '#' + [r, g, bl].map(v => v.toString(16).padStart(2, '0')).join('');
 }
 
+/** WCAG contrast ratio between two colors */
+function contrastRatio(a: string, b: string): number {
+  const l1 = luminance(a);
+  const l2 = luminance(b);
+
+  const lighter = Math.max(l1, l2);
+  const darker = Math.min(l1, l2);
+
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
 /** Best contrasting text color (white or black) for a given background. */
 function contrastText(bg: string): string {
-  return luminance(bg) > 0.179 ? '#0a0a0a' : '#ffffff';
+  const black = '#000000';
+  const white = '#ffffff';
+
+  const contrastBlack = contrastRatio(bg, black);
+  const contrastWhite = contrastRatio(bg, white);
+
+  return contrastBlack > contrastWhite ? black : white;
 }
 
 /**
@@ -44,37 +61,45 @@ function contrastText(bg: string): string {
  * Status colors (success, warning, info, destructive) are fixed.
  */
 export function derivePalette(brand: BrandTheme): ColorTokens {
-  const dark = isDark(brand.bg);
-  // Neutral step: slightly lighter (dark bg) or slightly darker (light bg)
-  const step1 = dark ? mix(brand.bg, '#ffffff', 0.06) : mix(brand.bg, '#000000', 0.04);
-  const step2 = dark ? mix(brand.bg, '#ffffff', 0.12) : mix(brand.bg, '#000000', 0.08);
-  const mutedText = dark ? mix(brand.text, brand.bg, 0.45) : mix(brand.text, brand.bg, 0.5);
+ const dark = isDark(brand.bg);
+
+  const step1 = dark
+    ? mix(brand.bg, '#ffffff', 0.06)
+    : mix(brand.bg, '#000000', 0.04);
+
+  const step2 = dark
+    ? mix(brand.bg, '#ffffff', 0.12)
+    : mix(brand.bg, '#000000', 0.08);
+
+  const mutedText = dark
+    ? mix(brand.text, brand.bg, 0.4)
+    : mix(brand.text, brand.bg, 0.3);
 
   return {
-    background:              brand.bg,
-    foreground:              brand.text,
-    card:                    step1,
-    cardForeground:          brand.text,
-    popover:                 step1,
-    popoverForeground:       brand.text,
-    primary:                 brand.primary,
-    primaryForeground:       contrastText(brand.primary),
-    secondary:               brand.secondary,
-    secondaryForeground:     contrastText(brand.secondary),
-    muted:                   step1,
-    mutedForeground:         mutedText,
-    accent:                  brand.secondary,
-    accentForeground:        contrastText(brand.secondary),
-    destructive:             '#ef4444',
-    destructiveForeground:   '#ffffff',
-    border:                  step2,
-    input:                   step2,
-    ring:                    brand.primary,
-    success:                 '#22c55e',
-    successForeground:       '#ffffff',
-    warning:                 '#f59e0b',
-    warningForeground:       '#000000',
-    info:                    '#3b82f6',
-    infoForeground:          '#ffffff',
+    background: brand.bg,
+    foreground: brand.text,
+    card: step1,
+    cardForeground: brand.text,
+    popover: step1,
+    popoverForeground: brand.text,
+    primary: brand.primary,
+    primaryForeground: contrastText(brand.primary),
+    secondary: brand.secondary,
+    secondaryForeground: contrastText(brand.secondary),
+    muted: step1,
+    mutedForeground: mutedText,
+    accent: brand.accent,
+    accentForeground: contrastText(brand.accent),
+    destructive: '#ef4444',
+    destructiveForeground: '#ffffff',
+    border: step2,
+    input: step2,
+    ring: brand.primary,
+    success: '#22c55e',
+    successForeground: '#ffffff',
+    warning: '#f59e0b',
+    warningForeground: '#000000',
+    info: '#3b82f6',
+    infoForeground: '#ffffff',
   };
 }

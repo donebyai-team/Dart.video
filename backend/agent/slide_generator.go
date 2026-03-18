@@ -60,23 +60,38 @@ func (g *videoConfigGenerator) Fail(ctx context.Context, cause error, status mod
 }
 
 func (g *videoConfigGenerator) AddBranding(brandIdentityRegistry *brand_identity.BrandIdentityRegistry) {
+	generatedBranding := &pbcore.GeneratedVideoBranding{}
+
+	// Step 1: get colors (already processed)
 	if brandIdentityRegistry == nil {
-		// Extract default theme to start with
-		randomColors := brand_identity.ExtractOrGenerateColors(nil)
-		g.video.Metadata.GeneratedBranding = &pbcore.GeneratedVideoBranding{
-			Colors: randomColors,
+		generatedBranding.Colors = brand_identity.ExtractOrGenerateColors(nil)
+	} else {
+		brandIdentity := brandIdentityRegistry.GetIdentity()
+		generatedBranding.Colors = brandIdentity.Colors
+	}
+
+	// Step 2: ALWAYS generate gradient
+	gradient := brand_identity.GenerateGradient(generatedBranding.Colors)
+
+	// Step 3: compute safe text color for gradient
+	updatedTextColor := brand_identity.GetTextColorForGradient(gradient)
+
+	// Step 4: update text color
+	for _, brandColor := range generatedBranding.Colors {
+		if brandColor.Priority == pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_TEXT_PRIMARY {
+			brandColor.ColorHexCode = updatedTextColor
 		}
-		g.AddVideoBackground(&pbcore.BackgroundStyle{Style: &pbcore.BackgroundStyle_Gradient{Gradient: brand_identity.GenerateGradient(randomColors)}})
-		return
 	}
 
-	brandIdentity := brandIdentityRegistry.GetIdentity()
-	g.video.Metadata.GeneratedBranding = &pbcore.GeneratedVideoBranding{
-		BrandLibraryID: utils.Ptr(brandIdentity.Id),
-		Colors:         brandIdentity.Colors,
-	}
+	// Step 5: assign branding
+	g.video.Metadata.GeneratedBranding = generatedBranding
 
-	g.AddVideoBackground(&pbcore.BackgroundStyle{Style: &pbcore.BackgroundStyle_Gradient{Gradient: brand_identity.GenerateGradient(brandIdentity.Colors)}})
+	// Step 6: apply gradient background
+	g.AddVideoBackground(&pbcore.BackgroundStyle{
+		Style: &pbcore.BackgroundStyle_Gradient{
+			Gradient: gradient,
+		},
+	})
 }
 
 // CreatePendingSlides created slides with pending status

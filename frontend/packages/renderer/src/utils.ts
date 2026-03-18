@@ -37,6 +37,10 @@ export function brandingToTheme(
             case BrandAssetPriority.TEXT_SECONDARY:
                 if (!theme.text) theme.text = color;
                 break;
+
+             case BrandAssetPriority.ACCENT:
+                if (theme.accent) theme.accent = color;
+                break;    
         }
     }
 

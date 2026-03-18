@@ -3,29 +3,29 @@ package brand_identity
 import (
 	"fmt"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
+	"math"
 	"strconv"
 	"strings"
 )
 
-// Same as DEFAULT_THEME in frontend
+// ---------------- DEFAULTS ----------------
+
+// Default fallback colors if nothing is scraped / provided
 var defaultColors = map[string]string{
-	"primary":       "#6366f1",
-	"secondary":     "#a5b4fc",
+	"primary":       "#6366F1",
+	"secondary":     "#A5B4FC",
 	"accent":        "#F59E0B",
-	"background":    "#ffffff",
-	"textPrimary":   "#0a0a0a",
+	"background":    "#FFFFFF",
+	"textPrimary":   "#0A0A0A",
 	"textSecondary": "#6B7280",
 }
 
+// Order ensures consistent output ordering
 var colorOrder = []string{
-	"primary",
-	"secondary",
-	"accent",
-	"background",
-	"textPrimary",
-	"textSecondary",
+	"primary", "secondary", "accent", "background", "textPrimary", "textSecondary",
 }
 
+// Mapping to protobuf priority
 var priorityMap = map[string]pbcore.BrandAssetPriority{
 	"primary":       pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_PRIMARY,
 	"secondary":     pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_SECONDARY,
@@ -35,13 +35,16 @@ var priorityMap = map[string]pbcore.BrandAssetPriority{
 	"textSecondary": pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_TEXT_SECONDARY,
 }
 
-func brightness(hex string) float64 {
-	r, g, b := hexToRGB(hex)
+// ---------------- MAIN ENTRY ----------------
 
-	return 0.299*float64(r) + 0.587*float64(g) + 0.114*float64(b)
-}
-
+// Entry point:
+// 1. Build palette (scraped/user input = source of truth)
+// 2. Fill missing colors ONLY once
+// 3. Return structured list
 func ExtractOrGenerateColors(input map[string]string) []*pbcore.BrandColor {
+	if input == nil {
+		input = map[string]string{} // treat as empty input
+	}
 
 	colors := buildColorPalette(input)
 
@@ -49,21 +52,18 @@ func ExtractOrGenerateColors(input map[string]string) []*pbcore.BrandColor {
 	seen := make(map[string]bool)
 
 	for _, colorName := range colorOrder {
-
 		hex := strings.TrimSpace(colors[colorName])
 		if hex == "" {
 			continue
 		}
 
+		// Avoid duplicate hex values
 		hexLower := strings.ToLower(hex)
-
 		if !seen[hexLower] {
-
 			result = append(result, &pbcore.BrandColor{
 				ColorHexCode: hex,
 				Priority:     priorityMap[colorName],
 			})
-
 			seen[hexLower] = true
 		}
 	}
@@ -71,16 +71,22 @@ func ExtractOrGenerateColors(input map[string]string) []*pbcore.BrandColor {
 	return result
 }
 
+// ---------------- PALETTE BUILD ----------------
+
+// Builds final palette ONCE
+// - Scraped/user colors take priority
+// - Missing colors are derived
+// - After this → palette is fixed (no more mutation later)
 func buildColorPalette(input map[string]string) map[string]string {
 
 	result := make(map[string]string)
 
-	// Step 1: start with defaults
+	// Step 1: Start with defaults
 	for k, v := range defaultColors {
 		result[k] = v
 	}
 
-	// Step 2: override with provided tokens
+	// Step 2: Override with scraped/user input (source of truth)
 	for k, v := range input {
 		if v != "" {
 			result[k] = normalizeHex(v)
@@ -89,38 +95,32 @@ func buildColorPalette(input map[string]string) map[string]string {
 
 	primary := result["primary"]
 
-	bright := brightness(primary)
+	// Step 3: Derive missing colors
 
-	// Secondary
+	// Secondary: lighter version of primary (keeps brand consistency)
 	if input["secondary"] == "" {
-
-		if bright > 200 {
-			result["secondary"] = darken(primary, 0.25)
-		} else if bright > 140 {
-			result["secondary"] = darken(primary, 0.15)
-		} else {
-			result["secondary"] = lighten(primary, 0.35)
-		}
+		result["secondary"] = lightenHSL(primary, 0.25)
 	}
 
-	// Accent
+	// Accent: hue-shifted version (creates visual separation)
 	if input["accent"] == "" {
-		result["accent"] = darken(primary, 0.20)
+		result["accent"] = shiftHue(primary, 35)
 	}
 
-	// Background (never white)
+	// Background: very light version of primary
+	// IMPORTANT: never allow pure/near white
 	if input["background"] == "" {
-
-		if bright > 200 {
-			result["background"] = darken(primary, 0.90)
-		} else {
-			result["background"] = lighten(primary, 0.92)
+		bg := lightenHSL(primary, 0.9)
+		if isTooLight(bg) {
+			bg = lightenHSL(primary, 0.85)
 		}
+		result["background"] = bg
 	}
 
-	// Text
+	// Text colors are NOT finalized here
+	// They will be computed based on gradient later
 	if input["textPrimary"] == "" {
-		result["textPrimary"] = "#111827"
+		result["textPrimary"] = "#000000"
 	}
 
 	if input["textSecondary"] == "" {
@@ -130,8 +130,127 @@ func buildColorPalette(input map[string]string) map[string]string {
 	return result
 }
 
-func normalizeHex(hex string) string {
+// ---------------- GRADIENT ----------------
 
+// Gradient is computed EVERY time (pure function)
+// based on current palette (user may edit anytime)
+func GenerateGradient(colors []*pbcore.BrandColor) *pbcore.Gradient {
+	var primary, secondary, accent string
+
+	// Extract relevant colors from palette
+	for _, c := range colors {
+		switch c.Priority {
+		case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_PRIMARY:
+			primary = c.ColorHexCode
+		case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_SECONDARY:
+			secondary = c.ColorHexCode
+		case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_ACCENT:
+			accent = c.ColorHexCode
+		}
+	}
+
+	// Prefer primary → secondary for gradients (more stable than accent)
+	start := primary
+	end := secondary
+
+	// Fallbacks if missing
+	if start == "" {
+		start = accent
+	}
+	if end == "" {
+		end = accent
+	}
+
+	if start == "" && len(colors) > 0 {
+		start = colors[0].ColorHexCode
+	}
+	if end == "" {
+		end = darkenHSL(start, 0.2)
+	}
+
+	// ---- SAFETY RULES ----
+
+	// 1. Avoid near-white gradients (bad for video/UI)
+	if isTooLight(start) {
+		start = darkenHSL(start, 0.2)
+	}
+	if isTooLight(end) {
+		end = darkenHSL(end, 0.2)
+	}
+
+	// 2. Avoid both stops being dark (flat gradient)
+	if isDark(start) && isDark(end) {
+		end = lightenHSL(end, 0.3)
+	}
+
+	// 3. Ensure visible difference between stops
+	if colorDistance(start, end) < 20 {
+		end = shiftHue(end, 25)
+	}
+
+	return &pbcore.Gradient{
+		Type:  pbcore.GradientType_GRADIENT_TYPE_LINEAR,
+		Angle: 135,
+		Stops: []*pbcore.GradientStop{
+			{Color: start, Position: 0},
+			{Color: end, Position: 100},
+		},
+	}
+}
+
+// ---------------- TEXT (GRADIENT-AWARE) ----------------
+
+// Computes text color based on BOTH gradient stops
+// Ensures readability across entire gradient
+func GetTextColorForGradient(g *pbcore.Gradient) string {
+	if len(g.Stops) < 2 {
+		return "#FFFFFF"
+	}
+
+	start := g.Stops[0].Color
+	end := g.Stops[1].Color
+
+	return getReadableTextOnGradient(start, end)
+}
+
+// Chooses black or white based on worst-case contrast
+// (minimum contrast across both gradient stops)
+func getReadableTextOnGradient(start, end string) string {
+
+	blackStart := contrastRatio(start, "#000000")
+	blackEnd := contrastRatio(end, "#000000")
+
+	whiteStart := contrastRatio(start, "#FFFFFF")
+	whiteEnd := contrastRatio(end, "#FFFFFF")
+
+	// Take worst-case contrast (important for gradients)
+	blackMin := math.Min(blackStart, blackEnd)
+	whiteMin := math.Min(whiteStart, whiteEnd)
+
+	if blackMin > whiteMin {
+		return "#000000"
+	}
+
+	return "#FFFFFF"
+}
+
+// ---------------- CONTRAST ----------------
+
+// Standard WCAG contrast ratio formula
+func contrastRatio(a, b string) float64 {
+	l1 := luminance(a)
+	l2 := luminance(b)
+
+	if l1 < l2 {
+		l1, l2 = l2, l1
+	}
+
+	return (l1 + 0.05) / (l2 + 0.05)
+}
+
+// ---------------- COLOR UTILS ----------------
+
+func normalizeHex(hex string) string {
 	hex = strings.TrimSpace(hex)
 
 	if !strings.HasPrefix(hex, "#") {
@@ -142,7 +261,6 @@ func normalizeHex(hex string) string {
 		r := string(hex[1])
 		g := string(hex[2])
 		b := string(hex[3])
-
 		hex = "#" + r + r + g + g + b + b
 	}
 
@@ -150,7 +268,6 @@ func normalizeHex(hex string) string {
 }
 
 func hexToRGB(hex string) (int, int, int) {
-
 	hex = strings.TrimPrefix(hex, "#")
 
 	r, _ := strconv.ParseInt(hex[0:2], 16, 0)
@@ -165,92 +282,141 @@ func rgbToHex(r, g, b int) string {
 }
 
 func clamp(v int) int {
-
 	if v < 0 {
 		return 0
 	}
-
 	if v > 255 {
 		return 255
 	}
-
 	return v
 }
 
-func lighten(hex string, percent float64) string {
+// ---------------- HSL ----------------
 
+// Convert HEX → HSL (used for perceptual color adjustments)
+func hexToHSL(hex string) (float64, float64, float64) {
 	r, g, b := hexToRGB(hex)
 
-	r = int(float64(r) + (255-float64(r))*percent)
-	g = int(float64(g) + (255-float64(g))*percent)
-	b = int(float64(b) + (255-float64(b))*percent)
+	rf := float64(r) / 255
+	gf := float64(g) / 255
+	bf := float64(b) / 255
 
-	return rgbToHex(r, g, b)
-}
+	max := math.Max(rf, math.Max(gf, bf))
+	min := math.Min(rf, math.Min(gf, bf))
 
-func darken(hex string, percent float64) string {
+	l := (max + min) / 2
 
-	r, g, b := hexToRGB(hex)
+	var h, s float64
 
-	r = int(float64(r) * (1 - percent))
-	g = int(float64(g) * (1 - percent))
-	b = int(float64(b) * (1 - percent))
+	if max == min {
+		h, s = 0, 0
+	} else {
+		d := max - min
 
-	return rgbToHex(r, g, b)
-}
+		if l > 0.5 {
+			s = d / (2 - max - min)
+		} else {
+			s = d / (max + min)
+		}
 
-func GenerateGradient(colors []*pbcore.BrandColor) *pbcore.Gradient {
-	var primary string
-	var accent string
-	var secondary string
+		switch max {
+		case rf:
+			h = (gf - bf) / d
+		case gf:
+			h = 2 + (bf-rf)/d
+		case bf:
+			h = 4 + (rf-gf)/d
+		}
 
-	for _, c := range colors {
-
-		switch c.Priority {
-
-		case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_PRIMARY:
-			primary = c.ColorHexCode
-
-		case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_ACCENT:
-			accent = c.ColorHexCode
-
-		case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_SECONDARY:
-			secondary = c.ColorHexCode
+		h *= 60
+		if h < 0 {
+			h += 360
 		}
 	}
 
-	start := primary
-	end := accent
+	return h, s, l
+}
 
-	if start == "" {
-		start = secondary
+func hslToHex(h, s, l float64) string {
+	c := (1 - math.Abs(2*l-1)) * s
+	x := c * (1 - math.Abs(math.Mod(h/60, 2)-1))
+	m := l - c/2
+
+	var r, g, b float64
+
+	switch {
+	case h < 60:
+		r, g, b = c, x, 0
+	case h < 120:
+		r, g, b = x, c, 0
+	case h < 180:
+		r, g, b = 0, c, x
+	case h < 240:
+		r, g, b = 0, x, c
+	case h < 300:
+		r, g, b = x, 0, c
+	default:
+		r, g, b = c, 0, x
 	}
 
-	if end == "" {
-		end = secondary
-	}
+	return rgbToHex(
+		int((r+m)*255),
+		int((g+m)*255),
+		int((b+m)*255),
+	)
+}
 
-	// Final fallback
-	if start == "" && len(colors) > 0 {
-		start = colors[0].ColorHexCode
-	}
+// ---------------- DERIVATION ----------------
 
-	if end == "" {
-		end = darken(start, 0.2)
-	}
+// Lighten/darken using HSL (better than RGB scaling)
+func lightenHSL(hex string, p float64) string {
+	h, s, l := hexToHSL(hex)
+	l = math.Min(1, l+p)
+	return hslToHex(h, s, l)
+}
 
-	return &pbcore.Gradient{
-		Type:  pbcore.GradientType_GRADIENT_TYPE_LINEAR,
-		Angle: 135,
-		Stops: []*pbcore.GradientStop{
-			{
-				Color:    start,
-				Position: 0,
-			},
-			{
-				Color:    end,
-				Position: 100,
-			},
-		},
-	}
+func darkenHSL(hex string, p float64) string {
+	h, s, l := hexToHSL(hex)
+	l = math.Max(0, l-p)
+	return hslToHex(h, s, l)
+}
+
+// Shift hue → creates visually distinct accent
+func shiftHue(hex string, deg float64) string {
+	h, s, l := hexToHSL(hex)
+	h = math.Mod(h+deg, 360)
+	return hslToHex(h, s, l)
+}
+
+// ---------------- HELPERS ----------------
+
+// Relative luminance (used for contrast calculations)
+func luminance(hex string) float64 {
+	r, g, b := hexToRGB(hex)
+
+	rs := float64(r) / 255
+	gs := float64(g) / 255
+	bs := float64(b) / 255
+
+	return 0.2126*rs + 0.7152*gs + 0.0722*bs
+}
+
+func isTooLight(hex string) bool {
+	return luminance(hex) > 0.92
+}
+
+func isDark(hex string) bool {
+	return luminance(hex) < 0.25
+}
+
+// Simple RGB distance to detect visually similar colors
+func colorDistance(a, b string) float64 {
+	r1, g1, b1 := hexToRGB(a)
+	r2, g2, b2 := hexToRGB(b)
+
+	return math.Sqrt(
+		math.Pow(float64(r1-r2), 2) +
+			math.Pow(float64(g1-g2), 2) +
+			math.Pow(float64(b1-b2), 2),
+	)
 }
