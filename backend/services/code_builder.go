@@ -119,12 +119,12 @@ func staticValidateCode(code string) *BuildError {
 			},
 			message: "missing RemoteComponent contract: code must declare `export default function RemoteComponent()`",
 		},
-		{
-			ok: func(c string) bool {
-				return !strings.Contains(c, "import ")
-			},
-			message: "imports are not allowed: remove all import statements and use only the provided runtime components",
-		},
+		//{
+		//	ok: func(c string) bool {
+		//		return !strings.Contains(c, "import ")
+		//	},
+		//	message: "imports are not allowed: remove all import statements and use only the provided runtime components",
+		//},
 	}
 
 	var errs []string
