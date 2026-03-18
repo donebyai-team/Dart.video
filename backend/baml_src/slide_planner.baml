@@ -191,9 +191,6 @@ function GeneratePlanStreaming(input: VideoGenerationPlanRequest, conversation_h
     - Do not begin execution without first forming a clear plan.
     ---
 
-    {{ ThinkingPrompt() }}
-    ---
-
     # Ask Questions Rules
     If you do not have clarity on what should appear visually in the **`bearDescription`** of a slide, you must ask a clarifying question before proceeding.
     Do **not assume** missing creative direction.

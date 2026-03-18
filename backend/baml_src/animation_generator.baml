@@ -37,7 +37,7 @@ function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_hi
     ## INPUT
 
     ## Animation Duration In Frames:
-    {{ resume.duration }}
+    {{ resume.durationInFrames }}
 
     ## ANIMATION BRIEF:
     {{ resume.animationPrompt }}

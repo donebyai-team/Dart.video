@@ -20,7 +20,7 @@ class EditString {
 }
 
 function EditAnimationCode(resume: EditAnimationCodeRequest, conversation_history: Message[]) -> EditAnimationCodeResponse {
-  client CustomOpenAI
+  client CustomOpenAI5
   prompt #"
     You are an expert at making targeted edits to React components.
 

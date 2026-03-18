@@ -30,7 +30,6 @@ client<llm> CustomOpenAI {
     model "gpt-5.4"
     api_key env.OPENAI_API_KEY
     //max_completion_tokens 12000
-    thinking "medium"
   }
 }
 
