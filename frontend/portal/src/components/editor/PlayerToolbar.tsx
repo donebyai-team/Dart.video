@@ -15,11 +15,11 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useVideoStore } from '@/stores/video'
 import { SlideType, EffectType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { ActiveToolType } from '@/types/tools'
-import DurationChangeComponent from './remotion/components/DurationChangeComponent'
 import { backgroundStyleToCSS } from '@coasterai/renderer'
+import SpeedChangeComponent from './remotion/components/SpeedChangeComponent'
 
 interface PlayerToolbarProps {
-  onDurationChange: (newDuration: number) => void
+  onSlideSpeedChange: (newDuration: number) => void
   minDuration?: number
   maxDuration?: number
 }
@@ -30,13 +30,12 @@ const insertTools: { id: EffectType; name: string; icon: React.ElementType }[] =
   { id: EffectType.ZOOM, name: 'Zoom', icon: ZoomIn },
 ]
 
-const PlayerToolbar = ({ onDurationChange, minDuration = 1, maxDuration = 180 }: PlayerToolbarProps) => {
+const PlayerToolbar = ({ onSlideSpeedChange, minDuration = 1, maxDuration = 180 }: PlayerToolbarProps) => {
   const getSlideWithBackground = useVideoStore(s => s.getSlideWithBackground)
   const onChangeTextAnimation = useVideoStore(s => s.handleEditAnimation)
   const activeTool = useVideoStore(s => s.activeTool)
   const onSelectTool = useVideoStore(s => s.handleSelectTool)
   const selectedSlide = useVideoStore(s => s.selectedSlide)
-  const getSlideDurationInSeconds = useVideoStore(s => s.getSlideDurationInSeconds)
 
   if (!selectedSlide) return
   let slide = selectedSlide.slide 
@@ -145,23 +144,24 @@ const PlayerToolbar = ({ onDurationChange, minDuration = 1, maxDuration = 180 }:
             <TooltipTrigger asChild>
               <div className='flex items-center gap-1'>
                 <Clock className='w-4 h-4 text-muted-foreground' />
-                <span className='text-xs text-muted-foreground'>Duration:</span>
+                <span className='text-xs text-muted-foreground'>Change Speed:</span>
               </div>
             </TooltipTrigger>
             <TooltipContent side='bottom' className='text-xs'>
-              Slide duration in seconds
+              Change Animation Speed
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
 
-        <DurationChangeComponent
-          value={getSlideDurationInSeconds(slide)}
-          onValueChange={val => {
-            onDurationChange(val)
+        <SpeedChangeComponent
+          baseFrames={slide.settledFrame}
+          durationInFrames={slide.durationInFrames}
+          onChange={val => {
+            onSlideSpeedChange(val)
           }}
           max={maxDuration}
           min={minDuration}
-          step={0.1}
+          step={20}
         />
       </div>
     </div>

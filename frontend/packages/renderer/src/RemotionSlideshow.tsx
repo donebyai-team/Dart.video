@@ -272,7 +272,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({
                   return (
                     <React.Fragment key={slide.id}>
 
-                      <TransitionSeries.Sequence durationInFrames={durationInFrames}>
+                      <TransitionSeries.Sequence durationInFrames={Math.round(durationInFrames)}>
                         {renderSlide(slide)}
                       </TransitionSeries.Sequence>
 
@@ -285,7 +285,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({
                             height
                           ) as any}
                           timing={linearTiming({
-                            durationInFrames: transitionDurationFrames
+                            durationInFrames: Math.round(transitionDurationFrames)
                           })}
                         />
                       )}
