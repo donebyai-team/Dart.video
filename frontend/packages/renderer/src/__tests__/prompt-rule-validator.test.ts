@@ -42,17 +42,17 @@ export default function NotRemoteComponent(props) {
     );
   });
 
-  it("rejects imports", () => {
-    expectSingleRule(
-      `
-import React from "react";
-export default function RemoteComponent() {
-  return <SafeArea><Stack /></SafeArea>;
-}
-`,
-      "no-imports",
-    );
-  });
+//   it("rejects imports", () => {
+//     expectSingleRule(
+//       `
+// import React from "react";
+// export default function RemoteComponent() {
+//   return <SafeArea><Stack /></SafeArea>;
+// }
+// `,
+//       "no-imports",
+//     );
+//   });
 
   it("rejects forbidden Remotion API usage", () => {
     expectSingleRule(

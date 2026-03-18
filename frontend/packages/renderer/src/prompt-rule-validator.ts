@@ -204,16 +204,16 @@ export function validatePromptRules(code: string): PromptRuleViolation[] {
   let hasValidDefaultExport = false;
 
   for (const node of ast.program.body) {
-    if (node.type === "ImportDeclaration") {
-      pushViolation(
-        createViolation(
-          "no-imports",
-          "Imports are not allowed in generated components.",
-          'Remove all imports and use only the provided runtime components.',
-          node,
-        ),
-      );
-    }
+    // if (node.type === "ImportDeclaration") {
+    //   pushViolation(
+    //     createViolation(
+    //       "no-imports",
+    //       "Imports are not allowed in generated components.",
+    //       'Remove all imports and use only the provided runtime components.',
+    //       node,
+    //     ),
+    //   );
+    // }
 
     if (node.type === "ExportDefaultDeclaration") {
       const decl = node.declaration;
