@@ -27,9 +27,10 @@ export default function RemoteComponent({ data }) {
    <SafeArea>
       <AbsoluteCenter axis="both">
      <Stack gap={24} align="center">
-  <SlideIn id="slidein-0" delay={0} duration={24} direction="up" distance={24}>
-  <Text id="text-0" variant="display">Tiny UI changes slip through.</Text>
-  </SlideIn>
+
+  <Text id="text-0" variant="display">Tiny UI changes slip through outside boxes in a row.</Text>
+  <Typewriter id="text-0" text="Tiny UI changes slip through outside boxes in a row" variant="heading" />
+
   </Stack>
       </AbsoluteCenter>
     </SafeArea>

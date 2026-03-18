@@ -32,14 +32,14 @@ export const MyVideo = () => {
         }}
       />
       {/* Animation system example — renders compiled LLM-generated primitives */}
-      {/* <Composition
+      <Composition
         id='AnimationExample'
         component={AnimationPreview}
         durationInFrames={ANIMATION_PREVIEW_DURATION_FRAMES}
         fps={30}
         width={1920}
         height={1080}
-      /> */}
+      />
     </>
   )
 }

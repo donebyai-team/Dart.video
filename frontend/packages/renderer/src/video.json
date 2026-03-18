@@ -1,2887 +1,255 @@
 {
-    "id": "d313b2a5-7794-42b2-b678-a9b51c903ab9",
-    "name": "Ship UI Changes Confidently with Percy",
+    "id": "669ee51b-57e0-4d6c-84f9-89ef2ab7569e",
+    "name": "Percy at Scale",
     "config": {
         "sections": [
             {
-                "id": "section-1772600926330352000",
-                "title": "Hook",
-                "color": "#FFEAA7",
+                "id": "section-1773760512323491000",
+                "title": "Launch",
+                "color": "#4ECDC4",
                 "slides": [
                     {
-                        "id": "slide-1772600926330378000",
+                        "id": "slide-1773760512323526000",
                         "type": "SLIDE_TYPE_ANIMATION",
-                        "transcript": "A tiny UI change can create a big production surprise.",
-                        "duration": 4,
+                        "transcript": "Meet Percy, the new BrowserStack platform helping teams automate testing with more confidence and clarity.",
                         "transition": "TRANSITION_WIPE_LEFT",
-                        "transitionDuration": 0.3,
-                        "direction": "TRANSITION_DIRECTION_FROM_BOTTOM",
+                        "transitionDuration": 0.5,
+                        "direction": "TRANSITION_DIRECTION_FROM_LEFT",
+                        "durationInFrames": 150,
+                        "settledFrame": 130,
                         "animation": {
                             "codeRegistry": {
-                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d/5c4e830d-9830-49e2-a21e-5a451547894a/TransformedWaveHighlight.tsx"
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d/669ee51b-57e0-4d6c-84f9-89ef2ab7569e/Component6c5602f4df3d4485945503f8218557e1.tsx",
+                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d/669ee51b-57e0-4d6c-84f9-89ef2ab7569e/TransformedComponent6c5602f4df3d4485945503f8218557e1.tsx"
                             },
                             "plan": {
                                 "index": "1",
-                                "beatDescription": "Open with BrowserStack brand presence and immediately frame the stakes: small UI changes can break production. This sets urgency and tees up the need for visual testing.",
-                                "animationType": "BRAND",
-                                "categorySearcQquery": "brand introduction leading into product reliability promise",
-                                "duration": "4",
-                                "voiceover": "A tiny UI change can create a big production surprise.",
-                                "selectedTemplateDescription": "Center-aligned text animates into view one letter at a time with a cascading effect. Each character slides in smoothly from the left while fading from transparent to fully visible using a soft spring motion. The animation creates a sequential, flowing reveal of the full sentence, with subtle glow and shadow for emphasis."
+                                "beatDescription": "Open with a bold launch statement introducing Percy as a new BrowserStack testing platform built for modern automation. This creates immediate context from a cold start, hints at the challenge of shipping confidently, and naturally leads into seeing the product in a real interface.",
+                                "animationType": "TEXT",
+                                "categorySearcQquery": "software testing complexity and automation launch",
+                                "durationInFrames": "240",
+                                "voiceover": "Meet Percy, the new BrowserStack platform helping teams automate testing with more confidence and clarity.",
+                                "selectedTemplateDescription": "A bold centered launch statement, “Meet Percy,” arrives first with a calm scale-in, establishing it as the clear focal point. A smaller line slides up beneath it a beat later to frame Percy as BrowserStack’s new platform for modern test automation, while the BrowserStack logo fades in quietly above as a secondary cue. The motion is deliberate and spacious, with each element revealed in sequence, then the whole composition settles into a clean hold before the transition."
                             },
                             "edits": {
-                                "el-14": {
-                                    "transform": {
-                                        "translateX": 428.53391684901527,
-                                        "translateY": -56.71772428884026
+                                "fadein-0": {
+                                    "value": {
+                                        "delay": 62,
+                                        "duration": 18
                                     }
                                 },
-                                "el-16": {
-                                    "transform": {
-                                        "translateX": -1257.8085769913332,
-                                        "translateY": 370.6589017729458
+                                "logoasset-0": {
+                                    "value": {
+                                        "height": 40,
+                                        "width": 180
                                     }
                                 },
-                                "el-17": {
-                                    "transform": {
-                                        "translateX": 40.12639776701871,
-                                        "translateY": -279.05373972673556
+                                "scalein-0": {
+                                    "value": {
+                                        "delay": 0,
+                                        "duration": 24,
+                                        "origin": "center"
                                     }
                                 },
-                                "el-9": {
-                                    "transform": {
-                                        "translateX": -63.01969365426695,
-                                        "translateY": -835.010940919037
+                                "slidein-0": {
+                                    "value": {
+                                        "delay": 32,
+                                        "direction": "up",
+                                        "distance": 24,
+                                        "duration": 22
                                     }
-                                }
-                            },
-                            "registry": {
-                                "el-1": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "color": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "#0070F0"
-                                        },
-                                        "fontFamily": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "Inter, sans-serif"
-                                        },
-                                        "fontSize": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 26
-                                        },
-                                        "fontWeight": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 700
-                                        },
-                                        "opacity": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 0.7
-                                        }
-                                    },
-                                    "eid": "el-1",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #1",
-                                    "lowConfidence": [],
-                                    "nonEditable": [],
-                                    "staticStyle": {
-                                        "color": "#0070F0",
-                                        "fontFamily": "Inter, sans-serif",
-                                        "fontSize": 26,
-                                        "fontWeight": 700,
-                                        "opacity": 0.7
-                                    },
-                                    "staticText": "buy",
-                                    "textType": "static"
                                 },
-                                "el-10": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "alignItems": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "background": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "#0070F0"
-                                        },
-                                        "borderRadius": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 999
-                                        },
-                                        "display": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "flex"
-                                        },
-                                        "height": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "justifyContent": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "opacity": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 0.35
-                                        },
-                                        "width": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        }
-                                    },
-                                    "eid": "el-10-${i}",
-                                    "elementType": "div",
-                                    "isLoopItem": true,
-                                    "label": "div #10",
-                                    "lowConfidence": [],
-                                    "nonEditable": [
-                                        "width",
-                                        "height"
-                                    ],
-                                    "staticStyle": {
-                                        "alignItems": "center",
-                                        "background": "#0070F0",
-                                        "borderRadius": 999,
-                                        "display": "flex",
-                                        "justifyContent": "center",
-                                        "opacity": 0.35
-                                    },
-                                    "textType": "dynamic"
+                                "text-0": {
+                                    "value": {
+                                        "children": "Meet Percy",
+                                        "variant": "display"
+                                    }
                                 },
-                                "el-11": {
-                                    "animatedProps": {},
-                                    "assetType": "image",
-                                    "editableProps": {},
-                                    "eid": "el-11-${i}",
-                                    "elementType": "img",
-                                    "isLoopItem": true,
-                                    "label": "img #11",
-                                    "lowConfidence": [],
-                                    "nonEditable": [],
-                                    "staticSrc": "https://placehold.co/24x24?text=+",
-                                    "staticStyle": {},
-                                    "textType": "none"
-                                },
-                                "el-12": {
-                                    "animatedProps": {
-                                        "opacity": {
-                                            "frameRange": [
-                                                0,
-                                                0,
-                                                0
-                                            ],
-                                            "outputRange": [
-                                                0,
-                                                0.75,
-                                                0
-                                            ],
-                                            "type": "interpolate"
-                                        }
-                                    },
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "opacity": {
-                                            "confidence": "high",
-                                            "editable": true
-                                        }
-                                    },
-                                    "eid": "el-12-${i}",
-                                    "elementType": "div",
-                                    "isLoopItem": true,
-                                    "label": "div #12",
-                                    "lowConfidence": [],
-                                    "nonEditable": [],
-                                    "staticStyle": {},
-                                    "textType": "dynamic"
-                                },
-                                "el-13": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "alignItems": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "display": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "flex"
-                                        },
-                                        "flexDirection": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "column"
-                                        },
-                                        "gap": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "inset": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 0
-                                        },
-                                        "justifyContent": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "paddingLeft": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "paddingRight": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "position": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "absolute"
-                                        }
-                                    },
-                                    "eid": "el-13",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #13",
-                                    "lowConfidence": [],
-                                    "nonEditable": [
-                                        "gap",
-                                        "paddingLeft",
-                                        "paddingRight"
-                                    ],
-                                    "staticStyle": {
-                                        "alignItems": "center",
-                                        "display": "flex",
-                                        "flexDirection": "column",
-                                        "inset": 0,
-                                        "justifyContent": "center",
-                                        "position": "absolute"
-                                    },
-                                    "textType": "mixed"
-                                },
-                                "el-14": {
-                                    "animatedProps": {
-                                        "opacity": {
-                                            "frameRange": [
-                                                0,
-                                                18
-                                            ],
-                                            "outputRange": [
-                                                0,
-                                                0.7
-                                            ],
-                                            "type": "interpolate"
-                                        },
-                                        "scale": {
-                                            "config": {
-                                                "damping": 12,
-                                                "mass": 1,
-                                                "stiffness": 90
-                                            },
-                                            "type": "spring"
-                                        }
-                                    },
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "background": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "rgba(0, 112, 240, 0.18)"
-                                        },
-                                        "borderRadius": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 999
-                                        },
-                                        "filter": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "blur(16px)"
-                                        },
-                                        "height": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "opacity": {
-                                            "confidence": "high",
-                                            "editable": true
-                                        },
-                                        "position": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "absolute"
-                                        },
-                                        "scale": {
-                                            "confidence": "high",
-                                            "editable": true
-                                        },
-                                        "width": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        }
-                                    },
-                                    "eid": "el-14",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #14",
-                                    "lowConfidence": [],
-                                    "nonEditable": [
-                                        "width",
-                                        "height"
-                                    ],
-                                    "staticStyle": {
-                                        "background": "rgba(0, 112, 240, 0.18)",
-                                        "borderRadius": 999,
-                                        "filter": "blur(16px)",
-                                        "position": "absolute"
-                                    },
-                                    "textType": "none"
-                                },
-                                "el-15": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "alignItems": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "display": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "flex"
-                                        },
-                                        "height": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "justifyContent": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "position": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "relative"
-                                        },
-                                        "scale": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "width": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "zIndex": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 2
-                                        }
-                                    },
-                                    "eid": "el-15",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #15",
-                                    "lowConfidence": [],
-                                    "nonEditable": [
-                                        "width",
-                                        "height",
-                                        "scale"
-                                    ],
-                                    "staticStyle": {
-                                        "alignItems": "center",
-                                        "display": "flex",
-                                        "justifyContent": "center",
-                                        "position": "relative",
-                                        "zIndex": 2
-                                    },
-                                    "textType": "dynamic"
-                                },
-                                "el-16": {
-                                    "animatedProps": {},
-                                    "assetType": "image",
-                                    "editableProps": {},
-                                    "eid": "el-16",
-                                    "elementType": "img",
-                                    "isLoopItem": false,
-                                    "label": "img #16",
-                                    "lowConfidence": [],
-                                    "nonEditable": [],
-                                    "staticSrc": "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1772628923-bstack-logo-global.svg",
-                                    "staticStyle": {},
-                                    "textType": "none"
-                                },
-                                "el-17": {
-                                    "animatedProps": {
-                                        "opacity": {
-                                            "frameRange": [
-                                                16,
-                                                36
-                                            ],
-                                            "outputRange": [
-                                                0,
-                                                1
-                                            ],
-                                            "type": "interpolate"
-                                        },
-                                        "scale": {
-                                            "config": {
-                                                "damping": 16,
-                                                "mass": 0.9,
-                                                "stiffness": 120
-                                            },
-                                            "type": "spring"
-                                        }
-                                    },
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "color": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "#111827"
-                                        },
-                                        "fontFamily": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "Inter, sans-serif"
-                                        },
-                                        "fontSize": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 54
-                                        },
-                                        "fontWeight": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 800
-                                        },
-                                        "lineHeight": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 1.2
-                                        },
-                                        "maxWidth": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "opacity": {
-                                            "confidence": "high",
-                                            "editable": true
-                                        },
-                                        "scale": {
-                                            "confidence": "high",
-                                            "editable": true
-                                        },
-                                        "textAlign": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "zIndex": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 2
-                                        }
-                                    },
-                                    "eid": "el-17",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #17",
-                                    "lowConfidence": [],
-                                    "nonEditable": [
-                                        "maxWidth"
-                                    ],
-                                    "staticStyle": {
-                                        "color": "#111827",
-                                        "fontFamily": "Inter, sans-serif",
-                                        "fontSize": 54,
-                                        "fontWeight": 800,
-                                        "lineHeight": 1.2,
-                                        "textAlign": "center",
-                                        "zIndex": 2
-                                    },
-                                    "staticText": "Your next best leads are already talking on Reddit.",
-                                    "textType": "static"
-                                },
-                                "el-2": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "color": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "#0070F0"
-                                        },
-                                        "fontFamily": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "Inter, sans-serif"
-                                        },
-                                        "fontSize": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 24
-                                        },
-                                        "fontWeight": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 600
-                                        },
-                                        "opacity": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 0.65
-                                        }
-                                    },
-                                    "eid": "el-2",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #2",
-                                    "lowConfidence": [],
-                                    "nonEditable": [],
-                                    "staticStyle": {
-                                        "color": "#0070F0",
-                                        "fontFamily": "Inter, sans-serif",
-                                        "fontSize": 24,
-                                        "fontWeight": 600,
-                                        "opacity": 0.65
-                                    },
-                                    "staticText": "pricing",
-                                    "textType": "static"
-                                },
-                                "el-3": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "color": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "#0070F0"
-                                        },
-                                        "fontFamily": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "Inter, sans-serif"
-                                        },
-                                        "fontSize": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 24
-                                        },
-                                        "fontWeight": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 600
-                                        },
-                                        "opacity": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 0.65
-                                        }
-                                    },
-                                    "eid": "el-3",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #3",
-                                    "lowConfidence": [],
-                                    "nonEditable": [],
-                                    "staticStyle": {
-                                        "color": "#0070F0",
-                                        "fontFamily": "Inter, sans-serif",
-                                        "fontSize": 24,
-                                        "fontWeight": 600,
-                                        "opacity": 0.65
-                                    },
-                                    "staticText": "recommendation",
-                                    "textType": "static"
-                                },
-                                "el-4": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "color": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "#0070F0"
-                                        },
-                                        "fontFamily": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "Inter, sans-serif"
-                                        },
-                                        "fontSize": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 24
-                                        },
-                                        "fontWeight": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 600
-                                        },
-                                        "opacity": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 0.6
-                                        }
-                                    },
-                                    "eid": "el-4",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #4",
-                                    "lowConfidence": [],
-                                    "nonEditable": [],
-                                    "staticStyle": {
-                                        "color": "#0070F0",
-                                        "fontFamily": "Inter, sans-serif",
-                                        "fontSize": 24,
-                                        "fontWeight": 600,
-                                        "opacity": 0.6
-                                    },
-                                    "staticText": "review",
-                                    "textType": "static"
-                                },
-                                "el-5": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "color": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "#0070F0"
-                                        },
-                                        "fontFamily": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "Inter, sans-serif"
-                                        },
-                                        "fontSize": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 24
-                                        },
-                                        "fontWeight": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 600
-                                        },
-                                        "opacity": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 0.6
-                                        }
-                                    },
-                                    "eid": "el-5",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #5",
-                                    "lowConfidence": [],
-                                    "nonEditable": [],
-                                    "staticStyle": {
-                                        "color": "#0070F0",
-                                        "fontFamily": "Inter, sans-serif",
-                                        "fontSize": 24,
-                                        "fontWeight": 600,
-                                        "opacity": 0.6
-                                    },
-                                    "staticText": "best",
-                                    "textType": "static"
-                                },
-                                "el-6": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "background": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "transparent"
-                                        },
-                                        "height": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "100%"
-                                        },
-                                        "overflow": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "hidden"
-                                        },
-                                        "position": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "relative"
-                                        },
-                                        "width": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "100%"
-                                        }
-                                    },
-                                    "eid": "el-6",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #6",
-                                    "lowConfidence": [],
-                                    "nonEditable": [],
-                                    "staticStyle": {
-                                        "background": "transparent",
-                                        "height": "100%",
-                                        "overflow": "hidden",
-                                        "position": "relative",
-                                        "width": "100%"
-                                    },
-                                    "textType": "mixed"
-                                },
-                                "el-7": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "background": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "linear-gradient(135deg, #EAF2FF 0%, #CFE3FF 55%, #9CC7FF 100%)"
-                                        },
-                                        "inset": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 0
-                                        },
-                                        "position": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "absolute"
-                                        }
-                                    },
-                                    "eid": "el-7",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #7",
-                                    "lowConfidence": [],
-                                    "nonEditable": [],
-                                    "staticStyle": {
-                                        "background": "linear-gradient(135deg, #EAF2FF 0%, #CFE3FF 55%, #9CC7FF 100%)",
-                                        "inset": 0,
-                                        "position": "absolute"
-                                    },
-                                    "textType": "none"
-                                },
-                                "el-8": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "inset": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 0
-                                        },
-                                        "position": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "absolute"
-                                        }
-                                    },
-                                    "eid": "el-8",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #8",
-                                    "lowConfidence": [],
-                                    "nonEditable": [],
-                                    "staticStyle": {
-                                        "inset": 0,
-                                        "position": "absolute"
-                                    },
-                                    "textType": "dynamic"
-                                },
-                                "el-9": {
-                                    "animatedProps": {
-                                        "opacity": {
-                                            "frameRange": [
-                                                0,
-                                                0,
-                                                0
-                                            ],
-                                            "outputRange": [
-                                                0,
-                                                0.6,
-                                                0.1
-                                            ],
-                                            "type": "interpolate"
-                                        }
-                                    },
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "alignItems": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "background": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "rgba(255, 255, 255, 0.7)"
-                                        },
-                                        "borderRadius": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 18
-                                        },
-                                        "boxShadow": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "0 12px 24px rgba(0, 112, 240, 0.15)"
-                                        },
-                                        "display": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "flex"
-                                        },
-                                        "gap": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "height": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "justifyContent": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "space-between"
-                                        },
-                                        "left": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "opacity": {
-                                            "confidence": "high",
-                                            "editable": true
-                                        },
-                                        "paddingLeft": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "paddingRight": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "position": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "absolute"
-                                        },
-                                        "top": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "width": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        }
-                                    },
-                                    "eid": "el-9-${i}",
-                                    "elementType": "div",
-                                    "isLoopItem": true,
-                                    "label": "div #9",
-                                    "lowConfidence": [],
-                                    "nonEditable": [
-                                        "left",
-                                        "top",
-                                        "width",
-                                        "height",
-                                        "paddingLeft",
-                                        "paddingRight",
-                                        "gap"
-                                    ],
-                                    "staticStyle": {
-                                        "alignItems": "center",
-                                        "background": "rgba(255, 255, 255, 0.7)",
-                                        "borderRadius": 18,
-                                        "boxShadow": "0 12px 24px rgba(0, 112, 240, 0.15)",
-                                        "display": "flex",
-                                        "justifyContent": "space-between",
-                                        "position": "absolute"
-                                    },
-                                    "textType": "mixed"
+                                "text-1": {
+                                    "value": {
+                                        "children": "BrowserStack's new platform for modern test automation",
+                                        "variant": "subheading"
+                                    }
                                 }
                             }
                         },
                         "slideStatus": "SLIDE_STATUS_GENERATED"
-                    },
-                    {
-                        "id": "slide-1772600926330378003",
-                        "type": "SLIDE_TYPE_ANIMATION",
-                        "transcript": "A tiny UI change can create a big production surprise.",
-                        "duration": 5.7,
-                        "transition": "TRANSITION_WIPE_LEFT",
-                        "transitionDuration": 0.3,
-                        "direction": "TRANSITION_DIRECTION_FROM_BOTTOM",
-                        "animation": {
-                            "codeRegistry": {
-                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d/d313b2a5-7794-42b2-b678-a9b51c903ab9/slide-1772600926330378003/StackBlock_17730601605935010000.tsx",
-                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d/d313b2a5-7794-42b2-b678-a9b51c903ab9/slide-1772600926330378003/TransformedStackBlock_17730601605935010000.tsx"
-                            },
-                            "plan": {
-                                "index": "1",
-                                "beatDescription": "Open with BrowserStack brand presence and immediately frame the stakes: small UI changes can break production. This sets urgency and tees up the need for visual testing.",
-                                "animationType": "TEXT",
-                                "categorySearcQquery": "brand introduction leading into product reliability promise",
-                                "duration": "4",
-                                "voiceover": "A tiny UI change can create a big production surprise.",
-                                "selectedTemplateDescription": "Center-aligned text animates into view one letter at a time with a cascading effect. Each character slides in smoothly from the left while fading from transparent to fully visible using a soft spring motion. The animation creates a sequential, flowing reveal of the full sentence, with subtle glow and shadow for emphasis."
-                            },
-                            "edits": {
-                                "el-3": {
-                                    "text": "20% Month-on-Month Growth",
-                                    "transform": {
-                                        "translateX": -16.125984251968482,
-                                        "translateY": -24.188976377952763
-                                    }
-                                },
-                                "el-9": {
-                                    "style": {
-                                        "backgroundColor": "#2e2ed6",
-                                        "borderRadius": 25
-                                    },
-                                    "transform": {
-                                        "translateX": -178.39866296800426,
-                                        "translateY": 197.63152363066212
-                                    }
-                                },
-                                "el-9-0": {
-                                    "style": {
-                                        "backgroundColor": "#a8a9e1"
-                                    }
-                                },
-                                "el-9-1": {
-                                    "style": {
-                                        "backgroundColor": "#0d0d2b"
-                                    }
-                                },
-                                "el-9-4": {
-                                    "style": {
-                                        "backgroundColor": "#0e0e25"
-                                    }
-                                }
-                            },
-                            "registry": {
-                                "el-1": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "alignItems": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "background": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "transparent"
-                                        },
-                                        "boxSizing": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "border-box"
-                                        },
-                                        "display": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "flex"
-                                        },
-                                        "height": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "100%"
-                                        },
-                                        "justifyContent": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "padding": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "position": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "relative"
-                                        },
-                                        "width": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "100%"
-                                        }
-                                    },
-                                    "eid": "el-1",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #1",
-                                    "lowConfidence": [],
-                                    "nonEditable": [
-                                        "padding"
-                                    ],
-                                    "staticStyle": {
-                                        "alignItems": "center",
-                                        "background": "transparent",
-                                        "boxSizing": "border-box",
-                                        "display": "flex",
-                                        "height": "100%",
-                                        "justifyContent": "center",
-                                        "position": "relative",
-                                        "width": "100%"
-                                    },
-                                    "textType": "none"
-                                },
-                                "el-10": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "backgroundColor": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "rgba(255, 255, 255, 0.7)"
-                                        },
-                                        "borderRadius": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 16
-                                        },
-                                        "height": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 6
-                                        },
-                                        "width": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "100%"
-                                        }
-                                    },
-                                    "eid": "el-10-${i}",
-                                    "elementType": "div",
-                                    "isLoopItem": true,
-                                    "label": "div #10",
-                                    "lowConfidence": [],
-                                    "nonEditable": [],
-                                    "staticStyle": {
-                                        "backgroundColor": "rgba(255, 255, 255, 0.7)",
-                                        "borderRadius": 16,
-                                        "height": 6,
-                                        "width": "100%"
-                                    },
-                                    "textType": "none"
-                                },
-                                "el-11": {
-                                    "animatedProps": {
-                                        "opacity": {
-                                            "frameRange": [
-                                                0,
-                                                1
-                                            ],
-                                            "outputRange": [
-                                                0,
-                                                1
-                                            ],
-                                            "type": "interpolate"
-                                        }
-                                    },
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "color": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "white"
-                                        },
-                                        "fontFamily": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "Inter, sans-serif"
-                                        },
-                                        "fontSize": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 20
-                                        },
-                                        "fontWeight": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 600
-                                        },
-                                        "opacity": {
-                                            "confidence": "high",
-                                            "editable": true
-                                        }
-                                    },
-                                    "eid": "el-11-${i}",
-                                    "elementType": "div",
-                                    "isLoopItem": true,
-                                    "label": "div #11",
-                                    "lowConfidence": [],
-                                    "nonEditable": [],
-                                    "staticStyle": {
-                                        "color": "white",
-                                        "fontFamily": "Inter, sans-serif",
-                                        "fontSize": 20,
-                                        "fontWeight": 600
-                                    },
-                                    "textType": "dynamic"
-                                },
-                                "el-2": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "alignItems": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "display": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "flex"
-                                        },
-                                        "flexDirection": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "column"
-                                        },
-                                        "gap": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "height": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "100%"
-                                        },
-                                        "justifyContent": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "width": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "100%"
-                                        }
-                                    },
-                                    "eid": "el-2",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #2",
-                                    "lowConfidence": [],
-                                    "nonEditable": [
-                                        "gap"
-                                    ],
-                                    "staticStyle": {
-                                        "alignItems": "center",
-                                        "display": "flex",
-                                        "flexDirection": "column",
-                                        "height": "100%",
-                                        "justifyContent": "center",
-                                        "width": "100%"
-                                    },
-                                    "textType": "mixed"
-                                },
-                                "el-3": {
-                                    "animatedProps": {
-                                        "opacity": {
-                                            "frameRange": [
-                                                0,
-                                                20
-                                            ],
-                                            "outputRange": [
-                                                0,
-                                                1
-                                            ],
-                                            "type": "interpolate"
-                                        }
-                                    },
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "color": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "white"
-                                        },
-                                        "fontFamily": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "Inter, sans-serif"
-                                        },
-                                        "fontSize": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 64
-                                        },
-                                        "fontWeight": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 700
-                                        },
-                                        "opacity": {
-                                            "confidence": "high",
-                                            "editable": true
-                                        },
-                                        "textAlign": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "textShadow": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "0 2px 20px rgba(147, 51, 234, 0.4)"
-                                        }
-                                    },
-                                    "eid": "el-3",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #3",
-                                    "lowConfidence": [],
-                                    "nonEditable": [],
-                                    "staticStyle": {
-                                        "color": "white",
-                                        "fontFamily": "Inter, sans-serif",
-                                        "fontSize": 64,
-                                        "fontWeight": 700,
-                                        "textAlign": "center",
-                                        "textShadow": "0 2px 20px rgba(147, 51, 234, 0.4)"
-                                    },
-                                    "staticText": "10% Month-on-Month Growth",
-                                    "textType": "static"
-                                },
-                                "el-4": {
-                                    "animatedProps": {
-                                        "opacity": {
-                                            "frameRange": [
-                                                10,
-                                                30
-                                            ],
-                                            "outputRange": [
-                                                0,
-                                                1
-                                            ],
-                                            "type": "interpolate"
-                                        }
-                                    },
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "color": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "white"
-                                        },
-                                        "fontFamily": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "Inter, sans-serif"
-                                        },
-                                        "fontSize": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 28
-                                        },
-                                        "fontWeight": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 500
-                                        },
-                                        "opacity": {
-                                            "confidence": "high",
-                                            "editable": true
-                                        },
-                                        "textAlign": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "textShadow": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "0 2px 20px rgba(147, 51, 234, 0.25)"
-                                        }
-                                    },
-                                    "eid": "el-4",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #4",
-                                    "lowConfidence": [],
-                                    "nonEditable": [],
-                                    "staticStyle": {
-                                        "color": "white",
-                                        "fontFamily": "Inter, sans-serif",
-                                        "fontSize": 28,
-                                        "fontWeight": 500,
-                                        "textAlign": "center",
-                                        "textShadow": "0 2px 20px rgba(147, 51, 234, 0.25)"
-                                    },
-                                    "staticText": "Consistent compounding performance",
-                                    "textType": "static"
-                                },
-                                "el-5": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "alignItems": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "flex-end"
-                                        },
-                                        "boxSizing": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "border-box"
-                                        },
-                                        "display": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "flex"
-                                        },
-                                        "gap": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "height": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "justifyContent": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "paddingBottom": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "paddingTop": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "position": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "relative"
-                                        },
-                                        "width": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "100%"
-                                        }
-                                    },
-                                    "eid": "el-5",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #5",
-                                    "lowConfidence": [],
-                                    "nonEditable": [
-                                        "height",
-                                        "gap",
-                                        "paddingTop",
-                                        "paddingBottom"
-                                    ],
-                                    "staticStyle": {
-                                        "alignItems": "flex-end",
-                                        "boxSizing": "border-box",
-                                        "display": "flex",
-                                        "justifyContent": "center",
-                                        "position": "relative",
-                                        "width": "100%"
-                                    },
-                                    "textType": "mixed"
-                                },
-                                "el-6": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "backgroundColor": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "rgba(255, 255, 255, 0.4)"
-                                        },
-                                        "bottom": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "height": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 2
-                                        },
-                                        "left": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "position": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "absolute"
-                                        },
-                                        "right": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        }
-                                    },
-                                    "eid": "el-6",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #6",
-                                    "lowConfidence": [],
-                                    "nonEditable": [
-                                        "left",
-                                        "right",
-                                        "bottom"
-                                    ],
-                                    "staticStyle": {
-                                        "backgroundColor": "rgba(255, 255, 255, 0.4)",
-                                        "height": 2,
-                                        "position": "absolute"
-                                    },
-                                    "textType": "none"
-                                },
-                                "el-7": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "alignItems": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "display": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "flex"
-                                        },
-                                        "flexDirection": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "column"
-                                        },
-                                        "gap": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "justifyContent": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "flex-end"
-                                        },
-                                        "width": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        }
-                                    },
-                                    "eid": "el-7-${i}",
-                                    "elementType": "div",
-                                    "isLoopItem": true,
-                                    "label": "div #7",
-                                    "lowConfidence": [],
-                                    "nonEditable": [
-                                        "gap",
-                                        "width"
-                                    ],
-                                    "staticStyle": {
-                                        "alignItems": "center",
-                                        "display": "flex",
-                                        "flexDirection": "column",
-                                        "justifyContent": "flex-end"
-                                    },
-                                    "textType": "mixed"
-                                },
-                                "el-8": {
-                                    "animatedProps": {
-                                        "opacity": {
-                                            "frameRange": [
-                                                0,
-                                                1
-                                            ],
-                                            "outputRange": [
-                                                0,
-                                                1
-                                            ],
-                                            "type": "interpolate"
-                                        }
-                                    },
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "color": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "white"
-                                        },
-                                        "fontFamily": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "Inter, sans-serif"
-                                        },
-                                        "fontSize": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 20
-                                        },
-                                        "fontWeight": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 600
-                                        },
-                                        "opacity": {
-                                            "confidence": "high",
-                                            "editable": true
-                                        }
-                                    },
-                                    "eid": "el-8-${i}",
-                                    "elementType": "div",
-                                    "isLoopItem": true,
-                                    "label": "div #8",
-                                    "lowConfidence": [],
-                                    "nonEditable": [],
-                                    "staticStyle": {
-                                        "color": "white",
-                                        "fontFamily": "Inter, sans-serif",
-                                        "fontSize": 20,
-                                        "fontWeight": 600
-                                    },
-                                    "textType": "dynamic"
-                                },
-                                "el-9": {
-                                    "animatedProps": {
-                                        "height": {
-                                            "frameRange": [
-                                                0,
-                                                1
-                                            ],
-                                            "outputRange": [
-                                                0,
-                                                320
-                                            ],
-                                            "type": "interpolate"
-                                        },
-                                        "opacity": {
-                                            "frameRange": [
-                                                0,
-                                                1
-                                            ],
-                                            "outputRange": [
-                                                0,
-                                                1
-                                            ],
-                                            "type": "interpolate"
-                                        }
-                                    },
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "alignItems": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "flex-end"
-                                        },
-                                        "backgroundColor": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "rgba(99, 102, 241, 0.9)"
-                                        },
-                                        "borderRadius": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 16
-                                        },
-                                        "display": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "flex"
-                                        },
-                                        "height": {
-                                            "confidence": "high",
-                                            "editable": true
-                                        },
-                                        "justifyContent": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "opacity": {
-                                            "confidence": "high",
-                                            "editable": true
-                                        },
-                                        "width": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "100%"
-                                        }
-                                    },
-                                    "eid": "el-9-${i}",
-                                    "elementType": "div",
-                                    "isLoopItem": true,
-                                    "label": "div #9",
-                                    "lowConfidence": [],
-                                    "nonEditable": [],
-                                    "staticStyle": {
-                                        "alignItems": "flex-end",
-                                        "backgroundColor": "rgba(99, 102, 241, 0.9)",
-                                        "borderRadius": 16,
-                                        "display": "flex",
-                                        "justifyContent": "center",
-                                        "width": "100%"
-                                    },
-                                    "textType": "none"
-                                }
-                            }
-                        },
-                        "slideStatus": "SLIDE_STATUS_GENERATED",
-                        "index": 1
-                    },
-                    {
-                        "id": "a868edc3-c7f1-4f00-881b-59e0d830d2be",
-                        "type": "SLIDE_TYPE_ANIMATION",
-                        "duration": 3,
-                        "backgroundStyle": {
-                            "gradient": {
-                                "angle": 135,
-                                "stops": [
-                                    {
-                                        "color": "#EAF2FF"
-                                    },
-                                    {
-                                        "color": "#929eaf",
-                                        "position": 100
-                                    }
-                                ]
-                            },
-                            "applyAll": true
-                        },
-                        "animation": {
-                            "codeRegistry": {
-                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d/d313b2a5-7794-42b2-b678-a9b51c903ab9/GlowStack_17731451851856200000.tsx",
-                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d/d313b2a5-7794-42b2-b678-a9b51c903ab9/TransformedGlowStack_17731451851856200000.tsx"
-                            },
-                            "plan": {
-                                "beatDescription": "clean single-line message reveal",
-                                "animationType": "SIMPLE_TEXT",
-                                "categorySearcQquery": "single line text emphasis",
-                                "duration": "2",
-                                "selectedTemplateDescription": "Background: linear-gradient(135deg, #EAF2FF 0%, #929eaf 100%).\nCenter a single-line message with generous margins, clean sans-serif, high-contrast text.\nReveal: subtle fade-in with a slight upward drift (8–12px) over 0.6s, then hold steady.\nAdd a soft underline sweep or light glint passing once beneath the text to emphasize clarity.\nKeep motion minimal, calm, and readable—no extra elements or icons.\nEnd with a brief 0.3s fade-out to transition."
-                            },
-                            "edits": {
-                                "el-5": {
-                                    "style": {
-                                        "fontFamily": "Roboto",
-                                        "fontSize": 72
-                                    },
-                                    "text": "Chanhged me",
-                                    "transform": {
-                                        "translateX": 338.64566929133855,
-                                        "translateY": 157.22834645669292
-                                    }
-                                }
-                            },
-                            "registry": {
-                                "el-1": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "alignItems": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "background": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "transparent"
-                                        },
-                                        "display": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "flex"
-                                        },
-                                        "height": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "100%"
-                                        },
-                                        "justifyContent": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "position": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "relative"
-                                        },
-                                        "width": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "100%"
-                                        }
-                                    },
-                                    "eid": "el-1",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #1",
-                                    "lowConfidence": [],
-                                    "nonEditable": [],
-                                    "staticStyle": {
-                                        "alignItems": "center",
-                                        "background": "transparent",
-                                        "display": "flex",
-                                        "height": "100%",
-                                        "justifyContent": "center",
-                                        "position": "relative",
-                                        "width": "100%"
-                                    },
-                                    "textType": "mixed"
-                                },
-                                "el-2": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "background": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "linear-gradient(135deg, #EAF2FF 0%, #929eaf 100%)"
-                                        },
-                                        "inset": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 0
-                                        },
-                                        "position": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "absolute"
-                                        }
-                                    },
-                                    "eid": "el-2",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #2",
-                                    "lowConfidence": [],
-                                    "nonEditable": [],
-                                    "staticStyle": {
-                                        "background": "linear-gradient(135deg, #EAF2FF 0%, #929eaf 100%)",
-                                        "inset": 0,
-                                        "position": "absolute"
-                                    },
-                                    "textType": "none"
-                                },
-                                "el-3": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "alignItems": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "display": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "flex"
-                                        },
-                                        "height": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "100%"
-                                        },
-                                        "justifyContent": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "paddingBottom": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "paddingLeft": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "paddingRight": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "paddingTop": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "position": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "relative"
-                                        },
-                                        "width": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "100%"
-                                        }
-                                    },
-                                    "eid": "el-3",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #3",
-                                    "lowConfidence": [],
-                                    "nonEditable": [
-                                        "paddingLeft",
-                                        "paddingRight",
-                                        "paddingTop",
-                                        "paddingBottom"
-                                    ],
-                                    "staticStyle": {
-                                        "alignItems": "center",
-                                        "display": "flex",
-                                        "height": "100%",
-                                        "justifyContent": "center",
-                                        "position": "relative",
-                                        "width": "100%"
-                                    },
-                                    "textType": "none"
-                                },
-                                "el-4": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "alignItems": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "display": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "flex"
-                                        },
-                                        "flexDirection": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "column"
-                                        },
-                                        "gap": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "width": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        }
-                                    },
-                                    "eid": "el-4",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #4",
-                                    "lowConfidence": [],
-                                    "nonEditable": [
-                                        "width",
-                                        "gap"
-                                    ],
-                                    "staticStyle": {
-                                        "alignItems": "center",
-                                        "display": "flex",
-                                        "flexDirection": "column"
-                                    },
-                                    "textType": "mixed"
-                                },
-                                "el-5": {
-                                    "animatedProps": {
-                                        "marginTop": {
-                                            "frameRange": [
-                                                0,
-                                                0
-                                            ],
-                                            "outputRange": [
-                                                12,
-                                                0
-                                            ],
-                                            "type": "interpolate"
-                                        }
-                                    },
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "color": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "#0B1320"
-                                        },
-                                        "fontFamily": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "Inter, sans-serif"
-                                        },
-                                        "fontSize": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 64
-                                        },
-                                        "fontWeight": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 600
-                                        },
-                                        "lineHeight": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 1.2
-                                        },
-                                        "marginTop": {
-                                            "confidence": "high",
-                                            "editable": true
-                                        },
-                                        "opacity": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "textAlign": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        }
-                                    },
-                                    "eid": "el-5",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #5",
-                                    "lowConfidence": [],
-                                    "nonEditable": [
-                                        "opacity"
-                                    ],
-                                    "staticStyle": {
-                                        "color": "#0B1320",
-                                        "fontFamily": "Inter, sans-serif",
-                                        "fontSize": 64,
-                                        "fontWeight": 600,
-                                        "lineHeight": 1.2,
-                                        "textAlign": "center"
-                                    },
-                                    "staticText": "Clarity through simple motion",
-                                    "textType": "static"
-                                },
-                                "el-6": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "height": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 6
-                                        },
-                                        "opacity": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "position": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "relative"
-                                        },
-                                        "width": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        }
-                                    },
-                                    "eid": "el-6",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #6",
-                                    "lowConfidence": [],
-                                    "nonEditable": [
-                                        "width",
-                                        "opacity"
-                                    ],
-                                    "staticStyle": {
-                                        "height": 6,
-                                        "position": "relative"
-                                    },
-                                    "textType": "mixed"
-                                },
-                                "el-7": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "background": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "rgba(11,19,32,0.2)"
-                                        },
-                                        "borderRadius": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 2
-                                        },
-                                        "height": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 2
-                                        },
-                                        "left": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 0
-                                        },
-                                        "position": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "absolute"
-                                        },
-                                        "right": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 0
-                                        },
-                                        "top": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 2
-                                        }
-                                    },
-                                    "eid": "el-7",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #7",
-                                    "lowConfidence": [],
-                                    "nonEditable": [],
-                                    "staticStyle": {
-                                        "background": "rgba(11,19,32,0.2)",
-                                        "borderRadius": 2,
-                                        "height": 2,
-                                        "left": 0,
-                                        "position": "absolute",
-                                        "right": 0,
-                                        "top": 2
-                                    },
-                                    "textType": "none"
-                                },
-                                "el-8": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "background": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "rgba(255,255,255,0.8)"
-                                        },
-                                        "borderRadius": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 4
-                                        },
-                                        "height": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 4
-                                        },
-                                        "left": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "opacity": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "position": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "absolute"
-                                        },
-                                        "top": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 1
-                                        },
-                                        "width": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        }
-                                    },
-                                    "eid": "el-8",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #8",
-                                    "lowConfidence": [],
-                                    "nonEditable": [
-                                        "width",
-                                        "left",
-                                        "opacity"
-                                    ],
-                                    "staticStyle": {
-                                        "background": "rgba(255,255,255,0.8)",
-                                        "borderRadius": 4,
-                                        "height": 4,
-                                        "position": "absolute",
-                                        "top": 1
-                                    },
-                                    "textType": "none"
-                                }
-                            }
-                        },
-                        "slideStatus": "SLIDE_STATUS_GENERATED"
-                    },
-                    {
-                        "id": "d8a86430-2789-4ae7-8b30-eec42e92bcea",
-                        "type": "SLIDE_TYPE_ANIMATION",
-                        "duration": 13.3,
-                        "backgroundStyle": {
-                            "gradient": {
-                                "angle": 135,
-                                "stops": [
-                                    {
-                                        "color": "#EAF2FF"
-                                    },
-                                    {
-                                        "color": "#929eaf",
-                                        "position": 100
-                                    }
-                                ]
-                            },
-                            "applyAll": true
-                        },
-                        "animation": {
-                            "codeRegistry": {
-                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/08127b0b-98ff-40a7-a0de-fd9ec3a0ff42/d313b2a5-7794-42b2-b678-a9b51c903ab9/d8a86430-2789-4ae7-8b30-eec42e92bcea/StackReveal_17732050823857630000.tsx",
-                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/08127b0b-98ff-40a7-a0de-fd9ec3a0ff42/d313b2a5-7794-42b2-b678-a9b51c903ab9/d8a86430-2789-4ae7-8b30-eec42e92bcea/TransformedStackReveal_17732050823857630000.tsx"
-                            },
-                            "plan": {
-                                "beatDescription": "Typewriter reveal of a short greeting message",
-                                "animationType": "TEXT",
-                                "categorySearcQquery": "typewriter text reveal",
-                                "duration": "3",
-                                "selectedTemplateDescription": "Center the phrase “How are you man” in large bold sans-serif, dark navy (#1F2A44) on the gradient background.\nTypewriter effect reveals letters left-to-right over 1.6s with a blinking caret after the last letter.\nCaret blinks at 2Hz for 0.8s after typing completes.\nSubtle 3% scale-up and 10px fade-in on the first 0.4s to add presence.\nHold final text steady for readability until end."
-                            },
-                            "edits": {
-                                "el-5": {
-                                    "style": {
-                                        "color": "#3064df"
-                                    },
-                                    "transform": {
-                                        "translateX": -745.5941005186168,
-                                        "translateY": 746.5749582177501
-                                    }
-                                },
-                                "el-6": {
-                                    "style": {
-                                        "background": "#eedf96"
-                                    },
-                                    "transform": {
-                                        "translateX": 12.094488188976378,
-                                        "translateY": 8.062992125984266
-                                    }
-                                }
-                            },
-                            "registry": {
-                                "el-1": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "alignItems": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "background": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "transparent"
-                                        },
-                                        "display": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "flex"
-                                        },
-                                        "height": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "100%"
-                                        },
-                                        "justifyContent": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "overflow": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "hidden"
-                                        },
-                                        "paddingBottom": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "paddingLeft": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "paddingRight": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "paddingTop": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "position": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "relative"
-                                        },
-                                        "width": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "100%"
-                                        }
-                                    },
-                                    "eid": "el-1",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #1",
-                                    "lowConfidence": [],
-                                    "nonEditable": [
-                                        "paddingLeft",
-                                        "paddingRight",
-                                        "paddingTop",
-                                        "paddingBottom"
-                                    ],
-                                    "staticStyle": {
-                                        "alignItems": "center",
-                                        "background": "transparent",
-                                        "display": "flex",
-                                        "height": "100%",
-                                        "justifyContent": "center",
-                                        "overflow": "hidden",
-                                        "position": "relative",
-                                        "width": "100%"
-                                    },
-                                    "textType": "mixed"
-                                },
-                                "el-2": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "background": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "linear-gradient(135deg, #EAF2FF 0%, #929eaf 100%)"
-                                        },
-                                        "inset": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 0
-                                        },
-                                        "position": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "absolute"
-                                        }
-                                    },
-                                    "eid": "el-2",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #2",
-                                    "lowConfidence": [],
-                                    "nonEditable": [],
-                                    "staticStyle": {
-                                        "background": "linear-gradient(135deg, #EAF2FF 0%, #929eaf 100%)",
-                                        "inset": 0,
-                                        "position": "absolute"
-                                    },
-                                    "textType": "none"
-                                },
-                                "el-3": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "alignItems": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "display": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "flex"
-                                        },
-                                        "height": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "100%"
-                                        },
-                                        "justifyContent": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "position": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "relative"
-                                        },
-                                        "width": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "100%"
-                                        }
-                                    },
-                                    "eid": "el-3",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #3",
-                                    "lowConfidence": [],
-                                    "nonEditable": [],
-                                    "staticStyle": {
-                                        "alignItems": "center",
-                                        "display": "flex",
-                                        "height": "100%",
-                                        "justifyContent": "center",
-                                        "position": "relative",
-                                        "width": "100%"
-                                    },
-                                    "textType": "none"
-                                },
-                                "el-4": {
-                                    "animatedProps": {
-                                        "marginTop": {
-                                            "frameRange": [
-                                                0,
-                                                0
-                                            ],
-                                            "outputRange": [
-                                                10,
-                                                0
-                                            ],
-                                            "type": "interpolate"
-                                        },
-                                        "opacity": {
-                                            "frameRange": [
-                                                0,
-                                                0
-                                            ],
-                                            "outputRange": [
-                                                0,
-                                                1
-                                            ],
-                                            "type": "interpolate"
-                                        },
-                                        "scale": {
-                                            "frameRange": [
-                                                0,
-                                                0
-                                            ],
-                                            "outputRange": [
-                                                0.97,
-                                                1
-                                            ],
-                                            "type": "interpolate"
-                                        }
-                                    },
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "color": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "#1F2A44"
-                                        },
-                                        "fontFamily": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "Inter, sans-serif"
-                                        },
-                                        "fontSize": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 84
-                                        },
-                                        "fontWeight": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 800
-                                        },
-                                        "letterSpacing": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 0
-                                        },
-                                        "lineHeight": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 1.1
-                                        },
-                                        "marginTop": {
-                                            "confidence": "high",
-                                            "editable": true
-                                        },
-                                        "opacity": {
-                                            "confidence": "high",
-                                            "editable": true
-                                        },
-                                        "scale": {
-                                            "confidence": "high",
-                                            "editable": true
-                                        },
-                                        "textAlign": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "whiteSpace": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "nowrap"
-                                        }
-                                    },
-                                    "eid": "el-4",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #4",
-                                    "lowConfidence": [],
-                                    "nonEditable": [],
-                                    "staticStyle": {
-                                        "color": "#1F2A44",
-                                        "fontFamily": "Inter, sans-serif",
-                                        "fontSize": 84,
-                                        "fontWeight": 800,
-                                        "letterSpacing": 0,
-                                        "lineHeight": 1.1,
-                                        "textAlign": "center",
-                                        "whiteSpace": "nowrap"
-                                    },
-                                    "textType": "mixed"
-                                },
-                                "el-5": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "color": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "#1F2A44"
-                                        },
-                                        "fontFamily": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "Inter, sans-serif"
-                                        },
-                                        "fontSize": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 84
-                                        },
-                                        "fontWeight": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 800
-                                        }
-                                    },
-                                    "eid": "el-5",
-                                    "elementType": "span",
-                                    "isLoopItem": false,
-                                    "label": "span #5",
-                                    "lowConfidence": [],
-                                    "nonEditable": [],
-                                    "sourceText": "How are you",
-                                    "sourceVar": "text",
-                                    "staticStyle": {
-                                        "color": "#1F2A44",
-                                        "fontFamily": "Inter, sans-serif",
-                                        "fontSize": 84,
-                                        "fontWeight": 800
-                                    },
-                                    "textType": "typewriter"
-                                },
-                                "el-6": {
-                                    "animatedProps": {
-                                        "opacity": {
-                                            "frameRange": [
-                                                0,
-                                                0
-                                            ],
-                                            "outputRange": [
-                                                0,
-                                                1
-                                            ],
-                                            "type": "interpolate"
-                                        }
-                                    },
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "background": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "#FFE66D"
-                                        },
-                                        "borderRadius": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 10
-                                        },
-                                        "color": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "#1F2A44"
-                                        },
-                                        "display": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "inline-block"
-                                        },
-                                        "fontFamily": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "Inter, sans-serif"
-                                        },
-                                        "fontSize": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 84
-                                        },
-                                        "fontWeight": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 800
-                                        },
-                                        "marginLeft": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 16
-                                        },
-                                        "opacity": {
-                                            "confidence": "high",
-                                            "editable": true
-                                        },
-                                        "padding": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "6px 14px"
-                                        },
-                                        "transform": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "transformOrigin": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        }
-                                    },
-                                    "eid": "el-6",
-                                    "elementType": "span",
-                                    "isLoopItem": false,
-                                    "label": "span #6",
-                                    "lowConfidence": [],
-                                    "nonEditable": [
-                                        "transform"
-                                    ],
-                                    "staticStyle": {
-                                        "background": "#FFE66D",
-                                        "borderRadius": 10,
-                                        "color": "#1F2A44",
-                                        "display": "inline-block",
-                                        "fontFamily": "Inter, sans-serif",
-                                        "fontSize": 84,
-                                        "fontWeight": 800,
-                                        "marginLeft": 16,
-                                        "padding": "6px 14px",
-                                        "transformOrigin": "center"
-                                    },
-                                    "staticText": "Man",
-                                    "textType": "static"
-                                }
-                            }
-                        },
-                        "slideStatus": "SLIDE_STATUS_GENERATED"
-                    },
-                    {
-                        "id": "slide-1772600926330378009",
-                        "type": "SLIDE_TYPE_ANIMATION",
-                        "transcript": "A tiny UI change can create a big production surprise.",
-                        "duration": 4.7,
-                        "transition": "TRANSITION_WIPE_LEFT",
-                        "transitionDuration": 0.3,
-                        "direction": "TRANSITION_DIRECTION_FROM_BOTTOM",
-                        "animation": {
-                            "codeRegistry": {
-                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d/d313b2a5-7794-42b2-b678-a9b51c903ab9/slide-1772600926330378009/FlipBlock_17730651095090810000.tsx",
-                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d/d313b2a5-7794-42b2-b678-a9b51c903ab9/slide-1772600926330378009/TransformedFlipBlock_17730651095090810000.tsx"
-                            },
-                            "plan": {
-                                "index": "1",
-                                "beatDescription": "Open with BrowserStack brand presence and immediately frame the stakes: small UI changes can break production. This sets urgency and tees up the need for visual testing.",
-                                "animationType": "TEXT",
-                                "categorySearcQquery": "brand introduction leading into product reliability promise",
-                                "duration": "4",
-                                "voiceover": "A tiny UI change can create a big production surprise.",
-                                "selectedTemplateDescription": "Center-aligned text animates into view one letter at a time with a cascading effect. Each character slides in smoothly from the left while fading from transparent to fully visible using a soft spring motion. The animation creates a sequential, flowing reveal of the full sentence, with subtle glow and shadow for emphasis."
-                            },
-                            "edits": {},
-                            "registry": {
-                                "el-1": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "alignItems": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "background": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "transparent"
-                                        },
-                                        "display": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "flex"
-                                        },
-                                        "height": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "100%"
-                                        },
-                                        "justifyContent": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "position": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "relative"
-                                        },
-                                        "width": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "100%"
-                                        }
-                                    },
-                                    "eid": "el-1",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #1",
-                                    "lowConfidence": [],
-                                    "nonEditable": [],
-                                    "staticStyle": {
-                                        "alignItems": "center",
-                                        "background": "transparent",
-                                        "display": "flex",
-                                        "height": "100%",
-                                        "justifyContent": "center",
-                                        "position": "relative",
-                                        "width": "100%"
-                                    },
-                                    "textType": "mixed"
-                                },
-                                "el-2": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "background": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "linear-gradient(135deg, #EAF2FF 0%, #929eaf 100%)"
-                                        },
-                                        "inset": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": 0
-                                        },
-                                        "position": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "absolute"
-                                        }
-                                    },
-                                    "eid": "el-2",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #2",
-                                    "lowConfidence": [],
-                                    "nonEditable": [],
-                                    "staticStyle": {
-                                        "background": "linear-gradient(135deg, #EAF2FF 0%, #929eaf 100%)",
-                                        "inset": 0,
-                                        "position": "absolute"
-                                    },
-                                    "textType": "none"
-                                },
-                                "el-3": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "alignItems": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "display": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "flex"
-                                        },
-                                        "height": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "justifyContent": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "center"
-                                        },
-                                        "paddingBottom": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "paddingLeft": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "paddingRight": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "paddingTop": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        },
-                                        "position": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "relative"
-                                        },
-                                        "width": {
-                                            "confidence": "high",
-                                            "editable": false
-                                        }
-                                    },
-                                    "eid": "el-3",
-                                    "elementType": "div",
-                                    "isLoopItem": false,
-                                    "label": "div #3",
-                                    "lowConfidence": [],
-                                    "nonEditable": [
-                                        "width",
-                                        "height",
-                                        "paddingLeft",
-                                        "paddingRight",
-                                        "paddingTop",
-                                        "paddingBottom"
-                                    ],
-                                    "staticStyle": {
-                                        "alignItems": "center",
-                                        "display": "flex",
-                                        "justifyContent": "center",
-                                        "position": "relative"
-                                    },
-                                    "textType": "none"
-                                },
-                                "el-4": {
-                                    "animatedProps": {},
-                                    "assetType": "none",
-                                    "editableProps": {
-                                        "height": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "100%"
-                                        },
-                                        "width": {
-                                            "confidence": "high",
-                                            "editable": true,
-                                            "staticValue": "100%"
-                                        }
-                                    },
-                                    "eid": "el-4",
-                                    "elementType": "svg",
-                                    "isLoopItem": false,
-                                    "label": "svg #4",
-                                    "lowConfidence": [],
-                                    "nonEditable": [],
-                                    "staticStyle": {
-                                        "height": "100%",
-                                        "width": "100%"
-                                    },
-                                    "textType": "mixed"
-                                }
-                            }
-                        },
-                        "slideStatus": "SLIDE_STATUS_GENERATED",
-                        "index": 1
-                    },
-                    {
-                        "id": "slide-1772601064012",
-                        "type": "SLIDE_TYPE_MEDIA",
-                        "duration": 5,
-                        "transitionDuration": 0.3,
-                        "media": {
-                            "meta": {
-                                "x": 182.46352,
-                                "y": 101.64235,
-                                "width": 1536,
-                                "height": 864,
-                                "scale": 1,
-                                "rotation": 0
-                            },
-                            "src": "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1772601145-add_this_person_to_the_back_of_t-0.jpg",
-                            "style": {},
-                            "mediaType": "MEDIA_TYPE_IMAGE",
-                            "uploadedMedia": {
-                                "url": "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1772601145-add_this_person_to_the_back_of_t-0.jpg",
-                                "mimeType": "image/jpeg",
-                                "fileName": "add_this_person_to_the_back_of_t-0.jpg"
-                            },
-                            "plan": {}
-                        },
-                        "zooms": [
-                            {
-                                "id": "zoom-effect-1772601158213",
-                                "x": 1216.8932,
-                                "y": 374.85437,
-                                "zoomLevel": 2,
-                                "startTime": 2.2,
-                                "endTime": 4.7
-                            }
-                        ],
-                        "slideStatus": "SLIDE_STATUS_GENERATED",
-                        "index": 2
                     }
                 ]
+            },
+            {
+                "id": "section-1773760512323547000",
+                "title": "Workflow",
+                "color": "#E84393",
+                "slides": [
+                    {
+                        "id": "slide-1773760512323549000",
+                        "type": "SLIDE_TYPE_MEDIA",
+                        "transition": "TRANSITION_IRIS",
+                        "transitionDuration": 0.5,
+                        "direction": "TRANSITION_DIRECTION_FROM_BOTTOM",
+                        "durationInFrames": 150,
+                        "settledFrame": 150,
+                        "media": {
+                            "meta": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864,
+                                "scale": 1
+                            },
+                            "src": "https://placehold.co/600x400?text=Upload+a+screenshot+or+short+clip+of+your+product&font=roboto",
+                            "style": {},
+                            "mediaType": "MEDIA_TYPE_IMAGE",
+                            "plan": {
+                                "index": "1",
+                                "beatDescription": "This is the media slide, user will be asked to upload their product screenshot or clip",
+                                "durationInFrames": "150",
+                                "selectedTemplateDescription": "This is the media slide, user will be asked to upload their product screenshot or clip"
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED"
+                    },
+                    {
+                        "id": "slide-1773760512323554000",
+                        "type": "SLIDE_TYPE_MEDIA",
+                        "transition": "TRANSITION_FADE",
+                        "transitionDuration": 0.5,
+                        "direction": "TRANSITION_DIRECTION_FROM_RIGHT",
+                        "durationInFrames": 150,
+                        "settledFrame": 150,
+                        "media": {
+                            "meta": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864,
+                                "scale": 1
+                            },
+                            "src": "https://placehold.co/600x400?text=Upload+a+screenshot+or+short+clip+of+your+product&font=roboto",
+                            "style": {},
+                            "mediaType": "MEDIA_TYPE_IMAGE",
+                            "plan": {
+                                "index": "2",
+                                "beatDescription": "This is the media slide, user will be asked to upload their product screenshot or clip",
+                                "durationInFrames": "150",
+                                "selectedTemplateDescription": "This is the media slide, user will be asked to upload their product screenshot or clip"
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED",
+                        "index": 1
+                    }
+                ],
+                "index": 1
+            },
+            {
+                "id": "section-1773760512323556000",
+                "title": "Scale",
+                "color": "#96CEB4",
+                "slides": [
+                    {
+                        "id": "slide-1773760512323557000",
+                        "type": "SLIDE_TYPE_ANIMATION",
+                        "transcript": "And Percy is already running at serious scale, with more than one hundred thousand tests executed every single day.",
+                        "transition": "TRANSITION_IRIS",
+                        "transitionDuration": 0.5,
+                        "direction": "TRANSITION_DIRECTION_FROM_LEFT",
+                        "durationInFrames": 150,
+                        "settledFrame": 130,
+                        "animation": {
+                            "codeRegistry": {
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d/669ee51b-57e0-4d6c-84f9-89ef2ab7569e/Component117b8b837538478bae6bc8e12d5d74d9.tsx",
+                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d/669ee51b-57e0-4d6c-84f9-89ef2ab7569e/TransformedComponent117b8b837538478bae6bc8e12d5d74d9.tsx"
+                            },
+                            "plan": {
+                                "index": "1",
+                                "beatDescription": "Cut to a full-screen animated counter that climbs and lands on 100K+ tests per day. This is the proof moment after the workflow scenes, turning product capability into visible scale and momentum. It sets up the final scene by showing that Percy is already operating at meaningful daily volume.",
+                                "animationType": "TEXT",
+                                "categorySearcQquery": "high volume test execution counter and scale proof",
+                                "durationInFrames": "240",
+                                "voiceover": "And Percy is already running at serious scale, with more than one hundred thousand tests executed every single day.",
+                                "selectedTemplateDescription": "A giant 100K+ counter takes over the screen as the sole focal point, emerging softly in the center before accelerating upward with confident momentum. As the digits climb, the frame stays otherwise quiet, letting the scale itself do the talking. Once the count lands, a small “tests per day” line fades in beneath it as confirmation. The composition then settles into a clean, full-screen hold, ending on the finished number with weight and certainty."
+                            },
+                            "edits": {
+                                "counter-0": {
+                                    "value": {
+                                        "delay": 6,
+                                        "duration": 72,
+                                        "from": 0,
+                                        "suffix": "K+",
+                                        "to": 100,
+                                        "variant": "display"
+                                    }
+                                },
+                                "fadein-0": {
+                                    "value": {
+                                        "delay": 88,
+                                        "duration": 20
+                                    }
+                                },
+                                "scalein-0": {
+                                    "value": {
+                                        "delay": 0,
+                                        "duration": 24,
+                                        "origin": "center"
+                                    }
+                                },
+                                "text-0": {
+                                    "value": {
+                                        "children": "tests per day",
+                                        "variant": "label"
+                                    }
+                                }
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED"
+                    },
+                    {
+                        "id": "slide-1773760512323558000",
+                        "type": "SLIDE_TYPE_MEDIA",
+                        "durationInFrames": 150,
+                        "settledFrame": 150,
+                        "media": {
+                            "meta": {
+                                "x": 192,
+                                "y": 108,
+                                "width": 1536,
+                                "height": 864,
+                                "scale": 1
+                            },
+                            "src": "https://placehold.co/600x400?text=Upload+a+screenshot+or+short+clip+of+your+product&font=roboto",
+                            "style": {},
+                            "mediaType": "MEDIA_TYPE_IMAGE",
+                            "plan": {
+                                "index": "2",
+                                "beatDescription": "This is the media slide, user will be asked to upload their product screenshot or clip",
+                                "durationInFrames": "150",
+                                "selectedTemplateDescription": "This is the media slide, user will be asked to upload their product screenshot or clip"
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED",
+                        "index": 1
+                    }
+                ],
+                "index": 2
             }
         ]
     },
     "metadata": {
-        "fps": 30,        
+        "fps": 30,
         "backgroundStyle": {
             "gradient": {
                 "angle": 135,
                 "stops": [
                     {
-                        "color": "#EAF2FF"
+                        "color": "#2563EB"
                     },
                     {
-                        "color": "#929eaf",
+                        "color": "#0070F0",
                         "position": 100
                     }
                 ]
-            },
-            "applyAll": true
+            }
         },
         "resolution": {
             "id": "16:9",
@@ -2890,11 +258,100 @@
             "width": 1920,
             "height": 1080
         },
-        "duration": 34.8,
-        "prompt": "Hey, help me create a video",
-        "backgroundAudioUrl": "https://ik.imagekit.io/coasterai/freepik-deep-calm_A4WXzk4Mk.mp3"
+        "duration": 23,
+        "prompt": "Help me create a 5 slide video on a new test automation platform we recently launched called Percy. We are eecuting more than 100K tests on a daily basis. Make one of the slide show the counter of 100K tests",
+        "backgroundAudioUrl": "https://ik.imagekit.io/coasterai/freepik-deep-calm_A4WXzk4Mk.mp3",
+        "generatedBranding": {
+            "colors": [
+                {
+                    "colorHexCode": "#2563EB",
+                    "priority": "BRAND_ASSET_PRIORITY_PRIMARY"
+                },
+                {
+                    "colorHexCode": "#7199F2",
+                    "priority": "BRAND_ASSET_PRIORITY_SECONDARY"
+                },
+                {
+                    "colorHexCode": "#0070F0",
+                    "priority": "BRAND_ASSET_PRIORITY_ACCENT"
+                },
+                {
+                    "colorHexCode": "#FFFFFF",
+                    "priority": "BRAND_ASSET_PRIORITY_BACKGROUND"
+                },
+                {
+                    "colorHexCode": "#111827",
+                    "priority": "BRAND_ASSET_PRIORITY_TEXT_PRIMARY"
+                },
+                {
+                    "colorHexCode": "#6B7280",
+                    "priority": "BRAND_ASSET_PRIORITY_TEXT_SECONDARY"
+                }
+            ],
+            "brandLibraryID": "baebec08-404b-4c54-b6d8-3530f99b5359",
+            "brandIdentity": {
+                "name": "browserstack.com",
+                "websiteUrl": "browserstack.com",
+                "tagline": "Most Reliable App & Cross Browser Testing Platform",
+                "description": "Instant access to 3000+ browsers and real iOS and Android devices for cross browser testing. Ship apps and websites that work for everyone, every time. Get Free Trial.",
+                "logos": [
+                    {
+                        "asset": {
+                            "url": "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1773653735-bstack-logo-global.svg",
+                            "mimeType": "image/svg+xml",
+                            "size": 13532,
+                            "fileName": "bstack-logo-global.svg",
+                            "mediaType": "MEDIA_TYPE_SVG"
+                        },
+                        "priority": "BRAND_ASSET_PRIORITY_PRIMARY",
+                        "type": "BRAND_MEDIA_TYPE_LOGO"
+                    },
+                    {
+                        "asset": {
+                            "url": "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1773653736-apple-touch-icon.png",
+                            "width": 160,
+                            "height": 160,
+                            "mimeType": "image/png",
+                            "size": 17448,
+                            "fileName": "apple-touch-icon.png",
+                            "mediaType": "MEDIA_TYPE_IMAGE"
+                        },
+                        "priority": "BRAND_ASSET_PRIORITY_PRIMARY",
+                        "type": "BRAND_MEDIA_TYPE_LOGO"
+                    }
+                ],
+                "fonts": [
+                    {
+                        "googleFontsName": "Inter",
+                        "name": "Inter"
+                    }
+                ],
+                "colors": [
+                    {
+                        "colorHexCode": "#2563EB",
+                        "priority": "BRAND_ASSET_PRIORITY_PRIMARY"
+                    },
+                    {
+                        "colorHexCode": "#7199F2",
+                        "priority": "BRAND_ASSET_PRIORITY_SECONDARY"
+                    },
+                    {
+                        "colorHexCode": "#0070F0",
+                        "priority": "BRAND_ASSET_PRIORITY_ACCENT"
+                    },
+                    {
+                        "colorHexCode": "#FFFFFF",
+                        "priority": "BRAND_ASSET_PRIORITY_BACKGROUND"
+                    },
+                    {
+                        "colorHexCode": "#6B7280",
+                        "priority": "BRAND_ASSET_PRIORITY_TEXT_SECONDARY"
+                    }
+                ]
+            }
+        }
     },
-    "createdAt": "2026-03-04T05:07:53.063353Z",
+    "createdAt": "2026-03-17T15:14:09.441292Z",
     "status": "VIDEO_STATUS_COMPLETED",
-    "version": "238"
+    "version": "2"
 }
