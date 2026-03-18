@@ -413,15 +413,6 @@ func (registry *BrandIdentityRegistry) FormatBrandAndAssetDetails() string {
 					writeLine(3, "Dimensions: %.0fx%.0f", a.Width, a.Height)
 				}
 			}
-
-			switch a.MediaType {
-			case pbcore.MediaType_MEDIA_TYPE_SVG,
-				pbcore.MediaType_MEDIA_TYPE_IMAGE:
-				writeLine(3, "Render Hint: Use <img> tag")
-
-			case pbcore.MediaType_MEDIA_TYPE_VIDEO:
-				writeLine(3, "Render Hint: Use <video> tag")
-			}
 		}
 	}
 
