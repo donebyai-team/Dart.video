@@ -14,6 +14,16 @@ import {
   Type, Heading1, Heading2, Tag, ALargeSmall,
   Eye, EyeOff, Layers, GalleryHorizontalEnd,
   Shuffle, X, Plus,
+  TramFrontIcon,
+  BringToFrontIcon,
+  TypeIcon,
+  PenBox,
+  PenIcon,
+  BoldIcon,
+  SpaceIcon,
+  ArrowLeftRightIcon,
+  Droplet,
+  DropletIcon,
 } from 'lucide-react'
 import {
   resolveComponentFromId,
@@ -25,8 +35,10 @@ import {
   SelectInput,
   SliderInput,
   ColorSwatch,
+  FontFamilySelect,
 } from './toolbars/shared'
 import { MediaToolbar } from './toolbars/MediaToolbar'
+import { IconToolbar } from './toolbars/IconToolbar'
 
 // ─── Options ────────────────────────────────────────────────────────────────
 
@@ -74,6 +86,14 @@ const LETTER_SPACING_OPTIONS = [
   { label: 'Wide', value: '0.025em' },
 ]
 
+const TEXT_STYLE_COMPONENTS = new Set([
+  'Text',
+  'Counter',
+  'WordCycle',
+  'Typewriter',
+  'TitleCard',
+])
+
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 /** Icon + tooltip wrapper for a control group */
@@ -118,6 +138,10 @@ export function AnimationToolbar({
 
   const currentProps = overlay[selectedId]?.value ?? {}
   const styleOverride = overlay[selectedId]?.styleOverride ?? {}
+  const showFontFamilyControl =
+    (componentName !== null && TEXT_STYLE_COMPONENTS.has(componentName)) ||
+    elType === 'html' ||
+    elType === 'custom'
 
   const vp = (prop: string, value: unknown) => onValuePatch(selectedId, prop, value)
   const so = (style: Record<string, string | number>) => onStyleOverride(selectedId, style)
@@ -137,13 +161,24 @@ export function AnimationToolbar({
     )
   }
 
+  if (componentName === 'IconAsset') {
+    return (
+      <IconToolbar
+        currentProps={currentProps}
+        styleOverride={styleOverride}
+        onValuePatch={vp}
+        onStyleOverride={so}
+      />
+    )
+  }
+
   return (
     <div className="flex flex-wrap items-center gap-1.5 px-3 py-1.5 rounded-xl bg-background/95 backdrop-blur-lg border border-border shadow-xl text-sm select-none max-w-[700px]">
 
       {/* ═══ TEXT ═══ */}
       {componentName === 'Text' && (
         <>
-          <CtrlGroup icon={<Type size={13} />} tooltip="Text content">
+          <CtrlGroup icon={<PenIcon size={16} />} tooltip="Text content">
             <input
               type="text"
               value={String(currentProps.children ?? '')}
@@ -153,7 +188,7 @@ export function AnimationToolbar({
             />
           </CtrlGroup>
           <Div />
-          <CtrlGroup icon={<ALargeSmall size={13} />} tooltip="Typography variant">
+          <CtrlGroup icon={<ALargeSmall size={16} />} tooltip="Typography variant">
             <SelectInput
               value={String(currentProps.variant ?? 'body')}
               options={VARIANT_OPTIONS}
@@ -167,7 +202,7 @@ export function AnimationToolbar({
       {/* ═══ TYPEWRITER ═══ */}
       {componentName === 'Typewriter' && (
         <>
-          <CtrlGroup icon={<Type size={13} />} tooltip="Source text">
+          <CtrlGroup icon={<Type size={16} />} tooltip="Source text">
             <input
               type="text"
               value={String(currentProps.text ?? '')}
@@ -177,7 +212,7 @@ export function AnimationToolbar({
             />
           </CtrlGroup>
           <Div />
-          <CtrlGroup icon={<ALargeSmall size={13} />} tooltip="Typography variant">
+          <CtrlGroup icon={<ALargeSmall size={16} />} tooltip="Typography variant">
             <SelectInput
               value={String(currentProps.variant ?? 'body')}
               options={VARIANT_OPTIONS}
@@ -186,7 +221,7 @@ export function AnimationToolbar({
             />
           </CtrlGroup>
           <Div />
-          <CtrlGroup icon={<Layers size={13} />} tooltip="Reveal mode (char/word/line)">
+          <CtrlGroup icon={<Layers size={16} />} tooltip="Reveal mode (char/word/line)">
             <SelectInput
               value={String(currentProps.mode ?? 'char')}
               options={TYPEWRITER_MODE_OPTIONS}
@@ -200,7 +235,7 @@ export function AnimationToolbar({
       {/* ═══ TITLECARD ═══ */}
       {componentName === 'TitleCard' && (
         <>
-          <CtrlGroup icon={<Heading1 size={13} />} tooltip="Heading text">
+          <CtrlGroup icon={<Heading1 size={16} />} tooltip="Heading text">
             <input
               type="text"
               value={String(currentProps.heading ?? '')}
@@ -209,7 +244,7 @@ export function AnimationToolbar({
               className="h-7 w-36 px-2 rounded-md border border-border bg-muted text-xs focus:outline-none focus:ring-1 focus:ring-ring/50"
             />
           </CtrlGroup>
-          <CtrlGroup icon={<Heading2 size={13} />} tooltip="Subheading text">
+          <CtrlGroup icon={<Heading2 size={16} />} tooltip="Subheading text">
             <input
               type="text"
               value={String(currentProps.subheading ?? '')}
@@ -218,7 +253,7 @@ export function AnimationToolbar({
               className="h-7 w-28 px-2 rounded-md border border-border bg-muted text-xs focus:outline-none focus:ring-1 focus:ring-ring/50"
             />
           </CtrlGroup>
-          <CtrlGroup icon={<Tag size={13} />} tooltip="Eyebrow label">
+          <CtrlGroup icon={<Tag size={16} />} tooltip="Eyebrow label">
             <input
               type="text"
               value={String(currentProps.eyebrow ?? '')}
@@ -233,7 +268,7 @@ export function AnimationToolbar({
       {/* ═══ COUNTER ═══ */}
       {componentName === 'Counter' && (
         <>
-          <CtrlGroup icon={<Hash size={13} />} tooltip="Count from value">
+          <CtrlGroup icon={<Hash size={16} />} tooltip="Count from value">
             <NumberStepper
               value={Number(currentProps.from ?? 0)}
               onChange={v => vp('from', v)}
@@ -242,7 +277,7 @@ export function AnimationToolbar({
             />
           </CtrlGroup>
           <span className="text-xs text-muted-foreground">to</span>
-          <CtrlGroup icon={<Hash size={13} />} tooltip="Count to value">
+          <CtrlGroup icon={<Hash size={16} />} tooltip="Count to value">
             <NumberStepper
               value={Number(currentProps.to ?? 100)}
               onChange={v => vp('to', v)}
@@ -316,7 +351,7 @@ export function AnimationToolbar({
             </button>
           </div>
           <Div />
-          <CtrlGroup icon={<Shuffle size={13} />} tooltip="Transition animation between words">
+          <CtrlGroup icon={<Shuffle size={16} />} tooltip="Transition animation between words">
             <SelectInput
               value={String(currentProps.transition ?? 'fadeSwap')}
               options={WORDCYCLE_TRANSITION_OPTIONS}
@@ -332,14 +367,14 @@ export function AnimationToolbar({
         componentName === 'SlideIn' || componentName === 'SlideOut' ||
         componentName === 'ScaleIn' || componentName === 'ScaleOut') && (
         <>
-          <CtrlGroup icon={<Timer size={13} />} tooltip="Start frame (when animation begins)">
+          <CtrlGroup icon={<Timer size={16} />} tooltip="Start frame (when animation begins)">
             <NumberStepper
               value={Number(currentProps.startAt ?? 0)}
               onChange={v => vp('startAt', v)}
               min={0} step={1} unit="f" inputWidth="w-12"
             />
           </CtrlGroup>
-          <CtrlGroup icon={<Clock size={13} />} tooltip="Duration in frames">
+          <CtrlGroup icon={<Clock size={16} />} tooltip="Duration in frames">
             <NumberStepper
               value={Number(currentProps.durationInFrames ?? 30)}
               onChange={v => vp('durationInFrames', v)}
@@ -349,7 +384,7 @@ export function AnimationToolbar({
           {(componentName === 'SlideIn' || componentName === 'SlideOut') && (
             <>
               <Div />
-              <CtrlGroup icon={<ArrowUpDown size={13} />} tooltip="Slide direction">
+              <CtrlGroup icon={<ArrowUpDown size={16} />} tooltip="Slide direction">
                 <SelectInput
                   value={String(currentProps[componentName === 'SlideIn' ? 'from' : 'to'] ?? 'bottom')}
                   options={DIRECTION_OPTIONS}
@@ -357,7 +392,7 @@ export function AnimationToolbar({
                   width="w-20"
                 />
               </CtrlGroup>
-              <CtrlGroup icon={<Ruler size={13} />} tooltip="Slide distance in pixels">
+              <CtrlGroup icon={<Ruler size={16} />} tooltip="Slide distance in pixels">
                 <NumberStepper
                   value={Number(currentProps.distance ?? 100)}
                   onChange={v => vp('distance', v)}
@@ -372,14 +407,14 @@ export function AnimationToolbar({
       {/* ═══ STAGGER ═══ */}
       {componentName === 'Stagger' && (
         <>
-          <CtrlGroup icon={<Timer size={13} />} tooltip="Start frame">
+          <CtrlGroup icon={<Timer size={16} />} tooltip="Start frame">
             <NumberStepper
               value={Number(currentProps.startAt ?? 0)}
               onChange={v => vp('startAt', v)}
               min={0} step={1} unit="f" inputWidth="w-12"
             />
           </CtrlGroup>
-          <CtrlGroup icon={<GalleryHorizontalEnd size={13} />} tooltip="Delay between each child (frames)">
+          <CtrlGroup icon={<GalleryHorizontalEnd size={16} />} tooltip="Delay between each child (frames)">
             <NumberStepper
               value={Number(currentProps.delayBetween ?? 12)}
               onChange={v => vp('delayBetween', v)}
@@ -392,14 +427,14 @@ export function AnimationToolbar({
       {/* ═══ TIMELINEGATE ═══ */}
       {componentName === 'TimelineGate' && (
         <>
-          <CtrlGroup icon={<Eye size={13} />} tooltip="Show children after this frame">
+          <CtrlGroup icon={<Eye size={16} />} tooltip="Show children after this frame">
             <NumberStepper
               value={Number(currentProps.showAfter ?? 0)}
               onChange={v => vp('showAfter', v)}
               min={0} step={1} unit="f" inputWidth="w-12"
             />
           </CtrlGroup>
-          <CtrlGroup icon={<EyeOff size={13} />} tooltip="Hide children after this frame">
+          <CtrlGroup icon={<EyeOff size={16} />} tooltip="Hide children after this frame">
             <NumberStepper
               value={Number(currentProps.hideAfter ?? 999)}
               onChange={v => vp('hideAfter', v)}
@@ -414,6 +449,15 @@ export function AnimationToolbar({
       {componentName !== 'LogoAsset' && (componentName || elType === 'html' || elType === 'custom') && (
         <>
           <Div />
+          {showFontFamilyControl && (
+            <CtrlGroup icon={<TypeIcon size={16} />} tooltip="Font family">
+            <FontFamilySelect
+              value={String(styleOverride.fontFamily ?? '')}
+              onChange={v => so({ fontFamily: v || 'inherit' })}
+            />
+            </CtrlGroup>
+          )}
+          {showFontFamilyControl && <Div />}
           {/* Text color */}
           <ColorSwatch
             color={styleOverride.color ?? '#ffffff'}
@@ -429,26 +473,32 @@ export function AnimationToolbar({
             onChange={v => so({ backgroundColor: v })}
           />
           {/* Font weight */}
+          <CtrlGroup icon={<BoldIcon size={16} />} tooltip="Font weight">
           <SelectInput
             value={String(styleOverride.fontWeight ?? '400')}
             options={FONT_WEIGHT_OPTIONS}
             onChange={v => so({ fontWeight: parseInt(v) })}
             width="w-24"
           />
+          </CtrlGroup>
           {/* Letter spacing */}
+           <CtrlGroup icon={<ArrowLeftRightIcon size={16} />} tooltip="Spacing between letters">
           <SelectInput
             value={String(styleOverride.letterSpacing ?? '0em')}
             options={LETTER_SPACING_OPTIONS}
             onChange={v => so({ letterSpacing: v })}
             width="w-20"
           />
+          </CtrlGroup>
           {/* Opacity */}
+           <CtrlGroup icon={<DropletIcon size={16} />} tooltip="Opacity">
           <SliderInput
             value={(styleOverride.opacity as number) ?? 1}
             onChange={v => so({ opacity: v })}
             min={0} max={1} step={0.05}
             width="w-14"
           />
+          </CtrlGroup>
         </>
       )}
     </div>

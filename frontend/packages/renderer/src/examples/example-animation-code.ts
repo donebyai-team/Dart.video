@@ -27,7 +27,7 @@ export default function RemoteComponent({ data }) {
    <SafeArea>
       <AbsoluteCenter axis="both">
      <Stack gap={24} align="center">
-
+  <IconAsset name="check"  />
   <Text id="text-0" variant="display">Tiny UI changes slip through outside boxes in a row.</Text>
   <Typewriter id="text-0" text="Tiny UI changes slip through outside boxes in a row" variant="heading" />
 

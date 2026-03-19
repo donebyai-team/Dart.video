@@ -1,7 +1,8 @@
-import { Composition, getInputProps } from 'remotion'
+import { Composition, getInputProps, getRemotionEnvironment } from 'remotion'
 import video from './video.json'
 import Slideshow from './RemotionSlideshow'
 import { AnimationPreview, ANIMATION_PREVIEW_DURATION_FRAMES } from './examples/AnimationPreview'
+import { loadAllFonts, SUPPORTED_FONTS } from './load_fonts'
 
 export const MyVideo = () => {
   const inputProps = getInputProps() as { video?: typeof video } | undefined
@@ -14,6 +15,12 @@ export const MyVideo = () => {
   // Get video resolution i.e width and height
   const width = videoData.metadata.resolution.width
   const height = videoData.metadata.resolution.height
+
+  // load fonts
+  if (getRemotionEnvironment().isRendering) {    
+    loadAllFonts()
+    console.log('Loaded fonts', SUPPORTED_FONTS.length)
+  }
 
   return (
     <>

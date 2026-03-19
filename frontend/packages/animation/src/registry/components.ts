@@ -20,7 +20,7 @@ export interface ComponentRegistration {
   description: string;
 }
 
-// ── Schemas ────────────────────────────────────────────────────────────────
+// ── Schemas For LLM exposed prompt ────────────────────────────────────────────────────────────────
 
 const frameTimingSchema = {
   delay: z.number().optional().describe('Frames before animation starts'),
@@ -180,6 +180,15 @@ export const VideoAssetSchema = z.object({
   height: z.number().optional(),
   style: z.any().optional(),
   className: z.string().optional(),
+});
+
+export const IconAssetSchema = z.object({
+  name: z.string(),
+  size: z.number().optional(),
+  borderRadius: z.number().optional(),
+  style: z.any().optional(),
+  className: z.string().optional(),
+  id: z.string().optional(),
 });
 
 // ── Registry ───────────────────────────────────────────────────────────────
@@ -359,6 +368,14 @@ export const BRAND_COMPONENTS: ComponentRegistration[] = [
     editorProps: ['src', 'width', 'height'],
     animationTypes: ALL_TYPES,
     description: 'Generic video primitive for uploaded media. Width and height define the rendered box; the video always preserves aspect ratio and stays fully visible.',
+  },
+  {
+    name: 'IconAsset',
+    type: 'brand',
+    fullSchema: IconAssetSchema,
+    editorProps: ['name', 'size'],
+    animationTypes: ALL_TYPES,
+    description: 'Icon asset from the icon library. Wrap in FadeIn, SlideIn, or ScaleIn to animate. Use name to specify the icon slug. Size controls dimensions, and the animation toolbar can override icon color, background color, and radius.',
   },
 ];
 

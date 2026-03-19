@@ -11,6 +11,7 @@ export {
 } from '@coasterai/animation';
 export { compileRemoteComponent, stripImports } from './compiler';
 export type { CompilationResult, CompileRemoteComponentOptions } from './compiler';
+export { SUPPORTED_FONTS, loadAllFonts } from './load_fonts';
 export {
   TRANSITION_OPTIONS,
   TRANSITION_DIRECTION_OPTIONS,

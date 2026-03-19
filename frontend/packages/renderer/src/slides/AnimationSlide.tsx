@@ -12,6 +12,40 @@ import { compileRemoteComponent } from '../compiler'
 import { AnimatedBackground } from '../effects/AnimatedBackground'
 import { backgroundStyleToCSS } from '../backgroundUtils'
 
+const compiledTemplateCache = new Map<string, React.ComponentType<any>>()
+const compiledTemplatePromiseCache = new Map<string, Promise<React.ComponentType<any>>>()
+
+async function loadCompiledTemplate(templateUrl: string): Promise<React.ComponentType<any>> {
+  const cached = compiledTemplateCache.get(templateUrl)
+  if (cached) return cached
+
+  const inFlight = compiledTemplatePromiseCache.get(templateUrl)
+  if (inFlight) return inFlight
+
+  const promise = (async () => {
+    const response = await fetch(templateUrl, { cache: 'force-cache' })
+    if (!response.ok) {
+      throw new Error(`Failed to fetch template: ${response.status} ${response.statusText}`)
+    }
+
+    const code = await response.text()
+    const result = compileRemoteComponent(code)
+    if (result.error || !result.Component) {
+      throw new Error(`Compilation failed: ${result.error ?? 'Unknown compilation error'}`)
+    }
+
+    compiledTemplateCache.set(templateUrl, result.Component)
+    compiledTemplatePromiseCache.delete(templateUrl)
+    return result.Component
+  })().catch((error) => {
+    compiledTemplatePromiseCache.delete(templateUrl)
+    throw error
+  })
+
+  compiledTemplatePromiseCache.set(templateUrl, promise)
+  return promise
+}
+
 // While testing in local, just replace this with the component to test
 // import { RemoteComponent as HardcodedShankTemplate } from '../../../templates/text-animation/Shank'
 
@@ -66,6 +100,14 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
       setIsLoading(false)
       setCompiledComponent(null)
       setTemplateError(null)
+      return
+    }
+
+    const cached = compiledTemplateCache.get(templateUrl)
+    if (cached) {
+      setCompiledComponent(() => cached)
+      setIsLoading(false)
+      setTemplateError(null)
     }
   }, [templateUrl])
 
@@ -73,30 +115,26 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
     if (!templateUrl) return
 
     let disposed = false
-    setCompiledComponent(null)
+    const cached = compiledTemplateCache.get(templateUrl)
+    if (cached) {
+      setCompiledComponent(() => cached)
+      setIsLoading(false)
+      setTemplateError(null)
+      if (renderHandle) continueRender(renderHandle)
+      return () => {
+        disposed = true
+      }
+    }
+
     setIsLoading(true)
     setTemplateError(null)
 
       ; (async () => {
         try {
-          const response = await fetch(templateUrl, { cache: 'no-store' })
-          if (!response.ok) {
-            throw new Error(`Failed to fetch template: ${response.status} ${response.statusText}`)
-          }
-          const code = await response.text()
-
-          const result = compileRemoteComponent(code)
-          if (result.error) {
-            console.error(`Failed to compile template "${templateUrl}": ${result.error}`)
-            if (!disposed) {
-              setCompiledComponent(null)
-              setTemplateError(`Compilation failed: ${result.error}`)
-            }
-          } else {
-            if (!disposed) {
-              setCompiledComponent(() => result.Component)
-              setTemplateError(null)
-            }
+          const component = await loadCompiledTemplate(templateUrl)
+          if (!disposed) {
+            setCompiledComponent(() => component)
+            setTemplateError(null)
           }
         } catch (error) {
           if (error instanceof TypeError) {
@@ -110,9 +148,10 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
           }
           if (!disposed) {
             setCompiledComponent(null)
-            setTemplateError(
-              `Failed to load template: ${error instanceof Error ? error.message : String(error)}`
-            )
+            const message = error instanceof Error ? error.message : String(error)
+            setTemplateError(message.startsWith('Compilation failed:')
+              ? message
+              : `Failed to load template: ${message}`)
           }
         } finally {
           if (!disposed) {
