@@ -8,7 +8,7 @@
  */
 import { writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { getAnimationPrompt } from '../src/prompt/getAnimationPrompt';
+import { getAnimationPrompt } from '../src/prompt/generate_system_prompt';
 
 function getFlagValue(args: string[], name: string): string | undefined {
   const exact = `--${name}`;

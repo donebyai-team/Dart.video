@@ -1,10 +1,10 @@
 import * as Babel from "@babel/standalone";
 import {
-  ANIMATION_PRIMIIVES,
   getComponentRegistration,
   getComponentTimingDefaults,
   resolveStyle,
 } from "@coasterai/animation";
+import { ANIMATION_PRIMIIVES } from "@coasterai/animation/src/registry/animation_primitives";
 import { z } from "zod";
 
 export const FALLBACK_SETTLED_FRAME = 130;

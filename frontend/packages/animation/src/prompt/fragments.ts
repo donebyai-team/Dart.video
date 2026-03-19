@@ -2,7 +2,6 @@ import { z } from 'zod';
 import { AspectPreset } from '../styles/AspectPresetContext';
 import { BrandTheme as BrandObject } from '../theme/types';
 import { ComponentRegistration } from '../registry/components';
-import { AnimationTypeDefinition } from '../registry/animationTypes';
 import { PROMPT_SPACING_VALUES } from '../tokens/spacing';
 
 export function frameContractFragment(): string {
@@ -123,14 +122,6 @@ export function timingGuidanceFragment(): string {
     '- Typewriter per character: 2-3 frames (set duration = text.length * 2)',
     '- Hold before next section: 10-20 frames',
   ].join('\n');
-}
-
-export function typeSpecificRulesFragment(typeDef: AnimationTypeDefinition): string {
-  const lines = [`${typeDef.name.toUpperCase()} TYPE RULES:`];
-  for (const rule of typeDef.promptRules) {
-    lines.push(`  ${rule}`);
-  }
-  return lines.join('\n');
 }
 
 export function exampleFragment(): string {

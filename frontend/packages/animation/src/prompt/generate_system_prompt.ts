@@ -1,5 +1,10 @@
-import { ASPECT_PRESETS, AspectPreset } from '../styles/AspectPresetContext';
-import { BrandTheme as BrandObject } from '../theme/types';
+import { ComponentRegistration } from '../registry';
+import { ANIMATION_PRIMITIVE_COMPONENTS } from '../registry/animation_primitives';
+import { BRAND_COMPONENTS } from '../registry/assets';
+import { CONTENT_COMPONENTS } from '../registry/content';
+import { LAYOUT_COMPONENTS } from '../registry/layouts';
+import { SCENE_COMPONENTS } from '../registry/scenes';
+import { ASPECT_PRESETS } from '../styles/AspectPresetContext';
 import {
   frameContractFragment,
   canvasDimensionsFragment,
@@ -9,14 +14,7 @@ import {
   timingGuidanceFragment,
   exampleFragment,
 } from './fragments';
-import {
-  LAYOUT_COMPONENTS,
-  ANIMATION_PRIMITIVE_COMPONENTS,
-  CONTENT_COMPONENTS,
-  SCENE_COMPONENTS,
-  BRAND_COMPONENTS,
-  ComponentRegistration,
-} from '../registry';
+
 
 const VISUAL_MECHANISM_SUMMARIES: Record<string, string> = {
   FadeIn: 'reveal elements onto the canvas',
