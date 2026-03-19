@@ -20,21 +20,12 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils'
 import { ColorSwatch, NumberStepper } from './shared'
 
-const PREVIEW_COLORS = ['#0f766e', '#2563eb', '#d97706'] as const
 
 const ICON_OPTIONS = [
   { name: 'star', Preview: Star },
   { name: 'heart', Preview: Heart },
-  { name: 'bookmark', Preview: Bookmark },
-  { name: 'sparkles', Preview: Sparkles },
-  { name: 'rocket', Preview: Rocket },
   { name: 'shield', Preview: Shield },
   { name: 'play', Preview: Play },
-  { name: 'globe', Preview: Globe },
-  { name: 'camera', Preview: Camera },
-  { name: 'message-circle', Preview: MessageCircle },
-  { name: 'bell', Preview: Bell },
-  { name: 'zap', Preview: Zap },
 ] as const
 
 function CtrlGroup({
@@ -103,8 +94,7 @@ export function IconToolbar({
                 style={{
                   color:
                     typeof styleOverride.color === 'string'
-                      ? styleOverride.color
-                      : PREVIEW_COLORS[0],
+                      ? styleOverride.color: undefined                      
                 }}
                 className="shrink-0"
               />
@@ -113,52 +103,45 @@ export function IconToolbar({
             </button>
           </PopoverTrigger>
 
-          <PopoverContent className="w-[260px] p-0" align="start" sideOffset={6}>
-            <div className="border-b px-3 py-2">
-              <input
-                type="text"
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                placeholder="Search icons..."
-                className="h-8 w-full rounded-md border border-border bg-background px-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring/50"
-              />
-            </div>
+         <PopoverContent className="w-fit p-0" align="start" sideOffset={6}>
+  <div className="border-b px-2 py-2">
+    <input
+      type="text"
+      value={query}
+      onChange={e => setQuery(e.target.value)}
+      placeholder="Search icons..."
+      className="h-8 w-[180px] rounded-md border border-border bg-background px-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring/50"
+    />
+  </div>
 
-            <div className="max-h-[240px] overflow-y-auto p-2">
-              {filteredIcons.length === 0 ? (
-                <div className="py-6 text-center text-xs text-muted-foreground">
-                  No icons found
-                </div>
-              ) : (
-                <div className="grid grid-cols-3 gap-2">
-                  {filteredIcons.map((icon, index) => {
-                    const Preview = icon.Preview
-                    const previewColor = PREVIEW_COLORS[index % PREVIEW_COLORS.length]
-                    const isSelected = icon.name === currentName
+  <div className="max-h-[240px] overflow-y-auto  px-2 py-2">
+    <div className="grid grid-cols-4 gap-1 justify-items-center">
+      {filteredIcons.map((icon, index) => {
+        const Preview = icon.Preview
+        const isSelected = icon.name === currentName
 
-                    return (
-                      <button
-                        key={icon.name}
-                        type="button"
-                        title={icon.name}
-                        onClick={() => {
-                          onValuePatch('name', icon.name)
-                          setOpen(false)
-                        }}
-                        className={cn(
-                          'h-16 rounded-lg border border-border bg-muted/60 hover:bg-accent transition-colors flex items-center justify-center',
-                          isSelected && 'ring-2 ring-primary/50 bg-accent',
-                        )}
-                      >
-                        <Preview size={22} style={{ color: previewColor }} />
-                        <span className="sr-only">{icon.name}</span>
-                      </button>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-          </PopoverContent>
+        return (
+          <div
+            key={icon.name}
+            role="button"
+            tabIndex={0}
+            title={icon.name}
+            onClick={() => {
+              onValuePatch('name', icon.name)
+              setOpen(false)
+            }}
+            className={cn(
+              'inline-flex cursor-pointer',
+              isSelected && 'bg-accent rounded-sm'
+            )}
+          >
+            <Preview size={24}  />
+          </div>
+        )
+      })}
+    </div>
+  </div>
+</PopoverContent>
         </Popover>
       </CtrlGroup>
 
