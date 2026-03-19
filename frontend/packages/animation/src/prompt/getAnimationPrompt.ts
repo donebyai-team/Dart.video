@@ -15,7 +15,75 @@ import {
   CONTENT_COMPONENTS,
   SCENE_COMPONENTS,
   BRAND_COMPONENTS,
+  ComponentRegistration,
 } from '../registry';
+
+const VISUAL_MECHANISM_SUMMARIES: Record<string, string> = {
+  FadeIn: 'reveal elements onto the canvas',
+  SlideIn: 'reveal elements onto the canvas',
+  ScaleIn: 'reveal elements onto the canvas',
+  FadeOut: 'remove elements from the canvas',
+  SlideOut: 'remove elements from the canvas',
+  ScaleOut: 'remove elements from the canvas',
+  Stagger: 'reveal a list of items one after another',
+  TimelineGate: 'show or hide a section at a specific moment',
+  Text: 'static label or heading',
+  Typewriter: 'text that types itself out progressively',
+  WordCycle: 'a word that cycles through multiple values',
+  Counter: 'a number that animates up or down to a target value',
+  Stack: 'vertical arrangement',
+  Row: 'horizontal arrangement',
+  AbsoluteCenter: 'center content on the canvas',
+  LogoAsset: 'the brand logo',
+};
+
+function formatMechanismLine(component: ComponentRegistration): string {
+  return `${component.name} — ${VISUAL_MECHANISM_SUMMARIES[component.name] ?? component.description}`;
+}
+
+function formatMechanismSection(title: string, components: ComponentRegistration[]): string | null {
+  if (components.length === 0) return null;
+
+  return [
+    `### ${title}`,
+    ...components.map(formatMechanismLine),
+  ].join('\n');
+}
+
+function getOnlyComponentsDescriptionPrompt(): string {
+  const sections = [
+    '## AVAILABLE VISUAL MECHANISMS',
+    '',
+    "Use only these when designing your concept. Do not invent mechanisms that don't exist.",
+    formatMechanismSection(
+      'Entrances',
+      ANIMATION_PRIMITIVE_COMPONENTS.filter((component) => component.name.endsWith('In')),
+    ),
+    formatMechanismSection(
+      'Exits',
+      ANIMATION_PRIMITIVE_COMPONENTS.filter((component) => component.name.endsWith('Out')),
+    ),
+    formatMechanismSection(
+      'Sequencing',
+      ANIMATION_PRIMITIVE_COMPONENTS.filter((component) =>
+        !component.name.endsWith('In') && !component.name.endsWith('Out')
+      ),
+    ),
+    formatMechanismSection(
+      'Text',
+      CONTENT_COMPONENTS.filter((component) => component.name !== 'Counter'),
+    ),
+    formatMechanismSection(
+      'Numbers',
+      CONTENT_COMPONENTS.filter((component) => component.name === 'Counter'),
+    ),
+    formatMechanismSection('Layout', LAYOUT_COMPONENTS),
+    formatMechanismSection('Brand Assets', BRAND_COMPONENTS),
+    formatMechanismSection('Scenes', SCENE_COMPONENTS),
+  ].filter((section): section is string => Boolean(section));
+
+  return sections.join('\n\n');
+}
 
 export function getAnimationPrompt(
   opts?: {
@@ -25,15 +93,7 @@ export function getAnimationPrompt(
   // const typeDef = ANIMATION_TYPE_DEFINITIONS[animationType];
 
   if (opts?.mode === 'only_components_description') {
-    const componentSections = [
-      componentListFragment('LAYOUT', LAYOUT_COMPONENTS, { onlyDescriptions: true }),
-      componentListFragment('ANIMATION PRIMITIVES', ANIMATION_PRIMITIVE_COMPONENTS, { onlyDescriptions: true }),
-      componentListFragment('CONTENT', CONTENT_COMPONENTS, { onlyDescriptions: true }),
-      componentListFragment('SCENES', SCENE_COMPONENTS, { onlyDescriptions: true }),
-      componentListFragment('BRAND', BRAND_COMPONENTS, { onlyDescriptions: true }),
-    ];
-
-    return componentSections.join('\n');
+    return getOnlyComponentsDescriptionPrompt();
   }
 
   const sections = [

@@ -1,11 +1,13 @@
 /**
- * Prints the full LLM animation prompt to stdout.
+ * Generates prompt markdown files in src/prompt.
  *
  * Usage:
  *   pnpm prompt
  *   pnpm prompt -- --mode only_components_description
- *   pnpm prompt > prompt.txt
+ *   pnpm prompt -- --mode only_components_description --stdout
  */
+import { writeFileSync } from 'node:fs';
+import path from 'node:path';
 import { getAnimationPrompt } from '../src/prompt/getAnimationPrompt';
 
 function getFlagValue(args: string[], name: string): string | undefined {
@@ -31,4 +33,17 @@ const mode = getFlagValue(process.argv.slice(2), 'mode') as
   | 'only_components_description'
   | undefined;
 
-console.log(getAnimationPrompt(mode ? { mode } : undefined));
+const shouldPrintToStdout = process.argv.slice(2).includes('--stdout');
+const prompt = getAnimationPrompt(mode ? { mode } : undefined);
+const outputPath = path.resolve(
+  process.cwd(),
+  'src/prompt',
+  mode === 'only_components_description' ? 'prompt_list_components.md' : 'Prompt.md',
+);
+
+if (shouldPrintToStdout) {
+  console.log(prompt);
+} else {
+  writeFileSync(outputPath, `${prompt}\n`);
+  console.log(`Wrote ${path.relative(process.cwd(), outputPath)}`);
+}
