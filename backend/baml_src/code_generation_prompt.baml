@@ -40,50 +40,50 @@ Props:
 ### FadeIn
 Fade-in entrance animation (opacity 0 to 1)
 Props:
-- delay: number (optional)
-- duration: number (optional)
+- startAt: number (optional)
+- durationInFrames: number (optional)
 
 ### FadeOut
 Fade-out exit animation (opacity 1 to 0)
 Props:
-- delay: number (optional)
-- duration: number (optional)
+- startAt: number (optional)
+- durationInFrames: number (optional)
 
 ### SlideIn
 Slide-in entrance with translation and fade
 Props:
-- delay: number (optional)
-- duration: number (optional)
+- startAt: number (optional)
+- durationInFrames: number (optional)
 - direction: enum(up|down|left|right) (optional)
 - distance: number (optional)
 
 ### SlideOut
 Slide-out exit with translation and fade
 Props:
-- delay: number (optional)
-- duration: number (optional)
+- startAt: number (optional)
+- durationInFrames: number (optional)
 - direction: enum(up|down|left|right) (optional)
 - distance: number (optional)
 
 ### ScaleIn
 Scale-in entrance animation (scale 0 to 1)
 Props:
-- delay: number (optional)
-- duration: number (optional)
+- startAt: number (optional)
+- durationInFrames: number (optional)
 - origin: enum(center|top|bottom|left|right) (optional)
 
 ### ScaleOut
 Scale-out exit animation (scale 1 to 0)
 Props:
-- delay: number (optional)
-- duration: number (optional)
+- startAt: number (optional)
+- durationInFrames: number (optional)
 - origin: enum(center|top|bottom|left|right) (optional)
 
 ### Stagger
 Staggers children animations with increasing delay offsets
 Props:
 - startAt: number (optional)
-- delayBetween: number (optional)
+- staggerDelay: number (optional)
 
 ### TimelineGate
 Mounts/unmounts children within a frame window, use instead of JSX conditionals
@@ -102,8 +102,8 @@ Props:
 ### Counter
 Animated number counter that tweens between values
 Props:
-- delay: number (optional)
-- duration: number (optional)
+- startAt: number (optional)
+- durationInFrames: number (optional)
 - from: number (optional)
 - to: number (required)
 - format: string (optional)
@@ -114,8 +114,8 @@ Props:
 ### Typewriter
 Progressively reveals text character by character, word, or line
 Props:
-- delay: number (optional)
-- duration: number (optional)
+- startAt: number (optional)
+- durationInFrames: number (optional)
 - text: string (required)
 - mode: enum(char|word|line) (optional)
 - variant: enum(caption|label|body|subheading|heading|display) (optional)
@@ -123,7 +123,7 @@ Props:
 ### WordCycle
 Cycles through an array of words with animated transitions
 Props:
-- delay: number (optional)
+- startAt: number (optional)
 - words: array (required)
 - holdDuration: number (optional)
 - transitionDuration: number (optional)
@@ -139,16 +139,39 @@ Props:
 - heading: string (required)
 - subheading: string (optional)
 - eyebrow: string (optional)
-- delay: number (optional)
+- startAt: number (optional)
 
 
 ## BRAND
 
 ### LogoAsset
-Brand logo from ThemeProvider. Falls back to a placeholder if no logo is configured. Wrap in any animation primitive (FadeIn, SlideIn, ScaleIn etc.) to animate. Width and height define the bounding box; the logo always keeps its aspect ratio.
+Brand logo from ThemeProvider. Falls back to a placeholder if no logo is configured. Wrap in any animation primitive (FadeIn, SlideIn, ScaleIn etc.) to animate. the logo always keeps its aspect ratio.
 Props:
+- src: string (optional)
 - width: number (optional)
 - height: number (optional)
+
+### ImageAsset
+Generic image primitive for uploaded or remote media.
+Props:
+- src: string (optional)
+- width: number (optional)
+- height: number (optional)
+
+### VideoAsset
+Generic video primitive for uploaded media. Width and height define the rendered box; the video always preserves aspect ratio and stays fully visible.
+Props:
+- src: string (optional)
+- width: number (optional)
+- height: number (optional)
+
+### IconAsset
+Icon asset from the icon library.
+Props:
+- name: string (required)
+- size: number (optional)
+- borderRadius: number (optional)
+- id: string (optional)
 
 
 ## SPACING (use these values for gap/padding/margin):
@@ -255,27 +278,26 @@ TitleCard — a full hero title composition with heading and subheading
 template_string FrameDurationRules() #"
 ## FRAME DURATION RULES
 
-**All timing values are in frames (fps=30).**
+All timing values are in frames (fps=30).
 Never use decimal values for duration or startAt.
 Always use whole numbers: durationInFrames={20} not durationInFrames={0.7}
 
 Build the timeline element by element. Each element's startAt is:
-  startAt = previous element's (startAt + duration) + hold
+  startAt = previous element's (startAt + durationInFrames) + hold
 
 Default hold between elements: 6 frames
 Hold between sections (topic changes): 15 frames
-Hold at end after last element: 20 frames minimum
 
 ## Sequential example
 
 Logo fades in
-  startAt=0  duration=20  ends=20
+  startAt=0  durationInFrames=20  ends=20
 
 Heading slides in (6 frame hold)
-  startAt=26  duration=20  ends=46
+  startAt=26  durationInFrames=20  ends=46
 
 Subheading fades in (6 frame hold)
-  startAt=52  duration=20  ends=72
+  startAt=52  durationInFrames=20  ends=72
 
 ## Elements that form one visual unit — start together
 
@@ -293,6 +315,18 @@ next element startAt = stagger end frame + hold
 char mode:  durationInFrames = text.length × 2
 word mode:  durationInFrames = wordCount × 10
 next element startAt = Typewriter startAt + durationInFrames + hold
+
+## WordCycle duration
+
+durationInFrames = words.length × (holdDuration + transitionDuration)
+next element startAt = WordCycle startAt + durationInFrames + hold
+
+## settledFrame
+
+Calculate settledFrame as max(startAt + durationInFrames) across all elements.
+For Stagger: startAt + ((childCount - 1) × delayBetween) + childDuration
+For WordCycle: startAt + (words.length × (holdDuration + transitionDuration))
+Return it in your JSON response alongside the code.
 
 ## Total duration targets
 Never exceed 240 frames for a single slide.

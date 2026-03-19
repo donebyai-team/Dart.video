@@ -86,27 +86,15 @@ function getStringProp(openingElement: any, name: string): string | undefined {
   return typeof value === "string" ? value : undefined;
 }
 
-function collectTypographyVariants(node: any, variants: string[]): void {
-  if (!node || node.type !== "JSXElement") return;
+function getDirectTypographyVariant(node: any): string | null {
+  if (!node || node.type !== "JSXElement") return null;
 
   const openingElement = node.openingElement;
   const name = getJsxName(openingElement?.name);
-  if (!name) return;
+  if (!name || !TYPOGRAPHY_COMPONENTS.has(name)) return null;
 
-  if (name === "Row") return;
-
-  if (TYPOGRAPHY_COMPONENTS.has(name)) {
-    const variant = getStringProp(openingElement, "variant");
-    if (variant && variant in VARIANT_SIZE) {
-      variants.push(variant);
-    }
-  }
-
-  for (const child of node.children ?? []) {
-    if (child?.type === "JSXElement") {
-      collectTypographyVariants(child, variants);
-    }
-  }
+  const variant = getStringProp(openingElement, "variant");
+  return variant && variant in VARIANT_SIZE ? variant : null;
 }
 
 /*
@@ -142,8 +130,9 @@ export function validateVisualConsistancyRules(code: string): VisualConsistancyR
 
       const variants: string[] = [];
       for (const child of path.node.children ?? []) {
-        if (child?.type === "JSXElement") {
-          collectTypographyVariants(child, variants);
+        const variant = getDirectTypographyVariant(child);
+        if (variant) {
+          variants.push(variant);
         }
       }
 

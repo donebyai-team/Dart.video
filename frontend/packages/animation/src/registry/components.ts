@@ -18,31 +18,41 @@ export interface ComponentRegistration {
   animationTypes: AnimationTypeName[];
   /** One-line description for prompt generation. */
   description: string;
+  /** Optional contract for validator AST duration fallback. */
+  durationContract?: {
+    kind: 'fixed' | 'formula' | 'manual';
+    strategy?: 'wordCycle';
+  };
 }
 
 // ── Schemas For LLM exposed prompt ────────────────────────────────────────────────────────────────
 
 const frameTimingSchema = {
-  delay: z.number().optional().describe('Frames before animation starts'),
-  duration: z.number().optional().describe('Animation duration in frames'),
+  startAt: z.number().default(0).optional().describe('Absolute frame when animation starts'),
+  durationInFrames: z.number().describe('Animation duration in frames'),
 };
 
+const fixedFrameTimingSchema = (durationInFrames: number) => ({
+  startAt: z.number().default(0).optional().describe('Absolute frame when animation starts'),
+  durationInFrames: z.number().default(durationInFrames).optional().describe('Animation duration in frames'),
+});
+
 export const FadeInSchema = z.object({
-  ...frameTimingSchema,
+  ...fixedFrameTimingSchema(30),
   children: z.any().optional(),
   style: z.any().optional(),
   className: z.string().optional(),
 });
 
 export const FadeOutSchema = z.object({
-  ...frameTimingSchema,
+  ...fixedFrameTimingSchema(30),
   children: z.any().optional(),
   style: z.any().optional(),
   className: z.string().optional(),
 });
 
 export const SlideInSchema = z.object({
-  ...frameTimingSchema,
+  ...fixedFrameTimingSchema(30),
   direction: z.enum(['up', 'down', 'left', 'right']).optional(),
   distance: z.number().optional(),
   children: z.any().optional(),
@@ -51,7 +61,7 @@ export const SlideInSchema = z.object({
 });
 
 export const SlideOutSchema = z.object({
-  ...frameTimingSchema,
+  ...fixedFrameTimingSchema(30),
   direction: z.enum(['up', 'down', 'left', 'right']).optional(),
   distance: z.number().optional(),
   children: z.any().optional(),
@@ -60,7 +70,7 @@ export const SlideOutSchema = z.object({
 });
 
 export const ScaleInSchema = z.object({
-  ...frameTimingSchema,
+  ...fixedFrameTimingSchema(30),
   origin: z.enum(['center', 'top', 'bottom', 'left', 'right']).optional(),
   children: z.any().optional(),
   style: z.any().optional(),
@@ -68,7 +78,7 @@ export const ScaleInSchema = z.object({
 });
 
 export const ScaleOutSchema = z.object({
-  ...frameTimingSchema,
+  ...fixedFrameTimingSchema(30),
   origin: z.enum(['center', 'top', 'bottom', 'left', 'right']).optional(),
   children: z.any().optional(),
   style: z.any().optional(),
@@ -76,8 +86,8 @@ export const ScaleOutSchema = z.object({
 });
 
 export const StaggerSchema = z.object({
-  startAt: z.number().optional(),
-  delayBetween: z.number().optional(),
+  startAt: z.number().default(0).optional(),
+  staggerDelay: z.number().optional(),
   children: z.any().optional(),
 });
 
@@ -120,7 +130,7 @@ export const TextSchema = z.object({
 });
 
 export const CounterSchema = z.object({
-  ...frameTimingSchema,
+  ...fixedFrameTimingSchema(45),
   from: z.number().optional(),
   to: z.number(),
   format: z.string().optional(),
@@ -132,7 +142,7 @@ export const CounterSchema = z.object({
 });
 
 export const TypewriterSchema = z.object({
-  ...frameTimingSchema,
+  ...fixedFrameTimingSchema(60),
   text: z.string(),
   mode: z.enum(['char', 'word', 'line']).optional(),
   variant: z.enum(['caption', 'label', 'body', 'subheading', 'heading', 'display']).optional(),
@@ -141,10 +151,10 @@ export const TypewriterSchema = z.object({
 });
 
 export const WordCycleSchema = z.object({
-  delay: z.number().optional(),
+  startAt: z.number().default(0).optional(),
   words: z.array(z.string()),
-  holdDuration: z.number().optional(),
-  transitionDuration: z.number().optional(),
+  holdDuration: z.number().default(45).optional(),
+  transitionDuration: z.number().default(12).optional(),
   transition: z.enum(['flipY', 'fadeSwap', 'slideUp']).optional(),
   variant: z.enum(['caption', 'label', 'body', 'subheading', 'heading', 'display']).optional(),
   style: z.any().optional(),
@@ -155,7 +165,7 @@ export const TitleCardSchema = z.object({
   heading: z.string(),
   subheading: z.string().optional(),
   eyebrow: z.string().optional(),
-  delay: z.number().optional(),
+  startAt: z.number().default(0).optional(),
 });
 
 export const LogoAssetSchema = z.object({
@@ -236,57 +246,64 @@ export const ANIMATION_PRIMITIVE_COMPONENTS: ComponentRegistration[] = [
     name: 'FadeIn',
     type: 'animation',
     fullSchema: FadeInSchema,
-    editorProps: ['delay', 'duration'],
+    editorProps: ['startAt', 'durationInFrames'],
     animationTypes: ALL_TYPES,
     description: 'Fade-in entrance animation (opacity 0 to 1)',
+    durationContract: { kind: 'fixed' },
   },
   {
     name: 'FadeOut',
     type: 'animation',
     fullSchema: FadeOutSchema,
-    editorProps: ['delay', 'duration'],
+    editorProps: ['startAt', 'durationInFrames'],
     animationTypes: ALL_TYPES,
     description: 'Fade-out exit animation (opacity 1 to 0)',
+    durationContract: { kind: 'fixed' },
   },
   {
     name: 'SlideIn',
     type: 'animation',
     fullSchema: SlideInSchema,
-    editorProps: ['delay', 'duration', 'direction', 'distance'],
+    editorProps: ['startAt', 'durationInFrames', 'direction', 'distance'],
     animationTypes: ALL_TYPES,
     description: 'Slide-in entrance with translation and fade',
+    durationContract: { kind: 'fixed' },
   },
   {
     name: 'SlideOut',
     type: 'animation',
     fullSchema: SlideOutSchema,
-    editorProps: ['delay', 'duration', 'direction', 'distance'],
+    editorProps: ['startAt', 'durationInFrames', 'direction', 'distance'],
     animationTypes: ALL_TYPES,
     description: 'Slide-out exit with translation and fade',
+    durationContract: { kind: 'fixed' },
   },
   {
     name: 'ScaleIn',
     type: 'animation',
     fullSchema: ScaleInSchema,
-    editorProps: ['delay', 'duration', 'origin'],
+    editorProps: ['startAt', 'durationInFrames', 'origin'],
     animationTypes: ALL_TYPES,
     description: 'Scale-in entrance animation (scale 0 to 1)',
+    durationContract: { kind: 'fixed' },
   },
   {
     name: 'ScaleOut',
     type: 'animation',
     fullSchema: ScaleOutSchema,
-    editorProps: ['delay', 'duration', 'origin'],
+    editorProps: ['startAt', 'durationInFrames', 'origin'],
     animationTypes: ALL_TYPES,
     description: 'Scale-out exit animation (scale 1 to 0)',
+    durationContract: { kind: 'fixed' },
   },
   {
     name: 'Stagger',
     type: 'animation',
     fullSchema: StaggerSchema,
-    editorProps: ['startAt', 'delayBetween'],
+    editorProps: ['startAt', 'staggerDelay'],
     animationTypes: ALL_TYPES,
     description: 'Staggers children animations with increasing delay offsets',
+    durationContract: { kind: 'manual' },
   },
   {
     name: 'TimelineGate',
@@ -311,27 +328,52 @@ export const CONTENT_COMPONENTS: ComponentRegistration[] = [
     name: 'Counter',
     type: 'content',
     fullSchema: CounterSchema,
-    editorProps: ['from', 'to', 'format', 'prefix', 'suffix', 'delay', 'duration'],
+    editorProps: ['from', 'to', 'format', 'prefix', 'suffix', 'startAt', 'durationInFrames'],
     animationTypes: ['text', 'data', 'presentation', 'custom'],
     description: 'Animated number counter that tweens between values',
+    durationContract: { kind: 'fixed' },
   },
   {
     name: 'Typewriter',
     type: 'content',
     fullSchema: TypewriterSchema,
-    editorProps: ['text', 'mode', 'delay', 'duration'],
+    editorProps: ['text', 'mode', 'startAt', 'durationInFrames'],
     animationTypes: ['text', 'presentation', 'social', 'custom'],
     description: 'Progressively reveals text character by character, word, or line',
+    durationContract: { kind: 'fixed' },
   },
   {
     name: 'WordCycle',
     type: 'content',
     fullSchema: WordCycleSchema,
-    editorProps: ['words', 'holdDuration', 'transitionDuration', 'transition'],
+    editorProps: ['startAt', 'words', 'holdDuration', 'transitionDuration', 'transition'],
     animationTypes: ['text', 'social', 'custom'],
     description: 'Cycles through an array of words with animated transitions',
+    durationContract: { kind: 'formula', strategy: 'wordCycle' },
   },
 ];
+
+/**
+ * Static validator duration source of truth.
+ *
+ * When adding a new primitive that contributes to total animation duration:
+ * - add its JSX name here
+ * - update the renderer JSX duration analyzer if it needs custom timing semantics
+ *
+ * Custom scenes only work automatically when they are composed from these
+ * existing primitives. If a custom scene has its own internal timing logic,
+ * it must store or expose its duration in frames separately.
+ */
+export const ANIMATION_PRIMIIVES = [
+  'FadeIn',
+  'FadeOut',
+  'SlideIn',
+  'SlideOut',
+  'ScaleIn',
+  'ScaleOut',
+  'Counter',
+  'Typewriter',
+] as const;
 
 export const SCENE_COMPONENTS: ComponentRegistration[] = [
   {
@@ -351,7 +393,7 @@ export const BRAND_COMPONENTS: ComponentRegistration[] = [
     fullSchema: LogoAssetSchema,
     editorProps: ['src', 'width', 'height'],
     animationTypes: ALL_TYPES,
-    description: 'Brand logo from ThemeProvider. Falls back to a placeholder if no logo is configured. Wrap in any animation primitive (FadeIn, SlideIn, ScaleIn etc.) to animate. Width and height define the bounding box; the logo always keeps its aspect ratio.',
+    description: 'Brand logo from ThemeProvider. Falls back to a placeholder if no logo is configured. Wrap in any animation primitive (FadeIn, SlideIn, ScaleIn etc.) to animate. the logo always keeps its aspect ratio.',
   },
   {
     name: 'ImageAsset',
@@ -359,7 +401,7 @@ export const BRAND_COMPONENTS: ComponentRegistration[] = [
     fullSchema: ImageAssetSchema,
     editorProps: ['src', 'width', 'height'],
     animationTypes: ALL_TYPES,
-    description: 'Generic image primitive for uploaded or remote media. Width and height define the rendered box; the image fills that box according to objectFit and can be edited from the animation toolbar.',
+    description: 'Generic image primitive for uploaded or remote media.'
   },
   {
     name: 'VideoAsset',
@@ -375,7 +417,7 @@ export const BRAND_COMPONENTS: ComponentRegistration[] = [
     fullSchema: IconAssetSchema,
     editorProps: ['name', 'size'],
     animationTypes: ALL_TYPES,
-    description: 'Icon asset from the icon library. Wrap in FadeIn, SlideIn, or ScaleIn to animate. Use name to specify the icon slug. Size controls dimensions, and the animation toolbar can override icon color, background color, and radius.',
+    description: 'Icon asset from the icon library.'
   },
 ];
 
@@ -394,6 +436,34 @@ export const REGISTERED_COMPONENT_NAMES = new Set(COMPONENT_REGISTRY.map((c) => 
 export const LAYOUT_COMPONENT_NAMES = new Set(
   COMPONENT_REGISTRY.filter((c) => c.type === 'layout').map((c) => c.name),
 );
+
+function extractSchemaDefault(schema: z.ZodTypeAny): unknown {
+  if (schema instanceof z.ZodOptional || schema instanceof z.ZodNullable) {
+    return extractSchemaDefault(schema._def.innerType);
+  }
+  if (schema instanceof z.ZodDefault) {
+    return schema._def.defaultValue();
+  }
+  return undefined;
+}
+
+export function getComponentTimingDefaults(name: string): { startAt?: number; durationInFrames?: number } | null {
+  const registration = getComponentRegistration(name);
+  if (!registration) return null;
+
+  const shape = registration.fullSchema.shape;
+  const startAtDefault = shape.startAt ? extractSchemaDefault(shape.startAt) : undefined;
+  const durationDefault = shape.durationInFrames ? extractSchemaDefault(shape.durationInFrames) : undefined;
+  const startAt = typeof startAtDefault === 'number'
+    ? startAtDefault
+    : undefined;
+  const durationInFrames = typeof durationDefault === 'number'
+    ? durationDefault
+    : undefined;
+
+  if (startAt === undefined && durationInFrames === undefined) return null;
+  return { startAt, durationInFrames };
+}
 
 /** Lowercase name → registration lookup. Built once. */
 const REGISTRY_BY_LOWERCASE = new Map(
