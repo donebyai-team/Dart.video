@@ -1,5 +1,6 @@
 'use client'
 
+import { FIGMA_OAUTH_POPUP_MESSAGE_TYPE } from '@/components/figma/oauth'
 import { routes } from '@coasterai/ui-core/routing'
 import { FallbackSpinner } from '../../../../atoms/FallbackSpinner'
 import { useSearchParams } from 'next/navigation'
@@ -17,6 +18,10 @@ export default function Page() {
 
   useEffect(() => {
     const handleCallback = async () => {
+      if (!searchParams) {
+        throw new Error('Missing search params')
+      }
+
       // If its a microsoft callback, we get back a tenant and code is null
       // If its a google callback, we get back a code and tenant is null
       const { code, tenant, stateHash, error } = {
@@ -33,7 +38,7 @@ export default function Page() {
         console.error('callback error: ', error ?? 'no code')
       }
 
-      log.info('callback', { code, tenant, stateHash, error })
+      log.info({ code, tenant, stateHash, error }, 'callback')
       const res = await portalClient.oauthCallback(
         {
           state: stateHash,
@@ -43,15 +48,41 @@ export default function Page() {
           timeoutMs: 30000
         }
       )
-      log.info('callback answer', res)
+      log.info({ redirectUrl: res.redirectUrl }, 'callback answer')
+
+      if (window.opener && !window.opener.closed) {
+        window.opener.postMessage(
+          {
+            type: FIGMA_OAUTH_POPUP_MESSAGE_TYPE,
+            status: 'success',
+            redirectUrl: res.redirectUrl
+          },
+          window.location.origin
+        )
+        window.close()
+        return
+      }
 
       router.push(res.redirectUrl)
     }
 
     handleCallback().catch((err) => {
-      toast.error(getConnectError(err));
-      router.push(routes.app.home);
-    });
+      if (window.opener && !window.opener.closed) {
+        window.opener.postMessage(
+          {
+            type: FIGMA_OAUTH_POPUP_MESSAGE_TYPE,
+            status: 'error',
+            error: getConnectError(err)
+          },
+          window.location.origin
+        )
+        window.close()
+        return
+      }
+
+      toast.error(getConnectError(err))
+      router.push(routes.app.home)
+    })
 
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
