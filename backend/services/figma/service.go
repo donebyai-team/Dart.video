@@ -93,9 +93,6 @@ func (s *service) ListFrames(ctx context.Context, orgID string, req *pbportal.Li
 	if err != nil {
 		return nil, err
 	}
-	s.logger.Info("List frames for org",
-		zap.String("file", req.FileKey),
-		zap.String("orgID", orgID))
 
 	fileKey := req.FileKey
 	if fileKey == "" {
@@ -105,6 +102,10 @@ func (s *service) ListFrames(ctx context.Context, orgID string, req *pbportal.Li
 			return nil, err
 		}
 	}
+
+	s.logger.Info("List frames for org",
+		zap.String("file", fileKey),
+		zap.String("orgID", orgID))
 
 	fileResp, err := s.getFile(ctx, integration.AccessToken, fileKey)
 	if err != nil {
@@ -297,6 +298,10 @@ func doFigmaRequestWithRetry(ctx context.Context, req *http.Request) (*http.Resp
 		}
 
 		retryDelay := retryAfterDelay(resp.Header.Get("Retry-After"))
+		if retryDelay > time.Minute {
+			return nil, fmt.Errorf("retry delay too long: %v", retryDelay)
+		}
+
 		io.Copy(io.Discard, resp.Body)
 		resp.Body.Close()
 
