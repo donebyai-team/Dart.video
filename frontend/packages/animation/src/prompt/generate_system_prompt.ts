@@ -11,7 +11,6 @@ import {
   componentListFragment,
   spacingFragment,
   typographyFragment,
-  timingGuidanceFragment,
   exampleFragment,
 } from './fragments';
 
@@ -50,7 +49,7 @@ function formatMechanismSection(title: string, components: ComponentRegistration
 
 function getOnlyComponentsDescriptionPrompt(): string {
   const sections = [
-    '## AVAILABLE VISUAL MECHANISMS',
+    '## AVAILABLE COMPONENTS',
     '',
     "Use only these when designing your concept. Do not invent mechanisms that don't exist.",
     formatMechanismSection(
@@ -105,7 +104,7 @@ export function getAnimationPrompt(
     spacingFragment(),
     typographyFragment(),
     // brandTokensFragment(brand),
-    timingGuidanceFragment(),
+    // timingGuidanceFragment(),
     // typeSpecificRulesFragment(typeDef),
     exampleFragment(), 
   ];

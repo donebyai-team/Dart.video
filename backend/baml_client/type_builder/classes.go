@@ -155,6 +155,42 @@ func (t *CategoryClassView) Type() (baml.Type, error) {
 	return t.inner.Type()
 }
 
+type DataPointClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *DataPointClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *DataPointClassView) PropertyReason() (ClassPropertyView, error) {
+	return t.inner.Property("reason")
+}
+
+func (t *DataPointClassView) PropertyValue() (ClassPropertyView, error) {
+	return t.inner.Property("value")
+}
+
+func (t *TypeBuilder) DataPoint() (*DataPointClassView, error) {
+	bld, err := t.inner.Class("DataPoint")
+	if err != nil {
+		return nil, err
+	}
+	return &DataPointClassView{inner: bld}, nil
+}
+
+func (t *DataPointClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
 type EditAnimationCodeRequestClassView struct {
 	inner baml.ClassBuilder
 }
@@ -380,6 +416,42 @@ func (t *TypeBuilder) EnhancedAnimationPrompt() (*EnhancedAnimationPromptClassVi
 }
 
 func (t *EnhancedAnimationPromptClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
+type FrameRangeClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *FrameRangeClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *FrameRangeClassView) PropertyStart() (ClassPropertyView, error) {
+	return t.inner.Property("start")
+}
+
+func (t *FrameRangeClassView) PropertyEnd() (ClassPropertyView, error) {
+	return t.inner.Property("end")
+}
+
+func (t *TypeBuilder) FrameRange() (*FrameRangeClassView, error) {
+	bld, err := t.inner.Class("FrameRange")
+	if err != nil {
+		return nil, err
+	}
+	return &FrameRangeClassView{inner: bld}, nil
+}
+
+func (t *FrameRangeClassView) Type() (baml.Type, error) {
 	return t.inner.Type()
 }
 
@@ -844,6 +916,90 @@ func (t *TypeBuilder) ReGenerateAnimationCodeResponse() (*ReGenerateAnimationCod
 }
 
 func (t *ReGenerateAnimationCodeResponseClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
+type SceneClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *SceneClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *SceneClassView) PropertyIndex() (ClassPropertyView, error) {
+	return t.inner.Property("index")
+}
+
+func (t *SceneClassView) PropertyCategory() (ClassPropertyView, error) {
+	return t.inner.Property("category")
+}
+
+func (t *SceneClassView) PropertyBrief() (ClassPropertyView, error) {
+	return t.inner.Property("brief")
+}
+
+func (t *SceneClassView) PropertyFrameRange() (ClassPropertyView, error) {
+	return t.inner.Property("frameRange")
+}
+
+func (t *SceneClassView) PropertyDataPoint() (ClassPropertyView, error) {
+	return t.inner.Property("dataPoint")
+}
+
+func (t *TypeBuilder) Scene() (*SceneClassView, error) {
+	bld, err := t.inner.Class("Scene")
+	if err != nil {
+		return nil, err
+	}
+	return &SceneClassView{inner: bld}, nil
+}
+
+func (t *SceneClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
+type SceneElementClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *SceneElementClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *SceneElementClassView) PropertyComponent() (ClassPropertyView, error) {
+	return t.inner.Property("component")
+}
+
+func (t *SceneElementClassView) PropertyChildren() (ClassPropertyView, error) {
+	return t.inner.Property("children")
+}
+
+func (t *TypeBuilder) SceneElement() (*SceneElementClassView, error) {
+	bld, err := t.inner.Class("SceneElement")
+	if err != nil {
+		return nil, err
+	}
+	return &SceneElementClassView{inner: bld}, nil
+}
+
+func (t *SceneElementClassView) Type() (baml.Type, error) {
 	return t.inner.Type()
 }
 

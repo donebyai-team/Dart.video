@@ -152,3 +152,96 @@ func (e AnimationType) Encode() (*cffi.HostValue, error) {
 func (e AnimationType) BamlTypeName() string {
 	return "AnimationType"
 }
+
+type SceneCategory string
+
+const (
+	SceneCategoryTITLE             SceneCategory = "TITLE"
+	SceneCategoryOUTRO             SceneCategory = "OUTRO"
+	SceneCategoryTRANSITION        SceneCategory = "TRANSITION"
+	SceneCategorySINGLE_STAT       SceneCategory = "SINGLE_STAT"
+	SceneCategoryCOMPARISON        SceneCategory = "COMPARISON"
+	SceneCategoryTREND             SceneCategory = "TREND"
+	SceneCategoryBREAKDOWN         SceneCategory = "BREAKDOWN"
+	SceneCategoryFEATURE_HIGHLIGHT SceneCategory = "FEATURE_HIGHLIGHT"
+	SceneCategoryFEATURE_LIST      SceneCategory = "FEATURE_LIST"
+	SceneCategoryWORKFLOW          SceneCategory = "WORKFLOW"
+	SceneCategoryTESTIMONIAL       SceneCategory = "TESTIMONIAL"
+	SceneCategoryLOGO_WALL         SceneCategory = "LOGO_WALL"
+	SceneCategoryCASE_STUDY_STAT   SceneCategory = "CASE_STUDY_STAT"
+	SceneCategoryPROBLEM           SceneCategory = "PROBLEM"
+	SceneCategorySOLUTION          SceneCategory = "SOLUTION"
+	SceneCategoryHOW_IT_WORKS      SceneCategory = "HOW_IT_WORKS"
+)
+
+// Values returns all allowed values for the SceneCategory type.
+func (SceneCategory) Values() []SceneCategory {
+	return []SceneCategory{
+		SceneCategoryTITLE,
+		SceneCategoryOUTRO,
+		SceneCategoryTRANSITION,
+		SceneCategorySINGLE_STAT,
+		SceneCategoryCOMPARISON,
+		SceneCategoryTREND,
+		SceneCategoryBREAKDOWN,
+		SceneCategoryFEATURE_HIGHLIGHT,
+		SceneCategoryFEATURE_LIST,
+		SceneCategoryWORKFLOW,
+		SceneCategoryTESTIMONIAL,
+		SceneCategoryLOGO_WALL,
+		SceneCategoryCASE_STUDY_STAT,
+		SceneCategoryPROBLEM,
+		SceneCategorySOLUTION,
+		SceneCategoryHOW_IT_WORKS,
+	}
+}
+
+// IsValid checks whether the given SceneCategory value is valid.
+func (e SceneCategory) IsValid() bool {
+
+	for _, v := range e.Values() {
+		if e == v {
+			return true
+		}
+	}
+	return false
+
+}
+
+// MarshalJSON customizes JSON marshaling for SceneCategory.
+func (e SceneCategory) MarshalJSON() ([]byte, error) {
+	if !e.IsValid() {
+		return nil, fmt.Errorf("invalid SceneCategory: %q", e)
+	}
+	return json.Marshal(string(e))
+}
+
+// UnmarshalJSON customizes JSON unmarshaling for SceneCategory.
+func (e *SceneCategory) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return err
+	}
+	*e = SceneCategory(s)
+	if !e.IsValid() {
+		return fmt.Errorf("invalid SceneCategory: %q", s)
+	}
+	return nil
+}
+
+func (e *SceneCategory) Decode(holder *cffi.CFFIValueEnum, typeMap baml.TypeMap) {
+	name := holder.Name
+	if name.Name != "SceneCategory" && name.Namespace != cffi.CFFITypeNamespace_TYPES {
+		panic(fmt.Sprintf("expected types.SceneCategory, got %s.%s", string(name.Namespace.String()), string(name.Name)))
+	}
+	value := holder.Value
+	*e = SceneCategory(value)
+}
+
+func (e SceneCategory) Encode() (*cffi.HostValue, error) {
+	return baml.EncodeEnum("SceneCategory", string(e), false)
+}
+
+func (e SceneCategory) BamlTypeName() string {
+	return "SceneCategory"
+}

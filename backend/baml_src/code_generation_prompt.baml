@@ -179,69 +179,10 @@ Props:
 
 ## TYPOGRAPHY variants:
 caption | label | body | subheading | heading | display — never hardcode font sizes
-
-## TIMING GUIDANCE (fps=30, so 30 frames = 1 second):
-
-- Typical entrance: 15-25 frames
-- Typical exit: 10-15 frames
-- Stagger between items: 6-10 frames
-- Counter animation: 30-60 frames
-- Typewriter per character: 2-3 frames (set duration = text.length * 2)
-- Hold before next section: 10-20 frames
-"#
-
-template_string CodeGenerationMustHave() #"
-## ANIMATION QUALITY
-
-- Keep text minimal — one or two key messages per animation, never more than five text elements total.
-- Stagger reveals rather than showing everything at once — give each element room to breathe.
-- Prefer slow, deliberate timing — entrances at 20-25 frames feel confident, rushed animations at 8-10 frames feel cheap.
-- Leave generous hold time between sections — do not animate continuously from frame 0 to the end.
-- Never stack more than three animation layers deep — avoid wrapping FadeIn inside SlideIn inside ScaleIn.
-- ** One dominant visual element per animation — a single Counter, a single heading, a single logo. Supporting elements should feel secondary.**
-- Prefer a single focal point centered on the canvas over busy multi-column layouts.
-- Whitespace is intentional — a centered heading with room around it reads better than content filling the full canvas.`;
-"#
-
-template_string CodeGenerationRules() #"
-## RULES:
-
-The following rules are strict and must always be followed when generating the component.
-
-## Component contract
-- Component receives no props — export as: export default function RemoteComponent() { ... }
-- Never import from "remotion" or any other library.
-- Never use useCurrentFrame, interpolate, spring, or any Remotion hook directly.
-
-## Layout
-- SafeArea must always be the outermost wrapper. Nothing renders outside it.
-- Every visible element must be a direct child of Stack, Row, or AbsoluteCenter — never place components as siblings without a layout primitive.
-- Use Stack for vertical arrangement, Row for horizontal. Nest them for complex layouts.
-- Never use position:absolute, position:fixed, or position:relative — AbsoluteCenter is the only component that handles absolute positioning.
-- Never create wrapper divs purely for layout — use Stack and Row instead.
-- Never animate an empty div — every animation primitive must wrap visible content.
-- Plain React divs are allowed only for geometric shapes and decorative elements (circles, dividers, lines). Never for layout.
-- Spacing values for gap, padding, margin must be token values only mentioned above
-
-## Styling
-- Never set color, fontSize, fontWeight, letterSpacing, or fontFamily in style props — the design system controls these automatically.
-- Never hardcode hex colors or rgba color values.
-- Never hardcode font sizes — use Text variant prop instead.
-- style props are for geometry and layout only: width, height, maxWidth, borderRadius, overflow, padding, margin.
-
-## Animation
-- Never use JSX conditionals for animated elements — use TimelineGate instead.
-- Never animate an empty or invisible element.
-- Always wrap content in an animation primitive to animate it — content primitives (Text, Counter, LogoAsset) never animate themselves.
-- Width and height on LogoAsset define its bounding box; the logo remains contained without distortion.
-
-## Safety
-- Only use primitives, layout components from the AVAILABLE list. Never invent new component names.
-- Never use className for layout or styling — it is not supported in the animation runtime.
 "#
 
 template_string AllComponentsList() #"
-## AVAILABLE VISUAL MECHANISMS
+## AVAILABLE COMPONENTS
 
 Use only these when designing your concept. Do not invent mechanisms that don't exist.
 
@@ -283,59 +224,139 @@ IconAsset — Icon asset from the icon library.
 TitleCard — Pre-built hero title card composition with heading, subheading, and eyebrow
 "#
 
-template_string FrameDurationRules() #"
-## FRAME DURATION RULES
+// RULES
+template_string SceneDesignPrinciples() #"
+## SCENE DESIGN PRINCIPLES
 
-All timing values are in frames (fps=30).
-Never use decimal values for duration or startAt.
-Always use whole numbers: durationInFrames={20} not durationInFrames={0.7}
+- One idea per scene. Never combine two messages in one scene.
+- One dominant visual element — a single Counter, a single heading, a single logo.
+  Everything else is supporting.
+- Keep text minimal — at most two key messages per scene, never more than five
+  text elements total.
+- Stagger reveals — never show all elements at once. Give each element room to enter.
+- Prefer a single focal point centered on canvas over busy multi-column layouts.
+- Whitespace is intentional — a centered heading with space around it reads better
+  than content filling the full canvas.
+- Use FocusColor on the dominant element. Never on layout.
+- Prefer slow, deliberate timing — entrances at 20-25 frames feel confident, rushed at 8-10 feel cheap.
+- Leave generous hold time between sections.
+ - Never stack more than three animation layers deep.
+"#
 
-Build the timeline element by element. Each element's startAt is:
+template_string CodeGenerationRules() #"
+## RULES:
+
+The following rules are strict and must always be followed when generating the component.
+
+## Component contract
+- Component receives no props — export as: export default function RemoteComponent() { ... }
+- Never import from "remotion" or any other library.
+- Never use useCurrentFrame, interpolate, spring, or any Remotion hook directly.
+
+## Layout
+- SafeArea must always be the outermost wrapper. Nothing renders outside it.
+- Every visible element must be a direct child of Stack, Row, or AbsoluteCenter — never place components as siblings without a layout primitive.
+- Use Stack for vertical arrangement, Row for horizontal. Nest them for complex layouts.
+- Never use position:absolute, position:fixed, or position:relative — AbsoluteCenter is the only component that handles absolute positioning.
+- Never create wrapper divs purely for layout — use Stack and Row instead.
+- Never animate an empty div — every animation primitive must wrap visible content.
+- Plain React divs are allowed only for geometric shapes and decorative elements (circles, dividers, lines). Never for layout.
+- Spacing values for gap, padding, margin must be token values only mentioned above
+
+## Styling
+- Never set color, fontSize, fontWeight, letterSpacing, or fontFamily in style props — the design system controls these automatically.
+- Never hardcode hex colors or rgba color values.
+- Never hardcode font sizes — use Text variant prop instead.
+- style props are for geometry and layout only: width, height, maxWidth, borderRadius, overflow, padding, margin.
+
+## Animation
+- Never use JSX conditionals for animated elements — use TimelineGate instead.
+- Never animate an empty or invisible element.
+- Always wrap content in an animation primitive to animate it — content primitives (Text, Counter, LogoAsset) never animate themselves.
+- Width and height on LogoAsset define its bounding box; the logo remains contained without distortion.
+
+## Safety
+- Only use primitives, layout components from the AVAILABLE list. Never invent new component names.
+- Never use className for layout or styling — it is not supported in the animation runtime.
+"#
+
+template_string PlannerTimingGuidance() #"
+## TIMING GUIDANCE (30 frames = 1 second)
+  ### Scene Duration Budgets
+  Title / outro           — 60-90 frames
+  Single stat             — 90-120 frames
+  Comparison              — 120-150 frames
+  Feature highlight       — 120-180 frames
+  Workflow / how-it-works — 150-210 frames
+
+  ### Content Minimums (to inform frameRange allocation)
+  Counter                 — needs at least 90 frames total
+  Typewriter              — needs ~2 frames per character minimum
+  WordCycle               — needs at least 40 frames per word
+  Stagger of 3+ items     — needs at least 90 frames total
+
+  ### Total Video Budget
+  Distribute frameRange across scenes to sum close to otal Video Budget given below.
+"#
+
+template_string TimingAndFrameRules() #"
+## TIMING AND FRAME RULES (fps=30, 30 frames = 1 second)
+
+### General
+- All timing values are whole numbers only. Never decimals.
+  durationInFrames={20} ✓   durationInFrames={0.7} ✗
+- Never animate continuously — every scene must have a hold period.
+- Never stack entrance duration — if a parent SlideIn runs 20 frames,
+  its child startAt is 0, not delayed again.
+
+### Entrance / Exit
+- Entrance: 15-25 frames (prefer 20-25 for confident feel, never below 15)
+- Exit: 10-15 frames (always faster than entrance)
+- ScaleIn: 20-30 frames
+
+### Hold
+- Default hold between elements: 6 frames
+- Hold between sections (topic change): 15 frames
+- Minimum hold before exit: 20 frames preferred 30+
+- Every animation must have at least 6 frames of settled state before anything else moves
+
+### Timeline Construction
+Build element by element. Each element's startAt is:
   startAt = previous element's (startAt + durationInFrames) + hold
 
-Default hold between elements: 6 frames
-Hold between sections (topic changes): 15 frames
+Sequential example:
+  Logo fades in       startAt=0,  durationInFrames=20, ends=20
+  Heading slides in   startAt=26, durationInFrames=20, ends=46  (6 frame hold)
+  Subtext fades in    startAt=52, durationInFrames=20, ends=72  (6 frame hold)
 
-## Sequential example
+Elements that form one visual unit start together (same startAt):
+  Counter and its label
+  Heading and eyebrow
+  Logo and company name
 
-Logo fades in
-  startAt=0  durationInFrames=20  ends=20
+### Stagger
+- Delay between items: 8-10 frames
+- All staggered children use same durationInFrames — only startAt shifts
+- Last child ends at: startAt + ((childCount - 1) × delayBetween) + childDuration
+- Next element startAt = stagger end frame + hold
 
-Heading slides in (6 frame hold)
-  startAt=26  durationInFrames=20  ends=46
+### Content Duration
+- Counter: 60-90 frames (minimum 60, longer for large numbers)
+- Typewriter char mode: durationInFrames = text.length × 2
+- Typewriter word mode: durationInFrames = wordCount × 10
+- WordCycle: durationInFrames = words.length × (holdDuration + transitionDuration)
+- Next element after Typewriter/WordCycle: startAt = their startAt + durationInFrames + hold
 
-Subheading fades in (6 frame hold)
-  startAt=52  durationInFrames=20  ends=72
+### settledFrame
+settledFrame = max(startAt + durationInFrames) across ALL elements.
 
-## Elements that form one visual unit — start together
+Special cases:
+  Stagger:   startAt + ((childCount - 1) × delayBetween) + childDuration
+  WordCycle: startAt + (words.length × (holdDuration + transitionDuration))
 
-Counter and its label    → same startAt
-Heading and eyebrow      → same startAt
-Logo and company name    → same startAt
+- settledFrame must leave at least 15 frames for exit
+- durationInFrames = settledFrame + 20
 
-## Stagger end frame
-
-last child ends at: startAt + ((childCount - 1) × delayBetween) + childDuration
-next element startAt = stagger end frame + hold
-
-## Typewriter duration
-
-char mode:  durationInFrames = text.length × 2
-word mode:  durationInFrames = wordCount × 10
-next element startAt = Typewriter startAt + durationInFrames + hold
-
-## WordCycle duration
-
-durationInFrames = words.length × (holdDuration + transitionDuration)
-next element startAt = WordCycle startAt + durationInFrames + hold
-
-## settledFrame
-
-Calculate settledFrame as max(startAt + durationInFrames) across all elements.
-For Stagger: startAt + ((childCount - 1) × delayBetween) + childDuration
-For WordCycle: startAt + (words.length × (holdDuration + transitionDuration))
-Return it in your JSON response alongside the code.
-
-## Total duration targets
-Never exceed 240 frames for a single slide.
+### Limits
+- Never exceed 240 frames for a single scene.
 "#

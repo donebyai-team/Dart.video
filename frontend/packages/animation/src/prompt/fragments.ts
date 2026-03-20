@@ -117,7 +117,7 @@ export function timingGuidanceFragment(): string {
     '',
     '- Typical entrance: 15-25 frames',
     '- Typical exit: 10-15 frames',
-    '- Stagger between items: 6-10 frames',
+    '- Stagger between items: 8-10 frames',
     '- Counter animation: 30-60 frames',
     '- Typewriter per character: 2-3 frames (set duration = text.length * 2)',
     '- Hold before next section: 10-20 frames',

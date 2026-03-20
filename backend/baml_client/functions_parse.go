@@ -307,6 +307,53 @@ func (*parse) GeneratePlanStreaming(text string, opts ...CallOptionFunc) (types.
 	return casted, nil
 }
 
+// / Parse version of GeneratePlanV2 (Takes in string and returns types.StreamingVideoGenerationPlan)
+func (*parse) GeneratePlanV2(text string, opts ...CallOptionFunc) (types.StreamingVideoGenerationPlan, error) {
+
+	var callOpts callOption
+	for _, opt := range opts {
+		opt(&callOpts)
+	}
+
+	args := baml.BamlFunctionArguments{
+		Kwargs: map[string]any{"text": text, "stream": false},
+		Env:    getEnvVars(callOpts.env),
+	}
+
+	if callOpts.clientRegistry != nil {
+		args.ClientRegistry = callOpts.clientRegistry
+	}
+
+	if callOpts.collectors != nil {
+		args.Collectors = callOpts.collectors
+	}
+
+	if callOpts.typeBuilder != nil {
+		args.TypeBuilder = callOpts.typeBuilder
+	}
+
+	if callOpts.tags != nil {
+		args.Tags = callOpts.tags
+	}
+
+	encoded, err := args.Encode()
+	if err != nil {
+		// This should never happen. if it does, please file an issue at https://github.com/boundaryml/baml/issues
+		// and include the type of the args you're passing in.
+		wrapped_err := fmt.Errorf("BAML INTERNAL ERROR: GeneratePlanV2: %w", err)
+		panic(wrapped_err)
+	}
+
+	result, err := bamlRuntime.CallFunctionParse(context.Background(), "GeneratePlanV2", encoded)
+	if err != nil {
+		return types.StreamingVideoGenerationPlan{}, err
+	}
+
+	casted := (result).(types.StreamingVideoGenerationPlan)
+
+	return casted, nil
+}
+
 // / Parse version of MatchCategories (Takes in string and returns types.MatchCategoriesResponse)
 func (*parse) MatchCategories(text string, opts ...CallOptionFunc) (types.MatchCategoriesResponse, error) {
 
