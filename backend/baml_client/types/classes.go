@@ -103,6 +103,7 @@ type AskUserQuestion struct {
 	Question_text      string   `json:"question_text"`
 	Options            []string `json:"options"`
 	Allow_custom_entry *bool    `json:"allow_custom_entry"`
+	ThinkingSummary    *string  `json:"thinkingSummary"`
 }
 
 func (c *AskUserQuestion) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -131,6 +132,9 @@ func (c *AskUserQuestion) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeM
 		case "allow_custom_entry":
 			c.Allow_custom_entry = baml.Decode(valueHolder).Interface().(*bool)
 
+		case "thinkingSummary":
+			c.ThinkingSummary = baml.Decode(valueHolder).Interface().(*string)
+
 		default:
 
 			panic(fmt.Sprintf("unexpected field: %s in class AskUserQuestion", key))
@@ -150,6 +154,8 @@ func (c AskUserQuestion) Encode() (*cffi.HostValue, error) {
 	fields["options"] = c.Options
 
 	fields["allow_custom_entry"] = c.Allow_custom_entry
+
+	fields["thinkingSummary"] = c.ThinkingSummary
 
 	return baml.EncodeClass("AskUserQuestion", fields, nil)
 }
@@ -1473,8 +1479,9 @@ func (c VideoBranding) BamlTypeName() string {
 }
 
 type VideoGenerationPlan struct {
-	VideoName string    `json:"videoName"`
-	Sections  []Section `json:"sections"`
+	VideoName       string    `json:"videoName"`
+	Sections        []Section `json:"sections"`
+	ThinkingSummary *string   `json:"thinkingSummary"`
 }
 
 func (c *VideoGenerationPlan) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -1497,6 +1504,9 @@ func (c *VideoGenerationPlan) Decode(holder *cffi.CFFIValueClass, typeMap baml.T
 		case "sections":
 			c.Sections = baml.Decode(valueHolder).Interface().([]Section)
 
+		case "thinkingSummary":
+			c.ThinkingSummary = baml.Decode(valueHolder).Interface().(*string)
+
 		default:
 
 			panic(fmt.Sprintf("unexpected field: %s in class VideoGenerationPlan", key))
@@ -1512,6 +1522,8 @@ func (c VideoGenerationPlan) Encode() (*cffi.HostValue, error) {
 	fields["videoName"] = c.VideoName
 
 	fields["sections"] = c.Sections
+
+	fields["thinkingSummary"] = c.ThinkingSummary
 
 	return baml.EncodeClass("VideoGenerationPlan", fields, nil)
 }

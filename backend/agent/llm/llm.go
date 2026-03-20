@@ -3,12 +3,10 @@ package llm
 import (
 	"context"
 	"fmt"
-	baml "github.com/boundaryml/baml/engine/language_client_go/pkg"
 	"github.com/shank318/coasterai/baml_client"
 	"github.com/shank318/coasterai/baml_client/types"
+	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
-	"math/rand"
-	"time"
 )
 
 // LLMService declares all LLM interactions in the pipeline.
@@ -31,113 +29,7 @@ func NewLlmService(logger *zap.Logger) LLMService {
 	return &llmService{logger: logger}
 }
 
-// streamEvent is a normalised view of one value off a BAML stream channel.
-// Both PlanSlides and SelectTemplates produce values that fit this shape;
-// the two callbacks below are the only thing that differs between them.
-type streamEvent struct {
-	isError bool
-	isFinal bool
-	err     error
-
-	// partialThinking returns the thinking text accumulated so far (may be nil).
-	partialThinking func() *string
-	// finalThinking returns the thinking text from the final result (may be nil).
-	finalThinking func() *string
-	// markDone is called when isFinal is true; it lets the caller capture the
-	// concrete final value via a closure before handleStream returns.
-	markDone func()
-}
-
-// handleStream runs the shared select-loop that both methods used to duplicate.
-// The caller is responsible for converting each channel read into a streamEvent
-// and for capturing the final typed result inside markDone.
-func (l *llmService) handleStream(
-	ctx context.Context,
-	recv func() (streamEvent, bool), // returns (event, channelOpen)
-	onThinking func(string),
-) error {
-	const streamTimeout = 30 * time.Second
-	timer := time.NewTimer(streamTimeout)
-	defer timer.Stop()
-
-	var (
-		lastThinkingLen  int
-		thinkingComplete bool
-		gotFinal         bool
-	)
-
-	for {
-		// We can't select on a generic channel, so we poll recv() in a
-		// goroutine and funnel the result back through a typed channel.
-		type recvResult struct {
-			event streamEvent
-			open  bool
-		}
-		ch := make(chan recvResult, 1)
-		go func() {
-			e, ok := recv()
-			ch <- recvResult{e, ok}
-		}()
-
-		select {
-		case <-ctx.Done():
-			return handleContextError(ctx.Err())
-
-		case <-timer.C:
-			l.logger.Error("⏰ Stream timeout - no data received within timeout period")
-			return fmt.Errorf("stream timeout after %v", streamTimeout)
-
-		case r := <-ch:
-			timer.Reset(streamTimeout)
-
-			if !r.open {
-				if !gotFinal {
-					return fmt.Errorf("stream closed without final result")
-				}
-				l.logger.Info("✅ Stream completed successfully")
-				return nil
-			}
-
-			e := r.event
-			if e.isError {
-				return fmt.Errorf("stream error: %w", e.err)
-			}
-
-			// Partial thinking update.
-			if !e.isFinal && onThinking != nil && !thinkingComplete {
-				if t := e.partialThinking(); t != nil {
-					onThinking(*t)
-				}
-			}
-
-			// Final result.
-			if e.isFinal {
-				e.markDone()
-				gotFinal = true
-
-				if onThinking != nil && !thinkingComplete {
-					if t := e.finalThinking(); t != nil {
-						finalThinking := *t
-						if len(finalThinking) > lastThinkingLen {
-							if lastThinkingLen == 0 {
-								onThinking(finalThinking)
-							} else {
-								onThinking(finalThinking[lastThinkingLen:])
-							}
-						}
-						thinkingComplete = true
-					}
-				}
-			}
-		}
-	}
-}
-
-func extractThinking(ctx context.Context, reason baml.TickReason, log baml.FunctionLog) baml.FunctionSignal {
-	return nil
-}
-
-func (l llmService) PlanSlidesWithStreaming(
+func (l *llmService) PlanSlidesWithStreaming(
 	ctx context.Context,
 	req types.VideoGenerationPlanRequest,
 	conversationHistory []types.Message,
@@ -146,7 +38,6 @@ func (l llmService) PlanSlidesWithStreaming(
 	l.logger.Info("🚀 Starting video plan generation..")
 
 	thinkingMessages := []string{
-		"Thinking...",
 		"Understanding the request...",
 		"Planning the video structure...",
 		"Designing flow...",
@@ -154,27 +45,9 @@ func (l llmService) PlanSlidesWithStreaming(
 		"Finalizing the plan...",
 	}
 
-	done := make(chan struct{})
-	defer close(done)
-	// Background thinking loop
-	go func() {
-		for {
-			select {
+	extractor := l.NewThinkingExtractor(onThinking, thinkingMessages)
 
-			case <-ctx.Done():
-				return
-
-			case <-done:
-				return
-
-			case <-time.After(time.Duration(rand.Intn(1500)+800) * time.Millisecond):
-				msg := thinkingMessages[rand.Intn(len(thinkingMessages))]
-				onThinking(msg)
-			}
-		}
-	}()
-
-	stream, err := baml_client.Stream.GeneratePlanStreaming(ctx, req, conversationHistory, baml_client.WithOnTick(extractThinking))
+	stream, err := baml_client.Stream.GeneratePlanStreaming(ctx, req, conversationHistory, baml_client.WithOnTick(extractor.HandleTick))
 	if err != nil {
 		return nil, handleInitialError(err)
 	}
@@ -203,6 +76,21 @@ func (l llmService) PlanSlidesWithStreaming(
 		// Process final result
 		if value.IsFinal && value.Final() != nil {
 			final := *value.Final()
+
+			summary := extractor.FinalSummary()
+			duration := extractor.Duration()
+
+			l.logger.Info("Final thinking summary",
+				zap.String("summary", summary),
+				zap.Float64("duration", duration),
+			)
+
+			if final.Plan.IsVideoGenerationPlan() {
+				final.Plan.AsVideoGenerationPlan().ThinkingSummary = utils.Ptr(summary)
+			} else if final.Plan.IsAskUserQuestion() {
+				final.Plan.AsAskUserQuestion().ThinkingSummary = utils.Ptr(summary)
+			}
+
 			return &final.Plan, nil
 		}
 	}
@@ -210,7 +98,7 @@ func (l llmService) PlanSlidesWithStreaming(
 	return nil, fmt.Errorf("stream closed without final result")
 }
 
-func (l llmService) MatchTemplates(ctx context.Context, req *types.MatchTemplateRequest) ([]types.TemplateItem, error) {
+func (l *llmService) MatchTemplates(ctx context.Context, req *types.MatchTemplateRequest) ([]types.TemplateItem, error) {
 	template, err := baml_client.MatchTemplate(ctx, *req)
 	if err != nil {
 		return nil, handleInitialError(err)

@@ -25,6 +25,13 @@ func (a *agentV1) handleToolCalls(
 		zap.String("question", question.Question_text),
 	)
 
+	if question.ThinkingSummary != nil {
+		session.ConversationHistory = append(session.ConversationHistory, types.Message{
+			Role:    types.Union3KassistantOrKtoolOrKuser__NewKassistant(),
+			Content: *question.ThinkingSummary,
+		})
+	}
+
 	session.ConversationHistory = append(session.ConversationHistory, types.Message{
 		Role:    types.Union3KassistantOrKtoolOrKuser__NewKassistant(),
 		Content: question.Question_text,
