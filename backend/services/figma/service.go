@@ -4,10 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/shank318/coasterai/datastore"
+	"github.com/shank318/coasterai/models"
+	"go.uber.org/zap"
+	"io"
 	"net/http"
 	"net/url"
 	"path/filepath"
+	"strconv"
 	"strings"
+	"time"
 
 	figmaoauth "github.com/shank318/coasterai/integrations/figma"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
@@ -15,19 +21,42 @@ import (
 	"github.com/shank318/coasterai/services"
 )
 
+var ignoredTopLevelNameMarkers = []string{"old", "archive", "wip", "copy", "draft", "ignore"}
+
+const (
+	maxFigmaRetries        = 3
+	defaultRetryAfterDelay = 2 * time.Second
+)
+
 type Service interface {
 	ParseFileKey(input string) (string, error)
-	ListFrames(ctx context.Context, accessToken string, req *pbportal.ListFigmaFramesRequest) (*pbportal.ListFigmaFramesResponse, error)
-	ImportFrame(ctx context.Context, accessToken string, fileKey, nodeID, orgID string) (*pbportal.ImportFigmaFrameResponse, error)
+	ListFrames(ctx context.Context, orgID string, req *pbportal.ListFigmaFramesRequest) (*pbportal.ListFigmaFramesResponse, error)
+	ImportFrame(ctx context.Context, fileKey, nodeID, orgID string) (*pbportal.ImportFigmaFrameResponse, error)
+}
+
+func (p *service) getActiveFigmaIntegration(ctx context.Context, organizationID string) (*models.FigmaConfig, error) {
+	integrations, err := p.db.GetIntegrationByOrgAndType(ctx, organizationID, models.IntegrationTypeFIGMA)
+	if err != nil {
+		return nil, err
+	}
+	for _, integration := range integrations {
+		if integration.State == models.IntegrationStateACTIVE {
+			return integration.GetFigmaConfig(), nil
+		}
+	}
+	return nil, fmt.Errorf("figma integration is not connected")
 }
 
 type service struct {
+	db         datastore.Repository
 	oauth      *figmaoauth.OauthClient
 	mediaStore services.MediaStore
+	logger     *zap.Logger
 }
 
-func NewService(oauth *figmaoauth.OauthClient, mediaStore services.MediaStore) Service {
+func NewService(db datastore.Repository, oauth *figmaoauth.OauthClient, mediaStore services.MediaStore, logger *zap.Logger) Service {
 	return &service{
+		db:         db,
 		oauth:      oauth,
 		mediaStore: mediaStore,
 	}
@@ -58,7 +87,15 @@ func (s *service) ParseFileKey(input string) (string, error) {
 	return "", fmt.Errorf("could not extract figma file key from url")
 }
 
-func (s *service) ListFrames(ctx context.Context, accessToken string, req *pbportal.ListFigmaFramesRequest) (*pbportal.ListFigmaFramesResponse, error) {
+func (s *service) ListFrames(ctx context.Context, orgID string, req *pbportal.ListFigmaFramesRequest) (*pbportal.ListFigmaFramesResponse, error) {
+	integration, err := s.getActiveFigmaIntegration(ctx, orgID)
+	if err != nil {
+		return nil, err
+	}
+	s.logger.Info("List frames for org",
+		zap.String("file", req.FileKey),
+		zap.String("orgID", orgID))
+
 	fileKey := req.FileKey
 	if fileKey == "" {
 		var err error
@@ -68,21 +105,27 @@ func (s *service) ListFrames(ctx context.Context, accessToken string, req *pbpor
 		}
 	}
 
-	fileResp, err := s.getFile(ctx, accessToken, fileKey)
+	fileResp, err := s.getFile(ctx, integration.AccessToken, fileKey)
 	if err != nil {
 		return nil, err
 	}
 
 	query := strings.TrimSpace(strings.ToLower(req.GetQuery()))
-	frameNodes := collectFrames(fileResp.Document, query)
-	imageURLs, err := s.getImages(ctx, accessToken, fileKey, frameNodes)
+	pages := collectPages(fileResp.Document)
+	selectedPageID := req.GetPageId()
+	if selectedPageID == "" && len(pages) > 0 {
+		selectedPageID = pages[0].ID
+	}
+
+	frameNodes := collectFrames(fileResp.Document, selectedPageID, query)
+	imageURLs, err := s.getImages(ctx, integration.AccessToken, fileKey, frameNodes)
 	if err != nil {
 		return nil, err
 	}
 
-	frames := make([]*pbportal.FigmaFrame, 0, len(frameNodes))
+	frames := make([]*pbcore.FigmaFrame, 0, len(frameNodes))
 	for _, node := range frameNodes {
-		frames = append(frames, &pbportal.FigmaFrame{
+		frames = append(frames, &pbcore.FigmaFrame{
 			FileKey:      fileKey,
 			FileName:     fileResp.Name,
 			NodeId:       node.ID,
@@ -90,18 +133,43 @@ func (s *service) ListFrames(ctx context.Context, accessToken string, req *pbpor
 			ThumbnailUrl: imageURLs[node.ID],
 			Width:        node.AbsoluteBoundingBox.Width,
 			Height:       node.AbsoluteBoundingBox.Height,
+			PageId:       node.PageID,
+			PageName:     node.PageName,
 		})
 	}
+
+	respPages := make([]*pbcore.FigmaPage, 0, len(pages))
+	for _, page := range pages {
+		respPages = append(respPages, &pbcore.FigmaPage{
+			Id:   page.ID,
+			Name: page.Name,
+		})
+	}
+
+	s.logger.Info("found frames for org",
+		zap.Int("frames", len(frames)),
+		zap.Int("pages", len(pages)))
 
 	return &pbportal.ListFigmaFramesResponse{
 		FileKey:  fileKey,
 		FileName: fileResp.Name,
 		Frames:   frames,
+		Pages:    respPages,
 	}, nil
 }
 
-func (s *service) ImportFrame(ctx context.Context, accessToken string, fileKey, nodeID, orgID string) (*pbportal.ImportFigmaFrameResponse, error) {
-	images, err := s.getImages(ctx, accessToken, fileKey, []figmaNode{{ID: nodeID}})
+func (s *service) ImportFrame(ctx context.Context, fileKey, nodeID, orgID string) (*pbportal.ImportFigmaFrameResponse, error) {
+	integration, err := s.getActiveFigmaIntegration(ctx, orgID)
+	if err != nil {
+		return nil, err
+	}
+
+	s.logger.Info("Import frame for org",
+		zap.String("orgId", orgID),
+		zap.String("nodeID", nodeID),
+		zap.String("file", fileKey))
+
+	images, err := s.getImages(ctx, integration.AccessToken, fileKey, []figmaNode{{ID: nodeID}})
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +187,7 @@ func (s *service) ImportFrame(ctx context.Context, accessToken string, fileKey, 
 
 	return &pbportal.ImportFigmaFrameResponse{
 		Asset: asset,
-		Frame: &pbportal.FigmaFrame{
+		Frame: &pbcore.FigmaFrame{
 			FileKey:      fileKey,
 			NodeId:       nodeID,
 			ThumbnailUrl: imageURL,
@@ -132,10 +200,17 @@ type figmaFileResponse struct {
 	Document figmaNode `json:"document"`
 }
 
+type figmaPage struct {
+	ID   string
+	Name string
+}
+
 type figmaNode struct {
 	ID                  string      `json:"id"`
 	Name                string      `json:"name"`
 	Type                string      `json:"type"`
+	PageID              string      `json:"-"`
+	PageName            string      `json:"-"`
 	Children            []figmaNode `json:"children"`
 	AbsoluteBoundingBox struct {
 		Width  float32 `json:"width"`
@@ -154,7 +229,7 @@ func (s *service) getFile(ctx context.Context, accessToken, fileKey string) (*fi
 	}
 	req.Header.Set("Authorization", "Bearer "+accessToken)
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := doFigmaRequestWithRetry(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -192,7 +267,7 @@ func (s *service) getImages(ctx context.Context, accessToken, fileKey string, no
 	}
 	req.Header.Set("Authorization", "Bearer "+accessToken)
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := doFigmaRequestWithRetry(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -209,23 +284,183 @@ func (s *service) getImages(ctx context.Context, accessToken, fileKey string, no
 	return out.Images, nil
 }
 
-func collectFrames(root figmaNode, query string) []figmaNode {
-	var frames []figmaNode
-
-	var walk func(node figmaNode)
-	walk = func(node figmaNode) {
-		if (node.Type == "FRAME" || node.Type == "COMPONENT" || node.Type == "SECTION") &&
-			(query == "" || strings.Contains(strings.ToLower(node.Name), query)) {
-			frames = append(frames, node)
+func doFigmaRequestWithRetry(ctx context.Context, req *http.Request) (*http.Response, error) {
+	for attempt := 0; attempt < maxFigmaRetries; attempt++ {
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			return nil, err
 		}
 
-		for _, child := range node.Children {
-			walk(child)
+		if resp.StatusCode != http.StatusTooManyRequests {
+			return resp, nil
+		}
+
+		retryDelay := retryAfterDelay(resp.Header.Get("Retry-After"))
+		io.Copy(io.Discard, resp.Body)
+		resp.Body.Close()
+
+		if attempt == maxFigmaRetries-1 {
+			return nil, fmt.Errorf("figma request failed after retries: %s", http.StatusText(http.StatusTooManyRequests))
+		}
+
+		timer := time.NewTimer(retryDelay)
+		select {
+		case <-ctx.Done():
+			timer.Stop()
+			return nil, ctx.Err()
+		case <-timer.C:
 		}
 	}
 
-	walk(root)
+	return nil, fmt.Errorf("figma request retry loop exited unexpectedly")
+}
+
+func retryAfterDelay(value string) time.Duration {
+	if value == "" {
+		return defaultRetryAfterDelay
+	}
+
+	if seconds, err := strconv.Atoi(strings.TrimSpace(value)); err == nil && seconds > 0 {
+		return time.Duration(seconds) * time.Second
+	}
+
+	if retryAt, err := http.ParseTime(value); err == nil {
+		delay := time.Until(retryAt)
+		if delay > 0 {
+			return delay
+		}
+	}
+
+	return defaultRetryAfterDelay
+}
+
+func collectPages(root figmaNode) []figmaPage {
+	pages := make([]figmaPage, 0, len(root.Children))
+
+	for _, page := range root.Children {
+		if page.Type != "CANVAS" {
+			continue
+		}
+
+		pages = append(pages, figmaPage{
+			ID:   page.ID,
+			Name: page.Name,
+		})
+	}
+
+	return pages
+}
+
+func collectFrames(root figmaNode, pageID, query string) []figmaNode {
+	var frames []figmaNode
+
+	for _, page := range root.Children {
+		if page.Type != "CANVAS" {
+			continue
+		}
+		if pageID != "" && page.ID != pageID {
+			continue
+		}
+
+		for _, child := range expandTopLevelCandidates(page, query) {
+			frames = append(frames, child)
+		}
+	}
+
 	return frames
+}
+
+func expandTopLevelCandidates(page figmaNode, query string) []figmaNode {
+	var candidates []figmaNode
+
+	for _, node := range page.Children {
+		for _, candidate := range normalizeTopLevelNode(node) {
+			candidate.PageID = page.ID
+			candidate.PageName = page.Name
+			if isRelevantTopLevelNode(candidate) && matchesFrameQuery(candidate, query) {
+				candidates = append(candidates, candidate)
+			}
+		}
+	}
+
+	return candidates
+}
+
+func normalizeTopLevelNode(node figmaNode) []figmaNode {
+	if node.Type == "FRAME" && len(node.Children) > 0 && hasOnlyFrameChildren(node.Children) {
+		return node.Children
+	}
+
+	return []figmaNode{node}
+}
+
+func hasOnlyFrameChildren(children []figmaNode) bool {
+	if len(children) == 0 {
+		return false
+	}
+
+	for _, child := range children {
+		if child.Type != "FRAME" {
+			return false
+		}
+	}
+
+	return true
+}
+
+func isRelevantTopLevelNode(node figmaNode) bool {
+	switch node.Type {
+	case "FRAME":
+		return true
+	case "GROUP":
+		return isRelevantGroup(node)
+	default:
+		return false
+	}
+}
+
+func isRelevantGroup(node figmaNode) bool {
+	if node.AbsoluteBoundingBox.Width < 200 || node.AbsoluteBoundingBox.Height < 200 {
+		return false
+	}
+
+	if hasIgnoredTopLevelName(node.Name) {
+		return false
+	}
+
+	return hasNonTextNonVectorChild(node.Children)
+}
+
+func hasIgnoredTopLevelName(name string) bool {
+	normalized := strings.TrimSpace(strings.ToLower(name))
+	if normalized == "" {
+		return false
+	}
+
+	if strings.HasPrefix(normalized, "_") || strings.HasPrefix(normalized, ".") {
+		return true
+	}
+
+	for _, marker := range ignoredTopLevelNameMarkers {
+		if strings.Contains(normalized, marker) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func hasNonTextNonVectorChild(children []figmaNode) bool {
+	for _, child := range children {
+		if child.Type != "TEXT" && child.Type != "VECTOR" {
+			return true
+		}
+	}
+	return false
+}
+
+func matchesFrameQuery(node figmaNode, query string) bool {
+	return query == "" || strings.Contains(strings.ToLower(node.Name), query)
 }
 
 func buildImportFileName(fileKey, nodeID, imageURL string) string {

@@ -1,5 +1,6 @@
 'use client'
 
+import { create } from '@bufbuild/protobuf'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Film,
@@ -16,9 +17,10 @@ import {
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import FigmaImportPanel from '@/components/figma/FigmaImportPanel'
+import FigmaImportPanel, { type ConfirmPayload as FigmaImportConfirmPayload } from '@/components/figma/FigmaImportPanel'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { FigmaFrameSchema, type FigmaFrame as CoreFigmaFrame } from '@coasterai/pb/coasterai/core/v1/figma_pb'
 import { Script } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import ScriptEditorDialog from '@/components/dashboard/ScriptEditorDialog'
 import { useClientsContext } from '@coasterai/ui-core/context/ClientContext'
@@ -63,6 +65,7 @@ const VideoIntentComposer = () => {
   const [figmaDialogOpen, setFigmaDialogOpen] = useState(false)
   const [selectedStyle, setSelectedStyle] = useState<StyleType>(StyleType.UNDEFINED)
   const [script, setScript] = useState<Script | undefined>()
+  const [selectedFigmaFrames, setSelectedFigmaFrames] = useState<CoreFigmaFrame[]>([])
 
   const [stage, setStage] = useState<ComposerStage>('compose')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -85,7 +88,8 @@ const VideoIntentComposer = () => {
   const scriptVoiceoverCount = script?.items?.filter(i => i.voiceover?.trim()).length ?? 0
   const hasValidScript = scriptVoiceoverCount >= MIN_SCRIPT_SECTIONS
   const hasPrompt = prompt.trim().length > MIN_PROMPT_LENGTH
-  const canGenerate = hasPrompt || hasValidScript
+  const hasSelectedFigmaFrames = selectedFigmaFrames.length > 0
+  const canGenerate = hasPrompt || hasValidScript || hasSelectedFigmaFrames
   const [identities, setIdentities] = useState<BrandIdentity[]>([])
 
    useEffect(() => {
@@ -208,7 +212,8 @@ const VideoIntentComposer = () => {
         resolution: selectedResolution,
         duration: Number(duration),
         brandLibraryId: selectedBrandLibraryId,
-        styleType: selectedStyle
+        styleType: selectedStyle,
+        selectedFrames: selectedFigmaFrames
       }, { signal: controller.signal })
 
       await consumePlanningStream(stream, controller.signal, streamSession)
@@ -273,6 +278,27 @@ const VideoIntentComposer = () => {
 
   const removeScript = () => setScript(undefined)
 
+  const handleSelectFigmaFrame = ({ selectedFrame, sectionNote }: FigmaImportConfirmPayload) => {
+    const nextFrame = create(FigmaFrameSchema, {
+      fileKey: selectedFrame.fileKey,
+      fileName: selectedFrame.fileName,
+      nodeId: selectedFrame.nodeId,
+      name: selectedFrame.name,
+      thumbnailUrl: selectedFrame.thumbnailUrl,
+      width: selectedFrame.width,
+      height: selectedFrame.height,
+      pageId: selectedFrame.pageId,
+      pageName: selectedFrame.pageName,
+      userNote: sectionNote?.trim() || undefined
+    })
+
+    setSelectedFigmaFrames(current => {
+      const remaining = current.filter(frame => frame.nodeId !== nextFrame.nodeId)
+      return [...remaining, nextFrame]
+    })
+    setFigmaDialogOpen(false)
+  }
+
   return (
     <div className='flex flex-col w-full max-w-3xl mx-auto px-4 min-h-[calc(100vh-4rem)]'>
       <ScriptEditorDialog
@@ -290,12 +316,10 @@ const VideoIntentComposer = () => {
       />
 
       <Dialog open={figmaDialogOpen} onOpenChange={setFigmaDialogOpen}>
-        <DialogContent className='max-w-2xl p-0 overflow-hidden'>
+        <DialogContent className='max-w-2xl p-0 overflow-hidden' forceMount>
           <FigmaImportPanel
             onClose={() => setFigmaDialogOpen(false)}
-            onConfirm={() => {
-              setFigmaDialogOpen(false)
-            }}
+            onConfirm={handleSelectFigmaFrame}
             confirmLabel='Select frame'
             canConfirm={stage === 'compose'}
           />
@@ -478,6 +502,34 @@ const VideoIntentComposer = () => {
               >
                 <X className='w-3.5 h-3.5' />
               </button>
+            </div>
+          )}
+
+          {hasSelectedFigmaFrames && (
+            <div className='mx-4 mt-2 flex flex-wrap gap-2'>
+              <div
+                onClick={() => setFigmaDialogOpen(true)}
+                className='flex cursor-pointer items-center justify-between rounded-lg border border-primary/15 bg-primary/5 px-3 py-1.5 text-xs transition-colors hover:border-primary/30'
+              >
+                <div className='flex items-center gap-2 text-primary'>
+                  <span className='font-medium'>
+                    {selectedFigmaFrames.length} selected screen{selectedFigmaFrames.length > 1 ? 's' : ''}
+                  </span>
+                  <span className='text-muted-foreground'>
+                    · {selectedFigmaFrames[0]?.pageName || 'From Figma'}
+                  </span>
+                </div>
+                <button
+                  onClick={e => {
+                    e.stopPropagation()
+                    setSelectedFigmaFrames([])
+                  }}
+                  className='p-0.5 rounded hover:bg-destructive/10 hover:text-destructive'
+                  type='button'
+                >
+                  <X className='w-3.5 h-3.5' />
+                </button>
+              </div>
             </div>
           )}
 
