@@ -59,6 +59,7 @@ func NewService(db datastore.Repository, oauth *figmaoauth.OauthClient, mediaSto
 		db:         db,
 		oauth:      oauth,
 		mediaStore: mediaStore,
+		logger:     logger,
 	}
 }
 
