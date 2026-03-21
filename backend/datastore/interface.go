@@ -28,6 +28,7 @@ type Repository interface {
 	VideoRepository
 	TemplateRepository
 	BrandIdentityRepository
+	MediaAssetRepository
 }
 
 type OrganizationRepository interface {
@@ -98,4 +99,10 @@ type TemplateRepository interface {
 		animationType types.AnimationType,
 		name string,
 	) (*models.Template, error)
+}
+
+type MediaAssetRepository interface {
+	GetMediaAssetsByID(ctx context.Context, IDs []string) ([]*models.MediaAsset, error)
+	GetMediaAssetsByOrgID(ctx context.Context, orgID string) ([]*models.MediaAsset, error)
+	CreateMediaAsset(ctx context.Context, asset *models.MediaAsset) (*models.MediaAsset, error)
 }

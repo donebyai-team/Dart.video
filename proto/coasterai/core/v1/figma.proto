@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package coasterai.core.v1;
+
+option go_package = "github.com/shank318/coasterai/pb/coasterai/core/v1;pbcore";
+import "google/protobuf/timestamp.proto";
+
+import "google/protobuf/any.proto";
+
+message FigmaPage {
+  string id = 1;
+  string name = 2;
+}
+
+message FigmaFrame {
+  string file_key = 1;
+  string file_name = 2;
+  string node_id = 3;
+  string name = 4;
+  string thumbnail_url = 5;
+  float width = 6;
+  float height = 7;
+  string page_id = 8;
+  string page_name = 9;
+  optional string userNote = 10;
+}

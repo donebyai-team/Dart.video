@@ -46,6 +46,7 @@ const (
 	PortalService_GetBrandIdentities_FullMethodName           = "/coasterai.portal.v1.PortalService/GetBrandIdentities"
 	PortalService_UpdateBrandIdentity_FullMethodName          = "/coasterai.portal.v1.PortalService/UpdateBrandIdentity"
 	PortalService_GenerateOrEditAnimationSlide_FullMethodName = "/coasterai.portal.v1.PortalService/GenerateOrEditAnimationSlide"
+	PortalService_GetMediaAssets_FullMethodName               = "/coasterai.portal.v1.PortalService/GetMediaAssets"
 )
 
 // PortalServiceClient is the client API for PortalService service.
@@ -81,6 +82,8 @@ type PortalServiceClient interface {
 	UpdateBrandIdentity(ctx context.Context, in *UpdateBrandIdentityRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// Edit animations
 	GenerateOrEditAnimationSlide(ctx context.Context, in *GenerateOrEditAnimationRequest, opts ...grpc.CallOption) (PortalService_GenerateOrEditAnimationSlideClient, error)
+	// Assets
+	GetMediaAssets(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetMediaAssetsResponse, error)
 }
 
 type portalServiceClient struct {
@@ -408,6 +411,15 @@ func (x *portalServiceGenerateOrEditAnimationSlideClient) Recv() (*GenerateOrEdi
 	return m, nil
 }
 
+func (c *portalServiceClient) GetMediaAssets(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetMediaAssetsResponse, error) {
+	out := new(GetMediaAssetsResponse)
+	err := c.cc.Invoke(ctx, PortalService_GetMediaAssets_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PortalServiceServer is the server API for PortalService service.
 // All implementations must embed UnimplementedPortalServiceServer
 // for forward compatibility
@@ -441,6 +453,8 @@ type PortalServiceServer interface {
 	UpdateBrandIdentity(context.Context, *UpdateBrandIdentityRequest) (*emptypb.Empty, error)
 	// Edit animations
 	GenerateOrEditAnimationSlide(*GenerateOrEditAnimationRequest, PortalService_GenerateOrEditAnimationSlideServer) error
+	// Assets
+	GetMediaAssets(context.Context, *emptypb.Empty) (*GetMediaAssetsResponse, error)
 	mustEmbedUnimplementedPortalServiceServer()
 }
 
@@ -522,6 +536,9 @@ func (UnimplementedPortalServiceServer) UpdateBrandIdentity(context.Context, *Up
 }
 func (UnimplementedPortalServiceServer) GenerateOrEditAnimationSlide(*GenerateOrEditAnimationRequest, PortalService_GenerateOrEditAnimationSlideServer) error {
 	return status.Errorf(codes.Unimplemented, "method GenerateOrEditAnimationSlide not implemented")
+}
+func (UnimplementedPortalServiceServer) GetMediaAssets(context.Context, *emptypb.Empty) (*GetMediaAssetsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMediaAssets not implemented")
 }
 func (UnimplementedPortalServiceServer) mustEmbedUnimplementedPortalServiceServer() {}
 
@@ -998,6 +1015,24 @@ func (x *portalServiceGenerateOrEditAnimationSlideServer) Send(m *GenerateOrEdit
 	return x.ServerStream.SendMsg(m)
 }
 
+func _PortalService_GetMediaAssets_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PortalServiceServer).GetMediaAssets(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PortalService_GetMediaAssets_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PortalServiceServer).GetMediaAssets(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PortalService_ServiceDesc is the grpc.ServiceDesc for PortalService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1088,6 +1123,10 @@ var PortalService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateBrandIdentity",
 			Handler:    _PortalService_UpdateBrandIdentity_Handler,
+		},
+		{
+			MethodName: "GetMediaAssets",
+			Handler:    _PortalService_GetMediaAssets_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

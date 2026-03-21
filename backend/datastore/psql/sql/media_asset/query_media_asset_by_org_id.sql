@@ -1,0 +1,1 @@
+SELECT * FROM media_assets WHERE organization_id = :organization_id;

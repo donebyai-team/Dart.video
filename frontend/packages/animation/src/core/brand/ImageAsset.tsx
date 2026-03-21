@@ -42,7 +42,7 @@ export function ImageAsset({
     const resolvedBoxWidth = patchedWidth ?? defaultBoxWidth;
     const resolvedBoxHeight = patchedHeight ?? defaultBoxHeight;
     const resolvedObjectFit: React.CSSProperties['objectFit'] =
-        typeof objectFit === 'string' ? objectFit as React.CSSProperties['objectFit'] : 'cover';
+        typeof objectFit === 'string' ? objectFit as React.CSSProperties['objectFit'] : 'contain';
 
     useEffect(() => {
         if (!patchedSrc || !isRendering) return;

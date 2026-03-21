@@ -69,7 +69,7 @@ func New(
 		codeBuilderService:     codeBuilderService,
 		googleOauthClient:      googleOauthClient,
 		figmaOauthClient:       figmaOauthClient,
-		figmaService:           figmasvc.NewService(figmaOauthClient, mediaService),
+		figmaService:           figmasvc.NewService(db, figmaOauthClient, mediaService, logger),
 		authStateStore:         authStateStore,
 		authUsecase:            authUsecase,
 		Shutter:                shutter.New(),

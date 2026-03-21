@@ -6,6 +6,8 @@ import (
 	"context"
 	"encoding/xml"
 	"fmt"
+	"github.com/shank318/coasterai/datastore"
+	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/streamingfast/dstore"
 	_ "golang.org/x/image/webp"
@@ -44,9 +46,10 @@ type gcpMediaStore struct {
 	dStore dstore.Store
 	client *storage.Client
 	bucket *storage.BucketHandle
+	db     datastore.Repository
 }
 
-func NewGcpMediaStore() MediaStore {
+func NewGcpMediaStore(db datastore.Repository) MediaStore {
 	ctx := context.Background()
 
 	debugStore, err := dstore.NewStore(fmt.Sprintf("gs://%s", publicBucket), "", "", false)
@@ -63,6 +66,7 @@ func NewGcpMediaStore() MediaStore {
 		dStore: debugStore,
 		client: client,
 		bucket: client.Bucket(publicBucket),
+		db:     db,
 	}
 }
 
@@ -321,6 +325,23 @@ func (g gcpMediaStore) Upload(
 		return nil, fmt.Errorf("writer close failed: %w", err)
 	}
 
+	// Save in DB
+	asset, err := g.db.CreateMediaAsset(ctx, &models.MediaAsset{
+		OrganizationID: orgId,
+		Path:           objectPath,
+		MimeType:       contentType,
+		MediaType:      mediaType,
+		Metadata: models.AssetMetadata{
+			Width:    int(width),
+			Height:   int(height),
+			FileName: safeFileName,
+			Size:     size,
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	return &pbcore.MediaAsset{
 		Url:       fmt.Sprintf("%s/%s", GetPublicBucketURL(), objectPath),
 		FileName:  safeFileName,
@@ -329,6 +350,7 @@ func (g gcpMediaStore) Upload(
 		Width:     width,
 		Height:    height,
 		MediaType: mediaType,
+		Id:        asset.ID,
 	}, nil
 }
 

@@ -7,6 +7,7 @@ import type { Message } from "@bufbuild/protobuf";
 import type { MediaAsset, Slide } from "../../core/v1/slide_pb";
 import type { AnimationTemplate } from "../../core/v1/template_pb";
 import type { BrandIdentity, BrandIdentitySchema } from "../../core/v1/brandkit_pb";
+import type { FigmaFrame, FigmaPage } from "../../core/v1/figma_pb";
 import type { Resolution, Script, StyleType, Video, VideoConfig, VideoLanguage, VideoMetadata } from "../../core/v1/video_pb";
 import type { EmptySchema, Timestamp } from "@bufbuild/protobuf/wkt";
 
@@ -14,6 +15,22 @@ import type { EmptySchema, Timestamp } from "@bufbuild/protobuf/wkt";
  * Describes the file coasterai/portal/v1/portal.proto.
  */
 export declare const file_coasterai_portal_v1_portal: GenFile;
+
+/**
+ * @generated from message coasterai.portal.v1.GetMediaAssetsResponse
+ */
+export declare type GetMediaAssetsResponse = Message<"coasterai.portal.v1.GetMediaAssetsResponse"> & {
+  /**
+   * @generated from field: repeated coasterai.core.v1.MediaAsset assets = 1;
+   */
+  assets: MediaAsset[];
+};
+
+/**
+ * Describes the message coasterai.portal.v1.GetMediaAssetsResponse.
+ * Use `create(GetMediaAssetsResponseSchema)` to create a new message.
+ */
+export declare const GetMediaAssetsResponseSchema: GenMessage<GetMediaAssetsResponse>;
 
 /**
  * @generated from message coasterai.portal.v1.GenerateOrEditAnimationRequest
@@ -281,6 +298,11 @@ export declare type ListFigmaFramesRequest = Message<"coasterai.portal.v1.ListFi
    * @generated from field: optional string query = 3;
    */
   query?: string;
+
+  /**
+   * @generated from field: optional string page_id = 4;
+   */
+  pageId?: string;
 };
 
 /**
@@ -288,52 +310,6 @@ export declare type ListFigmaFramesRequest = Message<"coasterai.portal.v1.ListFi
  * Use `create(ListFigmaFramesRequestSchema)` to create a new message.
  */
 export declare const ListFigmaFramesRequestSchema: GenMessage<ListFigmaFramesRequest>;
-
-/**
- * @generated from message coasterai.portal.v1.FigmaFrame
- */
-export declare type FigmaFrame = Message<"coasterai.portal.v1.FigmaFrame"> & {
-  /**
-   * @generated from field: string file_key = 1;
-   */
-  fileKey: string;
-
-  /**
-   * @generated from field: string file_name = 2;
-   */
-  fileName: string;
-
-  /**
-   * @generated from field: string node_id = 3;
-   */
-  nodeId: string;
-
-  /**
-   * @generated from field: string name = 4;
-   */
-  name: string;
-
-  /**
-   * @generated from field: string thumbnail_url = 5;
-   */
-  thumbnailUrl: string;
-
-  /**
-   * @generated from field: float width = 6;
-   */
-  width: number;
-
-  /**
-   * @generated from field: float height = 7;
-   */
-  height: number;
-};
-
-/**
- * Describes the message coasterai.portal.v1.FigmaFrame.
- * Use `create(FigmaFrameSchema)` to create a new message.
- */
-export declare const FigmaFrameSchema: GenMessage<FigmaFrame>;
 
 /**
  * @generated from message coasterai.portal.v1.ListFigmaFramesResponse
@@ -350,9 +326,14 @@ export declare type ListFigmaFramesResponse = Message<"coasterai.portal.v1.ListF
   fileName: string;
 
   /**
-   * @generated from field: repeated coasterai.portal.v1.FigmaFrame frames = 3;
+   * @generated from field: repeated coasterai.core.v1.FigmaFrame frames = 3;
    */
   frames: FigmaFrame[];
+
+  /**
+   * @generated from field: repeated coasterai.core.v1.FigmaPage pages = 4;
+   */
+  pages: FigmaPage[];
 };
 
 /**
@@ -392,7 +373,7 @@ export declare type ImportFigmaFrameResponse = Message<"coasterai.portal.v1.Impo
   asset?: MediaAsset;
 
   /**
-   * @generated from field: coasterai.portal.v1.FigmaFrame frame = 2;
+   * @generated from field: coasterai.core.v1.FigmaFrame frame = 2;
    */
   frame?: FigmaFrame;
 };
@@ -567,6 +548,11 @@ export declare type CreateVideoRequest = Message<"coasterai.portal.v1.CreateVide
    * @generated from field: int32 fps = 8;
    */
   fps: number;
+
+  /**
+   * @generated from field: repeated coasterai.portal.v1.SelectedMediaAsset assets = 9;
+   */
+  assets: SelectedMediaAsset[];
 };
 
 /**
@@ -574,6 +560,27 @@ export declare type CreateVideoRequest = Message<"coasterai.portal.v1.CreateVide
  * Use `create(CreateVideoRequestSchema)` to create a new message.
  */
 export declare const CreateVideoRequestSchema: GenMessage<CreateVideoRequest>;
+
+/**
+ * @generated from message coasterai.portal.v1.SelectedMediaAsset
+ */
+export declare type SelectedMediaAsset = Message<"coasterai.portal.v1.SelectedMediaAsset"> & {
+  /**
+   * @generated from field: string assetID = 1;
+   */
+  assetID: string;
+
+  /**
+   * @generated from field: optional string note = 2;
+   */
+  note?: string;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.SelectedMediaAsset.
+ * Use `create(SelectedMediaAssetSchema)` to create a new message.
+ */
+export declare const SelectedMediaAssetSchema: GenMessage<SelectedMediaAsset>;
 
 /**
  * @generated from message coasterai.portal.v1.CreateVideoResponse
@@ -1514,6 +1521,16 @@ export declare const PortalService: GenService<{
     methodKind: "server_streaming";
     input: typeof GenerateOrEditAnimationRequestSchema;
     output: typeof GenerateOrEditAnimationResponseSchema;
+  },
+  /**
+   * Assets
+   *
+   * @generated from rpc coasterai.portal.v1.PortalService.GetMediaAssets
+   */
+  getMediaAssets: {
+    methodKind: "unary";
+    input: typeof EmptySchema;
+    output: typeof GetMediaAssetsResponseSchema;
   },
 }>;
 

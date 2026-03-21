@@ -11,6 +11,7 @@ import "coasterai/core/v1/slide.proto";
 import "coasterai/core/v1/video.proto";
 import "coasterai/core/v1/brandkit.proto";
 import "coasterai/core/v1/template.proto";
+import "coasterai/core/v1/figma.proto";
 
 service PortalService {
   rpc GetConfig(.google.protobuf.Empty) returns (Config);
@@ -44,6 +45,13 @@ service PortalService {
 
   // Edit animations
   rpc GenerateOrEditAnimationSlide(GenerateOrEditAnimationRequest) returns (stream GenerateOrEditAnimationResponse);
+
+  // Assets
+  rpc GetMediaAssets(.google.protobuf.Empty) returns (GetMediaAssetsResponse);
+}
+
+message GetMediaAssetsResponse {
+  repeated core.v1.MediaAsset assets = 1;
 }
 
 message GenerateOrEditAnimationRequest {
@@ -108,22 +116,14 @@ message ListFigmaFramesRequest {
   string file_key = 1;
   string file_url = 2;
   optional string query = 3;
-}
-
-message FigmaFrame {
-  string file_key = 1;
-  string file_name = 2;
-  string node_id = 3;
-  string name = 4;
-  string thumbnail_url = 5;
-  float width = 6;
-  float height = 7;
+  optional string page_id = 4;
 }
 
 message ListFigmaFramesResponse {
   string file_key = 1;
   string file_name = 2;
-  repeated FigmaFrame frames = 3;
+  repeated core.v1.FigmaFrame frames = 3;
+  repeated core.v1.FigmaPage pages = 4;
 }
 
 message ImportFigmaFrameRequest {
@@ -133,7 +133,7 @@ message ImportFigmaFrameRequest {
 
 message ImportFigmaFrameResponse {
   core.v1.MediaAsset asset = 1;
-  FigmaFrame frame = 2;
+  core.v1.FigmaFrame frame = 2;
 }
 
 message StopVideoRequest {
@@ -176,6 +176,12 @@ message CreateVideoRequest {
   core.v1.VideoLanguage language = 6;
   core.v1.StyleType styleType = 7;
   int32 fps = 8;
+  repeated SelectedMediaAsset assets = 9;
+}
+
+message SelectedMediaAsset {
+  string assetID = 1;
+  optional string note = 2;
 }
 
 message CreateVideoResponse {

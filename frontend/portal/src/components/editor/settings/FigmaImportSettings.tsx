@@ -22,7 +22,7 @@ const FigmaImportSettings = ({ onClose }: FigmaImportSettingsProps) => {
   const mediaSlide = selectedSlide?.slide
   const canImport = mediaSlide?.type === SlideType.MEDIA
 
-  const handleImport = async ({ fileKey, selectedFrame }: { fileKey: string; selectedFrame: FigmaFrame }) => {
+  const handleImport = async ({ fileKey, selectedFrame }: { fileKey: string; selectedFrame: FigmaFrame; sectionNote?: string }) => {
     if (!selectedSlide?.slide || selectedSlide.slide.type !== SlideType.MEDIA) {
       return
     }
