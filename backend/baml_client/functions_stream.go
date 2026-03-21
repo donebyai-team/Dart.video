@@ -42,6 +42,80 @@ func (s *StreamValue[TStream, TFinal]) Stream() *TStream {
 	return s.as_stream
 }
 
+// / Streaming version of AnalyzeImage
+func (*stream) AnalyzeImage(ctx context.Context, image types.Image, opts ...CallOptionFunc) (<-chan StreamValue[stream_types.AssetAnalysis, types.AssetAnalysis], error) {
+
+	var callOpts callOption
+	for _, opt := range opts {
+		opt(&callOpts)
+	}
+
+	args := baml.BamlFunctionArguments{
+		Kwargs: map[string]any{"image": image},
+		Env:    getEnvVars(callOpts.env),
+	}
+
+	if callOpts.clientRegistry != nil {
+		args.ClientRegistry = callOpts.clientRegistry
+	}
+
+	if callOpts.collectors != nil {
+		args.Collectors = callOpts.collectors
+	}
+
+	if callOpts.typeBuilder != nil {
+		args.TypeBuilder = callOpts.typeBuilder
+	}
+
+	if callOpts.tags != nil {
+		args.Tags = callOpts.tags
+	}
+
+	encoded, err := args.Encode()
+	if err != nil {
+		// This should never happen. if it does, please file an issue at https://github.com/boundaryml/baml/issues
+		// and include the type of the args you're passing in.
+		wrapped_err := fmt.Errorf("BAML INTERNAL ERROR: AnalyzeImage: %w", err)
+		panic(wrapped_err)
+	}
+
+	internal_channel, err := bamlRuntime.CallFunctionStream(ctx, "AnalyzeImage", encoded, callOpts.onTick)
+	if err != nil {
+		return nil, err
+	}
+
+	channel := make(chan StreamValue[stream_types.AssetAnalysis, types.AssetAnalysis])
+	go func() {
+		for result := range internal_channel {
+			if result.Error != nil {
+				channel <- StreamValue[stream_types.AssetAnalysis, types.AssetAnalysis]{
+					IsError: true,
+					Error:   result.Error,
+				}
+				close(channel)
+				return
+			}
+			if result.HasData {
+				data := (result.Data).(types.AssetAnalysis)
+				channel <- StreamValue[stream_types.AssetAnalysis, types.AssetAnalysis]{
+					IsFinal:  true,
+					as_final: &data,
+				}
+			} else {
+				data := (result.StreamData).(stream_types.AssetAnalysis)
+				channel <- StreamValue[stream_types.AssetAnalysis, types.AssetAnalysis]{
+					IsFinal:   false,
+					as_stream: &data,
+				}
+			}
+		}
+
+		// when internal_channel is closed, close the output too
+		close(channel)
+	}()
+	return channel, nil
+}
+
 // / Streaming version of EditAnimationCode
 func (*stream) EditAnimationCode(ctx context.Context, resume types.EditAnimationCodeRequest, conversation_history []types.Message, opts ...CallOptionFunc) (<-chan StreamValue[stream_types.EditAnimationCodeResponse, types.EditAnimationCodeResponse], error) {
 
@@ -487,7 +561,7 @@ func (*stream) GeneratePlanStreaming(ctx context.Context, input types.VideoGener
 }
 
 // / Streaming version of GeneratePlanV2
-func (*stream) GeneratePlanV2(ctx context.Context, input types.VideoGenerationPlanRequest, conversation_history []types.Message, opts ...CallOptionFunc) (<-chan StreamValue[stream_types.StreamingVideoGenerationPlan, types.StreamingVideoGenerationPlan], error) {
+func (*stream) GeneratePlanV2(ctx context.Context, input types.VideoGenerationPlanRequest, conversation_history []types.Message, opts ...CallOptionFunc) (<-chan StreamValue[stream_types.VideoGenerationPlanV2, types.VideoGenerationPlanV2], error) {
 
 	var callOpts callOption
 	for _, opt := range opts {
@@ -528,11 +602,11 @@ func (*stream) GeneratePlanV2(ctx context.Context, input types.VideoGenerationPl
 		return nil, err
 	}
 
-	channel := make(chan StreamValue[stream_types.StreamingVideoGenerationPlan, types.StreamingVideoGenerationPlan])
+	channel := make(chan StreamValue[stream_types.VideoGenerationPlanV2, types.VideoGenerationPlanV2])
 	go func() {
 		for result := range internal_channel {
 			if result.Error != nil {
-				channel <- StreamValue[stream_types.StreamingVideoGenerationPlan, types.StreamingVideoGenerationPlan]{
+				channel <- StreamValue[stream_types.VideoGenerationPlanV2, types.VideoGenerationPlanV2]{
 					IsError: true,
 					Error:   result.Error,
 				}
@@ -540,14 +614,14 @@ func (*stream) GeneratePlanV2(ctx context.Context, input types.VideoGenerationPl
 				return
 			}
 			if result.HasData {
-				data := (result.Data).(types.StreamingVideoGenerationPlan)
-				channel <- StreamValue[stream_types.StreamingVideoGenerationPlan, types.StreamingVideoGenerationPlan]{
+				data := (result.Data).(types.VideoGenerationPlanV2)
+				channel <- StreamValue[stream_types.VideoGenerationPlanV2, types.VideoGenerationPlanV2]{
 					IsFinal:  true,
 					as_final: &data,
 				}
 			} else {
-				data := (result.StreamData).(stream_types.StreamingVideoGenerationPlan)
-				channel <- StreamValue[stream_types.StreamingVideoGenerationPlan, types.StreamingVideoGenerationPlan]{
+				data := (result.StreamData).(stream_types.VideoGenerationPlanV2)
+				channel <- StreamValue[stream_types.VideoGenerationPlanV2, types.VideoGenerationPlanV2]{
 					IsFinal:   false,
 					as_stream: &data,
 				}

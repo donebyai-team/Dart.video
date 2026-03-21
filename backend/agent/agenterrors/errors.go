@@ -15,6 +15,7 @@ const (
 	ReasonInternal                  = "AGENT_INTERNAL"
 	ReasonAnimationGenerationFailed = "AGENT_ANIMATION_GENERATION_FAILED"
 	ReasonNoEditsFound              = "NO_EDITS_FOUND"
+	ReasonAssetAnalysisFailed       = "AGENT_ASSET_ANALYSIS_FAILED"
 )
 
 func NoEditsApplied(message string, cause error) error {
@@ -35,6 +36,10 @@ func SessionUnavailable(message string, cause error) error {
 
 func StateUnavailable(message string, cause error) error {
 	return errorx.New(errorx.CodeUnavailable, ReasonStateUnavailable, message, cause)
+}
+
+func AssetAnalysisFailed(message string, cause error) error {
+	return errorx.New(errorx.CodeUnavailable, ReasonAssetAnalysisFailed, message, cause)
 }
 
 func LLMPlanningFailed(message string, cause error) error {

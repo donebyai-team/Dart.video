@@ -134,7 +134,7 @@ func (p *Portal) ContinueVideoPlanning(ctx context.Context, c *connect.Request[p
 }
 
 func (p *Portal) newVideoAgent(logger *zap.Logger, sessionID, orgID string) agent.VideoAgent {
-	return agent.NewAgentV1(
+	return agent.NewAgentV2(
 		sessionID,
 		orgID,
 		logger,

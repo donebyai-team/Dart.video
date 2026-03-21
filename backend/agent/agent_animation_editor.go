@@ -88,7 +88,7 @@ func NewAgentAnimationEditor(
 	codeBuilder services.TemplateCodeBuilder,
 	videoService services.VideoGeneration,
 ) AnimationGeneratorAgent {
-	llmService := llm.NewLlmService(logger)
+	llmService := llm.NewLlmService(logger, cache)
 	return &agentAnimationEditor{
 		fps:              defaultFPS,
 		sessionID:        sessionID,
@@ -310,8 +310,8 @@ func (l *agentAnimationEditor) runGenerateAnimationFromPrompt(ctx context.Contex
 	if l.generationOptions.VideoBranding != nil {
 		input.Branding = *l.generationOptions.VideoBranding
 
-		if l.generationOptions.BrandIdentityMapper != nil {
-			input.Branding.BrandGuideLines = utils.Ptr(l.generationOptions.BrandIdentityMapper.FormatBrandAndAssetDetails())
+		if l.generationOptions.assetRegistry != nil {
+			input.Branding.BrandGuideLines = l.generationOptions.assetRegistry.FormatBrandDetails()
 			l.logger.Info("using injected brand-identity mapper")
 		}
 	}

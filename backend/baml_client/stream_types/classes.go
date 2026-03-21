@@ -166,6 +166,54 @@ func (c AskUserQuestion) BamlTypeName() string {
 	return "AskUserQuestion"
 }
 
+type AssetAnalysis struct {
+	Description *string  `json:"description"`
+	Tags        []string `json:"tags"`
+}
+
+func (c *AssetAnalysis) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_STREAM_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_STREAM_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "AssetAnalysis" {
+		panic(fmt.Sprintf("expected AssetAnalysis, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "description":
+			c.Description = baml.Decode(valueHolder).Interface().(*string)
+
+		case "tags":
+			c.Tags = baml.Decode(valueHolder).Interface().([]string)
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class AssetAnalysis", key))
+
+		}
+	}
+
+}
+
+func (c AssetAnalysis) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["description"] = c.Description
+
+	fields["tags"] = c.Tags
+
+	return baml.EncodeClass("AssetAnalysis", fields, nil)
+}
+
+func (c AssetAnalysis) BamlTypeName() string {
+	return "AssetAnalysis"
+}
+
 type Category struct {
 	Name        *string `json:"name"`
 	Description *string `json:"description"`
@@ -215,8 +263,8 @@ func (c Category) BamlTypeName() string {
 }
 
 type DataPoint struct {
-	Reason *string `json:"reason"`
-	Value  *string `json:"value"`
+	Description *string `json:"description"`
+	Value       *string `json:"value"`
 }
 
 func (c *DataPoint) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -233,8 +281,8 @@ func (c *DataPoint) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
 		valueHolder := field.Value
 		switch key {
 
-		case "reason":
-			c.Reason = baml.Decode(valueHolder).Interface().(*string)
+		case "description":
+			c.Description = baml.Decode(valueHolder).Interface().(*string)
 
 		case "value":
 			c.Value = baml.Decode(valueHolder).Interface().(*string)
@@ -251,7 +299,7 @@ func (c *DataPoint) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
 func (c DataPoint) Encode() (*cffi.HostValue, error) {
 	fields := map[string]any{}
 
-	fields["reason"] = c.Reason
+	fields["description"] = c.Description
 
 	fields["value"] = c.Value
 
@@ -566,54 +614,6 @@ func (c EnhancedAnimationPrompt) Encode() (*cffi.HostValue, error) {
 
 func (c EnhancedAnimationPrompt) BamlTypeName() string {
 	return "EnhancedAnimationPrompt"
-}
-
-type FrameRange struct {
-	Start *int64 `json:"start"`
-	End   *int64 `json:"end"`
-}
-
-func (c *FrameRange) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
-	typeName := holder.Name
-	if typeName.Namespace != cffi.CFFITypeNamespace_STREAM_TYPES {
-		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_STREAM_TYPES, got %s", string(typeName.Namespace.String())))
-	}
-	if typeName.Name != "FrameRange" {
-		panic(fmt.Sprintf("expected FrameRange, got %s", typeName.Name))
-	}
-
-	for _, field := range holder.Fields {
-		key := field.Key
-		valueHolder := field.Value
-		switch key {
-
-		case "start":
-			c.Start = baml.Decode(valueHolder).Interface().(*int64)
-
-		case "end":
-			c.End = baml.Decode(valueHolder).Interface().(*int64)
-
-		default:
-
-			panic(fmt.Sprintf("unexpected field: %s in class FrameRange", key))
-
-		}
-	}
-
-}
-
-func (c FrameRange) Encode() (*cffi.HostValue, error) {
-	fields := map[string]any{}
-
-	fields["start"] = c.Start
-
-	fields["end"] = c.End
-
-	return baml.EncodeClass("FrameRange", fields, nil)
-}
-
-func (c FrameRange) BamlTypeName() string {
-	return "FrameRange"
 }
 
 type GenerateAnimationCodeRequest struct {
@@ -1241,11 +1241,12 @@ func (c ReGenerateAnimationCodeResponse) BamlTypeName() string {
 }
 
 type Scene struct {
-	Index      *int64               `json:"index"`
-	Category   *types.SceneCategory `json:"category"`
-	Brief      *string              `json:"brief"`
-	FrameRange *FrameRange          `json:"frameRange"`
-	DataPoint  *DataPoint           `json:"dataPoint"`
+	Index       *int64               `json:"index"`
+	Category    *types.SceneCategory `json:"category"`
+	Elements    []SceneElement       `json:"elements"`
+	Brief       *string              `json:"brief"`
+	FrameBudget []int64              `json:"frameBudget"`
+	DataPoint   *DataPoint           `json:"dataPoint"`
 }
 
 func (c *Scene) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -1268,11 +1269,14 @@ func (c *Scene) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
 		case "category":
 			c.Category = baml.Decode(valueHolder).Interface().(*types.SceneCategory)
 
+		case "elements":
+			c.Elements = baml.Decode(valueHolder).Interface().([]SceneElement)
+
 		case "brief":
 			c.Brief = baml.Decode(valueHolder).Interface().(*string)
 
-		case "frameRange":
-			c.FrameRange = baml.Decode(valueHolder).Interface().(*FrameRange)
+		case "frameBudget":
+			c.FrameBudget = baml.Decode(valueHolder).Interface().([]int64)
 
 		case "dataPoint":
 			c.DataPoint = baml.Decode(valueHolder).Interface().(*DataPoint)
@@ -1293,9 +1297,11 @@ func (c Scene) Encode() (*cffi.HostValue, error) {
 
 	fields["category"] = c.Category
 
+	fields["elements"] = c.Elements
+
 	fields["brief"] = c.Brief
 
-	fields["frameRange"] = c.FrameRange
+	fields["frameBudget"] = c.FrameBudget
 
 	fields["dataPoint"] = c.DataPoint
 
@@ -1650,6 +1656,7 @@ func (c TemplateItem) BamlTypeName() string {
 
 type VideoBranding struct {
 	BrandGuideLines *string `json:"brandGuideLines"`
+	Attachments     *string `json:"attachments"`
 }
 
 func (c *VideoBranding) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -1669,6 +1676,9 @@ func (c *VideoBranding) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap
 		case "brandGuideLines":
 			c.BrandGuideLines = baml.Decode(valueHolder).Interface().(*string)
 
+		case "attachments":
+			c.Attachments = baml.Decode(valueHolder).Interface().(*string)
+
 		default:
 
 			panic(fmt.Sprintf("unexpected field: %s in class VideoBranding", key))
@@ -1682,6 +1692,8 @@ func (c VideoBranding) Encode() (*cffi.HostValue, error) {
 	fields := map[string]any{}
 
 	fields["brandGuideLines"] = c.BrandGuideLines
+
+	fields["attachments"] = c.Attachments
 
 	return baml.EncodeClass("VideoBranding", fields, nil)
 }
@@ -1826,4 +1838,160 @@ func (c VideoGenerationPlanRequest) Encode() (*cffi.HostValue, error) {
 
 func (c VideoGenerationPlanRequest) BamlTypeName() string {
 	return "VideoGenerationPlanRequest"
+}
+
+type VideoGenerationPlanV2 struct {
+	Plan *Union2AskUserQuestionOrVideoPlanV2 `json:"plan"`
+}
+
+func (c *VideoGenerationPlanV2) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_STREAM_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_STREAM_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "VideoGenerationPlanV2" {
+		panic(fmt.Sprintf("expected VideoGenerationPlanV2, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "plan":
+			c.Plan = baml.Decode(valueHolder).Interface().(*Union2AskUserQuestionOrVideoPlanV2)
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class VideoGenerationPlanV2", key))
+
+		}
+	}
+
+}
+
+func (c VideoGenerationPlanV2) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["plan"] = c.Plan
+
+	return baml.EncodeClass("VideoGenerationPlanV2", fields, nil)
+}
+
+func (c VideoGenerationPlanV2) BamlTypeName() string {
+	return "VideoGenerationPlanV2"
+}
+
+type VideoPlanV2 struct {
+	VideoName       *string            `json:"videoName"`
+	Scenes          []Scene            `json:"scenes"`
+	Segments        []VoiceoverSegment `json:"segments"`
+	ThinkingSummary *string            `json:"thinkingSummary"`
+}
+
+func (c *VideoPlanV2) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_STREAM_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_STREAM_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "VideoPlanV2" {
+		panic(fmt.Sprintf("expected VideoPlanV2, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "videoName":
+			c.VideoName = baml.Decode(valueHolder).Interface().(*string)
+
+		case "scenes":
+			c.Scenes = baml.Decode(valueHolder).Interface().([]Scene)
+
+		case "segments":
+			c.Segments = baml.Decode(valueHolder).Interface().([]VoiceoverSegment)
+
+		case "thinkingSummary":
+			c.ThinkingSummary = baml.Decode(valueHolder).Interface().(*string)
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class VideoPlanV2", key))
+
+		}
+	}
+
+}
+
+func (c VideoPlanV2) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["videoName"] = c.VideoName
+
+	fields["scenes"] = c.Scenes
+
+	fields["segments"] = c.Segments
+
+	fields["thinkingSummary"] = c.ThinkingSummary
+
+	return baml.EncodeClass("VideoPlanV2", fields, nil)
+}
+
+func (c VideoPlanV2) BamlTypeName() string {
+	return "VideoPlanV2"
+}
+
+type VoiceoverSegment struct {
+	Voiceover  *string `json:"voiceover"`
+	StartFrame *int64  `json:"startFrame"`
+	EndFrame   *int64  `json:"endFrame"`
+}
+
+func (c *VoiceoverSegment) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_STREAM_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_STREAM_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "VoiceoverSegment" {
+		panic(fmt.Sprintf("expected VoiceoverSegment, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "voiceover":
+			c.Voiceover = baml.Decode(valueHolder).Interface().(*string)
+
+		case "startFrame":
+			c.StartFrame = baml.Decode(valueHolder).Interface().(*int64)
+
+		case "endFrame":
+			c.EndFrame = baml.Decode(valueHolder).Interface().(*int64)
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class VoiceoverSegment", key))
+
+		}
+	}
+
+}
+
+func (c VoiceoverSegment) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["voiceover"] = c.Voiceover
+
+	fields["startFrame"] = c.StartFrame
+
+	fields["endFrame"] = c.EndFrame
+
+	return baml.EncodeClass("VoiceoverSegment", fields, nil)
+}
+
+func (c VoiceoverSegment) BamlTypeName() string {
+	return "VoiceoverSegment"
 }

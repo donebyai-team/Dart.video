@@ -1,16 +1,16 @@
-package brand_identity
+package services
 
 import (
-	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
+	"github.com/shank318/coasterai/models"
 	"strings"
 	"testing"
 )
 
 func TestResolveMediaHandles_BasicReplacement(t *testing.T) {
-	registry := &BrandIdentityRegistry{
-		assetMapper: map[string]*pbcore.MediaAsset{
+	registry := &MediaAssetRegistry{
+		assetMapper: map[string]*models.MediaAsset{
 			"@generated/test/0.png": {
-				Url: "https://cdn.example.com/logo.png",
+				Path: "https://cdn.example.com/logo.png",
 			},
 		},
 	}
@@ -27,19 +27,19 @@ func TestResolveMediaHandles_BasicReplacement(t *testing.T) {
 }
 
 func TestResolveMediaHandles_AngleBracketReplacement_RemovesBrackets(t *testing.T) {
-	registry := &BrandIdentityRegistry{
-		assetMapper: map[string]*pbcore.MediaAsset{
+	registry := &MediaAssetRegistry{
+		assetMapper: map[string]*models.MediaAsset{
 			"@generated/test/0.png": {
-				Url: "https://cdn.example.com/logo.png",
+				Path: "https://cdn.example.com/logo.png",
 			},
 		},
 	}
 
-	input := `URL: <@generated/test/0.png>`
+	input := `Path: <@generated/test/0.png>`
 
 	out := registry.ResolveMediaHandles(input)
 
-	expected := `URL: https://cdn.example.com/logo.png`
+	expected := `Path: https://cdn.example.com/logo.png`
 
 	if out != expected {
 		t.Fatalf("expected %s, got %s", expected, out)
@@ -47,15 +47,15 @@ func TestResolveMediaHandles_AngleBracketReplacement_RemovesBrackets(t *testing.
 }
 
 func TestResolveMediaHandles_MixedHandleFormats(t *testing.T) {
-	registry := &BrandIdentityRegistry{
-		assetMapper: map[string]*pbcore.MediaAsset{
-			"@generated/a/0.png": {Url: "https://cdn.example.com/a.png"},
+	registry := &MediaAssetRegistry{
+		assetMapper: map[string]*models.MediaAsset{
+			"@generated/a/0.png": {Path: "https://cdn.example.com/a.png"},
 		},
 	}
 
 	input := `
 <img src="@generated/a/0.png">
-URL: <@generated/a/0.png>
+Path: <@generated/a/0.png>
 `
 
 	out := registry.ResolveMediaHandles(input)
@@ -65,15 +65,15 @@ URL: <@generated/a/0.png>
 	}
 
 	if !strings.Contains(out, "https://cdn.example.com/a.png") {
-		t.Fatalf("expected url replacement")
+		t.Fatalf("expected Path replacement")
 	}
 }
 
 func TestResolveMediaHandles_MultipleHandles(t *testing.T) {
-	registry := &BrandIdentityRegistry{
-		assetMapper: map[string]*pbcore.MediaAsset{
-			"@generated/a/0.png": {Url: "https://cdn.example.com/a.png"},
-			"@generated/b/1.png": {Url: "https://cdn.example.com/b.png"},
+	registry := &MediaAssetRegistry{
+		assetMapper: map[string]*models.MediaAsset{
+			"@generated/a/0.png": {Path: "https://cdn.example.com/a.png"},
+			"@generated/b/1.png": {Path: "https://cdn.example.com/b.png"},
 		},
 	}
 
@@ -98,10 +98,10 @@ func TestResolveMediaHandles_MultipleHandles(t *testing.T) {
 }
 
 func TestResolveMediaHandles_SkipNilOrEmptyAssets(t *testing.T) {
-	registry := &BrandIdentityRegistry{
-		assetMapper: map[string]*pbcore.MediaAsset{
+	registry := &MediaAssetRegistry{
+		assetMapper: map[string]*models.MediaAsset{
 			"@generated/test/0.png": nil,
-			"@generated/test/1.png": {Url: ""},
+			"@generated/test/1.png": {Path: ""},
 		},
 	}
 
@@ -115,8 +115,8 @@ func TestResolveMediaHandles_SkipNilOrEmptyAssets(t *testing.T) {
 }
 
 func TestResolveMediaHandles_NoHandles(t *testing.T) {
-	registry := &BrandIdentityRegistry{
-		assetMapper: map[string]*pbcore.MediaAsset{},
+	registry := &MediaAssetRegistry{
+		assetMapper: map[string]*models.MediaAsset{},
 	}
 
 	input := `<img src="logo.png">`

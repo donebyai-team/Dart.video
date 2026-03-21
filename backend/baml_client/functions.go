@@ -21,6 +21,80 @@ import (
 	"github.com/shank318/coasterai/baml_client/types"
 )
 
+func AnalyzeImage(ctx context.Context, image types.Image, opts ...CallOptionFunc) (types.AssetAnalysis, error) {
+
+	var callOpts callOption
+	for _, opt := range opts {
+		opt(&callOpts)
+	}
+
+	// Resolve client option to clientRegistry (client takes precedence)
+	if callOpts.client != nil {
+		if callOpts.clientRegistry == nil {
+			callOpts.clientRegistry = baml.NewClientRegistry()
+		}
+		callOpts.clientRegistry.SetPrimaryClient(*callOpts.client)
+	}
+
+	args := baml.BamlFunctionArguments{
+		Kwargs: map[string]any{"image": image},
+		Env:    getEnvVars(callOpts.env),
+	}
+
+	if callOpts.clientRegistry != nil {
+		args.ClientRegistry = callOpts.clientRegistry
+	}
+
+	if callOpts.collectors != nil {
+		args.Collectors = callOpts.collectors
+	}
+
+	if callOpts.typeBuilder != nil {
+		args.TypeBuilder = callOpts.typeBuilder
+	}
+
+	if callOpts.tags != nil {
+		args.Tags = callOpts.tags
+	}
+
+	encoded, err := args.Encode()
+	if err != nil {
+		panic(err)
+	}
+
+	if callOpts.onTick == nil {
+		result, err := bamlRuntime.CallFunction(ctx, "AnalyzeImage", encoded, callOpts.onTick)
+		if err != nil {
+			return types.AssetAnalysis{}, err
+		}
+
+		if result.Error != nil {
+			return types.AssetAnalysis{}, result.Error
+		}
+
+		casted := (result.Data).(types.AssetAnalysis)
+
+		return casted, nil
+	} else {
+		channel, err := bamlRuntime.CallFunctionStream(ctx, "AnalyzeImage", encoded, callOpts.onTick)
+		if err != nil {
+			return types.AssetAnalysis{}, err
+		}
+
+		for result := range channel {
+			if result.Error != nil {
+				return types.AssetAnalysis{}, result.Error
+			}
+
+			if result.HasData {
+				return result.Data.(types.AssetAnalysis), nil
+			}
+		}
+
+		return types.AssetAnalysis{}, fmt.Errorf("No data returned from stream")
+	}
+}
+
 func EditAnimationCode(ctx context.Context, resume types.EditAnimationCodeRequest, conversation_history []types.Message, opts ...CallOptionFunc) (types.EditAnimationCodeResponse, error) {
 
 	var callOpts callOption
@@ -465,7 +539,7 @@ func GeneratePlanStreaming(ctx context.Context, input types.VideoGenerationPlanR
 	}
 }
 
-func GeneratePlanV2(ctx context.Context, input types.VideoGenerationPlanRequest, conversation_history []types.Message, opts ...CallOptionFunc) (types.StreamingVideoGenerationPlan, error) {
+func GeneratePlanV2(ctx context.Context, input types.VideoGenerationPlanRequest, conversation_history []types.Message, opts ...CallOptionFunc) (types.VideoGenerationPlanV2, error) {
 
 	var callOpts callOption
 	for _, opt := range opts {
@@ -509,33 +583,33 @@ func GeneratePlanV2(ctx context.Context, input types.VideoGenerationPlanRequest,
 	if callOpts.onTick == nil {
 		result, err := bamlRuntime.CallFunction(ctx, "GeneratePlanV2", encoded, callOpts.onTick)
 		if err != nil {
-			return types.StreamingVideoGenerationPlan{}, err
+			return types.VideoGenerationPlanV2{}, err
 		}
 
 		if result.Error != nil {
-			return types.StreamingVideoGenerationPlan{}, result.Error
+			return types.VideoGenerationPlanV2{}, result.Error
 		}
 
-		casted := (result.Data).(types.StreamingVideoGenerationPlan)
+		casted := (result.Data).(types.VideoGenerationPlanV2)
 
 		return casted, nil
 	} else {
 		channel, err := bamlRuntime.CallFunctionStream(ctx, "GeneratePlanV2", encoded, callOpts.onTick)
 		if err != nil {
-			return types.StreamingVideoGenerationPlan{}, err
+			return types.VideoGenerationPlanV2{}, err
 		}
 
 		for result := range channel {
 			if result.Error != nil {
-				return types.StreamingVideoGenerationPlan{}, result.Error
+				return types.VideoGenerationPlanV2{}, result.Error
 			}
 
 			if result.HasData {
-				return result.Data.(types.StreamingVideoGenerationPlan), nil
+				return result.Data.(types.VideoGenerationPlanV2), nil
 			}
 		}
 
-		return types.StreamingVideoGenerationPlan{}, fmt.Errorf("No data returned from stream")
+		return types.VideoGenerationPlanV2{}, fmt.Errorf("No data returned from stream")
 	}
 }
 

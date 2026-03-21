@@ -46,6 +46,15 @@ client<llm> CustomOpenAI5 {
   }
 }
 
+client<llm> OpenAIImageAnalysis {
+  provider "openai-responses"
+  retry_policy Exponential
+  options {
+    model "gpt-5.4-mini"
+    api_key env.OPENAI_API_KEY
+  }
+}
+
 client<llm> CustomOpenAI5WithThinkingSummary {
   provider "openai-responses"
   retry_policy Exponential

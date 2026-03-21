@@ -72,6 +72,7 @@ class Section {
 
 class VideoBranding {
   brandGuideLines string? @skip @description("user provided brand guidelines")
+  attachments string? 
 }
 
 class StreamingVideoGenerationPlan {

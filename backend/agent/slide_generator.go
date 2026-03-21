@@ -59,14 +59,14 @@ func (g *videoConfigGenerator) Fail(ctx context.Context, cause error, status mod
 	return g.update(ctx, status)
 }
 
-func (g *videoConfigGenerator) AddBranding(brandIdentityRegistry *brand_identity.BrandIdentityRegistry) {
+func (g *videoConfigGenerator) AddBranding(assetRegistry *services.MediaAssetRegistry) {
 	generatedBranding := &pbcore.GeneratedVideoBranding{}
 
 	// Step 1: get colors (already processed)
-	if brandIdentityRegistry == nil {
+	if assetRegistry == nil {
 		generatedBranding.Colors = brand_identity.ExtractOrGenerateColors(nil)
 	} else {
-		brandIdentity := brandIdentityRegistry.GetIdentity()
+		brandIdentity := assetRegistry.GetIdentity()
 		generatedBranding.Colors = brandIdentity.Colors
 	}
 
@@ -98,11 +98,11 @@ func (g *videoConfigGenerator) AddBranding(brandIdentityRegistry *brand_identity
 // and each slide plan is stored so that it can be resumed
 func (g *videoConfigGenerator) CreatePendingSlides(
 	ctx context.Context,
-	brandIdentityRegistry *brand_identity.BrandIdentityRegistry,
+	assetRegistry *services.MediaAssetRegistry,
 	plan *types.VideoGenerationPlan,
 ) (*pbcore.Video, error) {
 	// save background
-	g.AddBranding(brandIdentityRegistry)
+	g.AddBranding(assetRegistry)
 
 	// save slides
 	sections := make([]*pbcore.Section, 0, len(plan.Sections))

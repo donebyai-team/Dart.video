@@ -3,6 +3,11 @@ template_string BrandGuidelines(resume: VideoBranding) #"
     ### Brand Details:
     {{ resume.brandGuideLines }}
     {% endif %}
+
+    {% if resume.attachments %}
+    ### Attachments:
+    {{ resume.attachments }}
+    {% endif %}
 "#
 
 template_string AnimationTypes() #"

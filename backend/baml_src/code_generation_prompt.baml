@@ -240,7 +240,16 @@ template_string SceneDesignPrinciples() #"
 - Use FocusColor on the dominant element. Never on layout.
 - Prefer slow, deliberate timing — entrances at 20-25 frames feel confident, rushed at 8-10 feel cheap.
 - Leave generous hold time between sections.
- - Never stack more than three animation layers deep.
+- Never stack more than three animation layers deep.
+
+## ELEMENT TREE RULES
+
+- SafeArea is implicit — never include it in elements.
+- Every content element must be inside Stack or Row — never place a content
+  component as a direct sibling without a layout wrapper.
+- Use Stack for vertical arrangement, Row for horizontal. Nest them for complex layouts.
+- AbsoluteCenter for centering a single element on the full canvas.
+- Animation primitives always wrap a content or asset element — never leave them empty.
 "#
 
 template_string CodeGenerationRules() #"

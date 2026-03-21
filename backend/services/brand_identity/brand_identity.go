@@ -10,10 +10,8 @@ import (
 	"github.com/shank318/coasterai/services"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/wrapperspb"
-	"math/rand"
 	"net/url"
 	"strings"
-	"time"
 )
 
 type BrandIdentity interface {
@@ -22,7 +20,7 @@ type BrandIdentity interface {
 	GetBrandIdentities(ctx context.Context, orgID string) ([]*pbcore.BrandIdentity, error)
 	GetSupportedFonts(ctx context.Context, orgID string) []string
 	GetBrandIdentityByID(ctx context.Context, ID string) (*models.BrandIdentity, error)
-	GetBrandIdentity(ctx context.Context, ID string) (*BrandIdentityRegistry, error)
+	GetBrandIdentity(ctx context.Context, ID string) (*models.BrandIdentity, error)
 }
 
 type brandIdentity struct {
@@ -33,13 +31,13 @@ type brandIdentity struct {
 	googleFontLoader fontLoader
 }
 
-func (b brandIdentity) GetBrandIdentity(ctx context.Context, ID string) (*BrandIdentityRegistry, error) {
+func (b brandIdentity) GetBrandIdentity(ctx context.Context, ID string) (*models.BrandIdentity, error) {
 	brandIdentity, err := b.db.GetBrandIdentityByID(ctx, ID)
 	if err != nil {
 		return nil, err
 	}
 	brandIdentity.BrandIdentity.Id = brandIdentity.ID
-	return NewBrandIdentityRegistry(brandIdentity.BrandIdentity), nil
+	return brandIdentity, nil
 }
 
 func (b brandIdentity) GetBrandIdentityByID(ctx context.Context, ID string) (*models.BrandIdentity, error) {
@@ -243,187 +241,4 @@ func (b brandIdentity) UpdateBrandIdentity(ctx context.Context, orgID string, id
 
 func (b brandIdentity) GetBrandIdentities(ctx context.Context, orgID string) ([]*pbcore.BrandIdentity, error) {
 	return b.db.GetBrandIdentities(ctx, orgID)
-}
-
-type BrandIdentityRegistry struct {
-	assetMapper  map[string]*pbcore.MediaAsset
-	identity     *pbcore.BrandIdentity
-	assetHandles []string
-}
-
-func (registry *BrandIdentityRegistry) GetIdentity() *pbcore.BrandIdentity {
-	return registry.identity
-}
-
-func (registry *BrandIdentityRegistry) ResolveMediaHandles(code string) string {
-	replacements := make([]string, 0, len(registry.assetMapper)*4)
-
-	for handleID, asset := range registry.assetMapper {
-		if asset == nil || asset.Url == "" {
-			continue
-		}
-
-		// Handle <@generated/...>
-		replacements = append(replacements, "<"+handleID+">", asset.Url)
-
-		// Handle @generated/...
-		replacements = append(replacements, handleID, asset.Url)
-	}
-
-	replacer := strings.NewReplacer(replacements...)
-	return replacer.Replace(code)
-}
-
-/*
-Brand Identity:
-
-	ID: brand_123
-	Name: Stripe
-	Website: <https://stripe.com>
-	Tagline: Payments infrastructure for the internet
-	Description: Stripe builds economic infrastructure...
-*/
-func (registry *BrandIdentityRegistry) FormatBrandDetails() string {
-	b := registry.identity
-	var sb strings.Builder
-
-	writeLine := func(indent int, format string, args ...interface{}) {
-		sb.WriteString(strings.Repeat("  ", indent))
-		sb.WriteString(fmt.Sprintf(format, args...))
-		sb.WriteString("\n")
-	}
-
-	writeLine(0, "Brand Identity:")
-	//writeLine(1, "ID: %s", b.Id)
-	writeLine(1, "Name: %s", b.Name) // Name is sam as website, skip for now
-	//writeLine(1, "Website: <%s>", b.WebsiteUrl)
-
-	if b.Tagline != nil && b.Tagline.Value != "" {
-		writeLine(1, "Tagline: %s", b.Tagline.Value)
-	}
-
-	if b.Description != nil && b.Description.Value != "" {
-		writeLine(1, "Description: %s", b.Description.Value)
-	}
-
-	// ---- Colors ----
-	//if len(b.Colors) > 0 {
-	//	writeLine(1, "Colors:")
-	//	for _, c := range b.Colors {
-	//		if c.Priority == pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_UNSPECIFIED {
-	//			writeLine(2, "- %s", c.ColorHexCode)
-	//		} else {
-	//			writeLine(2, "- %s (%s)", c.ColorHexCode, c.Priority.String())
-	//		}
-	//	}
-	//}
-	//
-	//// ---- Fonts ----
-	//if len(b.Fonts) > 0 {
-	//	writeLine(1, "Fonts:")
-	//	for _, f := range b.Fonts {
-	//		if f.GoogleFontsName != nil && f.GoogleFontsName.Value != "" {
-	//			writeLine(2, "- %s", f.GoogleFontsName.Value)
-	//		}
-	//	}
-	//}
-
-	return sb.String()
-}
-
-func NewBrandIdentityRegistry(identity *pbcore.BrandIdentity) *BrandIdentityRegistry {
-	registry := &BrandIdentityRegistry{
-		identity:     identity,
-		assetMapper:  make(map[string]*pbcore.MediaAsset),
-		assetHandles: []string{},
-	}
-
-	for index, m := range identity.Logos {
-		if m.Asset == nil {
-			continue
-		}
-
-		a := m.Asset
-
-		handleID := fmt.Sprintf(
-			"@generated/%s/%d.%s",
-			generateRandomID(),
-			index,
-			a.MediaType.Extension(),
-		)
-
-		registry.assetMapper[handleID] = a
-		registry.assetHandles = append(registry.assetHandles, handleID)
-	}
-
-	return registry
-}
-
-/*
-		Media:
-		 - Type: BRAND_MEDIA_TYPE_LOGO
-	   		Priority: BRAND_ASSET_PRIORITY_PRIMARY
-	   		URL: <https://cdn.example.com/logo.png>
-	   		MIME Type: image/png
-	   		Asset Type: MEDIA_TYPE_IMAGE
-	   		Dimensions: 1024x256
-*/
-func (registry *BrandIdentityRegistry) FormatBrandAndAssetDetails() string {
-	b := registry.identity
-	var sb strings.Builder
-
-	sb.WriteString(registry.FormatBrandDetails())
-
-	writeLine := func(indent int, format string, args ...interface{}) {
-		sb.WriteString(strings.Repeat("  ", indent))
-		sb.WriteString(fmt.Sprintf(format, args...))
-		sb.WriteString("\n")
-	}
-
-	if len(b.Logos) > 0 {
-		writeLine(1, "Media:")
-
-		for index, m := range b.Logos {
-			if m.Asset == nil {
-				continue
-			}
-
-			a := m.Asset
-			handleID := registry.assetHandles[index]
-
-			writeLine(2, "- Type: %s", m.Type.String())
-
-			if m.Priority != pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_UNSPECIFIED {
-				writeLine(3, "Priority: %s", m.Priority.String())
-			}
-
-			writeLine(3, "URL: <%s>", handleID)
-
-			if a.MimeType != "" {
-				writeLine(3, "MIME Type: %s", a.MimeType)
-			}
-
-			if a.MediaType != pbcore.MediaType_MEDIA_TYPE_UNDEFINED {
-				writeLine(3, "Asset Type: %s", a.MediaType.String())
-			}
-
-			if a.MediaType == pbcore.MediaType_MEDIA_TYPE_IMAGE {
-				if a.Width > 0 && a.Height > 0 {
-					writeLine(3, "Dimensions: %.0fx%.0f", a.Width, a.Height)
-				}
-			}
-		}
-	}
-
-	return sb.String()
-}
-
-func generateRandomID() string {
-	const letters = "abcdefghijklmnopqrstuvwxyzx"
-	rand.Seed(time.Now().UnixNano())
-	id := make([]byte, 6)
-	for i := range id {
-		id[i] = letters[rand.Intn(len(letters))]
-	}
-	return string(id)
 }

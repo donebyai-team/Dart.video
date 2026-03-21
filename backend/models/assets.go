@@ -21,6 +21,10 @@ type MediaAsset struct {
 	Metadata       AssetMetadata      `db:"metadata"`
 	CreatedAt      time.Time          `db:"created_at"`
 	UpdatedAt      *time.Time         `db:"updated_at"`
+
+	UserNote    string `db:"-"`
+	Description string `db:"-"`
+	Tags        string `db:"-"`
 }
 
 type AssetMetadata struct {

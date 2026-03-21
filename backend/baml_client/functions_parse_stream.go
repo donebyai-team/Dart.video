@@ -25,6 +25,53 @@ type parse_stream struct{}
 
 var ParseStream = &parse_stream{}
 
+// / Parse version of AnalyzeImage (Takes in string and returns stream_types.AssetAnalysis)
+func (*parse_stream) AnalyzeImage(text string, opts ...CallOptionFunc) (stream_types.AssetAnalysis, error) {
+
+	var callOpts callOption
+	for _, opt := range opts {
+		opt(&callOpts)
+	}
+
+	args := baml.BamlFunctionArguments{
+		Kwargs: map[string]any{"text": text, "stream": true},
+		Env:    getEnvVars(callOpts.env),
+	}
+
+	if callOpts.clientRegistry != nil {
+		args.ClientRegistry = callOpts.clientRegistry
+	}
+
+	if callOpts.collectors != nil {
+		args.Collectors = callOpts.collectors
+	}
+
+	if callOpts.typeBuilder != nil {
+		args.TypeBuilder = callOpts.typeBuilder
+	}
+
+	if callOpts.tags != nil {
+		args.Tags = callOpts.tags
+	}
+
+	encoded, err := args.Encode()
+	if err != nil {
+		// This should never happen. if it does, please file an issue at https://github.com/boundaryml/baml/issues
+		// and include the type of the args you're passing in.
+		wrapped_err := fmt.Errorf("BAML INTERNAL ERROR: AnalyzeImage: %w", err)
+		panic(wrapped_err)
+	}
+
+	result, err := bamlRuntime.CallFunctionParse(context.Background(), "AnalyzeImage", encoded)
+	if err != nil {
+		return stream_types.AssetAnalysis{}, err
+	}
+
+	casted := (result).(stream_types.AssetAnalysis)
+
+	return casted, nil
+}
+
 // / Parse version of EditAnimationCode (Takes in string and returns stream_types.EditAnimationCodeResponse)
 func (*parse_stream) EditAnimationCode(text string, opts ...CallOptionFunc) (stream_types.EditAnimationCodeResponse, error) {
 
@@ -307,8 +354,8 @@ func (*parse_stream) GeneratePlanStreaming(text string, opts ...CallOptionFunc) 
 	return casted, nil
 }
 
-// / Parse version of GeneratePlanV2 (Takes in string and returns stream_types.StreamingVideoGenerationPlan)
-func (*parse_stream) GeneratePlanV2(text string, opts ...CallOptionFunc) (stream_types.StreamingVideoGenerationPlan, error) {
+// / Parse version of GeneratePlanV2 (Takes in string and returns stream_types.VideoGenerationPlanV2)
+func (*parse_stream) GeneratePlanV2(text string, opts ...CallOptionFunc) (stream_types.VideoGenerationPlanV2, error) {
 
 	var callOpts callOption
 	for _, opt := range opts {
@@ -346,10 +393,10 @@ func (*parse_stream) GeneratePlanV2(text string, opts ...CallOptionFunc) (stream
 
 	result, err := bamlRuntime.CallFunctionParse(context.Background(), "GeneratePlanV2", encoded)
 	if err != nil {
-		return stream_types.StreamingVideoGenerationPlan{}, err
+		return stream_types.VideoGenerationPlanV2{}, err
 	}
 
-	casted := (result).(stream_types.StreamingVideoGenerationPlan)
+	casted := (result).(stream_types.VideoGenerationPlanV2)
 
 	return casted, nil
 }

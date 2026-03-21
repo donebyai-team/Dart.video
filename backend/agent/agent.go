@@ -61,7 +61,7 @@ type agentV1 struct {
 	orgID                string
 	db                   datastore.Repository
 	brandIdentityService brand_identity.BrandIdentity
-	brandIdentityMapper  *brand_identity.BrandIdentityRegistry
+	assetRegistry        *services.MediaAssetRegistry
 	retrievalService     RetrievalService
 	llmService           llm.LLMService
 	videoService         services.VideoGeneration
@@ -84,7 +84,7 @@ func NewAgentV1(
 	videoService services.VideoGeneration,
 	brandIdentityService brand_identity.BrandIdentity,
 ) *agentV1 {
-	llmService := llm.NewLlmService(logger)
+	llmService := llm.NewLlmService(logger, cache)
 	return &agentV1{
 		fps:                  defaultFPS,
 		sessionID:            sessionID,
@@ -160,7 +160,7 @@ func (a *agentV1) Start(ctx context.Context, options StartSessionOptions) (*RunR
 		return nil, err
 	}
 
-	err := a.injectBrandIdentityMapper(ctx, options.Input.BrandLibraryId)
+	err := a.injectMediaAssets(ctx, options.Input)
 	if err != nil {
 		return nil, err
 	}
@@ -194,9 +194,10 @@ func (a *agentV1) Start(ctx context.Context, options StartSessionOptions) (*RunR
 	}
 
 	// use brand guidelines only when specified
-	if a.brandIdentityMapper != nil {
+	if a.assetRegistry != nil {
 		generatePlanRequest.VideoBranding = types.VideoBranding{
-			BrandGuideLines: utils.Ptr(a.brandIdentityMapper.FormatBrandDetails()),
+			BrandGuideLines: a.assetRegistry.FormatBrandDetails(),
+			Attachments:     a.assetRegistry.FormatAssets(),
 		}
 	}
 
@@ -224,7 +225,7 @@ func (a *agentV1) Continue(ctx context.Context, options ContinueSessionOptions) 
 		return nil, err
 	}
 
-	if err = a.injectBrandIdentityMapper(ctx, session.Request.BrandLibraryID); err != nil {
+	if err = a.injectMediaAssets(ctx, &pbportal.CreateVideoRequest{BrandLibraryId: session.Request.BrandLibraryID}); err != nil {
 		return nil, err
 	}
 
@@ -248,21 +249,21 @@ func (a *agentV1) Continue(ctx context.Context, options ContinueSessionOptions) 
 	return a.runPlanning(ctx, session)
 }
 
-func (a *agentV1) injectBrandIdentityMapper(ctx context.Context, brandLibraryID *string) error {
-	if brandLibraryID == nil {
-		return nil
-	}
+func (a *agentV1) injectMediaAssets(ctx context.Context, input *pbportal.CreateVideoRequest) error {
+	registryBuilder := services.NewMediaAssetRegistryBuilder()
 
-	brandIdentityMapper, err := a.brandIdentityService.GetBrandIdentity(ctx, *brandLibraryID)
-	if err != nil {
-		if errors.Is(err, datastore.NotFound) {
-			return agenterrors.InvalidInput("brand_identity not found", nil)
+	if input.BrandLibraryId != nil {
+		brandIdentity, err := a.brandIdentityService.GetBrandIdentity(ctx, *input.BrandLibraryId)
+		if err != nil {
+			if errors.Is(err, datastore.NotFound) {
+				return agenterrors.InvalidInput("brand_identity not found", nil)
+			}
+			return err
 		}
-		return err
+		registryBuilder.WithBrandIdentity(brandIdentity.BrandIdentity)
 	}
 
-	a.brandIdentityMapper = brandIdentityMapper
-
+	a.assetRegistry = registryBuilder.Build()
 	return nil
 }
 
@@ -368,15 +369,15 @@ func (a *agentV1) applyPlan(
 
 	// inject dependencies for generator
 	optionsBuilder := NewAnimationGenerationOptionsBuilder()
-	if a.brandIdentityMapper != nil {
-		optionsBuilder.WithBrandIdentityMapper(a.brandIdentityMapper)
+	if a.assetRegistry != nil {
+		optionsBuilder.WithAssetRegistry(a.assetRegistry)
 	}
 	a.animationGenerator.ApplyGenerationOptions(optionsBuilder.Build())
 
 	// save config with pending items
 	builder := NewVideoConfigGenerator(a.logger, a.videoService).
 		Init(a.sessionID, aiPlan.VideoName)
-	pendingVideo, err := builder.CreatePendingSlides(ctx, a.brandIdentityMapper, aiPlan)
+	pendingVideo, err := builder.CreatePendingSlides(ctx, a.assetRegistry, aiPlan)
 	if err != nil {
 		return fmt.Errorf("creating pending slides: %w", err)
 	}

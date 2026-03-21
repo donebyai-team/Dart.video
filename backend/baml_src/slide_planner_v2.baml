@@ -23,25 +23,38 @@ class SceneElement {
 }
 
 class DataPoint {
-  reason string
+  description string @description("short description about what's been specified in the value field")
   value string @description("json for nested, complex data points, or direct value")
-}
-
-class FrameRange {
-  start int
-  end int
 }
 
 class Scene {
   index int
   category SceneCategory
-  brief string
-  frameRange FrameRange
-  dataPoint DataPoint
+  elements SceneElement[]
+  brief string @description("a short description explaining the scene, used for semantic search for existing templates and the animation generator")
+  frameBudget int[] @description("a range of frame budget for this scene eg. 40-70 frames")
+  dataPoint DataPoint @description("generator will use this data to convert selected SceneElements into animation")
+}
+
+class VoiceoverSegment {
+  voiceover string
+  startFrame int
+  endFrame int
+}
+
+class VideoPlanV2 {
+    videoName string @description("name of the video, around 5 to 15 length")
+    scenes Scene[]
+    segments VoiceoverSegment[] @description("voiceover to play across scenes, roughly split it across the total frames of the video")
+    thinkingSummary string? @skip()
+}
+
+class VideoGenerationPlanV2 {
+  plan (VideoPlanV2 | AskUserQuestion)
 }
 
 
-function GeneratePlanV2(input: VideoGenerationPlanRequest, conversation_history: Message[]) -> StreamingVideoGenerationPlan {
+function GeneratePlanV2(input: VideoGenerationPlanRequest, conversation_history: Message[]) -> VideoGenerationPlanV2 {
   client CustomOpenAI5WithThinkingSummary
   prompt #"
     You are a cinematic video planning director. Your job is to decompose a video brief into a sequence of scenes.
@@ -51,7 +64,6 @@ function GeneratePlanV2(input: VideoGenerationPlanRequest, conversation_history:
     {{ AllComponentsList() }}
     {{ SceneDesignPrinciples() }}
     {{ PlannerTimingGuidance() }}
-    {{ BrandGuidelines(input.VideoBranding) }}
 
     ## PLANNING RULES
 
@@ -87,8 +99,8 @@ function GeneratePlanV2(input: VideoGenerationPlanRequest, conversation_history:
     Ask if:
     - A scene implies brand presence but no brand name is provided
     - Metrics are mentioned but it is unclear if they are real or placeholder
-    - A product screen is implied but no Figma asset matches the intent
-    - Any key visual storytelling decision is ambiguous
+    - A product screen assets is implied but the description is not clear
+    - Any key visual storytelling decision is ambiguous from script or assets
 
     Do not ask about:
     - Timing or animation style — you decide these
@@ -99,10 +111,12 @@ function GeneratePlanV2(input: VideoGenerationPlanRequest, conversation_history:
 
     Before outputting scenes, reason through:
     1. How many scenes does this video need?
-    2. What is the narrative arc — problem, solution, proof, CTA?
+    2. What is the narrative arc ?
     3. Which scenes are hero scenes and which are supporting?
     4. What data is available vs what needs a placeholder?
-    5. Are there Figma assets that match any scene intent?
+    5. Are there assets that match any scene intent?
+    5. Use <attachments> and <user_note> to analyse what attachment to use with Asset COMPONENTS.
+    6. *You can add the attachment url in the dataPoint value for the component*
 
     Only begin output after forming a clear plan.
 
@@ -114,7 +128,7 @@ function GeneratePlanV2(input: VideoGenerationPlanRequest, conversation_history:
     Total Video Budget: {{ input.Duration }} frames
     Language: {{ input.Language }}
 
-    ### Prompt
+    ### User prompt
     {{ input.Prompt }}
 
     {% if input.Script %}
@@ -127,6 +141,8 @@ function GeneratePlanV2(input: VideoGenerationPlanRequest, conversation_history:
       {% endif %}
     {% endfor %}
     {% endif %}
+
+    {{ BrandGuidelines(input.VideoBranding) }}
 
     ---
 

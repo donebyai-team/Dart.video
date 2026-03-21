@@ -2,12 +2,12 @@ package agent
 
 import (
 	"github.com/shank318/coasterai/baml_client/types"
-	"github.com/shank318/coasterai/services/brand_identity"
+	"github.com/shank318/coasterai/services"
 )
 
 type AnimationGenerationOptions struct {
-	VideoBranding       *types.VideoBranding
-	BrandIdentityMapper *brand_identity.BrandIdentityRegistry
+	VideoBranding *types.VideoBranding
+	assetRegistry *services.MediaAssetRegistry
 }
 
 type AnimationGenerationOptionsBuilder struct {
@@ -23,8 +23,8 @@ func (b *AnimationGenerationOptionsBuilder) WithVideoBranding(videoBranding *typ
 	return b
 }
 
-func (b *AnimationGenerationOptionsBuilder) WithBrandIdentityMapper(brandIdentityMapper *brand_identity.BrandIdentityRegistry) *AnimationGenerationOptionsBuilder {
-	b.options.BrandIdentityMapper = brandIdentityMapper
+func (b *AnimationGenerationOptionsBuilder) WithAssetRegistry(assetRegistry *services.MediaAssetRegistry) *AnimationGenerationOptionsBuilder {
+	b.options.assetRegistry = assetRegistry
 	return b
 }
 

@@ -255,7 +255,7 @@ func (p *Portal) injectAnimationGenerationContext(
 		return nil
 	}
 
-	brandIdentityMapper, err := p.brandIdentityService.GetBrandIdentity(ctx, *brandLibraryID)
+	brandIdentity, err := p.brandIdentityService.GetBrandIdentity(ctx, *brandLibraryID)
 	if err != nil {
 		if errors.Is(err, datastore.NotFound) {
 			return connect.NewError(connect.CodeInvalidArgument, errors.New("brand_identity not found"))
@@ -263,8 +263,10 @@ func (p *Portal) injectAnimationGenerationContext(
 		return err
 	}
 
+	registryBuilder := services.NewMediaAssetRegistryBuilder().WithBrandIdentity(brandIdentity.BrandIdentity)
+
 	options := agent.NewAnimationGenerationOptionsBuilder().
-		WithBrandIdentityMapper(brandIdentityMapper).
+		WithAssetRegistry(registryBuilder.Build()).
 		Build()
 	animationAgent.ApplyGenerationOptions(options)
 

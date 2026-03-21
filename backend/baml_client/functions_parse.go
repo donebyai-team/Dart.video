@@ -25,6 +25,53 @@ type parse struct{}
 
 var Parse = &parse{}
 
+// / Parse version of AnalyzeImage (Takes in string and returns types.AssetAnalysis)
+func (*parse) AnalyzeImage(text string, opts ...CallOptionFunc) (types.AssetAnalysis, error) {
+
+	var callOpts callOption
+	for _, opt := range opts {
+		opt(&callOpts)
+	}
+
+	args := baml.BamlFunctionArguments{
+		Kwargs: map[string]any{"text": text, "stream": false},
+		Env:    getEnvVars(callOpts.env),
+	}
+
+	if callOpts.clientRegistry != nil {
+		args.ClientRegistry = callOpts.clientRegistry
+	}
+
+	if callOpts.collectors != nil {
+		args.Collectors = callOpts.collectors
+	}
+
+	if callOpts.typeBuilder != nil {
+		args.TypeBuilder = callOpts.typeBuilder
+	}
+
+	if callOpts.tags != nil {
+		args.Tags = callOpts.tags
+	}
+
+	encoded, err := args.Encode()
+	if err != nil {
+		// This should never happen. if it does, please file an issue at https://github.com/boundaryml/baml/issues
+		// and include the type of the args you're passing in.
+		wrapped_err := fmt.Errorf("BAML INTERNAL ERROR: AnalyzeImage: %w", err)
+		panic(wrapped_err)
+	}
+
+	result, err := bamlRuntime.CallFunctionParse(context.Background(), "AnalyzeImage", encoded)
+	if err != nil {
+		return types.AssetAnalysis{}, err
+	}
+
+	casted := (result).(types.AssetAnalysis)
+
+	return casted, nil
+}
+
 // / Parse version of EditAnimationCode (Takes in string and returns types.EditAnimationCodeResponse)
 func (*parse) EditAnimationCode(text string, opts ...CallOptionFunc) (types.EditAnimationCodeResponse, error) {
 
@@ -307,8 +354,8 @@ func (*parse) GeneratePlanStreaming(text string, opts ...CallOptionFunc) (types.
 	return casted, nil
 }
 
-// / Parse version of GeneratePlanV2 (Takes in string and returns types.StreamingVideoGenerationPlan)
-func (*parse) GeneratePlanV2(text string, opts ...CallOptionFunc) (types.StreamingVideoGenerationPlan, error) {
+// / Parse version of GeneratePlanV2 (Takes in string and returns types.VideoGenerationPlanV2)
+func (*parse) GeneratePlanV2(text string, opts ...CallOptionFunc) (types.VideoGenerationPlanV2, error) {
 
 	var callOpts callOption
 	for _, opt := range opts {
@@ -346,10 +393,10 @@ func (*parse) GeneratePlanV2(text string, opts ...CallOptionFunc) (types.Streami
 
 	result, err := bamlRuntime.CallFunctionParse(context.Background(), "GeneratePlanV2", encoded)
 	if err != nil {
-		return types.StreamingVideoGenerationPlan{}, err
+		return types.VideoGenerationPlanV2{}, err
 	}
 
-	casted := (result).(types.StreamingVideoGenerationPlan)
+	casted := (result).(types.VideoGenerationPlanV2)
 
 	return casted, nil
 }

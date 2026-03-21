@@ -12,7 +12,6 @@ import (
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/services"
-	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
 	"strings"
 )
@@ -179,8 +178,8 @@ func (l *animationGenerator) Generate(
 		input.Branding = *l.generationOptions.VideoBranding
 	}
 
-	if l.generationOptions.BrandIdentityMapper != nil {
-		input.Branding.BrandGuideLines = utils.Ptr(l.generationOptions.BrandIdentityMapper.FormatBrandAndAssetDetails())
+	if l.generationOptions.assetRegistry != nil {
+		input.Branding.BrandGuideLines = l.generationOptions.assetRegistry.FormatBrandDetails()
 		l.logger.Info("using injected brand-identity mapper")
 	}
 
@@ -212,8 +211,8 @@ func (l *animationGenerator) GenerateCode(ctx context.Context,
 		inptCodeGeneration.Branding = *l.generationOptions.VideoBranding
 	}
 
-	if l.generationOptions.BrandIdentityMapper != nil {
-		inptCodeGeneration.Branding.BrandGuideLines = utils.Ptr(l.generationOptions.BrandIdentityMapper.FormatBrandAndAssetDetails())
+	if l.generationOptions.assetRegistry != nil {
+		inptCodeGeneration.Branding.BrandGuideLines = l.generationOptions.assetRegistry.FormatAssets()
 		l.logger.Info("using injected brand-identity mapper", zap.String("guidelines", *inptCodeGeneration.Branding.BrandGuideLines))
 	}
 
@@ -232,9 +231,9 @@ func (l *animationGenerator) GenerateCode(ctx context.Context,
 		}
 
 		// resolve the asset handles
-		if l.generationOptions.BrandIdentityMapper != nil {
+		if l.generationOptions.assetRegistry != nil {
 			l.logger.Info("using brand-identity mapping for resolving media handles")
-			generatedAnimation.Code = l.generationOptions.BrandIdentityMapper.ResolveMediaHandles(generatedAnimation.Code)
+			generatedAnimation.Code = l.generationOptions.assetRegistry.ResolveMediaHandles(generatedAnimation.Code)
 		}
 
 		// Default
@@ -576,9 +575,9 @@ func (l *animationGenerator) tryRegenerateAnimation(
 			return nil, agenterrors.EditAnimationCodeFailed("failed to re-generate animation", err)
 		}
 
-		if l.generationOptions.BrandIdentityMapper != nil {
+		if l.generationOptions.assetRegistry != nil {
 			l.logger.Info("using brand-identity mapping for resolving media handles")
-			response.Code = l.generationOptions.BrandIdentityMapper.ResolveMediaHandles(response.Code)
+			response.Code = l.generationOptions.assetRegistry.ResolveMediaHandles(response.Code)
 		}
 
 		indentedCode := indentCode(response.Code)
@@ -648,8 +647,8 @@ func (l *animationGenerator) buildRegenInput(
 		input.Branding = *l.generationOptions.VideoBranding
 	}
 
-	if l.generationOptions.BrandIdentityMapper != nil {
-		input.Branding.BrandGuideLines = utils.Ptr(l.generationOptions.BrandIdentityMapper.FormatBrandAndAssetDetails())
+	if l.generationOptions.assetRegistry != nil {
+		input.Branding.BrandGuideLines = l.generationOptions.assetRegistry.FormatBrandDetails()
 		l.logger.Info("using injected brand-identity mapper")
 	}
 
@@ -689,8 +688,8 @@ func (l *animationGenerator) ExtractConfig(
 		input.Branding = *l.generationOptions.VideoBranding
 	}
 
-	if l.generationOptions.BrandIdentityMapper != nil {
-		input.Branding.BrandGuideLines = utils.Ptr(l.generationOptions.BrandIdentityMapper.FormatBrandAndAssetDetails())
+	if l.generationOptions.assetRegistry != nil {
+		input.Branding.BrandGuideLines = l.generationOptions.assetRegistry.FormatBrandDetails()
 		l.logger.Info("using injected brand-identity mapper",
 			zap.String("guidelines", *input.Branding.BrandGuideLines),
 		)
@@ -706,9 +705,9 @@ func (l *animationGenerator) ExtractConfig(
 		return nil, errors.New(fmt.Sprintf("template config validation failed for template : %s", template.ID))
 	}
 
-	if l.generationOptions.BrandIdentityMapper != nil {
+	if l.generationOptions.assetRegistry != nil {
 		l.logger.Info("using brand-identity mapping for resolving media handles")
-		output.Config = l.generationOptions.BrandIdentityMapper.ResolveMediaHandles(output.Config)
+		output.Config = l.generationOptions.assetRegistry.ResolveMediaHandles(output.Config)
 	}
 
 	return &output, nil
