@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
-import { useDurationCollector } from '../duration/DurationCollector';
 import { usePrimitivePatches, usePatchedProp, useStyleOverride } from '../patches/PatchContext';
 import { useStyleContext } from '../styles/StyleContext';
 import { useAspectPreset } from '../styles/AspectPresetContext';
@@ -9,6 +8,7 @@ import { getEasing, interpolateWithEasing } from '../styles/easingResolver';
 import { type Easing } from '../styles/types';
 import { TypographyVariant } from '../tokens/semantic';
 import { resolveTypography } from '../tokens/resolveTypography';
+import { applySpeedFactor, useSpeedFactor } from '../duration';
 
 export type WordCycleTransition = 'flipY' | 'fadeSwap' | 'slideUp';
 
@@ -46,23 +46,27 @@ export function WordCycle({
   const styleConfig = useStyleContext();
   const theme = useTheme();
   const preset = useAspectPreset();
-  const registerEndFrame = useDurationCollector();
+
+  const speedFactor = useSpeedFactor();
+  const adjustedStartAt = applySpeedFactor(startAt, speedFactor);
+  const adjustedHoldDuration = applySpeedFactor(holdDuration, speedFactor);
+  const adjustedTransitionDuration = applySpeedFactor(transitionDuration, speedFactor);
+
+
 
   // startAt maps to delay slot, holdDuration maps to duration slot for patch overrides
   const { effectiveStartAt, effectiveDurationInFrames: effectiveHold } = usePrimitivePatches(id, {
-    startAt,
-    durationInFrames: holdDuration,
+    startAt: adjustedStartAt,
+    durationInFrames: adjustedHoldDuration,
   });
 
   const patchedWords = usePatchedProp(id, 'words', words);
-  const patchedTransitionDuration = usePatchedProp(id, 'transitionDuration', transitionDuration);
+  const patchedTransitionDuration = usePatchedProp(id, 'transitionDuration', adjustedTransitionDuration);
   const patchedTransition = usePatchedProp<WordCycleTransition>(id, 'transition', transition);
   const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', variant);
   const styleOverride = useStyleOverride(id);
 
   const cycleDuration = effectiveHold + patchedTransitionDuration;
-  const endFrame = effectiveStartAt + patchedWords.length * cycleDuration;
-  useMemo(() => { registerEndFrame(endFrame); }, [endFrame]);
 
   const resolvedEasing = easing ?? getEasing(styleConfig.motion, 'wordcycle');
   const typographyStyle = resolveTypography(patchedVariant, styleConfig, theme, preset);
@@ -74,16 +78,16 @@ export function WordCycle({
   const cycleFrame = elapsed - cycleIndex * cycleDuration;
 
   const currentWord = patchedWords[cycleIndex % patchedWords.length] ?? patchedWords[0] ?? '';
-  const nextWord    = patchedWords[(cycleIndex + 1) % patchedWords.length] ?? patchedWords[0] ?? '';
+  const nextWord = patchedWords[(cycleIndex + 1) % patchedWords.length] ?? patchedWords[0] ?? '';
   const isTransitioning = cycleFrame >= effectiveHold;
 
   const transitionProgress = isTransitioning
     ? interpolateWithEasing(
-        cycleFrame,
-        [effectiveHold, effectiveHold + patchedTransitionDuration],
-        [0, 1],
-        resolvedEasing,
-      )
+      cycleFrame,
+      [effectiveHold, effectiveHold + patchedTransitionDuration],
+      [0, 1],
+      resolvedEasing,
+    )
     : 0;
 
   if (patchedTransition === 'fadeSwap') {

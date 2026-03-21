@@ -1,6 +1,5 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useCurrentFrame } from 'remotion';
-import { useDurationCollector } from '../duration/DurationCollector';
 import { usePrimitivePatches, usePatchedProp, useStyleOverride } from '../patches/PatchContext';
 import { useStyleContext } from '../styles/StyleContext';
 import { useAspectPreset } from '../styles/AspectPresetContext';
@@ -8,6 +7,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { interpolateWithEasing } from '../styles/easingResolver';
 import { TypographyVariant } from '../tokens/semantic';
 import { resolveTypography } from '../tokens/resolveTypography';
+import { applySpeedFactor, useSpeedFactor } from '../duration';
 
 export type TypewriterMode = 'char' | 'word' | 'line';
 
@@ -41,15 +41,17 @@ export function Typewriter({
   const styleConfig = useStyleContext();
   const theme = useTheme();
   const preset = useAspectPreset();
-  const registerEndFrame = useDurationCollector();
-  const { effectiveStartAt, effectiveDurationInFrames } = usePrimitivePatches(id, { startAt, durationInFrames });
+
+  const speedFactor = useSpeedFactor();
+  const adjustedStartAt = applySpeedFactor(startAt, speedFactor);
+  const adjustedDurationInFrames = applySpeedFactor(durationInFrames, speedFactor);
+
+  const { effectiveStartAt, effectiveDurationInFrames } = usePrimitivePatches(id, { startAt: adjustedStartAt, durationInFrames: adjustedDurationInFrames });
 
   const patchedText = usePatchedProp(id, 'text', text);
   const patchedMode = usePatchedProp<TypewriterMode>(id, 'mode', mode);
   const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', variant);
   const styleOverride = useStyleOverride(id);
-
-  useMemo(() => { registerEndFrame(effectiveStartAt + effectiveDurationInFrames); }, [effectiveStartAt, effectiveDurationInFrames]);
 
   const progress = interpolateWithEasing(
     frame,

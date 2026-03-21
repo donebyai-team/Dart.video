@@ -208,7 +208,7 @@ func (g *videoConfigGenerator) UpdateAnimationSlide(
 		for _, slide := range section.Slides {
 			if slide.Id == slideID {
 				// update durations, here we receive in frames, no need to convert
-				slide.DurationInFrames = float32(selectedTemplate.Config.TotalDuration)
+				slide.DurationInFrames = float32(selectedTemplate.Config.VisibleDuration)
 				slide.SettledFrame = float32(selectedTemplate.Config.VisibleDuration)
 
 				animation := slide.GetAnimation()

@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
-import { useDurationCollector } from '../../duration/DurationCollector';
 import { usePrimitivePatches } from '../../patches/PatchContext';
+import { applySpeedFactor, useSpeedFactor } from '../../duration';
 
 export interface TimelineGateProps {
   showAfter: number;
@@ -21,19 +21,23 @@ export function TimelineGate({
   children,
 }: TimelineGateProps): React.ReactElement | null {
   const frame = useCurrentFrame();
-  const registerEndFrame = useDurationCollector();
+
+  const speedFactor = useSpeedFactor();
+  const adjustedShowAfter = applySpeedFactor(showAfter, speedFactor);
+  const adjustedHideAfter = hideAfter !== undefined ? applySpeedFactor(hideAfter, speedFactor) : undefined;
+  
+  
 
   // showAfter maps to startAt, hideAfter delta maps to durationInFrames
   const { effectiveStartAt: effectiveShowAfter } = usePrimitivePatches(id, {
-    startAt: showAfter,
-    durationInFrames: hideAfter !== undefined ? hideAfter - showAfter : 0,
+    startAt: adjustedShowAfter,
+    durationInFrames: adjustedHideAfter !== undefined ? adjustedHideAfter - adjustedShowAfter : 0,
   });
 
-  const effectiveHideAfter = hideAfter !== undefined
-    ? effectiveShowAfter + (hideAfter - showAfter)
+  const effectiveHideAfter = adjustedHideAfter !== undefined
+    ? effectiveShowAfter + (adjustedHideAfter - adjustedShowAfter)
     : undefined;
 
-  useMemo(() => { registerEndFrame(effectiveHideAfter ?? effectiveShowAfter); }, [effectiveHideAfter, effectiveShowAfter]);
 
   const isVisible =
     frame >= effectiveShowAfter &&

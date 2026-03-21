@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
-import { useDurationCollector } from '../duration/DurationCollector';
 import { usePrimitivePatches, usePatchedProp, useStyleOverride } from '../patches/PatchContext';
 import { useStyleContext } from '../styles/StyleContext';
 import { useAspectPreset } from '../styles/AspectPresetContext';
@@ -9,6 +8,7 @@ import { getEasing, interpolateWithEasing } from '../styles/easingResolver';
 import { type Easing } from '../styles/types';
 import { TypographyVariant } from '../tokens/semantic';
 import { resolveTypography } from '../tokens/resolveTypography';
+import { applySpeedFactor, useSpeedFactor } from '../duration';
 
 export interface CounterProps {
   startAt?: number;
@@ -64,8 +64,13 @@ export function Counter({
   const styleConfig = useStyleContext();
   const theme = useTheme();
   const preset = useAspectPreset();
-  const registerEndFrame = useDurationCollector();
-  const { effectiveStartAt, effectiveDurationInFrames } = usePrimitivePatches(id, { startAt, durationInFrames });
+
+  const speedFactor = useSpeedFactor();
+  const adjustedStartAt = applySpeedFactor(startAt, speedFactor);
+  const adjustedDurationInFrames = applySpeedFactor(durationInFrames, speedFactor);
+
+
+  const { effectiveStartAt, effectiveDurationInFrames } = usePrimitivePatches(id, { startAt: adjustedStartAt, durationInFrames: adjustedDurationInFrames });
 
   const patchedFrom = usePatchedProp(id, 'from', from);
   const patchedTo = usePatchedProp(id, 'to', to);
@@ -74,8 +79,6 @@ export function Counter({
   const patchedSuffix = usePatchedProp(id, 'suffix', suffix);
   const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', variant);
   const styleOverride = useStyleOverride(id);
-
-  useMemo(() => { registerEndFrame(effectiveStartAt + effectiveDurationInFrames); }, [effectiveStartAt, effectiveDurationInFrames]);
 
   const resolvedEasing = easing ?? getEasing(styleConfig.motion, 'counter');
 

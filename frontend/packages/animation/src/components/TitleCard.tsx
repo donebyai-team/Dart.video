@@ -1,6 +1,5 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useCurrentFrame } from 'remotion';
-import { useDurationCollector } from '../duration/DurationCollector';
 import { useSpeedFactor, applySpeedFactor } from '../duration/speedFactor';
 import { usePatchedProp } from '../patches/PatchContext';
 import { useStyleContext } from '../styles/StyleContext';
@@ -30,24 +29,18 @@ export function TitleCard({
   const frame = useCurrentFrame();
   const styleConfig = useStyleContext();
   const speedFactor = useSpeedFactor();
-  const registerEndFrame = useDurationCollector();
+  const adjustedStartAt = applySpeedFactor(startAt, speedFactor);
 
   const patchedHeading = usePatchedProp(id, 'heading', heading);
   const patchedSubheading = usePatchedProp(id, 'subheading', subheading);
   const patchedEyebrow = usePatchedProp(id, 'eyebrow', eyebrow);
 
-  const adjustedStartAt = applySpeedFactor(startAt, speedFactor);
-  const eyebrowDuration   = 20;
-  const headingDuration   = 25;
+  const eyebrowDuration = 20;
+  const headingDuration = 25;
   const subheadingDuration = 20;
-  const headingAnimStart   = adjustedStartAt + 8;
-  const subheadingStart    = adjustedStartAt + 15;
+  const headingAnimStart = adjustedStartAt + 8;
+  const subheadingStart = adjustedStartAt + 15;
 
-  const lastFrame = patchedSubheading
-    ? subheadingStart + subheadingDuration
-    : headingAnimStart + headingDuration;
-
-  useMemo(() => { registerEndFrame(lastFrame); }, [lastFrame]);
 
   const easing = styleConfig.motion.entrance;
 
@@ -66,9 +59,9 @@ export function TitleCard({
     ? interpolateWithEasing(frame, [subheadingStart, subheadingStart + subheadingDuration], [0, 1], easing)
     : 0;
 
-  const headingVariant    = TYPOGRAPHY_VARIANTS['display'];
+  const headingVariant = TYPOGRAPHY_VARIANTS['display'];
   const subheadingVariant = TYPOGRAPHY_VARIANTS['subheading'];
-  const eyebrowVariant    = TYPOGRAPHY_VARIANTS['label'];
+  const eyebrowVariant = TYPOGRAPHY_VARIANTS['label'];
 
   const fontFamilyMap: Record<string, string> = {
     sans: 'system-ui, sans-serif',

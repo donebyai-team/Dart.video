@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
-import { useDurationCollector } from '../../duration/DurationCollector';
 import { useStyleContext } from '../../styles/StyleContext';
 import { getEasing, interpolateWithEasing } from '../../styles/easingResolver';
 import { usePrimitivePatches, useStyleOverride } from '../../patches/PatchContext';
@@ -33,7 +32,6 @@ export function ScaleIn({
 }: ScaleInProps): React.ReactElement | null {
   const frame = useCurrentFrame();
   const styleConfig = useStyleContext();
-  const registerEndFrame = useDurationCollector();
 
   const speedFactor = useSpeedFactor();
   const adjustedStartAt = applySpeedFactor(startAt, speedFactor);
@@ -41,9 +39,6 @@ export function ScaleIn({
 
   const { effectiveStartAt, effectiveDurationInFrames } = usePrimitivePatches(id, { startAt: adjustedStartAt, durationInFrames: adjustedDurationInFrames });
   const styleOverride = useStyleOverride(id);
-
-  
-  useMemo(() => { registerEndFrame(effectiveStartAt + effectiveDurationInFrames); }, [effectiveStartAt, effectiveDurationInFrames]);
 
   const resolvedEasing = easing ?? getEasing(styleConfig.motion, 'entrance');
 

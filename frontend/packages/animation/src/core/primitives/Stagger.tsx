@@ -1,9 +1,9 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useCurrentFrame } from 'remotion';
-import { useDurationCollector } from '../../duration/DurationCollector';
 import { usePrimitivePatches } from '../../patches/PatchContext';
 import { useStyleContext } from '../../styles/StyleContext';
 import { getStaggerConfig } from '../../styles/easingResolver';
+import { applySpeedFactor, useSpeedFactor } from '../../duration';
 
 export interface StaggerProps {
   startAt?: number;
@@ -34,20 +34,21 @@ export function Stagger({
   const frame = useCurrentFrame();
   const styleConfig = useStyleContext();
   const staggerDefaults = getStaggerConfig(styleConfig.motion);
-  const registerEndFrame = useDurationCollector();
 
   const resolvedStartAt      = startAt      ?? staggerDefaults.startAt;
   const resolvedStaggerDelay = staggerDelay ?? staggerDefaults.staggerDelay;
 
+  const speedFactor = useSpeedFactor();
+  const adjustedStartAt = applySpeedFactor(resolvedStartAt, speedFactor);
+  const adjustedStaggerDelay = applySpeedFactor(resolvedStaggerDelay, speedFactor);
+
+
   // Patch: 'startAt' maps to delay slot, 'staggerDelay' maps to duration slot
   const { effectiveStartAt, effectiveDurationInFrames: effectiveStaggerDelay } =
-    usePrimitivePatches(id, { startAt: resolvedStartAt, durationInFrames: resolvedStaggerDelay });
+    usePrimitivePatches(id, { startAt: adjustedStartAt, durationInFrames: adjustedStaggerDelay });
 
   const childArray = React.Children.toArray(children);
 
-  const estimatedChildDuration = 30;
-  const endFrame = effectiveStartAt + (childArray.length - 1) * effectiveStaggerDelay + estimatedChildDuration;
-  useMemo(() => { registerEndFrame(endFrame); }, [endFrame]);
 
   return (
     <div id={id} className={className} style={style}>
