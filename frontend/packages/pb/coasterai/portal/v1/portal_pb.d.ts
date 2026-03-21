@@ -17,6 +17,22 @@ import type { EmptySchema, Timestamp } from "@bufbuild/protobuf/wkt";
 export declare const file_coasterai_portal_v1_portal: GenFile;
 
 /**
+ * @generated from message coasterai.portal.v1.GetMediaAssetsResponse
+ */
+export declare type GetMediaAssetsResponse = Message<"coasterai.portal.v1.GetMediaAssetsResponse"> & {
+  /**
+   * @generated from field: repeated coasterai.core.v1.MediaAsset assets = 1;
+   */
+  assets: MediaAsset[];
+};
+
+/**
+ * Describes the message coasterai.portal.v1.GetMediaAssetsResponse.
+ * Use `create(GetMediaAssetsResponseSchema)` to create a new message.
+ */
+export declare const GetMediaAssetsResponseSchema: GenMessage<GetMediaAssetsResponse>;
+
+/**
  * @generated from message coasterai.portal.v1.GenerateOrEditAnimationRequest
  */
 export declare type GenerateOrEditAnimationRequest = Message<"coasterai.portal.v1.GenerateOrEditAnimationRequest"> & {
@@ -534,9 +550,9 @@ export declare type CreateVideoRequest = Message<"coasterai.portal.v1.CreateVide
   fps: number;
 
   /**
-   * @generated from field: repeated coasterai.core.v1.FigmaFrame selectedFrames = 9;
+   * @generated from field: repeated coasterai.portal.v1.SelectedMediaAsset assets = 9;
    */
-  selectedFrames: FigmaFrame[];
+  assets: SelectedMediaAsset[];
 };
 
 /**
@@ -544,6 +560,27 @@ export declare type CreateVideoRequest = Message<"coasterai.portal.v1.CreateVide
  * Use `create(CreateVideoRequestSchema)` to create a new message.
  */
 export declare const CreateVideoRequestSchema: GenMessage<CreateVideoRequest>;
+
+/**
+ * @generated from message coasterai.portal.v1.SelectedMediaAsset
+ */
+export declare type SelectedMediaAsset = Message<"coasterai.portal.v1.SelectedMediaAsset"> & {
+  /**
+   * @generated from field: string assetID = 1;
+   */
+  assetID: string;
+
+  /**
+   * @generated from field: optional string note = 2;
+   */
+  note?: string;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.SelectedMediaAsset.
+ * Use `create(SelectedMediaAssetSchema)` to create a new message.
+ */
+export declare const SelectedMediaAssetSchema: GenMessage<SelectedMediaAsset>;
 
 /**
  * @generated from message coasterai.portal.v1.CreateVideoResponse
@@ -1484,6 +1521,16 @@ export declare const PortalService: GenService<{
     methodKind: "server_streaming";
     input: typeof GenerateOrEditAnimationRequestSchema;
     output: typeof GenerateOrEditAnimationResponseSchema;
+  },
+  /**
+   * Assets
+   *
+   * @generated from rpc coasterai.portal.v1.PortalService.GetMediaAssets
+   */
+  getMediaAssets: {
+    methodKind: "unary";
+    input: typeof EmptySchema;
+    output: typeof GetMediaAssetsResponseSchema;
   },
 }>;
 

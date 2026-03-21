@@ -1,0 +1,6 @@
+BEGIN;
+DROP TABLE IF EXISTS media_assets;
+DROP INDEX IF EXISTS fk1_media_assets;
+COMMIT;
+
+

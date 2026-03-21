@@ -105,6 +105,9 @@ const (
 	// PortalServiceGenerateOrEditAnimationSlideProcedure is the fully-qualified name of the
 	// PortalService's GenerateOrEditAnimationSlide RPC.
 	PortalServiceGenerateOrEditAnimationSlideProcedure = "/coasterai.portal.v1.PortalService/GenerateOrEditAnimationSlide"
+	// PortalServiceGetMediaAssetsProcedure is the fully-qualified name of the PortalService's
+	// GetMediaAssets RPC.
+	PortalServiceGetMediaAssetsProcedure = "/coasterai.portal.v1.PortalService/GetMediaAssets"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
@@ -135,6 +138,7 @@ var (
 	portalServiceGetBrandIdentitiesMethodDescriptor           = portalServiceServiceDescriptor.Methods().ByName("GetBrandIdentities")
 	portalServiceUpdateBrandIdentityMethodDescriptor          = portalServiceServiceDescriptor.Methods().ByName("UpdateBrandIdentity")
 	portalServiceGenerateOrEditAnimationSlideMethodDescriptor = portalServiceServiceDescriptor.Methods().ByName("GenerateOrEditAnimationSlide")
+	portalServiceGetMediaAssetsMethodDescriptor               = portalServiceServiceDescriptor.Methods().ByName("GetMediaAssets")
 )
 
 // PortalServiceClient is a client for the coasterai.portal.v1.PortalService service.
@@ -168,6 +172,8 @@ type PortalServiceClient interface {
 	UpdateBrandIdentity(context.Context, *connect.Request[v1.UpdateBrandIdentityRequest]) (*connect.Response[emptypb.Empty], error)
 	// Edit animations
 	GenerateOrEditAnimationSlide(context.Context, *connect.Request[v1.GenerateOrEditAnimationRequest]) (*connect.ServerStreamForClient[v1.GenerateOrEditAnimationResponse], error)
+	// Assets
+	GetMediaAssets(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetMediaAssetsResponse], error)
 }
 
 // NewPortalServiceClient constructs a client for the coasterai.portal.v1.PortalService service. By
@@ -330,6 +336,12 @@ func NewPortalServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(portalServiceGenerateOrEditAnimationSlideMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		getMediaAssets: connect.NewClient[emptypb.Empty, v1.GetMediaAssetsResponse](
+			httpClient,
+			baseURL+PortalServiceGetMediaAssetsProcedure,
+			connect.WithSchema(portalServiceGetMediaAssetsMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -360,6 +372,7 @@ type portalServiceClient struct {
 	getBrandIdentities           *connect.Client[emptypb.Empty, v1.BrandIdentityResponse]
 	updateBrandIdentity          *connect.Client[v1.UpdateBrandIdentityRequest, emptypb.Empty]
 	generateOrEditAnimationSlide *connect.Client[v1.GenerateOrEditAnimationRequest, v1.GenerateOrEditAnimationResponse]
+	getMediaAssets               *connect.Client[emptypb.Empty, v1.GetMediaAssetsResponse]
 }
 
 // GetConfig calls coasterai.portal.v1.PortalService.GetConfig.
@@ -488,6 +501,11 @@ func (c *portalServiceClient) GenerateOrEditAnimationSlide(ctx context.Context, 
 	return c.generateOrEditAnimationSlide.CallServerStream(ctx, req)
 }
 
+// GetMediaAssets calls coasterai.portal.v1.PortalService.GetMediaAssets.
+func (c *portalServiceClient) GetMediaAssets(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetMediaAssetsResponse], error) {
+	return c.getMediaAssets.CallUnary(ctx, req)
+}
+
 // PortalServiceHandler is an implementation of the coasterai.portal.v1.PortalService service.
 type PortalServiceHandler interface {
 	GetConfig(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.Config], error)
@@ -519,6 +537,8 @@ type PortalServiceHandler interface {
 	UpdateBrandIdentity(context.Context, *connect.Request[v1.UpdateBrandIdentityRequest]) (*connect.Response[emptypb.Empty], error)
 	// Edit animations
 	GenerateOrEditAnimationSlide(context.Context, *connect.Request[v1.GenerateOrEditAnimationRequest], *connect.ServerStream[v1.GenerateOrEditAnimationResponse]) error
+	// Assets
+	GetMediaAssets(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetMediaAssetsResponse], error)
 }
 
 // NewPortalServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -677,6 +697,12 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(portalServiceGenerateOrEditAnimationSlideMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	portalServiceGetMediaAssetsHandler := connect.NewUnaryHandler(
+		PortalServiceGetMediaAssetsProcedure,
+		svc.GetMediaAssets,
+		connect.WithSchema(portalServiceGetMediaAssetsMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/coasterai.portal.v1.PortalService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case PortalServiceGetConfigProcedure:
@@ -729,6 +755,8 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 			portalServiceUpdateBrandIdentityHandler.ServeHTTP(w, r)
 		case PortalServiceGenerateOrEditAnimationSlideProcedure:
 			portalServiceGenerateOrEditAnimationSlideHandler.ServeHTTP(w, r)
+		case PortalServiceGetMediaAssetsProcedure:
+			portalServiceGetMediaAssetsHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -836,4 +864,8 @@ func (UnimplementedPortalServiceHandler) UpdateBrandIdentity(context.Context, *c
 
 func (UnimplementedPortalServiceHandler) GenerateOrEditAnimationSlide(context.Context, *connect.Request[v1.GenerateOrEditAnimationRequest], *connect.ServerStream[v1.GenerateOrEditAnimationResponse]) error {
 	return connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.GenerateOrEditAnimationSlide is not implemented"))
+}
+
+func (UnimplementedPortalServiceHandler) GetMediaAssets(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetMediaAssetsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.GetMediaAssets is not implemented"))
 }

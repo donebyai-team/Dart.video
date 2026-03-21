@@ -45,6 +45,13 @@ service PortalService {
 
   // Edit animations
   rpc GenerateOrEditAnimationSlide(GenerateOrEditAnimationRequest) returns (stream GenerateOrEditAnimationResponse);
+
+  // Assets
+  rpc GetMediaAssets(.google.protobuf.Empty) returns (GetMediaAssetsResponse);
+}
+
+message GetMediaAssetsResponse {
+  repeated core.v1.MediaAsset assets = 1;
 }
 
 message GenerateOrEditAnimationRequest {
@@ -169,7 +176,12 @@ message CreateVideoRequest {
   core.v1.VideoLanguage language = 6;
   core.v1.StyleType styleType = 7;
   int32 fps = 8;
-  repeated core.v1.FigmaFrame selectedFrames = 9;
+  repeated SelectedMediaAsset assets = 9;
+}
+
+message SelectedMediaAsset {
+  string assetID = 1;
+  optional string note = 2;
 }
 
 message CreateVideoResponse {
