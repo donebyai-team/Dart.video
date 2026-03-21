@@ -45,6 +45,13 @@ service PortalService {
 
   // Edit animations
   rpc GenerateOrEditAnimationSlide(GenerateOrEditAnimationRequest) returns (stream GenerateOrEditAnimationResponse);
+
+  // Assets
+  rpc GetMediaAssets(.google.protobuf.Empty) returns (GetMediaAssetsResponse);
+}
+
+message GetMediaAssetsResponse {
+  repeated core.v1.MediaAsset assets = 1;
 }
 
 message GenerateOrEditAnimationRequest {

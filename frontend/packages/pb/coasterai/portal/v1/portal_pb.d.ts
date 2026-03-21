@@ -17,6 +17,22 @@ import type { EmptySchema, Timestamp } from "@bufbuild/protobuf/wkt";
 export declare const file_coasterai_portal_v1_portal: GenFile;
 
 /**
+ * @generated from message coasterai.portal.v1.GetMediaAssetsResponse
+ */
+export declare type GetMediaAssetsResponse = Message<"coasterai.portal.v1.GetMediaAssetsResponse"> & {
+  /**
+   * @generated from field: repeated coasterai.core.v1.MediaAsset assets = 1;
+   */
+  assets: MediaAsset[];
+};
+
+/**
+ * Describes the message coasterai.portal.v1.GetMediaAssetsResponse.
+ * Use `create(GetMediaAssetsResponseSchema)` to create a new message.
+ */
+export declare const GetMediaAssetsResponseSchema: GenMessage<GetMediaAssetsResponse>;
+
+/**
  * @generated from message coasterai.portal.v1.GenerateOrEditAnimationRequest
  */
 export declare type GenerateOrEditAnimationRequest = Message<"coasterai.portal.v1.GenerateOrEditAnimationRequest"> & {
@@ -1484,6 +1500,16 @@ export declare const PortalService: GenService<{
     methodKind: "server_streaming";
     input: typeof GenerateOrEditAnimationRequestSchema;
     output: typeof GenerateOrEditAnimationResponseSchema;
+  },
+  /**
+   * Assets
+   *
+   * @generated from rpc coasterai.portal.v1.PortalService.GetMediaAssets
+   */
+  getMediaAssets: {
+    methodKind: "unary";
+    input: typeof EmptySchema;
+    output: typeof GetMediaAssetsResponseSchema;
   },
 }>;
 
