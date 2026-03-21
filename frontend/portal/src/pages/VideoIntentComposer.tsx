@@ -13,14 +13,17 @@ import {
   Square,
   Wand2,
   ChevronDown,
-  Figma
+  Figma,
+  ImagePlus
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import FigmaImportPanel, { type ConfirmPayload as FigmaImportConfirmPayload } from '@/components/figma/FigmaImportPanel'
+import ManualMediaImportPanel from '@/components/assets/ManualMediaImportPanel'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { FigmaFrameSchema, type FigmaFrame as CoreFigmaFrame } from '@coasterai/pb/coasterai/core/v1/figma_pb'
+import type { MediaAsset } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Script } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import ScriptEditorDialog from '@/components/dashboard/ScriptEditorDialog'
 import { useClientsContext } from '@coasterai/ui-core/context/ClientContext'
@@ -29,7 +32,7 @@ import toast from 'react-hot-toast'
 import defaultEditorConfig from '@/data/editorConfig'
 import { useRouter } from 'next/navigation'
 import { getDefaultResolution } from '@/stores/video/defaults'
-import type { AskUserQuestion, CreateVideoResponse } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
+import { SelectedMediaAssetSchema, type AskUserQuestion, type CreateVideoResponse, type SelectedMediaAsset } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
 import QuestionPanel from '@/components/composer/QuestionPanel'
 import ThinkingViewComponent from '@/components/composer/ThinkingViewComponent'
 import { BrandIdentity } from '@coasterai/pb/coasterai/core/v1/brandkit_pb'
@@ -53,6 +56,7 @@ const MIN_SCRIPT_SECTIONS = 3
 const MIN_PROMPT_LENGTH = 10
 
 type ComposerStage = 'compose' | 'planning' | 'question'
+type AssetPickerMode = 'figma' | 'upload'
 
 const VideoIntentComposer = () => {
   const [prompt, setPrompt] = useState('')
@@ -62,10 +66,11 @@ const VideoIntentComposer = () => {
   const [language, setLanguage] = useState('en')
   const [scriptDialogOpen, setScriptDialogOpen] = useState(false)
   const [styleDialogOpen, setStyleDialogOpen] = useState(false)
-  const [figmaDialogOpen, setFigmaDialogOpen] = useState(false)
+  const [assetDialogOpen, setAssetDialogOpen] = useState(false)
+  const [assetPickerMode, setAssetPickerMode] = useState<AssetPickerMode>('figma')
   const [selectedStyle, setSelectedStyle] = useState<StyleType>(StyleType.UNDEFINED)
   const [script, setScript] = useState<Script | undefined>()
-  const [selectedFigmaFrames, setSelectedFigmaFrames] = useState<CoreFigmaFrame[]>([])
+  const [selectedAssets, setSelectedAssets] = useState<SelectedMediaAsset[]>([])
 
   const [stage, setStage] = useState<ComposerStage>('compose')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -88,8 +93,8 @@ const VideoIntentComposer = () => {
   const scriptVoiceoverCount = script?.items?.filter(i => i.voiceover?.trim()).length ?? 0
   const hasValidScript = scriptVoiceoverCount >= MIN_SCRIPT_SECTIONS
   const hasPrompt = prompt.trim().length > MIN_PROMPT_LENGTH
-  const hasSelectedFigmaFrames = selectedFigmaFrames.length > 0
-  const canGenerate = hasPrompt || hasValidScript || hasSelectedFigmaFrames
+  const hasSelectedAssets = selectedAssets.length > 0
+  const canGenerate = hasPrompt || hasValidScript || hasSelectedAssets
   const [identities, setIdentities] = useState<BrandIdentity[]>([])
 
    useEffect(() => {
@@ -213,7 +218,7 @@ const VideoIntentComposer = () => {
         duration: Number(duration),
         brandLibraryId: selectedBrandLibraryId,
         styleType: selectedStyle,
-        selectedFrames: selectedFigmaFrames
+        assets: selectedAssets
       }, { signal: controller.signal })
 
       await consumePlanningStream(stream, controller.signal, streamSession)
@@ -278,25 +283,41 @@ const VideoIntentComposer = () => {
 
   const removeScript = () => setScript(undefined)
 
-  const handleSelectFigmaFrame = ({ selectedFrame, sectionNote }: FigmaImportConfirmPayload) => {
-    const nextFrame = create(FigmaFrameSchema, {
-      fileKey: selectedFrame.fileKey,
-      fileName: selectedFrame.fileName,
-      nodeId: selectedFrame.nodeId,
-      name: selectedFrame.name,
-      thumbnailUrl: selectedFrame.thumbnailUrl,
-      width: selectedFrame.width,
-      height: selectedFrame.height,
-      pageId: selectedFrame.pageId,
-      pageName: selectedFrame.pageName,
-      userNote: sectionNote?.trim() || undefined
+  const upsertSelectedAsset = (asset: MediaAsset, note?: string) => {
+    const nextAsset = create(SelectedMediaAssetSchema, {
+      assetID: asset.id,
+      note: note?.trim() || undefined
     })
 
-    setSelectedFigmaFrames(current => {
-      const remaining = current.filter(frame => frame.nodeId !== nextFrame.nodeId)
-      return [...remaining, nextFrame]
+    setSelectedAssets(current => {
+      const remaining = current.filter(item => item.assetID !== nextAsset.assetID)
+      return [...remaining, nextAsset]
     })
-    setFigmaDialogOpen(false)
+    setAssetDialogOpen(false)
+  }
+
+  const handleSelectFigmaFrame = async ({ fileKey, selectedFrame, sectionNote }: FigmaImportConfirmPayload) => {
+    try {
+      const res = await portalClient.importFigmaFrame({
+        fileKey,
+        nodeId: selectedFrame.nodeId
+      })
+      if (!res.asset) {
+        throw new Error('Figma import did not return an asset')
+      }
+      upsertSelectedAsset(res.asset, sectionNote)
+    } catch (err) {
+      toast.error(getConnectError(err))
+    }
+  }
+
+  const handleSelectUploadedAsset = async ({ asset, sectionNote }: { asset: MediaAsset; sectionNote?: string }) => {
+    upsertSelectedAsset(asset, sectionNote)
+  }
+
+  const openAssetDialog = (mode: AssetPickerMode) => {
+    setAssetPickerMode(mode)
+    setAssetDialogOpen(true)
   }
 
   return (
@@ -315,14 +336,22 @@ const VideoIntentComposer = () => {
         onSelect={setSelectedStyle}
       />
 
-      <Dialog open={figmaDialogOpen} onOpenChange={setFigmaDialogOpen}>
+      <Dialog open={assetDialogOpen} onOpenChange={setAssetDialogOpen}>
         <DialogContent className='max-w-2xl p-0 overflow-hidden' forceMount>
-          <FigmaImportPanel
-            onClose={() => setFigmaDialogOpen(false)}
-            onConfirm={handleSelectFigmaFrame}
-            confirmLabel='Select frame'
-            canConfirm={stage === 'compose'}
-          />
+          <div className={assetPickerMode === 'figma' ? 'block' : 'hidden'}>
+            <FigmaImportPanel
+              onClose={() => setAssetDialogOpen(false)}
+              onConfirm={handleSelectFigmaFrame}
+              canConfirm={stage === 'compose'}
+            />
+          </div>
+          <div className={assetPickerMode === 'upload' ? 'block' : 'hidden'}>
+            <ManualMediaImportPanel
+              onClose={() => setAssetDialogOpen(false)}
+              onConfirm={handleSelectUploadedAsset}
+              canConfirm={stage === 'compose'}
+            />
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -436,15 +465,28 @@ const VideoIntentComposer = () => {
 
             <span className='text-border/60 mx-0.5'>·</span>
 
-           {/* Add Figma */}
-            <button
-              onClick={() => setFigmaDialogOpen(true)}
-              disabled={stage !== 'compose'}
-              className='flex items-center gap-1.5 flex-shrink-0 hover:text-foreground rounded px-1.5 py-1 hover:bg-muted/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed'
-            >
-              <Figma className='w-4 h-4' />
-              <span>Import from Figma</span>
-            </button>
+           <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  disabled={stage !== 'compose'}
+                  className='flex items-center gap-1.5 flex-shrink-0 hover:text-foreground rounded px-1.5 py-1 hover:bg-muted/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed'
+                >
+                  <Figma className='w-4 h-4' />
+                  <span>Add Assets</span>
+                  <ChevronDown className='w-3 h-3 opacity-60' />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align='end'>
+                <DropdownMenuItem onSelect={() => openAssetDialog('figma')}>
+                  <Figma className='mr-2 h-4 w-4' />
+                  Import from Figma
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => openAssetDialog('upload')}>
+                  <ImagePlus className='mr-2 h-4 w-4' />
+                  Upload Media
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <span className='text-border/60 mx-0.5'>·</span>
 
@@ -485,9 +527,10 @@ const VideoIntentComposer = () => {
 
           {/* Script badge */}
           {hasScript && (
+            <div className='mx-4 mt-2 flex flex-wrap gap-2'>
             <div
               onClick={() => setScriptDialogOpen(true)}
-              className='mx-4 mt-2 flex items-center justify-between rounded-lg border bg-primary/5 border-primary/15 px-3 py-1.5 text-xs cursor-pointer hover:border-primary/30 transition-colors'
+              className='flex items-center justify-between rounded-lg border bg-primary/5 border-primary/15 px-3 py-1.5 text-xs cursor-pointer hover:border-primary/30 transition-colors'
             >
               <div className='flex items-center gap-2 text-primary'>
                 <span className='font-medium'>Script attached</span>
@@ -503,26 +546,27 @@ const VideoIntentComposer = () => {
                 <X className='w-3.5 h-3.5' />
               </button>
             </div>
+            </div>
           )}
 
-          {hasSelectedFigmaFrames && (
+          {hasSelectedAssets && (
             <div className='mx-4 mt-2 flex flex-wrap gap-2'>
               <div
-                onClick={() => setFigmaDialogOpen(true)}
+                onClick={() => setAssetDialogOpen(true)}
                 className='flex cursor-pointer items-center justify-between rounded-lg border border-primary/15 bg-primary/5 px-3 py-1.5 text-xs transition-colors hover:border-primary/30'
               >
                 <div className='flex items-center gap-2 text-primary'>
                   <span className='font-medium'>
-                    {selectedFigmaFrames.length} selected screen{selectedFigmaFrames.length > 1 ? 's' : ''}
+                    {selectedAssets.length} selected screen{selectedAssets.length > 1 ? 's' : ''}
                   </span>
                   <span className='text-muted-foreground'>
-                    · {selectedFigmaFrames[0]?.pageName || 'From Figma'}
+                    · Imported assets
                   </span>
                 </div>
                 <button
                   onClick={e => {
                     e.stopPropagation()
-                    setSelectedFigmaFrames([])
+                    setSelectedAssets([])
                   }}
                   className='p-0.5 rounded hover:bg-destructive/10 hover:text-destructive'
                   type='button'

@@ -9,9 +9,9 @@ import { buildAppUrl } from '@/app/routes'
 import { toast } from '@/hooks/use-toast'
 import { portalClient } from '@/services/grpc'
 import { getConnectError } from '@/utils/error'
-import FigmaFramePreviewDialog from '@/components/figma/FigmaFramePreviewDialog'
+import AssetPreviewDialog from '@/components/assets/AssetPreviewDialog'
 import { routes } from '@coasterai/ui-core/routing'
-import { ExternalLink, Figma, Loader2, RefreshCw, X } from 'lucide-react'
+import { ExternalLink, Figma, Loader2, X } from 'lucide-react'
 import { type FigmaFrame, type FigmaPage } from '@coasterai/pb/coasterai/core/v1/figma_pb'
 import {
   IntegrationState,
@@ -32,8 +32,6 @@ export interface ConfirmPayload {
 interface FigmaImportPanelProps {
   onClose: () => void
   onConfirm: (payload: ConfirmPayload) => Promise<void> | void
-  confirmLabel?: string
-  isConfirming?: boolean
   canConfirm?: boolean
 }
 
@@ -59,8 +57,6 @@ const buildPopupFeatures = () => {
 const FigmaImportPanel = ({
   onClose,
   onConfirm,
-  confirmLabel = 'Import selected frame',
-  isConfirming = false,
   canConfirm = true
 }: FigmaImportPanelProps) => {
   const [isLoadingIntegration, setIsLoadingIntegration] = useState(true)
@@ -261,24 +257,12 @@ const FigmaImportPanel = ({
     }
   }
 
-  const handleConfirm = async () => {
-    if (!selectedFrame || !fileKey) {
-      return
-    }
-
-    await onConfirm({
-      fileKey,
-      selectedFrame,
-      sectionNote: selectedSectionNote.trim() || undefined
-    })
-  }
-
   const handleOpenPreview = (frame: FigmaFrame) => {
     setPreviewNodeId(frame.nodeId)
     setPreviewSectionNote(frame.nodeId === selectedNodeId ? selectedSectionNote : '')
   }
 
-  const handleSelectPreviewFrame = () => {
+  const handleSelectPreviewFrame = async () => {
     if (!previewFrame) {
       return
     }
@@ -286,20 +270,38 @@ const FigmaImportPanel = ({
     setSelectedNodeId(previewFrame.nodeId)
     setSelectedSectionNote(previewSectionNote.trim())
     setPreviewNodeId(null)
+
+    if (!fileKey || !canConfirm) {
+      return
+    }
+
+    await onConfirm({
+      fileKey,
+      selectedFrame: previewFrame,
+      sectionNote: previewSectionNote.trim() || undefined
+    })
   }
 
   return (
     <div className='h-full flex flex-col bg-card'>
-      <FigmaFramePreviewDialog
-        frame={previewFrame}
+      <AssetPreviewDialog
+        title={previewFrame?.name || 'Selected frame'}
+        subtitle='Add an optional note for where this frame should appear.'
+        previewUrl={previewFrame?.thumbnailUrl}
+        mediaKind='image'
+        width={previewFrame?.width}
+        height={previewFrame?.height}
         open={!!previewFrame}
-        sectionNote={previewSectionNote}
+        note={previewSectionNote}
+        noteLabel='How should this frame be used?'
+        notePlaceholder='Optional: use it inside the section product explainer...'
+        selectLabel='Use this frame'
         onOpenChange={open => {
           if (!open) {
             setPreviewNodeId(null)
           }
         }}
-        onSectionNoteChange={setPreviewSectionNote}
+        onNoteChange={setPreviewSectionNote}
         onSelect={handleSelectPreviewFrame}
       />
 
@@ -338,10 +340,6 @@ const FigmaImportPanel = ({
               <div className='flex gap-2'>
                 <Button size='sm' className='flex-1' onClick={handleListFrames} disabled={isLoadingFrames}>
                   {isLoadingFrames ? <Loader2 className='w-4 h-4 animate-spin' /> : 'Load frames'}
-                </Button>
-                <Button size='sm' variant='outline' onClick={refreshIntegration} disabled={isLoadingIntegration}>
-                  <RefreshCw className='w-4 h-4' />
-                  Refresh
                 </Button>
               </div>
             </div>
@@ -402,9 +400,6 @@ const FigmaImportPanel = ({
               </ScrollArea>
             </div>
 
-            <Button onClick={handleConfirm} disabled={!selectedFrame || !canConfirm || isConfirming} className='w-full'>
-              {isConfirming ? <Loader2 className='w-4 h-4 animate-spin' /> : confirmLabel}
-            </Button>
           </div>
         ) : (
           <div className='rounded-lg border border-dashed border-border p-4 space-y-3'>

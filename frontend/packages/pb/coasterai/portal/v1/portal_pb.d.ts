@@ -550,9 +550,9 @@ export declare type CreateVideoRequest = Message<"coasterai.portal.v1.CreateVide
   fps: number;
 
   /**
-   * @generated from field: repeated coasterai.core.v1.FigmaFrame selectedFrames = 9;
+   * @generated from field: repeated coasterai.portal.v1.SelectedMediaAsset assets = 9;
    */
-  selectedFrames: FigmaFrame[];
+  assets: SelectedMediaAsset[];
 };
 
 /**
@@ -560,6 +560,27 @@ export declare type CreateVideoRequest = Message<"coasterai.portal.v1.CreateVide
  * Use `create(CreateVideoRequestSchema)` to create a new message.
  */
 export declare const CreateVideoRequestSchema: GenMessage<CreateVideoRequest>;
+
+/**
+ * @generated from message coasterai.portal.v1.SelectedMediaAsset
+ */
+export declare type SelectedMediaAsset = Message<"coasterai.portal.v1.SelectedMediaAsset"> & {
+  /**
+   * @generated from field: string assetID = 1;
+   */
+  assetID: string;
+
+  /**
+   * @generated from field: optional string note = 2;
+   */
+  note?: string;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.SelectedMediaAsset.
+ * Use `create(SelectedMediaAssetSchema)` to create a new message.
+ */
+export declare const SelectedMediaAssetSchema: GenMessage<SelectedMediaAsset>;
 
 /**
  * @generated from message coasterai.portal.v1.CreateVideoResponse

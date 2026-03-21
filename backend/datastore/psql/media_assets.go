@@ -15,7 +15,14 @@ func init() {
 	})
 }
 
-const baseGCPBucketURL = "https://storage.googleapis.com"
+const (
+	publicBucket     = "coasterai-public"
+	baseGCPBucketURL = "https://storage.googleapis.com"
+)
+
+func GetPublicBucketURL() string {
+	return fmt.Sprintf("%s/%s", baseGCPBucketURL, publicBucket)
+}
 
 func (r *Database) GetMediaAssetsByID(ctx context.Context, IDs []string) ([]*models.MediaAsset, error) {
 	mediaAssets, err := getMany[models.MediaAsset](ctx, r, "media_asset/query_media_asset_by_ids.sql", map[string]any{
@@ -33,7 +40,7 @@ func (r *Database) GetMediaAssetsByID(ctx context.Context, IDs []string) ([]*mod
 }
 
 func toFullUrl(path string) string {
-	return fmt.Sprintf("%s/%s", baseGCPBucketURL, path)
+	return fmt.Sprintf("%s/%s", GetPublicBucketURL(), path)
 }
 
 func (r *Database) GetMediaAssetsByOrgID(ctx context.Context, orgID string) ([]*models.MediaAsset, error) {
@@ -66,5 +73,6 @@ func (r *Database) CreateMediaAsset(ctx context.Context, asset *models.MediaAsse
 		return nil, fmt.Errorf("failed to create media asset: %w", err)
 	}
 	asset.ID = id
+	asset.Path = toFullUrl(asset.Path)
 	return asset, nil
 }
