@@ -11,7 +11,6 @@ import {
   componentListFragment,
   spacingFragment,
   typographyFragment,
-  timingGuidanceFragment,
   exampleFragment,
 } from './fragments';
 
