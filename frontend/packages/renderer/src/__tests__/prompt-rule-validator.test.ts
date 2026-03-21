@@ -493,4 +493,27 @@ export default function RemoteComponent() {
 
     expect(errors).toEqual([]);
   });
+
+  it("ignores nested descendants when checking Row variant jumps", () => {
+    const errors = validateVisualConsistancyRules(`
+export default function RemoteComponent() {
+  return (
+    <SafeArea>
+      <Row>
+        <Stack gap={8} align="center">
+          <Counter variant="heading" value={42} />
+          <Text variant="label">new users</Text>
+        </Stack>
+        <Stack gap={8} align="center">
+          <Counter variant="heading" value={84} />
+          <Text variant="label">retention</Text>
+        </Stack>
+      </Row>
+    </SafeArea>
+  );
+}
+`);
+
+    expect(errors).toEqual([]);
+  });
 });

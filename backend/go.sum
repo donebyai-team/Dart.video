@@ -173,8 +173,8 @@ github.com/blendle/zapdriver v1.3.2-0.20200203083823-9200777f8a3d h1:fSlGu5ePbkj
 github.com/blendle/zapdriver v1.3.2-0.20200203083823-9200777f8a3d/go.mod h1:yCBkgASmKHgUOFjK9h1sOytUVgA+JkQjqj3xYP4AdWY=
 github.com/bobg/go-generics/v2 v2.2.2 h1:cHTV51Vr/wSlwiNWvncz66E4QtoRw9qXZeEiLAmwqW8=
 github.com/bobg/go-generics/v2 v2.2.2/go.mod h1:ieOJ1ARFvk+HfMKbW1DT5UzJ/CJPKoiRm17QKK82bRE=
-github.com/boundaryml/baml v0.218.1 h1:FVq6kbDzSDSodNfd2AOwpEdSiwcGGT8o9eo++U4zObA=
-github.com/boundaryml/baml v0.218.1/go.mod h1:dzmyDMNDXIVxJX75q9KTjuTUADsYSGUEbGyi76Cwkew=
+github.com/boundaryml/baml v0.220.0 h1:+t1bZnl/pMiK1Tvn5A/Mne0dsa+j10fqG+0YQZ+opmY=
+github.com/boundaryml/baml v0.220.0/go.mod h1:dzmyDMNDXIVxJX75q9KTjuTUADsYSGUEbGyi76Cwkew=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/census-instrumentation/opencensus-proto v0.3.0/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/census-instrumentation/opencensus-proto v0.4.1 h1:iKLQ0xPNFxR/2hzXZMrBo8f1j86j5WHzznCCQxV/b8g=

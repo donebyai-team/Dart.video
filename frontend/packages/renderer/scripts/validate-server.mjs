@@ -36,6 +36,14 @@ import {bundle} from '@remotion/bundler';
 import {renderStill, selectComposition} from '@remotion/renderer';
 import {compileRemoteComponent} from '../src/compiler.ts'
 import {assignPrimitiveIds, transformAssignedPrimitiveIds} from '../src/primitive-ast-pass.ts'
+import {
+  computeAnimationDurationFromCode,
+  FALLBACK_DURATION_IN_FRAMES,
+  FALLBACK_SETTLED_FRAME,
+  getDeclaredSettledFrame,
+  isValidDeclaredSettledFrame,
+  TAIL_BUFFER,
+} from '../src/code_rules_validators/animation-duration.ts';
 import {parseValidateRequestBody, validateGeneratedCode} from '../src/code_rules_validators/validate-request.ts';
 import {randomUUID} from 'node:crypto';
 import {existsSync} from 'node:fs';
@@ -78,15 +86,12 @@ const TEMPLATES_DIR = resolve(__dirname, '../../templates');
  * error_type even if the Babel pre-check somehow missed them. Runtime errors
  * (bad hooks, undefined vars in JSX, etc.) propagate naturally.
  */
-const TAIL_BUFFER = 20;
-
-function buildRootEntry(code) {
+function buildRootEntry(code, durationInFrames) {
   return [
-    `import React, { useEffect } from 'react';`,
+    `import React from 'react';`,
     `import { Composition, registerRoot } from 'remotion';`,
     `import { compileRemoteComponent } from '@/compiler';`,
     `import {`,
-    `  DurationCollectorProvider,`,
     `  ThemeProvider,`,
     `  AspectPresetProvider,`,
     `  StyleContextProvider,`,
@@ -96,26 +101,12 @@ function buildRootEntry(code) {
     `} from '@coasterai/animation';`,
     ``,
     `const __CODE__ = ${JSON.stringify(code)};`,
-    `const __TAIL_BUFFER__ = ${TAIL_BUFFER};`,
     ``,
-    `// Probe component: renders the animation to collect duration via DurationCollector.`,
     `const ProbeComp = () => {`,
-    `  const endFrames = React.useRef([]);`,
-    `  const onRegister = (endFrame) => { endFrames.current.push(endFrame); };`,
-    ``,
     `  const { Component, error } = compileRemoteComponent(__CODE__, { validateShapeProps: true });`,
     `  if (error || !Component) {`,
     `    throw new Error('[compile_error] ' + (error || 'Unknown compilation error'));`,
     `  }`,
-    ``,
-    `  useEffect(() => {`,
-    `    const frames = endFrames.current;`,
-    `    const settledFrame = frames.length > 0 ? Math.max(...frames) : 90;`,
-    `    window.__ANIMATION_DURATION__ = {`,
-    `      settledFrame,`,
-    `      durationInFrames: settledFrame + __TAIL_BUFFER__,`,
-    `    };`,
-    `  }, []);`,
     ``,
     `  const preset = { id: 'probe', width: 1280, height: 720, safeArea: { top: 0, right: 0, bottom: 0, left: 0 } };`,
     ``,
@@ -124,9 +115,7 @@ function buildRootEntry(code) {
     `      React.createElement(AspectPresetProvider, { preset },`,
     `        React.createElement(StyleContextProvider, { style: resolveStyle('clean') },`,
     `          React.createElement(SpeedFactorProvider, { factor: 1 },`,
-    `            React.createElement(DurationCollectorProvider, { onRegister },`,
-    `              React.createElement(Component, null)`,
-    `            )`,
+    `            React.createElement(Component, null)`,
     `          )`,
     `        )`,
     `      )`,
@@ -138,14 +127,10 @@ function buildRootEntry(code) {
     `  return React.createElement(Composition, {`,
     `    id: 'ValidatorComp',`,
     `    component: ProbeComp,`,
-    `    durationInFrames: 300,`,
+    `    durationInFrames: ${durationInFrames},`,
     `    fps: 30,`,
     `    width: 1280,`,
     `    height: 720,`,
-    `    calculateMetadata: async () => {`,
-    `      const dur = typeof window !== 'undefined' && window.__ANIMATION_DURATION__;`,
-    `      return { durationInFrames: dur ? dur.durationInFrames : 150 };`,
-    `    },`,
     `  });`,
     `};`,
     ``,
@@ -273,6 +258,40 @@ async function handleValidate(req, res) {
     return;
   }
   console.log('[validate] compile check passed');
+  const declaredSettledFrame = getDeclaredSettledFrame(code);
+  const astFallbackDuration = computeAnimationDurationFromCode(code);
+  const hasValidDeclaredSettledFrame = isValidDeclaredSettledFrame(declaredSettledFrame);
+  const hasUsableAstEstimate = astFallbackDuration.settledFrame !== FALLBACK_SETTLED_FRAME;
+
+  // Declared settledFrame is the primary source when it passes the validator contract:
+  // - exported as a numeric literal
+  // - integer
+  // - > 0
+  // - <= single-slide max bound
+  //
+  // AST is used as:
+  // - the fallback when declared settledFrame is missing/invalid
+  // - a debug-only sanity check when both values are available
+  if (hasValidDeclaredSettledFrame && hasUsableAstEstimate) {
+    const delta = Math.abs(declaredSettledFrame - astFallbackDuration.settledFrame);
+    if (delta > 30) {
+      console.warn(
+        `[validate] duration mismatch: declared=${declaredSettledFrame} ast=${astFallbackDuration.settledFrame}`,
+      );
+    }
+  }
+
+  const settledFrame = hasValidDeclaredSettledFrame
+    ? declaredSettledFrame
+    : astFallbackDuration.settledFrame ?? FALLBACK_SETTLED_FRAME;
+  const durationInFrames = hasValidDeclaredSettledFrame
+    ? declaredSettledFrame + TAIL_BUFFER
+    : astFallbackDuration.durationInFrames ?? FALLBACK_DURATION_IN_FRAMES;
+  console.log(
+    `[validate] duration resolved: settledFrame=${settledFrame}, durationInFrames=${durationInFrames}, source=${
+      hasValidDeclaredSettledFrame ? 'declared' : 'ast-fallback'
+    }`,
+  );
 
   const uniqueComponentName = `Component${randomUUID().replace(/-/g, '')}`;
   const idsGcsPath = `${output_path}/${uniqueComponentName}.tsx`;
@@ -317,7 +336,7 @@ async function handleValidate(req, res) {
 
     await writeFile(
       resolve(templatesDir, 'root.tsx'),
-      buildRootEntry(code),
+      buildRootEntry(code, durationInFrames),
       'utf8',
     );
 
@@ -339,19 +358,13 @@ async function handleValidate(req, res) {
       }),
     });
 
-    console.log('[validate] bundling complete — selecting composition (triggers duration probe)');
+    console.log('[validate] bundling complete — selecting composition');
     const composition = await selectComposition({
       serveUrl: bundleDir,
       id: 'ValidatorComp',
       inputProps: {},
       chromiumOptions,
     });
-
-    // Duration was computed by DurationCollector during selectComposition's
-    // calculateMetadata call. The composition now has the correct durationInFrames.
-    const settledFrame = composition.durationInFrames - TAIL_BUFFER;
-    const durationInFrames = composition.durationInFrames;
-    console.log(`[validate] duration detected: settledFrame=${settledFrame}, durationInFrames=${durationInFrames}`);
 
     try {
       await renderStill({
@@ -389,6 +402,7 @@ async function handleValidate(req, res) {
       duration: {
         settledFrame,
         durationInFrames,
+        astSettledFrame: astFallbackDuration.settledFrame,
       },
     }));
 

@@ -46,6 +46,20 @@ client<llm> CustomOpenAI5 {
   }
 }
 
+client<llm> CustomOpenAI5WithThinkingSummary {
+  provider "openai-responses"
+  retry_policy Exponential
+  options {
+    model "gpt-5.4"
+    api_key env.OPENAI_API_KEY
+    //max_completion_tokens 12000
+    reasoning {
+      effort "medium"
+      summary "auto"
+    }
+  }
+}
+
 // https://docs.boundaryml.com/docs/snippets/clients/retry
 retry_policy Constant {
   max_retries 3

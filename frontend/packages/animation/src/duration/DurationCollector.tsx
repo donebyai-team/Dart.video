@@ -3,11 +3,11 @@ import React, { createContext, useContext, useRef } from 'react';
 /**
  * DurationCollector context.
  * Every primitive calls this with its end frame on every render.
- * The probe render collects all registrations to compute total duration.
+ * Animation primitives register end frames here when a collector is provided.
  * Outside of a Provider, this is a no-op.
  */
 export const DurationCollectorContext = createContext<(endFrame: number) => void>(
-  // Default: no-op. Primitives work normally outside probe render.
+  // Default: no-op. Primitives work normally without a collector provider.
   () => undefined
 );
 
@@ -32,8 +32,7 @@ export function DurationCollectorProvider({
 }
 
 /**
- * Hook for the probe render. Returns a ref to the collected max end frame.
- * Usage: wrap component in DurationCollectorProvider with the returned onRegister.
+ * Usage: wrap a subtree in DurationCollectorProvider to observe end-frame registrations.
  */
 export function useDurationCollection() {
   const endFrames = useRef<number[]>([]);
@@ -47,9 +46,5 @@ export function useDurationCollection() {
     return Math.max(...endFrames.current);
   }
 
-  function reset() {
-    endFrames.current = [];
-  }
-
-  return { onRegister, getMaxEndFrame, reset };
+  return { onRegister, getMaxEndFrame };
 }

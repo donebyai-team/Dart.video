@@ -62,6 +62,7 @@ class VideoGenerationPlanRequest {
 class VideoGenerationPlan {
     videoName string @description("name of the video, around 5 to 15 length")
     sections Section[]
+    thinkingSummary string? @skip()
 }
 
 class Section {
@@ -88,10 +89,11 @@ class AskUserQuestion {
   question_text string @description("The question to ask the user. Keep it concise (8 words or less).")
   options string[] @description("The answer choices for the user to select from")
   allow_custom_entry bool? @description("Whether to allow custom text entry in addition to the predefined options")
+  thinkingSummary string? @skip()
 }
 
 function GeneratePlanStreaming(input: VideoGenerationPlanRequest, conversation_history: Message[]) -> StreamingVideoGenerationPlan {
-  client CustomOpenAI5
+  client CustomOpenAI5WithThinkingSummary
   prompt #"
     You are a cinematic video planning director.
 

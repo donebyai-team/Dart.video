@@ -11,10 +11,13 @@ import {
   LanguagesIcon,
   Square,
   Wand2,
-  ChevronDown
+  ChevronDown,
+  Figma
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
+import FigmaImportPanel from '@/components/figma/FigmaImportPanel'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Script } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import ScriptEditorDialog from '@/components/dashboard/ScriptEditorDialog'
@@ -57,6 +60,7 @@ const VideoIntentComposer = () => {
   const [language, setLanguage] = useState('en')
   const [scriptDialogOpen, setScriptDialogOpen] = useState(false)
   const [styleDialogOpen, setStyleDialogOpen] = useState(false)
+  const [figmaDialogOpen, setFigmaDialogOpen] = useState(false)
   const [selectedStyle, setSelectedStyle] = useState<StyleType>(StyleType.UNDEFINED)
   const [script, setScript] = useState<Script | undefined>()
 
@@ -285,6 +289,19 @@ const VideoIntentComposer = () => {
         onSelect={setSelectedStyle}
       />
 
+      <Dialog open={figmaDialogOpen} onOpenChange={setFigmaDialogOpen}>
+        <DialogContent className='max-w-2xl p-0 overflow-hidden'>
+          <FigmaImportPanel
+            onClose={() => setFigmaDialogOpen(false)}
+            onConfirm={() => {
+              setFigmaDialogOpen(false)
+            }}
+            confirmLabel='Select frame'
+            canConfirm={stage === 'compose'}
+          />
+        </DialogContent>
+      </Dialog>
+
       {/* Center area — grows to push input to the bottom */}
       <div className='flex-1 flex items-center justify-center py-8'>
         <div className='text-center'>
@@ -382,6 +399,7 @@ const VideoIntentComposer = () => {
 
             <span className='text-border/60 mx-0.5'>·</span>
 
+           {/* Add Style */}
             <button
               onClick={() => setStyleDialogOpen(true)}
               disabled={stage !== 'compose'}
@@ -394,6 +412,19 @@ const VideoIntentComposer = () => {
 
             <span className='text-border/60 mx-0.5'>·</span>
 
+           {/* Add Figma */}
+            <button
+              onClick={() => setFigmaDialogOpen(true)}
+              disabled={stage !== 'compose'}
+              className='flex items-center gap-1.5 flex-shrink-0 hover:text-foreground rounded px-1.5 py-1 hover:bg-muted/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed'
+            >
+              <Figma className='w-4 h-4' />
+              <span>Import from Figma</span>
+            </button>
+
+            <span className='text-border/60 mx-0.5'>·</span>
+
+            {/* Add Brand Library */}
             <span className='flex items-center gap-1 flex-shrink-0'>
               <Palette className='w-4 h-4 opacity-70' />
               <Select

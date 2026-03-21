@@ -1,7 +1,6 @@
 export { backgroundStyleToCSS } from './backgroundUtils';
 export { Slideshow, SlideComponent, SingleSlidePreview } from './RemotionSlideshow';
 export { assignPrimitiveIds, transformAssignedPrimitiveIds } from './primitive-ast-pass';
-export { probeRender } from './probeRender';
 // Re-export types from animation for portal consumers
 export type { PatchOverlay, ElementPatchEntry } from '@coasterai/animation';
 export {
@@ -11,6 +10,7 @@ export {
 } from '@coasterai/animation';
 export { compileRemoteComponent, stripImports } from './compiler';
 export type { CompilationResult, CompileRemoteComponentOptions } from './compiler';
+export { SUPPORTED_FONTS, loadAllFonts } from './load_fonts';
 export {
   TRANSITION_OPTIONS,
   TRANSITION_DIRECTION_OPTIONS,

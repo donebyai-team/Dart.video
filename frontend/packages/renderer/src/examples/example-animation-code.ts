@@ -16,10 +16,8 @@
  *   Stagger clones each child injecting startAt = startAt + index * staggerDelay,
  *   so children don't need explicit startAt props.
  *
- * Duration is collected automatically:
- *   Every primitive calls registerEndFrame(startAt + durationInFrames) via DurationCollector.
- *   A probe render wrapped in DurationCollectorProvider collects the max end frame —
- *   see AnimationPreview.tsx for the pattern.
+ * Validator duration is computed statically from JSX timing props.
+ * Preview/demo surfaces may still use runtime collection where needed.
  */
 export const EXAMPLE_ANIMATION_CODE = `
 export default function RemoteComponent({ data }) {
@@ -27,7 +25,7 @@ export default function RemoteComponent({ data }) {
    <SafeArea>
       <AbsoluteCenter axis="both">
      <Stack gap={24} align="center">
-
+  <IconAsset name="check"  />
   <Text id="text-0" variant="display">Tiny UI changes slip through outside boxes in a row.</Text>
   <Typewriter id="text-0" text="Tiny UI changes slip through outside boxes in a row" variant="heading" />
 

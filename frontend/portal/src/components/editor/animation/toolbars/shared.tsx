@@ -6,6 +6,7 @@
  */
 
 import React from 'react'
+import { SUPPORTED_FONTS } from '@coasterai/renderer'
 
 // ─── Separator ─────────────────────────────────────────────────────────────
 
@@ -223,24 +224,6 @@ export function ColorSwatch({
 
 // ─── Font Family Select ──────────────────────────────────────────────────────
 
-const FONT_OPTIONS = [
-  'Inter',
-  'Roboto',
-  'Open Sans',
-  'Lato',
-  'Montserrat',
-  'Poppins',
-  'Oswald',
-  'Raleway',
-  'Source Sans Pro',
-  'Nunito',
-  'Arial',
-  'Georgia',
-  'Times New Roman',
-  'Courier New',
-  'Verdana',
-]
-
 export function FontFamilySelect({
   value,
   onChange,
@@ -252,9 +235,10 @@ export function FontFamilySelect({
     <select
       value={value}
       onChange={e => onChange(e.target.value)}
-      className="h-7 w-32 px-2 rounded-md border border-border bg-muted text-xs focus:outline-none focus:ring-1 focus:ring-ring/50 cursor-pointer"
+      className="h-7 w-24 px-2 rounded-md border border-border bg-muted text-xs focus:outline-none focus:ring-1 focus:ring-ring/50 cursor-pointer"
     >
-      {FONT_OPTIONS.map(f => (
+      <option value="">Default</option>
+      {SUPPORTED_FONTS.map(f => (
         <option key={f} value={f}>
           {f}
         </option>

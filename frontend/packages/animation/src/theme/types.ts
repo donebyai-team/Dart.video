@@ -46,4 +46,5 @@ export interface ResolvedTheme {
   /** Resolved serif font stack (brand serif font + system fallbacks) */
   fontSerif: string;
   logo?: BrandAsset;
+  iconStyle?: string 
 }

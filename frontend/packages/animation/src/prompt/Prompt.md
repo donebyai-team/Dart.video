@@ -39,50 +39,50 @@ Props:
 ### FadeIn
 Fade-in entrance animation (opacity 0 to 1)
 Props:
-- delay: number (optional)
-- duration: number (optional)
+- startAt: number (optional)
+- durationInFrames: number (optional)
 
 ### FadeOut
 Fade-out exit animation (opacity 1 to 0)
 Props:
-- delay: number (optional)
-- duration: number (optional)
+- startAt: number (optional)
+- durationInFrames: number (optional)
 
 ### SlideIn
 Slide-in entrance with translation and fade
 Props:
-- delay: number (optional)
-- duration: number (optional)
+- startAt: number (optional)
+- durationInFrames: number (optional)
 - direction: enum(up|down|left|right) (optional)
 - distance: number (optional)
 
 ### SlideOut
 Slide-out exit with translation and fade
 Props:
-- delay: number (optional)
-- duration: number (optional)
+- startAt: number (optional)
+- durationInFrames: number (optional)
 - direction: enum(up|down|left|right) (optional)
 - distance: number (optional)
 
 ### ScaleIn
 Scale-in entrance animation (scale 0 to 1)
 Props:
-- delay: number (optional)
-- duration: number (optional)
+- startAt: number (optional)
+- durationInFrames: number (optional)
 - origin: enum(center|top|bottom|left|right) (optional)
 
 ### ScaleOut
 Scale-out exit animation (scale 1 to 0)
 Props:
-- delay: number (optional)
-- duration: number (optional)
+- startAt: number (optional)
+- durationInFrames: number (optional)
 - origin: enum(center|top|bottom|left|right) (optional)
 
 ### Stagger
 Staggers children animations with increasing delay offsets
 Props:
 - startAt: number (optional)
-- delayBetween: number (optional)
+- staggerDelay: number (optional)
 
 ### TimelineGate
 Mounts/unmounts children within a frame window, use instead of JSX conditionals
@@ -101,8 +101,8 @@ Props:
 ### Counter
 Animated number counter that tweens between values
 Props:
-- delay: number (optional)
-- duration: number (optional)
+- startAt: number (optional)
+- durationInFrames: number (optional)
 - from: number (optional)
 - to: number (required)
 - format: string (optional)
@@ -113,8 +113,8 @@ Props:
 ### Typewriter
 Progressively reveals text character by character, word, or line
 Props:
-- delay: number (optional)
-- duration: number (optional)
+- startAt: number (optional)
+- durationInFrames: number (optional)
 - text: string (required)
 - mode: enum(char|word|line) (optional)
 - variant: enum(caption|label|body|subheading|heading|display) (optional)
@@ -122,7 +122,7 @@ Props:
 ### WordCycle
 Cycles through an array of words with animated transitions
 Props:
-- delay: number (optional)
+- startAt: number (optional)
 - words: array (required)
 - holdDuration: number (optional)
 - transitionDuration: number (optional)
@@ -138,17 +138,39 @@ Props:
 - heading: string (required)
 - subheading: string (optional)
 - eyebrow: string (optional)
-- delay: number (optional)
+- startAt: number (optional)
 
 
 ## BRAND
 
 ### LogoAsset
-Brand logo from ThemeProvider. Falls back to a placeholder if no logo is configured. Wrap in any animation primitive (FadeIn, SlideIn, ScaleIn etc.) to animate. Width and height define the bounding box; the logo always keeps its aspect ratio.
+Brand logo from ThemeProvider. Falls back to a placeholder if no logo is configured. Wrap in any animation primitive (FadeIn, SlideIn, ScaleIn etc.) to animate. the logo always keeps its aspect ratio.
 Props:
 - src: string (optional)
 - width: number (optional)
 - height: number (optional)
+
+### ImageAsset
+Generic image primitive for uploaded or remote media.
+Props:
+- src: string (optional)
+- width: number (optional)
+- height: number (optional)
+
+### VideoAsset
+Generic video primitive for uploaded media. Width and height define the rendered box; the video always preserves aspect ratio and stays fully visible.
+Props:
+- src: string (optional)
+- width: number (optional)
+- height: number (optional)
+
+### IconAsset
+Icon asset from the icon library.
+Props:
+- name: string (required)
+- size: number (optional)
+- borderRadius: number (optional)
+- id: string (optional)
 
 
 ## SPACING (use these values for gap/padding/margin):
@@ -166,86 +188,21 @@ caption | label | body | subheading | heading | display — never hardcode font 
 - Typewriter per character: 2-3 frames (set duration = text.length * 2)
 - Hold before next section: 10-20 frames
 
-## RULES:
+## EXAMPLES
 
-The following rules are strict and must always be followed when generating the component.
-
-## Component contract
-- Component receives no props — export as: export default function RemoteComponent() { ... }
-- Never import from "remotion" or any other library.
-- Never use useCurrentFrame, interpolate, spring, or any Remotion hook directly.
-
-## Layout
-- SafeArea must always be the outermost wrapper. Nothing renders outside it.
-- Every visible element must be a direct child of Stack, Row, or AbsoluteCenter — never place components as siblings without a layout primitive.
-- Use Stack for vertical arrangement, Row for horizontal. Nest them for complex layouts.
-- Never use position:absolute, position:fixed, or position:relative — AbsoluteCenter is the only component that handles absolute positioning.
-- Never create wrapper divs purely for layout — use Stack and Row instead.
-- Never animate an empty div — every animation primitive must wrap visible content.
-- Plain React divs are allowed only for geometric shapes and decorative elements (circles, dividers, lines). Never for layout.
-- Spacing values for gap, padding, margin must be token values only mentioned above
-
-## Styling
-- Never set color, fontSize, fontWeight, letterSpacing, or fontFamily in style props — the design system controls these automatically.
-- Never hardcode hex colors or rgba color values.
-- Never hardcode font sizes — use Text variant prop instead.
-- style props are for geometry and layout only: width, height, maxWidth, borderRadius, overflow, padding, margin.
-
-## Animation
-- Never use JSX conditionals for animated elements — use TimelineGate instead.
-- Never animate an empty or invisible element.
-- Always wrap content in an animation primitive to animate it — content primitives (Text, Counter, LogoAsset) never animate themselves.
-- Width and height on LogoAsset define its bounding box; the logo remains contained without distortion.
-
-## Safety
-- Only use primitives, layout components from the AVAILABLE list. Never invent new component names.
-- Never use className for layout or styling — it is not supported in the animation runtime.
-
-## EXAMPLES:
-
-### Example 1 — primitives only
+### Example 1 — sequential title reveal (settledFrame: 46)
 ```tsx
 export default function RemoteComponent() {
   return (
     <SafeArea>
       <AbsoluteCenter axis="both">
-        <Stack gap={24} align="center">
-
-          <SlideIn delay={0} duration={20} direction="up">
+        <Stack gap={16} align="center" style={{ maxWidth: 800 }}>
+          <SlideIn startAt={0} durationInFrames={20} from="bottom">
             <Text variant="display">Q4 Results</Text>
           </SlideIn>
-
-          <FadeIn delay={15} duration={20}>
+          <FadeIn startAt={26} durationInFrames={20}>
             <Text variant="subheading">Revenue up this quarter</Text>
           </FadeIn>
-
-          <FadeIn delay={30} duration={20}>
-            <Row gap={48} align="center">
-              <Stack gap={8} align="center">
-                <Counter to={9800} delay={35} duration={60} suffix="+" variant="heading" />
-                <Text variant="label">new users</Text>
-              </Stack>
-              <Stack gap={8} align="center">
-                <Counter to={94} delay={45} duration={60} suffix="%" variant="heading" />
-                <Text variant="label">retention</Text>
-              </Stack>
-            </Row>
-          </FadeIn>
-
-          <TimelineGate showAfter={120}>
-            <Stagger startAt={120} delayBetween={8}>
-              <SlideIn duration={20} direction="up">
-                <Text variant="label">✓ Revenue target hit</Text>
-              </SlideIn>
-              <SlideIn duration={20} direction="up">
-                <Text variant="label">✓ User growth 40%</Text>
-              </SlideIn>
-              <SlideIn duration={20} direction="up">
-                <Text variant="label">✓ Churn reduced</Text>
-              </SlideIn>
-            </Stagger>
-          </TimelineGate>
-
         </Stack>
       </AbsoluteCenter>
     </SafeArea>
@@ -253,37 +210,90 @@ export default function RemoteComponent() {
 }
 ```
 
-### Example 2 — primitives with plain React for geometry
+### Example 2 — two stats side by side (settledFrame: 70)
 ```tsx
 export default function RemoteComponent() {
   return (
     <SafeArea>
       <AbsoluteCenter axis="both">
-        <Stack gap={32} align="center">
-
-          <ScaleIn delay={0} duration={20} origin="center">
-            <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(255,255,255,0.8)' }} />
-            </div>
-          </ScaleIn>
-
-          <SlideIn delay={20} duration={25} direction="up">
+        <Row gap={48} align="center">
+          <FadeIn startAt={0} durationInFrames={20}>
             <Stack gap={8} align="center">
-              <Text variant="heading">Acme Inc</Text>
-              <Text variant="body">Building the future</Text>
+              <Counter to={9800} startAt={0} durationInFrames={60} suffix="+" variant="heading" />
+              <Text variant="label">new users</Text>
             </Stack>
+          </FadeIn>
+          <FadeIn startAt={0} durationInFrames={20}>
+            <Stack gap={8} align="center">
+              <Counter to={94} startAt={10} durationInFrames={60} suffix="%" variant="heading" />
+              <Text variant="label">retention</Text>
+            </Stack>
+          </FadeIn>
+        </Row>
+      </AbsoluteCenter>
+    </SafeArea>
+  );
+}
+```
+
+### Example 3 — staggered list (settledFrame: 62)
+```tsx
+export default function RemoteComponent() {
+  return (
+    <SafeArea>
+      <AbsoluteCenter axis="both">
+        <Stack gap={16} align="center" style={{ maxWidth: 600 }}>
+          <SlideIn startAt={0} durationInFrames={20} from="bottom">
+            <Text variant="heading">What we shipped</Text>
           </SlideIn>
-
-          <FadeIn delay={50} duration={20}>
-            <div style={{ width: 320, height: 1, background: 'rgba(255,255,255,0.15)' }} />
-          </FadeIn>
-
-          <FadeIn delay={60} duration={20}>
-            <Text variant="label">est. 2024</Text>
-          </FadeIn>
-
+          <TimelineGate showAfter={26}>
+            <Stagger startAt={26} staggerDelay={8}>
+              <SlideIn durationInFrames={20} from="bottom">
+                <Text variant="body">Faster build times</Text>
+              </SlideIn>
+              <SlideIn durationInFrames={20} from="bottom">
+                <Text variant="body">Improved test coverage</Text>
+              </SlideIn>
+              <SlideIn durationInFrames={20} from="bottom">
+                <Text variant="body">Zero downtime deploys</Text>
+              </SlideIn>
+            </Stagger>
+          </TimelineGate>
         </Stack>
       </AbsoluteCenter>
     </SafeArea>
   );
 }
+```
+
+### Example 4 — word cycle resolving to final word (settledFrame: 156)
+```tsx
+export default function RemoteComponent() {
+  return (
+    <SafeArea>
+      <AbsoluteCenter axis="both">
+        <Stack gap={16} align="center" style={{ maxWidth: 700 }}>
+          <FadeIn startAt={0} durationInFrames={20}>
+            <Text variant="subheading">We protect your</Text>
+          </FadeIn>
+          <TimelineGate showAfter={26} hideAfter={130}>
+            <WordCycle
+              startAt={26}
+              words={["layouts", "spacing", "colors", "trust"]}
+              holdDuration={18}
+              transitionDuration={10}
+              transition="fadeSwap"
+              variant="display"
+            />
+          </TimelineGate>
+          <TimelineGate showAfter={136}>
+            <ScaleIn startAt={136} durationInFrames={20} origin="center">
+              <Text variant="display">trust</Text>
+            </ScaleIn>
+          </TimelineGate>
+        </Stack>
+      </AbsoluteCenter>
+    </SafeArea>
+  );
+}
+```

@@ -103,6 +103,10 @@ func (t *AskUserQuestionClassView) PropertyAllow_custom_entry() (ClassPropertyVi
 	return t.inner.Property("allow_custom_entry")
 }
 
+func (t *AskUserQuestionClassView) PropertyThinkingSummary() (ClassPropertyView, error) {
+	return t.inner.Property("thinkingSummary")
+}
+
 func (t *TypeBuilder) AskUserQuestion() (*AskUserQuestionClassView, error) {
 	bld, err := t.inner.Class("AskUserQuestion")
 	if err != nil {
@@ -1117,6 +1121,10 @@ func (t *VideoGenerationPlanClassView) PropertyVideoName() (ClassPropertyView, e
 
 func (t *VideoGenerationPlanClassView) PropertySections() (ClassPropertyView, error) {
 	return t.inner.Property("sections")
+}
+
+func (t *VideoGenerationPlanClassView) PropertyThinkingSummary() (ClassPropertyView, error) {
+	return t.inner.Property("thinkingSummary")
 }
 
 func (t *TypeBuilder) VideoGenerationPlan() (*VideoGenerationPlanClassView, error) {

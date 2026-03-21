@@ -51,7 +51,7 @@ require (
 
 require (
 	cloud.google.com/go/storage v1.50.0
-	github.com/boundaryml/baml v0.218.1
+	github.com/boundaryml/baml v0.220.0
 	github.com/hashicorp/go-retryablehttp v0.7.8
 	github.com/streamingfast/dstore v0.1.2
 	golang.org/x/image v0.0.0-20190802002840-cff245a6509b
