@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
-import { useDurationCollector } from '../../duration/DurationCollector';
 import { useStyleContext } from '../../styles/StyleContext';
 import { getEasing, interpolateWithEasing } from '../../styles/easingResolver';
 import { usePrimitivePatches, usePatchedProp, useStyleOverride } from '../../patches/PatchContext';
 import { splitStyles, mergeChildStyles } from '../../styles/styleUtils';
 import { type Easing } from '../../styles/types';
 import { type SlideDirection } from './SlideIn';
+import { applySpeedFactor, useSpeedFactor } from '../../duration';
 
 export interface SlideOutProps {
   startAt?: number;
@@ -35,13 +35,16 @@ export function SlideOut({
 }: SlideOutProps): React.ReactElement | null {
   const frame = useCurrentFrame();
   const styleConfig = useStyleContext();
-  const registerEndFrame = useDurationCollector();
-  const { effectiveStartAt, effectiveDurationInFrames } = usePrimitivePatches(id, { startAt, durationInFrames });
+
+  const speedFactor = useSpeedFactor();
+  const adjustedStartAt = applySpeedFactor(startAt, speedFactor);
+  const adjustedDurationInFrames = applySpeedFactor(durationInFrames, speedFactor);
+  
+
+  const { effectiveStartAt, effectiveDurationInFrames } = usePrimitivePatches(id, { startAt: adjustedStartAt, durationInFrames: adjustedDurationInFrames });
   const patchedTo = usePatchedProp<SlideDirection>(id, 'to', to);
   const patchedDistance = usePatchedProp(id, 'distance', distance);
   const styleOverride = useStyleOverride(id);
-
-  useMemo(() => { registerEndFrame(effectiveStartAt + effectiveDurationInFrames); }, [effectiveStartAt, effectiveDurationInFrames]);
 
   const resolvedEasing = easing ?? getEasing(styleConfig.motion, 'exit');
 

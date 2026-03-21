@@ -7,8 +7,8 @@ import { portalClient } from '@/services/grpc'
 import { useVideoStore } from '@/stores/video'
 import { toast } from '@/hooks/use-toast'
 import { getConnectError } from '@/utils/error'
-import { type FigmaFrame } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
 import { MediaSlideContentSchema, MediaType, SlideType, type Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { FigmaFrame } from '@coasterai/pb/coasterai/core/v1/figma_pb'
 
 interface FigmaImportSettingsProps {
   onClose: () => void

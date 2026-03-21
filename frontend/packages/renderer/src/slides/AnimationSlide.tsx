@@ -187,11 +187,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
         {isLoading ? (
           <TemplateLoadingPlaceholder />
         ) : CompiledComponent ? (
-          <SpeedFactorProvider factor={
-            slide.settledFrame > 0 && slide.durationInFrames > 0
-              ? slide.settledFrame / slide.durationInFrames
-              : 1
-          }>
+          <SpeedFactorProvider factor={slide.settledFrame/slide.durationInFrames}>
             <PatchContextProvider overlay={patchOverlay}>
               <CompiledComponent />
             </PatchContextProvider>

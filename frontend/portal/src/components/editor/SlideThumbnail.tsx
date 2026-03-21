@@ -72,11 +72,11 @@ const SlideThumbnail = ({ slide, index = 0 }: SlideThumbnailProps) => {
         <Player
           component={SingleSlidePreview as any}
           inputProps={{ slide: debouncedSlide, isEditing: false }}
-          durationInFrames={durationInFrames}
+          durationInFrames={Math.round(durationInFrames)}
           compositionWidth={resolution.width}
           compositionHeight={resolution.height}
           fps={fps}
-          initialFrame={initialFrame}
+          initialFrame={Math.round(initialFrame)}
           controls={false}
           autoPlay={false}
           style={{
