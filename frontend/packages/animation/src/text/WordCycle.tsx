@@ -29,6 +29,9 @@ export interface WordCycleProps {
 
 /**
  * Cycles through an array of words with animated transitions.
+ *
+ * Auto-adjusts container width to the longest word using a hidden spacer —
+ * no layout reflow occurs when words change, eliminating jerk in Stack/Row layouts.
  */
 export function WordCycle({
   startAt = 0,
@@ -52,9 +55,6 @@ export function WordCycle({
   const adjustedHoldDuration = applySpeedFactor(holdDuration, speedFactor);
   const adjustedTransitionDuration = applySpeedFactor(transitionDuration, speedFactor);
 
-
-
-  // startAt maps to delay slot, holdDuration maps to duration slot for patch overrides
   const { effectiveStartAt, effectiveDurationInFrames: effectiveHold } = usePrimitivePatches(id, {
     startAt: adjustedStartAt,
     durationInFrames: adjustedHoldDuration,
@@ -67,9 +67,15 @@ export function WordCycle({
   const styleOverride = useStyleOverride(id);
 
   const cycleDuration = effectiveHold + patchedTransitionDuration;
-
   const resolvedEasing = easing ?? getEasing(styleConfig.motion, 'wordcycle');
   const typographyStyle = resolveTypography(patchedVariant, styleConfig, theme, preset);
+
+  // The longest word by character count — used as an invisible spacer to
+  // hold the container width stable across all word changes.
+  const longestWord = useMemo(
+    () => patchedWords.reduce((a, b) => (a.length >= b.length ? a : b), ''),
+    [patchedWords],
+  );
 
   if (patchedWords.length === 0) return <span className={className} style={style} />;
 
@@ -83,19 +89,60 @@ export function WordCycle({
 
   const transitionProgress = isTransitioning
     ? interpolateWithEasing(
-      cycleFrame,
-      [effectiveHold, effectiveHold + patchedTransitionDuration],
-      [0, 1],
-      resolvedEasing,
-    )
+        cycleFrame,
+        [effectiveHold, effectiveHold + patchedTransitionDuration],
+        [0, 1],
+        resolvedEasing,
+      )
     : 0;
+
+  // Outer container — sized by the invisible spacer (longestWord), never by
+  // the visible word. This is what eliminates layout reflow.
+  const containerStyle: React.CSSProperties = {
+    ...typographyStyle,
+    position: 'relative',
+    display: 'inline-block',
+    ...style,
+    ...styleOverride,
+  };
+
+  // Invisible spacer — always renders the longest word to hold container width.
+  const spacerStyle: React.CSSProperties = {
+    visibility: 'hidden',
+    whiteSpace: 'nowrap',
+    display: 'block',
+    pointerEvents: 'none',
+    userSelect: 'none',
+    // Occupy height too so the container height is stable
+    lineHeight: 'inherit',
+  };
+
+  // Visible words are absolutely positioned on top of the spacer.
+  const absoluteLayerStyle: React.CSSProperties = {
+    position: 'absolute',
+    inset: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    whiteSpace: 'nowrap',
+  };
 
   if (patchedTransition === 'fadeSwap') {
     return (
-      <span id={id} className={className} style={{ ...typographyStyle, position: 'relative', display: 'inline-block', ...style, ...styleOverride }}>
-        <span style={{ opacity: isTransitioning ? 1 - transitionProgress : 1 }}>{currentWord}</span>
+      <span id={id} className={className} style={containerStyle}>
+        {/* Spacer holds the width — never visible */}
+        <span style={spacerStyle} aria-hidden="true">{longestWord}</span>
+
+        {/* Current word fades out during transition */}
+        <span style={{ ...absoluteLayerStyle, opacity: isTransitioning ? 1 - transitionProgress : 1 }}>
+          {currentWord}
+        </span>
+
+        {/* Next word fades in during transition */}
         {isTransitioning && (
-          <span style={{ position: 'absolute', left: 0, opacity: transitionProgress }}>{nextWord}</span>
+          <span style={{ ...absoluteLayerStyle, opacity: transitionProgress }}>
+            {nextWord}
+          </span>
         )}
       </span>
     );
@@ -103,12 +150,27 @@ export function WordCycle({
 
   if (patchedTransition === 'slideUp') {
     return (
-      <span id={id} className={className} style={{ ...typographyStyle, position: 'relative', display: 'inline-block', overflow: 'hidden', ...style, ...styleOverride }}>
-        <span style={{ display: 'block', transform: isTransitioning ? `translateY(-${transitionProgress * 100}%)` : 'translateY(0)', opacity: isTransitioning ? 1 - transitionProgress : 1 }}>
+      <span id={id} className={className} style={{ ...containerStyle, overflow: 'hidden' }}>
+        <span style={spacerStyle} aria-hidden="true">{longestWord}</span>
+
+        <span
+          style={{
+            ...absoluteLayerStyle,
+            transform: isTransitioning ? `translateY(-${transitionProgress * 100}%)` : 'translateY(0)',
+            opacity: isTransitioning ? 1 - transitionProgress : 1,
+          }}
+        >
           {currentWord}
         </span>
+
         {isTransitioning && (
-          <span style={{ position: 'absolute', left: 0, top: 0, transform: `translateY(${(1 - transitionProgress) * 100}%)`, opacity: transitionProgress }}>
+          <span
+            style={{
+              ...absoluteLayerStyle,
+              transform: `translateY(${(1 - transitionProgress) * 100}%)`,
+              opacity: transitionProgress,
+            }}
+          >
             {nextWord}
           </span>
         )}
@@ -118,12 +180,27 @@ export function WordCycle({
 
   // flipY
   return (
-    <span id={id} className={className} style={{ ...typographyStyle, position: 'relative', display: 'inline-block', ...style, ...styleOverride }}>
-      <span style={{ display: 'block', transform: isTransitioning ? `rotateX(${transitionProgress * 90}deg)` : 'rotateX(0deg)', opacity: isTransitioning ? 1 - transitionProgress : 1 }}>
+    <span id={id} className={className} style={containerStyle}>
+      <span style={spacerStyle} aria-hidden="true">{longestWord}</span>
+
+      <span
+        style={{
+          ...absoluteLayerStyle,
+          transform: isTransitioning ? `rotateX(${transitionProgress * 90}deg)` : 'rotateX(0deg)',
+          opacity: isTransitioning ? 1 - transitionProgress : 1,
+        }}
+      >
         {currentWord}
       </span>
+
       {isTransitioning && (
-        <span style={{ position: 'absolute', left: 0, top: 0, transform: `rotateX(${(1 - transitionProgress) * -90}deg)`, opacity: transitionProgress }}>
+        <span
+          style={{
+            ...absoluteLayerStyle,
+            transform: `rotateX(${(1 - transitionProgress) * -90}deg)`,
+            opacity: transitionProgress,
+          }}
+        >
           {nextWord}
         </span>
       )}
