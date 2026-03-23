@@ -9,7 +9,6 @@ import {
 } from '@coasterai/animation'
 
 import { compileRemoteComponent } from '../compiler'
-import { AnimatedBackground } from '../effects/AnimatedBackground'
 import { backgroundStyleToCSS } from '../backgroundUtils'
 
 const compiledTemplateCache = new Map<string, React.ComponentType<any>>()
@@ -182,12 +181,11 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
         alignItems: 'center'
       }}
     >
-      <AnimatedBackground width={width} height={height} />
       <div style={{ width: '100%', height: '100%' }}>
         {isLoading ? (
           <TemplateLoadingPlaceholder />
         ) : CompiledComponent ? (
-          <SpeedFactorProvider factor={slide.settledFrame/slide.durationInFrames}>
+          <SpeedFactorProvider factor={slide.speed ? slide.speed: 1}>
             <PatchContextProvider overlay={patchOverlay}>
               <CompiledComponent />
             </PatchContextProvider>

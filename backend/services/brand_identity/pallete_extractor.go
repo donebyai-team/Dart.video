@@ -137,7 +137,7 @@ func buildColorPalette(input map[string]string) map[string]string {
 func GenerateGradient(colors []*pbcore.BrandColor) *pbcore.Gradient {
 	var primary, secondary, accent string
 
-	// Extract relevant colors from palette
+	// Extract palette colors
 	for _, c := range colors {
 		switch c.Priority {
 		case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_PRIMARY:
@@ -149,53 +149,80 @@ func GenerateGradient(colors []*pbcore.BrandColor) *pbcore.Gradient {
 		}
 	}
 
-	// Prefer primary → secondary for gradients (more stable than accent)
-	start := primary
-	end := secondary
+	var start, end string
 
-	// Fallbacks if missing
-	if start == "" {
+	// ---- PRIMARY STRATEGY ----
+	if accent != "" {
 		start = accent
-	}
-	if end == "" {
-		end = accent
-	}
 
-	if start == "" && len(colors) > 0 {
-		start = colors[0].ColorHexCode
-	}
-	if end == "" {
-		end = darkenHSL(start, 0.2)
+		// Use secondary only if it is lighter
+		if secondary != "" && lightness(secondary) > lightness(primary) {
+			end = secondary
+		} else {
+			// Generate pastel version of primary
+			end = lightenHSL(accent, 0.45)
+		}
+	} else {
+		// ---- FALLBACK STRATEGY ----
+		if secondary != "" {
+			start = secondary
+			end = lightenHSL(secondary, 0.35)
+		} else if primary != "" {
+			start = primary
+			end = lightenHSL(primary, 0.35)
+		} else if len(colors) > 0 {
+			start = colors[0].ColorHexCode
+			end = lightenHSL(start, 0.35)
+		}
 	}
 
 	// ---- SAFETY RULES ----
 
-	// 1. Avoid near-white gradients (bad for video/UI)
+	// Ensure end color is light enough for backgrounds
+	if lightness(end) < 0.85 {
+		end = lightenHSL(end, 0.35)
+	}
+
+	// Avoid near white
 	if isTooLight(start) {
-		start = darkenHSL(start, 0.2)
+		start = darkenHSL(start, 0.15)
 	}
 	if isTooLight(end) {
-		end = darkenHSL(end, 0.2)
+		end = darkenHSL(end, 0.05)
 	}
 
-	// 2. Avoid both stops being dark (flat gradient)
-	if isDark(start) && isDark(end) {
-		end = lightenHSL(end, 0.3)
-	}
-
-	// 3. Ensure visible difference between stops
+	// Ensure visible gradient difference
 	if colorDistance(start, end) < 20 {
-		end = shiftHue(end, 25)
+		end = lightenHSL(end, 0.2)
 	}
 
 	return &pbcore.Gradient{
 		Type:  pbcore.GradientType_GRADIENT_TYPE_LINEAR,
 		Angle: 135,
 		Stops: []*pbcore.GradientStop{
-			{Color: start, Position: 0},
-			{Color: end, Position: 100},
+			{
+				Color:    start,
+				Position: 0,
+			},
+			{
+				Color:    end,
+				Position: 100,
+			},
 		},
 	}
+}
+
+func lightness(hex string) float64 {
+	r, g, b := hexToRGB(hex)
+
+	rf := float64(r) / 255
+	gf := float64(g) / 255
+	bf := float64(b) / 255
+
+	max := math.Max(rf, math.Max(gf, bf))
+	min := math.Min(rf, math.Min(gf, bf))
+
+	return (max + min) / 2
 }
 
 // ---------------- TEXT (GRADIENT-AWARE) ----------------

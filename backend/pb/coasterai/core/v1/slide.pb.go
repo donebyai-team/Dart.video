@@ -1429,6 +1429,7 @@ type Slide struct {
 	Plan               *structpb.Struct   `protobuf:"bytes,21,opt,name=plan,proto3" json:"plan,omitempty"`
 	SlideStatus        SlideStatus        `protobuf:"varint,22,opt,name=slideStatus,proto3,enum=coasterai.core.v1.SlideStatus" json:"slideStatus,omitempty"`
 	Index              int32              `protobuf:"varint,24,opt,name=index,proto3" json:"index,omitempty"`
+	Speed              float32            `protobuf:"fixed32,27,opt,name=speed,proto3" json:"speed,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -1610,6 +1611,13 @@ func (x *Slide) GetSlideStatus() SlideStatus {
 func (x *Slide) GetIndex() int32 {
 	if x != nil {
 		return x.Index
+	}
+	return 0
+}
+
+func (x *Slide) GetSpeed() float32 {
+	if x != nil {
+		return x.Speed
 	}
 	return 0
 }
@@ -2121,7 +2129,7 @@ const file_coasterai_core_v1_slide_proto_rawDesc = "" +
 	"\x01y\x18\x03 \x01(\x02R\x01y\x12\x1c\n" +
 	"\tzoomLevel\x18\x04 \x01(\x02R\tzoomLevel\x12\x1c\n" +
 	"\tstartTime\x18\x05 \x01(\x02R\tstartTime\x12\x18\n" +
-	"\aendTime\x18\x06 \x01(\x02R\aendTime\"\x8b\t\n" +
+	"\aendTime\x18\x06 \x01(\x02R\aendTime\"\xa1\t\n" +
 	"\x05Slide\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x120\n" +
 	"\x04type\x18\x02 \x01(\x0e2\x1c.coasterai.core.v1.SlideTypeR\x04type\x12\x1e\n" +
@@ -2148,7 +2156,8 @@ const file_coasterai_core_v1_slide_proto_rawDesc = "" +
 	"\x05zooms\x18\x14 \x03(\v2\x1d.coasterai.core.v1.ZoomEffectR\x05zooms\x12+\n" +
 	"\x04plan\x18\x15 \x01(\v2\x17.google.protobuf.StructR\x04plan\x12@\n" +
 	"\vslideStatus\x18\x16 \x01(\x0e2\x1e.coasterai.core.v1.SlideStatusR\vslideStatus\x12\x14\n" +
-	"\x05index\x18\x18 \x01(\x05R\x05indexB\t\n" +
+	"\x05index\x18\x18 \x01(\x05R\x05index\x12\x14\n" +
+	"\x05speed\x18\x1b \x01(\x02R\x05speedB\t\n" +
 	"\acontentB\x15\n" +
 	"\x13_transitionDurationB\x13\n" +
 	"\x11_background_styleB\f\n" +

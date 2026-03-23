@@ -120,6 +120,7 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 				Id:          fmt.Sprintf("slide-%d", time.Now().UnixNano()),
 				SlideStatus: pbcore.SlideStatus_SLIDE_STATUS_PENDING,
 				Index:       int32(slideIndex),
+				Speed:       1.0,
 			}
 
 			sceneMapper[slide.Id] = &pendingSlide

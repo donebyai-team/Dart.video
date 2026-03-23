@@ -581,6 +581,11 @@ export declare type Slide = Message<"coasterai.core.v1.Slide"> & {
    * @generated from field: int32 index = 24;
    */
   index: number;
+
+  /**
+   * @generated from field: float speed = 27;
+   */
+  speed: number;
 };
 
 /**

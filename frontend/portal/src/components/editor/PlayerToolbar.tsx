@@ -16,10 +16,11 @@ import { useVideoStore } from '@/stores/video'
 import { SlideType, EffectType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { ActiveToolType } from '@/types/tools'
 import { backgroundStyleToCSS } from '@coasterai/renderer'
-import SpeedChangeComponent from './remotion/components/SpeedChangeComponent'
+import DurationChangeComponent from './remotion/components/DurationChangeComponent'
 
 interface PlayerToolbarProps {
   onSlideSpeedChange: (newDuration: number) => void
+  onDurationChange: (newDuration: number) => void
   minDuration?: number
   maxDuration?: number
 }
@@ -30,15 +31,16 @@ const insertTools: { id: EffectType; name: string; icon: React.ElementType }[] =
   { id: EffectType.ZOOM, name: 'Zoom', icon: ZoomIn },
 ]
 
-const PlayerToolbar = ({ onSlideSpeedChange, minDuration = 1, maxDuration = 180 }: PlayerToolbarProps) => {
+const PlayerToolbar = ({ onSlideSpeedChange, onDurationChange, minDuration = 1, maxDuration = 180 }: PlayerToolbarProps) => {
   const getSlideWithBackground = useVideoStore(s => s.getSlideWithBackground)
   const onChangeTextAnimation = useVideoStore(s => s.handleEditAnimation)
   const activeTool = useVideoStore(s => s.activeTool)
   const onSelectTool = useVideoStore(s => s.handleSelectTool)
   const selectedSlide = useVideoStore(s => s.selectedSlide)
+  const getSlideDurationInSeconds = useVideoStore(s => s.getSlideDurationInSeconds)
 
   if (!selectedSlide) return
-  let slide = selectedSlide.slide 
+  let slide = selectedSlide.slide
 
   const currentBg = backgroundStyleToCSS(getSlideWithBackground(slide));
   const isBackgroundActive = activeTool?.type === ActiveToolType.BACKGROUND
@@ -48,7 +50,7 @@ const PlayerToolbar = ({ onSlideSpeedChange, minDuration = 1, maxDuration = 180 
     <div className='flex items-center justify-between gap-4 px-4 py-2 border-b border-border bg-background'>
       {/* Left side: Slide info and editing tools */}
       <div className='flex items-center gap-2'>
-       
+
         {/* Background tool */}
         <TooltipProvider delayDuration={200}>
           <Tooltip>
@@ -134,12 +136,12 @@ const PlayerToolbar = ({ onSlideSpeedChange, minDuration = 1, maxDuration = 180 
               </DropdownMenuContent>
             </DropdownMenu>
           </>
-        )}        
+        )}
       </div>
 
       {/* Right side: Duration control */}
       <div className='flex items-center gap-2'>
-        <TooltipProvider delayDuration={200}>
+        <TooltipProvider delayDuration={100}>
           <Tooltip>
             <TooltipTrigger asChild>
               <div className='flex items-center gap-1'>
@@ -153,15 +155,38 @@ const PlayerToolbar = ({ onSlideSpeedChange, minDuration = 1, maxDuration = 180 
           </Tooltip>
         </TooltipProvider>
 
-        <SpeedChangeComponent
-          baseFrames={slide.settledFrame}
-          durationInFrames={slide.durationInFrames}
-          onChange={val => {
+        <DurationChangeComponent
+          value={slide.speed ? slide.speed : 1}
+          onValueChange={val => {
             onSlideSpeedChange(val)
+          }}
+          max={2}
+          min={0}
+          step={0.1}
+        />
+
+        <TooltipProvider delayDuration={100}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className='flex items-center gap-1'>
+                <Clock className='w-4 h-4 text-muted-foreground' />
+                <span className='text-xs text-muted-foreground'>Change Duration:</span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side='bottom' className='text-xs'>
+              Change Animation Duration
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        <DurationChangeComponent
+          value={getSlideDurationInSeconds(slide)}
+          onValueChange={val => {
+            onDurationChange(val)
           }}
           max={maxDuration}
           min={minDuration}
-          step={20}
+          step={0.1}
         />
       </div>
     </div>

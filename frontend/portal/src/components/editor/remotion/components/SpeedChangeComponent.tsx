@@ -2,8 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Minus, Plus } from 'lucide-react'
 
 interface Props {
-  baseFrames: number
-  durationInFrames: number
+  existingSpeed: number
   onChange: (value: number) => void
   max: number
   min: number
@@ -11,19 +10,18 @@ interface Props {
 }
 
 const SpeedChangeComponent = ({
-  baseFrames,
-  durationInFrames,
+  existingSpeed,
   onChange,
   max,
   min,
   step,
 }: Props) => {
   // Derived speed
-  const speed = baseFrames / durationInFrames
+  const speed = existingSpeed
   const speedDisplay = speed.toFixed(1)
 
   const handleChange = (delta: number) => {
-    const next = durationInFrames + delta   
+    const next = existingSpeed + delta   
     console.log("change", next) 
     onChange(Math.round(next))
   }
@@ -35,7 +33,7 @@ const SpeedChangeComponent = ({
         size='sm'
         className='h-7 w-7 p-0'
         onClick={() => handleChange(step)} // slower → +frames
-        disabled={durationInFrames >= max}
+        disabled={existingSpeed >= max}
       >
         <Minus className='w-3 h-3' />
       </Button>
@@ -49,7 +47,7 @@ const SpeedChangeComponent = ({
         size='sm'
         className='h-7 w-7 p-0'
         onClick={() => handleChange(-step)} // faster → -frames
-        disabled={durationInFrames <= min}
+        disabled={existingSpeed <= min}
       >
         <Plus className='w-3 h-3' />
       </Button>
