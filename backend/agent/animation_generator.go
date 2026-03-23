@@ -177,8 +177,8 @@ func (l *animationGenerator) GenerateCodeV2(ctx context.Context, scene *types.Sc
 					zap.Int("llm_settled_frame", int(generatedAnimation.SettledFrame)),
 					zap.Int("computed", int(template.Config.VisibleDuration)),
 				)
-			} else {
-				l.logger.Info("difference between llm and computed settledFrame",
+			} else if diff > 0 {
+				l.logger.Info("found difference between llm and computed settledFrame",
 					zap.Int("llm_settled_frame", int(generatedAnimation.SettledFrame)),
 					zap.Int("computed", int(template.Config.VisibleDuration)),
 				)
@@ -454,19 +454,19 @@ func (l *animationGenerator) EditAnimationCode(
 	callback(TemplateGenerationProgress{
 		Message: CreativeStageMessage(StageUnderstanding, 0),
 	})
-	// 1️⃣ Attempt targeted edits first
-	template, err := l.tryTargetedEdits(
-		ctx,
-		code,
-		prompt,
-		callback,
-	)
-
-	if err == nil {
-		return template, nil
-	}
-
-	l.logger.Error("targeted edits failed", zap.Error(err))
+	//// 1️⃣ Attempt targeted edits first
+	//template, err := l.tryTargetedEdits(
+	//	ctx,
+	//	code,
+	//	prompt,
+	//	callback,
+	//)
+	//
+	//if err == nil {
+	//	return template, nil
+	//}
+	//
+	//l.logger.Error("targeted edits failed", zap.Error(err))
 
 	// 2️⃣ fallback to regeneration
 	return l.tryRegenerateAnimation(
@@ -474,7 +474,6 @@ func (l *animationGenerator) EditAnimationCode(
 		code,
 		animationSlide,
 		prompt,
-		types.AnimationType(slideContent.Plan.AnimationType),
 		callback,
 	)
 }
@@ -668,7 +667,6 @@ func (l *animationGenerator) tryRegenerateAnimation(
 	code string,
 	animationSlide *pbcore.Slide,
 	prompt string,
-	animationType types.AnimationType,
 	callback TemplateGenerationCallback,
 ) (*models.Template, error) {
 	conversationHistory := []types.Message{}
@@ -676,7 +674,6 @@ func (l *animationGenerator) tryRegenerateAnimation(
 		input := l.buildRegenInput(
 			code,
 			animationSlide,
-			animationType,
 			prompt,
 		)
 
@@ -749,13 +746,11 @@ func (l *animationGenerator) tryRegenerateAnimation(
 func (l *animationGenerator) buildRegenInput(
 	code string,
 	animationSlide *pbcore.Slide,
-	animationType types.AnimationType,
 	prompt string,
 ) types.ReGenerateAnimationCodeRequest {
 
 	input := types.ReGenerateAnimationCodeRequest{
 		Code:             code,
-		AnimationType:    animationType,
 		Prompt:           prompt,
 		DurationInFrames: int64(animationSlide.DurationInFrames),
 	}
@@ -769,19 +764,9 @@ func (l *animationGenerator) buildRegenInput(
 		l.logger.Info("using injected brand-identity mapper")
 	}
 
+	// TODO: the injact attachments here as well
+
 	return input
-}
-
-var adjectives = []string{
-	"Text", "Motion", "Flip", "Reveal", "Pulse",
-	"Cascade", "Flow", "Wave", "Glow", "Shift",
-	"Zoom", "Slide", "Stack", "Fade", "Orbit",
-}
-
-var nouns = []string{
-	"Block", "Stack", "Cascade", "Sequence",
-	"Frame", "Flow", "Layer", "Reveal",
-	"Highlight", "Motion", "Cluster",
 }
 
 func (l *animationGenerator) ExtractConfig(

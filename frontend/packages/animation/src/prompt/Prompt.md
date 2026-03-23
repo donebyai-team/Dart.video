@@ -8,112 +8,18 @@
 ## Available CANVAS size:
 1920px × 1080px (web)
 
-## Entrances
+## Scenes — standalone, no siblings
 
-### FadeIn
-fades an element in from transparent to fully visible
+### TitleCard
+pre-built hero title with heading, subheading, and optional eyebrow
 Props:
+- heading: string (required)
+- subheading: string (optional)
+- eyebrow: string (optional)
 - startAt: number (optional)
-- durationInFrames: number (optional)
-
-### SlideIn
-slides an element in from outside the canvas edge
-Props:
-- startAt: number (optional)
-- durationInFrames: number (optional)
-- direction: enum(up|down|left|right) (optional)
-- distance: number (optional)
-
-### ScaleIn
-scales an element up from small to full size
-Props:
-- startAt: number (optional)
-- durationInFrames: number (optional)
-- origin: enum(center|top|bottom|left|right) (optional)
 
 
-## Exits
-
-### FadeOut
-fades an element out from visible to transparent
-Props:
-- startAt: number (optional)
-- durationInFrames: number (optional)
-
-### SlideOut
-slides an element out toward the canvas edge
-Props:
-- startAt: number (optional)
-- durationInFrames: number (optional)
-- direction: enum(up|down|left|right) (optional)
-- distance: number (optional)
-
-### ScaleOut
-scales an element down from full size to nothing
-Props:
-- startAt: number (optional)
-- durationInFrames: number (optional)
-- origin: enum(center|top|bottom|left|right) (optional)
-
-
-## Sequencing
-
-### Stagger
-reveals children one after another with a delay between each — children must be animation primitives
-Props:
-- startAt: number (optional)
-- staggerDelay: number (optional)
-
-### TimelineGate
-shows its child only within a defined time window — use instead of JSX conditionals
-Props:
-- showAfter: number (required)
-- hideAfter: number (optional)
-
-
-## Text
-
-### Text
-Static text element, wrap in FadeIn/SlideIn to animate
-Props:
-- variant: enum(caption|label|body|subheading|heading|display) (optional)
-
-### Typewriter
-Progressively reveals text character by character, word, or line
-Props:
-- startAt: number (optional)
-- durationInFrames: number (optional)
-- text: string (required)
-- mode: enum(char|word|line) (optional)
-- variant: enum(caption|label|body|subheading|heading|display) (optional)
-
-### WordCycle
-Cycles through an array of words with animated transitions
-Props:
-- startAt: number (optional)
-- words: array (required)
-- holdDuration: number (optional)
-- transitionDuration: number (optional)
-- transition: enum(flipY|fadeSwap|slideUp) (optional)
-- variant: enum(caption|label|body|subheading|heading|display) (optional)
-
-
-## Numbers
-
-### Counter
-Animated number counter that tweens between values
-Props:
-- startAt: number (optional)
-- durationInFrames: number (optional)
-- from: number (optional)
-- to: number (required)
-- format: string (optional)
-- prefix: string (optional)
-- suffix: string (optional)
-- variant: enum(caption|label|body|subheading|heading|display) (optional)
-
-
-## Layout
+## Layout Primitives — structural only, every visible element must live inside one
 
 ### SafeArea
 Outermost content wrapper that applies safe area insets from the active aspect preset
@@ -139,18 +45,106 @@ Props:
 - axis: enum(x|y|both) (optional)
 
 
-## Scene components (stand alone — no siblings, no mixing with other scene components)
+## Motion Primitives — wraps exactly one child, never wraps Layout
 
-### TitleCard
-pre-built hero title with heading, subheading, and optional eyebrow
+### FadeIn
+fades an element in from transparent to fully visible
 Props:
-- heading: string (required)
-- subheading: string (optional)
-- eyebrow: string (optional)
 - startAt: number (optional)
+- durationInFrames: number (optional)
+
+### FadeOut
+fades an element out from visible to transparent
+Props:
+- startAt: number (optional)
+- durationInFrames: number (optional)
+
+### SlideIn
+slides an element in from outside the canvas edge
+Props:
+- startAt: number (optional)
+- durationInFrames: number (optional)
+- direction: enum(up|down|left|right) (optional)
+- distance: number (optional)
+
+### SlideOut
+slides an element out toward the canvas edge
+Props:
+- startAt: number (optional)
+- durationInFrames: number (optional)
+- direction: enum(up|down|left|right) (optional)
+- distance: number (optional)
+
+### ScaleIn
+scales an element up from small to full size
+Props:
+- startAt: number (optional)
+- durationInFrames: number (optional)
+- origin: enum(center|top|bottom|left|right) (optional)
+
+### ScaleOut
+scales an element down from full size to nothing
+Props:
+- startAt: number (optional)
+- durationInFrames: number (optional)
+- origin: enum(center|top|bottom|left|right) (optional)
+
+### Stagger
+reveals children one after another with a delay between each — children must be animation primitives
+Props:
+- startAt: number (optional)
+- staggerDelay: number (optional)
+
+### TimelineGate
+shows its child only within a defined time window — use instead of JSX conditionals
+Props:
+- showAfter: number (required)
+- hideAfter: number (optional)
 
 
-## Brand Assets
+## Static Primitives — no built-in animation, wrap in Motion to animate
+
+### Text
+Static text element, wrap in FadeIn/SlideIn to animate
+Props:
+- variant: enum(caption|label|body|subheading|heading|display) (optional)
+
+
+## Dynamic Primitives — self-animating, never wrap in Motion, use startAt directly
+
+### Counter
+Animated number counter that tweens between values
+Props:
+- startAt: number (optional)
+- durationInFrames: number (optional)
+- from: number (optional)
+- to: number (required)
+- format: string (optional)
+- prefix: string (optional)
+- suffix: string (optional)
+- variant: enum(caption|label|body|subheading|heading|display) (optional)
+
+### Typewriter
+Progressively reveals text character by character, word, or line
+Props:
+- startAt: number (optional)
+- durationInFrames: number (optional)
+- text: string (required)
+- mode: enum(char|word|line) (optional)
+- variant: enum(caption|label|body|subheading|heading|display) (optional)
+
+### WordCycle
+Cycles through an array of words with animated transitions
+Props:
+- startAt: number (optional)
+- words: array (required)
+- holdDuration: number (optional)
+- transitionDuration: number (optional)
+- transition: enum(flipY|fadeSwap|slideUp) (optional)
+- variant: enum(caption|label|body|subheading|heading|display) (optional)
+
+
+## Asset Primitives — no built-in animation, wrap in Motion to animate
 
 ### LogoAsset
 renders the brand logo from the active theme — use for brand presence in title and outro scenes
@@ -196,7 +190,7 @@ export default function RemoteComponent() {
   return (
     <SafeArea>
       <AbsoluteCenter axis="both">
-        <Stack gap={16} align="center" style={{ maxWidth: 800 }}>
+        <Stack gap={16} align="center">
           <SlideIn startAt={0} durationInFrames={20} from="bottom">
             <Text variant="display">Q4 Results</Text>
           </SlideIn>
@@ -210,25 +204,30 @@ export default function RemoteComponent() {
 }
 ```
 
-### Example 2 — two stats side by side (settledFrame: 70)
+### Example 2 — two stats side by side (settledFrame: 60)
 ```tsx
+// Motion primitives wrap Static/Dynamic primitives individually — never wrap Stack or Row
 export default function RemoteComponent() {
   return (
     <SafeArea>
       <AbsoluteCenter axis="both">
         <Row gap={48} align="center">
-          <FadeIn startAt={0} durationInFrames={20}>
-            <Stack gap={8} align="center">
+          <Stack gap={8} align="center">
+            <FadeIn startAt={0} durationInFrames={20}>
               <Counter to={9800} startAt={0} durationInFrames={60} suffix="+" variant="heading" />
+            </FadeIn>
+            <FadeIn startAt={0} durationInFrames={20}>
               <Text variant="label">new users</Text>
-            </Stack>
-          </FadeIn>
-          <FadeIn startAt={0} durationInFrames={20}>
-            <Stack gap={8} align="center">
-              <Counter to={94} startAt={10} durationInFrames={60} suffix="%" variant="heading" />
+            </FadeIn>
+          </Stack>
+          <Stack gap={8} align="center">
+            <FadeIn startAt={0} durationInFrames={20}>
+              <Counter to={94} startAt={0} durationInFrames={60} suffix="%" variant="heading" />
+            </FadeIn>
+            <FadeIn startAt={0} durationInFrames={20}>
               <Text variant="label">retention</Text>
-            </Stack>
-          </FadeIn>
+            </FadeIn>
+          </Stack>
         </Row>
       </AbsoluteCenter>
     </SafeArea>
@@ -238,27 +237,26 @@ export default function RemoteComponent() {
 
 ### Example 3 — staggered list (settledFrame: 62)
 ```tsx
+// Stagger manages its own timing — no TimelineGate wrapper needed
 export default function RemoteComponent() {
   return (
     <SafeArea>
       <AbsoluteCenter axis="both">
-        <Stack gap={16} align="center" style={{ maxWidth: 600 }}>
+        <Stack gap={16} align="center">
           <SlideIn startAt={0} durationInFrames={20} from="bottom">
             <Text variant="heading">What we shipped</Text>
           </SlideIn>
-          <TimelineGate showAfter={26}>
-            <Stagger startAt={26} staggerDelay={8}>
-              <SlideIn durationInFrames={20} from="bottom">
-                <Text variant="body">Faster build times</Text>
-              </SlideIn>
-              <SlideIn durationInFrames={20} from="bottom">
-                <Text variant="body">Improved test coverage</Text>
-              </SlideIn>
-              <SlideIn durationInFrames={20} from="bottom">
-                <Text variant="body">Zero downtime deploys</Text>
-              </SlideIn>
-            </Stagger>
-          </TimelineGate>
+          <Stagger startAt={26} staggerDelay={8}>
+            <SlideIn durationInFrames={20} from="bottom">
+              <Text variant="body">Faster build times</Text>
+            </SlideIn>
+            <SlideIn durationInFrames={20} from="bottom">
+              <Text variant="body">Improved test coverage</Text>
+            </SlideIn>
+            <SlideIn durationInFrames={20} from="bottom">
+              <Text variant="body">Zero downtime deploys</Text>
+            </SlideIn>
+          </Stagger>
         </Stack>
       </AbsoluteCenter>
     </SafeArea>
@@ -272,7 +270,7 @@ export default function RemoteComponent() {
   return (
     <SafeArea>
       <AbsoluteCenter axis="both">
-        <Stack gap={16} align="center" style={{ maxWidth: 700 }}>
+        <Stack gap={16} align="center">
           <FadeIn startAt={0} durationInFrames={20}>
             <Text variant="subheading">We protect your</Text>
           </FadeIn>

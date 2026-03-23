@@ -53,18 +53,8 @@ function describeZodType(schema: z.ZodTypeAny): string {
 export function componentListFragment(
   sectionName: string,
   components: ComponentRegistration[],
-  opts?: {
-    onlyDescriptions?: boolean;
-  }
 ): string {
   const lines: string[] = [];
-
-  if (opts?.onlyDescriptions) {
-    for (const c of components) {
-      lines.push(`## ${c.name} - ${c.description}`);
-    }
-    return lines.join("\n");
-  }
 
   lines.push(`## ${sectionName}`);
   lines.push("");
@@ -108,19 +98,6 @@ export function brandTokensFragment(brand: BrandObject): string {
     '## BRAND TOKENS (use these for colors — never hardcode hex):',
     `  brand.primary="${brand.primary}" brand.secondary="${brand.secondary}"`,
     `  brand.bg="${brand.bg}" brand.text="${brand.text}" brand.font="${brand.font}"`,
-  ].join('\n');
-}
-
-export function timingGuidanceFragment(): string {
-  return [
-    '## TIMING GUIDANCE (fps=30, so 30 frames = 1 second):',
-    '',
-    '- Typical entrance: 15-25 frames',
-    '- Typical exit: 10-15 frames',
-    '- Stagger between items: 8-10 frames',
-    '- Counter animation: 30-60 frames',
-    '- Typewriter per character: 2-3 frames (set duration = text.length * 2)',
-    '- Hold before next section: 10-20 frames',
   ].join('\n');
 }
 

@@ -931,10 +931,6 @@ func (t *ReGenerateAnimationCodeRequestClassView) PropertyCode() (ClassPropertyV
 	return t.inner.Property("code")
 }
 
-func (t *ReGenerateAnimationCodeRequestClassView) PropertyAnimationType() (ClassPropertyView, error) {
-	return t.inner.Property("animationType")
-}
-
 func (t *ReGenerateAnimationCodeRequestClassView) PropertyPrompt() (ClassPropertyView, error) {
 	return t.inner.Property("prompt")
 }
@@ -977,6 +973,14 @@ func (t *ReGenerateAnimationCodeResponseClassView) ListProperties() ([]ClassProp
 
 func (t *ReGenerateAnimationCodeResponseClassView) PropertyCode() (ClassPropertyView, error) {
 	return t.inner.Property("code")
+}
+
+func (t *ReGenerateAnimationCodeResponseClassView) PropertySettledFrame() (ClassPropertyView, error) {
+	return t.inner.Property("settledFrame")
+}
+
+func (t *ReGenerateAnimationCodeResponseClassView) PropertyThinkingSummary() (ClassPropertyView, error) {
+	return t.inner.Property("thinkingSummary")
 }
 
 func (t *TypeBuilder) ReGenerateAnimationCodeResponse() (*ReGenerateAnimationCodeResponseClassView, error) {

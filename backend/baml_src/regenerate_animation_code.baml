@@ -1,13 +1,14 @@
 class ReGenerateAnimationCodeRequest {
   code string
-  animationType AnimationType
   prompt string
   durationInFrames int
   branding VideoBranding
 }
 
 class ReGenerateAnimationCodeResponse {
-  code string @description("Typescript code")
+   code string @description("Typescript code")
+   settledFrame int @description("duration of the video in frames")
+   thinkingSummary string? @skip()
 }
 
 function ReGenerateAnimation(resume: ReGenerateAnimationCodeRequest, conversation_history: Message[]) -> ReGenerateAnimationCodeResponse {
@@ -26,6 +27,10 @@ function ReGenerateAnimation(resume: ReGenerateAnimationCodeRequest, conversatio
 
     ---
 
+    {{ AllComponentsListWithProps() }}
+    {{ CodeGenerationRules() }}
+    {{ TimingAndFrameRules() }}
+
     ## EDITING RULES
 
     1. Modify the existing code — never rewrite from scratch.
@@ -34,13 +39,11 @@ function ReGenerateAnimation(resume: ReGenerateAnimationCodeRequest, conversatio
     4. Never remove animation logic unless the edit explicitly requires it.
     5. When adding elements, integrate them into the existing layout naturally.
     6. Keep all existing timing values unless the edit changes them.
-    7. All rules from the generation prompt apply here too — no hex colors, no arbitrary px, no Remotion imports, style props for layout only.
+    7. For changing colors, or style related changed. use the add the *style* tag in props eg.
+       {% raw %}
+       <Text style={{ color: '#fffff' }} />
+       {% endraw %}
 
-    ---
-
-    {{ CodeGeneration() }}
-    {{ CodeGenerationMustHave() }}
-    {{ FrameDurationRules() }}
     ---
 
     ## INPUT
@@ -48,16 +51,16 @@ function ReGenerateAnimation(resume: ReGenerateAnimationCodeRequest, conversatio
     Resolution and Canvas Size:
     16x9(1920x1080)
 
-   {{ BrandGuidelines(resume.branding) }}
-
     Animation Duration In Frames:
-    {{ resume.duration }}
+    {{ resume.durationInFrames }}
 
     ## Requested Edits
     {{ resume.prompt }}
 
     ## Existing Animation Code
     {{ resume.code }}
+
+    {{ BrandGuidelines(resume.branding) }}
 
     ---
 

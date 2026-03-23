@@ -1228,7 +1228,6 @@ func (c Message) BamlTypeName() string {
 
 type ReGenerateAnimationCodeRequest struct {
 	Code             string        `json:"code"`
-	AnimationType    AnimationType `json:"animationType"`
 	Prompt           string        `json:"prompt"`
 	DurationInFrames int64         `json:"durationInFrames"`
 	Branding         VideoBranding `json:"branding"`
@@ -1250,9 +1249,6 @@ func (c *ReGenerateAnimationCodeRequest) Decode(holder *cffi.CFFIValueClass, typ
 
 		case "code":
 			c.Code = baml.Decode(valueHolder).Interface().(string)
-
-		case "animationType":
-			c.AnimationType = baml.Decode(valueHolder).Interface().(AnimationType)
 
 		case "prompt":
 			c.Prompt = baml.Decode(valueHolder).Interface().(string)
@@ -1277,8 +1273,6 @@ func (c ReGenerateAnimationCodeRequest) Encode() (*cffi.HostValue, error) {
 
 	fields["code"] = c.Code
 
-	fields["animationType"] = c.AnimationType
-
 	fields["prompt"] = c.Prompt
 
 	fields["durationInFrames"] = c.DurationInFrames
@@ -1293,7 +1287,9 @@ func (c ReGenerateAnimationCodeRequest) BamlTypeName() string {
 }
 
 type ReGenerateAnimationCodeResponse struct {
-	Code string `json:"code"`
+	Code            string  `json:"code"`
+	SettledFrame    int64   `json:"settledFrame"`
+	ThinkingSummary *string `json:"thinkingSummary"`
 }
 
 func (c *ReGenerateAnimationCodeResponse) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -1313,6 +1309,12 @@ func (c *ReGenerateAnimationCodeResponse) Decode(holder *cffi.CFFIValueClass, ty
 		case "code":
 			c.Code = baml.Decode(valueHolder).Interface().(string)
 
+		case "settledFrame":
+			c.SettledFrame = baml.Decode(valueHolder).Int()
+
+		case "thinkingSummary":
+			c.ThinkingSummary = baml.Decode(valueHolder).Interface().(*string)
+
 		default:
 
 			panic(fmt.Sprintf("unexpected field: %s in class ReGenerateAnimationCodeResponse", key))
@@ -1326,6 +1328,10 @@ func (c ReGenerateAnimationCodeResponse) Encode() (*cffi.HostValue, error) {
 	fields := map[string]any{}
 
 	fields["code"] = c.Code
+
+	fields["settledFrame"] = c.SettledFrame
+
+	fields["thinkingSummary"] = c.ThinkingSummary
 
 	return baml.EncodeClass("ReGenerateAnimationCodeResponse", fields, nil)
 }
