@@ -87,12 +87,6 @@ type AnimationGenerator interface {
 		ctx context.Context,
 		beatDescription string,
 		template *models.Template) (*types.TemplateConfigExtractorOutput, error)
-	Generate(
-		ctx context.Context,
-		animation *types.AnimationSlide,
-		planSoFar *types.VideoGenerationPlan,
-		callback TemplateGenerationCallback,
-	) (*models.Template, error)
 	GenerateCode(ctx context.Context,
 		prompt string,
 		animation *types.AnimationSlide,
@@ -272,44 +266,6 @@ func buildFailureMessage(buildErr *services.BuildError) string {
 
 func (l *animationGenerator) ApplyGenerationOptions(options AnimationGenerationOptions) {
 	l.generationOptions = options
-}
-
-func (l *animationGenerator) Generate(
-	ctx context.Context,
-	animation *types.AnimationSlide,
-	planSoFar *types.VideoGenerationPlan,
-	callback TemplateGenerationCallback,
-) (*models.Template, error) {
-
-	callback(TemplateGenerationProgress{
-		Message: CreativeStageMessage(StageUnderstanding, 0),
-	})
-
-	input := types.GenerateAnimationPromptRequest{
-		CurrentBeat:   animation.BeatDescription,
-		AnimationType: animation.AnimationType,
-		Voiceover:     animation.Voiceover,
-	}
-
-	if l.generationOptions.VideoBranding != nil {
-		input.Branding = *l.generationOptions.VideoBranding
-	}
-
-	if l.generationOptions.assetRegistry != nil {
-		input.Branding.BrandGuideLines = l.generationOptions.assetRegistry.FormatBrandDetails()
-		l.logger.Info("using injected brand-identity mapper")
-	}
-
-	if len(planSoFar.Sections) > 0 {
-		input.PlanSoFar = planSoFar.Sections
-	}
-
-	output, err := baml_client.GenerateAnimationPrompt(ctx, input)
-	if err != nil {
-		return nil, agenterrors.AnimationGenerationFailed("failed to generate prompt", err)
-	}
-
-	return l.GenerateCode(ctx, output.Prompt, animation, callback)
 }
 
 func (l *animationGenerator) GenerateCode(ctx context.Context,
