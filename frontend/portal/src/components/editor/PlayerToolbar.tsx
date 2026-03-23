@@ -4,6 +4,7 @@ import {
   Type,
   ChevronDown,
   Wand2,
+  Code2,
   Focus,
   CircleDot,
   ZoomIn,
@@ -34,6 +35,7 @@ const insertTools: { id: EffectType; name: string; icon: React.ElementType }[] =
 const PlayerToolbar = ({ onSlideSpeedChange, onDurationChange, minDuration = 1, maxDuration = 180 }: PlayerToolbarProps) => {
   const getSlideWithBackground = useVideoStore(s => s.getSlideWithBackground)
   const onChangeTextAnimation = useVideoStore(s => s.handleEditAnimation)
+  const onViewAnimationCode = useVideoStore(s => s.handleViewAnimationCode)
   const activeTool = useVideoStore(s => s.activeTool)
   const onSelectTool = useVideoStore(s => s.handleSelectTool)
   const selectedSlide = useVideoStore(s => s.selectedSlide)
@@ -44,6 +46,7 @@ const PlayerToolbar = ({ onSlideSpeedChange, onDurationChange, minDuration = 1, 
 
   const currentBg = backgroundStyleToCSS(getSlideWithBackground(slide));
   const isBackgroundActive = activeTool?.type === ActiveToolType.BACKGROUND
+  const isAnimationCodeActive = activeTool?.type === ActiveToolType.ANIMATION_CODE
   const activeInsertTool = activeTool?.type === ActiveToolType.INSERT ? activeTool.tool : null
 
   return (
@@ -90,6 +93,27 @@ const PlayerToolbar = ({ onSlideSpeedChange, onDurationChange, minDuration = 1, 
               </Tooltip>
             </TooltipProvider>
           </>
+        )}
+
+        {slide.type === SlideType.ANIMATION && onViewAnimationCode && (
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={isAnimationCodeActive ? 'secondary' : 'ghost'}
+                  size='sm'
+                  className='gap-2 h-8'
+                  onClick={() => (isAnimationCodeActive ? onSelectTool({ type: ActiveToolType.NONE }) : onViewAnimationCode())}
+                >
+                  <Code2 className='w-4 h-4' />
+                  <span className='text-xs'>Edit Code</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side='bottom' className='text-xs'>
+                View generated animation code
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         )}
 
         {/* Insert Tools Dropdown - only for image/video slides */}

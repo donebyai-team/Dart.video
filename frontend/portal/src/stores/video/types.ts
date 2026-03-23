@@ -49,6 +49,7 @@ export interface VideoActions {
     // Sync actions
     autoSyncVideoConfig: () => void;
     getSyncStatus: () => 'idle' | 'syncing' | 'error';
+    getFPS: () => number;
 
     // Streaming actions
     startVideoStream: (videoId: string) => Promise<Video | null>;
@@ -65,6 +66,7 @@ export interface VideoActions {
     setEditingSectionTitle: (title: string) => void;
 
     // Slides
+    getSlideDurationInSeconds: (slide: Slide) => number;
     getSlideWithBackground: (slide : Slide) => BackgroundStyle;
     getTimelineSlides: () => TimelineSlide[]
     addSlide: (sectionId: string, type: SlideType, afterSlideId?: string) => void
@@ -107,6 +109,7 @@ export interface VideoActions {
     handleSelectTool: (tool: SelectedTool) => void
     handleCloseTool: () => void
     handleEditAnimation: () => void
+    handleViewAnimationCode: () => void
     handleAddAnimation: (sectionId: string, afterSlideId?: string) => void                                          
 
     // Text animation

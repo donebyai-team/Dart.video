@@ -56,6 +56,15 @@ export const createToolActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     }
   },
 
+  handleViewAnimationCode() {
+    const { selectedSlide } = get()
+    if (!selectedSlide) return
+
+    if (selectedSlide.slide.type === SlideType.ANIMATION) {
+      set({ activeTool: { type: ActiveToolType.ANIMATION_CODE } })
+    }
+  },
+
   handleAddAnimation(sectionId: string, afterSlideId?: string) {
     set({
       activeTool: {

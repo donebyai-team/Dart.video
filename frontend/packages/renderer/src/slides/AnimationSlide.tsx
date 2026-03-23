@@ -10,6 +10,7 @@ import {
 
 import { compileRemoteComponent } from '../compiler'
 import { backgroundStyleToCSS } from '../backgroundUtils'
+import { loadTemplateSource } from '../templateSource'
 
 const compiledTemplateCache = new Map<string, React.ComponentType<any>>()
 const compiledTemplatePromiseCache = new Map<string, Promise<React.ComponentType<any>>>()
@@ -22,12 +23,7 @@ async function loadCompiledTemplate(templateUrl: string): Promise<React.Componen
   if (inFlight) return inFlight
 
   const promise = (async () => {
-    const response = await fetch(templateUrl, { cache: 'force-cache' })
-    if (!response.ok) {
-      throw new Error(`Failed to fetch template: ${response.status} ${response.statusText}`)
-    }
-
-    const code = await response.text()
+    const code = await loadTemplateSource(templateUrl)
     const result = compileRemoteComponent(code)
     if (result.error || !result.Component) {
       throw new Error(`Compilation failed: ${result.error ?? 'Unknown compilation error'}`)

@@ -11,6 +11,7 @@ import {
 } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { motion } from 'framer-motion'
 import AnimationEditor from './settings/AnimationEditor'
+import { CodeEditor } from './settings/CodeEditor'
 
 interface ToolsSettingsPanelProps {
   onPreviewTemplate: () => void
@@ -26,7 +27,7 @@ interface ToolsSettingsPanelProps {
 }
 
 const ToolsSettingsPanel = ({
-  onPreviewTemplate,
+  onPreviewTemplate: _onPreviewTemplate,
   isPreviewPlaying = false,
   onUpdateSpotlight,
   onUpdateCallout,
@@ -95,6 +96,10 @@ const ToolsSettingsPanel = ({
           settings={activeTool.settings}
           onClose={handleCloseTool}
         />
+      )}
+
+      {activeTool.type === ActiveToolType.ANIMATION_CODE && (
+        <CodeEditor onClose={handleCloseTool} />
       )}
 
       {activeTool.type === ActiveToolType.FIGMA_IMPORT && (
