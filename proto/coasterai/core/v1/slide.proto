@@ -78,6 +78,7 @@ message AnimationSlidePlan {
   int64 durationInFrames = 5;
   optional string voiceover = 6;
   optional string selectedTemplateDescription = 7;
+  optional string thinking_summary = 8;
 }
 
 message MediaSlidePlan {

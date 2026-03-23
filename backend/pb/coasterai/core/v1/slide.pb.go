@@ -481,6 +481,7 @@ type AnimationSlidePlan struct {
 	DurationInFrames            int64                  `protobuf:"varint,5,opt,name=durationInFrames,proto3" json:"durationInFrames,omitempty"`
 	Voiceover                   *string                `protobuf:"bytes,6,opt,name=voiceover,proto3,oneof" json:"voiceover,omitempty"`
 	SelectedTemplateDescription *string                `protobuf:"bytes,7,opt,name=selectedTemplateDescription,proto3,oneof" json:"selectedTemplateDescription,omitempty"`
+	ThinkingSummary             *string                `protobuf:"bytes,8,opt,name=thinking_summary,json=thinkingSummary,proto3,oneof" json:"thinking_summary,omitempty"`
 	unknownFields               protoimpl.UnknownFields
 	sizeCache                   protoimpl.SizeCache
 }
@@ -560,6 +561,13 @@ func (x *AnimationSlidePlan) GetVoiceover() string {
 func (x *AnimationSlidePlan) GetSelectedTemplateDescription() string {
 	if x != nil && x.SelectedTemplateDescription != nil {
 		return *x.SelectedTemplateDescription
+	}
+	return ""
+}
+
+func (x *AnimationSlidePlan) GetThinkingSummary() string {
+	if x != nil && x.ThinkingSummary != nil {
+		return *x.ThinkingSummary
 	}
 	return ""
 }
@@ -2016,7 +2024,7 @@ var File_coasterai_core_v1_slide_proto protoreflect.FileDescriptor
 
 const file_coasterai_core_v1_slide_proto_rawDesc = "" +
 	"\n" +
-	"\x1dcoasterai/core/v1/slide.proto\x12\x11coasterai.core.v1\x1a\x1cgoogle/protobuf/struct.proto\"\xf0\x02\n" +
+	"\x1dcoasterai/core/v1/slide.proto\x12\x11coasterai.core.v1\x1a\x1cgoogle/protobuf/struct.proto\"\xb5\x03\n" +
 	"\x12AnimationSlidePlan\x12\x14\n" +
 	"\x05index\x18\x01 \x01(\x03R\x05index\x12(\n" +
 	"\x0fbeatDescription\x18\x02 \x01(\tR\x0fbeatDescription\x12$\n" +
@@ -2024,10 +2032,12 @@ const file_coasterai_core_v1_slide_proto_rawDesc = "" +
 	"\x13categorySearcQquery\x18\x04 \x01(\tR\x13categorySearcQquery\x12*\n" +
 	"\x10durationInFrames\x18\x05 \x01(\x03R\x10durationInFrames\x12!\n" +
 	"\tvoiceover\x18\x06 \x01(\tH\x00R\tvoiceover\x88\x01\x01\x12E\n" +
-	"\x1bselectedTemplateDescription\x18\a \x01(\tH\x01R\x1bselectedTemplateDescription\x88\x01\x01B\f\n" +
+	"\x1bselectedTemplateDescription\x18\a \x01(\tH\x01R\x1bselectedTemplateDescription\x88\x01\x01\x12.\n" +
+	"\x10thinking_summary\x18\b \x01(\tH\x02R\x0fthinkingSummary\x88\x01\x01B\f\n" +
 	"\n" +
 	"_voiceoverB\x1e\n" +
-	"\x1c_selectedTemplateDescription\"\xe3\x01\n" +
+	"\x1c_selectedTemplateDescriptionB\x13\n" +
+	"\x11_thinking_summary\"\xe3\x01\n" +
 	"\x0eMediaSlidePlan\x12\x14\n" +
 	"\x05index\x18\x01 \x01(\x03R\x05index\x12(\n" +
 	"\x0fbeatDescription\x18\x02 \x01(\tR\x0fbeatDescription\x12*\n" +

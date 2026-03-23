@@ -175,7 +175,7 @@ func (registry *MediaAssetRegistry) FormatAssets() *string {
 		}
 
 		writeLine(1, "<attachment>")
-		writeLine(2, "<handle>%s</handle>", handle)
+		writeLine(2, "<url>%s</url>", handle)
 		writeLine(2, "<width>%d</width>", asset.Metadata.Width)
 		writeLine(2, "<height>%d</height>", asset.Metadata.Height)
 		writeLine(2, "<media_type>%s</media_type>", asset.MediaType.String())

@@ -86,6 +86,11 @@ export declare type VideoMetadata = Message<"coasterai.core.v1.VideoMetadata"> &
    * @generated from field: optional coasterai.core.v1.GeneratedVideoBranding generatedBranding = 9;
    */
   generatedBranding?: GeneratedVideoBranding;
+
+  /**
+   * @generated from field: optional string thinking_summary = 10;
+   */
+  thinkingSummary?: string;
 };
 
 /**

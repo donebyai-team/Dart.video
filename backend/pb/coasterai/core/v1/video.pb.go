@@ -297,6 +297,7 @@ type VideoMetadata struct {
 	Language           VideoLanguage           `protobuf:"varint,7,opt,name=language,proto3,enum=coasterai.core.v1.VideoLanguage" json:"language,omitempty"`
 	BackgroundAudioUrl *string                 `protobuf:"bytes,8,opt,name=background_audio_url,json=backgroundAudioUrl,proto3,oneof" json:"background_audio_url,omitempty"`
 	GeneratedBranding  *GeneratedVideoBranding `protobuf:"bytes,9,opt,name=generatedBranding,proto3,oneof" json:"generatedBranding,omitempty"`
+	ThinkingSummary    *string                 `protobuf:"bytes,10,opt,name=thinking_summary,json=thinkingSummary,proto3,oneof" json:"thinking_summary,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -385,6 +386,13 @@ func (x *VideoMetadata) GetGeneratedBranding() *GeneratedVideoBranding {
 		return x.GeneratedBranding
 	}
 	return nil
+}
+
+func (x *VideoMetadata) GetThinkingSummary() string {
+	if x != nil && x.ThinkingSummary != nil {
+		return *x.ThinkingSummary
+	}
+	return ""
 }
 
 type Video struct {
@@ -713,7 +721,7 @@ const file_coasterai_core_v1_video_proto_rawDesc = "" +
 	"\x0ebrandLibraryID\x18\x02 \x01(\tH\x00R\x0ebrandLibraryID\x88\x01\x01\x12K\n" +
 	"\rbrandIdentity\x18\x03 \x01(\v2 .coasterai.core.v1.BrandIdentityH\x01R\rbrandIdentity\x88\x01\x01B\x11\n" +
 	"\x0f_brandLibraryIDB\x10\n" +
-	"\x0e_brandIdentity\"\xff\x03\n" +
+	"\x0e_brandIdentity\"\xc4\x04\n" +
 	"\rVideoMetadata\x12\x10\n" +
 	"\x03fps\x18\x01 \x01(\x05R\x03fps\x12R\n" +
 	"\x10background_style\x18\x02 \x01(\v2\".coasterai.core.v1.BackgroundStyleH\x00R\x0fbackgroundStyle\x88\x01\x01\x12=\n" +
@@ -724,10 +732,13 @@ const file_coasterai_core_v1_video_proto_rawDesc = "" +
 	"\x06prompt\x18\x05 \x01(\tR\x06prompt\x12<\n" +
 	"\blanguage\x18\a \x01(\x0e2 .coasterai.core.v1.VideoLanguageR\blanguage\x125\n" +
 	"\x14background_audio_url\x18\b \x01(\tH\x01R\x12backgroundAudioUrl\x88\x01\x01\x12\\\n" +
-	"\x11generatedBranding\x18\t \x01(\v2).coasterai.core.v1.GeneratedVideoBrandingH\x02R\x11generatedBranding\x88\x01\x01B\x13\n" +
+	"\x11generatedBranding\x18\t \x01(\v2).coasterai.core.v1.GeneratedVideoBrandingH\x02R\x11generatedBranding\x88\x01\x01\x12.\n" +
+	"\x10thinking_summary\x18\n" +
+	" \x01(\tH\x03R\x0fthinkingSummary\x88\x01\x01B\x13\n" +
 	"\x11_background_styleB\x17\n" +
 	"\x15_background_audio_urlB\x14\n" +
-	"\x12_generatedBranding\"\xae\x02\n" +
+	"\x12_generatedBrandingB\x13\n" +
+	"\x11_thinking_summary\"\xae\x02\n" +
 	"\x05Video\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x126\n" +

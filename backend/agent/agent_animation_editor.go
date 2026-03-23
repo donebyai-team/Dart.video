@@ -108,6 +108,7 @@ func NewAgentAnimationEditor(
 			mediaStore,
 			codeBuilder,
 			logger,
+			nil,
 		),
 	}
 }

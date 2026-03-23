@@ -11,12 +11,13 @@ import (
 	"github.com/shank318/coasterai/cache"
 	"github.com/shank318/coasterai/datastore"
 	"github.com/shank318/coasterai/models"
-	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
 	"github.com/shank318/coasterai/services"
 	"github.com/shank318/coasterai/services/brand_identity"
+	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
 	"strings"
+	"time"
 )
 
 type agentV2 struct {
@@ -36,6 +37,102 @@ type agentV2 struct {
 	stateUpdates chan VideoAgentState
 }
 
+func (a *agentV2) getPlanningSession(ctx context.Context) (*planningSession, error) {
+	value, err := a.cache.GetKey(ctx, fmt.Sprintf("%s:%s", sessionKeyPrefix, a.sessionID))
+	if err != nil {
+		return nil, agenterrors.SessionUnavailable("failed to read planning session", err)
+	}
+
+	var session planningSession
+	if err := json.Unmarshal([]byte(value), &session); err != nil {
+		return nil, agenterrors.SessionUnavailable("invalid planning session payload", err)
+	}
+	return &session, nil
+}
+
+func (a *agentV2) setTags(ctx context.Context) context.Context {
+	return context.WithValue(ctx, "session_id", a.sessionID)
+}
+
+func (a *agentV2) Continue(ctx context.Context, options ContinueSessionOptions) (*RunResult, error) {
+	ctx = a.setTags(ctx)
+	userResponse := strings.TrimSpace(options.UserResponse)
+	if userResponse == "" {
+		return nil, agenterrors.InvalidInput("user response is required", nil)
+	}
+
+	session, err := a.getPlanningSession(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if session == nil {
+		return nil, agenterrors.InvalidInput("session is nil", nil)
+	}
+
+	generatePlanRequest := types.VideoGenerationPlanRequest{
+		Duration:       int64(session.RequestV2.Duration) * a.fps,
+		Prompt:         session.RequestV2.Prompt,
+		Language:       "English",
+		Resolution:     session.RequestV2.Resolution.Id,
+		BrandLibraryID: session.RequestV2.BrandLibraryId,
+	}
+
+	err = a.injectMediaAssets(ctx, session.RequestV2)
+	if err != nil {
+		return nil, err
+	}
+
+	// use brand guidelines only when specified
+	if a.assetRegistry != nil {
+		generatePlanRequest.VideoBranding = types.VideoBranding{
+			BrandGuideLines: a.assetRegistry.FormatBrandDetails(),
+			Attachments:     a.assetRegistry.FormatAssets(),
+		}
+	}
+
+	session.ConversationHistory = append(session.ConversationHistory, types.Message{
+		Tool_call_id: utils.Ptr(fmt.Sprintf("call_%d", time.Now().Unix())),
+		Role:         types.Union3KassistantOrKtoolOrKuser__NewKtool(),
+		Content:      userResponse,
+	})
+
+	session.Request = generatePlanRequest
+
+	if err := a.savePlanningSession(ctx, session); err != nil {
+		return nil, err
+	}
+
+	a.publishTransientState(VideoAgentState{
+		State:            stateStatusProcessing,
+		LastUserResponse: userResponse,
+	})
+
+	a.logger.Info("continuing agent session with user response", zap.String("response", userResponse))
+
+	return a.runPlanning(ctx, session)
+}
+
+func (a *agentV2) GetState(ctx context.Context) (*VideoAgentState, error) {
+	value, err := a.cache.GetKey(ctx, fmt.Sprintf("%s:%s", stateKeyPrefix, a.sessionID))
+	if err != nil {
+		if errors.Is(err, cache.ErrCacheMiss) {
+			return nil, nil
+		}
+		return nil, agenterrors.StateUnavailable("failed to read agent state", err)
+	}
+
+	var state VideoAgentState
+	if err := json.Unmarshal([]byte(value), &state); err != nil {
+		return nil, agenterrors.StateUnavailable("invalid agent state payload", err)
+	}
+	return &state, nil
+}
+
+func (a *agentV2) StopAgent(ctx context.Context, videoID string) error {
+	return nil
+}
+
 func NewAgentV2(
 	sessionID string,
 	orgID string,
@@ -48,7 +145,7 @@ func NewAgentV2(
 	brandIdentityService brand_identity.BrandIdentity,
 ) VideoAgent {
 	llmService := llm.NewLlmService(logger, cache)
-	return &agentV1{
+	return &agentV2{
 		fps:                  defaultFPS,
 		sessionID:            sessionID,
 		orgID:                orgID,
@@ -67,11 +164,13 @@ func NewAgentV2(
 			mediaStore,
 			codeBuilder,
 			logger,
+			llmService,
 		),
 	}
 }
 
 func (a *agentV2) Start(ctx context.Context, options StartSessionOptions) (*RunResult, error) {
+	ctx = a.setTags(ctx)
 	if options.Input == nil {
 		return nil, agenterrors.InvalidInput("input is required", nil)
 	}
@@ -111,19 +210,12 @@ func (a *agentV2) Start(ctx context.Context, options StartSessionOptions) (*RunR
 	}
 
 	generatePlanRequest := types.VideoGenerationPlanRequest{
-		Duration:       int64(options.Input.Duration),
+		Duration:       int64(options.Input.Duration) * a.fps,
 		Prompt:         options.Input.Prompt,
 		Language:       "English",
 		Resolution:     options.Input.Resolution.Id,
 		Script:         script,
 		BrandLibraryID: options.Input.BrandLibraryId,
-	}
-
-	if options.Input.StyleType == pbcore.StyleType_STYLE_TYPE_SIMPLE {
-		generatePlanRequest.AvailableAnimationTypes = []types.AnimationType{
-			types.AnimationTypeSIMPLE_TEXT,
-			types.AnimationTypeBRAND,
-		}
 	}
 
 	// use brand guidelines only when specified
@@ -135,6 +227,7 @@ func (a *agentV2) Start(ctx context.Context, options StartSessionOptions) (*RunR
 	}
 
 	session := &planningSession{
+		RequestV2:           options.Input,
 		Request:             generatePlanRequest,
 		ConversationHistory: make([]types.Message, 0),
 	}
@@ -268,7 +361,165 @@ func (a *agentV2) runPlanning(ctx context.Context, session *planningSession) (re
 		return nil, err
 	}
 
-	return result, err
+	// Planning is complete; execute applyPlan asynchronously so Create/Continue
+	// can return after the first slide is persisted while generation continues.
+	if ctx.Err() != nil {
+		return nil, ctx.Err()
+	}
+
+	// We wait for the first slide to be generated as its a part of the planning phase
+	// once first slide is generated, we let the applyPlan run async which can be cancelled via StopAgent
+	firstSlideReady := make(chan struct{}, 1)
+	applyPlanDone := make(chan error, 1)
+	applyPlanCtx, cancelBeforeFirstSlide := context.WithCancel(context.Background())
+
+	go func() {
+		defer cancelBeforeFirstSlide()
+		if err := a.applyPlan(applyPlanCtx, plan, firstSlideReady); err != nil {
+			a.logger.Error("applyPlan async run failed", zap.Error(err))
+			applyPlanDone <- err
+			return
+		}
+		applyPlanDone <- nil
+	}()
+
+	select {
+	case <-firstSlideReady:
+		return &RunResult{Status: RunStatusCompleted}, nil
+	case err := <-applyPlanDone:
+		if err != nil {
+			return nil, err
+		}
+		return &RunResult{Status: RunStatusCompleted}, nil
+	case <-ctx.Done():
+		// If first slide is not ready yet, treat this as planning cancellation and
+		// stop applyPlan. If first slide is already ready, allow applyPlan to continue.
+		select {
+		case <-firstSlideReady:
+			return &RunResult{Status: RunStatusCompleted}, nil
+		default:
+			cancelBeforeFirstSlide()
+		}
+		return nil, ctx.Err()
+	}
+}
+
+// aiPlan is sanitized to duration in frames
+// apply should always work on frames
+func (a *agentV2) applyPlan(
+	ctx context.Context,
+	aiPlan *types.VideoPlanV2,
+	firstSlideReady chan<- struct{},
+) (err error) {
+
+	// inject dependencies for generator
+	optionsBuilder := NewAnimationGenerationOptionsBuilder()
+	if a.assetRegistry != nil {
+		optionsBuilder.WithAssetRegistry(a.assetRegistry)
+	}
+	a.animationGenerator.ApplyGenerationOptions(optionsBuilder.Build())
+
+	// save config with pending items
+	builder := NewVideoConfigGenerator(a.logger, a.videoService).
+		Init(a.sessionID, aiPlan.VideoName)
+	pendingVideo, sceneMapper, err := builder.CreatePendingSlidesV2(ctx, a.assetRegistry, aiPlan)
+	if err != nil {
+		return fmt.Errorf("creating pending slides: %w", err)
+	}
+
+	plan := pendingVideo.Config
+	a.updateState(ctx, VideoAgentState{
+		Thinking: generating,
+		State:    stateStatusProcessing,
+	})
+
+	defer func() {
+		if err != nil {
+			failStatus := models.VideoStatusFAILED
+			failCtx := ctx
+
+			// Treat both a hard context cancel (runCtx cancelled by the handler) and a
+			// soft Redis cancel (written by StopAgent) as user-initiated cancellations.
+			isUserCancel := ctx.Err() != nil || errors.Is(err, errUserSoftCancelled)
+			if isUserCancel {
+				failStatus = models.VideoStatusUSERCANCELLED
+				// The original ctx may already be done; use a fresh one for the DB write.
+				var cancelFn context.CancelFunc
+				failCtx, cancelFn = context.WithTimeout(context.Background(), 5*time.Second)
+				defer cancelFn()
+			}
+
+			a.logger.Info("applyPlan: marking video terminal",
+				zap.String("fail_status", string(failStatus)),
+				zap.Bool("user_cancel", isUserCancel),
+				zap.Error(err),
+			)
+
+			if failErr := builder.Fail(failCtx, err, failStatus); failErr != nil {
+				a.logger.Error("failed to mark video as failed/cancelled",
+					zap.Error(failErr),
+				)
+			}
+		}
+	}()
+
+	firstSlidePersisted := false
+	// markReadyOnce transitions the state to READY_FOR_EDITOR on the first persisted slide.
+	// totalSlides is carried forward so the UI progress bar keeps its denominator.
+	markReadyOnce := func() {
+		if firstSlidePersisted {
+			return
+		}
+		firstSlidePersisted = true
+		if firstSlideReady != nil {
+			select {
+			case firstSlideReady <- struct{}{}:
+			default:
+			}
+		}
+	}
+
+	for _, section := range plan.Sections {
+
+		for _, slide := range section.Slides {
+			// ---- Cancellation check (runs before every slide) ----
+			//
+			// Hard cancel: runCtx was cancelled (e.g. client disconnected during planning).
+			if ctx.Err() != nil {
+				a.logger.Info("applyPlan: context cancelled, stopping slide generation")
+				return ctx.Err()
+			}
+			// Soft cancel: StopAgent wrote stateStatusCancelled to Redis.
+			// This is the path taken when the client disconnects from the editor
+			// (GetVideo stream ends) — we do not cancel runCtx in that case so
+			// we rely on this Redis-based signal instead.
+			if currentState, stateErr := a.GetState(ctx); stateErr == nil &&
+				currentState != nil && currentState.State == stateStatusCancelled {
+				a.logger.Info("applyPlan: soft-cancel signal detected in Redis, stopping slide generation")
+				return errUserSoftCancelled
+			}
+
+			scene := sceneMapper[slide.Id]
+
+			template, err := a.animationGenerator.GenerateCodeV2(ctx, scene, func(progress TemplateGenerationProgress) {
+				a.updateState(ctx, VideoAgentState{
+					Thinking: progress.Message,
+					State:    stateStatusProcessing,
+				})
+			})
+			if err != nil {
+				return err
+			}
+
+			if err = builder.UpdateAnimationSlide(ctx, slide.Id, template); err != nil {
+				return agenterrors.VideoPersistFailed("failed to persist animation slide", err)
+			}
+
+			markReadyOnce()
+		}
+	}
+
+	return builder.Done(ctx)
 }
 
 func (a *agentV2) updateState(ctx context.Context, state VideoAgentState) error {

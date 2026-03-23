@@ -104,6 +104,7 @@ func NewAgentV1(
 			mediaStore,
 			codeBuilder,
 			logger,
+			nil,
 		),
 	}
 }
@@ -136,7 +137,61 @@ type VideoAgentState struct {
 
 type planningSession struct {
 	Request             types.VideoGenerationPlanRequest `json:"request"`
+	RequestV2           *pbportal.CreateVideoRequest     `json:"requestv2"`
 	ConversationHistory []types.Message                  `json:"conversation_history"`
+}
+
+func (p *planningSession) MarshalJSON() ([]byte, error) {
+
+	var reqBytes []byte
+	var err error
+
+	if p.RequestV2 != nil {
+		reqBytes, err = utils.MarshalProto(p.RequestV2)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	tmp := struct {
+		Request             types.VideoGenerationPlanRequest `json:"request"`
+		RequestV2           []byte                           `json:"requestv2,omitempty"`
+		ConversationHistory []types.Message                  `json:"conversation_history"`
+	}{
+		Request:             p.Request,
+		RequestV2:           reqBytes,
+		ConversationHistory: p.ConversationHistory,
+	}
+
+	return json.Marshal(tmp)
+}
+
+func (p *planningSession) UnmarshalJSON(data []byte) error {
+
+	tmp := struct {
+		Request             types.VideoGenerationPlanRequest `json:"request"`
+		RequestV2           []byte                           `json:"requestv2"`
+		ConversationHistory []types.Message                  `json:"conversation_history"`
+	}{}
+
+	if err := json.Unmarshal(data, &tmp); err != nil {
+		return err
+	}
+
+	p.Request = tmp.Request
+	p.ConversationHistory = tmp.ConversationHistory
+
+	if len(tmp.RequestV2) > 0 {
+		req := &pbportal.CreateVideoRequest{}
+
+		if err := utils.UnmarshalProto(tmp.RequestV2, req); err != nil {
+			return err
+		}
+
+		p.RequestV2 = req
+	}
+
+	return nil
 }
 
 func (a *agentV1) Start(ctx context.Context, options StartSessionOptions) (*RunResult, error) {

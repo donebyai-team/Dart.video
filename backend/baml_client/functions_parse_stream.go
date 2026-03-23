@@ -307,6 +307,53 @@ func (*parse_stream) GenerateAnimationPrompt(text string, opts ...CallOptionFunc
 	return casted, nil
 }
 
+// / Parse version of GenerateAnimationV2 (Takes in string and returns stream_types.GenerateAnimationCodeResponseV2)
+func (*parse_stream) GenerateAnimationV2(text string, opts ...CallOptionFunc) (stream_types.GenerateAnimationCodeResponseV2, error) {
+
+	var callOpts callOption
+	for _, opt := range opts {
+		opt(&callOpts)
+	}
+
+	args := baml.BamlFunctionArguments{
+		Kwargs: map[string]any{"text": text, "stream": true},
+		Env:    getEnvVars(callOpts.env),
+	}
+
+	if callOpts.clientRegistry != nil {
+		args.ClientRegistry = callOpts.clientRegistry
+	}
+
+	if callOpts.collectors != nil {
+		args.Collectors = callOpts.collectors
+	}
+
+	if callOpts.typeBuilder != nil {
+		args.TypeBuilder = callOpts.typeBuilder
+	}
+
+	if callOpts.tags != nil {
+		args.Tags = callOpts.tags
+	}
+
+	encoded, err := args.Encode()
+	if err != nil {
+		// This should never happen. if it does, please file an issue at https://github.com/boundaryml/baml/issues
+		// and include the type of the args you're passing in.
+		wrapped_err := fmt.Errorf("BAML INTERNAL ERROR: GenerateAnimationV2: %w", err)
+		panic(wrapped_err)
+	}
+
+	result, err := bamlRuntime.CallFunctionParse(context.Background(), "GenerateAnimationV2", encoded)
+	if err != nil {
+		return stream_types.GenerateAnimationCodeResponseV2{}, err
+	}
+
+	casted := (result).(stream_types.GenerateAnimationCodeResponseV2)
+
+	return casted, nil
+}
+
 // / Parse version of GeneratePlanStreaming (Takes in string and returns stream_types.StreamingVideoGenerationPlan)
 func (*parse_stream) GeneratePlanStreaming(text string, opts ...CallOptionFunc) (stream_types.StreamingVideoGenerationPlan, error) {
 

@@ -8,7 +8,112 @@
 ## Available CANVAS size:
 1920px × 1080px (web)
 
-## LAYOUT
+## Entrances
+
+### FadeIn
+fades an element in from transparent to fully visible
+Props:
+- startAt: number (optional)
+- durationInFrames: number (optional)
+
+### SlideIn
+slides an element in from outside the canvas edge
+Props:
+- startAt: number (optional)
+- durationInFrames: number (optional)
+- direction: enum(up|down|left|right) (optional)
+- distance: number (optional)
+
+### ScaleIn
+scales an element up from small to full size
+Props:
+- startAt: number (optional)
+- durationInFrames: number (optional)
+- origin: enum(center|top|bottom|left|right) (optional)
+
+
+## Exits
+
+### FadeOut
+fades an element out from visible to transparent
+Props:
+- startAt: number (optional)
+- durationInFrames: number (optional)
+
+### SlideOut
+slides an element out toward the canvas edge
+Props:
+- startAt: number (optional)
+- durationInFrames: number (optional)
+- direction: enum(up|down|left|right) (optional)
+- distance: number (optional)
+
+### ScaleOut
+scales an element down from full size to nothing
+Props:
+- startAt: number (optional)
+- durationInFrames: number (optional)
+- origin: enum(center|top|bottom|left|right) (optional)
+
+
+## Sequencing
+
+### Stagger
+reveals children one after another with a delay between each — children must be animation primitives
+Props:
+- startAt: number (optional)
+- staggerDelay: number (optional)
+
+### TimelineGate
+shows its child only within a defined time window — use instead of JSX conditionals
+Props:
+- showAfter: number (required)
+- hideAfter: number (optional)
+
+
+## Text
+
+### Text
+Static text element, wrap in FadeIn/SlideIn to animate
+Props:
+- variant: enum(caption|label|body|subheading|heading|display) (optional)
+
+### Typewriter
+Progressively reveals text character by character, word, or line
+Props:
+- startAt: number (optional)
+- durationInFrames: number (optional)
+- text: string (required)
+- mode: enum(char|word|line) (optional)
+- variant: enum(caption|label|body|subheading|heading|display) (optional)
+
+### WordCycle
+Cycles through an array of words with animated transitions
+Props:
+- startAt: number (optional)
+- words: array (required)
+- holdDuration: number (optional)
+- transitionDuration: number (optional)
+- transition: enum(flipY|fadeSwap|slideUp) (optional)
+- variant: enum(caption|label|body|subheading|heading|display) (optional)
+
+
+## Numbers
+
+### Counter
+Animated number counter that tweens between values
+Props:
+- startAt: number (optional)
+- durationInFrames: number (optional)
+- from: number (optional)
+- to: number (required)
+- format: string (optional)
+- prefix: string (optional)
+- suffix: string (optional)
+- variant: enum(caption|label|body|subheading|heading|display) (optional)
+
+
+## Layout
 
 ### SafeArea
 Outermost content wrapper that applies safe area insets from the active aspect preset
@@ -34,106 +139,10 @@ Props:
 - axis: enum(x|y|both) (optional)
 
 
-## ANIMATION PRIMITIVES
-
-### FadeIn
-Fade-in entrance animation (opacity 0 to 1)
-Props:
-- startAt: number (optional)
-- durationInFrames: number (optional)
-
-### FadeOut
-Fade-out exit animation (opacity 1 to 0)
-Props:
-- startAt: number (optional)
-- durationInFrames: number (optional)
-
-### SlideIn
-Slide-in entrance with translation and fade
-Props:
-- startAt: number (optional)
-- durationInFrames: number (optional)
-- direction: enum(up|down|left|right) (optional)
-- distance: number (optional)
-
-### SlideOut
-Slide-out exit with translation and fade
-Props:
-- startAt: number (optional)
-- durationInFrames: number (optional)
-- direction: enum(up|down|left|right) (optional)
-- distance: number (optional)
-
-### ScaleIn
-Scale-in entrance animation (scale 0 to 1)
-Props:
-- startAt: number (optional)
-- durationInFrames: number (optional)
-- origin: enum(center|top|bottom|left|right) (optional)
-
-### ScaleOut
-Scale-out exit animation (scale 1 to 0)
-Props:
-- startAt: number (optional)
-- durationInFrames: number (optional)
-- origin: enum(center|top|bottom|left|right) (optional)
-
-### Stagger
-Staggers children animations with increasing delay offsets
-Props:
-- startAt: number (optional)
-- staggerDelay: number (optional)
-
-### TimelineGate
-Mounts/unmounts children within a frame window, use instead of JSX conditionals
-Props:
-- showAfter: number (required)
-- hideAfter: number (optional)
-
-
-## CONTENT
-
-### Text
-Static text element, wrap in FadeIn/SlideIn to animate
-Props:
-- variant: enum(caption|label|body|subheading|heading|display) (optional)
-
-### Counter
-Animated number counter that tweens between values
-Props:
-- startAt: number (optional)
-- durationInFrames: number (optional)
-- from: number (optional)
-- to: number (required)
-- format: string (optional)
-- prefix: string (optional)
-- suffix: string (optional)
-- variant: enum(caption|label|body|subheading|heading|display) (optional)
-
-### Typewriter
-Progressively reveals text character by character, word, or line
-Props:
-- startAt: number (optional)
-- durationInFrames: number (optional)
-- text: string (required)
-- mode: enum(char|word|line) (optional)
-- variant: enum(caption|label|body|subheading|heading|display) (optional)
-
-### WordCycle
-Cycles through an array of words with animated transitions
-Props:
-- startAt: number (optional)
-- words: array (required)
-- holdDuration: number (optional)
-- transitionDuration: number (optional)
-- transition: enum(flipY|fadeSwap|slideUp) (optional)
-- variant: enum(caption|label|body|subheading|heading|display) (optional)
-
-
-## SCENES
+## Scene components (stand alone — no siblings, no mixing with other scene components)
 
 ### TitleCard
-Pre-built hero title card composition with heading, subheading, and eyebrow
+pre-built hero title with heading, subheading, and optional eyebrow
 Props:
 - heading: string (required)
 - subheading: string (optional)
@@ -141,31 +150,31 @@ Props:
 - startAt: number (optional)
 
 
-## BRAND
+## Brand Assets
 
 ### LogoAsset
-Brand logo from ThemeProvider. Falls back to a placeholder if no logo is configured. Wrap in any animation primitive (FadeIn, SlideIn, ScaleIn etc.) to animate. the logo always keeps its aspect ratio.
+renders the brand logo from the active theme — use for brand presence in title and outro scenes
 Props:
 - src: string (optional)
 - width: number (optional)
 - height: number (optional)
 
 ### ImageAsset
-Generic image primitive for uploaded or remote media.
+renders a static image from a URL — use for product screens, photos, and illustrations
 Props:
 - src: string (optional)
 - width: number (optional)
 - height: number (optional)
 
 ### VideoAsset
-Generic video primitive for uploaded media. Width and height define the rendered box; the video always preserves aspect ratio and stays fully visible.
+renders a static video file from a url — use for product tutorials, and explainer content
 Props:
 - src: string (optional)
 - width: number (optional)
 - height: number (optional)
 
 ### IconAsset
-Icon asset from the icon library.
+renders a single icon by name from the icon library — use for decorative or supportive visual cues
 Props:
 - name: string (required)
 - size: number (optional)
@@ -178,15 +187,6 @@ Props:
 
 ## TYPOGRAPHY variants:
 caption | label | body | subheading | heading | display — never hardcode font sizes
-
-## TIMING GUIDANCE (fps=30, so 30 frames = 1 second):
-
-- Typical entrance: 15-25 frames
-- Typical exit: 10-15 frames
-- Stagger between items: 6-10 frames
-- Counter animation: 30-60 frames
-- Typewriter per character: 2-3 frames (set duration = text.length * 2)
-- Hold before next section: 10-20 frames
 
 ## EXAMPLES
 

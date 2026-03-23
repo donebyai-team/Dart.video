@@ -188,7 +188,11 @@ func (t *ThinkingExtractor) HandleTick(
 			close(t.stopCh)
 
 			if t.onThinking != nil {
-				t.onThinking(fmt.Sprintf("Thought for %.2fs...", t.duration))
+				if t.duration < 60 {
+					t.onThinking(fmt.Sprintf("Thought for %.2fs...", t.duration))
+				} else {
+					t.onThinking(fmt.Sprintf("Thought for %.2fm...", t.duration/60))
+				}
 			}
 		}
 	}

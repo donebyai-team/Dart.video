@@ -15,27 +15,8 @@ import {
 } from './fragments';
 
 
-const VISUAL_MECHANISM_SUMMARIES: Record<string, string> = {
-  FadeIn: 'reveal elements onto the canvas',
-  SlideIn: 'reveal elements onto the canvas',
-  ScaleIn: 'reveal elements onto the canvas',
-  FadeOut: 'remove elements from the canvas',
-  SlideOut: 'remove elements from the canvas',
-  ScaleOut: 'remove elements from the canvas',
-  Stagger: 'reveal a list of items one after another',
-  TimelineGate: 'show or hide a section at a specific moment',
-  Text: 'static label or heading',
-  Typewriter: 'text that types itself out progressively',
-  WordCycle: 'a word that cycles through multiple values',
-  Counter: 'a number that animates up or down to a target value',
-  Stack: 'vertical arrangement',
-  Row: 'horizontal arrangement',
-  AbsoluteCenter: 'center content on the canvas',
-  LogoAsset: 'the brand logo',
-};
-
 function formatMechanismLine(component: ComponentRegistration): string {
-  return `${component.name} — ${VISUAL_MECHANISM_SUMMARIES[component.name] ?? component.description}`;
+  return `${component.name} — ${component.description}`;
 }
 
 function formatMechanismSection(title: string, components: ComponentRegistration[]): string | null {
@@ -49,7 +30,7 @@ function formatMechanismSection(title: string, components: ComponentRegistration
 
 function getOnlyComponentsDescriptionPrompt(): string {
   const sections = [
-    '## AVAILABLE COMPONENTS',
+    '## AVAILABLE VISUAL MECHANISMS',
     '',
     "Use only these when designing your concept. Do not invent mechanisms that don't exist.",
     formatMechanismSection(
@@ -76,7 +57,7 @@ function getOnlyComponentsDescriptionPrompt(): string {
     ),
     formatMechanismSection('Layout', LAYOUT_COMPONENTS),
     formatMechanismSection('Brand Assets', BRAND_COMPONENTS),
-    formatMechanismSection('Scenes', SCENE_COMPONENTS),
+    formatMechanismSection('Scene components (stand alone — no siblings, no mixing with other scene components)', SCENE_COMPONENTS),
   ].filter((section): section is string => Boolean(section));
 
   return sections.join('\n\n');
@@ -96,11 +77,20 @@ export function getAnimationPrompt(
   const sections = [
     frameContractFragment(),
     canvasDimensionsFragment(ASPECT_PRESETS['web']),
-    componentListFragment('LAYOUT', LAYOUT_COMPONENTS),
-    componentListFragment('ANIMATION PRIMITIVES', ANIMATION_PRIMITIVE_COMPONENTS),
-    componentListFragment('CONTENT', CONTENT_COMPONENTS),
-    componentListFragment('SCENES', SCENE_COMPONENTS),
-    componentListFragment('BRAND', BRAND_COMPONENTS),
+    componentListFragment('Entrances',
+      ANIMATION_PRIMITIVE_COMPONENTS.filter((component) => component.name.endsWith('In'))),
+    componentListFragment('Exits',
+      ANIMATION_PRIMITIVE_COMPONENTS.filter((component) => component.name.endsWith('Out'))),
+    componentListFragment('Sequencing',
+      ANIMATION_PRIMITIVE_COMPONENTS.filter((component) =>
+        !component.name.endsWith('In') && !component.name.endsWith('Out')
+      )),
+
+    componentListFragment('Text', CONTENT_COMPONENTS.filter((component) => component.name !== 'Counter')),
+    componentListFragment('Numbers', CONTENT_COMPONENTS.filter((component) => component.name === 'Counter')),
+    componentListFragment('Layout', LAYOUT_COMPONENTS),
+    componentListFragment('Scene components (stand alone — no siblings, no mixing with other scene components)', SCENE_COMPONENTS),
+    componentListFragment('Brand Assets', BRAND_COMPONENTS),
     spacingFragment(),
     typographyFragment(),
     // brandTokensFragment(brand),

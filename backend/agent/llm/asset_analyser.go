@@ -3,10 +3,12 @@ package llm
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/shank318/coasterai/agent/agenterrors"
 	"github.com/shank318/coasterai/baml_client"
 	"github.com/shank318/coasterai/baml_client/types"
+	"github.com/shank318/coasterai/cache"
 	"github.com/shank318/coasterai/models"
 	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
@@ -24,7 +26,9 @@ func (l *llmService) AnalyzeImage(ctx context.Context, asset *models.MediaAsset)
 	cacheKey := assetCacheKey(asset.ID)
 	analysedAsset, err := l.cache.GetKey(ctx, cacheKey)
 	if err != nil {
-		l.logger.Error("cache get failed for key", zap.String("key", cacheKey), zap.Error(err))
+		if !errors.Is(err, cache.ErrCacheMiss) {
+			l.logger.Error("cache get failed for key", zap.String("key", cacheKey), zap.Error(err))
+		}
 	}
 
 	if analysedAsset != "" {
@@ -43,7 +47,7 @@ func (l *llmService) AnalyzeImage(ctx context.Context, asset *models.MediaAsset)
 	}
 
 	// Call the BAML function
-	result, err := baml_client.AnalyzeImage(ctx, img)
+	result, err := baml_client.AnalyzeImage(ctx, img, baml_client.WithTags(getTags(ctx)))
 	if err != nil {
 		return nil, agenterrors.AssetAnalysisFailed("failed to analyze asset image", err)
 	}

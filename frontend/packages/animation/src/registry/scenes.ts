@@ -14,6 +14,6 @@ export const SCENE_COMPONENTS: ComponentRegistration[] = [
     type: 'scene',
     fullSchema: TitleCardSchema,
     editorProps: ['heading', 'subheading', 'eyebrow', 'delay'],
-    description: 'Pre-built hero title card composition with heading, subheading, and eyebrow',
+    description: 'pre-built hero title with heading, subheading, and optional eyebrow',
   },
 ];

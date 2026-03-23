@@ -53,6 +53,11 @@ export declare type AnimationSlidePlan = Message<"coasterai.core.v1.AnimationSli
    * @generated from field: optional string selectedTemplateDescription = 7;
    */
   selectedTemplateDescription?: string;
+
+  /**
+   * @generated from field: optional string thinking_summary = 8;
+   */
+  thinkingSummary?: string;
 };
 
 /**

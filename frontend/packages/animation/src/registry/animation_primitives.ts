@@ -93,13 +93,15 @@ export const TimelineGateSchema = z.object({
   children: z.any().optional(),
 });
 
+
+
 export const ANIMATION_PRIMITIVE_COMPONENTS: ComponentRegistration[] = [
   {
     name: 'FadeIn',
     type: 'animation',
     fullSchema: FadeInSchema,
     editorProps: ['startAt', 'durationInFrames'],
-    description: 'Fade-in entrance animation (opacity 0 to 1)',
+    description: 'fades an element in from transparent to fully visible',
     durationContract: { kind: 'fixed' },
   },
   {
@@ -107,7 +109,7 @@ export const ANIMATION_PRIMITIVE_COMPONENTS: ComponentRegistration[] = [
     type: 'animation',
     fullSchema: FadeOutSchema,
     editorProps: ['startAt', 'durationInFrames'],
-    description: 'Fade-out exit animation (opacity 1 to 0)',
+    description: 'fades an element out from visible to transparent',
     durationContract: { kind: 'fixed' },
   },
   {
@@ -115,7 +117,7 @@ export const ANIMATION_PRIMITIVE_COMPONENTS: ComponentRegistration[] = [
     type: 'animation',
     fullSchema: SlideInSchema,
     editorProps: ['startAt', 'durationInFrames', 'direction', 'distance'],
-    description: 'Slide-in entrance with translation and fade',
+    description: 'slides an element in from outside the canvas edge',
     durationContract: { kind: 'fixed' },
   },
   {
@@ -123,7 +125,7 @@ export const ANIMATION_PRIMITIVE_COMPONENTS: ComponentRegistration[] = [
     type: 'animation',
     fullSchema: SlideOutSchema,
     editorProps: ['startAt', 'durationInFrames', 'direction', 'distance'],
-    description: 'Slide-out exit with translation and fade',
+    description: 'slides an element out toward the canvas edge',
     durationContract: { kind: 'fixed' },
   },
   {
@@ -131,7 +133,7 @@ export const ANIMATION_PRIMITIVE_COMPONENTS: ComponentRegistration[] = [
     type: 'animation',
     fullSchema: ScaleInSchema,
     editorProps: ['startAt', 'durationInFrames', 'origin'],
-    description: 'Scale-in entrance animation (scale 0 to 1)',
+    description: 'scales an element up from small to full size',
     durationContract: { kind: 'fixed' },
   },
   {
@@ -139,7 +141,7 @@ export const ANIMATION_PRIMITIVE_COMPONENTS: ComponentRegistration[] = [
     type: 'animation',
     fullSchema: ScaleOutSchema,
     editorProps: ['startAt', 'durationInFrames', 'origin'],
-    description: 'Scale-out exit animation (scale 1 to 0)',
+    description: 'scales an element down from full size to nothing',
     durationContract: { kind: 'fixed' },
   },
   {
@@ -147,7 +149,7 @@ export const ANIMATION_PRIMITIVE_COMPONENTS: ComponentRegistration[] = [
     type: 'animation',
     fullSchema: StaggerSchema,
     editorProps: ['startAt', 'staggerDelay'],
-    description: 'Staggers children animations with increasing delay offsets',
+    description: 'reveals children one after another with a delay between each — children must be animation primitives',
     durationContract: { kind: 'manual' },
   },
   {
@@ -155,6 +157,6 @@ export const ANIMATION_PRIMITIVE_COMPONENTS: ComponentRegistration[] = [
     type: 'animation',
     fullSchema: TimelineGateSchema,
     editorProps: ['showAfter', 'hideAfter'],
-    description: 'Mounts/unmounts children within a frame window, use instead of JSX conditionals',
+    description: 'shows its child only within a defined time window — use instead of JSX conditionals',
   },
 ];

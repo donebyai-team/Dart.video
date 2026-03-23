@@ -503,6 +503,38 @@ func (t *GenerateAnimationCodeRequestClassView) Type() (baml.Type, error) {
 	return t.inner.Type()
 }
 
+type GenerateAnimationCodeRequestV2ClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *GenerateAnimationCodeRequestV2ClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *GenerateAnimationCodeRequestV2ClassView) PropertyScene() (ClassPropertyView, error) {
+	return t.inner.Property("scene")
+}
+
+func (t *TypeBuilder) GenerateAnimationCodeRequestV2() (*GenerateAnimationCodeRequestV2ClassView, error) {
+	bld, err := t.inner.Class("GenerateAnimationCodeRequestV2")
+	if err != nil {
+		return nil, err
+	}
+	return &GenerateAnimationCodeRequestV2ClassView{inner: bld}, nil
+}
+
+func (t *GenerateAnimationCodeRequestV2ClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
 type GenerateAnimationCodeResponseClassView struct {
 	inner baml.ClassBuilder
 }
@@ -532,6 +564,46 @@ func (t *TypeBuilder) GenerateAnimationCodeResponse() (*GenerateAnimationCodeRes
 }
 
 func (t *GenerateAnimationCodeResponseClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
+type GenerateAnimationCodeResponseV2ClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *GenerateAnimationCodeResponseV2ClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *GenerateAnimationCodeResponseV2ClassView) PropertyCode() (ClassPropertyView, error) {
+	return t.inner.Property("code")
+}
+
+func (t *GenerateAnimationCodeResponseV2ClassView) PropertySettledFrame() (ClassPropertyView, error) {
+	return t.inner.Property("settledFrame")
+}
+
+func (t *GenerateAnimationCodeResponseV2ClassView) PropertyThinkingSummary() (ClassPropertyView, error) {
+	return t.inner.Property("thinkingSummary")
+}
+
+func (t *TypeBuilder) GenerateAnimationCodeResponseV2() (*GenerateAnimationCodeResponseV2ClassView, error) {
+	bld, err := t.inner.Class("GenerateAnimationCodeResponseV2")
+	if err != nil {
+		return nil, err
+	}
+	return &GenerateAnimationCodeResponseV2ClassView{inner: bld}, nil
+}
+
+func (t *GenerateAnimationCodeResponseV2ClassView) Type() (baml.Type, error) {
 	return t.inner.Type()
 }
 
@@ -955,8 +1027,8 @@ func (t *SceneClassView) PropertyFrameBudget() (ClassPropertyView, error) {
 	return t.inner.Property("frameBudget")
 }
 
-func (t *SceneClassView) PropertyDataPoint() (ClassPropertyView, error) {
-	return t.inner.Property("dataPoint")
+func (t *SceneClassView) PropertyDataPoints() (ClassPropertyView, error) {
+	return t.inner.Property("dataPoints")
 }
 
 func (t *TypeBuilder) Scene() (*SceneClassView, error) {
@@ -1004,6 +1076,42 @@ func (t *TypeBuilder) SceneElement() (*SceneElementClassView, error) {
 }
 
 func (t *SceneElementClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
+type SceneSectionClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *SceneSectionClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *SceneSectionClassView) PropertyName() (ClassPropertyView, error) {
+	return t.inner.Property("name")
+}
+
+func (t *SceneSectionClassView) PropertySlides() (ClassPropertyView, error) {
+	return t.inner.Property("slides")
+}
+
+func (t *TypeBuilder) SceneSection() (*SceneSectionClassView, error) {
+	bld, err := t.inner.Class("SceneSection")
+	if err != nil {
+		return nil, err
+	}
+	return &SceneSectionClassView{inner: bld}, nil
+}
+
+func (t *SceneSectionClassView) Type() (baml.Type, error) {
 	return t.inner.Type()
 }
 
@@ -1415,8 +1523,8 @@ func (t *VideoPlanV2ClassView) PropertyVideoName() (ClassPropertyView, error) {
 	return t.inner.Property("videoName")
 }
 
-func (t *VideoPlanV2ClassView) PropertyScenes() (ClassPropertyView, error) {
-	return t.inner.Property("scenes")
+func (t *VideoPlanV2ClassView) PropertySections() (ClassPropertyView, error) {
+	return t.inner.Property("sections")
 }
 
 func (t *VideoPlanV2ClassView) PropertySegments() (ClassPropertyView, error) {

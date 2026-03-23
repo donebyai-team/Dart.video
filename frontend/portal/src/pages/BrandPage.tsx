@@ -488,13 +488,18 @@ const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onLogoUpload,
                                             style={{ backgroundColor: color.colorHexCode }}
                                             onClick={() => document.getElementById(`color-${index}`)?.click()}
                                         />
-                                        <input
-                                            id={`color-${index}`}
-                                            type="color"
-                                            value={color.colorHexCode}
-                                            onChange={(e) => updateColor(index, e.target.value)}
-                                            className="sr-only"
-                                        />
+                                        <div className="flex flex-col items-center gap-1">
+                                            <input
+                                                id={`color-${index}`}
+                                                type="color"
+                                                value={color.colorHexCode}
+                                                onChange={(e) => updateColor(index, e.target.value)}
+                                                className="sr-only"
+                                            />
+                                            <span className="text-xs text-muted-foreground">
+                                                {BrandAssetPriority[color.priority]}
+                                            </span>
+                                        </div>
                                         <Input
                                             value={color.colorHexCode}
                                             onChange={(e) => updateColor(index, e.target.value)}

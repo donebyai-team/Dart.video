@@ -7,12 +7,14 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/shank318/coasterai/agent/agenterrors"
+	"github.com/shank318/coasterai/agent/llm"
 	"github.com/shank318/coasterai/baml_client"
 	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/services"
 	"go.uber.org/zap"
+	"math"
 	"strings"
 )
 
@@ -102,6 +104,10 @@ type AnimationGenerator interface {
 		prompt string,
 		callback TemplateGenerationCallback,
 	) (*models.Template, error)
+	GenerateCodeV2(ctx context.Context,
+		scene *types.Scene,
+		callback TemplateGenerationCallback,
+	) (*models.Template, error)
 	ApplyGenerationOptions(options AnimationGenerationOptions)
 }
 
@@ -112,14 +118,124 @@ type animationGenerator struct {
 	mediaStore        services.MediaStore
 	codeBuilder       services.TemplateCodeBuilder
 	generationOptions AnimationGenerationOptions
+	llmService        llm.LLMService
 	logger            *zap.Logger
+}
+
+func (l *animationGenerator) GenerateCodeV2(ctx context.Context, scene *types.Scene, callback TemplateGenerationCallback) (*models.Template, error) {
+	inptCodeGeneration := types.GenerateAnimationCodeRequestV2{
+		Scene: *scene,
+	}
+
+	conversationHistory := make([]types.Message, 0)
+	for attempt := 0; attempt < maxAttempts; attempt++ {
+
+		// 🎨 Designing
+		callback(TemplateGenerationProgress{
+			Message: CreativeStageMessage(StageDesigning, attempt),
+		})
+
+		l.logger.Info("generating code")
+		generatedAnimation, err := l.llmService.GenerateAnimationCodeV2(ctx, inptCodeGeneration, conversationHistory, func(thinking string) {
+
+		})
+		if err != nil {
+			return nil, agenterrors.AnimationGenerationFailed("failed to generate animation", err)
+		}
+
+		// resolve the asset handles
+		if l.generationOptions.assetRegistry != nil {
+			l.logger.Info("using brand-identity mapping for resolving media handles")
+			generatedAnimation.Code = l.generationOptions.assetRegistry.ResolveMediaHandles(generatedAnimation.Code)
+		}
+
+		// Default
+		indentedCode := indentCode(generatedAnimation.Code)
+
+		// 💾 Saving draft
+		callback(TemplateGenerationProgress{
+			Message: CreativeStageMessage(StageSaving, attempt),
+		})
+
+		// ⚙️ Bringing to life (BUILD STAGE)
+		callback(TemplateGenerationProgress{
+			Message: CreativeStageMessage(StageBuilding, attempt),
+		})
+
+		l.logger.Info("building code")
+		codeFilePath := fmt.Sprintf(
+			"templates/generated/%s/%s",
+			l.orgID,
+			l.slideID,
+		)
+
+		template, err := l.uploadAndBuild(ctx, indentedCode, codeFilePath, attempt, callback)
+		if err == nil {
+			diff := math.Abs(float64(generatedAnimation.SettledFrame) - float64(template.Config.VisibleDuration))
+			if diff > 30 {
+				l.logger.Info("difference between llm and computed settledFrame is more than 30",
+					zap.Int("llm_settled_frame", int(generatedAnimation.SettledFrame)),
+					zap.Int("computed", int(template.Config.VisibleDuration)),
+				)
+			} else {
+				l.logger.Info("difference between llm and computed settledFrame",
+					zap.Int("llm_settled_frame", int(generatedAnimation.SettledFrame)),
+					zap.Int("computed", int(template.Config.VisibleDuration)),
+				)
+			}
+
+			if generatedAnimation.ThinkingSummary != nil {
+				template.Description = *generatedAnimation.ThinkingSummary
+			}
+			template.Config.VisibleDuration = generatedAnimation.SettledFrame
+			template.Config.TotalDuration = generatedAnimation.SettledFrame
+			return template, nil
+		}
+
+		// Retry only on build errors
+		var buildErr *services.BuildError
+		if errors.As(err, &buildErr) {
+			// append thinking summary
+			if generatedAnimation.ThinkingSummary != nil {
+				conversationHistory = append(conversationHistory, types.Message{
+					Role:    types.Union3KassistantOrKtoolOrKuser__NewKassistant(),
+					Content: *generatedAnimation.ThinkingSummary,
+				})
+			}
+
+			conversationHistory = appendRetryConversation(
+				conversationHistory,
+				indentedCode,
+				buildFailureMessage(buildErr),
+			)
+
+			l.logger.Error("failed to build animation",
+				zap.Int("attempt_left", maxAttempts-attempt),
+				zap.Error(buildErr))
+
+			// 🔧 Refinement loop
+			callback(TemplateGenerationProgress{
+				Message: CreativeStageMessage(StageRefining, attempt),
+			})
+			continue
+		}
+
+		return nil, agenterrors.AnimationGenerationFailed("failed to build animation", err)
+	}
+
+	return nil, agenterrors.AnimationGenerationFailed(
+		"animation generation failed after max retries",
+		fmt.Errorf("max build attempts reached"),
+	)
 }
 
 func NewAnimationGenerator(sessionID string,
 	orgID string,
 	slideID string,
 	mediaStore services.MediaStore,
-	codeBuilder services.TemplateCodeBuilder, logger *zap.Logger) AnimationGenerator {
+	codeBuilder services.TemplateCodeBuilder,
+	logger *zap.Logger,
+	llmService llm.LLMService) AnimationGenerator {
 	return &animationGenerator{
 		sessionID:   sessionID,
 		orgID:       orgID,
@@ -127,6 +243,7 @@ func NewAnimationGenerator(sessionID string,
 		mediaStore:  mediaStore,
 		codeBuilder: codeBuilder,
 		logger:      logger,
+		llmService:  llmService,
 	}
 }
 

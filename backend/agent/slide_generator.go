@@ -94,6 +94,70 @@ func (g *videoConfigGenerator) AddBranding(assetRegistry *services.MediaAssetReg
 	})
 }
 
+func (g *videoConfigGenerator) CreatePendingSlidesV2(
+	ctx context.Context,
+	assetRegistry *services.MediaAssetRegistry,
+	plan *types.VideoPlanV2,
+) (*pbcore.Video, map[string]*types.Scene, error) {
+	// save background
+	g.AddBranding(assetRegistry)
+
+	// save slides
+	sections := make([]*pbcore.Section, 0, len(plan.Sections))
+	totalAnimationSlides := 0
+	totalMediaSlides := 0
+	sceneMapper := make(map[string]*types.Scene)
+	for index, pendingSection := range plan.Sections {
+		section := &pbcore.Section{
+			Id:     fmt.Sprintf("section-%d", time.Now().UnixNano()),
+			Title:  pendingSection.Name,
+			Color:  pickRandomColor(),
+			Slides: []*pbcore.Slide{},
+			Index:  int32(index),
+		}
+		for slideIndex, pendingSlide := range pendingSection.Slides {
+			slide := &pbcore.Slide{
+				Id:          fmt.Sprintf("slide-%d", time.Now().UnixNano()),
+				SlideStatus: pbcore.SlideStatus_SLIDE_STATUS_PENDING,
+				Index:       int32(slideIndex),
+			}
+
+			sceneMapper[slide.Id] = &pendingSlide
+			totalAnimationSlides++
+			slide.Type = pbcore.SlideType_SLIDE_TYPE_ANIMATION
+			assignRandomTransitionAndDirection(slide)
+
+			slide.Content = &pbcore.Slide_Animation{
+				Animation: &pbcore.AnimationSlideContent{
+					Plan: &pbcore.AnimationSlidePlan{
+						Index:           pendingSlide.Index,
+						BeatDescription: pendingSlide.Brief,
+						AnimationType:   pendingSlide.Category.BamlTypeName(),
+					},
+				},
+			}
+
+			section.Slides = append(section.Slides, slide)
+		}
+		sections = append(sections, section)
+	}
+
+	g.logger.Info("pending slides summary",
+		zap.Int("total_sections", len(sections)),
+		zap.Int("total_animation_slides", totalAnimationSlides),
+		zap.Int("total_media_slides", totalMediaSlides))
+
+	g.video.Config.Sections = sections
+	g.video.Metadata.ThinkingSummary = plan.ThinkingSummary
+
+	err := g.update(ctx, models.VideoStatusPROCESSING)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return g.video, sceneMapper, nil
+}
+
 // CreatePendingSlides created slides with pending status
 // and each slide plan is stored so that it can be resumed
 func (g *videoConfigGenerator) CreatePendingSlides(
@@ -218,7 +282,7 @@ func (g *videoConfigGenerator) UpdateAnimationSlide(
 
 				// update the selected template description
 				// for future slides to know what's being selected so far
-				animation.Plan.SelectedTemplateDescription = utils.Ptr(selectedTemplate.Description)
+				animation.Plan.ThinkingSummary = utils.Ptr(selectedTemplate.Description)
 			}
 		}
 	}

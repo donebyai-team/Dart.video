@@ -1,4 +1,4 @@
-template_string CodeGeneration() #"
+template_string AllComponentsListWithProps() #"
 ## FRAME CONTRACT:
 
 - Your component runs inside a managed animation runtime.
@@ -182,46 +182,46 @@ caption | label | body | subheading | heading | display — never hardcode font 
 "#
 
 template_string AllComponentsList() #"
-## AVAILABLE COMPONENTS
+## AVAILABLE VISUAL MECHANISMS
 
 Use only these when designing your concept. Do not invent mechanisms that don't exist.
 
 ### Entrances
-FadeIn — reveal elements onto the canvas
-SlideIn — reveal elements onto the canvas
-ScaleIn — reveal elements onto the canvas
+FadeIn — fades an element in from transparent to fully visible
+SlideIn — slides an element in from outside the canvas edge
+ScaleIn — scales an element up from small to full size
 
 ### Exits
-FadeOut — remove elements from the canvas
-SlideOut — remove elements from the canvas
-ScaleOut — remove elements from the canvas
+FadeOut — fades an element out from visible to transparent
+SlideOut — slides an element out toward the canvas edge
+ScaleOut — scales an element down from full size to nothing
 
 ### Sequencing
-Stagger — reveal a list of items one after another
-TimelineGate — show or hide a section at a specific moment
+Stagger — reveals children one after another with a delay between each — children must be animation primitives
+TimelineGate — shows its child only within a defined time window — use instead of JSX conditionals
 
 ### Text
-Text — static label or heading
-Typewriter — text that types itself out progressively
-WordCycle — a word that cycles through multiple values
+Text — Static text element, wrap in FadeIn/SlideIn to animate
+Typewriter — Progressively reveals text character by character, word, or line
+WordCycle — Cycles through an array of words with animated transitions
 
 ### Numbers
-Counter — a number that animates up or down to a target value
+Counter — Animated number counter that tweens between values
 
 ### Layout
 SafeArea — Outermost content wrapper that applies safe area insets from the active aspect preset
-Stack — vertical arrangement
-Row — horizontal arrangement
-AbsoluteCenter — center content on the canvas
+Stack — Vertical flex layout with spacing token values for gap
+Row — Horizontal flex layout with spacing token values for gap
+AbsoluteCenter — Centers child absolutely within nearest positioned parent
 
 ### Brand Assets
-LogoAsset — the brand logo
-ImageAsset — Generic image primitive for uploaded or remote media.
-VideoAsset — Generic video primitive for uploaded media. Width and height define the rendered box; the video always preserves aspect ratio and stays fully visible.
-IconAsset — Icon asset from the icon library.
+LogoAsset — renders the brand logo from the active theme — use for brand presence in title and outro scenes
+ImageAsset — renders a static image from a URL — use for product screens, photos, and illustrations
+VideoAsset — renders a static video file from a url — use for product tutorials, and explainer content
+IconAsset — renders a single icon by name from the icon library — use for decorative or supportive visual cues
 
-### Scenes
-TitleCard — Pre-built hero title card composition with heading, subheading, and eyebrow
+### Scene components (stand alone — no siblings, no mixing with other scene components)
+TitleCard — pre-built hero title with heading, subheading, and optional eyebrow
 "#
 
 // RULES
@@ -237,10 +237,9 @@ template_string SceneDesignPrinciples() #"
 - Prefer a single focal point centered on canvas over busy multi-column layouts.
 - Whitespace is intentional — a centered heading with space around it reads better
   than content filling the full canvas.
-- Use FocusColor on the dominant element. Never on layout.
-- Prefer slow, deliberate timing — entrances at 20-25 frames feel confident, rushed at 8-10 feel cheap.
-- Leave generous hold time between sections.
-- Never stack more than three animation layers deep.
+- Express pacing intent in the brief — "slow and confident", "punchy and fast",
+  "let the counter breathe". The generator translates this into frame values.
+- Never stack more than three animation layers deep in the element tree.
 
 ## ELEMENT TREE RULES
 
@@ -249,7 +248,10 @@ template_string SceneDesignPrinciples() #"
   component as a direct sibling without a layout wrapper.
 - Use Stack for vertical arrangement, Row for horizontal. Nest them for complex layouts.
 - AbsoluteCenter for centering a single element on the full canvas.
-- Animation primitives always wrap a content or asset element — never leave them empty.
+- Animation primitives (FadeIn, SlideIn etc) always wrap a single content or asset
+  element — never wrap layout primitives (Stack, Row, AbsoluteCenter).
+- Stagger wraps a list of animation primitives — each child must be an animation
+  primitive wrapping content, not content directly.
 "#
 
 template_string CodeGenerationRules() #"
@@ -276,7 +278,6 @@ The following rules are strict and must always be followed when generating the c
 - Never set color, fontSize, fontWeight, letterSpacing, or fontFamily in style props — the design system controls these automatically.
 - Never hardcode hex colors or rgba color values.
 - Never hardcode font sizes — use Text variant prop instead.
-- style props are for geometry and layout only: width, height, maxWidth, borderRadius, overflow, padding, margin.
 
 ## Animation
 - Never use JSX conditionals for animated elements — use TimelineGate instead.
@@ -291,21 +292,26 @@ The following rules are strict and must always be followed when generating the c
 
 template_string PlannerTimingGuidance() #"
 ## TIMING GUIDANCE (30 frames = 1 second)
-  ### Scene Duration Budgets
+
+### Scene Duration Budgets
   Title / outro           — 60-90 frames
   Single stat             — 90-120 frames
   Comparison              — 120-150 frames
   Feature highlight       — 120-180 frames
   Workflow / how-it-works — 150-210 frames
+  Transition              — 30-60 frames
 
-  ### Content Minimums (to inform frameRange allocation)
+### Content Minimums
   Counter                 — needs at least 90 frames total
   Typewriter              — needs ~2 frames per character minimum
   WordCycle               — needs at least 40 frames per word
   Stagger of 3+ items     — needs at least 90 frames total
 
-  ### Total Video Budget
-  Distribute frameRange across scenes to sum close to otal Video Budget given below.
+### Total Video Budget
+  Budgets across all scenes must sum close to total video budget given below.
+  Allocate proportionally to scene complexity — a single centered heading needs
+  far fewer frames than a staggered multi-element feature highlight.
+  Let content density and narrative weight drive the budget, not equal distribution.
 "#
 
 template_string TimingAndFrameRules() #"

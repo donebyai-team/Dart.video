@@ -43,27 +43,27 @@ export const BRAND_COMPONENTS: ComponentRegistration[] = [
     type: 'brand',
     fullSchema: LogoAssetSchema,
     editorProps: ['src', 'width', 'height'],
-    description: 'Brand logo from ThemeProvider. Falls back to a placeholder if no logo is configured. Wrap in any animation primitive (FadeIn, SlideIn, ScaleIn etc.) to animate. the logo always keeps its aspect ratio.',
+    description: 'renders the brand logo from the active theme — use for brand presence in title and outro scenes',
   },
   {
     name: 'ImageAsset',
     type: 'brand',
     fullSchema: ImageAssetSchema,
     editorProps: ['src', 'width', 'height'],
-    description: 'Generic image primitive for uploaded or remote media.'
+    description: 'renders a static image from a URL — use for product screens, photos, and illustrations',
   },
   {
     name: 'VideoAsset',
     type: 'brand',
     fullSchema: VideoAssetSchema,
     editorProps: ['src', 'width', 'height'],
-    description: 'Generic video primitive for uploaded media. Width and height define the rendered box; the video always preserves aspect ratio and stays fully visible.',
+    description: 'renders a static video file from a url — use for product tutorials, and explainer content',
   },
   {
     name: 'IconAsset',
     type: 'brand',
     fullSchema: IconAssetSchema,
     editorProps: ['name', 'size'],
-    description: 'Icon asset from the icon library.'
+    description: 'renders a single icon by name from the icon library — use for decorative or supportive visual cues',
   },
 ];
