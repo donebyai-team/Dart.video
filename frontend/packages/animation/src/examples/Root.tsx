@@ -1,6 +1,6 @@
 import React from "react";
 import { Composition } from "remotion";
-import { Counter, Typewriter, WordCycle } from "../components/text";
+import { Counter, Typewriter, WordCycle, TextHighlight } from "../components/text";
 import { FadeIn, FadeOut, SlideIn, ScaleIn, Stagger, TimelineGate } from "../core/animation_primitives";
 import { FramePreset, SafeArea, AbsoluteCenter, Stack, Row } from "../core/layout";
 import { Text } from "../core/text";
@@ -109,7 +109,7 @@ const TextComponentsScene: React.FC = () => (
     <Scene>
         <SafeArea>
             <AbsoluteCenter axis="both">
-                <Stack gap={32} align="center">
+                <Stack gap={64} align="center">
                     <FadeIn id="txt-title" startAt={0} durationInFrames={15}>
                         <Text id="t-txt" variant="heading">Text Components</Text>
                     </FadeIn>
@@ -141,6 +141,13 @@ const TextComponentsScene: React.FC = () => (
                         transitionDuration={10}
                         transition="slideUp"
                         variant="display"
+                    />
+
+                    <TextHighlight
+                        id="th-0"
+                        text="This is a {highlighted} text."
+                        highlightColor="#ffeb3b"
+                        style={{ fontSize: 64, color: '#FFF' }}
                     />
                 </Stack>
             </AbsoluteCenter>
