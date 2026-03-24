@@ -1,6 +1,6 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { LogoAsset } from '../core/brand/LogoAsset';
+import { LogoAsset } from '../core/assets/LogoAsset';
 import { PatchContextProvider } from '../patches/PatchContext';
 import { createEmptyPatchOverlay, applyValuePatches } from '../patches/types';
 import { AspectPreset, AspectPresetProvider, ASPECT_PRESETS } from '../styles/AspectPresetContext';

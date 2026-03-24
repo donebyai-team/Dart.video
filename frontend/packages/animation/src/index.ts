@@ -14,13 +14,13 @@ export * from './duration';
 export * from './core/layout';
 
 // Animation primitives
-export * from './core/primitives';
+export * from './core/animation_primitives';
 
 // Content primitives
-export * from './text';
+export * from './components/text';
 
 // Scene components
-export * from './components';
+export * from './components/scenes';
 
 // Registry
 export * from './registry';
@@ -31,8 +31,5 @@ export * from './prompt';
 // Patch system
 export * from './patches';
 
-// Assets
-export * from './assets';
-
 // Brand
-export * from './core/brand';
+export * from './core/assets';

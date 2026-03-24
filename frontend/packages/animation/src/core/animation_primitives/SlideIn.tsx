@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
-import { useDurationCollector } from '../../duration/DurationCollector';
 import { useStyleContext } from '../../styles/StyleContext';
 import { getEasing, interpolateWithEasing } from '../../styles/easingResolver';
 import { usePrimitivePatches, usePatchedProp, useStyleOverride } from '../../patches/PatchContext';

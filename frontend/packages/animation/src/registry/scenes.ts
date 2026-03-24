@@ -1,5 +1,5 @@
 import z from "zod";
-import { ComponentRegistration } from "./components";
+import { ComponentRegistration } from "./registry";
 
 export const TitleCardSchema = z.object({
   heading: z.string(),

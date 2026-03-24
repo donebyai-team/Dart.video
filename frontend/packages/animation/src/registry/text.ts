@@ -1,4 +1,4 @@
-import { ComponentRegistration } from "./components";
+import { ComponentRegistration } from "./registry";
 import { z } from "zod";
 import { fixedFrameTimingSchema } from "./animation_primitives";
 
@@ -42,27 +42,20 @@ export const WordCycleSchema = z.object({
   className: z.string().optional(),
 });
 
-export const TitleCardSchema = z.object({
-  heading: z.string(),
-  subheading: z.string().optional(),
-  eyebrow: z.string().optional(),
-  startAt: z.number().default(0).optional(),
-});
-
 export const CONTENT_COMPONENTS: ComponentRegistration[] = [
   {
     name: 'Text',
     type: 'content',
     fullSchema: TextSchema,
     editorProps: ['variant'],
-    description: 'Static text element, wrap in FadeIn/SlideIn to animate',
+    description: 'displays a static string — use for headings, labels, and body copy',
   },
   {
     name: 'Counter',
     type: 'content',
     fullSchema: CounterSchema,
     editorProps: ['from', 'to', 'format', 'prefix', 'suffix', 'startAt', 'durationInFrames'],
-    description: 'Animated number counter that tweens between values',
+    description: 'animates a number incrementing or decrementing to a target value — use for metrics and stats',
     durationContract: { kind: 'fixed' },
   },
   {
@@ -70,7 +63,7 @@ export const CONTENT_COMPONENTS: ComponentRegistration[] = [
     type: 'content',
     fullSchema: TypewriterSchema,
     editorProps: ['text', 'mode', 'startAt', 'durationInFrames'],
-    description: 'Progressively reveals text character by character, word, or line',
+    description: 'reveals text character by character — use for dramatic or progressive text reveals',
     durationContract: { kind: 'fixed' },
   },
   {
@@ -78,7 +71,7 @@ export const CONTENT_COMPONENTS: ComponentRegistration[] = [
     type: 'content',
     fullSchema: WordCycleSchema,
     editorProps: ['startAt', 'words', 'holdDuration', 'transitionDuration', 'transition'],
-    description: 'Cycles through an array of words with animated transitions',
+    description: 'cycles through a list of words in place — use when one slot shows multiple values over time',
     durationContract: { kind: 'formula', strategy: 'wordCycle' },
   },
 ];

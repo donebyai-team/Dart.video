@@ -1,39 +1,3 @@
-/**
- * AnimationPreview
- *
- * Compiles example LLM-generated code and wraps it in the full provider stack:
- *   ThemeProvider → AspectPresetProvider → StyleContextProvider → SpeedFactorProvider
- *
- * ─── DurationCollector system ────────────────────────────────────────────────
- * Every animation primitive calls  registerEndFrame(startAt + durationInFrames)
- * via DurationCollectorContext. Outside a DurationCollectorProvider this is a
- * no-op, so primitives work fine in normal rendering.
- *
- * To AUTO-COMPUTE total composition duration from the animation content:
- *
- *   const { onRegister, getMaxEndFrame, reset } = useDurationCollection();
- *
- *   // 1. Render the tree inside DurationCollectorProvider
- *   //    (Remotion renders frame 0 first, which triggers all registerEndFrame calls)
- *   //
- *   // 2. In a useEffect / after first render, call getMaxEndFrame()
- *   //    That value is startAt + durationInFrames of the last-ending primitive.
- *   //
- *   // 3. Add a tail buffer (e.g. +20 frames) so the last frame isn't cut off.
- *
- *   return (
- *     <DurationCollectorProvider onRegister={onRegister}>
- *       <CompiledComponent data={data} />
- *     </DurationCollectorProvider>
- *   );
- *
- *   // After render:  const totalFrames = getMaxEndFrame() + 20;
- *
- * ─── Frame contract ──────────────────────────────────────────────────────────
- * Primitives call useCurrentFrame() internally — no frame prop needed on the
- * compiled component. The provider stack handles all context injection.
- */
-
 import React, { useMemo } from 'react';
 import {
   ThemeProvider,

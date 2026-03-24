@@ -1,5 +1,5 @@
 import z from "zod";
-import { ComponentRegistration } from "./components";
+import { ComponentRegistration } from "./registry";
 
 /**
  * Static validator duration source of truth.

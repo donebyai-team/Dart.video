@@ -222,3 +222,12 @@ After reconciliation, stale patches are removed from the overlay. The user does 
 Style override patches store resolved values (hex strings, pixel values) not token names. This means they are brand-specific — switching brand does not update manual overrides. This is intentional. A manual override is a deliberate user choice that should not change silently.
 
 If the user wants a brand-aware override they use the prompt: "make this text use the primary brand color." The LLM writes `brand.primary` into the component code. That is baked in, not a patch.
+
+# Old AST
+1. We separate the old ast with this new AST approach mentioned above
+2. Modify reconcileEdits to work with the new AST approach
+3. Modify the AnimationEditLayer, AnimationToolbar in @toolbars as per the new changes. 
+4. In new approch, better is to have a single toolbar which render options based on what is available in the zod schema of the primitives, scenes etc
+5. For each type of change, we should have a separate component only if the change requires complex logic or multiple controls. Eg. Changing counter values or change the text of a word in wordcycle. 
+
+Ask clarifying questions if needed

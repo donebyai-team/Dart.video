@@ -1,11 +1,11 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
-import { useSpeedFactor, applySpeedFactor } from '../duration/speedFactor';
-import { usePatchedProp } from '../patches/PatchContext';
-import { useStyleContext } from '../styles/StyleContext';
-import { interpolateWithEasing } from '../styles/easingResolver';
-import { TYPOGRAPHY_VARIANTS } from '../tokens/semantic';
-import { FONT_SIZE_VALUES, FONT_WEIGHT_VALUES } from '../tokens/typography';
+import { useSpeedFactor, applySpeedFactor } from '../../duration/speedFactor';
+import { usePatchedProp } from '../../patches/PatchContext';
+import { useStyleContext } from '../../styles/StyleContext';
+import { interpolateWithEasing } from '../../styles/easingResolver';
+import { TYPOGRAPHY_VARIANTS } from '../../tokens/semantic';
+import { FONT_SIZE_VALUES, FONT_WEIGHT_VALUES } from '../../tokens/typography';
 
 export interface TitleCardProps {
   startAt?: number;

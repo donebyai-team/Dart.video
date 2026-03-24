@@ -1,7 +1,7 @@
 import { ComponentRegistration } from '../registry';
 import { ANIMATION_PRIMITIVE_COMPONENTS } from '../registry/animation_primitives';
 import { BRAND_COMPONENTS } from '../registry/assets';
-import { CONTENT_COMPONENTS } from '../registry/content';
+import { CONTENT_COMPONENTS } from '../registry/text';
 import { LAYOUT_COMPONENTS } from '../registry/layouts';
 import { SCENE_COMPONENTS } from '../registry/scenes';
 import { ASPECT_PRESETS } from '../styles/AspectPresetContext';

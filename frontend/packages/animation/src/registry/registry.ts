@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { LAYOUT_COMPONENTS } from './layouts';
 import { ANIMATION_PRIMITIVE_COMPONENTS } from './animation_primitives';
-import { CONTENT_COMPONENTS } from './content';
+import { CONTENT_COMPONENTS } from './text';
 import { SCENE_COMPONENTS } from './scenes';
 import { BRAND_COMPONENTS } from './assets';
 

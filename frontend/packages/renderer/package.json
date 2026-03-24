@@ -7,7 +7,7 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": {
-    "studio": "remotion studio src/remotion-entry.ts",
+    "studio": "remotion studio src/examples/index.ts",
     "type-check": "tsc --noEmit",
     "generate:shape-props": "node ./scripts/generate-remotion-shapes-props.mjs",
     "deploy:remotion": "./scripts/deploy-remotion-cloudrun.sh",

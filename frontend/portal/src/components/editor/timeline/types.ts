@@ -63,6 +63,7 @@ export interface OverlayItem {
 export interface TimelineSlide {
   id: string;
   duration: number; // Exclusive duration
+  settledFrame: number;
   sectionColor: string;
   sectionTitle: string;
   slide: Slide;

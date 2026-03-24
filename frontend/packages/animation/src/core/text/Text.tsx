@@ -1,10 +1,10 @@
 import React from 'react';
-import { usePatchedProp, useStyleOverride } from '../patches/PatchContext';
-import { useStyleContext } from '../styles/StyleContext';
-import { useAspectPreset } from '../styles/AspectPresetContext';
-import { useTheme } from '../theme/ThemeContext';
-import { TypographyVariant } from '../tokens/semantic';
-import { resolveTypography } from '../tokens/resolveTypography';
+import { usePatchedProp, useStyleOverride } from '../../patches/PatchContext';
+import { useStyleContext } from '../../styles/StyleContext';
+import { useAspectPreset } from '../../styles/AspectPresetContext';
+import { useTheme } from '../../theme/ThemeContext';
+import { TypographyVariant } from '../../tokens/semantic';
+import { resolveTypography } from '../../tokens/resolveTypography';
 
 export interface TextProps {
   /** Semantic typography variant. Never hardcode font sizes. */

@@ -1,4 +1,4 @@
-import { ComponentRegistration } from "./components";
+import { ComponentRegistration } from "./registry";
 import { z } from "zod";
 
 export const SafeAreaSchema = z.object({
@@ -39,20 +39,20 @@ export const LAYOUT_COMPONENTS: ComponentRegistration[] = [
     type: 'layout',
     fullSchema: StackSchema,
     editorProps: ['gap', 'align', 'justify'],
-    description: 'Vertical flex layout with spacing token values for gap',
+    description: 'arranges children vertically — primary layout primitive for top-to-bottom compositions',
   },
   {
     name: 'Row',
     type: 'layout',
     fullSchema: RowSchema,
     editorProps: ['gap', 'align', 'justify'],
-    description: 'Horizontal flex layout with spacing token values for gap',
+    description: 'arranges children horizontally — use for side-by-side elements',
   },
   {
     name: 'AbsoluteCenter',
     type: 'layout',
     fullSchema: AbsoluteCenterSchema,
     editorProps: ['axis'],
-    description: 'Centers child absolutely within nearest positioned parent',
+    description: 'centers a single child both horizontally and vertically on the full canvas',
   },
 ];

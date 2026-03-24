@@ -66,9 +66,6 @@ function GenerateAnimationV2(input: GenerateAnimationCodeRequestV2, conversation
     ## Frames duration budget(30fps):
     {{ input.scene.frameBudget }}
 
-    ## ANIMATION BRIEF:
-    {{ input.scene.brief }}
-
     ## Animation elements:
     {{ input.scene.elements }}
 
