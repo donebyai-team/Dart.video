@@ -7,6 +7,7 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": {
+    "studio": "remotion studio src/examples/index.ts",
     "type-check": "tsc --noEmit",
     "test": "jest --config jest.config.cjs",
     "prompt": "tsx scripts/print-prompt.ts",
@@ -20,7 +21,8 @@
   },
   "devDependencies": {
     "@types/react": "^18.3.3",
-    "tsx": "^4.19.0"
+    "tsx": "^4.19.0",
+    "@remotion/cli": "4.0.421"
   },
   "peerDependencies": {
     "react": "^18.3.1"

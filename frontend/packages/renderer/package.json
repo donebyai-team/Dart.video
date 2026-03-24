@@ -7,7 +7,6 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": {
-    "studio": "remotion studio src/examples/index.ts",
     "type-check": "tsc --noEmit",
     "generate:shape-props": "node ./scripts/generate-remotion-shapes-props.mjs",
     "deploy:remotion": "./scripts/deploy-remotion-cloudrun.sh",
@@ -41,7 +40,6 @@
   },
   "devDependencies": {
     "@coasterai/ts-config": "workspace:*",
-    "@remotion/cli": "4.0.421",
     "@types/babel__standalone": "^7.1.9"
   }
 }

@@ -16,6 +16,8 @@ export * from './core/layout';
 // Animation primitives
 export * from './core/animation_primitives';
 
+export * from './core/text';
+
 // Content primitives
 export * from './components/text';
 
@@ -26,7 +28,7 @@ export * from './components/scenes';
 export * from './registry';
 
 // Prompt generation
-export * from './registry/prompt';
+export * from './registry/prompt_generator';
 
 // Patch system
 export * from './patches';

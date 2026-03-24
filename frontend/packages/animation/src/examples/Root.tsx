@@ -1,24 +1,13 @@
 import React, { useMemo } from "react";
 import { Composition } from "remotion";
-import {
-    AbsoluteCenter,
-    ASPECT_PRESETS,
-    AspectPresetProvider,
-    BrandTheme,
-    FadeIn,
-    FramePreset,
-    lightTheme,
-    resolveStyle,
-    SafeArea,
-    ScaleIn,
-    SpeedFactorProvider,
-    Stack,
-    StyleContextProvider,
-    ThemeProvider,
-    Text,
-    WordCycle,
-    darkTheme
-} from "@coasterai/animation";
+import { WordCycle } from "../components/text";
+import { FadeIn, ScaleIn } from "../core/animation_primitives";
+import { FramePreset, SafeArea, AbsoluteCenter, Stack } from "../core/layout";
+import { Text } from "../core/text";
+import { SpeedFactorProvider } from "../duration";
+import { ASPECT_PRESETS, resolveStyle, AspectPresetProvider, StyleContextProvider } from "../styles";
+import { BrandTheme, darkTheme, ThemeProvider } from "../theme";
+
 
 const EXAMPLE_BRAND: BrandTheme = {
     ...darkTheme,
