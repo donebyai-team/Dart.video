@@ -8,6 +8,9 @@ import { ImageAsset, LogoAsset } from "../core/assets";
 import { SpeedFactorProvider } from "../duration";
 import { ASPECT_PRESETS, resolveStyle, AspectPresetProvider, StyleContextProvider } from "../styles";
 import { BrandTheme, darkTheme, ThemeProvider } from "../theme";
+import { WordStagger } from "../components/text/WordStagger";
+import { ListReveal } from "../components/scenes/ListReveal";
+import { ComparisonCard } from "../components/scenes/ComparisonCard";
 
 
 const BRAND: BrandTheme = {
@@ -21,7 +24,7 @@ const STYLE_ID = "clean";
 const PRESET = ASPECT_PRESETS["web"]!;
 
 /* ── helper: wrap each scene in the required providers ── */
-const Scene: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const Scene: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const styleConfig = resolveStyle(STYLE_ID);
     return (
         <FramePreset preset={PRESET}>
@@ -110,7 +113,7 @@ const TextComponentsScene: React.FC = () => (
         <SafeArea>
             <AbsoluteCenter axis="both">
                 <Stack gap={64} align="center">
-                    <FadeIn id="txt-title" startAt={0} durationInFrames={15}>
+                    {/* <FadeIn id="txt-title" startAt={0} durationInFrames={15}>
                         <Text id="t-txt" variant="heading">Text Components</Text>
                     </FadeIn>
 
@@ -149,6 +152,38 @@ const TextComponentsScene: React.FC = () => (
                         highlightColor="#ffeb3b"
                         style={{ fontSize: 64, color: '#FFF' }}
                     />
+
+                    <WordStagger
+                        text="This is a staggered text."
+                        animation="slideLeft"
+                        startAt={0}
+                        duration={45}
+                        style={{ fontSize: 64, color: '#FFF' }}
+                    /> */}
+                    {/* <StatBlock
+                        value="1,234"
+                        label="Total Users"                        
+                    /> */}
+
+<ComparisonCard
+  left={{
+    title: "Feature A",
+    status: "Available",
+    statusColor: "#10b981",
+    items: ["Item 1", "Item 2", "Item 3"],
+    backgroundColor: "#f9fafb",
+  }}
+  right={{
+    title: "Feature B",
+    status: "Coming Soon",
+    statusColor: "#6b7280",
+    items: ["Item A", "Item B", "Item C"],
+    backgroundColor: "#f9fafb",
+  }}
+  vsLabel="VS"
+  startAt={0}
+/>
+
                 </Stack>
             </AbsoluteCenter>
         </SafeArea>

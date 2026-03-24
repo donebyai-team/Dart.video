@@ -1,4 +1,5 @@
 import { ColorTokens } from '../tokens/colors';
+import { RadiusTokens } from '../tokens/radius';
 
 export interface BrandAsset {
   url: string;
@@ -46,5 +47,5 @@ export interface ResolvedTheme {
   /** Resolved serif font stack (brand serif font + system fallbacks) */
   fontSerif: string;
   logo?: BrandAsset;
-  iconStyle?: string 
+  iconStyle?: string;
 }
