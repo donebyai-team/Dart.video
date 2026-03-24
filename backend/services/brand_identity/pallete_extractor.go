@@ -132,6 +132,59 @@ func buildColorPalette(input map[string]string) map[string]string {
 
 // ---------------- GRADIENT ----------------
 
+func GenerateGradientFromBackground(colors []*pbcore.BrandColor) *pbcore.Gradient {
+	var bg string
+
+	// Extract palette colors
+	for _, c := range colors {
+		switch c.Priority {
+		case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_BACKGROUND:
+			bg = c.ColorHexCode
+		}
+	}
+
+	if bg == "" {
+		return GenerateGradient(colors)
+	}
+
+	start := bg
+	end := lightenHSL(bg, 0.45)
+
+	// Ensure end is light enough for UI backgrounds
+	if lightness(end) < 0.85 {
+		end = lightenHSL(end, 0.25)
+	}
+
+	// Avoid near-white gradients
+	if isTooLight(start) {
+		start = darkenHSL(start, 0.15)
+	}
+
+	if isTooLight(end) {
+		end = darkenHSL(end, 0.05)
+	}
+
+	// Ensure visible difference
+	if colorDistance(start, end) < 20 {
+		end = lightenHSL(end, 0.2)
+	}
+
+	return &pbcore.Gradient{
+		Type:  pbcore.GradientType_GRADIENT_TYPE_LINEAR,
+		Angle: 135,
+		Stops: []*pbcore.GradientStop{
+			{
+				Color:    start,
+				Position: 0,
+			},
+			{
+				Color:    end,
+				Position: 100,
+			},
+		},
+	}
+}
+
 // Gradient is computed EVERY time (pure function)
 // based on current palette (user may edit anytime)
 func GenerateGradient(colors []*pbcore.BrandColor) *pbcore.Gradient {
