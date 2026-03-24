@@ -34,6 +34,19 @@ export const TextHighlightSchema = z.object({
 });
 
 const AnimationEnum = z.enum(['slideUp', 'slideDown', 'slideLeft', 'slideRight', 'fadeIn', 'scaleIn']);
+const PeelDirectionEnum = z.enum(['left', 'right', 'up', 'down']);
+
+export const ImagePeelSchema = z.object({
+  sources: z.array(z.string()).min(2),
+  direction: PeelDirectionEnum.default('right').optional(),
+  startAt: z.number().default(0).optional(),
+  holdDuration: z.number().default(20).optional(),
+  peelDuration: z.number().default(20).optional(),
+  stackOffset: z.number().default(20).optional(),
+  borderRadius: z.number().default(16).optional(),
+  width: z.number().optional(),
+  height: z.number().optional(),
+});
 
 export const AnimatedImageSchema = z.object({
   text: z.string(),
@@ -102,5 +115,12 @@ export const SCENE_COMPONENTS: ComponentRegistration[] = [
     fullSchema: AnimatedVideoSchema,
     editorProps: ['text', 'src', 'variant', 'animation', 'borderRadius'],
     description: 'text label above a video with entrance animation (slide, fade, scale)',
+  },
+  {
+    name: 'ImagePeel',
+    type: 'scene',
+    fullSchema: ImagePeelSchema,
+    editorProps: ['sources', 'direction', 'holdDuration', 'peelDuration', 'borderRadius'],
+    description: 'stacked images that peel away one by one to reveal the next image',
   },
 ];

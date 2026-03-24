@@ -11,6 +11,7 @@ import { BrandTheme, darkTheme, ThemeProvider } from "../theme";
 import { WordStagger } from "../components/scenes/text/WordStagger";
 import { AnimatedImage } from "../components/scenes/assets/AnimatedImage";
 import { AnimatedVideo } from "../components/scenes/assets/AnimatedVideo";
+import { ImagePeel } from "../components/scenes";
 
 
 const BRAND: BrandTheme = {
@@ -218,7 +219,17 @@ const AnimatedImageScene: React.FC = () => (
     <Scene>
         <SafeArea>
             <AbsoluteCenter axis="both">
-                <AnimatedImage id="animated-image-0" text="Your dashboard, logs, and alerts didn't adapt" src="https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774173924-cuser.png" />
+                {/* <AnimatedImage id="animated-image-0" text="Your dashboard, logs, and alerts didn't adapt" src="https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774173924-cuser.png" /> */}
+                <ImagePeel
+                    id="animated-peel-0" 
+                    sources={[
+                        "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774173924-cuser.png",
+                        "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774083475-add_this_person_to_the_back_of_t-0.jpg",
+                        "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774173924-cuser.png",
+                        "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774083475-add_this_person_to_the_back_of_t-0.jpg"
+                    ]}
+                >
+                </ImagePeel>
             </AbsoluteCenter>
         </SafeArea>
     </Scene>
