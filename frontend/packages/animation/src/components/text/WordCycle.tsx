@@ -36,8 +36,8 @@ export interface WordCycleProps {
 export function WordCycle({
   startAt = 0,
   words,
-  holdDuration = 45,
-  transitionDuration = 12,
+  holdDuration = 30,
+  transitionDuration = 5,
   easing,
   transition = 'fadeSwap',
   variant = 'body',

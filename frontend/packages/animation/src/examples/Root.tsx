@@ -113,11 +113,11 @@ const TextComponentsScene: React.FC = () => (
         <SafeArea>
             <AbsoluteCenter axis="both">
                 <Stack gap={64} align="center">
-                    {/* <FadeIn id="txt-title" startAt={0} durationInFrames={15}>
-                        <Text id="t-txt" variant="heading">Text Components</Text>
+                    <FadeIn id="txt-title">
+                        <Text id="t-txt" variant="heading">Your dashboard, logs, and alerts didn't adapt</Text>
                     </FadeIn>
 
-                    <Typewriter
+                    {/* <Typewriter
                         id="tw-0"
                         startAt={15}
                         durationInFrames={60}
@@ -144,46 +144,37 @@ const TextComponentsScene: React.FC = () => (
                         transitionDuration={10}
                         transition="slideUp"
                         variant="display"
-                    />
+                    /> */}
+
+                    <Row gap={2} >
+                        <Text id="t-txt" variant="body">Your dashboard, has</Text>
+                        <WordCycle
+                            id="wc-0"
+                            words={["Design", "Build", "Ship", "Iterate"]}
+                            transition="slideUp"
+                            variant="body"
+                        />
+                    </Row>
 
                     <TextHighlight
                         id="th-0"
                         text="This is a {highlighted} text."
                         highlightColor="#ffeb3b"
-                        style={{ fontSize: 64, color: '#FFF' }}
+                        variant="heading"
+                    />
+
+                    <Typewriter
+                        id="tw-0"
+                        text="Your dashboard, logs, and alerts didn't adapt"
+                        mode="char"
+                        variant="heading"
                     />
 
                     <WordStagger
-                        text="This is a staggered text."
+                        text="Your dashboard, logs, and alerts didn't adapt."
                         animation="slideLeft"
-                        startAt={0}
-                        duration={45}
-                        style={{ fontSize: 64, color: '#FFF' }}
-                    /> */}
-                    {/* <StatBlock
-                        value="1,234"
-                        label="Total Users"                        
-                    /> */}
-
-<ComparisonCard
-  left={{
-    title: "Feature A",
-    status: "Available",
-    statusColor: "#10b981",
-    items: ["Item 1", "Item 2", "Item 3"],
-    backgroundColor: "#f9fafb",
-  }}
-  right={{
-    title: "Feature B",
-    status: "Coming Soon",
-    statusColor: "#6b7280",
-    items: ["Item A", "Item B", "Item C"],
-    backgroundColor: "#f9fafb",
-  }}
-  vsLabel="VS"
-  startAt={0}
-/>
-
+                        style={{ fontSize: 48, color: '#FFF' }}
+                    />
                 </Stack>
             </AbsoluteCenter>
         </SafeArea>
@@ -275,10 +266,10 @@ const LayoutScene: React.FC = () => (
    ══════════════════════════════════════════════════════════ */
 export const RemotionRoot: React.FC = () => (
     <>
-        <Composition id="fade-slide"      component={FadeSlideScene}      durationInFrames={150} fps={30} width={1920} height={1080} />
-        <Composition id="scale-stagger"   component={ScaleStaggerScene}   durationInFrames={150} fps={30} width={1920} height={1080} />
-        <Composition id="text-components" component={TextComponentsScene} durationInFrames={300} fps={30} width={1920} height={1080} />
-        <Composition id="assets"          component={AssetsScene}         durationInFrames={210} fps={30} width={1920} height={1080} />
-        <Composition id="layout"          component={LayoutScene}         durationInFrames={180} fps={30} width={1920} height={1080} />
+        <Composition id="fade-slide" component={FadeSlideScene} durationInFrames={150} fps={30} width={1920} height={1080} />
+        <Composition id="scale-stagger" component={ScaleStaggerScene} durationInFrames={150} fps={30} width={1920} height={1080} />
+        <Composition id="text-components" component={TextComponentsScene} durationInFrames={180} fps={30} width={1920} height={1080} />
+        <Composition id="assets" component={AssetsScene} durationInFrames={210} fps={30} width={1920} height={1080} />
+        <Composition id="layout" component={LayoutScene} durationInFrames={180} fps={30} width={1920} height={1080} />
     </>
 );

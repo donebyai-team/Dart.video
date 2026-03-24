@@ -1,7 +1,15 @@
 import React from 'react';
 import { interpolate, useCurrentFrame } from 'remotion';
+import { TypographyVariant } from '../../tokens/semantic';
+import { useStyleContext } from '../../styles/StyleContext';
+import { usePatchedProp, useStyleOverride } from '../../patches';
+import { useAspectPreset } from '../../styles';
+import { useTheme } from '../../theme';
+import { resolveTypography } from '../../tokens';
 
 export interface WordStaggerProps {
+  id?: string;
+  variant?: TypographyVariant;
   text: string;
   staggerDelay?: number; // frames between each word
   animation?: 'fadeIn' | 'slideUp' | 'slideDown' | 'slideLeft' | 'slideRight' | 'scaleIn' | 'rotateIn';
@@ -14,6 +22,8 @@ export interface WordStaggerProps {
 }
 
 export const WordStagger: React.FC<WordStaggerProps> = ({
+  id,  
+  variant = 'heading',  
   text,
   staggerDelay = 5,
   animation = 'slideUp',
@@ -25,6 +35,13 @@ export const WordStagger: React.FC<WordStaggerProps> = ({
   wordStyle,
 }) => {
   const frame = useCurrentFrame();
+ const styleConfig = useStyleContext();
+  const theme = useTheme();
+  const preset = useAspectPreset();
+
+  const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', variant);
+  const styleOverride = useStyleOverride(id);
+
   const words = text.split(separator);
 
   const getAnimationStyles = (wordIndex: number): React.CSSProperties => {
@@ -91,7 +108,7 @@ export const WordStagger: React.FC<WordStaggerProps> = ({
   };
 
   return (
-    <span className={className} style={{ display: 'inline-block', ...style }}>
+    <span id={id} className={className} style={{ display: 'inline-block', ...style }}>
       {words.map((word, index) => (
         <span
           key={index}
@@ -99,7 +116,9 @@ export const WordStagger: React.FC<WordStaggerProps> = ({
             display: 'inline-block',
             marginRight: index < words.length - 1 ? '0.25em' : 0,
             ...getAnimationStyles(index),
-            ...wordStyle,
+            ...resolveTypography(patchedVariant, styleConfig, theme, preset), 
+            ...wordStyle, 
+            ...styleOverride
           }}
         >
           {word}
