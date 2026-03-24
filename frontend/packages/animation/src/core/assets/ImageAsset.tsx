@@ -32,17 +32,16 @@ export function ImageAsset({
     const { isRendering } = useRemotionEnvironment();
     const preset = useAspectPreset();
     const styleOverride = useStyleOverride(id);
-    const { objectFit, ...wrapperStyleOverride } = styleOverride;
+    const { objectFit: styleObjectFit, ...restStyle } = style ?? {};
+    const { objectFit: overrideObjectFit, ...wrapperStyleOverride } = styleOverride;
     const patchedSrc = usePatchedProp<string | undefined>(id, 'src', src ?? DEFAULT_IMAGE_SVG);
     const patchedWidth = usePatchedProp<number | undefined>(id, 'width', width);
     const patchedHeight = usePatchedProp<number | undefined>(id, 'height', height);
-    // Content images usually want a more substantial default footprint than logos.
-    const defaultBoxWidth = Math.min(Math.max(preset.width * 0.42, 280), 720);
-    const defaultBoxHeight = Math.min(Math.max(preset.height * 0.32, 180), 420);
-    const resolvedBoxWidth = patchedWidth ?? defaultBoxWidth;
-    const resolvedBoxHeight = patchedHeight ?? defaultBoxHeight;
+    const resolvedBoxWidth = patchedWidth ?? preset.width;
+    const resolvedBoxHeight = patchedHeight ?? preset.height;
+    const rawObjectFit = overrideObjectFit ?? styleObjectFit;
     const resolvedObjectFit: React.CSSProperties['objectFit'] =
-        typeof objectFit === 'string' ? objectFit as React.CSSProperties['objectFit'] : 'contain';
+        typeof rawObjectFit === 'string' ? rawObjectFit as React.CSSProperties['objectFit'] : 'cover';
 
     useEffect(() => {
         if (!patchedSrc || !isRendering) return;
@@ -63,7 +62,7 @@ export function ImageAsset({
                 width: resolvedBoxWidth,
                 height: resolvedBoxHeight,
                 overflow: 'hidden',
-                ...style,
+                ...restStyle,
                 ...wrapperStyleOverride,
             }}
         >

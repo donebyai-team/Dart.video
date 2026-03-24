@@ -1,4 +1,5 @@
-export * from './TitleCard';
-export * from './ComparisonCard';
-export * from './ListReveal';
+export * from './assets';
+export * from './text';
+export * from './comparison';
+export * from './list';
 

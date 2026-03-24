@@ -1,10 +1,10 @@
 import { ComponentRegistration } from "./registry";
 import { z } from "zod";
 import { fixedFrameTimingSchema } from "./animation_primitives";
-
+import { TYPOGRAPHY_VARIANT_NAMES } from "../tokens/semantic";
 
 export const TextSchema = z.object({
-  variant: z.enum(['caption', 'label', 'body', 'subheading', 'heading', 'display']).optional(),
+  variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).optional(),
   style: z.any().optional(),
   className: z.string().optional(),
   children: z.any().optional(),
@@ -17,16 +17,7 @@ export const CounterSchema = z.object({
   format: z.string().optional(),
   prefix: z.string().optional(),
   suffix: z.string().optional(),
-  variant: z.enum(['caption', 'label', 'body', 'subheading', 'heading', 'display']).optional(),
-  style: z.any().optional(),
-  className: z.string().optional(),
-});
-
-export const TypewriterSchema = z.object({
-  ...fixedFrameTimingSchema(60),
-  text: z.string(),
-  mode: z.enum(['char', 'word', 'line']).optional(),
-  variant: z.enum(['caption', 'label', 'body', 'subheading', 'heading', 'display']).optional(),
+  variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).optional(),
   style: z.any().optional(),
   className: z.string().optional(),
 });
@@ -37,7 +28,7 @@ export const WordCycleSchema = z.object({
   holdDuration: z.number().default(45).optional(),
   transitionDuration: z.number().default(12).optional(),
   transition: z.enum(['flipY', 'fadeSwap', 'slideUp']).optional(),
-  variant: z.enum(['caption', 'label', 'body', 'subheading', 'heading', 'display']).optional(),
+  variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).optional(),
   style: z.any().optional(),
   className: z.string().optional(),
 });
@@ -56,14 +47,6 @@ export const CONTENT_COMPONENTS: ComponentRegistration[] = [
     fullSchema: CounterSchema,
     editorProps: ['from', 'to', 'format', 'prefix', 'suffix', 'startAt', 'durationInFrames'],
     description: 'animates a number incrementing or decrementing to a target value — use for metrics and stats',
-    durationContract: { kind: 'fixed' },
-  },
-  {
-    name: 'Typewriter',
-    type: 'content',
-    fullSchema: TypewriterSchema,
-    editorProps: ['text', 'mode', 'startAt', 'durationInFrames'],
-    description: 'reveals text character by character — use for dramatic or progressive text reveals',
     durationContract: { kind: 'fixed' },
   },
   {

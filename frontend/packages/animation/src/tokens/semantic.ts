@@ -1,7 +1,8 @@
 import { FontSizeToken, FontWeightToken } from './typography';
 
 /** Semantic typography variants. LLM only sees these names. */
-export type TypographyVariant = 'caption' | 'label' | 'body' | 'subheading' | 'heading' | 'display';
+export const TYPOGRAPHY_VARIANT_NAMES = ['caption', 'label', 'body', 'subheading', 'heading', 'display'] as const;
+export type TypographyVariant = (typeof TYPOGRAPHY_VARIANT_NAMES)[number];
 
 export interface TypographyVariantConfig {
   fontSize: FontSizeToken;

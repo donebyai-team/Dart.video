@@ -1,14 +1,14 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
-import { usePrimitivePatches, usePatchedProp, useStyleOverride } from '../../patches/PatchContext';
-import { useStyleContext } from '../../styles/StyleContext';
-import { useAspectPreset } from '../../styles/AspectPresetContext';
-import { useTheme } from '../../theme/ThemeContext';
-import { getEasing, interpolateWithEasing } from '../../styles/easingResolver';
-import { type Easing } from '../../styles/types';
-import { TypographyVariant } from '../../tokens/semantic';
-import { resolveTypography } from '../../tokens/resolveTypography';
-import { applySpeedFactor, useSpeedFactor } from '../../duration';
+import { usePrimitivePatches, usePatchedProp, useStyleOverride } from '../../../patches/PatchContext';
+import { useStyleContext } from '../../../styles/StyleContext';
+import { useAspectPreset } from '../../../styles/AspectPresetContext';
+import { useTheme } from '../../../theme/ThemeContext';
+import { getEasing, interpolateWithEasing } from '../../../styles/easingResolver';
+import { type Easing } from '../../../styles/types';
+import { TypographyVariant } from '../../../tokens/semantic';
+import { resolveTypography } from '../../../tokens/resolveTypography';
+import { applySpeedFactor, useSpeedFactor } from '../../../duration';
 
 export type WordCycleTransition = 'flipY' | 'fadeSwap' | 'slideUp';
 

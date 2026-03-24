@@ -1,9 +1,9 @@
 import React from 'react';
-import { useTheme } from '../../theme/ThemeContext';
-import { Stagger, SlideIn, FadeIn } from '../../core/animation_primitives';
-import { resolveTypography } from '../../tokens/resolveTypography';
-import { useStyleContext, useAspectPreset } from '../../styles';
-import { SPACING_SCALE } from '../../tokens/spacing';
+import { useTheme } from '../../../theme/ThemeContext';
+import { Stagger, SlideIn, FadeIn } from '../../../core/animation_primitives';
+import { resolveTypography } from '../../../tokens/resolveTypography';
+import { useStyleContext, useAspectPreset } from '../../../styles';
+import { SPACING_SCALE } from '../../../tokens/spacing';
 
 export interface ListRevealProps {
   items: string[];

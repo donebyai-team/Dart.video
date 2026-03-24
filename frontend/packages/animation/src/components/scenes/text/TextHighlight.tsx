@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react';
 import { interpolate, useCurrentFrame } from 'remotion';
-import { usePatchedProp, useStyleOverride } from '../../patches';
-import { useStyleContext, useAspectPreset } from '../../styles';
-import { useTheme } from '../../theme';
-import { resolveTypography, TypographyVariant } from '../../tokens';
+import { usePatchedProp, useStyleOverride } from '../../../patches';
+import { useStyleContext, useAspectPreset } from '../../../styles';
+import { useTheme } from '../../../theme';
+import { resolveTypography, TypographyVariant } from '../../../tokens';
 
 export interface TextHighlightProps {
     id?: string;

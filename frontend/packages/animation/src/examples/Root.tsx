@@ -1,6 +1,6 @@
 import React from "react";
 import { Composition } from "remotion";
-import { Counter, Typewriter, WordCycle, TextHighlight } from "../components/text";
+import { Typewriter, WordCycle, TextHighlight } from "../components/scenes/text";
 import { FadeIn, FadeOut, SlideIn, ScaleIn, Stagger, TimelineGate } from "../core/animation_primitives";
 import { FramePreset, SafeArea, AbsoluteCenter, Stack, Row } from "../core/layout";
 import { Text } from "../core/text";
@@ -8,9 +8,9 @@ import { ImageAsset, LogoAsset } from "../core/assets";
 import { SpeedFactorProvider } from "../duration";
 import { ASPECT_PRESETS, resolveStyle, AspectPresetProvider, StyleContextProvider } from "../styles";
 import { BrandTheme, darkTheme, ThemeProvider } from "../theme";
-import { WordStagger } from "../components/text/WordStagger";
-import { ListReveal } from "../components/scenes/ListReveal";
-import { ComparisonCard } from "../components/scenes/ComparisonCard";
+import { WordStagger } from "../components/scenes/text/WordStagger";
+import { AnimatedImage } from "../components/scenes/assets/AnimatedImage";
+import { AnimatedVideo } from "../components/scenes/assets/AnimatedVideo";
 
 
 const BRAND: BrandTheme = {
@@ -214,6 +214,26 @@ const AssetsScene: React.FC = () => (
     </Scene>
 );
 
+const AnimatedImageScene: React.FC = () => (
+    <Scene>
+        <SafeArea>
+            <AbsoluteCenter axis="both">
+                <AnimatedImage id="animated-image-0" text="Your dashboard, logs, and alerts didn't adapt" src="https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774173924-cuser.png" />
+            </AbsoluteCenter>
+        </SafeArea>
+    </Scene>
+);
+
+const AnimatedVideoScene: React.FC = () => (
+    <Scene>
+        <SafeArea>
+            <AbsoluteCenter axis="both">
+                <AnimatedVideo id="animated-video-0" text="Your dashboard, logs, and alerts didn't adapt" src="https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774173924-cur.mp4" />
+            </AbsoluteCenter>
+        </SafeArea>
+    </Scene>
+);
+
 /* ─────────────────────────────────────────────────────────
    5 · Layout – Row + Stack combos
    ───────────────────────────────────────────────────────── */
@@ -271,5 +291,7 @@ export const RemotionRoot: React.FC = () => (
         <Composition id="text-components" component={TextComponentsScene} durationInFrames={180} fps={30} width={1920} height={1080} />
         <Composition id="assets" component={AssetsScene} durationInFrames={210} fps={30} width={1920} height={1080} />
         <Composition id="layout" component={LayoutScene} durationInFrames={180} fps={30} width={1920} height={1080} />
+        <Composition id="animated-image" component={AnimatedImageScene} durationInFrames={180} fps={30} width={1920} height={1080} />
+        <Composition id="animated-video" component={AnimatedVideoScene} durationInFrames={180} fps={30} width={1920} height={1080} />
     </>
 );

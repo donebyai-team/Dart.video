@@ -19,7 +19,7 @@ export * from './core/animation_primitives';
 export * from './core/text';
 
 // Content primitives
-export * from './components/text';
+export * from './components/scenes/text';
 
 // Scene components
 export * from './components/scenes';

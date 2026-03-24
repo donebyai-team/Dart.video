@@ -27,15 +27,18 @@ export function VideoAsset({
     const patchedSrc = usePatchedProp<string | undefined>(id, 'src', src);
     const patchedWidth = usePatchedProp<number | undefined>(id, 'width', width);
     const patchedHeight = usePatchedProp<number | undefined>(id, 'height', height);
-    const defaultBoxWidth = Math.min(Math.max(preset.width * 0.42, 280), 720);
-    const defaultBoxHeight = Math.min(Math.max(preset.height * 0.32, 180), 420);
-    const resolvedBoxWidth = patchedWidth ?? defaultBoxWidth;
-    const resolvedBoxHeight = patchedHeight ?? defaultBoxHeight;
+    const { objectFit: styleObjectFit, ...restStyle } = style ?? {};
+    const { objectFit: overrideObjectFit, ...wrapperStyleOverride } = styleOverride;
+    const resolvedBoxWidth = patchedWidth ?? preset.width;
+    const resolvedBoxHeight = patchedHeight ?? preset.height;
+    const rawObjectFit = overrideObjectFit ?? styleObjectFit;
+    const resolvedObjectFit: React.CSSProperties['objectFit'] =
+        typeof rawObjectFit === 'string' ? rawObjectFit as React.CSSProperties['objectFit'] : 'cover';
     const videoStyle: React.CSSProperties = {
         display: 'block',
         width: '100%',
         height: '100%',
-        objectFit: 'contain',
+        objectFit: resolvedObjectFit,
     };
 
     useEffect(() => {
@@ -57,8 +60,8 @@ export function VideoAsset({
                 width: resolvedBoxWidth,
                 height: resolvedBoxHeight,
                 overflow: 'hidden',
-                ...style,
-                ...styleOverride,
+                ...restStyle,
+                ...wrapperStyleOverride,
             }}
         >
             {patchedSrc ? (
