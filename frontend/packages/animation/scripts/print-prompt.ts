@@ -8,7 +8,7 @@
  */
 import { writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { getAnimationPrompt } from '../src/prompt/generate_system_prompt';
+import { getAnimationPrompt } from '../src/registry/prompt_generator';
 
 function getFlagValue(args: string[], name: string): string | undefined {
   const exact = `--${name}`;
@@ -37,7 +37,7 @@ const shouldPrintToStdout = process.argv.slice(2).includes('--stdout');
 const prompt = getAnimationPrompt(mode ? { mode } : undefined);
 const outputPath = path.resolve(
   process.cwd(),
-  'src/prompt',
+  'src/registry/prompt_generator/prompts',
   mode === 'only_components_description' ? 'prompt_list_components.md' : 'Prompt.md',
 );
 

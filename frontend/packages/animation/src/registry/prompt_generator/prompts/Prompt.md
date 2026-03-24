@@ -26,21 +26,21 @@ Outermost content wrapper that applies safe area insets from the active aspect p
 Props:
 
 ### Stack
-Vertical flex layout with spacing token values for gap
+arranges children vertically — primary layout primitive for top-to-bottom compositions
 Props:
 - gap: number (optional)
 - align: string (optional)
 - justify: string (optional)
 
 ### Row
-Horizontal flex layout with spacing token values for gap
+arranges children horizontally — use for side-by-side elements
 Props:
 - gap: number (optional)
 - align: string (optional)
 - justify: string (optional)
 
 ### AbsoluteCenter
-Centers child absolutely within nearest positioned parent
+centers a single child both horizontally and vertically on the full canvas
 Props:
 - axis: enum(x|y|both) (optional)
 
@@ -105,7 +105,7 @@ Props:
 ## Static Primitives — no built-in animation, wrap in Motion to animate
 
 ### Text
-Static text element, wrap in FadeIn/SlideIn to animate
+displays a static string — use for headings, labels, and body copy
 Props:
 - variant: enum(caption|label|body|subheading|heading|display) (optional)
 
@@ -113,7 +113,7 @@ Props:
 ## Dynamic Primitives — self-animating, never wrap in Motion, use startAt directly
 
 ### Counter
-Animated number counter that tweens between values
+animates a number incrementing or decrementing to a target value — use for metrics and stats
 Props:
 - startAt: number (optional)
 - durationInFrames: number (optional)
@@ -125,7 +125,7 @@ Props:
 - variant: enum(caption|label|body|subheading|heading|display) (optional)
 
 ### Typewriter
-Progressively reveals text character by character, word, or line
+reveals text character by character — use for dramatic or progressive text reveals
 Props:
 - startAt: number (optional)
 - durationInFrames: number (optional)
@@ -134,7 +134,7 @@ Props:
 - variant: enum(caption|label|body|subheading|heading|display) (optional)
 
 ### WordCycle
-Cycles through an array of words with animated transitions
+cycles through a list of words in place — use when one slot shows multiple values over time
 Props:
 - startAt: number (optional)
 - words: array (required)
@@ -190,7 +190,7 @@ export default function RemoteComponent() {
   return (
     <SafeArea>
       <AbsoluteCenter axis="both">
-        <Stack gap={16} align="center">
+        <Stack gap={16} align="center" style={{ maxWidth: 800 }}>
           <SlideIn startAt={0} durationInFrames={20} from="bottom">
             <Text variant="display">Q4 Results</Text>
           </SlideIn>
@@ -204,30 +204,25 @@ export default function RemoteComponent() {
 }
 ```
 
-### Example 2 — two stats side by side (settledFrame: 60)
+### Example 2 — two stats side by side (settledFrame: 70)
 ```tsx
-// Motion primitives wrap Static/Dynamic primitives individually — never wrap Stack or Row
 export default function RemoteComponent() {
   return (
     <SafeArea>
       <AbsoluteCenter axis="both">
         <Row gap={48} align="center">
-          <Stack gap={8} align="center">
-            <FadeIn startAt={0} durationInFrames={20}>
+          <FadeIn startAt={0} durationInFrames={20}>
+            <Stack gap={8} align="center">
               <Counter to={9800} startAt={0} durationInFrames={60} suffix="+" variant="heading" />
-            </FadeIn>
-            <FadeIn startAt={0} durationInFrames={20}>
               <Text variant="label">new users</Text>
-            </FadeIn>
-          </Stack>
-          <Stack gap={8} align="center">
-            <FadeIn startAt={0} durationInFrames={20}>
-              <Counter to={94} startAt={0} durationInFrames={60} suffix="%" variant="heading" />
-            </FadeIn>
-            <FadeIn startAt={0} durationInFrames={20}>
+            </Stack>
+          </FadeIn>
+          <FadeIn startAt={0} durationInFrames={20}>
+            <Stack gap={8} align="center">
+              <Counter to={94} startAt={10} durationInFrames={60} suffix="%" variant="heading" />
               <Text variant="label">retention</Text>
-            </FadeIn>
-          </Stack>
+            </Stack>
+          </FadeIn>
         </Row>
       </AbsoluteCenter>
     </SafeArea>
@@ -237,26 +232,27 @@ export default function RemoteComponent() {
 
 ### Example 3 — staggered list (settledFrame: 62)
 ```tsx
-// Stagger manages its own timing — no TimelineGate wrapper needed
 export default function RemoteComponent() {
   return (
     <SafeArea>
       <AbsoluteCenter axis="both">
-        <Stack gap={16} align="center">
+        <Stack gap={16} align="center" style={{ maxWidth: 600 }}>
           <SlideIn startAt={0} durationInFrames={20} from="bottom">
             <Text variant="heading">What we shipped</Text>
           </SlideIn>
-          <Stagger startAt={26} staggerDelay={8}>
-            <SlideIn durationInFrames={20} from="bottom">
-              <Text variant="body">Faster build times</Text>
-            </SlideIn>
-            <SlideIn durationInFrames={20} from="bottom">
-              <Text variant="body">Improved test coverage</Text>
-            </SlideIn>
-            <SlideIn durationInFrames={20} from="bottom">
-              <Text variant="body">Zero downtime deploys</Text>
-            </SlideIn>
-          </Stagger>
+          <TimelineGate showAfter={26}>
+            <Stagger startAt={26} staggerDelay={8}>
+              <SlideIn durationInFrames={20} from="bottom">
+                <Text variant="body">Faster build times</Text>
+              </SlideIn>
+              <SlideIn durationInFrames={20} from="bottom">
+                <Text variant="body">Improved test coverage</Text>
+              </SlideIn>
+              <SlideIn durationInFrames={20} from="bottom">
+                <Text variant="body">Zero downtime deploys</Text>
+              </SlideIn>
+            </Stagger>
+          </TimelineGate>
         </Stack>
       </AbsoluteCenter>
     </SafeArea>
@@ -270,7 +266,7 @@ export default function RemoteComponent() {
   return (
     <SafeArea>
       <AbsoluteCenter axis="both">
-        <Stack gap={16} align="center">
+        <Stack gap={16} align="center" style={{ maxWidth: 700 }}>
           <FadeIn startAt={0} durationInFrames={20}>
             <Text variant="subheading">We protect your</Text>
           </FadeIn>

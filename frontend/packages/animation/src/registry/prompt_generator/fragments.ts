@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { AspectPreset } from '../styles/AspectPresetContext';
-import { BrandTheme as BrandObject } from '../theme/types';
-import { ComponentRegistration } from '../registry/registry';
-import { PROMPT_SPACING_VALUES } from '../tokens/spacing';
+import { AspectPreset } from '../../styles/AspectPresetContext';
+import { BrandTheme as BrandObject } from '../../theme/types';
+import { ComponentRegistration } from '../registry';
+import { PROMPT_SPACING_VALUES } from '../../tokens/spacing';
 
 export function frameContractFragment(): string {
   return [

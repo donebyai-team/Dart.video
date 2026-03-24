@@ -7,9 +7,9 @@ TitleCard — pre-built hero title with heading, subheading, and optional eyebro
 
 ### Layout Primitives - structural only, every visible element must live inside one
 SafeArea — Outermost content wrapper that applies safe area insets from the active aspect preset
-Stack — Vertical flex layout with spacing token values for gap
-Row — Horizontal flex layout with spacing token values for gap
-AbsoluteCenter — Centers child absolutely within nearest positioned parent
+Stack — arranges children vertically — primary layout primitive for top-to-bottom compositions
+Row — arranges children horizontally — use for side-by-side elements
+AbsoluteCenter — centers a single child both horizontally and vertically on the full canvas
 
 ### Motion Primitives - wraps exactly one child, never wraps Layout
 FadeIn — fades an element in from transparent to fully visible
@@ -22,12 +22,12 @@ Stagger — reveals children one after another with a delay between each — chi
 TimelineGate — shows its child only within a defined time window — use instead of JSX conditionals
 
 ### Static Primitives - no built-in animation, wrap in Motion to animate
-Text — Static text element, wrap in FadeIn/SlideIn to animate
+Text — displays a static string — use for headings, labels, and body copy
 
 ### Dynamic Primitives - self-animating, never wrap in Motion, use startAt directly
-Counter — Animated number counter that tweens between values
-Typewriter — Progressively reveals text character by character, word, or line
-WordCycle — Cycles through an array of words with animated transitions
+Counter — animates a number incrementing or decrementing to a target value — use for metrics and stats
+Typewriter — reveals text character by character — use for dramatic or progressive text reveals
+WordCycle — cycles through a list of words in place — use when one slot shows multiple values over time
 
 ### Asset Primitives - no built-in animation, wrap in Motion to animate
 LogoAsset — renders the brand logo from the active theme — use for brand presence in title and outro scenes

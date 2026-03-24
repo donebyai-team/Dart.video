@@ -26,7 +26,7 @@ export * from './components/scenes';
 export * from './registry';
 
 // Prompt generation
-export * from './prompt';
+export * from './registry/prompt';
 
 // Patch system
 export * from './patches';

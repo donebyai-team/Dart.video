@@ -1,10 +1,10 @@
-import { ComponentRegistration } from '../registry';
-import { ANIMATION_PRIMITIVE_COMPONENTS } from '../registry/animation_primitives';
-import { BRAND_COMPONENTS } from '../registry/assets';
-import { CONTENT_COMPONENTS } from '../registry/text';
-import { LAYOUT_COMPONENTS } from '../registry/layouts';
-import { SCENE_COMPONENTS } from '../registry/scenes';
-import { ASPECT_PRESETS } from '../styles/AspectPresetContext';
+import { ComponentRegistration } from '..';
+import { ANIMATION_PRIMITIVE_COMPONENTS } from '../animation_primitives';
+import { BRAND_COMPONENTS } from '../assets';
+import { CONTENT_COMPONENTS } from '../text';
+import { LAYOUT_COMPONENTS } from '../layouts';
+import { SCENE_COMPONENTS } from '../scenes';
+import { ASPECT_PRESETS } from '../../styles/AspectPresetContext';
 import {
   frameContractFragment,
   canvasDimensionsFragment,
