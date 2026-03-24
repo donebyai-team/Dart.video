@@ -105,10 +105,10 @@ function GeneratePlanV2(input: VideoGenerationPlanRequest, conversation_history:
     Use the ask tool — do not assume missing creative direction.
 
     Ask if:
-    - A scene implies brand presence but no brand name is provided
+    - A scene implies brand presence but no brand name is provided, ask user add a brand identity
     - Metrics are mentioned but it is unclear if they are real or placeholder
-    - A product screen assets is implied but the description is not clear
-    - Any key visual storytelling decision is ambiguous from script or assets
+    - An attachment is provided but you are not clear on where and how to use it.
+    - Any key visual storytelling decision is ambiguous from script or attachments
 
     Do not ask about:
     - Timing or animation style — you decide these
