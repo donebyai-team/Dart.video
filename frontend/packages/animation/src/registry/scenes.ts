@@ -34,6 +34,7 @@ export const TextHighlightSchema = z.object({
 });
 
 const AnimationEnum = z.enum(['slideUp', 'slideDown', 'slideLeft', 'slideRight', 'fadeIn', 'scaleIn']);
+const LogoAnimationEnum = z.enum(['none', 'fadeIn', 'zoomIn', 'bounceIn', 'spinIn', 'dropIn']);
 const PeelDirectionEnum = z.enum(['left', 'right', 'up', 'down']);
 
 export const ImagePeelSchema = z.object({
@@ -122,5 +123,21 @@ export const SCENE_COMPONENTS: ComponentRegistration[] = [
     fullSchema: ImagePeelSchema,
     editorProps: ['sources', 'direction', 'holdDuration', 'peelDuration', 'borderRadius'],
     description: 'stacked images that peel away one by one to reveal the next image',
+  },
+  {
+    name: 'LogoWithBrandName',
+    type: 'scene',
+    fullSchema: z.object({
+      brandName: z.string(),
+      src: z.string().optional(),
+      logoSize: z.number().optional(),
+      variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).optional(),
+      animation: LogoAnimationEnum.default('zoomIn').optional(),
+      startAt: z.number().default(0).optional(),
+      nameDelay: z.number().default(15).optional(),
+      layout: z.enum(['horizontal', 'vertical']).default('horizontal').optional(),
+    }),
+    editorProps: ['brandName', 'src', 'variant', 'animation', 'layout', 'logoSize'],
+    description: 'logo icon with animated brand name reveal — logo appears first, then name slides in',
   },
 ];

@@ -144,7 +144,7 @@ export function ImagePeel({
                                     : 'bottom center',
                                 transform: `translate(${stackX}px, ${stackY}px) ${peelTransform}`,
                                 opacity: peelOpacity,
-                                boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                                boxShadow: "0 20px 40px rgba(0,0,0,0.25), 0 12px 24px rgba(0,0,0,0.15)",
                             }}
                         >
                             <ImageAsset src={src} width={patchedWidth} height={patchedHeight} />

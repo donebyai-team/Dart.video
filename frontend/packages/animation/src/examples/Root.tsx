@@ -1,10 +1,10 @@
 import React from "react";
-import { Composition } from "remotion";
+import { AbsoluteFill, Composition } from "remotion";
 import { Typewriter, WordCycle, TextHighlight } from "../components/scenes/text";
 import { FadeIn, FadeOut, SlideIn, ScaleIn, Stagger, TimelineGate } from "../core/animation_primitives";
 import { FramePreset, SafeArea, AbsoluteCenter, Stack, Row } from "../core/layout";
 import { Text } from "../core/text";
-import { ImageAsset, LogoAsset } from "../core/assets";
+import { ImageAsset, LogoAsset, LogoWithBrandName } from "../core/assets";
 import { SpeedFactorProvider } from "../duration";
 import { ASPECT_PRESETS, resolveStyle, AspectPresetProvider, StyleContextProvider } from "../styles";
 import { BrandTheme, darkTheme, ThemeProvider } from "../theme";
@@ -217,31 +217,52 @@ const AssetsScene: React.FC = () => (
 
 const AnimatedImageScene: React.FC = () => (
     <Scene>
-        <SafeArea>
-            <AbsoluteCenter axis="both">
-                {/* <AnimatedImage id="animated-image-0" text="Your dashboard, logs, and alerts didn't adapt" src="https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774173924-cuser.png" /> */}
-                <ImagePeel
-                    id="animated-peel-0" 
-                    sources={[
-                        "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774173924-cuser.png",
-                        "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774083475-add_this_person_to_the_back_of_t-0.jpg",
-                        "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774173924-cuser.png",
-                        "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774083475-add_this_person_to_the_back_of_t-0.jpg"
-                    ]}
-                >
-                </ImagePeel>
-            </AbsoluteCenter>
-        </SafeArea>
+        <AbsoluteFill style={{ backgroundColor: 'white' }}>
+            <SafeArea>
+                <AbsoluteCenter axis="both">
+                    {/* <AnimatedImage style={ { color: "#000"}} id="animated-image-0" text="Your dashboard, logs, and alerts didn't adapt" src="https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774173924-cuser.png" /> */}
+                    <ImagePeel
+                        id="animated-peel-0"
+                        sources={[
+                            "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774173924-cuser.png",
+                            "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774083475-add_this_person_to_the_back_of_t-0.jpg",
+                            "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774173924-cuser.png",
+                            "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774083475-add_this_person_to_the_back_of_t-0.jpg"
+                        ]}
+                    >
+                    </ImagePeel>
+                </AbsoluteCenter>
+            </SafeArea>
+        </AbsoluteFill>
     </Scene>
 );
 
 const AnimatedVideoScene: React.FC = () => (
     <Scene>
-        <SafeArea>
-            <AbsoluteCenter axis="both">
-                <AnimatedVideo id="animated-video-0" text="Your dashboard, logs, and alerts didn't adapt" src="https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774173924-cur.mp4" />
-            </AbsoluteCenter>
-        </SafeArea>
+        <AbsoluteFill style={{ backgroundColor: 'white' }}>
+            <SafeArea>
+                <AbsoluteCenter axis="both">
+                    <AnimatedVideo style={{ color: "#000" }} id="animated-video-0" text="Your dashboard, logs, and alerts didn't adapt" src="https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774173924-cur.mp4" />
+                </AbsoluteCenter>
+            </SafeArea>
+        </AbsoluteFill>
+    </Scene>
+);
+
+const LogoScene: React.FC = () => (
+    <Scene>
+        <AbsoluteFill style={{ backgroundColor: 'white' }}>
+            <SafeArea>
+                <AbsoluteCenter axis="both">
+                    {/* <LogoAsset id="logo-0" src="https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774240200-inline.svg" /> */}
+                    <LogoWithBrandName 
+                    style={{ color: "#000" }} 
+                    variant="heading"
+                    src="https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774240201-apple-touch-icon.png" id="logo-with-brand-name-0" 
+                    brandName="Cursor" />
+                </AbsoluteCenter>
+            </SafeArea>
+        </AbsoluteFill>
     </Scene>
 );
 
@@ -304,5 +325,6 @@ export const RemotionRoot: React.FC = () => (
         <Composition id="layout" component={LayoutScene} durationInFrames={180} fps={30} width={1920} height={1080} />
         <Composition id="animated-image" component={AnimatedImageScene} durationInFrames={180} fps={30} width={1920} height={1080} />
         <Composition id="animated-video" component={AnimatedVideoScene} durationInFrames={180} fps={30} width={1920} height={1080} />
+        <Composition id="logo" component={LogoScene} durationInFrames={80} fps={30} width={1920} height={1080} />
     </>
 );

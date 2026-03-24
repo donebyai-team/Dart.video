@@ -1,8 +1,11 @@
 import { preloadImage } from "@remotion/preload";
 import { useEffect } from "react";
-import { useRemotionEnvironment } from "remotion";
+import { useCurrentFrame, useRemotionEnvironment } from "remotion";
 import { usePatchedProp, useStyleOverride } from "../../patches/PatchContext";
+import { useSpeedFactor, applySpeedFactor } from "../../duration/speedFactor";
+import { useStyleContext } from "../../styles/StyleContext";
 import { useAspectPreset } from "../../styles/AspectPresetContext";
+import { interpolateWithEasing } from "../../styles/easingResolver";
 import { useTheme } from "../../theme";
 
 const DEFAULT_LOGO_SVG = `data:image/svg+xml,${encodeURIComponent(`
@@ -14,35 +17,65 @@ const DEFAULT_LOGO_SVG = `data:image/svg+xml,${encodeURIComponent(`
 </svg>
 `)}`;
 
+export type LogoAnimation = 'none' | 'fadeIn' | 'zoomIn' | 'bounceIn' | 'spinIn' | 'dropIn';
+
 export interface LogoAssetProps {
     src?: string;
     width?: number;
     height?: number;
+    animation?: LogoAnimation;
+    startAt?: number;
     style?: React.CSSProperties;
     className?: string;
     id?: string;
+}
+
+function getLogoAnimationStyle(animation: LogoAnimation, progress: number): React.CSSProperties {
+    const inv = 1 - progress;
+    switch (animation) {
+        case 'fadeIn':
+            return { opacity: progress };
+        case 'zoomIn':
+            return { opacity: progress, transform: `scale(${0.3 + progress * 0.7})` };
+        case 'bounceIn': {
+            // Overshoot then settle: scales past 1.0 then back
+            const overshoot = progress < 1 ? 0.3 + progress * 0.9 + Math.sin(progress * Math.PI) * 0.15 : 1;
+            return { opacity: Math.min(progress * 2, 1), transform: `scale(${overshoot})` };
+        }
+        case 'spinIn':
+            return { opacity: progress, transform: `scale(${0.3 + progress * 0.7}) rotate(${inv * 360}deg)` };
+        case 'dropIn':
+            return { opacity: progress, transform: `translateY(${inv * -60}px) scale(${0.8 + progress * 0.2})` };
+        case 'none':
+        default:
+            return {};
+    }
 }
 
 export function LogoAsset({
     src,
     width,
     height,
+    animation = 'zoomIn',
+    startAt = 0,
     style,
     className,
     id,
 }: LogoAssetProps): React.ReactElement {
+    const frame = useCurrentFrame();
     const { logo } = useTheme();
     const { isRendering } = useRemotionEnvironment();
+    const styleConfig = useStyleContext();
     const preset = useAspectPreset();
+    const speedFactor = useSpeedFactor();
     const styleOverride = useStyleOverride(id);
-    const { objectFit, ...wrapperStyleOverride } = styleOverride;
+    const { objectFit: styleObjectFit, ...restStyle } = style ?? {};
+    const { objectFit: overrideObjectFit, ...wrapperStyleOverride } = styleOverride;
     const patchedWidth = usePatchedProp<number | undefined>(id, 'width', width);
     const patchedHeight = usePatchedProp<number | undefined>(id, 'height', height);
     const defaultSrc = src ?? logo?.url ?? DEFAULT_LOGO_SVG;
     const patchedSrc = usePatchedProp<string | undefined>(id, 'src', defaultSrc);
-    // Use a frame-relative default so logos feel consistent across presets
-    // without requiring callers to pass explicit dimensions.
-    const defaultBoxSize = Math.min(Math.max(Math.min(preset.width, preset.height) * 0.2, 160), 260);
+    const defaultBoxSize = Math.min(preset.width, preset.height) * 0.35;
     // Width/height define the bounding box. If only one is provided, mirror it
     // so the logo still gets a deterministic square box to fit into.
     const resolvedBoxWidth = patchedWidth ?? patchedHeight ?? defaultBoxSize;
@@ -53,8 +86,17 @@ export function LogoAsset({
     const canUseThemeLogoMetadata = !!logo?.url && patchedSrc === logo.url;
     const hasIntrinsicSize = canUseThemeLogoMetadata && (logo?.width ?? 0) > 0 && (logo?.height ?? 0) > 0;
     const intrinsicAspectRatio = hasIntrinsicSize ? `${logo!.width} / ${logo!.height}` : undefined;
+    const rawObjectFit = overrideObjectFit ?? styleObjectFit;
     const resolvedObjectFit: React.CSSProperties['objectFit'] =
-        typeof objectFit === 'string' ? objectFit as React.CSSProperties['objectFit'] : 'contain';
+        typeof rawObjectFit === 'string' ? rawObjectFit as React.CSSProperties['objectFit'] : 'contain';
+
+    const patchedAnimation = usePatchedProp<LogoAnimation>(id, 'animation', animation);
+    const adjustedStartAt = applySpeedFactor(startAt, speedFactor);
+    const animDuration = 30;
+    const animProgress = patchedAnimation !== 'none'
+        ? interpolateWithEasing(frame, [adjustedStartAt, adjustedStartAt + animDuration], [0, 1], styleConfig.motion.entrance)
+        : 1;
+    const animStyle = getLogoAnimationStyle(patchedAnimation, animProgress);
 
     useEffect(() => {
         if (!patchedSrc || !isRendering) return;
@@ -74,7 +116,8 @@ export function LogoAsset({
                 justifyContent: 'center',
                 width: resolvedBoxWidth,
                 height: resolvedBoxHeight,
-                ...style,
+                ...animStyle,
+                ...restStyle,
                 ...wrapperStyleOverride,
             }}
         >
