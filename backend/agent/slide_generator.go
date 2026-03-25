@@ -131,9 +131,9 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 			slide.Content = &pbcore.Slide_Animation{
 				Animation: &pbcore.AnimationSlideContent{
 					Plan: &pbcore.AnimationSlidePlan{
-						Index:           pendingSlide.Index,
-						BeatDescription: pendingSlide.Brief,
-						AnimationType:   pendingSlide.Category.BamlTypeName(),
+						Index: pendingSlide.Index,
+						//BeatDescription: pendingSlide.Brief,
+						//AnimationType:   pendingSlide.Category.BamlTypeName(),
 					},
 				},
 			}

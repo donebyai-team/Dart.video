@@ -18,6 +18,8 @@ enum SceneCategory {
 
 class SceneElement {
   component string
+  props string @description("required props json as per the scene")
+  children SceneElement[]
 }
 
 class DataPoint {
@@ -32,10 +34,7 @@ class SceneSection {
 
 class Scene {
   index int
-  category SceneCategory
   elements SceneElement[]
-  brief string @description("a short description explaining the scene, used for semantic search for existing templates and the animation generator")
-  dataPoints DataPoint[] @description("generator will use this data to convert selected SceneElements into animation")
 }
 
 class VideoPlanV2 {
@@ -54,9 +53,9 @@ function GeneratePlanV2(input: VideoGenerationPlanRequest, conversation_history:
   prompt #"
     You are a cinematic video planning director. Your job is to decompose a video brief into a sequence of scenes.
     You decide WHAT appears in each scene, HOW it behaves, and WHAT data it shows.
-    You do NOT write code. You do NOT decide timing values. You do NOT choose props.
+    You do NOT write code.
 
-    {{ AllComponentsList() }}
+    {{ AllScenes() }}
 
     ## SCENE DESIGN PRINCIPLES
 
@@ -109,117 +108,21 @@ function GeneratePlanV2(input: VideoGenerationPlanRequest, conversation_history:
     ```json
     [
       {
+        "index": 0,
+        "elements": [
+          {
+            "component": "AnimatedNumber",
+            "props": {"startText": "Solving", "endText": "incidents", "from": 0, "to": 100}
+          }
+        ]
+      },
+      {
         "index": 1,
-        "category": "TITLE",
-        "brief": "Premium slow open. Headline fades in centered, tagline follows with a beat. Slow and confident — nothing rushes.",
-        "durationBudget": [60, 80],
         "elements": [
           {
-            "component": "Stack",
-            "children": [
-              {
-                "component": "FadeIn",
-                "children": [{ "component": "Text" }]
-              },
-              {
-                "component": "FadeIn",
-                "children": [{ "component": "Text" }]
-              }
-            ]
+            "component": "TextHighlight",
+            "props": {"text": "Everything else is just {noise}"}
           }
-        ],
-        "dataPoints": [
-          { "description": "main headline", "value": "CoasterAI" },
-          { "description": "supporting tagline below headline", "value": "Video generation, automated." }
-        ]
-      },
-      {
-        "index": 2,
-        "category": "SINGLE_STAT",
-        "brief": "Counter is the hero. Label slides in first, counter follows immediately with focus. Give the counter room to breathe. Fast clean exit.",
-        "durationBudget": [90, 130],
-        "elements": [
-          {
-            "component": "Stack",
-            "children": [
-              {
-                "component": "SlideIn",
-                "children": [{ "component": "Text" }]
-              },
-              {
-                "component": "SlideIn",
-                "children": [{ "component": "Counter" }]
-              }
-            ]
-          }
-        ],
-        "dataPoints": [
-          { "description": "label above the counter", "value": "Total Revenue" },
-          { "description": "hero metric shown in counter", "value": 1240000 }
-        ]
-      },
-      {
-        "index": 3,
-        "category": "FEATURE_HIGHLIGHT",
-        "brief": "Product screen dominates the right. Two feature points stagger in on the left. Screen slides in from right edge. Confident and product-led.",
-        "durationBudget": [130, 180],
-        "elements": [
-          {
-            "component": "Row",
-            "children": [
-              {
-                "component": "Stack",
-                "children": [
-                  {
-                    "component": "Stagger",
-                    "children": [
-                      {
-                        "component": "FadeIn",
-                        "children": [{ "component": "Text" }]
-                      },
-                      {
-                        "component": "FadeIn",
-                        "children": [{ "component": "Text" }]
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "component": "SlideIn",
-                "children": [{ "component": "ImageAsset" }]
-              }
-            ]
-          }
-        ],
-        "dataPoints": [
-          { "description": "first feature point on the left", "value": "Real-time Analytics" },
-          { "description": "second feature point on the left", "value": "Zero setup required" },
-          { "description": "product screen shown on the right", "value": "@generated/mixect/0.png" }
-        ]
-      },
-      {
-        "index": 4,
-        "category": "OUTRO",
-        "brief": "Logo scales in centered, CTA fades in below. Unhurried and brand-forward. Logo is the hero.",
-        "durationBudget": [55, 70],
-        "elements": [
-          {
-            "component": "Stack",
-            "children": [
-              {
-                "component": "ScaleIn",
-                "children": [{ "component": "LogoAsset" }]
-              },
-              {
-                "component": "FadeIn",
-                "children": [{ "component": "Text" }]
-              }
-            ]
-          }
-        ],
-        "dataPoints": [
-          { "description": "call to action text below the logo", "value": "Try CoasterAI free today" }
         ]
       }
     ]

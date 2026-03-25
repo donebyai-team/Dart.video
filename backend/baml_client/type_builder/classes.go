@@ -1023,20 +1023,8 @@ func (t *SceneClassView) PropertyIndex() (ClassPropertyView, error) {
 	return t.inner.Property("index")
 }
 
-func (t *SceneClassView) PropertyCategory() (ClassPropertyView, error) {
-	return t.inner.Property("category")
-}
-
 func (t *SceneClassView) PropertyElements() (ClassPropertyView, error) {
 	return t.inner.Property("elements")
-}
-
-func (t *SceneClassView) PropertyBrief() (ClassPropertyView, error) {
-	return t.inner.Property("brief")
-}
-
-func (t *SceneClassView) PropertyDataPoints() (ClassPropertyView, error) {
-	return t.inner.Property("dataPoints")
 }
 
 func (t *TypeBuilder) Scene() (*SceneClassView, error) {
@@ -1069,6 +1057,14 @@ func (t *SceneElementClassView) ListProperties() ([]ClassPropertyView, error) {
 
 func (t *SceneElementClassView) PropertyComponent() (ClassPropertyView, error) {
 	return t.inner.Property("component")
+}
+
+func (t *SceneElementClassView) PropertyProps() (ClassPropertyView, error) {
+	return t.inner.Property("props")
+}
+
+func (t *SceneElementClassView) PropertyChildren() (ClassPropertyView, error) {
+	return t.inner.Property("children")
 }
 
 func (t *TypeBuilder) SceneElement() (*SceneElementClassView, error) {
