@@ -1,14 +1,25 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
+import z from 'zod';
 import { usePrimitivePatches, usePatchedProp, useStyleOverride } from '../../../patches/PatchContext';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme/ThemeContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
-import { TypographyVariant } from '../../../tokens/semantic';
+import { TypographyVariant, TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
 import { resolveTypography } from '../../../tokens/resolveTypography';
 import { applySpeedFactor, useSpeedFactor } from '../../../duration';
-import { EntranceAnimation, getEntranceTransform } from '../types';
+import { EntranceAnimation, getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
+import type { ComponentRegistration } from '../../../registry/registry';
+import type { DurationResult } from '../durationTypes';
+
+// Default duration constants
+const DEFAULT_ENTRANCE_DURATION = 20;
+const DEFAULT_TYPING_DURATION = 60;
+const DEFAULT_FRAMES_PER_CHAR = 2;
+const DEFAULT_FRAMES_PER_WORD = 8;
+const DEFAULT_FRAMES_PER_LINE = 15;
+const MIN_TYPING_DURATION = 30;
 
 export type TypewriterMode = 'char' | 'word' | 'line';
 
@@ -114,3 +125,73 @@ export function Typewriter({
     </span>
   );
 }
+
+// ============================================================================
+// Schema & Duration Calculation
+// ============================================================================
+
+export const TypewriterSchema = z.object({
+  text: z.string().min(1, "text is required"),
+  mode: z.enum(['char', 'word', 'line']).default('char').optional(),
+  variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).optional(),
+  animation: z.enum(ENTRANCE_ANIMATIONS).optional(),
+  startAt: z.number().min(0, "startAt cannot be negative").default(0).optional(),
+  durationInFrames: z.number().min(1, "durationInFrames must be positive").default(DEFAULT_TYPING_DURATION).optional(),
+  style: z.any().optional(),
+  className: z.string().optional(),
+});
+
+export function calculateTypewriterDuration(props: TypewriterProps): DurationResult {
+  // Validate props
+  const validation = TypewriterSchema.safeParse(props);
+  if (!validation.success) {
+    const firstError = validation.error.errors[0];
+    return {
+      success: false,
+      error: firstError.message,
+      field: firstError.path[0] as string,
+    };
+  }
+
+  const validated = validation.data;
+  const mode = validated.mode ?? 'char';
+  const entranceDuration = DEFAULT_ENTRANCE_DURATION;
+  
+  // Calculate typing duration based on mode
+  let typingDuration: number;
+  
+  if (validated.durationInFrames) {
+    // User specified duration
+    typingDuration = validated.durationInFrames;
+  } else {
+    // Auto-calculate based on content
+    if (mode === 'char') {
+      const charCount = validated.text.length;
+      typingDuration = Math.max(MIN_TYPING_DURATION, charCount * DEFAULT_FRAMES_PER_CHAR);
+    } else if (mode === 'word') {
+      const wordCount = validated.text.split(' ').length;
+      typingDuration = Math.max(MIN_TYPING_DURATION, wordCount * DEFAULT_FRAMES_PER_WORD);
+    } else { // line
+      const lineCount = validated.text.split('\n').length;
+      typingDuration = Math.max(MIN_TYPING_DURATION, lineCount * DEFAULT_FRAMES_PER_LINE);
+    }
+  }
+  
+  return {
+    success: true,
+    duration: Math.ceil(entranceDuration + typingDuration),
+  };
+}
+
+// ============================================================================
+// Registry Descriptor
+// ============================================================================
+
+export const TypewriterDescriptor: ComponentRegistration = {
+  name: 'Typewriter',
+  type: 'content',
+  fullSchema: TypewriterSchema,
+  editorProps: ['text', 'mode', 'animation', 'durationInFrames'],
+  description: 'reveals text character by character — use for dramatic or progressive text reveals',
+  calculateDuration: calculateTypewriterDuration,
+};

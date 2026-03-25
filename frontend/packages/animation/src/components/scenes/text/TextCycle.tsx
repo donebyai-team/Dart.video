@@ -1,14 +1,21 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
+import z from 'zod';
 import { usePrimitivePatches, usePatchedProp, useStyleOverride } from '../../../patches/PatchContext';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme/ThemeContext';
 import { getEasing, interpolateWithEasing } from '../../../styles/easingResolver';
 import { type Easing } from '../../../styles/types';
-import { TypographyVariant } from '../../../tokens/semantic';
+import { TypographyVariant, TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
 import { resolveTypography } from '../../../tokens/resolveTypography';
 import { applySpeedFactor, useSpeedFactor } from '../../../duration';
+import type { ComponentRegistration } from '../../../registry/registry';
+import type { DurationResult } from '../durationTypes';
+
+// Default duration constants
+const DEFAULT_HOLD_DURATION = 15;
+const DEFAULT_TRANSITION_DURATION = 5;
 
 export type TextCycleTransition = 'flipY' | 'fadeSwap' | 'slideUp';
 
@@ -34,13 +41,13 @@ export interface TextCycleProps {
  * no layout reflow occurs when words change, eliminating jerk in Stack/Row layouts.
  */
 export function TextCycle({
-  startAt = 0,
+  startAt,
   texts,
-  holdDuration = 15,
-  transitionDuration = 5,
+  holdDuration,
+  transitionDuration,
   easing,
-  transition = 'flipY',
-  variant = 'heading',
+  transition,
+  variant,
   style,
   className,
   id,
@@ -51,9 +58,16 @@ export function TextCycle({
   const preset = useAspectPreset();
 
   const speedFactor = useSpeedFactor();
-  const adjustedStartAt = applySpeedFactor(startAt, speedFactor);
-  const adjustedHoldDuration = applySpeedFactor(holdDuration, speedFactor);
-  const adjustedTransitionDuration = applySpeedFactor(transitionDuration, speedFactor);
+
+  // Apply defaults
+  const actualStartAt = startAt ?? 0;
+  const actualHoldDuration = holdDuration ?? DEFAULT_HOLD_DURATION;
+  const actualTransitionDuration = transitionDuration ?? DEFAULT_TRANSITION_DURATION;
+  const actualTransition = transition ?? 'flipY';
+  const actualVariant = variant ?? 'heading';
+  const adjustedStartAt = applySpeedFactor(actualStartAt, speedFactor);
+  const adjustedHoldDuration = applySpeedFactor(actualHoldDuration, speedFactor);
+  const adjustedTransitionDuration = applySpeedFactor(actualTransitionDuration, speedFactor);
 
   const { effectiveStartAt, effectiveDurationInFrames: effectiveHold } = usePrimitivePatches(id, {
     startAt: adjustedStartAt,
@@ -62,8 +76,8 @@ export function TextCycle({
 
   const patchedTexts = usePatchedProp(id, 'texts', texts);
   const patchedTransitionDuration = usePatchedProp(id, 'transitionDuration', adjustedTransitionDuration);
-  const patchedTransition = usePatchedProp<TextCycleTransition>(id, 'transition', transition);
-  const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', variant);
+  const patchedTransition = usePatchedProp<TextCycleTransition>(id, 'transition', actualTransition);
+  const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', actualVariant);
   const styleOverride = useStyleOverride(id);
 
   const cycleDuration = effectiveHold + patchedTransitionDuration;
@@ -207,3 +221,66 @@ export function TextCycle({
     </span>
   );
 }
+
+// ============================================================================
+// Schema & Duration Calculation
+// ============================================================================
+
+export const TextCycleSchema = z.object({
+  texts: z.array(z.string()).min(1, "texts must contain at least one item"),
+  holdDuration: z.number().min(0, "holdDuration cannot be negative").default(DEFAULT_HOLD_DURATION).optional(),
+  transitionDuration: z.number().min(0, "transitionDuration cannot be negative").default(DEFAULT_TRANSITION_DURATION).optional(),
+  easing: z.string().optional(),
+  transition: z.enum(['flipY', 'fadeSwap', 'slideUp']).optional(),
+  variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).optional(),
+  startAt: z.number().min(0, "startAt cannot be negative").default(0).optional(),
+  style: z.any().optional(),
+  className: z.string().optional(),
+});
+
+export function calculateTextCycleDuration(props: TextCycleProps): DurationResult {
+  // Validate props
+  const validation = TextCycleSchema.safeParse(props);
+  if (!validation.success) {
+    const firstError = validation.error.errors[0];
+    return {
+      success: false,
+      error: firstError.message,
+      field: firstError.path[0] as string,
+    };
+  }
+
+  const validated = validation.data;
+  
+  if (validated.texts.length === 0) {
+    return {
+      success: false,
+      error: "texts array cannot be empty",
+      field: "texts",
+    };
+  }
+
+  // Calculate duration: (hold + transition) * number of texts
+  const holdDuration = validated.holdDuration ?? DEFAULT_HOLD_DURATION;
+  const transitionDuration = validated.transitionDuration ?? DEFAULT_TRANSITION_DURATION;
+  const cycleDuration = holdDuration + transitionDuration;
+  const totalDuration = cycleDuration * validated.texts.length;
+  
+  return {
+    success: true,
+    duration: Math.ceil(totalDuration),
+  };
+}
+
+// ============================================================================
+// Registry Descriptor
+// ============================================================================
+
+export const TextCycleDescriptor: ComponentRegistration = {
+  name: 'TextCycle',
+  type: 'content',
+  fullSchema: TextCycleSchema,
+  editorProps: ['texts', 'transition', 'holdDuration', 'transitionDuration'],
+  description: 'cycles through text array with transitions — use for rotating messages',
+  calculateDuration: calculateTextCycleDuration,
+};

@@ -44,6 +44,9 @@ import {
   isValidDeclaredSettledFrame,
   TAIL_BUFFER,
 } from '../src/code_rules_validators/animation-duration.ts';
+import {
+  computeAnimationDurationFromCodeV2,
+} from '../src/code_rules_validators/animation-duration-v2.ts';
 import {parseValidateRequestBody, validateGeneratedCode} from '../src/code_rules_validators/validate-request.ts';
 import {randomUUID} from 'node:crypto';
 import {existsSync} from 'node:fs';
@@ -258,10 +261,37 @@ async function handleValidate(req, res) {
     return;
   }
   console.log('[validate] compile check passed');
+  
+  // ── Step 1.5: Component-based duration validation (V2) ───────────────────
+  console.log('[validate] step 1.5 — component duration validation (V2)');
+  const v2DurationResult = computeAnimationDurationFromCodeV2(code);
+  
+  // Check for validation errors from component duration calculators
+  if (v2DurationResult.errors && v2DurationResult.errors.length > 0) {
+    const formattedErrors = v2DurationResult.errors.map(err => {
+      let message = err.error;
+      if (err.component) {
+        message = `[${err.component}] ${message}`;
+        if (err.field) {
+          message += ` (field: ${err.field})`;
+        }
+      }
+      return message;
+    });
+    
+    console.log('[validate] component duration validation FAILED:\n', formattedErrors);
+    res.writeHead(422, {'Content-Type': 'application/json'});
+    res.end(JSON.stringify({
+      error_type: 'validation_error',
+      errors: formattedErrors,
+    }));
+    return;
+  }
+  console.log('[validate] component duration validation passed');
+  
   const declaredSettledFrame = getDeclaredSettledFrame(code);
-  const astFallbackDuration = computeAnimationDurationFromCode(code);
   const hasValidDeclaredSettledFrame = isValidDeclaredSettledFrame(declaredSettledFrame);
-  const hasUsableAstEstimate = astFallbackDuration.settledFrame !== FALLBACK_SETTLED_FRAME;
+  const hasUsableV2Estimate = v2DurationResult.settledFrame !== FALLBACK_SETTLED_FRAME;
 
   // Declared settledFrame is the primary source when it passes the validator contract:
   // - exported as a numeric literal
@@ -269,27 +299,27 @@ async function handleValidate(req, res) {
   // - > 0
   // - <= single-slide max bound
   //
-  // AST is used as:
+  // V2 (component-based) is used as:
   // - the fallback when declared settledFrame is missing/invalid
   // - a debug-only sanity check when both values are available
-  if (hasValidDeclaredSettledFrame && hasUsableAstEstimate) {
-    const delta = Math.abs(declaredSettledFrame - astFallbackDuration.settledFrame);
+  if (hasValidDeclaredSettledFrame && hasUsableV2Estimate) {
+    const delta = Math.abs(declaredSettledFrame - v2DurationResult.settledFrame);
     if (delta > 30) {
       console.warn(
-        `[validate] duration mismatch: declared=${declaredSettledFrame} ast=${astFallbackDuration.settledFrame}`,
+        `[validate] duration mismatch: declared=${declaredSettledFrame} v2=${v2DurationResult.settledFrame}`,
       );
     }
   }
 
   const settledFrame = hasValidDeclaredSettledFrame
     ? declaredSettledFrame
-    : astFallbackDuration.settledFrame ?? FALLBACK_SETTLED_FRAME;
+    : v2DurationResult.settledFrame ?? FALLBACK_SETTLED_FRAME;
   const durationInFrames = hasValidDeclaredSettledFrame
     ? declaredSettledFrame + TAIL_BUFFER
-    : astFallbackDuration.durationInFrames ?? FALLBACK_DURATION_IN_FRAMES;
+    : v2DurationResult.durationInFrames ?? FALLBACK_DURATION_IN_FRAMES;
   console.log(
     `[validate] duration resolved: settledFrame=${settledFrame}, durationInFrames=${durationInFrames}, source=${
-      hasValidDeclaredSettledFrame ? 'declared' : 'ast-fallback'
+      hasValidDeclaredSettledFrame ? 'declared' : 'v2-component-based'
     }`,
   );
 

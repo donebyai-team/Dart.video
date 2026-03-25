@@ -1,10 +1,17 @@
 import React, { useMemo } from 'react';
-import { interpolate, useCurrentFrame } from 'remotion';
+import { useCurrentFrame } from 'remotion';
+import z from 'zod';
 import { usePatchedProp, useStyleOverride } from '../../../patches';
 import { useStyleContext, useAspectPreset, interpolateWithEasing } from '../../../styles';
 import { useTheme } from '../../../theme';
-import { resolveTypography, TypographyVariant } from '../../../tokens';
-import { EntranceAnimation, getEntranceTransform } from '../types';
+import { resolveTypography, TypographyVariant, TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens';
+import { EntranceAnimation, getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
+import type { ComponentRegistration } from '../../../registry/registry';
+import type { DurationResult } from '../durationTypes';
+
+// Default duration constants
+const DEFAULT_ENTRANCE_DURATION = 30;
+const DEFAULT_ZOOM_DURATION = 20;
 
 export interface TextHighlightProps {
     id?: string;
@@ -24,15 +31,15 @@ export interface TextHighlightProps {
 
 export const TextHighlight: React.FC<TextHighlightProps> = ({
     id,
-    variant = 'heading',
     text,
-    highlightPattern = /{([^}]+)}/g, // Default: matches {text}
-    highlightStyle = 'glow',
+    variant,
+    highlightPattern,
+    highlightStyle,
     highlightColor,
-    animation = 'slideUp',
-    animationDelay = 30,
-    zoomDuration = 20,
-    startAt = 0,
+    animation,
+    animationDelay,
+    zoomDuration,
+    startAt,
     className,
     style,
 }) => {
@@ -40,13 +47,19 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
     const styleConfig = useStyleContext();
     const theme = useTheme();
     const preset = useAspectPreset();
-    if (!highlightColor) {
-        highlightColor = theme.colors.primary;
-    }
 
-    const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', variant);
-    const patchedHighlightColor = usePatchedProp<string>(id, 'highlightColor', highlightColor);
-    const patchedAnimation = usePatchedProp<EntranceAnimation>(id, 'animation', animation);
+    // Apply defaults
+    const actualVariant = variant ?? 'heading';
+    const actualHighlightStyle = highlightStyle ?? 'glow';
+    const actualHighlightColor = highlightColor ?? theme.colors.primary;
+    const actualAnimation = animation ?? 'fadeIn';
+    const actualAnimationDelay = animationDelay ?? DEFAULT_ENTRANCE_DURATION;
+    const actualZoomDuration = zoomDuration ?? DEFAULT_ZOOM_DURATION;
+    const actualStartAt = startAt ?? 0;
+
+    const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', actualVariant);
+    const patchedHighlightColor = usePatchedProp<string>(id, 'highlightColor', actualHighlightColor);
+    const patchedAnimation = usePatchedProp<EntranceAnimation>(id, 'animation', actualAnimation);
     const styleOverride = useStyleOverride(id);
     const easing = styleConfig.motion.entrance;
 
@@ -57,21 +70,21 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
 
     const entranceProgress = interpolateWithEasing(
         frame,
-        [startAt, startAt + animationDelay],
+        [actualStartAt, actualStartAt + actualAnimationDelay],
         [0, 1],
         easing
     );
 
-    const zoomStartFrame = startAt + animationDelay;
+    const zoomStartFrame = actualStartAt + actualAnimationDelay;
     const zoomProgress = interpolateWithEasing(
         frame,
-        [zoomStartFrame, zoomStartFrame + zoomDuration],
+        [zoomStartFrame, zoomStartFrame + actualZoomDuration],
         [0, 1],
         easing
     );
 
     // Disappear immediately after zoom completes
-    const disappearFrame = zoomStartFrame + zoomDuration;
+    const disappearFrame = zoomStartFrame + actualZoomDuration;
     const isVisible = frame < disappearFrame;
 
     const segments = useMemo(() => {
@@ -97,7 +110,7 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
             } else {
                 parts.push({ text, highlight: false, index: 0 });
             }
-        } else {
+        } else if (highlightPattern) {
             // Regex matching
             const regex = new RegExp(highlightPattern);
             let match;
@@ -147,7 +160,7 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
         const zoomScale = 1 + zoomProgress * 9; // Scales from 1 to 10x for full screen effect
         const baseTransform = `scale(${zoomScale})`;
 
-        switch (highlightStyle) {
+        switch (actualHighlightStyle) {
             case 'marker':
                 return {
                     position: 'relative',
@@ -241,4 +254,59 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
             ))}
         </span>
     );
+};
+
+// ============================================================================
+// Schema & Duration Calculation
+// ============================================================================
+
+export const TextHighlightSchema = z.object({
+    text: z.string().min(1, "text is required"),
+    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).optional(),
+    highlightPattern: z.union([z.string(), z.instanceof(RegExp)]).optional(),
+    highlightStyle: z.enum(['marker', 'underline', 'box', 'glow', 'background']).optional(),
+    highlightColor: z.string().optional(),
+    animation: z.enum(ENTRANCE_ANIMATIONS).optional(),
+    animationDelay: z.number().min(0, "animationDelay cannot be negative").default(DEFAULT_ENTRANCE_DURATION).optional(),
+    zoomDuration: z.number().min(0, "zoomDuration cannot be negative").default(DEFAULT_ZOOM_DURATION).optional(),
+    startAt: z.number().min(0, "startAt cannot be negative").default(0).optional(),
+    className: z.string().optional(),
+    style: z.any().optional(),
+});
+
+export function calculateTextHighlightDuration(props: TextHighlightProps): DurationResult {
+    // Validate props
+    const validation = TextHighlightSchema.safeParse(props);
+    if (!validation.success) {
+        const firstError = validation.error.errors[0];
+        return {
+            success: false,
+            error: firstError.message,
+            field: firstError.path[0] as string,
+        };
+    }
+
+    const validated = validation.data;
+    
+    // Fixed duration: entrance + zoom + disappear
+    const entranceDuration = validated.animationDelay ?? DEFAULT_ENTRANCE_DURATION;
+    const zoomDuration = validated.zoomDuration ?? DEFAULT_ZOOM_DURATION;
+    
+    return {
+        success: true,
+        duration: Math.ceil(entranceDuration + zoomDuration),
+    };
+}
+
+// ============================================================================
+// Registry Descriptor
+// ============================================================================
+
+export const TextHighlightDescriptor: ComponentRegistration = {
+    name: 'TextHighlight',
+    type: 'content',
+    fullSchema: TextHighlightSchema,
+    editorProps: ['text', 'highlightStyle', 'animation', 'animationDelay', 'zoomDuration'],
+    description: 'highlights text with zoom effect — use for emphasis',
+    calculateDuration: calculateTextHighlightDuration,
 };

@@ -1,12 +1,19 @@
 import React from 'react';
 import { interpolate, useCurrentFrame } from 'remotion';
-import { TypographyVariant } from '../../../tokens/semantic';
+import z from 'zod';
+import { TypographyVariant, TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { usePatchedProp, useStyleOverride } from '../../../patches';
 import { useAspectPreset } from '../../../styles';
 import { useTheme } from '../../../theme';
 import { resolveTypography } from '../../../tokens';
-import { EntranceAnimation, getEntranceTransform } from '../types';
+import { EntranceAnimation, getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
+import type { ComponentRegistration } from '../../../registry/registry';
+import type { DurationResult } from '../durationTypes';
+
+// Default duration constants
+const DEFAULT_STAGGER_DELAY = 5;
+const DEFAULT_WORD_DURATION = 15;
 
 export interface TextStaggerStaggerProps {
     id?: string;
@@ -24,13 +31,13 @@ export interface TextStaggerStaggerProps {
 
 export const TextStagger: React.FC<TextStaggerStaggerProps> = ({
     id,
-    variant = 'heading',
+    variant,
     text,
-    staggerDelay = 5,
-    animation = 'slideUp',
-    startAt = 0,
-    duration = 15,
-    separator = ' ',
+    staggerDelay,
+    animation,
+    startAt,
+    duration,
+    separator,
     className,
     style,
     wordStyle,
@@ -40,16 +47,24 @@ export const TextStagger: React.FC<TextStaggerStaggerProps> = ({
     const theme = useTheme();
     const preset = useAspectPreset();
 
-    const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', variant);
+    // Apply defaults
+    const actualVariant = variant ?? 'heading';
+    const actualStaggerDelay = staggerDelay ?? DEFAULT_STAGGER_DELAY;
+    const actualAnimation = animation ?? 'slideUp';
+    const actualStartAt = startAt ?? 0;
+    const actualDuration = duration ?? DEFAULT_WORD_DURATION;
+    const actualSeparator = separator ?? ' ';
+
+    const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', actualVariant);
     const styleOverride = useStyleOverride(id);
 
-    const words = text.split(separator);
+    const words = text.split(actualSeparator);
 
     const getAnimationStyles = (wordIndex: number): React.CSSProperties => {
-        const wordStartAt = startAt + wordIndex * staggerDelay;
+        const wordStartAt = actualStartAt + wordIndex * actualStaggerDelay;
         const progress = interpolate(
             frame,
-            [wordStartAt, wordStartAt + duration],
+            [wordStartAt, wordStartAt + actualDuration],
             [0, 1],
             {
                 extrapolateLeft: 'clamp',
@@ -59,7 +74,7 @@ export const TextStagger: React.FC<TextStaggerStaggerProps> = ({
 
         return {
             opacity: progress,
-            transform: getEntranceTransform(animation, progress),
+            transform: getEntranceTransform(actualAnimation, progress),
         };
     };
 
@@ -82,4 +97,75 @@ export const TextStagger: React.FC<TextStaggerStaggerProps> = ({
             ))}
         </span>
     );
+};
+
+// ============================================================================
+// Schema & Duration Calculation
+// ============================================================================
+
+export const TextStaggerSchema = z.object({
+    text: z.string().min(1, "text is required"),
+    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).optional(),
+    staggerDelay: z.number().min(0, "staggerDelay cannot be negative").default(DEFAULT_STAGGER_DELAY).optional(),
+    animation: z.enum(ENTRANCE_ANIMATIONS).optional(),
+    startAt: z.number().min(0, "startAt cannot be negative").default(0).optional(),
+    duration: z.number().min(1, "duration must be positive").default(DEFAULT_WORD_DURATION).optional(),
+    separator: z.union([z.string(), z.instanceof(RegExp)]).optional(),
+    className: z.string().optional(),
+    style: z.any().optional(),
+    wordStyle: z.any().optional(),
+});
+
+export function calculateTextStaggerDuration(props: TextStaggerStaggerProps): DurationResult {
+    // Validate props
+    const validation = TextStaggerSchema.safeParse(props);
+    if (!validation.success) {
+        const firstError = validation.error.errors[0];
+        return {
+            success: false,
+            error: firstError.message,
+            field: firstError.path[0] as string,
+        };
+    }
+
+    const validated = validation.data;
+    
+    // Calculate word count
+    const separator = validated.separator ?? ' ';
+    const words = validated.text.split(separator);
+    const wordCount = words.length;
+    
+    if (wordCount === 0) {
+        return {
+            success: false,
+            error: "text must contain at least one word",
+            field: "text",
+        };
+    }
+
+    // Calculate duration
+    const staggerDelay = validated.staggerDelay ?? DEFAULT_STAGGER_DELAY;
+    const wordDuration = validated.duration ?? DEFAULT_WORD_DURATION;
+    const startAt = validated.startAt ?? 0;
+    
+    // Total duration = time until last word starts + duration of last word animation
+    const totalDuration = (wordCount - 1) * staggerDelay + wordDuration;
+    
+    return {
+        success: true,
+        duration: Math.ceil(totalDuration),
+    };
+}
+
+// ============================================================================
+// Registry Descriptor
+// ============================================================================
+
+export const TextStaggerDescriptor: ComponentRegistration = {
+    name: 'TextStagger',
+    type: 'content',
+    fullSchema: TextStaggerSchema,
+    editorProps: ['text', 'animation', 'staggerDelay', 'duration'],
+    description: 'reveals words with staggered delays — use for multi-line or multi-word text',
+    calculateDuration: calculateTextStaggerDuration,
 };

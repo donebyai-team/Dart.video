@@ -5,6 +5,7 @@ import {
   getDeclaredSettledFrame,
   isValidDeclaredSettledFrame,
 } from "../code_rules_validators/animation-duration";
+import { computeAnimationDurationFromCodeV2 } from "../code_rules_validators/animation-duration-v2";
 import { getComponentRegistration, getComponentTimingDefaults } from "@coasterai/animation";
 
 describe("declared settledFrame", () => {
@@ -56,20 +57,6 @@ export default function RemoteComponent() {
 }
 `),
     ).toEqual({ settledFrame: 32, durationInFrames: 52 });
-  });
-
-  it("computes WordCycle duration from words and defaults", () => {
-    expect(
-      computeAnimationDurationFromCode(`
-export default function RemoteComponent() {
-  return (
-    <SafeArea>
-      <WordCycle words={["layouts", "spacing", "colors", "trust"]} />
-    </SafeArea>
-  );
-}
-`),
-    ).toEqual({ settledFrame: 228, durationInFrames: 248 });
   });
 
   it("computes the product update example with current prop names", () => {
@@ -144,15 +131,47 @@ describe("duration contract", () => {
     });
   });
 
-  it("marks WordCycle as a formula-based fallback component", () => {
-    expect(getComponentRegistration("WordCycle")?.durationContract).toEqual({
-      kind: "formula",
-      strategy: "wordCycle",
-    });
-  });
-
   it("exports fallback constants for validator reuse", () => {
     expect(FALLBACK_SETTLED_FRAME).toBe(130);
     expect(FALLBACK_DURATION_IN_FRAMES).toBe(150);
+  });
+});
+
+describe("computeAnimationDurationFromCodeV2", () => {
+  it("calculates duration using component registry for TextStagger", () => {
+    const result = computeAnimationDurationFromCodeV2(`
+export default function RemoteComponent() {
+  return (
+    <SafeArea>
+      <TextStagger text="Hello World Test" />
+    </SafeArea>
+  );
+}
+`);
+    
+    // TextStagger with 3 words: (3-1) * 5 + 15 = 25 frames
+    // Total with tail buffer: 25 + 20 = 45
+    expect(result.settledFrame).toBe(25);
+    expect(result.durationInFrames).toBe(45);
+    expect(result.errors).toBeUndefined();
+  });
+
+  it("returns validation errors for invalid component props", () => {
+    const result = computeAnimationDurationFromCodeV2(`
+export default function RemoteComponent() {
+  return (
+    <SafeArea>
+      <TextStagger text="" />
+      <AnimatedNumber startText="Count" endText="items" to={100} from={100} />
+    </SafeArea>
+  );
+}
+`);
+    
+    expect(result.errors).toBeDefined();
+    expect(result.errors?.length).toBeGreaterThan(0);
+    // Should have errors for empty text and to === from
+    expect(result.errors?.some(e => e.component === "TextStagger")).toBe(true);
+    expect(result.errors?.some(e => e.component === "AnimatedNumber")).toBe(true);
   });
 });

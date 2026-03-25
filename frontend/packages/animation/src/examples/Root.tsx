@@ -1,6 +1,6 @@
 import React from "react";
 import { AbsoluteFill, Composition } from "remotion";
-import { Typewriter, TextCycle, TextHighlight, Counter } from "../components/scenes/text";
+import { Typewriter, TextCycle, TextHighlight, Counter, AnimatedNumber } from "../components/scenes/text";
 import { FadeIn, FadeOut, SlideIn, ScaleIn, Stagger, TimelineGate } from "../core/animation_primitives";
 import { FramePreset, SafeArea, AbsoluteCenter, Stack, Row } from "../core/layout";
 import { Text } from "../core/text";
@@ -113,23 +113,33 @@ const TextComponentsScene: React.FC = () => (
     <Scene>
         <SafeArea>
             <AbsoluteCenter axis="both">
-                <Stack gap={64} align="center">                 
-                     <Counter
+                <Stack gap={64} align="center">
+                    {/* <Counter
                         id="ctr-0"
+                        suffix=" incidents"
                         from={0}
                         to={12450}
-                        prefix="Your dashboard, logs, and alerts didn't adapt "
-                    />
-
+                        prefix="Solved "
+                    /> */}
+                    {/* 
                     <Row gap={2} >
                         <Text id="t-txt" variant="heading">Your dashboard, has</Text>
                         <TextCycle
                             id="wc-0"
                             texts={["Design Me", "Build Me", "Ship Me", "Iterate Me"]}
                         />
-                    </Row>
+                    </Row> */}
 
-                    <TextHighlight
+                    <AnimatedNumber
+                        id="an-0"
+                        startText="Solved"
+                        endText="incidents"
+                        from={0}
+                        to={12450}
+                        animation="slideUp"
+                    />
+
+                    {/* <TextHighlight
                         id="th-0"
                         text="This is a {highlighted} text."
                     />
@@ -142,7 +152,7 @@ const TextComponentsScene: React.FC = () => (
 
                     <TextStagger
                         text="Your dashboard, logs, and alerts didn't adapt."
-                    />
+                    /> */}
                 </Stack>
             </AbsoluteCenter>
         </SafeArea>
@@ -222,11 +232,11 @@ const LogoScene: React.FC = () => (
             <SafeArea>
                 <AbsoluteCenter axis="both">
                     {/* <LogoAsset id="logo-0" src="https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774240200-inline.svg" /> */}
-                    <LogoWithBrandName 
-                    style={{ color: "#000" }} 
-                    variant="heading"
-                    src="https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774240201-apple-touch-icon.png" id="logo-with-brand-name-0" 
-                    brandName="Cursor" />
+                    <LogoWithBrandName
+                        style={{ color: "#000" }}
+                        variant="heading"
+                        src="https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774240201-apple-touch-icon.png" id="logo-with-brand-name-0"
+                        brandName="Cursor" />
                 </AbsoluteCenter>
             </SafeArea>
         </AbsoluteFill>
@@ -287,7 +297,7 @@ export const RemotionRoot: React.FC = () => (
     <>
         <Composition id="fade-slide" component={FadeSlideScene} durationInFrames={150} fps={30} width={1920} height={1080} />
         <Composition id="scale-stagger" component={ScaleStaggerScene} durationInFrames={150} fps={30} width={1920} height={1080} />
-        <Composition id="text-components" component={TextComponentsScene} durationInFrames={70} fps={30} width={1920} height={1080} />
+        <Composition id="text-components" component={TextComponentsScene} durationInFrames={100} fps={30} width={1920} height={1080} />
         <Composition id="assets" component={AssetsScene} durationInFrames={210} fps={30} width={1920} height={1080} />
         <Composition id="layout" component={LayoutScene} durationInFrames={180} fps={30} width={1920} height={1080} />
         <Composition id="animated-image" component={AnimatedImageScene} durationInFrames={180} fps={30} width={1920} height={1080} />

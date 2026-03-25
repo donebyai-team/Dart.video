@@ -1,17 +1,24 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
+import z from 'zod';
 import { useSpeedFactor, applySpeedFactor } from '../../../duration/speedFactor';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { Text } from '../../../core/text/Text';
 import { ImageAsset } from '../../../core/assets/ImageAsset';
-import { TypographyVariant } from '../../../tokens/semantic';
+import { TypographyVariant, TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
 import { usePatchedProp, useStyleOverride } from '../../../patches';
 import { resolveTypography } from '../../../tokens';
 import { useTheme } from '../../../theme';
-import { EntranceAnimation, getEntranceTransform } from '../types';
+import { EntranceAnimation, getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
+import type { ComponentRegistration } from '../../../registry/registry';
+import type { DurationResult } from '../../../registry/registry';
 
+// Default duration constants
+const DEFAULT_TEXT_DURATION = 30;
+const DEFAULT_DELAY = 10;
+const DEFAULT_IMAGE_DURATION = 40;
 
 export interface AnimatedImageProps {
     /** The text displayed above the image. */
@@ -42,10 +49,10 @@ export interface AnimatedImageProps {
 export function AnimatedImage({
     text,
     src,
-    variant = 'subheading',
-    animation = 'slideUp',
-    startAt = 0,
-    borderRadius = 16,
+    variant,
+    animation,
+    startAt,
+    borderRadius,
     width,
     height,
     style,
@@ -56,9 +63,16 @@ export function AnimatedImage({
     const theme = useTheme();
     const preset = useAspectPreset();
     const speedFactor = useSpeedFactor();
-    const adjustedStartAt = applySpeedFactor(startAt, speedFactor);
 
-    const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', variant);
+    // Apply defaults
+    const actualVariant = variant ?? 'subheading';
+    const actualAnimation = animation ?? 'slideUp';
+    const actualStartAt = startAt ?? 0;
+    const actualBorderRadius = borderRadius ?? 16;
+
+    const adjustedStartAt = applySpeedFactor(actualStartAt, speedFactor);
+
+    const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', actualVariant);
     const styleOverride = useStyleOverride(id);
     const patchedSrc = usePatchedProp<string | undefined>(id, 'src', src);
     const patchedWidth = usePatchedProp<number | undefined>(id, 'width', width ?? preset.width * 0.7);
@@ -109,8 +123,8 @@ export function AnimatedImage({
             <div
                 style={{
                     opacity: imageProgress,
-                    transform: getEntranceTransform(animation, imageProgress),
-                    borderRadius,
+                    transform: getEntranceTransform(actualAnimation, imageProgress),
+                    borderRadius: actualBorderRadius,
                     overflow: 'hidden',
                     boxShadow: "0 20px 40px rgba(0,0,0,0.25), 0 12px 24px rgba(0,0,0,0.15)",
                 }}
@@ -120,3 +134,56 @@ export function AnimatedImage({
         </div>
     );
 }
+
+// ============================================================================
+// Schema & Duration Calculation
+// ============================================================================
+
+export const AnimatedImageSchema = z.object({
+    text: z.string().min(1, "text is required"),
+    src: z.string().url("src must be a valid URL"),
+    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).optional(),
+    animation: z.enum(ENTRANCE_ANIMATIONS).optional(),
+    startAt: z.number().min(0, "startAt cannot be negative").default(0).optional(),
+    borderRadius: z.number().min(0, "borderRadius cannot be negative").default(16).optional(),
+    width: z.number().min(1, "width must be positive").optional(),
+    height: z.number().min(1, "height must be positive").optional(),
+    style: z.any().optional(),
+});
+
+export function calculateAnimatedImageDuration(props: AnimatedImageProps): DurationResult {
+    // Validate props
+    const validation = AnimatedImageSchema.safeParse(props);
+    if (!validation.success) {
+        const firstError = validation.error.errors[0];
+        return {
+            success: false,
+            error: firstError.message,
+            field: firstError.path[0] as string,
+        };
+    }
+
+    // Fixed duration: text + delay + image = 80 frames total
+    // This is a good baseline for showing an image with text
+    const textDuration = DEFAULT_TEXT_DURATION;
+    const delay = DEFAULT_DELAY;
+    const imageDuration = DEFAULT_IMAGE_DURATION;
+    
+    return {
+        success: true,
+        duration: textDuration + delay + imageDuration,
+    };
+}
+
+// ============================================================================
+// Registry Descriptor
+// ============================================================================
+
+export const AnimatedImageDescriptor: ComponentRegistration = {
+    name: 'AnimatedImage',
+    type: 'scene',
+    fullSchema: AnimatedImageSchema,
+    editorProps: ['text', 'src', 'variant', 'animation', 'borderRadius'],
+    description: 'text label above an image with entrance animation (slide, fade, scale)',
+    calculateDuration: calculateAnimatedImageDuration,
+};

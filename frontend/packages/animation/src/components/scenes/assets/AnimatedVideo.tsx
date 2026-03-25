@@ -1,16 +1,18 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
+import z from 'zod';
 import { useSpeedFactor, applySpeedFactor } from '../../../duration/speedFactor';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { Text } from '../../../core/text/Text';
 import { VideoAsset } from '../../../core/assets/VideoAsset';
-import { TypographyVariant } from '../../../tokens/semantic';
+import { TypographyVariant, TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
 import { usePatchedProp, useStyleOverride } from '../../../patches';
 import { resolveTypography } from '../../../tokens';
 import { useTheme } from '../../../theme';
-import { EntranceAnimation, getEntranceTransform } from '../types';
+import { EntranceAnimation, getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
+import type { ComponentRegistration } from '../../../registry/registry';
 
 
 export interface AnimatedVideoProps {
@@ -38,10 +40,10 @@ export interface AnimatedVideoProps {
 export function AnimatedVideo({
     text,
     src,
-    variant = 'subheading',
-    animation = 'slideUp',
-    startAt = 0,
-    borderRadius = 16,
+    variant,
+    animation,
+    startAt,
+    borderRadius,
     width,
     height,
     style,
@@ -52,9 +54,16 @@ export function AnimatedVideo({
     const theme = useTheme();
     const preset = useAspectPreset();
     const speedFactor = useSpeedFactor();
-    const adjustedStartAt = applySpeedFactor(startAt, speedFactor);
 
-    const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', variant);
+    // Apply defaults
+    const actualVariant = variant ?? 'subheading';
+    const actualAnimation = animation ?? 'slideUp';
+    const actualStartAt = startAt ?? 0;
+    const actualBorderRadius = borderRadius ?? 16;
+
+    const adjustedStartAt = applySpeedFactor(actualStartAt, speedFactor);
+
+    const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', actualVariant);
     const styleOverride = useStyleOverride(id);
     const patchedSrc = usePatchedProp<string | undefined>(id, 'src', src);
     const patchedWidth = usePatchedProp<number | undefined>(id, 'width', width ?? preset.width * 0.7);
@@ -103,8 +112,8 @@ export function AnimatedVideo({
             <div
                 style={{
                     opacity: videoProgress,
-                    transform: getEntranceTransform(animation, videoProgress),
-                    borderRadius,
+                    transform: getEntranceTransform(actualAnimation, videoProgress),
+                    borderRadius: actualBorderRadius,
                     overflow: 'hidden',
                     boxShadow: "0 20px 40px rgba(0,0,0,0.25), 0 12px 24px rgba(0,0,0,0.15)",
                 }}
@@ -114,3 +123,30 @@ export function AnimatedVideo({
         </div>
     );
 }
+
+// ============================================================================
+// Schema & Registry Descriptor
+// ============================================================================
+
+export const AnimatedVideoSchema = z.object({
+    text: z.string().min(1, "text is required"),
+    src: z.string().url("src must be a valid URL"),
+    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).optional(),
+    animation: z.enum(ENTRANCE_ANIMATIONS).optional(),
+    startAt: z.number().min(0, "startAt cannot be negative").default(0).optional(),
+    borderRadius: z.number().min(0, "borderRadius cannot be negative").default(16).optional(),
+    width: z.number().min(1, "width must be positive").optional(),
+    height: z.number().min(1, "height must be positive").optional(),
+    style: z.any().optional(),
+});
+
+// Note: No duration calculator - video duration depends on video length
+
+export const AnimatedVideoDescriptor: ComponentRegistration = {
+    name: 'AnimatedVideo',
+    type: 'scene',
+    fullSchema: AnimatedVideoSchema,
+    editorProps: ['text', 'src', 'variant', 'animation', 'borderRadius'],
+    description: 'text label above a video with entrance animation (slide, fade, scale)',
+    // No calculateDuration - video duration is determined by video file length
+};

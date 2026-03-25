@@ -26,11 +26,11 @@ interface ComponentGroup {
 
 const COMPONENT_GROUPS: ComponentGroup[] = [
   { title: 'Scenes', description: 'standalone, no siblings', components: SCENE_COMPONENTS },
-  { title: 'Layout Primitives', description: 'structural only, every visible element must live inside one', components: LAYOUT_COMPONENTS },
-  { title: 'Motion Primitives', description: 'wraps exactly one child, never wraps Layout', components: ANIMATION_PRIMITIVE_COMPONENTS },
-  { title: 'Static Primitives', description: 'no built-in animation, wrap in Motion to animate', components: STATIC_PRIMITIVES },
-  { title: 'Dynamic Primitives', description: 'self-animating, never wrap in Motion, use startAt directly', components: DYNAMIC_PRIMITIVES },
-  { title: 'Asset Primitives', description: 'no built-in animation, wrap in Motion to animate', components: BRAND_COMPONENTS },
+  // { title: 'Layout Primitives', description: 'structural only, every visible element must live inside one', components: LAYOUT_COMPONENTS },
+  // { title: 'Motion Primitives', description: 'wraps exactly one child, never wraps Layout', components: ANIMATION_PRIMITIVE_COMPONENTS },
+  // { title: 'Static Primitives', description: 'no built-in animation, wrap in Motion to animate', components: STATIC_PRIMITIVES },
+  // { title: 'Dynamic Primitives', description: 'self-animating, never wrap in Motion, use startAt directly', components: DYNAMIC_PRIMITIVES },
+  // { title: 'Asset Primitives', description: 'no built-in animation, wrap in Motion to animate', components: BRAND_COMPONENTS },
 ];
 
 function formatComponentLine(component: ComponentRegistration): string {
@@ -68,11 +68,11 @@ export function getAnimationPrompt(
 
   const sections = [
     frameContractFragment(),
-    canvasDimensionsFragment(ASPECT_PRESETS['web']),
+    // canvasDimensionsFragment(ASPECT_PRESETS['web']),
     ...COMPONENT_GROUPS.map((g) => componentListFragment(`${g.title} — ${g.description}`, g.components)),
-    spacingFragment(),
-    typographyFragment(),
-    exampleFragment(),
+    // spacingFragment(),
+    // typographyFragment(),
+    // exampleFragment(),
   ];
 
   return sections.join('\n\n');

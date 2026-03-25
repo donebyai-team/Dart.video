@@ -1,23 +1,20 @@
 import * as Babel from "@babel/standalone";
-import {
-  getComponentRegistration,
-  getComponentTimingDefaults,
-  resolveStyle,
-} from "@coasterai/animation";
-import { ANIMATION_PRIMIIVES } from "@coasterai/animation/src/registry/animation_primitives";
-import { z } from "zod";
+import { calculateComponentDuration, getComponentRegistration } from "@coasterai/animation";
 
 export const FALLBACK_SETTLED_FRAME = 130;
 export const FALLBACK_DURATION_IN_FRAMES = 150;
 export const TAIL_BUFFER = 20;
 const MAX_SETTLED_FRAME = 240;
-const CLEAN_STAGGER_DEFAULTS = resolveStyle("clean").motion.stagger;
-
-const ANIMATION_PRIMITIVE_NAME_SET = new Set<string>(ANIMATION_PRIMIIVES);
 
 type DurationResult = {
   settledFrame: number;
   durationInFrames: number;
+};
+
+type DurationError = {
+  error: string;
+  component?: string;
+  field?: string;
 };
 
 function fallbackDuration(): DurationResult {
@@ -59,11 +56,6 @@ function getLiteralValue(node: any): unknown {
   return undefined;
 }
 
-function getNumericProp(openingElement: any, name: string): number | undefined {
-  const value = getLiteralValue(getJsxAttribute(openingElement, name)?.value);
-  return typeof value === "number" ? value : undefined;
-}
-
 function getStringArrayProp(openingElement: any, name: string): string[] | undefined {
   const attr = getJsxAttribute(openingElement, name)?.value;
   if (!attr || attr.type !== "JSXExpressionContainer") return undefined;
@@ -75,10 +67,6 @@ function getStringArrayProp(openingElement: any, name: string): string[] | undef
     values.push(element.value);
   }
   return values;
-}
-
-function getDirectJsxElementChildren(node: any): any[] {
-  return (node?.children ?? []).filter((child: any) => child?.type === "JSXElement");
 }
 
 function getRemoteComponentReturnExpression(ast: any): any | null {
@@ -131,37 +119,54 @@ export function getDeclaredSettledFrame(code: string): number | null {
  * - greater than 0
  * - within the single-slide safety bound
  *
- * If any of those checks fail, the validator falls back to AST-derived timing.
+ * If any of those checks fail, the validator falls back to component-based duration calculation.
  */
 export function isValidDeclaredSettledFrame(settledFrame: number | null): settledFrame is number {
   return typeof settledFrame === "number" && Number.isInteger(settledFrame) && settledFrame > 0 && settledFrame <= MAX_SETTLED_FRAME;
 }
 
-function getSchemaDefaultNumber(name: string, prop: "startAt" | "durationInFrames" | "holdDuration" | "transitionDuration"): number | undefined {
-  const registration = getComponentRegistration(name);
-  const shape = registration?.fullSchema?.shape;
-  const schema = shape?.[prop];
-  if (!schema) return undefined;
-  return extractSchemaDefaultNumber(schema);
+/**
+ * Extract props from a JSX element's opening tag.
+ * Returns an object with all prop values that can be extracted as literals.
+ */
+function extractPropsFromJsxElement(openingElement: any): Record<string, any> {
+  const props: Record<string, any> = {};
+  
+  for (const attr of openingElement?.attributes ?? []) {
+    if (attr.type !== "JSXAttribute" || attr.name?.type !== "JSXIdentifier") continue;
+    
+    const propName = attr.name.name;
+    const value = getLiteralValue(attr.value);
+    
+    // Special handling for array props
+    if (value === undefined) {
+      const arrayValue = getStringArrayProp(openingElement, propName);
+      if (arrayValue !== undefined) {
+        props[propName] = arrayValue;
+      }
+    } else {
+      props[propName] = value;
+    }
+  }
+  
+  return props;
 }
 
-function extractSchemaDefaultNumber(schema: z.ZodTypeAny): number | undefined {
-  if (schema instanceof z.ZodOptional || schema instanceof z.ZodNullable) {
-    return extractSchemaDefaultNumber(schema._def.innerType);
-  }
-  if (schema instanceof z.ZodDefault) {
-    const value = schema._def.defaultValue();
-    return typeof value === "number" ? value : undefined;
-  }
-  return undefined;
-}
-
-function collectEndFrames(node: any, inheritedOffset: number, endFrames: number[]): void {
+/**
+ * Collect end frames from JSX tree using component registry's calculateDuration functions.
+ * Returns errors if any component fails duration calculation.
+ */
+function collectEndFramesV2(
+  node: any,
+  inheritedOffset: number,
+  endFrames: number[],
+  errors: DurationError[]
+): void {
   if (!node) return;
 
   if (node.type === "JSXFragment") {
     for (const child of node.children ?? []) {
-      collectEndFrames(child, inheritedOffset, endFrames);
+      collectEndFramesV2(child, inheritedOffset, endFrames, errors);
     }
     return;
   }
@@ -169,38 +174,51 @@ function collectEndFrames(node: any, inheritedOffset: number, endFrames: number[
   if (node.type !== "JSXElement") return;
 
   const openingElement = node.openingElement;
-  const name = getJsxName(openingElement?.name);
-  if (!name) return;
+  const componentName = getJsxName(openingElement?.name);
+  if (!componentName) return;
 
-  if (name === "Stagger") {
-    const staggerDefaults = getComponentTimingDefaults("Stagger");
-    const staggerStartAt = getNumericProp(openingElement, "startAt") ?? staggerDefaults?.startAt ?? 0;
-    const staggerDelay = getNumericProp(openingElement, "staggerDelay") ?? CLEAN_STAGGER_DEFAULTS.staggerDelay;
-    const childOffsetBase = inheritedOffset + staggerStartAt;
-    const jsxChildren = getDirectJsxElementChildren(node);
+  // Extract props from JSX
+  const props = extractPropsFromJsxElement(openingElement);
+  const startAt = typeof props.startAt === "number" ? props.startAt : 0;
 
-    jsxChildren.forEach((child, index) => {
-      collectEndFrames(child, childOffsetBase + index * staggerDelay, endFrames);
-    });
-    return;
-  }
-
-  const timingDefaults = getComponentTimingDefaults(name);
-  const startAt = getNumericProp(openingElement, "startAt") ?? timingDefaults?.startAt ?? 0;  
-
-  if (ANIMATION_PRIMITIVE_NAME_SET.has(name)) {
-    const durationInFrames = getNumericProp(openingElement, "durationInFrames") ?? timingDefaults?.durationInFrames;
-    if (typeof durationInFrames === "number") {
-      endFrames.push(inheritedOffset + startAt + durationInFrames);
+  // Look up component in registry
+  const registration = getComponentRegistration(componentName);
+  
+  if (registration?.calculateDuration) {
+    // Use the component's duration calculator
+    const result = calculateComponentDuration(componentName, props);
+    
+    if (result.success) {
+      endFrames.push(inheritedOffset + startAt + result.duration);
+    } else {
+      errors.push({
+        error: result.error,
+        component: componentName,
+        field: result.field,
+      });
     }
+  } else {
+    // Component doesn't have a duration calculator
+    // This is OK for layout components, primitives without duration, etc.
+    // Just traverse children
   }
 
+  // Recursively process children
   for (const child of node.children ?? []) {
-    collectEndFrames(child, inheritedOffset, endFrames);
+    collectEndFramesV2(child, inheritedOffset, endFrames, errors);
   }
 }
 
-export function computeAnimationDurationFromCode(code: string): DurationResult {
+/**
+ * V2: Compute animation duration using component registry's calculateDuration functions.
+ * 
+ * This version:
+ * - Parses JSX to extract component props
+ * - Calls calculateDuration from component registry for each component
+ * - Returns errors if any component fails validation
+ * - Falls back to default duration if no components have duration calculators
+ */
+export function computeAnimationDurationFromCodeV2(code: string): DurationResult & { errors?: DurationError[] } {
   try {
     const parser = Babel.packages.parser;
     const ast = parser.parse(code, {
@@ -213,9 +231,18 @@ export function computeAnimationDurationFromCode(code: string): DurationResult {
     if (!rootExpression) return fallbackDuration();
 
     const endFrames: number[] = [];
-    collectEndFrames(rootExpression, 0, endFrames);
+    const errors: DurationError[] = [];
+    collectEndFramesV2(rootExpression, 0, endFrames, errors);
 
-    // Fallback when no supported timing primitives can be derived from the JSX.
+    // If there are validation errors, return them
+    if (errors.length > 0) {
+      return {
+        ...fallbackDuration(),
+        errors,
+      };
+    }
+
+    // Fallback when no components with duration calculators were found
     if (endFrames.length === 0) return fallbackDuration();
 
     const settledFrame = Math.max(...endFrames);
@@ -223,8 +250,13 @@ export function computeAnimationDurationFromCode(code: string): DurationResult {
       settledFrame,
       durationInFrames: settledFrame + TAIL_BUFFER,
     };
-  } catch {
+  } catch (error) {
     // Fallback on any parse failure or unsupported syntax shape.
-    return fallbackDuration();
+    return {
+      ...fallbackDuration(),
+      errors: [{
+        error: error instanceof Error ? error.message : "Failed to parse code",
+      }],
+    };
   }
 }

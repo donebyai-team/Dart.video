@@ -8,6 +8,17 @@ import { BRAND_COMPONENTS } from './assets';
 /** Component taxonomy types. */
 export type ComponentType = 'layout' | 'animation' | 'content' | 'scene' | 'headless' | 'brand';
 
+export type DurationResult = 
+  | {
+      success: true;
+      duration: number;
+  }
+  | {
+      success: false;
+      error: string;
+      field?: string;
+  };
+
 export interface ComponentRegistration {
   /** Exact JSX component name as LLM writes it. Used for scope injection and AST ID assignment. */
   name: string;
@@ -18,11 +29,8 @@ export interface ComponentRegistration {
   editorProps: string[];
   /** One-line description for prompt generation. */
   description: string;
-  /** Optional contract for validator AST duration fallback. */
-  durationContract?: {
-    kind: 'fixed' | 'formula' | 'manual';
-    strategy?: 'wordCycle';
-  };
+  /** Calculate ideal duration based on props. Optional - only for components with dynamic duration. */
+  calculateDuration?: (props: any) => DurationResult;
 }
 
 
@@ -78,6 +86,30 @@ const REGISTRY_BY_LOWERCASE = new Map(
 /** Look up a registration by component name. */
 export function getComponentRegistration(name: string): ComponentRegistration | undefined {
   return COMPONENT_REGISTRY.find((c) => c.name === name);
+}
+
+/**
+ * Calculate duration for a component by name using its registered calculator.
+ * Returns error if component not found or has no duration calculator.
+ */
+export function calculateComponentDuration(componentName: string, props: any): DurationResult {
+  const registration = getComponentRegistration(componentName);
+  
+  if (!registration) {
+    return {
+      success: false,
+      error: `Component '${componentName}' not found in registry`,
+    };
+  }
+  
+  if (!registration.calculateDuration) {
+    return {
+      success: false,
+      error: `Component '${componentName}' does not have a duration calculator`,
+    };
+  }
+  
+  return registration.calculateDuration(props);
 }
 
 /**

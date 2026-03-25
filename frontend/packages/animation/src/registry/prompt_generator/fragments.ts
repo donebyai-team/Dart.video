@@ -71,6 +71,7 @@ export function componentListFragment(
       if (key === "children" || key === "style" || key === "className") continue;
 
       const isOptional = (field as z.ZodTypeAny).isOptional();
+      if (isOptional) continue;
       const typeHint = describeZodType(field as z.ZodTypeAny);
       lines.push(`- ${key}: ${typeHint} (${isOptional ? "optional" : "required"})`);
     }
