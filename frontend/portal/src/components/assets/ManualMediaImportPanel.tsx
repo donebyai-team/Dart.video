@@ -191,15 +191,16 @@ const ManualMediaImportPanel = ({
                       key={asset.id}
                       type='button'
                       onClick={() => handleOpenPreview(asset)}
-                      className={`rounded-lg border p-2 text-left transition-colors ${
-                        selectedAssetId === asset.id ? 'border-primary bg-primary/5' : 'border-border hover:bg-muted/40'
-                      }`}
+                      className={`rounded-lg border p-2 text-left transition-colors ${selectedAssetId === asset.id ? 'border-primary bg-primary/5' : 'border-border hover:bg-muted/40'
+                        }`}
                     >
                       {isVideoAsset(asset) ? (
-                        <div className='mb-2 flex h-28 w-full items-center justify-center rounded bg-muted text-xs text-muted-foreground'>
-                          <Video className='mr-2 h-4 w-4' />
-                          Video
-                        </div>
+                        <video
+                          src={asset.thumbnailUrl || asset.url}
+                          className="mb-2 h-28 w-full rounded object-cover"
+                          preload="metadata"
+                          muted
+                        />
                       ) : asset.url ? (
                         <img src={asset.thumbnailUrl || asset.url} alt={asset.fileName} className='mb-2 h-28 w-full rounded object-cover' />
                       ) : (
@@ -208,9 +209,9 @@ const ManualMediaImportPanel = ({
                         </div>
                       )}
                       <p className='text-xs font-medium line-clamp-1'>{asset.fileName || asset.id}</p>
-                      <p className='text-[11px] text-muted-foreground'>
+                      {/* <p className='text-[11px] text-muted-foreground'>
                         {Math.round(asset.width)} x {Math.round(asset.height)}
-                      </p>
+                      </p> */}
                     </button>
                   ))}
                   {!isLoadingAssets && assets.length === 0 && (

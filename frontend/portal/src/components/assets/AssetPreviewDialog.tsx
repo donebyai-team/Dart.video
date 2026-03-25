@@ -1,13 +1,9 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader } from '@/components/ui/dialog'
 import {
-  ASPECT_PRESETS,
-  AspectPresetProvider,
   createEmptyPatchOverlay,
-  ImageAsset,
-  PatchContextProvider
 } from '../../../../packages/animation/src'
 
 interface AssetPreviewDialogProps {
@@ -48,7 +44,7 @@ const AssetPreviewDialog = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className='max-w-5xl overflow-hidden p-0'>
-        <div className='grid min-h-[560px] grid-cols-1 md:grid-cols-[320px_minmax(0,1fr)]'>
+        <div className='grid min-h-[400px] grid-cols-1 md:grid-cols-[320px_minmax(0,1fr)]'>
           <div className='border-b border-border p-6 md:border-b-0 md:border-r'>
             <DialogHeader className='text-left'>
               {/* <DialogTitle className='text-base'>{title}</DialogTitle> */}
@@ -66,7 +62,6 @@ const AssetPreviewDialog = ({
                   </p>
                 </div>
               )}
-
               <div className='space-y-4'>
                 <label htmlFor='asset-preview-note' className='text-xs font-medium'>
                   {noteLabel}
@@ -96,11 +91,7 @@ const AssetPreviewDialog = ({
                   className='max-h-full max-w-full rounded-lg'
                 />
               ) : (
-                <AspectPresetProvider preset={ASPECT_PRESETS.web}>
-                  <PatchContextProvider overlay={previewOverlay}>
-                    <ImageAsset src={previewUrl} style={{ objectFit: 'contain' }} />
-                  </PatchContextProvider>
-                </AspectPresetProvider>
+                <img src={previewUrl} style={{ objectFit: 'contain' }} />
               )}
             </div>
           </div>

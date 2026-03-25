@@ -28,11 +28,11 @@ type MediaAsset struct {
 }
 
 type AssetMetadata struct {
-	Width    int    `json:"width"`
-	Height   int    `json:"height"`
-	FileName string `json:"fileName"`
-	Duration *int   `json:"duration"`
-	Size     int64  `json:"size"`
+	Width    int      `json:"width"`
+	Height   int      `json:"height"`
+	FileName string   `json:"fileName"`
+	Duration *float64 `json:"duration"`
+	Size     int64    `json:"size"`
 }
 
 func (v AssetMetadata) Value() (driver.Value, error) {

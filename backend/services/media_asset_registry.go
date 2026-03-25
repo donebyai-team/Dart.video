@@ -180,8 +180,16 @@ func (registry *MediaAssetRegistry) FormatAssets() *string {
 		writeLine(2, "<height>%d</height>", asset.Metadata.Height)
 		writeLine(2, "<media_type>%s</media_type>", asset.MediaType.String())
 		writeLine(2, "<mime_type>%s</mime_type>", asset.MimeType)
-		writeLine(2, "<description>%s</description>", asset.Description)
-		writeLine(2, "<tags>%s</tags>", asset.Tags)
+		if asset.Metadata.Duration != nil && *asset.Metadata.Duration > 0 {
+			writeLine(2, "<duration>%d</duration>", asset.Metadata.Duration)
+		}
+		if asset.Description != "" {
+			writeLine(2, "<description>%s</description>", asset.Description)
+		}
+		if len(asset.Tags) > 0 {
+			writeLine(2, "<tags>%s</tags>", asset.Tags)
+		}
+
 		writeLine(2, "<user_note>%s</user_note>", asset.UserNote)
 		writeLine(1, "</attachment>")
 	}

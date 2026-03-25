@@ -6,10 +6,13 @@ import (
 	"context"
 	"encoding/xml"
 	"fmt"
+	"github.com/abema/go-mp4"
 	"github.com/shank318/coasterai/datastore"
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
+	"github.com/shank318/coasterai/utils"
 	"github.com/streamingfast/dstore"
+	"go.uber.org/zap"
 	_ "golang.org/x/image/webp"
 	"image"
 	_ "image/gif"
@@ -47,9 +50,10 @@ type gcpMediaStore struct {
 	client *storage.Client
 	bucket *storage.BucketHandle
 	db     datastore.Repository
+	logger *zap.Logger
 }
 
-func NewGcpMediaStore(db datastore.Repository) MediaStore {
+func NewGcpMediaStore(db datastore.Repository, logger *zap.Logger) MediaStore {
 	ctx := context.Background()
 
 	debugStore, err := dstore.NewStore(fmt.Sprintf("gs://%s", publicBucket), "", "", false)
@@ -67,6 +71,7 @@ func NewGcpMediaStore(db datastore.Repository) MediaStore {
 		client: client,
 		bucket: client.Bucket(publicBucket),
 		db:     db,
+		logger: logger,
 	}
 }
 
@@ -308,7 +313,7 @@ func (g gcpMediaStore) Upload(
 
 	mediaType := DetectMediaType(contentType)
 
-	width, height := extractMediaDimensions(reader, mediaType, contentType)
+	width, height, duration := g.extractMediaDimensions(reader, mediaType, contentType)
 
 	obj := g.bucket.Object(objectPath)
 	writer := obj.NewWriter(ctx)
@@ -336,6 +341,7 @@ func (g gcpMediaStore) Upload(
 			Height:   int(height),
 			FileName: safeFileName,
 			Size:     size,
+			Duration: utils.Ptr(duration),
 		},
 	})
 	if err != nil {
@@ -354,24 +360,102 @@ func (g gcpMediaStore) Upload(
 	}, nil
 }
 
-func extractMediaDimensions(reader io.ReadSeeker, mediaType pbcore.MediaType, contentType string) (float32, float32) {
-	defer reader.Seek(0, io.SeekStart)
+func (g gcpMediaStore) extractMediaDimensions(reader io.ReadSeeker, mediaType pbcore.MediaType, contentType string) (float32, float32, float64) {
+	defer func(reader io.ReadSeeker, offset int64, whence int) {
+		_, err := reader.Seek(offset, whence)
+		if err != nil {
+			g.logger.Error("seek failed", zap.Error(err))
+		}
+	}(reader, 0, io.SeekStart)
 
 	switch mediaType {
 	case pbcore.MediaType_MEDIA_TYPE_IMAGE:
 		cfg, _, err := image.DecodeConfig(reader)
 		if err != nil {
-			return 0, 0
+			return 0, 0, 0
 		}
-		return float32(cfg.Width), float32(cfg.Height)
+		return float32(cfg.Width), float32(cfg.Height), 0
 	case pbcore.MediaType_MEDIA_TYPE_SVG:
 		if !strings.Contains(contentType, "svg") {
-			return 0, 0
+			return 0, 0, 0
 		}
-		return extractSVGDimensions(reader)
+		w, h := extractSVGDimensions(reader)
+		return w, h, 0
+	case pbcore.MediaType_MEDIA_TYPE_VIDEO:
+		w, h, duration, err := extractMP4Metadata(reader)
+		if err != nil {
+			return 0, 0, 0
+		}
+		return float32(w), float32(h), duration
 	default:
-		return 0, 0
+		return 0, 0, 0
 	}
+}
+
+func extractMP4Metadata(reader io.ReadSeeker) (width, height, duration float64, err error) {
+	var timescale uint32
+	var movieDuration uint64
+
+	var trackWidth float64
+	var trackHeight float64
+
+	_, err = mp4.ReadBoxStructure(reader, func(h *mp4.ReadHandle) (interface{}, error) {
+
+		switch h.BoxInfo.Type {
+
+		case mp4.BoxTypeMvhd():
+			box, _, err := h.ReadPayload()
+			if err != nil {
+				return nil, err
+			}
+
+			mvhd := box.(*mp4.Mvhd)
+			timescale = mvhd.Timescale
+
+			if mvhd.Version == 0 {
+				movieDuration = uint64(mvhd.DurationV0)
+			} else {
+				movieDuration = mvhd.DurationV1
+			}
+
+		case mp4.BoxTypeTkhd():
+			box, _, err := h.ReadPayload()
+			if err != nil {
+				return nil, err
+			}
+
+			tkhd := box.(*mp4.Tkhd)
+
+			// stored as 16.16 fixed-point
+			trackWidth = float64(tkhd.Width) / 65536
+			trackHeight = float64(tkhd.Height) / 65536
+
+		case mp4.BoxTypeHdlr():
+			box, _, err := h.ReadPayload()
+			if err != nil {
+				return nil, err
+			}
+
+			hdlr := box.(*mp4.Hdlr)
+
+			if string(hdlr.HandlerType[:]) == "vide" {
+				width = trackWidth
+				height = trackHeight
+			}
+		}
+
+		return h.Expand()
+	})
+
+	if err != nil {
+		return
+	}
+
+	if timescale > 0 {
+		duration = float64(movieDuration) / float64(timescale)
+	}
+
+	return
 }
 
 func extractSVGDimensions(reader io.Reader) (float32, float32) {

@@ -180,7 +180,7 @@ func (b *DependenciesBuilder) Build(ctx context.Context, logger *zap.Logger, tra
 		out.FigmaClient = figma2.NewOauthClient(b.FigmaConfig.ClientID, b.FigmaConfig.ClientSecret, b.FigmaConfig.RedirectURL, logger)
 	}
 
-	out.MediaStore = services.NewGcpMediaStore(out.DataStore)
+	out.MediaStore = services.NewGcpMediaStore(out.DataStore, logger)
 
 	//if b.imageKitKey != "" {
 	//	client := imagekit.NewClient(
