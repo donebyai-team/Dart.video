@@ -1,8 +1,4 @@
-import z from "zod";
 import { ComponentRegistration } from "./registry";
-import { fixedFrameTimingSchema } from "./animation_primitives";
-import { TYPOGRAPHY_VARIANT_NAMES } from "../tokens/semantic";
-import { ENTRANCE_ANIMATIONS, LOGO_ANIMATIONS, PEEL_DIRECTIONS } from "../components/scenes/types";
 import { AnimatedNumberDescriptor } from "../components/scenes/text/AnimatedNumber";
 import { TextStaggerDescriptor } from "../components/scenes/text/TextStagger";
 import { TypewriterDescriptor } from "../components/scenes/text/Typewriter";

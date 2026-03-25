@@ -8,7 +8,7 @@ import { useStyleContext } from "../../../styles/StyleContext";
 import { useAspectPreset } from "../../../styles/AspectPresetContext";
 import { interpolateWithEasing } from "../../../styles/easingResolver";
 import { useTheme } from "../../../theme";
-import { LOGO_ANIMATIONS } from '../types';
+import { LOGO_ANIMATIONS, LogoAnimation } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../../../registry/registry';
 
@@ -24,7 +24,6 @@ const DEFAULT_LOGO_SVG = `data:image/svg+xml,${encodeURIComponent(`
 </svg>
 `)}`;
 
-export type LogoAnimation = 'none' | 'fadeIn' | 'zoomIn' | 'bounceIn' | 'spinIn' | 'dropIn';
 
 export interface LogoAssetProps {
     src?: string;
