@@ -60,3 +60,9 @@ Displays a logo alongside brand name text that fades in character-by-character. 
 Props:
 - brandName: string (required)
 
+### IconShowcase
+Displays a row of icons with rotating entrance animations followed by descriptive text. Use for tech stacks ("Built with React and Node.js"), integrations ("Integrates with Slack, GitHub, Jira"), partners ("Trusted by leading companies"), or social proof. Required props: icons={["shopify", "midjourney", "openai"]}, text="Thousands of startups are using cursor to see 10X productivity".
+Props:
+- icons: array (required)
+- text: string (required)
+

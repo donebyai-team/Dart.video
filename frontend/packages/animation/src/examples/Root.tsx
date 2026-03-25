@@ -12,6 +12,7 @@ import { TextStagger } from "../components/scenes/text/TextStagger";
 import { AnimatedImage } from "../components/scenes/assets/AnimatedImage";
 import { AnimatedVideo } from "../components/scenes/assets/AnimatedVideo";
 import { ImagePeel } from "../components/scenes";
+import { IconShowcase } from "../components/scenes/assets/IconShowcase";
 
 
 const BRAND: BrandTheme = {
@@ -214,6 +215,21 @@ const AnimatedImageScene: React.FC = () => (
     </Scene>
 );
 
+const AnimatedIconShowcaseScene: React.FC = () => (
+    <Scene>
+        <AbsoluteFill >
+            <SafeArea>
+                <AbsoluteCenter axis="both">
+                    <IconShowcase
+                        icons={["shopify", "midjourney", "openai"]}
+                        text="Startups are getting 10× productivity with Cursor"
+                    />
+                </AbsoluteCenter>
+            </SafeArea>
+        </AbsoluteFill>
+    </Scene>
+);
+
 const AnimatedVideoScene: React.FC = () => (
     <Scene>
         <AbsoluteFill style={{ backgroundColor: 'white' }}>
@@ -303,5 +319,6 @@ export const RemotionRoot: React.FC = () => (
         <Composition id="animated-image" component={AnimatedImageScene} durationInFrames={180} fps={30} width={1920} height={1080} />
         <Composition id="animated-video" component={AnimatedVideoScene} durationInFrames={180} fps={30} width={1920} height={1080} />
         <Composition id="logo" component={LogoScene} durationInFrames={80} fps={30} width={1920} height={1080} />
+        <Composition id="icon-showcase" component={AnimatedIconShowcaseScene} durationInFrames={180} fps={30} width={1920} height={1080} />
     </>
 );

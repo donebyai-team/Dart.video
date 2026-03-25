@@ -1,6 +1,6 @@
 import React from "react";
 import { preloadImage } from "@remotion/preload";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRemotionEnvironment } from "remotion";
 import { usePatchedProp, useStyleOverride } from "../../patches";
 import { useTheme } from "../../theme";
@@ -21,6 +21,7 @@ export interface IconAssetProps {
 }
 
 const ICON_BASE = 'https://storage.googleapis.com/coasterai-public/icons';
+const PLACEHOLDER_ICON = 'heart'; // Fallback icon name when requested icon is not found
 
 export function IconAsset({
   name,
@@ -39,14 +40,36 @@ export function IconAsset({
   const patchedSize = usePatchedProp<number>(id, 'size', size);
   const patchedRadius = usePatchedProp<number | undefined>(id, 'borderRadius', borderRadius);
 
+  const [iconExists, setIconExists] = useState(true);
   const variant = theme.iconStyle ?? 'outline';
-  const maskUrl = `${ICON_BASE}/${variant}/${patchedName.toLowerCase()}.svg`;
+  const requestedMaskUrl = `${ICON_BASE}/${variant}/${patchedName.toLowerCase()}.svg`;
+  const fallbackMaskUrl = `${ICON_BASE}/${variant}/${PLACEHOLDER_ICON}.svg`;
+  const maskUrl = iconExists ? requestedMaskUrl : fallbackMaskUrl;
+  
   const scaledSize = scaleToCanvas(patchedSize, preset);
   const iconColor =
     typeof styleOverride.color === 'string'
       ? styleOverride.color
       : theme.colors.foreground;
 
+  // Check if icon exists
+  useEffect(() => {
+    // Reset state when checking new icon
+    setIconExists(true);
+    
+    // Try to load the requested icon
+    const img = new Image();
+    img.onload = () => {
+      setIconExists(true);
+    };
+    img.onerror = () => {
+      console.warn(`Icon "${patchedName}" not found at ${requestedMaskUrl}, using placeholder`);
+      setIconExists(false);
+    };
+    img.src = requestedMaskUrl;
+  }, [requestedMaskUrl, patchedName]);
+
+  // Preload the icon that will be used (only during rendering)
   useEffect(() => {
     if (!isRendering) return;
     const unpreload = preloadImage(maskUrl);

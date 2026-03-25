@@ -13,6 +13,7 @@ import { AnimatedVideoDescriptor } from "../components/scenes/assets/AnimatedVid
 import { ImagePeelDescriptor } from "../components/scenes/assets/ImagePeel";
 import { LogoAssetDescriptor } from "../components/scenes/assets/LogoAsset";
 import { LogoWithBrandNameDescriptor } from "../components/scenes/assets/LogoWithBrandName";
+import { IconShowcaseDescriptor } from "../components/scenes/assets/IconShowcase";
 
 
 export const SCENE_COMPONENTS: ComponentRegistration[] = [
@@ -29,4 +30,5 @@ export const SCENE_COMPONENTS: ComponentRegistration[] = [
   ImagePeelDescriptor,
   LogoAssetDescriptor,
   LogoWithBrandNameDescriptor,
+  IconShowcaseDescriptor,
 ];
