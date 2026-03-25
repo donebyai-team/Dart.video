@@ -6,7 +6,6 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/shank318/coasterai/agent"
-	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/errorx"
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
@@ -126,7 +125,8 @@ func (p *Portal) ContinueVideoPlanning(ctx context.Context, c *connect.Request[p
 		c.Msg.Id,
 		func(runCtx context.Context) (*agent.RunResult, error) {
 			return videoAgent.Continue(runCtx, agent.ContinueSessionOptions{
-				UserResponse: c.Msg.Response,
+				UserResponse:        c.Msg.Response,
+				SelectedMediaAssets: c.Msg.Assets,
 			})
 		},
 		logger,
@@ -219,7 +219,7 @@ func (p *Portal) streamAgentRun(
 				if err := stream.Send(&pbportal.CreateVideoResponse{
 					Id:                  videoID,
 					WaitingForUserInput: true,
-					AskUserQuestion:     toProtoQuestion(out.result.AskUserQuestion),
+					AskUserQuestion:     out.result.AskUserQuestion,
 				}); err != nil {
 					return nil
 				}
@@ -236,18 +236,6 @@ func (p *Portal) streamAgentRun(
 			// runPlanning already spawned applyPlan in background.
 			return nil
 		}
-	}
-}
-
-func toProtoQuestion(question *types.AskUserQuestion) *pbportal.AskUserQuestion {
-	if question == nil {
-		return nil
-	}
-	return &pbportal.AskUserQuestion{
-		ToolName:         question.Tool_name,
-		QuestionText:     question.Question_text,
-		Options:          question.Options,
-		AllowCustomEntry: question.Allow_custom_entry,
 	}
 }
 

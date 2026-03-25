@@ -638,6 +638,11 @@ export declare type ContinueVideoPlanningRequest = Message<"coasterai.portal.v1.
    * @generated from field: string response = 2;
    */
   response: string;
+
+  /**
+   * @generated from field: repeated coasterai.portal.v1.SelectedMediaAsset assets = 3;
+   */
+  assets: SelectedMediaAsset[];
 };
 
 /**
@@ -669,6 +674,16 @@ export declare type AskUserQuestion = Message<"coasterai.portal.v1.AskUserQuesti
    * @generated from field: optional bool allow_custom_entry = 4;
    */
   allowCustomEntry?: boolean;
+
+  /**
+   * @generated from field: optional coasterai.core.v1.MediaAsset asset = 5;
+   */
+  asset?: MediaAsset;
+
+  /**
+   * @generated from field: coasterai.portal.v1.AskUserQuestionType questionType = 6;
+   */
+  questionType: AskUserQuestionType;
 };
 
 /**
@@ -1176,6 +1191,36 @@ export declare type OauthCallbackResponse = Message<"coasterai.portal.v1.OauthCa
  * Use `create(OauthCallbackResponseSchema)` to create a new message.
  */
 export declare const OauthCallbackResponseSchema: GenMessage<OauthCallbackResponse>;
+
+/**
+ * @generated from enum coasterai.portal.v1.AskUserQuestionType
+ */
+export enum AskUserQuestionType {
+  /**
+   * @generated from enum value: ASK_USER_QUESTION_TYPE_UNDEFINED = 0;
+   */
+  UNDEFINED = 0,
+
+  /**
+   * @generated from enum value: ASK_USER_QUESTION_TYPE_GENERAL = 1;
+   */
+  GENERAL = 1,
+
+  /**
+   * @generated from enum value: ASK_USER_QUESTION_TYPE_ASSET_CLARIFICATION = 2;
+   */
+  ASSET_CLARIFICATION = 2,
+
+  /**
+   * @generated from enum value: ASK_USER_QUESTION_TYPE_UPLOAD_ASSET = 3;
+   */
+  UPLOAD_ASSET = 3,
+}
+
+/**
+ * Describes the enum coasterai.portal.v1.AskUserQuestionType.
+ */
+export declare const AskUserQuestionTypeSchema: GenEnum<AskUserQuestionType>;
 
 /**
  * @generated from enum coasterai.portal.v1.OauthAuthorizeType

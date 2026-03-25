@@ -153,6 +153,73 @@ func (e AnimationType) BamlTypeName() string {
 	return "AnimationType"
 }
 
+type AskUserQuestionType string
+
+const (
+	AskUserQuestionTypeGENERIC                  AskUserQuestionType = "GENERIC"
+	AskUserQuestionTypeATTACHMENT_CLARIFICATION AskUserQuestionType = "ATTACHMENT_CLARIFICATION"
+	AskUserQuestionTypeUPLOAD_ATTACHMENT        AskUserQuestionType = "UPLOAD_ATTACHMENT"
+)
+
+// Values returns all allowed values for the AskUserQuestionType type.
+func (AskUserQuestionType) Values() []AskUserQuestionType {
+	return []AskUserQuestionType{
+		AskUserQuestionTypeGENERIC,
+		AskUserQuestionTypeATTACHMENT_CLARIFICATION,
+		AskUserQuestionTypeUPLOAD_ATTACHMENT,
+	}
+}
+
+// IsValid checks whether the given AskUserQuestionType value is valid.
+func (e AskUserQuestionType) IsValid() bool {
+
+	for _, v := range e.Values() {
+		if e == v {
+			return true
+		}
+	}
+	return false
+
+}
+
+// MarshalJSON customizes JSON marshaling for AskUserQuestionType.
+func (e AskUserQuestionType) MarshalJSON() ([]byte, error) {
+	if !e.IsValid() {
+		return nil, fmt.Errorf("invalid AskUserQuestionType: %q", e)
+	}
+	return json.Marshal(string(e))
+}
+
+// UnmarshalJSON customizes JSON unmarshaling for AskUserQuestionType.
+func (e *AskUserQuestionType) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return err
+	}
+	*e = AskUserQuestionType(s)
+	if !e.IsValid() {
+		return fmt.Errorf("invalid AskUserQuestionType: %q", s)
+	}
+	return nil
+}
+
+func (e *AskUserQuestionType) Decode(holder *cffi.CFFIValueEnum, typeMap baml.TypeMap) {
+	name := holder.Name
+	if name.Name != "AskUserQuestionType" && name.Namespace != cffi.CFFITypeNamespace_TYPES {
+		panic(fmt.Sprintf("expected types.AskUserQuestionType, got %s.%s", string(name.Namespace.String()), string(name.Name)))
+	}
+	value := holder.Value
+	*e = AskUserQuestionType(value)
+}
+
+func (e AskUserQuestionType) Encode() (*cffi.HostValue, error) {
+	return baml.EncodeEnum("AskUserQuestionType", string(e), false)
+}
+
+func (e AskUserQuestionType) BamlTypeName() string {
+	return "AskUserQuestionType"
+}
+
 type SceneCategory string
 
 const (

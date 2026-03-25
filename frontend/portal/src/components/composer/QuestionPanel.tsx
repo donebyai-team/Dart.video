@@ -1,8 +1,12 @@
 'use client'
 
-import { ChevronRight } from 'lucide-react'
+import { useState } from 'react'
+import { ChevronRight, ImagePlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import type { AskUserQuestion } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
+import type { AskUserQuestion, SelectedMediaAsset } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
+import { AskUserQuestionType } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
+import AssetPreviewDialog from '@/components/assets/AssetPreviewDialog'
+import AssetUploadDropdown from './AssetUploadDropdown'
 
 interface QuestionPanelProps {
   question: AskUserQuestion
@@ -12,6 +16,8 @@ interface QuestionPanelProps {
   onOptionClick: (option: string) => void
   onCustomAnswerChange: (value: string) => void
   onContinue: () => void
+  selectedQuestionAssets?: SelectedMediaAsset[]
+  onOpenAssetPicker?: (mode: 'figma' | 'upload') => void
 }
 
 const QuestionPanel = ({
@@ -22,10 +28,81 @@ const QuestionPanel = ({
   onOptionClick,
   onCustomAnswerChange,
   onContinue,
+  selectedQuestionAssets = [],
+  onOpenAssetPicker,
 }: QuestionPanelProps) => {
+  const [assetPreviewOpen, setAssetPreviewOpen] = useState(false)
+  const [assetNote, setAssetNote] = useState('')
+  
+  const isAssetClarification = question.questionType === AskUserQuestionType.ASSET_CLARIFICATION
+  const isUploadAsset = question.questionType === AskUserQuestionType.UPLOAD_ASSET
+  const showAssetFeatures = isAssetClarification || isUploadAsset
   return (
     <div className='rounded-xl border bg-background p-4 space-y-3 shadow-sm'>
       <p className='text-sm font-medium leading-snug'>{question.questionText}</p>
+
+      {/* Asset Preview for ASSET_CLARIFICATION */}
+      {isAssetClarification && question.asset && (
+        <>
+          <div className='rounded-lg border bg-muted/30 p-3'>
+            <div className='flex items-start gap-3'>
+              <button 
+                onClick={() => setAssetPreviewOpen(true)}
+                className='flex-shrink-0 w-16 h-16 rounded border bg-background overflow-hidden hover:opacity-80 transition-opacity'
+              >
+                {question.asset.thumbnailUrl ? (
+                  <img 
+                    src={question.asset.thumbnailUrl} 
+                    alt={question.asset.fileName || 'Asset'}
+                    className='w-full h-full object-cover'
+                  />
+                ) : (
+                  <div className='w-full h-full flex items-center justify-center text-muted-foreground'>
+                    <ImagePlus className='w-6 h-6' />
+                  </div>
+                )}
+              </button>
+              <div className='flex-1 min-w-0'>
+                <p className='text-xs font-medium truncate'>{question.asset.fileName || 'Unnamed Asset'}</p>
+                <p className='text-xs text-muted-foreground mt-0.5'>Click to view full asset</p>
+              </div>
+            </div>
+          </div>
+          <AssetPreviewDialog
+            title={question.asset.fileName || 'Asset'}
+            subtitle='Add clarification for this asset'
+            previewUrl={question.asset.url}
+            mediaKind={question.asset.mimeType?.startsWith('video/') ? 'video' : 'image'}
+            width={question.asset.width}
+            height={question.asset.height}
+            open={assetPreviewOpen}
+            note={assetNote}
+            noteLabel='Clarification for this asset'
+            notePlaceholder='Add notes about how this asset should be used...'
+            selectLabel='Done'
+            onOpenChange={setAssetPreviewOpen}
+            onNoteChange={setAssetNote}
+            onSelect={() => setAssetPreviewOpen(false)}
+          />
+        </>
+      )}
+
+      {/* Asset Upload for UPLOAD_ASSET */}
+      {isUploadAsset && onOpenAssetPicker && (
+        <div className='space-y-2'>
+          <AssetUploadDropdown
+            disabled={isSubmitting}
+            onOpenAssetPicker={onOpenAssetPicker}
+            triggerClassName='w-full flex items-center justify-center gap-2 px-3 py-2 text-sm rounded-lg border transition-colors hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed'
+            showLabel={true}
+          />
+          {selectedQuestionAssets.length > 0 && (
+            <div className='text-xs text-muted-foreground text-center'>
+              {selectedQuestionAssets.length} asset{selectedQuestionAssets.length > 1 ? 's' : ''} selected
+            </div>
+          )}
+        </div>
+      )}
 
       {question.options?.length > 0 && (
         <div className='flex flex-wrap gap-2'>

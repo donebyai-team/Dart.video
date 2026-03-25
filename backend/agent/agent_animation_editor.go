@@ -12,6 +12,7 @@ import (
 	"github.com/shank318/coasterai/datastore"
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
+	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
 	"github.com/shank318/coasterai/services"
 	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
@@ -21,7 +22,7 @@ import (
 
 type AnimationGenerationAgentRunResult struct {
 	Status             RunStatus
-	AskUserQuestion    *types.AskUserQuestion
+	AskUserQuestion    *pbportal.AskUserQuestion
 	Suggestions        []*models.Template
 	GeneratedAnimation *models.Template
 }

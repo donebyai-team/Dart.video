@@ -201,7 +201,7 @@ func sendAnimationResult(
 		if err := stream.Send(&pbportal.GenerateOrEditAnimationResponse{
 			Slide:               slide,
 			WaitingForUserInput: true,
-			AskUserQuestion:     toProtoQuestion(runResult.AskUserQuestion),
+			AskUserQuestion:     runResult.AskUserQuestion,
 		}); err != nil {
 			return nil
 		}

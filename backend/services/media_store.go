@@ -10,7 +10,6 @@ import (
 	"github.com/shank318/coasterai/datastore"
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
-	"github.com/shank318/coasterai/utils"
 	"github.com/streamingfast/dstore"
 	"go.uber.org/zap"
 	_ "golang.org/x/image/webp"
@@ -341,7 +340,7 @@ func (g gcpMediaStore) Upload(
 			Height:   int(height),
 			FileName: safeFileName,
 			Size:     size,
-			Duration: utils.Ptr(duration),
+			Duration: duration,
 		},
 	})
 	if err != nil {

@@ -27,12 +27,27 @@ type MediaAsset struct {
 	Tags        string `db:"-"`
 }
 
+func (asset MediaAsset) ToProto() *pbcore.MediaAsset {
+	return &pbcore.MediaAsset{
+		Url:       asset.Path,
+		Width:     float32(asset.Metadata.Width),
+		Height:    float32(asset.Metadata.Height),
+		MimeType:  asset.MimeType,
+		Size:      float32(asset.Metadata.Size),
+		FileId:    asset.Metadata.FileName,
+		FileName:  asset.Metadata.FileName,
+		Id:        asset.ID,
+		MediaType: asset.MediaType,
+		Duration:  float32(asset.Metadata.Duration),
+	}
+}
+
 type AssetMetadata struct {
-	Width    int      `json:"width"`
-	Height   int      `json:"height"`
-	FileName string   `json:"fileName"`
-	Duration *float64 `json:"duration"`
-	Size     int64    `json:"size"`
+	Width    int     `json:"width"`
+	Height   int     `json:"height"`
+	FileName string  `json:"fileName"`
+	Duration float64 `json:"duration"`
+	Size     int64   `json:"size"`
 }
 
 func (v AssetMetadata) Value() (driver.Value, error) {

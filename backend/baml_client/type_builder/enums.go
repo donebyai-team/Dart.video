@@ -91,6 +91,46 @@ func (t *AnimationTypeEnumView) Type() (baml.Type, error) {
 	return t.inner.Type()
 }
 
+type AskUserQuestionTypeEnumView struct {
+	inner baml.EnumBuilder
+}
+
+func (t *AskUserQuestionTypeEnumView) ListValues() ([]EnumValueView, error) {
+	result, err := t.inner.ListValues()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]EnumValueView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *AskUserQuestionTypeEnumView) ValueGENERIC() (EnumValueView, error) {
+	return t.inner.Value("GENERIC")
+}
+
+func (t *AskUserQuestionTypeEnumView) ValueATTACHMENT_CLARIFICATION() (EnumValueView, error) {
+	return t.inner.Value("ATTACHMENT_CLARIFICATION")
+}
+
+func (t *AskUserQuestionTypeEnumView) ValueUPLOAD_ATTACHMENT() (EnumValueView, error) {
+	return t.inner.Value("UPLOAD_ATTACHMENT")
+}
+
+func (t *TypeBuilder) AskUserQuestionType() (*AskUserQuestionTypeEnumView, error) {
+	bld, err := t.inner.Enum("AskUserQuestionType")
+	if err != nil {
+		return nil, err
+	}
+	return &AskUserQuestionTypeEnumView{inner: bld}, nil
+}
+
+func (t *AskUserQuestionTypeEnumView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
 type SceneCategoryEnumView struct {
 	inner baml.EnumBuilder
 }

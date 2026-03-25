@@ -984,7 +984,7 @@ type MediaAsset struct {
 	FileName      string                 `protobuf:"bytes,8,opt,name=fileName,proto3" json:"fileName,omitempty"`
 	Id            string                 `protobuf:"bytes,9,opt,name=id,proto3" json:"id,omitempty"`
 	MediaType     MediaType              `protobuf:"varint,10,opt,name=mediaType,proto3,enum=coasterai.core.v1.MediaType" json:"mediaType,omitempty"`
-	Duration      *float32               `protobuf:"fixed32,11,opt,name=duration,proto3,oneof" json:"duration,omitempty"`
+	Duration      float32                `protobuf:"fixed32,11,opt,name=duration,proto3" json:"duration,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1090,8 +1090,8 @@ func (x *MediaAsset) GetMediaType() MediaType {
 }
 
 func (x *MediaAsset) GetDuration() float32 {
-	if x != nil && x.Duration != nil {
-		return *x.Duration
+	if x != nil {
+		return x.Duration
 	}
 	return 0
 }
@@ -2080,7 +2080,7 @@ const file_coasterai_core_v1_slide_proto_rawDesc = "" +
 	"\x05edits\x18\x03 \x01(\v2\x17.google.protobuf.StructR\x05edits\"6\n" +
 	"\fCodeRegistry\x12\x12\n" +
 	"\x04mUrl\x18\x01 \x01(\tR\x04mUrl\x12\x12\n" +
-	"\x04tUrl\x18\x02 \x01(\tR\x04tUrl\"\xce\x02\n" +
+	"\x04tUrl\x18\x02 \x01(\tR\x04tUrl\"\xbc\x02\n" +
 	"\n" +
 	"MediaAsset\x12\x10\n" +
 	"\x03url\x18\x01 \x01(\tR\x03url\x12\"\n" +
@@ -2093,9 +2093,8 @@ const file_coasterai_core_v1_slide_proto_rawDesc = "" +
 	"\bfileName\x18\b \x01(\tR\bfileName\x12\x0e\n" +
 	"\x02id\x18\t \x01(\tR\x02id\x12:\n" +
 	"\tmediaType\x18\n" +
-	" \x01(\x0e2\x1c.coasterai.core.v1.MediaTypeR\tmediaType\x12\x1f\n" +
-	"\bduration\x18\v \x01(\x02H\x00R\bduration\x88\x01\x01B\v\n" +
-	"\t_duration\"\xe7\x01\n" +
+	" \x01(\x0e2\x1c.coasterai.core.v1.MediaTypeR\tmediaType\x12\x1a\n" +
+	"\bduration\x18\v \x01(\x02R\bduration\"\xe7\x01\n" +
 	"\x0fSpotlightEffect\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\f\n" +
 	"\x01x\x18\x02 \x01(\x02R\x01x\x12\f\n" +
@@ -2332,7 +2331,6 @@ func file_coasterai_core_v1_slide_proto_init() {
 	file_coasterai_core_v1_slide_proto_msgTypes[2].OneofWrappers = []any{}
 	file_coasterai_core_v1_slide_proto_msgTypes[3].OneofWrappers = []any{}
 	file_coasterai_core_v1_slide_proto_msgTypes[4].OneofWrappers = []any{}
-	file_coasterai_core_v1_slide_proto_msgTypes[7].OneofWrappers = []any{}
 	file_coasterai_core_v1_slide_proto_msgTypes[11].OneofWrappers = []any{
 		(*Slide_Media)(nil),
 		(*Slide_Animation)(nil),

@@ -101,11 +101,13 @@ func (c AnimationSlide) BamlTypeName() string {
 }
 
 type AskUserQuestion struct {
-	Tool_name          *string  `json:"tool_name"`
-	Question_text      *string  `json:"question_text"`
-	Options            []string `json:"options"`
-	Allow_custom_entry *bool    `json:"allow_custom_entry"`
-	ThinkingSummary    *string  `json:"thinkingSummary"`
+	Tool_name          *string                    `json:"tool_name"`
+	QuestionType       *types.AskUserQuestionType `json:"questionType"`
+	Question_text      *string                    `json:"question_text"`
+	Options            []string                   `json:"options"`
+	Allow_custom_entry *bool                      `json:"allow_custom_entry"`
+	AttachmentUrl      *string                    `json:"attachmentUrl"`
+	ThinkingSummary    *string                    `json:"thinkingSummary"`
 }
 
 func (c *AskUserQuestion) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -125,6 +127,9 @@ func (c *AskUserQuestion) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeM
 		case "tool_name":
 			c.Tool_name = baml.Decode(valueHolder).Interface().(*string)
 
+		case "questionType":
+			c.QuestionType = baml.Decode(valueHolder).Interface().(*types.AskUserQuestionType)
+
 		case "question_text":
 			c.Question_text = baml.Decode(valueHolder).Interface().(*string)
 
@@ -133,6 +138,9 @@ func (c *AskUserQuestion) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeM
 
 		case "allow_custom_entry":
 			c.Allow_custom_entry = baml.Decode(valueHolder).Interface().(*bool)
+
+		case "attachmentUrl":
+			c.AttachmentUrl = baml.Decode(valueHolder).Interface().(*string)
 
 		case "thinkingSummary":
 			c.ThinkingSummary = baml.Decode(valueHolder).Interface().(*string)
@@ -151,11 +159,15 @@ func (c AskUserQuestion) Encode() (*cffi.HostValue, error) {
 
 	fields["tool_name"] = c.Tool_name
 
+	fields["questionType"] = c.QuestionType
+
 	fields["question_text"] = c.Question_text
 
 	fields["options"] = c.Options
 
 	fields["allow_custom_entry"] = c.Allow_custom_entry
+
+	fields["attachmentUrl"] = c.AttachmentUrl
 
 	fields["thinkingSummary"] = c.ThinkingSummary
 

@@ -196,6 +196,7 @@ message CreateVideoResponse {
 message ContinueVideoPlanningRequest {
   string id = 1; // video id
   string response = 2;
+  repeated SelectedMediaAsset assets = 3;
 }
 
 message AskUserQuestion {
@@ -203,6 +204,15 @@ message AskUserQuestion {
   string question_text = 2;
   repeated string options = 3;
   optional bool allow_custom_entry = 4;
+  optional core.v1.MediaAsset asset = 5;
+  AskUserQuestionType questionType = 6;
+}
+
+enum AskUserQuestionType {
+  ASK_USER_QUESTION_TYPE_UNDEFINED = 0;
+  ASK_USER_QUESTION_TYPE_GENERAL = 1;
+  ASK_USER_QUESTION_TYPE_ASSET_CLARIFICATION = 2;
+  ASK_USER_QUESTION_TYPE_UPLOAD_ASSET = 3;
 }
 
 message Config {

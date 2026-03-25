@@ -132,7 +132,7 @@ message MediaAsset {
   string fileName = 8;
   string id = 9;
   MediaType mediaType = 10;
-  optional float duration = 11;
+  float duration = 11;
 }
 
 // ===================== EFFECTS =====================

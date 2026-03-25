@@ -2,6 +2,7 @@ package agent
 
 import (
 	"context"
+	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
 
 	"github.com/shank318/coasterai/agent/agenterrors"
 	"github.com/shank318/coasterai/baml_client/types"
@@ -51,10 +52,48 @@ func (a *agentV2) handleToolCalls(
 		return true, nil, err
 	}
 
+	questionProto := toProtoQuestion(&questionCopy)
+
+	if questionCopy.AttachmentUrl != nil {
+		asset := a.assetRegistry.GetAssetFromPath(*questionCopy.AttachmentUrl)
+		if asset != nil {
+			questionProto.Asset = asset.ToProto()
+		}
+	}
+
+	// if no asset is provided
+	if questionProto.Asset == nil {
+		questionProto.QuestionType = pbportal.AskUserQuestionType_ASK_USER_QUESTION_TYPE_GENERAL
+	}
+
 	return true, &RunResult{
 		Status:          RunStatusWaitingForUserInput,
-		AskUserQuestion: &questionCopy,
+		AskUserQuestion: questionProto,
 	}, nil
+}
+
+func toProtoQuestion(question *types.AskUserQuestion) *pbportal.AskUserQuestion {
+	if question == nil {
+		return nil
+	}
+
+	proto := &pbportal.AskUserQuestion{
+		QuestionType:     pbportal.AskUserQuestionType_ASK_USER_QUESTION_TYPE_UNDEFINED,
+		ToolName:         question.Tool_name,
+		QuestionText:     question.Question_text,
+		Options:          question.Options,
+		AllowCustomEntry: question.Allow_custom_entry,
+	}
+
+	if question.QuestionType == types.AskUserQuestionTypeGENERIC {
+		proto.QuestionType = pbportal.AskUserQuestionType_ASK_USER_QUESTION_TYPE_GENERAL
+	} else if question.QuestionType == types.AskUserQuestionTypeATTACHMENT_CLARIFICATION {
+		proto.QuestionType = pbportal.AskUserQuestionType_ASK_USER_QUESTION_TYPE_ASSET_CLARIFICATION
+	} else if question.QuestionType == types.AskUserQuestionTypeUPLOAD_ATTACHMENT {
+		proto.QuestionType = pbportal.AskUserQuestionType_ASK_USER_QUESTION_TYPE_UPLOAD_ASSET
+	}
+
+	return proto
 }
 
 func (a *agentAnimationEditor) handleAnimationGenerationToolCalls(
@@ -90,8 +129,10 @@ func (a *agentAnimationEditor) handleAnimationGenerationToolCalls(
 		AskUserQuestion: &questionCopy,
 	})
 
+	protoQuestion := toProtoQuestion(&questionCopy)
+
 	return true, &AnimationGenerationAgentRunResult{
 		Status:          RunStatusWaitingForUserInput,
-		AskUserQuestion: &questionCopy,
+		AskUserQuestion: protoQuestion,
 	}, nil
 }

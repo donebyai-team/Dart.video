@@ -3,7 +3,6 @@ package portal
 import (
 	"connectrpc.com/connect"
 	"context"
-	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -21,22 +20,8 @@ func (p *Portal) GetMediaAssets(ctx context.Context, c *connect.Request[emptypb.
 
 	protoAssets := make([]*pbcore.MediaAsset, 0, len(assets))
 	for _, asset := range assets {
-		protoAssets = append(protoAssets, assetToProto(asset))
+		protoAssets = append(protoAssets, asset.ToProto())
 	}
 
 	return connect.NewResponse(&pbportal.GetMediaAssetsResponse{Assets: protoAssets}), nil
-}
-
-func assetToProto(asset *models.MediaAsset) *pbcore.MediaAsset {
-	return &pbcore.MediaAsset{
-		Url:       asset.Path,
-		Width:     float32(asset.Metadata.Width),
-		Height:    float32(asset.Metadata.Height),
-		MimeType:  asset.MimeType,
-		Size:      float32(asset.Metadata.Size),
-		FileId:    asset.Metadata.FileName,
-		FileName:  asset.Metadata.FileName,
-		Id:        asset.ID,
-		MediaType: asset.MediaType,
-	}
 }

@@ -4,24 +4,16 @@ import { create } from '@bufbuild/protobuf'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Film,
-  Clock,
   Sparkles,
   TextIcon,
   X,
-  Palette,
-  LanguagesIcon,
-  Square,
-  Wand2,
-  ChevronDown,
-  Figma,
-  ImagePlus
+  Square
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import FigmaImportPanel, { type ConfirmPayload as FigmaImportConfirmPayload } from '@/components/figma/FigmaImportPanel'
 import ManualMediaImportPanel from '@/components/assets/ManualMediaImportPanel'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { MediaAsset } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Script } from '@coasterai/pb/coasterai/core/v1/video_pb'
@@ -35,23 +27,14 @@ import { getDefaultResolution } from '@/stores/video/defaults'
 import { SelectedMediaAssetSchema, type AskUserQuestion, type CreateVideoResponse, type SelectedMediaAsset } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
 import QuestionPanel from '@/components/composer/QuestionPanel'
 import ThinkingViewComponent from '@/components/composer/ThinkingViewComponent'
-import { BrandIdentity } from '@coasterai/pb/coasterai/core/v1/brandkit_pb'
 import { StyleType } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import StylePickerDialog from '@/components/composer/StylePickerDialog'
+import AssetUploadDropdown from '@/components/composer/AssetUploadDropdown'
+import DurationSelector from '@/components/composer/DurationSelector'
+import LanguageSelector from '@/components/composer/LanguageSelector'
+import StyleSelector from '@/components/composer/StyleSelector'
+import BrandLibrarySelector from '@/components/composer/BrandLibrarySelector'
 
-const DURATIONS = [
-  { label: '60s', value: '60' },
-  { label: '90s', value: '90' }
-]
-
-const LANGUAGES = [{ label: 'English(UK)', value: 'en' }]
-
-const STYLE_LABELS: Record<number, string> = {
-  1: 'Simple Text',
-}
-
-const NO_BRAND_VALUE = 'none'
-const ADD_BRAND_VALUE = '__add_brand__'
 const MIN_SCRIPT_SECTIONS = 3
 const MIN_PROMPT_LENGTH = 10
 
@@ -85,6 +68,7 @@ const VideoIntentComposer = () => {
   const [pendingQuestion, setPendingQuestion] = useState<AskUserQuestion | undefined>()
   const [selectedAnswer, setSelectedAnswer] = useState('')
   const [customAnswer, setCustomAnswer] = useState('')
+  const [questionAssets, setQuestionAssets] = useState<SelectedMediaAsset[]>([])
 
   const hasScript = !!script?.items?.length
   const router = useRouter()
@@ -95,24 +79,6 @@ const VideoIntentComposer = () => {
   const hasPrompt = prompt.trim().length > MIN_PROMPT_LENGTH
   const hasSelectedAssets = selectedAssets.length > 0
   const canGenerate = hasPrompt || hasValidScript || hasSelectedAssets
-  const [identities, setIdentities] = useState<BrandIdentity[]>([])
-
-   useEffect(() => {
-        fetchBrandIdentities();
-    }, [portalClient])
-
-   const fetchBrandIdentities = async () => {
-        try {
-            const res = await portalClient.getBrandIdentities({})
-            setIdentities(res.identities)
-            if (res.identities.length > 0)          {
-              setSelectedBrandLibraryId(res.identities[0].id);
-            }
-        } catch (err) {
-            console.error("Failed to fetch brand identities", err)
-            toast.error(getConnectError(err))
-        }
-    }
 
   const answerInput = useMemo(() => {
     if (!activeQuestion) return ''
@@ -131,6 +97,7 @@ const VideoIntentComposer = () => {
     setPendingQuestion(undefined)
     setSelectedAnswer('')
     setCustomAnswer('')
+    setQuestionAssets([])
     setStage('question')
   }, [pendingQuestion, isThinkingBusy])
 
@@ -188,6 +155,7 @@ const VideoIntentComposer = () => {
     setStage('compose')
     setActiveQuestion(undefined)
     setPendingQuestion(undefined)
+    setQuestionAssets([])
   }
 
   const handleSubmit = async () => {
@@ -260,8 +228,11 @@ const VideoIntentComposer = () => {
 
       const stream = portalClient.continueVideoPlanning({
         id: videoId,
-        response
+        response,
+        assets: questionAssets
       }, { signal: controller.signal })
+
+      setQuestionAssets([])
 
       await consumePlanningStream(stream, controller.signal, streamSession)
     } catch (err: any) {
@@ -296,6 +267,19 @@ const VideoIntentComposer = () => {
     setAssetDialogOpen(false)
   }
 
+  const upsertQuestionAsset = (asset: MediaAsset, note?: string) => {
+    const nextAsset = create(SelectedMediaAssetSchema, {
+      assetID: asset.id,
+      note: note?.trim() || undefined
+    })
+
+    setQuestionAssets(current => {
+      const remaining = current.filter(item => item.assetID !== nextAsset.assetID)
+      return [...remaining, nextAsset]
+    })
+    setAssetDialogOpen(false)
+  }
+
   const handleSelectFigmaFrame = async ({ fileKey, selectedFrame, sectionNote }: FigmaImportConfirmPayload) => {
     try {
       const res = await portalClient.importFigmaFrame({
@@ -305,14 +289,22 @@ const VideoIntentComposer = () => {
       if (!res.asset) {
         throw new Error('Figma import did not return an asset')
       }
-      upsertSelectedAsset(res.asset, sectionNote)
+      if (stage === 'question') {
+        upsertQuestionAsset(res.asset, sectionNote)
+      } else {
+        upsertSelectedAsset(res.asset, sectionNote)
+      }
     } catch (err) {
       toast.error(getConnectError(err))
     }
   }
 
   const handleSelectUploadedAsset = async ({ asset, sectionNote }: { asset: MediaAsset; sectionNote?: string }) => {
-    upsertSelectedAsset(asset, sectionNote)
+    if (stage === 'question') {
+      upsertQuestionAsset(asset, sectionNote)
+    } else {
+      upsertSelectedAsset(asset, sectionNote)
+    }
   }
 
   const openAssetDialog = (mode: AssetPickerMode) => {
@@ -342,14 +334,14 @@ const VideoIntentComposer = () => {
             <FigmaImportPanel
               onClose={() => setAssetDialogOpen(false)}
               onConfirm={handleSelectFigmaFrame}
-              canConfirm={stage === 'compose'}
+              canConfirm={stage === 'compose' || stage === 'question'}
             />
           </div>
           <div className={assetPickerMode === 'upload' ? 'block' : 'hidden'}>
             <ManualMediaImportPanel
               onClose={() => setAssetDialogOpen(false)}
               onConfirm={handleSelectUploadedAsset}
-              canConfirm={stage === 'compose'}
+              canConfirm={stage === 'compose' || stage === 'question'}
             />
           </div>
         </DialogContent>
@@ -384,6 +376,8 @@ const VideoIntentComposer = () => {
             }}
             onCustomAnswerChange={setCustomAnswer}
             onContinue={() => void handleContinuePlanning()}
+            selectedQuestionAssets={questionAssets}
+            onOpenAssetPicker={openAssetDialog}
           />
         )}
 
@@ -410,35 +404,19 @@ const VideoIntentComposer = () => {
 
             <span className='text-border/60 mx-0.5'>·</span>
 
-            <span className='flex items-center gap-1 flex-shrink-0'>
-              <Clock className='w-4 h-4' />
-              <Select value={duration} onValueChange={setDuration} disabled={stage !== 'compose'}>
-                <SelectTrigger className='h-7 text-xs bg-transparent border-none shadow-none ring-0 focus:ring-0 px-1 gap-1 w-auto min-w-0'>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {DURATIONS.map(d => (
-                    <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </span>
+            <DurationSelector
+              value={duration}
+              onChange={setDuration}
+              disabled={stage !== 'compose'}
+            />
 
             <span className='text-border/60 mx-0.5'>·</span>
 
-            <span className='flex items-center gap-1 flex-shrink-0'>
-              <LanguagesIcon className='w-4 h-4' />
-              <Select value={language} onValueChange={setLanguage} disabled={stage !== 'compose'}>
-                <SelectTrigger className='h-7 text-xs bg-transparent border-none shadow-none ring-0 focus:ring-0 px-1 gap-1 w-auto min-w-0'>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {LANGUAGES.map(d => (
-                    <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </span>
+            <LanguageSelector
+              value={language}
+              onChange={setLanguage}
+              disabled={stage !== 'compose'}
+            />
 
             <div className='flex-1' />
 
@@ -453,76 +431,28 @@ const VideoIntentComposer = () => {
             <span className='text-border/60 mx-0.5'>·</span>
 
            {/* Add Style */}
-            <button
-              onClick={() => setStyleDialogOpen(true)}
+            <StyleSelector
+              selectedStyle={selectedStyle}
+              onOpenDialog={() => setStyleDialogOpen(true)}
               disabled={stage !== 'compose'}
-              className='flex items-center gap-1.5 flex-shrink-0 hover:text-foreground rounded px-1.5 py-1 hover:bg-muted/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed'
-            >
-              <Wand2 className='w-3.5 h-3.5' />
-              <span>{STYLE_LABELS[selectedStyle] ?? 'Style'}</span>
-              <ChevronDown className='w-3 h-3 opacity-60' />
-            </button>
+            />
 
             <span className='text-border/60 mx-0.5'>·</span>
 
-           <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  disabled={stage !== 'compose'}
-                  className='flex items-center gap-1.5 flex-shrink-0 hover:text-foreground rounded px-1.5 py-1 hover:bg-muted/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed'
-                >
-                  <Figma className='w-4 h-4' />
-                  <span>Add Assets</span>
-                  <ChevronDown className='w-3 h-3 opacity-60' />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align='end'>
-                <DropdownMenuItem onSelect={() => openAssetDialog('figma')}>
-                  <Figma className='mr-2 h-4 w-4' />
-                  Import from Figma
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => openAssetDialog('upload')}>
-                  <ImagePlus className='mr-2 h-4 w-4' />
-                  Upload Media
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <AssetUploadDropdown
+              disabled={stage !== 'compose'}
+              onOpenAssetPicker={openAssetDialog}
+            />
 
             <span className='text-border/60 mx-0.5'>·</span>
 
             {/* Add Brand Library */}
-            <span className='flex items-center gap-1 flex-shrink-0'>
-              <Palette className='w-4 h-4 opacity-70' />
-              <Select
-                value={selectedBrandLibraryId ?? ADD_BRAND_VALUE}
-                onValueChange={v => {
-                  if (v === ADD_BRAND_VALUE) {
-                    router.push('/dashboard/brand')
-                    return
-                  }
-                  setSelectedBrandLibraryId(v === NO_BRAND_VALUE ? undefined : v)
-                }}
-                disabled={stage !== 'compose'}
-              >
-                <SelectTrigger className='h-7 text-xs bg-transparent border-none shadow-none ring-0 focus:ring-0 px-1 gap-1 w-auto min-w-0'>
-                  <SelectValue placeholder='Brand' />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem
-                    value={ADD_BRAND_VALUE}
-                    onPointerDown={e => {
-                      e.preventDefault()
-                      router.push('/dashboard/brand')
-                    }}
-                  >
-                    Add brand
-                  </SelectItem>
-                  {identities.map(b => (
-                    <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </span>
+            <BrandLibrarySelector
+              selectedBrandLibraryId={selectedBrandLibraryId}
+              onChange={setSelectedBrandLibraryId}
+              onAddBrand={() => router.push('/dashboard/brand')}
+              disabled={stage !== 'compose'}
+            />
           </div>
 
           {/* Script badge */}

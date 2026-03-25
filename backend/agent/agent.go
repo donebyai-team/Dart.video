@@ -29,7 +29,8 @@ type StartSessionOptions struct {
 }
 
 type ContinueSessionOptions struct {
-	UserResponse string
+	UserResponse        string
+	SelectedMediaAssets []*pbportal.SelectedMediaAsset
 }
 
 type RunStatus string
@@ -42,7 +43,7 @@ const (
 
 type RunResult struct {
 	Status          RunStatus
-	AskUserQuestion *types.AskUserQuestion
+	AskUserQuestion *pbportal.AskUserQuestion
 }
 
 const (

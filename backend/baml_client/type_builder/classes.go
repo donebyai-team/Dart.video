@@ -91,6 +91,10 @@ func (t *AskUserQuestionClassView) PropertyTool_name() (ClassPropertyView, error
 	return t.inner.Property("tool_name")
 }
 
+func (t *AskUserQuestionClassView) PropertyQuestionType() (ClassPropertyView, error) {
+	return t.inner.Property("questionType")
+}
+
 func (t *AskUserQuestionClassView) PropertyQuestion_text() (ClassPropertyView, error) {
 	return t.inner.Property("question_text")
 }
@@ -101,6 +105,10 @@ func (t *AskUserQuestionClassView) PropertyOptions() (ClassPropertyView, error) 
 
 func (t *AskUserQuestionClassView) PropertyAllow_custom_entry() (ClassPropertyView, error) {
 	return t.inner.Property("allow_custom_entry")
+}
+
+func (t *AskUserQuestionClassView) PropertyAttachmentUrl() (ClassPropertyView, error) {
+	return t.inner.Property("attachmentUrl")
 }
 
 func (t *AskUserQuestionClassView) PropertyThinkingSummary() (ClassPropertyView, error) {

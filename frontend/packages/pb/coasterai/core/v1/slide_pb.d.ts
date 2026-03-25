@@ -302,9 +302,9 @@ export declare type MediaAsset = Message<"coasterai.core.v1.MediaAsset"> & {
   mediaType: MediaType;
 
   /**
-   * @generated from field: optional float duration = 11;
+   * @generated from field: float duration = 11;
    */
-  duration?: number;
+  duration: number;
 };
 
 /**

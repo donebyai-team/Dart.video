@@ -78,6 +78,12 @@ func (a *agentV2) Continue(ctx context.Context, options ContinueSessionOptions) 
 		BrandLibraryID: session.RequestV2.BrandLibraryId,
 	}
 
+	// If the user has provided more assets or clarification, update the attachments
+	if options.SelectedMediaAssets != nil && len(options.SelectedMediaAssets) > 0 {
+		session.RequestV2.Assets = append(session.RequestV2.Assets, options.SelectedMediaAssets...)
+		userResponse += "\n\nattachments updated"
+	}
+
 	err = a.injectMediaAssets(ctx, session.RequestV2)
 	if err != nil {
 		return nil, err
@@ -111,6 +117,33 @@ func (a *agentV2) Continue(ctx context.Context, options ContinueSessionOptions) 
 	a.logger.Info("continuing agent session with user response", zap.String("response", userResponse))
 
 	return a.runPlanning(ctx, session)
+}
+
+func deduplicateAssets(
+	assets []*pbportal.SelectedMediaAsset,
+) []*pbportal.SelectedMediaAsset {
+
+	index := make(map[string]int)
+	deduped := make([]*pbportal.SelectedMediaAsset, 0, len(assets))
+
+	// First deduplicate existing assets
+	for _, a := range assets {
+		if a.AssetID == "" {
+			continue
+		}
+		
+		if i, ok := index[a.AssetID]; ok {
+			// keep the latest if it has a note
+			if a.Note != nil {
+				deduped[i] = a
+			}
+		} else {
+			index[a.AssetID] = len(deduped)
+			deduped = append(deduped, a)
+		}
+	}
+
+	return deduped
 }
 
 func (a *agentV2) GetState(ctx context.Context) (*VideoAgentState, error) {
@@ -253,6 +286,7 @@ func (a *agentV2) savePlanningSession(ctx context.Context, session *planningSess
 }
 
 func (a *agentV2) injectMediaAssets(ctx context.Context, input *pbportal.CreateVideoRequest) error {
+	input.Assets = deduplicateAssets(input.Assets)
 
 	registryBuilder := services.NewMediaAssetRegistryBuilder()
 

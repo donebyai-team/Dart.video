@@ -97,6 +97,14 @@ func (registry *MediaAssetRegistry) ResolveMediaHandles(code string) string {
 	return replacer.Replace(code)
 }
 
+func (registry *MediaAssetRegistry) GetAssetFromPath(path string) *models.MediaAsset {
+	asset, ok := registry.assetMapper[path]
+	if !ok {
+		return nil
+	}
+	return asset
+}
+
 func (registry *MediaAssetRegistry) FormatBrandDetails() *string {
 	if registry.identity == nil {
 		return nil
@@ -180,7 +188,7 @@ func (registry *MediaAssetRegistry) FormatAssets() *string {
 		writeLine(2, "<height>%d</height>", asset.Metadata.Height)
 		writeLine(2, "<media_type>%s</media_type>", asset.MediaType.String())
 		writeLine(2, "<mime_type>%s</mime_type>", asset.MimeType)
-		if asset.Metadata.Duration != nil && *asset.Metadata.Duration > 0 {
+		if asset.Metadata.Duration > 0 {
 			writeLine(2, "<duration>%d</duration>", asset.Metadata.Duration)
 		}
 		if asset.Description != "" {

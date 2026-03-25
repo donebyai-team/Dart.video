@@ -104,6 +104,7 @@ var typeMap = map[string]reflect.Type{
 
 	"TYPES.AnimationCodeEditType": reflect.TypeOf(types.AnimationCodeEditType("")),
 	"TYPES.AnimationType":         reflect.TypeOf(types.AnimationType("")),
+	"TYPES.AskUserQuestionType":   reflect.TypeOf(types.AskUserQuestionType("")),
 	"TYPES.SceneCategory":         reflect.TypeOf(types.SceneCategory("")),
 
 	"TYPES.AnimationSlide__MediaSlide":                 reflect.TypeOf(types.Union2AnimationSlideOrMediaSlide{}),
