@@ -432,7 +432,6 @@ async function handleValidate(req, res) {
       duration: {
         settledFrame,
         durationInFrames,
-        astSettledFrame: astFallbackDuration.settledFrame,
       },
     }));
 
