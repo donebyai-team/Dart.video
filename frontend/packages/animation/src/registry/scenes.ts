@@ -2,6 +2,7 @@ import z from "zod";
 import { ComponentRegistration } from "./registry";
 import { fixedFrameTimingSchema } from "./animation_primitives";
 import { TYPOGRAPHY_VARIANT_NAMES } from "../tokens/semantic";
+import { ENTRANCE_ANIMATIONS, LOGO_ANIMATIONS, PEEL_DIRECTIONS } from "../components/scenes/types";
 
 export const TitleCardSchema = z.object({
   heading: z.string(),
@@ -33,9 +34,9 @@ export const TextHighlightSchema = z.object({
   durationInFrames: z.number().default(60).optional(),
 });
 
-const AnimationEnum = z.enum(['slideUp', 'slideDown', 'slideLeft', 'slideRight', 'fadeIn', 'scaleIn']);
-const LogoAnimationEnum = z.enum(['none', 'fadeIn', 'zoomIn', 'bounceIn', 'spinIn', 'dropIn']);
-const PeelDirectionEnum = z.enum(['left', 'right', 'up', 'down']);
+const AnimationEnum = z.enum(ENTRANCE_ANIMATIONS);
+const LogoAnimationEnum = z.enum(LOGO_ANIMATIONS);
+const PeelDirectionEnum = z.enum(PEEL_DIRECTIONS);
 
 export const ImagePeelSchema = z.object({
   sources: z.array(z.string()).min(2),
@@ -88,7 +89,7 @@ export const SCENE_COMPONENTS: ComponentRegistration[] = [
     durationContract: { kind: 'fixed' },
   },
   {
-    name: 'WordStagger',
+    name: 'TextStagger',
     type: 'content',
     fullSchema: WordStaggerSchema,
     editorProps: ['words', 'startAt', 'durationInFrames'],

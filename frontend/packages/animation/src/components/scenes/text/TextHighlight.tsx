@@ -1,9 +1,10 @@
 import React, { useMemo } from 'react';
 import { interpolate, useCurrentFrame } from 'remotion';
 import { usePatchedProp, useStyleOverride } from '../../../patches';
-import { useStyleContext, useAspectPreset } from '../../../styles';
+import { useStyleContext, useAspectPreset, interpolateWithEasing } from '../../../styles';
 import { useTheme } from '../../../theme';
 import { resolveTypography, TypographyVariant } from '../../../tokens';
+import { EntranceAnimation, getEntranceTransform } from '../types';
 
 export interface TextHighlightProps {
     id?: string;
@@ -12,6 +13,7 @@ export interface TextHighlightProps {
     highlightPattern?: RegExp | string; // Pattern to match for highlighting
     highlightStyle?: 'marker' | 'underline' | 'box' | 'glow' | 'background';
     highlightColor?: string;
+    animation?: EntranceAnimation;
     animationDelay?: number;
     durationInFrames?: number;
     startAt?: number;
@@ -25,7 +27,8 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
     text,
     highlightPattern = /{([^}]+)}/g, // Default: matches {text}
     highlightStyle = 'glow',
-    highlightColor = '#ffeb3b',
+    highlightColor,
+    animation = 'slideRight',
     animationDelay = 30,
     durationInFrames = 20,
     startAt = 0,
@@ -42,7 +45,16 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
 
     const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', variant);
     const patchedHighlightColor = usePatchedProp<string>(id, 'highlightColor', highlightColor);
+    const patchedAnimation = usePatchedProp<EntranceAnimation>(id, 'animation', animation);
     const styleOverride = useStyleOverride(id);
+    const easing = styleConfig.motion.entrance;
+
+    const entranceProgress = interpolateWithEasing(
+        frame,
+        [startAt, startAt + animationDelay],
+        [0, 1],
+        easing
+    );
 
     const segments = useMemo(() => {
         const parts: { text: string; highlight: boolean; index: number }[] = [];
@@ -178,9 +190,11 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
     };
 
     return (
-        <span id={id} className={className} style={
-            {
+        <span id={id} className={className} style={{
                 ...resolveTypography(patchedVariant, styleConfig, theme, preset),
+                opacity: entranceProgress,
+                transform: getEntranceTransform(patchedAnimation, entranceProgress, 20),
+                display: 'inline-block',
                 ...style,
                 ...styleOverride
             }

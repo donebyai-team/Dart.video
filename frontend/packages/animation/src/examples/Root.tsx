@@ -1,6 +1,6 @@
 import React from "react";
 import { AbsoluteFill, Composition } from "remotion";
-import { Typewriter, WordCycle, TextHighlight } from "../components/scenes/text";
+import { Typewriter, TextCycle, TextHighlight, Counter } from "../components/scenes/text";
 import { FadeIn, FadeOut, SlideIn, ScaleIn, Stagger, TimelineGate } from "../core/animation_primitives";
 import { FramePreset, SafeArea, AbsoluteCenter, Stack, Row } from "../core/layout";
 import { Text } from "../core/text";
@@ -8,7 +8,7 @@ import { ImageAsset, LogoAsset, LogoWithBrandName } from "../core/assets";
 import { SpeedFactorProvider } from "../duration";
 import { ASPECT_PRESETS, resolveStyle, AspectPresetProvider, StyleContextProvider } from "../styles";
 import { BrandTheme, darkTheme, ThemeProvider } from "../theme";
-import { WordStagger } from "../components/scenes/text/WordStagger";
+import { TextStagger } from "../components/scenes/text/TextStagger";
 import { AnimatedImage } from "../components/scenes/assets/AnimatedImage";
 import { AnimatedVideo } from "../components/scenes/assets/AnimatedVideo";
 import { ImagePeel } from "../components/scenes";
@@ -113,68 +113,35 @@ const TextComponentsScene: React.FC = () => (
     <Scene>
         <SafeArea>
             <AbsoluteCenter axis="both">
-                <Stack gap={64} align="center">
-                    <FadeIn id="txt-title">
-                        <Text id="t-txt" variant="heading">Your dashboard, logs, and alerts didn't adapt</Text>
-                    </FadeIn>
-
-                    {/* <Typewriter
-                        id="tw-0"
-                        startAt={15}
-                        durationInFrames={60}
-                        text="This text types itself in character by character."
-                        mode="char"
-                        variant="body"
-                    />
-
-                    <Counter
+                <Stack gap={64} align="center">                 
+                     <Counter
                         id="ctr-0"
-                        startAt={40}
-                        durationInFrames={50}
                         from={0}
                         to={12450}
-                        prefix="$"
-                        variant="display"
+                        prefix="Your dashboard, logs, and alerts didn't adapt "
                     />
 
-                    <WordCycle
-                        id="wc-0"
-                        startAt={60}
-                        words={["Design", "Build", "Ship", "Iterate"]}
-                        holdDuration={45}
-                        transitionDuration={10}
-                        transition="slideUp"
-                        variant="display"
-                    /> */}
-
                     <Row gap={2} >
-                        <Text id="t-txt" variant="body">Your dashboard, has</Text>
-                        <WordCycle
+                        <Text id="t-txt" variant="heading">Your dashboard, has</Text>
+                        <TextCycle
                             id="wc-0"
-                            words={["Design", "Build", "Ship", "Iterate"]}
-                            transition="slideUp"
-                            variant="body"
+                            texts={["Design Me", "Build Me", "Ship Me", "Iterate Me"]}
                         />
                     </Row>
 
                     <TextHighlight
                         id="th-0"
                         text="This is a {highlighted} text."
-                        highlightColor="#ffeb3b"
-                        variant="heading"
                     />
 
                     <Typewriter
                         id="tw-0"
                         text="Your dashboard, logs, and alerts didn't adapt"
                         mode="char"
-                        variant="heading"
                     />
 
-                    <WordStagger
+                    <TextStagger
                         text="Your dashboard, logs, and alerts didn't adapt."
-                        animation="slideLeft"
-                        style={{ fontSize: 48, color: '#FFF' }}
                     />
                 </Stack>
             </AbsoluteCenter>

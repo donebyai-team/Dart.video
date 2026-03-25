@@ -10,17 +10,17 @@ import { TypographyVariant } from '../../../tokens/semantic';
 import { resolveTypography } from '../../../tokens/resolveTypography';
 import { applySpeedFactor, useSpeedFactor } from '../../../duration';
 
-export type WordCycleTransition = 'flipY' | 'fadeSwap' | 'slideUp';
+export type TextCycleTransition = 'flipY' | 'fadeSwap' | 'slideUp';
 
-export interface WordCycleProps {
+export interface TextCycleProps {
   startAt?: number;
-  words: string[];
+  texts: string[];
   /** Frames each word is held. */
   holdDuration?: number;
   /** Frames for transition between words. */
   transitionDuration?: number;
   easing?: Easing;
-  transition?: WordCycleTransition;
+  transition?: TextCycleTransition;
   variant?: TypographyVariant;
   style?: React.CSSProperties;
   className?: string;
@@ -33,18 +33,18 @@ export interface WordCycleProps {
  * Auto-adjusts container width to the longest word using a hidden spacer —
  * no layout reflow occurs when words change, eliminating jerk in Stack/Row layouts.
  */
-export function WordCycle({
+export function TextCycle({
   startAt = 0,
-  words,
-  holdDuration = 30,
+  texts,
+  holdDuration = 15,
   transitionDuration = 5,
   easing,
-  transition = 'fadeSwap',
-  variant = 'body',
+  transition = 'flipY',
+  variant = 'heading',
   style,
   className,
   id,
-}: WordCycleProps): React.ReactElement {
+}: TextCycleProps): React.ReactElement {
   const frame = useCurrentFrame();
   const styleConfig = useStyleContext();
   const theme = useTheme();
@@ -60,9 +60,9 @@ export function WordCycle({
     durationInFrames: adjustedHoldDuration,
   });
 
-  const patchedWords = usePatchedProp(id, 'words', words);
+  const patchedTexts = usePatchedProp(id, 'texts', texts);
   const patchedTransitionDuration = usePatchedProp(id, 'transitionDuration', adjustedTransitionDuration);
-  const patchedTransition = usePatchedProp<WordCycleTransition>(id, 'transition', transition);
+  const patchedTransition = usePatchedProp<TextCycleTransition>(id, 'transition', transition);
   const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', variant);
   const styleOverride = useStyleOverride(id);
 
@@ -73,18 +73,18 @@ export function WordCycle({
   // The longest word by character count — used as an invisible spacer to
   // hold the container width stable across all word changes.
   const longestWord = useMemo(
-    () => patchedWords.reduce((a, b) => (a.length >= b.length ? a : b), ''),
-    [patchedWords],
+    () => patchedTexts.reduce((a, b) => (a.length >= b.length ? a : b), ''),
+    [patchedTexts],
   );
 
-  if (patchedWords.length === 0) return <span className={className} style={style} />;
+  if (patchedTexts.length === 0) return <span className={className} style={style} />;
 
   const elapsed = Math.max(0, frame - effectiveStartAt);
   const cycleIndex = Math.floor(elapsed / cycleDuration);
   const cycleFrame = elapsed - cycleIndex * cycleDuration;
 
-  const currentWord = patchedWords[cycleIndex % patchedWords.length] ?? patchedWords[0] ?? '';
-  const nextWord = patchedWords[(cycleIndex + 1) % patchedWords.length] ?? patchedWords[0] ?? '';
+  const currentWord = patchedTexts[cycleIndex % patchedTexts.length] ?? patchedTexts[0] ?? '';
+  const nextWord = patchedTexts[(cycleIndex + 1) % patchedTexts.length] ?? patchedTexts[0] ?? '';
   const isTransitioning = cycleFrame >= effectiveHold;
 
   const transitionProgress = isTransitioning

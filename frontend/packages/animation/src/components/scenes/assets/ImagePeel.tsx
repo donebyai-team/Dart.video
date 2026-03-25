@@ -6,8 +6,7 @@ import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { ImageAsset } from '../../../core/assets/ImageAsset';
 import { usePatchedProp } from '../../../patches';
-
-export type PeelDirection = 'left' | 'right' | 'up' | 'down';
+import { PeelDirection } from '../types';
 
 export interface ImagePeelProps {
     /** Array of image source URLs. */

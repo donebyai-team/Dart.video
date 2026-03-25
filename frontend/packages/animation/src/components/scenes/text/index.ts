@@ -1,7 +1,7 @@
 export * from './Counter';
 export * from './Typewriter';
-export * from './WordCycle';
+export * from './TextCycle';
 export * from './TextHighlight';
 export * from './TitleCard';
-export * from './WordStagger';
+export * from './TextStagger';
 

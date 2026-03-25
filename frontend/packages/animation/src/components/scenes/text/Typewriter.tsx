@@ -8,6 +8,7 @@ import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { TypographyVariant } from '../../../tokens/semantic';
 import { resolveTypography } from '../../../tokens/resolveTypography';
 import { applySpeedFactor, useSpeedFactor } from '../../../duration';
+import { EntranceAnimation, getEntranceTransform } from '../types';
 
 export type TypewriterMode = 'char' | 'word' | 'line';
 
@@ -18,6 +19,7 @@ export interface TypewriterProps {
   text: string;
   mode?: TypewriterMode;
   variant?: TypographyVariant;
+  animation?: EntranceAnimation;
   style?: React.CSSProperties;
   className?: string;
   id?: string;
@@ -32,7 +34,8 @@ export function Typewriter({
   durationInFrames = 60,
   text,
   mode = 'char',
-  variant = 'body',
+  variant = 'heading',
+  animation = 'slideUp',
   style,
   className,
   id,
@@ -51,7 +54,16 @@ export function Typewriter({
   const patchedText = usePatchedProp(id, 'text', text);
   const patchedMode = usePatchedProp<TypewriterMode>(id, 'mode', mode);
   const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', variant);
+  const patchedAnimation = usePatchedProp<EntranceAnimation>(id, 'animation', animation);
   const styleOverride = useStyleOverride(id);
+
+  const entranceDuration = 20;
+  const entranceProgress = interpolateWithEasing(
+    frame,
+    [effectiveStartAt, effectiveStartAt + entranceDuration],
+    [0, 1],
+    'linear',
+  );
 
   const progress = interpolateWithEasing(
     frame,
@@ -86,7 +98,14 @@ export function Typewriter({
     <span
       id={id}
       className={className}
-      style={{ ...resolveTypography(patchedVariant, styleConfig, theme, preset), ...style, ...styleOverride }}
+      style={{
+        ...resolveTypography(patchedVariant, styleConfig, theme, preset),
+        opacity: entranceProgress,
+        transform: getEntranceTransform(patchedAnimation, entranceProgress, 20),
+        display: 'inline-block',
+        ...style,
+        ...styleOverride
+      }}
     >
       {visibleText}
       {showCursor && cursorChar && (

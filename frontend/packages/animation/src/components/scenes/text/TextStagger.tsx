@@ -6,13 +6,14 @@ import { usePatchedProp, useStyleOverride } from '../../../patches';
 import { useAspectPreset } from '../../../styles';
 import { useTheme } from '../../../theme';
 import { resolveTypography } from '../../../tokens';
+import { EntranceAnimation, getEntranceTransform } from '../types';
 
-export interface WordStaggerProps {
+export interface TextStaggerStaggerProps {
     id?: string;
     variant?: TypographyVariant;
     text: string;
     staggerDelay?: number; // frames between each word
-    animation?: 'fadeIn' | 'slideUp' | 'slideDown' | 'slideLeft' | 'slideRight' | 'scaleIn' | 'rotateIn';
+    animation?: EntranceAnimation;
     startAt?: number;
     duration?: number; // animation duration per word
     separator?: string | RegExp;
@@ -21,7 +22,7 @@ export interface WordStaggerProps {
     wordStyle?: React.CSSProperties;
 }
 
-export const WordStagger: React.FC<WordStaggerProps> = ({
+export const TextStagger: React.FC<TextStaggerStaggerProps> = ({
     id,
     variant = 'heading',
     text,
@@ -56,55 +57,10 @@ export const WordStagger: React.FC<WordStaggerProps> = ({
             }
         );
 
-        const opacity = progress;
-
-        switch (animation) {
-            case 'fadeIn':
-                return {
-                    opacity,
-                };
-
-            case 'slideUp':
-                return {
-                    opacity,
-                    transform: `translateY(${(1 - progress) * 20}px)`,
-                };
-
-            case 'slideDown':
-                return {
-                    opacity,
-                    transform: `translateY(${(1 - progress) * -20}px)`,
-                };
-
-            case 'slideLeft':
-                return {
-                    opacity,
-                    transform: `translateX(${(1 - progress) * 20}px)`,
-                };
-
-            case 'slideRight':
-                return {
-                    opacity,
-                    transform: `translateX(${(1 - progress) * -20}px)`,
-                };
-
-            case 'scaleIn':
-                return {
-                    opacity,
-                    transform: `scale(${0.5 + progress * 0.5})`,
-                };
-
-            case 'rotateIn':
-                return {
-                    opacity,
-                    transform: `rotate(${(1 - progress) * 180}deg) scale(${0.5 + progress * 0.5})`,
-                };
-
-            default:
-                return {
-                    opacity,
-                };
-        }
+        return {
+            opacity: progress,
+            transform: getEntranceTransform(animation, progress, 20),
+        };
     };
 
     return (

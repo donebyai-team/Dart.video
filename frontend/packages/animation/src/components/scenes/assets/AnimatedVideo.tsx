@@ -10,8 +10,8 @@ import { TypographyVariant } from '../../../tokens/semantic';
 import { usePatchedProp, useStyleOverride } from '../../../patches';
 import { resolveTypography } from '../../../tokens';
 import { useTheme } from '../../../theme';
+import { EntranceAnimation, getEntranceTransform } from '../types';
 
-export type VideoAnimation = 'slideUp' | 'slideDown' | 'slideLeft' | 'slideRight' | 'fadeIn' | 'scaleIn';
 
 export interface AnimatedVideoProps {
     /** The text displayed above the video. */
@@ -21,7 +21,7 @@ export interface AnimatedVideoProps {
     /** Typography variant for the text. */
     variant?: TypographyVariant;
     /** Video entrance animation. */
-    animation?: VideoAnimation;
+    animation?: EntranceAnimation;
     /** Frame at which the animation begins. */
     startAt?: number;
     /** Border radius applied to the video. */
@@ -34,24 +34,6 @@ export interface AnimatedVideoProps {
     id?: string;
 }
 
-function getVideoTransform(animation: VideoAnimation, progress: number): string {
-    const inv = 1 - progress;
-    switch (animation) {
-        case 'slideUp':
-            return `translateY(${inv * 200}px)`;
-        case 'slideDown':
-            return `translateY(${inv * -200}px)`;
-        case 'slideLeft':
-            return `translateX(${inv * 200}px)`;
-        case 'slideRight':
-            return `translateX(${inv * -200}px)`;
-        case 'scaleIn':
-            return `scale(${0.5 + progress * 0.5})`;
-        case 'fadeIn':
-        default:
-            return 'none';
-    }
-}
 
 export function AnimatedVideo({
     text,
@@ -121,7 +103,7 @@ export function AnimatedVideo({
             <div
                 style={{
                     opacity: videoProgress,
-                    transform: getVideoTransform(animation, videoProgress),
+                    transform: getEntranceTransform(animation, videoProgress),
                     borderRadius,
                     overflow: 'hidden',
                     boxShadow: "0 20px 40px rgba(0,0,0,0.25), 0 12px 24px rgba(0,0,0,0.15)",

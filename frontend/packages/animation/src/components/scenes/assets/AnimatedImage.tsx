@@ -10,8 +10,8 @@ import { TypographyVariant } from '../../../tokens/semantic';
 import { usePatchedProp, useStyleOverride } from '../../../patches';
 import { resolveTypography } from '../../../tokens';
 import { useTheme } from '../../../theme';
+import { EntranceAnimation, getEntranceTransform } from '../types';
 
-export type ImageAnimation = 'slideUp' | 'slideDown' | 'slideLeft' | 'slideRight' | 'fadeIn' | 'scaleIn';
 
 export interface AnimatedImageProps {
     /** The text displayed above the image. */
@@ -21,7 +21,7 @@ export interface AnimatedImageProps {
     /** Typography variant for the text. */
     variant?: TypographyVariant;
     /** Image entrance animation. */
-    animation?: ImageAnimation;
+    animation?: EntranceAnimation;
     /** Frame at which the animation begins. */
     startAt?: number;
     /** Border radius applied to the image. */
@@ -38,24 +38,6 @@ export interface AnimatedImageProps {
  * Scene showing a text label above a full image that slides up into view.
  * Text fades in first, then the image slides up with a border radius.
  */
-function getImageTransform(animation: ImageAnimation, progress: number): string {
-    const inv = 1 - progress;
-    switch (animation) {
-        case 'slideUp':
-            return `translateY(${inv * 200}px)`;
-        case 'slideDown':
-            return `translateY(${inv * -200}px)`;
-        case 'slideLeft':
-            return `translateX(${inv * 200}px)`;
-        case 'slideRight':
-            return `translateX(${inv * -200}px)`;
-        case 'scaleIn':
-            return `scale(${0.5 + progress * 0.5})`;
-        case 'fadeIn':
-        default:
-            return 'none';
-    }
-}
 
 export function AnimatedImage({
     text,
@@ -127,7 +109,7 @@ export function AnimatedImage({
             <div
                 style={{
                     opacity: imageProgress,
-                    transform: getImageTransform(animation, imageProgress),
+                    transform: getEntranceTransform(animation, imageProgress),
                     borderRadius,
                     overflow: 'hidden',
                     boxShadow: "0 20px 40px rgba(0,0,0,0.25), 0 12px 24px rgba(0,0,0,0.15)",
