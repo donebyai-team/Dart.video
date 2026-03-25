@@ -95,6 +95,7 @@ function GeneratePlanV2(input: VideoGenerationPlanRequest, conversation_history:
     - An attachment is provided but you are not clear on where and how to use it using ATTACHMENT_CLARIFICATION
     - If you think a scene needs an attachment, ask user to upload using UPLOAD_ATTACHMENT
     - Any key visual storytelling decision is ambiguous from script or attachments
+    - if the script is not clear or brief enough to create a video of at-least 10 scenes.
 
     Do not ask about:
     - Props or component internals — the generator handles these
