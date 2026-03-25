@@ -184,6 +184,6 @@ export const AnimatedImageDescriptor: ComponentRegistration = {
     type: 'scene',
     fullSchema: AnimatedImageSchema,
     editorProps: ['text', 'src', 'variant', 'animation', 'borderRadius'],
-    description: 'Displays a text label above an image with entrance animation. Use for product showcases, feature highlights, or visual content. Required props: text="New Product Launch", src="https://example.com/product.jpg". The text animates in first, then the image follows.',
+    description: 'Displays a text label above an image with entrance animation. Use for product showcases, feature highlights, or visual content. Required props: text="New Product Launch", src="attachment url". The text animates in first, then the image follows.',
     calculateDuration: calculateAnimatedImageDuration,
 };

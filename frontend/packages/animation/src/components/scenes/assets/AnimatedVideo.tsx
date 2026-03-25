@@ -147,6 +147,6 @@ export const AnimatedVideoDescriptor: ComponentRegistration = {
     type: 'scene',
     fullSchema: AnimatedVideoSchema,
     editorProps: ['text', 'src', 'variant', 'animation', 'borderRadius'],
-    description: 'Displays a text label above a video with entrance animation. Use for demo videos, testimonials, or video content. Required props: text="Watch Demo", src="https://example.com/demo.mp4". The text animates in first, then the video follows. Note: Total duration depends on video length.',
+    description: 'Displays a text label above a video with entrance animation. Use for demo videos, testimonials, or video content. Required props: text="Watch Demo", src="attachment video url". The text animates in first, then the video follows. Note: Total duration depends on video length.',
     // No calculateDuration - video duration is determined by video file length
 };

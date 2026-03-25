@@ -35,24 +35,24 @@ Props:
 - texts: array (required)
 
 ### AnimatedImage
-Displays a text label above an image with entrance animation. Use for product showcases, feature highlights, or visual content. Required props: text="New Product Launch", src="https://example.com/product.jpg". The text animates in first, then the image follows.
+Displays a text label above an image with entrance animation. Use for product showcases, feature highlights, or visual content. Required props: text="New Product Launch", src="attachment url". The text animates in first, then the image follows.
 Props:
 - text: string (required)
 - src: string (required)
 
 ### AnimatedVideo
-Displays a text label above a video with entrance animation. Use for demo videos, testimonials, or video content. Required props: text="Watch Demo", src="https://example.com/demo.mp4". The text animates in first, then the video follows. Note: Total duration depends on video length.
+Displays a text label above a video with entrance animation. Use for demo videos, testimonials, or video content. Required props: text="Watch Demo", src="attachment video url". The text animates in first, then the video follows. Note: Total duration depends on video length.
 Props:
 - text: string (required)
 - src: string (required)
 
 ### ImagePeel
-Stacked images that peel away one-by-one to reveal the next. Use for before/after comparisons, product variations, or image galleries. Required props: sources={["https://example.com/img1.jpg", "https://example.com/img2.jpg", "https://example.com/img3.jpg"]}. Minimum 2 images required.
+Stacked images that peel away one-by-one to reveal the next. Use for before/after comparisons, product variations, or image galleries. Required props: sources={["attachment url", "attachment url", "attachment url"]}. Minimum 2 images required.
 Props:
 - sources: array (required)
 
 ### LogoAsset
-Displays a logo with entrance animation. Use for brand intros or logo reveals. Optional props: src="https://example.com/logo.svg" (uses theme logo if omitted), animation="zoomIn" (options: fadeIn, zoomIn, bounceIn, spinIn, dropIn, none). Set animation="none" for instant display.
+Displays a logo with entrance animation. Use for brand intros or logo reveals. Optional props: src="attachment url" (uses theme logo if omitted), animation="zoomIn" (options: fadeIn, zoomIn, bounceIn, spinIn, dropIn, none). Set animation="none" for instant display.
 Props:
 
 ### LogoWithBrandName
