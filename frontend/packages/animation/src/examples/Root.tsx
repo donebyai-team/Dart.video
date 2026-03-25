@@ -287,7 +287,7 @@ export const RemotionRoot: React.FC = () => (
     <>
         <Composition id="fade-slide" component={FadeSlideScene} durationInFrames={150} fps={30} width={1920} height={1080} />
         <Composition id="scale-stagger" component={ScaleStaggerScene} durationInFrames={150} fps={30} width={1920} height={1080} />
-        <Composition id="text-components" component={TextComponentsScene} durationInFrames={180} fps={30} width={1920} height={1080} />
+        <Composition id="text-components" component={TextComponentsScene} durationInFrames={70} fps={30} width={1920} height={1080} />
         <Composition id="assets" component={AssetsScene} durationInFrames={210} fps={30} width={1920} height={1080} />
         <Composition id="layout" component={LayoutScene} durationInFrames={180} fps={30} width={1920} height={1080} />
         <Composition id="animated-image" component={AnimatedImageScene} durationInFrames={180} fps={30} width={1920} height={1080} />

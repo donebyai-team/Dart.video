@@ -59,7 +59,7 @@ export const TextStagger: React.FC<TextStaggerStaggerProps> = ({
 
         return {
             opacity: progress,
-            transform: getEntranceTransform(animation, progress, 20),
+            transform: getEntranceTransform(animation, progress),
         };
     };
 

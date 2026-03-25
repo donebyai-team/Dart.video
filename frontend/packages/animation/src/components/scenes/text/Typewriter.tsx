@@ -101,7 +101,7 @@ export function Typewriter({
       style={{
         ...resolveTypography(patchedVariant, styleConfig, theme, preset),
         opacity: entranceProgress,
-        transform: getEntranceTransform(patchedAnimation, entranceProgress, 20),
+        transform: getEntranceTransform(patchedAnimation, entranceProgress),
         display: 'inline-block',
         ...style,
         ...styleOverride

@@ -15,7 +15,8 @@ export interface TextHighlightProps {
     highlightColor?: string;
     animation?: EntranceAnimation;
     animationDelay?: number;
-    durationInFrames?: number;
+    /** Duration for the zoom out phase in frames */
+    zoomDuration?: number;
     startAt?: number;
     className?: string;
     style?: React.CSSProperties;
@@ -28,9 +29,9 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
     highlightPattern = /{([^}]+)}/g, // Default: matches {text}
     highlightStyle = 'glow',
     highlightColor,
-    animation = 'slideRight',
+    animation = 'slideUp',
     animationDelay = 30,
-    durationInFrames = 20,
+    zoomDuration = 20,
     startAt = 0,
     className,
     style,
@@ -49,12 +50,29 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
     const styleOverride = useStyleOverride(id);
     const easing = styleConfig.motion.entrance;
 
+    // Animation timeline:
+    // Phase 1: Entrance animation with highlight already visible (0 to animationDelay)
+    // Phase 2: Zoom out highlighted word (animationDelay to animationDelay + zoomDuration)
+    // Phase 3: Entire text disappears after zoom completes
+
     const entranceProgress = interpolateWithEasing(
         frame,
         [startAt, startAt + animationDelay],
         [0, 1],
         easing
     );
+
+    const zoomStartFrame = startAt + animationDelay;
+    const zoomProgress = interpolateWithEasing(
+        frame,
+        [zoomStartFrame, zoomStartFrame + zoomDuration],
+        [0, 1],
+        easing
+    );
+
+    // Disappear immediately after zoom completes
+    const disappearFrame = zoomStartFrame + zoomDuration;
+    const isVisible = frame < disappearFrame;
 
     const segments = useMemo(() => {
         const parts: { text: string; highlight: boolean; index: number }[] = [];
@@ -122,16 +140,12 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
     }, [text, highlightPattern]);
 
     const getHighlightStyles = (index: number): React.CSSProperties => {
-        const highlightStartAt = startAt + animationDelay + index * 10;
-        const progress = interpolate(
-            frame,
-            [highlightStartAt, highlightStartAt + durationInFrames],
-            [0, 1],
-            {
-                extrapolateLeft: 'clamp',
-                extrapolateRight: 'clamp',
-            }
-        );
+        // Highlight is always at full intensity (no animation delay)
+        const progress = 1;
+
+        // Calculate zoom scale for highlighted words - dramatic expansion to fill screen
+        const zoomScale = 1 + zoomProgress * 9; // Scales from 1 to 10x for full screen effect
+        const baseTransform = `scale(${zoomScale})`;
 
         switch (highlightStyle) {
             case 'marker':
@@ -146,6 +160,8 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
           )`,
                     padding: '2px 4px',
                     margin: '0 -4px',
+                    transform: baseTransform,
+                    display: 'inline-block',
                 };
 
             case 'underline':
@@ -154,6 +170,8 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
                     borderBottom: `3px solid ${patchedHighlightColor}`,
                     borderBottomWidth: `${progress * 3}px`,
                     paddingBottom: '2px',
+                    transform: baseTransform,
+                    display: 'inline-block',
                 };
 
             case 'box':
@@ -164,6 +182,8 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
                     padding: '2px 6px',
                     margin: '0 2px',
                     opacity: progress,
+                    transform: baseTransform,
+                    display: 'inline-block',
                 };
 
             case 'glow':
@@ -171,6 +191,8 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
                     position: 'relative',
                     textShadow: `0 0 ${progress * 20}px ${patchedHighlightColor}`,
                     color: progress > 0.5 ? patchedHighlightColor : 'inherit',
+                    transform: baseTransform,
+                    display: 'inline-block',
                 };
 
             case 'background':
@@ -182,6 +204,8 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
                     margin: '0 2px',
                     borderRadius: '4px',
                     opacity: progress,
+                    transform: baseTransform,
+                    display: 'inline-block',
                 };
 
             default:
@@ -189,11 +213,15 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
         }
     };
 
+    if (!isVisible) {
+        return null;
+    }
+
     return (
         <span id={id} className={className} style={{
                 ...resolveTypography(patchedVariant, styleConfig, theme, preset),
                 opacity: entranceProgress,
-                transform: getEntranceTransform(patchedAnimation, entranceProgress, 20),
+                transform: getEntranceTransform(patchedAnimation, entranceProgress, 200),
                 display: 'inline-block',
                 ...style,
                 ...styleOverride
