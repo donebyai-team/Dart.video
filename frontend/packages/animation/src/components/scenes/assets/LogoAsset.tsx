@@ -184,7 +184,7 @@ export function calculateLogoAssetDuration(props: LogoAssetProps): DurationResul
     if (animationType === 'none') {
         return {
             success: true,
-            duration: 0, // No animation, instant display
+            duration: 30, // No animation, instant display
         };
     }
     

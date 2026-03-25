@@ -61,14 +61,18 @@ function GeneratePlanV2(input: VideoGenerationPlanRequest, conversation_history:
     ## SCENE DESIGN PRINCIPLES
 
     - One idea per scene. Never combine two components in one scene.
+    - Keep the pacing of the video fast as most of the scenes like text, numbers etc are quite fast. Around 2 frames per char, average 25-70 frames.
+      Except ones which requires attachments. So add as many scenes as possible.
+    - Image/Logo related scenes takes around 80-100 frames
+    - Video related scenes will be equal to the duration of the video (duration*fps)
+    - A 60s video need around 15-20 scenes
 
     ## PLANNING RULES
 
     ### Structure
     - Every scene has a single clear purpose. One idea per scene.
-    - SafeArea is always the implicit outermost wrapper. Do not include it in elements.
-    - Scene components (TitleCard, StatBlock etc) must stand alone. No siblings.
-    - Animation primitives wrap a single content or asset element. Never wrap layout directly.
+    - Each scene must stand alone. No siblings.
+    - Define the pros of scenes in dataPoint
 
     ### Data
     - dataPoint is an ordered list. Each entry has a description and a value.
@@ -78,6 +82,7 @@ function GeneratePlanV2(input: VideoGenerationPlanRequest, conversation_history:
       traversal order.
     - Use placeholder values if real data is not provided.
     - Asset URLs go directly in value — use the attachment handle or URL as the value.
+    - For images, you can use https://placehold.co/{width}x{height}.png width/height in px.
 
     ### Brief
     - brief is plain English directorial intent — feel, pacing, what the eye should go to.
@@ -93,7 +98,7 @@ function GeneratePlanV2(input: VideoGenerationPlanRequest, conversation_history:
     - A scene implies brand presence but no brand name is provided, ask user add a brand identity
     - Metrics are mentioned but it is unclear if they are real or placeholder
     - An attachment is provided but you are not clear on where and how to use it using ATTACHMENT_CLARIFICATION
-    - If you think a scene needs an attachment, ask user to upload using UPLOAD_ATTACHMENT
+    - If you think a scene needs an attachment, ask user to upload using UPLOAD_ATTACHMENT or use a placeholder
     - Any key visual storytelling decision is ambiguous from script or attachments
     - if the script is not clear or brief enough to create a video of at-least 10 scenes.
 
@@ -236,6 +241,7 @@ function GeneratePlanV2(input: VideoGenerationPlanRequest, conversation_history:
     ---
 
     ## INPUT
+    Video FPS: 30 frames/second
     Language: {{ input.Language }}
 
     ### User provided prompt/script

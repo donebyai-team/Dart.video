@@ -1,4 +1,3 @@
-export * from './Counter';
 export * from './AnimatedNumber';
 export * from './Typewriter';
 export * from './TextCycle';
