@@ -12,8 +12,9 @@ import { LOGO_ANIMATIONS, LogoAnimation } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../../../registry/registry';
 
-// Default duration constants
+// Default constants
 const DEFAULT_ANIMATION_DURATION = 30;
+const DEFAULT_ANIMATION = 'zoomIn' as const;
 
 const DEFAULT_LOGO_SVG = `data:image/svg+xml,${encodeURIComponent(`
 <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
@@ -77,7 +78,7 @@ export function LogoAsset({
     const styleOverride = useStyleOverride(id);
 
     // Apply defaults
-    const actualAnimation = animation ?? 'zoomIn';
+    const actualAnimation = animation ?? DEFAULT_ANIMATION;
     const actualStartAt = startAt ?? 0;
     const { objectFit: styleObjectFit, ...restStyle } = style ?? {};
     const { objectFit: overrideObjectFit, ...wrapperStyleOverride } = styleOverride;
@@ -157,7 +158,7 @@ export const LogoAssetSchema = z.object({
     src: z.string().url("src must be a valid URL").optional(),
     width: z.number().min(1, "width must be positive").optional(),
     height: z.number().min(1, "height must be positive").optional(),
-    animation: z.enum(LOGO_ANIMATIONS).optional(),
+    animation: z.enum(LOGO_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
     startAt: z.number().min(0, "startAt cannot be negative").default(0).optional(),
     style: z.any().optional(),
     className: z.string().optional(),

@@ -13,9 +13,11 @@ import { applySpeedFactor, useSpeedFactor } from '../../../duration';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../durationTypes';
 
-// Default duration constants
+// Default constants
 const DEFAULT_HOLD_DURATION = 15;
 const DEFAULT_TRANSITION_DURATION = 5;
+const DEFAULT_TRANSITION = 'flipY' as const;
+const DEFAULT_VARIANT = 'heading' as const;
 
 export type TextCycleTransition = 'flipY' | 'fadeSwap' | 'slideUp';
 
@@ -63,8 +65,8 @@ export function TextCycle({
   const actualStartAt = startAt ?? 0;
   const actualHoldDuration = holdDuration ?? DEFAULT_HOLD_DURATION;
   const actualTransitionDuration = transitionDuration ?? DEFAULT_TRANSITION_DURATION;
-  const actualTransition = transition ?? 'flipY';
-  const actualVariant = variant ?? 'heading';
+  const actualTransition = transition ?? DEFAULT_TRANSITION;
+  const actualVariant = variant ?? DEFAULT_VARIANT;
   const adjustedStartAt = applySpeedFactor(actualStartAt, speedFactor);
   const adjustedHoldDuration = applySpeedFactor(actualHoldDuration, speedFactor);
   const adjustedTransitionDuration = applySpeedFactor(actualTransitionDuration, speedFactor);
@@ -231,8 +233,8 @@ export const TextCycleSchema = z.object({
   holdDuration: z.number().min(0, "holdDuration cannot be negative").default(DEFAULT_HOLD_DURATION).optional(),
   transitionDuration: z.number().min(0, "transitionDuration cannot be negative").default(DEFAULT_TRANSITION_DURATION).optional(),
   easing: z.string().optional(),
-  transition: z.enum(['flipY', 'fadeSwap', 'slideUp']).optional(),
-  variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).optional(),
+  transition: z.enum(['flipY', 'fadeSwap', 'slideUp']).default(DEFAULT_TRANSITION).optional(),
+  variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
   startAt: z.number().min(0, "startAt cannot be negative").default(0).optional(),
   style: z.any().optional(),
   className: z.string().optional(),

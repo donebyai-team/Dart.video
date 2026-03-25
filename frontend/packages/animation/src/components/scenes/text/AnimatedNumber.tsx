@@ -11,10 +11,14 @@ import { Counter } from './Counter';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../durationTypes';
 
-// Default duration constants
+// Default constants
 const DEFAULT_ENTRANCE_DURATION = 30;
 const DEFAULT_COUNTER_MIN_DURATION = 45;
 const DEFAULT_COUNTER_MAX_DURATION = 100;
+const DEFAULT_COUNTER_DURATION = 45;
+const DEFAULT_VARIANT = 'heading' as const;
+const DEFAULT_HIGHLIGHT_STYLE = 'glow' as const;
+const DEFAULT_ANIMATION = 'slideUp' as const;
 
 export interface AnimatedNumberProps {
     id?: string;
@@ -70,12 +74,12 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
     
     // Apply defaults
     const actualFrom = from ?? 0;
-    const actualVariant = variant ?? 'heading';
-    const actualHighlightStyle = highlightStyle ?? 'glow';
+    const actualVariant = variant ?? DEFAULT_VARIANT;
+    const actualHighlightStyle = highlightStyle ?? DEFAULT_HIGHLIGHT_STYLE;
     const actualHighlightColor = highlightColor ?? theme.colors.primary;
-    const actualAnimation = animation ?? 'slideUp';
+    const actualAnimation = animation ?? DEFAULT_ANIMATION;
     const actualAnimationDelay = animationDelay ?? DEFAULT_ENTRANCE_DURATION;
-    const actualDurationInFrames = durationInFrames ?? 45;
+    const actualDurationInFrames = durationInFrames ?? DEFAULT_COUNTER_DURATION;
     const actualStartAt = startAt ?? 0;
 
     const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', actualVariant);
@@ -192,12 +196,12 @@ export const AnimatedNumberSchema = z.object({
     from: z.number().default(0),
     to: z.number(),
     format: z.string().optional(),
-    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).optional(),
-    highlightStyle: z.enum(['marker', 'underline', 'box', 'glow', 'background']).optional(),
+    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
+    highlightStyle: z.enum(['marker', 'underline', 'box', 'glow', 'background']).default(DEFAULT_HIGHLIGHT_STYLE).optional(),
     highlightColor: z.string().optional(),
-    animation: z.enum(ENTRANCE_ANIMATIONS).optional(),
+    animation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
     animationDelay: z.number().min(0, "animationDelay cannot be negative").default(DEFAULT_ENTRANCE_DURATION).optional(),
-    durationInFrames: z.number().min(1, "durationInFrames must be positive").optional(),
+    durationInFrames: z.number().min(1, "durationInFrames must be positive").default(DEFAULT_COUNTER_DURATION).optional(),
     startAt: z.number().min(0, "startAt cannot be negative").default(0).optional(),
     className: z.string().optional(),
     style: z.any().optional(),

@@ -11,11 +11,14 @@ import { TypographyVariant, TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/sem
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../durationTypes';
 
-// Default duration constants
+// Default constants
 const DEFAULT_ENTRANCE_DURATION = 10;
 const DEFAULT_ICON_STAGGER = 5;
 const DEFAULT_ICON_ANIMATION_DURATION = 10;
 const DEFAULT_TEXT_DELAY = 5;
+const DEFAULT_VARIANT = 'heading' as const;
+const DEFAULT_ICON_SIZE = 72;
+const DEFAULT_ICON_GAP = 64;
 
 export interface IconShowcaseProps {
     id?: string;
@@ -54,9 +57,9 @@ export const IconShowcase: React.FC<IconShowcaseProps> = ({
 
     // Apply defaults
     const actualStartAt = startAt ?? 0;
-    const actualIconSize = iconSize ?? 72;
-    const actualIconGap = iconGap ?? 64;
-    const actualVariant = variant ?? 'heading';
+    const actualIconSize = iconSize ?? DEFAULT_ICON_SIZE;
+    const actualIconGap = iconGap ?? DEFAULT_ICON_GAP;
+    const actualVariant = variant ?? DEFAULT_VARIANT;
 
     // Animation timing
     const localFrame = frame - actualStartAt;
@@ -181,9 +184,9 @@ export const IconShowcase: React.FC<IconShowcaseProps> = ({
 export const IconShowcaseSchema = z.object({
     icons: z.array(z.string().min(1, "icon name cannot be empty")).min(1, "at least one icon is required"),
     text: z.string().min(1, "text cannot be empty"),
-    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).optional(),
-    iconSize: z.number().min(1, "iconSize must be positive").optional(),
-    iconGap: z.number().min(0, "iconGap cannot be negative").optional(),
+    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
+    iconSize: z.number().min(1, "iconSize must be positive").default(DEFAULT_ICON_SIZE).optional(),
+    iconGap: z.number().min(0, "iconGap cannot be negative").default(DEFAULT_ICON_GAP).optional(),
     startAt: z.number().min(0, "startAt cannot be negative").default(0).optional(),
     style: z.any().optional(),
 });

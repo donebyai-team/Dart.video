@@ -14,6 +14,13 @@ import { useTheme } from '../../../theme';
 import { EntranceAnimation, getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
 
+// Default constants
+const DEFAULT_TEXT_DURATION = 30;
+const DEFAULT_VIDEO_DURATION = 40;
+const DEFAULT_VIDEO_START_DELAY = 10;
+const DEFAULT_VARIANT = 'subheading' as const;
+const DEFAULT_ANIMATION = 'slideUp' as const;
+const DEFAULT_BORDER_RADIUS = 16;
 
 export interface AnimatedVideoProps {
     /** The text displayed above the video. */
@@ -56,10 +63,10 @@ export function AnimatedVideo({
     const speedFactor = useSpeedFactor();
 
     // Apply defaults
-    const actualVariant = variant ?? 'subheading';
-    const actualAnimation = animation ?? 'slideUp';
+    const actualVariant = variant ?? DEFAULT_VARIANT;
+    const actualAnimation = animation ?? DEFAULT_ANIMATION;
     const actualStartAt = startAt ?? 0;
-    const actualBorderRadius = borderRadius ?? 16;
+    const actualBorderRadius = borderRadius ?? DEFAULT_BORDER_RADIUS;
 
     const adjustedStartAt = applySpeedFactor(actualStartAt, speedFactor);
 
@@ -71,9 +78,9 @@ export function AnimatedVideo({
 
     const easing = styleConfig.motion.entrance;
 
-    const textDuration = 30;
-    const videoDuration = 40;
-    const videoStart = adjustedStartAt + 10;
+    const textDuration = DEFAULT_TEXT_DURATION;
+    const videoDuration = DEFAULT_VIDEO_DURATION;
+    const videoStart = adjustedStartAt + DEFAULT_VIDEO_START_DELAY;
 
     const textProgress = interpolateWithEasing(
         frame,
@@ -131,10 +138,10 @@ export function AnimatedVideo({
 export const AnimatedVideoSchema = z.object({
     text: z.string().min(1, "text is required"),
     src: z.string().url("src must be a valid URL"),
-    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).optional(),
-    animation: z.enum(ENTRANCE_ANIMATIONS).optional(),
+    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
+    animation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
     startAt: z.number().min(0, "startAt cannot be negative").default(0).optional(),
-    borderRadius: z.number().min(0, "borderRadius cannot be negative").default(16).optional(),
+    borderRadius: z.number().min(0, "borderRadius cannot be negative").default(DEFAULT_BORDER_RADIUS).optional(),
     width: z.number().min(1, "width must be positive").optional(),
     height: z.number().min(1, "height must be positive").optional(),
     style: z.any().optional(),

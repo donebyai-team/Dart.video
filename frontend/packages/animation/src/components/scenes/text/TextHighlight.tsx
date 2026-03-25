@@ -9,9 +9,12 @@ import { EntranceAnimation, getEntranceTransform, ENTRANCE_ANIMATIONS } from '..
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../durationTypes';
 
-// Default duration constants
+// Default constants
 const DEFAULT_ENTRANCE_DURATION = 30;
 const DEFAULT_ZOOM_DURATION = 20;
+const DEFAULT_VARIANT = 'heading' as const;
+const DEFAULT_HIGHLIGHT_STYLE = 'glow' as const;
+const DEFAULT_ANIMATION = 'slideUp' as const;
 
 export interface TextHighlightProps {
     id?: string;
@@ -49,10 +52,10 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
     const preset = useAspectPreset();
 
     // Apply defaults
-    const actualVariant = variant ?? 'heading';
-    const actualHighlightStyle = highlightStyle ?? 'glow';
+    const actualVariant = variant ?? DEFAULT_VARIANT;
+    const actualHighlightStyle = highlightStyle ?? DEFAULT_HIGHLIGHT_STYLE;
     const actualHighlightColor = highlightColor ?? theme.colors.primary;
-    const actualAnimation = animation ?? 'fadeIn';
+    const actualAnimation = animation ?? DEFAULT_ANIMATION;
     const actualAnimationDelay = animationDelay ?? DEFAULT_ENTRANCE_DURATION;
     const actualZoomDuration = zoomDuration ?? DEFAULT_ZOOM_DURATION;
     const actualStartAt = startAt ?? 0;
@@ -92,17 +95,20 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
         let lastIndex = 0;
         let highlightIndex = 0;
 
-        if (typeof highlightPattern === 'string') {
+        // If no highlightPattern provided, check for {curly brace} pattern in text
+        const effectivePattern = highlightPattern ?? /\{([^}]+)\}/g;
+
+        if (typeof effectivePattern === 'string') {
             // Simple string matching
-            const index = text.indexOf(highlightPattern);
+            const index = text.indexOf(effectivePattern);
             if (index !== -1) {
                 if (index > 0) {
                     parts.push({ text: text.slice(0, index), highlight: false, index: 0 });
                 }
-                parts.push({ text: highlightPattern, highlight: true, index: 0 });
-                if (index + highlightPattern.length < text.length) {
+                parts.push({ text: effectivePattern, highlight: true, index: 0 });
+                if (index + effectivePattern.length < text.length) {
                     parts.push({
-                        text: text.slice(index + highlightPattern.length),
+                        text: text.slice(index + effectivePattern.length),
                         highlight: false,
                         index: 0
                     });
@@ -110,9 +116,9 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
             } else {
                 parts.push({ text, highlight: false, index: 0 });
             }
-        } else if (highlightPattern) {
+        } else {
             // Regex matching
-            const regex = new RegExp(highlightPattern);
+            const regex = new RegExp(effectivePattern);
             let match;
 
             while ((match = regex.exec(text)) !== null) {
@@ -262,11 +268,11 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
 
 export const TextHighlightSchema = z.object({
     text: z.string().min(1, "text is required"),
-    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).optional(),
+    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
     highlightPattern: z.union([z.string(), z.instanceof(RegExp)]).optional(),
-    highlightStyle: z.enum(['marker', 'underline', 'box', 'glow', 'background']).optional(),
+    highlightStyle: z.enum(['marker', 'underline', 'box', 'glow', 'background']).default(DEFAULT_HIGHLIGHT_STYLE).optional(),
     highlightColor: z.string().optional(),
-    animation: z.enum(ENTRANCE_ANIMATIONS).optional(),
+    animation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
     animationDelay: z.number().min(0, "animationDelay cannot be negative").default(DEFAULT_ENTRANCE_DURATION).optional(),
     zoomDuration: z.number().min(0, "zoomDuration cannot be negative").default(DEFAULT_ZOOM_DURATION).optional(),
     startAt: z.number().min(0, "startAt cannot be negative").default(0).optional(),
@@ -304,7 +310,7 @@ export function calculateTextHighlightDuration(props: TextHighlightProps): Durat
 
 export const TextHighlightDescriptor: ComponentRegistration = {
     name: 'TextHighlight',
-    type: 'content',
+    type: 'scene',
     fullSchema: TextHighlightSchema,
     editorProps: ['text', 'highlightStyle', 'animation', 'animationDelay', 'zoomDuration'],
     description: 'Displays text with highlighted portions that zoom/pulse for emphasis. Use to draw attention to key words or phrases. Required props: text="Increase revenue by 300%", highlightPattern="300%". The pattern can be a word or phrase to highlight within the text.',

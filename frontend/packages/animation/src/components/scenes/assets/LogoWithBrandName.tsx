@@ -13,9 +13,10 @@ import { LogoAsset } from "./LogoAsset";
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../../../registry/registry';
 
-// Default duration constants
+// Default constants
 const DEFAULT_CHAR_STAGGER = 4;
 const DEFAULT_CHAR_FADE_DURATION = 15;
+const DEFAULT_VARIANT = 'heading' as const;
 
 export interface LogoWithBrandNameProps {
     /** Brand name text. */
@@ -48,7 +49,7 @@ export function LogoWithBrandName({
     const speedFactor = useSpeedFactor();
 
     // Apply defaults
-    const actualVariant = variant ?? 'heading';
+    const actualVariant = variant ?? DEFAULT_VARIANT;
     const actualStartAt = startAt ?? 0;
 
     const adjustedStartAt = applySpeedFactor(actualStartAt, speedFactor);
@@ -133,7 +134,7 @@ export const LogoWithBrandNameSchema = z.object({
     brandName: z.string().min(1, "brandName is required"),
     src: z.string().url("src must be a valid URL").optional(),
     logoSize: z.number().min(1, "logoSize must be positive").optional(),
-    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).optional(),
+    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
     startAt: z.number().min(0, "startAt cannot be negative").default(0).optional(),
     style: z.any().optional(),
 });

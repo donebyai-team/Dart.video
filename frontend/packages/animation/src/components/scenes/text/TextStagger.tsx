@@ -11,9 +11,12 @@ import { EntranceAnimation, getEntranceTransform, ENTRANCE_ANIMATIONS } from '..
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../durationTypes';
 
-// Default duration constants
+// Default constants
 const DEFAULT_STAGGER_DELAY = 5;
 const DEFAULT_WORD_DURATION = 15;
+const DEFAULT_VARIANT = 'heading' as const;
+const DEFAULT_ANIMATION = 'slideUp' as const;
+const DEFAULT_SEPARATOR = ' ';
 
 export interface TextStaggerStaggerProps {
     id?: string;
@@ -48,12 +51,12 @@ export const TextStagger: React.FC<TextStaggerStaggerProps> = ({
     const preset = useAspectPreset();
 
     // Apply defaults
-    const actualVariant = variant ?? 'heading';
+    const actualVariant = variant ?? DEFAULT_VARIANT;
     const actualStaggerDelay = staggerDelay ?? DEFAULT_STAGGER_DELAY;
-    const actualAnimation = animation ?? 'slideUp';
+    const actualAnimation = animation ?? DEFAULT_ANIMATION;
     const actualStartAt = startAt ?? 0;
     const actualDuration = duration ?? DEFAULT_WORD_DURATION;
-    const actualSeparator = separator ?? ' ';
+    const actualSeparator = separator ?? DEFAULT_SEPARATOR;
 
     const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', actualVariant);
     const styleOverride = useStyleOverride(id);
@@ -105,12 +108,12 @@ export const TextStagger: React.FC<TextStaggerStaggerProps> = ({
 
 export const TextStaggerSchema = z.object({
     text: z.string().min(1, "text is required"),
-    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).optional(),
+    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
     staggerDelay: z.number().min(0, "staggerDelay cannot be negative").default(DEFAULT_STAGGER_DELAY).optional(),
-    animation: z.enum(ENTRANCE_ANIMATIONS).optional(),
+    animation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
     startAt: z.number().min(0, "startAt cannot be negative").default(0).optional(),
     duration: z.number().min(1, "duration must be positive").default(DEFAULT_WORD_DURATION).optional(),
-    separator: z.union([z.string(), z.instanceof(RegExp)]).optional(),
+    separator: z.union([z.string(), z.instanceof(RegExp)]).default(DEFAULT_SEPARATOR).optional(),
     className: z.string().optional(),
     style: z.any().optional(),
     wordStyle: z.any().optional(),

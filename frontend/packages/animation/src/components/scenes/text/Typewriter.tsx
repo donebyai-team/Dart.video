@@ -13,13 +13,16 @@ import { EntranceAnimation, getEntranceTransform, ENTRANCE_ANIMATIONS } from '..
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../durationTypes';
 
-// Default duration constants
+// Default constants
 const DEFAULT_ENTRANCE_DURATION = 20;
 const DEFAULT_TYPING_DURATION = 60;
 const DEFAULT_FRAMES_PER_CHAR = 2;
 const DEFAULT_FRAMES_PER_WORD = 8;
 const DEFAULT_FRAMES_PER_LINE = 15;
 const MIN_TYPING_DURATION = 30;
+const DEFAULT_MODE = 'char' as const;
+const DEFAULT_VARIANT = 'heading' as const;
+const DEFAULT_ANIMATION = 'slideUp' as const;
 
 export type TypewriterMode = 'char' | 'word' | 'line';
 
@@ -42,11 +45,11 @@ export interface TypewriterProps {
  */
 export function Typewriter({
   startAt = 0,
-  durationInFrames = 60,
+  durationInFrames = DEFAULT_TYPING_DURATION,
   text,
-  mode = 'char',
-  variant = 'heading',
-  animation = 'slideUp',
+  mode = DEFAULT_MODE,
+  variant = DEFAULT_VARIANT,
+  animation = DEFAULT_ANIMATION,
   style,
   className,
   id,
@@ -132,9 +135,9 @@ export function Typewriter({
 
 export const TypewriterSchema = z.object({
   text: z.string().min(1, "text is required"),
-  mode: z.enum(['char', 'word', 'line']).default('char').optional(),
-  variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).optional(),
-  animation: z.enum(ENTRANCE_ANIMATIONS).optional(),
+  mode: z.enum(['char', 'word', 'line']).default(DEFAULT_MODE).optional(),
+  variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
+  animation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
   startAt: z.number().min(0, "startAt cannot be negative").default(0).optional(),
   durationInFrames: z.number().min(1, "durationInFrames must be positive").default(DEFAULT_TYPING_DURATION).optional(),
   style: z.any().optional(),

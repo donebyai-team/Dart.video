@@ -11,10 +11,13 @@ import { PeelDirection, PEEL_DIRECTIONS } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../../../registry/registry';
 
-// Default duration constants
+// Default constants
 const DEFAULT_ENTRANCE_DURATION = 30;
 const DEFAULT_HOLD_DURATION = 20;
 const DEFAULT_PEEL_DURATION = 20;
+const DEFAULT_DIRECTION = 'right' as const;
+const DEFAULT_STACK_OFFSET = 20;
+const DEFAULT_BORDER_RADIUS = 16;
 
 export interface ImagePeelProps {
     /** Array of image source URLs. */
@@ -72,12 +75,12 @@ export function ImagePeel({
     const speedFactor = useSpeedFactor();
 
     // Apply defaults
-    const actualDirection = direction ?? 'right';
+    const actualDirection = direction ?? DEFAULT_DIRECTION;
     const actualStartAt = startAt ?? 0;
     const actualHoldDuration = holdDuration ?? DEFAULT_HOLD_DURATION;
     const actualPeelDuration = peelDuration ?? DEFAULT_PEEL_DURATION;
-    const actualStackOffset = stackOffset ?? 20;
-    const actualBorderRadius = borderRadius ?? 16;
+    const actualStackOffset = stackOffset ?? DEFAULT_STACK_OFFSET;
+    const actualBorderRadius = borderRadius ?? DEFAULT_BORDER_RADIUS;
 
     const adjustedStartAt = applySpeedFactor(actualStartAt, speedFactor);
 
@@ -178,12 +181,12 @@ export function ImagePeel({
 
 export const ImagePeelSchema = z.object({
     sources: z.array(z.string().url("each source must be a valid URL")).min(2, "sources must contain at least 2 images"),
-    direction: z.enum(PEEL_DIRECTIONS).optional(),
+    direction: z.enum(PEEL_DIRECTIONS).default(DEFAULT_DIRECTION).optional(),
     startAt: z.number().min(0, "startAt cannot be negative").default(0).optional(),
     holdDuration: z.number().min(0, "holdDuration cannot be negative").default(DEFAULT_HOLD_DURATION).optional(),
     peelDuration: z.number().min(0, "peelDuration cannot be negative").default(DEFAULT_PEEL_DURATION).optional(),
-    stackOffset: z.number().min(0, "stackOffset cannot be negative").default(20).optional(),
-    borderRadius: z.number().min(0, "borderRadius cannot be negative").default(16).optional(),
+    stackOffset: z.number().min(0, "stackOffset cannot be negative").default(DEFAULT_STACK_OFFSET).optional(),
+    borderRadius: z.number().min(0, "borderRadius cannot be negative").default(DEFAULT_BORDER_RADIUS).optional(),
     width: z.number().min(1, "width must be positive").optional(),
     height: z.number().min(1, "height must be positive").optional(),
     style: z.any().optional(),

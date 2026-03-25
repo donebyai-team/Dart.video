@@ -131,14 +131,14 @@ const TextComponentsScene: React.FC = () => (
                         />
                     </Row> */}
 
-                    <AnimatedNumber
+                    {/* <AnimatedNumber
                         id="an-0"
                         startText="Solved"
                         endText="incidents"
                         from={0}
                         to={12450}
                         animation="slideUp"
-                    />
+                    /> */}
 
                     {/* <TextHighlight
                         id="th-0"
@@ -154,6 +154,11 @@ const TextComponentsScene: React.FC = () => (
                     <TextStagger
                         text="Your dashboard, logs, and alerts didn't adapt."
                     /> */}
+
+                    <TextHighlight
+                        id="th-0"
+                        text="Everything else is just {noise}"
+                    />            
                 </Stack>
             </AbsoluteCenter>
         </SafeArea>
@@ -313,7 +318,7 @@ export const RemotionRoot: React.FC = () => (
     <>
         <Composition id="fade-slide" component={FadeSlideScene} durationInFrames={150} fps={30} width={1920} height={1080} />
         <Composition id="scale-stagger" component={ScaleStaggerScene} durationInFrames={150} fps={30} width={1920} height={1080} />
-        <Composition id="text-components" component={TextComponentsScene} durationInFrames={100} fps={30} width={1920} height={1080} />
+        <Composition id="text-components" component={TextComponentsScene} durationInFrames={50} fps={30} width={1920} height={1080} />
         <Composition id="assets" component={AssetsScene} durationInFrames={210} fps={30} width={1920} height={1080} />
         <Composition id="layout" component={LayoutScene} durationInFrames={180} fps={30} width={1920} height={1080} />
         <Composition id="animated-image" component={AnimatedImageScene} durationInFrames={180} fps={30} width={1920} height={1080} />

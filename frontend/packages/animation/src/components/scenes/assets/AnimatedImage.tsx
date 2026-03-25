@@ -15,10 +15,13 @@ import { EntranceAnimation, getEntranceTransform, ENTRANCE_ANIMATIONS } from '..
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../../../registry/registry';
 
-// Default duration constants
+// Default constants
 const DEFAULT_TEXT_DURATION = 30;
 const DEFAULT_DELAY = 10;
 const DEFAULT_IMAGE_DURATION = 40;
+const DEFAULT_VARIANT = 'subheading' as const;
+const DEFAULT_ANIMATION = 'slideUp' as const;
+const DEFAULT_BORDER_RADIUS = 16;
 
 export interface AnimatedImageProps {
     /** The text displayed above the image. */
@@ -65,10 +68,10 @@ export function AnimatedImage({
     const speedFactor = useSpeedFactor();
 
     // Apply defaults
-    const actualVariant = variant ?? 'subheading';
-    const actualAnimation = animation ?? 'slideUp';
+    const actualVariant = variant ?? DEFAULT_VARIANT;
+    const actualAnimation = animation ?? DEFAULT_ANIMATION;
     const actualStartAt = startAt ?? 0;
-    const actualBorderRadius = borderRadius ?? 16;
+    const actualBorderRadius = borderRadius ?? DEFAULT_BORDER_RADIUS;
 
     const adjustedStartAt = applySpeedFactor(actualStartAt, speedFactor);
 
@@ -142,10 +145,10 @@ export function AnimatedImage({
 export const AnimatedImageSchema = z.object({
     text: z.string().min(1, "text is required"),
     src: z.string().url("src must be a valid URL"),
-    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).optional(),
-    animation: z.enum(ENTRANCE_ANIMATIONS).optional(),
+    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
+    animation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
     startAt: z.number().min(0, "startAt cannot be negative").default(0).optional(),
-    borderRadius: z.number().min(0, "borderRadius cannot be negative").default(16).optional(),
+    borderRadius: z.number().min(0, "borderRadius cannot be negative").default(DEFAULT_BORDER_RADIUS).optional(),
     width: z.number().min(1, "width must be positive").optional(),
     height: z.number().min(1, "height must be positive").optional(),
     style: z.any().optional(),
