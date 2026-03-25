@@ -11,13 +11,15 @@ import {
   Figma
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useVideoStore } from '@/stores/video'
 import { SlideType, EffectType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { ActiveToolType } from '@/types/tools'
 import { backgroundStyleToCSS } from '@coasterai/renderer'
 import DurationChangeComponent from './remotion/components/DurationChangeComponent'
+import { isPlatformAdmin } from '@coasterai/ui-core/helper/role'
+import { useAuth } from '@coasterai/ui-core/hooks/useAuth'
 
 interface PlayerToolbarProps {
   onSlideSpeedChange: (newDuration: number) => void
@@ -33,6 +35,10 @@ const insertTools: { id: EffectType; name: string; icon: React.ElementType }[] =
 ]
 
 const PlayerToolbar = ({ onSlideSpeedChange, onDurationChange, minDuration = 1, maxDuration = 180 }: PlayerToolbarProps) => {
+
+  const { user } = useAuth()
+  const isPlatformAdminUser = user && isPlatformAdmin(user);
+
   const getSlideWithBackground = useVideoStore(s => s.getSlideWithBackground)
   const onChangeTextAnimation = useVideoStore(s => s.handleEditAnimation)
   const onViewAnimationCode = useVideoStore(s => s.handleViewAnimationCode)
@@ -95,7 +101,7 @@ const PlayerToolbar = ({ onSlideSpeedChange, onDurationChange, minDuration = 1, 
           </>
         )}
 
-        {slide.type === SlideType.ANIMATION && onViewAnimationCode && (
+        {slide.type === SlideType.ANIMATION && onViewAnimationCode && isPlatformAdminUser && (
           <TooltipProvider delayDuration={200}>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -115,57 +121,53 @@ const PlayerToolbar = ({ onSlideSpeedChange, onDurationChange, minDuration = 1, 
             </Tooltip>
           </TooltipProvider>
         )}
-
-        {/* Insert Tools Dropdown - only for image/video slides */}
-        {slide.type == SlideType.MEDIA && (
-          <>
-            <div className='h-4 w-px bg-border mx-1' />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant={activeInsertTool ? 'secondary' : 'ghost'} size='sm' className='gap-2 h-8'>
-                  {activeInsertTool ? (
-                    <>
-                      {(() => {
-                        const tool = insertTools.find(t => t.id === activeInsertTool)
-                        const Icon = tool?.icon || Type
-                        return <Icon className='w-4 h-4' />
-                      })()}
-                      <span className='text-xs'>{insertTools.find(t => t.id === activeInsertTool)?.name}</span>
-                    </>
-                  ) : (
-                    <>
-                      <Type className='w-4 h-4' />
-                      <span className='text-xs'>Insert</span>
-                    </>
-                  )}
-                  <ChevronDown className='w-3 h-3' />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align='start' className='w-40 bg-popover'>
-                {insertTools.map(tool => (
-                  <DropdownMenuItem
-                    key={String(tool.id)}
-                    onClick={() => onSelectTool({ type: ActiveToolType.INSERT, tool: tool.id })}
-                    className='gap-2'
-                  >
-                    <tool.icon className='w-4 h-4' />
-                    {tool.name}
-                  </DropdownMenuItem>
-                ))}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => onSelectTool({ type: ActiveToolType.FIGMA_IMPORT })} className='gap-2'>
-                  <Figma className='w-4 h-4' />
-                  Import from Figma
+        <>
+          <div className='h-4 w-px bg-border mx-1' />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant={activeInsertTool ? 'secondary' : 'ghost'} size='sm' className='gap-2 h-8'>
+                {activeInsertTool ? (
+                  <>
+                    {(() => {
+                      const tool = insertTools.find(t => t.id === activeInsertTool)
+                      const Icon = tool?.icon || Type
+                      return <Icon className='w-4 h-4' />
+                    })()}
+                    <span className='text-xs'>{insertTools.find(t => t.id === activeInsertTool)?.name}</span>
+                  </>
+                ) : (
+                  <>
+                    <Type className='w-4 h-4' />
+                    <span className='text-xs'>Insert</span>
+                  </>
+                )}
+                <ChevronDown className='w-3 h-3' />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='start' className='w-40 bg-popover'>
+              {insertTools.map(tool => (
+                <DropdownMenuItem
+                  key={String(tool.id)}
+                  onClick={() => onSelectTool({ type: ActiveToolType.INSERT, tool: tool.id })}
+                  className='gap-2'
+                >
+                  <tool.icon className='w-4 h-4' />
+                  {tool.name}
                 </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </>
-        )}
+              ))}
+              {/* <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => onSelectTool({ type: ActiveToolType.FIGMA_IMPORT })} className='gap-2'>
+                <Figma className='w-4 h-4' />
+                Import from Figma
+              </DropdownMenuItem> */}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </>
       </div>
 
       {/* Right side: Duration control */}
       <div className='flex items-center gap-2'>
-        <TooltipProvider delayDuration={100}>
+        {/* <TooltipProvider delayDuration={100}>
           <Tooltip>
             <TooltipTrigger asChild>
               <div className='flex items-center gap-1'>
@@ -187,7 +189,7 @@ const PlayerToolbar = ({ onSlideSpeedChange, onDurationChange, minDuration = 1, 
           max={2}
           min={0}
           step={0.1}
-        />
+        /> */}
 
         <TooltipProvider delayDuration={100}>
           <Tooltip>
@@ -198,7 +200,7 @@ const PlayerToolbar = ({ onSlideSpeedChange, onDurationChange, minDuration = 1, 
               </div>
             </TooltipTrigger>
             <TooltipContent side='bottom' className='text-xs'>
-              Change Animation Duration
+              Change Duration
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

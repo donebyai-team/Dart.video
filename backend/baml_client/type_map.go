@@ -99,8 +99,6 @@ var typeMap = map[string]reflect.Type{
 	"STREAM_TYPES.VideoGenerationPlanV2":           reflect.TypeOf(stream_types.VideoGenerationPlanV2{}),
 	"TYPES.VideoPlanV2":                            reflect.TypeOf(types.VideoPlanV2{}),
 	"STREAM_TYPES.VideoPlanV2":                     reflect.TypeOf(stream_types.VideoPlanV2{}),
-	"TYPES.VoiceoverSegment":                       reflect.TypeOf(types.VoiceoverSegment{}),
-	"STREAM_TYPES.VoiceoverSegment":                reflect.TypeOf(stream_types.VoiceoverSegment{}),
 
 	"TYPES.AnimationCodeEditType": reflect.TypeOf(types.AnimationCodeEditType("")),
 	"TYPES.AnimationType":         reflect.TypeOf(types.AnimationType("")),

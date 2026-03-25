@@ -1,7 +1,6 @@
 enum SceneCategory {
   TITLE
   OUTRO
-  TRANSITION
   SINGLE_STAT
   COMPARISON
   TREND
@@ -19,7 +18,6 @@ enum SceneCategory {
 
 class SceneElement {
   component string
-  children SceneElement[]?
 }
 
 class DataPoint {
@@ -37,20 +35,12 @@ class Scene {
   category SceneCategory
   elements SceneElement[]
   brief string @description("a short description explaining the scene, used for semantic search for existing templates and the animation generator")
-  frameBudget int[] @description("a range of frame budget for this scene eg. 40-70 frames")
   dataPoints DataPoint[] @description("generator will use this data to convert selected SceneElements into animation")
-}
-
-class VoiceoverSegment {
-  voiceover string
-  startFrame int
-  endFrame int
 }
 
 class VideoPlanV2 {
     videoName string @description("name of the video, around 5 to 15 length")
     sections SceneSection[]
-    segments VoiceoverSegment[] @description("voiceover to play across scenes, roughly split it across the total frames of the video")
     thinkingSummary string? @skip()
 }
 
@@ -67,8 +57,10 @@ function GeneratePlanV2(input: VideoGenerationPlanRequest, conversation_history:
     You do NOT write code. You do NOT decide timing values. You do NOT choose props.
 
     {{ AllComponentsList() }}
-    {{ SceneDesignPrinciples() }}
-    {{ PlannerTimingGuidance() }}
+
+    ## SCENE DESIGN PRINCIPLES
+
+    - One idea per scene. Never combine two components in one scene.
 
     ## PLANNING RULES
 
@@ -87,13 +79,6 @@ function GeneratePlanV2(input: VideoGenerationPlanRequest, conversation_history:
     - Use placeholder values if real data is not provided.
     - Asset URLs go directly in value — use the attachment handle or URL as the value.
 
-    ### Frame Budget
-    - Total frames must be close to the total video budget. Allowed variance +/- 10%.
-    - frameBudget per scene is a range [min, max] — the generator works within this budget.
-      Aim for the lower bound. Only expand toward the upper bound if content genuinely needs it.
-      The sum of all scene lower bounds must be close to the total video budget.
-    - Generator handles all global timeline offsets — you only think in per-scene budgets.
-
     ### Brief
     - brief is plain English directorial intent — feel, pacing, what the eye should go to.
     - brief is also used for template matching — be specific about layout and animation behavior.
@@ -107,14 +92,12 @@ function GeneratePlanV2(input: VideoGenerationPlanRequest, conversation_history:
     Ask if:
     - A scene implies brand presence but no brand name is provided, ask user add a brand identity
     - Metrics are mentioned but it is unclear if they are real or placeholder
-    - An attachment is provided but you are not clear on where and how to use it.
+    - An attachment is provided but you are not clear on where and how to use it using ATTACHMENT_CLARIFICATION
+    - If you think a scene needs an attachment, ask user to upload using UPLOAD_ATTACHMENT
     - Any key visual storytelling decision is ambiguous from script or attachments
 
     Do not ask about:
-    - Timing or animation style — you decide these
     - Props or component internals — the generator handles these
-    - Layout nesting details — use your judgment
-
 
     ## EXAMPLE SCENES
     ```json
@@ -247,17 +230,11 @@ function GeneratePlanV2(input: VideoGenerationPlanRequest, conversation_history:
     6. Use <attachments> and <user_note> to decide which attachment to use
        with Asset components. Use the url directly as the value
        in a dataPoint.
-    7. Allocate frame budgets proportionally to scene complexity — a single centered
-       heading needs far fewer frames than a staggered multi-element comparison.
-       Let content density and narrative weight drive the budget, not equal distribution.
 
     Only begin output after forming a clear plan.
     ---
 
     ## INPUT
-
-    Video fps: 30 frames/sec
-    Total Video Budget: {{ input.Duration }} frames
     Language: {{ input.Language }}
 
     ### User provided prompt/script

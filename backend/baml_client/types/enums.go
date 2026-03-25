@@ -225,7 +225,6 @@ type SceneCategory string
 const (
 	SceneCategoryTITLE             SceneCategory = "TITLE"
 	SceneCategoryOUTRO             SceneCategory = "OUTRO"
-	SceneCategoryTRANSITION        SceneCategory = "TRANSITION"
 	SceneCategorySINGLE_STAT       SceneCategory = "SINGLE_STAT"
 	SceneCategoryCOMPARISON        SceneCategory = "COMPARISON"
 	SceneCategoryTREND             SceneCategory = "TREND"
@@ -246,7 +245,6 @@ func (SceneCategory) Values() []SceneCategory {
 	return []SceneCategory{
 		SceneCategoryTITLE,
 		SceneCategoryOUTRO,
-		SceneCategoryTRANSITION,
 		SceneCategorySINGLE_STAT,
 		SceneCategoryCOMPARISON,
 		SceneCategoryTREND,

@@ -1035,10 +1035,6 @@ func (t *SceneClassView) PropertyBrief() (ClassPropertyView, error) {
 	return t.inner.Property("brief")
 }
 
-func (t *SceneClassView) PropertyFrameBudget() (ClassPropertyView, error) {
-	return t.inner.Property("frameBudget")
-}
-
 func (t *SceneClassView) PropertyDataPoints() (ClassPropertyView, error) {
 	return t.inner.Property("dataPoints")
 }
@@ -1073,10 +1069,6 @@ func (t *SceneElementClassView) ListProperties() ([]ClassPropertyView, error) {
 
 func (t *SceneElementClassView) PropertyComponent() (ClassPropertyView, error) {
 	return t.inner.Property("component")
-}
-
-func (t *SceneElementClassView) PropertyChildren() (ClassPropertyView, error) {
-	return t.inner.Property("children")
 }
 
 func (t *TypeBuilder) SceneElement() (*SceneElementClassView, error) {
@@ -1539,10 +1531,6 @@ func (t *VideoPlanV2ClassView) PropertySections() (ClassPropertyView, error) {
 	return t.inner.Property("sections")
 }
 
-func (t *VideoPlanV2ClassView) PropertySegments() (ClassPropertyView, error) {
-	return t.inner.Property("segments")
-}
-
 func (t *VideoPlanV2ClassView) PropertyThinkingSummary() (ClassPropertyView, error) {
 	return t.inner.Property("thinkingSummary")
 }
@@ -1556,45 +1544,5 @@ func (t *TypeBuilder) VideoPlanV2() (*VideoPlanV2ClassView, error) {
 }
 
 func (t *VideoPlanV2ClassView) Type() (baml.Type, error) {
-	return t.inner.Type()
-}
-
-type VoiceoverSegmentClassView struct {
-	inner baml.ClassBuilder
-}
-
-func (t *VoiceoverSegmentClassView) ListProperties() ([]ClassPropertyView, error) {
-	result, err := t.inner.ListProperties()
-	if err != nil {
-		return nil, err
-	}
-	builders := make([]ClassPropertyView, len(result))
-	for i, p := range result {
-		builders[i] = p
-	}
-	return builders, nil
-}
-
-func (t *VoiceoverSegmentClassView) PropertyVoiceover() (ClassPropertyView, error) {
-	return t.inner.Property("voiceover")
-}
-
-func (t *VoiceoverSegmentClassView) PropertyStartFrame() (ClassPropertyView, error) {
-	return t.inner.Property("startFrame")
-}
-
-func (t *VoiceoverSegmentClassView) PropertyEndFrame() (ClassPropertyView, error) {
-	return t.inner.Property("endFrame")
-}
-
-func (t *TypeBuilder) VoiceoverSegment() (*VoiceoverSegmentClassView, error) {
-	bld, err := t.inner.Class("VoiceoverSegment")
-	if err != nil {
-		return nil, err
-	}
-	return &VoiceoverSegmentClassView{inner: bld}, nil
-}
-
-func (t *VoiceoverSegmentClassView) Type() (baml.Type, error) {
 	return t.inner.Type()
 }

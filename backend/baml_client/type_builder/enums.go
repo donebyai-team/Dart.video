@@ -155,10 +155,6 @@ func (t *SceneCategoryEnumView) ValueOUTRO() (EnumValueView, error) {
 	return t.inner.Value("OUTRO")
 }
 
-func (t *SceneCategoryEnumView) ValueTRANSITION() (EnumValueView, error) {
-	return t.inner.Value("TRANSITION")
-}
-
 func (t *SceneCategoryEnumView) ValueSINGLE_STAT() (EnumValueView, error) {
 	return t.inner.Value("SINGLE_STAT")
 }
