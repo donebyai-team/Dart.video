@@ -79,6 +79,9 @@ func (v videoGeneration) UpdateVideoConfig(ctx context.Context, video *models.Vi
 		if video.Metadata.GeneratedBranding != nil {
 			existingVideo.Metadata.GeneratedBranding = video.Metadata.GeneratedBranding
 		}
+		if video.Metadata.ThinkingSummary != nil {
+			existingVideo.Metadata.ThinkingSummary = video.Metadata.ThinkingSummary
+		}
 	}
 
 	if nameChanged {

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Mic2, Eye, Volume2, RefreshCw, Video, Home, Settings, HelpCircle, Timer, Music2 } from 'lucide-react'
+import { Mic2, Eye, Volume2, RefreshCw, Video, Home, Settings, HelpCircle, Timer, Music2, Brain } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -124,7 +124,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
           )
         }
 
-        const renderStatus = await pollVideoRender(renderResponse.jobId, 
+        const renderStatus = await pollVideoRender(renderResponse.jobId,
           renderResponse.videoId, Number(renderResponse.version))
 
         if (renderStatus.type === 'file') {
@@ -322,6 +322,23 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
         </div>
 
         <div className='flex items-center gap-2'>
+          {/* Thinking Summary */}
+          {videoConfigFromStore?.metadata?.thinkingSummary && (
+            <div className="relative group inline-flex">
+
+              <div className="flex cursor-pointer items-center gap-1 rounded-md border bg-muted px-2 py-1 text-sm font-medium text-muted-foreground">
+                <Brain className="w-4 h-4" />
+                Thoughts
+              </div>
+
+              <div className="absolute left-0 top-8 z-50 hidden w-max max-w-sm rounded-md border bg-popover p-3 text-xs shadow-lg group-hover:block">
+                <div className="max-h-64 overflow-auto whitespace-pre-wrap">
+                  {videoConfigFromStore.metadata.thinkingSummary}
+                </div>
+              </div>
+
+            </div>
+          )}
           {/* Duration Badge (Non-clickable) */}
           <div className="flex items-center gap-1 px-2 py-1 text-sm font-medium rounded-md border bg-muted text-muted-foreground">
             <Timer className='w-4 h-4' />
@@ -343,10 +360,10 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
           <Button
             className='btn-accent-gradient gap-2'
             disabled={isStreamingVideo ||
-               isExportingVideo || 
-               videoConfigFromStore?.config?.sections.length == 0 ||
-               videoConfigFromStore?.config?.sections[0].slides.length == 0
-              }
+              isExportingVideo ||
+              videoConfigFromStore?.config?.sections.length == 0 ||
+              videoConfigFromStore?.config?.sections[0].slides.length == 0
+            }
             onClick={handleExportVideo}
           >
             <Eye className='w-4 h-4' />
@@ -365,12 +382,12 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
         >
           <AnimatePresence mode='wait'>
             {activeTool.type != ActiveToolType.NONE && selectedSlide ? (
-                <ToolsSettingsPanel
-                  deleteSpotlight={deleteSpotlight}
-                  deleteCallout={deleteCallout}
-                  deleteZoom={deleteZoom}
-                  isPreviewPlaying={isPlayerPlaying}
-                  onPreviewTemplate={() => handleTogglePreviewSlide(selectedSlide.slide.id)}
+              <ToolsSettingsPanel
+                deleteSpotlight={deleteSpotlight}
+                deleteCallout={deleteCallout}
+                deleteZoom={deleteZoom}
+                isPreviewPlaying={isPlayerPlaying}
+                onPreviewTemplate={() => handleTogglePreviewSlide(selectedSlide.slide.id)}
                 onUpdateSpotlight={updates => {
                   if (selectedEffectId) {
                     updateSpotlight(selectedEffectId, updates)
@@ -442,7 +459,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
               onSlideChange={slideId => {
                 // Use unified selection handler
                 handleSelectEntity(createSlideEntityId(slideId))
-              }}             
+              }}
               onFullscreenChange={handleFullscreenChange}
               onPlaybackStateChange={setIsPlayerPlaying}
               onSelectOverlayFromTimeline={(overlayId, slideId) => {
@@ -454,9 +471,9 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
                 console.debug('slide speed changed: ', newSpeed)
                 updateSlide({ speed: newSpeed })
               }}
-               // Duration change handler — newDuration is in seconds, store as frames
+              // Duration change handler — newDuration is in seconds, store as frames
               onDurationChange={(_slideId, newDurationInSeconds) => {
-                updateSlide({ durationInFrames:  Math.round(newDurationInSeconds * fps()) })
+                updateSlide({ durationInFrames: Math.round(newDurationInSeconds * fps()) })
               }}
               onSelectTemplate={slideId => {
                 console.debug('selected templated slide: ', slideId)
@@ -495,7 +512,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
                 }
 
                 let currentTranscript = selectedSlide.slide.transcript
-                let handleTranscriptChange = updateSlideTranscript               
+                let handleTranscriptChange = updateSlideTranscript
 
                 return (
                   <div className='space-y-2'>
