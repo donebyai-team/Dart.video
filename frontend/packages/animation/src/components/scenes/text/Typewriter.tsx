@@ -192,6 +192,6 @@ export const TypewriterDescriptor: ComponentRegistration = {
   type: 'content',
   fullSchema: TypewriterSchema,
   editorProps: ['text', 'mode', 'animation', 'durationInFrames'],
-  description: 'reveals text character by character — use for dramatic or progressive text reveals',
+  description: 'Reveals text character-by-character like a typewriter. Use for dramatic reveals or code/terminal effects. Required props: text="Building the future of AI". Optional: mode="char" (default), "word", or "line" to control typing granularity.',
   calculateDuration: calculateTypewriterDuration,
 };

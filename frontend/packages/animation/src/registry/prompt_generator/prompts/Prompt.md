@@ -8,55 +8,55 @@
 ## Scenes — standalone, no siblings
 
 ### AnimatedNumber
-animated number counter with start/end text and highlight effects
+Animated counter that counts from one number to another with text labels. Use for metrics, statistics, KPIs. Required props: startText="Solved", endText="incidents", to={12450}. Optional: from (default 0), format (e.g. "0,0" for thousands separator).
 Props:
 - startText: string (required)
 - endText: string (required)
 - to: number (required)
 
 ### TextStagger
-reveals words with staggered delays — use for multi-line or multi-word text
+Reveals text word-by-word with staggered animation delays. Use for multi-word headlines or body text. Required props: text="Transform your workflow with AI". Each word animates in sequence with configurable delay.
 Props:
 - text: string (required)
 
 ### Typewriter
-reveals text character by character — use for dramatic or progressive text reveals
+Reveals text character-by-character like a typewriter. Use for dramatic reveals or code/terminal effects. Required props: text="Building the future of AI". Optional: mode="char" (default), "word", or "line" to control typing granularity.
 Props:
 - text: string (required)
 
 ### TextHighlight
-highlights text with zoom effect — use for emphasis
+Displays text with highlighted portions that zoom/pulse for emphasis. Use to draw attention to key words or phrases. Required props: text="Increase revenue by 300%", highlightPattern="300%". The pattern can be a word or phrase to highlight within the text.
 Props:
 - text: string (required)
 
 ### TextCycle
-cycles through text array with transitions — use for rotating messages
+Cycles through multiple text strings with smooth transitions. Use for rotating taglines, benefits, or features. Required props: texts={["Build faster with AI", "Deploy with confidence", "Scale without limits"]}. Each text displays briefly then transitions to the next.
 Props:
 - texts: array (required)
 
 ### AnimatedImage
-text label above an image with entrance animation (slide, fade, scale)
+Displays a text label above an image with entrance animation. Use for product showcases, feature highlights, or visual content. Required props: text="New Product Launch", src="https://example.com/product.jpg". The text animates in first, then the image follows.
 Props:
 - text: string (required)
 - src: string (required)
 
 ### AnimatedVideo
-text label above a video with entrance animation (slide, fade, scale)
+Displays a text label above a video with entrance animation. Use for demo videos, testimonials, or video content. Required props: text="Watch Demo", src="https://example.com/demo.mp4". The text animates in first, then the video follows. Note: Total duration depends on video length.
 Props:
 - text: string (required)
 - src: string (required)
 
 ### ImagePeel
-stacked images that peel away one by one to reveal the next image
+Stacked images that peel away one-by-one to reveal the next. Use for before/after comparisons, product variations, or image galleries. Required props: sources={["https://example.com/img1.jpg", "https://example.com/img2.jpg", "https://example.com/img3.jpg"]}. Minimum 2 images required.
 Props:
 - sources: array (required)
 
 ### LogoAsset
-logo image with entrance animations (fade, zoom, bounce, spin, drop)
+Displays a logo with entrance animation. Use for brand intros or logo reveals. Optional props: src="https://example.com/logo.svg" (uses theme logo if omitted), animation="zoomIn" (options: fadeIn, zoomIn, bounceIn, spinIn, dropIn, none). Set animation="none" for instant display.
 Props:
 
 ### LogoWithBrandName
-logo with brand name text that fades in character by character
+Displays a logo alongside brand name text that fades in character-by-character. Use for brand introductions or company presentations. Required props: brandName="CoasterAI". Optional: src for custom logo (uses theme logo if omitted). The brand name animates in one character at a time for dramatic effect.
 Props:
 - brandName: string (required)
 

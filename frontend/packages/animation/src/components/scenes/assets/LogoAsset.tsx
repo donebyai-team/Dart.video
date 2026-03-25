@@ -203,6 +203,6 @@ export const LogoAssetDescriptor: ComponentRegistration = {
     type: 'brand',
     fullSchema: LogoAssetSchema,
     editorProps: ['src', 'animation', 'width', 'height'],
-    description: 'logo image with entrance animations (fade, zoom, bounce, spin, drop)',
+    description: 'Displays a logo with entrance animation. Use for brand intros or logo reveals. Optional props: src="https://example.com/logo.svg" (uses theme logo if omitted), animation="zoomIn" (options: fadeIn, zoomIn, bounceIn, spinIn, dropIn, none). Set animation="none" for instant display.',
     calculateDuration: calculateLogoAssetDuration,
 };

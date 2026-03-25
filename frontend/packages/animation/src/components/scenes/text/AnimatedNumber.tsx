@@ -248,7 +248,7 @@ export const AnimatedNumberDescriptor: ComponentRegistration = {
     name: 'AnimatedNumber',
     type: 'content',
     fullSchema: AnimatedNumberSchema,
-    editorProps: ['startText', 'endText', 'from', 'to', 'highlightStyle', 'animation'],
-    description: 'animated number counter with start/end text and highlight effects',
+    editorProps: ['startText', 'endText', 'from', 'to', 'format', 'variant', 'highlightStyle', 'animation'],
+    description: 'Animated counter that counts from one number to another with text labels. Use for metrics, statistics, KPIs. Required props: startText="Solved", endText="incidents", to={12450}. Optional: from (default 0), format (e.g. "0,0" for thousands separator).',
     calculateDuration: calculateAnimatedNumberDuration,
 };

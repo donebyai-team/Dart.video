@@ -281,6 +281,6 @@ export const TextCycleDescriptor: ComponentRegistration = {
   type: 'content',
   fullSchema: TextCycleSchema,
   editorProps: ['texts', 'transition', 'holdDuration', 'transitionDuration'],
-  description: 'cycles through text array with transitions — use for rotating messages',
+  description: 'Cycles through multiple text strings with smooth transitions. Use for rotating taglines, benefits, or features. Required props: texts={["Build faster with AI", "Deploy with confidence", "Scale without limits"]}. Each text displays briefly then transitions to the next.',
   calculateDuration: calculateTextCycleDuration,
 };

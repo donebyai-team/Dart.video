@@ -166,6 +166,6 @@ export const TextStaggerDescriptor: ComponentRegistration = {
     type: 'content',
     fullSchema: TextStaggerSchema,
     editorProps: ['text', 'animation', 'staggerDelay', 'duration'],
-    description: 'reveals words with staggered delays — use for multi-line or multi-word text',
+    description: 'Reveals text word-by-word with staggered animation delays. Use for multi-word headlines or body text. Required props: text="Transform your workflow with AI". Each word animates in sequence with configurable delay.',
     calculateDuration: calculateTextStaggerDuration,
 };

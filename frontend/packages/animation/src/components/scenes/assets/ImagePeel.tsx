@@ -235,6 +235,6 @@ export const ImagePeelDescriptor: ComponentRegistration = {
     type: 'scene',
     fullSchema: ImagePeelSchema,
     editorProps: ['sources', 'direction', 'holdDuration', 'peelDuration', 'borderRadius'],
-    description: 'stacked images that peel away one by one to reveal the next image',
+    description: 'Stacked images that peel away one-by-one to reveal the next. Use for before/after comparisons, product variations, or image galleries. Required props: sources={["https://example.com/img1.jpg", "https://example.com/img2.jpg", "https://example.com/img3.jpg"]}. Minimum 2 images required.',
     calculateDuration: calculateImagePeelDuration,
 };
