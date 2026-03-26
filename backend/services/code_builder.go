@@ -64,8 +64,8 @@ type ValidateAndBuildOutput struct {
 }
 
 type CodeDuration struct {
-	SettledFrame     int `json:"settledFrame"`
-	DurationInFrames int `json:"durationInFrames"`
+	SettledFrame     int32 `json:"settledFrame"`
+	DurationInFrames int32 `json:"durationInFrames"`
 }
 
 type codeBuilderService struct {

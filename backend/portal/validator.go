@@ -121,18 +121,12 @@ func validateSlide(slide *pbcore.Slide, idRegistry map[string]string) error {
 		return fmt.Errorf("invalid duration")
 	}
 
-	if slide.TransitionDuration != nil && *slide.TransitionDuration < 0 {
+	if slide.TransitionDurationInFrames != nil && *slide.TransitionDurationInFrames < 0 {
 		return fmt.Errorf("invalid transition duration")
 	}
 
-	if slide.GetMedia() != nil {
-		if err := validateSlideMedia(slide.GetMedia()); err != nil {
-			return err
-		}
-	}
-
-	if slide.GetAnimation() != nil {
-		if err := validateSlideAnimation(slide.GetAnimation()); err != nil {
+	if slide.GetContent() != nil {
+		if err := validateSlideAnimation(slide.GetContent()); err != nil {
 			return err
 		}
 	}
@@ -160,7 +154,7 @@ func validateSlide(slide *pbcore.Slide, idRegistry map[string]string) error {
 }
 
 func validateEffect(
-	slideDuration float32,
+	slideDuration int32,
 	id string,
 	x, y float32,
 	startTime, endTime float32,
@@ -180,9 +174,9 @@ func validateEffect(
 		return fmt.Errorf("%s start time is invalid", entityType)
 	}
 
-	if endTime <= 0 || endTime > slideDuration {
-		return fmt.Errorf("%s end time exceeds slide duration", entityType)
-	}
+	//if endTime <= 0 || endTime > slideDuration {
+	//	return fmt.Errorf("%s end time exceeds slide duration", entityType)
+	//}
 
 	if startTime >= endTime {
 		return fmt.Errorf("%s start time must be less than end time", entityType)
@@ -211,50 +205,6 @@ func validateSlideAnimation(content *pbcore.AnimationSlideContent) error {
 	//if content.Plan == nil {
 	//	return fmt.Errorf("content plan is required")
 	//}
-
-	return nil
-}
-
-func validateSlideMedia(content *pbcore.MediaSlideContent) error {
-	if content == nil {
-		return fmt.Errorf("content is nil")
-	}
-
-	// ---- Meta Validation ----
-	err := validateContentMeta(content.GetMeta())
-	if err != nil {
-		return err
-	}
-
-	// ---- Src Validation ----
-	src := strings.TrimSpace(content.Src)
-	if src == "" {
-		return fmt.Errorf("src is required")
-	}
-
-	if _, err := validateURL(src); err != nil {
-		return fmt.Errorf("invalid image src: %w", err)
-	}
-
-	//if content.Plan == nil {
-	//	return fmt.Errorf("content plan is required")
-	//}
-
-	return nil
-}
-
-func validateContentMeta(meta *pbcore.MetaData) error {
-	if meta == nil {
-		return fmt.Errorf("content meta is nil")
-	}
-
-	if meta.X < 0 || meta.Y < 0 {
-		return fmt.Errorf("content meta x,y coordinates are invalid")
-	}
-
-	if meta.Width < 0 || meta.Height < 0 {
-		return fmt.Errorf("content meta width or height is invalid")
-	}
 
 	return nil
 }

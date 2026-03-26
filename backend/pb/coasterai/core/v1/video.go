@@ -82,12 +82,3 @@ func (v *AnimationSlidePlan) ToModel() *types.AnimationSlide {
 		SelectedTemplateDescription: v.SelectedTemplateDescription,
 	}
 }
-
-func (v *MediaSlidePlan) ToModel() *types.MediaSlide {
-	return &types.MediaSlide{
-		Index:                       v.Index,
-		BeatDescription:             v.BeatDescription,
-		Duration:                    v.DurationInFrames,
-		SelectedTemplateDescription: v.SelectedTemplateDescription,
-	}
-}

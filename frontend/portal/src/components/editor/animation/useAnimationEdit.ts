@@ -48,7 +48,7 @@ export function useAnimationEdit(): UseAnimationEditReturn {
     setSelectedEid(null)
     setAnimEditVersion(0)
 
-    overlayRef.current = content?.edits ?? {} as PatchOverlay
+    overlayRef.current = (content?.edits as PatchOverlay) ?? {}
     setOverlay(overlayRef.current)
   }, [slideId])
 

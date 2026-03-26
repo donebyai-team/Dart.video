@@ -13,10 +13,10 @@ export const createToolActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     const resolution = videoConfig.metadata?.resolution;
     if (!resolution) return;
 
-    const startTime = selectedSlide.slide.transitionDuration || 0;
+    const startTime = selectedSlide.slide.transitionDurationInFrames || 0;
     const endTime =
       get().getSlideDurationInSeconds(selectedSlide.slide) -
-      (selectedSlide.slide.transitionDuration || 0);
+      (selectedSlide.slide.transitionDurationInFrames || 0);
 
     set({ activeTool: tool });
 

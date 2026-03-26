@@ -292,7 +292,7 @@ type VideoMetadata struct {
 	Fps                int32                   `protobuf:"varint,1,opt,name=fps,proto3" json:"fps,omitempty"`
 	BackgroundStyle    *BackgroundStyle        `protobuf:"bytes,2,opt,name=background_style,json=backgroundStyle,proto3,oneof" json:"background_style,omitempty"`
 	Resolution         *Resolution             `protobuf:"bytes,3,opt,name=resolution,proto3" json:"resolution,omitempty"`
-	Duration           float32                 `protobuf:"fixed32,4,opt,name=duration,proto3" json:"duration,omitempty"`
+	DurationInFrames   int32                   `protobuf:"varint,4,opt,name=durationInFrames,proto3" json:"durationInFrames,omitempty"`
 	Prompt             string                  `protobuf:"bytes,5,opt,name=prompt,proto3" json:"prompt,omitempty"`
 	Language           VideoLanguage           `protobuf:"varint,7,opt,name=language,proto3,enum=coasterai.core.v1.VideoLanguage" json:"language,omitempty"`
 	BackgroundAudioUrl *string                 `protobuf:"bytes,8,opt,name=background_audio_url,json=backgroundAudioUrl,proto3,oneof" json:"background_audio_url,omitempty"`
@@ -353,9 +353,9 @@ func (x *VideoMetadata) GetResolution() *Resolution {
 	return nil
 }
 
-func (x *VideoMetadata) GetDuration() float32 {
+func (x *VideoMetadata) GetDurationInFrames() int32 {
 	if x != nil {
-		return x.Duration
+		return x.DurationInFrames
 	}
 	return 0
 }
@@ -721,14 +721,14 @@ const file_coasterai_core_v1_video_proto_rawDesc = "" +
 	"\x0ebrandLibraryID\x18\x02 \x01(\tH\x00R\x0ebrandLibraryID\x88\x01\x01\x12K\n" +
 	"\rbrandIdentity\x18\x03 \x01(\v2 .coasterai.core.v1.BrandIdentityH\x01R\rbrandIdentity\x88\x01\x01B\x11\n" +
 	"\x0f_brandLibraryIDB\x10\n" +
-	"\x0e_brandIdentity\"\xc4\x04\n" +
+	"\x0e_brandIdentity\"\xd4\x04\n" +
 	"\rVideoMetadata\x12\x10\n" +
 	"\x03fps\x18\x01 \x01(\x05R\x03fps\x12R\n" +
 	"\x10background_style\x18\x02 \x01(\v2\".coasterai.core.v1.BackgroundStyleH\x00R\x0fbackgroundStyle\x88\x01\x01\x12=\n" +
 	"\n" +
 	"resolution\x18\x03 \x01(\v2\x1d.coasterai.core.v1.ResolutionR\n" +
-	"resolution\x12\x1a\n" +
-	"\bduration\x18\x04 \x01(\x02R\bduration\x12\x16\n" +
+	"resolution\x12*\n" +
+	"\x10durationInFrames\x18\x04 \x01(\x05R\x10durationInFrames\x12\x16\n" +
 	"\x06prompt\x18\x05 \x01(\tR\x06prompt\x12<\n" +
 	"\blanguage\x18\a \x01(\x0e2 .coasterai.core.v1.VideoLanguageR\blanguage\x125\n" +
 	"\x14background_audio_url\x18\b \x01(\tH\x01R\x12backgroundAudioUrl\x88\x01\x01\x12\\\n" +

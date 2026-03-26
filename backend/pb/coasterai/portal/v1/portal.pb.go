@@ -1494,7 +1494,7 @@ type CreateVideoRequest struct {
 	Script         *v1.Script             `protobuf:"bytes,1,opt,name=script,proto3" json:"script,omitempty"`
 	Prompt         string                 `protobuf:"bytes,2,opt,name=prompt,proto3" json:"prompt,omitempty"`
 	Resolution     *v1.Resolution         `protobuf:"bytes,3,opt,name=resolution,proto3" json:"resolution,omitempty"`
-	Duration       float32                `protobuf:"fixed32,4,opt,name=duration,proto3" json:"duration,omitempty"`
+	DurationInSec  int32                  `protobuf:"varint,4,opt,name=durationInSec,proto3" json:"durationInSec,omitempty"`
 	BrandLibraryId *string                `protobuf:"bytes,5,opt,name=brand_library_id,json=brandLibraryId,proto3,oneof" json:"brand_library_id,omitempty"`
 	Language       v1.VideoLanguage       `protobuf:"varint,6,opt,name=language,proto3,enum=coasterai.core.v1.VideoLanguage" json:"language,omitempty"`
 	StyleType      v1.StyleType           `protobuf:"varint,7,opt,name=styleType,proto3,enum=coasterai.core.v1.StyleType" json:"styleType,omitempty"`
@@ -1555,9 +1555,9 @@ func (x *CreateVideoRequest) GetResolution() *v1.Resolution {
 	return nil
 }
 
-func (x *CreateVideoRequest) GetDuration() float32 {
+func (x *CreateVideoRequest) GetDurationInSec() int32 {
 	if x != nil {
-		return x.Duration
+		return x.DurationInSec
 	}
 	return 0
 }
@@ -3176,14 +3176,14 @@ const file_coasterai_portal_v1_portal_proto_rawDesc = "" +
 	"\x0fGetVideoRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"E\n" +
 	"\x11GetVideosResponse\x120\n" +
-	"\x06videos\x18\x01 \x03(\v2\x18.coasterai.core.v1.VideoR\x06videos\"\xcb\x03\n" +
+	"\x06videos\x18\x01 \x03(\v2\x18.coasterai.core.v1.VideoR\x06videos\"\xd5\x03\n" +
 	"\x12CreateVideoRequest\x121\n" +
 	"\x06script\x18\x01 \x01(\v2\x19.coasterai.core.v1.ScriptR\x06script\x12\x16\n" +
 	"\x06prompt\x18\x02 \x01(\tR\x06prompt\x12=\n" +
 	"\n" +
 	"resolution\x18\x03 \x01(\v2\x1d.coasterai.core.v1.ResolutionR\n" +
-	"resolution\x12\x1a\n" +
-	"\bduration\x18\x04 \x01(\x02R\bduration\x12-\n" +
+	"resolution\x12$\n" +
+	"\rdurationInSec\x18\x04 \x01(\x05R\rdurationInSec\x12-\n" +
 	"\x10brand_library_id\x18\x05 \x01(\tH\x00R\x0ebrandLibraryId\x88\x01\x01\x12<\n" +
 	"\blanguage\x18\x06 \x01(\x0e2 .coasterai.core.v1.VideoLanguageR\blanguage\x12:\n" +
 	"\tstyleType\x18\a \x01(\x0e2\x1c.coasterai.core.v1.StyleTypeR\tstyleType\x12\x10\n" +

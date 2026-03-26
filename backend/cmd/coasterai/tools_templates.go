@@ -248,7 +248,7 @@ func syncTemplate(ctx context.Context, db datastore.TemplateRepository, template
 	}
 
 	// validations
-	if config.TotalDuration <= 0 || config.VisibleDuration <= 0 {
+	if config.TotalDurationInFrames <= 0 || config.VisibleDurationInFrames <= 0 {
 		return fmt.Errorf("metadata.json invalid duration in template %s", templateName)
 	}
 
@@ -326,11 +326,11 @@ func templateNeedsUpdate(existing *models.Template, categories []string, descrip
 		return true
 	}
 
-	if existing.Config.TotalDuration != config.TotalDuration {
+	if existing.Config.TotalDurationInFrames != config.TotalDurationInFrames {
 		return true
 	}
 
-	if existing.Config.VisibleDuration != config.VisibleDuration {
+	if existing.Config.VisibleDurationInFrames != config.VisibleDurationInFrames {
 		return true
 	}
 

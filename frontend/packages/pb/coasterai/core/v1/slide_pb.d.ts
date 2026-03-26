@@ -398,9 +398,9 @@ export declare type Slide = Message<"coasterai.core.v1.Slide"> & {
   transition: TransitionType;
 
   /**
-   * @generated from field: optional float transitionDuration = 6;
+   * @generated from field: optional int32 transitionDurationInFrames = 6;
    */
-  transitionDuration?: number;
+  transitionDurationInFrames?: number;
 
   /**
    * @generated from field: optional coasterai.core.v1.BackgroundStyle background_style = 7;

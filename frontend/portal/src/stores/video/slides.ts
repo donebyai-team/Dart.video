@@ -5,13 +5,13 @@ import { createNewSlide, getDefaulVideotMetadata, createDefaultBackgroundStyle, 
 import { VideoStoreSet, VideoStoreGet } from './types'
 import { getSections, updateVideoConfigSections, updateSelectedSlide, updateTotalDuration, getPreviousSlide } from './utils'
 import defaultEditorConfig from '@/data/editorConfig'
-import { TRANSITION_DURATION_SECONDS } from '@coasterai/renderer/src/frameUtils'
-import { ActiveToolType } from '@/types/tools'
-import { type } from 'os'
+import { TRANSITION_DURATION_FRAMES } from '@coasterai/renderer/src/frameUtils'
 
 export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   /* ================= ADD ================= */
 
+  setShowTransitionPicker: (slideId: string | null) =>
+    set({ showTransitionPicker: slideId }),
 
   // if global is available then use global or default to slide
   getSlideWithBackground(slide: Slide): BackgroundStyle {
@@ -35,7 +35,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     const previousSlide = getPreviousSlide(sections, sectionId);
     const globalBackground = videoConfig.metadata?.backgroundStyle;
 
-    
+
     const inheritedBg =
       globalBackground ??
       previousSlide?.backgroundStyle ??
@@ -399,8 +399,8 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
                     transition: transitionType,
                     direction: direction,
                     //TRANSITION_DURATION_SECONDS is minimum transition time 
-                    transitionDuration:
-                      transitionType === TransitionType.TRANSITION_NONE ? 0 : TRANSITION_DURATION_SECONDS
+                    transitionDurationInFrames:
+                      transitionType === TransitionType.TRANSITION_NONE ? 0 : TRANSITION_DURATION_FRAMES
                   }
 
                   if (direction !== undefined) {
@@ -429,7 +429,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
             const updatedSlide: any = {
               ...slide,
               transition: transitionType,
-              transitionDuration: transitionType === TransitionType.TRANSITION_NONE ? 0 : TRANSITION_DURATION_SECONDS
+              transitionDurationInFrames: transitionType === TransitionType.TRANSITION_NONE ? 0 : TRANSITION_DURATION_FRAMES
             }
 
             if (direction !== undefined) {

@@ -159,7 +159,7 @@ message Slide {
   string id = 1;
   string transcript = 3;
   TransitionType transition = 5;
-  optional float transitionDuration = 6;
+  optional int32 transitionDurationInFrames = 6;
   optional BackgroundStyle background_style = 7;
   optional TransitionDirection direction = 23;
   int32 durationInFrames = 25;

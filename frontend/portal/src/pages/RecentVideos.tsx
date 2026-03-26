@@ -83,7 +83,7 @@ const RecentVideos = () => {
                   <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
                     <span>{getSlideCount(video)} slides</span>
                     <span>•</span>
-                    <span>{video.metadata?.duration.toFixed(2)}s</span>
+                    <span>{video.metadata?.durationInFrames ? (video.metadata.durationInFrames/30).toFixed(2) : '0.00'}s</span>
                   </div>
 
                   <div className="mt-2 text-xs text-muted-foreground">

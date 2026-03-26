@@ -2,7 +2,7 @@
 import { EffectType, TransitionType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import type { TimelineSlide, SlideItem, TransitionItem, OverlayItem, TimelineLayout } from './types'
 import { getRealSlideStartFrame } from '../frame_calculations'
-import { TRANSITION_DURATION_SECONDS } from '@coasterai/renderer/src/frameUtils'
+import { TRANSITION_DURATION_FRAMES } from '@coasterai/renderer/src/frameUtils'
 
 /**
  * REMOTION TIMELINE CALCULATIONS (2026)
@@ -109,7 +109,7 @@ export function calculateRemotionSlideItems(
       hasTransition,
       // Add overlap information for visual rendering
       overlapStart: hasTransition
-        ? framesToSeconds(absoluteEndFrame - (TRANSITION_DURATION_SECONDS * fps) + 1, fps)
+        ? framesToSeconds(absoluteEndFrame - (TRANSITION_DURATION_FRAMES) + 1, fps)
         : null,
       overlapEnd: hasTransition ? framesToSeconds(absoluteEndFrame, fps) : null
     })
@@ -117,7 +117,7 @@ export function calculateRemotionSlideItems(
     // Move to next slide position
     // Next slide starts: Current Start + Current Duration - Transition Duration
     if (hasTransition) {
-      currentFramePosition = absoluteStartFrame + slideDurationFrames - Math.round(TRANSITION_DURATION_SECONDS * fps);
+      currentFramePosition = absoluteStartFrame + slideDurationFrames - Math.round(TRANSITION_DURATION_FRAMES);
     } else {
       currentFramePosition = absoluteStartFrame + slideDurationFrames
     }

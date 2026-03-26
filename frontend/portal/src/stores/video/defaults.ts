@@ -16,7 +16,7 @@ import {
 } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { Resolution, ResolutionSchema, Video, VideoMetadata, VideoMetadataSchema } from "@coasterai/pb/coasterai/core/v1/video_pb";
 import { SelectedSection } from "./types";
-import { TRANSITION_DURATION_SECONDS } from "@coasterai/renderer/src/frameUtils";
+import { TRANSITION_DURATION_FRAMES } from "@coasterai/renderer/src/frameUtils";
 
 export function resolveBackgroundStyle(
     slide?: Slide,
@@ -59,7 +59,7 @@ export function createNewSlide(params: { inheritedBg: BackgroundStyle }) {
         durationInFrames: 5 * 30,
         transition: TransitionType.TRANSITION_NONE,
         backgroundStyle: inheritedBg,
-        transitionDuration: TRANSITION_DURATION_SECONDS,
+        transitionDurationInFrames: TRANSITION_DURATION_FRAMES,
         content: create(AnimationSlideContentSchema, {}),
         spotlights: [],
         callouts: [],

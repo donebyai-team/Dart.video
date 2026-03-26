@@ -525,9 +525,9 @@ export declare type CreateVideoRequest = Message<"coasterai.portal.v1.CreateVide
   resolution?: Resolution;
 
   /**
-   * @generated from field: float duration = 4;
+   * @generated from field: int32 durationInSec = 4;
    */
-  duration: number;
+  durationInSec: number;
 
   /**
    * @generated from field: optional string brand_library_id = 5;

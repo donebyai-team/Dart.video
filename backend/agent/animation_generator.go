@@ -188,11 +188,11 @@ func (l *animationGenerator) GenerateCodeV2(ctx context.Context, scene *types.Sc
 			//template.Config.VisibleDuration = template.Config.VisibleDuration
 			//template.Config.TotalDuration = generatedAnimation.SettledFrame
 
-			if template.Config.VisibleDuration == 0 {
-				template.Config.VisibleDuration = 40
+			if template.Config.VisibleDurationInFrames == 0 {
+				template.Config.VisibleDurationInFrames = 40
 			}
-			if template.Config.TotalDuration == 0 {
-				template.Config.TotalDuration = 40
+			if template.Config.TotalDurationInFrames == 0 {
+				template.Config.TotalDurationInFrames = 40
 			}
 
 			return template, nil
@@ -361,10 +361,10 @@ func (l *animationGenerator) GenerateCode(ctx context.Context,
 						MUrl: buildOutput.CodeWithAssignedIdsPath,
 						TUrl: buildOutput.TransformedCodePath,
 					},
-					VisibleDuration: int64(buildOutput.CodeDuration.SettledFrame),
-					TotalDuration:   int64(buildOutput.CodeDuration.DurationInFrames),
-					Repeatable:      false,
-					Categories:      nil,
+					VisibleDurationInFrames: buildOutput.CodeDuration.SettledFrame,
+					TotalDurationInFrames:   buildOutput.CodeDuration.DurationInFrames,
+					Repeatable:              false,
+					Categories:              nil,
 				},
 				GeneratedPatches: buildOutput.Registry,
 			}, nil
@@ -406,7 +406,7 @@ func (l *animationGenerator) EditAnimationCode(
 	callback TemplateGenerationCallback,
 ) (*models.Template, error) {
 
-	slideContent := animationSlide.GetAnimation()
+	slideContent := animationSlide.GetContent()
 	if slideContent.Plan == nil {
 		return nil, agenterrors.EditAnimationCodeFailed(
 			"failed to edit animation",
@@ -620,10 +620,10 @@ func (l *animationGenerator) uploadAndBuild(
 				MUrl: buildOutput.CodeWithAssignedIdsPath,
 				TUrl: buildOutput.TransformedCodePath,
 			},
-			VisibleDuration: int64(buildOutput.CodeDuration.SettledFrame),
-			TotalDuration:   int64(buildOutput.CodeDuration.DurationInFrames),
-			Repeatable:      false,
-			Categories:      nil,
+			VisibleDurationInFrames: buildOutput.CodeDuration.SettledFrame,
+			TotalDurationInFrames:   buildOutput.CodeDuration.DurationInFrames,
+			Repeatable:              false,
+			Categories:              nil,
 		},
 		Repeatable:       false,
 		GeneratedPatches: buildOutput.Registry,

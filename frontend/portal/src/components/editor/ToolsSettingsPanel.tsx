@@ -135,7 +135,7 @@ const ToolsSettingsPanel = ({
             canDelete={true}
             slideDurationInSecond={getSlideDurationInSeconds(selectedSlide?.slide!)}
             slideStartTime={0}
-            transitionDuration={selectedSlide?.slide.transitionDuration}
+            transitionDuration={selectedSlide?.slide.transitionDurationInFrames ? selectedSlide?.slide.transitionDurationInFrames/30 : 0}
             onPlay={onSpotlightPlay}
             isPreviewPlaying={isPreviewPlaying}
           />

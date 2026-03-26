@@ -1152,26 +1152,26 @@ func (x *ZoomEffect) GetEndTime() float32 {
 }
 
 type Slide struct {
-	state              protoimpl.MessageState `protogen:"open.v1"`
-	Id                 string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Transcript         string                 `protobuf:"bytes,3,opt,name=transcript,proto3" json:"transcript,omitempty"`
-	Transition         TransitionType         `protobuf:"varint,5,opt,name=transition,proto3,enum=coasterai.core.v1.TransitionType" json:"transition,omitempty"`
-	TransitionDuration *float32               `protobuf:"fixed32,6,opt,name=transitionDuration,proto3,oneof" json:"transitionDuration,omitempty"`
-	BackgroundStyle    *BackgroundStyle       `protobuf:"bytes,7,opt,name=background_style,json=backgroundStyle,proto3,oneof" json:"background_style,omitempty"`
-	Direction          *TransitionDirection   `protobuf:"varint,23,opt,name=direction,proto3,enum=coasterai.core.v1.TransitionDirection,oneof" json:"direction,omitempty"`
-	DurationInFrames   int32                  `protobuf:"varint,25,opt,name=durationInFrames,proto3" json:"durationInFrames,omitempty"`
-	SettledFrame       int32                  `protobuf:"varint,26,opt,name=settledFrame,proto3" json:"settledFrame,omitempty"`
-	Content            *AnimationSlideContent `protobuf:"bytes,9,opt,name=content,proto3" json:"content,omitempty"`
-	VoiceoverGenerated *bool                  `protobuf:"varint,15,opt,name=voiceoverGenerated,proto3,oneof" json:"voiceoverGenerated,omitempty"`
-	IsNested           *bool                  `protobuf:"varint,16,opt,name=isNested,proto3,oneof" json:"isNested,omitempty"`
-	Spotlights         []*SpotlightEffect     `protobuf:"bytes,18,rep,name=spotlights,proto3" json:"spotlights,omitempty"`
-	Callouts           []*CalloutEffect       `protobuf:"bytes,19,rep,name=callouts,proto3" json:"callouts,omitempty"`
-	Zooms              []*ZoomEffect          `protobuf:"bytes,20,rep,name=zooms,proto3" json:"zooms,omitempty"`
-	Plan               *structpb.Struct       `protobuf:"bytes,21,opt,name=plan,proto3" json:"plan,omitempty"`
-	SlideStatus        SlideStatus            `protobuf:"varint,22,opt,name=slideStatus,proto3,enum=coasterai.core.v1.SlideStatus" json:"slideStatus,omitempty"`
-	Index              int32                  `protobuf:"varint,24,opt,name=index,proto3" json:"index,omitempty"`
-	unknownFields      protoimpl.UnknownFields
-	sizeCache          protoimpl.SizeCache
+	state                      protoimpl.MessageState `protogen:"open.v1"`
+	Id                         string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Transcript                 string                 `protobuf:"bytes,3,opt,name=transcript,proto3" json:"transcript,omitempty"`
+	Transition                 TransitionType         `protobuf:"varint,5,opt,name=transition,proto3,enum=coasterai.core.v1.TransitionType" json:"transition,omitempty"`
+	TransitionDurationInFrames *int32                 `protobuf:"varint,6,opt,name=transitionDurationInFrames,proto3,oneof" json:"transitionDurationInFrames,omitempty"`
+	BackgroundStyle            *BackgroundStyle       `protobuf:"bytes,7,opt,name=background_style,json=backgroundStyle,proto3,oneof" json:"background_style,omitempty"`
+	Direction                  *TransitionDirection   `protobuf:"varint,23,opt,name=direction,proto3,enum=coasterai.core.v1.TransitionDirection,oneof" json:"direction,omitempty"`
+	DurationInFrames           int32                  `protobuf:"varint,25,opt,name=durationInFrames,proto3" json:"durationInFrames,omitempty"`
+	SettledFrame               int32                  `protobuf:"varint,26,opt,name=settledFrame,proto3" json:"settledFrame,omitempty"`
+	Content                    *AnimationSlideContent `protobuf:"bytes,9,opt,name=content,proto3" json:"content,omitempty"`
+	VoiceoverGenerated         *bool                  `protobuf:"varint,15,opt,name=voiceoverGenerated,proto3,oneof" json:"voiceoverGenerated,omitempty"`
+	IsNested                   *bool                  `protobuf:"varint,16,opt,name=isNested,proto3,oneof" json:"isNested,omitempty"`
+	Spotlights                 []*SpotlightEffect     `protobuf:"bytes,18,rep,name=spotlights,proto3" json:"spotlights,omitempty"`
+	Callouts                   []*CalloutEffect       `protobuf:"bytes,19,rep,name=callouts,proto3" json:"callouts,omitempty"`
+	Zooms                      []*ZoomEffect          `protobuf:"bytes,20,rep,name=zooms,proto3" json:"zooms,omitempty"`
+	Plan                       *structpb.Struct       `protobuf:"bytes,21,opt,name=plan,proto3" json:"plan,omitempty"`
+	SlideStatus                SlideStatus            `protobuf:"varint,22,opt,name=slideStatus,proto3,enum=coasterai.core.v1.SlideStatus" json:"slideStatus,omitempty"`
+	Index                      int32                  `protobuf:"varint,24,opt,name=index,proto3" json:"index,omitempty"`
+	unknownFields              protoimpl.UnknownFields
+	sizeCache                  protoimpl.SizeCache
 }
 
 func (x *Slide) Reset() {
@@ -1225,9 +1225,9 @@ func (x *Slide) GetTransition() TransitionType {
 	return TransitionType_TRANSITION_NONE
 }
 
-func (x *Slide) GetTransitionDuration() float32 {
-	if x != nil && x.TransitionDuration != nil {
-		return *x.TransitionDuration
+func (x *Slide) GetTransitionDurationInFrames() int32 {
+	if x != nil && x.TransitionDurationInFrames != nil {
+		return *x.TransitionDurationInFrames
 	}
 	return 0
 }
@@ -1794,7 +1794,7 @@ const file_coasterai_core_v1_slide_proto_rawDesc = "" +
 	"\x01y\x18\x03 \x01(\x02R\x01y\x12\x1c\n" +
 	"\tzoomLevel\x18\x04 \x01(\x02R\tzoomLevel\x12\x1c\n" +
 	"\tstartTime\x18\x05 \x01(\x02R\tstartTime\x12\x18\n" +
-	"\aendTime\x18\x06 \x01(\x02R\aendTime\"\xd2\a\n" +
+	"\aendTime\x18\x06 \x01(\x02R\aendTime\"\xea\a\n" +
 	"\x05Slide\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1e\n" +
 	"\n" +
@@ -1802,8 +1802,8 @@ const file_coasterai_core_v1_slide_proto_rawDesc = "" +
 	"transcript\x12A\n" +
 	"\n" +
 	"transition\x18\x05 \x01(\x0e2!.coasterai.core.v1.TransitionTypeR\n" +
-	"transition\x123\n" +
-	"\x12transitionDuration\x18\x06 \x01(\x02H\x00R\x12transitionDuration\x88\x01\x01\x12R\n" +
+	"transition\x12C\n" +
+	"\x1atransitionDurationInFrames\x18\x06 \x01(\x05H\x00R\x1atransitionDurationInFrames\x88\x01\x01\x12R\n" +
 	"\x10background_style\x18\a \x01(\v2\".coasterai.core.v1.BackgroundStyleH\x01R\x0fbackgroundStyle\x88\x01\x01\x12I\n" +
 	"\tdirection\x18\x17 \x01(\x0e2&.coasterai.core.v1.TransitionDirectionH\x02R\tdirection\x88\x01\x01\x12*\n" +
 	"\x10durationInFrames\x18\x19 \x01(\x05R\x10durationInFrames\x12\"\n" +
@@ -1818,8 +1818,8 @@ const file_coasterai_core_v1_slide_proto_rawDesc = "" +
 	"\x05zooms\x18\x14 \x03(\v2\x1d.coasterai.core.v1.ZoomEffectR\x05zooms\x12+\n" +
 	"\x04plan\x18\x15 \x01(\v2\x17.google.protobuf.StructR\x04plan\x12@\n" +
 	"\vslideStatus\x18\x16 \x01(\x0e2\x1e.coasterai.core.v1.SlideStatusR\vslideStatus\x12\x14\n" +
-	"\x05index\x18\x18 \x01(\x05R\x05indexB\x15\n" +
-	"\x13_transitionDurationB\x13\n" +
+	"\x05index\x18\x18 \x01(\x05R\x05indexB\x1d\n" +
+	"\x1b_transitionDurationInFramesB\x13\n" +
 	"\x11_background_styleB\f\n" +
 	"\n" +
 	"_directionB\x15\n" +

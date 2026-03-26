@@ -70,16 +70,11 @@ type Template struct {
 }
 
 type TemplateConfig struct {
-	CodeRegistry    *pbcore.CodeRegistry `json:"code_registry"`
-	VisibleDuration int64                `json:"visible_duration"`
-	TotalDuration   int64                `json:"total_duration"`
-	Repeatable      bool                 `json:"repeatable"`
-	Categories      TemplateCategories   `json:"categories"`
-}
-
-func (v *TemplateConfig) ConvertDurationToFrames(fps int64) {
-	v.TotalDuration = v.TotalDuration * fps
-	v.VisibleDuration = v.VisibleDuration * fps
+	CodeRegistry            *pbcore.CodeRegistry `json:"code_registry"`
+	VisibleDurationInFrames int32                `json:"visible_duration"`
+	TotalDurationInFrames   int32                `json:"total_duration"`
+	Repeatable              bool                 `json:"repeatable"`
+	Categories              TemplateCategories   `json:"categories"`
 }
 
 func (v *TemplateConfig) Value() (driver.Value, error) {
