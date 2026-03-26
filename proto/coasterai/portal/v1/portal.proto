@@ -171,7 +171,7 @@ message CreateVideoRequest {
   core.v1.Script script = 1;
   string prompt = 2;
   core.v1.Resolution resolution = 3;
-  float duration = 4;
+  int32 durationInSec = 4;
   optional string brand_library_id = 5;
   core.v1.VideoLanguage language = 6;
   core.v1.StyleType styleType = 7;

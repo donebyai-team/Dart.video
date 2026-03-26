@@ -24,6 +24,7 @@ import BackgroundMusicSelector from '@/components/editor/remotion/components/Bac
 import { useClientsContext } from '@coasterai/ui-core/context/ClientContext';
 import { pollVideoRender } from '@/services/utils';
 import VideoGenerationProgress from '@/components/editor/VideoGenerationProgress';
+import { convertFramesToSeconds } from '@coasterai/renderer/src/frameUtils';
 
 interface EditorPageProps {
   videoId: string
@@ -343,7 +344,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
           <div className="flex items-center gap-1 px-2 py-1 text-sm font-medium rounded-md border bg-muted text-muted-foreground">
             <Timer className='w-4 h-4' />
             {/* To fixed is used here to show only 2 decimal point to user for UX */}
-            {videoConfigFromStore?.metadata?.duration.toFixed(2)}s
+            {convertFramesToSeconds(videoConfigFromStore?.metadata?.durationInFrames!, fps()).toFixed(2)}s            
           </div>
           <ResolutionSelector />
           <BackgroundMusicSelector />
@@ -469,7 +470,6 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
               // Duration change handler — newDuration is in seconds, store as frames
               onSlideSpeedChange={(_slideId, newSpeed) => {
                 console.debug('slide speed changed: ', newSpeed)
-                updateSlide({ speed: newSpeed })
               }}
               // Duration change handler — newDuration is in seconds, store as frames
               onDurationChange={(_slideId, newDurationInSeconds) => {

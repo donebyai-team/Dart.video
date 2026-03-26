@@ -57,9 +57,8 @@ const InsertSettings = ({
   slideStartTime = 0,
   onPlay,
   isPreviewPlaying = false,
-  transitionDuration = 0,
   transitionDurationInFrames = 0,
-  fps = 30
+  fps
 }: InsertSettingsProps) => {
   const [settings, setSettings] = useState<SpotlightEffect | CalloutEffect | ZoomEffect>(currentObject);
 
@@ -83,7 +82,7 @@ const InsertSettings = ({
               onUpdate(settings);
             }}
             slideDuration={slideDurationInSecond}
-            transitionDuration={transitionDuration}
+            transitionDuration={transitionDurationInFrames}
           />
         )
       case EffectType.SPOTLIGHT:
@@ -97,7 +96,7 @@ const InsertSettings = ({
             slideStartTime={slideStartTime}
             //We need transition duration to calculate accurate start and end time of spotlight
             //so that they don't overlap with transitions
-            transitionDuration={transitionDuration}
+            transitionDuration={transitionDurationInFrames}
             onPlay={onPlay}
             isPreviewPlaying={isPreviewPlaying}
           />
@@ -106,8 +105,9 @@ const InsertSettings = ({
         return (
           <ZoomSettings
             settings={settings as ZoomEffect}
-            onChange={settings => {
-              onUpdate(settings)
+            onChange={updates => {
+              setSettings(prev => ({ ...prev, ...updates } as ZoomEffect))
+              onUpdate(updates)
             }}
             slideDurationInFrames={slideDurationInFrames}
             slideStartFrame={slideStartFrame}

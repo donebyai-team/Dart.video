@@ -71,7 +71,7 @@ func (a *agentV2) Continue(ctx context.Context, options ContinueSessionOptions) 
 	}
 
 	generatePlanRequest := types.VideoGenerationPlanRequest{
-		Duration:       int64(session.RequestV2.Duration) * a.fps,
+		Duration:       int64(session.RequestV2.DurationInSec) * a.fps,
 		Prompt:         session.RequestV2.Prompt,
 		Language:       "English",
 		Resolution:     session.RequestV2.Resolution.Id,
@@ -243,7 +243,7 @@ func (a *agentV2) Start(ctx context.Context, options StartSessionOptions) (*RunR
 	}
 
 	generatePlanRequest := types.VideoGenerationPlanRequest{
-		Duration:       int64(options.Input.Duration) * a.fps,
+		Duration:       int64(options.Input.DurationInSec) * a.fps,
 		Prompt:         options.Input.Prompt,
 		Language:       "English",
 		Resolution:     options.Input.Resolution.Id,

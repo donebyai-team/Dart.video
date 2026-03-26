@@ -17,7 +17,7 @@ import (
 )
 
 // Default transition time for all slides, same in frontend
-const transitionDuration = 0.5
+const transitionDurationInFrames int32 = 15
 
 type videoConfigGenerator struct {
 	video                 *pbcore.Video
@@ -121,21 +121,17 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 				Id:          fmt.Sprintf("slide-%d", time.Now().UnixNano()),
 				SlideStatus: pbcore.SlideStatus_SLIDE_STATUS_PENDING,
 				Index:       int32(slideIndex),
-				Speed:       1.0,
 			}
 
 			sceneMapper[slide.Id] = &pendingSlide
 			totalAnimationSlides++
-			slide.Type = pbcore.SlideType_SLIDE_TYPE_ANIMATION
 			//assignRandomTransitionAndDirection(slide)
 
-			slide.Content = &pbcore.Slide_Animation{
-				Animation: &pbcore.AnimationSlideContent{
-					Plan: &pbcore.AnimationSlidePlan{
-						Index: pendingSlide.Index,
-						//BeatDescription: pendingSlide.Brief,
-						//AnimationType:   pendingSlide.Category.BamlTypeName(),
-					},
+			slide.Content = &pbcore.AnimationSlideContent{
+				Plan: &pbcore.AnimationSlidePlan{
+					Index: pendingSlide.Index,
+					//BeatDescription: pendingSlide.Brief,
+					//AnimationType:   pendingSlide.Category.BamlTypeName(),
 				},
 			}
 
@@ -178,10 +174,10 @@ func (g *videoConfigGenerator) UpdateAnimationSlide(
 		for _, slide := range section.Slides {
 			if slide.Id == slideID {
 				// update durations, here we receive in frames, no need to convert
-				slide.DurationInFrames = float32(selectedTemplate.Config.VisibleDuration)
-				slide.SettledFrame = float32(selectedTemplate.Config.VisibleDuration)
+				slide.DurationInFrames = selectedTemplate.Config.VisibleDurationInFrames
+				slide.SettledFrame = selectedTemplate.Config.VisibleDurationInFrames
 
-				animation := slide.GetAnimation()
+				animation := slide.Content
 				slide.SlideStatus = pbcore.SlideStatus_SLIDE_STATUS_GENERATED
 				animation.CodeRegistry = selectedTemplate.Config.CodeRegistry
 				animation.Edits = toStructConfig
@@ -193,28 +189,6 @@ func (g *videoConfigGenerator) UpdateAnimationSlide(
 		}
 	}
 
-	return g.update(ctx, models.VideoStatusPROCESSING)
-}
-
-func (g *videoConfigGenerator) UpdateMediaSlide(
-	ctx context.Context,
-	slideID string,
-) error {
-	for _, section := range g.video.Config.Sections {
-		for _, slide := range section.Slides {
-			if slide.Id == slideID {
-				mediaPlan := slide.GetMedia().Plan
-				if mediaPlan.BeatDescription != "" {
-					mediaPlan.BeatDescription = "This is the media slide, user will be asked to upload their product screenshot or clip"
-				}
-
-				// update the selected template description
-				// for future slides to know what's being selected so far
-				mediaPlan.SelectedTemplateDescription = utils.Ptr(mediaPlan.BeatDescription)
-				slide.SlideStatus = pbcore.SlideStatus_SLIDE_STATUS_GENERATED
-			}
-		}
-	}
 	return g.update(ctx, models.VideoStatusPROCESSING)
 }
 
@@ -276,7 +250,7 @@ func assignRandomTransitionAndDirection(slide *pbcore.Slide) {
 	}
 
 	slide.Transition = pendingSlideTransitionOptions[rand.Intn(len(pendingSlideTransitionOptions))]
-	slide.TransitionDuration = utils.Ptr(float32(transitionDuration))
+	slide.TransitionDurationInFrames = utils.Ptr(transitionDurationInFrames)
 	slide.Direction = pendingSlideDirectionOptions[rand.Intn(len(pendingSlideDirectionOptions))].Enum()
 
 	// TODO: Generate transition and direction via LLM instead of random defaults.

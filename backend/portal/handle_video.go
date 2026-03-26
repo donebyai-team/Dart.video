@@ -44,7 +44,7 @@ func (p *Portal) CreateVideo(ctx context.Context, c *connect.Request[pbportal.Cr
 		return errorx.ToConnect(errorx.New(errorx.CodeInvalidArgument, "VIDEO_RESOLUTION_REQUIRED", "resolution is required", nil))
 	}
 
-	if c.Msg.Duration != 60 && c.Msg.Duration != 90 {
+	if c.Msg.DurationInSec != 60 && c.Msg.DurationInSec != 90 {
 		return errorx.ToConnect(errorx.New(errorx.CodeInvalidArgument, "VIDEO_INVALID_DURATION", "invalid duration specified", nil))
 	}
 

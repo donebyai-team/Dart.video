@@ -1,4 +1,4 @@
-export const TRANSITION_DURATION_SECONDS = 0.5;
+export const TRANSITION_DURATION_FRAMES = 15;
 
 export function convertFramesToSeconds(frames: number, fps: number): number {
     return frames / fps;

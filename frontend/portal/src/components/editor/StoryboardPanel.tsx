@@ -16,8 +16,7 @@ import {
 import { Plus } from "lucide-react";
 import StoryboardSection from "./StoryboardSection";
 import { useVideoStore } from "@/stores/video";
-import { Section, Slide, SlideType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
-import { ActiveToolType } from "@/types/tools";
+import { Section, Slide } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 interface StoryboardPanelProps {
     isStreamingVideo?: boolean;
@@ -52,7 +51,6 @@ const StoryboardPanel = ({
     const onCancelEditTitle = useVideoStore(s => s.setEditingSectionId);
     const onShowTransitionPicker = useVideoStore(s => s.setShowTransitionPicker);
     const onUpdateTransition = useVideoStore(s => s.updateSlideTransition);
-    const onAddSlide = useVideoStore(s => s.addSlide);
     const handleAddAnimation = useVideoStore(s => s.handleAddAnimation);
     const onAddSection = useVideoStore(s => s.addSection);
 
@@ -147,13 +145,8 @@ const StoryboardPanel = ({
                                     )
                                 }
 
-                                onAddSlide={(type, afterSlideId) => {
-                                    if (type === SlideType.ANIMATION) {
-                                       handleAddAnimation(section.id, afterSlideId)
-                                        return
-                                    }
-
-                                    onAddSlide(section.id, type, afterSlideId)
+                                onAddSlide={(afterSlideId) => {                                    
+                                    handleAddAnimation(section.id, afterSlideId)
                                 }}
 
                                 onReorderSlides={(activeId, overId) =>

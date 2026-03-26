@@ -12,12 +12,6 @@ enum SlideStatus {
   SLIDE_STATUS_PENDING = 2;
 }
 
-enum SlideType {
-  SLIDE_TYPE_UNDEFINED = 0;
-  SLIDE_TYPE_ANIMATION = 1;
-  SLIDE_TYPE_MEDIA = 5;
-}
-
 enum MediaType {
   MEDIA_TYPE_UNDEFINED = 0;
   MEDIA_TYPE_IMAGE = 1;
@@ -79,27 +73,6 @@ message AnimationSlidePlan {
   optional string voiceover = 6;
   optional string selectedTemplateDescription = 7;
   optional string thinking_summary = 8;
-}
-
-message MediaSlidePlan {
-  int64 index = 1;
-  string beatDescription = 2;
-  int64 durationInFrames = 3;
-  optional string selectedTemplateDescription = 4;
-}
-
-message MediaSlideStyle {
-  float borderRadius = 1;
-  optional string objectFit = 2;
-}
-
-message MediaSlideContent {
-  MetaData meta = 1;
-  string src = 2;
-  MediaSlideStyle style = 3;
-  MediaType mediaType = 4;
-  optional MediaAsset uploadedMedia = 5;
-  MediaSlidePlan plan = 6;
 }
 
 message MetaData {
@@ -184,30 +157,22 @@ enum EffectType {
 
 message Slide {
   string id = 1;
-  SlideType type = 2;
   string transcript = 3;
   TransitionType transition = 5;
-  optional float transitionDuration = 6;
+  optional int32 transitionDurationInFrames = 6;
   optional BackgroundStyle background_style = 7;
   optional TransitionDirection direction = 23;
-  float durationInFrames = 25;
-  float settledFrame = 26;
-
-  oneof content {
-    MediaSlideContent media = 8;
-    AnimationSlideContent animation = 9;
-  }
-
+  int32 durationInFrames = 25;
+  int32 settledFrame = 26;
+  AnimationSlideContent content = 9;
   optional bool voiceoverGenerated = 15;
   optional bool isNested = 16;
-  repeated Slide subSlides = 17;
   repeated SpotlightEffect spotlights = 18;
   repeated CalloutEffect callouts = 19;
   repeated ZoomEffect zooms = 20;
   google.protobuf.Struct plan = 21;
   SlideStatus slideStatus = 22;
   int32 index = 24;
-  float speed = 27;
 }
 
 message BackgroundStyle {

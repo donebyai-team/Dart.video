@@ -183,7 +183,7 @@ const VideoIntentComposer = () => {
         prompt,
         script,
         resolution: selectedResolution,
-        duration: Number(duration),
+        durationInSec: Number(duration),
         brandLibraryId: selectedBrandLibraryId,
         styleType: selectedStyle,
         assets: selectedAssets
@@ -404,13 +404,13 @@ const VideoIntentComposer = () => {
 
             <span className='text-border/60 mx-0.5'>·</span>
 
-            <DurationSelector
+            {/* <DurationSelector
               value={duration}
               onChange={setDuration}
               disabled={stage !== 'compose'}
             />
 
-            <span className='text-border/60 mx-0.5'>·</span>
+            <span className='text-border/60 mx-0.5'>·</span> */}
 
             <LanguageSelector
               value={language}
@@ -431,11 +431,11 @@ const VideoIntentComposer = () => {
             <span className='text-border/60 mx-0.5'>·</span>
 
            {/* Add Style */}
-            <StyleSelector
+            {/* <StyleSelector
               selectedStyle={selectedStyle}
               onOpenDialog={() => setStyleDialogOpen(true)}
               disabled={stage !== 'compose'}
-            />
+            /> */}
 
             <span className='text-border/60 mx-0.5'>·</span>
 

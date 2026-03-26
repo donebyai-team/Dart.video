@@ -9,7 +9,7 @@ import { file_google_protobuf_struct } from "@bufbuild/protobuf/wkt";
  * Describes the file coasterai/core/v1/slide.proto.
  */
 export const file_coasterai_core_v1_slide = /*@__PURE__*/
-  fileDesc("Ch1jb2FzdGVyYWkvY29yZS92MS9zbGlkZS5wcm90bxIRY29hc3RlcmFpLmNvcmUudjEirgIKEkFuaW1hdGlvblNsaWRlUGxhbhINCgVpbmRleBgBIAEoAxIXCg9iZWF0RGVzY3JpcHRpb24YAiABKAkSFQoNYW5pbWF0aW9uVHlwZRgDIAEoCRIbChNjYXRlZ29yeVNlYXJjUXF1ZXJ5GAQgASgJEhgKEGR1cmF0aW9uSW5GcmFtZXMYBSABKAMSFgoJdm9pY2VvdmVyGAYgASgJSACIAQESKAobc2VsZWN0ZWRUZW1wbGF0ZURlc2NyaXB0aW9uGAcgASgJSAGIAQESHQoQdGhpbmtpbmdfc3VtbWFyeRgIIAEoCUgCiAEBQgwKCl92b2ljZW92ZXJCHgocX3NlbGVjdGVkVGVtcGxhdGVEZXNjcmlwdGlvbkITChFfdGhpbmtpbmdfc3VtbWFyeSKcAQoOTWVkaWFTbGlkZVBsYW4SDQoFaW5kZXgYASABKAMSFwoPYmVhdERlc2NyaXB0aW9uGAIgASgJEhgKEGR1cmF0aW9uSW5GcmFtZXMYAyABKAMSKAobc2VsZWN0ZWRUZW1wbGF0ZURlc2NyaXB0aW9uGAQgASgJSACIAQFCHgocX3NlbGVjdGVkVGVtcGxhdGVEZXNjcmlwdGlvbiJNCg9NZWRpYVNsaWRlU3R5bGUSFAoMYm9yZGVyUmFkaXVzGAEgASgCEhYKCW9iamVjdEZpdBgCIAEoCUgAiAEBQgwKCl9vYmplY3RGaXQirQIKEU1lZGlhU2xpZGVDb250ZW50EikKBG1ldGEYASABKAsyGy5jb2FzdGVyYWkuY29yZS52MS5NZXRhRGF0YRILCgNzcmMYAiABKAkSMQoFc3R5bGUYAyABKAsyIi5jb2FzdGVyYWkuY29yZS52MS5NZWRpYVNsaWRlU3R5bGUSLwoJbWVkaWFUeXBlGAQgASgOMhwuY29hc3RlcmFpLmNvcmUudjEuTWVkaWFUeXBlEjkKDXVwbG9hZGVkTWVkaWEYBSABKAsyHS5jb2FzdGVyYWkuY29yZS52MS5NZWRpYUFzc2V0SACIAQESLwoEcGxhbhgGIAEoCzIhLmNvYXN0ZXJhaS5jb3JlLnYxLk1lZGlhU2xpZGVQbGFuQhAKDl91cGxvYWRlZE1lZGlhIoEBCghNZXRhRGF0YRIJCgF4GAIgASgCEgkKAXkYAyABKAISDQoFd2lkdGgYBCABKAISDgoGaGVpZ2h0GAUgASgCEhIKBXNjYWxlGAYgASgCSACIAQESFQoIcm90YXRpb24YByABKAJIAYgBAUIICgZfc2NhbGVCCwoJX3JvdGF0aW9uIqsBChVBbmltYXRpb25TbGlkZUNvbnRlbnQSNQoMY29kZVJlZ2lzdHJ5GAEgASgLMh8uY29hc3RlcmFpLmNvcmUudjEuQ29kZVJlZ2lzdHJ5EjMKBHBsYW4YAiABKAsyJS5jb2FzdGVyYWkuY29yZS52MS5BbmltYXRpb25TbGlkZVBsYW4SJgoFZWRpdHMYAyABKAsyFy5nb29nbGUucHJvdG9idWYuU3RydWN0IioKDENvZGVSZWdpc3RyeRIMCgRtVXJsGAEgASgJEgwKBHRVcmwYAiABKAki3wEKCk1lZGlhQXNzZXQSCwoDdXJsGAEgASgJEhQKDHRodW1ibmFpbFVybBgCIAEoCRINCgV3aWR0aBgDIAEoAhIOCgZoZWlnaHQYBCABKAISEAoIbWltZVR5cGUYBSABKAkSDAoEc2l6ZRgGIAEoAhIOCgZmaWxlSWQYByABKAkSEAoIZmlsZU5hbWUYCCABKAkSCgoCaWQYCSABKAkSLwoJbWVkaWFUeXBlGAogASgOMhwuY29hc3RlcmFpLmNvcmUudjEuTWVkaWFUeXBlEhAKCGR1cmF0aW9uGAsgASgCIqIBCg9TcG90bGlnaHRFZmZlY3QSCgoCaWQYASABKAkSCQoBeBgCIAEoAhIJCgF5GAMgASgCEg0KBXdpZHRoGAQgASgCEg4KBmhlaWdodBgFIAEoAhISCgpibHVyQW1vdW50GAYgASgCEhQKDGJvcmRlclJhZGl1cxgHIAEoAhISCgpzdGFydEZyYW1lGAggASgCEhAKCGVuZEZyYW1lGAkgASgCIq8BCg1DYWxsb3V0RWZmZWN0EgoKAmlkGAEgASgJEgkKAXgYAiABKAISCQoBeRgDIAEoAhINCgV3aWR0aBgEIAEoAhIOCgZoZWlnaHQYBSABKAISEgoKYmx1ckFtb3VudBgGIAEoAhIUCgxib3JkZXJSYWRpdXMYByABKAISEgoKc3RhcnRGcmFtZRgIIAEoAhIQCghlbmRGcmFtZRgJIAEoAhINCgVjb2xvchgKIAEoCSJnCgpab29tRWZmZWN0EgoKAmlkGAEgASgJEgkKAXgYAiABKAISCQoBeRgDIAEoAhIRCgl6b29tTGV2ZWwYBCABKAISEgoKc3RhcnRGcmFtZRgFIAEoAhIQCghlbmRGcmFtZRgGIAEoAiK2BwoFU2xpZGUSCgoCaWQYASABKAkSKgoEdHlwZRgCIAEoDjIcLmNvYXN0ZXJhaS5jb3JlLnYxLlNsaWRlVHlwZRISCgp0cmFuc2NyaXB0GAMgASgJEjUKCnRyYW5zaXRpb24YBSABKA4yIS5jb2FzdGVyYWkuY29yZS52MS5UcmFuc2l0aW9uVHlwZRIfChJ0cmFuc2l0aW9uRHVyYXRpb24YBiABKAJIAYgBARJBChBiYWNrZ3JvdW5kX3N0eWxlGAcgASgLMiIuY29hc3RlcmFpLmNvcmUudjEuQmFja2dyb3VuZFN0eWxlSAKIAQESPgoJZGlyZWN0aW9uGBcgASgOMiYuY29hc3RlcmFpLmNvcmUudjEuVHJhbnNpdGlvbkRpcmVjdGlvbkgDiAEBEhgKEGR1cmF0aW9uSW5GcmFtZXMYGSABKAISFAoMc2V0dGxlZEZyYW1lGBogASgCEjUKBW1lZGlhGAggASgLMiQuY29hc3RlcmFpLmNvcmUudjEuTWVkaWFTbGlkZUNvbnRlbnRIABI9CglhbmltYXRpb24YCSABKAsyKC5jb2FzdGVyYWkuY29yZS52MS5BbmltYXRpb25TbGlkZUNvbnRlbnRIABIfChJ2b2ljZW92ZXJHZW5lcmF0ZWQYDyABKAhIBIgBARIVCghpc05lc3RlZBgQIAEoCEgFiAEBEisKCXN1YlNsaWRlcxgRIAMoCzIYLmNvYXN0ZXJhaS5jb3JlLnYxLlNsaWRlEjYKCnNwb3RsaWdodHMYEiADKAsyIi5jb2FzdGVyYWkuY29yZS52MS5TcG90bGlnaHRFZmZlY3QSMgoIY2FsbG91dHMYEyADKAsyIC5jb2FzdGVyYWkuY29yZS52MS5DYWxsb3V0RWZmZWN0EiwKBXpvb21zGBQgAygLMh0uY29hc3RlcmFpLmNvcmUudjEuWm9vbUVmZmVjdBIlCgRwbGFuGBUgASgLMhcuZ29vZ2xlLnByb3RvYnVmLlN0cnVjdBIzCgtzbGlkZVN0YXR1cxgWIAEoDjIeLmNvYXN0ZXJhaS5jb3JlLnYxLlNsaWRlU3RhdHVzEg0KBWluZGV4GBggASgFEg0KBXNwZWVkGBsgASgCQgkKB2NvbnRlbnRCFQoTX3RyYW5zaXRpb25EdXJhdGlvbkITChFfYmFja2dyb3VuZF9zdHlsZUIMCgpfZGlyZWN0aW9uQhUKE192b2ljZW92ZXJHZW5lcmF0ZWRCCwoJX2lzTmVzdGVkIsMBCg9CYWNrZ3JvdW5kU3R5bGUSLgoFc29saWQYASABKAsyHS5jb2FzdGVyYWkuY29yZS52MS5Tb2xpZENvbG9ySAASLwoIZ3JhZGllbnQYAiABKAsyGy5jb2FzdGVyYWkuY29yZS52MS5HcmFkaWVudEgAEjMKBWltYWdlGAMgASgLMiIuY29hc3RlcmFpLmNvcmUudjEuQmFja2dyb3VuZEltYWdlSAASEQoJYXBwbHlfYWxsGAQgASgIQgcKBXN0eWxlIhkKClNvbGlkQ29sb3ISCwoDaGV4GAEgASgJIh4KD0JhY2tncm91bmRJbWFnZRILCgN1cmwYASABKAkieAoIR3JhZGllbnQSLQoEdHlwZRgBIAEoDjIfLmNvYXN0ZXJhaS5jb3JlLnYxLkdyYWRpZW50VHlwZRINCgVhbmdsZRgCIAEoBRIuCgVzdG9wcxgDIAMoCzIfLmNvYXN0ZXJhaS5jb3JlLnYxLkdyYWRpZW50U3RvcCIvCgxHcmFkaWVudFN0b3ASDQoFY29sb3IYASABKAkSEAoIcG9zaXRpb24YAiABKAUipAEKB1NlY3Rpb24SCgoCaWQYASABKAkSDQoFdGl0bGUYAiABKAkSDQoFY29sb3IYAyABKAkSKAoGc2xpZGVzGAQgAygLMhguY29hc3RlcmFpLmNvcmUudjEuU2xpZGUSHwoSdm9pY2VvdmVyR2VuZXJhdGVkGAUgASgISACIAQESDQoFaW5kZXgYBiABKAVCFQoTX3ZvaWNlb3ZlckdlbmVyYXRlZCpfCgtTbGlkZVN0YXR1cxIaChZTTElERV9TVEFUVVNfVU5ERUZJTkVEEAASGgoWU0xJREVfU1RBVFVTX0dFTkVSQVRFRBABEhgKFFNMSURFX1NUQVRVU19QRU5ESU5HEAIqVQoJU2xpZGVUeXBlEhgKFFNMSURFX1RZUEVfVU5ERUZJTkVEEAASGAoUU0xJREVfVFlQRV9BTklNQVRJT04QARIUChBTTElERV9UWVBFX01FRElBEAUqegoJTWVkaWFUeXBlEhgKFE1FRElBX1RZUEVfVU5ERUZJTkVEEAASFAoQTUVESUFfVFlQRV9JTUFHRRABEhQKEE1FRElBX1RZUEVfVklERU8QAhISCg5NRURJQV9UWVBFX1NWRxADEhMKD01FRElBX1RZUEVfQ09ERRAEKlUKElN0YWNrQW5pbWF0aW9uTW9kZRIeChpTVEFDS19BTklNQVRJT05fTU9ERV9TVEFDSxAAEh8KG1NUQUNLX0FOSU1BVElPTl9NT0RFX1JFVkVBTBABKuEDCg5UcmFuc2l0aW9uVHlwZRITCg9UUkFOU0lUSU9OX05PTkUQABITCg9UUkFOU0lUSU9OX0ZBREUQARIZChVUUkFOU0lUSU9OX1NMSURFX0xFRlQQAhIaChZUUkFOU0lUSU9OX1NMSURFX1JJR0hUEAMSFwoTVFJBTlNJVElPTl9TTElERV9VUBAEEhkKFVRSQU5TSVRJT05fU0xJREVfRE9XThAFEhgKFFRSQU5TSVRJT05fV0lQRV9MRUZUEAYSGQoVVFJBTlNJVElPTl9XSVBFX1JJR0hUEAcSFgoSVFJBTlNJVElPTl9XSVBFX1VQEAgSGAoUVFJBTlNJVElPTl9XSVBFX0RPV04QCRIeChpUUkFOU0lUSU9OX0ZMSVBfSE9SSVpPTlRBTBAKEhwKGFRSQU5TSVRJT05fRkxJUF9WRVJUSUNBTBALEhkKFVRSQU5TSVRJT05fQ0xPQ0tfV0lQRRAMEhgKFFRSQU5TSVRJT05fRkxJUF9MRUZUEA0SGQoVVFJBTlNJVElPTl9GTElQX1JJR0hUEA4SFgoSVFJBTlNJVElPTl9GTElQX1VQEA8SGAoUVFJBTlNJVElPTl9GTElQX0RPV04QEBITCg9UUkFOU0lUSU9OX0lSSVMQESrNAQoTVHJhbnNpdGlvbkRpcmVjdGlvbhIkCiBUUkFOU0lUSU9OX0RJUkVDVElPTl9VTlNQRUNJRklFRBAAEiIKHlRSQU5TSVRJT05fRElSRUNUSU9OX0ZST01fTEVGVBABEiMKH1RSQU5TSVRJT05fRElSRUNUSU9OX0ZST01fUklHSFQQAhIhCh1UUkFOU0lUSU9OX0RJUkVDVElPTl9GUk9NX1RPUBADEiQKIFRSQU5TSVRJT05fRElSRUNUSU9OX0ZST01fQk9UVE9NEAQqcQoKRWZmZWN0VHlwZRIZChVFRkZFQ1RfVFlQRV9VTkRFRklORUQQABIXChNFRkZFQ1RfVFlQRV9DQUxMT1VUEAESGQoVRUZGRUNUX1RZUEVfU1BPVExJR0hUEAISFAoQRUZGRUNUX1RZUEVfWk9PTRADKkIKDEdyYWRpZW50VHlwZRIYChRHUkFESUVOVF9UWVBFX0xJTkVBUhAAEhgKFEdSQURJRU5UX1RZUEVfUkFESUFMEAFCO1o5Z2l0aHViLmNvbS9zaGFuazMxOC9jb2FzdGVyYWkvcGIvY29hc3RlcmFpL2NvcmUvdjE7cGJjb3JlYgZwcm90bzM", [file_google_protobuf_struct]);
+  fileDesc("Ch1jb2FzdGVyYWkvY29yZS92MS9zbGlkZS5wcm90bxIRY29hc3RlcmFpLmNvcmUudjEirgIKEkFuaW1hdGlvblNsaWRlUGxhbhINCgVpbmRleBgBIAEoAxIXCg9iZWF0RGVzY3JpcHRpb24YAiABKAkSFQoNYW5pbWF0aW9uVHlwZRgDIAEoCRIbChNjYXRlZ29yeVNlYXJjUXF1ZXJ5GAQgASgJEhgKEGR1cmF0aW9uSW5GcmFtZXMYBSABKAMSFgoJdm9pY2VvdmVyGAYgASgJSACIAQESKAobc2VsZWN0ZWRUZW1wbGF0ZURlc2NyaXB0aW9uGAcgASgJSAGIAQESHQoQdGhpbmtpbmdfc3VtbWFyeRgIIAEoCUgCiAEBQgwKCl92b2ljZW92ZXJCHgocX3NlbGVjdGVkVGVtcGxhdGVEZXNjcmlwdGlvbkITChFfdGhpbmtpbmdfc3VtbWFyeSKBAQoITWV0YURhdGESCQoBeBgCIAEoAhIJCgF5GAMgASgCEg0KBXdpZHRoGAQgASgCEg4KBmhlaWdodBgFIAEoAhISCgVzY2FsZRgGIAEoAkgAiAEBEhUKCHJvdGF0aW9uGAcgASgCSAGIAQFCCAoGX3NjYWxlQgsKCV9yb3RhdGlvbiKrAQoVQW5pbWF0aW9uU2xpZGVDb250ZW50EjUKDGNvZGVSZWdpc3RyeRgBIAEoCzIfLmNvYXN0ZXJhaS5jb3JlLnYxLkNvZGVSZWdpc3RyeRIzCgRwbGFuGAIgASgLMiUuY29hc3RlcmFpLmNvcmUudjEuQW5pbWF0aW9uU2xpZGVQbGFuEiYKBWVkaXRzGAMgASgLMhcuZ29vZ2xlLnByb3RvYnVmLlN0cnVjdCIqCgxDb2RlUmVnaXN0cnkSDAoEbVVybBgBIAEoCRIMCgR0VXJsGAIgASgJIt8BCgpNZWRpYUFzc2V0EgsKA3VybBgBIAEoCRIUCgx0aHVtYm5haWxVcmwYAiABKAkSDQoFd2lkdGgYAyABKAISDgoGaGVpZ2h0GAQgASgCEhAKCG1pbWVUeXBlGAUgASgJEgwKBHNpemUYBiABKAISDgoGZmlsZUlkGAcgASgJEhAKCGZpbGVOYW1lGAggASgJEgoKAmlkGAkgASgJEi8KCW1lZGlhVHlwZRgKIAEoDjIcLmNvYXN0ZXJhaS5jb3JlLnYxLk1lZGlhVHlwZRIQCghkdXJhdGlvbhgLIAEoAiKiAQoPU3BvdGxpZ2h0RWZmZWN0EgoKAmlkGAEgASgJEgkKAXgYAiABKAISCQoBeRgDIAEoAhINCgV3aWR0aBgEIAEoAhIOCgZoZWlnaHQYBSABKAISEgoKYmx1ckFtb3VudBgGIAEoAhIUCgxib3JkZXJSYWRpdXMYByABKAISEgoKc3RhcnRGcmFtZRgIIAEoAhIQCghlbmRGcmFtZRgJIAEoAiKvAQoNQ2FsbG91dEVmZmVjdBIKCgJpZBgBIAEoCRIJCgF4GAIgASgCEgkKAXkYAyABKAISDQoFd2lkdGgYBCABKAISDgoGaGVpZ2h0GAUgASgCEhIKCmJsdXJBbW91bnQYBiABKAISFAoMYm9yZGVyUmFkaXVzGAcgASgCEhIKCnN0YXJ0RnJhbWUYCCABKAISEAoIZW5kRnJhbWUYCSABKAISDQoFY29sb3IYCiABKAkiZwoKWm9vbUVmZmVjdBIKCgJpZBgBIAEoCRIJCgF4GAIgASgCEgkKAXkYAyABKAISEQoJem9vbUxldmVsGAQgASgCEhIKCnN0YXJ0RnJhbWUYBSABKAISEAoIZW5kRnJhbWUYBiABKAIimAYKBVNsaWRlEgoKAmlkGAEgASgJEhIKCnRyYW5zY3JpcHQYAyABKAkSNQoKdHJhbnNpdGlvbhgFIAEoDjIhLmNvYXN0ZXJhaS5jb3JlLnYxLlRyYW5zaXRpb25UeXBlEicKGnRyYW5zaXRpb25EdXJhdGlvbkluRnJhbWVzGAYgASgFSACIAQESQQoQYmFja2dyb3VuZF9zdHlsZRgHIAEoCzIiLmNvYXN0ZXJhaS5jb3JlLnYxLkJhY2tncm91bmRTdHlsZUgBiAEBEj4KCWRpcmVjdGlvbhgXIAEoDjImLmNvYXN0ZXJhaS5jb3JlLnYxLlRyYW5zaXRpb25EaXJlY3Rpb25IAogBARIYChBkdXJhdGlvbkluRnJhbWVzGBkgASgFEhQKDHNldHRsZWRGcmFtZRgaIAEoBRI5Cgdjb250ZW50GAkgASgLMiguY29hc3RlcmFpLmNvcmUudjEuQW5pbWF0aW9uU2xpZGVDb250ZW50Eh8KEnZvaWNlb3ZlckdlbmVyYXRlZBgPIAEoCEgDiAEBEhUKCGlzTmVzdGVkGBAgASgISASIAQESNgoKc3BvdGxpZ2h0cxgSIAMoCzIiLmNvYXN0ZXJhaS5jb3JlLnYxLlNwb3RsaWdodEVmZmVjdBIyCghjYWxsb3V0cxgTIAMoCzIgLmNvYXN0ZXJhaS5jb3JlLnYxLkNhbGxvdXRFZmZlY3QSLAoFem9vbXMYFCADKAsyHS5jb2FzdGVyYWkuY29yZS52MS5ab29tRWZmZWN0EiUKBHBsYW4YFSABKAsyFy5nb29nbGUucHJvdG9idWYuU3RydWN0EjMKC3NsaWRlU3RhdHVzGBYgASgOMh4uY29hc3RlcmFpLmNvcmUudjEuU2xpZGVTdGF0dXMSDQoFaW5kZXgYGCABKAVCHQobX3RyYW5zaXRpb25EdXJhdGlvbkluRnJhbWVzQhMKEV9iYWNrZ3JvdW5kX3N0eWxlQgwKCl9kaXJlY3Rpb25CFQoTX3ZvaWNlb3ZlckdlbmVyYXRlZEILCglfaXNOZXN0ZWQiwwEKD0JhY2tncm91bmRTdHlsZRIuCgVzb2xpZBgBIAEoCzIdLmNvYXN0ZXJhaS5jb3JlLnYxLlNvbGlkQ29sb3JIABIvCghncmFkaWVudBgCIAEoCzIbLmNvYXN0ZXJhaS5jb3JlLnYxLkdyYWRpZW50SAASMwoFaW1hZ2UYAyABKAsyIi5jb2FzdGVyYWkuY29yZS52MS5CYWNrZ3JvdW5kSW1hZ2VIABIRCglhcHBseV9hbGwYBCABKAhCBwoFc3R5bGUiGQoKU29saWRDb2xvchILCgNoZXgYASABKAkiHgoPQmFja2dyb3VuZEltYWdlEgsKA3VybBgBIAEoCSJ4CghHcmFkaWVudBItCgR0eXBlGAEgASgOMh8uY29hc3RlcmFpLmNvcmUudjEuR3JhZGllbnRUeXBlEg0KBWFuZ2xlGAIgASgFEi4KBXN0b3BzGAMgAygLMh8uY29hc3RlcmFpLmNvcmUudjEuR3JhZGllbnRTdG9wIi8KDEdyYWRpZW50U3RvcBINCgVjb2xvchgBIAEoCRIQCghwb3NpdGlvbhgCIAEoBSKkAQoHU2VjdGlvbhIKCgJpZBgBIAEoCRINCgV0aXRsZRgCIAEoCRINCgVjb2xvchgDIAEoCRIoCgZzbGlkZXMYBCADKAsyGC5jb2FzdGVyYWkuY29yZS52MS5TbGlkZRIfChJ2b2ljZW92ZXJHZW5lcmF0ZWQYBSABKAhIAIgBARINCgVpbmRleBgGIAEoBUIVChNfdm9pY2VvdmVyR2VuZXJhdGVkKl8KC1NsaWRlU3RhdHVzEhoKFlNMSURFX1NUQVRVU19VTkRFRklORUQQABIaChZTTElERV9TVEFUVVNfR0VORVJBVEVEEAESGAoUU0xJREVfU1RBVFVTX1BFTkRJTkcQAip6CglNZWRpYVR5cGUSGAoUTUVESUFfVFlQRV9VTkRFRklORUQQABIUChBNRURJQV9UWVBFX0lNQUdFEAESFAoQTUVESUFfVFlQRV9WSURFTxACEhIKDk1FRElBX1RZUEVfU1ZHEAMSEwoPTUVESUFfVFlQRV9DT0RFEAQqVQoSU3RhY2tBbmltYXRpb25Nb2RlEh4KGlNUQUNLX0FOSU1BVElPTl9NT0RFX1NUQUNLEAASHwobU1RBQ0tfQU5JTUFUSU9OX01PREVfUkVWRUFMEAEq4QMKDlRyYW5zaXRpb25UeXBlEhMKD1RSQU5TSVRJT05fTk9ORRAAEhMKD1RSQU5TSVRJT05fRkFERRABEhkKFVRSQU5TSVRJT05fU0xJREVfTEVGVBACEhoKFlRSQU5TSVRJT05fU0xJREVfUklHSFQQAxIXChNUUkFOU0lUSU9OX1NMSURFX1VQEAQSGQoVVFJBTlNJVElPTl9TTElERV9ET1dOEAUSGAoUVFJBTlNJVElPTl9XSVBFX0xFRlQQBhIZChVUUkFOU0lUSU9OX1dJUEVfUklHSFQQBxIWChJUUkFOU0lUSU9OX1dJUEVfVVAQCBIYChRUUkFOU0lUSU9OX1dJUEVfRE9XThAJEh4KGlRSQU5TSVRJT05fRkxJUF9IT1JJWk9OVEFMEAoSHAoYVFJBTlNJVElPTl9GTElQX1ZFUlRJQ0FMEAsSGQoVVFJBTlNJVElPTl9DTE9DS19XSVBFEAwSGAoUVFJBTlNJVElPTl9GTElQX0xFRlQQDRIZChVUUkFOU0lUSU9OX0ZMSVBfUklHSFQQDhIWChJUUkFOU0lUSU9OX0ZMSVBfVVAQDxIYChRUUkFOU0lUSU9OX0ZMSVBfRE9XThAQEhMKD1RSQU5TSVRJT05fSVJJUxARKs0BChNUcmFuc2l0aW9uRGlyZWN0aW9uEiQKIFRSQU5TSVRJT05fRElSRUNUSU9OX1VOU1BFQ0lGSUVEEAASIgoeVFJBTlNJVElPTl9ESVJFQ1RJT05fRlJPTV9MRUZUEAESIwofVFJBTlNJVElPTl9ESVJFQ1RJT05fRlJPTV9SSUdIVBACEiEKHVRSQU5TSVRJT05fRElSRUNUSU9OX0ZST01fVE9QEAMSJAogVFJBTlNJVElPTl9ESVJFQ1RJT05fRlJPTV9CT1RUT00QBCpxCgpFZmZlY3RUeXBlEhkKFUVGRkVDVF9UWVBFX1VOREVGSU5FRBAAEhcKE0VGRkVDVF9UWVBFX0NBTExPVVQQARIZChVFRkZFQ1RfVFlQRV9TUE9UTElHSFQQAhIUChBFRkZFQ1RfVFlQRV9aT09NEAMqQgoMR3JhZGllbnRUeXBlEhgKFEdSQURJRU5UX1RZUEVfTElORUFSEAASGAoUR1JBRElFTlRfVFlQRV9SQURJQUwQAUI7WjlnaXRodWIuY29tL3NoYW5rMzE4L2NvYXN0ZXJhaS9wYi9jb2FzdGVyYWkvY29yZS92MTtwYmNvcmViBnByb3RvMw", [file_google_protobuf_struct]);
 
 /**
  * Describes the message coasterai.core.v1.AnimationSlidePlan.
@@ -19,123 +19,102 @@ export const AnimationSlidePlanSchema = /*@__PURE__*/
   messageDesc(file_coasterai_core_v1_slide, 0);
 
 /**
- * Describes the message coasterai.core.v1.MediaSlidePlan.
- * Use `create(MediaSlidePlanSchema)` to create a new message.
- */
-export const MediaSlidePlanSchema = /*@__PURE__*/
-  messageDesc(file_coasterai_core_v1_slide, 1);
-
-/**
- * Describes the message coasterai.core.v1.MediaSlideStyle.
- * Use `create(MediaSlideStyleSchema)` to create a new message.
- */
-export const MediaSlideStyleSchema = /*@__PURE__*/
-  messageDesc(file_coasterai_core_v1_slide, 2);
-
-/**
- * Describes the message coasterai.core.v1.MediaSlideContent.
- * Use `create(MediaSlideContentSchema)` to create a new message.
- */
-export const MediaSlideContentSchema = /*@__PURE__*/
-  messageDesc(file_coasterai_core_v1_slide, 3);
-
-/**
  * Describes the message coasterai.core.v1.MetaData.
  * Use `create(MetaDataSchema)` to create a new message.
  */
 export const MetaDataSchema = /*@__PURE__*/
-  messageDesc(file_coasterai_core_v1_slide, 4);
+  messageDesc(file_coasterai_core_v1_slide, 1);
 
 /**
  * Describes the message coasterai.core.v1.AnimationSlideContent.
  * Use `create(AnimationSlideContentSchema)` to create a new message.
  */
 export const AnimationSlideContentSchema = /*@__PURE__*/
-  messageDesc(file_coasterai_core_v1_slide, 5);
+  messageDesc(file_coasterai_core_v1_slide, 2);
 
 /**
  * Describes the message coasterai.core.v1.CodeRegistry.
  * Use `create(CodeRegistrySchema)` to create a new message.
  */
 export const CodeRegistrySchema = /*@__PURE__*/
-  messageDesc(file_coasterai_core_v1_slide, 6);
+  messageDesc(file_coasterai_core_v1_slide, 3);
 
 /**
  * Describes the message coasterai.core.v1.MediaAsset.
  * Use `create(MediaAssetSchema)` to create a new message.
  */
 export const MediaAssetSchema = /*@__PURE__*/
-  messageDesc(file_coasterai_core_v1_slide, 7);
+  messageDesc(file_coasterai_core_v1_slide, 4);
 
 /**
  * Describes the message coasterai.core.v1.SpotlightEffect.
  * Use `create(SpotlightEffectSchema)` to create a new message.
  */
 export const SpotlightEffectSchema = /*@__PURE__*/
-  messageDesc(file_coasterai_core_v1_slide, 8);
+  messageDesc(file_coasterai_core_v1_slide, 5);
 
 /**
  * Describes the message coasterai.core.v1.CalloutEffect.
  * Use `create(CalloutEffectSchema)` to create a new message.
  */
 export const CalloutEffectSchema = /*@__PURE__*/
-  messageDesc(file_coasterai_core_v1_slide, 9);
+  messageDesc(file_coasterai_core_v1_slide, 6);
 
 /**
  * Describes the message coasterai.core.v1.ZoomEffect.
  * Use `create(ZoomEffectSchema)` to create a new message.
  */
 export const ZoomEffectSchema = /*@__PURE__*/
-  messageDesc(file_coasterai_core_v1_slide, 10);
+  messageDesc(file_coasterai_core_v1_slide, 7);
 
 /**
  * Describes the message coasterai.core.v1.Slide.
  * Use `create(SlideSchema)` to create a new message.
  */
 export const SlideSchema = /*@__PURE__*/
-  messageDesc(file_coasterai_core_v1_slide, 11);
+  messageDesc(file_coasterai_core_v1_slide, 8);
 
 /**
  * Describes the message coasterai.core.v1.BackgroundStyle.
  * Use `create(BackgroundStyleSchema)` to create a new message.
  */
 export const BackgroundStyleSchema = /*@__PURE__*/
-  messageDesc(file_coasterai_core_v1_slide, 12);
+  messageDesc(file_coasterai_core_v1_slide, 9);
 
 /**
  * Describes the message coasterai.core.v1.SolidColor.
  * Use `create(SolidColorSchema)` to create a new message.
  */
 export const SolidColorSchema = /*@__PURE__*/
-  messageDesc(file_coasterai_core_v1_slide, 13);
+  messageDesc(file_coasterai_core_v1_slide, 10);
 
 /**
  * Describes the message coasterai.core.v1.BackgroundImage.
  * Use `create(BackgroundImageSchema)` to create a new message.
  */
 export const BackgroundImageSchema = /*@__PURE__*/
-  messageDesc(file_coasterai_core_v1_slide, 14);
+  messageDesc(file_coasterai_core_v1_slide, 11);
 
 /**
  * Describes the message coasterai.core.v1.Gradient.
  * Use `create(GradientSchema)` to create a new message.
  */
 export const GradientSchema = /*@__PURE__*/
-  messageDesc(file_coasterai_core_v1_slide, 15);
+  messageDesc(file_coasterai_core_v1_slide, 12);
 
 /**
  * Describes the message coasterai.core.v1.GradientStop.
  * Use `create(GradientStopSchema)` to create a new message.
  */
 export const GradientStopSchema = /*@__PURE__*/
-  messageDesc(file_coasterai_core_v1_slide, 16);
+  messageDesc(file_coasterai_core_v1_slide, 13);
 
 /**
  * Describes the message coasterai.core.v1.Section.
  * Use `create(SectionSchema)` to create a new message.
  */
 export const SectionSchema = /*@__PURE__*/
-  messageDesc(file_coasterai_core_v1_slide, 17);
+  messageDesc(file_coasterai_core_v1_slide, 14);
 
 /**
  * Describes the enum coasterai.core.v1.SlideStatus.
@@ -150,22 +129,10 @@ export const SlideStatus = /*@__PURE__*/
   tsEnum(SlideStatusSchema);
 
 /**
- * Describes the enum coasterai.core.v1.SlideType.
- */
-export const SlideTypeSchema = /*@__PURE__*/
-  enumDesc(file_coasterai_core_v1_slide, 1);
-
-/**
- * @generated from enum coasterai.core.v1.SlideType
- */
-export const SlideType = /*@__PURE__*/
-  tsEnum(SlideTypeSchema);
-
-/**
  * Describes the enum coasterai.core.v1.MediaType.
  */
 export const MediaTypeSchema = /*@__PURE__*/
-  enumDesc(file_coasterai_core_v1_slide, 2);
+  enumDesc(file_coasterai_core_v1_slide, 1);
 
 /**
  * @generated from enum coasterai.core.v1.MediaType
@@ -177,7 +144,7 @@ export const MediaType = /*@__PURE__*/
  * Describes the enum coasterai.core.v1.StackAnimationMode.
  */
 export const StackAnimationModeSchema = /*@__PURE__*/
-  enumDesc(file_coasterai_core_v1_slide, 3);
+  enumDesc(file_coasterai_core_v1_slide, 2);
 
 /**
  * @generated from enum coasterai.core.v1.StackAnimationMode
@@ -189,7 +156,7 @@ export const StackAnimationMode = /*@__PURE__*/
  * Describes the enum coasterai.core.v1.TransitionType.
  */
 export const TransitionTypeSchema = /*@__PURE__*/
-  enumDesc(file_coasterai_core_v1_slide, 4);
+  enumDesc(file_coasterai_core_v1_slide, 3);
 
 /**
  * @generated from enum coasterai.core.v1.TransitionType
@@ -201,7 +168,7 @@ export const TransitionType = /*@__PURE__*/
  * Describes the enum coasterai.core.v1.TransitionDirection.
  */
 export const TransitionDirectionSchema = /*@__PURE__*/
-  enumDesc(file_coasterai_core_v1_slide, 5);
+  enumDesc(file_coasterai_core_v1_slide, 4);
 
 /**
  * @generated from enum coasterai.core.v1.TransitionDirection
@@ -213,7 +180,7 @@ export const TransitionDirection = /*@__PURE__*/
  * Describes the enum coasterai.core.v1.EffectType.
  */
 export const EffectTypeSchema = /*@__PURE__*/
-  enumDesc(file_coasterai_core_v1_slide, 6);
+  enumDesc(file_coasterai_core_v1_slide, 5);
 
 /**
  * @generated from enum coasterai.core.v1.EffectType
@@ -225,7 +192,7 @@ export const EffectType = /*@__PURE__*/
  * Describes the enum coasterai.core.v1.GradientType.
  */
 export const GradientTypeSchema = /*@__PURE__*/
-  enumDesc(file_coasterai_core_v1_slide, 7);
+  enumDesc(file_coasterai_core_v1_slide, 6);
 
 /**
  * @generated from enum coasterai.core.v1.GradientType

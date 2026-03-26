@@ -62,9 +62,12 @@ export const updateTotalDuration = (videoConfig: Video): Video => {
 
   const totalDuration = allSlides.reduce((sum, slide, index) => {
     const slideDuration = slide.durationInFrames / (videoConfig.metadata?.fps!)
+    const transitionDuration = slide.transitionDurationInFrames 
+      ? slide.transitionDurationInFrames / (videoConfig.metadata?.fps! || 1)
+      : 0
     // Last slide never transitions out, so don't subtract its transitionDuration
-    const transitionDuration = index < allSlides.length - 1 ? (slide.transitionDuration || 0) : 0
-    return sum + slideDuration - transitionDuration
+    const transitionDurationFromNext = index < allSlides.length - 1 ? (transitionDuration || 0) : 0
+    return sum + slideDuration - transitionDurationFromNext
   }, 0)
 
   return {

@@ -18,6 +18,7 @@ import {
     ChevronDown,
     GripVertical,
     Pencil,
+    Plus,
     Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,14 +28,11 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import AddSlideButton from "./AddSlideButton";
 import SortableSlideCard from "./SortableSlideCard";
 import TransitionPicker from "./TransitionPicker";
-import { ImageIcon, Type, BarChart3, Sparkles, Film, Layers } from "lucide-react";
 import {
     Section,
     Slide,
-    SlideType,
     TransitionDirection,
     TransitionType
 } from "@coasterai/pb/coasterai/core/v1/slide_pb";
@@ -60,7 +58,7 @@ interface StoryboardSectionProps {
     onCancelEditTitle: () => void;
     onShowTransitionPicker: (slideId: string | null) => void;
     onUpdateTransition: (slideId: string, transitionId: TransitionType, direction?: TransitionDirection) => void;
-    onAddSlide: (type: SlideType, afterSlideId?: string) => void;
+    onAddSlide: (afterSlideId?: string) => void;
     onReorderSlides: (activeId: string, overId: string) => void;
 }
 
@@ -91,11 +89,6 @@ const StoryboardSection = ({
         transition,
         isDragging,
     } = useSortable({ id: section.id });
-
-    const allSlideTypes = [
-        { id: SlideType.MEDIA, name: "Image/Video", description: "Add product screen or clip", icon: ImageIcon },
-        { id: SlideType.ANIMATION, name: "Animation", description: "Animated scene", icon: Sparkles },
-    ];
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -283,11 +276,13 @@ const StoryboardSection = ({
                                                     {/* <div className="absolute left-1/2 right-1/2 top-0 bottom-0 w-px bg-border" /> */}
 
                                                     {/* Add slide button (left of center) */}
-                                                    <AddSlideButton
-                                                        slideTypes={allSlideTypes}
-                                                        onAddSlide={(type) => onAddSlide(type, slide.id)}
-                                                        variant="between"
-                                                    />
+                                                    <button
+                                                        onClick={() => onAddSlide()}
+                                                        className="relative z-10 flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-medium transition-colors bg-muted hover:bg-muted/80 text-muted-foreground mr-1"
+                                                    >
+                                                        <Plus className="w-3 h-3" />
+                                                        Add scene
+                                                    </button>
 
                                                     {/* Transition picker (right of center) */}
                                                     <TransitionPicker
@@ -319,13 +314,6 @@ const StoryboardSection = ({
                                 })}
                             </SortableContext>
                         </DndContext>
-
-                        {/* Add slide button */}
-                        {/* <AddSlideButton
-                            slideTypes={allSlideTypes}
-                            onAddSlide={onAddSlide}
-                            variant="inline"
-                        /> */}
                     </div>
                 </CollapsibleContent>
             </Collapsible>

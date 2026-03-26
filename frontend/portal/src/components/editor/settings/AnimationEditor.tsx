@@ -8,7 +8,7 @@ import { useVideoStore } from '@/stores/video'
 import { AddOrEditAnimationSettings } from '@/types/tools'
 import type { AskUserQuestion, GenerateOrEditAnimationResponse } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
 import type { AnimationTemplate } from '@coasterai/pb/coasterai/core/v1/template_pb'
-import { SlideType, type AnimationSlideContent, type Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { type AnimationSlideContent, type Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { getConnectError } from '@/utils/error'
 import toast from 'react-hot-toast'
 import { reconcileEdits } from '../animation/reconcileEdits'
@@ -40,8 +40,6 @@ export default function AnimationEditor({ settings, onClose }: AnimationEditorPr
     const [pendingQuestion, setPendingQuestion] = useState<AskUserQuestion | undefined>()
     const [selectedAnswer, setSelectedAnswer] = useState('')
     const [customAnswer, setCustomAnswer] = useState('')
-    const [suggestions, setSuggestions] = useState<AnimationTemplate[]>([])
-    const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(0)
     const [isThinkingBusy, setIsThinkingBusy] = useState(false)
 
     const abortControllerRef = useRef<AbortController | null>(null)
@@ -56,11 +54,9 @@ export default function AnimationEditor({ settings, onClose }: AnimationEditorPr
     const canSubmit = prompt.trim().length > 0
 
     useEffect(() => {
-        if (selectedSlide
-            && selectedSlide.slide.content.case == "animation") {
+        if (selectedSlide) {
             setPrompt(
-                (selectedSlide.slide.content.value as AnimationSlideContent)
-                    .plan?.selectedTemplateDescription || ''
+                (selectedSlide.slide?.content?.plan?.selectedTemplateDescription) || ''
             );
         }
     }, [selectedSlide]);
@@ -88,11 +84,11 @@ export default function AnimationEditor({ settings, onClose }: AnimationEditorPr
     const applySlideToStore = (slide: Slide) => {
         // Editing: update codeRegistry + reconcile edits (overlay) on the current selected slide.
         // edits IS the PatchOverlay — contains both initial LLM values and user overrides.
-        const updatedContent = slide.content?.case === 'animation' ? slide.content.value : undefined
+        const updatedContent = slide.content;
         if (!updatedContent) return
 
-        const existingContent = selectedSlide?.slide.content?.case === 'animation'
-            ? selectedSlide.slide.content.value
+        const existingContent = selectedSlide?.slide.content
+            ? selectedSlide.slide.content
             : undefined
 
         // Reconcile: merge user's existing edits with the new code's initial overlay.
@@ -110,39 +106,11 @@ export default function AnimationEditor({ settings, onClose }: AnimationEditorPr
             durationInFrames: slide.durationInFrames,
             settledFrame: slide.settledFrame,
             content: {
-                case: 'animation' as const,
-                value: {
-                    ...(existingContent ?? {}),
-                    codeRegistry: updatedContent.codeRegistry,
-                    edits: reconciledOverlay as unknown as AnimationSlideContent['edits'],
-                } as AnimationSlideContent
+                ...(existingContent ?? {}),
+                codeRegistry: updatedContent.codeRegistry,
+                edits: reconciledOverlay as unknown as AnimationSlideContent['edits'],
             }
-        })
-    }
-
-    const randomSlideId = () => {
-        return `slide-${Date.now()}`
-    }
-
-    const buildSlideWithTemplate = (baseSlide: Slide, template: AnimationTemplate): Slide => {
-        const baseAnimation = baseSlide.content?.case === 'animation'
-            ? baseSlide.content.value
-            : undefined
-
-        return {
-            ...baseSlide,
-            id: baseSlide.id,
-            type: SlideType.ANIMATION,
-            content: {
-                case: 'animation',
-                value: {
-                    ...(baseAnimation ?? {}),
-                    codeRegistry: template.codeRegistry,
-                    edits: template.edits,
-                    plan: template.plan,
-                } as AnimationSlideContent
-            },
-        }
+        } as Slide)
     }
 
     const createOrUpdateAddedSlide = (slide: Slide) => {
@@ -187,22 +155,12 @@ export default function AnimationEditor({ settings, onClose }: AnimationEditorPr
 
                 if (event.slide) {
                     pendingGeneratedSlideRef.current = event.slide
-                }
-
-                if (event.suggestions.length > 0) {
-                    // Show the suggestion grid and apply the first option automatically
-                    setSuggestions(event.suggestions)
-                    setSelectedSuggestionIndex(0)
-                    handleSelectSuggestion(0, event.suggestions)
-                } else if (event.slide) {
-                    // No suggestions — commit the slide directly
-                    if (isAdding) {
+                     if (isAdding) {
                         createOrUpdateAddedSlide(event.slide)
                     } else {
                         applySlideToStore(event.slide)
                     }
-                }
-
+                }               
                 setPrompt('')
                 setStage('compose')
                 setIsSubmitting(false)
@@ -365,52 +323,8 @@ export default function AnimationEditor({ settings, onClose }: AnimationEditorPr
         }
     }
 
-    const handleSelectSuggestion = (index: number, sourceSuggestions?: AnimationTemplate[]) => {
-        setSelectedSuggestionIndex(index)
-        const template = (sourceSuggestions ?? suggestions)[index]
-        if (!template) return
-
-        if (isAdding && settings.previousSlide) {
-            if (!slideInStoreRef.current) {
-                const baseSlide = pendingGeneratedSlideRef.current ?? {
-                    ...settings.previousSlide.slide,
-                    id: randomSlideId(),
-                    type: SlideType.ANIMATION,
-                    content: {
-                        case: 'animation',
-                        value: {
-                            plan: template.plan,
-                        } as AnimationSlideContent,
-                    },
-                }
-                createOrUpdateAddedSlide(buildSlideWithTemplate(baseSlide, template))
-                return
-            }
-        }
-
-        const existingContent = selectedSlide?.slide.content?.case === 'animation'
-            ? selectedSlide.slide.content.value
-            : undefined
-        updateSlide({
-            content: {
-                case: 'animation' as const,
-                value: {
-                    ...(existingContent ?? {}),
-                    codeRegistry: template.codeRegistry,
-                    edits: template.edits ?? existingContent?.edits,
-                } as AnimationSlideContent
-            }
-        })
-    }
-
-    const handleDislikeSuggestions = () => {
-        setSuggestions([])
-        startStream(undefined, false)
-    }
-
     const showThinking = !!thinkingChunk
-    const showSuggestions = suggestions.length > 0
-    const showEmptyState = !showSuggestions
+    const showEmptyState = true
 
     return (
         <div className='flex flex-col h-full p-4 gap-3'>
@@ -438,47 +352,6 @@ export default function AnimationEditor({ settings, onClose }: AnimationEditorPr
                             onCustomAnswerChange={setCustomAnswer}
                             onContinue={() => void handleContinuePlanning()}
                         />
-                    )}
-
-                    {showSuggestions && (
-                        <div className='flex flex-col gap-2'>
-                            <p className='text-xs text-muted-foreground font-medium'>Choose a style</p>
-                            <div className='grid grid-cols-2 gap-2'>
-                                {suggestions.map((template, index) => (
-                                    <button
-                                        key={template.id}
-                                        onClick={() => handleSelectSuggestion(index)}
-                                        className={`relative rounded-lg overflow-hidden border-2 transition-colors aspect-video bg-muted ${selectedSuggestionIndex === index
-                                            ? 'border-primary'
-                                            : 'border-transparent hover:border-border'
-                                            }`}
-                                    >
-                                        {template.previewUrl ? (
-                                            <img
-                                                src={template.previewUrl}
-                                                alt={template.name}
-                                                className='w-full h-full object-cover'
-                                            />
-                                        ) : (
-                                            <div className='w-full h-full flex items-center justify-center text-xs text-muted-foreground'>
-                                                {template.name}
-                                            </div>
-                                        )}
-                                        {selectedSuggestionIndex === index && (
-                                            <div className='absolute inset-0 bg-primary/10' />
-                                        )}
-                                    </button>
-                                ))}
-                            </div>
-                            <button
-                                onClick={handleDislikeSuggestions}
-                                disabled={isSubmitting}
-                                className='flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 self-start'
-                            >
-                                <X className='w-3 h-3' />
-                                I don't like any of these
-                            </button>
-                        </div>
                     )}
 
                     {showEmptyState && (

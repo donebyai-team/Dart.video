@@ -45,7 +45,6 @@ const PlayerCanvas = ({
   const getTimelineSlides = useVideoStore(s => s.getTimelineSlides)
 
   const {
-    isAnimationSlide,
     overlay,
     selectedEid,
     setSelectedEid,
@@ -90,15 +89,6 @@ const PlayerCanvas = ({
   
   // Calculate slide start frame for overlay visibility check
   const slideStartFrame = getRealSlideStartFrame(getTimelineSlides(), selectedSlide.slide.id, fps)
-  const slideRelativeFrame = currentFrame - slideStartFrame
-  
-  // Debug: log frame values
-  console.debug('PlayerCanvas frame debug:', {
-    currentFrame,
-    slideStartFrame,
-    slideRelativeFrame,
-    zooms: zooms.map(z => ({ startFrame: z.startFrame, endFrame: z.endFrame }))
-  })
 
   return (
     <div
@@ -151,7 +141,7 @@ const PlayerCanvas = ({
       </motion.div>
 
       {/* Animation edit layer - disabled when an effect (zoom/spotlight/callout) is selected */}
-      {isEditing && !isPlaying && isAnimationSlide && !selectedEffectId && (
+      {isEditing && !isPlaying && !selectedEffectId && (
         <AnimationEditLayer
           playerRef={canvasRef}
           selectedEid={selectedEid}

@@ -1,12 +1,11 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import type { PatchOverlay } from '@coasterai/renderer'
-import { AnimationSlideContent } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { AnimationSlideContent, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { JsonObject } from '@bufbuild/protobuf'
 import { useVideoStore } from '@/stores/video'
 import { debounce } from '@/stores/video/sync'
 
 interface UseAnimationEditReturn {
-  isAnimationSlide: boolean
   /** The current overlay: initial LLM values + user edits merged. */
   overlay: PatchOverlay
   selectedEid: string | null
@@ -26,7 +25,6 @@ export function useAnimationEdit(): UseAnimationEditReturn {
   const updateSlide = useVideoStore(s => s.updateSlide)
 
   const content = selectedSlide?.slide?.content
-  const isAnimationSlide = content?.case === 'animation'
   const slideId = selectedSlide?.slide?.id
 
   const selectedSlideRef = useRef(selectedSlide)
@@ -41,7 +39,7 @@ export function useAnimationEdit(): UseAnimationEditReturn {
 
   // ── Keep window.__PATCH_OVERLAY__ in sync ──────────────────────────────────
   useEffect(() => {
-    ;(window as any).__PATCH_OVERLAY__ = overlay
+    ; (window as any).__PATCH_OVERLAY__ = overlay
   }, [overlay])
 
   // ── Load saved overlay when slide changes and set initial overlay─────────────────────────────────
@@ -50,12 +48,8 @@ export function useAnimationEdit(): UseAnimationEditReturn {
     setSelectedEid(null)
     setAnimEditVersion(0)
 
-    const saved = isAnimationSlide
-      ? ((content?.value as AnimationSlideContent)?.edits ?? {}) as PatchOverlay
-      : {}
-
-    overlayRef.current = saved
-    setOverlay(saved)
+    overlayRef.current = (content?.edits as PatchOverlay) ?? {}
+    setOverlay(overlayRef.current)
   }, [slideId])
 
   // ── Apply a single value patch ────────────────────────────────────────────
@@ -104,16 +98,12 @@ export function useAnimationEdit(): UseAnimationEditReturn {
     () =>
       debounce((ov: PatchOverlay) => {
         const slideContent = selectedSlideRef.current?.slide?.content
-        if (slideContent?.case !== 'animation') return
         updateSlide({
           content: {
-            case: 'animation',
-            value: {
-              ...slideContent.value,
-              edits: ov as unknown as JsonObject,
-            },
+            ...slideContent,
+            edits: ov as unknown as JsonObject,
           },
-        })
+        } as Slide)
       }, 600),
     [updateSlide]
   )
@@ -121,28 +111,25 @@ export function useAnimationEdit(): UseAnimationEditReturn {
   useEffect(() => () => debouncedPersist?.cancel?.(), [debouncedPersist])
 
   useEffect(() => {
-    if (!isAnimationSlide) return
     if (isLoadingRef.current) {
       isLoadingRef.current = false
       return
     }
     debouncedPersist(overlay)
-  }, [overlay, isAnimationSlide, debouncedPersist])
+  }, [overlay, debouncedPersist])
 
   const flushPersist = useCallback(() => {
     debouncedPersist.cancel?.()
     const slideContent = selectedSlideRef.current?.slide?.content
-    if (slideContent?.case !== 'animation') return
     updateSlide({
       content: {
-        case: 'animation',
-        value: { ...slideContent.value, edits: overlayRef.current as unknown as JsonObject },
+        ...slideContent,
+        edits: overlayRef.current as unknown as JsonObject,
       },
-    })
+    } as Slide)
   }, [debouncedPersist, updateSlide])
 
   return {
-    isAnimationSlide,
     overlay,
     selectedEid,
     setSelectedEid,

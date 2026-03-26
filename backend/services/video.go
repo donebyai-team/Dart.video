@@ -100,20 +100,20 @@ func (v videoGeneration) UpdateVideoConfig(ctx context.Context, video *models.Vi
 		allSlides = append(allSlides, section.Slides...)
 	}
 
-	totalDuration := float32(0.0)
+	totalDuration := int32(0)
 	for i, slide := range allSlides {
-		totalDuration += slide.DurationInFrames / float32(video.Metadata.Fps)
+		totalDuration += slide.DurationInFrames
 
 		// subtract transition for every slide except the last one globally
 		if i < len(allSlides)-1 &&
-			slide.TransitionDuration != nil &&
+			slide.TransitionDurationInFrames != nil &&
 			slide.Transition != pbcore.TransitionType_TRANSITION_NONE {
 
-			totalDuration -= *slide.TransitionDuration
+			totalDuration -= *slide.TransitionDurationInFrames * video.Metadata.Fps
 		}
 	}
 
-	existingVideo.Metadata.Duration = totalDuration
+	existingVideo.Metadata.DurationInFrames = totalDuration
 
 	if video.Status != "" {
 		existingVideo.Status = video.Status
@@ -149,11 +149,11 @@ func (v videoGeneration) CreateVideo(ctx context.Context, organizationID string,
 		OrganizationID: organizationID,
 		Status:         models.VideoStatusPLANNING,
 		Metadata: &pbcore.VideoMetadata{
-			Fps:        defaultVideoFPS,
-			Prompt:     params.Prompt,
-			Duration:   params.Duration,
-			Language:   params.Language,
-			Resolution: params.Resolution,
+			Fps:              defaultVideoFPS,
+			Prompt:           params.Prompt,
+			DurationInFrames: params.DurationInSec * defaultVideoFPS,
+			Language:         params.Language,
+			Resolution:       params.Resolution,
 		},
 	})
 
@@ -206,7 +206,7 @@ func filterGeneratedSections(video *models.Video, options VideoOptions) int {
 
 	if lastSlide != nil {
 		lastSlide.Transition = pbcore.TransitionType_TRANSITION_NONE
-		lastSlide.TransitionDuration = nil
+		lastSlide.TransitionDurationInFrames = nil
 		lastSlide.Direction = nil
 	}
 
@@ -221,13 +221,9 @@ func stripSlideForRender(slide *pbcore.Slide) {
 
 	// remove fields not needed for rendering
 	slide.Plan = nil
-	if slide.GetAnimation() != nil {
-		slide.GetAnimation().Plan = nil
-		slide.GetAnimation().CodeRegistry.MUrl = ""
-	}
-
-	if slide.GetMedia() != nil {
-		slide.GetMedia().Plan = nil
+	if slide.GetContent() != nil {
+		slide.GetContent().Plan = nil
+		slide.GetContent().CodeRegistry.MUrl = ""
 	}
 }
 

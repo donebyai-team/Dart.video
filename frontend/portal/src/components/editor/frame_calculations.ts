@@ -1,7 +1,7 @@
 // Calculate total duration in frames for Remotion rendering
 import { TransitionType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { TimelineSlide } from "./timeline/types";
-import { TRANSITION_DURATION_SECONDS } from "@coasterai/renderer/src/frameUtils";
+import { TRANSITION_DURATION_FRAMES } from "@coasterai/renderer/src/frameUtils";
 
 // Total frames accounting for transition overlaps (source of truth for Remotion player)
 export const calculateRealTotalFrames = (allSlides: TimelineSlide[], fps: number): number => {
@@ -17,7 +17,7 @@ export const calculateRealTotalFrames = (allSlides: TimelineSlide[], fps: number
     totalFrames += slide.slide.durationInFrames;
 
     if (hasTransition) {
-      totalFrames -= Math.round(TRANSITION_DURATION_SECONDS * fps);
+      totalFrames -= TRANSITION_DURATION_FRAMES;
     }
   })
 
@@ -38,7 +38,7 @@ export const getRealSlideStartFrame = (allSlides: TimelineSlide[], slideId: stri
     frame += slide.slide.durationInFrames;
 
     if (hasTransition) {
-      frame -= Math.round(TRANSITION_DURATION_SECONDS * fps);
+      frame -= TRANSITION_DURATION_FRAMES;
     }
   }
 
@@ -59,7 +59,7 @@ export const getSlideVisualEndFrame = (allSlides: TimelineSlide[], slideId: stri
     slide.transition !== TransitionType.TRANSITION_NONE
 
   if (hasTransition) {
-    return startFrame + slideDurationFrames - Math.round(TRANSITION_DURATION_SECONDS * fps) - 1;
+    return startFrame + slideDurationFrames - TRANSITION_DURATION_FRAMES - 1;
   }
 
   return startFrame + slideDurationFrames - 1;
@@ -69,7 +69,7 @@ export const getSlideVisualEndFrame = (allSlides: TimelineSlide[], slideId: stri
 // are replaced by non-overlapping spacer frames to keep total duration aligned.
 export const getSlideEditPreviewFrame = (allSlides: TimelineSlide[], slideId: string, fps: number): number => {
   let frame = 0;
-  const transitionFrames = Math.round(TRANSITION_DURATION_SECONDS * fps);
+  const transitionFrames = TRANSITION_DURATION_FRAMES;
 
   for (let index = 0; index < allSlides.length; index++) {
     const slide = allSlides[index]

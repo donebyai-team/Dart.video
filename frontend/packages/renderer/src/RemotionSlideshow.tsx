@@ -1,5 +1,5 @@
 import { fromJson, JsonObject } from '@bufbuild/protobuf'
-import { Slide, SlideType, TransitionType, MediaAsset } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { Slide, TransitionType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Video, VideoSchema } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import { linearTiming, TransitionSeries } from '@remotion/transitions'
 import React, { useMemo } from 'react'
@@ -13,11 +13,11 @@ import {
   ASPECT_PRESETS,
   defaultTheme,
 } from '@coasterai/animation'
-import { AnimationSlide, MediaSlide } from './slides'
+import { AnimationSlide } from './slides'
 import { backgroundStyleToCSS } from './backgroundUtils'
 import { getTransitionPresentation } from './transitions/presentation'
 import { getSlideTransitionDirectionValue } from './transitions/config'
-import { TRANSITION_DURATION_SECONDS } from './frameUtils'
+import { TRANSITION_DURATION_FRAMES } from './frameUtils'
 import { brandingToTheme } from './utils'
 
 
@@ -30,84 +30,7 @@ interface SlideshowProps {
   videoConfig?: Video
   isPlaying?: boolean
   onUpdate?: (updates: Partial<Slide>) => void
-  uploadMedia?: (file: File) => Promise<MediaAsset>
 }
-
-type SlideComponentConfig = {
-  component: React.ComponentType<any>
-  contentCase: string
-}
-
-const componentMap: Partial<Record<SlideType, SlideComponentConfig>> = {
-  [SlideType.ANIMATION]: {
-    component: AnimationSlide,
-    contentCase: "animation"
-  },
-  [SlideType.MEDIA]: {
-    component: MediaSlide,
-    contentCase: "media"
-  }
-}
-// Main slide component router
-export const SlideComponent: React.FC<{
-  slide: Slide
-  width: number
-  height: number
-  isEditing?: boolean
-  isSelected?: boolean
-  isPlaying?: boolean
-  onSelect?: () => void
-  onUpdate?: (updates: Partial<Slide>) => void
-  uploadMedia?: (file: File) => Promise<MediaAsset>
-}> = ({
-  slide,
-  width,
-  height,
-  isEditing,
-  isSelected = false,
-  isPlaying = true,
-  onSelect,
-  onUpdate = () => { },
-  uploadMedia
-}) => {
-    const slideBackground = backgroundStyleToCSS(slide.backgroundStyle)
-    const config = componentMap[slide.type]
-
-    if (config && (!slide.content?.case || slide.content.case === config.contentCase)) {
-      const Component = config.component
-
-      return (
-        <Component
-          slide={slide}
-          width={width}
-          height={height}
-          isEditing={isEditing}
-          isSelected={isSelected}
-          isPlaying={isPlaying}
-          onSelect={onSelect}
-          onUpdate={onUpdate}
-          uploadMedia={uploadMedia}
-        />
-      )
-    }
-
-    // fallback
-    return (
-      <AbsoluteFill
-        style={{
-          backgroundColor: slideBackground,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "white",
-          fontSize: 18,
-          opacity: 0.7
-        }}
-      >
-        Content type mismatch: {slide.type} slide with {slide.content?.case || "undefined"} content
-      </AbsoluteFill>
-    )
-  }
 
 export const SingleSlidePreview: React.FC<{
   slide: Slide
@@ -117,7 +40,7 @@ export const SingleSlidePreview: React.FC<{
 
   return (
     <AbsoluteFill style={{ background: backgroundStyleToCSS(slide.backgroundStyle) }}>
-      <SlideComponent
+      <AnimationSlide
         slide={slide}
         width={width}
         height={height}
@@ -146,7 +69,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({
   videoConfig: videoConfigProp,
   isPlaying = true,
   onUpdate = () => { },
-  uploadMedia }) => {
+}) => {
   const selectedTemplateId = null
 
   const { width, height } = useVideoConfig()
@@ -159,12 +82,12 @@ export const Slideshow: React.FC<SlideshowProps> = ({
 
   // Use the one that is generated from backend or default
   const brandTheme = useMemo(
-  () =>
-    videoConfig?.metadata?.generatedBranding
-      ? brandingToTheme(videoConfig.metadata.generatedBranding)
-      : defaultTheme,
-  [videoConfig?.metadata?.generatedBranding]
-);
+    () =>
+      videoConfig?.metadata?.generatedBranding
+        ? brandingToTheme(videoConfig.metadata.generatedBranding)
+        : defaultTheme,
+    [videoConfig?.metadata?.generatedBranding]
+  );
 
   /* ================= GATE ================= */
 
@@ -179,7 +102,6 @@ export const Slideshow: React.FC<SlideshowProps> = ({
   // if external video object exist use it or assign zustand video object
   const allSlides = sections.flatMap(section => section.slides)
 
-  const transitionDurationFrames = Math.round(fps * TRANSITION_DURATION_SECONDS)
 
   /* ================= EMPTY ================= */
 
@@ -209,7 +131,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({
       globalBackground != 'transparent' ? { ...slide, backgroundColor: 'transparent' } : slide
 
     return (
-      <SlideComponent
+      <AnimationSlide
         slide={slideWithBackground}
         width={width}
         height={height}
@@ -217,7 +139,6 @@ export const Slideshow: React.FC<SlideshowProps> = ({
         isSelected={isSelected}
         isPlaying={isPlaying}
         onUpdate={onUpdate}
-        uploadMedia={uploadMedia}
         onSelect={() => {
           onSelectTemplate?.(slide.id);
         }}
@@ -254,7 +175,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({
                     index < allSlides.length - 1 &&
                     slide.transition !== TransitionType.TRANSITION_NONE
                   const visibleDuration = hasTransition
-                    ? Math.max(1, slide.durationInFrames - transitionDurationFrames)
+                    ? Math.max(1, slide.durationInFrames - TRANSITION_DURATION_FRAMES)
                     : slide.durationInFrames
 
                   return (
@@ -290,7 +211,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({
                             height
                           ) as any}
                           timing={linearTiming({
-                            durationInFrames: Math.round(transitionDurationFrames)
+                            durationInFrames: Math.round(TRANSITION_DURATION_FRAMES)
                           })}
                         />
                       )}

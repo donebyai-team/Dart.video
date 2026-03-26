@@ -36,6 +36,15 @@ const ZoomSettings = ({
   const zoomEndSec = slideStartSec + (settings.endFrame ?? slideDurationInFrames) / fps
   const zoomLevel = settings.zoomLevel ?? 2
 
+  // Debug: log values to check for NaN
+  console.log('ZoomSettings values:', {
+    slideStartFrame, slideDurationInFrames, fps, transitionDurationInFrames,
+    slideStartSec, slideEndSec, transitionDurationSec,
+    zoomStartSec, zoomEndSec, zoomLevel,
+    settingsStartFrame: settings.startFrame,
+    settingsEndFrame: settings.endFrame,
+  })
+
   return (
     <div className='space-y-4'>
       {/* Zoom Level */}
@@ -46,8 +55,8 @@ const ZoomSettings = ({
           <Slider
             value={[zoomLevel]}
             onValueChange={values => {
-              settings.zoomLevel = values[0]
-              onChange(settings)
+              console.log('ZoomSettings: changing zoomLevel to', values[0])
+              onChange({ zoomLevel: values[0] })
             }}
             min={1.2}
             max={5}
@@ -70,8 +79,7 @@ const ZoomSettings = ({
             onValueChange={val => {
               // Convert global seconds back to slide-relative frames
               const slideRelativeSec = val - slideStartSec
-              settings.startFrame = Math.round(slideRelativeSec * fps)
-              onChange(settings)
+              onChange({ startFrame: Math.round(slideRelativeSec * fps) })
             }}
             max={zoomEndSec - 0.1}
             min={slideStartSec + transitionDurationSec}
@@ -85,8 +93,7 @@ const ZoomSettings = ({
             onValueChange={val => {
               // Convert global seconds back to slide-relative frames
               const slideRelativeSec = val - slideStartSec
-              settings.endFrame = Math.round(slideRelativeSec * fps)
-              onChange(settings)
+              onChange({ endFrame: Math.round(slideRelativeSec * fps) })
             }}
             max={slideEndSec - transitionDurationSec}
             min={zoomStartSec + 0.1}

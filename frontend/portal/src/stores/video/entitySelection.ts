@@ -1,7 +1,6 @@
 import { parseEntityId } from '@/types/selection'
 import {
   EffectType,
-  SlideType,
 } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { ActiveToolType } from '@/types/tools'
 import { VideoStoreGet, VideoStoreSet } from './types'
@@ -99,13 +98,13 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
 
     if (parsed.type === 'slide') {
 
-      if (foundSlide.type === SlideType.ANIMATION) {
-        set({
-          activeTool: {
-            type: ActiveToolType.TEXT_ANIMATION_TEMPLATE
-          }
-        })
-      }
+      // if (foundSlide.type === SlideType.ANIMATION) {
+      //   set({
+      //     activeTool: {
+      //       type: ActiveToolType.TEXT_ANIMATION_TEMPLATE
+      //     }
+      //   })
+      // }
 
     } else if (
       parsed.type === 'overlay'

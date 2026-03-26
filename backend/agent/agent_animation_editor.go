@@ -283,9 +283,7 @@ func (l *agentAnimationEditor) GetAnimationSuggestions(
 		if err != nil {
 			return nil, agenterrors.TemplateExtractFailed("failed to extract template config", err)
 		}
-
-		template.Config.ConvertDurationToFrames(l.fps)
-
+		
 		// To be used as edits
 		template.GeneratedPatches = json.RawMessage(templateConfig.Config)
 		// Save plan for debugging

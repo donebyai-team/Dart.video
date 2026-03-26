@@ -1,5 +1,4 @@
 import BackgroundSettings from '@/components/editor/settings/BackgroundSettings'
-import FigmaImportSettings from '@/components/editor/settings/FigmaImportSettings'
 import InsertSettings from '@/components/editor/settings/InsertSettings'
 import { useVideoStore } from '@/stores/video'
 import { ActiveToolType } from '@/types/tools'
@@ -13,6 +12,7 @@ import { motion } from 'framer-motion'
 import AnimationEditor from './settings/AnimationEditor'
 import { CodeEditor } from './settings/CodeEditor'
 import { getRealSlideStartFrame } from './frame_calculations'
+import { TRANSITION_DURATION_FRAMES } from '@coasterai/renderer/src/frameUtils'
 
 interface ToolsSettingsPanelProps {
   onPreviewTemplate: () => void
@@ -49,7 +49,6 @@ const ToolsSettingsPanel = ({
   const callouts = useVideoStore(s => s.getCallouts) || []
   const zooms = useVideoStore(s => s.getZooms) || []
   const updateSlideBackground = useVideoStore(s => s.updateSlideBackground)
-  const updateSlide = useVideoStore(s => s.updateSlide)
   const getSlideDurationInSeconds = useVideoStore(s => s.getSlideDurationInSeconds)
   const getTimelineSlides = useVideoStore(s => s.getTimelineSlides)
   const fps = useVideoStore(s => s.videoConfig?.metadata?.fps) || 30
@@ -105,52 +104,6 @@ const ToolsSettingsPanel = ({
         <CodeEditor onClose={handleCloseTool} />
       )}
 
-      {activeTool.type === ActiveToolType.FIGMA_IMPORT && (
-        <FigmaImportSettings onClose={handleCloseTool} />
-      )}
-
-      {/* {activeTool.type === ActiveToolType.TEXT_ANIMATION_TEMPLATE &&
-        selectedSlide?.slide.type === SlideType.ANIMATION &&
-        (() => {
-          const textAnimConfig = getTextAnimationConfig()
-          if (!textAnimConfig) return null
-
-          const content = selectedSlide?.slide.content.value as AnimationSlideContent
-          const templateId = content?.templateId
-          const templateConfig = content?.templateConfig || {}
-          if (!templateId) return null
-
-          return (
-            <TextAnimationTemplateSettings
-              templateId={templateId}
-              templates={textAnimConfig.templates.templates}
-              props={templateConfig}
-              onUpdateProps={onUpdateTemplateProps}
-              onClose={handleCloseTool}
-              onApply={onPreviewTemplate}
-              isPreviewPlaying={isPreviewPlaying}
-            />
-          )
-        })()} */}
-
-      {/* suggestions */}
-      {/* {activeTool.type === ActiveToolType.TEXT_ANIMATION_SETTINGS &&
-        (() => {
-          const textAnimConfig = getTextAnimationConfig()
-          if (!textAnimConfig) return null
-          return (
-            <TextAnimationSelector
-              selectedSlide={selectedSlide!}
-              config={textAnimConfig.templates}
-              onClose={handleCloseTool}
-              onApply={templateId => {
-                console.log('selected template', templateId)
-                onSelectTextAnimationTemplate(templateId)
-              }}
-            />
-          )
-        })()} */}
-
       {activeTool.type === ActiveToolType.INSERT
         && selectedEffectId
         && selectedObject
@@ -187,8 +140,7 @@ const ToolsSettingsPanel = ({
             slideDurationInFrames={selectedSlide?.slide.durationInFrames}
             slideStartFrame={getRealSlideStartFrame(getTimelineSlides(), selectedSlide?.slide.id ?? '', fps)}
             slideStartTime={0}
-            transitionDuration={selectedSlide?.slide.transitionDuration}
-            transitionDurationInFrames={Math.round((selectedSlide?.slide.transitionDuration || 0) * fps)}
+            transitionDurationInFrames={TRANSITION_DURATION_FRAMES}
             fps={fps}
             onPlay={onSpotlightPlay}
             isPreviewPlaying={isPreviewPlaying}

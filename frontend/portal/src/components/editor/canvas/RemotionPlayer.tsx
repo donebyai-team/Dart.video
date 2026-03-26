@@ -367,9 +367,9 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
     <div ref={fullscreenContainerRef} className="flex flex-col h-full" onMouseMove={handleMouseMove}>
       {!isFullscreen && (
         <PlayerToolbar
-          onSlideSpeedChange={(newDuration) => onSlideSpeedChange(selectedSlideId, newDuration)}
+          // onSlideSpeedChange={(newDuration) => onSlideSpeedChange(selectedSlideId, newDuration)}
           onDurationChange={(newDuration) => onDurationChange(selectedSlideId, newDuration)}
-          currentFrame={currentFrame}
+          currentFrame={controls.getCurrentFrame()}
         />
       )}
 

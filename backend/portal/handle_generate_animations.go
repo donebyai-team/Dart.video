@@ -276,11 +276,8 @@ func (p *Portal) injectAnimationGenerationContext(
 func createNewSlide(slideID string) *pbcore.Slide {
 	return &pbcore.Slide{
 		Id:          slideID,
-		Type:        pbcore.SlideType_SLIDE_TYPE_ANIMATION,
 		SlideStatus: pbcore.SlideStatus_SLIDE_STATUS_GENERATED,
-		Content: &pbcore.Slide_Animation{
-			Animation: &pbcore.AnimationSlideContent{},
-		},
+		Content:     &pbcore.AnimationSlideContent{},
 	}
 }
 
@@ -289,14 +286,14 @@ func applyTemplateToSlide(slide *pbcore.Slide, template *models.Template, isExis
 		return nil
 	}
 
-	slide.DurationInFrames = float32(template.Config.TotalDuration)
-	slide.SettledFrame = float32(template.Config.VisibleDuration)
+	slide.DurationInFrames = template.Config.TotalDurationInFrames
+	slide.SettledFrame = template.Config.VisibleDurationInFrames
 	toPatches, err := utils.RawMessageToStruct(template.GeneratedPatches)
 	if err != nil {
 		return fmt.Errorf("invalid template registry: %s", template.Name)
 	}
 
-	animationContent := slide.GetAnimation()
+	animationContent := slide.GetContent()
 	animationContent.CodeRegistry = template.Config.CodeRegistry
 	animationContent.Edits = toPatches
 

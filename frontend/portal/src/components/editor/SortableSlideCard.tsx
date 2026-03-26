@@ -1,11 +1,11 @@
 import { useMemo } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { GripVertical, ImageIcon, Type, Trash2, Layers } from 'lucide-react'
+import { GripVertical, ImageIcon, Type, Trash2, Layers, WandIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import SlideThumbnail from './SlideThumbnail'
-import { Slide, SlideType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { useVideoStore } from '@/stores/video'
 
 interface SortableSlideCardProps {
@@ -14,12 +14,6 @@ interface SortableSlideCardProps {
   index: number
   onSelect: () => void
   onDelete: () => void
-}
-
-const slideTypeIcons: Record<SlideType, React.ElementType> = {
-  [SlideType.MEDIA]: ImageIcon,
-  [SlideType.ANIMATION]: Type,
-  [SlideType.UNDEFINED]: Layers
 }
 
 const SortableSlideCard = ({ slide, isSelected, index, onSelect, onDelete }: SortableSlideCardProps) => {
@@ -39,7 +33,6 @@ const SortableSlideCard = ({ slide, isSelected, index, onSelect, onDelete }: Sor
     zIndex: isDragging ? 100 : undefined
   }
 
-  const TypeIcon = slideTypeIcons[slide.type] || ImageIcon
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -71,7 +64,7 @@ const SortableSlideCard = ({ slide, isSelected, index, onSelect, onDelete }: Sor
           <SlideThumbnail slide={slideWithBackground} index={index} />
           {/* Slide type indicator */}
           <div className='absolute bottom-0.5 left-0.5 bg-foreground/80 text-background p-0.5 rounded'>
-            <TypeIcon className='w-2 h-2' />
+            <WandIcon className='w-2 h-2' />
           </div>
           {/* Duration */}
           <div className='absolute bottom-0.5 right-0.5 bg-foreground/80 text-background text-[7px] px-0.5 rounded'>
