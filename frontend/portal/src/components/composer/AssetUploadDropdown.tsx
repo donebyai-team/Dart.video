@@ -23,7 +23,7 @@ const AssetUploadDropdown = ({
           disabled={disabled}
           className={triggerClassName || 'flex items-center gap-1.5 flex-shrink-0 hover:text-foreground rounded px-1.5 py-1 hover:bg-muted/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed'}
         >
-          <Figma className='w-4 h-4' />
+          <ImagePlus className='w-4 h-4' />
           {showLabel && <span>Add Assets</span>}
           <ChevronDown className='w-3 h-3 opacity-60' />
         </button>

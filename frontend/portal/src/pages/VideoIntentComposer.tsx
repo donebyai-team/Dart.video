@@ -420,7 +420,7 @@ const VideoIntentComposer = () => {
 
             <div className='flex-1' />
 
-            <button
+            {/* <button
               onClick={() => setScriptDialogOpen(true)}
               className='flex items-center gap-1.5 flex-shrink-0 hover:text-foreground rounded px-1.5 py-1 hover:bg-muted/50 transition-colors'
             >
@@ -428,7 +428,7 @@ const VideoIntentComposer = () => {
               <span>{hasScript ? 'Edit script' : 'Script'}</span>
             </button>
 
-            <span className='text-border/60 mx-0.5'>·</span>
+            <span className='text-border/60 mx-0.5'>·</span> */}
 
            {/* Add Style */}
             {/* <StyleSelector
