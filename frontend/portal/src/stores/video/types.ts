@@ -1,7 +1,6 @@
 import { TimelineSlide } from "@/components/editor/timeline/types";
 import type {
     EditorConfig,
-    TextAnimationSlideConfig,
 } from "@/types/editor";
 import type { EntityId } from "@/types/selection";
 import { SelectedTool } from "@/types/tools";
