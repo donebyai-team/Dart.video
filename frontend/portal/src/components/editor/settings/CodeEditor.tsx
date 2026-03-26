@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { X, FileCode2 } from 'lucide-react'
 import { loadTemplateSource } from '@coasterai/renderer'
-import { SlideType, type AnimationSlideContent } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 
 import { Button } from '@/components/ui/button'
 import { useVideoStore } from '@/stores/video'
@@ -23,10 +22,7 @@ export const CodeEditor = ({ onClose }: CodeEditorProps) => {
   const [error, setError] = useState<string | null>(null)
 
   const animationContent = useMemo(() => {
-    if (selectedSlide?.slide.type !== SlideType.ANIMATION) return null
-    return selectedSlide.slide.content.case === 'animation'
-      ? selectedSlide.slide.content.value as AnimationSlideContent
-      : null
+    return selectedSlide?.slide.content
   }, [selectedSlide])
 
   const templateUrl = animationContent?.codeRegistry?.mUrl?.trim() ?? ''
@@ -34,7 +30,7 @@ export const CodeEditor = ({ onClose }: CodeEditorProps) => {
 
   useEffect(() => {
     if (activeTool.type !== ActiveToolType.ANIMATION_CODE) return
-    if (!selectedSlide || selectedSlide.slide.type !== SlideType.ANIMATION) {
+    if (!selectedSlide || !animationContent) {
       handleCloseTool()
     }
   }, [activeTool.type, handleCloseTool, selectedSlide])
@@ -42,7 +38,7 @@ export const CodeEditor = ({ onClose }: CodeEditorProps) => {
   useEffect(() => {
     let cancelled = false
 
-    if (!selectedSlide || selectedSlide.slide.type !== SlideType.ANIMATION) {
+    if (!selectedSlide || !animationContent) {
       setCode('')
       setError(null)
       setIsLoading(false)

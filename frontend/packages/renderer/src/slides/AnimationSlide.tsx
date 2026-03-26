@@ -1,4 +1,4 @@
-import { AnimationSlideContent, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import React, { useEffect, useState } from 'react'
 
 import { AbsoluteFill, continueRender, delayRender, useRemotionEnvironment } from 'remotion'
@@ -73,8 +73,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
   const [isLoading, setIsLoading] = useState(true)
   const [templateError, setTemplateError] = useState<string | null>(null)
 
-  const { isRendering } = useRemotionEnvironment()
-  const content = slide.content.value as AnimationSlideContent
+  const content = slide.content;
 
   // template id for hard-coded local templates
   // const localTemplateId = content?.templateId
@@ -181,7 +180,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
         {isLoading ? (
           <TemplateLoadingPlaceholder />
         ) : CompiledComponent ? (
-          <SpeedFactorProvider factor={slide.speed ? slide.speed: 1}>
+          <SpeedFactorProvider factor={1}>
             <PatchContextProvider overlay={patchOverlay}>
               <CompiledComponent />
             </PatchContextProvider>

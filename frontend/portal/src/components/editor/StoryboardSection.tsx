@@ -34,7 +34,6 @@ import { ImageIcon, Type, BarChart3, Sparkles, Film, Layers } from "lucide-react
 import {
     Section,
     Slide,
-    SlideType,
     TransitionDirection,
     TransitionType
 } from "@coasterai/pb/coasterai/core/v1/slide_pb";
@@ -60,7 +59,7 @@ interface StoryboardSectionProps {
     onCancelEditTitle: () => void;
     onShowTransitionPicker: (slideId: string | null) => void;
     onUpdateTransition: (slideId: string, transitionId: TransitionType, direction?: TransitionDirection) => void;
-    onAddSlide: (type: SlideType, afterSlideId?: string) => void;
+    onAddSlide: (afterSlideId?: string) => void;
     onReorderSlides: (activeId: string, overId: string) => void;
 }
 
@@ -91,11 +90,6 @@ const StoryboardSection = ({
         transition,
         isDragging,
     } = useSortable({ id: section.id });
-
-    const allSlideTypes = [
-        { id: SlideType.MEDIA, name: "Image/Video", description: "Add product screen or clip", icon: ImageIcon },
-        { id: SlideType.ANIMATION, name: "Animation", description: "Animated scene", icon: Sparkles },
-    ];
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -284,8 +278,7 @@ const StoryboardSection = ({
 
                                                     {/* Add slide button (left of center) */}
                                                     <AddSlideButton
-                                                        slideTypes={allSlideTypes}
-                                                        onAddSlide={(type) => onAddSlide(type, slide.id)}
+                                                        onAddSlide={() => onAddSlide(slide.id)}
                                                         variant="between"
                                                     />
 

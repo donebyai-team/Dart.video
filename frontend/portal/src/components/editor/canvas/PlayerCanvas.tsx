@@ -41,7 +41,6 @@ const PlayerCanvas = ({
   const onUpdateZoom = useVideoStore(s => s.updateZoom)
 
   const {
-    isAnimationSlide,
     overlay,
     selectedEid,
     setSelectedEid,
@@ -133,7 +132,7 @@ const PlayerCanvas = ({
       </motion.div>
 
       {/* Animation edit layer */}
-      {isEditing && !isPlaying && isAnimationSlide && (
+      {isEditing && !isPlaying && (
         <AnimationEditLayer
           playerRef={canvasRef}
           selectedEid={selectedEid}

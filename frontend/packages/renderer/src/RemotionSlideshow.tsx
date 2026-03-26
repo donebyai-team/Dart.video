@@ -1,5 +1,5 @@
 import { fromJson, JsonObject } from '@bufbuild/protobuf'
-import { Slide, SlideType, TransitionType, MediaAsset } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { Slide, TransitionType, MediaAsset } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Video, VideoSchema } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import { linearTiming, TransitionSeries } from '@remotion/transitions'
 import React, { useMemo } from 'react'
@@ -30,81 +30,7 @@ interface SlideshowProps {
   videoConfig?: Video
   isPlaying?: boolean
   onUpdate?: (updates: Partial<Slide>) => void
-  uploadMedia?: (file: File) => Promise<MediaAsset>
 }
-
-type SlideComponentConfig = {
-  component: React.ComponentType<any>
-  contentCase: string
-}
-
-const componentMap: Partial<Record<SlideType, SlideComponentConfig>> = {
-  [SlideType.ANIMATION]: {
-    component: AnimationSlide,
-    contentCase: "animation"
-  },
-  [SlideType.MEDIA]: {
-    component: MediaSlide,
-    contentCase: "media"
-  }
-}
-// Main slide component router
-export const SlideComponent: React.FC<{
-  slide: Slide
-  width: number
-  height: number
-  isEditing?: boolean
-  isSelected?: boolean
-  onSelect?: () => void
-  onUpdate?: (updates: Partial<Slide>) => void
-  uploadMedia?: (file: File) => Promise<MediaAsset>
-}> = ({
-  slide,
-  width,
-  height,
-  isEditing,
-  isSelected = false,
-  onSelect,
-  onUpdate = () => { },
-  uploadMedia
-}) => {
-    const slideBackground = backgroundStyleToCSS(slide.backgroundStyle)
-    const config = componentMap[slide.type]
-
-    if (config && (!slide.content?.case || slide.content.case === config.contentCase)) {
-      const Component = config.component
-
-      return (
-        <Component
-          slide={slide}
-          width={width}
-          height={height}
-          isEditing={isEditing}
-          isSelected={isSelected}
-          onSelect={onSelect}
-          onUpdate={onUpdate}
-          uploadMedia={uploadMedia}
-        />
-      )
-    }
-
-    // fallback
-    return (
-      <AbsoluteFill
-        style={{
-          backgroundColor: slideBackground,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "white",
-          fontSize: 18,
-          opacity: 0.7
-        }}
-      >
-        Content type mismatch: {slide.type} slide with {slide.content?.case || "undefined"} content
-      </AbsoluteFill>
-    )
-  }
 
 export const SingleSlidePreview: React.FC<{
   slide: Slide
@@ -114,7 +40,7 @@ export const SingleSlidePreview: React.FC<{
 
   return (
     <AbsoluteFill style={{ background: backgroundStyleToCSS(slide.backgroundStyle) }}>
-      <SlideComponent
+      <AnimationSlide
         slide={slide}
         width={width}
         height={height}
@@ -142,7 +68,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({
   video,
   videoConfig: videoConfigProp,
   onUpdate = () => { },
-  uploadMedia }) => {
+}) => {
   const selectedTemplateId = null
 
   const { width, height } = useVideoConfig()
@@ -155,12 +81,12 @@ export const Slideshow: React.FC<SlideshowProps> = ({
 
   // Use the one that is generated from backend or default
   const brandTheme = useMemo(
-  () =>
-    videoConfig?.metadata?.generatedBranding
-      ? brandingToTheme(videoConfig.metadata.generatedBranding)
-      : defaultTheme,
-  [videoConfig?.metadata?.generatedBranding]
-);
+    () =>
+      videoConfig?.metadata?.generatedBranding
+        ? brandingToTheme(videoConfig.metadata.generatedBranding)
+        : defaultTheme,
+    [videoConfig?.metadata?.generatedBranding]
+  );
 
   /* ================= GATE ================= */
 
@@ -205,14 +131,13 @@ export const Slideshow: React.FC<SlideshowProps> = ({
       globalBackground != 'transparent' ? { ...slide, backgroundColor: 'transparent' } : slide
 
     return (
-      <SlideComponent
+      <AnimationSlide
         slide={slideWithBackground}
         width={width}
         height={height}
         isEditing={isEditing}
         isSelected={isSelected}
         onUpdate={onUpdate}
-        uploadMedia={uploadMedia}
         onSelect={() => {
           onSelectTemplate?.(slide.id);
         }}

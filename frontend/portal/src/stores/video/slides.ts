@@ -1,5 +1,5 @@
 import { TimelineSlide } from '@/components/editor/timeline/types'
-import { SlideType, Slide, TransitionDirection, TransitionType, BackgroundStyle, Section } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { Slide, TransitionDirection, TransitionType, BackgroundStyle, Section } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { arrayMove } from '@dnd-kit/sortable'
 import { createNewSlide, getDefaulVideotMetadata, createDefaultBackgroundStyle, resolveBackgroundStyle } from './defaults'
 import { VideoStoreSet, VideoStoreGet } from './types'
@@ -7,6 +7,7 @@ import { getSections, updateVideoConfigSections, updateSelectedSlide, updateTota
 import defaultEditorConfig from '@/data/editorConfig'
 import { TRANSITION_DURATION_SECONDS } from '@coasterai/renderer/src/frameUtils'
 import { ActiveToolType } from '@/types/tools'
+import { type } from 'os'
 
 export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   /* ================= ADD ================= */
@@ -68,7 +69,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     get().autoSyncVideoConfig();
   },
 
-  addSlide(sectionId: string, type: SlideType, afterSlideId?: string) {
+  addSlide(sectionId: string, afterSlideId?: string) {
     const { videoConfig } = get();
     if (!videoConfig?.config) return;
 
@@ -83,7 +84,6 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       createDefaultBackgroundStyle();
 
     const newSlide = createNewSlide({
-      type,
       inheritedBg,
     });
 
@@ -363,7 +363,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
         section.id === selectedSlide.section.id
           ? {
             ...section,
-            slides: section.slides.map(sl => (sl.id === selectedSlide.slide.id ? { ...sl, content: newContent } : sl))
+            slides: section.slides.map(sl => (sl.id === selectedSlide.slide.id ? { ...sl, content: newContent } as Slide : sl))
           }
           : section
       )
@@ -374,7 +374,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       selectedSlide: updateSelectedSlide(selectedSlide, slide => ({
         ...slide,
         content: newContent
-      }))
+      } as Slide))
     })
 
     get().autoSyncVideoConfig()

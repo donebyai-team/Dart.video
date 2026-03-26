@@ -1,4 +1,4 @@
-import { EditorConfig, SlideTypeConfig, TextAnimationSlideConfig } from "@/types/editor";
+import { EditorConfig} from "@/types/editor";
 import { ActiveToolType, SelectedTool } from "@/types/tools";
 import { create } from "@bufbuild/protobuf";
 import {
@@ -7,11 +7,8 @@ import {
     BackgroundStyleSchema,
     CalloutEffect,
     CalloutEffectSchema,
-    MediaSlideContentSchema,
-    MediaType,
-    MetaData, MetaDataSchema,
     Section, SectionSchema,
-    Slide, SlideSchema, SlideStatus, SlideType,
+    Slide, SlideSchema, SlideStatus,
     SpotlightEffect, SpotlightEffectSchema,
     TransitionType,
     ZoomEffect,
@@ -21,20 +18,15 @@ import { Resolution, ResolutionSchema, Video, VideoMetadata, VideoMetadataSchema
 import { SelectedSection } from "./types";
 import { TRANSITION_DURATION_SECONDS } from "@coasterai/renderer/src/frameUtils";
 
-// Helper functions (moved from useEditorState)
-export const getSlideTypeConfig = (config: EditorConfig | null, slideType: SlideType): SlideTypeConfig | undefined => {
-    return config?.slideTypes.types.find(t => t.id === slideType);
-};
-
 export function resolveBackgroundStyle(
-  slide?: Slide,
-  globalBackground?: BackgroundStyle
+    slide?: Slide,
+    globalBackground?: BackgroundStyle
 ): BackgroundStyle {
-  return (
-    globalBackground ??
-    slide?.backgroundStyle ??
-    createDefaultBackgroundStyle()
-  );
+    return (
+        globalBackground ??
+        slide?.backgroundStyle ??
+        createDefaultBackgroundStyle()
+    );
 }
 
 /**
@@ -55,70 +47,23 @@ export function createDefaultBackgroundStyle(
     });
 }
 
-export const getTextAnimationConfig = (config: EditorConfig): TextAnimationSlideConfig | undefined => {
-    const slideConfig = getSlideTypeConfig(config, SlideType.ANIMATION);
-    if (slideConfig?.id === SlideType.ANIMATION) {
-        return slideConfig as TextAnimationSlideConfig;
-    }
-    return undefined;
-};
-
-export const getDefaultMetadata = (): MetaData =>
-    create(MetaDataSchema, {
-        x: 192,
-        y: 108,
-        width: 1536,
-        height: 864,
-        scale: 1,
-        rotation: 0,
-    });
-
-export function buildSlideContent(type: SlideType): Slide["content"] {
-    switch (type) {
-        case SlideType.MEDIA:
-            return {
-                case: "media",
-                value: create(MediaSlideContentSchema, {
-                    mediaType: MediaType.IMAGE,
-                    meta: getDefaultMetadata(),
-                    src: "https://placehold.co/600x400?text=Upload+a+screenshot+or+short+clip+of+your+product&font=roboto",
-                    style: {},
-                }),
-            };
-
-        case SlideType.ANIMATION:
-            return {
-                case: "animation",
-                value: create(AnimationSlideContentSchema, {}),
-            };
-        default:
-            return { case: undefined };
-    }
-}
-
-export function createNewSlide(params: {
-    type: SlideType;
-    inheritedBg: BackgroundStyle;
-}) {
+export function createNewSlide(params: { inheritedBg: BackgroundStyle }) {
     const {
-        type,
         inheritedBg,
     } = params;
 
     return create(SlideSchema, {
         id: `slide-${Date.now()}`,
-        type,
         transcript: "",
         slideStatus: SlideStatus.GENERATED,
-        durationInFrames: 5*30,
+        durationInFrames: 5 * 30,
         transition: TransitionType.TRANSITION_NONE,
         backgroundStyle: inheritedBg,
         transitionDuration: TRANSITION_DURATION_SECONDS,
-        content: buildSlideContent(type),
+        content: create(AnimationSlideContentSchema, {}),
         spotlights: [],
         callouts: [],
         zooms: [],
-        subSlides: [],
     });
 }
 

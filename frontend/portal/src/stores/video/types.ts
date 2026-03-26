@@ -5,8 +5,7 @@ import type {
 } from "@/types/editor";
 import type { EntityId } from "@/types/selection";
 import { SelectedTool } from "@/types/tools";
-import { JsonObject } from "@bufbuild/protobuf";
-import { Section, Slide, SlideType, TransitionDirection, TransitionType, CalloutEffect, BackgroundStyle, ZoomEffect, SpotlightEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { Section, Slide, TransitionDirection, TransitionType, CalloutEffect, BackgroundStyle, ZoomEffect, SpotlightEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { Resolution, Video } from "@coasterai/pb/coasterai/core/v1/video_pb";
 import { DragEndEvent } from "@dnd-kit/core";
 import type { StateCreator } from "zustand";
@@ -69,7 +68,7 @@ export interface VideoActions {
     getSlideDurationInSeconds: (slide: Slide) => number;
     getSlideWithBackground: (slide : Slide) => BackgroundStyle;
     getTimelineSlides: () => TimelineSlide[]
-    addSlide: (sectionId: string, type: SlideType, afterSlideId?: string) => void
+    addSlide: (sectionId: string, afterSlideId?: string) => void
     addAnimationSlide: (sectionId: string, slide: Slide,afterSlideId?: string) => void
     removeSlide: (sectionId: string, slideId: string) => void
     updateSlide: (updates: Partial<Slide>) => void
@@ -111,11 +110,6 @@ export interface VideoActions {
     handleEditAnimation: () => void
     handleViewAnimationCode: () => void
     handleAddAnimation: (sectionId: string, afterSlideId?: string) => void                                          
-
-    // Text animation
-    handleSelectTextAnimationTemplate: (templateId: string) => void
-    updateTextAnimationProps: (props: JsonObject) => void
-    getTextAnimationConfig: () => TextAnimationSlideConfig | undefined
 
     // Voiceover
     handleGenerateSlideVoiceover: () => void

@@ -1,9 +1,7 @@
 'use client'
 
-import { FallbackSpinner } from '../atoms/FallbackSpinner'
 import { ReactNode, createContext, useEffect, useState } from 'react'
 import { Config, ConfigSchema } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
-import { portalClient } from '../services/grpc'
 import { create } from '@bufbuild/protobuf'
 
 // ** Defaults

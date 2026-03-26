@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useVideoStore } from '@/stores/video'
-import { SlideType, EffectType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { EffectType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { ActiveToolType } from '@/types/tools'
 import { backgroundStyleToCSS } from '@coasterai/renderer'
 import DurationChangeComponent from './remotion/components/DurationChangeComponent'
@@ -82,7 +82,7 @@ const PlayerToolbar = ({ onSlideSpeedChange, onDurationChange, minDuration = 1, 
         </TooltipProvider>
 
         {/* Change Animation button for text-animation slides */}
-        {slide.type === SlideType.ANIMATION && onChangeTextAnimation && (
+        {onChangeTextAnimation && (
           <>
             <div className='h-4 w-px bg-border mx-1' />
             <TooltipProvider delayDuration={200}>
@@ -101,7 +101,7 @@ const PlayerToolbar = ({ onSlideSpeedChange, onDurationChange, minDuration = 1, 
           </>
         )}
 
-        {slide.type === SlideType.ANIMATION && onViewAnimationCode && isPlatformAdminUser && (
+        {onViewAnimationCode && isPlatformAdminUser && (
           <TooltipProvider delayDuration={200}>
             <Tooltip>
               <TooltipTrigger asChild>

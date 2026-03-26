@@ -469,7 +469,6 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
               // Duration change handler — newDuration is in seconds, store as frames
               onSlideSpeedChange={(_slideId, newSpeed) => {
                 console.debug('slide speed changed: ', newSpeed)
-                updateSlide({ speed: newSpeed })
               }}
               // Duration change handler — newDuration is in seconds, store as frames
               onDurationChange={(_slideId, newDurationInSeconds) => {

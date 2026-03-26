@@ -1,25 +1,15 @@
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { SlideType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
-
-interface SlideTypeOption {
-  id: SlideType;
-  name: string;
-  description?: string;
-  icon: React.ElementType;
-}
+import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface AddSlideButtonProps {
-  slideTypes: SlideTypeOption[];
-  onAddSlide: (type: SlideType) => void;
+  onAddSlide: () => void;
   disabled?: boolean;
   variant?: "button" | "inline" | "between";
   className?: string;
 }
 
 const AddSlideButton = ({
-  slideTypes,
   onAddSlide,
   disabled = false,
   variant = "button",
@@ -37,24 +27,7 @@ const AddSlideButton = ({
             <Plus className="w-2.5 h-2.5" />
             Add scene
           </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="center" className="w-48 bg-popover">
-          {slideTypes.map((option) => (
-            <DropdownMenuItem
-              key={option.id}
-              onClick={() => onAddSlide(option.id)}
-              className="gap-2"
-            >
-              <option.icon className="w-4 h-4" />
-              <div>
-                <p className="text-sm font-medium">{option.name}</p>
-                {option.description && (
-                  <p className="text-[10px] text-muted-foreground">{option.description}</p>
-                )}
-              </div>
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
+        </DropdownMenuTrigger>        
       </DropdownMenu>
     );
   }
@@ -64,6 +37,7 @@ const AddSlideButton = ({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button
+            onClick={() => onAddSlide()}
             disabled={disabled}
             className={`w-full flex items-center justify-center gap-1 py-1.5 text-[10px] text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
           >
@@ -71,23 +45,6 @@ const AddSlideButton = ({
             Add scene
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="center" className="w-48 bg-popover">
-          {slideTypes.map((option) => (
-            <DropdownMenuItem
-              key={option.id}
-              onClick={() => onAddSlide(option.id)}
-              className="gap-2"
-            >
-              <option.icon className="w-4 h-4" />
-              <div>
-                <p className="text-sm font-medium">{option.name}</p>
-                {option.description && (
-                  <p className="text-[10px] text-muted-foreground">{option.description}</p>
-                )}
-              </div>
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
       </DropdownMenu>
     );
   }
@@ -95,9 +52,10 @@ const AddSlideButton = ({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button 
-          variant="outline" 
-          size="sm" 
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onAddSlide()}
           className={`w-full gap-2 ${className}`}
           disabled={disabled}
         >
@@ -105,18 +63,6 @@ const AddSlideButton = ({
           Add Slide
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="center" className="w-48">
-        {slideTypes.map((option) => (
-          <DropdownMenuItem
-            key={option.id}
-            onClick={() => onAddSlide(option.id)}
-            className="gap-2"
-          >
-            <option.icon className="w-4 h-4" />
-            <span>{option.name}</span>
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
     </DropdownMenu>
   );
 };

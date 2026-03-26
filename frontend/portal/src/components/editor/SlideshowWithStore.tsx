@@ -9,7 +9,7 @@ type SlideshowProps = ComponentProps<typeof Slideshow>
  * Wraps Slideshow with Zustand video store — use this in the editor.
  * The renderer package's Slideshow is store-free and receives these as props.
  */
-export const SlideshowWithStore: React.FC<Omit<SlideshowProps, 'videoConfig' | 'onUpdate' | 'uploadMedia'>> = (props) => {
+export const SlideshowWithStore: React.FC<Omit<SlideshowProps, 'videoConfig' | 'onUpdate'>> = (props) => {
   const videoConfig = useVideoStore(s => s.videoConfig)
   const onUpdate = useVideoStore(s => s.updateSlide)
 
@@ -18,7 +18,6 @@ export const SlideshowWithStore: React.FC<Omit<SlideshowProps, 'videoConfig' | '
       {...props}
       videoConfig={videoConfig ?? undefined}
       onUpdate={onUpdate}
-      uploadMedia={uploadMedia}
     />
   )
 }

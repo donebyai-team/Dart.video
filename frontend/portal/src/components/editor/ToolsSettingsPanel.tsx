@@ -1,5 +1,4 @@
 import BackgroundSettings from '@/components/editor/settings/BackgroundSettings'
-import FigmaImportSettings from '@/components/editor/settings/FigmaImportSettings'
 import InsertSettings from '@/components/editor/settings/InsertSettings'
 import { useVideoStore } from '@/stores/video'
 import { ActiveToolType } from '@/types/tools'
@@ -101,52 +100,6 @@ const ToolsSettingsPanel = ({
       {activeTool.type === ActiveToolType.ANIMATION_CODE && (
         <CodeEditor onClose={handleCloseTool} />
       )}
-
-      {activeTool.type === ActiveToolType.FIGMA_IMPORT && (
-        <FigmaImportSettings onClose={handleCloseTool} />
-      )}
-
-      {/* {activeTool.type === ActiveToolType.TEXT_ANIMATION_TEMPLATE &&
-        selectedSlide?.slide.type === SlideType.ANIMATION &&
-        (() => {
-          const textAnimConfig = getTextAnimationConfig()
-          if (!textAnimConfig) return null
-
-          const content = selectedSlide?.slide.content.value as AnimationSlideContent
-          const templateId = content?.templateId
-          const templateConfig = content?.templateConfig || {}
-          if (!templateId) return null
-
-          return (
-            <TextAnimationTemplateSettings
-              templateId={templateId}
-              templates={textAnimConfig.templates.templates}
-              props={templateConfig}
-              onUpdateProps={onUpdateTemplateProps}
-              onClose={handleCloseTool}
-              onApply={onPreviewTemplate}
-              isPreviewPlaying={isPreviewPlaying}
-            />
-          )
-        })()} */}
-
-      {/* suggestions */}
-      {/* {activeTool.type === ActiveToolType.TEXT_ANIMATION_SETTINGS &&
-        (() => {
-          const textAnimConfig = getTextAnimationConfig()
-          if (!textAnimConfig) return null
-          return (
-            <TextAnimationSelector
-              selectedSlide={selectedSlide!}
-              config={textAnimConfig.templates}
-              onClose={handleCloseTool}
-              onApply={templateId => {
-                console.log('selected template', templateId)
-                onSelectTextAnimationTemplate(templateId)
-              }}
-            />
-          )
-        })()} */}
 
       {activeTool.type === ActiveToolType.INSERT
         && selectedEffectId

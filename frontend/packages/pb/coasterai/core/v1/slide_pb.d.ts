@@ -67,99 +67,6 @@ export declare type AnimationSlidePlan = Message<"coasterai.core.v1.AnimationSli
 export declare const AnimationSlidePlanSchema: GenMessage<AnimationSlidePlan>;
 
 /**
- * @generated from message coasterai.core.v1.MediaSlidePlan
- */
-export declare type MediaSlidePlan = Message<"coasterai.core.v1.MediaSlidePlan"> & {
-  /**
-   * @generated from field: int64 index = 1;
-   */
-  index: bigint;
-
-  /**
-   * @generated from field: string beatDescription = 2;
-   */
-  beatDescription: string;
-
-  /**
-   * @generated from field: int64 durationInFrames = 3;
-   */
-  durationInFrames: bigint;
-
-  /**
-   * @generated from field: optional string selectedTemplateDescription = 4;
-   */
-  selectedTemplateDescription?: string;
-};
-
-/**
- * Describes the message coasterai.core.v1.MediaSlidePlan.
- * Use `create(MediaSlidePlanSchema)` to create a new message.
- */
-export declare const MediaSlidePlanSchema: GenMessage<MediaSlidePlan>;
-
-/**
- * @generated from message coasterai.core.v1.MediaSlideStyle
- */
-export declare type MediaSlideStyle = Message<"coasterai.core.v1.MediaSlideStyle"> & {
-  /**
-   * @generated from field: float borderRadius = 1;
-   */
-  borderRadius: number;
-
-  /**
-   * @generated from field: optional string objectFit = 2;
-   */
-  objectFit?: string;
-};
-
-/**
- * Describes the message coasterai.core.v1.MediaSlideStyle.
- * Use `create(MediaSlideStyleSchema)` to create a new message.
- */
-export declare const MediaSlideStyleSchema: GenMessage<MediaSlideStyle>;
-
-/**
- * @generated from message coasterai.core.v1.MediaSlideContent
- */
-export declare type MediaSlideContent = Message<"coasterai.core.v1.MediaSlideContent"> & {
-  /**
-   * @generated from field: coasterai.core.v1.MetaData meta = 1;
-   */
-  meta?: MetaData;
-
-  /**
-   * @generated from field: string src = 2;
-   */
-  src: string;
-
-  /**
-   * @generated from field: coasterai.core.v1.MediaSlideStyle style = 3;
-   */
-  style?: MediaSlideStyle;
-
-  /**
-   * @generated from field: coasterai.core.v1.MediaType mediaType = 4;
-   */
-  mediaType: MediaType;
-
-  /**
-   * @generated from field: optional coasterai.core.v1.MediaAsset uploadedMedia = 5;
-   */
-  uploadedMedia?: MediaAsset;
-
-  /**
-   * @generated from field: coasterai.core.v1.MediaSlidePlan plan = 6;
-   */
-  plan?: MediaSlidePlan;
-};
-
-/**
- * Describes the message coasterai.core.v1.MediaSlideContent.
- * Use `create(MediaSlideContentSchema)` to create a new message.
- */
-export declare const MediaSlideContentSchema: GenMessage<MediaSlideContent>;
-
-/**
  * @generated from message coasterai.core.v1.MetaData
  */
 export declare type MetaData = Message<"coasterai.core.v1.MetaData"> & {
@@ -481,11 +388,6 @@ export declare type Slide = Message<"coasterai.core.v1.Slide"> & {
   id: string;
 
   /**
-   * @generated from field: coasterai.core.v1.SlideType type = 2;
-   */
-  type: SlideType;
-
-  /**
    * @generated from field: string transcript = 3;
    */
   transcript: string;
@@ -511,31 +413,19 @@ export declare type Slide = Message<"coasterai.core.v1.Slide"> & {
   direction?: TransitionDirection;
 
   /**
-   * @generated from field: float durationInFrames = 25;
+   * @generated from field: int32 durationInFrames = 25;
    */
   durationInFrames: number;
 
   /**
-   * @generated from field: float settledFrame = 26;
+   * @generated from field: int32 settledFrame = 26;
    */
   settledFrame: number;
 
   /**
-   * @generated from oneof coasterai.core.v1.Slide.content
+   * @generated from field: coasterai.core.v1.AnimationSlideContent content = 9;
    */
-  content: {
-    /**
-     * @generated from field: coasterai.core.v1.MediaSlideContent media = 8;
-     */
-    value: MediaSlideContent;
-    case: "media";
-  } | {
-    /**
-     * @generated from field: coasterai.core.v1.AnimationSlideContent animation = 9;
-     */
-    value: AnimationSlideContent;
-    case: "animation";
-  } | { case: undefined; value?: undefined };
+  content?: AnimationSlideContent;
 
   /**
    * @generated from field: optional bool voiceoverGenerated = 15;
@@ -546,11 +436,6 @@ export declare type Slide = Message<"coasterai.core.v1.Slide"> & {
    * @generated from field: optional bool isNested = 16;
    */
   isNested?: boolean;
-
-  /**
-   * @generated from field: repeated coasterai.core.v1.Slide subSlides = 17;
-   */
-  subSlides: Slide[];
 
   /**
    * @generated from field: repeated coasterai.core.v1.SpotlightEffect spotlights = 18;
@@ -581,11 +466,6 @@ export declare type Slide = Message<"coasterai.core.v1.Slide"> & {
    * @generated from field: int32 index = 24;
    */
   index: number;
-
-  /**
-   * @generated from field: float speed = 27;
-   */
-  speed: number;
 };
 
 /**
@@ -787,31 +667,6 @@ export enum SlideStatus {
  * Describes the enum coasterai.core.v1.SlideStatus.
  */
 export declare const SlideStatusSchema: GenEnum<SlideStatus>;
-
-/**
- * @generated from enum coasterai.core.v1.SlideType
- */
-export enum SlideType {
-  /**
-   * @generated from enum value: SLIDE_TYPE_UNDEFINED = 0;
-   */
-  UNDEFINED = 0,
-
-  /**
-   * @generated from enum value: SLIDE_TYPE_ANIMATION = 1;
-   */
-  ANIMATION = 1,
-
-  /**
-   * @generated from enum value: SLIDE_TYPE_MEDIA = 5;
-   */
-  MEDIA = 5,
-}
-
-/**
- * Describes the enum coasterai.core.v1.SlideType.
- */
-export declare const SlideTypeSchema: GenEnum<SlideType>;
 
 /**
  * @generated from enum coasterai.core.v1.MediaType
