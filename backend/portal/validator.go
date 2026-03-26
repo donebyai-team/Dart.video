@@ -236,9 +236,9 @@ func validateSlideMedia(content *pbcore.MediaSlideContent) error {
 		return fmt.Errorf("invalid image src: %w", err)
 	}
 
-	if content.Plan == nil {
-		return fmt.Errorf("content plan is required")
-	}
+	//if content.Plan == nil {
+	//	return fmt.Errorf("content plan is required")
+	//}
 
 	return nil
 }

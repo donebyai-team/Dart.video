@@ -1,6 +1,6 @@
 import { preloadImage } from "@remotion/preload";
-import { useEffect } from "react";
-import { useRemotionEnvironment } from "remotion";
+import { useEffect, useState } from "react";
+import { useRemotionEnvironment, delayRender, continueRender } from "remotion";
 import { usePatchedProp, useStyleOverride } from "../../patches/PatchContext";
 import { useAspectPreset } from "../../styles/AspectPresetContext";
 
@@ -43,13 +43,32 @@ export function ImageAsset({
     const resolvedObjectFit: React.CSSProperties['objectFit'] =
         typeof rawObjectFit === 'string' ? rawObjectFit as React.CSSProperties['objectFit'] : 'cover';
 
+    const [handle] = useState(() => isRendering ? delayRender('Loading image') : null);
+
     useEffect(() => {
-        if (!patchedSrc || !isRendering) return;
-        const unpreload = preloadImage(patchedSrc);
-        return () => {
-            unpreload();
+        if (!patchedSrc) return;
+        
+        const img = new Image();
+        img.onload = () => {
+            if (handle !== null) {
+                continueRender(handle);
+            }
         };
-    }, [patchedSrc, isRendering]);
+        img.onerror = () => {
+            if (handle !== null) {
+                continueRender(handle);
+            }
+        };
+        img.src = patchedSrc;
+
+        let unpreload: (() => void) | undefined;
+        if (isRendering) {
+            unpreload = preloadImage(patchedSrc);
+        }
+        return () => {
+            unpreload?.();
+        };
+    }, [patchedSrc, isRendering, handle]);
 
     return (
         <span

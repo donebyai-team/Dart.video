@@ -1,7 +1,7 @@
 import React from "react";
 import { preloadImage } from "@remotion/preload";
 import { useEffect, useState } from "react";
-import { useRemotionEnvironment } from "remotion";
+import { useRemotionEnvironment, delayRender, continueRender } from "remotion";
 import { usePatchedProp, useStyleOverride } from "../../patches";
 import { useTheme } from "../../theme";
 import { useAspectPreset } from "../../styles";
@@ -41,6 +41,7 @@ export function IconAsset({
   const patchedRadius = usePatchedProp<number | undefined>(id, 'borderRadius', borderRadius);
 
   const [iconExists, setIconExists] = useState(true);
+  const [handle] = useState(() => isRendering ? delayRender('Loading icon') : null);
   const variant = theme.iconStyle ?? 'outline';
   const requestedMaskUrl = `${ICON_BASE}/${variant}/${patchedName.toLowerCase()}.svg`;
   const fallbackMaskUrl = `${ICON_BASE}/${variant}/${PLACEHOLDER_ICON}.svg`;
@@ -52,7 +53,7 @@ export function IconAsset({
       ? styleOverride.color
       : theme.colors.foreground;
 
-  // Check if icon exists
+  // Check if icon exists and load it
   useEffect(() => {
     // Reset state when checking new icon
     setIconExists(true);
@@ -61,13 +62,29 @@ export function IconAsset({
     const img = new Image();
     img.onload = () => {
       setIconExists(true);
+      if (handle !== null) {
+        continueRender(handle);
+      }
     };
     img.onerror = () => {
       console.warn(`Icon "${patchedName}" not found at ${requestedMaskUrl}, using placeholder`);
       setIconExists(false);
+      // Load fallback icon before continuing
+      const fallbackImg = new Image();
+      fallbackImg.onload = () => {
+        if (handle !== null) {
+          continueRender(handle);
+        }
+      };
+      fallbackImg.onerror = () => {
+        if (handle !== null) {
+          continueRender(handle);
+        }
+      };
+      fallbackImg.src = fallbackMaskUrl;
     };
     img.src = requestedMaskUrl;
-  }, [requestedMaskUrl, patchedName]);
+  }, [requestedMaskUrl, patchedName, handle, fallbackMaskUrl]);
 
   // Preload the icon that will be used (only during rendering)
   useEffect(() => {

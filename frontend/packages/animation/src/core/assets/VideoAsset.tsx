@@ -1,6 +1,6 @@
 import { preloadVideo } from "@remotion/preload";
-import { useEffect } from "react";
-import { Html5Video, OffthreadVideo, useRemotionEnvironment } from "remotion";
+import { useEffect, useState } from "react";
+import { Html5Video, OffthreadVideo, useRemotionEnvironment, delayRender, continueRender } from "remotion";
 import { usePatchedProp, useStyleOverride } from "../../patches/PatchContext";
 import { useAspectPreset } from "../../styles/AspectPresetContext";
 
@@ -41,13 +41,32 @@ export function VideoAsset({
         objectFit: resolvedObjectFit,
     };
 
+    const [handle] = useState(() => isRendering && patchedSrc ? delayRender('Loading video') : null);
+
     useEffect(() => {
-        if (!patchedSrc || !isRendering) return;
-        const unpreload = preloadVideo(patchedSrc);
-        return () => {
-            unpreload();
+        if (!patchedSrc) return;
+
+        const video = document.createElement('video');
+        video.onloadeddata = () => {
+            if (handle !== null) {
+                continueRender(handle);
+            }
         };
-    }, [patchedSrc, isRendering]);
+        video.onerror = () => {
+            if (handle !== null) {
+                continueRender(handle);
+            }
+        };
+        video.src = patchedSrc;
+
+        let unpreload: (() => void) | undefined;
+        if (isRendering) {
+            unpreload = preloadVideo(patchedSrc);
+        }
+        return () => {
+            unpreload?.();
+        };
+    }, [patchedSrc, isRendering, handle]);
 
     return (
         <span

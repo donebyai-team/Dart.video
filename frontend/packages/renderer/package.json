@@ -32,14 +32,15 @@
     "react-dom": "18.3.1",
     "react-hot-toast": "2.4.1",
     "swc-loader": "^0.2.7",
-    "tsx": "^4.19.0"
+    "tsx": "^4.19.0",
+    "remotion": "4.0.421"
   },
   "peerDependencies": {
-    "@remotion/transitions": "*",
-    "remotion": "*"
+    "@remotion/transitions": "*"
   },
   "devDependencies": {
     "@coasterai/ts-config": "workspace:*",
+    "@remotion/cli": "4.0.421",
     "@types/babel__standalone": "^7.1.9"
   }
 }
