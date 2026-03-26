@@ -1,6 +1,6 @@
 import React from "react";
 import { AbsoluteFill, Composition } from "remotion";
-import { TextHighlight } from "../components/scenes/text";
+import { AnimatedNumber, TextHighlight, TextStagger } from "../components/scenes/text";
 import { FadeIn, FadeOut, SlideIn, ScaleIn, Stagger, TimelineGate } from "../core/animation_primitives";
 import { FramePreset, SafeArea, AbsoluteCenter, Stack, Row } from "../core/layout";
 import { Text } from "../core/text";
@@ -112,7 +112,7 @@ const TextComponentsScene: React.FC = () => (
     <Scene>
         <SafeArea>
             <AbsoluteCenter axis="both">
-                <Stack gap={64} align="center">
+                {/* <Stack gap={64} align="center"> */}
                     {/* <Counter
                         id="ctr-0"
                         suffix=" incidents"
@@ -153,11 +153,22 @@ const TextComponentsScene: React.FC = () => (
                         text="Your dashboard, logs, and alerts didn't adapt."
                     /> */}
 
-                    <TextHighlight
+                    {/* <TextHighlight
                         id="th-0"
-                        text="Everything else is just {noise}"
-                    />            
-                </Stack>
+                        text="Everything {noise} is pain "
+                    />             */}
+
+                    {/* <AnimatedNumber
+                        id="an-0"
+                        startText="Solved"
+                        endText="incidents"
+                        from={0}
+                        to={12450}
+                    />
+
+                    <TextHighlight id="texthighlight-0" text="Can your AI actually work with you?" /> */}
+                    <TextStagger id="textstagger-0" text="All teams are stretched thin." />
+                {/* </Stack> */}
             </AbsoluteCenter>
         </SafeArea>
     </Scene>
@@ -250,12 +261,12 @@ const LogoScene: React.FC = () => (
         <AbsoluteFill style={{ backgroundColor: 'white' }}>
             <SafeArea>
                 <AbsoluteCenter axis="both">
-                    {/* <LogoAsset id="logo-0" src="https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774240200-inline.svg" /> */}
-                    <LogoWithBrandName
+                    <LogoAsset id="logo-0" src="https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774240200-inline.svg" />
+                    {/* <LogoWithBrandName
                         style={{ color: "#000" }}
                         variant="heading"
                         src="https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774240201-apple-touch-icon.png" id="logo-with-brand-name-0"
-                        brandName="Cursor" />
+                        brandName="Cursor" /> */}
                 </AbsoluteCenter>
             </SafeArea>
         </AbsoluteFill>

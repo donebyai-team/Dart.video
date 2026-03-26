@@ -10,6 +10,7 @@ import (
 	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/cache"
 	"github.com/shank318/coasterai/models"
+	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
 	"time"
@@ -23,6 +24,9 @@ func assetCacheKey(assetID string) string {
 }
 
 func (l *llmService) AnalyzeImage(ctx context.Context, asset *models.MediaAsset) (*types.AssetAnalysis, error) {
+	if asset.MediaType != pbcore.MediaType_MEDIA_TYPE_IMAGE {
+		return &types.AssetAnalysis{}, nil
+	}
 	cacheKey := assetCacheKey(asset.ID)
 	analysedAsset, err := l.cache.GetKey(ctx, cacheKey)
 	if err != nil {

@@ -14,7 +14,6 @@ import (
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/services"
 	"go.uber.org/zap"
-	"math"
 	"strings"
 )
 
@@ -117,11 +116,11 @@ type animationGenerator struct {
 }
 
 func (l *animationGenerator) GenerateCodeV2(ctx context.Context, scene *types.Scene, callback TemplateGenerationCallback) (*models.Template, error) {
-	inptCodeGeneration := types.GenerateAnimationCodeRequestV2{
-		Scene: *scene,
-	}
-
-	conversationHistory := make([]types.Message, 0)
+	//inptCodeGeneration := types.GenerateAnimationCodeRequestV2{
+	//	Scene: *scene,
+	//}
+	//
+	//conversationHistory := make([]types.Message, 0)
 	for attempt := 0; attempt < maxAttempts; attempt++ {
 
 		// 🎨 Designing
@@ -130,9 +129,14 @@ func (l *animationGenerator) GenerateCodeV2(ctx context.Context, scene *types.Sc
 		})
 
 		l.logger.Info("generating code")
-		generatedAnimation, err := l.llmService.GenerateAnimationCodeV2(ctx, inptCodeGeneration, conversationHistory, func(thinking string) {
+		//generatedAnimation, err := l.llmService.GenerateAnimationCodeV2(ctx, inptCodeGeneration, conversationHistory, func(thinking string) {
+		//
+		//})
+		//if err != nil {
+		//	return nil, agenterrors.AnimationGenerationFailed("failed to generate animation", err)
+		//}
 
-		})
+		generatedAnimation, err := GenerateReact(scene)
 		if err != nil {
 			return nil, agenterrors.AnimationGenerationFailed("failed to generate animation", err)
 		}
@@ -165,54 +169,62 @@ func (l *animationGenerator) GenerateCodeV2(ctx context.Context, scene *types.Sc
 
 		template, err := l.uploadAndBuild(ctx, indentedCode, codeFilePath, attempt, callback)
 		if err == nil {
-			diff := math.Abs(float64(generatedAnimation.SettledFrame) - float64(template.Config.VisibleDuration))
-			if diff > 30 {
-				l.logger.Info("difference between llm and computed settledFrame is more than 30",
-					zap.Int("llm_settled_frame", int(generatedAnimation.SettledFrame)),
-					zap.Int("computed", int(template.Config.VisibleDuration)),
-				)
-			} else if diff > 0 {
-				l.logger.Info("found difference between llm and computed settledFrame",
-					zap.Int("llm_settled_frame", int(generatedAnimation.SettledFrame)),
-					zap.Int("computed", int(template.Config.VisibleDuration)),
-				)
+			//diff := math.Abs(float64(generatedAnimation.SettledFrame) - float64(template.Config.VisibleDuration))
+			//if diff > 30 {
+			//	l.logger.Info("difference between llm and computed settledFrame is more than 30",
+			//		zap.Int("llm_settled_frame", int(generatedAnimation.SettledFrame)),
+			//		zap.Int("computed", int(template.Config.VisibleDuration)),
+			//	)
+			//} else if diff > 0 {
+			//	l.logger.Info("found difference between llm and computed settledFrame",
+			//		zap.Int("llm_settled_frame", int(generatedAnimation.SettledFrame)),
+			//		zap.Int("computed", int(template.Config.VisibleDuration)),
+			//	)
+			//}
+			//
+			//if generatedAnimation.ThinkingSummary != nil {
+			//	template.Description = *generatedAnimation.ThinkingSummary
+			//}
+			//template.Config.VisibleDuration = template.Config.VisibleDuration
+			//template.Config.TotalDuration = generatedAnimation.SettledFrame
+
+			if template.Config.VisibleDuration == 0 {
+				template.Config.VisibleDuration = 40
+			}
+			if template.Config.TotalDuration == 0 {
+				template.Config.TotalDuration = 40
 			}
 
-			if generatedAnimation.ThinkingSummary != nil {
-				template.Description = *generatedAnimation.ThinkingSummary
-			}
-			template.Config.VisibleDuration = generatedAnimation.SettledFrame
-			template.Config.TotalDuration = generatedAnimation.SettledFrame
 			return template, nil
 		}
 
 		// Retry only on build errors
-		var buildErr *services.BuildError
-		if errors.As(err, &buildErr) {
-			// append thinking summary
-			if generatedAnimation.ThinkingSummary != nil {
-				conversationHistory = append(conversationHistory, types.Message{
-					Role:    types.Union3KassistantOrKtoolOrKuser__NewKassistant(),
-					Content: *generatedAnimation.ThinkingSummary,
-				})
-			}
-
-			conversationHistory = appendRetryConversation(
-				conversationHistory,
-				indentedCode,
-				buildFailureMessage(buildErr),
-			)
-
-			l.logger.Error("failed to build animation",
-				zap.Int("attempt_left", maxAttempts-attempt),
-				zap.Error(buildErr))
-
-			// 🔧 Refinement loop
-			callback(TemplateGenerationProgress{
-				Message: CreativeStageMessage(StageRefining, attempt),
-			})
-			continue
-		}
+		//var buildErr *services.BuildError
+		//if errors.As(err, &buildErr) {
+		//	// append thinking summary
+		//	if generatedAnimation.ThinkingSummary != nil {
+		//		conversationHistory = append(conversationHistory, types.Message{
+		//			Role:    types.Union3KassistantOrKtoolOrKuser__NewKassistant(),
+		//			Content: *generatedAnimation.ThinkingSummary,
+		//		})
+		//	}
+		//
+		//	conversationHistory = appendRetryConversation(
+		//		conversationHistory,
+		//		indentedCode,
+		//		buildFailureMessage(buildErr),
+		//	)
+		//
+		//	l.logger.Error("failed to build animation",
+		//		zap.Int("attempt_left", maxAttempts-attempt),
+		//		zap.Error(buildErr))
+		//
+		//	// 🔧 Refinement loop
+		//	callback(TemplateGenerationProgress{
+		//		Message: CreativeStageMessage(StageRefining, attempt),
+		//	})
+		//	continue
+		//}
 
 		return nil, agenterrors.AnimationGenerationFailed("failed to build animation", err)
 	}

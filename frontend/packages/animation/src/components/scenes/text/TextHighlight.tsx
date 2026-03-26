@@ -313,6 +313,6 @@ export const TextHighlightDescriptor: ComponentRegistration = {
     type: 'scene',
     fullSchema: TextHighlightSchema,
     editorProps: ['text', 'highlightStyle', 'animation', 'animationDelay', 'zoomDuration'],
-    description: 'Displays text with highlighted portions that zoom/pulse for emphasis. Use to draw attention to key words or phrases. Required props: text="Increase revenue by 300%", highlightPattern="300%". The pattern can be a word or phrase to highlight within the text.',
+    description: 'Displays text with highlighted portions that zoom/pulse for emphasis. Use to draw attention to key words or phrases. Required props: text="Increase revenue by {300%}", wrap the word to highlight in {}. The pattern can be a word or phrase to highlight within the text.',
     calculateDuration: calculateTextHighlightDuration,
 };

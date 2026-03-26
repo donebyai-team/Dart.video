@@ -131,7 +131,7 @@ func deduplicateAssets(
 		if a.AssetID == "" {
 			continue
 		}
-		
+
 		if i, ok := index[a.AssetID]; ok {
 			// keep the latest if it has a note
 			if a.Note != nil {
@@ -311,6 +311,10 @@ func (a *agentV2) injectMediaAssets(ctx context.Context, input *pbportal.CreateV
 	}
 
 	if len(assetIDs) > 0 {
+		a.publishTransientState(VideoAgentState{
+			Thinking: "Analysing images..",
+			State:    stateStatusProcessing,
+		})
 		mediaAssets, err := a.db.GetMediaAssetsByID(ctx, assetIDs)
 		if err != nil {
 			return err

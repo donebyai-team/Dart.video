@@ -126,7 +126,7 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 			sceneMapper[slide.Id] = &pendingSlide
 			totalAnimationSlides++
 			slide.Type = pbcore.SlideType_SLIDE_TYPE_ANIMATION
-			assignRandomTransitionAndDirection(slide)
+			//assignRandomTransitionAndDirection(slide)
 
 			slide.Content = &pbcore.Slide_Animation{
 				Animation: &pbcore.AnimationSlideContent{
@@ -187,7 +187,7 @@ func (g *videoConfigGenerator) UpdateAnimationSlide(
 
 				// update the selected template description
 				// for future slides to know what's being selected so far
-				animation.Plan.ThinkingSummary = utils.Ptr(selectedTemplate.Description)
+				//animation.Plan.ThinkingSummary = utils.Ptr(selectedTemplate.Description)
 			}
 		}
 	}

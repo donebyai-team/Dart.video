@@ -31,7 +31,7 @@ export function AbsoluteCenter({ axis = 'both', children }: AbsoluteCenterProps)
   }
 
   return (
-    <div style={{ ...style, width: defaultWidth }}>
+    <div style={{ ...style, width: defaultWidth, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       {children}
     </div>
   );

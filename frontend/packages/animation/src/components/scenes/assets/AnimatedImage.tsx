@@ -18,7 +18,7 @@ import type { DurationResult } from '../../../registry/registry';
 // Default constants
 const DEFAULT_TEXT_DURATION = 30;
 const DEFAULT_DELAY = 10;
-const DEFAULT_IMAGE_DURATION = 40;
+const DEFAULT_IMAGE_DURATION = 50;
 const DEFAULT_VARIANT = 'subheading' as const;
 const DEFAULT_ANIMATION = 'slideUp' as const;
 const DEFAULT_BORDER_RADIUS = 16;

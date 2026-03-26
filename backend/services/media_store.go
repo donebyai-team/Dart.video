@@ -392,69 +392,70 @@ func (g gcpMediaStore) extractMediaDimensions(reader io.ReadSeeker, mediaType pb
 }
 
 func extractMP4Metadata(reader io.ReadSeeker) (width, height, duration float64, err error) {
-	var timescale uint32
-	var movieDuration uint64
+	mvhdBoxes, err := mp4.ExtractBoxWithPayload(reader, nil, mp4.BoxPath{mp4.BoxTypeMoov(), mp4.BoxTypeMvhd()})
+	if err != nil {
+		return 0, 0, 0, err
+	}
 
-	var trackWidth float64
-	var trackHeight float64
-
-	_, err = mp4.ReadBoxStructure(reader, func(h *mp4.ReadHandle) (interface{}, error) {
-
-		switch h.BoxInfo.Type {
-
-		case mp4.BoxTypeMvhd():
-			box, _, err := h.ReadPayload()
-			if err != nil {
-				return nil, err
-			}
-
-			mvhd := box.(*mp4.Mvhd)
-			timescale = mvhd.Timescale
-
+	if len(mvhdBoxes) > 0 {
+		mvhd := mvhdBoxes[0].Payload.(*mp4.Mvhd)
+		if mvhd.Timescale > 0 {
+			movieDuration := mvhd.DurationV1
 			if mvhd.Version == 0 {
 				movieDuration = uint64(mvhd.DurationV0)
-			} else {
-				movieDuration = mvhd.DurationV1
 			}
+			duration = float64(movieDuration) / float64(mvhd.Timescale)
+		}
+	}
 
-		case mp4.BoxTypeTkhd():
-			box, _, err := h.ReadPayload()
-			if err != nil {
-				return nil, err
-			}
+	trakBoxes, err := mp4.ExtractBox(reader, nil, mp4.BoxPath{mp4.BoxTypeMoov(), mp4.BoxTypeTrak()})
+	if err != nil {
+		return 0, 0, duration, err
+	}
 
-			tkhd := box.(*mp4.Tkhd)
+	for _, trak := range trakBoxes {
+		trackBoxes, err := mp4.ExtractBoxesWithPayload(reader, trak, []mp4.BoxPath{
+			{mp4.BoxTypeTkhd()},
+			{mp4.BoxTypeMdia(), mp4.BoxTypeHdlr()},
+			{mp4.BoxTypeMdia(), mp4.BoxTypeMdhd()},
+		})
+		if err != nil {
+			continue
+		}
 
-			// stored as 16.16 fixed-point
-			trackWidth = float64(tkhd.Width) / 65536
-			trackHeight = float64(tkhd.Height) / 65536
+		var tkhd *mp4.Tkhd
+		var hdlr *mp4.Hdlr
+		var mdhd *mp4.Mdhd
 
-		case mp4.BoxTypeHdlr():
-			box, _, err := h.ReadPayload()
-			if err != nil {
-				return nil, err
-			}
-
-			hdlr := box.(*mp4.Hdlr)
-
-			if string(hdlr.HandlerType[:]) == "vide" {
-				width = trackWidth
-				height = trackHeight
+		for _, box := range trackBoxes {
+			switch box.Info.Type {
+			case mp4.BoxTypeTkhd():
+				tkhd = box.Payload.(*mp4.Tkhd)
+			case mp4.BoxTypeHdlr():
+				hdlr = box.Payload.(*mp4.Hdlr)
+			case mp4.BoxTypeMdhd():
+				mdhd = box.Payload.(*mp4.Mdhd)
 			}
 		}
 
-		return h.Expand()
-	})
+		if hdlr == nil || string(hdlr.HandlerType[:]) != "vide" {
+			continue
+		}
 
-	if err != nil {
-		return
+		if tkhd != nil {
+			// Width/height are stored as 16.16 fixed-point values.
+			width = float64(tkhd.Width) / 65536
+			height = float64(tkhd.Height) / 65536
+		}
+
+		if duration == 0 && mdhd != nil && mdhd.Timescale > 0 {
+			duration = float64(mdhd.GetDuration()) / float64(mdhd.Timescale)
+		}
+
+		return width, height, duration, nil
 	}
 
-	if timescale > 0 {
-		duration = float64(movieDuration) / float64(timescale)
-	}
-
-	return
+	return width, height, duration, nil
 }
 
 func extractSVGDimensions(reader io.Reader) (float32, float32) {

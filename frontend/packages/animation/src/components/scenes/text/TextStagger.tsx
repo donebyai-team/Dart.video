@@ -15,7 +15,7 @@ import type { DurationResult } from '../durationTypes';
 const DEFAULT_STAGGER_DELAY = 5;
 const DEFAULT_WORD_DURATION = 15;
 const DEFAULT_VARIANT = 'heading' as const;
-const DEFAULT_ANIMATION = 'slideUp' as const;
+const DEFAULT_ANIMATION = 'scaleIn' as const;
 const DEFAULT_SEPARATOR = ' ';
 
 export interface TextStaggerStaggerProps {

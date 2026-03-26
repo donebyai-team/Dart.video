@@ -7,20 +7,20 @@ import (
 	"strings"
 )
 
-func GenerateReact(scene types.Scene) (string, error) {
+func GenerateReact(scene *types.Scene) (*types.GenerateAnimationCodeResponse, error) {
 	var elements []string
 
 	for _, el := range scene.Elements {
 
 		rendered, err := renderElement(el, 3, el.Component)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 
 		elements = append(elements, rendered)
 	}
 
-	return fmt.Sprintf(`
+	code := fmt.Sprintf(`
 export default function RemoteComponent() {
   return (
     <SafeArea>
@@ -30,7 +30,8 @@ export default function RemoteComponent() {
     </SafeArea>
   );
 }
-`, strings.Join(elements, "\n")), nil
+`, strings.Join(elements, "\n"))
+	return &types.GenerateAnimationCodeResponse{Code: code}, nil
 }
 
 func renderElement(el types.SceneElement, indent int, path string) (string, error) {

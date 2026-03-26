@@ -13,6 +13,7 @@ import { resolveTypography } from '../../../tokens';
 import { useTheme } from '../../../theme';
 import { EntranceAnimation, getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
+import type { DurationResult } from '../../../registry/registry';
 
 // Default constants
 const DEFAULT_TEXT_DURATION = 30;
@@ -147,13 +148,33 @@ export const AnimatedVideoSchema = z.object({
     style: z.any().optional(),
 });
 
-// Note: No duration calculator - video duration depends on video length
+// Default video duration (hardcoded for now - ideally would be determined by video file length)
+const DEFAULT_VIDEO_SCENE_DURATION = 500;
+
+export function calculateAnimatedVideoDuration(props: AnimatedVideoProps): DurationResult {
+    // Validate props
+    const validation = AnimatedVideoSchema.safeParse(props);
+    if (!validation.success) {
+        const firstError = validation.error.errors[0];
+        return {
+            success: false,
+            error: firstError.message,
+            field: firstError.path[0] as string,
+        };
+    }
+
+    // Hardcoded duration for now - video duration ideally depends on video file length
+    return {
+        success: true,
+        duration: DEFAULT_VIDEO_SCENE_DURATION,
+    };
+}
 
 export const AnimatedVideoDescriptor: ComponentRegistration = {
     name: 'AnimatedVideo',
     type: 'scene',
     fullSchema: AnimatedVideoSchema,
     editorProps: ['text', 'src', 'variant', 'animation', 'borderRadius'],
-    description: 'Displays a text label above a video with entrance animation. Use for demo videos, testimonials, or video content. Required props: text="Watch Demo", src="attachment video url". The text animates in first, then the video follows. Note: Total duration depends on video length.',
-    // No calculateDuration - video duration is determined by video file length
+    description: 'Displays a text label above a video with entrance animation. Use for demo videos, testimonials, or video content. Required props: text="Watch Demo", src="attachment video url". The text animates in first, then the video follows.',
+    calculateDuration: calculateAnimatedVideoDuration,
 };

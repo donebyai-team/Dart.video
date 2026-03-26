@@ -35,7 +35,7 @@ export interface LogoWithBrandNameProps {
 
 export function LogoWithBrandName({
     brandName,
-    src,
+    src='https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774240201-apple-touch-icon.png',
     logoSize,
     variant,
     startAt,
