@@ -100,20 +100,20 @@ func (v videoGeneration) UpdateVideoConfig(ctx context.Context, video *models.Vi
 		allSlides = append(allSlides, section.Slides...)
 	}
 
-	totalDuration := int32(0)
+	totalDurationInFrames := int32(0)
 	for i, slide := range allSlides {
-		totalDuration += slide.DurationInFrames
+		totalDurationInFrames += slide.DurationInFrames
 
 		// subtract transition for every slide except the last one globally
 		if i < len(allSlides)-1 &&
 			slide.TransitionDurationInFrames != nil &&
 			slide.Transition != pbcore.TransitionType_TRANSITION_NONE {
 
-			totalDuration -= *slide.TransitionDurationInFrames * video.Metadata.Fps
+			totalDurationInFrames -= *slide.TransitionDurationInFrames
 		}
 	}
 
-	existingVideo.Metadata.DurationInFrames = totalDuration
+	existingVideo.Metadata.DurationInFrames = totalDurationInFrames
 
 	if video.Status != "" {
 		existingVideo.Status = video.Status
