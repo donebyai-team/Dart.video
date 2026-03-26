@@ -60,36 +60,41 @@ export const CanvasZoomEffect: React.FC<CanvasZoomEffectProps> = ({
   const maxZoom = Math.max(1, activeZoom.zoomLevel ?? 2)
   const totalFrames = endFrame - startFrame
 
-  // Use 30% of duration for zoom-in and zoom-out, capped at 0.5s each
-  const transitionFrames = Math.min(fps * 0.5, totalFrames * 0.3)
+  // Use 25% of duration for zoom-in, 35% for zoom-out (slower return feels smoother)
+  const zoomInFrames = Math.min(fps * 0.5, totalFrames * 0.25)
+  const zoomOutFrames = Math.min(fps * 0.7, totalFrames * 0.35)
 
-  const easeInOut = (t: number) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t)
+  // Smoother cubic ease-in-out for gentler zoom transitions
+  const easeInOut = (t: number) => t < 0.5 
+    ? 4 * t * t * t 
+    : 1 - Math.pow(-2 * t + 2, 3) / 2
 
   // Compute zoom progress: ramp up, hold, ramp down
   let zoomProgress = 1
-  if (frame < startFrame + transitionFrames) {
-    zoomProgress = easeInOut((frame - startFrame) / transitionFrames)
-  } else if (frame > endFrame - transitionFrames) {
-    zoomProgress = easeInOut((endFrame - frame) / transitionFrames)
+  if (frame < startFrame + zoomInFrames) {
+    // Zoom in phase
+    const t = (frame - startFrame) / zoomInFrames
+    zoomProgress = easeInOut(Math.min(1, Math.max(0, t)))
+  } else if (frame > endFrame - zoomOutFrames) {
+    // Zoom out phase - ensure we reach exactly 0 at endFrame
+    const t = (endFrame - frame) / zoomOutFrames
+    zoomProgress = easeInOut(Math.min(1, Math.max(0, t)))
   }
 
   const currentZoom = 1 + (maxZoom - 1) * zoomProgress
+  
+  // If zoom is essentially 1 (no zoom), render without transform to avoid any visual artifacts
+  if (Math.abs(currentZoom - 1) < 0.001) {
+    return <>{children}</>
+  }
 
   // Zoom center in canvas coordinates (where user selected)
   const zoomX = activeZoom.x || width / 2
   const zoomY = activeZoom.y || height / 2
 
-  // Canvas center
-  const canvasCenterX = width / 2
-  const canvasCenterY = height / 2
-
-  // Calculate translation to move zoom center to canvas center
-  // After scaling, we need to translate so (zoomX, zoomY) appears at (canvasCenterX, canvasCenterY)
-  // Translation = (canvasCenter - zoomCenter) * currentZoom... but since we scale first,
-  // we translate in pre-scaled coordinates: (canvasCenter - zoomCenter * currentZoom)
-  const translateX = canvasCenterX - zoomX * currentZoom
-  const translateY = canvasCenterY - zoomY * currentZoom
-
+  // Camera zoom: scale around the zoom point
+  // The content stays in place, we just zoom the "camera" into that point
+  // transform-origin is set to the zoom point, so scaling happens around it
   return (
     <div
       style={{
@@ -102,8 +107,8 @@ export const CanvasZoomEffect: React.FC<CanvasZoomEffectProps> = ({
         style={{
           width: '100%',
           height: '100%',
-          transform: `translate(${translateX}px, ${translateY}px) scale(${currentZoom})`,
-          transformOrigin: '0 0',
+          transform: `scale(${currentZoom})`,
+          transformOrigin: `${zoomX}px ${zoomY}px`,
         }}
       >
         {children}
