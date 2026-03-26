@@ -314,13 +314,6 @@ const StoryboardSection = ({
                                 })}
                             </SortableContext>
                         </DndContext>
-
-                        {/* Add slide button */}
-                        {/* <AddSlideButton
-                            slideTypes={allSlideTypes}
-                            onAddSlide={onAddSlide}
-                            variant="inline"
-                        /> */}
                     </div>
                 </CollapsibleContent>
             </Collapsible>

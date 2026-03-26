@@ -1,5 +1,5 @@
 import { fromJson, JsonObject } from '@bufbuild/protobuf'
-import { Slide, TransitionType, MediaAsset } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { Slide, TransitionType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Video, VideoSchema } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import { linearTiming, TransitionSeries } from '@remotion/transitions'
 import React, { useMemo } from 'react'
@@ -13,11 +13,11 @@ import {
   ASPECT_PRESETS,
   defaultTheme,
 } from '@coasterai/animation'
-import { AnimationSlide, MediaSlide } from './slides'
+import { AnimationSlide } from './slides'
 import { backgroundStyleToCSS } from './backgroundUtils'
 import { getTransitionPresentation } from './transitions/presentation'
 import { getSlideTransitionDirectionValue } from './transitions/config'
-import { TRANSITION_DURATION_SECONDS } from './frameUtils'
+import { TRANSITION_DURATION_FRAMES } from './frameUtils'
 import { brandingToTheme } from './utils'
 
 
@@ -101,7 +101,6 @@ export const Slideshow: React.FC<SlideshowProps> = ({
   // if external video object exist use it or assign zustand video object
   const allSlides = sections.flatMap(section => section.slides)
 
-  const transitionDurationFrames = Math.round(fps * TRANSITION_DURATION_SECONDS)
 
   /* ================= EMPTY ================= */
 
@@ -174,7 +173,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({
                     index < allSlides.length - 1 &&
                     slide.transition !== TransitionType.TRANSITION_NONE
                   const visibleDuration = hasTransition
-                    ? Math.max(1, slide.durationInFrames - transitionDurationFrames)
+                    ? Math.max(1, slide.durationInFrames - TRANSITION_DURATION_FRAMES)
                     : slide.durationInFrames
 
                   return (
@@ -210,7 +209,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({
                             height
                           ) as any}
                           timing={linearTiming({
-                            durationInFrames: Math.round(transitionDurationFrames)
+                            durationInFrames: Math.round(TRANSITION_DURATION_FRAMES)
                           })}
                         />
                       )}
