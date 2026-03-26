@@ -6,11 +6,13 @@ import { SlideshowWithStore as Slideshow } from '../SlideshowWithStore'
 import { useVideoStore } from '@/stores/video'
 import { AnimationEditLayer } from '../animation/AnimationEditLayer'
 import { useAnimationEdit } from '../animation/useAnimationEdit'
+import { getRealSlideStartFrame } from '../frame_calculations'
 
 interface PlayerCanvasProps {
   playerRef: React.RefObject<PlayerRef>
   totalFrames: number
   fps: number
+  currentFrame: number
   isFullscreen: boolean
   isEditing: boolean
   scale: number
@@ -24,6 +26,7 @@ const PlayerCanvas = ({
   playerRef,
   totalFrames,
   fps,
+  currentFrame,
   isFullscreen,
   isEditing,
   scale,
@@ -39,6 +42,7 @@ const PlayerCanvas = ({
   const onUpdateSpotlight = useVideoStore(s => s.updateSpotlight)
   const onUpdateCallout = useVideoStore(s => s.updateCallout)
   const onUpdateZoom = useVideoStore(s => s.updateZoom)
+  const getTimelineSlides = useVideoStore(s => s.getTimelineSlides)
 
   const {
     isAnimationSlide,
@@ -83,6 +87,18 @@ const PlayerCanvas = ({
   const spotlights = selectedSlide.slide.spotlights ?? []
   const callouts = selectedSlide.slide.callouts ?? []
   const zooms = selectedSlide.slide.zooms ?? []
+  
+  // Calculate slide start frame for overlay visibility check
+  const slideStartFrame = getRealSlideStartFrame(getTimelineSlides(), selectedSlide.slide.id, fps)
+  const slideRelativeFrame = currentFrame - slideStartFrame
+  
+  // Debug: log frame values
+  console.debug('PlayerCanvas frame debug:', {
+    currentFrame,
+    slideStartFrame,
+    slideRelativeFrame,
+    zooms: zooms.map(z => ({ startFrame: z.startFrame, endFrame: z.endFrame }))
+  })
 
   return (
     <div
@@ -127,13 +143,15 @@ const PlayerCanvas = ({
               onUpdateZoom={(id, updates) => onUpdateZoom(id, updates)}
               containerWidth={canvasSize.width}
               containerHeight={canvasSize.height}
+              currentFrame={currentFrame}
+              slideStartFrame={slideStartFrame}
             />
           </div>
         )}
       </motion.div>
 
-      {/* Animation edit layer */}
-      {isEditing && !isPlaying && isAnimationSlide && (
+      {/* Animation edit layer - disabled when an effect (zoom/spotlight/callout) is selected */}
+      {isEditing && !isPlaying && isAnimationSlide && !selectedEffectId && (
         <AnimationEditLayer
           playerRef={canvasRef}
           selectedEid={selectedEid}

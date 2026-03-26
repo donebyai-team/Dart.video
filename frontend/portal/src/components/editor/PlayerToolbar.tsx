@@ -26,15 +26,16 @@ interface PlayerToolbarProps {
   onDurationChange: (newDuration: number) => void
   minDuration?: number
   maxDuration?: number
+  currentFrame?: number
 }
 
 const insertTools: { id: EffectType; name: string; icon: React.ElementType }[] = [
-  { id: EffectType.CALLOUT, name: 'Callout', icon: Focus },
-  { id: EffectType.SPOTLIGHT, name: 'Spotlight', icon: CircleDot },
+  // { id: EffectType.CALLOUT, name: 'Callout', icon: Focus },
+  // { id: EffectType.SPOTLIGHT, name: 'Spotlight', icon: CircleDot },
   { id: EffectType.ZOOM, name: 'Zoom', icon: ZoomIn },
 ]
 
-const PlayerToolbar = ({ onSlideSpeedChange, onDurationChange, minDuration = 1, maxDuration = 180 }: PlayerToolbarProps) => {
+const PlayerToolbar = ({ onSlideSpeedChange, onDurationChange, minDuration = 1, maxDuration = 180, currentFrame = 0 }: PlayerToolbarProps) => {
 
   const { user } = useAuth()
   const isPlatformAdminUser = user && isPlatformAdmin(user);
@@ -148,7 +149,7 @@ const PlayerToolbar = ({ onSlideSpeedChange, onDurationChange, minDuration = 1, 
               {insertTools.map(tool => (
                 <DropdownMenuItem
                   key={String(tool.id)}
-                  onClick={() => onSelectTool({ type: ActiveToolType.INSERT, tool: tool.id })}
+                  onClick={() => onSelectTool({ type: ActiveToolType.INSERT, tool: tool.id }, currentFrame)}
                   className='gap-2'
                 >
                   <tool.icon className='w-4 h-4' />

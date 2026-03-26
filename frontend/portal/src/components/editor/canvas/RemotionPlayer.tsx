@@ -369,6 +369,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
         <PlayerToolbar
           onSlideSpeedChange={(newDuration) => onSlideSpeedChange(selectedSlideId, newDuration)}
           onDurationChange={(newDuration) => onDurationChange(selectedSlideId, newDuration)}
+          currentFrame={currentFrame}
         />
       )}
 
@@ -380,6 +381,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
           playerRef={playerRef}
           totalFrames={totalFrames}
           fps={fps}
+          currentFrame={currentFrame}
           isFullscreen={isFullscreen}
           isEditing={!isFullscreen}
           canvasSize={canvasSize}

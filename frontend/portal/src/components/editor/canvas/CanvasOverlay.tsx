@@ -17,6 +17,8 @@ interface CanvasOverlayProps {
   onUpdateZoom?: (id: string, updates: Partial<ZoomEffect>) => void;
   containerWidth: number;
   containerHeight: number;
+  currentFrame?: number; // Global frame in video
+  slideStartFrame?: number; // Global frame where current slide starts
 }
 
 const CanvasOverlay = ({
@@ -31,7 +33,18 @@ const CanvasOverlay = ({
   onUpdateZoom,
   containerWidth,
   containerHeight,
+  currentFrame = 0,
+  slideStartFrame = 0,
 }: CanvasOverlayProps) => {
+  // Convert global frame to slide-relative frame
+  const slideRelativeFrame = Math.max(0, currentFrame - slideStartFrame);
+  
+  // Helper to check if an effect is active at current slide-relative frame
+  const isEffectActiveAtFrame = (startFrame?: number, endFrame?: number) => {
+    const start = startFrame ?? 0;
+    const end = endFrame ?? Infinity;
+    return slideRelativeFrame >= start && slideRelativeFrame <= end;
+  };
 
   const { scale } = useMemo(() => {
     if (!containerWidth || !containerHeight) {
@@ -95,23 +108,26 @@ const CanvasOverlay = ({
         />
       ))}
 
-      {/* Render zoom effects using ZoomOverlay for interactive editing */}
-      {zooms.map((zoom) => (
-        <ZoomOverlay
-          key={zoom.id}
-          zoom={zoom}
-          resolution={resolution}
-          containerWidth={containerWidth}
-          containerHeight={containerHeight}
-          isSelected={selectedEffectId === zoom.id}
-          onSelect={() => onSelectObject(zoom.id)}
-          onUpdate={(updates) => {
-            if (onUpdateZoom) {
-              onUpdateZoom(zoom.id, updates as Partial<ZoomEffect>);
-            }
-          }}
-        />
-      ))}
+      {/* Render zoom effects using ZoomOverlay for interactive editing
+          Only show when current frame is within effect range */}
+      {zooms
+        .filter((zoom) => isEffectActiveAtFrame(zoom.startFrame, zoom.endFrame))
+        .map((zoom) => (
+          <ZoomOverlay
+            key={zoom.id}
+            zoom={zoom}
+            resolution={resolution}
+            containerWidth={containerWidth}
+            containerHeight={containerHeight}
+            isSelected={selectedEffectId === zoom.id}
+            onSelect={() => onSelectObject(zoom.id)}
+            onUpdate={(updates) => {
+              if (onUpdateZoom) {
+                onUpdateZoom(zoom.id, updates as Partial<ZoomEffect>);
+              }
+            }}
+          />
+        ))}
     </>
   );
 };

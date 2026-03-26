@@ -132,8 +132,8 @@ export const createNewSection = (): Section =>
 
 export const createSpotlightEffect = (
     resolution: Resolution,
-    startTimeInSec: number,
-    endTimeInSec: number
+    startFrame: number,
+    endFrame: number
 ): SpotlightEffect => {
     const width = 200;
     const height = 150;
@@ -146,15 +146,15 @@ export const createSpotlightEffect = (
         height,
         blurAmount: 10,
         borderRadius: 8,
-        startTime: startTimeInSec,
-        endTime: endTimeInSec,
+        startFrame,
+        endFrame,
     });
 };
 
 export const createCalloutEffect = (
     resolution: Resolution,
-    startTimeInSec: number,
-    endTimeInSec: number
+   startFrame: number,
+    endFrame: number
 ): CalloutEffect => {
     const width = 200;
     const height = 150;
@@ -167,24 +167,24 @@ export const createCalloutEffect = (
         height,
         blurAmount: 10,
         borderRadius: 8,
-        startTime: startTimeInSec,
-        endTime: endTimeInSec,
+        startFrame,
+        endFrame,
         color: "#22c55e"
     });
 };
 
 export const createZoomEffect = (
     resolution: Resolution,
-    startTimeInSec: number,
-    endTimeInSec: number
+    startFrame: number,
+    endFrame: number
 ): ZoomEffect => {
     return create(ZoomEffectSchema, {
         id: `zoom-effect-${Date.now()}`,
         x: resolution.width / 2,
         y: resolution.height / 2,
         zoomLevel: 2,
-        startTime: startTimeInSec,
-        endTime: endTimeInSec,
+        startFrame,
+        endFrame,
     });
 };
 

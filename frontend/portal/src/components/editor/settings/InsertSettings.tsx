@@ -15,8 +15,12 @@ interface InsertSettingsProps {
   onClose: () => void
   canDelete?: boolean
   slideDurationInSecond?: number
+  slideDurationInFrames?: number
+  slideStartFrame?: number // Global frame where slide starts
   slideStartTime?: number
   transitionDuration?: number
+  transitionDurationInFrames?: number
+  fps?: number
   onPlay?: () => void
   isPreviewPlaying?: boolean
 }
@@ -48,10 +52,14 @@ const InsertSettings = ({
   onClose,
   canDelete = true,
   slideDurationInSecond = 5,
+  slideDurationInFrames = 150,
+  slideStartFrame = 0,
   slideStartTime = 0,
   onPlay,
   isPreviewPlaying = false,
-  transitionDuration = 0
+  transitionDuration = 0,
+  transitionDurationInFrames = 0,
+  fps = 30
 }: InsertSettingsProps) => {
   const [settings, setSettings] = useState<SpotlightEffect | CalloutEffect | ZoomEffect>(currentObject);
 
@@ -101,8 +109,10 @@ const InsertSettings = ({
             onChange={settings => {
               onUpdate(settings)
             }}
-            slideDuration={slideDurationInSecond}
-            transitionDuration={transitionDuration}
+            slideDurationInFrames={slideDurationInFrames}
+            slideStartFrame={slideStartFrame}
+            transitionDurationInFrames={transitionDurationInFrames}
+            fps={fps}
             onPlay={onPlay}
             isPreviewPlaying={isPreviewPlaying}
           />

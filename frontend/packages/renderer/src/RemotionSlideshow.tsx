@@ -55,6 +55,7 @@ export const SlideComponent: React.FC<{
   height: number
   isEditing?: boolean
   isSelected?: boolean
+  isPlaying?: boolean
   onSelect?: () => void
   onUpdate?: (updates: Partial<Slide>) => void
   uploadMedia?: (file: File) => Promise<MediaAsset>
@@ -64,6 +65,7 @@ export const SlideComponent: React.FC<{
   height,
   isEditing,
   isSelected = false,
+  isPlaying = true,
   onSelect,
   onUpdate = () => { },
   uploadMedia
@@ -81,6 +83,7 @@ export const SlideComponent: React.FC<{
           height={height}
           isEditing={isEditing}
           isSelected={isSelected}
+          isPlaying={isPlaying}
           onSelect={onSelect}
           onUpdate={onUpdate}
           uploadMedia={uploadMedia}
@@ -141,6 +144,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({
   onSelectTemplate,
   video,
   videoConfig: videoConfigProp,
+  isPlaying = true,
   onUpdate = () => { },
   uploadMedia }) => {
   const selectedTemplateId = null
@@ -211,6 +215,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({
         height={height}
         isEditing={isEditing}
         isSelected={isSelected}
+        isPlaying={isPlaying}
         onUpdate={onUpdate}
         uploadMedia={uploadMedia}
         onSelect={() => {

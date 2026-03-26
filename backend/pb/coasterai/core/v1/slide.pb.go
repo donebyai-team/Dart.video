@@ -1105,8 +1105,8 @@ type SpotlightEffect struct {
 	Height        float32                `protobuf:"fixed32,5,opt,name=height,proto3" json:"height,omitempty"`
 	BlurAmount    float32                `protobuf:"fixed32,6,opt,name=blurAmount,proto3" json:"blurAmount,omitempty"`
 	BorderRadius  float32                `protobuf:"fixed32,7,opt,name=borderRadius,proto3" json:"borderRadius,omitempty"`
-	StartTime     float32                `protobuf:"fixed32,8,opt,name=startTime,proto3" json:"startTime,omitempty"`
-	EndTime       float32                `protobuf:"fixed32,9,opt,name=endTime,proto3" json:"endTime,omitempty"`
+	StartFrame    float32                `protobuf:"fixed32,8,opt,name=startFrame,proto3" json:"startFrame,omitempty"`
+	EndFrame      float32                `protobuf:"fixed32,9,opt,name=endFrame,proto3" json:"endFrame,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1190,16 +1190,16 @@ func (x *SpotlightEffect) GetBorderRadius() float32 {
 	return 0
 }
 
-func (x *SpotlightEffect) GetStartTime() float32 {
+func (x *SpotlightEffect) GetStartFrame() float32 {
 	if x != nil {
-		return x.StartTime
+		return x.StartFrame
 	}
 	return 0
 }
 
-func (x *SpotlightEffect) GetEndTime() float32 {
+func (x *SpotlightEffect) GetEndFrame() float32 {
 	if x != nil {
-		return x.EndTime
+		return x.EndFrame
 	}
 	return 0
 }
@@ -1213,8 +1213,8 @@ type CalloutEffect struct {
 	Height        float32                `protobuf:"fixed32,5,opt,name=height,proto3" json:"height,omitempty"`
 	BlurAmount    float32                `protobuf:"fixed32,6,opt,name=blurAmount,proto3" json:"blurAmount,omitempty"`
 	BorderRadius  float32                `protobuf:"fixed32,7,opt,name=borderRadius,proto3" json:"borderRadius,omitempty"`
-	StartTime     float32                `protobuf:"fixed32,8,opt,name=startTime,proto3" json:"startTime,omitempty"`
-	EndTime       float32                `protobuf:"fixed32,9,opt,name=endTime,proto3" json:"endTime,omitempty"`
+	StartFrame    float32                `protobuf:"fixed32,8,opt,name=startFrame,proto3" json:"startFrame,omitempty"`
+	EndFrame      float32                `protobuf:"fixed32,9,opt,name=endFrame,proto3" json:"endFrame,omitempty"`
 	Color         string                 `protobuf:"bytes,10,opt,name=color,proto3" json:"color,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1299,16 +1299,16 @@ func (x *CalloutEffect) GetBorderRadius() float32 {
 	return 0
 }
 
-func (x *CalloutEffect) GetStartTime() float32 {
+func (x *CalloutEffect) GetStartFrame() float32 {
 	if x != nil {
-		return x.StartTime
+		return x.StartFrame
 	}
 	return 0
 }
 
-func (x *CalloutEffect) GetEndTime() float32 {
+func (x *CalloutEffect) GetEndFrame() float32 {
 	if x != nil {
-		return x.EndTime
+		return x.EndFrame
 	}
 	return 0
 }
@@ -1326,8 +1326,8 @@ type ZoomEffect struct {
 	X             float32                `protobuf:"fixed32,2,opt,name=x,proto3" json:"x,omitempty"`
 	Y             float32                `protobuf:"fixed32,3,opt,name=y,proto3" json:"y,omitempty"`
 	ZoomLevel     float32                `protobuf:"fixed32,4,opt,name=zoomLevel,proto3" json:"zoomLevel,omitempty"`
-	StartTime     float32                `protobuf:"fixed32,5,opt,name=startTime,proto3" json:"startTime,omitempty"`
-	EndTime       float32                `protobuf:"fixed32,6,opt,name=endTime,proto3" json:"endTime,omitempty"`
+	StartFrame    float32                `protobuf:"fixed32,5,opt,name=startFrame,proto3" json:"startFrame,omitempty"`
+	EndFrame      float32                `protobuf:"fixed32,6,opt,name=endFrame,proto3" json:"endFrame,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1390,16 +1390,16 @@ func (x *ZoomEffect) GetZoomLevel() float32 {
 	return 0
 }
 
-func (x *ZoomEffect) GetStartTime() float32 {
+func (x *ZoomEffect) GetStartFrame() float32 {
 	if x != nil {
-		return x.StartTime
+		return x.StartFrame
 	}
 	return 0
 }
 
-func (x *ZoomEffect) GetEndTime() float32 {
+func (x *ZoomEffect) GetEndFrame() float32 {
 	if x != nil {
-		return x.EndTime
+		return x.EndFrame
 	}
 	return 0
 }
@@ -2094,7 +2094,7 @@ const file_coasterai_core_v1_slide_proto_rawDesc = "" +
 	"\x02id\x18\t \x01(\tR\x02id\x12:\n" +
 	"\tmediaType\x18\n" +
 	" \x01(\x0e2\x1c.coasterai.core.v1.MediaTypeR\tmediaType\x12\x1a\n" +
-	"\bduration\x18\v \x01(\x02R\bduration\"\xe7\x01\n" +
+	"\bduration\x18\v \x01(\x02R\bduration\"\xeb\x01\n" +
 	"\x0fSpotlightEffect\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\f\n" +
 	"\x01x\x18\x02 \x01(\x02R\x01x\x12\f\n" +
@@ -2104,9 +2104,11 @@ const file_coasterai_core_v1_slide_proto_rawDesc = "" +
 	"\n" +
 	"blurAmount\x18\x06 \x01(\x02R\n" +
 	"blurAmount\x12\"\n" +
-	"\fborderRadius\x18\a \x01(\x02R\fborderRadius\x12\x1c\n" +
-	"\tstartTime\x18\b \x01(\x02R\tstartTime\x12\x18\n" +
-	"\aendTime\x18\t \x01(\x02R\aendTime\"\xfb\x01\n" +
+	"\fborderRadius\x18\a \x01(\x02R\fborderRadius\x12\x1e\n" +
+	"\n" +
+	"startFrame\x18\b \x01(\x02R\n" +
+	"startFrame\x12\x1a\n" +
+	"\bendFrame\x18\t \x01(\x02R\bendFrame\"\xff\x01\n" +
 	"\rCalloutEffect\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\f\n" +
 	"\x01x\x18\x02 \x01(\x02R\x01x\x12\f\n" +
@@ -2116,19 +2118,23 @@ const file_coasterai_core_v1_slide_proto_rawDesc = "" +
 	"\n" +
 	"blurAmount\x18\x06 \x01(\x02R\n" +
 	"blurAmount\x12\"\n" +
-	"\fborderRadius\x18\a \x01(\x02R\fborderRadius\x12\x1c\n" +
-	"\tstartTime\x18\b \x01(\x02R\tstartTime\x12\x18\n" +
-	"\aendTime\x18\t \x01(\x02R\aendTime\x12\x14\n" +
+	"\fborderRadius\x18\a \x01(\x02R\fborderRadius\x12\x1e\n" +
+	"\n" +
+	"startFrame\x18\b \x01(\x02R\n" +
+	"startFrame\x12\x1a\n" +
+	"\bendFrame\x18\t \x01(\x02R\bendFrame\x12\x14\n" +
 	"\x05color\x18\n" +
-	" \x01(\tR\x05color\"\x8e\x01\n" +
+	" \x01(\tR\x05color\"\x92\x01\n" +
 	"\n" +
 	"ZoomEffect\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\f\n" +
 	"\x01x\x18\x02 \x01(\x02R\x01x\x12\f\n" +
 	"\x01y\x18\x03 \x01(\x02R\x01y\x12\x1c\n" +
-	"\tzoomLevel\x18\x04 \x01(\x02R\tzoomLevel\x12\x1c\n" +
-	"\tstartTime\x18\x05 \x01(\x02R\tstartTime\x12\x18\n" +
-	"\aendTime\x18\x06 \x01(\x02R\aendTime\"\xa1\t\n" +
+	"\tzoomLevel\x18\x04 \x01(\x02R\tzoomLevel\x12\x1e\n" +
+	"\n" +
+	"startFrame\x18\x05 \x01(\x02R\n" +
+	"startFrame\x12\x1a\n" +
+	"\bendFrame\x18\x06 \x01(\x02R\bendFrame\"\xa1\t\n" +
 	"\x05Slide\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x120\n" +
 	"\x04type\x18\x02 \x01(\x0e2\x1c.coasterai.core.v1.SlideTypeR\x04type\x12\x1e\n" +

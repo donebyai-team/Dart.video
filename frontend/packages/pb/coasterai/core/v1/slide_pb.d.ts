@@ -353,14 +353,14 @@ export declare type SpotlightEffect = Message<"coasterai.core.v1.SpotlightEffect
   borderRadius: number;
 
   /**
-   * @generated from field: float startTime = 8;
+   * @generated from field: float startFrame = 8;
    */
-  startTime: number;
+  startFrame: number;
 
   /**
-   * @generated from field: float endTime = 9;
+   * @generated from field: float endFrame = 9;
    */
-  endTime: number;
+  endFrame: number;
 };
 
 /**
@@ -409,14 +409,14 @@ export declare type CalloutEffect = Message<"coasterai.core.v1.CalloutEffect"> &
   borderRadius: number;
 
   /**
-   * @generated from field: float startTime = 8;
+   * @generated from field: float startFrame = 8;
    */
-  startTime: number;
+  startFrame: number;
 
   /**
-   * @generated from field: float endTime = 9;
+   * @generated from field: float endFrame = 9;
    */
-  endTime: number;
+  endFrame: number;
 
   /**
    * @generated from field: string color = 10;
@@ -455,14 +455,14 @@ export declare type ZoomEffect = Message<"coasterai.core.v1.ZoomEffect"> & {
   zoomLevel: number;
 
   /**
-   * @generated from field: float startTime = 5;
+   * @generated from field: float startFrame = 5;
    */
-  startTime: number;
+  startFrame: number;
 
   /**
-   * @generated from field: float endTime = 6;
+   * @generated from field: float endFrame = 6;
    */
-  endTime: number;
+  endFrame: number;
 };
 
 /**

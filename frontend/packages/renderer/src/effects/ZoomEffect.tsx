@@ -9,7 +9,7 @@ interface ZoomEffectProps {
   fps: number
   width: number
   height: number
-  slideDuration: number
+  slideDurationInFrames: number
   fullWidth: number
   fullHeight: number
   src: string
@@ -32,7 +32,7 @@ export const ZoomEffectComponent: React.FC<ZoomEffectProps> = ({
   fps,
   width,
   height,
-  slideDuration,
+  slideDurationInFrames,
   fullWidth,
   fullHeight,
   src,
@@ -40,12 +40,9 @@ export const ZoomEffectComponent: React.FC<ZoomEffectProps> = ({
   style,
   mediaType
 }) => {
-  const startTime = zoom.startTime ?? 0
-  const endTime = zoom.endTime ?? slideDuration
+  const startFrame = zoom.startFrame ?? 0
+  const endFrame = zoom.endFrame ?? slideDurationInFrames
   const maxZoom = Math.max(1, zoom.zoomLevel ?? 2)
-
-  const startFrame = startTime * fps
-  const endFrame = endTime * fps
 
   if (frame < startFrame || frame > endFrame) return null
 

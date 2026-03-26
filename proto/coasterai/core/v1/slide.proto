@@ -145,8 +145,8 @@ message SpotlightEffect {
   float height = 5;
   float blurAmount = 6;
   float borderRadius = 7;
-  float startTime = 8;
-  float endTime = 9;
+  float startFrame = 8;
+  float endFrame = 9;
 }
 
 message CalloutEffect {
@@ -157,8 +157,8 @@ message CalloutEffect {
   float height = 5;
   float blurAmount = 6;
   float borderRadius = 7;
-  float startTime = 8;
-  float endTime = 9;
+  float startFrame = 8;
+  float endFrame = 9;
   string color = 10;
 }
 
@@ -167,8 +167,8 @@ message ZoomEffect {
   float x = 2;
   float y = 3;
   float zoomLevel = 4;
-  float startTime = 5;
-  float endTime = 6;
+  float startFrame = 5;
+  float endFrame = 6;
 }
 
 // ===================== BACKWARD COMPAT TYPES =====================

@@ -287,7 +287,7 @@ export const MediaSlide: React.FC<MediaSlideProps> = ({ slide, width, height, is
               fullWidth={width}
               fullHeight={height}
               src={resolvedSrc}
-              slideDuration={convertFramesToSeconds(slide.durationInFrames, fps)}
+              slideDurationInFrames={slide.durationInFrames}
               meta={mediaContent.meta as MetaData}
               style={{
                 borderRadius: mediaContent.style?.borderRadius as number,

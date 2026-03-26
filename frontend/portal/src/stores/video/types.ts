@@ -106,7 +106,7 @@ export interface VideoActions {
     openEntitySettings: (id: EntityId) => void
 
     // Tools
-    handleSelectTool: (tool: SelectedTool) => void
+    handleSelectTool: (tool: SelectedTool, currentFrame?: number) => void
     handleCloseTool: () => void
     handleEditAnimation: () => void
     handleViewAnimationCode: () => void

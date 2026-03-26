@@ -8,8 +8,10 @@ import DurationChangeComponent from '../remotion/components/DurationChangeCompon
 interface ZoomSettingsProps {
   settings: Partial<ZoomEffect>
   onChange: (settings: Partial<ZoomEffect>) => void
-  slideDuration?: number
-  transitionDuration?: number
+  slideDurationInFrames?: number
+  slideStartFrame?: number // Global frame where this slide starts
+  transitionDurationInFrames?: number
+  fps?: number
   onPlay?: () => void
   isPreviewPlaying?: boolean
 }
@@ -17,13 +19,21 @@ interface ZoomSettingsProps {
 const ZoomSettings = ({
   settings,
   onChange,
-  slideDuration = 5,
-  transitionDuration = 0,
+  slideDurationInFrames = 150,
+  slideStartFrame = 0,
+  transitionDurationInFrames = 0,
+  fps = 30,
   onPlay,
   isPreviewPlaying = false,
 }: ZoomSettingsProps) => {
-  const zoomStart = settings.startTime ?? 0
-  const zoomEnd = settings.endTime ?? slideDuration
+  // Convert to global timeline seconds for display
+  const slideStartSec = slideStartFrame / fps
+  const slideEndSec = (slideStartFrame + slideDurationInFrames) / fps
+  const transitionDurationSec = transitionDurationInFrames / fps
+  
+  // Get current values as global timeline seconds
+  const zoomStartSec = slideStartSec + (settings.startFrame ?? 0) / fps
+  const zoomEndSec = slideStartSec + (settings.endFrame ?? slideDurationInFrames) / fps
   const zoomLevel = settings.zoomLevel ?? 2
 
   return (
@@ -48,38 +58,42 @@ const ZoomSettings = ({
         </div>
       </div>
 
-      {/* Timing Section */}
+      {/* Timing Section - shows global timeline time */}
       <div className='space-y-2'>
         <Label className='text-xs font-medium text-muted-foreground uppercase tracking-wide'>
-          Timing (Slide: 0s - {slideDuration.toFixed(1)}s)
+          Timing (Slide: {slideStartSec.toFixed(1)}s - {slideEndSec.toFixed(1)}s)
         </Label>
         <div className='flex items-center gap-2'>
           <Label className='text-xs w-16'>Start</Label>
           <DurationChangeComponent
-            value={zoomStart}
+            value={zoomStartSec}
             onValueChange={val => {
-              settings.startTime = val
+              // Convert global seconds back to slide-relative frames
+              const slideRelativeSec = val - slideStartSec
+              settings.startFrame = Math.round(slideRelativeSec * fps)
               onChange(settings)
             }}
-            max={zoomEnd - 0.1}
-            min={transitionDuration}
+            max={zoomEndSec - 0.1}
+            min={slideStartSec + transitionDurationSec}
             step={0.1}
           />
         </div>
         <div className='flex items-center gap-2'>
           <Label className='text-xs w-16'>End</Label>
           <DurationChangeComponent
-            value={zoomEnd}
+            value={zoomEndSec}
             onValueChange={val => {
-              settings.endTime = val
+              // Convert global seconds back to slide-relative frames
+              const slideRelativeSec = val - slideStartSec
+              settings.endFrame = Math.round(slideRelativeSec * fps)
               onChange(settings)
             }}
-            max={slideDuration - transitionDuration}
-            min={zoomStart + 0.1}
+            max={slideEndSec - transitionDurationSec}
+            min={zoomStartSec + 0.1}
             step={0.1}
           />
         </div>
-        <p className='text-xs text-muted-foreground'>Duration: {(zoomEnd - zoomStart).toFixed(1)}s</p>
+        <p className='text-xs text-muted-foreground'>Duration: {(zoomEndSec - zoomStartSec).toFixed(1)}s</p>
       </div>
 
       {/* Preview */}

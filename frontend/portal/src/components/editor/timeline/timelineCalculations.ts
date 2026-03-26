@@ -207,9 +207,10 @@ export function calculateOverlayItems(slides: TimelineSlide[], fps: number): Ove
       const realSlideStartTimeInSeconds = realSlideStartTimeFrame / fps
 
       slide.spotlights.forEach(effect => {
-        const startTime = effect.startTime ?? 0
-        const endTime = effect.endTime ?? slide.duration
-        const duration = endTime - startTime
+         const startTimeInSeconds = (effect.startFrame ?? 0) / fps
+        const endTimeInSeconds = (effect.endFrame ?? (slide.duration * fps)) / fps
+        const duration = endTimeInSeconds - startTimeInSeconds
+
 
         overlays.push({
           type: 'overlay',
@@ -217,7 +218,7 @@ export function calculateOverlayItems(slides: TimelineSlide[], fps: number): Ove
           overlayId: effect.id!,
           slideId: slide.id,
           overlayType: EffectType.SPOTLIGHT,
-          startTime: realSlideStartTimeInSeconds + startTime,
+          startTime: realSlideStartTimeInSeconds + startTimeInSeconds,
           duration,
           trackIndex: 0 // Will be assigned by assignOverlayTracks
         })
@@ -234,9 +235,9 @@ export function calculateOverlayItems(slides: TimelineSlide[], fps: number): Ove
       const realSlideStartTimeInSeconds = realSlideStartTimeFrame / fps
 
       slide.callouts.forEach(effect => {
-        const startTime = effect.startTime ?? 0
-        const endTime = effect.endTime ?? slide.duration
-        const duration = endTime - startTime
+        const startTimeInSeconds = (effect.startFrame ?? 0) / fps
+        const endTimeInSeconds = (effect.endFrame ?? (slide.duration * fps)) / fps
+        const duration = endTimeInSeconds - startTimeInSeconds
 
         overlays.push({
           type: 'overlay',
@@ -244,7 +245,7 @@ export function calculateOverlayItems(slides: TimelineSlide[], fps: number): Ove
           overlayId: effect.id!,
           slideId: slide.id,
           overlayType: EffectType.CALLOUT,
-          startTime: realSlideStartTimeInSeconds + startTime,
+          startTime: realSlideStartTimeInSeconds + startTimeInSeconds,
           duration,
           trackIndex: 0 // Will be assigned by assignOverlayTracks
         })
@@ -258,9 +259,10 @@ export function calculateOverlayItems(slides: TimelineSlide[], fps: number): Ove
       const realSlideStartTimeInSeconds = realSlideStartTimeFrame / fps
 
       slide.zooms.forEach(effect => {
-        const startTime = effect.startTime ?? 0
-        const endTime = effect.endTime ?? slide.duration
-        const duration = endTime - startTime
+        // Zoom effects store frames, convert to seconds for timeline
+        const startTimeInSeconds = (effect.startFrame ?? 0) / fps
+        const endTimeInSeconds = (effect.endFrame ?? (slide.duration * fps)) / fps
+        const duration = endTimeInSeconds - startTimeInSeconds
 
         overlays.push({
           type: 'overlay',
@@ -268,7 +270,7 @@ export function calculateOverlayItems(slides: TimelineSlide[], fps: number): Ove
           overlayId: effect.id!,
           slideId: slide.id,
           overlayType: EffectType.ZOOM,
-          startTime: realSlideStartTimeInSeconds + startTime,
+          startTime: realSlideStartTimeInSeconds + startTimeInSeconds,
           duration,
           trackIndex: 0 // Will be assigned by assignOverlayTracks
         })

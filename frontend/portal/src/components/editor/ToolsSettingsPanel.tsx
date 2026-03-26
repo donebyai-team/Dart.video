@@ -12,6 +12,7 @@ import {
 import { motion } from 'framer-motion'
 import AnimationEditor from './settings/AnimationEditor'
 import { CodeEditor } from './settings/CodeEditor'
+import { getRealSlideStartFrame } from './frame_calculations'
 
 interface ToolsSettingsPanelProps {
   onPreviewTemplate: () => void
@@ -50,6 +51,8 @@ const ToolsSettingsPanel = ({
   const updateSlideBackground = useVideoStore(s => s.updateSlideBackground)
   const updateSlide = useVideoStore(s => s.updateSlide)
   const getSlideDurationInSeconds = useVideoStore(s => s.getSlideDurationInSeconds)
+  const getTimelineSlides = useVideoStore(s => s.getTimelineSlides)
+  const fps = useVideoStore(s => s.videoConfig?.metadata?.fps) || 30
  
   console.log("active tool", activeTool);
 
@@ -181,8 +184,12 @@ const ToolsSettingsPanel = ({
             onClose={handleCloseTool}
             canDelete={true}
             slideDurationInSecond={getSlideDurationInSeconds(selectedSlide?.slide!)}
+            slideDurationInFrames={selectedSlide?.slide.durationInFrames}
+            slideStartFrame={getRealSlideStartFrame(getTimelineSlides(), selectedSlide?.slide.id ?? '', fps)}
             slideStartTime={0}
             transitionDuration={selectedSlide?.slide.transitionDuration}
+            transitionDurationInFrames={Math.round((selectedSlide?.slide.transitionDuration || 0) * fps)}
+            fps={fps}
             onPlay={onSpotlightPlay}
             isPreviewPlaying={isPreviewPlaying}
           />

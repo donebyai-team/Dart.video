@@ -139,19 +139,19 @@ func validateSlide(slide *pbcore.Slide, idRegistry map[string]string) error {
 
 	// Effects
 	for _, s := range slide.Spotlights {
-		if err := validateEffect(slide.DurationInFrames, s.Id, s.X, s.Y, s.StartTime, s.EndTime, "spotlight", idRegistry); err != nil {
+		if err := validateEffect(slide.DurationInFrames, s.Id, s.X, s.Y, s.StartFrame, s.EndFrame, "spotlight", idRegistry); err != nil {
 			return err
 		}
 	}
 
 	for _, c := range slide.Callouts {
-		if err := validateEffect(slide.DurationInFrames, c.Id, c.X, c.Y, c.StartTime, c.EndTime, "callout", idRegistry); err != nil {
+		if err := validateEffect(slide.DurationInFrames, c.Id, c.X, c.Y, c.StartFrame, c.EndFrame, "callout", idRegistry); err != nil {
 			return err
 		}
 	}
 
 	for _, z := range slide.Zooms {
-		if err := validateEffect(slide.DurationInFrames, z.Id, z.X, z.Y, z.StartTime, z.EndTime, "zoom", idRegistry); err != nil {
+		if err := validateEffect(slide.DurationInFrames, z.Id, z.X, z.Y, z.StartFrame, z.EndFrame, "zoom", idRegistry); err != nil {
 			return err
 		}
 	}
@@ -163,7 +163,7 @@ func validateEffect(
 	slideDuration float32,
 	id string,
 	x, y float32,
-	startTime, endTime float32,
+	StartFrame, EndFrame float32,
 	entityType string,
 	idRegistry map[string]string,
 ) error {
@@ -176,15 +176,15 @@ func validateEffect(
 		return fmt.Errorf("%s coordinates are invalid", entityType)
 	}
 
-	if startTime < 0 {
+	if StartFrame < 0 {
 		return fmt.Errorf("%s start time is invalid", entityType)
 	}
 
-	if endTime <= 0 || endTime > slideDuration {
-		return fmt.Errorf("%s end time exceeds slide duration", entityType)
-	}
+	//if EndFrame <= 0 || EndFrame > slideDuration {
+	//	return fmt.Errorf("%s end time exceeds slide duration", entityType)
+	//}
 
-	if startTime >= endTime {
+	if StartFrame >= EndFrame {
 		return fmt.Errorf("%s start time must be less than end time", entityType)
 	}
 

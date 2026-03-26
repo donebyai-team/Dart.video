@@ -23,8 +23,8 @@ const ZoomOverlay = ({
 }: ZoomOverlayProps) => {
   const [isDragging, setIsDragging] = useState(false)
   const [isResizing, setIsResizing] = useState(false)
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
-  const [initialValues, setInitialValues] = useState({ x: 0, y: 0, zoomLevel: 2 })
+  const dragStartRef = useRef({ x: 0, y: 0 })
+  const initialValuesRef = useRef({ x: 0, y: 0, zoomLevel: 2 })
   const overlayRef = useRef<HTMLDivElement>(null)
 
   const scale = containerWidth / resolution.width
@@ -49,8 +49,8 @@ const ZoomOverlay = ({
       e.stopPropagation()
       onSelect()
       setIsDragging(true)
-      setDragStart({ x: e.clientX, y: e.clientY })
-      setInitialValues({ x: zoom.x || resolution.width / 2, y: zoom.y || resolution.height / 2, zoomLevel })
+      dragStartRef.current = { x: e.clientX, y: e.clientY }
+      initialValuesRef.current = { x: zoom.x || resolution.width / 2, y: zoom.y || resolution.height / 2, zoomLevel }
     },
     [zoom.x, zoom.y, zoomLevel, resolution.width, resolution.height, onSelect]
   )
@@ -60,8 +60,8 @@ const ZoomOverlay = ({
       e.preventDefault()
       e.stopPropagation()
       setIsResizing(true)
-      setDragStart({ x: e.clientX, y: e.clientY })
-      setInitialValues({ x: zoom.x || resolution.width / 2, y: zoom.y || resolution.height / 2, zoomLevel })
+      dragStartRef.current = { x: e.clientX, y: e.clientY }
+      initialValuesRef.current = { x: zoom.x || resolution.width / 2, y: zoom.y || resolution.height / 2, zoomLevel }
     },
     [zoom.x, zoom.y, zoomLevel, resolution.width, resolution.height]
   )
@@ -70,6 +70,8 @@ const ZoomOverlay = ({
     (e: MouseEvent) => {
       if (!isDragging && !isResizing) return
 
+      const dragStart = dragStartRef.current
+      const initialValues = initialValuesRef.current
       const dx = (e.clientX - dragStart.x) / scale
       const dy = (e.clientY - dragStart.y) / scale
 
@@ -86,7 +88,7 @@ const ZoomOverlay = ({
         onUpdate({ zoomLevel: Math.max(1, Math.min(10, newZoomLevel)) })
       }
     },
-    [isDragging, isResizing, dragStart, initialValues, scale, resolution, containerWidth, onUpdate]
+    [isDragging, isResizing, scale, resolution, containerWidth, onUpdate]
   )
 
   const handleMouseUp = useCallback(() => {
@@ -122,50 +124,57 @@ const ZoomOverlay = ({
         onSelect()
       }}
     >
-      {/* Zoom region border */}
+      {/* Zoom region border - dual color for visibility on all backgrounds */}
       <div
         className='w-full h-full transition-colors'
         style={{
-          border: `2px dashed ${isSelected ? 'hsl(var(--primary))' : 'rgba(255, 255, 255, 0.8)'}`,
+          border: `2px dashed ${isSelected ? '#22c55e' : '#ffffff'}`,
           borderRadius: 2,
+          // Dark outline behind the border for contrast on light backgrounds
+          outline: `2px solid ${isSelected ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0.6)'}`,
+          outlineOffset: -2,
           boxShadow: isSelected
-            ? '0 0 0 2px hsl(var(--primary) / 0.3)'
-            : '0 0 8px rgba(0, 0, 0, 0.3)',
+            ? '0 0 0 3px rgba(34, 197, 94, 0.4), 0 0 12px rgba(0, 0, 0, 0.4)'
+            : '0 0 12px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(0, 0, 0, 0.3)',
         }}
       />
 
-      {/* Center crosshair */}
+      {/* Center crosshair - dual color for visibility */}
       <div
         style={{
           position: 'absolute',
           left: '50%',
           top: '50%',
           transform: 'translate(-50%, -50%)',
-          width: 20,
-          height: 20,
+          width: 24,
+          height: 24,
           pointerEvents: 'none',
         }}
       >
+        {/* Horizontal line with shadow */}
         <div
           style={{
             position: 'absolute',
             left: 0,
             top: '50%',
             width: '100%',
-            height: 1,
-            background: isSelected ? 'hsl(var(--primary))' : 'rgba(255,255,255,0.9)',
+            height: 2,
+            background: isSelected ? '#22c55e' : '#ffffff',
             transform: 'translateY(-50%)',
+            boxShadow: '0 0 3px rgba(0, 0, 0, 0.8)',
           }}
         />
+        {/* Vertical line with shadow */}
         <div
           style={{
             position: 'absolute',
             left: '50%',
             top: 0,
-            width: 1,
+            width: 2,
             height: '100%',
-            background: isSelected ? 'hsl(var(--primary))' : 'rgba(255,255,255,0.9)',
+            background: isSelected ? '#22c55e' : '#ffffff',
             transform: 'translateX(-50%)',
+            boxShadow: '0 0 3px rgba(0, 0, 0, 0.8)',
           }}
         />
       </div>

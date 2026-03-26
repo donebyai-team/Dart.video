@@ -1,7 +1,7 @@
 import { AnimationSlideContent, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import React, { useEffect, useState } from 'react'
 
-import { AbsoluteFill, continueRender, delayRender, useRemotionEnvironment } from 'remotion'
+import { AbsoluteFill, continueRender, delayRender, useCurrentFrame, useRemotionEnvironment, useVideoConfig } from 'remotion'
 import {
   SpeedFactorProvider,
   PatchContextProvider,
@@ -11,6 +11,7 @@ import {
 import { compileRemoteComponent } from '../compiler'
 import { backgroundStyleToCSS } from '../backgroundUtils'
 import { loadTemplateSource } from '../templateSource'
+import { CanvasEffectsLayer } from '../effects/CanvasEffectsLayer'
 
 const compiledTemplateCache = new Map<string, React.ComponentType<any>>()
 const compiledTemplatePromiseCache = new Map<string, Promise<React.ComponentType<any>>>()
@@ -50,6 +51,7 @@ interface TextAnimationSlideProps {
   height: number
   isEditing?: boolean
   isSelected?: boolean
+  isPlaying?: boolean
   onUpdate?: (updates: Partial<Slide>) => void
   onSelect?: () => void
 }
@@ -66,6 +68,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
   height,
   isEditing = false,
   isSelected = false,
+  isPlaying = true,
   onUpdate,
   onSelect
 }) => {
@@ -74,6 +77,8 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
   const [templateError, setTemplateError] = useState<string | null>(null)
 
   const { isRendering } = useRemotionEnvironment()
+  const frame = useCurrentFrame()
+  const { fps } = useVideoConfig()
   const content = slide.content.value as AnimationSlideContent
 
   // template id for hard-coded local templates
@@ -177,19 +182,31 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
         alignItems: 'center'
       }}
     >
-      <div style={{ width: '100%', height: '100%' }}>
-        {isLoading ? (
-          <TemplateLoadingPlaceholder />
-        ) : CompiledComponent ? (
-          <SpeedFactorProvider factor={slide.speed ? slide.speed: 1}>
-            <PatchContextProvider overlay={patchOverlay}>
-              <CompiledComponent />
-            </PatchContextProvider>
-          </SpeedFactorProvider>
-        ) : templateError ? (
-          <TemplateErrorFallback message={templateError} />
-        ) : null}
-      </div>
+      <CanvasEffectsLayer
+          zooms={slide.zooms ?? []}
+          spotlights={slide.spotlights ?? []}
+          callouts={slide.callouts ?? []}
+          frame={frame}
+          fps={fps}
+          width={width}
+          height={height}
+          slideDurationInFrames={slide.durationInFrames}
+          isPlaying={isPlaying}
+        >
+          <div style={{ width: '100%', height: '100%' }}>
+            {isLoading ? (
+              <TemplateLoadingPlaceholder />
+            ) : CompiledComponent ? (
+              <SpeedFactorProvider factor={slide.speed ? slide.speed: 1}>
+                <PatchContextProvider overlay={patchOverlay}>
+                  <CompiledComponent />
+                </PatchContextProvider>
+              </SpeedFactorProvider>
+            ) : templateError ? (
+              <TemplateErrorFallback message={templateError} />
+            ) : null}
+          </div>
+        </CanvasEffectsLayer>
     </AbsoluteFill>
   )
 }
