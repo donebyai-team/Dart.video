@@ -35,12 +35,18 @@ const AssetPreviewDialog = ({
   open,
   note,
   noteLabel = 'How should this asset be used?',
-  notePlaceholder = 'Optional note about where or how this should appear...',
+  notePlaceholder,
   selectLabel = 'Use this asset',
   onOpenChange,
   onNoteChange,
   onSelect
 }: AssetPreviewDialogProps) => {
+  const isVideo = mediaKind === 'video'
+  const minNoteLength = 20
+  const isNoteValid = !isVideo || note.trim().length >= minNoteLength
+  const defaultPlaceholder =
+    'Tell us in which part of the script, AI should use this. Eg. Use it to show feature 1'
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className='max-w-5xl overflow-hidden p-0'>
@@ -64,21 +70,21 @@ const AssetPreviewDialog = ({
               )}
               <div className='space-y-4'>
                 <label htmlFor='asset-preview-note' className='text-xs font-medium'>
-                  {noteLabel}
+                  {noteLabel}{isVideo && <span className='text-destructive'> *</span>}
                 </label>
                 <textarea
                   id='asset-preview-note'
                   value={note}
                   onChange={e => onNoteChange(e.target.value)}
                   rows={3}
-                  placeholder={notePlaceholder}
+                  placeholder={notePlaceholder || defaultPlaceholder}
                   className='min-h-[96px] w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
                 />
               </div>
             </div>
 
             <div className='mt-6 flex justify-end'>
-              <Button onClick={onSelect}>{selectLabel}</Button>
+              <Button onClick={onSelect} disabled={!isNoteValid}>{selectLabel}</Button>
             </div>
           </div>
 
