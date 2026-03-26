@@ -431,11 +431,11 @@ const VideoIntentComposer = () => {
             <span className='text-border/60 mx-0.5'>·</span>
 
            {/* Add Style */}
-            <StyleSelector
+            {/* <StyleSelector
               selectedStyle={selectedStyle}
               onOpenDialog={() => setStyleDialogOpen(true)}
               disabled={stage !== 'compose'}
-            />
+            /> */}
 
             <span className='text-border/60 mx-0.5'>·</span>
 

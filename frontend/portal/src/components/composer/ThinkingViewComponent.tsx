@@ -13,32 +13,6 @@ const ThinkingViewComponent = ({
   thinkingChunk,
 }: ThinkingViewComponentProps) => {
 
-
-  const NON_TYPED_STATES = [
-    'Generating...',
-    'Matching...',
-    'Extracting...',
-    'Searching...',
-    'Processing...',
-    'Starting planning...',
-    // Retry tones
-    "Refining the motion...",
-    "Polishing the animation...",
-    "Adding final touches...",
-    "Stabilizing the performance...",
-
-    // Creative stages
-    "Understanding the scene...",
-    "Crafting motion direction...",
-    "Designing the animation...",
-    "Translating motion into code...",
-    "Saving creative draft...",
-    "Bringing animation to life...",
-    "Smoothing out rough edges...",
-    "Animation ready ✨",
-    "Working on it..."
-  ]
-
   return (
     <div className='flex items-center gap-2.5 px-4 py-2.5 rounded-xl border bg-background/95 backdrop-blur-sm text-sm text-muted-foreground shadow-sm'>
       <CircleDashed className='w-3.5 h-3.5 animate-spin flex-shrink-0' />
