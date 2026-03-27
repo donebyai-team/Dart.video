@@ -293,6 +293,50 @@ func (IntegrationState) EnumDescriptor() ([]byte, []int) {
 	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{4}
 }
 
+type GetMediaAssetsByIDs struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	AssetsIDs     []string               `protobuf:"bytes,1,rep,name=assetsIDs,proto3" json:"assetsIDs,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMediaAssetsByIDs) Reset() {
+	*x = GetMediaAssetsByIDs{}
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMediaAssetsByIDs) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMediaAssetsByIDs) ProtoMessage() {}
+
+func (x *GetMediaAssetsByIDs) ProtoReflect() protoreflect.Message {
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMediaAssetsByIDs.ProtoReflect.Descriptor instead.
+func (*GetMediaAssetsByIDs) Descriptor() ([]byte, []int) {
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *GetMediaAssetsByIDs) GetAssetsIDs() []string {
+	if x != nil {
+		return x.AssetsIDs
+	}
+	return nil
+}
+
 type GetMediaAssetsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Assets        []*v1.MediaAsset       `protobuf:"bytes,1,rep,name=assets,proto3" json:"assets,omitempty"`
@@ -302,7 +346,7 @@ type GetMediaAssetsResponse struct {
 
 func (x *GetMediaAssetsResponse) Reset() {
 	*x = GetMediaAssetsResponse{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[0]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -314,7 +358,7 @@ func (x *GetMediaAssetsResponse) String() string {
 func (*GetMediaAssetsResponse) ProtoMessage() {}
 
 func (x *GetMediaAssetsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[0]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -327,7 +371,7 @@ func (x *GetMediaAssetsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMediaAssetsResponse.ProtoReflect.Descriptor instead.
 func (*GetMediaAssetsResponse) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{0}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *GetMediaAssetsResponse) GetAssets() []*v1.MediaAsset {
@@ -352,7 +396,7 @@ type GenerateOrEditAnimationRequest struct {
 
 func (x *GenerateOrEditAnimationRequest) Reset() {
 	*x = GenerateOrEditAnimationRequest{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[1]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -364,7 +408,7 @@ func (x *GenerateOrEditAnimationRequest) String() string {
 func (*GenerateOrEditAnimationRequest) ProtoMessage() {}
 
 func (x *GenerateOrEditAnimationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[1]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -377,7 +421,7 @@ func (x *GenerateOrEditAnimationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GenerateOrEditAnimationRequest.ProtoReflect.Descriptor instead.
 func (*GenerateOrEditAnimationRequest) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{1}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *GenerateOrEditAnimationRequest) GetVideoId() string {
@@ -455,7 +499,7 @@ type EditAnimationUserInput struct {
 
 func (x *EditAnimationUserInput) Reset() {
 	*x = EditAnimationUserInput{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[2]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -467,7 +511,7 @@ func (x *EditAnimationUserInput) String() string {
 func (*EditAnimationUserInput) ProtoMessage() {}
 
 func (x *EditAnimationUserInput) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[2]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -480,7 +524,7 @@ func (x *EditAnimationUserInput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EditAnimationUserInput.ProtoReflect.Descriptor instead.
 func (*EditAnimationUserInput) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{2}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *EditAnimationUserInput) GetSlideId() string {
@@ -507,7 +551,7 @@ type CreateNewAnimationInput struct {
 
 func (x *CreateNewAnimationInput) Reset() {
 	*x = CreateNewAnimationInput{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[3]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -519,7 +563,7 @@ func (x *CreateNewAnimationInput) String() string {
 func (*CreateNewAnimationInput) ProtoMessage() {}
 
 func (x *CreateNewAnimationInput) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[3]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -532,7 +576,7 @@ func (x *CreateNewAnimationInput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateNewAnimationInput.ProtoReflect.Descriptor instead.
 func (*CreateNewAnimationInput) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{3}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *CreateNewAnimationInput) GetSuggestions() bool {
@@ -560,7 +604,7 @@ type AskUserInput struct {
 
 func (x *AskUserInput) Reset() {
 	*x = AskUserInput{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[4]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -572,7 +616,7 @@ func (x *AskUserInput) String() string {
 func (*AskUserInput) ProtoMessage() {}
 
 func (x *AskUserInput) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[4]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -585,7 +629,7 @@ func (x *AskUserInput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AskUserInput.ProtoReflect.Descriptor instead.
 func (*AskUserInput) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{4}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *AskUserInput) GetSlideId() string {
@@ -624,7 +668,7 @@ type GenerateOrEditAnimationResponse struct {
 
 func (x *GenerateOrEditAnimationResponse) Reset() {
 	*x = GenerateOrEditAnimationResponse{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[5]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -636,7 +680,7 @@ func (x *GenerateOrEditAnimationResponse) String() string {
 func (*GenerateOrEditAnimationResponse) ProtoMessage() {}
 
 func (x *GenerateOrEditAnimationResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[5]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -649,7 +693,7 @@ func (x *GenerateOrEditAnimationResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GenerateOrEditAnimationResponse.ProtoReflect.Descriptor instead.
 func (*GenerateOrEditAnimationResponse) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{5}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *GenerateOrEditAnimationResponse) GetSlide() *v1.Slide {
@@ -710,7 +754,7 @@ type UpdateBrandIdentityRequest struct {
 
 func (x *UpdateBrandIdentityRequest) Reset() {
 	*x = UpdateBrandIdentityRequest{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[6]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -722,7 +766,7 @@ func (x *UpdateBrandIdentityRequest) String() string {
 func (*UpdateBrandIdentityRequest) ProtoMessage() {}
 
 func (x *UpdateBrandIdentityRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[6]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -735,7 +779,7 @@ func (x *UpdateBrandIdentityRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateBrandIdentityRequest.ProtoReflect.Descriptor instead.
 func (*UpdateBrandIdentityRequest) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{6}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *UpdateBrandIdentityRequest) GetIdentity() *v1.BrandIdentity {
@@ -754,7 +798,7 @@ type BrandIdentityRequest struct {
 
 func (x *BrandIdentityRequest) Reset() {
 	*x = BrandIdentityRequest{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[7]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -766,7 +810,7 @@ func (x *BrandIdentityRequest) String() string {
 func (*BrandIdentityRequest) ProtoMessage() {}
 
 func (x *BrandIdentityRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[7]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -779,7 +823,7 @@ func (x *BrandIdentityRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BrandIdentityRequest.ProtoReflect.Descriptor instead.
 func (*BrandIdentityRequest) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{7}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *BrandIdentityRequest) GetWebsiteUrl() string {
@@ -799,7 +843,7 @@ type BrandIdentityResponse struct {
 
 func (x *BrandIdentityResponse) Reset() {
 	*x = BrandIdentityResponse{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[8]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -811,7 +855,7 @@ func (x *BrandIdentityResponse) String() string {
 func (*BrandIdentityResponse) ProtoMessage() {}
 
 func (x *BrandIdentityResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[8]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -824,7 +868,7 @@ func (x *BrandIdentityResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BrandIdentityResponse.ProtoReflect.Descriptor instead.
 func (*BrandIdentityResponse) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{8}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *BrandIdentityResponse) GetIdentities() []*v1.BrandIdentity {
@@ -850,7 +894,7 @@ type RenderVideoRequest struct {
 
 func (x *RenderVideoRequest) Reset() {
 	*x = RenderVideoRequest{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[9]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -862,7 +906,7 @@ func (x *RenderVideoRequest) String() string {
 func (*RenderVideoRequest) ProtoMessage() {}
 
 func (x *RenderVideoRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[9]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -875,7 +919,7 @@ func (x *RenderVideoRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RenderVideoRequest.ProtoReflect.Descriptor instead.
 func (*RenderVideoRequest) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{9}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *RenderVideoRequest) GetVideoId() string {
@@ -896,7 +940,7 @@ type RenderVideoResponse struct {
 
 func (x *RenderVideoResponse) Reset() {
 	*x = RenderVideoResponse{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[10]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -908,7 +952,7 @@ func (x *RenderVideoResponse) String() string {
 func (*RenderVideoResponse) ProtoMessage() {}
 
 func (x *RenderVideoResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[10]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -921,7 +965,7 @@ func (x *RenderVideoResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RenderVideoResponse.ProtoReflect.Descriptor instead.
 func (*RenderVideoResponse) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{10}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *RenderVideoResponse) GetJobId() string {
@@ -957,7 +1001,7 @@ type ListFigmaFramesRequest struct {
 
 func (x *ListFigmaFramesRequest) Reset() {
 	*x = ListFigmaFramesRequest{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[11]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -969,7 +1013,7 @@ func (x *ListFigmaFramesRequest) String() string {
 func (*ListFigmaFramesRequest) ProtoMessage() {}
 
 func (x *ListFigmaFramesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[11]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -982,7 +1026,7 @@ func (x *ListFigmaFramesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListFigmaFramesRequest.ProtoReflect.Descriptor instead.
 func (*ListFigmaFramesRequest) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{11}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *ListFigmaFramesRequest) GetFileKey() string {
@@ -1025,7 +1069,7 @@ type ListFigmaFramesResponse struct {
 
 func (x *ListFigmaFramesResponse) Reset() {
 	*x = ListFigmaFramesResponse{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[12]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1037,7 +1081,7 @@ func (x *ListFigmaFramesResponse) String() string {
 func (*ListFigmaFramesResponse) ProtoMessage() {}
 
 func (x *ListFigmaFramesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[12]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1050,7 +1094,7 @@ func (x *ListFigmaFramesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListFigmaFramesResponse.ProtoReflect.Descriptor instead.
 func (*ListFigmaFramesResponse) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{12}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *ListFigmaFramesResponse) GetFileKey() string {
@@ -1091,7 +1135,7 @@ type ImportFigmaFrameRequest struct {
 
 func (x *ImportFigmaFrameRequest) Reset() {
 	*x = ImportFigmaFrameRequest{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[13]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1103,7 +1147,7 @@ func (x *ImportFigmaFrameRequest) String() string {
 func (*ImportFigmaFrameRequest) ProtoMessage() {}
 
 func (x *ImportFigmaFrameRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[13]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1116,7 +1160,7 @@ func (x *ImportFigmaFrameRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ImportFigmaFrameRequest.ProtoReflect.Descriptor instead.
 func (*ImportFigmaFrameRequest) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{13}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *ImportFigmaFrameRequest) GetFileKey() string {
@@ -1143,7 +1187,7 @@ type ImportFigmaFrameResponse struct {
 
 func (x *ImportFigmaFrameResponse) Reset() {
 	*x = ImportFigmaFrameResponse{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[14]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1155,7 +1199,7 @@ func (x *ImportFigmaFrameResponse) String() string {
 func (*ImportFigmaFrameResponse) ProtoMessage() {}
 
 func (x *ImportFigmaFrameResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[14]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1168,7 +1212,7 @@ func (x *ImportFigmaFrameResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ImportFigmaFrameResponse.ProtoReflect.Descriptor instead.
 func (*ImportFigmaFrameResponse) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{14}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *ImportFigmaFrameResponse) GetAsset() *v1.MediaAsset {
@@ -1194,7 +1238,7 @@ type StopVideoRequest struct {
 
 func (x *StopVideoRequest) Reset() {
 	*x = StopVideoRequest{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[15]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1206,7 +1250,7 @@ func (x *StopVideoRequest) String() string {
 func (*StopVideoRequest) ProtoMessage() {}
 
 func (x *StopVideoRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[15]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1219,7 +1263,7 @@ func (x *StopVideoRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StopVideoRequest.ProtoReflect.Descriptor instead.
 func (*StopVideoRequest) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{15}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *StopVideoRequest) GetVideoId() string {
@@ -1238,7 +1282,7 @@ type DeleteVideoRequest struct {
 
 func (x *DeleteVideoRequest) Reset() {
 	*x = DeleteVideoRequest{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[16]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1250,7 +1294,7 @@ func (x *DeleteVideoRequest) String() string {
 func (*DeleteVideoRequest) ProtoMessage() {}
 
 func (x *DeleteVideoRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[16]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1263,7 +1307,7 @@ func (x *DeleteVideoRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteVideoRequest.ProtoReflect.Descriptor instead.
 func (*DeleteVideoRequest) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{16}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *DeleteVideoRequest) GetVideoId() string {
@@ -1284,7 +1328,7 @@ type GetVideoResponse struct {
 
 func (x *GetVideoResponse) Reset() {
 	*x = GetVideoResponse{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[17]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1296,7 +1340,7 @@ func (x *GetVideoResponse) String() string {
 func (*GetVideoResponse) ProtoMessage() {}
 
 func (x *GetVideoResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[17]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1309,7 +1353,7 @@ func (x *GetVideoResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetVideoResponse.ProtoReflect.Descriptor instead.
 func (*GetVideoResponse) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{17}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *GetVideoResponse) GetVideo() *v1.Video {
@@ -1345,7 +1389,7 @@ type UpdateVideoConfigRequest struct {
 
 func (x *UpdateVideoConfigRequest) Reset() {
 	*x = UpdateVideoConfigRequest{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[18]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1357,7 +1401,7 @@ func (x *UpdateVideoConfigRequest) String() string {
 func (*UpdateVideoConfigRequest) ProtoMessage() {}
 
 func (x *UpdateVideoConfigRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[18]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1370,7 +1414,7 @@ func (x *UpdateVideoConfigRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateVideoConfigRequest.ProtoReflect.Descriptor instead.
 func (*UpdateVideoConfigRequest) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{18}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *UpdateVideoConfigRequest) GetId() string {
@@ -1410,7 +1454,7 @@ type GetVideoRequest struct {
 
 func (x *GetVideoRequest) Reset() {
 	*x = GetVideoRequest{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[19]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1422,7 +1466,7 @@ func (x *GetVideoRequest) String() string {
 func (*GetVideoRequest) ProtoMessage() {}
 
 func (x *GetVideoRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[19]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1435,7 +1479,7 @@ func (x *GetVideoRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetVideoRequest.ProtoReflect.Descriptor instead.
 func (*GetVideoRequest) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{19}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *GetVideoRequest) GetId() string {
@@ -1454,7 +1498,7 @@ type GetVideosResponse struct {
 
 func (x *GetVideosResponse) Reset() {
 	*x = GetVideosResponse{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[20]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1466,7 +1510,7 @@ func (x *GetVideosResponse) String() string {
 func (*GetVideosResponse) ProtoMessage() {}
 
 func (x *GetVideosResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[20]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1479,7 +1523,7 @@ func (x *GetVideosResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetVideosResponse.ProtoReflect.Descriptor instead.
 func (*GetVideosResponse) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{20}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *GetVideosResponse) GetVideos() []*v1.Video {
@@ -1506,7 +1550,7 @@ type CreateVideoRequest struct {
 
 func (x *CreateVideoRequest) Reset() {
 	*x = CreateVideoRequest{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[21]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1518,7 +1562,7 @@ func (x *CreateVideoRequest) String() string {
 func (*CreateVideoRequest) ProtoMessage() {}
 
 func (x *CreateVideoRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[21]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1531,7 +1575,7 @@ func (x *CreateVideoRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateVideoRequest.ProtoReflect.Descriptor instead.
 func (*CreateVideoRequest) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{21}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *CreateVideoRequest) GetScript() *v1.Script {
@@ -1611,7 +1655,7 @@ type CreateVideoResponse struct {
 
 func (x *CreateVideoResponse) Reset() {
 	*x = CreateVideoResponse{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[22]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1623,7 +1667,7 @@ func (x *CreateVideoResponse) String() string {
 func (*CreateVideoResponse) ProtoMessage() {}
 
 func (x *CreateVideoResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[22]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1636,7 +1680,7 @@ func (x *CreateVideoResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateVideoResponse.ProtoReflect.Descriptor instead.
 func (*CreateVideoResponse) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{22}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *CreateVideoResponse) GetId() string {
@@ -1692,7 +1736,7 @@ type ContinueVideoPlanningRequest struct {
 
 func (x *ContinueVideoPlanningRequest) Reset() {
 	*x = ContinueVideoPlanningRequest{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[23]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1704,7 +1748,7 @@ func (x *ContinueVideoPlanningRequest) String() string {
 func (*ContinueVideoPlanningRequest) ProtoMessage() {}
 
 func (x *ContinueVideoPlanningRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[23]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1717,7 +1761,7 @@ func (x *ContinueVideoPlanningRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ContinueVideoPlanningRequest.ProtoReflect.Descriptor instead.
 func (*ContinueVideoPlanningRequest) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{23}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *ContinueVideoPlanningRequest) GetId() string {
@@ -1755,7 +1799,7 @@ type AskUserQuestion struct {
 
 func (x *AskUserQuestion) Reset() {
 	*x = AskUserQuestion{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[24]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1767,7 +1811,7 @@ func (x *AskUserQuestion) String() string {
 func (*AskUserQuestion) ProtoMessage() {}
 
 func (x *AskUserQuestion) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[24]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1780,7 +1824,7 @@ func (x *AskUserQuestion) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AskUserQuestion.ProtoReflect.Descriptor instead.
 func (*AskUserQuestion) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{24}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *AskUserQuestion) GetToolName() string {
@@ -1839,7 +1883,7 @@ type Config struct {
 
 func (x *Config) Reset() {
 	*x = Config{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[25]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1851,7 +1895,7 @@ func (x *Config) String() string {
 func (*Config) ProtoMessage() {}
 
 func (x *Config) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[25]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1864,7 +1908,7 @@ func (x *Config) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Config.ProtoReflect.Descriptor instead.
 func (*Config) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{25}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *Config) GetAuth0Domain() string {
@@ -1919,7 +1963,7 @@ type PasswordlessStartRequest struct {
 
 func (x *PasswordlessStartRequest) Reset() {
 	*x = PasswordlessStartRequest{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[26]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1931,7 +1975,7 @@ func (x *PasswordlessStartRequest) String() string {
 func (*PasswordlessStartRequest) ProtoMessage() {}
 
 func (x *PasswordlessStartRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[26]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1944,7 +1988,7 @@ func (x *PasswordlessStartRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PasswordlessStartRequest.ProtoReflect.Descriptor instead.
 func (*PasswordlessStartRequest) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{26}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *PasswordlessStartRequest) GetRedirectUri() string {
@@ -1971,7 +2015,7 @@ type PasswordlessStartVerify struct {
 
 func (x *PasswordlessStartVerify) Reset() {
 	*x = PasswordlessStartVerify{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[27]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1983,7 +2027,7 @@ func (x *PasswordlessStartVerify) String() string {
 func (*PasswordlessStartVerify) ProtoMessage() {}
 
 func (x *PasswordlessStartVerify) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[27]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1996,7 +2040,7 @@ func (x *PasswordlessStartVerify) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PasswordlessStartVerify.ProtoReflect.Descriptor instead.
 func (*PasswordlessStartVerify) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{27}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *PasswordlessStartVerify) GetEmail() string {
@@ -2022,7 +2066,7 @@ type AuthStateRequest struct {
 
 func (x *AuthStateRequest) Reset() {
 	*x = AuthStateRequest{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[28]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2034,7 +2078,7 @@ func (x *AuthStateRequest) String() string {
 func (*AuthStateRequest) ProtoMessage() {}
 
 func (x *AuthStateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[28]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2047,7 +2091,7 @@ func (x *AuthStateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AuthStateRequest.ProtoReflect.Descriptor instead.
 func (*AuthStateRequest) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{28}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *AuthStateRequest) GetRedirectUri() string {
@@ -2067,7 +2111,7 @@ type State struct {
 
 func (x *State) Reset() {
 	*x = State{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[29]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2079,7 +2123,7 @@ func (x *State) String() string {
 func (*State) ProtoMessage() {}
 
 func (x *State) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[29]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2092,7 +2136,7 @@ func (x *State) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use State.ProtoReflect.Descriptor instead.
 func (*State) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{29}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *State) GetState() string {
@@ -2124,7 +2168,7 @@ type User struct {
 
 func (x *User) Reset() {
 	*x = User{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[30]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2136,7 +2180,7 @@ func (x *User) String() string {
 func (*User) ProtoMessage() {}
 
 func (x *User) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[30]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2149,7 +2193,7 @@ func (x *User) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use User.ProtoReflect.Descriptor instead.
 func (*User) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{30}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *User) GetId() string {
@@ -2211,7 +2255,7 @@ type OauthAuthorizeRequest struct {
 
 func (x *OauthAuthorizeRequest) Reset() {
 	*x = OauthAuthorizeRequest{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[31]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2223,7 +2267,7 @@ func (x *OauthAuthorizeRequest) String() string {
 func (*OauthAuthorizeRequest) ProtoMessage() {}
 
 func (x *OauthAuthorizeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[31]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2236,7 +2280,7 @@ func (x *OauthAuthorizeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OauthAuthorizeRequest.ProtoReflect.Descriptor instead.
 func (*OauthAuthorizeRequest) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{31}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *OauthAuthorizeRequest) GetIntegrationType() IntegrationType {
@@ -2262,7 +2306,7 @@ type OauthAuthorizeResponse struct {
 
 func (x *OauthAuthorizeResponse) Reset() {
 	*x = OauthAuthorizeResponse{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[32]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2274,7 +2318,7 @@ func (x *OauthAuthorizeResponse) String() string {
 func (*OauthAuthorizeResponse) ProtoMessage() {}
 
 func (x *OauthAuthorizeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[32]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2287,7 +2331,7 @@ func (x *OauthAuthorizeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OauthAuthorizeResponse.ProtoReflect.Descriptor instead.
 func (*OauthAuthorizeResponse) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{32}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *OauthAuthorizeResponse) GetAuthorizeUrl() string {
@@ -2307,7 +2351,7 @@ type IssueRequest struct {
 
 func (x *IssueRequest) Reset() {
 	*x = IssueRequest{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[33]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2319,7 +2363,7 @@ func (x *IssueRequest) String() string {
 func (*IssueRequest) ProtoMessage() {}
 
 func (x *IssueRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[33]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2332,7 +2376,7 @@ func (x *IssueRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IssueRequest.ProtoReflect.Descriptor instead.
 func (*IssueRequest) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{33}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *IssueRequest) GetCode() string {
@@ -2359,7 +2403,7 @@ type JWT struct {
 
 func (x *JWT) Reset() {
 	*x = JWT{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[34]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2371,7 +2415,7 @@ func (x *JWT) String() string {
 func (*JWT) ProtoMessage() {}
 
 func (x *JWT) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[34]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2384,7 +2428,7 @@ func (x *JWT) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use JWT.ProtoReflect.Descriptor instead.
 func (*JWT) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{34}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *JWT) GetToken() string {
@@ -2413,7 +2457,7 @@ type Organization struct {
 
 func (x *Organization) Reset() {
 	*x = Organization{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[35]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2425,7 +2469,7 @@ func (x *Organization) String() string {
 func (*Organization) ProtoMessage() {}
 
 func (x *Organization) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[35]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2438,7 +2482,7 @@ func (x *Organization) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Organization.ProtoReflect.Descriptor instead.
 func (*Organization) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{35}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *Organization) GetId() string {
@@ -2477,7 +2521,7 @@ type OrganizationFeatureFlags struct {
 
 func (x *OrganizationFeatureFlags) Reset() {
 	*x = OrganizationFeatureFlags{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[36]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2489,7 +2533,7 @@ func (x *OrganizationFeatureFlags) String() string {
 func (*OrganizationFeatureFlags) ProtoMessage() {}
 
 func (x *OrganizationFeatureFlags) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[36]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2502,7 +2546,7 @@ func (x *OrganizationFeatureFlags) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OrganizationFeatureFlags.ProtoReflect.Descriptor instead.
 func (*OrganizationFeatureFlags) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{36}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{37}
 }
 
 type Integration struct {
@@ -2522,7 +2566,7 @@ type Integration struct {
 
 func (x *Integration) Reset() {
 	*x = Integration{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[37]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2534,7 +2578,7 @@ func (x *Integration) String() string {
 func (*Integration) ProtoMessage() {}
 
 func (x *Integration) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[37]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2547,7 +2591,7 @@ func (x *Integration) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Integration.ProtoReflect.Descriptor instead.
 func (*Integration) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{37}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *Integration) GetId() string {
@@ -2630,7 +2674,7 @@ type RedditIntegration struct {
 
 func (x *RedditIntegration) Reset() {
 	*x = RedditIntegration{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[38]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2642,7 +2686,7 @@ func (x *RedditIntegration) String() string {
 func (*RedditIntegration) ProtoMessage() {}
 
 func (x *RedditIntegration) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[38]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2655,7 +2699,7 @@ func (x *RedditIntegration) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RedditIntegration.ProtoReflect.Descriptor instead.
 func (*RedditIntegration) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{38}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *RedditIntegration) GetUserName() string {
@@ -2690,7 +2734,7 @@ type FigmaIntegration struct {
 
 func (x *FigmaIntegration) Reset() {
 	*x = FigmaIntegration{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[39]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2702,7 +2746,7 @@ func (x *FigmaIntegration) String() string {
 func (*FigmaIntegration) ProtoMessage() {}
 
 func (x *FigmaIntegration) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[39]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2715,7 +2759,7 @@ func (x *FigmaIntegration) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FigmaIntegration.ProtoReflect.Descriptor instead.
 func (*FigmaIntegration) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{39}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *FigmaIntegration) GetUserId() string {
@@ -2748,7 +2792,7 @@ type Integrations struct {
 
 func (x *Integrations) Reset() {
 	*x = Integrations{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[40]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2760,7 +2804,7 @@ func (x *Integrations) String() string {
 func (*Integrations) ProtoMessage() {}
 
 func (x *Integrations) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[40]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2773,7 +2817,7 @@ func (x *Integrations) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Integrations.ProtoReflect.Descriptor instead.
 func (*Integrations) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{40}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{41}
 }
 
 func (x *Integrations) GetIntegrations() []*Integration {
@@ -2796,7 +2840,7 @@ type UpdateIntegrationRequest struct {
 
 func (x *UpdateIntegrationRequest) Reset() {
 	*x = UpdateIntegrationRequest{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[41]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2808,7 +2852,7 @@ func (x *UpdateIntegrationRequest) String() string {
 func (*UpdateIntegrationRequest) ProtoMessage() {}
 
 func (x *UpdateIntegrationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[41]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2821,7 +2865,7 @@ func (x *UpdateIntegrationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateIntegrationRequest.ProtoReflect.Descriptor instead.
 func (*UpdateIntegrationRequest) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{41}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{42}
 }
 
 func (x *UpdateIntegrationRequest) GetId() string {
@@ -2866,7 +2910,7 @@ type RevokeIntegrationRequest struct {
 
 func (x *RevokeIntegrationRequest) Reset() {
 	*x = RevokeIntegrationRequest{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[42]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2878,7 +2922,7 @@ func (x *RevokeIntegrationRequest) String() string {
 func (*RevokeIntegrationRequest) ProtoMessage() {}
 
 func (x *RevokeIntegrationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[42]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2891,7 +2935,7 @@ func (x *RevokeIntegrationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RevokeIntegrationRequest.ProtoReflect.Descriptor instead.
 func (*RevokeIntegrationRequest) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{42}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{43}
 }
 
 func (x *RevokeIntegrationRequest) GetId() string {
@@ -2910,7 +2954,7 @@ type GetIntegrationRequest struct {
 
 func (x *GetIntegrationRequest) Reset() {
 	*x = GetIntegrationRequest{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[43]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2922,7 +2966,7 @@ func (x *GetIntegrationRequest) String() string {
 func (*GetIntegrationRequest) ProtoMessage() {}
 
 func (x *GetIntegrationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[43]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2935,7 +2979,7 @@ func (x *GetIntegrationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetIntegrationRequest.ProtoReflect.Descriptor instead.
 func (*GetIntegrationRequest) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{43}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{44}
 }
 
 func (x *GetIntegrationRequest) GetType() IntegrationType {
@@ -2955,7 +2999,7 @@ type OauthCallbackRequest struct {
 
 func (x *OauthCallbackRequest) Reset() {
 	*x = OauthCallbackRequest{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[44]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2967,7 +3011,7 @@ func (x *OauthCallbackRequest) String() string {
 func (*OauthCallbackRequest) ProtoMessage() {}
 
 func (x *OauthCallbackRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[44]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2980,7 +3024,7 @@ func (x *OauthCallbackRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OauthCallbackRequest.ProtoReflect.Descriptor instead.
 func (*OauthCallbackRequest) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{44}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{45}
 }
 
 func (x *OauthCallbackRequest) GetState() string {
@@ -3006,7 +3050,7 @@ type OauthCallbackResponse struct {
 
 func (x *OauthCallbackResponse) Reset() {
 	*x = OauthCallbackResponse{}
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[45]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[46]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3018,7 +3062,7 @@ func (x *OauthCallbackResponse) String() string {
 func (*OauthCallbackResponse) ProtoMessage() {}
 
 func (x *OauthCallbackResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[45]
+	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[46]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3031,7 +3075,7 @@ func (x *OauthCallbackResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OauthCallbackResponse.ProtoReflect.Descriptor instead.
 func (*OauthCallbackResponse) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{45}
+	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{46}
 }
 
 func (x *OauthCallbackResponse) GetRedirectUrl() string {
@@ -3045,7 +3089,9 @@ var File_coasterai_portal_v1_portal_proto protoreflect.FileDescriptor
 
 const file_coasterai_portal_v1_portal_proto_rawDesc = "" +
 	"\n" +
-	" coasterai/portal/v1/portal.proto\x12\x13coasterai.portal.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1ccoasterai/core/v1/core.proto\x1a\x1dcoasterai/core/v1/slide.proto\x1a\x1dcoasterai/core/v1/video.proto\x1a coasterai/core/v1/brandkit.proto\x1a coasterai/core/v1/template.proto\x1a\x1dcoasterai/core/v1/figma.proto\x1a#coasterai/core/v1/media_asset.proto\"O\n" +
+	" coasterai/portal/v1/portal.proto\x12\x13coasterai.portal.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1ccoasterai/core/v1/core.proto\x1a\x1dcoasterai/core/v1/slide.proto\x1a\x1dcoasterai/core/v1/video.proto\x1a coasterai/core/v1/brandkit.proto\x1a coasterai/core/v1/template.proto\x1a\x1dcoasterai/core/v1/figma.proto\x1a#coasterai/core/v1/media_asset.proto\"3\n" +
+	"\x13GetMediaAssetsByIDs\x12\x1c\n" +
+	"\tassetsIDs\x18\x01 \x03(\tR\tassetsIDs\"O\n" +
 	"\x16GetMediaAssetsResponse\x125\n" +
 	"\x06assets\x18\x01 \x03(\v2\x1d.coasterai.core.v1.MediaAssetR\x06assets\"\xe5\x02\n" +
 	"\x1eGenerateOrEditAnimationRequest\x12\x18\n" +
@@ -3264,7 +3310,7 @@ const file_coasterai_portal_v1_portal_proto_rawDesc = "" +
 	"\x1eINTEGRATION_STATE_AUTH_REVOKED\x10\x02\x12'\n" +
 	"#INTEGRATION_STATE_ACCOUNT_SUSPENDED\x10\x03\x12\"\n" +
 	"\x1eINTEGRATION_STATE_AUTH_EXPIRED\x10\x04\x12%\n" +
-	"!INTEGRATION_STATE_NOT_ESTABLISHED\x10\x052\x9c\x13\n" +
+	"!INTEGRATION_STATE_NOT_ESTABLISHED\x10\x052\x89\x14\n" +
 	"\rPortalService\x12@\n" +
 	"\tGetConfig\x12\x16.google.protobuf.Empty\x1a\x1b.coasterai.portal.v1.Config\x129\n" +
 	"\x04Self\x12\x16.google.protobuf.Empty\x1a\x19.coasterai.portal.v1.User\x12_\n" +
@@ -3291,7 +3337,8 @@ const file_coasterai_portal_v1_portal_proto_rawDesc = "" +
 	"\x12GetBrandIdentities\x12\x16.google.protobuf.Empty\x1a*.coasterai.portal.v1.BrandIdentityResponse\x12^\n" +
 	"\x13UpdateBrandIdentity\x12/.coasterai.portal.v1.UpdateBrandIdentityRequest\x1a\x16.google.protobuf.Empty\x12\x8b\x01\n" +
 	"\x1cGenerateOrEditAnimationSlide\x123.coasterai.portal.v1.GenerateOrEditAnimationRequest\x1a4.coasterai.portal.v1.GenerateOrEditAnimationResponse0\x01\x12U\n" +
-	"\x0eGetMediaAssets\x12\x16.google.protobuf.Empty\x1a+.coasterai.portal.v1.GetMediaAssetsResponseB?Z=github.com/shank318/coasterai/pb/coasterai/portal/v1;pbportalb\x06proto3"
+	"\x0eGetMediaAssets\x12\x16.google.protobuf.Empty\x1a+.coasterai.portal.v1.GetMediaAssetsResponse\x12k\n" +
+	"\x12GetMediaAssetsByID\x12(.coasterai.portal.v1.GetMediaAssetsByIDs\x1a+.coasterai.portal.v1.GetMediaAssetsResponseB?Z=github.com/shank318/coasterai/pb/coasterai/portal/v1;pbportalb\x06proto3"
 
 var (
 	file_coasterai_portal_v1_portal_proto_rawDescOnce sync.Once
@@ -3306,170 +3353,173 @@ func file_coasterai_portal_v1_portal_proto_rawDescGZIP() []byte {
 }
 
 var file_coasterai_portal_v1_portal_proto_enumTypes = make([]protoimpl.EnumInfo, 5)
-var file_coasterai_portal_v1_portal_proto_msgTypes = make([]protoimpl.MessageInfo, 46)
+var file_coasterai_portal_v1_portal_proto_msgTypes = make([]protoimpl.MessageInfo, 47)
 var file_coasterai_portal_v1_portal_proto_goTypes = []any{
 	(AskUserQuestionType)(0),                // 0: coasterai.portal.v1.AskUserQuestionType
 	(OauthAuthorizeType)(0),                 // 1: coasterai.portal.v1.OauthAuthorizeType
 	(UserRole)(0),                           // 2: coasterai.portal.v1.UserRole
 	(IntegrationType)(0),                    // 3: coasterai.portal.v1.IntegrationType
 	(IntegrationState)(0),                   // 4: coasterai.portal.v1.IntegrationState
-	(*GetMediaAssetsResponse)(nil),          // 5: coasterai.portal.v1.GetMediaAssetsResponse
-	(*GenerateOrEditAnimationRequest)(nil),  // 6: coasterai.portal.v1.GenerateOrEditAnimationRequest
-	(*EditAnimationUserInput)(nil),          // 7: coasterai.portal.v1.EditAnimationUserInput
-	(*CreateNewAnimationInput)(nil),         // 8: coasterai.portal.v1.CreateNewAnimationInput
-	(*AskUserInput)(nil),                    // 9: coasterai.portal.v1.AskUserInput
-	(*GenerateOrEditAnimationResponse)(nil), // 10: coasterai.portal.v1.GenerateOrEditAnimationResponse
-	(*UpdateBrandIdentityRequest)(nil),      // 11: coasterai.portal.v1.UpdateBrandIdentityRequest
-	(*BrandIdentityRequest)(nil),            // 12: coasterai.portal.v1.BrandIdentityRequest
-	(*BrandIdentityResponse)(nil),           // 13: coasterai.portal.v1.BrandIdentityResponse
-	(*RenderVideoRequest)(nil),              // 14: coasterai.portal.v1.RenderVideoRequest
-	(*RenderVideoResponse)(nil),             // 15: coasterai.portal.v1.RenderVideoResponse
-	(*ListFigmaFramesRequest)(nil),          // 16: coasterai.portal.v1.ListFigmaFramesRequest
-	(*ListFigmaFramesResponse)(nil),         // 17: coasterai.portal.v1.ListFigmaFramesResponse
-	(*ImportFigmaFrameRequest)(nil),         // 18: coasterai.portal.v1.ImportFigmaFrameRequest
-	(*ImportFigmaFrameResponse)(nil),        // 19: coasterai.portal.v1.ImportFigmaFrameResponse
-	(*StopVideoRequest)(nil),                // 20: coasterai.portal.v1.StopVideoRequest
-	(*DeleteVideoRequest)(nil),              // 21: coasterai.portal.v1.DeleteVideoRequest
-	(*GetVideoResponse)(nil),                // 22: coasterai.portal.v1.GetVideoResponse
-	(*UpdateVideoConfigRequest)(nil),        // 23: coasterai.portal.v1.UpdateVideoConfigRequest
-	(*GetVideoRequest)(nil),                 // 24: coasterai.portal.v1.GetVideoRequest
-	(*GetVideosResponse)(nil),               // 25: coasterai.portal.v1.GetVideosResponse
-	(*CreateVideoRequest)(nil),              // 26: coasterai.portal.v1.CreateVideoRequest
-	(*CreateVideoResponse)(nil),             // 27: coasterai.portal.v1.CreateVideoResponse
-	(*ContinueVideoPlanningRequest)(nil),    // 28: coasterai.portal.v1.ContinueVideoPlanningRequest
-	(*AskUserQuestion)(nil),                 // 29: coasterai.portal.v1.AskUserQuestion
-	(*Config)(nil),                          // 30: coasterai.portal.v1.Config
-	(*PasswordlessStartRequest)(nil),        // 31: coasterai.portal.v1.PasswordlessStartRequest
-	(*PasswordlessStartVerify)(nil),         // 32: coasterai.portal.v1.PasswordlessStartVerify
-	(*AuthStateRequest)(nil),                // 33: coasterai.portal.v1.AuthStateRequest
-	(*State)(nil),                           // 34: coasterai.portal.v1.State
-	(*User)(nil),                            // 35: coasterai.portal.v1.User
-	(*OauthAuthorizeRequest)(nil),           // 36: coasterai.portal.v1.OauthAuthorizeRequest
-	(*OauthAuthorizeResponse)(nil),          // 37: coasterai.portal.v1.OauthAuthorizeResponse
-	(*IssueRequest)(nil),                    // 38: coasterai.portal.v1.IssueRequest
-	(*JWT)(nil),                             // 39: coasterai.portal.v1.JWT
-	(*Organization)(nil),                    // 40: coasterai.portal.v1.Organization
-	(*OrganizationFeatureFlags)(nil),        // 41: coasterai.portal.v1.OrganizationFeatureFlags
-	(*Integration)(nil),                     // 42: coasterai.portal.v1.Integration
-	(*RedditIntegration)(nil),               // 43: coasterai.portal.v1.RedditIntegration
-	(*FigmaIntegration)(nil),                // 44: coasterai.portal.v1.FigmaIntegration
-	(*Integrations)(nil),                    // 45: coasterai.portal.v1.Integrations
-	(*UpdateIntegrationRequest)(nil),        // 46: coasterai.portal.v1.UpdateIntegrationRequest
-	(*RevokeIntegrationRequest)(nil),        // 47: coasterai.portal.v1.RevokeIntegrationRequest
-	(*GetIntegrationRequest)(nil),           // 48: coasterai.portal.v1.GetIntegrationRequest
-	(*OauthCallbackRequest)(nil),            // 49: coasterai.portal.v1.OauthCallbackRequest
-	(*OauthCallbackResponse)(nil),           // 50: coasterai.portal.v1.OauthCallbackResponse
-	(*v1.MediaAsset)(nil),                   // 51: coasterai.core.v1.MediaAsset
-	(*v1.Slide)(nil),                        // 52: coasterai.core.v1.Slide
-	(*v1.AnimationTemplate)(nil),            // 53: coasterai.core.v1.AnimationTemplate
-	(*v1.BrandIdentity)(nil),                // 54: coasterai.core.v1.BrandIdentity
-	(*v1.FigmaFrame)(nil),                   // 55: coasterai.core.v1.FigmaFrame
-	(*v1.FigmaPage)(nil),                    // 56: coasterai.core.v1.FigmaPage
-	(*v1.Video)(nil),                        // 57: coasterai.core.v1.Video
-	(*v1.VideoConfig)(nil),                  // 58: coasterai.core.v1.VideoConfig
-	(*v1.VideoMetadata)(nil),                // 59: coasterai.core.v1.VideoMetadata
-	(*v1.Script)(nil),                       // 60: coasterai.core.v1.Script
-	(*v1.Resolution)(nil),                   // 61: coasterai.core.v1.Resolution
-	(v1.VideoLanguage)(0),                   // 62: coasterai.core.v1.VideoLanguage
-	(v1.StyleType)(0),                       // 63: coasterai.core.v1.StyleType
-	(*v1.SelectedMediaAsset)(nil),           // 64: coasterai.core.v1.SelectedMediaAsset
-	(*timestamppb.Timestamp)(nil),           // 65: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),                   // 66: google.protobuf.Empty
+	(*GetMediaAssetsByIDs)(nil),             // 5: coasterai.portal.v1.GetMediaAssetsByIDs
+	(*GetMediaAssetsResponse)(nil),          // 6: coasterai.portal.v1.GetMediaAssetsResponse
+	(*GenerateOrEditAnimationRequest)(nil),  // 7: coasterai.portal.v1.GenerateOrEditAnimationRequest
+	(*EditAnimationUserInput)(nil),          // 8: coasterai.portal.v1.EditAnimationUserInput
+	(*CreateNewAnimationInput)(nil),         // 9: coasterai.portal.v1.CreateNewAnimationInput
+	(*AskUserInput)(nil),                    // 10: coasterai.portal.v1.AskUserInput
+	(*GenerateOrEditAnimationResponse)(nil), // 11: coasterai.portal.v1.GenerateOrEditAnimationResponse
+	(*UpdateBrandIdentityRequest)(nil),      // 12: coasterai.portal.v1.UpdateBrandIdentityRequest
+	(*BrandIdentityRequest)(nil),            // 13: coasterai.portal.v1.BrandIdentityRequest
+	(*BrandIdentityResponse)(nil),           // 14: coasterai.portal.v1.BrandIdentityResponse
+	(*RenderVideoRequest)(nil),              // 15: coasterai.portal.v1.RenderVideoRequest
+	(*RenderVideoResponse)(nil),             // 16: coasterai.portal.v1.RenderVideoResponse
+	(*ListFigmaFramesRequest)(nil),          // 17: coasterai.portal.v1.ListFigmaFramesRequest
+	(*ListFigmaFramesResponse)(nil),         // 18: coasterai.portal.v1.ListFigmaFramesResponse
+	(*ImportFigmaFrameRequest)(nil),         // 19: coasterai.portal.v1.ImportFigmaFrameRequest
+	(*ImportFigmaFrameResponse)(nil),        // 20: coasterai.portal.v1.ImportFigmaFrameResponse
+	(*StopVideoRequest)(nil),                // 21: coasterai.portal.v1.StopVideoRequest
+	(*DeleteVideoRequest)(nil),              // 22: coasterai.portal.v1.DeleteVideoRequest
+	(*GetVideoResponse)(nil),                // 23: coasterai.portal.v1.GetVideoResponse
+	(*UpdateVideoConfigRequest)(nil),        // 24: coasterai.portal.v1.UpdateVideoConfigRequest
+	(*GetVideoRequest)(nil),                 // 25: coasterai.portal.v1.GetVideoRequest
+	(*GetVideosResponse)(nil),               // 26: coasterai.portal.v1.GetVideosResponse
+	(*CreateVideoRequest)(nil),              // 27: coasterai.portal.v1.CreateVideoRequest
+	(*CreateVideoResponse)(nil),             // 28: coasterai.portal.v1.CreateVideoResponse
+	(*ContinueVideoPlanningRequest)(nil),    // 29: coasterai.portal.v1.ContinueVideoPlanningRequest
+	(*AskUserQuestion)(nil),                 // 30: coasterai.portal.v1.AskUserQuestion
+	(*Config)(nil),                          // 31: coasterai.portal.v1.Config
+	(*PasswordlessStartRequest)(nil),        // 32: coasterai.portal.v1.PasswordlessStartRequest
+	(*PasswordlessStartVerify)(nil),         // 33: coasterai.portal.v1.PasswordlessStartVerify
+	(*AuthStateRequest)(nil),                // 34: coasterai.portal.v1.AuthStateRequest
+	(*State)(nil),                           // 35: coasterai.portal.v1.State
+	(*User)(nil),                            // 36: coasterai.portal.v1.User
+	(*OauthAuthorizeRequest)(nil),           // 37: coasterai.portal.v1.OauthAuthorizeRequest
+	(*OauthAuthorizeResponse)(nil),          // 38: coasterai.portal.v1.OauthAuthorizeResponse
+	(*IssueRequest)(nil),                    // 39: coasterai.portal.v1.IssueRequest
+	(*JWT)(nil),                             // 40: coasterai.portal.v1.JWT
+	(*Organization)(nil),                    // 41: coasterai.portal.v1.Organization
+	(*OrganizationFeatureFlags)(nil),        // 42: coasterai.portal.v1.OrganizationFeatureFlags
+	(*Integration)(nil),                     // 43: coasterai.portal.v1.Integration
+	(*RedditIntegration)(nil),               // 44: coasterai.portal.v1.RedditIntegration
+	(*FigmaIntegration)(nil),                // 45: coasterai.portal.v1.FigmaIntegration
+	(*Integrations)(nil),                    // 46: coasterai.portal.v1.Integrations
+	(*UpdateIntegrationRequest)(nil),        // 47: coasterai.portal.v1.UpdateIntegrationRequest
+	(*RevokeIntegrationRequest)(nil),        // 48: coasterai.portal.v1.RevokeIntegrationRequest
+	(*GetIntegrationRequest)(nil),           // 49: coasterai.portal.v1.GetIntegrationRequest
+	(*OauthCallbackRequest)(nil),            // 50: coasterai.portal.v1.OauthCallbackRequest
+	(*OauthCallbackResponse)(nil),           // 51: coasterai.portal.v1.OauthCallbackResponse
+	(*v1.MediaAsset)(nil),                   // 52: coasterai.core.v1.MediaAsset
+	(*v1.Slide)(nil),                        // 53: coasterai.core.v1.Slide
+	(*v1.AnimationTemplate)(nil),            // 54: coasterai.core.v1.AnimationTemplate
+	(*v1.BrandIdentity)(nil),                // 55: coasterai.core.v1.BrandIdentity
+	(*v1.FigmaFrame)(nil),                   // 56: coasterai.core.v1.FigmaFrame
+	(*v1.FigmaPage)(nil),                    // 57: coasterai.core.v1.FigmaPage
+	(*v1.Video)(nil),                        // 58: coasterai.core.v1.Video
+	(*v1.VideoConfig)(nil),                  // 59: coasterai.core.v1.VideoConfig
+	(*v1.VideoMetadata)(nil),                // 60: coasterai.core.v1.VideoMetadata
+	(*v1.Script)(nil),                       // 61: coasterai.core.v1.Script
+	(*v1.Resolution)(nil),                   // 62: coasterai.core.v1.Resolution
+	(v1.VideoLanguage)(0),                   // 63: coasterai.core.v1.VideoLanguage
+	(v1.StyleType)(0),                       // 64: coasterai.core.v1.StyleType
+	(*v1.SelectedMediaAsset)(nil),           // 65: coasterai.core.v1.SelectedMediaAsset
+	(*timestamppb.Timestamp)(nil),           // 66: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),                   // 67: google.protobuf.Empty
 }
 var file_coasterai_portal_v1_portal_proto_depIdxs = []int32{
-	51, // 0: coasterai.portal.v1.GetMediaAssetsResponse.assets:type_name -> coasterai.core.v1.MediaAsset
-	7,  // 1: coasterai.portal.v1.GenerateOrEditAnimationRequest.edit_animation_user_input:type_name -> coasterai.portal.v1.EditAnimationUserInput
-	8,  // 2: coasterai.portal.v1.GenerateOrEditAnimationRequest.create_new_animation_input:type_name -> coasterai.portal.v1.CreateNewAnimationInput
-	9,  // 3: coasterai.portal.v1.GenerateOrEditAnimationRequest.ask_user_input:type_name -> coasterai.portal.v1.AskUserInput
-	52, // 4: coasterai.portal.v1.GenerateOrEditAnimationResponse.slide:type_name -> coasterai.core.v1.Slide
-	29, // 5: coasterai.portal.v1.GenerateOrEditAnimationResponse.ask_user_question:type_name -> coasterai.portal.v1.AskUserQuestion
-	53, // 6: coasterai.portal.v1.GenerateOrEditAnimationResponse.suggestions:type_name -> coasterai.core.v1.AnimationTemplate
-	54, // 7: coasterai.portal.v1.UpdateBrandIdentityRequest.identity:type_name -> coasterai.core.v1.BrandIdentity
-	54, // 8: coasterai.portal.v1.BrandIdentityResponse.identities:type_name -> coasterai.core.v1.BrandIdentity
-	55, // 9: coasterai.portal.v1.ListFigmaFramesResponse.frames:type_name -> coasterai.core.v1.FigmaFrame
-	56, // 10: coasterai.portal.v1.ListFigmaFramesResponse.pages:type_name -> coasterai.core.v1.FigmaPage
-	51, // 11: coasterai.portal.v1.ImportFigmaFrameResponse.asset:type_name -> coasterai.core.v1.MediaAsset
-	55, // 12: coasterai.portal.v1.ImportFigmaFrameResponse.frame:type_name -> coasterai.core.v1.FigmaFrame
-	57, // 13: coasterai.portal.v1.GetVideoResponse.video:type_name -> coasterai.core.v1.Video
-	58, // 14: coasterai.portal.v1.UpdateVideoConfigRequest.config:type_name -> coasterai.core.v1.VideoConfig
-	59, // 15: coasterai.portal.v1.UpdateVideoConfigRequest.metadata:type_name -> coasterai.core.v1.VideoMetadata
-	57, // 16: coasterai.portal.v1.GetVideosResponse.videos:type_name -> coasterai.core.v1.Video
-	60, // 17: coasterai.portal.v1.CreateVideoRequest.script:type_name -> coasterai.core.v1.Script
-	61, // 18: coasterai.portal.v1.CreateVideoRequest.resolution:type_name -> coasterai.core.v1.Resolution
-	62, // 19: coasterai.portal.v1.CreateVideoRequest.language:type_name -> coasterai.core.v1.VideoLanguage
-	63, // 20: coasterai.portal.v1.CreateVideoRequest.styleType:type_name -> coasterai.core.v1.StyleType
-	64, // 21: coasterai.portal.v1.CreateVideoRequest.assets:type_name -> coasterai.core.v1.SelectedMediaAsset
-	29, // 22: coasterai.portal.v1.CreateVideoResponse.ask_user_question:type_name -> coasterai.portal.v1.AskUserQuestion
-	64, // 23: coasterai.portal.v1.ContinueVideoPlanningRequest.assets:type_name -> coasterai.core.v1.SelectedMediaAsset
-	51, // 24: coasterai.portal.v1.AskUserQuestion.asset:type_name -> coasterai.core.v1.MediaAsset
+	52, // 0: coasterai.portal.v1.GetMediaAssetsResponse.assets:type_name -> coasterai.core.v1.MediaAsset
+	8,  // 1: coasterai.portal.v1.GenerateOrEditAnimationRequest.edit_animation_user_input:type_name -> coasterai.portal.v1.EditAnimationUserInput
+	9,  // 2: coasterai.portal.v1.GenerateOrEditAnimationRequest.create_new_animation_input:type_name -> coasterai.portal.v1.CreateNewAnimationInput
+	10, // 3: coasterai.portal.v1.GenerateOrEditAnimationRequest.ask_user_input:type_name -> coasterai.portal.v1.AskUserInput
+	53, // 4: coasterai.portal.v1.GenerateOrEditAnimationResponse.slide:type_name -> coasterai.core.v1.Slide
+	30, // 5: coasterai.portal.v1.GenerateOrEditAnimationResponse.ask_user_question:type_name -> coasterai.portal.v1.AskUserQuestion
+	54, // 6: coasterai.portal.v1.GenerateOrEditAnimationResponse.suggestions:type_name -> coasterai.core.v1.AnimationTemplate
+	55, // 7: coasterai.portal.v1.UpdateBrandIdentityRequest.identity:type_name -> coasterai.core.v1.BrandIdentity
+	55, // 8: coasterai.portal.v1.BrandIdentityResponse.identities:type_name -> coasterai.core.v1.BrandIdentity
+	56, // 9: coasterai.portal.v1.ListFigmaFramesResponse.frames:type_name -> coasterai.core.v1.FigmaFrame
+	57, // 10: coasterai.portal.v1.ListFigmaFramesResponse.pages:type_name -> coasterai.core.v1.FigmaPage
+	52, // 11: coasterai.portal.v1.ImportFigmaFrameResponse.asset:type_name -> coasterai.core.v1.MediaAsset
+	56, // 12: coasterai.portal.v1.ImportFigmaFrameResponse.frame:type_name -> coasterai.core.v1.FigmaFrame
+	58, // 13: coasterai.portal.v1.GetVideoResponse.video:type_name -> coasterai.core.v1.Video
+	59, // 14: coasterai.portal.v1.UpdateVideoConfigRequest.config:type_name -> coasterai.core.v1.VideoConfig
+	60, // 15: coasterai.portal.v1.UpdateVideoConfigRequest.metadata:type_name -> coasterai.core.v1.VideoMetadata
+	58, // 16: coasterai.portal.v1.GetVideosResponse.videos:type_name -> coasterai.core.v1.Video
+	61, // 17: coasterai.portal.v1.CreateVideoRequest.script:type_name -> coasterai.core.v1.Script
+	62, // 18: coasterai.portal.v1.CreateVideoRequest.resolution:type_name -> coasterai.core.v1.Resolution
+	63, // 19: coasterai.portal.v1.CreateVideoRequest.language:type_name -> coasterai.core.v1.VideoLanguage
+	64, // 20: coasterai.portal.v1.CreateVideoRequest.styleType:type_name -> coasterai.core.v1.StyleType
+	65, // 21: coasterai.portal.v1.CreateVideoRequest.assets:type_name -> coasterai.core.v1.SelectedMediaAsset
+	30, // 22: coasterai.portal.v1.CreateVideoResponse.ask_user_question:type_name -> coasterai.portal.v1.AskUserQuestion
+	65, // 23: coasterai.portal.v1.ContinueVideoPlanningRequest.assets:type_name -> coasterai.core.v1.SelectedMediaAsset
+	52, // 24: coasterai.portal.v1.AskUserQuestion.asset:type_name -> coasterai.core.v1.MediaAsset
 	0,  // 25: coasterai.portal.v1.AskUserQuestion.questionType:type_name -> coasterai.portal.v1.AskUserQuestionType
 	2,  // 26: coasterai.portal.v1.User.role:type_name -> coasterai.portal.v1.UserRole
-	40, // 27: coasterai.portal.v1.User.organizations:type_name -> coasterai.portal.v1.Organization
-	65, // 28: coasterai.portal.v1.User.created_at:type_name -> google.protobuf.Timestamp
+	41, // 27: coasterai.portal.v1.User.organizations:type_name -> coasterai.portal.v1.Organization
+	66, // 28: coasterai.portal.v1.User.created_at:type_name -> google.protobuf.Timestamp
 	3,  // 29: coasterai.portal.v1.OauthAuthorizeRequest.integration_type:type_name -> coasterai.portal.v1.IntegrationType
-	41, // 30: coasterai.portal.v1.Organization.feature_flags:type_name -> coasterai.portal.v1.OrganizationFeatureFlags
-	65, // 31: coasterai.portal.v1.Organization.created_at:type_name -> google.protobuf.Timestamp
+	42, // 30: coasterai.portal.v1.Organization.feature_flags:type_name -> coasterai.portal.v1.OrganizationFeatureFlags
+	66, // 31: coasterai.portal.v1.Organization.created_at:type_name -> google.protobuf.Timestamp
 	3,  // 32: coasterai.portal.v1.Integration.type:type_name -> coasterai.portal.v1.IntegrationType
 	4,  // 33: coasterai.portal.v1.Integration.status:type_name -> coasterai.portal.v1.IntegrationState
-	43, // 34: coasterai.portal.v1.Integration.reddit:type_name -> coasterai.portal.v1.RedditIntegration
-	44, // 35: coasterai.portal.v1.Integration.figma:type_name -> coasterai.portal.v1.FigmaIntegration
-	42, // 36: coasterai.portal.v1.Integrations.integrations:type_name -> coasterai.portal.v1.Integration
-	43, // 37: coasterai.portal.v1.UpdateIntegrationRequest.reddit:type_name -> coasterai.portal.v1.RedditIntegration
+	44, // 34: coasterai.portal.v1.Integration.reddit:type_name -> coasterai.portal.v1.RedditIntegration
+	45, // 35: coasterai.portal.v1.Integration.figma:type_name -> coasterai.portal.v1.FigmaIntegration
+	43, // 36: coasterai.portal.v1.Integrations.integrations:type_name -> coasterai.portal.v1.Integration
+	44, // 37: coasterai.portal.v1.UpdateIntegrationRequest.reddit:type_name -> coasterai.portal.v1.RedditIntegration
 	3,  // 38: coasterai.portal.v1.GetIntegrationRequest.type:type_name -> coasterai.portal.v1.IntegrationType
-	66, // 39: coasterai.portal.v1.PortalService.GetConfig:input_type -> google.protobuf.Empty
-	66, // 40: coasterai.portal.v1.PortalService.Self:input_type -> google.protobuf.Empty
-	48, // 41: coasterai.portal.v1.PortalService.GetIntegration:input_type -> coasterai.portal.v1.GetIntegrationRequest
-	47, // 42: coasterai.portal.v1.PortalService.RevokeIntegration:input_type -> coasterai.portal.v1.RevokeIntegrationRequest
-	46, // 43: coasterai.portal.v1.PortalService.UpdateIntegration:input_type -> coasterai.portal.v1.UpdateIntegrationRequest
-	31, // 44: coasterai.portal.v1.PortalService.PasswordlessStart:input_type -> coasterai.portal.v1.PasswordlessStartRequest
-	32, // 45: coasterai.portal.v1.PortalService.PasswordlessVerify:input_type -> coasterai.portal.v1.PasswordlessStartVerify
-	36, // 46: coasterai.portal.v1.PortalService.OauthAuthorize:input_type -> coasterai.portal.v1.OauthAuthorizeRequest
-	49, // 47: coasterai.portal.v1.PortalService.OauthCallback:input_type -> coasterai.portal.v1.OauthCallbackRequest
-	49, // 48: coasterai.portal.v1.PortalService.SocialLoginCallback:input_type -> coasterai.portal.v1.OauthCallbackRequest
-	66, // 49: coasterai.portal.v1.PortalService.GetIntegrations:input_type -> google.protobuf.Empty
-	26, // 50: coasterai.portal.v1.PortalService.CreateVideo:input_type -> coasterai.portal.v1.CreateVideoRequest
-	28, // 51: coasterai.portal.v1.PortalService.ContinueVideoPlanning:input_type -> coasterai.portal.v1.ContinueVideoPlanningRequest
-	24, // 52: coasterai.portal.v1.PortalService.GetVideo:input_type -> coasterai.portal.v1.GetVideoRequest
-	20, // 53: coasterai.portal.v1.PortalService.StopVideo:input_type -> coasterai.portal.v1.StopVideoRequest
-	66, // 54: coasterai.portal.v1.PortalService.GetVideos:input_type -> google.protobuf.Empty
-	21, // 55: coasterai.portal.v1.PortalService.DeleteVideo:input_type -> coasterai.portal.v1.DeleteVideoRequest
-	23, // 56: coasterai.portal.v1.PortalService.UpdateVideoConfig:input_type -> coasterai.portal.v1.UpdateVideoConfigRequest
-	14, // 57: coasterai.portal.v1.PortalService.RenderVideo:input_type -> coasterai.portal.v1.RenderVideoRequest
-	16, // 58: coasterai.portal.v1.PortalService.ListFigmaFrames:input_type -> coasterai.portal.v1.ListFigmaFramesRequest
-	18, // 59: coasterai.portal.v1.PortalService.ImportFigmaFrame:input_type -> coasterai.portal.v1.ImportFigmaFrameRequest
-	12, // 60: coasterai.portal.v1.PortalService.CreateBrandIdentity:input_type -> coasterai.portal.v1.BrandIdentityRequest
-	66, // 61: coasterai.portal.v1.PortalService.GetBrandIdentities:input_type -> google.protobuf.Empty
-	11, // 62: coasterai.portal.v1.PortalService.UpdateBrandIdentity:input_type -> coasterai.portal.v1.UpdateBrandIdentityRequest
-	6,  // 63: coasterai.portal.v1.PortalService.GenerateOrEditAnimationSlide:input_type -> coasterai.portal.v1.GenerateOrEditAnimationRequest
-	66, // 64: coasterai.portal.v1.PortalService.GetMediaAssets:input_type -> google.protobuf.Empty
-	30, // 65: coasterai.portal.v1.PortalService.GetConfig:output_type -> coasterai.portal.v1.Config
-	35, // 66: coasterai.portal.v1.PortalService.Self:output_type -> coasterai.portal.v1.User
-	45, // 67: coasterai.portal.v1.PortalService.GetIntegration:output_type -> coasterai.portal.v1.Integrations
-	66, // 68: coasterai.portal.v1.PortalService.RevokeIntegration:output_type -> google.protobuf.Empty
-	66, // 69: coasterai.portal.v1.PortalService.UpdateIntegration:output_type -> google.protobuf.Empty
-	66, // 70: coasterai.portal.v1.PortalService.PasswordlessStart:output_type -> google.protobuf.Empty
-	39, // 71: coasterai.portal.v1.PortalService.PasswordlessVerify:output_type -> coasterai.portal.v1.JWT
-	37, // 72: coasterai.portal.v1.PortalService.OauthAuthorize:output_type -> coasterai.portal.v1.OauthAuthorizeResponse
-	50, // 73: coasterai.portal.v1.PortalService.OauthCallback:output_type -> coasterai.portal.v1.OauthCallbackResponse
-	39, // 74: coasterai.portal.v1.PortalService.SocialLoginCallback:output_type -> coasterai.portal.v1.JWT
-	45, // 75: coasterai.portal.v1.PortalService.GetIntegrations:output_type -> coasterai.portal.v1.Integrations
-	27, // 76: coasterai.portal.v1.PortalService.CreateVideo:output_type -> coasterai.portal.v1.CreateVideoResponse
-	27, // 77: coasterai.portal.v1.PortalService.ContinueVideoPlanning:output_type -> coasterai.portal.v1.CreateVideoResponse
-	22, // 78: coasterai.portal.v1.PortalService.GetVideo:output_type -> coasterai.portal.v1.GetVideoResponse
-	66, // 79: coasterai.portal.v1.PortalService.StopVideo:output_type -> google.protobuf.Empty
-	25, // 80: coasterai.portal.v1.PortalService.GetVideos:output_type -> coasterai.portal.v1.GetVideosResponse
-	66, // 81: coasterai.portal.v1.PortalService.DeleteVideo:output_type -> google.protobuf.Empty
-	66, // 82: coasterai.portal.v1.PortalService.UpdateVideoConfig:output_type -> google.protobuf.Empty
-	15, // 83: coasterai.portal.v1.PortalService.RenderVideo:output_type -> coasterai.portal.v1.RenderVideoResponse
-	17, // 84: coasterai.portal.v1.PortalService.ListFigmaFrames:output_type -> coasterai.portal.v1.ListFigmaFramesResponse
-	19, // 85: coasterai.portal.v1.PortalService.ImportFigmaFrame:output_type -> coasterai.portal.v1.ImportFigmaFrameResponse
-	54, // 86: coasterai.portal.v1.PortalService.CreateBrandIdentity:output_type -> coasterai.core.v1.BrandIdentity
-	13, // 87: coasterai.portal.v1.PortalService.GetBrandIdentities:output_type -> coasterai.portal.v1.BrandIdentityResponse
-	66, // 88: coasterai.portal.v1.PortalService.UpdateBrandIdentity:output_type -> google.protobuf.Empty
-	10, // 89: coasterai.portal.v1.PortalService.GenerateOrEditAnimationSlide:output_type -> coasterai.portal.v1.GenerateOrEditAnimationResponse
-	5,  // 90: coasterai.portal.v1.PortalService.GetMediaAssets:output_type -> coasterai.portal.v1.GetMediaAssetsResponse
-	65, // [65:91] is the sub-list for method output_type
-	39, // [39:65] is the sub-list for method input_type
+	67, // 39: coasterai.portal.v1.PortalService.GetConfig:input_type -> google.protobuf.Empty
+	67, // 40: coasterai.portal.v1.PortalService.Self:input_type -> google.protobuf.Empty
+	49, // 41: coasterai.portal.v1.PortalService.GetIntegration:input_type -> coasterai.portal.v1.GetIntegrationRequest
+	48, // 42: coasterai.portal.v1.PortalService.RevokeIntegration:input_type -> coasterai.portal.v1.RevokeIntegrationRequest
+	47, // 43: coasterai.portal.v1.PortalService.UpdateIntegration:input_type -> coasterai.portal.v1.UpdateIntegrationRequest
+	32, // 44: coasterai.portal.v1.PortalService.PasswordlessStart:input_type -> coasterai.portal.v1.PasswordlessStartRequest
+	33, // 45: coasterai.portal.v1.PortalService.PasswordlessVerify:input_type -> coasterai.portal.v1.PasswordlessStartVerify
+	37, // 46: coasterai.portal.v1.PortalService.OauthAuthorize:input_type -> coasterai.portal.v1.OauthAuthorizeRequest
+	50, // 47: coasterai.portal.v1.PortalService.OauthCallback:input_type -> coasterai.portal.v1.OauthCallbackRequest
+	50, // 48: coasterai.portal.v1.PortalService.SocialLoginCallback:input_type -> coasterai.portal.v1.OauthCallbackRequest
+	67, // 49: coasterai.portal.v1.PortalService.GetIntegrations:input_type -> google.protobuf.Empty
+	27, // 50: coasterai.portal.v1.PortalService.CreateVideo:input_type -> coasterai.portal.v1.CreateVideoRequest
+	29, // 51: coasterai.portal.v1.PortalService.ContinueVideoPlanning:input_type -> coasterai.portal.v1.ContinueVideoPlanningRequest
+	25, // 52: coasterai.portal.v1.PortalService.GetVideo:input_type -> coasterai.portal.v1.GetVideoRequest
+	21, // 53: coasterai.portal.v1.PortalService.StopVideo:input_type -> coasterai.portal.v1.StopVideoRequest
+	67, // 54: coasterai.portal.v1.PortalService.GetVideos:input_type -> google.protobuf.Empty
+	22, // 55: coasterai.portal.v1.PortalService.DeleteVideo:input_type -> coasterai.portal.v1.DeleteVideoRequest
+	24, // 56: coasterai.portal.v1.PortalService.UpdateVideoConfig:input_type -> coasterai.portal.v1.UpdateVideoConfigRequest
+	15, // 57: coasterai.portal.v1.PortalService.RenderVideo:input_type -> coasterai.portal.v1.RenderVideoRequest
+	17, // 58: coasterai.portal.v1.PortalService.ListFigmaFrames:input_type -> coasterai.portal.v1.ListFigmaFramesRequest
+	19, // 59: coasterai.portal.v1.PortalService.ImportFigmaFrame:input_type -> coasterai.portal.v1.ImportFigmaFrameRequest
+	13, // 60: coasterai.portal.v1.PortalService.CreateBrandIdentity:input_type -> coasterai.portal.v1.BrandIdentityRequest
+	67, // 61: coasterai.portal.v1.PortalService.GetBrandIdentities:input_type -> google.protobuf.Empty
+	12, // 62: coasterai.portal.v1.PortalService.UpdateBrandIdentity:input_type -> coasterai.portal.v1.UpdateBrandIdentityRequest
+	7,  // 63: coasterai.portal.v1.PortalService.GenerateOrEditAnimationSlide:input_type -> coasterai.portal.v1.GenerateOrEditAnimationRequest
+	67, // 64: coasterai.portal.v1.PortalService.GetMediaAssets:input_type -> google.protobuf.Empty
+	5,  // 65: coasterai.portal.v1.PortalService.GetMediaAssetsByID:input_type -> coasterai.portal.v1.GetMediaAssetsByIDs
+	31, // 66: coasterai.portal.v1.PortalService.GetConfig:output_type -> coasterai.portal.v1.Config
+	36, // 67: coasterai.portal.v1.PortalService.Self:output_type -> coasterai.portal.v1.User
+	46, // 68: coasterai.portal.v1.PortalService.GetIntegration:output_type -> coasterai.portal.v1.Integrations
+	67, // 69: coasterai.portal.v1.PortalService.RevokeIntegration:output_type -> google.protobuf.Empty
+	67, // 70: coasterai.portal.v1.PortalService.UpdateIntegration:output_type -> google.protobuf.Empty
+	67, // 71: coasterai.portal.v1.PortalService.PasswordlessStart:output_type -> google.protobuf.Empty
+	40, // 72: coasterai.portal.v1.PortalService.PasswordlessVerify:output_type -> coasterai.portal.v1.JWT
+	38, // 73: coasterai.portal.v1.PortalService.OauthAuthorize:output_type -> coasterai.portal.v1.OauthAuthorizeResponse
+	51, // 74: coasterai.portal.v1.PortalService.OauthCallback:output_type -> coasterai.portal.v1.OauthCallbackResponse
+	40, // 75: coasterai.portal.v1.PortalService.SocialLoginCallback:output_type -> coasterai.portal.v1.JWT
+	46, // 76: coasterai.portal.v1.PortalService.GetIntegrations:output_type -> coasterai.portal.v1.Integrations
+	28, // 77: coasterai.portal.v1.PortalService.CreateVideo:output_type -> coasterai.portal.v1.CreateVideoResponse
+	28, // 78: coasterai.portal.v1.PortalService.ContinueVideoPlanning:output_type -> coasterai.portal.v1.CreateVideoResponse
+	23, // 79: coasterai.portal.v1.PortalService.GetVideo:output_type -> coasterai.portal.v1.GetVideoResponse
+	67, // 80: coasterai.portal.v1.PortalService.StopVideo:output_type -> google.protobuf.Empty
+	26, // 81: coasterai.portal.v1.PortalService.GetVideos:output_type -> coasterai.portal.v1.GetVideosResponse
+	67, // 82: coasterai.portal.v1.PortalService.DeleteVideo:output_type -> google.protobuf.Empty
+	67, // 83: coasterai.portal.v1.PortalService.UpdateVideoConfig:output_type -> google.protobuf.Empty
+	16, // 84: coasterai.portal.v1.PortalService.RenderVideo:output_type -> coasterai.portal.v1.RenderVideoResponse
+	18, // 85: coasterai.portal.v1.PortalService.ListFigmaFrames:output_type -> coasterai.portal.v1.ListFigmaFramesResponse
+	20, // 86: coasterai.portal.v1.PortalService.ImportFigmaFrame:output_type -> coasterai.portal.v1.ImportFigmaFrameResponse
+	55, // 87: coasterai.portal.v1.PortalService.CreateBrandIdentity:output_type -> coasterai.core.v1.BrandIdentity
+	14, // 88: coasterai.portal.v1.PortalService.GetBrandIdentities:output_type -> coasterai.portal.v1.BrandIdentityResponse
+	67, // 89: coasterai.portal.v1.PortalService.UpdateBrandIdentity:output_type -> google.protobuf.Empty
+	11, // 90: coasterai.portal.v1.PortalService.GenerateOrEditAnimationSlide:output_type -> coasterai.portal.v1.GenerateOrEditAnimationResponse
+	6,  // 91: coasterai.portal.v1.PortalService.GetMediaAssets:output_type -> coasterai.portal.v1.GetMediaAssetsResponse
+	6,  // 92: coasterai.portal.v1.PortalService.GetMediaAssetsByID:output_type -> coasterai.portal.v1.GetMediaAssetsResponse
+	66, // [66:93] is the sub-list for method output_type
+	39, // [39:66] is the sub-list for method input_type
 	39, // [39:39] is the sub-list for extension type_name
 	39, // [39:39] is the sub-list for extension extendee
 	0,  // [0:39] is the sub-list for field type_name
@@ -3480,29 +3530,29 @@ func file_coasterai_portal_v1_portal_proto_init() {
 	if File_coasterai_portal_v1_portal_proto != nil {
 		return
 	}
-	file_coasterai_portal_v1_portal_proto_msgTypes[1].OneofWrappers = []any{
+	file_coasterai_portal_v1_portal_proto_msgTypes[2].OneofWrappers = []any{
 		(*GenerateOrEditAnimationRequest_EditAnimationUserInput)(nil),
 		(*GenerateOrEditAnimationRequest_CreateNewAnimationInput)(nil),
 		(*GenerateOrEditAnimationRequest_AskUserInput)(nil),
 	}
-	file_coasterai_portal_v1_portal_proto_msgTypes[11].OneofWrappers = []any{}
-	file_coasterai_portal_v1_portal_proto_msgTypes[21].OneofWrappers = []any{}
-	file_coasterai_portal_v1_portal_proto_msgTypes[24].OneofWrappers = []any{}
-	file_coasterai_portal_v1_portal_proto_msgTypes[37].OneofWrappers = []any{
+	file_coasterai_portal_v1_portal_proto_msgTypes[12].OneofWrappers = []any{}
+	file_coasterai_portal_v1_portal_proto_msgTypes[22].OneofWrappers = []any{}
+	file_coasterai_portal_v1_portal_proto_msgTypes[25].OneofWrappers = []any{}
+	file_coasterai_portal_v1_portal_proto_msgTypes[38].OneofWrappers = []any{
 		(*Integration_Reddit)(nil),
 		(*Integration_Figma)(nil),
 	}
-	file_coasterai_portal_v1_portal_proto_msgTypes[41].OneofWrappers = []any{
+	file_coasterai_portal_v1_portal_proto_msgTypes[42].OneofWrappers = []any{
 		(*UpdateIntegrationRequest_Reddit)(nil),
 	}
-	file_coasterai_portal_v1_portal_proto_msgTypes[44].OneofWrappers = []any{}
+	file_coasterai_portal_v1_portal_proto_msgTypes[45].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_coasterai_portal_v1_portal_proto_rawDesc), len(file_coasterai_portal_v1_portal_proto_rawDesc)),
 			NumEnums:      5,
-			NumMessages:   46,
+			NumMessages:   47,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

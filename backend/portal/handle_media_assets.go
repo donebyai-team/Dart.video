@@ -25,3 +25,21 @@ func (p *Portal) GetMediaAssets(ctx context.Context, c *connect.Request[emptypb.
 
 	return connect.NewResponse(&pbportal.GetMediaAssetsResponse{Assets: protoAssets}), nil
 }
+
+func (p *Portal) GetMediaAssetsByID(ctx context.Context, c *connect.Request[pbportal.GetMediaAssetsByIDs]) (*connect.Response[pbportal.GetMediaAssetsResponse], error) {
+	_, err := p.gethAuthContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	assets, err := p.db.GetMediaAssetsByID(ctx, c.Msg.AssetsIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	protoAssets := make([]*pbcore.MediaAsset, 0, len(assets))
+	for _, asset := range assets {
+		protoAssets = append(protoAssets, asset.ToProto())
+	}
+
+	return connect.NewResponse(&pbportal.GetMediaAssetsResponse{Assets: protoAssets}), nil
+}

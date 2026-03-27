@@ -32,6 +32,7 @@ import AssetUploadDropdown from '@/components/composer/AssetUploadDropdown'
 import LanguageSelector from '@/components/composer/LanguageSelector'
 import BrandLibrarySelector from '@/components/composer/BrandLibrarySelector'
 import { MediaAsset, SelectedMediaAsset, SelectedMediaAssetSchema } from '@coasterai/pb/coasterai/core/v1/media_asset_pb'
+import SelectedAssetsDialog, { type SelectedAssetWithPreview } from '@/components/assets/SelectedAssetsDialog'
 
 const MIN_SCRIPT_SECTIONS = 3
 const MIN_PROMPT_LENGTH = 10
@@ -49,10 +50,11 @@ const VideoIntentComposer = () => {
   const [scriptDialogOpen, setScriptDialogOpen] = useState(false)
   const [styleDialogOpen, setStyleDialogOpen] = useState(false)
   const [assetDialogOpen, setAssetDialogOpen] = useState(false)
+  const [selectedAssetsDialogOpen, setSelectedAssetsDialogOpen] = useState(false)
   const [assetPickerMode, setAssetPickerMode] = useState<AssetPickerMode>('upload')
   const [selectedStyle, setSelectedStyle] = useState<StyleType>(StyleType.UNDEFINED)
   const [script, setScript] = useState<Script | undefined>()
-  const [selectedAssets, setSelectedAssets] = useState<SelectedMediaAsset[]>([])
+  const [selectedAssets, setSelectedAssets] = useState<SelectedAssetWithPreview[]>([])
 
   const [stage, setStage] = useState<ComposerStage>('compose')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -78,6 +80,10 @@ const VideoIntentComposer = () => {
   const hasPrompt = prompt.trim().length > MIN_PROMPT_LENGTH
   const hasSelectedAssets = selectedAssets.length > 0
   const canGenerate = hasPrompt || hasValidScript || hasSelectedAssets
+  const selectedAssetMessages = useMemo(
+    () => selectedAssets.map(asset => asset.selection),
+    [selectedAssets]
+  )
 
   const answerInput = useMemo(() => {
     if (!activeQuestion) return ''
@@ -113,7 +119,9 @@ const VideoIntentComposer = () => {
     try {
       const metadata = fromJsonString(VideoMetadataSchema, serializedMetadata)
       setPrompt(metadata.prompt ?? '')
-      setSelectedAssets(metadata.assets ?? [])
+      setSelectedAssets((metadata.assets ?? []).map(asset => ({
+        selection: asset
+      })))
       if (metadata.generatedBranding?.brandLibraryID || metadata.generatedBranding?.brandIdentity?.id) {
         setSelectedBrandLibraryId(metadata.generatedBranding?.brandLibraryID || metadata.generatedBranding?.brandIdentity?.id)
       }
@@ -204,7 +212,7 @@ const VideoIntentComposer = () => {
         durationInSec: Number(duration),
         brandLibraryId: selectedBrandLibraryId,
         styleType: selectedStyle,
-        assets: selectedAssets
+        assets: selectedAssetMessages
       }, { signal: controller.signal })
 
       await consumePlanningStream(stream, controller.signal, streamSession)
@@ -279,8 +287,8 @@ const VideoIntentComposer = () => {
     })
 
     setSelectedAssets(current => {
-      const remaining = current.filter(item => item.assetID !== nextAsset.assetID)
-      return [...remaining, nextAsset]
+      const remaining = current.filter(item => item.selection.assetID !== nextAsset.assetID)
+      return [...remaining, { selection: nextAsset, asset }]
     })
     setAssetDialogOpen(false)
   }
@@ -330,6 +338,38 @@ const VideoIntentComposer = () => {
     setAssetDialogOpen(true)
   }
 
+  const removeSelectedAsset = (assetID: string) => {
+    setSelectedAssets(current => current.filter(asset => asset.selection.assetID !== assetID))
+  }
+
+  const updateSelectedAssetNote = (assetID: string, note?: string) => {
+    setSelectedAssets(current =>
+      current.map(asset => asset.selection.assetID === assetID
+        ? {
+            ...asset,
+            selection: create(SelectedMediaAssetSchema, {
+              assetID,
+              note
+            })
+          }
+        : asset
+      )
+    )
+  }
+
+  const hydrateSelectedAssets = (assets: MediaAsset[]) => {
+    if (assets.length === 0) return
+
+    setSelectedAssets(current =>
+      current.map(selectedAsset => {
+        const fullAsset = assets.find(asset => asset.id === selectedAsset.selection.assetID)
+        return fullAsset
+          ? { ...selectedAsset, asset: fullAsset }
+          : selectedAsset
+      })
+    )
+  }
+
   return (
     <div className='flex flex-col w-full max-w-3xl mx-auto px-4 min-h-[calc(100vh-4rem)]'>
       <ScriptEditorDialog
@@ -364,6 +404,16 @@ const VideoIntentComposer = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <SelectedAssetsDialog
+        open={selectedAssetsDialogOpen}
+        selectedAssets={selectedAssets}
+        onOpenChange={setSelectedAssetsDialogOpen}
+        onHydrateAssets={hydrateSelectedAssets}
+        onRemoveAsset={removeSelectedAsset}
+        onUpdateAssetNote={updateSelectedAssetNote}
+        onOpenUpload={() => openAssetDialog('upload')}
+      />
 
       {/* Center area — grows to push input to the bottom */}
       <div className='flex-1 flex items-center justify-center py-8'>
@@ -500,7 +550,7 @@ const VideoIntentComposer = () => {
           {hasSelectedAssets && (
             <div className='mx-4 mt-2 flex flex-wrap gap-2'>
               <div
-                onClick={() => setAssetDialogOpen(true)}
+                onClick={() => setSelectedAssetsDialogOpen(true)}
                 className='flex cursor-pointer items-center justify-between rounded-lg border border-primary/15 bg-primary/5 px-3 py-1.5 text-xs transition-colors hover:border-primary/30'
               >
                 <div className='flex items-center gap-2 text-primary'>

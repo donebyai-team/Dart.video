@@ -49,6 +49,11 @@ service PortalService {
 
   // Assets
   rpc GetMediaAssets(.google.protobuf.Empty) returns (GetMediaAssetsResponse);
+  rpc GetMediaAssetsByID(GetMediaAssetsByIDs) returns (GetMediaAssetsResponse);
+}
+
+message GetMediaAssetsByIDs {
+  repeated string assetsIDs = 1;
 }
 
 message GetMediaAssetsResponse {
