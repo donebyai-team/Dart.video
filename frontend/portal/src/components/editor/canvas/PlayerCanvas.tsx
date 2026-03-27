@@ -64,6 +64,8 @@ const PlayerCanvas = ({
     animEditVersion,
   }), [fps, isEditing, onSelectTemplate, isPlaying, animEditVersion])
 
+  console.log("rgesgewg", isPlaying)
+
   // Pinch-to-zoom
   useEffect(() => {
     const container = containerRef.current

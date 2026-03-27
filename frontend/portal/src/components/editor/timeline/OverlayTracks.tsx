@@ -99,7 +99,7 @@ export function OverlayTracks({
                 pixelsPerSecond={pixelsPerSecond}
                 onClick={() => {
                   onSelectOverlay?.(overlayItem.overlayId, overlayItem.slideId)
-                  if (onSeek) {
+                  if (onSeek) {                   
                     onSeek(overlayItem.startTime)
                   }
                 }}
