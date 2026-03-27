@@ -276,11 +276,14 @@ const LETTER_SPACING_OPTIONS = [
 export function StyleOverrideSection({
   styleOverride,
   onStyleOverride,
+  collapsible = true,
 }: {
   styleOverride: Record<string, string | number>
   onStyleOverride: (style: Record<string, string | number>) => void
+  collapsible?: boolean
 }) {
   const [expanded, setExpanded] = React.useState(false)
+  const isExpanded = collapsible ? expanded : true
 
   const color = styleOverride.color as string | undefined
   const backgroundColor = styleOverride.backgroundColor as string | undefined
@@ -289,17 +292,7 @@ export function StyleOverrideSection({
   const opacity = styleOverride.opacity as number | undefined
 
   return (
-    <>
-      <Sep />
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors shrink-0"
-        title="Style overrides"
-      >
-        <span className="text-[10px]">{expanded ? '▾' : '▸'}</span>
-        Style
-      </button>
-
+    <>     
       {/* Always-visible: text color swatch */}
       <ColorSwatch
         color={color ?? '#ffffff'}
@@ -309,7 +302,7 @@ export function StyleOverrideSection({
       />
 
       {/* Expanded controls */}
-      {expanded && (
+      {isExpanded && (
         <>
           {/* Background color */}
           <ColorSwatch
@@ -352,18 +345,6 @@ export function StyleOverrideSection({
         </>
       )}
     </>
-  )
-}
-
-// ─── Low Confidence Indicator ─────────────────────────────────────────────────
-// Shown as a small warning dot on a control when confidence is "low".
-
-export function LowConfidenceDot() {
-  return (
-    <span
-      className="inline-block w-1.5 h-1.5 rounded-full bg-yellow-400 align-super ml-0.5"
-      title='Value may not reflect the original — came from a spread or conditional expression'
-    />
   )
 }
 

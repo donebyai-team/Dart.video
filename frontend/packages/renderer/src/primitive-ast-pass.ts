@@ -20,10 +20,12 @@
 
 import * as Babel from "@babel/standalone";
 import {
+  getComponentRegistration,
   REGISTERED_COMPONENT_NAMES,
   LAYOUT_COMPONENT_NAMES,
 } from "@coasterai/animation";
 import type { PatchOverlay } from "@coasterai/animation";
+import { z } from "zod";
 
 /** Preamble injected at top — gives raw HTML elements access to patches. */
 const PREAMBLE = `var __patches = (typeof window !== 'undefined' && window.__PATCH_OVERLAY__) || {};`;
@@ -106,6 +108,33 @@ function createIdAssignmentPlugin(
       return props;
     }
 
+    function extractSchemaDefault(schema: z.ZodTypeAny): unknown {
+      if (schema instanceof z.ZodOptional || schema instanceof z.ZodNullable) {
+        return extractSchemaDefault(schema._def.innerType);
+      }
+      if (schema instanceof z.ZodDefault) {
+        return schema._def.defaultValue();
+      }
+      return undefined;
+    }
+
+    function extractSchemaDefaults(componentName: string): Record<string, unknown> {
+      const shape = getComponentRegistration(componentName)?.fullSchema?.shape;
+      if (!shape) return {};
+
+      const defaults: Record<string, unknown> = {};
+      for (const [name, schema] of Object.entries(shape)) {
+        if (name === "id" || name === "key" || name === "ref" || name === "style" || name === "className") {
+          continue;
+        }
+
+        const value = extractSchemaDefault(schema);
+        if (value !== undefined) defaults[name] = value;
+      }
+
+      return defaults;
+    }
+
     function extractTextChildren(parent: any): string | undefined {
       if (!parent || !t.isJSXElement(parent)) return undefined;
       const children = parent.children;
@@ -156,12 +185,15 @@ function createIdAssignmentPlugin(
             const id = nextPrimitiveId(name);
             injectId(path.node, id);
 
-            const props = extractProps(attrs);
+            const props = {
+              ...extractSchemaDefaults(name),
+              ...extractProps(attrs),
+            };
             const textContent = extractTextChildren(path.parent);
             if (textContent !== undefined) props.children = textContent;
 
             if (Object.keys(props).length > 0) {
-              initialOverlay[id] = { value: props };
+              initialOverlay[id] = props;
             }
             return;
           }
@@ -185,7 +217,7 @@ function createTransformAssignedIdsPlugin(counters: AstPassCounters) {
     function injectStyleSpread(openingEl: any, id: string): void {
       const patchExpr = t.optionalMemberExpression(
         t.memberExpression(t.identifier("__patches"), t.stringLiteral(id), true),
-        t.identifier("styleOverride"),
+        t.identifier("style"),
         false,
         true,
       );
@@ -243,7 +275,7 @@ function createTransformAssignedIdsPlugin(counters: AstPassCounters) {
         return (
           t.isLogicalExpression(argument, { operator: "||" }) &&
           t.isOptionalMemberExpression(argument.left) &&
-          t.isIdentifier(argument.left.property, { name: "styleOverride" })
+          t.isIdentifier(argument.left.property, { name: "style" })
         );
       });
     }

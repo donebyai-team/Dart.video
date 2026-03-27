@@ -60,7 +60,7 @@ export function useAnimationEdit(): UseAnimationEditReturn {
         ...prev,
         [id]: {
           ...entry,
-          value: { ...(entry.value ?? {}), [prop]: value },
+          [prop]: value,
         },
       }
       overlayRef.current = next
@@ -77,7 +77,7 @@ export function useAnimationEdit(): UseAnimationEditReturn {
         ...prev,
         [id]: {
           ...entry,
-          styleOverride: { ...(entry.styleOverride ?? {}), ...style },
+          style: { ...((entry.style as Record<string, string | number> | undefined) ?? {}), ...style },
         },
       }
       overlayRef.current = next

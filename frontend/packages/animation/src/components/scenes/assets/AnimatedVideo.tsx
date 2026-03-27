@@ -102,14 +102,13 @@ export function AnimatedVideo({
             }}
         >
             <div style={{ opacity: textProgress, transform: `translateY(${(1 - textProgress) * 20}px)` }}>
-                <Text style={
+                <Text text={text} style={
                     {
                         ...resolveTypography(patchedVariant, styleConfig, theme, preset),
                         ...style,
                         ...styleOverride
-                    }}>
-                    {text}
-                </Text>
+                    }}
+                />
             </div>
             <div
                 style={{

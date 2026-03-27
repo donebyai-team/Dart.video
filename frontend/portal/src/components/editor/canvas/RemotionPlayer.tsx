@@ -30,6 +30,7 @@ import {
 } from "../frame_calculations";
 import { useVideoStore } from "@/stores/video";
 import Loading from "@/app/loading";
+import type { PatchOverlay } from "@coasterai/renderer";
 
 interface RemotionPlayerProps {
   onSlideChange?: (slideId: string) => void;
@@ -40,6 +41,14 @@ interface RemotionPlayerProps {
   onSlideSpeedChange: (slideId: string, newDuration: number) => void;
   onSelectTemplate?: (slideId: string) => void;
   onDurationChange: (slideId: string, newDuration: number) => void;
+  animationEdit: {
+    overlay: PatchOverlay
+    selectedEid: string | null
+    setSelectedEid: (eid: string | null) => void
+    animEditVersion: number
+    applyValuePatch: (id: string, prop: string, value: unknown) => void
+    applyStyleOverride: (id: string, style: Record<string, string | number>) => void
+  }
 }
 
 export interface RemotionPlayerHandle extends PlayerControls {
@@ -56,6 +65,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
     onSlideSpeedChange,
     onDurationChange,
     onSelectTemplate,
+    animationEdit,
   },
   ref
 ) => {
@@ -395,6 +405,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
           onSetScale={setUserZoom}
           isPlaying={isPlaying}
           onSelectTemplate={onSelectTemplate}
+          animationEdit={animationEdit}
         />
       </div>
 

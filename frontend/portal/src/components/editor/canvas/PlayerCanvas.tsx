@@ -5,8 +5,9 @@ import CanvasOverlay from './CanvasOverlay'
 import { SlideshowWithStore as Slideshow } from '../SlideshowWithStore'
 import { useVideoStore } from '@/stores/video'
 import { AnimationEditLayer } from '../animation/AnimationEditLayer'
-import { useAnimationEdit } from '../animation/useAnimationEdit'
+import type { PatchOverlay } from '@coasterai/renderer'
 import { getRealSlideStartFrame } from '../frame_calculations'
+import { ActiveToolType } from '@/types/tools'
 
 interface PlayerCanvasProps {
   playerRef: React.RefObject<PlayerRef>
@@ -20,6 +21,14 @@ interface PlayerCanvasProps {
   onSetScale: (scale: number) => void
   isPlaying?: boolean
   onSelectTemplate?: (slideId: string) => void
+  animationEdit: {
+    overlay: PatchOverlay
+    selectedEid: string | null
+    setSelectedEid: (eid: string | null) => void
+    animEditVersion: number
+    applyValuePatch: (id: string, prop: string, value: unknown) => void
+    applyStyleOverride: (id: string, style: Record<string, string | number>) => void
+  }
 }
 
 const PlayerCanvas = ({
@@ -34,11 +43,13 @@ const PlayerCanvas = ({
   onSetScale,
   onSelectTemplate,
   isPlaying = false,
+  animationEdit,
 }: PlayerCanvasProps) => {
   const videoConfigFromStore = useVideoStore(s => s.videoConfig)
   const selectedSlide = useVideoStore(s => s.selectedSlide)
   const selectedEffectId = useVideoStore(s => s.selectedEffectId)
   const handleSelectEffect = useVideoStore(s => s.handleSelectEffect)
+  const handleSelectTool = useVideoStore(s => s.handleSelectTool)
   const onUpdateSpotlight = useVideoStore(s => s.updateSpotlight)
   const onUpdateCallout = useVideoStore(s => s.updateCallout)
   const onUpdateZoom = useVideoStore(s => s.updateZoom)
@@ -51,7 +62,7 @@ const PlayerCanvas = ({
     animEditVersion,
     applyValuePatch,
     applyStyleOverride,
-  } = useAnimationEdit()
+  } = animationEdit
 
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
@@ -63,8 +74,6 @@ const PlayerCanvas = ({
     isPlaying,
     animEditVersion,
   }), [fps, isEditing, onSelectTemplate, isPlaying, animEditVersion])
-
-  console.log("rgesgewg", isPlaying)
 
   // Pinch-to-zoom
   useEffect(() => {
@@ -149,7 +158,13 @@ const PlayerCanvas = ({
           selectedEid={selectedEid}
           overlay={overlay}
           animEditVersion={animEditVersion}
-          onSelectElement={setSelectedEid}
+          onSelectElement={eid => {
+            setSelectedEid(eid)
+            handleSelectTool({
+              type: ActiveToolType.ADD_OR_EDIT_ANIMATION,
+              settings: eid ? { animationElementId: eid } : {},
+            })
+          }}
           onValuePatch={applyValuePatch}
           onStyleOverride={applyStyleOverride}
         />

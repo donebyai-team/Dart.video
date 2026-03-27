@@ -148,11 +148,7 @@ export const IconShowcase: React.FC<IconShowcaseProps> = ({
                                 opacity,
                             }}
                         >
-                            <IconAsset
-                                name={iconName}
-                                size={actualIconSize}
-                                id={id ? `${id}-icon-${index}` : undefined}
-                            />
+                            <IconAsset id={`iconasset-${id}-${index}`} name={iconName} size={actualIconSize} />
                         </div>
                     );
                 })}
@@ -167,7 +163,7 @@ export const IconShowcase: React.FC<IconShowcaseProps> = ({
                 >
                     <TextStagger
                         text={text}
-                        animation='slideRight'
+                        entranceAnimation='slideRight'
                         variant={actualVariant}
                         startAt={actualStartAt + textStartFrame}
                         id={id ? `${id}-text` : undefined}

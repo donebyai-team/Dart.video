@@ -13,6 +13,7 @@ import AnimationEditor from './settings/AnimationEditor'
 import { CodeEditor } from './settings/CodeEditor'
 import { getRealSlideStartFrame } from './frame_calculations'
 import { TRANSITION_DURATION_FRAMES } from '@coasterai/renderer/src/frameUtils'
+import type { PatchOverlay } from '@coasterai/renderer'
 
 interface ToolsSettingsPanelProps {
   onPreviewTemplate: () => void
@@ -25,6 +26,9 @@ interface ToolsSettingsPanelProps {
   deleteSpotlight: (effectId: string) => void
   deleteCallout: (effectId: string) => void
   deleteZoom: (effectId: string) => void
+  overlay: PatchOverlay
+  onValuePatch: (id: string, prop: string, value: unknown) => void
+  setOverlay: (overlay: PatchOverlay) => void
 }
 
 const ToolsSettingsPanel = ({
@@ -36,7 +40,10 @@ const ToolsSettingsPanel = ({
   onSpotlightPlay,
   deleteSpotlight,
   deleteCallout,
-  deleteZoom
+  deleteZoom,
+  overlay,
+  onValuePatch,
+  setOverlay,
 }: ToolsSettingsPanelProps) => {
 
   // const videoConfigFromStore = useVideoStore(s => s.videoConfig);
@@ -83,6 +90,7 @@ const ToolsSettingsPanel = ({
       exit={{ opacity: 0, x: -20 }}
       transition={{ duration: 0.2 }}
       className='h-full'
+      data-animation-settings-panel="true"
     >
       {activeTool.type === ActiveToolType.BACKGROUND && (
         <BackgroundSettings
@@ -96,6 +104,9 @@ const ToolsSettingsPanel = ({
        activeTool.settings && (
         <AnimationEditor
           settings={activeTool.settings}
+          overlay={overlay}
+          onValuePatch={onValuePatch}
+          setOverlay={setOverlay}
           onClose={handleCloseTool}
         />
       )}

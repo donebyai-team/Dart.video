@@ -7,27 +7,28 @@ import ThinkingViewComponent from '@/components/composer/ThinkingViewComponent'
 import { useVideoStore } from '@/stores/video'
 import { AddOrEditAnimationSettings } from '@/types/tools'
 import type { AskUserQuestion, GenerateOrEditAnimationResponse } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
-import type { AnimationTemplate } from '@coasterai/pb/coasterai/core/v1/template_pb'
 import { type AnimationSlideContent, type Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { getConnectError } from '@/utils/error'
 import toast from 'react-hot-toast'
-import { reconcileEdits } from '../animation/reconcileEdits'
-import { useAnimationEdit } from '../animation/useAnimationEdit'
+import { PatchOverlay } from '@coasterai/renderer'
+import SceneSettings from './SceneSettings'
 
 interface AnimationEditorProps {
     settings: AddOrEditAnimationSettings
+    overlay: PatchOverlay
+    onValuePatch: (id: string, prop: string, value: unknown) => void
+    setOverlay: (overlay: PatchOverlay) => void
     onClose: () => void
 }
 
 type Stage = 'compose' | 'thinking' | 'question'
 
-export default function AnimationEditor({ settings, onClose }: AnimationEditorProps) {
+export default function AnimationEditor({ settings, overlay, onValuePatch, setOverlay, onClose }: AnimationEditorProps) {
     const updateSlide = useVideoStore(s => s.updateSlide)
     const selectedSlide = useVideoStore(s => s.selectedSlide)
     const addAnimationSlide = useVideoStore(s => s.addAnimationSlide)
     const videoId = useVideoStore(s => s.videoConfig?.id)
     const { portalClient } = useClientsContext()
-    const { setOverlay } = useAnimationEdit()
 
     const isAdding = !!settings.previousSlide
 
@@ -91,16 +92,9 @@ export default function AnimationEditor({ settings, onClose }: AnimationEditorPr
             ? selectedSlide.slide.content
             : undefined
 
-        // Reconcile: merge user's existing edits with the new code's initial overlay.
-        // prevOverlay = what the editor currently has (initial + user edits)
-        // nextInitialOverlay = fresh initial values from the new code
-        const prevOverlay = (existingContent?.edits ?? {}) as unknown as Parameters<typeof reconcileEdits>[0]
-        const nextInitialOverlay = (updatedContent.edits ?? {}) as unknown as Parameters<typeof reconcileEdits>[1]
-        const reconciledOverlay = reconcileEdits(prevOverlay, nextInitialOverlay)
-        console.debug('[AnimationEditor] Reconciled overlay', reconciledOverlay)
-
+        const pathOverlay = updatedContent.edits as unknown as PatchOverlay           
         // Update editor state
-        setOverlay(reconciledOverlay)
+        setOverlay(pathOverlay)
 
         updateSlide({
             durationInFrames: slide.durationInFrames,
@@ -108,7 +102,7 @@ export default function AnimationEditor({ settings, onClose }: AnimationEditorPr
             content: {
                 ...(existingContent ?? {}),
                 codeRegistry: updatedContent.codeRegistry,
-                edits: reconciledOverlay as unknown as AnimationSlideContent['edits'],
+                edits: pathOverlay,
             }
         } as Slide)
     }
@@ -324,7 +318,7 @@ export default function AnimationEditor({ settings, onClose }: AnimationEditorPr
     }
 
     const showThinking = !!thinkingChunk
-    const showEmptyState = true
+    const showEmptyState = isAdding
 
     return (
         <div className='flex flex-col h-full p-4 gap-3'>
@@ -338,6 +332,16 @@ export default function AnimationEditor({ settings, onClose }: AnimationEditorPr
             </div>
 
             <div className='flex flex-col flex-1 min-h-0'>
+                {settings.animationElementId && (
+                    <div className='mb-3 rounded-xl border bg-background shadow-sm overflow-hidden'>
+                        <SceneSettings
+                            elementId={settings.animationElementId}
+                            overlay={overlay}
+                            onValuePatch={onValuePatch}
+                        />
+                    </div>
+                )}
+
                 <div className='flex-1 min-h-0 rounded-xl bg-background/60 backdrop-blur-sm p-3 overflow-auto'>
                     {stage === 'question' && activeQuestion && (
                         <QuestionPanel
@@ -357,12 +361,10 @@ export default function AnimationEditor({ settings, onClose }: AnimationEditorPr
                     {showEmptyState && (
                         <div className='h-full flex flex-col items-center justify-center text-center px-4'>
                             <h3 className='text-base font-semibold text-foreground'>
-                                {isAdding ? 'Add Animation' : 'Edit Animation'}
+                                Add Animation
                             </h3>
                             <p className='mt-1 text-sm text-muted-foreground max-w-md'>
-                                {isAdding
-                                    ? 'Describe the motion style, pacing, and visual direction to generate a new animation'
-                                    : 'Describe the changes you want in this animation (e.g., change text, colors, timing, or layout)'}
+                                Describe the motion style, pacing, and visual direction to generate a new animation
                             </p>
                         </div>
                     )}

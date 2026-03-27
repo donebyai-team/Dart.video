@@ -52,23 +52,23 @@ const FadeSlideScene: React.FC = () => (
             <AbsoluteCenter axis="both">
                 <Stack gap={24} align="center">
                     <FadeIn id="fade-title" startAt={0} durationInFrames={20}>
-                        <Text id="t-fade" variant="heading">FadeIn + SlideIn</Text>
+                        <Text text="FadeIn + SlideIn" id="t-fade" variant="heading" />
                     </FadeIn>
 
                     <SlideIn id="slide-left" startAt={15} durationInFrames={25} from="left" distance={120}>
-                        <Text id="t-sl" variant="body">← slides from left</Text>
+                        <Text text="← slides from left" id="t-sl" variant="body" />
                     </SlideIn>
 
                     <SlideIn id="slide-right" startAt={30} durationInFrames={25} from="right" distance={120}>
-                        <Text id="t-sr" variant="body">slides from right →</Text>
+                        <Text text="slides from right →" id="t-sr" variant="body" />
                     </SlideIn>
 
                     <SlideIn id="slide-bottom" startAt={45} durationInFrames={25} from="bottom">
-                        <Text id="t-sb" variant="body">↑ slides from bottom</Text>
+                        <Text text="↑ slides from bottom" id="t-sb" variant="body" />
                     </SlideIn>
 
                     <FadeOut id="fade-all" startAt={100} durationInFrames={30}>
-                        <Text id="t-fo" variant="caption">…then fades out</Text>
+                        <Text text="…then fades out" id="t-fo" variant="caption" />
                     </FadeOut>
                 </Stack>
             </AbsoluteCenter>
@@ -85,18 +85,18 @@ const ScaleStaggerScene: React.FC = () => (
             <AbsoluteCenter axis="both">
                 <Stack gap={20} align="center">
                     <FadeIn id="stag-title" startAt={0} durationInFrames={15}>
-                        <Text id="t-stag" variant="heading">ScaleIn + Stagger</Text>
+                        <Text text="ScaleIn + Stagger" id="t-stag" variant="heading" />
                     </FadeIn>
 
                     <Stagger id="stag-list" startAt={20} staggerDelay={8}>
                         <ScaleIn id="sc-0" durationInFrames={20}>
-                            <Text id="t-s0" variant="body">Feature One</Text>
+                            <Text text="Feature One" id="t-s0" variant="body" />
                         </ScaleIn>
                         <ScaleIn id="sc-1" durationInFrames={20}>
-                            <Text id="t-s1" variant="body">Feature Two</Text>
+                            <Text text="Feature Two" id="t-s1" variant="body" />
                         </ScaleIn>
                         <ScaleIn id="sc-2" durationInFrames={20}>
-                            <Text id="t-s2" variant="body">Feature Three</Text>
+                            <Text text="Feature Three" id="t-s2" variant="body" />
                         </ScaleIn>
                     </Stagger>
                 </Stack>
@@ -183,7 +183,7 @@ const AssetsScene: React.FC = () => (
             <AbsoluteCenter axis="both">
                 <Stack gap={24} align="center">
                     <FadeIn id="asset-title" startAt={0} durationInFrames={15}>
-                        <Text id="t-asset" variant="heading">Assets + TimelineGate</Text>
+                        <Text text="Assets + TimelineGate" id="t-asset" variant="heading" />
                     </FadeIn>
 
                     <ScaleIn id="logo-in" startAt={10} durationInFrames={20}>
@@ -198,7 +198,7 @@ const AssetsScene: React.FC = () => (
 
                     <TimelineGate id="gate-caption" showAfter={60}>
                         <SlideIn id="cap-slide" startAt={60} durationInFrames={20} from="bottom">
-                            <Text id="t-cap" variant="caption">Image visible from frame 35–180</Text>
+                            <Text text="Image visible from frame 35–180" id="t-cap" variant="caption" />
                         </SlideIn>
                     </TimelineGate>
                 </Stack>
@@ -282,7 +282,7 @@ const LayoutScene: React.FC = () => (
             <AbsoluteCenter axis="both">
                 <Stack gap={32} align="center">
                     <FadeIn id="lay-title" startAt={0} durationInFrames={15}>
-                        <Text id="t-lay" variant="heading">Layout Primitives</Text>
+                        <Text text="Layout Primitives" id="t-lay" variant="heading" />
                     </FadeIn>
 
                     <Stagger id="lay-stag" startAt={15} staggerDelay={10}>
@@ -290,8 +290,8 @@ const LayoutScene: React.FC = () => (
                             <Row gap={8} align="center" justify="center">
                                 <LogoAsset id="logo-row" width={60} height={60} />
                                 <Stack gap={4}>
-                                    <Text id="t-name" variant="body">CoasterAI</Text>
-                                    <Text id="t-tag" variant="caption">Animation toolkit</Text>
+                                    <Text text="CoasterAI" id="t-name" variant="body" />
+                                    <Text text="Animation toolkit" id="t-tag" variant="caption" />
                                 </Stack>
                             </Row>
                         </FadeIn>
@@ -299,16 +299,16 @@ const LayoutScene: React.FC = () => (
                         <FadeIn id="cols-fade" durationInFrames={20}>
                             <Row gap={16} justify="center">
                                 <Stack gap={4} align="center">
-                                    <Text id="t-m1" variant="display">42</Text>
-                                    <Text id="t-l1" variant="caption">Components</Text>
+                                    <Text text="42" id="t-m1" variant="display" />
+                                    <Text text="Components" id="t-l1" variant="caption" />
                                 </Stack>
                                 <Stack gap={4} align="center">
-                                    <Text id="t-m2" variant="display">8</Text>
-                                    <Text id="t-l2" variant="caption">Primitives</Text>
+                                    <Text text="8" id="t-m2" variant="display" />
+                                    <Text text="Primitives" id="t-l2" variant="caption" />
                                 </Stack>
                                 <Stack gap={4} align="center">
-                                    <Text id="t-m3" variant="display">∞</Text>
-                                    <Text id="t-l3" variant="caption">Combos</Text>
+                                    <Text text="∞" id="t-m3" variant="display" />
+                                    <Text text="Combos" id="t-l3" variant="caption" />
                                 </Stack>
                             </Row>
                         </FadeIn>

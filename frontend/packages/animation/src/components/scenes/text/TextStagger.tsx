@@ -23,10 +23,9 @@ export interface TextStaggerStaggerProps {
     variant?: TypographyVariant;
     text: string;
     staggerDelay?: number; // frames between each word
-    animation?: EntranceAnimation;
+    entranceAnimation?: EntranceAnimation;
     startAt?: number;
     duration?: number; // animation duration per word
-    separator?: string | RegExp;
     className?: string;
     style?: React.CSSProperties;
     wordStyle?: React.CSSProperties;
@@ -37,10 +36,9 @@ export const TextStagger: React.FC<TextStaggerStaggerProps> = ({
     variant,
     text,
     staggerDelay,
-    animation,
+    entranceAnimation,
     startAt,
     duration,
-    separator,
     className,
     style,
     wordStyle,
@@ -53,15 +51,14 @@ export const TextStagger: React.FC<TextStaggerStaggerProps> = ({
     // Apply defaults
     const actualVariant = variant ?? DEFAULT_VARIANT;
     const actualStaggerDelay = staggerDelay ?? DEFAULT_STAGGER_DELAY;
-    const actualAnimation = animation ?? DEFAULT_ANIMATION;
+    const actualAnimation = entranceAnimation ?? DEFAULT_ANIMATION;
     const actualStartAt = startAt ?? 0;
     const actualDuration = duration ?? DEFAULT_WORD_DURATION;
-    const actualSeparator = separator ?? DEFAULT_SEPARATOR;
 
     const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', actualVariant);
     const styleOverride = useStyleOverride(id);
 
-    const words = text.split(actualSeparator);
+    const words = text.split(DEFAULT_SEPARATOR);
 
     const getAnimationStyles = (wordIndex: number): React.CSSProperties => {
         const wordStartAt = actualStartAt + wordIndex * actualStaggerDelay;
@@ -106,9 +103,8 @@ export const TextStaggerSchema = z.object({
     text: z.string().min(1, "text is required"),
     variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
     staggerDelay: z.number().min(0, "staggerDelay cannot be negative").default(DEFAULT_STAGGER_DELAY).optional(),
-    animation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
+    entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
     duration: z.number().min(1, "duration must be positive").default(DEFAULT_WORD_DURATION).optional(),
-    separator: z.union([z.string(), z.instanceof(RegExp)]).default(DEFAULT_SEPARATOR).optional(),
     className: z.string().optional(),
     style: z.any().optional(),
     wordStyle: z.any().optional(),
@@ -129,8 +125,7 @@ export function calculateTextStaggerDuration(props: TextStaggerStaggerProps): Du
     const validated = validation.data;
     
     // Calculate word count
-    const separator = validated.separator ?? ' ';
-    const words = validated.text.split(separator);
+    const words = validated.text.split(DEFAULT_SEPARATOR);
     const wordCount = words.length;
     
     if (wordCount === 0) {

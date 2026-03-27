@@ -83,23 +83,6 @@ export function AnimationEditLayer({
     if (!selectedEid) setElementRect(null)
   }, [selectedEid])
 
-  // ── Click-outside to deselect ─────────────────────────────────────────────
-  useEffect(() => {
-    if (!selectedEid) return
-    const handleMouseDown = (e: MouseEvent) => {
-      const t = e.target as Node
-      if (toolbarRef.current?.contains(t)) return
-      if (canvasRect) {
-        const { left, top, width, height } = canvasRect
-        const { clientX: x, clientY: y } = e
-        if (x >= left && x <= left + width && y >= top && y <= top + height) return
-      }
-      onSelectElement(null)
-    }
-    document.addEventListener('mousedown', handleMouseDown)
-    return () => document.removeEventListener('mousedown', handleMouseDown)
-  }, [selectedEid, canvasRect, onSelectElement])
-
   // ── Hit testing ───────────────────────────────────────────────────────────
 
   /** Check if an element ID is selectable (has a toolbar). */

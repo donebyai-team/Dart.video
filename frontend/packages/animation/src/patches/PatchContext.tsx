@@ -7,8 +7,8 @@ import { useSpeedFactor } from '../duration/speedFactor';
  * Every primitive reads from this to apply user edits non-destructively.
  *
  * The overlay is a flat object keyed by element ID. Each entry contains:
- *   - value: prop value overrides
- *   - styleOverride: CSS property overrides (always wins)
+ *   - direct prop overrides
+ *   - style: CSS property overrides (always wins)
  *   - swap: component replacement target
  */
 export const PatchContext = createContext<PatchOverlay>(createEmptyPatchOverlay());
@@ -45,7 +45,7 @@ export interface ResolvedTiming {
 /**
  * Returns effective startAt and durationInFrames for a primitive,
  * accounting for:
- *   1. User value patches on these timing props
+ *   1. User patches on these timing props
  *   2. Global speed factor (> 1 = faster, < 1 = slower)
  */
 export function usePrimitivePatches(
@@ -60,10 +60,8 @@ export function usePrimitivePatches(
 
   if (id) {
     const entry = overlay[id];
-    if (entry?.value) {
-      if (typeof entry.value.startAt === 'number') startAt = entry.value.startAt;
-      if (typeof entry.value.durationInFrames === 'number') duration = entry.value.durationInFrames;
-    }
+    if (typeof entry?.startAt === 'number') startAt = entry.startAt;
+    if (typeof entry?.durationInFrames === 'number') duration = entry.durationInFrames;
   }
 
   // Apply speed factor — scales all timing proportionally
@@ -88,7 +86,7 @@ export function usePatchedProp<T>(
   if (!id) return defaultValue;
 
   const entry = overlay[id];
-  if (entry?.value && prop in entry.value) return entry.value[prop] as T;
+  if (entry && prop in entry) return entry[prop] as T;
   return defaultValue;
 }
 
@@ -99,5 +97,6 @@ export function usePatchedProp<T>(
 export function useStyleOverride(id: string | undefined): Record<string, string | number> {
   const overlay = useContext(PatchContext);
   if (!id) return {};
-  return overlay[id]?.styleOverride ?? {};
+  const entry = overlay[id];
+  return (entry?.style as Record<string, string | number> | undefined) ?? {};
 }

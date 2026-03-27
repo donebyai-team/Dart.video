@@ -8,11 +8,11 @@ import { resolveTypography } from '../../tokens/resolveTypography';
 
 export interface TextProps {
   /** Semantic typography variant. Never hardcode font sizes. */
+  text: string;
   variant?: TypographyVariant;
   style?: React.CSSProperties;
   className?: string;
   id?: string;
-  children: React.ReactNode;
 }
 
 /**
@@ -22,18 +22,18 @@ export interface TextProps {
  * Color comes from theme: foreground for display/heading/body, mutedForeground for label/caption.
  */
 export function Text({
+  text,
   variant = 'body',
   style,
   className,
   id,
-  children,
 }: TextProps): React.ReactElement {
   const styleConfig = useStyleContext();
   const theme = useTheme();
   const preset = useAspectPreset();
 
   const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', variant);
-  const patchedChildren = usePatchedProp<React.ReactNode>(id, 'children', children);
+  const patchedText = usePatchedProp<React.ReactNode>(id, 'text', text);
   const styleOverride = useStyleOverride(id);
 
   return (
@@ -42,7 +42,7 @@ export function Text({
       className={className}
       style={{ ...resolveTypography(patchedVariant, styleConfig, theme, preset), ...style, ...styleOverride }}
     >
-      {patchedChildren}
+      {patchedText}
     </span>
   );
 }

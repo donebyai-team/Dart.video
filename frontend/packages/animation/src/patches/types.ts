@@ -1,9 +1,8 @@
 /** Per-element patch entry. Keyed by element ID in the PatchOverlay. */
 export interface ElementPatchEntry {
-  /** Prop value overrides — e.g. { delay: 20, from: 'left' } */
-  value?: Record<string, unknown>;
+  [prop: string]: unknown;
   /** CSS style overrides — always wins over component style */
-  styleOverride?: Record<string, string | number>;
+  style?: Record<string, string | number>;
   /** Swap to a different component type */
   swap?: string;
 }
@@ -14,9 +13,9 @@ export interface ElementPatchEntry {
  * Example:
  * ```
  * {
- *   'text-0':    { value: { variant: 'heading' }, styleOverride: { color: '#6366f1' } },
- *   'slidein-0': { value: { durationInFrames: 40 } },
- *   'counter-0': { value: { to: 23 } },
+ *   'text-0':    { variant: 'heading', style: { color: '#6366f1' } },
+ *   'slidein-0': { durationInFrames: 40 },
+ *   'counter-0': { to: 23 },
  * }
  * ```
  */
@@ -38,7 +37,7 @@ export function applyValuePatch(
     ...overlay,
     [id]: {
       ...entry,
-      value: { ...(entry.value ?? {}), [prop]: value },
+      [prop]: value,
     },
   };
 }
@@ -54,7 +53,7 @@ export function applyValuePatches(
     ...overlay,
     [id]: {
       ...entry,
-      value: { ...(entry.value ?? {}), ...values },
+      ...values,
     },
   };
 }
@@ -70,7 +69,7 @@ export function applyStyleOverride(
     ...overlay,
     [id]: {
       ...entry,
-      styleOverride: { ...(entry.styleOverride ?? {}), ...style },
+      style: { ...((entry.style as Record<string, string | number> | undefined) ?? {}), ...style },
     },
   };
 }

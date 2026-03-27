@@ -25,6 +25,7 @@ import { useClientsContext } from '@coasterai/ui-core/context/ClientContext';
 import { pollVideoRender } from '@/services/utils';
 import VideoGenerationProgress from '@/components/editor/VideoGenerationProgress';
 import { convertFramesToSeconds } from '@coasterai/renderer/src/frameUtils';
+import { useAnimationEdit } from '@/components/editor/animation/useAnimationEdit';
 
 interface EditorPageProps {
   videoId: string
@@ -95,6 +96,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
   const handleSelectEntity = useVideoStore(s => s.handleSelectEntity)
   const openEntitySettings = useVideoStore(s => s.openEntitySettings)
   const fps = useVideoStore(s => s.getFPS)
+  const animationEdit = useAnimationEdit()
 
   const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -432,6 +434,9 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
                 deleteSpotlight={deleteSpotlight}
                 deleteCallout={deleteCallout}
                 deleteZoom={deleteZoom}
+                overlay={animationEdit.overlay}
+                onValuePatch={animationEdit.applyValuePatch}
+                setOverlay={animationEdit.setOverlay}
                 isPreviewPlaying={isPlayerPlaying}
                 onPreviewTemplate={() => handleTogglePreviewSlide(selectedSlide.slide.id)}
                 onUpdateSpotlight={updates => {
@@ -520,6 +525,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
               onDurationChange={(_slideId, newDurationInSeconds) => {
                 updateSlide({ durationInFrames: Math.round(newDurationInSeconds * fps()) })
               }}
+              animationEdit={animationEdit}
               onSelectTemplate={slideId => {
                 console.debug('selected templated slide: ', slideId)
                 const entityId = createSlideEntityId(slideId)

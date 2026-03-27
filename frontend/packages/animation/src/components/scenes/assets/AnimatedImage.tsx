@@ -109,14 +109,12 @@ export function AnimatedImage({
         >
 
             <div style={{ opacity: textProgress, transform: `translateY(${(1 - textProgress) * 20}px)` }}>
-                <Text id='text-0' style={
+                <Text text={text} id='text-0' style={
                     {
                         ...resolveTypography(patchedVariant, styleConfig, theme, preset),
                         ...style,
                         ...styleOverride
-                    }}>
-                    {text}
-                </Text>
+                    }} />
             </div>
             <div
                 style={{
