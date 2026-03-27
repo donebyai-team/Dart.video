@@ -7,7 +7,7 @@ import { MultiSceneMediaPicker, SingleSceneMediaPicker } from './SceneMediaPicke
 import SceneSortablePillList from './SceneSortablePillList'
 import {
   compareSceneFieldsByPriority,
-  inferSceneFieldDefinition,
+  getEditableSceneFields,
   resolveScenePatchEntryId,
   toSceneFieldLabel,
 } from './sceneSettingsHelpers'
@@ -28,24 +28,12 @@ export default function SceneSettings({
   const MIN_ARRAY_ITEMS = 2
   const [arrayDrafts, setArrayDrafts] = useState<Record<string, string>>({})
   const patchEntryId = useMemo(() => resolveScenePatchEntryId(elementId, overlay), [elementId, overlay])
-  const patchEntry = patchEntryId ? overlay[patchEntryId] ?? {} : {}
 
   const fields = useMemo(() => {
-    return Object.entries(patchEntry)
-      .filter(([prop]) => prop !== 'style' && prop !== 'swap')
-      .map(([prop, value]) => ({
-        prop,
-        value,
-        definition: inferSceneFieldDefinition(prop, value),
-      }))
-      .filter(field => field.definition !== null)
-      .sort((left, right) =>
-        compareSceneFieldsByPriority(
-          left as { prop: string; definition: NonNullable<typeof left.definition> },
-          right as { prop: string; definition: NonNullable<typeof right.definition> },
-        )
-      )
-  }, [patchEntry])
+    return getEditableSceneFields(elementId, overlay).sort((left, right) =>
+      compareSceneFieldsByPriority(left, right),
+    )
+  }, [elementId, overlay])
 
   return (
     <div className="h-full flex flex-col">

@@ -12,6 +12,7 @@ import { getConnectError } from '@/utils/error'
 import toast from 'react-hot-toast'
 import { PatchOverlay } from '@coasterai/renderer'
 import SceneSettings from './SceneSettings'
+import { hasEditableSceneFields } from './sceneSettingsHelpers'
 
 interface AnimationEditorProps {
     settings: AddOrEditAnimationSettings
@@ -53,6 +54,8 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
     const pendingGeneratedSlideRef = useRef<Slide | null>(null)
 
     const canSubmit = prompt.trim().length > 0
+    const shouldShowSceneSettings = !!settings.animationElementId
+        && hasEditableSceneFields(settings.animationElementId, overlay)
 
     useEffect(() => {
         if (selectedSlide) {
@@ -332,7 +335,7 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
             </div>
 
             <div className='flex flex-col flex-1 min-h-0'>
-                {settings.animationElementId && (
+                {shouldShowSceneSettings && settings.animationElementId && (
                     <div className='mb-3 rounded-xl border bg-background shadow-sm overflow-hidden'>
                         <SceneSettings
                             elementId={settings.animationElementId}

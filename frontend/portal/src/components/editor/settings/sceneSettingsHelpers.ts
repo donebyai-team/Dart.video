@@ -165,3 +165,39 @@ export function resolveScenePatchEntryId(
 
   return null
 }
+
+export function getEditableSceneFields(
+  elementId: string,
+  overlay: Record<string, unknown>,
+): Array<{ prop: string; value: unknown; definition: SceneFieldDefinition }> {
+  const patchEntryId = resolveScenePatchEntryId(elementId, overlay)
+  const patchEntry =
+    patchEntryId && typeof overlay[patchEntryId] === 'object' && overlay[patchEntryId] !== null
+      ? (overlay[patchEntryId] as Record<string, unknown>)
+      : {}
+
+  return Object.entries(patchEntry)
+    .filter(([prop]) => prop !== 'style' && prop !== 'swap')
+    .map(([prop, value]) => ({
+      prop,
+      value,
+      definition: inferSceneFieldDefinition(prop, value),
+    }))
+    .filter(
+      (
+        field,
+      ): field is {
+        prop: string
+        value: unknown
+        definition: SceneFieldDefinition
+      } => field.definition !== null,
+    )
+    .sort((left, right) => compareSceneFieldsByPriority(left, right))
+}
+
+export function hasEditableSceneFields(
+  elementId: string,
+  overlay: Record<string, unknown>,
+): boolean {
+  return getEditableSceneFields(elementId, overlay).length > 0
+}
