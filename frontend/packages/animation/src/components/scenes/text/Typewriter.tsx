@@ -27,9 +27,6 @@ const DEFAULT_ANIMATION = 'slideUp' as const;
 export type TypewriterMode = 'char' | 'word' | 'line';
 
 export interface TypewriterProps {
-  startAt?: number;
-  /** Total duration for full text reveal in frames. */
-  durationInFrames?: number;
   text: string;
   mode?: TypewriterMode;
   variant?: TypographyVariant;
@@ -44,8 +41,6 @@ export interface TypewriterProps {
  * Cursor appearance (shape, behavior) driven by StyleContext.cursor.
  */
 export function Typewriter({
-  startAt = 0,
-  durationInFrames = DEFAULT_TYPING_DURATION,
   text,
   mode = DEFAULT_MODE,
   variant = DEFAULT_VARIANT,
@@ -59,12 +54,6 @@ export function Typewriter({
   const theme = useTheme();
   const preset = useAspectPreset();
 
-  const speedFactor = useSpeedFactor();
-  const adjustedStartAt = applySpeedFactor(startAt, speedFactor);
-  const adjustedDurationInFrames = applySpeedFactor(durationInFrames, speedFactor);
-
-  const { effectiveStartAt, effectiveDurationInFrames } = usePrimitivePatches(id, { startAt: adjustedStartAt, durationInFrames: adjustedDurationInFrames });
-
   const patchedText = usePatchedProp(id, 'text', text);
   const patchedMode = usePatchedProp<TypewriterMode>(id, 'mode', mode);
   const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', variant);
@@ -74,14 +63,14 @@ export function Typewriter({
   const entranceDuration = 20;
   const entranceProgress = interpolateWithEasing(
     frame,
-    [effectiveStartAt, effectiveStartAt + entranceDuration],
+    [0, entranceDuration],
     [0, 1],
     'linear',
   );
 
   const progress = interpolateWithEasing(
     frame,
-    [effectiveStartAt, effectiveStartAt + effectiveDurationInFrames],
+    [0, DEFAULT_TYPING_DURATION],
     [0, 1],
     'linear',
   );
@@ -102,11 +91,11 @@ export function Typewriter({
     line: '|', underscore: '_', block: '█', none: '',
   };
   const cursorChar = cursorCharMap[cursor.shape] ?? '';
-  const showCursor = cursor.shape !== 'none' && frame >= effectiveStartAt;
+  const showCursor = cursor.shape !== 'none' && frame >= 0;
   const cursorVisible =
     cursor.behavior === 'solid' ? true
-    : cursor.behavior === 'fade' ? Math.sin((frame * Math.PI) / 15) > 0
-    : Math.floor(frame / 15) % 2 === 0;
+      : cursor.behavior === 'fade' ? Math.sin((frame * Math.PI) / 15) > 0
+        : Math.floor(frame / 15) % 2 === 0;
 
   return (
     <span
@@ -138,8 +127,6 @@ export const TypewriterSchema = z.object({
   mode: z.enum(['char', 'word', 'line']).default(DEFAULT_MODE).optional(),
   variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
   animation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
-  startAt: z.number().min(0, "startAt cannot be negative").default(0).optional(),
-  durationInFrames: z.number().min(1, "durationInFrames must be positive").default(DEFAULT_TYPING_DURATION).optional(),
   style: z.any().optional(),
   className: z.string().optional(),
 });
@@ -158,31 +145,27 @@ export function calculateTypewriterDuration(props: TypewriterProps): DurationRes
 
   const validated = validation.data;
   const mode = validated.mode ?? 'char';
-  const entranceDuration = DEFAULT_ENTRANCE_DURATION;
-  
+
   // Calculate typing duration based on mode
   let typingDuration: number;
-  
-  if (validated.durationInFrames) {
-    // User specified duration
-    typingDuration = validated.durationInFrames;
-  } else {
-    // Auto-calculate based on content
-    if (mode === 'char') {
-      const charCount = validated.text.length;
-      typingDuration = Math.max(MIN_TYPING_DURATION, charCount * DEFAULT_FRAMES_PER_CHAR);
-    } else if (mode === 'word') {
-      const wordCount = validated.text.split(' ').length;
-      typingDuration = Math.max(MIN_TYPING_DURATION, wordCount * DEFAULT_FRAMES_PER_WORD);
-    } else { // line
-      const lineCount = validated.text.split('\n').length;
-      typingDuration = Math.max(MIN_TYPING_DURATION, lineCount * DEFAULT_FRAMES_PER_LINE);
-    }
+
+
+  // Auto-calculate based on content
+  if (mode === 'char') {
+    const charCount = validated.text.length;
+    typingDuration = Math.max(MIN_TYPING_DURATION, charCount * DEFAULT_FRAMES_PER_CHAR);
+  } else if (mode === 'word') {
+    const wordCount = validated.text.split(' ').length;
+    typingDuration = Math.max(MIN_TYPING_DURATION, wordCount * DEFAULT_FRAMES_PER_WORD);
+  } else { // line
+    const lineCount = validated.text.split('\n').length;
+    typingDuration = Math.max(MIN_TYPING_DURATION, lineCount * DEFAULT_FRAMES_PER_LINE);
   }
-  
+
+
   return {
     success: true,
-    duration: Math.ceil(entranceDuration + typingDuration),
+    duration: Math.ceil(DEFAULT_ENTRANCE_DURATION + typingDuration),
   };
 }
 

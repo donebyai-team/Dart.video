@@ -272,7 +272,6 @@ export const TextHighlightSchema = z.object({
     animation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
     animationDelay: z.number().min(0, "animationDelay cannot be negative").default(DEFAULT_ENTRANCE_DURATION).optional(),
     zoomDuration: z.number().min(0, "zoomDuration cannot be negative").default(DEFAULT_ZOOM_DURATION).optional(),
-    startAt: z.number().min(0, "startAt cannot be negative").default(0).optional(),
     className: z.string().optional(),
     style: z.any().optional(),
 });

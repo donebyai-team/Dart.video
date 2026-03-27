@@ -227,7 +227,6 @@ export const TextCycleSchema = z.object({
   easing: z.string().optional(),
   transition: z.enum(['flipY', 'fadeSwap', 'slideUp']).default(DEFAULT_TRANSITION).optional(),
   variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
-  startAt: z.number().min(0, "startAt cannot be negative").default(0).optional(),
   style: z.any().optional(),
   className: z.string().optional(),
 });

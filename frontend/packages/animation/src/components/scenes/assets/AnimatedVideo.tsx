@@ -135,7 +135,6 @@ export const AnimatedVideoSchema = z.object({
     src: z.string().url("src must be a valid URL"),
     variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
     animation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
-    startAt: z.number().min(0, "startAt cannot be negative").default(0).optional(),
     borderRadius: z.number().min(0, "borderRadius cannot be negative").default(DEFAULT_BORDER_RADIUS).optional(),
     width: z.number().min(1, "width must be positive").optional(),
     height: z.number().min(1, "height must be positive").optional(),

@@ -2,7 +2,6 @@ import React from "react";
 import { useCurrentFrame } from "remotion";
 import z from 'zod';
 import { usePatchedProp, useStyleOverride } from "../../../patches/PatchContext";
-import { useSpeedFactor, applySpeedFactor } from "../../../duration/speedFactor";
 import { useStyleContext } from "../../../styles/StyleContext";
 import { useAspectPreset } from "../../../styles/AspectPresetContext";
 import { interpolateWithEasing } from "../../../styles/easingResolver";
@@ -128,7 +127,6 @@ export const LogoWithBrandNameSchema = z.object({
     src: z.string().url("src must be a valid URL").optional(),
     logoSize: z.number().min(1, "logoSize must be positive").optional(),
     variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
-    startAt: z.number().min(0, "startAt cannot be negative").default(0).optional(),
     style: z.any().optional(),
 });
 

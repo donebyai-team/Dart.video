@@ -42,10 +42,6 @@ export interface AnimatedNumberProps {
     animation?: EntranceAnimation;
     /** Duration of entrance animation in frames */
     animationDelay?: number;
-    /** Duration for counting animation in frames */
-    durationInFrames?: number;
-    /** Frame at which the animation begins */
-    startAt?: number;
     className?: string;
     style?: React.CSSProperties;
 }
@@ -62,8 +58,6 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
     highlightColor,
     animation,
     animationDelay,
-    durationInFrames,
-    startAt,
     className,
     style,
 }) => {
@@ -75,12 +69,9 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
     // Apply defaults
     const actualFrom = from ?? 0;
     const actualVariant = variant ?? DEFAULT_VARIANT;
-    const actualHighlightStyle = highlightStyle ?? DEFAULT_HIGHLIGHT_STYLE;
     const actualHighlightColor = highlightColor ?? theme.colors.primary;
     const actualAnimation = animation ?? DEFAULT_ANIMATION;
     const actualAnimationDelay = animationDelay ?? DEFAULT_ENTRANCE_DURATION;
-    const actualDurationInFrames = durationInFrames ?? DEFAULT_COUNTER_DURATION;
-    const actualStartAt = startAt ?? 0;
 
     const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', actualVariant);
     const patchedHighlightColor = usePatchedProp<string>(id, 'highlightColor', actualHighlightColor);
@@ -90,7 +81,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
 
     const entranceProgress = interpolateWithEasing(
         frame,
-        [actualStartAt, actualStartAt + actualAnimationDelay],
+        [0, actualAnimationDelay],
         [0, 1],
         easing
     );
@@ -176,9 +167,9 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
                     to={to}
                     format={format}
                     variant={patchedVariant}
-                    startAt={actualStartAt + actualAnimationDelay}
+                    startAt={actualAnimationDelay}
                     style={getHighlightStyles()}
-                    durationInFrames={actualDurationInFrames}
+                    durationInFrames={DEFAULT_COUNTER_DURATION}
                 />
             </span>
             <span style={{ marginLeft: '0.25em' }}>{endText}</span>
@@ -202,7 +193,6 @@ export const AnimatedNumberSchema = z.object({
     animation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
     animationDelay: z.number().min(0, "animationDelay cannot be negative").default(DEFAULT_ENTRANCE_DURATION).optional(),
     durationInFrames: z.number().min(1, "durationInFrames must be positive").default(DEFAULT_COUNTER_DURATION).optional(),
-    startAt: z.number().min(0, "startAt cannot be negative").default(0).optional(),
     className: z.string().optional(),
     style: z.any().optional(),
 });

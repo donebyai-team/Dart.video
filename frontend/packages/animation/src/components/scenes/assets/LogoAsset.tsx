@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useCurrentFrame, useRemotionEnvironment } from "remotion";
 import z from 'zod';
 import { usePatchedProp, useStyleOverride } from "../../../patches/PatchContext";
-import { useSpeedFactor, applySpeedFactor } from "../../../duration/speedFactor";
+
 import { useStyleContext } from "../../../styles/StyleContext";
 import { useAspectPreset } from "../../../styles/AspectPresetContext";
 import { interpolateWithEasing } from "../../../styles/easingResolver";
@@ -72,7 +72,6 @@ export function LogoAsset({
     const { isRendering } = useRemotionEnvironment();
     const styleConfig = useStyleContext();
     const preset = useAspectPreset();
-    const speedFactor = useSpeedFactor();
     const styleOverride = useStyleOverride(id);
 
     // Apply defaults
@@ -155,7 +154,6 @@ export const LogoAssetSchema = z.object({
     width: z.number().min(1, "width must be positive").optional(),
     height: z.number().min(1, "height must be positive").optional(),
     animation: z.enum(LOGO_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
-    startAt: z.number().min(0, "startAt cannot be negative").default(0).optional(),
     style: z.any().optional(),
     className: z.string().optional(),
 });

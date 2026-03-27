@@ -176,7 +176,6 @@ export function ImagePeel({
 export const ImagePeelSchema = z.object({
     sources: z.array(z.string().url("each source must be a valid URL")).min(2, "sources must contain at least 2 images"),
     direction: z.enum(PEEL_DIRECTIONS).default(DEFAULT_DIRECTION).optional(),
-    startAt: z.number().min(0, "startAt cannot be negative").default(0).optional(),
     holdDuration: z.number().min(0, "holdDuration cannot be negative").default(DEFAULT_HOLD_DURATION).optional(),
     peelDuration: z.number().min(0, "peelDuration cannot be negative").default(DEFAULT_PEEL_DURATION).optional(),
     stackOffset: z.number().min(0, "stackOffset cannot be negative").default(DEFAULT_STACK_OFFSET).optional(),

@@ -107,7 +107,6 @@ export const TextStaggerSchema = z.object({
     variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
     staggerDelay: z.number().min(0, "staggerDelay cannot be negative").default(DEFAULT_STAGGER_DELAY).optional(),
     animation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
-    startAt: z.number().min(0, "startAt cannot be negative").default(0).optional(),
     duration: z.number().min(1, "duration must be positive").default(DEFAULT_WORD_DURATION).optional(),
     separator: z.union([z.string(), z.instanceof(RegExp)]).default(DEFAULT_SEPARATOR).optional(),
     className: z.string().optional(),
@@ -145,7 +144,6 @@ export function calculateTextStaggerDuration(props: TextStaggerStaggerProps): Du
     // Calculate duration
     const staggerDelay = validated.staggerDelay ?? DEFAULT_STAGGER_DELAY;
     const wordDuration = validated.duration ?? DEFAULT_WORD_DURATION;
-    const startAt = validated.startAt ?? 0;
     
     // Total duration = time until last word starts + duration of last word animation
     const totalDuration = (wordCount - 1) * staggerDelay + wordDuration;
