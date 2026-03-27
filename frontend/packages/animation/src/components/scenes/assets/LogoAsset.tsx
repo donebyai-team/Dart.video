@@ -31,7 +31,6 @@ export interface LogoAssetProps {
     width?: number;
     height?: number;
     animation?: LogoAnimation;
-    startAt?: number;
     style?: React.CSSProperties;
     className?: string;
     id?: string;
@@ -64,7 +63,6 @@ export function LogoAsset({
     width,
     height,
     animation,
-    startAt,
     style,
     className,
     id,
@@ -79,7 +77,6 @@ export function LogoAsset({
 
     // Apply defaults
     const actualAnimation = animation ?? DEFAULT_ANIMATION;
-    const actualStartAt = startAt ?? 0;
     const { objectFit: styleObjectFit, ...restStyle } = style ?? {};
     const { objectFit: overrideObjectFit, ...wrapperStyleOverride } = styleOverride;
     const patchedWidth = usePatchedProp<number | undefined>(id, 'width', width);
@@ -102,10 +99,9 @@ export function LogoAsset({
         typeof rawObjectFit === 'string' ? rawObjectFit as React.CSSProperties['objectFit'] : 'contain';
 
     const patchedAnimation = usePatchedProp<LogoAnimation>(id, 'animation', actualAnimation);
-    const adjustedStartAt = applySpeedFactor(actualStartAt, speedFactor);
     const animDuration = DEFAULT_ANIMATION_DURATION;
     const animProgress = patchedAnimation !== 'none'
-        ? interpolateWithEasing(frame, [adjustedStartAt, adjustedStartAt + animDuration], [0, 1], styleConfig.motion.entrance)
+        ? interpolateWithEasing(frame, [0, animDuration], [0, 1], styleConfig.motion.entrance)
         : 1;
     const animStyle = getLogoAnimationStyle(patchedAnimation, animProgress);
 

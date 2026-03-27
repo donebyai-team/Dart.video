@@ -4,7 +4,7 @@ import z from 'zod';
 import { TypographyVariant, TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { usePatchedProp, useStyleOverride } from '../../../patches';
-import { useAspectPreset } from '../../../styles';
+import { interpolateWithEasing, useAspectPreset } from '../../../styles';
 import { useTheme } from '../../../theme';
 import { resolveTypography } from '../../../tokens';
 import { EntranceAnimation, getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
@@ -65,14 +65,10 @@ export const TextStagger: React.FC<TextStaggerStaggerProps> = ({
 
     const getAnimationStyles = (wordIndex: number): React.CSSProperties => {
         const wordStartAt = actualStartAt + wordIndex * actualStaggerDelay;
-        const progress = interpolate(
+        const progress = interpolateWithEasing(
             frame,
             [wordStartAt, wordStartAt + actualDuration],
-            [0, 1],
-            {
-                extrapolateLeft: 'clamp',
-                extrapolateRight: 'clamp',
-            }
+            [0, 1],           
         );
 
         return {

@@ -9,7 +9,6 @@ import { getEasing, interpolateWithEasing } from '../../../styles/easingResolver
 import { type Easing } from '../../../styles/types';
 import { TypographyVariant, TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
 import { resolveTypography } from '../../../tokens/resolveTypography';
-import { applySpeedFactor, useSpeedFactor } from '../../../duration';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../durationTypes';
 
@@ -22,7 +21,6 @@ const DEFAULT_VARIANT = 'heading' as const;
 export type TextCycleTransition = 'flipY' | 'fadeSwap' | 'slideUp';
 
 export interface TextCycleProps {
-  startAt?: number;
   texts: string[];
   /** Frames each word is held. */
   holdDuration?: number;
@@ -43,7 +41,6 @@ export interface TextCycleProps {
  * no layout reflow occurs when words change, eliminating jerk in Stack/Row layouts.
  */
 export function TextCycle({
-  startAt,
   texts,
   holdDuration,
   transitionDuration,
@@ -59,25 +56,20 @@ export function TextCycle({
   const theme = useTheme();
   const preset = useAspectPreset();
 
-  const speedFactor = useSpeedFactor();
 
   // Apply defaults
-  const actualStartAt = startAt ?? 0;
   const actualHoldDuration = holdDuration ?? DEFAULT_HOLD_DURATION;
   const actualTransitionDuration = transitionDuration ?? DEFAULT_TRANSITION_DURATION;
   const actualTransition = transition ?? DEFAULT_TRANSITION;
   const actualVariant = variant ?? DEFAULT_VARIANT;
-  const adjustedStartAt = applySpeedFactor(actualStartAt, speedFactor);
-  const adjustedHoldDuration = applySpeedFactor(actualHoldDuration, speedFactor);
-  const adjustedTransitionDuration = applySpeedFactor(actualTransitionDuration, speedFactor);
 
   const { effectiveStartAt, effectiveDurationInFrames: effectiveHold } = usePrimitivePatches(id, {
-    startAt: adjustedStartAt,
-    durationInFrames: adjustedHoldDuration,
+    startAt: 0,
+    durationInFrames: actualHoldDuration,
   });
 
   const patchedTexts = usePatchedProp(id, 'texts', texts);
-  const patchedTransitionDuration = usePatchedProp(id, 'transitionDuration', adjustedTransitionDuration);
+  const patchedTransitionDuration = usePatchedProp(id, 'transitionDuration', actualTransitionDuration);
   const patchedTransition = usePatchedProp<TextCycleTransition>(id, 'transition', actualTransition);
   const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', actualVariant);
   const styleOverride = useStyleOverride(id);

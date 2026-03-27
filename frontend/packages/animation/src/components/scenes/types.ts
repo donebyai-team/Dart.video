@@ -1,3 +1,5 @@
+import z from "zod";
+
 export const ENTRANCE_ANIMATIONS = [
   'fadeIn',
   'slideUp',
@@ -50,3 +52,7 @@ export function getEntranceTransform(animation: EntranceAnimation, progress: num
             return 'none';
     }
 }
+
+export const IconNameSchema = z.string().min(2, "icon name cannot be empty");
+
+export type IconName = z.infer<typeof IconNameSchema>;

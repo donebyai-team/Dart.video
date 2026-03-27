@@ -24,8 +24,6 @@ export interface ImagePeelProps {
     sources: string[];
     /** Direction images peel away towards. */
     direction?: PeelDirection;
-    /** Frame at which the animation begins. */
-    startAt?: number;
     /** Frames each image is visible before peeling. */
     holdDuration?: number;
     /** Frames for the peel transition. */
@@ -59,7 +57,6 @@ function getPeelTransform(direction: PeelDirection, progress: number): { transfo
 export function ImagePeel({
     sources,
     direction,
-    startAt,
     holdDuration,
     peelDuration,
     stackOffset,
@@ -76,13 +73,10 @@ export function ImagePeel({
 
     // Apply defaults
     const actualDirection = direction ?? DEFAULT_DIRECTION;
-    const actualStartAt = startAt ?? 0;
     const actualHoldDuration = holdDuration ?? DEFAULT_HOLD_DURATION;
     const actualPeelDuration = peelDuration ?? DEFAULT_PEEL_DURATION;
     const actualStackOffset = stackOffset ?? DEFAULT_STACK_OFFSET;
     const actualBorderRadius = borderRadius ?? DEFAULT_BORDER_RADIUS;
-
-    const adjustedStartAt = applySpeedFactor(actualStartAt, speedFactor);
 
     const patchedSources = usePatchedProp<string[]>(id, 'sources', sources);
     const patchedWidth = usePatchedProp<number | undefined>(id, 'width', width ?? preset.width * 0.7);
@@ -97,7 +91,7 @@ export function ImagePeel({
     const entranceDuration = 30;
     const entranceProgress = interpolateWithEasing(
         frame,
-        [adjustedStartAt, adjustedStartAt + entranceDuration],
+        [0, entranceDuration],
         [0, 1],
         easing,
     );
@@ -124,7 +118,7 @@ export function ImagePeel({
                 {/* Render bottom to top: last image at bottom, first on top */}
                 {[...patchedSources].reverse().map((src, reversedIndex) => {
                     const index = count - 1 - reversedIndex;
-                    const peelStart = adjustedStartAt + entranceDuration + index * cycleDuration;
+                    const peelStart = entranceDuration + index * cycleDuration;
 
                     // Progress of this image peeling away (0 = stationary, 1 = fully peeled)
                     const peelProgress = interpolateWithEasing(

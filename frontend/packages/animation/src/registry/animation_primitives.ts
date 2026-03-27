@@ -102,7 +102,6 @@ export const ANIMATION_PRIMITIVE_COMPONENTS: ComponentRegistration[] = [
     fullSchema: FadeInSchema,
     editorProps: ['startAt', 'durationInFrames'],
     description: 'fades an element in from transparent to fully visible',
-    durationContract: { kind: 'fixed' },
   },
   {
     name: 'FadeOut',
@@ -110,7 +109,6 @@ export const ANIMATION_PRIMITIVE_COMPONENTS: ComponentRegistration[] = [
     fullSchema: FadeOutSchema,
     editorProps: ['startAt', 'durationInFrames'],
     description: 'fades an element out from visible to transparent',
-    durationContract: { kind: 'fixed' },
   },
   {
     name: 'SlideIn',
@@ -118,7 +116,6 @@ export const ANIMATION_PRIMITIVE_COMPONENTS: ComponentRegistration[] = [
     fullSchema: SlideInSchema,
     editorProps: ['startAt', 'durationInFrames', 'direction', 'distance'],
     description: 'slides an element in from outside the canvas edge',
-    durationContract: { kind: 'fixed' },
   },
   {
     name: 'SlideOut',
@@ -126,7 +123,6 @@ export const ANIMATION_PRIMITIVE_COMPONENTS: ComponentRegistration[] = [
     fullSchema: SlideOutSchema,
     editorProps: ['startAt', 'durationInFrames', 'direction', 'distance'],
     description: 'slides an element out toward the canvas edge',
-    durationContract: { kind: 'fixed' },
   },
   {
     name: 'ScaleIn',
@@ -134,7 +130,6 @@ export const ANIMATION_PRIMITIVE_COMPONENTS: ComponentRegistration[] = [
     fullSchema: ScaleInSchema,
     editorProps: ['startAt', 'durationInFrames', 'origin'],
     description: 'scales an element up from small to full size',
-    durationContract: { kind: 'fixed' },
   },
   {
     name: 'ScaleOut',
@@ -142,7 +137,6 @@ export const ANIMATION_PRIMITIVE_COMPONENTS: ComponentRegistration[] = [
     fullSchema: ScaleOutSchema,
     editorProps: ['startAt', 'durationInFrames', 'origin'],
     description: 'scales an element down from full size to nothing',
-    durationContract: { kind: 'fixed' },
   },
   {
     name: 'Stagger',
@@ -150,7 +144,6 @@ export const ANIMATION_PRIMITIVE_COMPONENTS: ComponentRegistration[] = [
     fullSchema: StaggerSchema,
     editorProps: ['startAt', 'staggerDelay'],
     description: 'reveals children one after another with a delay between each — children must be animation primitives',
-    durationContract: { kind: 'manual' },
   },
   {
     name: 'TimelineGate',

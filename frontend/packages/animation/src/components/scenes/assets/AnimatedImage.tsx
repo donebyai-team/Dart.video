@@ -22,6 +22,7 @@ const DEFAULT_IMAGE_DURATION = 50;
 const DEFAULT_VARIANT = 'subheading' as const;
 const DEFAULT_ANIMATION = 'slideUp' as const;
 const DEFAULT_BORDER_RADIUS = 16;
+const DEFAULT_START_AT = 0;
 
 export interface AnimatedImageProps {
     /** The text displayed above the image. */
@@ -32,8 +33,6 @@ export interface AnimatedImageProps {
     variant?: TypographyVariant;
     /** Image entrance animation. */
     animation?: EntranceAnimation;
-    /** Frame at which the animation begins. */
-    startAt?: number;
     /** Border radius applied to the image. */
     borderRadius?: number;
     /** Width of the image container. */
@@ -54,7 +53,6 @@ export function AnimatedImage({
     src,
     variant,
     animation,
-    startAt,
     borderRadius,
     width,
     height,
@@ -70,10 +68,7 @@ export function AnimatedImage({
     // Apply defaults
     const actualVariant = variant ?? DEFAULT_VARIANT;
     const actualAnimation = animation ?? DEFAULT_ANIMATION;
-    const actualStartAt = startAt ?? 0;
     const actualBorderRadius = borderRadius ?? DEFAULT_BORDER_RADIUS;
-
-    const adjustedStartAt = applySpeedFactor(actualStartAt, speedFactor);
 
     const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', actualVariant);
     const styleOverride = useStyleOverride(id);
@@ -86,11 +81,11 @@ export function AnimatedImage({
 
     const textDuration = 30;
     const imageDuration = 40;
-    const imageStart = adjustedStartAt + 10;
+    const imageStart = 10;
 
     const textProgress = interpolateWithEasing(
         frame,
-        [adjustedStartAt, adjustedStartAt + textDuration],
+        [0, textDuration],
         [0, 1],
         easing,
     );
@@ -114,7 +109,7 @@ export function AnimatedImage({
         >
 
             <div style={{ opacity: textProgress, transform: `translateY(${(1 - textProgress) * 20}px)` }}>
-                <Text style={
+                <Text id='text-0' style={
                     {
                         ...resolveTypography(patchedVariant, styleConfig, theme, preset),
                         ...style,
@@ -132,7 +127,7 @@ export function AnimatedImage({
                     boxShadow: "0 20px 40px rgba(0,0,0,0.25), 0 12px 24px rgba(0,0,0,0.15)",
                 }}
             >
-                <ImageAsset src={patchedSrc} width={patchedWidth} height={patchedHeight} />
+                <ImageAsset id='imageasset-0' src={patchedSrc} width={patchedWidth} height={patchedHeight} />
             </div>
         </div>
     );
@@ -171,7 +166,7 @@ export function calculateAnimatedImageDuration(props: AnimatedImageProps): Durat
     const textDuration = DEFAULT_TEXT_DURATION;
     const delay = DEFAULT_DELAY;
     const imageDuration = DEFAULT_IMAGE_DURATION;
-    
+
     return {
         success: true,
         duration: textDuration + delay + imageDuration,

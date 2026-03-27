@@ -10,6 +10,7 @@ import { useTheme } from '../../../theme';
 import { TypographyVariant, TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../durationTypes';
+import { IconName, IconNameSchema } from '../types';
 
 // Default constants
 const DEFAULT_ENTRANCE_DURATION = 10;
@@ -23,7 +24,7 @@ const DEFAULT_ICON_GAP = 64;
 export interface IconShowcaseProps {
     id?: string;
     /** Array of icon names to display (e.g., ["react", "typescript", "nodejs"]) */
-    icons: string[];
+    icons: IconName[];
     /** Text to display below icons */
     text: string;
     /** Typography variant for text */
@@ -66,7 +67,7 @@ export const IconShowcase: React.FC<IconShowcaseProps> = ({
     const entranceDuration = DEFAULT_ENTRANCE_DURATION;
     const iconStagger = DEFAULT_ICON_STAGGER;
     const iconAnimDuration = DEFAULT_ICON_ANIMATION_DURATION;
-    
+
     // Calculate when all icons are visible
     const allIconsVisibleFrame = entranceDuration + (icons.length - 1) * iconStagger + iconAnimDuration;
     const textStartFrame = allIconsVisibleFrame + DEFAULT_TEXT_DELAY;
@@ -182,7 +183,7 @@ export const IconShowcase: React.FC<IconShowcaseProps> = ({
 // ============================================================================
 
 export const IconShowcaseSchema = z.object({
-    icons: z.array(z.string().min(1, "icon name cannot be empty")).min(1, "at least one icon is required"),
+    icons: z.array(IconNameSchema).min(2, "at least two icons are required"),
     text: z.string().min(1, "text cannot be empty"),
     variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
     iconSize: z.number().min(1, "iconSize must be positive").default(DEFAULT_ICON_SIZE).optional(),
@@ -197,7 +198,7 @@ export const IconShowcaseSchema = z.object({
 
 export function calculateIconShowcaseDuration(props: Record<string, any>): DurationResult {
     const validation = IconShowcaseSchema.safeParse(props);
-    
+
     if (!validation.success) {
         const firstError = validation.error.errors[0];
         return {
@@ -208,28 +209,28 @@ export function calculateIconShowcaseDuration(props: Record<string, any>): Durat
     }
 
     const validated = validation.data;
-    
+
     // Calculate duration based on animation sequence
     const entranceDuration = DEFAULT_ENTRANCE_DURATION;
     const iconStagger = DEFAULT_ICON_STAGGER;
     const iconAnimDuration = DEFAULT_ICON_ANIMATION_DURATION;
     const iconCount = validated.icons.length;
-    
+
     // Time until all icons are visible
     const allIconsVisibleFrame = entranceDuration + (iconCount - 1) * iconStagger + iconAnimDuration;
-    
+
     // Add text delay + text animation duration (text is now mandatory)
     {
         const textDelay = DEFAULT_TEXT_DELAY;
         const textMoveUpDuration = 15;
-        
+
         // Text stagger duration: word count based
         const words = validated.text.trim().split(/\s+/);
         const wordCount = words.length;
         const textStaggerDelay = 5; // from TextStagger defaults
         const textWordDuration = 15; // from TextStagger defaults
         const textDuration = (wordCount - 1) * textStaggerDelay + textWordDuration;
-        
+
         return {
             success: true,
             duration: Math.ceil(allIconsVisibleFrame + textDelay + textMoveUpDuration + textDuration),

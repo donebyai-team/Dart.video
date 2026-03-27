@@ -8,7 +8,6 @@ import { TYPOGRAPHY_VARIANTS } from '../../../tokens/semantic';
 import { FONT_SIZE_VALUES, FONT_WEIGHT_VALUES } from '../../../tokens/typography';
 
 export interface TitleCardProps {
-  startAt?: number;
   heading: string;
   subheading?: string;
   eyebrow?: string;
@@ -20,7 +19,6 @@ export interface TitleCardProps {
  * All visual decisions are internal — LLM provides data and timing only.
  */
 export function TitleCard({
-  startAt = 0,
   heading,
   subheading,
   eyebrow,
@@ -29,7 +27,6 @@ export function TitleCard({
   const frame = useCurrentFrame();
   const styleConfig = useStyleContext();
   const speedFactor = useSpeedFactor();
-  const adjustedStartAt = applySpeedFactor(startAt, speedFactor);
 
   const patchedHeading = usePatchedProp(id, 'heading', heading);
   const patchedSubheading = usePatchedProp(id, 'subheading', subheading);
@@ -38,14 +35,14 @@ export function TitleCard({
   const eyebrowDuration = 20;
   const headingDuration = 25;
   const subheadingDuration = 20;
-  const headingAnimStart = adjustedStartAt + 8;
-  const subheadingStart = adjustedStartAt + 15;
+  const headingAnimStart = 8;
+  const subheadingStart = 15;
 
 
   const easing = styleConfig.motion.entrance;
 
   const eyebrowProgress = (patchedSubheading !== undefined || patchedEyebrow !== undefined)
-    ? interpolateWithEasing(frame, [adjustedStartAt, adjustedStartAt + eyebrowDuration], [0, 1], easing)
+    ? interpolateWithEasing(frame, [0, eyebrowDuration], [0, 1], easing)
     : 0;
 
   const headingProgress = interpolateWithEasing(

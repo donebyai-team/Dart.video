@@ -27,7 +27,6 @@ export interface TextHighlightProps {
     animationDelay?: number;
     /** Duration for the zoom out phase in frames */
     zoomDuration?: number;
-    startAt?: number;
     className?: string;
     style?: React.CSSProperties;
 }
@@ -42,7 +41,6 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
     animation,
     animationDelay,
     zoomDuration,
-    startAt,
     className,
     style,
 }) => {
@@ -58,7 +56,6 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
     const actualAnimation = animation ?? DEFAULT_ANIMATION;
     const actualAnimationDelay = animationDelay ?? DEFAULT_ENTRANCE_DURATION;
     const actualZoomDuration = zoomDuration ?? DEFAULT_ZOOM_DURATION;
-    const actualStartAt = startAt ?? 0;
 
     const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', actualVariant);
     const patchedHighlightColor = usePatchedProp<string>(id, 'highlightColor', actualHighlightColor);
@@ -73,12 +70,12 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
 
     const entranceProgress = interpolateWithEasing(
         frame,
-        [actualStartAt, actualStartAt + actualAnimationDelay],
+        [0, actualAnimationDelay],
         [0, 1],
         easing
     );
 
-    const zoomStartFrame = actualStartAt + actualAnimationDelay;
+    const zoomStartFrame = actualAnimationDelay;
     const zoomProgress = interpolateWithEasing(
         frame,
         [zoomStartFrame, zoomStartFrame + actualZoomDuration],

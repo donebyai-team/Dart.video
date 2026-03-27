@@ -32,8 +32,6 @@ export interface AnimatedVideoProps {
     variant?: TypographyVariant;
     /** Video entrance animation. */
     animation?: EntranceAnimation;
-    /** Frame at which the animation begins. */
-    startAt?: number;
     /** Border radius applied to the video. */
     borderRadius?: number;
     /** Width of the video container. */
@@ -50,7 +48,6 @@ export function AnimatedVideo({
     src,
     variant,
     animation,
-    startAt,
     borderRadius,
     width,
     height,
@@ -66,10 +63,7 @@ export function AnimatedVideo({
     // Apply defaults
     const actualVariant = variant ?? DEFAULT_VARIANT;
     const actualAnimation = animation ?? DEFAULT_ANIMATION;
-    const actualStartAt = startAt ?? 0;
     const actualBorderRadius = borderRadius ?? DEFAULT_BORDER_RADIUS;
-
-    const adjustedStartAt = applySpeedFactor(actualStartAt, speedFactor);
 
     const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', actualVariant);
     const styleOverride = useStyleOverride(id);
@@ -81,11 +75,11 @@ export function AnimatedVideo({
 
     const textDuration = DEFAULT_TEXT_DURATION;
     const videoDuration = DEFAULT_VIDEO_DURATION;
-    const videoStart = adjustedStartAt + DEFAULT_VIDEO_START_DELAY;
+    const videoStart = DEFAULT_VIDEO_START_DELAY;
 
     const textProgress = interpolateWithEasing(
         frame,
-        [adjustedStartAt, adjustedStartAt + textDuration],
+        [0, textDuration],
         [0, 1],
         easing,
     );

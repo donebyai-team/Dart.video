@@ -27,8 +27,6 @@ export interface LogoWithBrandNameProps {
     logoSize?: number;
     /** Typography variant for the brand name. */
     variant?: TypographyVariant;
-    /** Frame at which the text fade begins. */
-    startAt?: number;
     style?: React.CSSProperties;
     id?: string;
 }
@@ -38,7 +36,6 @@ export function LogoWithBrandName({
     src='https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774240201-apple-touch-icon.png',
     logoSize,
     variant,
-    startAt,
     style,
     id,
 }: LogoWithBrandNameProps): React.ReactElement {
@@ -46,13 +43,9 @@ export function LogoWithBrandName({
     const styleConfig = useStyleContext();
     const theme = useTheme();
     const preset = useAspectPreset();
-    const speedFactor = useSpeedFactor();
 
     // Apply defaults
     const actualVariant = variant ?? DEFAULT_VARIANT;
-    const actualStartAt = startAt ?? 0;
-
-    const adjustedStartAt = applySpeedFactor(actualStartAt, speedFactor);
 
     const patchedBrandName = usePatchedProp<string>(id, 'brandName', brandName);
     const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', actualVariant);
@@ -71,7 +64,7 @@ export function LogoWithBrandName({
     const charFadeDuration = DEFAULT_CHAR_FADE_DURATION;
 
     const getCharOpacity = (i: number): number => {
-        const charStart = adjustedStartAt + i * charStagger;
+        const charStart = i * charStagger;
         return interpolateWithEasing(
             frame,
             [charStart, charStart + charFadeDuration],
