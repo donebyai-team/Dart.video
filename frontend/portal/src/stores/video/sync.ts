@@ -1,11 +1,12 @@
+import { equals } from "@bufbuild/protobuf";
+import { createSlideEntityId } from "@/types/selection";
 import { portalClient } from "@/services/grpc";
-import { VideoStoreSet, VideoStoreGet } from "./types";
 import toast from "react-hot-toast";
 import { getConnectError } from "@/utils/error";
-import { equals } from "@bufbuild/protobuf"
-import { Video, VideoSchema, VideoStatus } from "@coasterai/pb/coasterai/core/v1/video_pb";
+import { VideoSchema, VideoStatus } from "@coasterai/pb/coasterai/core/v1/video_pb";
+import { VideoStoreSet, VideoStoreGet } from "./types";
+import { getInitialSelection } from "./defaults";
 
-// Debounce utility
 export function debounce<T extends (...args: any[]) => any>(
     func: T,
     wait: number
@@ -23,68 +24,84 @@ export function debounce<T extends (...args: any[]) => any>(
     return debounced;
 }
 
-export const createSyncActions = (_: VideoStoreSet, get: VideoStoreGet) => {
-    // Track sync state
+export const createSyncActions = (set: VideoStoreSet, get: VideoStoreGet) => {
     let syncStatus: 'idle' | 'syncing' | 'error' = 'idle';
-    let lastSyncedSections: Video;
-
-    // Debounced sync function
-    const debouncedSync = debounce(async (video: Video) => {
-        const videoId = video.id;
-        if (!videoId || syncStatus === 'syncing' || video.status == VideoStatus.PROCESSING) {
-            console.debug("sync skipped.")
-            return
-        };
-        if (lastSyncedSections && equals(VideoSchema, lastSyncedSections, video)) {
-            console.debug("No change in config, skipping sync")
-            return
-        }
-
-        try {
-            syncStatus = 'syncing';
-            console.log('Syncing sections to server...', { videoId, sectionsCount: video.config?.sections.length });
-
-
-            // Make the gRPC call
-            await portalClient.updateVideoConfig({
-                id: video.id,
-                config: video.config,
-                metadata: video.metadata,
-                name: video.name
-            });
-
-            // Update tracking
-            lastSyncedSections = structuredClone(video);;
-            syncStatus = 'idle';
-
-            console.log('Successfully synced sections to server');
-        } catch (error) {
-            syncStatus = 'error';
-            console.error('Failed to sync sections to server:', error);
-            toast.error(getConnectError(error));
-
-            // Optionally retry after a delay
-            // setTimeout(() => {
-            //     if (syncStatus === 'error') {
-            //         syncStatus = 'idle';
-            //         debouncedSync(sections);
-            //     }
-            // }, 5000);
-        }
-    }, 500); // 500ms debounce
 
     return {
-        // Auto-sync sections when they change
-        autoSyncVideoConfig() {
-            const videoConfig = get().videoConfig;
-            if (videoConfig && videoConfig.config) {               
-                debouncedSync(videoConfig);
-            } else {
-                console.debug("[ERROR]", "video config is null or undefined")
+        refreshPendingChanges() {
+            const { videoConfig, acceptedVideoConfig } = get();
+            const hasPendingChanges = Boolean(
+                videoConfig &&
+                acceptedVideoConfig &&
+                !equals(VideoSchema, acceptedVideoConfig, videoConfig)
+            );
+
+            set({ hasPendingChanges });
+        },
+
+        async acceptVideoConfigChanges() {
+            const videoToAccept = get().videoConfig;
+            if (!videoToAccept?.id || videoToAccept.status === VideoStatus.PROCESSING || syncStatus === 'syncing') {
+                return;
+            }
+
+            try {
+                syncStatus = 'syncing';
+                await portalClient.updateVideoConfig({
+                    id: videoToAccept.id,
+                    config: videoToAccept.config,
+                    metadata: videoToAccept.metadata,
+                    name: videoToAccept.name,
+                });
+
+                const acceptedVideoConfig = structuredClone(videoToAccept);
+                const currentVideoConfig = get().videoConfig;
+                set({
+                    acceptedVideoConfig,
+                    hasPendingChanges: Boolean(
+                        currentVideoConfig &&
+                        !equals(VideoSchema, acceptedVideoConfig, currentVideoConfig)
+                    ),
+                });
+
+                syncStatus = 'idle';
+            } catch (error) {
+                syncStatus = 'error';
+                console.error('Failed to sync sections to server:', error);
+                toast.error(getConnectError(error));
+                throw error;
             }
         },
 
-        // Get sync status
+        discardVideoConfigChanges() {
+            const { acceptedVideoConfig, selectedSlide } = get();
+            if (!acceptedVideoConfig) return;
+
+            const restoredVideoConfig = structuredClone(acceptedVideoConfig);
+
+            let nextSelectedSlide = getInitialSelection(restoredVideoConfig);
+            if (selectedSlide) {
+                for (const section of restoredVideoConfig.config?.sections ?? []) {
+                    const restoredSlide = section.slides.find(slide => slide.id === selectedSlide.slide.id);
+                    if (restoredSlide) {
+                        nextSelectedSlide = {
+                            section,
+                            slide: restoredSlide,
+                        };
+                        break;
+                    }
+                }
+            }
+
+            set({
+                videoConfig: restoredVideoConfig,
+                selectedSlide: nextSelectedSlide,
+                selectedEntityId: createSlideEntityId(nextSelectedSlide?.slide.id ?? ""),
+                selectedEffectId: null,
+                hasPendingChanges: false,
+            });
+        },
+
         getSyncStatus() {
             return syncStatus;
         },

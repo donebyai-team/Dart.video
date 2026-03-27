@@ -26,6 +26,8 @@ export const createInitActions = (
 
     set({
       videoConfig: newVideoConfig,
+      acceptedVideoConfig: structuredClone(newVideoConfig),
+      hasPendingChanges: false,
       selectedEntityId: createSlideEntityId(firstSlideId),
       selectedSlide,
       isInitialized: true,
@@ -35,4 +37,3 @@ export const createInitActions = (
   }
   ,
 });
-

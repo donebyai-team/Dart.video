@@ -57,17 +57,25 @@ export const createStreamingActions = (set: VideoStoreSet, get: VideoStoreGet) =
             latestVideo = response.video;
 
             const safeVideo = ensureVideoResolution(response.video, defaultEditorConfig);
-
-            // ✅ Single source of truth
-            set({ videoConfig: safeVideo });
-
-            const sections = getSections(response.video);
             const currentState = get();
 
-            if (sections.length > 0) {
+            // Keep the accepted snapshot aligned with server state until the user
+            // starts editing locally.
+            if (!currentState.hasPendingChanges) {
+              set({
+                videoConfig: safeVideo,
+                acceptedVideoConfig: structuredClone(safeVideo),
+                hasPendingChanges: false,
+              });
+            }
+
+            const sections = getSections(safeVideo);
+            const nextState = get();
+
+            if (!currentState.hasPendingChanges && sections.length > 0) {
 
               // ✅ Auto select first slide
-              if (!currentState.selectedSlide) {
+              if (!nextState.selectedSlide) {
                 const firstSection = sections[0];
                 const firstSlide = firstSection?.slides?.[0];
 
@@ -84,7 +92,7 @@ export const createStreamingActions = (set: VideoStoreSet, get: VideoStoreGet) =
 
               // ✅ Refresh selected slide reference
               else {
-                const currentSlideId = currentState.selectedSlide.slide.id;
+                const currentSlideId = nextState.selectedSlide.slide.id;
 
                 let foundSlide = null;
                 let foundSection = null;

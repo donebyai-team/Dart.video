@@ -66,7 +66,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       set({ selectedSlide: { section, slide: newSlide } });
     }
 
-    get().autoSyncVideoConfig();
+    get().refreshPendingChanges();
   },
 
   addSlide(sectionId: string, afterSlideId?: string) {
@@ -109,7 +109,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       set({ selectedSlide: { section, slide: newSlide } });
     }
 
-    get().autoSyncVideoConfig();
+    get().refreshPendingChanges();
   },
 
   /* ================= BACKGROUND ================= */
@@ -222,7 +222,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       });
     }
 
-    get().autoSyncVideoConfig();
+    get().refreshPendingChanges();
   },
 
   /* ================= TRANSCRIPT ================= */
@@ -252,7 +252,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       }))
     })
 
-    get().autoSyncVideoConfig()
+    get().refreshPendingChanges()
   },
 
   /* ================= REMOVE ================= */
@@ -286,7 +286,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       }
     }
 
-    get().autoSyncVideoConfig()
+    get().refreshPendingChanges()
   },
 
   /* ================= GENERIC UPDATE ================= */
@@ -316,7 +316,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       }))
     })
 
-    get().autoSyncVideoConfig()
+    get().refreshPendingChanges()
   },
 
   getSlideDurationInSeconds: (slide: Slide) => {
@@ -377,7 +377,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       } as Slide))
     })
 
-    get().autoSyncVideoConfig()
+    get().refreshPendingChanges()
   },
 
   /* ================= TRANSITION ================= */
@@ -444,7 +444,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       showTransitionPicker: null
     })
 
-    get().autoSyncVideoConfig()
+    get().refreshPendingChanges()
   },
 
   /* ================= REORDER ================= */
@@ -471,6 +471,6 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
 
     set({ videoConfig: newVideoConfig })
 
-    get().autoSyncVideoConfig()
+    get().refreshPendingChanges()
   }
 })

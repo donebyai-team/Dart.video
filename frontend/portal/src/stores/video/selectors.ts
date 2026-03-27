@@ -17,7 +17,7 @@ export const createSelectors = (set: VideoStoreSet, get: VideoStoreGet) => ({
 
     set({ videoConfig: newVideoConfig });
 
-    get().autoSyncVideoConfig();
+    get().refreshPendingChanges();
   },
 
   setBackgroundMusic: (url?: string) => {
@@ -35,7 +35,7 @@ export const createSelectors = (set: VideoStoreSet, get: VideoStoreGet) => ({
 
     set({ videoConfig: newVideoConfig });
 
-    get().autoSyncVideoConfig();
+    get().refreshPendingChanges();
   },
 
 });

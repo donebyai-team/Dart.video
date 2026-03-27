@@ -5,6 +5,8 @@ import { getDefaultSelectedTool } from "./defaults";
 export const initialState: VideoState = {
   // main state
   videoConfig: null,
+  acceptedVideoConfig: null,
+  hasPendingChanges: false,
 
 
   // TODO: move these into a separate states maybe

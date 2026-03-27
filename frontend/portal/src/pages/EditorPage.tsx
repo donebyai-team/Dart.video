@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Mic2, Eye, Volume2, RefreshCw, Video, Home, Settings, HelpCircle, Timer, Music2, Brain } from 'lucide-react'
+import { Mic2, Eye, Volume2, RefreshCw, Video, Home, Settings, HelpCircle, Timer, Music2, Brain, Check, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -14,7 +14,7 @@ import { type EditorConfig } from '@/types/editor'
 import { defaultEditorConfig } from '@/data/editorConfig'
 import { Sheet, SheetTrigger } from '@/components/ui/sheet'
 import { useVideoStore } from '@/stores/video'
-import { Video as VideoConfig } from '@coasterai/pb/coasterai/core/v1/video_pb'
+import { VideoStatus } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import toast from 'react-hot-toast'
 import { getConnectError } from '@/utils/error';
 import { ActiveToolType } from '@/types/tools';
@@ -45,6 +45,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
   // State for loading video data
   const [isLoadingVideo, setIsLoadingVideo] = useState(true)
   const [isExportingVideo, setIsExportingVideo] = useState(false)
+  const [isAcceptingChanges, setIsAcceptingChanges] = useState(false)
   const [isPlayerPlaying, setIsPlayerPlaying] = useState(false)
   const [exportProgress, setExportProgress] = useState<ExportProgressState | null>(null)
   const prepareProgressRef = useRef(0)
@@ -62,6 +63,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
 
   // Video data from store (this is the single source of truth)
   const videoConfigFromStore = useVideoStore(s => s.videoConfig);
+  const hasPendingChanges = useVideoStore(s => s.hasPendingChanges)
   const selectedSlide = useVideoStore(s => s.selectedSlide)
 
   const setShowVoiceover = useVideoStore(s => s.setShowVoiceover)
@@ -81,6 +83,8 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
   const updateSlideTranscript = useVideoStore(s => s.updateSlideTranscript)
   const handleGenerateSlideVoiceover = useVideoStore(s => s.handleGenerateSlideVoiceover)
   const handleCloseTool = useVideoStore(s => s.handleCloseTool)
+  const acceptVideoConfigChanges = useVideoStore(s => s.acceptVideoConfigChanges)
+  const discardVideoConfigChanges = useVideoStore(s => s.discardVideoConfigChanges)
   const updateSpotlight = useVideoStore(s => s.updateSpotlight)
   const updateCallout = useVideoStore(s => s.updateCallout)
   const updateZoom = useVideoStore(s => s.updateZoom)
@@ -103,6 +107,21 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
     link.click()
     link.remove()
     URL.revokeObjectURL(fileUrl)
+  }
+
+  const isProcessingVideo = videoConfigFromStore?.status === VideoStatus.PROCESSING
+
+  const handleAcceptChanges = async () => {
+    if (isAcceptingChanges || isProcessingVideo) return
+
+    try {
+      setIsAcceptingChanges(true)
+      await acceptVideoConfigChanges()
+    } catch (error) {
+      console.error('Accept changes failed', error)
+    } finally {
+      setIsAcceptingChanges(false)
+    }
   }
 
   const handleExportVideo = async () => {
@@ -323,6 +342,31 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
         </div>
 
         <div className='flex items-center gap-2'>
+          {/* Pending changes */}
+            {hasPendingChanges && !isProcessingVideo && (
+            <>
+              <Button
+                variant='ghost'
+                size='icon'
+                onClick={discardVideoConfigChanges}
+                disabled={isAcceptingChanges}
+                className='h-8 w-8'
+                aria-label='Discard changes'
+              >
+                <X className='w-4 h-4' />
+              </Button>
+              <Button
+                size='sm'
+                onClick={handleAcceptChanges}
+                disabled={isAcceptingChanges}
+                className='h-8 gap-1 rounded-md px-2 py-1 text-sm'
+              >
+                <Check className='w-4 h-4' />
+                Accept changes
+              </Button>
+            </>
+          )}
+
           {/* Thinking Summary */}
           {videoConfigFromStore?.metadata?.thinkingSummary && (
             <div className="relative group inline-flex">
@@ -339,7 +383,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
               </div>
 
             </div>
-          )}
+          )}        
           {/* Duration Badge (Non-clickable) */}
           <div className="flex items-center gap-1 px-2 py-1 text-sm font-medium rounded-md border bg-muted text-muted-foreground">
             <Timer className='w-4 h-4' />
@@ -362,6 +406,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
             className='btn-accent-gradient gap-2'
             disabled={isStreamingVideo ||
               isExportingVideo ||
+              hasPendingChanges ||
               videoConfigFromStore?.config?.sections.length == 0 ||
               videoConfigFromStore?.config?.sections[0].slides.length == 0
             }

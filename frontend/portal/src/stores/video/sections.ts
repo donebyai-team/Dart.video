@@ -23,7 +23,7 @@ export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => 
       videoConfig: newVideoConfig,
     });
 
-    get().autoSyncVideoConfig();
+    get().refreshPendingChanges();
   },
 
   /* ================= EDITING ================= */
@@ -70,7 +70,7 @@ export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => 
       }
     }
 
-    get().autoSyncVideoConfig();
+    get().refreshPendingChanges();
   },
 
   /* ================= UPDATE ================= */
@@ -104,7 +104,7 @@ export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => 
       });
     }
 
-    get().autoSyncVideoConfig();
+    get().refreshPendingChanges();
   },
 
   /* ================= DRAG ================= */
@@ -136,7 +136,7 @@ export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => 
       videoConfig: newVideoConfig,
     });
 
-    get().autoSyncVideoConfig();
+    get().refreshPendingChanges();
   },
 
   getFPS: () => {

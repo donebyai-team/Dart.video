@@ -21,6 +21,8 @@ export interface SelectedSection {
 
 export interface VideoState {
     videoConfig: Video | null;
+    acceptedVideoConfig: Video | null;
+    hasPendingChanges: boolean;
     isInitialized: boolean;
     selectedEntityId: EntityId;
     selectedSlide: SelectedSection | null;
@@ -45,7 +47,9 @@ export interface VideoActions {
     initialize: (config: EditorConfig, videoConfig: Video) => void;
 
     // Sync actions
-    autoSyncVideoConfig: () => void;
+    refreshPendingChanges: () => void;
+    acceptVideoConfigChanges: () => Promise<void>;
+    discardVideoConfigChanges: () => void;
     getSyncStatus: () => 'idle' | 'syncing' | 'error';
     getFPS: () => number;
 

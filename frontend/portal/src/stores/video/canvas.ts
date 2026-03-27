@@ -39,7 +39,7 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
       })),
     })
 
-    get().autoSyncVideoConfig()
+    get().refreshPendingChanges()
   },
 
   updateSpotlight(effectId: string, updates: Partial<SpotlightEffect>) {
@@ -76,7 +76,7 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
       })),
     })
 
-    get().autoSyncVideoConfig()
+    get().refreshPendingChanges()
   },
 
   deleteSpotlight(effectId: string) {
@@ -110,7 +110,7 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
       selectedEffectId: null,
     })
 
-    get().autoSyncVideoConfig()
+    get().refreshPendingChanges()
   },
 
   /* ================= CALLOUT ================= */
@@ -147,7 +147,7 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
       })),
     })
 
-    get().autoSyncVideoConfig()
+    get().refreshPendingChanges()
   },
 
   updateCallout(effectId: string, updates: Partial<CalloutEffect>) {
@@ -184,7 +184,7 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
       })),
     })
 
-    get().autoSyncVideoConfig()
+    get().refreshPendingChanges()
   },
 
   deleteCallout(effectId: string) {
@@ -218,7 +218,7 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
       selectedEffectId: null,
     })
 
-    get().autoSyncVideoConfig()
+    get().refreshPendingChanges()
   },
 
   /* ================= ZOOM ================= */
@@ -255,7 +255,7 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
       })),
     })
 
-    get().autoSyncVideoConfig()
+    get().refreshPendingChanges()
   },
 
   updateZoom(effectId: string, updates: Partial<ZoomEffect>) {
@@ -292,7 +292,7 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
       })),
     })
 
-    get().autoSyncVideoConfig()
+    get().refreshPendingChanges()
   },
 
   deleteZoom(effectId: string) {
@@ -326,8 +326,7 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
       selectedEffectId: null,
     })
 
-    get().autoSyncVideoConfig()
+    get().refreshPendingChanges()
   },
 
 })
-
