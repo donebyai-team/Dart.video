@@ -480,7 +480,7 @@ var File_coasterai_core_v1_brandkit_proto protoreflect.FileDescriptor
 
 const file_coasterai_core_v1_brandkit_proto_rawDesc = "" +
 	"\n" +
-	" coasterai/core/v1/brandkit.proto\x12\x11coasterai.core.v1\x1a\x1egoogle/protobuf/wrappers.proto\x1a\x1dcoasterai/core/v1/slide.proto\"\xbb\x01\n" +
+	" coasterai/core/v1/brandkit.proto\x12\x11coasterai.core.v1\x1a\x1egoogle/protobuf/wrappers.proto\x1a#coasterai/core/v1/media_asset.proto\"\xbb\x01\n" +
 	"\n" +
 	"BrandMedia\x123\n" +
 	"\x05asset\x18\x01 \x01(\v2\x1d.coasterai.core.v1.MediaAssetR\x05asset\x12A\n" +
@@ -574,7 +574,7 @@ func file_coasterai_core_v1_brandkit_proto_init() {
 	if File_coasterai_core_v1_brandkit_proto != nil {
 		return
 	}
-	file_coasterai_core_v1_slide_proto_init()
+	file_coasterai_core_v1_media_asset_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

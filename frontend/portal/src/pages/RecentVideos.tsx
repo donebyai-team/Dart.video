@@ -3,16 +3,20 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Play } from "lucide-react";
+import { Copy, Play } from "lucide-react";
+import { toJsonString } from "@bufbuild/protobuf";
 
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useClientsContext } from "@coasterai/ui-core/context/ClientContext";
-import { Video as VideoConfig } from "@coasterai/pb/coasterai/core/v1/video_pb";
+import { Video as VideoConfig, VideoMetadataSchema } from "@coasterai/pb/coasterai/core/v1/video_pb";
 import toast from "react-hot-toast";
 import { getConnectError } from "@/utils/error";
 import SlideThumbnail from "@/components/editor/SlideThumbnail";
 import { getFormattedDate, getSlideCount } from "@/utils/format";
 import { AuthLoading } from "@/components/Loader/loader";
+
+const VIDEO_COMPOSER_PREFILL_STORAGE_KEY = "video-composer-prefill-metadata";
 
 const RecentVideos = () => {
   const router = useRouter();
@@ -41,6 +45,24 @@ const RecentVideos = () => {
   if (isLoading) {
     return <AuthLoading />;
   }
+
+  const handleCopyPrompt = (video: VideoConfig) => {
+    if (!video.metadata) {
+      toast.error("No video metadata found for this video");
+      return;
+    }
+
+    try {
+      window.sessionStorage.setItem(
+        VIDEO_COMPOSER_PREFILL_STORAGE_KEY,
+        toJsonString(VideoMetadataSchema, video.metadata)
+      );
+      router.push("/dashboard");
+    } catch (err) {
+      console.error("Failed to prefill composer from video metadata", err);
+      toast.error("Unable to copy prompt to composer");
+    }
+  };
 
   return (
     <div className="p-8">
@@ -90,7 +112,22 @@ const RecentVideos = () => {
                 </div>
 
                 <CardContent className="p-4">
-                  <h3 className="font-medium truncate">{video.name}</h3>
+                  <div className="flex items-start justify-between gap-3">
+                    <h3 className="font-medium truncate">{video.name}</h3>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      className="h-8 shrink-0 px-2"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCopyPrompt(video);
+                      }}
+                    >
+                      <Copy className="w-3.5 h-3.5 mr-1" />
+                      Copy prompt
+                    </Button>
+                  </div>
 
                   <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
                     <span>{getSlideCount(video)} slides</span>

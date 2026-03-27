@@ -12,6 +12,7 @@ import "coasterai/core/v1/video.proto";
 import "coasterai/core/v1/brandkit.proto";
 import "coasterai/core/v1/template.proto";
 import "coasterai/core/v1/figma.proto";
+import "coasterai/core/v1/media_asset.proto";
 
 service PortalService {
   rpc GetConfig(.google.protobuf.Empty) returns (Config);
@@ -176,12 +177,7 @@ message CreateVideoRequest {
   core.v1.VideoLanguage language = 6;
   core.v1.StyleType styleType = 7;
   int32 fps = 8;
-  repeated SelectedMediaAsset assets = 9;
-}
-
-message SelectedMediaAsset {
-  string assetID = 1;
-  optional string note = 2;
+  repeated core.v1.SelectedMediaAsset assets = 9;
 }
 
 message CreateVideoResponse {
@@ -196,7 +192,7 @@ message CreateVideoResponse {
 message ContinueVideoPlanningRequest {
   string id = 1; // video id
   string response = 2;
-  repeated SelectedMediaAsset assets = 3;
+  repeated core.v1.SelectedMediaAsset assets = 3;
 }
 
 message AskUserQuestion {

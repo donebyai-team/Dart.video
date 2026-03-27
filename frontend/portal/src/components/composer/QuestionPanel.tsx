@@ -3,10 +3,11 @@
 import { useState } from 'react'
 import { ChevronRight, ImagePlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import type { AskUserQuestion, SelectedMediaAsset } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
+import type { AskUserQuestion } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
 import { AskUserQuestionType } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
 import AssetPreviewDialog from '@/components/assets/AssetPreviewDialog'
 import AssetUploadDropdown from './AssetUploadDropdown'
+import { SelectedMediaAsset } from '@coasterai/pb/coasterai/core/v1/media_asset_pb'
 
 interface QuestionPanelProps {
   question: AskUserQuestion

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"time"
 
 	"github.com/shank318/coasterai/baml_client/types"
@@ -30,7 +31,7 @@ type StartSessionOptions struct {
 
 type ContinueSessionOptions struct {
 	UserResponse        string
-	SelectedMediaAssets []*pbportal.SelectedMediaAsset
+	SelectedMediaAssets []*pbcore.SelectedMediaAsset
 }
 
 type RunStatus string

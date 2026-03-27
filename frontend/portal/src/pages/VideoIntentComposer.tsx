@@ -1,6 +1,6 @@
 'use client'
 
-import { create } from '@bufbuild/protobuf'
+import { create, fromJsonString } from '@bufbuild/protobuf'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Film,
@@ -15,7 +15,6 @@ import FigmaImportPanel, { type ConfirmPayload as FigmaImportConfirmPayload } fr
 import ManualMediaImportPanel from '@/components/assets/ManualMediaImportPanel'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import type { MediaAsset } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Script } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import ScriptEditorDialog from '@/components/dashboard/ScriptEditorDialog'
 import { useClientsContext } from '@coasterai/ui-core/context/ClientContext'
@@ -24,19 +23,19 @@ import toast from 'react-hot-toast'
 import defaultEditorConfig from '@/data/editorConfig'
 import { useRouter } from 'next/navigation'
 import { getDefaultResolution } from '@/stores/video/defaults'
-import { SelectedMediaAssetSchema, type AskUserQuestion, type CreateVideoResponse, type SelectedMediaAsset } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
+import { type AskUserQuestion, type CreateVideoResponse } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
 import QuestionPanel from '@/components/composer/QuestionPanel'
 import ThinkingViewComponent from '@/components/composer/ThinkingViewComponent'
-import { StyleType } from '@coasterai/pb/coasterai/core/v1/video_pb'
+import { StyleType, VideoMetadataSchema } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import StylePickerDialog from '@/components/composer/StylePickerDialog'
 import AssetUploadDropdown from '@/components/composer/AssetUploadDropdown'
-import DurationSelector from '@/components/composer/DurationSelector'
 import LanguageSelector from '@/components/composer/LanguageSelector'
-import StyleSelector from '@/components/composer/StyleSelector'
 import BrandLibrarySelector from '@/components/composer/BrandLibrarySelector'
+import { MediaAsset, SelectedMediaAsset, SelectedMediaAssetSchema } from '@coasterai/pb/coasterai/core/v1/media_asset_pb'
 
 const MIN_SCRIPT_SECTIONS = 3
 const MIN_PROMPT_LENGTH = 10
+const VIDEO_COMPOSER_PREFILL_STORAGE_KEY = 'video-composer-prefill-metadata'
 
 type ComposerStage = 'compose' | 'planning' | 'question'
 type AssetPickerMode = 'figma' | 'upload'
@@ -50,7 +49,7 @@ const VideoIntentComposer = () => {
   const [scriptDialogOpen, setScriptDialogOpen] = useState(false)
   const [styleDialogOpen, setStyleDialogOpen] = useState(false)
   const [assetDialogOpen, setAssetDialogOpen] = useState(false)
-  const [assetPickerMode, setAssetPickerMode] = useState<AssetPickerMode>('figma')
+  const [assetPickerMode, setAssetPickerMode] = useState<AssetPickerMode>('upload')
   const [selectedStyle, setSelectedStyle] = useState<StyleType>(StyleType.UNDEFINED)
   const [script, setScript] = useState<Script | undefined>()
   const [selectedAssets, setSelectedAssets] = useState<SelectedMediaAsset[]>([])
@@ -104,6 +103,25 @@ const VideoIntentComposer = () => {
   useEffect(() => {
     return () => {
       abortControllerRef.current?.abort()
+    }
+  }, [])
+
+  useEffect(() => {
+    const serializedMetadata = window.sessionStorage.getItem(VIDEO_COMPOSER_PREFILL_STORAGE_KEY)
+    if (!serializedMetadata) return
+
+    try {
+      const metadata = fromJsonString(VideoMetadataSchema, serializedMetadata)
+      setPrompt(metadata.prompt ?? '')
+      setSelectedAssets(metadata.assets ?? [])
+      if (metadata.generatedBranding?.brandLibraryID || metadata.generatedBranding?.brandIdentity?.id) {
+        setSelectedBrandLibraryId(metadata.generatedBranding?.brandLibraryID || metadata.generatedBranding?.brandIdentity?.id)
+      }
+    } catch (err) {
+      console.error('Failed to restore video metadata prefill', err)
+      toast.error('Unable to prefill composer from the selected video')
+    } finally {
+      window.sessionStorage.removeItem(VIDEO_COMPOSER_PREFILL_STORAGE_KEY)
     }
   }, [])
 

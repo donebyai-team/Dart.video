@@ -4,7 +4,7 @@
 
 import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv1";
 import type { Message } from "@bufbuild/protobuf";
-import type { MediaAsset } from "./slide_pb";
+import type { MediaAsset } from "./media_asset_pb";
 
 /**
  * Describes the file coasterai/core/v1/brandkit.proto.

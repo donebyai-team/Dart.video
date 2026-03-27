@@ -6,6 +6,7 @@ import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv1"
 import type { Message } from "@bufbuild/protobuf";
 import type { BrandColor, BrandIdentity } from "./brandkit_pb";
 import type { BackgroundStyle, Section } from "./slide_pb";
+import type { SelectedMediaAsset } from "./media_asset_pb";
 import type { Timestamp } from "@bufbuild/protobuf/wkt";
 
 /**
@@ -91,6 +92,11 @@ export declare type VideoMetadata = Message<"coasterai.core.v1.VideoMetadata"> &
    * @generated from field: optional string thinking_summary = 10;
    */
   thinkingSummary?: string;
+
+  /**
+   * @generated from field: repeated coasterai.core.v1.SelectedMediaAsset assets = 11;
+   */
+  assets: SelectedMediaAsset[];
 };
 
 /**

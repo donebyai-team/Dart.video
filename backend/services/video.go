@@ -154,6 +154,7 @@ func (v videoGeneration) CreateVideo(ctx context.Context, organizationID string,
 			DurationInFrames: params.DurationInSec * defaultVideoFPS,
 			Language:         params.Language,
 			Resolution:       params.Resolution,
+			Assets:           params.Assets,
 		},
 	})
 

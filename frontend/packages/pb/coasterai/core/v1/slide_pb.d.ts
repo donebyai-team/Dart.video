@@ -155,72 +155,6 @@ export declare type CodeRegistry = Message<"coasterai.core.v1.CodeRegistry"> & {
 export declare const CodeRegistrySchema: GenMessage<CodeRegistry>;
 
 /**
- * @generated from message coasterai.core.v1.MediaAsset
- */
-export declare type MediaAsset = Message<"coasterai.core.v1.MediaAsset"> & {
-  /**
-   * @generated from field: string url = 1;
-   */
-  url: string;
-
-  /**
-   * @generated from field: string thumbnailUrl = 2;
-   */
-  thumbnailUrl: string;
-
-  /**
-   * @generated from field: float width = 3;
-   */
-  width: number;
-
-  /**
-   * @generated from field: float height = 4;
-   */
-  height: number;
-
-  /**
-   * @generated from field: string mimeType = 5;
-   */
-  mimeType: string;
-
-  /**
-   * @generated from field: float size = 6;
-   */
-  size: number;
-
-  /**
-   * @generated from field: string fileId = 7;
-   */
-  fileId: string;
-
-  /**
-   * @generated from field: string fileName = 8;
-   */
-  fileName: string;
-
-  /**
-   * @generated from field: string id = 9;
-   */
-  id: string;
-
-  /**
-   * @generated from field: coasterai.core.v1.MediaType mediaType = 10;
-   */
-  mediaType: MediaType;
-
-  /**
-   * @generated from field: float duration = 11;
-   */
-  duration: number;
-};
-
-/**
- * Describes the message coasterai.core.v1.MediaAsset.
- * Use `create(MediaAssetSchema)` to create a new message.
- */
-export declare const MediaAssetSchema: GenMessage<MediaAsset>;
-
-/**
  * @generated from message coasterai.core.v1.SpotlightEffect
  */
 export declare type SpotlightEffect = Message<"coasterai.core.v1.SpotlightEffect"> & {
@@ -667,41 +601,6 @@ export enum SlideStatus {
  * Describes the enum coasterai.core.v1.SlideStatus.
  */
 export declare const SlideStatusSchema: GenEnum<SlideStatus>;
-
-/**
- * @generated from enum coasterai.core.v1.MediaType
- */
-export enum MediaType {
-  /**
-   * @generated from enum value: MEDIA_TYPE_UNDEFINED = 0;
-   */
-  UNDEFINED = 0,
-
-  /**
-   * @generated from enum value: MEDIA_TYPE_IMAGE = 1;
-   */
-  IMAGE = 1,
-
-  /**
-   * @generated from enum value: MEDIA_TYPE_VIDEO = 2;
-   */
-  VIDEO = 2,
-
-  /**
-   * @generated from enum value: MEDIA_TYPE_SVG = 3;
-   */
-  SVG = 3,
-
-  /**
-   * @generated from enum value: MEDIA_TYPE_CODE = 4;
-   */
-  CODE = 4,
-}
-
-/**
- * Describes the enum coasterai.core.v1.MediaType.
- */
-export declare const MediaTypeSchema: GenEnum<MediaType>;
 
 /**
  * @generated from enum coasterai.core.v1.StackAnimationMode

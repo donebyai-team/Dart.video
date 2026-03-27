@@ -12,14 +12,6 @@ enum SlideStatus {
   SLIDE_STATUS_PENDING = 2;
 }
 
-enum MediaType {
-  MEDIA_TYPE_UNDEFINED = 0;
-  MEDIA_TYPE_IMAGE = 1;
-  MEDIA_TYPE_VIDEO = 2;
-  MEDIA_TYPE_SVG = 3;
-  MEDIA_TYPE_CODE = 4;
-}
-
 enum StackAnimationMode {
   STACK_ANIMATION_MODE_STACK = 0;
   STACK_ANIMATION_MODE_REVEAL = 1;
@@ -92,20 +84,6 @@ message AnimationSlideContent {
 message CodeRegistry {
   string mUrl = 1;
   string tUrl = 2;
-}
-
-message MediaAsset {
-  string url = 1;
-  string thumbnailUrl = 2;
-  float width = 3;
-  float height = 4;
-  string mimeType = 5;
-  float size = 6;
-  string fileId = 7;
-  string fileName = 8;
-  string id = 9;
-  MediaType mediaType = 10;
-  float duration = 11;
 }
 
 // ===================== EFFECTS =====================

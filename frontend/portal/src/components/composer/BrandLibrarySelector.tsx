@@ -28,16 +28,21 @@ const BrandLibrarySelector = ({
   const { portalClient } = useClientsContext()
 
   useEffect(() => {
-    fetchBrandIdentities()
+    if (!portalClient) return
+    void fetchBrandIdentities()
   }, [portalClient])
+
+  useEffect(() => {
+    if (identities.length === 0) return
+    if (selectedBrandLibraryId) return
+
+    onChange(identities[0].id)
+  }, [identities, onChange, selectedBrandLibraryId])
 
   const fetchBrandIdentities = async () => {
     try {
       const res = await portalClient.getBrandIdentities({})
       setIdentities(res.identities)
-      if (res.identities.length > 0 && !selectedBrandLibraryId) {
-        onChange(res.identities[0].id)
-      }
     } catch (err) {
       console.error('Failed to fetch brand identities', err)
       toast.error(getConnectError(err))

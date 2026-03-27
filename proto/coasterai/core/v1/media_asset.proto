@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+import "google/protobuf/wrappers.proto";
+package coasterai.core.v1;
+option go_package = "github.com/shank318/coasterai/pb/coasterai/core/v1;pbcore";
+
+enum MediaType {
+  MEDIA_TYPE_UNDEFINED = 0;
+  MEDIA_TYPE_IMAGE = 1;
+  MEDIA_TYPE_VIDEO = 2;
+  MEDIA_TYPE_SVG = 3;
+  MEDIA_TYPE_CODE = 4;
+}
+
+message SelectedMediaAsset {
+  string assetID = 1;
+  optional string note = 2;
+}
+
+message MediaAsset {
+  string url = 1;
+  string thumbnailUrl = 2;
+  float width = 3;
+  float height = 4;
+  string mimeType = 5;
+  float size = 6;
+  string fileId = 7;
+  string fileName = 8;
+  string id = 9;
+  MediaType mediaType = 10;
+  float duration = 11;
+}

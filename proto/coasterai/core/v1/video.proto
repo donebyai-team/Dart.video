@@ -5,6 +5,7 @@ option go_package = "github.com/shank318/coasterai/pb/coasterai/core/v1;pbcore";
 import "google/protobuf/timestamp.proto";
 import "coasterai/core/v1/slide.proto";
 import "coasterai/core/v1/brandkit.proto";
+import "coasterai/core/v1/media_asset.proto";
 
 enum VideoStatus {
   VIDEO_STATUS_UNSPECIFIED = 0;  
@@ -49,6 +50,7 @@ message VideoMetadata {
     optional string background_audio_url = 8;
     optional GeneratedVideoBranding generatedBranding = 9;
     optional string thinking_summary = 10;
+    repeated SelectedMediaAsset assets = 11;
 }
 
 message Video {

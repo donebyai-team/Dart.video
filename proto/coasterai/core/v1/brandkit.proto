@@ -3,7 +3,7 @@ syntax = "proto3";
 import "google/protobuf/wrappers.proto";
 package coasterai.core.v1;
 option go_package = "github.com/shank318/coasterai/pb/coasterai/core/v1;pbcore";
-import "coasterai/core/v1/slide.proto";
+import "coasterai/core/v1/media_asset.proto";
 
 enum BrandMediaType {
   BRAND_MEDIA_TYPE_UNSPECIFIED = 0;

@@ -11,6 +11,7 @@ import (
 	"github.com/shank318/coasterai/cache"
 	"github.com/shank318/coasterai/datastore"
 	"github.com/shank318/coasterai/models"
+	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
 	"github.com/shank318/coasterai/services"
 	"github.com/shank318/coasterai/services/brand_identity"
@@ -120,11 +121,11 @@ func (a *agentV2) Continue(ctx context.Context, options ContinueSessionOptions) 
 }
 
 func deduplicateAssets(
-	assets []*pbportal.SelectedMediaAsset,
-) []*pbportal.SelectedMediaAsset {
+	assets []*pbcore.SelectedMediaAsset,
+) []*pbcore.SelectedMediaAsset {
 
 	index := make(map[string]int)
-	deduped := make([]*pbportal.SelectedMediaAsset, 0, len(assets))
+	deduped := make([]*pbcore.SelectedMediaAsset, 0, len(assets))
 
 	// First deduplicate existing assets
 	for _, a := range assets {

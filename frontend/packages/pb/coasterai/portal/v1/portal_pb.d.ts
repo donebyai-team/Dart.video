@@ -4,7 +4,8 @@
 
 import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv1";
 import type { Message } from "@bufbuild/protobuf";
-import type { MediaAsset, Slide } from "../../core/v1/slide_pb";
+import type { MediaAsset, SelectedMediaAsset } from "../../core/v1/media_asset_pb";
+import type { Slide } from "../../core/v1/slide_pb";
 import type { AnimationTemplate } from "../../core/v1/template_pb";
 import type { BrandIdentity, BrandIdentitySchema } from "../../core/v1/brandkit_pb";
 import type { FigmaFrame, FigmaPage } from "../../core/v1/figma_pb";
@@ -550,7 +551,7 @@ export declare type CreateVideoRequest = Message<"coasterai.portal.v1.CreateVide
   fps: number;
 
   /**
-   * @generated from field: repeated coasterai.portal.v1.SelectedMediaAsset assets = 9;
+   * @generated from field: repeated coasterai.core.v1.SelectedMediaAsset assets = 9;
    */
   assets: SelectedMediaAsset[];
 };
@@ -560,27 +561,6 @@ export declare type CreateVideoRequest = Message<"coasterai.portal.v1.CreateVide
  * Use `create(CreateVideoRequestSchema)` to create a new message.
  */
 export declare const CreateVideoRequestSchema: GenMessage<CreateVideoRequest>;
-
-/**
- * @generated from message coasterai.portal.v1.SelectedMediaAsset
- */
-export declare type SelectedMediaAsset = Message<"coasterai.portal.v1.SelectedMediaAsset"> & {
-  /**
-   * @generated from field: string assetID = 1;
-   */
-  assetID: string;
-
-  /**
-   * @generated from field: optional string note = 2;
-   */
-  note?: string;
-};
-
-/**
- * Describes the message coasterai.portal.v1.SelectedMediaAsset.
- * Use `create(SelectedMediaAssetSchema)` to create a new message.
- */
-export declare const SelectedMediaAssetSchema: GenMessage<SelectedMediaAsset>;
 
 /**
  * @generated from message coasterai.portal.v1.CreateVideoResponse
@@ -640,7 +620,7 @@ export declare type ContinueVideoPlanningRequest = Message<"coasterai.portal.v1.
   response: string;
 
   /**
-   * @generated from field: repeated coasterai.portal.v1.SelectedMediaAsset assets = 3;
+   * @generated from field: repeated coasterai.core.v1.SelectedMediaAsset assets = 3;
    */
   assets: SelectedMediaAsset[];
 };

@@ -29,10 +29,10 @@ const AssetUploadDropdown = ({
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align='end'>
-        <DropdownMenuItem onSelect={() => onOpenAssetPicker('figma')}>
+        {/* <DropdownMenuItem onSelect={() => onOpenAssetPicker('figma')}>
           <Figma className='mr-2 h-4 w-4' />
           Import from Figma
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
         <DropdownMenuItem onSelect={() => onOpenAssetPicker('upload')}>
           <ImagePlus className='mr-2 h-4 w-4' />
           Upload Media

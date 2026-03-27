@@ -298,6 +298,7 @@ type VideoMetadata struct {
 	BackgroundAudioUrl *string                 `protobuf:"bytes,8,opt,name=background_audio_url,json=backgroundAudioUrl,proto3,oneof" json:"background_audio_url,omitempty"`
 	GeneratedBranding  *GeneratedVideoBranding `protobuf:"bytes,9,opt,name=generatedBranding,proto3,oneof" json:"generatedBranding,omitempty"`
 	ThinkingSummary    *string                 `protobuf:"bytes,10,opt,name=thinking_summary,json=thinkingSummary,proto3,oneof" json:"thinking_summary,omitempty"`
+	Assets             []*SelectedMediaAsset   `protobuf:"bytes,11,rep,name=assets,proto3" json:"assets,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -393,6 +394,13 @@ func (x *VideoMetadata) GetThinkingSummary() string {
 		return *x.ThinkingSummary
 	}
 	return ""
+}
+
+func (x *VideoMetadata) GetAssets() []*SelectedMediaAsset {
+	if x != nil {
+		return x.Assets
+	}
+	return nil
 }
 
 type Video struct {
@@ -715,13 +723,13 @@ var File_coasterai_core_v1_video_proto protoreflect.FileDescriptor
 
 const file_coasterai_core_v1_video_proto_rawDesc = "" +
 	"\n" +
-	"\x1dcoasterai/core/v1/video.proto\x12\x11coasterai.core.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1dcoasterai/core/v1/slide.proto\x1a coasterai/core/v1/brandkit.proto\"\xee\x01\n" +
+	"\x1dcoasterai/core/v1/video.proto\x12\x11coasterai.core.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1dcoasterai/core/v1/slide.proto\x1a coasterai/core/v1/brandkit.proto\x1a#coasterai/core/v1/media_asset.proto\"\xee\x01\n" +
 	"\x16GeneratedVideoBranding\x125\n" +
 	"\x06colors\x18\x01 \x03(\v2\x1d.coasterai.core.v1.BrandColorR\x06colors\x12+\n" +
 	"\x0ebrandLibraryID\x18\x02 \x01(\tH\x00R\x0ebrandLibraryID\x88\x01\x01\x12K\n" +
 	"\rbrandIdentity\x18\x03 \x01(\v2 .coasterai.core.v1.BrandIdentityH\x01R\rbrandIdentity\x88\x01\x01B\x11\n" +
 	"\x0f_brandLibraryIDB\x10\n" +
-	"\x0e_brandIdentity\"\xd4\x04\n" +
+	"\x0e_brandIdentity\"\x93\x05\n" +
 	"\rVideoMetadata\x12\x10\n" +
 	"\x03fps\x18\x01 \x01(\x05R\x03fps\x12R\n" +
 	"\x10background_style\x18\x02 \x01(\v2\".coasterai.core.v1.BackgroundStyleH\x00R\x0fbackgroundStyle\x88\x01\x01\x12=\n" +
@@ -734,7 +742,8 @@ const file_coasterai_core_v1_video_proto_rawDesc = "" +
 	"\x14background_audio_url\x18\b \x01(\tH\x01R\x12backgroundAudioUrl\x88\x01\x01\x12\\\n" +
 	"\x11generatedBranding\x18\t \x01(\v2).coasterai.core.v1.GeneratedVideoBrandingH\x02R\x11generatedBranding\x88\x01\x01\x12.\n" +
 	"\x10thinking_summary\x18\n" +
-	" \x01(\tH\x03R\x0fthinkingSummary\x88\x01\x01B\x13\n" +
+	" \x01(\tH\x03R\x0fthinkingSummary\x88\x01\x01\x12=\n" +
+	"\x06assets\x18\v \x03(\v2%.coasterai.core.v1.SelectedMediaAssetR\x06assetsB\x13\n" +
 	"\x11_background_styleB\x17\n" +
 	"\x15_background_audio_urlB\x14\n" +
 	"\x12_generatedBrandingB\x13\n" +
@@ -817,8 +826,9 @@ var file_coasterai_core_v1_video_proto_goTypes = []any{
 	(*BrandColor)(nil),             // 11: coasterai.core.v1.BrandColor
 	(*BrandIdentity)(nil),          // 12: coasterai.core.v1.BrandIdentity
 	(*BackgroundStyle)(nil),        // 13: coasterai.core.v1.BackgroundStyle
-	(*timestamppb.Timestamp)(nil),  // 14: google.protobuf.Timestamp
-	(*Section)(nil),                // 15: coasterai.core.v1.Section
+	(*SelectedMediaAsset)(nil),     // 14: coasterai.core.v1.SelectedMediaAsset
+	(*timestamppb.Timestamp)(nil),  // 15: google.protobuf.Timestamp
+	(*Section)(nil),                // 16: coasterai.core.v1.Section
 }
 var file_coasterai_core_v1_video_proto_depIdxs = []int32{
 	11, // 0: coasterai.core.v1.GeneratedVideoBranding.colors:type_name -> coasterai.core.v1.BrandColor
@@ -827,17 +837,18 @@ var file_coasterai_core_v1_video_proto_depIdxs = []int32{
 	10, // 3: coasterai.core.v1.VideoMetadata.resolution:type_name -> coasterai.core.v1.Resolution
 	1,  // 4: coasterai.core.v1.VideoMetadata.language:type_name -> coasterai.core.v1.VideoLanguage
 	4,  // 5: coasterai.core.v1.VideoMetadata.generatedBranding:type_name -> coasterai.core.v1.GeneratedVideoBranding
-	7,  // 6: coasterai.core.v1.Video.config:type_name -> coasterai.core.v1.VideoConfig
-	5,  // 7: coasterai.core.v1.Video.metadata:type_name -> coasterai.core.v1.VideoMetadata
-	14, // 8: coasterai.core.v1.Video.created_at:type_name -> google.protobuf.Timestamp
-	0,  // 9: coasterai.core.v1.Video.status:type_name -> coasterai.core.v1.VideoStatus
-	15, // 10: coasterai.core.v1.VideoConfig.sections:type_name -> coasterai.core.v1.Section
-	9,  // 11: coasterai.core.v1.Script.items:type_name -> coasterai.core.v1.ScriptItem
-	12, // [12:12] is the sub-list for method output_type
-	12, // [12:12] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	14, // 6: coasterai.core.v1.VideoMetadata.assets:type_name -> coasterai.core.v1.SelectedMediaAsset
+	7,  // 7: coasterai.core.v1.Video.config:type_name -> coasterai.core.v1.VideoConfig
+	5,  // 8: coasterai.core.v1.Video.metadata:type_name -> coasterai.core.v1.VideoMetadata
+	15, // 9: coasterai.core.v1.Video.created_at:type_name -> google.protobuf.Timestamp
+	0,  // 10: coasterai.core.v1.Video.status:type_name -> coasterai.core.v1.VideoStatus
+	16, // 11: coasterai.core.v1.VideoConfig.sections:type_name -> coasterai.core.v1.Section
+	9,  // 12: coasterai.core.v1.Script.items:type_name -> coasterai.core.v1.ScriptItem
+	13, // [13:13] is the sub-list for method output_type
+	13, // [13:13] is the sub-list for method input_type
+	13, // [13:13] is the sub-list for extension type_name
+	13, // [13:13] is the sub-list for extension extendee
+	0,  // [0:13] is the sub-list for field type_name
 }
 
 func init() { file_coasterai_core_v1_video_proto_init() }
@@ -847,6 +858,7 @@ func file_coasterai_core_v1_video_proto_init() {
 	}
 	file_coasterai_core_v1_slide_proto_init()
 	file_coasterai_core_v1_brandkit_proto_init()
+	file_coasterai_core_v1_media_asset_proto_init()
 	file_coasterai_core_v1_video_proto_msgTypes[0].OneofWrappers = []any{}
 	file_coasterai_core_v1_video_proto_msgTypes[1].OneofWrappers = []any{}
 	file_coasterai_core_v1_video_proto_msgTypes[5].OneofWrappers = []any{}
