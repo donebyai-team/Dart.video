@@ -7,17 +7,24 @@ import { SingleSlidePreview } from '@coasterai/renderer'
 interface SlideThumbnailProps {
   slide: Slide
   index?: number
+  resolution?: {
+    width: number
+    height: number
+  } | null
+  fps?: number | null
 }
 
 const MAX_STAGGER_ITEMS = 8
 
-const SlideThumbnail = ({ slide, index = 0 }: SlideThumbnailProps) => {
+const SlideThumbnail = ({ slide, index = 0, resolution: resolutionProp, fps: fpsProp }: SlideThumbnailProps) => {
   const rootRef = useRef<HTMLDivElement | null>(null)
   const [isVisible, setIsVisible] = useState(false)
   const [debouncedSlide, setDebouncedSlide] = useState(slide)
 
-  const resolution = useVideoStore(s => s.videoConfig?.metadata?.resolution)
-  const fps = useVideoStore(s => s.videoConfig?.metadata?.fps || 30)
+  const storeResolution = useVideoStore(s => s.videoConfig?.metadata?.resolution)
+  const storeFps = useVideoStore(s => s.videoConfig?.metadata?.fps)
+  const resolution = resolutionProp ?? storeResolution
+  const fps = fpsProp ?? storeFps ?? 30
 
   useEffect(() => {
     const node = rootRef.current

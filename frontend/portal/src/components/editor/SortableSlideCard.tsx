@@ -20,9 +20,8 @@ const SortableSlideCard = ({ slide, isSelected, index, onSelect, onDelete }: Sor
   const getSlideWithBackground = useVideoStore(s => s.getSlideWithBackground)
   const slideWithBackground = useMemo(
     () => ({ ...slide, backgroundStyle: getSlideWithBackground(slide) }),
-    [slide, getSlideWithBackground]    
+    [slide, getSlideWithBackground]
   )
-  const getSlideDurationInSeconds = useVideoStore(s => s.getSlideDurationInSeconds)
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: slide.id })
 
@@ -43,9 +42,8 @@ const SortableSlideCard = ({ slide, isSelected, index, onSelect, onDelete }: Sor
     <div
       ref={setNodeRef}
       style={style}
-      className={`group cursor-pointer rounded-lg overflow-hidden transition-all border ${
-        isSelected ? 'border-primary shadow-sm shadow-primary/10' : 'border-border/50 hover:border-border'
-      } ${isDragging ? 'shadow-lg' : ''}`}
+      className={`group cursor-pointer rounded-lg overflow-hidden transition-all border ${isSelected ? 'border-primary shadow-sm shadow-primary/10' : 'border-border/50 hover:border-border'
+        } ${isDragging ? 'shadow-lg' : ''}`}
       onClick={onSelect}
     >
       <div className='flex gap-2 p-1.5 bg-background'>
@@ -59,24 +57,15 @@ const SortableSlideCard = ({ slide, isSelected, index, onSelect, onDelete }: Sor
           <GripVertical className='w-3 h-3 text-muted-foreground/50 hover:text-muted-foreground transition-colors' />
         </div>
 
-        {/* Thumbnail */}
-        <div className='relative w-16 h-10 rounded overflow-hidden flex-shrink-0 bg-muted'>
+        <div className='relative w-32 aspect-video rounded overflow-hidden flex-shrink-0 bg-muted'>
           <SlideThumbnail slide={slideWithBackground} index={index} />
-          {/* Slide type indicator */}
-          <div className='absolute bottom-0.5 left-0.5 bg-foreground/80 text-background p-0.5 rounded'>
-            <WandIcon className='w-2 h-2' />
-          </div>
-          {/* Duration */}
-          <div className='absolute bottom-0.5 right-0.5 bg-foreground/80 text-background text-[7px] px-0.5 rounded'>
-            {getSlideDurationInSeconds(slide).toFixed(2)}s
-          </div>
-          {/* Play overlay */}
           <div className='absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors flex items-center justify-center'>
             <div className='w-4 h-4 rounded-full bg-background/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity'>
               <div className='w-0 h-0 border-l-[5px] border-l-foreground border-y-[3px] border-y-transparent ml-0.5' />
             </div>
           </div>
         </div>
+
 
         {/* Content */}
         <div className='flex-1 min-w-0'>
