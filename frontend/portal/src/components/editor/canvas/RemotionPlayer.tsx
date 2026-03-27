@@ -94,7 +94,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   const [playFromSlideId, setPlayFromSlideId] = useState<string | null>(null);
 
   // Pause on drag start; stay paused when drag ends (user presses play to resume)
-  // while dragging set isPlaying to true so that we can see the changes in the player and effect overlays
+  // while dragging set isPlaying to true so that we can see the changes in the player and effect 
   const handleDraggingChange = useCallback((dragging: boolean) => {
     if (dragging){
       playerRef.current?.pause();
