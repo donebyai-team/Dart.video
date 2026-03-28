@@ -8,7 +8,7 @@ import { AnimationEditLayer } from '../animation/AnimationEditLayer'
 import type { PatchOverlay } from '@coasterai/renderer'
 import { getRealSlideStartFrame } from '../frame_calculations'
 import { ActiveToolType } from '@/types/tools'
-import { hasEditableSceneFields } from '../settings/sceneSettingsHelpers'
+import { resolveOwningSceneElementId } from '../settings/sceneSettingsHelpers'
 
 interface PlayerCanvasProps {
   playerRef: React.RefObject<PlayerRef>
@@ -161,27 +161,19 @@ const PlayerCanvas = ({
           overlay={overlay}
           animEditVersion={animEditVersion}
           onSelectElement={eid => {
-            const nextElementId =
-              eid && hasEditableSceneFields(eid, overlay) ? eid : null
+            const sceneElementId = eid ? resolveOwningSceneElementId(eid) : null
             const existingSettings =
               activeTool.type === ActiveToolType.ADD_OR_EDIT_ANIMATION
                 ? activeTool.settings ?? {}
                 : {}
-
-            if (eid && !nextElementId) {
-              console.debug('[SceneSettings] No editable props found for selected element', {
-                elementId: eid,
-              })
-            }
-
-            setSelectedEid(nextElementId)
+            setSelectedEid(eid)
 
             handleSelectTool({
               type: ActiveToolType.ADD_OR_EDIT_ANIMATION,
-              settings: nextElementId
+              settings: sceneElementId
                 ? {
                     ...existingSettings,
-                    animationElementId: nextElementId,
+                    animationElementId: sceneElementId,
                   }
                 : (() => {
                     const { animationElementId: _animationElementId, ...rest } = existingSettings

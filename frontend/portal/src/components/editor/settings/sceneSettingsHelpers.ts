@@ -1,4 +1,5 @@
-import { ENTRANCE_ANIMATIONS, TYPOGRAPHY_VARIANT_NAMES } from "../../../../../packages/animation/src"
+import { ENTRANCE_ANIMATIONS, SCENE_COMPONENTS, TYPOGRAPHY_VARIANT_NAMES } from "../../../../../packages/animation/src"
+import { resolveComponentFromId } from '@coasterai/renderer'
 
 
 export type SceneFieldKind = 'string' | 'number' | 'boolean' | 'string[]' | 'enum'
@@ -11,6 +12,8 @@ export type SceneFieldDefinition = {
   kind: SceneFieldKind
   options?: string[]
 }
+
+const SCENE_COMPONENT_NAME_SET = new Set(SCENE_COMPONENTS.map(component => component.name))
 
 const RESERVED_FIELD_MAP: Record<string, SceneFieldDefinition> = {
   variant: {
@@ -164,6 +167,33 @@ export function resolveScenePatchEntryId(
   }
 
   return null
+}
+
+export function resolveOwningSceneElementId(elementId: string): string | null {
+  let current = elementId
+  let resolvedSceneId: string | null = null
+
+  // Child primitives keep their own ids for toolbar selection, but scene settings
+  // should always target the outermost owning scene component.
+  // We keep walking upward and remember the last matching scene id so a nested
+  // child like "textstagger-logowithbrandname-0" resolves to "logowithbrandname-0".
+  // This is intentionally based on the scenes registry rather than registration.type,
+  // because some scene-capable components (like text scenes) are typed as "content".
+  while (current.length > 0) {
+    const registration = resolveComponentFromId(current)
+    if (registration && SCENE_COMPONENT_NAME_SET.has(registration.name)) {
+      resolvedSceneId = current
+    }
+
+    const lastDashIdx = current.lastIndexOf('-')
+    if (lastDashIdx <= 0) break
+
+    // Nested primitive ids are encoded with dashed ancestry, so trimming one segment
+    // at a time lets us climb from a clicked child like "textstagger-foo-0" to "foo-0".
+    current = current.slice(0, lastDashIdx)
+  }
+
+  return resolvedSceneId
 }
 
 export function getEditableSceneFields(
