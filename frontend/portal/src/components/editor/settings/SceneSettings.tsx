@@ -91,6 +91,7 @@ export default function SceneSettings({
             <label key={prop} className="flex flex-col gap-2">
               <span className="text-sm font-medium">{toSceneFieldLabel(prop)}</span>
               <SingleSceneMediaPicker
+                fieldName={prop}
                 value={String(value)}
                 onChange={next => onValuePatch(patchEntryId ?? elementId, prop, next)}
               />

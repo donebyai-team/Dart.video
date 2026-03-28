@@ -115,13 +115,25 @@ export function calculateComponentDuration(componentName: string, props: any): D
 /**
  * Resolve a primitive element ID to its ComponentRegistration.
  * Derives component name from the ID prefix: "fadein-0" → "fadein" → FadeIn.
+ * Also supports nested IDs like "textstagger-logowithbrandname-0" by walking
+ * backward through dashed prefixes until a registered component name is found.
  * Returns null for raw HTML (el-*) and custom components (custom-*).
  */
 export function resolveComponentFromId(id: string): ComponentRegistration | null {
   const dashIdx = id.lastIndexOf('-');
   if (dashIdx <= 0) return null;
-  const prefix = id.substring(0, dashIdx);
-  return REGISTRY_BY_LOWERCASE.get(prefix) ?? null;
+
+  let prefix = id.substring(0, dashIdx);
+  while (prefix.length > 0) {
+    const registration = REGISTRY_BY_LOWERCASE.get(prefix);
+    if (registration) return registration;
+
+    const nextDashIdx = prefix.lastIndexOf('-');
+    if (nextDashIdx <= 0) break;
+    prefix = prefix.substring(0, nextDashIdx);
+  }
+
+  return null;
 }
 
 /**

@@ -15,6 +15,7 @@ import type { DurationResult } from '../../../registry/registry';
 // Default constants
 const DEFAULT_ANIMATION_DURATION = 30;
 const DEFAULT_ANIMATION = 'zoomIn' as const;
+const DEFAULT_SRC = ""
 
 const DEFAULT_LOGO_SVG = `data:image/svg+xml,${encodeURIComponent(`
 <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
@@ -32,7 +33,7 @@ const DEFAULT_LOGO_SVG = `data:image/svg+xml,${encodeURIComponent(`
 
 export const LogoAssetSchema = z.object({
     id: z.string().optional(),
-    src: z.string().url("src must be a valid URL").optional(),
+    src: z.string().default(DEFAULT_SRC).optional(),
     width: z.number().min(1, "width must be positive").optional(),
     height: z.number().min(1, "height must be positive").optional(),
     animation: z.enum(LOGO_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
@@ -79,7 +80,8 @@ export function LogoAsset(propsInit: LogoAssetProps): React.ReactElement {
     const actualAnimation = props.animation ?? DEFAULT_ANIMATION;
     const { objectFit: styleObjectFit, ...restStyle } = props.style ?? {};
     const { objectFit: overrideObjectFit, ...wrapperStyleOverride } = styleOverride;
-    const defaultSrc = props.src ?? logo?.url ?? DEFAULT_LOGO_SVG;
+    const defaultSrc = props.src || logo?.url || DEFAULT_LOGO_SVG;
+
     const defaultBoxSize = Math.min(preset.width, preset.height) * 0.35;
     // Width/height define the bounding box. If only one is provided, mirror it
     // so the logo still gets a deterministic square box to fit into.

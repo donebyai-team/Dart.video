@@ -23,9 +23,11 @@ function moveValuesByIds(values: string[], ids: string[]): string[] {
 }
 
 export function SingleSceneMediaPicker({
+  fieldName,
   value,
   onChange,
 }: {
+  fieldName?: string
   value: string
   onChange: (value: string) => void
 }) {
@@ -36,6 +38,14 @@ export function SingleSceneMediaPicker({
     setOpen(false)
   }
 
+  const lowerFieldName = fieldName?.toLowerCase() ?? ''
+  const buttonLabel =
+    lowerFieldName === 'src'
+      ? 'Replace image'
+      : value
+        ? 'Replace asset'
+        : 'Choose asset'
+
   return (
     <div className="flex flex-col gap-2">
       {value ? (
@@ -45,7 +55,7 @@ export function SingleSceneMediaPicker({
       ) : null}
       <div>
         <Button type="button" variant="outline" size="sm" onClick={() => setOpen(true)}>
-          {value ? 'Replace asset' : 'Choose asset'}
+          {buttonLabel}
         </Button>
       </div>
       <Dialog open={open} onOpenChange={setOpen}>

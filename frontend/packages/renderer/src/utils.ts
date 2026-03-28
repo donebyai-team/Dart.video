@@ -1,6 +1,6 @@
 import { BrandAsset, BrandTheme, DEFAULT_BRAND_THEME } from "@coasterai/animation";
-import { BrandAssetPriority, BrandMedia } from "@coasterai/pb/coasterai/core/v1/brandkit_pb";
-import { MediaAsset } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { BrandAssetPriority, BrandMedia, BrandMediaType } from "@coasterai/pb/coasterai/core/v1/brandkit_pb";
+import { MediaAsset } from "@coasterai/pb/coasterai/core/v1/media_asset_pb";
 import { GeneratedVideoBranding } from "@coasterai/pb/coasterai/core/v1/video_pb";
 
 export function brandingToTheme(
@@ -38,22 +38,28 @@ export function brandingToTheme(
                 if (!theme.text) theme.text = color;
                 break;
 
-             case BrandAssetPriority.ACCENT:
+            case BrandAssetPriority.ACCENT:
                 if (theme.accent) theme.accent = color;
-                break;    
+                break;
         }
     }
 
     for (const c of branding.brandIdentity?.logos || []) {
         if (!c.asset) continue;
-        if (c.priority === BrandAssetPriority.PRIMARY) {
-            theme.logo = toBrandAsset(c.asset);
-            break
+
+        const asset = toBrandAsset(c.asset);
+
+        if (c.type === BrandMediaType.LOGO) {
+            theme.logo = asset;
         }
 
-        if (c.priority === BrandAssetPriority.SECONDARY) {
-            if (!theme.logo) theme.logo = toBrandAsset(c.asset);
-            break
+        if (c.type === BrandMediaType.ICON) {
+            theme.logoIcon = asset;
+
+            // fallback logo if no real logo exists
+            if (!theme.logo) {
+                theme.logo = asset;
+            }
         }
     }
 

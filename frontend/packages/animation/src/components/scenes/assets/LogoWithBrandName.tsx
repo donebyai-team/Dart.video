@@ -1,26 +1,29 @@
 import React from "react";
 import { useCurrentFrame } from "remotion";
 import z from 'zod';
-import { usePatchedProp, usePatchedProps, useStyleOverride } from "../../../patches/PatchContext";
+import { usePatchedProps, useStyleOverride } from "../../../patches/PatchContext";
 import { useStyleContext } from "../../../styles/StyleContext";
 import { useAspectPreset } from "../../../styles/AspectPresetContext";
 import { interpolateWithEasing } from "../../../styles/easingResolver";
 import { useTheme } from "../../../theme";
 import { resolveTypography } from "../../../tokens/resolveTypography";
-import { TypographyVariant, TYPOGRAPHY_VARIANT_NAMES } from "../../../tokens/semantic";
+import { TYPOGRAPHY_VARIANT_NAMES } from "../../../tokens/semantic";
 import { LogoAsset } from "./LogoAsset";
+import { TextStagger, calculateTextStaggerDuration } from "../text/TextStagger";
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../../../registry/registry';
+import { TYPEWRITER_MODES } from "../../..";
 
 // Default constants
 const DEFAULT_CHAR_STAGGER = 4;
 const DEFAULT_CHAR_FADE_DURATION = 15;
 const DEFAULT_VARIANT = 'heading' as const;
+const DEFAULT_SRC = ""
 
 export const LogoWithBrandNameSchema = z.object({
     id: z.string().optional(),
     brandName: z.string().min(1, "brandName is required"),
-    src: z.string().url("src must be a valid URL").optional(),
+    src: z.string().default(DEFAULT_SRC).optional(),
     logoSize: z.number().min(1, "logoSize must be positive").optional(),
     variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
     style: z.any().optional(),
@@ -35,8 +38,9 @@ export function LogoWithBrandName(propsInit: LogoWithBrandNameProps): React.Reac
     const theme = useTheme();
     const preset = useAspectPreset();
 
-    const patchedProps = usePatchedProps(propsInit.id, propsInit);   
+    const patchedProps = usePatchedProps(propsInit.id, propsInit);
     const props = { ...LogoWithBrandNameSchema.parse(patchedProps), id: propsInit.id };
+    const resolvedLogo = props.src || theme.logoIcon?.url;
 
     // Apply defaults
     const actualVariant = props.variant ?? DEFAULT_VARIANT;
@@ -50,23 +54,14 @@ export function LogoWithBrandName(propsInit: LogoWithBrandNameProps): React.Reac
     const lineHeight = typeof typo.lineHeight === 'number' ? typo.lineHeight : 1.1;
     const resolvedLogoSize = props.logoSize ?? Math.round(fontSize * lineHeight);
 
+    // Check first char opacity to animate the gap
     const easing = styleConfig.motion.entrance;
-
-    const chars = props.brandName.split('');
-    const charStagger = DEFAULT_CHAR_STAGGER;
-    const charFadeDuration = DEFAULT_CHAR_FADE_DURATION;
-
-    const getCharOpacity = (i: number): number => {
-        const charStart = i * charStagger;
-        return interpolateWithEasing(
-            frame,
-            [charStart, charStart + charFadeDuration],
-            [0, 1],
-            easing,
-        );
-    };
-
-    const firstCharOpacity = chars.length > 0 ? getCharOpacity(0) : 0;
+    const firstCharOpacity = interpolateWithEasing(
+        frame,
+        [0, DEFAULT_CHAR_FADE_DURATION],
+        [0, 1],
+        easing,
+    );
 
     return (
         <div
@@ -88,26 +83,21 @@ export function LogoWithBrandName(propsInit: LogoWithBrandNameProps): React.Reac
                 }}
             >
                 <LogoAsset
-                   id={`logoasset-${props.id}`}
-                    src={props.src}
+                    id={`logoasset-${props.id}`}
+                    src={resolvedLogo}
                     width={resolvedLogoSize}
                     height={resolvedLogoSize}
                     animation="none"
                 />
-                <span
-                    style={{
-                        whiteSpace: 'nowrap',
-                        ...resolveTypography(actualVariant, styleConfig, theme, preset),
-                        ...props.style,
-                        ...styleOverride,
-                    }}
-                >
-                    {chars.map((char, i) => (
-                        <span key={i} style={{ opacity: getCharOpacity(i) }}>
-                            {char}
-                        </span>
-                    ))}
-                </span>
+                <TextStagger
+                    id={`textstagger-${props.id}`}
+                    text={props.brandName}
+                    splitBy={TYPEWRITER_MODES[0]}
+                    staggerDelay={DEFAULT_CHAR_STAGGER}
+                    duration={DEFAULT_CHAR_FADE_DURATION}
+                    variant={actualVariant}
+                    style={{ whiteSpace: 'nowrap' }}
+                />
             </div>
         </div>
     );
@@ -130,19 +120,14 @@ export function calculateLogoWithBrandNameDuration(props: LogoWithBrandNameProps
     }
 
     const validated = validation.data;
-    
-    // Calculate duration based on brand name length
-    const charCount = validated.brandName.length;
-    const charStagger = DEFAULT_CHAR_STAGGER;
-    const charFadeDuration = DEFAULT_CHAR_FADE_DURATION;
-    
-    // Total duration = time until last char starts + fade duration of last char
-    const totalDuration = (charCount - 1) * charStagger + charFadeDuration;
-    
-    return {
-        success: true,
-        duration: Math.ceil(totalDuration),
-    };
+
+    // Delegate to TextStagger duration calculation with char splitting
+    return calculateTextStaggerDuration({
+        text: validated.brandName,
+        splitBy: 'char',
+        staggerDelay: DEFAULT_CHAR_STAGGER,
+        duration: DEFAULT_CHAR_FADE_DURATION,
+    });
 }
 
 // ============================================================================

@@ -186,7 +186,7 @@ func (a brandIdentity) extractMediaImages(ctx context.Context, images map[string
 		if err != nil {
 			a.logger.Info("Skipping logo", zap.Error(err), zap.String("logo", logo))
 		} else {
-			logos = append(logos, createBrandMediaFromAsset(ctx, asset, pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_PRIMARY, pbcore.BrandMediaType_BRAND_MEDIA_TYPE_LOGO))
+			logos = append(logos, createBrandMediaFromAsset(ctx, asset, pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_PRIMARY, pbcore.BrandMediaType_BRAND_MEDIA_TYPE_ICON))
 		}
 	}
 

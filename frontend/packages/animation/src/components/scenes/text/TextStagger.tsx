@@ -7,7 +7,7 @@ import { usePatchedProp, usePatchedProps, useStyleOverride } from '../../../patc
 import { interpolateWithEasing, useAspectPreset } from '../../../styles';
 import { useTheme } from '../../../theme';
 import { resolveTypography } from '../../../tokens';
-import { getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
+import { getEntranceTransform, ENTRANCE_ANIMATIONS, TYPEWRITER_MODES } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../durationTypes';
 
@@ -16,7 +16,7 @@ const DEFAULT_STAGGER_DELAY = 5;
 const DEFAULT_WORD_DURATION = 15;
 const DEFAULT_VARIANT = 'heading' as const;
 const DEFAULT_ANIMATION = 'scaleIn' as const;
-const DEFAULT_SEPARATOR = ' ';
+const DEFAULT_SPLIT_BY = 'word' as const;
 
 // Use z.input for props (what callers pass) - fields with defaults are optional
 export type TextStaggerProps = z.input<typeof TextStaggerSchema>;
@@ -42,10 +42,11 @@ export const TextStagger: React.FC<TextStaggerProps> = (propsInit: TextStaggerPr
 
     const styleOverride = useStyleOverride(props.id);
 
-    const words = props.text.split(DEFAULT_SEPARATOR);
+    const splitBy = props.splitBy ?? DEFAULT_SPLIT_BY;
+    const units = splitBy === 'char' ? props.text.split('') : splitBy === 'line' ? props.text.split('\n') : props.text.split(' ');
 
-    const getAnimationStyles = (wordIndex: number): React.CSSProperties => {
-        const wordStartAt = actualStartAt + wordIndex * actualStaggerDelay;
+    const getAnimationStyles = (unitIndex: number): React.CSSProperties => {
+        const wordStartAt = actualStartAt + unitIndex * actualStaggerDelay;
         const progress = interpolateWithEasing(
             frame,
             [wordStartAt, wordStartAt + actualDuration],
@@ -60,19 +61,19 @@ export const TextStagger: React.FC<TextStaggerProps> = (propsInit: TextStaggerPr
 
     return (
         <span id={props.id} className={props.className} style={{ display: 'inline-block', ...props.style }}>
-            {words.map((word, index) => (
+            {units.map((unit, index) => (
                 <span
                     key={index}
                     style={{
                         display: 'inline-block',
-                        marginRight: index < words.length - 1 ? '0.25em' : 0,
+                        marginRight: splitBy === 'word' && index < units.length - 1 ? '0.25em' : 0,
                         ...getAnimationStyles(index),
                         ...resolveTypography(actualVariant, styleConfig, theme, preset),
                         ...props.wordStyle,
                         ...styleOverride
                     }}
                 >
-                    {word}
+                    {unit}
                 </span>
             ))}
         </span>
@@ -91,6 +92,7 @@ export const TextStaggerSchema = z.object({
     staggerDelay: z.number().min(0, "staggerDelay cannot be negative").optional().default(DEFAULT_STAGGER_DELAY),
     entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).optional().default(DEFAULT_ANIMATION),
     duration: z.number().min(1, "duration must be positive").optional().default(DEFAULT_WORD_DURATION),
+    splitBy: z.enum(TYPEWRITER_MODES).optional().default(DEFAULT_SPLIT_BY),
     className: z.string().optional(),
     style: z.any().optional(),
     wordStyle: z.any().optional(),
@@ -110,11 +112,12 @@ export function calculateTextStaggerDuration(props: TextStaggerProps): DurationR
 
     const validated = validation.data;
 
-    // Calculate word count
-    const words = validated.text.split(DEFAULT_SEPARATOR);
-    const wordCount = words.length;
+    // Calculate unit count based on splitBy mode
+    const splitBy = validated.splitBy ?? DEFAULT_SPLIT_BY;
+    const units = splitBy === 'char' ? validated.text.split('') : splitBy === 'line' ? validated.text.split('\n') : validated.text.split(' ');
+    const unitCount = units.length;
 
-    if (wordCount === 0) {
+    if (unitCount === 0) {
         return {
             success: false,
             error: "text must contain at least one word",
@@ -124,10 +127,10 @@ export function calculateTextStaggerDuration(props: TextStaggerProps): DurationR
 
     // Calculate duration
     const staggerDelay = validated.staggerDelay ?? DEFAULT_STAGGER_DELAY;
-    const wordDuration = validated.duration ?? DEFAULT_WORD_DURATION;
+    const unitDuration = validated.duration ?? DEFAULT_WORD_DURATION;
 
-    // Total duration = time until last word starts + duration of last word animation
-    const totalDuration = (wordCount - 1) * staggerDelay + wordDuration;
+    // Total duration = time until last unit starts + duration of last unit animation
+    const totalDuration = (unitCount - 1) * staggerDelay + unitDuration;
 
     return {
         success: true,
@@ -143,7 +146,7 @@ export const TextStaggerDescriptor: ComponentRegistration = {
     name: 'TextStagger',
     type: 'content',
     fullSchema: TextStaggerSchema,
-    editorProps: ['text', 'animation', 'staggerDelay', 'duration'],
-    description: 'Reveals text word-by-word with staggered animation delays. Use for multi-word headlines or body text. Required props: text="Transform your workflow with AI". Each word animates in sequence with configurable delay.',
+    editorProps: ['text', 'animation', 'staggerDelay', 'duration', 'splitBy'],
+    description: 'Reveals text word-by-word or character-by-character with staggered animation delays. Use for multi-word headlines or body text. Required props: text="Transform your workflow with AI". Each unit animates in sequence with configurable delay. Set splitBy="char" for character-level animation.',
     calculateDuration: calculateTextStaggerDuration,
 };

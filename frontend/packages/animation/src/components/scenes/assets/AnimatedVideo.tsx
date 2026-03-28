@@ -51,6 +51,8 @@ export function AnimatedVideo(propsInit: AnimatedVideoProps): React.ReactElement
     const actualVariant = props.variant ?? DEFAULT_VARIANT;
     const actualAnimation = props.animation ?? DEFAULT_ANIMATION;
     const actualBorderRadius = props.borderRadius ?? DEFAULT_BORDER_RADIUS;
+    const imageWidth = props.width ?? DEFAULT_WIDTH;
+    const imageHeight = props.height ?? DEFAULT_HEIGHT;
 
     const styleOverride = useStyleOverride(props.id);
 
@@ -102,7 +104,7 @@ export function AnimatedVideo(propsInit: AnimatedVideoProps): React.ReactElement
                     boxShadow: "0 20px 40px rgba(0,0,0,0.25), 0 12px 24px rgba(0,0,0,0.15)",
                 }}
             >
-                <VideoAsset id={`videoasset-${props.id}`} src={props.src} width={props.width} height={props.height} />
+                <VideoAsset id={`videoasset-${props.id}`} src={props.src} width={imageWidth} height={imageHeight} />
             </div>
         </div>
     );

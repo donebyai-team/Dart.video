@@ -44,6 +44,36 @@ describe('TextStagger Duration Calculation', () => {
     }
   });
 
+  it('should calculate duration with splitBy char', () => {
+    const result = calculateTextStaggerDuration({
+      text: 'CoasterAI',
+      splitBy: 'char',
+    });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      // 9 characters, default staggerDelay=5, default duration=15
+      // Total: (9-1) * 5 + 15 = 40 + 15 = 55 frames
+      expect(result.duration).toBe(55);
+    }
+  });
+
+  it('should calculate duration with splitBy char and custom delays', () => {
+    const result = calculateTextStaggerDuration({
+      text: 'ACME',
+      splitBy: 'char',
+      staggerDelay: 4,
+      duration: 15,
+    });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      // 4 characters, staggerDelay=4, duration=15
+      // Total: (4-1) * 4 + 15 = 12 + 15 = 27 frames
+      expect(result.duration).toBe(27);
+    }
+  });
+
   it('should return error for empty text', () => {
     const result = calculateTextStaggerDuration({
       text: '',

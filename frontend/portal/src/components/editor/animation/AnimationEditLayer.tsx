@@ -48,6 +48,11 @@ export function AnimationEditLayer({
   const [elementRect, setElementRect] = useState<FRect | null>(null)
   const [hoverCursor, setHoverCursor] = useState<'default' | 'pointer'>('default')
 
+  function supportsToolbar(id: string): boolean {
+    const lowerId = id.toLowerCase()
+    return lowerId.includes('text') || lowerId.includes('icon')
+  }
+
   // ── Track canvas position ─────────────────────────────────────────────────
   useEffect(() => {
     if (!playerRef.current) return
@@ -135,13 +140,14 @@ export function AnimationEditLayer({
     const hits = selectableStackAtPoint(e.clientX, e.clientY, e.currentTarget)
     if (hits.length === 0) { deselect(); return }
 
+    console.log("hits", hits)
+
     if (!selectedEid) {
       const hit = hits[0]
       setElementRect(hit.el.getBoundingClientRect())
       onSelectElement(hit.id)
       return
     }
-
     const idx = hits.findIndex(h => h.id === selectedEid)
     if (idx !== -1 && idx < hits.length - 1) {
       const parent = hits[idx + 1]
@@ -199,7 +205,7 @@ export function AnimationEditLayer({
       )}
 
       {/* Toolbar */}
-      {selectedEid && (
+      {selectedEid && supportsToolbar(selectedEid) && (
         <div
           ref={toolbarRef}
           style={{
