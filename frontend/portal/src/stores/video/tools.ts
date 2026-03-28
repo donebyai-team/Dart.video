@@ -32,21 +32,29 @@ export const createToolActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     const zoomEndFrame = Math.min(zoomStartFrame + zoomDuration, slideDurationFrames - transitionFrames);
 
 
-    set({ activeTool: tool });
+    const normalizedTool =
+      tool.type === ActiveToolType.ADD_OR_EDIT_ANIMATION
+        ? {
+            ...tool,
+            settings: tool.settings ?? {},
+          }
+        : tool
 
-    if (tool?.type === ActiveToolType.INSERT) {
+    set({ activeTool: normalizedTool });
 
-      if (tool.tool === EffectType.SPOTLIGHT) {
+    if (normalizedTool?.type === ActiveToolType.INSERT) {
+
+      if (normalizedTool.tool === EffectType.SPOTLIGHT) {
         const effect = createSpotlightEffect(resolution, zoomStartFrame, zoomEndFrame);
         get().addSpotlight(effect);
         set({ selectedEffectId: effect.id });
 
-      } else if (tool.tool === EffectType.CALLOUT) {
+      } else if (normalizedTool.tool === EffectType.CALLOUT) {
         const effect = createCalloutEffect(resolution, zoomStartFrame, zoomEndFrame);
         get().addCallout(effect);
         set({ selectedEffectId: effect.id });
 
-      } else if (tool.tool === EffectType.ZOOM) {
+      } else if (normalizedTool.tool === EffectType.ZOOM) {
 
         const effect = createZoomEffect(resolution, zoomStartFrame, zoomEndFrame);
         get().addZoom(effect);

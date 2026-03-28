@@ -2,7 +2,7 @@ import { preloadImage } from "@remotion/preload";
 import { useEffect } from "react";
 import { useCurrentFrame, useRemotionEnvironment } from "remotion";
 import z from 'zod';
-import { usePatchedProp, useStyleOverride } from "../../../patches/PatchContext";
+import { usePatchedProps, useStyleOverride } from "../../../patches/PatchContext";
 
 import { useStyleContext } from "../../../styles/StyleContext";
 import { useAspectPreset } from "../../../styles/AspectPresetContext";
@@ -26,15 +26,21 @@ const DEFAULT_LOGO_SVG = `data:image/svg+xml,${encodeURIComponent(`
 `)}`;
 
 
-export interface LogoAssetProps {
-    src?: string;
-    width?: number;
-    height?: number;
-    animation?: LogoAnimation;
-    style?: React.CSSProperties;
-    className?: string;
-    id?: string;
-}
+// ============================================================================
+// Schema & Duration Calculation
+// ============================================================================
+
+export const LogoAssetSchema = z.object({
+    id: z.string().optional(),
+    src: z.string().url("src must be a valid URL").optional(),
+    width: z.number().min(1, "width must be positive").optional(),
+    height: z.number().min(1, "height must be positive").optional(),
+    animation: z.enum(LOGO_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
+    style: z.any().optional(),
+    className: z.string().optional(),
+});
+
+export type LogoAssetProps = z.input<typeof LogoAssetSchema>;
 
 function getLogoAnimationStyle(animation: LogoAnimation, progress: number): React.CSSProperties {
     const inv = 1 - progress;
@@ -58,64 +64,55 @@ function getLogoAnimationStyle(animation: LogoAnimation, progress: number): Reac
     }
 }
 
-export function LogoAsset({
-    src,
-    width,
-    height,
-    animation,
-    style,
-    className,
-    id,
-}: LogoAssetProps): React.ReactElement {
+export function LogoAsset(propsInit: LogoAssetProps): React.ReactElement {
+    const patchedProps = usePatchedProps(propsInit.id, propsInit);
+    const props = { ...LogoAssetSchema.parse(patchedProps), id: propsInit.id };
+
     const frame = useCurrentFrame();
     const { logo } = useTheme();
     const { isRendering } = useRemotionEnvironment();
     const styleConfig = useStyleContext();
     const preset = useAspectPreset();
-    const styleOverride = useStyleOverride(id);
+    const styleOverride = useStyleOverride(props.id);
 
     // Apply defaults
-    const actualAnimation = animation ?? DEFAULT_ANIMATION;
-    const { objectFit: styleObjectFit, ...restStyle } = style ?? {};
+    const actualAnimation = props.animation ?? DEFAULT_ANIMATION;
+    const { objectFit: styleObjectFit, ...restStyle } = props.style ?? {};
     const { objectFit: overrideObjectFit, ...wrapperStyleOverride } = styleOverride;
-    const patchedWidth = usePatchedProp<number | undefined>(id, 'width', width);
-    const patchedHeight = usePatchedProp<number | undefined>(id, 'height', height);
-    const defaultSrc = src ?? logo?.url ?? DEFAULT_LOGO_SVG;
-    const patchedSrc = usePatchedProp<string | undefined>(id, 'src', defaultSrc);
+    const defaultSrc = props.src ?? logo?.url ?? DEFAULT_LOGO_SVG;
     const defaultBoxSize = Math.min(preset.width, preset.height) * 0.35;
     // Width/height define the bounding box. If only one is provided, mirror it
     // so the logo still gets a deterministic square box to fit into.
-    const resolvedBoxWidth = patchedWidth ?? patchedHeight ?? defaultBoxSize;
-    const resolvedBoxHeight = patchedHeight ?? patchedWidth ?? defaultBoxSize;
+    const resolvedBoxWidth = props.width ?? props.height ?? defaultBoxSize;
+    const resolvedBoxHeight = props.height ?? props.width ?? defaultBoxSize;
     // Raster assets can provide a stable intrinsic ratio up front; SVG uploads
     // may come through as 0x0, so ignore invalid metadata and let the browser fit
     // the asset inside the wrapper box instead.
-    const canUseThemeLogoMetadata = !!logo?.url && patchedSrc === logo.url;
+    const canUseThemeLogoMetadata = !!logo?.url && defaultSrc === logo.url;
     const hasIntrinsicSize = canUseThemeLogoMetadata && (logo?.width ?? 0) > 0 && (logo?.height ?? 0) > 0;
     const intrinsicAspectRatio = hasIntrinsicSize ? `${logo!.width} / ${logo!.height}` : undefined;
     const rawObjectFit = overrideObjectFit ?? styleObjectFit;
     const resolvedObjectFit: React.CSSProperties['objectFit'] =
         typeof rawObjectFit === 'string' ? rawObjectFit as React.CSSProperties['objectFit'] : 'contain';
 
-    const patchedAnimation = usePatchedProp<LogoAnimation>(id, 'animation', actualAnimation);
     const animDuration = DEFAULT_ANIMATION_DURATION;
-    const animProgress = patchedAnimation !== 'none'
+    const animProgress = actualAnimation !== 'none'
         ? interpolateWithEasing(frame, [0, animDuration], [0, 1], styleConfig.motion.entrance)
         : 1;
-    const animStyle = getLogoAnimationStyle(patchedAnimation, animProgress);
+    const animStyle = getLogoAnimationStyle(actualAnimation, animProgress);
 
     useEffect(() => {
-        if (!patchedSrc || !isRendering) return;
-        const unpreload = preloadImage(patchedSrc);
+        if (!defaultSrc || !isRendering) return;
+        const unpreload = preloadImage(defaultSrc);
         return () => {
             unpreload();
         };
-    }, [patchedSrc, isRendering]);
+    }, [defaultSrc, isRendering]);
 
     return (
         <span
-            id={id}
-            className={className}
+            id={props.id}
+            className={props.className}
             style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -130,7 +127,7 @@ export function LogoAsset({
             {/* The wrapper owns sizing; the image always scales to fill that box
                 while remaining fully visible via object-fit: contain. */}
             <img
-                src={patchedSrc}
+                src={defaultSrc}
                 width={hasIntrinsicSize ? logo?.width : undefined}
                 height={hasIntrinsicSize ? logo?.height : undefined}
                 style={{
@@ -144,19 +141,6 @@ export function LogoAsset({
         </span>
     );
 }
-
-// ============================================================================
-// Schema & Duration Calculation
-// ============================================================================
-
-export const LogoAssetSchema = z.object({
-    src: z.string().url("src must be a valid URL").optional(),
-    width: z.number().min(1, "width must be positive").optional(),
-    height: z.number().min(1, "height must be positive").optional(),
-    animation: z.enum(LOGO_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
-    style: z.any().optional(),
-    className: z.string().optional(),
-});
 
 export function calculateLogoAssetDuration(props: LogoAssetProps): DurationResult {
     // Validate props

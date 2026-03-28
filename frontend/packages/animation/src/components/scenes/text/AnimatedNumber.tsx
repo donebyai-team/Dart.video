@@ -1,13 +1,14 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
 import z from 'zod';
-import { usePatchedProp, useStyleOverride } from '../../../patches';
+import { usePatchedProp, usePatchedProps, useStyleOverride } from '../../../patches';
 import { useStyleContext, useAspectPreset, interpolateWithEasing } from '../../../styles';
 import { useTheme } from '../../../theme';
 import { resolveTypography, TypographyVariant } from '../../../tokens';
 import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
 import { EntranceAnimation, getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
 import { Counter } from './Counter';
+import { Text } from '../../../core/text/Text';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../durationTypes';
 
@@ -20,63 +21,25 @@ const DEFAULT_VARIANT = 'heading' as const;
 const DEFAULT_HIGHLIGHT_STYLE = 'glow' as const;
 const DEFAULT_ANIMATION = 'slideUp' as const;
 
-export interface AnimatedNumberProps {
-    id?: string;
-    /** Text displayed before the number */
-    startText: string;
-    /** Text displayed after the number */
-    endText: string;
-    /** Starting number value */
-    from?: number;
-    /** Ending number value */
-    to: number;
-    /** Number format string, e.g. "0,0" | "$0,0" | "0%" */
-    format?: string;
-    /** Typography variant for the entire component */
-    variant?: TypographyVariant;
-    /** Highlight style for the number */
-    highlightStyle?: 'marker' | 'underline' | 'box' | 'glow' | 'background';
-    /** Color for the highlight effect */
-    highlightColor?: string;
-    /** Entrance animation type */
-    animation?: EntranceAnimation;
-    /** Duration of entrance animation in frames */
-    animationDelay?: number;
-    className?: string;
-    style?: React.CSSProperties;
-}
+// Use z.input for props (what callers pass) - fields with defaults are optional
+export type AnimatedNumberProps = z.input<typeof AnimatedNumberSchema>;
 
-export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
-    id,
-    startText,
-    endText,
-    from,
-    to,
-    format,
-    variant,
-    highlightStyle,
-    highlightColor,
-    animation,
-    animationDelay,
-    className,
-    style,
-}) => {
+export const AnimatedNumber: React.FC<AnimatedNumberProps> = (propsInit: AnimatedNumberProps) => {
     const frame = useCurrentFrame();
     const styleConfig = useStyleContext();
     const theme = useTheme();
     const preset = useAspectPreset();
-    
-    // Apply defaults
-    const actualFrom = from ?? 0;
-    const actualVariant = variant ?? DEFAULT_VARIANT;
-    const actualHighlightColor = highlightColor ?? theme.colors.primary;
-    const actualAnimation = animation ?? DEFAULT_ANIMATION;
-    const actualAnimationDelay = animationDelay ?? DEFAULT_ENTRANCE_DURATION;
 
-    const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', actualVariant);
-    const patchedHighlightColor = usePatchedProp<string>(id, 'highlightColor', actualHighlightColor);
-    const patchedAnimation = usePatchedProp<EntranceAnimation>(id, 'animation', actualAnimation);
-    const styleOverride = useStyleOverride(id);
+    const patchedProps = usePatchedProps(propsInit.id, propsInit)
+    const props = { ...AnimatedNumberSchema.parse(patchedProps), id: propsInit.id }
+
+    // Apply defaults
+    const actualVariant = props.variant ?? DEFAULT_VARIANT;
+    const actualHighlightColor = props.highlightColor ?? theme.colors.primary;
+    const actualAnimation = props.animation ?? DEFAULT_ANIMATION;
+    const actualAnimationDelay = props.animationDelay ?? DEFAULT_ENTRANCE_DURATION;
+
+    const styleOverride = useStyleOverride(props.id);
     const easing = styleConfig.motion.entrance;
 
     const entranceProgress = interpolateWithEasing(
@@ -87,12 +50,12 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
     );
 
     const getHighlightStyles = (): React.CSSProperties => {
-        switch (highlightStyle) {
+        switch (props.highlightStyle) {
             case 'marker':
                 return {
                     position: 'relative',
                     zIndex: 1,
-                    background: `${patchedHighlightColor}88`,
+                    background: `${actualHighlightColor}88`,
                     padding: '2px 4px',
                     margin: '0 4px',
                     display: 'inline-block',
@@ -101,7 +64,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
             case 'underline':
                 return {
                     position: 'relative',
-                    borderBottom: `3px solid ${patchedHighlightColor}`,
+                    borderBottom: `3px solid ${actualHighlightColor}`,
                     paddingBottom: '2px',
                     margin: '0 4px',
                     display: 'inline-block',
@@ -110,7 +73,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
             case 'box':
                 return {
                     position: 'relative',
-                    border: `2px solid ${patchedHighlightColor}`,
+                    border: `2px solid ${actualHighlightColor}`,
                     borderRadius: '4px',
                     padding: '2px 6px',
                     margin: '0 4px',
@@ -120,8 +83,8 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
             case 'glow':
                 return {
                     position: 'relative',
-                    textShadow: `0 0 20px ${patchedHighlightColor}`,
-                    color: patchedHighlightColor,
+                    textShadow: `0 0 20px ${actualHighlightColor}`,
+                    color: actualHighlightColor,
                     margin: '0 4px',
                     display: 'inline-block',
                 };
@@ -129,7 +92,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
             case 'background':
                 return {
                     position: 'relative',
-                    backgroundColor: patchedHighlightColor,
+                    backgroundColor: actualHighlightColor,
                     color: '#000',
                     padding: '2px 6px',
                     margin: '0 4px',
@@ -145,34 +108,50 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
         }
     };
 
-    const typographyStyle = resolveTypography(patchedVariant, styleConfig, theme, preset);
+    const typographyStyle = resolveTypography(actualVariant, styleConfig, theme, preset);
 
     return (
         <span
-            id={id}
-            className={className}
+            id={props.id}
+            className={props.className}
             style={{
                 ...typographyStyle,
                 opacity: entranceProgress,
-                transform: getEntranceTransform(patchedAnimation, entranceProgress),
+                transform: getEntranceTransform(actualAnimation, entranceProgress),
                 display: 'inline-block',
-                ...style,
+                ...props.style,
                 ...styleOverride,
             }}
         >
-            <span style={{ marginRight: '0.25em' }}>{startText}</span>
+
+
+            <Text text={props.startText} id={`text-right-${props.id}`} style={
+                {
+                    marginRight: '0.25em',
+                    ...typographyStyle,
+                    ...props.style,
+                    ...styleOverride
+                }} />
+
             <span style={getHighlightStyles()}>
                 <Counter
-                    from={actualFrom}
-                    to={to}
-                    format={format}
-                    variant={patchedVariant}
+                    id={`counter-${props.id}`}
+                    from={props.from}
+                    to={props.to}
+                    format={props.format}
+                    variant={actualVariant}
                     startAt={actualAnimationDelay}
                     style={getHighlightStyles()}
                     durationInFrames={DEFAULT_COUNTER_DURATION}
                 />
             </span>
-            <span style={{ marginLeft: '0.25em' }}>{endText}</span>
+            <Text text={props.endText} id={`text-left-${props.id}`} style={
+                {
+                    marginLeft: '0.25em',
+                    ...typographyStyle,
+                    ...props.style,
+                    ...styleOverride
+                }} />
         </span>
     );
 };
@@ -182,6 +161,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = ({
 // ============================================================================
 
 export const AnimatedNumberSchema = z.object({
+    id: z.string().optional(),
     startText: z.string().min(1, "startText is required"),
     endText: z.string().min(1, "endText is required"),
     from: z.number().default(0),
@@ -210,7 +190,7 @@ export function calculateAnimatedNumberDuration(props: AnimatedNumberProps): Dur
     }
 
     const validated = validation.data;
-    
+
     // Additional business logic validation
     if (validated.to === validated.from) {
         return {
@@ -223,11 +203,11 @@ export function calculateAnimatedNumberDuration(props: AnimatedNumberProps): Dur
     // Calculate duration
     const entranceDuration = validated.animationDelay ?? DEFAULT_ENTRANCE_DURATION;
     const range = Math.abs(validated.to - validated.from);
-    
+
     // Counter duration: logarithmic scale based on number range
-    const counterDuration = validated.durationInFrames ?? 
+    const counterDuration = validated.durationInFrames ??
         Math.max(DEFAULT_COUNTER_MIN_DURATION, Math.min(DEFAULT_COUNTER_MAX_DURATION, Math.log10(range + 1) * 20));
-    
+
     return {
         success: true,
         duration: Math.ceil(entranceDuration + counterDuration),

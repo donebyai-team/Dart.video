@@ -1,7 +1,7 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
 import z from 'zod';
-import { usePrimitivePatches, usePatchedProp, useStyleOverride } from '../../../patches/PatchContext';
+import { usePatchedProp, usePatchedProps, useStyleOverride } from '../../../patches/PatchContext';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme/ThemeContext';
@@ -9,7 +9,7 @@ import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { TypographyVariant, TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
 import { resolveTypography } from '../../../tokens/resolveTypography';
 import { applySpeedFactor, useSpeedFactor } from '../../../duration';
-import { EntranceAnimation, getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
+import { getEntranceTransform, ENTRANCE_ANIMATIONS, TYPEWRITER_MODES } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../durationTypes';
 
@@ -24,41 +24,29 @@ const DEFAULT_MODE = 'char' as const;
 const DEFAULT_VARIANT = 'heading' as const;
 const DEFAULT_ANIMATION = 'slideUp' as const;
 
-export type TypewriterMode = 'char' | 'word' | 'line';
 
-export interface TypewriterProps {
-  text: string;
-  mode?: TypewriterMode;
-  variant?: TypographyVariant;
-  animation?: EntranceAnimation;
-  style?: React.CSSProperties;
-  className?: string;
-  id?: string;
-}
+export type TypewriterProps = z.input<typeof TypewriterSchema>;
+
 
 /**
  * Reveals text progressively using linear easing.
  * Cursor appearance (shape, behavior) driven by StyleContext.cursor.
  */
-export function Typewriter({
-  text,
-  mode = DEFAULT_MODE,
-  variant = DEFAULT_VARIANT,
-  animation = DEFAULT_ANIMATION,
-  style,
-  className,
-  id,
-}: TypewriterProps): React.ReactElement {
+export function Typewriter(propsInit: TypewriterProps): React.ReactElement {
   const frame = useCurrentFrame();
   const styleConfig = useStyleContext();
   const theme = useTheme();
   const preset = useAspectPreset();
 
-  const patchedText = usePatchedProp(id, 'text', text);
-  const patchedMode = usePatchedProp<TypewriterMode>(id, 'mode', mode);
-  const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', variant);
-  const patchedAnimation = usePatchedProp<EntranceAnimation>(id, 'animation', animation);
-  const styleOverride = useStyleOverride(id);
+  const patchedProps = usePatchedProps(propsInit.id, propsInit);
+  const props = { ...TypewriterSchema.parse(patchedProps), id: propsInit.id };
+
+  // Apply defaults
+  const actualMode = props.mode ?? DEFAULT_MODE;
+  const actualAnimation = props.animation ?? DEFAULT_ANIMATION;
+  const actualVariant = props.variant ?? DEFAULT_VARIANT;
+
+  const styleOverride = useStyleOverride(props.id);
 
   const entranceDuration = 20;
   const entranceProgress = interpolateWithEasing(
@@ -76,13 +64,13 @@ export function Typewriter({
   );
 
   let visibleText: string;
-  if (patchedMode === 'char') {
-    visibleText = patchedText.slice(0, Math.floor(progress * patchedText.length));
-  } else if (patchedMode === 'word') {
-    const words = patchedText.split(' ');
+  if (actualMode === 'char') {
+    visibleText = props.text.slice(0, Math.floor(progress * props.text.length));
+  } else if (actualMode === 'word') {
+    const words = props.text.split(' ');
     visibleText = words.slice(0, Math.floor(progress * words.length)).join(' ');
   } else {
-    const lines = patchedText.split('\n');
+    const lines = props.text.split('\n');
     visibleText = lines.slice(0, Math.floor(progress * lines.length)).join('\n');
   }
 
@@ -99,14 +87,14 @@ export function Typewriter({
 
   return (
     <span
-      id={id}
-      className={className}
+      id={props.id}
+      className={props.className}
       style={{
-        ...resolveTypography(patchedVariant, styleConfig, theme, preset),
+        ...resolveTypography(actualVariant, styleConfig, theme, preset),
         opacity: entranceProgress,
-        transform: getEntranceTransform(patchedAnimation, entranceProgress),
+        transform: getEntranceTransform(actualAnimation, entranceProgress),
         display: 'inline-block',
-        ...style,
+        ...props.style,
         ...styleOverride
       }}
     >
@@ -123,8 +111,10 @@ export function Typewriter({
 // ============================================================================
 
 export const TypewriterSchema = z.object({
+  id: z.string().optional(),
+  startAt: z.number().min(0, "startAt cannot be negative").default(0).optional(),
   text: z.string().min(1, "text is required"),
-  mode: z.enum(['char', 'word', 'line']).default(DEFAULT_MODE).optional(),
+  mode: z.enum(TYPEWRITER_MODES).default(DEFAULT_MODE).optional(),
   variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
   animation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
   style: z.any().optional(),

@@ -26,7 +26,6 @@ export function TitleCard({
 }: TitleCardProps): React.ReactElement {
   const frame = useCurrentFrame();
   const styleConfig = useStyleContext();
-  const speedFactor = useSpeedFactor();
 
   const patchedHeading = usePatchedProp(id, 'heading', heading);
   const patchedSubheading = usePatchedProp(id, 'subheading', subheading);

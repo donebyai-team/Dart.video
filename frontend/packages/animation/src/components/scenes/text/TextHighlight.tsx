@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
 import z from 'zod';
-import { usePatchedProp, useStyleOverride } from '../../../patches';
+import { usePatchedProp, usePatchedProps, useStyleOverride } from '../../../patches';
 import { useStyleContext, useAspectPreset, interpolateWithEasing } from '../../../styles';
 import { useTheme } from '../../../theme';
 import { resolveTypography, TypographyVariant, TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens';
@@ -16,51 +16,40 @@ const DEFAULT_VARIANT = 'heading' as const;
 const DEFAULT_HIGHLIGHT_STYLE = 'glow' as const;
 const DEFAULT_ANIMATION = 'slideUp' as const;
 
-export interface TextHighlightProps {
-    id?: string;
-    text: string;
-    variant?: TypographyVariant;
-    highlightPattern?: RegExp | string; // Pattern to match for highlighting
-    highlightStyle?: 'marker' | 'underline' | 'box' | 'glow' | 'background';
-    highlightColor?: string;
-    animation?: EntranceAnimation;
-    animationDelay?: number;
-    /** Duration for the zoom out phase in frames */
-    zoomDuration?: number;
-    className?: string;
-    style?: React.CSSProperties;
-}
+export const TextHighlightSchema = z.object({
+    id: z.string().optional(),
+    text: z.string().min(1, "text is required"),
+    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
+    highlightPattern: z.union([z.string(), z.instanceof(RegExp)]).optional(),
+    highlightStyle: z.enum(['marker', 'underline', 'box', 'glow', 'background']).default(DEFAULT_HIGHLIGHT_STYLE).optional(),
+    highlightColor: z.string().optional(),
+    animation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
+    animationDelay: z.number().min(0, "animationDelay cannot be negative").default(DEFAULT_ENTRANCE_DURATION).optional(),
+    zoomDuration: z.number().min(0, "zoomDuration cannot be negative").default(DEFAULT_ZOOM_DURATION).optional(),
+    className: z.string().optional(),
+    style: z.any().optional(),
+});
 
-export const TextHighlight: React.FC<TextHighlightProps> = ({
-    id,
-    text,
-    variant,
-    highlightPattern,
-    highlightStyle,
-    highlightColor,
-    animation,
-    animationDelay,
-    zoomDuration,
-    className,
-    style,
-}) => {
+// Use z.input for props (what callers pass) - fields with defaults are optional
+export type TextHighlightProps = z.input<typeof TextHighlightSchema>;
+
+export const TextHighlight: React.FC<TextHighlightProps> = (propsInit: TextHighlightProps) => {
     const frame = useCurrentFrame();
     const styleConfig = useStyleContext();
     const theme = useTheme();
     const preset = useAspectPreset();
 
-    // Apply defaults
-    const actualVariant = variant ?? DEFAULT_VARIANT;
-    const actualHighlightStyle = highlightStyle ?? DEFAULT_HIGHLIGHT_STYLE;
-    const actualHighlightColor = highlightColor ?? theme.colors.primary;
-    const actualAnimation = animation ?? DEFAULT_ANIMATION;
-    const actualAnimationDelay = animationDelay ?? DEFAULT_ENTRANCE_DURATION;
-    const actualZoomDuration = zoomDuration ?? DEFAULT_ZOOM_DURATION;
+    const patchedProps = usePatchedProps(propsInit.id, propsInit);
+    const props = { ...TextHighlightSchema.parse(patchedProps), id: propsInit.id };
 
-    const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', actualVariant);
-    const patchedHighlightColor = usePatchedProp<string>(id, 'highlightColor', actualHighlightColor);
-    const patchedAnimation = usePatchedProp<EntranceAnimation>(id, 'animation', actualAnimation);
-    const styleOverride = useStyleOverride(id);
+    // Apply defaults
+    const actualVariant = props.variant ?? DEFAULT_VARIANT;
+    const actualHighlightStyle = props.highlightStyle ?? DEFAULT_HIGHLIGHT_STYLE;
+    const actualHighlightColor = props.highlightColor ?? theme.colors.primary;
+    const actualAnimation = props.animation ?? DEFAULT_ANIMATION;
+    const actualAnimationDelay = props.animationDelay ?? DEFAULT_ENTRANCE_DURATION;
+    const actualZoomDuration = props.zoomDuration ?? DEFAULT_ZOOM_DURATION;
+    const styleOverride = useStyleOverride(props.id);
     const easing = styleConfig.motion.entrance;
 
     // Animation timeline:
@@ -93,35 +82,35 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
         let highlightIndex = 0;
 
         // If no highlightPattern provided, check for {curly brace} pattern in text
-        const effectivePattern = highlightPattern ?? /\{([^}]+)\}/g;
+        const effectivePattern = props.highlightPattern ?? /\{([^}]+)\}/g;
 
         if (typeof effectivePattern === 'string') {
             // Simple string matching
-            const index = text.indexOf(effectivePattern);
+            const index = props.text.indexOf(effectivePattern);
             if (index !== -1) {
                 if (index > 0) {
-                    parts.push({ text: text.slice(0, index), highlight: false, index: 0 });
+                    parts.push({ text: props.text.slice(0, index), highlight: false, index: 0 });
                 }
                 parts.push({ text: effectivePattern, highlight: true, index: 0 });
-                if (index + effectivePattern.length < text.length) {
+                if (index + effectivePattern.length < props.text.length) {
                     parts.push({
-                        text: text.slice(index + effectivePattern.length),
+                        text: props.text.slice(index + effectivePattern.length),
                         highlight: false,
                         index: 0
                     });
                 }
             } else {
-                parts.push({ text, highlight: false, index: 0 });
+                parts.push({ text: props.text, highlight: false, index: 0 });
             }
         } else {
             // Regex matching
             const regex = new RegExp(effectivePattern);
             let match;
 
-            while ((match = regex.exec(text)) !== null) {
+            while ((match = regex.exec(props.text)) !== null) {
                 if (match.index > lastIndex) {
                     parts.push({
-                        text: text.slice(lastIndex, match.index),
+                        text: props.text.slice(lastIndex, match.index),
                         highlight: false,
                         index: 0,
                     });
@@ -138,9 +127,9 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
                 lastIndex = match.index + match[0].length;
             }
 
-            if (lastIndex < text.length) {
+            if (lastIndex < props.text.length) {
                 parts.push({
-                    text: text.slice(lastIndex),
+                    text: props.text.slice(lastIndex),
                     highlight: false,
                     index: 0,
                 });
@@ -148,12 +137,12 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
 
             // If no matches, return entire text
             if (parts.length === 0) {
-                parts.push({ text, highlight: false, index: 0 });
+                parts.push({ text: props.text, highlight: false, index: 0 });
             }
         }
 
         return parts;
-    }, [text, highlightPattern]);
+    }, [props.text, props.highlightPattern]);
 
     const getHighlightStyles = (index: number): React.CSSProperties => {
         // Highlight is always at full intensity (no animation delay)
@@ -171,8 +160,8 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
                     background: `linear-gradient(
             to right,
             transparent 0%,
-            ${patchedHighlightColor}88 ${progress * 100}%,
-            ${patchedHighlightColor}88 100%
+            ${actualHighlightColor}88 ${progress * 100}%,
+            ${actualHighlightColor}88 100%
           )`,
                     padding: '2px 4px',
                     margin: '0 -4px',
@@ -183,7 +172,7 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
             case 'underline':
                 return {
                     position: 'relative',
-                    borderBottom: `3px solid ${patchedHighlightColor}`,
+                    borderBottom: `3px solid ${actualHighlightColor}`,
                     borderBottomWidth: `${progress * 3}px`,
                     paddingBottom: '2px',
                     transform: baseTransform,
@@ -193,7 +182,7 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
             case 'box':
                 return {
                     position: 'relative',
-                    border: `2px solid ${patchedHighlightColor}`,
+                    border: `2px solid ${actualHighlightColor}`,
                     borderRadius: '4px',
                     padding: '2px 6px',
                     margin: '0 2px',
@@ -205,8 +194,8 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
             case 'glow':
                 return {
                     position: 'relative',
-                    textShadow: `0 0 ${progress * 20}px ${patchedHighlightColor}`,
-                    color: progress > 0.5 ? patchedHighlightColor : 'inherit',
+                    textShadow: `0 0 ${progress * 20}px ${actualHighlightColor}`,
+                    color: progress > 0.5 ? actualHighlightColor : 'inherit',
                     transform: baseTransform,
                     display: 'inline-block',
                 };
@@ -214,7 +203,7 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
             case 'background':
                 return {
                     position: 'relative',
-                    backgroundColor: patchedHighlightColor,
+                    backgroundColor: actualHighlightColor,
                     color: progress > 0.5 ? '#000' : 'inherit',
                     padding: '2px 6px',
                     margin: '0 2px',
@@ -234,12 +223,12 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
     }
 
     return (
-        <span id={id} className={className} style={{
-                ...resolveTypography(patchedVariant, styleConfig, theme, preset),
+        <span id={props.id} className={props.className} style={{
+                ...resolveTypography(actualVariant, styleConfig, theme, preset),
                 opacity: entranceProgress,
-                transform: getEntranceTransform(patchedAnimation, entranceProgress, 200),
+                transform: getEntranceTransform(actualAnimation, entranceProgress, 200),
                 display: 'inline-block',
-                ...style,
+                ...props.style,
                 ...styleOverride
             }
         }>
@@ -260,21 +249,8 @@ export const TextHighlight: React.FC<TextHighlightProps> = ({
 };
 
 // ============================================================================
-// Schema & Duration Calculation
+// Duration Calculation
 // ============================================================================
-
-export const TextHighlightSchema = z.object({
-    text: z.string().min(1, "text is required"),
-    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
-    highlightPattern: z.union([z.string(), z.instanceof(RegExp)]).optional(),
-    highlightStyle: z.enum(['marker', 'underline', 'box', 'glow', 'background']).default(DEFAULT_HIGHLIGHT_STYLE).optional(),
-    highlightColor: z.string().optional(),
-    animation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
-    animationDelay: z.number().min(0, "animationDelay cannot be negative").default(DEFAULT_ENTRANCE_DURATION).optional(),
-    zoomDuration: z.number().min(0, "zoomDuration cannot be negative").default(DEFAULT_ZOOM_DURATION).optional(),
-    className: z.string().optional(),
-    style: z.any().optional(),
-});
 
 export function calculateTextHighlightDuration(props: TextHighlightProps): DurationResult {
     // Validate props

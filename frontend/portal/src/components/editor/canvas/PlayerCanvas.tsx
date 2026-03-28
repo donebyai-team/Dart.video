@@ -51,6 +51,7 @@ const PlayerCanvas = ({
   const selectedEffectId = useVideoStore(s => s.selectedEffectId)
   const handleSelectEffect = useVideoStore(s => s.handleSelectEffect)
   const handleSelectTool = useVideoStore(s => s.handleSelectTool)
+  const activeTool = useVideoStore(s => s.activeTool)
   const onUpdateSpotlight = useVideoStore(s => s.updateSpotlight)
   const onUpdateCallout = useVideoStore(s => s.updateCallout)
   const onUpdateZoom = useVideoStore(s => s.updateZoom)
@@ -162,6 +163,10 @@ const PlayerCanvas = ({
           onSelectElement={eid => {
             const nextElementId =
               eid && hasEditableSceneFields(eid, overlay) ? eid : null
+            const existingSettings =
+              activeTool.type === ActiveToolType.ADD_OR_EDIT_ANIMATION
+                ? activeTool.settings ?? {}
+                : {}
 
             if (eid && !nextElementId) {
               console.debug('[SceneSettings] No editable props found for selected element', {
@@ -170,9 +175,18 @@ const PlayerCanvas = ({
             }
 
             setSelectedEid(nextElementId)
+
             handleSelectTool({
               type: ActiveToolType.ADD_OR_EDIT_ANIMATION,
-              settings: nextElementId ? { animationElementId: nextElementId } : {},
+              settings: nextElementId
+                ? {
+                    ...existingSettings,
+                    animationElementId: nextElementId,
+                  }
+                : (() => {
+                    const { animationElementId: _animationElementId, ...rest } = existingSettings
+                    return rest
+                  })(),
             })
           }}
           onValuePatch={applyValuePatch}

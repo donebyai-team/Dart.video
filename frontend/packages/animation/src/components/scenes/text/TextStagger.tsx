@@ -3,11 +3,11 @@ import { interpolate, useCurrentFrame } from 'remotion';
 import z from 'zod';
 import { TypographyVariant, TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
 import { useStyleContext } from '../../../styles/StyleContext';
-import { usePatchedProp, useStyleOverride } from '../../../patches';
+import { usePatchedProp, usePatchedProps, useStyleOverride } from '../../../patches';
 import { interpolateWithEasing, useAspectPreset } from '../../../styles';
 import { useTheme } from '../../../theme';
 import { resolveTypography } from '../../../tokens';
-import { EntranceAnimation, getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
+import { getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../durationTypes';
 
@@ -18,54 +18,38 @@ const DEFAULT_VARIANT = 'heading' as const;
 const DEFAULT_ANIMATION = 'scaleIn' as const;
 const DEFAULT_SEPARATOR = ' ';
 
-export interface TextStaggerStaggerProps {
-    id?: string;
-    variant?: TypographyVariant;
-    text: string;
-    staggerDelay?: number; // frames between each word
-    entranceAnimation?: EntranceAnimation;
-    startAt?: number;
-    duration?: number; // animation duration per word
-    className?: string;
-    style?: React.CSSProperties;
-    wordStyle?: React.CSSProperties;
-}
+// Use z.input for props (what callers pass) - fields with defaults are optional
+export type TextStaggerProps = z.input<typeof TextStaggerSchema>;
 
-export const TextStagger: React.FC<TextStaggerStaggerProps> = ({
-    id,
-    variant,
-    text,
-    staggerDelay,
-    entranceAnimation,
-    startAt,
-    duration,
-    className,
-    style,
-    wordStyle,
-}) => {
+export const TextStagger: React.FC<TextStaggerProps> = (propsInit: TextStaggerProps) => {
+
     const frame = useCurrentFrame();
     const styleConfig = useStyleContext();
     const theme = useTheme();
     const preset = useAspectPreset();
 
+    const patchedProps = usePatchedProps(propsInit.id, propsInit)   
+    const props = { ...TextStaggerSchema.parse(patchedProps), id: propsInit.id }
+
+
     // Apply defaults
-    const actualVariant = variant ?? DEFAULT_VARIANT;
-    const actualStaggerDelay = staggerDelay ?? DEFAULT_STAGGER_DELAY;
-    const actualAnimation = entranceAnimation ?? DEFAULT_ANIMATION;
-    const actualStartAt = startAt ?? 0;
-    const actualDuration = duration ?? DEFAULT_WORD_DURATION;
+    const actualVariant = props.variant ?? DEFAULT_VARIANT;
+    const actualStaggerDelay = props.staggerDelay ?? DEFAULT_STAGGER_DELAY;
+    const actualAnimation = props.entranceAnimation ?? DEFAULT_ANIMATION;
+    const actualStartAt = props.startAt ?? 0;
+    const actualDuration = props.duration ?? DEFAULT_WORD_DURATION;
 
-    const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', actualVariant);
-    const styleOverride = useStyleOverride(id);
 
-    const words = text.split(DEFAULT_SEPARATOR);
+    const styleOverride = useStyleOverride(props.id);
+
+    const words = props.text.split(DEFAULT_SEPARATOR);
 
     const getAnimationStyles = (wordIndex: number): React.CSSProperties => {
         const wordStartAt = actualStartAt + wordIndex * actualStaggerDelay;
         const progress = interpolateWithEasing(
             frame,
             [wordStartAt, wordStartAt + actualDuration],
-            [0, 1],           
+            [0, 1],
         );
 
         return {
@@ -75,7 +59,7 @@ export const TextStagger: React.FC<TextStaggerStaggerProps> = ({
     };
 
     return (
-        <span id={id} className={className} style={{ display: 'inline-block', ...style }}>
+        <span id={props.id} className={props.className} style={{ display: 'inline-block', ...props.style }}>
             {words.map((word, index) => (
                 <span
                     key={index}
@@ -83,8 +67,8 @@ export const TextStagger: React.FC<TextStaggerStaggerProps> = ({
                         display: 'inline-block',
                         marginRight: index < words.length - 1 ? '0.25em' : 0,
                         ...getAnimationStyles(index),
-                        ...resolveTypography(patchedVariant, styleConfig, theme, preset),
-                        ...wordStyle,
+                        ...resolveTypography(actualVariant, styleConfig, theme, preset),
+                        ...props.wordStyle,
                         ...styleOverride
                     }}
                 >
@@ -100,17 +84,19 @@ export const TextStagger: React.FC<TextStaggerStaggerProps> = ({
 // ============================================================================
 
 export const TextStaggerSchema = z.object({
+    id: z.string().optional(),
+    startAt: z.number().min(0, "startAt cannot be negative").optional().default(0),
     text: z.string().min(1, "text is required"),
-    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
-    staggerDelay: z.number().min(0, "staggerDelay cannot be negative").default(DEFAULT_STAGGER_DELAY).optional(),
-    entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
-    duration: z.number().min(1, "duration must be positive").default(DEFAULT_WORD_DURATION).optional(),
+    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).optional().default(DEFAULT_VARIANT),
+    staggerDelay: z.number().min(0, "staggerDelay cannot be negative").optional().default(DEFAULT_STAGGER_DELAY),
+    entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).optional().default(DEFAULT_ANIMATION),
+    duration: z.number().min(1, "duration must be positive").optional().default(DEFAULT_WORD_DURATION),
     className: z.string().optional(),
     style: z.any().optional(),
     wordStyle: z.any().optional(),
 });
 
-export function calculateTextStaggerDuration(props: TextStaggerStaggerProps): DurationResult {
+export function calculateTextStaggerDuration(props: TextStaggerProps): DurationResult {
     // Validate props
     const validation = TextStaggerSchema.safeParse(props);
     if (!validation.success) {
@@ -123,11 +109,11 @@ export function calculateTextStaggerDuration(props: TextStaggerStaggerProps): Du
     }
 
     const validated = validation.data;
-    
+
     // Calculate word count
     const words = validated.text.split(DEFAULT_SEPARATOR);
     const wordCount = words.length;
-    
+
     if (wordCount === 0) {
         return {
             success: false,
@@ -139,10 +125,10 @@ export function calculateTextStaggerDuration(props: TextStaggerStaggerProps): Du
     // Calculate duration
     const staggerDelay = validated.staggerDelay ?? DEFAULT_STAGGER_DELAY;
     const wordDuration = validated.duration ?? DEFAULT_WORD_DURATION;
-    
+
     // Total duration = time until last word starts + duration of last word animation
     const totalDuration = (wordCount - 1) * staggerDelay + wordDuration;
-    
+
     return {
         success: true,
         duration: Math.ceil(totalDuration),

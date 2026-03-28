@@ -100,10 +100,9 @@ const ToolsSettingsPanel = ({
         />
       )}
 
-      {activeTool.type === ActiveToolType.ADD_OR_EDIT_ANIMATION &&
-       activeTool.settings && (
+      {activeTool.type === ActiveToolType.ADD_OR_EDIT_ANIMATION && (
         <AnimationEditor
-          settings={activeTool.settings}
+          settings={activeTool.settings ?? {}}
           overlay={overlay}
           onValuePatch={onValuePatch}
           setOverlay={setOverlay}

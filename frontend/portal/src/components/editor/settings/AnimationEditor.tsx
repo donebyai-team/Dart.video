@@ -31,7 +31,8 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
     const videoId = useVideoStore(s => s.videoConfig?.id)
     const { portalClient } = useClientsContext()
 
-    const isAdding = !!settings.previousSlide
+    const normalizedSettings = settings ?? {}
+    const isAdding = !!normalizedSettings.previousSlide
 
     const [prompt, setPrompt] = useState('')
 
@@ -54,8 +55,9 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
     const pendingGeneratedSlideRef = useRef<Slide | null>(null)
 
     const canSubmit = prompt.trim().length > 0
-    const shouldShowSceneSettings = !!settings.animationElementId
-        && hasEditableSceneFields(settings.animationElementId, overlay)
+    const selectedAnimationElementId = normalizedSettings.animationElementId ?? null
+    const shouldShowSceneSettings = !!selectedAnimationElementId
+        && hasEditableSceneFields(selectedAnimationElementId, overlay)
 
     useEffect(() => {
         if (selectedSlide) {
@@ -111,10 +113,10 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
     }
 
     const createOrUpdateAddedSlide = (slide: Slide) => {
-        if (!isAdding || !settings.previousSlide) return
+        if (!isAdding || !normalizedSettings.previousSlide) return
 
         if (!slideInStoreRef.current) {
-            addAnimationSlide(settings.previousSlide.section.id, slide, settings.previousSlide.slide.id)
+            addAnimationSlide(normalizedSettings.previousSlide.section.id, slide, normalizedSettings.previousSlide.slide.id)
             createdSlideIdRef.current = slide.id
             slideInStoreRef.current = true
             pendingGeneratedSlideRef.current = slide
@@ -335,10 +337,10 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
             </div>
 
             <div className='flex flex-col flex-1 min-h-0'>
-                {shouldShowSceneSettings && settings.animationElementId && (
+                {shouldShowSceneSettings && selectedAnimationElementId && (
                     <div className='mb-3 rounded-xl border bg-background shadow-sm overflow-hidden'>
                         <SceneSettings
-                            elementId={settings.animationElementId}
+                            elementId={selectedAnimationElementId}
                             overlay={overlay}
                             onValuePatch={onValuePatch}
                         />

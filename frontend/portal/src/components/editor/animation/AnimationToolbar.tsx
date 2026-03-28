@@ -17,7 +17,7 @@ export function AnimationToolbar({
   const style = (overlay[selectedId]?.style as Record<string, string | number> | undefined) ?? {}
 
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-background/95 backdrop-blur-lg border border-border shadow-xl text-sm select-none max-w-[700px]">
+    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-background/95 backdrop-blur-lg border border-border shadow-xl text-sm select-none max-w-[850px]">
       <StyleOverrideSection
         styleOverride={style}
         onStyleOverride={next => onStyleOverride(selectedId, next)}

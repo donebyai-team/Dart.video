@@ -1,12 +1,11 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
 import z from 'zod';
-import { usePrimitivePatches, usePatchedProp, useStyleOverride } from '../../../patches/PatchContext';
+import { usePatchedProp, usePatchedProps, useStyleOverride } from '../../../patches/PatchContext';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme/ThemeContext';
 import { getEasing, interpolateWithEasing } from '../../../styles/easingResolver';
-import { type Easing } from '../../../styles/types';
 import { TypographyVariant, TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
 import { resolveTypography } from '../../../tokens/resolveTypography';
 import type { ComponentRegistration } from '../../../registry/registry';
@@ -20,19 +19,23 @@ const DEFAULT_VARIANT = 'heading' as const;
 
 export type TextCycleTransition = 'flipY' | 'fadeSwap' | 'slideUp';
 
-export interface TextCycleProps {
-  texts: string[];
-  /** Frames each word is held. */
-  holdDuration?: number;
-  /** Frames for transition between words. */
-  transitionDuration?: number;
-  easing?: Easing;
-  transition?: TextCycleTransition;
-  variant?: TypographyVariant;
-  style?: React.CSSProperties;
-  className?: string;
-  id?: string;
-}
+// ============================================================================
+// Schema & Duration Calculation
+// ============================================================================
+
+export const TextCycleSchema = z.object({
+  id: z.string().optional(),
+  texts: z.array(z.string()).min(1, "texts must contain at least one item"),
+  holdDuration: z.number().min(0, "holdDuration cannot be negative").default(DEFAULT_HOLD_DURATION).optional(),
+  transitionDuration: z.number().min(0, "transitionDuration cannot be negative").default(DEFAULT_TRANSITION_DURATION).optional(),
+  transition: z.enum(['flipY', 'fadeSwap', 'slideUp']).default(DEFAULT_TRANSITION).optional(),
+  variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
+  style: z.any().optional(),
+  className: z.string().optional(),
+});
+
+// Use z.input for props (what callers pass) - fields with defaults are optional
+export type TextCycleProps = z.input<typeof TextCycleSchema>;
 
 /**
  * Cycles through an array of words with animated transitions.
@@ -40,65 +43,45 @@ export interface TextCycleProps {
  * Auto-adjusts container width to the longest word using a hidden spacer —
  * no layout reflow occurs when words change, eliminating jerk in Stack/Row layouts.
  */
-export function TextCycle({
-  texts,
-  holdDuration,
-  transitionDuration,
-  easing,
-  transition,
-  variant,
-  style,
-  className,
-  id,
-}: TextCycleProps): React.ReactElement {
+export const TextCycle: React.FC<TextCycleProps> = (propsInit: TextCycleProps) => {
   const frame = useCurrentFrame();
   const styleConfig = useStyleContext();
   const theme = useTheme();
   const preset = useAspectPreset();
 
+  const patchedProps = usePatchedProps(propsInit.id, propsInit);
+  const props = { ...TextCycleSchema.parse(patchedProps), id: propsInit.id };
 
-  // Apply defaults
-  const actualHoldDuration = holdDuration ?? DEFAULT_HOLD_DURATION;
-  const actualTransitionDuration = transitionDuration ?? DEFAULT_TRANSITION_DURATION;
-  const actualTransition = transition ?? DEFAULT_TRANSITION;
-  const actualVariant = variant ?? DEFAULT_VARIANT;
+  const patchedVariant = props.variant ?? DEFAULT_VARIANT;
+  const styleOverride = useStyleOverride(props.id);
 
-  const { effectiveStartAt, effectiveDurationInFrames: effectiveHold } = usePrimitivePatches(id, {
-    startAt: 0,
-    durationInFrames: actualHoldDuration,
-  });
-
-  const patchedTexts = usePatchedProp(id, 'texts', texts);
-  const patchedTransitionDuration = usePatchedProp(id, 'transitionDuration', actualTransitionDuration);
-  const patchedTransition = usePatchedProp<TextCycleTransition>(id, 'transition', actualTransition);
-  const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', actualVariant);
-  const styleOverride = useStyleOverride(id);
-
-  const cycleDuration = effectiveHold + patchedTransitionDuration;
-  const resolvedEasing = easing ?? getEasing(styleConfig.motion, 'wordcycle');
+  const cycleDuration = (props.holdDuration ?? DEFAULT_HOLD_DURATION) + (props.transitionDuration ?? DEFAULT_TRANSITION_DURATION);
+  const resolvedEasing = getEasing(styleConfig.motion, 'wordcycle');
   const typographyStyle = resolveTypography(patchedVariant, styleConfig, theme, preset);
 
   // The longest word by character count — used as an invisible spacer to
   // hold the container width stable across all word changes.
   const longestWord = useMemo(
-    () => patchedTexts.reduce((a, b) => (a.length >= b.length ? a : b), ''),
-    [patchedTexts],
+    () => props.texts.reduce((a, b) => (a.length >= b.length ? a : b), ''),
+    [props.texts],
   );
 
-  if (patchedTexts.length === 0) return <span className={className} style={style} />;
+  if (props.texts.length === 0) return <span className={props.className} style={props.style} />;
 
-  const elapsed = Math.max(0, frame - effectiveStartAt);
+  const elapsed = Math.max(0, frame);
+  const holdDuration = props.holdDuration ?? DEFAULT_HOLD_DURATION;
+  const transitionDuration = props.transitionDuration ?? DEFAULT_TRANSITION_DURATION;
   const cycleIndex = Math.floor(elapsed / cycleDuration);
   const cycleFrame = elapsed - cycleIndex * cycleDuration;
 
-  const currentWord = patchedTexts[cycleIndex % patchedTexts.length] ?? patchedTexts[0] ?? '';
-  const nextWord = patchedTexts[(cycleIndex + 1) % patchedTexts.length] ?? patchedTexts[0] ?? '';
-  const isTransitioning = cycleFrame >= effectiveHold;
+  const currentWord = props.texts[cycleIndex % props.texts.length] ?? props.texts[0] ?? '';
+  const nextWord = props.texts[(cycleIndex + 1) % props.texts.length] ?? props.texts[0] ?? '';
+  const isTransitioning = cycleFrame >= holdDuration;
 
   const transitionProgress = isTransitioning
     ? interpolateWithEasing(
         cycleFrame,
-        [effectiveHold, effectiveHold + patchedTransitionDuration],
+        [holdDuration, holdDuration + transitionDuration],
         [0, 1],
         resolvedEasing,
       )
@@ -110,7 +93,7 @@ export function TextCycle({
     ...typographyStyle,
     position: 'relative',
     display: 'inline-block',
-    ...style,
+    ...props.style,
     ...styleOverride,
   };
 
@@ -135,9 +118,9 @@ export function TextCycle({
     whiteSpace: 'nowrap',
   };
 
-  if (patchedTransition === 'fadeSwap') {
+  if (props.transition === 'fadeSwap') {
     return (
-      <span id={id} className={className} style={containerStyle}>
+      <span id={props.id} className={props.className} style={containerStyle}>
         {/* Spacer holds the width — never visible */}
         <span style={spacerStyle} aria-hidden="true">{longestWord}</span>
 
@@ -156,9 +139,9 @@ export function TextCycle({
     );
   }
 
-  if (patchedTransition === 'slideUp') {
+  if (props.transition === 'slideUp') {
     return (
-      <span id={id} className={className} style={{ ...containerStyle, overflow: 'hidden' }}>
+      <span id={props.id} className={props.className} style={{ ...containerStyle, overflow: 'hidden' }}>
         <span style={spacerStyle} aria-hidden="true">{longestWord}</span>
 
         <span
@@ -188,7 +171,7 @@ export function TextCycle({
 
   // flipY
   return (
-    <span id={id} className={className} style={containerStyle}>
+    <span id={props.id} className={props.className} style={containerStyle}>
       <span style={spacerStyle} aria-hidden="true">{longestWord}</span>
 
       <span
@@ -215,21 +198,6 @@ export function TextCycle({
     </span>
   );
 }
-
-// ============================================================================
-// Schema & Duration Calculation
-// ============================================================================
-
-export const TextCycleSchema = z.object({
-  texts: z.array(z.string()).min(1, "texts must contain at least one item"),
-  holdDuration: z.number().min(0, "holdDuration cannot be negative").default(DEFAULT_HOLD_DURATION).optional(),
-  transitionDuration: z.number().min(0, "transitionDuration cannot be negative").default(DEFAULT_TRANSITION_DURATION).optional(),
-  easing: z.string().optional(),
-  transition: z.enum(['flipY', 'fadeSwap', 'slideUp']).default(DEFAULT_TRANSITION).optional(),
-  variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
-  style: z.any().optional(),
-  className: z.string().optional(),
-});
 
 export function calculateTextCycleDuration(props: TextCycleProps): DurationResult {
   // Validate props

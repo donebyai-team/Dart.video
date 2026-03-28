@@ -131,6 +131,26 @@ func buildColorPalette(input map[string]string) map[string]string {
 }
 
 // ---------------- GRADIENT ----------------
+const defaultBackgroundColor = "#FFFFFF"
+
+func GenerateSolidFromBackground(colors []*pbcore.BrandColor) *pbcore.SolidColor {
+	bg := defaultBackgroundColor
+
+	// Extract palette colors
+	for _, c := range colors {
+		switch c.Priority {
+		case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_BACKGROUND:
+			bg = c.ColorHexCode
+		}
+	}
+	return &pbcore.SolidColor{
+		Hex: bg,
+	}
+}
+
+func GetTextColorForSolid(g *pbcore.SolidColor) string {
+	return getReadableTextOnGradient(g.Hex, g.Hex)
+}
 
 func GenerateGradientFromBackground(colors []*pbcore.BrandColor) *pbcore.Gradient {
 	var bg string

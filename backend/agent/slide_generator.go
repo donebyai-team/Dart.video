@@ -72,10 +72,10 @@ func (g *videoConfigGenerator) AddBranding(assetRegistry *services.MediaAssetReg
 	}
 
 	// Step 2: ALWAYS generate gradient
-	gradient := brand_identity.GenerateGradientFromBackground(generatedBranding.Colors)
+	solidColor := brand_identity.GenerateSolidFromBackground(generatedBranding.Colors)
 
 	// Step 3: compute safe text color for gradient
-	updatedTextColor := brand_identity.GetTextColorForGradient(gradient)
+	updatedTextColor := brand_identity.GetTextColorForSolid(solidColor)
 
 	// Step 4: update text color
 	for _, brandColor := range generatedBranding.Colors {
@@ -89,8 +89,8 @@ func (g *videoConfigGenerator) AddBranding(assetRegistry *services.MediaAssetReg
 
 	// Step 6: apply gradient background
 	g.AddVideoBackground(&pbcore.BackgroundStyle{
-		Style: &pbcore.BackgroundStyle_Gradient{
-			Gradient: gradient,
+		Style: &pbcore.BackgroundStyle_Solid{
+			Solid: solidColor,
 		},
 	})
 }

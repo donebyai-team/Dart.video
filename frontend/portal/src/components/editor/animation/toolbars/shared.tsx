@@ -6,6 +6,8 @@
  */
 
 import React from 'react'
+import { HexColorPicker } from 'react-colorful'
+import { useState } from 'react'
 import { SUPPORTED_FONTS } from '@coasterai/renderer'
 
 // ─── Separator ─────────────────────────────────────────────────────────────
@@ -178,7 +180,6 @@ export function SliderInput({
 
 // ─── Color Swatch ────────────────────────────────────────────────────────────
 // Shows a colored square. Clicking opens the native color picker.
-// `label` is an optional text shown above the swatch (e.g. "A" for text color).
 
 export function ColorSwatch({
   color,
@@ -191,34 +192,143 @@ export function ColorSwatch({
   label?: string
   onChange: (v: string) => void
 }) {
-  const hex = toHex(color)
+  const initial = toHex(color)
+  const [open, setOpen] = useState(false)
+  const [value, setValue] = useState(initial)
+
+  const update = (v: string) => {
+    setValue(v)
+    onChange(v)
+  }
+
+  const reset = () => {
+    setValue(initial)
+    onChange(initial)
+  }
 
   return (
-    <label className="relative cursor-pointer group flex flex-col items-center gap-0.5" title={title}>
+    <div className="relative flex flex-col items-center gap-1">
       {label && (
-        <span className="text-foreground text-xs font-medium leading-none select-none">
+        <span className="text-foreground text-xs font-medium select-none">
           {label}
         </span>
       )}
-      {/* Color bar under label, or standalone swatch */}
-      {label ? (
-        <span
-          className="w-5 h-1 rounded-sm block border border-border/40"
-          style={{ background: hex }}
-        />
-      ) : (
-        <span
-          className="w-6 h-6 rounded-md border border-border shadow-sm block group-hover:ring-2 group-hover:ring-primary/30 transition-shadow"
-          style={{ background: typeof color === 'string' ? color : '#fff' }}
-        />
-      )}
-      <input
-        type="color"
-        value={hex}
-        onChange={e => onChange(e.target.value)}
-        className="absolute inset-0 opacity-0 cursor-pointer"
+
+      <button
+        title={title}
+        onClick={() => setOpen(!open)}
+        className="w-6 h-6 rounded-md border border-border shadow-sm"
+        style={{ background: value }}
       />
-    </label>
+
+      {open && (
+        <div className="absolute top-8 z-50 bg-background border border-border rounded-lg shadow-lg p-3 w-56 space-y-3">
+          <HexColorPicker color={value} onChange={update} />
+
+          <input
+            value={value}
+            onChange={(e) => update(e.target.value)}
+            className="w-full text-xs px-2 py-1 border rounded"
+          />
+
+          <div className="flex justify-between">
+            <button
+              onClick={reset}
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
+              Reset
+            </button>
+
+            <button
+              onClick={() => setOpen(false)}
+              className="text-xs font-medium"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Dual Color Picker ──────────────────────────────────────────────────────
+// Single button that opens a popover with tabs for Text and Background color.
+
+export function DualColorPicker({
+  textColor,
+  bgColor,
+  onTextColor,
+  onBgColor,
+}: {
+  textColor: string
+  bgColor: string
+  onTextColor: (v: string) => void
+  onBgColor: (v: string) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [tab, setTab] = useState<'text' | 'bg'>('text')
+
+  const activeColor = tab === 'text' ? textColor : bgColor
+  const onChangeActive = tab === 'text' ? onTextColor : onBgColor
+
+  return (
+    <div className="relative flex items-center">
+      {/* Color button – rainbow gradient rectangle */}
+      <button
+        title="Colors"
+        onClick={() => setOpen(!open)}
+        className="w-8 h-7 rounded-md border border-border shadow-sm cursor-pointer"
+        style={{
+          background: 'linear-gradient(135deg, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00)',
+        }}
+      />
+
+      {open && (
+        <div className="absolute top-9 left-0 z-50 bg-background border border-border rounded-lg shadow-lg p-3 w-56 space-y-3">
+          {/* Tabs */}
+          <div className="flex rounded-md border border-border overflow-hidden text-xs">
+            <button
+              onClick={() => setTab('text')}
+              className={`flex-1 py-1 transition-colors ${
+                tab === 'text'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Text
+            </button>
+            <button
+              onClick={() => setTab('bg')}
+              className={`flex-1 py-1 transition-colors ${
+                tab === 'bg'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Background
+            </button>
+          </div>
+
+          <HexColorPicker color={activeColor} onChange={onChangeActive} />
+
+          <input
+            value={activeColor}
+            onChange={(e) => onChangeActive(e.target.value)}
+            className="w-full text-xs px-2 py-1 border border-border rounded bg-muted"
+          />
+
+          <div className="flex justify-end">
+            <button
+              onClick={() => setOpen(false)}
+              className="text-xs font-medium"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -257,20 +367,20 @@ export function FontFamilySelect({
 
 /** Font weight options matching animation token FontWeightToken values. */
 const FONT_WEIGHT_OPTIONS = [
-  { label: 'Thin',      value: '100' },
-  { label: 'Light',     value: '300' },
-  { label: 'Normal',    value: '400' },
-  { label: 'Medium',    value: '500' },
-  { label: 'Semibold',  value: '600' },
-  { label: 'Bold',      value: '700' },
+  { label: 'Thin', value: '100' },
+  { label: 'Light', value: '300' },
+  { label: 'Normal', value: '400' },
+  { label: 'Medium', value: '500' },
+  { label: 'Semibold', value: '600' },
+  { label: 'Bold', value: '700' },
   { label: 'Extrabold', value: '800' },
 ]
 
 /** Letter spacing options matching StyleConfig.type.tracking token. */
 const LETTER_SPACING_OPTIONS = [
-  { label: 'Tight',  value: '-0.025em' },
+  { label: 'Tight', value: '-0.025em' },
   { label: 'Normal', value: '0em' },
-  { label: 'Wide',   value: '0.025em' },
+  { label: 'Wide', value: '0.025em' },
 ]
 
 export function StyleOverrideSection({
@@ -282,69 +392,66 @@ export function StyleOverrideSection({
   onStyleOverride: (style: Record<string, string | number>) => void
   collapsible?: boolean
 }) {
-  const [expanded, setExpanded] = React.useState(false)
-  const isExpanded = collapsible ? expanded : true
 
   const color = styleOverride.color as string | undefined
   const backgroundColor = styleOverride.backgroundColor as string | undefined
+  const fontFamily = styleOverride.fontFamily as string | undefined
   const fontWeight = styleOverride.fontWeight as string | number | undefined
   const letterSpacing = styleOverride.letterSpacing as string | undefined
   const opacity = styleOverride.opacity as number | undefined
 
   return (
-    <>     
-      {/* Always-visible: text color swatch */}
-      <ColorSwatch
-        color={color ?? '#ffffff'}
-        label="A"
-        title="Text color"
-        onChange={v => onStyleOverride({ color: v })}
+    <div className="flex items-center gap-3 whitespace-nowrap">
+      {/* Colors – single picker with Text / Background tabs */}
+      <DualColorPicker
+        textColor={toHex(color ?? '#ffffff')}
+        bgColor={toHex(backgroundColor ?? '#000000')}
+        onTextColor={v => onStyleOverride({ color: v })}
+        onBgColor={v => onStyleOverride({ backgroundColor: v })}
       />
 
-      {/* Expanded controls */}
-      {isExpanded && (
-        <>
-          {/* Background color */}
-          <ColorSwatch
-            color={backgroundColor ?? '#000000'}
-            label="▨"
-            title="Background color"
-            onChange={v => onStyleOverride({ backgroundColor: v })}
-          />
+      {/* Font */}
+      <LabeledField label="Font">
+        <FontFamilySelect
+          value={fontFamily ?? ''}
+          onChange={v => onStyleOverride({ fontFamily: v })}
+        />
+      </LabeledField>
 
-          <Sep />
+      {/* Weight */}
+      <LabeledField label="Weight">
+        <SelectInput
+          value={String(fontWeight ?? '400')}
+          options={FONT_WEIGHT_OPTIONS}
+          onChange={v => onStyleOverride({ fontWeight: parseInt(v) })}
+          width="w-24"
+        />
+      </LabeledField>
 
-          {/* Font weight — uses animation FontWeightToken values */}
-          <SelectInput
-            value={String(fontWeight ?? '400')}
-            options={FONT_WEIGHT_OPTIONS}
-            onChange={v => onStyleOverride({ fontWeight: parseInt(v) })}
-            width="w-24"
-          />
+      {/* Spacing */}
+      <LabeledField label="Spacing">
+        <SelectInput
+          value={String(letterSpacing ?? '0em')}
+          options={LETTER_SPACING_OPTIONS}
+          onChange={v => onStyleOverride({ letterSpacing: v })}
+          width="w-20"
+        />
+      </LabeledField>
+    </div>
+  )
+}
 
-          {/* Letter spacing — uses StyleConfig tracking tokens */}
-          <SelectInput
-            value={String(letterSpacing ?? '0em')}
-            options={LETTER_SPACING_OPTIONS}
-            onChange={v => onStyleOverride({ letterSpacing: v })}
-            width="w-20"
-          />
+// ─── Labeled Field ──────────────────────────────────────────────────────────
+// Wraps a control with a small top-aligned label so users know what each dropdown is.
 
-          <Sep />
-
-          {/* Opacity */}
-          <SliderInput
-            value={opacity ?? 1}
-            onChange={v => onStyleOverride({ opacity: v })}
-            min={0}
-            max={1}
-            step={0.05}
-            label="Opacity"
-            width="w-16"
-          />
-        </>
-      )}
-    </>
+function LabeledField({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <span className="text-muted-foreground text-[10px] uppercase tracking-wider font-medium select-none">
+        {label}
+      </span>
+      {children}
+    </div>
   )
 }
 
@@ -352,15 +459,15 @@ export function StyleOverrideSection({
 
 export function toHex(color: unknown): string {
   if (!color || typeof color !== 'string') return '#ffffff'
-  const c = color.trim()
-  if (c.startsWith('#')) return c.slice(0, 7)
-  const m = c.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/)
-  if (m)
-    return (
-      '#' +
-      [m[1], m[2], m[3]]
-        .map(n => parseInt(n).toString(16).padStart(2, '0'))
-        .join('')
-    )
-  return '#ffffff'
-}
+    const c = color.trim()
+    if (c.startsWith('#')) return c.slice(0, 7)
+    const m = c.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/)
+    if (m)
+      return (
+        '#' +
+        [m[1], m[2], m[3]]
+          .map(n => parseInt(n).toString(16).padStart(2, '0'))
+          .join('')
+      )
+    return '#ffffff'
+  }

@@ -1,22 +1,9 @@
 import { ComponentRegistration } from '..';
-import { ANIMATION_PRIMITIVE_COMPONENTS } from '../animation_primitives';
-import { BRAND_COMPONENTS } from '../assets';
-import { CONTENT_COMPONENTS } from '../text';
-import { LAYOUT_COMPONENTS } from '../layouts';
 import { SCENE_COMPONENTS } from '../scenes';
-import { ASPECT_PRESETS } from '../../styles/AspectPresetContext';
 import {
   frameContractFragment,
-  canvasDimensionsFragment,
   componentListFragment,
-  spacingFragment,
-  typographyFragment,
-  exampleFragment,
 } from './fragments';
-
-// Component groups aligned with component_library_spec.md taxonomy
-const STATIC_PRIMITIVES = CONTENT_COMPONENTS.filter((c) => c.name === 'Text');
-const DYNAMIC_PRIMITIVES = CONTENT_COMPONENTS.filter((c) => c.name !== 'Text');
 
 interface ComponentGroup {
   title: string;

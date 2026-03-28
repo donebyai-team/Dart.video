@@ -32,6 +32,15 @@ export const PEEL_DIRECTIONS = [
 
 export type PeelDirection = typeof PEEL_DIRECTIONS[number];
 
+export const TYPEWRITER_MODES = ['char', 'word', 'line'] as const;
+
+export type TypewriterMode = typeof TYPEWRITER_MODES[number];
+
+export const IconNameSchema = z.string().min(2, "icon name cannot be empty");
+
+export type IconName = z.infer<typeof IconNameSchema>;
+
+
 export function getEntranceTransform(animation: EntranceAnimation, progress: number, distance: number = 200): string {
     const inv = 1 - progress;
     switch (animation) {
@@ -52,7 +61,3 @@ export function getEntranceTransform(animation: EntranceAnimation, progress: num
             return 'none';
     }
 }
-
-export const IconNameSchema = z.string().min(2, "icon name cannot be empty");
-
-export type IconName = z.infer<typeof IconNameSchema>;

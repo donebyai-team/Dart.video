@@ -1,17 +1,16 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
 import z from 'zod';
-import { useSpeedFactor, applySpeedFactor } from '../../../duration/speedFactor';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { Text } from '../../../core/text/Text';
 import { VideoAsset } from '../../../core/assets/VideoAsset';
-import { TypographyVariant, TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
-import { usePatchedProp, useStyleOverride } from '../../../patches';
+import {  TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
+import { usePatchedProps, useStyleOverride } from '../../../patches';
 import { resolveTypography } from '../../../tokens';
 import { useTheme } from '../../../theme';
-import { EntranceAnimation, getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
+import { getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../../../registry/registry';
 
@@ -22,54 +21,38 @@ const DEFAULT_VIDEO_START_DELAY = 10;
 const DEFAULT_VARIANT = 'subheading' as const;
 const DEFAULT_ANIMATION = 'slideUp' as const;
 const DEFAULT_BORDER_RADIUS = 16;
+const DEFAULT_WIDTH = 1920 * 0.7;
+const DEFAULT_HEIGHT = 1080 * 0.7;
 
-export interface AnimatedVideoProps {
-    /** The text displayed above the video. */
-    text: string;
-    /** Video source URL. */
-    src: string;
-    /** Typography variant for the text. */
-    variant?: TypographyVariant;
-    /** Video entrance animation. */
-    animation?: EntranceAnimation;
-    /** Border radius applied to the video. */
-    borderRadius?: number;
-    /** Width of the video container. */
-    width?: number;
-    /** Height of the video container. */
-    height?: number;
-    style?: React.CSSProperties;
-    id?: string;
-}
+export const AnimatedVideoSchema = z.object({
+    id: z.string().optional(),
+    text: z.string().min(1, "text is required"),
+    src: z.string().url("src must be a valid URL"),
+    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
+    animation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
+    borderRadius: z.number().min(0, "borderRadius cannot be negative").default(DEFAULT_BORDER_RADIUS).optional(),
+    width: z.number().min(1, "width must be positive").default(DEFAULT_WIDTH).optional(),
+    height: z.number().min(1, "height must be positive").default(DEFAULT_HEIGHT).optional(),
+    style: z.any().optional(),
+});
 
+export type AnimatedVideoProps = z.input<typeof AnimatedVideoSchema>;
 
-export function AnimatedVideo({
-    text,
-    src,
-    variant,
-    animation,
-    borderRadius,
-    width,
-    height,
-    style,
-    id,
-}: AnimatedVideoProps): React.ReactElement {
+export function AnimatedVideo(propsInit: AnimatedVideoProps): React.ReactElement {
+    const patchedProps = usePatchedProps(propsInit.id, propsInit);
+    const props = { ...AnimatedVideoSchema.parse(patchedProps), id: propsInit.id };
+
     const frame = useCurrentFrame();
     const styleConfig = useStyleContext();
     const theme = useTheme();
     const preset = useAspectPreset();
-    const speedFactor = useSpeedFactor();
 
     // Apply defaults
-    const actualVariant = variant ?? DEFAULT_VARIANT;
-    const actualAnimation = animation ?? DEFAULT_ANIMATION;
-    const actualBorderRadius = borderRadius ?? DEFAULT_BORDER_RADIUS;
+    const actualVariant = props.variant ?? DEFAULT_VARIANT;
+    const actualAnimation = props.animation ?? DEFAULT_ANIMATION;
+    const actualBorderRadius = props.borderRadius ?? DEFAULT_BORDER_RADIUS;
 
-    const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', actualVariant);
-    const styleOverride = useStyleOverride(id);
-    const patchedSrc = usePatchedProp<string | undefined>(id, 'src', src);
-    const patchedWidth = usePatchedProp<number | undefined>(id, 'width', width ?? preset.width * 0.7);
-    const patchedHeight = usePatchedProp<number | undefined>(id, 'height', height ?? preset.height * 0.7);
+    const styleOverride = useStyleOverride(props.id);
 
     const easing = styleConfig.motion.entrance;
 
@@ -93,7 +76,7 @@ export function AnimatedVideo({
 
     return (
         <div
-            id={id}
+            id={props.id}
             style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -102,10 +85,10 @@ export function AnimatedVideo({
             }}
         >
             <div style={{ opacity: textProgress, transform: `translateY(${(1 - textProgress) * 20}px)` }}>
-                <Text text={text} style={
+                <Text id={`text-${props.id}`} text={props.text} style={
                     {
-                        ...resolveTypography(patchedVariant, styleConfig, theme, preset),
-                        ...style,
+                        ...resolveTypography(actualVariant, styleConfig, theme, preset),
+                        ...props.style,
                         ...styleOverride
                     }}
                 />
@@ -119,26 +102,15 @@ export function AnimatedVideo({
                     boxShadow: "0 20px 40px rgba(0,0,0,0.25), 0 12px 24px rgba(0,0,0,0.15)",
                 }}
             >
-                <VideoAsset src={patchedSrc} width={patchedWidth} height={patchedHeight} />
+                <VideoAsset id={`videoasset-${props.id}`} src={props.src} width={props.width} height={props.height} />
             </div>
         </div>
     );
 }
 
 // ============================================================================
-// Schema & Registry Descriptor
+// Registry Descriptor
 // ============================================================================
-
-export const AnimatedVideoSchema = z.object({
-    text: z.string().min(1, "text is required"),
-    src: z.string().url("src must be a valid URL"),
-    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
-    animation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
-    borderRadius: z.number().min(0, "borderRadius cannot be negative").default(DEFAULT_BORDER_RADIUS).optional(),
-    width: z.number().min(1, "width must be positive").optional(),
-    height: z.number().min(1, "height must be positive").optional(),
-    style: z.any().optional(),
-});
 
 // Default video duration (hardcoded for now - ideally would be determined by video file length)
 const DEFAULT_VIDEO_SCENE_DURATION = 500;

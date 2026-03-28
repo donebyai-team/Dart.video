@@ -4,7 +4,7 @@ import z from 'zod';
 import { IconAsset } from '../../../core/assets/IconAsset';
 import { TextStagger } from '../text/TextStagger';
 import { useStyleContext } from '../../../styles/StyleContext';
-import { usePatchedProp, useStyleOverride } from '../../../patches';
+import { usePatchedProps, useStyleOverride } from '../../../patches';
 import { useAspectPreset } from '../../../styles';
 import { useTheme } from '../../../theme';
 import { TypographyVariant, TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
@@ -21,46 +21,36 @@ const DEFAULT_VARIANT = 'heading' as const;
 const DEFAULT_ICON_SIZE = 72;
 const DEFAULT_ICON_GAP = 64;
 
-export interface IconShowcaseProps {
-    id?: string;
-    /** Array of icon names to display (e.g., ["react", "typescript", "nodejs"]) */
-    icons: IconName[];
-    /** Text to display below icons */
-    text: string;
-    /** Typography variant for text */
-    variant?: TypographyVariant;
-    /** Icon size in pixels */
-    iconSize?: number;
-    /** Gap between icons in pixels */
-    iconGap?: number;
-    /** Frame at which animation starts */
-    startAt?: number;
-    className?: string;
-    style?: React.CSSProperties;
-}
+// ============================================================================
+// Zod Schema
+// ============================================================================
 
-export const IconShowcase: React.FC<IconShowcaseProps> = ({
-    id,
-    icons,
-    text,
-    variant,
-    iconSize,
-    iconGap,
-    startAt,
-    className,
-    style,
-}) => {
+export const IconShowcaseSchema = z.object({
+    id: z.string().optional(),
+    icons: z.array(IconNameSchema).min(2, "at least two icons are required"),
+    text: z.string().min(1, "text cannot be empty"),
+    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
+    iconSize: z.number().min(1, "iconSize must be positive").default(DEFAULT_ICON_SIZE).optional(),
+    iconGap: z.number().min(0, "iconGap cannot be negative").default(DEFAULT_ICON_GAP).optional(),
+    startAt: z.number().optional(),
+    className: z.string().optional(),
+    style: z.any().optional(),
+});
+
+export type IconShowcaseProps = z.input<typeof IconShowcaseSchema>;
+
+export const IconShowcase: React.FC<IconShowcaseProps> = (propsInit: IconShowcaseProps) => {
+    const patchedProps = usePatchedProps(propsInit.id, propsInit);
+    const props = { ...IconShowcaseSchema.parse(patchedProps), id: propsInit.id };
+
     const frame = useCurrentFrame();
-    const styleConfig = useStyleContext();
-    const theme = useTheme();
-    const preset = useAspectPreset();
-    const styleOverride = useStyleOverride(id);
+    const styleOverride = useStyleOverride(props.id);
 
     // Apply defaults
-    const actualStartAt = startAt ?? 0;
-    const actualIconSize = iconSize ?? DEFAULT_ICON_SIZE;
-    const actualIconGap = iconGap ?? DEFAULT_ICON_GAP;
-    const actualVariant = variant ?? DEFAULT_VARIANT;
+    const actualStartAt = props.startAt ?? 0;
+    const actualIconSize = props.iconSize ?? DEFAULT_ICON_SIZE;
+    const actualIconGap = props.iconGap ?? DEFAULT_ICON_GAP;
+    const actualVariant = props.variant ?? DEFAULT_VARIANT;
 
     // Animation timing
     const localFrame = frame - actualStartAt;
@@ -69,7 +59,7 @@ export const IconShowcase: React.FC<IconShowcaseProps> = ({
     const iconAnimDuration = DEFAULT_ICON_ANIMATION_DURATION;
 
     // Calculate when all icons are visible
-    const allIconsVisibleFrame = entranceDuration + (icons.length - 1) * iconStagger + iconAnimDuration;
+    const allIconsVisibleFrame = entranceDuration + (props.icons.length - 1) * iconStagger + iconAnimDuration;
     const textStartFrame = allIconsVisibleFrame + DEFAULT_TEXT_DELAY;
 
     // Container entrance animation (fade in)
@@ -81,7 +71,7 @@ export const IconShowcase: React.FC<IconShowcaseProps> = ({
     );
 
     // Vertical shift when text appears (move icons up to center everything)
-    const hasText = text && text.trim().length > 0;
+    const hasText = props.text && props.text.trim().length > 0;
     const verticalShift = hasText
         ? interpolate(
             localFrame,
@@ -93,8 +83,8 @@ export const IconShowcase: React.FC<IconShowcaseProps> = ({
 
     return (
         <div
-            id={id}
-            className={className}
+            id={props.id}
+            className={props.className}
             style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -103,7 +93,7 @@ export const IconShowcase: React.FC<IconShowcaseProps> = ({
                 width: '100%',
                 height: '100%',
                 opacity: containerOpacity,
-                ...style,
+                ...props.style,
                 ...styleOverride,
             }}
         >
@@ -121,7 +111,7 @@ export const IconShowcase: React.FC<IconShowcaseProps> = ({
                     transition: 'transform 0.3s ease-out',
                 }}
             >
-                {icons.map((iconName, index) => {
+                {props.icons.map((iconName, index) => {
                     const iconStartFrame = entranceDuration + index * iconStagger;
                     const iconLocalFrame = localFrame - iconStartFrame;
 
@@ -148,7 +138,7 @@ export const IconShowcase: React.FC<IconShowcaseProps> = ({
                                 opacity,
                             }}
                         >
-                            <IconAsset id={`iconasset-${id}-${index}`} name={iconName} size={actualIconSize} />
+                            <IconAsset id={`iconasset-${props.id}-${index}`} name={iconName} size={actualIconSize} />
                         </div>
                     );
                 })}
@@ -162,30 +152,17 @@ export const IconShowcase: React.FC<IconShowcaseProps> = ({
                     }}
                 >
                     <TextStagger
-                        text={text}
+                        id={`textstagger-${props.id}`}
+                        text={props.text}
                         entranceAnimation='slideRight'
                         variant={actualVariant}
                         startAt={actualStartAt + textStartFrame}
-                        id={id ? `${id}-text` : undefined}
                     />
                 </div>
             )}
         </div>
     );
 };
-
-// ============================================================================
-// Zod Schema
-// ============================================================================
-
-export const IconShowcaseSchema = z.object({
-    icons: z.array(IconNameSchema).min(2, "at least two icons are required"),
-    text: z.string().min(1, "text cannot be empty"),
-    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
-    iconSize: z.number().min(1, "iconSize must be positive").default(DEFAULT_ICON_SIZE).optional(),
-    iconGap: z.number().min(0, "iconGap cannot be negative").default(DEFAULT_ICON_GAP).optional(),
-    style: z.any().optional(),
-});
 
 // ============================================================================
 // Duration Calculator

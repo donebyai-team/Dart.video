@@ -86,8 +86,21 @@ export function usePatchedProp<T>(
   if (!id) return defaultValue;
 
   const entry = overlay[id];
+  if (!prop) return entry as T;
   if (entry && prop in entry) return entry[prop] as T;
   return defaultValue;
+}
+
+export function usePatchedProps<T>(
+  id: string | undefined,
+  defaultValue: T,
+): T {
+  const overlay = useContext(PatchContext);
+  if (!id) return defaultValue;
+
+  const entry = overlay[id];
+  if (!entry) return defaultValue;
+  return entry as T;
 }
 
 /**

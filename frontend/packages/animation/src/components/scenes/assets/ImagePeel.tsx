@@ -6,7 +6,7 @@ import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { ImageAsset } from '../../../core/assets/ImageAsset';
-import { usePatchedProp } from '../../../patches';
+import { usePatchedProps } from '../../../patches';
 import { PeelDirection, PEEL_DIRECTIONS } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../../../registry/registry';
@@ -18,27 +18,28 @@ const DEFAULT_PEEL_DURATION = 20;
 const DEFAULT_DIRECTION = 'right' as const;
 const DEFAULT_STACK_OFFSET = 20;
 const DEFAULT_BORDER_RADIUS = 16;
+const DEFAULT_WIDTH = 1920 * 0.7;
+const DEFAULT_HEIGHT = 1080 * 0.7;
 
-export interface ImagePeelProps {
-    /** Array of image source URLs. */
-    sources: string[];
-    /** Direction images peel away towards. */
-    direction?: PeelDirection;
-    /** Frames each image is visible before peeling. */
-    holdDuration?: number;
-    /** Frames for the peel transition. */
-    peelDuration?: number;
-    /** Pixel offset between stacked images. */
-    stackOffset?: number;
-    /** Border radius applied to each image. */
-    borderRadius?: number;
-    /** Width of each image. */
-    width?: number;
-    /** Height of each image. */
-    height?: number;
-    style?: React.CSSProperties;
-    id?: string;
-}
+// ============================================================================
+// Schema & Type
+// ============================================================================
+
+export const ImagePeelSchema = z.object({
+    id: z.string().optional(),
+    sources: z.array(z.string().url("each source must be a valid URL")).min(2, "sources must contain at least 2 images"),
+    direction: z.enum(PEEL_DIRECTIONS).default(DEFAULT_DIRECTION).optional(),
+    holdDuration: z.number().min(0, "holdDuration cannot be negative").default(DEFAULT_HOLD_DURATION).optional(),
+    peelDuration: z.number().min(0, "peelDuration cannot be negative").default(DEFAULT_PEEL_DURATION).optional(),
+    stackOffset: z.number().min(0, "stackOffset cannot be negative").default(DEFAULT_STACK_OFFSET).optional(),
+    borderRadius: z.number().min(0, "borderRadius cannot be negative").default(DEFAULT_BORDER_RADIUS).optional(),
+    width: z.number().min(1, "width must be positive").default(DEFAULT_WIDTH).optional(),
+    height: z.number().min(1, "height must be positive").default(DEFAULT_HEIGHT).optional(),
+
+    style: z.any().optional(),
+});
+
+export type ImagePeelProps = z.input<typeof ImagePeelSchema>;
 
 function getPeelTransform(direction: PeelDirection, progress: number): { transform: string; opacity: number } {
     const opacity = 1 - progress;
@@ -54,37 +55,27 @@ function getPeelTransform(direction: PeelDirection, progress: number): { transfo
     }
 }
 
-export function ImagePeel({
-    sources,
-    direction,
-    holdDuration,
-    peelDuration,
-    stackOffset,
-    borderRadius,
-    width,
-    height,
-    style,
-    id,
-}: ImagePeelProps): React.ReactElement {
+export function ImagePeel(propsInit: ImagePeelProps): React.ReactElement {
+    const patchedProps = usePatchedProps(propsInit.id, propsInit);
+    const props = { ...ImagePeelSchema.parse(patchedProps), id: propsInit.id };
+
     const frame = useCurrentFrame();
     const styleConfig = useStyleContext();
-    const preset = useAspectPreset();
-    const speedFactor = useSpeedFactor();
 
     // Apply defaults
-    const actualDirection = direction ?? DEFAULT_DIRECTION;
-    const actualHoldDuration = holdDuration ?? DEFAULT_HOLD_DURATION;
-    const actualPeelDuration = peelDuration ?? DEFAULT_PEEL_DURATION;
-    const actualStackOffset = stackOffset ?? DEFAULT_STACK_OFFSET;
-    const actualBorderRadius = borderRadius ?? DEFAULT_BORDER_RADIUS;
+    const actualDirection = props.direction ?? DEFAULT_DIRECTION;
+    const actualHoldDuration = props.holdDuration ?? DEFAULT_HOLD_DURATION;
+    const actualPeelDuration = props.peelDuration ?? DEFAULT_PEEL_DURATION;
+    const actualStackOffset = props.stackOffset ?? DEFAULT_STACK_OFFSET;
+    const actualBorderRadius = props.borderRadius ?? DEFAULT_BORDER_RADIUS;
 
-    const patchedSources = usePatchedProp<string[]>(id, 'sources', sources);
-    const patchedWidth = usePatchedProp<number | undefined>(id, 'width', width ?? preset.width * 0.7);
-    const patchedHeight = usePatchedProp<number | undefined>(id, 'height', height ?? preset.height * 0.7);
+    const resolvedWidth = props.width ?? DEFAULT_WIDTH;
+    const resolvedHeight = props.height ?? DEFAULT_HEIGHT;
 
     const easing = styleConfig.motion.entrance;
-    const count = patchedSources.length;
+    const count = props.sources.length;
     // Each image: [enter] -> [hold] -> [peel away], staggered
+
     const cycleDuration = actualHoldDuration + actualPeelDuration;
 
     // Entrance animation for the whole stack
@@ -98,25 +89,25 @@ export function ImagePeel({
 
     return (
         <div
-            id={id}
+            id={props.id}
             style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 opacity: entranceProgress,
                 transform: `scale(${0.9 + entranceProgress * 0.1})`,
-                ...style,
+                ...props.style,
             }}
         >
             <div
                 style={{
                     position: 'relative',
-                    width: patchedWidth,
-                    height: patchedHeight,
+                    width: resolvedWidth,
+                    height: resolvedHeight,
                 }}
             >
                 {/* Render bottom to top: last image at bottom, first on top */}
-                {[...patchedSources].reverse().map((src, reversedIndex) => {
+                {[...props.sources].reverse().map((src, reversedIndex) => {
                     const index = count - 1 - reversedIndex;
                     const peelStart = entranceDuration + index * cycleDuration;
 
@@ -153,14 +144,14 @@ export function ImagePeel({
                                 overflow: 'hidden',
                                 transformOrigin: actualDirection === 'left' ? 'top left'
                                     : actualDirection === 'right' ? 'top right'
-                                    : actualDirection === 'up' ? 'top center'
-                                    : 'bottom center',
+                                        : actualDirection === 'up' ? 'top center'
+                                            : 'bottom center',
                                 transform: `translate(${stackX}px, ${stackY}px) ${peelTransform}`,
                                 opacity: peelOpacity,
                                 boxShadow: "0 20px 40px rgba(0,0,0,0.25), 0 12px 24px rgba(0,0,0,0.15)",
                             }}
                         >
-                            <ImageAsset src={src} width={patchedWidth} height={patchedHeight} />
+                            <ImageAsset id={`imageasset-${props.id}-${index}`} src={src} width={resolvedWidth} height={resolvedHeight} />
                         </div>
                     );
                 })}
@@ -170,20 +161,8 @@ export function ImagePeel({
 }
 
 // ============================================================================
-// Schema & Duration Calculation
+// Duration Calculation
 // ============================================================================
-
-export const ImagePeelSchema = z.object({
-    sources: z.array(z.string().url("each source must be a valid URL")).min(2, "sources must contain at least 2 images"),
-    direction: z.enum(PEEL_DIRECTIONS).default(DEFAULT_DIRECTION).optional(),
-    holdDuration: z.number().min(0, "holdDuration cannot be negative").default(DEFAULT_HOLD_DURATION).optional(),
-    peelDuration: z.number().min(0, "peelDuration cannot be negative").default(DEFAULT_PEEL_DURATION).optional(),
-    stackOffset: z.number().min(0, "stackOffset cannot be negative").default(DEFAULT_STACK_OFFSET).optional(),
-    borderRadius: z.number().min(0, "borderRadius cannot be negative").default(DEFAULT_BORDER_RADIUS).optional(),
-    width: z.number().min(1, "width must be positive").optional(),
-    height: z.number().min(1, "height must be positive").optional(),
-    style: z.any().optional(),
-});
 
 export function calculateImagePeelDuration(props: ImagePeelProps): DurationResult {
     // Validate props
@@ -198,7 +177,7 @@ export function calculateImagePeelDuration(props: ImagePeelProps): DurationResul
     }
 
     const validated = validation.data;
-    
+
     if (validated.sources.length < 2) {
         return {
             success: false,
@@ -212,10 +191,10 @@ export function calculateImagePeelDuration(props: ImagePeelProps): DurationResul
     const holdDuration = validated.holdDuration ?? DEFAULT_HOLD_DURATION;
     const peelDuration = validated.peelDuration ?? DEFAULT_PEEL_DURATION;
     const cycleDuration = holdDuration + peelDuration;
-    
+
     // Total: entrance + (cycles for all images)
     const totalDuration = entranceDuration + (validated.sources.length * cycleDuration);
-    
+
     return {
         success: true,
         duration: Math.ceil(totalDuration),
