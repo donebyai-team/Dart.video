@@ -1,13 +1,13 @@
 import React from 'react';
-import { interpolate, useCurrentFrame } from 'remotion';
+import { useCurrentFrame } from 'remotion';
 import z from 'zod';
-import { TypographyVariant, TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
+import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
 import { useStyleContext } from '../../../styles/StyleContext';
-import { usePatchedProp, usePatchedProps, useStyleOverride } from '../../../patches';
+import { usePatchedProps, useStyleOverride } from '../../../patches';
 import { interpolateWithEasing, useAspectPreset } from '../../../styles';
 import { useTheme } from '../../../theme';
 import { resolveTypography } from '../../../tokens';
-import { getEntranceTransform, ENTRANCE_ANIMATIONS, TYPEWRITER_MODES } from '../types';
+import { getEntranceTransform, ENTRANCE_ANIMATIONS, SPLIT_BY_MODES } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../durationTypes';
 
@@ -92,7 +92,7 @@ export const TextStaggerSchema = z.object({
     staggerDelay: z.number().min(0, "staggerDelay cannot be negative").optional().default(DEFAULT_STAGGER_DELAY),
     entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).optional().default(DEFAULT_ANIMATION),
     duration: z.number().min(1, "duration must be positive").optional().default(DEFAULT_WORD_DURATION),
-    splitBy: z.enum(TYPEWRITER_MODES).optional().default(DEFAULT_SPLIT_BY),
+    splitBy: z.enum(SPLIT_BY_MODES).optional().default(DEFAULT_SPLIT_BY),
     className: z.string().optional(),
     style: z.any().optional(),
     wordStyle: z.any().optional(),

@@ -8,7 +8,7 @@ import { useTheme } from '../../../theme/ThemeContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
 import { resolveTypography } from '../../../tokens/resolveTypography';
-import { getEntranceTransform, ENTRANCE_ANIMATIONS, TYPEWRITER_MODES } from '../types';
+import { getEntranceTransform, ENTRANCE_ANIMATIONS, SPLIT_BY_MODES } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../durationTypes';
 
@@ -19,7 +19,7 @@ const DEFAULT_FRAMES_PER_CHAR = 2;
 const DEFAULT_FRAMES_PER_WORD = 8;
 const DEFAULT_FRAMES_PER_LINE = 15;
 const MIN_TYPING_DURATION = 30;
-const DEFAULT_MODE = 'char' as const;
+const DEFAULT_SPLIT_BY = 'char' as const;
 const DEFAULT_VARIANT = 'heading' as const;
 const DEFAULT_ANIMATION = 'slideUp' as const;
 
@@ -41,7 +41,7 @@ export function Typewriter(propsInit: TypewriterProps): React.ReactElement {
   const props = { ...TypewriterSchema.parse(patchedProps), id: propsInit.id };
 
   // Apply defaults
-  const actualMode = props.mode ?? DEFAULT_MODE;
+  const actualSplitBy = props.splitBy ?? DEFAULT_SPLIT_BY;
   const actualAnimation = props.animation ?? DEFAULT_ANIMATION;
   const actualVariant = props.variant ?? DEFAULT_VARIANT;
 
@@ -63,9 +63,9 @@ export function Typewriter(propsInit: TypewriterProps): React.ReactElement {
   );
 
   let visibleText: string;
-  if (actualMode === 'char') {
+  if (actualSplitBy === 'char') {
     visibleText = props.text.slice(0, Math.floor(progress * props.text.length));
-  } else if (actualMode === 'word') {
+  } else if (actualSplitBy === 'word') {
     const words = props.text.split(' ');
     visibleText = words.slice(0, Math.floor(progress * words.length)).join(' ');
   } else {
@@ -113,7 +113,7 @@ export const TypewriterSchema = z.object({
   id: z.string().optional(),
   startAt: z.number().min(0, "startAt cannot be negative").default(0).optional(),
   text: z.string().min(1, "text is required"),
-  mode: z.enum(TYPEWRITER_MODES).default(DEFAULT_MODE).optional(),
+  splitBy: z.enum(SPLIT_BY_MODES).default(DEFAULT_SPLIT_BY).optional(),
   variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
   animation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
   style: z.any().optional(),
@@ -133,17 +133,17 @@ export function calculateTypewriterDuration(props: TypewriterProps): DurationRes
   }
 
   const validated = validation.data;
-  const mode = validated.mode ?? 'char';
+  const splitBy = validated.splitBy ?? DEFAULT_SPLIT_BY;
 
   // Calculate typing duration based on mode
   let typingDuration: number;
 
 
   // Auto-calculate based on content
-  if (mode === 'char') {
+  if (splitBy === 'char') {
     const charCount = validated.text.length;
     typingDuration = Math.max(MIN_TYPING_DURATION, charCount * DEFAULT_FRAMES_PER_CHAR);
-  } else if (mode === 'word') {
+  } else if (splitBy === 'word') {
     const wordCount = validated.text.split(' ').length;
     typingDuration = Math.max(MIN_TYPING_DURATION, wordCount * DEFAULT_FRAMES_PER_WORD);
   } else { // line

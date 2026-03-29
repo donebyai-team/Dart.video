@@ -23,18 +23,18 @@ export const LOGO_ANIMATIONS = [
 
 export type LogoAnimation = typeof LOGO_ANIMATIONS[number];
 
-export const PEEL_DIRECTIONS = [
+export const DIRECTIONS = [
   'left',
   'right',
   'up',
   'down',
 ] as const;
 
-export type PeelDirection = typeof PEEL_DIRECTIONS[number];
+export type Direction = typeof DIRECTIONS[number];
 
-export const TYPEWRITER_MODES = ['char', 'word', 'line'] as const;
+export const SPLIT_BY_MODES = ['char', 'word', 'line'] as const;
 
-export type TypewriterMode = typeof TYPEWRITER_MODES[number];
+export type SplitByMode = typeof SPLIT_BY_MODES[number];
 
 export const IconNameSchema = z.string().min(2, "icon name cannot be empty");
 

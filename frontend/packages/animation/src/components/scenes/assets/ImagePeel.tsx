@@ -1,13 +1,11 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
 import z from 'zod';
-import { useSpeedFactor, applySpeedFactor } from '../../../duration/speedFactor';
 import { useStyleContext } from '../../../styles/StyleContext';
-import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { ImageAsset } from '../../../core/assets/ImageAsset';
 import { usePatchedProps } from '../../../patches';
-import { PeelDirection, PEEL_DIRECTIONS } from '../types';
+import { DIRECTIONS, Direction } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../../../registry/registry';
 
@@ -28,7 +26,7 @@ const DEFAULT_HEIGHT = 1080 * 0.7;
 export const ImagePeelSchema = z.object({
     id: z.string().optional(),
     sources: z.array(z.string().url("each source must be a valid URL")).min(2, "sources must contain at least 2 images"),
-    direction: z.enum(PEEL_DIRECTIONS).default(DEFAULT_DIRECTION).optional(),
+    direction: z.enum(DIRECTIONS).default(DEFAULT_DIRECTION).optional(),
     holdDuration: z.number().min(0, "holdDuration cannot be negative").default(DEFAULT_HOLD_DURATION).optional(),
     peelDuration: z.number().min(0, "peelDuration cannot be negative").default(DEFAULT_PEEL_DURATION).optional(),
     stackOffset: z.number().min(0, "stackOffset cannot be negative").default(DEFAULT_STACK_OFFSET).optional(),
@@ -41,7 +39,7 @@ export const ImagePeelSchema = z.object({
 
 export type ImagePeelProps = z.input<typeof ImagePeelSchema>;
 
-function getPeelTransform(direction: PeelDirection, progress: number): { transform: string; opacity: number } {
+function getPeelTransform(direction: Direction, progress: number): { transform: string; opacity: number } {
     const opacity = 1 - progress;
     switch (direction) {
         case 'left':

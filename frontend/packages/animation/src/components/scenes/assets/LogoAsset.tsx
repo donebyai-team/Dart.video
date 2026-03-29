@@ -36,7 +36,7 @@ export const LogoAssetSchema = z.object({
     src: z.string().default(DEFAULT_SRC).optional(),
     width: z.number().min(1, "width must be positive").optional(),
     height: z.number().min(1, "height must be positive").optional(),
-    animation: z.enum(LOGO_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
+    logoAnimation: z.enum(LOGO_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
     style: z.any().optional(),
     className: z.string().optional(),
 });
@@ -77,7 +77,7 @@ export function LogoAsset(propsInit: LogoAssetProps): React.ReactElement {
     const styleOverride = useStyleOverride(props.id);
 
     // Apply defaults
-    const actualAnimation = props.animation ?? DEFAULT_ANIMATION;
+    const actualAnimation = props.logoAnimation ?? DEFAULT_ANIMATION;
     const { objectFit: styleObjectFit, ...restStyle } = props.style ?? {};
     const { objectFit: overrideObjectFit, ...wrapperStyleOverride } = styleOverride;
     const defaultSrc = props.src || logo?.url || DEFAULT_LOGO_SVG;
@@ -159,7 +159,7 @@ export function calculateLogoAssetDuration(props: LogoAssetProps): DurationResul
     const validated = validation.data;
     
     // Fixed duration based on animation
-    const animationType = validated.animation ?? 'zoomIn';
+    const animationType = validated.logoAnimation ?? 'zoomIn';
     
     if (animationType === 'none') {
         return {

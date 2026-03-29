@@ -12,7 +12,7 @@ import { LogoAsset } from "./LogoAsset";
 import { TextStagger, calculateTextStaggerDuration } from "../text/TextStagger";
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../../../registry/registry';
-import { TYPEWRITER_MODES } from "../../..";
+import { SPLIT_BY_MODES } from "../types";
 
 // Default constants
 const DEFAULT_CHAR_STAGGER = 4;
@@ -87,12 +87,12 @@ export function LogoWithBrandName(propsInit: LogoWithBrandNameProps): React.Reac
                     src={resolvedLogo}
                     width={resolvedLogoSize}
                     height={resolvedLogoSize}
-                    animation="none"
+                    logoAnimation="none"
                 />
                 <TextStagger
                     id={`textstagger-${props.id}`}
                     text={props.brandName}
-                    splitBy={TYPEWRITER_MODES[0]}
+                    splitBy={SPLIT_BY_MODES[0]}
                     staggerDelay={DEFAULT_CHAR_STAGGER}
                     duration={DEFAULT_CHAR_FADE_DURATION}
                     variant={actualVariant}
