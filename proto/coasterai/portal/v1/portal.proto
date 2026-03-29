@@ -72,17 +72,20 @@ message GenerateOrEditAnimationRequest {
 message EditAnimationUserInput {
   string slide_id = 1;
   string prompt = 2;
+  repeated core.v1.SelectedMediaAsset assets = 3;
 }
 
 message CreateNewAnimationInput {
   bool suggestions = 1;
   string prompt = 2;
+  repeated core.v1.SelectedMediaAsset assets = 3;
 }
 
 message AskUserInput {
   string slide_id = 1;
   string response = 2;
   string video_id = 3;
+  repeated core.v1.SelectedMediaAsset assets = 4;
 }
 
 message GenerateOrEditAnimationResponse {

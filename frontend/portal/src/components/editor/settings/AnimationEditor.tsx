@@ -1,17 +1,26 @@
+import { create } from '@bufbuild/protobuf'
 import { useClientsContext } from '@coasterai/ui-core/context/ClientContext'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Sparkles, Square, X } from 'lucide-react'
+import { Palette, Sparkles, Square, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
 import QuestionPanel from '@/components/composer/QuestionPanel'
 import ThinkingViewComponent from '@/components/composer/ThinkingViewComponent'
+import AssetUploadDropdown from '@/components/composer/AssetUploadDropdown'
+import BrandLibrarySelector from '@/components/composer/BrandLibrarySelector'
+import ManualMediaImportPanel from '@/components/assets/ManualMediaImportPanel'
+import FigmaImportPanel, { type ConfirmPayload as FigmaImportConfirmPayload } from '@/components/figma/FigmaImportPanel'
+import SelectedAssetsDialog, { type SelectedAssetWithPreview } from '@/components/assets/SelectedAssetsDialog'
 import { useVideoStore } from '@/stores/video'
 import { AddOrEditAnimationSettings } from '@/types/tools'
 import type { AskUserQuestion, GenerateOrEditAnimationResponse } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
 import {type Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { MediaAsset, SelectedMediaAsset, SelectedMediaAssetSchema } from '@coasterai/pb/coasterai/core/v1/media_asset_pb'
 import { getConnectError } from '@/utils/error'
 import toast from 'react-hot-toast'
 import { PatchOverlay } from '@coasterai/renderer'
 import SceneSettings from './SceneSettings'
+import { useRouter } from 'next/navigation'
 
 interface AnimationEditorProps {
     settings: AddOrEditAnimationSettings
@@ -28,10 +37,14 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
     const selectedSlide = useVideoStore(s => s.selectedSlide)
     const addAnimationSlide = useVideoStore(s => s.addAnimationSlide)
     const videoId = useVideoStore(s => s.videoConfig?.id)
+    const brandIdentity = useVideoStore(s => s.videoConfig?.metadata?.generatedBranding?.brandIdentity)
+    const brandLibraryID = useVideoStore(s => s.videoConfig?.metadata?.generatedBranding?.brandLibraryID)
     const { portalClient } = useClientsContext()
+    const router = useRouter()
 
     const normalizedSettings = settings ?? {}
     const isAdding = !!normalizedSettings.previousSlide
+    const hasBrand = !!(brandLibraryID || brandIdentity?.id)
 
     const [prompt, setPrompt] = useState('')
 
@@ -43,6 +56,20 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
     const [selectedAnswer, setSelectedAnswer] = useState('')
     const [customAnswer, setCustomAnswer] = useState('')
     const [isThinkingBusy, setIsThinkingBusy] = useState(false)
+
+    // Asset management
+    type AssetPickerMode = 'figma' | 'upload'
+    const [selectedAssets, setSelectedAssets] = useState<SelectedAssetWithPreview[]>([])
+    const [assetDialogOpen, setAssetDialogOpen] = useState(false)
+    const [assetPickerMode, setAssetPickerMode] = useState<AssetPickerMode>('upload')
+    const [selectedAssetsDialogOpen, setSelectedAssetsDialogOpen] = useState(false)
+    const [questionAssets, setQuestionAssets] = useState<SelectedMediaAsset[]>([])
+
+    const hasSelectedAssets = selectedAssets.length > 0
+    const selectedAssetMessages = useMemo(
+        () => selectedAssets.map(a => a.selection),
+        [selectedAssets]
+    )
 
     const abortControllerRef = useRef<AbortController | null>(null)
     const streamSessionRef = useRef(0)
@@ -221,6 +248,7 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                             value: {
                                 slideId: activeSlideId ?? '',
                                 prompt: finalPrompt,
+                                assets: selectedAssetMessages,
                             },
                         },
                     }
@@ -231,6 +259,7 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                             value: {
                                 suggestions: withSuggestions,
                                 prompt: finalPrompt,
+                                assets: selectedAssetMessages,
                             },
                         },
                     },
@@ -269,6 +298,83 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
         setThinkingChunk('')
         setActiveQuestion(undefined)
         setPendingQuestion(undefined)
+        setQuestionAssets([])
+    }
+
+    // ── Asset helpers ──
+
+    const openAssetDialog = (mode: AssetPickerMode) => {
+        setAssetPickerMode(mode)
+        setAssetDialogOpen(true)
+    }
+
+    const upsertSelectedAsset = (asset: MediaAsset, note?: string) => {
+        const nextAsset = create(SelectedMediaAssetSchema, {
+            assetID: asset.id,
+            note: note?.trim() || undefined
+        })
+        setSelectedAssets(current => {
+            const remaining = current.filter(item => item.selection.assetID !== nextAsset.assetID)
+            return [...remaining, { selection: nextAsset, asset }]
+        })
+        setAssetDialogOpen(false)
+    }
+
+    const upsertQuestionAsset = (asset: MediaAsset, note?: string) => {
+        const nextAsset = create(SelectedMediaAssetSchema, {
+            assetID: asset.id,
+            note: note?.trim() || undefined
+        })
+        setQuestionAssets(current => {
+            const remaining = current.filter(item => item.assetID !== nextAsset.assetID)
+            return [...remaining, nextAsset]
+        })
+        setAssetDialogOpen(false)
+    }
+
+    const handleSelectFigmaFrame = async ({ fileKey, selectedFrame, sectionNote }: FigmaImportConfirmPayload) => {
+        try {
+            const res = await portalClient.importFigmaFrame({ fileKey, nodeId: selectedFrame.nodeId })
+            if (!res.asset) throw new Error('Figma import did not return an asset')
+            if (stage === 'question') {
+                upsertQuestionAsset(res.asset, sectionNote)
+            } else {
+                upsertSelectedAsset(res.asset, sectionNote)
+            }
+        } catch (err) {
+            toast.error(getConnectError(err))
+        }
+    }
+
+    const handleSelectUploadedAsset = ({ asset, sectionNote }: { asset: MediaAsset; sectionNote?: string }) => {
+        if (stage === 'question') {
+            upsertQuestionAsset(asset, sectionNote)
+        } else {
+            upsertSelectedAsset(asset, sectionNote)
+        }
+    }
+
+    const removeSelectedAsset = (assetID: string) => {
+        setSelectedAssets(current => current.filter(a => a.selection.assetID !== assetID))
+    }
+
+    const updateSelectedAssetNote = (assetID: string, note?: string) => {
+        setSelectedAssets(current =>
+            current.map(a => a.selection.assetID === assetID
+                ? { ...a, selection: create(SelectedMediaAssetSchema, { assetID, note }) }
+                : a
+            )
+        )
+    }
+
+    const hydrateSelectedAssets = (assets: MediaAsset[]) => {
+        if (assets.length === 0) return
+        setSelectedAssets(current =>
+            current.map(sa => {
+                const full = assets.find(a => a.id === sa.selection.assetID)
+                return full ? { ...sa, asset: full } : sa
+            })
+        )
     }
 
     const handleContinuePlanning = async (responseOverride?: string) => {
@@ -294,13 +400,14 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                 input: {
                     case: 'askUserInput',
                     value: {
-                        // slideId is always required: for new slides it comes from createdSlideIdRef
-                        // (set when the waitingForUserInput event arrived), for edits it's the selected slide
                         slideId: createdSlideIdRef.current!,
                         response,
+                        assets: questionAssets,
                     },
                 },
             }, { signal: controller.signal })
+
+            setQuestionAssets([])
 
             await consumeStream(stream, controller.signal, streamSession)
         } catch (err: any) {
@@ -323,6 +430,36 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
 
     return (
         <div className='flex flex-col h-full p-4 gap-3'>
+            {/* Asset picker dialog */}
+            <Dialog open={assetDialogOpen} onOpenChange={setAssetDialogOpen}>
+                <DialogContent className='max-w-2xl p-0 overflow-hidden' forceMount>
+                    <div className={assetPickerMode === 'figma' ? 'block' : 'hidden'}>
+                        <FigmaImportPanel
+                            onClose={() => setAssetDialogOpen(false)}
+                            onConfirm={handleSelectFigmaFrame}
+                            canConfirm={stage === 'compose' || stage === 'question'}
+                        />
+                    </div>
+                    <div className={assetPickerMode === 'upload' ? 'block' : 'hidden'}>
+                        <ManualMediaImportPanel
+                            onClose={() => setAssetDialogOpen(false)}
+                            onConfirm={handleSelectUploadedAsset}
+                            canConfirm={stage === 'compose' || stage === 'question'}
+                        />
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            <SelectedAssetsDialog
+                open={selectedAssetsDialogOpen}
+                selectedAssets={selectedAssets}
+                onOpenChange={setSelectedAssetsDialogOpen}
+                onHydrateAssets={hydrateSelectedAssets}
+                onRemoveAsset={removeSelectedAsset}
+                onUpdateAssetNote={updateSelectedAssetNote}
+                onOpenUpload={() => openAssetDialog('upload')}
+            />
+
             <div className='flex items-center justify-between'>
                 <span className='text-sm font-medium text-foreground'>
                     {/* {isAdding ? 'Generate Animation' : 'Edit Animation'} */}
@@ -358,6 +495,8 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                                     }}
                                     onCustomAnswerChange={setCustomAnswer}
                                     onContinue={() => void handleContinuePlanning()}
+                                    selectedQuestionAssets={questionAssets}
+                                    onOpenAssetPicker={openAssetDialog}
                                 />
                             )}
 
@@ -380,6 +519,56 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                         )}
 
                         <div className="mt-3 rounded-xl border bg-background shadow-sm overflow-hidden relative">
+                            {/* Toolbar row */}
+                            <div className='flex items-center gap-1.5 px-3 pt-2 pb-1.5 text-xs text-muted-foreground border-b border-border/40 flex-wrap'>
+                                {hasBrand ? (
+                                    <span className='flex items-center gap-1 flex-shrink-0'>
+                                        <Palette className='w-4 h-4 opacity-70' />
+                                        <span className='text-xs'>{brandIdentity?.name ?? 'Brand'}</span>
+                                    </span>
+                                ) : (
+                                    <BrandLibrarySelector
+                                        selectedBrandLibraryId={undefined}
+                                        onChange={() => {}}
+                                        onAddBrand={() => router.push('/dashboard/brand')}
+                                        disabled={stage !== 'compose'}
+                                    />
+                                )}
+
+                                <span className='text-border/60 mx-0.5'>·</span>
+
+                                <AssetUploadDropdown
+                                    disabled={stage !== 'compose'}
+                                    onOpenAssetPicker={openAssetDialog}
+                                />
+                            </div>
+
+                            {/* Selected assets badge */}
+                            {hasSelectedAssets && (
+                                <div className='mx-3 mt-1.5 flex flex-wrap gap-2'>
+                                    <div
+                                        onClick={() => setSelectedAssetsDialogOpen(true)}
+                                        className='flex cursor-pointer items-center justify-between rounded-lg border border-primary/15 bg-primary/5 px-3 py-1.5 text-xs transition-colors hover:border-primary/30'
+                                    >
+                                        <div className='flex items-center gap-2 text-primary'>
+                                            <span className='font-medium'>
+                                                {selectedAssets.length} asset{selectedAssets.length > 1 ? 's' : ''}
+                                            </span>
+                                        </div>
+                                        <button
+                                            onClick={e => {
+                                                e.stopPropagation()
+                                                setSelectedAssets([])
+                                            }}
+                                            className='ml-2 p-0.5 rounded hover:bg-destructive/10 hover:text-destructive'
+                                            type='button'
+                                        >
+                                            <X className='w-3.5 h-3.5' />
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
                             <textarea
                                 value={prompt}
                                 onChange={e => setPrompt(e.target.value)}

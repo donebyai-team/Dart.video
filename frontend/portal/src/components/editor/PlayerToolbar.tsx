@@ -22,7 +22,6 @@ import { isPlatformAdmin } from '@coasterai/ui-core/helper/role'
 import { useAuth } from '@coasterai/ui-core/hooks/useAuth'
 
 interface PlayerToolbarProps {
-  onSlideSpeedChange: (newDuration: number) => void
   onDurationChange: (newDuration: number) => void
   minDuration?: number
   maxDuration?: number
@@ -35,7 +34,7 @@ const insertTools: { id: EffectType; name: string; icon: React.ElementType }[] =
   { id: EffectType.ZOOM, name: 'Zoom', icon: ZoomIn },
 ]
 
-const PlayerToolbar = ({ onSlideSpeedChange, onDurationChange, minDuration = 1, maxDuration = 180, currentFrame = 0 }: PlayerToolbarProps) => {
+const PlayerToolbar = ({ onDurationChange, minDuration = 1, maxDuration = 180, currentFrame = 0 }: PlayerToolbarProps) => {
 
   const { user } = useAuth()
   const isPlatformAdminUser = user && isPlatformAdmin(user);
@@ -83,7 +82,7 @@ const PlayerToolbar = ({ onSlideSpeedChange, onDurationChange, minDuration = 1, 
         </TooltipProvider>
 
         {/* Change Animation button for text-animation slides */}
-        {onChangeTextAnimation && (
+        {/* {onChangeTextAnimation && (
           <>
             <div className='h-4 w-px bg-border mx-1' />
             <TooltipProvider delayDuration={200}>
@@ -100,7 +99,7 @@ const PlayerToolbar = ({ onSlideSpeedChange, onDurationChange, minDuration = 1, 
               </Tooltip>
             </TooltipProvider>
           </>
-        )}
+        )} */}
 
         {onViewAnimationCode && isPlatformAdminUser && (
           <TooltipProvider delayDuration={200}>
@@ -155,7 +154,7 @@ const PlayerToolbar = ({ onSlideSpeedChange, onDurationChange, minDuration = 1, 
                   <tool.icon className='w-4 h-4' />
                   {tool.name}
                 </DropdownMenuItem>
-              ))}           
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
         </>

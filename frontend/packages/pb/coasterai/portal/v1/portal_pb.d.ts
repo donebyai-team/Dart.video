@@ -101,6 +101,11 @@ export declare type EditAnimationUserInput = Message<"coasterai.portal.v1.EditAn
    * @generated from field: string prompt = 2;
    */
   prompt: string;
+
+  /**
+   * @generated from field: repeated coasterai.core.v1.SelectedMediaAsset assets = 3;
+   */
+  assets: SelectedMediaAsset[];
 };
 
 /**
@@ -122,6 +127,11 @@ export declare type CreateNewAnimationInput = Message<"coasterai.portal.v1.Creat
    * @generated from field: string prompt = 2;
    */
   prompt: string;
+
+  /**
+   * @generated from field: repeated coasterai.core.v1.SelectedMediaAsset assets = 3;
+   */
+  assets: SelectedMediaAsset[];
 };
 
 /**
@@ -148,6 +158,11 @@ export declare type AskUserInput = Message<"coasterai.portal.v1.AskUserInput"> &
    * @generated from field: string video_id = 3;
    */
   videoId: string;
+
+  /**
+   * @generated from field: repeated coasterai.core.v1.SelectedMediaAsset assets = 4;
+   */
+  assets: SelectedMediaAsset[];
 };
 
 /**
