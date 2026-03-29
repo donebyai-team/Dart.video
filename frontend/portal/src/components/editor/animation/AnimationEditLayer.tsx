@@ -50,7 +50,10 @@ export function AnimationEditLayer({
 
   function supportsToolbar(id: string): boolean {
     const lowerId = id.toLowerCase()
-    return lowerId.includes('text') || lowerId.includes('icon')
+    return lowerId.includes('text') || 
+    lowerId.includes('icon') || 
+    lowerId.includes('counter') ||
+    lowerId.includes('typewriter')
   }
 
   // ── Track canvas position ─────────────────────────────────────────────────

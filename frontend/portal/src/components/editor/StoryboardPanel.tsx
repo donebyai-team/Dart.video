@@ -46,6 +46,7 @@ const StoryboardPanel = ({
 
     const onRemoveSection = useVideoStore(s => s.removeSection);
     const onRemoveSlide = useVideoStore(s => s.removeSlide);
+    const onDuplicateSlide = useVideoStore(s => s.duplicateSlide);
     const onEditTitleChange = useVideoStore(s => s.setEditingSectionTitle);
 
     const onCancelEditTitle = useVideoStore(s => s.setEditingSectionId);
@@ -124,6 +125,9 @@ const StoryboardPanel = ({
                                 onRemoveSection={() => onRemoveSection(section.id)}
                                 onRemoveSlide={(slideId) =>
                                     onRemoveSlide(section.id, slideId)
+                                }
+                                onDuplicateSlide={(slideId) =>
+                                    onDuplicateSlide(section.id, slideId)
                                 }
 
                                 onStartEditTitle={() =>

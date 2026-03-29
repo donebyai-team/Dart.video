@@ -447,6 +447,46 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     get().refreshPendingChanges()
   },
 
+  /* ================= DUPLICATE ================= */
+
+  duplicateSlide(sectionId: string, slideId: string) {
+    const { videoConfig } = get()
+    if (!videoConfig?.config) return
+
+    const sections = getSections(videoConfig)
+    const section = sections.find(s => s.id === sectionId)
+    if (!section) return
+
+    const sourceSlide = section.slides.find(sl => sl.id === slideId)
+    if (!sourceSlide) return
+
+    const duplicatedSlide: Slide = {
+      ...structuredClone(sourceSlide),
+      id: `${slideId}-duplicate`,
+    }
+
+    let newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
+      sections.map(s => {
+        if (s.id !== sectionId) return s
+        const idx = s.slides.findIndex(sl => sl.id === slideId)
+        const updated = [...s.slides]
+        updated.splice(idx + 1, 0, duplicatedSlide)
+        return { ...s, slides: updated }
+      })
+    )
+
+    newVideoConfig = updateTotalDuration(newVideoConfig)
+
+    set({ videoConfig: newVideoConfig })
+
+    const updatedSection = getSections(newVideoConfig).find(s => s.id === sectionId)
+    if (updatedSection) {
+      set({ selectedSlide: { section: updatedSection, slide: duplicatedSlide } })
+    }
+
+    get().refreshPendingChanges()
+  },
+
   /* ================= REORDER ================= */
 
   reorderSlidesInSection(sectionId: string, activeId: string, overId: string) {

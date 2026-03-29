@@ -52,6 +52,7 @@ interface StoryboardSectionProps {
     onSelectSlide: (section: Section, slide: Slide) => void;
     onRemoveSection: () => void;
     onRemoveSlide: (slideId: string) => void;
+    onDuplicateSlide: (slideId: string) => void;
     onStartEditTitle: () => void;
     onEditTitleChange: (value: string) => void;
     onSaveTitle: () => void;
@@ -72,6 +73,7 @@ const StoryboardSection = ({
     onSelectSlide,
     onRemoveSection,
     onRemoveSlide,
+    onDuplicateSlide,
     onStartEditTitle,
     onEditTitleChange,
     onSaveTitle,
@@ -267,6 +269,7 @@ const StoryboardSection = ({
                                                 index={slideIndex}
                                                 onSelect={() => onSelectSlide(section, slide)}
                                                 onDelete={() => onRemoveSlide(slide.id)}
+                                                onDuplicate={() => onDuplicateSlide(slide.id)}
                                             />
 
                                             {/* Between-slide controls: transition + add slide */}

@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { GripVertical, ImageIcon, Type, Trash2, Layers, WandIcon } from 'lucide-react'
+import { GripVertical, ImageIcon, Type, Trash2, Copy, Layers, WandIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import SlideThumbnail from './SlideThumbnail'
@@ -14,9 +14,10 @@ interface SortableSlideCardProps {
   index: number
   onSelect: () => void
   onDelete: () => void
+  onDuplicate: () => void
 }
 
-const SortableSlideCard = ({ slide, isSelected, index, onSelect, onDelete }: SortableSlideCardProps) => {
+const SortableSlideCard = ({ slide, isSelected, index, onSelect, onDelete, onDuplicate }: SortableSlideCardProps) => {
   const getSlideWithBackground = useVideoStore(s => s.getSlideWithBackground)
   const slideWithBackground = useMemo(
     () => ({ ...slide, backgroundStyle: getSlideWithBackground(slide) }),
@@ -36,6 +37,11 @@ const SortableSlideCard = ({ slide, isSelected, index, onSelect, onDelete }: Sor
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation()
     onDelete()
+  }
+
+  const handleDuplicate = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    onDuplicate()
   }
 
   return (
@@ -75,6 +81,21 @@ const SortableSlideCard = ({ slide, isSelected, index, onSelect, onDelete }: Sor
         {/* Delete action */}
         <div className='flex items-center gap-0.5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity'>
           <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant='ghost'
+                  size='icon'
+                  className='h-5 w-5 text-muted-foreground hover:text-foreground hover:bg-muted'
+                  onClick={handleDuplicate}
+                >
+                  <Copy className='w-3 h-3' />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side='right' className='text-[10px]'>
+                Duplicate slide
+              </TooltipContent>
+            </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button

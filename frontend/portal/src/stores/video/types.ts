@@ -74,6 +74,7 @@ export interface VideoActions {
     addSlide: (sectionId: string, afterSlideId?: string) => void
     addAnimationSlide: (sectionId: string, slide: Slide,afterSlideId?: string) => void
     removeSlide: (sectionId: string, slideId: string) => void
+    duplicateSlide: (sectionId: string, slideId: string) => void
     updateSlide: (updates: Partial<Slide>) => void
     updateSlideContent: (updates: Record<string, unknown>) => void
     updateSlideTransition: (sectionId: string, slideId: string, transitionId: TransitionType, direction?: TransitionDirection) => void
