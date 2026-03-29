@@ -1,4 +1,4 @@
-import { Music, VolumeX, Waves } from "lucide-react";
+import { Music, VolumeX, Waves, Sunrise, BeakerIcon, PointerIcon, VolumeIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -18,7 +18,25 @@ const backgroundTracks = [
         id: "deep-calm",
         name: "Deep Calm",
         url: "https://ik.imagekit.io/coasterai/freepik-deep-calm_A4WXzk4Mk.mp3",
+        icon: VolumeIcon,
+    },
+    {
+        id: "next-wave",
+        name: "Next Wave",
+        url: "https://storage.googleapis.com/coasterai-public/background_music/above-the-next-wave.mp3",
         icon: Waves,
+    },
+    {
+        id: "boardroom-groove",
+        name: "Boardroom Groove",
+        url: "https://storage.googleapis.com/coasterai-public/background_music/boardroom-groove-revolution.mp3",
+        icon: BeakerIcon,
+    },
+    {
+        id: "chasing-the-morning",
+        name: "Chasing the Morning",
+        url: "https://storage.googleapis.com/coasterai-public/background_music/chasing-the-morning-light.mp3",
+        icon: Sunrise,
     },
 ];
 
