@@ -140,8 +140,6 @@ export function AnimationEditLayer({
     const hits = selectableStackAtPoint(e.clientX, e.clientY, e.currentTarget)
     if (hits.length === 0) { deselect(); return }
 
-    console.log("hits", hits)
-
     if (!selectedEid) {
       const hit = hits[0]
       setElementRect(hit.el.getBoundingClientRect())

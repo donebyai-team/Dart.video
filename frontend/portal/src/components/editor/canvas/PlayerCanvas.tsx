@@ -51,6 +51,7 @@ const PlayerCanvas = ({
   const selectedEffectId = useVideoStore(s => s.selectedEffectId)
   const handleSelectEffect = useVideoStore(s => s.handleSelectEffect)
   const handleSelectTool = useVideoStore(s => s.handleSelectTool)
+  const handleCloseTool = useVideoStore(s => s.handleCloseTool)
   const activeTool = useVideoStore(s => s.activeTool)
   const onUpdateSpotlight = useVideoStore(s => s.updateSpotlight)
   const onUpdateCallout = useVideoStore(s => s.updateCallout)
@@ -167,6 +168,11 @@ const PlayerCanvas = ({
                 ? activeTool.settings ?? {}
                 : {}
             setSelectedEid(eid)
+
+            if (!sceneElementId && !existingSettings.previousSlide) {
+              handleCloseTool()
+              return
+            }
 
             handleSelectTool({
               type: ActiveToolType.ADD_OR_EDIT_ANIMATION,

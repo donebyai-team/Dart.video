@@ -7,7 +7,7 @@ import ThinkingViewComponent from '@/components/composer/ThinkingViewComponent'
 import { useVideoStore } from '@/stores/video'
 import { AddOrEditAnimationSettings } from '@/types/tools'
 import type { AskUserQuestion, GenerateOrEditAnimationResponse } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
-import { type AnimationSlideContent, type Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import {type Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { getConnectError } from '@/utils/error'
 import toast from 'react-hot-toast'
 import { PatchOverlay } from '@coasterai/renderer'
@@ -55,11 +55,6 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
 
     const canSubmit = prompt.trim().length > 0
     const selectedAnimationElementId = normalizedSettings.animationElementId ?? null
-
-    console.log('[AnimationEditor] SceneSettings target', {
-        selectedAnimationElementId,
-        overlayEntry: selectedAnimationElementId ? overlay[selectedAnimationElementId] : null,
-    })
 
 
     useEffect(() => {
@@ -149,8 +144,6 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
             }
 
             // completed=true means work is fully done; the event always includes a slide with its id.
-            // If suggestions are present, auto-select the first one (user can switch via the grid).
-            // If no suggestions, apply the slide directly to the store.
             // Either way, abort the stream and return to compose stage.
             if (event.completed) {
                 setIsThinkingBusy(false)
@@ -350,78 +343,82 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                     </div>
                 )}
 
-                <div className='flex-1 min-h-0 rounded-xl bg-background/60 backdrop-blur-sm p-3 overflow-auto'>
-                    {stage === 'question' && activeQuestion && (
-                        <QuestionPanel
-                            question={activeQuestion}
-                            isSubmitting={isSubmitting}
-                            customAnswer={customAnswer}
-                            answerInput={answerInput}
-                            onOptionClick={option => {
-                                setSelectedAnswer(option)
-                                void handleContinuePlanning(option)
-                            }}
-                            onCustomAnswerChange={setCustomAnswer}
-                            onContinue={() => void handleContinuePlanning()}
-                        />
-                    )}
+                {isAdding && (
+                    <>
+                        <div className='flex-1 min-h-0 rounded-xl bg-background/60 backdrop-blur-sm p-3 overflow-auto'>
+                            {stage === 'question' && activeQuestion && (
+                                <QuestionPanel
+                                    question={activeQuestion}
+                                    isSubmitting={isSubmitting}
+                                    customAnswer={customAnswer}
+                                    answerInput={answerInput}
+                                    onOptionClick={option => {
+                                        setSelectedAnswer(option)
+                                        void handleContinuePlanning(option)
+                                    }}
+                                    onCustomAnswerChange={setCustomAnswer}
+                                    onContinue={() => void handleContinuePlanning()}
+                                />
+                            )}
 
-                    {showEmptyState && (
-                        <div className='h-full flex flex-col items-center justify-center text-center px-4'>
-                            <h3 className='text-base font-semibold text-foreground'>
-                                Add Animation
-                            </h3>
-                            <p className='mt-1 text-sm text-muted-foreground max-w-md'>
-                                Describe the motion style, pacing, and visual direction to generate a new animation
-                            </p>
+                            {showEmptyState && (
+                                <div className='h-full flex flex-col items-center justify-center text-center px-4'>
+                                    <h3 className='text-base font-semibold text-foreground'>
+                                        Add Animation
+                                    </h3>
+                                    <p className='mt-1 text-sm text-muted-foreground max-w-md'>
+                                        Describe the motion style, pacing, and visual direction to generate a new animation
+                                    </p>
+                                </div>
+                            )}
                         </div>
-                    )}
-                </div>
 
-                {showThinking && (
-                    <div className='mt-3'>
-                        <ThinkingViewComponent thinkingChunk={thinkingChunk} />
-                    </div>
-                )}
-
-                <div className="mt-3 rounded-xl border bg-background shadow-sm overflow-hidden relative">
-                    <textarea
-                        value={prompt}
-                        onChange={e => setPrompt(e.target.value)}
-                        onKeyDown={e => {
-                            if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && canSubmit && !isSubmitting) {
-                                e.preventDefault()
-                                void handleSubmit()
-                            }
-                        }}
-                        placeholder={isAdding ? 'Describe the animation you want...' : 'Describe changes to make...'}
-                        rows={5}
-                        disabled={isSubmitting || stage === 'question'}
-                        className="w-full resize-none bg-transparent px-3 py-2.5 pr-12 text-sm focus:outline-none placeholder:text-muted-foreground/60 disabled:opacity-50"
-                    />
-
-                    <div className="absolute bottom-2 right-2">
-                        {isSubmitting || stage === 'question' ? (
-                            <Button
-                                onClick={handleStop}
-                                variant="outline"
-                                size="sm"
-                                className="h-8 w-8 rounded-lg hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
-                            >
-                                <Square className="w-3 h-3 fill-current" />
-                            </Button>
-                        ) : (
-                            <Button
-                                onClick={handleSubmit}
-                                size="sm"
-                                disabled={!canSubmit}
-                                className="h-8 w-8 rounded-lg"
-                            >
-                                <Sparkles className="w-3.5 h-3.5" />
-                            </Button>
+                        {showThinking && (
+                            <div className='mt-3'>
+                                <ThinkingViewComponent thinkingChunk={thinkingChunk} />
+                            </div>
                         )}
-                    </div>
-                </div>
+
+                        <div className="mt-3 rounded-xl border bg-background shadow-sm overflow-hidden relative">
+                            <textarea
+                                value={prompt}
+                                onChange={e => setPrompt(e.target.value)}
+                                onKeyDown={e => {
+                                    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && canSubmit && !isSubmitting) {
+                                        e.preventDefault()
+                                        void handleSubmit()
+                                    }
+                                }}
+                                placeholder='Describe the animation you want...'
+                                rows={5}
+                                disabled={isSubmitting || stage === 'question'}
+                                className="w-full resize-none bg-transparent px-3 py-2.5 pr-12 text-sm focus:outline-none placeholder:text-muted-foreground/60 disabled:opacity-50"
+                            />
+
+                            <div className="absolute bottom-2 right-2">
+                                {isSubmitting || stage === 'question' ? (
+                                    <Button
+                                        onClick={handleStop}
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-8 w-8 rounded-lg hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
+                                    >
+                                        <Square className="w-3 h-3 fill-current" />
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        onClick={handleSubmit}
+                                        size="sm"
+                                        disabled={!canSubmit}
+                                        className="h-8 w-8 rounded-lg"
+                                    >
+                                        <Sparkles className="w-3.5 h-3.5" />
+                                    </Button>
+                                )}
+                            </div>
+                        </div>
+                    </>
+                )}
             </div>
         </div>
     )
