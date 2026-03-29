@@ -25,8 +25,6 @@ export interface ComponentRegistration {
   type: ComponentType;
   /** Zod schema for all props (type safety, patch validation). */
   fullSchema: z.ZodObject<z.ZodRawShape>;
-  /** Subset of prop names shown in the editor toolbar. */
-  editorProps: string[];
   /** One-line description for prompt generation. */
   description: string;
   /** Calculate ideal duration based on props. Optional - only for components with dynamic duration. */

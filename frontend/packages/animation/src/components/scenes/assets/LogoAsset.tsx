@@ -182,7 +182,6 @@ export const LogoAssetDescriptor: ComponentRegistration = {
     name: 'LogoAsset',
     type: 'brand',
     fullSchema: LogoAssetSchema,
-    editorProps: ['src', 'animation', 'width', 'height'],
     description: 'Displays a logo with entrance animation. Use for brand intros or logo reveals. Optional props: src="attachment url" (uses theme logo if omitted), animation="zoomIn" (options: fadeIn, zoomIn, bounceIn, spinIn, dropIn, none). Set animation="none" for instant display.',
     calculateDuration: calculateLogoAssetDuration,
 };

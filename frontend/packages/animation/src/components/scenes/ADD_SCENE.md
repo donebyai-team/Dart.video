@@ -164,7 +164,6 @@ export const MyNewSceneDescriptor: ComponentRegistration = {
     name: 'MyNewScene',
     type: 'scene',
     fullSchema: MyNewSceneSchema,
-    editorProps: ['text', 'variant', 'animation'],  // Props shown in editor
     description: 'Brief description of what this scene does. Use for X, Y, Z. Required props: text="Example text".',
     calculateDuration: calculateMyNewSceneDuration,
 };

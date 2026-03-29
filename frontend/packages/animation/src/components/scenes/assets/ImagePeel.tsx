@@ -207,7 +207,6 @@ export const ImagePeelDescriptor: ComponentRegistration = {
     name: 'ImagePeel',
     type: 'scene',
     fullSchema: ImagePeelSchema,
-    editorProps: ['sources', 'direction', 'holdDuration', 'peelDuration', 'borderRadius'],
     description: 'Stacked images that peel away one-by-one to reveal the next. Use for before/after comparisons, product variations, or image galleries. Required props: sources={["attachment url", "attachment url", "attachment url"]}. Minimum 2 images required.',
     calculateDuration: calculateImagePeelDuration,
 };

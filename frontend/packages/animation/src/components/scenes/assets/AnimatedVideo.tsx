@@ -140,7 +140,6 @@ export const AnimatedVideoDescriptor: ComponentRegistration = {
     name: 'AnimatedVideo',
     type: 'scene',
     fullSchema: AnimatedVideoSchema,
-    editorProps: ['text', 'src', 'variant', 'animation', 'borderRadius'],
     description: 'Displays a text label above a video with entrance animation. Use for demo videos, testimonials, or video content. Required props: text="Watch Demo", src="attachment video url". The text animates in first, then the video follows.',
     calculateDuration: calculateAnimatedVideoDuration,
 };

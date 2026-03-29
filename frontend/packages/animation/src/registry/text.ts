@@ -38,23 +38,18 @@ export const CONTENT_COMPONENTS: ComponentRegistration[] = [
     name: 'Text',
     type: 'content',
     fullSchema: TextSchema,
-    editorProps: ['variant'],
     description: 'displays a static string — use for headings, labels, and body copy',
   },
   {
     name: 'Counter',
     type: 'content',
     fullSchema: CounterSchema,
-    editorProps: ['from', 'to', 'format', 'prefix', 'suffix', 'startAt', 'durationInFrames'],
     description: 'animates a number incrementing or decrementing to a target value — use for metrics and stats',
-    durationContract: { kind: 'fixed' },
   },
   {
     name: 'WordCycle',
     type: 'content',
     fullSchema: WordCycleSchema,
-    editorProps: ['startAt', 'words', 'holdDuration', 'transitionDuration', 'transition'],
     description: 'cycles through a list of words in place — use when one slot shows multiple values over time',
-    durationContract: { kind: 'formula', strategy: 'wordCycle' },
   },
 ];

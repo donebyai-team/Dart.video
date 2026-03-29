@@ -214,7 +214,6 @@ export const IconShowcaseDescriptor: ComponentRegistration = {
     name: 'IconShowcase',
     type: 'scene',
     fullSchema: IconShowcaseSchema,
-    editorProps: ['icons', 'text', 'variant', 'iconSize', 'iconGap'],
     description: 'Displays a row of animated icons representing technologies, social proof, integrations, or partners with a short descriptive text. Required props: icons={["shopify", "midjourney", "openai"]}, text="Startups are getting 10× productivity with Cursor".',
     calculateDuration: calculateIconShowcaseDuration,
 };

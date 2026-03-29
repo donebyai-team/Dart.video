@@ -31,28 +31,24 @@ export const LAYOUT_COMPONENTS: ComponentRegistration[] = [
     name: 'SafeArea',
     type: 'layout',
     fullSchema: SafeAreaSchema,
-    editorProps: [],
     description: 'Outermost content wrapper that applies safe area insets from the active aspect preset',
   },
   {
     name: 'Stack',
     type: 'layout',
     fullSchema: StackSchema,
-    editorProps: ['gap', 'align', 'justify'],
     description: 'arranges children vertically — primary layout primitive for top-to-bottom compositions',
   },
   {
     name: 'Row',
     type: 'layout',
     fullSchema: RowSchema,
-    editorProps: ['gap', 'align', 'justify'],
     description: 'arranges children horizontally — use for side-by-side elements',
   },
   {
     name: 'AbsoluteCenter',
     type: 'layout',
     fullSchema: AbsoluteCenterSchema,
-    editorProps: ['axis'],
     description: 'centers a single child both horizontally and vertically on the full canvas',
   },
 ];

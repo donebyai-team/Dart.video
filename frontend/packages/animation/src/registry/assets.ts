@@ -42,28 +42,24 @@ export const BRAND_COMPONENTS: ComponentRegistration[] = [
     name: 'LogoAsset',
     type: 'brand',
     fullSchema: LogoAssetSchema,
-    editorProps: ['src', 'width', 'height'],
     description: 'renders the brand logo from the active theme — use for brand presence in title and outro scenes',
   },
   {
     name: 'ImageAsset',
     type: 'brand',
     fullSchema: ImageAssetSchema,
-    editorProps: ['src', 'width', 'height'],
     description: 'renders a static image from a URL — use for product screens, photos, and illustrations',
   },
   {
     name: 'VideoAsset',
     type: 'brand',
     fullSchema: VideoAssetSchema,
-    editorProps: ['src', 'width', 'height'],
     description: 'renders a static video file from a url — use for product tutorials, and explainer content',
   },
   {
     name: 'IconAsset',
     type: 'brand',
     fullSchema: IconAssetSchema,
-    editorProps: ['name', 'size'],
     description: 'renders a single icon by name from the icon library — use for decorative or supportive visual cues',
   },
 ];
