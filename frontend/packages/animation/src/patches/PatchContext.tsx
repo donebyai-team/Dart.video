@@ -1,6 +1,7 @@
 import React, { createContext, useContext } from 'react';
 import { PatchOverlay, createEmptyPatchOverlay } from './types';
 import { useSpeedFactor } from '../duration/speedFactor';
+import { deepMerge } from './utils';
 
 /**
  * PatchContext holds the active PatchOverlay for the current animation.
@@ -96,11 +97,13 @@ export function usePatchedProps<T>(
   defaultValue: T,
 ): T {
   const overlay = useContext(PatchContext);
+
   if (!id) return defaultValue;
 
-  const entry = overlay[id];
+  const entry = overlay[id] as Partial<T> | undefined;
   if (!entry) return defaultValue;
-  return entry as T;
+
+  return deepMerge(defaultValue, entry);
 }
 
 /**

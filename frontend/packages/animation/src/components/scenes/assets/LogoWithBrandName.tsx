@@ -39,6 +39,12 @@ export function LogoWithBrandName(propsInit: LogoWithBrandNameProps): React.Reac
     const preset = useAspectPreset();
 
     const patchedProps = usePatchedProps(propsInit.id, propsInit);
+    console.log('[LogoWithBrandName] patch input', {
+  id: propsInit.id,
+  propsInit,
+  patchedProps,
+})
+
     const props = { ...LogoWithBrandNameSchema.parse(patchedProps), id: propsInit.id };
     const resolvedLogo = props.src || theme.logoIcon?.url;
 

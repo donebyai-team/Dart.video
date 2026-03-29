@@ -56,6 +56,12 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
     const canSubmit = prompt.trim().length > 0
     const selectedAnimationElementId = normalizedSettings.animationElementId ?? null
 
+    console.log('[AnimationEditor] SceneSettings target', {
+        selectedAnimationElementId,
+        overlayEntry: selectedAnimationElementId ? overlay[selectedAnimationElementId] : null,
+    })
+
+
     useEffect(() => {
         if (selectedSlide) {
             setPrompt(
@@ -94,7 +100,7 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
             ? selectedSlide.slide.content
             : undefined
 
-        const pathOverlay = updatedContent.edits as unknown as PatchOverlay           
+        const pathOverlay = updatedContent.edits as unknown as PatchOverlay
         // Update editor state
         setOverlay(pathOverlay)
 
@@ -151,12 +157,12 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
 
                 if (event.slide) {
                     pendingGeneratedSlideRef.current = event.slide
-                     if (isAdding) {
+                    if (isAdding) {
                         createOrUpdateAddedSlide(event.slide)
                     } else {
                         applySlideToStore(event.slide)
                     }
-                }               
+                }
                 setPrompt('')
                 setStage('compose')
                 setIsSubmitting(false)

@@ -185,12 +185,19 @@ export function resolveOwningSceneElementId(elementId: string): string | null {
       resolvedSceneId = current
     }
 
-    const lastDashIdx = current.lastIndexOf('-')
-    if (lastDashIdx <= 0) break
+    if (!registration) break
 
-    // Nested primitive ids are encoded with dashed ancestry, so trimming one segment
-    // at a time lets us climb from a clicked child like "textstagger-foo-0" to "foo-0".
-    current = current.slice(0, lastDashIdx)
+    const componentPrefix = registration.name.toLowerCase()
+    const nestedPrefix = `${componentPrefix}-`
+    if (!current.startsWith(nestedPrefix)) break
+
+    const parentId = current.slice(nestedPrefix.length)
+    if (!parentId || parentId === current) break
+
+    // Nested child ids are encoded as "<child-component>-<parent-id>", so walking
+    // to the owning scene means removing the leading component prefix, not trimming
+    // the numeric suffix from the end.
+    current = parentId
   }
 
   return resolvedSceneId

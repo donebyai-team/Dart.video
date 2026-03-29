@@ -29,6 +29,11 @@ export const TextStagger: React.FC<TextStaggerProps> = (propsInit: TextStaggerPr
     const preset = useAspectPreset();
 
     const patchedProps = usePatchedProps(propsInit.id, propsInit)   
+     console.log('[TextStagger] patch input', {
+  id: propsInit.id,
+  propsInit,
+  patchedProps,
+})
     const props = { ...TextStaggerSchema.parse(patchedProps), id: propsInit.id }
 
 
