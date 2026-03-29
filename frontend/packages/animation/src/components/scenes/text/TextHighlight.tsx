@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
 import z from 'zod';
-import { usePatchedProp, usePatchedProps, useStyleOverride } from '../../../patches';
+import { usePatchedProps, useStyleOverride } from '../../../patches';
 import { useStyleContext, useAspectPreset, interpolateWithEasing } from '../../../styles';
 import { useTheme } from '../../../theme';
-import { resolveTypography, TypographyVariant, TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens';
-import { EntranceAnimation, getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
+import { resolveTypography, TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens';
+import { getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../durationTypes';
 

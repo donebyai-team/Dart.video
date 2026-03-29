@@ -15,9 +15,9 @@ import type { DurationResult } from '../durationTypes';
 // Default constants
 const DEFAULT_ENTRANCE_DURATION = 20;
 const DEFAULT_TYPING_DURATION = 60;
-const DEFAULT_FRAMES_PER_CHAR = 2;
-const DEFAULT_FRAMES_PER_WORD = 8;
-const DEFAULT_FRAMES_PER_LINE = 15;
+const DEFAULT_FRAMES_PER_CHAR = 3;
+const DEFAULT_FRAMES_PER_WORD = 9;
+const DEFAULT_FRAMES_PER_LINE = 18;
 const MIN_TYPING_DURATION = 30;
 const DEFAULT_SPLIT_BY = 'char' as const;
 const DEFAULT_VARIANT = 'heading' as const;

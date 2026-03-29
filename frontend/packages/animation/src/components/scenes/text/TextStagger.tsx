@@ -12,11 +12,20 @@ import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../durationTypes';
 
 // Default constants
-const DEFAULT_STAGGER_DELAY = 5;
-const DEFAULT_WORD_DURATION = 15;
 const DEFAULT_VARIANT = 'heading' as const;
 const DEFAULT_ANIMATION = 'scaleIn' as const;
 const DEFAULT_SPLIT_BY = 'word' as const;
+
+// Per-mode defaults: stagger delay and unit animation duration
+const SPLIT_MODE_DEFAULTS: Record<string, { staggerDelay: number; unitDuration: number }> = {
+    char: { staggerDelay: 2, unitDuration: 8 },
+    word: { staggerDelay: 5, unitDuration: 15 },
+    line: { staggerDelay: 10, unitDuration: 20 },
+};
+
+function getSplitModeDefaults(splitBy: string) {
+    return SPLIT_MODE_DEFAULTS[splitBy] ?? SPLIT_MODE_DEFAULTS['word'];
+}
 
 // Use z.input for props (what callers pass) - fields with defaults are optional
 export type TextStaggerProps = z.input<typeof TextStaggerSchema>;
@@ -32,17 +41,18 @@ export const TextStagger: React.FC<TextStaggerProps> = (propsInit: TextStaggerPr
     const props = { ...TextStaggerSchema.parse(patchedProps), id: propsInit.id }
 
 
-    // Apply defaults
+    // Apply defaults (split-mode-aware)
     const actualVariant = props.variant ?? DEFAULT_VARIANT;
-    const actualStaggerDelay = props.staggerDelay ?? DEFAULT_STAGGER_DELAY;
     const actualAnimation = props.entranceAnimation ?? DEFAULT_ANIMATION;
     const actualStartAt = props.startAt ?? 0;
-    const actualDuration = props.duration ?? DEFAULT_WORD_DURATION;
+    const splitBy = props.splitBy ?? DEFAULT_SPLIT_BY;
+    const modeDefaults = getSplitModeDefaults(splitBy);
+    const actualStaggerDelay = propsInit.staggerDelay ?? modeDefaults.staggerDelay;
+    const actualDuration = propsInit.duration ?? modeDefaults.unitDuration;
 
 
     const styleOverride = useStyleOverride(props.id);
 
-    const splitBy = props.splitBy ?? DEFAULT_SPLIT_BY;
     const units = splitBy === 'char' ? props.text.split('') : splitBy === 'line' ? props.text.split('\n') : props.text.split(' ');
 
     const getAnimationStyles = (unitIndex: number): React.CSSProperties => {
@@ -86,12 +96,12 @@ export const TextStagger: React.FC<TextStaggerProps> = (propsInit: TextStaggerPr
 
 export const TextStaggerSchema = z.object({
     id: z.string().optional(),
-    startAt: z.number().min(0, "startAt cannot be negative").optional().default(0),
+    startAt: z.number().min(0, "startAt cannot be negative").optional(),
     text: z.string().min(1, "text is required"),
     variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).optional().default(DEFAULT_VARIANT),
-    staggerDelay: z.number().min(0, "staggerDelay cannot be negative").optional().default(DEFAULT_STAGGER_DELAY),
+    staggerDelay: z.number().min(0, "staggerDelay cannot be negative").optional().default(SPLIT_MODE_DEFAULTS.word.staggerDelay),
     entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).optional().default(DEFAULT_ANIMATION),
-    duration: z.number().min(1, "duration must be positive").optional().default(DEFAULT_WORD_DURATION),
+    duration: z.number().min(1, "duration must be positive").optional().default(SPLIT_MODE_DEFAULTS.word.unitDuration),
     splitBy: z.enum(SPLIT_BY_MODES).optional().default(DEFAULT_SPLIT_BY),
     className: z.string().optional(),
     style: z.any().optional(),
@@ -125,9 +135,11 @@ export function calculateTextStaggerDuration(props: TextStaggerProps): DurationR
         };
     }
 
-    // Calculate duration
-    const staggerDelay = validated.staggerDelay ?? DEFAULT_STAGGER_DELAY;
-    const unitDuration = validated.duration ?? DEFAULT_WORD_DURATION;
+    // Use split-mode-aware defaults for stagger delay and unit duration
+    // Check raw props (not validated) so Zod schema defaults don't override mode-specific defaults
+    const modeDefaults = getSplitModeDefaults(splitBy);
+    const staggerDelay = props.staggerDelay ?? modeDefaults.staggerDelay;
+    const unitDuration = props.duration ?? modeDefaults.unitDuration;
 
     // Total duration = time until last unit starts + duration of last unit animation
     const totalDuration = (unitCount - 1) * staggerDelay + unitDuration;

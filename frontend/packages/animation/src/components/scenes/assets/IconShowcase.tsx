@@ -3,14 +3,11 @@ import { interpolate, useCurrentFrame, spring } from 'remotion';
 import z from 'zod';
 import { IconAsset } from '../../../core/assets/IconAsset';
 import { TextStagger } from '../text/TextStagger';
-import { useStyleContext } from '../../../styles/StyleContext';
 import { usePatchedProps, useStyleOverride } from '../../../patches';
-import { useAspectPreset } from '../../../styles';
-import { useTheme } from '../../../theme';
-import { TypographyVariant, TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
+import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../durationTypes';
-import { IconName, IconNameSchema } from '../types';
+import { ENTRANCE_ANIMATIONS, IconNameSchema, SPLIT_BY_MODES } from '../types';
 
 // Default constants
 const DEFAULT_ENTRANCE_DURATION = 10;
@@ -32,7 +29,6 @@ export const IconShowcaseSchema = z.object({
     variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
     iconSize: z.number().min(1, "iconSize must be positive").default(DEFAULT_ICON_SIZE).optional(),
     iconGap: z.number().min(0, "iconGap cannot be negative").default(DEFAULT_ICON_GAP).optional(),
-    startAt: z.number().optional(),
     className: z.string().optional(),
     style: z.any().optional(),
 });
@@ -47,13 +43,12 @@ export const IconShowcase: React.FC<IconShowcaseProps> = (propsInit: IconShowcas
     const styleOverride = useStyleOverride(props.id);
 
     // Apply defaults
-    const actualStartAt = props.startAt ?? 0;
     const actualIconSize = props.iconSize ?? DEFAULT_ICON_SIZE;
     const actualIconGap = props.iconGap ?? DEFAULT_ICON_GAP;
     const actualVariant = props.variant ?? DEFAULT_VARIANT;
 
     // Animation timing
-    const localFrame = frame - actualStartAt;
+    const localFrame = frame;
     const entranceDuration = DEFAULT_ENTRANCE_DURATION;
     const iconStagger = DEFAULT_ICON_STAGGER;
     const iconAnimDuration = DEFAULT_ICON_ANIMATION_DURATION;
@@ -154,9 +149,10 @@ export const IconShowcase: React.FC<IconShowcaseProps> = (propsInit: IconShowcas
                     <TextStagger
                         id={`textstagger-${props.id}`}
                         text={props.text}
-                        entranceAnimation='slideRight'
                         variant={actualVariant}
-                        startAt={actualStartAt + textStartFrame}
+                        splitBy={SPLIT_BY_MODES[1]}
+                        entranceAnimation={ENTRANCE_ANIMATIONS[3]}
+                        startAt={textStartFrame}
                     />
                 </div>
             )}

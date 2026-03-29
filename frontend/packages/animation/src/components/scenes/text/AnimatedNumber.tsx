@@ -1,12 +1,12 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
 import z from 'zod';
-import { usePatchedProp, usePatchedProps, useStyleOverride } from '../../../patches';
+import { usePatchedProps, useStyleOverride } from '../../../patches';
 import { useStyleContext, useAspectPreset, interpolateWithEasing } from '../../../styles';
 import { useTheme } from '../../../theme';
-import { resolveTypography, TypographyVariant } from '../../../tokens';
+import { resolveTypography } from '../../../tokens';
 import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
-import { EntranceAnimation, getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
+import { getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
 import { Counter } from './Counter';
 import { Text } from '../../../core/text/Text';
 import type { ComponentRegistration } from '../../../registry/registry';
