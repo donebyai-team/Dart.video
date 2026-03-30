@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/shank318/coasterai/agent/agenterrors"
 	"github.com/shank318/coasterai/agent/llm"
+	"github.com/shank318/coasterai/agent/scenes"
 	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/cache"
 	"github.com/shank318/coasterai/datastore"
@@ -313,6 +314,7 @@ func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest ty
 		}
 	}()
 
+	generatePlanRequest.ComponentList = scenes.BuildScenesList(false, nil)
 	llmResponse, err := l.llmService.GenerateScene(ctx, generatePlanRequest, session.ConversationHistory, func(chunk string) {
 		l.publishTransientState(VideoAgentState{
 			Thinking: chunk,

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/shank318/coasterai/agent/agenterrors"
 	"github.com/shank318/coasterai/agent/llm"
+	"github.com/shank318/coasterai/agent/scenes"
 	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/cache"
 	"github.com/shank318/coasterai/datastore"
@@ -367,6 +368,8 @@ func (a *agentV2) runPlanning(ctx context.Context, req types.VideoGenerationPlan
 			a.logger.Error("failed to mark video as failed/cancelled", zap.Error(failErr))
 		}
 	}()
+
+	req.ComponentList = scenes.BuildScenesList(true, nil)
 
 	llmResponse, err := a.llmService.GeneratePlanV2(ctx, req, session.ConversationHistory, func(chunk string) {
 		a.publishTransientState(VideoAgentState{

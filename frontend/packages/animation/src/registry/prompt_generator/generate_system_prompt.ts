@@ -88,6 +88,7 @@ interface PropJson {
 
 interface ComponentJson {
   name: string;
+  id: string;
   description: string;
   props: PropJson[];
 }
@@ -120,7 +121,7 @@ function componentToJson(c: ComponentRegistration): ComponentJson {
     props.push(prop);
   }
 
-  return { name: c.name, description: c.description, props };
+  return { name: c.name, id: c.name.toLocaleLowerCase(), description: c.description, props };
 }
 
 function getComponentGroupsJson(): ComponentGroupJson[] {

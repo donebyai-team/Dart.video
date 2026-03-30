@@ -46,7 +46,7 @@ if (mode === 'json') {
     const outputPath = path.resolve(
       process.cwd(),
       'src/registry/prompt_generator/prompts',
-      'prompt_components.json',
+      'scenes-manifest.json',
     );
     writeFileSync(outputPath, `${content}\n`);
     console.log(`Wrote ${path.relative(process.cwd(), outputPath)}`);

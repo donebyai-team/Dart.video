@@ -31,6 +31,10 @@ func (t *AddSceneRequestClassView) ListProperties() ([]ClassPropertyView, error)
 	return builders, nil
 }
 
+func (t *AddSceneRequestClassView) PropertyComponentList() (ClassPropertyView, error) {
+	return t.inner.Property("ComponentList")
+}
+
 func (t *AddSceneRequestClassView) PropertyVideoBranding() (ClassPropertyView, error) {
 	return t.inner.Property("VideoBranding")
 }
@@ -805,6 +809,10 @@ func (t *VideoGenerationPlanRequestClassView) PropertyVideoBranding() (ClassProp
 
 func (t *VideoGenerationPlanRequestClassView) PropertyBrandLibraryID() (ClassPropertyView, error) {
 	return t.inner.Property("BrandLibraryID")
+}
+
+func (t *VideoGenerationPlanRequestClassView) PropertyComponentList() (ClassPropertyView, error) {
+	return t.inner.Property("ComponentList")
 }
 
 func (t *TypeBuilder) VideoGenerationPlanRequest() (*VideoGenerationPlanRequestClassView, error) {

@@ -12,6 +12,7 @@ class VideoGenerationPlanRequest {
     Script  ScriptItem[]
     VideoBranding VideoBranding
     BrandLibraryID string? @skip // Just needed to store the request as it is
+    ComponentList string
 }
 
 class SceneSection {
@@ -36,7 +37,7 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     You decide WHAT appears in each scene, HOW it behaves, and WHAT data it shows.
     You do NOT write code.
 
-    {{ AllScenes() }}
+    {{ input.ComponentList }}
 
     ## SCENE DESIGN PRINCIPLES
 

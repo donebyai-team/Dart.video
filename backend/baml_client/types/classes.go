@@ -21,6 +21,7 @@ import (
 )
 
 type AddSceneRequest struct {
+	ComponentList string        `json:"ComponentList"`
 	VideoBranding VideoBranding `json:"VideoBranding"`
 }
 
@@ -38,6 +39,9 @@ func (c *AddSceneRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeM
 		valueHolder := field.Value
 		switch key {
 
+		case "ComponentList":
+			c.ComponentList = baml.Decode(valueHolder).Interface().(string)
+
 		case "VideoBranding":
 			c.VideoBranding = baml.Decode(valueHolder).Interface().(VideoBranding)
 
@@ -52,6 +56,8 @@ func (c *AddSceneRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeM
 
 func (c AddSceneRequest) Encode() (*cffi.HostValue, error) {
 	fields := map[string]any{}
+
+	fields["ComponentList"] = c.ComponentList
 
 	fields["VideoBranding"] = c.VideoBranding
 
@@ -1030,6 +1036,7 @@ type VideoGenerationPlanRequest struct {
 	Script         []ScriptItem  `json:"Script"`
 	VideoBranding  VideoBranding `json:"VideoBranding"`
 	BrandLibraryID *string       `json:"BrandLibraryID"`
+	ComponentList  string        `json:"ComponentList"`
 }
 
 func (c *VideoGenerationPlanRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -1067,6 +1074,9 @@ func (c *VideoGenerationPlanRequest) Decode(holder *cffi.CFFIValueClass, typeMap
 		case "BrandLibraryID":
 			c.BrandLibraryID = baml.Decode(valueHolder).Interface().(*string)
 
+		case "ComponentList":
+			c.ComponentList = baml.Decode(valueHolder).Interface().(string)
+
 		default:
 
 			panic(fmt.Sprintf("unexpected field: %s in class VideoGenerationPlanRequest", key))
@@ -1092,6 +1102,8 @@ func (c VideoGenerationPlanRequest) Encode() (*cffi.HostValue, error) {
 	fields["VideoBranding"] = c.VideoBranding
 
 	fields["BrandLibraryID"] = c.BrandLibraryID
+
+	fields["ComponentList"] = c.ComponentList
 
 	return baml.EncodeClass("VideoGenerationPlanRequest", fields, nil)
 }

@@ -1,4 +1,5 @@
 class AddSceneRequest {
+  ComponentList string
   VideoBranding VideoBranding
 }
 
@@ -14,7 +15,7 @@ function GenerateScene(input: AddSceneRequest, conversation_history: Message[]) 
     You decide WHAT appears in scene, HOW it behaves, and WHAT data it shows.
     You do NOT write code.
 
-    {{ AllScenes() }}
+     {{ input.ComponentList }}
 
     ## SCENE DESIGN PRINCIPLES
 

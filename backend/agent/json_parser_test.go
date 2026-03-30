@@ -1,6 +1,9 @@
 package agent
 
-import "testing"
+import (
+	"github.com/shank318/coasterai/agent/scenes"
+	"testing"
+)
 
 func TestParseScenePatch_BasicRoot(t *testing.T) {
 	input := []byte(`{
@@ -24,13 +27,19 @@ func TestParseScenePatch_BasicRoot(t *testing.T) {
 		t.Errorf("expected ID animatedvideo-0, got %s", node.ID)
 	}
 
-	if node.Type != "Animatedvideo" {
+	if node.Type != "AnimatedVideo" {
 		t.Errorf("expected Type Animatedvideo, got %s", node.Type)
 	}
 
 	if node.Props["src"] != "video.mp4" {
 		t.Errorf("expected src video.mp4, got %v", node.Props["src"])
 	}
+
+	list := scenes.BuildScenesList(false, nil)
+	if list == "" {
+		t.Fatal("expected non-empty list")
+	}
+
 }
 
 func TestParseScenePatch_WithChild(t *testing.T) {

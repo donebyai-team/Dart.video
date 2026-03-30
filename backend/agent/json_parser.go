@@ -3,6 +3,7 @@ package agent
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/shank318/coasterai/agent/scenes"
 	"github.com/shank318/coasterai/baml_client/types"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/structpb"
@@ -83,7 +84,7 @@ func ParseScenePatch(data []byte) ([]PatchOverlay, error) {
 
 			nodes[key] = &PatchOverlay{
 				ID:       key,
-				Type:     toPascalCase(parts[0]), // PascalCase here
+				Type:     scenes.GetComponentName(parts[0]),
 				Props:    props,
 				Children: map[string]map[string]interface{}{},
 			}
@@ -120,11 +121,4 @@ func ParseScenePatch(data []byte) ([]PatchOverlay, error) {
 	}
 
 	return result, nil
-}
-
-func toPascalCase(s string) string {
-	if s == "" {
-		return s
-	}
-	return strings.ToUpper(s[:1]) + s[1:]
 }
