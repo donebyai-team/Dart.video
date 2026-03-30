@@ -371,76 +371,103 @@ func (a *agentV2) runPlanning(ctx context.Context, req types.VideoGenerationPlan
 
 	req.ComponentList = scenes.BuildScenesList(true, nil)
 
-	llmResponse, err := a.llmService.GeneratePlanV2(ctx, req, session.ConversationHistory, func(chunk string) {
-		a.publishTransientState(VideoAgentState{
-			Thinking: chunk,
-			State:    stateStatusProcessing,
+	// Generate and validate upto max attempts
+	for attempt := 0; attempt < maxAttempts; attempt++ {
+		llmResponse, err := a.llmService.GeneratePlanV2(ctx, req, session.ConversationHistory, func(chunk string) {
+			a.publishTransientState(VideoAgentState{
+				Thinking: chunk,
+				State:    stateStatusProcessing,
+			})
 		})
-	})
-	if err != nil {
-		return nil, agenterrors.LLMPlanningFailed("failed to generate video plan", err)
-	}
-
-	handled, result, err := a.handleToolCalls(ctx, session, llmResponse, "")
-	if handled {
-		return result, err
-	}
-
-	plan := llmResponse.AsGeneratedVideoPlan()
-	if plan == nil {
-		return nil, agenterrors.Internal("llm response did not include a plan", nil)
-	}
-
-	// update the conversation
-	session.ConversationHistory = append(session.ConversationHistory, types.Message{
-		Role:    types.Union3KassistantOrKtoolOrKuser__NewKassistant(),
-		Content: fmt.Sprintf("Generated plan: %s", plan.VideoName),
-	})
-	if err = a.savePlanningSession(ctx, session); err != nil {
-		return nil, err
-	}
-
-	// Planning is complete; execute applyPlan asynchronously so Create/Continue
-	// can return after the first slide is persisted while generation continues.
-	if ctx.Err() != nil {
-		return nil, ctx.Err()
-	}
-
-	// We wait for the first slide to be generated as its a part of the planning phase
-	// once first slide is generated, we let the applyPlan run async which can be cancelled via StopAgent
-	firstSlideReady := make(chan struct{}, 1)
-	applyPlanDone := make(chan error, 1)
-	applyPlanCtx, cancelBeforeFirstSlide := context.WithCancel(context.Background())
-
-	go func() {
-		defer cancelBeforeFirstSlide()
-		if err := a.applyPlan(applyPlanCtx, plan, firstSlideReady); err != nil {
-			a.logger.Error("applyPlan async run failed", zap.Error(err))
-			applyPlanDone <- err
-			return
-		}
-		applyPlanDone <- nil
-	}()
-
-	select {
-	case <-firstSlideReady:
-		return &RunResult{Status: RunStatusCompleted}, nil
-	case err := <-applyPlanDone:
 		if err != nil {
-			return nil, err
+			return nil, agenterrors.LLMPlanningFailed("failed to generate video plan", err)
 		}
-		return &RunResult{Status: RunStatusCompleted}, nil
-	case <-ctx.Done():
-		// If first slide is not ready yet, treat this as planning cancellation and
-		// stop applyPlan. If first slide is already ready, allow applyPlan to continue.
+
+		handled, result, err := a.handleToolCalls(ctx, session, llmResponse, "")
+		if handled {
+			return result, err
+		}
+
+		plan := llmResponse.AsGeneratedVideoPlan()
+		if plan == nil {
+			return nil, agenterrors.Internal("llm response did not include a plan", nil)
+		}
+
+		// Validate Scenes
+		sceneErrors := make([]string, 0)
+		for _, section := range plan.Sections {
+			for _, scene := range section.Slides {
+				_, err := scenes.ConvertToSceneConfig(&scene)
+				if err != nil {
+					sceneErrors = append(sceneErrors, err.Error())
+				}
+			}
+		}
+
+		// Retry
+		if len(sceneErrors) > 0 {
+			marshal, _ := json.Marshal(plan)
+			session.ConversationHistory = append(session.ConversationHistory, types.Message{
+				Role:    types.Union3KassistantOrKtoolOrKuser__NewKassistant(),
+				Content: string(marshal),
+			})
+
+			session.ConversationHistory = append(session.ConversationHistory, types.Message{
+				Role:    types.Union3KassistantOrKtoolOrKuser__NewKuser(),
+				Content: fmt.Sprintf("Here are some of the invalid scenes you generated, please return the full plan again \n %s", strings.Join(sceneErrors, "\n")),
+			})
+
+			a.logger.Error("received invalid scenes, retrying..",
+				zap.Int("attempts", attempt),
+				zap.Strings("scene_errors", sceneErrors))
+
+			continue
+		}
+
+		// Planning is complete; execute applyPlan asynchronously so Create/Continue
+		// can return after the first slide is persisted while generation continues.
+		if ctx.Err() != nil {
+			return nil, ctx.Err()
+		}
+
+		// We wait for the first slide to be generated as its a part of the planning phase
+		// once first slide is generated, we let the applyPlan run async which can be cancelled via StopAgent
+		firstSlideReady := make(chan struct{}, 1)
+		applyPlanDone := make(chan error, 1)
+		applyPlanCtx, cancelBeforeFirstSlide := context.WithCancel(context.Background())
+
+		go func() {
+			defer cancelBeforeFirstSlide()
+			if err := a.applyPlan(applyPlanCtx, plan, firstSlideReady); err != nil {
+				a.logger.Error("applyPlan async run failed", zap.Error(err))
+				applyPlanDone <- err
+				return
+			}
+			applyPlanDone <- nil
+		}()
+
 		select {
 		case <-firstSlideReady:
 			return &RunResult{Status: RunStatusCompleted}, nil
-		default:
-			cancelBeforeFirstSlide()
+		case err := <-applyPlanDone:
+			if err != nil {
+				return nil, err
+			}
+			return &RunResult{Status: RunStatusCompleted}, nil
+		case <-ctx.Done():
+			// If first slide is not ready yet, treat this as planning cancellation and
+			// stop applyPlan. If first slide is already ready, allow applyPlan to continue.
+			select {
+			case <-firstSlideReady:
+				return &RunResult{Status: RunStatusCompleted}, nil
+			default:
+				cancelBeforeFirstSlide()
+			}
+			return nil, ctx.Err()
 		}
-		return nil, ctx.Err()
 	}
+
+	return nil, agenterrors.LLMPlanningFailed("failed to run planning", nil)
 }
 
 // aiPlan is sanitized to duration in frames
@@ -540,7 +567,13 @@ func (a *agentV2) applyPlan(
 
 			scene := sceneMapper[slide.Id]
 
-			template, err := a.animationGenerator.GenerateCodeFromScene(ctx, scene, func(progress TemplateGenerationProgress) {
+			//Convert to config
+			sceneConfig, err := scenes.ConvertToSceneConfig(scene)
+			if err != nil {
+				return fmt.Errorf("converting scene to config: %w", err)
+			}
+
+			template, err := a.animationGenerator.GenerateCodeFromScene(ctx, sceneConfig, func(progress TemplateGenerationProgress) {
 				a.updateState(ctx, VideoAgentState{
 					Thinking: progress.Message,
 					State:    stateStatusProcessing,

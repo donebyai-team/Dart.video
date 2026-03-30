@@ -79,7 +79,7 @@ export const TextStagger: React.FC<TextStaggerProps> = (propsInit: TextStaggerPr
                         marginRight: splitBy === 'word' && index < units.length - 1 ? '0.25em' : 0,
                         ...getAnimationStyles(index),
                         ...resolveTypography(actualVariant, styleConfig, theme, preset),
-                        ...props.wordStyle,
+                        ...props.style,
                         ...styleOverride
                     }}
                 >
@@ -105,7 +105,6 @@ export const TextStaggerSchema = z.object({
     splitBy: z.enum(SPLIT_BY_MODES).optional().default(DEFAULT_SPLIT_BY),
     className: z.string().optional(),
     style: z.any().optional(),
-    wordStyle: z.any().optional(),
 });
 
 export function calculateTextStaggerDuration(props: TextStaggerProps): DurationResult {
@@ -158,7 +157,6 @@ export const TextStaggerDescriptor: ComponentRegistration = {
     name: 'TextStagger',
     type: 'content',
     fullSchema: TextStaggerSchema,
-    editorProps: ['text', 'animation', 'staggerDelay', 'duration', 'splitBy'],
     description: 'Reveals text word-by-word or character-by-character with staggered animation delays. Use for multi-word headlines or body text. Required props: text="Transform your workflow with AI". Each unit animates in sequence with configurable delay. Set splitBy="char" for character-level animation.',
     calculateDuration: calculateTextStaggerDuration,
 };

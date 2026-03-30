@@ -3,16 +3,23 @@ package agent
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/shank318/coasterai/baml_client/types"
+	"github.com/shank318/coasterai/agent/scenes"
 	"strings"
 )
 
-func GenerateReact(scene *types.Scene) (string, error) {
+func GenerateCodeFromSceneConfig(scene *scenes.SceneConfig) (string, error) {
 	var elements []string
 
-	for _, el := range scene.Elements {
+	rendered, err := renderElement(scene, 3, scene.Name)
+	if err != nil {
+		return "", err
+	}
 
-		rendered, err := renderElement(el, 3, el.Component)
+	elements = append(elements, rendered)
+
+	for _, el := range scene.Children {
+
+		rendered, err := renderElement(&el, 3, el.Name)
 		if err != nil {
 			return "", err
 		}
@@ -34,7 +41,7 @@ export default function RemoteComponent() {
 	return code, nil
 }
 
-func renderElement(el types.SceneElement, indent int, path string) (string, error) {
+func renderElement(el *scenes.SceneConfig, indent int, path string) (string, error) {
 
 	space := strings.Repeat("  ", indent)
 
@@ -43,7 +50,7 @@ func renderElement(el types.SceneElement, indent int, path string) (string, erro
 		return "", err
 	}
 
-	tagOpen := el.Component
+	tagOpen := el.Name
 	if props != "" {
 		tagOpen += " " + props
 	}
@@ -56,9 +63,9 @@ func renderElement(el types.SceneElement, indent int, path string) (string, erro
 
 	for i, child := range el.Children {
 
-		childPath := fmt.Sprintf("%s > %s[%d]", path, child.Component, i)
+		childPath := fmt.Sprintf("%s > %s[%d]", path, child.Name, i)
 
-		rendered, err := renderElement(child, indent+1, childPath)
+		rendered, err := renderElement(&child, indent+1, childPath)
 		if err != nil {
 			return "", err
 		}
@@ -72,44 +79,11 @@ func renderElement(el types.SceneElement, indent int, path string) (string, erro
 		tagOpen,
 		strings.Join(children, "\n"),
 		space,
-		el.Component,
+		el.Name,
 	), nil
 }
 
-func renderProps(propsStr string, path string) (string, error) {
-
-	if propsStr == "" {
-		return "", nil
-	}
-
-	var props map[string]interface{}
-
-	err := json.Unmarshal([]byte(propsStr), &props)
-	if err != nil {
-
-		return "", fmt.Errorf(
-			`Invalid props JSON for component "%s".
-
-Props must be a valid JSON object.
-
-Received:
-%s
-
-Error:
-%s
-
-Example valid props:
-{
-  "text": "Hello",
-  "count": 10,
-  "style": {"color":"red"}
-}`,
-			path,
-			propsStr,
-			err.Error(),
-		)
-	}
-
+func renderProps(props map[string]interface{}, path string) (string, error) {
 	var parts []string
 
 	for key, value := range props {
@@ -122,6 +96,9 @@ Example valid props:
 		case float64:
 			parts = append(parts, fmt.Sprintf(`%s={%v}`, key, val))
 
+		case int:
+			parts = append(parts, fmt.Sprintf(`%s={%v}`, key, val))
+			
 		case bool:
 			parts = append(parts, fmt.Sprintf(`%s={%t}`, key, val))
 

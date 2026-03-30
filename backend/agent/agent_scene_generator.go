@@ -17,6 +17,7 @@ import (
 	"github.com/shank318/coasterai/services/brand_identity"
 	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/types/known/structpb"
 	"strings"
 	"time"
 )
@@ -177,7 +178,7 @@ func (a *sceneGenerator) ContinueAgent(
 
 	a.logger.Info("continuing agent session with user response", zap.String("response", userResponse))
 
-	return a.runPlanning(ctx, generatePlanRequest, session)
+	return a.runPlanning(ctx, generatePlanRequest, session, options.SlideToEdit)
 }
 
 func (a *sceneGenerator) injectMediaAssets(ctx context.Context, input *pbportal.CreateVideoRequest) error {
@@ -274,12 +275,11 @@ func (l *sceneGenerator) GenerateScene(
 
 	// Check if its a edit call and add previously scene
 	if slide.Content != nil && slide.Content.Edits != nil {
-		scene, err := ParseScenePatchFromStruct(slide.Content.Edits)
+		sceneToEdit, err := scenes.EditsToScene(slide.Content.Edits)
 		if err != nil {
 			return nil, agenterrors.InvalidInput("invalid scene patch", err)
 		}
-
-		marshalScene, err := json.Marshal(scene)
+		marshalScene, err := json.Marshal(sceneToEdit)
 		if err != nil {
 			return nil, agenterrors.InvalidInput("invalid scene patch", err)
 		}
@@ -300,55 +300,142 @@ func (l *sceneGenerator) GenerateScene(
 		return nil, err
 	}
 
-	return l.runPlanning(ctx, generatePlanRequest, session)
+	return l.runPlanning(ctx, generatePlanRequest, session, slide)
 }
 
-func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest types.AddSceneRequest, session *planningSession) (result *RunResult, retErr error) {
+func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest types.AddSceneRequest, session *planningSession, slide *pbcore.Slide) (result *RunResult, retErr error) {
 	defer func() {
-		if retErr == nil {
-			return
-		}
-
-		if ctx.Err() != nil || errors.Is(retErr, context.Canceled) || errors.Is(retErr, context.DeadlineExceeded) {
-			return
+		if retErr != nil {
+			// Treat both a hard context cancel (runCtx cancelled by the handler) and a
+			// soft Redis cancel (written by StopAgent) as user-initiated cancellations.
+			isUserCancel := ctx.Err() != nil || errors.Is(retErr, errUserSoftCancelled)
+			l.logger.Info("runPlanning: received termination",
+				zap.Bool("user_cancel", isUserCancel),
+				zap.Error(retErr),
+			)
 		}
 	}()
 
 	generatePlanRequest.ComponentList = scenes.BuildScenesList(false, nil)
-	llmResponse, err := l.llmService.GenerateScene(ctx, generatePlanRequest, session.ConversationHistory, func(chunk string) {
-		l.publishTransientState(VideoAgentState{
-			Thinking: chunk,
-			State:    stateStatusProcessing,
+	// Generate and validate upto max attempts
+	for attempt := 0; attempt < maxAttempts; attempt++ {
+		llmResponse, err := l.llmService.GenerateScene(ctx, generatePlanRequest, session.ConversationHistory, func(chunk string) {
+			l.publishTransientState(VideoAgentState{
+				Thinking: chunk,
+				State:    stateStatusProcessing,
+			})
 		})
-	})
-	if err != nil {
-		return nil, agenterrors.LLMPlanningFailed("failed to generate video plan", err)
-	}
+		if err != nil {
+			return nil, agenterrors.LLMPlanningFailed("failed to generate scene", err)
+		}
 
-	handled, result, err := l.handleToolCalls(ctx, session, llmResponse, "")
-	if handled {
-		return result, err
-	}
+		handled, result, err := l.handleToolCalls(ctx, session, llmResponse, "")
+		if handled {
+			return result, err
+		}
 
-	scene := llmResponse.AsScene()
-	if scene == nil {
-		return nil, agenterrors.Internal("llm response did not include a plan", nil)
-	}
+		scene := llmResponse.AsScene()
+		if scene == nil {
+			return nil, agenterrors.Internal("scene is missing", nil)
+		}
 
-	template, err := l.animationGenerator.GenerateCodeFromScene(ctx, scene, func(progress TemplateGenerationProgress) {
-		l.publishTransientState(VideoAgentState{
-			Thinking: progress.Message,
-			State:    stateStatusProcessing,
+		// Validate scene
+		sceneConfig, err := scenes.ConvertToSceneConfig(scene)
+		if err != nil {
+			marshalScene, _ := json.Marshal(scene)
+			session.ConversationHistory = appendRetryConversation(
+				session.ConversationHistory,
+				string(marshalScene),
+				err.Error(),
+			)
+
+			l.logger.Error("received invalid scene, retrying..",
+				zap.Int("attempts", attempt),
+				zap.String("scene_error", err.Error()))
+
+			continue
+		}
+
+		template, err := l.animationGenerator.GenerateCodeFromScene(ctx, sceneConfig, func(progress TemplateGenerationProgress) {
+			l.publishTransientState(VideoAgentState{
+				Thinking: progress.Message,
+				State:    stateStatusProcessing,
+			})
 		})
-	})
-	if err != nil {
+		if err != nil {
+			return nil, err
+		}
+
+		// Merge with user edits
+		// There can be orphans object if the scene is replaced
+		if slide.Content != nil && slide.Content.Edits != nil {
+			edits, err := mergeEdits(slide.Content.Edits, template.GeneratedPatches)
+			if err != nil {
+				return nil, agenterrors.InvalidInput("failed to merge edits", err)
+			}
+			template.GeneratedPatches = edits
+		}
+
+		return &RunResult{
+			Status:             RunStatusCompleted,
+			GeneratedAnimation: template,
+		}, nil
+
+	}
+
+	return nil, agenterrors.AnimationGenerationFailed("unable to generate, all retries exhausted", nil)
+
+}
+
+// Keps right as source of truth
+// there can be orphans object if the scene is replaced
+func mergeEdits(left *structpb.Struct, right json.RawMessage) (json.RawMessage, error) {
+	if left == nil {
+		return right, nil
+	}
+
+	if len(right) == 0 {
+		return json.Marshal(left.AsMap())
+	}
+
+	leftMap := left.AsMap()
+
+	var rightMap map[string]any
+	if err := json.Unmarshal(right, &rightMap); err != nil {
 		return nil, err
 	}
 
-	return &RunResult{
-		Status:             RunStatusCompleted,
-		GeneratedAnimation: template,
-	}, nil
+	merged := deepMergeMaps(leftMap, rightMap)
+
+	return json.Marshal(merged)
+}
+
+func deepMergeMaps(left, right map[string]any) map[string]any {
+	result := make(map[string]any, len(left)+len(right))
+
+	for k, v := range left {
+		result[k] = v
+	}
+
+	for k, rv := range right {
+		lv, exists := result[k]
+
+		if !exists {
+			result[k] = rv
+			continue
+		}
+
+		lmap, lok := lv.(map[string]any)
+		rmap, rok := rv.(map[string]any)
+
+		if lok && rok {
+			result[k] = deepMergeMaps(lmap, rmap)
+		} else {
+			result[k] = rv // right overrides
+		}
+	}
+
+	return result
 }
 
 func (a *sceneGenerator) publishTransientState(state VideoAgentState) {

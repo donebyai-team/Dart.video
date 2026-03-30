@@ -115,11 +115,6 @@
             "type": "enum(char|word|line)",
             "required": false,
             "default": "word"
-          },
-          {
-            "name": "wordStyle",
-            "type": "any",
-            "required": false
           }
         ]
       },
@@ -174,11 +169,6 @@
             "type": "enum(caption|label|body|subheading|heading|display)",
             "required": false,
             "default": "heading"
-          },
-          {
-            "name": "highlightPattern",
-            "type": "any",
-            "required": false
           },
           {
             "name": "highlightStyle",

@@ -497,7 +497,7 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                                 void handleSubmit()
                             }
                         }}
-                        placeholder='Describe the animation you want...'
+                        placeholder="Describe the changes you'd like to make..."
                         rows={5}
                         disabled={isSubmitting || stage === 'question'}
                         className="w-full resize-none bg-transparent px-3 py-2.5 pr-12 text-sm focus:outline-none placeholder:text-muted-foreground/60 disabled:opacity-50"

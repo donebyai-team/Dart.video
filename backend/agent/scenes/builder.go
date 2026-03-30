@@ -24,9 +24,10 @@ type Component struct {
 }
 
 type Prop struct {
-	Name     string `json:"name"`
-	Type     string `json:"type"`
-	Required bool   `json:"required"`
+	Name     string      `json:"name"`
+	Type     string      `json:"type"`
+	Required bool        `json:"required"`
+	Default  interface{} `json:"default"`
 }
 
 var (

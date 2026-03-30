@@ -61,6 +61,7 @@ func (p *Portal) GenerateOrEditScene(ctx context.Context, c *connect.Request[pbp
 			case *pbportal.GenerateOrEditSceneRequest_AskUserInput:
 				return animationAgent.ContinueAgent(runCtx, agent.ContinueSessionOptions{
 					UserResponse:        c.Msg.GetAskUserInput().Response,
+					SlideToEdit:         c.Msg.SlideToEdit,
 					SelectedMediaAssets: c.Msg.GetAskUserInput().Assets})
 			default:
 				return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("invalid input type"))

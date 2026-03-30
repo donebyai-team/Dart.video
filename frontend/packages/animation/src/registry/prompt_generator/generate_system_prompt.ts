@@ -76,6 +76,9 @@ function getZodDefault(schema: z.ZodTypeAny): unknown | undefined {
   if (schema instanceof z.ZodOptional || schema instanceof z.ZodNullable) {
     return getZodDefault(schema._def.innerType);
   }
+  if (schema instanceof z.ZodEffects) {
+    return getZodDefault(schema._def.schema);
+  }
   return undefined;
 }
 

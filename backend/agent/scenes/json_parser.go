@@ -1,23 +1,24 @@
-package agent
+package scenes
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/shank318/coasterai/agent/scenes"
 	"github.com/shank318/coasterai/baml_client/types"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/structpb"
 	"strings"
 )
 
-type PatchOverlay struct {
+// This is what even dynamic scenes will store
+type SceneConfig struct {
 	ID       string
-	Type     string
+	Name     string
 	Props    map[string]interface{}
-	Children map[string]map[string]interface{}
+	Children []SceneConfig
 }
 
-func ParseScenePatchFromStruct(edits *structpb.Struct) (*types.Scene, error) {
+// Convert edits to scene parent only
+func EditsToScene(edits *structpb.Struct) (*types.Scene, error) {
 	if edits == nil {
 		return nil, nil
 	}
@@ -47,7 +48,7 @@ func ParseScenePatchFromStruct(edits *structpb.Struct) (*types.Scene, error) {
 
 	elements := make([]types.SceneElement, 0)
 	elements = append(elements, types.SceneElement{
-		Component: node.Type,
+		Component: node.Name,
 		Props:     string(marshal),
 		Children:  nil,
 	})
@@ -58,14 +59,14 @@ func ParseScenePatchFromStruct(edits *structpb.Struct) (*types.Scene, error) {
 	}, nil
 }
 
-func ParseScenePatch(data []byte) ([]PatchOverlay, error) {
+func ParseScenePatch(data []byte) ([]SceneConfig, error) {
 	var raw map[string]json.RawMessage
 	err := json.Unmarshal(data, &raw)
 	if err != nil {
 		return nil, err
 	}
 
-	nodes := map[string]*PatchOverlay{}
+	nodes := map[string]*SceneConfig{}
 
 	// Pass 1: find root objects
 	for key, value := range raw {
@@ -85,16 +86,16 @@ func ParseScenePatch(data []byte) ([]PatchOverlay, error) {
 				return nil, fmt.Errorf("failed to unmarshal props %s: %w", key, err)
 			}
 
-			name := scenes.GetComponentName(parts[0])
+			name := GetComponentName(parts[0])
 			if name == "" {
 				return nil, fmt.Errorf("invalid component name: %s", parts[0])
 			}
 
-			nodes[key] = &PatchOverlay{
+			nodes[key] = &SceneConfig{
 				ID:       key,
-				Type:     name,
+				Name:     name,
 				Props:    props,
-				Children: map[string]map[string]interface{}{},
+				Children: nil,
 			}
 		}
 	}
@@ -115,7 +116,11 @@ func ParseScenePatch(data []byte) ([]PatchOverlay, error) {
 			continue
 		}
 
-		childType := parts[0]
+		// For now, not doing child validations as only scenes exists
+		//name := GetComponentName(parts[0])
+		//if name == "" {
+		//	return nil, fmt.Errorf("invalid component name: %s", parts[0])
+		//}
 
 		props := map[string]interface{}{}
 		err := json.Unmarshal(value, &props)
@@ -123,10 +128,15 @@ func ParseScenePatch(data []byte) ([]PatchOverlay, error) {
 			return nil, fmt.Errorf("failed to unmarshal props %s: %w", key, err)
 		}
 
-		node.Children[childType] = props
+		node.Children = append(node.Children, SceneConfig{
+			ID:       key,
+			Name:     parts[0],
+			Props:    props,
+			Children: nil,
+		})
 	}
 
-	result := []PatchOverlay{}
+	result := []SceneConfig{}
 	for _, node := range nodes {
 		result = append(result, *node)
 	}

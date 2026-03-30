@@ -33,6 +33,7 @@ type StartSessionOptions struct {
 type ContinueSessionOptions struct {
 	UserResponse        string
 	SelectedMediaAssets []*pbcore.SelectedMediaAsset
+	SlideToEdit         *pbcore.Slide
 }
 
 type RunStatus string

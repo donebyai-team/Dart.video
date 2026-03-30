@@ -20,7 +20,6 @@ export const TextHighlightSchema = z.object({
     id: z.string().optional(),
     text: z.string().min(1, "text is required"),
     variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
-    highlightPattern: z.union([z.string(), z.instanceof(RegExp)]).optional(),
     highlightStyle: z.enum(['marker', 'underline', 'box', 'glow', 'background']).default(DEFAULT_HIGHLIGHT_STYLE).optional(),
     highlightColor: z.string().optional(),
     animation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
@@ -77,72 +76,53 @@ export const TextHighlight: React.FC<TextHighlightProps> = (propsInit: TextHighl
     const isVisible = frame < disappearFrame;
 
     const segments = useMemo(() => {
-        const parts: { text: string; highlight: boolean; index: number }[] = [];
-        let lastIndex = 0;
-        let highlightIndex = 0;
+    const parts: { text: string; highlight: boolean; index: number }[] = [];
+    let lastIndex = 0;
+    let highlightIndex = 0;
 
-        // If no highlightPattern provided, check for {curly brace} pattern in text
-        const effectivePattern = props.highlightPattern ?? /\{([^}]+)\}/g;
+    const text = props.text;
 
-        if (typeof effectivePattern === 'string') {
-            // Simple string matching
-            const index = props.text.indexOf(effectivePattern);
-            if (index !== -1) {
-                if (index > 0) {
-                    parts.push({ text: props.text.slice(0, index), highlight: false, index: 0 });
-                }
-                parts.push({ text: effectivePattern, highlight: true, index: 0 });
-                if (index + effectivePattern.length < props.text.length) {
-                    parts.push({
-                        text: props.text.slice(index + effectivePattern.length),
-                        highlight: false,
-                        index: 0
-                    });
-                }
-            } else {
-                parts.push({ text: props.text, highlight: false, index: 0 });
-            }
-        } else {
-            // Regex matching
-            const regex = new RegExp(effectivePattern);
-            let match;
+    while (true) {
+        const start = text.indexOf("{", lastIndex);
+        if (start === -1) break;
 
-            while ((match = regex.exec(props.text)) !== null) {
-                if (match.index > lastIndex) {
-                    parts.push({
-                        text: props.text.slice(lastIndex, match.index),
-                        highlight: false,
-                        index: 0,
-                    });
-                }
+        const end = text.indexOf("}", start);
+        if (end === -1) break;
 
-                // If using capture groups (like {text}), use the captured group
-                const highlightText = match[1] || match[0];
-                parts.push({
-                    text: highlightText,
-                    highlight: true,
-                    index: highlightIndex++,
-                });
-
-                lastIndex = match.index + match[0].length;
-            }
-
-            if (lastIndex < props.text.length) {
-                parts.push({
-                    text: props.text.slice(lastIndex),
-                    highlight: false,
-                    index: 0,
-                });
-            }
-
-            // If no matches, return entire text
-            if (parts.length === 0) {
-                parts.push({ text: props.text, highlight: false, index: 0 });
-            }
+        // normal text before highlight
+        if (start > lastIndex) {
+            parts.push({
+                text: text.slice(lastIndex, start),
+                highlight: false,
+                index: 0,
+            });
         }
 
-        return parts;
-    }, [props.text, props.highlightPattern]);
+        // highlighted text
+        parts.push({
+            text: text.slice(start + 1, end),
+            highlight: true,
+            index: highlightIndex++,
+        });
+
+        lastIndex = end + 1;
+    }
+
+    // remaining text
+    if (lastIndex < text.length) {
+        parts.push({
+            text: text.slice(lastIndex),
+            highlight: false,
+            index: 0,
+        });
+    }
+
+    if (parts.length === 0) {
+        parts.push({ text, highlight: false, index: 0 });
+    }
+
+    return parts;
+}, [props.text]);
 
     const getHighlightStyles = (index: number): React.CSSProperties => {
         // Highlight is always at full intensity (no animation delay)

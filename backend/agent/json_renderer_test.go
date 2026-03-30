@@ -1,23 +1,25 @@
 package agent
 
 import (
-	"github.com/shank318/coasterai/baml_client/types"
+	"github.com/shank318/coasterai/agent/scenes"
 	"strings"
 	"testing"
 )
 
 func TestGenerateReact_ValidSimpleProps(t *testing.T) {
-
-	scene := types.Scene{
-		Elements: []types.SceneElement{
-			{
-				Component: "AnimatedNumber",
-				Props:     `{"startText":"Solving","endText":"incidents","from":0,"to":100}`,
-			},
+	sceneConfig := scenes.SceneConfig{
+		ID:   "",
+		Name: "AnimatedNumber",
+		Props: map[string]interface{}{
+			"startText": "Solving",
+			"endText":   "incidents",
+			"from":      0,
+			"to":        100,
 		},
+		Children: nil,
 	}
 
-	out, err := GenerateReact(&scene)
+	out, err := GenerateCodeFromSceneConfig(&sceneConfig)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -29,17 +31,18 @@ func TestGenerateReact_ValidSimpleProps(t *testing.T) {
 }
 
 func TestGenerateReact_StyleObject(t *testing.T) {
-
-	scene := types.Scene{
-		Elements: []types.SceneElement{
-			{
-				Component: "Box",
-				Props:     `{"style":{"color":"red","fontSize":20}}`,
+	sceneConfig := scenes.SceneConfig{
+		Name: "Box",
+		Props: map[string]interface{}{
+			"style": map[string]interface{}{
+				"color":    "red",
+				"fontSize": 20,
 			},
 		},
+		Children: nil,
 	}
 
-	out, err := GenerateReact(&scene)
+	out, err := GenerateCodeFromSceneConfig(&sceneConfig)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -51,17 +54,15 @@ func TestGenerateReact_StyleObject(t *testing.T) {
 }
 
 func TestGenerateReact_ArrayProp(t *testing.T) {
-
-	scene := types.Scene{
-		Elements: []types.SceneElement{
-			{
-				Component: "Chart",
-				Props:     `{"data":[1,2,3]}`,
-			},
+	sceneConfig := scenes.SceneConfig{
+		Name: "Chart",
+		Props: map[string]interface{}{
+			"data": []int{1, 2, 3},
 		},
+		Children: nil,
 	}
 
-	out, err := GenerateReact(&scene)
+	out, err := GenerateCodeFromSceneConfig(&sceneConfig)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -73,23 +74,22 @@ func TestGenerateReact_ArrayProp(t *testing.T) {
 }
 
 func TestGenerateReact_NestedComponents(t *testing.T) {
-
-	scene := types.Scene{
-		Elements: []types.SceneElement{
-			{
-				Component: "Box",
-				Props:     `{"padding":10}`,
-				Children: []types.SceneElement{
-					{
-						Component: "TextHighlight",
-						Props:     `{"text":"Hello World"}`,
-					},
+	sceneConfig := scenes.SceneConfig{
+		Name: "Box",
+		Props: map[string]interface{}{
+			"padding": 10,
+		},
+		Children: []scenes.SceneConfig{
+			scenes.SceneConfig{
+				Name: "TextHighlight",
+				Props: map[string]interface{}{
+					"text": "Hello World",
 				},
 			},
 		},
 	}
 
-	out, err := GenerateReact(&scene)
+	out, err := GenerateCodeFromSceneConfig(&sceneConfig)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -100,67 +100,16 @@ func TestGenerateReact_NestedComponents(t *testing.T) {
 	}
 }
 
-func TestGenerateReact_InvalidJSONProps(t *testing.T) {
-
-	scene := types.Scene{
-		Elements: []types.SceneElement{
-			{
-				Component: "Box",
-				Props:     `{color:'red'}`,
-			},
-		},
-	}
-
-	_, err := GenerateReact(&scene)
-
-	if err == nil {
-		t.Fatal("expected error but got none")
-	}
-
-	if !strings.Contains(err.Error(), "Invalid props JSON") {
-		t.Fatalf("unexpected error message: %v", err)
-	}
-}
-
-func TestGenerateReact_ErrorPath(t *testing.T) {
-
-	scene := types.Scene{
-		Elements: []types.SceneElement{
-			{
-				Component: "Box",
-				Children: []types.SceneElement{
-					{
-						Component: "TextHighlight",
-						Props:     `{bad json}`,
-					},
-				},
-			},
-		},
-	}
-
-	_, err := GenerateReact(&scene)
-
-	if err == nil {
-		t.Fatal("expected error")
-	}
-
-	if !strings.Contains(err.Error(), "TextHighlight") {
-		t.Fatalf("error should include component path: %v", err)
-	}
-}
-
 func TestGenerateReact_Snapshot(t *testing.T) {
-
-	scene := types.Scene{
-		Elements: []types.SceneElement{
-			{
-				Component: "AnimatedNumber",
-				Props:     `{"from":0,"to":100}`,
-			},
+	sceneConfig := scenes.SceneConfig{
+		Name: "AnimatedNumber",
+		Props: map[string]interface{}{
+			"from": 0,
+			"to":   100,
 		},
 	}
 
-	out, err := GenerateReact(&scene)
+	out, err := GenerateCodeFromSceneConfig(&sceneConfig)
 
 	if err != nil {
 		t.Fatal(err)

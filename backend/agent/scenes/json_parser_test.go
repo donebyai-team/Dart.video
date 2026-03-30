@@ -1,7 +1,6 @@
-package agent
+package scenes
 
 import (
-	"github.com/shank318/coasterai/agent/scenes"
 	"testing"
 )
 
@@ -27,15 +26,15 @@ func TestParseScenePatch_BasicRoot(t *testing.T) {
 		t.Errorf("expected ID animatedvideo-0, got %s", node.ID)
 	}
 
-	if node.Type != "AnimatedVideo" {
-		t.Errorf("expected Type Animatedvideo, got %s", node.Type)
+	if node.Name != "AnimatedVideo" {
+		t.Errorf("expected Type Animatedvideo, got %s", node.Name)
 	}
 
 	if node.Props["src"] != "video.mp4" {
 		t.Errorf("expected src video.mp4, got %v", node.Props["src"])
 	}
 
-	list := scenes.BuildScenesList(false, nil)
+	list := BuildScenesList(false, nil)
 	if list == "" {
 		t.Fatal("expected non-empty list")
 	}
@@ -61,12 +60,12 @@ func TestParseScenePatch_WithChild(t *testing.T) {
 
 	node := nodes[0]
 
-	child, exists := node.Children["text"]
-	if !exists {
+	child := node.Children[0]
+	if child.Name != "text" {
 		t.Fatalf("expected child 'text'")
 	}
 
-	style := child["style"].(map[string]interface{})
+	style := child.Props["style"].(map[string]interface{})
 	if style["color"] != "#641414" {
 		t.Errorf("expected color #641414, got %v", style["color"])
 	}
@@ -77,7 +76,7 @@ func TestParseScenePatch_MultipleRoots(t *testing.T) {
 		"animatedvideo-0": {
 			"src": "video.mp4"
 		},
-		"text-1": {
+		"textstagger-1": {
 			"value": "hello"
 		}
 	}`)

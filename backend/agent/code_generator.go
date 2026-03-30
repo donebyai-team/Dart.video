@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/shank318/coasterai/agent/agenterrors"
 	"github.com/shank318/coasterai/agent/llm"
+	"github.com/shank318/coasterai/agent/scenes"
 	"github.com/shank318/coasterai/baml_client"
 	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/models"
@@ -83,7 +84,7 @@ func CreativeStageMessage(stage GenerationStage, attempt int) string {
 
 type CodeGenerator interface {
 	GenerateCodeFromScene(ctx context.Context,
-		scene *types.Scene,
+		scene *scenes.SceneConfig,
 		callback TemplateGenerationCallback,
 	) (*models.Template, error)
 	ApplyGenerationOptions(options AnimationGenerationOptions)
@@ -100,7 +101,7 @@ type codeGenerator struct {
 	logger            *zap.Logger
 }
 
-func (l *codeGenerator) GenerateCodeFromScene(ctx context.Context, scene *types.Scene, callback TemplateGenerationCallback) (*models.Template, error) {
+func (l *codeGenerator) GenerateCodeFromScene(ctx context.Context, scene *scenes.SceneConfig, callback TemplateGenerationCallback) (*models.Template, error) {
 	//inptCodeGeneration := types.GenerateAnimationCodeRequestV2{
 	//	Scene: *scene,
 	//}
@@ -121,7 +122,7 @@ func (l *codeGenerator) GenerateCodeFromScene(ctx context.Context, scene *types.
 		//	return nil, agenterrors.AnimationGenerationFailed("failed to generate animation", err)
 		//}
 
-		generatedAnimation, err := GenerateReact(scene)
+		generatedAnimation, err := GenerateCodeFromSceneConfig(scene)
 		if err != nil {
 			return nil, agenterrors.AnimationGenerationFailed("failed to generate animation", err)
 		}
@@ -238,7 +239,7 @@ func NewAnimationGenerator(sessionID string,
 	}
 }
 
-const maxAttempts = 5
+const maxAttempts = 1
 
 type TemplateGenerationCallback func(TemplateGenerationProgress)
 

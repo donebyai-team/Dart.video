@@ -84,7 +84,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
   // const localTemplateId = content?.templateId
 
   // URL to fetch LLM-generated TSX source from
-  const templateUrl = content?.codeRegistry?.tUrl
+  const templateUrl = content?.codeRegistry?.mUrl
 
   const background = backgroundStyleToCSS(slide.backgroundStyle)
 
