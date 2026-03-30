@@ -80,11 +80,19 @@ func ParseScenePatch(data []byte) ([]PatchOverlay, error) {
 		if len(parts) == 2 {
 
 			props := map[string]interface{}{}
-			json.Unmarshal(value, &props)
+			err := json.Unmarshal(value, &props)
+			if err != nil {
+				return nil, fmt.Errorf("failed to unmarshal props %s: %w", key, err)
+			}
+
+			name := scenes.GetComponentName(parts[0])
+			if name == "" {
+				return nil, fmt.Errorf("invalid component name: %s", parts[0])
+			}
 
 			nodes[key] = &PatchOverlay{
 				ID:       key,
-				Type:     scenes.GetComponentName(parts[0]),
+				Type:     name,
 				Props:    props,
 				Children: map[string]map[string]interface{}{},
 			}
@@ -110,7 +118,10 @@ func ParseScenePatch(data []byte) ([]PatchOverlay, error) {
 		childType := parts[0]
 
 		props := map[string]interface{}{}
-		json.Unmarshal(value, &props)
+		err := json.Unmarshal(value, &props)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal props %s: %w", key, err)
+		}
 
 		node.Children[childType] = props
 	}

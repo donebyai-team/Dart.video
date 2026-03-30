@@ -98,7 +98,7 @@ func GetComponentName(id string) string {
 	if name, ok := componentNameMap[id]; ok {
 		return name
 	}
-	return strings.ToUpper(id[:1]) + id[1:]
+	return ""
 }
 
 func init() {
