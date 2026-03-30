@@ -34,3 +34,4 @@ npm-debug.log*
 .env
 
 out.mp4
+**/prompt_generator/prompts/ 

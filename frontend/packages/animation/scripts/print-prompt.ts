@@ -4,11 +4,11 @@
  * Usage:
  *   pnpm prompt
  *   pnpm prompt -- --mode only_components_description
- *   pnpm prompt -- --mode only_components_description --stdout
+ *   pnpm prompt -- --mode json
  */
 import { writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { getAnimationPrompt } from '../src/registry/prompt_generator';
+import { getAnimationPrompt, getAnimationPromptJson } from '../src/registry/prompt_generator';
 
 function getFlagValue(args: string[], name: string): string | undefined {
   const exact = `--${name}`;
@@ -31,19 +31,38 @@ function getFlagValue(args: string[], name: string): string | undefined {
 
 const mode = getFlagValue(process.argv.slice(2), 'mode') as
   | 'only_components_description'
+  | 'json'
   | undefined;
 
 const shouldPrintToStdout = process.argv.slice(2).includes('--stdout');
-const prompt = getAnimationPrompt(mode ? { mode } : undefined);
-const outputPath = path.resolve(
-  process.cwd(),
-  'src/registry/prompt_generator/prompts',
-  mode === 'only_components_description' ? 'prompt_list_components.md' : 'Prompt.md',
-);
 
-if (shouldPrintToStdout) {
-  console.log(prompt);
+if (mode === 'json') {
+  const json = getAnimationPromptJson();
+  const content = JSON.stringify(json, null, 2);
+
+  if (shouldPrintToStdout) {
+    console.log(content);
+  } else {
+    const outputPath = path.resolve(
+      process.cwd(),
+      'src/registry/prompt_generator/prompts',
+      'prompt_components.json',
+    );
+    writeFileSync(outputPath, `${content}\n`);
+    console.log(`Wrote ${path.relative(process.cwd(), outputPath)}`);
+  }
 } else {
-  writeFileSync(outputPath, `${prompt}\n`);
-  console.log(`Wrote ${path.relative(process.cwd(), outputPath)}`);
+  const prompt = getAnimationPrompt(mode ? { mode } : undefined);
+  const outputPath = path.resolve(
+    process.cwd(),
+    'src/registry/prompt_generator/prompts',
+    mode === 'only_components_description' ? 'prompt_list_components.md' : 'Prompt.md',
+  );
+
+  if (shouldPrintToStdout) {
+    console.log(prompt);
+  } else {
+    writeFileSync(outputPath, `${prompt}\n`);
+    console.log(`Wrote ${path.relative(process.cwd(), outputPath)}`);
+  }
 }

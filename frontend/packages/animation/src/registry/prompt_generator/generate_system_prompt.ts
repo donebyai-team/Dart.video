@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { ComponentRegistration } from '..';
 import { SCENE_COMPONENTS } from '../scenes';
 import {
@@ -44,6 +45,96 @@ function getOnlyComponentsDescriptionPrompt(): string {
   return sections.join('\n\n');
 }
 
+// ── JSON schema helpers ──────────────────────────────────────────────
+
+function unwrapZod(schema: z.ZodTypeAny): z.ZodTypeAny {
+  if (schema instanceof z.ZodOptional || schema instanceof z.ZodNullable) {
+    return unwrapZod(schema._def.innerType);
+  }
+  if (schema instanceof z.ZodDefault) {
+    return unwrapZod(schema._def.innerType);
+  }
+  return schema;
+}
+
+function describeZodType(schema: z.ZodTypeAny): string {
+  const inner = unwrapZod(schema);
+  if (inner instanceof z.ZodEnum) {
+    return `enum(${(inner._def.values as string[]).join('|')})`;
+  }
+  if (inner instanceof z.ZodNumber) return 'number';
+  if (inner instanceof z.ZodString) return 'string';
+  if (inner instanceof z.ZodArray) return 'array';
+  if (inner instanceof z.ZodBoolean) return 'boolean';
+  return 'any';
+}
+
+function getZodDefault(schema: z.ZodTypeAny): unknown | undefined {
+  if (schema instanceof z.ZodDefault) {
+    return schema._def.defaultValue();
+  }
+  if (schema instanceof z.ZodOptional || schema instanceof z.ZodNullable) {
+    return getZodDefault(schema._def.innerType);
+  }
+  return undefined;
+}
+
+interface PropJson {
+  name: string;
+  type: string;
+  required: boolean;
+  default?: unknown;
+}
+
+interface ComponentJson {
+  name: string;
+  description: string;
+  props: PropJson[];
+}
+
+interface ComponentGroupJson {
+  title: string;
+  description: string;
+  components: ComponentJson[];
+}
+
+function componentToJson(c: ComponentRegistration): ComponentJson {
+  const shape = c.fullSchema.shape;
+  const props: PropJson[] = [];
+
+  for (const [key, field] of Object.entries(shape)) {
+    if (key === 'children' || key === 'style' || key === 'className' || key === 'id') continue;
+
+    const zodField = field as z.ZodTypeAny;
+    const prop: PropJson = {
+      name: key,
+      type: describeZodType(zodField),
+      required: !zodField.isOptional(),
+    };
+
+    const defaultVal = getZodDefault(zodField);
+    if (defaultVal !== undefined) {
+      prop.default = defaultVal;
+    }
+
+    props.push(prop);
+  }
+
+  return { name: c.name, description: c.description, props };
+}
+
+function getComponentGroupsJson(): ComponentGroupJson[] {
+  return COMPONENT_GROUPS
+    .filter((g) => g.components.length > 0)
+    .map((g) => ({
+      title: g.title,
+      description: g.description,
+      components: g.components.map(componentToJson),
+    }));
+}
+
+// ── Public API ────────────────────────────────────────────────────────
+
 export function getAnimationPrompt(
   opts?: {
     mode?: 'only_components_description';
@@ -63,4 +154,8 @@ export function getAnimationPrompt(
   ];
 
   return sections.join('\n\n');
+}
+
+export function getAnimationPromptJson(): ComponentGroupJson[] {
+  return getComponentGroupsJson();
 }
