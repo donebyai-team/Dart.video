@@ -45,7 +45,7 @@ service PortalService {
   rpc UpdateBrandIdentity(UpdateBrandIdentityRequest) returns (.google.protobuf.Empty);
 
   // Edit animations
-  rpc GenerateOrEditAnimationSlide(GenerateOrEditAnimationRequest) returns (stream GenerateOrEditAnimationResponse);
+  rpc GenerateOrEditScene(GenerateOrEditSceneRequest) returns (stream GenerateOrEditSceneResponse);
 
   // Assets
   rpc GetMediaAssets(.google.protobuf.Empty) returns (GetMediaAssetsResponse);
@@ -60,40 +60,20 @@ message GetMediaAssetsResponse {
   repeated core.v1.MediaAsset assets = 1;
 }
 
-message GenerateOrEditAnimationRequest {
+message GenerateOrEditSceneRequest {
   string videoId = 1;
+  core.v1.Slide slideToEdit = 2;
   oneof input {
-    EditAnimationUserInput edit_animation_user_input = 2;
-    CreateNewAnimationInput create_new_animation_input = 3;
-    AskUserInput ask_user_input = 4;
+    CreateVideoRequest request = 3;
+    ContinueVideoPlanningRequest ask_user_input = 4;
   }
 }
 
-message EditAnimationUserInput {
-  string slide_id = 1;
-  string prompt = 2;
-  repeated core.v1.SelectedMediaAsset assets = 3;
-}
-
-message CreateNewAnimationInput {
-  bool suggestions = 1;
-  string prompt = 2;
-  repeated core.v1.SelectedMediaAsset assets = 3;
-}
-
-message AskUserInput {
-  string slide_id = 1;
-  string response = 2;
-  string video_id = 3;
-  repeated core.v1.SelectedMediaAsset assets = 4;
-}
-
-message GenerateOrEditAnimationResponse {
+message GenerateOrEditSceneResponse {
   core.v1.Slide slide = 1;
   string thinking_summary = 2;
   AskUserQuestion ask_user_question = 3;
   bool waiting_for_user_input = 4;
-  repeated core.v1.AnimationTemplate suggestions = 5;
   bool completed = 6;
   string error_message = 7;
 }
@@ -201,6 +181,7 @@ message ContinueVideoPlanningRequest {
   string id = 1; // video id
   string response = 2;
   repeated core.v1.SelectedMediaAsset assets = 3;
+  optional string slide_id = 4;
 }
 
 message AskUserQuestion {

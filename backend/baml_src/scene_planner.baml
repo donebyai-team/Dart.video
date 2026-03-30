@@ -1,24 +1,17 @@
-enum SceneCategory {
-  TITLE
-  OUTRO
-  SINGLE_STAT
-  COMPARISON
-  TREND
-  BREAKDOWN
-  FEATURE_HIGHLIGHT
-  FEATURE_LIST
-  WORKFLOW
-  TESTIMONIAL
-  LOGO_WALL
-  CASE_STUDY_STAT
-  PROBLEM
-  SOLUTION
-  HOW_IT_WORKS
+class ScriptItem {
+ name string
+ voiceover string?
+ reference string?
 }
 
-class DataPoint {
-  description string @description("plain English — what this value is for")
-  value string @description("number, string, array, object, URL — whatever the scene needs")
+class VideoGenerationPlanRequest {
+    Duration int
+    Prompt string
+    Language string
+    Resolution string
+    Script  ScriptItem[]
+    VideoBranding VideoBranding
+    BrandLibraryID string? @skip // Just needed to store the request as it is
 }
 
 class SceneSection {
@@ -26,29 +19,17 @@ class SceneSection {
   slides Scene[]
 }
 
-class Scene {
-  index int
-  elements SceneElement[]
-}
-
-class SceneElement {
-  component string
-  props string @description("required props in VALID JSON format as per the scene")
-  children SceneElement[]
-}
-
-class VideoPlanV2 {
+class GeneratedVideoPlan {
     videoName string @description("name of the video, around 5 to 15 length")
     sections SceneSection[]
     thinkingSummary string? @skip()
 }
 
-class VideoGenerationPlanV2 {
-  plan (VideoPlanV2 | AskUserQuestion)
+class VideoGenerationPlan {
+  plan (GeneratedVideoPlan | AskUserQuestion)
 }
 
-
-function GeneratePlanV2(input: VideoGenerationPlanRequest, conversation_history: Message[]) -> VideoGenerationPlanV2 {
+function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: Message[]) -> VideoGenerationPlan {
   client CustomOpenAI5WithThinkingSummary
   prompt #"
     You are a cinematic video planning director. Your job is to decompose a video brief into a sequence of scenes.
@@ -137,7 +118,7 @@ function GeneratePlanV2(input: VideoGenerationPlanRequest, conversation_history:
     5. Are there assets that match any scene intent?
     6. Use <attachments> and <user_note> to decide which attachment to use
        with Asset components. Use the url directly as the value
-       in a dataPoint.
+       in props src.
 
     Only begin output after forming a clear plan.
     ---

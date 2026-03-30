@@ -1,8 +1,6 @@
-import { SelectedSection } from "@/stores/video/types";
 import { EffectType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 
 export interface AddOrEditAnimationSettings {
-  previousSlide?: SelectedSection // if provided, we're adding an animation to a new slide after this previous slide
   animationElementId?: string
 }
 

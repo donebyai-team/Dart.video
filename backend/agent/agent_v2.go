@@ -30,7 +30,7 @@ type agentV2 struct {
 	retrievalService     RetrievalService
 	llmService           llm.LLMService
 	videoService         services.VideoGeneration
-	animationGenerator   AnimationGenerator
+	animationGenerator   CodeGenerator
 	cache                cache.Cache
 	logger               *zap.Logger
 	fps                  int64
@@ -72,20 +72,20 @@ func (a *agentV2) Continue(ctx context.Context, options ContinueSessionOptions) 
 	}
 
 	generatePlanRequest := types.VideoGenerationPlanRequest{
-		Duration:       int64(session.RequestV2.DurationInSec) * a.fps,
-		Prompt:         session.RequestV2.Prompt,
+		Duration:       int64(session.Request.DurationInSec) * a.fps,
+		Prompt:         session.Request.Prompt,
 		Language:       "English",
-		Resolution:     session.RequestV2.Resolution.Id,
-		BrandLibraryID: session.RequestV2.BrandLibraryId,
+		Resolution:     session.Request.Resolution.Id,
+		BrandLibraryID: session.Request.BrandLibraryId,
 	}
 
 	// If the user has provided more assets or clarification, update the attachments
 	if options.SelectedMediaAssets != nil && len(options.SelectedMediaAssets) > 0 {
-		session.RequestV2.Assets = append(session.RequestV2.Assets, options.SelectedMediaAssets...)
+		session.Request.Assets = append(session.Request.Assets, options.SelectedMediaAssets...)
 		userResponse += "\n\nattachments updated"
 	}
 
-	err = a.injectMediaAssets(ctx, session.RequestV2)
+	err = a.injectMediaAssets(ctx, session.Request)
 	if err != nil {
 		return nil, err
 	}
@@ -104,8 +104,6 @@ func (a *agentV2) Continue(ctx context.Context, options ContinueSessionOptions) 
 		Content:      userResponse,
 	})
 
-	session.Request = generatePlanRequest
-
 	if err := a.savePlanningSession(ctx, session); err != nil {
 		return nil, err
 	}
@@ -117,7 +115,7 @@ func (a *agentV2) Continue(ctx context.Context, options ContinueSessionOptions) 
 
 	a.logger.Info("continuing agent session with user response", zap.String("response", userResponse))
 
-	return a.runPlanning(ctx, session)
+	return a.runPlanning(ctx, generatePlanRequest, session)
 }
 
 func deduplicateAssets(
@@ -261,8 +259,7 @@ func (a *agentV2) Start(ctx context.Context, options StartSessionOptions) (*RunR
 	}
 
 	session := &planningSession{
-		RequestV2:           options.Input,
-		Request:             generatePlanRequest,
+		Request:             options.Input,
 		ConversationHistory: make([]types.Message, 0),
 	}
 
@@ -271,7 +268,7 @@ func (a *agentV2) Start(ctx context.Context, options StartSessionOptions) (*RunR
 	}
 
 	a.logger.Info("started agent session")
-	return a.runPlanning(ctx, session)
+	return a.runPlanning(ctx, generatePlanRequest, session)
 }
 
 func (a *agentV2) savePlanningSession(ctx context.Context, session *planningSession) error {
@@ -356,7 +353,7 @@ func (a *agentV2) publishState(state VideoAgentState) {
 	default:
 	}
 }
-func (a *agentV2) runPlanning(ctx context.Context, session *planningSession) (result *RunResult, retErr error) {
+func (a *agentV2) runPlanning(ctx context.Context, req types.VideoGenerationPlanRequest, session *planningSession) (result *RunResult, retErr error) {
 	defer func() {
 		if retErr == nil {
 			return
@@ -371,7 +368,7 @@ func (a *agentV2) runPlanning(ctx context.Context, session *planningSession) (re
 		}
 	}()
 
-	llmResponse, err := a.llmService.GeneratePlanV2(ctx, session.Request, session.ConversationHistory, func(chunk string) {
+	llmResponse, err := a.llmService.GeneratePlanV2(ctx, req, session.ConversationHistory, func(chunk string) {
 		a.publishTransientState(VideoAgentState{
 			Thinking: chunk,
 			State:    stateStatusProcessing,
@@ -386,7 +383,7 @@ func (a *agentV2) runPlanning(ctx context.Context, session *planningSession) (re
 		return result, err
 	}
 
-	plan := llmResponse.AsVideoPlanV2()
+	plan := llmResponse.AsGeneratedVideoPlan()
 	if plan == nil {
 		return nil, agenterrors.Internal("llm response did not include a plan", nil)
 	}
@@ -447,7 +444,7 @@ func (a *agentV2) runPlanning(ctx context.Context, session *planningSession) (re
 // apply should always work on frames
 func (a *agentV2) applyPlan(
 	ctx context.Context,
-	aiPlan *types.VideoPlanV2,
+	aiPlan *types.GeneratedVideoPlan,
 	firstSlideReady chan<- struct{},
 ) (err error) {
 
@@ -540,7 +537,7 @@ func (a *agentV2) applyPlan(
 
 			scene := sceneMapper[slide.Id]
 
-			template, err := a.animationGenerator.GenerateCodeV2(ctx, scene, func(progress TemplateGenerationProgress) {
+			template, err := a.animationGenerator.GenerateCodeFromScene(ctx, scene, func(progress TemplateGenerationProgress) {
 				a.updateState(ctx, VideoAgentState{
 					Thinking: progress.Message,
 					State:    stateStatusProcessing,

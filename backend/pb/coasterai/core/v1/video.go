@@ -3,7 +3,6 @@ package pbcore
 import (
 	"database/sql/driver"
 	"github.com/pkg/errors"
-	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/utils"
 )
 
@@ -69,16 +68,4 @@ func (v *CodeRegistry) Scan(value any) error {
 		return errors.Wrap(err, "CodeRegistry metadata")
 	}
 	return nil
-}
-
-func (v *AnimationSlidePlan) ToModel() *types.AnimationSlide {
-	return &types.AnimationSlide{
-		Index:                       v.Index,
-		BeatDescription:             v.BeatDescription,
-		AnimationType:               types.AnimationType(v.AnimationType),
-		CategorySearchQuery:         v.CategorySearcQquery,
-		Duration:                    v.DurationInFrames,
-		Voiceover:                   v.Voiceover,
-		SelectedTemplateDescription: v.SelectedTemplateDescription,
-	}
 }

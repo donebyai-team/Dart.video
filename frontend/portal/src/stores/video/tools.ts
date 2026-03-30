@@ -83,15 +83,14 @@ export const createToolActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   },
 
   handleAddAnimation(sectionId: string, afterSlideId?: string) {
+    const { addSlide } = get()
+
+    // Add an empty slide
+    addSlide(sectionId, afterSlideId)
+
     set({
       activeTool: {
         type: ActiveToolType.ADD_OR_EDIT_ANIMATION,
-        settings: {
-          previousSlide: {
-            section: { id: sectionId } as Section,
-            slide: { id: afterSlideId || '' } as Slide
-          }
-        }
       }
     })
   }

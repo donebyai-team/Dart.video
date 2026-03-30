@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"github.com/lib/pq"
-	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 )
@@ -79,11 +78,11 @@ type TemplateRepository interface {
 	UpdateTemplateCategory(ctx context.Context, tc *models.TemplateCategory) error
 	GetTemplateCategoriesByAnimationType(
 		ctx context.Context,
-		animationType types.AnimationType,
+		animationType string,
 	) ([]*models.TemplateCategory, error)
 	GetTemplateCategoryByName(
 		ctx context.Context,
-		animationType types.AnimationType,
+		animationType string,
 		name string,
 	) (*models.TemplateCategory, error)
 	CreateTemplate(ctx context.Context, t *models.Template) (*models.Template, error)
@@ -91,12 +90,12 @@ type TemplateRepository interface {
 	GetTemplatesByCategory(
 		ctx context.Context,
 		category string,
-		animationType types.AnimationType,
+		animationType string,
 		usedIds []string,
 	) ([]*models.Template, error)
 	GetTemplateByName(
 		ctx context.Context,
-		animationType types.AnimationType,
+		animationType string,
 		name string,
 	) (*models.Template, error)
 }

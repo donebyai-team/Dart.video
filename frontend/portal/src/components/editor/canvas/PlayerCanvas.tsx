@@ -100,7 +100,7 @@ const PlayerCanvas = ({
   const spotlights = selectedSlide.slide.spotlights ?? []
   const callouts = selectedSlide.slide.callouts ?? []
   const zooms = selectedSlide.slide.zooms ?? []
-  
+
   // Calculate slide start frame for overlay visibility check
   const slideStartFrame = getRealSlideStartFrame(getTimelineSlides(), selectedSlide.slide.id, fps)
 
@@ -163,28 +163,16 @@ const PlayerCanvas = ({
           animEditVersion={animEditVersion}
           onSelectElement={eid => {
             const sceneElementId = eid ? resolveOwningSceneElementId(eid) : null
-            const existingSettings =
-              activeTool.type === ActiveToolType.ADD_OR_EDIT_ANIMATION
-                ? activeTool.settings ?? {}
-                : {}
             setSelectedEid(eid)
 
-            if (!sceneElementId && !existingSettings.previousSlide) {
+            if (!sceneElementId) {
               handleCloseTool()
               return
             }
 
             handleSelectTool({
               type: ActiveToolType.ADD_OR_EDIT_ANIMATION,
-              settings: sceneElementId
-                ? {
-                    ...existingSettings,
-                    animationElementId: sceneElementId,
-                  }
-                : (() => {
-                    const { animationElementId: _animationElementId, ...rest } = existingSettings
-                    return rest
-                  })(),
+              settings: { animationElementId: sceneElementId }
             })
           }}
           onValuePatch={applyValuePatch}

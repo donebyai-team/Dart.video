@@ -71,8 +71,7 @@ export interface VideoActions {
     getSlideDurationInSeconds: (slide: Slide) => number;
     getSlideWithBackground: (slide : Slide) => BackgroundStyle;
     getTimelineSlides: () => TimelineSlide[]
-    addSlide: (sectionId: string, afterSlideId?: string) => void
-    addAnimationSlide: (sectionId: string, slide: Slide,afterSlideId?: string) => void
+    addSlide: (sectionId: string, afterSlideId?: string) => string
     removeSlide: (sectionId: string, slideId: string) => void
     duplicateSlide: (sectionId: string, slideId: string) => void
     updateSlide: (updates: Partial<Slide>) => void

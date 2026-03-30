@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/lib/pq"
-	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/models"
 )
 
@@ -55,7 +54,7 @@ func (r *Database) UpdateTemplateCategory(ctx context.Context, tc *models.Templa
 
 func (r *Database) GetTemplateCategoriesByAnimationType(
 	ctx context.Context,
-	animationType types.AnimationType,
+	animationType string,
 ) ([]*models.TemplateCategory, error) {
 	return getMany[models.TemplateCategory](
 		ctx,
@@ -69,7 +68,7 @@ func (r *Database) GetTemplateCategoriesByAnimationType(
 
 func (r *Database) GetTemplateCategoryByName(
 	ctx context.Context,
-	animationType types.AnimationType,
+	animationType string,
 	name string,
 ) (*models.TemplateCategory, error) {
 	return getOne[models.TemplateCategory](ctx, r, "templates/query_template_categories_by_name.sql", map[string]any{
@@ -121,7 +120,7 @@ func (r *Database) UpdateTemplate(ctx context.Context, t *models.Template) error
 func (r *Database) GetTemplatesByCategory(
 	ctx context.Context,
 	category string,
-	animationType types.AnimationType,
+	animationType string,
 	usedIds []string,
 ) ([]*models.Template, error) {
 	return getMany[models.Template](
@@ -138,7 +137,7 @@ func (r *Database) GetTemplatesByCategory(
 
 func (r *Database) GetTemplateByName(
 	ctx context.Context,
-	animationType types.AnimationType,
+	animationType string,
 	name string,
 ) (*models.Template, error) {
 	return getOne[models.Template](

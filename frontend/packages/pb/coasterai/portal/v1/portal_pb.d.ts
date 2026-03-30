@@ -6,7 +6,6 @@ import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobu
 import type { Message } from "@bufbuild/protobuf";
 import type { MediaAsset, SelectedMediaAsset } from "../../core/v1/media_asset_pb";
 import type { Slide } from "../../core/v1/slide_pb";
-import type { AnimationTemplate } from "../../core/v1/template_pb";
 import type { BrandIdentity, BrandIdentitySchema } from "../../core/v1/brandkit_pb";
 import type { FigmaFrame, FigmaPage } from "../../core/v1/figma_pb";
 import type { Resolution, Script, StyleType, Video, VideoConfig, VideoLanguage, VideoMetadata } from "../../core/v1/video_pb";
@@ -50,131 +49,47 @@ export declare type GetMediaAssetsResponse = Message<"coasterai.portal.v1.GetMed
 export declare const GetMediaAssetsResponseSchema: GenMessage<GetMediaAssetsResponse>;
 
 /**
- * @generated from message coasterai.portal.v1.GenerateOrEditAnimationRequest
+ * @generated from message coasterai.portal.v1.GenerateOrEditSceneRequest
  */
-export declare type GenerateOrEditAnimationRequest = Message<"coasterai.portal.v1.GenerateOrEditAnimationRequest"> & {
+export declare type GenerateOrEditSceneRequest = Message<"coasterai.portal.v1.GenerateOrEditSceneRequest"> & {
   /**
    * @generated from field: string videoId = 1;
    */
   videoId: string;
 
   /**
-   * @generated from oneof coasterai.portal.v1.GenerateOrEditAnimationRequest.input
+   * @generated from field: coasterai.core.v1.Slide slideToEdit = 2;
+   */
+  slideToEdit?: Slide;
+
+  /**
+   * @generated from oneof coasterai.portal.v1.GenerateOrEditSceneRequest.input
    */
   input: {
     /**
-     * @generated from field: coasterai.portal.v1.EditAnimationUserInput edit_animation_user_input = 2;
+     * @generated from field: coasterai.portal.v1.CreateVideoRequest request = 3;
      */
-    value: EditAnimationUserInput;
-    case: "editAnimationUserInput";
+    value: CreateVideoRequest;
+    case: "request";
   } | {
     /**
-     * @generated from field: coasterai.portal.v1.CreateNewAnimationInput create_new_animation_input = 3;
+     * @generated from field: coasterai.portal.v1.ContinueVideoPlanningRequest ask_user_input = 4;
      */
-    value: CreateNewAnimationInput;
-    case: "createNewAnimationInput";
-  } | {
-    /**
-     * @generated from field: coasterai.portal.v1.AskUserInput ask_user_input = 4;
-     */
-    value: AskUserInput;
+    value: ContinueVideoPlanningRequest;
     case: "askUserInput";
   } | { case: undefined; value?: undefined };
 };
 
 /**
- * Describes the message coasterai.portal.v1.GenerateOrEditAnimationRequest.
- * Use `create(GenerateOrEditAnimationRequestSchema)` to create a new message.
+ * Describes the message coasterai.portal.v1.GenerateOrEditSceneRequest.
+ * Use `create(GenerateOrEditSceneRequestSchema)` to create a new message.
  */
-export declare const GenerateOrEditAnimationRequestSchema: GenMessage<GenerateOrEditAnimationRequest>;
+export declare const GenerateOrEditSceneRequestSchema: GenMessage<GenerateOrEditSceneRequest>;
 
 /**
- * @generated from message coasterai.portal.v1.EditAnimationUserInput
+ * @generated from message coasterai.portal.v1.GenerateOrEditSceneResponse
  */
-export declare type EditAnimationUserInput = Message<"coasterai.portal.v1.EditAnimationUserInput"> & {
-  /**
-   * @generated from field: string slide_id = 1;
-   */
-  slideId: string;
-
-  /**
-   * @generated from field: string prompt = 2;
-   */
-  prompt: string;
-
-  /**
-   * @generated from field: repeated coasterai.core.v1.SelectedMediaAsset assets = 3;
-   */
-  assets: SelectedMediaAsset[];
-};
-
-/**
- * Describes the message coasterai.portal.v1.EditAnimationUserInput.
- * Use `create(EditAnimationUserInputSchema)` to create a new message.
- */
-export declare const EditAnimationUserInputSchema: GenMessage<EditAnimationUserInput>;
-
-/**
- * @generated from message coasterai.portal.v1.CreateNewAnimationInput
- */
-export declare type CreateNewAnimationInput = Message<"coasterai.portal.v1.CreateNewAnimationInput"> & {
-  /**
-   * @generated from field: bool suggestions = 1;
-   */
-  suggestions: boolean;
-
-  /**
-   * @generated from field: string prompt = 2;
-   */
-  prompt: string;
-
-  /**
-   * @generated from field: repeated coasterai.core.v1.SelectedMediaAsset assets = 3;
-   */
-  assets: SelectedMediaAsset[];
-};
-
-/**
- * Describes the message coasterai.portal.v1.CreateNewAnimationInput.
- * Use `create(CreateNewAnimationInputSchema)` to create a new message.
- */
-export declare const CreateNewAnimationInputSchema: GenMessage<CreateNewAnimationInput>;
-
-/**
- * @generated from message coasterai.portal.v1.AskUserInput
- */
-export declare type AskUserInput = Message<"coasterai.portal.v1.AskUserInput"> & {
-  /**
-   * @generated from field: string slide_id = 1;
-   */
-  slideId: string;
-
-  /**
-   * @generated from field: string response = 2;
-   */
-  response: string;
-
-  /**
-   * @generated from field: string video_id = 3;
-   */
-  videoId: string;
-
-  /**
-   * @generated from field: repeated coasterai.core.v1.SelectedMediaAsset assets = 4;
-   */
-  assets: SelectedMediaAsset[];
-};
-
-/**
- * Describes the message coasterai.portal.v1.AskUserInput.
- * Use `create(AskUserInputSchema)` to create a new message.
- */
-export declare const AskUserInputSchema: GenMessage<AskUserInput>;
-
-/**
- * @generated from message coasterai.portal.v1.GenerateOrEditAnimationResponse
- */
-export declare type GenerateOrEditAnimationResponse = Message<"coasterai.portal.v1.GenerateOrEditAnimationResponse"> & {
+export declare type GenerateOrEditSceneResponse = Message<"coasterai.portal.v1.GenerateOrEditSceneResponse"> & {
   /**
    * @generated from field: coasterai.core.v1.Slide slide = 1;
    */
@@ -196,11 +111,6 @@ export declare type GenerateOrEditAnimationResponse = Message<"coasterai.portal.
   waitingForUserInput: boolean;
 
   /**
-   * @generated from field: repeated coasterai.core.v1.AnimationTemplate suggestions = 5;
-   */
-  suggestions: AnimationTemplate[];
-
-  /**
    * @generated from field: bool completed = 6;
    */
   completed: boolean;
@@ -212,10 +122,10 @@ export declare type GenerateOrEditAnimationResponse = Message<"coasterai.portal.
 };
 
 /**
- * Describes the message coasterai.portal.v1.GenerateOrEditAnimationResponse.
- * Use `create(GenerateOrEditAnimationResponseSchema)` to create a new message.
+ * Describes the message coasterai.portal.v1.GenerateOrEditSceneResponse.
+ * Use `create(GenerateOrEditSceneResponseSchema)` to create a new message.
  */
-export declare const GenerateOrEditAnimationResponseSchema: GenMessage<GenerateOrEditAnimationResponse>;
+export declare const GenerateOrEditSceneResponseSchema: GenMessage<GenerateOrEditSceneResponse>;
 
 /**
  * @generated from message coasterai.portal.v1.UpdateBrandIdentityRequest
@@ -654,6 +564,11 @@ export declare type ContinueVideoPlanningRequest = Message<"coasterai.portal.v1.
    * @generated from field: repeated coasterai.core.v1.SelectedMediaAsset assets = 3;
    */
   assets: SelectedMediaAsset[];
+
+  /**
+   * @generated from field: optional string slide_id = 4;
+   */
+  slideId?: string;
 };
 
 /**
@@ -1571,12 +1486,12 @@ export declare const PortalService: GenService<{
   /**
    * Edit animations
    *
-   * @generated from rpc coasterai.portal.v1.PortalService.GenerateOrEditAnimationSlide
+   * @generated from rpc coasterai.portal.v1.PortalService.GenerateOrEditScene
    */
-  generateOrEditAnimationSlide: {
+  generateOrEditScene: {
     methodKind: "server_streaming";
-    input: typeof GenerateOrEditAnimationRequestSchema;
-    output: typeof GenerateOrEditAnimationResponseSchema;
+    input: typeof GenerateOrEditSceneRequestSchema;
+    output: typeof GenerateOrEditSceneResponseSchema;
   },
   /**
    * Assets

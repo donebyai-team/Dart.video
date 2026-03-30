@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/shank318/coasterai/baml_client/types"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/services"
 	"github.com/shank318/coasterai/template_validator"
@@ -35,11 +34,11 @@ var toolsSyncTemplates = Command(
 	"Synchronize animation categories and templates from the frontend filesystem into the backend database",
 )
 
-var animationFolderToType = map[string]types.AnimationType{
-	"text-animation": types.AnimationTypeTEXT,
-	//"visual-animation": types.AnimationTypeVISUAL,
-	//"stats-animation":  types.AnimationTypeSTATS,
-	//"chart-animation":  types.AnimationTypeCHART,
+var animationFolderToType = map[string]string{
+	"text-animation": "text",
+	//"visual-animation": stringVISUAL,
+	//"stats-animation":  stringSTATS,
+	//"chart-animation":  stringCHART,
 }
 
 var categoryFilePattern = regexp.MustCompile(`^[a-z0-9-]+\.md$`)
@@ -144,7 +143,7 @@ func toolsSyncTemplatesRunE(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func syncCategories(ctx context.Context, db datastore.TemplateRepository, categoriesDir string, animType types.AnimationType, animFolderName string, stats *syncStats) error {
+func syncCategories(ctx context.Context, db datastore.TemplateRepository, categoriesDir string, animType string, animFolderName string, stats *syncStats) error {
 	entries, err := os.ReadDir(categoriesDir)
 	if err != nil {
 		return fmt.Errorf("failed to read categories dir in %s: %w", animFolderName, err)
@@ -200,7 +199,7 @@ func syncCategories(ctx context.Context, db datastore.TemplateRepository, catego
 	return nil
 }
 
-func syncTemplate(ctx context.Context, db datastore.TemplateRepository, templateDir, templateName string, animType types.AnimationType, animFolderName string, stats *syncStats) error {
+func syncTemplate(ctx context.Context, db datastore.TemplateRepository, templateDir, templateName string, animType string, animFolderName string, stats *syncStats) error {
 	metadataPath := filepath.Join(templateDir, "metadata.json")
 	schemaPath := filepath.Join(templateDir, "schema.json")
 	embeddingPath := filepath.Join(templateDir, "embedding.md")

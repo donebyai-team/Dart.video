@@ -169,302 +169,6 @@ func EditAnimationCode(ctx context.Context, resume types.EditAnimationCodeReques
 	}
 }
 
-func EnhanceAnimationPrompt(ctx context.Context, request types.EnhanceAnimationPromptRequest, conversation_history []types.Message, opts ...CallOptionFunc) (types.EnhanceAnimationPromptResponse, error) {
-
-	var callOpts callOption
-	for _, opt := range opts {
-		opt(&callOpts)
-	}
-
-	// Resolve client option to clientRegistry (client takes precedence)
-	if callOpts.client != nil {
-		if callOpts.clientRegistry == nil {
-			callOpts.clientRegistry = baml.NewClientRegistry()
-		}
-		callOpts.clientRegistry.SetPrimaryClient(*callOpts.client)
-	}
-
-	args := baml.BamlFunctionArguments{
-		Kwargs: map[string]any{"request": request, "conversation_history": conversation_history},
-		Env:    getEnvVars(callOpts.env),
-	}
-
-	if callOpts.clientRegistry != nil {
-		args.ClientRegistry = callOpts.clientRegistry
-	}
-
-	if callOpts.collectors != nil {
-		args.Collectors = callOpts.collectors
-	}
-
-	if callOpts.typeBuilder != nil {
-		args.TypeBuilder = callOpts.typeBuilder
-	}
-
-	if callOpts.tags != nil {
-		args.Tags = callOpts.tags
-	}
-
-	encoded, err := args.Encode()
-	if err != nil {
-		panic(err)
-	}
-
-	if callOpts.onTick == nil {
-		result, err := bamlRuntime.CallFunction(ctx, "EnhanceAnimationPrompt", encoded, callOpts.onTick)
-		if err != nil {
-			return types.EnhanceAnimationPromptResponse{}, err
-		}
-
-		if result.Error != nil {
-			return types.EnhanceAnimationPromptResponse{}, result.Error
-		}
-
-		casted := (result.Data).(types.EnhanceAnimationPromptResponse)
-
-		return casted, nil
-	} else {
-		channel, err := bamlRuntime.CallFunctionStream(ctx, "EnhanceAnimationPrompt", encoded, callOpts.onTick)
-		if err != nil {
-			return types.EnhanceAnimationPromptResponse{}, err
-		}
-
-		for result := range channel {
-			if result.Error != nil {
-				return types.EnhanceAnimationPromptResponse{}, result.Error
-			}
-
-			if result.HasData {
-				return result.Data.(types.EnhanceAnimationPromptResponse), nil
-			}
-		}
-
-		return types.EnhanceAnimationPromptResponse{}, fmt.Errorf("No data returned from stream")
-	}
-}
-
-func ExtractTemplateConfig(ctx context.Context, input types.TemplateConfigExtractorInput, opts ...CallOptionFunc) (types.TemplateConfigExtractorOutput, error) {
-
-	var callOpts callOption
-	for _, opt := range opts {
-		opt(&callOpts)
-	}
-
-	// Resolve client option to clientRegistry (client takes precedence)
-	if callOpts.client != nil {
-		if callOpts.clientRegistry == nil {
-			callOpts.clientRegistry = baml.NewClientRegistry()
-		}
-		callOpts.clientRegistry.SetPrimaryClient(*callOpts.client)
-	}
-
-	args := baml.BamlFunctionArguments{
-		Kwargs: map[string]any{"input": input},
-		Env:    getEnvVars(callOpts.env),
-	}
-
-	if callOpts.clientRegistry != nil {
-		args.ClientRegistry = callOpts.clientRegistry
-	}
-
-	if callOpts.collectors != nil {
-		args.Collectors = callOpts.collectors
-	}
-
-	if callOpts.typeBuilder != nil {
-		args.TypeBuilder = callOpts.typeBuilder
-	}
-
-	if callOpts.tags != nil {
-		args.Tags = callOpts.tags
-	}
-
-	encoded, err := args.Encode()
-	if err != nil {
-		panic(err)
-	}
-
-	if callOpts.onTick == nil {
-		result, err := bamlRuntime.CallFunction(ctx, "ExtractTemplateConfig", encoded, callOpts.onTick)
-		if err != nil {
-			return types.TemplateConfigExtractorOutput{}, err
-		}
-
-		if result.Error != nil {
-			return types.TemplateConfigExtractorOutput{}, result.Error
-		}
-
-		casted := (result.Data).(types.TemplateConfigExtractorOutput)
-
-		return casted, nil
-	} else {
-		channel, err := bamlRuntime.CallFunctionStream(ctx, "ExtractTemplateConfig", encoded, callOpts.onTick)
-		if err != nil {
-			return types.TemplateConfigExtractorOutput{}, err
-		}
-
-		for result := range channel {
-			if result.Error != nil {
-				return types.TemplateConfigExtractorOutput{}, result.Error
-			}
-
-			if result.HasData {
-				return result.Data.(types.TemplateConfigExtractorOutput), nil
-			}
-		}
-
-		return types.TemplateConfigExtractorOutput{}, fmt.Errorf("No data returned from stream")
-	}
-}
-
-func GenerateAnimation(ctx context.Context, resume types.GenerateAnimationCodeRequest, conversation_history []types.Message, opts ...CallOptionFunc) (types.GenerateAnimationCodeResponse, error) {
-
-	var callOpts callOption
-	for _, opt := range opts {
-		opt(&callOpts)
-	}
-
-	// Resolve client option to clientRegistry (client takes precedence)
-	if callOpts.client != nil {
-		if callOpts.clientRegistry == nil {
-			callOpts.clientRegistry = baml.NewClientRegistry()
-		}
-		callOpts.clientRegistry.SetPrimaryClient(*callOpts.client)
-	}
-
-	args := baml.BamlFunctionArguments{
-		Kwargs: map[string]any{"resume": resume, "conversation_history": conversation_history},
-		Env:    getEnvVars(callOpts.env),
-	}
-
-	if callOpts.clientRegistry != nil {
-		args.ClientRegistry = callOpts.clientRegistry
-	}
-
-	if callOpts.collectors != nil {
-		args.Collectors = callOpts.collectors
-	}
-
-	if callOpts.typeBuilder != nil {
-		args.TypeBuilder = callOpts.typeBuilder
-	}
-
-	if callOpts.tags != nil {
-		args.Tags = callOpts.tags
-	}
-
-	encoded, err := args.Encode()
-	if err != nil {
-		panic(err)
-	}
-
-	if callOpts.onTick == nil {
-		result, err := bamlRuntime.CallFunction(ctx, "GenerateAnimation", encoded, callOpts.onTick)
-		if err != nil {
-			return types.GenerateAnimationCodeResponse{}, err
-		}
-
-		if result.Error != nil {
-			return types.GenerateAnimationCodeResponse{}, result.Error
-		}
-
-		casted := (result.Data).(types.GenerateAnimationCodeResponse)
-
-		return casted, nil
-	} else {
-		channel, err := bamlRuntime.CallFunctionStream(ctx, "GenerateAnimation", encoded, callOpts.onTick)
-		if err != nil {
-			return types.GenerateAnimationCodeResponse{}, err
-		}
-
-		for result := range channel {
-			if result.Error != nil {
-				return types.GenerateAnimationCodeResponse{}, result.Error
-			}
-
-			if result.HasData {
-				return result.Data.(types.GenerateAnimationCodeResponse), nil
-			}
-		}
-
-		return types.GenerateAnimationCodeResponse{}, fmt.Errorf("No data returned from stream")
-	}
-}
-
-func GenerateAnimationPrompt(ctx context.Context, resume types.GenerateAnimationPromptRequest, opts ...CallOptionFunc) (types.GenerateAnimationPromptResponse, error) {
-
-	var callOpts callOption
-	for _, opt := range opts {
-		opt(&callOpts)
-	}
-
-	// Resolve client option to clientRegistry (client takes precedence)
-	if callOpts.client != nil {
-		if callOpts.clientRegistry == nil {
-			callOpts.clientRegistry = baml.NewClientRegistry()
-		}
-		callOpts.clientRegistry.SetPrimaryClient(*callOpts.client)
-	}
-
-	args := baml.BamlFunctionArguments{
-		Kwargs: map[string]any{"resume": resume},
-		Env:    getEnvVars(callOpts.env),
-	}
-
-	if callOpts.clientRegistry != nil {
-		args.ClientRegistry = callOpts.clientRegistry
-	}
-
-	if callOpts.collectors != nil {
-		args.Collectors = callOpts.collectors
-	}
-
-	if callOpts.typeBuilder != nil {
-		args.TypeBuilder = callOpts.typeBuilder
-	}
-
-	if callOpts.tags != nil {
-		args.Tags = callOpts.tags
-	}
-
-	encoded, err := args.Encode()
-	if err != nil {
-		panic(err)
-	}
-
-	if callOpts.onTick == nil {
-		result, err := bamlRuntime.CallFunction(ctx, "GenerateAnimationPrompt", encoded, callOpts.onTick)
-		if err != nil {
-			return types.GenerateAnimationPromptResponse{}, err
-		}
-
-		if result.Error != nil {
-			return types.GenerateAnimationPromptResponse{}, result.Error
-		}
-
-		casted := (result.Data).(types.GenerateAnimationPromptResponse)
-
-		return casted, nil
-	} else {
-		channel, err := bamlRuntime.CallFunctionStream(ctx, "GenerateAnimationPrompt", encoded, callOpts.onTick)
-		if err != nil {
-			return types.GenerateAnimationPromptResponse{}, err
-		}
-
-		for result := range channel {
-			if result.Error != nil {
-				return types.GenerateAnimationPromptResponse{}, result.Error
-			}
-
-			if result.HasData {
-				return result.Data.(types.GenerateAnimationPromptResponse), nil
-			}
-		}
-
-		return types.GenerateAnimationPromptResponse{}, fmt.Errorf("No data returned from stream")
-	}
-}
-
 func GenerateAnimationV2(ctx context.Context, input types.GenerateAnimationCodeRequestV2, conversation_history []types.Message, opts ...CallOptionFunc) (types.GenerateAnimationCodeResponseV2, error) {
 
 	var callOpts callOption
@@ -539,7 +243,7 @@ func GenerateAnimationV2(ctx context.Context, input types.GenerateAnimationCodeR
 	}
 }
 
-func GeneratePlanStreaming(ctx context.Context, input types.VideoGenerationPlanRequest, conversation_history []types.Message, opts ...CallOptionFunc) (types.StreamingVideoGenerationPlan, error) {
+func GeneratePlan(ctx context.Context, input types.VideoGenerationPlanRequest, conversation_history []types.Message, opts ...CallOptionFunc) (types.VideoGenerationPlan, error) {
 
 	var callOpts callOption
 	for _, opt := range opts {
@@ -581,39 +285,39 @@ func GeneratePlanStreaming(ctx context.Context, input types.VideoGenerationPlanR
 	}
 
 	if callOpts.onTick == nil {
-		result, err := bamlRuntime.CallFunction(ctx, "GeneratePlanStreaming", encoded, callOpts.onTick)
+		result, err := bamlRuntime.CallFunction(ctx, "GeneratePlan", encoded, callOpts.onTick)
 		if err != nil {
-			return types.StreamingVideoGenerationPlan{}, err
+			return types.VideoGenerationPlan{}, err
 		}
 
 		if result.Error != nil {
-			return types.StreamingVideoGenerationPlan{}, result.Error
+			return types.VideoGenerationPlan{}, result.Error
 		}
 
-		casted := (result.Data).(types.StreamingVideoGenerationPlan)
+		casted := (result.Data).(types.VideoGenerationPlan)
 
 		return casted, nil
 	} else {
-		channel, err := bamlRuntime.CallFunctionStream(ctx, "GeneratePlanStreaming", encoded, callOpts.onTick)
+		channel, err := bamlRuntime.CallFunctionStream(ctx, "GeneratePlan", encoded, callOpts.onTick)
 		if err != nil {
-			return types.StreamingVideoGenerationPlan{}, err
+			return types.VideoGenerationPlan{}, err
 		}
 
 		for result := range channel {
 			if result.Error != nil {
-				return types.StreamingVideoGenerationPlan{}, result.Error
+				return types.VideoGenerationPlan{}, result.Error
 			}
 
 			if result.HasData {
-				return result.Data.(types.StreamingVideoGenerationPlan), nil
+				return result.Data.(types.VideoGenerationPlan), nil
 			}
 		}
 
-		return types.StreamingVideoGenerationPlan{}, fmt.Errorf("No data returned from stream")
+		return types.VideoGenerationPlan{}, fmt.Errorf("No data returned from stream")
 	}
 }
 
-func GeneratePlanV2(ctx context.Context, input types.VideoGenerationPlanRequest, conversation_history []types.Message, opts ...CallOptionFunc) (types.VideoGenerationPlanV2, error) {
+func GenerateScene(ctx context.Context, input types.AddSceneRequest, conversation_history []types.Message, opts ...CallOptionFunc) (types.AddSceneResponse, error) {
 
 	var callOpts callOption
 	for _, opt := range opts {
@@ -655,35 +359,35 @@ func GeneratePlanV2(ctx context.Context, input types.VideoGenerationPlanRequest,
 	}
 
 	if callOpts.onTick == nil {
-		result, err := bamlRuntime.CallFunction(ctx, "GeneratePlanV2", encoded, callOpts.onTick)
+		result, err := bamlRuntime.CallFunction(ctx, "GenerateScene", encoded, callOpts.onTick)
 		if err != nil {
-			return types.VideoGenerationPlanV2{}, err
+			return types.AddSceneResponse{}, err
 		}
 
 		if result.Error != nil {
-			return types.VideoGenerationPlanV2{}, result.Error
+			return types.AddSceneResponse{}, result.Error
 		}
 
-		casted := (result.Data).(types.VideoGenerationPlanV2)
+		casted := (result.Data).(types.AddSceneResponse)
 
 		return casted, nil
 	} else {
-		channel, err := bamlRuntime.CallFunctionStream(ctx, "GeneratePlanV2", encoded, callOpts.onTick)
+		channel, err := bamlRuntime.CallFunctionStream(ctx, "GenerateScene", encoded, callOpts.onTick)
 		if err != nil {
-			return types.VideoGenerationPlanV2{}, err
+			return types.AddSceneResponse{}, err
 		}
 
 		for result := range channel {
 			if result.Error != nil {
-				return types.VideoGenerationPlanV2{}, result.Error
+				return types.AddSceneResponse{}, result.Error
 			}
 
 			if result.HasData {
-				return result.Data.(types.VideoGenerationPlanV2), nil
+				return result.Data.(types.AddSceneResponse), nil
 			}
 		}
 
-		return types.VideoGenerationPlanV2{}, fmt.Errorf("No data returned from stream")
+		return types.AddSceneResponse{}, fmt.Errorf("No data returned from stream")
 	}
 }
 
@@ -758,153 +462,5 @@ func MatchCategories(ctx context.Context, resume types.MatchCategoriesRequest, o
 		}
 
 		return types.MatchCategoriesResponse{}, fmt.Errorf("No data returned from stream")
-	}
-}
-
-func MatchTemplate(ctx context.Context, resume types.MatchTemplateRequest, opts ...CallOptionFunc) (types.MatchTemplateResponse, error) {
-
-	var callOpts callOption
-	for _, opt := range opts {
-		opt(&callOpts)
-	}
-
-	// Resolve client option to clientRegistry (client takes precedence)
-	if callOpts.client != nil {
-		if callOpts.clientRegistry == nil {
-			callOpts.clientRegistry = baml.NewClientRegistry()
-		}
-		callOpts.clientRegistry.SetPrimaryClient(*callOpts.client)
-	}
-
-	args := baml.BamlFunctionArguments{
-		Kwargs: map[string]any{"resume": resume},
-		Env:    getEnvVars(callOpts.env),
-	}
-
-	if callOpts.clientRegistry != nil {
-		args.ClientRegistry = callOpts.clientRegistry
-	}
-
-	if callOpts.collectors != nil {
-		args.Collectors = callOpts.collectors
-	}
-
-	if callOpts.typeBuilder != nil {
-		args.TypeBuilder = callOpts.typeBuilder
-	}
-
-	if callOpts.tags != nil {
-		args.Tags = callOpts.tags
-	}
-
-	encoded, err := args.Encode()
-	if err != nil {
-		panic(err)
-	}
-
-	if callOpts.onTick == nil {
-		result, err := bamlRuntime.CallFunction(ctx, "MatchTemplate", encoded, callOpts.onTick)
-		if err != nil {
-			return types.MatchTemplateResponse{}, err
-		}
-
-		if result.Error != nil {
-			return types.MatchTemplateResponse{}, result.Error
-		}
-
-		casted := (result.Data).(types.MatchTemplateResponse)
-
-		return casted, nil
-	} else {
-		channel, err := bamlRuntime.CallFunctionStream(ctx, "MatchTemplate", encoded, callOpts.onTick)
-		if err != nil {
-			return types.MatchTemplateResponse{}, err
-		}
-
-		for result := range channel {
-			if result.Error != nil {
-				return types.MatchTemplateResponse{}, result.Error
-			}
-
-			if result.HasData {
-				return result.Data.(types.MatchTemplateResponse), nil
-			}
-		}
-
-		return types.MatchTemplateResponse{}, fmt.Errorf("No data returned from stream")
-	}
-}
-
-func ReGenerateAnimation(ctx context.Context, resume types.ReGenerateAnimationCodeRequest, conversation_history []types.Message, opts ...CallOptionFunc) (types.ReGenerateAnimationCodeResponse, error) {
-
-	var callOpts callOption
-	for _, opt := range opts {
-		opt(&callOpts)
-	}
-
-	// Resolve client option to clientRegistry (client takes precedence)
-	if callOpts.client != nil {
-		if callOpts.clientRegistry == nil {
-			callOpts.clientRegistry = baml.NewClientRegistry()
-		}
-		callOpts.clientRegistry.SetPrimaryClient(*callOpts.client)
-	}
-
-	args := baml.BamlFunctionArguments{
-		Kwargs: map[string]any{"resume": resume, "conversation_history": conversation_history},
-		Env:    getEnvVars(callOpts.env),
-	}
-
-	if callOpts.clientRegistry != nil {
-		args.ClientRegistry = callOpts.clientRegistry
-	}
-
-	if callOpts.collectors != nil {
-		args.Collectors = callOpts.collectors
-	}
-
-	if callOpts.typeBuilder != nil {
-		args.TypeBuilder = callOpts.typeBuilder
-	}
-
-	if callOpts.tags != nil {
-		args.Tags = callOpts.tags
-	}
-
-	encoded, err := args.Encode()
-	if err != nil {
-		panic(err)
-	}
-
-	if callOpts.onTick == nil {
-		result, err := bamlRuntime.CallFunction(ctx, "ReGenerateAnimation", encoded, callOpts.onTick)
-		if err != nil {
-			return types.ReGenerateAnimationCodeResponse{}, err
-		}
-
-		if result.Error != nil {
-			return types.ReGenerateAnimationCodeResponse{}, result.Error
-		}
-
-		casted := (result.Data).(types.ReGenerateAnimationCodeResponse)
-
-		return casted, nil
-	} else {
-		channel, err := bamlRuntime.CallFunctionStream(ctx, "ReGenerateAnimation", encoded, callOpts.onTick)
-		if err != nil {
-			return types.ReGenerateAnimationCodeResponse{}, err
-		}
-
-		for result := range channel {
-			if result.Error != nil {
-				return types.ReGenerateAnimationCodeResponse{}, result.Error
-			}
-
-			if result.HasData {
-				return result.Data.(types.ReGenerateAnimationCodeResponse), nil
-			}
-		}
-
-		return types.ReGenerateAnimationCodeResponse{}, fmt.Errorf("No data returned from stream")
 	}
 }

@@ -13,7 +13,7 @@ import (
 func (a *agentV2) handleToolCalls(
 	ctx context.Context,
 	session *planningSession,
-	llmResponse *types.Union2AskUserQuestionOrVideoPlanV2,
+	llmResponse *types.Union2AskUserQuestionOrGeneratedVideoPlan,
 	thinking string,
 ) (bool, *RunResult, error) {
 	question := llmResponse.AsAskUserQuestion()
@@ -96,43 +96,61 @@ func toProtoQuestion(question *types.AskUserQuestion) *pbportal.AskUserQuestion 
 	return proto
 }
 
-func (a *agentAnimationEditor) handleAnimationGenerationToolCalls(
+func (a *sceneGenerator) handleToolCalls(
 	ctx context.Context,
-	session *generateOrEditAnimationSession,
-	llmResponse *types.Union2AskUserQuestionOrEnhancedAnimationPrompt,
+	session *planningSession,
+	llmResponse *types.Union2AskUserQuestionOrScene,
 	thinking string,
-) (bool, *AnimationGenerationAgentRunResult, error) {
+) (bool, *RunResult, error) {
 	question := llmResponse.AsAskUserQuestion()
 	if question == nil {
 		return false, nil, nil
 	}
 
 	logger := logging.Logger(ctx, a.logger)
-	logger.Info("animation generation paused: waiting for user input",
+	logger.Info("planning paused: waiting for user input",
 		zap.String("question", question.Question_text),
 	)
+
+	if question.ThinkingSummary != nil && *question.ThinkingSummary != "" {
+		session.ConversationHistory = append(session.ConversationHistory, types.Message{
+			Role:    types.Union3KassistantOrKtoolOrKuser__NewKassistant(),
+			Content: *question.ThinkingSummary,
+		})
+	}
 
 	session.ConversationHistory = append(session.ConversationHistory, types.Message{
 		Role:    types.Union3KassistantOrKtoolOrKuser__NewKassistant(),
 		Content: question.Question_text,
 	})
-	session.AwaitingUserInput = true
 
-	if err := a.saveGenerateOrEditAnimationSession(ctx, session); err != nil {
-		return true, nil, agenterrors.SessionUnavailable("failed to save animation generation session with tool call", err)
+	if err := a.savePlanningSession(ctx, session); err != nil {
+		return true, nil, agenterrors.SessionUnavailable("failed to save planning session with tool call", err)
 	}
 
 	questionCopy := *question
-	a.publishTransientState(AnimationGeneratorAgentState{
+	a.publishTransientState(VideoAgentState{
 		Thinking:        thinking,
 		State:           stateStatusWaiting,
 		AskUserQuestion: &questionCopy,
 	})
 
-	protoQuestion := toProtoQuestion(&questionCopy)
+	questionProto := toProtoQuestion(&questionCopy)
 
-	return true, &AnimationGenerationAgentRunResult{
+	if questionCopy.AttachmentUrl != nil {
+		asset := a.assetRegistry.GetAssetFromPath(*questionCopy.AttachmentUrl)
+		if asset != nil {
+			questionProto.Asset = asset.ToProto()
+		}
+	}
+
+	// if no asset is provided
+	if questionProto.Asset == nil {
+		questionProto.QuestionType = pbportal.AskUserQuestionType_ASK_USER_QUESTION_TYPE_GENERAL
+	}
+
+	return true, &RunResult{
 		Status:          RunStatusWaitingForUserInput,
-		AskUserQuestion: protoQuestion,
+		AskUserQuestion: questionProto,
 	}, nil
 }

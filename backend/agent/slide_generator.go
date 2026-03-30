@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/services/brand_identity"
+	"github.com/shank318/coasterai/services/voiceover"
 	"math/rand"
 	"time"
 
@@ -47,7 +48,7 @@ func (g *videoConfigGenerator) Init(videoID, name string) *videoConfigGenerator 
 
 func (g *videoConfigGenerator) AddVideoBackground(style *pbcore.BackgroundStyle) {
 	g.video.Metadata.BackgroundStyle = style
-	g.video.Metadata.BackgroundAudioUrl = utils.Ptr("https://ik.imagekit.io/coasterai/freepik-deep-calm_A4WXzk4Mk.mp3")
+	g.video.Metadata.BackgroundAudioUrl = utils.Ptr(voiceover.GenerateBackgroundMusic().URL)
 }
 
 func (g *videoConfigGenerator) Done(ctx context.Context) error {
@@ -98,7 +99,7 @@ func (g *videoConfigGenerator) AddBranding(assetRegistry *services.MediaAssetReg
 func (g *videoConfigGenerator) CreatePendingSlidesV2(
 	ctx context.Context,
 	assetRegistry *services.MediaAssetRegistry,
-	plan *types.VideoPlanV2,
+	plan *types.GeneratedVideoPlan,
 ) (*pbcore.Video, map[string]*types.Scene, error) {
 	// save background
 	g.AddBranding(assetRegistry)

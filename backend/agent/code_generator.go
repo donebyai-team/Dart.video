@@ -81,30 +81,15 @@ func CreativeStageMessage(stage GenerationStage, attempt int) string {
 	}
 }
 
-type AnimationGenerator interface {
-	ExtractConfig(
-		ctx context.Context,
-		beatDescription string,
-		template *models.Template) (*types.TemplateConfigExtractorOutput, error)
-	GenerateCode(ctx context.Context,
-		prompt string,
-		animation *types.AnimationSlide,
-		callback TemplateGenerationCallback,
-	) (*models.Template, error)
-	EditAnimationCode(
-		ctx context.Context,
-		animationSlide *pbcore.Slide,
-		prompt string,
-		callback TemplateGenerationCallback,
-	) (*models.Template, error)
-	GenerateCodeV2(ctx context.Context,
+type CodeGenerator interface {
+	GenerateCodeFromScene(ctx context.Context,
 		scene *types.Scene,
 		callback TemplateGenerationCallback,
 	) (*models.Template, error)
 	ApplyGenerationOptions(options AnimationGenerationOptions)
 }
 
-type animationGenerator struct {
+type codeGenerator struct {
 	sessionID         string
 	orgID             string
 	slideID           string
@@ -115,7 +100,7 @@ type animationGenerator struct {
 	logger            *zap.Logger
 }
 
-func (l *animationGenerator) GenerateCodeV2(ctx context.Context, scene *types.Scene, callback TemplateGenerationCallback) (*models.Template, error) {
+func (l *codeGenerator) GenerateCodeFromScene(ctx context.Context, scene *types.Scene, callback TemplateGenerationCallback) (*models.Template, error) {
 	//inptCodeGeneration := types.GenerateAnimationCodeRequestV2{
 	//	Scene: *scene,
 	//}
@@ -144,11 +129,11 @@ func (l *animationGenerator) GenerateCodeV2(ctx context.Context, scene *types.Sc
 		// resolve the asset handles
 		if l.generationOptions.assetRegistry != nil {
 			l.logger.Info("using brand-identity mapping for resolving media handles")
-			generatedAnimation.Code = l.generationOptions.assetRegistry.ResolveMediaHandles(generatedAnimation.Code)
+			generatedAnimation = l.generationOptions.assetRegistry.ResolveMediaHandles(generatedAnimation)
 		}
 
 		// Default
-		indentedCode := indentCode(generatedAnimation.Code)
+		indentedCode := indentCode(generatedAnimation)
 
 		// 💾 Saving draft
 		callback(TemplateGenerationProgress{
@@ -241,8 +226,8 @@ func NewAnimationGenerator(sessionID string,
 	mediaStore services.MediaStore,
 	codeBuilder services.TemplateCodeBuilder,
 	logger *zap.Logger,
-	llmService llm.LLMService) AnimationGenerator {
-	return &animationGenerator{
+	llmService llm.LLMService) CodeGenerator {
+	return &codeGenerator{
 		sessionID:   sessionID,
 		orgID:       orgID,
 		slideID:     slideID,
@@ -276,177 +261,11 @@ func buildFailureMessage(buildErr *services.BuildError) string {
 	}
 }
 
-func (l *animationGenerator) ApplyGenerationOptions(options AnimationGenerationOptions) {
+func (l *codeGenerator) ApplyGenerationOptions(options AnimationGenerationOptions) {
 	l.generationOptions = options
 }
 
-func (l *animationGenerator) GenerateCode(ctx context.Context,
-	prompt string,
-	animation *types.AnimationSlide,
-	callback TemplateGenerationCallback,
-) (*models.Template, error) {
-	inptCodeGeneration := types.GenerateAnimationCodeRequest{
-		AnimationPrompt:  prompt,
-		DurationInFrames: animation.Duration, // was converted to frames while sanitization
-		Voiceover:        animation.Voiceover,
-		AnimationType:    animation.AnimationType,
-	}
-
-	if l.generationOptions.VideoBranding != nil {
-		inptCodeGeneration.Branding = *l.generationOptions.VideoBranding
-	}
-
-	if l.generationOptions.assetRegistry != nil {
-		inptCodeGeneration.Branding.BrandGuideLines = l.generationOptions.assetRegistry.FormatAssets()
-		l.logger.Info("using injected brand-identity mapper", zap.String("guidelines", *inptCodeGeneration.Branding.BrandGuideLines))
-	}
-
-	conversationHistory := make([]types.Message, 0)
-	for attempt := 0; attempt < maxAttempts; attempt++ {
-
-		// 🎨 Designing
-		callback(TemplateGenerationProgress{
-			Message: CreativeStageMessage(StageDesigning, attempt),
-		})
-
-		l.logger.Info("generating code")
-		generatedAnimation, err := baml_client.GenerateAnimation(ctx, inptCodeGeneration, conversationHistory)
-		if err != nil {
-			return nil, agenterrors.AnimationGenerationFailed("failed to generate animation", err)
-		}
-
-		// resolve the asset handles
-		if l.generationOptions.assetRegistry != nil {
-			l.logger.Info("using brand-identity mapping for resolving media handles")
-			generatedAnimation.Code = l.generationOptions.assetRegistry.ResolveMediaHandles(generatedAnimation.Code)
-		}
-
-		// Default
-		indentedCode := indentCode(generatedAnimation.Code)
-
-		// 💾 Saving draft
-		callback(TemplateGenerationProgress{
-			Message: CreativeStageMessage(StageSaving, attempt),
-		})
-
-		// ⚙️ Bringing to life (BUILD STAGE)
-		callback(TemplateGenerationProgress{
-			Message: CreativeStageMessage(StageBuilding, attempt),
-		})
-
-		l.logger.Info("building code")
-
-		buildOutput, err := l.codeBuilder.ValidateAndBuild(ctx, &services.ValidateAndBuildInput{
-			Code:       indentedCode,
-			OutputPath: fmt.Sprintf("templates/generated/%s/%s", l.orgID, l.sessionID),
-		})
-
-		if err == nil {
-			callback(TemplateGenerationProgress{
-				Message: CreativeStageMessage(StageReady, 0),
-			})
-
-			l.logger.Info("uploaded generated code",
-				zap.String("transformed_url", buildOutput.TransformedCodePath),
-				zap.String("assigned_ids_url", buildOutput.CodeWithAssignedIdsPath))
-
-			return &models.Template{
-				ID:            uuid.New().String(),
-				Name:          buildOutput.ComponentName,
-				AnimationType: types.AnimationTypeTEXT,
-				Repeatable:    false,
-				Description:   prompt,
-				Config: &models.TemplateConfig{
-					CodeRegistry: &pbcore.CodeRegistry{
-						MUrl: buildOutput.CodeWithAssignedIdsPath,
-						TUrl: buildOutput.TransformedCodePath,
-					},
-					VisibleDurationInFrames: buildOutput.CodeDuration.SettledFrame,
-					TotalDurationInFrames:   buildOutput.CodeDuration.DurationInFrames,
-					Repeatable:              false,
-					Categories:              nil,
-				},
-				GeneratedPatches: buildOutput.Registry,
-			}, nil
-		}
-
-		// Retry only on build errors
-		var buildErr *services.BuildError
-		if errors.As(err, &buildErr) {
-			conversationHistory = appendRetryConversation(
-				conversationHistory,
-				indentedCode,
-				buildFailureMessage(buildErr),
-			)
-
-			l.logger.Error("failed to build animation",
-				zap.Int("attempt_left", maxAttempts-attempt),
-				zap.Error(buildErr))
-
-			// 🔧 Refinement loop
-			callback(TemplateGenerationProgress{
-				Message: CreativeStageMessage(StageRefining, attempt),
-			})
-			continue
-		}
-
-		return nil, agenterrors.AnimationGenerationFailed("failed to build animation", err)
-	}
-
-	return nil, agenterrors.AnimationGenerationFailed(
-		"animation generation failed after max retries",
-		fmt.Errorf("max build attempts reached"),
-	)
-}
-
-func (l *animationGenerator) EditAnimationCode(
-	ctx context.Context,
-	animationSlide *pbcore.Slide,
-	prompt string,
-	callback TemplateGenerationCallback,
-) (*models.Template, error) {
-
-	slideContent := animationSlide.GetContent()
-	if slideContent.Plan == nil {
-		return nil, agenterrors.EditAnimationCodeFailed(
-			"failed to edit animation",
-			errors.New("animation has no plan"),
-		)
-	}
-
-	code, err := l.loadExistingCode(ctx, slideContent)
-	if err != nil {
-		return nil, fmt.Errorf("failed to load existing code: %w", err)
-	}
-
-	callback(TemplateGenerationProgress{
-		Message: CreativeStageMessage(StageUnderstanding, 0),
-	})
-	//// 1️⃣ Attempt targeted edits first
-	//template, err := l.tryTargetedEdits(
-	//	ctx,
-	//	code,
-	//	prompt,
-	//	callback,
-	//)
-	//
-	//if err == nil {
-	//	return template, nil
-	//}
-	//
-	//l.logger.Error("targeted edits failed", zap.Error(err))
-
-	// 2️⃣ fallback to regeneration
-	return l.tryRegenerateAnimation(
-		ctx,
-		code,
-		animationSlide,
-		prompt,
-		callback,
-	)
-}
-
-func (l *animationGenerator) loadExistingCode(
+func (l *codeGenerator) loadExistingCode(
 	ctx context.Context,
 	slideContent *pbcore.AnimationSlideContent,
 ) (string, error) {
@@ -459,7 +278,7 @@ func (l *animationGenerator) loadExistingCode(
 	return indentCode(code), nil
 }
 
-func (l *animationGenerator) tryTargetedEdits(
+func (l *codeGenerator) tryTargetedEdits(
 	ctx context.Context,
 	code string,
 	prompt string,
@@ -580,7 +399,7 @@ func stringify(v any) string {
 	return string(b)
 }
 
-func (l *animationGenerator) uploadAndBuild(
+func (l *codeGenerator) uploadAndBuild(
 	ctx context.Context,
 	code string,
 	codeFilePath string,
@@ -628,159 +447,6 @@ func (l *animationGenerator) uploadAndBuild(
 		Repeatable:       false,
 		GeneratedPatches: buildOutput.Registry,
 	}, nil
-}
-
-func (l *animationGenerator) tryRegenerateAnimation(
-	ctx context.Context,
-	code string,
-	animationSlide *pbcore.Slide,
-	prompt string,
-	callback TemplateGenerationCallback,
-) (*models.Template, error) {
-	conversationHistory := []types.Message{}
-	for attempt := 0; attempt < maxAttempts; attempt++ {
-		input := l.buildRegenInput(
-			code,
-			animationSlide,
-			prompt,
-		)
-
-		callback(TemplateGenerationProgress{
-			Message: CreativeStageMessage(StageDesigning, attempt),
-		})
-
-		// TODO: Feed LLM the existing patches to keep existing user edits
-		// We may want to compare the original with the latest patch to know the user edits
-		l.logger.Info("fallback to regeneration animation", zap.Int("attempt", attempt))
-		response, err := baml_client.ReGenerateAnimation(ctx, input, conversationHistory)
-		if err != nil {
-			return nil, agenterrors.EditAnimationCodeFailed("failed to re-generate animation", err)
-		}
-
-		if l.generationOptions.assetRegistry != nil {
-			l.logger.Info("using brand-identity mapping for resolving media handles")
-			response.Code = l.generationOptions.assetRegistry.ResolveMediaHandles(response.Code)
-		}
-
-		indentedCode := indentCode(response.Code)
-
-		codeFilePath := fmt.Sprintf(
-			"templates/generated/%s/%s/%s",
-			l.orgID,
-			l.sessionID,
-			l.slideID,
-		)
-
-		template, err := l.uploadAndBuild(
-			ctx,
-			indentedCode,
-			codeFilePath,
-			attempt,
-			callback,
-		)
-
-		if err == nil {
-			return template, nil
-		}
-
-		var buildErr *services.BuildError
-		if errors.As(err, &buildErr) {
-			conversationHistory = appendRetryConversation(
-				conversationHistory,
-				indentedCode,
-				buildFailureMessage(buildErr),
-			)
-
-			l.logger.Error("failed to build animation",
-				zap.Int("attempt_left", maxAttempts-attempt),
-				zap.Error(buildErr))
-
-			callback(TemplateGenerationProgress{
-				Message: CreativeStageMessage(StageRefining, attempt),
-			})
-
-			continue
-		}
-
-		return nil, err
-	}
-
-	return nil, agenterrors.EditAnimationCodeFailed(
-		"edit animation generation failed after max retries",
-		fmt.Errorf("max build attempts reached"),
-	)
-}
-
-func (l *animationGenerator) buildRegenInput(
-	code string,
-	animationSlide *pbcore.Slide,
-	prompt string,
-) types.ReGenerateAnimationCodeRequest {
-
-	input := types.ReGenerateAnimationCodeRequest{
-		Code:             code,
-		Prompt:           prompt,
-		DurationInFrames: int64(animationSlide.DurationInFrames),
-	}
-
-	if l.generationOptions.VideoBranding != nil {
-		input.Branding = *l.generationOptions.VideoBranding
-	}
-
-	if l.generationOptions.assetRegistry != nil {
-		input.Branding.BrandGuideLines = l.generationOptions.assetRegistry.FormatBrandDetails()
-		l.logger.Info("using injected brand-identity mapper")
-	}
-
-	// TODO: the injact attachments here as well
-
-	return input
-}
-
-func (l *animationGenerator) ExtractConfig(
-	ctx context.Context,
-	beatDescription string,
-	template *models.Template,
-) (*types.TemplateConfigExtractorOutput, error) {
-	l.logger.Info("extracting template config")
-	marshal, err := json.Marshal(template.Schema)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to marshal template schema of template : %s", template.ID)
-	}
-
-	input := types.TemplateConfigExtractorInput{
-		Schema:              string(marshal),
-		BeatDescription:     beatDescription,
-		TemplateDescription: template.Description,
-	}
-
-	if l.generationOptions.VideoBranding != nil {
-		input.Branding = *l.generationOptions.VideoBranding
-	}
-
-	if l.generationOptions.assetRegistry != nil {
-		input.Branding.BrandGuideLines = l.generationOptions.assetRegistry.FormatBrandDetails()
-		l.logger.Info("using injected brand-identity mapper",
-			zap.String("guidelines", *input.Branding.BrandGuideLines),
-		)
-	}
-
-	output, err := baml_client.ExtractTemplateConfig(ctx, input)
-	if err != nil {
-		return nil, fmt.Errorf("failed to extract template config from BAML : %s", err)
-	}
-
-	valid := json.Valid([]byte(output.Config))
-	if !valid {
-		return nil, errors.New(fmt.Sprintf("template config validation failed for template : %s", template.ID))
-	}
-
-	if l.generationOptions.assetRegistry != nil {
-		l.logger.Info("using brand-identity mapping for resolving media handles")
-		output.Config = l.generationOptions.assetRegistry.ResolveMediaHandles(output.Config)
-	}
-
-	return &output, nil
 }
 
 func indentCode(code string) string {

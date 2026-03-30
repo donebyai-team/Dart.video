@@ -13,8 +13,8 @@ import FigmaImportPanel, { type ConfirmPayload as FigmaImportConfirmPayload } fr
 import SelectedAssetsDialog, { type SelectedAssetWithPreview } from '@/components/assets/SelectedAssetsDialog'
 import { useVideoStore } from '@/stores/video'
 import { AddOrEditAnimationSettings } from '@/types/tools'
-import type { AskUserQuestion, GenerateOrEditAnimationResponse } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
-import {type Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import type { AskUserQuestion, GenerateOrEditSceneResponse } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
+import {SlideStatus, type Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { MediaAsset, SelectedMediaAsset, SelectedMediaAssetSchema } from '@coasterai/pb/coasterai/core/v1/media_asset_pb'
 import { getConnectError } from '@/utils/error'
 import toast from 'react-hot-toast'
@@ -35,16 +35,14 @@ type Stage = 'compose' | 'thinking' | 'question'
 export default function AnimationEditor({ settings, overlay, onValuePatch, setOverlay, onClose }: AnimationEditorProps) {
     const updateSlide = useVideoStore(s => s.updateSlide)
     const selectedSlide = useVideoStore(s => s.selectedSlide)
-    const addAnimationSlide = useVideoStore(s => s.addAnimationSlide)
     const videoId = useVideoStore(s => s.videoConfig?.id)
     const brandIdentity = useVideoStore(s => s.videoConfig?.metadata?.generatedBranding?.brandIdentity)
     const brandLibraryID = useVideoStore(s => s.videoConfig?.metadata?.generatedBranding?.brandLibraryID)
     const { portalClient } = useClientsContext()
     const router = useRouter()
 
-    const normalizedSettings = settings ?? {}
-    const isAdding = !!normalizedSettings.previousSlide
     const hasBrand = !!(brandLibraryID || brandIdentity?.id)
+    const selectedAnimationElementId = settings?.animationElementId ?? null
 
     const [prompt, setPrompt] = useState('')
 
@@ -73,16 +71,8 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
 
     const abortControllerRef = useRef<AbortController | null>(null)
     const streamSessionRef = useRef(0)
-    const createdSlideIdRef = useRef<string | null>(null)
-    // Tracks whether the new slide has been committed to the store yet.
-    // createdSlideIdRef can be set earlier (from a waitingForUserInput event) without the slide
-    // being in the store — this flag distinguishes the two states.
-    const slideInStoreRef = useRef(false)
-    const pendingGeneratedSlideRef = useRef<Slide | null>(null)
 
     const canSubmit = prompt.trim().length > 0
-    const selectedAnimationElementId = normalizedSettings.animationElementId ?? null
-
 
     useEffect(() => {
         if (selectedSlide) {
@@ -113,8 +103,6 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
     }, [])
 
     const applySlideToStore = (slide: Slide) => {
-        // Editing: update codeRegistry + reconcile edits (overlay) on the current selected slide.
-        // edits IS the PatchOverlay — contains both initial LLM values and user overrides.
         const updatedContent = slide.content;
         if (!updatedContent) return
 
@@ -123,10 +111,10 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
             : undefined
 
         const pathOverlay = updatedContent.edits as unknown as PatchOverlay
-        // Update editor state
         setOverlay(pathOverlay)
 
         updateSlide({
+            slideStatus: SlideStatus.GENERATED,
             durationInFrames: slide.durationInFrames,
             settledFrame: slide.settledFrame,
             content: {
@@ -137,28 +125,8 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
         } as Slide)
     }
 
-    const createOrUpdateAddedSlide = (slide: Slide) => {
-        if (!isAdding || !normalizedSettings.previousSlide) return
-
-        if (!slideInStoreRef.current) {
-            addAnimationSlide(normalizedSettings.previousSlide.section.id, slide, normalizedSettings.previousSlide.slide.id)
-            createdSlideIdRef.current = slide.id
-            slideInStoreRef.current = true
-            pendingGeneratedSlideRef.current = slide
-            return
-        }
-
-        if (selectedSlide?.slide.id !== createdSlideIdRef.current) return
-        updateSlide({
-            durationInFrames: slide.durationInFrames,
-            transcript: slide.transcript,
-            backgroundStyle: slide.backgroundStyle,
-            content: slide.content,
-        })
-    }
-
     const consumeStream = async (
-        stream: AsyncIterable<GenerateOrEditAnimationResponse>,
+        stream: AsyncIterable<GenerateOrEditSceneResponse>,
         signal: AbortSignal,
         streamSession: number
     ) => {
@@ -170,18 +138,11 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                 setIsThinkingBusy(true)
             }
 
-            // completed=true means work is fully done; the event always includes a slide with its id.
-            // Either way, abort the stream and return to compose stage.
             if (event.completed) {
                 setIsThinkingBusy(false)
 
                 if (event.slide) {
-                    pendingGeneratedSlideRef.current = event.slide
-                    if (isAdding) {
-                        createOrUpdateAddedSlide(event.slide)
-                    } else {
-                        applySlideToStore(event.slide)
-                    }
+                    applySlideToStore(event.slide)
                 }
                 setPrompt('')
                 setStage('compose')
@@ -190,20 +151,7 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                 return
             }
 
-            // completed=false + waitingForUserInput means the backend needs more info before finishing.
-            // The event includes the in-progress slide (with its id) so we can reference it in the
-            // follow-up askUserInput call. Abort the current stream; it will be restarted via
-            // handleContinuePlanning once the user answers.
             if (!event.completed && event.waitingForUserInput && event.askUserQuestion) {
-                if (event.slide) {
-                    // Only store the id for the follow-up askUserInput — do NOT add this partial
-                    // slide to the store, it has no renderable content yet
-                    pendingGeneratedSlideRef.current = event.slide
-                    if (isAdding && !createdSlideIdRef.current) {
-                        createdSlideIdRef.current = event.slide.id
-                    }
-                }
-
                 setPendingQuestion(event.askUserQuestion)
                 setIsThinkingBusy(false)
                 setIsSubmitting(false)
@@ -220,12 +168,10 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
         }
     }
 
-    const startStream = async (overridePrompt?: string, withSuggestions = true) => {
+    const startStream = async (overridePrompt?: string) => {
         const finalPrompt = (overridePrompt ?? prompt).trim()
-        if (!videoId || !finalPrompt || isSubmitting) return
-        const activeSlideId = createdSlideIdRef.current ?? selectedSlide?.slide.id
-        const shouldEditExisting = !isAdding || !!createdSlideIdRef.current
-        if (shouldEditExisting && !activeSlideId) return
+        const slideId = selectedSlide?.slide.id
+        if (!videoId || !finalPrompt || !slideId || isSubmitting) return
 
         const controller = new AbortController()
         abortControllerRef.current = controller
@@ -239,30 +185,18 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
             setPendingQuestion(undefined)
             setIsThinkingBusy(true)
 
-            const stream = portalClient.generateOrEditAnimationSlide(
-                shouldEditExisting
-                    ? {
-                        videoId,
-                        input: {
-                            case: 'editAnimationUserInput',
-                            value: {
-                                slideId: activeSlideId ?? '',
-                                prompt: finalPrompt,
-                                assets: selectedAssetMessages,
-                            },
-                        },
-                    }
-                    : {
-                        videoId,
-                        input: {
-                            case: 'createNewAnimationInput',
-                            value: {
-                                suggestions: withSuggestions,
-                                prompt: finalPrompt,
-                                assets: selectedAssetMessages,
-                            },
+            const stream = portalClient.generateOrEditScene(
+                {
+                    videoId,
+                    slideToEdit: selectedSlide?.slide,
+                    input: {
+                        case: 'request',
+                        value: {
+                            prompt: finalPrompt,
+                            assets: selectedAssetMessages,
                         },
                     },
+                },
                 { signal: controller.signal }
             )
 
@@ -286,7 +220,7 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
         }
     }
 
-    const handleSubmit = () => startStream(undefined, isAdding && !createdSlideIdRef.current)
+    const handleSubmit = () => startStream()
 
     const handleStop = () => {
         streamSessionRef.current++
@@ -379,7 +313,8 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
 
     const handleContinuePlanning = async (responseOverride?: string) => {
         const response = (responseOverride ?? answerInput).trim()
-        if (!videoId || !response || isSubmitting) return
+        const slideId = selectedSlide?.slide.id
+        if (!videoId || !response || !slideId || isSubmitting) return
 
         const controller = new AbortController()
         abortControllerRef.current = controller
@@ -395,12 +330,12 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
             setThinkingChunk('Processing your answer...')
             setIsThinkingBusy(true)
 
-            const stream = portalClient.generateOrEditAnimationSlide({
+            const stream = portalClient.generateOrEditScene({
                 videoId,
                 input: {
                     case: 'askUserInput',
                     value: {
-                        slideId: createdSlideIdRef.current!,
+                        slideId,
                         response,
                         assets: questionAssets,
                     },
@@ -426,7 +361,6 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
     }
 
     const showThinking = !!thinkingChunk
-    const showEmptyState = isAdding
 
     return (
         <div className='flex flex-col h-full p-4 gap-3'>
@@ -461,9 +395,7 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
             />
 
             <div className='flex items-center justify-between'>
-                <span className='text-sm font-medium text-foreground'>
-                    {/* {isAdding ? 'Generate Animation' : 'Edit Animation'} */}
-                </span>
+                <span className='text-sm font-medium text-foreground' />
                 <Button variant='ghost' size='sm' className='h-6 w-6 p-0' onClick={onClose}>
                     <X className='w-4 h-4' />
                 </Button>
@@ -480,134 +412,119 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                     </div>
                 )}
 
-                {isAdding && (
-                    <>
-                        <div className='flex-1 min-h-0 rounded-xl bg-background/60 backdrop-blur-sm p-3 overflow-auto'>
-                            {stage === 'question' && activeQuestion && (
-                                <QuestionPanel
-                                    question={activeQuestion}
-                                    isSubmitting={isSubmitting}
-                                    customAnswer={customAnswer}
-                                    answerInput={answerInput}
-                                    onOptionClick={option => {
-                                        setSelectedAnswer(option)
-                                        void handleContinuePlanning(option)
-                                    }}
-                                    onCustomAnswerChange={setCustomAnswer}
-                                    onContinue={() => void handleContinuePlanning()}
-                                    selectedQuestionAssets={questionAssets}
-                                    onOpenAssetPicker={openAssetDialog}
-                                />
-                            )}
+                <div className='flex-1 min-h-0 rounded-xl bg-background/60 backdrop-blur-sm p-3 overflow-auto'>
+                    {stage === 'question' && activeQuestion && (
+                        <QuestionPanel
+                            question={activeQuestion}
+                            isSubmitting={isSubmitting}
+                            customAnswer={customAnswer}
+                            answerInput={answerInput}
+                            onOptionClick={option => {
+                                setSelectedAnswer(option)
+                                void handleContinuePlanning(option)
+                            }}
+                            onCustomAnswerChange={setCustomAnswer}
+                            onContinue={() => void handleContinuePlanning()}
+                            selectedQuestionAssets={questionAssets}
+                            onOpenAssetPicker={openAssetDialog}
+                        />
+                    )}
+                </div>
 
-                            {showEmptyState && (
-                                <div className='h-full flex flex-col items-center justify-center text-center px-4'>
-                                    <h3 className='text-base font-semibold text-foreground'>
-                                        Add Animation
-                                    </h3>
-                                    <p className='mt-1 text-sm text-muted-foreground max-w-md'>
-                                        Describe the motion style, pacing, and visual direction to generate a new animation
-                                    </p>
-                                </div>
-                            )}
-                        </div>
+                {showThinking && (
+                    <div className='mt-3'>
+                        <ThinkingViewComponent thinkingChunk={thinkingChunk} />
+                    </div>
+                )}
 
-                        {showThinking && (
-                            <div className='mt-3'>
-                                <ThinkingViewComponent thinkingChunk={thinkingChunk} />
-                            </div>
+                <div className="mt-3 rounded-xl border bg-background shadow-sm overflow-hidden relative">
+                    {/* Toolbar row */}
+                    <div className='flex items-center gap-1.5 px-3 pt-2 pb-1.5 text-xs text-muted-foreground border-b border-border/40 flex-wrap'>
+                        {hasBrand ? (
+                            <span className='flex items-center gap-1 flex-shrink-0'>
+                                <Palette className='w-4 h-4 opacity-70' />
+                                <span className='text-xs'>{brandIdentity?.name ?? 'Brand'}</span>
+                            </span>
+                        ) : (
+                            <BrandLibrarySelector
+                                selectedBrandLibraryId={undefined}
+                                onChange={() => {}}
+                                onAddBrand={() => router.push('/dashboard/brand')}
+                                disabled={stage !== 'compose'}
+                            />
                         )}
 
-                        <div className="mt-3 rounded-xl border bg-background shadow-sm overflow-hidden relative">
-                            {/* Toolbar row */}
-                            <div className='flex items-center gap-1.5 px-3 pt-2 pb-1.5 text-xs text-muted-foreground border-b border-border/40 flex-wrap'>
-                                {hasBrand ? (
-                                    <span className='flex items-center gap-1 flex-shrink-0'>
-                                        <Palette className='w-4 h-4 opacity-70' />
-                                        <span className='text-xs'>{brandIdentity?.name ?? 'Brand'}</span>
+                        <span className='text-border/60 mx-0.5'>·</span>
+
+                        <AssetUploadDropdown
+                            disabled={stage !== 'compose'}
+                            onOpenAssetPicker={openAssetDialog}
+                        />
+                    </div>
+
+                    {/* Selected assets badge */}
+                    {hasSelectedAssets && (
+                        <div className='mx-3 mt-1.5 flex flex-wrap gap-2'>
+                            <div
+                                onClick={() => setSelectedAssetsDialogOpen(true)}
+                                className='flex cursor-pointer items-center justify-between rounded-lg border border-primary/15 bg-primary/5 px-3 py-1.5 text-xs transition-colors hover:border-primary/30'
+                            >
+                                <div className='flex items-center gap-2 text-primary'>
+                                    <span className='font-medium'>
+                                        {selectedAssets.length} asset{selectedAssets.length > 1 ? 's' : ''}
                                     </span>
-                                ) : (
-                                    <BrandLibrarySelector
-                                        selectedBrandLibraryId={undefined}
-                                        onChange={() => {}}
-                                        onAddBrand={() => router.push('/dashboard/brand')}
-                                        disabled={stage !== 'compose'}
-                                    />
-                                )}
-
-                                <span className='text-border/60 mx-0.5'>·</span>
-
-                                <AssetUploadDropdown
-                                    disabled={stage !== 'compose'}
-                                    onOpenAssetPicker={openAssetDialog}
-                                />
-                            </div>
-
-                            {/* Selected assets badge */}
-                            {hasSelectedAssets && (
-                                <div className='mx-3 mt-1.5 flex flex-wrap gap-2'>
-                                    <div
-                                        onClick={() => setSelectedAssetsDialogOpen(true)}
-                                        className='flex cursor-pointer items-center justify-between rounded-lg border border-primary/15 bg-primary/5 px-3 py-1.5 text-xs transition-colors hover:border-primary/30'
-                                    >
-                                        <div className='flex items-center gap-2 text-primary'>
-                                            <span className='font-medium'>
-                                                {selectedAssets.length} asset{selectedAssets.length > 1 ? 's' : ''}
-                                            </span>
-                                        </div>
-                                        <button
-                                            onClick={e => {
-                                                e.stopPropagation()
-                                                setSelectedAssets([])
-                                            }}
-                                            className='ml-2 p-0.5 rounded hover:bg-destructive/10 hover:text-destructive'
-                                            type='button'
-                                        >
-                                            <X className='w-3.5 h-3.5' />
-                                        </button>
-                                    </div>
                                 </div>
-                            )}
-
-                            <textarea
-                                value={prompt}
-                                onChange={e => setPrompt(e.target.value)}
-                                onKeyDown={e => {
-                                    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && canSubmit && !isSubmitting) {
-                                        e.preventDefault()
-                                        void handleSubmit()
-                                    }
-                                }}
-                                placeholder='Describe the animation you want...'
-                                rows={5}
-                                disabled={isSubmitting || stage === 'question'}
-                                className="w-full resize-none bg-transparent px-3 py-2.5 pr-12 text-sm focus:outline-none placeholder:text-muted-foreground/60 disabled:opacity-50"
-                            />
-
-                            <div className="absolute bottom-2 right-2">
-                                {isSubmitting || stage === 'question' ? (
-                                    <Button
-                                        onClick={handleStop}
-                                        variant="outline"
-                                        size="sm"
-                                        className="h-8 w-8 rounded-lg hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
-                                    >
-                                        <Square className="w-3 h-3 fill-current" />
-                                    </Button>
-                                ) : (
-                                    <Button
-                                        onClick={handleSubmit}
-                                        size="sm"
-                                        disabled={!canSubmit}
-                                        className="h-8 w-8 rounded-lg"
-                                    >
-                                        <Sparkles className="w-3.5 h-3.5" />
-                                    </Button>
-                                )}
+                                <button
+                                    onClick={e => {
+                                        e.stopPropagation()
+                                        setSelectedAssets([])
+                                    }}
+                                    className='ml-2 p-0.5 rounded hover:bg-destructive/10 hover:text-destructive'
+                                    type='button'
+                                >
+                                    <X className='w-3.5 h-3.5' />
+                                </button>
                             </div>
                         </div>
-                    </>
-                )}
+                    )}
+
+                    <textarea
+                        value={prompt}
+                        onChange={e => setPrompt(e.target.value)}
+                        onKeyDown={e => {
+                            if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && canSubmit && !isSubmitting) {
+                                e.preventDefault()
+                                void handleSubmit()
+                            }
+                        }}
+                        placeholder='Describe the animation you want...'
+                        rows={5}
+                        disabled={isSubmitting || stage === 'question'}
+                        className="w-full resize-none bg-transparent px-3 py-2.5 pr-12 text-sm focus:outline-none placeholder:text-muted-foreground/60 disabled:opacity-50"
+                    />
+
+                    <div className="absolute bottom-2 right-2">
+                        {isSubmitting || stage === 'question' ? (
+                            <Button
+                                onClick={handleStop}
+                                variant="outline"
+                                size="sm"
+                                className="h-8 w-8 rounded-lg hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
+                            >
+                                <Square className="w-3 h-3 fill-current" />
+                            </Button>
+                        ) : (
+                            <Button
+                                onClick={handleSubmit}
+                                size="sm"
+                                disabled={!canSubmit}
+                                className="h-8 w-8 rounded-lg"
+                            >
+                                <Sparkles className="w-3.5 h-3.5" />
+                            </Button>
+                        )}
+                    </div>
+                </div>
             </div>
         </div>
     )

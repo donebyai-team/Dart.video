@@ -51,46 +51,6 @@ func (t *AnimationCodeEditTypeEnumView) Type() (baml.Type, error) {
 	return t.inner.Type()
 }
 
-type AnimationTypeEnumView struct {
-	inner baml.EnumBuilder
-}
-
-func (t *AnimationTypeEnumView) ListValues() ([]EnumValueView, error) {
-	result, err := t.inner.ListValues()
-	if err != nil {
-		return nil, err
-	}
-	builders := make([]EnumValueView, len(result))
-	for i, p := range result {
-		builders[i] = p
-	}
-	return builders, nil
-}
-
-func (t *AnimationTypeEnumView) ValueBRAND() (EnumValueView, error) {
-	return t.inner.Value("BRAND")
-}
-
-func (t *AnimationTypeEnumView) ValueTEXT() (EnumValueView, error) {
-	return t.inner.Value("TEXT")
-}
-
-func (t *AnimationTypeEnumView) ValueSIMPLE_TEXT() (EnumValueView, error) {
-	return t.inner.Value("SIMPLE_TEXT")
-}
-
-func (t *TypeBuilder) AnimationType() (*AnimationTypeEnumView, error) {
-	bld, err := t.inner.Enum("AnimationType")
-	if err != nil {
-		return nil, err
-	}
-	return &AnimationTypeEnumView{inner: bld}, nil
-}
-
-func (t *AnimationTypeEnumView) Type() (baml.Type, error) {
-	return t.inner.Type()
-}
-
 type AskUserQuestionTypeEnumView struct {
 	inner baml.EnumBuilder
 }

@@ -17,7 +17,7 @@ func TestGenerateReact_ValidSimpleProps(t *testing.T) {
 		},
 	}
 
-	out, err := GenerateReact(scene)
+	out, err := GenerateReact(&scene)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -39,7 +39,7 @@ func TestGenerateReact_StyleObject(t *testing.T) {
 		},
 	}
 
-	out, err := GenerateReact(scene)
+	out, err := GenerateReact(&scene)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -61,7 +61,7 @@ func TestGenerateReact_ArrayProp(t *testing.T) {
 		},
 	}
 
-	out, err := GenerateReact(scene)
+	out, err := GenerateReact(&scene)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -89,7 +89,7 @@ func TestGenerateReact_NestedComponents(t *testing.T) {
 		},
 	}
 
-	out, err := GenerateReact(scene)
+	out, err := GenerateReact(&scene)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -111,7 +111,7 @@ func TestGenerateReact_InvalidJSONProps(t *testing.T) {
 		},
 	}
 
-	_, err := GenerateReact(scene)
+	_, err := GenerateReact(&scene)
 
 	if err == nil {
 		t.Fatal("expected error but got none")
@@ -138,7 +138,7 @@ func TestGenerateReact_ErrorPath(t *testing.T) {
 		},
 	}
 
-	_, err := GenerateReact(scene)
+	_, err := GenerateReact(&scene)
 
 	if err == nil {
 		t.Fatal("expected error")
@@ -160,7 +160,7 @@ func TestGenerateReact_Snapshot(t *testing.T) {
 		},
 	}
 
-	out, err := GenerateReact(scene)
+	out, err := GenerateReact(&scene)
 
 	if err != nil {
 		t.Fatal(err)

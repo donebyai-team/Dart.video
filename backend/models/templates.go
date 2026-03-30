@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"github.com/lib/pq"
 	"github.com/pkg/errors"
-	"github.com/shank318/coasterai/baml_client/types"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"time"
 )
@@ -16,12 +15,12 @@ import (
 //type AnimationType string
 
 type TemplateCategory struct {
-	ID            string              `db:"id"`
-	AnimationType types.AnimationType `db:"animation_type"`
-	Name          string              `db:"name"`
-	Description   string              `db:"description"`
-	CreatedAt     time.Time           `db:"created_at"`
-	UpdatedAt     *time.Time          `db:"updated_at"`
+	ID            string     `db:"id"`
+	AnimationType string     `db:"animation_type"`
+	Name          string     `db:"name"`
+	Description   string     `db:"description"`
+	CreatedAt     time.Time  `db:"created_at"`
+	UpdatedAt     *time.Time `db:"updated_at"`
 }
 
 type TemplateCategories []string
@@ -53,17 +52,17 @@ func (a *TemplateCategories) Scan(src interface{}) error {
 }
 
 type Template struct {
-	ID            string              `db:"id"`
-	Name          string              `db:"name"`
-	AnimationType types.AnimationType `db:"animation_type"`
-	Categories    TemplateCategories  `db:"categories"`
-	Description   string              `db:"description"`
-	Schema        json.RawMessage     `db:"schema"`
-	PreviewUrl    string              `db:"preview_url"`
-	CreatedAt     time.Time           `db:"created_at"`
-	UpdatedAt     *time.Time          `db:"updated_at"`
-	Repeatable    bool                `db:"repeatable"`
-	Config        *TemplateConfig     `db:"config"`
+	ID            string             `db:"id"`
+	Name          string             `db:"name"`
+	AnimationType string             `db:"animation_type"`
+	Categories    TemplateCategories `db:"categories"`
+	Description   string             `db:"description"`
+	Schema        json.RawMessage    `db:"schema"`
+	PreviewUrl    string             `db:"preview_url"`
+	CreatedAt     time.Time          `db:"created_at"`
+	UpdatedAt     *time.Time         `db:"updated_at"`
+	Repeatable    bool               `db:"repeatable"`
+	Config        *TemplateConfig    `db:"config"`
 
 	GeneratedPatches json.RawMessage            `db:"-"` // Maps to edits in slide
 	GeneratedPlan    *pbcore.AnimationSlidePlan `db:"-"`

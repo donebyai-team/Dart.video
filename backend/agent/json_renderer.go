@@ -7,14 +7,14 @@ import (
 	"strings"
 )
 
-func GenerateReact(scene *types.Scene) (*types.GenerateAnimationCodeResponse, error) {
+func GenerateReact(scene *types.Scene) (string, error) {
 	var elements []string
 
 	for _, el := range scene.Elements {
 
 		rendered, err := renderElement(el, 3, el.Component)
 		if err != nil {
-			return nil, err
+			return "", err
 		}
 
 		elements = append(elements, rendered)
@@ -31,7 +31,7 @@ export default function RemoteComponent() {
   );
 }
 `, strings.Join(elements, "\n"))
-	return &types.GenerateAnimationCodeResponse{Code: code}, nil
+	return code, nil
 }
 
 func renderElement(el types.SceneElement, indent int, path string) (string, error) {

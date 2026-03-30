@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"time"
 
@@ -43,8 +44,9 @@ const (
 )
 
 type RunResult struct {
-	Status          RunStatus
-	AskUserQuestion *pbportal.AskUserQuestion
+	Status             RunStatus
+	AskUserQuestion    *pbportal.AskUserQuestion
+	GeneratedAnimation *models.Template
 }
 
 const (
@@ -74,9 +76,8 @@ type VideoAgentState struct {
 }
 
 type planningSession struct {
-	Request             types.VideoGenerationPlanRequest `json:"request"`
-	RequestV2           *pbportal.CreateVideoRequest     `json:"requestv2"`
-	ConversationHistory []types.Message                  `json:"conversation_history"`
+	Request             *pbportal.CreateVideoRequest `json:"request"`
+	ConversationHistory []types.Message              `json:"conversation_history"`
 }
 
 func (p *planningSession) MarshalJSON() ([]byte, error) {
@@ -84,20 +85,18 @@ func (p *planningSession) MarshalJSON() ([]byte, error) {
 	var reqBytes []byte
 	var err error
 
-	if p.RequestV2 != nil {
-		reqBytes, err = utils.MarshalProto(p.RequestV2)
+	if p.Request != nil {
+		reqBytes, err = utils.MarshalProto(p.Request)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	tmp := struct {
-		Request             types.VideoGenerationPlanRequest `json:"request"`
-		RequestV2           []byte                           `json:"requestv2,omitempty"`
-		ConversationHistory []types.Message                  `json:"conversation_history"`
+		Request             []byte          `json:"request,omitempty"`
+		ConversationHistory []types.Message `json:"conversation_history"`
 	}{
-		Request:             p.Request,
-		RequestV2:           reqBytes,
+		Request:             reqBytes,
 		ConversationHistory: p.ConversationHistory,
 	}
 
@@ -107,27 +106,22 @@ func (p *planningSession) MarshalJSON() ([]byte, error) {
 func (p *planningSession) UnmarshalJSON(data []byte) error {
 
 	tmp := struct {
-		Request             types.VideoGenerationPlanRequest `json:"request"`
-		RequestV2           []byte                           `json:"requestv2"`
-		ConversationHistory []types.Message                  `json:"conversation_history"`
+		Request             []byte          `json:"request"`
+		ConversationHistory []types.Message `json:"conversation_history"`
 	}{}
 
 	if err := json.Unmarshal(data, &tmp); err != nil {
 		return err
 	}
 
-	p.Request = tmp.Request
 	p.ConversationHistory = tmp.ConversationHistory
 
-	if len(tmp.RequestV2) > 0 {
-		req := &pbportal.CreateVideoRequest{}
+	req := &pbportal.CreateVideoRequest{}
 
-		if err := utils.UnmarshalProto(tmp.RequestV2, req); err != nil {
-			return err
-		}
-
-		p.RequestV2 = req
+	if err := utils.UnmarshalProto(tmp.Request, req); err != nil {
+		return err
 	}
+	p.Request = req
 
 	return nil
 }
@@ -137,24 +131,3 @@ func (p *planningSession) UnmarshalJSON(data []byte) error {
 // the deferred error handler can tell the difference between a context cancel and a
 // user-initiated stop that arrived through the Redis state channel.
 var errUserSoftCancelled = errors.New("agent stopped via soft-cancel signal")
-
-//func toBackgroundStyle(bc types.VideoBackground) *pbcore.BackgroundStyle {
-//	gradientStops := make([]*pbcore.GradientStop, 0)
-//	for _, item := range bc.Gradient.Stops {
-//		gradientStops = append(gradientStops, &pbcore.GradientStop{
-//			Color:    item.Color,
-//			Position: int32(item.Position),
-//		})
-//	}
-//
-//	return &pbcore.BackgroundStyle{
-//		Style: &pbcore.BackgroundStyle_Gradient{
-//			Gradient: &pbcore.Gradient{
-//				Type:  pbcore.GradientType_GRADIENT_TYPE_LINEAR,
-//				Angle: int32(bc.Gradient.Angle),
-//				Stops: gradientStops,
-//			},
-//		},
-//		ApplyAll: true,
-//	}
-//}
