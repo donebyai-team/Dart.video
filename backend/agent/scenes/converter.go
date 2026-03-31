@@ -9,6 +9,7 @@ import (
 )
 
 // Convert the LLM generated scene to internal config
+// Merge the props from scene with defaults
 func ConvertToSceneConfig(scene *types.Scene) (*SceneConfig, error) {
 	if len(scene.Elements) == 0 {
 		return nil, fmt.Errorf("scene can't have empty elements")

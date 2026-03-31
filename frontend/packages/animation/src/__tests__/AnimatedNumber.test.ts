@@ -30,8 +30,6 @@ describe('AnimatedNumber Duration Calculation', () => {
       highlightColor: '#ff0000',
       animation: 'fadeIn',
       animationDelay: 20,
-      durationInFrames: 60,
-      startAt: 0,
     });
 
     expect(result.success).toBe(true);

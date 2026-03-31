@@ -38,6 +38,8 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
     const videoId = useVideoStore(s => s.videoConfig?.id)
     const brandIdentity = useVideoStore(s => s.videoConfig?.metadata?.generatedBranding?.brandIdentity)
     const brandLibraryID = useVideoStore(s => s.videoConfig?.metadata?.generatedBranding?.brandLibraryID)
+    const acceptVideoConfigChanges = useVideoStore(s => s.acceptVideoConfigChanges)
+
     const { portalClient } = useClientsContext()
     const router = useRouter()
 
@@ -123,6 +125,9 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                 edits: pathOverlay,
             }
         } as Slide)
+
+        // Force sync changes to backend. 
+        acceptVideoConfigChanges();
     }
 
     const consumeStream = async (
@@ -332,6 +337,7 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
 
             const stream = portalClient.generateOrEditScene({
                 videoId,
+                slideToEdit: selectedSlide?.slide,
                 input: {
                     case: 'askUserInput',
                     value: {
@@ -498,7 +504,7 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                             }
                         }}
                         placeholder="Describe the changes you'd like to make..."
-                        rows={5}
+                        rows={8}
                         disabled={isSubmitting || stage === 'question'}
                         className="w-full resize-none bg-transparent px-3 py-2.5 pr-12 text-sm focus:outline-none placeholder:text-muted-foreground/60 disabled:opacity-50"
                     />

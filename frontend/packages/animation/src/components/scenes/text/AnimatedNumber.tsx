@@ -31,7 +31,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (propsInit: Animate
     const preset = useAspectPreset();
 
     const patchedProps = usePatchedProps(propsInit.id, propsInit)
-    const props = { ...AnimatedNumberSchema.parse(patchedProps), id: propsInit.id }
+    const props = { ...AnimatedNumberSchema.parse(patchedProps), id: propsInit.id }  
 
     // Apply defaults
     const actualVariant = props.variant ?? DEFAULT_VARIANT;
@@ -125,7 +125,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (propsInit: Animate
         >
 
 
-            <Text text={props.startText} id={`text-right-${props.id}`} style={
+            <Text text={props.startText} id={`text-left-${props.id}`} style={
                 {
                     marginRight: '0.25em',
                     ...typographyStyle,
@@ -145,7 +145,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (propsInit: Animate
                     durationInFrames={DEFAULT_COUNTER_DURATION}
                 />
             </span>
-            <Text text={props.endText} id={`text-left-${props.id}`} style={
+            <Text text={props.endText} id={`text-right-${props.id}`} style={
                 {
                     marginLeft: '0.25em',
                     ...typographyStyle,
@@ -172,7 +172,6 @@ export const AnimatedNumberSchema = z.object({
     highlightColor: z.string().optional(),
     animation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
     animationDelay: z.number().min(0, "animationDelay cannot be negative").default(DEFAULT_ENTRANCE_DURATION).optional(),
-    durationInFrames: z.number().min(1, "durationInFrames must be positive").default(DEFAULT_COUNTER_DURATION).optional(),
     className: z.string().optional(),
     style: z.any().optional(),
 });
@@ -205,8 +204,7 @@ export function calculateAnimatedNumberDuration(props: AnimatedNumberProps): Dur
     const range = Math.abs(validated.to - validated.from);
 
     // Counter duration: logarithmic scale based on number range
-    const counterDuration = validated.durationInFrames ??
-        Math.max(DEFAULT_COUNTER_MIN_DURATION, Math.min(DEFAULT_COUNTER_MAX_DURATION, Math.log10(range + 1) * 20));
+    const counterDuration = Math.max(DEFAULT_COUNTER_MIN_DURATION, Math.min(DEFAULT_COUNTER_MAX_DURATION, Math.log10(range + 1) * 20));
 
     return {
         success: true,

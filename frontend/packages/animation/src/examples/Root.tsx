@@ -1,6 +1,6 @@
 import React from "react";
 import { AbsoluteFill, Composition } from "remotion";
-import { AnimatedNumber, TextHighlight, TextStagger } from "../components/scenes/text";
+import { TextStagger } from "../components/scenes/text";
 import { FadeIn, FadeOut, SlideIn, ScaleIn, Stagger, TimelineGate } from "../core/animation_primitives";
 import { FramePreset, SafeArea, AbsoluteCenter, Stack, Row } from "../core/layout";
 import { Text } from "../core/text";

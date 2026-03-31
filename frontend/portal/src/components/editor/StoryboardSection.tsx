@@ -280,7 +280,7 @@ const StoryboardSection = ({
 
                                                     {/* Add slide button (left of center) */}
                                                     <button
-                                                        onClick={() => onAddSlide()}
+                                                        onClick={() => onAddSlide(slide.id)}
                                                         className="relative z-10 flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-medium transition-colors bg-muted hover:bg-muted/80 text-muted-foreground mr-1"
                                                     >
                                                         <Plus className="w-3 h-3" />

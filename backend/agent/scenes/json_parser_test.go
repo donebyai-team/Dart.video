@@ -4,14 +4,14 @@ import (
 	"testing"
 )
 
-func TestParseScenePatch_BasicRoot(t *testing.T) {
+func TestParseSceneConfigFromEditsPatch_BasicRoot(t *testing.T) {
 	input := []byte(`{
 		"animatedvideo-0": {
 			"src": "video.mp4"
 		}
 	}`)
 
-	nodes, err := ParseScenePatch(input)
+	nodes, err := ParseSceneConfigFromEditsPatch(input)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -41,19 +41,24 @@ func TestParseScenePatch_BasicRoot(t *testing.T) {
 
 }
 
-func TestParseScenePatch_WithChild(t *testing.T) {
+func TestParseSceneConfigFromEditsPatch_WithChild(t *testing.T) {
 	input := []byte(`{
 		"animatedvideo-0": {
 			"src": "video.mp4"
 		},
-		"text-animatedvideo-0": {
+		"text-right-animatedvideo-0": {
+			"style": {
+				"color": "#641414"
+			}
+		},
+		"logoasset-left-animatedvideo-0": {
 			"style": {
 				"color": "#641414"
 			}
 		}
 	}`)
 
-	nodes, err := ParseScenePatch(input)
+	nodes, err := ParseSceneConfigFromEditsPatch(input)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -65,23 +70,29 @@ func TestParseScenePatch_WithChild(t *testing.T) {
 		t.Fatalf("expected child 'text'")
 	}
 
+	child2 := node.Children[1]
+	if child2.Name != "logoasset" {
+		t.Fatalf("expected child 'logoasset'")
+	}
+
 	style := child.Props["style"].(map[string]interface{})
 	if style["color"] != "#641414" {
 		t.Errorf("expected color #641414, got %v", style["color"])
 	}
 }
 
-func TestParseScenePatch_MultipleRoots(t *testing.T) {
+func TestParseSceneConfigFromEditsPatch_MultipleRoots(t *testing.T) {
 	input := []byte(`{
 		"animatedvideo-0": {
-			"src": "video.mp4"
+			"src": "video.mp4",
+			"data": [1, 2, 3]
 		},
 		"textstagger-1": {
 			"value": "hello"
 		}
 	}`)
 
-	nodes, err := ParseScenePatch(input)
+	nodes, err := ParseSceneConfigFromEditsPatch(input)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

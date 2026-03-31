@@ -62,12 +62,6 @@
             "type": "number",
             "required": false,
             "default": 30
-          },
-          {
-            "name": "durationInFrames",
-            "type": "number",
-            "required": false,
-            "default": 45
           }
         ]
       },

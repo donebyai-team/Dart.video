@@ -36,6 +36,10 @@ export const SPLIT_BY_MODES = ['char', 'word', 'line'] as const;
 
 export type SplitByMode = typeof SPLIT_BY_MODES[number];
 
+export const HIGHLIGHT_STYLES = ['marker', 'underline', 'box', 'glow', 'background'] as const;
+
+export type HighlightStyle = typeof HIGHLIGHT_STYLES[number];
+
 export const IconNameSchema = z.string().min(2, "icon name cannot be empty");
 
 export type IconName = z.infer<typeof IconNameSchema>;

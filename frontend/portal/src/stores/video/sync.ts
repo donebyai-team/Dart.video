@@ -24,6 +24,34 @@ export function debounce<T extends (...args: any[]) => any>(
     return debounced;
 }
 
+function logChanges(oldObj = {}, newObj = {}, path = "") {
+    const keys = new Set([
+        ...Object.keys(oldObj),
+        ...Object.keys(newObj),
+    ]);
+
+    for (const key of keys) {
+        const newPath = path ? `${path}.${key}` : key;
+
+        const oldVal = oldObj[key];
+        const newVal = newObj[key];
+
+        if (
+            oldVal &&
+            newVal &&
+            typeof oldVal === "object" &&
+            typeof newVal === "object"
+        ) {
+            logChanges(oldVal, newVal, newPath);
+        } else if (!Object.is(oldVal, newVal)) {
+            console.log(`Changed: ${newPath}`, {
+                old: oldVal,
+                new: newVal,
+            });
+        }
+    }
+}
+
 export const createSyncActions = (set: VideoStoreSet, get: VideoStoreGet) => {
     let syncStatus: 'idle' | 'syncing' | 'error' = 'idle';
 
@@ -35,6 +63,8 @@ export const createSyncActions = (set: VideoStoreSet, get: VideoStoreGet) => {
                 acceptedVideoConfig &&
                 !equals(VideoSchema, acceptedVideoConfig, videoConfig)
             );
+
+            // logChanges(acceptedVideoConfig!, videoConfig!);
 
             set({ hasPendingChanges });
         },

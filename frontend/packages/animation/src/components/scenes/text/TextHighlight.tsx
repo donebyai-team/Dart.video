@@ -5,7 +5,7 @@ import { usePatchedProps, useStyleOverride } from '../../../patches';
 import { useStyleContext, useAspectPreset, interpolateWithEasing } from '../../../styles';
 import { useTheme } from '../../../theme';
 import { resolveTypography, TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens';
-import { getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
+import { getEntranceTransform, ENTRANCE_ANIMATIONS, HIGHLIGHT_STYLES } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../durationTypes';
 
@@ -20,7 +20,7 @@ export const TextHighlightSchema = z.object({
     id: z.string().optional(),
     text: z.string().min(1, "text is required"),
     variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
-    highlightStyle: z.enum(['marker', 'underline', 'box', 'glow', 'background']).default(DEFAULT_HIGHLIGHT_STYLE).optional(),
+    highlightStyle: z.enum(HIGHLIGHT_STYLES).default(DEFAULT_HIGHLIGHT_STYLE).optional(),
     highlightColor: z.string().optional(),
     animation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
     animationDelay: z.number().min(0, "animationDelay cannot be negative").default(DEFAULT_ENTRANCE_DURATION).optional(),

@@ -29,7 +29,7 @@ func EditsToScene(edits *structpb.Struct) (*types.Scene, error) {
 		return nil, err
 	}
 
-	nodes, err := ParseScenePatch(jsonBytes)
+	nodes, err := ParseSceneConfigFromEditsPatch(jsonBytes)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func EditsToScene(edits *structpb.Struct) (*types.Scene, error) {
 	}, nil
 }
 
-func ParseScenePatch(data []byte) ([]SceneConfig, error) {
+func ParseSceneConfigFromEditsPatch(data []byte) ([]SceneConfig, error) {
 	var raw map[string]json.RawMessage
 	err := json.Unmarshal(data, &raw)
 	if err != nil {
@@ -105,10 +105,14 @@ func ParseScenePatch(data []byte) ([]SceneConfig, error) {
 
 		parts := strings.Split(key, "-")
 
+		// if < 3 that means its a root, we have already captured it above
 		if len(parts) < 3 {
 			continue
 		}
 
+		// child id always has child-xxx-rootid eg. text-right-[animatedvideo-0]
+		// child = parts[0]
+		// parent = end part split by -
 		rootID := parts[len(parts)-2] + "-" + parts[len(parts)-1]
 
 		node, exists := nodes[rootID]

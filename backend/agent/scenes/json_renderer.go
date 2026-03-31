@@ -1,13 +1,12 @@
-package agent
+package scenes
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/shank318/coasterai/agent/scenes"
 	"strings"
 )
 
-func GenerateCodeFromSceneConfig(scene *scenes.SceneConfig) (string, error) {
+func RenderJSXCodeFromSceneConfig(scene *SceneConfig) (string, error) {
 	var elements []string
 
 	rendered, err := renderElement(scene, 3, scene.Name)
@@ -41,7 +40,7 @@ export default function RemoteComponent() {
 	return code, nil
 }
 
-func renderElement(el *scenes.SceneConfig, indent int, path string) (string, error) {
+func renderElement(el *SceneConfig, indent int, path string) (string, error) {
 
 	space := strings.Repeat("  ", indent)
 
@@ -98,7 +97,7 @@ func renderProps(props map[string]interface{}, path string) (string, error) {
 
 		case int:
 			parts = append(parts, fmt.Sprintf(`%s={%v}`, key, val))
-			
+
 		case bool:
 			parts = append(parts, fmt.Sprintf(`%s={%t}`, key, val))
 

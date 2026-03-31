@@ -133,7 +133,7 @@ export const IconShowcase: React.FC<IconShowcaseProps> = (propsInit: IconShowcas
                                 opacity,
                             }}
                         >
-                            <IconAsset id={`iconasset-${props.id}-${index}`} name={iconName} size={actualIconSize} />
+                            <IconAsset id={`iconasset-${index}-${props.id}`} name={iconName} size={actualIconSize} />
                         </div>
                     );
                 })}

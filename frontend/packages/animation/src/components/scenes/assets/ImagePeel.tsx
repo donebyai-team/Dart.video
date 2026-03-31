@@ -149,7 +149,7 @@ export function ImagePeel(propsInit: ImagePeelProps): React.ReactElement {
                                 boxShadow: "0 20px 40px rgba(0,0,0,0.25), 0 12px 24px rgba(0,0,0,0.15)",
                             }}
                         >
-                            <ImageAsset id={`imageasset-${props.id}-${index}`} src={src} width={resolvedWidth} height={resolvedHeight} />
+                            <ImageAsset id={`imageasset-${index}-${props.id}`} src={src} width={resolvedWidth} height={resolvedHeight} />
                         </div>
                     );
                 })}

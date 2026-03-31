@@ -1,17 +1,17 @@
-import { Section, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { Section, Slide, TransitionType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Video, VideoMetadata } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import { SelectedSection } from './types'
 
 export const getSections = (videoConfig: Video) => videoConfig?.config?.sections || []
- /**
- * Returns the nearest previous slide relative to a section.
- *
- * Priority:
- * 1. Last slide of the given section
- * 2. If none, last slide of the previous section
- * 3. Continue checking earlier sections
- * 4. If no slides exist in any previous section, returns undefined
- */
+/**
+* Returns the nearest previous slide relative to a section.
+*
+* Priority:
+* 1. Last slide of the given section
+* 2. If none, last slide of the previous section
+* 3. Continue checking earlier sections
+* 4. If no slides exist in any previous section, returns undefined
+*/
 export function getPreviousSlide(
   sections: Section[],
   sectionId: string
@@ -60,15 +60,19 @@ export const updateTotalDuration = (videoConfig: Video): Video => {
   // in the Remotion timeline, so we must treat slides as one continuous sequence.
   const allSlides = videoConfig.config.sections.flatMap(s => s.slides || [])
 
-  const totalDuration = allSlides.reduce((sum, slide, index) => {
-    const slideDuration = slide.durationInFrames
-    const transitionDuration = slide.transitionDurationInFrames 
-      ? slide.transitionDurationInFrames
-      : 0
-    // Last slide never transitions out, so don't subtract its transitionDuration
-    const transitionDurationFromNext = index < allSlides.length - 1 ? (transitionDuration || 0) : 0
-    return sum + slideDuration - transitionDurationFromNext
-  }, 0)
+  let totalDuration = 0
+
+  allSlides.forEach((slide, i) => {
+    totalDuration += slide.durationInFrames
+
+    if (
+      i < allSlides.length - 1 &&
+      slide.transitionDurationInFrames &&
+      slide.transition !== TransitionType.TRANSITION_NONE
+    ) {
+      totalDuration -= slide.transitionDurationInFrames
+    }
+  })
 
   return {
     ...videoConfig,

@@ -1,13 +1,12 @@
-package agent
+package scenes
 
 import (
-	"github.com/shank318/coasterai/agent/scenes"
 	"strings"
 	"testing"
 )
 
 func TestGenerateReact_ValidSimpleProps(t *testing.T) {
-	sceneConfig := scenes.SceneConfig{
+	sceneConfig := SceneConfig{
 		ID:   "",
 		Name: "AnimatedNumber",
 		Props: map[string]interface{}{
@@ -19,7 +18,7 @@ func TestGenerateReact_ValidSimpleProps(t *testing.T) {
 		Children: nil,
 	}
 
-	out, err := GenerateCodeFromSceneConfig(&sceneConfig)
+	out, err := RenderJSXCodeFromSceneConfig(&sceneConfig)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -31,7 +30,7 @@ func TestGenerateReact_ValidSimpleProps(t *testing.T) {
 }
 
 func TestGenerateReact_StyleObject(t *testing.T) {
-	sceneConfig := scenes.SceneConfig{
+	sceneConfig := SceneConfig{
 		Name: "Box",
 		Props: map[string]interface{}{
 			"style": map[string]interface{}{
@@ -42,7 +41,7 @@ func TestGenerateReact_StyleObject(t *testing.T) {
 		Children: nil,
 	}
 
-	out, err := GenerateCodeFromSceneConfig(&sceneConfig)
+	out, err := RenderJSXCodeFromSceneConfig(&sceneConfig)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -54,15 +53,19 @@ func TestGenerateReact_StyleObject(t *testing.T) {
 }
 
 func TestGenerateReact_ArrayProp(t *testing.T) {
-	sceneConfig := scenes.SceneConfig{
-		Name: "Chart",
-		Props: map[string]interface{}{
-			"data": []int{1, 2, 3},
+	input := []byte(`{
+		"animatedvideo-0": {
+			"src": "video.mp4",
+			"data": [1, 2, 3]
 		},
-		Children: nil,
-	}
+		"textstagger-1": {
+			"value": "hello"
+		}
+	}`)
 
-	out, err := GenerateCodeFromSceneConfig(&sceneConfig)
+	nodes, err := ParseSceneConfigFromEditsPatch(input)
+
+	out, err := RenderJSXCodeFromSceneConfig(&nodes[0])
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -74,13 +77,13 @@ func TestGenerateReact_ArrayProp(t *testing.T) {
 }
 
 func TestGenerateReact_NestedComponents(t *testing.T) {
-	sceneConfig := scenes.SceneConfig{
+	sceneConfig := SceneConfig{
 		Name: "Box",
 		Props: map[string]interface{}{
 			"padding": 10,
 		},
-		Children: []scenes.SceneConfig{
-			scenes.SceneConfig{
+		Children: []SceneConfig{
+			SceneConfig{
 				Name: "TextHighlight",
 				Props: map[string]interface{}{
 					"text": "Hello World",
@@ -89,7 +92,7 @@ func TestGenerateReact_NestedComponents(t *testing.T) {
 		},
 	}
 
-	out, err := GenerateCodeFromSceneConfig(&sceneConfig)
+	out, err := RenderJSXCodeFromSceneConfig(&sceneConfig)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -101,7 +104,7 @@ func TestGenerateReact_NestedComponents(t *testing.T) {
 }
 
 func TestGenerateReact_Snapshot(t *testing.T) {
-	sceneConfig := scenes.SceneConfig{
+	sceneConfig := SceneConfig{
 		Name: "AnimatedNumber",
 		Props: map[string]interface{}{
 			"from": 0,
@@ -109,7 +112,7 @@ func TestGenerateReact_Snapshot(t *testing.T) {
 		},
 	}
 
-	out, err := GenerateCodeFromSceneConfig(&sceneConfig)
+	out, err := RenderJSXCodeFromSceneConfig(&sceneConfig)
 
 	if err != nil {
 		t.Fatal(err)

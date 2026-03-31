@@ -63,7 +63,7 @@ client<llm> CustomOpenAI5WithThinkingSummary {
     api_key env.OPENAI_API_KEY
     //max_completion_tokens 12000
     reasoning {
-      effort "medium"
+      effort "low"
       summary "auto"
     }
   }

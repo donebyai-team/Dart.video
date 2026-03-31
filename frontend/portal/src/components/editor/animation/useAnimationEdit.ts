@@ -80,6 +80,7 @@ export function useAnimationEdit(): UseAnimationEditReturn {
           style: { ...((entry.style as Record<string, string | number> | undefined) ?? {}), ...style },
         },
       }
+      console.log("wefwef2", entry)
       overlayRef.current = next
       return next
     })

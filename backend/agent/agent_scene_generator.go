@@ -17,7 +17,6 @@ import (
 	"github.com/shank318/coasterai/services/brand_identity"
 	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
-	"google.golang.org/protobuf/types/known/structpb"
 	"strings"
 	"time"
 )
@@ -339,7 +338,7 @@ func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest ty
 			return nil, agenterrors.Internal("scene is missing", nil)
 		}
 
-		// Validate scene
+		// Validate scene and add default props
 		sceneConfig, err := scenes.ConvertToSceneConfig(scene)
 		if err != nil {
 			marshalScene, _ := json.Marshal(scene)
@@ -369,7 +368,7 @@ func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest ty
 		// Merge with user edits
 		// There can be orphans object if the scene is replaced
 		if slide.Content != nil && slide.Content.Edits != nil {
-			edits, err := mergeEdits(slide.Content.Edits, template.GeneratedPatches)
+			edits, err := scenes.ReconcileEditsPatch(slide.Content.Edits, template.GeneratedPatches)
 			if err != nil {
 				return nil, agenterrors.InvalidInput("failed to merge edits", err)
 			}
@@ -385,57 +384,6 @@ func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest ty
 
 	return nil, agenterrors.AnimationGenerationFailed("unable to generate, all retries exhausted", nil)
 
-}
-
-// Keps right as source of truth
-// there can be orphans object if the scene is replaced
-func mergeEdits(left *structpb.Struct, right json.RawMessage) (json.RawMessage, error) {
-	if left == nil {
-		return right, nil
-	}
-
-	if len(right) == 0 {
-		return json.Marshal(left.AsMap())
-	}
-
-	leftMap := left.AsMap()
-
-	var rightMap map[string]any
-	if err := json.Unmarshal(right, &rightMap); err != nil {
-		return nil, err
-	}
-
-	merged := deepMergeMaps(leftMap, rightMap)
-
-	return json.Marshal(merged)
-}
-
-func deepMergeMaps(left, right map[string]any) map[string]any {
-	result := make(map[string]any, len(left)+len(right))
-
-	for k, v := range left {
-		result[k] = v
-	}
-
-	for k, rv := range right {
-		lv, exists := result[k]
-
-		if !exists {
-			result[k] = rv
-			continue
-		}
-
-		lmap, lok := lv.(map[string]any)
-		rmap, rok := rv.(map[string]any)
-
-		if lok && rok {
-			result[k] = deepMergeMaps(lmap, rmap)
-		} else {
-			result[k] = rv // right overrides
-		}
-	}
-
-	return result
 }
 
 func (a *sceneGenerator) publishTransientState(state VideoAgentState) {

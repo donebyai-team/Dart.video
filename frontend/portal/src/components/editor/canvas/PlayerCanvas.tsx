@@ -52,7 +52,6 @@ const PlayerCanvas = ({
   const handleSelectEffect = useVideoStore(s => s.handleSelectEffect)
   const handleSelectTool = useVideoStore(s => s.handleSelectTool)
   const handleCloseTool = useVideoStore(s => s.handleCloseTool)
-  const activeTool = useVideoStore(s => s.activeTool)
   const onUpdateSpotlight = useVideoStore(s => s.updateSpotlight)
   const onUpdateCallout = useVideoStore(s => s.updateCallout)
   const onUpdateZoom = useVideoStore(s => s.updateZoom)
@@ -166,7 +165,7 @@ const PlayerCanvas = ({
             setSelectedEid(eid)
 
             if (!sceneElementId) {
-              handleCloseTool()
+              // handleCloseTool()
               return
             }
 

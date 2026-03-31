@@ -122,7 +122,7 @@ func (l *codeGenerator) GenerateCodeFromScene(ctx context.Context, scene *scenes
 		//	return nil, agenterrors.AnimationGenerationFailed("failed to generate animation", err)
 		//}
 
-		generatedAnimation, err := GenerateCodeFromSceneConfig(scene)
+		generatedAnimation, err := scenes.RenderJSXCodeFromSceneConfig(scene)
 		if err != nil {
 			return nil, agenterrors.AnimationGenerationFailed("failed to generate animation", err)
 		}

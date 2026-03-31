@@ -168,10 +168,8 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
   // PatchOverlay — read from window (set by useAnimationEdit in editor)
   // or fall back to persisted edits (during Remotion rendering).
   // No useMemo — must re-read on every render to pick up live edits.
-  const patchOverlay: PatchOverlay =
-    (typeof window !== 'undefined' && (window as any).__PATCH_OVERLAY__)
-      ? (window as any).__PATCH_OVERLAY__ as PatchOverlay
-      : (content?.edits ?? {}) as unknown as PatchOverlay
+  // const patchOverlay: PatchOverlay =
+  //   content?.edits ?? {}) as unknown as PatchOverlay 
 
   return (
     <AbsoluteFill
@@ -197,7 +195,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
               <TemplateLoadingPlaceholder />
             ) : CompiledComponent ? (
               <SpeedFactorProvider factor={1}>
-                <PatchContextProvider overlay={patchOverlay}>
+                <PatchContextProvider overlay={content?.edits as PatchOverlay}>
                   <CompiledComponent />
                 </PatchContextProvider>
               </SpeedFactorProvider>

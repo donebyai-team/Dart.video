@@ -26,52 +26,9 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     return resolveBackgroundStyle(slide, globalBackground);
   },
 
-  addAnimationSlide: (sectionId: string, newSlide: Slide, afterSlideId?: string) => {
+  addSlide(sectionId: string, afterSlideId?: string): string {
     const { videoConfig } = get();
-    if (!videoConfig?.config) return;
-    console.log("Added new slide", newSlide, sectionId, afterSlideId)
-
-    const sections = getSections(videoConfig);
-    const previousSlide = getPreviousSlide(sections, sectionId);
-    const globalBackground = videoConfig.metadata?.backgroundStyle;
-
-
-    const inheritedBg =
-      globalBackground ??
-      previousSlide?.backgroundStyle ??
-      createDefaultBackgroundStyle();
-
-    newSlide.backgroundStyle = { ...inheritedBg };
-
-
-    let newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
-      sections.map(s => {
-        if (s.id !== sectionId) return s;
-        if (!afterSlideId) return { ...s, slides: [...s.slides, newSlide] };
-        const idx = s.slides.findIndex(sl => sl.id === afterSlideId);
-        const insertAt = idx === -1 ? s.slides.length : idx + 1;
-        const updated = [...s.slides];
-        updated.splice(insertAt, 0, newSlide);
-        return { ...s, slides: updated };
-      })
-    );
-
-    newVideoConfig = updateTotalDuration(newVideoConfig);
-
-    set({ videoConfig: newVideoConfig });
-
-    const section = getSections(newVideoConfig).find(s => s.id === sectionId);
-
-    if (section) {
-      set({ selectedSlide: { section, slide: newSlide } });
-    }
-
-    get().refreshPendingChanges();
-  },
-
-  addSlide(sectionId: string, afterSlideId?: string) {
-    const { videoConfig } = get();
-    if (!videoConfig?.config) return;
+    if (!videoConfig?.config) return "";
 
     const sections = getSections(videoConfig);
     const previousSlide = getPreviousSlide(sections, sectionId);
@@ -109,7 +66,10 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       set({ selectedSlide: { section, slide: newSlide } });
     }
 
+    console.debug("added slide", newSlide.id, "after", afterSlideId);
+
     get().refreshPendingChanges();
+    return newSlide.id;
   },
 
   /* ================= BACKGROUND ================= */
