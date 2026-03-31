@@ -122,6 +122,7 @@ export function resolveComponentFromId(id: string): ComponentRegistration | null
   if (dashIdx <= 0) return null;
 
   let prefix = id.substring(0, dashIdx);
+
   while (prefix.length > 0) {
     const registration = REGISTRY_BY_LOWERCASE.get(prefix);
     if (registration) return registration;

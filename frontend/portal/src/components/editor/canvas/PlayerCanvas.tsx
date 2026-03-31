@@ -161,6 +161,8 @@ const PlayerCanvas = ({
           overlay={overlay}
           animEditVersion={animEditVersion}
           onSelectElement={eid => {
+            // Get the parent scene id from the clicked id
+            // so we can open the scene settings
             const sceneElementId = eid ? resolveOwningSceneElementId(eid) : null
             setSelectedEid(eid)
 

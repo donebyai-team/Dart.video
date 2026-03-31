@@ -66,6 +66,43 @@ func TestMergeEdits(t *testing.T) {
 				"textstagger-0": { "text": "new headline" }
 			}`,
 		},
+		{
+			name: "replace root scene and remove children",
+			left: `{
+  "iconasset-iconshowcase-0-0": {
+    "style": {
+      "color": "#ea6a6a"
+    }
+  },
+  "iconshowcase-0": {
+    "icons": [
+      "openai",
+      "anthropic"
+    ],
+    "text": "Work with the latest models from OpenAI, Anthropic, and more"
+  }
+}`,
+			right: `{
+				"textstagger-0": {
+                                            "duration": 15,
+                                            "entranceAnimation": "scaleIn",
+                                            "splitBy": "word",
+                                            "staggerDelay": 5,
+                                            "text": "I am changing it",
+                                            "variant": "heading"
+                                        }
+			}`,
+			expected: `{
+				"textstagger-0": {
+                                            "duration": 15,
+                                            "entranceAnimation": "scaleIn",
+                                            "splitBy": "word",
+                                            "staggerDelay": 5,
+                                            "text": "I am changing it",
+                                            "variant": "heading"
+                                        }
+			}`,
+		},
 	}
 
 	for _, tt := range tests {

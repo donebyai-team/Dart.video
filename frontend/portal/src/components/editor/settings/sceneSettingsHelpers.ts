@@ -186,9 +186,10 @@ export function resolveOwningSceneElementId(elementId: string): string | null {
   let resolvedSceneId: string | null = null
 
   // Child primitives keep their own ids for toolbar selection, but scene settings
-  // should always target the outermost owning scene component.
-  // We keep walking upward and remember the last matching scene id so a nested
-  // child like "textstagger-logowithbrandname-0" resolves to "logowithbrandname-0".
+  // should always target the owning scene id that appears as the suffix of a child id.
+  // Nested ids follow "<child-local-id>-<parent-id>", and the child-local part may
+  // itself contain dashes like "text-right" or "text-0". Because of that, we test
+  // each remaining suffix as a full id by removing one leftmost segment at a time.
   // This is intentionally based on the scenes registry rather than registration.type,
   // because some scene-capable components (like text scenes) are typed as "content".
   while (current.length > 0) {
@@ -197,19 +198,9 @@ export function resolveOwningSceneElementId(elementId: string): string | null {
       resolvedSceneId = current
     }
 
-    if (!registration) break
-
-    const componentPrefix = registration.name.toLowerCase()
-    const nestedPrefix = `${componentPrefix}-`
-    if (!current.startsWith(nestedPrefix)) break
-
-    const parentId = current.slice(nestedPrefix.length)
-    if (!parentId || parentId === current) break
-
-    // Nested child ids are encoded as "<child-component>-<parent-id>", so walking
-    // to the owning scene means removing the leading component prefix, not trimming
-    // the numeric suffix from the end.
-    current = parentId
+    const firstDashIdx = current.indexOf('-')
+    if (firstDashIdx <= 0) break
+    current = current.slice(firstDashIdx + 1)
   }
 
   return resolvedSceneId

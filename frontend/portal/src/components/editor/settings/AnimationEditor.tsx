@@ -12,7 +12,7 @@ import ManualMediaImportPanel from '@/components/assets/ManualMediaImportPanel'
 import FigmaImportPanel, { type ConfirmPayload as FigmaImportConfirmPayload } from '@/components/figma/FigmaImportPanel'
 import SelectedAssetsDialog, { type SelectedAssetWithPreview } from '@/components/assets/SelectedAssetsDialog'
 import { useVideoStore } from '@/stores/video'
-import { AddOrEditAnimationSettings } from '@/types/tools'
+import { ActiveToolType, AddOrEditAnimationSettings } from '@/types/tools'
 import type { AskUserQuestion, GenerateOrEditSceneResponse } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
 import {SlideStatus, type Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { MediaAsset, SelectedMediaAsset, SelectedMediaAssetSchema } from '@coasterai/pb/coasterai/core/v1/media_asset_pb'
@@ -40,6 +40,7 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
     const brandLibraryID = useVideoStore(s => s.videoConfig?.metadata?.generatedBranding?.brandLibraryID)
     const acceptVideoConfigChanges = useVideoStore(s => s.acceptVideoConfigChanges)
 
+    const handleSelectTool = useVideoStore(s => s.handleSelectTool)
     const { portalClient } = useClientsContext()
     const router = useRouter()
 
@@ -104,6 +105,23 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
         return () => { abortControllerRef.current?.abort() }
     }, [])
 
+    /** 
+     * If the scene is completely changed when user prompted
+     * We'd get new edits with only the changed scene ids
+     * In this case, we select the first element from the new edits to refresh the scene settings     
+    */
+    const reselectIfNeeded = (edits: PatchOverlay) => {
+        if (selectedAnimationElementId && edits[selectedAnimationElementId]) return
+        const firstId = Object.keys(edits)[0]
+        if (firstId) {
+            console.log("updated the scene id", firstId)
+            handleSelectTool({
+                type: ActiveToolType.ADD_OR_EDIT_ANIMATION,
+                settings: { animationElementId: firstId },
+            })
+        }
+    }
+
     const applySlideToStore = (slide: Slide) => {
         const updatedContent = slide.content;
         if (!updatedContent) return
@@ -114,6 +132,7 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
 
         const pathOverlay = updatedContent.edits as unknown as PatchOverlay
         setOverlay(pathOverlay)
+        reselectIfNeeded(pathOverlay)
 
         updateSlide({
             slideStatus: SlideStatus.GENERATED,
@@ -126,7 +145,7 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
             }
         } as Slide)
 
-        // Force sync changes to backend. 
+        // Force sync changes to backend.
         acceptVideoConfigChanges();
     }
 
