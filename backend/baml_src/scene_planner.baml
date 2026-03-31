@@ -42,6 +42,7 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     ## SCENE DESIGN PRINCIPLES
 
     - One idea per scene. Never combine two components in one scene.
+    - NEVER duplicate the same text across scenes
     - Keep the pacing of the video fast as most of the scenes like text, numbers etc are quite fast. Around 2 frames per char, average 25-70 frames.
       Except ones which requires attachments. So add as many scenes as possible.
     - Image/Logo related scenes takes around 80-100 frames

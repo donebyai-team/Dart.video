@@ -106,8 +106,6 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 
 	// save slides
 	sections := make([]*pbcore.Section, 0, len(plan.Sections))
-	totalAnimationSlides := 0
-	totalMediaSlides := 0
 	sceneMapper := make(map[string]*types.Scene)
 	for index, pendingSection := range plan.Sections {
 		section := &pbcore.Section{
@@ -125,7 +123,6 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 			}
 
 			sceneMapper[slide.Id] = &pendingSlide
-			totalAnimationSlides++
 			//assignRandomTransitionAndDirection(slide)
 
 			slide.Content = &pbcore.AnimationSlideContent{
@@ -143,8 +140,7 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 
 	g.logger.Info("pending slides summary",
 		zap.Int("total_sections", len(sections)),
-		zap.Int("total_animation_slides", totalAnimationSlides),
-		zap.Int("total_media_slides", totalMediaSlides))
+		zap.Int("total_slides", len(sceneMapper)))
 
 	g.video.Config.Sections = sections
 	g.video.Metadata.ThinkingSummary = plan.ThinkingSummary
