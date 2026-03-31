@@ -64,7 +64,7 @@ const QuestionPanel = ({
               >
                 {question.asset.thumbnailUrl ? (
                   <img 
-                    src={question.asset.thumbnailUrl} 
+                    src={question.asset.url} 
                     alt={question.asset.fileName || 'Asset'}
                     className='w-full h-full object-cover'
                   />
