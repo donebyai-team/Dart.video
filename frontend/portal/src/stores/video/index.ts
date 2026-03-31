@@ -14,6 +14,7 @@ import { VideoState, VideoActions } from "./types";
 
 export const useVideoStore = create<VideoState & VideoActions>()((set, get) => ({
     ...initialState,
+    reset: () => set(initialState),
     ...createInitActions(set, get),
     ...createSyncActions(set, get),
     ...createStreamingActions(set, get),

@@ -45,6 +45,7 @@ export interface VideoState {
 
 export interface VideoActions {
     initialize: (config: EditorConfig, videoConfig: Video) => void;
+    reset: () => void;
 
     // Sync actions
     refreshPendingChanges: () => void;

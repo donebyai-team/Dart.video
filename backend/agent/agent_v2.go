@@ -73,11 +73,10 @@ func (a *agentV2) Continue(ctx context.Context, options ContinueSessionOptions) 
 	}
 
 	generatePlanRequest := types.VideoGenerationPlanRequest{
-		Duration:       int64(session.Request.DurationInSec) * a.fps,
-		Prompt:         session.Request.Prompt,
-		Language:       "English",
-		Resolution:     session.Request.Resolution.Id,
-		BrandLibraryID: session.Request.BrandLibraryId,
+		Duration:   int64(session.Request.DurationInSec) * a.fps,
+		Prompt:     session.Request.Prompt,
+		Language:   "English",
+		Resolution: session.Request.Resolution.Id,
 	}
 
 	// If the user has provided more assets or clarification, update the attachments
@@ -243,12 +242,11 @@ func (a *agentV2) Start(ctx context.Context, options StartSessionOptions) (*RunR
 	}
 
 	generatePlanRequest := types.VideoGenerationPlanRequest{
-		Duration:       int64(options.Input.DurationInSec) * a.fps,
-		Prompt:         options.Input.Prompt,
-		Language:       "English",
-		Resolution:     options.Input.Resolution.Id,
-		Script:         script,
-		BrandLibraryID: options.Input.BrandLibraryId,
+		Duration:   int64(options.Input.DurationInSec) * a.fps,
+		Prompt:     options.Input.Prompt,
+		Language:   "English",
+		Resolution: options.Input.Resolution.Id,
+		Script:     script,
 	}
 
 	// use brand guidelines only when specified

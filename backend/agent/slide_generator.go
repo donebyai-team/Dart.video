@@ -3,11 +3,11 @@ package agent
 import (
 	"context"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/services/brand_identity"
 	"github.com/shank318/coasterai/services/voiceover"
 	"math/rand"
-	"time"
 
 	"github.com/pkg/errors"
 	"github.com/shank318/coasterai/models"
@@ -109,7 +109,7 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 	sceneMapper := make(map[string]*types.Scene)
 	for index, pendingSection := range plan.Sections {
 		section := &pbcore.Section{
-			Id:     fmt.Sprintf("section-%d", time.Now().UnixNano()),
+			Id:     fmt.Sprintf("section-%s", uuid.NewString()),
 			Title:  pendingSection.Name,
 			Color:  pickRandomColor(),
 			Slides: []*pbcore.Slide{},
@@ -117,7 +117,7 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 		}
 		for slideIndex, pendingSlide := range pendingSection.Slides {
 			slide := &pbcore.Slide{
-				Id:          fmt.Sprintf("slide-%d", time.Now().UnixNano()),
+				Id:          fmt.Sprintf("slide-%s", uuid.NewString()),
 				SlideStatus: pbcore.SlideStatus_SLIDE_STATUS_PENDING,
 				Index:       int32(slideIndex),
 			}

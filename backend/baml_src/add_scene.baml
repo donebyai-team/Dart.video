@@ -9,7 +9,7 @@ class AddSceneResponse {
 
 
 function GenerateScene(input: AddSceneRequest, conversation_history: Message[]) -> AddSceneResponse {
-  client CustomOpenAI5WithThinkingSummary
+  client CustomOpenAI5WithLowThinkingSummary
   prompt #"
     You are a cinematic video planning director. Your job is to decompose a user query into a scene of an existing video.
     You decide WHAT appears in scene, HOW it behaves, and WHAT data it shows.

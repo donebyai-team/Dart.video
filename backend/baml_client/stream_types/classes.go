@@ -1031,14 +1031,13 @@ func (c VideoGenerationPlan) BamlTypeName() string {
 }
 
 type VideoGenerationPlanRequest struct {
-	Duration       *int64         `json:"Duration"`
-	Prompt         *string        `json:"Prompt"`
-	Language       *string        `json:"Language"`
-	Resolution     *string        `json:"Resolution"`
-	Script         []ScriptItem   `json:"Script"`
-	VideoBranding  *VideoBranding `json:"VideoBranding"`
-	BrandLibraryID *string        `json:"BrandLibraryID"`
-	ComponentList  *string        `json:"ComponentList"`
+	Duration      *int64         `json:"Duration"`
+	Prompt        *string        `json:"Prompt"`
+	Language      *string        `json:"Language"`
+	Resolution    *string        `json:"Resolution"`
+	Script        []ScriptItem   `json:"Script"`
+	VideoBranding *VideoBranding `json:"VideoBranding"`
+	ComponentList *string        `json:"ComponentList"`
 }
 
 func (c *VideoGenerationPlanRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -1073,9 +1072,6 @@ func (c *VideoGenerationPlanRequest) Decode(holder *cffi.CFFIValueClass, typeMap
 		case "VideoBranding":
 			c.VideoBranding = baml.Decode(valueHolder).Interface().(*VideoBranding)
 
-		case "BrandLibraryID":
-			c.BrandLibraryID = baml.Decode(valueHolder).Interface().(*string)
-
 		case "ComponentList":
 			c.ComponentList = baml.Decode(valueHolder).Interface().(*string)
 
@@ -1102,8 +1098,6 @@ func (c VideoGenerationPlanRequest) Encode() (*cffi.HostValue, error) {
 	fields["Script"] = c.Script
 
 	fields["VideoBranding"] = c.VideoBranding
-
-	fields["BrandLibraryID"] = c.BrandLibraryID
 
 	fields["ComponentList"] = c.ComponentList
 

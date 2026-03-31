@@ -53,9 +53,9 @@ export function createNewSlide(params: { inheritedBg: BackgroundStyle }) {
     } = params;
 
     return create(SlideSchema, {
-        id: `slide-${Date.now()}`,
+        id: `slide-${crypto.randomUUID()}`,
         transcript: "",
-        slideStatus: SlideStatus.GENERATED,
+        slideStatus: SlideStatus.PENDING,
         durationInFrames: 5 * 30,
         transition: TransitionType.TRANSITION_NONE,
         backgroundStyle: inheritedBg,
@@ -208,7 +208,6 @@ export const ensureVideoResolution = (
     // Already valid → return original (important for avoiding extra renders)
     return video;
 };
-
 
 
 

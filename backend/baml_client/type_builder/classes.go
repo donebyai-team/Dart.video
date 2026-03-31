@@ -807,10 +807,6 @@ func (t *VideoGenerationPlanRequestClassView) PropertyVideoBranding() (ClassProp
 	return t.inner.Property("VideoBranding")
 }
 
-func (t *VideoGenerationPlanRequestClassView) PropertyBrandLibraryID() (ClassPropertyView, error) {
-	return t.inner.Property("BrandLibraryID")
-}
-
 func (t *VideoGenerationPlanRequestClassView) PropertyComponentList() (ClassPropertyView, error) {
 	return t.inner.Property("ComponentList")
 }

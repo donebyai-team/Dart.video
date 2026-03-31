@@ -53,6 +53,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
 
   // ---- Values (reactive) ----
   const initialize = useVideoStore(s => s.initialize)
+  const reset = useVideoStore(s => s.reset)
   const isInitialized = useVideoStore(s => s.isInitialized)
 
   // Streaming state
@@ -231,7 +232,13 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
     initialize
   ]);
 
-
+  // Clean up store when leaving the editor
+  useEffect(() => {
+    return () => {
+      stopVideoStream()
+      reset()
+    }
+  }, [stopVideoStream, reset])
 
   // Centralized preview handler - plays a slide from start and pauses at end
   const handlePreviewSlide = (slideId: string) => {
