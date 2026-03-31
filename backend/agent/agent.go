@@ -42,6 +42,7 @@ const (
 	RunStatusCompleted           RunStatus = "COMPLETED"
 	RunStatusWaitingForUserInput RunStatus = "WAITING_FOR_USER_INPUT"
 	defaultFPS                             = 30
+	assetUpdatedMessage          string    = "<attachments> list has been updated. Newly added or updated attachments appear at the bottom."
 )
 
 type RunResult struct {

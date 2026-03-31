@@ -82,7 +82,7 @@ func (a *agentV2) Continue(ctx context.Context, options ContinueSessionOptions) 
 	// If the user has provided more assets or clarification, update the attachments
 	if options.SelectedMediaAssets != nil && len(options.SelectedMediaAssets) > 0 {
 		session.Request.Assets = append(session.Request.Assets, options.SelectedMediaAssets...)
-		userResponse += "\n\noriginal attachment list updated, please check"
+		userResponse += "\n\n" + assetUpdatedMessage
 	}
 
 	err = a.injectMediaAssets(ctx, session.Request)

@@ -148,7 +148,7 @@ func (a *sceneGenerator) ContinueAgent(
 	// If the user has provided more assets or clarification, update the attachments
 	if options.SelectedMediaAssets != nil && len(options.SelectedMediaAssets) > 0 {
 		session.Request.Assets = append(session.Request.Assets, options.SelectedMediaAssets...)
-		userResponse += "\n\noriginal attachment list updated, please check"
+		userResponse += "\n\n" + assetUpdatedMessage
 	}
 
 	err = a.injectMediaAssets(ctx, session.Request)
@@ -273,6 +273,12 @@ func (l *sceneGenerator) GenerateScene(
 			Request:             input,
 			ConversationHistory: make([]types.Message, 0),
 		}
+	}
+
+	// if there are assets and there is an ongoing conversation
+	// we want LLM to know that assets are updated and use the latest ones
+	if len(input.Assets) > 0 && len(session.ConversationHistory) > 0 {
+		input.Prompt += "\n\n" + assetUpdatedMessage
 	}
 
 	// Check if its a edit call and add previously scene
