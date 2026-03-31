@@ -98,6 +98,7 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
         setPendingQuestion(undefined)
         setSelectedAnswer('')
         setCustomAnswer('')
+        setThinkingChunk('')
         setStage('question')
     }, [pendingQuestion, isThinkingBusy])
 
@@ -427,7 +428,7 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
             </div>
 
             <div className='flex flex-col flex-1 min-h-0'>
-                {selectedAnimationElementId && (
+                {selectedAnimationElementId && stage !== 'question' && (
                     <div className='mb-3 rounded-xl border bg-background shadow-sm overflow-hidden'>
                         <SceneSettings
                             elementId={selectedAnimationElementId}
@@ -440,7 +441,7 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                 <div className='flex-1 min-h-0 rounded-xl bg-background/60 backdrop-blur-sm p-3 overflow-auto'>
                     {stage === 'question' && activeQuestion && (
                         <QuestionPanel
-                            question={activeQuestion}
+                            question={activeQuestion} 
                             isSubmitting={isSubmitting}
                             customAnswer={customAnswer}
                             answerInput={answerInput}

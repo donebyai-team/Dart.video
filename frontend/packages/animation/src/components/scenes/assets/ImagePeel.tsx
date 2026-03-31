@@ -25,7 +25,7 @@ const DEFAULT_HEIGHT = 1080 * 0.7;
 
 export const ImagePeelSchema = z.object({
     id: z.string().optional(),
-    sources: z.array(z.string().url("each source must be a valid URL")).min(2, "sources must contain at least 2 images"),
+    images: z.array(z.string().url("each source must be a valid URL")).min(2, "sources must contain at least 2 images"),
     direction: z.enum(DIRECTIONS).default(DEFAULT_DIRECTION).optional(),
     holdDuration: z.number().min(0, "holdDuration cannot be negative").default(DEFAULT_HOLD_DURATION).optional(),
     peelDuration: z.number().min(0, "peelDuration cannot be negative").default(DEFAULT_PEEL_DURATION).optional(),
@@ -33,7 +33,6 @@ export const ImagePeelSchema = z.object({
     borderRadius: z.number().min(0, "borderRadius cannot be negative").default(DEFAULT_BORDER_RADIUS).optional(),
     width: z.number().min(1, "width must be positive").default(DEFAULT_WIDTH).optional(),
     height: z.number().min(1, "height must be positive").default(DEFAULT_HEIGHT).optional(),
-
     style: z.any().optional(),
 });
 
@@ -71,7 +70,7 @@ export function ImagePeel(propsInit: ImagePeelProps): React.ReactElement {
     const resolvedHeight = props.height ?? DEFAULT_HEIGHT;
 
     const easing = styleConfig.motion.entrance;
-    const count = props.sources.length;
+    const count = props.images.length;
     // Each image: [enter] -> [hold] -> [peel away], staggered
 
     const cycleDuration = actualHoldDuration + actualPeelDuration;
@@ -105,7 +104,7 @@ export function ImagePeel(propsInit: ImagePeelProps): React.ReactElement {
                 }}
             >
                 {/* Render bottom to top: last image at bottom, first on top */}
-                {[...props.sources].reverse().map((src, reversedIndex) => {
+                {[...props.images].reverse().map((src, reversedIndex) => {
                     const index = count - 1 - reversedIndex;
                     const peelStart = entranceDuration + index * cycleDuration;
 
@@ -176,11 +175,11 @@ export function calculateImagePeelDuration(props: ImagePeelProps): DurationResul
 
     const validated = validation.data;
 
-    if (validated.sources.length < 2) {
+    if (validated.images.length < 2) {
         return {
             success: false,
-            error: "sources must contain at least 2 images",
-            field: "sources",
+            error: "images must contain at least 2 images",
+            field: "images",
         };
     }
 
@@ -191,7 +190,7 @@ export function calculateImagePeelDuration(props: ImagePeelProps): DurationResul
     const cycleDuration = holdDuration + peelDuration;
 
     // Total: entrance + (cycles for all images)
-    const totalDuration = entranceDuration + (validated.sources.length * cycleDuration);
+    const totalDuration = entranceDuration + (validated.images.length * cycleDuration);
 
     return {
         success: true,

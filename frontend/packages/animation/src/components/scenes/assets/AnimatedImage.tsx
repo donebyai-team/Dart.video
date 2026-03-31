@@ -6,8 +6,8 @@ import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { Text } from '../../../core/text/Text';
 import { ImageAsset } from '../../../core/assets/ImageAsset';
-import {  TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
-import {  usePatchedProps, useStyleOverride } from '../../../patches';
+import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
+import { usePatchedProps, useStyleOverride } from '../../../patches';
 import { resolveTypography } from '../../../tokens';
 import { useTheme } from '../../../theme';
 import { getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
@@ -33,7 +33,7 @@ export const AnimatedImageSchema = z.object({
     text: z.string().min(1, "text is required"),
     src: z.string().url("src must be a valid URL"),
     variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
-    animation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
+    entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
     borderRadius: z.number().min(0, "borderRadius cannot be negative").default(DEFAULT_BORDER_RADIUS).optional(),
     width: z.number().min(1, "width must be positive").default(DEFAULT_WIDTH).optional(),
     height: z.number().min(1, "height must be positive").default(DEFAULT_HEIGHT).optional(),
@@ -58,7 +58,7 @@ export function AnimatedImage(propsInit: AnimatedImageProps): React.ReactElement
 
     // Apply defaults
     const actualVariant = props.variant ?? DEFAULT_VARIANT;
-    const actualAnimation = props.animation ?? DEFAULT_ANIMATION;
+    const actualAnimation = props.entranceAnimation ?? DEFAULT_ANIMATION;
     const actualBorderRadius = props.borderRadius ?? DEFAULT_BORDER_RADIUS;
     const imageWidth = props.width ?? DEFAULT_WIDTH;
     const imageHeight = props.height ?? DEFAULT_HEIGHT;

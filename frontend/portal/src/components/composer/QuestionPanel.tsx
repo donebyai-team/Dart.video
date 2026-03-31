@@ -34,6 +34,7 @@ const QuestionPanel = ({
 }: QuestionPanelProps) => {
   const [assetPreviewOpen, setAssetPreviewOpen] = useState(false)
   const [assetNote, setAssetNote] = useState('')
+  console.log("waiting foe user input", question)
   
   const isAssetClarification = question.questionType === AskUserQuestionType.ASSET_CLARIFICATION
   const isUploadAsset = question.questionType === AskUserQuestionType.UPLOAD_ASSET

@@ -44,7 +44,7 @@ func renderElement(el *SceneConfig, indent int, path string) (string, error) {
 
 	space := strings.Repeat("  ", indent)
 
-	props, err := renderProps(el.Props, path)
+	props, err := renderProps(el.Props, el.ID, path)
 	if err != nil {
 		return "", err
 	}
@@ -82,8 +82,13 @@ func renderElement(el *SceneConfig, indent int, path string) (string, error) {
 	), nil
 }
 
-func renderProps(props map[string]interface{}, path string) (string, error) {
+func renderProps(props map[string]interface{}, id, path string) (string, error) {
 	var parts []string
+
+	// Add id first
+	if id != "" {
+		parts = append(parts, fmt.Sprintf(`id="%s"`, id))
+	}
 
 	for key, value := range props {
 

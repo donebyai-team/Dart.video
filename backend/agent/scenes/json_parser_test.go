@@ -1,6 +1,8 @@
 package scenes
 
 import (
+	"encoding/json"
+	"reflect"
 	"testing"
 )
 
@@ -99,5 +101,90 @@ func TestParseSceneConfigFromEditsPatch_MultipleRoots(t *testing.T) {
 
 	if len(nodes) != 2 {
 		t.Fatalf("expected 2 nodes, got %d", len(nodes))
+	}
+}
+
+func TestSceneConfig_ToEditsPatch(t *testing.T) {
+	tests := []struct {
+		name     string
+		scene    SceneConfig
+		expected map[string]map[string]interface{}
+	}{
+		{
+			name: "single node",
+			scene: SceneConfig{
+				ID: "root",
+				Props: map[string]interface{}{
+					"color": "blue",
+				},
+			},
+			expected: map[string]map[string]interface{}{
+				"root": {"color": "blue"},
+			},
+		},
+		{
+			name: "with children",
+			scene: SceneConfig{
+				ID: "root",
+				Props: map[string]interface{}{
+					"color": "blue",
+				},
+				Children: []SceneConfig{
+					{
+						ID: "text-1",
+						Props: map[string]interface{}{
+							"text": "hello",
+						},
+					},
+				},
+			},
+			expected: map[string]map[string]interface{}{
+				"root":   {"color": "blue"},
+				"text-1": {"text": "hello"},
+			},
+		},
+		{
+			name: "nested children",
+			scene: SceneConfig{
+				ID: "root",
+				Props: map[string]interface{}{
+					"bg": "black",
+				},
+				Children: []SceneConfig{
+					{
+						ID: "group-1",
+						Props: map[string]interface{}{
+							"layout": "row",
+						},
+						Children: []SceneConfig{
+							{
+								ID: "text-1",
+								Props: map[string]interface{}{
+									"text": "hi",
+								},
+							},
+						},
+					},
+				},
+			},
+			expected: map[string]map[string]interface{}{
+				"root":    {"bg": "black"},
+				"group-1": {"layout": "row"},
+				"text-1":  {"text": "hi"},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			raw := tt.scene.ToEditsPatch()
+
+			var result map[string]map[string]interface{}
+			_ = json.Unmarshal(raw, &result)
+
+			if !reflect.DeepEqual(result, tt.expected) {
+				t.Fatalf("expected %v, got %v", tt.expected, result)
+			}
+		})
 	}
 }

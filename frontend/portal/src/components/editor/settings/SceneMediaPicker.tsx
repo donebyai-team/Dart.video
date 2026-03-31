@@ -92,7 +92,7 @@ export function MultiSceneMediaPicker({
   }))
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       <SceneSortablePillList
         items={items}
         minItems={minItems}
@@ -106,7 +106,7 @@ export function MultiSceneMediaPicker({
       />
       <div>
         <Button type="button" variant="outline" size="sm" onClick={() => setOpen(true)}>
-          Add asset
+          Add image
         </Button>
       </div>
       <Dialog open={open} onOpenChange={setOpen}>

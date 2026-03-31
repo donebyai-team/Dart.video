@@ -17,6 +17,26 @@ type SceneConfig struct {
 	Children []SceneConfig
 }
 
+func (s SceneConfig) ToEditsPatch() json.RawMessage {
+	patch := make(map[string]map[string]interface{})
+
+	var walk func(SceneConfig)
+	walk = func(node SceneConfig) {
+		if node.ID != "" {
+			patch[node.ID] = node.Props
+		}
+
+		for _, child := range node.Children {
+			walk(child)
+		}
+	}
+
+	walk(s)
+
+	data, _ := json.Marshal(patch)
+	return data
+}
+
 // Convert edits to scene parent only
 func EditsToScene(edits *structpb.Struct) (*types.Scene, error) {
 	if edits == nil {

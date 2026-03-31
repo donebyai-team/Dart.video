@@ -119,6 +119,12 @@ func (a *sceneGenerator) getGenerateOrEditAnimationSession(ctx context.Context) 
 	if err := json.Unmarshal([]byte(value), &session); err != nil {
 		return nil, agenterrors.SessionUnavailable("invalid planning session payload", err)
 	}
+
+	// keep only the last 5 messages
+	if len(session.ConversationHistory) > 5 {
+		session.ConversationHistory = session.ConversationHistory[len(session.ConversationHistory)-5:]
+	}
+
 	return &session, nil
 }
 
@@ -315,6 +321,12 @@ func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest ty
 		}
 	}()
 
+	optionsBuilder := NewAnimationGenerationOptionsBuilder()
+	if l.assetRegistry != nil {
+		optionsBuilder.WithAssetRegistry(l.assetRegistry)
+	}
+	l.animationGenerator.ApplyGenerationOptions(optionsBuilder.Build())
+
 	generatePlanRequest.ComponentList = scenes.BuildScenesList(false, nil)
 	// Generate and validate upto max attempts
 	for attempt := 0; attempt < maxAttempts; attempt++ {
@@ -336,6 +348,14 @@ func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest ty
 		scene := llmResponse.AsScene()
 		if scene == nil {
 			return nil, agenterrors.Internal("scene is missing", nil)
+		}
+
+		// replace generated asset handles
+		if l.assetRegistry != nil {
+			for i := range scene.Elements {
+				resolved := l.assetRegistry.ResolveMediaHandles(scene.Elements[i].Props)
+				scene.Elements[i].Props = resolved
+			}
 		}
 
 		// Validate scene and add default props

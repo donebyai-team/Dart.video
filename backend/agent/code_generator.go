@@ -127,12 +127,6 @@ func (l *codeGenerator) GenerateCodeFromScene(ctx context.Context, scene *scenes
 			return nil, agenterrors.AnimationGenerationFailed("failed to generate animation", err)
 		}
 
-		// resolve the asset handles
-		if l.generationOptions.assetRegistry != nil {
-			l.logger.Info("using brand-identity mapping for resolving media handles")
-			generatedAnimation = l.generationOptions.assetRegistry.ResolveMediaHandles(generatedAnimation)
-		}
-
 		// Default
 		indentedCode := indentCode(generatedAnimation)
 
@@ -155,6 +149,8 @@ func (l *codeGenerator) GenerateCodeFromScene(ctx context.Context, scene *scenes
 
 		template, err := l.uploadAndBuild(ctx, indentedCode, codeFilePath, attempt, callback)
 		if err == nil {
+			// Override the patch, we later remove it from validator
+			template.GeneratedPatches = scene.ToEditsPatch()
 			//diff := math.Abs(float64(generatedAnimation.SettledFrame) - float64(template.Config.VisibleDuration))
 			//if diff > 30 {
 			//	l.logger.Info("difference between llm and computed settledFrame is more than 30",

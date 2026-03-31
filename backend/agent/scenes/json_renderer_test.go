@@ -106,6 +106,7 @@ func TestGenerateReact_NestedComponents(t *testing.T) {
 func TestGenerateReact_Snapshot(t *testing.T) {
 	sceneConfig := SceneConfig{
 		Name: "AnimatedNumber",
+		ID:   "animatednumber-0",
 		Props: map[string]interface{}{
 			"from": 0,
 			"to":   100,
@@ -118,7 +119,7 @@ func TestGenerateReact_Snapshot(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected := `<AnimatedNumber from={0} to={100} />`
+	expected := `<AnimatedNumber id="animatednumber-0" from={0} to={100} />`
 
 	if !strings.Contains(out, expected) {
 		t.Fatalf("snapshot mismatch:\n%s", out)

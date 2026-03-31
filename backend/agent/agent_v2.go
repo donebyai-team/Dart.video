@@ -401,6 +401,14 @@ func (a *agentV2) runPlanning(ctx context.Context, req types.VideoGenerationPlan
 				if err != nil {
 					sceneErrors = append(sceneErrors, err.Error())
 				}
+
+				// replace generated asset handles
+				if a.assetRegistry != nil {
+					for i := range scene.Elements {
+						resolved := a.assetRegistry.ResolveMediaHandles(scene.Elements[i].Props)
+						scene.Elements[i].Props = resolved
+					}
+				}
 			}
 		}
 
