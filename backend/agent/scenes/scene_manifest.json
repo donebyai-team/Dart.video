@@ -52,7 +52,7 @@
             "required": false
           },
           {
-            "name": "animation",
+            "name": "entranceAnimation",
             "type": "enum(fadeIn|slideUp|slideDown|slideLeft|slideRight|scaleIn|rotateIn)",
             "required": false,
             "default": "slideUp"
@@ -141,7 +141,7 @@
             "default": "heading"
           },
           {
-            "name": "animation",
+            "name": "entranceAnimation",
             "type": "enum(fadeIn|slideUp|slideDown|slideLeft|slideRight|scaleIn|rotateIn)",
             "required": false,
             "default": "slideUp"
@@ -176,7 +176,7 @@
             "required": false
           },
           {
-            "name": "animation",
+            "name": "entranceAnimation",
             "type": "enum(fadeIn|slideUp|slideDown|slideLeft|slideRight|scaleIn|rotateIn)",
             "required": false,
             "default": "slideUp"

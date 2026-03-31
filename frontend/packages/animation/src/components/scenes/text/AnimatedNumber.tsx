@@ -36,7 +36,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (propsInit: Animate
     // Apply defaults
     const actualVariant = props.variant ?? DEFAULT_VARIANT;
     const actualHighlightColor = props.highlightColor ?? theme.colors.primary;
-    const actualAnimation = props.animation ?? DEFAULT_ANIMATION;
+    const actualAnimation = props.entranceAnimation ?? DEFAULT_ANIMATION;
     const actualAnimationDelay = props.animationDelay ?? DEFAULT_ENTRANCE_DURATION;
 
     const styleOverride = useStyleOverride(props.id);
@@ -170,7 +170,7 @@ export const AnimatedNumberSchema = z.object({
     variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
     highlightStyle: z.enum(['marker', 'underline', 'box', 'glow', 'background']).default(DEFAULT_HIGHLIGHT_STYLE).optional(),
     highlightColor: z.string().optional(),
-    animation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
+    entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
     animationDelay: z.number().min(0, "animationDelay cannot be negative").default(DEFAULT_ENTRANCE_DURATION).optional(),
     className: z.string().optional(),
     style: z.any().optional(),

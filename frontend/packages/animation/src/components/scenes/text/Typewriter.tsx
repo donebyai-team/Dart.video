@@ -42,7 +42,7 @@ export function Typewriter(propsInit: TypewriterProps): React.ReactElement {
 
   // Apply defaults
   const actualSplitBy = props.splitBy ?? DEFAULT_SPLIT_BY;
-  const actualAnimation = props.animation ?? DEFAULT_ANIMATION;
+  const actualAnimation = props.entranceAnimation ?? DEFAULT_ANIMATION;
   const actualVariant = props.variant ?? DEFAULT_VARIANT;
 
   const styleOverride = useStyleOverride(props.id);
@@ -115,7 +115,7 @@ export const TypewriterSchema = z.object({
   text: z.string().min(1, "text is required"),
   splitBy: z.enum(SPLIT_BY_MODES).default(DEFAULT_SPLIT_BY).optional(),
   variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
-  animation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
+  entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
   style: z.any().optional(),
   className: z.string().optional(),
 });

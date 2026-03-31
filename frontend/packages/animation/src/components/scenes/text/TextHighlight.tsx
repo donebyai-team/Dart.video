@@ -22,7 +22,7 @@ export const TextHighlightSchema = z.object({
     variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
     highlightStyle: z.enum(HIGHLIGHT_STYLES).default(DEFAULT_HIGHLIGHT_STYLE).optional(),
     highlightColor: z.string().optional(),
-    animation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
+    entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
     animationDelay: z.number().min(0, "animationDelay cannot be negative").default(DEFAULT_ENTRANCE_DURATION).optional(),
     zoomDuration: z.number().min(0, "zoomDuration cannot be negative").default(DEFAULT_ZOOM_DURATION).optional(),
     className: z.string().optional(),
@@ -45,7 +45,7 @@ export const TextHighlight: React.FC<TextHighlightProps> = (propsInit: TextHighl
     const actualVariant = props.variant ?? DEFAULT_VARIANT;
     const actualHighlightStyle = props.highlightStyle ?? DEFAULT_HIGHLIGHT_STYLE;
     const actualHighlightColor = props.highlightColor ?? theme.colors.primary;
-    const actualAnimation = props.animation ?? DEFAULT_ANIMATION;
+    const actualAnimation = props.entranceAnimation ?? DEFAULT_ANIMATION;
     const actualAnimationDelay = props.animationDelay ?? DEFAULT_ENTRANCE_DURATION;
     const actualZoomDuration = props.zoomDuration ?? DEFAULT_ZOOM_DURATION;
     const styleOverride = useStyleOverride(props.id);
@@ -76,53 +76,53 @@ export const TextHighlight: React.FC<TextHighlightProps> = (propsInit: TextHighl
     const isVisible = frame < disappearFrame;
 
     const segments = useMemo(() => {
-    const parts: { text: string; highlight: boolean; index: number }[] = [];
-    let lastIndex = 0;
-    let highlightIndex = 0;
+        const parts: { text: string; highlight: boolean; index: number }[] = [];
+        let lastIndex = 0;
+        let highlightIndex = 0;
 
-    const text = props.text;
+        const text = props.text;
 
-    while (true) {
-        const start = text.indexOf("{", lastIndex);
-        if (start === -1) break;
+        while (true) {
+            const start = text.indexOf("{", lastIndex);
+            if (start === -1) break;
 
-        const end = text.indexOf("}", start);
-        if (end === -1) break;
+            const end = text.indexOf("}", start);
+            if (end === -1) break;
 
-        // normal text before highlight
-        if (start > lastIndex) {
+            // normal text before highlight
+            if (start > lastIndex) {
+                parts.push({
+                    text: text.slice(lastIndex, start),
+                    highlight: false,
+                    index: 0,
+                });
+            }
+
+            // highlighted text
             parts.push({
-                text: text.slice(lastIndex, start),
+                text: text.slice(start + 1, end),
+                highlight: true,
+                index: highlightIndex++,
+            });
+
+            lastIndex = end + 1;
+        }
+
+        // remaining text
+        if (lastIndex < text.length) {
+            parts.push({
+                text: text.slice(lastIndex),
                 highlight: false,
                 index: 0,
             });
         }
 
-        // highlighted text
-        parts.push({
-            text: text.slice(start + 1, end),
-            highlight: true,
-            index: highlightIndex++,
-        });
+        if (parts.length === 0) {
+            parts.push({ text, highlight: false, index: 0 });
+        }
 
-        lastIndex = end + 1;
-    }
-
-    // remaining text
-    if (lastIndex < text.length) {
-        parts.push({
-            text: text.slice(lastIndex),
-            highlight: false,
-            index: 0,
-        });
-    }
-
-    if (parts.length === 0) {
-        parts.push({ text, highlight: false, index: 0 });
-    }
-
-    return parts;
-}, [props.text]);
+        return parts;
+    }, [props.text]);
 
     const getHighlightStyles = (index: number): React.CSSProperties => {
         // Highlight is always at full intensity (no animation delay)
@@ -204,13 +204,13 @@ export const TextHighlight: React.FC<TextHighlightProps> = (propsInit: TextHighl
 
     return (
         <span id={props.id} className={props.className} style={{
-                ...resolveTypography(actualVariant, styleConfig, theme, preset),
-                opacity: entranceProgress,
-                transform: getEntranceTransform(actualAnimation, entranceProgress, 200),
-                display: 'inline-block',
-                ...props.style,
-                ...styleOverride
-            }
+            ...resolveTypography(actualVariant, styleConfig, theme, preset),
+            opacity: entranceProgress,
+            transform: getEntranceTransform(actualAnimation, entranceProgress, 200),
+            display: 'inline-block',
+            ...props.style,
+            ...styleOverride
+        }
         }>
             {segments.map((segment, i) => (
                 <span
@@ -245,11 +245,11 @@ export function calculateTextHighlightDuration(props: TextHighlightProps): Durat
     }
 
     const validated = validation.data;
-    
+
     // Fixed duration: entrance + zoom + disappear
     const entranceDuration = validated.animationDelay ?? DEFAULT_ENTRANCE_DURATION;
     const zoomDuration = validated.zoomDuration ?? DEFAULT_ZOOM_DURATION;
-    
+
     return {
         success: true,
         duration: Math.ceil(entranceDuration + zoomDuration),
