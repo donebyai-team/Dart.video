@@ -64,13 +64,28 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
     const [assetDialogOpen, setAssetDialogOpen] = useState(false)
     const [assetPickerMode, setAssetPickerMode] = useState<AssetPickerMode>('upload')
     const [selectedAssetsDialogOpen, setSelectedAssetsDialogOpen] = useState(false)
-    const [questionAssets, setQuestionAssets] = useState<SelectedMediaAsset[]>([])
+    const [questionAssetsDialogOpen, setQuestionAssetsDialogOpen] = useState(false)
+    const [questionAssets, setQuestionAssets] = useState<SelectedAssetWithPreview[]>([])
 
     const hasSelectedAssets = selectedAssets.length > 0
     const selectedAssetMessages = useMemo(
         () => selectedAssets.map(a => a.selection),
         [selectedAssets]
     )
+    const mergedQuestionAssetMessages = useMemo(() => {
+        const merged = [...selectedAssetMessages]
+
+        for (const questionAsset of questionAssets) {
+            const existingIndex = merged.findIndex(asset => asset.assetID === questionAsset.selection.assetID)
+            if (existingIndex >= 0) {
+                merged[existingIndex] = questionAsset.selection
+            } else {
+                merged.push(questionAsset.selection)
+            }
+        }
+
+        return merged
+    }, [questionAssets, selectedAssetMessages])
 
     const abortControllerRef = useRef<AbortController | null>(null)
     const streamSessionRef = useRef(0)
@@ -99,6 +114,8 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
         setSelectedAnswer('')
         setCustomAnswer('')
         setThinkingChunk('')
+        setQuestionAssets([])
+        setQuestionAssetsDialogOpen(false)
         setStage('question')
     }, [pendingQuestion, isThinkingBusy])
 
@@ -258,6 +275,7 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
         setActiveQuestion(undefined)
         setPendingQuestion(undefined)
         setQuestionAssets([])
+        setQuestionAssetsDialogOpen(false)
     }
 
     // ── Asset helpers ──
@@ -285,8 +303,8 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
             note: note?.trim() || undefined
         })
         setQuestionAssets(current => {
-            const remaining = current.filter(item => item.assetID !== nextAsset.assetID)
-            return [...remaining, nextAsset]
+            const remaining = current.filter(item => item.selection.assetID !== nextAsset.assetID)
+            return [...remaining, { selection: nextAsset, asset }]
         })
         setAssetDialogOpen(false)
     }
@@ -336,6 +354,32 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
         )
     }
 
+    const removeQuestionAsset = (assetID: string) => {
+        setQuestionAssets(current => current.filter(asset => asset.selection.assetID !== assetID))
+    }
+
+    const updateQuestionAssetNote = (assetID: string, note?: string) => {
+        setQuestionAssets(current =>
+            current.map(asset => asset.selection.assetID === assetID
+                ? {
+                    ...asset,
+                    selection: create(SelectedMediaAssetSchema, { assetID, note })
+                }
+                : asset
+            )
+        )
+    }
+
+    const hydrateQuestionAssets = (assets: MediaAsset[]) => {
+        if (assets.length === 0) return
+        setQuestionAssets(current =>
+            current.map(selectedAsset => {
+                const full = assets.find(asset => asset.id === selectedAsset.selection.assetID)
+                return full ? { ...selectedAsset, asset: full } : selectedAsset
+            })
+        )
+    }
+
     const handleContinuePlanning = async (responseOverride?: string) => {
         const response = (responseOverride ?? answerInput).trim()
         const slideId = selectedSlide?.slide.id
@@ -363,12 +407,13 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                     value: {
                         slideId,
                         response,
-                        assets: questionAssets,
+                        assets: mergedQuestionAssetMessages,
                     },
                 },
             }, { signal: controller.signal })
 
             setQuestionAssets([])
+            setQuestionAssetsDialogOpen(false)
 
             await consumeStream(stream, controller.signal, streamSession)
         } catch (err: any) {
@@ -420,6 +465,16 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                 onOpenUpload={() => openAssetDialog('upload')}
             />
 
+            <SelectedAssetsDialog
+                open={questionAssetsDialogOpen}
+                selectedAssets={questionAssets}
+                onOpenChange={setQuestionAssetsDialogOpen}
+                onHydrateAssets={hydrateQuestionAssets}
+                onRemoveAsset={removeQuestionAsset}
+                onUpdateAssetNote={updateQuestionAssetNote}
+                onOpenUpload={() => openAssetDialog('upload')}
+            />
+
             <div className='flex items-center justify-between'>
                 <span className='text-sm font-medium text-foreground' />
                 <Button variant='ghost' size='sm' className='h-6 w-6 p-0' onClick={onClose}>
@@ -450,9 +505,10 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                                 void handleContinuePlanning(option)
                             }}
                             onCustomAnswerChange={setCustomAnswer}
-                            onContinue={() => void handleContinuePlanning()}
+                            onContinue={responseOverride => void handleContinuePlanning(responseOverride)}
                             selectedQuestionAssets={questionAssets}
                             onOpenAssetPicker={openAssetDialog}
+                            onOpenSelectedAssetsDialog={() => setQuestionAssetsDialogOpen(true)}
                         />
                     )}
                 </div>

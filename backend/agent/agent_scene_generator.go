@@ -15,10 +15,8 @@ import (
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
 	"github.com/shank318/coasterai/services"
 	"github.com/shank318/coasterai/services/brand_identity"
-	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
 	"strings"
-	"time"
 )
 
 const (
@@ -150,7 +148,7 @@ func (a *sceneGenerator) ContinueAgent(
 	// If the user has provided more assets or clarification, update the attachments
 	if options.SelectedMediaAssets != nil && len(options.SelectedMediaAssets) > 0 {
 		session.Request.Assets = append(session.Request.Assets, options.SelectedMediaAssets...)
-		userResponse += "\n\nattachments updated"
+		userResponse += "\n\noriginal attachment list updated, please check"
 	}
 
 	err = a.injectMediaAssets(ctx, session.Request)
@@ -167,9 +165,8 @@ func (a *sceneGenerator) ContinueAgent(
 	}
 
 	session.ConversationHistory = append(session.ConversationHistory, types.Message{
-		Tool_call_id: utils.Ptr(fmt.Sprintf("call_%d", time.Now().Unix())),
-		Role:         types.Union3KassistantOrKtoolOrKuser__NewKtool(),
-		Content:      userResponse,
+		Role:    types.Union3KassistantOrKtoolOrKuser__NewKuser(),
+		Content: userResponse,
 	})
 
 	if err := a.savePlanningSession(ctx, session); err != nil {

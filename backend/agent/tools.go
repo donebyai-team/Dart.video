@@ -3,6 +3,7 @@ package agent
 import (
 	"context"
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
+	"github.com/shank318/coasterai/utils"
 
 	"github.com/shank318/coasterai/agent/agenterrors"
 	"github.com/shank318/coasterai/baml_client/types"
@@ -61,9 +62,13 @@ func (a *agentV2) handleToolCalls(
 		}
 	}
 
-	// if no asset is provided
-	if questionProto.Asset == nil {
+	// if no asset is provided while clarification
+	// fallback to GENERAL, ideally it should not happen
+	if questionProto.Asset == nil && questionCopy.QuestionType == types.AskUserQuestionTypeATTACHMENT_CLARIFICATION {
 		questionProto.QuestionType = pbportal.AskUserQuestionType_ASK_USER_QUESTION_TYPE_GENERAL
+		if len(questionProto.Options) == 0 {
+			questionProto.AllowCustomEntry = utils.Ptr(true)
+		}
 	}
 
 	return true, &RunResult{
@@ -144,9 +149,13 @@ func (a *sceneGenerator) handleToolCalls(
 		}
 	}
 
-	// if no asset is provided
-	if questionProto.Asset == nil {
+	// if no asset is provided while clarification
+	// fallback to GENERAL, ideally it should not happen
+	if questionProto.Asset == nil && questionCopy.QuestionType == types.AskUserQuestionTypeATTACHMENT_CLARIFICATION {
 		questionProto.QuestionType = pbportal.AskUserQuestionType_ASK_USER_QUESTION_TYPE_GENERAL
+		if len(questionProto.Options) == 0 {
+			questionProto.AllowCustomEntry = utils.Ptr(true)
+		}
 	}
 
 	return true, &RunResult{

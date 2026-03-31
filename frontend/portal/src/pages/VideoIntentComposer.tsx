@@ -51,6 +51,7 @@ const VideoIntentComposer = () => {
   const [styleDialogOpen, setStyleDialogOpen] = useState(false)
   const [assetDialogOpen, setAssetDialogOpen] = useState(false)
   const [selectedAssetsDialogOpen, setSelectedAssetsDialogOpen] = useState(false)
+  const [questionAssetsDialogOpen, setQuestionAssetsDialogOpen] = useState(false)
   const [assetPickerMode, setAssetPickerMode] = useState<AssetPickerMode>('upload')
   const [selectedStyle, setSelectedStyle] = useState<StyleType>(StyleType.UNDEFINED)
   const [script, setScript] = useState<Script | undefined>()
@@ -69,7 +70,7 @@ const VideoIntentComposer = () => {
   const [pendingQuestion, setPendingQuestion] = useState<AskUserQuestion | undefined>()
   const [selectedAnswer, setSelectedAnswer] = useState('')
   const [customAnswer, setCustomAnswer] = useState('')
-  const [questionAssets, setQuestionAssets] = useState<SelectedMediaAsset[]>([])
+  const [questionAssets, setQuestionAssets] = useState<SelectedAssetWithPreview[]>([])
 
   const hasScript = !!script?.items?.length
   const router = useRouter()
@@ -84,6 +85,20 @@ const VideoIntentComposer = () => {
     () => selectedAssets.map(asset => asset.selection),
     [selectedAssets]
   )
+  const mergedQuestionAssetMessages = useMemo(() => {
+    const merged = [...selectedAssetMessages]
+
+    for (const questionAsset of questionAssets) {
+      const existingIndex = merged.findIndex(asset => asset.assetID === questionAsset.selection.assetID)
+      if (existingIndex >= 0) {
+        merged[existingIndex] = questionAsset.selection
+      } else {
+        merged.push(questionAsset.selection)
+      }
+    }
+
+    return merged
+  }, [questionAssets, selectedAssetMessages])
 
   const answerInput = useMemo(() => {
     if (!activeQuestion) return ''
@@ -103,6 +118,7 @@ const VideoIntentComposer = () => {
     setSelectedAnswer('')
     setCustomAnswer('')
     setQuestionAssets([])
+    setQuestionAssetsDialogOpen(false)
     setStage('question')
   }, [pendingQuestion, isThinkingBusy])
 
@@ -182,6 +198,7 @@ const VideoIntentComposer = () => {
     setActiveQuestion(undefined)
     setPendingQuestion(undefined)
     setQuestionAssets([])
+    setQuestionAssetsDialogOpen(false)
   }
 
   const handleSubmit = async () => {
@@ -255,10 +272,11 @@ const VideoIntentComposer = () => {
       const stream = portalClient.continueVideoPlanning({
         id: videoId,
         response,
-        assets: questionAssets
+        assets: mergedQuestionAssetMessages
       }, { signal: controller.signal })
 
       setQuestionAssets([])
+      setQuestionAssetsDialogOpen(false)
 
       await consumePlanningStream(stream, controller.signal, streamSession)
     } catch (err: any) {
@@ -300,8 +318,8 @@ const VideoIntentComposer = () => {
     })
 
     setQuestionAssets(current => {
-      const remaining = current.filter(item => item.assetID !== nextAsset.assetID)
-      return [...remaining, nextAsset]
+      const remaining = current.filter(item => item.selection.assetID !== nextAsset.assetID)
+      return [...remaining, { selection: nextAsset, asset }]
     })
     setAssetDialogOpen(false)
   }
@@ -370,6 +388,38 @@ const VideoIntentComposer = () => {
     )
   }
 
+  const removeQuestionAsset = (assetID: string) => {
+    setQuestionAssets(current => current.filter(asset => asset.selection.assetID !== assetID))
+  }
+
+  const updateQuestionAssetNote = (assetID: string, note?: string) => {
+    setQuestionAssets(current =>
+      current.map(asset => asset.selection.assetID === assetID
+        ? {
+            ...asset,
+            selection: create(SelectedMediaAssetSchema, {
+              assetID,
+              note
+            })
+          }
+        : asset
+      )
+    )
+  }
+
+  const hydrateQuestionAssets = (assets: MediaAsset[]) => {
+    if (assets.length === 0) return
+
+    setQuestionAssets(current =>
+      current.map(selectedAsset => {
+        const fullAsset = assets.find(asset => asset.id === selectedAsset.selection.assetID)
+        return fullAsset
+          ? { ...selectedAsset, asset: fullAsset }
+          : selectedAsset
+      })
+    )
+  }
+
   return (
     <div className='flex flex-col w-full max-w-3xl mx-auto px-4 min-h-[calc(100vh-4rem)]'>
       <ScriptEditorDialog
@@ -415,6 +465,16 @@ const VideoIntentComposer = () => {
         onOpenUpload={() => openAssetDialog('upload')}
       />
 
+      <SelectedAssetsDialog
+        open={questionAssetsDialogOpen}
+        selectedAssets={questionAssets}
+        onOpenChange={setQuestionAssetsDialogOpen}
+        onHydrateAssets={hydrateQuestionAssets}
+        onRemoveAsset={removeQuestionAsset}
+        onUpdateAssetNote={updateQuestionAssetNote}
+        onOpenUpload={() => openAssetDialog('upload')}
+      />
+
       {/* Center area — grows to push input to the bottom */}
       <div className='flex-1 flex items-center justify-center py-8'>
         <div className='text-center'>
@@ -443,9 +503,10 @@ const VideoIntentComposer = () => {
               void handleContinuePlanning(option)
             }}
             onCustomAnswerChange={setCustomAnswer}
-            onContinue={() => void handleContinuePlanning()}
+            onContinue={responseOverride => void handleContinuePlanning(responseOverride)}
             selectedQuestionAssets={questionAssets}
             onOpenAssetPicker={openAssetDialog}
+            onOpenSelectedAssetsDialog={() => setQuestionAssetsDialogOpen(true)}
           />
         )}
 

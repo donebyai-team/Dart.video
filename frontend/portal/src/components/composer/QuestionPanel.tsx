@@ -1,13 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ChevronRight, ImagePlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { AskUserQuestion } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
 import { AskUserQuestionType } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
 import AssetPreviewDialog from '@/components/assets/AssetPreviewDialog'
 import AssetUploadDropdown from './AssetUploadDropdown'
-import { SelectedMediaAsset } from '@coasterai/pb/coasterai/core/v1/media_asset_pb'
+import type { SelectedAssetWithPreview } from '@/components/assets/SelectedAssetsDialog'
 
 interface QuestionPanelProps {
   question: AskUserQuestion
@@ -16,9 +16,10 @@ interface QuestionPanelProps {
   answerInput: string
   onOptionClick: (option: string) => void
   onCustomAnswerChange: (value: string) => void
-  onContinue: () => void
-  selectedQuestionAssets?: SelectedMediaAsset[]
+  onContinue: (responseOverride?: string) => void
+  selectedQuestionAssets?: SelectedAssetWithPreview[]
   onOpenAssetPicker?: (mode: 'figma' | 'upload') => void
+  onOpenSelectedAssetsDialog?: () => void
 }
 
 const QuestionPanel = ({
@@ -31,14 +32,23 @@ const QuestionPanel = ({
   onContinue,
   selectedQuestionAssets = [],
   onOpenAssetPicker,
+  onOpenSelectedAssetsDialog,
 }: QuestionPanelProps) => {
   const [assetPreviewOpen, setAssetPreviewOpen] = useState(false)
   const [assetNote, setAssetNote] = useState('')
-  console.log("waiting foe user input", question)
-  
+
   const isAssetClarification = question.questionType === AskUserQuestionType.ASSET_CLARIFICATION
   const isUploadAsset = question.questionType === AskUserQuestionType.UPLOAD_ASSET
-  const showAssetFeatures = isAssetClarification || isUploadAsset
+  const filteredUploadOptions = (question.options ?? []).filter(option => {
+    const normalizedOption = String(option ?? '').trim()
+    return normalizedOption.length > 0 && !/upload/i.test(normalizedOption)
+  })
+  const questionAssetCount = selectedQuestionAssets.length
+
+  useEffect(() => {
+    setAssetNote('')
+  }, [question.questionText, question.questionType])
+
   return (
     <div className='rounded-xl border bg-background p-4 space-y-3 shadow-sm'>
       <p className='text-sm font-medium leading-snug'>{question.questionText}</p>
@@ -89,24 +99,56 @@ const QuestionPanel = ({
         </>
       )}
 
-      {/* Asset Upload for UPLOAD_ASSET */}
-      {isUploadAsset && onOpenAssetPicker && (
-        <div className='space-y-2'>
-          <AssetUploadDropdown
-            disabled={isSubmitting}
-            onOpenAssetPicker={onOpenAssetPicker}
-            triggerClassName='w-full flex items-center justify-center gap-2 px-3 py-2 text-sm rounded-lg border transition-colors hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed'
-            showLabel={true}
-          />
-          {selectedQuestionAssets.length > 0 && (
-            <div className='text-xs text-muted-foreground text-center'>
-              {selectedQuestionAssets.length} asset{selectedQuestionAssets.length > 1 ? 's' : ''} selected
+      {isUploadAsset ? (
+        <div className='space-y-3'>
+          <div className='flex flex-wrap gap-2'>
+            {onOpenAssetPicker && (
+              <AssetUploadDropdown
+                disabled={isSubmitting}
+                onOpenAssetPicker={onOpenAssetPicker}
+                triggerClassName='px-3 py-1.5 text-sm rounded-lg border transition-colors hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2'
+                showLabel={true}
+              />
+            )}
+            {filteredUploadOptions.map(option => (
+              <button
+                key={option}
+                onClick={() => onOptionClick(option)}
+                disabled={isSubmitting}
+                className='px-3 py-1.5 text-sm rounded-lg border transition-colors hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed'
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+
+          {onOpenAssetPicker && (
+            <div className='space-y-2'>
+              {questionAssetCount > 0 && (
+                <div className='flex justify-center'>
+                  <button
+                    type='button'
+                    onClick={onOpenSelectedAssetsDialog}
+                    className='flex cursor-pointer items-center justify-between rounded-lg border border-primary/15 bg-primary/5 px-3 py-1.5 text-xs transition-colors hover:border-primary/30'
+                  >
+                    <span className='font-medium text-primary'>
+                      {questionAssetCount} asset{questionAssetCount > 1 ? 's' : ''} selected
+                    </span>
+                  </button>
+                </div>
+              )}
+              <Button
+                size='sm'
+                onClick={() => onContinue('Yes')} // just something to respond
+                disabled={questionAssetCount === 0 || isSubmitting}
+                className='w-full h-8 text-sm gap-1.5'
+              >
+                Continue <ChevronRight className='w-3.5 h-3.5' />
+              </Button>
             </div>
           )}
         </div>
-      )}
-
-      {question.options?.length > 0 && (
+      ) : question.options?.length > 0 && (
         <div className='flex flex-wrap gap-2'>
           {question.options.map(option => (
             <button
@@ -132,7 +174,7 @@ const QuestionPanel = ({
           />
           <Button
             size='sm'
-            onClick={onContinue}
+            onClick={() => onContinue()}
             disabled={!answerInput || isSubmitting}
             className='w-full h-8 text-sm gap-1.5'
           >
