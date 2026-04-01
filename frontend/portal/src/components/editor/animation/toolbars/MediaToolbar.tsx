@@ -1,8 +1,5 @@
-import React, { useRef, useState } from 'react'
-import { ImageUp } from 'lucide-react'
-import toast from 'react-hot-toast'
-import { uploadMedia } from '@/services/utils'
-import { NumberStepper, SelectInput } from './shared'
+import React from 'react'
+import { NumberStepper, SelectInput, SliderInput } from './TextToolbar'
 
 const OBJECT_FIT_OPTIONS = [
   { label: 'Contain', value: 'contain' },
@@ -10,119 +7,93 @@ const OBJECT_FIT_OPTIONS = [
   { label: 'Fill', value: 'fill' },
 ]
 
-function CtrlGroup({ icon, tooltip, children }: {
-  icon: React.ReactNode
-  tooltip: string
-  children: React.ReactNode
-}) {
-  return (
-    <div className="flex items-center gap-1.5 shrink-0" title={tooltip}>
-      <span className="text-muted-foreground shrink-0">{icon}</span>
-      {children}
-    </div>
-  )
-}
-
-function Div() {
-  return <div className="w-px h-5 bg-border/60 mx-0.5 shrink-0" />
-}
-
 interface MediaToolbarProps {
   mediaKind?: 'image' | 'video';
-  currentProps: Record<string, unknown>
   styleOverride: Record<string, string | number>
-  onValuePatch: (prop: string, value: unknown) => void
   onStyleOverride: (style: Record<string, string | number>) => void
+}
+
+const DEFAULT_SHADOW = 'rgba(0, 0, 0, 0.25)'
+const SHADOW_SPREAD = 0
+const SHADOW_Y_OFFSET = 8
+const MAX_SHADOW_BLUR = 40
+
+function parseShadowBlur(boxShadow: string | number | undefined): number {
+  if (typeof boxShadow !== 'string' || boxShadow.trim() === '' || boxShadow === 'none') {
+    return 0
+  }
+
+  const matches = boxShadow.match(/-?\d+(?:\.\d+)?px/g)
+  if (!matches || matches.length < 3) {
+    return 0
+  }
+
+  const blur = parseFloat(matches[2])
+  return Number.isFinite(blur) ? blur : 0
+}
+
+function buildShadow(blur: number): string {
+  if (blur <= 0) return 'none'
+  return `0 ${SHADOW_Y_OFFSET}px ${blur}px ${SHADOW_SPREAD}px ${DEFAULT_SHADOW}`
 }
 
 export function MediaToolbar({
   mediaKind = 'image',
-  currentProps,
   styleOverride,
-  onValuePatch,
   onStyleOverride,
 }: MediaToolbarProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const [isUploading, setIsUploading] = useState(false)
-
-  const handleUpload = async (file: File) => {
-    try {
-      setIsUploading(true)
-      const asset = await uploadMedia(file)
-      onValuePatch('src', asset.url)
-    } catch (error) {
-      console.error('Failed to upload media for animation toolbar', error)
-      toast.error(error instanceof Error ? error.message : 'Failed to upload media')
-    } finally {
-      setIsUploading(false)
-    }
-  }
+  const currentObjectFit =
+    typeof styleOverride.objectFit === 'string'
+      ? styleOverride.objectFit as 'contain' | 'cover' | 'fill'
+      : 'contain'
+  const currentRadius =
+    typeof styleOverride.borderRadius === 'number'
+      ? styleOverride.borderRadius
+      : Number(styleOverride.borderRadius) || 0
+  const currentShadow = parseShadowBlur(styleOverride.boxShadow)
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5 px-3 py-1.5 rounded-xl bg-background/95 backdrop-blur-lg border border-border shadow-xl text-sm select-none max-w-[700px]">
-      <CtrlGroup icon={<ImageUp size={13} />} tooltip={mediaKind === 'video' ? 'Upload a replacement video' : 'Upload a replacement image'}>
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={isUploading}
-          className="h-7 px-2.5 rounded-md border border-border bg-muted hover:bg-accent disabled:opacity-50 text-xs transition-colors"
-        >
-          {isUploading ? 'Uploading...' : 'Upload'}
-        </button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept={mediaKind === 'video' ? 'video/*' : 'image/*'}
-          className="hidden"
-          onChange={async (e) => {
-            const file = e.target.files?.[0]
-            if (file) {
-              await handleUpload(file)
-              e.target.value = ''
-            }
-          }}
+    <div className="flex items-center gap-3 whitespace-nowrap">
+      <LabeledField label="Fit">
+        <SelectInput
+          value={currentObjectFit}
+          options={OBJECT_FIT_OPTIONS}
+          onChange={value => onStyleOverride({ objectFit: value })}
+          width="w-24"
         />
-      </CtrlGroup>
+      </LabeledField>
 
-      <Div />
-
-      <CtrlGroup icon={<span className="text-xs font-medium leading-none">W</span>} tooltip="Width">
-        <NumberStepper
-          value={typeof currentProps.width === 'number' ? currentProps.width : 0}
-          onChange={value => onValuePatch('width', value)}
+      <LabeledField label="Shadow">
+        <SliderInput
+          value={currentShadow}
+          onChange={value => onStyleOverride({ boxShadow: buildShadow(value) })}
           min={0}
-          step={10}
+          max={MAX_SHADOW_BLUR}
+          step={1}
+          width="w-24"
+        />
+      </LabeledField>
+
+      <LabeledField label="Radius">
+        <NumberStepper
+          value={currentRadius}
+          onChange={value => onStyleOverride({ borderRadius: value })}
+          min={0}
+          step={2}
           inputWidth="w-14"
         />
-      </CtrlGroup>
+      </LabeledField>
+    </div>
+  )
+}
 
-      <CtrlGroup icon={<span className="text-xs font-medium leading-none">H</span>} tooltip="Height">
-        <NumberStepper
-          value={typeof currentProps.height === 'number' ? currentProps.height : 0}
-          onChange={value => onValuePatch('height', value)}
-          min={0}
-          step={10}
-          inputWidth="w-14"
-        />
-      </CtrlGroup>
-
-      {mediaKind === 'image' && (
-        <>
-          <Div />
-
-          <CtrlGroup icon={<ImageUp size={13} />} tooltip="How the image fits inside its box">
-            <SelectInput
-              value={typeof styleOverride.objectFit === 'string' ? styleOverride.objectFit as 'contain' | 'cover' | 'fill' : 'contain'}
-              options={OBJECT_FIT_OPTIONS}
-              onChange={value => onStyleOverride({ objectFit: value })}
-              width="w-24"
-            />
-          </CtrlGroup>
-        </>
-      )}
-
-      {/* TODO: Add explicit reset actions once patch removal helpers exist so
-          src/width/height/objectFit can revert to component defaults. */}
+function LabeledField({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <span className="text-muted-foreground text-[10px] uppercase tracking-wider font-medium select-none">
+        {label}
+      </span>
+      {children}
     </div>
   )
 }

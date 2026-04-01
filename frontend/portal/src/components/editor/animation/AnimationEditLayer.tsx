@@ -53,7 +53,9 @@ export function AnimationEditLayer({
     return lowerId.includes('text') || 
     lowerId.includes('icon') || 
     lowerId.includes('counter') ||
-    lowerId.includes('typewriter')
+    lowerId.includes('typewriter') ||
+    lowerId.includes('image') ||
+    lowerId.includes('video')
   }
 
   // ── Track canvas position ─────────────────────────────────────────────────

@@ -3,7 +3,7 @@ import { calculateImagePeelDuration } from '../components/scenes/assets/ImagePee
 describe('ImagePeel Duration Calculation', () => {
   it('should calculate duration with only required props', () => {
     const result = calculateImagePeelDuration({
-      sources: [
+      images: [
         'https://example.com/image1.jpg',
         'https://example.com/image2.jpg',
         'https://example.com/image3.jpg',
@@ -21,7 +21,7 @@ describe('ImagePeel Duration Calculation', () => {
 
   it('should calculate duration with custom hold and peel durations', () => {
     const result = calculateImagePeelDuration({
-      sources: [
+      images: [
         'https://example.com/a.jpg',
         'https://example.com/b.jpg',
       ],
@@ -42,7 +42,7 @@ describe('ImagePeel Duration Calculation', () => {
 
   it('should return error for single image', () => {
     const result = calculateImagePeelDuration({
-      sources: ['https://example.com/single.jpg'],
+      images: ['https://example.com/single.jpg'],
     });
 
     expect(result.success).toBe(false);
@@ -54,7 +54,7 @@ describe('ImagePeel Duration Calculation', () => {
 
   it('should return error for invalid URL', () => {
     const result = calculateImagePeelDuration({
-      sources: [
+      images: [
         'not-a-url',
         'https://example.com/valid.jpg',
       ],

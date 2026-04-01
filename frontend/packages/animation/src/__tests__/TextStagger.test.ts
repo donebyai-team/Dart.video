@@ -19,7 +19,7 @@ describe('TextStagger Duration Calculation', () => {
       text: 'One Two Three Four Five',
       staggerDelay: 10,
       duration: 20,
-      animation: 'slideUp',
+      entranceAnimation: 'slideUp',
       variant: 'heading',
     });
 

@@ -1,5 +1,6 @@
-import type { PatchOverlay } from '@coasterai/renderer'
-import { StyleOverrideSection } from './toolbars/shared'
+import { resolveComponentFromId, type PatchOverlay } from '@coasterai/renderer'
+import { MediaToolbar } from './toolbars/MediaToolbar'
+import { TextToolbar } from './toolbars/TextToolbar'
 
 interface AnimationToolbarProps {
   selectedId: string
@@ -15,14 +16,28 @@ export function AnimationToolbar({
   onStyleOverride,
 }: AnimationToolbarProps) {
   const style = (overlay[selectedId]?.style as Record<string, string | number> | undefined) ?? {}
+  const resolvedComponent = resolveComponentFromId(selectedId)
+  const resolvedName = resolvedComponent?.name ?? ''
+  const name = resolvedName?.toLowerCase() || "";
+
+  const isImage = name.includes("image");
+  const isVideo = name.includes("video");
+  const isMediaComponent = isImage || isVideo;
 
   return (
     <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-background/95 backdrop-blur-lg border border-border shadow-xl text-sm select-none max-w-[850px]">
-      <StyleOverrideSection
-        styleOverride={style}
-        onStyleOverride={next => onStyleOverride(selectedId, next)}
-        collapsible={false}
-      />
+      {isMediaComponent ? (
+        <MediaToolbar
+          mediaKind={isVideo ? "video" : "image"}
+          styleOverride={style}
+          onStyleOverride={next => onStyleOverride(selectedId, next)}
+        />
+      ) : (
+        <TextToolbar
+          styleOverride={style}
+          onStyleOverride={next => onStyleOverride(selectedId, next)}
+        />
+      )}
     </div>
-  )
+  );
 }
