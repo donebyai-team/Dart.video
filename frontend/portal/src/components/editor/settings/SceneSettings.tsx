@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { PatchOverlay } from '@coasterai/renderer'
-import { NumberStepper, SelectInput } from '../animation/toolbars/shared'
+import { NumberStepper, SelectInput } from '../animation/toolbars/TextToolbar'
 import { Plus } from 'lucide-react'
 import { MultiSceneIconPicker, SingleSceneIconPicker } from './SceneIconPicker'
 import { MultiSceneMediaPicker, SingleSceneMediaPicker } from './SceneMediaPicker'

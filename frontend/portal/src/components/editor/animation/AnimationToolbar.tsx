@@ -1,5 +1,5 @@
 import type { PatchOverlay } from '@coasterai/renderer'
-import { StyleOverrideSection } from './toolbars/shared'
+import { TextToolbar } from './toolbars/TextToolbar'
 
 interface AnimationToolbarProps {
   selectedId: string
@@ -18,7 +18,7 @@ export function AnimationToolbar({
 
   return (
     <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-background/95 backdrop-blur-lg border border-border shadow-xl text-sm select-none max-w-[850px]">
-      <StyleOverrideSection
+      <TextToolbar
         styleOverride={style}
         onStyleOverride={next => onStyleOverride(selectedId, next)}
         collapsible={false}

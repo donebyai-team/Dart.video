@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react'
 import { ImageUp } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { uploadMedia } from '@/services/utils'
-import { NumberStepper, SelectInput } from './shared'
+import { NumberStepper, SelectInput } from './TextToolbar'
 
 const OBJECT_FIT_OPTIONS = [
   { label: 'Contain', value: 'contain' },

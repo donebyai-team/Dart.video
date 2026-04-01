@@ -12,7 +12,7 @@
 import React, { useState } from 'react'
 import { X, Plus } from 'lucide-react'
 import type { ToolbarProps } from './types'
-import { Sep, SelectInput } from './shared'
+import { Sep, SelectInput } from './TextToolbar'
 
 const TRANSITION_OPTIONS = [
   { label: 'Fade Swap', value: 'fadeSwap' },

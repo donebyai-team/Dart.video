@@ -13,7 +13,7 @@
 import React from 'react'
 import { Hash } from 'lucide-react'
 import type { ToolbarProps } from './types'
-import { NumberStepper, Sep } from './shared'
+import { NumberStepper, Sep } from './TextToolbar'
 
 export function CounterToolbar({
   currentProps,

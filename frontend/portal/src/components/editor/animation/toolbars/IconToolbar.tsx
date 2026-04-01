@@ -18,7 +18,7 @@ import {
 } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
-import { ColorSwatch, NumberStepper } from './shared'
+import { ColorSwatch, NumberStepper } from './TextToolbar'
 
 
 const ICON_OPTIONS = [
