@@ -20,7 +20,6 @@ describe('LogoWithBrandName Duration Calculation', () => {
       src: 'https://example.com/logo.svg',
       logoSize: 64,
       variant: 'subheading',
-      startAt: 10,
     });
 
     expect(result.success).toBe(true);
