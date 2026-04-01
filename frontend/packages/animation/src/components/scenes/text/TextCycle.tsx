@@ -13,9 +13,9 @@ import type { DurationResult } from '../durationTypes';
 import { TEXT_CYCLE_TRANSITIONS } from '../types';
 
 // Default constants
-const DEFAULT_HOLD_DURATION = 15;
+const DEFAULT_HOLD_DURATION = 20;
 const DEFAULT_TRANSITION_DURATION = 5;
-const DEFAULT_TRANSITION = 'flipY' as const;
+const DEFAULT_TRANSITION = 'slideUp' as const;
 const DEFAULT_VARIANT = 'heading' as const;
 
 

@@ -127,7 +127,7 @@ export const createZoomEffect = (
         id: `zoom-effect-${Date.now()}`,
         x: resolution.width / 2,
         y: resolution.height / 2,
-        zoomLevel: 2,
+        zoomLevel: 1.2,
         startFrame,
         endFrame,
     });
