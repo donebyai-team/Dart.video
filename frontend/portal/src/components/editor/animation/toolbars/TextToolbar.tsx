@@ -386,7 +386,6 @@ const LETTER_SPACING_OPTIONS = [
 export function TextToolbar({
   styleOverride,
   onStyleOverride,
-  collapsible = true,
 }: {
   styleOverride: Record<string, string | number>
   onStyleOverride: (style: Record<string, string | number>) => void
