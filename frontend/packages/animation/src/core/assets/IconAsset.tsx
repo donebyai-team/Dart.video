@@ -1,8 +1,8 @@
 import React from "react";
 import { preloadImage } from "@remotion/preload";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRemotionEnvironment, delayRender, continueRender } from "remotion";
-import { usePatchedProp, useStyleOverride } from "../../patches";
+import { usePatchedProps, useStyleOverride } from "../../patches";
 import { useTheme } from "../../theme";
 import { useAspectPreset } from "../../styles";
 import { scaleToCanvas } from "../../theme/scale";
@@ -21,72 +21,50 @@ export interface IconAssetProps {
 }
 
 const ICON_BASE = 'https://storage.googleapis.com/coasterai-public/icons';
-const PLACEHOLDER_ICON = 'heart'; // Fallback icon name when requested icon is not found
+// const ICON_BASE = 'https://www.thesvg.org/icons'
+const PLACEHOLDER_ICON = 'heart';
 
-export function IconAsset({
-  name,
-  size = 64,
-  borderRadius,
-  style,
-  className,
-  id,
-}: IconAssetProps): React.ReactElement {
+export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
   const theme = useTheme();
   const { isRendering } = useRemotionEnvironment();
   const preset = useAspectPreset();
-  const styleOverride = useStyleOverride(id);
 
-  const patchedName = usePatchedProp<string>(id, 'name', name);
-  const patchedSize = usePatchedProp<number>(id, 'size', size);
-  const patchedRadius = usePatchedProp<number | undefined>(id, 'borderRadius', borderRadius);
+  const styleOverride = useStyleOverride(propsInit.id);
+  const patchedProps = usePatchedProps(propsInit.id, propsInit);
+  const props = { ...patchedProps, id: propsInit.id };
 
-  const [iconExists, setIconExists] = useState(true);
-  const [handle] = useState(() => isRendering ? delayRender('Loading icon') : null);
+
+  const patchedName = props.name;
+  const patchedSize = props.size || 64;
+  const patchedRadius = props.borderRadius || 0;
+
   const variant = theme.iconStyle ?? 'outline';
-  const requestedMaskUrl = `${ICON_BASE}/${variant}/${patchedName.toLowerCase()}.svg`;
-  const fallbackMaskUrl = `${ICON_BASE}/${variant}/${PLACEHOLDER_ICON}.svg`;
-  const maskUrl = iconExists ? requestedMaskUrl : fallbackMaskUrl;
-  
+  const maskUrl = `${ICON_BASE}/${variant}/${patchedName.toLowerCase()}.svg`;
+  const fallbackUrl = `${ICON_BASE}/${variant}/${PLACEHOLDER_ICON}.svg`;
+
   const scaledSize = scaleToCanvas(patchedSize, preset);
-  const iconColor =
-    typeof styleOverride.color === 'string'
-      ? styleOverride.color
-      : theme.colors.foreground;
+  const [loaded, setLoaded] = useState(false);
+  const [errored, setErrored] = useState(false);
+  const [handle] = useState(() => isRendering ? delayRender('Loading icon') : null);
 
-  // Check if icon exists and load it
+  const onLoad = useCallback(() => {
+    setLoaded(true);
+    if (handle !== null) continueRender(handle);
+  }, [handle]);
+
+  const onError = useCallback(() => {
+    console.warn(`Icon "${patchedName}" not found at ${maskUrl}`);
+    setErrored(true);
+    if (handle !== null) continueRender(handle);
+  }, [handle, patchedName, maskUrl]);
+
+  // Reset state when icon changes
   useEffect(() => {
-    // Reset state when checking new icon
-    setIconExists(true);
-    
-    // Try to load the requested icon
-    const img = new Image();
-    img.onload = () => {
-      setIconExists(true);
-      if (handle !== null) {
-        continueRender(handle);
-      }
-    };
-    img.onerror = () => {
-      console.warn(`Icon "${patchedName}" not found at ${requestedMaskUrl}, using placeholder`);
-      setIconExists(false);
-      // Load fallback icon before continuing
-      const fallbackImg = new Image();
-      fallbackImg.onload = () => {
-        if (handle !== null) {
-          continueRender(handle);
-        }
-      };
-      fallbackImg.onerror = () => {
-        if (handle !== null) {
-          continueRender(handle);
-        }
-      };
-      fallbackImg.src = fallbackMaskUrl;
-    };
-    img.src = requestedMaskUrl;
-  }, [requestedMaskUrl, patchedName, handle, fallbackMaskUrl]);
+    setLoaded(false);
+    setErrored(false);
+  }, [maskUrl]);
 
-  // Preload the icon that will be used (only during rendering)
+  // Preload the icon during rendering
   useEffect(() => {
     if (!isRendering) return;
     const unpreload = preloadImage(maskUrl);
@@ -97,8 +75,8 @@ export function IconAsset({
 
   return (
     <div
-      id={id}
-      className={className}
+      id={props.id}
+      className={props.className}
       style={{
         width: scaledSize,
         height: scaledSize,
@@ -108,25 +86,34 @@ export function IconAsset({
         justifyContent: 'center',
         flexShrink: 0,
         overflow: 'hidden',
-        ...style,
+        color: "#000",
+        ...props.style,
         ...styleOverride,
       }}
     >
-      <div
-        style={{
-          width: '100%',
-          height: '100%',
-          backgroundColor: iconColor,
-          maskImage: `url("${maskUrl}")`,
-          WebkitMaskImage: `url("${maskUrl}")`,
-          maskRepeat: 'no-repeat',
-          WebkitMaskRepeat: 'no-repeat',
-          maskPosition: 'center',
-          WebkitMaskPosition: 'center',
-          maskSize: 'contain',
-          WebkitMaskSize: 'contain',
-        }}
-      />
+      {errored ? (
+        <img
+          src={fallbackUrl}
+          alt="placeholder"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+          }}
+        />
+      ) : (
+        <img
+          src={maskUrl}
+          alt={patchedName}
+          onLoad={onLoad}
+          onError={onError}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+          }}
+        />
+      )}
     </div>
   );
 }
