@@ -1,7 +1,7 @@
 import { browserTokenStore } from '@coasterai/ui-core/provider/BrowserStores'
 import { CONFIG_API_URI } from './config'
-import { MediaAsset, MediaAssetSchema } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { create } from '@bufbuild/protobuf'
+import { MediaAsset, MediaAssetSchema } from '@coasterai/pb/coasterai/core/v1/media_asset_pb'
 
 export const uploadMedia = async (file: File): Promise<MediaAsset> => {
   // // Check file size (10 MB = 10 * 1024 * 1024 bytes)

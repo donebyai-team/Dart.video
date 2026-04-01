@@ -21,6 +21,8 @@ function GenerateScene(input: AddSceneRequest, conversation_history: Message[]) 
 
     - One idea per scene. Never combine two components in one scene.
     - Only provide the mandatory props unless user has specifically asked for it
+    - You have the CSS property "style" available for all components. You can use it in props to do styling
+      changes only if user has specifically asked for it
 
     ## PLANNING RULES
 

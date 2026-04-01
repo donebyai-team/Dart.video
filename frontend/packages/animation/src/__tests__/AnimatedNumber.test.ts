@@ -28,7 +28,7 @@ describe('AnimatedNumber Duration Calculation', () => {
       variant: 'subheading',
       highlightStyle: 'marker',
       highlightColor: '#ff0000',
-      animation: 'fadeIn',
+      entranceAnimation: 'fadeIn',
       animationDelay: 20,
     });
 

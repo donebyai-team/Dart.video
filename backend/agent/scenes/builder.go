@@ -86,9 +86,16 @@ func loadComponents() error {
 
 	componentNameMap = make(map[string]string)
 
-	for _, g := range componentGroups {
-		for _, c := range g.Components {
+	for gi := range componentGroups {
+		for ci := range componentGroups[gi].Components {
+			c := &componentGroups[gi].Components[ci]
+
 			componentNameMap[c.ID] = c.Name
+
+			c.Props = append(c.Props, Prop{
+				Name: "style",
+				Type: "object",
+			})
 		}
 	}
 
