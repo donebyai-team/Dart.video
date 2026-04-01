@@ -1,4 +1,4 @@
-import { DIRECTIONS, ENTRANCE_ANIMATIONS, LOGO_ANIMATIONS, SCENE_COMPONENTS, SPLIT_BY_MODES, TYPOGRAPHY_VARIANT_NAMES } from "../../../../../packages/animation/src"
+import { DIRECTIONS, ENTRANCE_ANIMATIONS, LOGO_ANIMATIONS, SCENE_COMPONENTS, SPLIT_BY_MODES, TEXT_CYCLE_TRANSITIONS, TYPOGRAPHY_VARIANT_NAMES } from "../../../../../packages/animation/src"
 import { resolveComponentFromId } from '@coasterai/renderer'
 
 
@@ -39,6 +39,10 @@ const RESERVED_FIELD_MAP: Record<string, SceneFieldDefinition> = {
   splitBy: {
     kind: 'enum',
     options: [...SPLIT_BY_MODES],
+  },
+  transition: {
+    kind: 'enum',
+    options: [...TEXT_CYCLE_TRANSITIONS],
   },
   text: {
     kind: 'string',

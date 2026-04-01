@@ -1,15 +1,16 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
 import z from 'zod';
-import { usePatchedProp, usePatchedProps, useStyleOverride } from '../../../patches/PatchContext';
+import { usePatchedProps, useStyleOverride } from '../../../patches/PatchContext';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme/ThemeContext';
 import { getEasing, interpolateWithEasing } from '../../../styles/easingResolver';
-import { TypographyVariant, TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
+import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
 import { resolveTypography } from '../../../tokens/resolveTypography';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../durationTypes';
+import { TEXT_CYCLE_TRANSITIONS } from '../types';
 
 // Default constants
 const DEFAULT_HOLD_DURATION = 15;
@@ -17,7 +18,6 @@ const DEFAULT_TRANSITION_DURATION = 5;
 const DEFAULT_TRANSITION = 'flipY' as const;
 const DEFAULT_VARIANT = 'heading' as const;
 
-export type TextCycleTransition = 'flipY' | 'fadeSwap' | 'slideUp';
 
 // ============================================================================
 // Schema & Duration Calculation
@@ -28,7 +28,7 @@ export const TextCycleSchema = z.object({
   texts: z.array(z.string()).min(1, "texts must contain at least one item"),
   holdDuration: z.number().min(0, "holdDuration cannot be negative").default(DEFAULT_HOLD_DURATION).optional(),
   transitionDuration: z.number().min(0, "transitionDuration cannot be negative").default(DEFAULT_TRANSITION_DURATION).optional(),
-  transition: z.enum(['flipY', 'fadeSwap', 'slideUp']).default(DEFAULT_TRANSITION).optional(),
+  transition: z.enum(TEXT_CYCLE_TRANSITIONS).default(DEFAULT_TRANSITION).optional(),
   variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
   style: z.any().optional(),
   className: z.string().optional(),

@@ -40,6 +40,10 @@ export const HIGHLIGHT_STYLES = ['marker', 'underline', 'box', 'glow', 'backgrou
 
 export type HighlightStyle = typeof HIGHLIGHT_STYLES[number];
 
+export const TEXT_CYCLE_TRANSITIONS = ['flipY', 'fadeSwap', 'slideUp'] as const;
+
+export type TextCycleTransition = typeof TEXT_CYCLE_TRANSITIONS[number];
+
 export const IconNameSchema = z.string().min(2, "icon name cannot be empty");
 
 export type IconName = z.infer<typeof IconNameSchema>;
