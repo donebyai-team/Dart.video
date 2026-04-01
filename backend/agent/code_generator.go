@@ -75,7 +75,7 @@ func CreativeStageMessage(stage GenerationStage, attempt int) string {
 		return "Smoothing out rough edges..."
 
 	case StageReady:
-		return "Animation ready ✨"
+		return "Done. Need anything else?"
 
 	default:
 		return "Working on it..."

@@ -32,7 +32,7 @@ interface ToolsSettingsPanelProps {
 }
 
 const ToolsSettingsPanel = ({
-  onPreviewTemplate: _onPreviewTemplate,
+  onPreviewTemplate,
   isPreviewPlaying = false,
   onUpdateSpotlight,
   onUpdateCallout,
@@ -107,6 +107,8 @@ const ToolsSettingsPanel = ({
           onValuePatch={onValuePatch}
           setOverlay={setOverlay}
           onClose={handleCloseTool}
+          onPlay={onPreviewTemplate}
+          isPreviewPlaying={isPreviewPlaying}
         />
       )}
 

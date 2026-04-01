@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
 import type { PatchOverlay } from '@coasterai/renderer'
 import { NumberStepper, SelectInput } from '../animation/toolbars/TextToolbar'
-import { Plus } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Pause, Play, Plus } from 'lucide-react'
 import { MultiSceneIconPicker, SingleSceneIconPicker } from './SceneIconPicker'
 import { MultiSceneMediaPicker, SingleSceneMediaPicker } from './SceneMediaPicker'
 import SceneSortablePillList from './SceneSortablePillList'
@@ -16,14 +17,16 @@ interface SceneSettingsProps {
   elementId: string
   overlay: PatchOverlay
   onValuePatch: (id: string, prop: string, value: unknown) => void
-  onClose?: () => void
+  onPlay?: () => void
+  isPreviewPlaying?: boolean
 }
 
 export default function SceneSettings({
   elementId,
   overlay,
   onValuePatch,
-  onClose,
+  onPlay,
+  isPreviewPlaying = false,
 }: SceneSettingsProps) {
   const MIN_ARRAY_ITEMS = 2
   const [arrayDrafts, setArrayDrafts] = useState<Record<string, string>>({})
@@ -37,14 +40,13 @@ export default function SceneSettings({
 
   return (
     <div className="h-full flex flex-col">
-      <div className="p-4 border-b border-border flex items-center justify-between">
-        <div>
-          <h2 className="font-semibold">Scene Settings</h2>
-        </div>
-        {onClose && (
-          <button className="text-sm text-muted-foreground hover:text-foreground" onClick={onClose}>
-            Close
-          </button>
+      <div className="p-2 border-b border-border flex items-center justify-between">
+        <h2 className="font-semibold">Settings</h2>
+        {onPlay && (
+          <Button variant='secondary' size='sm' className='h-7 gap-1.5 px-2.5 text-xs' onClick={onPlay}>
+            {isPreviewPlaying ? <Pause className='w-3 h-3' /> : <Play className='w-3 h-3' />}
+            {isPreviewPlaying ? 'Stop' : 'Preview'}
+          </Button>
         )}
       </div>
 

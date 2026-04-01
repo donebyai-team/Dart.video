@@ -28,11 +28,13 @@ interface AnimationEditorProps {
     onValuePatch: (id: string, prop: string, value: unknown) => void
     setOverlay: (overlay: PatchOverlay) => void
     onClose: () => void
+    onPlay?: () => void
+    isPreviewPlaying?: boolean
 }
 
 type Stage = 'compose' | 'thinking' | 'question'
 
-export default function AnimationEditor({ settings, overlay, onValuePatch, setOverlay, onClose }: AnimationEditorProps) {
+export default function AnimationEditor({ settings, overlay, onValuePatch, setOverlay, onClose, onPlay, isPreviewPlaying }: AnimationEditorProps) {
     const updateSlide = useVideoStore(s => s.updateSlide)
     const selectedSlide = useVideoStore(s => s.selectedSlide)
     const videoId = useVideoStore(s => s.videoConfig?.id)
@@ -489,6 +491,8 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                             elementId={selectedAnimationElementId}
                             overlay={overlay}
                             onValuePatch={onValuePatch}
+                            onPlay={onPlay}
+                            isPreviewPlaying={isPreviewPlaying}
                         />
                     </div>
                 )}

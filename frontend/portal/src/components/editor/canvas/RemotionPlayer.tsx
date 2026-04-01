@@ -103,6 +103,10 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   // Set whenever the user manually selects a slide (from timeline or settings panel).
   const [playFromSlideId, setPlayFromSlideId] = useState<string | null>(null);
 
+  // When set, playback auto-pauses when the current frame reaches this value.
+  // Used by slide preview to stop at the end of the slide.
+  const previewEndFrameRef = useRef<number | null>(null);
+
   // Pause on drag start; stay paused when drag ends (user presses play to resume)
   // while dragging set isPlaying to true so that we can see the changes in the player and effect 
   const handleDraggingChange = useCallback((dragging: boolean) => {
@@ -130,6 +134,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
     playFromSlideId,
     setPlayFromSlideId,
     fps,
+    previewEndFrameRef,
   );
 
   // Seek to frame 1 on mount to avoid blank screen at frame 0
@@ -155,6 +160,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
     setIsPlaying,
     setCurrentFrame,
     fps,
+    previewEndFrameRef,
   });
 
   // Ref to track which slide changes were already handled to prevent double-seeking.
@@ -178,6 +184,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   // Sets playFromSlideId so that pressing play restarts from the slide's beginning.
   const handleSlideSelect = useCallback((slideId: string) => {
     lastHandledSlideRef.current = slideId;
+    previewEndFrameRef.current = null;
     playerRef.current?.pause();
     const frame = isPlaying
       ? getSlideVisualEndFrame(allSlides, slideId, fps)

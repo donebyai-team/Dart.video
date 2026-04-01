@@ -12,6 +12,7 @@ interface UseRemotionPlayerEventsProps {
   setIsPlaying: (playing: boolean) => void;
   setCurrentFrame: (frame: number) => void;
   fps: number;
+  previewEndFrameRef: React.MutableRefObject<number | null>;
 }
 
 export function useRemotionPlayerEvents({
@@ -23,6 +24,7 @@ export function useRemotionPlayerEvents({
   setIsPlaying,
   setCurrentFrame,
   fps,
+  previewEndFrameRef,
 }: UseRemotionPlayerEventsProps) {
   useEffect(() => {
     const player = playerRef.current;
@@ -35,6 +37,13 @@ export function useRemotionPlayerEvents({
       const frame = data.detail.frame;
       setCurrentFrame(frame);
       onFrameChange?.(frame);
+
+      // Auto-pause at slide boundary during slide preview
+      if (previewEndFrameRef.current !== null && frame >= previewEndFrameRef.current) {
+        previewEndFrameRef.current = null;
+        player.pause();
+        return;
+      }
 
       // Detect which slide is active at this frame, accounting for transition overlaps.
       // During a transition, two slides overlap — pick the incoming (later-starting) one.
@@ -72,5 +81,5 @@ export function useRemotionPlayerEvents({
       player.removeEventListener("pause", handlePause);
       player.removeEventListener("frameupdate", handleFrameUpdate as never);
     };
-  }, [playerRef, allSlides, selectedSlideId, onSlideChange, onFrameChange, setIsPlaying, setCurrentFrame, fps]);
+  }, [playerRef, allSlides, selectedSlideId, onSlideChange, onFrameChange, setIsPlaying, setCurrentFrame, fps, previewEndFrameRef]);
 }

@@ -240,12 +240,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
     }
   }, [stopVideoStream, reset])
 
-  // Centralized preview handler - plays a slide from start and pauses at end
-  const handlePreviewSlide = (slideId: string) => {
-    playerRef.current?.seekToSlide(slideId)
-    setTimeout(() => playerRef.current?.play(), 100)
-  }
-
+  // Centralized preview handler - plays a slide from start and auto-pauses at slide end
   const handleTogglePreviewSlide = (slideId: string) => {
     const currentlyPlaying = playerRef.current?.isPlaying() ?? false
 
@@ -254,7 +249,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
       return
     }
 
-    handlePreviewSlide(slideId)
+    playerRef.current?.playSlidePreview(slideId)
   }
 
   // Centralized fullscreen handler
