@@ -179,11 +179,9 @@ export const Slideshow: React.FC<SlideshowProps> = ({
                     : slide.durationInFrames
 
                   return (
-                    <React.Fragment key={slide.id}>
-                      <Series.Sequence durationInFrames={visibleDuration}>
-                        {renderSlide(slide)}
-                      </Series.Sequence>
-                    </React.Fragment>
+                    <Series.Sequence key={slide.id} durationInFrames={visibleDuration}>
+                      {renderSlide(slide)}
+                    </Series.Sequence>
                   )
                 })}
               </Series>
