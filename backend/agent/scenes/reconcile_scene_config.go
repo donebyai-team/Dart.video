@@ -8,6 +8,7 @@ import (
 
 // Keps right as source of truth
 // there can be orphans object if the scene is replaced
+// Does not merge arrays, always keep the right one. Which is fine.
 func ReconcileEditsPatch(left *structpb.Struct, right json.RawMessage) (json.RawMessage, error) {
 
 	if left == nil {

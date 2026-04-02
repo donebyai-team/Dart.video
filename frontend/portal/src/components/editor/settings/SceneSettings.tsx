@@ -12,6 +12,7 @@ import {
   resolveScenePatchEntryId,
   toSceneFieldLabel,
 } from './sceneSettingsHelpers'
+import { Icon } from '../../../../../packages/animation/src'
 
 interface SceneSettingsProps {
   elementId: string
@@ -76,7 +77,7 @@ export default function SceneSettings({
             <label key={prop} className="flex flex-col gap-2">
               <span className="text-sm font-medium">{toSceneFieldLabel(prop)}</span>
               <SingleSceneIconPicker
-                value={String(value)}
+                value={value as Icon}
                 onChange={next => onValuePatch(patchEntryId ?? elementId, prop, next)}
               />
             </label>
@@ -84,7 +85,7 @@ export default function SceneSettings({
             <div key={prop} className="flex flex-col gap-2">
               <span className="text-sm font-medium">{toSceneFieldLabel(prop)}</span>
               <MultiSceneIconPicker
-                value={value as string[]}
+                value={value as Icon[]}
                 onChange={next => onValuePatch(patchEntryId ?? elementId, prop, next)}
                 minItems={MIN_ARRAY_ITEMS}
               />

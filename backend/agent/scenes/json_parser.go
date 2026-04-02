@@ -58,7 +58,7 @@ func EditsToScene(edits *structpb.Struct) (*types.Scene, error) {
 		return nil, fmt.Errorf("invalid scene patch, length of nodes is zero")
 	}
 
-	// Convert to scene
+	// Convert to scene, skipping child nodes are they are already part of the scene
 	node := nodes[0]
 
 	marshal, err := json.Marshal(node.Props)

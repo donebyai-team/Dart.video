@@ -1,33 +1,33 @@
 import z from "zod";
 
 export const ENTRANCE_ANIMATIONS = [
-  'fadeIn',
-  'slideUp',
-  'slideDown',
-  'slideLeft',
-  'slideRight',
-  'scaleIn',
-  'rotateIn',
+    'fadeIn',
+    'slideUp',
+    'slideDown',
+    'slideLeft',
+    'slideRight',
+    'scaleIn',
+    'rotateIn',
 ] as const;
 
 export type EntranceAnimation = typeof ENTRANCE_ANIMATIONS[number];
 
 export const LOGO_ANIMATIONS = [
-  'none',
-  'fadeIn',
-  'zoomIn',
-  'bounceIn',
-  'spinIn',
-  'dropIn',
+    'none',
+    'fadeIn',
+    'zoomIn',
+    'bounceIn',
+    'spinIn',
+    'dropIn',
 ] as const;
 
 export type LogoAnimation = typeof LOGO_ANIMATIONS[number];
 
 export const DIRECTIONS = [
-  'left',
-  'right',
-  'up',
-  'down',
+    'left',
+    'right',
+    'up',
+    'down',
 ] as const;
 
 export type Direction = typeof DIRECTIONS[number];
@@ -44,9 +44,14 @@ export const TEXT_CYCLE_TRANSITIONS = ['flipY', 'fadeSwap', 'slideUp'] as const;
 
 export type TextCycleTransition = typeof TEXT_CYCLE_TRANSITIONS[number];
 
-export const IconNameSchema = z.string().min(2, "icon name cannot be empty");
+export const IconSchema = z
+    .object({
+        name: z.string(),
+        icon: z.string()
+    })
+    .describe("icon");
 
-export type IconName = z.infer<typeof IconNameSchema>;
+export type Icon = z.infer<typeof IconSchema>;
 
 
 export function getEntranceTransform(animation: EntranceAnimation, progress: number, distance: number = 200): string {

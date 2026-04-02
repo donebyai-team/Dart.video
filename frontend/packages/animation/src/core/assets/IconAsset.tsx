@@ -6,13 +6,13 @@ import { usePatchedProps, useStyleOverride } from "../../patches";
 import { useTheme } from "../../theme";
 import { useAspectPreset } from "../../styles";
 import { scaleToCanvas } from "../../theme/scale";
+import { Icon } from "../../components/scenes";
 
 export interface IconAssetProps {
-  name: string;
+  icon: Icon;
   size?: number;
   width?: number;
   height?: number;
-  color?: string;
   background?: string;
   borderRadius?: number;
   style?: React.CSSProperties;
@@ -20,9 +20,8 @@ export interface IconAssetProps {
   id?: string;
 }
 
-const ICON_BASE = 'https://storage.googleapis.com/coasterai-public/icons';
-// const ICON_BASE = 'https://www.thesvg.org/icons'
-const PLACEHOLDER_ICON = 'heart';
+const ICON_BASE = "https://storage.googleapis.com/coasterai-public/icons";
+const PLACEHOLDER_ICON = "heart";
 
 export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
   const theme = useTheme();
@@ -33,19 +32,21 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
   const patchedProps = usePatchedProps(propsInit.id, propsInit);
   const props = { ...patchedProps, id: propsInit.id };
 
-
-  const patchedName = props.name;
+  const patchedIcon = props.icon;
   const patchedSize = props.size || 64;
   const patchedRadius = props.borderRadius || 0;
 
-  const variant = theme.iconStyle ?? 'outline';
-  const maskUrl = `${ICON_BASE}/${variant}/${patchedName.toLowerCase()}.svg`;
+  const variant = theme.iconStyle ?? "outline";
+  const iconUrl = patchedIcon.icon;
   const fallbackUrl = `${ICON_BASE}/${variant}/${PLACEHOLDER_ICON}.svg`;
 
   const scaledSize = scaleToCanvas(patchedSize, preset);
+
   const [loaded, setLoaded] = useState(false);
   const [errored, setErrored] = useState(false);
-  const [handle] = useState(() => isRendering ? delayRender('Loading icon') : null);
+  const [handle] = useState(() =>
+    isRendering ? delayRender("Loading icon") : null
+  );
 
   const onLoad = useCallback(() => {
     setLoaded(true);
@@ -53,25 +54,34 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
   }, [handle]);
 
   const onError = useCallback(() => {
-    console.warn(`Icon "${patchedName}" not found at ${maskUrl}`);
+    console.warn(`Icon "${patchedIcon.name}" not found at ${iconUrl}`);
     setErrored(true);
     if (handle !== null) continueRender(handle);
-  }, [handle, patchedName, maskUrl]);
+  }, [handle, patchedIcon.name, iconUrl]);
 
-  // Reset state when icon changes
+  /* Reset when icon changes */
+
   useEffect(() => {
     setLoaded(false);
     setErrored(false);
-  }, [maskUrl]);
+  }, [iconUrl]);
 
-  // Preload the icon during rendering
+  /* Preload icon during rendering */
+
   useEffect(() => {
     if (!isRendering) return;
-    const unpreload = preloadImage(maskUrl);
+    const unpreload = preloadImage(iconUrl);
     return () => {
       unpreload();
     };
-  }, [isRendering, maskUrl]);
+  }, [isRendering, iconUrl]);
+
+  /* Detect Tabler icon */
+
+  const isTabler =
+    iconUrl.includes("@tabler") ||
+    iconUrl.includes("/icons/outline/") ||
+    iconUrl.includes("/icons/filled/");
 
   return (
     <div
@@ -81,12 +91,11 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
         width: scaledSize,
         height: scaledSize,
         borderRadius: patchedRadius,
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
         flexShrink: 0,
-        overflow: 'hidden',
-        color: "#000",
+        overflow: "hidden",
         ...props.style,
         ...styleOverride,
       }}
@@ -96,21 +105,43 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
           src={fallbackUrl}
           alt="placeholder"
           style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'contain',
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+          }}
+        />
+      ) : isTabler ? (
+        /* Tabler icon → colorable mask */
+
+        <div
+          onLoad={onLoad}
+          style={{
+            width: "100%",
+            height: "100%",
+            backgroundColor: "currentColor",
+            WebkitMaskImage: `url(${iconUrl})`,
+            WebkitMaskRepeat: "no-repeat",
+            WebkitMaskPosition: "center",
+            WebkitMaskSize: "contain",
+
+            maskImage: `url(${iconUrl})`,
+            maskRepeat: "no-repeat",
+            maskPosition: "center",
+            maskSize: "contain",
           }}
         />
       ) : (
+        /* Brand icon → normal image */
+
         <img
-          src={maskUrl}
-          alt={patchedName}
+          src={iconUrl}
+          alt={patchedIcon.name}
           onLoad={onLoad}
           onError={onError}
           style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'contain',
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
           }}
         />
       )}

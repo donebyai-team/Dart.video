@@ -41,7 +41,7 @@ function SortablePill({
         transition,
         opacity: isDragging ? 0.6 : 1,
       }}
-      className="inline-flex items-center gap-1 rounded-sm border border-border bg-muted px-3 py-1 text-sm"
+      className="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-3 py-1 text-sm"
     >
       <button
         type="button"

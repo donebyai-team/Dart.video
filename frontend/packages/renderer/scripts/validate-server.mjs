@@ -37,14 +37,6 @@ import {renderStill, selectComposition} from '@remotion/renderer';
 import {compileRemoteComponent} from '../src/compiler.ts'
 import {assignPrimitiveIds, transformAssignedPrimitiveIds} from '../src/primitive-ast-pass.ts'
 import {
-  computeAnimationDurationFromCode,
-  FALLBACK_DURATION_IN_FRAMES,
-  FALLBACK_SETTLED_FRAME,
-  getDeclaredSettledFrame,
-  isValidDeclaredSettledFrame,
-  TAIL_BUFFER,
-} from '../src/code_rules_validators/animation-duration.ts';
-import {
   computeAnimationDurationFromCodeV2,
 } from '../src/code_rules_validators/animation-duration-v2.ts';
 import {parseValidateRequestBody, validateGeneratedCode} from '../src/code_rules_validators/validate-request.ts';
@@ -288,40 +280,6 @@ async function handleValidate(req, res) {
     return;
   }
   console.log('[validate] component duration validation passed');
-  
-  const declaredSettledFrame = getDeclaredSettledFrame(code);
-  const hasValidDeclaredSettledFrame = isValidDeclaredSettledFrame(declaredSettledFrame);
-  const hasUsableV2Estimate = v2DurationResult.settledFrame !== FALLBACK_SETTLED_FRAME;
-
-  // Declared settledFrame is the primary source when it passes the validator contract:
-  // - exported as a numeric literal
-  // - integer
-  // - > 0
-  // - <= single-slide max bound
-  //
-  // V2 (component-based) is used as:
-  // - the fallback when declared settledFrame is missing/invalid
-  // - a debug-only sanity check when both values are available
-  if (hasValidDeclaredSettledFrame && hasUsableV2Estimate) {
-    const delta = Math.abs(declaredSettledFrame - v2DurationResult.settledFrame);
-    if (delta > 30) {
-      console.warn(
-        `[validate] duration mismatch: declared=${declaredSettledFrame} v2=${v2DurationResult.settledFrame}`,
-      );
-    }
-  }
-
-  const settledFrame = hasValidDeclaredSettledFrame
-    ? declaredSettledFrame
-    : v2DurationResult.settledFrame ?? FALLBACK_SETTLED_FRAME;
-  const durationInFrames = hasValidDeclaredSettledFrame
-    ? declaredSettledFrame + TAIL_BUFFER
-    : v2DurationResult.durationInFrames ?? FALLBACK_DURATION_IN_FRAMES;
-  console.log(
-    `[validate] duration resolved: settledFrame=${settledFrame}, durationInFrames=${durationInFrames}, source=${
-      hasValidDeclaredSettledFrame ? 'declared' : 'v2-component-based'
-    }`,
-  );
 
   const uniqueComponentName = `Component${randomUUID().replace(/-/g, '')}`;
   const idsGcsPath = `${output_path}/${uniqueComponentName}.tsx`;
@@ -366,7 +324,7 @@ async function handleValidate(req, res) {
 
     await writeFile(
       resolve(templatesDir, 'root.tsx'),
-      buildRootEntry(code, durationInFrames),
+      buildRootEntry(code, v2DurationResult.durationInFrames),
       'utf8',
     );
 
@@ -430,8 +388,8 @@ async function handleValidate(req, res) {
       codeWithAssignedIdsPath: `https://storage.googleapis.com/${OUTPUT_BUCKET}/${idsGcsPath}`,
       transformedCodePath: `https://storage.googleapis.com/${OUTPUT_BUCKET}/${transformedGcsPath}`,
       duration: {
-        settledFrame,
-        durationInFrames,
+        settledFrame: v2DurationResult.settledFrame,
+        durationInFrames: v2DurationResult.durationInFrames,
       },
     }));
 

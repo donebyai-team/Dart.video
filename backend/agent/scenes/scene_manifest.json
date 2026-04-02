@@ -203,13 +203,14 @@
           {
             "name": "texts",
             "type": "array",
-            "required": true
+            "required": true,
+            "subtype": "string"
           },
           {
             "name": "holdDuration",
             "type": "number",
             "required": false,
-            "default": 15
+            "default": 20
           },
           {
             "name": "transitionDuration",
@@ -221,7 +222,7 @@
             "name": "transition",
             "type": "enum(flipY|fadeSwap|slideUp)",
             "required": false,
-            "default": "flipY"
+            "default": "slideUp"
           },
           {
             "name": "variant",
@@ -333,7 +334,8 @@
           {
             "name": "images",
             "type": "array",
-            "required": true
+            "required": true,
+            "subtype": "string"
           },
           {
             "name": "direction",
@@ -445,7 +447,8 @@
           {
             "name": "icons",
             "type": "array",
-            "required": true
+            "required": true,
+            "subtype": "icon"
           },
           {
             "name": "text",
@@ -462,7 +465,7 @@
             "name": "iconSize",
             "type": "number",
             "required": false,
-            "default": 72
+            "default": 90
           },
           {
             "name": "iconGap",

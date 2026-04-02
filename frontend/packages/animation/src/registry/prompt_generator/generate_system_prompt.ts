@@ -57,16 +57,37 @@ function unwrapZod(schema: z.ZodTypeAny): z.ZodTypeAny {
   return schema;
 }
 
+function getArraySubtype(schema: z.ZodTypeAny): string | undefined {
+  const inner = unwrapZod(schema);
+
+  if (inner instanceof z.ZodArray) {
+    const element = unwrapZod(inner.element);
+
+    // use description if present
+    if (element.description) {
+      return element.description;
+    }
+
+    return describeZodType(element);
+  }
+
+  return undefined;
+}
+
 function describeZodType(schema: z.ZodTypeAny): string {
   const inner = unwrapZod(schema);
+
   if (inner instanceof z.ZodEnum) {
-    return `enum(${(inner._def.values as string[]).join('|')})`;
+    return `enum(${inner._def.values.join("|")})`;
   }
-  if (inner instanceof z.ZodNumber) return 'number';
-  if (inner instanceof z.ZodString) return 'string';
-  if (inner instanceof z.ZodArray) return 'array';
-  if (inner instanceof z.ZodBoolean) return 'boolean';
-  return 'any';
+
+  if (inner instanceof z.ZodString) return "string";
+  if (inner instanceof z.ZodNumber) return "number";
+  if (inner instanceof z.ZodBoolean) return "boolean";
+  if (inner instanceof z.ZodObject) return "object";
+  if (inner instanceof z.ZodArray) return "array";
+
+  return "any";
 }
 
 function getZodDefault(schema: z.ZodTypeAny): unknown | undefined {
@@ -87,6 +108,7 @@ interface PropJson {
   type: string;
   required: boolean;
   default?: unknown;
+  subtype?: string;
 }
 
 interface ComponentJson {
@@ -114,6 +136,7 @@ function componentToJson(c: ComponentRegistration): ComponentJson {
       name: key,
       type: describeZodType(zodField),
       required: !zodField.isOptional(),
+      subtype: getArraySubtype(zodField),
     };
 
     const defaultVal = getZodDefault(zodField);

@@ -82,10 +82,10 @@ export function inferSceneFieldDefinition(prop: string, value: unknown): SceneFi
     return { kind: 'media[]' }
   }
 
-  if (lowerProp.includes('icon') && typeof value === 'string') {
+  if (lowerProp.includes('icon') && typeof value === 'object' && value !== null && 'name' in value) {
     return { kind: 'icon' }
   }
-  if (lowerProp.includes('icon') && Array.isArray(value) && value.every(item => typeof item === 'string')) {
+  if (lowerProp.includes('icon') && Array.isArray(value) && value.every(item => typeof item === 'object' && item !== null && 'name' in item)) {
     return { kind: 'icon[]' }
   }
 

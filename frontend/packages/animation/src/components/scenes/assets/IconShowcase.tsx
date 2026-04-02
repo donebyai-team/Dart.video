@@ -1,5 +1,5 @@
 import React from 'react';
-import { interpolate, useCurrentFrame, spring } from 'remotion';
+import { interpolate, useCurrentFrame } from 'remotion';
 import z from 'zod';
 import { IconAsset } from '../../../core/assets/IconAsset';
 import { TextStagger } from '../text/TextStagger';
@@ -7,7 +7,7 @@ import { usePatchedProps, useStyleOverride } from '../../../patches';
 import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../durationTypes';
-import { ENTRANCE_ANIMATIONS, IconNameSchema, SPLIT_BY_MODES } from '../types';
+import { ENTRANCE_ANIMATIONS, IconSchema, SPLIT_BY_MODES } from '../types';
 
 // Default constants
 const DEFAULT_ENTRANCE_DURATION = 10;
@@ -15,7 +15,7 @@ const DEFAULT_ICON_STAGGER = 5;
 const DEFAULT_ICON_ANIMATION_DURATION = 10;
 const DEFAULT_TEXT_DELAY = 5;
 const DEFAULT_VARIANT = 'heading' as const;
-const DEFAULT_ICON_SIZE = 72;
+const DEFAULT_ICON_SIZE = 90;
 const DEFAULT_ICON_GAP = 64;
 
 // ============================================================================
@@ -24,8 +24,8 @@ const DEFAULT_ICON_GAP = 64;
 
 export const IconShowcaseSchema = z.object({
     id: z.string().optional(),
-    icons: z.array(IconNameSchema).min(2, "at least two icons are required"),
-    text: z.string().min(1, "text cannot be empty"),
+    icons: z.array(IconSchema).default([]),
+    text: z.string().default(""),
     variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
     iconSize: z.number().min(1, "iconSize must be positive").default(DEFAULT_ICON_SIZE).optional(),
     iconGap: z.number().min(0, "iconGap cannot be negative").default(DEFAULT_ICON_GAP).optional(),
@@ -106,7 +106,7 @@ export const IconShowcase: React.FC<IconShowcaseProps> = (propsInit: IconShowcas
                     transition: 'transform 0.3s ease-out',
                 }}
             >
-                {props.icons.map((iconName, index) => {
+                {props.icons.map((icon, index) => {
                     const iconStartFrame = entranceDuration + index * iconStagger;
                     const iconLocalFrame = localFrame - iconStartFrame;
 
@@ -127,13 +127,13 @@ export const IconShowcase: React.FC<IconShowcaseProps> = (propsInit: IconShowcas
 
                     return (
                         <div
-                            key={`${iconName}-${index}`}
+                            key={`${icon.name}-${index}`}
                             style={{
                                 transform: `scale(${scale}) rotate(${rotation}deg)`,
                                 opacity,
                             }}
                         >
-                            <IconAsset id={`iconasset-${index}-${props.id}`} name={iconName} size={actualIconSize} />
+                            <IconAsset id={`iconasset-${index}-${props.id}`} icon={icon} size={actualIconSize} />
                         </div>
                     );
                 })}
