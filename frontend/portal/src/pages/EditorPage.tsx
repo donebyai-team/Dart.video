@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Mic2, Eye, Volume2, RefreshCw, Video, Home, Settings, HelpCircle, Timer, Music2, Brain, Check, X } from 'lucide-react'
+import { Mic2, Volume2, RefreshCw, Home, Timer, Brain, Check, X, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -416,7 +416,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
             }
             onClick={handleExportVideo}
           >
-            <Eye className='w-4 h-4' />
+            <ExternalLink className='w-4 h-4' />
             Export
           </Button>
         </div>

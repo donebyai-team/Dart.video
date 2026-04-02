@@ -1,21 +1,6 @@
 import { interpolate, Easing as RemotionEasing } from 'remotion';
-import { Easing, MotionConfig, StaggerMotionConfig } from './types';
+import { Easing } from './types';
 
-export type PrimitiveMotionCategory = 'entrance' | 'exit' | 'counter' | 'typewriter' | 'wordcycle';
-
-/**
- * Returns the easing for a given primitive category from the style's motion config.
- */
-export function getEasing(motion: MotionConfig, category: PrimitiveMotionCategory): Easing {
-  return motion[category];
-}
-
-/**
- * Returns the stagger timing config from a style's motion config.
- */
-export function getStaggerConfig(motion: MotionConfig): StaggerMotionConfig {
-  return motion.stagger;
-}
 
 const easingFnMap: Record<Easing, (t: number) => number> = {
   'linear':            RemotionEasing.linear,

@@ -40,13 +40,12 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (propsInit: Animate
     const actualAnimationDelay = props.animationDelay ?? DEFAULT_ENTRANCE_DURATION;
 
     const styleOverride = useStyleOverride(props.id);
-    const easing = styleConfig.motion.entrance;
 
     const entranceProgress = interpolateWithEasing(
         frame,
         [0, actualAnimationDelay],
         [0, 1],
-        easing
+        'ease-out'
     );
 
     const getHighlightStyles = (): React.CSSProperties => {

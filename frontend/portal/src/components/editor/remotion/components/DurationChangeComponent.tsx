@@ -27,7 +27,7 @@ const DurationChangeComponent = ({ value, onValueChange, max, min, step }: Props
         <Minus className='w-3 h-3' />
       </Button>
 
-      <div className='h-5 text-center text-sm'>{value.toFixed(1)}</div>
+      <div className='h-5 text-center text-sm'>{value.toFixed(1)}s</div>
 
       <Button
         variant='ghost'

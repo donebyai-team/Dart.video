@@ -1,7 +1,6 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useCurrentFrame } from 'remotion';
-import { useStyleContext } from '../../styles/StyleContext';
-import { getEasing, interpolateWithEasing } from '../../styles/easingResolver';
+import { interpolateWithEasing } from '../../styles/easingResolver';
 import { usePrimitivePatches, usePatchedProp, useStyleOverride } from '../../patches/PatchContext';
 import { splitStyles, mergeChildStyles } from '../../styles/styleUtils';
 import { type Easing } from '../../styles/types';
@@ -35,7 +34,6 @@ export function SlideIn({
   className,
 }: SlideInProps): React.ReactElement | null {
   const frame = useCurrentFrame();
-  const styleConfig = useStyleContext();
 
   const speedFactor = useSpeedFactor();
   const adjustedStartAt = applySpeedFactor(startAt, speedFactor);
@@ -48,13 +46,11 @@ export function SlideIn({
   const styleOverride = useStyleOverride(id);
 
 
-  const resolvedEasing = easing ?? getEasing(styleConfig.motion, 'entrance');
-
   const progress = interpolateWithEasing(
     frame,
     [effectiveStartAt, effectiveStartAt + effectiveDurationInFrames],
     [0, 1],
-    resolvedEasing,
+    'ease-in',
   );
 
   const offset = patchedDistance * (1 - progress);

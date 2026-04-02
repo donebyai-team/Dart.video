@@ -49,7 +49,6 @@ export const TextHighlight: React.FC<TextHighlightProps> = (propsInit: TextHighl
     const actualAnimationDelay = props.animationDelay ?? DEFAULT_ENTRANCE_DURATION;
     const actualZoomDuration = props.zoomDuration ?? DEFAULT_ZOOM_DURATION;
     const styleOverride = useStyleOverride(props.id);
-    const easing = styleConfig.motion.entrance;
 
     // Animation timeline:
     // Phase 1: Entrance animation with highlight already visible (0 to animationDelay)
@@ -60,7 +59,7 @@ export const TextHighlight: React.FC<TextHighlightProps> = (propsInit: TextHighl
         frame,
         [0, actualAnimationDelay],
         [0, 1],
-        easing
+        'ease-out'
     );
 
     const zoomStartFrame = actualAnimationDelay;
@@ -68,7 +67,7 @@ export const TextHighlight: React.FC<TextHighlightProps> = (propsInit: TextHighl
         frame,
         [zoomStartFrame, zoomStartFrame + actualZoomDuration],
         [0, 1],
-        easing
+        'ease-out'
     );
 
     // Disappear immediately after zoom completes

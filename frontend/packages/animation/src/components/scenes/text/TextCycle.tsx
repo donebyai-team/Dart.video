@@ -5,7 +5,7 @@ import { usePatchedProps, useStyleOverride } from '../../../patches/PatchContext
 import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme/ThemeContext';
-import { getEasing, interpolateWithEasing } from '../../../styles/easingResolver';
+import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
 import { resolveTypography } from '../../../tokens/resolveTypography';
 import type { ComponentRegistration } from '../../../registry/registry';
@@ -56,7 +56,6 @@ export const TextCycle: React.FC<TextCycleProps> = (propsInit: TextCycleProps) =
   const styleOverride = useStyleOverride(props.id);
 
   const cycleDuration = (props.holdDuration ?? DEFAULT_HOLD_DURATION) + (props.transitionDuration ?? DEFAULT_TRANSITION_DURATION);
-  const resolvedEasing = getEasing(styleConfig.motion, 'wordcycle');
   const typographyStyle = resolveTypography(patchedVariant, styleConfig, theme, preset);
 
   // The longest word by character count — used as an invisible spacer to
@@ -83,7 +82,7 @@ export const TextCycle: React.FC<TextCycleProps> = (propsInit: TextCycleProps) =
         cycleFrame,
         [holdDuration, holdDuration + transitionDuration],
         [0, 1],
-        resolvedEasing,
+        'ease-out',
       )
     : 0;
 

@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
 import { useStyleContext } from '../../styles/StyleContext';
-import { getEasing, interpolateWithEasing } from '../../styles/easingResolver';
+import { interpolateWithEasing } from '../../styles/easingResolver';
 import { usePrimitivePatches, useStyleOverride } from '../../patches/PatchContext';
 import { splitStyles, mergeChildStyles } from '../../styles/styleUtils';
 import { type Easing } from '../../styles/types';
@@ -40,13 +40,11 @@ export function ScaleIn({
   const { effectiveStartAt, effectiveDurationInFrames } = usePrimitivePatches(id, { startAt: adjustedStartAt, durationInFrames: adjustedDurationInFrames });
   const styleOverride = useStyleOverride(id);
 
-  const resolvedEasing = easing ?? getEasing(styleConfig.motion, 'entrance');
-
   const scale = interpolateWithEasing(
     frame,
     [effectiveStartAt, effectiveStartAt + effectiveDurationInFrames],
     [initialScale, 1],
-    resolvedEasing,
+    'ease-out',
   );
 
   const animationStyle: React.CSSProperties = { transform: `scale(${Math.max(0, scale)})` };

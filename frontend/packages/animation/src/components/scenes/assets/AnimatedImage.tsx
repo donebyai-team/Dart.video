@@ -65,8 +65,6 @@ export function AnimatedImage(propsInit: AnimatedImageProps): React.ReactElement
 
     const styleOverride = useStyleOverride(props.id);
 
-    const easing = styleConfig.motion.entrance;
-
     const textDuration = 30;
     const imageDuration = 40;
     const imageStart = 10;
@@ -75,14 +73,14 @@ export function AnimatedImage(propsInit: AnimatedImageProps): React.ReactElement
         frame,
         [0, textDuration],
         [0, 1],
-        easing,
+        'ease-out',
     );
 
     const imageProgress = interpolateWithEasing(
         frame,
         [imageStart, imageStart + imageDuration],
         [0, 1],
-        easing,
+        'ease-out',
     );
 
     return (

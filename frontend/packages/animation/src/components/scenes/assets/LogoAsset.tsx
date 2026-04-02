@@ -99,7 +99,7 @@ export function LogoAsset(propsInit: LogoAssetProps): React.ReactElement {
 
     const animDuration = DEFAULT_ANIMATION_DURATION;
     const animProgress = actualAnimation !== 'none'
-        ? interpolateWithEasing(frame, [0, animDuration], [0, 1], styleConfig.motion.entrance)
+        ? interpolateWithEasing(frame, [0, animDuration], [0, 1], 'ease-out')
         : 1;
     const animStyle = getLogoAnimationStyle(actualAnimation, animProgress);
 

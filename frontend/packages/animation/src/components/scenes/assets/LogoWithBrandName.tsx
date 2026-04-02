@@ -55,12 +55,11 @@ export function LogoWithBrandName(propsInit: LogoWithBrandNameProps): React.Reac
     const resolvedLogoSize = props.logoSize ?? Math.round(fontSize * lineHeight);
 
     // Check first char opacity to animate the gap
-    const easing = styleConfig.motion.entrance;
     const firstCharOpacity = interpolateWithEasing(
         frame,
         [0, DEFAULT_CHAR_FADE_DURATION],
         [0, 1],
-        easing,
+        'ease-out',
     );
 
     return (

@@ -69,7 +69,6 @@ export function ImagePeel(propsInit: ImagePeelProps): React.ReactElement {
     const resolvedWidth = props.width ?? DEFAULT_WIDTH;
     const resolvedHeight = props.height ?? DEFAULT_HEIGHT;
 
-    const easing = styleConfig.motion.entrance;
     const count = props.images.length;
     // Each image: [enter] -> [hold] -> [peel away], staggered
 
@@ -81,7 +80,7 @@ export function ImagePeel(propsInit: ImagePeelProps): React.ReactElement {
         frame,
         [0, entranceDuration],
         [0, 1],
-        easing,
+        'ease-out',
     );
 
     return (
@@ -113,7 +112,7 @@ export function ImagePeel(propsInit: ImagePeelProps): React.ReactElement {
                         frame,
                         [peelStart + actualHoldDuration, peelStart + actualHoldDuration + actualPeelDuration],
                         [0, 1],
-                        easing,
+                        'ease-out',
                     );
 
                     // Once fully peeled, hide

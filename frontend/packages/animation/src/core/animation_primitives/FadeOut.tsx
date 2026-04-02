@@ -1,7 +1,6 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useCurrentFrame } from 'remotion';
-import { useStyleContext } from '../../styles/StyleContext';
-import { getEasing, interpolateWithEasing } from '../../styles/easingResolver';
+import { interpolateWithEasing } from '../../styles/easingResolver';
 import { usePrimitivePatches, useStyleOverride } from '../../patches/PatchContext';
 import { splitStyles, mergeChildStyles } from '../../styles/styleUtils';
 import { type Easing } from '../../styles/types';
@@ -29,7 +28,6 @@ export function FadeOut({
   className,
 }: FadeOutProps): React.ReactElement | null {
   const frame = useCurrentFrame();
-  const styleConfig = useStyleContext();
 
   const speedFactor = useSpeedFactor();
   const adjustedStartAt = applySpeedFactor(startAt, speedFactor);
@@ -38,13 +36,11 @@ export function FadeOut({
   const { effectiveStartAt, effectiveDurationInFrames } = usePrimitivePatches(id, { startAt: adjustedStartAt, durationInFrames: adjustedDurationInFrames });
   const styleOverride = useStyleOverride(id);
 
-  const resolvedEasing = easing ?? getEasing(styleConfig.motion, 'exit');
-
   const opacity = interpolateWithEasing(
     frame,
     [effectiveStartAt, effectiveStartAt + effectiveDurationInFrames],
     [1, 0],
-    resolvedEasing,
+    'ease-in',
   );
 
   const animationStyle: React.CSSProperties = { opacity };

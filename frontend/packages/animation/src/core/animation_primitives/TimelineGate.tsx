@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useCurrentFrame } from 'remotion';
 import { usePrimitivePatches } from '../../patches/PatchContext';
 import { applySpeedFactor, useSpeedFactor } from '../../duration';

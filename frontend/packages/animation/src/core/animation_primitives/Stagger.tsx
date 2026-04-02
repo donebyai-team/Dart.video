@@ -1,8 +1,6 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
 import { usePrimitivePatches } from '../../patches/PatchContext';
-import { useStyleContext } from '../../styles/StyleContext';
-import { getStaggerConfig } from '../../styles/easingResolver';
 import { applySpeedFactor, useSpeedFactor } from '../../duration';
 
 export interface StaggerProps {
@@ -32,11 +30,9 @@ export function Stagger({
   style,
 }: StaggerProps): React.ReactElement {
   const frame = useCurrentFrame();
-  const styleConfig = useStyleContext();
-  const staggerDefaults = getStaggerConfig(styleConfig.motion);
 
-  const resolvedStartAt      = startAt      ?? staggerDefaults.startAt;
-  const resolvedStaggerDelay = staggerDelay ?? staggerDefaults.staggerDelay;
+  const resolvedStartAt      = startAt      ?? 0;
+  const resolvedStaggerDelay = staggerDelay ?? 12;
 
   const speedFactor = useSpeedFactor();
   const adjustedStartAt = applySpeedFactor(resolvedStartAt, speedFactor);

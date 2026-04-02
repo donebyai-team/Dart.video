@@ -56,8 +56,6 @@ export function AnimatedVideo(propsInit: AnimatedVideoProps): React.ReactElement
 
     const styleOverride = useStyleOverride(props.id);
 
-    const easing = styleConfig.motion.entrance;
-
     const textDuration = DEFAULT_TEXT_DURATION;
     const videoDuration = DEFAULT_VIDEO_DURATION;
     const videoStart = DEFAULT_VIDEO_START_DELAY;
@@ -66,14 +64,14 @@ export function AnimatedVideo(propsInit: AnimatedVideoProps): React.ReactElement
         frame,
         [0, textDuration],
         [0, 1],
-        easing,
+        'ease-out',
     );
 
     const videoProgress = interpolateWithEasing(
         frame,
         [videoStart, videoStart + videoDuration],
         [0, 1],
-        easing,
+        'ease-out',
     );
 
     return (

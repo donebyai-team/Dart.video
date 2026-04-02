@@ -30,22 +30,6 @@ export interface StaggerMotionConfig {
   startAt: number;
 }
 
-/** Per-primitive easing and stagger timing within a style's motion definition. */
-export interface MotionConfig {
-  /** Slide, Fade, Scale entrance animations */
-  entrance: Easing;
-  /** Slide, Fade, Scale exit animations */
-  exit: Easing;
-  /** Counter animated number */
-  counter: Easing;
-  /** Typewriter text reveal */
-  typewriter: Easing;
-  /** WordCycle word transition */
-  wordcycle: Easing;
-  /** Stagger list orchestration timing */
-  stagger: StaggerMotionConfig;
-}
-
 export interface ShapeConfig {
   radii: { sm: string; md: string; lg: string; xl: string; full: string };
 }
@@ -90,7 +74,6 @@ export interface CursorConfig {
  *  Structural rules only — no colors. Colors come from ThemeContext (BrandTheme). */
 export interface StyleConfig {
   id: string;
-  motion: MotionConfig;
   shape: ShapeConfig;
   stroke: StrokeConfig;
   surface: SurfaceConfig;

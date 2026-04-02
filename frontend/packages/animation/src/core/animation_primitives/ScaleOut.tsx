@@ -1,7 +1,7 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useCurrentFrame } from 'remotion';
 import { useStyleContext } from '../../styles/StyleContext';
-import { getEasing, interpolateWithEasing } from '../../styles/easingResolver';
+import { interpolateWithEasing } from '../../styles/easingResolver';
 import { usePrimitivePatches, useStyleOverride } from '../../patches/PatchContext';
 import { splitStyles, mergeChildStyles } from '../../styles/styleUtils';
 import { type Easing } from '../../styles/types';
@@ -41,13 +41,11 @@ export function ScaleOut({
   const { effectiveStartAt, effectiveDurationInFrames } = usePrimitivePatches(id, { startAt: adjustedStartAt, durationInFrames: adjustedDurationInFrames });
   const styleOverride = useStyleOverride(id);
 
-  const resolvedEasing = easing ?? getEasing(styleConfig.motion, 'exit');
-
   const scale = interpolateWithEasing(
     frame,
     [effectiveStartAt, effectiveStartAt + effectiveDurationInFrames],
     [1, finalScale],
-    resolvedEasing,
+    'ease-in',
   );
 
   if (asChild) {

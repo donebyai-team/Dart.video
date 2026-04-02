@@ -1,10 +1,10 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useCurrentFrame } from 'remotion';
 import { usePrimitivePatches, usePatchedProp, useStyleOverride } from '../../../patches/PatchContext';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme/ThemeContext';
-import { getEasing, interpolateWithEasing } from '../../../styles/easingResolver';
+import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { type Easing } from '../../../styles/types';
 import { TypographyVariant } from '../../../tokens/semantic';
 import { resolveTypography } from '../../../tokens/resolveTypography';
@@ -80,13 +80,11 @@ export function Counter({
   const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', variant);
   const styleOverride = useStyleOverride(id);
 
-  const resolvedEasing = easing ?? getEasing(styleConfig.motion, 'counter');
-
   const progress = interpolateWithEasing(
     frame,
     [effectiveStartAt, effectiveStartAt + effectiveDurationInFrames],
     [0, 1],
-    resolvedEasing,
+    'ease-out',
   );
 
   const currentValue = patchedFrom + (patchedTo - patchedFrom) * progress;
