@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { NumberStepper, SelectInput, SliderInput } from './TextToolbar'
 
 const OBJECT_FIT_OPTIONS = [
@@ -11,6 +11,21 @@ interface MediaToolbarProps {
   mediaKind?: 'image' | 'video';
   styleOverride: Record<string, string | number>
   onStyleOverride: (style: Record<string, string | number>) => void
+  selectedElementId?: string
+}
+
+function useComputedMediaStyles(elementId?: string) {
+  return useMemo(() => {
+    if (!elementId) return {}
+    const el = document.getElementById(elementId)
+    if (!el) return {}
+    const computed = window.getComputedStyle(el)
+    return {
+      objectFit: computed.objectFit as 'contain' | 'cover' | 'fill' | undefined,
+      borderRadius: parseFloat(computed.borderRadius) || 0,
+      boxShadow: computed.boxShadow,
+    }
+  }, [elementId])
 }
 
 const DEFAULT_SHADOW = 'rgba(0, 0, 0, 0.25)'
@@ -41,16 +56,19 @@ export function MediaToolbar({
   mediaKind = 'image',
   styleOverride,
   onStyleOverride,
+  selectedElementId,
 }: MediaToolbarProps) {
+  const computed = useComputedMediaStyles(selectedElementId)
+
   const currentObjectFit =
     typeof styleOverride.objectFit === 'string'
       ? styleOverride.objectFit as 'contain' | 'cover' | 'fill'
-      : 'contain'
+      : computed.objectFit ?? 'contain'
   const currentRadius =
     typeof styleOverride.borderRadius === 'number'
       ? styleOverride.borderRadius
-      : Number(styleOverride.borderRadius) || 0
-  const currentShadow = parseShadowBlur(styleOverride.boxShadow)
+      : Number(styleOverride.borderRadius) || computed.borderRadius || 0
+  const currentShadow = parseShadowBlur(styleOverride.boxShadow ?? computed.boxShadow)
 
   return (
     <div className="flex items-center gap-3 whitespace-nowrap">

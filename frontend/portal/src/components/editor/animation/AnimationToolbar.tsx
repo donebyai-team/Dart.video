@@ -30,6 +30,7 @@ export function AnimationToolbar({
         <MediaToolbar
           mediaKind={isVideo ? "video" : "image"}
           styleOverride={style}
+          selectedElementId={selectedId}
           onStyleOverride={next => onStyleOverride(selectedId, next)}
         />
       ) : (
