@@ -9,7 +9,7 @@ export const MyVideo = () => {
 
   //Get video FPS and total frames of video
   const fps = videoData.metadata.fps
-  const totalVideoFrames = videoData.metadata.duration * fps
+  const totalVideoFrames = videoData.metadata.durationInFrames
 
   // Get video resolution i.e width and height
   const width = videoData.metadata.resolution.width

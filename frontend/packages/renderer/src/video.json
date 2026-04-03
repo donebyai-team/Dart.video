@@ -1,254 +1,486 @@
 {
-    "id": "669ee51b-57e0-4d6c-84f9-89ef2ab7569e",
-    "name": "Percy at Scale",
+    "id": "11f57825-e351-491a-b12f-951a4057795d",
+    "name": "Cursor Works With You",
     "config": {
         "sections": [
             {
-                "id": "section-1773760512323491000",
-                "title": "Launch",
-                "color": "#4ECDC4",
+                "id": "section-a0e3483b-5a19-4169-9ad0-62603ecc51cc",
+                "title": "Hook",
+                "color": "#6C5CE7",
                 "slides": [
                     {
-                        "id": "slide-1773760512323526000",
-                        "type": "SLIDE_TYPE_ANIMATION",
-                        "transcript": "Meet Percy, the new BrowserStack platform helping teams automate testing with more confidence and clarity.",
-                        "transition": "TRANSITION_WIPE_LEFT",
-                        "transitionDuration": 0.5,
-                        "direction": "TRANSITION_DIRECTION_FROM_LEFT",
-                        "durationInFrames": 150,
-                        "settledFrame": 130,
-                        "animation": {
+                        "id": "slide-f9cd3402-f389-44d0-ad59-49f19450fa3c",
+                        "durationInFrames": 45,
+                        "settledFrame": 45,
+                        "content": {
                             "codeRegistry": {
-                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d/669ee51b-57e0-4d6c-84f9-89ef2ab7569e/Component6c5602f4df3d4485945503f8218557e1.tsx",
-                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d/669ee51b-57e0-4d6c-84f9-89ef2ab7569e/TransformedComponent6c5602f4df3d4485945503f8218557e1.tsx"
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//Componentf96d784c3ccf40d5996f8f0f36f1e301.tsx",
+                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//TransformedComponentf96d784c3ccf40d5996f8f0f36f1e301.tsx"
                             },
-                            "plan": {
-                                "index": "1",
-                                "beatDescription": "Open with a bold launch statement introducing Percy as a new BrowserStack testing platform built for modern automation. This creates immediate context from a cold start, hints at the challenge of shipping confidently, and naturally leads into seeing the product in a real interface.",
-                                "animationType": "TEXT",
-                                "categorySearcQquery": "software testing complexity and automation launch",
-                                "durationInFrames": "240",
-                                "voiceover": "Meet Percy, the new BrowserStack platform helping teams automate testing with more confidence and clarity.",
-                                "selectedTemplateDescription": "A bold centered launch statement, “Meet Percy,” arrives first with a calm scale-in, establishing it as the clear focal point. A smaller line slides up beneath it a beat later to frame Percy as BrowserStack’s new platform for modern test automation, while the BrowserStack logo fades in quietly above as a secondary cue. The motion is deliberate and spacious, with each element revealed in sequence, then the whole composition settles into a clean hold before the transition."
-                            },
-                            "edits": {
-                                "fadein-0": {
-                                    "value": {
-                                        "delay": 62,
-                                        "duration": 18
-                                    }
-                                },
-                                "logoasset-0": {
-                                    "value": {
-                                        "height": 40,
-                                        "width": 180
-                                    }
-                                },
-                                "scalein-0": {
-                                    "value": {
-                                        "delay": 0,
-                                        "duration": 24,
-                                        "origin": "center"
-                                    }
-                                },
-                                "slidein-0": {
-                                    "value": {
-                                        "delay": 32,
-                                        "direction": "up",
-                                        "distance": 24,
-                                        "duration": 22
-                                    }
-                                },
-                                "text-0": {
-                                    "value": {
-                                        "children": "Meet Percy",
-                                        "variant": "display"
-                                    }
-                                },
-                                "text-1": {
-                                    "value": {
-                                        "children": "BrowserStack's new platform for modern test automation",
-                                        "variant": "subheading"
-                                    }
-                                }
-                            }
+                            "plan": {},
+                            "edits": {}
                         },
                         "slideStatus": "SLIDE_STATUS_GENERATED"
-                    }
-                ]
-            },
-            {
-                "id": "section-1773760512323547000",
-                "title": "Workflow",
-                "color": "#E84393",
-                "slides": [
+                    },
                     {
-                        "id": "slide-1773760512323549000",
-                        "type": "SLIDE_TYPE_MEDIA",
-                        "transition": "TRANSITION_IRIS",
-                        "transitionDuration": 0.5,
-                        "direction": "TRANSITION_DIRECTION_FROM_BOTTOM",
-                        "durationInFrames": 150,
-                        "settledFrame": 150,
-                        "media": {
-                            "meta": {
-                                "x": 192,
-                                "y": 108,
-                                "width": 1536,
-                                "height": 864,
-                                "scale": 1
+                        "id": "slide-70b8d49d-7070-49a0-831f-1ae53ed6b40e",
+                        "transitionDurationInFrames": 15,
+                        "backgroundStyle": {
+                            "solid": {
+                                "hex": "#F7F7F4"
+                            }
+                        },
+                        "durationInFrames": 110,
+                        "settledFrame": 90,
+                        "content": {
+                            "codeRegistry": {
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d/slide-70b8d49d-7070-49a0-831f-1ae53ed6b40e/Componentf1ec430468694b9f97eb3354aea1b328.tsx",
+                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d/slide-70b8d49d-7070-49a0-831f-1ae53ed6b40e/TransformedComponentf1ec430468694b9f97eb3354aea1b328.tsx"
                             },
-                            "src": "https://placehold.co/600x400?text=Upload+a+screenshot+or+short+clip+of+your+product&font=roboto",
-                            "style": {},
-                            "mediaType": "MEDIA_TYPE_IMAGE",
-                            "plan": {
-                                "index": "1",
-                                "beatDescription": "This is the media slide, user will be asked to upload their product screenshot or clip",
-                                "durationInFrames": "150",
-                                "selectedTemplateDescription": "This is the media slide, user will be asked to upload their product screenshot or clip"
+                            "edits": {
+                                "animatedimage-3njq05": {
+                                    "borderRadius": 0,
+                                    "entranceAnimation": "scaleIn",
+                                    "height": 700,
+                                    "src": "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1775021255-group-882.svg",
+                                    "style": {
+                                        "boxShadow": "none"
+                                    },
+                                    "text": "Upload your stats",
+                                    "variant": "heading",
+                                    "width": 900
+                                }
                             }
                         },
                         "slideStatus": "SLIDE_STATUS_GENERATED"
                     },
                     {
-                        "id": "slide-1773760512323554000",
-                        "type": "SLIDE_TYPE_MEDIA",
-                        "transition": "TRANSITION_FADE",
-                        "transitionDuration": 0.5,
-                        "direction": "TRANSITION_DIRECTION_FROM_RIGHT",
-                        "durationInFrames": 150,
-                        "settledFrame": 150,
-                        "media": {
-                            "meta": {
-                                "x": 192,
-                                "y": 108,
-                                "width": 1536,
-                                "height": 864,
-                                "scale": 1
+                        "id": "slide-a8349fa5-e821-4862-a733-41a0db11992e",
+                        "durationInFrames": 50,
+                        "settledFrame": 50,
+                        "content": {
+                            "codeRegistry": {
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//Componentcd4050ed3b794fb595a99809989c30f4.tsx",
+                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//TransformedComponentcd4050ed3b794fb595a99809989c30f4.tsx"
                             },
-                            "src": "https://placehold.co/600x400?text=Upload+a+screenshot+or+short+clip+of+your+product&font=roboto",
-                            "style": {},
-                            "mediaType": "MEDIA_TYPE_IMAGE",
                             "plan": {
-                                "index": "2",
-                                "beatDescription": "This is the media slide, user will be asked to upload their product screenshot or clip",
-                                "durationInFrames": "150",
-                                "selectedTemplateDescription": "This is the media slide, user will be asked to upload their product screenshot or clip"
+                                "index": "1"
+                            },
+                            "edits": {
+                                "texthighlight-h2b2po": {
+                                    "animationDelay": 30,
+                                    "entranceAnimation": "slideUp",
+                                    "highlightStyle": "glow",
+                                    "text": "Teams are {stretched thin}",
+                                    "variant": "heading",
+                                    "zoomDuration": 20
+                                }
                             }
                         },
                         "slideStatus": "SLIDE_STATUS_GENERATED",
                         "index": 1
+                    },
+                    {
+                        "id": "slide-bfc3ecfc-5fc9-4e42-ad9a-e094ef7b18e7",
+                        "durationInFrames": 140,
+                        "settledFrame": 140,
+                        "content": {
+                            "codeRegistry": {
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//Componentacc9a8bbab7d4bbbb87c936b8c26e538.tsx",
+                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//TransformedComponentacc9a8bbab7d4bbbb87c936b8c26e538.tsx"
+                            },
+                            "plan": {
+                                "index": "2"
+                            },
+                            "edits": {
+                                "typewriter-5fcxmu": {
+                                    "entranceAnimation": "slideLeft",
+                                    "splitBy": "char",
+                                    "startAt": 0,
+                                    "text": "Competition is growing faster than ever.",
+                                    "variant": "heading"
+                                }
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED",
+                        "index": 2
+                    },
+                    {
+                        "id": "slide-d28e3f8a-fe93-4e08-ae94-5842a5324f52",
+                        "durationInFrames": 50,
+                        "settledFrame": 50,
+                        "content": {
+                            "codeRegistry": {
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//Componentb5ebb6ac9db146ecbc63269ca0b6cc33.tsx",
+                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//TransformedComponentb5ebb6ac9db146ecbc63269ca0b6cc33.tsx"
+                            },
+                            "plan": {
+                                "index": "3"
+                            },
+                            "edits": {
+                                "texthighlight-k34efx": {
+                                    "animationDelay": 30,
+                                    "entranceAnimation": "slideUp",
+                                    "highlightStyle": "glow",
+                                    "text": "Hiring is {slow and expensive}",
+                                    "variant": "heading",
+                                    "zoomDuration": 20
+                                }
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED",
+                        "index": 3
+                    }
+                ]
+            },
+            {
+                "id": "section-86b3722e-de1e-4468-8912-568700e0eaea",
+                "title": "Intro",
+                "color": "#96CEB4",
+                "slides": [
+                    {
+                        "id": "slide-81672b56-e78e-40aa-b1a7-811219d6941d",
+                        "durationInFrames": 56,
+                        "settledFrame": 35,
+                        "content": {
+                            "codeRegistry": {
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//Component83149ba15a6c4c18961cc761d9ab88ec.tsx",
+                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//TransformedComponent83149ba15a6c4c18961cc761d9ab88ec.tsx"
+                            },
+                            "plan": {
+                                "index": "4"
+                            },
+                            "edits": {
+                                "logowithbrandname-yg4unt": {
+                                    "brandName": "Cursor",
+                                    "src": "",
+                                    "variant": "heading"
+                                }
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED"
+                    },
+                    {
+                        "id": "slide-72ac9883-5aa2-404f-9039-9579cf7a7408",
+                        "durationInFrames": 55,
+                        "settledFrame": 55,
+                        "content": {
+                            "codeRegistry": {
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//Component9bfb329ec45c4851883c385f16273554.tsx",
+                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//TransformedComponent9bfb329ec45c4851883c385f16273554.tsx"
+                            },
+                            "plan": {
+                                "index": "5"
+                            },
+                            "edits": {
+                                "textstagger-f91ypw": {
+                                    "duration": 15,
+                                    "entranceAnimation": "scaleIn",
+                                    "splitBy": "word",
+                                    "staggerDelay": 5,
+                                    "text": "Your personal AI assistant for building software at work.",
+                                    "variant": "heading"
+                                }
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED",
+                        "index": 1
+                    },
+                    {
+                        "id": "slide-e48d40c0-5e98-4442-b066-ba17ae98e1ed",
+                        "durationInFrames": 98,
+                        "settledFrame": 80,
+                        "content": {
+                            "codeRegistry": {
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//Component4a4490083da1441cb4a36d4244952793.tsx",
+                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//TransformedComponent4a4490083da1441cb4a36d4244952793.tsx"
+                            },
+                            "plan": {
+                                "index": "6"
+                            },
+                            "edits": {
+                                "textcycle-ie9axg": {
+                                    "holdDuration": 20,
+                                    "texts": [
+                                        "Agent mode for action",
+                                        "Plan mode for thinking",
+                                        "Debug mode for fixing",
+                                        "Ask mode for answers"
+                                    ],
+                                    "transition": "flipY",
+                                    "transitionDuration": 15,
+                                    "variant": "heading"
+                                }
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED",
+                        "index": 2
                     }
                 ],
                 "index": 1
             },
             {
-                "id": "section-1773760512323556000",
-                "title": "Scale",
+                "id": "section-faed55e3-e989-4a5e-aac4-aca78d00a0e0",
+                "title": "Product",
+                "color": "#45B7D1",
+                "slides": [
+                    {
+                        "id": "slide-992908d8-f68f-42b4-849a-ed69e04a29f1",
+                        "durationInFrames": 500,
+                        "settledFrame": 500,
+                        "content": {
+                            "codeRegistry": {
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//Component814101168f444b20b21929d2bae2be95.tsx",
+                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//TransformedComponent814101168f444b20b21929d2bae2be95.tsx"
+                            },
+                            "plan": {
+                                "index": "7"
+                            },
+                            "edits": {
+                                "animatedvideo-ckd5pl": {
+                                    "borderRadius": 16,
+                                    "entranceAnimation": "slideUp",
+                                    "height": 756,
+                                    "src": "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774506564-cur.mp4",
+                                    "text": "See Cursor in action",
+                                    "variant": "subheading",
+                                    "width": 1344
+                                }
+                            }
+                        },
+                        "zooms": [
+                            {
+                                "id": "zoom-effect-1775019989676",
+                                "x": 584.24506,
+                                "y": 781.05035,
+                                "zoomLevel": 2.4,
+                                "startFrame": 15,
+                                "endFrame": 105
+                            },
+                            {
+                                "id": "zoom-effect-1775020276541",
+                                "x": 1125.7554,
+                                "y": 366.47482,
+                                "zoomLevel": 1.3,
+                                "startFrame": 150,
+                                "endFrame": 240
+                            }
+                        ],
+                        "slideStatus": "SLIDE_STATUS_GENERATED"
+                    },
+                    {
+                        "id": "slide-6cdf9230-11b4-47c5-94f9-b4b3c55d2fa5",
+                        "durationInFrames": 135,
+                        "settledFrame": 115,
+                        "content": {
+                            "codeRegistry": {
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d/slide-6cdf9230-11b4-47c5-94f9-b4b3c55d2fa5/Component98348b45d3ea4df2a727ba940bcceb1f.tsx",
+                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d/slide-6cdf9230-11b4-47c5-94f9-b4b3c55d2fa5/TransformedComponent98348b45d3ea4df2a727ba940bcceb1f.tsx"
+                            },
+                            "plan": {
+                                "index": "8"
+                            },
+                            "edits": {
+                                "iconshowcase-5p0zcy": {
+                                    "iconGap": 64,
+                                    "iconSize": 90,
+                                    "icons": [
+                                        "https://www.thesvg.org/icons/openai/light.svg",
+                                        "https://www.thesvg.org/icons/anthropic/light.svg",
+                                        "https://www.thesvg.org/icons/google/default.svg",
+                                        "https://www.thesvg.org/icons/midjourney/light.svg",
+                                        "https://cdn.jsdelivr.net/npm/@tabler/icons/icons/outline/mood-confuzed.svg"
+                                    ],
+                                    "text": "Work with the latest models from leading AI labs",
+                                    "variant": "heading"
+                                }
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED",
+                        "index": 1
+                    },
+                    {
+                        "id": "slide-15c6880b-2214-45b0-80a1-2f95adb4729b",
+                        "durationInFrames": 60,
+                        "settledFrame": 60,
+                        "content": {
+                            "codeRegistry": {
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//Componentba3aedceb4f64d68b0b34a30e6ce5e98.tsx",
+                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//TransformedComponentba3aedceb4f64d68b0b34a30e6ce5e98.tsx"
+                            },
+                            "plan": {
+                                "index": "9"
+                            },
+                            "edits": {
+                                "textstagger-mprcc1": {
+                                    "duration": 15,
+                                    "entranceAnimation": "scaleIn",
+                                    "splitBy": "word",
+                                    "staggerDelay": 5,
+                                    "text": "Add custom plugins to connect the tools you already love.",
+                                    "variant": "heading"
+                                }
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED",
+                        "index": 2
+                    },
+                    {
+                        "id": "slide-da18ea14-2c79-44f6-9d77-9bd41f09694a",
+                        "durationInFrames": 60,
+                        "settledFrame": 60,
+                        "content": {
+                            "codeRegistry": {
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//Componentbb2651540e404cb990b1d95214304547.tsx",
+                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//TransformedComponentbb2651540e404cb990b1d95214304547.tsx"
+                            },
+                            "plan": {
+                                "index": "10"
+                            },
+                            "edits": {
+                                "textcycle-76uf25": {
+                                    "holdDuration": 15,
+                                    "texts": [
+                                        "Code faster",
+                                        "Plan clearly",
+                                        "Ship confidently"
+                                    ],
+                                    "transition": "flipY",
+                                    "transitionDuration": 5,
+                                    "variant": "heading"
+                                }
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED",
+                        "index": 3
+                    }
+                ],
+                "index": 2
+            },
+            {
+                "id": "section-2c5eb702-a4f3-4c52-9642-bd4406972cc4",
+                "title": "Proof",
+                "color": "#00B894",
+                "slides": [
+                    {
+                        "id": "slide-739cbb48-4205-4a74-a4b2-f5a4bfeeebf0",
+                        "durationInFrames": 75,
+                        "settledFrame": 75,
+                        "content": {
+                            "codeRegistry": {
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//Component40ea0337813b47918274e7416a0c46f3.tsx",
+                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//TransformedComponent40ea0337813b47918274e7416a0c46f3.tsx"
+                            },
+                            "plan": {
+                                "index": "12"
+                            },
+                            "edits": {
+                                "animatednumber-ioy74k": {
+                                    "animationDelay": 30,
+                                    "endText": "productivity",
+                                    "entranceAnimation": "slideUp",
+                                    "from": 1,
+                                    "highlightStyle": "glow",
+                                    "startText": "Up to",
+                                    "to": 10,
+                                    "variant": "heading"
+                                }
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED",
+                        "index": 1
+                    },
+                    {
+                        "id": "slide-b8f47e5c-1077-4093-ab99-76c8ea83d3f1",
+                        "durationInFrames": 50,
+                        "settledFrame": 50,
+                        "content": {
+                            "codeRegistry": {
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//Component2c51a45a44b14612bdb5f730607ca0e9.tsx",
+                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//TransformedComponent2c51a45a44b14612bdb5f730607ca0e9.tsx"
+                            },
+                            "plan": {
+                                "index": "13"
+                            },
+                            "edits": {
+                                "texthighlight-m7ju14": {
+                                    "animationDelay": 30,
+                                    "entranceAnimation": "slideUp",
+                                    "highlightStyle": "glow",
+                                    "text": "Build software with {extraordinary productivity}",
+                                    "variant": "heading",
+                                    "zoomDuration": 20
+                                }
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED",
+                        "index": 2
+                    }
+                ],
+                "index": 3
+            },
+            {
+                "id": "section-49913068-20cf-4fe7-b59f-263f22f115ec",
+                "title": "CTA",
                 "color": "#96CEB4",
                 "slides": [
                     {
-                        "id": "slide-1773760512323557000",
-                        "type": "SLIDE_TYPE_ANIMATION",
-                        "transcript": "And Percy is already running at serious scale, with more than one hundred thousand tests executed every single day.",
-                        "transition": "TRANSITION_IRIS",
-                        "transitionDuration": 0.5,
-                        "direction": "TRANSITION_DIRECTION_FROM_LEFT",
-                        "durationInFrames": 150,
-                        "settledFrame": 130,
-                        "animation": {
+                        "id": "slide-84a82efa-09c4-465a-9f40-0bbbfaa22137",
+                        "durationInFrames": 30,
+                        "settledFrame": 30,
+                        "content": {
                             "codeRegistry": {
-                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d/669ee51b-57e0-4d6c-84f9-89ef2ab7569e/Component117b8b837538478bae6bc8e12d5d74d9.tsx",
-                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d/669ee51b-57e0-4d6c-84f9-89ef2ab7569e/TransformedComponent117b8b837538478bae6bc8e12d5d74d9.tsx"
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//Component391e33f8d60e480eb738972779fd154e.tsx",
+                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//TransformedComponent391e33f8d60e480eb738972779fd154e.tsx"
                             },
                             "plan": {
-                                "index": "1",
-                                "beatDescription": "Cut to a full-screen animated counter that climbs and lands on 100K+ tests per day. This is the proof moment after the workflow scenes, turning product capability into visible scale and momentum. It sets up the final scene by showing that Percy is already operating at meaningful daily volume.",
-                                "animationType": "TEXT",
-                                "categorySearcQquery": "high volume test execution counter and scale proof",
-                                "durationInFrames": "240",
-                                "voiceover": "And Percy is already running at serious scale, with more than one hundred thousand tests executed every single day.",
-                                "selectedTemplateDescription": "A giant 100K+ counter takes over the screen as the sole focal point, emerging softly in the center before accelerating upward with confident momentum. As the digits climb, the frame stays otherwise quiet, letting the scale itself do the talking. Once the count lands, a small “tests per day” line fades in beneath it as confirmation. The composition then settles into a clean, full-screen hold, ending on the finished number with weight and certainty."
+                                "index": "14"
                             },
                             "edits": {
-                                "counter-0": {
-                                    "value": {
-                                        "delay": 6,
-                                        "duration": 72,
-                                        "from": 0,
-                                        "suffix": "K+",
-                                        "to": 100,
-                                        "variant": "display"
-                                    }
-                                },
-                                "fadein-0": {
-                                    "value": {
-                                        "delay": 88,
-                                        "duration": 20
-                                    }
-                                },
-                                "scalein-0": {
-                                    "value": {
-                                        "delay": 0,
-                                        "duration": 24,
-                                        "origin": "center"
-                                    }
-                                },
-                                "text-0": {
-                                    "value": {
-                                        "children": "tests per day",
-                                        "variant": "label"
-                                    }
+                                "textstagger-ww9qqk": {
+                                    "duration": 15,
+                                    "entranceAnimation": "scaleIn",
+                                    "splitBy": "word",
+                                    "staggerDelay": 5,
+                                    "text": "Try Cursor free today.",
+                                    "variant": "heading"
                                 }
                             }
                         },
                         "slideStatus": "SLIDE_STATUS_GENERATED"
                     },
                     {
-                        "id": "slide-1773760512323558000",
-                        "type": "SLIDE_TYPE_MEDIA",
-                        "durationInFrames": 150,
-                        "settledFrame": 150,
-                        "media": {
-                            "meta": {
-                                "x": 192,
-                                "y": 108,
-                                "width": 1536,
-                                "height": 864,
-                                "scale": 1
+                        "id": "slide-9856bd09-ec0b-4928-9e7c-98b3550d4bfc",
+                        "durationInFrames": 50,
+                        "settledFrame": 30,
+                        "content": {
+                            "codeRegistry": {
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d/slide-9856bd09-ec0b-4928-9e7c-98b3550d4bfc/Componentaa261b796daa4d7680b6ffff58991b71.tsx",
+                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d/slide-9856bd09-ec0b-4928-9e7c-98b3550d4bfc/TransformedComponentaa261b796daa4d7680b6ffff58991b71.tsx"
                             },
-                            "src": "https://placehold.co/600x400?text=Upload+a+screenshot+or+short+clip+of+your+product&font=roboto",
-                            "style": {},
-                            "mediaType": "MEDIA_TYPE_IMAGE",
                             "plan": {
-                                "index": "2",
-                                "beatDescription": "This is the media slide, user will be asked to upload their product screenshot or clip",
-                                "durationInFrames": "150",
-                                "selectedTemplateDescription": "This is the media slide, user will be asked to upload their product screenshot or clip"
+                                "index": "15"
+                            },
+                            "edits": {
+                                "logoasset-iba9bg": {
+                                    "logoAnimation": "zoomIn",
+                                    "src": "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774240200-inline.svg"
+                                }
                             }
                         },
                         "slideStatus": "SLIDE_STATUS_GENERATED",
                         "index": 1
                     }
                 ],
-                "index": 2
+                "index": 4
             }
         ]
     },
     "metadata": {
         "fps": 30,
         "backgroundStyle": {
-            "gradient": {
-                "angle": 135,
-                "stops": [
-                    {
-                        "color": "#2563EB"
-                    },
-                    {
-                        "color": "#0070F0",
-                        "position": 100
-                    }
-                ]
+            "solid": {
+                "hex": "#F7F7F4"
             }
         },
         "resolution": {
@@ -258,49 +490,48 @@
             "width": 1920,
             "height": 1080
         },
-        "duration": 23,
-        "prompt": "Help me create a 5 slide video on a new test automation platform we recently launched called Percy. We are eecuting more than 100K tests on a daily basis. Make one of the slide show the counter of 100K tests",
-        "backgroundAudioUrl": "https://ik.imagekit.io/coasterai/freepik-deep-calm_A4WXzk4Mk.mp3",
+        "durationInFrames": 1564,
+        "prompt": "Hook\tCan your AI actually work with you?\nProblem\tAll teams are stretched thin. Competetion is growing faster than ever. Hiring is slow and expensive\nProduct Intro\tIntroducing Cursor. \n\tThe personal AI assistant built everything at work. \nFeature 1\tUse cursor in agent, plan, debug, ask modes, \nFeature 2\tWork with the latest models from Open AI, Anthropic and everyone else.\nFeature 3\tAdd custom plugins to supercharge cursor with your favourite tools\nSocial proof\tShopify, Midjourney, and thousands of startups are using cursor to see 10X productivity\nCTA\tTry Cursor free today.",
+        "backgroundAudioUrl": "https://storage.googleapis.com/coasterai-public/background_music/chasing-the-morning-light.mp3",
         "generatedBranding": {
             "colors": [
                 {
-                    "colorHexCode": "#2563EB",
+                    "colorHexCode": "#F54E00",
                     "priority": "BRAND_ASSET_PRIORITY_PRIMARY"
                 },
                 {
-                    "colorHexCode": "#7199F2",
+                    "colorHexCode": "#FFA175",
                     "priority": "BRAND_ASSET_PRIORITY_SECONDARY"
                 },
                 {
-                    "colorHexCode": "#0070F0",
+                    "colorHexCode": "#26251E",
                     "priority": "BRAND_ASSET_PRIORITY_ACCENT"
                 },
                 {
-                    "colorHexCode": "#FFFFFF",
+                    "colorHexCode": "#F7F7F4",
                     "priority": "BRAND_ASSET_PRIORITY_BACKGROUND"
-                },
-                {
-                    "colorHexCode": "#111827",
-                    "priority": "BRAND_ASSET_PRIORITY_TEXT_PRIMARY"
                 },
                 {
                     "colorHexCode": "#6B7280",
                     "priority": "BRAND_ASSET_PRIORITY_TEXT_SECONDARY"
                 }
             ],
-            "brandLibraryID": "baebec08-404b-4c54-b6d8-3530f99b5359",
             "brandIdentity": {
-                "name": "browserstack.com",
-                "websiteUrl": "browserstack.com",
-                "tagline": "Most Reliable App & Cross Browser Testing Platform",
-                "description": "Instant access to 3000+ browsers and real iOS and Android devices for cross browser testing. Ship apps and websites that work for everyone, every time. Get Free Trial.",
+                "id": "54d0140d-b235-42e6-8ab6-f33b87100898",
+                "name": "Cursor",
+                "websiteUrl": "cursor.com",
+                "tagline": "The best way to code with AI",
+                "description": "Built to make you extraordinarily productive, Cursor is the best way to build software with AI.",
                 "logos": [
                     {
                         "asset": {
-                            "url": "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1773653735-bstack-logo-global.svg",
+                            "url": "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774240200-inline.svg",
+                            "width": 2193,
+                            "height": 545,
                             "mimeType": "image/svg+xml",
-                            "size": 13532,
-                            "fileName": "bstack-logo-global.svg",
+                            "size": 2909,
+                            "fileName": "inline.svg",
+                            "id": "c96082f0-7152-41ec-b7a5-c6da92919f4d",
                             "mediaType": "MEDIA_TYPE_SVG"
                         },
                         "priority": "BRAND_ASSET_PRIORITY_PRIMARY",
@@ -308,12 +539,13 @@
                     },
                     {
                         "asset": {
-                            "url": "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1773653736-apple-touch-icon.png",
-                            "width": 160,
-                            "height": 160,
+                            "url": "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774240201-apple-touch-icon.png",
+                            "width": 180,
+                            "height": 180,
                             "mimeType": "image/png",
-                            "size": 17448,
+                            "size": 1711,
                             "fileName": "apple-touch-icon.png",
+                            "id": "23678a32-be33-40c9-9c1b-81377ff5c1d7",
                             "mediaType": "MEDIA_TYPE_IMAGE"
                         },
                         "priority": "BRAND_ASSET_PRIORITY_PRIMARY",
@@ -328,19 +560,19 @@
                 ],
                 "colors": [
                     {
-                        "colorHexCode": "#2563EB",
+                        "colorHexCode": "#F54E00",
                         "priority": "BRAND_ASSET_PRIORITY_PRIMARY"
                     },
                     {
-                        "colorHexCode": "#7199F2",
+                        "colorHexCode": "#FFA175",
                         "priority": "BRAND_ASSET_PRIORITY_SECONDARY"
                     },
                     {
-                        "colorHexCode": "#0070F0",
+                        "colorHexCode": "#26251E",
                         "priority": "BRAND_ASSET_PRIORITY_ACCENT"
                     },
                     {
-                        "colorHexCode": "#FFFFFF",
+                        "colorHexCode": "#F7F7F4",
                         "priority": "BRAND_ASSET_PRIORITY_BACKGROUND"
                     },
                     {
@@ -349,9 +581,15 @@
                     }
                 ]
             }
-        }
+        },
+        "thinkingSummary": "**Planning product demo output**\n\nI’ve got clarification that I need to create a product demo with a structured output plan in JSON format. The goal is to include 10 or more scenes, using the attachment as \"AnimatedVideo\" with text labels, and I should avoid any code. I'll organize everything into sections and slides, ensuring each scene features only one component with no duplicate text. I want to aim for 4 sections and 12 scenes, using valid JSON strings related to the brand name. Also, I’ve got to be cautious about text duplication.\n\n",
+        "assets": [
+            {
+                "assetID": "b32ed690-ec07-41f0-8a71-f3e6996931ec"
+            }
+        ]
     },
-    "createdAt": "2026-03-17T15:14:09.441292Z",
+    "createdAt": "2026-03-31T10:11:43.422647Z",
     "status": "VIDEO_STATUS_COMPLETED",
-    "version": "2"
+    "version": "36"
 }
