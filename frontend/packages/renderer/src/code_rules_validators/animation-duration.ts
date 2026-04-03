@@ -11,7 +11,6 @@ export const FALLBACK_SETTLED_FRAME = 130;
 export const FALLBACK_DURATION_IN_FRAMES = 150;
 export const TAIL_BUFFER = 20;
 const MAX_SETTLED_FRAME = 240;
-const CLEAN_STAGGER_DEFAULTS = resolveStyle("clean").motion.stagger;
 
 const ANIMATION_PRIMITIVE_NAME_SET = new Set<string>(ANIMATION_PRIMIIVES);
 
@@ -175,7 +174,7 @@ function collectEndFrames(node: any, inheritedOffset: number, endFrames: number[
   if (name === "Stagger") {
     const staggerDefaults = getComponentTimingDefaults("Stagger");
     const staggerStartAt = getNumericProp(openingElement, "startAt") ?? staggerDefaults?.startAt ?? 0;
-    const staggerDelay = getNumericProp(openingElement, "staggerDelay") ?? CLEAN_STAGGER_DEFAULTS.staggerDelay;
+    const staggerDelay = getNumericProp(openingElement, "staggerDelay") ?? 0;
     const childOffsetBase = inheritedOffset + staggerStartAt;
     const jsxChildren = getDirectJsxElementChildren(node);
 

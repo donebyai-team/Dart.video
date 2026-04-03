@@ -66,18 +66,20 @@ func NewAgentAnimationEditor(
 	db datastore.Repository,
 	mediaStore services.MediaStore,
 	codeBuilder services.TemplateCodeBuilder,
+	brandIdentityService brand_identity.BrandIdentity,
 ) SceneGeneratorAgent {
 	llmService := llm.NewLlmService(logger, cache)
 	return &sceneGenerator{
-		fps:          defaultFPS,
-		sessionID:    sessionID,
-		orgID:        orgID,
-		slideID:      slideID,
-		logger:       logger,
-		cache:        cache,
-		db:           db,
-		llmService:   llmService,
-		stateUpdates: make(chan VideoAgentState, 64),
+		fps:                  defaultFPS,
+		sessionID:            sessionID,
+		orgID:                orgID,
+		slideID:              slideID,
+		logger:               logger,
+		cache:                cache,
+		db:                   db,
+		llmService:           llmService,
+		brandIdentityService: brandIdentityService,
+		stateUpdates:         make(chan VideoAgentState, 64),
 		animationGenerator: NewAnimationGenerator(
 			sessionID,
 			orgID,
@@ -196,7 +198,9 @@ func (a *sceneGenerator) injectMediaAssets(ctx context.Context, input *pbportal.
 			}
 			return err
 		}
-		registryBuilder.WithBrandIdentity(brandIdentity.BrandIdentity)
+		registryBuilder.
+			WithBrandIdentity(brandIdentity.BrandIdentity).
+			WithBrandAssets() // only while editing
 	}
 
 	assetIDs := make([]string, 0, len(input.Assets))
