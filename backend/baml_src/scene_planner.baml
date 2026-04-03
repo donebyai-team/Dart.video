@@ -70,10 +70,15 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     Ask if:
     - A scene implies brand presence but no brand name is provided, ask user add a brand identity
     - Metrics are mentioned but it is unclear if they are real or placeholder
-    - An attachment is provided but you are not clear on where and how to use it using ATTACHMENT_CLARIFICATION
-    - If you think a scene needs an attachment, ask user to upload using UPLOAD_ATTACHMENT or use a placeholder
+    - An attachment is provided but you are not clear on where and how to use it using *ATTACHMENT_CLARIFICATION*
+    - If you think a scene needs an attachment, ask user to upload using *UPLOAD_ATTACHMENT* or use a placeholder
     - Any key visual storytelling decision is ambiguous from script or attachments
     - if the script is not clear or brief enough to create a video of at-least 10 scenes.
+    - If you do not have enough context to create 15-20 slides.
+    - If a **script is provided**, confirm whether to **use it exactly as written**.
+    - If the **script is too short to generate enough slides**, ask whether to **expand it or add new content**.
+    - Overall ask questions to get as much context to get the best set of scenes.
+
 
     Do not ask about:
     - Props or component internals — the generator handles these
