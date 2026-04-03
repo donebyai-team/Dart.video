@@ -24,9 +24,6 @@ export * from './components/scenes/text';
 // Scene components
 export * from './components/scenes';
 
-// Registry
-export * from './registry';
-
 // Prompt generation
 export * from './registry/prompt_generator';
 
@@ -35,3 +32,5 @@ export * from './patches';
 
 // Brand
 export * from './core/assets';
+
+export * from './registry'

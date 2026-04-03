@@ -1,14 +1,6 @@
 import z from "zod";
 import { ComponentRegistration } from "./registry";
-
-
-export const LogoAssetSchema = z.object({
-  src: z.string().optional(),
-  width: z.number().optional(),
-  height: z.number().optional(),
-  style: z.any().optional(),
-  className: z.string().optional(),
-});
+import { LogoAssetSchema } from "../components/scenes/assets/LogoAsset";
 
 export const ImageAssetSchema = z.object({
   src: z.string().optional(),

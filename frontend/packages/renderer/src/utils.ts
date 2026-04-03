@@ -7,7 +7,7 @@ export function brandingToTheme(
     branding?: GeneratedVideoBranding
 ): BrandTheme {
 
-    if (!branding || !branding.colors?.length) {
+    if (!branding) {
         return DEFAULT_BRAND_THEME;
     }
 
@@ -61,6 +61,13 @@ export function brandingToTheme(
                 theme.logo = asset;
             }
         }
+    }
+
+    // Set fonts
+    for (const c of branding.brandIdentity?.fonts || []) {
+        theme.font = c.googleFontsName;
+        if (theme.font)
+            break;
     }
 
     return theme;

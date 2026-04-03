@@ -5,10 +5,64 @@
  * All toolbar sub-components (TextToolbar, ImageToolbar, etc.) import from here.
  */
 
-import React from 'react'
+import React, { useMemo } from 'react'
 import { HexColorPicker } from 'react-colorful'
 import { useState } from 'react'
 import { SUPPORTED_FONTS } from '@coasterai/renderer'
+
+/**
+ * Reads computed styles from a DOM element by ID.
+ * Returns undefined values if element not found.
+ */
+/**
+ * Extracts the actual font name from a CSS font-family value.
+ * Handles Next.js hashed names like "__Inter_93f1ff" -> "Inter"
+ */
+function extractFontName(rawFontFamily: string): string | undefined {
+  const first = rawFontFamily.split(',')[0]?.trim().replace(/["']/g, '')
+  if (!first) return undefined
+  // Next.js font hash pattern: __FontName_hash or __Font_Name_hash
+  const nextMatch = first.match(/^__([A-Za-z_]+)_[a-f0-9]+$/)
+  if (nextMatch) {
+    // Convert underscores to spaces for multi-word fonts, e.g. __Open_Sans_abc -> "Open Sans"
+    return nextMatch[1].replace(/_/g, ' ')
+  }
+  return first
+}
+
+function useComputedStyles(elementId?: string) {
+  return useMemo(() => {
+    if (!elementId) return {}
+    const el = document.getElementById(elementId)
+    if (!el) return {}
+    const computed = window.getComputedStyle(el)
+    return {
+      color: rgbaToHex(computed.color),
+      backgroundColor: rgbaToHex(computed.backgroundColor),
+      fontFamily: extractFontName(computed.fontFamily || ''),
+      fontWeight: computed.fontWeight,
+      letterSpacing: computed.letterSpacing,
+    }
+  }, [elementId])
+}
+
+/**
+ * Converts rgba/rgb color string to hex.
+ * e.g. "rgba(0, 0, 0, 0.87)" -> "#000000"
+ */
+function rgbaToHex(color: string): string | undefined {
+  if (!color) return undefined
+  const m = color.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/)
+  if (m) {
+    return (
+      '#' +
+      [m[1], m[2], m[3]]
+        .map(n => parseInt(n).toString(16).padStart(2, '0'))
+        .join('')
+    )
+  }
+  return color.startsWith('#') ? color : undefined
+}
 
 // ─── Separator ─────────────────────────────────────────────────────────────
 
@@ -386,25 +440,28 @@ const LETTER_SPACING_OPTIONS = [
 export function TextToolbar({
   styleOverride,
   onStyleOverride,
+  selectedElementId,
 }: {
   styleOverride: Record<string, string | number>
   onStyleOverride: (style: Record<string, string | number>) => void
+  selectedElementId?: string
   collapsible?: boolean
 }) {
+  const computed = useComputedStyles(selectedElementId)
+  console.log("rgsg", computed)
 
-  const color = styleOverride.color as string | undefined
-  const backgroundColor = styleOverride.backgroundColor as string | undefined
-  const fontFamily = styleOverride.fontFamily as string | undefined
-  const fontWeight = styleOverride.fontWeight as string | number | undefined
-  const letterSpacing = styleOverride.letterSpacing as string | undefined
-  const opacity = styleOverride.opacity as number | undefined
+  const color = (styleOverride.color ?? computed.color) as string | undefined
+  const backgroundColor = (styleOverride.backgroundColor ?? computed.backgroundColor) as string | undefined
+  const fontFamily = (styleOverride.fontFamily ?? computed.fontFamily) as string | undefined
+  const fontWeight = (styleOverride.fontWeight ?? computed.fontWeight) as string | number | undefined
+  const letterSpacing = (styleOverride.letterSpacing ?? computed.letterSpacing) as string | undefined
 
   return (
     <div className="flex items-center gap-3 whitespace-nowrap">
       {/* Colors – single picker with Text / Background tabs */}
       <DualColorPicker
         textColor={toHex(color ?? '#ffffff')}
-        bgColor={toHex(backgroundColor ?? '#000000')}
+        bgColor={toHex(backgroundColor ?? 'transparent')}
         onTextColor={v => onStyleOverride({ color: v })}
         onBgColor={v => onStyleOverride({ backgroundColor: v })}
       />

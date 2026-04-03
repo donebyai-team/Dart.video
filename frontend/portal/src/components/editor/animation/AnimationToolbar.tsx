@@ -35,7 +35,11 @@ export function AnimationToolbar({
       ) : (
         <TextToolbar
           styleOverride={style}
-          onStyleOverride={next => onStyleOverride(selectedId, next)}
+          onStyleOverride={next =>{
+            console.log("wefwefewf", next)
+             onStyleOverride(selectedId, next)
+          }}
+          selectedElementId={selectedId}
         />
       )}
     </div>
