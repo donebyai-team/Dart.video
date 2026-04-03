@@ -3,6 +3,7 @@ package scenes
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/shank318/coasterai/agent/scenes/field_resolvers"
 	"github.com/shank318/coasterai/baml_client/types"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/structpb"
@@ -161,7 +162,25 @@ func ParseSceneConfigFromEditsPatch(data []byte) ([]SceneConfig, error) {
 	}
 
 	result := []SceneConfig{}
+
 	for _, node := range nodes {
+
+		for propName, val := range node.Props {
+
+			resolved, err := field_resolvers.FieldMappings.ResolveReverse(propName, val)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"unable to reverse resolve %s of component %s: %w",
+					propName,
+					node.Name,
+					err,
+				)
+			}
+
+			// write back into props
+			node.Props[propName] = resolved
+		}
+
 		result = append(result, *node)
 	}
 

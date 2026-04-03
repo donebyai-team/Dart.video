@@ -12,7 +12,7 @@ import {
   resolveScenePatchEntryId,
   toSceneFieldLabel,
 } from './sceneSettingsHelpers'
-import { Icon } from '../../../../../packages/animation/src'
+import { Icon } from '../IconPicker'
 
 interface SceneSettingsProps {
   elementId: string
@@ -77,16 +77,16 @@ export default function SceneSettings({
             <label key={prop} className="flex flex-col gap-2">
               <span className="text-sm font-medium">{toSceneFieldLabel(prop)}</span>
               <SingleSceneIconPicker
-                value={value as Icon}
-                onChange={next => onValuePatch(patchEntryId ?? elementId, prop, next)}
+                value={{ name: "", icon: String(value) } as Icon}
+                onChange={next => onValuePatch(patchEntryId ?? elementId, prop, next.icon)}
               />
             </label>
           ) : definition.kind === 'icon[]' ? (
             <div key={prop} className="flex flex-col gap-2">
               <span className="text-sm font-medium">{toSceneFieldLabel(prop)}</span>
               <MultiSceneIconPicker
-                value={value as Icon[]}
-                onChange={next => onValuePatch(patchEntryId ?? elementId, prop, next)}
+                value={(value as string[]).map(v => ({ name: "", icon: v } as Icon))}
+                onChange={next => onValuePatch(patchEntryId ?? elementId, prop, next.map(i => i.icon))}
                 minItems={MIN_ARRAY_ITEMS}
               />
             </div>

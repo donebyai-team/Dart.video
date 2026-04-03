@@ -6,6 +6,104 @@ import (
 	"testing"
 )
 
+func TestParseSceneConfigWithIconResolver(t *testing.T) {
+
+	tests := []struct {
+		name     string
+		input    string
+		expected []string
+	}{
+		{
+			name: "empty icons",
+			input: `{
+				"iconshowcase-0": {
+					"icons": []
+				}
+			}`,
+			expected: []string{},
+		},
+		{
+			name: "tabler icon",
+			input: `{
+				"iconshowcase-0": {
+					"icons": [
+						"https://cdn.jsdelivr.net/npm/@tabler/icons/icons/outline/arrow-right.svg"
+					]
+				}
+			}`,
+			expected: []string{"arrow-right"},
+		},
+		{
+			name: "brand icon",
+			input: `{
+				"iconshowcase-0": {
+					"icons": [
+						"https://www.thesvg.org/icons/openai/default.svg"
+					]
+				}
+			}`,
+			expected: []string{"openai"},
+		},
+		{
+			name: "mixed icons",
+			input: `{
+				"iconshowcase-0": {
+					"icons": [
+						"https://www.thesvg.org/icons/openai/default.svg",
+						"https://cdn.jsdelivr.net/npm/@tabler/icons/icons/outline/sparkles.svg"
+					]
+				}
+			}`,
+			expected: []string{"openai", "sparkles"},
+		},
+		{
+			name: "invalid icons",
+			input: `{
+				"iconshowcase-0": {
+					"icons": [
+						"openai"
+					]
+				}
+			}`,
+			expected: []string{},
+		},
+	}
+
+	for _, tt := range tests {
+
+		t.Run(tt.name, func(t *testing.T) {
+
+			nodes, err := ParseSceneConfigFromEditsPatch([]byte(tt.input))
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+
+			if len(nodes) != 1 {
+				t.Fatalf("expected 1 node, got %d", len(nodes))
+			}
+
+			node := nodes[0]
+
+			raw := node.Props["icons"]
+
+			icons, ok := raw.([]string)
+			if !ok {
+				t.Fatalf("icons not converted to []string, got %T", raw)
+			}
+
+			if len(icons) != len(tt.expected) {
+				t.Fatalf("expected %d icons, got %d", len(tt.expected), len(icons))
+			}
+
+			for i := range icons {
+				if icons[i] != tt.expected[i] {
+					t.Fatalf("expected icon %s, got %s", tt.expected[i], icons[i])
+				}
+			}
+		})
+	}
+}
+
 func TestParseSceneConfigFromEditsPatch_BasicRoot(t *testing.T) {
 	input := []byte(`{
 		"animatedvideo-0": {

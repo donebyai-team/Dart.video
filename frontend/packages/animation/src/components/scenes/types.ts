@@ -44,15 +44,6 @@ export const TEXT_CYCLE_TRANSITIONS = ['flipY', 'fadeSwap', 'slideUp'] as const;
 
 export type TextCycleTransition = typeof TEXT_CYCLE_TRANSITIONS[number];
 
-export const IconSchema = z
-    .object({
-        name: z.string(),
-        icon: z.string()
-    })
-    .describe("icon");
-
-export type Icon = z.infer<typeof IconSchema>;
-
 
 export function getEntranceTransform(animation: EntranceAnimation, progress: number, distance: number = 200): string {
     const inv = 1 - progress;

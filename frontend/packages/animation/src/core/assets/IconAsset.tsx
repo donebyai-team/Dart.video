@@ -6,10 +6,9 @@ import { usePatchedProps, useStyleOverride } from "../../patches";
 import { useTheme } from "../../theme";
 import { useAspectPreset } from "../../styles";
 import { scaleToCanvas } from "../../theme/scale";
-import { Icon } from "../../components/scenes";
 
 export interface IconAssetProps {
-  icon: Icon;
+  icon: string;
   size?: number;
   width?: number;
   height?: number;
@@ -37,7 +36,6 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
   const patchedRadius = props.borderRadius || 0;
 
   const variant = theme.iconStyle ?? "outline";
-  const iconUrl = patchedIcon.icon;
   const fallbackUrl = `${ICON_BASE}/${variant}/${PLACEHOLDER_ICON}.svg`;
 
   const scaledSize = scaleToCanvas(patchedSize, preset);
@@ -45,7 +43,7 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
   const [loaded, setLoaded] = useState(false);
   const [errored, setErrored] = useState(false);
   const [handle] = useState(() =>
-    isRendering ? delayRender("Loading icon") : null
+    isRendering ? delayRender(`Loading icon: ${patchedIcon}`) : null
   );
 
   const onLoad = useCallback(() => {
@@ -54,34 +52,34 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
   }, [handle]);
 
   const onError = useCallback(() => {
-    console.warn(`Icon "${patchedIcon.name}" not found at ${iconUrl}`);
+    console.warn(`Icon not found at ${patchedIcon}`);
     setErrored(true);
     if (handle !== null) continueRender(handle);
-  }, [handle, patchedIcon.name, iconUrl]);
+  }, [handle, patchedIcon]);
 
   /* Reset when icon changes */
 
   useEffect(() => {
     setLoaded(false);
     setErrored(false);
-  }, [iconUrl]);
+  }, [patchedIcon]);
 
   /* Preload icon during rendering */
 
   useEffect(() => {
     if (!isRendering) return;
-    const unpreload = preloadImage(iconUrl);
+    const unpreload = preloadImage(patchedIcon);
     return () => {
       unpreload();
     };
-  }, [isRendering, iconUrl]);
+  }, [isRendering, patchedIcon]);
 
   /* Detect Tabler icon */
 
   const isTabler =
-    iconUrl.includes("@tabler") ||
-    iconUrl.includes("/icons/outline/") ||
-    iconUrl.includes("/icons/filled/");
+    patchedIcon.includes("@tabler") ||
+    patchedIcon.includes("/icons/outline/") ||
+    patchedIcon.includes("/icons/filled/");
 
   return (
     <div
@@ -119,12 +117,12 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
             width: "100%",
             height: "100%",
             backgroundColor: "currentColor",
-            WebkitMaskImage: `url(${iconUrl})`,
+            WebkitMaskImage: `url(${patchedIcon})`,
             WebkitMaskRepeat: "no-repeat",
             WebkitMaskPosition: "center",
             WebkitMaskSize: "contain",
 
-            maskImage: `url(${iconUrl})`,
+            maskImage: `url(${patchedIcon})`,
             maskRepeat: "no-repeat",
             maskPosition: "center",
             maskSize: "contain",
@@ -134,8 +132,8 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
         /* Brand icon → normal image */
 
         <img
-          src={iconUrl}
-          alt={patchedIcon.name}
+          src={patchedIcon}
+          alt={patchedIcon}
           onLoad={onLoad}
           onError={onError}
           style={{

@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from "react"
-import { Icon } from "../../../../packages/animation/src"
 
+export interface Icon {
+    name: string
+    icon: string
+}
 
 export function IconPicker({
     value,

@@ -1,21 +1,20 @@
 import { useState } from 'react'
 import {
   ChevronsUpDown,
-  Plus,
 } from 'lucide-react'
 import { Popover, PopoverTrigger } from '@/components/ui/popover'
 import SceneSortablePillList from './SceneSortablePillList'
 import { IconPicker } from '../IconPicker'
-import { Icon } from '../../../../../packages/animation/src'
+import type { Icon } from '../IconPicker'
 
 function IconPreview({
   icon,
-  size = 24,
+  size = 14,
 }: {
   icon: Icon
   size?: number
 }) {
-  if (icon?.icon) {
+  if (icon.icon) {
     return (
       <img
         src={icon.icon}
@@ -80,9 +79,9 @@ export function MultiSceneIconPicker({
 
   const items = value.map((item, index) => {
     return {
-      id: `${index}:${item}`,
+      id: `${index}`,
       label: item.name,
-      preview: <IconPreview icon={item} size={14} />,
+      preview: <IconPreview icon={item} />,
     }
   })
 

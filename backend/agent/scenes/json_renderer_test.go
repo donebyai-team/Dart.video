@@ -56,7 +56,11 @@ func TestGenerateReact_ArrayProp(t *testing.T) {
 	input := []byte(`{
 		"animatedvideo-0": {
 			"src": "video.mp4",
-			"data": [1, 2, 3]
+			"data": [1, 2, 3],
+			"icons": [
+				 "https://www.thesvg.org/icons/openai/default.svg",
+				  "https://www.thesvg.org/icons/anthropic/default.svg"
+			]
 		},
 		"textstagger-1": {
 			"value": "hello"

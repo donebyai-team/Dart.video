@@ -110,6 +110,10 @@ func renderProps(props map[string]interface{}, id, path string) (string, error) 
 			b, _ := json.Marshal(val)
 			parts = append(parts, fmt.Sprintf(`%s={%s}`, key, string(b)))
 
+		case []string:
+			b, _ := json.Marshal(val)
+			parts = append(parts, fmt.Sprintf(`%s={%s}`, key, string(b)))
+
 		case map[string]interface{}:
 			b, _ := json.Marshal(val)
 			parts = append(parts, fmt.Sprintf(`%s={%s}`, key, string(b)))

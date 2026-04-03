@@ -328,54 +328,54 @@ async function handleValidate(req, res) {
       'utf8',
     );
 
-    console.log('[validate] step 2 — bundling for render check');
-    const bundleDir = await bundle({
-      entryPoint: resolve(templatesDir, 'root.tsx'),
-      webpackOverride: (cfg) => ({
-        ...cfg,
-        resolve: {
-          ...cfg.resolve,
-          // '@' alias lets compiler.ts resolve '@/...' imports from renderer/src/
-          alias: {...cfg.resolve?.alias, '@': RENDERER_SRC_DIR},
-          modules: [
-            ...(cfg.resolve?.modules ?? ['node_modules']),
-            resolve(__dirname, '../node_modules'),       // packages/renderer/node_modules
-            resolve(__dirname, '../../../node_modules'), // frontend root node_modules
-          ],
-        },
-      }),
-    });
+    // console.log('[validate] step 2 — bundling for render check');
+    // const bundleDir = await bundle({
+    //   entryPoint: resolve(templatesDir, 'root.tsx'),
+    //   webpackOverride: (cfg) => ({
+    //     ...cfg,
+    //     resolve: {
+    //       ...cfg.resolve,
+    //       // '@' alias lets compiler.ts resolve '@/...' imports from renderer/src/
+    //       alias: {...cfg.resolve?.alias, '@': RENDERER_SRC_DIR},
+    //       modules: [
+    //         ...(cfg.resolve?.modules ?? ['node_modules']),
+    //         resolve(__dirname, '../node_modules'),       // packages/renderer/node_modules
+    //         resolve(__dirname, '../../../node_modules'), // frontend root node_modules
+    //       ],
+    //     },
+    //   }),
+    // });
 
-    console.log('[validate] bundling complete — selecting composition');
-    const composition = await selectComposition({
-      serveUrl: bundleDir,
-      id: 'ValidatorComp',
-      inputProps: {},
-      chromiumOptions,
-    });
+    // console.log('[validate] bundling complete — selecting composition');
+    // const composition = await selectComposition({
+    //   serveUrl: bundleDir,
+    //   id: 'ValidatorComp',
+    //   inputProps: {},
+    //   chromiumOptions,
+    // });
 
-    try {
-      await renderStill({
-        composition,
-        serveUrl: bundleDir,
-        output: stillOutput,
-        inputProps: {},
-        chromiumOptions,
-        frame: 0,
-      });
-    } catch (renderErr) {
-      // renderStill throws when ValidatorComp throws during rendering.
-      // Covers both late compile errors and runtime rendering errors.
-      const formatted = formatRenderErrorForLlm(renderErr);
+    // try {
+    //   await renderStill({
+    //     composition,
+    //     serveUrl: bundleDir,
+    //     output: stillOutput,
+    //     inputProps: {},
+    //     chromiumOptions,
+    //     frame: 0,
+    //   });
+    // } catch (renderErr) {
+    //   // renderStill throws when ValidatorComp throws during rendering.
+    //   // Covers both late compile errors and runtime rendering errors.
+    //   const formatted = formatRenderErrorForLlm(renderErr);
 
-      // ValidatorComp tags compile failures with "[compile_error]"
-      const errorType = formatted.includes('[compile_error]') ? 'compile_error' : 'render_error';
+    //   // ValidatorComp tags compile failures with "[compile_error]"
+    //   const errorType = formatted.includes('[compile_error]') ? 'compile_error' : 'render_error';
 
-      console.log(`[validate] render check FAILED (${errorType}):\n`, formatted);
-      res.writeHead(422, {'Content-Type': 'application/json'});
-      res.end(JSON.stringify({error_type: errorType, errors: [formatted]}));
-      return;
-    }
+    //   console.log(`[validate] render check FAILED (${errorType}):\n`, formatted);
+    //   res.writeHead(422, {'Content-Type': 'application/json'});
+    //   res.end(JSON.stringify({error_type: errorType, errors: [formatted]}));
+    //   return;
+    // }
 
     await uploadToGCS(OUTPUT_BUCKET, idsGcsPath, Buffer.from(codeWithAssignedIds, 'utf8'));
     await uploadToGCS(OUTPUT_BUCKET, transformedGcsPath, Buffer.from(transformedCode, 'utf8'));

@@ -7,7 +7,7 @@ import { usePatchedProps, useStyleOverride } from '../../../patches';
 import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../durationTypes';
-import { ENTRANCE_ANIMATIONS, IconSchema, SPLIT_BY_MODES } from '../types';
+import { ENTRANCE_ANIMATIONS, SPLIT_BY_MODES } from '../types';
 
 // Default constants
 const DEFAULT_ENTRANCE_DURATION = 10;
@@ -24,7 +24,7 @@ const DEFAULT_ICON_GAP = 64;
 
 export const IconShowcaseSchema = z.object({
     id: z.string().optional(),
-    icons: z.array(IconSchema).default([]),
+    icons: z.array(z.string()).default([]),
     text: z.string().default(""),
     variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
     iconSize: z.number().min(1, "iconSize must be positive").default(DEFAULT_ICON_SIZE).optional(),
@@ -127,7 +127,7 @@ export const IconShowcase: React.FC<IconShowcaseProps> = (propsInit: IconShowcas
 
                     return (
                         <div
-                            key={`${icon.name}-${index}`}
+                            key={`${icon}-${index}`}
                             style={{
                                 transform: `scale(${scale}) rotate(${rotation}deg)`,
                                 opacity,

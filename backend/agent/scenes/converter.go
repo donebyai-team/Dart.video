@@ -3,6 +3,7 @@ package scenes
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/shank318/coasterai/agent/scenes/field_resolvers"
 	"github.com/shank318/coasterai/baml_client/types"
 	"math/rand"
 	"time"
@@ -35,6 +36,7 @@ func ConvertToSceneConfig(scene *types.Scene) (*SceneConfig, error) {
 			// merge defaults + validate required
 			for _, prop := range component.Props {
 
+				// props from LLM
 				val, exists := props[prop.Name]
 
 				if !exists {
@@ -50,7 +52,13 @@ func ConvertToSceneConfig(scene *types.Scene) (*SceneConfig, error) {
 					continue
 				}
 
-				finalProps[prop.Name] = val
+				// Resolve field
+				resolved, err := field_resolvers.FieldMappings.ResolveForward(prop.Name, val)
+				if err != nil {
+					return nil, fmt.Errorf("unable to resolve %s: %w", prop.Name, err)
+				}
+				
+				finalProps[prop.Name] = resolved
 			}
 
 			return &SceneConfig{
