@@ -103,7 +103,6 @@ export const IconShowcase: React.FC<IconShowcaseProps> = (propsInit: IconShowcas
                     flexWrap: 'wrap',
                     maxWidth: '80%',
                     transform: `translateY(${verticalShift}px)`,
-                    transition: 'transform 0.3s ease-out',
                 }}
             >
                 {props.icons.map((icon, index) => {
