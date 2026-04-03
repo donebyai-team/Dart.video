@@ -1,8 +1,10 @@
 package field_resolvers
 
+import "github.com/shank318/coasterai/services"
+
 type FieldResolver[T any] interface {
-	Forward(value T) (T, error) // LLM → internal
-	Reverse(value T) (T, error) // internal → LLM
+	Forward(value T, fieldValueMapper *services.MediaAssetRegistry) (T, error) // LLM → internal
+	Reverse(value T, fieldValueMapper *services.MediaAssetRegistry) (T, error) // internal → LLM
 }
 
 type ResolverRegistry struct {
@@ -19,24 +21,24 @@ func (r *ResolverRegistry) Register(name string, resolver FieldResolver[any]) {
 	r.resolvers[name] = resolver
 }
 
-func (r *ResolverRegistry) ResolveForward(name string, value any) (any, error) {
+func (r *ResolverRegistry) ResolveForward(name string, value any, fieldValueMapper *services.MediaAssetRegistry) (any, error) {
 
 	resolver, ok := r.resolvers[name]
 	if !ok {
 		return value, nil
 	}
 
-	return resolver.Forward(value)
+	return resolver.Forward(value, fieldValueMapper)
 }
 
-func (r *ResolverRegistry) ResolveReverse(name string, value any) (any, error) {
+func (r *ResolverRegistry) ResolveReverse(name string, value any, fieldValueMapper *services.MediaAssetRegistry) (any, error) {
 
 	resolver, ok := r.resolvers[name]
 	if !ok {
 		return value, nil
 	}
 
-	return resolver.Reverse(value)
+	return resolver.Reverse(value, fieldValueMapper)
 }
 
 var FieldMappings = NewResolverRegistry()

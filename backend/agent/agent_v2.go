@@ -395,7 +395,7 @@ func (a *agentV2) runPlanning(ctx context.Context, req types.VideoGenerationPlan
 		sceneErrors := make([]string, 0)
 		for _, section := range plan.Sections {
 			for _, scene := range section.Slides {
-				_, err := scenes.ConvertToSceneConfig(&scene)
+				_, err := scenes.ConvertToSceneConfig(&scene, nil)
 				if err != nil {
 					sceneErrors = append(sceneErrors, err.Error())
 				}
@@ -574,7 +574,7 @@ func (a *agentV2) applyPlan(
 			scene := sceneMapper[slide.Id]
 
 			//Convert to config
-			sceneConfig, err := scenes.ConvertToSceneConfig(scene)
+			sceneConfig, err := scenes.ConvertToSceneConfig(scene, nil)
 			if err != nil {
 				return fmt.Errorf("converting scene to config: %w", err)
 			}

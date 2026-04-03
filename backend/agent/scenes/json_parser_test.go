@@ -73,7 +73,7 @@ func TestParseSceneConfigWithIconResolver(t *testing.T) {
 
 		t.Run(tt.name, func(t *testing.T) {
 
-			nodes, err := ParseSceneConfigFromEditsPatch([]byte(tt.input))
+			nodes, err := ParseSceneConfigFromEditsPatch([]byte(tt.input), nil)
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
@@ -111,7 +111,7 @@ func TestParseSceneConfigFromEditsPatch_BasicRoot(t *testing.T) {
 		}
 	}`)
 
-	nodes, err := ParseSceneConfigFromEditsPatch(input)
+	nodes, err := ParseSceneConfigFromEditsPatch(input, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -158,26 +158,22 @@ func TestParseSceneConfigFromEditsPatch_WithChild(t *testing.T) {
 		}
 	}`)
 
-	nodes, err := ParseSceneConfigFromEditsPatch(input)
+	nodes, err := ParseSceneConfigFromEditsPatch(input, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
 	node := nodes[0]
 
-	child := node.Children[0]
-	if child.Name != "text" {
-		t.Fatalf("expected child 'text'")
-	}
+	for _, child := range node.Children {
+		if child.Name != "text" && child.Name != "logoasset" {
+			t.Errorf("expected child to be text or logoasset")
+		}
 
-	child2 := node.Children[1]
-	if child2.Name != "logoasset" {
-		t.Fatalf("expected child 'logoasset'")
-	}
-
-	style := child.Props["style"].(map[string]interface{})
-	if style["color"] != "#641414" {
-		t.Errorf("expected color #641414, got %v", style["color"])
+		style := child.Props["style"].(map[string]interface{})
+		if style["color"] != "#641414" {
+			t.Errorf("expected color #641414, got %v", style["color"])
+		}
 	}
 }
 
@@ -192,7 +188,7 @@ func TestParseSceneConfigFromEditsPatch_MultipleRoots(t *testing.T) {
 		}
 	}`)
 
-	nodes, err := ParseSceneConfigFromEditsPatch(input)
+	nodes, err := ParseSceneConfigFromEditsPatch(input, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

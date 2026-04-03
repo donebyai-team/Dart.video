@@ -15,6 +15,7 @@ type MediaAssetRegistry struct {
 	identity          *pbcore.BrandIdentity
 	assetHandles      []string
 	brandAssetHandles []string
+	fieldValueMapper  map[string]string
 }
 
 type MediaAssetRegistryBuilder struct {
@@ -27,8 +28,17 @@ func NewMediaAssetRegistryBuilder() *MediaAssetRegistryBuilder {
 			assetMapper:       make(map[string]*models.MediaAsset),
 			assetHandles:      []string{},
 			brandAssetHandles: []string{},
+			fieldValueMapper:  make(map[string]string),
 		},
 	}
+}
+
+func (registry *MediaAssetRegistry) AddFieldValueMapping(key string, value string) {
+	registry.fieldValueMapper[key] = value
+}
+
+func (registry *MediaAssetRegistry) GetResolvedFieldValue(key string) string {
+	return registry.fieldValueMapper[key]
 }
 
 func (b *MediaAssetRegistryBuilder) WithBrandIdentity(identity *pbcore.BrandIdentity) *MediaAssetRegistryBuilder {

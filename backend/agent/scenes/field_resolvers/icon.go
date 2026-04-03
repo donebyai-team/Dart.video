@@ -6,10 +6,15 @@ const fallbackIcon = "https://cdn.jsdelivr.net/npm/@tabler/icons/icons/outline/m
 
 type IconArrayResolver struct{}
 
-func (r IconArrayResolver) Forward(value any) (any, error) {
-
+func (r IconArrayResolver) Forward(value any, fieldValueMapper *services.MediaAssetRegistry) (any, error) {
 	// single icon
 	if name, ok := value.(string); ok {
+		if fieldValueMapper != nil {
+			resolvedIconURL := fieldValueMapper.GetResolvedFieldValue(name)
+			if resolvedIconURL != "" {
+				return resolvedIconURL, nil
+			}
+		}
 
 		url := services.ResolveIconFromName(name)
 		if url == "" {
@@ -28,6 +33,14 @@ func (r IconArrayResolver) Forward(value any) (any, error) {
 	result := make([]string, 0, len(names))
 
 	for _, name := range names {
+		if fieldValueMapper != nil {
+			resolvedIconURL := fieldValueMapper.GetResolvedFieldValue(name)
+			if resolvedIconURL != "" {
+				result = append(result, resolvedIconURL)
+				continue
+			}
+		}
+
 		url := services.ResolveIconFromName(name)
 		if url == "" {
 			url = fallbackIcon
@@ -38,13 +51,15 @@ func (r IconArrayResolver) Forward(value any) (any, error) {
 	return result, nil
 }
 
-func (r IconArrayResolver) Reverse(value any) (any, error) {
+func (r IconArrayResolver) Reverse(value any, fieldValueMapper *services.MediaAssetRegistry) (any, error) {
 
 	// single icon
 	if url, ok := value.(string); ok {
-
 		name := services.ResolveIconNameFromURL(url)
 		if name != "" {
+			if fieldValueMapper != nil {
+				fieldValueMapper.AddFieldValueMapping(name, url)
+			}
 			return name, nil
 		}
 
@@ -62,6 +77,9 @@ func (r IconArrayResolver) Reverse(value any) (any, error) {
 	for _, u := range urls {
 		name := services.ResolveIconNameFromURL(u)
 		if name != "" {
+			if fieldValueMapper != nil {
+				fieldValueMapper.AddFieldValueMapping(name, u)
+			}
 			names = append(names, name)
 		}
 	}

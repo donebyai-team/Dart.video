@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"github.com/shank318/coasterai/agent/scenes/field_resolvers"
 	"github.com/shank318/coasterai/baml_client/types"
+	"github.com/shank318/coasterai/services"
 	"math/rand"
 	"time"
 )
 
 // Convert the LLM generated scene to internal config
 // Merge the props from scene with defaults
-func ConvertToSceneConfig(scene *types.Scene) (*SceneConfig, error) {
+func ConvertToSceneConfig(scene *types.Scene, fieldValueMapper *services.MediaAssetRegistry) (*SceneConfig, error) {
 	if len(scene.Elements) == 0 {
 		return nil, fmt.Errorf("scene can't have empty elements")
 	}
@@ -53,11 +54,11 @@ func ConvertToSceneConfig(scene *types.Scene) (*SceneConfig, error) {
 				}
 
 				// Resolve field
-				resolved, err := field_resolvers.FieldMappings.ResolveForward(prop.Name, val)
+				resolved, err := field_resolvers.FieldMappings.ResolveForward(prop.Name, val, fieldValueMapper)
 				if err != nil {
 					return nil, fmt.Errorf("unable to resolve %s: %w", prop.Name, err)
 				}
-				
+
 				finalProps[prop.Name] = resolved
 			}
 

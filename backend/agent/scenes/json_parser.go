@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/shank318/coasterai/agent/scenes/field_resolvers"
 	"github.com/shank318/coasterai/baml_client/types"
+	"github.com/shank318/coasterai/services"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/structpb"
 	"strings"
@@ -39,7 +40,7 @@ func (s SceneConfig) ToEditsPatch() json.RawMessage {
 }
 
 // Convert edits to scene parent only
-func EditsToScene(edits *structpb.Struct) (*types.Scene, error) {
+func EditsToScene(edits *structpb.Struct, fieldValueMapper *services.MediaAssetRegistry) (*types.Scene, error) {
 	if edits == nil {
 		return nil, nil
 	}
@@ -50,7 +51,7 @@ func EditsToScene(edits *structpb.Struct) (*types.Scene, error) {
 		return nil, err
 	}
 
-	nodes, err := ParseSceneConfigFromEditsPatch(jsonBytes)
+	nodes, err := ParseSceneConfigFromEditsPatch(jsonBytes, fieldValueMapper)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +81,7 @@ func EditsToScene(edits *structpb.Struct) (*types.Scene, error) {
 	}, nil
 }
 
-func ParseSceneConfigFromEditsPatch(data []byte) ([]SceneConfig, error) {
+func ParseSceneConfigFromEditsPatch(data []byte, fieldValueMapper *services.MediaAssetRegistry) ([]SceneConfig, error) {
 	var raw map[string]json.RawMessage
 	err := json.Unmarshal(data, &raw)
 	if err != nil {
@@ -167,7 +168,7 @@ func ParseSceneConfigFromEditsPatch(data []byte) ([]SceneConfig, error) {
 
 		for propName, val := range node.Props {
 
-			resolved, err := field_resolvers.FieldMappings.ResolveReverse(propName, val)
+			resolved, err := field_resolvers.FieldMappings.ResolveReverse(propName, val, fieldValueMapper)
 			if err != nil {
 				return nil, fmt.Errorf(
 					"unable to reverse resolve %s of component %s: %w",

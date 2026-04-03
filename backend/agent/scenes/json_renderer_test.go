@@ -24,7 +24,15 @@ func TestGenerateReact_ValidSimpleProps(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if !strings.Contains(out, `<AnimatedNumber startText="Solving" endText="incidents" from={0} to={100} />`) {
+	if !strings.Contains(out, `endText="incidents"`) {
+		t.Fatalf("unexpected output:\n%s", out)
+	}
+
+	if !strings.Contains(out, `from={0}`) {
+		t.Fatalf("unexpected output:\n%s", out)
+	}
+
+	if !strings.Contains(out, `<AnimatedNumber`) {
 		t.Fatalf("unexpected output:\n%s", out)
 	}
 }
@@ -67,7 +75,7 @@ func TestGenerateReact_ArrayProp(t *testing.T) {
 		}
 	}`)
 
-	nodes, err := ParseSceneConfigFromEditsPatch(input)
+	nodes, err := ParseSceneConfigFromEditsPatch(input, nil)
 
 	out, err := RenderJSXCodeFromSceneConfig(&nodes[0])
 

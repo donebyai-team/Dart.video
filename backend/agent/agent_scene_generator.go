@@ -287,7 +287,7 @@ func (l *sceneGenerator) GenerateScene(
 
 	// Check if its a edit call and add previously scene
 	if slide.Content != nil && slide.Content.Edits != nil {
-		sceneToEdit, err := scenes.EditsToScene(slide.Content.Edits)
+		sceneToEdit, err := scenes.EditsToScene(slide.Content.Edits, l.assetRegistry)
 		if err != nil {
 			return nil, agenterrors.InvalidInput("invalid scene patch", err)
 		}
@@ -366,7 +366,7 @@ func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest ty
 		}
 
 		// Validate scene and add default props
-		sceneConfig, err := scenes.ConvertToSceneConfig(scene)
+		sceneConfig, err := scenes.ConvertToSceneConfig(scene, l.assetRegistry)
 		if err != nil {
 			marshalScene, _ := json.Marshal(scene)
 			session.ConversationHistory = appendRetryConversation(

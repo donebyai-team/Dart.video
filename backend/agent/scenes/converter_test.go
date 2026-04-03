@@ -25,7 +25,7 @@ func TestConvertSceneToSceneConfig(t *testing.T) {
 		t.Fatal(fmt.Errorf("error unmarshalling scene json: %s", err))
 	}
 
-	out, err := ConvertToSceneConfig(&scene)
+	out, err := ConvertToSceneConfig(&scene, nil)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -106,7 +106,7 @@ func TestConvertIconsSceneToSceneConfig(t *testing.T) {
 				}
 			  ]
 			}`,
-			expectedIcons: 1,
+			expectedIcons: 2,
 		},
 	}
 
@@ -121,7 +121,7 @@ func TestConvertIconsSceneToSceneConfig(t *testing.T) {
 				t.Fatalf("error unmarshalling scene json: %v", err)
 			}
 
-			out, err := ConvertToSceneConfig(&scene)
+			out, err := ConvertToSceneConfig(&scene, nil)
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}

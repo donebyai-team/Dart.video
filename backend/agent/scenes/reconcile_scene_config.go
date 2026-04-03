@@ -45,9 +45,9 @@ func ReconcileEditsPatch(left *structpb.Struct, right json.RawMessage) (json.Raw
 
 func removeAllRootScenes(left map[string]any) {
 	for k := range left {
-		if isRootComponentKey(k) {
-			removeSceneFromLeft(left, k)
-		}
+		//if isRootComponentKey(k) {
+		removeSceneFromLeft(left, k)
+		//}
 	}
 }
 
