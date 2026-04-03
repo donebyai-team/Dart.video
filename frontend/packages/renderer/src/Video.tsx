@@ -16,6 +16,7 @@ export const MyVideo = () => {
   const height = videoData.metadata.resolution.height
 
   // load fonts
+  // TODO: Load applied fonts across scenes and theme from backend or gcp bucket
   if (getRemotionEnvironment().isRendering) {    
     loadAllFonts()
     console.log('Loaded fonts', SUPPORTED_FONTS.length)

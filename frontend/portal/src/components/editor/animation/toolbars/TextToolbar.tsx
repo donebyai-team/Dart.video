@@ -5,10 +5,67 @@
  * All toolbar sub-components (TextToolbar, ImageToolbar, etc.) import from here.
  */
 
-import React from 'react'
+import React, { useMemo } from 'react'
 import { HexColorPicker } from 'react-colorful'
 import { useState } from 'react'
 import { SUPPORTED_FONTS } from '@coasterai/renderer'
+import { DualColorPicker } from './stylers/DualColorPicker'
+import { FontSelector } from './stylers/FontSelector'
+import { FONT_WEIGHT_OPTIONS, LETTER_SPACING_OPTIONS, toHex } from './stylers/options'
+
+/**
+ * Reads computed styles from a DOM element by ID.
+ * Returns undefined values if element not found.
+ */
+/**
+ * Extracts the actual font name from a CSS font-family value.
+ * Handles Next.js hashed names like "__Inter_93f1ff" -> "Inter"
+ */
+function extractFontName(rawFontFamily: string): string | undefined {
+  const first = rawFontFamily.split(',')[0]?.trim().replace(/["']/g, '')
+  if (!first) return undefined
+  // Next.js font hash pattern: __FontName_hash or __Font_Name_hash
+  const nextMatch = first.match(/^__([A-Za-z_]+)_[a-f0-9]+$/)
+  if (nextMatch) {
+    // Convert underscores to spaces for multi-word fonts, e.g. __Open_Sans_abc -> "Open Sans"
+    return nextMatch[1].replace(/_/g, ' ')
+  }
+  return first
+}
+
+function useComputedStyles(elementId?: string) {
+  return useMemo(() => {
+    if (!elementId) return {}
+    const el = document.getElementById(elementId)
+    if (!el) return {}
+    const computed = window.getComputedStyle(el)
+    return {
+      color: rgbaToHex(computed.color),
+      backgroundColor: rgbaToHex(computed.backgroundColor),
+      fontFamily: extractFontName(computed.fontFamily || ''),
+      fontWeight: computed.fontWeight,
+      letterSpacing: computed.letterSpacing,
+    }
+  }, [elementId])
+}
+
+/**
+ * Converts rgba/rgb color string to hex.
+ * e.g. "rgba(0, 0, 0, 0.87)" -> "#000000"
+ */
+function rgbaToHex(color: string): string | undefined {
+  if (!color) return undefined
+  const m = color.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/)
+  if (m) {
+    return (
+      '#' +
+      [m[1], m[2], m[3]]
+        .map(n => parseInt(n).toString(16).padStart(2, '0'))
+        .join('')
+    )
+  }
+  return color.startsWith('#') ? color : undefined
+}
 
 // ─── Separator ─────────────────────────────────────────────────────────────
 
@@ -252,166 +309,37 @@ export function ColorSwatch({
   )
 }
 
-// ─── Dual Color Picker ──────────────────────────────────────────────────────
-// Single button that opens a popover with tabs for Text and Background color.
-
-export function DualColorPicker({
-  textColor,
-  bgColor,
-  onTextColor,
-  onBgColor,
-}: {
-  textColor: string
-  bgColor: string
-  onTextColor: (v: string) => void
-  onBgColor: (v: string) => void
-}) {
-  const [open, setOpen] = useState(false)
-  const [tab, setTab] = useState<'text' | 'bg'>('text')
-
-  const activeColor = tab === 'text' ? textColor : bgColor
-  const onChangeActive = tab === 'text' ? onTextColor : onBgColor
-
-  return (
-    <div className="relative flex items-center">
-      {/* Color button – rainbow gradient rectangle */}
-      <button
-        title="Colors"
-        onClick={() => setOpen(!open)}
-        className="w-8 h-7 rounded-md border border-border shadow-sm cursor-pointer"
-        style={{
-          background: 'linear-gradient(135deg, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00)',
-        }}
-      />
-
-      {open && (
-        <div className="absolute top-9 left-0 z-50 bg-background border border-border rounded-lg shadow-lg p-3 w-56 space-y-3">
-          {/* Tabs */}
-          <div className="flex rounded-md border border-border overflow-hidden text-xs">
-            <button
-              onClick={() => setTab('text')}
-              className={`flex-1 py-1 transition-colors ${
-                tab === 'text'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Text
-            </button>
-            <button
-              onClick={() => setTab('bg')}
-              className={`flex-1 py-1 transition-colors ${
-                tab === 'bg'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Background
-            </button>
-          </div>
-
-          <HexColorPicker color={activeColor} onChange={onChangeActive} />
-
-          <input
-            value={activeColor}
-            onChange={(e) => onChangeActive(e.target.value)}
-            className="w-full text-xs px-2 py-1 border border-border rounded bg-muted"
-          />
-
-          <div className="flex justify-end">
-            <button
-              onClick={() => setOpen(false)}
-              className="text-xs font-medium"
-            >
-              Done
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
-// ─── Font Family Select ──────────────────────────────────────────────────────
-
-export function FontFamilySelect({
-  value,
-  onChange,
-}: {
-  value: string
-  onChange: (v: string) => void
-}) {
-  return (
-    <select
-      value={value}
-      onChange={e => onChange(e.target.value)}
-      className="h-7 w-24 px-2 rounded-md border border-border bg-muted text-xs focus:outline-none focus:ring-1 focus:ring-ring/50 cursor-pointer"
-    >
-      <option value="">Default</option>
-      {SUPPORTED_FONTS.map(f => (
-        <option key={f} value={f}>
-          {f}
-        </option>
-      ))}
-    </select>
-  )
-}
-
-// ─── Style Override Section ──────────────────────────────────────────────────
-// Collapsible section that shows common style controls for any visual element.
-// Always available for text-related components. Collapsed by default per spec.
-//
-// Token values sourced from @coasterai/animation/tokens:
-//   FontWeightToken: thin=100, light=300, normal=400, medium=500, semibold=600, bold=700, extrabold=800
-//   LetterSpacing:   tight=-0.025em, normal=0, wide=0.025em (maps to StyleConfig.type.tracking)
-
-/** Font weight options matching animation token FontWeightToken values. */
-const FONT_WEIGHT_OPTIONS = [
-  { label: 'Thin', value: '100' },
-  { label: 'Light', value: '300' },
-  { label: 'Normal', value: '400' },
-  { label: 'Medium', value: '500' },
-  { label: 'Semibold', value: '600' },
-  { label: 'Bold', value: '700' },
-  { label: 'Extrabold', value: '800' },
-]
-
-/** Letter spacing options matching StyleConfig.type.tracking token. */
-const LETTER_SPACING_OPTIONS = [
-  { label: 'Tight', value: '-0.025em' },
-  { label: 'Normal', value: '0em' },
-  { label: 'Wide', value: '0.025em' },
-]
-
 export function TextToolbar({
   styleOverride,
   onStyleOverride,
+  selectedElementId,
 }: {
   styleOverride: Record<string, string | number>
   onStyleOverride: (style: Record<string, string | number>) => void
+  selectedElementId?: string
   collapsible?: boolean
 }) {
+  const computed = useComputedStyles(selectedElementId)
 
-  const color = styleOverride.color as string | undefined
-  const backgroundColor = styleOverride.backgroundColor as string | undefined
-  const fontFamily = styleOverride.fontFamily as string | undefined
-  const fontWeight = styleOverride.fontWeight as string | number | undefined
-  const letterSpacing = styleOverride.letterSpacing as string | undefined
-  const opacity = styleOverride.opacity as number | undefined
+  const color = (styleOverride.color ?? computed.color) as string | undefined
+  const backgroundColor = (styleOverride.backgroundColor ?? computed.backgroundColor) as string | undefined
+  const fontFamily = (styleOverride.fontFamily ?? computed.fontFamily) as string | undefined
+  const fontWeight = (styleOverride.fontWeight ?? computed.fontWeight) as string | number | undefined
+  const letterSpacing = (styleOverride.letterSpacing ?? computed.letterSpacing) as string | undefined
 
   return (
     <div className="flex items-center gap-3 whitespace-nowrap">
       {/* Colors – single picker with Text / Background tabs */}
       <DualColorPicker
         textColor={toHex(color ?? '#ffffff')}
-        bgColor={toHex(backgroundColor ?? '#000000')}
+        bgColor={toHex(backgroundColor ?? 'transparent')}
         onTextColor={v => onStyleOverride({ color: v })}
         onBgColor={v => onStyleOverride({ backgroundColor: v })}
       />
 
       {/* Font */}
       <LabeledField label="Font">
-        <FontFamilySelect
+        <FontSelector
           value={fontFamily ?? ''}
           onChange={v => onStyleOverride({ fontFamily: v })}
         />
@@ -453,20 +381,3 @@ function LabeledField({ label, children }: { label: string; children: React.Reac
     </div>
   )
 }
-
-// ─── Utility: toHex ─────────────────────────────────────────────────────────
-
-export function toHex(color: unknown): string {
-  if (!color || typeof color !== 'string') return '#ffffff'
-    const c = color.trim()
-    if (c.startsWith('#')) return c.slice(0, 7)
-    const m = c.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/)
-    if (m)
-      return (
-        '#' +
-        [m[1], m[2], m[3]]
-          .map(n => parseInt(n).toString(16).padStart(2, '0'))
-          .join('')
-      )
-    return '#ffffff'
-  }

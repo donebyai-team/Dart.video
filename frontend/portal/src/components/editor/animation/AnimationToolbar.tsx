@@ -30,12 +30,17 @@ export function AnimationToolbar({
         <MediaToolbar
           mediaKind={isVideo ? "video" : "image"}
           styleOverride={style}
+          selectedElementId={selectedId}
           onStyleOverride={next => onStyleOverride(selectedId, next)}
         />
       ) : (
         <TextToolbar
           styleOverride={style}
-          onStyleOverride={next => onStyleOverride(selectedId, next)}
+          onStyleOverride={next =>{
+            console.log("wefwefewf", next)
+             onStyleOverride(selectedId, next)
+          }}
+          selectedElementId={selectedId}
         />
       )}
     </div>

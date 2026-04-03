@@ -32,12 +32,12 @@ type brandIdentity struct {
 }
 
 func (b brandIdentity) GetBrandIdentity(ctx context.Context, ID string) (*models.BrandIdentity, error) {
-	brandIdentity, err := b.db.GetBrandIdentityByID(ctx, ID)
+	identity, err := b.db.GetBrandIdentityByID(ctx, ID)
 	if err != nil {
 		return nil, err
 	}
-	brandIdentity.BrandIdentity.Id = brandIdentity.ID
-	return brandIdentity, nil
+	identity.BrandIdentity.Id = identity.ID
+	return identity, nil
 }
 
 func (b brandIdentity) GetBrandIdentityByID(ctx context.Context, ID string) (*models.BrandIdentity, error) {

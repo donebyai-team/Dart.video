@@ -19,6 +19,7 @@
     "@azure/service-bus": "^7.9.5",
     "@babel/preset-env": "^7.24.8",
     "@bufbuild/protobuf": "catalog:",
+    "@coasterai/animation": "workspace:*",
     "@coasterai/client": "workspace:*",
     "@coasterai/mui-config": "workspace:*",
     "@coasterai/pb": "workspace:*",

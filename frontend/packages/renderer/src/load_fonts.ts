@@ -23,6 +23,7 @@ export const SUPPORTED_FONTS = [
   'DM Mono',
 ]
 
+// Load fonts while rendering, while editing already available in browser
 export function loadAllFonts(): void {
   SUPPORTED_FONTS.forEach(fontName => {
     const handle = delayRender(`Loading font: ${fontName}`)

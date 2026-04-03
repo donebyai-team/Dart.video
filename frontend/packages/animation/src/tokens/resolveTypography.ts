@@ -18,7 +18,7 @@ const HANDWRITTEN_STACK = '"Segoe Script", "Comic Sans MS", cursive';
  * - sans/mono/serif: pulls from the brand-resolved theme stacks
  * - handwritten: style-owned fixed fallback stack (not a brand decision)
  */
-export function resolveFont(family: FontFamily, theme: ResolvedTheme): string {
+export function resolveFont(family: FontFamily, theme: ResolvedTheme): string {  
   switch (family) {
     case 'mono':        return theme.fontMono;
     case 'serif':       return theme.fontSerif;

@@ -11,9 +11,10 @@ import (
 )
 
 type MediaAssetRegistry struct {
-	assetMapper  map[string]*models.MediaAsset
-	identity     *pbcore.BrandIdentity
-	assetHandles []string
+	assetMapper       map[string]*models.MediaAsset
+	identity          *pbcore.BrandIdentity
+	assetHandles      []string
+	brandAssetHandles []string
 }
 
 type MediaAssetRegistryBuilder struct {
@@ -23,8 +24,9 @@ type MediaAssetRegistryBuilder struct {
 func NewMediaAssetRegistryBuilder() *MediaAssetRegistryBuilder {
 	return &MediaAssetRegistryBuilder{
 		registry: &MediaAssetRegistry{
-			assetMapper:  make(map[string]*models.MediaAsset),
-			assetHandles: []string{},
+			assetMapper:       make(map[string]*models.MediaAsset),
+			assetHandles:      []string{},
+			brandAssetHandles: []string{},
 		},
 	}
 }
@@ -46,6 +48,48 @@ func (b *MediaAssetRegistryBuilder) AddAssets(assets []*models.MediaAsset) *Medi
 	return b
 }
 
+func (b *MediaAssetRegistryBuilder) WithBrandAssets() *MediaAssetRegistryBuilder {
+	if b.registry.identity == nil {
+		panic("WithBrandAssets requires identity")
+	}
+	// update registry
+	for _, logo := range b.registry.identity.Logos {
+		index := len(b.registry.brandAssetHandles)
+		a := logo.Asset
+
+		handleID := fmt.Sprintf(
+			"@brand/%s/%d.%s",
+			generateRandomID(),
+			index,
+			a.MediaType.Extension(),
+		)
+
+		model := &models.MediaAsset{
+			ID:        a.Id,
+			Path:      a.Url,
+			MimeType:  a.MediaType.Extension(),
+			MediaType: a.MediaType,
+			Metadata: models.AssetMetadata{
+				Width:    int(a.Width),
+				Height:   int(a.Height),
+				FileName: a.FileName,
+				Duration: float64(a.Duration),
+				Size:     int64(a.Size),
+			},
+			Description: "brand logo",
+		}
+
+		if logo.Type == pbcore.BrandMediaType_BRAND_MEDIA_TYPE_ICON {
+			model.Description = "brand icon"
+		}
+
+		b.registry.assetMapper[handleID] = model
+		b.registry.brandAssetHandles = append(b.registry.brandAssetHandles, handleID)
+	}
+
+	return b
+}
+
 func (b *MediaAssetRegistryBuilder) Build() *MediaAssetRegistry {
 	return b.registry
 }
@@ -54,7 +98,7 @@ func (b *MediaAssetRegistryBuilder) addAsset(a *models.MediaAsset) {
 	index := len(b.registry.assetHandles)
 
 	handleID := fmt.Sprintf(
-		"@generated/%s/%d.%s",
+		"@asset/%s/%d.%s",
 		generateRandomID(),
 		index,
 		a.MediaType.Extension(),
@@ -130,6 +174,11 @@ func (registry *MediaAssetRegistry) FormatBrandDetails() *string {
 		writeLine(1, "<description>%s</description>", b.Description.Value)
 	}
 
+	attachments := registry.toAttachment(registry.brandAssetHandles)
+	if attachments != "" {
+		writeLine(1, "%s", attachments)
+	}
+
 	// ---- Colors ----
 	/*
 		if len(b.Colors) > 0 {
@@ -163,9 +212,9 @@ func (registry *MediaAssetRegistry) FormatBrandDetails() *string {
 	return utils.Ptr(sb.String())
 }
 
-func (registry *MediaAssetRegistry) FormatAssets() *string {
-	if registry.assetMapper == nil || len(registry.assetMapper) == 0 {
-		return nil
+func (registry *MediaAssetRegistry) toAttachment(handles []string) string {
+	if len(handles) == 0 {
+		return ""
 	}
 	var sb strings.Builder
 
@@ -176,7 +225,7 @@ func (registry *MediaAssetRegistry) FormatAssets() *string {
 	}
 	writeLine(0, "<attachments>")
 
-	for _, handle := range registry.assetHandles {
+	for _, handle := range handles {
 		asset := registry.assetMapper[handle]
 		if asset == nil {
 			continue
@@ -203,6 +252,13 @@ func (registry *MediaAssetRegistry) FormatAssets() *string {
 	}
 
 	writeLine(0, "</attachments>")
+	return sb.String()
+}
 
-	return utils.Ptr(sb.String())
+func (registry *MediaAssetRegistry) FormatAssets() *string {
+	if registry.assetMapper == nil || len(registry.assetMapper) == 0 {
+		return nil
+	}
+
+	return utils.Ptr(registry.toAttachment(registry.assetHandles))
 }

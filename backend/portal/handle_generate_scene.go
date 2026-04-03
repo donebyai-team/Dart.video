@@ -54,7 +54,9 @@ func (p *Portal) GenerateOrEditScene(ctx context.Context, c *connect.Request[pbp
 		func(runCtx context.Context) (*agent.RunResult, error) {
 			switch input := c.Msg.GetInput().(type) {
 			case *pbportal.GenerateOrEditSceneRequest_Request:
-				input.Request.BrandLibraryId = video.Metadata.GeneratedBranding.BrandLibraryID
+				if video.Metadata.GeneratedBranding.BrandIdentity != nil {
+					input.Request.BrandLibraryId = utils.Ptr(video.Metadata.GeneratedBranding.BrandIdentity.Id)
+				}
 
 				return animationAgent.GenerateScene(runCtx, c.Msg.SlideToEdit, input.Request)
 
@@ -189,5 +191,6 @@ func (p *Portal) newAnimationGeneratorAgent(logger *zap.Logger, sessionID, slide
 		p.db,
 		p.mediaService,
 		p.codeBuilderService,
+		p.brandIdentityService,
 	)
 }
