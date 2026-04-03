@@ -86,7 +86,7 @@ export function MultiSceneIconPicker({
   })
 
   const reorderValues = (ids: string[]) => {
-    const indexed = value.map((item, index) => ({ id: `${index}:${item}`, value: item }))
+    const indexed = value.map((item, index) => ({ id: `${index}`, value: item }))
     const next = ids
       .map(id => indexed.find(entry => entry.id === id))
       .filter((entry): entry is { id: string; value: Icon } => Boolean(entry))
@@ -99,7 +99,7 @@ export function MultiSceneIconPicker({
       <SceneSortablePillList
         items={items}
         minItems={minItems}
-        onRemove={id => reorderValues(items.filter(item => item.id !== id).map(item => item.id))}
+        onRemove={id => onChange(value.filter((_, index) => `${index}` !== id))}
         onReorder={reorderValues}
       />
 
