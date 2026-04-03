@@ -67,12 +67,21 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
   /* Preload icon during rendering */
 
   useEffect(() => {
-    if (!isRendering) return;
-    const unpreload = preloadImage(patchedIcon);
-    return () => {
-      unpreload();
+    if (!isRendering || handle === null) return;
+
+    const img = new Image();
+    img.src = patchedIcon;
+
+    img.onload = () => {
+      setLoaded(true);
+      continueRender(handle);
     };
-  }, [isRendering, patchedIcon]);
+
+    img.onerror = () => {
+      setErrored(true);
+      continueRender(handle);
+    };
+  }, [isRendering, patchedIcon, handle]);
 
   /* Detect Tabler icon */
 
@@ -112,7 +121,6 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
         /* Tabler icon → colorable mask */
 
         <div
-          onLoad={onLoad}
           style={{
             width: "100%",
             height: "100%",
