@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	neturl "net/url"
 	"strings"
 )
 
@@ -13,8 +12,10 @@ const (
 	SvgBase        = "https://www.thesvg.org/icons"
 	TablerBase     = "https://cdn.jsdelivr.net/npm/@tabler/icons/icons/outline"
 	TablerIndexURL = "https://storage.googleapis.com/coasterai-public/tabler-icons.json.gz"
+	TheSVGIndexURL = "https://storage.googleapis.com/coasterai-public/thesvg-icons.json.gz"
 )
 
+var brandIcons map[string][]string
 var tablerList []string
 
 type tablerIndex struct {
@@ -27,6 +28,10 @@ Initialize tabler icon list
 */
 
 func init() {
+	if err := loadBrandIcons(); err != nil {
+		log.Printf("icon resolver: failed to load brand icons: %v", err)
+	}
+
 	if err := loadTablerIcons(); err != nil {
 		log.Printf("icon resolver: failed to load tabler icons: %v", err)
 	}
@@ -58,6 +63,31 @@ func loadTablerIcons() error {
 	}
 
 	log.Printf("icon resolver: loaded %d tabler icons", len(tablerList))
+
+	return nil
+}
+
+func loadBrandIcons() error {
+
+	resp, err := http.Get(TheSVGIndexURL)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	var data map[string][]string
+
+	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+		return err
+	}
+
+	brandIcons = make(map[string][]string, len(data))
+
+	for slug, variants := range data {
+		brandIcons[strings.ToLower(slug)] = variants
+	}
+
+	log.Printf("icon resolver: loaded %d brand icons", len(brandIcons))
 
 	return nil
 }
@@ -143,85 +173,63 @@ func ResolveIconNameFromURL(iconURL string) string {
 
 func resolveBrandIcon(name string) (string, bool) {
 
-	reqURL := "https://www.thesvg.org/api/registry?limit=1&q=" + neturl.QueryEscape(name)
+	name = strings.ToLower(name)
 
-	resp, err := http.Get(reqURL)
-	if err != nil {
-		return "", false
-	}
-	defer resp.Body.Close()
+	/* exact match */
 
-	var data svgRegistryResponse
+	var slug string
 
-	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
-		return "", false
-	}
+	if _, ok := brandIcons[name]; ok {
+		slug = name
+	} else {
 
-	if len(data.Icons) == 0 {
-		return "", false
-	}
+		/* fallback: contains match */
 
-	icon := data.Icons[0]
+		for s := range brandIcons {
+			if strings.Contains(s, name) {
+				slug = s
+				break
+			}
+		}
 
-	if len(icon.Variants) == 0 {
-		return "", false
-	}
-
-	if !strings.EqualFold(icon.Slug, name) {
-		return "", false
-	}
-
-	/*
-	   Remove wordmark variants
-	*/
-
-	var variants []string
-
-	for _, v := range icon.Variants {
-		if !strings.Contains(strings.ToLower(v), "wordmark") {
-			variants = append(variants, v)
+		if slug == "" {
+			return "", false
 		}
 	}
 
+	variants := brandIcons[slug]
+
 	if len(variants) == 0 {
-		variants = icon.Variants
+		return "", false
 	}
 
-	/*
-	   Variant priority
-	*/
+	/* remove wordmarks */
+
+	filtered := make([]string, 0, len(variants))
+
+	for _, v := range variants {
+		if !strings.Contains(strings.ToLower(v), "wordmark") {
+			filtered = append(filtered, v)
+		}
+	}
+
+	if len(filtered) == 0 {
+		filtered = variants
+	}
+
+	/* variant priority */
 
 	priority := []string{"color", "light", "dark", "default"}
 
 	for _, p := range priority {
-		for _, v := range variants {
+		for _, v := range filtered {
 			if strings.EqualFold(v, p) {
-				return fmt.Sprintf("%s/%s/%s.svg", SvgBase, icon.Slug, v), true
+				return fmt.Sprintf("%s/%s/%s.svg", SvgBase, slug, v), true
 			}
 		}
 	}
 
-	/*
-	   fallback
-	*/
+	/* fallback */
 
-	return fmt.Sprintf("%s/%s/%s.svg", SvgBase, icon.Slug, variants[0]), true
-}
-
-/*
-Brand resolver
-*/
-
-type svgRegistryResponse struct {
-	Icons []struct {
-		Slug     string   `json:"slug"`
-		Variants []string `json:"variants"`
-	} `json:"icons"`
-}
-
-func init() {
-	err := loadTablerIcons()
-	if err != nil {
-		panic(fmt.Errorf("icon resolver: failed to load tabler icons: %v", err))
-	}
+	return fmt.Sprintf("%s/%s/%s.svg", SvgBase, slug, filtered[0]), true
 }
