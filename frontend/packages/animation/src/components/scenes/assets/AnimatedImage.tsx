@@ -7,7 +7,7 @@ import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { Text } from '../../../core/text/Text';
 import { ImageAsset } from '../../../core/assets/ImageAsset';
 import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
-import { usePatchedProps, useStyleOverride } from '../../../patches';
+import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
 import { resolveTypography } from '../../../tokens';
 import { useTheme } from '../../../theme';
 import { getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
@@ -62,8 +62,11 @@ export function AnimatedImage(propsInit: AnimatedImageProps): React.ReactElement
     const actualBorderRadius = props.borderRadius ?? DEFAULT_BORDER_RADIUS;
     const imageWidth = props.width ?? DEFAULT_WIDTH;
     const imageHeight = props.height ?? DEFAULT_HEIGHT;
+    const imageElementId = `imageasset-${props.id}`;
 
     const styleOverride = useStyleOverride(props.id);
+    const imageStyleOverride = useStyleOverride(imageElementId);
+    const imageDragStyle = usePatchedDragStyle(imageElementId);
 
     const textDuration = 30;
     const imageDuration = 40;
@@ -103,16 +106,32 @@ export function AnimatedImage(propsInit: AnimatedImageProps): React.ReactElement
                     }} />
             </div>
             <div
+                id={imageElementId}
                 style={{
-                    opacity: imageProgress,
-                    transform: getEntranceTransform(actualAnimation, imageProgress),
-                    borderRadius: actualBorderRadius,
-                    overflow: 'hidden',
-                    boxShadow: "0 20px 40px rgba(0,0,0,0.25), 0 12px 24px rgba(0,0,0,0.15)",
-                    ...styleOverride
+                    display: 'inline-block',
+                    ...imageDragStyle,
                 }}
             >
-                <ImageAsset id={`imageasset-${props.id}`} src={props.src} width={imageWidth} height={imageHeight} />
+                <div
+                    style={{
+                        opacity: imageProgress,
+                        transform: getEntranceTransform(actualAnimation, imageProgress),
+                    }}
+                >
+                    <ImageAsset
+                        src={props.src}
+                        width={imageWidth}
+                        height={imageHeight}
+                        style={
+                            {
+                                borderRadius: actualBorderRadius,
+                                overflow: 'hidden',
+                                boxShadow: "0 20px 40px rgba(0,0,0,0.25), 0 12px 24px rgba(0,0,0,0.15)",
+                                ...imageStyleOverride,
+                            }
+                        }
+                    />
+                </div>
             </div>
         </div>
     );

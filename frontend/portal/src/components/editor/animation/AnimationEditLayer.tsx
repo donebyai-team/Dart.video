@@ -102,8 +102,9 @@ export function AnimationEditLayer({
   function isSelectable(id: string): boolean {
     const elType = getElementTypeFromId(id)
     if (elType === 'html' || elType === 'custom') return true
-    // Primitive — selectable unless it resolved to nothing (shouldn't happen)
-    return resolveComponentFromId(id) !== null
+    const registration = resolveComponentFromId(id)
+    if (!registration) return false
+    return registration.type !== 'scene'
   }
 
   /**

@@ -1,7 +1,7 @@
 import { preloadVideo } from "@remotion/preload";
 import { useEffect, useState } from "react";
 import { Html5Video, OffthreadVideo, useRemotionEnvironment, delayRender, continueRender } from "remotion";
-import { usePatchedDragStyle, usePatchedProp, useStyleOverride } from "../../patches";
+import { usePatchedProp, useStyleOverride } from "../../patches";
 import { useAspectPreset } from "../../styles/AspectPresetContext";
 
 export interface VideoAssetProps {
@@ -24,8 +24,6 @@ export function VideoAsset({
     const { isRendering } = useRemotionEnvironment();
     const preset = useAspectPreset();
     const styleOverride = useStyleOverride(id);
-    const overrideTransform = typeof styleOverride.transform === 'string' ? styleOverride.transform : undefined;
-    const dragStyle = usePatchedDragStyle(id, style?.transform, overrideTransform);
     const patchedSrc = usePatchedProp<string | undefined>(id, 'src', src);
     const patchedWidth = usePatchedProp<number | undefined>(id, 'width', width);
     const patchedHeight = usePatchedProp<number | undefined>(id, 'height', height);
@@ -83,7 +81,6 @@ export function VideoAsset({
                 overflow: 'hidden',
                 ...restStyle,
                 ...wrapperStyleOverride,
-                ...dragStyle,
             }}
         >
             {patchedSrc ? (
