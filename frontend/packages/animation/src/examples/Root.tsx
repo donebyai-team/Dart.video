@@ -4,12 +4,12 @@ import { TextStagger } from "../components/scenes/text";
 import { FadeIn, FadeOut, SlideIn, ScaleIn, Stagger, TimelineGate } from "../core/animation_primitives";
 import { FramePreset, SafeArea, AbsoluteCenter, Stack, Row } from "../core/layout";
 import { Text } from "../core/text";
-import { ImageAsset, LogoAsset, LogoWithBrandName } from "../core/assets";
+import { ImageAsset } from "../core/assets";
 import { SpeedFactorProvider } from "../duration";
 import { ASPECT_PRESETS, resolveStyle, AspectPresetProvider, StyleContextProvider } from "../styles";
 import { BrandTheme, darkTheme, ThemeProvider } from "../theme";
 import { AnimatedVideo } from "../components/scenes/assets/AnimatedVideo";
-import { ImagePeel } from "../components/scenes";
+import { ImagePeel, ListReveal, LogoAsset, LogoShowcase } from "../components/scenes";
 import { IconShowcase } from "../components/scenes/assets/IconShowcase";
 
 
@@ -167,7 +167,10 @@ const TextComponentsScene: React.FC = () => (
                     />
 
                     <TextHighlight id="texthighlight-0" text="Can your AI actually work with you?" /> */}
-                    <TextStagger id="textstagger-0" text="All teams are stretched thin." />
+                    {/* <TextStagger id="textstagger-0" text="All teams are stretched thin." /> */}
+                    <ListReveal 
+                      items={["Design Me", "Build Me", "Ship Me", "Iterate Me"]}
+                    />
                 {/* </Stack> */}
             </AbsoluteCenter>
         </SafeArea>
@@ -231,12 +234,23 @@ const AnimatedImageScene: React.FC = () => (
 
 const AnimatedIconShowcaseScene: React.FC = () => (
     <Scene>
-        <AbsoluteFill >
+        <AbsoluteFill style={{ backgroundColor: 'white' }}>
             <SafeArea>
                 <AbsoluteCenter axis="both">
-                    <IconShowcase
+                    {/* <IconShowcase
                         icons={["shopify", "midjourney", "openai"]}
                         text="Startups are getting 10× productivity with Cursor"
+                    /> */}
+                    <LogoShowcase 
+                    style={{ color: "#000" }}
+                    text="Building with unber companies"
+                        logos={[
+                            "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/google/wordmark.svg", 
+                            "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/openai/wordmark-light.svg", 
+                            "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/razorpay/default.svg", 
+                            "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/netflix/wordmark.svg", 
+                            "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774173924-cuser.png"
+                        ]}
                     />
                 </AbsoluteCenter>
             </SafeArea>
