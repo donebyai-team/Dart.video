@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
 import z from 'zod';
-import { usePatchedProps, useStyleOverride } from '../../../patches';
+import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
 import { useStyleContext, useAspectPreset, interpolateWithEasing } from '../../../styles';
 import { useTheme } from '../../../theme';
 import { resolveTypography, TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens';
@@ -49,6 +49,7 @@ export const TextHighlight: React.FC<TextHighlightProps> = (propsInit: TextHighl
     const actualAnimationDelay = props.animationDelay ?? DEFAULT_ENTRANCE_DURATION;
     const actualZoomDuration = props.zoomDuration ?? DEFAULT_ZOOM_DURATION;
     const styleOverride = useStyleOverride(props.id);
+    const dragStyle = usePatchedDragStyle(props.id, props.style?.transform);
 
     // Animation timeline:
     // Phase 1: Entrance animation with highlight already visible (0 to animationDelay)
@@ -202,27 +203,37 @@ export const TextHighlight: React.FC<TextHighlightProps> = (propsInit: TextHighl
     }
 
     return (
-        <span id={props.id} className={props.className} style={{
-            ...resolveTypography(actualVariant, styleConfig, theme, preset),
-            opacity: entranceProgress,
-            transform: getEntranceTransform(actualAnimation, entranceProgress, 200),
-            display: 'inline-block',
-            ...props.style,
-            ...styleOverride
-        }
-        }>
-            {segments.map((segment, i) => (
-                <span
-                    key={i}
-                    style={
-                        segment.highlight
-                            ? getHighlightStyles(segment.index)
-                            : {}
-                    }
-                >
-                    {segment.text}
-                </span>
-            ))}
+        <span
+            id={props.id}
+            className={props.className}
+            style={{
+                display: 'inline-block',
+                ...props.style,
+                ...dragStyle,
+            }}
+        >
+            <span
+                style={{
+                    ...resolveTypography(actualVariant, styleConfig, theme, preset),
+                    opacity: entranceProgress,
+                    transform: getEntranceTransform(actualAnimation, entranceProgress, 200),
+                    display: 'inline-block',
+                    ...styleOverride,
+                }}
+            >
+                {segments.map((segment, i) => (
+                    <span
+                        key={i}
+                        style={
+                            segment.highlight
+                                ? getHighlightStyles(segment.index)
+                                : {}
+                        }
+                    >
+                        {segment.text}
+                    </span>
+                ))}
+            </span>
         </span>
     );
 };

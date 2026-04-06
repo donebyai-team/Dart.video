@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
 import z from 'zod';
-import { usePatchedProps, useStyleOverride } from '../../../patches/PatchContext';
+import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme/ThemeContext';
@@ -54,6 +54,7 @@ export const TextCycle: React.FC<TextCycleProps> = (propsInit: TextCycleProps) =
 
   const patchedVariant = props.variant ?? DEFAULT_VARIANT;
   const styleOverride = useStyleOverride(props.id);
+  const dragStyle = usePatchedDragStyle(props.id, props.style?.transform);
 
   const cycleDuration = (props.holdDuration ?? DEFAULT_HOLD_DURATION) + (props.transitionDuration ?? DEFAULT_TRANSITION_DURATION);
   const typographyStyle = resolveTypography(patchedVariant, styleConfig, theme, preset);
@@ -70,12 +71,13 @@ export const TextCycle: React.FC<TextCycleProps> = (propsInit: TextCycleProps) =
   const elapsed = Math.max(0, frame);
   const holdDuration = props.holdDuration ?? DEFAULT_HOLD_DURATION;
   const transitionDuration = props.transitionDuration ?? DEFAULT_TRANSITION_DURATION;
-  const cycleIndex = Math.floor(elapsed / cycleDuration);
+  const lastCycleIndex = props.texts.length - 1;
+  const cycleIndex = Math.min(Math.floor(elapsed / cycleDuration), lastCycleIndex);
   const cycleFrame = elapsed - cycleIndex * cycleDuration;
 
   const currentWord = props.texts[cycleIndex % props.texts.length] ?? props.texts[0] ?? '';
-  const nextWord = props.texts[(cycleIndex + 1) % props.texts.length] ?? props.texts[0] ?? '';
-  const isTransitioning = cycleFrame >= holdDuration;
+  const nextWord = props.texts[Math.min(cycleIndex + 1, lastCycleIndex)] ?? currentWord;
+  const isTransitioning = cycleFrame >= holdDuration && cycleIndex < lastCycleIndex;
 
   const transitionProgress = isTransitioning
     ? interpolateWithEasing(
@@ -94,6 +96,7 @@ export const TextCycle: React.FC<TextCycleProps> = (propsInit: TextCycleProps) =
     display: 'inline-block',
     ...props.style,
     ...styleOverride,
+    ...dragStyle,
   };
 
   // Invisible spacer — always renders the longest word to hold container width.
