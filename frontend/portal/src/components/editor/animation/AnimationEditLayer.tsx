@@ -15,6 +15,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimationToolbar } from './AnimationToolbar'
+import { usePrimitiveDrag } from './usePrimitiveDrag'
 import {
   resolveComponentFromId,
   getElementTypeFromId,
@@ -46,7 +47,8 @@ export function AnimationEditLayer({
 
   const [canvasRect, setCanvasRect] = useState<FRect | null>(null)
   const [elementRect, setElementRect] = useState<FRect | null>(null)
-  const [hoverCursor, setHoverCursor] = useState<'default' | 'pointer'>('default')
+  const toolbarOffset = 12
+  const estimatedToolbarHeight = 48
 
   function supportsToolbar(id: string): boolean {
     const lowerId = id.toLowerCase()
@@ -81,6 +83,7 @@ export function AnimationEditLayer({
   // ── Recompute element rect after edits ────────────────────────────────────
   useEffect(() => {
     if (!selectedEid || !animEditVersion) return
+    if (dragStateRef.current?.elementId === selectedEid) return
     requestAnimationFrame(() => {
       const el = playerRef.current?.querySelector(`[id="${selectedEid}"]`) as HTMLElement | null
       if (!el) return
@@ -133,6 +136,30 @@ export function AnimationEditLayer({
     return hits
   }
 
+  const {
+    dragStateRef,
+    suppressClickRef,
+    pointerSelectedIdRef,
+    hoverCursor,
+    setHoverCursor,
+    handlePointerDown,
+    handlePointerMove,
+    handlePointerEnd,
+  } = usePrimitiveDrag({
+    playerRef,
+    overlay,
+    selectedEid,
+    onSelectElement,
+    onValuePatch,
+    setElementRect: rect => setElementRect({
+      left: rect.left,
+      top: rect.top,
+      width: rect.width,
+      height: rect.height,
+    }),
+    selectableStackAtPoint,
+  })
+
   const deselect = useCallback(() => onSelectElement(null), [onSelectElement])
 
   /**
@@ -142,6 +169,16 @@ export function AnimationEditLayer({
    *   - At topmost: deselect.
    */
   function handleCanvasClick(e: React.MouseEvent<HTMLDivElement>) {
+    if (suppressClickRef.current) {
+      suppressClickRef.current = false
+      return
+    }
+
+    if (pointerSelectedIdRef.current) {
+      pointerSelectedIdRef.current = null
+      return
+    }
+
     const hits = selectableStackAtPoint(e.clientX, e.clientY, e.currentTarget)
     if (hits.length === 0) { deselect(); return }
 
@@ -179,13 +216,13 @@ export function AnimationEditLayer({
           width: canvasRect.width,
           height: canvasRect.height,
           zIndex: 40,
-          cursor: hoverCursor,
+          cursor: dragStateRef.current ? 'grabbing' : selectedEid ? 'grab' : hoverCursor,
         }}
         onClick={handleCanvasClick}
-        onMouseMove={(e: React.MouseEvent<HTMLDivElement>) => {
-          const hits = selectableStackAtPoint(e.clientX, e.clientY, e.currentTarget)
-          setHoverCursor(hits.length > 0 ? 'pointer' : 'default')
-        }}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerEnd}
+        onPointerCancel={handlePointerEnd}
         onMouseLeave={() => setHoverCursor('default')}
       />
 
@@ -213,7 +250,10 @@ export function AnimationEditLayer({
           ref={toolbarRef}
           style={{
             position: 'fixed',
-            top: canvasRect.top + 8,
+            top:
+              canvasRect.top > estimatedToolbarHeight + toolbarOffset
+                ? canvasRect.top - estimatedToolbarHeight - toolbarOffset
+                : canvasRect.top + toolbarOffset,
             left: canvasRect.left + canvasRect.width / 2,
             transform: 'translateX(-50%)',
             zIndex: 50,

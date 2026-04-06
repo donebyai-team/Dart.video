@@ -1,5 +1,5 @@
 import React from 'react';
-import { usePatchedProp, useStyleOverride } from '../../patches/PatchContext';
+import { usePatchedProp, usePatchedDragStyle, useStyleOverride } from '../../patches';
 import { useStyleContext } from '../../styles/StyleContext';
 import { useAspectPreset } from '../../styles/AspectPresetContext';
 import { useTheme } from '../../theme/ThemeContext';
@@ -35,12 +35,20 @@ export function Text({
   const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', variant);
   const patchedText = usePatchedProp<React.ReactNode>(id, 'text', text);
   const styleOverride = useStyleOverride(id);
+  const overrideTransform = typeof styleOverride.transform === 'string' ? styleOverride.transform : undefined;
+  const dragStyle = usePatchedDragStyle(id, style?.transform, overrideTransform);
 
   return (
     <span
       id={id}
       className={className}
-      style={{ ...resolveTypography(patchedVariant, styleConfig, theme, preset), ...style, ...styleOverride }}
+      style={{
+        display: 'inline-block',
+        ...resolveTypography(patchedVariant, styleConfig, theme, preset),
+        ...style,
+        ...styleOverride,
+        ...dragStyle,
+      }}
     >
       {patchedText}
     </span>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
 import z from 'zod';
-import { usePatchedProps, useStyleOverride } from '../../../patches/PatchContext';
+import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme/ThemeContext';
@@ -46,6 +46,7 @@ export function Typewriter(propsInit: TypewriterProps): React.ReactElement {
   const actualVariant = props.variant ?? DEFAULT_VARIANT;
 
   const styleOverride = useStyleOverride(props.id);
+  const dragStyle = usePatchedDragStyle(props.id, props.style?.transform);
 
   const entranceDuration = 20;
   const entranceProgress = interpolateWithEasing(
@@ -89,18 +90,25 @@ export function Typewriter(propsInit: TypewriterProps): React.ReactElement {
       id={props.id}
       className={props.className}
       style={{
-        ...resolveTypography(actualVariant, styleConfig, theme, preset),
-        opacity: entranceProgress,
-        transform: getEntranceTransform(actualAnimation, entranceProgress),
         display: 'inline-block',
         ...props.style,
-        ...styleOverride
+        ...dragStyle,
       }}
     >
-      {visibleText}
-      {showCursor && cursorChar && (
-        <span style={{ opacity: cursorVisible ? 1 : 0 }}>{cursorChar}</span>
-      )}
+      <span
+        style={{
+          ...resolveTypography(actualVariant, styleConfig, theme, preset),
+          opacity: entranceProgress,
+          transform: getEntranceTransform(actualAnimation, entranceProgress),
+          display: 'inline-block',
+          ...styleOverride,
+        }}
+      >
+        {visibleText}
+        {showCursor && cursorChar && (
+          <span style={{ opacity: cursorVisible ? 1 : 0 }}>{cursorChar}</span>
+        )}
+      </span>
     </span>
   );
 }

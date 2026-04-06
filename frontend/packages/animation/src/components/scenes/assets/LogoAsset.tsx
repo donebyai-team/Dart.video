@@ -2,7 +2,7 @@ import { preloadImage } from "@remotion/preload";
 import { useEffect } from "react";
 import { useCurrentFrame, useRemotionEnvironment } from "remotion";
 import z from 'zod';
-import { usePatchedProps, useStyleOverride } from "../../../patches/PatchContext";
+import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from "../../../patches";
 
 import { useStyleContext } from "../../../styles/StyleContext";
 import { useAspectPreset } from "../../../styles/AspectPresetContext";
@@ -72,9 +72,10 @@ export function LogoAsset(propsInit: LogoAssetProps): React.ReactElement {
     const frame = useCurrentFrame();
     const { logo } = useTheme();
     const { isRendering } = useRemotionEnvironment();
-    const styleConfig = useStyleContext();
     const preset = useAspectPreset();
     const styleOverride = useStyleOverride(props.id);
+    const overrideTransform = typeof styleOverride.transform === 'string' ? styleOverride.transform : undefined;
+    const dragStyle = usePatchedDragStyle(props.id, props.style?.transform, overrideTransform);
 
     // Apply defaults
     const actualAnimation = props.logoAnimation ?? DEFAULT_ANIMATION;
@@ -121,25 +122,36 @@ export function LogoAsset(propsInit: LogoAssetProps): React.ReactElement {
                 justifyContent: 'center',
                 width: resolvedBoxWidth,
                 height: resolvedBoxHeight,
-                ...animStyle,
                 ...restStyle,
                 ...wrapperStyleOverride,
+                ...dragStyle,
             }}
         >
-            {/* The wrapper owns sizing; the image always scales to fill that box
-                while remaining fully visible via object-fit: contain. */}
-            <img
-                src={defaultSrc}
-                width={hasIntrinsicSize ? logo?.width : undefined}
-                height={hasIntrinsicSize ? logo?.height : undefined}
+            <span
                 style={{
-                    display: 'block',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     width: '100%',
                     height: '100%',
-                    objectFit: resolvedObjectFit,
-                    aspectRatio: intrinsicAspectRatio,
+                    ...animStyle,
                 }}
-            />
+            >
+                {/* The wrapper owns sizing; the image always scales to fill that box
+                    while remaining fully visible via object-fit: contain. */}
+                <img
+                    src={defaultSrc}
+                    width={hasIntrinsicSize ? logo?.width : undefined}
+                    height={hasIntrinsicSize ? logo?.height : undefined}
+                    style={{
+                        display: 'block',
+                        width: '100%',
+                        height: '100%',
+                        objectFit: resolvedObjectFit,
+                        aspectRatio: intrinsicAspectRatio,
+                    }}
+                />
+            </span>
         </span>
     );
 }

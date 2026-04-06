@@ -2,7 +2,7 @@ import React from "react";
 import { preloadImage } from "@remotion/preload";
 import { useEffect, useState, useCallback } from "react";
 import { useRemotionEnvironment, delayRender, continueRender } from "remotion";
-import { usePatchedProps, useStyleOverride } from "../../patches";
+import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from "../../patches";
 import { useTheme } from "../../theme";
 import { useAspectPreset } from "../../styles";
 import { scaleToCanvas } from "../../theme/scale";
@@ -30,6 +30,8 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
   const styleOverride = useStyleOverride(propsInit.id);
   const patchedProps = usePatchedProps(propsInit.id, propsInit);
   const props = { ...patchedProps, id: propsInit.id };
+  const overrideTransform = typeof styleOverride.transform === 'string' ? styleOverride.transform : undefined;
+  const dragStyle = usePatchedDragStyle(props.id, props.style?.transform, overrideTransform);
 
   const patchedIcon = props.icon;
   const patchedSize = props.size || 64;
@@ -105,6 +107,7 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
         overflow: "hidden",
         ...props.style,
         ...styleOverride,
+        ...dragStyle,
       }}
     >
       {errored ? (

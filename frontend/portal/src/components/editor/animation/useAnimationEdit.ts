@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import type { PatchOverlay } from '@coasterai/renderer'
-import { AnimationSlideContent, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { JsonObject } from '@bufbuild/protobuf'
 import { useVideoStore } from '@/stores/video'
 import { debounce } from '@/stores/video/sync'
@@ -37,6 +37,21 @@ export function useAnimationEdit(): UseAnimationEditReturn {
   const [animEditVersion, setAnimEditVersion] = useState(0)
   const isLoadingRef = useRef(false)
 
+  const mergeOverlayEntry = useCallback((
+    id: string,
+    updater: (entry: Record<string, unknown>) => Record<string, unknown>,
+  ) => {
+    setOverlay(prev => {
+      const entry = (prev[id] as Record<string, unknown> | undefined) ?? {}
+      const next: PatchOverlay = {
+        ...prev,
+        [id]: updater(entry),
+      }
+      overlayRef.current = next
+      return next
+    })
+  }, [])
+
   // ── Keep window.__PATCH_OVERLAY__ in sync ──────────────────────────────────
   useEffect(() => {
     ; (window as any).__PATCH_OVERLAY__ = overlay
@@ -54,38 +69,21 @@ export function useAnimationEdit(): UseAnimationEditReturn {
 
   // ── Apply a single value patch ────────────────────────────────────────────
   const applyValuePatch = useCallback((id: string, prop: string, value: unknown) => {
-    setOverlay(prev => {
-      const entry = prev[id] ?? {}
-      const next: PatchOverlay = {
-        ...prev,
-        [id]: {
-          ...entry,
-          [prop]: value,
-        },
-      }
-      overlayRef.current = next
-      return next
-    })
+    mergeOverlayEntry(id, entry => ({
+      ...entry,
+      [prop]: value,
+    }))
     setAnimEditVersion(v => v + 1)
-  }, [])
+  }, [mergeOverlayEntry])
 
   // ── Apply style override ──────────────────────────────────────────────────
   const applyStyleOverride = useCallback((id: string, style: Record<string, string | number>) => {
-    setOverlay(prev => {
-      const entry = prev[id] ?? {}
-      const next: PatchOverlay = {
-        ...prev,
-        [id]: {
-          ...entry,
-          style: { ...((entry.style as Record<string, string | number> | undefined) ?? {}), ...style },
-        },
-      }
-      console.log("wefwef2", entry)
-      overlayRef.current = next
-      return next
-    })
+    mergeOverlayEntry(id, entry => ({
+      ...entry,
+      style: { ...((entry.style as Record<string, string | number> | undefined) ?? {}), ...style },
+    }))
     setAnimEditVersion(v => v + 1)
-  }, [])
+  }, [mergeOverlayEntry])
 
   // ── Replace entire overlay ─────────────────────────────────────────────────
   const setOverlayFn = useCallback((newOverlay: PatchOverlay) => {

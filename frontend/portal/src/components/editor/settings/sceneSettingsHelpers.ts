@@ -221,7 +221,7 @@ export function getEditableSceneFields(
       : {}
 
   return Object.entries(patchEntry)
-    .filter(([prop]) => prop !== 'style' && prop !== 'swap')
+    .filter(([prop]) => prop !== 'style' && prop !== 'dragX' && prop !== 'dragY') // skip these fields to edit
     .map(([prop, value]) => ({
       prop,
       value,

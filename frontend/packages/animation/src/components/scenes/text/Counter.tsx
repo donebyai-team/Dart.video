@@ -1,6 +1,6 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
-import { usePrimitivePatches, usePatchedProp, useStyleOverride } from '../../../patches/PatchContext';
+import { usePatchedDragStyle, usePrimitivePatches, usePatchedProp, useStyleOverride } from '../../../patches';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme/ThemeContext';
@@ -79,6 +79,8 @@ export function Counter({
   const patchedSuffix = usePatchedProp(id, 'suffix', suffix);
   const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', variant);
   const styleOverride = useStyleOverride(id);
+  const overrideTransform = typeof styleOverride.transform === 'string' ? styleOverride.transform : undefined;
+  const dragStyle = usePatchedDragStyle(id, style?.transform, overrideTransform);
 
   const progress = interpolateWithEasing(
     frame,
@@ -93,7 +95,13 @@ export function Counter({
     <span
       id={id}
       className={className}
-      style={{ ...resolveTypography(patchedVariant, styleConfig, theme, preset), ...style, ...styleOverride }}
+      style={{
+        display: 'inline-block',
+        ...resolveTypography(patchedVariant, styleConfig, theme, preset),
+        ...style,
+        ...styleOverride,
+        ...dragStyle,
+      }}
     >
       {formatNumber(currentValue, patchedFormat, patchedPrefix, patchedSuffix)}
     </span>
