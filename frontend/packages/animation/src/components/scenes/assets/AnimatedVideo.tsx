@@ -7,7 +7,7 @@ import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { Text } from '../../../core/text/Text';
 import { VideoAsset } from '../../../core/assets/VideoAsset';
 import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
-import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
+import { usePatchedProps, useStyleOverride } from '../../../patches';
 import { resolveTypography } from '../../../tokens';
 import { useTheme } from '../../../theme';
 import { getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
@@ -30,7 +30,6 @@ export const AnimatedVideoSchema = z.object({
     src: z.string().url("src must be a valid URL"),
     variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
     entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
-    borderRadius: z.number().min(0, "borderRadius cannot be negative").default(DEFAULT_BORDER_RADIUS).optional(),
     width: z.number().min(1, "width must be positive").default(DEFAULT_WIDTH).optional(),
     height: z.number().min(1, "height must be positive").default(DEFAULT_HEIGHT).optional(),
     style: z.any().optional(),
@@ -50,14 +49,10 @@ export function AnimatedVideo(propsInit: AnimatedVideoProps): React.ReactElement
     // Apply defaults
     const actualVariant = props.variant ?? DEFAULT_VARIANT;
     const actualAnimation = props.entranceAnimation ?? DEFAULT_ANIMATION;
-    const actualBorderRadius = props.borderRadius ?? DEFAULT_BORDER_RADIUS;
     const imageWidth = props.width ?? DEFAULT_WIDTH;
     const imageHeight = props.height ?? DEFAULT_HEIGHT;
-    const videoElementId = `videoasset-${props.id}`;
 
     const styleOverride = useStyleOverride(props.id);
-    const videoStyleOverride = useStyleOverride(videoElementId);
-    const videoDragStyle = usePatchedDragStyle(videoElementId);
 
     const textDuration = DEFAULT_TEXT_DURATION;
     const videoDuration = DEFAULT_VIDEO_DURATION;
@@ -97,24 +92,22 @@ export function AnimatedVideo(propsInit: AnimatedVideoProps): React.ReactElement
                 />
             </div>
             <div
-                id={videoElementId}
                 style={{
-                    display: 'inline-block',
-                    ...videoDragStyle,
+                    opacity: videoProgress,
+                    transform: getEntranceTransform(actualAnimation, videoProgress),
                 }}
             >
-                <div
+                <VideoAsset
+                    id={`videoasset-${props.id}`}
+                    src={props.src}
+                    width={imageWidth}
+                    height={imageHeight}
                     style={{
-                        opacity: videoProgress,
-                        transform: getEntranceTransform(actualAnimation, videoProgress),
-                        borderRadius: actualBorderRadius,
                         overflow: 'hidden',
                         boxShadow: "0 20px 40px rgba(0,0,0,0.25), 0 12px 24px rgba(0,0,0,0.15)",
-                        ...videoStyleOverride,
+                        ...styleOverride,
                     }}
-                >
-                    <VideoAsset src={props.src} width={imageWidth} height={imageHeight} />
-                </div>
+                />
             </div>
         </div>
     );

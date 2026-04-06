@@ -7,7 +7,7 @@ import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { Text } from '../../../core/text/Text';
 import { ImageAsset } from '../../../core/assets/ImageAsset';
 import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
-import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
+import { usePatchedProps, useStyleOverride } from '../../../patches';
 import { resolveTypography } from '../../../tokens';
 import { useTheme } from '../../../theme';
 import { getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
@@ -20,7 +20,6 @@ const DEFAULT_DELAY = 10;
 const DEFAULT_IMAGE_DURATION = 50;
 const DEFAULT_VARIANT = 'subheading' as const;
 const DEFAULT_ANIMATION = 'slideUp' as const;
-const DEFAULT_BORDER_RADIUS = 16;
 const DEFAULT_WIDTH = 1920 * 0.7;
 const DEFAULT_HEIGHT = 1080 * 0.7;
 
@@ -34,7 +33,6 @@ export const AnimatedImageSchema = z.object({
     src: z.string().url("src must be a valid URL"),
     variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
     entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
-    borderRadius: z.number().min(0, "borderRadius cannot be negative").default(DEFAULT_BORDER_RADIUS).optional(),
     width: z.number().min(1, "width must be positive").default(DEFAULT_WIDTH).optional(),
     height: z.number().min(1, "height must be positive").default(DEFAULT_HEIGHT).optional(),
     style: z.any().optional(),
@@ -59,14 +57,10 @@ export function AnimatedImage(propsInit: AnimatedImageProps): React.ReactElement
     // Apply defaults
     const actualVariant = props.variant ?? DEFAULT_VARIANT;
     const actualAnimation = props.entranceAnimation ?? DEFAULT_ANIMATION;
-    const actualBorderRadius = props.borderRadius ?? DEFAULT_BORDER_RADIUS;
     const imageWidth = props.width ?? DEFAULT_WIDTH;
     const imageHeight = props.height ?? DEFAULT_HEIGHT;
-    const imageElementId = `imageasset-${props.id}`;
 
     const styleOverride = useStyleOverride(props.id);
-    const imageStyleOverride = useStyleOverride(imageElementId);
-    const imageDragStyle = usePatchedDragStyle(imageElementId);
 
     const textDuration = 30;
     const imageDuration = 40;
@@ -106,32 +100,21 @@ export function AnimatedImage(propsInit: AnimatedImageProps): React.ReactElement
                     }} />
             </div>
             <div
-                id={imageElementId}
                 style={{
-                    display: 'inline-block',
-                    ...imageDragStyle,
+                    opacity: imageProgress,
+                    transform: getEntranceTransform(actualAnimation, imageProgress),
                 }}
             >
-                <div
+                <ImageAsset
+                    id={`imageasset-${props.id}`}
+                    src={props.src}
+                    width={imageWidth}
+                    height={imageHeight}
                     style={{
-                        opacity: imageProgress,
-                        transform: getEntranceTransform(actualAnimation, imageProgress),
+                        overflow: 'hidden',                      
+                        ...styleOverride,
                     }}
-                >
-                    <ImageAsset
-                        src={props.src}
-                        width={imageWidth}
-                        height={imageHeight}
-                        style={
-                            {
-                                borderRadius: actualBorderRadius,
-                                overflow: 'hidden',
-                                boxShadow: "0 20px 40px rgba(0,0,0,0.25), 0 12px 24px rgba(0,0,0,0.15)",
-                                ...imageStyleOverride,
-                            }
-                        }
-                    />
-                </div>
+                />
             </div>
         </div>
     );
