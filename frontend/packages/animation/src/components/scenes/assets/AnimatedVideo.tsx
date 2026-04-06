@@ -7,7 +7,7 @@ import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { Text } from '../../../core/text/Text';
 import { VideoAsset } from '../../../core/assets/VideoAsset';
 import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
-import { usePatchedProps, useStyleOverride } from '../../../patches';
+import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
 import { resolveTypography } from '../../../tokens';
 import { useTheme } from '../../../theme';
 import { getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
@@ -53,8 +53,11 @@ export function AnimatedVideo(propsInit: AnimatedVideoProps): React.ReactElement
     const actualBorderRadius = props.borderRadius ?? DEFAULT_BORDER_RADIUS;
     const imageWidth = props.width ?? DEFAULT_WIDTH;
     const imageHeight = props.height ?? DEFAULT_HEIGHT;
+    const videoElementId = `videoasset-${props.id}`;
 
     const styleOverride = useStyleOverride(props.id);
+    const videoStyleOverride = useStyleOverride(videoElementId);
+    const videoDragStyle = usePatchedDragStyle(videoElementId);
 
     const textDuration = DEFAULT_TEXT_DURATION;
     const videoDuration = DEFAULT_VIDEO_DURATION;
@@ -94,15 +97,24 @@ export function AnimatedVideo(propsInit: AnimatedVideoProps): React.ReactElement
                 />
             </div>
             <div
+                id={videoElementId}
                 style={{
-                    opacity: videoProgress,
-                    transform: getEntranceTransform(actualAnimation, videoProgress),
-                    borderRadius: actualBorderRadius,
-                    overflow: 'hidden',
-                    boxShadow: "0 20px 40px rgba(0,0,0,0.25), 0 12px 24px rgba(0,0,0,0.15)",
+                    display: 'inline-block',
+                    ...videoDragStyle,
                 }}
             >
-                <VideoAsset id={`videoasset-${props.id}`} src={props.src} width={imageWidth} height={imageHeight} />
+                <div
+                    style={{
+                        opacity: videoProgress,
+                        transform: getEntranceTransform(actualAnimation, videoProgress),
+                        borderRadius: actualBorderRadius,
+                        overflow: 'hidden',
+                        boxShadow: "0 20px 40px rgba(0,0,0,0.25), 0 12px 24px rgba(0,0,0,0.15)",
+                        ...videoStyleOverride,
+                    }}
+                >
+                    <VideoAsset src={props.src} width={imageWidth} height={imageHeight} />
+                </div>
             </div>
         </div>
     );

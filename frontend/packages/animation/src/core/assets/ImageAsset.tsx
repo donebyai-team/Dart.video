@@ -1,7 +1,7 @@
 import { preloadImage } from "@remotion/preload";
 import { useEffect, useState } from "react";
 import { useRemotionEnvironment, delayRender, continueRender } from "remotion";
-import { usePatchedDragStyle, usePatchedProp, useStyleOverride } from "../../patches";
+import { usePatchedProp, useStyleOverride } from "../../patches";
 import { useAspectPreset } from "../../styles/AspectPresetContext";
 
 const DEFAULT_IMAGE_SVG = `data:image/svg+xml,${encodeURIComponent(`
@@ -34,8 +34,6 @@ export function ImageAsset({
     const styleOverride = useStyleOverride(id);
     const { objectFit: styleObjectFit, ...restStyle } = style ?? {};
     const { objectFit: overrideObjectFit, ...wrapperStyleOverride } = styleOverride;
-    const overrideTransform = typeof styleOverride.transform === 'string' ? styleOverride.transform : undefined;
-    const dragStyle = usePatchedDragStyle(id, style?.transform, overrideTransform);
     const patchedSrc = usePatchedProp<string | undefined>(id, 'src', src ?? DEFAULT_IMAGE_SVG);
     const patchedWidth = usePatchedProp<number | undefined>(id, 'width', width);
     const patchedHeight = usePatchedProp<number | undefined>(id, 'height', height);
@@ -85,7 +83,6 @@ export function ImageAsset({
                 overflow: 'hidden',
                 ...restStyle,
                 ...wrapperStyleOverride,
-                ...dragStyle,
             }}
         >
             <img
