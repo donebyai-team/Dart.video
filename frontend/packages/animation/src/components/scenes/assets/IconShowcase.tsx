@@ -27,8 +27,8 @@ export const IconShowcaseSchema = z.object({
     icons: z.array(z.string()).default([]),
     text: z.string().default(""),
     variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
-    iconSize: z.number().min(1, "iconSize must be positive").default(DEFAULT_ICON_SIZE).optional(),
-    iconGap: z.number().min(0, "iconGap cannot be negative").default(DEFAULT_ICON_GAP).optional(),
+    iconSize: z.number().default(DEFAULT_ICON_SIZE).optional(),
+    iconGap: z.number().default(DEFAULT_ICON_GAP).optional(),
     className: z.string().optional(),
     style: z.any().optional(),
 });

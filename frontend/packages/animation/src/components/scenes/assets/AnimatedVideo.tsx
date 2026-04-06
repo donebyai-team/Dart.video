@@ -26,12 +26,12 @@ const DEFAULT_HEIGHT = 1080 * 0.7;
 
 export const AnimatedVideoSchema = z.object({
     id: z.string().optional(),
-    text: z.string().min(1, "text is required"),
-    src: z.string().url("src must be a valid URL"),
+    text: z.string().default(''),
+    src: z.string(),
     variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
     entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
-    width: z.number().min(1, "width must be positive").default(DEFAULT_WIDTH).optional(),
-    height: z.number().min(1, "height must be positive").default(DEFAULT_HEIGHT).optional(),
+    width: z.number().default(DEFAULT_WIDTH).optional(),
+    height: z.number().default(DEFAULT_HEIGHT).optional(),
     style: z.any().optional(),
 });
 
@@ -103,8 +103,7 @@ export function AnimatedVideo(propsInit: AnimatedVideoProps): React.ReactElement
                     width={imageWidth}
                     height={imageHeight}
                     style={{
-                        overflow: 'hidden',
-                        boxShadow: "0 20px 40px rgba(0,0,0,0.25), 0 12px 24px rgba(0,0,0,0.15)",
+                        overflow: 'hidden',                        
                         ...styleOverride,
                     }}
                 />

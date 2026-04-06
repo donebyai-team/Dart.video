@@ -32,8 +32,8 @@ const DEFAULT_LOGO_SVG = `data:image/svg+xml,${encodeURIComponent(`
 export const LogoAssetSchema = z.object({
     id: z.string().optional(),
     src: z.string().default(DEFAULT_SRC).optional(),
-    width: z.number().min(1, "width must be positive").optional(),
-    height: z.number().min(1, "height must be positive").optional(),
+    width: z.number().optional(),
+    height: z.number().optional(),
     logoAnimation: z.enum(LOGO_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
     style: z.any().optional(),
     className: z.string().optional(),

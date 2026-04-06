@@ -105,12 +105,12 @@ export const TextStagger: React.FC<TextStaggerProps> = (propsInit: TextStaggerPr
 
 export const TextStaggerSchema = z.object({
     id: z.string().optional(),
-    startAt: z.number().min(0, "startAt cannot be negative").optional(),
-    text: z.string().min(1, "text is required"),
+    startAt: z.number().default(0).optional(),
+    text: z.string().default(''),
     variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).optional().default(DEFAULT_VARIANT),
-    staggerDelay: z.number().min(0, "staggerDelay cannot be negative").optional().default(SPLIT_MODE_DEFAULTS.word.staggerDelay),
+    staggerDelay: z.number().min(0).optional().default(SPLIT_MODE_DEFAULTS.word.staggerDelay),
     entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).optional().default(DEFAULT_ANIMATION),
-    duration: z.number().min(1, "duration must be positive").optional().default(SPLIT_MODE_DEFAULTS.word.unitDuration),
+    duration: z.number().optional().default(SPLIT_MODE_DEFAULTS.word.unitDuration),
     splitBy: z.enum(SPLIT_BY_MODES).optional().default(DEFAULT_SPLIT_BY),
     className: z.string().optional(),
     style: z.any().optional(),

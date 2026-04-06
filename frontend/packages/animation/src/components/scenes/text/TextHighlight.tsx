@@ -1,10 +1,11 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
 import z from 'zod';
-import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
-import { useStyleContext, useAspectPreset, interpolateWithEasing } from '../../../styles';
+import { usePatchedProps, useStyleOverride } from '../../../patches';
+import { interpolateWithEasing } from '../../../styles';
 import { useTheme } from '../../../theme';
-import { resolveTypography, TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens';
+import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens';
+import { Text } from '../../../core/text/Text';
 import { getEntranceTransform, ENTRANCE_ANIMATIONS, HIGHLIGHT_STYLES } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../durationTypes';
@@ -18,13 +19,13 @@ const DEFAULT_ANIMATION = 'slideUp' as const;
 
 export const TextHighlightSchema = z.object({
     id: z.string().optional(),
-    text: z.string().min(1, "text is required"),
+    text: z.string().default(''),
     variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
     highlightStyle: z.enum(HIGHLIGHT_STYLES).default(DEFAULT_HIGHLIGHT_STYLE).optional(),
     highlightColor: z.string().optional(),
     entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
-    animationDelay: z.number().min(0, "animationDelay cannot be negative").default(DEFAULT_ENTRANCE_DURATION).optional(),
-    zoomDuration: z.number().min(0, "zoomDuration cannot be negative").default(DEFAULT_ZOOM_DURATION).optional(),
+    animationDelay: z.number().default(DEFAULT_ENTRANCE_DURATION).optional(),
+    zoomDuration: z.number().default(DEFAULT_ZOOM_DURATION).optional(),
     className: z.string().optional(),
     style: z.any().optional(),
 });
@@ -34,9 +35,7 @@ export type TextHighlightProps = z.input<typeof TextHighlightSchema>;
 
 export const TextHighlight: React.FC<TextHighlightProps> = (propsInit: TextHighlightProps) => {
     const frame = useCurrentFrame();
-    const styleConfig = useStyleContext();
     const theme = useTheme();
-    const preset = useAspectPreset();
 
     const patchedProps = usePatchedProps(propsInit.id, propsInit);
     const props = { ...TextHighlightSchema.parse(patchedProps), id: propsInit.id };
@@ -49,7 +48,6 @@ export const TextHighlight: React.FC<TextHighlightProps> = (propsInit: TextHighl
     const actualAnimationDelay = props.animationDelay ?? DEFAULT_ENTRANCE_DURATION;
     const actualZoomDuration = props.zoomDuration ?? DEFAULT_ZOOM_DURATION;
     const styleOverride = useStyleOverride(props.id);
-    const dragStyle = usePatchedDragStyle(props.id, props.style?.transform);
 
     // Animation timeline:
     // Phase 1: Entrance animation with highlight already visible (0 to animationDelay)
@@ -208,32 +206,24 @@ export const TextHighlight: React.FC<TextHighlightProps> = (propsInit: TextHighl
             className={props.className}
             style={{
                 display: 'inline-block',
+                opacity: entranceProgress,
+                transform: getEntranceTransform(actualAnimation, entranceProgress, 200),
                 ...props.style,
-                ...dragStyle,
+                ...styleOverride,
             }}
         >
-            <span
-                style={{
-                    ...resolveTypography(actualVariant, styleConfig, theme, preset),
-                    opacity: entranceProgress,
-                    transform: getEntranceTransform(actualAnimation, entranceProgress, 200),
-                    display: 'inline-block',
-                    ...styleOverride,
-                }}
-            >
-                {segments.map((segment, i) => (
-                    <span
-                        key={i}
-                        style={
-                            segment.highlight
-                                ? getHighlightStyles(segment.index)
-                                : {}
-                        }
-                    >
-                        {segment.text}
-                    </span>
-                ))}
-            </span>
+            {segments.map((segment, i) => (
+                <Text
+                    key={i}
+                    id={`text-${i}-${props.id}`}
+                    text={segment.text}
+                    variant={actualVariant}
+                    style={{
+                        whiteSpace: 'pre',
+                        ...(segment.highlight ? getHighlightStyles(segment.index) : {}),
+                    }}
+                />
+            ))}
         </span>
     );
 };

@@ -22,9 +22,9 @@ const DEFAULT_SRC = ""
 
 export const LogoWithBrandNameSchema = z.object({
     id: z.string().optional(),
-    brandName: z.string().min(1, "brandName is required"),
+    brandName: z.string().default(''),
     src: z.string().default(DEFAULT_SRC).optional(),
-    logoSize: z.number().min(1, "logoSize must be positive").optional(),
+    logoSize: z.number().optional(),
     variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
     style: z.any().optional(),
 });

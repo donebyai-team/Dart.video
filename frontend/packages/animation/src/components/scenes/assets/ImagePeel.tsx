@@ -25,14 +25,14 @@ const DEFAULT_HEIGHT = 1080 * 0.7;
 
 export const ImagePeelSchema = z.object({
     id: z.string().optional(),
-    images: z.array(z.string().url("each source must be a valid URL")).min(2, "sources must contain at least 2 images"),
+    images: z.array(z.string()),
     direction: z.enum(DIRECTIONS).default(DEFAULT_DIRECTION).optional(),
-    holdDuration: z.number().min(0, "holdDuration cannot be negative").default(DEFAULT_HOLD_DURATION).optional(),
-    peelDuration: z.number().min(0, "peelDuration cannot be negative").default(DEFAULT_PEEL_DURATION).optional(),
-    stackOffset: z.number().min(0, "stackOffset cannot be negative").default(DEFAULT_STACK_OFFSET).optional(),
-    borderRadius: z.number().min(0, "borderRadius cannot be negative").default(DEFAULT_BORDER_RADIUS).optional(),
-    width: z.number().min(1, "width must be positive").default(DEFAULT_WIDTH).optional(),
-    height: z.number().min(1, "height must be positive").default(DEFAULT_HEIGHT).optional(),
+    holdDuration: z.number().default(DEFAULT_HOLD_DURATION).optional(),
+    peelDuration: z.number().default(DEFAULT_PEEL_DURATION).optional(),
+    stackOffset: z.number().default(DEFAULT_STACK_OFFSET).optional(),
+    borderRadius: z.number().default(DEFAULT_BORDER_RADIUS).optional(),
+    width: z.number().default(DEFAULT_WIDTH).optional(),
+    height: z.number().default(DEFAULT_HEIGHT).optional(),
     style: z.any().optional(),
 });
 

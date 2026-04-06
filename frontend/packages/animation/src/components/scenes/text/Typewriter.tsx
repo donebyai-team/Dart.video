@@ -119,8 +119,8 @@ export function Typewriter(propsInit: TypewriterProps): React.ReactElement {
 
 export const TypewriterSchema = z.object({
   id: z.string().optional(),
-  startAt: z.number().min(0, "startAt cannot be negative").default(0).optional(),
-  text: z.string().min(1, "text is required"),
+  startAt: z.number().default(0).optional(),
+  text: z.string().default(''),
   splitBy: z.enum(SPLIT_BY_MODES).default(DEFAULT_SPLIT_BY).optional(),
   variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
   entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),

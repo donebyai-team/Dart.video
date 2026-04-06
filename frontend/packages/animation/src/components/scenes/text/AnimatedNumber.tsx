@@ -161,8 +161,8 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (propsInit: Animate
 
 export const AnimatedNumberSchema = z.object({
     id: z.string().optional(),
-    startText: z.string().min(1, "startText is required"),
-    endText: z.string().min(1, "endText is required"),
+    startText: z.string().default(''),
+    endText: z.string().default(''),
     from: z.number().default(0),
     to: z.number(),
     format: z.string().optional(),
@@ -170,7 +170,7 @@ export const AnimatedNumberSchema = z.object({
     highlightStyle: z.enum(HIGHLIGHT_STYLES).default(DEFAULT_HIGHLIGHT_STYLE).optional(),
     highlightColor: z.string().optional(),
     entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
-    animationDelay: z.number().min(0, "animationDelay cannot be negative").default(DEFAULT_ENTRANCE_DURATION).optional(),
+    animationDelay: z.number().default(DEFAULT_ENTRANCE_DURATION).optional(),
     className: z.string().optional(),
     style: z.any().optional(),
 });
