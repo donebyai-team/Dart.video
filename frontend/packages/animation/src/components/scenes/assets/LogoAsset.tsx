@@ -3,8 +3,6 @@ import { useEffect } from "react";
 import { useCurrentFrame, useRemotionEnvironment } from "remotion";
 import z from 'zod';
 import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from "../../../patches";
-
-import { useStyleContext } from "../../../styles/StyleContext";
 import { useAspectPreset } from "../../../styles/AspectPresetContext";
 import { interpolateWithEasing } from "../../../styles/easingResolver";
 import { useTheme } from "../../../theme";

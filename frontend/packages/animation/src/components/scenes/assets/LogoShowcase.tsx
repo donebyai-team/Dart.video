@@ -33,7 +33,7 @@ function getSlotLayout(count: number) {
 
 export const LogoShowcaseSchema = z.object({
     id: z.string().optional(),
-    logos: z.array(z.string()).default([]),
+    images: z.array(z.string()).default([]),
     text: z.string().default(''),
     variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
     logoGap: z.number().default(DEFAULT_LOGO_GAP).optional(),
@@ -51,7 +51,7 @@ export const LogoShowcase: React.FC<LogoShowcaseProps> = (propsInit: LogoShowcas
     const styleOverride = useStyleOverride(props.id);
 
     const actualVariant = props.variant ?? DEFAULT_VARIANT;
-    const logoCount = props.logos.length;
+    const logoCount = props.images.length;
     const itemsPerRow = Math.min(Math.max(logoCount, 1), MAX_LOGOS_PER_ROW);
     const slotLayout = getSlotLayout(itemsPerRow);
     const actualLogoGap = props.logoGap ?? slotLayout.gap;
@@ -99,10 +99,10 @@ export const LogoShowcase: React.FC<LogoShowcaseProps> = (propsInit: LogoShowcas
                     width: '100%',
                     maxWidth: slotLayout.width * itemsPerRow + actualLogoGap * Math.max(itemsPerRow - 1, 0),
                     marginTop: 56,
-                    overflow: 'hidden',
+                    // overflow: 'hidden',
                 }}
             >
-                {props.logos.map((logo, index) => {
+                {props.images.map((logo, index) => {
                     const logoStartFrame = logosStartFrame + index * DEFAULT_LOGO_STAGGER;
                     const logoLocalFrame = frame - logoStartFrame;
                     const logoProgress = interpolateWithEasing(
@@ -159,7 +159,7 @@ export function calculateLogoShowcaseDuration(props: Record<string, any>): Durat
     }
 
     const validated = validation.data;
-    const logoCount = validated.logos.length;
+    const logoCount = validated.images.length;
     const textDurationResult = calculateTextStaggerDuration({
         text: validated.text,
         splitBy: DEFAULT_TEXT_STAGGER_SPLIT_BY,
