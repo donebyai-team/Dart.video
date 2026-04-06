@@ -8,6 +8,7 @@ import { useTheme } from '../../../theme/ThemeContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
 import { resolveTypography } from '../../../tokens/resolveTypography';
+import { Text } from '../../../core/text/Text';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../durationTypes';
 import { TEXT_CYCLE_TRANSITIONS } from '../types';
@@ -66,7 +67,7 @@ export const TextCycle: React.FC<TextCycleProps> = (propsInit: TextCycleProps) =
     [props.texts],
   );
 
-  if (props.texts.length === 0) return <span className={props.className} style={props.style} />;
+  if (props.texts.length === 0) return <Text text="" variant={patchedVariant} className={props.className} style={props.style} />;
 
   const elapsed = Math.max(0, frame);
   const holdDuration = props.holdDuration ?? DEFAULT_HOLD_DURATION;
@@ -124,18 +125,22 @@ export const TextCycle: React.FC<TextCycleProps> = (propsInit: TextCycleProps) =
     return (
       <span id={props.id} className={props.className} style={containerStyle}>
         {/* Spacer holds the width — never visible */}
-        <span style={spacerStyle} aria-hidden="true">{longestWord}</span>
+        <Text text={longestWord} variant={patchedVariant} style={spacerStyle} />
 
         {/* Current word fades out during transition */}
-        <span style={{ ...absoluteLayerStyle, opacity: isTransitioning ? 1 - transitionProgress : 1 }}>
-          {currentWord}
-        </span>
+        <Text
+          text={currentWord}
+          variant={patchedVariant}
+          style={{ ...absoluteLayerStyle, opacity: isTransitioning ? 1 - transitionProgress : 1 }}
+        />
 
         {/* Next word fades in during transition */}
         {isTransitioning && (
-          <span style={{ ...absoluteLayerStyle, opacity: transitionProgress }}>
-            {nextWord}
-          </span>
+          <Text
+            text={nextWord}
+            variant={patchedVariant}
+            style={{ ...absoluteLayerStyle, opacity: transitionProgress }}
+          />
         )}
       </span>
     );
@@ -144,28 +149,28 @@ export const TextCycle: React.FC<TextCycleProps> = (propsInit: TextCycleProps) =
   if (props.transition === 'slideUp') {
     return (
       <span id={props.id} className={props.className} style={{ ...containerStyle, overflow: 'hidden' }}>
-        <span style={spacerStyle} aria-hidden="true">{longestWord}</span>
+        <Text text={longestWord} variant={patchedVariant} style={spacerStyle} />
 
-        <span
+        <Text
+          text={currentWord}
+          variant={patchedVariant}
           style={{
             ...absoluteLayerStyle,
             transform: isTransitioning ? `translateY(-${transitionProgress * 100}%)` : 'translateY(0)',
             opacity: isTransitioning ? 1 - transitionProgress : 1,
           }}
-        >
-          {currentWord}
-        </span>
+        />
 
         {isTransitioning && (
-          <span
+          <Text
+            text={nextWord}
+            variant={patchedVariant}
             style={{
               ...absoluteLayerStyle,
               transform: `translateY(${(1 - transitionProgress) * 100}%)`,
               opacity: transitionProgress,
             }}
-          >
-            {nextWord}
-          </span>
+          />
         )}
       </span>
     );
@@ -174,28 +179,28 @@ export const TextCycle: React.FC<TextCycleProps> = (propsInit: TextCycleProps) =
   // flipY
   return (
     <span id={props.id} className={props.className} style={containerStyle}>
-      <span style={spacerStyle} aria-hidden="true">{longestWord}</span>
+      <Text text={longestWord} variant={patchedVariant} style={spacerStyle} />
 
-      <span
+      <Text
+        text={currentWord}
+        variant={patchedVariant}
         style={{
           ...absoluteLayerStyle,
           transform: isTransitioning ? `rotateX(${transitionProgress * 90}deg)` : 'rotateX(0deg)',
           opacity: isTransitioning ? 1 - transitionProgress : 1,
         }}
-      >
-        {currentWord}
-      </span>
+      />
 
       {isTransitioning && (
-        <span
+        <Text
+          text={nextWord}
+          variant={patchedVariant}
           style={{
             ...absoluteLayerStyle,
             transform: `rotateX(${(1 - transitionProgress) * -90}deg)`,
             opacity: transitionProgress,
           }}
-        >
-          {nextWord}
-        </span>
+        />
       )}
     </span>
   );

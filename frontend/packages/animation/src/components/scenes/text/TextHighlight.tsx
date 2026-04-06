@@ -272,7 +272,7 @@ export function calculateTextHighlightDuration(props: TextHighlightProps): Durat
 
 export const TextHighlightDescriptor: ComponentRegistration = {
     name: 'TextHighlight',
-    type: 'scene',
+    type: 'content',
     fullSchema: TextHighlightSchema,
     description: 'Displays text with highlighted portions that zoom/pulse for emphasis. Use to draw attention to key words or phrases. Required props: text="Increase revenue by {300%}", wrap the word to highlight in {}. The pattern can be a word or phrase to highlight within the text.',
     calculateDuration: calculateTextHighlightDuration,

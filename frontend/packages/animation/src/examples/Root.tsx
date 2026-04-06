@@ -244,7 +244,7 @@ const AnimatedIconShowcaseScene: React.FC = () => (
                     <LogoShowcase 
                     style={{ color: "#000" }}
                     text="Building with unber companies"
-                        logos={[
+                        images={[
                             "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/google/wordmark.svg", 
                             "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/openai/wordmark-light.svg", 
                             "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/razorpay/default.svg", 

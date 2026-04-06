@@ -1,13 +1,10 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
 import { usePatchedDragStyle, usePrimitivePatches, usePatchedProp, useStyleOverride } from '../../../patches';
-import { useStyleContext } from '../../../styles/StyleContext';
-import { useAspectPreset } from '../../../styles/AspectPresetContext';
-import { useTheme } from '../../../theme/ThemeContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { type Easing } from '../../../styles/types';
 import { TypographyVariant } from '../../../tokens/semantic';
-import { resolveTypography } from '../../../tokens/resolveTypography';
+import { Text } from '../../../core/text/Text';
 import { applySpeedFactor, useSpeedFactor } from '../../../duration';
 
 export interface CounterProps {
@@ -61,9 +58,6 @@ export function Counter({
   id,
 }: CounterProps): React.ReactElement {
   const frame = useCurrentFrame();
-  const styleConfig = useStyleContext();
-  const theme = useTheme();
-  const preset = useAspectPreset();
 
   const speedFactor = useSpeedFactor();
   const adjustedStartAt = applySpeedFactor(startAt, speedFactor);
@@ -92,18 +86,16 @@ export function Counter({
   const currentValue = patchedFrom + (patchedTo - patchedFrom) * progress;
 
   return (
-    <span
+    <Text
       id={id}
+      text={formatNumber(currentValue, patchedFormat, patchedPrefix, patchedSuffix)}
+      variant={patchedVariant}
       className={className}
       style={{
-        display: 'inline-block',
-        ...resolveTypography(patchedVariant, styleConfig, theme, preset),
         ...style,
         ...styleOverride,
         ...dragStyle,
       }}
-    >
-      {formatNumber(currentValue, patchedFormat, patchedPrefix, patchedSuffix)}
-    </span>
+    />
   );
 }

@@ -1,4 +1,4 @@
-import { DIRECTIONS, ENTRANCE_ANIMATIONS, LOGO_ANIMATIONS, SCENE_COMPONENTS, SPLIT_BY_MODES, TEXT_CYCLE_TRANSITIONS, TYPOGRAPHY_VARIANT_NAMES } from "../../../../../packages/animation/src"
+import { DIRECTIONS, ENTRANCE_ANIMATIONS, HIGHLIGHT_STYLES, LOGO_ANIMATIONS, SCENE_COMPONENTS, SPLIT_BY_MODES, TEXT_CYCLE_TRANSITIONS, TYPOGRAPHY_VARIANT_NAMES } from "../../../../../packages/animation/src"
 import { resolveComponentFromId } from '@coasterai/renderer'
 
 
@@ -46,6 +46,10 @@ const RESERVED_FIELD_MAP: Record<string, SceneFieldDefinition> = {
   },
   text: {
     kind: 'string',
+  },
+  highlightStyle: {
+    kind: 'enum',
+    options: [...HIGHLIGHT_STYLES],
   }
 }
 
@@ -103,7 +107,7 @@ function getSceneFieldPriority(prop: string): number {
   const lower = prop.toLowerCase()
 
   if (lower === 'text' || lower === 'children') return 0
-  if (lower.includes('text')) return 1
+  if (lower.includes('text') || lower === 'variant') return 1
   return 10
 }
 
