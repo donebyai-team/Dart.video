@@ -44,8 +44,11 @@ export const TEXT_CYCLE_TRANSITIONS = ['flipY', 'fadeSwap', 'slideUp'] as const;
 
 export type TextCycleTransition = typeof TEXT_CYCLE_TRANSITIONS[number];
 
-
-export function getEntranceTransform(animation: EntranceAnimation, progress: number, distance: number = 200): string {
+export function getEntranceTransform(
+    animation: EntranceAnimation,
+    progress: number,
+    distance: number = 200,
+): string {
     const inv = 1 - progress;
     switch (animation) {
         case 'slideUp':

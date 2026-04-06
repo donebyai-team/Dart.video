@@ -4,12 +4,12 @@ import { TextStagger } from "../components/scenes/text";
 import { FadeIn, FadeOut, SlideIn, ScaleIn, Stagger, TimelineGate } from "../core/animation_primitives";
 import { FramePreset, SafeArea, AbsoluteCenter, Stack, Row } from "../core/layout";
 import { Text } from "../core/text";
-import { ImageAsset, LogoAsset, LogoWithBrandName } from "../core/assets";
+import { ImageAsset } from "../core/assets";
 import { SpeedFactorProvider } from "../duration";
 import { ASPECT_PRESETS, resolveStyle, AspectPresetProvider, StyleContextProvider } from "../styles";
 import { BrandTheme, darkTheme, ThemeProvider } from "../theme";
 import { AnimatedVideo } from "../components/scenes/assets/AnimatedVideo";
-import { ImagePeel } from "../components/scenes";
+import { ImagePeel, LogoAsset } from "../components/scenes";
 import { IconShowcase } from "../components/scenes/assets/IconShowcase";
 
 

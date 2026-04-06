@@ -3,7 +3,7 @@ import { useCurrentFrame } from 'remotion';
 import z from 'zod';
 import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
 import { useStyleContext } from '../../../styles/StyleContext';
-import { usePatchedProps, useStyleOverride } from '../../../patches';
+import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
 import { interpolateWithEasing, useAspectPreset } from '../../../styles';
 import { useTheme } from '../../../theme';
 import { resolveTypography } from '../../../tokens';
@@ -52,6 +52,7 @@ export const TextStagger: React.FC<TextStaggerProps> = (propsInit: TextStaggerPr
 
 
     const styleOverride = useStyleOverride(props.id);
+    const dragStyle = usePatchedDragStyle(props.id, props.style?.transform);
 
     const units = splitBy === 'char' ? props.text.split('') : splitBy === 'line' ? props.text.split('\n') : props.text.split(' ');
 
@@ -70,7 +71,15 @@ export const TextStagger: React.FC<TextStaggerProps> = (propsInit: TextStaggerPr
     };
 
     return (
-        <span id={props.id} className={props.className} style={{ display: 'inline-block', ...props.style }}>
+        <span
+            id={props.id}
+            className={props.className}
+            style={{
+                display: 'inline-block',
+                ...props.style,
+                ...dragStyle,
+            }}
+        >
             {units.map((unit, index) => (
                 <span
                     key={index}
