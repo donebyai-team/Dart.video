@@ -331,10 +331,12 @@ export function TextToolbar({
     <div className="flex items-center gap-3 whitespace-nowrap">
       {/* Colors – single picker with Text / Background tabs */}
       <DualColorPicker
-        textColor={toHex(color ?? '#ffffff')}
-        bgColor={toHex(backgroundColor ?? 'transparent')}
-        onTextColor={v => onStyleOverride({ color: v })}
-        onBgColor={v => onStyleOverride({ backgroundColor: v })}
+        primaryColor={toHex(color ?? '#ffffff')}
+        secondaryColor={toHex(backgroundColor ?? 'transparent')}
+        onPrimaryColor={v => onStyleOverride({ color: v })}
+        onSecondaryColor={v => onStyleOverride({ backgroundColor: v })}
+        primaryLabel="Text"
+        secondaryLabel="Background"
       />
 
       {/* Font */}

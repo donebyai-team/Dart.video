@@ -11,8 +11,8 @@ interface CalloutSettingsProps {
 }
 
 const CalloutSettings = ({ settings, onChange, slideDuration = 0, transitionDuration = 0 }: CalloutSettingsProps) => {
-  const calloutStart = settings.startTime ?? 0
-  const calloutEnd = settings.endTime ?? slideDuration
+  const calloutStart = settings.startFrame ?? 0
+  const calloutEnd = settings.endFrame ?? slideDuration
   return (
     <div className='space-y-2'>
       <Label className='text-xs font-medium text-muted-foreground uppercase tracking-wide'>
@@ -32,7 +32,7 @@ const CalloutSettings = ({ settings, onChange, slideDuration = 0, transitionDura
           <DurationButtonRange
             value={calloutStart}
             onValueChange={val => {
-              settings.startTime = val
+              settings.startFrame = val
               onChange(settings)
             }}
             // the max value of startTime will calloutEnd seconds - 0.1
@@ -49,7 +49,7 @@ const CalloutSettings = ({ settings, onChange, slideDuration = 0, transitionDura
           <DurationButtonRange
             value={calloutEnd}
             onValueChange={val => {
-              settings.endTime = val
+              settings.endFrame = val
               onChange(settings)
             }}
             // If there is transition in slide it will make sure the endTime ends before transitionDuration

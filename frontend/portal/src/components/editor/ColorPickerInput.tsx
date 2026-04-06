@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import BrandColors from "@/components/editor/settings/BrandColors";
 
 interface ColorPickerInputProps {
   label?: string;
@@ -67,6 +68,16 @@ const ColorPickerInput = ({
           />
         ))}
       </div>
+
+      <BrandColors
+        selectedColor={value}
+        onSelect={(color) => {
+          onChange(color);
+          setHexInput(color);
+        }}
+        className="flex flex-wrap gap-1"
+        swatchClassName="w-5 h-5 rounded border transition-all hover:scale-110"
+      />
 
       {/* Custom color input */}
       <div className="flex gap-1.5 items-center">

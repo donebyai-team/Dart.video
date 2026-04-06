@@ -1,30 +1,43 @@
 // ─── Dual Color Picker ──────────────────────────────────────────────────────
-// Single button that opens a popover with tabs for Text and Background color.
+// Single button that opens a popover with tabs for two color values.
 
 import { useState } from "react"
 import { HexColorPicker } from "react-colorful"
 
+import BrandColors from "@/components/editor/settings/BrandColors"
+
 export function DualColorPicker({
-  textColor,
-  bgColor,
-  onTextColor,
-  onBgColor,
+  primaryColor,
+  secondaryColor,
+  onPrimaryColor,
+  onSecondaryColor,
+  primaryLabel = "Primary",
+  secondaryLabel = "Secondary",
 }: {
-  textColor: string
-  bgColor: string
-  onTextColor: (v: string) => void
-  onBgColor: (v: string) => void
+  primaryColor: string
+  secondaryColor?: string
+  onPrimaryColor: (v: string) => void
+  onSecondaryColor?: (v: string) => void
+  primaryLabel?: string
+  secondaryLabel?: string
 }) {
   const [open, setOpen] = useState(false)
-  const [tab, setTab] = useState<'text' | 'bg'>('text')
+  const [tab, setTab] = useState<'primary' | 'secondary'>('primary')
 
-  const activeColor = tab === 'text' ? textColor : bgColor
-  const onChangeActive = tab === 'text' ? onTextColor : onBgColor
+  const hasSecondary = !!secondaryColor && !!onSecondaryColor
+  const activeTab = hasSecondary ? tab : 'primary'
+  const activeColor = activeTab === 'primary' ? primaryColor : secondaryColor
+  const onChangeActive = activeTab === 'primary' ? onPrimaryColor : onSecondaryColor
+
+  if (!activeColor || !onChangeActive) {
+    return null
+  }
 
   return (
     <div className="relative flex items-center">
       {/* Color button – rainbow gradient rectangle */}
       <button
+        type="button"
         title="Colors"
         onClick={() => setOpen(!open)}
         className="w-8 h-7 rounded-md border border-border shadow-sm cursor-pointer"
@@ -35,31 +48,47 @@ export function DualColorPicker({
 
       {open && (
         <div className="absolute top-9 left-0 z-50 bg-background border border-border rounded-lg shadow-lg p-3 w-56 space-y-3">
-          {/* Tabs */}
-          <div className="flex rounded-md border border-border overflow-hidden text-xs">
-            <button
-              onClick={() => setTab('text')}
-              className={`flex-1 py-1 transition-colors ${
-                tab === 'text'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Text
-            </button>
-            <button
-              onClick={() => setTab('bg')}
-              className={`flex-1 py-1 transition-colors ${
-                tab === 'bg'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Background
-            </button>
-          </div>
+          {hasSecondary && (
+            <div className="flex rounded-md border border-border overflow-hidden text-xs">
+              <button
+                type="button"
+                onClick={() => setTab('primary')}
+                className={`flex-1 py-1 transition-colors ${
+                  tab === 'primary'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {primaryLabel}
+              </button>
+              <button
+                type="button"
+                onClick={() => setTab('secondary')}
+                className={`flex-1 py-1 transition-colors ${
+                  tab === 'secondary'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {secondaryLabel}
+              </button>
+            </div>
+          )}
+
+          {!hasSecondary && (
+            <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              {primaryLabel}
+            </div>
+          )}
 
           <HexColorPicker color={activeColor} onChange={onChangeActive} />
+
+          <BrandColors
+            selectedColor={activeColor}
+            onSelect={onChangeActive}
+            className="flex flex-wrap gap-1"
+            swatchClassName="w-5 h-5 rounded border transition-all hover:scale-110"
+          />
 
           <input
             value={activeColor}
@@ -69,6 +98,7 @@ export function DualColorPicker({
 
           <div className="flex justify-end">
             <button
+              type="button"
               onClick={() => setOpen(false)}
               className="text-xs font-medium"
             >

@@ -6,6 +6,8 @@ import { create } from "@bufbuild/protobuf";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import BrandColors from "@/components/editor/settings/BrandColors";
+import { DualColorPicker } from "@/components/editor/animation/toolbars/stylers/DualColorPicker";
 import { backgroundStyleToCSS } from '@coasterai/renderer';
 import { BackgroundStyle, Gradient, GradientSchema, GradientType, GradientStopSchema, BackgroundStyleSchema } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { gradientToCSS } from "@coasterai/renderer/src/backgroundUtils";
@@ -62,7 +64,6 @@ export default function BackgroundSettings({
   onChange,
   onClose,
 }: BackgroundSettingsProps) {
-
   /* ---------- SAFE DEFAULT ---------- */
 
   const safeValue =
@@ -125,7 +126,7 @@ export default function BackgroundSettings({
   return (
     <div className="h-full flex flex-col bg-card pb-10">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+      <div className="flex items-center justify-between px-5  border-b border-border">
         <h3 className="font-semibold text-sm tracking-tight">
           Background
         </h3>
@@ -134,7 +135,7 @@ export default function BackgroundSettings({
         </Button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-5 py-6 space-y-10">
+      <div className="flex-1 overflow-y-auto px-5 py-6 space-y-6">
 
         {/* Apply to all */}
         <div className="flex items-center justify-between">
@@ -145,13 +146,18 @@ export default function BackgroundSettings({
           />
         </div>
 
+        <BrandColors
+          selectedColor={activeCase === "solid" ? safeValue.style?.value.hex : undefined}
+          onSelect={(color) => updateStyle("solid", { hex: color })}
+        />
+
         {/* SOLID */}
         <div className="space-y-4">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Solid
           </p>
 
-          <div className="grid grid-cols-8 gap-3">
+          <div className="grid grid-cols-10 gap-1">
             {solidPresets.map((color) => {
 
               const isActive =
@@ -161,7 +167,7 @@ export default function BackgroundSettings({
                 <button
                   key={color}
                   onClick={() => updateStyle("solid", { hex: color })}
-                  className={`w-8 h-8 rounded-full transition-all duration-200 hover:scale-110
+                  className={`w-6 h-6 rounded-md  transition-all duration-200 hover:scale-110
             ${isActive ? "ring-2 ring-primary ring-offset-1 ring-offset-card" : ""}
           `}
                   style={{ backgroundColor: color }}
@@ -170,38 +176,11 @@ export default function BackgroundSettings({
             })}
           </div>
 
-          {/* Custom Hex Input */}
-          <div className="flex items-center gap-3">
-            <input
-              type="color"
-              value={
-                activeCase === "solid"
-                  ? safeValue.style?.value.hex
-                  : "#0f172a"
-              }
-              onChange={(e) =>
-                updateStyle("solid", { hex: e.target.value })
-              }
-              className="w-9 h-9 rounded-md border border-border cursor-pointer"
-            />
-
-            <input
-              type="text"
-              value={
-                activeCase === "solid"
-                  ? safeValue.style?.value.hex
-                  : ""
-              }
-              onChange={(e) => {
-                const val = e.target.value;
-                if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
-                  updateStyle("solid", { hex: val });
-                }
-              }}
-              placeholder="#000000"
-              className="flex-1 px-3 py-1.5 text-sm rounded-md border border-border bg-transparent font-mono"
-            />
-          </div>
+          <DualColorPicker
+            primaryColor={activeCase === "solid" ? safeValue.style?.value.hex : "#0f172a"}
+            onPrimaryColor={(color) => updateStyle("solid", { hex: color })}
+            primaryLabel="Color"
+          />
         </div>
 
 
@@ -211,7 +190,7 @@ export default function BackgroundSettings({
             Gradients
           </p>
 
-          <div className="grid grid-cols-8 gap-3">
+          <div className="grid grid-cols-10 gap-1">
             {modernGradients.map(([c1, c2], i) => {
               const preset = buildGradient(c1, c2, 135);
 
@@ -225,7 +204,7 @@ export default function BackgroundSettings({
                 <button
                   key={i}
                   onClick={() => updateStyle("gradient", preset)}
-                  className={`w-8 h-8 rounded-full transition-all duration-200 hover:scale-110
+                  className={`w-6 h-6 rounded-md transition-all duration-200 hover:scale-110
             ${isActive ? "ring-2 ring-primary ring-offset-1 ring-offset-card" : ""}
           `}
                   style={{ background: gradientToCSS(preset) }}
