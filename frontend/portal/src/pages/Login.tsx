@@ -80,7 +80,7 @@ export const LoginPanel: FC<Props> = ({
     try {
       // Simulate sending OTP to email
       await portalClient.passwordlessStart({ email: email });
-      
+
       setShowOtp(true);
       toast({
         title: "OTP sent",
@@ -109,9 +109,9 @@ export const LoginPanel: FC<Props> = ({
 
       const token = await portalClient.passwordlessVerify({ email: email, code: otp });
       onPasswordlessVerified(token);
-      
+
       navigate.push("/dashboard");
-      
+
     } catch (error) {
       toast({
         title: "Invalid code",
@@ -142,15 +142,14 @@ export const LoginPanel: FC<Props> = ({
         <Card className="border-2 border-primary/20 shadow-md">
           {/* Logo Section */}
           <CardHeader className="text-center pb-6">
-            <div className="flex justify-center mb-4">
-              <Logo />
-            </div>
 
             <CardTitle className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
-              Redora
+              <span className="text-4xl font-semibold text-gray-900">
+                dart<span className="text-gray-500">.video</span>
+              </span>
             </CardTitle>
-            <CardDescription className="text-base">
-              Sign in to discover your next customers
+            <CardDescription className="text-sm">
+             Turn features into videos
             </CardDescription>
           </CardHeader>
 
@@ -294,53 +293,7 @@ export const LoginPanel: FC<Props> = ({
                 </div>
               )}
             </Button>
-
-            {/* Feature Highlights */}
-            <div className="grid grid-cols-3 gap-4 pt-4">
-              <div className="text-center">
-                <div className="bg-primary/10 p-3 rounded-lg mx-auto w-fit mb-2">
-                  <svg className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <p className="text-xs text-muted-foreground font-medium">AI Powered</p>
-              </div>
-              <div className="text-center">
-                <div className="bg-primary/10 p-3 rounded-lg mx-auto w-fit mb-2">
-                  <svg className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <p className="text-xs text-muted-foreground font-medium">24/7 Scanning</p>
-              </div>
-              <div className="text-center">
-                <div className="bg-primary/10 p-3 rounded-lg mx-auto w-fit mb-2">
-                  <svg className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
-                </div>
-                <p className="text-xs text-muted-foreground font-medium">Smart DMs</p>
-              </div>
-            </div>
           </CardContent>
-
-          <CardFooter className="text-center px-6 pb-6">
-            <div className="w-full">
-              <div className="bg-secondary/30 p-4 rounded-lg border">
-                <p className="text-sm text-muted-foreground mb-2">
-                  Join thousands of businesses finding their next customers on Reddit
-                </p>
-                <div className="flex justify-center gap-4 text-xs text-muted-foreground">
-                  <span>✓ Secure OAuth</span>
-                  <span>✓ Privacy First</span>
-                </div>
-              </div>
-
-              <p className="text-sm text-muted-foreground mt-4">
-                Ready to transform your lead generation?{" "}
-              </p>
-            </div>
-          </CardFooter>
         </Card>
       </div>
     </div>

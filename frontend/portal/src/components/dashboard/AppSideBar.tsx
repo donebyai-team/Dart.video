@@ -60,23 +60,23 @@ export function AppSidebar() {
             <SidebarHeader className="p-4 border-b border-border">
                 <div className="flex items-center gap-2">
                     <Link href="/dashboard" className="flex items-center gap-2 px-2">
-                        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                            <Video className="w-4 h-4 text-primary-foreground" />
-                        </div>
+                        <span className="text-lg font-semibold text-gray-900">
+                            dart<span className="text-gray-500">.video</span>
+                        </span>
                     </Link>
-                    <span className="font-semibold text-lg">CoasterAI</span>
+
                     {/* <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={toggleSidebar}
-                    >
-                        {isMobile && openMobile ? (
-                            <X className="h-4 w-4" />
-                        ) : (
-                            <PanelLeft className="h-4 w-4" />
-                        )}
-                    </Button> */}
+    variant="ghost"
+    size="icon"
+    className="h-8 w-8"
+    onClick={toggleSidebar}
+  >
+    {isMobile && openMobile ? (
+      <X className="h-4 w-4" />
+    ) : (
+      <PanelLeft className="h-4 w-4" />
+    )}
+  </Button> */}
                 </div>
             </SidebarHeader>
             <SidebarContent className="flex-grow">
@@ -101,7 +101,7 @@ export function AppSidebar() {
 
             {/* ---------------- Footer ---------------- */}
             <SidebarFooter className="p-4 border-t border-border">
-                 <WorkspaceSwitcher />  
+                <WorkspaceSwitcher />
                 <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
                         <span className="text-sm font-medium"></span>
