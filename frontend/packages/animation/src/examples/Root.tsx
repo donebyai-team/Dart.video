@@ -9,8 +9,7 @@ import { SpeedFactorProvider } from "../duration";
 import { ASPECT_PRESETS, resolveStyle, AspectPresetProvider, StyleContextProvider } from "../styles";
 import { BrandTheme, darkTheme, ThemeProvider } from "../theme";
 import { AnimatedVideo } from "../components/scenes/assets/AnimatedVideo";
-import { ImagePeel, ListReveal, LogoAsset, LogoShowcase } from "../components/scenes";
-import { IconShowcase } from "../components/scenes/assets/IconShowcase";
+import { ImagePeel, LogoAsset, LogoShowcase } from "../components/scenes";
 
 
 const BRAND: BrandTheme = {
@@ -167,10 +166,7 @@ const TextComponentsScene: React.FC = () => (
                     />
 
                     <TextHighlight id="texthighlight-0" text="Can your AI actually work with you?" /> */}
-                    {/* <TextStagger id="textstagger-0" text="All teams are stretched thin." /> */}
-                    <ListReveal 
-                      items={["Design Me", "Build Me", "Ship Me", "Iterate Me"]}
-                    />
+                    <TextStagger id="textstagger-0" text="All teams are stretched thin." />                    
                 {/* </Stack> */}
             </AbsoluteCenter>
         </SafeArea>
