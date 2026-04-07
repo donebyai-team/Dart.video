@@ -204,7 +204,8 @@ export function calculateImagePeelDuration(props: ImagePeelProps): DurationResul
 export const ImagePeelDescriptor: ComponentRegistration = {
     name: 'ImagePeel',
     type: 'scene',
+    tags: ['Solution', 'Product Info'],
     fullSchema: ImagePeelSchema,
-    description: 'Stacked images that peel away one-by-one to reveal the next. Use for before/after comparisons, product variations, or image galleries. Required props: sources={["attachment url", "attachment url", "attachment url"]}. Minimum 2 images required.',
+    description: 'Images peel away one by one. Use for before/after or variations. Min 2 images.',
     calculateDuration: calculateImagePeelDuration,
 };

@@ -136,7 +136,8 @@ export function calculateLogoWithBrandNameDuration(props: LogoWithBrandNameProps
 export const LogoWithBrandNameDescriptor: ComponentRegistration = {
     name: 'LogoWithBrandName',
     type: 'scene',
+    tags: ['Hook', 'Intro'],
     fullSchema: LogoWithBrandNameSchema,
-    description: 'Displays a logo alongside brand name text that fades in character-by-character. Use for brand introductions or company presentations. Required props: brandName="CoasterAI". Optional: src for custom logo (uses theme logo if omitted). The brand name animates in one character at a time for dramatic effect.',
+    description: 'Logo + brand name reveal. Use for brand intro.',
     calculateDuration: calculateLogoWithBrandNameDuration,
 };

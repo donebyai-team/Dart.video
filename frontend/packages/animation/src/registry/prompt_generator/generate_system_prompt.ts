@@ -113,6 +113,7 @@ interface PropJson {
 
 interface ComponentJson {
   name: string;
+  tags: string[];
   id: string;
   description: string;
   props: PropJson[];
@@ -135,7 +136,7 @@ function componentToJson(c: ComponentRegistration): ComponentJson {
     const prop: PropJson = {
       name: key,
       type: describeZodType(zodField),
-      required: !zodField.isOptional(),
+      required: !(zodField instanceof z.ZodOptional),
       subtype: getArraySubtype(zodField),
     };
 
@@ -147,7 +148,7 @@ function componentToJson(c: ComponentRegistration): ComponentJson {
     props.push(prop);
   }
 
-  return { name: c.name, id: c.name.toLocaleLowerCase(), description: c.description, props };
+  return { name: c.name, tags: c.tags || [], id: c.name.toLocaleLowerCase(), description: c.description, props };
 }
 
 function getComponentGroupsJson(): ComponentGroupJson[] {

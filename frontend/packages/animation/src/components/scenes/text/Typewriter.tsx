@@ -119,8 +119,8 @@ export function Typewriter(propsInit: TypewriterProps): React.ReactElement {
 
 export const TypewriterSchema = z.object({
   id: z.string().optional(),
-  startAt: z.number().default(0).optional(),
   text: z.string().default(''),
+  startAt: z.number().default(0).optional(),
   splitBy: z.enum(SPLIT_BY_MODES).default(DEFAULT_SPLIT_BY).optional(),
   variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
   entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
@@ -174,6 +174,6 @@ export const TypewriterDescriptor: ComponentRegistration = {
   name: 'Typewriter',
   type: 'content',
   fullSchema: TypewriterSchema,
-  description: 'Reveals text character-by-character like a typewriter. Use for dramatic reveals or code/terminal effects. Required props: text="Building the future of AI". Optional: mode="char" (default), "word", or "line" to control typing granularity.',
+  description: 'Character-by-character text reveal. Use for dramatic reveals or code/terminal effects.',
   calculateDuration: calculateTypewriterDuration,
 };

@@ -5,23 +5,26 @@
     "components": [
       {
         "name": "AnimatedNumber",
+        "tags": [],
         "id": "animatednumber",
-        "description": "Animated counter that counts from one number to another with text labels. Use for metrics, statistics, KPIs. Required props: startText=\"Solved\", endText=\"incidents\", to={12450}. Optional: from (default 0), format (e.g. \"0,0\" for thousands separator).",
+        "description": "Counting metric with label text. Use for stats and KPIs",
         "props": [
           {
             "name": "startText",
             "type": "string",
-            "required": true
+            "required": true,
+            "default": ""
           },
           {
             "name": "endText",
             "type": "string",
-            "required": true
+            "required": true,
+            "default": ""
           },
           {
             "name": "from",
             "type": "number",
-            "required": false,
+            "required": true,
             "default": 0
           },
           {
@@ -67,18 +70,21 @@
       },
       {
         "name": "TextStagger",
+        "tags": [],
         "id": "textstagger",
-        "description": "Reveals text word-by-word or character-by-character with staggered animation delays. Use for multi-word headlines or body text. Required props: text=\"Transform your workflow with AI\". Each unit animates in sequence with configurable delay. Set splitBy=\"char\" for character-level animation.",
+        "description": "word-by-word reveal. Use for headlines or supporting copy",
         "props": [
-          {
-            "name": "startAt",
-            "type": "number",
-            "required": false
-          },
           {
             "name": "text",
             "type": "string",
-            "required": true
+            "required": true,
+            "default": ""
+          },
+          {
+            "name": "startAt",
+            "type": "number",
+            "required": false,
+            "default": 0
           },
           {
             "name": "variant",
@@ -114,19 +120,21 @@
       },
       {
         "name": "Typewriter",
+        "tags": [],
         "id": "typewriter",
-        "description": "Reveals text character-by-character like a typewriter. Use for dramatic reveals or code/terminal effects. Required props: text=\"Building the future of AI\". Optional: mode=\"char\" (default), \"word\", or \"line\" to control typing granularity.",
+        "description": "Character-by-character text reveal. Use for dramatic reveals or code/terminal effects.",
         "props": [
+          {
+            "name": "text",
+            "type": "string",
+            "required": true,
+            "default": ""
+          },
           {
             "name": "startAt",
             "type": "number",
             "required": false,
             "default": 0
-          },
-          {
-            "name": "text",
-            "type": "string",
-            "required": true
           },
           {
             "name": "splitBy",
@@ -150,13 +158,15 @@
       },
       {
         "name": "TextHighlight",
+        "tags": [],
         "id": "texthighlight",
-        "description": "Displays text with highlighted portions that zoom/pulse for emphasis. Use to draw attention to key words or phrases. Required props: text=\"Increase revenue by {300%}\", wrap the word to highlight in {}. The pattern can be a word or phrase to highlight within the text.",
+        "description": "Bold statement with an emphasized word/phrase. Use for key claims.",
         "props": [
           {
             "name": "text",
             "type": "string",
-            "required": true
+            "required": true,
+            "default": ""
           },
           {
             "name": "variant",
@@ -197,14 +207,16 @@
       },
       {
         "name": "TextCycle",
+        "tags": [],
         "id": "textcycle",
-        "description": "Cycles through multiple text strings or words with smooth transitions. Use for rotating taglines, benefits, or features. Required props: texts={[\"Build faster with AI\", \"Deploy with confidence\", \"Scale without limits\"]}. Each text displays briefly then transitions to the next.",
+        "description": "rotating text strings. Use for taglines or feature lists",
         "props": [
           {
             "name": "texts",
             "type": "array",
             "required": true,
-            "subtype": "string"
+            "subtype": "string",
+            "default": []
           },
           {
             "name": "holdDuration",
@@ -234,13 +246,18 @@
       },
       {
         "name": "AnimatedImage",
+        "tags": [
+          "Solution",
+          "Product Info"
+        ],
         "id": "animatedimage",
-        "description": "Displays a text label above an image with entrance animation. Use for product showcases, feature highlights, or visual content. Required props: text=\"New Product Launch\", src=\"attachment url\". The text animates in first, then the image follows.",
+        "description": "Label + image entrance. Use for product/feature visuals.",
         "props": [
           {
             "name": "text",
             "type": "string",
-            "required": true
+            "required": true,
+            "default": ""
           },
           {
             "name": "src",
@@ -258,12 +275,6 @@
             "type": "enum(fadeIn|slideUp|slideDown|slideLeft|slideRight|scaleIn|rotateIn)",
             "required": false,
             "default": "slideUp"
-          },
-          {
-            "name": "borderRadius",
-            "type": "number",
-            "required": false,
-            "default": 16
           },
           {
             "name": "width",
@@ -281,13 +292,18 @@
       },
       {
         "name": "AnimatedVideo",
+        "tags": [
+          "Solution",
+          "Product Info"
+        ],
         "id": "animatedvideo",
-        "description": "Displays a text label above a video with entrance animation. Use for demo videos, testimonials, or video content. Required props: text=\"Watch Demo\", src=\"attachment video url\". The text animates in first, then the video follows.",
+        "description": "Label + video entrance. Duration = video length.",
         "props": [
           {
             "name": "text",
             "type": "string",
-            "required": true
+            "required": true,
+            "default": ""
           },
           {
             "name": "src",
@@ -307,12 +323,6 @@
             "default": "slideUp"
           },
           {
-            "name": "borderRadius",
-            "type": "number",
-            "required": false,
-            "default": 16
-          },
-          {
             "name": "width",
             "type": "number",
             "required": false,
@@ -328,8 +338,12 @@
       },
       {
         "name": "ImagePeel",
+        "tags": [
+          "Solution",
+          "Product Info"
+        ],
         "id": "imagepeel",
-        "description": "Stacked images that peel away one-by-one to reveal the next. Use for before/after comparisons, product variations, or image galleries. Required props: sources={[\"attachment url\", \"attachment url\", \"attachment url\"]}. Minimum 2 images required.",
+        "description": "Images peel away one by one. Use for before/after or variations. Min 2 images.",
         "props": [
           {
             "name": "images",
@@ -383,8 +397,11 @@
       },
       {
         "name": "LogoAsset",
+        "tags": [
+          "CTA"
+        ],
         "id": "logoasset",
-        "description": "Displays a logo with entrance animation. Use for brand intros or logo reveals. Optional props: src=\"attachment url\" (uses theme logo if omitted), animation=\"zoomIn\" (options: fadeIn, zoomIn, bounceIn, spinIn, dropIn, none). Set animation=\"none\" for instant display.",
+        "description": "Logo reveal. Default is brand logo, no props. Use as the final scene.",
         "props": [
           {
             "name": "src",
@@ -411,14 +428,56 @@
         ]
       },
       {
+        "name": "LogoShowcase",
+        "tags": [
+          "Solution",
+          "Product Info",
+          "Social proof"
+        ],
+        "id": "logoshowcase",
+        "description": "Row of logos + caption. Use for integrations, tech stack, partners, brands. eg. logos=[\"url1\", \"url2\"], text=\"caption text\".",
+        "props": [
+          {
+            "name": "images",
+            "type": "array",
+            "required": true,
+            "subtype": "string",
+            "default": []
+          },
+          {
+            "name": "text",
+            "type": "string",
+            "required": true,
+            "default": ""
+          },
+          {
+            "name": "variant",
+            "type": "enum(caption|label|body|subheading|heading|display)",
+            "required": false,
+            "default": "heading"
+          },
+          {
+            "name": "logoGap",
+            "type": "number",
+            "required": false,
+            "default": 48
+          }
+        ]
+      },
+      {
         "name": "LogoWithBrandName",
+        "tags": [
+          "Hook",
+          "Intro"
+        ],
         "id": "logowithbrandname",
-        "description": "Displays a logo alongside brand name text that fades in character-by-character. Use for brand introductions or company presentations. Required props: brandName=\"CoasterAI\". Optional: src for custom logo (uses theme logo if omitted). The brand name animates in one character at a time for dramatic effect.",
+        "description": "Logo + brand name reveal. Use for brand intro.",
         "props": [
           {
             "name": "brandName",
             "type": "string",
-            "required": true
+            "required": true,
+            "default": ""
           },
           {
             "name": "src",
@@ -441,19 +500,26 @@
       },
       {
         "name": "IconShowcase",
+        "tags": [
+          "Solution",
+          "Product Info",
+          "Social proof"
+        ],
         "id": "iconshowcase",
-        "description": "Displays a row of animated icons representing technologies, social proof, integrations, or partners with a short descriptive text. Required props: icons={[\"shopify\", \"midjourney\", \"openai\"]}, text=\"Startups are getting 10× productivity with Cursor\".",
+        "description": "Row of icons + caption. Use for integrations, tech stack, partners, brands. eg. icons={[\"shopify\", \"midjourney\", \"openai\"]}, text=\"caption text\".",
         "props": [
           {
             "name": "icons",
             "type": "array",
             "required": true,
-            "subtype": "icon"
+            "subtype": "string",
+            "default": []
           },
           {
             "name": "text",
             "type": "string",
-            "required": true
+            "required": true,
+            "default": ""
           },
           {
             "name": "variant",

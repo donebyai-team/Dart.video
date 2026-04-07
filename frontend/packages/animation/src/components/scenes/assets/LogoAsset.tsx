@@ -191,7 +191,8 @@ export function calculateLogoAssetDuration(props: LogoAssetProps): DurationResul
 export const LogoAssetDescriptor: ComponentRegistration = {
     name: 'LogoAsset',
     type: 'brand',
+    tags: ['CTA'],
     fullSchema: LogoAssetSchema,
-    description: 'Displays a logo with entrance animation. Use for brand intros or logo reveals. Optional props: src="attachment url" (uses theme logo if omitted), animation="zoomIn" (options: fadeIn, zoomIn, bounceIn, spinIn, dropIn, none). Set animation="none" for instant display.',
+    description: 'Logo reveal. Default is brand logo, no props. Use as the final scene.',
     calculateDuration: calculateLogoAssetDuration,
 };

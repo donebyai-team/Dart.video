@@ -26,9 +26,9 @@ const DEFAULT_VARIANT = 'heading' as const;
 
 export const TextCycleSchema = z.object({
   id: z.string().optional(),
-  texts: z.array(z.string()).min(1, "texts must contain at least one item"),
-  holdDuration: z.number().min(0, "holdDuration cannot be negative").default(DEFAULT_HOLD_DURATION).optional(),
-  transitionDuration: z.number().min(0, "transitionDuration cannot be negative").default(DEFAULT_TRANSITION_DURATION).optional(),
+  texts: z.array(z.string()).default([]),
+  holdDuration: z.number().default(DEFAULT_HOLD_DURATION).optional(),
+  transitionDuration: z.number().default(DEFAULT_TRANSITION_DURATION).optional(),
   transition: z.enum(TEXT_CYCLE_TRANSITIONS).default(DEFAULT_TRANSITION).optional(),
   variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
   style: z.any().optional(),
@@ -248,6 +248,6 @@ export const TextCycleDescriptor: ComponentRegistration = {
   name: 'TextCycle',
   type: 'content',
   fullSchema: TextCycleSchema,
-  description: 'Cycles through multiple text strings or words with smooth transitions. Use for rotating taglines, benefits, or features. Required props: texts={["Build faster with AI", "Deploy with confidence", "Scale without limits"]}. Each text displays briefly then transitions to the next.',
+  description: 'rotating text strings. Use for taglines or feature lists',
   calculateDuration: calculateTextCycleDuration,
 };

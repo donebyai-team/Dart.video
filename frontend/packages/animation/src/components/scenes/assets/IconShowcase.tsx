@@ -212,7 +212,8 @@ export function calculateIconShowcaseDuration(props: Record<string, any>): Durat
 export const IconShowcaseDescriptor: ComponentRegistration = {
     name: 'IconShowcase',
     type: 'scene',
+    tags: ['Solution', 'Product Info', 'Social proof'],
     fullSchema: IconShowcaseSchema,
-    description: 'Displays a row of animated icons representing technologies, social proof, integrations, or partners with a short descriptive text. Required props: icons={["shopify", "midjourney", "openai"]}, text="Startups are getting 10× productivity with Cursor".',
+    description: 'Row of icons + caption. Use for integrations, tech stack, partners, brands. eg. icons={["shopify", "midjourney", "openai"]}, text="caption text".',
     calculateDuration: calculateIconShowcaseDuration,
 };

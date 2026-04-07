@@ -17,10 +17,11 @@ type ComponentGroup struct {
 }
 
 type Component struct {
-	Name        string `json:"name"`
-	ID          string `json:"id"`
-	Description string `json:"description"`
-	Props       []Prop `json:"props"`
+	Name        string   `json:"name"`
+	Tags        []string `json:"tags"`
+	ID          string   `json:"id"`
+	Description string   `json:"description"`
+	Props       []Prop   `json:"props"`
 }
 
 type Prop struct {
@@ -41,41 +42,59 @@ func BuildScenesList(requiredOnly bool, excludeProps []string) string {
 		exclude[p] = true
 	}
 
-	var b strings.Builder
-
+	// Find the Scenes group
+	var components []Component
 	for _, g := range componentGroups {
-
-		fmt.Fprintf(&b, "## %s — %s\n\n", g.Title, g.Description)
-
-		for _, c := range g.Components {
-
-			fmt.Fprintf(&b, "### %s\n", c.Name)
-			fmt.Fprintf(&b, "%s\n", c.Description)
-			fmt.Fprintf(&b, "Props:\n")
-
-			for _, p := range c.Props {
-
-				if requiredOnly && !p.Required {
-					continue
-				}
-
-				if exclude[p.Name] {
-					continue
-				}
-
-				req := ""
-				if p.Required {
-					req = " (required)"
-				}
-
-				fmt.Fprintf(&b, "- %s: %s%s\n", p.Name, p.Type, req)
-			}
-
-			b.WriteString("\n")
+		if g.Title == "Scenes" {
+			components = g.Components
+			break
 		}
 	}
 
+	var sectional, filler []Component
+	for _, c := range components {
+		if len(c.Tags) > 0 {
+			sectional = append(sectional, c)
+		} else {
+			filler = append(filler, c)
+		}
+	}
+
+	var b strings.Builder
+
+	b.WriteString("## Available Scenes\n\n")
+
+	b.WriteString("### Sectional — prefer for opening/closing of each section\n\n")
+	for _, c := range sectional {
+		fmt.Fprintf(&b, "%s | %s\n", c.Name, strings.Join(c.Tags, ", "))
+		fmt.Fprintf(&b, "%s\n", c.Description)
+		fmt.Fprintf(&b, "Props: %s\n\n", buildPropsInline(c.Props, requiredOnly, exclude))
+	}
+
+	b.WriteString("### Filler — use anywhere, not tied to a specific section\n\n")
+	for _, c := range filler {
+		fmt.Fprintf(&b, "%s — %s Props: %s\n\n", c.Name, c.Description, buildPropsInline(c.Props, requiredOnly, exclude))
+	}
+
 	return b.String()
+}
+
+func buildPropsInline(props []Prop, requiredOnly bool, exclude map[string]bool) string {
+	var parts []string
+	for _, p := range props {
+		if exclude[p.Name] {
+			continue
+		}
+		if requiredOnly && !p.Required {
+			continue
+		}
+		entry := fmt.Sprintf("%s: %s", p.Name, p.Type)
+		if p.Required {
+			entry += "*"
+		}
+		parts = append(parts, entry)
+	}
+	return strings.Join(parts, "  ")
 }
 
 func loadComponents() error {

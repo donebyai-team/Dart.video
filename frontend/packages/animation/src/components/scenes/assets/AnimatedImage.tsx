@@ -151,7 +151,8 @@ export function calculateAnimatedImageDuration(props: AnimatedImageProps): Durat
 export const AnimatedImageDescriptor: ComponentRegistration = {
     name: 'AnimatedImage',
     type: 'scene',
+    tags: ['Solution', 'Product Info'],
     fullSchema: AnimatedImageSchema,
-    description: 'Displays a text label above an image with entrance animation. Use for product showcases, feature highlights, or visual content. Required props: text="New Product Launch", src="attachment url". The text animates in first, then the image follows.',
+    description: 'Label + image entrance. Use for product/feature visuals.',
     calculateDuration: calculateAnimatedImageDuration,
 };

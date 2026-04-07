@@ -141,7 +141,8 @@ export function calculateAnimatedVideoDuration(props: AnimatedVideoProps): Durat
 export const AnimatedVideoDescriptor: ComponentRegistration = {
     name: 'AnimatedVideo',
     type: 'scene',
+    tags: ['Solution', 'Product Info'],
     fullSchema: AnimatedVideoSchema,
-    description: 'Displays a text label above a video with entrance animation. Use for demo videos, testimonials, or video content. Required props: text="Watch Demo", src="attachment video url". The text animates in first, then the video follows.',
+    description: 'Label + video entrance. Duration = video length.',
     calculateDuration: calculateAnimatedVideoDuration,
 };

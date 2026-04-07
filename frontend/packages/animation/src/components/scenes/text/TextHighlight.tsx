@@ -264,6 +264,6 @@ export const TextHighlightDescriptor: ComponentRegistration = {
     name: 'TextHighlight',
     type: 'content',
     fullSchema: TextHighlightSchema,
-    description: 'Displays text with highlighted portions that zoom/pulse for emphasis. Use to draw attention to key words or phrases. Required props: text="Increase revenue by {300%}", wrap the word to highlight in {}. The pattern can be a word or phrase to highlight within the text.',
+    description: 'Bold statement with an emphasized word/phrase. Use for key claims.',
     calculateDuration: calculateTextHighlightDuration,
 };

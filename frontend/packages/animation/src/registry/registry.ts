@@ -22,6 +22,7 @@ export type DurationResult =
 export interface ComponentRegistration {
   /** Exact JSX component name as LLM writes it. Used for scope injection and AST ID assignment. */
   name: string;
+  tags?: string[];
   type: ComponentType;
   /** Zod schema for all props (type safety, patch validation). */
   fullSchema: z.ZodObject<z.ZodRawShape>;

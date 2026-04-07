@@ -219,6 +219,6 @@ export const AnimatedNumberDescriptor: ComponentRegistration = {
     name: 'AnimatedNumber',
     type: 'content',
     fullSchema: AnimatedNumberSchema,
-    description: 'Animated counter that counts from one number to another with text labels. Use for metrics, statistics, KPIs. Required props: startText="Solved", endText="incidents", to={12450}. Optional: from (default 0), format (e.g. "0,0" for thousands separator).',
+    description: 'Counting metric with label text. Use for stats and KPIs',
     calculateDuration: calculateAnimatedNumberDuration,
 };

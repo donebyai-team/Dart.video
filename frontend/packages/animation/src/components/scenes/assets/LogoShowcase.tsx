@@ -186,7 +186,8 @@ export function calculateLogoShowcaseDuration(props: Record<string, any>): Durat
 export const LogoShowcaseDescriptor: ComponentRegistration = {
     name: 'LogoShowcase',
     type: 'scene',
+    tags: ['Solution', 'Product Info', 'Social proof'],
     fullSchema: LogoShowcaseSchema,
-    description: 'Displays centered text first, followed by logos appearing one-by-one in a consistent wrapped layout with up to 5 logos per row. Required props: text="Trusted by leading teams", logos=["https://.../logo1.svg", "https://.../logo2.svg"].',
+    description: 'Row of logos + caption. Use for integrations, tech stack, partners, brands. eg. logos=["url1", "url2"], text="caption text".',
     calculateDuration: calculateLogoShowcaseDuration,
 };
