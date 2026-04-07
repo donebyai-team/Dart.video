@@ -14,8 +14,8 @@ import NotificationProvider from '@/components/layout/notification'
 // const amplitudeApiKey = process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY || '';
 
 export const metadata = {
-  title: 'CoasterAI',
-  description: ''
+  title: 'dart.video',
+  description: 'Turn features into videos'
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
