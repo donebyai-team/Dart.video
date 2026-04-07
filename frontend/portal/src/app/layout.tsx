@@ -10,23 +10,23 @@ import { NextElementRegistryProvider } from '../context/NextElementRegistryProvi
 import { PortalClientProvider } from '../provider/PortalClientProvider'
 import { PortalExecutionRuntimeProvider } from '../provider/PortalExecutionRuntimeProvider'
 import NotificationProvider from '@/components/layout/notification'
+import type { Metadata } from "next";
 
-// const amplitudeApiKey = process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY || '';
-
-export const metadata = {
-  title: 'dart.video',
-  description: 'Turn features into videos'
-}
+export const metadata: Metadata = {
+  title: "dart.video",
+  description: "Turn features into videos",
+  robots: {
+    index: true,
+    follow: true,
+  },
+  icons: {
+    icon: "/images/favicon.ico",
+  },
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang='en'>
-      <head>
-        <meta name='robots' content='noindex,follow' />
-        <link rel="icon" href="/images/favicon.ico" />
-        <title>CoasterAI</title>
-      </head>
-
+    <html lang='en'>     
       <body>
           <NextElementRegistryProvider>
             <ConfigGuard fallback={<FallbackSpinner />}>
