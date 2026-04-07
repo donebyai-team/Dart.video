@@ -1,7 +1,8 @@
 import { portalClient } from "@/services/grpc";
 import { getConnectError } from "@/utils/error";
 import { VideoStoreGet, VideoStoreSet } from "./types";
-import { Video } from "@coasterai/pb/coasterai/core/v1/video_pb";
+import { Video, VideoSchema } from "@coasterai/pb/coasterai/core/v1/video_pb";
+import { clone } from "@bufbuild/protobuf";
 import { createSlideEntityId } from "@/types/selection";
 import { getSections } from "./utils";
 import { ensureVideoResolution } from "./defaults";
@@ -64,7 +65,7 @@ export const createStreamingActions = (set: VideoStoreSet, get: VideoStoreGet) =
             // if (!currentState.hasPendingChanges) {
             set({
               videoConfig: safeVideo,
-              acceptedVideoConfig: structuredClone(safeVideo),
+              acceptedVideoConfig: clone(VideoSchema, safeVideo),
               hasPendingChanges: false,
             });
             // }

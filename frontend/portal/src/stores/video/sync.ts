@@ -1,4 +1,4 @@
-import { equals } from "@bufbuild/protobuf";
+import { equals, clone } from "@bufbuild/protobuf";
 import { createSlideEntityId } from "@/types/selection";
 import { portalClient } from "@/services/grpc";
 import toast from "react-hot-toast";
@@ -64,7 +64,7 @@ export const createSyncActions = (set: VideoStoreSet, get: VideoStoreGet) => {
                 !equals(VideoSchema, acceptedVideoConfig, videoConfig)
             );
 
-            //  logChanges(acceptedVideoConfig!, videoConfig!);
+            logChanges(acceptedVideoConfig!, videoConfig!);
 
             set({ hasPendingChanges });
         },
@@ -84,7 +84,7 @@ export const createSyncActions = (set: VideoStoreSet, get: VideoStoreGet) => {
                     name: videoToAccept.name,
                 });
 
-                const acceptedVideoConfig = structuredClone(videoToAccept);
+                const acceptedVideoConfig = clone(VideoSchema, videoToAccept);
                 const currentVideoConfig = get().videoConfig;
                 set({
                     acceptedVideoConfig,
@@ -107,7 +107,7 @@ export const createSyncActions = (set: VideoStoreSet, get: VideoStoreGet) => {
             const { acceptedVideoConfig, selectedSlide } = get();
             if (!acceptedVideoConfig) return;
 
-            const restoredVideoConfig = structuredClone(acceptedVideoConfig);
+            const restoredVideoConfig = clone(VideoSchema, acceptedVideoConfig);
 
             let nextSelectedSlide = getInitialSelection(restoredVideoConfig);
             if (selectedSlide) {

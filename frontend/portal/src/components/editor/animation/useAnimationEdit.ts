@@ -57,9 +57,13 @@ export function useAnimationEdit(): UseAnimationEditReturn {
     ; (window as any).__PATCH_OVERLAY__ = overlay
   }, [overlay])
 
+  // Track the slideId that was last loaded to avoid persisting on initial load
+  const loadedSlideIdRef = useRef<string | undefined>(undefined)
+
   // ── Load saved overlay when slide changes and set initial overlay─────────────────────────────────
   useEffect(() => {
     isLoadingRef.current = true
+    loadedSlideIdRef.current = slideId
     setSelectedEid(null)
     setAnimEditVersion(0)
 
@@ -110,12 +114,17 @@ export function useAnimationEdit(): UseAnimationEditReturn {
   useEffect(() => () => debouncedPersist?.cancel?.(), [debouncedPersist])
 
   useEffect(() => {
+    // Skip persisting if we just loaded this slide (initial load or slide switch)
     if (isLoadingRef.current) {
       isLoadingRef.current = false
       return
     }
+    // Only persist if slideId matches what we loaded (prevents stale persists)
+    if (slideId !== loadedSlideIdRef.current) {
+      return
+    }
     debouncedPersist(overlay)
-  }, [overlay, debouncedPersist])
+  }, [overlay, debouncedPersist, slideId])
 
   const flushPersist = useCallback(() => {
     debouncedPersist.cancel?.()

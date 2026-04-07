@@ -1,8 +1,9 @@
 import { createSlideEntityId } from "@/types/selection";
 import { VideoStoreSet, VideoStoreGet } from "./types";
 import { EditorConfig } from "@/types/editor";
-import { Video } from "@coasterai/pb/coasterai/core/v1/video_pb";
+import { Video, VideoSchema } from "@coasterai/pb/coasterai/core/v1/video_pb";
 import { ensureVideoResolution, getInitialSelection } from "./defaults";
+import { clone } from "@bufbuild/protobuf";
 
 export const createInitActions = (
   set: VideoStoreSet,
@@ -26,7 +27,7 @@ export const createInitActions = (
 
     set({
       videoConfig: newVideoConfig,
-      acceptedVideoConfig: structuredClone(newVideoConfig),
+      acceptedVideoConfig: clone(VideoSchema, newVideoConfig),
       hasPendingChanges: false,
       selectedEntityId: createSlideEntityId(firstSlideId),
       selectedSlide,

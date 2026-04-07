@@ -1,6 +1,5 @@
 import { EditorConfig} from "@/types/editor";
 import { ActiveToolType, SelectedTool } from "@/types/tools";
-import { create } from "@bufbuild/protobuf";
 import {
     AnimationSlideContentSchema,
     BackgroundStyle,
@@ -14,7 +13,8 @@ import {
     ZoomEffect,
     ZoomEffectSchema,
 } from "@coasterai/pb/coasterai/core/v1/slide_pb";
-import { Resolution, ResolutionSchema, Video, VideoMetadata, VideoMetadataSchema } from "@coasterai/pb/coasterai/core/v1/video_pb";
+import { Resolution, ResolutionSchema, Video, VideoMetadata, VideoMetadataSchema, VideoSchema } from "@coasterai/pb/coasterai/core/v1/video_pb";
+import { clone, create } from "@bufbuild/protobuf";
 import { SelectedSection } from "./types";
 import { TRANSITION_DURATION_FRAMES } from "@coasterai/renderer/src/frameUtils";
 
@@ -186,23 +186,21 @@ export const ensureVideoResolution = (
 
     const defaultResolution = getDefaultResolution(config);
 
-    // If metadata missing → create full metadata
+    // If metadata missing → clone video and add full metadata
     if (!video.metadata) {
-        return {
-            ...video,
-            metadata: getDefaulVideotMetadata(config),
-        };
+        const cloned = clone(VideoSchema, video);
+        cloned.metadata = getDefaulVideotMetadata(config);
+        return cloned;
     }
 
-    // If resolution missing → clone + inject resolution
+    // If resolution missing → clone video and inject resolution
     if (!video.metadata.resolution) {
-        return {
-            ...video,
-            metadata: create(VideoMetadataSchema, {
-                ...video.metadata,
-                resolution: defaultResolution,
-            }),
-        };
+        const cloned = clone(VideoSchema, video);
+        cloned.metadata = create(VideoMetadataSchema, {
+            ...video.metadata,
+            resolution: defaultResolution,
+        });
+        return cloned;
     }
 
     // Already valid → return original (important for avoiding extra renders)
