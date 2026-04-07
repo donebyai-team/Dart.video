@@ -229,6 +229,7 @@ func (p *Portal) streamAgentRun(
 			if err := stream.Send(&pbportal.CreateVideoResponse{
 				Id:                videoID,
 				PlanningCompleted: true,
+				ThinkingSummary:   "",
 			}); err != nil {
 				return nil
 			}

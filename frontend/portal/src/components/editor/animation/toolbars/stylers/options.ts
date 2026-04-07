@@ -21,6 +21,16 @@ export const LETTER_SPACING_OPTIONS = [
   { label: 'Wide', value: '0.025em' },
 ]
 
+/** Text alignment options matching CSS textAlign property. */
+export const TEXT_ALIGN_OPTIONS = [
+  { label: 'Left', value: 'left' },
+  { label: 'Center', value: 'center' },
+  { label: 'Right', value: 'right' },
+  { label: 'Justify', value: 'justify' },
+  { label: 'Start', value: 'start' },
+  { label: 'End', value: 'end' },
+]
+
 // ─── Utility: toHex ─────────────────────────────────────────────────────────
 
 export function toHex(color: unknown): string {

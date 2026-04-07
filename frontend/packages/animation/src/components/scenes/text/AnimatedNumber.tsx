@@ -139,14 +139,14 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (propsInit: Animate
                     to={props.to}
                     format={props.format}
                     variant={actualVariant}
-                    startAt={actualAnimationDelay}
+                    startAt={0}
                     style={getHighlightStyles()}
                     durationInFrames={DEFAULT_COUNTER_DURATION}
                 />
             </span>
             <Text text={props.endText} id={`text-right-${props.id}`} style={
                 {
-                    marginLeft: '0.25em',
+                    // marginLeft: '0.25em',
                     ...typographyStyle,
                     ...props.style,
                     ...styleOverride

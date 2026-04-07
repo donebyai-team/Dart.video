@@ -466,12 +466,9 @@
       },
       {
         "name": "LogoWithBrandName",
-        "tags": [
-          "Hook",
-          "Intro"
-        ],
+        "tags": ["Solution"],
         "id": "logowithbrandname",
-        "description": "Logo + brand name reveal. Use for brand intro.",
+        "description": "Logo + brand name reveal. Use for brand intro as a solution.",
         "props": [
           {
             "name": "brandName",

@@ -57,22 +57,23 @@ export const createStreamingActions = (set: VideoStoreSet, get: VideoStoreGet) =
             latestVideo = response.video;
 
             const safeVideo = ensureVideoResolution(response.video, defaultEditorConfig);
-            const currentState = get();
+            // const currentState = get();
 
             // Keep the accepted snapshot aligned with server state until the user
             // starts editing locally.
-            if (!currentState.hasPendingChanges) {
-              set({
-                videoConfig: safeVideo,
-                acceptedVideoConfig: structuredClone(safeVideo),
-                hasPendingChanges: false,
-              });
-            }
+            // if (!currentState.hasPendingChanges) {
+            set({
+              videoConfig: safeVideo,
+              acceptedVideoConfig: structuredClone(safeVideo),
+              hasPendingChanges: false,
+            });
+            // }
 
             const sections = getSections(safeVideo);
             const nextState = get();
 
-            if (!currentState.hasPendingChanges && sections.length > 0) {
+            // if (!currentState.hasPendingChanges && sections.length > 0) {
+            if (sections.length > 0) {
 
               // ✅ Auto select first slide
               if (!nextState.selectedSlide) {
@@ -166,7 +167,7 @@ export const createStreamingActions = (set: VideoStoreSet, get: VideoStoreGet) =
   stopVideoStream: () => {
     // Resolve videoId from current config before we clear state.
     const videoId = get().videoConfig?.id;
-  
+
     // Abort the GetVideo poll stream so the backend ctx.Done() fires and
     // the poll loop exits. The agent itself is NOT stopped by the disconnect —
     // it is stopped only by the explicit StopVideo RPC call below.

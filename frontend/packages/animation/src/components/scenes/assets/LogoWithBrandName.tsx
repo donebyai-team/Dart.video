@@ -136,7 +136,7 @@ export function calculateLogoWithBrandNameDuration(props: LogoWithBrandNameProps
 export const LogoWithBrandNameDescriptor: ComponentRegistration = {
     name: 'LogoWithBrandName',
     type: 'scene',
-    tags: ['Hook', 'Intro'],
+    tags: ['Solution'],
     fullSchema: LogoWithBrandNameSchema,
     description: 'Logo + brand name reveal. Use for brand intro.',
     calculateDuration: calculateLogoWithBrandNameDuration,

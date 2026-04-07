@@ -24,13 +24,13 @@ export function debounce<T extends (...args: any[]) => any>(
     return debounced;
 }
 
-function logChanges(oldObj = {}, newObj = {}, path = "") {
+function logChanges(oldObj: Record<string, unknown> = {}, newObj: Record<string, unknown> = {}, path = "") {
     const keys = new Set([
         ...Object.keys(oldObj),
         ...Object.keys(newObj),
     ]);
 
-    for (const key of keys) {
+    for (const key of Array.from(keys)) {
         const newPath = path ? `${path}.${key}` : key;
 
         const oldVal = oldObj[key];
@@ -42,7 +42,7 @@ function logChanges(oldObj = {}, newObj = {}, path = "") {
             typeof oldVal === "object" &&
             typeof newVal === "object"
         ) {
-            logChanges(oldVal, newVal, newPath);
+            logChanges(oldVal as Record<string, unknown>, newVal as Record<string, unknown>, newPath);
         } else if (!Object.is(oldVal, newVal)) {
             console.log(`Changed: ${newPath}`, {
                 old: oldVal,
@@ -64,7 +64,7 @@ export const createSyncActions = (set: VideoStoreSet, get: VideoStoreGet) => {
                 !equals(VideoSchema, acceptedVideoConfig, videoConfig)
             );
 
-            // logChanges(acceptedVideoConfig!, videoConfig!);
+            //  logChanges(acceptedVideoConfig!, videoConfig!);
 
             set({ hasPendingChanges });
         },

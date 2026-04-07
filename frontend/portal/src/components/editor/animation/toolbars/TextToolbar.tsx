@@ -11,7 +11,7 @@ import { useState } from 'react'
 import { SUPPORTED_FONTS } from '@coasterai/renderer'
 import { DualColorPicker } from './stylers/DualColorPicker'
 import { FontSelector } from './stylers/FontSelector'
-import { FONT_WEIGHT_OPTIONS, LETTER_SPACING_OPTIONS, toHex } from './stylers/options'
+import { FONT_WEIGHT_OPTIONS, LETTER_SPACING_OPTIONS, TEXT_ALIGN_OPTIONS, toHex } from './stylers/options'
 
 /**
  * Reads computed styles from a DOM element by ID.
@@ -45,6 +45,7 @@ function useComputedStyles(elementId?: string) {
       fontFamily: extractFontName(computed.fontFamily || ''),
       fontWeight: computed.fontWeight,
       letterSpacing: computed.letterSpacing,
+      textAlign: computed.textAlign,
     }
   }, [elementId])
 }
@@ -326,6 +327,7 @@ export function TextToolbar({
   const fontFamily = (styleOverride.fontFamily ?? computed.fontFamily) as string | undefined
   const fontWeight = (styleOverride.fontWeight ?? computed.fontWeight) as string | number | undefined
   const letterSpacing = (styleOverride.letterSpacing ?? computed.letterSpacing) as string | undefined
+  const textAlign = (styleOverride.textAlign ?? computed.textAlign) as string | undefined
 
   return (
     <div className="flex items-center gap-3 whitespace-nowrap">
@@ -363,6 +365,16 @@ export function TextToolbar({
           value={String(letterSpacing ?? '0em')}
           options={LETTER_SPACING_OPTIONS}
           onChange={v => onStyleOverride({ letterSpacing: v })}
+          width="w-20"
+        />
+      </LabeledField>
+
+      {/* Align */}
+      <LabeledField label="Align">
+        <SelectInput
+          value={String(textAlign ?? 'left')}
+          options={TEXT_ALIGN_OPTIONS}
+          onChange={v => onStyleOverride({ textAlign: v })}
           width="w-20"
         />
       </LabeledField>
