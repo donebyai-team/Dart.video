@@ -189,21 +189,13 @@ func validateSlideAnimation(content *pbcore.AnimationSlideContent) error {
 		return fmt.Errorf("content is nil")
 	}
 
-	//if content.Registry == nil {
-	//	return fmt.Errorf("registry can't be empty")
-	//}
-
-	if content.CodeRegistry == nil {
+	if content.CodeRegistry == nil || content.CodeRegistry.TUrl == "" || content.CodeRegistry.MUrl == "" {
 		return fmt.Errorf("code registry can't be empty")
 	}
 
-	if content.Edits == nil {
+	if content.Edits == nil || len(content.Edits.Fields) == 0 {
 		return fmt.Errorf("edits can't be empty")
 	}
-
-	//if content.Plan == nil {
-	//	return fmt.Errorf("content plan is required")
-	//}
 
 	return nil
 }
