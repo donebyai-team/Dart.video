@@ -111,8 +111,7 @@ export default function SceneSettings({
           ) : definition.kind === 'string' ? (
             <label key={prop} className="flex flex-col gap-2">
               <span className="text-sm font-medium">{toSceneFieldLabel(prop)}</span>
-              <input
-                type="text"
+              <textarea
                 value={String(value)}
                 onChange={e => onValuePatch(patchEntryId ?? elementId, prop, e.target.value)}
                 className="h-9 px-3 rounded-md border border-border bg-background text-sm focus:outline-none focus:ring-1 focus:ring-ring/50"

@@ -44,6 +44,7 @@ export function Text({
       className={className}
       style={{
         display: 'inline-block',
+        whiteSpace: 'pre-wrap',
         ...resolveTypography(patchedVariant, styleConfig, theme, preset),
         ...style,
         ...styleOverride,

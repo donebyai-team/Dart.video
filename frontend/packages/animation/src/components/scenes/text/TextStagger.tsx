@@ -105,13 +105,13 @@ export const TextStagger: React.FC<TextStaggerProps> = (propsInit: TextStaggerPr
 
 export const TextStaggerSchema = z.object({
     id: z.string().optional(),
-    text: z.string().default(''),
     startAt: z.number().default(0).optional(),
-    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
-    staggerDelay: z.number().default(SPLIT_MODE_DEFAULTS.word.staggerDelay).optional(),
-    entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
-    duration: z.number().default(SPLIT_MODE_DEFAULTS.word.unitDuration).optional(),
-    splitBy: z.enum(SPLIT_BY_MODES).default(DEFAULT_SPLIT_BY).optional(),
+    text: z.string().default(''),
+    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).optional().default(DEFAULT_VARIANT),
+    staggerDelay: z.number().min(0).optional().default(SPLIT_MODE_DEFAULTS.word.staggerDelay),
+    entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).optional().default(DEFAULT_ANIMATION),
+    duration: z.number().optional().default(SPLIT_MODE_DEFAULTS.word.unitDuration),
+    splitBy: z.enum(SPLIT_BY_MODES).optional().default(DEFAULT_SPLIT_BY),
     className: z.string().optional(),
     style: z.any().optional(),
 });
@@ -166,6 +166,6 @@ export const TextStaggerDescriptor: ComponentRegistration = {
     name: 'TextStagger',
     type: 'content',
     fullSchema: TextStaggerSchema,
-    description: 'word-by-word reveal. Use for headlines or supporting copy',
+    description: 'Reveals text word-by-word or character-by-character with staggered animation delays. Use for multi-word headlines or body text. Required props: text="Transform your workflow with AI". Each unit animates in sequence with configurable delay. Set splitBy="char" for character-level animation.',
     calculateDuration: calculateTextStaggerDuration,
 };
