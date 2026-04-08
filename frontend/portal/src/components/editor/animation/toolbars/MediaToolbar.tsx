@@ -1,4 +1,11 @@
 import React, { useMemo } from 'react'
+import {
+  buildDepthShadow,
+  DEFAULT_MEDIA_DEPTH,
+  DEPTH_STYLE_PROPERTY,
+  MAX_ELEMENT_DEPTH,
+  parseDepthFromShadow,
+} from '@coasterai/renderer'
 import { NumberStepper, SelectInput, SliderInput } from './TextToolbar'
 
 const OBJECT_FIT_OPTIONS = [
@@ -8,7 +15,6 @@ const OBJECT_FIT_OPTIONS = [
 ]
 
 interface MediaToolbarProps {
-  mediaKind?: 'image' | 'video';
   styleOverride: Record<string, string | number>
   onStyleOverride: (style: Record<string, string | number>) => void
   selectedElementId?: string
@@ -24,36 +30,29 @@ function useComputedMediaStyles(elementId?: string) {
       objectFit: computed.objectFit as 'contain' | 'cover' | 'fill' | undefined,
       borderRadius: parseFloat(computed.borderRadius) || 0,
       boxShadow: computed.boxShadow,
+      depth: Number(computed.getPropertyValue(DEPTH_STYLE_PROPERTY)) || undefined,
     }
   }, [elementId])
 }
 
-const DEFAULT_SHADOW = 'rgba(0, 0, 0, 0.25)'
-const SHADOW_SPREAD = 0
-const SHADOW_Y_OFFSET = 8
-const MAX_SHADOW_BLUR = 40
+function getDepthValue(
+  styleOverride: Record<string, string | number>,
+  computed: { boxShadow?: string; depth?: number },
+): number {
+  const overrideDepth = Number(styleOverride[DEPTH_STYLE_PROPERTY])
+  if (Number.isFinite(overrideDepth)) return overrideDepth
 
-function parseShadowBlur(boxShadow: string | number | undefined): number {
-  if (typeof boxShadow !== 'string' || boxShadow.trim() === '' || boxShadow === 'none') {
-    return 0
+  if (styleOverride.boxShadow !== undefined) {
+    return parseDepthFromShadow(styleOverride.boxShadow)
   }
 
-  const matches = boxShadow.match(/-?\d+(?:\.\d+)?px/g)
-  if (!matches || matches.length < 3) {
-    return 0
-  }
+  const parsedDepth = parseDepthFromShadow(styleOverride.boxShadow ?? computed.boxShadow)
+  if (parsedDepth > 0) return parsedDepth
 
-  const blur = parseFloat(matches[2])
-  return Number.isFinite(blur) ? blur : 0
-}
-
-function buildShadow(blur: number): string {
-  if (blur <= 0) return 'none'
-  return `0 ${SHADOW_Y_OFFSET}px ${blur}px ${SHADOW_SPREAD}px ${DEFAULT_SHADOW}`
+  return computed.depth ?? DEFAULT_MEDIA_DEPTH
 }
 
 export function MediaToolbar({
-  mediaKind = 'image',
   styleOverride,
   onStyleOverride,
   selectedElementId,
@@ -68,7 +67,7 @@ export function MediaToolbar({
     typeof styleOverride.borderRadius === 'number'
       ? styleOverride.borderRadius
       : Number(styleOverride.borderRadius) || computed.borderRadius || 0
-  const currentShadow = parseShadowBlur(styleOverride.boxShadow ?? computed.boxShadow)
+  const currentDepth = getDepthValue(styleOverride, computed)
 
   return (
     <div className="flex items-center gap-3 whitespace-nowrap">
@@ -81,12 +80,15 @@ export function MediaToolbar({
         />
       </LabeledField>
 
-      <LabeledField label="Shadow">
+      <LabeledField label="Depth">
         <SliderInput
-          value={currentShadow}
-          onChange={value => onStyleOverride({ boxShadow: buildShadow(value) })}
+          value={currentDepth}
+          onChange={value => onStyleOverride({
+            [DEPTH_STYLE_PROPERTY]: value,
+            boxShadow: buildDepthShadow(value),
+          })}
           min={0}
-          max={MAX_SHADOW_BLUR}
+          max={MAX_ELEMENT_DEPTH}
           step={1}
           width="w-24"
         />

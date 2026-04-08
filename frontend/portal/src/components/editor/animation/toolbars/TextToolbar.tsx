@@ -8,7 +8,13 @@
 import React, { useMemo } from 'react'
 import { HexColorPicker } from 'react-colorful'
 import { useState } from 'react'
-import { SUPPORTED_FONTS } from '@coasterai/renderer'
+import {
+  buildDepthTextShadow,
+  DEPTH_STYLE_PROPERTY,
+  MAX_ELEMENT_DEPTH,
+  parseDepthFromShadow,
+  SUPPORTED_FONTS,
+} from '@coasterai/renderer'
 import { DualColorPicker } from './stylers/DualColorPicker'
 import { FontSelector } from './stylers/FontSelector'
 import { FONT_WEIGHT_OPTIONS, LETTER_SPACING_OPTIONS, TEXT_ALIGN_OPTIONS, toHex } from './stylers/options'
@@ -46,8 +52,32 @@ function useComputedStyles(elementId?: string) {
       fontWeight: computed.fontWeight,
       letterSpacing: computed.letterSpacing,
       textAlign: computed.textAlign,
+      boxShadow: computed.boxShadow,
+      textShadow: computed.textShadow,
+      depth: Number(computed.getPropertyValue(DEPTH_STYLE_PROPERTY)) || undefined,
     }
   }, [elementId])
+}
+
+function getDepthValue(
+  styleOverride: Record<string, string | number>,
+  computed: { boxShadow?: string; textShadow?: string; depth?: number },
+): number {
+  const overrideDepth = Number(styleOverride[DEPTH_STYLE_PROPERTY])
+  if (Number.isFinite(overrideDepth)) return overrideDepth
+
+  if (styleOverride.textShadow !== undefined) {
+    return parseDepthFromShadow(styleOverride.textShadow)
+  }
+
+  if (styleOverride.boxShadow !== undefined) {
+    return parseDepthFromShadow(styleOverride.boxShadow)
+  }
+
+  const parsedDepth = parseDepthFromShadow(computed.textShadow ?? computed.boxShadow)
+  if (parsedDepth > 0) return parsedDepth
+
+  return computed.depth ?? 0
 }
 
 /**
@@ -328,6 +358,7 @@ export function TextToolbar({
   const fontWeight = (styleOverride.fontWeight ?? computed.fontWeight) as string | number | undefined
   const letterSpacing = (styleOverride.letterSpacing ?? computed.letterSpacing) as string | undefined
   const textAlign = (styleOverride.textAlign ?? computed.textAlign) as string | undefined
+  const depth = getDepthValue(styleOverride, computed)
 
   return (
     <div className="flex items-center gap-3 whitespace-nowrap">
@@ -376,6 +407,21 @@ export function TextToolbar({
           options={TEXT_ALIGN_OPTIONS}
           onChange={v => onStyleOverride({ textAlign: v })}
           width="w-20"
+        />
+      </LabeledField>
+
+      <LabeledField label="Depth">
+        <SliderInput
+          value={depth}
+          onChange={value => onStyleOverride({
+            [DEPTH_STYLE_PROPERTY]: value,
+            boxShadow: 'none',
+            textShadow: buildDepthTextShadow(value),
+          })}
+          min={0}
+          max={MAX_ELEMENT_DEPTH}
+          step={1}
+          width="w-24"
         />
       </LabeledField>
     </div>

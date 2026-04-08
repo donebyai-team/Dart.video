@@ -4,3 +4,4 @@ export * from './AspectPresetContext';
 export * from './resolveStyle';
 export * from './easingResolver';
 export * from './presets';
+export * from './depth';

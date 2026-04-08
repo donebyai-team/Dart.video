@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Html5Video, OffthreadVideo, useRemotionEnvironment, delayRender, continueRender } from "remotion";
 import { usePatchedDragStyle, usePatchedProp, useStyleOverride } from "../../patches";
 import { useAspectPreset } from "../../styles/AspectPresetContext";
+import { buildDepthShadow, DEFAULT_MEDIA_DEPTH } from "../../styles/depth";
 
 export interface VideoAssetProps {
     src?: string;
@@ -82,7 +83,7 @@ export function VideoAsset({
                 height: resolvedBoxHeight,
                 borderRadius: 16,
                 overflow: 'hidden',
-                boxShadow: "0 20px 40px rgba(0,0,0,0.25), 0 12px 24px rgba(0,0,0,0.15)",
+                boxShadow: buildDepthShadow(DEFAULT_MEDIA_DEPTH),
                 ...restStyle,
                 ...wrapperStyleOverride,
                 ...dragStyle,

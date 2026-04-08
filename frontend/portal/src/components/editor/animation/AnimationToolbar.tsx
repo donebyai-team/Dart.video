@@ -28,7 +28,6 @@ export function AnimationToolbar({
     <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-background/95 backdrop-blur-lg border border-border shadow-xl text-sm select-none max-w-[850px]">
       {isMediaComponent ? (
         <MediaToolbar
-          mediaKind={isVideo ? "video" : "image"}
           styleOverride={style}
           selectedElementId={selectedId}
           onStyleOverride={next => onStyleOverride(selectedId, next)}

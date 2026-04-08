@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useRemotionEnvironment, delayRender, continueRender } from "remotion";
 import { usePatchedDragStyle, usePatchedProp, useStyleOverride } from "../../patches";
 import { useAspectPreset } from "../../styles/AspectPresetContext";
+import { buildDepthShadow, DEFAULT_MEDIA_DEPTH } from "../../styles/depth";
 
 const DEFAULT_IMAGE_SVG = `data:image/svg+xml,${encodeURIComponent(`
 <svg width="96" height="72" viewBox="0 0 96 72" xmlns="http://www.w3.org/2000/svg">
@@ -83,7 +84,7 @@ export function ImageAsset({
                 width: resolvedBoxWidth,
                 height: resolvedBoxHeight,
                 borderRadius: 16,
-                boxShadow: "0 20px 40px rgba(0,0,0,0.25), 0 12px 24px rgba(0,0,0,0.15)",
+                boxShadow: buildDepthShadow(DEFAULT_MEDIA_DEPTH),
                 overflow: 'hidden',
                 ...restStyle,
                 ...wrapperStyleOverride,

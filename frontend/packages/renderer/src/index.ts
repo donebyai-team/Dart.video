@@ -7,6 +7,12 @@ export {
   resolveComponentFromId,
   getElementTypeFromId,
   type ComponentRegistration,
+  buildDepthShadow,
+  buildDepthTextShadow,
+  parseDepthFromShadow,
+  DEPTH_STYLE_PROPERTY,
+  DEFAULT_MEDIA_DEPTH,
+  MAX_ELEMENT_DEPTH,
 } from '@coasterai/animation';
 export { compileRemoteComponent, stripImports } from './compiler';
 export type { CompilationResult, CompileRemoteComponentOptions } from './compiler';

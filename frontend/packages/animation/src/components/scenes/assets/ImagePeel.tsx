@@ -4,7 +4,7 @@ import z from 'zod';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { ImageAsset } from '../../../core/assets/ImageAsset';
-import { usePatchedProps } from '../../../patches';
+import { usePatchedProps, useStyleOverride } from '../../../patches';
 import { DIRECTIONS, Direction } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../../../registry/registry';
@@ -15,7 +15,6 @@ const DEFAULT_HOLD_DURATION = 20;
 const DEFAULT_PEEL_DURATION = 20;
 const DEFAULT_DIRECTION = 'right' as const;
 const DEFAULT_STACK_OFFSET = 20;
-const DEFAULT_BORDER_RADIUS = 16;
 const DEFAULT_WIDTH = 1920 * 0.7;
 const DEFAULT_HEIGHT = 1080 * 0.7;
 
@@ -30,7 +29,6 @@ export const ImagePeelSchema = z.object({
     holdDuration: z.number().default(DEFAULT_HOLD_DURATION).optional(),
     peelDuration: z.number().default(DEFAULT_PEEL_DURATION).optional(),
     stackOffset: z.number().default(DEFAULT_STACK_OFFSET).optional(),
-    borderRadius: z.number().default(DEFAULT_BORDER_RADIUS).optional(),
     width: z.number().default(DEFAULT_WIDTH).optional(),
     height: z.number().default(DEFAULT_HEIGHT).optional(),
     style: z.any().optional(),
@@ -64,10 +62,10 @@ export function ImagePeel(propsInit: ImagePeelProps): React.ReactElement {
     const actualHoldDuration = props.holdDuration ?? DEFAULT_HOLD_DURATION;
     const actualPeelDuration = props.peelDuration ?? DEFAULT_PEEL_DURATION;
     const actualStackOffset = props.stackOffset ?? DEFAULT_STACK_OFFSET;
-    const actualBorderRadius = props.borderRadius ?? DEFAULT_BORDER_RADIUS;
 
     const resolvedWidth = props.width ?? DEFAULT_WIDTH;
     const resolvedHeight = props.height ?? DEFAULT_HEIGHT;
+    const styleOverride = useStyleOverride(props.id);
 
     const count = props.images.length;
     // Each image: [enter] -> [hold] -> [peel away], staggered
@@ -133,21 +131,25 @@ export function ImagePeel(propsInit: ImagePeelProps): React.ReactElement {
                             style={{
                                 position: 'absolute',
                                 top: 0,
-                                left: 0,
-                                width: '100%',
-                                height: '100%',
-                                borderRadius: actualBorderRadius,
-                                overflow: 'hidden',
+                                left: 0,                              
                                 transformOrigin: actualDirection === 'left' ? 'top left'
                                     : actualDirection === 'right' ? 'top right'
                                         : actualDirection === 'up' ? 'top center'
                                             : 'bottom center',
                                 transform: `translate(${stackX}px, ${stackY}px) ${peelTransform}`,
                                 opacity: peelOpacity,
-                                boxShadow: "0 20px 40px rgba(0,0,0,0.25), 0 12px 24px rgba(0,0,0,0.15)",
                             }}
                         >
-                            <ImageAsset id={`imageasset-${index}-${props.id}`} src={src} width={resolvedWidth} height={resolvedHeight} />
+                            <ImageAsset
+                                id={`imageasset-${index}-${props.id}`}
+                                src={src}
+                                width={resolvedWidth}
+                                height={resolvedHeight}
+                                style={{
+                                    overflow: 'hidden',
+                                    ...styleOverride,
+                                }}
+                            />
                         </div>
                     );
                 })}
