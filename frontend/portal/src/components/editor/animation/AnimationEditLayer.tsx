@@ -24,6 +24,16 @@ import {
 
 interface FRect { left: number; top: number; width: number; height: number }
 
+interface TextResizeState {
+  pointerId: number
+  elementId: string
+  startClientX: number
+  initialWidth: number
+  pendingWidth: number
+  scaleX: number
+  previewEl: HTMLElement
+}
+
 interface AnimationEditLayerProps {
   playerRef: React.RefObject<HTMLDivElement>
   selectedEid: string | null
@@ -44,6 +54,7 @@ export function AnimationEditLayer({
   onStyleOverride,
 }: AnimationEditLayerProps) {
   const toolbarRef = useRef<HTMLDivElement>(null)
+  const textResizeStateRef = useRef<TextResizeState | null>(null)
 
   const [canvasRect, setCanvasRect] = useState<FRect | null>(null)
   const [elementRect, setElementRect] = useState<FRect | null>(null)
@@ -58,6 +69,11 @@ export function AnimationEditLayer({
     lowerId.includes('typewriter') ||
     lowerId.includes('image') ||
     lowerId.includes('video')
+  }
+
+  // TODO: add it for all text components
+  function isPlainTextElement(id: string): boolean {
+    return resolveComponentFromId(id)?.name === 'Text'
   }
 
   // ── Track canvas position ─────────────────────────────────────────────────
@@ -84,6 +100,7 @@ export function AnimationEditLayer({
   useEffect(() => {
     if (!selectedEid || !animEditVersion) return
     if (dragStateRef.current?.elementId === selectedEid) return
+    if (textResizeStateRef.current?.elementId === selectedEid) return
     requestAnimationFrame(() => {
       const el = playerRef.current?.querySelector(`[id="${selectedEid}"]`) as HTMLElement | null
       if (!el) return
@@ -163,6 +180,68 @@ export function AnimationEditLayer({
 
   const deselect = useCallback(() => onSelectElement(null), [onSelectElement])
 
+  function handleTextResizePointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    if (!selectedEid || !isPlainTextElement(selectedEid)) return
+
+    const previewEl = playerRef.current?.querySelector(`[id="${selectedEid}"]`) as HTMLElement | null
+    if (!previewEl) return
+
+    e.preventDefault()
+    e.stopPropagation()
+
+    const previewRect = previewEl.getBoundingClientRect()
+    const initialWidth = previewEl.offsetWidth || previewRect.width
+    const scaleX = previewRect.width > 0 ? initialWidth / previewRect.width : 1
+
+    textResizeStateRef.current = {
+      pointerId: e.pointerId,
+      elementId: selectedEid,
+      startClientX: e.clientX,
+      initialWidth,
+      pendingWidth: initialWidth,
+      scaleX,
+      previewEl,
+    }
+
+    e.currentTarget.setPointerCapture(e.pointerId)
+  }
+
+  function handleTextResizePointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    const resizeState = textResizeStateRef.current
+    if (!resizeState || resizeState.pointerId !== e.pointerId) return
+
+    e.preventDefault()
+    e.stopPropagation()
+
+    const deltaX = (e.clientX - resizeState.startClientX) * resizeState.scaleX
+    const nextWidth = Math.max(40, Math.round(resizeState.initialWidth + deltaX))
+    resizeState.pendingWidth = nextWidth
+    resizeState.previewEl.style.width = `${nextWidth}px`
+
+    const nextRect = resizeState.previewEl.getBoundingClientRect()
+    setElementRect({
+      left: nextRect.left,
+      top: nextRect.top,
+      width: nextRect.width,
+      height: nextRect.height,
+    })
+  }
+
+  function handleTextResizePointerEnd(e: React.PointerEvent<HTMLDivElement>) {
+    const resizeState = textResizeStateRef.current
+    if (!resizeState || resizeState.pointerId !== e.pointerId) return
+
+    e.preventDefault()
+    e.stopPropagation()
+
+    onStyleOverride(resizeState.elementId, { width: resizeState.pendingWidth })
+    textResizeStateRef.current = null
+
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId)
+    }
+  }
+
   /**
    * Click handler with parent-walk:
    *   - First click: select deepest element.
@@ -241,6 +320,34 @@ export function AnimationEditLayer({
             boxSizing: 'border-box',
             pointerEvents: 'none',
             zIndex: 41,
+          }}
+        />
+      )}
+
+      {/* Plain Text resize handle */}
+      {elementRect && selectedEid && isPlainTextElement(selectedEid) && (
+        <div
+          style={{
+            position: 'fixed',
+            left: elementRect.left + elementRect.width - 5,
+            top: elementRect.top + elementRect.height / 2 - 5,
+            width: 10,
+            height: 10,
+            background: '#ffffff',
+            border: '2px solid rgba(99,102,241,0.95)',
+            borderRadius: 3,
+            boxSizing: 'border-box',
+            cursor: 'ew-resize',
+            pointerEvents: 'auto',
+            zIndex: 42,
+          }}
+          onPointerDown={handleTextResizePointerDown}
+          onPointerMove={handleTextResizePointerMove}
+          onPointerUp={handleTextResizePointerEnd}
+          onPointerCancel={handleTextResizePointerEnd}
+          onClick={e => {
+            e.preventDefault()
+            e.stopPropagation()
           }}
         />
       )}
