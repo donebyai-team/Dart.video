@@ -219,7 +219,7 @@ export const TextHighlight: React.FC<TextHighlightProps> = (propsInit: TextHighl
                     text={segment.text}
                     variant={actualVariant}
                     style={{
-                        whiteSpace: 'pre',
+                        whiteSpace: 'pre-wrap',
                         ...(segment.highlight ? getHighlightStyles(segment.index) : {}),
                     }}
                 />

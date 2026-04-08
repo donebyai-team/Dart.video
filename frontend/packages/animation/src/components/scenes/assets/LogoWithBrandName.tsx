@@ -15,8 +15,8 @@ import type { DurationResult } from '../../../registry/registry';
 import { SPLIT_BY_MODES } from "../types";
 
 // Default constants
-const DEFAULT_CHAR_STAGGER = 4;
-const DEFAULT_CHAR_FADE_DURATION = 15;
+const DEFAULT_CHAR_STAGGER = 5;
+const DEFAULT_CHAR_FADE_DURATION = 20;
 const DEFAULT_VARIANT = 'heading' as const;
 const DEFAULT_SRC = ""
 
