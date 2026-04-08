@@ -439,6 +439,18 @@ export declare type BackgroundStyle = Message<"coasterai.core.v1.BackgroundStyle
    * @generated from field: bool apply_all = 4;
    */
   applyAll: boolean;
+
+  /**
+   * @generated from field: coasterai.core.v1.BackgroundPattern pattern = 5;
+   */
+  pattern: BackgroundPattern;
+
+  /**
+   * 0.0 to 1.0, defaults to 0.1
+   *
+   * @generated from field: optional float pattern_opacity = 6;
+   */
+  patternOpacity?: number;
 };
 
 /**
@@ -806,4 +818,59 @@ export enum GradientType {
  * Describes the enum coasterai.core.v1.GradientType.
  */
 export declare const GradientTypeSchema: GenEnum<GradientType>;
+
+/**
+ * @generated from enum coasterai.core.v1.BackgroundPattern
+ */
+export enum BackgroundPattern {
+  /**
+   * @generated from enum value: BACKGROUND_PATTERN_NONE = 0;
+   */
+  NONE = 0,
+
+  /**
+   * @generated from enum value: BACKGROUND_PATTERN_DOTS = 1;
+   */
+  DOTS = 1,
+
+  /**
+   * @generated from enum value: BACKGROUND_PATTERN_GRID = 2;
+   */
+  GRID = 2,
+
+  /**
+   * @generated from enum value: BACKGROUND_PATTERN_DIAGONAL_LINES = 3;
+   */
+  DIAGONAL_LINES = 3,
+
+  /**
+   * @generated from enum value: BACKGROUND_PATTERN_CROSS_HATCH = 4;
+   */
+  CROSS_HATCH = 4,
+
+  /**
+   * @generated from enum value: BACKGROUND_PATTERN_CIRCLES = 5;
+   */
+  CIRCLES = 5,
+
+  /**
+   * @generated from enum value: BACKGROUND_PATTERN_HEXAGONS = 6;
+   */
+  HEXAGONS = 6,
+
+  /**
+   * @generated from enum value: BACKGROUND_PATTERN_TRIANGLES = 7;
+   */
+  TRIANGLES = 7,
+
+  /**
+   * @generated from enum value: BACKGROUND_PATTERN_WAVES = 8;
+   */
+  WAVES = 8,
+}
+
+/**
+ * Describes the enum coasterai.core.v1.BackgroundPattern.
+ */
+export declare const BackgroundPatternSchema: GenEnum<BackgroundPattern>;
 

@@ -19,6 +19,7 @@ import (
 
 // Default transition time for all slides, same in frontend
 const transitionDurationInFrames int32 = 15
+const defaultPatternOpacity float32 = 0.1
 
 type videoConfigGenerator struct {
 	video                 *pbcore.Video
@@ -93,6 +94,8 @@ func (g *videoConfigGenerator) AddBranding(assetRegistry *services.MediaAssetReg
 		Style: &pbcore.BackgroundStyle_Solid{
 			Solid: solidColor,
 		},
+		Pattern:        pbcore.BackgroundPattern_BACKGROUND_PATTERN_DOTS,
+		PatternOpacity: utils.Ptr(defaultPatternOpacity),
 	})
 }
 

@@ -364,6 +364,73 @@ func (GradientType) EnumDescriptor() ([]byte, []int) {
 	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{5}
 }
 
+type BackgroundPattern int32
+
+const (
+	BackgroundPattern_BACKGROUND_PATTERN_NONE           BackgroundPattern = 0
+	BackgroundPattern_BACKGROUND_PATTERN_DOTS           BackgroundPattern = 1
+	BackgroundPattern_BACKGROUND_PATTERN_GRID           BackgroundPattern = 2
+	BackgroundPattern_BACKGROUND_PATTERN_DIAGONAL_LINES BackgroundPattern = 3
+	BackgroundPattern_BACKGROUND_PATTERN_CROSS_HATCH    BackgroundPattern = 4
+	BackgroundPattern_BACKGROUND_PATTERN_CIRCLES        BackgroundPattern = 5
+	BackgroundPattern_BACKGROUND_PATTERN_HEXAGONS       BackgroundPattern = 6
+	BackgroundPattern_BACKGROUND_PATTERN_TRIANGLES      BackgroundPattern = 7
+	BackgroundPattern_BACKGROUND_PATTERN_WAVES          BackgroundPattern = 8
+)
+
+// Enum value maps for BackgroundPattern.
+var (
+	BackgroundPattern_name = map[int32]string{
+		0: "BACKGROUND_PATTERN_NONE",
+		1: "BACKGROUND_PATTERN_DOTS",
+		2: "BACKGROUND_PATTERN_GRID",
+		3: "BACKGROUND_PATTERN_DIAGONAL_LINES",
+		4: "BACKGROUND_PATTERN_CROSS_HATCH",
+		5: "BACKGROUND_PATTERN_CIRCLES",
+		6: "BACKGROUND_PATTERN_HEXAGONS",
+		7: "BACKGROUND_PATTERN_TRIANGLES",
+		8: "BACKGROUND_PATTERN_WAVES",
+	}
+	BackgroundPattern_value = map[string]int32{
+		"BACKGROUND_PATTERN_NONE":           0,
+		"BACKGROUND_PATTERN_DOTS":           1,
+		"BACKGROUND_PATTERN_GRID":           2,
+		"BACKGROUND_PATTERN_DIAGONAL_LINES": 3,
+		"BACKGROUND_PATTERN_CROSS_HATCH":    4,
+		"BACKGROUND_PATTERN_CIRCLES":        5,
+		"BACKGROUND_PATTERN_HEXAGONS":       6,
+		"BACKGROUND_PATTERN_TRIANGLES":      7,
+		"BACKGROUND_PATTERN_WAVES":          8,
+	}
+)
+
+func (x BackgroundPattern) Enum() *BackgroundPattern {
+	p := new(BackgroundPattern)
+	*p = x
+	return p
+}
+
+func (x BackgroundPattern) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (BackgroundPattern) Descriptor() protoreflect.EnumDescriptor {
+	return file_coasterai_core_v1_slide_proto_enumTypes[6].Descriptor()
+}
+
+func (BackgroundPattern) Type() protoreflect.EnumType {
+	return &file_coasterai_core_v1_slide_proto_enumTypes[6]
+}
+
+func (x BackgroundPattern) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use BackgroundPattern.Descriptor instead.
+func (BackgroundPattern) EnumDescriptor() ([]byte, []int) {
+	return file_coasterai_core_v1_slide_proto_rawDescGZIP(), []int{6}
+}
+
 // Mostly be used for debugging what AI created
 // Useful for rerunning the generation
 // selectedTemplateDescription is basically the prompt generated to created the animation
@@ -1151,10 +1218,12 @@ type BackgroundStyle struct {
 	//	*BackgroundStyle_Solid
 	//	*BackgroundStyle_Gradient
 	//	*BackgroundStyle_Image
-	Style         isBackgroundStyle_Style `protobuf_oneof:"style"`
-	ApplyAll      bool                    `protobuf:"varint,4,opt,name=apply_all,json=applyAll,proto3" json:"apply_all,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	Style          isBackgroundStyle_Style `protobuf_oneof:"style"`
+	ApplyAll       bool                    `protobuf:"varint,4,opt,name=apply_all,json=applyAll,proto3" json:"apply_all,omitempty"`
+	Pattern        BackgroundPattern       `protobuf:"varint,5,opt,name=pattern,proto3,enum=coasterai.core.v1.BackgroundPattern" json:"pattern,omitempty"`
+	PatternOpacity *float32                `protobuf:"fixed32,6,opt,name=pattern_opacity,json=patternOpacity,proto3,oneof" json:"pattern_opacity,omitempty"` // 0.0 to 1.0, defaults to 0.1
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *BackgroundStyle) Reset() {
@@ -1226,6 +1295,20 @@ func (x *BackgroundStyle) GetApplyAll() bool {
 		return x.ApplyAll
 	}
 	return false
+}
+
+func (x *BackgroundStyle) GetPattern() BackgroundPattern {
+	if x != nil {
+		return x.Pattern
+	}
+	return BackgroundPattern_BACKGROUND_PATTERN_NONE
+}
+
+func (x *BackgroundStyle) GetPatternOpacity() float32 {
+	if x != nil && x.PatternOpacity != nil {
+		return *x.PatternOpacity
+	}
+	return 0
 }
 
 type isBackgroundStyle_Style interface {
@@ -1637,13 +1720,16 @@ const file_coasterai_core_v1_slide_proto_rawDesc = "" +
 	"\n" +
 	"_directionB\x15\n" +
 	"\x13_voiceoverGeneratedB\v\n" +
-	"\t_isNested\"\xe5\x01\n" +
+	"\t_isNested\"\xe7\x02\n" +
 	"\x0fBackgroundStyle\x125\n" +
 	"\x05solid\x18\x01 \x01(\v2\x1d.coasterai.core.v1.SolidColorH\x00R\x05solid\x129\n" +
 	"\bgradient\x18\x02 \x01(\v2\x1b.coasterai.core.v1.GradientH\x00R\bgradient\x12:\n" +
 	"\x05image\x18\x03 \x01(\v2\".coasterai.core.v1.BackgroundImageH\x00R\x05image\x12\x1b\n" +
-	"\tapply_all\x18\x04 \x01(\bR\bapplyAllB\a\n" +
-	"\x05style\"\x1e\n" +
+	"\tapply_all\x18\x04 \x01(\bR\bapplyAll\x12>\n" +
+	"\apattern\x18\x05 \x01(\x0e2$.coasterai.core.v1.BackgroundPatternR\apattern\x12,\n" +
+	"\x0fpattern_opacity\x18\x06 \x01(\x02H\x01R\x0epatternOpacity\x88\x01\x01B\a\n" +
+	"\x05styleB\x12\n" +
+	"\x10_pattern_opacity\"\x1e\n" +
 	"\n" +
 	"SolidColor\x12\x10\n" +
 	"\x03hex\x18\x01 \x01(\tR\x03hex\"#\n" +
@@ -1705,7 +1791,17 @@ const file_coasterai_core_v1_slide_proto_rawDesc = "" +
 	"\x10EFFECT_TYPE_ZOOM\x10\x03*B\n" +
 	"\fGradientType\x12\x18\n" +
 	"\x14GRADIENT_TYPE_LINEAR\x10\x00\x12\x18\n" +
-	"\x14GRADIENT_TYPE_RADIAL\x10\x01B;Z9github.com/shank318/coasterai/pb/coasterai/core/v1;pbcoreb\x06proto3"
+	"\x14GRADIENT_TYPE_RADIAL\x10\x01*\xb6\x02\n" +
+	"\x11BackgroundPattern\x12\x1b\n" +
+	"\x17BACKGROUND_PATTERN_NONE\x10\x00\x12\x1b\n" +
+	"\x17BACKGROUND_PATTERN_DOTS\x10\x01\x12\x1b\n" +
+	"\x17BACKGROUND_PATTERN_GRID\x10\x02\x12%\n" +
+	"!BACKGROUND_PATTERN_DIAGONAL_LINES\x10\x03\x12\"\n" +
+	"\x1eBACKGROUND_PATTERN_CROSS_HATCH\x10\x04\x12\x1e\n" +
+	"\x1aBACKGROUND_PATTERN_CIRCLES\x10\x05\x12\x1f\n" +
+	"\x1bBACKGROUND_PATTERN_HEXAGONS\x10\x06\x12 \n" +
+	"\x1cBACKGROUND_PATTERN_TRIANGLES\x10\a\x12\x1c\n" +
+	"\x18BACKGROUND_PATTERN_WAVES\x10\bB;Z9github.com/shank318/coasterai/pb/coasterai/core/v1;pbcoreb\x06proto3"
 
 var (
 	file_coasterai_core_v1_slide_proto_rawDescOnce sync.Once
@@ -1719,7 +1815,7 @@ func file_coasterai_core_v1_slide_proto_rawDescGZIP() []byte {
 	return file_coasterai_core_v1_slide_proto_rawDescData
 }
 
-var file_coasterai_core_v1_slide_proto_enumTypes = make([]protoimpl.EnumInfo, 6)
+var file_coasterai_core_v1_slide_proto_enumTypes = make([]protoimpl.EnumInfo, 7)
 var file_coasterai_core_v1_slide_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_coasterai_core_v1_slide_proto_goTypes = []any{
 	(SlideStatus)(0),              // 0: coasterai.core.v1.SlideStatus
@@ -1728,46 +1824,48 @@ var file_coasterai_core_v1_slide_proto_goTypes = []any{
 	(TransitionDirection)(0),      // 3: coasterai.core.v1.TransitionDirection
 	(EffectType)(0),               // 4: coasterai.core.v1.EffectType
 	(GradientType)(0),             // 5: coasterai.core.v1.GradientType
-	(*AnimationSlidePlan)(nil),    // 6: coasterai.core.v1.AnimationSlidePlan
-	(*MetaData)(nil),              // 7: coasterai.core.v1.MetaData
-	(*AnimationSlideContent)(nil), // 8: coasterai.core.v1.AnimationSlideContent
-	(*CodeRegistry)(nil),          // 9: coasterai.core.v1.CodeRegistry
-	(*SpotlightEffect)(nil),       // 10: coasterai.core.v1.SpotlightEffect
-	(*CalloutEffect)(nil),         // 11: coasterai.core.v1.CalloutEffect
-	(*ZoomEffect)(nil),            // 12: coasterai.core.v1.ZoomEffect
-	(*Slide)(nil),                 // 13: coasterai.core.v1.Slide
-	(*BackgroundStyle)(nil),       // 14: coasterai.core.v1.BackgroundStyle
-	(*SolidColor)(nil),            // 15: coasterai.core.v1.SolidColor
-	(*BackgroundImage)(nil),       // 16: coasterai.core.v1.BackgroundImage
-	(*Gradient)(nil),              // 17: coasterai.core.v1.Gradient
-	(*GradientStop)(nil),          // 18: coasterai.core.v1.GradientStop
-	(*Section)(nil),               // 19: coasterai.core.v1.Section
-	(*structpb.Struct)(nil),       // 20: google.protobuf.Struct
+	(BackgroundPattern)(0),        // 6: coasterai.core.v1.BackgroundPattern
+	(*AnimationSlidePlan)(nil),    // 7: coasterai.core.v1.AnimationSlidePlan
+	(*MetaData)(nil),              // 8: coasterai.core.v1.MetaData
+	(*AnimationSlideContent)(nil), // 9: coasterai.core.v1.AnimationSlideContent
+	(*CodeRegistry)(nil),          // 10: coasterai.core.v1.CodeRegistry
+	(*SpotlightEffect)(nil),       // 11: coasterai.core.v1.SpotlightEffect
+	(*CalloutEffect)(nil),         // 12: coasterai.core.v1.CalloutEffect
+	(*ZoomEffect)(nil),            // 13: coasterai.core.v1.ZoomEffect
+	(*Slide)(nil),                 // 14: coasterai.core.v1.Slide
+	(*BackgroundStyle)(nil),       // 15: coasterai.core.v1.BackgroundStyle
+	(*SolidColor)(nil),            // 16: coasterai.core.v1.SolidColor
+	(*BackgroundImage)(nil),       // 17: coasterai.core.v1.BackgroundImage
+	(*Gradient)(nil),              // 18: coasterai.core.v1.Gradient
+	(*GradientStop)(nil),          // 19: coasterai.core.v1.GradientStop
+	(*Section)(nil),               // 20: coasterai.core.v1.Section
+	(*structpb.Struct)(nil),       // 21: google.protobuf.Struct
 }
 var file_coasterai_core_v1_slide_proto_depIdxs = []int32{
-	9,  // 0: coasterai.core.v1.AnimationSlideContent.codeRegistry:type_name -> coasterai.core.v1.CodeRegistry
-	6,  // 1: coasterai.core.v1.AnimationSlideContent.plan:type_name -> coasterai.core.v1.AnimationSlidePlan
-	20, // 2: coasterai.core.v1.AnimationSlideContent.edits:type_name -> google.protobuf.Struct
+	10, // 0: coasterai.core.v1.AnimationSlideContent.codeRegistry:type_name -> coasterai.core.v1.CodeRegistry
+	7,  // 1: coasterai.core.v1.AnimationSlideContent.plan:type_name -> coasterai.core.v1.AnimationSlidePlan
+	21, // 2: coasterai.core.v1.AnimationSlideContent.edits:type_name -> google.protobuf.Struct
 	2,  // 3: coasterai.core.v1.Slide.transition:type_name -> coasterai.core.v1.TransitionType
-	14, // 4: coasterai.core.v1.Slide.background_style:type_name -> coasterai.core.v1.BackgroundStyle
+	15, // 4: coasterai.core.v1.Slide.background_style:type_name -> coasterai.core.v1.BackgroundStyle
 	3,  // 5: coasterai.core.v1.Slide.direction:type_name -> coasterai.core.v1.TransitionDirection
-	8,  // 6: coasterai.core.v1.Slide.content:type_name -> coasterai.core.v1.AnimationSlideContent
-	10, // 7: coasterai.core.v1.Slide.spotlights:type_name -> coasterai.core.v1.SpotlightEffect
-	11, // 8: coasterai.core.v1.Slide.callouts:type_name -> coasterai.core.v1.CalloutEffect
-	12, // 9: coasterai.core.v1.Slide.zooms:type_name -> coasterai.core.v1.ZoomEffect
-	20, // 10: coasterai.core.v1.Slide.plan:type_name -> google.protobuf.Struct
+	9,  // 6: coasterai.core.v1.Slide.content:type_name -> coasterai.core.v1.AnimationSlideContent
+	11, // 7: coasterai.core.v1.Slide.spotlights:type_name -> coasterai.core.v1.SpotlightEffect
+	12, // 8: coasterai.core.v1.Slide.callouts:type_name -> coasterai.core.v1.CalloutEffect
+	13, // 9: coasterai.core.v1.Slide.zooms:type_name -> coasterai.core.v1.ZoomEffect
+	21, // 10: coasterai.core.v1.Slide.plan:type_name -> google.protobuf.Struct
 	0,  // 11: coasterai.core.v1.Slide.slideStatus:type_name -> coasterai.core.v1.SlideStatus
-	15, // 12: coasterai.core.v1.BackgroundStyle.solid:type_name -> coasterai.core.v1.SolidColor
-	17, // 13: coasterai.core.v1.BackgroundStyle.gradient:type_name -> coasterai.core.v1.Gradient
-	16, // 14: coasterai.core.v1.BackgroundStyle.image:type_name -> coasterai.core.v1.BackgroundImage
-	5,  // 15: coasterai.core.v1.Gradient.type:type_name -> coasterai.core.v1.GradientType
-	18, // 16: coasterai.core.v1.Gradient.stops:type_name -> coasterai.core.v1.GradientStop
-	13, // 17: coasterai.core.v1.Section.slides:type_name -> coasterai.core.v1.Slide
-	18, // [18:18] is the sub-list for method output_type
-	18, // [18:18] is the sub-list for method input_type
-	18, // [18:18] is the sub-list for extension type_name
-	18, // [18:18] is the sub-list for extension extendee
-	0,  // [0:18] is the sub-list for field type_name
+	16, // 12: coasterai.core.v1.BackgroundStyle.solid:type_name -> coasterai.core.v1.SolidColor
+	18, // 13: coasterai.core.v1.BackgroundStyle.gradient:type_name -> coasterai.core.v1.Gradient
+	17, // 14: coasterai.core.v1.BackgroundStyle.image:type_name -> coasterai.core.v1.BackgroundImage
+	6,  // 15: coasterai.core.v1.BackgroundStyle.pattern:type_name -> coasterai.core.v1.BackgroundPattern
+	5,  // 16: coasterai.core.v1.Gradient.type:type_name -> coasterai.core.v1.GradientType
+	19, // 17: coasterai.core.v1.Gradient.stops:type_name -> coasterai.core.v1.GradientStop
+	14, // 18: coasterai.core.v1.Section.slides:type_name -> coasterai.core.v1.Slide
+	19, // [19:19] is the sub-list for method output_type
+	19, // [19:19] is the sub-list for method input_type
+	19, // [19:19] is the sub-list for extension type_name
+	19, // [19:19] is the sub-list for extension extendee
+	0,  // [0:19] is the sub-list for field type_name
 }
 
 func init() { file_coasterai_core_v1_slide_proto_init() }
@@ -1789,7 +1887,7 @@ func file_coasterai_core_v1_slide_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_coasterai_core_v1_slide_proto_rawDesc), len(file_coasterai_core_v1_slide_proto_rawDesc)),
-			NumEnums:      6,
+			NumEnums:      7,
 			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   0,

@@ -161,6 +161,8 @@ message BackgroundStyle {
   }
 
   bool apply_all = 4;
+  BackgroundPattern pattern = 5;
+  optional float pattern_opacity = 6; // 0.0 to 1.0, defaults to 0.1
 }
 
 message SolidColor {
@@ -186,6 +188,18 @@ message GradientStop {
 enum GradientType {
   GRADIENT_TYPE_LINEAR = 0;
   GRADIENT_TYPE_RADIAL = 1;
+}
+
+enum BackgroundPattern {
+  BACKGROUND_PATTERN_NONE = 0;
+  BACKGROUND_PATTERN_DOTS = 1;
+  BACKGROUND_PATTERN_GRID = 2;
+  BACKGROUND_PATTERN_DIAGONAL_LINES = 3;
+  BACKGROUND_PATTERN_CROSS_HATCH = 4;
+  BACKGROUND_PATTERN_CIRCLES = 5;
+  BACKGROUND_PATTERN_HEXAGONS = 6;
+  BACKGROUND_PATTERN_TRIANGLES = 7;
+  BACKGROUND_PATTERN_WAVES = 8;
 }
 
 

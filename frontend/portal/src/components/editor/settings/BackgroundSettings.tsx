@@ -9,8 +9,8 @@ import { Label } from "@/components/ui/label";
 import BrandColors from "@/components/editor/settings/BrandColors";
 import { DualColorPicker } from "@/components/editor/animation/toolbars/stylers/DualColorPicker";
 import { backgroundStyleToCSS } from '@coasterai/renderer';
-import { BackgroundStyle, Gradient, GradientSchema, GradientType, GradientStopSchema, BackgroundStyleSchema } from "@coasterai/pb/coasterai/core/v1/slide_pb";
-import { gradientToCSS } from "@coasterai/renderer/src/backgroundUtils";
+import { BackgroundStyle, Gradient, GradientSchema, GradientType, GradientStopSchema, BackgroundStyleSchema, BackgroundPattern } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { gradientToCSS, patternToCSS, PATTERN_OPTIONS } from "@coasterai/renderer/src/backgroundUtils";
 
 interface BackgroundSettingsProps {
   value?: BackgroundStyle | null;
@@ -92,6 +92,11 @@ export default function BackgroundSettings({
     initialGradient.angle ?? 135
   );
 
+  /* ---------- PATTERN STATE ---------- */
+  const [patternOpacity, setPatternOpacity] = useState(
+    safeValue.patternOpacity ?? 0.1
+  );
+
   /* ---------- UPDATE HELPERS ---------- */
   const updateStyle = (
     styleCase: "solid" | "gradient",
@@ -100,6 +105,8 @@ export default function BackgroundSettings({
     const updated = create(BackgroundStyleSchema, {
       style: { case: styleCase, value: styleValue },
       applyAll: safeValue.applyAll ?? false,
+      pattern: safeValue.pattern,
+      patternOpacity: safeValue.patternOpacity,
     });
 
     onChange(updated);
@@ -110,9 +117,30 @@ export default function BackgroundSettings({
     const updated = create(BackgroundStyleSchema, {
       style: safeValue.style,
       applyAll: checked,
+      pattern: safeValue.pattern,
+      patternOpacity: safeValue.patternOpacity,
     });
+    onChange(updated);
+  };
 
-    console.debug("[Update apply all]", updated)
+  const updatePattern = (pattern: BackgroundPattern) => {
+    const updated = create(BackgroundStyleSchema, {
+      style: safeValue.style,
+      applyAll: safeValue.applyAll ?? false,
+      pattern,
+      patternOpacity,
+    });
+    onChange(updated);
+  };
+
+  const updatePatternOpacity = (opacity: number) => {
+    setPatternOpacity(opacity);
+    const updated = create(BackgroundStyleSchema, {
+      style: safeValue.style,
+      applyAll: safeValue.applyAll ?? false,
+      pattern: safeValue.pattern,
+      patternOpacity: opacity,
+    });
     onChange(updated);
   };
 
@@ -274,6 +302,80 @@ export default function BackgroundSettings({
 
             </div>
           </div>
+        </div>
+
+        {/* ---------------- PATTERN OVERLAY ---------------- */}
+        <div className="space-y-4">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Pattern
+          </p>
+
+          {/* Pattern Grid */}
+          <div className="grid grid-cols-5 gap-2">
+            {PATTERN_OPTIONS.map((option) => {
+              const isActive = safeValue.pattern === option.value;
+              const previewBg = option.value === BackgroundPattern.NONE
+                ? 'transparent'
+                : patternToCSS(option.value, '#ffffff', 0.5);
+
+              return (
+                <button
+                  key={option.value}
+                  onClick={() => updatePattern(option.value)}
+                  className={`flex flex-col items-center gap-1 p-2 rounded-lg border transition-all duration-200 hover:border-primary/50
+                    ${isActive ? "border-primary ring-1 ring-primary bg-primary/5" : "border-border bg-muted/20"}
+                  `}
+                >
+                  <div
+                    className="w-8 h-8 rounded bg-slate-800"
+                    style={{
+                      backgroundImage: previewBg,
+                      backgroundRepeat: 'repeat',
+                    }}
+                  />
+                  <span className="text-[10px] text-muted-foreground truncate w-full text-center">
+                    {option.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Pattern Customization */}
+          {safeValue.pattern != null && safeValue.pattern !== BackgroundPattern.NONE && (
+            <div className="p-3 rounded-xl border border-border bg-muted/20 space-y-3">
+              {/* Pattern Opacity */}
+              <div className="flex items-center gap-2">
+                <Label className="text-xs text-muted-foreground">Opacity</Label>
+                <input
+                  type="range"
+                  min="0.01"
+                  max="0.5"
+                  step="0.01"
+                  value={patternOpacity}
+                  onChange={(e) => updatePatternOpacity(Number(e.target.value))}
+                  className="flex-1"
+                />
+                <span className="text-[11px] text-muted-foreground w-8 text-right">
+                  {Math.round(patternOpacity * 100)}%
+                </span>
+              </div>
+
+              {/* Preview - pattern color auto-contrasts with background */}
+              <div
+                className="h-16 rounded-lg relative overflow-hidden"
+                style={{ background: backgroundStyleToCSS(safeValue) }}
+              >
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    backgroundImage: patternToCSS(safeValue.pattern, '#ffffff', patternOpacity),
+                    backgroundRepeat: 'repeat',
+                  }}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
       </div>

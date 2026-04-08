@@ -1,5 +1,3 @@
-import z from "zod";
-
 export const ENTRANCE_ANIMATIONS = [
     'fadeIn',
     'slideUp',
@@ -8,6 +6,13 @@ export const ENTRANCE_ANIMATIONS = [
     'slideRight',
     'scaleIn',
     'rotateIn',
+    'tiltX',
+    'tiltY',
+    'flipX',
+    'flipY',
+    'zoomRotate',
+    'elasticScale',
+    'swingIn',
 ] as const;
 
 export type EntranceAnimation = typeof ENTRANCE_ANIMATIONS[number];
@@ -63,6 +68,22 @@ export function getEntranceTransform(
             return `scale(${0.5 + progress * 0.5})`;
         case 'rotateIn':
             return `rotate(${inv * 180}deg) scale(${0.5 + progress * 0.5})`;
+        case 'tiltX':
+            return `perspective(800px) rotateX(${inv * 90}deg)`;
+        case 'tiltY':
+            return `perspective(800px) rotateY(${inv * 90}deg)`;
+        case 'flipX':
+            return `perspective(800px) rotateX(${inv * 180}deg)`;
+        case 'flipY':
+            return `perspective(800px) rotateY(${inv * 180}deg)`;
+        case 'zoomRotate':
+            return `scale(${progress}) rotate(${inv * 360}deg)`;
+        case 'elasticScale': {
+            const elastic = 1 + Math.sin(progress * Math.PI * 3) * inv * 0.3;
+            return `scale(${progress * elastic})`;
+        }
+        case 'swingIn':
+            return `perspective(800px) rotateY(${inv * 70}deg) translateX(${inv * -100}px)`;
         case 'fadeIn':
         default:
             return 'none';

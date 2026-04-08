@@ -1,6 +1,7 @@
 import { TimelineSlide } from '@/components/editor/timeline/types'
-import { Slide, TransitionDirection, TransitionType, BackgroundStyle, Section } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { Slide, TransitionDirection, TransitionType, BackgroundStyle, Section, BackgroundStyleSchema } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { arrayMove } from '@dnd-kit/sortable'
+import { clone, create } from '@bufbuild/protobuf'
 import { createNewSlide, getDefaulVideotMetadata, createDefaultBackgroundStyle, resolveBackgroundStyle } from './defaults'
 import { VideoStoreSet, VideoStoreGet } from './types'
 import { getSections, updateVideoConfigSections, updateSelectedSlide, updateTotalDuration, getPreviousSlide } from './utils'
@@ -76,87 +77,53 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
 
   updateSlideBackground: (background: BackgroundStyle) => {
     const { videoConfig, selectedSlide } = get();
-    if (!videoConfig || !videoConfig.config || !selectedSlide) return;
+    if (!videoConfig?.config || !selectedSlide) return;
 
     let newVideoConfig = videoConfig;
 
-    /* =========================
-       APPLY TO ALL (GLOBAL)
-       ========================= */
-
     if (background.applyAll) {
-      // 1️⃣ Remove slide overrides
+      // Remove slide overrides and set global background
       newVideoConfig = updateVideoConfigSections(videoConfig, (sections) =>
         sections.map((section) => ({
           ...section,
-          slides: section.slides.map((slide) => {
-            const { backgroundStyle, ...rest } = slide;
-            return rest;
-          }),
+          slides: section.slides.map(({ backgroundStyle, ...rest }) => rest),
         }))
       );
 
-      // 2️⃣ Set global background
       newVideoConfig = {
         ...newVideoConfig,
         metadata: {
-          ...(videoConfig.metadata ??
-            getDefaulVideotMetadata(defaultEditorConfig)),
+          ...(videoConfig.metadata ?? getDefaulVideotMetadata(defaultEditorConfig)),
           backgroundStyle: background,
         },
       };
 
-      // 3️⃣ Remove selected override
       set({
         videoConfig: newVideoConfig,
-        selectedSlide: updateSelectedSlide(selectedSlide, (slide) => {
-          const { backgroundStyle, ...rest } = slide;
-          return rest;
-        }),
+        selectedSlide: updateSelectedSlide(selectedSlide, ({ backgroundStyle, ...rest }) => rest),
       });
-    }
-
-    /* =========================
-       APPLY TO SELECTED ONLY
-       ========================= */
-
-    else {
+    } else {
       const globalBackground = videoConfig.metadata?.backgroundStyle;
+      const { backgroundStyle: _, ...metadataWithoutBg } = 
+        videoConfig.metadata ?? getDefaulVideotMetadata(defaultEditorConfig);
 
-      // 1️⃣ Remove global background from metadata
-      const metadata = videoConfig.metadata ??
-        getDefaulVideotMetadata(defaultEditorConfig);
-
-      const { backgroundStyle: _, ...metadataWithoutBg } = metadata;
-
-      // 2️⃣ Push global background down to all slides except selected
+      // Push global background to other slides, apply new background to selected
       newVideoConfig = updateVideoConfigSections(videoConfig, (sections) =>
         sections.map((section) => ({
           ...section,
           slides: section.slides.map((slide) => {
-            if (
-              slide.id === selectedSlide.slide.id &&
-              section.id === selectedSlide.section.id
-            ) {
-              // Selected slide → new background
-              return {
-                ...slide,
-                backgroundStyle: {
-                  ...background,
-                  applyAll: false,
-                },
-              };
+            const isSelected = slide.id === selectedSlide.slide.id && section.id === selectedSlide.section.id;
+            
+            if (isSelected) {
+              const clonedBg = clone(BackgroundStyleSchema, background);
+              clonedBg.applyAll = false;
+              return { ...slide, backgroundStyle: clonedBg };
             }
 
-            // Other slides → inherit previous global (if existed)
             if (globalBackground) {
-              return {
-                ...slide,
-                backgroundStyle: {
-                  ...globalBackground,
-                  applyAll: false,
-                },
-              };
+              const clonedGlobalBg = clone(BackgroundStyleSchema, globalBackground);
+              clonedGlobalBg.applyAll = false;
+              return { ...slide, backgroundStyle: clonedGlobalBg };
             }
 
             return slide;
@@ -164,21 +131,13 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
         }))
       );
 
-      // 3️⃣ Update config without global background
-      newVideoConfig = {
-        ...newVideoConfig,
-        metadata: metadataWithoutBg,
-      };
-
       set({
-        videoConfig: newVideoConfig,
-        selectedSlide: updateSelectedSlide(selectedSlide, (slide) => ({
-          ...slide,
-          backgroundStyle: {
-            ...background,
-            applyAll: false,
-          },
-        })),
+        videoConfig: { ...newVideoConfig, metadata: metadataWithoutBg },
+        selectedSlide: updateSelectedSlide(selectedSlide, (slide) => {
+          const clonedBg = clone(BackgroundStyleSchema, background);
+          clonedBg.applyAll = false;
+          return { ...slide, backgroundStyle: clonedBg };
+        }),
       });
     }
 
