@@ -264,6 +264,6 @@ export const TextHighlightDescriptor: ComponentRegistration = {
     name: 'TextHighlight',
     type: 'content',
     fullSchema: TextHighlightSchema,
-    description: 'Bold statement with an emphasized word/phrase. Use for key claims.',
+    description: 'Bold statement with an emphasized word/phrase. Use for key claims. Use {} to highlight. eg "We build amazing {software}"',
     calculateDuration: calculateTextHighlightDuration,
 };

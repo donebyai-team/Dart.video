@@ -18,7 +18,7 @@ const HANDWRITTEN_STACK = '"Segoe Script", "Comic Sans MS", cursive';
  * - sans/mono/serif: pulls from the brand-resolved theme stacks
  * - handwritten: style-owned fixed fallback stack (not a brand decision)
  */
-export function resolveFont(family: FontFamily, theme: ResolvedTheme): string {  
+export function resolveFont(family: FontFamily, theme: ResolvedTheme): string {
   switch (family) {
     case 'mono':        return theme.fontMono;
     case 'serif':       return theme.fontSerif;
@@ -26,12 +26,6 @@ export function resolveFont(family: FontFamily, theme: ResolvedTheme): string {
     default:            return theme.font; // 'sans' and any future additions
   }
 }
-
-/**
- * Variants that use mutedForeground instead of foreground.
- * Gives automatic visual hierarchy without the LLM setting colors.
- */
-const MUTED_VARIANTS = new Set<TypographyVariant>(['caption', 'label']);
 
 /**
  * Computes the font scale factor for a given composition.
@@ -54,11 +48,9 @@ export function resolveTypography(
   theme: ResolvedTheme,
   preset: AspectPreset,
 ): React.CSSProperties {
-  const variantConfig = TYPOGRAPHY_VARIANTS[variant];
+  const variantConfig = TYPOGRAPHY_VARIANTS[variant] || TYPOGRAPHY_VARIANTS.display;
   const scale = getFontScale(preset);
-  const color = MUTED_VARIANTS.has(variant)
-    ? theme.colors.mutedForeground
-    : theme.colors.foreground;
+  const color = theme.colors.foreground;
 
   const fontFamily = resolveFont(styleConfig.type.family, theme);
 

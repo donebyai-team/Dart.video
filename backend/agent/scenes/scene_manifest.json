@@ -39,7 +39,7 @@
           },
           {
             "name": "variant",
-            "type": "enum(caption|label|body|subheading|heading|display)",
+            "type": "enum(subheading|heading|display|displayLg|displayXl|display2xl)",
             "required": false,
             "default": "heading"
           },
@@ -56,7 +56,7 @@
           },
           {
             "name": "entranceAnimation",
-            "type": "enum(fadeIn|slideUp|slideDown|slideLeft|slideRight|scaleIn|rotateIn)",
+            "type": "enum(fadeIn|slideUp|slideDown|slideLeft|slideRight|scaleIn|rotateIn|tiltX|tiltY|flipX|flipY|zoomRotate|elasticScale|swingIn)",
             "required": false,
             "default": "slideUp"
           },
@@ -72,14 +72,8 @@
         "name": "TextStagger",
         "tags": [],
         "id": "textstagger",
-        "description": "word-by-word reveal. Use for headlines or supporting copy",
+        "description": "Reveals text word-by-word or character-by-character with staggered animation delays. Use for multi-word headlines or body text. Required props: text=\"Transform your workflow with AI\". Each unit animates in sequence with configurable delay. Set splitBy=\"char\" for character-level animation.",
         "props": [
-          {
-            "name": "text",
-            "type": "string",
-            "required": true,
-            "default": ""
-          },
           {
             "name": "startAt",
             "type": "number",
@@ -87,33 +81,39 @@
             "default": 0
           },
           {
+            "name": "text",
+            "type": "string",
+            "required": true,
+            "default": ""
+          },
+          {
             "name": "variant",
-            "type": "enum(caption|label|body|subheading|heading|display)",
-            "required": false,
+            "type": "enum(subheading|heading|display|displayLg|displayXl|display2xl)",
+            "required": true,
             "default": "heading"
           },
           {
             "name": "staggerDelay",
             "type": "number",
-            "required": false,
+            "required": true,
             "default": 5
           },
           {
             "name": "entranceAnimation",
-            "type": "enum(fadeIn|slideUp|slideDown|slideLeft|slideRight|scaleIn|rotateIn)",
-            "required": false,
+            "type": "enum(fadeIn|slideUp|slideDown|slideLeft|slideRight|scaleIn|rotateIn|tiltX|tiltY|flipX|flipY|zoomRotate|elasticScale|swingIn)",
+            "required": true,
             "default": "scaleIn"
           },
           {
             "name": "duration",
             "type": "number",
-            "required": false,
+            "required": true,
             "default": 15
           },
           {
             "name": "splitBy",
             "type": "enum(char|word|line)",
-            "required": false,
+            "required": true,
             "default": "word"
           }
         ]
@@ -144,13 +144,13 @@
           },
           {
             "name": "variant",
-            "type": "enum(caption|label|body|subheading|heading|display)",
+            "type": "enum(subheading|heading|display|displayLg|displayXl|display2xl)",
             "required": false,
             "default": "heading"
           },
           {
             "name": "entranceAnimation",
-            "type": "enum(fadeIn|slideUp|slideDown|slideLeft|slideRight|scaleIn|rotateIn)",
+            "type": "enum(fadeIn|slideUp|slideDown|slideLeft|slideRight|scaleIn|rotateIn|tiltX|tiltY|flipX|flipY|zoomRotate|elasticScale|swingIn)",
             "required": false,
             "default": "slideUp"
           }
@@ -160,7 +160,7 @@
         "name": "TextHighlight",
         "tags": [],
         "id": "texthighlight",
-        "description": "Bold statement with an emphasized word/phrase. Use for key claims.",
+        "description": "Bold statement with an emphasized word/phrase. Use for key claims. Use {} to highlight. eg \"We build amazing {software}\"",
         "props": [
           {
             "name": "text",
@@ -170,7 +170,7 @@
           },
           {
             "name": "variant",
-            "type": "enum(caption|label|body|subheading|heading|display)",
+            "type": "enum(subheading|heading|display|displayLg|displayXl|display2xl)",
             "required": false,
             "default": "heading"
           },
@@ -187,7 +187,7 @@
           },
           {
             "name": "entranceAnimation",
-            "type": "enum(fadeIn|slideUp|slideDown|slideLeft|slideRight|scaleIn|rotateIn)",
+            "type": "enum(fadeIn|slideUp|slideDown|slideLeft|slideRight|scaleIn|rotateIn|tiltX|tiltY|flipX|flipY|zoomRotate|elasticScale|swingIn)",
             "required": false,
             "default": "slideUp"
           },
@@ -238,7 +238,7 @@
           },
           {
             "name": "variant",
-            "type": "enum(caption|label|body|subheading|heading|display)",
+            "type": "enum(subheading|heading|display|displayLg|displayXl|display2xl)",
             "required": false,
             "default": "heading"
           }
@@ -266,13 +266,13 @@
           },
           {
             "name": "variant",
-            "type": "enum(caption|label|body|subheading|heading|display)",
+            "type": "enum(subheading|heading|display|displayLg|displayXl|display2xl)",
             "required": false,
             "default": "subheading"
           },
           {
             "name": "entranceAnimation",
-            "type": "enum(fadeIn|slideUp|slideDown|slideLeft|slideRight|scaleIn|rotateIn)",
+            "type": "enum(fadeIn|slideUp|slideDown|slideLeft|slideRight|scaleIn|rotateIn|tiltX|tiltY|flipX|flipY|zoomRotate|elasticScale|swingIn)",
             "required": false,
             "default": "slideUp"
           },
@@ -312,13 +312,13 @@
           },
           {
             "name": "variant",
-            "type": "enum(caption|label|body|subheading|heading|display)",
+            "type": "enum(subheading|heading|display|displayLg|displayXl|display2xl)",
             "required": false,
             "default": "subheading"
           },
           {
             "name": "entranceAnimation",
-            "type": "enum(fadeIn|slideUp|slideDown|slideLeft|slideRight|scaleIn|rotateIn)",
+            "type": "enum(fadeIn|slideUp|slideDown|slideLeft|slideRight|scaleIn|rotateIn|tiltX|tiltY|flipX|flipY|zoomRotate|elasticScale|swingIn)",
             "required": false,
             "default": "slideUp"
           },
@@ -374,12 +374,6 @@
             "type": "number",
             "required": false,
             "default": 20
-          },
-          {
-            "name": "borderRadius",
-            "type": "number",
-            "required": false,
-            "default": 16
           },
           {
             "name": "width",
@@ -452,7 +446,7 @@
           },
           {
             "name": "variant",
-            "type": "enum(caption|label|body|subheading|heading|display)",
+            "type": "enum(subheading|heading|display|displayLg|displayXl|display2xl)",
             "required": false,
             "default": "heading"
           },
@@ -466,9 +460,11 @@
       },
       {
         "name": "LogoWithBrandName",
-        "tags": ["Solution"],
+        "tags": [
+          "Solution"
+        ],
         "id": "logowithbrandname",
-        "description": "Logo + brand name reveal. Use for brand intro as a solution.",
+        "description": "Logo + brand name reveal. Use for brand intro.",
         "props": [
           {
             "name": "brandName",
@@ -489,7 +485,7 @@
           },
           {
             "name": "variant",
-            "type": "enum(caption|label|body|subheading|heading|display)",
+            "type": "enum(subheading|heading|display|displayLg|displayXl|display2xl)",
             "required": false,
             "default": "heading"
           }
@@ -520,7 +516,7 @@
           },
           {
             "name": "variant",
-            "type": "enum(caption|label|body|subheading|heading|display)",
+            "type": "enum(subheading|heading|display|displayLg|displayXl|display2xl)",
             "required": false,
             "default": "heading"
           },

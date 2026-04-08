@@ -23,7 +23,7 @@ export interface TextProps {
  */
 export function Text({
   text,
-  variant = 'body',
+  variant = 'heading',
   style,
   className,
   id,

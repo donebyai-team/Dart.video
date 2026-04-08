@@ -1,4 +1,4 @@
-export type FontSizeToken = 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl';
+export type FontSizeToken = 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | '7xl';
 export type FontWeightToken = 'thin' | 'light' | 'normal' | 'medium' | 'semibold' | 'bold' | 'extrabold';
 export type LineHeightToken = 'none' | 'tight' | 'normal' | 'relaxed' | 'loose';
 export type FontFamilyToken = 'sans' | 'mono';
@@ -20,6 +20,8 @@ export const FONT_SIZE_VALUES: Record<FontSizeToken, number> = {
   '3xl': 72,
   '4xl': 96,
   '5xl': 128,
+  '6xl': 160,
+  '7xl': 192,
 };
 
 export const FONT_WEIGHT_VALUES: Record<FontWeightToken, number> = {
