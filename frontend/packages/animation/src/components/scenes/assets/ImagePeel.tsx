@@ -159,47 +159,6 @@ export function ImagePeel(propsInit: ImagePeelProps): React.ReactElement {
 }
 
 // ============================================================================
-// Duration Calculation
-// ============================================================================
-
-export function calculateImagePeelDuration(props: ImagePeelProps): DurationResult {
-    // Validate props
-    const validation = ImagePeelSchema.safeParse(props);
-    if (!validation.success) {
-        const firstError = validation.error.errors[0];
-        return {
-            success: false,
-            error: firstError.message,
-            field: firstError.path[0] as string,
-        };
-    }
-
-    const validated = validation.data;
-
-    if (validated.images.length < 2) {
-        return {
-            success: false,
-            error: "images must contain at least 2 images",
-            field: "images",
-        };
-    }
-
-    // Calculate duration based on number of images
-    const entranceDuration = DEFAULT_ENTRANCE_DURATION;
-    const holdDuration = validated.holdDuration ?? DEFAULT_HOLD_DURATION;
-    const peelDuration = validated.peelDuration ?? DEFAULT_PEEL_DURATION;
-    const cycleDuration = holdDuration + peelDuration;
-
-    // Total: entrance + (cycles for all images)
-    const totalDuration = entranceDuration + (validated.images.length * cycleDuration);
-
-    return {
-        success: true,
-        duration: Math.ceil(totalDuration),
-    };
-}
-
-// ============================================================================
 // Registry Descriptor
 // ============================================================================
 
@@ -209,5 +168,5 @@ export const ImagePeelDescriptor: ComponentRegistration = {
     tags: ['Solution', 'Product Info'],
     fullSchema: ImagePeelSchema,
     description: 'Images peel away one by one. Use for before/after or variations. Min 2 images.',
-    calculateDuration: calculateImagePeelDuration,
+    celExpression: 'ceil(30 + size(props.images) * (props.holdDuration + props.peelDuration))',
 };

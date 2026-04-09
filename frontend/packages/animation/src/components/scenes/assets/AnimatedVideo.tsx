@@ -20,7 +20,6 @@ const DEFAULT_VIDEO_DURATION = 40;
 const DEFAULT_VIDEO_START_DELAY = 10;
 const DEFAULT_VARIANT = 'subheading' as const;
 const DEFAULT_ANIMATION = 'slideUp' as const;
-const DEFAULT_BORDER_RADIUS = 16;
 const DEFAULT_WIDTH = 1920 * 0.7;
 const DEFAULT_HEIGHT = 1080 * 0.7;
 
@@ -116,27 +115,6 @@ export function AnimatedVideo(propsInit: AnimatedVideoProps): React.ReactElement
 // Registry Descriptor
 // ============================================================================
 
-// Default video duration (hardcoded for now - ideally would be determined by video file length)
-const DEFAULT_VIDEO_SCENE_DURATION = 500;
-
-export function calculateAnimatedVideoDuration(props: AnimatedVideoProps): DurationResult {
-    // Validate props
-    const validation = AnimatedVideoSchema.safeParse(props);
-    if (!validation.success) {
-        const firstError = validation.error.errors[0];
-        return {
-            success: false,
-            error: firstError.message,
-            field: firstError.path[0] as string,
-        };
-    }
-
-    // Hardcoded duration for now - video duration ideally depends on video file length
-    return {
-        success: true,
-        duration: DEFAULT_VIDEO_SCENE_DURATION,
-    };
-}
 
 export const AnimatedVideoDescriptor: ComponentRegistration = {
     name: 'AnimatedVideo',
@@ -144,5 +122,5 @@ export const AnimatedVideoDescriptor: ComponentRegistration = {
     tags: ['Solution', 'Product Info'],
     fullSchema: AnimatedVideoSchema,
     description: 'Label + video entrance. Duration = video length.',
-    calculateDuration: calculateAnimatedVideoDuration,
+    celExpression: '500',
 };

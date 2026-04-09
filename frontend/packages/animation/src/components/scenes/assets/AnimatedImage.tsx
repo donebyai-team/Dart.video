@@ -12,12 +12,8 @@ import { resolveTypography } from '../../../tokens';
 import { useTheme } from '../../../theme';
 import { getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
-import type { DurationResult } from '../../../registry/registry';
 
 // Default constants
-const DEFAULT_TEXT_DURATION = 30;
-const DEFAULT_DELAY = 10;
-const DEFAULT_IMAGE_DURATION = 50;
 const DEFAULT_VARIANT = 'subheading' as const;
 const DEFAULT_ANIMATION = 'slideUp' as const;
 const DEFAULT_WIDTH = 1920 * 0.7;
@@ -120,29 +116,6 @@ export function AnimatedImage(propsInit: AnimatedImageProps): React.ReactElement
     );
 }
 
-export function calculateAnimatedImageDuration(props: AnimatedImageProps): DurationResult {
-    // Validate props
-    const validation = AnimatedImageSchema.safeParse(props);
-    if (!validation.success) {
-        const firstError = validation.error.errors[0];
-        return {
-            success: false,
-            error: firstError.message,
-            field: firstError.path[0] as string,
-        };
-    }
-
-    // Fixed duration: text + delay + image = 80 frames total
-    // This is a good baseline for showing an image with text
-    const textDuration = DEFAULT_TEXT_DURATION;
-    const delay = DEFAULT_DELAY;
-    const imageDuration = DEFAULT_IMAGE_DURATION;
-
-    return {
-        success: true,
-        duration: textDuration + delay + imageDuration,
-    };
-}
 
 // ============================================================================
 // Registry Descriptor
@@ -154,5 +127,5 @@ export const AnimatedImageDescriptor: ComponentRegistration = {
     tags: ['Solution', 'Product Info'],
     fullSchema: AnimatedImageSchema,
     description: 'Label + image entrance. Use for product/feature visuals.',
-    calculateDuration: calculateAnimatedImageDuration,
+    celExpression: '80',
 };

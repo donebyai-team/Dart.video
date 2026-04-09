@@ -2,7 +2,6 @@ import React, { createContext, useContext, useMemo } from 'react';
 import { BrandTheme, ResolvedTheme } from './types';
 import { derivePalette } from './derive';
 import { DEFAULT_BRAND_THEME } from './defaults';
-import { DEFAULT_RADIUS_TOKENS } from '../tokens/radius';
 
 const SANS_FALLBACK  = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 const MONO_FALLBACK  = 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace';

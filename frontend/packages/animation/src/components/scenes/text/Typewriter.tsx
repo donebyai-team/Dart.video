@@ -175,4 +175,5 @@ export const TypewriterDescriptor: ComponentRegistration = {
   fullSchema: TypewriterSchema,
   description: 'Character-by-character text reveal. Use for dramatic reveals or code/terminal effects.',
   calculateDuration: calculateTypewriterDuration,
+  celExpression: 'max(30, props.splitBy == "char" ? size(props.text) * 2 : props.splitBy == "word" ? size(props.text.split(" ")) * 9 : size(props.text.split("\\n")) * 18)',
 };

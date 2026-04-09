@@ -251,34 +251,6 @@ export const TextHighlight: React.FC<TextHighlightProps> = (propsInit: TextHighl
 };
 
 // ============================================================================
-// Duration Calculation
-// ============================================================================
-
-export function calculateTextHighlightDuration(props: TextHighlightProps): DurationResult {
-    // Validate props
-    const validation = TextHighlightSchema.safeParse(props);
-    if (!validation.success) {
-        const firstError = validation.error.errors[0];
-        return {
-            success: false,
-            error: firstError.message,
-            field: firstError.path[0] as string,
-        };
-    }
-
-    const validated = validation.data;
-
-    // Fixed duration: entrance + zoom + disappear
-    const entranceDuration = validated.animationDelay ?? DEFAULT_ENTRANCE_DURATION;
-    const zoomDuration = validated.zoomDuration ?? DEFAULT_ZOOM_DURATION;
-
-    return {
-        success: true,
-        duration: Math.ceil(entranceDuration + zoomDuration),
-    };
-}
-
-// ============================================================================
 // Registry Descriptor
 // ============================================================================
 
@@ -287,5 +259,5 @@ export const TextHighlightDescriptor: ComponentRegistration = {
     type: 'content',
     fullSchema: TextHighlightSchema,
     description: 'Bold statement with an emphasized word/phrase. Use for key claims. Use {} to highlight. eg "We build amazing {software}"',
-    calculateDuration: calculateTextHighlightDuration,
+    celExpression: 'ceil(props.animationDelay + props.zoomDuration)',
 };

@@ -9,9 +9,8 @@ import { useTheme } from "../../../theme";
 import { resolveTypography } from "../../../tokens/resolveTypography";
 import { TYPOGRAPHY_VARIANT_NAMES } from "../../../tokens/semantic";
 import { LogoAsset } from "./LogoAsset";
-import { TextStagger, calculateTextStaggerDuration } from "../text/TextStagger";
+import { TextStagger } from "../text/TextStagger";
 import type { ComponentRegistration } from '../../../registry/registry';
-import type { DurationResult } from '../../../registry/registry';
 import { SPLIT_BY_MODES } from "../types";
 
 // Default constants
@@ -103,33 +102,6 @@ export function LogoWithBrandName(propsInit: LogoWithBrandNameProps): React.Reac
 }
 
 // ============================================================================
-// Duration Calculation
-// ============================================================================
-
-export function calculateLogoWithBrandNameDuration(props: LogoWithBrandNameProps): DurationResult {
-    // Validate props
-    const validation = LogoWithBrandNameSchema.safeParse(props);
-    if (!validation.success) {
-        const firstError = validation.error.errors[0];
-        return {
-            success: false,
-            error: firstError.message,
-            field: firstError.path[0] as string,
-        };
-    }
-
-    const validated = validation.data;
-
-    // Delegate to TextStagger duration calculation with char splitting
-    return calculateTextStaggerDuration({
-        text: validated.brandName,
-        splitBy: 'char',
-        staggerDelay: DEFAULT_CHAR_STAGGER,
-        duration: DEFAULT_CHAR_FADE_DURATION,
-    });
-}
-
-// ============================================================================
 // Registry Descriptor
 // ============================================================================
 
@@ -139,5 +111,5 @@ export const LogoWithBrandNameDescriptor: ComponentRegistration = {
     tags: ['Solution'],
     fullSchema: LogoWithBrandNameSchema,
     description: 'Logo + brand name reveal. Use for brand intro.',
-    calculateDuration: calculateLogoWithBrandNameDuration,
+    celExpression: 'ceil((size(props.brandName.split("")) - 1) * 5 + 20)',
 };

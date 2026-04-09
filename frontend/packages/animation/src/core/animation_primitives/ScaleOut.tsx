@@ -31,7 +31,6 @@ export function ScaleOut({
   className,
 }: ScaleOutProps): React.ReactElement | null {
   const frame = useCurrentFrame();
-  const styleConfig = useStyleContext();
 
   const speedFactor = useSpeedFactor();
   const adjustedStartAt = applySpeedFactor(startAt, speedFactor);

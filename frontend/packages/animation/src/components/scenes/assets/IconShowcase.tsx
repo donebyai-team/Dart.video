@@ -159,51 +159,6 @@ export const IconShowcase: React.FC<IconShowcaseProps> = (propsInit: IconShowcas
     );
 };
 
-// ============================================================================
-// Duration Calculator
-// ============================================================================
-
-export function calculateIconShowcaseDuration(props: Record<string, any>): DurationResult {
-    const validation = IconShowcaseSchema.safeParse(props);
-
-    if (!validation.success) {
-        const firstError = validation.error.errors[0];
-        return {
-            success: false,
-            error: firstError.message,
-            field: firstError.path[0] as string,
-        };
-    }
-
-    const validated = validation.data;
-
-    // Calculate duration based on animation sequence
-    const entranceDuration = DEFAULT_ENTRANCE_DURATION;
-    const iconStagger = DEFAULT_ICON_STAGGER;
-    const iconAnimDuration = DEFAULT_ICON_ANIMATION_DURATION;
-    const iconCount = validated.icons.length;
-
-    // Time until all icons are visible
-    const allIconsVisibleFrame = entranceDuration + (iconCount - 1) * iconStagger + iconAnimDuration;
-
-    // Add text delay + text animation duration (text is now mandatory)
-    {
-        const textDelay = DEFAULT_TEXT_DELAY;
-        const textMoveUpDuration = 15;
-
-        // Text stagger duration: word count based
-        const words = validated.text.trim().split(/\s+/);
-        const wordCount = words.length;
-        const textStaggerDelay = 5; // from TextStagger defaults
-        const textWordDuration = 15; // from TextStagger defaults
-        const textDuration = (wordCount - 1) * textStaggerDelay + textWordDuration;
-
-        return {
-            success: true,
-            duration: Math.ceil(allIconsVisibleFrame + textDelay + textMoveUpDuration + textDuration),
-        };
-    }
-}
 
 // ============================================================================
 // Registry Descriptor
@@ -215,5 +170,5 @@ export const IconShowcaseDescriptor: ComponentRegistration = {
     tags: ['Solution', 'Product Info', 'Social proof'],
     fullSchema: IconShowcaseSchema,
     description: 'Row of icons + caption. Use for integrations, tech stack, partners, brands. eg. icons={["shopify", "midjourney", "openai"]}, text="caption text".',
-    calculateDuration: calculateIconShowcaseDuration,
+    celExpression: 'ceil(10 + (size(props.icons) - 1) * 5 + 10 + 5 + 15 + (size(props.text.trim().split(" ")) - 1) * 5 + 15)',
 };

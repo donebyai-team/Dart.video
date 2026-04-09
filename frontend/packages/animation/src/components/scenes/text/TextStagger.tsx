@@ -116,48 +116,6 @@ export const TextStaggerSchema = z.object({
     style: z.any().optional(),
 });
 
-export function calculateTextStaggerDuration(props: TextStaggerProps): DurationResult {
-    // Validate props
-    const validation = TextStaggerSchema.safeParse(props);
-    if (!validation.success) {
-        const firstError = validation.error.errors[0];
-        return {
-            success: false,
-            error: firstError.message,
-            field: firstError.path[0] as string,
-        };
-    }
-
-    const validated = validation.data;
-
-    // Calculate unit count based on splitBy mode
-    const splitBy = validated.splitBy ?? DEFAULT_SPLIT_BY;
-    const units = splitBy === 'char' ? validated.text.split('') : splitBy === 'line' ? validated.text.split('\n') : validated.text.split(' ');
-    const unitCount = units.length;
-
-    if (unitCount === 0) {
-        return {
-            success: false,
-            error: "text must contain at least one word",
-            field: "text",
-        };
-    }
-
-    // Use split-mode-aware defaults for stagger delay and unit duration
-    // Check raw props (not validated) so Zod schema defaults don't override mode-specific defaults
-    const modeDefaults = getSplitModeDefaults(splitBy);
-    const staggerDelay = props.staggerDelay ?? modeDefaults.staggerDelay;
-    const unitDuration = props.duration ?? modeDefaults.unitDuration;
-
-    // Total duration = time until last unit starts + duration of last unit animation
-    const totalDuration = (unitCount - 1) * staggerDelay + unitDuration;
-
-    return {
-        success: true,
-        duration: Math.ceil(totalDuration),
-    };
-}
-
 // ============================================================================
 // Registry Descriptor
 // ============================================================================
@@ -167,5 +125,5 @@ export const TextStaggerDescriptor: ComponentRegistration = {
     type: 'content',
     fullSchema: TextStaggerSchema,
     description: 'Reveals text word-by-word or character-by-character with staggered animation delays. Use for multi-word headlines or body text. Required props: text="Transform your workflow with AI". Each unit animates in sequence with configurable delay. Set splitBy="char" for character-level animation.',
-    calculateDuration: calculateTextStaggerDuration,
+    celExpression: 'ceil((size(props.splitBy == "char" ? props.text.split("") : props.splitBy == "line" ? props.text.split("\\n") : props.text.split(" ")) - 1) * props.staggerDelay + props.duration)',
 };

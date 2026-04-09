@@ -5,6 +5,7 @@
     "components": [
       {
         "name": "AnimatedNumber",
+        "durationExpression": "ceil(props.animationDelay + max(45, min(100, log10(abs(props.to - props.from) + 1) * 20)))",
         "tags": [],
         "id": "animatednumber",
         "description": "Counting metric with label text. Use for stats and KPIs",
@@ -70,6 +71,7 @@
       },
       {
         "name": "TextStagger",
+        "durationExpression": "ceil((size(props.splitBy == \"char\" ? props.text.split(\"\") : props.splitBy == \"line\" ? props.text.split(\"\\n\") : props.text.split(\" \")) - 1) * props.staggerDelay + props.duration)",
         "tags": [],
         "id": "textstagger",
         "description": "Reveals text word-by-word or character-by-character with staggered animation delays. Use for multi-word headlines or body text. Required props: text=\"Transform your workflow with AI\". Each unit animates in sequence with configurable delay. Set splitBy=\"char\" for character-level animation.",
@@ -120,6 +122,7 @@
       },
       {
         "name": "Typewriter",
+        "durationExpression": "max(30, props.splitBy == \"char\" ? size(props.text) * 2 : props.splitBy == \"word\" ? size(props.text.split(\" \")) * 9 : size(props.text.split(\"\\n\")) * 18)",
         "tags": [],
         "id": "typewriter",
         "description": "Character-by-character text reveal. Use for dramatic reveals or code/terminal effects.",
@@ -158,6 +161,7 @@
       },
       {
         "name": "TextHighlight",
+        "durationExpression": "ceil(props.animationDelay + props.zoomDuration)",
         "tags": [],
         "id": "texthighlight",
         "description": "Bold statement with an emphasized word/phrase. Use for key claims. Use {} to highlight. eg \"We build amazing {software}\"",
@@ -181,6 +185,12 @@
             "default": "glow"
           },
           {
+            "name": "highlightedTextAnimation",
+            "type": "enum(zoom|jump)",
+            "required": false,
+            "default": "jump"
+          },
+          {
             "name": "highlightColor",
             "type": "string",
             "required": false
@@ -201,15 +211,16 @@
             "name": "zoomDuration",
             "type": "number",
             "required": false,
-            "default": 20
+            "default": 30
           }
         ]
       },
       {
         "name": "TextCycle",
+        "durationExpression": "ceil((props.holdDuration + props.transitionDuration) * size(props.texts))",
         "tags": [],
         "id": "textcycle",
-        "description": "rotating text strings. Use for taglines or feature lists",
+        "description": "rotating text strings or words. Use for taglines, feature lists, multi highlights",
         "props": [
           {
             "name": "texts",
@@ -240,12 +251,70 @@
             "name": "variant",
             "type": "enum(subheading|heading|display|displayLg|displayXl|display2xl)",
             "required": false,
+            "default": "displayXl"
+          }
+        ]
+      },
+      {
+        "name": "TextWithWordCycle",
+        "durationExpression": "ceil((props.holdDuration + props.transitionDuration) * size(props.cyclingWords))",
+        "tags": [],
+        "id": "textwithwordcycle",
+        "description": "Static text with cycling highlighted words at the end. Use for dynamic taglines like \"We build amazing [software/products/solutions]\"",
+        "props": [
+          {
+            "name": "text",
+            "type": "string",
+            "required": true,
+            "default": ""
+          },
+          {
+            "name": "cyclingWords",
+            "type": "array",
+            "required": true,
+            "subtype": "string",
+            "default": []
+          },
+          {
+            "name": "holdDuration",
+            "type": "number",
+            "required": false,
+            "default": 20
+          },
+          {
+            "name": "transitionDuration",
+            "type": "number",
+            "required": false,
+            "default": 10
+          },
+          {
+            "name": "transition",
+            "type": "enum(flipY|fadeSwap|slideUp)",
+            "required": false,
+            "default": "slideUp"
+          },
+          {
+            "name": "variant",
+            "type": "enum(subheading|heading|display|displayLg|displayXl|display2xl)",
+            "required": false,
             "default": "heading"
+          },
+          {
+            "name": "highlightStyle",
+            "type": "enum(marker|underline|box|glow|background)",
+            "required": false,
+            "default": "background"
+          },
+          {
+            "name": "highlightColor",
+            "type": "string",
+            "required": false
           }
         ]
       },
       {
         "name": "AnimatedImage",
+        "durationExpression": "80",
         "tags": [
           "Solution",
           "Product Info"
@@ -292,6 +361,7 @@
       },
       {
         "name": "AnimatedVideo",
+        "durationExpression": "500",
         "tags": [
           "Solution",
           "Product Info"
@@ -337,7 +407,38 @@
         ]
       },
       {
+        "name": "ContentAwareScene",
+        "tags": [],
+        "id": "contentawarescene",
+        "description": "Automatically chooses a media-and-text layout from image or video dimensions and text visual weight.Pass textComponent as one of TextStagger, TextHighlight, Typewriter, or TextWithWordCycle.",
+        "props": [
+          {
+            "name": "src",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "mediaType",
+            "type": "enum(img|video)",
+            "required": false,
+            "default": "img"
+          },
+          {
+            "name": "entranceAnimation",
+            "type": "enum(fadeIn|slideUp|slideDown|slideLeft|slideRight|scaleIn|rotateIn|tiltX|tiltY|flipX|flipY|zoomRotate|elasticScale|swingIn)",
+            "required": false,
+            "default": "slideUp"
+          },
+          {
+            "name": "textComponent",
+            "type": "any",
+            "required": true
+          }
+        ]
+      },
+      {
         "name": "ImagePeel",
+        "durationExpression": "ceil(30 + size(props.images) * (props.holdDuration + props.peelDuration))",
         "tags": [
           "Solution",
           "Product Info"
@@ -391,6 +492,7 @@
       },
       {
         "name": "LogoAsset",
+        "durationExpression": "props.logoAnimation == \"none\" ? 30 : 30",
         "tags": [
           "CTA"
         ],
@@ -423,6 +525,7 @@
       },
       {
         "name": "LogoShowcase",
+        "durationExpression": "ceil((size(props.text.split(\"\\n\")) - 1) * 10 + 20 + (size(props.images) - 1) * 5 + 12)",
         "tags": [
           "Solution",
           "Product Info",
@@ -460,6 +563,7 @@
       },
       {
         "name": "LogoWithBrandName",
+        "durationExpression": "ceil((size(props.brandName.split(\"\")) - 1) * 5 + 20)",
         "tags": [
           "Solution"
         ],
@@ -493,6 +597,7 @@
       },
       {
         "name": "IconShowcase",
+        "durationExpression": "ceil(10 + (size(props.icons) - 1) * 5 + 10 + 5 + 15 + (size(props.text.trim().split(\" \")) - 1) * 5 + 15)",
         "tags": [
           "Solution",
           "Product Info",

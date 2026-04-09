@@ -117,6 +117,7 @@ interface ComponentJson {
   id: string;
   description: string;
   props: PropJson[];
+  durationExpression?: string;
 }
 
 interface ComponentGroupJson {
@@ -148,7 +149,13 @@ function componentToJson(c: ComponentRegistration): ComponentJson {
     props.push(prop);
   }
 
-  return { name: c.name, tags: c.tags || [], id: c.name.toLocaleLowerCase(), description: c.description, props };
+  return { 
+    name: c.name, 
+    durationExpression: c.celExpression,
+    tags: c.tags || [], 
+    id: c.name.toLocaleLowerCase(), 
+    description: c.description, 
+    props };
 }
 
 function getComponentGroupsJson(): ComponentGroupJson[] {

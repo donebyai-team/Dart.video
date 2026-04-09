@@ -17,7 +17,7 @@ import { TEXT_CYCLE_TRANSITIONS } from '../types';
 const DEFAULT_HOLD_DURATION = 20;
 const DEFAULT_TRANSITION_DURATION = 5;
 const DEFAULT_TRANSITION = 'slideUp' as const;
-const DEFAULT_VARIANT = 'heading' as const;
+const DEFAULT_VARIANT = 'displayXl' as const;
 
 
 // ============================================================================
@@ -206,40 +206,6 @@ export const TextCycle: React.FC<TextCycleProps> = (propsInit: TextCycleProps) =
   );
 }
 
-export function calculateTextCycleDuration(props: TextCycleProps): DurationResult {
-  // Validate props
-  const validation = TextCycleSchema.safeParse(props);
-  if (!validation.success) {
-    const firstError = validation.error.errors[0];
-    return {
-      success: false,
-      error: firstError.message,
-      field: firstError.path[0] as string,
-    };
-  }
-
-  const validated = validation.data;
-  
-  if (validated.texts.length === 0) {
-    return {
-      success: false,
-      error: "texts array cannot be empty",
-      field: "texts",
-    };
-  }
-
-  // Calculate duration: (hold + transition) * number of texts
-  const holdDuration = validated.holdDuration ?? DEFAULT_HOLD_DURATION;
-  const transitionDuration = validated.transitionDuration ?? DEFAULT_TRANSITION_DURATION;
-  const cycleDuration = holdDuration + transitionDuration;
-  const totalDuration = cycleDuration * validated.texts.length;
-  
-  return {
-    success: true,
-    duration: Math.ceil(totalDuration),
-  };
-}
-
 // ============================================================================
 // Registry Descriptor
 // ============================================================================
@@ -248,6 +214,6 @@ export const TextCycleDescriptor: ComponentRegistration = {
   name: 'TextCycle',
   type: 'content',
   fullSchema: TextCycleSchema,
-  description: 'rotating text strings. Use for taglines or feature lists',
-  calculateDuration: calculateTextCycleDuration,
+  description: 'rotating text strings or words. Use for taglines, feature lists, multi highlights',
+  celExpression: 'ceil((props.holdDuration + props.transitionDuration) * size(props.texts))',
 };

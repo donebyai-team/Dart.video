@@ -30,6 +30,8 @@ export interface ComponentRegistration {
   description: string;
   /** Calculate ideal duration based on props. Optional - only for components with dynamic duration. */
   calculateDuration?: (props: any) => DurationResult;
+  /** CEL expression to calculate duration on Go server. Will replace calculateDuration. */
+  celExpression?: string;
 }
 
 

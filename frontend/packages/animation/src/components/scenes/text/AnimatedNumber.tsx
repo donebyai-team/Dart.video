@@ -175,42 +175,6 @@ export const AnimatedNumberSchema = z.object({
     style: z.any().optional(),
 });
 
-export function calculateAnimatedNumberDuration(props: AnimatedNumberProps): DurationResult {
-    // Validate props
-    const validation = AnimatedNumberSchema.safeParse(props);
-    if (!validation.success) {
-        const firstError = validation.error.errors[0];
-        return {
-            success: false,
-            error: firstError.message,
-            field: firstError.path[0] as string,
-        };
-    }
-
-    const validated = validation.data;
-
-    // Additional business logic validation
-    if (validated.to === validated.from) {
-        return {
-            success: false,
-            error: "to and from cannot be the same value",
-            field: "to",
-        };
-    }
-
-    // Calculate duration
-    const entranceDuration = validated.animationDelay ?? DEFAULT_ENTRANCE_DURATION;
-    const range = Math.abs(validated.to - validated.from);
-
-    // Counter duration: logarithmic scale based on number range
-    const counterDuration = Math.max(DEFAULT_COUNTER_MIN_DURATION, Math.min(DEFAULT_COUNTER_MAX_DURATION, Math.log10(range + 1) * 20));
-
-    return {
-        success: true,
-        duration: Math.ceil(entranceDuration + counterDuration),
-    };
-}
-
 // ============================================================================
 // Registry Descriptor
 // ============================================================================
@@ -220,5 +184,5 @@ export const AnimatedNumberDescriptor: ComponentRegistration = {
     type: 'content',
     fullSchema: AnimatedNumberSchema,
     description: 'Counting metric with label text. Use for stats and KPIs',
-    calculateDuration: calculateAnimatedNumberDuration,
+    celExpression: 'ceil(props.animationDelay + max(45, min(100, log10(abs(props.to - props.from) + 1) * 20)))',
 };

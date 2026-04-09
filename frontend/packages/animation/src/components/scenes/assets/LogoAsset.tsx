@@ -153,37 +153,6 @@ export function LogoAsset(propsInit: LogoAssetProps): React.ReactElement {
         </span>
     );
 }
-
-export function calculateLogoAssetDuration(props: LogoAssetProps): DurationResult {
-    // Validate props
-    const validation = LogoAssetSchema.safeParse(props);
-    if (!validation.success) {
-        const firstError = validation.error.errors[0];
-        return {
-            success: false,
-            error: firstError.message,
-            field: firstError.path[0] as string,
-        };
-    }
-
-    const validated = validation.data;
-    
-    // Fixed duration based on animation
-    const animationType = validated.logoAnimation ?? 'zoomIn';
-    
-    if (animationType === 'none') {
-        return {
-            success: true,
-            duration: 30, // No animation, instant display
-        };
-    }
-    
-    return {
-        success: true,
-        duration: DEFAULT_ANIMATION_DURATION,
-    };
-}
-
 // ============================================================================
 // Registry Descriptor
 // ============================================================================
@@ -194,5 +163,5 @@ export const LogoAssetDescriptor: ComponentRegistration = {
     tags: ['CTA'],
     fullSchema: LogoAssetSchema,
     description: 'Logo reveal. Default is brand logo, no props. Use as the final scene.',
-    calculateDuration: calculateLogoAssetDuration,
+    celExpression: 'props.logoAnimation == "none" ? 30 : 30',
 };

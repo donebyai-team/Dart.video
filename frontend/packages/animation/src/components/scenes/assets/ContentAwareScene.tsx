@@ -9,7 +9,7 @@ import { Text } from '../../../core/text/Text';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { spacingToCss } from '../../../tokens/spacing';
-import { TYPOGRAPHY_VARIANT_NAMES, type TypographyVariant } from '../../../tokens/semantic';
+import { type TypographyVariant } from '../../../tokens/semantic';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
 import { resolveContentAwareLayout, type ContentAwareLayout } from './ContentAwareScene.layout';
@@ -22,22 +22,25 @@ const FALLBACK_MEDIA_HEIGHT = 1080;
 
 export const ContentAwareSceneSchema = z.object({
   id: z.string().optional(),
-  src: z.string().min(1),
-  media_type: z.enum(['img', 'video']),
-  entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).optional().default(DEFAULT_ANIMATION),
-  text: z.object({
-    content: z.string().min(1),
-    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).optional().default(DEFAULT_VARIANT),
-  }),
+  src: z.string(),
+  mediaType: z.enum(['img', 'video']).default('img').optional(),
+  entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
+  textComponent: z.any(),
 });
 
 export type ContentAwareSceneProps = z.input<typeof ContentAwareSceneSchema>;
 
-type MediaType = ContentAwareSceneProps['media_type'];
+type MediaType = ContentAwareSceneProps['mediaType'];
 
 interface MediaDimensions {
   width: number;
   height: number;
+}
+
+interface ResolvedTextInput {
+  content: string;
+  variant: TypographyVariant;
+  node: React.ReactElement;
 }
 
 function useMediaDimensions(src: string, mediaType: MediaType): MediaDimensions {
@@ -143,6 +146,43 @@ function renderTextBlock(
   );
 }
 
+function getTextContentFromComponent(component: React.ReactElement): string | null {
+  const props = component.props as { text?: unknown; texts?: unknown };
+
+  if (typeof props.text === 'string' && props.text.trim().length > 0) {
+    return props.text;
+  }
+
+  if (Array.isArray(props.texts)) {
+    const stringItems = props.texts.filter((item): item is string => typeof item === 'string' && item.trim().length > 0);
+    if (stringItems.length > 0) {
+      return stringItems.reduce((longest, current) => current.length > longest.length ? current : longest);
+    }
+  }
+
+  return null;
+}
+
+function resolveTextInput(
+  id: string | undefined,
+  textComponent: unknown,
+): ResolvedTextInput {
+  if (React.isValidElement(textComponent)) {
+    const inferredContent = getTextContentFromComponent(textComponent);
+    const inferredVariant = (textComponent.props as { variant?: TypographyVariant }).variant ?? DEFAULT_VARIANT;
+
+    if (inferredContent) {
+      return {
+        content: inferredContent,
+        variant: inferredVariant,
+        node: textComponent,
+      };
+    }
+  }
+
+  throw new Error('ContentAwareScene requires textComponent with a text or texts prop.');
+}
+
 function renderMediaBlock(
   id: string | undefined,
   mediaType: MediaType,
@@ -208,7 +248,6 @@ function renderResolvedLayout(
   estimatedLines: number,
 ): React.ReactElement {
   const textBasis = `${Math.round(textWidthPercent * 100)}%`;
-  const isSingleLineStack = estimatedLines <= 1;
 
   switch (layout) {
     case 'image-left-text-right':
@@ -252,17 +291,8 @@ export function ContentAwareScene(propsInit: ContentAwareSceneProps): React.Reac
   const frame = useCurrentFrame();
   const preset = useAspectPreset();
   const patchedProps = usePatchedProps(propsInit.id, propsInit);
-  const normalizedProps = patchedProps && typeof patchedProps === 'object' && 'image' in patchedProps
-    ? {
-        id: propsInit.id,
-        src: (patchedProps as { image: { src: string }; text: unknown }).image.src,
-        media_type: 'img' as const,
-        entranceAnimation: DEFAULT_ANIMATION,
-        text: (patchedProps as { text: unknown }).text,
-      }
-    : { ...ContentAwareSceneSchema.parse(patchedProps), id: propsInit.id };
-  const props = ContentAwareSceneSchema.parse(normalizedProps);
-  const mediaDimensions = useMediaDimensions(props.src, props.media_type);
+  const props = { ...ContentAwareSceneSchema.parse(patchedProps), id: propsInit.id };
+  const mediaDimensions = useMediaDimensions(props.src, props.mediaType);
   const mediaProgress = interpolateWithEasing(
     frame,
     [10, 50],
@@ -272,24 +302,23 @@ export function ContentAwareScene(propsInit: ContentAwareSceneProps): React.Reac
 
   const availableWidth = preset.width - preset.safeArea.left - preset.safeArea.right;
   const availableHeight = preset.height - preset.safeArea.top - preset.safeArea.bottom;
+  
+  const resolvedText = resolveTextInput(props.id, props.textComponent);
+
   const resolved = resolveContentAwareLayout({
     canvasWidth: availableWidth,
     canvasHeight: availableHeight,
     imageWidth: mediaDimensions.width,
     imageHeight: mediaDimensions.height,
-    text: props.text.content,
-    variant: props.text.variant ?? DEFAULT_VARIANT,
+    text: resolvedText.content,
+    variant: resolvedText.variant,
   });
   const stackedTextWidth =
-    resolved.layout === 'image-top-text-bottom' || resolved.layout === 'image-bottom-text-top'
+    resolved.layout === 'image-top-text-bottom'
       ? Math.max(resolved.textWidth, DEFAULT_STACKED_TEXT_WIDTH)
       : resolved.textWidth;
 
-  const textNode = renderTextBlock(
-    props.id,
-    props.text.content,
-    props.text.variant ?? DEFAULT_VARIANT,
-  );
+  const textNode = resolvedText.node;
 
   const imageDimensions = getImageDimensions(
     resolved.layout,
@@ -309,7 +338,7 @@ export function ContentAwareScene(propsInit: ContentAwareSceneProps): React.Reac
     >
       {renderMediaBlock(
         props.id,
-        props.media_type,
+        props.mediaType,
         props.src,
         imageDimensions.width,
         imageDimensions.height,
@@ -342,5 +371,6 @@ export const ContentAwareSceneDescriptor: ComponentRegistration = {
   name: 'ContentAwareScene',
   type: 'scene',
   fullSchema: ContentAwareSceneSchema,
-  description: 'Automatically chooses a media-and-text layout from image or video dimensions and text visual weight.',
+  description: 'Automatically chooses a media-and-text layout from image or video dimensions and text visual weight.' +
+    'Pass textComponent as one of TextStagger, TextHighlight, Typewriter, or TextWithWordCycle.',
 };

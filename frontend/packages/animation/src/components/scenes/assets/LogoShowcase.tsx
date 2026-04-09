@@ -5,9 +5,8 @@ import { usePatchedProps, useStyleOverride } from '../../../patches';
 import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
 import { LogoAsset } from './LogoAsset';
 import type { ComponentRegistration } from '../../../registry/registry';
-import type { DurationResult } from '../durationTypes';
 import { interpolateWithEasing } from '../../../styles';
-import { TextStagger, calculateTextStaggerDuration } from '../text/TextStagger';
+import { TextStagger } from '../text/TextStagger';
 import { ENTRANCE_ANIMATIONS } from '../types';
 
 const DEFAULT_TEXT_ENTRANCE_DURATION = 5;
@@ -55,12 +54,8 @@ export const LogoShowcase: React.FC<LogoShowcaseProps> = (propsInit: LogoShowcas
     const itemsPerRow = Math.min(Math.max(logoCount, 1), MAX_LOGOS_PER_ROW);
     const slotLayout = getSlotLayout(itemsPerRow);
     const actualLogoGap = props.logoGap ?? slotLayout.gap;
-    const textDurationResult = calculateTextStaggerDuration({
-        text: props.text,
-        splitBy: DEFAULT_TEXT_STAGGER_SPLIT_BY,
-        entranceAnimation: DEFAULT_TEXT_STAGGER_ANIMATION,
-    });
-    const textDuration = textDurationResult.success ? textDurationResult.duration : DEFAULT_TEXT_ENTRANCE_DURATION;
+
+    const textDuration = DEFAULT_TEXT_ENTRANCE_DURATION;
     const logosStartFrame = textDuration;
 
     return (
@@ -146,48 +141,11 @@ export const LogoShowcase: React.FC<LogoShowcaseProps> = (propsInit: LogoShowcas
     );
 };
 
-export function calculateLogoShowcaseDuration(props: Record<string, any>): DurationResult {
-    const validation = LogoShowcaseSchema.safeParse(props);
-
-    if (!validation.success) {
-        const firstError = validation.error.errors[0];
-        return {
-            success: false,
-            error: firstError.message,
-            field: firstError.path[0] as string,
-        };
-    }
-
-    const validated = validation.data;
-    const logoCount = validated.images.length;
-    const textDurationResult = calculateTextStaggerDuration({
-        text: validated.text,
-        splitBy: DEFAULT_TEXT_STAGGER_SPLIT_BY,
-        entranceAnimation: DEFAULT_TEXT_STAGGER_ANIMATION,
-    });
-    const textDuration = textDurationResult.success ? textDurationResult.duration : DEFAULT_TEXT_ENTRANCE_DURATION;
-
-    if (logoCount === 0) {
-        return {
-            success: true,
-            duration: textDuration ,
-        };
-    }
-
-    const lastLogoStartFrame = textDuration
-        + (logoCount - 1) * DEFAULT_LOGO_STAGGER;
-
-    return {
-        success: true,
-        duration: Math.ceil(lastLogoStartFrame + DEFAULT_LOGO_ANIMATION_DURATION),
-    };
-}
-
 export const LogoShowcaseDescriptor: ComponentRegistration = {
     name: 'LogoShowcase',
     type: 'scene',
     tags: ['Solution', 'Product Info', 'Social proof'],
     fullSchema: LogoShowcaseSchema,
     description: 'Row of logos + caption. Use for integrations, tech stack, partners, brands. eg. logos=["url1", "url2"], text="caption text".',
-    calculateDuration: calculateLogoShowcaseDuration,
+    celExpression: 'ceil((size(props.text.split("\\n")) - 1) * 10 + 20 + (size(props.images) - 1) * 5 + 12)',
 };

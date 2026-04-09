@@ -9,7 +9,7 @@ import { uploadMedia } from '@/services/utils'
 import { getConnectError } from '@/utils/error'
 import AssetPreviewDialog from '@/components/assets/AssetPreviewDialog'
 import { ImagePlus, Loader2, Upload, Video, X } from 'lucide-react'
-import type { MediaAsset } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { MediaAsset } from '@coasterai/pb/coasterai/core/v1/media_asset_pb'
 
 export interface ManualMediaConfirmPayload {
   asset: MediaAsset
