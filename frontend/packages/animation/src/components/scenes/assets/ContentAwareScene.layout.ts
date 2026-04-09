@@ -3,17 +3,12 @@ import { FONT_SIZE_VALUES, FONT_SCALE_BASE } from '../../../tokens/typography';
 
 export type ContentAwareLayout =
   | 'image-left-text-right'
-  | 'image-right-text-left'
-  | 'image-top-text-bottom'
   | 'image-bottom-text-top'
-  | 'image-background-text-overlay'
-  | 'text-top-left-image-bottom-right'
-  | 'text-top-right-image-bottom-left';
+  | 'image-top-text-bottom';
 
 type TextVisualWeight = 'compact' | 'medium' | 'dominant';
 type ImageAspectBucket = 'portrait' | 'square' | 'landscape' | 'very-wide';
 type ImageFootprintBucket = 'small' | 'medium' | 'screen';
-type TextAnchor = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
 
 export interface ContentAwareLayoutInput {
   canvasWidth: number;
@@ -27,7 +22,6 @@ export interface ContentAwareLayoutInput {
 export interface ResolvedContentAwareLayout {
   layout: ContentAwareLayout;
   textWidth: number;
-  textAnchor: TextAnchor;
   estimatedLines: number;
   textWeight: TextVisualWeight;
   imageAspectBucket: ImageAspectBucket;
@@ -44,32 +38,14 @@ const VARIANT_WEIGHT: Record<TypographyVariant, TextVisualWeight> = {
 
 const DEFAULT_TEXT_WIDTH: Record<ContentAwareLayout, number> = {
   'image-left-text-right': 0.4,
-  'image-right-text-left': 0.4,
   'image-top-text-bottom': 0.72,
-  'image-bottom-text-top': 0.72,
-  'image-background-text-overlay': 0.52,
-  'text-top-left-image-bottom-right': 0.34,
-  'text-top-right-image-bottom-left': 0.34,
+  'image-bottom-text-top': 0.72
 };
 
 const WIDENED_TEXT_WIDTH: Record<ContentAwareLayout, number> = {
   'image-left-text-right': 0.48,
-  'image-right-text-left': 0.48,
   'image-top-text-bottom': 0.78,
   'image-bottom-text-top': 0.78,
-  'image-background-text-overlay': 0.7,
-  'text-top-left-image-bottom-right': 0.42,
-  'text-top-right-image-bottom-left': 0.42,
-};
-
-const TEXT_ANCHOR_BY_LAYOUT: Record<ContentAwareLayout, TextAnchor> = {
-  'image-left-text-right': 'center',
-  'image-right-text-left': 'center',
-  'image-top-text-bottom': 'center',
-  'image-bottom-text-top': 'center',
-  'image-background-text-overlay': 'top-left',
-  'text-top-left-image-bottom-right': 'top-left',
-  'text-top-right-image-bottom-left': 'top-right',
 };
 
 function getTextWeight(variant: TypographyVariant, text: string): TextVisualWeight {
@@ -231,6 +207,5 @@ export function resolveContentAwareLayout(input: ContentAwareLayoutInput): Resol
     estimatedLines,
     textWeight,
     imageAspectBucket,
-    textAnchor: TEXT_ANCHOR_BY_LAYOUT[layout],
   };
 }

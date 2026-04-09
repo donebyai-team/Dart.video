@@ -179,12 +179,11 @@ function getImageDimensions(
 
   switch (layout) {
     case 'image-left-text-right':
-    case 'image-right-text-left':
       return fitBoxWithinBounds(
         sourceWidth,
         sourceHeight,
         isVeryTallPortrait
-          ? Math.max(1, paddedWidth * 0.5)
+          ? Math.max(1, paddedWidth * 0.7)
           : Math.max(1, paddedWidth - textWidth - SHARED_GAP),
         paddedHeight * 0.7,
       );
@@ -195,21 +194,6 @@ function getImageDimensions(
         sourceHeight,
         paddedWidth * STACK_IMAGE_MAX_WIDTH_RATIO,
         paddedHeight * STACK_IMAGE_MAX_HEIGHT_RATIO,
-      );
-    case 'image-background-text-overlay':
-      return fitBoxWithinBounds(
-        sourceWidth,
-        sourceHeight,
-        paddedWidth,
-        paddedHeight * 0.7,
-      );
-    case 'text-top-left-image-bottom-right':
-    case 'text-top-right-image-bottom-left':
-      return fitBoxWithinBounds(
-        sourceWidth,
-        sourceHeight,
-        paddedWidth * 0.58,
-        paddedHeight * 0.5,
       );
     default:
       return fitBoxWithinBounds(sourceWidth, sourceHeight, paddedWidth, paddedHeight);
@@ -235,59 +219,6 @@ function renderResolvedLayout(
             {textNode}
           </div>
         </Row>
-      );
-    case 'image-right-text-left':
-      return (
-        <Row gap={SHARED_GAP} align="center" justify="center" style={{ width: '100%', height: '100%' }}>
-          <div style={{ flexBasis: textBasis, maxWidth: textBasis, minWidth: 0, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: spacingToCss(CONTENT_PADDING) }}>
-            {textNode}
-          </div>
-          <div style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', paddingLeft: spacingToCss(CONTENT_PADDING) }}>{imageNode}</div>
-        </Row>
-      );
-    case 'image-bottom-text-top':
-      return (
-        <Stack
-          gap={VERTICAL_STACK_GAP_PX}
-          align="center"
-          justify={isSingleLineStack ? 'center' : 'start'}
-          style={{
-            width: '100%',
-            height: '100%',
-            padding: `${spacingToCss(CONTENT_PADDING)} ${spacingToCss(CONTENT_PADDING)} ${spacingToCss(12)}`,
-            boxSizing: 'border-box',
-          }}
-        >
-          <div style={{ width: textBasis, maxWidth: '100%', margin: '0 auto', flexShrink: 0 }}>{textNode}</div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{imageNode}</div>
-        </Stack>
-      );
-    case 'image-background-text-overlay':
-      return (
-        <div style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', inset: spacingToCss(CONTENT_PADDING), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{imageNode}</div>
-          <div style={{ position: 'absolute', top: spacingToCss(CONTENT_PADDING), left: spacingToCss(CONTENT_PADDING), width: textBasis, maxWidth: '60%' }}>
-            {textNode}
-          </div>
-        </div>
-      );
-    case 'text-top-left-image-bottom-right':
-      return (
-        <div style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: spacingToCss(CONTENT_PADDING), left: spacingToCss(CONTENT_PADDING), width: textBasis, maxWidth: '58%' }}>
-            {textNode}
-          </div>
-          <div style={{ position: 'absolute', right: spacingToCss(CONTENT_PADDING), bottom: spacingToCss(CONTENT_PADDING) }}>{imageNode}</div>
-        </div>
-      );
-    case 'text-top-right-image-bottom-left':
-      return (
-        <div style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: spacingToCss(CONTENT_PADDING), right: spacingToCss(CONTENT_PADDING), width: textBasis, maxWidth: '58%' }}>
-            {textNode}
-          </div>
-          <div style={{ position: 'absolute', left: spacingToCss(CONTENT_PADDING), bottom: spacingToCss(CONTENT_PADDING) }}>{imageNode}</div>
-        </div>
       );
     case 'image-top-text-bottom':
     default:
