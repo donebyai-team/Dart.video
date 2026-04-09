@@ -12,16 +12,22 @@ import type { DurationResult } from '../durationTypes';
 
 // Default constants
 const DEFAULT_ENTRANCE_DURATION = 30;
-const DEFAULT_ZOOM_DURATION = 20;
+const DEFAULT_ZOOM_DURATION = 30;
 const DEFAULT_VARIANT = 'heading' as const;
 const DEFAULT_HIGHLIGHT_STYLE = 'glow' as const;
 const DEFAULT_ANIMATION = 'slideUp' as const;
+const HIGHLIGHTED_TEXT_ANIMATIONS = ['zoom', 'jump'] as const;
+const DEFAULT_HIGHLIGHTED_TEXT_ANIMATION = 'jump' as const;
 
 export const TextHighlightSchema = z.object({
     id: z.string().optional(),
     text: z.string().default(''),
     variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
     highlightStyle: z.enum(HIGHLIGHT_STYLES).default(DEFAULT_HIGHLIGHT_STYLE).optional(),
+    highlightedTextAnimation: z
+        .enum(HIGHLIGHTED_TEXT_ANIMATIONS)
+        .default(DEFAULT_HIGHLIGHTED_TEXT_ANIMATION)
+        .optional(),
     highlightColor: z.string().optional(),
     entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
     animationDelay: z.number().default(DEFAULT_ENTRANCE_DURATION).optional(),
@@ -43,6 +49,8 @@ export const TextHighlight: React.FC<TextHighlightProps> = (propsInit: TextHighl
     // Apply defaults
     const actualVariant = props.variant ?? DEFAULT_VARIANT;
     const actualHighlightStyle = props.highlightStyle ?? DEFAULT_HIGHLIGHT_STYLE;
+    const actualHighlightedTextAnimation =
+        props.highlightedTextAnimation ?? DEFAULT_HIGHLIGHTED_TEXT_ANIMATION;
     const actualHighlightColor = props.highlightColor ?? theme.colors.primary;
     const actualAnimation = props.entranceAnimation ?? DEFAULT_ANIMATION;
     const actualAnimationDelay = props.animationDelay ?? DEFAULT_ENTRANCE_DURATION;
@@ -51,8 +59,8 @@ export const TextHighlight: React.FC<TextHighlightProps> = (propsInit: TextHighl
 
     // Animation timeline:
     // Phase 1: Entrance animation with highlight already visible (0 to animationDelay)
-    // Phase 2: Zoom out highlighted word (animationDelay to animationDelay + zoomDuration)
-    // Phase 3: Entire text disappears after zoom completes
+    // Phase 2: Highlighted text animation (animationDelay to animationDelay + zoomDuration)
+    // Phase 3: Entire text disappears after the highlight animation completes
 
     const entranceProgress = interpolateWithEasing(
         frame,
@@ -69,7 +77,20 @@ export const TextHighlight: React.FC<TextHighlightProps> = (propsInit: TextHighl
         'ease-out'
     );
 
-    // Disappear immediately after zoom completes
+    const jumpHeight = interpolateWithEasing(
+        frame,
+        [zoomStartFrame, zoomStartFrame + actualZoomDuration / 2],
+        [0, -18],
+        'ease-out'
+    );
+    const landingHeight = interpolateWithEasing(
+        frame,
+        [zoomStartFrame + actualZoomDuration / 2, zoomStartFrame + actualZoomDuration],
+        [-18, 0],
+        'ease-in-out'
+    );
+
+    // Disappear immediately after the highlight animation completes
     const disappearFrame = zoomStartFrame + actualZoomDuration;
     const isVisible = frame < disappearFrame;
 
@@ -126,9 +147,10 @@ export const TextHighlight: React.FC<TextHighlightProps> = (propsInit: TextHighl
         // Highlight is always at full intensity (no animation delay)
         const progress = 1;
 
-        // Calculate zoom scale for highlighted words - dramatic expansion to fill screen
-        const zoomScale = 1 + zoomProgress * 9; // Scales from 1 to 10x for full screen effect
-        const baseTransform = `scale(${zoomScale})`;
+        const baseTransform =
+            actualHighlightedTextAnimation === 'jump'
+                ? `translateY(${frame < zoomStartFrame + actualZoomDuration / 2 ? jumpHeight : landingHeight}px)`
+                : `scale(${1 + zoomProgress * 9})`;
 
         switch (actualHighlightStyle) {
             case 'marker':
