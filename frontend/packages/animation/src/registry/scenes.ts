@@ -6,6 +6,7 @@ import { TextHighlightDescriptor } from "../components/scenes/text/TextHighlight
 import { TextCycleDescriptor } from "../components/scenes/text/TextCycle";
 import { AnimatedImageDescriptor } from "../components/scenes/assets/AnimatedImage";
 import { AnimatedVideoDescriptor } from "../components/scenes/assets/AnimatedVideo";
+import { ContentAwareSceneDescriptor } from "../components/scenes/assets/ContentAwareScene";
 import { ImagePeelDescriptor } from "../components/scenes/assets/ImagePeel";
 import { LogoAssetDescriptor } from "../components/scenes/assets/LogoAsset";
 import { LogoShowcaseDescriptor } from "../components/scenes/assets/LogoShowcase";
@@ -24,6 +25,7 @@ export const SCENE_COMPONENTS: ComponentRegistration[] = [
   // Asset components with schemas and duration calculators
   AnimatedImageDescriptor,
   AnimatedVideoDescriptor,
+  ContentAwareSceneDescriptor,
   ImagePeelDescriptor,
   LogoAssetDescriptor,
   LogoShowcaseDescriptor,

@@ -1,5 +1,5 @@
 import React from "react";
-import { AbsoluteFill, Composition } from "remotion";
+import { AbsoluteFill, Composition, Sequence } from "remotion";
 import { TextStagger } from "../components/scenes/text";
 import { FadeIn, FadeOut, SlideIn, ScaleIn, Stagger, TimelineGate } from "../core/animation_primitives";
 import { FramePreset, SafeArea, AbsoluteCenter, Stack, Row } from "../core/layout";
@@ -9,7 +9,7 @@ import { SpeedFactorProvider } from "../duration";
 import { ASPECT_PRESETS, resolveStyle, AspectPresetProvider, StyleContextProvider } from "../styles";
 import { BrandTheme, darkTheme, ThemeProvider } from "../theme";
 import { AnimatedVideo } from "../components/scenes/assets/AnimatedVideo";
-import { ImagePeel, LogoAsset, LogoShowcase } from "../components/scenes";
+import { ContentAwareScene, ImagePeel, LogoAsset, LogoShowcase } from "../components/scenes";
 
 
 const BRAND: BrandTheme = {
@@ -112,14 +112,14 @@ const TextComponentsScene: React.FC = () => (
         <SafeArea>
             <AbsoluteCenter axis="both">
                 {/* <Stack gap={64} align="center"> */}
-                    {/* <Counter
+                {/* <Counter
                         id="ctr-0"
                         suffix=" incidents"
                         from={0}
                         to={12450}
                         prefix="Solved "
                     /> */}
-                    {/* 
+                {/* 
                     <Row gap={2} >
                         <Text id="t-txt" variant="heading">Your dashboard, has</Text>
                         <TextCycle
@@ -128,7 +128,7 @@ const TextComponentsScene: React.FC = () => (
                         />
                     </Row> */}
 
-                    {/* <AnimatedNumber
+                {/* <AnimatedNumber
                         id="an-0"
                         startText="Solved"
                         endText="incidents"
@@ -137,7 +137,7 @@ const TextComponentsScene: React.FC = () => (
                         animation="slideUp"
                     /> */}
 
-                    {/* <TextHighlight
+                {/* <TextHighlight
                         id="th-0"
                         text="This is a {highlighted} text."
                     />
@@ -152,12 +152,12 @@ const TextComponentsScene: React.FC = () => (
                         text="Your dashboard, logs, and alerts didn't adapt."
                     /> */}
 
-                    {/* <TextHighlight
+                {/* <TextHighlight
                         id="th-0"
                         text="Everything {noise} is pain "
                     />             */}
 
-                    {/* <AnimatedNumber
+                {/* <AnimatedNumber
                         id="an-0"
                         startText="Solved"
                         endText="incidents"
@@ -166,7 +166,7 @@ const TextComponentsScene: React.FC = () => (
                     />
 
                     <TextHighlight id="texthighlight-0" text="Can your AI actually work with you?" /> */}
-                    <TextStagger id="textstagger-0" text="All teams are stretched thin." />                    
+                <TextStagger id="textstagger-0" text="All teams are stretched thin." />
                 {/* </Stack> */}
             </AbsoluteCenter>
         </SafeArea>
@@ -206,23 +206,205 @@ const AssetsScene: React.FC = () => (
     </Scene>
 );
 
+export const ContentAwareSceneExamples: React.FC = () => {
+  return (
+    <AbsoluteFill>
+      <Sequence from={0} durationInFrames={90}>
+        <ContentAwareScene
+          id="content-aware-0"
+          src="https://placehold.co/2800x1400"
+          media_type="img"
+          text={{
+            content: "Your dashboard, logs, and alerts didn't adapt, because you didn't allow",
+            variant: 'heading',
+          }}
+        />
+      </Sequence>
+
+      <Sequence from={90} durationInFrames={90}>
+        <ContentAwareScene
+          id="content-aware-1"
+          src="https://placehold.co/400x600"
+          media_type="img"
+          text={{
+            content: 'A vertical image with shorter supporting text',
+            variant: 'heading',
+          }}
+        />
+      </Sequence>
+
+      <Sequence from={180} durationInFrames={90}>
+        <ContentAwareScene
+          id="content-aware-2"
+          src="https://placehold.co/900x500"
+          media_type="img"
+          text={{
+            content:
+              "Your dashboard, logs, and alerts didn't adapt, because you are liar",
+            variant: 'heading',
+          }}
+        />
+      </Sequence>
+
+      <Sequence from={270} durationInFrames={90}>
+        <ContentAwareScene
+          id="content-aware-3"
+          src="https://placehold.co/350x357"
+          media_type="img"
+          text={{
+            content: 'Near-square asset with compact text',
+            variant: 'heading',
+          }}
+        />
+      </Sequence>
+
+      <Sequence from={360} durationInFrames={90}>
+        <ContentAwareScene
+          id="content-aware-4"
+          src="https://placehold.co/672x730"
+          media_type="img"
+          text={{
+            content: 'Medium vertical asset should usually sit side by side',
+            variant: 'heading',
+          }}
+        />
+      </Sequence>
+       <Sequence from={450} durationInFrames={90}>
+        <ContentAwareScene
+          id="content-aware-5"
+          src="https://placehold.co/2000x2000"
+          media_type="img"
+          text={{
+            content: 'Medium vertical asset should usually sit side by side',
+            variant: 'heading',
+          }}
+        />
+      </Sequence>
+      <Sequence from={540} durationInFrames={90}>
+    <ContentAwareScene
+      id="content-aware-6"
+      src="https://placehold.co/2000x400"
+      media_type="img"
+      text={{
+        content: 'Extremely wide panorama image',
+        variant: 'heading',
+      }}
+    />
+  </Sequence>
+
+  {/* Extremely tall image */}
+  <Sequence from={630} durationInFrames={90}>
+    <ContentAwareScene
+      id="content-aware-7"
+      src="https://placehold.co/400x2000"
+      media_type="img"
+      text={{
+        content: 'Extremely tall portrait image',
+        variant: 'heading',
+      }}
+    />
+  </Sequence>
+
+  {/* Very small image */}
+  <Sequence from={720} durationInFrames={90}>
+    <ContentAwareScene
+      id="content-aware-8"
+      src="https://placehold.co/80x80"
+      media_type="img"
+      text={{
+        content: 'Very tiny asset should not dominate layout',
+        variant: 'heading',
+      }}
+    />
+  </Sequence>
+
+  {/* Very long paragraph text */}
+  <Sequence from={810} durationInFrames={90}>
+    <ContentAwareScene
+      id="content-aware-9"
+      src="https://placehold.co/600x400"
+      media_type="img"
+      text={{
+        content:
+          'This is an intentionally very long piece of text meant to test how the layout behaves when the heading wraps across multiple lines and starts competing with the image for visual dominance in the composition.',
+        variant: 'heading',
+      }}
+    />
+  </Sequence>
+
+  {/* Very short text */}
+  <Sequence from={900} durationInFrames={90}>
+    <ContentAwareScene
+      id="content-aware-10"
+      src="https://placehold.co/600x400"
+      media_type="img"
+      text={{
+        content: 'Hi.',
+        variant: 'heading',
+      }}
+    />
+  </Sequence>
+
+  {/* Emoji / unicode text */}
+  <Sequence from={990} durationInFrames={90}>
+    <ContentAwareScene
+      id="content-aware-11"
+      src="https://placehold.co/500x500"
+      media_type="img"
+      text={{
+        content: 'Logs crashed 😬 Alerts everywhere 🚨',
+        variant: 'heading',
+      }}
+    />
+  </Sequence>
+
+  {/* Long unbroken word */}
+  <Sequence from={1080} durationInFrames={90}>
+    <ContentAwareScene
+      id="content-aware-12"
+      src="https://placehold.co/600x400"
+      media_type="img"
+      text={{
+        content: 'SupercalifragilisticexpialidociousLayoutBreakTest',
+        variant: 'heading',
+      }}
+    />
+  </Sequence>
+
+  {/* Multi-line formatted text */}
+  <Sequence from={1170} durationInFrames={90}>
+    <ContentAwareScene
+      id="content-aware-13"
+      src="https://placehold.co/606x450"
+      media_type="img"
+      text={{
+        content:
+          'Your dashboards failed. Your alerts failed. Your tooling failed.',
+        variant: 'heading',
+      }}
+    />
+  </Sequence>
+    </AbsoluteFill>
+  );
+};
+
 const AnimatedImageScene: React.FC = () => (
     <Scene>
-        <AbsoluteFill style={{ backgroundColor: 'white' }}>
+        <AbsoluteFill >
             <SafeArea>
-                <AbsoluteCenter axis="both">
-                    {/* <AnimatedImage style={ { color: "#000"}} id="animated-image-0" text="Your dashboard, logs, and alerts didn't adapt" src="https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774173924-cuser.png" /> */}
-                    <ImagePeel
-                        id="animated-peel-0"
-                        images={[
-                            "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774173924-cuser.png",
-                            "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774083475-add_this_person_to_the_back_of_t-0.jpg",
-                            "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774173924-cuser.png",
-                            "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774083475-add_this_person_to_the_back_of_t-0.jpg"
-                        ]}
-                    >
-                    </ImagePeel>
-                </AbsoluteCenter>
+                {/* <AbsoluteCenter axis="both"> */}
+                {/* <AnimatedImage style={ { color: "#000"}} id="animated-image-0" text="Your dashboard, logs, and alerts didn't adapt" src="https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774173924-cuser.png" /> */}
+                <ContentAwareScene
+                    id="content-aware-0"
+                    src="https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774503450-screenshot-2026-03-26-at-11.06.54am.png"
+                    media_type="img"
+                    text={{
+                        content: "Your dashboard, logs, and alerts didn't adapt, Your dashboard, logs, and alerts didn't adapt",
+                        variant: "heading",
+                    }}
+                />
+
+                {/* </AbsoluteCenter> */}
             </SafeArea>
         </AbsoluteFill>
     </Scene>
@@ -237,14 +419,14 @@ const AnimatedIconShowcaseScene: React.FC = () => (
                         icons={["shopify", "midjourney", "openai"]}
                         text="Startups are getting 10× productivity with Cursor"
                     /> */}
-                    <LogoShowcase 
-                    style={{ color: "#000" }}
-                    text="Building with unber companies"
+                    <LogoShowcase
+                        style={{ color: "#000" }}
+                        text="Building with unber companies"
                         images={[
-                            "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/google/wordmark.svg", 
-                            "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/openai/wordmark-light.svg", 
-                            "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/razorpay/default.svg", 
-                            "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/netflix/wordmark.svg", 
+                            "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/google/wordmark.svg",
+                            "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/openai/wordmark-light.svg",
+                            "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/razorpay/default.svg",
+                            "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/netflix/wordmark.svg",
                             "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774173924-cuser.png"
                         ]}
                     />
@@ -344,5 +526,6 @@ export const RemotionRoot: React.FC = () => (
         <Composition id="animated-video" component={AnimatedVideoScene} durationInFrames={180} fps={30} width={1920} height={1080} />
         <Composition id="logo" component={LogoScene} durationInFrames={80} fps={30} width={1920} height={1080} />
         <Composition id="icon-showcase" component={AnimatedIconShowcaseScene} durationInFrames={180} fps={30} width={1920} height={1080} />
+        <Composition id="content-aware-scene" component={ContentAwareSceneExamples} durationInFrames={1260} fps={30} width={1920} height={1080} />
     </>
 );

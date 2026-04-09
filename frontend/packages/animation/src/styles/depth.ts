@@ -1,5 +1,5 @@
 export const DEPTH_STYLE_PROPERTY = '--coaster-depth';
-export const DEFAULT_MEDIA_DEPTH = 8;
+export const DEFAULT_MEDIA_DEPTH = 4;
 export const MAX_ELEMENT_DEPTH = 10;
 
 function formatPx(value: number): string {
