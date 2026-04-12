@@ -1,12 +1,12 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
 import z from 'zod';
-import { usePatchedProps, useStyleOverride } from '../../../patches';
+import { useArrayPatch, usePatchedProps, useStyleOverride } from '../../../patches';
 import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
 import { LogoAsset } from './LogoAsset';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { interpolateWithEasing } from '../../../styles';
-import { TextStagger } from '../text/TextStagger';
+import { TextStagger, TextStaggerProps, TextStaggerSchemaFields } from '../text/TextStagger';
 import { ENTRANCE_ANIMATIONS } from '../types';
 
 const DEFAULT_TEXT_ENTRANCE_DURATION = 5;
@@ -34,34 +34,27 @@ export const LogoShowcaseSchema = z.object({
     id: z.string().optional(),
     images: z.array(z.string()).default([]),
     text: z.string().default(''),
-    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
-    logoGap: z.number().default(DEFAULT_LOGO_GAP).optional(),
-    className: z.string().optional(),
-    style: z.any().optional(),
 });
 
 export type LogoShowcaseProps = z.input<typeof LogoShowcaseSchema>;
 
-export const LogoShowcase: React.FC<LogoShowcaseProps> = (propsInit: LogoShowcaseProps) => {
-    const patchedProps = usePatchedProps(propsInit.id, propsInit);
-    const props = { ...LogoShowcaseSchema.parse(patchedProps), id: propsInit.id };
+export const LogoShowcase: React.FC = () => {
+    const parentProps = usePatchedProps("scene", {});
+    const textProps = usePatchedProps("textstagger", {}) as TextStaggerProps;
+    const arrayProps = useArrayPatch("logoasset");
 
     const frame = useCurrentFrame();
-    const styleOverride = useStyleOverride(props.id);
 
-    const actualVariant = props.variant ?? DEFAULT_VARIANT;
-    const logoCount = props.images.length;
+    const logoCount = arrayProps.length;
     const itemsPerRow = Math.min(Math.max(logoCount, 1), MAX_LOGOS_PER_ROW);
     const slotLayout = getSlotLayout(itemsPerRow);
-    const actualLogoGap = props.logoGap ?? slotLayout.gap;
+    const actualLogoGap = slotLayout.gap;
 
     const textDuration = DEFAULT_TEXT_ENTRANCE_DURATION;
     const logosStartFrame = textDuration;
 
     return (
         <div
-            id={props.id}
-            className={props.className}
             style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -69,18 +62,16 @@ export const LogoShowcase: React.FC<LogoShowcaseProps> = (propsInit: LogoShowcas
                 justifyContent: 'center',
                 width: '100%',
                 height: '100%',
-                ...props.style,
-                ...styleOverride,
             }}
         >
             <TextStagger
-                id={`textstagger-${props.id}`}
-                text={props.text}
-                variant={actualVariant}
+                id='textstagger'
+                text={textProps.text}
+                variant={DEFAULT_VARIANT}
                 splitBy={DEFAULT_TEXT_STAGGER_SPLIT_BY}
                 entranceAnimation={DEFAULT_TEXT_STAGGER_ANIMATION}
                 startAt={0}
-                style={{ textAlign: 'center', ...props.style }}
+                style={{ textAlign: 'center' }}
             />
 
             <div
@@ -97,7 +88,9 @@ export const LogoShowcase: React.FC<LogoShowcaseProps> = (propsInit: LogoShowcas
                     // overflow: 'hidden',
                 }}
             >
-                {props.images.map((logo, index) => {
+                {arrayProps.map((item, index) => {
+                    const [eid, patch] = Object.entries(item)[0]
+
                     const logoStartFrame = logosStartFrame + index * DEFAULT_LOGO_STAGGER;
                     const logoLocalFrame = frame - logoStartFrame;
                     const logoProgress = interpolateWithEasing(
@@ -112,7 +105,7 @@ export const LogoShowcase: React.FC<LogoShowcaseProps> = (propsInit: LogoShowcas
 
                     return (
                         <div
-                            key={`${logo}-${index}`}
+                            key={`${index}`}
                             style={{
                                 display: 'flex',
                                 alignItems: 'center',
@@ -127,8 +120,8 @@ export const LogoShowcase: React.FC<LogoShowcaseProps> = (propsInit: LogoShowcas
                             }}
                         >
                             <LogoAsset
-                                id={`logoasset-${index}-${props.id}`}
-                                src={logo}
+                                id={eid}
+                                src={patch.src}
                                 width={slotLayout.width - slotLayout.padding * 2}
                                 height={slotLayout.height - slotLayout.padding * 2}
                                 logoAnimation="none"
@@ -141,11 +134,51 @@ export const LogoShowcase: React.FC<LogoShowcaseProps> = (propsInit: LogoShowcas
     );
 };
 
+export const LogoShowcaseSchemaFields = [
+    {
+        type: "component",
+        name: 'textstagger',
+        fields: TextStaggerSchemaFields
+    },
+    {
+        type: "repeat",
+        source: "logos",
+        map: "props.logos",
+        components: [
+            {
+                name: "logoasset",
+                fields: [
+                    {
+                        name: "src",
+                        type: "string",
+                        map: "item"
+                    }
+                ]
+            }
+        ]
+    }
+]
+
 export const LogoShowcaseDescriptor: ComponentRegistration = {
     name: 'LogoShowcase',
     type: 'scene',
     tags: ['Solution', 'Product Info', 'Social proof'],
-    fullSchema: LogoShowcaseSchema,
+    schema: LogoShowcaseSchemaFields,
+    llmSchema: [
+        {
+            name: 'text',
+            type: 'string',
+            "items": {
+                "type": "string"
+            }
+        },
+        {
+            name: 'logos',
+            type: 'array',
+
+        },
+    ],
     description: 'Row of logos + caption. Use for integrations, tech stack, partners, brands. eg. logos=["url1", "url2"], text="caption text".',
-    celExpression: 'ceil((size(props.text.split("\\n")) - 1) * 10 + 20 + (size(props.images) - 1) * 5 + 12)',
+    celExpression: 'ceil((size(props.textstagger.text.split("\\n")) - 1) * 10 + 20 + (size(props.array) - 1) * 5 + 12)',
 };
+

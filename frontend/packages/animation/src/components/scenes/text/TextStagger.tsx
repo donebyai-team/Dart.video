@@ -120,10 +120,57 @@ export const TextStaggerSchema = z.object({
 // Registry Descriptor
 // ============================================================================
 
+export const TextStaggerSchemaFields = [
+    {
+        "name": "text",
+        "type": "string",
+        
+        "map": "props.text"
+    },
+    {
+        "name": "variant",
+        "type": "string",
+        "subtype": "enum",
+        "default": DEFAULT_VARIANT
+    },
+    {
+        "name": "staggerDelay",
+        "type": "number",
+        "default": SPLIT_MODE_DEFAULTS.word.staggerDelay
+    },
+    {
+        "name": "entranceAnimation",
+        "type": "string",
+        "subtype": "enum",
+        "default": DEFAULT_ANIMATION
+    },
+    {
+        "name": "duration",
+        "type": "number",
+        "default": SPLIT_MODE_DEFAULTS.word.unitDuration
+    },
+    {
+        "name": "splitBy",
+        "type": "string",
+        "subtype": "enum",
+        "default": DEFAULT_SPLIT_BY
+    }
+]
+
 export const TextStaggerDescriptor: ComponentRegistration = {
     name: 'TextStagger',
     type: 'content',
-    fullSchema: TextStaggerSchema,
+    schema: [{
+        type: 'component',
+        name: 'textstagger',
+        fields: TextStaggerSchemaFields
+    }],
+    llmSchema: [
+        {
+            name: 'text',
+            type: 'string',     
+        }
+    ],
     description: 'Reveals text word-by-word or character-by-character with staggered animation delays. Use for multi-word headlines or body text. Required props: text="Transform your workflow with AI". Each unit animates in sequence with configurable delay. Set splitBy="char" for character-level animation.',
     celExpression: 'ceil((size(props.splitBy == "char" ? props.text.split("") : props.splitBy == "line" ? props.text.split("\\n") : props.text.split(" ")) - 1) * props.staggerDelay + props.duration)',
 };

@@ -1,13 +1,11 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
 import z from 'zod';
-import { useStyleContext } from '../../../styles/StyleContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { ImageAsset } from '../../../core/assets/ImageAsset';
-import { usePatchedProps, useStyleOverride } from '../../../patches';
+import { useArrayPatch, usePatchedProps } from '../../../patches';
 import { DIRECTIONS, Direction } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
-import type { DurationResult } from '../../../registry/registry';
 
 // Default constants
 const DEFAULT_ENTRANCE_DURATION = 30;
@@ -29,9 +27,6 @@ export const ImagePeelSchema = z.object({
     holdDuration: z.number().default(DEFAULT_HOLD_DURATION).optional(),
     peelDuration: z.number().default(DEFAULT_PEEL_DURATION).optional(),
     stackOffset: z.number().default(DEFAULT_STACK_OFFSET).optional(),
-    width: z.number().default(DEFAULT_WIDTH).optional(),
-    height: z.number().default(DEFAULT_HEIGHT).optional(),
-    style: z.any().optional(),
 });
 
 export type ImagePeelProps = z.input<typeof ImagePeelSchema>;
@@ -50,24 +45,19 @@ function getPeelTransform(direction: Direction, progress: number): { transform: 
     }
 }
 
-export function ImagePeel(propsInit: ImagePeelProps): React.ReactElement {
-    const patchedProps = usePatchedProps(propsInit.id, propsInit);
-    const props = { ...ImagePeelSchema.parse(patchedProps), id: propsInit.id };
+export function ImagePeel(): React.ReactElement {
+    const parentProps = usePatchedProps("scene", {}) as ImagePeelProps;
+    const arrayProps = useArrayPatch("iconasset");
 
     const frame = useCurrentFrame();
-    const styleConfig = useStyleContext();
 
     // Apply defaults
-    const actualDirection = props.direction ?? DEFAULT_DIRECTION;
-    const actualHoldDuration = props.holdDuration ?? DEFAULT_HOLD_DURATION;
-    const actualPeelDuration = props.peelDuration ?? DEFAULT_PEEL_DURATION;
-    const actualStackOffset = props.stackOffset ?? DEFAULT_STACK_OFFSET;
+    const actualDirection = parentProps.direction ?? DEFAULT_DIRECTION;
+    const actualHoldDuration = parentProps.holdDuration ?? DEFAULT_HOLD_DURATION;
+    const actualPeelDuration = parentProps.peelDuration ?? DEFAULT_PEEL_DURATION;
+    const actualStackOffset = parentProps.stackOffset ?? DEFAULT_STACK_OFFSET;
 
-    const resolvedWidth = props.width ?? DEFAULT_WIDTH;
-    const resolvedHeight = props.height ?? DEFAULT_HEIGHT;
-    const styleOverride = useStyleOverride(props.id);
-
-    const count = props.images.length;
+    const count = parentProps.images.length;
     // Each image: [enter] -> [hold] -> [peel away], staggered
 
     const cycleDuration = actualHoldDuration + actualPeelDuration;
@@ -83,25 +73,24 @@ export function ImagePeel(propsInit: ImagePeelProps): React.ReactElement {
 
     return (
         <div
-            id={props.id}
             style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 opacity: entranceProgress,
                 transform: `scale(${0.9 + entranceProgress * 0.1})`,
-                ...props.style,
             }}
         >
             <div
                 style={{
                     position: 'relative',
-                    width: resolvedWidth,
-                    height: resolvedHeight,
+                    width: DEFAULT_WIDTH,
+                    height: DEFAULT_HEIGHT,
                 }}
             >
                 {/* Render bottom to top: last image at bottom, first on top */}
-                {[...props.images].reverse().map((src, reversedIndex) => {
+                {[...arrayProps].reverse().map((item, reversedIndex) => {
+                    const [eid, patch] = Object.entries(item)[0]
                     const index = count - 1 - reversedIndex;
                     const peelStart = entranceDuration + index * cycleDuration;
 
@@ -131,7 +120,7 @@ export function ImagePeel(propsInit: ImagePeelProps): React.ReactElement {
                             style={{
                                 position: 'absolute',
                                 top: 0,
-                                left: 0,                              
+                                left: 0,
                                 transformOrigin: actualDirection === 'left' ? 'top left'
                                     : actualDirection === 'right' ? 'top right'
                                         : actualDirection === 'up' ? 'top center'
@@ -141,13 +130,12 @@ export function ImagePeel(propsInit: ImagePeelProps): React.ReactElement {
                             }}
                         >
                             <ImageAsset
-                                id={`imageasset-${index}-${props.id}`}
-                                src={src}
-                                width={resolvedWidth}
-                                height={resolvedHeight}
+                                id={eid}
+                                src={patch.src}
+                                width={patch.width}
+                                height={patch.height}
                                 style={{
                                     overflow: 'hidden',
-                                    ...styleOverride,
                                 }}
                             />
                         </div>
@@ -162,11 +150,78 @@ export function ImagePeel(propsInit: ImagePeelProps): React.ReactElement {
 // Registry Descriptor
 // ============================================================================
 
+export const ImagePeelSchemaFields = [
+    {
+        type: "repeat",
+        source: "images",
+        map: "props.images",
+        components: [
+            {
+                name: "imageasset",
+                fields: [
+                    {
+                        "name": "src",
+                        "type": "string",
+                        "map": "item"
+                    },
+                    {
+                        "name": "width",
+                        "type": "number",
+                        "default": DEFAULT_WIDTH
+                    },
+                    {
+                        "name": "height",
+                        "type": "number",
+                        "default": DEFAULT_HEIGHT
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        type: "component",
+        name: 'scene',
+        fields: [
+            {
+                "name": "direction",
+                "type": "string",
+                "subtype": "enum",
+                "default": DEFAULT_DIRECTION
+            },
+            {
+                "name": "holdDuration",
+                "type": "number",
+                "default": DEFAULT_HOLD_DURATION
+            },
+            {
+                "name": "peelDuration",
+                "type": "number",
+                "default": DEFAULT_PEEL_DURATION
+            },
+            {
+                "name": "stackOffset",
+                "type": "number",
+                "default": DEFAULT_STACK_OFFSET
+            }
+        ]
+    }
+]
+
 export const ImagePeelDescriptor: ComponentRegistration = {
     name: 'ImagePeel',
     type: 'scene',
     tags: ['Solution', 'Product Info'],
-    fullSchema: ImagePeelSchema,
+    schema: ImagePeelSchemaFields,
+    llmSchema: [
+        {
+            name: 'images',
+            type: 'array',
+            "items": {
+                "type": "string"
+            }
+        },
+    ],
     description: 'Images peel away one by one. Use for before/after or variations. Min 2 images.',
-    celExpression: 'ceil(30 + size(props.images) * (props.holdDuration + props.peelDuration))',
+    celExpression: 'ceil(30 + size(props.array) * (props.scene.holdDuration + props.scene.peelDuration))',
 };
+

@@ -1,15 +1,15 @@
 import React from "react";
 import { useCurrentFrame } from "remotion";
 import z from 'zod';
-import { usePatchedProps, useStyleOverride } from "../../../patches/PatchContext";
+import { usePatchedProps } from "../../../patches/PatchContext";
 import { useStyleContext } from "../../../styles/StyleContext";
 import { useAspectPreset } from "../../../styles/AspectPresetContext";
 import { interpolateWithEasing } from "../../../styles/easingResolver";
 import { useTheme } from "../../../theme";
 import { resolveTypography } from "../../../tokens/resolveTypography";
 import { TYPOGRAPHY_VARIANT_NAMES } from "../../../tokens/semantic";
-import { LogoAsset } from "./LogoAsset";
-import { TextStagger } from "../text/TextStagger";
+import { LogoAsset, LogoAssetProps, LogoAssetSchemaFields } from "./LogoAsset";
+import { TextStagger, TextStaggerProps, TextStaggerSchemaFields } from "../text/TextStagger";
 import type { ComponentRegistration } from '../../../registry/registry';
 import { SPLIT_BY_MODES } from "../types";
 
@@ -23,35 +23,33 @@ export const LogoWithBrandNameSchema = z.object({
     id: z.string().optional(),
     brandName: z.string().default(''),
     src: z.string().default(DEFAULT_SRC).optional(),
-    logoSize: z.number().optional(),
     variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
-    style: z.any().optional(),
 });
 
 // Use z.input for props (what callers pass) - fields with defaults are optional
 export type LogoWithBrandNameProps = z.input<typeof LogoWithBrandNameSchema>;
 
-export function LogoWithBrandName(propsInit: LogoWithBrandNameProps): React.ReactElement {
+export function LogoWithBrandName(): React.ReactElement {
+    const textProps = usePatchedProps("textstagger", {}) as TextStaggerProps;
+    const logoAssetProps = usePatchedProps("logoasset", {}) as LogoAssetProps;
+
+
     const frame = useCurrentFrame();
     const styleConfig = useStyleContext();
     const theme = useTheme();
     const preset = useAspectPreset();
 
-    const patchedProps = usePatchedProps(propsInit.id, propsInit);
-    const props = { ...LogoWithBrandNameSchema.parse(patchedProps), id: propsInit.id };
-    const resolvedLogo = props.src || theme.logoIcon?.url;
+
+    const resolvedLogo = logoAssetProps.src || theme.logoIcon?.url;
 
     // Apply defaults
-    const actualVariant = props.variant ?? DEFAULT_VARIANT;
-
-
-    const styleOverride = useStyleOverride(props.id);
+    const actualVariant = textProps.variant ?? DEFAULT_VARIANT;
 
     // Derive logo size from text's resolved font size
     const typo = resolveTypography(actualVariant, styleConfig, theme, preset);
     const fontSize = typeof typo.fontSize === 'number' ? typo.fontSize : 48;
     const lineHeight = typeof typo.lineHeight === 'number' ? typo.lineHeight : 1.1;
-    const resolvedLogoSize = props.logoSize ?? Math.round(fontSize * lineHeight);
+    const resolvedLogoSize = Math.round(fontSize * lineHeight);
 
     // Check first char opacity to animate the gap
     const firstCharOpacity = interpolateWithEasing(
@@ -63,13 +61,10 @@ export function LogoWithBrandName(propsInit: LogoWithBrandNameProps): React.Reac
 
     return (
         <div
-            id={props.id}
             style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                ...props.style,
-                ...styleOverride,
             }}
         >
             <div
@@ -81,15 +76,15 @@ export function LogoWithBrandName(propsInit: LogoWithBrandNameProps): React.Reac
                 }}
             >
                 <LogoAsset
-                    id={`logoasset-${props.id}`}
+                    id="logoasset"
                     src={resolvedLogo}
                     width={resolvedLogoSize}
                     height={resolvedLogoSize}
                     logoAnimation="none"
                 />
                 <TextStagger
-                    id={`textstagger-${props.id}`}
-                    text={props.brandName}
+                    id="textstagger"
+                    text={textProps.text}
                     splitBy={SPLIT_BY_MODES[0]}
                     staggerDelay={DEFAULT_CHAR_STAGGER}
                     duration={DEFAULT_CHAR_FADE_DURATION}
@@ -105,11 +100,29 @@ export function LogoWithBrandName(propsInit: LogoWithBrandNameProps): React.Reac
 // Registry Descriptor
 // ============================================================================
 
+export const LogoWithBrandNameSchemaFields = [
+    {
+        type: "component",
+        name: 'textstagger',
+        fields: TextStaggerSchemaFields
+    },
+    {
+        type: "component",
+        name: 'logoasset',
+        fields: LogoAssetSchemaFields
+    },
+
+]
+
 export const LogoWithBrandNameDescriptor: ComponentRegistration = {
     name: 'LogoWithBrandName',
     type: 'scene',
     tags: ['Solution'],
-    fullSchema: LogoWithBrandNameSchema,
+    schema: LogoWithBrandNameSchemaFields,
+    llmSchema: [{
+        name: 'text',
+        type: 'string',
+    }],
     description: 'Logo + brand name reveal. Use for brand intro.',
-    celExpression: 'ceil((size(props.brandName.split("")) - 1) * 5 + 20)',
+    celExpression: 'ceil((size(props.textstagger.text.split("")) - 1) * 5 + 20)',
 };

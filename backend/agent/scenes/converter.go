@@ -6,9 +6,18 @@ import (
 	"github.com/shank318/coasterai/agent/scenes/field_resolvers"
 	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/services"
-	"math/rand"
-	"time"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/types/known/structpb"
+	"strings"
 )
+
+// This is what even dynamic scenes will store
+type SceneConfig struct {
+	ID       string
+	Name     string
+	Props    map[string]interface{}
+	Children []SceneConfig
+}
 
 // Convert the LLM generated scene to internal config
 // Merge the props from scene with defaults
@@ -18,70 +27,123 @@ func ConvertToSceneConfig(scene *types.Scene, fieldValueMapper *services.MediaAs
 	}
 
 	element := scene.Elements[0]
-	componentName := element.Component
-
 	var props map[string]interface{}
 	if err := json.Unmarshal([]byte(element.Props), &props); err != nil {
 		return nil, fmt.Errorf("invalid scene props json: %w", err)
 	}
 
-	for _, group := range componentGroups {
-		for _, component := range group.Components {
-
-			if component.Name != componentName {
-				continue
-			}
-
-			finalProps := make(map[string]interface{})
-
-			// merge defaults + validate required
-			for _, prop := range component.Props {
-
-				// props from LLM
-				val, exists := props[prop.Name]
-
-				if !exists {
-					if prop.Required {
-						return nil, fmt.Errorf("missing required prop: %s", prop.Name)
-					}
-
-					// use default if defined
-					if prop.Default != nil {
-						finalProps[prop.Name] = prop.Default
-					}
-
-					continue
-				}
-
-				// Resolve field
-				resolved, err := field_resolvers.FieldMappings.ResolveForward(prop.Name, val, fieldValueMapper)
-				if err != nil {
-					return nil, fmt.Errorf("unable to resolve %s: %w", prop.Name, err)
-				}
-
-				finalProps[prop.Name] = resolved
-			}
-
-			return &SceneConfig{
-				ID:    component.ID + "-" + shortID(6),
-				Name:  component.Name,
-				Props: finalProps,
-			}, nil
-		}
+	component, err := findComponent(element.Component)
+	if err != nil {
+		return nil, err
 	}
 
-	return nil, fmt.Errorf("scene component %s not found in component list", componentName)
+	finalProps, err := GenerateEditsFromProps(component.Schema, props, field_resolvers.FieldResolverForward, fieldValueMapper)
+	if err != nil {
+		return nil, err
+	}
+
+	cfg := SceneConfig{
+		ID:    strings.ToLower(component.Name),
+		Name:  component.Name,
+		Props: finalProps,
+	}
+
+	//for _, child := range e.Children {
+	//	cfg.Children = append(cfg.Children, ConvertSceneElement(child))
+	//}
+
+	return &cfg, nil
 }
 
-const idChars = "abcdefghijklmnopqrstuvwxyz0123456789"
+// Convert to edits
+func (s SceneConfig) ToEditsPatch() json.RawMessage {
+	m := make(map[string]interface{})
 
-func shortID(n int) string {
-	rand.Seed(time.Now().UnixNano())
+	// add name
+	m["name"] = s.Name
 
-	b := make([]byte, n)
-	for i := range b {
-		b[i] = idChars[rand.Intn(len(idChars))]
+	// merge props
+	for k, v := range s.Props {
+		m[k] = v
 	}
 
-	return string(b)
+	b, _ := json.Marshal(m)
+	return json.RawMessage(b)
+}
+
+// Convert edits to scene parent only
+func EditsToScene(edits *structpb.Struct, fieldValueMapper *services.MediaAssetRegistry) (*types.Scene, error) {
+	if edits == nil {
+		return nil, nil
+	}
+
+	// Convert protobuf Struct → JSON
+	jsonBytes, err := protojson.Marshal(edits)
+	if err != nil {
+		return nil, err
+	}
+
+	config, err := sceneConfigFromPatch(jsonBytes, fieldValueMapper)
+	if err != nil {
+		return nil, err
+	}
+
+	marshal, err := json.Marshal(config.Props)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal node props: %w", err)
+	}
+
+	elements := make([]types.SceneElement, 0)
+	elements = append(elements, types.SceneElement{
+		Component: config.Name,
+		Props:     string(marshal),
+		Children:  nil,
+	})
+
+	// Call your existing parser
+	return &types.Scene{
+		Elements: elements,
+	}, nil
+}
+
+func sceneConfigFromPatch(data []byte, fieldValueMapper *services.MediaAssetRegistry) (*SceneConfig, error) {
+	var raw map[string]any
+
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return nil, err
+	}
+
+	cfg := &SceneConfig{
+		Props: make(map[string]any),
+	}
+
+	if len(raw) == 0 {
+		return nil, fmt.Errorf("invalid scene patch, length of raw config is zero")
+	}
+
+	for k, v := range raw {
+		if k == "name" {
+			if name, ok := v.(string); ok {
+				cfg.Name = name
+			}
+			continue
+		}
+
+		cfg.Props[k] = v
+	}
+
+	// Resolve
+	component, err := findComponent(cfg.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	finalProps, err := GenerateEditsFromProps(component.Schema, cfg.Props, field_resolvers.FieldResolverReverse, fieldValueMapper)
+	if err != nil {
+		return nil, err
+	}
+
+	cfg.Props = finalProps
+
+	return cfg, nil
 }

@@ -355,7 +355,6 @@ const AnimatedIconShowcaseScene: React.FC = () => (
                         text="Startups are getting 10× productivity with Cursor"
                     /> */}
                     <LogoShowcase
-                        style={{ color: "#000" }}
                         text="Building with unber companies"
                         images={[
                             "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/google/wordmark.svg",
@@ -376,7 +375,7 @@ const AnimatedVideoScene: React.FC = () => (
         <AbsoluteFill style={{ backgroundColor: 'white' }}>
             <SafeArea>
                 <AbsoluteCenter axis="both">
-                    <AnimatedVideo style={{ color: "#000" }} id="animated-video-0" text="Your dashboard, logs, and alerts didn't adapt" src="https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774173924-cur.mp4" />
+                    <AnimatedVideo id="animated-video-0" text="Your dashboard, logs, and alerts didn't adapt" src="https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774173924-cur.mp4" />
                 </AbsoluteCenter>
             </SafeArea>
         </AbsoluteFill>

@@ -2,6 +2,13 @@ package field_resolvers
 
 import "github.com/shank318/coasterai/services"
 
+type FieldResolverDirection int
+
+const (
+	FieldResolverForward FieldResolverDirection = iota
+	FieldResolverReverse
+)
+
 type FieldResolver[T any] interface {
 	Forward(value T, fieldValueMapper *services.MediaAssetRegistry) (T, error) // LLM → internal
 	Reverse(value T, fieldValueMapper *services.MediaAssetRegistry) (T, error) // internal → LLM

@@ -6,6 +6,23 @@ import { useTheme } from '../../theme/ThemeContext';
 import { TypographyVariant } from '../../tokens/semantic';
 import { resolveTypography } from '../../tokens/resolveTypography';
 
+export const TextAssetSchema = [
+  {
+    "name": "text",
+    "type": "string",
+    "subtype": "content",
+    "llm": true,
+    "map": "props.text"
+  },
+  {
+    "name": "variant",
+    "type": "string",
+    "subtype": "TypographyVariant",
+    "llm": false,
+    "default": "heading"
+  }
+]
+
 export interface TextProps {
   /** Semantic typography variant. Never hardcode font sizes. */
   text: string;

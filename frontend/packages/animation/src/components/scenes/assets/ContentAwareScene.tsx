@@ -5,7 +5,7 @@ import { delayRender, continueRender, useCurrentFrame, useRemotionEnvironment } 
 import { usePatchedProps } from '../../../patches';
 import { ImageAsset, VideoAsset } from '../../../core/assets';
 import { Row, Stack } from '../../../core/layout';
-import { Text } from '../../../core/text/Text';
+import { Text } from '../../../core/assets/Text';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { spacingToCss } from '../../../tokens/spacing';
@@ -367,10 +367,10 @@ export function ContentAwareScene(propsInit: ContentAwareSceneProps): React.Reac
   );
 }
 
-export const ContentAwareSceneDescriptor: ComponentRegistration = {
-  name: 'ContentAwareScene',
-  type: 'scene',
-  fullSchema: ContentAwareSceneSchema,
-  description: 'Automatically chooses a media-and-text layout from image or video dimensions and text visual weight.' +
-    'Pass textComponent as one of TextStagger, TextHighlight, Typewriter, or TextWithWordCycle.',
-};
+// export const ContentAwareSceneDescriptor: ComponentRegistration = {
+//   name: 'ContentAwareScene',
+//   type: 'scene',
+//   llmSchema: ContentAwareSceneSchema,
+//   description: 'Automatically chooses a media-and-text layout from image or video dimensions and text visual weight.' +
+//     'Pass textComponent as one of TextStagger, TextHighlight, Typewriter, or TextWithWordCycle.',
+// };

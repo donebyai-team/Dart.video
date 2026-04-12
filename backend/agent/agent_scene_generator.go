@@ -334,7 +334,7 @@ func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest ty
 	}
 	l.animationGenerator.ApplyGenerationOptions(optionsBuilder.Build())
 
-	generatePlanRequest.ComponentList = scenes.BuildScenesList(false, nil)
+	generatePlanRequest.ComponentList = scenes.BuildScenesList()
 	// Generate and validate upto max attempts
 	for attempt := 0; attempt < maxAttempts; attempt++ {
 		llmResponse, err := l.llmService.GenerateScene(ctx, generatePlanRequest, session.ConversationHistory, func(chunk string) {
@@ -394,13 +394,13 @@ func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest ty
 
 		// Merge with user edits
 		// There can be orphans object if the scene is replaced
-		if slide.Content != nil && slide.Content.Edits != nil {
-			edits, err := scenes.ReconcileEditsPatch(slide.Content.Edits, template.GeneratedPatches)
-			if err != nil {
-				return nil, agenterrors.InvalidInput("failed to merge edits", err)
-			}
-			template.GeneratedPatches = edits
-		}
+		//if slide.Content != nil && slide.Content.Edits != nil {
+		//	edits, err := scenes.ReconcileEditsPatch(slide.Content.Edits, template.GeneratedPatches)
+		//	if err != nil {
+		//		return nil, agenterrors.InvalidInput("failed to merge edits", err)
+		//	}
+		//	template.GeneratedPatches = edits
+		//}
 
 		return &RunResult{
 			Status:             RunStatusCompleted,

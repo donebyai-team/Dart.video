@@ -1,644 +1,962 @@
-[
-  {
-    "title": "Scenes",
-    "description": "standalone, no siblings",
-    "components": [
-      {
-        "name": "AnimatedNumber",
-        "durationExpression": "ceil(props.animationDelay + max(45, min(100, log10(abs(props.to - props.from) + 1) * 20)))",
-        "tags": [],
-        "id": "animatednumber",
-        "description": "Counting metric with label text. Use for stats and KPIs",
-        "props": [
-          {
-            "name": "startText",
-            "type": "string",
-            "required": true,
-            "default": ""
-          },
-          {
-            "name": "endText",
-            "type": "string",
-            "required": true,
-            "default": ""
-          },
-          {
-            "name": "from",
-            "type": "number",
-            "required": true,
-            "default": 0
-          },
-          {
-            "name": "to",
-            "type": "number",
-            "required": true
-          },
-          {
-            "name": "format",
-            "type": "string",
-            "required": false
-          },
-          {
-            "name": "variant",
-            "type": "enum(subheading|heading|display|displayLg|displayXl|display2xl)",
-            "required": false,
-            "default": "heading"
-          },
-          {
-            "name": "highlightStyle",
-            "type": "enum(marker|underline|box|glow|background)",
-            "required": false,
-            "default": "glow"
-          },
-          {
-            "name": "highlightColor",
-            "type": "string",
-            "required": false
-          },
-          {
-            "name": "entranceAnimation",
-            "type": "enum(fadeIn|slideUp|slideDown|slideLeft|slideRight|scaleIn|rotateIn|tiltX|tiltY|flipX|flipY|zoomRotate|elasticScale|swingIn)",
-            "required": false,
-            "default": "slideUp"
-          },
-          {
-            "name": "animationDelay",
-            "type": "number",
-            "required": false,
-            "default": 30
-          }
-        ]
-      },
-      {
-        "name": "TextStagger",
-        "durationExpression": "ceil((size(props.splitBy == \"char\" ? props.text.split(\"\") : props.splitBy == \"line\" ? props.text.split(\"\\n\") : props.text.split(\" \")) - 1) * props.staggerDelay + props.duration)",
-        "tags": [],
-        "id": "textstagger",
-        "description": "Reveals text word-by-word or character-by-character with staggered animation delays. Use for multi-word headlines or body text. Required props: text=\"Transform your workflow with AI\". Each unit animates in sequence with configurable delay. Set splitBy=\"char\" for character-level animation.",
-        "props": [
-          {
-            "name": "startAt",
-            "type": "number",
-            "required": false,
-            "default": 0
-          },
-          {
-            "name": "text",
-            "type": "string",
-            "required": true,
-            "default": ""
-          },
-          {
-            "name": "variant",
-            "type": "enum(subheading|heading|display|displayLg|displayXl|display2xl)",
-            "required": true,
-            "default": "heading"
-          },
-          {
-            "name": "staggerDelay",
-            "type": "number",
-            "required": true,
-            "default": 5
-          },
-          {
-            "name": "entranceAnimation",
-            "type": "enum(fadeIn|slideUp|slideDown|slideLeft|slideRight|scaleIn|rotateIn|tiltX|tiltY|flipX|flipY|zoomRotate|elasticScale|swingIn)",
-            "required": true,
-            "default": "scaleIn"
-          },
-          {
-            "name": "duration",
-            "type": "number",
-            "required": true,
-            "default": 15
-          },
-          {
-            "name": "splitBy",
-            "type": "enum(char|word|line)",
-            "required": true,
-            "default": "word"
-          }
-        ]
-      },
-      {
-        "name": "Typewriter",
-        "durationExpression": "max(30, props.splitBy == \"char\" ? size(props.text) * 2 : props.splitBy == \"word\" ? size(props.text.split(\" \")) * 9 : size(props.text.split(\"\\n\")) * 18)",
-        "tags": [],
-        "id": "typewriter",
-        "description": "Character-by-character text reveal. Use for dramatic reveals or code/terminal effects.",
-        "props": [
-          {
-            "name": "text",
-            "type": "string",
-            "required": true,
-            "default": ""
-          },
-          {
-            "name": "startAt",
-            "type": "number",
-            "required": false,
-            "default": 0
-          },
-          {
-            "name": "splitBy",
-            "type": "enum(char|word|line)",
-            "required": false,
-            "default": "char"
-          },
-          {
-            "name": "variant",
-            "type": "enum(subheading|heading|display|displayLg|displayXl|display2xl)",
-            "required": false,
-            "default": "heading"
-          },
-          {
-            "name": "entranceAnimation",
-            "type": "enum(fadeIn|slideUp|slideDown|slideLeft|slideRight|scaleIn|rotateIn|tiltX|tiltY|flipX|flipY|zoomRotate|elasticScale|swingIn)",
-            "required": false,
-            "default": "slideUp"
-          }
-        ]
-      },
-      {
-        "name": "TextHighlight",
-        "durationExpression": "ceil(props.animationDelay + props.zoomDuration)",
-        "tags": [],
-        "id": "texthighlight",
-        "description": "Bold statement with an emphasized word/phrase. Use for key claims. Use {} to highlight. eg \"We build amazing {software}\"",
-        "props": [
-          {
-            "name": "text",
-            "type": "string",
-            "required": true,
-            "default": ""
-          },
-          {
-            "name": "variant",
-            "type": "enum(subheading|heading|display|displayLg|displayXl|display2xl)",
-            "required": false,
-            "default": "heading"
-          },
-          {
-            "name": "highlightStyle",
-            "type": "enum(marker|underline|box|glow|background)",
-            "required": false,
-            "default": "glow"
-          },
-          {
-            "name": "highlightedTextAnimation",
-            "type": "enum(zoom|jump)",
-            "required": false,
-            "default": "jump"
-          },
-          {
-            "name": "highlightColor",
-            "type": "string",
-            "required": false
-          },
-          {
-            "name": "entranceAnimation",
-            "type": "enum(fadeIn|slideUp|slideDown|slideLeft|slideRight|scaleIn|rotateIn|tiltX|tiltY|flipX|flipY|zoomRotate|elasticScale|swingIn)",
-            "required": false,
-            "default": "slideUp"
-          },
-          {
-            "name": "animationDelay",
-            "type": "number",
-            "required": false,
-            "default": 30
-          },
-          {
-            "name": "zoomDuration",
-            "type": "number",
-            "required": false,
-            "default": 30
-          }
-        ]
-      },
-      {
-        "name": "TextCycle",
-        "durationExpression": "ceil((props.holdDuration + props.transitionDuration) * size(props.texts))",
-        "tags": [],
-        "id": "textcycle",
-        "description": "rotating text strings or words. Use for taglines, feature lists, multi highlights",
-        "props": [
-          {
-            "name": "texts",
-            "type": "array",
-            "required": true,
-            "subtype": "string",
-            "default": []
-          },
-          {
-            "name": "holdDuration",
-            "type": "number",
-            "required": false,
-            "default": 20
-          },
-          {
-            "name": "transitionDuration",
-            "type": "number",
-            "required": false,
-            "default": 5
-          },
-          {
-            "name": "transition",
-            "type": "enum(flipY|fadeSwap|slideUp)",
-            "required": false,
-            "default": "slideUp"
-          },
-          {
-            "name": "variant",
-            "type": "enum(subheading|heading|display|displayLg|displayXl|display2xl)",
-            "required": false,
-            "default": "displayXl"
-          }
-        ]
-      },
-      {
-        "name": "TextWithWordCycle",
-        "durationExpression": "ceil((props.holdDuration + props.transitionDuration) * size(props.cyclingWords))",
-        "tags": [],
-        "id": "textwithwordcycle",
-        "description": "Static text with cycling highlighted words at the end. Use for dynamic taglines like \"We build amazing [software/products/solutions]\"",
-        "props": [
-          {
-            "name": "text",
-            "type": "string",
-            "required": true,
-            "default": ""
-          },
-          {
-            "name": "cyclingWords",
-            "type": "array",
-            "required": true,
-            "subtype": "string",
-            "default": []
-          },
-          {
-            "name": "holdDuration",
-            "type": "number",
-            "required": false,
-            "default": 20
-          },
-          {
-            "name": "transitionDuration",
-            "type": "number",
-            "required": false,
-            "default": 10
-          },
-          {
-            "name": "transition",
-            "type": "enum(flipY|fadeSwap|slideUp)",
-            "required": false,
-            "default": "slideUp"
-          },
-          {
-            "name": "variant",
-            "type": "enum(subheading|heading|display|displayLg|displayXl|display2xl)",
-            "required": false,
-            "default": "heading"
-          },
-          {
-            "name": "highlightStyle",
-            "type": "enum(marker|underline|box|glow|background)",
-            "required": false,
-            "default": "background"
-          },
-          {
-            "name": "highlightColor",
-            "type": "string",
-            "required": false
-          }
-        ]
-      },
-      {
-        "name": "AnimatedImage",
-        "durationExpression": "80",
-        "tags": [
-          "Solution",
-          "Product Info"
-        ],
-        "id": "animatedimage",
-        "description": "Label + image entrance. Use for product/feature visuals.",
-        "props": [
-          {
-            "name": "text",
-            "type": "string",
-            "required": true,
-            "default": ""
-          },
-          {
-            "name": "src",
-            "type": "string",
-            "required": true
-          },
-          {
-            "name": "variant",
-            "type": "enum(subheading|heading|display|displayLg|displayXl|display2xl)",
-            "required": false,
-            "default": "subheading"
-          },
-          {
-            "name": "entranceAnimation",
-            "type": "enum(fadeIn|slideUp|slideDown|slideLeft|slideRight|scaleIn|rotateIn|tiltX|tiltY|flipX|flipY|zoomRotate|elasticScale|swingIn)",
-            "required": false,
-            "default": "slideUp"
-          },
-          {
-            "name": "width",
-            "type": "number",
-            "required": false,
-            "default": 1344
-          },
-          {
-            "name": "height",
-            "type": "number",
-            "required": false,
-            "default": 756
-          }
-        ]
-      },
-      {
-        "name": "AnimatedVideo",
-        "durationExpression": "500",
-        "tags": [
-          "Solution",
-          "Product Info"
-        ],
-        "id": "animatedvideo",
-        "description": "Label + video entrance. Duration = video length.",
-        "props": [
-          {
-            "name": "text",
-            "type": "string",
-            "required": true,
-            "default": ""
-          },
-          {
-            "name": "src",
-            "type": "string",
-            "required": true
-          },
-          {
-            "name": "variant",
-            "type": "enum(subheading|heading|display|displayLg|displayXl|display2xl)",
-            "required": false,
-            "default": "subheading"
-          },
-          {
-            "name": "entranceAnimation",
-            "type": "enum(fadeIn|slideUp|slideDown|slideLeft|slideRight|scaleIn|rotateIn|tiltX|tiltY|flipX|flipY|zoomRotate|elasticScale|swingIn)",
-            "required": false,
-            "default": "slideUp"
-          },
-          {
-            "name": "width",
-            "type": "number",
-            "required": false,
-            "default": 1344
-          },
-          {
-            "name": "height",
-            "type": "number",
-            "required": false,
-            "default": 756
-          }
-        ]
-      },
-      {
-        "name": "ContentAwareScene",
-        "tags": [],
-        "id": "contentawarescene",
-        "description": "Automatically chooses a media-and-text layout from image or video dimensions and text visual weight.Pass textComponent as one of TextStagger, TextHighlight, Typewriter, or TextWithWordCycle.",
-        "props": [
-          {
-            "name": "src",
-            "type": "string",
-            "required": true
-          },
-          {
-            "name": "mediaType",
-            "type": "enum(img|video)",
-            "required": false,
-            "default": "img"
-          },
-          {
-            "name": "entranceAnimation",
-            "type": "enum(fadeIn|slideUp|slideDown|slideLeft|slideRight|scaleIn|rotateIn|tiltX|tiltY|flipX|flipY|zoomRotate|elasticScale|swingIn)",
-            "required": false,
-            "default": "slideUp"
-          },
-          {
-            "name": "textComponent",
-            "type": "any",
-            "required": true
-          }
-        ]
-      },
-      {
-        "name": "ImagePeel",
-        "durationExpression": "ceil(30 + size(props.images) * (props.holdDuration + props.peelDuration))",
-        "tags": [
-          "Solution",
-          "Product Info"
-        ],
-        "id": "imagepeel",
-        "description": "Images peel away one by one. Use for before/after or variations. Min 2 images.",
-        "props": [
-          {
-            "name": "images",
-            "type": "array",
-            "required": true,
-            "subtype": "string"
-          },
-          {
-            "name": "direction",
-            "type": "enum(left|right|up|down)",
-            "required": false,
-            "default": "right"
-          },
-          {
-            "name": "holdDuration",
-            "type": "number",
-            "required": false,
-            "default": 20
-          },
-          {
-            "name": "peelDuration",
-            "type": "number",
-            "required": false,
-            "default": 20
-          },
-          {
-            "name": "stackOffset",
-            "type": "number",
-            "required": false,
-            "default": 20
-          },
-          {
-            "name": "width",
-            "type": "number",
-            "required": false,
-            "default": 1344
-          },
-          {
-            "name": "height",
-            "type": "number",
-            "required": false,
-            "default": 756
-          }
-        ]
-      },
-      {
-        "name": "LogoAsset",
-        "durationExpression": "props.logoAnimation == \"none\" ? 30 : 30",
-        "tags": [
-          "CTA"
-        ],
-        "id": "logoasset",
-        "description": "Logo reveal. Default is brand logo, no props. Use as the final scene.",
-        "props": [
-          {
-            "name": "src",
-            "type": "string",
-            "required": false,
-            "default": ""
-          },
-          {
-            "name": "width",
-            "type": "number",
-            "required": false
-          },
-          {
-            "name": "height",
-            "type": "number",
-            "required": false
-          },
-          {
-            "name": "logoAnimation",
-            "type": "enum(none|fadeIn|zoomIn|bounceIn|spinIn|dropIn)",
-            "required": false,
-            "default": "zoomIn"
-          }
-        ]
-      },
-      {
-        "name": "LogoShowcase",
-        "durationExpression": "ceil((size(props.text.split(\"\\n\")) - 1) * 10 + 20 + (size(props.images) - 1) * 5 + 12)",
-        "tags": [
-          "Solution",
-          "Product Info",
-          "Social proof"
-        ],
-        "id": "logoshowcase",
-        "description": "Row of logos + caption. Use for integrations, tech stack, partners, brands. eg. logos=[\"url1\", \"url2\"], text=\"caption text\".",
-        "props": [
-          {
-            "name": "images",
-            "type": "array",
-            "required": true,
-            "subtype": "string",
-            "default": []
-          },
-          {
-            "name": "text",
-            "type": "string",
-            "required": true,
-            "default": ""
-          },
-          {
-            "name": "variant",
-            "type": "enum(subheading|heading|display|displayLg|displayXl|display2xl)",
-            "required": false,
-            "default": "heading"
-          },
-          {
-            "name": "logoGap",
-            "type": "number",
-            "required": false,
-            "default": 48
-          }
-        ]
-      },
-      {
-        "name": "LogoWithBrandName",
-        "durationExpression": "ceil((size(props.brandName.split(\"\")) - 1) * 5 + 20)",
-        "tags": [
-          "Solution"
-        ],
-        "id": "logowithbrandname",
-        "description": "Logo + brand name reveal. Use for brand intro.",
-        "props": [
-          {
-            "name": "brandName",
-            "type": "string",
-            "required": true,
-            "default": ""
-          },
-          {
-            "name": "src",
-            "type": "string",
-            "required": false,
-            "default": ""
-          },
-          {
-            "name": "logoSize",
-            "type": "number",
-            "required": false
-          },
-          {
-            "name": "variant",
-            "type": "enum(subheading|heading|display|displayLg|displayXl|display2xl)",
-            "required": false,
-            "default": "heading"
-          }
-        ]
-      },
-      {
-        "name": "IconShowcase",
-        "durationExpression": "ceil(10 + (size(props.icons) - 1) * 5 + 10 + 5 + 15 + (size(props.text.trim().split(\" \")) - 1) * 5 + 15)",
-        "tags": [
-          "Solution",
-          "Product Info",
-          "Social proof"
-        ],
-        "id": "iconshowcase",
-        "description": "Row of icons + caption. Use for integrations, tech stack, partners, brands. eg. icons={[\"shopify\", \"midjourney\", \"openai\"]}, text=\"caption text\".",
-        "props": [
-          {
-            "name": "icons",
-            "type": "array",
-            "required": true,
-            "subtype": "string",
-            "default": []
-          },
-          {
-            "name": "text",
-            "type": "string",
-            "required": true,
-            "default": ""
-          },
-          {
-            "name": "variant",
-            "type": "enum(subheading|heading|display|displayLg|displayXl|display2xl)",
-            "required": false,
-            "default": "heading"
-          },
-          {
-            "name": "iconSize",
-            "type": "number",
-            "required": false,
-            "default": 90
-          },
-          {
-            "name": "iconGap",
-            "type": "number",
-            "required": false,
-            "default": 64
-          }
-        ]
-      }
-    ]
-  }
-]
+{
+  "available_enums": [
+    {
+      "name": "variant",
+      "description": "used for changing the font sizes",
+      "value": [
+        "subheading",
+        "heading",
+        "display",
+        "displayLg",
+        "displayXl",
+        "display2xl"
+      ]
+    },
+    {
+      "name": "entranceAnimation",
+      "description": "used for entrance animations",
+      "value": [
+        "fadeIn",
+        "slideUp",
+        "slideDown",
+        "slideLeft",
+        "slideRight",
+        "scaleIn",
+        "rotateIn",
+        "tiltX",
+        "tiltY",
+        "flipX",
+        "flipY",
+        "zoomRotate",
+        "elasticScale",
+        "swingIn"
+      ]
+    },
+    {
+      "name": "splitBy",
+      "value": [
+        "char",
+        "word",
+        "line"
+      ]
+    },
+    {
+      "name": "logoAnimation",
+      "value": [
+        "none",
+        "fadeIn",
+        "zoomIn",
+        "bounceIn",
+        "spinIn",
+        "dropIn"
+      ]
+    },
+    {
+      "name": "direction",
+      "value": [
+        "left",
+        "right",
+        "up",
+        "down"
+      ]
+    },
+    {
+      "name": "highlightStyle",
+      "value": [
+        "marker",
+        "underline",
+        "box",
+        "glow",
+        "background"
+      ]
+    },
+    {
+      "name": "textCycleTransition",
+      "value": [
+        "flipY",
+        "fadeSwap",
+        "slideUp"
+      ]
+    }
+  ],
+  "components": [
+    {
+      "title": "Scenes",
+      "description": "standalone, no siblings",
+      "components": [
+        {
+          "name": "AnimatedNumber",
+          "type": "content",
+          "schema": [
+            {
+              "type": "component",
+              "name": "animatednumber",
+              "fields": [
+                {
+                  "name": "entranceAnimation",
+                  "type": "string",
+                  "default": "slideUp"
+                },
+                {
+                  "name": "animationDelay",
+                  "type": "number",
+                  "default": 30
+                },
+                {
+                  "name": "startText",
+                  "type": "string",
+                  "map": "props.startText"
+                },
+                {
+                  "name": "endText",
+                  "type": "string",
+                  "map": "props.endText"
+                },
+                {
+                  "name": "from",
+                  "type": "number",
+                  "map": "props.from",
+                  "default": 0
+                },
+                {
+                  "name": "to",
+                  "type": "number",
+                  "map": "props.to",
+                  "default": 100
+                },
+                {
+                  "name": "format",
+                  "type": "string",
+                  "default": ""
+                },
+                {
+                  "name": "prefix",
+                  "type": "string",
+                  "default": ""
+                },
+                {
+                  "name": "suffix",
+                  "type": "string",
+                  "default": ""
+                },
+                {
+                  "name": "variant",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "heading"
+                }
+              ]
+            }
+          ],
+          "llmSchema": [
+            {
+              "name": "startText",
+              "type": "string"
+            },
+            {
+              "name": "endText",
+              "type": "string"
+            },
+            {
+              "name": "from",
+              "type": "number"
+            },
+            {
+              "name": "to",
+              "type": "number"
+            }
+          ],
+          "description": "Counting metric with label text. Use for stats and KPIs",
+          "celExpression": "ceil(props.animationDelay + max(45, min(100, log10(abs(props.to - props.from) + 1) * 20)))"
+        },
+        {
+          "name": "TextStagger",
+          "type": "content",
+          "schema": [
+            {
+              "type": "component",
+              "name": "textstagger",
+              "fields": [
+                {
+                  "name": "text",
+                  "type": "string",
+                  "map": "props.text"
+                },
+                {
+                  "name": "variant",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "heading"
+                },
+                {
+                  "name": "staggerDelay",
+                  "type": "number",
+                  "default": 5
+                },
+                {
+                  "name": "entranceAnimation",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "scaleIn"
+                },
+                {
+                  "name": "duration",
+                  "type": "number",
+                  "default": 15
+                },
+                {
+                  "name": "splitBy",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "word"
+                }
+              ]
+            }
+          ],
+          "llmSchema": [
+            {
+              "name": "text",
+              "type": "string"
+            }
+          ],
+          "description": "Reveals text word-by-word or character-by-character with staggered animation delays. Use for multi-word headlines or body text. Required props: text=\"Transform your workflow with AI\". Each unit animates in sequence with configurable delay. Set splitBy=\"char\" for character-level animation.",
+          "celExpression": "ceil((size(props.splitBy == \"char\" ? props.text.split(\"\") : props.splitBy == \"line\" ? props.text.split(\"\\n\") : props.text.split(\" \")) - 1) * props.staggerDelay + props.duration)"
+        },
+        {
+          "name": "Typewriter",
+          "type": "content",
+          "schema": [
+            {
+              "type": "component",
+              "name": "typewriter",
+              "fields": [
+                {
+                  "name": "text",
+                  "type": "string",
+                  "required": true,
+                  "map": "props.text"
+                },
+                {
+                  "name": "variant",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "heading"
+                },
+                {
+                  "name": "splitBy",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "char"
+                },
+                {
+                  "name": "entranceAnimation",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "slideUp"
+                },
+                {
+                  "name": "startAt",
+                  "type": "number",
+                  "default": 0
+                }
+              ]
+            }
+          ],
+          "llmSchema": [
+            {
+              "name": "text",
+              "type": "string"
+            }
+          ],
+          "description": "Character-by-character text reveal. Use for dramatic reveals or code/terminal effects.",
+          "celExpression": "max(30, props.splitBy == \"char\" ? size(props.text) * 2 : props.splitBy == \"word\" ? size(props.text.split(\" \")) * 9 : size(props.text.split(\"\\n\")) * 18)"
+        },
+        {
+          "name": "TextHighlight",
+          "type": "content",
+          "schema": [
+            {
+              "type": "component",
+              "name": "texthighlight",
+              "fields": [
+                {
+                  "name": "text",
+                  "type": "string",
+                  "map": "props.text"
+                },
+                {
+                  "name": "variant",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "heading"
+                },
+                {
+                  "name": "entranceAnimation",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "slideUp"
+                },
+                {
+                  "name": "animationDelay",
+                  "type": "number",
+                  "default": 30
+                },
+                {
+                  "name": "zoomDuration",
+                  "type": "number",
+                  "default": 30
+                },
+                {
+                  "name": "highlightStyle",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "glow"
+                },
+                {
+                  "name": "highlightColor",
+                  "type": "string",
+                  "subtype": "color"
+                }
+              ]
+            }
+          ],
+          "llmSchema": [
+            {
+              "name": "text",
+              "type": "string"
+            }
+          ],
+          "description": "Bold statement with an emphasized word/phrase. Use for key claims. Use {} to highlight. eg \"We build amazing {software}\"",
+          "celExpression": "ceil(props.animationDelay + props.zoomDuration)"
+        },
+        {
+          "name": "TextCycle",
+          "type": "content",
+          "schema": [
+            {
+              "type": "component",
+              "name": "textcycle",
+              "fields": [
+                {
+                  "name": "texts",
+                  "type": "array",
+                  "subtype": "string",
+                  "map": "props.texts"
+                },
+                {
+                  "name": "variant",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "displayXl"
+                },
+                {
+                  "name": "textCycleTransition",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "slideUp"
+                },
+                {
+                  "name": "holdDuration",
+                  "type": "number",
+                  "default": 20
+                },
+                {
+                  "name": "transitionDuration",
+                  "type": "number",
+                  "default": 5
+                }
+              ]
+            }
+          ],
+          "llmSchema": [
+            {
+              "name": "texts",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ],
+          "description": "rotating text strings or words. Use for taglines, feature lists, multi highlights",
+          "celExpression": "ceil((props.holdDuration + props.transitionDuration) * size(props.texts))"
+        },
+        {
+          "name": "TextWithWordCycle",
+          "type": "content",
+          "schema": [
+            {
+              "type": "component",
+              "name": "textwithwordcycle",
+              "fields": [
+                {
+                  "name": "text",
+                  "type": "string",
+                  "required": true,
+                  "map": "props.text"
+                },
+                {
+                  "name": "cyclingWords",
+                  "type": "array",
+                  "required": true,
+                  "map": "props.cyclingWords",
+                  "default": []
+                },
+                {
+                  "name": "variant",
+                  "type": "string",
+                  "sub_type": "enum",
+                  "default": "heading"
+                },
+                {
+                  "name": "holdDuration",
+                  "type": "number",
+                  "default": 20
+                },
+                {
+                  "name": "transitionDuration",
+                  "type": "number",
+                  "default": 10
+                },
+                {
+                  "name": "textCycleTransition",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "slideUp"
+                }
+              ]
+            }
+          ],
+          "llmSchema": [
+            {
+              "name": "text",
+              "type": "string"
+            },
+            {
+              "name": "cyclingWords",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ],
+          "description": "Static text with cycling highlighted words at the end. Use for dynamic taglines like \"We build amazing [software/products/solutions]\"",
+          "celExpression": "ceil((props.holdDuration + props.transitionDuration) * size(props.cyclingWords))"
+        },
+        {
+          "name": "AnimatedImage",
+          "type": "scene",
+          "tags": [
+            "Solution",
+            "Product Info"
+          ],
+          "schema": [
+            {
+              "type": "component",
+              "name": "scene",
+              "fields": [
+                {
+                  "name": "entranceAnimation",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "slideUp"
+                }
+              ]
+            },
+            {
+              "type": "component",
+              "name": "text",
+              "fields": [
+                {
+                  "name": "text",
+                  "type": "string",
+                  "map": "props.text"
+                },
+                {
+                  "name": "variant",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "subheading"
+                }
+              ]
+            },
+            {
+              "type": "component",
+              "name": "imageasset",
+              "fields": [
+                {
+                  "name": "src",
+                  "type": "string",
+                  "subtype": "image",
+                  "map": "props.src"
+                },
+                {
+                  "name": "width",
+                  "type": "number",
+                  "default": 1344
+                },
+                {
+                  "name": "height",
+                  "type": "number",
+                  "default": 756
+                }
+              ]
+            }
+          ],
+          "llmSchema": [
+            {
+              "name": "text",
+              "type": "string"
+            },
+            {
+              "name": "src",
+              "type": "string"
+            }
+          ],
+          "description": "Label + image entrance. Use for product/feature visuals.",
+          "celExpression": "80"
+        },
+        {
+          "name": "AnimatedVideo",
+          "type": "scene",
+          "tags": [
+            "Solution",
+            "Product Info"
+          ],
+          "schema": [
+            {
+              "type": "component",
+              "name": "scene",
+              "fields": [
+                {
+                  "name": "entranceAnimation",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "slideUp"
+                }
+              ]
+            },
+            {
+              "type": "component",
+              "name": "text",
+              "fields": [
+                {
+                  "name": "text",
+                  "type": "string",
+                  "subtype": "content",
+                  "map": "props.text"
+                },
+                {
+                  "name": "variant",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "subheading"
+                }
+              ]
+            },
+            {
+              "type": "component",
+              "name": "videoasset",
+              "fields": [
+                {
+                  "name": "src",
+                  "type": "string",
+                  "subtype": "video",
+                  "map": "props.src"
+                },
+                {
+                  "name": "width",
+                  "type": "number",
+                  "default": 1344
+                },
+                {
+                  "name": "height",
+                  "type": "number",
+                  "default": 756
+                }
+              ]
+            }
+          ],
+          "llmSchema": [
+            {
+              "name": "text",
+              "type": "string"
+            },
+            {
+              "name": "src",
+              "type": "string"
+            }
+          ],
+          "description": "Label + video entrance. Duration = video length.",
+          "celExpression": "500"
+        },
+        {
+          "name": "ImagePeel",
+          "type": "scene",
+          "tags": [
+            "Solution",
+            "Product Info"
+          ],
+          "schema": [
+            {
+              "type": "repeat",
+              "source": "images",
+              "map": "props.images",
+              "components": [
+                {
+                  "name": "imageasset",
+                  "fields": [
+                    {
+                      "name": "src",
+                      "type": "string",
+                      "map": "item"
+                    },
+                    {
+                      "name": "width",
+                      "type": "number",
+                      "default": 1344
+                    },
+                    {
+                      "name": "height",
+                      "type": "number",
+                      "default": 756
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "component",
+              "name": "scene",
+              "fields": [
+                {
+                  "name": "direction",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "right"
+                },
+                {
+                  "name": "holdDuration",
+                  "type": "number",
+                  "default": 20
+                },
+                {
+                  "name": "peelDuration",
+                  "type": "number",
+                  "default": 20
+                },
+                {
+                  "name": "stackOffset",
+                  "type": "number",
+                  "default": 20
+                }
+              ]
+            }
+          ],
+          "llmSchema": [
+            {
+              "name": "images",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ],
+          "description": "Images peel away one by one. Use for before/after or variations. Min 2 images.",
+          "celExpression": "ceil(30 + size(props.array) * (props.scene.holdDuration + props.scene.peelDuration))"
+        },
+        {
+          "name": "LogoAsset",
+          "type": "content",
+          "tags": [
+            "CTA"
+          ],
+          "schema": [
+            {
+              "type": "component",
+              "name": "logoasset",
+              "fields": [
+                {
+                  "name": "src",
+                  "type": "string",
+                  "subtype": "image",
+                  "required": false,
+                  "map": "props.src"
+                },
+                {
+                  "name": "logoAnimation",
+                  "type": "string",
+                  "default": "zoomIn",
+                  "sub_type": "enum",
+                  "enum": [
+                    "none",
+                    "fadeIn",
+                    "zoomIn",
+                    "bounceIn",
+                    "spinIn",
+                    "dropIn"
+                  ]
+                }
+              ]
+            }
+          ],
+          "llmSchema": [],
+          "description": "Logo reveal. Default is brand logo, no props. Use as the final scene.",
+          "celExpression": "30"
+        },
+        {
+          "name": "LogoShowcase",
+          "type": "scene",
+          "tags": [
+            "Solution",
+            "Product Info",
+            "Social proof"
+          ],
+          "schema": [
+            {
+              "type": "component",
+              "name": "textstagger",
+              "fields": [
+                {
+                  "name": "text",
+                  "type": "string",
+                  "map": "props.text"
+                },
+                {
+                  "name": "variant",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "heading"
+                },
+                {
+                  "name": "staggerDelay",
+                  "type": "number",
+                  "default": 5
+                },
+                {
+                  "name": "entranceAnimation",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "scaleIn"
+                },
+                {
+                  "name": "duration",
+                  "type": "number",
+                  "default": 15
+                },
+                {
+                  "name": "splitBy",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "word"
+                }
+              ]
+            },
+            {
+              "type": "repeat",
+              "source": "logos",
+              "map": "props.logos",
+              "components": [
+                {
+                  "name": "logoasset",
+                  "fields": [
+                    {
+                      "name": "src",
+                      "type": "string",
+                      "map": "item"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "llmSchema": [
+            {
+              "name": "text",
+              "type": "string",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "logos",
+              "type": "array"
+            }
+          ],
+          "description": "Row of logos + caption. Use for integrations, tech stack, partners, brands. eg. logos=[\"url1\", \"url2\"], text=\"caption text\".",
+          "celExpression": "ceil((size(props.textstagger.text.split(\"\\n\")) - 1) * 10 + 20 + (size(props.array) - 1) * 5 + 12)"
+        },
+        {
+          "name": "LogoWithBrandName",
+          "type": "scene",
+          "tags": [
+            "Solution"
+          ],
+          "schema": [
+            {
+              "type": "component",
+              "name": "textstagger",
+              "fields": [
+                {
+                  "name": "text",
+                  "type": "string",
+                  "map": "props.text"
+                },
+                {
+                  "name": "variant",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "heading"
+                },
+                {
+                  "name": "staggerDelay",
+                  "type": "number",
+                  "default": 5
+                },
+                {
+                  "name": "entranceAnimation",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "scaleIn"
+                },
+                {
+                  "name": "duration",
+                  "type": "number",
+                  "default": 15
+                },
+                {
+                  "name": "splitBy",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "word"
+                }
+              ]
+            },
+            {
+              "type": "component",
+              "name": "logoasset",
+              "fields": [
+                {
+                  "name": "src",
+                  "type": "string",
+                  "subtype": "image",
+                  "required": false,
+                  "map": "props.src"
+                },
+                {
+                  "name": "logoAnimation",
+                  "type": "string",
+                  "default": "zoomIn",
+                  "sub_type": "enum",
+                  "enum": [
+                    "none",
+                    "fadeIn",
+                    "zoomIn",
+                    "bounceIn",
+                    "spinIn",
+                    "dropIn"
+                  ]
+                }
+              ]
+            }
+          ],
+          "llmSchema": [
+            {
+              "name": "text",
+              "type": "string"
+            }
+          ],
+          "description": "Logo + brand name reveal. Use for brand intro.",
+          "celExpression": "ceil((size(props.textstagger.text.split(\"\")) - 1) * 5 + 20)"
+        },
+        {
+          "name": "IconShowcase",
+          "type": "scene",
+          "tags": [
+            "Solution",
+            "Product Info",
+            "Social proof"
+          ],
+          "schema": [
+            {
+              "type": "component",
+              "name": "textstagger",
+              "fields": [
+                {
+                  "name": "text",
+                  "type": "string",
+                  "map": "props.text"
+                },
+                {
+                  "name": "variant",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "heading"
+                },
+                {
+                  "name": "staggerDelay",
+                  "type": "number",
+                  "default": 5
+                },
+                {
+                  "name": "entranceAnimation",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "scaleIn"
+                },
+                {
+                  "name": "duration",
+                  "type": "number",
+                  "default": 15
+                },
+                {
+                  "name": "splitBy",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "word"
+                }
+              ]
+            },
+            {
+              "type": "repeat",
+              "source": "icons",
+              "map": "props.icons",
+              "components": [
+                {
+                  "name": "iconasset",
+                  "fields": [
+                    {
+                      "name": "icon",
+                      "type": "string",
+                      "dataType": "icon",
+                      "map": "item"
+                    },
+                    {
+                      "name": "size",
+                      "type": "number",
+                      "default": 90
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "llmSchema": [
+            {
+              "name": "text",
+              "type": "string"
+            },
+            {
+              "name": "icons",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ],
+          "description": "Row of icons + caption. Use for integrations, tech stack, partners, brands. eg. icons={[\"shopify\", \"midjourney\", \"openai\"]}, text=\"caption text\".",
+          "celExpression": "ceil(10 + (size(props.array) - 1) * 5 + 10 + 5 + 15 + (size(props.textstagger.text.trim().split(\" \")) - 1) * 5 + 15)"
+        }
+      ]
+    }
+  ]
+}

@@ -250,7 +250,7 @@ func buildFailureMessage(buildErr *services.BuildError) string {
 	case "rule_not_enforced":
 		return "Generated code violated required animation rules:\n" + buildErr.Error() + "\nReview the generation rules and rewrite the component to follow them exactly."
 	case "render_error":
-		return "Render failed with error:\n" + buildErr.Error()
+		return "GenerateEditsFromProps failed with error:\n" + buildErr.Error()
 	case "framerules_not_enforced":
 		return "Generated code violated required frame duration rules:\n" + buildErr.Error() + "\nReview the FRAME DURATION RULES rules and rewrite the component to follow them exactly."
 	default:

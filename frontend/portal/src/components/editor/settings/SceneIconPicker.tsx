@@ -1,8 +1,4 @@
 import { useState } from 'react'
-import {
-  ChevronsUpDown,
-} from 'lucide-react'
-import { Popover, PopoverTrigger } from '@/components/ui/popover'
 import SceneSortablePillList from './SceneSortablePillList'
 import { IconPicker } from '../IconPicker'
 import type { Icon } from '../IconPicker'
@@ -44,25 +40,13 @@ export function SingleSceneIconPicker({
   value: Icon
   onChange: (value: Icon) => void
 }) {
-  const [open, setOpen] = useState(false)
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          className="h-9 w-full px-3 rounded-md border border-border bg-background hover:bg-accent/40 transition-colors text-sm flex items-center gap-2"
-        >
-          <span className="truncate">{value.name}</span>
-          <ChevronsUpDown size={14} className="ml-auto shrink-0 text-muted-foreground" />
-        </button>
-      </PopoverTrigger>
-      <IconPicker
-        onChange={(icon) => {
-          console.log(icon)
-        }}
-      />
-    </Popover>
+    <IconPicker
+      onChange={(icon) => {
+        onChange(icon)
+      }}
+    />
   )
 }
 

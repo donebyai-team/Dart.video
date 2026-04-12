@@ -188,6 +188,8 @@ func (l *llmService) GeneratePlanV2(
 ) (*types.Union2AskUserQuestionOrGeneratedVideoPlan, error) {
 	l.logger.Info("🚀 Starting video plan generation..")
 
+	return nil, nil
+
 	thinkingMessages := []string{
 		"Understanding the request...",
 		"Planning the video structure...",

@@ -4,15 +4,13 @@ import z from 'zod';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
-import { Text } from '../../../core/text/Text';
+import { Text, TextProps } from '../../../core/assets/Text';
 import { VideoAsset } from '../../../core/assets/VideoAsset';
 import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
-import { usePatchedProps, useStyleOverride } from '../../../patches';
-import { resolveTypography } from '../../../tokens';
+import { usePatchedProps } from '../../../patches';
 import { useTheme } from '../../../theme';
 import { getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
-import type { DurationResult } from '../../../registry/registry';
 
 // Default constants
 const DEFAULT_TEXT_DURATION = 30;
@@ -27,32 +25,18 @@ export const AnimatedVideoSchema = z.object({
     id: z.string().optional(),
     text: z.string().default(''),
     src: z.string(),
-    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
     entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
-    width: z.number().default(DEFAULT_WIDTH).optional(),
-    height: z.number().default(DEFAULT_HEIGHT).optional(),
-    style: z.any().optional(),
 });
 
-export type AnimatedVideoProps = z.input<typeof AnimatedVideoSchema>;
 
-export function AnimatedVideo(propsInit: AnimatedVideoProps): React.ReactElement {
-    const patchedProps = usePatchedProps(propsInit.id, propsInit);
-    const props = { ...AnimatedVideoSchema.parse(patchedProps), id: propsInit.id };
+export function AnimatedVideo(): React.ReactElement {
+    const parentProps = usePatchedProps("scene", {}) as z.infer<typeof AnimatedVideoSchema>;
+    const textProps = usePatchedProps("text", {}) as TextProps;
+    const videoProps = usePatchedProps("videoasset", {}) as any;
 
     const frame = useCurrentFrame();
-    const styleConfig = useStyleContext();
-    const theme = useTheme();
-    const preset = useAspectPreset();
 
-    // Apply defaults
-    const actualVariant = props.variant ?? DEFAULT_VARIANT;
-    const actualAnimation = props.entranceAnimation ?? DEFAULT_ANIMATION;
-    const imageWidth = props.width ?? DEFAULT_WIDTH;
-    const imageHeight = props.height ?? DEFAULT_HEIGHT;
-
-    const styleOverride = useStyleOverride(props.id);
-
+    const actualAnimation = parentProps.entranceAnimation ?? DEFAULT_ANIMATION;
     const textDuration = DEFAULT_TEXT_DURATION;
     const videoDuration = DEFAULT_VIDEO_DURATION;
     const videoStart = DEFAULT_VIDEO_START_DELAY;
@@ -73,7 +57,6 @@ export function AnimatedVideo(propsInit: AnimatedVideoProps): React.ReactElement
 
     return (
         <div
-            id={props.id}
             style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -82,13 +65,7 @@ export function AnimatedVideo(propsInit: AnimatedVideoProps): React.ReactElement
             }}
         >
             <div style={{ opacity: textProgress, transform: `translateY(${(1 - textProgress) * 20}px)` }}>
-                <Text id={`text-${props.id}`} text={props.text} style={
-                    {
-                        ...resolveTypography(actualVariant, styleConfig, theme, preset),
-                        ...props.style,
-                        ...styleOverride
-                    }}
-                />
+                <Text id='text' text={textProps.text} variant={textProps.variant} />
             </div>
             <div
                 style={{
@@ -97,13 +74,12 @@ export function AnimatedVideo(propsInit: AnimatedVideoProps): React.ReactElement
                 }}
             >
                 <VideoAsset
-                    id={`videoasset-${props.id}`}
-                    src={props.src}
-                    width={imageWidth}
-                    height={imageHeight}
+                    id='videoasset'
+                    src={videoProps.src}
+                    width={videoProps.width}
+                    height={videoProps.height}
                     style={{
-                        overflow: 'hidden',                        
-                        ...styleOverride,
+                        overflow: 'hidden',
                     }}
                 />
             </div>
@@ -116,11 +92,79 @@ export function AnimatedVideo(propsInit: AnimatedVideoProps): React.ReactElement
 // ============================================================================
 
 
+export const VideoAssetSchema = [
+    {
+        type: "component",
+        name: 'scene',
+        fields: [
+            {
+                "name": "entranceAnimation",
+                "type": "string",
+                "subtype": "enum",
+                "default": DEFAULT_ANIMATION
+            }
+        ]
+    },
+    {
+        type: "component",
+        name: 'text',
+        fields: [
+            {
+                "name": "text",
+                "type": "string",
+                "subtype": "content",
+                
+                "map": "props.text"
+            },
+            {
+                "name": "variant",
+                "type": "string",
+                "subtype": "enum",
+                "default": DEFAULT_VARIANT
+            }
+        ]
+    },
+    {
+        type: "component",
+        name: 'videoasset',
+        fields: [
+            {
+                "name": "src",
+                "type": "string",
+                "subtype": "video",
+                
+                "map": "props.src"
+            },
+            {
+                "name": "width",
+                "type": "number",
+                "default": DEFAULT_WIDTH
+            },
+            {
+                "name": "height",
+                "type": "number",
+                "default": DEFAULT_HEIGHT
+            }
+        ]
+    }
+]
+
 export const AnimatedVideoDescriptor: ComponentRegistration = {
     name: 'AnimatedVideo',
     type: 'scene',
     tags: ['Solution', 'Product Info'],
-    fullSchema: AnimatedVideoSchema,
+    schema: VideoAssetSchema,
+    llmSchema: [
+        {
+            name: 'text',
+            type: 'string',
+        },
+        {
+            name: 'src',
+            type: 'string',
+        },
+    ],
     description: 'Label + video entrance. Duration = video length.',
-    celExpression: '500',
+    celExpression: '500'
 };
+

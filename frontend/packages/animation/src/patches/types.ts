@@ -3,8 +3,6 @@ export interface ElementPatchEntry {
   [prop: string]: unknown;
   /** CSS style overrides — always wins over component style */
   style?: Record<string, string | number>;
-  /** Swap to a different component type */
-  swap?: string;
 }
 
 /**

@@ -7,10 +7,9 @@ import { useTheme } from '../../../theme';
 import { resolveTypography } from '../../../tokens';
 import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
 import { getEntranceTransform, ENTRANCE_ANIMATIONS, HIGHLIGHT_STYLES } from '../types';
-import { Counter } from './Counter';
-import { Text } from '../../../core/text/Text';
+import { Counter, CounterSchemaFields } from './Counter';
+import { Text } from '../../../core/assets/Text';
 import type { ComponentRegistration } from '../../../registry/registry';
-import type { DurationResult } from '../durationTypes';
 
 // Default constants
 const DEFAULT_ENTRANCE_DURATION = 30;
@@ -31,7 +30,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (propsInit: Animate
     const preset = useAspectPreset();
 
     const patchedProps = usePatchedProps(propsInit.id, propsInit)
-    const props = { ...AnimatedNumberSchema.parse(patchedProps), id: propsInit.id }  
+    const props = { ...AnimatedNumberSchema.parse(patchedProps), id: propsInit.id }
 
     // Apply defaults
     const actualVariant = props.variant ?? DEFAULT_VARIANT;
@@ -111,7 +110,6 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (propsInit: Animate
 
     return (
         <span
-            id={props.id}
             className={props.className}
             style={{
                 ...typographyStyle,
@@ -124,7 +122,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (propsInit: Animate
         >
 
 
-            <Text text={props.startText} id={`text-left-${props.id}`} style={
+            <Text text={props.startText} id={`text-left`} style={
                 {
                     marginRight: '0.25em',
                     ...typographyStyle,
@@ -134,7 +132,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (propsInit: Animate
 
             <span style={getHighlightStyles()}>
                 <Counter
-                    id={`counter-${props.id}`}
+                    id={`counter`}
                     from={props.from}
                     to={props.to}
                     format={props.format}
@@ -144,7 +142,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (propsInit: Animate
                     durationInFrames={DEFAULT_COUNTER_DURATION}
                 />
             </span>
-            <Text text={props.endText} id={`text-right-${props.id}`} style={
+            <Text text={props.endText} id={`text-right`} style={
                 {
                     // marginLeft: '0.25em',
                     ...typographyStyle,
@@ -179,10 +177,57 @@ export const AnimatedNumberSchema = z.object({
 // Registry Descriptor
 // ============================================================================
 
+export const AnimatedNumberAssetSchema = [
+    {
+        name: 'entranceAnimation',
+        type: 'string',
+        default: DEFAULT_ANIMATION,
+    }, {
+        name: 'animationDelay',
+        type: 'number',
+        default: DEFAULT_ENTRANCE_DURATION,
+    },
+    {
+        "name": "startText",
+        "type": "string",
+        "map": "props.startText"
+    },
+
+    {
+        "name": "endText",
+        "type": "string",
+        "map": "props.endText"
+    },
+    ...CounterSchemaFields
+]
+
 export const AnimatedNumberDescriptor: ComponentRegistration = {
     name: 'AnimatedNumber',
     type: 'content',
-    fullSchema: AnimatedNumberSchema,
+    schema: [{
+        type: 'component',
+        name: 'animatednumber',
+        fields: AnimatedNumberAssetSchema
+    }],
+    llmSchema: [
+        {
+            name: 'startText',
+            type: 'string',
+        },
+        {
+            name: 'endText',
+            type: 'string',
+        },
+        {
+            name: 'from',
+            type: 'number',
+        },
+        {
+            name: 'to',
+            type: 'number',
+        },
+    ],
     description: 'Counting metric with label text. Use for stats and KPIs',
     celExpression: 'ceil(props.animationDelay + max(45, min(100, log10(abs(props.to - props.from) + 1) * 20)))',
 };
+

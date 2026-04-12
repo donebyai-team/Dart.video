@@ -121,7 +121,8 @@ export function AnimationEditLayer({
     if (elType === 'html' || elType === 'custom') return true
     const registration = resolveComponentFromId(id)
     if (!registration) return false
-    return registration.type !== 'scene'
+    // return registration.type !== 'scene'
+    return true
   }
 
   /**

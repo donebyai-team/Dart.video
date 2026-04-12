@@ -10,7 +10,6 @@ import { deepMerge } from './utils';
  * The overlay is a flat object keyed by element ID. Each entry contains:
  *   - direct prop overrides
  *   - style: CSS property overrides (always wins)
- *   - swap: component replacement target
  */
 export const PatchContext = createContext<PatchOverlay>(createEmptyPatchOverlay());
 
@@ -104,6 +103,26 @@ export function usePatchedProps<T>(
   if (!entry) return defaultValue;
 
   return deepMerge(defaultValue, entry);
+}
+
+export function useArrayPatch(...prefixes: string[]) {
+  const patches = useContext(PatchContext)
+  const byIndex: Record<number, Record<string, any>> = {}
+
+  for (const prefix of prefixes) {
+    const regex = new RegExp(`^${prefix}-(\\d+)$`)
+    for (const [eid, patch] of Object.entries(patches)) {
+      const match = eid.match(regex)
+      if (!match) continue
+      const index = parseInt(match[1])
+      byIndex[index] ??= {}
+      byIndex[index][eid] = patch
+    }
+  }
+
+  return Object.entries(byIndex)
+    .sort(([a], [b]) => parseInt(a) - parseInt(b))
+    .map(([_, item]) => item)
 }
 
 /**

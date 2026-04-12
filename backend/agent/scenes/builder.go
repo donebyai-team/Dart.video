@@ -10,6 +10,17 @@ import (
 //go:embed scene_manifest.json
 var componentsJSON []byte
 
+type AvailableEnum struct {
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	Value       []string `json:"value"`
+}
+
+type SceneRegistry struct {
+	AvailableEnums []AvailableEnum  `json:"available_enums"`
+	Components     []ComponentGroup `json:"components"`
+}
+
 type ComponentGroup struct {
 	Title       string      `json:"title"`
 	Description string      `json:"description"`
@@ -17,46 +28,82 @@ type ComponentGroup struct {
 }
 
 type Component struct {
-	Name        string   `json:"name"`
-	Tags        []string `json:"tags"`
-	ID          string   `json:"id"`
-	Description string   `json:"description"`
-	Props       []Prop   `json:"props"`
+	Name          string       `json:"name"`
+	Type          string       `json:"type"`
+	Tags          []string     `json:"tags,omitempty"`
+	Schema        []SchemaNode `json:"schema"`
+	LLMSchema     []LLMField   `json:"llmSchema"`
+	Description   string       `json:"description,omitempty"`
+	CELExpression string       `json:"celExpression,omitempty"`
 }
 
-type Prop struct {
+type SchemaNode struct {
+	Type       string            `json:"type"` // component | repeat
+	Name       string            `json:"name,omitempty"`
+	Source     string            `json:"source,omitempty"`
+	Fields     []FieldSchema     `json:"fields,omitempty"`     // used when type is component
+	Components []ComponentSchema `json:"components,omitempty"` // used when type is repeat
+	Map        string            `json:"map,omitempty"`
+}
+
+type ComponentSchema struct {
+	Name   string        `json:"name"`
+	Fields []FieldSchema `json:"fields"`
+}
+
+type FieldSchema struct {
 	Name     string      `json:"name"`
 	Type     string      `json:"type"`
-	Required bool        `json:"required"`
-	Default  interface{} `json:"default"`
+	Subtype  string      `json:"subtype,omitempty"`
+	Map      string      `json:"map,omitempty"`
+	Default  interface{} `json:"default,omitempty"`
+	DataType string      `json:"datatype,omitempty"`
+}
+
+type LLMField struct {
+	Name    string    `json:"name"`
+	Type    string    `json:"type"`
+	Subtype string    `json:"subtype,omitempty"`
+	Items   *LLMItems `json:"items,omitempty"`
+}
+
+type LLMItems struct {
+	Type   string     `json:"type"`
+	Fields []LLMField `json:"fields,omitempty"`
 }
 
 var (
-	componentGroups  []ComponentGroup
-	componentNameMap map[string]string
+	registry SceneRegistry
 )
 
-func BuildScenesList(requiredOnly bool, excludeProps []string) string {
-	exclude := map[string]bool{}
-	for _, p := range excludeProps {
-		exclude[p] = true
-	}
+func loadComponents() error {
+	return json.Unmarshal(componentsJSON, &registry)
+}
 
-	// Find the Scenes group
-	var components []Component
-	for _, g := range componentGroups {
+func init() {
+	if err := loadComponents(); err != nil {
+		panic(fmt.Sprintf("failed to load scene registry: %v", err))
+	}
+}
+
+func BuildScenesList() string {
+
+	var scenes []Component
+
+	for _, g := range registry.Components {
 		if g.Title == "Scenes" {
-			components = g.Components
+			scenes = g.Components
 			break
 		}
 	}
 
 	var sectional, filler []Component
-	for _, c := range components {
-		if len(c.Tags) > 0 {
-			sectional = append(sectional, c)
+
+	for _, s := range scenes {
+		if len(s.Tags) > 0 {
+			sectional = append(sectional, s)
 		} else {
-			filler = append(filler, c)
+			filler = append(filler, s)
 		}
 	}
 
@@ -65,72 +112,84 @@ func BuildScenesList(requiredOnly bool, excludeProps []string) string {
 	b.WriteString("## Available Scenes\n\n")
 
 	b.WriteString("### Sectional — prefer for opening/closing of each section\n\n")
-	for _, c := range sectional {
-		fmt.Fprintf(&b, "%s | %s\n", c.Name, strings.Join(c.Tags, ", "))
-		fmt.Fprintf(&b, "%s\n", c.Description)
-		fmt.Fprintf(&b, "Props: %s\n\n", buildPropsInline(c.Props, requiredOnly, exclude))
+
+	for _, s := range sectional {
+		writeScene(&b, s)
 	}
 
-	b.WriteString("### Filler — use anywhere, not tied to a specific section\n\n")
-	for _, c := range filler {
-		fmt.Fprintf(&b, "%s — %s Props: %s\n\n", c.Name, c.Description, buildPropsInline(c.Props, requiredOnly, exclude))
+	b.WriteString("### Filler — use anywhere\n\n")
+
+	for _, s := range filler {
+		writeScene(&b, s)
 	}
 
 	return b.String()
 }
 
-func buildPropsInline(props []Prop, requiredOnly bool, exclude map[string]bool) string {
-	var parts []string
-	for _, p := range props {
-		if exclude[p.Name] {
-			continue
-		}
-		if requiredOnly && !p.Required {
-			continue
-		}
-		entry := fmt.Sprintf("%s: %s", p.Name, p.Type)
-		if p.Required {
-			entry += "*"
-		}
-		parts = append(parts, entry)
+func writeScene(b *strings.Builder, c Component) {
+
+	fmt.Fprintf(b, "%s", c.Name)
+
+	if len(c.Tags) > 0 {
+		fmt.Fprintf(b, " | %s", strings.Join(c.Tags, ", "))
 	}
+
+	fmt.Fprintf(b, "\n")
+
+	if c.Description != "" {
+		fmt.Fprintf(b, "%s\n", c.Description)
+	}
+
+	fmt.Fprintf(b, "Props: %s\n\n", buildPropsInline(c.LLMSchema))
+}
+
+func buildPropsInline(fields []LLMField) string {
+
+	var parts []string
+
+	for _, f := range fields {
+
+		if f.Type == "array" {
+
+			if f.Items != nil {
+
+				if len(f.Items.Fields) > 0 {
+
+					var objParts []string
+					for _, sub := range f.Items.Fields {
+						objParts = append(objParts, fmt.Sprintf("%s:%s", sub.Name, sub.Type))
+					}
+
+					parts = append(parts,
+						fmt.Sprintf("%s:[{%s}]", f.Name, strings.Join(objParts, ", ")),
+					)
+
+				} else {
+					parts = append(parts,
+						fmt.Sprintf("%s:[%s]", f.Name, f.Items.Type),
+					)
+				}
+
+			}
+
+			continue
+		}
+
+		parts = append(parts, fmt.Sprintf("%s:%s", f.Name, f.Type))
+	}
+
 	return strings.Join(parts, "  ")
 }
 
-func loadComponents() error {
-	err := json.Unmarshal(componentsJSON, &componentGroups)
-	if err != nil {
-		return err
-	}
+func findComponent(name string) (*Component, error) {
 
-	componentNameMap = make(map[string]string)
-
-	for gi := range componentGroups {
-		for ci := range componentGroups[gi].Components {
-			c := &componentGroups[gi].Components[ci]
-
-			componentNameMap[c.ID] = c.Name
-
-			c.Props = append(c.Props, Prop{
-				Name: "style",
-				Type: "object",
-			})
+	for _, g := range registry.Components {
+		for i := range g.Components {
+			if strings.EqualFold(g.Components[i].Name, name) {
+				return &g.Components[i], nil
+			}
 		}
 	}
 
-	return nil
-}
-
-func GetComponentName(id string) string {
-	if name, ok := componentNameMap[id]; ok {
-		return name
-	}
-	return ""
-}
-
-func init() {
-	err := loadComponents()
-	if err != nil {
-		panic(fmt.Sprintf("failed to load components: %v", err))
-	}
+	return nil, fmt.Errorf("component %s not found", name)
 }

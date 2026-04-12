@@ -1,15 +1,10 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
 import z from 'zod';
-import { useStyleContext } from '../../../styles/StyleContext';
-import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
-import { Text } from '../../../core/text/Text';
+import { Text, TextProps } from '../../../core/assets/Text';
 import { ImageAsset } from '../../../core/assets/ImageAsset';
-import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
-import { usePatchedProps, useStyleOverride } from '../../../patches';
-import { resolveTypography } from '../../../tokens';
-import { useTheme } from '../../../theme';
+import { usePatchedProps } from '../../../patches';
 import { getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
 
@@ -27,36 +22,23 @@ export const AnimatedImageSchema = z.object({
     id: z.string().optional(),
     text: z.string().default(''),
     src: z.string(),
-    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
     entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
-    width: z.number().default(DEFAULT_WIDTH).optional(),
-    height: z.number().default(DEFAULT_HEIGHT).optional(),
-    style: z.any().optional(),
 });
-
-export type AnimatedImageProps = z.input<typeof AnimatedImageSchema>;
 
 /**
  * Scene showing a text label above a full image that slides up into view.
  * Text fades in first, then the image slides up with a border radius.
  */
 
-export function AnimatedImage(propsInit: AnimatedImageProps): React.ReactElement {
-    const patchedProps = usePatchedProps(propsInit.id, propsInit);
-    const props = { ...AnimatedImageSchema.parse(patchedProps), id: propsInit.id };
+export function AnimatedImage(): React.ReactElement {
+    const parentProps = usePatchedProps("scene", {}) as z.infer<typeof AnimatedImageSchema>;
+    const textProps = usePatchedProps("text", {}) as TextProps;
+    const imageProps = usePatchedProps("imageasset", {}) as any;
 
     const frame = useCurrentFrame();
-    const styleConfig = useStyleContext();
-    const theme = useTheme();
-    const preset = useAspectPreset();
 
     // Apply defaults
-    const actualVariant = props.variant ?? DEFAULT_VARIANT;
-    const actualAnimation = props.entranceAnimation ?? DEFAULT_ANIMATION;
-    const imageWidth = props.width ?? DEFAULT_WIDTH;
-    const imageHeight = props.height ?? DEFAULT_HEIGHT;
-
-    const styleOverride = useStyleOverride(props.id);
+    const actualAnimation = parentProps.entranceAnimation ?? DEFAULT_ANIMATION;
 
     const textDuration = 30;
     const imageDuration = 40;
@@ -78,7 +60,6 @@ export function AnimatedImage(propsInit: AnimatedImageProps): React.ReactElement
 
     return (
         <div
-            id={props.id}
             style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -88,12 +69,7 @@ export function AnimatedImage(propsInit: AnimatedImageProps): React.ReactElement
         >
 
             <div style={{ opacity: textProgress, transform: `translateY(${(1 - textProgress) * 20}px)` }}>
-                <Text text={props.text} id={`text-${props.id}`} style={
-                    {
-                        ...resolveTypography(actualVariant, styleConfig, theme, preset),
-                        ...props.style,
-                        ...styleOverride
-                    }} />
+                <Text text={textProps.text} id='text' variant={textProps.variant} />
             </div>
             <div
                 style={{
@@ -102,13 +78,12 @@ export function AnimatedImage(propsInit: AnimatedImageProps): React.ReactElement
                 }}
             >
                 <ImageAsset
-                    id={`imageasset-${props.id}`}
-                    src={props.src}
-                    width={imageWidth}
-                    height={imageHeight}
+                    id='imageasset'
+                    src={imageProps.src}
+                    width={imageProps.width}
+                    height={imageProps.height}
                     style={{
-                        overflow: 'hidden',                      
-                        ...styleOverride,
+                        overflow: 'hidden',
                     }}
                 />
             </div>
@@ -121,11 +96,78 @@ export function AnimatedImage(propsInit: AnimatedImageProps): React.ReactElement
 // Registry Descriptor
 // ============================================================================
 
+
+
+export const AnimatedImageAssetSchema = [
+    {
+        type: "component",
+        name: 'scene',
+        fields: [
+            {
+                "name": "entranceAnimation",
+                "type": "string",
+                "subtype": "enum",
+                "default": DEFAULT_ANIMATION
+            }
+        ]
+    },
+    {
+        type: "component",
+        name: 'text',
+        fields: [
+            {
+                "name": "text",
+                "type": "string",                
+                "map": "props.text"
+            },
+            {
+                "name": "variant",
+                "type": "string",
+                "subtype": "enum",
+                "default": DEFAULT_VARIANT
+            }
+        ]
+    },
+    {
+        type: "component",
+        name: 'imageasset',
+        fields: [
+            {
+                "name": "src",
+                "type": "string",
+                "subtype": "image",                
+                "map": "props.src"
+            },
+            {
+                "name": "width",
+                "type": "number",
+                "default": DEFAULT_WIDTH
+            },
+            {
+                "name": "height",
+                "type": "number",
+                "default": DEFAULT_HEIGHT
+            }
+        ]
+    }
+]
+
 export const AnimatedImageDescriptor: ComponentRegistration = {
     name: 'AnimatedImage',
     type: 'scene',
     tags: ['Solution', 'Product Info'],
-    fullSchema: AnimatedImageSchema,
+    schema: AnimatedImageAssetSchema,
+    llmSchema: [
+        {
+            name: 'text',
+            type: 'string',
+        },
+        {
+            name: 'src',
+            type: 'string',
+        },
+    ],
     description: 'Label + image entrance. Use for product/feature visuals.',
-    celExpression: '80',
+    celExpression: '80'
 };
+

@@ -4,8 +4,7 @@ import { usePatchedDragStyle, usePrimitivePatches, usePatchedProp, useStyleOverr
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { type Easing } from '../../../styles/types';
 import { TypographyVariant } from '../../../tokens/semantic';
-import { Text } from '../../../core/text/Text';
-import { applySpeedFactor, useSpeedFactor } from '../../../duration';
+import { Text } from '../../../core/assets/Text';
 
 export interface CounterProps {
   startAt?: number;
@@ -59,12 +58,7 @@ export function Counter({
 }: CounterProps): React.ReactElement {
   const frame = useCurrentFrame();
 
-  const speedFactor = useSpeedFactor();
-  const adjustedStartAt = applySpeedFactor(startAt, speedFactor);
-  const adjustedDurationInFrames = applySpeedFactor(durationInFrames, speedFactor);
-
-
-  const { effectiveStartAt, effectiveDurationInFrames } = usePrimitivePatches(id, { startAt: adjustedStartAt, durationInFrames: adjustedDurationInFrames });
+  const { effectiveStartAt, effectiveDurationInFrames } = usePrimitivePatches(id, { startAt, durationInFrames });
 
   const patchedFrom = usePatchedProp(id, 'from', from);
   const patchedTo = usePatchedProp(id, 'to', to);
@@ -99,3 +93,41 @@ export function Counter({
     />
   );
 }
+
+export const CounterSchemaFields = [
+  {
+    "name": "from",
+    "type": "number",
+    
+    "map": "props.from",
+    "default": 0
+  },
+  {
+    "name": "to",
+    "type": "number",
+    
+    "map": "props.to",
+    "default": 100
+  },
+  {
+    "name": "format",
+    "type": "string",
+    "default": ""
+  },
+  {
+    "name": "prefix",
+    "type": "string",
+    "default": ""
+  },
+  {
+    "name": "suffix",
+    "type": "string",
+    "default": ""
+  },
+  {
+    "name": "variant",
+    "type": "string",
+    "subtype": "enum",
+    "default": "heading"
+  }
+]

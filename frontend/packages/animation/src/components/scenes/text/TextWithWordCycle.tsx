@@ -8,7 +8,7 @@ import { useTheme } from '../../../theme/ThemeContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
 import { resolveTypography } from '../../../tokens/resolveTypography';
-import { Text } from '../../../core/text/Text';
+import { Text } from '../../../core/assets/Text';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../durationTypes';
 import { TEXT_CYCLE_TRANSITIONS, HIGHLIGHT_STYLES } from '../types';
@@ -20,23 +20,6 @@ const DEFAULT_TRANSITION = 'slideUp' as const;
 const DEFAULT_VARIANT = 'heading' as const;
 const DEFAULT_HIGHLIGHT_STYLE = 'background' as const;
 
-// ============================================================================
-// Schema & Duration Calculation
-// ============================================================================
-
-export const TextWithWordCycleSchema = z.object({
-  id: z.string().optional(),
-  text: z.string().default(''),
-  cyclingWords: z.array(z.string()).default([]),
-  holdDuration: z.number().default(DEFAULT_HOLD_DURATION).optional(),
-  transitionDuration: z.number().default(DEFAULT_TRANSITION_DURATION).optional(),
-  transition: z.enum(TEXT_CYCLE_TRANSITIONS).default(DEFAULT_TRANSITION).optional(),
-  variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
-  highlightStyle: z.enum(HIGHLIGHT_STYLES).default(DEFAULT_HIGHLIGHT_STYLE).optional(),
-  highlightColor: z.string().optional(),
-  style: z.any().optional(),
-  className: z.string().optional(),
-});
 
 // Use z.input for props (what callers pass) - fields with defaults are optional
 export type TextWithWordCycleProps = z.input<typeof TextWithWordCycleSchema>;
@@ -72,11 +55,11 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (propsInit: T
 
   if (props.cyclingWords.length === 0) {
     return (
-      <Text 
-        text={props.text} 
-        variant={patchedVariant} 
-        className={props.className} 
-        style={{ ...props.style, ...styleOverride, ...dragStyle }} 
+      <Text
+        text={props.text}
+        variant={patchedVariant}
+        className={props.className}
+        style={{ ...props.style, ...styleOverride, ...dragStyle }}
       />
     );
   }
@@ -94,11 +77,11 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (propsInit: T
 
   const transitionProgress = isTransitioning
     ? interpolateWithEasing(
-        cycleFrame,
-        [holdDuration, holdDuration + transitionDuration],
-        [0, 1],
-        'ease-out',
-      )
+      cycleFrame,
+      [holdDuration, holdDuration + transitionDuration],
+      [0, 1],
+      'ease-out',
+    )
     : 0;
 
   const getHighlightStyles = (baseStyle: React.CSSProperties): React.CSSProperties => {
@@ -143,7 +126,7 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (propsInit: T
           ...baseStyle,
           backgroundColor: actualHighlightColor,
           color: '#000',
-         borderRadius: '4px',
+          borderRadius: '4px',
           padding: '2px 6px',
           margin: '0 2px',
           display: 'inline-block',
@@ -190,7 +173,7 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (propsInit: T
       display: 'inline-block',
     };
 
-    if (props.transition === 'fadeSwap') {
+    if (props.textCycleTransition === 'fadeSwap') {
       return (
         <span style={cycleContainerStyle}>
           <span style={spacerStyle}>{longestWord}</span>
@@ -220,7 +203,7 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (propsInit: T
       );
     }
 
-    if (props.transition === 'slideUp') {
+    if (props.textCycleTransition === 'slideUp') {
       return (
         <span style={{ ...cycleContainerStyle, overflow: 'hidden' }}>
           <span style={spacerStyle}>{longestWord}</span>
@@ -285,15 +268,15 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (propsInit: T
   };
 
   return (
-    <span 
-      id={props.id} 
-      className={props.className} 
-      style={{ 
+    <span
+      id={props.id}
+      className={props.className}
+      style={{
         display: 'inline',
         ...typographyStyle,
-        ...props.style, 
-        ...styleOverride, 
-        ...dragStyle 
+        ...props.style,
+        ...styleOverride,
+        ...dragStyle
       }}
     >
       {props.text && (
@@ -308,10 +291,82 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (propsInit: T
 // Registry Descriptor
 // ============================================================================
 
+export const TextWithWordCycleSchema = z.object({
+  id: z.string().optional(),
+  text: z.string().default(''),
+  cyclingWords: z.array(z.string()).default([]),
+  holdDuration: z.number().default(DEFAULT_HOLD_DURATION).optional(),
+  transitionDuration: z.number().default(DEFAULT_TRANSITION_DURATION).optional(),
+  textCycleTransition: z.enum(TEXT_CYCLE_TRANSITIONS).default(DEFAULT_TRANSITION).optional(),
+  variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
+  highlightStyle: z.enum(HIGHLIGHT_STYLES).default(DEFAULT_HIGHLIGHT_STYLE).optional(),
+  highlightColor: z.string().optional(),
+  style: z.any().optional(),
+  className: z.string().optional(),
+});
+
+
+const TextWithWordCycleSchemaFields = [
+  {
+    "name": "text",
+    "type": "string",
+
+    "required": true,
+    "map": "props.text"
+  },
+  {
+    "name": "cyclingWords",
+    "type": "array",
+
+    "required": true,
+    "map": "props.cyclingWords",
+    "default": []
+  },
+  {
+    "name": "variant",
+    "type": "string",
+    "sub_type": "enum",
+    "default": DEFAULT_VARIANT
+  },
+  {
+    "name": "holdDuration",
+    "type": "number",
+    "default": DEFAULT_HOLD_DURATION
+  },
+  {
+    "name": "transitionDuration",
+    "type": "number",
+    "default": DEFAULT_TRANSITION_DURATION
+  },
+  {
+    "name": "textCycleTransition",
+    "type": "string",
+    "subtype": "enum",
+    "default": DEFAULT_TRANSITION
+  }
+]
+
 export const TextWithWordCycleDescriptor: ComponentRegistration = {
   name: 'TextWithWordCycle',
   type: 'content',
-  fullSchema: TextWithWordCycleSchema,
+  schema: [{
+    type: 'component',
+    name: 'textwithwordcycle',
+    fields: TextWithWordCycleSchemaFields
+  }],
+  llmSchema: [
+    {
+      name: 'text',
+      type: 'string',
+    },
+    {
+      name: 'cyclingWords',
+      type: 'array',
+      "items": {
+        "type": "string"
+      }
+    }
+  ],
   description: 'Static text with cycling highlighted words at the end. Use for dynamic taglines like "We build amazing [software/products/solutions]"',
   celExpression: 'ceil((props.holdDuration + props.transitionDuration) * size(props.cyclingWords))',
 };

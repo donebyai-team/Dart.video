@@ -16,8 +16,6 @@ export * from './core/layout';
 // Animation primitives
 export * from './core/animation_primitives';
 
-export * from './core/text';
-
 // Content primitives
 export * from './components/scenes/text';
 

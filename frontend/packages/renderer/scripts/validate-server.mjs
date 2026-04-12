@@ -32,13 +32,8 @@
  */
 
 import {Storage} from '@google-cloud/storage';
-import {bundle} from '@remotion/bundler';
-import {renderStill, selectComposition} from '@remotion/renderer';
 import {compileRemoteComponent} from '../src/compiler.ts'
 import {assignPrimitiveIds, transformAssignedPrimitiveIds} from '../src/primitive-ast-pass.ts'
-import {
-  computeAnimationDurationFromCodeV2,
-} from '../src/code_rules_validators/animation-duration-v2.ts';
 import {parseValidateRequestBody, validateGeneratedCode} from '../src/code_rules_validators/validate-request.ts';
 import {randomUUID} from 'node:crypto';
 import {existsSync} from 'node:fs';
@@ -63,7 +58,6 @@ const chromiumOptions = {
 // Path layout (relative to packages/renderer/scripts/):
 //   ../src            → packages/renderer/src/
 //   ../../templates   → packages/templates/
-const RENDERER_SRC_DIR = resolve(__dirname, '../src');
 const TEMPLATES_DIR = resolve(__dirname, '../../templates');
 
 // ── Step 2: Render check root entry ──────────────────────────────────────────
@@ -253,33 +247,6 @@ async function handleValidate(req, res) {
     return;
   }
   console.log('[validate] compile check passed');
-  
-  // ── Step 1.5: Component-based duration validation (V2) ───────────────────
-  console.log('[validate] step 1.5 — component duration validation (V2)');
-  const v2DurationResult = computeAnimationDurationFromCodeV2(code);
-  
-  // Check for validation errors from component duration calculators
-  if (v2DurationResult.errors && v2DurationResult.errors.length > 0) {
-    const formattedErrors = v2DurationResult.errors.map(err => {
-      let message = err.error;
-      if (err.component) {
-        message = `[${err.component}] ${message}`;
-        if (err.field) {
-          message += ` (field: ${err.field})`;
-        }
-      }
-      return message;
-    });
-    
-    console.log('[validate] component duration validation FAILED:\n', formattedErrors);
-    res.writeHead(422, {'Content-Type': 'application/json'});
-    res.end(JSON.stringify({
-      error_type: 'validation_error',
-      errors: formattedErrors,
-    }));
-    return;
-  }
-  console.log('[validate] component duration validation passed');
 
   const uniqueComponentName = `Component${randomUUID().replace(/-/g, '')}`;
   const idsGcsPath = `${output_path}/${uniqueComponentName}.tsx`;

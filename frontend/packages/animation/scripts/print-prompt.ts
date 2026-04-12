@@ -8,7 +8,7 @@
  */
 import { writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { getAnimationPrompt, getAnimationPromptJson } from '../src/registry/prompt_generator';
+import { getAnimationPromptJson } from '../src/registry/prompt_generator';
 
 function getFlagValue(args: string[], name: string): string | undefined {
   const exact = `--${name}`;
@@ -52,11 +52,11 @@ if (mode === 'json') {
     console.log(`Wrote ${path.relative(process.cwd(), outputPath)}`);
   }
 } else {
-  const prompt = getAnimationPrompt(mode ? { mode } : undefined);
+  const prompt = getAnimationPromptJson();
   const outputPath = path.resolve(
     process.cwd(),
     'src/registry/prompt_generator/prompts',
-    mode === 'only_components_description' ? 'prompt_list_components.md' : 'Prompt.md',
+    'scenes-manifest.json',
   );
 
   if (shouldPrintToStdout) {

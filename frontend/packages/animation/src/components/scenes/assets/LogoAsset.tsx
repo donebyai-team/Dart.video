@@ -8,7 +8,6 @@ import { interpolateWithEasing } from "../../../styles/easingResolver";
 import { useTheme } from "../../../theme";
 import { LOGO_ANIMATIONS, LogoAnimation } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
-import type { DurationResult } from '../../../registry/registry';
 
 // Default constants
 const DEFAULT_ANIMATION_DURATION = 30;
@@ -157,11 +156,35 @@ export function LogoAsset(propsInit: LogoAssetProps): React.ReactElement {
 // Registry Descriptor
 // ============================================================================
 
+export const LogoAssetSchemaFields = [
+    {
+        "name": "src",
+        "type": "string",
+        "subtype": "image",    
+        "required": false,
+        "map": "props.src"
+    },
+    {
+        "name": "logoAnimation",
+        "type": "string",
+        "default": DEFAULT_ANIMATION,
+        "sub_type": "enum",
+        "enum": LOGO_ANIMATIONS
+    }
+]
+
 export const LogoAssetDescriptor: ComponentRegistration = {
     name: 'LogoAsset',
-    type: 'brand',
+    type: 'content',
     tags: ['CTA'],
-    fullSchema: LogoAssetSchema,
+    schema: [{
+        type: "component",
+        name: 'logoasset',
+        fields: LogoAssetSchemaFields
+    }],
+    llmSchema: [],
     description: 'Logo reveal. Default is brand logo, no props. Use as the final scene.',
-    celExpression: 'props.logoAnimation == "none" ? 30 : 30',
+    celExpression: '30',
 };
+
+

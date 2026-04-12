@@ -5,7 +5,7 @@ import { usePatchedProps, useStyleOverride } from '../../../patches';
 import { interpolateWithEasing } from '../../../styles';
 import { useTheme } from '../../../theme';
 import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens';
-import { Text } from '../../../core/text/Text';
+import { Text } from '../../../core/assets/Text';
 import { getEntranceTransform, ENTRANCE_ANIMATIONS, HIGHLIGHT_STYLES } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../durationTypes';
@@ -18,23 +18,6 @@ const DEFAULT_HIGHLIGHT_STYLE = 'glow' as const;
 const DEFAULT_ANIMATION = 'slideUp' as const;
 const HIGHLIGHTED_TEXT_ANIMATIONS = ['zoom', 'jump'] as const;
 const DEFAULT_HIGHLIGHTED_TEXT_ANIMATION = 'jump' as const;
-
-export const TextHighlightSchema = z.object({
-    id: z.string().optional(),
-    text: z.string().default(''),
-    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
-    highlightStyle: z.enum(HIGHLIGHT_STYLES).default(DEFAULT_HIGHLIGHT_STYLE).optional(),
-    highlightedTextAnimation: z
-        .enum(HIGHLIGHTED_TEXT_ANIMATIONS)
-        .default(DEFAULT_HIGHLIGHTED_TEXT_ANIMATION)
-        .optional(),
-    highlightColor: z.string().optional(),
-    entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
-    animationDelay: z.number().default(DEFAULT_ENTRANCE_DURATION).optional(),
-    zoomDuration: z.number().default(DEFAULT_ZOOM_DURATION).optional(),
-    className: z.string().optional(),
-    style: z.any().optional(),
-});
 
 // Use z.input for props (what callers pass) - fields with defaults are optional
 export type TextHighlightProps = z.input<typeof TextHighlightSchema>;
@@ -254,10 +237,80 @@ export const TextHighlight: React.FC<TextHighlightProps> = (propsInit: TextHighl
 // Registry Descriptor
 // ============================================================================
 
+export const TextHighlightSchema = z.object({
+    id: z.string().optional(),
+    text: z.string().default(''),
+    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
+    highlightStyle: z.enum(HIGHLIGHT_STYLES).default(DEFAULT_HIGHLIGHT_STYLE).optional(),
+    highlightedTextAnimation: z
+        .enum(HIGHLIGHTED_TEXT_ANIMATIONS)
+        .default(DEFAULT_HIGHLIGHTED_TEXT_ANIMATION)
+        .optional(),
+    highlightColor: z.string().optional(),
+    entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
+    animationDelay: z.number().default(DEFAULT_ENTRANCE_DURATION).optional(),
+    zoomDuration: z.number().default(DEFAULT_ZOOM_DURATION).optional(),
+    className: z.string().optional(),
+    style: z.any().optional(),
+});
+
+export const TextHighlightSchemaFields = [
+    {
+        "name": "text",
+        "type": "string",
+        
+        "map": "props.text"
+    },
+    {
+        "name": "variant",
+        "type": "string",
+        "subtype": "enum",
+        "default": DEFAULT_VARIANT
+    },
+    {
+        "name": "entranceAnimation",
+        "type": "string",
+        "subtype": "enum",
+        "default": DEFAULT_ANIMATION
+    },
+    {
+        "name": "animationDelay",
+        "type": "number",
+        "default": DEFAULT_ENTRANCE_DURATION
+    },
+    {
+        "name": "zoomDuration",
+        "type": "number",
+        "default": DEFAULT_ZOOM_DURATION
+    },
+    {
+        "name": "highlightStyle",
+        "type": "string",
+        "subtype": "enum",
+        "default": DEFAULT_HIGHLIGHT_STYLE
+    },
+    {
+        "name": "highlightColor",
+        "type": "string",
+        "subtype": "color",
+    }
+]
+
 export const TextHighlightDescriptor: ComponentRegistration = {
     name: 'TextHighlight',
     type: 'content',
-    fullSchema: TextHighlightSchema,
+    schema: [{
+        type: 'component',
+        name: 'texthighlight',
+        fields: TextHighlightSchemaFields
+    }],
+    llmSchema: [
+        {
+            name: 'text',
+            type: 'string',
+        }
+    ],
     description: 'Bold statement with an emphasized word/phrase. Use for key claims. Use {} to highlight. eg "We build amazing {software}"',
     celExpression: 'ceil(props.animationDelay + props.zoomDuration)',
 };
+

@@ -8,7 +8,7 @@ import { useTheme } from '../../../theme/ThemeContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
 import { resolveTypography } from '../../../tokens/resolveTypography';
-import { Text } from '../../../core/text/Text';
+import { Text } from '../../../core/assets/Text';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { DurationResult } from '../durationTypes';
 import { TEXT_CYCLE_TRANSITIONS } from '../types';
@@ -29,7 +29,7 @@ export const TextCycleSchema = z.object({
   texts: z.array(z.string()).default([]),
   holdDuration: z.number().default(DEFAULT_HOLD_DURATION).optional(),
   transitionDuration: z.number().default(DEFAULT_TRANSITION_DURATION).optional(),
-  transition: z.enum(TEXT_CYCLE_TRANSITIONS).default(DEFAULT_TRANSITION).optional(),
+  textCycleTransition: z.enum(TEXT_CYCLE_TRANSITIONS).default(DEFAULT_TRANSITION).optional(),
   variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
   style: z.any().optional(),
   className: z.string().optional(),
@@ -82,11 +82,11 @@ export const TextCycle: React.FC<TextCycleProps> = (propsInit: TextCycleProps) =
 
   const transitionProgress = isTransitioning
     ? interpolateWithEasing(
-        cycleFrame,
-        [holdDuration, holdDuration + transitionDuration],
-        [0, 1],
-        'ease-out',
-      )
+      cycleFrame,
+      [holdDuration, holdDuration + transitionDuration],
+      [0, 1],
+      'ease-out',
+    )
     : 0;
 
   // Outer container — sized by the invisible spacer (longestWord), never by
@@ -121,7 +121,7 @@ export const TextCycle: React.FC<TextCycleProps> = (propsInit: TextCycleProps) =
     whiteSpace: 'nowrap',
   };
 
-  if (props.transition === 'fadeSwap') {
+  if (props.textCycleTransition === 'fadeSwap') {
     return (
       <span id={props.id} className={props.className} style={containerStyle}>
         {/* Spacer holds the width — never visible */}
@@ -146,7 +146,7 @@ export const TextCycle: React.FC<TextCycleProps> = (propsInit: TextCycleProps) =
     );
   }
 
-  if (props.transition === 'slideUp') {
+  if (props.textCycleTransition === 'slideUp') {
     return (
       <span id={props.id} className={props.className} style={{ ...containerStyle, overflow: 'hidden' }}>
         <Text text={longestWord} variant={patchedVariant} style={spacerStyle} />
@@ -208,12 +208,58 @@ export const TextCycle: React.FC<TextCycleProps> = (propsInit: TextCycleProps) =
 
 // ============================================================================
 // Registry Descriptor
-// ============================================================================
+// ===========================================================================
+
+const TextCycleSchemaFields = [
+  {
+    "name": "texts",
+    "type": "array",
+    "subtype": "string",
+
+    "map": "props.texts"
+  },
+  {
+    "name": "variant",
+    "type": "string",
+    "subtype": "enum",
+    "default": DEFAULT_VARIANT
+  },
+  {
+    "name": "textCycleTransition",
+    "type": "string",
+    "subtype": "enum",
+    "default": DEFAULT_TRANSITION
+  },
+  {
+    "name": "holdDuration",
+    "type": "number",
+    "default": DEFAULT_HOLD_DURATION
+  },
+  {
+    "name": "transitionDuration",
+    "type": "number",
+    "default": DEFAULT_TRANSITION_DURATION
+  }
+]
+
 
 export const TextCycleDescriptor: ComponentRegistration = {
   name: 'TextCycle',
   type: 'content',
-  fullSchema: TextCycleSchema,
+  schema: [{
+    type: "component",
+    name: 'textcycle',
+    fields: TextCycleSchemaFields
+  }],
+  llmSchema: [
+    {
+      name: 'texts',
+      type: 'array',
+      "items": {
+        "type": "string"
+      }
+    }
+  ],
   description: 'rotating text strings or words. Use for taglines, feature lists, multi highlights',
   celExpression: 'ceil((props.holdDuration + props.transitionDuration) * size(props.texts))',
 };

@@ -4,81 +4,224 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/shank318/coasterai/agent/scenes/field_resolvers"
-	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/services"
-	"google.golang.org/protobuf/encoding/protojson"
-	"google.golang.org/protobuf/types/known/structpb"
+	"reflect"
 	"strings"
 )
 
-// This is what even dynamic scenes will store
-type SceneConfig struct {
-	ID       string
-	Name     string
-	Props    map[string]interface{}
-	Children []SceneConfig
+func GenerateEditsFromProps(schema []SchemaNode, input map[string]interface{}, direction field_resolvers.FieldResolverDirection, fieldValueMapper *services.MediaAssetRegistry) (map[string]interface{}, error) {
+
+	output := map[string]interface{}{}
+
+	for _, node := range schema {
+
+		switch node.Type {
+
+		case "component":
+
+			existing := getExistingNode(input, node.Name)
+
+			props, err := resolveFields(node.Fields, input, existing, nil, direction, fieldValueMapper)
+			if err != nil {
+				return nil, fmt.Errorf("failed to resolve fields for component %s: %v", node.Name, err)
+			}
+
+			output[node.Name] = props
+		case "repeat":
+
+			arr := toSlice(resolveMap(node.Map, input, nil))
+
+			// ---------- Case 1: LLM array ----------
+			if len(arr) > 0 {
+
+				for i, item := range arr {
+
+					for _, comp := range node.Components {
+
+						key := fmt.Sprintf("%s-%d", comp.Name, i)
+
+						existing := getExistingNode(input, key)
+
+						props, err := resolveFields(comp.Fields, input, existing, item, direction, fieldValueMapper)
+						if err != nil {
+							return nil, fmt.Errorf("failed to resolve fields for component %s: %v", comp.Name, err)
+						}
+
+						output[key] = props
+					}
+				}
+
+				continue
+			}
+
+			// ---------- Case 2: existing component instances ----------
+			for _, comp := range node.Components {
+
+				prefix := comp.Name + "-"
+
+				for key, value := range input {
+
+					if !strings.HasPrefix(key, prefix) {
+						continue
+					}
+
+					existing, _ := value.(map[string]interface{})
+
+					props, err := resolveFields(comp.Fields, input, existing, nil, direction, fieldValueMapper)
+					if err != nil {
+						return nil, fmt.Errorf("failed to resolve fields for component %s: %v", comp.Name, err)
+					}
+
+					output[key] = props
+				}
+			}
+		}
+	}
+
+	return output, nil
 }
 
-func (s SceneConfig) ToEditsPatch() json.RawMessage {
-	patch := make(map[string]map[string]interface{})
+func resolveFields(
+	fields []FieldSchema,
+	input map[string]interface{},
+	existing map[string]interface{},
+	item interface{},
+	direction field_resolvers.FieldResolverDirection,
+	fieldValueMapper *services.MediaAssetRegistry,
+) (map[string]interface{}, error) {
 
-	var walk func(SceneConfig)
-	walk = func(node SceneConfig) {
-		if node.ID != "" {
-			patch[node.ID] = node.Props
+	out := map[string]interface{}{}
+
+	// preserve unknown existing fields
+	for k, v := range existing {
+		out[k] = v
+	}
+
+	for _, f := range fields {
+
+		var value interface{}
+
+		// 1️⃣ existing patch value
+		if v, ok := existing[f.Name]; ok {
+			value = v
 		}
 
-		for _, child := range node.Children {
-			walk(child)
+		// 2️⃣ mapped value
+		if value == nil && f.Map != "" {
+			v := resolveMap(f.Map, input, item)
+			if v != nil {
+				value = v
+			}
+		}
+
+		// 3️⃣ default
+		if value == nil && f.Default != nil {
+			value = f.Default
+		}
+
+		// 4️⃣ apply forward mapper
+		if value != nil && f.DataType != "" {
+
+			var err error
+
+			switch direction {
+			case field_resolvers.FieldResolverForward:
+				value, err = field_resolvers.FieldMappings.ResolveForward(
+					f.DataType,
+					value,
+					fieldValueMapper,
+				)
+
+			case field_resolvers.FieldResolverReverse:
+				value, err = field_resolvers.FieldMappings.ResolveReverse(
+					f.DataType,
+					value,
+					fieldValueMapper,
+				)
+			}
+
+			if err != nil {
+				return nil, fmt.Errorf(
+					"unable to resolve data type %s: %w",
+					f.DataType,
+					err,
+				)
+			}
+		}
+
+		if value != nil {
+			out[f.Name] = value
 		}
 	}
 
-	walk(s)
-
-	data, _ := json.Marshal(patch)
-	return data
+	return out, nil
 }
 
-// Convert edits to scene parent only
-func EditsToScene(edits *structpb.Struct, fieldValueMapper *services.MediaAssetRegistry) (*types.Scene, error) {
-	if edits == nil {
-		return nil, nil
+func resolveMap(path string, input map[string]interface{}, item interface{}) interface{} {
+
+	if path == "item" {
+		return item
 	}
 
-	// Convert protobuf Struct → JSON
-	jsonBytes, err := protojson.Marshal(edits)
-	if err != nil {
-		return nil, err
+	if strings.HasPrefix(path, "props.") {
+		return getNested(input, strings.TrimPrefix(path, "props."))
 	}
 
-	nodes, err := ParseSceneConfigFromEditsPatch(jsonBytes, fieldValueMapper)
-	if err != nil {
-		return nil, err
+	if strings.HasPrefix(path, "item.") {
+
+		obj, ok := item.(map[string]interface{})
+		if !ok {
+			return nil
+		}
+
+		return getNested(obj, strings.TrimPrefix(path, "item."))
 	}
 
-	if len(nodes) == 0 {
-		return nil, fmt.Errorf("invalid scene patch, length of nodes is zero")
+	return nil
+}
+
+func getNested(m map[string]interface{}, path string) interface{} {
+
+	parts := strings.Split(path, ".")
+	var cur interface{} = m
+
+	for _, p := range parts {
+
+		obj, ok := cur.(map[string]interface{})
+		if !ok {
+			return nil
+		}
+
+		cur = obj[p]
 	}
 
-	// Convert to scene, skipping child nodes are they are already part of the scene
-	node := nodes[0]
+	return cur
+}
 
-	marshal, err := json.Marshal(node.Props)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal node props: %w", err)
+func getExistingNode(input map[string]interface{}, name string) map[string]interface{} {
+
+	if v, ok := input[name].(map[string]interface{}); ok {
+		return v
 	}
 
-	elements := make([]types.SceneElement, 0)
-	elements = append(elements, types.SceneElement{
-		Component: node.Name,
-		Props:     string(marshal),
-		Children:  nil,
-	})
+	return map[string]interface{}{}
+}
 
-	// Call your existing parser
-	return &types.Scene{
-		Elements: elements,
-	}, nil
+func toSlice(v interface{}) []interface{} {
+
+	rv := reflect.ValueOf(v)
+
+	if rv.Kind() != reflect.Slice {
+		return nil
+	}
+
+	out := make([]interface{}, rv.Len())
+
+	for i := 0; i < rv.Len(); i++ {
+		out[i] = rv.Index(i).Interface()
+	}
+
+	return out
 }
 
 func ParseSceneConfigFromEditsPatch(data []byte, fieldValueMapper *services.MediaAssetRegistry) ([]SceneConfig, error) {
@@ -108,16 +251,15 @@ func ParseSceneConfigFromEditsPatch(data []byte, fieldValueMapper *services.Medi
 				return nil, fmt.Errorf("failed to unmarshal props %s: %w", key, err)
 			}
 
-			name := GetComponentName(parts[0])
+			name := "GetComponentName(parts[0])"
 			if name == "" {
 				return nil, fmt.Errorf("invalid component name: %s", parts[0])
 			}
 
 			nodes[key] = &SceneConfig{
-				ID:       key,
-				Name:     name,
-				Props:    props,
-				Children: nil,
+				ID:    key,
+				Name:  name,
+				Props: props,
 			}
 		}
 	}
