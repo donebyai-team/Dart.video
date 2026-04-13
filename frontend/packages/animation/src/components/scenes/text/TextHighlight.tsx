@@ -18,7 +18,7 @@ export const TextHighlightDefaults = {
     variant: 'heading' as TypographyVariant,
     highlightStyle: 'glow' as HighlightStyle,
     highlightedTextAnimation: 'jump' as HighlightedTextAnimation,
-    highlightColor: undefined as string | undefined,
+    highlightColor: '',
     entranceAnimation: 'slideUp' as EntranceAnimation,
     animationDelay: 30,
     zoomDuration: 30,
@@ -38,7 +38,7 @@ export const TextHighlight: React.FC<TextHighlightProps> = () => {
     const actualVariant = props.variant;
     const actualHighlightStyle = props.highlightStyle;
     const actualHighlightedTextAnimation = props.highlightedTextAnimation;
-    const actualHighlightColor = props.highlightColor ?? theme.colors.primary;
+    const actualHighlightColor = props.highlightColor || theme.colors.primary;
     const actualAnimation = props.entranceAnimation;
     const actualAnimationDelay = props.animationDelay;
     const actualZoomDuration = props.zoomDuration;
