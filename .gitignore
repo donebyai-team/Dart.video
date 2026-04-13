@@ -34,3 +34,4 @@ redora
 **/remotion-ui/
 **/generated/
 **/prompt_generator/prompts/
+.gomodcache/

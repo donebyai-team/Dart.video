@@ -164,7 +164,7 @@
             }
           ],
           "description": "Counting metric with label text. Use for stats and KPIs",
-          "celExpression": "ceil(props.animationDelay + max(45, min(100, log10(abs(props.to - props.from) + 1) * 20)))"
+          "celExpression": "ceil(props.animatednumber.animationDelay + max(45, min(100, log10(abs(props.animatednumber.to - props.animatednumber.from) + 1) * 20)))"
         },
         {
           "name": "TextStagger",
@@ -217,7 +217,7 @@
             }
           ],
           "description": "Reveals text word-by-word or character-by-character with staggered animation delays. Use for multi-word headlines or body text. Required props: text=\"Transform your workflow with AI\". Each unit animates in sequence with configurable delay. Set splitBy=\"char\" for character-level animation.",
-          "celExpression": "ceil((size(props.splitBy == \"char\" ? props.text.split(\"\") : props.splitBy == \"line\" ? props.text.split(\"\\n\") : props.text.split(\" \")) - 1) * props.staggerDelay + props.duration)"
+          "celExpression": "ceil((size(props.textstagger.splitBy == \"char\" ? props.textstagger.text.split(\"\") : props.textstagger.splitBy == \"line\" ? props.textstagger.text.split(\"\\n\") : props.textstagger.text.split(\" \")) - 1) * props.textstagger.staggerDelay + props.textstagger.duration)"
         },
         {
           "name": "Typewriter",
@@ -266,7 +266,7 @@
             }
           ],
           "description": "Character-by-character text reveal. Use for dramatic reveals or code/terminal effects.",
-          "celExpression": "max(30, props.splitBy == \"char\" ? size(props.text) * 2 : props.splitBy == \"word\" ? size(props.text.split(\" \")) * 9 : size(props.text.split(\"\\n\")) * 18)"
+          "celExpression": "max(30, props.typewriter.splitBy == \"char\" ? size(props.typewriter.text) * 2 : props.typewriter.splitBy == \"word\" ? size(props.typewriter.text.split(\" \")) * 9 : size(props.typewriter.text.split(\"\\n\")) * 18)"
         },
         {
           "name": "TextHighlight",
@@ -330,7 +330,7 @@
             }
           ],
           "description": "Bold statement with an emphasized word/phrase. Use for key claims. Use {} to highlight. eg \"We build amazing {software}\"",
-          "celExpression": "ceil(props.animationDelay + props.zoomDuration)"
+          "celExpression": "ceil(props.texthighlight.animationDelay + props.texthighlight.zoomDuration)"
         },
         {
           "name": "TextCycle",
@@ -381,7 +381,7 @@
             }
           ],
           "description": "rotating text strings or words. Use for taglines, feature lists, multi highlights",
-          "celExpression": "ceil((props.holdDuration + props.transitionDuration) * size(props.texts))"
+          "celExpression": "ceil((props.textcycle.holdDuration + props.textcycle.transitionDuration) * size(props.textcycle.texts))"
         },
         {
           "name": "TextWithWordCycle",
@@ -443,7 +443,7 @@
             }
           ],
           "description": "Static text with cycling highlighted words at the end. Use for dynamic taglines like \"We build amazing [software/products/solutions]\"",
-          "celExpression": "ceil((props.holdDuration + props.transitionDuration) * size(props.cyclingWords))"
+          "celExpression": "ceil((props.textwithwordcycle.holdDuration + props.textwithwordcycle.transitionDuration) * size(props.textwithwordcycle.cyclingWords))"
         },
         {
           "name": "AnimatedImage",
@@ -665,7 +665,7 @@
             }
           ],
           "description": "Images peel away one by one. Use for before/after or variations. Min 2 images.",
-          "celExpression": "ceil(30 + size(props.array) * (props.scene.holdDuration + props.scene.peelDuration))"
+          "celExpression": "ceil(30 + size(props.images) * (props.scene.holdDuration + props.scene.peelDuration))"
         },
         {
           "name": "LogoAsset",
@@ -786,7 +786,7 @@
             }
           ],
           "description": "Row of logos + caption. Use for integrations, tech stack, partners, brands. eg. logos=[\"url1\", \"url2\"], text=\"caption text\".",
-          "celExpression": "ceil((size(props.textstagger.text.split(\"\\n\")) - 1) * 10 + 20 + (size(props.array) - 1) * 5 + 12)"
+          "celExpression": "ceil((size(props.textstagger.text.split(\"\\n\")) - 1) * 10 + 20 + (size(props.logos) - 1) * 5 + 12)"
         },
         {
           "name": "LogoWithBrandName",
@@ -957,7 +957,7 @@
             }
           ],
           "description": "Row of icons + caption. Use for integrations, tech stack, partners, brands. eg. icons={[\"shopify\", \"midjourney\", \"openai\"]}, text=\"caption text\".",
-          "celExpression": "ceil(10 + (size(props.array) - 1) * 5 + 10 + 5 + 15 + (size(props.textstagger.text.trim().split(\" \")) - 1) * 5 + 15)"
+          "celExpression": "ceil(10 + (size(props.icons) - 1) * 5 + 10 + 5 + 15 + (size(props.textstagger.text.trim().split(\" \")) - 1) * 5 + 15)"
         }
       ]
     }

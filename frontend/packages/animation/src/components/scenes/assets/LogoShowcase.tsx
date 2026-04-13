@@ -179,6 +179,6 @@ export const LogoShowcaseDescriptor: ComponentRegistration = {
         },
     ],
     description: 'Row of logos + caption. Use for integrations, tech stack, partners, brands. eg. logos=["url1", "url2"], text="caption text".',
-    celExpression: 'ceil((size(props.textstagger.text.split("\\n")) - 1) * 10 + 20 + (size(props.array) - 1) * 5 + 12)',
+    celExpression: 'ceil((size(props.textstagger.text.split("\\n")) - 1) * 10 + 20 + (size(props.logos) - 1) * 5 + 12)',
 };
 

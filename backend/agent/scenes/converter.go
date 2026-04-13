@@ -13,10 +13,11 @@ import (
 
 // This is what even dynamic scenes will store
 type SceneConfig struct {
-	ID       string
-	Name     string
-	Props    map[string]interface{}
-	Children []SceneConfig
+	ID                 string
+	Name               string
+	Props              map[string]interface{}
+	DurationExpression string
+	Children           []SceneConfig
 }
 
 // Convert the LLM generated scene to internal config
@@ -43,9 +44,10 @@ func ConvertToSceneConfig(scene *types.Scene, fieldValueMapper *services.MediaAs
 	}
 
 	cfg := SceneConfig{
-		ID:    strings.ToLower(component.Name),
-		Name:  component.Name,
-		Props: finalProps,
+		ID:                 strings.ToLower(component.Name),
+		Name:               component.Name,
+		DurationExpression: component.CELExpression,
+		Props:              finalProps,
 	}
 
 	//for _, child := range e.Children {
@@ -144,6 +146,7 @@ func sceneConfigFromPatch(data []byte, fieldValueMapper *services.MediaAssetRegi
 	}
 
 	cfg.Props = finalProps
+	cfg.DurationExpression = component.CELExpression
 
 	return cfg, nil
 }

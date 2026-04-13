@@ -300,5 +300,5 @@ export const TextHighlightDescriptor: ComponentRegistration = {
         }
     ],
     description: 'Bold statement with an emphasized word/phrase. Use for key claims. Use {} to highlight. eg "We build amazing {software}"',
-    celExpression: 'ceil(props.animationDelay + props.zoomDuration)',
+    celExpression: 'ceil(props.texthighlight.animationDelay + props.texthighlight.zoomDuration)',
 };

@@ -23,7 +23,7 @@ func TestConvertSceneToSceneConfig(t *testing.T) {
 			  "elements": [
 				{
 				  "component": "IconShowcase",
-				  "props": "{\n  \"iconasset-0\": { \"icon\": \"openai\", \"style\": {\"color\": \"#000\"} },\n  \"textstagger-0\": { \"text\": \"AI models\" },\n  \"iconasset-1\": { \"icon\": \"google\" },\n  \"textstagger-1\": { \"text\": \"Search APIs\" }\n}",
+				  "props": "{\n  \"iconasset-icons-0\": { \"icon\": \"openai\", \"style\": {\"color\": \"#000\"} },\n  \"textstagger\": { \"text\": \"AI models\" },\n  \"iconasset-icons-1\": { \"icon\": \"google\" }\n}",
 				  "children": []
 				}
 			  ]
@@ -32,14 +32,14 @@ func TestConvertSceneToSceneConfig(t *testing.T) {
   "ID": "iconshowcase",
   "Name": "IconShowcase",
   "Props": {
-    "iconasset-0": {
+    "iconasset-icons-0": {
       "icon": "https://www.thesvg.org/icons/openai/light.svg",
       "size": 90,
       "style": {
         "color": "#000"
       }
     },
-    "iconasset-1": {
+    "iconasset-icons-1": {
       "icon": "https://www.thesvg.org/icons/google/color.svg",
       "size": 90
     },
@@ -54,7 +54,7 @@ func TestConvertSceneToSceneConfig(t *testing.T) {
   "Children": null
 }`,
 			expectJSX:    []string{"<IconShowcase"},
-			editsToScene: []string{"openai", "google", "textstagger", "iconasset-1", "iconasset-0"},
+			editsToScene: []string{"openai", "google", "textstagger", "iconasset-icons-1", "iconasset-icons-0"},
 		},
 		{
 			name: "icon showcase LLM props",
@@ -71,11 +71,11 @@ func TestConvertSceneToSceneConfig(t *testing.T) {
   "ID": "iconshowcase",
   "Name": "IconShowcase",
   "Props": {
-    "iconasset-0": {
+    "iconasset-icons-0": {
       "icon": "https://www.thesvg.org/icons/openai/light.svg",
       "size": 90
     },
-    "iconasset-1": {
+    "iconasset-icons-1": {
       "icon": "https://www.thesvg.org/icons/google/color.svg",
       "size": 90
     },
@@ -91,7 +91,7 @@ func TestConvertSceneToSceneConfig(t *testing.T) {
   "Children": null
 }`,
 			expectJSX:    []string{"<IconShowcase"},
-			editsToScene: []string{"openai", "google", "textstagger", "iconasset-1", "iconasset-0"},
+			editsToScene: []string{"openai", "google", "textstagger", "iconasset-icons-1", "iconasset-icons-0"},
 		},
 	}
 

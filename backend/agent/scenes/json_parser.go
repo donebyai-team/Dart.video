@@ -37,7 +37,7 @@ func GenerateEditsFromProps(schema []SchemaNode, input map[string]interface{}, d
 
 					for _, comp := range node.Components {
 
-						key := fmt.Sprintf("%s-%d", comp.Name, i)
+						key := fmt.Sprintf("%s-%s-%d", comp.Name, node.Source, i)
 
 						existing := getExistingNode(input, key)
 
@@ -56,7 +56,7 @@ func GenerateEditsFromProps(schema []SchemaNode, input map[string]interface{}, d
 			// ---------- Case 2: existing component instances ----------
 			for _, comp := range node.Components {
 
-				prefix := comp.Name + "-"
+				prefix := comp.Name + "-" + node.Source + "-"
 
 				for key, value := range input {
 

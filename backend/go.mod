@@ -38,11 +38,11 @@ require (
 	go.uber.org/dig v1.18.0
 	go.uber.org/multierr v1.11.0
 	go.uber.org/zap v1.26.0
-	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
+	golang.org/x/exp v0.0.0-20240823005443-9b4947da3948
 	golang.org/x/oauth2 v0.28.0
 	golang.org/x/time v0.9.0 // indirect
 	google.golang.org/grpc v1.70.0
-	google.golang.org/protobuf v1.36.6
+	google.golang.org/protobuf v1.36.10
 )
 
 //replace github.com/tmc/langchaingo => github.com/streamingfast/langchaingo v0.1.9-0.20241203182852-7b3db2b92bc1
@@ -53,13 +53,14 @@ require (
 	cloud.google.com/go/storage v1.50.0
 	github.com/abema/go-mp4 v1.5.0
 	github.com/boundaryml/baml v0.220.0
+	github.com/google/cel-go v0.28.0
 	github.com/hashicorp/go-retryablehttp v0.7.8
 	github.com/streamingfast/dstore v0.1.2
 	golang.org/x/image v0.0.0-20190802002840-cff245a6509b
 )
 
 require (
-	cel.dev/expr v0.19.0 // indirect
+	cel.dev/expr v0.25.1 // indirect
 	cloud.google.com/go v0.118.1 // indirect
 	cloud.google.com/go/auth v0.14.0 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.7 // indirect
@@ -81,6 +82,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.3.0 // indirect
 	github.com/Masterminds/sprig/v3 v3.3.0 // indirect
 	github.com/abice/go-enum v0.9.2 // indirect
+	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
 	github.com/aws/aws-sdk-go v1.49.6 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.32.6 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.7 // indirect

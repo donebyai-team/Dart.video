@@ -2,14 +2,11 @@ package agent
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/pkg/errors"
 	"github.com/shank318/coasterai/agent/agenterrors"
 	"github.com/shank318/coasterai/agent/llm"
 	"github.com/shank318/coasterai/agent/scenes"
-	"github.com/shank318/coasterai/baml_client"
 	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
@@ -115,13 +112,6 @@ func (l *codeGenerator) GenerateCodeFromScene(ctx context.Context, scene *scenes
 		})
 
 		l.logger.Info("generating code")
-		//generatedAnimation, err := l.llmService.GenerateAnimationCodeV2(ctx, inptCodeGeneration, conversationHistory, func(thinking string) {
-		//
-		//})
-		//if err != nil {
-		//	return nil, agenterrors.AnimationGenerationFailed("failed to generate animation", err)
-		//}
-
 		generatedAnimation, err := scenes.RenderJSXCodeFromSceneConfig(scene)
 		if err != nil {
 			return nil, agenterrors.AnimationGenerationFailed("failed to generate animation", err)
@@ -151,6 +141,9 @@ func (l *codeGenerator) GenerateCodeFromScene(ctx context.Context, scene *scenes
 		if err == nil {
 			// Override the patch, we later remove it from validator
 			template.GeneratedPatches = scene.ToEditsPatch()
+			template.Config.VisibleDurationInFrames = scene.ComputeDurationFrames()
+			template.Config.TotalDurationInFrames = scene.ComputeDurationFrames()
+
 			//diff := math.Abs(float64(generatedAnimation.SettledFrame) - float64(template.Config.VisibleDuration))
 			//if diff > 30 {
 			//	l.logger.Info("difference between llm and computed settledFrame is more than 30",
@@ -169,13 +162,6 @@ func (l *codeGenerator) GenerateCodeFromScene(ctx context.Context, scene *scenes
 			//}
 			//template.Config.VisibleDuration = template.Config.VisibleDuration
 			//template.Config.TotalDuration = generatedAnimation.SettledFrame
-
-			if template.Config.VisibleDurationInFrames == 0 {
-				template.Config.VisibleDurationInFrames = 40
-			}
-			if template.Config.TotalDurationInFrames == 0 {
-				template.Config.TotalDurationInFrames = 40
-			}
 
 			return template, nil
 		}
@@ -275,127 +261,6 @@ func (l *codeGenerator) loadExistingCode(
 	return indentCode(code), nil
 }
 
-func (l *codeGenerator) tryTargetedEdits(
-	ctx context.Context,
-	code string,
-	prompt string,
-	callback TemplateGenerationCallback,
-) (*models.Template, error) {
-
-	input := types.EditAnimationCodeRequest{
-		Code:   code,
-		Prompt: prompt,
-	}
-
-	conversationHistory := []types.Message{}
-
-	for attempt := 0; attempt < maxAttempts; attempt++ {
-
-		l.logger.Info("trying targeted edits", zap.Int("attempt", attempt))
-		response, err := baml_client.EditAnimationCode(ctx, input, conversationHistory)
-		if err != nil {
-			return nil, agenterrors.EditAnimationCodeFailed("failed to edit animation", err)
-		}
-
-		if response.Type != types.AnimationCodeEditTypeTARGETED_EDITS {
-			return nil, fmt.Errorf("model switched to regeneration")
-		}
-
-		if len(response.Edits) == 0 {
-			return nil, agenterrors.NoEditsApplied("no reasonable edits applied", nil)
-		}
-
-		newCode, retryReason := applyEdits(code, response.Edits)
-
-		if retryReason != "" {
-			l.logger.Error("failed to apply edits, trying again",
-				zap.String("error", retryReason),
-				zap.Int("attempt_left", maxAttempts-attempt))
-
-			conversationHistory = appendRetryConversation(
-				conversationHistory,
-				stringify(response),
-				retryReason,
-			)
-			continue
-		}
-
-		code = newCode
-		codeFilePath := fmt.Sprintf(
-			"templates/generated/%s/%s/%s",
-			l.orgID,
-			l.sessionID,
-			l.slideID,
-		)
-
-		template, buildErr := l.uploadAndBuild(
-			ctx,
-			code,
-			codeFilePath,
-			attempt,
-			callback,
-		)
-
-		if buildErr == nil {
-			return template, nil
-		}
-
-		var buildError *services.BuildError
-		if errors.As(buildErr, &buildError) {
-			conversationHistory = appendRetryConversation(
-				conversationHistory,
-				stringify(response),
-				buildFailureMessage(buildError),
-			)
-
-			l.logger.Error("failed to build animation",
-				zap.Int("attempt_left", maxAttempts-attempt),
-				zap.Error(buildErr))
-
-			callback(TemplateGenerationProgress{
-				Message: CreativeStageMessage(StageRefining, attempt),
-			})
-
-			continue
-		}
-
-		return nil, buildErr
-	}
-
-	return nil, fmt.Errorf("targeted edit attempts exhausted")
-}
-
-func applyEdits(code string, edits []types.EditString) (string, string) {
-	for _, edit := range edits {
-
-		oldStr := strings.TrimSpace(edit.OldString)
-		newStr := strings.TrimSpace(edit.NewString)
-
-		if oldStr == "" || newStr == "" {
-			return code, "one of the suggested edit string is empty"
-		}
-
-		if !strings.Contains(code, oldStr) {
-			return code, fmt.Sprintf(
-				"oldString not found in code: %s",
-				oldStr,
-			)
-		}
-
-		code = strings.ReplaceAll(code, oldStr, newStr)
-	}
-
-	return code, ""
-}
-
-func stringify(v any) string {
-	b, err := json.MarshalIndent(v, "", "  ")
-	if err != nil {
-		return fmt.Sprintf("%v", v)
-	}
-	return string(b)
-}
-
 func (l *codeGenerator) uploadAndBuild(
 	ctx context.Context,
 	code string,
@@ -411,38 +276,37 @@ func (l *codeGenerator) uploadAndBuild(
 	callback(TemplateGenerationProgress{
 		Message: CreativeStageMessage(StageBuilding, attempt),
 	})
-	buildOutput, err := l.codeBuilder.ValidateAndBuild(ctx, &services.ValidateAndBuildInput{
-		Code:       code,
-		OutputPath: codeFilePath,
-	})
+	//buildOutput, err := l.codeBuilder.ValidateAndBuild(ctx, &services.ValidateAndBuildInput{
+	//	Code:       code,
+	//	OutputPath: codeFilePath,
+	//})
+	//
+	//if err != nil {
+	//	return nil, fmt.Errorf("failed to build animation: %w", err)
+	//}
+	assetID := uuid.New().String()
+	codeFilePath = fmt.Sprintf("%s/%s", codeFilePath, assetID)
 
+	uploadCodeAsset, err := l.mediaStore.UploadCode(ctx, codeFilePath, code)
 	if err != nil {
-		return nil, fmt.Errorf("failed to build animation: %w", err)
+		return nil, err
 	}
 
 	l.logger.Info("uploaded generated code",
-		zap.String("transformed_url", buildOutput.TransformedCodePath),
-		zap.String("assigned_ids_url", buildOutput.CodeWithAssignedIdsPath))
+		zap.String("assigned_ids_url", uploadCodeAsset.Url))
 
 	callback(TemplateGenerationProgress{
 		Message: CreativeStageMessage(StageReady, attempt),
 	})
 
 	return &models.Template{
-		ID:   uuid.New().String(),
-		Name: buildOutput.ComponentName,
+		ID: assetID,
 		Config: &models.TemplateConfig{
 			CodeRegistry: &pbcore.CodeRegistry{
-				MUrl: buildOutput.CodeWithAssignedIdsPath,
-				TUrl: buildOutput.TransformedCodePath,
+				MUrl: uploadCodeAsset.Url,
 			},
-			VisibleDurationInFrames: buildOutput.CodeDuration.SettledFrame,
-			TotalDurationInFrames:   buildOutput.CodeDuration.DurationInFrames,
-			Repeatable:              false,
-			Categories:              nil,
 		},
-		Repeatable:       false,
-		GeneratedPatches: buildOutput.Registry,
+		Repeatable: false,
 	}, nil
 }
 
