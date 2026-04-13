@@ -189,7 +189,7 @@ func validateSlideAnimation(content *pbcore.AnimationSlideContent) error {
 		return fmt.Errorf("content is nil")
 	}
 
-	if content.CodeRegistry == nil || content.CodeRegistry.TUrl == "" || content.CodeRegistry.MUrl == "" {
+	if content.CodeRegistry == nil || content.CodeRegistry.MUrl == "" {
 		return fmt.Errorf("code registry can't be empty")
 	}
 
