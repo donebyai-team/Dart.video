@@ -21,6 +21,7 @@ import {
   getElementTypeFromId,
   type PatchOverlay,
 } from '@coasterai/renderer'
+import { ArrayControlButton } from './ArrayControlButton'
 
 interface FRect { left: number; top: number; width: number; height: number }
 
@@ -41,6 +42,7 @@ interface AnimationEditLayerProps {
   animEditVersion?: number
   onSelectElement: (eid: string | null) => void
   onValuePatch: (id: string, prop: string, value: unknown) => void
+  onArrayPatch: (source: string, next: Record<string, any>[]) => void
   onStyleOverride: (id: string, style: Record<string, string | number>) => void
 }
 
@@ -51,6 +53,7 @@ export function AnimationEditLayer({
   animEditVersion,
   onSelectElement,
   onValuePatch,
+  onArrayPatch,
   onStyleOverride,
 }: AnimationEditLayerProps) {
   const toolbarRef = useRef<HTMLDivElement>(null)
@@ -63,12 +66,12 @@ export function AnimationEditLayer({
 
   function supportsToolbar(id: string): boolean {
     const lowerId = id.toLowerCase()
-    return lowerId.includes('text') || 
-    lowerId.includes('icon') || 
-    lowerId.includes('counter') ||
-    lowerId.includes('typewriter') ||
-    lowerId.includes('image') ||
-    lowerId.includes('video')
+    return lowerId.includes('text') ||
+      lowerId.includes('icon') ||
+      lowerId.includes('counter') ||
+      lowerId.includes('typewriter') ||
+      lowerId.includes('image') ||
+      lowerId.includes('video')
   }
 
   // TODO: add it for all text components
@@ -185,6 +188,40 @@ export function AnimationEditLayer({
     return hits
   }
 
+  type ControlPosition =
+    | 'corner-top-left' | 'corner-top-right'
+    | 'corner-bottom-left' | 'corner-bottom-right'
+    | 'mid-top' | 'mid-right' | 'mid-bottom' | 'mid-left'
+
+  function resolveControlPosition(rect: DOMRect, position: ControlPosition) {
+    switch (position) {
+      case 'corner-top-left': return { top: rect.top - 12, left: rect.left - 12 }
+      case 'corner-top-right': return { top: rect.top - 12, left: rect.right - 12 }
+      case 'corner-bottom-left': return { top: rect.bottom - 12, left: rect.left - 12 }
+      case 'corner-bottom-right': return { top: rect.bottom - 12, left: rect.right - 12 }
+      case 'mid-top': return { top: rect.top - 12, left: rect.left + rect.width / 2 - 12 }
+      case 'mid-right': return { top: rect.top + rect.height / 2 - 12, left: rect.right - 12 }
+      case 'mid-bottom': return { top: rect.bottom - 12, left: rect.left + rect.width / 2 - 12 }
+      case 'mid-left': return { top: rect.top + rect.height / 2 - 12, left: rect.left - 12 }
+    }
+  }
+
+  function handleArrayAdd(meta: any) {
+    const { index, source, array } = meta
+    const next = [
+      ...array.slice(0, index + 1),
+      { ...array[index] },
+      ...array.slice(index + 1),
+    ]
+    onArrayPatch(source, next)
+  }
+
+  function handleArrayRemove(meta: any) {
+    const { index, source, array } = meta
+    const next = array.filter((_: any, i: number) => i !== index)
+    onArrayPatch(source, next)
+  }
+
   const {
     dragStateRef,
     suppressClickRef,
@@ -194,6 +231,7 @@ export function AnimationEditLayer({
     handlePointerDown,
     handlePointerMove,
     handlePointerEnd,
+    hoveredArrayEl,
   } = usePrimitiveDrag({
     playerRef,
     overlay,
@@ -364,6 +402,33 @@ export function AnimationEditLayer({
           }}
         />
       )}
+
+      {/* Array item controls */}
+      {hoveredArrayEl && (() => {
+        const meta = (hoveredArrayEl as any).__arrayMeta
+        if (!meta) return null
+        const rect = hoveredArrayEl.getBoundingClientRect()
+        const removePos = resolveControlPosition(rect, meta.removeControl ?? 'corner-top-right')
+        const addPos = resolveControlPosition(rect, meta.addControl ?? 'mid-right')
+
+        return (
+          <>
+            {meta.array.length > 1 && (
+              <div style={{ position: 'fixed', top: removePos.top, left: removePos.left, zIndex: 50, pointerEvents: 'all' }}>
+                <ArrayControlButton onClick={() => handleArrayRemove(meta)}>
+                  ×
+                </ArrayControlButton>
+              </div>
+            )}
+
+            <div style={{ position: 'fixed', top: addPos.top, left: addPos.left, zIndex: 50, pointerEvents: 'all' }}>
+              <ArrayControlButton onClick={() => handleArrayAdd(meta)}>
+                +
+              </ArrayControlButton>
+            </div>
+          </>
+        )
+      })()}
 
       {/* Plain Text resize handle */}
       {elementRect && selectedEid && isPlainTextElement(selectedEid) && (

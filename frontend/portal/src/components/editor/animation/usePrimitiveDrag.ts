@@ -48,6 +48,7 @@ interface UsePrimitiveDragResult {
   handlePointerDown: (e: React.PointerEvent<HTMLDivElement>) => void
   handlePointerMove: (e: React.PointerEvent<HTMLDivElement>) => void
   handlePointerEnd: (e: React.PointerEvent<HTMLDivElement>) => void
+  hoveredArrayEl: Element | null
 }
 
 function composePreviewTransform(dragX: number, dragY: number, baseTransform: string): string {
@@ -94,6 +95,8 @@ export function usePrimitiveDrag({
   const suppressClickRef = useRef(false)
   const pointerSelectedIdRef = useRef<string | null>(null)
   const [hoverCursor, setHoverCursor] = useState<OverlayCursor>('default')
+  const [hoveredArrayEl, setHoveredArrayEl] = useState<Element | null>(null)
+  const hoveredArrayElRef = useRef<Element | null>(null)
 
   function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
     const hits = selectableStackAtPoint(e.clientX, e.clientY, e.currentTarget)
@@ -140,7 +143,21 @@ export function usePrimitiveDrag({
     if (!dragState || dragState.pointerId !== e.pointerId) {
       const hits = selectableStackAtPoint(e.clientX, e.clientY, e.currentTarget)
       setHoverCursor(getCursorForHits(hits))
+
+      e.currentTarget.style.pointerEvents = 'none'
+      const el = document.elementFromPoint(e.clientX, e.clientY)
+      e.currentTarget.style.pointerEvents = 'auto'
+
+      const arrayEl = el?.closest('[data-array-index]') ?? null
+      hoveredArrayElRef.current = arrayEl
+      setHoveredArrayEl(arrayEl)
+
       return
+    }
+
+    // drag branch — force re-render so buttons follow
+    if (hoveredArrayElRef.current) {
+      setHoveredArrayEl(prev => prev)
     }
 
     const deltaX = (e.clientX - dragState.startClientX) * dragState.scaleX
@@ -185,5 +202,6 @@ export function usePrimitiveDrag({
     handlePointerDown,
     handlePointerMove,
     handlePointerEnd,
+    hoveredArrayEl,
   }
 }

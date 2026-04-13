@@ -16,7 +16,7 @@ export const TextCycleDefaults = {
   holdDuration: 20,
   transitionDuration: 5,
   textCycleTransition: 'slideUp' as TextCycleTransition,
-  variant: 'displayXl' as TypographyVariant,
+  variant: 'heading' as TypographyVariant,
   style: undefined as React.CSSProperties | undefined,
   className: undefined as string | undefined,
 };

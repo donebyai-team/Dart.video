@@ -8,6 +8,7 @@ import type { ComponentRegistration } from '../../../registry/registry';
 import { interpolateWithEasing } from '../../../styles';
 import { TextStagger, TextStaggerProps, TextStaggerSchemaFields } from '../text/TextStagger';
 import { ENTRANCE_ANIMATIONS } from '../types';
+import { ArrayItem } from '../../../core/assets/ArrayItem';
 
 const DEFAULT_TEXT_ENTRANCE_DURATION = 5;
 const DEFAULT_LOGO_STAGGER = 5;
@@ -41,7 +42,7 @@ export type LogoShowcaseProps = z.input<typeof LogoShowcaseSchema>;
 export const LogoShowcase: React.FC = () => {
     const parentProps = usePatchedProps("scene", {});
     const textProps = usePatchedProps("textstagger", {}) as TextStaggerProps;
-    const arrayProps = useArrayPatch("logoasset-logos");
+    const arrayProps = useArrayPatch("logos");
 
     const frame = useCurrentFrame();
 
@@ -103,30 +104,40 @@ export const LogoShowcase: React.FC = () => {
                     const translateY = interpolateWithEasing(logoProgress, [0, 1], [24, 0]);
                     const scale = interpolateWithEasing(logoProgress, [0, 1], [0.9, 1]);
 
+
+
                     return (
-                        <div
-                            key={`${index}`}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                flex: `0 0 ${slotLayout.width}px`,
-                                width: slotLayout.width,
-                                height: slotLayout.height,
-                                padding: slotLayout.padding,
-                                boxSizing: 'border-box',
-                                opacity,
-                                transform: `translateY(${translateY}px) scale(${scale})`,
-                            }}
+                        <ArrayItem
+                            key={eid}
+                            index={index}
+                            source="logos"
+                            removeControl="mid-left"
+                            addControl="mid-right"
                         >
-                            <LogoAsset
-                                id={eid}
-                                src={patch.src}
-                                width={slotLayout.width - slotLayout.padding * 2}
-                                height={slotLayout.height - slotLayout.padding * 2}
-                                logoAnimation="none"
-                            />
-                        </div>
+                            <div
+                                key={`${index}`}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    flex: `0 0 ${slotLayout.width}px`,
+                                    width: slotLayout.width,
+                                    height: slotLayout.height,
+                                    padding: slotLayout.padding,
+                                    boxSizing: 'border-box',
+                                    opacity,
+                                    transform: `translateY(${translateY}px) scale(${scale})`,
+                                }}
+                            >
+                                <LogoAsset
+                                    id={eid}
+                                    src={patch.src}
+                                    width={slotLayout.width - slotLayout.padding * 2}
+                                    height={slotLayout.height - slotLayout.padding * 2}
+                                    logoAnimation="none"
+                                />
+                            </div>
+                        </ArrayItem>
                     );
                 })}
             </div>

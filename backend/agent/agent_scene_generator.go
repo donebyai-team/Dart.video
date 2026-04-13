@@ -286,7 +286,7 @@ func (l *sceneGenerator) GenerateScene(
 	}
 
 	// Check if its a edit call and add previously scene
-	if slide.Content != nil && slide.Content.Edits != nil {
+	if slide.Content != nil && slide.Content.Edits != nil && len(slide.Content.Edits.Fields) > 0 {
 		sceneToEdit, err := scenes.EditsToScene(slide.Content.Edits, l.assetRegistry)
 		if err != nil {
 			return nil, agenterrors.InvalidInput("invalid scene patch", err)

@@ -54,7 +54,11 @@ const RESERVED_FIELD_MAP: Record<string, SceneFieldDefinition> = {
   highlightedTextAnimation: {
     kind: 'enum',
     options: [...HIGHLIGHTED_TEXT_ANIMATIONS],
-  }
+  },
+  textCycleTransition: {
+    kind: 'enum',
+    options: [...TEXT_CYCLE_TRANSITIONS],
+  },
 }
 
 export function toSceneFieldLabel(prop: string): string {

@@ -29,6 +29,7 @@ interface PlayerCanvasProps {
     animEditVersion: number
     applyValuePatch: (id: string, prop: string, value: unknown) => void
     applyStyleOverride: (id: string, style: Record<string, string | number>) => void
+    applyArrayPatch: (source: string, next: Record<string, any>[]) => void
   }
 }
 
@@ -64,6 +65,7 @@ const PlayerCanvas = ({
     animEditVersion,
     applyValuePatch,
     applyStyleOverride,
+    applyArrayPatch,
   } = animationEdit
 
   const containerRef = useRef<HTMLDivElement>(null)
@@ -179,6 +181,7 @@ const PlayerCanvas = ({
           }}
           onValuePatch={applyValuePatch}
           onStyleOverride={applyStyleOverride}
+          onArrayPatch={applyArrayPatch}
         />
       )}
     </div>

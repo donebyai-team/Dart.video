@@ -105,19 +105,18 @@ export function usePatchedProps<T>(
   return deepMerge(defaultValue, entry);
 }
 
-export function useArrayPatch(...prefixes: string[]) {
+export function useArrayPatch(source: string) {
   const patches = useContext(PatchContext)
+  const regex = new RegExp(`^\\w+-${source}-(\\d+)$`)
+
   const byIndex: Record<number, Record<string, any>> = {}
 
-  for (const prefix of prefixes) {
-    const regex = new RegExp(`^${prefix}-(\\d+)$`)
-    for (const [eid, patch] of Object.entries(patches)) {
-      const match = eid.match(regex)
-      if (!match) continue
-      const index = parseInt(match[1])
-      byIndex[index] ??= {}
-      byIndex[index][eid] = patch
-    }
+  for (const [eid, patch] of Object.entries(patches)) {
+    const match = eid.match(regex)
+    if (!match) continue
+    const index = parseInt(match[1])
+    byIndex[index] ??= {}
+    byIndex[index][eid] = patch
   }
 
   return Object.entries(byIndex)

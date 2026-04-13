@@ -7,6 +7,7 @@ import { useArrayPatch, usePatchedProps } from '../../../patches';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { ENTRANCE_ANIMATIONS, SPLIT_BY_MODES } from '../types';
 import { interpolateWithEasing } from '../../../styles';
+import { ArrayItem } from '../../../core/assets/ArrayItem';
 
 // Default constants
 const DEFAULT_ENTRANCE_DURATION = 10;
@@ -30,7 +31,7 @@ export const LLMIconShowcaseSchema = z.object({
 
 export const IconShowcase: React.FC = () => {
     const textProps = usePatchedProps("textstagger", {}) as TextStaggerProps;
-    const arrayProps = useArrayPatch("iconasset-icons");
+    const arrayProps = useArrayPatch("icons");
 
 
     const frame = useCurrentFrame();
@@ -109,15 +110,22 @@ export const IconShowcase: React.FC = () => {
                     });
 
                     return (
-                        <div
+                        <ArrayItem
                             key={eid}
-                            style={{
-                                transform: `scale(${scale}) rotate(${rotation}deg)`,
-                                opacity,
-                            }}
+                            index={index}
+                            source="icons"
+                            removeControl="mid-top"
+                            addControl="mid-bottom"
                         >
-                            <IconAsset id={eid} icon={patch.icon} size={patch.size} />
-                        </div>
+                            <div
+                                style={{
+                                    transform: `scale(${scale}) rotate(${rotation}deg)`,
+                                    opacity,
+                                }}
+                            >
+                                <IconAsset id={eid} icon={patch.icon} size={patch.size} />
+                            </div>
+                        </ArrayItem>
                     );
                 })}
             </div>

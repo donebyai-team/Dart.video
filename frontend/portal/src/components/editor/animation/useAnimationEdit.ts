@@ -18,6 +18,7 @@ interface UseAnimationEditReturn {
   /** Replace the entire overlay (e.g. after reconciliation). */
   setOverlay: (overlay: PatchOverlay) => void
   flushPersist: () => void
+  applyArrayPatch: (source: string, next: Record<string, any>[]) => void
 }
 
 export function useAnimationEdit(): UseAnimationEditReturn {
@@ -79,6 +80,32 @@ export function useAnimationEdit(): UseAnimationEditReturn {
     }))
     setAnimEditVersion(v => v + 1)
   }, [mergeOverlayEntry])
+
+  const applyArrayPatch = useCallback((source: string, next: Record<string, any>[]) => {
+    setOverlay(prev => {
+      const updated = { ...prev }
+
+      // remove all existing entries for this source
+      for (const key of Object.keys(updated)) {
+        if (new RegExp(`^\\w+-${source}-\\d+$`).test(key)) {
+          delete updated[key]
+        }
+      }
+
+      // rewrite from next array with correct indices
+      next.forEach((item, i) => {
+        for (const [eid, patch] of Object.entries(item)) {
+          const primitive = eid.match(/^(\w+)-\w+-\d+$/)?.[1]
+          if (primitive) updated[`${primitive}-${source}-${i}`] = patch
+        }
+      })
+
+      overlayRef.current = updated
+      return updated
+    })
+
+    setAnimEditVersion(v => v + 1)
+  }, [])
 
   // ── Apply style override ──────────────────────────────────────────────────
   const applyStyleOverride = useCallback((id: string, style: Record<string, string | number>) => {
@@ -146,5 +173,6 @@ export function useAnimationEdit(): UseAnimationEditReturn {
     applyStyleOverride,
     setOverlay: setOverlayFn,
     flushPersist,
+    applyArrayPatch,
   }
 }

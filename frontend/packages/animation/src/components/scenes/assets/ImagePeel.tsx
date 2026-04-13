@@ -6,6 +6,7 @@ import { ImageAsset } from '../../../core/assets/ImageAsset';
 import { useArrayPatch, usePatchedProps } from '../../../patches';
 import { DIRECTIONS, Direction } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
+import { ArrayItem } from '../../../core/assets/ArrayItem';
 
 // Default constants
 const DEFAULT_ENTRANCE_DURATION = 30;
@@ -47,7 +48,7 @@ function getPeelTransform(direction: Direction, progress: number): { transform: 
 
 export function ImagePeel(): React.ReactElement {
     const parentProps = usePatchedProps("scene", {}) as ImagePeelProps;
-    const arrayProps = useArrayPatch("iconasset");
+    const arrayProps = useArrayPatch("images");
 
     const frame = useCurrentFrame();
 
@@ -57,7 +58,7 @@ export function ImagePeel(): React.ReactElement {
     const actualPeelDuration = parentProps.peelDuration ?? DEFAULT_PEEL_DURATION;
     const actualStackOffset = parentProps.stackOffset ?? DEFAULT_STACK_OFFSET;
 
-    const count = parentProps.images.length;
+    const count = arrayProps.length;
     // Each image: [enter] -> [hold] -> [peel away], staggered
 
     const cycleDuration = actualHoldDuration + actualPeelDuration;
@@ -115,30 +116,37 @@ export function ImagePeel(): React.ReactElement {
                     const stackY = reversedIndex * actualStackOffset;
 
                     return (
-                        <div
-                            key={index}
-                            style={{
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                transformOrigin: actualDirection === 'left' ? 'top left'
-                                    : actualDirection === 'right' ? 'top right'
-                                        : actualDirection === 'up' ? 'top center'
-                                            : 'bottom center',
-                                transform: `translate(${stackX}px, ${stackY}px) ${peelTransform}`,
-                                opacity: peelOpacity,
-                            }}
+                        <ArrayItem
+                            key={eid}
+                            index={index}
+                            source="images"
+                            removeControl="mid-left"
+                            addControl="mid-right"
                         >
-                            <ImageAsset
-                                id={eid}
-                                src={patch.src}
-                                width={patch.width}
-                                height={patch.height}
+                            <div
                                 style={{
-                                    overflow: 'hidden',
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    transformOrigin: actualDirection === 'left' ? 'top left'
+                                        : actualDirection === 'right' ? 'top right'
+                                            : actualDirection === 'up' ? 'top center'
+                                                : 'bottom center',
+                                    transform: `translate(${stackX}px, ${stackY}px) ${peelTransform}`,
+                                    opacity: peelOpacity,
                                 }}
-                            />
-                        </div>
+                            >
+                                <ImageAsset
+                                    id={eid}
+                                    src={patch.src}
+                                    width={patch.width}
+                                    height={patch.height}
+                                    style={{
+                                        overflow: 'hidden',
+                                    }}
+                                />
+                            </div>
+                        </ArrayItem>
                     );
                 })}
             </div>
