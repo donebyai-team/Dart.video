@@ -52,9 +52,9 @@ export default function SceneSettings({
       </div>
 
       <div className="p-4 space-y-4 overflow-auto">
-        {fields.length === 0 && (
+        {/* {fields.length === 0 && (
           <div className="text-sm text-muted-foreground">No editable props found yet.</div>
-        )}
+        )} */}
 
         {fields.map((field, index) => {
           const { prop, value, definition } = field

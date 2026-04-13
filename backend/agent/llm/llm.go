@@ -2,6 +2,7 @@ package llm
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/shank318/coasterai/baml_client"
 	"github.com/shank318/coasterai/baml_client/types"
@@ -16,6 +17,12 @@ import (
 type LLMService interface {
 	AnalyzeImage(ctx context.Context, asset *models.MediaAsset) (*types.AssetAnalysis, error)
 	GeneratePlanV2(
+		ctx context.Context,
+		req types.VideoGenerationPlanRequest,
+		conversationHistory []types.Message,
+		onThinking func(thinking string),
+	) (*types.Union2AskUserQuestionOrGeneratedVideoPlan, error)
+	GeneratePlanV2Mock(
 		ctx context.Context,
 		req types.VideoGenerationPlanRequest,
 		conversationHistory []types.Message,
@@ -188,8 +195,6 @@ func (l *llmService) GeneratePlanV2(
 ) (*types.Union2AskUserQuestionOrGeneratedVideoPlan, error) {
 	l.logger.Info("🚀 Starting video plan generation..")
 
-	return nil, nil
-
 	thinkingMessages := []string{
 		"Understanding the request...",
 		"Planning the video structure...",
@@ -251,4 +256,29 @@ func (l *llmService) GeneratePlanV2(
 	}
 
 	return nil, fmt.Errorf("stream closed without final result")
+}
+
+func (l *llmService) GeneratePlanV2Mock(
+	ctx context.Context,
+	req types.VideoGenerationPlanRequest,
+	conversationHistory []types.Message,
+	onThinking func(thinking string),
+) (*types.Union2AskUserQuestionOrGeneratedVideoPlan, error) {
+	if onThinking != nil {
+		onThinking("Loading mock video plan...")
+	}
+
+	var generatedPlan types.GeneratedVideoPlan
+	if err := json.Unmarshal([]byte(mockGeneratePlanV2ResponseJSON), &generatedPlan); err == nil {
+		mockPlan := types.Union2AskUserQuestionOrGeneratedVideoPlan__NewGeneratedVideoPlan(generatedPlan)
+		return &mockPlan, nil
+	}
+
+	var askUserQuestion types.AskUserQuestion
+	if err := json.Unmarshal([]byte(mockGeneratePlanV2ResponseJSON), &askUserQuestion); err == nil {
+		mockPlan := types.Union2AskUserQuestionOrGeneratedVideoPlan__NewAskUserQuestion(askUserQuestion)
+		return &mockPlan, nil
+	}
+
+	return nil, fmt.Errorf("unmarshal mock GeneratePlanV2 response: json did not match GeneratedVideoPlan or AskUserQuestion")
 }

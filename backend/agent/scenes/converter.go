@@ -15,7 +15,7 @@ import (
 type SceneConfig struct {
 	ID                 string
 	Name               string
-	Props              map[string]interface{}
+	Props              map[string]any
 	DurationExpression string
 	Children           []SceneConfig
 }
@@ -28,7 +28,7 @@ func ConvertToSceneConfig(scene *types.Scene, fieldValueMapper *services.MediaAs
 	}
 
 	element := scene.Elements[0]
-	var props map[string]interface{}
+	var props map[string]any
 	if err := json.Unmarshal([]byte(element.Props), &props); err != nil {
 		return nil, fmt.Errorf("invalid scene props json: %w", err)
 	}

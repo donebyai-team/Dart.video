@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { SCENE_COMPONENTS } from './scenes';
 import { CONTENT_COMPONENTS } from './assets';
+import { LAYOUT_COMPONENTS } from './layouts';
 
 /** Component taxonomy types. */
 export type ComponentType = 'layout' | 'animation' | 'content' | 'scene' | 'headless' | 'brand';
@@ -21,6 +22,7 @@ export interface ComponentRegistration {
 export const COMPONENT_REGISTRY: ComponentRegistration[] = [
   ...CONTENT_COMPONENTS,
   ...SCENE_COMPONENTS,
+  ...LAYOUT_COMPONENTS,
 ];
 
 /** Set of all registered component names. Used for AST ID pass and scope injection. */
@@ -30,16 +32,6 @@ export const REGISTERED_COMPONENT_NAMES = new Set(COMPONENT_REGISTRY.map((c) => 
 export const LAYOUT_COMPONENT_NAMES = new Set(
   COMPONENT_REGISTRY.filter((c) => c.type === 'layout').map((c) => c.name),
 );
-
-function extractSchemaDefault(schema: z.ZodTypeAny): unknown {
-  if (schema instanceof z.ZodOptional || schema instanceof z.ZodNullable) {
-    return extractSchemaDefault(schema._def.innerType);
-  }
-  if (schema instanceof z.ZodDefault) {
-    return schema._def.defaultValue();
-  }
-  return undefined;
-}
 
 /** Lowercase name → registration lookup. Built once. */
 const REGISTRY_BY_LOWERCASE = new Map(

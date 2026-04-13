@@ -270,6 +270,7 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = () => {
 
   return (
     <span
+      id='textwithwordcycle'
       className={props.className}
       style={{
         display: 'inline',

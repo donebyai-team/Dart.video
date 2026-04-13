@@ -371,7 +371,7 @@ func (a *agentV2) runPlanning(ctx context.Context, req types.VideoGenerationPlan
 
 	// Generate and validate upto max attempts
 	for attempt := 0; attempt < maxAttempts; attempt++ {
-		llmResponse, err := a.llmService.GeneratePlanV2(ctx, req, session.ConversationHistory, func(chunk string) {
+		llmResponse, err := a.llmService.GeneratePlanV2Mock(ctx, req, session.ConversationHistory, func(chunk string) {
 			a.publishTransientState(VideoAgentState{
 				Thinking: chunk,
 				State:    stateStatusProcessing,

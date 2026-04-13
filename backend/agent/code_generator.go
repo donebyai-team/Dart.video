@@ -131,18 +131,17 @@ func (l *codeGenerator) GenerateCodeFromScene(ctx context.Context, scene *scenes
 		})
 
 		l.logger.Info("building code")
-		codeFilePath := fmt.Sprintf(
-			"templates/generated/%s/%s",
-			l.orgID,
-			l.slideID,
-		)
+		codeFilePath := fmt.Sprintf("templates/generated/%s", l.orgID)
+		if l.slideID != "" {
+			codeFilePath = fmt.Sprintf("%s/%s", codeFilePath, l.slideID)
+		}
 
 		template, err := l.uploadAndBuild(ctx, indentedCode, codeFilePath, attempt, callback)
 		if err == nil {
 			// Override the patch, we later remove it from validator
 			template.GeneratedPatches = scene.ToEditsPatch()
 			template.Config.VisibleDurationInFrames = scene.ComputeDurationFrames()
-			template.Config.TotalDurationInFrames = scene.ComputeDurationFrames()
+			template.Config.TotalDurationInFrames = template.Config.VisibleDurationInFrames
 
 			//diff := math.Abs(float64(generatedAnimation.SettledFrame) - float64(template.Config.VisibleDuration))
 			//if diff > 30 {
@@ -287,7 +286,7 @@ func (l *codeGenerator) uploadAndBuild(
 	assetID := uuid.New().String()
 	codeFilePath = fmt.Sprintf("%s/%s", codeFilePath, assetID)
 
-	uploadCodeAsset, err := l.mediaStore.UploadCode(ctx, codeFilePath, code)
+	uploadCodeAsset, err := l.mediaStore.UploadCode(ctx, code, codeFilePath)
 	if err != nil {
 		return nil, err
 	}

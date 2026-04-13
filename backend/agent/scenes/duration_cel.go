@@ -109,7 +109,7 @@ func evaluateDurationExpression(expression string, props map[string]any) (any, e
 			),
 		),
 		cel.Function("split",
-			cel.MemberOverload("duration_string_split", []*cel.Type{cel.StringType, cel.StringType}, cel.ListType(cel.StringType),
+			cel.MemberOverload("duration_string_split", []*cel.Type{cel.DynType, cel.StringType}, cel.ListType(cel.StringType),
 				cel.BinaryBinding(func(lhs, rhs ref.Val) ref.Val {
 					input, ok := lhs.Value().(string)
 					if !ok {
@@ -126,7 +126,7 @@ func evaluateDurationExpression(expression string, props map[string]any) (any, e
 			),
 		),
 		cel.Function("trim",
-			cel.MemberOverload("duration_string_trim", []*cel.Type{cel.StringType}, cel.StringType,
+			cel.MemberOverload("duration_string_trim", []*cel.Type{cel.DynType}, cel.StringType,
 				cel.UnaryBinding(func(arg ref.Val) ref.Val {
 					input, ok := arg.Value().(string)
 					if !ok {
@@ -152,7 +152,10 @@ func evaluateDurationExpression(expression string, props map[string]any) (any, e
 		return nil, fmt.Errorf("create CEL program: %w", err)
 	}
 
-	out, _, err := program.Eval(map[string]any{"props": props})
+	payload := map[string]any{"props": props}
+	payload = map[string]any{"props": normalizeCELValue(props)}
+
+	out, _, err := program.Eval(payload)
 	if err != nil {
 		return nil, fmt.Errorf("evaluate CEL expression: %w", err)
 	}
@@ -274,4 +277,28 @@ func numericToInt32(value any) (int32, bool) {
 	}
 
 	return int32(math.Round(n)), true
+}
+
+func normalizeCELValue(value any) any {
+	switch value := value.(type) {
+	case map[string]any:
+		out := make(map[string]any, len(value))
+		for key, item := range value {
+			out[key] = normalizeCELValue(item)
+		}
+		return out
+	case []any:
+		out := make([]any, len(value))
+		for i, item := range value {
+			out[i] = normalizeCELValue(item)
+		}
+		return out
+	case float64:
+		if value == math.Trunc(value) {
+			return int64(value)
+		}
+		return value
+	default:
+		return value
+	}
 }

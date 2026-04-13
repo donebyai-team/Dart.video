@@ -107,7 +107,7 @@ export const TextCycle: React.FC<TextCycleProps> = () => {
 
   if (props.textCycleTransition === 'fadeSwap') {
     return (
-      <span className={props.className} style={containerStyle}>
+      <span id='textcycle' className={props.className} style={containerStyle}>
         {/* Spacer holds the width — never visible */}
         <Text text={longestWord} variant={patchedVariant} style={spacerStyle} />
 

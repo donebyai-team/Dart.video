@@ -212,6 +212,7 @@ export const TextHighlight: React.FC<TextHighlightProps> = () => {
 
     return (
         <span
+            id='texthighlight'
             className={props.className}
             style={{
                 display: 'inline-block',

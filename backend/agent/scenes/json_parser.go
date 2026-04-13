@@ -8,9 +8,9 @@ import (
 	"strings"
 )
 
-func GenerateEditsFromProps(schema []SchemaNode, input map[string]interface{}, direction field_resolvers.FieldResolverDirection, fieldValueMapper *services.MediaAssetRegistry) (map[string]interface{}, error) {
+func GenerateEditsFromProps(schema []SchemaNode, input map[string]any, direction field_resolvers.FieldResolverDirection, fieldValueMapper *services.MediaAssetRegistry) (map[string]any, error) {
 
-	output := map[string]interface{}{}
+	output := map[string]any{}
 
 	for _, node := range schema {
 
@@ -64,7 +64,7 @@ func GenerateEditsFromProps(schema []SchemaNode, input map[string]interface{}, d
 						continue
 					}
 
-					existing, _ := value.(map[string]interface{})
+					existing, _ := value.(map[string]any)
 
 					props, err := resolveFields(comp.Fields, input, existing, nil, direction, fieldValueMapper)
 					if err != nil {
@@ -82,14 +82,14 @@ func GenerateEditsFromProps(schema []SchemaNode, input map[string]interface{}, d
 
 func resolveFields(
 	fields []FieldSchema,
-	input map[string]interface{},
-	existing map[string]interface{},
-	item interface{},
+	input map[string]any,
+	existing map[string]any,
+	item any,
 	direction field_resolvers.FieldResolverDirection,
 	fieldValueMapper *services.MediaAssetRegistry,
-) (map[string]interface{}, error) {
+) (map[string]any, error) {
 
-	out := map[string]interface{}{}
+	out := map[string]any{}
 
 	// preserve unknown existing fields
 	for k, v := range existing {
@@ -98,7 +98,7 @@ func resolveFields(
 
 	for _, f := range fields {
 
-		var value interface{}
+		var value any
 
 		// 1️⃣ existing patch value
 		if v, ok := existing[f.Name]; ok {
@@ -156,7 +156,7 @@ func resolveFields(
 	return out, nil
 }
 
-func resolveMap(path string, input map[string]interface{}, item interface{}) interface{} {
+func resolveMap(path string, input map[string]any, item any) any {
 
 	if path == "item" {
 		return item
@@ -168,7 +168,7 @@ func resolveMap(path string, input map[string]interface{}, item interface{}) int
 
 	if strings.HasPrefix(path, "item.") {
 
-		obj, ok := item.(map[string]interface{})
+		obj, ok := item.(map[string]any)
 		if !ok {
 			return nil
 		}
@@ -179,14 +179,14 @@ func resolveMap(path string, input map[string]interface{}, item interface{}) int
 	return nil
 }
 
-func getNested(m map[string]interface{}, path string) interface{} {
+func getNested(m map[string]any, path string) any {
 
 	parts := strings.Split(path, ".")
-	var cur interface{} = m
+	var cur any = m
 
 	for _, p := range parts {
 
-		obj, ok := cur.(map[string]interface{})
+		obj, ok := cur.(map[string]any)
 		if !ok {
 			return nil
 		}
@@ -197,16 +197,16 @@ func getNested(m map[string]interface{}, path string) interface{} {
 	return cur
 }
 
-func getExistingNode(input map[string]interface{}, name string) map[string]interface{} {
+func getExistingNode(input map[string]any, name string) map[string]any {
 
-	if v, ok := input[name].(map[string]interface{}); ok {
+	if v, ok := input[name].(map[string]any); ok {
 		return v
 	}
 
-	return map[string]interface{}{}
+	return map[string]any{}
 }
 
-func toSlice(v interface{}) []interface{} {
+func toSlice(v any) []any {
 
 	rv := reflect.ValueOf(v)
 
@@ -214,7 +214,7 @@ func toSlice(v interface{}) []interface{} {
 		return nil
 	}
 
-	out := make([]interface{}, rv.Len())
+	out := make([]any, rv.Len())
 
 	for i := 0; i < rv.Len(); i++ {
 		out[i] = rv.Index(i).Interface()
@@ -244,7 +244,7 @@ func toSlice(v interface{}) []interface{} {
 //		// root node pattern: type-index
 //		if len(parts) == 2 {
 //
-//			props := map[string]interface{}{}
+//			props := map[string]any{}
 //			err := json.Unmarshal(value, &props)
 //			if err != nil {
 //				return nil, fmt.Errorf("failed to unmarshal props %s: %w", key, err)
@@ -289,7 +289,7 @@ func toSlice(v interface{}) []interface{} {
 //		//	return nil, fmt.Errorf("invalid component name: %s", parts[0])
 //		//}
 //
-//		props := map[string]interface{}{}
+//		props := map[string]any{}
 //		err := json.Unmarshal(value, &props)
 //		if err != nil {
 //			return nil, fmt.Errorf("failed to unmarshal props %s: %w", key, err)

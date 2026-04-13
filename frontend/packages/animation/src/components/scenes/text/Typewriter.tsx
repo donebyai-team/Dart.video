@@ -75,7 +75,8 @@ export function Typewriter(): React.ReactElement {
         : Math.floor(frame / 15) % 2 === 0;
 
   return (
-    <span
+    <span      
+      id='typewriter'
       className={props.className}
       style={{
         display: 'inline-block',

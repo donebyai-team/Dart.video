@@ -31,7 +31,7 @@ export const LLMIconShowcaseSchema = z.object({
 export const IconShowcase: React.FC = () => {
     const parentProps = usePatchedProps("scene", {});
     const textProps = usePatchedProps("textstagger", {}) as TextStaggerProps;
-    const arrayProps = useArrayPatch("iconasset");
+    const arrayProps = useArrayPatch("iconasset-icons");
 
 
     const frame = useCurrentFrame();

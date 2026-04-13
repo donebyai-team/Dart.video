@@ -6,12 +6,16 @@ func TestSceneConfigComputeDurationFrames(t *testing.T) {
 	t.Run("computes duration for single component scene", func(t *testing.T) {
 		scene := SceneConfig{
 			Name:               "TextStagger",
-			DurationExpression: `ceil((size(props.splitBy == "char" ? props.text.split("") : props.splitBy == "line" ? props.text.split("\n") : props.text.split(" ")) - 1) * props.staggerDelay + props.duration)`,
+			DurationExpression: `ceil((size(props.textstagger.splitBy == "char" ? props.textstagger.text.split("") : props.textstagger.splitBy == "line" ? props.textstagger.text.split("\n") : props.textstagger.text.split(" ")) - 1) * props.textstagger.staggerDelay + props.textstagger.duration)`,
 			Props: map[string]any{
-				"text":         "AI models",
-				"staggerDelay": 5,
-				"duration":     15,
-				"splitBy":      "word",
+				"textstagger": map[string]any{
+					"text":              "AI models",
+					"variant":           "heading",
+					"staggerDelay":      5,
+					"entranceAnimation": "scaleIn",
+					"duration":          15,
+					"splitBy":           "word",
+				},
 			},
 		}
 

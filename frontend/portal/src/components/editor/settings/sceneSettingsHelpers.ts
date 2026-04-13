@@ -1,4 +1,4 @@
-import { DIRECTIONS, ENTRANCE_ANIMATIONS, HIGHLIGHT_STYLES, LOGO_ANIMATIONS, SCENE_COMPONENTS, SPLIT_BY_MODES, TEXT_CYCLE_TRANSITIONS, TYPOGRAPHY_VARIANT_NAMES } from "../../../../../packages/animation/src"
+import { DIRECTIONS, ENTRANCE_ANIMATIONS, HIGHLIGHT_STYLES, HIGHLIGHTED_TEXT_ANIMATIONS, LOGO_ANIMATIONS, SCENE_COMPONENTS, SPLIT_BY_MODES, TEXT_CYCLE_TRANSITIONS, TYPOGRAPHY_VARIANT_NAMES } from "../../../../../packages/animation/src"
 import { resolveComponentFromId } from '@coasterai/renderer'
 
 
@@ -50,6 +50,10 @@ const RESERVED_FIELD_MAP: Record<string, SceneFieldDefinition> = {
   highlightStyle: {
     kind: 'enum',
     options: [...HIGHLIGHT_STYLES],
+  },
+  highlightedTextAnimation: {
+    kind: 'enum',
+    options: [...HIGHLIGHTED_TEXT_ANIMATIONS],
   }
 }
 

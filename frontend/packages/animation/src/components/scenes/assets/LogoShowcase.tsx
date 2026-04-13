@@ -41,7 +41,7 @@ export type LogoShowcaseProps = z.input<typeof LogoShowcaseSchema>;
 export const LogoShowcase: React.FC = () => {
     const parentProps = usePatchedProps("scene", {});
     const textProps = usePatchedProps("textstagger", {}) as TextStaggerProps;
-    const arrayProps = useArrayPatch("logoasset");
+    const arrayProps = useArrayPatch("logoasset-logos");
 
     const frame = useCurrentFrame();
 

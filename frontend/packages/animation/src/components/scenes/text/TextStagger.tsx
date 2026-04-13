@@ -82,6 +82,7 @@ export const TextStagger: React.FC<TextStaggerProps> = () => {
 
     return (
         <span
+            id='textstagger'
             className={props.className}
             style={{
                 display: 'inline-block',

@@ -125,6 +125,36 @@ export function AnimationEditLayer({
     return true
   }
 
+  function hasTextLikeField(entry: unknown): boolean {
+    if (!entry || typeof entry !== 'object') return false
+
+    return Object.entries(entry as Record<string, unknown>).some(([prop, value]) => {
+      if (prop === 'style' || prop === 'dragX' || prop === 'dragY') return false
+      if (typeof value !== 'string' || value.trim().length === 0) return false
+
+      const lowerProp = prop.toLowerCase()
+      return (
+        lowerProp === 'text' ||
+        lowerProp === 'title' ||
+        lowerProp === 'subtitle' ||
+        lowerProp === 'label' ||
+        lowerProp.includes('text')
+      )
+    })
+  }
+
+  function getFallbackSelectionId(): string | null {
+    const sceneEntry = overlay.scene
+    if (sceneEntry && typeof sceneEntry === 'object') return 'scene'
+
+    const overlayEntries = Object.entries(overlay)
+
+    const textEntry = overlayEntries.find(([, entry]) => hasTextLikeField(entry))
+    if (textEntry) return textEntry[0]
+
+    return overlayEntries[0]?.[0] ?? null
+  }
+
   /**
    * Collect all selectable elements at the cursor, deepest first.
    * Used for click-to-select and parent-walk-on-reclick.
@@ -247,7 +277,7 @@ export function AnimationEditLayer({
    * Click handler with parent-walk:
    *   - First click: select deepest element.
    *   - Click again on selected: walk up to parent.
-   *   - At topmost: deselect.
+   *   - At topmost: keep it selected.
    */
   function handleCanvasClick(e: React.MouseEvent<HTMLDivElement>) {
     if (suppressClickRef.current) {
@@ -261,7 +291,12 @@ export function AnimationEditLayer({
     }
 
     const hits = selectableStackAtPoint(e.clientX, e.clientY, e.currentTarget)
-    if (hits.length === 0) { deselect(); return }
+    if (hits.length === 0) {
+      const fallbackId = getFallbackSelectionId()
+      setElementRect(null)
+      onSelectElement(fallbackId)
+      return
+    }
 
     if (!selectedEid) {
       const hit = hits[0]
@@ -277,7 +312,12 @@ export function AnimationEditLayer({
       return
     }
 
-    if (idx === hits.length - 1) { deselect(); return }
+    if (idx === hits.length - 1) {
+      const hit = hits[idx]
+      setElementRect(hit.el.getBoundingClientRect())
+      onSelectElement(hit.id)
+      return
+    }
 
     const hit = hits[0]
     setElementRect(hit.el.getBoundingClientRect())
