@@ -48,6 +48,7 @@ interface RemotionPlayerProps {
     animEditVersion: number
     applyValuePatch: (id: string, prop: string, value: unknown) => void
     applyStyleOverride: (id: string, style: Record<string, string | number>) => void
+    applyArrayPatch: (source: string, next: Record<string, any>[]) => void
   }
 }
 

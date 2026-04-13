@@ -138,34 +138,34 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = () => {
     }
   };
 
-  // Container for the cycling word section
+  // Keep the cycling segment in normal inline flow while overlaying animated words
+  // on top of an invisible width reservation for the longest entry.
   const cycleContainerStyle: React.CSSProperties = {
-    position: 'relative',
-    display: 'inline-block',
-    marginLeft: props.text ? '0.2em' : '0',
+    display: 'inline-grid',
+    gridTemplateColumns: 'auto',
+    gridTemplateRows: 'auto',
+    alignItems: 'baseline',
+    verticalAlign: 'baseline',
   };
 
   // Invisible spacer
   const spacerStyle: React.CSSProperties = {
+    gridArea: '1 / 1',
     visibility: 'hidden',
-    whiteSpace: 'pre-wrap',
-    display: 'block',
+    whiteSpace: 'nowrap',
+    display: 'inline-block',
     pointerEvents: 'none',
     userSelect: 'none',
     lineHeight: 'inherit',
   };
 
-  // Visible words are absolutely positioned
-  const absoluteLayerStyle: React.CSSProperties = {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    display: 'flex',
-    alignItems: 'baseline',
-    justifyContent: 'flex-start',
+  // Animated words share the same grid cell as the spacer, so the full sentence
+  // stays inline and responsive while we still get overlapping transitions.
+  const overlayLayerStyle: React.CSSProperties = {
+    gridArea: '1 / 1',
     whiteSpace: 'nowrap',
+    alignSelf: 'baseline',
+    justifySelf: 'start',
   };
 
   const renderCyclingWords = () => {
@@ -183,7 +183,7 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = () => {
             text={currentWord}
             variant={patchedVariant}
             style={getHighlightStyles({
-              ...absoluteLayerStyle,
+              ...overlayLayerStyle,
               ...baseWordStyle,
               opacity: isTransitioning ? 1 - transitionProgress : 1,
             })}
@@ -194,7 +194,7 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = () => {
               text={nextWord}
               variant={patchedVariant}
               style={getHighlightStyles({
-                ...absoluteLayerStyle,
+                ...overlayLayerStyle,
                 ...baseWordStyle,
                 opacity: transitionProgress,
               })}
@@ -213,7 +213,7 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = () => {
             text={currentWord}
             variant={patchedVariant}
             style={getHighlightStyles({
-              ...absoluteLayerStyle,
+              ...overlayLayerStyle,
               ...baseWordStyle,
               transform: isTransitioning ? `translateY(-${transitionProgress * 100}%)` : 'translateY(0)',
               opacity: isTransitioning ? 1 - transitionProgress : 1,
@@ -225,7 +225,7 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = () => {
               text={nextWord}
               variant={patchedVariant}
               style={getHighlightStyles({
-                ...absoluteLayerStyle,
+                ...overlayLayerStyle,
                 ...baseWordStyle,
                 transform: `translateY(${(1 - transitionProgress) * 100}%)`,
                 opacity: transitionProgress,
@@ -245,7 +245,7 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = () => {
           text={currentWord}
           variant={patchedVariant}
           style={getHighlightStyles({
-            ...absoluteLayerStyle,
+            ...overlayLayerStyle,
             ...baseWordStyle,
             transform: isTransitioning ? `rotateX(${transitionProgress * 90}deg)` : 'rotateX(0deg)',
             opacity: isTransitioning ? 1 - transitionProgress : 1,
@@ -257,7 +257,7 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = () => {
             text={nextWord}
             variant={patchedVariant}
             style={getHighlightStyles({
-              ...absoluteLayerStyle,
+              ...overlayLayerStyle,
               ...baseWordStyle,
               transform: `rotateX(${(1 - transitionProgress) * -90}deg)`,
               opacity: transitionProgress,
@@ -283,6 +283,7 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = () => {
       {props.text && (
         <Text text={props.text} variant={patchedVariant} style={{ display: 'inline', whiteSpace: 'normal' }} />
       )}
+      {props.text ? ' ' : null}
       {renderCyclingWords()}
     </span>
   );
