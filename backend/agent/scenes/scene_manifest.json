@@ -350,7 +350,7 @@
                   "name": "variant",
                   "type": "string",
                   "subtype": "enum",
-                  "default": "displayXl"
+                  "default": "heading"
                 },
                 {
                   "name": "textCycleTransition",
@@ -425,6 +425,12 @@
                   "type": "string",
                   "subtype": "enum",
                   "default": "slideUp"
+                },
+                {
+                  "name": "highlightStyle",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "background"
                 }
               ]
             }

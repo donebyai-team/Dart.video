@@ -329,6 +329,12 @@ const TextWithWordCycleSchemaFields = [
     "type": "string",
     "subtype": "enum",
     "default": TextWithWordCycleDefaults.textCycleTransition
+  },
+  {
+    "name": "highlightStyle",
+    "type": "string",
+    "subtype": "enum",
+    "default": TextWithWordCycleDefaults.highlightStyle
   }
 ]
 
