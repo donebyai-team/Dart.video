@@ -117,7 +117,7 @@ export function ImagePeel(): React.ReactElement {
 
                     return (
                         <ArrayItem
-                            key={eid}
+                            key={`icons-${index}`} // any unique id works
                             index={index}
                             source="images"
                             removeControl="mid-left"

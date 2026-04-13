@@ -1,10 +1,7 @@
 import React from "react";
 import { AbsoluteFill, Composition, Sequence } from "remotion";
 import { TextCycle, TextHighlight, TextStagger, TextWithWordCycle, Typewriter } from "../components/scenes/text";
-import { FadeIn, FadeOut, SlideIn, ScaleIn, Stagger, TimelineGate } from "../core/animation_primitives";
 import { FramePreset, SafeArea, AbsoluteCenter, Stack, Row } from "../core/layout";
-import { Text } from "../core/text";
-import { ImageAsset } from "../core/assets";
 import { SpeedFactorProvider } from "../duration";
 import { ASPECT_PRESETS, resolveStyle, AspectPresetProvider, StyleContextProvider } from "../styles";
 import { BrandTheme, darkTheme, ThemeProvider } from "../theme";
@@ -42,67 +39,6 @@ export const Scene: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     );
 };
 
-/* ─────────────────────────────────────────────────────────
-   1 · Fade & Slide – basic entrance primitives
-   ───────────────────────────────────────────────────────── */
-const FadeSlideScene: React.FC = () => (
-    <Scene>
-        <SafeArea>
-            <AbsoluteCenter axis="both">
-                <Stack gap={24} align="center">
-                    <FadeIn id="fade-title" startAt={0} durationInFrames={20}>
-                        <Text text="FadeIn + SlideIn" id="t-fade" variant="heading" />
-                    </FadeIn>
-
-                    <SlideIn id="slide-left" startAt={15} durationInFrames={25} from="left" distance={120}>
-                        <Text text="← slides from left" id="t-sl" variant="heading" />
-                    </SlideIn>
-
-                    <SlideIn id="slide-right" startAt={30} durationInFrames={25} from="right" distance={120}>
-                        <Text text="slides from right →" id="t-sr" variant="heading" />
-                    </SlideIn>
-
-                    <SlideIn id="slide-bottom" startAt={45} durationInFrames={25} from="bottom">
-                        <Text text="↑ slides from bottom" id="t-sb" variant="heading" />
-                    </SlideIn>
-
-                    <FadeOut id="fade-all" startAt={100} durationInFrames={30}>
-                        <Text text="…then fades out" id="t-fo" variant="heading" />
-                    </FadeOut>
-                </Stack>
-            </AbsoluteCenter>
-        </SafeArea>
-    </Scene>
-);
-
-/* ─────────────────────────────────────────────────────────
-   2 · Scale + Stagger – list entrance
-   ───────────────────────────────────────────────────────── */
-const ScaleStaggerScene: React.FC = () => (
-    <Scene>
-        <SafeArea>
-            <AbsoluteCenter axis="both">
-                <Stack gap={20} align="center">
-                    <FadeIn id="stag-title" startAt={0} durationInFrames={15}>
-                        <Text text="ScaleIn + Stagger" id="t-stag" variant="heading" />
-                    </FadeIn>
-
-                    <Stagger id="stag-list" startAt={20} staggerDelay={8}>
-                        <ScaleIn id="sc-0" durationInFrames={20}>
-                            <Text text="Feature One" id="t-s0" variant="heading" />
-                        </ScaleIn>
-                        <ScaleIn id="sc-1" durationInFrames={20}>
-                            <Text text="Feature Two" id="t-s1" variant="heading" />
-                        </ScaleIn>
-                        <ScaleIn id="sc-2" durationInFrames={20}>
-                            <Text text="Feature Three" id="t-s2" variant="heading" />
-                        </ScaleIn>
-                    </Stagger>
-                </Stack>
-            </AbsoluteCenter>
-        </SafeArea>
-    </Scene>
-);
 
 /* ─────────────────────────────────────────────────────────
    3 · Text components – Typewriter, Counter, WordCycle
@@ -115,9 +51,10 @@ const TextComponentsScene: React.FC = () => (
                     text="We build amazing products"
                     cyclingWords={['software', 'products', 'solutions', 'Try again']}
                     highlightStyle="background"
-                    transition="slideUp"
-                    highlightColor="#00FF00"
-                />
+                    textCycleTransition="slideUp"
+                    highlightColor="#00FF00" 
+                    holdDuration={0} 
+                    transitionDuration={0} variant={"heading"} style={undefined} className={undefined}                />
 
                 {/* <Stack gap={64} align="center"> */}
                 {/* <Counter
@@ -406,8 +343,6 @@ const LogoScene: React.FC = () => (
    ══════════════════════════════════════════════════════════ */
 export const RemotionRoot: React.FC = () => (
     <>
-        <Composition id="fade-slide" component={FadeSlideScene} durationInFrames={150} fps={30} width={1920} height={1080} />
-        <Composition id="scale-stagger" component={ScaleStaggerScene} durationInFrames={150} fps={30} width={1920} height={1080} />
         <Composition id="text-components" component={TextComponentsScene} durationInFrames={200} fps={30} width={1920} height={1080} />
         <Composition id="animated-image" component={AnimatedImageScene} durationInFrames={180} fps={30} width={1920} height={1080} />
         <Composition id="animated-video" component={AnimatedVideoScene} durationInFrames={180} fps={30} width={1920} height={1080} />

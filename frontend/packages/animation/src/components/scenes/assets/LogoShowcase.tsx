@@ -40,7 +40,6 @@ export const LogoShowcaseSchema = z.object({
 export type LogoShowcaseProps = z.input<typeof LogoShowcaseSchema>;
 
 export const LogoShowcase: React.FC = () => {
-    const parentProps = usePatchedProps("scene", {});
     const textProps = usePatchedProps("textstagger", {}) as TextStaggerProps;
     const arrayProps = useArrayPatch("logos");
 
@@ -108,7 +107,7 @@ export const LogoShowcase: React.FC = () => {
 
                     return (
                         <ArrayItem
-                            key={eid}
+                            key={`icons-${index}`} // any unique id works
                             index={index}
                             source="logos"
                             removeControl="mid-left"

@@ -111,7 +111,7 @@ export const IconShowcase: React.FC = () => {
 
                     return (
                         <ArrayItem
-                            key={eid}
+                            key={`icons-${index}`} // any unique id works
                             index={index}
                             source="icons"
                             removeControl="mid-top"
