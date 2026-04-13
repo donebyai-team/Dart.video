@@ -22,13 +22,16 @@ function GenerateScene(input: AddSceneRequest, conversation_history: Message[]) 
     - One idea per scene. Never combine two components in one scene.
     - Only provide the mandatory props unless user has specifically asked for it
     - You have the CSS property "style" available for all components. You can use it in props to do styling
-      changes only if user has specifically asked for it
+      changes only if user has specifically asked for it.
+    - You should always keep existing props passed in the input while editing already generated scene.
+    - If you have to replace or generate a new scene, use the component list and its props.
 
     ## PLANNING RULES
 
     ### Structure
     - Every scene has a single clear purpose. One idea per scene.
     - Each scene must stand alone. No siblings.
+    - If the input props has a scene-0,scene-1 format that means its an array
     - **Define the props of scenes in SceneElement props in JSON format**
 
     ### Data
@@ -58,16 +61,18 @@ function GenerateScene(input: AddSceneRequest, conversation_history: Message[]) 
     Do not ask about:
     - Props or component internals — the generator handles these
 
-    ## EXAMPLE SCENE
+    ## EXAMPLE SCENES
     ```json
+   // Editing an existing scene
  {
    "elements": [
      {
-       "component": "AnimatedNumber",
-       "props": "{\"startText\": \"Solving\", \"endText\": \"incidents\", \"from\": 0, \"to\": 100}"
+       "component": "IconShowcase",
+       "props": "{\n \"textstagger-0\": { \"text\": \"AI models\" , \"style\": { \"textAlign\": \"center\"}},\n  \"iconasset\": { \"icon\": \"google\" },\n  \"textstagger-1\": { \"text\": \"Search APIs\" }\n}"
      }
    ]
  }
+ // Generating or swapping an existing scene with a new one
 {
   "elements": [
     {

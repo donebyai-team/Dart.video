@@ -367,7 +367,7 @@ func (a *agentV2) runPlanning(ctx context.Context, req types.VideoGenerationPlan
 		}
 	}()
 
-	req.ComponentList = scenes.BuildScenesList()
+	req.ComponentList = scenes.BuildScenesList(false)
 
 	// Generate and validate upto max attempts
 	for attempt := 0; attempt < maxAttempts; attempt++ {

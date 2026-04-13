@@ -1,44 +1,49 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
-import z from 'zod';
-import { usePatchedProps, useStyleOverride } from '../../../patches';
+import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
 import { interpolateWithEasing } from '../../../styles';
 import { useTheme } from '../../../theme';
-import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens';
+import type { TypographyVariant } from '../../../tokens';
 import { Text } from '../../../core/assets/Text';
-import { getEntranceTransform, ENTRANCE_ANIMATIONS, HIGHLIGHT_STYLES } from '../types';
+import {
+    getEntranceTransform,
+    HighlightedTextAnimation,
+    type EntranceAnimation,
+    type HighlightStyle,
+} from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
-import type { DurationResult } from '../durationTypes';
 
-// Default constants
-const DEFAULT_ENTRANCE_DURATION = 30;
-const DEFAULT_ZOOM_DURATION = 30;
-const DEFAULT_VARIANT = 'heading' as const;
-const DEFAULT_HIGHLIGHT_STYLE = 'glow' as const;
-const DEFAULT_ANIMATION = 'slideUp' as const;
-const HIGHLIGHTED_TEXT_ANIMATIONS = ['zoom', 'jump'] as const;
-const DEFAULT_HIGHLIGHTED_TEXT_ANIMATION = 'jump' as const;
+export const TextHighlightDefaults = {
+    text: 'We build amazing {software}',
+    variant: 'heading' as TypographyVariant,
+    highlightStyle: 'glow' as HighlightStyle,
+    highlightedTextAnimation: 'jump' as HighlightedTextAnimation,
+    highlightColor: undefined as string | undefined,
+    entranceAnimation: 'slideUp' as EntranceAnimation,
+    animationDelay: 30,
+    zoomDuration: 30,
+    className: undefined as string | undefined,
+    style: undefined as React.CSSProperties | undefined,
+};
 
-// Use z.input for props (what callers pass) - fields with defaults are optional
-export type TextHighlightProps = z.input<typeof TextHighlightSchema>;
+export type TextHighlightProps = Partial<typeof TextHighlightDefaults> & { id?: string };
 
-export const TextHighlight: React.FC<TextHighlightProps> = (propsInit: TextHighlightProps) => {
+export const TextHighlight: React.FC<TextHighlightProps> = () => {
     const frame = useCurrentFrame();
     const theme = useTheme();
 
-    const patchedProps = usePatchedProps(propsInit.id, propsInit);
-    const props = { ...TextHighlightSchema.parse(patchedProps), id: propsInit.id };
+    const props = usePatchedProps('texthighlight', TextHighlightDefaults);
 
     // Apply defaults
-    const actualVariant = props.variant ?? DEFAULT_VARIANT;
-    const actualHighlightStyle = props.highlightStyle ?? DEFAULT_HIGHLIGHT_STYLE;
-    const actualHighlightedTextAnimation =
-        props.highlightedTextAnimation ?? DEFAULT_HIGHLIGHTED_TEXT_ANIMATION;
+    const actualVariant = props.variant;
+    const actualHighlightStyle = props.highlightStyle;
+    const actualHighlightedTextAnimation = props.highlightedTextAnimation;
     const actualHighlightColor = props.highlightColor ?? theme.colors.primary;
-    const actualAnimation = props.entranceAnimation ?? DEFAULT_ANIMATION;
-    const actualAnimationDelay = props.animationDelay ?? DEFAULT_ENTRANCE_DURATION;
-    const actualZoomDuration = props.zoomDuration ?? DEFAULT_ZOOM_DURATION;
-    const styleOverride = useStyleOverride(props.id);
+    const actualAnimation = props.entranceAnimation;
+    const actualAnimationDelay = props.animationDelay;
+    const actualZoomDuration = props.zoomDuration;
+    const styleOverride = useStyleOverride('texthighlight');
+    const dragStyle = usePatchedDragStyle('texthighlight', props.style?.transform);
 
     // Animation timeline:
     // Phase 1: Entrance animation with highlight already visible (0 to animationDelay)
@@ -207,7 +212,6 @@ export const TextHighlight: React.FC<TextHighlightProps> = (propsInit: TextHighl
 
     return (
         <span
-            id={props.id}
             className={props.className}
             style={{
                 display: 'inline-block',
@@ -215,12 +219,12 @@ export const TextHighlight: React.FC<TextHighlightProps> = (propsInit: TextHighl
                 transform: getEntranceTransform(actualAnimation, entranceProgress, 200),
                 ...props.style,
                 ...styleOverride,
+                ...dragStyle,
             }}
         >
             {segments.map((segment, i) => (
                 <Text
                     key={i}
-                    id={`text-${i}-${props.id}`}
                     text={segment.text}
                     variant={actualVariant}
                     style={{
@@ -233,27 +237,6 @@ export const TextHighlight: React.FC<TextHighlightProps> = (propsInit: TextHighl
     );
 };
 
-// ============================================================================
-// Registry Descriptor
-// ============================================================================
-
-export const TextHighlightSchema = z.object({
-    id: z.string().optional(),
-    text: z.string().default(''),
-    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
-    highlightStyle: z.enum(HIGHLIGHT_STYLES).default(DEFAULT_HIGHLIGHT_STYLE).optional(),
-    highlightedTextAnimation: z
-        .enum(HIGHLIGHTED_TEXT_ANIMATIONS)
-        .default(DEFAULT_HIGHLIGHTED_TEXT_ANIMATION)
-        .optional(),
-    highlightColor: z.string().optional(),
-    entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
-    animationDelay: z.number().default(DEFAULT_ENTRANCE_DURATION).optional(),
-    zoomDuration: z.number().default(DEFAULT_ZOOM_DURATION).optional(),
-    className: z.string().optional(),
-    style: z.any().optional(),
-});
-
 export const TextHighlightSchemaFields = [
     {
         "name": "text",
@@ -265,29 +248,35 @@ export const TextHighlightSchemaFields = [
         "name": "variant",
         "type": "string",
         "subtype": "enum",
-        "default": DEFAULT_VARIANT
+        "default": TextHighlightDefaults.variant
     },
     {
         "name": "entranceAnimation",
         "type": "string",
         "subtype": "enum",
-        "default": DEFAULT_ANIMATION
+        "default": TextHighlightDefaults.entranceAnimation
     },
     {
         "name": "animationDelay",
         "type": "number",
-        "default": DEFAULT_ENTRANCE_DURATION
+        "default": TextHighlightDefaults.animationDelay
     },
     {
         "name": "zoomDuration",
         "type": "number",
-        "default": DEFAULT_ZOOM_DURATION
+        "default": TextHighlightDefaults.zoomDuration
     },
     {
         "name": "highlightStyle",
         "type": "string",
         "subtype": "enum",
-        "default": DEFAULT_HIGHLIGHT_STYLE
+        "default": TextHighlightDefaults.highlightStyle
+    },
+    {
+        "name": "highlightedTextAnimation",
+        "type": "string",
+        "subtype": "enum",
+        "default": TextHighlightDefaults.highlightedTextAnimation
     },
     {
         "name": "highlightColor",
@@ -313,4 +302,3 @@ export const TextHighlightDescriptor: ComponentRegistration = {
     description: 'Bold statement with an emphasized word/phrase. Use for key claims. Use {} to highlight. eg "We build amazing {software}"',
     celExpression: 'ceil(props.animationDelay + props.zoomDuration)',
 };
-

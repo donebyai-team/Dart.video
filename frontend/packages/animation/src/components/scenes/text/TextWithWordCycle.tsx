@@ -1,50 +1,51 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
-import z from 'zod';
 import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme/ThemeContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
-import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
+import type { TypographyVariant } from '../../../tokens/semantic';
 import { resolveTypography } from '../../../tokens/resolveTypography';
 import { Text } from '../../../core/assets/Text';
 import type { ComponentRegistration } from '../../../registry/registry';
-import type { DurationResult } from '../durationTypes';
-import { TEXT_CYCLE_TRANSITIONS, HIGHLIGHT_STYLES } from '../types';
+import type { HighlightStyle, TextCycleTransition } from '../types';
 
-// Default constants
-const DEFAULT_HOLD_DURATION = 20;
-const DEFAULT_TRANSITION_DURATION = 10;
-const DEFAULT_TRANSITION = 'slideUp' as const;
-const DEFAULT_VARIANT = 'heading' as const;
-const DEFAULT_HIGHLIGHT_STYLE = 'background' as const;
+export const TextWithWordCycleDefaults = {
+  text: 'Sample text',
+  cyclingWords: ['first word', 'next word', 'last word'],
+  holdDuration: 20,
+  transitionDuration: 10,
+  textCycleTransition: 'slideUp' as TextCycleTransition,
+  variant: 'heading' as TypographyVariant,
+  highlightStyle: 'background' as HighlightStyle,
+  highlightColor: undefined as string | undefined,
+  style: undefined as React.CSSProperties | undefined,
+  className: undefined as string | undefined,
+};
 
-
-// Use z.input for props (what callers pass) - fields with defaults are optional
-export type TextWithWordCycleProps = z.input<typeof TextWithWordCycleSchema>;
+export type TextWithWordCycleProps = typeof TextWithWordCycleDefaults;
 
 /**
  * Displays static text followed by cycling highlighted words with animated transitions.
  * 
  * Example: "We build amazing [software/products/solutions]" where the bracketed words cycle.
  */
-export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (propsInit: TextWithWordCycleProps) => {
+export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = () => {
   const frame = useCurrentFrame();
   const styleConfig = useStyleContext();
   const theme = useTheme();
   const preset = useAspectPreset();
 
-  const patchedProps = usePatchedProps(propsInit.id, propsInit);
-  const props = { ...TextWithWordCycleSchema.parse(patchedProps), id: propsInit.id };
+  const props = usePatchedProps('textwithwordcycle', TextWithWordCycleDefaults);
 
-  const patchedVariant = props.variant ?? DEFAULT_VARIANT;
-  const actualHighlightStyle = props.highlightStyle ?? DEFAULT_HIGHLIGHT_STYLE;
+  const patchedVariant = props.variant;
+  const actualHighlightStyle = props.highlightStyle;
   const actualHighlightColor = props.highlightColor ?? theme.colors.primary;
-  const styleOverride = useStyleOverride(props.id);
-  const dragStyle = usePatchedDragStyle(props.id, props.style?.transform);
+  const styleOverride = useStyleOverride('textwithwordcycle');
+  const dragStyle = usePatchedDragStyle('textwithwordcycle', props.style?.transform);
 
-  const cycleDuration = (props.holdDuration ?? DEFAULT_HOLD_DURATION) + (props.transitionDuration ?? DEFAULT_TRANSITION_DURATION);
+  const cycleDuration = props.holdDuration + props.transitionDuration;
   const typographyStyle = resolveTypography(patchedVariant, styleConfig, theme, preset);
 
   // The longest word by character count — used as an invisible spacer
@@ -65,8 +66,8 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (propsInit: T
   }
 
   const elapsed = Math.max(0, frame);
-  const holdDuration = props.holdDuration ?? DEFAULT_HOLD_DURATION;
-  const transitionDuration = props.transitionDuration ?? DEFAULT_TRANSITION_DURATION;
+  const holdDuration = props.holdDuration;
+  const transitionDuration = props.transitionDuration;
   const lastCycleIndex = props.cyclingWords.length - 1;
   const cycleIndex = Math.min(Math.floor(elapsed / cycleDuration), lastCycleIndex);
   const cycleFrame = elapsed - cycleIndex * cycleDuration;
@@ -269,7 +270,6 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (propsInit: T
 
   return (
     <span
-      id={props.id}
       className={props.className}
       style={{
         display: 'inline',
@@ -291,21 +291,6 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (propsInit: T
 // Registry Descriptor
 // ============================================================================
 
-export const TextWithWordCycleSchema = z.object({
-  id: z.string().optional(),
-  text: z.string().default(''),
-  cyclingWords: z.array(z.string()).default([]),
-  holdDuration: z.number().default(DEFAULT_HOLD_DURATION).optional(),
-  transitionDuration: z.number().default(DEFAULT_TRANSITION_DURATION).optional(),
-  textCycleTransition: z.enum(TEXT_CYCLE_TRANSITIONS).default(DEFAULT_TRANSITION).optional(),
-  variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
-  highlightStyle: z.enum(HIGHLIGHT_STYLES).default(DEFAULT_HIGHLIGHT_STYLE).optional(),
-  highlightColor: z.string().optional(),
-  style: z.any().optional(),
-  className: z.string().optional(),
-});
-
-
 const TextWithWordCycleSchemaFields = [
   {
     "name": "text",
@@ -326,23 +311,23 @@ const TextWithWordCycleSchemaFields = [
     "name": "variant",
     "type": "string",
     "sub_type": "enum",
-    "default": DEFAULT_VARIANT
+    "default": TextWithWordCycleDefaults.variant
   },
   {
     "name": "holdDuration",
     "type": "number",
-    "default": DEFAULT_HOLD_DURATION
+    "default": TextWithWordCycleDefaults.holdDuration
   },
   {
     "name": "transitionDuration",
     "type": "number",
-    "default": DEFAULT_TRANSITION_DURATION
+    "default": TextWithWordCycleDefaults.transitionDuration
   },
   {
     "name": "textCycleTransition",
     "type": "string",
     "subtype": "enum",
-    "default": DEFAULT_TRANSITION
+    "default": TextWithWordCycleDefaults.textCycleTransition
   }
 ]
 

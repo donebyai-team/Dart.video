@@ -1,58 +1,68 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
-import z from 'zod';
-import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
+import type { TypographyVariant } from '../../../tokens/semantic';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
 import { interpolateWithEasing, useAspectPreset } from '../../../styles';
 import { useTheme } from '../../../theme';
 import { resolveTypography } from '../../../tokens';
-import { getEntranceTransform, ENTRANCE_ANIMATIONS, SPLIT_BY_MODES } from '../types';
+import {
+    getEntranceTransform,
+    type EntranceAnimation,
+    type SplitByMode,
+} from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
-import type { DurationResult } from '../durationTypes';
-
-// Default constants
-const DEFAULT_VARIANT = 'heading' as const;
-const DEFAULT_ANIMATION = 'scaleIn' as const;
-const DEFAULT_SPLIT_BY = 'word' as const;
-
-// Per-mode defaults: stagger delay and unit animation duration
-const SPLIT_MODE_DEFAULTS: Record<string, { staggerDelay: number; unitDuration: number }> = {
-    char: { staggerDelay: 2, unitDuration: 8 },
-    word: { staggerDelay: 5, unitDuration: 15 },
-    line: { staggerDelay: 10, unitDuration: 20 },
-};
-
-function getSplitModeDefaults(splitBy: string) {
-    return SPLIT_MODE_DEFAULTS[splitBy] ?? SPLIT_MODE_DEFAULTS['word'];
+function getSplitModeDefaults(splitBy: SplitByMode) {
+    switch (splitBy) {
+        case 'char':
+            return { staggerDelay: 2, duration: 8 };
+        case 'line':
+            return { staggerDelay: 10, duration: 20 };
+        case 'word':
+        default:
+            return {
+                staggerDelay: TextStaggerDefaults.staggerDelay,
+                duration: TextStaggerDefaults.duration,
+            };
+    }
 }
 
-// Use z.input for props (what callers pass) - fields with defaults are optional
-export type TextStaggerProps = z.input<typeof TextStaggerSchema>;
+export const TextStaggerDefaults = {
+    startAt: 0,
+    text: 'Sample text',
+    variant: 'heading' as TypographyVariant,
+    staggerDelay: 5,
+    entranceAnimation: 'scaleIn' as EntranceAnimation,
+    duration: 15,
+    splitBy: 'word' as SplitByMode,
+    className: undefined as string | undefined,
+    style: undefined as React.CSSProperties | undefined,
+};
 
-export const TextStagger: React.FC<TextStaggerProps> = (propsInit: TextStaggerProps) => {
+export type TextStaggerProps = Partial<typeof TextStaggerDefaults> & { id?: string };
+
+export const TextStagger: React.FC<TextStaggerProps> = () => {
 
     const frame = useCurrentFrame();
     const styleConfig = useStyleContext();
     const theme = useTheme();
     const preset = useAspectPreset();
 
-    const patchedProps = usePatchedProps(propsInit.id, propsInit);
-    const props = { ...TextStaggerSchema.parse(patchedProps), id: propsInit.id }
+    const props = usePatchedProps('textstagger', TextStaggerDefaults);
 
 
     // Apply defaults (split-mode-aware)
-    const actualVariant = props.variant ?? DEFAULT_VARIANT;
-    const actualAnimation = props.entranceAnimation ?? DEFAULT_ANIMATION;
-    const actualStartAt = props.startAt ?? 0;
-    const splitBy = props.splitBy ?? DEFAULT_SPLIT_BY;
+    const actualVariant = props.variant;
+    const actualAnimation = props.entranceAnimation;
+    const actualStartAt = props.startAt;
+    const splitBy = props.splitBy;
     const modeDefaults = getSplitModeDefaults(splitBy);
-    const actualStaggerDelay = propsInit.staggerDelay ?? modeDefaults.staggerDelay;
-    const actualDuration = propsInit.duration ?? modeDefaults.unitDuration;
+    const actualStaggerDelay = props.staggerDelay ?? modeDefaults.staggerDelay;
+    const actualDuration = props.duration ?? modeDefaults.duration;
 
 
-    const styleOverride = useStyleOverride(props.id);
-    const dragStyle = usePatchedDragStyle(props.id, props.style?.transform);
+    const styleOverride = useStyleOverride('textstagger');
+    const dragStyle = usePatchedDragStyle('textstagger', props.style?.transform);
 
     const units = splitBy === 'char' ? props.text.split('') : splitBy === 'line' ? props.text.split('\n') : props.text.split(' ');
 
@@ -72,7 +82,6 @@ export const TextStagger: React.FC<TextStaggerProps> = (propsInit: TextStaggerPr
 
     return (
         <span
-            id={props.id}
             className={props.className}
             style={{
                 display: 'inline-block',
@@ -100,23 +109,6 @@ export const TextStagger: React.FC<TextStaggerProps> = (propsInit: TextStaggerPr
 };
 
 // ============================================================================
-// Schema & Duration Calculation
-// ============================================================================
-
-export const TextStaggerSchema = z.object({
-    id: z.string().optional(),
-    startAt: z.number().default(0).optional(),
-    text: z.string().default(''),
-    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).optional().default(DEFAULT_VARIANT),
-    staggerDelay: z.number().min(0).optional().default(SPLIT_MODE_DEFAULTS.word.staggerDelay),
-    entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).optional().default(DEFAULT_ANIMATION),
-    duration: z.number().optional().default(SPLIT_MODE_DEFAULTS.word.unitDuration),
-    splitBy: z.enum(SPLIT_BY_MODES).optional().default(DEFAULT_SPLIT_BY),
-    className: z.string().optional(),
-    style: z.any().optional(),
-});
-
-// ============================================================================
 // Registry Descriptor
 // ============================================================================
 
@@ -131,29 +123,29 @@ export const TextStaggerSchemaFields = [
         "name": "variant",
         "type": "string",
         "subtype": "enum",
-        "default": DEFAULT_VARIANT
+        "default": TextStaggerDefaults.variant
     },
     {
         "name": "staggerDelay",
         "type": "number",
-        "default": SPLIT_MODE_DEFAULTS.word.staggerDelay
+        "default": TextStaggerDefaults.staggerDelay
     },
     {
         "name": "entranceAnimation",
         "type": "string",
         "subtype": "enum",
-        "default": DEFAULT_ANIMATION
+        "default": TextStaggerDefaults.entranceAnimation
     },
     {
         "name": "duration",
         "type": "number",
-        "default": SPLIT_MODE_DEFAULTS.word.unitDuration
+        "default": TextStaggerDefaults.duration
     },
     {
         "name": "splitBy",
         "type": "string",
         "subtype": "enum",
-        "default": DEFAULT_SPLIT_BY
+        "default": TextStaggerDefaults.splitBy
     }
 ]
 

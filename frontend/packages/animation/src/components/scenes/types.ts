@@ -35,7 +35,11 @@ export const DIRECTIONS = [
     'down',
 ] as const;
 
+export const HIGHLIGHTED_TEXT_ANIMATIONS = ['zoom', 'jump'] as const;
+
 export type Direction = typeof DIRECTIONS[number];
+
+export type HighlightedTextAnimation = typeof HIGHLIGHTED_TEXT_ANIMATIONS[number];
 
 export const SPLIT_BY_MODES = ['char', 'word', 'line'] as const;
 

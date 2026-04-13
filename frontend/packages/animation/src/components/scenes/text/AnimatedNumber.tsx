@@ -1,44 +1,50 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
-import z from 'zod';
-import { usePatchedProps, useStyleOverride } from '../../../patches';
+import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
 import { useStyleContext, useAspectPreset, interpolateWithEasing } from '../../../styles';
 import { useTheme } from '../../../theme';
 import { resolveTypography } from '../../../tokens';
-import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
-import { getEntranceTransform, ENTRANCE_ANIMATIONS, HIGHLIGHT_STYLES } from '../types';
-import { Counter, CounterSchemaFields } from './Counter';
+import type { TypographyVariant } from '../../../tokens/semantic';
+import { getEntranceTransform } from '../types';
+import type { EntranceAnimation, HighlightStyle } from '../types';
+import { Counter } from './Counter';
 import { Text } from '../../../core/assets/Text';
 import type { ComponentRegistration } from '../../../registry/registry';
 
-// Default constants
-const DEFAULT_ENTRANCE_DURATION = 30;
-const DEFAULT_COUNTER_MIN_DURATION = 45;
-const DEFAULT_COUNTER_MAX_DURATION = 100;
-const DEFAULT_COUNTER_DURATION = 45;
-const DEFAULT_VARIANT = 'heading' as const;
-const DEFAULT_HIGHLIGHT_STYLE = 'glow' as const;
-const DEFAULT_ANIMATION = 'slideUp' as const;
+export const AnimatedNumberDefaults = {
+    startText: 'Solved',
+    endText: 'incidents',
+    from: 0,
+    to: 100,
+    format: undefined as string | undefined,
+    variant: 'heading' as TypographyVariant,
+    highlightStyle: 'glow' as HighlightStyle,
+    highlightColor: undefined as string | undefined,
+    entranceAnimation: 'slideUp' as EntranceAnimation,
+    animationDelay: 30,
+    counterDuration: 45,
+    className: undefined as string | undefined,
+    style: undefined as React.CSSProperties | undefined,
+};
 
-// Use z.input for props (what callers pass) - fields with defaults are optional
-export type AnimatedNumberProps = z.input<typeof AnimatedNumberSchema>;
+export type AnimatedNumberProps = Partial<typeof AnimatedNumberDefaults> & { id?: string };
 
-export const AnimatedNumber: React.FC<AnimatedNumberProps> = (propsInit: AnimatedNumberProps) => {
+export const AnimatedNumber: React.FC<AnimatedNumberProps> = () => {
     const frame = useCurrentFrame();
     const styleConfig = useStyleContext();
     const theme = useTheme();
     const preset = useAspectPreset();
 
-    const patchedProps = usePatchedProps(propsInit.id, propsInit)
-    const props = { ...AnimatedNumberSchema.parse(patchedProps), id: propsInit.id }
+    const props = usePatchedProps('animatednumber', AnimatedNumberDefaults)
 
     // Apply defaults
-    const actualVariant = props.variant ?? DEFAULT_VARIANT;
+    const actualVariant = props.variant;
     const actualHighlightColor = props.highlightColor ?? theme.colors.primary;
-    const actualAnimation = props.entranceAnimation ?? DEFAULT_ANIMATION;
-    const actualAnimationDelay = props.animationDelay ?? DEFAULT_ENTRANCE_DURATION;
+    const actualAnimation = props.entranceAnimation;
+    const actualAnimationDelay = props.animationDelay;
 
-    const styleOverride = useStyleOverride(props.id);
+    const styleOverride = useStyleOverride('animatednumber');
+    const dragStyle = usePatchedDragStyle('animatednumber', props.style?.transform);
 
     const entranceProgress = interpolateWithEasing(
         frame,
@@ -118,6 +124,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (propsInit: Animate
                 display: 'inline-block',
                 ...props.style,
                 ...styleOverride,
+                ...dragStyle,
             }}
         >
 
@@ -139,7 +146,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (propsInit: Animate
                     variant={actualVariant}
                     startAt={0}
                     style={getHighlightStyles()}
-                    durationInFrames={DEFAULT_COUNTER_DURATION}
+                    durationInFrames={props.counterDuration}
                 />
             </span>
             <Text text={props.endText} id={`text-right`} style={
@@ -153,39 +160,16 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (propsInit: Animate
     );
 };
 
-// ============================================================================
-// Schema & Duration Calculation
-// ============================================================================
-
-export const AnimatedNumberSchema = z.object({
-    id: z.string().optional(),
-    startText: z.string().default(''),
-    endText: z.string().default(''),
-    from: z.number().default(0),
-    to: z.number(),
-    format: z.string().optional(),
-    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
-    highlightStyle: z.enum(HIGHLIGHT_STYLES).default(DEFAULT_HIGHLIGHT_STYLE).optional(),
-    highlightColor: z.string().optional(),
-    entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
-    animationDelay: z.number().default(DEFAULT_ENTRANCE_DURATION).optional(),
-    className: z.string().optional(),
-    style: z.any().optional(),
-});
-
-// ============================================================================
-// Registry Descriptor
-// ============================================================================
-
 export const AnimatedNumberAssetSchema = [
     {
         name: 'entranceAnimation',
         type: 'string',
-        default: DEFAULT_ANIMATION,
-    }, {
+        default: AnimatedNumberDefaults.entranceAnimation,
+    },
+    {
         name: 'animationDelay',
         type: 'number',
-        default: DEFAULT_ENTRANCE_DURATION,
+        default: AnimatedNumberDefaults.animationDelay,
     },
     {
         "name": "startText",
@@ -198,7 +182,29 @@ export const AnimatedNumberAssetSchema = [
         "type": "string",
         "map": "props.endText"
     },
-    ...CounterSchemaFields
+    {
+        "name": "from",
+        "type": "number",
+        "map": "props.from",
+        "default": AnimatedNumberDefaults.from
+    },
+    {
+        "name": "to",
+        "type": "number",
+        "map": "props.to",
+        "default": AnimatedNumberDefaults.to
+    },
+    {
+        "name": "format",
+        "type": "string",
+        "default": ""
+    },
+    {
+        "name": "variant",
+        "type": "string",
+        "subtype": "enum",
+        "default": AnimatedNumberDefaults.variant
+    }
 ]
 
 export const AnimatedNumberDescriptor: ComponentRegistration = {
@@ -230,4 +236,3 @@ export const AnimatedNumberDescriptor: ComponentRegistration = {
     description: 'Counting metric with label text. Use for stats and KPIs',
     celExpression: 'ceil(props.animationDelay + max(45, min(100, log10(abs(props.to - props.from) + 1) * 20)))',
 };
-

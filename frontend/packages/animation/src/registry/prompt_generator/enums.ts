@@ -1,4 +1,4 @@
-import { DIRECTIONS, ENTRANCE_ANIMATIONS, HIGHLIGHT_STYLES, LOGO_ANIMATIONS, SPLIT_BY_MODES, TEXT_CYCLE_TRANSITIONS } from "../../components/scenes";
+import { DIRECTIONS, ENTRANCE_ANIMATIONS, HIGHLIGHT_STYLES, HIGHLIGHTED_TEXT_ANIMATIONS, LOGO_ANIMATIONS, SPLIT_BY_MODES, TEXT_CYCLE_TRANSITIONS } from "../../components/scenes";
 import { TYPOGRAPHY_VARIANT_NAMES } from "../../tokens";
 
 export const AVAILABLE_ENUMS = [
@@ -31,5 +31,9 @@ export const AVAILABLE_ENUMS = [
     {
         name: "textCycleTransition",
         value: TEXT_CYCLE_TRANSITIONS,
+    },
+    {
+        name: "highlightedTextAnimation",
+        value: HIGHLIGHTED_TEXT_ANIMATIONS,
     },
 ]

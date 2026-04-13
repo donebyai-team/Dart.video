@@ -1,42 +1,27 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
-import z from 'zod';
 import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme/ThemeContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
-import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
+import type { TypographyVariant } from '../../../tokens/semantic';
 import { resolveTypography } from '../../../tokens/resolveTypography';
 import { Text } from '../../../core/assets/Text';
 import type { ComponentRegistration } from '../../../registry/registry';
-import type { DurationResult } from '../durationTypes';
-import { TEXT_CYCLE_TRANSITIONS } from '../types';
+import type { TextCycleTransition } from '../types';
 
-// Default constants
-const DEFAULT_HOLD_DURATION = 20;
-const DEFAULT_TRANSITION_DURATION = 5;
-const DEFAULT_TRANSITION = 'slideUp' as const;
-const DEFAULT_VARIANT = 'displayXl' as const;
+export const TextCycleDefaults = {
+  texts: ['First text', 'Second text', 'Third text'],
+  holdDuration: 20,
+  transitionDuration: 5,
+  textCycleTransition: 'slideUp' as TextCycleTransition,
+  variant: 'displayXl' as TypographyVariant,
+  style: undefined as React.CSSProperties | undefined,
+  className: undefined as string | undefined,
+};
 
-
-// ============================================================================
-// Schema & Duration Calculation
-// ============================================================================
-
-export const TextCycleSchema = z.object({
-  id: z.string().optional(),
-  texts: z.array(z.string()).default([]),
-  holdDuration: z.number().default(DEFAULT_HOLD_DURATION).optional(),
-  transitionDuration: z.number().default(DEFAULT_TRANSITION_DURATION).optional(),
-  textCycleTransition: z.enum(TEXT_CYCLE_TRANSITIONS).default(DEFAULT_TRANSITION).optional(),
-  variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
-  style: z.any().optional(),
-  className: z.string().optional(),
-});
-
-// Use z.input for props (what callers pass) - fields with defaults are optional
-export type TextCycleProps = z.input<typeof TextCycleSchema>;
+export type TextCycleProps = Partial<typeof TextCycleDefaults> & { id?: string };
 
 /**
  * Cycles through an array of words with animated transitions.
@@ -44,20 +29,19 @@ export type TextCycleProps = z.input<typeof TextCycleSchema>;
  * Auto-adjusts container width to the longest word using a hidden spacer —
  * no layout reflow occurs when words change, eliminating jerk in Stack/Row layouts.
  */
-export const TextCycle: React.FC<TextCycleProps> = (propsInit: TextCycleProps) => {
+export const TextCycle: React.FC<TextCycleProps> = () => {
   const frame = useCurrentFrame();
   const styleConfig = useStyleContext();
   const theme = useTheme();
   const preset = useAspectPreset();
 
-  const patchedProps = usePatchedProps(propsInit.id, propsInit);
-  const props = { ...TextCycleSchema.parse(patchedProps), id: propsInit.id };
+  const props = usePatchedProps('textcycle', TextCycleDefaults);
 
-  const patchedVariant = props.variant ?? DEFAULT_VARIANT;
-  const styleOverride = useStyleOverride(props.id);
-  const dragStyle = usePatchedDragStyle(props.id, props.style?.transform);
+  const patchedVariant = props.variant;
+  const styleOverride = useStyleOverride('textcycle');
+  const dragStyle = usePatchedDragStyle('textcycle', props.style?.transform);
 
-  const cycleDuration = (props.holdDuration ?? DEFAULT_HOLD_DURATION) + (props.transitionDuration ?? DEFAULT_TRANSITION_DURATION);
+  const cycleDuration = props.holdDuration + props.transitionDuration;
   const typographyStyle = resolveTypography(patchedVariant, styleConfig, theme, preset);
 
   // The longest word by character count — used as an invisible spacer to
@@ -70,8 +54,8 @@ export const TextCycle: React.FC<TextCycleProps> = (propsInit: TextCycleProps) =
   if (props.texts.length === 0) return <Text text="" variant={patchedVariant} className={props.className} style={props.style} />;
 
   const elapsed = Math.max(0, frame);
-  const holdDuration = props.holdDuration ?? DEFAULT_HOLD_DURATION;
-  const transitionDuration = props.transitionDuration ?? DEFAULT_TRANSITION_DURATION;
+  const holdDuration = props.holdDuration;
+  const transitionDuration = props.transitionDuration;
   const lastCycleIndex = props.texts.length - 1;
   const cycleIndex = Math.min(Math.floor(elapsed / cycleDuration), lastCycleIndex);
   const cycleFrame = elapsed - cycleIndex * cycleDuration;
@@ -123,7 +107,7 @@ export const TextCycle: React.FC<TextCycleProps> = (propsInit: TextCycleProps) =
 
   if (props.textCycleTransition === 'fadeSwap') {
     return (
-      <span id={props.id} className={props.className} style={containerStyle}>
+      <span className={props.className} style={containerStyle}>
         {/* Spacer holds the width — never visible */}
         <Text text={longestWord} variant={patchedVariant} style={spacerStyle} />
 
@@ -148,7 +132,7 @@ export const TextCycle: React.FC<TextCycleProps> = (propsInit: TextCycleProps) =
 
   if (props.textCycleTransition === 'slideUp') {
     return (
-      <span id={props.id} className={props.className} style={{ ...containerStyle, overflow: 'hidden' }}>
+      <span className={props.className} style={{ ...containerStyle, overflow: 'hidden' }}>
         <Text text={longestWord} variant={patchedVariant} style={spacerStyle} />
 
         <Text
@@ -178,7 +162,7 @@ export const TextCycle: React.FC<TextCycleProps> = (propsInit: TextCycleProps) =
 
   // flipY
   return (
-    <span id={props.id} className={props.className} style={containerStyle}>
+    <span className={props.className} style={containerStyle}>
       <Text text={longestWord} variant={patchedVariant} style={spacerStyle} />
 
       <Text
@@ -222,23 +206,23 @@ const TextCycleSchemaFields = [
     "name": "variant",
     "type": "string",
     "subtype": "enum",
-    "default": DEFAULT_VARIANT
+    "default": TextCycleDefaults.variant
   },
   {
     "name": "textCycleTransition",
     "type": "string",
     "subtype": "enum",
-    "default": DEFAULT_TRANSITION
+    "default": TextCycleDefaults.textCycleTransition
   },
   {
     "name": "holdDuration",
     "type": "number",
-    "default": DEFAULT_HOLD_DURATION
+    "default": TextCycleDefaults.holdDuration
   },
   {
     "name": "transitionDuration",
     "type": "number",
-    "default": DEFAULT_TRANSITION_DURATION
+    "default": TextCycleDefaults.transitionDuration
   }
 ]
 

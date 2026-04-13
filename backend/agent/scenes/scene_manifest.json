@@ -77,6 +77,13 @@
         "fadeSwap",
         "slideUp"
       ]
+    },
+    {
+      "name": "highlightedTextAnimation",
+      "value": [
+        "zoom",
+        "jump"
+      ]
     }
   ],
   "components": [
@@ -126,16 +133,6 @@
                 },
                 {
                   "name": "format",
-                  "type": "string",
-                  "default": ""
-                },
-                {
-                  "name": "prefix",
-                  "type": "string",
-                  "default": ""
-                },
-                {
-                  "name": "suffix",
                   "type": "string",
                   "default": ""
                 },
@@ -311,6 +308,12 @@
                   "type": "string",
                   "subtype": "enum",
                   "default": "glow"
+                },
+                {
+                  "name": "highlightedTextAnimation",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "jump"
                 },
                 {
                   "name": "highlightColor",

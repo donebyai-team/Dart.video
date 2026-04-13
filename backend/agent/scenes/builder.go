@@ -86,7 +86,7 @@ func init() {
 	}
 }
 
-func BuildScenesList() string {
+func BuildScenesList(editMode bool) string {
 
 	var scenes []Component
 
@@ -123,7 +123,31 @@ func BuildScenesList() string {
 		writeScene(&b, s)
 	}
 
+	if editMode && len(registry.AvailableEnums) > 0 {
+		writeAvailableEnums(&b)
+	}
+
 	return b.String()
+}
+
+func writeAvailableEnums(b *strings.Builder) {
+	b.WriteString("## Available Enums\n\n")
+
+	for _, enum := range registry.AvailableEnums {
+		fmt.Fprintf(b, "%s", enum.Name)
+
+		if enum.Description != "" {
+			fmt.Fprintf(b, " | %s", enum.Description)
+		}
+
+		fmt.Fprintf(b, "\n")
+
+		if len(enum.Value) > 0 {
+			fmt.Fprintf(b, "Values: %s\n\n", strings.Join(enum.Value, ", "))
+		} else {
+			fmt.Fprintf(b, "\n")
+		}
+	}
 }
 
 func writeScene(b *strings.Builder, c Component) {
