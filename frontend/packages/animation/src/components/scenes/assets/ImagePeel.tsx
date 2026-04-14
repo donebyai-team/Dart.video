@@ -135,7 +135,7 @@ export function ImagePeel(): React.ReactElement {
                             >
                                 <ImageAsset
                                     id={eid}
-                                    src={patch.src}
+                                    image={patch.image}
                                     width={patch.width}
                                     height={patch.height}
                                     style={{
@@ -165,7 +165,7 @@ export const ImagePeelSchemaFields = [
                 name: "imageasset",
                 fields: [
                     {
-                        "name": "src",
+                        "name": "image",
                         "type": "string",
                         "map": "item",
                         "dataType": "media",

@@ -102,6 +102,6 @@ type TemplateRepository interface {
 
 type MediaAssetRepository interface {
 	GetMediaAssetsByID(ctx context.Context, IDs []string) ([]*models.MediaAsset, error)
-	GetMediaAssetsByOrgID(ctx context.Context, orgID string) ([]*models.MediaAsset, error)
+	GetMediaAssetsByOrgID(ctx context.Context, orgID string, mediaType pbcore.MediaType) ([]*models.MediaAsset, error)
 	CreateMediaAsset(ctx context.Context, asset *models.MediaAsset) (*models.MediaAsset, error)
 }

@@ -5,15 +5,14 @@ import (
 	"context"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-func (p *Portal) GetMediaAssets(ctx context.Context, c *connect.Request[emptypb.Empty]) (*connect.Response[pbportal.GetMediaAssetsResponse], error) {
+func (p *Portal) GetMediaAssets(ctx context.Context, c *connect.Request[pbportal.GetMediaAssetsRequest]) (*connect.Response[pbportal.GetMediaAssetsResponse], error) {
 	actor, err := p.gethAuthContext(ctx)
 	if err != nil {
 		return nil, err
 	}
-	assets, err := p.db.GetMediaAssetsByOrgID(ctx, actor.OrganizationID)
+	assets, err := p.db.GetMediaAssetsByOrgID(ctx, actor.OrganizationID, c.Msg.MediaType)
 	if err != nil {
 		return nil, err
 	}

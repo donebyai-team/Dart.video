@@ -1,14 +1,10 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
 import z from 'zod';
-import { useStyleContext } from '../../../styles/StyleContext';
-import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { Text, TextProps } from '../../../core/assets/Text';
 import { VideoAsset } from '../../../core/assets/VideoAsset';
-import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
 import { usePatchedProps } from '../../../patches';
-import { useTheme } from '../../../theme';
 import { getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
 
@@ -75,7 +71,7 @@ export function AnimatedVideo(): React.ReactElement {
             >
                 <VideoAsset
                     id='videoasset'
-                    src={videoProps.src}
+                    video={videoProps.video}
                     width={videoProps.width}
                     height={videoProps.height}
                     style={{

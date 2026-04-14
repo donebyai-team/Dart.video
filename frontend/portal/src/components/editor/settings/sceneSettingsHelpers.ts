@@ -5,8 +5,10 @@ import { resolveComponentFromId } from '@coasterai/renderer'
 export type SceneFieldKind = 'string' | 'number' | 'boolean' | 'string[]' | 'enum'
   | 'icon'
   | 'icon[]'
-  | 'media'
-  | 'media[]'
+  | 'image'
+  | 'image[]'
+  | 'video'
+  | 'video[]'
 
 export type SceneFieldDefinition = {
   kind: SceneFieldKind
@@ -77,21 +79,22 @@ export function inferSceneFieldDefinition(prop: string, value: unknown): SceneFi
 
   const lowerProp = prop.toLowerCase()
 
-  const isMediaField =
-    lowerProp === 'src' ||
-    lowerProp === 'image' ||
-    lowerProp === 'images' ||
-    lowerProp === 'video' ||
-    lowerProp === 'videos' ||
-    lowerProp.includes('image') ||
-    lowerProp.includes('video') ||
-    lowerProp.includes('src')
+  const isVideoField = lowerProp === 'video' || lowerProp === 'videos'
+  const isImageField = lowerProp === 'image' || lowerProp === 'images'
 
-  if (isMediaField && typeof value === 'string') {
-    return { kind: 'media' }
+
+  if (isVideoField && typeof value === 'string') {
+    return { kind: 'video' }
   }
-  if (isMediaField && Array.isArray(value) && value.every(item => typeof item === 'string')) {
-    return { kind: 'media[]' }
+  if (isVideoField && Array.isArray(value) && value.every(item => typeof item === 'string')) {
+    return { kind: 'video[]' }
+  }
+
+  if (isImageField && typeof value === 'string') {
+    return { kind: 'image' }
+  }
+  if (isImageField && Array.isArray(value) && value.every(item => typeof item === 'string')) {
+    return { kind: 'image[]' }
   }
 
   if (lowerProp.includes('icon') && typeof value === 'string') {
@@ -129,12 +132,16 @@ function getSceneFieldKindPriority(kind: SceneFieldKind): number {
       return 2
     case 'icon[]':
       return 2
-    case 'media':
+    case 'image':
       return 3
-    case 'media[]':
+    case 'image[]':
       return 4
-    case 'enum':
+    case 'video':
       return 5
+    case 'video[]':
+      return 6
+    case 'enum':
+      return 7
     case 'boolean':
       return 6
     case 'string[]':
@@ -154,10 +161,14 @@ export function getSceneFieldGroupLabel(kind: SceneFieldKind): string {
       return 'Icons'
     case 'icon[]':
       return 'Icons'
-    case 'media':
-      return 'Media'
-    case 'media[]':
-      return 'Media'
+    case 'image':
+      return 'Images'
+    case 'image[]':
+      return 'Images'
+    case 'video':
+      return 'Videos'
+    case 'video[]':
+      return 'Videos'
     case 'enum':
       return 'Options'
     case 'boolean':

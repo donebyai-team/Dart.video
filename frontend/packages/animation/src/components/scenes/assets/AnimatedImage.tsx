@@ -79,7 +79,7 @@ export function AnimatedImage(): React.ReactElement {
             >
                 <ImageAsset
                     id='imageasset'
-                    src={imageProps.src}
+                    image={imageProps.image}
                     width={imageProps.width}
                     height={imageProps.height}
                     style={{

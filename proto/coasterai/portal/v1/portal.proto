@@ -48,12 +48,16 @@ service PortalService {
   rpc GenerateOrEditScene(GenerateOrEditSceneRequest) returns (stream GenerateOrEditSceneResponse);
 
   // Assets
-  rpc GetMediaAssets(.google.protobuf.Empty) returns (GetMediaAssetsResponse);
+  rpc GetMediaAssets(GetMediaAssetsRequest) returns (GetMediaAssetsResponse);
   rpc GetMediaAssetsByID(GetMediaAssetsByIDs) returns (GetMediaAssetsResponse);
 }
 
 message GetMediaAssetsByIDs {
   repeated string assetsIDs = 1;
+}
+
+message GetMediaAssetsRequest {
+  core.v1.MediaType mediaType = 1;
 }
 
 message GetMediaAssetsResponse {

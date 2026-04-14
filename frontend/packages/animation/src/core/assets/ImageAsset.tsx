@@ -14,7 +14,7 @@ const DEFAULT_IMAGE_SVG = `data:image/svg+xml,${encodeURIComponent(`
 `)}`;
 
 export interface ImageAssetProps {
-    src?: string;
+    image?: string;
     width?: number;
     height?: number;
     style?: React.CSSProperties;
@@ -23,7 +23,7 @@ export interface ImageAssetProps {
 }
 
 export function ImageAsset({
-    src,
+    image,
     width,
     height,
     style,
@@ -37,7 +37,7 @@ export function ImageAsset({
     const { objectFit: overrideObjectFit, ...wrapperStyleOverride } = styleOverride;
     const overrideTransform = typeof styleOverride.transform === 'string' ? styleOverride.transform : undefined;
     const dragStyle = usePatchedDragStyle(id, style?.transform, overrideTransform);
-    const patchedSrc = usePatchedProp<string | undefined>(id, 'src', src ?? DEFAULT_IMAGE_SVG);
+    const patchedSrc = usePatchedProp<string | undefined>(id, 'image', image ?? DEFAULT_IMAGE_SVG);
     const patchedWidth = usePatchedProp<number | undefined>(id, 'width', width);
     const patchedHeight = usePatchedProp<number | undefined>(id, 'height', height);
     const resolvedBoxWidth = patchedWidth ?? preset.width;

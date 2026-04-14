@@ -158,7 +158,7 @@ func writeScene(b *strings.Builder, c Component) {
 	fmt.Fprintf(b, "%s", c.Name)
 
 	if len(c.Tags) > 0 {
-		fmt.Fprintf(b, " | %s", strings.Join(c.Tags, ", "))
+		fmt.Fprintf(b, " | Video sections: %s", strings.Join(c.Tags, " or "))
 	}
 
 	fmt.Fprintf(b, "\n")

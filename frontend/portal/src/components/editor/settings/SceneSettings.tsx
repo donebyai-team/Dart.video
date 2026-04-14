@@ -90,19 +90,41 @@ export default function SceneSettings({
                 minItems={MIN_ARRAY_ITEMS}
               />
             </div>
-          ) : definition.kind === 'media' ? (
+          ) : definition.kind === 'image' ? (
             <label key={prop} className="flex flex-col gap-2">
               <span className="text-sm font-medium">{toSceneFieldLabel(prop)}</span>
               <SingleSceneMediaPicker
+                mediaType='image'
                 fieldName={prop}
                 value={String(value)}
                 onChange={next => onValuePatch(patchEntryId ?? elementId, prop, next)}
               />
             </label>
-          ) : definition.kind === 'media[]' ? (
+          ) : definition.kind === 'image[]' ? (
             <div key={prop} className="flex flex-col gap-2">
               <span className="text-sm font-medium">{toSceneFieldLabel(prop)}</span>
               <MultiSceneMediaPicker
+                mediaType='image'
+                value={value as string[]}
+                onChange={next => onValuePatch(patchEntryId ?? elementId, prop, next)}
+                minItems={MIN_ARRAY_ITEMS}
+              />
+            </div>
+          ) : definition.kind === 'video' ? (
+            <label key={prop} className="flex flex-col gap-2">
+              <span className="text-sm font-medium">{toSceneFieldLabel(prop)}</span>
+              <SingleSceneMediaPicker
+                mediaType='video'
+                fieldName={prop}
+                value={String(value)}
+                onChange={next => onValuePatch(patchEntryId ?? elementId, prop, next)}
+              />
+            </label>
+          ) : definition.kind === 'video[]' ? (
+            <div key={prop} className="flex flex-col gap-2">
+              <span className="text-sm font-medium">{toSceneFieldLabel(prop)}</span>
+              <MultiSceneMediaPicker
+                mediaType='video'
                 value={value as string[]}
                 onChange={next => onValuePatch(patchEntryId ?? elementId, prop, next)}
                 minItems={MIN_ARRAY_ITEMS}

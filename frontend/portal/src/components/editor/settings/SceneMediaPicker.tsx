@@ -23,10 +23,12 @@ function moveValuesByIds(values: string[], ids: string[]): string[] {
 }
 
 export function SingleSceneMediaPicker({
+  mediaType,
   fieldName,
   value,
   onChange,
 }: {
+  mediaType?: 'image' | 'video'
   fieldName?: string
   value: string
   onChange: (value: string) => void
@@ -38,21 +40,15 @@ export function SingleSceneMediaPicker({
     setOpen(false)
   }
 
-  const lowerFieldName = fieldName?.toLowerCase() ?? ''
-  const buttonLabel =
-    lowerFieldName === 'src'
-      ? 'Replace image'
-      : value
-        ? 'Replace asset'
-        : 'Choose asset'
+  const buttonLabel = 'Replace'
 
   return (
     <div className="flex flex-col gap-2">
-      {value ? (
+      {/* {value ? (
         <div className="text-xs text-muted-foreground">
           Selected asset: {getMediaLabel(value)}
         </div>
-      ) : null}
+      ) : null} */}
       <div>
         <Button type="button" variant="outline" size="sm" onClick={() => setOpen(true)}>
           {buttonLabel}
@@ -61,6 +57,8 @@ export function SingleSceneMediaPicker({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-4xl p-0">
           <ManualMediaImportPanel
+            mediaType={mediaType}
+            showPreview={false}
             onClose={() => setOpen(false)}
             onConfirm={handleConfirm}
           />
@@ -71,10 +69,12 @@ export function SingleSceneMediaPicker({
 }
 
 export function MultiSceneMediaPicker({
+  mediaType,
   value,
   onChange,
   minItems = 2,
 }: {
+  mediaType?: 'image' | 'video'
   value: string[]
   onChange: (value: string[]) => void
   minItems?: number
@@ -112,6 +112,7 @@ export function MultiSceneMediaPicker({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-4xl p-0">
           <ManualMediaImportPanel
+            mediaType={mediaType}
             onClose={() => setOpen(false)}
             onConfirm={handleConfirm}
           />

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/lib/pq"
 	"github.com/shank318/coasterai/models"
+	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 )
 
 func init() {
@@ -43,7 +44,7 @@ func toFullUrl(path string) string {
 	return fmt.Sprintf("%s/%s", GetPublicBucketURL(), path)
 }
 
-func (r *Database) GetMediaAssetsByOrgID(ctx context.Context, orgID string) ([]*models.MediaAsset, error) {
+func (r *Database) GetMediaAssetsByOrgID(ctx context.Context, orgID string, mediaType pbcore.MediaType) ([]*models.MediaAsset, error) {
 	mediaAssets, err := getMany[models.MediaAsset](ctx, r, "media_asset/query_media_asset_by_org_id.sql", map[string]any{
 		"organization_id": orgID,
 	})

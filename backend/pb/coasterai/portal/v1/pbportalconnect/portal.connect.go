@@ -177,7 +177,7 @@ type PortalServiceClient interface {
 	// Edit animations
 	GenerateOrEditScene(context.Context, *connect.Request[v1.GenerateOrEditSceneRequest]) (*connect.ServerStreamForClient[v1.GenerateOrEditSceneResponse], error)
 	// Assets
-	GetMediaAssets(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetMediaAssetsResponse], error)
+	GetMediaAssets(context.Context, *connect.Request[v1.GetMediaAssetsRequest]) (*connect.Response[v1.GetMediaAssetsResponse], error)
 	GetMediaAssetsByID(context.Context, *connect.Request[v1.GetMediaAssetsByIDs]) (*connect.Response[v1.GetMediaAssetsResponse], error)
 }
 
@@ -341,7 +341,7 @@ func NewPortalServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(portalServiceGenerateOrEditSceneMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
-		getMediaAssets: connect.NewClient[emptypb.Empty, v1.GetMediaAssetsResponse](
+		getMediaAssets: connect.NewClient[v1.GetMediaAssetsRequest, v1.GetMediaAssetsResponse](
 			httpClient,
 			baseURL+PortalServiceGetMediaAssetsProcedure,
 			connect.WithSchema(portalServiceGetMediaAssetsMethodDescriptor),
@@ -383,7 +383,7 @@ type portalServiceClient struct {
 	getBrandIdentities    *connect.Client[emptypb.Empty, v1.BrandIdentityResponse]
 	updateBrandIdentity   *connect.Client[v1.UpdateBrandIdentityRequest, emptypb.Empty]
 	generateOrEditScene   *connect.Client[v1.GenerateOrEditSceneRequest, v1.GenerateOrEditSceneResponse]
-	getMediaAssets        *connect.Client[emptypb.Empty, v1.GetMediaAssetsResponse]
+	getMediaAssets        *connect.Client[v1.GetMediaAssetsRequest, v1.GetMediaAssetsResponse]
 	getMediaAssetsByID    *connect.Client[v1.GetMediaAssetsByIDs, v1.GetMediaAssetsResponse]
 }
 
@@ -513,7 +513,7 @@ func (c *portalServiceClient) GenerateOrEditScene(ctx context.Context, req *conn
 }
 
 // GetMediaAssets calls coasterai.portal.v1.PortalService.GetMediaAssets.
-func (c *portalServiceClient) GetMediaAssets(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetMediaAssetsResponse], error) {
+func (c *portalServiceClient) GetMediaAssets(ctx context.Context, req *connect.Request[v1.GetMediaAssetsRequest]) (*connect.Response[v1.GetMediaAssetsResponse], error) {
 	return c.getMediaAssets.CallUnary(ctx, req)
 }
 
@@ -554,7 +554,7 @@ type PortalServiceHandler interface {
 	// Edit animations
 	GenerateOrEditScene(context.Context, *connect.Request[v1.GenerateOrEditSceneRequest], *connect.ServerStream[v1.GenerateOrEditSceneResponse]) error
 	// Assets
-	GetMediaAssets(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetMediaAssetsResponse], error)
+	GetMediaAssets(context.Context, *connect.Request[v1.GetMediaAssetsRequest]) (*connect.Response[v1.GetMediaAssetsResponse], error)
 	GetMediaAssetsByID(context.Context, *connect.Request[v1.GetMediaAssetsByIDs]) (*connect.Response[v1.GetMediaAssetsResponse], error)
 }
 
@@ -891,7 +891,7 @@ func (UnimplementedPortalServiceHandler) GenerateOrEditScene(context.Context, *c
 	return connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.GenerateOrEditScene is not implemented"))
 }
 
-func (UnimplementedPortalServiceHandler) GetMediaAssets(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetMediaAssetsResponse], error) {
+func (UnimplementedPortalServiceHandler) GetMediaAssets(context.Context, *connect.Request[v1.GetMediaAssetsRequest]) (*connect.Response[v1.GetMediaAssetsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.GetMediaAssets is not implemented"))
 }
 

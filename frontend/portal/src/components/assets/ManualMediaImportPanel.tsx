@@ -20,6 +20,8 @@ interface ManualMediaImportPanelProps {
   onClose: () => void
   onConfirm: (payload: ManualMediaConfirmPayload) => Promise<void> | void
   canConfirm?: boolean
+  showPreview?: boolean
+  mediaType?: 'image' | 'video'
 }
 
 const isVideoAsset = (asset: MediaAsset) => asset.mimeType.startsWith('video/')
@@ -27,8 +29,10 @@ const isVideoAsset = (asset: MediaAsset) => asset.mimeType.startsWith('video/')
 const ManualMediaImportPanel = ({
   onClose,
   onConfirm,
-  canConfirm = true
-}: ManualMediaImportPanelProps) => {
+  canConfirm = true,
+  showPreview = true,
+  mediaType
+}: ManualMediaImportPanelProps & { mediaType?: 'image' | 'video' }) => {
   const [assets, setAssets] = useState<MediaAsset[]>([])
   const [isLoadingAssets, setIsLoadingAssets] = useState(true)
   const [isUploading, setIsUploading] = useState(false)
@@ -51,7 +55,11 @@ const ManualMediaImportPanel = ({
     setIsLoadingAssets(true)
     try {
       const res = await portalClient.getMediaAssets({})
-      setAssets(res.assets)
+      if (mediaType) {
+        setAssets(res.assets.filter(asset => asset.mimeType.startsWith(mediaType!)))
+      } else {
+        setAssets(res.assets)
+      }
       setSelectedAssetId(res.assets[0]?.id ?? null)
     } catch (error) {
       toast({
@@ -97,6 +105,24 @@ const ManualMediaImportPanel = ({
       if (inputRef.current) {
         inputRef.current.value = ''
       }
+    }
+  }
+
+  const handleSelectAsset = async (asset: MediaAsset) => {
+    if (showPreview) {
+      handleOpenPreview(asset)
+    } else {
+      setSelectedAssetId(asset.id)
+      setSelectedSectionNote('')
+
+      if (!canConfirm) {
+        return
+      }
+
+      await onConfirm({
+        asset,
+        sectionNote: undefined
+      })
     }
   }
 
@@ -190,7 +216,7 @@ const ManualMediaImportPanel = ({
                     <button
                       key={asset.id}
                       type='button'
-                      onClick={() => handleOpenPreview(asset)}
+                      onClick={() => handleSelectAsset(asset)}
                       className={`rounded-lg border p-2 text-left transition-colors ${selectedAssetId === asset.id ? 'border-primary bg-primary/5' : 'border-border hover:bg-muted/40'
                         }`}
                     >

@@ -6,7 +6,7 @@ import { useAspectPreset } from "../../styles/AspectPresetContext";
 import { buildDepthShadow, DEFAULT_MEDIA_DEPTH } from "../../styles/depth";
 
 export interface VideoAssetProps {
-    src?: string;
+    video?: string;
     width?: number;
     height?: number;
     style?: React.CSSProperties;
@@ -15,7 +15,7 @@ export interface VideoAssetProps {
 }
 
 export function VideoAsset({
-    src,
+    video,
     width,
     height,
     style,
@@ -27,7 +27,7 @@ export function VideoAsset({
     const styleOverride = useStyleOverride(id);
     const overrideTransform = typeof styleOverride.transform === 'string' ? styleOverride.transform : undefined;
     const dragStyle = usePatchedDragStyle(id, style?.transform, overrideTransform);
-    const patchedSrc = usePatchedProp<string | undefined>(id, 'src', src);
+    const patchedSrc = usePatchedProp<string | undefined>(id, 'video', video);
     const patchedWidth = usePatchedProp<number | undefined>(id, 'width', width);
     const patchedHeight = usePatchedProp<number | undefined>(id, 'height', height);
     const { objectFit: styleObjectFit, ...restStyle } = style ?? {};

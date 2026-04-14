@@ -84,7 +84,7 @@ type PortalServiceClient interface {
 	// Edit animations
 	GenerateOrEditScene(ctx context.Context, in *GenerateOrEditSceneRequest, opts ...grpc.CallOption) (PortalService_GenerateOrEditSceneClient, error)
 	// Assets
-	GetMediaAssets(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetMediaAssetsResponse, error)
+	GetMediaAssets(ctx context.Context, in *GetMediaAssetsRequest, opts ...grpc.CallOption) (*GetMediaAssetsResponse, error)
 	GetMediaAssetsByID(ctx context.Context, in *GetMediaAssetsByIDs, opts ...grpc.CallOption) (*GetMediaAssetsResponse, error)
 }
 
@@ -413,7 +413,7 @@ func (x *portalServiceGenerateOrEditSceneClient) Recv() (*GenerateOrEditSceneRes
 	return m, nil
 }
 
-func (c *portalServiceClient) GetMediaAssets(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetMediaAssetsResponse, error) {
+func (c *portalServiceClient) GetMediaAssets(ctx context.Context, in *GetMediaAssetsRequest, opts ...grpc.CallOption) (*GetMediaAssetsResponse, error) {
 	out := new(GetMediaAssetsResponse)
 	err := c.cc.Invoke(ctx, PortalService_GetMediaAssets_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -465,7 +465,7 @@ type PortalServiceServer interface {
 	// Edit animations
 	GenerateOrEditScene(*GenerateOrEditSceneRequest, PortalService_GenerateOrEditSceneServer) error
 	// Assets
-	GetMediaAssets(context.Context, *emptypb.Empty) (*GetMediaAssetsResponse, error)
+	GetMediaAssets(context.Context, *GetMediaAssetsRequest) (*GetMediaAssetsResponse, error)
 	GetMediaAssetsByID(context.Context, *GetMediaAssetsByIDs) (*GetMediaAssetsResponse, error)
 	mustEmbedUnimplementedPortalServiceServer()
 }
@@ -549,7 +549,7 @@ func (UnimplementedPortalServiceServer) UpdateBrandIdentity(context.Context, *Up
 func (UnimplementedPortalServiceServer) GenerateOrEditScene(*GenerateOrEditSceneRequest, PortalService_GenerateOrEditSceneServer) error {
 	return status.Errorf(codes.Unimplemented, "method GenerateOrEditScene not implemented")
 }
-func (UnimplementedPortalServiceServer) GetMediaAssets(context.Context, *emptypb.Empty) (*GetMediaAssetsResponse, error) {
+func (UnimplementedPortalServiceServer) GetMediaAssets(context.Context, *GetMediaAssetsRequest) (*GetMediaAssetsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMediaAssets not implemented")
 }
 func (UnimplementedPortalServiceServer) GetMediaAssetsByID(context.Context, *GetMediaAssetsByIDs) (*GetMediaAssetsResponse, error) {
@@ -1031,7 +1031,7 @@ func (x *portalServiceGenerateOrEditSceneServer) Send(m *GenerateOrEditSceneResp
 }
 
 func _PortalService_GetMediaAssets_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+	in := new(GetMediaAssetsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -1043,7 +1043,7 @@ func _PortalService_GetMediaAssets_Handler(srv interface{}, ctx context.Context,
 		FullMethod: PortalService_GetMediaAssets_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PortalServiceServer).GetMediaAssets(ctx, req.(*emptypb.Empty))
+		return srv.(PortalServiceServer).GetMediaAssets(ctx, req.(*GetMediaAssetsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

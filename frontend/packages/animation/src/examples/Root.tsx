@@ -6,7 +6,7 @@ import { SpeedFactorProvider } from "../duration";
 import { ASPECT_PRESETS, resolveStyle, AspectPresetProvider, StyleContextProvider } from "../styles";
 import { BrandTheme, darkTheme, ThemeProvider } from "../theme";
 import { AnimatedVideo } from "../components/scenes/assets/AnimatedVideo";
-import { ContentAwareScene, ImagePeel, LogoAsset, LogoShowcase } from "../components/scenes";
+import { TextWithImageScene, ImagePeel, LogoAsset, LogoShowcase } from "../components/scenes";
 
 
 const BRAND: BrandTheme = {
@@ -123,142 +123,66 @@ export const ContentAwareSceneExamples: React.FC = () => {
     return (
         <AbsoluteFill>
             <Sequence from={0} durationInFrames={90}>
-                <ContentAwareScene
-                    id="content-aware-0"
-                    src="https://placehold.co/2800x1400"
-                    mediaType="img"
-                    // text={{
-                    //     content: "Your dashboard, logs, and alerts didn't adapt, because you didn't allow",
-                    //     variant: 'heading',
-                    // }}
-                     textComponent={<TextHighlight
-                        text="We build amazing products for now it will be good to know and {all good}"
-                        // cyclingWords={['software', 'products', 'solutions', 'Try again']}
-                        highlightStyle="background"
-                        // {transition="slideUp"
-                        highlightColor="#00FF00"
-                    />}
-                />
+                <TextWithImageScene id="content-aware-0" />
             </Sequence>
 
             <Sequence from={90} durationInFrames={90}>
-                <ContentAwareScene
-                    id="content-aware-1"
-                    src="https://placehold.co/400x600"
-                    mediaType="img"
-                    textComponent={<TextHighlight
-                        text="We build amazing products for now it will be good to know and {all good}"
-                        // cyclingWords={['software', 'products', 'solutions', 'Try again']}
-                        highlightStyle="background"
-                        // {transition="slideUp"
-                        highlightColor="#00FF00"
-                    />}
-                //   text={{
-                //     content: 'A vertical image with shorter supporting text',
-                //     variant: 'heading',
-                //   }}
-                />
+                <TextWithImageScene id="content-aware-1" />
             </Sequence>
 
             <Sequence from={180} durationInFrames={90}>
-                <ContentAwareScene
-                    id="content-aware-2"
-                    src="https://placehold.co/900x500"
-                    mediaType="img"                    
-                />
+                <TextWithImageScene id="content-aware-2" />
             </Sequence>
 
             <Sequence from={270} durationInFrames={90}>
-                <ContentAwareScene
-                    id="content-aware-3"
-                    src="https://placehold.co/350x357"
-                    mediaType="img"                
-                />
+                <TextWithImageScene id="content-aware-3" />
             </Sequence>
 
             <Sequence from={360} durationInFrames={90}>
-                <ContentAwareScene
-                    id="content-aware-4"
-                    src="https://placehold.co/672x730"
-                    mediaType="img"                   
-                />
+                <TextWithImageScene id="content-aware-4" />
             </Sequence>
+
             <Sequence from={450} durationInFrames={90}>
-                <ContentAwareScene
-                    id="content-aware-5"
-                    src="https://placehold.co/2000x2000"
-                    mediaType="img"                    
-                />
+                <TextWithImageScene id="content-aware-5" />
             </Sequence>
+
             <Sequence from={540} durationInFrames={90}>
-                <ContentAwareScene
-                    id="content-aware-6"
-                    src="https://placehold.co/2000x400"
-                    mediaType="img"                    
-                />
+                <TextWithImageScene id="content-aware-6" />
             </Sequence>
 
             {/* Extremely tall image */}
             <Sequence from={630} durationInFrames={90}>
-                <ContentAwareScene
-                    id="content-aware-7"
-                    src="https://placehold.co/400x2000"
-                    mediaType="img"                    
-                />
+                <TextWithImageScene id="content-aware-7" />
             </Sequence>
 
             {/* Very small image */}
             <Sequence from={720} durationInFrames={90}>
-                <ContentAwareScene
-                    id="content-aware-8"
-                    src="https://placehold.co/80x80"
-                    mediaType="img"                    
-                />
+                <TextWithImageScene id="content-aware-8" />
             </Sequence>
 
             {/* Very long paragraph text */}
             <Sequence from={810} durationInFrames={90}>
-                <ContentAwareScene
-                    id="content-aware-9"
-                    src="https://placehold.co/600x400"
-                    mediaType="img"                    
-                />
+                <TextWithImageScene id="content-aware-9" />
             </Sequence>
 
             {/* Very short text */}
             <Sequence from={900} durationInFrames={90}>
-                <ContentAwareScene
-                    id="content-aware-10"
-                    src="https://placehold.co/600x400"
-                    mediaType="img"                    
-                />
+                <TextWithImageScene id="content-aware-10" />
             </Sequence>
 
             {/* Emoji / unicode text */}
             <Sequence from={990} durationInFrames={90}>
-                <ContentAwareScene
-                    id="content-aware-11"
-                    src="https://placehold.co/500x500"
-                    mediaType="img"                    
-                />
+                <TextWithImageScene id="content-aware-11" />
             </Sequence>
 
             {/* Long unbroken word */}
             <Sequence from={1080} durationInFrames={90}>
-                <ContentAwareScene
-                    id="content-aware-12"
-                    src="https://placehold.co/600x400"
-                    mediaType="img"                    
-                />
+                <TextWithImageScene id="content-aware-12" />
             </Sequence>
 
             {/* Multi-line formatted text */}
             <Sequence from={1170} durationInFrames={90}>
-                <ContentAwareScene
-                    id="content-aware-13"
-                    src="https://placehold.co/606x450"
-                    mediaType="img"                    
-                />
+                <TextWithImageScene id="content-aware-13" />
             </Sequence>
         </AbsoluteFill>
     );
@@ -268,15 +192,7 @@ const AnimatedImageScene: React.FC = () => (
     <Scene>
         <AbsoluteFill >
             <SafeArea>
-                {/* <AbsoluteCenter axis="both"> */}
-                {/* <AnimatedImage style={ { color: "#000"}} id="animated-image-0" text="Your dashboard, logs, and alerts didn't adapt" src="https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774173924-cuser.png" /> */}
-                <ContentAwareScene
-                    id="content-aware-0"
-                    src="https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774503450-screenshot-2026-03-26-at-11.06.54am.png"
-                    mediaType="img"                    
-                />
-
-                {/* </AbsoluteCenter> */}
+                <TextWithImageScene id="content-aware-0" />
             </SafeArea>
         </AbsoluteFill>
     </Scene>

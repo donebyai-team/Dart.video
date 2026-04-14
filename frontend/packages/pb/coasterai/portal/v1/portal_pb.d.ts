@@ -4,7 +4,7 @@
 
 import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv1";
 import type { Message } from "@bufbuild/protobuf";
-import type { MediaAsset, SelectedMediaAsset } from "../../core/v1/media_asset_pb";
+import type { MediaAsset, MediaType, SelectedMediaAsset } from "../../core/v1/media_asset_pb";
 import type { Slide } from "../../core/v1/slide_pb";
 import type { BrandIdentity, BrandIdentitySchema } from "../../core/v1/brandkit_pb";
 import type { FigmaFrame, FigmaPage } from "../../core/v1/figma_pb";
@@ -31,6 +31,22 @@ export declare type GetMediaAssetsByIDs = Message<"coasterai.portal.v1.GetMediaA
  * Use `create(GetMediaAssetsByIDsSchema)` to create a new message.
  */
 export declare const GetMediaAssetsByIDsSchema: GenMessage<GetMediaAssetsByIDs>;
+
+/**
+ * @generated from message coasterai.portal.v1.GetMediaAssetsRequest
+ */
+export declare type GetMediaAssetsRequest = Message<"coasterai.portal.v1.GetMediaAssetsRequest"> & {
+  /**
+   * @generated from field: coasterai.core.v1.MediaType mediaType = 1;
+   */
+  mediaType: MediaType;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.GetMediaAssetsRequest.
+ * Use `create(GetMediaAssetsRequestSchema)` to create a new message.
+ */
+export declare const GetMediaAssetsRequestSchema: GenMessage<GetMediaAssetsRequest>;
 
 /**
  * @generated from message coasterai.portal.v1.GetMediaAssetsResponse
@@ -1500,7 +1516,7 @@ export declare const PortalService: GenService<{
    */
   getMediaAssets: {
     methodKind: "unary";
-    input: typeof EmptySchema;
+    input: typeof GetMediaAssetsRequestSchema;
     output: typeof GetMediaAssetsResponseSchema;
   },
   /**

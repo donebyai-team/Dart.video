@@ -449,6 +449,7 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                     </div>
                     <div className={assetPickerMode === 'upload' ? 'block' : 'hidden'}>
                         <ManualMediaImportPanel
+                            showPreview={false}
                             onClose={() => setAssetDialogOpen(false)}
                             onConfirm={handleSelectUploadedAsset}
                             canConfirm={stage === 'compose' || stage === 'question'}

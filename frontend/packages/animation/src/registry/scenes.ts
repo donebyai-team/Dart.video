@@ -12,7 +12,7 @@ import { LogoAssetDescriptor } from "../components/scenes/assets/LogoAsset";
 import { LogoShowcaseDescriptor } from "../components/scenes/assets/LogoShowcase";
 import { LogoWithBrandNameDescriptor } from "../components/scenes/assets/LogoWithBrandName";
 import { IconShowcaseDescriptor } from "../components/scenes/assets/IconShowcase";
-import { ContentAwareDescriptor } from "../components/scenes";
+import { TextWithImageSceneDescriptor, TextWithVideoSceneDescriptor } from "../components/scenes";
 
 
 export const SCENE_COMPONENTS: ComponentRegistration[] = [
@@ -25,9 +25,10 @@ export const SCENE_COMPONENTS: ComponentRegistration[] = [
   TextWithWordCycleDescriptor,
   
   // Asset components with schemas and duration calculators
-  AnimatedImageDescriptor,
-  AnimatedVideoDescriptor,
-  ContentAwareDescriptor,
+  // AnimatedImageDescriptor,
+  // AnimatedVideoDescriptor,
+  TextWithImageSceneDescriptor,
+  TextWithVideoSceneDescriptor,
   ImagePeelDescriptor,
   LogoAssetDescriptor,
   LogoShowcaseDescriptor,
