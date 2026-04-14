@@ -116,7 +116,6 @@ export function TextWithVideoScene(propsInit: SceneProps): React.ReactElement {
   const textStaggerProps = usePatchedProps('textstagger', TextStaggerDefaults);
   const textWithWordCycleProps = usePatchedProps('textwithwordcycle', TextWithWordCycleDefaults);
 
-  const sceneId = propsInit.id ?? sceneProps.id;
   const videoDimensions = useVideoDimensions(videoProps.video, videoProps.width, videoProps.height);
   const videoProgress = interpolateWithEasing(frame, [10, 50], [0, 1], 'ease-out');
 
@@ -135,11 +134,11 @@ export function TextWithVideoScene(propsInit: SceneProps): React.ReactElement {
   if (activeTextType === 'texthighlight') {
     textContent = textHighlightProps.text;
     textVariant = textHighlightProps.variant;
-    textNode = <TextHighlight {...textHighlightProps} id={`texthighlight-${sceneId}`} />;
+    textNode = <TextHighlight {...textHighlightProps} id="texthighlight" />;
   } else if (activeTextType === 'textstagger') {
     textContent = textStaggerProps.text;
     textVariant = textStaggerProps.variant;
-    textNode = <TextStagger {...textStaggerProps} id={`textstagger-${sceneId}`} />;
+    textNode = <TextStagger {...textStaggerProps} id="textstagger" />;
   } else {
     const longestWord = textWithWordCycleProps.cyclingWords.reduce(
       (longest, current) => (current.length > longest.length ? current : longest),
@@ -147,7 +146,7 @@ export function TextWithVideoScene(propsInit: SceneProps): React.ReactElement {
     );
     textContent = [textWithWordCycleProps.text, longestWord].filter(Boolean).join(' ').trim();
     textVariant = textWithWordCycleProps.variant;
-    textNode = <TextWithWordCycle {...textWithWordCycleProps} id={`textwithwordcycle-${sceneId}`} />;
+    textNode = <TextWithWordCycle {...textWithWordCycleProps} id="textwithwordcycle" />;
   }
 
   const resolved = resolveContentAwareLayout({
@@ -188,11 +187,11 @@ export function TextWithVideoScene(propsInit: SceneProps): React.ReactElement {
       }}
     >
       <VideoAsset
-        id={`videoasset-${sceneId}`}
+        id="videoasset"
         video={videoProps.video}
         width={Math.max(1, Math.round(fittedVideo.width))}
         height={Math.max(1, Math.round(fittedVideo.height))}
-        style={{ objectFit: 'cover' }}
+        style={{ objectFit: 'contain' }}
       />
     </div>
   );
@@ -200,7 +199,7 @@ export function TextWithVideoScene(propsInit: SceneProps): React.ReactElement {
   const textBasis = `${Math.round(textWidthPercent * 100)}%`;
 
   return (
-    <div id={sceneId} style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden' }}>
       {resolved.layout === 'image-left-text-right' ? (
         <Row gap={SHARED_GAP} align="center" justify="center" style={{ width: '100%', height: '100%' }}>
           <div style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: spacingToCss(CONTENT_PADDING) }}>

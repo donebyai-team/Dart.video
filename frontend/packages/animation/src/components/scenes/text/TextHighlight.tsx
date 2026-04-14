@@ -51,7 +51,7 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
     // Animation timeline:
     // Phase 1: Entrance animation with highlight already visible (0 to animationDelay)
     // Phase 2: Highlighted text animation (animationDelay to animationDelay + zoomDuration)
-    // Phase 3: Entire text disappears after the highlight animation completes
+    // Phase 3: Text remains visible after animation completes
 
     const entranceProgress = interpolateWithEasing(
         frame,
@@ -80,10 +80,6 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
         [-18, 0],
         'ease-in-out'
     );
-
-    // Disappear immediately after the highlight animation completes
-    const disappearFrame = zoomStartFrame + actualZoomDuration;
-    const isVisible = frame < disappearFrame;
 
     const segments = useMemo(() => {
         const parts: { text: string; highlight: boolean; index: number }[] = [];
@@ -208,10 +204,6 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
                 return {};
         }
     };
-
-    if (!isVisible) {
-        return null;
-    }
 
     return (
         <span

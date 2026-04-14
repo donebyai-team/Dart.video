@@ -472,6 +472,7 @@
             {
               "type": "oneof",
               "selector": "props.textComponent",
+              "propsPath": "props.textComponentProps",
               "components": [
                 {
                   "name": "textstagger",

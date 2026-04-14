@@ -244,7 +244,7 @@ export function getEditableSceneFields(
       : {}
 
   return Object.entries(patchEntry)
-    .filter(([prop]) => prop !== 'mediaType' && prop !== 'style' && prop !== 'dragX' && prop !== 'dragY') // skip these fields to edit
+    .filter(([prop]) => prop !== 'mediaType' && prop !== 'duration' && prop !== 'style' && prop !== 'dragX' && prop !== 'dragY') // skip these fields to edit
     .map(([prop, value]) => ({
       prop,
       value,
