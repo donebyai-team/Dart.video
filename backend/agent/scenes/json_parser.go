@@ -15,7 +15,72 @@ func GenerateEditsFromProps(schema []SchemaNode, input map[string]any, direction
 	for _, node := range schema {
 
 		switch node.Type {
+		case "oneof":
 
+			value := resolveMap(node.Selector, input, nil)
+
+			var componentName string
+
+			// 1️⃣ selector mode (LLM input)
+			if value != nil {
+				componentName, _ = value.(string)
+			}
+
+			// 2️⃣ patch mode (detect existing component)
+			if componentName == "" {
+				for _, c := range node.Components {
+					if _, ok := input[c.Name]; ok {
+						componentName = c.Name
+						break
+					}
+				}
+			}
+
+			if componentName == "" {
+				continue
+			}
+
+			var component *ComponentSchema
+
+			for i := range node.Components {
+				if node.Components[i].Name == componentName {
+					component = &node.Components[i]
+					break
+				}
+			}
+
+			if component == nil {
+				continue
+			}
+
+			var componentInput map[string]interface{}
+
+			if node.PropsPath != "" {
+				componentInput, _ = resolveMap(node.PropsPath, input, nil).(map[string]interface{})
+			} else {
+				componentInput = input
+			}
+
+			existing := getExistingNode(input, component.Name)
+
+			props, err := resolveFields(
+				component.Fields,
+				componentInput,
+				existing,
+				nil,
+				direction,
+				fieldValueMapper,
+			)
+
+			if err != nil {
+				return nil, fmt.Errorf(
+					"failed to resolve fields for component %s: %v",
+					component.Name,
+					err,
+				)
+			}
+
+			output[component.Name] = props
 		case "component":
 
 			existing := getExistingNode(input, node.Name)

@@ -12,6 +12,7 @@ import { LogoAssetDescriptor } from "../components/scenes/assets/LogoAsset";
 import { LogoShowcaseDescriptor } from "../components/scenes/assets/LogoShowcase";
 import { LogoWithBrandNameDescriptor } from "../components/scenes/assets/LogoWithBrandName";
 import { IconShowcaseDescriptor } from "../components/scenes/assets/IconShowcase";
+import { ContentAwareDescriptor } from "../components/scenes";
 
 
 export const SCENE_COMPONENTS: ComponentRegistration[] = [
@@ -26,7 +27,7 @@ export const SCENE_COMPONENTS: ComponentRegistration[] = [
   // Asset components with schemas and duration calculators
   AnimatedImageDescriptor,
   AnimatedVideoDescriptor,
-  // ContentAwareSceneDescriptor,
+  ContentAwareDescriptor,
   ImagePeelDescriptor,
   LogoAssetDescriptor,
   LogoShowcaseDescriptor,

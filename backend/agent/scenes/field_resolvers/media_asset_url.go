@@ -16,7 +16,7 @@ func (r MediaAssetUrlResolver) Forward(value any, fieldValueMapper *services.Med
 	// single image
 	if url, ok := value.(string); ok {
 		if fieldValueMapper != nil {
-			resolvedMediaAsset := fieldValueMapper.GetAssetFromPath(url)
+			resolvedMediaAsset := fieldValueMapper.GetAssetFromHandle(url)
 			if resolvedMediaAsset != nil {
 				return &MediaAssetFields{
 					Url:       resolvedMediaAsset.Path,
@@ -41,7 +41,7 @@ func (r MediaAssetUrlResolver) Forward(value any, fieldValueMapper *services.Med
 
 	for _, url := range urls {
 		if fieldValueMapper != nil {
-			resolvedMediaAsset := fieldValueMapper.GetAssetFromPath(url)
+			resolvedMediaAsset := fieldValueMapper.GetAssetFromHandle(url)
 			if resolvedMediaAsset != nil {
 				result = append(result, resolvedMediaAsset.Path)
 			}

@@ -56,7 +56,7 @@ func (a *agentV2) handleToolCalls(
 	questionProto := toProtoQuestion(&questionCopy)
 
 	if questionCopy.AttachmentUrl != nil {
-		asset := a.assetRegistry.GetAssetFromPath(*questionCopy.AttachmentUrl)
+		asset := a.assetRegistry.GetAssetFromHandle(*questionCopy.AttachmentUrl)
 		if asset != nil {
 			questionProto.Asset = asset.ToProto()
 		}
@@ -143,7 +143,7 @@ func (a *sceneGenerator) handleToolCalls(
 	questionProto := toProtoQuestion(&questionCopy)
 
 	if questionCopy.AttachmentUrl != nil {
-		asset := a.assetRegistry.GetAssetFromPath(*questionCopy.AttachmentUrl)
+		asset := a.assetRegistry.GetAssetFromHandle(*questionCopy.AttachmentUrl)
 		if asset != nil {
 			questionProto.Asset = asset.ToProto()
 		}

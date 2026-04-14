@@ -3,6 +3,9 @@ package scenes
 import (
 	"encoding/json"
 	"github.com/shank318/coasterai/baml_client/types"
+	"github.com/shank318/coasterai/models"
+	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
+	"github.com/shank318/coasterai/services"
 	"google.golang.org/protobuf/types/known/structpb"
 	"reflect"
 	"strings"
@@ -93,17 +96,72 @@ func TestConvertSceneToSceneConfig(t *testing.T) {
 			expectJSX:    []string{"<IconShowcase"},
 			editsToScene: []string{"openai", "google", "textstagger", "iconasset-icons-1", "iconasset-icons-0"},
 		},
+		{
+			name: "content aware scene with oneof text + media",
+			inputJSON: `{
+	  "elements": [
+		{
+		  "component": "ContentAware",
+		  "props": "{\n  \"textComponent\": \"texthighlight\",\n  \"textComponentProps\": {\"text\": \"AI models\"},\n  \"mediaComponent\": \"imageasset\",\n  \"src\": \"fake_handle\"\n}",
+		  "children": []
+		}
+	  ]
+	}`,
+			expectedJSON: `{
+  "ID": "contentaware",
+  "Name": "ContentAware",
+  "Props": {
+    "texthighlight": {
+      "text": "AI models",
+      "highlightColor": "yellow"
+    },
+    "imageasset": {
+      "src": "https://www.thesvg.org/icons/openai/light.svg"
+    }
+  },
+  "Children": null
+}`,
+			expectJSX: []string{
+				"<ContentAware",
+			},
+			editsToScene: []string{
+				"imageasset",
+				"texthighlight",
+				"src",
+				"fake_original_url",
+				"width",
+				"height",
+				"duration",
+			},
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			registryBuilder := services.NewMediaAssetRegistryBuilder()
+			registryBuilder.AddAssets([]*models.MediaAsset{
+				{
+
+					Path:      "fake_original_url",
+					MediaType: pbcore.MediaType_MEDIA_TYPE_IMAGE,
+					Metadata: models.AssetMetadata{
+						Width:    100,
+						Height:   100,
+						Duration: 10,
+					},
+				},
+			})
+			registry := registryBuilder.Build()
+			handles := registry.GetAssetHandles()
 
 			var scene types.Scene
 			if err := json.Unmarshal([]byte(tt.inputJSON), &scene); err != nil {
 				t.Fatalf("failed to unmarshal input: %v", err)
 			}
 
-			out, err := ConvertToSceneConfig(&scene, nil)
+			scene.Elements[0].Props = strings.ReplaceAll(scene.Elements[0].Props, "fake_handle", handles[0])
+
+			out, err := ConvertToSceneConfig(&scene, registry)
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}

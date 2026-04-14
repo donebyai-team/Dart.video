@@ -599,6 +599,241 @@
           "celExpression": "500"
         },
         {
+          "name": "ContentAware",
+          "type": "scene",
+          "tags": [
+            "Solution"
+          ],
+          "schema": [
+            {
+              "type": "oneof",
+              "selector": "props.textComponent",
+              "components": [
+                {
+                  "name": "textstagger",
+                  "fields": [
+                    {
+                      "name": "text",
+                      "type": "string",
+                      "map": "props.text"
+                    },
+                    {
+                      "name": "variant",
+                      "type": "string",
+                      "subtype": "enum",
+                      "default": "heading"
+                    },
+                    {
+                      "name": "staggerDelay",
+                      "type": "number",
+                      "default": 5
+                    },
+                    {
+                      "name": "entranceAnimation",
+                      "type": "string",
+                      "subtype": "enum",
+                      "default": "scaleIn"
+                    },
+                    {
+                      "name": "duration",
+                      "type": "number",
+                      "default": 15
+                    },
+                    {
+                      "name": "splitBy",
+                      "type": "string",
+                      "subtype": "enum",
+                      "default": "word"
+                    }
+                  ]
+                },
+                {
+                  "name": "texthighlight",
+                  "fields": [
+                    {
+                      "name": "text",
+                      "type": "string",
+                      "map": "props.text"
+                    },
+                    {
+                      "name": "variant",
+                      "type": "string",
+                      "subtype": "enum",
+                      "default": "heading"
+                    },
+                    {
+                      "name": "entranceAnimation",
+                      "type": "string",
+                      "subtype": "enum",
+                      "default": "slideUp"
+                    },
+                    {
+                      "name": "animationDelay",
+                      "type": "number",
+                      "default": 30
+                    },
+                    {
+                      "name": "zoomDuration",
+                      "type": "number",
+                      "default": 30
+                    },
+                    {
+                      "name": "highlightStyle",
+                      "type": "string",
+                      "subtype": "enum",
+                      "default": "glow"
+                    },
+                    {
+                      "name": "highlightedTextAnimation",
+                      "type": "string",
+                      "subtype": "enum",
+                      "default": "jump"
+                    },
+                    {
+                      "name": "highlightColor",
+                      "type": "string",
+                      "subtype": "color"
+                    }
+                  ]
+                },
+                {
+                  "name": "textwithwordcycle",
+                  "fields": [
+                    {
+                      "name": "text",
+                      "type": "string",
+                      "required": true,
+                      "map": "props.text"
+                    },
+                    {
+                      "name": "cyclingWords",
+                      "type": "array",
+                      "required": true,
+                      "map": "props.cyclingWords",
+                      "default": []
+                    },
+                    {
+                      "name": "variant",
+                      "type": "string",
+                      "sub_type": "enum",
+                      "default": "heading"
+                    },
+                    {
+                      "name": "holdDuration",
+                      "type": "number",
+                      "default": 20
+                    },
+                    {
+                      "name": "transitionDuration",
+                      "type": "number",
+                      "default": 10
+                    },
+                    {
+                      "name": "textCycleTransition",
+                      "type": "string",
+                      "subtype": "enum",
+                      "default": "slideUp"
+                    },
+                    {
+                      "name": "highlightStyle",
+                      "type": "string",
+                      "subtype": "enum",
+                      "default": "background"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "oneof",
+              "selector": "props.mediaComponent",
+              "components": [
+                {
+                  "name": "imageasset",
+                  "fields": [
+                    {
+                      "name": "src",
+                      "type": "string",
+                      "dataType": "media",
+                      "map": "props.imageasset.src"
+                    },
+                    {
+                      "name": "duration",
+                      "type": "number",
+                      "map": "props.imageasset.duration"
+                    },
+                    {
+                      "name": "width",
+                      "type": "number",
+                      "map": "props.imageasset.width"
+                    },
+                    {
+                      "name": "height",
+                      "type": "number",
+                      "map": "props.imageasset.height"
+                    }
+                  ]
+                },
+                {
+                  "name": "videoasset",
+                  "fields": [
+                    {
+                      "name": "src",
+                      "type": "string",
+                      "dataType": "media",
+                      "map": "props.videoasset.src"
+                    },
+                    {
+                      "name": "duration",
+                      "type": "number",
+                      "map": "props.videoasset.duration"
+                    },
+                    {
+                      "name": "width",
+                      "type": "number",
+                      "map": "props.videoasset.width"
+                    },
+                    {
+                      "name": "height",
+                      "type": "number",
+                      "map": "props.videoasset.height"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "llmSchema": [
+            {
+              "name": "textComponent",
+              "type": "enum",
+              "enum": [
+                "textstagger",
+                "texthighlight",
+                "textwithwordcycle"
+              ]
+            },
+            {
+              "name": "textComponentProps",
+              "type": "object"
+            },
+            {
+              "name": "mediaComponent",
+              "type": "enum",
+              "enum": [
+                "imageasset",
+                "videoasset"
+              ]
+            },
+            {
+              "name": "src",
+              "type": "string"
+            }
+          ],
+          "description": "Shows a scene with exactly one text component and one media component.\n  Text component (choose one): texthighlight, textstagger, textwithwordcycle.\n  Media component (choose one): imageasset or videoasset.\n  Both components are mandatory. If required data is missing, ask the user to provide it before generating the scene.\n  If the user changes the media type (imageasset ↔ videoasset), return the updated Scene with the media component replaced.\n  If the user changes the text type, replace the existing text component accordingly.",
+          "celExpression": "props.videoasset.duration || 80"
+        },
+        {
           "name": "ImagePeel",
           "type": "scene",
           "tags": [

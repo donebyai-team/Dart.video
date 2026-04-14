@@ -1,40 +1,92 @@
 import React, { useEffect, useState } from 'react';
 import z from 'zod';
 import { preloadImage, preloadVideo } from '@remotion/preload';
-import { delayRender, continueRender, useCurrentFrame, useRemotionEnvironment } from 'remotion';
-import { usePatchedProps } from '../../../patches';
+import { continueRender, delayRender, useCurrentFrame, useRemotionEnvironment } from 'remotion';
+import { usePatchOverlay, usePatchedProps } from '../../../patches';
 import { ImageAsset, VideoAsset } from '../../../core/assets';
 import { Row, Stack } from '../../../core/layout';
-import { Text } from '../../../core/assets/Text';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { spacingToCss } from '../../../tokens/spacing';
-import { type TypographyVariant } from '../../../tokens/semantic';
+import { type TypographyVariant, TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
+import { TextHighlight, TextHighlightDefaults, TextHighlightSchemaFields } from '../text/TextHighlight';
+import { TextStagger, TextStaggerDefaults, TextStaggerSchemaFields } from '../text/TextStagger';
+import { TextWithWordCycle, TextWithWordCycleDefaults, TextWithWordCycleSchemaFields } from '../text/TextWithWordCycle';
 import { resolveContentAwareLayout, type ContentAwareLayout } from './ContentAwareScene.layout';
 
-const DEFAULT_VARIANT = 'heading' as const;
 const DEFAULT_ANIMATION = 'slideUp' as const;
 const DEFAULT_STACKED_TEXT_WIDTH = 0.7;
 const FALLBACK_MEDIA_WIDTH = 1920;
 const FALLBACK_MEDIA_HEIGHT = 1080;
 
+const MediaAssetSchema = z.object({
+  src: z.string(),
+  duration: z.number().optional(),
+  width: z.number().optional(),
+  height: z.number().optional(),
+  mediaType: z.string().optional(),
+}).passthrough();
+
+const TextHighlightInputSchema = z.object({
+  text: z.string(),
+  variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).optional(),
+}).passthrough();
+
+const TextStaggerInputSchema = z.object({
+  text: z.string(),
+  variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).optional(),
+}).passthrough();
+
+const TextWithWordCycleInputSchema = z.object({
+  text: z.string(),
+  cyclingWords: z.array(z.string()).default([]).optional(),
+  variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).optional(),
+}).passthrough();
+
 export const ContentAwareSceneSchema = z.object({
   id: z.string().optional(),
-  src: z.string(),
-  mediaType: z.enum(['img', 'video']).default('img').optional(),
   entranceAnimation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
-  textComponent: z.any(),
+  imageasset: MediaAssetSchema.optional(),
+  videoasset: MediaAssetSchema.optional(),
+  texthighlight: TextHighlightInputSchema.optional(),
+  textstagger: TextStaggerInputSchema.optional(),
+  textwithwordcycle: TextWithWordCycleInputSchema.optional(),
 });
+
+export const ContentAwareSceneDefaults = {
+  id: 'contentawarescene',
+  entranceAnimation: DEFAULT_ANIMATION,
+  imageasset: undefined,
+  videoasset: undefined,
+  texthighlight: undefined,
+  textstagger: undefined,
+  textwithwordcycle: undefined,
+};
 
 export type ContentAwareSceneProps = z.input<typeof ContentAwareSceneSchema>;
 
-type MediaType = ContentAwareSceneProps['mediaType'];
+const MediaAssetDefaults = {
+  src: '',
+  duration: undefined as number | undefined,
+  width: undefined as number | undefined,
+  height: undefined as number | undefined,
+  mediaType: undefined as string | undefined,
+};
+
+type MediaType = 'img' | 'video';
 
 interface MediaDimensions {
   width: number;
   height: number;
+}
+
+interface ResolvedMediaInput {
+  type: MediaType;
+  src: string;
+  width?: number;
+  height?: number;
 }
 
 interface ResolvedTextInput {
@@ -43,15 +95,25 @@ interface ResolvedTextInput {
   node: React.ReactElement;
 }
 
-function useMediaDimensions(src: string, mediaType: MediaType): MediaDimensions {
+function useMediaDimensions(
+  media: ResolvedMediaInput,
+): MediaDimensions {
   const { isRendering } = useRemotionEnvironment();
-  const [handle] = useState(() => (isRendering ? delayRender(`Loading ${mediaType} metadata`) : null));
+  const [handle] = useState(() => (isRendering ? delayRender(`Loading ${media.type} metadata`) : null));
   const [dimensions, setDimensions] = useState<MediaDimensions>({
-    width: FALLBACK_MEDIA_WIDTH,
-    height: FALLBACK_MEDIA_HEIGHT,
+    width: media.width && media.width > 0 ? media.width : FALLBACK_MEDIA_WIDTH,
+    height: media.height && media.height > 0 ? media.height : FALLBACK_MEDIA_HEIGHT,
   });
 
   useEffect(() => {
+    if (media.width && media.width > 0 && media.height && media.height > 0) {
+      if (handle !== null) {
+        continueRender(handle);
+      }
+      setDimensions({ width: media.width, height: media.height });
+      return;
+    }
+
     let cancelled = false;
     let unpreload: (() => void) | undefined;
 
@@ -65,7 +127,7 @@ function useMediaDimensions(src: string, mediaType: MediaType): MediaDimensions 
       }
     };
 
-    if (mediaType === 'img') {
+    if (media.type === 'img') {
       const img = new Image();
       img.onload = () => {
         finish({
@@ -74,10 +136,10 @@ function useMediaDimensions(src: string, mediaType: MediaType): MediaDimensions 
         });
       };
       img.onerror = () => finish();
-      img.src = src;
+      img.src = media.src;
 
       if (isRendering) {
-        unpreload = preloadImage(src);
+        unpreload = preloadImage(media.src);
       }
     } else {
       const video = document.createElement('video');
@@ -88,10 +150,10 @@ function useMediaDimensions(src: string, mediaType: MediaType): MediaDimensions 
         });
       };
       video.onerror = () => finish();
-      video.src = src;
+      video.src = media.src;
 
       if (isRendering) {
-        unpreload = preloadVideo(src);
+        unpreload = preloadVideo(media.src);
       }
     }
 
@@ -99,7 +161,7 @@ function useMediaDimensions(src: string, mediaType: MediaType): MediaDimensions 
       cancelled = true;
       unpreload?.();
     };
-  }, [src, mediaType, isRendering, handle]);
+  }, [handle, isRendering, media.height, media.src, media.type, media.width]);
 
   return dimensions;
 }
@@ -132,75 +194,109 @@ function fitBoxWithinBounds(
   };
 }
 
-function renderTextBlock(
-  id: string | undefined,
-  content: string,
-  variant: TypographyVariant,
-): React.ReactElement {
-  return (
-    <Text
-      id={id ? `text-${id}` : undefined}
-      text={content}
-      variant={variant}
-    />
-  );
-}
-
-function getTextContentFromComponent(component: React.ReactElement): string | null {
-  const props = component.props as { text?: unknown; texts?: unknown };
-
-  if (typeof props.text === 'string' && props.text.trim().length > 0) {
-    return props.text;
+function resolveMediaInput(
+  imageasset: typeof MediaAssetDefaults,
+  videoasset: typeof MediaAssetDefaults,
+  activeMediaType: 'imageasset' | 'videoasset' | null,
+): ResolvedMediaInput {
+  if (activeMediaType === 'imageasset') {
+    return {
+      type: 'img',
+      src: imageasset.src,
+      width: imageasset.width,
+      height: imageasset.height,
+    };
   }
 
-  if (Array.isArray(props.texts)) {
-    const stringItems = props.texts.filter((item): item is string => typeof item === 'string' && item.trim().length > 0);
-    if (stringItems.length > 0) {
-      return stringItems.reduce((longest, current) => current.length > longest.length ? current : longest);
-    }
+  if (activeMediaType === 'videoasset') {
+    return {
+      type: 'video',
+      src: videoasset.src,
+      width: videoasset.width,
+      height: videoasset.height,
+    };
   }
-
-  return null;
+  throw new Error('ContentAwareScene requires either imageasset or videoasset.');
 }
 
 function resolveTextInput(
   id: string | undefined,
-  textComponent: unknown,
+  activeTextType: 'texthighlight' | 'textstagger' | 'textwithwordcycle' | null,
+  texthighlight: z.infer<typeof TextHighlightInputSchema>,
+  textstagger: z.infer<typeof TextStaggerInputSchema>,
+  textwithwordcycle: z.infer<typeof TextWithWordCycleInputSchema>,
 ): ResolvedTextInput {
-  if (React.isValidElement(textComponent)) {
-    const inferredContent = getTextContentFromComponent(textComponent);
-    const inferredVariant = (textComponent.props as { variant?: TypographyVariant }).variant ?? DEFAULT_VARIANT;
+  if (activeTextType === 'texthighlight') {
+    const textHighlightProps = {
+      ...texthighlight,
+      id: id ? `texthighlight-${id}` : TextHighlightDefaults.id,
+      variant: texthighlight.variant ?? TextHighlightDefaults.variant,
+    };
 
-    if (inferredContent) {
-      return {
-        content: inferredContent,
-        variant: inferredVariant,
-        node: textComponent,
-      };
-    }
+    return {
+      content: texthighlight.text,
+      variant: textHighlightProps.variant,
+      node: <TextHighlight {...textHighlightProps} />,
+    };
   }
 
-  throw new Error('ContentAwareScene requires textComponent with a text or texts prop.');
+  if (activeTextType === 'textstagger') {
+    const textStaggerProps = {
+      ...textstagger,
+      id: id ? `textstagger-${id}` : TextStaggerDefaults.id,
+      variant: textstagger.variant ?? TextStaggerDefaults.variant,
+    };
+
+    return {
+      content: textstagger.text,
+      variant: textStaggerProps.variant,
+      node: <TextStagger {...textStaggerProps} />,
+    };
+  }
+
+  if (activeTextType === 'textwithwordcycle') {
+    const longestWord = (textwithwordcycle.cyclingWords ?? []).reduce(
+      (longest, current) => (current.length > longest.length ? current : longest),
+      '',
+    );
+    const content = [textwithwordcycle.text, longestWord].filter(Boolean).join(' ').trim();
+    const textWithWordCycleProps = {
+      ...TextWithWordCycleDefaults,
+      ...textwithwordcycle,
+      id: id ? `textwithwordcycle-${id}` : TextWithWordCycleDefaults.id,
+      variant: textwithwordcycle.variant ?? TextWithWordCycleDefaults.variant,
+      cyclingWords: textwithwordcycle.cyclingWords ?? TextWithWordCycleDefaults.cyclingWords,
+    };
+
+    return {
+      content,
+      variant: textWithWordCycleProps.variant,
+      node: <TextWithWordCycle {...textWithWordCycleProps} />,
+    };
+  }
+
+  throw new Error('ContentAwareScene requires one of texthighlight, textstagger, or textwithwordcycle.');
 }
 
 function renderMediaBlock(
   id: string | undefined,
-  mediaType: MediaType,
-  src: string,
+  media: ResolvedMediaInput,
   width: number,
   height: number,
 ): React.ReactElement {
   const sharedProps = {
-    id: id ? `${mediaType === 'video' ? 'videoasset' : 'imageasset'}-${id}` : undefined,
-    src,
+    id: id ? `${media.type === 'video' ? 'videoasset' : 'imageasset'}-${id}` : undefined,
+    src: media.src,
     width: Math.max(1, Math.round(width)),
     height: Math.max(1, Math.round(height)),
     style: { objectFit: 'cover' as const },
   };
 
-  return mediaType === 'video'
-    ? <VideoAsset {...sharedProps} />
-    : <ImageAsset {...sharedProps} />;
+  if (media.type === 'video') {
+    return <VideoAsset {...sharedProps} />;
+  }
+
+  return <ImageAsset {...sharedProps} />;
 }
 
 function getImageDimensions(
@@ -245,7 +341,6 @@ function renderResolvedLayout(
   textNode: React.ReactElement,
   imageNode: React.ReactElement,
   textWidthPercent: number,
-  estimatedLines: number,
 ): React.ReactElement {
   const textBasis = `${Math.round(textWidthPercent * 100)}%`;
 
@@ -290,9 +385,28 @@ function renderResolvedLayout(
 export function ContentAwareScene(propsInit: ContentAwareSceneProps): React.ReactElement {
   const frame = useCurrentFrame();
   const preset = useAspectPreset();
-  const patchedProps = usePatchedProps(propsInit.id, propsInit);
-  const props = { ...ContentAwareSceneSchema.parse(patchedProps), id: propsInit.id };
-  const mediaDimensions = useMediaDimensions(props.src, props.mediaType);
+  const overlay = usePatchOverlay();
+  const sceneProps = usePatchedProps('scene', ContentAwareSceneDefaults);
+  const imageasset = usePatchedProps('imageasset', MediaAssetDefaults);
+  const videoasset = usePatchedProps('videoasset', MediaAssetDefaults);
+  const texthighlight = usePatchedProps('texthighlight', TextHighlightDefaults);
+  const textstagger = usePatchedProps('textstagger', TextStaggerDefaults);
+  const textwithwordcycle = usePatchedProps('textwithwordcycle', TextWithWordCycleDefaults);
+
+  const activeTextType =
+    overlay.texthighlight ? 'texthighlight'
+      : overlay.textstagger ? 'textstagger'
+        : overlay.textwithwordcycle ? 'textwithwordcycle'
+          : null;
+
+  const activeMediaType =
+    overlay.imageasset ? 'imageasset'
+      : overlay.videoasset ? 'videoasset'
+        : null;
+
+  const media = resolveMediaInput(imageasset, videoasset, activeMediaType);
+  const text = resolveTextInput(propsInit.id ?? sceneProps.id, activeTextType, texthighlight, textstagger, textwithwordcycle);
+  const mediaDimensions = useMediaDimensions(media);
   const mediaProgress = interpolateWithEasing(
     frame,
     [10, 50],
@@ -302,23 +416,20 @@ export function ContentAwareScene(propsInit: ContentAwareSceneProps): React.Reac
 
   const availableWidth = preset.width - preset.safeArea.left - preset.safeArea.right;
   const availableHeight = preset.height - preset.safeArea.top - preset.safeArea.bottom;
-  
-  const resolvedText = resolveTextInput(props.id, props.textComponent);
 
   const resolved = resolveContentAwareLayout({
     canvasWidth: availableWidth,
     canvasHeight: availableHeight,
     imageWidth: mediaDimensions.width,
     imageHeight: mediaDimensions.height,
-    text: resolvedText.content,
-    variant: resolvedText.variant,
+    text: text.content,
+    variant: text.variant,
   });
+
   const stackedTextWidth =
     resolved.layout === 'image-top-text-bottom'
       ? Math.max(resolved.textWidth, DEFAULT_STACKED_TEXT_WIDTH)
       : resolved.textWidth;
-
-  const textNode = resolvedText.node;
 
   const imageDimensions = getImageDimensions(
     resolved.layout,
@@ -333,13 +444,12 @@ export function ContentAwareScene(propsInit: ContentAwareSceneProps): React.Reac
     <div
       style={{
         opacity: mediaProgress,
-        transform: getEntranceTransform(props.entranceAnimation ?? DEFAULT_ANIMATION, mediaProgress),
+        transform: getEntranceTransform(sceneProps.entranceAnimation ?? DEFAULT_ANIMATION, mediaProgress),
       }}
     >
       {renderMediaBlock(
-        props.id,
-        props.mediaType,
-        props.src,
+        propsInit.id ?? sceneProps.id,
+        media,
         imageDimensions.width,
         imageDimensions.height,
       )}
@@ -348,29 +458,133 @@ export function ContentAwareScene(propsInit: ContentAwareSceneProps): React.Reac
 
   return (
     <div
-      id={props.id}
+      id={propsInit.id ?? sceneProps.id}
       style={{
         width: '100%',
-          height: '100%',
+        height: '100%',
         position: 'relative',
         overflow: 'hidden',
       }}
     >
       {renderResolvedLayout(
         resolved.layout,
-        textNode,
+        text.node,
         imageNode,
         stackedTextWidth,
-        resolved.estimatedLines,
       )}
     </div>
   );
 }
 
-// export const ContentAwareSceneDescriptor: ComponentRegistration = {
-//   name: 'ContentAwareScene',
-//   type: 'scene',
-//   llmSchema: ContentAwareSceneSchema,
-//   description: 'Automatically chooses a media-and-text layout from image or video dimensions and text visual weight.' +
-//     'Pass textComponent as one of TextStagger, TextHighlight, Typewriter, or TextWithWordCycle.',
-// };
+export const ContentAwareSchemaFields = [
+  {
+    type: 'oneof',
+    selector: 'props.textComponent',
+    components: [
+      { name: 'textstagger', fields: TextStaggerSchemaFields },
+      { name: 'texthighlight', fields: TextHighlightSchemaFields },
+      { name: 'textwithwordcycle', fields: TextWithWordCycleSchemaFields },
+    ],
+  },
+  {
+    type: 'oneof',
+    selector: 'props.mediaComponent',
+    components: [
+      {
+        name: 'imageasset',
+        fields: [
+          {
+            name: 'src',
+            type: 'string',
+            dataType: 'media',
+            map: 'props.imageasset.src',
+          },
+          {
+            name: 'duration',
+            type: 'number',
+            map: 'props.imageasset.duration',
+          },
+          {
+            name: 'width',
+            type: 'number',
+            map: 'props.imageasset.width',
+          },
+          {
+            name: 'height',
+            type: 'number',
+            map: 'props.imageasset.height',
+          },
+        ],
+      },
+      {
+        name: 'videoasset',
+        fields: [
+          {
+            name: 'src',
+            type: 'string',
+            dataType: 'media',
+            map: 'props.videoasset.src',
+          },
+          {
+            name: 'duration',
+            type: 'number',
+            map: 'props.videoasset.duration',
+          },
+          {
+            name: 'width',
+            type: 'number',
+            map: 'props.videoasset.width',
+          },
+          {
+            name: 'height',
+            type: 'number',
+            map: 'props.videoasset.height',
+          },
+        ],
+      },
+    ],
+  },
+];
+
+export const ContentAwareDescriptor: ComponentRegistration = {
+  name: 'ContentAware',
+  type: 'scene',
+  tags: ['Solution'],
+  schema: ContentAwareSchemaFields,
+  llmSchema: [
+    {
+      name: "textComponent",
+      type: "enum",
+      enum: [
+        "textstagger",
+        "texthighlight",
+        "textwithwordcycle"
+      ]
+    },
+    {
+      name: "textComponentProps",
+      type: "object"
+    },
+    {
+      name: "mediaComponent",
+      type: "enum",
+      enum: [
+        "imageasset",
+        "videoasset"
+      ]
+    },
+    {
+      name: "src",
+      type: "string"
+    }
+  ],
+  description: `Shows a scene with exactly one text component and one media component.
+  Text component (choose one): texthighlight, textstagger, textwithwordcycle.
+  Media component (choose one): imageasset or videoasset.
+  Both components are mandatory. If required data is missing, ask the user to provide it before generating the scene.
+  If the user changes the media type (imageasset ↔ videoasset), return the updated Scene with the media component replaced.
+  If the user changes the text type, replace the existing text component accordingly.`,
+  celExpression: 'props.videoasset.duration || 80',
+};
+
+export const ContentAware = ContentAwareScene;

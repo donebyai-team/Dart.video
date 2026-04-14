@@ -43,7 +43,8 @@ const AssetPreviewDialog = ({
 }: AssetPreviewDialogProps) => {
   const isVideo = mediaKind === 'video'
   const minNoteLength = 20
-  const isNoteValid = !isVideo || note.trim().length >= minNoteLength
+  // const isNoteValid = !isVideo || note.trim().length >= minNoteLength
+  const isNoteValid = true
   const defaultPlaceholder =
     'Tell us in which part of the script, AI should use this. Eg. Use it to show feature 1'
 

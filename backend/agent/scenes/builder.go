@@ -38,12 +38,14 @@ type Component struct {
 }
 
 type SchemaNode struct {
-	Type       string            `json:"type"` // component | repeat
+	Type       string            `json:"type"` // component | repeat | oneof
 	Name       string            `json:"name,omitempty"`
 	Source     string            `json:"source,omitempty"`
 	Fields     []FieldSchema     `json:"fields,omitempty"`     // used when type is component
 	Components []ComponentSchema `json:"components,omitempty"` // used when type is repeat
 	Map        string            `json:"map,omitempty"`
+	Selector   string            `json:"selector,omitempty"`  // oneof
+	PropsPath  string            `json:"propsPath,omitempty"` //oneof
 }
 
 type ComponentSchema struct {
@@ -64,6 +66,7 @@ type LLMField struct {
 	Name    string    `json:"name"`
 	Type    string    `json:"type"`
 	Subtype string    `json:"subtype,omitempty"`
+	Enum    []string  `json:"enum,omitempty"`
 	Items   *LLMItems `json:"items,omitempty"`
 }
 
@@ -164,7 +167,7 @@ func writeScene(b *strings.Builder, c Component) {
 		fmt.Fprintf(b, "%s\n", c.Description)
 	}
 
-	fmt.Fprintf(b, "Props: %s\n\n", buildPropsInline(c.LLMSchema))
+	fmt.Fprintf(b, "Props: \n%s\n\n", buildPropsInline(c.LLMSchema))
 }
 
 func buildPropsInline(fields []LLMField) string {
@@ -199,10 +202,14 @@ func buildPropsInline(fields []LLMField) string {
 			continue
 		}
 
-		parts = append(parts, fmt.Sprintf("%s:%s", f.Name, f.Type))
+		propString := fmt.Sprintf("%s:%s", f.Name, f.Type)
+		if len(f.Enum) > 0 {
+			propString += fmt.Sprintf(" | %s", strings.Join(f.Enum, ", "))
+		}
+		parts = append(parts, propString)
 	}
 
-	return strings.Join(parts, "  ")
+	return strings.Join(parts, "\n")
 }
 
 func findComponent(name string) (*Component, error) {

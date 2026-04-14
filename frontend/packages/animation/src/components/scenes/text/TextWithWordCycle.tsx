@@ -32,7 +32,7 @@ export type TextWithWordCycleProps = typeof TextWithWordCycleDefaults;
  * 
  * Example: "We build amazing [software/products/solutions]" where the bracketed words cycle.
  */
-export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (initProps: TextWithWordCycleProps) => {
+export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (initProps) => {
   const frame = useCurrentFrame();
   const styleConfig = useStyleContext();
   const theme = useTheme();
@@ -296,7 +296,7 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (initProps: T
 // Registry Descriptor
 // ============================================================================
 
-const TextWithWordCycleSchemaFields = [
+export const TextWithWordCycleSchemaFields = [
   {
     "name": "text",
     "type": "string",

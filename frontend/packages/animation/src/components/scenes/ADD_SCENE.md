@@ -1,236 +1,394 @@
-# Adding a New Scene Component
+```markdown
+# Scene Rendering & LLM Integration Spec
 
-This guide outlines the steps to create a new scene component in the animation library.
+## Overview
 
-## 1. Create the Component File
+This system converts **LLM-generated scene props** into a **normalized scene patch** using a **schema-driven renderer**, and can also convert patches **back to LLM-editable format**.
 
-Create a new file in the appropriate subdirectory:
-- `text/` - Text-based animations (e.g., TextStagger, Typewriter)
-- `assets/` - Asset-based animations (e.g., AnimatedImage, ImagePeel)
+The renderer is designed to be **idempotent**, meaning:
 
 ```
-src/components/scenes/text/MyNewScene.tsx
-src/components/scenes/assets/MyNewScene.tsx
-```
 
-## 2. Define Default Constants
+Render(Render(scene)) == scene
 
-All defaults should be defined as constants at the top of the file using `as const` for type safety:
+````
 
-```typescript
-// Default constants
-const DEFAULT_ENTRANCE_DURATION = 30;
-const DEFAULT_VARIANT = 'heading' as const;
-const DEFAULT_ANIMATION = 'slideUp' as const;
-// Add other defaults as needed
-```
+This allows LLMs to safely edit scenes repeatedly.
 
-## 3. Define Props Interface
+---
 
-```typescript
-export interface MyNewSceneProps {
-    id?: string;
-    // Required props
-    text: string;
-    // Optional props with defaults
-    variant?: TypographyVariant;
-    animation?: EntranceAnimation;
-    startAt?: number;
-    className?: string;
-    style?: React.CSSProperties;
+# Core Concepts
+
+## SceneElement (LLM Input)
+
+Represents a scene returned by the LLM.
+
+```go
+type SceneElement struct {
+    Component string
+    Props     map[string]interface{}
+    Children  []SceneElement
+}
+````
+
+Props may be:
+
+* **LLM props**
+* **partial patch**
+* **final patch**
+
+---
+
+## SceneConfig (Internal Representation)
+
+Normalized scene structure after rendering.
+
+```go
+type SceneConfig struct {
+    ID       string
+    Name     string
+    Props    map[string]interface{}
+    Children []SceneConfig
 }
 ```
 
-**Rules:**
-- `animation` should always be **optional** with a default
-- `startAt` should always be **optional**, defaulting to `0`
-- Use `TypographyVariant` for text styling variants
-- Use `EntranceAnimation` for entrance animation types
+---
 
-## 4. Implement the Component
+# Scene Schema
 
-```typescript
-export const MyNewScene: React.FC<MyNewSceneProps> = ({
-    id,
-    text,
-    variant,
-    animation,
-    startAt,
-    className,
-    style,
-}) => {
-    const frame = useCurrentFrame();
-    const styleConfig = useStyleContext();
-    const theme = useTheme();
-    const preset = useAspectPreset();
+Each scene defines a **schema** describing how props map to components.
 
-    // Apply defaults using constants
-    const actualVariant = variant ?? DEFAULT_VARIANT;
-    const actualAnimation = animation ?? DEFAULT_ANIMATION;
-    const actualStartAt = startAt ?? 0;
+Example:
 
-    // Use interpolateWithEasing for smooth animations
-    const progress = interpolateWithEasing(
-        frame,
-        [actualStartAt, actualStartAt + DEFAULT_ENTRANCE_DURATION],
-        [0, 1],
-        styleConfig.motion.entrance  // Use easing from style config
-    );
-
-    // Render component...
-};
-```
-
-**Animation Guidelines:**
-- Always use `interpolateWithEasing()` instead of raw `interpolate()` for consistent easing
-- Get easing from `styleConfig.motion.entrance`
-- Use `getEntranceTransform()` helper for entrance animations
-
-## 5. Create Zod Schema
-
-Define the schema with defaults matching your constants:
-
-```typescript
-export const MyNewSceneSchema = z.object({
-    // Required props
-    text: z.string().min(1, "text is required"),
-    
-    // Optional props with defaults
-    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
-    animation: z.enum(ENTRANCE_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
-    startAt: z.number().min(0, "startAt cannot be negative").default(0).optional(),
-    
-    // Optional props without defaults
-    className: z.string().optional(),
-    style: z.any().optional(),
-});
-```
-
-**Schema Rules:**
-- Use `.default(CONSTANT)` for all props that have defaults
-- Use `.optional()` after `.default()` for optional props
-- Add validation messages for constraints (e.g., `.min(0, "message")`)
-
-## 6. Implement Duration Calculator
-
-The duration calculator validates props and returns the total animation duration:
-
-```typescript
-export function calculateMyNewSceneDuration(props: MyNewSceneProps): DurationResult {
-    // 1. Validate props with schema
-    const validation = MyNewSceneSchema.safeParse(props);
-    if (!validation.success) {
-        const firstError = validation.error.errors[0];
-        return {
-            success: false,
-            error: firstError.message,
-            field: firstError.path[0] as string,
-        };
-    }
-
-    const validated = validation.data;
-    
-    // 2. Add business logic validation if needed
-    if (someCondition) {
-        return {
-            success: false,
-            error: "descriptive error message",
-            field: "fieldName",
-        };
-    }
-
-    // 3. Calculate total duration
-    const entranceDuration = validated.animationDelay ?? DEFAULT_ENTRANCE_DURATION;
-    const contentDuration = /* calculate based on content */;
-    
-    return {
-        success: true,
-        duration: Math.ceil(entranceDuration + contentDuration),
-    };
-}
-```
-
-**DurationResult Type:**
-```typescript
-type DurationResult = 
-    | { success: true; duration: number }
-    | { success: false; error: string; field?: string };
-```
-
-## 7. Create Component Descriptor
-
-```typescript
-export const MyNewSceneDescriptor: ComponentRegistration = {
-    name: 'MyNewScene',
-    type: 'scene',
-    fullSchema: MyNewSceneSchema,
-    description: 'Brief description of what this scene does. Use for X, Y, Z. Required props: text="Example text".',
-    calculateDuration: calculateMyNewSceneDuration,
-};
-```
-
-**Description Guidelines:**
-- Keep it concise but informative
-- Mention use cases
-- Include example of required props
-
-## 8. Register in Component Registry
-
-Add to `src/registry/scenes.ts`:
-
-```typescript
-import { MyNewSceneDescriptor } from "../components/scenes/text/MyNewScene";
-
-export const SCENE_COMPONENTS: ComponentRegistration[] = [
-    // ... existing components
-    MyNewSceneDescriptor,
-];
-```
-
-## 9. Export from Index
-
-Add to the appropriate index file:
-
-```typescript
-// src/components/scenes/text/index.ts or assets/index.ts
-export { MyNewScene, MyNewSceneDescriptor } from './MyNewScene';
-```
-
-## 10. Write Tests
-
-Create test file in `src/__tests__/MyNewScene.test.ts`:
-
-```typescript
-import { calculateMyNewSceneDuration } from '../components/scenes/text/MyNewScene';
-
-describe('MyNewScene Duration Calculation', () => {
-    it('should calculate duration with required props', () => {
-        const result = calculateMyNewSceneDuration({
-            text: 'Test text',
-        });
-        expect(result.success).toBe(true);
-        if (result.success) {
-            expect(result.duration).toBe(/* expected duration */);
+```json
+{
+  "type": "repeat",
+  "source": "icons",
+  "map": "props.icons",
+  "components": [
+    {
+      "name": "iconasset",
+      "fields": [
+        {
+          "name": "icon",
+          "type": "string",
+          "map": "item",
+          "dataType": "icon"
+        },
+        {
+          "name": "size",
+          "type": "number",
+          "default": 90
         }
-    });
-
-    it('should return error for invalid props', () => {
-        const result = calculateMyNewSceneDuration({
-            text: '',  // Invalid: empty text
-        });
-        expect(result.success).toBe(false);
-    });
-});
+      ]
+    }
+  ]
+}
 ```
 
-## Checklist
+---
 
-- [ ] Constants defined with `as const`
-- [ ] Props interface with optional `animation` and `startAt`
-- [ ] Component uses `interpolateWithEasing()`
-- [ ] Zod schema with `.default()` matching constants
-- [ ] Duration calculator returns `DurationResult`
-- [ ] Descriptor with description and example
-- [ ] Registered in `scenes.ts`
-- [ ] Exported from index
-- [ ] Tests written for duration calculation
+# Field Schema
+
+```go
+type FieldSchema struct {
+    Name     string
+    Type     string
+    Subtype  string
+    Map      string
+    Default  interface{}
+    DataType string
+}
+```
+
+### Field Resolution Priority
+
+When rendering a field:
+
+```
+existing value
+↓
+mapped value
+↓
+default
+↓
+datatype mapper
+```
+
+---
+
+# Repeat Components
+
+Repeat blocks generate multiple component instances from arrays.
+
+Example LLM input:
+
+```json
+{
+  "icons": ["openai", "google"]
+}
+```
+
+Generated patch:
+
+```json
+{
+  "iconasset-icons-0": { "icon": "openai" },
+  "iconasset-icons-1": { "icon": "google" }
+}
+```
+
+---
+
+# Repeat Key Format
+
+Component instances follow this format:
+
+```
+{componentName}-{repeatSource}-{index}
+```
+
+Example:
+
+```
+iconasset-icons-0
+iconasset-icons-1
+textstagger-features-0
+```
+
+Benefits:
+
+* identifies repeat group
+* deterministic reverse mapping
+* supports multiple repeats using same component
+
+---
+
+# Mapping System
+
+Fields may define a `dataType`.
+
+Example:
+
+```
+dataType: "icon"
+```
+
+Mapping is handled by a **global resolver registry**.
+
+---
+
+## Resolver Interface
+
+```go
+type FieldResolver interface {
+    Forward(value any, registry *MediaAssetRegistry) (any, error)
+    Reverse(value any, registry *MediaAssetRegistry) (any, error)
+}
+```
+
+---
+
+## Resolver Registry
+
+```go
+type ResolverRegistry struct {
+    resolvers map[string]FieldResolver
+}
+```
+
+Usage:
+
+```
+ResolveForward(dataType, value)
+ResolveReverse(dataType, value)
+```
+
+Example mapping:
+
+```
+openai → https://cdn/icons/openai.svg
+```
+
+Reverse mapping:
+
+```
+https://cdn/icons/openai.svg → openai
+```
+
+---
+
+# Render Modes
+
+Render supports two transformation directions.
+
+| Mode    | Purpose           |
+| ------- | ----------------- |
+| Forward | LLM props → patch |
+| Reverse | patch → LLM patch |
+
+Enum:
+
+```go
+type ResolveDirection int
+
+const (
+    ResolveForward ResolveDirection = iota
+    ResolveReverse
+)
+```
+
+---
+
+# Render Pipeline
+
+## 1. LLM Props → Patch
+
+```
+LLM props
+↓
+Render(Forward)
+↓
+Scene patch
+```
+
+Example:
+
+```
+icons: ["openai"]
+```
+
+↓
+
+```
+iconasset-icons-0: { icon: "https://cdn/.../openai.svg" }
+```
+
+---
+
+## 2. Patch → LLM Patch
+
+```
+patch
+↓
+Render(Reverse)
+↓
+LLM patch
+```
+
+Example:
+
+```
+iconasset-icons-0: { icon: "https://cdn/.../openai.svg" }
+```
+
+↓
+
+```
+iconasset-icons-0: { icon: "openai" }
+```
+
+---
+
+## 3. LLM Patch → Patch
+
+```
+LLM patch
+↓
+Render(Forward)
+↓
+normalized patch
+```
+
+---
+
+# resolveFields Behavior
+
+Unknown fields are preserved.
+
+Example:
+
+Input patch:
+
+```json
+{
+  "iconasset-icons-0": {
+    "icon": "openai",
+    "customColor": "red"
+  }
+}
+```
+
+Output:
+
+```json
+{
+  "iconasset-icons-0": {
+    "icon": "https://cdn/.../openai.svg",
+    "customColor": "red"
+  }
+}
+```
+
+Unknown fields bypass mapping.
+
+---
+
+# Repeat Detection
+
+Repeat blocks support two modes.
+
+### 1. LLM Array Mode
+
+```
+props.icons → repeat expansion
+```
+
+### 2. Existing Patch Mode
+
+```
+iconasset-icons-0
+iconasset-icons-1
+```
+
+Renderer detects existing instances and normalizes them.
+
+---
+
+# Design Principles
+
+### Schema-driven rendering
+
+All conversions are controlled by the scene schema.
+
+### Idempotent rendering
+
+```
+Render(Render(scene)) == scene
+```
+
+### Separation of concerns
+
+| Layer    | Responsibility           |
+| -------- | ------------------------ |
+| Render   | schema normalization     |
+| Resolver | datatype transformations |
+| Schema   | mapping rules            |
+
+---
+
+# Benefits
+
+* LLM-safe editing
+* deterministic rendering
+* repeat normalization
+* bidirectional transformations
+* extensible datatype system
+* patch-friendly architecture
+
+```
+
+---
+
+If you'd like, I can also produce a **clean architecture diagram of this system (renderer + schema + resolvers + LLM loop)** which makes it much easier for new engineers to understand the flow.
+```

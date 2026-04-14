@@ -132,6 +132,10 @@ func (registry *MediaAssetRegistry) GetIdentity() *pbcore.BrandIdentity {
 	return registry.identity
 }
 
+func (registry *MediaAssetRegistry) GetAssetHandles() []string {
+	return registry.assetHandles
+}
+
 func (registry *MediaAssetRegistry) ResolveMediaHandles(code string) string {
 	replacements := make([]string, 0, len(registry.assetMapper)*4)
 
@@ -151,8 +155,8 @@ func (registry *MediaAssetRegistry) ResolveMediaHandles(code string) string {
 	return replacer.Replace(code)
 }
 
-func (registry *MediaAssetRegistry) GetAssetFromPath(path string) *models.MediaAsset {
-	asset, ok := registry.assetMapper[path]
+func (registry *MediaAssetRegistry) GetAssetFromHandle(handleID string) *models.MediaAsset {
+	asset, ok := registry.assetMapper[handleID]
 	if !ok {
 		return nil
 	}
@@ -248,7 +252,7 @@ func (registry *MediaAssetRegistry) toAttachment(handles []string) string {
 		writeLine(2, "<media_type>%s</media_type>", asset.MediaType.String())
 		writeLine(2, "<mime_type>%s</mime_type>", asset.MimeType)
 		if asset.Metadata.Duration > 0 {
-			writeLine(2, "<duration>%d</duration>", asset.Metadata.Duration)
+			writeLine(2, "<duration>%.2f</duration>", asset.Metadata.Duration)
 		}
 		if asset.Description != "" {
 			writeLine(2, "<description>%s</description>", asset.Description)
