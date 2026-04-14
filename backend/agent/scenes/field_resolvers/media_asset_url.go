@@ -22,7 +22,7 @@ func (r MediaAssetUrlResolver) Forward(value any, fieldValueMapper *services.Med
 					Url:       resolvedMediaAsset.Path,
 					Width:     resolvedMediaAsset.Metadata.Width,
 					Height:    resolvedMediaAsset.Metadata.Height,
-					Duration:  resolvedMediaAsset.Metadata.Duration,
+					Duration:  resolvedMediaAsset.Metadata.Duration * 30, // set it in frames
 					MediaType: resolvedMediaAsset.MediaType.String(),
 				}, nil
 			}

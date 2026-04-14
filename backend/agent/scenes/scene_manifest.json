@@ -394,13 +394,11 @@
                 {
                   "name": "text",
                   "type": "string",
-                  "required": true,
                   "map": "props.text"
                 },
                 {
                   "name": "cyclingWords",
                   "type": "array",
-                  "required": true,
                   "map": "props.cyclingWords",
                   "default": []
                 },
@@ -568,13 +566,11 @@
                     {
                       "name": "text",
                       "type": "string",
-                      "required": true,
                       "map": "props.text"
                     },
                     {
                       "name": "cyclingWords",
                       "type": "array",
-                      "required": true,
                       "map": "props.cyclingWords",
                       "default": []
                     },
@@ -668,6 +664,7 @@
             {
               "type": "oneof",
               "selector": "props.textComponent",
+              "propsPath": "props.textComponentProps",
               "components": [
                 {
                   "name": "textstagger",
@@ -762,13 +759,11 @@
                     {
                       "name": "text",
                       "type": "string",
-                      "required": true,
                       "map": "props.text"
                     },
                     {
                       "name": "cyclingWords",
                       "type": "array",
-                      "required": true,
                       "map": "props.cyclingWords",
                       "default": []
                     },

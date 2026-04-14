@@ -101,33 +101,33 @@ func TestConvertSceneToSceneConfig(t *testing.T) {
 			inputJSON: `{
 	  "elements": [
 		{
-		  "component": "ContentAware",
-		  "props": "{\n  \"textComponent\": \"texthighlight\",\n  \"textComponentProps\": {\"text\": \"AI models\"},\n  \"mediaComponent\": \"imageasset\",\n  \"src\": \"fake_handle\"\n}",
+		  "component": "TextWithImageScene",
+		  "props": "{\"textComponent\":\"textwithwordcycle\",\"textComponentProps\":{\"text\":\"An AI assistant for\",\"cyclingWords\":[\"planning\",\"debugging\",\"shipping\"]},\"image\":\"fake_handle\"}",
 		  "children": []
 		}
 	  ]
 	}`,
 			expectedJSON: `{
-  "ID": "contentaware",
-  "Name": "ContentAware",
+  "ID": "textwithimagescene",
+  "Name": "TextWithImageScene",
   "Props": {
-    "texthighlight": {
+    "textwithwordcycle": {
       "text": "AI models",
-      "highlightColor": "yellow"
+      "cyclingWords": ["planning","debugging","shipping"]
     },
     "imageasset": {
-      "src": "https://www.thesvg.org/icons/openai/light.svg"
+      "image": "https://www.thesvg.org/icons/openai/light.svg"
     }
   },
   "Children": null
 }`,
 			expectJSX: []string{
-				"<ContentAware",
+				"<TextWithImageScene",
 			},
 			editsToScene: []string{
 				"imageasset",
-				"texthighlight",
-				"src",
+				"textwithwordcycle",
+				"image",
 				"fake_original_url",
 				"width",
 				"height",

@@ -251,6 +251,7 @@ export const TextWithVideoSceneDescriptor: ComponentRegistration = {
   }, {
     type: 'oneof',
     selector: 'props.textComponent',
+    propsPath: 'props.textComponentProps',
     components: [
       { name: 'textstagger', fields: TextStaggerSchemaFields },
       { name: 'texthighlight', fields: TextHighlightSchemaFields },

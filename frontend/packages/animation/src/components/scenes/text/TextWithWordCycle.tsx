@@ -300,15 +300,11 @@ export const TextWithWordCycleSchemaFields = [
   {
     "name": "text",
     "type": "string",
-
-    "required": true,
     "map": "props.text"
   },
   {
     "name": "cyclingWords",
     "type": "array",
-
-    "required": true,
     "map": "props.cyclingWords",
     "default": []
   },
