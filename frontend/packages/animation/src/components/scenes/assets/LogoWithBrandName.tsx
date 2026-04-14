@@ -8,8 +8,8 @@ import { interpolateWithEasing } from "../../../styles/easingResolver";
 import { useTheme } from "../../../theme";
 import { resolveTypography } from "../../../tokens/resolveTypography";
 import { TYPOGRAPHY_VARIANT_NAMES } from "../../../tokens/semantic";
-import { LogoAsset, LogoAssetProps, LogoAssetSchemaFields } from "./LogoAsset";
-import { TextStagger, TextStaggerProps, TextStaggerSchemaFields } from "../text/TextStagger";
+import { LogoAsset, LogoAssetDefaults, LogoAssetProps, LogoAssetSchemaFields } from "./LogoAsset";
+import { TextStagger, TextStaggerDefaults, TextStaggerProps, TextStaggerSchemaFields } from "../text/TextStagger";
 import type { ComponentRegistration } from '../../../registry/registry';
 import { SPLIT_BY_MODES } from "../types";
 
@@ -19,19 +19,10 @@ const DEFAULT_CHAR_FADE_DURATION = 20;
 const DEFAULT_VARIANT = 'heading' as const;
 const DEFAULT_SRC = ""
 
-export const LogoWithBrandNameSchema = z.object({
-    id: z.string().optional(),
-    brandName: z.string().default(''),
-    src: z.string().default(DEFAULT_SRC).optional(),
-    variant: z.enum(TYPOGRAPHY_VARIANT_NAMES).default(DEFAULT_VARIANT).optional(),
-});
-
-// Use z.input for props (what callers pass) - fields with defaults are optional
-export type LogoWithBrandNameProps = z.input<typeof LogoWithBrandNameSchema>;
 
 export function LogoWithBrandName(): React.ReactElement {
-    const textProps = usePatchedProps("textstagger", {}) as TextStaggerProps;
-    const logoAssetProps = usePatchedProps("logoasset", {}) as LogoAssetProps;
+    const textProps = usePatchedProps("textstagger", TextStaggerDefaults);
+    const logoAssetProps = usePatchedProps("logoasset", LogoAssetDefaults);
 
 
     const frame = useCurrentFrame();

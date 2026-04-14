@@ -214,7 +214,7 @@ func (a *sceneGenerator) injectMediaAssets(ctx context.Context, input *pbportal.
 
 	if len(assetIDs) > 0 {
 		a.publishTransientState(VideoAgentState{
-			Thinking: "Analysing images..",
+			Thinking: "Analysing attachments..",
 			State:    stateStatusProcessing,
 		})
 		mediaAssets, err := a.db.GetMediaAssetsByID(ctx, assetIDs)
@@ -358,12 +358,12 @@ func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest ty
 		}
 
 		// replace generated asset handles
-		if l.assetRegistry != nil {
-			for i := range scene.Elements {
-				resolved := l.assetRegistry.ResolveMediaHandles(scene.Elements[i].Props)
-				scene.Elements[i].Props = resolved
-			}
-		}
+		//if l.assetRegistry != nil {
+		//	for i := range scene.Elements {
+		//		resolved := l.assetRegistry.ResolveMediaHandles(scene.Elements[i].Props)
+		//		scene.Elements[i].Props = resolved
+		//	}
+		//}
 
 		// Validate scene and add default props
 		sceneConfig, err := scenes.ConvertToSceneConfig(scene, l.assetRegistry)

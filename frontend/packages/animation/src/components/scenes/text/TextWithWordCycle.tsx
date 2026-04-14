@@ -12,6 +12,7 @@ import type { ComponentRegistration } from '../../../registry/registry';
 import type { HighlightStyle, TextCycleTransition } from '../types';
 
 export const TextWithWordCycleDefaults = {
+  id: 'textwithwordcycle',
   text: 'Sample text',
   cyclingWords: ['first word', 'next word', 'last word'],
   holdDuration: 20,
@@ -31,19 +32,21 @@ export type TextWithWordCycleProps = typeof TextWithWordCycleDefaults;
  * 
  * Example: "We build amazing [software/products/solutions]" where the bracketed words cycle.
  */
-export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = () => {
+export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (initProps: TextWithWordCycleProps) => {
   const frame = useCurrentFrame();
   const styleConfig = useStyleContext();
   const theme = useTheme();
   const preset = useAspectPreset();
+  const defaultProps = { ...TextWithWordCycleDefaults, ...initProps };
+  const id = defaultProps.id;
 
-  const props = usePatchedProps('textwithwordcycle', TextWithWordCycleDefaults);
+  const props = usePatchedProps(id, defaultProps);
 
   const patchedVariant = props.variant;
   const actualHighlightStyle = props.highlightStyle;
   const actualHighlightColor = props.highlightColor ?? theme.colors.primary;
-  const styleOverride = useStyleOverride('textwithwordcycle');
-  const dragStyle = usePatchedDragStyle('textwithwordcycle', props.style?.transform);
+  const styleOverride = useStyleOverride(id);
+  const dragStyle = usePatchedDragStyle(id, props.style?.transform);
 
   const cycleDuration = props.holdDuration + props.transitionDuration;
   const typographyStyle = resolveTypography(patchedVariant, styleConfig, theme, preset);
@@ -270,7 +273,7 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = () => {
 
   return (
     <span
-      id='textwithwordcycle'
+      id={id}
       className={props.className}
       style={{
         display: 'inline',

@@ -28,17 +28,17 @@ const DEFAULT_LOGO_SVG = `data:image/svg+xml,${encodeURIComponent(`
 // Schema & Duration Calculation
 // ============================================================================
 
-export const LogoAssetSchema = z.object({
-    id: z.string().optional(),
-    src: z.string().default(DEFAULT_SRC).optional(),
-    width: z.number().optional(),
-    height: z.number().optional(),
-    logoAnimation: z.enum(LOGO_ANIMATIONS).default(DEFAULT_ANIMATION).optional(),
-    style: z.any().optional(),
-    className: z.string().optional(),
-});
+export const LogoAssetDefaults = {
+    id: 'logoasset',
+    src: DEFAULT_SRC,
+    logoAnimation: LOGO_ANIMATIONS[0],
+    width: undefined as number | undefined,
+    height: undefined as number | undefined,
+    className: undefined as string | undefined,
+    style: undefined as React.CSSProperties | undefined,
+};
 
-export type LogoAssetProps = z.input<typeof LogoAssetSchema>;
+export type LogoAssetProps = Partial<typeof LogoAssetDefaults>
 
 function getLogoAnimationStyle(animation: LogoAnimation, progress: number): React.CSSProperties {
     const inv = 1 - progress;
@@ -62,9 +62,11 @@ function getLogoAnimationStyle(animation: LogoAnimation, progress: number): Reac
     }
 }
 
-export function LogoAsset(propsInit: LogoAssetProps): React.ReactElement {
-    const patchedProps = usePatchedProps(propsInit.id, propsInit);
-    const props = { ...LogoAssetSchema.parse(patchedProps), id: propsInit.id };
+export function LogoAsset(initProps: LogoAssetProps): React.ReactElement {
+    const defaultProps = { ...LogoAssetDefaults, ...initProps };
+    const id = defaultProps.id;
+    
+    const props = usePatchedProps(id, defaultProps);
 
     const frame = useCurrentFrame();
     const { logo } = useTheme();
@@ -76,6 +78,7 @@ export function LogoAsset(propsInit: LogoAssetProps): React.ReactElement {
 
     // Apply defaults
     const actualAnimation = props.logoAnimation ?? DEFAULT_ANIMATION;
+
     const { objectFit: styleObjectFit, ...restStyle } = props.style ?? {};
     const { objectFit: overrideObjectFit, ...wrapperStyleOverride } = styleOverride;
     const defaultSrc = props.src || logo?.url || DEFAULT_LOGO_SVG;
@@ -160,8 +163,7 @@ export const LogoAssetSchemaFields = [
     {
         "name": "src",
         "type": "string",
-        "subtype": "image",    
-        "required": false,
+        "dataType": "media",
         "map": "props.src"
     },
     {

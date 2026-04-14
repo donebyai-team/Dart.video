@@ -29,13 +29,15 @@ export const AnimatedNumberDefaults = {
 
 export type AnimatedNumberProps = Partial<typeof AnimatedNumberDefaults> & { id?: string };
 
-export const AnimatedNumber: React.FC<AnimatedNumberProps> = () => {
+export const AnimatedNumber: React.FC<AnimatedNumberProps> = (initProps) => {
     const frame = useCurrentFrame();
     const styleConfig = useStyleContext();
     const theme = useTheme();
     const preset = useAspectPreset();
 
-    const props = usePatchedProps('animatednumber', AnimatedNumberDefaults)
+    const defaultProps = { ...AnimatedNumberDefaults, ...initProps };
+    const id = defaultProps.id;
+    const props = usePatchedProps(id, defaultProps);
 
     // Apply defaults
     const actualVariant = props.variant;

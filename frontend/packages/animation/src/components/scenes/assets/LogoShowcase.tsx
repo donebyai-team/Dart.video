@@ -6,7 +6,7 @@ import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
 import { LogoAsset } from './LogoAsset';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { interpolateWithEasing } from '../../../styles';
-import { TextStagger, TextStaggerProps, TextStaggerSchemaFields } from '../text/TextStagger';
+import { TextStagger, TextStaggerDefaults, TextStaggerProps, TextStaggerSchemaFields } from '../text/TextStagger';
 import { ENTRANCE_ANIMATIONS } from '../types';
 import { ArrayItem } from '../../../core/assets/ArrayItem';
 
@@ -31,16 +31,8 @@ function getSlotLayout(count: number) {
     return SLOT_LAYOUT_BY_COUNT[Math.min(Math.max(count, 1), MAX_LOGOS_PER_ROW)] ?? SLOT_LAYOUT_BY_COUNT[5];
 }
 
-export const LogoShowcaseSchema = z.object({
-    id: z.string().optional(),
-    images: z.array(z.string()).default([]),
-    text: z.string().default(''),
-});
-
-export type LogoShowcaseProps = z.input<typeof LogoShowcaseSchema>;
-
 export const LogoShowcase: React.FC = () => {
-    const textProps = usePatchedProps("textstagger", {}) as TextStaggerProps;
+    const textProps = usePatchedProps("textstagger", TextStaggerDefaults);
     const arrayProps = useArrayPatch("logos");
 
     const frame = useCurrentFrame();
@@ -161,6 +153,7 @@ export const LogoShowcaseSchemaFields = [
                     {
                         name: "src",
                         type: "string",
+                        dataType: "media",
                         map: "item"
                     }
                 ]

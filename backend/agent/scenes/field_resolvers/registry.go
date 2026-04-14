@@ -53,4 +53,5 @@ var FieldMappings = NewResolverRegistry()
 func init() {
 	FieldMappings.Register("icon", IconArrayResolver{})
 	FieldMappings.Register("icons", IconArrayResolver{})
+	FieldMappings.Register("media", MediaAssetUrlResolver{})
 }

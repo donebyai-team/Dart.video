@@ -135,7 +135,7 @@ export const AnimatedImageAssetSchema = [
             {
                 "name": "src",
                 "type": "string",
-                "subtype": "image",                
+                "dataType": "media",               
                 "map": "props.src"
             },
             {

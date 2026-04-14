@@ -12,6 +12,7 @@ import type { ComponentRegistration } from '../../../registry/registry';
 import type { TextCycleTransition } from '../types';
 
 export const TextCycleDefaults = {
+  id: 'textcycle',
   texts: ['First text', 'Second text', 'Third text'],
   holdDuration: 20,
   transitionDuration: 5,
@@ -21,7 +22,7 @@ export const TextCycleDefaults = {
   className: undefined as string | undefined,
 };
 
-export type TextCycleProps = Partial<typeof TextCycleDefaults> & { id?: string };
+export type TextCycleProps = Partial<typeof TextCycleDefaults>;
 
 /**
  * Cycles through an array of words with animated transitions.
@@ -29,17 +30,19 @@ export type TextCycleProps = Partial<typeof TextCycleDefaults> & { id?: string }
  * Auto-adjusts container width to the longest word using a hidden spacer —
  * no layout reflow occurs when words change, eliminating jerk in Stack/Row layouts.
  */
-export const TextCycle: React.FC<TextCycleProps> = () => {
+export const TextCycle: React.FC<TextCycleProps> = (initProps) => {
   const frame = useCurrentFrame();
   const styleConfig = useStyleContext();
   const theme = useTheme();
   const preset = useAspectPreset();
 
-  const props = usePatchedProps('textcycle', TextCycleDefaults);
+  const defaultProps = { ...TextCycleDefaults, ...initProps };
+  const id = defaultProps.id;
+  const props = usePatchedProps(id, defaultProps);
 
   const patchedVariant = props.variant;
-  const styleOverride = useStyleOverride('textcycle');
-  const dragStyle = usePatchedDragStyle('textcycle', props.style?.transform);
+  const styleOverride = useStyleOverride(id);
+  const dragStyle = usePatchedDragStyle(id, props.style?.transform);
 
   const cycleDuration = props.holdDuration + props.transitionDuration;
   const typographyStyle = resolveTypography(patchedVariant, styleConfig, theme, preset);
@@ -162,7 +165,7 @@ export const TextCycle: React.FC<TextCycleProps> = () => {
 
   // flipY
   return (
-    <span className={props.className} style={containerStyle}>
+    <span className={props.className} style={containerStyle} id={initProps.id}>
       <Text text={longestWord} variant={patchedVariant} style={spacerStyle} />
 
       <Text

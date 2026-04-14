@@ -21,16 +21,13 @@ const DEFAULT_HEIGHT = 1080 * 0.7;
 // Schema & Type
 // ============================================================================
 
-export const ImagePeelSchema = z.object({
-    id: z.string().optional(),
-    images: z.array(z.string()),
-    direction: z.enum(DIRECTIONS).default(DEFAULT_DIRECTION).optional(),
-    holdDuration: z.number().default(DEFAULT_HOLD_DURATION).optional(),
-    peelDuration: z.number().default(DEFAULT_PEEL_DURATION).optional(),
-    stackOffset: z.number().default(DEFAULT_STACK_OFFSET).optional(),
-});
-
-export type ImagePeelProps = z.input<typeof ImagePeelSchema>;
+export const ImagePeelDefaults = {
+    id: 'imagepeel',
+    direction: DEFAULT_DIRECTION as Direction,
+    holdDuration: DEFAULT_HOLD_DURATION,
+    peelDuration: DEFAULT_PEEL_DURATION,
+    stackOffset: DEFAULT_STACK_OFFSET,
+};
 
 function getPeelTransform(direction: Direction, progress: number): { transform: string; opacity: number } {
     const opacity = 1 - progress;
@@ -47,16 +44,16 @@ function getPeelTransform(direction: Direction, progress: number): { transform: 
 }
 
 export function ImagePeel(): React.ReactElement {
-    const parentProps = usePatchedProps("scene", {}) as ImagePeelProps;
+    const parentProps = usePatchedProps("scene", ImagePeelDefaults);
     const arrayProps = useArrayPatch("images");
 
     const frame = useCurrentFrame();
 
     // Apply defaults
-    const actualDirection = parentProps.direction ?? DEFAULT_DIRECTION;
-    const actualHoldDuration = parentProps.holdDuration ?? DEFAULT_HOLD_DURATION;
-    const actualPeelDuration = parentProps.peelDuration ?? DEFAULT_PEEL_DURATION;
-    const actualStackOffset = parentProps.stackOffset ?? DEFAULT_STACK_OFFSET;
+    const actualDirection: Direction = parentProps.direction || DEFAULT_DIRECTION;
+    const actualHoldDuration = parentProps.holdDuration || DEFAULT_HOLD_DURATION;
+    const actualPeelDuration = parentProps.peelDuration || DEFAULT_PEEL_DURATION;
+    const actualStackOffset = parentProps.stackOffset || DEFAULT_STACK_OFFSET;
 
     const count = arrayProps.length;
     // Each image: [enter] -> [hold] -> [peel away], staggered
@@ -170,7 +167,8 @@ export const ImagePeelSchemaFields = [
                     {
                         "name": "src",
                         "type": "string",
-                        "map": "item"
+                        "map": "item",
+                        "dataType": "media",
                     },
                     {
                         "name": "width",

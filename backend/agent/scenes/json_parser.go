@@ -149,11 +149,27 @@ func resolveFields(
 		}
 
 		if value != nil {
+			if mediaAssetFields, ok := value.(*field_resolvers.MediaAssetFields); ok {
+				value = mediaAssetFields.Url
+				mergeMediaAssetFields(out, mediaAssetFields)
+			}
+
 			out[f.Name] = value
 		}
 	}
 
 	return out, nil
+}
+
+func mergeMediaAssetFields(out map[string]any, mediaAssetFields *field_resolvers.MediaAssetFields) {
+	if mediaAssetFields == nil {
+		return
+	}
+
+	out["width"] = mediaAssetFields.Width
+	out["height"] = mediaAssetFields.Height
+	out["duration"] = mediaAssetFields.Duration
+	out["mediaType"] = mediaAssetFields.MediaType
 }
 
 func resolveMap(path string, input map[string]any, item any) any {

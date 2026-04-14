@@ -10,6 +10,7 @@ import { getEntranceTransform } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
 
 export const TypewriterDefaults = {
+  id: 'typewriter',
   text: "Sample text",
   startAt: 0,
   splitBy: "char" as const,
@@ -27,15 +28,18 @@ export type TypewriterProps = typeof TypewriterDefaults;
  * Reveals text progressively using linear easing.
  * Cursor appearance (shape, behavior) driven by StyleContext.cursor.
  */
-export function Typewriter(): React.ReactElement {
+export function Typewriter(initProps: TypewriterProps): React.ReactElement {
   const frame = useCurrentFrame();
   const styleConfig = useStyleContext();
   const theme = useTheme();
   const preset = useAspectPreset();
-  const props = usePatchedProps('typewriter', TypewriterDefaults);
+  const defaultProps = { ...TypewriterDefaults, ...initProps };
+  const id = defaultProps.id;
 
-  const styleOverride = useStyleOverride('typewriter');
-  const dragStyle = usePatchedDragStyle('typewriter', props.style?.transform);
+  const props = usePatchedProps(id, defaultProps);
+
+  const styleOverride = useStyleOverride(id);
+  const dragStyle = usePatchedDragStyle(id, props.style?.transform);
 
   const entranceDuration = 20;
   const entranceProgress = interpolateWithEasing(
@@ -76,7 +80,7 @@ export function Typewriter(): React.ReactElement {
 
   return (
     <span      
-      id='typewriter'
+      id={id}
       className={props.className}
       style={{
         display: 'inline-block',

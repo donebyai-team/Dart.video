@@ -309,7 +309,7 @@ func (a *agentV2) injectMediaAssets(ctx context.Context, input *pbportal.CreateV
 
 	if len(assetIDs) > 0 {
 		a.publishTransientState(VideoAgentState{
-			Thinking: "Analysing images..",
+			Thinking: "Analysing attachments..",
 			State:    stateStatusProcessing,
 		})
 		mediaAssets, err := a.db.GetMediaAssetsByID(ctx, assetIDs)
@@ -401,12 +401,12 @@ func (a *agentV2) runPlanning(ctx context.Context, req types.VideoGenerationPlan
 				}
 
 				// replace generated asset handles
-				if a.assetRegistry != nil {
-					for i := range scene.Elements {
-						resolved := a.assetRegistry.ResolveMediaHandles(scene.Elements[i].Props)
-						scene.Elements[i].Props = resolved
-					}
-				}
+				//if a.assetRegistry != nil {
+				//	for i := range scene.Elements {
+				//		resolved := a.assetRegistry.ResolveMediaHandles(scene.Elements[i].Props)
+				//		scene.Elements[i].Props = resolved
+				//	}
+				//}
 			}
 		}
 

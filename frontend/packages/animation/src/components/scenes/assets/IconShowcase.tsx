@@ -2,7 +2,7 @@ import React from 'react';
 import { interpolate, useCurrentFrame } from 'remotion';
 import z from 'zod';
 import { IconAsset } from '../../../core/assets/IconAsset';
-import { TextStagger, TextStaggerProps, TextStaggerSchemaFields } from '../text/TextStagger';
+import { TextStagger, TextStaggerDefaults, TextStaggerProps, TextStaggerSchemaFields } from '../text/TextStagger';
 import { useArrayPatch, usePatchedProps } from '../../../patches';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { ENTRANCE_ANIMATIONS, SPLIT_BY_MODES } from '../types';
@@ -18,19 +18,8 @@ const DEFAULT_VARIANT = 'heading' as const;
 const DEFAULT_ICON_SIZE = 90;
 const DEFAULT_ICON_GAP = 64;
 
-// ============================================================================
-// Zod Schema
-// ============================================================================
-
-export const LLMIconShowcaseSchema = z.object({
-    id: z.string().optional(),
-    icons: z.array(z.string()).default([]),
-    text: z.string().default(""),
-});
-
-
 export const IconShowcase: React.FC = () => {
-    const textProps = usePatchedProps("textstagger", {}) as TextStaggerProps;
+    const textProps = usePatchedProps("textstagger", TextStaggerDefaults);
     const arrayProps = useArrayPatch("icons");
 
 

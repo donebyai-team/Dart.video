@@ -495,7 +495,7 @@
                 {
                   "name": "src",
                   "type": "string",
-                  "subtype": "image",
+                  "dataType": "media",
                   "map": "props.src"
                 },
                 {
@@ -569,7 +569,7 @@
                 {
                   "name": "src",
                   "type": "string",
-                  "subtype": "video",
+                  "dataType": "media",
                   "map": "props.src"
                 },
                 {
@@ -617,7 +617,8 @@
                     {
                       "name": "src",
                       "type": "string",
-                      "map": "item"
+                      "map": "item",
+                      "dataType": "media"
                     },
                     {
                       "name": "width",
@@ -687,8 +688,7 @@
                 {
                   "name": "src",
                   "type": "string",
-                  "subtype": "image",
-                  "required": false,
+                  "dataType": "media",
                   "map": "props.src"
                 },
                 {
@@ -771,6 +771,7 @@
                     {
                       "name": "src",
                       "type": "string",
+                      "dataType": "media",
                       "map": "item"
                     }
                   ]
@@ -847,8 +848,7 @@
                 {
                   "name": "src",
                   "type": "string",
-                  "subtype": "image",
-                  "required": false,
+                  "dataType": "media",
                   "map": "props.src"
                 },
                 {

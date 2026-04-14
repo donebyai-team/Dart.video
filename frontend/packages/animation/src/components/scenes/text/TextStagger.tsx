@@ -28,6 +28,7 @@ function getSplitModeDefaults(splitBy: SplitByMode) {
 }
 
 export const TextStaggerDefaults = {
+    id: 'textstagger',
     startAt: 0,
     text: 'Sample text',
     variant: 'heading' as TypographyVariant,
@@ -39,16 +40,18 @@ export const TextStaggerDefaults = {
     style: undefined as React.CSSProperties | undefined,
 };
 
-export type TextStaggerProps = Partial<typeof TextStaggerDefaults> & { id?: string };
+export type TextStaggerProps = Partial<typeof TextStaggerDefaults>
 
-export const TextStagger: React.FC<TextStaggerProps> = () => {
+export const TextStagger: React.FC<TextStaggerProps> = (initProps) => {
 
     const frame = useCurrentFrame();
     const styleConfig = useStyleContext();
     const theme = useTheme();
     const preset = useAspectPreset();
+    const defaultProps = { ...TextStaggerDefaults, ...initProps };
+    const id = defaultProps.id;
 
-    const props = usePatchedProps('textstagger', TextStaggerDefaults);
+    const props = usePatchedProps(id, defaultProps);
 
 
     // Apply defaults (split-mode-aware)
@@ -61,8 +64,8 @@ export const TextStagger: React.FC<TextStaggerProps> = () => {
     const actualDuration = props.duration ?? modeDefaults.duration;
 
 
-    const styleOverride = useStyleOverride('textstagger');
-    const dragStyle = usePatchedDragStyle('textstagger', props.style?.transform);
+    const styleOverride = useStyleOverride(id);
+    const dragStyle = usePatchedDragStyle(id, props.style?.transform);
 
     const units = splitBy === 'char' ? props.text.split('') : splitBy === 'line' ? props.text.split('\n') : props.text.split(' ');
 
@@ -82,7 +85,7 @@ export const TextStagger: React.FC<TextStaggerProps> = () => {
 
     return (
         <span
-            id='textstagger'
+            id={id}
             className={props.className}
             style={{
                 display: 'inline-block',

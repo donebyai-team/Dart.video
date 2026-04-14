@@ -14,6 +14,7 @@ import {
 import type { ComponentRegistration } from '../../../registry/registry';
 
 export const TextHighlightDefaults = {
+    id: 'texthighlight',
     text: 'We build amazing {software}',
     variant: 'heading' as TypographyVariant,
     highlightStyle: 'glow' as HighlightStyle,
@@ -26,13 +27,15 @@ export const TextHighlightDefaults = {
     style: undefined as React.CSSProperties | undefined,
 };
 
-export type TextHighlightProps = Partial<typeof TextHighlightDefaults> & { id?: string };
+export type TextHighlightProps = Partial<typeof TextHighlightDefaults>;
 
-export const TextHighlight: React.FC<TextHighlightProps> = () => {
+export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
     const frame = useCurrentFrame();
     const theme = useTheme();
 
-    const props = usePatchedProps('texthighlight', TextHighlightDefaults);
+    const defaultProps = { ...TextHighlightDefaults, ...initProps };
+    const id = defaultProps.id;
+    const props = usePatchedProps(id, defaultProps);
 
     // Apply defaults
     const actualVariant = props.variant;
@@ -42,8 +45,8 @@ export const TextHighlight: React.FC<TextHighlightProps> = () => {
     const actualAnimation = props.entranceAnimation;
     const actualAnimationDelay = props.animationDelay;
     const actualZoomDuration = props.zoomDuration;
-    const styleOverride = useStyleOverride('texthighlight');
-    const dragStyle = usePatchedDragStyle('texthighlight', props.style?.transform);
+    const styleOverride = useStyleOverride(initProps.id);
+    const dragStyle = usePatchedDragStyle(initProps.id, props.style?.transform);
 
     // Animation timeline:
     // Phase 1: Entrance animation with highlight already visible (0 to animationDelay)
@@ -212,7 +215,7 @@ export const TextHighlight: React.FC<TextHighlightProps> = () => {
 
     return (
         <span
-            id='texthighlight'
+            id={props.id}
             className={props.className}
             style={{
                 display: 'inline-block',
