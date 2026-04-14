@@ -574,7 +574,7 @@ func (a *agentV2) applyPlan(
 			scene := sceneMapper[slide.Id]
 
 			//Convert to config
-			sceneConfig, err := scenes.ConvertToSceneConfig(scene, nil)
+			sceneConfig, err := scenes.ConvertToSceneConfig(scene, a.assetRegistry)
 			if err != nil {
 				return fmt.Errorf("converting scene to config: %w", err)
 			}
