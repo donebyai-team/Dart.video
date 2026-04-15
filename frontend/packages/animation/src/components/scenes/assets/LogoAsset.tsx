@@ -1,7 +1,6 @@
 import { preloadImage } from "@remotion/preload";
 import { useEffect } from "react";
 import { useCurrentFrame, useRemotionEnvironment } from "remotion";
-import z from 'zod';
 import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from "../../../patches";
 import { useAspectPreset } from "../../../styles/AspectPresetContext";
 import { interpolateWithEasing } from "../../../styles/easingResolver";

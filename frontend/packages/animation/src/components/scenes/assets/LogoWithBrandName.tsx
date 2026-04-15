@@ -95,7 +95,42 @@ export const LogoWithBrandNameSchemaFields = [
     {
         type: "component",
         name: 'textstagger',
-        fields: TextStaggerSchemaFields
+        fields: [
+            {
+                "name": "text",
+                "type": "string",
+
+                "map": "props.text"
+            },
+            {
+                "name": "variant",
+                "type": "string",
+                "subtype": "enum",
+                "default": TextStaggerDefaults.variant
+            },
+            {
+                "name": "staggerDelay",
+                "type": "number",
+                "default": TextStaggerDefaults.staggerDelay
+            },
+            {
+                "name": "entranceAnimation",
+                "type": "string",
+                "subtype": "enum",
+                "default": TextStaggerDefaults.entranceAnimation
+            },
+            {
+                "name": "duration",
+                "type": "number",
+                "default": TextStaggerDefaults.duration
+            },
+            {
+                "name": "splitBy",
+                "type": "string",
+                "subtype": "enum",
+                "default": SPLIT_BY_MODES[0]
+            }
+        ]
     },
     {
         type: "component",

@@ -134,7 +134,8 @@ func IsImageTypeSupported(imageURL string) bool {
 			strings.HasSuffix(urlLower, ".jpeg") ||
 			strings.HasSuffix(urlLower, ".jpg") ||
 			strings.HasSuffix(urlLower, ".webp") ||
-			strings.HasSuffix(urlLower, ".svg")
+			strings.HasSuffix(urlLower, ".svg") ||
+			strings.HasSuffix(urlLower, ".ico")
 	}
 
 	// Check the extension from the path component
@@ -143,7 +144,8 @@ func IsImageTypeSupported(imageURL string) bool {
 		strings.HasSuffix(pathLower, ".jpeg") ||
 		strings.HasSuffix(pathLower, ".jpg") ||
 		strings.HasSuffix(pathLower, ".webp") ||
-		strings.HasSuffix(pathLower, ".svg")
+		strings.HasSuffix(pathLower, ".svg") ||
+		strings.HasSuffix(pathLower, ".ico")
 }
 
 func DetectMediaType(contentType string) pbcore.MediaType {
