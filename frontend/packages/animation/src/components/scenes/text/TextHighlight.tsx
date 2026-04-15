@@ -45,8 +45,7 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
     const actualAnimation = props.entranceAnimation;
     const actualAnimationDelay = props.animationDelay;
     const actualZoomDuration = props.zoomDuration;
-    const styleOverride = useStyleOverride(initProps.id);
-    const dragStyle = usePatchedDragStyle(initProps.id, props.style?.transform);
+    const styleOverride = useStyleOverride(id);
 
     // Animation timeline:
     // Phase 1: Entrance animation with highlight already visible (0 to animationDelay)
@@ -59,6 +58,8 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
         [0, 1],
         'ease-out'
     );
+    const entranceTransform = getEntranceTransform(actualAnimation, entranceProgress, 200);
+    const dragStyle = usePatchedDragStyle(id, entranceTransform, props.style?.transform);
 
     const zoomStartFrame = actualAnimationDelay;
     const zoomProgress = interpolateWithEasing(
@@ -212,7 +213,6 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
             style={{
                 display: 'inline-block',
                 opacity: entranceProgress,
-                transform: getEntranceTransform(actualAnimation, entranceProgress, 200),
                 ...props.style,
                 ...styleOverride,
                 ...dragStyle,
