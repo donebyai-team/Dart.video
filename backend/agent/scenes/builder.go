@@ -112,18 +112,20 @@ func BuildScenesList(editMode bool) string {
 
 	var b strings.Builder
 
-	b.WriteString("## Available Scenes\n\n")
+	b.WriteString("# Available Scenes\n\n")
 
-	b.WriteString("### Sectional — prefer for opening/closing of each section\n\n")
+	b.WriteString("## Sectional Scenes\n")
+	b.WriteString("Prefer for opening or closing a section.\n\n")
 
 	for _, s := range sectional {
-		writeScene(&b, s)
+		writeScene(&b, s, "Sectional")
 	}
 
-	b.WriteString("### Filler — use anywhere\n\n")
+	b.WriteString("## Filler Scenes\n")
+	b.WriteString("Can be used anywhere in the video.\n\n")
 
 	for _, s := range filler {
-		writeScene(&b, s)
+		writeScene(&b, s, "Filler")
 	}
 
 	if editMode && len(registry.AvailableEnums) > 0 {
@@ -133,83 +135,87 @@ func BuildScenesList(editMode bool) string {
 	return b.String()
 }
 
-func writeAvailableEnums(b *strings.Builder) {
-	b.WriteString("## Available Enums\n\n")
+func writeScene(b *strings.Builder, c Component, category string) {
 
-	for _, enum := range registry.AvailableEnums {
-		fmt.Fprintf(b, "%s", enum.Name)
+	fmt.Fprintf(b, "### Scene: %s\n\n", c.Name)
 
-		if enum.Description != "" {
-			fmt.Fprintf(b, " | %s", enum.Description)
-		}
-
-		fmt.Fprintf(b, "\n")
-
-		if len(enum.Value) > 0 {
-			fmt.Fprintf(b, "Values: %s\n\n", strings.Join(enum.Value, ", "))
-		} else {
-			fmt.Fprintf(b, "\n")
-		}
-	}
-}
-
-func writeScene(b *strings.Builder, c Component) {
-
-	fmt.Fprintf(b, "%s", c.Name)
+	fmt.Fprintf(b, "- Type: %s\n", category)
 
 	if len(c.Tags) > 0 {
-		fmt.Fprintf(b, " | Video sections: %s", strings.Join(c.Tags, " or "))
+		fmt.Fprintf(b, "- Sections: %s\n", strings.Join(c.Tags, ", "))
 	}
 
-	fmt.Fprintf(b, "\n")
+	b.WriteString("\n")
 
 	if c.Description != "" {
-		fmt.Fprintf(b, "%s\n", c.Description)
+		b.WriteString("**Description**\n")
+		fmt.Fprintf(b, "%s\n\n", c.Description)
 	}
 
-	fmt.Fprintf(b, "Props: \n%s\n\n", buildPropsInline(c.LLMSchema))
+	b.WriteString("**Props**\n")
+	writeProps(b, c.LLMSchema)
+
+	b.WriteString("\n---\n\n")
 }
 
-func buildPropsInline(fields []LLMField) string {
-
-	var parts []string
+func writeProps(b *strings.Builder, fields []LLMField) {
 
 	for _, f := range fields {
 
-		if f.Type == "array" {
+		if f.Type == "array" && f.Items != nil {
 
-			if f.Items != nil {
+			if len(f.Items.Fields) > 0 {
 
-				if len(f.Items.Fields) > 0 {
-
-					var objParts []string
-					for _, sub := range f.Items.Fields {
-						objParts = append(objParts, fmt.Sprintf("%s:%s", sub.Name, sub.Type))
-					}
-
-					parts = append(parts,
-						fmt.Sprintf("%s:[{%s}]", f.Name, strings.Join(objParts, ", ")),
-					)
-
-				} else {
-					parts = append(parts,
-						fmt.Sprintf("%s:[%s]", f.Name, f.Items.Type),
-					)
+				var sub []string
+				for _, s := range f.Items.Fields {
+					sub = append(sub, fmt.Sprintf("%s:%s", s.Name, s.Type))
 				}
+
+				fmt.Fprintf(b, "- %s (array<object>) → {%s}\n",
+					f.Name,
+					strings.Join(sub, ", "),
+				)
+
+			} else {
+
+				fmt.Fprintf(b, "- %s (array<%s>)\n", f.Name, f.Items.Type)
 
 			}
 
 			continue
 		}
 
-		propString := fmt.Sprintf("%s:%s", f.Name, f.Type)
-		if len(f.Enum) > 0 {
-			propString += fmt.Sprintf(" | %s", strings.Join(f.Enum, ", "))
-		}
-		parts = append(parts, propString)
-	}
+		fmt.Fprintf(b, "- %s (%s)", f.Name, f.Type)
 
-	return strings.Join(parts, "\n")
+		if len(f.Enum) > 0 {
+			fmt.Fprintf(b, " | values: %s", strings.Join(f.Enum, ", "))
+		}
+
+		b.WriteString("\n")
+	}
+}
+
+func writeAvailableEnums(b *strings.Builder) {
+
+	b.WriteString("## Enums\n\n")
+
+	for _, enum := range registry.AvailableEnums {
+
+		fmt.Fprintf(b, "### %s\n", enum.Name)
+
+		if enum.Description != "" {
+			fmt.Fprintf(b, "%s\n\n", enum.Description)
+		}
+
+		if len(enum.Value) > 0 {
+
+			for _, v := range enum.Value {
+				fmt.Fprintf(b, "- %s\n", v)
+			}
+
+			b.WriteString("\n")
+		}
+	}
 }
 
 func findComponent(name string) (*Component, error) {

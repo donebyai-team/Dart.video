@@ -216,7 +216,7 @@
               "type": "string"
             }
           ],
-          "description": "Reveals text word-by-word or character-by-character with staggered animation delays. Use for multi-word headlines or body text. Required props: text=\"Transform your workflow with AI\". Each unit animates in sequence with configurable delay. Set splitBy=\"char\" for character-level animation.",
+          "description": "Reveals text word-by-word with staggered animation delays. Use for multi-word headlines or body text",
           "celExpression": "ceil((size(props.textstagger.splitBy == \"char\" ? props.textstagger.text.split(\"\") : props.textstagger.splitBy == \"line\" ? props.textstagger.text.split(\"\\n\") : props.textstagger.text.split(\" \")) - 1) * props.textstagger.staggerDelay + props.textstagger.duration)"
         },
         {
@@ -350,7 +350,13 @@
                   "name": "variant",
                   "type": "string",
                   "subtype": "enum",
-                  "default": "heading"
+                  "default": "display"
+                },
+                {
+                  "name": "entranceAnimation",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "slideUp"
                 },
                 {
                   "name": "textCycleTransition",
@@ -409,6 +415,12 @@
                   "default": "heading"
                 },
                 {
+                  "name": "entranceAnimation",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "slideUp"
+                },
+                {
                   "name": "holdDuration",
                   "type": "number",
                   "default": 20
@@ -448,6 +460,48 @@
           ],
           "description": "Static text with cycling highlighted words at the end. Use for dynamic taglines like \"We build amazing [software/products/solutions]\"",
           "celExpression": "ceil((props.textwithwordcycle.holdDuration + props.textwithwordcycle.transitionDuration) * size(props.textwithwordcycle.cyclingWords))"
+        },
+        {
+          "name": "TextLeadStagger",
+          "type": "content",
+          "schema": [
+            {
+              "type": "component",
+              "name": "textleadstagger",
+              "fields": [
+                {
+                  "name": "text",
+                  "type": "string",
+                  "map": "props.text"
+                },
+                {
+                  "name": "variant",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "displayLg"
+                },
+                {
+                  "name": "entranceAnimation",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "slideLeft"
+                },
+                {
+                  "name": "speedFactor",
+                  "type": "number",
+                  "default": 1
+                }
+              ]
+            }
+          ],
+          "llmSchema": [
+            {
+              "name": "text",
+              "type": "string"
+            }
+          ],
+          "celExpression": "ceil((8 + 10 + max(0, size(props.textleadstagger.text.split(\" \")) - 2) * 5 + 12 + 10 + max(0, size(props.textleadstagger.text.split(\" \")) - 1) * 4 + 10) / max(0.25, props.textleadstagger.speedFactor))",
+          "description": "First word starts enlarged and then settles down. The remaining words enter in a stagger, making it ideal for emphasis moments (MAX 3–4 words).\nExamples:\ntext=\"Isn't getting clicks\"\ntext=\"You're missing out\"\n\nYou can combine it with other **fillers scenes** for showcasing a **\"Problem\" or \"Solution\" section** of a video or use it as a standalone filler with other scenes.\n\nExample problem: \"If your Airbnb listing isn't getting clicks\"\n\n- Scene 1: If (TextStagger)\n- Scene 2: your (TextStagger)\n- Scene 3: Airbnb {listing} (TextHighlight)\n- Scene 4: isn't getting clicks (TextLeadStagger)"
         },
         {
           "name": "TextWithImageScene",
@@ -580,6 +634,12 @@
                       "type": "string",
                       "sub_type": "enum",
                       "default": "heading"
+                    },
+                    {
+                      "name": "entranceAnimation",
+                      "type": "string",
+                      "subtype": "enum",
+                      "default": "slideUp"
                     },
                     {
                       "name": "holdDuration",
@@ -775,6 +835,12 @@
                       "default": "heading"
                     },
                     {
+                      "name": "entranceAnimation",
+                      "type": "string",
+                      "subtype": "enum",
+                      "default": "slideUp"
+                    },
+                    {
                       "name": "holdDuration",
                       "type": "number",
                       "default": 20
@@ -833,7 +899,7 @@
             }
           ],
           "description": "Displays text with a video. Choose one of the filler component and its props in textComponentProps: texthighlight, textstagger, or textwithwordcycle.",
-          "celExpression": "\"videoasset\" in props ? props.videoasset.duration : 90"
+          "celExpression": "\"videoasset\" in props ? props.videoasset._duration : 90"
         },
         {
           "name": "ImagePeel",
@@ -1074,7 +1140,7 @@
                   "name": "splitBy",
                   "type": "string",
                   "subtype": "enum",
-                  "default": "word"
+                  "default": "char"
                 }
               ]
             },

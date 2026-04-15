@@ -10,22 +10,38 @@ import { resolveTypography } from '../../../tokens/resolveTypography';
 import { getEntranceTransform } from '../types';
 import type { EntranceAnimation } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
+import { TextStagger } from '..';
 
+// Delay before the oversized lead word starts settling down.
 const BASE_LEAD_DELAY = 8;
-const BASE_LEAD_SETTLE_DURATION = 18;
+// Duration of the lead word scale-down / settle animation.
+const BASE_LEAD_SETTLE_DURATION = 10;
+// Delay between each non-lead word starting its entrance.
 const BASE_STAGGER_DELAY = 5;
+// Duration of each word's inline reveal / entrance animation.
 const BASE_WORD_ENTRANCE_DURATION = 12;
+// Time the full sentence remains visible before exit starts.
 const BASE_HOLD_DURATION = 10;
+// Delay between each word starting its exit animation.
 const BASE_EXIT_STAGGER_DELAY = 4;
+// Duration of each word's fade-and-shift exit animation.
 const BASE_EXIT_DURATION = 10;
+// Short crossfade window while the lead word merges into its inline slot.
+const BASE_HANDOFF_GAP = 2;
+// Target viewport width coverage for the oversized lead word.
 const LEAD_VIEWPORT_COVERAGE = 0.6;
+// Lowest allowed speedFactor so timings never collapse too far.
 const MIN_SPEED_FACTOR = 0.25;
+// Minimum reveal progress before a word becomes visible to avoid flicker.
+const MIN_VISIBLE_PROGRESS = 0.08;
+// CEL duration formula derived from the timing constants above.
+const TEXT_LEAD_STAGGER_DURATION_EXPRESSION = `ceil((${BASE_LEAD_DELAY} + ${BASE_LEAD_SETTLE_DURATION} + max(0, size(props.textleadstagger.text.split(" ")) - 2) * ${BASE_STAGGER_DELAY} + ${BASE_WORD_ENTRANCE_DURATION} + ${BASE_HOLD_DURATION} + max(0, size(props.textleadstagger.text.split(" ")) - 1) * ${BASE_EXIT_STAGGER_DELAY} + ${BASE_EXIT_DURATION}) / max(${MIN_SPEED_FACTOR}, props.textleadstagger.speedFactor))`;
 
 export const TextLeadStaggerDefaults = {
   id: 'textleadstagger',
   startAt: 0,
   text: "Isn't getting clicks",
-  variant: 'display' as TypographyVariant,
+  variant: 'displayLg' as TypographyVariant,
   entranceAnimation: 'slideLeft' as EntranceAnimation,
   speedFactor: 1,
   className: undefined as string | undefined,
@@ -82,6 +98,7 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
   const holdDuration = scaleTiming(BASE_HOLD_DURATION, speedFactor);
   const exitStaggerDelay = scaleTiming(BASE_EXIT_STAGGER_DELAY, speedFactor);
   const exitDuration = scaleTiming(BASE_EXIT_DURATION, speedFactor);
+  const handoffGap = scaleTiming(BASE_HANDOFF_GAP, speedFactor);
   const fontSizePx = parsePixelValue(typographyStyle.fontSize);
   const wordGapPx = fontSizePx * 0.25;
 
@@ -92,10 +109,17 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
   const leadScale = leadWordWidth > 0
     ? Math.min(Math.max((preset.width * LEAD_VIEWPORT_COVERAGE) / leadWordWidth, 1.8), 6)
     : 1;
+  // Frame where the centered lead-word settle animation finishes.
   const leadTimelineEnd = leadDelay + leadSettleDuration;
-  const firstWordInlineStart = Math.max(0, leadTimelineEnd - Math.max(4, Math.round(leadSettleDuration * 0.35)));
+  // Frame where the lead word starts blending into its inline sentence slot.
+  const leadBlendStart = Math.max(0, leadTimelineEnd - handoffGap);
+  // Frame where the inline version of the first word fully takes over.
+  const firstWordInlineEnd = leadTimelineEnd;
+  // Frame where the final entering word begins its reveal.
   const lastEntryStart = wordCount > 1 ? leadTimelineEnd + (wordCount - 2) * staggerDelay : leadTimelineEnd;
-  const allVisibleFrame = wordCount > 1 ? lastEntryStart + wordEntranceDuration : leadTimelineEnd;
+  // Frame where the whole sentence has fully entered and is visible.
+  const allVisibleFrame = wordCount > 1 ? lastEntryStart + wordEntranceDuration : firstWordInlineEnd;
+  // Frame where the staggered exit sequence begins.
   const exitBaseFrame = allVisibleFrame + holdDuration;
 
   const getWordStyle = (word: string, wordIndex: number): React.CSSProperties => {
@@ -113,20 +137,22 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
     if (wordIndex === 0) {
       const revealProgress = interpolateWithEasing(
         elapsed,
-        [firstWordInlineStart, leadTimelineEnd],
+        [leadBlendStart, firstWordInlineEnd],
         [0, 1],
         'ease-out',
       );
       const visibleProgress = Math.max(0, Math.min(1, revealProgress * exitVisibility));
+      const isVisible = visibleProgress > MIN_VISIBLE_PROGRESS;
 
       return {
         display: 'inline-block',
         overflow: 'hidden',
+        visibility: isVisible ? 'visible' : 'hidden',
         whiteSpace: 'nowrap',
         verticalAlign: 'top',
-        maxWidth: `${estimatedWidth * visibleProgress}px`,
-        marginRight: wordIndex < wordCount - 1 ? `${wordGapPx * visibleProgress}px` : 0,
-        opacity: visibleProgress,
+        maxWidth: `${estimatedWidth * (isVisible ? visibleProgress : 0)}px`,
+        marginRight: wordIndex < wordCount - 1 ? `${wordGapPx * (isVisible ? visibleProgress : 0)}px` : 0,
+        opacity: isVisible ? visibleProgress : 0,
         transform: exitTranslate,
         transformOrigin: 'left center',
       };
@@ -140,16 +166,18 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
       'ease-out',
     );
     const visibleProgress = Math.max(0, Math.min(1, entryProgress * exitVisibility));
+    const isVisible = visibleProgress > MIN_VISIBLE_PROGRESS;
     const entranceTransform = getEntranceTransform(props.entranceAnimation, entryProgress, Math.max(fontSizePx, 120));
 
     return {
       display: 'inline-block',
       overflow: 'hidden',
+      visibility: isVisible ? 'visible' : 'hidden',
       whiteSpace: 'nowrap',
       verticalAlign: 'top',
-      maxWidth: `${estimatedWidth * visibleProgress}px`,
-      marginRight: wordIndex < wordCount - 1 ? `${wordGapPx * visibleProgress}px` : 0,
-      opacity: visibleProgress,
+      maxWidth: `${estimatedWidth * (isVisible ? visibleProgress : 0)}px`,
+      marginRight: wordIndex < wordCount - 1 ? `${wordGapPx * (isVisible ? visibleProgress : 0)}px` : 0,
+      opacity: isVisible ? visibleProgress : 0,
       transform: composeTransforms(entranceTransform, exitTranslate),
       transformOrigin: 'left center',
     };
@@ -163,7 +191,7 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
   );
   const leadOverlayFade = interpolateWithEasing(
     elapsed,
-    [firstWordInlineStart, leadTimelineEnd],
+    [leadBlendStart, leadTimelineEnd],
     [1, 0],
     'ease-in-out',
   );
@@ -172,6 +200,7 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
     position: 'fixed',
     left: '50%',
     top: '50%',
+    zIndex: 1,
     whiteSpace: 'nowrap',
     pointerEvents: 'none',
     opacity: leadOverlayFade,
@@ -224,11 +253,6 @@ export const TextLeadStaggerSchemaFields = [
     "default": TextLeadStaggerDefaults.entranceAnimation
   },
   {
-    "name": "startAt",
-    "type": "number",
-    "default": TextLeadStaggerDefaults.startAt
-  },
-  {
     "name": "speedFactor",
     "type": "number",
     "default": TextLeadStaggerDefaults.speedFactor
@@ -249,6 +273,18 @@ export const TextLeadStaggerDescriptor: ComponentRegistration = {
       type: 'string',
     }
   ],
-  description: 'Lead word starts enlarged, settles down, remaining words enter in a stagger, then all words fade away one-by-one from the start.',
-  celExpression: 'ceil(props.textleadstagger.startAt + (8 + 18 + max(0, size(props.textleadstagger.text.split(" ")) - 2) * 5 + 12 + 10 + max(0, size(props.textleadstagger.text.split(" ")) - 1) * 4 + 10) / max(0.25, props.textleadstagger.speedFactor))',
+  celExpression: TEXT_LEAD_STAGGER_DURATION_EXPRESSION,
+  description: `First word starts enlarged and then settles down. The remaining words enter in a stagger, making it ideal for emphasis moments (MAX 3–4 words).
+Examples:
+text="Isn't getting clicks"
+text="You're missing out"
+
+You can combine it with other **fillers scenes** for showcasing a **"Problem" or "Solution" section** of a video or use it as a standalone filler with other scenes.
+
+Example problem: "If your Airbnb listing isn't getting clicks"
+
+- Scene 1: If (TextStagger)
+- Scene 2: your (TextStagger)
+- Scene 3: Airbnb {listing} (TextHighlight)
+- Scene 4: isn't getting clicks (TextLeadStagger)`,
 };

@@ -167,6 +167,6 @@ export const TextStaggerDescriptor: ComponentRegistration = {
             type: 'string',     
         }
     ],
-    description: 'Reveals text word-by-word or character-by-character with staggered animation delays. Use for multi-word headlines or body text. Required props: text="Transform your workflow with AI". Each unit animates in sequence with configurable delay. Set splitBy="char" for character-level animation.',
+    description: 'Reveals text word-by-word with staggered animation delays. Use for multi-word headlines or body text',
     celExpression: 'ceil((size(props.textstagger.splitBy == "char" ? props.textstagger.text.split("") : props.textstagger.splitBy == "line" ? props.textstagger.text.split("\\n") : props.textstagger.text.split(" ")) - 1) * props.textstagger.staggerDelay + props.textstagger.duration)',
 };

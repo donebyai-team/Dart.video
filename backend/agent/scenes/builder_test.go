@@ -20,7 +20,7 @@ func TestBuildScenesListIncludesEnumsInEditMode(t *testing.T) {
 		t.Fatalf("invalid prompt")
 	}
 
-	if !contains(prompt, "## Available Enums") {
+	if !contains(prompt, "## Enums") {
 		t.Fatalf("expected enums section in edit mode prompt")
 	}
 
