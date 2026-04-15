@@ -9,7 +9,8 @@ import type { TypographyVariant } from '../../../tokens/semantic';
 import { resolveTypography } from '../../../tokens/resolveTypography';
 import { Text } from '../../../core/assets/Text';
 import type { ComponentRegistration } from '../../../registry/registry';
-import type { HighlightStyle, TextCycleTransition } from '../types';
+import { getEntranceTransform } from '../types';
+import type { EntranceAnimation, HighlightStyle, TextCycleTransition } from '../types';
 
 export const TextWithWordCycleDefaults = {
   id: 'textwithwordcycle',
@@ -18,6 +19,7 @@ export const TextWithWordCycleDefaults = {
   holdDuration: 20,
   transitionDuration: 10,
   textCycleTransition: 'slideUp' as TextCycleTransition,
+  entranceAnimation: 'slideUp' as EntranceAnimation,
   variant: 'heading' as TypographyVariant,
   highlightStyle: 'background' as HighlightStyle,
   highlightColor: undefined as string | undefined,
@@ -45,11 +47,28 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (initProps) =
   const patchedVariant = props.variant;
   const actualHighlightStyle = props.highlightStyle;
   const actualHighlightColor = props.highlightColor ?? theme.colors.primary;
+  const actualEntranceAnimation = props.entranceAnimation;
   const styleOverride = useStyleOverride(id);
-  const dragStyle = usePatchedDragStyle(id, props.style?.transform);
 
   const cycleDuration = props.holdDuration + props.transitionDuration;
+  const entranceDuration = 20;
+  const entranceProgress = interpolateWithEasing(
+    frame,
+    [0, entranceDuration],
+    [0, 1],
+    'ease-out',
+  );
+  const entranceTransform = getEntranceTransform(actualEntranceAnimation, entranceProgress);
+  const dragStyle = usePatchedDragStyle(id, entranceTransform, props.style?.transform);
   const typographyStyle = resolveTypography(patchedVariant, styleConfig, theme, preset);
+  const containerStyle: React.CSSProperties = {
+    display: 'inline',
+    opacity: entranceProgress,
+    ...typographyStyle,
+    ...props.style,
+    ...styleOverride,
+    ...dragStyle,
+  };
 
   // The longest word by character count — used as an invisible spacer
   const longestWord = useMemo(
@@ -59,12 +78,13 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (initProps) =
 
   if (props.cyclingWords.length === 0) {
     return (
-      <Text
-        text={props.text}
-        variant={patchedVariant}
-        className={props.className}
-        style={{ ...props.style, ...styleOverride, ...dragStyle }}
-      />
+      <span id={id} className={props.className} style={containerStyle}>
+        <Text
+          text={props.text}
+          variant={patchedVariant}
+          style={{ display: 'inline', whiteSpace: 'normal' }}
+        />
+      </span>
     );
   }
 
@@ -275,13 +295,7 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (initProps) =
     <span
       id={id}
       className={props.className}
-      style={{
-        display: 'inline',
-        ...typographyStyle,
-        ...props.style,
-        ...styleOverride,
-        ...dragStyle
-      }}
+      style={containerStyle}
     >
       {props.text && (
         <Text text={props.text} variant={patchedVariant} style={{ display: 'inline', whiteSpace: 'normal' }} />
@@ -313,6 +327,12 @@ export const TextWithWordCycleSchemaFields = [
     "type": "string",
     "sub_type": "enum",
     "default": TextWithWordCycleDefaults.variant
+  },
+  {
+    "name": "entranceAnimation",
+    "type": "string",
+    "subtype": "enum",
+    "default": TextWithWordCycleDefaults.entranceAnimation
   },
   {
     "name": "holdDuration",

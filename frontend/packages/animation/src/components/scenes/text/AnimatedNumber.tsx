@@ -12,6 +12,7 @@ import { Text } from '../../../core/assets/Text';
 import type { ComponentRegistration } from '../../../registry/registry';
 
 export const AnimatedNumberDefaults = {
+    id: 'animatednumber',
     startText: 'Solved',
     endText: 'incidents',
     from: 0,
@@ -45,8 +46,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (initProps) => {
     const actualAnimation = props.entranceAnimation;
     const actualAnimationDelay = props.animationDelay;
 
-    const styleOverride = useStyleOverride('animatednumber');
-    const dragStyle = usePatchedDragStyle('animatednumber', props.style?.transform);
+    const styleOverride = useStyleOverride(id);
 
     const entranceProgress = interpolateWithEasing(
         frame,
@@ -54,6 +54,8 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (initProps) => {
         [0, 1],
         'ease-out'
     );
+    const entranceTransform = getEntranceTransform(actualAnimation, entranceProgress);
+    const dragStyle = usePatchedDragStyle(id, entranceTransform, props.style?.transform);
 
     const getHighlightStyles = (): React.CSSProperties => {
         switch (props.highlightStyle) {
@@ -122,7 +124,6 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (initProps) => {
             style={{
                 ...typographyStyle,
                 opacity: entranceProgress,
-                transform: getEntranceTransform(actualAnimation, entranceProgress),
                 display: 'inline-block',
                 ...props.style,
                 ...styleOverride,
@@ -131,7 +132,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (initProps) => {
         >
 
 
-            <Text text={props.startText} id={`text-left`} style={
+            <Text text={props.startText} style={
                 {
                     marginRight: '0.25em',
                     ...typographyStyle,
@@ -151,7 +152,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (initProps) => {
                     durationInFrames={props.counterDuration}
                 />
             </span>
-            <Text text={props.endText} id={`text-right`} style={
+            <Text text={props.endText} style={
                 {
                     // marginLeft: '0.25em',
                     ...typographyStyle,

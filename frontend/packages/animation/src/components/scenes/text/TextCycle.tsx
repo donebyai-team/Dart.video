@@ -9,7 +9,8 @@ import type { TypographyVariant } from '../../../tokens/semantic';
 import { resolveTypography } from '../../../tokens/resolveTypography';
 import { Text } from '../../../core/assets/Text';
 import type { ComponentRegistration } from '../../../registry/registry';
-import type { TextCycleTransition } from '../types';
+import { getEntranceTransform } from '../types';
+import type { EntranceAnimation, TextCycleTransition } from '../types';
 
 export const TextCycleDefaults = {
   id: 'textcycle',
@@ -17,6 +18,7 @@ export const TextCycleDefaults = {
   holdDuration: 20,
   transitionDuration: 5,
   textCycleTransition: 'slideUp' as TextCycleTransition,
+  entranceAnimation: 'slideUp' as EntranceAnimation,
   variant: 'display' as TypographyVariant,
   style: undefined as React.CSSProperties | undefined,
   className: undefined as string | undefined,
@@ -41,10 +43,19 @@ export const TextCycle: React.FC<TextCycleProps> = (initProps) => {
   const props = usePatchedProps(id, defaultProps);
 
   const patchedVariant = props.variant;
+  const actualEntranceAnimation = props.entranceAnimation;
   const styleOverride = useStyleOverride(id);
-  const dragStyle = usePatchedDragStyle(id, props.style?.transform);
 
   const cycleDuration = props.holdDuration + props.transitionDuration;
+  const entranceDuration = 20;
+  const entranceProgress = interpolateWithEasing(
+    frame,
+    [0, entranceDuration],
+    [0, 1],
+    'ease-out',
+  );
+  const entranceTransform = getEntranceTransform(actualEntranceAnimation, entranceProgress);
+  const dragStyle = usePatchedDragStyle(id, entranceTransform, props.style?.transform);
   const typographyStyle = resolveTypography(patchedVariant, styleConfig, theme, preset);
 
   // The longest word by character count — used as an invisible spacer to
@@ -54,7 +65,24 @@ export const TextCycle: React.FC<TextCycleProps> = (initProps) => {
     [props.texts],
   );
 
-  if (props.texts.length === 0) return <Text text="" variant={patchedVariant} className={props.className} style={props.style} />;
+  if (props.texts.length === 0) {
+    return (
+      <span
+        id={id}
+        className={props.className}
+        style={{
+          ...typographyStyle,
+          opacity: entranceProgress,
+          display: 'inline-block',
+          ...props.style,
+          ...styleOverride,
+          ...dragStyle,
+        }}
+      >
+        <Text text="" variant={patchedVariant} />
+      </span>
+    );
+  }
 
   const elapsed = Math.max(0, frame);
   const holdDuration = props.holdDuration;
@@ -80,6 +108,7 @@ export const TextCycle: React.FC<TextCycleProps> = (initProps) => {
   // the visible word. This is what eliminates layout reflow.
   const containerStyle: React.CSSProperties = {
     ...typographyStyle,
+    opacity: entranceProgress,
     position: 'relative',
     display: 'inline-block',
     ...props.style,
@@ -210,6 +239,12 @@ const TextCycleSchemaFields = [
     "type": "string",
     "subtype": "enum",
     "default": TextCycleDefaults.variant
+  },
+  {
+    "name": "entranceAnimation",
+    "type": "string",
+    "subtype": "enum",
+    "default": TextCycleDefaults.entranceAnimation
   },
   {
     "name": "textCycleTransition",
