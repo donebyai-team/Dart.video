@@ -31,7 +31,7 @@ export const ASPECT_PRESETS: Record<string, AspectPreset> = {
     id: 'web',
     width: 1920,
     height: 1080,
-    safeArea: { top: 0, right: 0, bottom: 0, left: 0 },
+    safeArea: { top: 30, right: 30, bottom: 30, left: 30 },
   },
   tall: {
     id: 'tall',

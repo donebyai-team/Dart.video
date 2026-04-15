@@ -1,7 +1,7 @@
 import { preloadVideo } from "@remotion/preload";
 import { useEffect, useState } from "react";
 import { Html5Video, OffthreadVideo, useRemotionEnvironment, delayRender, continueRender } from "remotion";
-import { usePatchedDragStyle, usePatchedProp, useStyleOverride } from "../../patches";
+import { usePatchedDragStyle } from "../../patches";
 import { useAspectPreset } from "../../styles/AspectPresetContext";
 import { buildDepthShadow, DEFAULT_MEDIA_DEPTH } from "../../styles/depth";
 
@@ -24,19 +24,14 @@ export function VideoAsset({
 }: VideoAssetProps): React.ReactElement {
     const { isRendering } = useRemotionEnvironment();
     const preset = useAspectPreset();
-    const styleOverride = useStyleOverride(id);
-    const overrideTransform = typeof styleOverride.transform === 'string' ? styleOverride.transform : undefined;
-    const dragStyle = usePatchedDragStyle(id, style?.transform, overrideTransform);
-    const patchedSrc = usePatchedProp<string | undefined>(id, 'video', video);
-    const patchedWidth = usePatchedProp<number | undefined>(id, 'width', width);
-    const patchedHeight = usePatchedProp<number | undefined>(id, 'height', height);
-    const { objectFit: styleObjectFit, ...restStyle } = style ?? {};
-    const { objectFit: overrideObjectFit, ...wrapperStyleOverride } = styleOverride;
-    const resolvedBoxWidth = patchedWidth ?? preset.width;
-    const resolvedBoxHeight = patchedHeight ?? preset.height;
-    const rawObjectFit = overrideObjectFit ?? styleObjectFit;
+    const { objectFit: styleObjectFit, transform: styleTransform, ...restStyle } = style ?? {};
+    const dragStyle = usePatchedDragStyle(id, styleTransform);
+    
+    const resolvedBoxWidth = width ?? preset.width;
+    const resolvedBoxHeight = height ?? preset.height;
     const resolvedObjectFit: React.CSSProperties['objectFit'] =
-        typeof rawObjectFit === 'string' ? rawObjectFit as React.CSSProperties['objectFit'] : 'cover';
+        typeof styleObjectFit === 'string' ? styleObjectFit as React.CSSProperties['objectFit'] : 'cover';
+    
     const videoStyle: React.CSSProperties = {
         display: 'block',
         width: '100%',
@@ -44,32 +39,32 @@ export function VideoAsset({
         objectFit: resolvedObjectFit,
     };
 
-    const [handle] = useState(() => isRendering && patchedSrc ? delayRender('Loading video') : null);
+    const [handle] = useState(() => isRendering && video ? delayRender('Loading video') : null);
 
     useEffect(() => {
-        if (!patchedSrc) return;
+        if (!video) return;
 
-        const video = document.createElement('video');
-        video.onloadeddata = () => {
+        const videoElement = document.createElement('video');
+        videoElement.onloadeddata = () => {
             if (handle !== null) {
                 continueRender(handle);
             }
         };
-        video.onerror = () => {
+        videoElement.onerror = () => {
             if (handle !== null) {
                 continueRender(handle);
             }
         };
-        video.src = patchedSrc;
+        videoElement.src = video;
 
         let unpreload: (() => void) | undefined;
         if (isRendering) {
-            unpreload = preloadVideo(patchedSrc);
+            unpreload = preloadVideo(video);
         }
         return () => {
             unpreload?.();
         };
-    }, [patchedSrc, isRendering, handle]);
+    }, [video, isRendering, handle]);
 
     return (
         <span
@@ -85,15 +80,14 @@ export function VideoAsset({
                 overflow: 'hidden',
                 boxShadow: buildDepthShadow(DEFAULT_MEDIA_DEPTH),
                 ...restStyle,
-                ...wrapperStyleOverride,
                 ...dragStyle,
             }}
         >
-            {patchedSrc ? (
+            {video ? (
                 isRendering ? (
-                    <OffthreadVideo src={patchedSrc} style={videoStyle} />
+                    <OffthreadVideo src={video} style={videoStyle} />
                 ) : (
-                    <Html5Video src={patchedSrc} playsInline muted style={videoStyle} />
+                    <Html5Video src={video} playsInline muted style={videoStyle} />
                 )
             ) : (
                 <span

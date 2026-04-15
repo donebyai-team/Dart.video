@@ -1,7 +1,7 @@
 import { preloadImage } from "@remotion/preload";
 import { useEffect, useState } from "react";
 import { useRemotionEnvironment, delayRender, continueRender } from "remotion";
-import { usePatchedDragStyle, usePatchedProp, useStyleOverride } from "../../patches";
+import { usePatchedDragStyle } from "../../patches";
 import { useAspectPreset } from "../../styles/AspectPresetContext";
 import { buildDepthShadow, DEFAULT_MEDIA_DEPTH } from "../../styles/depth";
 
@@ -32,24 +32,19 @@ export function ImageAsset({
 }: ImageAssetProps): React.ReactElement {
     const { isRendering } = useRemotionEnvironment();
     const preset = useAspectPreset();
-    const styleOverride = useStyleOverride(id);
-    const { objectFit: styleObjectFit, ...restStyle } = style ?? {};
-    const { objectFit: overrideObjectFit, ...wrapperStyleOverride } = styleOverride;
-    const overrideTransform = typeof styleOverride.transform === 'string' ? styleOverride.transform : undefined;
-    const dragStyle = usePatchedDragStyle(id, style?.transform, overrideTransform);
-    const patchedSrc = usePatchedProp<string | undefined>(id, 'image', image ?? DEFAULT_IMAGE_SVG);
-    const patchedWidth = usePatchedProp<number | undefined>(id, 'width', width);
-    const patchedHeight = usePatchedProp<number | undefined>(id, 'height', height);
-    const resolvedBoxWidth = patchedWidth ?? preset.width;
-    const resolvedBoxHeight = patchedHeight ?? preset.height;
-    const rawObjectFit = overrideObjectFit ?? styleObjectFit;
+    const { objectFit: styleObjectFit, transform: styleTransform, ...restStyle } = style ?? {};
+    const dragStyle = usePatchedDragStyle(id, styleTransform);
+    
+    const imageSrc = image ?? DEFAULT_IMAGE_SVG;
+    const resolvedBoxWidth = width ?? preset.width;
+    const resolvedBoxHeight = height ?? preset.height;
     const resolvedObjectFit: React.CSSProperties['objectFit'] =
-        typeof rawObjectFit === 'string' ? rawObjectFit as React.CSSProperties['objectFit'] : 'cover';
+        typeof styleObjectFit === 'string' ? styleObjectFit as React.CSSProperties['objectFit'] : 'cover';
 
     const [handle] = useState(() => isRendering ? delayRender('Loading image') : null);
 
     useEffect(() => {
-        if (!patchedSrc) return;
+        if (!imageSrc) return;
         
         const img = new Image();
         img.onload = () => {
@@ -62,16 +57,16 @@ export function ImageAsset({
                 continueRender(handle);
             }
         };
-        img.src = patchedSrc;
+        img.src = imageSrc;
 
         let unpreload: (() => void) | undefined;
         if (isRendering) {
-            unpreload = preloadImage(patchedSrc);
+            unpreload = preloadImage(imageSrc);
         }
         return () => {
             unpreload?.();
         };
-    }, [patchedSrc, isRendering, handle]);
+    }, [imageSrc, isRendering, handle]);
 
     return (
         <span
@@ -87,12 +82,11 @@ export function ImageAsset({
                 boxShadow: buildDepthShadow(DEFAULT_MEDIA_DEPTH),
                 overflow: 'hidden',
                 ...restStyle,
-                ...wrapperStyleOverride,
                 ...dragStyle,
             }}
         >
             <img
-                src={patchedSrc}
+                src={imageSrc}
                 style={{
                     display: 'block',
                     width: '100%',

@@ -231,10 +231,11 @@ func mergeMediaAssetFields(out map[string]any, mediaAssetFields *field_resolvers
 		return
 	}
 
-	out["width"] = mediaAssetFields.Width
-	out["height"] = mediaAssetFields.Height
-	out["duration"] = mediaAssetFields.Duration
-	out["mediaType"] = mediaAssetFields.MediaType
+	// fields starting with _ , don't render in editor
+	out["_width"] = mediaAssetFields.Width
+	out["_height"] = mediaAssetFields.Height
+	out["_duration"] = mediaAssetFields.Duration
+	out["_mediaType"] = mediaAssetFields.MediaType
 }
 
 func resolveMap(path string, input map[string]any, item any) any {
