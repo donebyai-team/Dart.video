@@ -29,8 +29,9 @@ function GenerateScene(input: AddSceneRequest, conversation_history: Message[]) 
     ## PLANNING RULES
 
     ### Structure
-    - Every scene has a single clear purpose. One idea per scene.
-    - Each scene must stand alone. No siblings.
+    - Scene has a single clear purpose. One idea per scene.
+    - Scene must stand alone. No siblings.
+    - Scene index is always 0.
     - If the input props has a scene-0,scene-1 format that means its an array
     - **Define the props of scenes in SceneElement props in JSON format**
 

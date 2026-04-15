@@ -10,7 +10,6 @@ import { resolveTypography } from '../../../tokens/resolveTypography';
 import { getEntranceTransform } from '../types';
 import type { EntranceAnimation } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
-import { TextStagger } from '..';
 
 // Delay before the oversized lead word starts settling down.
 const BASE_LEAD_DELAY = 8;
@@ -35,7 +34,6 @@ const MIN_SPEED_FACTOR = 0.25;
 // Minimum reveal progress before a word becomes visible to avoid flicker.
 const MIN_VISIBLE_PROGRESS = 0.08;
 // CEL duration formula derived from the timing constants above.
-const TEXT_LEAD_STAGGER_DURATION_EXPRESSION = `ceil((${BASE_LEAD_DELAY} + ${BASE_LEAD_SETTLE_DURATION} + max(0, size(props.textleadstagger.text.split(" ")) - 2) * ${BASE_STAGGER_DELAY} + ${BASE_WORD_ENTRANCE_DURATION} + ${BASE_HOLD_DURATION} + max(0, size(props.textleadstagger.text.split(" ")) - 1) * ${BASE_EXIT_STAGGER_DELAY} + ${BASE_EXIT_DURATION}) / max(${MIN_SPEED_FACTOR}, props.textleadstagger.speedFactor))`;
 
 export const TextLeadStaggerDefaults = {
   id: 'textleadstagger',
@@ -273,7 +271,7 @@ export const TextLeadStaggerDescriptor: ComponentRegistration = {
       type: 'string',
     }
   ],
-  celExpression: TEXT_LEAD_STAGGER_DURATION_EXPRESSION,
+  celExpression: `(40.0 + max(0.0, segmentCount(props.textleadstagger.text, "word") - 2) * 5.0 + max(0.0, segmentCount(props.textleadstagger.text, "word") - 1) * 4.0) / max(0.25, props.textleadstagger.speedFactor)`,
   description: `First word starts enlarged and then settles down. The remaining words enter in a stagger, making it ideal for emphasis moments (MAX 3–4 words).
 Examples:
 text="Isn't getting clicks"

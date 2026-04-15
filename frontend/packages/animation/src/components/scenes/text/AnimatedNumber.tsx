@@ -237,5 +237,5 @@ export const AnimatedNumberDescriptor: ComponentRegistration = {
         },
     ],
     description: 'Counting metric with label text. Use for stats and KPIs',
-    celExpression: 'ceil(props.animatednumber.animationDelay + max(45, min(100, log10(abs(props.animatednumber.to - props.animatednumber.from) + 1) * 20)))',
+    celExpression: 'props.animatednumber.animationDelay + max(45.0, min(100.0, log10(abs(props.animatednumber.to - props.animatednumber.from) + 1) * 20.0))'
 };

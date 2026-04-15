@@ -283,5 +283,5 @@ export const TextCycleDescriptor: ComponentRegistration = {
     }
   ],
   description: 'rotating text strings or words. Use for taglines, feature lists, multi highlights',
-  celExpression: 'ceil((props.textcycle.holdDuration + props.textcycle.transitionDuration) * size(props.textcycle.texts))',
+  celExpression: '(props.textcycle.holdDuration + props.textcycle.transitionDuration) * size(props.textcycle.texts)',
 };

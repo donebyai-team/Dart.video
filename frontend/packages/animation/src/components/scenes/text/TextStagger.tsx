@@ -168,5 +168,5 @@ export const TextStaggerDescriptor: ComponentRegistration = {
         }
     ],
     description: 'Reveals text word-by-word with staggered animation delays. Use for multi-word headlines or body text',
-    celExpression: 'ceil((size(props.textstagger.splitBy == "char" ? props.textstagger.text.split("") : props.textstagger.splitBy == "line" ? props.textstagger.text.split("\\n") : props.textstagger.text.split(" ")) - 1) * props.textstagger.staggerDelay + props.textstagger.duration)',
+    celExpression: `(segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * props.textstagger.staggerDelay + props.textstagger.duration`
 };

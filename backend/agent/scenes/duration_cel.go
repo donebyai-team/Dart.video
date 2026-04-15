@@ -63,6 +63,30 @@ func evaluateDurationExpression(expression string, props map[string]any) (any, e
 				}),
 			),
 		),
+		cel.Function("segmentCount",
+			cel.Overload("segment_count_string_string",
+				[]*cel.Type{cel.StringType, cel.StringType},
+				cel.IntType,
+				cel.BinaryBinding(func(textVal, modeVal ref.Val) ref.Val {
+					text := textVal.Value().(string)
+					mode := modeVal.Value().(string)
+
+					switch mode {
+					case "char":
+						return types.Int(len([]rune(text)))
+
+					case "line":
+						if text == "" {
+							return types.Int(0)
+						}
+						return types.Int(len(strings.Split(text, "\n")))
+
+					default: // word
+						return types.Int(len(strings.Fields(text)))
+					}
+				}),
+			),
+		),
 		cel.Function("min",
 			cel.Overload("duration_min_dyn_dyn", []*cel.Type{cel.DynType, cel.DynType}, cel.DoubleType,
 				cel.BinaryBinding(func(lhs, rhs ref.Val) ref.Val {

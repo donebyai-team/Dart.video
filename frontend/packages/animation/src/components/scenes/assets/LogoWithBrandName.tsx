@@ -99,7 +99,6 @@ export const LogoWithBrandNameSchemaFields = [
             {
                 "name": "text",
                 "type": "string",
-
                 "map": "props.text"
             },
             {
@@ -150,5 +149,5 @@ export const LogoWithBrandNameDescriptor: ComponentRegistration = {
         type: 'string',
     }],
     description: 'Logo + brand name reveal. Use for brand intro.',
-    celExpression: 'ceil((size(props.textstagger.text.split("")) - 1) * 5 + 20)',
+    celExpression: 'max(0.0, segmentCount(props.textstagger.text, "char") - 1) * 5.0 + 20.0',
 };

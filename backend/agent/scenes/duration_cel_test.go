@@ -6,7 +6,7 @@ func TestSceneConfigComputeDurationFrames(t *testing.T) {
 	t.Run("computes duration for single component scene", func(t *testing.T) {
 		scene := SceneConfig{
 			Name:               "TextStagger",
-			DurationExpression: `ceil((size(props.textstagger.splitBy == "char" ? props.textstagger.text.split("") : props.textstagger.splitBy == "line" ? props.textstagger.text.split("\n") : props.textstagger.text.split(" ")) - 1) * props.textstagger.staggerDelay + props.textstagger.duration)`,
+			DurationExpression: `(segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * props.textstagger.staggerDelay + props.textstagger.duration`,
 			Props: map[string]any{
 				"textstagger": map[string]any{
 					"text":              "AI models",
@@ -21,6 +21,25 @@ func TestSceneConfigComputeDurationFrames(t *testing.T) {
 
 		if got := scene.ComputeDurationFrames(); got != 20 {
 			t.Fatalf("expected 20 frames, got %d", got)
+		}
+	})
+
+	t.Run("computes duration for text leader", func(t *testing.T) {
+		scene := SceneConfig{
+			Name:               "TextLeadStagger",
+			DurationExpression: "(40.0 + max(0.0, segmentCount(props.textleadstagger.text, \"word\") - 2) * 5.0 + max(0.0, segmentCount(props.textleadstagger.text, \"word\") - 1) * 4.0) / max(0.25, props.textleadstagger.speedFactor)",
+			Props: map[string]any{
+				"textleadstagger": map[string]any{
+					"entranceAnimation": "slideLeft",
+					"speedFactor":       1,
+					"text":              "Isn't getting enough clicks",
+					"variant":           "displayLg",
+				},
+			},
+		}
+
+		if got := scene.ComputeDurationFrames(); got != 62 {
+			t.Fatalf("expected 62 frames, got %d", got)
 		}
 	})
 
