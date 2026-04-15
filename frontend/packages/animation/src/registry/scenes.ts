@@ -5,6 +5,7 @@ import { TypewriterDescriptor } from "../components/scenes/text/Typewriter";
 import { TextHighlightDescriptor } from "../components/scenes/text/TextHighlight";
 import { TextCycleDescriptor } from "../components/scenes/text/TextCycle";
 import { TextWithWordCycleDescriptor } from "../components/scenes/text/TextWithWordCycle";
+import { TextLeadStaggerDescriptor } from "../components/scenes/text/TextLeadStagger";
 import { AnimatedImageDescriptor } from "../components/scenes/assets/AnimatedImage";
 import { AnimatedVideoDescriptor } from "../components/scenes/assets/AnimatedVideo";
 import { ImagePeelDescriptor } from "../components/scenes/assets/ImagePeel";
@@ -23,6 +24,7 @@ export const SCENE_COMPONENTS: ComponentRegistration[] = [
   TextHighlightDescriptor,
   TextCycleDescriptor,
   TextWithWordCycleDescriptor,
+  TextLeadStaggerDescriptor,
   
   // Asset components with schemas and duration calculators
   // AnimatedImageDescriptor,

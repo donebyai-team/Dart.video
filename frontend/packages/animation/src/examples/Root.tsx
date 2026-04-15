@@ -6,7 +6,7 @@ import { SpeedFactorProvider } from "../duration";
 import { ASPECT_PRESETS, resolveStyle, AspectPresetProvider, StyleContextProvider } from "../styles";
 import { BrandTheme, darkTheme, ThemeProvider } from "../theme";
 import { AnimatedVideo } from "../components/scenes/assets/AnimatedVideo";
-import { TextWithImageScene, ImagePeel, LogoAsset, LogoShowcase } from "../components/scenes";
+import { TextWithImageScene, ImagePeel, LogoAsset, LogoShowcase, TextLeadStagger } from "../components/scenes";
 
 
 const BRAND: BrandTheme = {
@@ -47,14 +47,15 @@ const TextComponentsScene: React.FC = () => (
     <Scene>
         <SafeArea>
             <AbsoluteCenter axis="both">
-                <TextWithWordCycle
+                <TextLeadStagger />
+                {/* <TextWithWordCycle
                     text="We build amazing products"
                     cyclingWords={['software', 'products', 'solutions', 'Try again']}
                     highlightStyle="background"
                     textCycleTransition="slideUp"
                     highlightColor="#00FF00" 
                     holdDuration={0} 
-                    transitionDuration={0} variant={"heading"} style={undefined} className={undefined}                />
+                    transitionDuration={0} variant={"heading"} style={undefined} className={undefined}                /> */}
 
                 {/* <Stack gap={64} align="center"> */}
                 {/* <Counter
