@@ -1,6 +1,8 @@
 import React from 'react';
 import { useAspectPreset } from '../../styles/AspectPresetContext';
 
+const DEFAULT_SAFE_CONTENT_WIDTH_RATIO = 0.78;
+
 export interface SafeAreaProps {
   children: React.ReactNode;
 }
@@ -15,6 +17,8 @@ export interface SafeAreaProps {
 export function SafeArea({ children }: SafeAreaProps): React.ReactElement {
   const preset = useAspectPreset();
   const { top, right, bottom, left } = preset.safeArea;
+  const availableWidth = Math.max(1, preset.width - left - right);
+  const maxContentWidth = Math.max(1, Math.round(availableWidth * DEFAULT_SAFE_CONTENT_WIDTH_RATIO));
 
   return (
     <div
@@ -29,7 +33,17 @@ export function SafeArea({ children }: SafeAreaProps): React.ReactElement {
         position: 'relative',
       }}
     >
-      {children}
+      <div
+        style={{
+          width: '100%',
+          maxWidth: maxContentWidth,
+          height: '100%',
+          margin: '0 auto',
+          position: 'relative',
+        }}
+      >
+        {children}
+      </div>
     </div>
   );
 }

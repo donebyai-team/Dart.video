@@ -1,67 +1,88 @@
 {
-    "id": "b9ba173f-3fcc-415f-8e65-239b4938aa2b",
-    "name": "Cursor At Work",
+    "id": "616c8e23-5c56-4fe5-835e-b50da2722b61",
+    "name": "YouTube Creator Opportunity",
     "config": {
         "sections": [
             {
-                "id": "section-e22a1fb3-539f-4894-a08b-adccb1dbb930",
+                "id": "section-d0abc420-99c4-42a3-baf4-be85635959ae",
                 "title": "Hook",
-                "color": "#45B7D1",
+                "color": "#E84393",
                 "slides": [
                     {
-                        "id": "slide-fcbe4b3e-4d64-45fd-a40b-529113e706a2",
-                        "durationInFrames": 50,
-                        "settledFrame": 50,
+                        "id": "slide-5f62c008-a069-4454-a79e-fe1a9e0ee4ad",
+                        "durationInFrames": 90,
+                        "settledFrame": 90,
                         "content": {
                             "codeRegistry": {
-                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//Component7fb2d69feefb4ca084b9c5bbba324282.tsx",
-                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//TransformedComponent7fb2d69feefb4ca084b9c5bbba324282.tsx"
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/fec6a959-48fc-4c8d-80e4-9c762b5dd9af/a73e3bee-2034-4f54-9343-b25f471200f9"
                             },
                             "plan": {},
                             "edits": {
-                                "text-0-texthighlight-8b463m": {
-                                    "dragX": -128,
-                                    "dragY": -116
-                                },
-                                "texthighlight-8b463m": {
+                                "animatednumber": {
                                     "animationDelay": 30,
+                                    "endText": "people are watching right now",
                                     "entranceAnimation": "slideUp",
-                                    "highlightStyle": "glow",
-                                    "text": "Can your AI actually work with you?",
-                                    "variant": "heading",
-                                    "zoomDuration": 20
-                                }
+                                    "format": "",
+                                    "from": 0,
+                                    "startText": "",
+                                    "to": 2000000000,
+                                    "variant": "heading"
+                                },
+                                "name": "AnimatedNumber"
                             }
                         },
                         "slideStatus": "SLIDE_STATUS_GENERATED"
-                    }
-                ]
-            },
-            {
-                "id": "section-c262d857-e7db-41bb-b09d-17056da5d163",
-                "title": "Problem",
-                "color": "#6C5CE7",
-                "slides": [
+                    },
                     {
-                        "id": "slide-bd273b31-f2af-4e39-a860-b4f8ac29ce98",
-                        "durationInFrames": 35,
-                        "settledFrame": 35,
+                        "id": "slide-23feb160-9d78-4e13-8b77-05390ce40f3c",
+                        "durationInFrames": 62,
+                        "settledFrame": 62,
                         "content": {
                             "codeRegistry": {
-                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//Component4be8b3e1c1a04168831300621745bb2c.tsx",
-                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//TransformedComponent4be8b3e1c1a04168831300621745bb2c.tsx"
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/fec6a959-48fc-4c8d-80e4-9c762b5dd9af/f108ef3e-4e81-4b85-bf05-0831c9a1ac42"
                             },
                             "plan": {
                                 "index": "1"
                             },
                             "edits": {
-                                "textstagger-n2rhug": {
+                                "name": "TextLeadStagger",
+                                "textleadstagger": {
+                                    "entranceAnimation": "slideLeft",
+                                    "speedFactor": 1,
+                                    "text": "Are they watching you?",
+                                    "variant": "displayLg"
+                                }
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED",
+                        "index": 1
+                    }
+                ]
+            },
+            {
+                "id": "section-1f5a8339-c019-41b0-acda-9fa4db158069",
+                "title": "Problem",
+                "color": "#0984E3",
+                "slides": [
+                    {
+                        "id": "slide-1a758324-60e2-4cad-913b-f95aabccee86",
+                        "durationInFrames": 30,
+                        "settledFrame": 30,
+                        "content": {
+                            "codeRegistry": {
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/fec6a959-48fc-4c8d-80e4-9c762b5dd9af/ccc4972b-29b1-49f0-82c2-340880591bd0"
+                            },
+                            "plan": {
+                                "index": "2"
+                            },
+                            "edits": {
+                                "name": "TextStagger",
+                                "textstagger": {
                                     "duration": 15,
                                     "entranceAnimation": "scaleIn",
                                     "splitBy": "word",
                                     "staggerDelay": 5,
-                                    "startAt": 0,
-                                    "text": "All teams are stretched \n\nthin.",
+                                    "text": "Every niche is crowded.",
                                     "variant": "heading"
                                 }
                             }
@@ -69,24 +90,24 @@
                         "slideStatus": "SLIDE_STATUS_GENERATED"
                     },
                     {
-                        "id": "slide-3a255476-46cc-4f97-a1f7-65112a3c84c8",
-                        "durationInFrames": 140,
-                        "settledFrame": 140,
+                        "id": "slide-779deade-3ee8-4d96-8c88-77c77d92e696",
+                        "durationInFrames": 84,
+                        "settledFrame": 84,
                         "content": {
                             "codeRegistry": {
-                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//Component9bff381fd5904783a20735d580063c64.tsx",
-                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//TransformedComponent9bff381fd5904783a20735d580063c64.tsx"
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/fec6a959-48fc-4c8d-80e4-9c762b5dd9af/1d6860f4-b023-437d-91f9-bc7338d3c7e1"
                             },
                             "plan": {
-                                "index": "2"
+                                "index": "3"
                             },
                             "edits": {
-                                "typewriter-l664kj": {
+                                "name": "Typewriter",
+                                "typewriter": {
                                     "entranceAnimation": "slideUp",
                                     "splitBy": "char",
                                     "startAt": 0,
-                                    "text": "A is growing faster than ever.",
-                                    "variant": "display"
+                                    "text": "Trends change faster than you can keep up.",
+                                    "variant": "heading"
                                 }
                             }
                         },
@@ -94,25 +115,26 @@
                         "index": 1
                     },
                     {
-                        "id": "slide-5fe48285-aaf8-41ef-94d6-ad1f666d785b",
-                        "durationInFrames": 50,
-                        "settledFrame": 50,
+                        "id": "slide-ddc3df99-335c-40f4-9739-ce54b2303079",
+                        "durationInFrames": 60,
+                        "settledFrame": 60,
                         "content": {
                             "codeRegistry": {
-                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//Component8e5192d2b35f4da48b0db5e29fae565f.tsx",
-                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//TransformedComponent8e5192d2b35f4da48b0db5e29fae565f.tsx"
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/fec6a959-48fc-4c8d-80e4-9c762b5dd9af/3719c32d-397c-41f8-973b-0d97daccb506"
                             },
                             "plan": {
-                                "index": "3"
+                                "index": "4"
                             },
                             "edits": {
-                                "texthighlight-t2n7ss": {
+                                "name": "TextHighlight",
+                                "texthighlight": {
                                     "animationDelay": 30,
                                     "entranceAnimation": "slideUp",
                                     "highlightStyle": "glow",
-                                    "text": "Hiring is slow and expensive",
+                                    "highlightedTextAnimation": "jump",
+                                    "text": "And standing out takes more than just {good content}.",
                                     "variant": "heading",
-                                    "zoomDuration": 20
+                                    "zoomDuration": 30
                                 }
                             }
                         },
@@ -123,123 +145,64 @@
                 "index": 1
             },
             {
-                "id": "section-54059ec5-f181-4e1d-b40d-c90d47053d55",
+                "id": "section-37785d90-9328-4d26-9aa7-7ffe838d1f2d",
                 "title": "Solution",
-                "color": "#E84393",
+                "color": "#6C5CE7",
                 "slides": [
                     {
-                        "id": "slide-689d6d1f-e7be-46ec-a9d3-8384454d7c2b",
-                        "durationInFrames": 20,
-                        "settledFrame": 20,
+                        "id": "slide-84398443-6ed7-47aa-9a66-6176363cc6ac",
+                        "durationInFrames": 80,
+                        "settledFrame": 80,
                         "content": {
                             "codeRegistry": {
-                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//Component58b3c7f2dd3e4ac09f09255f8fbc7457.tsx",
-                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//TransformedComponent58b3c7f2dd3e4ac09f09255f8fbc7457.tsx"
-                            },
-                            "plan": {
-                                "index": "4"
-                            },
-                            "edits": {
-                                "textstagger-utmig7": {
-                                    "duration": 15,
-                                    "entranceAnimation": "scaleIn",
-                                    "splitBy": "word",
-                                    "staggerDelay": 5,
-                                    "startAt": 0,
-                                    "text": "Introducing Cursor.",
-                                    "variant": "heading"
-                                }
-                            }
-                        },
-                        "slideStatus": "SLIDE_STATUS_GENERATED"
-                    },
-                    {
-                        "id": "slide-e2fe4236-251e-48c5-9ae2-5f50127ca32e",
-                        "durationInFrames": 35,
-                        "settledFrame": 35,
-                        "content": {
-                            "codeRegistry": {
-                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//Componentd92b5be129e74bf78997fc7ddeec6260.tsx",
-                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//TransformedComponentd92b5be129e74bf78997fc7ddeec6260.tsx"
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/fec6a959-48fc-4c8d-80e4-9c762b5dd9af/65666e30-d49e-4a4f-a3ff-e06e8b8774f6"
                             },
                             "plan": {
                                 "index": "5"
                             },
                             "edits": {
-                                "logowithbrandname-05gdft": {
-                                    "brandName": "Cursor",
-                                    "src": "",
-                                    "variant": "heading"
-                                }
-                            }
-                        },
-                        "slideStatus": "SLIDE_STATUS_GENERATED",
-                        "index": 1
-                    }
-                ],
-                "index": 2
-            },
-            {
-                "id": "section-f910b018-a1b8-4eff-8a73-af50725f8fb2",
-                "title": "Product",
-                "color": "#0984E3",
-                "slides": [
-                    {
-                        "id": "slide-5e42bd14-724a-44b9-abf5-53dea6cc5335",
-                        "durationInFrames": 90,
-                        "settledFrame": 90,
-                        "content": {
-                            "codeRegistry": {
-                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//Component61c1350d99a94acbaeca9be73dfb95a2.tsx",
-                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//TransformedComponent61c1350d99a94acbaeca9be73dfb95a2.tsx"
-                            },
-                            "plan": {
-                                "index": "6"
-                            },
-                            "edits": {
-                                "animatedimage-2lw16a": {
-                                    "entranceAnimation": "slideDown",
-                                    "height": 756,
-                                    "src": "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774503450-screenshot-2026-03-26-at-11.06.54am.png",
-                                    "text": "The personal AI assistant \nbuilt everything at work.",
+                                "imageasset": {
+                                    "image": "https://placehold.co/1200x900.png?text=Single+Video+Moment"
+                                },
+                                "name": "TextWithImageScene",
+                                "scene": {
+                                    "entranceAnimation": "slideUp"
+                                },
+                                "texthighlight": {
+                                    "animationDelay": 30,
+                                    "entranceAnimation": "slideUp",
+                                    "highlightStyle": "glow",
+                                    "highlightedTextAnimation": "jump",
+                                    "text": "But there's one platform where a single video can {change everything}.",
                                     "variant": "heading",
-                                    "width": 1344
-                                },
-                                "imageasset-animatedimage-2lw16a": {
-                                    "dragX": -586,
-                                    "dragY": 191
-                                },
-                                "text-animatedimage-2lw16a": {
-                                    "dragX": 554,
-                                    "dragY": 432
+                                    "zoomDuration": 30
                                 }
                             }
                         },
                         "slideStatus": "SLIDE_STATUS_GENERATED"
                     },
                     {
-                        "id": "slide-dd396356-7648-4c6f-856f-091b9ed41083",
-                        "durationInFrames": 100,
-                        "settledFrame": 100,
+                        "id": "slide-350c1e7c-d8f8-4b43-855d-bd2fe30a87c3",
+                        "durationInFrames": 50,
+                        "settledFrame": 50,
                         "content": {
                             "codeRegistry": {
-                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//Component82a96de8adc24c7e97eb93108400cf58.tsx",
-                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//TransformedComponent82a96de8adc24c7e97eb93108400cf58.tsx"
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/fec6a959-48fc-4c8d-80e4-9c762b5dd9af/33e44c5a-7ca3-4d10-a30f-11f2949afe51"
                             },
                             "plan": {
-                                "index": "7"
+                                "index": "6"
                             },
                             "edits": {
-                                "textcycle-xkltz3": {
-                                    "holdDuration": 20,
-                                    "texts": [
-                                        "agent",
-                                        "plan",
-                                        "debug",
-                                        "ask"
-                                    ],
-                                    "transition": "slideUp",
-                                    "transitionDuration": 5,
+                                "logoasset": {
+                                    "logoAnimation": "zoomIn"
+                                },
+                                "name": "LogoWithBrandName",
+                                "textstagger": {
+                                    "duration": 15,
+                                    "entranceAnimation": "scaleIn",
+                                    "splitBy": "char",
+                                    "staggerDelay": 5,
+                                    "text": "YouTube",
                                     "variant": "heading"
                                 }
                             }
@@ -248,25 +211,133 @@
                         "index": 1
                     },
                     {
-                        "id": "slide-5668e37d-2939-4bbe-bf16-89dbe34676f6",
+                        "id": "slide-d00d22ac-3205-4720-93cc-c913801898ff",
+                        "durationInFrames": 80,
+                        "settledFrame": 80,
+                        "content": {
+                            "codeRegistry": {
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/fec6a959-48fc-4c8d-80e4-9c762b5dd9af/fa2b847d-0db7-49ec-9a19-5ae655c9adda"
+                            },
+                            "plan": {
+                                "index": "7"
+                            },
+                            "edits": {
+                                "imageasset": {
+                                    "image": "https://placehold.co/1200x900.png?text=Ideas+Become+Movements"
+                                },
+                                "name": "TextWithImageScene",
+                                "scene": {
+                                    "entranceAnimation": "slideUp"
+                                },
+                                "textstagger": {
+                                    "duration": 15,
+                                    "entranceAnimation": "scaleIn",
+                                    "splitBy": "word",
+                                    "staggerDelay": 5,
+                                    "text": "The stage where ideas become movements.",
+                                    "variant": "heading"
+                                }
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED",
+                        "index": 2
+                    }
+                ],
+                "index": 2
+            },
+            {
+                "id": "section-a2491985-cf65-4ea0-88e5-1125c7c209c1",
+                "title": "Product Info",
+                "color": "#6C5CE7",
+                "slides": [
+                    {
+                        "id": "slide-1fa0168e-a5fc-40fe-a627-6a3a3ab82369",
                         "durationInFrames": 90,
                         "settledFrame": 90,
                         "content": {
                             "codeRegistry": {
-                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//Component41987928fd7a45dbbe0d15a2e8c5303e.tsx",
-                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//TransformedComponent41987928fd7a45dbbe0d15a2e8c5303e.tsx"
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/fec6a959-48fc-4c8d-80e4-9c762b5dd9af/fc01fade-751b-46ec-9585-0bdee699038e"
                             },
                             "plan": {
                                 "index": "8"
                             },
                             "edits": {
-                                "animatedimage-nwxrrw": {
-                                    "entranceAnimation": "slideUp",
+                                "imageasset-images-0": {
                                     "height": 756,
-                                    "src": "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774503450-screenshot-2026-03-26-at-11.07.04am.png",
-                                    "text": "Use cursor in agent, plan, debug, ask modes,",
-                                    "variant": "subheading",
+                                    "image": "https://placehold.co/1200x900.png?text=Long-form",
                                     "width": 1344
+                                },
+                                "imageasset-images-1": {
+                                    "height": 756,
+                                    "image": "https://placehold.co/1200x900.png?text=Shorts",
+                                    "width": 1344
+                                },
+                                "imageasset-images-2": {
+                                    "height": 756,
+                                    "image": "https://placehold.co/1200x900.png?text=Go+Live",
+                                    "width": 1344
+                                },
+                                "name": "ImagePeel",
+                                "scene": {
+                                    "direction": "right",
+                                    "holdDuration": 20,
+                                    "peelDuration": 20,
+                                    "stackOffset": 20
+                                }
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED"
+                    },
+                    {
+                        "id": "slide-fba809aa-725b-4c07-906c-0ff403de300a",
+                        "durationInFrames": 75,
+                        "settledFrame": 75,
+                        "content": {
+                            "codeRegistry": {
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/fec6a959-48fc-4c8d-80e4-9c762b5dd9af/e7eeae89-0220-4d6f-a279-36b8d093e485"
+                            },
+                            "plan": {
+                                "index": "9"
+                            },
+                            "edits": {
+                                "name": "TextCycle",
+                                "textcycle": {
+                                    "entranceAnimation": "slideUp",
+                                    "holdDuration": 20,
+                                    "textCycleTransition": "slideUp",
+                                    "texts": [
+                                        "Upload long-form",
+                                        "Upload Shorts",
+                                        "Or go live"
+                                    ],
+                                    "transitionDuration": 5,
+                                    "variant": "display"
+                                }
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED",
+                        "index": 1
+                    },
+                    {
+                        "id": "slide-d810501f-94f6-4e7b-bf21-3b0eb5ebf3a6",
+                        "durationInFrames": 30,
+                        "settledFrame": 30,
+                        "content": {
+                            "codeRegistry": {
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/fec6a959-48fc-4c8d-80e4-9c762b5dd9af/6bd95673-31bb-466e-80c2-a30b482ee724"
+                            },
+                            "plan": {
+                                "index": "10"
+                            },
+                            "edits": {
+                                "name": "TextStagger",
+                                "textstagger": {
+                                    "duration": 15,
+                                    "entranceAnimation": "scaleIn",
+                                    "splitBy": "word",
+                                    "staggerDelay": 5,
+                                    "text": "Whatever fits your story.",
+                                    "variant": "heading"
                                 }
                             }
                         },
@@ -274,28 +345,40 @@
                         "index": 2
                     },
                     {
-                        "id": "slide-d6b04b52-e206-4995-bf06-276498eec9cb",
-                        "durationInFrames": 125,
-                        "settledFrame": 125,
+                        "id": "slide-054a2fbe-1fc5-405e-afab-52cb5446c836",
+                        "durationInFrames": 115,
+                        "settledFrame": 115,
                         "content": {
                             "codeRegistry": {
-                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//Component211ffe6d4cb24d51a8318bd1c458f822.tsx",
-                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//TransformedComponent211ffe6d4cb24d51a8318bd1c458f822.tsx"
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/fec6a959-48fc-4c8d-80e4-9c762b5dd9af/0569f704-8930-483e-9e3a-f66cf90f2dbe"
                             },
                             "plan": {
-                                "index": "9"
+                                "index": "11"
                             },
                             "edits": {
-                                "iconshowcase-hbd643": {
-                                    "iconGap": 64,
-                                    "iconSize": 90,
-                                    "icons": [
-                                        "https://www.thesvg.org/icons/openai/light.svg",
-                                        "https://www.thesvg.org/icons/anthropic/light.svg",
-                                        "https://www.thesvg.org/icons/google/color.svg",
-                                        "https://www.thesvg.org/icons/meta/color.svg"
-                                    ],
-                                    "text": "Work with the latest models from Open AI, Anthropic and everyone else.",
+                                "iconasset-icons-0": {
+                                    "icon": "https://www.thesvg.org/icons/headspace/default.svg",
+                                    "size": 90
+                                },
+                                "iconasset-icons-1": {
+                                    "icon": "https://cdn.jsdelivr.net/npm/@tabler/icons/icons/outline/mood-confuzed.svg",
+                                    "size": 90
+                                },
+                                "iconasset-icons-2": {
+                                    "icon": "https://cdn.jsdelivr.net/npm/@tabler/icons/icons/outline/mood-confuzed.svg",
+                                    "size": 90
+                                },
+                                "iconasset-icons-3": {
+                                    "icon": "https://cdn.jsdelivr.net/npm/@tabler/icons/icons/outline/mood-confuzed.svg",
+                                    "size": 90
+                                },
+                                "name": "IconShowcase",
+                                "textstagger": {
+                                    "duration": 15,
+                                    "entranceAnimation": "scaleIn",
+                                    "splitBy": "word",
+                                    "staggerDelay": 5,
+                                    "text": "Monetize with ads, memberships, Super Chats, and the Partner Program",
                                     "variant": "heading"
                                 }
                             }
@@ -304,23 +387,30 @@
                         "index": 3
                     },
                     {
-                        "id": "slide-ed1caa1a-a2da-48ff-8842-729f728f94ef",
-                        "durationInFrames": 218,
-                        "settledFrame": 218,
+                        "id": "slide-19dda14c-c946-4639-ba6c-2f57868a69c7",
+                        "durationInFrames": 80,
+                        "settledFrame": 80,
                         "content": {
                             "codeRegistry": {
-                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//Component22eb386227bc4435bab3d039995c6f5c.tsx",
-                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//TransformedComponent22eb386227bc4435bab3d039995c6f5c.tsx"
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/fec6a959-48fc-4c8d-80e4-9c762b5dd9af/24176b97-6c56-4854-9576-a2c7159e0de2"
                             },
                             "plan": {
-                                "index": "10"
+                                "index": "12"
                             },
                             "edits": {
-                                "typewriter-gxfss8": {
-                                    "entranceAnimation": "slideUp",
-                                    "splitBy": "char",
-                                    "startAt": 0,
-                                    "text": "Add custom plugins to supercharge cursor with your favourite tools",
+                                "imageasset": {
+                                    "image": "https://placehold.co/1200x900.png?text=YouTube+Studio"
+                                },
+                                "name": "TextWithImageScene",
+                                "scene": {
+                                    "entranceAnimation": "slideUp"
+                                },
+                                "textstagger": {
+                                    "duration": 15,
+                                    "entranceAnimation": "scaleIn",
+                                    "splitBy": "word",
+                                    "staggerDelay": 5,
+                                    "text": "Use Studio to manage, schedule, and optimize every upload",
                                     "variant": "heading"
                                 }
                             }
@@ -329,31 +419,34 @@
                         "index": 4
                     },
                     {
-                        "id": "slide-268690e2-39ef-4ca5-9c88-762adfd6e8eb",
-                        "durationInFrames": 150,
-                        "settledFrame": 150,
+                        "id": "slide-1a4dff99-9ee7-46d3-851a-3ab6287ea28a",
+                        "durationInFrames": 42,
+                        "settledFrame": 42,
                         "content": {
                             "codeRegistry": {
-                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//Component2fff79ab244243e4b22d6f94cfc119d9.tsx",
-                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//TransformedComponent2fff79ab244243e4b22d6f94cfc119d9.tsx"
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/fec6a959-48fc-4c8d-80e4-9c762b5dd9af/842b9bc6-6774-4dcb-b42c-79addcab57bf"
                             },
                             "plan": {
-                                "index": "11"
+                                "index": "13"
                             },
                             "edits": {
-                                "imagepeel-967dy9": {
-                                    "borderRadius": 16,
-                                    "direction": "right",
-                                    "height": 756,
-                                    "holdDuration": 20,
-                                    "images": [
-                                        "https://placehold.co/1600x900.png?text=GitHub+Plugin",
-                                        "https://placehold.co/1600x900.png?text=Slack+Plugin",
-                                        "https://placehold.co/1600x900.png?text=Notion+Plugin"
-                                    ],
-                                    "peelDuration": 20,
-                                    "stackOffset": 20,
-                                    "width": 1344
+                                "logoasset-logos-0": {
+                                    "src": "https://placehold.co/240x120.png?text=Editing+Software"
+                                },
+                                "logoasset-logos-1": {
+                                    "src": "https://placehold.co/240x120.png?text=Analytics"
+                                },
+                                "logoasset-logos-2": {
+                                    "src": "https://placehold.co/240x120.png?text=Workflow"
+                                },
+                                "name": "LogoShowcase",
+                                "textstagger": {
+                                    "duration": 15,
+                                    "entranceAnimation": "scaleIn",
+                                    "splitBy": "word",
+                                    "staggerDelay": 5,
+                                    "text": "Connect the tools you already use—editing software, analytics, your workflow.",
+                                    "variant": "heading"
                                 }
                             }
                         },
@@ -364,31 +457,28 @@
                 "index": 3
             },
             {
-                "id": "section-78e6104b-fca2-43aa-889c-ee33683e2444",
-                "title": "Proof",
-                "color": "#6C5CE7",
+                "id": "section-7420f4cb-3e3a-491e-8225-14b9ebdee045",
+                "title": "Social Proof",
+                "color": "#FF6B6B",
                 "slides": [
                     {
-                        "id": "slide-afad2c8d-cfa7-439e-8655-fa6e0a5fa3e0",
+                        "id": "slide-34fa92fd-b8a2-4086-8cb5-50d01371d0af",
                         "durationInFrames": 42,
                         "settledFrame": 42,
                         "content": {
                             "codeRegistry": {
-                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//Component2144cfd8e1c945dea756e3affdeff493.tsx",
-                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//TransformedComponent2144cfd8e1c945dea756e3affdeff493.tsx"
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/fec6a959-48fc-4c8d-80e4-9c762b5dd9af/0bc9088d-b7ff-4fdc-8450-8396ebd64692"
                             },
                             "plan": {
-                                "index": "12"
+                                "index": "14"
                             },
                             "edits": {
-                                "logoshowcase-s624ek": {
-                                    "images": [
-                                        "https://placehold.co/320x160.png?text=Shopify",
-                                        "https://placehold.co/320x160.png?text=Midjourney",
-                                        "https://placehold.co/320x160.png?text=Startups"
-                                    ],
-                                    "logoGap": 48,
-                                    "text": "Shopify, Midjourney, and thousands of startups are using cursor",
+                                "name": "Typewriter",
+                                "typewriter": {
+                                    "entranceAnimation": "slideUp",
+                                    "splitBy": "char",
+                                    "startAt": 0,
+                                    "text": "MrBeast, TED, HubSpot",
                                     "variant": "heading"
                                 }
                             }
@@ -396,26 +486,36 @@
                         "slideStatus": "SLIDE_STATUS_GENERATED"
                     },
                     {
-                        "id": "slide-2bad8e60-5404-46ee-af39-f4b391d4d4cd",
-                        "durationInFrames": 75,
-                        "settledFrame": 75,
+                        "id": "slide-ef3b1861-247f-4f1a-adaa-d32119540cf1",
+                        "durationInFrames": 47,
+                        "settledFrame": 47,
                         "content": {
                             "codeRegistry": {
-                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//Componentf04fddb140b74ef6b8104814712bd2d7.tsx",
-                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//TransformedComponentf04fddb140b74ef6b8104814712bd2d7.tsx"
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/fec6a959-48fc-4c8d-80e4-9c762b5dd9af/2b5e17f8-8c71-4eb4-bede-116a59405b6b"
                             },
                             "plan": {
-                                "index": "13"
+                                "index": "15"
                             },
                             "edits": {
-                                "animatednumber-affpcd": {
-                                    "animationDelay": 30,
-                                    "endText": "X productivity",
-                                    "entranceAnimation": "slideUp",
-                                    "from": 0,
-                                    "highlightStyle": "glow",
-                                    "startText": "",
-                                    "to": 10,
+                                "logoasset-logos-0": {
+                                    "src": "https://placehold.co/240x120.png?text=MrBeast"
+                                },
+                                "logoasset-logos-1": {
+                                    "src": "https://placehold.co/240x120.png?text=TED"
+                                },
+                                "logoasset-logos-2": {
+                                    "src": "https://placehold.co/240x120.png?text=HubSpot"
+                                },
+                                "logoasset-logos-3": {
+                                    "src": "https://placehold.co/240x120.png?text=Creators"
+                                },
+                                "name": "LogoShowcase",
+                                "textstagger": {
+                                    "duration": 15,
+                                    "entranceAnimation": "scaleIn",
+                                    "splitBy": "word",
+                                    "staggerDelay": 5,
+                                    "text": "And millions of creators have built entire businesses here.",
                                     "variant": "heading"
                                 }
                             }
@@ -427,30 +527,29 @@
                 "index": 4
             },
             {
-                "id": "section-6d1605f4-59f8-4ed7-96ae-8e0ed9c196cc",
+                "id": "section-14c1675c-d899-48eb-9527-8a3bab75eed1",
                 "title": "CTA",
-                "color": "#45B7D1",
+                "color": "#00B894",
                 "slides": [
                     {
-                        "id": "slide-3f95ce92-aa01-4771-93e7-c4cc53bee18d",
+                        "id": "slide-368eadf7-d65c-4d4f-a54a-051499c4b7c1",
                         "durationInFrames": 30,
                         "settledFrame": 30,
                         "content": {
                             "codeRegistry": {
-                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//Componente9b58147fc4d4b7b8f66ba537b0e9c2a.tsx",
-                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//TransformedComponente9b58147fc4d4b7b8f66ba537b0e9c2a.tsx"
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/fec6a959-48fc-4c8d-80e4-9c762b5dd9af/a54f0dd4-8948-4378-b451-d2dfb37b339a"
                             },
                             "plan": {
-                                "index": "14"
+                                "index": "16"
                             },
                             "edits": {
-                                "textstagger-ai79xg": {
+                                "name": "TextStagger",
+                                "textstagger": {
                                     "duration": 15,
                                     "entranceAnimation": "scaleIn",
                                     "splitBy": "word",
                                     "staggerDelay": 5,
-                                    "startAt": 0,
-                                    "text": "Try Cursor free today.",
+                                    "text": "Your audience is waiting.",
                                     "variant": "heading"
                                 }
                             }
@@ -458,26 +557,52 @@
                         "slideStatus": "SLIDE_STATUS_GENERATED"
                     },
                     {
-                        "id": "slide-0e1cdf2a-cd5f-4f6b-82dd-9812ce0f0175",
-                        "durationInFrames": 30,
-                        "settledFrame": 30,
+                        "id": "slide-f2566d25-2566-43b1-b149-f8f14aa43ad0",
+                        "durationInFrames": 60,
+                        "settledFrame": 60,
                         "content": {
                             "codeRegistry": {
-                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//Component64e9c7ca6b0947d898f438029110b9d1.tsx",
-                                "tUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/66a225f2-5ca6-433a-9d27-2aca804e3a1d//TransformedComponent64e9c7ca6b0947d898f438029110b9d1.tsx"
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/fec6a959-48fc-4c8d-80e4-9c762b5dd9af/aa6a96f2-a222-49f6-ba1e-d97a858793cd"
                             },
                             "plan": {
-                                "index": "15"
+                                "index": "17"
                             },
                             "edits": {
-                                "logoasset-9rprki": {
-                                    "logoAnimation": "zoomIn",
-                                    "src": ""
+                                "name": "TextHighlight",
+                                "texthighlight": {
+                                    "animationDelay": 30,
+                                    "entranceAnimation": "slideUp",
+                                    "highlightStyle": "glow",
+                                    "highlightedTextAnimation": "jump",
+                                    "text": "Start creating on {YouTube} today",
+                                    "variant": "heading",
+                                    "zoomDuration": 30
                                 }
                             }
                         },
                         "slideStatus": "SLIDE_STATUS_GENERATED",
                         "index": 1
+                    },
+                    {
+                        "id": "slide-86a7a4eb-f60f-4b4e-8a8a-e15a1e22f501",
+                        "durationInFrames": 30,
+                        "settledFrame": 30,
+                        "content": {
+                            "codeRegistry": {
+                                "mUrl": "https://storage.googleapis.com/coasterai-public/templates/generated/fec6a959-48fc-4c8d-80e4-9c762b5dd9af/1786aad3-9b96-4055-88df-90502c3d29d9"
+                            },
+                            "plan": {
+                                "index": "18"
+                            },
+                            "edits": {
+                                "logoasset": {
+                                    "logoAnimation": "zoomIn"
+                                },
+                                "name": "LogoAsset"
+                            }
+                        },
+                        "slideStatus": "SLIDE_STATUS_GENERATED",
+                        "index": 2
                     }
                 ],
                 "index": 5
@@ -488,11 +613,10 @@
         "fps": 30,
         "backgroundStyle": {
             "solid": {
-                "hex": "#F7F7F4"
+                "hex": "#FFFFFF"
             },
-            "applyAll": true,
-            "pattern": "BACKGROUND_PATTERN_GRID",
-            "patternOpacity": 0.03
+            "pattern": "BACKGROUND_PATTERN_DOTS",
+            "patternOpacity": 0.1
         },
         "resolution": {
             "id": "16:9",
@@ -501,26 +625,30 @@
             "width": 1920,
             "height": 1080
         },
-        "durationInFrames": 1280,
-        "prompt": "Hook\tCan your AI actually work with you?\nProblem\tAll teams are stretched thin. Competetion is growing faster than ever. Hiring is slow and expensive\nProduct Intro\tIntroducing Cursor. \n\tThe personal AI assistant built everything at work. \nFeature 1\tUse cursor in agent, plan, debug, ask modes, \nFeature 2\tWork with the latest models from Open AI, Anthropic and everyone else.\nFeature 3\tAdd custom plugins to supercharge cursor with your favourite tools\nSocial proof\tShopify, Midjourney, and thousands of startups are using cursor to see 10X productivity\nCTA\tTry Cursor free today.",
+        "durationInFrames": 1177,
+        "prompt": "Two billion people are watching right now. \nThe question is—are they watching you?\nEvery niche is crowded. \nTrends change faster than you can keep up. \nAnd standing out takes more than just good content.\nBut there's one platform where a single video can change everything.\nYouTube. The stage where ideas become movements.\nUpload long-form, Shorts, or go live—whatever fits your story.\nMonetize with ads, memberships, Super Chats, and the Partner Program\n Use Studio to manage, schedule, and optimize every upload\nConnect the tools you already use—editing software, analytics, your workflow.\nMrBeast, TED, HubSpot, and millions of creators have built entire businesses here. \nYour audience is waiting. Start creating on YouTube today",
         "backgroundAudioUrl": "https://storage.googleapis.com/coasterai-public/background_music/above-the-next-wave.mp3",
         "generatedBranding": {
             "colors": [
                 {
-                    "colorHexCode": "#F54E00",
+                    "colorHexCode": "#065FD4",
                     "priority": "BRAND_ASSET_PRIORITY_PRIMARY"
                 },
                 {
-                    "colorHexCode": "#FFA175",
+                    "colorHexCode": "#167AC6",
                     "priority": "BRAND_ASSET_PRIORITY_SECONDARY"
                 },
                 {
-                    "colorHexCode": "#26251E",
+                    "colorHexCode": "#3EA6FF",
                     "priority": "BRAND_ASSET_PRIORITY_ACCENT"
                 },
                 {
-                    "colorHexCode": "#F7F7F4",
+                    "colorHexCode": "#FFFFFF",
                     "priority": "BRAND_ASSET_PRIORITY_BACKGROUND"
+                },
+                {
+                    "colorHexCode": "#000000",
+                    "priority": "BRAND_ASSET_PRIORITY_TEXT_PRIMARY"
                 },
                 {
                     "colorHexCode": "#6B7280",
@@ -528,21 +656,21 @@
                 }
             ],
             "brandIdentity": {
-                "id": "54d0140d-b235-42e6-8ab6-f33b87100898",
-                "name": "Cursor",
-                "websiteUrl": "cursor.com",
-                "tagline": "The best way to code with AI",
-                "description": "Built to make you extraordinarily productive, Cursor is the best way to build software with AI.",
+                "id": "7cf99ea8-a30e-44f9-ab72-ea9810a3325c",
+                "name": "youtube.com",
+                "websiteUrl": "youtube.com",
+                "tagline": "YouTube",
+                "description": "Enjoy the videos and music you love, upload original content, and share it all with friends, family, and the world on YouTube.",
                 "logos": [
                     {
                         "asset": {
-                            "url": "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774240200-inline.svg",
-                            "width": 2193,
-                            "height": 545,
+                            "url": "https://storage.googleapis.com/coasterai-public/assets/fec6a959-48fc-4c8d-80e4-9c762b5dd9af/1776280426-inline.svg",
+                            "width": 93,
+                            "height": 20,
                             "mimeType": "image/svg+xml",
-                            "size": 2909,
+                            "size": 3395,
                             "fileName": "inline.svg",
-                            "id": "c96082f0-7152-41ec-b7a5-c6da92919f4d",
+                            "id": "9e3cc4c9-73a7-4b40-9b9e-4198399a4278",
                             "mediaType": "MEDIA_TYPE_SVG"
                         },
                         "priority": "BRAND_ASSET_PRIORITY_PRIMARY",
@@ -550,41 +678,43 @@
                     },
                     {
                         "asset": {
-                            "url": "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774240201-apple-touch-icon.png",
-                            "width": 180,
-                            "height": 180,
-                            "mimeType": "image/png",
-                            "size": 1711,
-                            "fileName": "apple-touch-icon.png",
-                            "id": "23678a32-be33-40c9-9c1b-81377ff5c1d7",
+                            "url": "https://storage.googleapis.com/coasterai-public/assets/fec6a959-48fc-4c8d-80e4-9c762b5dd9af/1776280428-favicon.ico",
+                            "mimeType": "image/x-icon",
+                            "size": 1150,
+                            "fileName": "favicon.ico",
+                            "id": "6e57ccf1-d389-49a2-b64b-351dc9a9a07f",
                             "mediaType": "MEDIA_TYPE_IMAGE"
                         },
                         "priority": "BRAND_ASSET_PRIORITY_PRIMARY",
-                        "type": "BRAND_MEDIA_TYPE_LOGO"
+                        "type": "BRAND_MEDIA_TYPE_ICON"
                     }
                 ],
                 "fonts": [
                     {
-                        "googleFontsName": "Inter",
-                        "name": "Inter"
+                        "googleFontsName": "Roboto",
+                        "name": "Roboto"
                     }
                 ],
                 "colors": [
                     {
-                        "colorHexCode": "#F54E00",
+                        "colorHexCode": "#065FD4",
                         "priority": "BRAND_ASSET_PRIORITY_PRIMARY"
                     },
                     {
-                        "colorHexCode": "#FFA175",
+                        "colorHexCode": "#167AC6",
                         "priority": "BRAND_ASSET_PRIORITY_SECONDARY"
                     },
                     {
-                        "colorHexCode": "#26251E",
+                        "colorHexCode": "#3EA6FF",
                         "priority": "BRAND_ASSET_PRIORITY_ACCENT"
                     },
                     {
-                        "colorHexCode": "#F7F7F4",
+                        "colorHexCode": "#FFFFFF",
                         "priority": "BRAND_ASSET_PRIORITY_BACKGROUND"
+                    },
+                    {
+                        "colorHexCode": "#000000",
+                        "priority": "BRAND_ASSET_PRIORITY_TEXT_PRIMARY"
                     },
                     {
                         "colorHexCode": "#6B7280",
@@ -593,20 +723,9 @@
                 ]
             }
         },
-        "thinkingSummary": "**Identifying problems and solutions**\n\nI see three main problems: teams are stretched thin, competition is increasing rapidly, and hiring issues make it slow and costly. For solutions, I want to introduce \"Cursor,\" which is a personal AI assistant designed to streamline work. I'm considering showcasing it with animated images, particularly emphasizing how it can function in various modes: agent, plan, debug, and ask. I need to be careful to avoid duplicating exact phrases across scenes, ensuring variety while conveying the same concepts.\n\n**Developing product info and visuals**\n\nI'm working on product information, starting with an icon showcase for models from OpenAI and Anthropic, with a caption promoting collaboration with these latest technologies. I’ll also include a typewriter effect that emphasizes adding custom plugins to enhance cursor functionality with favorite tools. For visuals, I need to use a placeholder for the animated image since it seems the real data isn’t uploaded. I’ll label it accordingly to maintain clarity in the presentation.\n\n**Considering tool variations**\n\nI'm thinking about how to show tool and plugin variations effectively. I might need a precise script without any extra text, perhaps utilizing ImagePeel with three placeholder images. However, without text, users might find it unclear.\n\nThen, there’s the idea of using IconShowcase with a caption about adding custom plugins to enhance the cursor, featuring icons like Slack, GitHub, Notion, and Figma. For Social Proof, I need to include actual logos of platforms like Shopify and Midjourney, but I might use placeholder images for now.\n\n**Refining social proof elements**\n\nI’m considering using LogoShowcase with three placeholders and the caption “Shopify, Midjourney, and thousands of startups are using cursor.” For the social proof script line, I want to express “...to see 10X productivity.” \n\nI could use AnimatedNumber starting from 1 to 10 with “X productivity” as the end text. I think I want to clarify what the start and end text should be. Also, I should ensure not to duplicate captions across scenes while reinforcing the message effectively.\n\n**Improving scene structure**\n\nI’m looking at the captions for Scene 11, focusing on exact wording for a partial view. For Scene 12, I want to create a TextHighlight that says, “and thousands of startups are using cursor to see 10X productivity,” ensuring I use the exact script without duplicating any strings. For the 14th CTA, I’m thinking of using \"Try Cursor free today,\" along with a LogoAsset.\n\nOverall, I need to focus on better distribution and variation throughout each section for improved flow.\n\n**Evaluating presentation structure**\n\nI’m looking at the presentation format, noticing there’s a need for better organization with hooks and sections. Solutions start with using elements like LogoWithBrandName and AnimatedImage for product info, while social proof can start with LogoShowcase. I realize I'll need to include both image attachments. In terms of scenes, I’m considering using AnimatedImage for the landing page and mission control UI. I should also check JSON formatting for elements and ensure everything matches the required schema.\n\n**Planning image assets and scripts**\n\nI'm working on the images array for ImagePeel and considering using the LogoShowcase with placeholders for logos. Since I don’t have the actual logos yet, I'll use placeholders like those from `placehold.co`, which will allow some custom text via query. For the images array, I’ll label the placeholders accordingly. \n\nI also need to consider how brand names appear, ensuring \"Cursor\" is correctly capitalized in certain places. To match the product introduction, I could use TextStagger for \"Introducing Cursor\" and include the brand name in the LogoWithBrandName component for consistency.\n\n**Clarifying brand name usage**\n\nI'm analyzing the brandName element and noticing that while it isn’t simply text, it appears visually. I’m a bit concerned about potential duplication in how it's displayed. However, I also recognize that the solution still needs to effectively introduce the product. I want to find the right balance between clarity and avoiding redundancy while ensuring the product is clearly presented. I’ll have to think through how to structure this.\n\n**Considering customization options**\n\nThe user mentioned that I should avoid an exact script. So, I’m thinking that maybe scene 11 can be developed using ImagePeel with three image placeholders to visually enhance the plugin or customization without any text. This approach offers good variation, and importantly, it keeps everything free from duplicate text. It seems like a neat way to ensure clarity while fulfilling the user's needs!\n\n**Restructuring plugin scenes**\n\nI’m noticing a need for variation in the scene order since scenes 6 and 7 both use AnimatedImage. I could insert a filler scene or swap the sequence with TextCycle for scene 7 and AnimatedImage for scene 8. \n\nFor instance, I could have scene 6 as AnimatedImage stating, \"The personal AI assistant built everything at work,\" followed by TextCycle. I’ll also consider how to handle punctuation and text cases in later scenes. Adjustments are necessary for precise wording, like in scene 13.\n\n**Validating JSON structure**\n\nI’m focusing on ensuring that the JSON string correctly escapes quotes. I’m thinking that an empty `startText` is likely acceptable since the string is required. \n\nFor the video name, I'm considering a length of 5 to 15 characters, like \"Cursor AI Works\" or \"Cursor At Work,\" which both fit that range. I need to avoid unclear video attachments, so I’ll make sure the props strings are formatted as valid JSON. I’ll also determine section names like \"Hook,\" \"Problem,\" \"Solution,\" and prepare pure JSON output without markdown.\n\n",
-        "assets": [
-            {
-                "assetID": "b32ed690-ec07-41f0-8a71-f3e6996931ec"
-            },
-            {
-                "assetID": "20bc9308-6db2-479c-aa49-5d65ce99b54f"
-            },
-            {
-                "assetID": "5e31e442-81af-42d7-9ea4-4f850c82c52a"
-            }
-        ]
+        "thinkingSummary": "**Planning presentation structure**\n\nI’m organizing my presentation sections into Hook, Problem, Solution, Product Info, Social Proof, and CTA. I need to decide which slides fit under each section, aiming for about 15-20 scenes to fit within 60 seconds. I have 12 script ideas but think I can create 16 scenes by subdividing some lines. It’s essential to vary the scene types and avoid having similar scenes back-to-back. I’ll use placeholders for images/videos and focus on one element per scene. Plus, I should include the brand introduction for YouTube to make a strong impact.\n\n**Designing brand reveal scene**\n\nI can create a scene featuring the LogoWithBrandName text that says, \"The stage where ideas become movements.\" That’s definitely an option! I also want to incorporate social proof by showcasing logos like MrBeast, TED, and HubSpot. I’ll need placeholder URLs for these logos since I don't have assets available. Using placeholder logo images, such as placehold.co/200x100.png?text=MrBeast, is a good idea. I can label these images in my captions appropriately.\n\n**Mapping the message**\n\nI’m considering how to structure the messaging. First, I might start with an animated hook stating, “Two billion people are watching right now.” Then, I’ll ask, “Are they watching you?”  \n\nThe problem section could highlight that \"every niche is crowded\" and emphasize that trends shift quickly. I want to stress that standing out takes more than just good content.  \n\nFor the solution, I can say, “But there's one platform,” showcasing it as “the stage where ideas become movements.” Finally, I could add a text scene about how one video can change everything.\n\n**Evaluating product info and metrics**\n\nImagePeel can showcase creator modes visually before monetization, which is great, but it requires product information within the tool. I’m thinking we might need about 15-20 total scenes, and maybe 5 of those could be used for product info. For social proof, I could include a logo showcase with a caption like “MrBeast, TED, HubSpot, and millions of creators have built entire businesses here.” But, I'm not sure if the metrics mentioned are real — should I ask for clarification before proceeding?\n\n**Refining script usage and scenes**\n\nSince the script provided needs to be used as is, I’m thinking it might be better to avoid numeric placeholders in favor of a non-numeric social proof scene. Perhaps just having one social proof scene could suffice. I also need to keep track of the total scene count. For the call to action, I'll use a TextStagger saying, \"Your audience is waiting,\" followed by a TextHighlight that says, \"Start creating on {YouTube} today.\" That brings us to a total of 17 scenes.\n\n**Considering video asset options**\n\nI’m thinking about possibly using a sample mp4 from the URL \"https://www.w3schools.com/html/mov_bbb.mp4\" as a placeholder, but the instructions say to use placeholder values when real data isn’t provided. It seems like there’s no explicit requirement for a video placeholder, and it might be better to avoid using video altogether. Instead, I could use images. So, let’s stick with images for Scenes 5 and 7 and make Scene 6 feature the YouTube logo.\n\n**Refining video format ideas**\n\nI’m exploring video formats like Shorts or going live—whichever fits the story. I realize Scene 8 visually demonstrates some formats without duplicating text. I should possibly use “or” with “go live” in Scene 9. For Scene 10, it’s about monetization—showing ads, memberships, Super Chats, and the Partner Program. Then, Scene 11 can include text about using Studio for managing uploads, and Scene 12 could showcase logos for integrations like editing software and analytics. Sounds good!\n\n**Structuring video scenes**\n\nI’m organizing the video with Scene 13 featuring a typewriter effect mentioning \"MrBeast, TED, HubSpot,\" followed by Scene 14 showing logos with text about millions of creators building businesses. The caption seems accurate, which is great! For the call to action, I have TextStagger saying, \"Your audience is waiting,\" and Highlight text like \"Start creating on {YouTube} today.\" I realize it’s better not to stack similar scenes. Also, I need to format sections and slides in a strict JSON structure, ensuring strings are correctly escaped. The video name could be \"YouTube Creator Opportunity,\" which fits!\n\n**Finalizing video schema**\n\nI'm checking the schema for SceneElement, which requires '{ component, props, children }.' I should include 'children: []' for each scene, which seems like a good move. I want to ensure I’m only using available scenes, and it looks like I’ve chosen the right ones. The typewriter effect is a nice filler too! Also, I need to remember that the enum values for TextWithImageScene's textComponent should be lowercase, like textstagger, texthighlight, and textwithwordcycle. I’ll use them accordingly and nest the textComponentProps object properly.\n\n"
     },
-    "createdAt": "2026-04-07T14:39:39.345197Z",
+    "createdAt": "2026-04-15T19:18:57.429991Z",
     "status": "VIDEO_STATUS_COMPLETED",
-    "version": "9"
+    "version": "1"
 }

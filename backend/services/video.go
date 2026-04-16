@@ -224,7 +224,7 @@ func stripSlideForRender(slide *pbcore.Slide) {
 	slide.Plan = nil
 	if slide.GetContent() != nil {
 		slide.GetContent().Plan = nil
-		slide.GetContent().CodeRegistry.MUrl = ""
+		//slide.GetContent().CodeRegistry.MUrl = ""
 	}
 }
 

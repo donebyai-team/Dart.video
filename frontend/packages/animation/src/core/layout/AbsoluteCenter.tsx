@@ -1,5 +1,4 @@
 import React from 'react';
-import { useAspectPreset } from '../../styles';
 
 export type CenterAxis = 'x' | 'y' | 'both';
 
@@ -13,10 +12,6 @@ export interface AbsoluteCenterProps {
  * Centers a child absolutely within its nearest positioned parent.
  */
 export function AbsoluteCenter({ axis = 'both', children }: AbsoluteCenterProps): React.ReactElement {
-  const preset = useAspectPreset();
-  // const defaultWidth = preset.width * 0.75;
-  const defaultWidth = preset.width;
-
   const style: React.CSSProperties = { position: 'absolute' };
 
   if (axis === 'both') {
@@ -32,7 +27,7 @@ export function AbsoluteCenter({ axis = 'both', children }: AbsoluteCenterProps)
   }
 
   return (
-    <div style={{ ...style, width: defaultWidth, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <div style={{ ...style, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       {children}
     </div>
   );
