@@ -29,11 +29,16 @@ const BASE_EXIT_DURATION = 10;
 const BASE_HANDOFF_GAP = 2;
 // Target viewport width coverage for the oversized lead word.
 const LEAD_VIEWPORT_COVERAGE = 0.6;
-// Lowest allowed speedFactor so timings never collapse too far.
-const MIN_SPEED_FACTOR = 0.25;
+// Integer speed percentage. 100 = normal speed.
+const DEFAULT_SPEED_PERCENTAGE = 100;
+// Lowest allowed speed percentage so timings never collapse too far.
+const MIN_SPEED_PERCENTAGE = 25;
 // Minimum reveal progress before a word becomes visible to avoid flicker.
 const MIN_VISIBLE_PROGRESS = 0.08;
 // CEL duration formula derived from the timing constants above.
+const CEL_BASE_FRAMES = BASE_LEAD_DELAY + BASE_LEAD_SETTLE_DURATION + BASE_WORD_ENTRANCE_DURATION + BASE_HOLD_DURATION;
+const CEL_EXTRA_ENTRY_FRAMES = BASE_STAGGER_DELAY;
+const CEL_EXTRA_EXIT_FRAMES = BASE_EXIT_STAGGER_DELAY;
 
 export const TextLeadStaggerDefaults = {
   id: 'textleadstagger',
@@ -41,7 +46,7 @@ export const TextLeadStaggerDefaults = {
   text: "Isn't getting clicks",
   variant: 'displayLg' as TypographyVariant,
   entranceAnimation: 'slideLeft' as EntranceAnimation,
-  speedFactor: 1,
+  speed: DEFAULT_SPEED_PERCENTAGE,
   className: undefined as string | undefined,
   style: undefined as React.CSSProperties | undefined,
 };
@@ -65,8 +70,8 @@ function estimateWordWidth(word: string, fontSizePx: number): number {
   return Math.max(fontSizePx * 0.9, word.length * fontSizePx * 0.62);
 }
 
-function scaleTiming(baseDuration: number, speedFactor: number): number {
-  return Math.max(1, Math.round(baseDuration / Math.max(speedFactor, MIN_SPEED_FACTOR)));
+function scaleTiming(baseDuration: number, speed: number): number {
+  return Math.max(1, Math.round((baseDuration * DEFAULT_SPEED_PERCENTAGE) / Math.max(speed, MIN_SPEED_PERCENTAGE)));
 }
 
 function composeTransforms(...transforms: Array<string | undefined>): string | undefined {
@@ -88,15 +93,15 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
   const dragStyle = usePatchedDragStyle(id, props.style?.transform, overrideTransform);
   const typographyStyle = resolveTypography(props.variant, styleConfig, theme, preset);
   const elapsed = Math.max(0, frame - props.startAt);
-  const speedFactor = Math.max(props.speedFactor, MIN_SPEED_FACTOR);
-  const leadDelay = scaleTiming(BASE_LEAD_DELAY, speedFactor);
-  const leadSettleDuration = scaleTiming(BASE_LEAD_SETTLE_DURATION, speedFactor);
-  const staggerDelay = scaleTiming(BASE_STAGGER_DELAY, speedFactor);
-  const wordEntranceDuration = scaleTiming(BASE_WORD_ENTRANCE_DURATION, speedFactor);
-  const holdDuration = scaleTiming(BASE_HOLD_DURATION, speedFactor);
-  const exitStaggerDelay = scaleTiming(BASE_EXIT_STAGGER_DELAY, speedFactor);
-  const exitDuration = scaleTiming(BASE_EXIT_DURATION, speedFactor);
-  const handoffGap = scaleTiming(BASE_HANDOFF_GAP, speedFactor);
+  const speed = Math.max(props.speed, MIN_SPEED_PERCENTAGE);
+  const leadDelay = scaleTiming(BASE_LEAD_DELAY, speed);
+  const leadSettleDuration = scaleTiming(BASE_LEAD_SETTLE_DURATION, speed);
+  const staggerDelay = scaleTiming(BASE_STAGGER_DELAY, speed);
+  const wordEntranceDuration = scaleTiming(BASE_WORD_ENTRANCE_DURATION, speed);
+  const holdDuration = scaleTiming(BASE_HOLD_DURATION, speed);
+  const exitStaggerDelay = scaleTiming(BASE_EXIT_STAGGER_DELAY, speed);
+  const exitDuration = scaleTiming(BASE_EXIT_DURATION, speed);
+  const handoffGap = scaleTiming(BASE_HANDOFF_GAP, speed);
   const fontSizePx = parsePixelValue(typographyStyle.fontSize);
   const wordGapPx = fontSizePx * 0.25;
 
@@ -251,9 +256,9 @@ export const TextLeadStaggerSchemaFields = [
     "default": TextLeadStaggerDefaults.entranceAnimation
   },
   {
-    "name": "speedFactor",
+    "name": "speed",
     "type": "number",
-    "default": TextLeadStaggerDefaults.speedFactor
+    "default": TextLeadStaggerDefaults.speed
   }
 ];
 
@@ -271,7 +276,7 @@ export const TextLeadStaggerDescriptor: ComponentRegistration = {
       type: 'string',
     }
   ],
-  celExpression: `(40 + max(0, segmentCount(props.textleadstagger.text, "word") - 2) * 5 + max(0, segmentCount(props.textleadstagger.text, "word") - 1) * 4) / max(0.25, props.textleadstagger.speedFactor)`,
+  celExpression: `((${CEL_BASE_FRAMES} + max(0, segmentCount(props.textleadstagger.text, "word") - 2) * ${CEL_EXTRA_ENTRY_FRAMES} + max(0, segmentCount(props.textleadstagger.text, "word") - 1) * ${CEL_EXTRA_EXIT_FRAMES}) * ${DEFAULT_SPEED_PERCENTAGE}) / max(${MIN_SPEED_PERCENTAGE}, props.textleadstagger.speed)`,
   description: `First word starts enlarged and then settles down. The remaining words enter in a stagger, making it ideal for emphasis moments (MAX 3–4 words).
 Examples:
 text="Isn't getting clicks"

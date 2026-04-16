@@ -27,11 +27,11 @@ func TestSceneConfigComputeDurationFrames(t *testing.T) {
 	t.Run("computes duration for text leader", func(t *testing.T) {
 		scene := SceneConfig{
 			Name:               "TextLeadStagger",
-			DurationExpression: "(40 + max(0, segmentCount(props.textleadstagger.text, \"word\") - 2) * 5 + max(0, segmentCount(props.textleadstagger.text, \"word\") - 1) * 4) / max(0.25, props.textleadstagger.speedFactor)",
+			DurationExpression: "((40 + max(0, segmentCount(props.textleadstagger.text, \"word\") - 2) * 5 + max(0, segmentCount(props.textleadstagger.text, \"word\") - 1) * 4) * 100) / max(25, props.textleadstagger.speed)",
 			Props: map[string]any{
 				"textleadstagger": map[string]any{
 					"entranceAnimation": "slideLeft",
-					"speedFactor":       1,
+					"speed":             100,
 					"text":              "Isn't getting enough clicks",
 					"variant":           "displayLg",
 				},

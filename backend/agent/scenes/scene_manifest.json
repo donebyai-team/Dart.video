@@ -487,9 +487,9 @@
                   "default": "slideLeft"
                 },
                 {
-                  "name": "speedFactor",
+                  "name": "speed",
                   "type": "number",
-                  "default": 1
+                  "default": 100
                 }
               ]
             }
@@ -500,7 +500,7 @@
               "type": "string"
             }
           ],
-          "celExpression": "(40 + max(0, segmentCount(props.textleadstagger.text, \"word\") - 2) * 5 + max(0, segmentCount(props.textleadstagger.text, \"word\") - 1) * 4) / max(0.25, props.textleadstagger.speedFactor)",
+          "celExpression": "((40 + max(0, segmentCount(props.textleadstagger.text, \"word\") - 2) * 5 + max(0, segmentCount(props.textleadstagger.text, \"word\") - 1) * 4) * 100) / max(25, props.textleadstagger.speed)",
           "description": "First word starts enlarged and then settles down. The remaining words enter in a stagger, making it ideal for emphasis moments (MAX 3–4 words).\nExamples:\ntext=\"Isn't getting clicks\"\ntext=\"You're missing out\"\n\nYou can combine it with other **fillers scenes** for showcasing a **\"Problem\" or \"Solution\" section** of a video or use it as a standalone filler with other scenes.\n\nExample problem: \"If your Airbnb listing isn't getting clicks\"\n\n- Scene 1: If (TextStagger)\n- Scene 2: your (TextStagger)\n- Scene 3: Airbnb {listing} (TextHighlight)\n- Scene 4: isn't getting clicks (TextLeadStagger)"
         },
         {
@@ -976,6 +976,77 @@
           ],
           "description": "Images peel away one by one. Use for before/after or variations. Min 2 images.",
           "celExpression": "30 + size(props.images) * (props.scene.holdDuration + props.scene.peelDuration)"
+        },
+        {
+          "name": "ProblemCollage",
+          "type": "scene",
+          "tags": [
+            "Problem",
+            "Pain Point"
+          ],
+          "schema": [
+            {
+              "type": "component",
+              "name": "textstagger",
+              "fields": [
+                {
+                  "name": "text",
+                  "type": "string",
+                  "map": "props.text"
+                },
+                {
+                  "name": "variant",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "heading"
+                }
+              ]
+            },
+            {
+              "type": "repeat",
+              "source": "images",
+              "map": "props.images",
+              "components": [
+                {
+                  "name": "imageasset",
+                  "fields": [
+                    {
+                      "name": "image",
+                      "type": "string",
+                      "map": "item",
+                      "dataType": "media"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "component",
+              "name": "scene",
+              "fields": [
+                {
+                  "name": "speed",
+                  "type": "number",
+                  "default": 100
+                }
+              ]
+            }
+          ],
+          "llmSchema": [
+            {
+              "name": "text",
+              "type": "string"
+            },
+            {
+              "name": "images",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ],
+          "description": "Centered problem statement with screenshots that fly in around it as a scattered collage. Best used to show data scattered across tools, fragmentation, multiple issues kind of problems.\nProvide 5 default images of size 800x400 that user can change later\nTakes around **66 frames** to complete",
+          "celExpression": "((38 + max(0, size(props.images) - 1) * 7) * 100) / max(props.scene.speed, 25)"
         },
         {
           "name": "LogoAsset",

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { useArrayPatch } from '../../patches'
 
 interface ArrayItemProps {
@@ -6,6 +6,7 @@ interface ArrayItemProps {
     source: string
     removeControl?: ControlPosition
     addControl?: ControlPosition
+    style?: React.CSSProperties
     children: React.ReactNode
 }
 
@@ -24,6 +25,7 @@ export function ArrayItem({
   source,
   removeControl = 'corner-top-right',
   addControl = 'mid-right',
+  style,
   children,
 }: ArrayItemProps) {
   const ref = useRef<HTMLDivElement>(null)
@@ -45,6 +47,7 @@ export function ArrayItem({
       ref={ref}
       data-array-index={String(index)}
       data-array-source={source}
+      style={style}
     >
       {children}
     </div>

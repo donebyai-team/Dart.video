@@ -14,7 +14,8 @@ export interface AbsoluteCenterProps {
  */
 export function AbsoluteCenter({ axis = 'both', children }: AbsoluteCenterProps): React.ReactElement {
   const preset = useAspectPreset();
-  const defaultWidth = preset.width * 0.75;
+  // const defaultWidth = preset.width * 0.75;
+  const defaultWidth = preset.width;
 
   const style: React.CSSProperties = { position: 'absolute' };
 

@@ -9,6 +9,7 @@ import { TextLeadStaggerDescriptor } from "../components/scenes/text/TextLeadSta
 import { AnimatedImageDescriptor } from "../components/scenes/assets/AnimatedImage";
 import { AnimatedVideoDescriptor } from "../components/scenes/assets/AnimatedVideo";
 import { ImagePeelDescriptor } from "../components/scenes/assets/ImagePeel";
+import { ProblemCollageDescriptor } from "../components/scenes/assets/ProblemCollage";
 import { LogoAssetDescriptor } from "../components/scenes/assets/LogoAsset";
 import { LogoShowcaseDescriptor } from "../components/scenes/assets/LogoShowcase";
 import { LogoWithBrandNameDescriptor } from "../components/scenes/assets/LogoWithBrandName";
@@ -32,6 +33,7 @@ export const SCENE_COMPONENTS: ComponentRegistration[] = [
   TextWithImageSceneDescriptor,
   TextWithVideoSceneDescriptor,
   ImagePeelDescriptor,
+  ProblemCollageDescriptor,
   LogoAssetDescriptor,
   LogoShowcaseDescriptor,
   LogoWithBrandNameDescriptor,

@@ -1,7 +1,7 @@
 import { Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import React, { useEffect, useState } from 'react'
 
-import { AbsoluteFill, continueRender, delayRender, useCurrentFrame, useRemotionEnvironment, useVideoConfig } from 'remotion'
+import { AbsoluteFill, continueRender, delayRender, useCurrentFrame, useVideoConfig } from 'remotion'
 import {
   SpeedFactorProvider,
   PatchContextProvider,

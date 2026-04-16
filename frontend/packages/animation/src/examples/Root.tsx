@@ -6,7 +6,7 @@ import { SpeedFactorProvider } from "../duration";
 import { ASPECT_PRESETS, resolveStyle, AspectPresetProvider, StyleContextProvider } from "../styles";
 import { BrandTheme, darkTheme, ThemeProvider } from "../theme";
 import { AnimatedVideo } from "../components/scenes/assets/AnimatedVideo";
-import { TextWithImageScene, ImagePeel, LogoAsset, LogoShowcase, TextLeadStagger } from "../components/scenes";
+import { TextWithImageScene, ImagePeel, LogoAsset, LogoShowcase, ProblemCollage, TextLeadStagger } from "../components/scenes";
 
 
 const BRAND: BrandTheme = {
@@ -208,16 +208,7 @@ const AnimatedIconShowcaseScene: React.FC = () => (
                         icons={["shopify", "midjourney", "openai"]}
                         text="Startups are getting 10× productivity with Cursor"
                     /> */}
-                    <LogoShowcase
-                        text="Building with unber companies"
-                        images={[
-                            "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/google/wordmark.svg",
-                            "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/openai/wordmark-light.svg",
-                            "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/razorpay/default.svg",
-                            "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/netflix/wordmark.svg",
-                            "https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774173924-cuser.png"
-                        ]}
-                    />
+                    <LogoShowcase />
                 </AbsoluteCenter>
             </SafeArea>
         </AbsoluteFill>
@@ -229,7 +220,19 @@ const AnimatedVideoScene: React.FC = () => (
         <AbsoluteFill style={{ backgroundColor: 'white' }}>
             <SafeArea>
                 <AbsoluteCenter axis="both">
-                    <AnimatedVideo id="animated-video-0" text="Your dashboard, logs, and alerts didn't adapt" src="https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774173924-cur.mp4" />
+                    <AnimatedVideo />
+                </AbsoluteCenter>
+            </SafeArea>
+        </AbsoluteFill>
+    </Scene>
+);
+
+const ProblemCollageScene: React.FC = () => (
+    <Scene>
+        <AbsoluteFill >
+            <SafeArea>
+                <AbsoluteCenter >
+                    <ProblemCollage />
                 </AbsoluteCenter>
             </SafeArea>
         </AbsoluteFill>
@@ -263,6 +266,7 @@ export const RemotionRoot: React.FC = () => (
         <Composition id="text-components" component={TextComponentsScene} durationInFrames={200} fps={30} width={1920} height={1080} />
         <Composition id="animated-image" component={AnimatedImageScene} durationInFrames={180} fps={30} width={1920} height={1080} />
         <Composition id="animated-video" component={AnimatedVideoScene} durationInFrames={180} fps={30} width={1920} height={1080} />
+        <Composition id="problem-collage" component={ProblemCollageScene} durationInFrames={66} fps={30} width={1920} height={1080} />
         <Composition id="logo" component={LogoScene} durationInFrames={80} fps={30} width={1920} height={1080} />
         <Composition id="icon-showcase" component={AnimatedIconShowcaseScene} durationInFrames={180} fps={30} width={1920} height={1080} />
         <Composition id="content-aware-scene" component={ContentAwareSceneExamples} durationInFrames={1260} fps={30} width={1920} height={1080} />
