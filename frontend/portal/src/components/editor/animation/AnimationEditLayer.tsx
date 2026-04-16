@@ -16,6 +16,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimationToolbar } from './AnimationToolbar'
 import { usePrimitiveDrag } from './usePrimitiveDrag'
+import { useMediaResize } from './useMediaResize'
 import {
   resolveComponentFromId,
   getElementTypeFromId,
@@ -79,6 +80,11 @@ export function AnimationEditLayer({
     return resolveComponentFromId(id)?.name === 'Text'
   }
 
+  function isResizableMediaElement(id: string): boolean {
+    const componentName = resolveComponentFromId(id)?.name
+    return componentName === 'ImageAsset' || componentName === 'VideoAsset'
+  }
+
   // ── Track canvas position ─────────────────────────────────────────────────
   useEffect(() => {
     if (!playerRef.current) return
@@ -104,6 +110,7 @@ export function AnimationEditLayer({
     if (!selectedEid || !animEditVersion) return
     if (dragStateRef.current?.elementId === selectedEid) return
     if (textResizeStateRef.current?.elementId === selectedEid) return
+    if (mediaResizeStateRef.current?.elementId === selectedEid) return
     requestAnimationFrame(() => {
       const el = playerRef.current?.querySelector(`[id="${selectedEid}"]`) as HTMLElement | null
       if (!el) return
@@ -221,6 +228,19 @@ export function AnimationEditLayer({
     const next = array.filter((_: any, i: number) => i !== index)
     onArrayPatch(source, next)
   }
+
+  const {
+    mediaResizeStateRef,
+    handleMediaResizePointerDown,
+    handleMediaResizePointerMove,
+    handleMediaResizePointerEnd,
+  } = useMediaResize({
+    playerRef,
+    selectedEid,
+    isResizableMediaElement,
+    onValuePatch,
+    setElementRect,
+  })
 
   const {
     dragStateRef,
@@ -451,6 +471,34 @@ export function AnimationEditLayer({
           onPointerMove={handleTextResizePointerMove}
           onPointerUp={handleTextResizePointerEnd}
           onPointerCancel={handleTextResizePointerEnd}
+          onClick={e => {
+            e.preventDefault()
+            e.stopPropagation()
+          }}
+        />
+      )}
+
+      {/* Media resize handle */}
+      {elementRect && selectedEid && isResizableMediaElement(selectedEid) && (
+        <div
+          style={{
+            position: 'fixed',
+            left: elementRect.left + elementRect.width - 6,
+            top: elementRect.top + elementRect.height - 6,
+            width: 12,
+            height: 12,
+            background: '#ffffff',
+            border: '2px solid rgba(99,102,241,0.95)',
+            borderRadius: 999,
+            boxSizing: 'border-box',
+            cursor: 'nwse-resize',
+            pointerEvents: 'auto',
+            zIndex: 42,
+          }}
+          onPointerDown={handleMediaResizePointerDown}
+          onPointerMove={handleMediaResizePointerMove}
+          onPointerUp={handleMediaResizePointerEnd}
+          onPointerCancel={handleMediaResizePointerEnd}
           onClick={e => {
             e.preventDefault()
             e.stopPropagation()
