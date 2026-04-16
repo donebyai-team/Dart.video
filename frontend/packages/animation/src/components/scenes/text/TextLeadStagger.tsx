@@ -271,7 +271,7 @@ export const TextLeadStaggerDescriptor: ComponentRegistration = {
       type: 'string',
     }
   ],
-  celExpression: `(40.0 + max(0.0, segmentCount(props.textleadstagger.text, "word") - 2) * 5.0 + max(0.0, segmentCount(props.textleadstagger.text, "word") - 1) * 4.0) / max(0.25, props.textleadstagger.speedFactor)`,
+  celExpression: `(40 + max(0, segmentCount(props.textleadstagger.text, "word") - 2) * 5 + max(0, segmentCount(props.textleadstagger.text, "word") - 1) * 4) / max(0.25, props.textleadstagger.speedFactor)`,
   description: `First word starts enlarged and then settles down. The remaining words enter in a stagger, making it ideal for emphasis moments (MAX 3–4 words).
 Examples:
 text="Isn't getting clicks"

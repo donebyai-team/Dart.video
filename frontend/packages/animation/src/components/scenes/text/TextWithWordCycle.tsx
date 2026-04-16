@@ -380,5 +380,5 @@ export const TextWithWordCycleDescriptor: ComponentRegistration = {
     }
   ],
   description: 'Static text with cycling highlighted words at the end. Use for dynamic taglines like "We build amazing [software/products/solutions]"',
-  celExpression: 'ceil((props.textwithwordcycle.holdDuration + props.textwithwordcycle.transitionDuration) * size(props.textwithwordcycle.cyclingWords))',
+  celExpression: '(props.textwithwordcycle.holdDuration + props.textwithwordcycle.transitionDuration) * size(props.textwithwordcycle.cyclingWords)',
 };

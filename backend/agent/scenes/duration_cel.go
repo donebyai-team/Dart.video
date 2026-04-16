@@ -34,20 +34,8 @@ func (s SceneConfig) ComputeDurationFrames() int32 {
 func evaluateDurationExpression(expression string, props map[string]any) (any, error) {
 	env, err := cel.NewEnv(
 		cel.Variable("props", cel.MapType(cel.StringType, cel.DynType)),
-		cel.Function("ceil",
-			cel.Overload("duration_ceil_dyn", []*cel.Type{cel.DynType}, cel.IntType,
-				cel.UnaryBinding(func(arg ref.Val) ref.Val {
-					n, ok := numericRefToFloat64(arg)
-					if !ok {
-						return types.NewErr("ceil expects numeric input")
-					}
-
-					return types.Int(int64(math.Ceil(n)))
-				}),
-			),
-		),
 		cel.Function("max",
-			cel.Overload("duration_max_dyn_dyn", []*cel.Type{cel.DynType, cel.DynType}, cel.DoubleType,
+			cel.Overload("duration_max_dyn_dyn", []*cel.Type{cel.DynType, cel.DynType}, cel.IntType,
 				cel.BinaryBinding(func(lhs, rhs ref.Val) ref.Val {
 					left, ok := numericRefToFloat64(lhs)
 					if !ok {
@@ -59,19 +47,77 @@ func evaluateDurationExpression(expression string, props map[string]any) (any, e
 						return types.NewErr("max expects numeric input")
 					}
 
-					return types.Double(math.Max(left, right))
+					return types.Int(int64(math.Max(left, right)))
 				}),
 			),
 		),
+
+		cel.Function("min",
+			cel.Overload("duration_min_dyn_dyn", []*cel.Type{cel.DynType, cel.DynType}, cel.IntType,
+				cel.BinaryBinding(func(lhs, rhs ref.Val) ref.Val {
+					left, ok := numericRefToFloat64(lhs)
+					if !ok {
+						return types.NewErr("min expects numeric input")
+					}
+
+					right, ok := numericRefToFloat64(rhs)
+					if !ok {
+						return types.NewErr("min expects numeric input")
+					}
+
+					return types.Int(int64(math.Min(left, right)))
+				}),
+			),
+		),
+
+		cel.Function("abs",
+			cel.Overload("duration_abs_dyn", []*cel.Type{cel.DynType}, cel.IntType,
+				cel.UnaryBinding(func(arg ref.Val) ref.Val {
+					n, ok := numericRefToFloat64(arg)
+					if !ok {
+						return types.NewErr("abs expects numeric input")
+					}
+
+					return types.Int(int64(math.Abs(n)))
+				}),
+			),
+		),
+
+		cel.Function("log10",
+			cel.Overload("duration_log10_dyn", []*cel.Type{cel.DynType}, cel.IntType,
+				cel.UnaryBinding(func(arg ref.Val) ref.Val {
+					n, ok := numericRefToFloat64(arg)
+					if !ok {
+						return types.NewErr("log10 expects numeric input")
+					}
+
+					if n <= 0 {
+						return types.NewErr("log10 expects positive input")
+					}
+
+					return types.Int(int64(math.Log10(n)))
+				}),
+			),
+		),
+
 		cel.Function("segmentCount",
 			cel.Overload("segment_count_string_string",
 				[]*cel.Type{cel.StringType, cel.StringType},
 				cel.IntType,
 				cel.BinaryBinding(func(textVal, modeVal ref.Val) ref.Val {
-					text := textVal.Value().(string)
-					mode := modeVal.Value().(string)
+
+					text, ok := textVal.Value().(string)
+					if !ok {
+						return types.NewErr("segmentCount text must be string")
+					}
+
+					mode, ok := modeVal.Value().(string)
+					if !ok {
+						return types.NewErr("segmentCount mode must be string")
+					}
 
 					switch mode {
+
 					case "char":
 						return types.Int(len([]rune(text)))
 
@@ -87,81 +133,8 @@ func evaluateDurationExpression(expression string, props map[string]any) (any, e
 				}),
 			),
 		),
-		cel.Function("min",
-			cel.Overload("duration_min_dyn_dyn", []*cel.Type{cel.DynType, cel.DynType}, cel.DoubleType,
-				cel.BinaryBinding(func(lhs, rhs ref.Val) ref.Val {
-					left, ok := numericRefToFloat64(lhs)
-					if !ok {
-						return types.NewErr("min expects numeric input")
-					}
-
-					right, ok := numericRefToFloat64(rhs)
-					if !ok {
-						return types.NewErr("min expects numeric input")
-					}
-
-					return types.Double(math.Min(left, right))
-				}),
-			),
-		),
-		cel.Function("abs",
-			cel.Overload("duration_abs_dyn", []*cel.Type{cel.DynType}, cel.DoubleType,
-				cel.UnaryBinding(func(arg ref.Val) ref.Val {
-					n, ok := numericRefToFloat64(arg)
-					if !ok {
-						return types.NewErr("abs expects numeric input")
-					}
-
-					return types.Double(math.Abs(n))
-				}),
-			),
-		),
-		cel.Function("log10",
-			cel.Overload("duration_log10_dyn", []*cel.Type{cel.DynType}, cel.DoubleType,
-				cel.UnaryBinding(func(arg ref.Val) ref.Val {
-					n, ok := numericRefToFloat64(arg)
-					if !ok {
-						return types.NewErr("log10 expects numeric input")
-					}
-
-					if n <= 0 {
-						return types.NewErr("log10 expects positive input")
-					}
-
-					return types.Double(math.Log10(n))
-				}),
-			),
-		),
-		cel.Function("split",
-			cel.MemberOverload("duration_string_split", []*cel.Type{cel.DynType, cel.StringType}, cel.ListType(cel.StringType),
-				cel.BinaryBinding(func(lhs, rhs ref.Val) ref.Val {
-					input, ok := lhs.Value().(string)
-					if !ok {
-						return types.NewErr("split receiver must be a string")
-					}
-
-					separator, ok := rhs.Value().(string)
-					if !ok {
-						return types.NewErr("split separator must be a string")
-					}
-
-					return types.DefaultTypeAdapter.NativeToValue(strings.Split(input, separator))
-				}),
-			),
-		),
-		cel.Function("trim",
-			cel.MemberOverload("duration_string_trim", []*cel.Type{cel.DynType}, cel.StringType,
-				cel.UnaryBinding(func(arg ref.Val) ref.Val {
-					input, ok := arg.Value().(string)
-					if !ok {
-						return types.NewErr("trim receiver must be a string")
-					}
-
-					return types.String(strings.TrimSpace(input))
-				}),
-			),
-		),
 	)
+
 	if err != nil {
 		return nil, fmt.Errorf("create CEL env: %w", err)
 	}
@@ -176,8 +149,9 @@ func evaluateDurationExpression(expression string, props map[string]any) (any, e
 		return nil, fmt.Errorf("create CEL program: %w", err)
 	}
 
-	payload := map[string]any{"props": props}
-	payload = map[string]any{"props": normalizeCELValue(props)}
+	payload := map[string]any{
+		"props": normalizeCELValue(props),
+	}
 
 	out, _, err := program.Eval(payload)
 	if err != nil {

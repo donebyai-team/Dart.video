@@ -228,6 +228,6 @@ export const ImagePeelDescriptor: ComponentRegistration = {
         },
     ],
     description: 'Images peel away one by one. Use for before/after or variations. Min 2 images.',
-    celExpression: '30.0 + size(props.images) * (props.scene.holdDuration + props.scene.peelDuration)',
+    celExpression: '30 + size(props.images) * (props.scene.holdDuration + props.scene.peelDuration)',
 };
 

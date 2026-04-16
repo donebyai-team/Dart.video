@@ -27,7 +27,7 @@ func TestSceneConfigComputeDurationFrames(t *testing.T) {
 	t.Run("computes duration for text leader", func(t *testing.T) {
 		scene := SceneConfig{
 			Name:               "TextLeadStagger",
-			DurationExpression: "(40.0 + max(0.0, segmentCount(props.textleadstagger.text, \"word\") - 2) * 5.0 + max(0.0, segmentCount(props.textleadstagger.text, \"word\") - 1) * 4.0) / max(0.25, props.textleadstagger.speedFactor)",
+			DurationExpression: "(40 + max(0, segmentCount(props.textleadstagger.text, \"word\") - 2) * 5 + max(0, segmentCount(props.textleadstagger.text, \"word\") - 1) * 4) / max(0.25, props.textleadstagger.speedFactor)",
 			Props: map[string]any{
 				"textleadstagger": map[string]any{
 					"entranceAnimation": "slideLeft",
@@ -43,10 +43,32 @@ func TestSceneConfigComputeDurationFrames(t *testing.T) {
 		}
 	})
 
+	t.Run("computes duration for image peel", func(t *testing.T) {
+		scene := SceneConfig{
+			Name:               "ImagePeel",
+			DurationExpression: "30 + size(props.images) * (props.scene.holdDuration + props.scene.peelDuration)",
+			Props: map[string]any{
+				"imageasset-images-0": map[string]any{},
+				"imageasset-images-1": map[string]any{},
+				"imageasset-images-3": map[string]any{},
+				"scene": map[string]any{
+					"direction":    "right",
+					"holdDuration": 20,
+					"peelDuration": 20,
+					"stackOffset":  20,
+				},
+			},
+		}
+
+		if got := scene.ComputeDurationFrames(); got != 150 {
+			t.Fatalf("expected 150 frames, got %d", got)
+		}
+	})
+
 	t.Run("computes duration for repeated scene props", func(t *testing.T) {
 		scene := SceneConfig{
 			Name:               "IconShowcase",
-			DurationExpression: `ceil(10 + (size(props.icons) - 1) * 5 + 10 + 5 + 15 + (size(props.textstagger.text.trim().split(" ")) - 1) * 5 + 15)`,
+			DurationExpression: `55 + max(0, size(props.icons) - 1) * 5 + max(0, segmentCount(props.textstagger.text, "word") - 1) * 5`,
 			Props: map[string]any{
 				"textstagger": map[string]any{
 					"text": "AI models",

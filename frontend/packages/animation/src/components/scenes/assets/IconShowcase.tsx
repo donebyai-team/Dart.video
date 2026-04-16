@@ -195,7 +195,7 @@ export const IconShowcaseDescriptor: ComponentRegistration = {
         },
     ],
     description: 'Row of icons + caption. Use for integrations, tech stack, partners, brands. eg. icons={["shopify", "midjourney", "openai"]}, text="caption text".',
-    celExpression: '55.0 + max(0.0, size(props.icons) - 1) * 5.0 + max(0.0, segmentCount(props.textstagger.text, "word") - 1) * 5.0',
+    celExpression: '55 + max(0, size(props.icons) - 1) * 5 + max(0, segmentCount(props.textstagger.text, "word") - 1) * 5',
 };
 
 

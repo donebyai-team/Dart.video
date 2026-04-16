@@ -164,7 +164,7 @@
             }
           ],
           "description": "Counting metric with label text. Use for stats and KPIs",
-          "celExpression": "props.animatednumber.animationDelay + max(45.0, min(100.0, log10(abs(props.animatednumber.to - props.animatednumber.from) + 1) * 20.0))"
+          "celExpression": "props.animatednumber.animationDelay + max(45, min(100, log10(abs(props.animatednumber.to - props.animatednumber.from) + 1) * 20))"
         },
         {
           "name": "TextStagger",
@@ -459,7 +459,7 @@
             }
           ],
           "description": "Static text with cycling highlighted words at the end. Use for dynamic taglines like \"We build amazing [software/products/solutions]\"",
-          "celExpression": "ceil((props.textwithwordcycle.holdDuration + props.textwithwordcycle.transitionDuration) * size(props.textwithwordcycle.cyclingWords))"
+          "celExpression": "(props.textwithwordcycle.holdDuration + props.textwithwordcycle.transitionDuration) * size(props.textwithwordcycle.cyclingWords)"
         },
         {
           "name": "TextLeadStagger",
@@ -500,7 +500,7 @@
               "type": "string"
             }
           ],
-          "celExpression": "(40.0 + max(0.0, segmentCount(props.textleadstagger.text, \"word\") - 2) * 5.0 + max(0.0, segmentCount(props.textleadstagger.text, \"word\") - 1) * 4.0) / max(0.25, props.textleadstagger.speedFactor)",
+          "celExpression": "(40 + max(0, segmentCount(props.textleadstagger.text, \"word\") - 2) * 5 + max(0, segmentCount(props.textleadstagger.text, \"word\") - 1) * 4) / max(0.25, props.textleadstagger.speedFactor)",
           "description": "First word starts enlarged and then settles down. The remaining words enter in a stagger, making it ideal for emphasis moments (MAX 3–4 words).\nExamples:\ntext=\"Isn't getting clicks\"\ntext=\"You're missing out\"\n\nYou can combine it with other **fillers scenes** for showcasing a **\"Problem\" or \"Solution\" section** of a video or use it as a standalone filler with other scenes.\n\nExample problem: \"If your Airbnb listing isn't getting clicks\"\n\n- Scene 1: If (TextStagger)\n- Scene 2: your (TextStagger)\n- Scene 3: Airbnb {listing} (TextHighlight)\n- Scene 4: isn't getting clicks (TextLeadStagger)"
         },
         {
@@ -975,7 +975,7 @@
             }
           ],
           "description": "Images peel away one by one. Use for before/after or variations. Min 2 images.",
-          "celExpression": "30.0 + size(props.images) * (props.scene.holdDuration + props.scene.peelDuration)"
+          "celExpression": "30 + size(props.images) * (props.scene.holdDuration + props.scene.peelDuration)"
         },
         {
           "name": "LogoAsset",
@@ -1096,7 +1096,7 @@
             }
           ],
           "description": "Row of logos + caption. Use for integrations, tech stack, partners, brands. eg. logos=[\"url1\", \"url2\"], text=\"caption text\".",
-          "celExpression": "ceil((size(props.textstagger.text.split(\"\\n\")) - 1) * 10 + 20 + (size(props.logos) - 1) * 5 + 12)"
+          "celExpression": "55 + max(0, size(props.logos) - 1) * 5 + max(0, segmentCount(props.textstagger.text, \"word\") - 1) * 5"
         },
         {
           "name": "LogoWithBrandName",
@@ -1178,7 +1178,7 @@
             }
           ],
           "description": "Logo + brand name reveal. Use for brand intro.",
-          "celExpression": "max(0.0, segmentCount(props.textstagger.text, \"char\") - 1) * 5.0 + 20.0"
+          "celExpression": "max(0, segmentCount(props.textstagger.text, \"char\") - 1) * 5 + 20"
         },
         {
           "name": "IconShowcase",
@@ -1266,7 +1266,7 @@
             }
           ],
           "description": "Row of icons + caption. Use for integrations, tech stack, partners, brands. eg. icons={[\"shopify\", \"midjourney\", \"openai\"]}, text=\"caption text\".",
-          "celExpression": "55.0 + max(0.0, size(props.icons) - 1) * 5.0 + max(0.0, segmentCount(props.textstagger.text, \"word\") - 1) * 5.0"
+          "celExpression": "55 + max(0, size(props.icons) - 1) * 5 + max(0, segmentCount(props.textstagger.text, \"word\") - 1) * 5"
         }
       ]
     }
