@@ -16,15 +16,13 @@ const ZoomOverlay = ({
   zoom,
   resolution,
   containerWidth,
-  containerHeight,
   isSelected,
   onSelect,
   onUpdate,
 }: ZoomOverlayProps) => {
   const [isDragging, setIsDragging] = useState(false)
-  const [isResizing, setIsResizing] = useState(false)
   const dragStartRef = useRef({ x: 0, y: 0 })
-  const initialValuesRef = useRef({ x: 0, y: 0, zoomLevel: 2 })
+  const initialValuesRef = useRef({ x: 0, y: 0 })
   const overlayRef = useRef<HTMLDivElement>(null)
 
   const scale = containerWidth / resolution.width
@@ -40,9 +38,6 @@ const ZoomOverlay = ({
   const rectHeight = effectiveHeight / zoomLevel
   const left = cx - rectWidth / 2
   const top = cy - rectHeight / 2
-
-  const handleSize = 10
-
   const handleBoxMouseDown = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault()
@@ -50,61 +45,40 @@ const ZoomOverlay = ({
       onSelect()
       setIsDragging(true)
       dragStartRef.current = { x: e.clientX, y: e.clientY }
-      initialValuesRef.current = { x: zoom.x || resolution.width / 2, y: zoom.y || resolution.height / 2, zoomLevel }
+      initialValuesRef.current = { x: zoom.x || resolution.width / 2, y: zoom.y || resolution.height / 2 }
     },
     [zoom.x, zoom.y, zoomLevel, resolution.width, resolution.height, onSelect]
   )
 
-  const handleResizeMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault()
-      e.stopPropagation()
-      setIsResizing(true)
-      dragStartRef.current = { x: e.clientX, y: e.clientY }
-      initialValuesRef.current = { x: zoom.x || resolution.width / 2, y: zoom.y || resolution.height / 2, zoomLevel }
-    },
-    [zoom.x, zoom.y, zoomLevel, resolution.width, resolution.height]
-  )
-
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
-      if (!isDragging && !isResizing) return
+      if (!isDragging) return
 
       const dragStart = dragStartRef.current
       const initialValues = initialValuesRef.current
       const dx = (e.clientX - dragStart.x) / scale
       const dy = (e.clientY - dragStart.y) / scale
 
-      if (isDragging) {
-        const newX = Math.max(0, Math.min(resolution.width, initialValues.x + dx))
-        const newY = Math.max(0, Math.min(resolution.height, initialValues.y + dy))
-        onUpdate({ x: newX, y: newY })
-      } else if (isResizing) {
-        // SE handle: dragging right/down grows the rect (less zoom), left/up shrinks (more zoom)
-        const initRectHalfWidth = containerWidth / (2 * initialValues.zoomLevel)
-        const dragDelta = e.clientX - dragStart.x
-        const newHalfWidth = Math.max(20, initRectHalfWidth + dragDelta)
-        const newZoomLevel = containerWidth / (2 * newHalfWidth)
-        onUpdate({ zoomLevel: Math.max(1, Math.min(10, newZoomLevel)) })
-      }
+      const newX = Math.max(0, Math.min(resolution.width, initialValues.x + dx))
+      const newY = Math.max(0, Math.min(resolution.height, initialValues.y + dy))
+      onUpdate({ x: newX, y: newY })
     },
-    [isDragging, isResizing, scale, resolution, containerWidth, onUpdate]
+    [isDragging, scale, resolution, onUpdate]
   )
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false)
-    setIsResizing(false)
   }, [])
 
   useEffect(() => {
-    if (!isDragging && !isResizing) return
+    if (!isDragging) return
     window.addEventListener('mousemove', handleMouseMove)
     window.addEventListener('mouseup', handleMouseUp)
     return () => {
       window.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('mouseup', handleMouseUp)
     }
-  }, [isDragging, isResizing, handleMouseMove, handleMouseUp])
+  }, [isDragging, handleMouseMove, handleMouseUp])
 
   return (
     <div
@@ -178,20 +152,6 @@ const ZoomOverlay = ({
           }}
         />
       </div>
-
-      {/* SE resize handle — drag toward center to increase zoom, away to decrease */}
-      {isSelected && (
-        <div
-          className='absolute bg-white border-2 border-primary rounded-sm cursor-se-resize'
-          style={{
-            right: -handleSize / 2,
-            bottom: -handleSize / 2,
-            width: handleSize,
-            height: handleSize,
-          }}
-          onMouseDown={handleResizeMouseDown}
-        />
-      )}
     </div>
   )
 }

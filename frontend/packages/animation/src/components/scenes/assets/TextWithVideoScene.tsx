@@ -25,6 +25,8 @@ type SceneProps = {
 
 type VideoProps = {
   video: string;
+  width?: number;
+  height?: number;
   style?: React.CSSProperties;
 };
 
@@ -35,6 +37,8 @@ const SceneDefaults: SceneProps = {
 
 const VideoDefaults: VideoProps = {
   video: '',
+  width: undefined,
+  height: undefined,
   style: {},
 };
 
@@ -149,6 +153,8 @@ export function TextWithVideoScene(propsInit: SceneProps): React.ReactElement {
   }
 
   const fittedVideo = fitVideo(videoDimensions.width, videoDimensions.height, maxVideoWidth, maxVideoHeight);
+  const resolvedVideoWidth = videoProps.width ?? Math.max(1, Math.round(fittedVideo.width));
+  const resolvedVideoHeight = videoProps.height ?? Math.max(1, Math.round(fittedVideo.height));
 
   const videoNode = (
     <div
@@ -160,8 +166,8 @@ export function TextWithVideoScene(propsInit: SceneProps): React.ReactElement {
       <VideoAsset
         id="videoasset"
         video={videoProps.video}
-        width={Math.max(1, Math.round(fittedVideo.width))}
-        height={Math.max(1, Math.round(fittedVideo.height))}
+        width={resolvedVideoWidth}
+        height={resolvedVideoHeight}
         style={{ objectFit: 'contain', ...videoProps.style }}
       />
     </div>

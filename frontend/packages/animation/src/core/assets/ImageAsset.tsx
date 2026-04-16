@@ -1,7 +1,7 @@
 import { preloadImage } from "@remotion/preload";
 import { useEffect, useState } from "react";
 import { useRemotionEnvironment, delayRender, continueRender } from "remotion";
-import { usePatchedDragStyle } from "../../patches";
+import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from "../../patches";
 import { useAspectPreset } from "../../styles/AspectPresetContext";
 import { buildDepthShadow, DEFAULT_MEDIA_DEPTH } from "../../styles/depth";
 
@@ -30,16 +30,30 @@ export function ImageAsset({
     className,
     id,
 }: ImageAssetProps): React.ReactElement {
+    const patchedProps = usePatchedProps(id, {
+        image,
+        width,
+        height,
+        style,
+        className,
+        id,
+    });
     const { isRendering } = useRemotionEnvironment();
     const preset = useAspectPreset();
-    const { objectFit: styleObjectFit, transform: styleTransform, ...restStyle } = style ?? {};
-    const dragStyle = usePatchedDragStyle(id, styleTransform);
+    const styleOverride = useStyleOverride(id);
+    const { objectFit: styleObjectFit, transform: styleTransform, ...restStyle } = patchedProps.style ?? {};
+    const { objectFit: overrideObjectFit, transform: overrideTransformValue, ...wrapperStyleOverride } = styleOverride;
+    const overrideTransform =
+        typeof overrideTransformValue === 'string' ? overrideTransformValue : undefined;
+    const dragStyle = usePatchedDragStyle(id, styleTransform, overrideTransform);
     
-    const imageSrc = image ?? DEFAULT_IMAGE_SVG;
-    const resolvedBoxWidth = width ?? preset.width;
-    const resolvedBoxHeight = height ?? preset.height;
+    const imageSrc = patchedProps.image ?? DEFAULT_IMAGE_SVG;
+    const resolvedBoxWidth = patchedProps.width ?? preset.width;
+    const resolvedBoxHeight = patchedProps.height ?? preset.height;
     const resolvedObjectFit: React.CSSProperties['objectFit'] =
-        typeof styleObjectFit === 'string' ? styleObjectFit as React.CSSProperties['objectFit'] : 'cover';
+        typeof (overrideObjectFit ?? styleObjectFit) === 'string'
+            ? (overrideObjectFit ?? styleObjectFit) as React.CSSProperties['objectFit']
+            : 'cover';
 
     const [handle] = useState(() => isRendering ? delayRender('Loading image') : null);
 
@@ -71,7 +85,7 @@ export function ImageAsset({
     return (
         <span
             id={id}
-            className={className}
+            className={patchedProps.className}
             style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -82,6 +96,7 @@ export function ImageAsset({
                 boxShadow: buildDepthShadow(DEFAULT_MEDIA_DEPTH),
                 overflow: 'hidden',
                 ...restStyle,
+                ...wrapperStyleOverride,
                 ...dragStyle,
             }}
         >
