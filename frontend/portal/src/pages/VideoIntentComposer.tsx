@@ -364,12 +364,12 @@ const VideoIntentComposer = () => {
     setSelectedAssets(current =>
       current.map(asset => asset.selection.assetID === assetID
         ? {
-            ...asset,
-            selection: create(SelectedMediaAssetSchema, {
-              assetID,
-              note
-            })
-          }
+          ...asset,
+          selection: create(SelectedMediaAssetSchema, {
+            assetID,
+            note
+          })
+        }
         : asset
       )
     )
@@ -396,12 +396,12 @@ const VideoIntentComposer = () => {
     setQuestionAssets(current =>
       current.map(asset => asset.selection.assetID === assetID
         ? {
-            ...asset,
-            selection: create(SelectedMediaAssetSchema, {
-              assetID,
-              note
-            })
-          }
+          ...asset,
+          selection: create(SelectedMediaAssetSchema, {
+            assetID,
+            note
+          })
+        }
         : asset
       )
     )
@@ -477,19 +477,21 @@ const VideoIntentComposer = () => {
 
       {/* Center area — grows to push input to the bottom */}
       <div className='flex-1 flex items-center justify-center py-8'>
-        <div className='text-center'>
-          <h1 className='text-2xl font-semibold tracking-tight'>Plan your video</h1>
-          <p className='text-sm text-muted-foreground mt-1.5'>
-            Describe your video, add a script, or both
-          </p>
-        </div>
-      </div>
+  <div className='text-center'>
+    <h1 className='text-2xl font-semibold tracking-tight'>
+      What feature are you launching today?
+    </h1>
+    <p className='text-sm text-muted-foreground mt-1.5'>
+      Add a detailed script to generate your video.
+    </p>
+  </div>
+</div>
 
       {/* Bottom composite area */}
       <div className='pb-6 space-y-2.5'>
 
         {/* Thinking bar — appears above input when agent is active */}
-        { showThinking && <ThinkingViewComponent thinkingChunk={thinkingChunk} />}
+        {showThinking && <ThinkingViewComponent thinkingChunk={thinkingChunk} />}
 
         {/* Question panel — appears above input when agent asks something */}
         {stage === 'question' && activeQuestion && (
@@ -559,7 +561,7 @@ const VideoIntentComposer = () => {
 
             <span className='text-border/60 mx-0.5'>·</span> */}
 
-           {/* Add Style */}
+            {/* Add Style */}
             {/* <StyleSelector
               selectedStyle={selectedStyle}
               onOpenDialog={() => setStyleDialogOpen(true)}
@@ -587,24 +589,24 @@ const VideoIntentComposer = () => {
           {/* Script badge */}
           {hasScript && (
             <div className='mx-4 mt-2 flex flex-wrap gap-2'>
-            <div
-              onClick={() => setScriptDialogOpen(true)}
-              className='flex items-center justify-between rounded-lg border bg-primary/5 border-primary/15 px-3 py-1.5 text-xs cursor-pointer hover:border-primary/30 transition-colors'
-            >
-              <div className='flex items-center gap-2 text-primary'>
-                <span className='font-medium'>Script attached</span>
-                <span className='text-muted-foreground'>· {scriptVoiceoverCount} sections</span>
-              </div>
-              <button
-                onClick={e => {
-                  e.stopPropagation()
-                  removeScript()
-                }}
-                className='p-0.5 rounded hover:bg-destructive/10 hover:text-destructive'
+              <div
+                onClick={() => setScriptDialogOpen(true)}
+                className='flex items-center justify-between rounded-lg border bg-primary/5 border-primary/15 px-3 py-1.5 text-xs cursor-pointer hover:border-primary/30 transition-colors'
               >
-                <X className='w-3.5 h-3.5' />
-              </button>
-            </div>
+                <div className='flex items-center gap-2 text-primary'>
+                  <span className='font-medium'>Script attached</span>
+                  <span className='text-muted-foreground'>· {scriptVoiceoverCount} sections</span>
+                </div>
+                <button
+                  onClick={e => {
+                    e.stopPropagation()
+                    removeScript()
+                  }}
+                  className='p-0.5 rounded hover:bg-destructive/10 hover:text-destructive'
+                >
+                  <X className='w-3.5 h-3.5' />
+                </button>
+              </div>
             </div>
           )}
 
@@ -642,8 +644,8 @@ const VideoIntentComposer = () => {
             onChange={e => setPrompt(e.target.value)}
             placeholder={
               hasScript
-                ? 'Add direction or style notes...'
-                : 'Describe the video you want to generate...'
+                ? 'Add direction or style notes (tone, pacing, visuals)...'
+                : 'Sample script (Hook → Problem → Product Intro → Features → Social Proof → CTA). Example: Hook: Can your AI actually work with you?'
             }
             rows={4}
             className='w-full resize-none bg-transparent px-4 py-3 text-sm focus:outline-none placeholder:text-muted-foreground/60'
