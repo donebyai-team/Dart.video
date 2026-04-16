@@ -9,6 +9,11 @@ import { resolveTypography } from '../../../tokens/resolveTypography';
 import { getEntranceTransform } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
 
+ const TYPEWRITER_TYPING_DURATION = 60;
+ const TYPEWRITER_CHAR_FRAME_MULTIPLIER = 2;
+ const TYPEWRITER_WORD_FRAME_MULTIPLIER = 9;
+ const TYPEWRITER_LINE_FRAME_MULTIPLIER = 18;
+
 export const TypewriterDefaults = {
   id: 'typewriter',
   text: "Sample text",
@@ -16,7 +21,7 @@ export const TypewriterDefaults = {
   splitBy: "char" as const,
   variant: "heading" as const,
   entranceAnimation: "slideUp" as const,
-  typingDuration: 60,
+  typingDuration: TYPEWRITER_TYPING_DURATION,
   style: undefined as React.CSSProperties | undefined,
   className: undefined as string | undefined,
 };
@@ -157,5 +162,5 @@ export const TypewriterDescriptor: ComponentRegistration = {
     }
   ],
   description: 'Character-by-character text reveal. Use for dramatic reveals or code/terminal effects.',
-  celExpression: `max(30, segmentCount(props.typewriter.text, props.typewriter.splitBy) * (props.typewriter.splitBy == "char" ? 2 : props.typewriter.splitBy == "word" ? 9 : 18))`
+  celExpression: `max(${TYPEWRITER_TYPING_DURATION}, segmentCount(props.typewriter.text, props.typewriter.splitBy) * (props.typewriter.splitBy == "char" ? ${TYPEWRITER_CHAR_FRAME_MULTIPLIER} : props.typewriter.splitBy == "word" ? ${TYPEWRITER_WORD_FRAME_MULTIPLIER} : ${TYPEWRITER_LINE_FRAME_MULTIPLIER}))`
 };
