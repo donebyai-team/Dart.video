@@ -163,6 +163,11 @@ message BackgroundStyle {
   bool apply_all = 4;
   BackgroundPattern pattern = 5;
   optional float pattern_opacity = 6; // 0.0 to 1.0, defaults to 0.1
+  optional BackgroundEffect effect = 7;
+}
+
+message BackgroundEffect {
+  BackgroundEffectType type = 1;
 }
 
 message SolidColor {
@@ -200,6 +205,13 @@ enum BackgroundPattern {
   BACKGROUND_PATTERN_HEXAGONS = 6;
   BACKGROUND_PATTERN_TRIANGLES = 7;
   BACKGROUND_PATTERN_WAVES = 8;
+}
+
+enum BackgroundEffectType {
+  BACKGROUND_EFFECT_TYPE_NONE = 0;
+  BACKGROUND_EFFECT_TYPE_AURORA = 1;
+  BACKGROUND_EFFECT_TYPE_GLOW = 2;
+  BACKGROUND_EFFECT_TYPE_SWEEP = 3;
 }
 
 

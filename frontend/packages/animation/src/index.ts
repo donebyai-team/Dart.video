@@ -32,3 +32,6 @@ export * from './patches';
 export * from './core/assets';
 
 export * from './registry'
+
+// Background effects
+export * from './background_effects'

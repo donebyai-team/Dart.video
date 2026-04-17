@@ -451,6 +451,11 @@ export declare type BackgroundStyle = Message<"coasterai.core.v1.BackgroundStyle
    * @generated from field: optional float pattern_opacity = 6;
    */
   patternOpacity?: number;
+
+  /**
+   * @generated from field: optional coasterai.core.v1.BackgroundEffect effect = 7;
+   */
+  effect?: BackgroundEffect;
 };
 
 /**
@@ -458,6 +463,22 @@ export declare type BackgroundStyle = Message<"coasterai.core.v1.BackgroundStyle
  * Use `create(BackgroundStyleSchema)` to create a new message.
  */
 export declare const BackgroundStyleSchema: GenMessage<BackgroundStyle>;
+
+/**
+ * @generated from message coasterai.core.v1.BackgroundEffect
+ */
+export declare type BackgroundEffect = Message<"coasterai.core.v1.BackgroundEffect"> & {
+  /**
+   * @generated from field: coasterai.core.v1.BackgroundEffectType type = 1;
+   */
+  type: BackgroundEffectType;
+};
+
+/**
+ * Describes the message coasterai.core.v1.BackgroundEffect.
+ * Use `create(BackgroundEffectSchema)` to create a new message.
+ */
+export declare const BackgroundEffectSchema: GenMessage<BackgroundEffect>;
 
 /**
  * @generated from message coasterai.core.v1.SolidColor
@@ -873,4 +894,34 @@ export enum BackgroundPattern {
  * Describes the enum coasterai.core.v1.BackgroundPattern.
  */
 export declare const BackgroundPatternSchema: GenEnum<BackgroundPattern>;
+
+/**
+ * @generated from enum coasterai.core.v1.BackgroundEffectType
+ */
+export enum BackgroundEffectType {
+  /**
+   * @generated from enum value: BACKGROUND_EFFECT_TYPE_NONE = 0;
+   */
+  NONE = 0,
+
+  /**
+   * @generated from enum value: BACKGROUND_EFFECT_TYPE_AURORA = 1;
+   */
+  AURORA = 1,
+
+  /**
+   * @generated from enum value: BACKGROUND_EFFECT_TYPE_GLOW = 2;
+   */
+  GLOW = 2,
+
+  /**
+   * @generated from enum value: BACKGROUND_EFFECT_TYPE_SWEEP = 3;
+   */
+  SWEEP = 3,
+}
+
+/**
+ * Describes the enum coasterai.core.v1.BackgroundEffectType.
+ */
+export declare const BackgroundEffectTypeSchema: GenEnum<BackgroundEffectType>;
 

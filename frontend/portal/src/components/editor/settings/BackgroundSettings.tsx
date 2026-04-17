@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import BrandColors from "@/components/editor/settings/BrandColors";
+import BackgroundEffectsPicker from "@/components/editor/settings/BackgroundEffectsPicker";
 import { DualColorPicker } from "@/components/editor/animation/toolbars/stylers/DualColorPicker";
-import { AURORA_PATTERN_OPACITY, backgroundStyleToCSS, isAuroraBackgroundStyle } from '@coasterai/renderer';
-import { BackgroundStyle, Gradient, GradientSchema, GradientType, GradientStopSchema, BackgroundStyleSchema, BackgroundPattern } from "@coasterai/pb/coasterai/core/v1/slide_pb";
+import { backgroundStyleToCSS } from '@coasterai/renderer';
+import { BackgroundStyle, Gradient, GradientSchema, GradientType, GradientStopSchema, BackgroundStyleSchema, BackgroundPattern, BackgroundEffectSchema, BackgroundEffectType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { gradientToCSS, patternToCSS, PATTERN_OPTIONS } from "@coasterai/renderer/src/backgroundUtils";
 
 interface BackgroundSettingsProps {
@@ -57,6 +58,14 @@ function buildGradient(c1: string, c2: string, angle: number): Gradient {
 
 export { backgroundStyleToCSS };
 
+function buildBackgroundEffect(type: BackgroundEffectType) {
+  if (type === BackgroundEffectType.NONE) {
+    return undefined;
+  }
+
+  return create(BackgroundEffectSchema, { type });
+}
+
 /* ---------------- COMPONENT ---------------- */
 
 export default function BackgroundSettings({
@@ -74,6 +83,7 @@ export default function BackgroundSettings({
     });
 
   const activeCase = safeValue.style?.case;
+  const activeEffectType = safeValue.effect?.type ?? BackgroundEffectType.NONE;
 
   /* ---------- CUSTOM GRADIENT STATE ---------- */
 
@@ -107,6 +117,7 @@ export default function BackgroundSettings({
       applyAll: safeValue.applyAll ?? false,
       pattern: safeValue.pattern,
       patternOpacity: safeValue.patternOpacity,
+      effect: styleCase === "solid" ? safeValue.effect : undefined,
     });
 
     onChange(updated);
@@ -119,6 +130,7 @@ export default function BackgroundSettings({
       applyAll: checked,
       pattern: safeValue.pattern,
       patternOpacity: safeValue.patternOpacity,
+      effect: safeValue.effect,
     });
 
     console.debug("[Update apply all]", updated)
@@ -132,6 +144,7 @@ export default function BackgroundSettings({
       applyAll: safeValue.applyAll ?? false,
       pattern,
       patternOpacity,
+      effect: safeValue.effect,
     });
     console.log('[updatePattern] created:', updated.pattern, updated.patternOpacity);
     onChange(updated);
@@ -144,6 +157,7 @@ export default function BackgroundSettings({
       applyAll: safeValue.applyAll ?? false,
       pattern: safeValue.pattern,
       patternOpacity: opacity,
+      effect: safeValue.effect,
     });
     onChange(updated);
   };
@@ -153,21 +167,18 @@ export default function BackgroundSettings({
     [gradientColor1, gradientColor2, gradientAngle]
   );
 
-  const applyAuroraPoc = () => {
-    const auroraColor =
-      activeCase === "solid"
-        ? safeValue.style?.value.hex
-        : activeCase === "gradient"
-          ? safeValue.style?.value.stops[0]?.color
-          : "#f97316";
+  const updateEffect = (effectType: BackgroundEffectType) => {
+    if (activeCase !== "solid") {
+      return;
+    }
 
-    setPatternOpacity(AURORA_PATTERN_OPACITY);
     onChange(
       create(BackgroundStyleSchema, {
-        style: { case: "solid", value: { hex: auroraColor ?? "#f97316" } },
+        style: safeValue.style,
         applyAll: safeValue.applyAll ?? false,
-        pattern: BackgroundPattern.WAVES,
-        patternOpacity: AURORA_PATTERN_OPACITY,
+        pattern: safeValue.pattern,
+        patternOpacity: safeValue.patternOpacity,
+        effect: buildBackgroundEffect(effectType),
       })
     );
   };
@@ -233,23 +244,11 @@ export default function BackgroundSettings({
             primaryLabel="Color"
           />
 
-          <div className="rounded-xl border border-border bg-muted/20 p-3 space-y-3">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-sm font-medium">Aurora POC</p>
-                <p className="text-xs text-muted-foreground">
-                  Turns the current color into the moving white glow background in Remotion.
-                </p>
-              </div>
-              <Button
-                size="sm"
-                variant={isAuroraBackgroundStyle(safeValue) ? "secondary" : "default"}
-                onClick={applyAuroraPoc}
-              >
-                {isAuroraBackgroundStyle(safeValue) ? "Applied" : "Use Aurora"}
-              </Button>
-            </div>
-          </div>
+          <BackgroundEffectsPicker
+            value={activeEffectType}
+            disabled={activeCase !== "solid"}
+            onChange={updateEffect}
+          />
         </div>
 
 

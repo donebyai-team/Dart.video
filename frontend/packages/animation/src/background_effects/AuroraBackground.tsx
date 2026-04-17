@@ -1,45 +1,6 @@
 import React from 'react'
 import { AbsoluteFill, useCurrentFrame } from 'remotion'
-import { BackgroundPattern, type BackgroundStyle } from '@coasterai/pb/coasterai/core/v1/slide_pb'
-
-export const AURORA_PATTERN_OPACITY = 0.42
-
-const AURORA_SENTINEL_TOLERANCE = 0.0001
-
-export const isAuroraBackgroundStyle = (style?: BackgroundStyle | null): boolean => {
-  if (style?.style?.case !== 'solid') {
-    return false
-  }
-
-  return (
-    style.pattern === BackgroundPattern.WAVES &&
-    Math.abs((style.patternOpacity ?? 0) - AURORA_PATTERN_OPACITY) < AURORA_SENTINEL_TOLERANCE
-  )
-}
-
-const hexToRgb = (hex: string) => {
-  const match = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-  if (!match) {
-    return { r: 249, g: 115, b: 22 }
-  }
-
-  return {
-    r: Number.parseInt(match[1], 16),
-    g: Number.parseInt(match[2], 16),
-    b: Number.parseInt(match[3], 16),
-  }
-}
-
-const toRgba = (hex: string, alpha: number) => {
-  const { r, g, b } = hexToRgb(hex)
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`
-}
-
-const layer = (style: React.CSSProperties): React.CSSProperties => ({
-  position: 'absolute',
-  pointerEvents: 'none',
-  ...style,
-})
+import { effectLayerStyle, toRgba } from './utils'
 
 export const AuroraBackground: React.FC<{
   color: string
@@ -74,14 +35,14 @@ export const AuroraBackground: React.FC<{
       }}
     >
       <div
-        style={layer({
+        style={effectLayerStyle({
           inset: '-8%',
           background: `radial-gradient(circle at ${50 + centerShiftX / 6}% ${44 + centerShiftY / 5}%, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.03) 26%, rgba(255,255,255,0) 62%)`,
           transform: `scale(${1.02 + (breathe - 1) * 0.35})`,
         })}
       />
       <div
-        style={layer({
+        style={effectLayerStyle({
           left: '-26%',
           top: '6%',
           width: '68%',
@@ -94,7 +55,7 @@ export const AuroraBackground: React.FC<{
         })}
       />
       <div
-        style={layer({
+        style={effectLayerStyle({
           right: '-24%',
           top: '10%',
           width: '74%',
@@ -107,7 +68,7 @@ export const AuroraBackground: React.FC<{
         })}
       />
       <div
-        style={layer({
+        style={effectLayerStyle({
           left: '12%',
           top: '-30%',
           width: '76%',
@@ -119,7 +80,7 @@ export const AuroraBackground: React.FC<{
         })}
       />
       <div
-        style={layer({
+        style={effectLayerStyle({
           left: `${veilAX}%`,
           top: `${veilAY}%`,
           width: '72%',
@@ -132,7 +93,7 @@ export const AuroraBackground: React.FC<{
         })}
       />
       <div
-        style={layer({
+        style={effectLayerStyle({
           left: `${veilBX}%`,
           top: `${veilBY}%`,
           width: '84%',
@@ -145,7 +106,7 @@ export const AuroraBackground: React.FC<{
         })}
       />
       <div
-        style={layer({
+        style={effectLayerStyle({
           left: `${veilCX}%`,
           top: `${veilCY}%`,
           width: '68%',
@@ -154,11 +115,11 @@ export const AuroraBackground: React.FC<{
           background: 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.04) 22%, rgba(255,255,255,0.16) 50%, rgba(255,255,255,0.05) 76%, rgba(255,255,255,0) 100%)',
           filter: 'blur(82px)',
           opacity: 0.44,
-          transform: `rotate(-6deg)`,
+          transform: 'rotate(-6deg)',
         })}
       />
       <div
-        style={layer({
+        style={effectLayerStyle({
           left: '-8%',
           bottom: '-24%',
           width: '116%',
@@ -170,9 +131,9 @@ export const AuroraBackground: React.FC<{
         })}
       />
       <div
-        style={layer({
+        style={effectLayerStyle({
           inset: 0,
-          background: `linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0) 36%, rgba(0,0,0,0.08) 100%)`,
+          background: 'linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0) 36%, rgba(0,0,0,0.08) 100%)',
         })}
       />
     </AbsoluteFill>
