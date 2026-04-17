@@ -6,7 +6,7 @@ func TestSceneConfigComputeDurationFrames(t *testing.T) {
 	t.Run("computes duration for single component scene", func(t *testing.T) {
 		scene := SceneConfig{
 			Name:               "TextStagger",
-			DurationExpression: `(segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * props.textstagger.staggerDelay + props.textstagger.duration`,
+			DurationExpression: `(segmentCount(props.textstagger.text, props.textstagger.splitBy) * props.textstagger.staggerDelay) + props.textstagger.duration`,
 			Props: map[string]any{
 				"textstagger": map[string]any{
 					"text":              "AI models",
@@ -19,8 +19,8 @@ func TestSceneConfigComputeDurationFrames(t *testing.T) {
 			},
 		}
 
-		if got := scene.ComputeDurationFrames(); got != 20 {
-			t.Fatalf("expected 20 frames, got %d", got)
+		if got := scene.ComputeDurationFrames(); got != 25 {
+			t.Fatalf("expected 25 frames, got %d", got)
 		}
 	})
 
