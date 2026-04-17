@@ -224,6 +224,45 @@ func TestConvertSceneToSceneConfig(t *testing.T) {
 	}
 }
 
+func TestConvertToSceneConfig_TextStaggerSingleWordUsesDisplay2xl(t *testing.T) {
+	var scene types.Scene
+	inputJSON := `{
+	  "elements": [
+		{
+		  "component": "TextStagger",
+		  "props": "{\"text\":\"Hello\"}",
+		  "children": []
+		}
+	  ]
+	}`
+
+	if err := json.Unmarshal([]byte(inputJSON), &scene); err != nil {
+		t.Fatalf("failed to unmarshal input: %v", err)
+	}
+
+	out, err := ConvertToSceneConfig(&scene, nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	textStaggerProps, ok := out.Props["textstagger"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected nested textstagger props, got %#v", out.Props)
+	}
+
+	if got := textStaggerProps["variant"]; got != "display2xl" {
+		t.Fatalf("expected variant display2xl, got %v", got)
+	}
+
+	if got := textStaggerProps["text"]; got != "Hello" {
+		t.Fatalf("expected text Hello, got %v", got)
+	}
+
+	if out.Props["variant"] != nil {
+		t.Fatalf("expected props to remain nested, got flattened props: %#v", out.Props)
+	}
+}
+
 func RawMessageToStructPB(raw json.RawMessage) (*structpb.Struct, error) {
 	var m map[string]interface{}
 

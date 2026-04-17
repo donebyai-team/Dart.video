@@ -50,6 +50,15 @@ func ConvertToSceneConfig(scene *types.Scene, fieldValueMapper *services.MediaAs
 		Props:              finalProps,
 	}
 
+	// TODO: Move it in a better place
+	if strings.EqualFold(cfg.Name, "textstagger") {
+		textStaggerProps := cfg.Props["textstagger"].(map[string]any)
+		text := textStaggerProps["text"].(string)
+		if len(strings.Split(text, " ")) == 1 {
+			textStaggerProps["variant"] = "display2xl"
+		}
+	}
+
 	//for _, child := range e.Children {
 	//	cfg.Children = append(cfg.Children, ConvertSceneElement(child))
 	//}
