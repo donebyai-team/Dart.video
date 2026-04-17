@@ -180,10 +180,10 @@ export const Slideshow: React.FC<SlideshowProps> = ({
     <ThemeProvider theme={brandTheme}>
       <AspectPresetProvider preset={aspectPreset}>
         <StyleContextProvider style={styleConfig}>
-          <AbsoluteFill >
-            {/* {hasGlobalAuroraBackground && ( */}
-              <AuroraBackground color={'#f97316'} />
-            {/* )} */}
+          <AbsoluteFill style={{ background: hasGlobalAuroraBackground ? 'transparent' : globalBackground }}>
+            {hasGlobalAuroraBackground && (
+              <AuroraBackground color={metadata?.backgroundStyle?.style.case === 'solid' ? metadata.backgroundStyle.style.value.hex : '#f97316'} />
+            )}
 
             {/* 🎵 Background Audio from URL */}
             {videoConfig.metadata?.backgroundAudioUrl && (
