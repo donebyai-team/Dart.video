@@ -1,4 +1,5 @@
 export { backgroundStyleToCSS, patternToCSS, PATTERN_OPTIONS } from './backgroundUtils';
+export { AuroraBackground, AURORA_PATTERN_OPACITY, isAuroraBackgroundStyle } from './AuroraBackground';
 export { Slideshow, SingleSlidePreview } from './RemotionSlideshow';
 export { assignPrimitiveIds, transformAssignedPrimitiveIds } from './primitive-ast-pass';
 // Re-export types from animation for portal consumers

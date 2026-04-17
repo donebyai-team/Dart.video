@@ -15,6 +15,7 @@ import {
 } from '@coasterai/animation'
 import { AnimationSlide } from './slides'
 import { backgroundStyleToCSS } from './backgroundUtils'
+import { AuroraBackground, isAuroraBackgroundStyle } from './AuroraBackground'
 import { getTransitionPresentation } from './transitions/presentation'
 import { getSlideTransitionDirectionValue } from './transitions/config'
 import { TRANSITION_DURATION_FRAMES } from './frameUtils'
@@ -37,11 +38,16 @@ export const SingleSlidePreview: React.FC<{
   isEditing?: boolean
 }> = ({ slide, isEditing = false }) => {
   const { width, height } = useVideoConfig()
+  const hasAuroraBackground = isAuroraBackgroundStyle(slide.backgroundStyle)
+  const slideForRender = hasAuroraBackground ? { ...slide, backgroundStyle: undefined } : slide
 
   return (
-    <AbsoluteFill style={{ background: backgroundStyleToCSS(slide.backgroundStyle) }}>
+    <AbsoluteFill style={{ background: hasAuroraBackground ? 'transparent' : backgroundStyleToCSS(slide.backgroundStyle) }}>
+      {hasAuroraBackground && (
+        <AuroraBackground color={slide.backgroundStyle?.style.case === 'solid' ? slide.backgroundStyle.style.value.hex : '#f97316'} />
+      )}
       <AnimationSlide
-        slide={slide}
+        slide={slideForRender}
         width={width}
         height={height}
         isEditing={isEditing}
@@ -98,6 +104,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({
   const metadata = videoConfig.metadata
   const sections = videoConfig.config.sections ?? []
   const globalBackground = backgroundStyleToCSS(metadata?.backgroundStyle);
+  const hasGlobalAuroraBackground = isAuroraBackgroundStyle(metadata?.backgroundStyle)
 
   // if external video object exist use it or assign zustand video object
   const allSlides = sections.flatMap(section => section.slides)
@@ -127,8 +134,31 @@ export const Slideshow: React.FC<SlideshowProps> = ({
 
   const renderSlide = (slide: Slide) => {
     const isSelected = selectedTemplateId === slide.id
+    const hasAuroraBackground = isAuroraBackgroundStyle(slide.backgroundStyle)
     const slideWithBackground =
-      globalBackground != 'transparent' ? { ...slide, backgroundColor: 'transparent' } : slide
+      hasAuroraBackground
+        ? { ...slide, backgroundStyle: undefined }
+        : globalBackground != 'transparent' ? { ...slide, backgroundColor: 'transparent' } : slide
+
+    if (hasAuroraBackground) {
+      return (
+        <AbsoluteFill>
+          <AuroraBackground color={slide.backgroundStyle?.style.case === 'solid' ? slide.backgroundStyle.style.value.hex : '#f97316'} />
+          <AnimationSlide
+            slide={slideWithBackground}
+            width={width}
+            height={height}
+            isEditing={isEditing}
+            isSelected={isSelected}
+            isPlaying={isPlaying}
+            onUpdate={onUpdate}
+            onSelect={() => {
+              onSelectTemplate?.(slide.id);
+            }}
+          />
+        </AbsoluteFill>
+      )
+    }
 
     return (
       <AnimationSlide
@@ -150,7 +180,10 @@ export const Slideshow: React.FC<SlideshowProps> = ({
     <ThemeProvider theme={brandTheme}>
       <AspectPresetProvider preset={aspectPreset}>
         <StyleContextProvider style={styleConfig}>
-          <AbsoluteFill style={{ background: globalBackground }}>
+          <AbsoluteFill >
+            {/* {hasGlobalAuroraBackground && ( */}
+              <AuroraBackground color={'#f97316'} />
+            {/* )} */}
 
             {/* 🎵 Background Audio from URL */}
             {videoConfig.metadata?.backgroundAudioUrl && (
