@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
-import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
+import { composeTransforms, usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme/ThemeContext';
@@ -45,6 +45,7 @@ export const TextCycle: React.FC<TextCycleProps> = (initProps) => {
   const patchedVariant = props.variant;
   const actualEntranceAnimation = props.entranceAnimation;
   const styleOverride = useStyleOverride(id);
+  const overrideTransform = typeof styleOverride.transform === 'string' ? styleOverride.transform : undefined;
 
   const cycleDuration = props.holdDuration + props.transitionDuration;
   const entranceDuration = 20;
@@ -55,8 +56,12 @@ export const TextCycle: React.FC<TextCycleProps> = (initProps) => {
     'ease-out',
   );
   const entranceTransform = getEntranceTransform(actualEntranceAnimation, entranceProgress);
-  const dragStyle = usePatchedDragStyle(id, entranceTransform, props.style?.transform);
+  const dragStyle = usePatchedDragStyle(id, entranceTransform, props.style?.transform, overrideTransform);
   const typographyStyle = resolveTypography(patchedVariant, styleConfig, theme, preset);
+  const textOverrideStyle: React.CSSProperties = {
+    ...styleOverride,
+  };
+  delete textOverrideStyle.transform;
 
   // The longest word by character count — used as an invisible spacer to
   // hold the container width stable across all word changes.
@@ -75,11 +80,10 @@ export const TextCycle: React.FC<TextCycleProps> = (initProps) => {
           opacity: entranceProgress,
           display: 'inline-block',
           ...props.style,
-          ...styleOverride,
           ...dragStyle,
         }}
       >
-        <Text text="" variant={patchedVariant} />
+        <Text text="" variant={patchedVariant} style={textOverrideStyle} />
       </span>
     );
   }
@@ -112,7 +116,6 @@ export const TextCycle: React.FC<TextCycleProps> = (initProps) => {
     position: 'relative',
     display: 'inline-block',
     ...props.style,
-    ...styleOverride,
     ...dragStyle,
   };
 
@@ -139,7 +142,7 @@ export const TextCycle: React.FC<TextCycleProps> = (initProps) => {
 
   if (props.textCycleTransition === 'fadeSwap') {
     return (
-      <span id='textcycle' className={props.className} style={containerStyle}>
+      <span id={id} className={props.className} style={containerStyle}>
         {/* Spacer holds the width — never visible */}
         <Text text={longestWord} variant={patchedVariant} style={spacerStyle} />
 
@@ -147,7 +150,11 @@ export const TextCycle: React.FC<TextCycleProps> = (initProps) => {
         <Text
           text={currentWord}
           variant={patchedVariant}
-          style={{ ...absoluteLayerStyle, opacity: isTransitioning ? 1 - transitionProgress : 1 }}
+          style={{
+            ...absoluteLayerStyle,
+            ...textOverrideStyle,
+            opacity: isTransitioning ? 1 - transitionProgress : 1,
+          }}
         />
 
         {/* Next word fades in during transition */}
@@ -155,7 +162,11 @@ export const TextCycle: React.FC<TextCycleProps> = (initProps) => {
           <Text
             text={nextWord}
             variant={patchedVariant}
-            style={{ ...absoluteLayerStyle, opacity: transitionProgress }}
+            style={{
+              ...absoluteLayerStyle,
+              ...textOverrideStyle,
+              opacity: transitionProgress,
+            }}
           />
         )}
       </span>
@@ -164,7 +175,7 @@ export const TextCycle: React.FC<TextCycleProps> = (initProps) => {
 
   if (props.textCycleTransition === 'slideUp') {
     return (
-      <span className={props.className} style={{ ...containerStyle, overflow: 'hidden' }}>
+      <span id={id} className={props.className} style={{ ...containerStyle, overflow: 'hidden' }}>
         <Text text={longestWord} variant={patchedVariant} style={spacerStyle} />
 
         <Text
@@ -172,7 +183,11 @@ export const TextCycle: React.FC<TextCycleProps> = (initProps) => {
           variant={patchedVariant}
           style={{
             ...absoluteLayerStyle,
-            transform: isTransitioning ? `translateY(-${transitionProgress * 100}%)` : 'translateY(0)',
+            ...textOverrideStyle,
+            transform: composeTransforms(
+              typeof textOverrideStyle.transform === 'string' ? textOverrideStyle.transform : undefined,
+              isTransitioning ? `translateY(-${transitionProgress * 100}%)` : 'translateY(0)',
+            ),
             opacity: isTransitioning ? 1 - transitionProgress : 1,
           }}
         />
@@ -183,7 +198,11 @@ export const TextCycle: React.FC<TextCycleProps> = (initProps) => {
             variant={patchedVariant}
             style={{
               ...absoluteLayerStyle,
-              transform: `translateY(${(1 - transitionProgress) * 100}%)`,
+              ...textOverrideStyle,
+              transform: composeTransforms(
+                typeof textOverrideStyle.transform === 'string' ? textOverrideStyle.transform : undefined,
+                `translateY(${(1 - transitionProgress) * 100}%)`,
+              ),
               opacity: transitionProgress,
             }}
           />
@@ -194,7 +213,7 @@ export const TextCycle: React.FC<TextCycleProps> = (initProps) => {
 
   // flipY
   return (
-    <span className={props.className} style={containerStyle} id={initProps.id}>
+    <span className={props.className} style={containerStyle} id={id}>
       <Text text={longestWord} variant={patchedVariant} style={spacerStyle} />
 
       <Text
@@ -202,7 +221,11 @@ export const TextCycle: React.FC<TextCycleProps> = (initProps) => {
         variant={patchedVariant}
         style={{
           ...absoluteLayerStyle,
-          transform: isTransitioning ? `rotateX(${transitionProgress * 90}deg)` : 'rotateX(0deg)',
+          ...textOverrideStyle,
+          transform: composeTransforms(
+            typeof textOverrideStyle.transform === 'string' ? textOverrideStyle.transform : undefined,
+            isTransitioning ? `rotateX(${transitionProgress * 90}deg)` : 'rotateX(0deg)',
+          ),
           opacity: isTransitioning ? 1 - transitionProgress : 1,
         }}
       />
@@ -213,7 +236,11 @@ export const TextCycle: React.FC<TextCycleProps> = (initProps) => {
           variant={patchedVariant}
           style={{
             ...absoluteLayerStyle,
-            transform: `rotateX(${(1 - transitionProgress) * -90}deg)`,
+            ...textOverrideStyle,
+            transform: composeTransforms(
+              typeof textOverrideStyle.transform === 'string' ? textOverrideStyle.transform : undefined,
+              `rotateX(${(1 - transitionProgress) * -90}deg)`,
+            ),
             opacity: transitionProgress,
           }}
         />
