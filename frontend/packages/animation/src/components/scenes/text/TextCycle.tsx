@@ -282,6 +282,6 @@ export const TextCycleDescriptor: ComponentRegistration = {
       }
     }
   ],
-  description: 'rotating text strings or words. Use for taglines, feature lists, multi highlights',
+  description: 'Rotates through words or text strings. Works for both single words and longer phrases. Use for taglines, feature lists, or highlighting multiple key points.',
   celExpression: '(props.textcycle.holdDuration + props.textcycle.transitionDuration) * size(props.textcycle.texts)',
 };

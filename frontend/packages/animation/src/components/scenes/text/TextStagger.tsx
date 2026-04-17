@@ -167,6 +167,6 @@ export const TextStaggerDescriptor: ComponentRegistration = {
             type: 'string',     
         }
     ],
-    description: 'Reveals text word-by-word with staggered animation delays. Use for multi-word headlines or body text',
+    description: 'Reveals a word or full text phrase word-by-word. Works for both single word and multi-word headlines or body text.',
     celExpression: `(segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * props.textstagger.staggerDelay + props.textstagger.duration`
 };

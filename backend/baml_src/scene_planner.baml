@@ -52,6 +52,7 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     ## SCENE DESIGN PRINCIPLES
 
     - One idea per scene. Never combine two components in one scene.
+    - All scenes should feel connected, forming a continuous flow that maintains visual rhythm and tone.
     - NEVER duplicate the same text across scenes
     - Don't stack similar scenes back to back — vary the visual rhythm.
     - Always finish with a LogoAsset scene.
@@ -62,11 +63,12 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     - Develop an idea within a section
     - Add pacing between two sectional scenes
     - Fill out scene count when a section needs more depth
+    - TextStagger can be used back-to-back to maintain flow—for example, showing features as a single word per scene,
+      like “Autonomous”, “Precise”, “Reliable” in consecutive filler scenes.
 
     ## PLANNING RULES
 
     ### Structure
-    - Every scene has a single clear purpose. One idea per scene.
     - Each scene must stand alone. No siblings.
     - **Define the props of scenes in SceneElement props in JSON format**
 
