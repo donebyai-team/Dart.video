@@ -278,6 +278,7 @@ export const TextHighlightSchemaFields = [
         "name": "highlightColor",
         "type": "string",
         "subtype": "color",
+        "default": TextHighlightDefaults.highlightColor
     }
 ]
 
