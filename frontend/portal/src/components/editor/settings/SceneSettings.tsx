@@ -6,6 +6,7 @@ import { Pause, Play, Plus } from 'lucide-react'
 import { MultiSceneIconPicker, SingleSceneIconPicker } from './SceneIconPicker'
 import { MultiSceneMediaPicker, SingleSceneMediaPicker } from './SceneMediaPicker'
 import SceneSortablePillList from './SceneSortablePillList'
+import { DualColorPicker } from '../animation/toolbars/stylers/DualColorPicker'
 import {
   compareSceneFieldsByPriority,
   getEditableSceneFields,
@@ -137,6 +138,17 @@ export default function SceneSettings({
                 value={String(value)}
                 onChange={e => onValuePatch(patchEntryId ?? elementId, prop, e.target.value)}
                 className="h-9 px-3 rounded-md border border-border bg-background text-sm focus:outline-none focus:ring-1 focus:ring-ring/50"
+              />
+            </label>
+          ) : definition.kind === 'color' ? (
+            <label key={prop} className="flex flex-col gap-2">
+              <span className="text-sm font-medium">{toSceneFieldLabel(prop)}</span>
+              <DualColorPicker
+                primaryColor={String(value)}
+                onPrimaryColor={next => onValuePatch(patchEntryId ?? elementId, prop, next)}
+                primaryLabel="Text color"
+                triggerVariant="input"
+                triggerStyle="active-color"
               />
             </label>
           ) : definition.kind === 'number' ? (

@@ -1,10 +1,12 @@
 // ─── Dual Color Picker ──────────────────────────────────────────────────────
 // Single button that opens a popover with tabs for two color values.
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { HexColorPicker } from "react-colorful"
 
 import BrandColors from "@/components/editor/settings/BrandColors"
+
+const FALLBACK_COLOR = "#000000"
 
 export function DualColorPicker({
   primaryColor,
@@ -13,6 +15,8 @@ export function DualColorPicker({
   onSecondaryColor,
   primaryLabel = "Primary",
   secondaryLabel = "Secondary",
+  triggerStyle = "gradient",
+  triggerVariant = "swatch",
 }: {
   primaryColor: string
   secondaryColor?: string
@@ -20,30 +24,62 @@ export function DualColorPicker({
   onSecondaryColor?: (v: string) => void
   primaryLabel?: string
   secondaryLabel?: string
+  triggerStyle?: "gradient" | "active-color"
+  triggerVariant?: "swatch" | "input"
 }) {
   const [open, setOpen] = useState(false)
   const [tab, setTab] = useState<'primary' | 'secondary'>('primary')
+  const containerRef = useRef<HTMLDivElement>(null)
 
   const hasSecondary = !!secondaryColor && !!onSecondaryColor
   const activeTab = hasSecondary ? tab : 'primary'
-  const activeColor = activeTab === 'primary' ? primaryColor : secondaryColor
+  const activeColorValue = activeTab === 'primary' ? primaryColor : secondaryColor
+  const activeColor = activeColorValue || FALLBACK_COLOR
   const onChangeActive = activeTab === 'primary' ? onPrimaryColor : onSecondaryColor
 
-  if (!activeColor || !onChangeActive) {
+  if (!onChangeActive) {
     return null
   }
 
+  useEffect(() => {
+    if (!open) {
+      return
+    }
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!containerRef.current?.contains(event.target as Node)) {
+        setOpen(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handlePointerDown)
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown)
+    }
+  }, [open])
+
   return (
-    <div className="relative flex items-center">
-      {/* Color button – rainbow gradient rectangle */}
+    <div ref={containerRef} className="relative flex items-center">
       <button
         type="button"
         title="Colors"
         onClick={() => setOpen(!open)}
-        className="w-8 h-7 rounded-md border border-border shadow-sm cursor-pointer"
-        style={{
-          background: 'linear-gradient(135deg, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00)',
-        }}
+        className={
+          triggerVariant === "input"
+            ? "flex h-7 w-9 items-center justify-center rounded-md border border-input bg-background shadow-sm"
+            : "w-8 h-7 rounded-md border border-border shadow-sm cursor-pointer"
+        }
+        style={
+          triggerVariant === "swatch" || triggerVariant === "input"
+            ? {
+                background:
+                  triggerStyle === "active-color"
+                    ? activeColorValue || FALLBACK_COLOR
+                    : "linear-gradient(135deg, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00)",
+              }
+            : undefined
+        }
       />
 
       {open && (
@@ -95,16 +131,6 @@ export function DualColorPicker({
             onChange={(e) => onChangeActive(e.target.value)}
             className="w-full text-xs px-2 py-1 border border-border rounded bg-muted"
           />
-
-          <div className="flex justify-end">
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              className="text-xs font-medium"
-            >
-              Done
-            </button>
-          </div>
         </div>
       )}
     </div>

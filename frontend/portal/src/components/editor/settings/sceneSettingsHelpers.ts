@@ -3,6 +3,7 @@ import { resolveComponentFromId } from '@coasterai/renderer'
 
 
 export type SceneFieldKind = 'string' | 'number' | 'boolean' | 'string[]' | 'enum'
+  | 'color'
   | 'icon'
   | 'icon[]'
   | 'image'
@@ -81,6 +82,7 @@ export function inferSceneFieldDefinition(prop: string, value: unknown): SceneFi
 
   const isVideoField = lowerProp === 'video' || lowerProp === 'videos'
   const isImageField = lowerProp === 'image' || lowerProp === 'images'
+  const isColorField = lowerProp.includes('color')
 
 
   if (isVideoField && typeof value === 'string') {
@@ -102,6 +104,10 @@ export function inferSceneFieldDefinition(prop: string, value: unknown): SceneFi
   }
   if (lowerProp.includes('icon') && Array.isArray(value)) {
     return { kind: 'icon[]' }
+  }
+
+  if (isColorField && typeof value === 'string') {
+    return { kind: 'color' }
   }
 
   if (typeof value === 'string') return { kind: 'string' }
@@ -128,24 +134,26 @@ function getSceneFieldKindPriority(kind: SceneFieldKind): number {
       return 0
     case 'number':
       return 1
+    case 'color':
+      return 2
     case 'icon':
-      return 2
-    case 'icon[]':
-      return 2
-    case 'image':
       return 3
-    case 'image[]':
+    case 'icon[]':
+      return 3
+    case 'image':
       return 4
-    case 'video':
+    case 'image[]':
       return 5
+    case 'video':
+      return 6
     case 'video[]':
-      return 6
+      return 7
     case 'enum':
-      return 7
+      return 8
     case 'boolean':
-      return 6
-    case 'string[]':
       return 7
+    case 'string[]':
+      return 8
     default:
       return 10
   }
@@ -157,6 +165,8 @@ export function getSceneFieldGroupLabel(kind: SceneFieldKind): string {
       return 'Text'
     case 'number':
       return 'Numbers'
+    case 'color':
+      return 'Colors'
     case 'icon':
       return 'Icons'
     case 'icon[]':

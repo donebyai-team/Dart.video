@@ -45,6 +45,7 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
+import { DualColorPicker } from "@/components/editor/animation/toolbars/stylers/DualColorPicker"
 
 const BrandPage = () => {
     const { portalClient } = useClientsContext()
@@ -483,28 +484,22 @@ const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onLogoUpload,
                                     className="relative group"
                                 >
                                     <div className="flex items-center gap-2 p-2 rounded-md border bg-muted/50">
-                                        <div
-                                            className="w-10 h-10 rounded border cursor-pointer flex-shrink-0"
-                                            style={{ backgroundColor: color.colorHexCode }}
-                                            onClick={() => document.getElementById(`color-${index}`)?.click()}
-                                        />
-                                        <div className="flex flex-col items-center gap-1">
-                                            <input
-                                                id={`color-${index}`}
-                                                type="color"
-                                                value={color.colorHexCode}
-                                                onChange={(e) => updateColor(index, e.target.value)}
-                                                className="sr-only"
+                                        <div className="flex items-center justify-center w-10 h-10 rounded border bg-background flex-shrink-0">
+                                            <div
+                                                className="w-8 h-7 rounded-md border border-border"
+                                                style={{ backgroundColor: color.colorHexCode }}
                                             />
+                                        </div>
+                                        <div className="flex flex-col items-center gap-1">
                                             <span className="text-xs text-muted-foreground">
                                                 {BrandAssetPriority[color.priority]}
                                             </span>
                                         </div>
-                                        <Input
-                                            value={color.colorHexCode}
-                                            onChange={(e) => updateColor(index, e.target.value)}
-                                            className="h-7 w-24 text-xs font-mono"
-                                            placeholder="#000000"
+                                        <DualColorPicker
+                                            primaryColor={color.colorHexCode}
+                                            onPrimaryColor={(value) => updateColor(index, value)}
+                                            primaryLabel="Text color"
+                                            triggerVariant="input"
                                         />
                                         <Button
                                             size="icon"
