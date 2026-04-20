@@ -100,6 +100,11 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
       (e.g. no Hook, no CTA). Ask whether to add them or proceed as is.
     - **Script is too short** to generate 15-20 scenes — ask whether to expand it or add new content.
     - **Script is provided** — confirm whether to use it exactly as written.
+      If yes:
+      - Preserve the original wording and meaning.
+      - You may reorder lines or ideas if it improves pacing and rhythm.
+      - You may still split it into meaningful scenes/fillers.
+      - You can make punctuation or formatting changes for rhythm and clarity.
     - A scene implies brand presence but no brand name is provided — ask user to add brand identity.
     - Metrics are mentioned but unclear if real or placeholder.
     - An attachment is provided but usage is unclear — use *ATTACHMENT_CLARIFICATION*.
