@@ -501,7 +501,7 @@
               "type": "string"
             }
           ],
-          "celExpression": "((40 + max(0, segmentCount(props.textleadstagger.text, \"word\") - 2) * 5 + max(0, segmentCount(props.textleadstagger.text, \"word\") - 1) * 4) * 100) / max(25, props.textleadstagger.speed)",
+          "celExpression": "((50 + max(0, segmentCount(props.textleadstagger.text, \"word\") - 2) * 5 + max(0, segmentCount(props.textleadstagger.text, \"word\") - 1) * 4) * 100) / max(25, props.textleadstagger.speed)",
           "description": "First word starts enlarged and then settles down. The remaining words enter in a stagger, making it ideal for emphasis moments (MAX 3–4 words).\nExamples:\ntext=\"Isn't getting clicks\"\ntext=\"You're missing out\"\n\nYou can combine it with other **fillers scenes** for showcasing a **\"Problem\" or \"Solution\" section** of a video or use it as a standalone filler with other scenes.\n\nExample problem: \"If your Airbnb listing isn't getting clicks\"\n\n- Scene 1: If (TextStagger)\n- Scene 2: your (TextStagger)\n- Scene 3: Airbnb {listing} (TextHighlight)\n- Scene 4: isn't getting clicks (TextLeadStagger)"
         },
         {
