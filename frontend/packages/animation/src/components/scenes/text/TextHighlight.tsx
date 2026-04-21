@@ -2,9 +2,11 @@ import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
 import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
 import { interpolateWithEasing } from '../../../styles';
+import { useStyleContext } from '../../../styles/StyleContext';
+import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme';
 import type { TypographyVariant } from '../../../tokens';
-import { Text } from '../../../core/assets/Text';
+import { resolveTypography } from '../../../tokens/resolveTypography';
 import {
     getEntranceTransform,
     HighlightedTextAnimation,
@@ -32,6 +34,8 @@ export type TextHighlightProps = Partial<typeof TextHighlightDefaults>;
 export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
     const frame = useCurrentFrame();
     const theme = useTheme();
+    const styleConfig = useStyleContext();
+    const preset = useAspectPreset();
 
     const defaultProps = { ...TextHighlightDefaults, ...initProps };
     const id = defaultProps.id;
@@ -206,6 +210,11 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
         }
     };
 
+    const splitHighlightSegment = (text: string): string[] => {
+        const parts = text.match(/\S+\s*|\s+/g);
+        return parts && parts.length > 0 ? parts : [text];
+    };
+
     return (
         <span
             id={props.id}
@@ -218,17 +227,36 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
                 ...dragStyle,
             }}
         >
-            {segments.map((segment, i) => (
-                <Text
-                    key={i}
-                    text={segment.text}
-                    variant={actualVariant}
-                    style={{
-                        whiteSpace: 'pre-wrap',
-                        ...(segment.highlight ? getHighlightStyles(segment.index) : {}),
-                    }}
-                />
-            ))}
+            <span
+                style={{
+                    ...resolveTypography(actualVariant, styleConfig, theme, preset),
+                    whiteSpace: 'pre-wrap',
+                }}
+            >
+                {segments.map((segment, i) => {
+                    if (!segment.highlight) {
+                        return <React.Fragment key={i}>{segment.text}</React.Fragment>;
+                    }
+
+                    return splitHighlightSegment(segment.text).map((part, partIndex) => {
+                        if (!part.trim()) {
+                            return <React.Fragment key={`${i}-${partIndex}`}>{part}</React.Fragment>;
+                        }
+
+                        return (
+                            <span
+                                key={`${i}-${partIndex}`}
+                                style={{
+                                    whiteSpace: 'pre-wrap',
+                                    ...getHighlightStyles(segment.index),
+                                }}
+                            >
+                                {part}
+                            </span>
+                        );
+                    });
+                })}
+            </span>
         </span>
     );
 };
