@@ -384,7 +384,7 @@ export const ProblemHeadlineSchemaFields = [
   {
     "name": "text",
     "type": "string",
-    "map": "props.problemheadline.text"
+    "map": "props.text"
   },
   {
     "name": "variant",
