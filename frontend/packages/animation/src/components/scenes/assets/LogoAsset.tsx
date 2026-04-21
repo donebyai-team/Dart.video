@@ -202,16 +202,16 @@ export const LogoAssetSchemaFields = [
         "dataType": "media",
         "map": "props.src"
     },
-    {
-        "name": "width",
-        "type": "number",
-        "map": "props.width"
-    },
-    {
-        "name": "height",
-        "type": "number",
-        "map": "props.height"
-    },
+    // {
+    //     "name": "width",
+    //     "type": "number",
+    //     "map": "props.width"
+    // },
+    // {
+    //     "name": "height",
+    //     "type": "number",
+    //     "map": "props.height"
+    // },
     {
         "name": "logoAnimation",
         "type": "string",

@@ -37,7 +37,7 @@ export const SCENE_COMPONENTS: ComponentRegistration[] = [
   TextWithVideoSceneDescriptor,
   ImagePeelDescriptor,
   ProblemCollageDescriptor,
-  LogoAssetDescriptor,
+  // LogoAssetDescriptor,
   LogoShowcaseDescriptor,
   LogoWithBrandNameDescriptor,
   LogoWithCTADescriptor,

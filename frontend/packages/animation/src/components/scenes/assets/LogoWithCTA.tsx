@@ -13,9 +13,8 @@ import type { ComponentRegistration } from '../../../registry/registry';
 const BRAND_TEXT_DEFAULTS = {
     ...TextStaggerDefaults,
     id: 'textstagger-brandname',
-    text: 'Brand',
+    text: 'Quarterzip',
     variant: 'display' as const,
-    splitBy: 'char' as const,
     staggerDelay: 2,
     duration: 10,
     entranceAnimation: 'fadeIn' as const,
@@ -24,27 +23,26 @@ const BRAND_TEXT_DEFAULTS = {
 const TAGLINE_TEXT_DEFAULTS = {
     ...TextStaggerDefaults,
     id: 'textstagger-tagline',
-    text: 'Your tagline here',
-    variant: 'heading' as const,
-    splitBy: 'word' as const,
+    text: 'Go live in minutes',
+    variant: 'display' as const,
     staggerDelay: 5,
     duration: 16,
-    entranceAnimation: 'slideUp' as const,
+    entranceAnimation: 'fadeIn' as const,
 };
 
 const LOCKUP_GAP = 20;
 const TAGLINE_GAP = 20;
 const TAGLINE_LIFT = 24;
-const LOCKUP_REVEAL_DURATION = 24;
+const LOGO_HOLD_FRAMES = 8;
+const LOCKUP_REVEAL_DURATION = 20;
+const FINAL_TOP_ROW_SCALE = 0.78;
 
-function getTextDuration(text: string, staggerDelay: number, duration: number, splitBy: 'char' | 'word' | 'line') {
-    const units = splitBy === 'char'
-        ? text.length
-        : splitBy === 'line'
-            ? text.split('\n').length
-            : text.split(' ').filter(Boolean).length;
+function getWordCount(text: string) {
+    return text.split(' ').filter(Boolean).length;
+}
 
-    return Math.max(0, units - 1) * staggerDelay + duration;
+function getWordRevealDuration(text: string, staggerDelay: number, duration: number) {
+    return Math.max(0, getWordCount(text) - 1) * staggerDelay + duration;
 }
 
 export function LogoWithCTA(): React.ReactElement {
@@ -53,8 +51,8 @@ export function LogoWithCTA(): React.ReactElement {
     const preset = useAspectPreset();
     const theme = useTheme();
     const logoProps = usePatchedProps('logoasset', LogoAssetDefaults);
-    const brandProps = usePatchedProps('brandname', BRAND_TEXT_DEFAULTS);
-    const taglineProps = usePatchedProps('tagline', TAGLINE_TEXT_DEFAULTS);
+    const brandProps = usePatchedProps('textstagger-brandname', BRAND_TEXT_DEFAULTS);
+    const taglineProps = usePatchedProps('textstagger-tagline', TAGLINE_TEXT_DEFAULTS);
 
     const resolvedLogo = logoProps.src || theme.logoIcon?.url || theme.logo?.url;
 
@@ -66,48 +64,38 @@ export function LogoWithCTA(): React.ReactElement {
         ?? Math.round(brandFontSize * brandLineHeight * 1.02);
 
     const estimatedBrandWidth = Math.max(brandFontSize * 2.8, brandProps.text.length * brandFontSize * 0.62);
-    const brandRevealDuration = getTextDuration(
+    const brandRevealDuration = getWordRevealDuration(
         brandProps.text,
         brandProps.staggerDelay,
         brandProps.duration,
-        brandProps.splitBy,
     );
     const brandRevealFrames = Math.max(LOCKUP_REVEAL_DURATION, brandRevealDuration);
-    const taglineStart = brandRevealFrames + 6;
-    const taglineRevealDuration = getTextDuration(
+    const taglineStart = LOGO_HOLD_FRAMES + brandRevealFrames + 6;
+    const taglineRevealDuration = getWordRevealDuration(
         taglineProps.text,
         taglineProps.staggerDelay,
         taglineProps.duration,
-        taglineProps.splitBy,
-    );
-
-    const brandRevealProgress = interpolateWithEasing(
-        frame,
-        [0, brandRevealFrames],
-        [0, 1],
-        'ease-out',
-    );
-
-    const rowGap = interpolateWithEasing(
-        frame,
-        [0, brandRevealFrames],
-        [0, LOCKUP_GAP],
-        'ease-out',
     );
 
     const brandMaxWidth = interpolateWithEasing(
         frame,
-        [0, brandRevealFrames],
+        [LOGO_HOLD_FRAMES, LOGO_HOLD_FRAMES + brandRevealFrames],
         [0, estimatedBrandWidth],
         'ease-out',
     );
 
-    const logoOffsetX = interpolateWithEasing(
+    const logoStartOffsetX = (estimatedBrandWidth + LOCKUP_GAP) / 2;
+    const logoTranslateX = interpolateWithEasing(
         frame,
-        [0, brandRevealFrames],
-        [estimatedBrandWidth * 0.18, 0],
+        [LOGO_HOLD_FRAMES, LOGO_HOLD_FRAMES + brandRevealFrames],
+        [logoStartOffsetX, 0],
         'ease-out',
     );
+    const topRowHeight = Math.max(
+        resolvedLogoSize,
+        Math.round(brandFontSize * brandLineHeight),
+    );
+    const topRowWidth = resolvedLogoSize + LOCKUP_GAP + estimatedBrandWidth;
 
     const taglineRevealProgress = interpolateWithEasing(
         frame,
@@ -120,6 +108,12 @@ export function LogoWithCTA(): React.ReactElement {
         taglineRevealProgress,
         [0, 1],
         [0, -TAGLINE_LIFT],
+        'ease-out',
+    );
+    const topRowScale = interpolateWithEasing(
+        taglineRevealProgress,
+        [0, 1],
+        [1, FINAL_TOP_ROW_SCALE],
         'ease-out',
     );
 
@@ -151,23 +145,24 @@ export function LogoWithCTA(): React.ReactElement {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: '100%',
+                width: 'fit-content',
             }}
         >
             <div
                 style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transform: `translateY(${topRowTranslateY}px)`,
+                    position: 'relative',
+                    width: topRowWidth,
+                    height: topRowHeight,
+                    transform: `translateY(${topRowTranslateY}px) scale(${topRowScale})`,
+                    transformOrigin: 'center center',
                 }}
             >
                 <div
                     style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: rowGap,
+                        position: 'absolute',
+                        left: 0,
+                        top: '50%',
+                        transform: `translate(${logoTranslateX}px, -50%)`,
                     }}
                 >
                     <LogoAsset
@@ -177,36 +172,34 @@ export function LogoWithCTA(): React.ReactElement {
                         height={logoProps.height ?? resolvedLogoSize}
                         logoAnimation={logoProps.logoAnimation}
                         className={logoProps.className}
+                        style={logoProps.style}
+                    />
+                </div>
+
+                <div
+                    style={{
+                        position: 'absolute',
+                        left: resolvedLogoSize + LOCKUP_GAP,
+                        top: '50%',
+                        width: brandMaxWidth,
+                        transform: 'translateY(-50%)',
+                    }}
+                >
+                    <TextStagger
+                        id="textstagger-brandname"
+                        text={brandProps.text}
+                        startAt={LOGO_HOLD_FRAMES + 4}
+                        splitBy="word"
+                        staggerDelay={brandProps.staggerDelay}
+                        duration={brandProps.duration}
+                        entranceAnimation={brandProps.entranceAnimation}
+                        variant={brandProps.variant}
+                        className={brandProps.className}
                         style={{
-                            ...(logoProps.style ?? {}),
-                            transform: `translateX(${logoOffsetX}px)`,
+                            ...(brandProps.style ?? {}),
+                            textAlign: 'left',
                         }}
                     />
-
-                    <div
-                        style={{
-                            maxWidth: brandMaxWidth,
-                            overflow: 'hidden',
-                            whiteSpace: 'nowrap',
-                        }}
-                    >
-                        <TextStagger
-                            id="textstagger-brandname"
-                            text={brandProps.text}
-                            startAt={4}
-                            splitBy="char"
-                            staggerDelay={brandProps.staggerDelay}
-                            duration={brandProps.duration}
-                            entranceAnimation={brandProps.entranceAnimation}
-                            variant={brandProps.variant}
-                            className={brandProps.className}
-                            style={{
-                                ...(brandProps.style ?? {}),
-                                whiteSpace: 'nowrap',
-                                textAlign: 'left',
-                            }}
-                        />
-                    </div>
                 </div>
             </div>
 
@@ -214,9 +207,8 @@ export function LogoWithCTA(): React.ReactElement {
                 style={{
                     display: 'flex',
                     justifyContent: 'center',
-                    width: '100%',
+                    width: 'fit-content',
                     maxWidth: preset.width * 0.82,
-                    overflow: 'hidden',
                     maxHeight: taglineMaxHeight,
                     marginTop: taglineMarginTop,
                     transform: `translateY(${taglineTranslateY}px)`,
@@ -245,7 +237,22 @@ export const LogoWithCTASchemaFields = [
     {
         type: 'component',
         name: 'logoasset',
-        fields: LogoAssetSchemaFields,
+        fields: [
+            {
+                "name": "src",
+                "type": "string",
+                "dataType": "media",
+                "default": "",
+            },
+            {
+                "name": "width",
+                "type": "number",
+            },
+            {
+                "name": "height",
+                "type": "number",
+            }
+        ],
     },
     {
         type: 'component',
@@ -254,35 +261,19 @@ export const LogoWithCTASchemaFields = [
             {
                 name: 'text',
                 type: 'string',
-                map: 'props.text',
+                map: 'props.brandName',
             },
             {
-                name: 'variant',
-                type: 'string',
-                subtype: 'enum',
-                default: BRAND_TEXT_DEFAULTS.variant,
+                "name": "variant",
+                "type": "string",
+                "subtype": "enum",
+                "default": BRAND_TEXT_DEFAULTS.variant
             },
             {
-                name: 'staggerDelay',
-                type: 'number',
-                default: BRAND_TEXT_DEFAULTS.staggerDelay,
-            },
-            {
-                name: 'entranceAnimation',
-                type: 'string',
-                subtype: 'enum',
-                default: BRAND_TEXT_DEFAULTS.entranceAnimation,
-            },
-            {
-                name: 'duration',
-                type: 'number',
-                default: BRAND_TEXT_DEFAULTS.duration,
-            },
-            {
-                name: 'splitBy',
-                type: 'string',
-                subtype: 'enum',
-                default: BRAND_TEXT_DEFAULTS.splitBy,
+                "name": "entranceAnimation",
+                "type": "string",
+                "subtype": "enum",
+                "default": BRAND_TEXT_DEFAULTS.entranceAnimation
             },
         ],
     },
@@ -293,35 +284,19 @@ export const LogoWithCTASchemaFields = [
             {
                 name: 'text',
                 type: 'string',
-                map: 'props.text',
+                map: 'props.ctaText',
             },
             {
-                name: 'variant',
-                type: 'string',
-                subtype: 'enum',
-                default: TAGLINE_TEXT_DEFAULTS.variant,
+                "name": "variant",
+                "type": "string",
+                "subtype": "enum",
+                "default": TAGLINE_TEXT_DEFAULTS.variant
             },
             {
-                name: 'staggerDelay',
-                type: 'number',
-                default: TAGLINE_TEXT_DEFAULTS.staggerDelay,
-            },
-            {
-                name: 'entranceAnimation',
-                type: 'string',
-                subtype: 'enum',
-                default: TAGLINE_TEXT_DEFAULTS.entranceAnimation,
-            },
-            {
-                name: 'duration',
-                type: 'number',
-                default: TAGLINE_TEXT_DEFAULTS.duration,
-            },
-            {
-                name: 'splitBy',
-                type: 'string',
-                subtype: 'enum',
-                default: TAGLINE_TEXT_DEFAULTS.splitBy,
+                "name": "entranceAnimation",
+                "type": "string",
+                "subtype": "enum",
+                "default": TAGLINE_TEXT_DEFAULTS.entranceAnimation
             },
         ],
     },
@@ -330,7 +305,7 @@ export const LogoWithCTASchemaFields = [
 export const LogoWithCTADescriptor: ComponentRegistration = {
     name: 'LogoWithCTA',
     type: 'scene',
-    tags: ['CTA', 'Brand'],
+    tags: ['CTA'],
     schema: LogoWithCTASchemaFields,
     llmSchema: [
         {
@@ -338,10 +313,10 @@ export const LogoWithCTADescriptor: ComponentRegistration = {
             type: 'string',
         },
         {
-            name: 'tagline',
+            name: 'ctaText',
             type: 'string',
         },
     ],
-    description: 'Logo icon reveals first, brand name joins beside it, then a larger tagline appears underneath.',
-    celExpression: 'max(24, max(0, segmentCount(props["textstagger-brandname"].text, "char") - 1) * props["textstagger-brandname"].staggerDelay + props["textstagger-brandname"].duration) + 6 + max(0, segmentCount(props["textstagger-tagline"].text, "word") - 1) * props["textstagger-tagline"].staggerDelay + props["textstagger-tagline"].duration',
+    description: 'Logo icon and brand name reveal with a CTA text below that. Use as the final scene.',
+    celExpression: '65',
 };
