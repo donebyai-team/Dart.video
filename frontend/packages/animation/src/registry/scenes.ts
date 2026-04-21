@@ -14,6 +14,7 @@ import { ProblemCollageDescriptor } from "../components/scenes/assets/ProblemCol
 import { LogoAssetDescriptor } from "../components/scenes/assets/LogoAsset";
 import { LogoShowcaseDescriptor } from "../components/scenes/assets/LogoShowcase";
 import { LogoWithBrandNameDescriptor } from "../components/scenes/assets/LogoWithBrandName";
+import { LogoWithCTADescriptor } from "../components/scenes/assets/LogoWithCTA";
 import { IconShowcaseDescriptor } from "../components/scenes/assets/IconShowcase";
 import { TextWithImageSceneDescriptor, TextWithVideoSceneDescriptor } from "../components/scenes";
 
@@ -39,5 +40,6 @@ export const SCENE_COMPONENTS: ComponentRegistration[] = [
   LogoAssetDescriptor,
   LogoShowcaseDescriptor,
   LogoWithBrandNameDescriptor,
+  LogoWithCTADescriptor,
   IconShowcaseDescriptor,
 ];

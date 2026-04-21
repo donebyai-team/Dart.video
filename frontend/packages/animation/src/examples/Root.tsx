@@ -6,7 +6,7 @@ import { SpeedFactorProvider } from "../duration";
 import { ASPECT_PRESETS, resolveStyle, AspectPresetProvider, StyleContextProvider } from "../styles";
 import { BrandTheme, darkTheme, ThemeProvider } from "../theme";
 import { AnimatedVideo } from "../components/scenes/assets/AnimatedVideo";
-import { TextWithImageScene, ImagePeel, LogoAsset, LogoShowcase, ProblemCollage, TextLeadStagger, ProblemHeadline } from "../components/scenes";
+import { TextWithImageScene, ImagePeel, LogoAsset, LogoShowcase, ProblemCollage, TextLeadStagger, ProblemHeadline, LogoWithCTA } from "../components/scenes";
 
 
 const BRAND: BrandTheme = {
@@ -244,7 +244,7 @@ const LogoScene: React.FC = () => (
         <AbsoluteFill style={{ backgroundColor: 'white' }}>
             <SafeArea>
                 <AbsoluteCenter axis="both">
-                    <LogoAsset id="logo-0" src="https://storage.googleapis.com/coasterai-public/assets/66a225f2-5ca6-433a-9d27-2aca804e3a1d/1774240200-inline.svg" />
+                    <LogoWithCTA />
                     {/* <LogoWithBrandName
                         style={{ color: "#000" }}
                         variant="heading"
