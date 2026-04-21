@@ -82,7 +82,7 @@ export function AnimationEditLayer({
 
   function isResizableMediaElement(id: string): boolean {
     const componentName = resolveComponentFromId(id)?.name
-    return componentName === 'ImageAsset' || componentName === 'VideoAsset'
+    return componentName === 'ImageAsset' || componentName === 'LogoAsset' || componentName === 'VideoAsset'
   }
 
   // ── Track canvas position ─────────────────────────────────────────────────
