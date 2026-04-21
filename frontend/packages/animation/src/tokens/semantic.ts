@@ -17,8 +17,8 @@ export const TYPOGRAPHY_VARIANTS: Record<TypographyVariant, TypographyVariantCon
   subheading: { fontSize: 'lg',  fontWeight: 'medium',    lineHeight: 1.4 },
   heading:    { fontSize: '2xl', fontWeight: 'bold',      lineHeight: 1.1 },
   headingLg:  { fontSize: '3xl', fontWeight: 'bold',      lineHeight: 1.1 },
-  display:    { fontSize: '4xl', fontWeight: 'extrabold', lineHeight: 1.0 },
-  displayLg:  { fontSize: '5xl', fontWeight: 'extrabold', lineHeight: 1.0 },
-  displayXl:  { fontSize: '6xl', fontWeight: 'extrabold', lineHeight: 1.0 },
-  display2xl: { fontSize: '7xl', fontWeight: 'extrabold', lineHeight: 1.0 },
+  display:    { fontSize: '4xl', fontWeight: 'extrabold', lineHeight: 1.02 },
+  displayLg:  { fontSize: '5xl', fontWeight: 'extrabold', lineHeight: 1.04 },
+  displayXl:  { fontSize: '6xl', fontWeight: 'extrabold', lineHeight: 1.08 },
+  display2xl: { fontSize: '7xl', fontWeight: 'extrabold', lineHeight: 1.08 },
 };
