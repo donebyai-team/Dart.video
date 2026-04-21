@@ -67,6 +67,7 @@ function getLogoAnimationStyle(animation: LogoAnimation, progress: number): Reac
 export function LogoAsset(initProps: LogoAssetProps): React.ReactElement {
     const defaultProps = { ...LogoAssetDefaults, ...initProps };
     const id = defaultProps.id;
+    console.log("rwgjlnklweg", defaultProps)
     
     const props = usePatchedProps(id, defaultProps);
 
@@ -202,16 +203,16 @@ export const LogoAssetSchemaFields = [
         "dataType": "media",
         "map": "props.src"
     },
-    // {
-    //     "name": "width",
-    //     "type": "number",
-    //     "map": "props.width"
-    // },
-    // {
-    //     "name": "height",
-    //     "type": "number",
-    //     "map": "props.height"
-    // },
+    {
+        "name": "width",
+        "type": "number",
+        "map": "props.width"
+    },
+    {
+        "name": "height",
+        "type": "number",
+        "map": "props.height"
+    },
     {
         "name": "logoAnimation",
         "type": "string",

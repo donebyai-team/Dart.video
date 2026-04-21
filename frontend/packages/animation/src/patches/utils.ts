@@ -13,6 +13,11 @@ export function deepMerge<T>(base: T, patch: Partial<T>): T {
     const baseValue = (base as any)[key];
     const patchValue = (patch as any)[key];
 
+    if (patchValue === undefined || patchValue === null || patchValue === "") {
+      result[key] = baseValue;
+      continue;
+    }
+
     if (
       typeof baseValue === "object" &&
       baseValue !== null &&

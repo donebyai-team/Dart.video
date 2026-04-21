@@ -30,6 +30,11 @@ import { ComponentRegistration } from "./registry";
 
 export const CONTENT_COMPONENTS: ComponentRegistration[] = [
   {
+    name: 'LogoAsset',
+    type: 'content',
+    description: '',
+  },
+  {
     name: 'ImageAsset',
     type: 'content',
     description: 'renders a static image from a URL — use for product screens, photos, and illustrations',

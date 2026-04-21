@@ -81,7 +81,7 @@ export function inferSceneFieldDefinition(prop: string, value: unknown): SceneFi
   const lowerProp = prop.toLowerCase()
 
   const isVideoField = lowerProp === 'video' || lowerProp === 'videos'
-  const isImageField = lowerProp === 'image' || lowerProp === 'images'
+  const isImageField = lowerProp === 'image' || lowerProp === 'images' || lowerProp === 'src'
   const isColorField = lowerProp.includes('color')
 
 

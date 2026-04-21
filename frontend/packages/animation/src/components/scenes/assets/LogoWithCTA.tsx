@@ -15,8 +15,8 @@ const BRAND_TEXT_DEFAULTS = {
     id: 'textstagger-brandname',
     text: 'Quarterzip',
     variant: 'display' as const,
-    staggerDelay: 2,
-    duration: 10,
+    staggerDelay: 1,
+    duration: 8,
     entranceAnimation: 'fadeIn' as const,
 };
 
@@ -24,17 +24,17 @@ const TAGLINE_TEXT_DEFAULTS = {
     ...TextStaggerDefaults,
     id: 'textstagger-tagline',
     text: 'Go live in minutes',
-    variant: 'display' as const,
-    staggerDelay: 5,
-    duration: 16,
+    variant: 'heading' as const,
+    staggerDelay: 3,
+    duration: 12,
     entranceAnimation: 'fadeIn' as const,
 };
 
 const LOCKUP_GAP = 20;
 const TAGLINE_GAP = 20;
 const TAGLINE_LIFT = 24;
-const LOGO_HOLD_FRAMES = 8;
-const LOCKUP_REVEAL_DURATION = 20;
+const LOGO_HOLD_FRAMES = 5;
+const LOCKUP_REVEAL_DURATION = 14;
 const FINAL_TOP_ROW_SCALE = 0.78;
 
 function getWordCount(text: string) {
@@ -54,7 +54,7 @@ export function LogoWithCTA(): React.ReactElement {
     const brandProps = usePatchedProps('textstagger-brandname', BRAND_TEXT_DEFAULTS);
     const taglineProps = usePatchedProps('textstagger-tagline', TAGLINE_TEXT_DEFAULTS);
 
-    const resolvedLogo = logoProps.src || theme.logoIcon?.url || theme.logo?.url;
+    const resolvedLogo = logoProps.src || theme.logoIcon?.url;
 
     const brandTypography = resolveTypography(brandProps.variant, styleConfig, theme, preset);
     const brandFontSize = typeof brandTypography.fontSize === 'number' ? brandTypography.fontSize : 44;
@@ -318,5 +318,5 @@ export const LogoWithCTADescriptor: ComponentRegistration = {
         },
     ],
     description: 'Logo icon and brand name reveal with a CTA text below that. Use as the final scene.',
-    celExpression: '65',
+    celExpression: '33 + (segmentCount(props.["textstagger-tagline"].text, "word") - 1) * 3 + 12',
 };

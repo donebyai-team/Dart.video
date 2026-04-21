@@ -1234,6 +1234,16 @@
                   "map": "props.src"
                 },
                 {
+                  "name": "width",
+                  "type": "number",
+                  "map": "props.width"
+                },
+                {
+                  "name": "height",
+                  "type": "number",
+                  "map": "props.height"
+                },
+                {
                   "name": "logoAnimation",
                   "type": "string",
                   "default": "zoomIn",
@@ -1322,7 +1332,7 @@
                   "name": "variant",
                   "type": "string",
                   "subtype": "enum",
-                  "default": "display"
+                  "default": "heading"
                 },
                 {
                   "name": "entranceAnimation",
@@ -1344,7 +1354,7 @@
             }
           ],
           "description": "Logo icon and brand name reveal with a CTA text below that. Use as the final scene.",
-          "celExpression": "65"
+          "celExpression": "33 + (segmentCount(props.[\"textstagger-tagline\"].text, \"word\") - 1) * 3 + 12"
         },
         {
           "name": "IconShowcase",
