@@ -168,5 +168,5 @@ export const TextStaggerDescriptor: ComponentRegistration = {
         }
     ],
     description: 'Reveals a word or full text phrase word-by-word. Works for both single word and multi-word headlines or body text.',
-    celExpression: `(segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * props.textstagger.staggerDelay + props.textstagger.duration`
+    celExpression: `(segmentCount(props.textstagger.text, props.textstagger.splitBy) * props.textstagger.staggerDelay) + props.textstagger.duration`
 };

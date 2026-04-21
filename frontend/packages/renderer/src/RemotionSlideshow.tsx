@@ -30,6 +30,7 @@ interface SlideshowProps {
   video?: JsonObject
   videoConfig?: Video
   isPlaying?: boolean
+  audioVolume?: number
   onUpdate?: (updates: Partial<Slide>) => void
 }
 
@@ -71,6 +72,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({
   video,
   videoConfig: videoConfigProp,
   isPlaying = true,
+  audioVolume = 0.5,
   onUpdate = () => { },
 }) => {
   const selectedTemplateId = null
@@ -180,7 +182,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({
             {videoConfig.metadata?.backgroundAudioUrl && (
               <Html5Audio
                 src={videoConfig.metadata.backgroundAudioUrl}
-                volume={0.5}
+                volume={audioVolume}
                 loop
                 onError={error => {
                   console.log('Audio error:', error.message)

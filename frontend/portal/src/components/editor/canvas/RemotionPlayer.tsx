@@ -125,6 +125,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   );
   const totalDuration = totalFrames / fps;
   const currentTime = currentFrame / fps;
+  const audioVolume = isMuted ? 0 : volume[0] / 100;
 
   const controls = usePlayerControls(
     playerRef,
@@ -406,6 +407,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
           totalFrames={totalFrames}
           fps={fps}
           currentFrame={currentFrame}
+          audioVolume={audioVolume}
           isFullscreen={isFullscreen}
           isEditing={!isFullscreen}
           canvasSize={canvasSize}

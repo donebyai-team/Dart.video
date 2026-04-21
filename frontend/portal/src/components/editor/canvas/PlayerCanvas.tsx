@@ -15,6 +15,7 @@ interface PlayerCanvasProps {
   totalFrames: number
   fps: number
   currentFrame: number
+  audioVolume: number
   isFullscreen: boolean
   isEditing: boolean
   scale: number
@@ -38,6 +39,7 @@ const PlayerCanvas = ({
   totalFrames,
   fps,
   currentFrame,
+  audioVolume,
   isFullscreen,
   isEditing,
   scale,
@@ -77,7 +79,8 @@ const PlayerCanvas = ({
     onSelectTemplate,
     isPlaying,
     animEditVersion,
-  }), [fps, isEditing, onSelectTemplate, isPlaying, animEditVersion])
+    audioVolume,
+  }), [fps, isEditing, onSelectTemplate, isPlaying, animEditVersion, audioVolume])
 
   // Pinch-to-zoom
   useEffect(() => {
