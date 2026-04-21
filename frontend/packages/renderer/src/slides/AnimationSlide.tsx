@@ -6,8 +6,6 @@ import {
   SpeedFactorProvider,
   PatchContextProvider,
   type PatchOverlay,
-  LogoWithCTA,
-  AbsoluteCenter,
 } from '@coasterai/animation'
 
 import { compileRemoteComponent } from '../compiler'
@@ -198,9 +196,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
             ) : CompiledComponent ? (
               <SpeedFactorProvider factor={1}>
                 <PatchContextProvider overlay={content?.edits as PatchOverlay}>
-                  <AbsoluteCenter>
-                    <LogoWithCTA />
-                  </AbsoluteCenter>
+                  <CompiledComponent />
                 </PatchContextProvider>
               </SpeedFactorProvider>
             ) : templateError ? (
