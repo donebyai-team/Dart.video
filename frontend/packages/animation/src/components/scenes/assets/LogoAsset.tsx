@@ -1,5 +1,5 @@
 import { preloadImage } from "@remotion/preload";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useCurrentFrame, useRemotionEnvironment } from "remotion";
 import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from "../../../patches";
 import { useAspectPreset } from "../../../styles/AspectPresetContext";
@@ -39,6 +39,9 @@ export const LogoAssetDefaults = {
 
 export type LogoAssetProps = Partial<typeof LogoAssetDefaults>
 
+const FALLBACK_LOGO_WIDTH = 48;
+const FALLBACK_LOGO_HEIGHT = 48;
+
 function getLogoAnimationStyle(animation: LogoAnimation, progress: number): React.CSSProperties {
     const inv = 1 - progress;
     switch (animation) {
@@ -74,6 +77,10 @@ export function LogoAsset(initProps: LogoAssetProps): React.ReactElement {
     const styleOverride = useStyleOverride(props.id);
     const overrideTransform = typeof styleOverride.transform === 'string' ? styleOverride.transform : undefined;
     const dragStyle = usePatchedDragStyle(props.id, props.style?.transform, overrideTransform);
+    const [intrinsicSize, setIntrinsicSize] = useState(() => ({
+        width: logo?.width || FALLBACK_LOGO_WIDTH,
+        height: logo?.height || FALLBACK_LOGO_HEIGHT,
+    }));
 
     // Apply defaults
     const actualAnimation = props.logoAnimation ?? DEFAULT_ANIMATION;
@@ -83,16 +90,24 @@ export function LogoAsset(initProps: LogoAssetProps): React.ReactElement {
     const defaultSrc = props.src || logo?.url || DEFAULT_LOGO_SVG;
 
     const defaultBoxSize = Math.min(preset.width, preset.height) * 0.35;
-    // Width/height define the bounding box. If only one is provided, mirror it
-    // so the logo still gets a deterministic square box to fit into.
-    const resolvedBoxWidth = props.width ?? props.height ?? defaultBoxSize;
-    const resolvedBoxHeight = props.height ?? props.width ?? defaultBoxSize;
-    // Raster assets can provide a stable intrinsic ratio up front; SVG uploads
-    // may come through as 0x0, so ignore invalid metadata and let the browser fit
-    // the asset inside the wrapper box instead.
     const canUseThemeLogoMetadata = !!logo?.url && defaultSrc === logo.url;
-    const hasIntrinsicSize = canUseThemeLogoMetadata && (logo?.width ?? 0) > 0 && (logo?.height ?? 0) > 0;
-    const intrinsicAspectRatio = hasIntrinsicSize ? `${logo!.width} / ${logo!.height}` : undefined;
+    const hasThemeLogoMetadata = canUseThemeLogoMetadata && (logo?.width ?? 0) > 0 && (logo?.height ?? 0) > 0;
+    const resolvedIntrinsicWidth = hasThemeLogoMetadata ? logo!.width : intrinsicSize.width;
+    const resolvedIntrinsicHeight = hasThemeLogoMetadata ? logo!.height : intrinsicSize.height;
+    const intrinsicAspectRatioValue = resolvedIntrinsicWidth > 0 && resolvedIntrinsicHeight > 0
+        ? resolvedIntrinsicWidth / resolvedIntrinsicHeight
+        : 1;
+    const intrinsicAspectRatio = `${resolvedIntrinsicWidth} / ${resolvedIntrinsicHeight}`;
+    const autoBoxWidth = intrinsicAspectRatioValue >= 1
+        ? defaultBoxSize
+        : defaultBoxSize * intrinsicAspectRatioValue;
+    const autoBoxHeight = intrinsicAspectRatioValue >= 1
+        ? defaultBoxSize / intrinsicAspectRatioValue
+        : defaultBoxSize;
+    const resolvedBoxWidth = props.width
+        ?? (props.height ? props.height * intrinsicAspectRatioValue : autoBoxWidth);
+    const resolvedBoxHeight = props.height
+        ?? (props.width ? props.width / intrinsicAspectRatioValue : autoBoxHeight);
     const rawObjectFit = overrideObjectFit ?? styleObjectFit;
     const resolvedObjectFit: React.CSSProperties['objectFit'] =
         typeof rawObjectFit === 'string' ? rawObjectFit as React.CSSProperties['objectFit'] : 'contain';
@@ -110,6 +125,28 @@ export function LogoAsset(initProps: LogoAssetProps): React.ReactElement {
             unpreload();
         };
     }, [defaultSrc, isRendering]);
+
+    useEffect(() => {
+        if (!defaultSrc || hasThemeLogoMetadata) return;
+
+        let cancelled = false;
+        const image = new Image();
+
+        image.onload = () => {
+            if (cancelled) return;
+
+            setIntrinsicSize({
+                width: image.naturalWidth || FALLBACK_LOGO_WIDTH,
+                height: image.naturalHeight || FALLBACK_LOGO_HEIGHT,
+            });
+        };
+
+        image.src = defaultSrc;
+
+        return () => {
+            cancelled = true;
+        };
+    }, [defaultSrc, hasThemeLogoMetadata]);
 
     return (
         <span
@@ -140,8 +177,8 @@ export function LogoAsset(initProps: LogoAssetProps): React.ReactElement {
                     while remaining fully visible via object-fit: contain. */}
                 <img
                     src={defaultSrc}
-                    width={hasIntrinsicSize ? logo?.width : undefined}
-                    height={hasIntrinsicSize ? logo?.height : undefined}
+                    width={resolvedIntrinsicWidth}
+                    height={resolvedIntrinsicHeight}
                     style={{
                         display: 'block',
                         width: '100%',
@@ -165,6 +202,16 @@ export const LogoAssetSchemaFields = [
         "dataType": "media",
         "map": "props.src"
     },
+    // {
+    //     "name": "width",
+    //     "type": "number",
+    //     "map": "props.width"
+    // },
+    // {
+    //     "name": "height",
+    //     "type": "number",
+    //     "map": "props.height"
+    // },
     {
         "name": "logoAnimation",
         "type": "string",
@@ -187,5 +234,3 @@ export const LogoAssetDescriptor: ComponentRegistration = {
     description: 'Logo reveal. Default is brand logo, no props. Use as the final scene.',
     celExpression: '30',
 };
-
-

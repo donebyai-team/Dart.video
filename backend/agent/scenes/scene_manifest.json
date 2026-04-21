@@ -6,6 +6,7 @@
       "value": [
         "subheading",
         "heading",
+        "headingLg",
         "display",
         "displayLg",
         "displayXl",
@@ -1094,44 +1095,6 @@
           "celExpression": "((38 + max(0, size(props.images) - 1) * 7) * 100) / max(props.scene.speed, 25)"
         },
         {
-          "name": "LogoAsset",
-          "type": "content",
-          "tags": [
-            "CTA"
-          ],
-          "schema": [
-            {
-              "type": "component",
-              "name": "logoasset",
-              "fields": [
-                {
-                  "name": "src",
-                  "type": "string",
-                  "dataType": "media",
-                  "map": "props.src"
-                },
-                {
-                  "name": "logoAnimation",
-                  "type": "string",
-                  "default": "zoomIn",
-                  "sub_type": "enum",
-                  "enum": [
-                    "none",
-                    "fadeIn",
-                    "zoomIn",
-                    "bounceIn",
-                    "spinIn",
-                    "dropIn"
-                  ]
-                }
-              ]
-            }
-          ],
-          "llmSchema": [],
-          "description": "Logo reveal. Default is brand logo, no props. Use as the final scene.",
-          "celExpression": "30"
-        },
-        {
           "name": "LogoShowcase",
           "type": "scene",
           "tags": [
@@ -1295,6 +1258,93 @@
           ],
           "description": "Logo + brand name reveal. Use for brand intro.",
           "celExpression": "max(0, segmentCount(props.textstagger.text, \"char\") - 1) * 5 + 20"
+        },
+        {
+          "name": "LogoWithCTA",
+          "type": "scene",
+          "tags": [
+            "CTA"
+          ],
+          "schema": [
+            {
+              "type": "component",
+              "name": "logoasset",
+              "fields": [
+                {
+                  "name": "src",
+                  "type": "string",
+                  "dataType": "media",
+                  "default": ""
+                },
+                {
+                  "name": "width",
+                  "type": "number"
+                },
+                {
+                  "name": "height",
+                  "type": "number"
+                }
+              ]
+            },
+            {
+              "type": "component",
+              "name": "textstagger-brandname",
+              "fields": [
+                {
+                  "name": "text",
+                  "type": "string",
+                  "map": "props.brandName"
+                },
+                {
+                  "name": "variant",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "display"
+                },
+                {
+                  "name": "entranceAnimation",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "fadeIn"
+                }
+              ]
+            },
+            {
+              "type": "component",
+              "name": "textstagger-tagline",
+              "fields": [
+                {
+                  "name": "text",
+                  "type": "string",
+                  "map": "props.ctaText"
+                },
+                {
+                  "name": "variant",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "display"
+                },
+                {
+                  "name": "entranceAnimation",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "fadeIn"
+                }
+              ]
+            }
+          ],
+          "llmSchema": [
+            {
+              "name": "brandName",
+              "type": "string"
+            },
+            {
+              "name": "ctaText",
+              "type": "string"
+            }
+          ],
+          "description": "Logo icon and brand name reveal with a CTA text below that. Use as the final scene.",
+          "celExpression": "65"
         },
         {
           "name": "IconShowcase",

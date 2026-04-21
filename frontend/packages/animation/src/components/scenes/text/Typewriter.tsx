@@ -14,7 +14,7 @@ const TYPEWRITER_PULSE_DURATION = 24;
 
 export const TypewriterDefaults = {
   id: 'typewriter',
-  text: "Sample text",
+  text: "Try cursor today",
   startAt: 0,
   splitBy: "char" as const,
   variant: "heading" as const,
@@ -92,8 +92,10 @@ export function Typewriter(initProps: TypewriterProps): React.ReactElement {
   const pulseCenter = -30 + (pulseProgress * 160);
   const pulseBandStart = pulseCenter - 18;
   const pulseBandEnd = pulseCenter + 18;
+  const { transform: _ignoredTransform, display: _ignoredDisplay, position: _ignoredPosition, ...textStyleProps } = props.style ?? {};
   const textStyles = {
     ...resolveTypography(props.variant, styleConfig, theme, preset),
+    ...textStyleProps,
     opacity: entranceProgress,
     transform: getEntranceTransform(props.entranceAnimation, entranceProgress),
     display: 'inline-block',
@@ -146,7 +148,7 @@ export function Typewriter(initProps: TypewriterProps): React.ReactElement {
 // Registry Descriptor
 // ============================================================================
 
-const TypewriterSchemaFields = [
+export const TypewriterSchemaFields = [
   {
     "name": "text",
     "type": "string",

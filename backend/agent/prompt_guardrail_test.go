@@ -14,7 +14,7 @@ func TestValidatePrompt(t *testing.T) {
 		expectedErr string
 	}{
 		{
-			name:   "accepts empty prompt",
+			name:   "Problem\nUK schools teach kids to pass exams—but real life has no marking scheme.\nStudents have the grades, but not the experience to make real decisions.\n\nProduct\nMeet Mini-Mogul—an immersive business simulation that turns students into CEOs.\n\nHow it Works\nIt’s a flight simulator for leadership.\nManage staff, balance budgets, and adapt to real-time challenges—like running a restaurant during a Wembley rush.\n\nSocial Proof\nParents are already seeing more confidence and strategic thinking.\n“He’s finally thinking for himself.” — London parent\n\nCTA\nBuild real-world confidence beyond exams.\nStart today\nMini-Mogul - Practice for the Real World.",
 			prompt: "   ",
 		},
 		{
