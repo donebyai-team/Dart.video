@@ -6,7 +6,7 @@ import { SpeedFactorProvider } from "../duration";
 import { ASPECT_PRESETS, resolveStyle, AspectPresetProvider, StyleContextProvider } from "../styles";
 import { BrandTheme, darkTheme, ThemeProvider } from "../theme";
 import { AnimatedVideo } from "../components/scenes/assets/AnimatedVideo";
-import { TextWithImageScene, ImagePeel, LogoAsset, LogoShowcase, ProblemCollage, TextLeadStagger } from "../components/scenes";
+import { TextWithImageScene, ImagePeel, LogoAsset, LogoShowcase, ProblemCollage, TextLeadStagger, ProblemHeadline } from "../components/scenes";
 
 
 const BRAND: BrandTheme = {
@@ -229,10 +229,10 @@ const AnimatedVideoScene: React.FC = () => (
 
 const ProblemCollageScene: React.FC = () => (
     <Scene>
-        <AbsoluteFill >
+        <AbsoluteFill  style={{ backgroundColor: 'white' }}>
             <SafeArea>
                 <AbsoluteCenter >
-                    <ProblemCollage />
+                    <ProblemHeadline style={ { color: "#000" }}/>
                 </AbsoluteCenter>
             </SafeArea>
         </AbsoluteFill>

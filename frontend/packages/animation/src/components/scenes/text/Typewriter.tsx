@@ -9,10 +9,8 @@ import { resolveTypography } from '../../../tokens/resolveTypography';
 import { getEntranceTransform } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
 
- const TYPEWRITER_TYPING_DURATION = 60;
- const TYPEWRITER_CHAR_FRAME_MULTIPLIER = 2;
- const TYPEWRITER_WORD_FRAME_MULTIPLIER = 9;
- const TYPEWRITER_LINE_FRAME_MULTIPLIER = 18;
+const TYPEWRITER_TYPING_DURATION = 30;
+const TYPEWRITER_PULSE_DURATION = 24;
 
 export const TypewriterDefaults = {
   id: 'typewriter',
@@ -82,9 +80,30 @@ export function Typewriter(initProps: TypewriterProps): React.ReactElement {
     cursor.behavior === 'solid' ? true
       : cursor.behavior === 'fade' ? Math.sin((frame * Math.PI) / 15) > 0
         : Math.floor(frame / 15) % 2 === 0;
+  const pulseStartFrame = props.typingDuration;
+  const pulseEndFrame = pulseStartFrame + TYPEWRITER_PULSE_DURATION;
+  const pulseProgress = interpolateWithEasing(
+    frame,
+    [pulseStartFrame, pulseEndFrame],
+    [0, 1],
+    'ease-in-out',
+  );
+  const pulseActive = frame >= pulseStartFrame && frame <= pulseEndFrame && visibleText.length > 0;
+  const pulseCenter = -30 + (pulseProgress * 160);
+  const pulseBandStart = pulseCenter - 18;
+  const pulseBandEnd = pulseCenter + 18;
+  const textStyles = {
+    ...resolveTypography(props.variant, styleConfig, theme, preset),
+    opacity: entranceProgress,
+    transform: getEntranceTransform(props.entranceAnimation, entranceProgress),
+    display: 'inline-block',
+    position: 'relative' as const,
+    whiteSpace: 'pre-wrap' as const,
+    ...styleOverride,
+  };
 
   return (
-    <span      
+    <span
       id={id}
       className={props.className}
       style={{
@@ -94,15 +113,27 @@ export function Typewriter(initProps: TypewriterProps): React.ReactElement {
       }}
     >
       <span
-        style={{
-          ...resolveTypography(props.variant, styleConfig, theme, preset),
-          opacity: entranceProgress,
-          transform: getEntranceTransform(props.entranceAnimation, entranceProgress),
-          display: 'inline-block',
-          ...styleOverride,
-        }}
+        style={textStyles}
       >
         {visibleText}
+        {pulseActive && (
+          <span
+            aria-hidden
+            style={{
+              position: 'absolute',
+              inset: 0,
+              color: 'transparent',
+              pointerEvents: 'none',
+              whiteSpace: 'pre-wrap',
+              backgroundImage: `linear-gradient(90deg, rgba(255,255,255,0) ${pulseBandStart}%, rgba(255,255,255,0.95) ${pulseCenter}%, rgba(255,255,255,0) ${pulseBandEnd}%)`,
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              opacity: entranceProgress,
+            }}
+          >
+            {visibleText}
+          </span>
+        )}
         {showCursor && cursorChar && (
           <span style={{ opacity: cursorVisible ? 1 : 0 }}>{cursorChar}</span>
         )}
@@ -139,11 +170,6 @@ const TypewriterSchemaFields = [
     "type": "string",
     "subtype": "enum",
     "default": TypewriterDefaults.entranceAnimation
-  },
-  {
-    "name": "startAt",
-    "type": "number",
-    "default": TypewriterDefaults.startAt
   }
 ]
 
@@ -162,5 +188,6 @@ export const TypewriterDescriptor: ComponentRegistration = {
     }
   ],
   description: 'Character-by-character text reveal. Use for dramatic reveals or code/terminal effects.',
-  celExpression: `max(${TYPEWRITER_TYPING_DURATION}, segmentCount(props.typewriter.text, props.typewriter.splitBy) * (props.typewriter.splitBy == "char" ? ${TYPEWRITER_CHAR_FRAME_MULTIPLIER} : props.typewriter.splitBy == "word" ? ${TYPEWRITER_WORD_FRAME_MULTIPLIER} : ${TYPEWRITER_LINE_FRAME_MULTIPLIER}))`
+  celExpression: `${TYPEWRITER_TYPING_DURATION + TYPEWRITER_PULSE_DURATION}`
+
 };

@@ -250,11 +250,6 @@
                   "type": "string",
                   "subtype": "enum",
                   "default": "slideUp"
-                },
-                {
-                  "name": "startAt",
-                  "type": "number",
-                  "default": 0
                 }
               ]
             }
@@ -266,7 +261,7 @@
             }
           ],
           "description": "Character-by-character text reveal. Use for dramatic reveals or code/terminal effects.",
-          "celExpression": "max(60, segmentCount(props.typewriter.text, props.typewriter.splitBy) * (props.typewriter.splitBy == \"char\" ? 2 : props.typewriter.splitBy == \"word\" ? 9 : 18))"
+          "celExpression": "54"
         },
         {
           "name": "TextHighlight",
@@ -503,6 +498,53 @@
           ],
           "celExpression": "((50 + max(0, segmentCount(props.textleadstagger.text, \"word\") - 2) * 5 + max(0, segmentCount(props.textleadstagger.text, \"word\") - 1) * 4) * 100) / max(25, props.textleadstagger.speed)",
           "description": "First word starts enlarged and then settles down. The remaining words enter in a stagger, making it ideal for emphasis moments (MAX 3–4 words).\nExamples:\ntext=\"Isn't getting clicks\"\ntext=\"You're missing out\"\n\nYou can combine it with other **fillers scenes** for showcasing a **\"Problem\" or \"Solution\" section** of a video or use it as a standalone filler with other scenes.\n\nExample problem: \"If your Airbnb listing isn't getting clicks\"\n\n- Scene 1: If (TextStagger)\n- Scene 2: your (TextStagger)\n- Scene 3: Airbnb {listing} (TextHighlight)\n- Scene 4: isn't getting clicks (TextLeadStagger)"
+        },
+        {
+          "name": "ProblemHeadline",
+          "type": "scene",
+          "tags": [
+            "Problem",
+            "Hook"
+          ],
+          "schema": [
+            {
+              "type": "component",
+              "name": "problemheadline",
+              "fields": [
+                {
+                  "name": "text",
+                  "type": "string",
+                  "map": "props.problemheadline.text"
+                },
+                {
+                  "name": "variant",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "display"
+                },
+                {
+                  "name": "entranceAnimation",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "slideUp"
+                },
+                {
+                  "name": "highlightColor",
+                  "type": "string",
+                  "subtype": "color",
+                  "default": ""
+                }
+              ]
+            }
+          ],
+          "llmSchema": [
+            {
+              "name": "text",
+              "type": "string"
+            }
+          ],
+          "celExpression": "82",
+          "description": "A short headline scene for concise text. Use it to show the main problem, key pain point, or an important headline from the script. Best for 2-6 words"
         },
         {
           "name": "TextWithImageScene",

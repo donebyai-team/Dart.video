@@ -5,3 +5,4 @@ export * from './TextWithWordCycle';
 export * from './TextHighlight';
 export * from './TextStagger';
 export * from './TextLeadStagger';
+export * from './ProblemHeadline';
