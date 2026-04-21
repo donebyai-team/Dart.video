@@ -69,8 +69,16 @@ func (g *videoConfigGenerator) AddBranding(assetRegistry *services.MediaAssetReg
 		generatedBranding.Colors = brand_identity.ExtractOrGenerateColors(nil)
 	} else {
 		brandIdentity := assetRegistry.GetIdentity()
-		generatedBranding.Colors = brandIdentity.Colors
-		generatedBranding.BrandIdentity = brandIdentity
+		if brandIdentity == nil {
+			generatedBranding.Colors = brand_identity.ExtractOrGenerateColors(nil)
+		} else {
+			generatedBranding.BrandIdentity = brandIdentity
+			if len(brandIdentity.Colors) == 0 {
+				generatedBranding.Colors = brand_identity.ExtractOrGenerateColors(nil)
+			} else {
+				generatedBranding.Colors = brandIdentity.Colors
+			}
+		}
 	}
 
 	// Step 2: ALWAYS generate gradient
