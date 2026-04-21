@@ -78,7 +78,7 @@ function splitTextIntoLines(text: string, maxWidthPx: number, fontSizePx: number
   }
 
   const fullText = words.join(' ');
-  if (estimateLineWidth(fullText, fontSizePx) <= maxWidthPx || words.length <= 2) {
+  if (words.length <= 2 || (words.length <= 3 && estimateLineWidth(fullText, fontSizePx) <= maxWidthPx)) {
     return [fullText, ''];
   }
 
