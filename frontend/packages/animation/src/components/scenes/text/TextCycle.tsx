@@ -12,6 +12,91 @@ import type { ComponentRegistration } from '../../../registry/registry';
 import { getEntranceTransform } from '../types';
 import type { EntranceAnimation, TextCycleTransition } from '../types';
 
+function normalizeMeasuredText(text: string, textTransform: React.CSSProperties['textTransform']): string {
+  switch (textTransform) {
+    case 'uppercase':
+      return text.toUpperCase();
+    case 'lowercase':
+      return text.toLowerCase();
+    case 'capitalize':
+      return text.replace(/\b\w/g, (char) => char.toUpperCase());
+    default:
+      return text;
+  }
+}
+
+function parsePixelValue(value: React.CSSProperties['fontSize'], fallback: number): number {
+  if (typeof value === 'number') {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    if (value.endsWith('px')) {
+      const parsed = Number.parseFloat(value);
+      return Number.isFinite(parsed) ? parsed : fallback;
+    }
+
+    if (value.endsWith('em')) {
+      const parsed = Number.parseFloat(value);
+      return Number.isFinite(parsed) ? parsed * fallback : fallback;
+    }
+  }
+
+  return fallback;
+}
+
+function parseLetterSpacing(
+  value: React.CSSProperties['letterSpacing'],
+  fontSizePx: number,
+): number {
+  if (typeof value === 'number') {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    if (value.endsWith('px')) {
+      const parsed = Number.parseFloat(value);
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    if (value.endsWith('em')) {
+      const parsed = Number.parseFloat(value);
+      return Number.isFinite(parsed) ? parsed * fontSizePx : 0;
+    }
+  }
+
+  return 0;
+}
+
+function getMeasuredWordWidth(text: string, style: React.CSSProperties): number {
+  if (typeof document === 'undefined') {
+    return text.length;
+  }
+
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+
+  if (!context) {
+    return text.length;
+  }
+
+  const fontSizePx = parsePixelValue(style.fontSize, 16);
+  const fontStyle = typeof style.fontStyle === 'string' ? style.fontStyle : 'normal';
+  const fontVariant = typeof style.fontVariant === 'string' ? style.fontVariant : 'normal';
+  const fontWeight = typeof style.fontWeight === 'string' || typeof style.fontWeight === 'number'
+    ? String(style.fontWeight)
+    : '400';
+  const fontFamily = typeof style.fontFamily === 'string' ? style.fontFamily : 'sans-serif';
+  const measuredText = normalizeMeasuredText(text, style.textTransform);
+  const letterSpacingPx = parseLetterSpacing(style.letterSpacing, fontSizePx);
+
+  context.font = `${fontStyle} ${fontVariant} ${fontWeight} ${fontSizePx}px ${fontFamily}`;
+
+  const baseWidth = context.measureText(measuredText).width;
+  const spacingWidth = Math.max(0, measuredText.length - 1) * letterSpacingPx;
+  return baseWidth + spacingWidth;
+}
+
 export const TextCycleDefaults = {
   id: 'textcycle',
   texts: ['First text', 'Second text', 'Third text'],
@@ -63,11 +148,22 @@ export const TextCycle: React.FC<TextCycleProps> = (initProps) => {
   };
   delete textOverrideStyle.transform;
 
-  // The longest word by character count — used as an invisible spacer to
-  // hold the container width stable across all word changes.
-  const longestWord = useMemo(
-    () => props.texts.reduce((a, b) => (a.length >= b.length ? a : b), ''),
-    [props.texts],
+  const spacerMeasurementStyle = useMemo(
+    () => ({
+      ...typographyStyle,
+      ...textOverrideStyle,
+    }),
+    [textOverrideStyle, typographyStyle],
+  );
+
+  // Reserve width using the widest rendered word, not the longest string.
+  const widestWord = useMemo(
+    () => props.texts.reduce((widest, candidate) => (
+      getMeasuredWordWidth(candidate, spacerMeasurementStyle) > getMeasuredWordWidth(widest, spacerMeasurementStyle)
+        ? candidate
+        : widest
+    ), ''),
+    [props.texts, spacerMeasurementStyle],
   );
 
   if (props.texts.length === 0) {
@@ -108,7 +204,7 @@ export const TextCycle: React.FC<TextCycleProps> = (initProps) => {
     )
     : 0;
 
-  // Outer container — sized by the invisible spacer (longestWord), never by
+  // Outer container — sized by the invisible spacer (widestWord), never by
   // the visible word. This is what eliminates layout reflow.
   const containerStyle: React.CSSProperties = {
     ...typographyStyle,
@@ -119,15 +215,18 @@ export const TextCycle: React.FC<TextCycleProps> = (initProps) => {
     ...dragStyle,
   };
 
-  // Invisible spacer — always renders the longest word to hold container width.
+  // Invisible spacer — always renders the widest word to hold container width.
   const spacerStyle: React.CSSProperties = {
     visibility: 'hidden',
     whiteSpace: 'nowrap',
     display: 'block',
     pointerEvents: 'none',
     userSelect: 'none',
-    // Occupy height too so the container height is stable
+    // Occupy height too so the container height is stable, with a little
+    // extra room for descenders during clipped slide transitions.
     lineHeight: 'inherit',
+    paddingTop: '0.08em',
+    paddingBottom: '0.08em',
   };
 
   // Visible words are absolutely positioned on top of the spacer.
@@ -144,7 +243,7 @@ export const TextCycle: React.FC<TextCycleProps> = (initProps) => {
     return (
       <span id={id} className={props.className} style={containerStyle}>
         {/* Spacer holds the width — never visible */}
-        <Text text={longestWord} variant={patchedVariant} style={spacerStyle} />
+        <Text text={widestWord} variant={patchedVariant} style={spacerStyle} />
 
         {/* Current word fades out during transition */}
         <Text
@@ -176,7 +275,7 @@ export const TextCycle: React.FC<TextCycleProps> = (initProps) => {
   if (props.textCycleTransition === 'slideUp') {
     return (
       <span id={id} className={props.className} style={{ ...containerStyle, overflow: 'hidden' }}>
-        <Text text={longestWord} variant={patchedVariant} style={spacerStyle} />
+        <Text text={widestWord} variant={patchedVariant} style={spacerStyle} />
 
         <Text
           text={currentWord}
@@ -214,7 +313,7 @@ export const TextCycle: React.FC<TextCycleProps> = (initProps) => {
   // flipY
   return (
     <span className={props.className} style={containerStyle} id={id}>
-      <Text text={longestWord} variant={patchedVariant} style={spacerStyle} />
+      <Text text={widestWord} variant={patchedVariant} style={spacerStyle} />
 
       <Text
         text={currentWord}
