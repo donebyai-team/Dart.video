@@ -281,6 +281,6 @@ export const TextCardStackDescriptor: ComponentRegistration = {
       },
     },
   ],
-  description: 'Shows multiple problem or solution statements as playful stacked cards. Each card swings into the center, holds briefly, then exits so the next card can take over.',
+  description: 'Displays problem or solution statements as playful stacked cards. Best for short descriptive phrases; avoid very brief (one- or two-word) content.',
   celExpression: `(((${BASE_ENTRY_DURATION} + ${BASE_SETTLE_DURATION} + ${BASE_HOLD_DURATION} + ${BASE_EXIT_DURATION} + ${BASE_CARD_GAP}) * size(props.textcardstack.texts)) * ${DEFAULT_SPEED_PERCENTAGE}) / max(${MIN_SPEED_PERCENTAGE}, props.textcardstack.speed)`,
 };

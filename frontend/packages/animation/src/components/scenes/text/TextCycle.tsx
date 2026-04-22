@@ -104,7 +104,7 @@ export const TextCycleDefaults = {
   transitionDuration: 5,
   textCycleTransition: 'slideUp' as TextCycleTransition,
   entranceAnimation: 'slideUp' as EntranceAnimation,
-  variant: 'display' as TypographyVariant,
+  variant: 'displayXl' as TypographyVariant,
   style: undefined as React.CSSProperties | undefined,
   className: undefined as string | undefined,
 };

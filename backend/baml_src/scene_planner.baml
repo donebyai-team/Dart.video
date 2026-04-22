@@ -99,10 +99,11 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     - **Sections are missing** that would significantly improve the video
       (e.g. no Hook, no CTA). Ask whether to add them or proceed as is.
     - **Script is too short** to generate 15-20 scenes — ask whether to expand it or add new content.
-    - **Script is provided** — confirm whether to use it exactly as written.
+    - **Script is provided** — confirm whether to use it as is, noting that small changes produces better results.
       If yes:
       - Preserve the original meaning.
-      - You may trim or split texts if a scene needs a certain no of words or lines.
+      - You may trim or split texts/phrases if a scene needs a certain no of words or lines.
+      - You can change the text without changing the meaning if needed to fit in scenes props
       - You may still split it into meaningful scenes/fillers.
       - You can make punctuation or formatting changes for rhythm and clarity.
     - A scene implies brand presence but no brand name is provided — ask user to add brand identity.

@@ -135,6 +135,13 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 			}
 
 			sceneMapper[slide.Id] = &pendingSlide
+
+			slide.Content = &pbcore.AnimationSlideContent{
+				Plan: &pbcore.AnimationSlidePlan{
+					Index: pendingSlide.Index,
+				},
+			}
+
 			//assignRandomTransitionAndDirection(slide)
 			// TODO: Do it as a pre/post processing stages or specify in the config itself
 			if len(pendingSlide.Elements) > 0 &&
@@ -145,12 +152,23 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 				slide.Direction = pbcore.TransitionDirection_TRANSITION_DIRECTION_FROM_BOTTOM.Enum()
 			}
 
-			slide.Content = &pbcore.AnimationSlideContent{
-				Plan: &pbcore.AnimationSlidePlan{
-					Index: pendingSlide.Index,
-					//BeatDescription: pendingSlide.Brief,
-					//AnimationType:   pendingSlide.Category.BamlTypeName(),
-				},
+			if len(pendingSlide.Elements) > 0 && strings.EqualFold(pendingSlide.Elements[0].Component, "TextCycle") {
+				slide.BackgroundStyle = &pbcore.BackgroundStyle{
+					Pattern: pbcore.BackgroundPattern_BACKGROUND_PATTERN_DOTS,
+					Effect: &pbcore.BackgroundEffect{
+						Type: pbcore.BackgroundEffectType_BACKGROUND_EFFECT_TYPE_AURORA,
+					},
+					PatternOpacity: utils.Ptr(defaultPatternOpacity),
+					Style:          &pbcore.BackgroundStyle_Solid{Solid: &pbcore.SolidColor{Hex: "#1207e5"}},
+				}
+				slide.Content.Edits = utils.CreateStructFromMap(map[string]interface{}{
+					"textcycle": map[string]interface{}{
+						"style": map[string]interface{}{
+							"color": "#FFFFFF",
+						},
+					},
+				})
+
 			}
 
 			section.Slides = append(section.Slides, slide)
@@ -197,7 +215,7 @@ func (g *videoConfigGenerator) UpdateAnimationSlide(
 				animation := slide.Content
 				slide.SlideStatus = pbcore.SlideStatus_SLIDE_STATUS_GENERATED
 				animation.CodeRegistry = selectedTemplate.Config.CodeRegistry
-				animation.Edits = toStructConfig
+				animation.Edits = utils.MergeStructs(animation.Edits, toStructConfig)
 
 				// update the selected template description
 				// for future slides to know what's being selected so far

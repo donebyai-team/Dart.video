@@ -59,3 +59,64 @@ func RawMessageToStruct(raw json.RawMessage) (*structpb.Struct, error) {
 
 	return structpb.NewStruct(data)
 }
+
+// CreateStructFromMap converts map[string]interface{} → *structpb.Struct
+func CreateStructFromMap(data map[string]interface{}) *structpb.Struct {
+	if data == nil {
+		data = map[string]interface{}{}
+	}
+	s, err := structpb.NewStruct(data)
+	if err != nil {
+		panic(fmt.Errorf("unable to CreateStructFromMap: %w", err)) // or log.Fatal
+	}
+	return s
+}
+
+// MergeStructs merges struct2 into struct1 (deep merge)
+func MergeStructs(s1, s2 *structpb.Struct) *structpb.Struct {
+	m1 := map[string]interface{}{}
+	m2 := map[string]interface{}{}
+
+	if s1 != nil {
+		m1 = s1.AsMap()
+	}
+	if s2 != nil {
+		m2 = s2.AsMap()
+	}
+
+	merged := deepMergeMaps(m1, m2)
+
+	s, err := structpb.NewStruct(merged)
+	if err != nil {
+		panic(fmt.Errorf("unable to MergeStructs: %w", err)) // or log.Fatal
+	}
+	return s
+}
+
+// helper: recursively merge maps
+func deepMergeMaps(m1, m2 map[string]interface{}) map[string]interface{} {
+	result := make(map[string]interface{})
+
+	// copy m1
+	for k, v := range m1 {
+		result[k] = v
+	}
+
+	// merge m2 into result
+	for k, v2 := range m2 {
+		if v1, exists := result[k]; exists {
+			// if both are maps → recurse
+			map1, ok1 := v1.(map[string]interface{})
+			map2, ok2 := v2.(map[string]interface{})
+
+			if ok1 && ok2 {
+				result[k] = deepMergeMaps(map1, map2)
+				continue
+			}
+		}
+		// otherwise overwrite
+		result[k] = v2
+	}
+
+	return result
+}

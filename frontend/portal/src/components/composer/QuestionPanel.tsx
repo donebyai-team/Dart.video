@@ -62,7 +62,7 @@ const QuestionPanel = ({
                 onClick={() => setAssetPreviewOpen(true)}
                 className='flex-shrink-0 w-16 h-16 rounded border bg-background overflow-hidden hover:opacity-80 transition-opacity'
               >
-                {question.asset.thumbnailUrl ? (
+                {question.asset.url ? (
                   <img 
                     src={question.asset.url} 
                     alt={question.asset.fileName || 'Asset'}
