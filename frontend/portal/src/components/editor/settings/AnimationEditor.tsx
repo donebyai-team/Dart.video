@@ -14,7 +14,7 @@ import SelectedAssetsDialog, { type SelectedAssetWithPreview } from '@/component
 import { useVideoStore } from '@/stores/video'
 import { ActiveToolType, AddOrEditAnimationSettings } from '@/types/tools'
 import type { AskUserQuestion, GenerateOrEditSceneResponse } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
-import {SlideStatus, type Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { SlideStatus, type Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { MediaAsset, SelectedMediaAsset, SelectedMediaAssetSchema } from '@coasterai/pb/coasterai/core/v1/media_asset_pb'
 import { getConnectError } from '@/utils/error'
 import toast from 'react-hot-toast'
@@ -165,8 +165,10 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
             }
         } as Slide)
 
-        // Force sync changes to backend.
-        acceptVideoConfigChanges();
+        // Force sync changes to backend only if a new slide is added
+        if (!existingContent?.edits || Object.keys(existingContent.edits).length === 0) {
+            acceptVideoConfigChanges();
+        }
     }
 
     const consumeStream = async (
@@ -501,7 +503,7 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                 <div className='flex-1 min-h-0 rounded-xl bg-background/60 backdrop-blur-sm p-3 overflow-auto'>
                     {stage === 'question' && activeQuestion && (
                         <QuestionPanel
-                            question={activeQuestion} 
+                            question={activeQuestion}
                             isSubmitting={isSubmitting}
                             customAnswer={customAnswer}
                             answerInput={answerInput}
@@ -535,7 +537,7 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                         ) : (
                             <BrandLibrarySelector
                                 selectedBrandLibraryId={undefined}
-                                onChange={() => {}}
+                                onChange={() => { }}
                                 onAddBrand={() => router.push('/dashboard/brand')}
                                 disabled={stage !== 'compose'}
                             />
