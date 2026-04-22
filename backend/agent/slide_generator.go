@@ -8,6 +8,7 @@ import (
 	"github.com/shank318/coasterai/services/brand_identity"
 	"github.com/shank318/coasterai/services/voiceover"
 	"math/rand"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/shank318/coasterai/models"
@@ -135,6 +136,14 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 
 			sceneMapper[slide.Id] = &pendingSlide
 			//assignRandomTransitionAndDirection(slide)
+			// TODO: Do it as a pre/post processing stages or specify in the config itself
+			if len(pendingSlide.Elements) > 0 &&
+				(strings.EqualFold(pendingSlide.Elements[0].Component, "TextWithImageScene") ||
+					strings.EqualFold(pendingSlide.Elements[0].Component, "TextWithVideoScene")) {
+				slide.Transition = pbcore.TransitionType_TRANSITION_SLIDE_UP
+				slide.TransitionDurationInFrames = utils.Ptr(transitionDurationInFrames)
+				slide.Direction = pbcore.TransitionDirection_TRANSITION_DIRECTION_FROM_BOTTOM.Enum()
+			}
 
 			slide.Content = &pbcore.AnimationSlideContent{
 				Plan: &pbcore.AnimationSlidePlan{
@@ -224,16 +233,6 @@ func (g *videoConfigGenerator) findSection(sectionID string) (*pbcore.Section, e
 		}
 	}
 	return nil, fmt.Errorf("section not found: %s", sectionID)
-}
-
-func defaultMeta() *pbcore.MetaData {
-	return &pbcore.MetaData{
-		X:      192,
-		Y:      108,
-		Width:  1536,
-		Height: 864,
-		Scale:  utils.Ptr(float32(1)),
-	}
 }
 
 var pendingSlideTransitionOptions = []pbcore.TransitionType{
