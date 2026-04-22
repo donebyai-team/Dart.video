@@ -135,14 +135,23 @@ export function AnimationEditLayer({
     return true
   }
 
+  // used as fallback click on the scene
   function hasTextLikeField(entry: unknown): boolean {
     if (!entry || typeof entry !== 'object') return false
 
+    // Some scenes store copy as a string array (`texts`) instead of a single `text` field.
+    // Treat both plain strings and non-empty string arrays as text-like content.
     return Object.entries(entry as Record<string, unknown>).some(([prop, value]) => {
       if (prop === 'style' || prop === 'dragX' || prop === 'dragY') return false
-      if (typeof value !== 'string' || value.trim().length === 0) return false
 
       const lowerProp = prop.toLowerCase()
+      const hasStringValue = typeof value === 'string' && value.trim().length > 0
+      const hasStringArrayValue = Array.isArray(value) && value.some(
+        (item) => typeof item === 'string' && item.trim().length > 0,
+      )
+
+      if (!hasStringValue && !hasStringArrayValue) return false
+
       return (
         lowerProp === 'text' ||
         lowerProp === 'title' ||

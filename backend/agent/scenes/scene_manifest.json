@@ -218,7 +218,7 @@
             }
           ],
           "description": "Reveals a word or full text phrase word-by-word. Works for both single word and multi-word headlines or body text.",
-          "celExpression": "(segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * props.textstagger.staggerDelay + props.textstagger.duration"
+          "celExpression": "(segmentCount(props.textstagger.text, props.textstagger.splitBy) * props.textstagger.staggerDelay) + props.textstagger.duration"
         },
         {
           "name": "Typewriter",
@@ -546,6 +546,51 @@
           ],
           "celExpression": "82",
           "description": "A short headline scene for concise text. Use it to show the main problem, key pain point, or an important headline from the script. Best for 2-6 words"
+        },
+        {
+          "name": "TextCardStack",
+          "type": "content",
+          "tags": [
+            "Problem",
+            "Solution",
+            "Pain Points"
+          ],
+          "schema": [
+            {
+              "type": "component",
+              "name": "textcardstack",
+              "fields": [
+                {
+                  "name": "texts",
+                  "type": "array",
+                  "subtype": "string",
+                  "map": "props.texts"
+                },
+                {
+                  "name": "variant",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "heading"
+                },
+                {
+                  "name": "speed",
+                  "type": "number",
+                  "default": 100
+                }
+              ]
+            }
+          ],
+          "llmSchema": [
+            {
+              "name": "texts",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ],
+          "description": "Shows multiple problem or solution statements as playful stacked cards. Each card swings into the center, holds briefly, then exits so the next card can take over.",
+          "celExpression": "(((22 + 0 + 14 + 10 + 1) * size(props.textcardstack.texts)) * 100) / max(25, props.textcardstack.speed)"
         },
         {
           "name": "TextWithImageScene",

@@ -6,3 +6,4 @@ export * from './TextHighlight';
 export * from './TextStagger';
 export * from './TextLeadStagger';
 export * from './ProblemHeadline';
+export * from './TextCardStack';
