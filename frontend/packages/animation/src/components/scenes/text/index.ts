@@ -1,6 +1,6 @@
 export * from './AnimatedNumber';
 export * from './Typewriter';
-export * from './TextCycle';
+export * from './WordCycle';
 export * from './TextWithWordCycle';
 export * from './TextHighlight';
 export * from './TextStagger';

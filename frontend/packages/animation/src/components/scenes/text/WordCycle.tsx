@@ -97,7 +97,7 @@ function getMeasuredWordWidth(text: string, style: React.CSSProperties): number 
   return baseWidth + spacingWidth;
 }
 
-export const TextCycleDefaults = {
+export const WordCycleDefaults = {
   id: 'textcycle',
   texts: ['First text', 'Second text', 'Third text'],
   holdDuration: 20,
@@ -109,7 +109,7 @@ export const TextCycleDefaults = {
   className: undefined as string | undefined,
 };
 
-export type TextCycleProps = Partial<typeof TextCycleDefaults>;
+export type WordCycleProps = Partial<typeof WordCycleDefaults>;
 
 /**
  * Cycles through an array of words with animated transitions.
@@ -117,13 +117,13 @@ export type TextCycleProps = Partial<typeof TextCycleDefaults>;
  * Auto-adjusts container width to the longest word using a hidden spacer —
  * no layout reflow occurs when words change, eliminating jerk in Stack/Row layouts.
  */
-export const TextCycle: React.FC<TextCycleProps> = (initProps) => {
+export const WordCycle: React.FC<WordCycleProps> = (initProps) => {
   const frame = useCurrentFrame();
   const styleConfig = useStyleContext();
   const theme = useTheme();
   const preset = useAspectPreset();
 
-  const defaultProps = { ...TextCycleDefaults, ...initProps };
+  const defaultProps = { ...WordCycleDefaults, ...initProps };
   const id = defaultProps.id;
   const props = usePatchedProps(id, defaultProps);
 
@@ -352,7 +352,7 @@ export const TextCycle: React.FC<TextCycleProps> = (initProps) => {
 // Registry Descriptor
 // ===========================================================================
 
-const TextCycleSchemaFields = [
+const WordCycleSchemaFields = [
   {
     "name": "texts",
     "type": "array",
@@ -364,40 +364,40 @@ const TextCycleSchemaFields = [
     "name": "variant",
     "type": "string",
     "subtype": "enum",
-    "default": TextCycleDefaults.variant
+    "default": WordCycleDefaults.variant
   },
   {
     "name": "entranceAnimation",
     "type": "string",
     "subtype": "enum",
-    "default": TextCycleDefaults.entranceAnimation
+    "default": WordCycleDefaults.entranceAnimation
   },
   {
     "name": "textCycleTransition",
     "type": "string",
     "subtype": "enum",
-    "default": TextCycleDefaults.textCycleTransition
+    "default": WordCycleDefaults.textCycleTransition
   },
   {
     "name": "holdDuration",
     "type": "number",
-    "default": TextCycleDefaults.holdDuration
+    "default": WordCycleDefaults.holdDuration
   },
   {
     "name": "transitionDuration",
     "type": "number",
-    "default": TextCycleDefaults.transitionDuration
+    "default": WordCycleDefaults.transitionDuration
   }
 ]
 
 
-export const TextCycleDescriptor: ComponentRegistration = {
-  name: 'TextCycle',
+export const WordCycleDescriptor: ComponentRegistration = {
+  name: 'WordCycle',
   type: 'content',
   schema: [{
     type: "component",
-    name: 'textcycle',
-    fields: TextCycleSchemaFields
+    name: 'wordcycle',
+    fields: WordCycleSchemaFields
   }],
   llmSchema: [
     {
@@ -408,6 +408,6 @@ export const TextCycleDescriptor: ComponentRegistration = {
       }
     }
   ],
-  description: 'Rotates through words or text strings. Works for both single words and longer phrases. Use for taglines, feature lists, or highlighting multiple key points.',
-  celExpression: '(props.textcycle.holdDuration + props.textcycle.transitionDuration) * size(props.textcycle.texts)',
+  description: 'Rotates through words or text strings on a bold background. Use for emphasis words, or highlighting multiple key points.',
+  celExpression: '(props.wordcycle.holdDuration + props.wordcycle.transitionDuration) * size(props.wordcycle.texts)',
 };

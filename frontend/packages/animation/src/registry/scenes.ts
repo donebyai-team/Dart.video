@@ -3,7 +3,6 @@ import { AnimatedNumberDescriptor } from "../components/scenes/text/AnimatedNumb
 import { TextStaggerDescriptor } from "../components/scenes/text/TextStagger";
 import { TypewriterDescriptor } from "../components/scenes/text/Typewriter";
 import { TextHighlightDescriptor } from "../components/scenes/text/TextHighlight";
-import { TextCycleDescriptor } from "../components/scenes/text/TextCycle";
 import { TextWithWordCycleDescriptor } from "../components/scenes/text/TextWithWordCycle";
 import { TextLeadStaggerDescriptor } from "../components/scenes/text/TextLeadStagger";
 import { ProblemHeadlineDescriptor } from "../components/scenes/text/ProblemHeadline";
@@ -18,7 +17,7 @@ import { LogoWithBrandNameDescriptor } from "../components/scenes/assets/LogoWit
 import { LogoWithCTADescriptor } from "../components/scenes/assets/LogoWithCTA";
 import { IconShowcaseDescriptor } from "../components/scenes/assets/IconShowcase";
 import { PillCarouselDescriptor } from "../components/scenes/assets/PillCarousel";
-import { TextWithImageSceneDescriptor, TextWithVideoSceneDescriptor } from "../components/scenes";
+import { TextWithImageSceneDescriptor, TextWithVideoSceneDescriptor, WordCycleDescriptor } from "../components/scenes";
 
 
 export const SCENE_COMPONENTS: ComponentRegistration[] = [
@@ -27,7 +26,7 @@ export const SCENE_COMPONENTS: ComponentRegistration[] = [
   TextStaggerDescriptor,
   TypewriterDescriptor,
   TextHighlightDescriptor,
-  TextCycleDescriptor,
+  WordCycleDescriptor,
   TextWithWordCycleDescriptor,
   TextLeadStaggerDescriptor,
   ProblemHeadlineDescriptor,

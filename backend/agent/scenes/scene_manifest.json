@@ -331,12 +331,12 @@
           "celExpression": "props.texthighlight.animationDelay + props.texthighlight.zoomDuration"
         },
         {
-          "name": "TextCycle",
+          "name": "WordCycle",
           "type": "content",
           "schema": [
             {
               "type": "component",
-              "name": "textcycle",
+              "name": "wordcycle",
               "fields": [
                 {
                   "name": "texts",
@@ -384,8 +384,8 @@
               }
             }
           ],
-          "description": "Rotates through words or text strings. Works for both single words and longer phrases. Use for taglines, feature lists, or highlighting multiple key points.",
-          "celExpression": "(props.textcycle.holdDuration + props.textcycle.transitionDuration) * size(props.textcycle.texts)"
+          "description": "Rotates through words or text strings on a bold background. Use for emphasis words, or highlighting multiple key points.",
+          "celExpression": "(props.wordcycle.holdDuration + props.wordcycle.transitionDuration) * size(props.wordcycle.texts)"
         },
         {
           "name": "TextWithWordCycle",
