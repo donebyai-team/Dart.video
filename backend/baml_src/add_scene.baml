@@ -26,6 +26,10 @@ function GenerateScene(input: AddSceneRequest, conversation_history: Message[]) 
     - You should always keep existing props passed in the input while editing already generated scene.
     - If you have to replace or generate a new scene, use the component list and its props.
 
+    ## SCENE SELECTION
+    - Pick best scene which can be used to communicate the idea given in the query
+    - Only suggest fillers when user asked or a visual scene is not available
+
     ## PLANNING RULES
 
     ### Structure

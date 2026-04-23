@@ -1512,18 +1512,13 @@
                   "name": "variant",
                   "type": "string",
                   "subtype": "enum",
-                  "default": "heading"
+                  "default": "display"
                 },
                 {
                   "name": "entranceAnimation",
                   "type": "string",
                   "subtype": "enum",
                   "default": "scaleIn"
-                },
-                {
-                  "name": "duration",
-                  "type": "number",
-                  "default": 15
                 }
               ]
             },
@@ -1604,7 +1599,7 @@
               }
             }
           ],
-          "description": "A headline with (icon and text as pill) carousel below it. Use for features, industries, use cases, capabilities, or category highlights. Takes around 25 frames per item. Min required 3 items.",
+          "description": "A headline with a carousel of items below, each showing text and an icon (choose an icon name that represents the text) as a pill. Use for features, industries, use cases, capabilities, or categories. ~25 frames per item; minimum 3 items.",
           "celExpression": "35 + max(0, size(props.pills) - 1) * 25"
         }
       ]

@@ -34,9 +34,6 @@ const DEFAULT_PILL_GAP = 36;
 const CAROUSEL_START_DELAY_FRAMES = 2;
 const BASE_SCENE_FRAMES = HERO_TEXT_DEFAULTS.duration + CAROUSEL_START_DELAY_FRAMES + DEFAULT_ENTRANCE_FRAMES;
 const PER_PILL_SCENE_FRAMES = DEFAULT_HOLD_FRAMES + DEFAULT_MOVE_FRAMES;
-const HERO_TEXT_SCHEMA_FIELDS = TextStaggerSchemaFields.filter(
-    (field) => field.name !== 'splitBy' && field.name !== 'staggerDelay',
-);
 
 function buildPillCenters(widths: number[], gap: number): number[] {
     if (widths.length === 0) {
@@ -235,7 +232,25 @@ export const HeroPillCarouselSchemaFields = [
     {
         type: 'component',
         name: 'textstagger',
-        fields: HERO_TEXT_SCHEMA_FIELDS,
+        fields: [
+            {
+                name: 'text',
+                type: 'string',
+                map: 'props.text',
+            },
+            {
+                "name": "variant",
+                "type": "string",
+                "subtype": "enum",
+                "default": HERO_TEXT_DEFAULTS.variant
+            },
+            {
+                "name": "entranceAnimation",
+                "type": "string",
+                "subtype": "enum",
+                "default": HERO_TEXT_DEFAULTS.entranceAnimation
+            },
+        ],
     },
     {
         type: 'repeat',
@@ -250,7 +265,7 @@ export const HeroPillCarouselSchemaFields = [
                         type: "string",
                         dataType: "icon",
                         map: "item.icon"
-                    }                   
+                    }
                 ]
             },
             {
@@ -267,7 +282,7 @@ export const HeroPillCarouselSchemaFields = [
                         type: 'string',
                         subtype: 'enum',
                         default: IconTextPillDefaults.variant,
-                    }                   
+                    }
                 ]
             },
             {
@@ -320,6 +335,6 @@ export const PillCarouselDescriptor: ComponentRegistration = {
             },
         },
     ],
-    description: 'A headline with (icon and text as pill) carousel below it. Use for features, industries, use cases, capabilities, or category highlights. Takes around 25 frames per item. Min required 3 items.',
+    description: 'A headline with a carousel of items below, each showing text and an icon (choose an icon name that represents the text) as a pill. Use for features, industries, use cases, capabilities, or categories. ~25 frames per item; minimum 3 items.',
     celExpression: `${BASE_SCENE_FRAMES} + max(0, size(props.pills) - 1) * ${PER_PILL_SCENE_FRAMES}`,
 };

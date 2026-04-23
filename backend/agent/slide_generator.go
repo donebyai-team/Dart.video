@@ -152,7 +152,7 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 				slide.Direction = pbcore.TransitionDirection_TRANSITION_DIRECTION_FROM_BOTTOM.Enum()
 			}
 
-			if len(pendingSlide.Elements) > 0 && strings.EqualFold(pendingSlide.Elements[0].Component, "TextCycle") {
+			if len(pendingSlide.Elements) > 0 && strings.EqualFold(pendingSlide.Elements[0].Component, "WordCycle") {
 				slide.BackgroundStyle = &pbcore.BackgroundStyle{
 					Pattern: pbcore.BackgroundPattern_BACKGROUND_PATTERN_DOTS,
 					Effect: &pbcore.BackgroundEffect{

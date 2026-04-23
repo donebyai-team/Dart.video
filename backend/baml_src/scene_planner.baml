@@ -60,11 +60,15 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
       how much the script emphasizes each section. Do not pad sections artificially.
 
     Fillers work in any section. Use them to:
-    - Develop an idea within a section
-    - Add pacing between two sectional scenes
+    - Develop an idea within a section with scenes
+    - Add pacing between scenes
     - Fill out scene count when a section needs more depth
+    - *When an appropriate scene is not available*
     - TextStagger can be used back-to-back to maintain flow—for example, showing features as a single word per scene,
       like “Autonomous”, “Precise”, “Reliable” in consecutive filler scenes.
+
+    ## SCENE SELECTION
+    Prioritize scenes over fillers—use scenes whenever the script can be effectively conveyed; otherwise, use fillers.
 
     ## PLANNING RULES
 
