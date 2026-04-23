@@ -69,6 +69,7 @@ export function AnimationEditLayer({
     const lowerId = id.toLowerCase()
     return lowerId.includes('text') ||
       lowerId.includes('icon') ||
+      lowerId.includes('container') ||
       lowerId.includes('counter') ||
       lowerId.includes('typewriter') ||
       lowerId.includes('image') ||
@@ -127,10 +128,10 @@ export function AnimationEditLayer({
 
   /** Check if an element ID is selectable (has a toolbar). */
   function isSelectable(id: string): boolean {
-    const elType = getElementTypeFromId(id)
-    if (elType === 'html' || elType === 'custom') return true
-    const registration = resolveComponentFromId(id)
-    if (!registration) return false
+    // const elType = getElementTypeFromId(id)
+    // if (elType === 'html' || elType === 'custom') return true
+    // const registration = resolveComponentFromId(id)
+    // if (!registration) return false
     // return registration.type !== 'scene'
     return true
   }
@@ -187,15 +188,15 @@ export function AnimationEditLayer({
     const topEl = document.elementFromPoint(clientX, clientY) as HTMLElement | null
     overlayEl.style.pointerEvents = 'auto'
 
-    const cRect = overlayEl.getBoundingClientRect()
+    // const cRect = overlayEl.getBoundingClientRect()
     const hits: { id: string; el: HTMLElement }[] = []
 
     let walkEl = topEl
     while (walkEl && walkEl !== overlayEl) {
       const elId = walkEl.getAttribute('id')
       if (elId && isSelectable(elId)) {
-        const r = walkEl.getBoundingClientRect()
-        if (r.width > cRect.width * 0.9 && r.height > cRect.height * 0.9) break
+        // const r = walkEl.getBoundingClientRect()
+        // if (r.width > cRect.width * 0.9 && r.height > cRect.height * 0.9) break
         hits.push({ id: elId, el: walkEl })
       }
       walkEl = walkEl.parentElement

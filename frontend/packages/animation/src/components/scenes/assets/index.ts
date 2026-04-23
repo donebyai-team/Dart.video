@@ -9,3 +9,5 @@ export * from './LogoAsset';
 export * from './LogoShowcase';
 export * from './LogoWithBrandName';
 export * from './LogoWithCTA';
+export * from '../../../core/assets/IconTextPill';
+export * from './PillCarousel';

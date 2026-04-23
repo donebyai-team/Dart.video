@@ -28,8 +28,10 @@ export interface ResolvedContentAwareLayout {
 }
 
 const VARIANT_WEIGHT: Record<TypographyVariant, TextVisualWeight> = {
+  body: 'compact',
   subheading: 'compact',
   heading: 'compact',
+  headingLg: 'compact',
   display: 'medium',
   displayLg: 'medium',
   displayXl: 'dominant',

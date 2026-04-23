@@ -96,7 +96,7 @@ export function TextWithImageScene(propsInit: SceneProps): React.ReactElement {
   // Determine active text component
   const activeTextType = overlay.texthighlight ? 'texthighlight'
     : overlay.textstagger ? 'textstagger'
-    : 'textwithwordcycle';
+      : 'textwithwordcycle';
 
   let textNode: React.ReactElement;
   let textContent: string;
@@ -157,13 +157,13 @@ export function TextWithImageScene(propsInit: SceneProps): React.ReactElement {
         transform: getEntranceTransform(sceneProps.entranceAnimation ?? DEFAULT_ANIMATION, imageProgress),
       }}
     >
-      <ImageAsset
-        id="imageasset"
-        image={imageProps.image}
-        width={Math.max(1, Math.round(fittedImage.width))}
-        height={Math.max(1, Math.round(fittedImage.height))}
-        style={{ objectFit: 'contain', ...imageProps.style }}
-      />
+        <ImageAsset
+          id="imageasset"
+          image={imageProps.image}
+          width={Math.max(1, Math.round(fittedImage.width))}
+          height={Math.max(1, Math.round(fittedImage.height))}
+          style={{ objectFit: 'contain', ...imageProps.style }}
+        />
     </div>
   );
 

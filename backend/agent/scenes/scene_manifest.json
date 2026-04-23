@@ -4,6 +4,7 @@
       "name": "variant",
       "description": "used for changing the font sizes",
       "value": [
+        "body",
         "subheading",
         "heading",
         "headingLg",
@@ -1488,6 +1489,123 @@
           ],
           "description": "Row of icons + caption. Use for integrations, tech stack, partners, brands. eg. icons={[\"shopify\", \"midjourney\", \"openai\"]}, text=\"caption text\".",
           "celExpression": "55 + max(0, size(props.icons) - 1) * 5 + max(0, segmentCount(props.textstagger.text, \"word\") - 1) * 5"
+        },
+        {
+          "name": "PillCarousel",
+          "type": "scene",
+          "tags": [
+            "Solution",
+            "Product Info",
+            "Use Cases"
+          ],
+          "schema": [
+            {
+              "type": "component",
+              "name": "textstagger",
+              "fields": [
+                {
+                  "name": "text",
+                  "type": "string",
+                  "map": "props.text"
+                },
+                {
+                  "name": "variant",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "heading"
+                },
+                {
+                  "name": "entranceAnimation",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "scaleIn"
+                },
+                {
+                  "name": "duration",
+                  "type": "number",
+                  "default": 15
+                }
+              ]
+            },
+            {
+              "type": "repeat",
+              "source": "pills",
+              "map": "props.pills",
+              "components": [
+                {
+                  "name": "iconasset",
+                  "fields": [
+                    {
+                      "name": "icon",
+                      "type": "string",
+                      "dataType": "icon",
+                      "map": "item.icon"
+                    }
+                  ]
+                },
+                {
+                  "name": "text",
+                  "fields": [
+                    {
+                      "name": "text",
+                      "type": "string",
+                      "dataType": "text",
+                      "map": "item.text"
+                    },
+                    {
+                      "name": "variant",
+                      "type": "string",
+                      "subtype": "enum",
+                      "default": "heading"
+                    }
+                  ]
+                },
+                {
+                  "name": "container",
+                  "fields": [
+                    {
+                      "name": "style",
+                      "type": "object",
+                      "dataType": "style",
+                      "default": {
+                        "backgroundColor": "transparent",
+                        "borderRadius": 50,
+                        "borderWidth": 5,
+                        "borderColor": "#d5d6d9",
+                        "padding": 30,
+                        "gap": 20
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "llmSchema": [
+            {
+              "name": "text",
+              "type": "string"
+            },
+            {
+              "name": "pills",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "fields": [
+                  {
+                    "name": "icon",
+                    "type": "string"
+                  },
+                  {
+                    "name": "text",
+                    "type": "string"
+                  }
+                ]
+              }
+            }
+          ],
+          "description": "A headline with (icon and text as pill) carousel below it. Use for features, industries, use cases, capabilities, or category highlights. Takes around 25 frames per item. Min required 3 items.",
+          "celExpression": "35 + max(0, size(props.pills) - 1) * 25"
         }
       ]
     }

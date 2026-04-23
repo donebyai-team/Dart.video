@@ -21,6 +21,45 @@ func TestConvertSceneToSceneConfig(t *testing.T) {
 		editsToScene []string
 	}{
 		{
+			name: "icon pill with stagger text",
+			inputJSON: `{
+			  "elements": [
+				{
+				  "component": "PillCarousel",
+				  "props": "{\n  \"text\": \"abc\",\n  \"pills\": [{\n    \"icon\": \"google\",\n    \"text\": \"Google\"\n  }]\n}",
+				  "children": []
+				}
+			  ]
+			}`,
+			expectedJSON: `{
+  "ID": "pillcarousel",
+  "Name": "PillCarousel",
+  "Props": {
+    "iconasset-pills-0": {
+      "icon": "https://www.thesvg.org/icons/openai/light.svg",
+      "size": 90,
+      "style": {
+        "color": "#000"
+      }
+    },
+    "iconasset-pills-1": {
+      "icon": "https://www.thesvg.org/icons/google/color.svg",
+      "size": 90
+    },
+    "textstagger": {
+      "duration": 15,
+      "entranceAnimation": "scaleIn",
+      "splitBy": "word",
+      "staggerDelay": 5,
+      "variant": "heading"
+    }
+  },
+  "Children": null
+}`,
+			expectJSX:    []string{"<IconShowcase"},
+			editsToScene: []string{"openai", "google", "textstagger", "iconasset-icons-1", "iconasset-icons-0"},
+		},
+		{
 			name: "icon showcase with stagger text",
 			inputJSON: `{
 			  "elements": [

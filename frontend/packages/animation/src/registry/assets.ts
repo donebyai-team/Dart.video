@@ -50,6 +50,11 @@ export const CONTENT_COMPONENTS: ComponentRegistration[] = [
     description: 'renders a single icon by name from the icon library — use for decorative or supportive visual cues',
   },
   {
+    name: 'IconTextPill',
+    type: 'content',
+    description: 'renders a rounded pill with a logo/icon and short text label — use inside feature rows and carousels',
+  },
+  {
     name: 'Text',
     type: 'content',
     description: 'renders a single icon by name from the icon library — use for decorative or supportive visual cues',
