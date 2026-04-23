@@ -339,10 +339,10 @@
               "name": "wordcycle",
               "fields": [
                 {
-                  "name": "texts",
+                  "name": "words",
                   "type": "array",
                   "subtype": "string",
-                  "map": "props.texts"
+                  "map": "props.words"
                 },
                 {
                   "name": "variant",
@@ -377,15 +377,15 @@
           ],
           "llmSchema": [
             {
-              "name": "texts",
+              "name": "words",
               "type": "array",
               "items": {
                 "type": "string"
               }
             }
           ],
-          "description": "Rotates through words or text strings on a bold background. Use for emphasis words, or highlighting multiple key points.",
-          "celExpression": "(props.wordcycle.holdDuration + props.wordcycle.transitionDuration) * size(props.wordcycle.texts)"
+          "description": "Rotates through words on a bold background. Use for emphasis words, or highlighting multiple key points.",
+          "celExpression": "(props.wordcycle.holdDuration + props.wordcycle.transitionDuration) * size(props.wordcycle.words)"
         },
         {
           "name": "TextWithWordCycle",

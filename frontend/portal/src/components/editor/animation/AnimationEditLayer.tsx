@@ -157,7 +157,7 @@ export function AnimationEditLayer({
         lowerProp === 'text' ||
         lowerProp === 'title' ||
         lowerProp === 'subtitle' ||
-        lowerProp === 'label' ||
+        lowerProp === 'word' ||
         lowerProp.includes('text')
       )
     })

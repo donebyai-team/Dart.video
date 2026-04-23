@@ -114,9 +114,6 @@ func BuildScenesList(editMode bool) string {
 
 	b.WriteString("# Available Scenes\n\n")
 
-	b.WriteString("## Sectional Scenes\n")
-	b.WriteString("Prefer for opening or closing a section.\n\n")
-
 	for _, s := range sectional {
 		writeScene(&b, s, "Sectional")
 	}

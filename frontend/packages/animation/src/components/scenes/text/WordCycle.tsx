@@ -99,7 +99,7 @@ function getMeasuredWordWidth(text: string, style: React.CSSProperties): number 
 
 export const WordCycleDefaults = {
   id: 'textcycle',
-  texts: ['First text', 'Second text', 'Third text'],
+  words: ['First text', 'Second text', 'Third text'],
   holdDuration: 20,
   transitionDuration: 5,
   textCycleTransition: 'slideUp' as TextCycleTransition,
@@ -158,15 +158,15 @@ export const WordCycle: React.FC<WordCycleProps> = (initProps) => {
 
   // Reserve width using the widest rendered word, not the longest string.
   const widestWord = useMemo(
-    () => props.texts.reduce((widest, candidate) => (
+    () => props.words.reduce((widest, candidate) => (
       getMeasuredWordWidth(candidate, spacerMeasurementStyle) > getMeasuredWordWidth(widest, spacerMeasurementStyle)
         ? candidate
         : widest
     ), ''),
-    [props.texts, spacerMeasurementStyle],
+    [props.words, spacerMeasurementStyle],
   );
 
-  if (props.texts.length === 0) {
+  if (props.words.length === 0) {
     return (
       <span
         id={id}
@@ -187,12 +187,12 @@ export const WordCycle: React.FC<WordCycleProps> = (initProps) => {
   const elapsed = Math.max(0, frame);
   const holdDuration = props.holdDuration;
   const transitionDuration = props.transitionDuration;
-  const lastCycleIndex = props.texts.length - 1;
+  const lastCycleIndex = props.words.length - 1;
   const cycleIndex = Math.min(Math.floor(elapsed / cycleDuration), lastCycleIndex);
   const cycleFrame = elapsed - cycleIndex * cycleDuration;
 
-  const currentWord = props.texts[cycleIndex % props.texts.length] ?? props.texts[0] ?? '';
-  const nextWord = props.texts[Math.min(cycleIndex + 1, lastCycleIndex)] ?? currentWord;
+  const currentWord = props.words[cycleIndex % props.words.length] ?? props.words[0] ?? '';
+  const nextWord = props.words[Math.min(cycleIndex + 1, lastCycleIndex)] ?? currentWord;
   const isTransitioning = cycleFrame >= holdDuration && cycleIndex < lastCycleIndex;
 
   const transitionProgress = isTransitioning
@@ -354,11 +354,10 @@ export const WordCycle: React.FC<WordCycleProps> = (initProps) => {
 
 const WordCycleSchemaFields = [
   {
-    "name": "texts",
+    "name": "words",
     "type": "array",
     "subtype": "string",
-
-    "map": "props.texts"
+    "map": "props.words"
   },
   {
     "name": "variant",
@@ -401,13 +400,13 @@ export const WordCycleDescriptor: ComponentRegistration = {
   }],
   llmSchema: [
     {
-      name: 'texts',
+      name: 'words',
       type: 'array',
       "items": {
         "type": "string"
       }
     }
   ],
-  description: 'Rotates through words or text strings on a bold background. Use for emphasis words, or highlighting multiple key points.',
-  celExpression: '(props.wordcycle.holdDuration + props.wordcycle.transitionDuration) * size(props.wordcycle.texts)',
+  description: 'Rotates through words on a bold background. Use for emphasis words, or highlighting multiple key points.',
+  celExpression: '(props.wordcycle.holdDuration + props.wordcycle.transitionDuration) * size(props.wordcycle.words)',
 };
