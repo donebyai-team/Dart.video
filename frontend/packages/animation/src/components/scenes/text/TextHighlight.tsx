@@ -8,9 +8,10 @@ import { useTheme } from '../../../theme';
 import type { TypographyVariant } from '../../../tokens';
 import { resolveTypography } from '../../../tokens/resolveTypography';
 import {
+    getHighlightedTextAnimationTransform,
     getEntranceTransform,
-    HighlightedTextAnimation,
     type EntranceAnimation,
+    type HighlightedTextAnimation,
     type HighlightStyle,
 } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
@@ -73,19 +74,6 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
         'ease-out'
     );
 
-    const jumpHeight = interpolateWithEasing(
-        frame,
-        [zoomStartFrame, zoomStartFrame + actualZoomDuration / 2],
-        [0, -18],
-        'ease-out'
-    );
-    const landingHeight = interpolateWithEasing(
-        frame,
-        [zoomStartFrame + actualZoomDuration / 2, zoomStartFrame + actualZoomDuration],
-        [-18, 0],
-        'ease-in-out'
-    );
-
     const segments = useMemo(() => {
         const parts: { text: string; highlight: boolean; index: number }[] = [];
         let lastIndex = 0;
@@ -139,10 +127,7 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
         // Highlight is always at full intensity (no animation delay)
         const progress = 1;
 
-        const baseTransform =
-            actualHighlightedTextAnimation === 'jump'
-                ? `translateY(${frame < zoomStartFrame + actualZoomDuration / 2 ? jumpHeight : landingHeight}px)`
-                : `scale(${1 + zoomProgress * 9})`;
+        const baseTransform = getHighlightedTextAnimationTransform(actualHighlightedTextAnimation, zoomProgress);
 
         switch (actualHighlightStyle) {
             case 'marker':

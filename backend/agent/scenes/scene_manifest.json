@@ -11,7 +11,8 @@
         "display",
         "displayLg",
         "displayXl",
-        "display2xl"
+        "display2xl",
+        "display3xl"
       ]
     },
     {
@@ -83,8 +84,10 @@
     {
       "name": "highlightedTextAnimation",
       "value": [
+        "none",
         "zoom",
-        "jump"
+        "jump",
+        "elasticStretch"
       ]
     }
   ],
@@ -220,6 +223,58 @@
           ],
           "description": "Reveals a word or full text phrase word-by-word. Works for both single word and multi-word headlines or body text.",
           "celExpression": "(segmentCount(props.textstagger.text, props.textstagger.splitBy) * props.textstagger.staggerDelay) + props.textstagger.duration"
+        },
+        {
+          "name": "TextHookStagger",
+          "type": "scene",
+          "tags": [
+            "Intro",
+            "Hook"
+          ],
+          "schema": [
+            {
+              "type": "component",
+              "name": "texthookstagger",
+              "fields": [
+                {
+                  "name": "text",
+                  "type": "string",
+                  "map": "props.text"
+                },
+                {
+                  "name": "variant",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "display3xl"
+                },
+                {
+                  "name": "staggerDelay",
+                  "type": "number",
+                  "default": 10
+                },
+                {
+                  "name": "highlightedTextAnimation",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "elasticStretch"
+                },
+                {
+                  "name": "highlightColor",
+                  "type": "string",
+                  "subtype": "color",
+                  "default": ""
+                }
+              ]
+            }
+          ],
+          "llmSchema": [
+            {
+              "name": "text",
+              "type": "string"
+            }
+          ],
+          "description": "Reveals a short hook or intro phrase word-by-word. Best for 4-5 word hook/intro scenes.",
+          "celExpression": "max(0, segmentCount(props.texthookstagger.text, \"word\") - 1) * props.texthookstagger.staggerDelay + 4 + 22"
         },
         {
           "name": "Typewriter",

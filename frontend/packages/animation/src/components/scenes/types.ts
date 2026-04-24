@@ -35,7 +35,7 @@ export const DIRECTIONS = [
     'down',
 ] as const;
 
-export const HIGHLIGHTED_TEXT_ANIMATIONS = ['zoom', 'jump'] as const;
+export const HIGHLIGHTED_TEXT_ANIMATIONS = ['none', 'zoom', 'jump', 'elasticStretch'] as const;
 
 export type Direction = typeof DIRECTIONS[number];
 
@@ -89,6 +89,33 @@ export function getEntranceTransform(
         case 'swingIn':
             return `perspective(800px) rotateY(${inv * 70}deg) translateX(${inv * -100}px)`;
         case 'fadeIn':
+        default:
+            return 'none';
+    }
+}
+
+export function getHighlightedTextAnimationTransform(
+    animation: HighlightedTextAnimation,
+    progress: number,
+): string {
+    const clampedProgress = Math.max(0, Math.min(1, progress));
+
+    switch (animation) {
+        case 'zoom':
+            return `scale(${1 + clampedProgress * 9})`;
+        case 'jump': {
+            const jumpHeight = -18 * Math.sin(clampedProgress * Math.PI);
+            return `translateY(${jumpHeight}px)`;
+        }
+        case 'elasticStretch': {
+            const decay = 1 - clampedProgress;
+            const wave = Math.sin(clampedProgress * Math.PI * 3);
+            const stretch = 1 + wave * decay * 0.28;
+            const squash = 1 - wave * decay * 0.12;
+
+            return `scaleX(${stretch}) scaleY(${squash})`;
+        }
+        case 'none':
         default:
             return 'none';
     }

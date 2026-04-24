@@ -1,7 +1,7 @@
 import { FontSizeToken, FontWeightToken } from './typography';
 
 /** Semantic typography variants. LLM only sees these names. */
-export const TYPOGRAPHY_VARIANT_NAMES = ['body', 'subheading', 'heading', 'headingLg', 'display', 'displayLg', 'displayXl', 'display2xl'] as const;
+export const TYPOGRAPHY_VARIANT_NAMES = ['body', 'subheading', 'heading', 'headingLg', 'display', 'displayLg', 'displayXl', 'display2xl', 'display3xl'] as const;
 export type TypographyVariant = (typeof TYPOGRAPHY_VARIANT_NAMES)[number];
 
 export interface TypographyVariantConfig {
@@ -19,6 +19,7 @@ export const TYPOGRAPHY_VARIANTS: Record<TypographyVariant, TypographyVariantCon
   headingLg:  { fontSize: '3xl', fontWeight: 'bold',      lineHeight: 1.1 },
   display:    { fontSize: '4xl', fontWeight: 'extrabold', lineHeight: 1.02 },
   displayLg:  { fontSize: '5xl', fontWeight: 'extrabold', lineHeight: 1.04 },
-  displayXl:  { fontSize: '6xl', fontWeight: 'extrabold', lineHeight: 1.08 },
+  displayXl:  { fontSize: '6xl', fontWeight: 'extrabold', lineHeight: 1.06 },
   display2xl: { fontSize: '7xl', fontWeight: 'extrabold', lineHeight: 1.08 },
+  display3xl: { fontSize: '8xl', fontWeight: 'extrabold', lineHeight: 1.10 },
 };
