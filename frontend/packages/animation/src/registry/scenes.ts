@@ -9,7 +9,7 @@ import { ProblemHeadlineDescriptor } from "../components/scenes/text/ProblemHead
 import { TextCardStackDescriptor } from "../components/scenes/text/TextCardStack";
 import { AnimatedImageDescriptor } from "../components/scenes/assets/AnimatedImage";
 import { AnimatedVideoDescriptor } from "../components/scenes/assets/AnimatedVideo";
-import { ImagePeelDescriptor } from "../components/scenes/assets/ImagePeel";
+import { MultiImageStackDescriptor } from "../components/scenes/assets/image_stack/MultiImageStack";
 import { ProblemCollageDescriptor } from "../components/scenes/assets/ProblemCollage";
 import { LogoAssetDescriptor } from "../components/scenes/assets/LogoAsset";
 import { LogoShowcaseDescriptor } from "../components/scenes/assets/LogoShowcase";
@@ -37,7 +37,7 @@ export const SCENE_COMPONENTS: ComponentRegistration[] = [
   // AnimatedVideoDescriptor,
   TextWithImageSceneDescriptor,
   TextWithVideoSceneDescriptor,
-  ImagePeelDescriptor,
+  MultiImageStackDescriptor,
   ProblemCollageDescriptor,
   // LogoAssetDescriptor,
   LogoShowcaseDescriptor,

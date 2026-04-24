@@ -9,6 +9,7 @@ import {
   SafeArea,
   AbsoluteCenter,
   PillCarousel,
+  MultiImageStack,
 } from '@coasterai/animation'
 
 import { compileRemoteComponent } from '../compiler'
@@ -183,30 +184,109 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
       }}
     >
       <CanvasEffectsLayer
-          zooms={slide.zooms ?? []}
-          spotlights={slide.spotlights ?? []}
-          callouts={slide.callouts ?? []}
-          frame={frame}
-          fps={fps}
-          width={width}
-          height={height}
-          slideDurationInFrames={slide.durationInFrames}
-          isPlaying={isPlaying}
-        >
-          <div style={{ width: '100%', height: '100%' }}>
-            {isLoading ? (
-              <TemplateLoadingPlaceholder />
-            ) : CompiledComponent ? (
-              <SpeedFactorProvider factor={1}>
-                <PatchContextProvider overlay={content?.edits as PatchOverlay}>
-                  <CompiledComponent />
-                </PatchContextProvider>              
-              </SpeedFactorProvider>
-            ) : templateError ? (
-              <TemplateErrorFallback message={templateError} />
-            ) : null}
-          </div>
-        </CanvasEffectsLayer>
+        zooms={slide.zooms ?? []}
+        spotlights={slide.spotlights ?? []}
+        callouts={slide.callouts ?? []}
+        frame={frame}
+        fps={fps}
+        width={width}
+        height={height}
+        slideDurationInFrames={slide.durationInFrames}
+        isPlaying={isPlaying}
+      >
+        <div style={{ width: '100%', height: '100%' }}>
+          {isLoading ? (
+            <TemplateLoadingPlaceholder />
+          ) : CompiledComponent ? (
+            <SpeedFactorProvider factor={1}>
+              <PatchContextProvider overlay={{
+                "textstagger": {
+                  "text": "One product. Every use case.",
+                  "variant": "display",
+                  "duration": 14,
+                  "entranceAnimation": "scaleIn"
+                },
+                "imageasset-images-0": {
+                  "image": "https://placehold.co/800x400.png?text=Backlog"
+                },
+                "imageasset-images-1": {
+                  "image": "https://placehold.co/800x400.png?text=Deadlines"
+                },
+                "imageasset-images-2": {
+                  "image": "https://placehold.co/800x400.png?text=Tickets"
+                },
+                "iconasset-pills-0": {
+                  "icon": "https://unpkg.com/@tabler/icons@3.41.1/icons/outline/home.svg"
+                },
+                "text-pills-0": {
+                  "text": "Home",
+                  "variant": "heading",
+                  "style": {
+                    "opacity": 0.8
+                  }
+                },
+                "container-pills-0": {
+                  "style": {
+                    "borderRadius": 50,
+                    "borderWidth": 5,
+                    "borderColor": "#d5d6d9",
+                    "padding": 30,
+                    "gap": 20
+                  }
+                },
+                "iconasset-pills-1": {
+                  "icon": "https://unpkg.com/@tabler/icons@3.41.1/icons/outline/home.svg"
+                },
+                "text-pills-1": {
+                  "text": "Hospital",
+                  "variant": "heading",
+                  "style": {
+                    "opacity": 0.8
+                  }
+                },
+                "container-pills-1": {
+                  "style": {
+                    "borderRadius": 50,
+                    "borderWidth": 5,
+                    "borderColor": "#d5d6d9",
+                    "padding": 30,
+                    "gap": 20
+                  }
+                },
+                "iconasset-pills-2": {
+                  "icon": "https://unpkg.com/@tabler/icons@3.41.1/icons/outline/home.svg"
+                },
+                "text-pills-2": {
+                  "text": "New Feature3",
+                  "variant": "heading",
+                  "style": {
+                    "opacity": 0.8
+                  }
+                },
+                "container-pills-2": {
+                  "style": {
+                    "borderRadius": 50,
+                    "borderWidth": 5,
+                    "borderColor": "#d5d6d9",
+                    "padding": 30,
+                    "gap": 20
+                  }
+                }
+              }}>
+                {/* <CompiledComponent /> */}
+                <SafeArea>
+                  <AbsoluteCenter>
+                    <MultiImageStack />
+                  </AbsoluteCenter>
+                </SafeArea>
+
+              </PatchContextProvider>
+            </SpeedFactorProvider>
+          ) : templateError ? (
+            <TemplateErrorFallback message={templateError} />
+          ) : null}
+        </div>
+      </CanvasEffectsLayer>
     </AbsoluteFill>
   )
 }
