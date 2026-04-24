@@ -53,14 +53,14 @@ export function parseLetterSpacing(value: React.CSSProperties['letterSpacing'], 
 
 export function measureTextWidth(text: string, style: React.CSSProperties): number {
     if (typeof document === 'undefined') {
-        return text.length * 16;
+        return text.length;
     }
 
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
 
     if (!context) {
-        return text.length * 16;
+        return text.length;
     }
 
     const fontSizePx = parsePixelValue(style.fontSize, 16);
