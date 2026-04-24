@@ -3,9 +3,9 @@
 import { Square } from 'lucide-react'
 
 interface VideoGenerationProgressProps {
-  /** Number of slides received so far (derived from videoConfig in the store). */
+  /** Number of scenes received so far (derived from videoConfig in the store). */
   receivedSlides: number
-  /** Total slides the agent plans to generate (from streamingTotalSlides). 0 = not yet known. */
+  /** Total scenes the agent plans to generate (from streamingTotalSlides). 0 = not yet known. */
   totalSlides: number
   /** Latest thinking text streamed from the agent. */
   thinkingSummary: string
@@ -37,8 +37,8 @@ const VideoGenerationProgress = ({
             <p className='text-sm font-semibold'>Generating Video</p>
             <p className='text-xs text-muted-foreground'>
               {hasTotal
-                ? `${receivedSlides} of ${totalSlides} slides done`
-                : 'Planning slides…'}
+                ? `${receivedSlides} of ${totalSlides} scenes done`
+                : 'Planning scenes…'}
             </p>
           </div>
         </div>

@@ -19,7 +19,6 @@ import { usePrimitiveDrag } from './usePrimitiveDrag'
 import { useMediaResize } from './useMediaResize'
 import {
   resolveComponentFromId,
-  getElementTypeFromId,
   type PatchOverlay,
 } from '@coasterai/renderer'
 import { ArrayControlButton } from './ArrayControlButton'

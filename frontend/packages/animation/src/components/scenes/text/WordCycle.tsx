@@ -11,7 +11,7 @@ import { Text } from '../../../core/assets/Text';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { getEntranceTransform } from '../types';
 import type { EntranceAnimation, TextCycleTransition } from '../types';
-import { measureTextWidth } from './measureText';
+import { measureTextWidth } from '../text/measureText';
 
 export const WordCycleDefaults = {
   id: 'textcycle',
