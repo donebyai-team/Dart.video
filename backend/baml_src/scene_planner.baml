@@ -55,7 +55,7 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     - All scenes should feel connected, forming a continuous flow that maintains visual rhythm and tone.
     - NEVER duplicate the same text across scenes
     - Don't stack similar scenes back to back — vary the visual rhythm.
-    - Always finish with a LogoAsset scene.
+    - Always finish with CTA scene.
     - Target **15-20 scenes total** for a 60s video. Distribute across sections naturally based on
       how much the script emphasizes each section. Do not pad sections artificially.
 
@@ -63,12 +63,12 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     - Develop an idea within a section with scenes
     - Add pacing between scenes
     - Fill out scene count when a section needs more depth
-    - *When an appropriate scene is not available*
+    - **When an appropriate scene is not available**
     - TextStagger can be used back-to-back to maintain flow—for example, showing features as a single word per scene,
       like “Autonomous”, “Precise”, “Reliable” in consecutive filler scenes.
 
     ## SCENE SELECTION
-    Prioritize scenes over fillers—use scenes whenever the script can be effectively conveyed; otherwise, use fillers.
+    - Prioritize scenes over fillers, use scenes whenever the script can be effectively conveyed; otherwise, use fillers.
 
     ## PLANNING RULES
 
@@ -84,8 +84,9 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
 
     Before outputting scenes, reason through:
 
-    1. **Section mapping** — which sections of the video structure does this script cover?
+    1. **Section mapping** — map or break the script into the appropriate sections?
        Quote the relevant script portion for each section found.
+    2. Then break each video section further into multiple scenes or fillers.
     2. **Scene count** — how many scenes does each section need to hit 15-20 total?
     3. **Narrative arc** — does the section order tell a coherent story?
     4. **Hero vs supporting scenes** — which scenes carry the main message vs add pacing?
