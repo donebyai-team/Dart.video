@@ -63,11 +63,12 @@ type FieldSchema struct {
 }
 
 type LLMField struct {
-	Name    string    `json:"name"`
-	Type    string    `json:"type"`
-	Subtype string    `json:"subtype,omitempty"`
-	Enum    []string  `json:"enum,omitempty"`
-	Items   *LLMItems `json:"items,omitempty"`
+	Name     string    `json:"name"`
+	Type     string    `json:"type"`
+	Subtype  string    `json:"subtype,omitempty"`
+	Enum     []string  `json:"enum,omitempty"`
+	Required bool      `json:"required,omitempty"`
+	Items    *LLMItems `json:"items,omitempty"`
 }
 
 type LLMItems struct {
@@ -183,6 +184,9 @@ func writeProps(b *strings.Builder, fields []LLMField) {
 		}
 
 		fmt.Fprintf(b, "- %s (%s)", f.Name, f.Type)
+		if !f.Required {
+			fmt.Fprintf(b, " (optional)")
+		}
 
 		if len(f.Enum) > 0 {
 			fmt.Fprintf(b, " | values: %s", strings.Join(f.Enum, ", "))

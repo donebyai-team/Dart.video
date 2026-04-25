@@ -1,4 +1,5 @@
 export * from './AnimatedNumber';
+export * from './StatCounter';
 export * from './Typewriter';
 export * from './WordCycle';
 export * from './TextWithWordCycle';

@@ -9,6 +9,7 @@ import {
   SafeArea,
   AbsoluteCenter,
   PillCarousel,
+  StatCounter,
 } from '@coasterai/animation'
 
 import { compileRemoteComponent } from '../compiler'
@@ -199,7 +200,12 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
             ) : CompiledComponent ? (
               <SpeedFactorProvider factor={1}>
                 <PatchContextProvider overlay={content?.edits as PatchOverlay}>
-                  <CompiledComponent />
+                  {/* <CompiledComponent /> */}
+                  <SafeArea>
+                    <AbsoluteCenter>  
+                      <StatCounter/>
+                    </AbsoluteCenter>
+                  </SafeArea>
                 </PatchContextProvider>              
               </SpeedFactorProvider>
             ) : templateError ? (
