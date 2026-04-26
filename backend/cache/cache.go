@@ -19,6 +19,7 @@ var ErrCacheMiss = errors.New("cache key not found")
 type Cache interface {
 	SetKey(ctx context.Context, key, value string, ttl time.Duration) error
 	GetKey(ctx context.Context, key string) (string, error)
+	RemoveKey(ctx context.Context, key string) error
 	AuthStateStore
 }
 
@@ -65,6 +66,24 @@ func NewRedisStore(redisAddr string, logger *zap.Logger) Cache {
 		redisClient: redisClient,
 		logger:      logger,
 	}
+}
+
+func (r *redisCache) RemoveKey(ctx context.Context, key string) error {
+	if key == "" {
+		return fmt.Errorf("key is required")
+	}
+
+	cmd := r.redisClient.Del(prefixedKey(key))
+	if err := cmd.Err(); err != nil {
+		return fmt.Errorf("remove cache key: %w", err)
+	}
+
+	//// Optional: detect if key didn't exist
+	//if cmd.Val() == 0 {
+	//	return ErrCacheMiss
+	//}
+
+	return nil
 }
 
 func (r *redisCache) SetKey(ctx context.Context, key, value string, ttl time.Duration) error {

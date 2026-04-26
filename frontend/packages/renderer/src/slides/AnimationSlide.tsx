@@ -200,12 +200,12 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
             ) : CompiledComponent ? (
               <SpeedFactorProvider factor={1}>
                 <PatchContextProvider overlay={content?.edits as PatchOverlay}>
-                  {/* <CompiledComponent /> */}
-                  <SafeArea>
+                  <CompiledComponent />
+                  {/* <SafeArea>
                     <AbsoluteCenter>  
                       <StatCounter/>
                     </AbsoluteCenter>
-                  </SafeArea>
+                  </SafeArea> */}
                 </PatchContextProvider>              
               </SpeedFactorProvider>
             ) : templateError ? (
