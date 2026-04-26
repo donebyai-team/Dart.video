@@ -19,7 +19,7 @@ export {
 export { compileRemoteComponent, stripImports } from './compiler';
 export type { CompilationResult, CompileRemoteComponentOptions } from './compiler';
 export { loadTemplateSource, getCachedTemplateSource } from './templateSource';
-export { SUPPORTED_FONTS, loadAllFonts } from './load_fonts';
+export { SUPPORTED_FONTS, loadAllFonts, loadFonts } from './load_fonts';
 export {
   TRANSITION_OPTIONS,
   TRANSITION_DIRECTION_OPTIONS,

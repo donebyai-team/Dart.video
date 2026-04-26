@@ -207,8 +207,6 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
             style={{
                 display: 'inline-block',
                 opacity: entranceProgress,
-                ...props.style,
-                ...styleOverride,
                 ...dragStyle,
             }}
         >
@@ -216,6 +214,8 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
                 style={{
                     ...resolveTypography(actualVariant, styleConfig, theme, preset),
                     whiteSpace: 'pre-wrap',
+                    ...props.style,
+                    ...styleOverride,
                 }}
             >
                 {segments.map((segment, i) => {

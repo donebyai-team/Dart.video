@@ -162,6 +162,9 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
         opacity: isVisible ? visibleProgress : 0,
         transform: exitTranslate,
         transformOrigin: 'left center',
+        ...typographyStyle,
+        ...props.style,
+        ...styleOverride,
       };
     }
 
@@ -191,6 +194,9 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
       opacity: isVisible ? visibleProgress : 0,
       transform: composeTransforms(entranceTransform, exitTranslate),
       transformOrigin: 'left center',
+      ...typographyStyle,
+      ...props.style,
+      ...styleOverride,
     };
   };
 
@@ -218,6 +224,8 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
     transform: `translate(-50%, -50%) scale(${leadScale - (leadScale - 1) * leadSettleProgress})`,
     transformOrigin: 'center center',
     ...typographyStyle,
+    ...props.style,
+    ...styleOverride,
   };
 
   return (
