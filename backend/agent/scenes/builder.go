@@ -69,6 +69,8 @@ type LLMField struct {
 	Enum     []string  `json:"enum,omitempty"`
 	Required *bool     `json:"required,omitempty"`
 	Items    *LLMItems `json:"items,omitempty"`
+	Hint     string    `json:"hint,omitempty"`
+	Range    string    `json:"range,omitempty"`
 }
 
 type LLMItems struct {
@@ -156,43 +158,55 @@ func writeScene(b *strings.Builder, c Component, category string) {
 	b.WriteString("\n---\n\n")
 }
 
+func fieldMeta(f LLMField) string {
+	var parts []string
+
+	if f.Required != nil && !*f.Required {
+		parts = append(parts, "optional")
+	}
+
+	if len(parts) == 0 {
+		return ""
+	}
+
+	return ", " + strings.Join(parts, ", ")
+}
+
+func writeFieldDetails(b *strings.Builder, f LLMField, indent string) {
+	if f.Hint != "" {
+		fmt.Fprintf(b, "%sHint: %s\n", indent, f.Hint)
+	}
+
+	if f.Range != "" {
+		fmt.Fprintf(b, "%sRange: %s\n", indent, f.Range)
+	}
+
+	if len(f.Enum) > 0 {
+		fmt.Fprintf(b, "%sAllowed values: %s\n", indent, strings.Join(f.Enum, ", "))
+	}
+}
+
 func writeProps(b *strings.Builder, fields []LLMField) {
-
 	for _, f := range fields {
-
 		if f.Type == "array" && f.Items != nil {
-
 			if len(f.Items.Fields) > 0 {
+				fmt.Fprintf(b, "- %s: array of objects%s\n", f.Name, fieldMeta(f))
+				fmt.Fprintf(b, "  Each item:\n")
 
-				var sub []string
 				for _, s := range f.Items.Fields {
-					sub = append(sub, fmt.Sprintf("%s:%s", s.Name, s.Type))
+					fmt.Fprintf(b, "  - %s: %s%s\n", s.Name, s.Type, fieldMeta(s))
+					writeFieldDetails(b, s, "    ")
 				}
-
-				fmt.Fprintf(b, "- %s (array<object>) → {%s}\n",
-					f.Name,
-					strings.Join(sub, ", "),
-				)
-
 			} else {
-
-				fmt.Fprintf(b, "- %s (array<%s>)\n", f.Name, f.Items.Type)
-
+				fmt.Fprintf(b, "- %s: array of %s%s\n", f.Name, f.Items.Type, fieldMeta(f))
+				writeFieldDetails(b, f, "  ")
 			}
 
 			continue
 		}
 
-		fmt.Fprintf(b, "- %s (%s)", f.Name, f.Type)
-		if f.Required != nil && !*f.Required {
-			fmt.Fprintf(b, " (optional)")
-		}
-
-		if len(f.Enum) > 0 {
-			fmt.Fprintf(b, " | values: %s", strings.Join(f.Enum, ", "))
-		}
-
-		b.WriteString("\n")
+		fmt.Fprintf(b, "- %s: %s%s\n", f.Name, f.Type, fieldMeta(f))
+		writeFieldDetails(b, f, "  ")
 	}
 }
 
