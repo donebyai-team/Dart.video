@@ -6,8 +6,9 @@ import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme/ThemeContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { resolveTypography } from '../../../tokens/resolveTypography';
-import { getEntranceTransform } from '../types';
+import { EntranceAnimation, getEntranceTransform } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
+import { TypographyVariant } from '../../../tokens';
 
 const TYPEWRITER_TYPING_DURATION = 30;
 const TYPEWRITER_PULSE_DURATION = 24;
@@ -17,8 +18,8 @@ export const TypewriterDefaults = {
   text: "Try cursor today",
   startAt: 0,
   splitBy: "char" as const,
-  variant: "heading" as const,
-  entranceAnimation: "slideUp" as const,
+  variant: "headingLg" as TypographyVariant,
+  entranceAnimation: "fadeIn" as EntranceAnimation,
   typingDuration: TYPEWRITER_TYPING_DURATION,
   style: undefined as React.CSSProperties | undefined,
   className: undefined as string | undefined,

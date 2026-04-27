@@ -67,7 +67,6 @@ function getLogoAnimationStyle(animation: LogoAnimation, progress: number): Reac
 export function LogoAsset(initProps: LogoAssetProps): React.ReactElement {
     const defaultProps = { ...LogoAssetDefaults, ...initProps };
     const id = defaultProps.id;
-    console.log("rwgjlnklweg", defaultProps)
     
     const props = usePatchedProps(id, defaultProps);
 
