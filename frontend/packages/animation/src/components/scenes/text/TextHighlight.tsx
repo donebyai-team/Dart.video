@@ -19,7 +19,7 @@ import type { ComponentRegistration } from '../../../registry/registry';
 export const TextHighlightDefaults = {
     id: 'texthighlight',
     text: 'We build amazing {software}',
-    variant: 'headingLg' as TypographyVariant,
+    variant: 'display' as TypographyVariant,
     highlightStyle: 'glow' as HighlightStyle,
     highlightedTextAnimation: 'jump' as HighlightedTextAnimation,
     highlightColor: '',

@@ -18,7 +18,7 @@ export const AnimatedNumberDefaults = {
     from: 0,
     to: 100,
     format: undefined as string | undefined,
-    variant: 'heading' as TypographyVariant,
+    variant: 'display' as TypographyVariant,
     highlightStyle: 'glow' as HighlightStyle,
     highlightColor: undefined as string | undefined,
     entranceAnimation: 'slideUp' as EntranceAnimation,

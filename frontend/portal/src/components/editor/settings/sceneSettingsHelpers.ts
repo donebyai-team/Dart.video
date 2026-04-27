@@ -10,6 +10,7 @@ export type SceneFieldKind = 'string' | 'number' | 'boolean' | 'string[]' | 'enu
   | 'image[]'
   | 'video'
   | 'video[]'
+  | 'animation_speed'
 
 export type SceneFieldDefinition = {
   kind: SceneFieldKind
@@ -84,6 +85,8 @@ export function inferSceneFieldDefinition(prop: string, value: unknown): SceneFi
   const isImageField = lowerProp === 'image' || lowerProp === 'images' || lowerProp === 'src'
   const isColorField = lowerProp.includes('color')
 
+  if (lowerProp === 'speed')
+    return { kind: 'animation_speed' }
 
   if (isVideoField && typeof value === 'string') {
     return { kind: 'video' }
@@ -154,6 +157,8 @@ function getSceneFieldKindPriority(kind: SceneFieldKind): number {
       return 7
     case 'string[]':
       return 8
+    case 'animation_speed':
+      return 100
     default:
       return 10
   }
