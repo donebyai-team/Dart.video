@@ -17,10 +17,6 @@ export type ContainerStylePatch = Partial<
   >
 >;
 
-export type NormalizedContainerStyle = ContainerStyleDefaults & {
-  style: React.CSSProperties;
-};
-
 export function parseContainerNumber(
   value: React.CSSProperties['borderRadius'] | React.CSSProperties['borderWidth'] | React.CSSProperties['padding'] | React.CSSProperties['gap'] | undefined,
   fallback: number,
@@ -40,7 +36,7 @@ export function parseContainerNumber(
 export function normalizeContainerStyle(
   defaults: ContainerStyleDefaults,
   ...overrides: Array<ContainerStylePatch | undefined>
-): NormalizedContainerStyle {
+): React.CSSProperties {
   const merged = Object.assign({}, defaults, ...overrides);
   const borderRadius = parseContainerNumber(merged.borderRadius, defaults.borderRadius);
   const borderWidth = parseContainerNumber(merged.borderWidth, defaults.borderWidth);
@@ -51,19 +47,10 @@ export function normalizeContainerStyle(
     backgroundColor: merged.backgroundColor ?? defaults.backgroundColor,
     borderRadius,
     borderWidth,
+    borderStyle: 'solid',
     borderColor: merged.borderColor ?? defaults.borderColor,
     padding,
     gap,
     boxShadow: merged.boxShadow ?? defaults.boxShadow,
-    style: {
-      backgroundColor: merged.backgroundColor ?? defaults.backgroundColor,
-      borderRadius,
-      borderWidth,
-      borderStyle: 'solid',
-      borderColor: merged.borderColor ?? defaults.borderColor,
-      padding,
-      gap,
-      boxShadow: merged.boxShadow ?? defaults.boxShadow,
-    },
   };
 }

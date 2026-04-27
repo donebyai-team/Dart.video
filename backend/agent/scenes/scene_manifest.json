@@ -172,6 +172,123 @@
           "celExpression": "props.animatednumber.animationDelay + max(45, min(100, log10(abs(props.animatednumber.to - props.animatednumber.from) + 1) * 20))"
         },
         {
+          "name": "StatCounter",
+          "type": "scene",
+          "tags": [
+            "Social Proof",
+            "Problem"
+          ],
+          "schema": [
+            {
+              "type": "component",
+              "name": "container",
+              "fields": [
+                {
+                  "name": "style",
+                  "type": "object",
+                  "dataType": "style",
+                  "default": {
+                    "backgroundColor": "none",
+                    "borderRadius": 0,
+                    "borderWidth": 0,
+                    "borderColor": "none",
+                    "padding": 50,
+                    "gap": 50,
+                    "boxShadow": "0 10px 20px rgba(0,0,0,0.25), 0 6px 12px rgba(0,0,0,0.15)"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "component",
+              "name": "text",
+              "fields": [
+                {
+                  "name": "label",
+                  "type": "string",
+                  "map": "props.label"
+                },
+                {
+                  "name": "variant",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "subheading"
+                }
+              ]
+            },
+            {
+              "type": "component",
+              "name": "counter",
+              "fields": [
+                {
+                  "name": "label",
+                  "type": "string",
+                  "map": "props.label"
+                },
+                {
+                  "name": "variant",
+                  "type": "string",
+                  "subtype": "enum",
+                  "default": "displayLg"
+                },
+                {
+                  "name": "from",
+                  "type": "number",
+                  "map": "props.from"
+                },
+                {
+                  "name": "to",
+                  "type": "number",
+                  "map": "props.to"
+                },
+                {
+                  "name": "prefix",
+                  "type": "string",
+                  "map": "props.prefix",
+                  "default": ""
+                },
+                {
+                  "name": "suffix",
+                  "type": "string",
+                  "map": "props.suffix",
+                  "default": ""
+                },
+                {
+                  "name": "speed",
+                  "type": "number",
+                  "default": 100
+                }
+              ]
+            }
+          ],
+          "llmSchema": [
+            {
+              "name": "label",
+              "type": "string"
+            },
+            {
+              "name": "from",
+              "type": "number"
+            },
+            {
+              "name": "to",
+              "type": "number"
+            },
+            {
+              "name": "prefix",
+              "type": "string",
+              "required": false
+            },
+            {
+              "name": "suffix",
+              "type": "string",
+              "required": false
+            }
+          ],
+          "description": "Centered animated metric counter with a short 2-3 word label below it. Use for large number, single stat, metric, or KPI with or without prefix/suffix eg. 1240, 500$, 500K, 500M",
+          "celExpression": "(((10 + 50 + 2 + 1) * 100) / max(25, props.counter.speed))"
+        },
+        {
           "name": "TextStagger",
           "type": "content",
           "schema": [

@@ -67,7 +67,7 @@ type LLMField struct {
 	Type     string    `json:"type"`
 	Subtype  string    `json:"subtype,omitempty"`
 	Enum     []string  `json:"enum,omitempty"`
-	Required bool      `json:"required,omitempty"`
+	Required *bool     `json:"required,omitempty"`
 	Items    *LLMItems `json:"items,omitempty"`
 }
 
@@ -184,7 +184,7 @@ func writeProps(b *strings.Builder, fields []LLMField) {
 		}
 
 		fmt.Fprintf(b, "- %s (%s)", f.Name, f.Type)
-		if !f.Required {
+		if f.Required != nil && !*f.Required {
 			fmt.Fprintf(b, " (optional)")
 		}
 

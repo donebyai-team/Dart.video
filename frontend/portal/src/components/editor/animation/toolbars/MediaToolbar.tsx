@@ -6,7 +6,7 @@ import {
   MAX_ELEMENT_DEPTH,
   parseDepthFromShadow,
 } from '@coasterai/renderer'
-import { NumberStepper, SelectInput, SliderInput } from './TextToolbar'
+import { LabeledField, NumberStepper, SelectInput, SliderInput } from './TextToolbar'
 
 const OBJECT_FIT_OPTIONS = [
   { label: 'Contain', value: 'contain' },
@@ -103,17 +103,6 @@ export function MediaToolbar({
           inputWidth="w-14"
         />
       </LabeledField>
-    </div>
-  )
-}
-
-function LabeledField({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex items-center gap-1.5">
-      <span className="text-muted-foreground text-[10px] uppercase tracking-wider font-medium select-none">
-        {label}
-      </span>
-      {children}
     </div>
   )
 }

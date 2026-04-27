@@ -6,28 +6,27 @@ import { useTheme } from '../../../theme';
 import { resolveTypography } from '../../../tokens';
 import type { TypographyVariant } from '../../../tokens/semantic';
 import { Text } from '../../../core/assets/Text';
-import { IconTextPillDefaults } from '../../../core/assets/IconTextPill';
 import { normalizeContainerStyle } from '../../../core/assets/ContainerAsset';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { Counter } from './Counter';
+import { DEFAULT_SPEED_PERCENTAGE, getSpeed, MIN_SPEED_PERCENTAGE, scaleTiming } from '../../../duration/timings';
 
-const DEFAULT_COUNTER_DURATION = 50;
-const DEFAULT_COUNTER_DELAY = 10;
-const DEFAULT_ANIMATION_DELAY = 12;
-const DEFAULT_HOLD_DURATION = 30;
+const BASE_COUNTER_DURATION = 50;
+const BASE_COUNTER_DELAY = 10;
+const BASE_ANIMATION_DELAY = 12;
+const BASE_HOLD_DURATION = 2;
 
 const StatCounterContainerDefaults = {
-  backgroundColor: IconTextPillDefaults.backgroundColor,
+  backgroundColor: 'none',
   borderRadius: 0,
   borderWidth: 0,
-  borderColor: IconTextPillDefaults.borderColor,
+  borderColor: 'none',
   padding: 50,
   gap: 50,
   boxShadow: buildDepthShadow(DEFAULT_MEDIA_DEPTH),
 };
 
 export const StatCounterDefaults = {
-  containerId: 'container',
   container: {
     style: StatCounterContainerDefaults as React.CSSProperties,
   },
@@ -38,14 +37,12 @@ export const StatCounterDefaults = {
     prefix: undefined as string | undefined,
     suffix: undefined as string | undefined,
     variant: 'displayLg' as TypographyVariant,
+    speed: DEFAULT_SPEED_PERCENTAGE,
   },
   text: {
     text: 'Total Users',
     variant: 'subheading' as TypographyVariant,
   },
-  animationDelay: DEFAULT_ANIMATION_DELAY,
-  counterDelay: DEFAULT_COUNTER_DELAY,
-  counterDuration: DEFAULT_COUNTER_DURATION,
 };
 
 export type StatCounterProps = Partial<typeof StatCounterDefaults> & { id?: string };
@@ -58,17 +55,23 @@ export const StatCounter: React.FC<StatCounterProps> = (initProps) => {
   const preset = useAspectPreset();
 
   const defaultProps = { ...StatCounterDefaults, ...initProps };
+  const containerProps = usePatchedProps('container', defaultProps.container);
   const counterProps = usePatchedProps('counter', defaultProps.counter);
   const textProps = usePatchedProps('text', defaultProps.text);
   const containerStyleOverride = useStyleOverride('container');
 
   const containerStyle = normalizeContainerStyle(
     StatCounterContainerDefaults,
+    containerProps.style,
     containerStyleOverride,
-  ).style;
+  );
+  const speed = getSpeed(counterProps.speed);
+  const animationDelay = scaleTiming(BASE_ANIMATION_DELAY, speed);
+  const counterDelay = scaleTiming(BASE_COUNTER_DELAY, speed);
+  const counterDuration = scaleTiming(BASE_COUNTER_DURATION, speed);
 
   const scaleSpring = spring({
-    frame: Math.max(0, frame - DEFAULT_ANIMATION_DELAY),
+    frame: Math.max(0, frame - animationDelay),
     fps,
     config: { damping: 12, stiffness: 100 },
   });
@@ -89,12 +92,12 @@ export const StatCounter: React.FC<StatCounterProps> = (initProps) => {
         id='container'
         style={{
           position: 'relative',
-          display: 'flex',
+          display: 'inline-flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          minWidth: '45%',
-          maxWidth: '86%',
+          width: 'fit-content',
+          maxWidth: '100%',
           textAlign: 'center',
           transform: `scale(${scaleSpring})`,
           ...containerStyle,
@@ -108,8 +111,8 @@ export const StatCounter: React.FC<StatCounterProps> = (initProps) => {
           prefix={counterProps.prefix}
           suffix={counterProps.suffix}
           variant={counterProps.variant}
-          startAt={DEFAULT_COUNTER_DELAY}
-          durationInFrames={DEFAULT_COUNTER_DURATION}
+          startAt={counterDelay}
+          durationInFrames={counterDuration}
           style={{
             ...numberTypography,
             textShadow: buildDepthShadow(2),
@@ -177,24 +180,29 @@ export const StatCounterAssetSchema = [
       {
         name: 'from',
         type: 'number',
-        map: 'props.from',
-        default: StatCounterDefaults.counter.from,
+        map: 'props.from'
       },
       {
         name: 'to',
         type: 'number',
-        map: 'props.to',
-        default: StatCounterDefaults.counter.to,
+        map: 'props.to'
       },
       {
         name: 'prefix',
         type: 'string',
         map: 'props.prefix',
+        default: '',
       },
       {
         name: 'suffix',
         type: 'string',
         map: 'props.suffix',
+        default: '',
+      },
+      {
+        name: 'speed',
+        type: 'number',
+        default: StatCounterDefaults.counter.speed,
       }
     ],
   },
@@ -202,7 +210,8 @@ export const StatCounterAssetSchema = [
 
 export const StatCounterDescriptor: ComponentRegistration = {
   name: 'StatCounter',
-  type: 'content',
+  type: 'scene',
+  tags: ['Social Proof', 'Problem'],
   schema: StatCounterAssetSchema,
   llmSchema: [
     {
@@ -229,5 +238,5 @@ export const StatCounterDescriptor: ComponentRegistration = {
     },
   ],
   description: 'Centered animated metric counter with a short 2-3 word label below it. Use for large number, single stat, metric, or KPI with or without prefix/suffix eg. 1240, 500$, 500K, 500M',
-  celExpression: `${DEFAULT_COUNTER_DELAY + DEFAULT_COUNTER_DURATION + DEFAULT_HOLD_DURATION}`,
+  celExpression: `(((${BASE_COUNTER_DELAY} + ${BASE_COUNTER_DURATION} + ${BASE_HOLD_DURATION} + 1) * ${DEFAULT_SPEED_PERCENTAGE}) / max(${MIN_SPEED_PERCENTAGE}, props.counter.speed))`,
 };

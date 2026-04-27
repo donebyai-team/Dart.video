@@ -489,7 +489,7 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
 
             <div className='flex flex-col flex-1 min-h-0'>
                 {selectedAnimationElementId && stage !== 'question' && (
-                    <div className='mb-3 rounded-xl border bg-background shadow-sm overflow-hidden'>
+                    <div className='mb-3 overflow-hidden'>
                         <SceneSettings
                             elementId={selectedAnimationElementId}
                             overlay={overlay}

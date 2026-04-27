@@ -40,8 +40,12 @@ export default function SceneSettings({
     )
   }, [elementId, overlay])
 
+  if (fields.length == 0) {
+    return null;
+  }
+
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col rounded-xl border bg-background shadow-sm">
       <div className="p-2 border-b border-border flex items-center justify-between">
         <h2 className="font-semibold">Settings</h2>
         {onPlay && (

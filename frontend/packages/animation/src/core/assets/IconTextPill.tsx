@@ -78,11 +78,28 @@ export function getNormalizedPill(item: PillPatchGroup): typeof IconTextPillDefa
         ...IconTextPillDefaults.textStyle,
         ...normalizeTextStyle(textPatch.style),
     };
-    const { style: _containerCssStyle, ...normalizedContainerStyle } = normalizeContainerStyle(IconTextPillDefaults, containerStyle);
+    const normalizedContainerStyle = normalizeContainerStyle(IconTextPillDefaults, containerStyle);
 
     return {
         ...IconTextPillDefaults,
-        ...normalizedContainerStyle,
+        backgroundColor: typeof normalizedContainerStyle.backgroundColor === 'string'
+            ? normalizedContainerStyle.backgroundColor
+            : IconTextPillDefaults.backgroundColor,
+        borderRadius: typeof normalizedContainerStyle.borderRadius === 'number'
+            ? normalizedContainerStyle.borderRadius
+            : IconTextPillDefaults.borderRadius,
+        borderWidth: typeof normalizedContainerStyle.borderWidth === 'number'
+            ? normalizedContainerStyle.borderWidth
+            : IconTextPillDefaults.borderWidth,
+        borderColor: typeof normalizedContainerStyle.borderColor === 'string'
+            ? normalizedContainerStyle.borderColor
+            : IconTextPillDefaults.borderColor,
+        padding: typeof normalizedContainerStyle.padding === 'number'
+            ? normalizedContainerStyle.padding
+            : IconTextPillDefaults.padding,
+        gap: typeof normalizedContainerStyle.gap === 'number'
+            ? normalizedContainerStyle.gap
+            : IconTextPillDefaults.gap,
         icon: iconPatch.icon ?? IconTextPillDefaults.icon,
         iconStyle: iconPatch.style ?? IconTextPillDefaults.iconStyle,
         text: textPatch.text ?? IconTextPillDefaults.text,
@@ -124,7 +141,7 @@ export function IconTextPill(initProps: IconTextPillProps): React.ReactElement {
     const props = { ...IconTextPillDefaults, ...initProps };
     const typo = resolveTypography(props.variant, styleConfig, theme, preset);
     const metrics = getIconTextPillMetrics(props, typo);
-    const containerStyle = normalizeContainerStyle(IconTextPillDefaults, props).style;
+    const containerStyle = normalizeContainerStyle(IconTextPillDefaults, props);
 
     return (
         <div
