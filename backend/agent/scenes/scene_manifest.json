@@ -411,7 +411,7 @@
                   "name": "variant",
                   "type": "string",
                   "subtype": "enum",
-                  "default": "heading"
+                  "default": "headingLg"
                 },
                 {
                   "name": "splitBy",
@@ -423,7 +423,7 @@
                   "name": "entranceAnimation",
                   "type": "string",
                   "subtype": "enum",
-                  "default": "slideUp"
+                  "default": "fadeIn"
                 }
               ]
             }
@@ -749,6 +749,17 @@
                   "name": "speed",
                   "type": "number",
                   "default": 100
+                }
+              ]
+            },
+            {
+              "type": "component",
+              "name": "container",
+              "fields": [
+                {
+                  "name": "style",
+                  "type": "object",
+                  "default": {}
                 }
               ]
             }
