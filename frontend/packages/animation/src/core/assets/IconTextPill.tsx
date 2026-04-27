@@ -166,7 +166,10 @@ export function IconTextPill(initProps: IconTextPillProps): React.ReactElement {
                 id={props.textId}
                 text={props.text}
                 variant={props.variant}
-                style={props.textStyle}
+                style={{
+                    ...props.textStyle,
+                    whiteSpace: 'nowrap', // to prevent text from wrapping and causing the pill to grow
+                }}
             />
         </div>
     );
