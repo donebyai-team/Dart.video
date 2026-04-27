@@ -163,6 +163,7 @@ func (a *sceneGenerator) ContinueAgent(
 		generatePlanRequest.VideoBranding = types.VideoBranding{
 			BrandGuideLines: a.assetRegistry.FormatBrandDetails(),
 			Attachments:     a.assetRegistry.FormatAssets(),
+			BrandColors:     a.assetRegistry.FormatBrandTokens(),
 		}
 	}
 
@@ -391,6 +392,8 @@ func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest ty
 		if err != nil {
 			return nil, err
 		}
+
+		template.BackgroundStyle = toSceneBackground(scene.Background)
 
 		// Merge with user edits
 		// There can be orphans object if the scene is replaced

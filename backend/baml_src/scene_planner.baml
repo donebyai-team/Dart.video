@@ -164,6 +164,8 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
 
     {{ BrandGuidelines(input.VideoBranding) }}
 
+    {{ BackgroundGuidelines(input.VideoBranding) }}
+
     ---
 
     {% if conversation_history %}

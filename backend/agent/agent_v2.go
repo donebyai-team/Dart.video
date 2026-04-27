@@ -254,6 +254,7 @@ func (a *agentV2) Start(ctx context.Context, options StartSessionOptions) (*RunR
 		generatePlanRequest.VideoBranding = types.VideoBranding{
 			BrandGuideLines: a.assetRegistry.FormatBrandDetails(),
 			Attachments:     a.assetRegistry.FormatAssets(),
+			BrandColors:     a.assetRegistry.FormatBrandTokens(),
 		}
 	}
 

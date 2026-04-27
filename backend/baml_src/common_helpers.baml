@@ -39,13 +39,15 @@ class AskUserQuestion {
 }
 
 class VideoBranding {
-  brandGuideLines string? @skip @description("user provided brand guidelines")
+  brandGuideLines string? @description("user provided brand guidelines")
+  brandColors string? @description("user provided brand tokens")
   attachments string?
 }
 
 class Scene {
   index int
   elements SceneElement[]
+  background BackgroundGradient? @description("background gradient for scene")
   thinkingSummary string? @skip()
 }
 
@@ -53,4 +55,14 @@ class SceneElement {
   component string
   props string @description("required props in VALID JSON format as per the scene")
   children SceneElement[]
+}
+
+class BackgroundGradient {
+   color1 string @description("valid hex code")
+   position1 int @description("0–100")
+
+   color2 string @description("valid hex code")
+   position2 int @description("0–100")
+
+   angle int @description("0–360")
 }

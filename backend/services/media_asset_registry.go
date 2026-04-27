@@ -163,6 +163,63 @@ func (registry *MediaAssetRegistry) GetAssetFromHandle(handleID string) *models.
 	return asset
 }
 
+func (registry *MediaAssetRegistry) FormatBrandTokens() *string {
+	if registry.identity == nil {
+		return nil
+	}
+
+	b := registry.identity
+	var sb strings.Builder
+
+	writeLine := func(indent int, format string, args ...interface{}) {
+		sb.WriteString(strings.Repeat("  ", indent))
+		sb.WriteString(fmt.Sprintf(format, args...))
+		sb.WriteString("\n")
+	}
+
+	writeLine(0, "<brand_tokens>")
+
+	if len(b.Colors) > 0 {
+		writeLine(1, "<colors>")
+
+		for _, c := range b.Colors {
+			if c.ColorHexCode == "" {
+				continue
+			}
+
+			switch c.Priority {
+			case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_PRIMARY:
+				writeLine(2, "<primary>%s</primary>", c.ColorHexCode)
+
+			case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_SECONDARY:
+				writeLine(2, "<secondary>%s</secondary>", c.ColorHexCode)
+
+			case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_ACCENT:
+				writeLine(2, "<accent>%s</accent>", c.ColorHexCode)
+
+			case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_BACKGROUND:
+				writeLine(2, "<background>%s</background>", c.ColorHexCode)
+
+			case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_TEXT_PRIMARY:
+				writeLine(2, "<text_primary>%s</text_primary>", c.ColorHexCode)
+
+			case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_TEXT_SECONDARY:
+				writeLine(2, "<text_secondary>%s</text_secondary>", c.ColorHexCode)
+
+			default:
+				// fallback (in case new enums show up)
+				writeLine(2, "<color>%s</color>", c.ColorHexCode)
+			}
+		}
+
+		writeLine(1, "</colors>")
+	}
+
+	writeLine(0, "</brand_tokens>")
+
+	return utils.Ptr(sb.String())
+}
+
 func (registry *MediaAssetRegistry) FormatBrandDetails() *string {
 	if registry.identity == nil {
 		return nil
@@ -192,34 +249,6 @@ func (registry *MediaAssetRegistry) FormatBrandDetails() *string {
 	if attachments != "" {
 		writeLine(1, "%s", attachments)
 	}
-
-	// ---- Colors ----
-	/*
-		if len(b.Colors) > 0 {
-			writeLine(1, "<colors>")
-			for _, c := range b.Colors {
-				if c.Priority == pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_UNSPECIFIED {
-					writeLine(2, "<color>%s</color>", c.ColorHexCode)
-				} else {
-					writeLine(2, "<color priority=\"%s\">%s</color>", c.Priority.String(), c.ColorHexCode)
-				}
-			}
-			writeLine(1, "</colors>")
-		}
-	*/
-
-	// ---- Fonts ----
-	/*
-		if len(b.Fonts) > 0 {
-			writeLine(1, "<fonts>")
-			for _, f := range b.Fonts {
-				if f.GoogleFontsName != nil && f.GoogleFontsName.Value != "" {
-					writeLine(2, "<font>%s</font>", f.GoogleFontsName.Value)
-				}
-			}
-			writeLine(1, "</fonts>")
-		}
-	*/
 
 	writeLine(0, "</brand_details>")
 

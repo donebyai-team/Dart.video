@@ -108,6 +108,34 @@ func (g *videoConfigGenerator) AddBranding(assetRegistry *services.MediaAssetReg
 	})
 }
 
+func toSceneBackground(bg *types.BackgroundGradient) *pbcore.BackgroundStyle {
+	if bg == nil || !utils.IsValidHexColor(bg.Color1) || !utils.IsValidHexColor(bg.Color2) {
+		return nil
+	}
+
+	stops := make([]*pbcore.GradientStop, 0, 2)
+	stops = append(stops, &pbcore.GradientStop{
+		Color:    bg.Color1,
+		Position: int32(bg.Position1),
+	})
+	stops = append(stops, &pbcore.GradientStop{
+		Color:    bg.Color2,
+		Position: int32(bg.Position2),
+	})
+
+	return &pbcore.BackgroundStyle{
+		Style: &pbcore.BackgroundStyle_Gradient{
+			Gradient: &pbcore.Gradient{
+				Type:  pbcore.GradientType_GRADIENT_TYPE_LINEAR,
+				Angle: int32(bg.Angle),
+				Stops: stops,
+			},
+		},
+		Pattern:        pbcore.BackgroundPattern_BACKGROUND_PATTERN_DOTS,
+		PatternOpacity: utils.Ptr(defaultPatternOpacity),
+	}
+}
+
 func (g *videoConfigGenerator) CreatePendingSlidesV2(
 	ctx context.Context,
 	assetRegistry *services.MediaAssetRegistry,
@@ -169,6 +197,10 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 					},
 				})
 
+			}
+
+			if slide.BackgroundStyle == nil {
+				slide.BackgroundStyle = toSceneBackground(pendingSlide.Background)
 			}
 
 			section.Slides = append(section.Slides, slide)
