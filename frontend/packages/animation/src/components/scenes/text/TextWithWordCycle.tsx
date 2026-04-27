@@ -21,7 +21,7 @@ export const TextWithWordCycleDefaults = {
   transitionDuration: 10,
   textCycleTransition: 'slideUp' as TextCycleTransition,
   entranceAnimation: 'slideUp' as EntranceAnimation,
-  variant: 'heading' as TypographyVariant,
+  variant: 'headingLg' as TypographyVariant,
   highlightStyle: 'background' as HighlightStyle,
   highlightColor: undefined as string | undefined,
   style: undefined as React.CSSProperties | undefined,
