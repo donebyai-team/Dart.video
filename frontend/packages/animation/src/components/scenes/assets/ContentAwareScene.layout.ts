@@ -36,6 +36,7 @@ const VARIANT_WEIGHT: Record<TypographyVariant, TextVisualWeight> = {
   displayLg: 'medium',
   displayXl: 'dominant',
   display2xl: 'dominant',
+  display3xl: 'dominant',
 };
 
 const DEFAULT_TEXT_WIDTH: Record<ContentAwareLayout, number> = {

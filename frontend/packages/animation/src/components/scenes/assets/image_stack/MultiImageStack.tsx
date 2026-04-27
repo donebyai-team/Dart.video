@@ -32,11 +32,14 @@ const DEFAULT_HERO_TEXT = {
 
 const DEFAULT_STACK_ANIMATION: StackAnimation = 'SlideDown';
 const DEFAULT_DIRECTION: Direction = 'right';
-const DEFAULT_HOLD_DURATION = 10;
-const DEFAULT_TRANSITION_DURATION = 10;
-const DEFAULT_STACK_OFFSET = 18;
+const DEFAULT_HOLD_DURATION = 28;
+const DEFAULT_TRANSITION_DURATION = 14;
+const DEFAULT_STACK_OFFSET = 0;
 const STACK_START_FRAME = 10;
 const STACK_ENTRANCE_DURATION = 10;
+const TEXT_PILL_GAP = 32;
+const PILL_IMAGE_GAP = 32;
+const PILL_ROW_HEIGHT = 150;
 const DEFAULT_IMAGE_WIDTH = Math.round(1920 * 0.7);
 const DEFAULT_IMAGE_HEIGHT = Math.round(1080 * 0.7);
 
@@ -51,8 +54,19 @@ const MultiImageStackDefaults = {
 
 function getPeelPillState(frame: number, count: number, holdDuration: number, transitionDuration: number) {
     const cycleDuration = holdDuration + transitionDuration;
-    const currentIndex = Math.min(Math.floor(frame / cycleDuration), Math.max(count - 1, 0));
-    const cycleFrame = frame % cycleDuration;
+    const maxIndex = Math.max(count - 1, 0);
+    const rawIndex = Math.floor(frame / cycleDuration);
+
+    if (rawIndex >= maxIndex) {
+        return {
+            currentIndex: maxIndex,
+            nextIndex: maxIndex,
+            fadeProgress: 1,
+        };
+    }
+
+    const currentIndex = Math.max(rawIndex, 0);
+    const cycleFrame = frame - (currentIndex * cycleDuration);
     const fadeProgress = interpolateWithEasing(
         cycleFrame,
         [holdDuration, holdDuration + transitionDuration],
@@ -62,26 +76,36 @@ function getPeelPillState(frame: number, count: number, holdDuration: number, tr
 
     return {
         currentIndex,
-        nextIndex: Math.min(currentIndex + 1, Math.max(count - 1, 0)),
+        nextIndex: Math.min(currentIndex + 1, maxIndex),
         fadeProgress,
     };
 }
 
 function getSlidePillState(frame: number, count: number, holdDuration: number, transitionDuration: number) {
     const cycleDuration = holdDuration + transitionDuration;
-    const currentIndex = Math.min(Math.floor(frame / cycleDuration), Math.max(count - 1, 0));
-    const cycleFrame = frame % cycleDuration;
+    const maxIndex = Math.max(count - 1, 0);
+    const rawIndex = Math.floor(frame / cycleDuration);
+
+    if (rawIndex >= maxIndex) {
+        return {
+            currentIndex: maxIndex,
+            nextIndex: maxIndex,
+            fadeProgress: 1,
+        };
+    }
+
+    const currentIndex = Math.min(Math.max(rawIndex, 0), maxIndex);
+    const cycleFrame = frame - (currentIndex * cycleDuration);
     const fadeProgress = interpolateWithEasing(
         cycleFrame,
-        [0, transitionDuration],
+        [holdDuration, holdDuration + transitionDuration],
         [0, 1],
         'ease-out',
     );
 
     return {
         currentIndex,
-        nextIndex: currentIndex,
-        previousIndex: Math.max(currentIndex - 1, 0),
+        nextIndex: Math.min(currentIndex + 1, maxIndex),
         fadeProgress,
     };
 }
@@ -90,8 +114,19 @@ function getPillIndex(index: number, count: number): number {
     return Math.min(index, Math.max(count - 1, 0));
 }
 
-function renderPill(item: PillPatchGroup, index: number, opacity: number, translateY: number, zIndex: number) {
-    const pillProps = getNormalizedPill(item);
+function renderPill(
+    item: PillPatchGroup,
+    index: number,
+    opacity: number,
+    translateY: number,
+    zIndex: number,
+    blur = 0,
+) {
+    const pillProps = {
+        ...getNormalizedPill(item),
+        borderWidth: 0,
+        borderColor: 'transparent',
+    };
 
     return (
         <ArrayItem
@@ -106,7 +141,9 @@ function renderPill(item: PillPatchGroup, index: number, opacity: number, transl
                 left: '50%',
                 opacity,
                 zIndex,
+                filter: `blur(${blur}px)`,
                 transform: `translateX(-50%) translateY(${translateY}px)`,
+                willChange: 'opacity, filter, transform',
             }}
         >
             <IconTextPill {...pillProps} />
@@ -129,7 +166,7 @@ export function MultiImageStack(): React.ReactElement {
     const stackAnimation = (sceneProps.stackAnimation ?? DEFAULT_STACK_ANIMATION) as StackAnimation;
     const stackOffset = sceneProps.stackOffset ?? DEFAULT_STACK_OFFSET;
     const imageWidth = Math.min(DEFAULT_IMAGE_WIDTH, preset.width * 0.8);
-    const imageHeight = Math.min(DEFAULT_IMAGE_HEIGHT, preset.height * 0.8);
+    const imageHeight = DEFAULT_IMAGE_HEIGHT;
     const stackEntranceProgress = interpolateWithEasing(
         stackFrame,
         [0, STACK_ENTRANCE_DURATION],
@@ -138,32 +175,32 @@ export function MultiImageStack(): React.ReactElement {
     );
     const pillCount = pills.length;
     const imageCount = images.length;
-    const syncCount = Math.max(imageCount, 1);
+    const hasPills = pillCount > 0;
+    const syncCount = Math.max(hasPills ? Math.min(imageCount, pillCount) : imageCount, 1);
 
     const peelPillState = getPeelPillState(animationFrame, syncCount, holdDuration, transitionDuration);
     const slidePillState = getSlidePillState(animationFrame, syncCount, holdDuration, transitionDuration);
     const pillState = stackAnimation === 'SlideDown' ? slidePillState : peelPillState;
     const activePillIndex = getPillIndex(pillState.currentIndex, pillCount);
     const nextPillIndex = getPillIndex(pillState.nextIndex, pillCount);
-    const previousPillIndex = getPillIndex(slidePillState.previousIndex, pillCount);
-    const hasPills = pillCount > 0;
 
     return (
         <div
-            style={{                
+            style={{
+                width: '100%',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: 34,
-                padding: `${Math.round(preset.height * 0.08)}px ${Math.round(preset.width * 0.08)}px`,
+                overflow: 'visible',
                 boxSizing: 'border-box',
             }}
         >
             <div
                 style={{
                     textAlign: 'center',
-                    maxWidth: preset.width * 0.82,
+                    width: '100%',
+                    maxWidth: '100%',
                 }}
             >
                 <TextStagger
@@ -182,43 +219,46 @@ export function MultiImageStack(): React.ReactElement {
                     style={{
                         position: 'relative',
                         width: '100%',
+                        height: PILL_ROW_HEIGHT,
+                        marginTop: TEXT_PILL_GAP,
+                        flex: '0 0 auto',
+                        display: 'flex',
+                        justifyContent: 'center',
                     }}
                 >
-                    {stackAnimation === 'SlideDown' && activePillIndex !== previousPillIndex && renderPill(
-                        pills[previousPillIndex],
-                        previousPillIndex,
-                        1 - pillState.fadeProgress,
-                        -10 - (pillState.fadeProgress * 18),
-                        1,
-                    )}
-
-                    {stackAnimation === 'Peel' && activePillIndex !== nextPillIndex && renderPill(
+                    {activePillIndex !== nextPillIndex && renderPill(
                         pills[activePillIndex],
                         activePillIndex,
                         1 - pillState.fadeProgress,
-                        -pillState.fadeProgress * 18,
+                        stackAnimation === 'SlideDown'
+                            ? pillState.fadeProgress * 18
+                            : -pillState.fadeProgress * 18,
                         1,
+                        pillState.fadeProgress * 12,
                     )}
 
                     {renderPill(
-                        pills[stackAnimation === 'Peel' ? nextPillIndex : activePillIndex],
-                        stackAnimation === 'Peel' ? nextPillIndex : activePillIndex,
-                        stackAnimation === 'Peel' && activePillIndex !== nextPillIndex
+                        pills[nextPillIndex],
+                        nextPillIndex,
+                        activePillIndex !== nextPillIndex
                             ? pillState.fadeProgress
-                            : pillState.fadeProgress,
-                        stackAnimation === 'Peel' && activePillIndex !== nextPillIndex
+                            : 1,
+                        activePillIndex !== nextPillIndex
                             ? 18 - (pillState.fadeProgress * 18)
-                            : 18 - (pillState.fadeProgress * 18),
+                            : 0,
                         2,
+                        activePillIndex === nextPillIndex ? 0 : (1 - pillState.fadeProgress) * 12,
                     )}
                 </div>
             )}
 
             <div
                 style={{
-                    width: imageWidth + ((imageCount - 1) * stackOffset),
-                    height: imageHeight + ((imageCount - 1) * stackOffset),
+                    width: imageWidth + (Math.max(imageCount - 1, 0) * stackOffset),
+                    height: imageHeight + (Math.max(imageCount - 1, 0) * stackOffset),
                     maxWidth: '100%',
+                    marginTop: hasPills ? PILL_IMAGE_GAP : TEXT_PILL_GAP,
+                    flex: '0 0 auto',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -320,8 +360,6 @@ export const MultiImageStackSchemaFields = [
                         default: {
                             backgroundColor: IconTextPillDefaults.backgroundColor,
                             borderRadius: IconTextPillDefaults.borderRadius,
-                            borderWidth: IconTextPillDefaults.borderWidth,
-                            borderColor: IconTextPillDefaults.borderColor,
                             padding: IconTextPillDefaults.padding,
                             gap: IconTextPillDefaults.gap,
                         },

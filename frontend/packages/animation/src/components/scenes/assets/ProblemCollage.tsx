@@ -7,6 +7,7 @@ import type { ComponentRegistration } from '../../../registry/registry';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { TextStagger, type TextStaggerProps, TextStaggerSchemaFields } from '../text/TextStagger';
+import { DEFAULT_SPEED_PERCENTAGE, getSpeed, MIN_SPEED_PERCENTAGE, scaleTiming } from '../../../duration/timings';
 
 const DEFAULT_CARD_WIDTH = 420;
 const DEFAULT_CARD_HEIGHT = 236;
@@ -18,8 +19,6 @@ const BASE_TEXT_DELAY = 5;
 const COLLAGE_VIEW_PADDING = 40;
 const MAX_SCATTER_WIDTH = 0.3;
 const MAX_SCATTER_HEIGHT = 0.34;
-const DEFAULT_SPEED_PERCENTAGE = 100;
-const MIN_SPEED_PERCENTAGE = 25;
 const CEL_PER_IMAGE_FRAMES = BASE_IMAGE_STAGGER;
 const CEL_BASE_FRAMES = BASE_TEXT_DELAY + BASE_IMAGE_DURATION + BASE_HOLD_DURATION + BASE_OUTRO_DURATION;
 
@@ -53,10 +52,6 @@ function fitWithin(sourceWidth: number, sourceHeight: number, maxWidth: number, 
         width: Math.round(width * scale),
         height: Math.round(height * scale),
     };
-}
-
-function scaleTiming(baseDuration: number, speed: number) {
-    return Math.max(1, Math.round((baseDuration * DEFAULT_SPEED_PERCENTAGE) / Math.max(speed, MIN_SPEED_PERCENTAGE)));
 }
 
 function useImageDimensions(src?: string) {
@@ -357,7 +352,8 @@ export const ProblemCollage: React.FC = () => {
 
     const contentWidth = preset.width - preset.safeArea.left - preset.safeArea.right;
     const contentHeight = preset.height - preset.safeArea.top - preset.safeArea.bottom;
-    const speed = Math.max(sceneProps.speed, MIN_SPEED_PERCENTAGE);
+    
+    const speed = getSpeed(sceneProps.speed);
     const textDelay = scaleTiming(BASE_TEXT_DELAY, speed);
     const imageStagger = scaleTiming(BASE_IMAGE_STAGGER, speed);
     const imageDuration = scaleTiming(BASE_IMAGE_DURATION, speed);

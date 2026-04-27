@@ -162,7 +162,7 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 					Style:          &pbcore.BackgroundStyle_Solid{Solid: &pbcore.SolidColor{Hex: "#1207e5"}},
 				}
 				slide.Content.Edits = utils.CreateStructFromMap(map[string]interface{}{
-					"textcycle": map[string]interface{}{
+					"wordcycle": map[string]interface{}{
 						"style": map[string]interface{}{
 							"color": "#FFFFFF",
 						},

@@ -1,6 +1,8 @@
 import { ComponentRegistration } from "./registry";
 import { AnimatedNumberDescriptor } from "../components/scenes/text/AnimatedNumber";
+import { StatCounterDescriptor } from "../components/scenes/text/StatCounter";
 import { TextStaggerDescriptor } from "../components/scenes/text/TextStagger";
+import { TextHookStaggerDescriptor } from "../components/scenes/text/TextHookStagger";
 import { TypewriterDescriptor } from "../components/scenes/text/Typewriter";
 import { TextHighlightDescriptor } from "../components/scenes/text/TextHighlight";
 import { TextWithWordCycleDescriptor } from "../components/scenes/text/TextWithWordCycle";
@@ -23,7 +25,9 @@ import { TextWithImageSceneDescriptor, TextWithVideoSceneDescriptor, WordCycleDe
 export const SCENE_COMPONENTS: ComponentRegistration[] = [
   // Text components with schemas and duration calculators
   AnimatedNumberDescriptor,
+  StatCounterDescriptor,
   TextStaggerDescriptor,
+  TextHookStaggerDescriptor,
   TypewriterDescriptor,
   TextHighlightDescriptor,
   WordCycleDescriptor,

@@ -261,6 +261,11 @@ func (s *renderVideoService) PollJob(
 
 		if p.Error != "" {
 			s.logger.Error("render progress", zap.String("error", p.Error))
+			// Remove the key from Redis so we don't keep retrying.'
+			err := s.cache.RemoveKey(ctx, progressKey)
+			if err != nil {
+				s.logger.Error("failed to remove render progress key", zap.Error(err))
+			}
 			return nil, fmt.Errorf("failed to render video")
 		}
 

@@ -40,7 +40,7 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
 
     A good product video follows these sections. Map the user's script to these sections before planning scenes:
 
-    - **Hook** — grab attention immediately..
+    - **Hook/Intro** — grab attention immediately..
     - **Problem** — articulate the pain point the product solves.
     - **Solution** — introduce the product as the answer.
     - **Product/Benefit Info** — show specific features, workflows, or how it works. This section can breathe.

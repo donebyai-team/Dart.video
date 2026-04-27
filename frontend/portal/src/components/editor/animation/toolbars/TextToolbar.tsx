@@ -59,14 +59,16 @@ function useComputedStyles(elementId?: string) {
   }, [elementId])
 }
 
-function getDepthValue(
+export function getDepthValue(
   styleOverride: Record<string, string | number>,
   computed: { boxShadow?: string; textShadow?: string; depth?: number },
+  options?: { boxOnly?: boolean; fallbackDepth?: number },
 ): number {
+  const { boxOnly = false, fallbackDepth = 0 } = options ?? {}
   const overrideDepth = Number(styleOverride[DEPTH_STYLE_PROPERTY])
   if (Number.isFinite(overrideDepth)) return overrideDepth
 
-  if (styleOverride.textShadow !== undefined) {
+  if (!boxOnly && styleOverride.textShadow !== undefined) {
     return parseDepthFromShadow(styleOverride.textShadow)
   }
 
@@ -74,17 +76,17 @@ function getDepthValue(
     return parseDepthFromShadow(styleOverride.boxShadow)
   }
 
-  const parsedDepth = parseDepthFromShadow(computed.textShadow ?? computed.boxShadow)
+  const parsedDepth = parseDepthFromShadow(boxOnly ? computed.boxShadow : (computed.textShadow ?? computed.boxShadow))
   if (parsedDepth > 0) return parsedDepth
 
-  return computed.depth ?? 0
+  return computed.depth ?? fallbackDepth
 }
 
 /**
  * Converts rgba/rgb color string to hex.
  * e.g. "rgba(0, 0, 0, 0.87)" -> "#000000"
  */
-function rgbaToHex(color: string): string | undefined {
+export function rgbaToHex(color: string): string | undefined {
   if (!color) return undefined
   const m = color.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/)
   if (m) {
@@ -431,7 +433,7 @@ export function TextToolbar({
 // ─── Labeled Field ──────────────────────────────────────────────────────────
 // Wraps a control with a small top-aligned label so users know what each dropdown is.
 
-function LabeledField({ label, children }: { label: string; children: React.ReactNode }) {
+export function LabeledField({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-1.5">
       <span className="text-muted-foreground text-[10px] uppercase tracking-wider font-medium select-none">

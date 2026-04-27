@@ -41,18 +41,30 @@ A **scene** is a visual representation of a concept from a video script.
 
   * A unique `id` (for interactivity, example id "textstagger" or "textstagger-left")
 * All elements must include **default values**
+* All Input props are key and its object, where key is the id of the element and value is the properties/props specific to that id. Eg. variant, style, text, speed, etc. 
+* When a user click on an element, we should the object of that element with all its properties/props in the settings which user can modify.
+* The same schema has to be exposed as Schema Architecture
 
 ### 3. Styling
 
 * Each element has a `style` prop (CSS object)
 * Styling must be **element-specific**
-* Do not define `style` in schema (already available)
+* It is an optional prop. If user changes any css property, it will be reflected in the style. 
 * Default styles can be set in default config
 
 ### 4. Data Handling
 
 * Use `ArrayItem` for arrays/objects requiring add/remove functionality
 * For simple text/word lists, `ArrayItem` is **not required**
+
+### 5. Animation Speed
+* Each element or scene can expose a speed attribute using which animation speed can be controlled. Instead of exposing many params like animation delay, hold etc., use a single speed attribute.
+* use `timings.ts` for common functions to calculate animation duration based on speed.
+
+### 6. Container styling
+* If a scene has a card or a container which needs to be styled, use the `ContainerAsset` component. It has some common functions
+* This is used if the scene has a card or wrapper which you'd want to style like chaging border, background color, depth, store etc.
+* You should pass an id starting with "container" or "container-" prefix if there are multiple. 
 
 ---
 

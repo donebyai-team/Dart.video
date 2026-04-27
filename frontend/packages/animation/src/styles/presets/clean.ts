@@ -21,7 +21,7 @@ export const cleanStyle: StyleConfig = {
     tracking: 'normal',
   },
   cursor: {
-    shape: 'line',
+    shape: 'none',
     behavior: 'blink',
   },
 };

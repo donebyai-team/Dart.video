@@ -10,6 +10,7 @@ import { resolveTypography } from '../../../tokens/resolveTypography';
 import { getEntranceTransform } from '../types';
 import type { EntranceAnimation } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
+import { DEFAULT_SPEED_PERCENTAGE, getSpeed, MIN_SPEED_PERCENTAGE, scaleTiming } from '../../../duration/timings';
 
 // Delay before the oversized lead word starts settling down.
 const BASE_LEAD_DELAY = 8;
@@ -29,10 +30,6 @@ const BASE_EXIT_DURATION = 10;
 const BASE_HANDOFF_GAP = 2;
 // Target viewport width coverage for the oversized lead word.
 const LEAD_VIEWPORT_COVERAGE = 0.6;
-// Integer speed percentage. 100 = normal speed.
-const DEFAULT_SPEED_PERCENTAGE = 100;
-// Lowest allowed speed percentage so timings never collapse too far.
-const MIN_SPEED_PERCENTAGE = 25;
 // Minimum reveal progress before a word becomes visible to avoid flicker.
 const MIN_VISIBLE_PROGRESS = 0.08;
 // CEL duration formula derived from the timing constants above.
@@ -70,10 +67,6 @@ function estimateWordWidth(word: string, fontSizePx: number): number {
   return Math.max(fontSizePx * 0.9, word.length * fontSizePx * 0.62);
 }
 
-function scaleTiming(baseDuration: number, speed: number): number {
-  return Math.max(1, Math.round((baseDuration * DEFAULT_SPEED_PERCENTAGE) / Math.max(speed, MIN_SPEED_PERCENTAGE)));
-}
-
 function composeTransforms(...transforms: Array<string | undefined>): string | undefined {
   const parts = transforms.filter((transform): transform is string => Boolean(transform && transform.trim()));
   return parts.length > 0 ? parts.join(' ') : undefined;
@@ -93,7 +86,8 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
   const dragStyle = usePatchedDragStyle(id, props.style?.transform, overrideTransform);
   const typographyStyle = resolveTypography(props.variant, styleConfig, theme, preset);
   const elapsed = Math.max(0, frame - props.startAt);
-  const speed = Math.max(props.speed, MIN_SPEED_PERCENTAGE);
+  
+  const speed = getSpeed(props.speed);
   const leadDelay = scaleTiming(BASE_LEAD_DELAY, speed);
   const leadSettleDuration = scaleTiming(BASE_LEAD_SETTLE_DURATION, speed);
   const staggerDelay = scaleTiming(BASE_STAGGER_DELAY, speed);
@@ -162,6 +156,9 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
         opacity: isVisible ? visibleProgress : 0,
         transform: exitTranslate,
         transformOrigin: 'left center',
+        ...typographyStyle,
+        ...props.style,
+        ...styleOverride,
       };
     }
 
@@ -191,6 +188,9 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
       opacity: isVisible ? visibleProgress : 0,
       transform: composeTransforms(entranceTransform, exitTranslate),
       transformOrigin: 'left center',
+      ...typographyStyle,
+      ...props.style,
+      ...styleOverride,
     };
   };
 
@@ -218,6 +218,8 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
     transform: `translate(-50%, -50%) scale(${leadScale - (leadScale - 1) * leadSettleProgress})`,
     transformOrigin: 'center center',
     ...typographyStyle,
+    ...props.style,
+    ...styleOverride,
   };
 
   return (

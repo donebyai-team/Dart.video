@@ -24,8 +24,16 @@ export function ImageSlide({
     height,
 }: ImageSlideProps): React.ReactElement {
     const cycleDuration = holdDuration + transitionDuration;
-    const activeIndex = Math.min(Math.floor(frame / cycleDuration), Math.max(images.length - 1, 0));
-    const visibleImages = images.slice(0, activeIndex + 1);
+    const maxIndex = Math.max(images.length - 1, 0);
+    const activeIndex = Math.min(Math.floor(frame / cycleDuration), maxIndex);
+    const cycleFrame = frame - (activeIndex * cycleDuration);
+    const exitProgress = activeIndex >= maxIndex ? 0 : interpolateWithEasing(
+        cycleFrame,
+        [holdDuration, holdDuration + transitionDuration],
+        [0, 1],
+        'ease-out',
+    );
+    const visibleImages = images.slice(activeIndex);
 
     return (
         <div
@@ -35,26 +43,15 @@ export function ImageSlide({
                 height,
             }}
         >
-            {visibleImages.map((item, index) => {
+            {visibleImages.map((item, visibleIndex) => {
+                const index = activeIndex + visibleIndex;
                 const [eid, patch] = Object.entries(item)[0] ?? [`image-${index}`, {}];
-                const enterStart = index * cycleDuration;
-                const enterProgress = interpolateWithEasing(
-                    frame,
-                    [enterStart, enterStart + transitionDuration],
-                    [0, 1],
-                    'ease-out',
-                );
-                const settledStackIndex = activeIndex - index;
-                const settleProgress = index === activeIndex ? enterProgress : 1;
-                const stackX = settledStackIndex * stackOffset;
-                const stackY = settledStackIndex * stackOffset;
-                const translateY = -220 * (1 - settleProgress);
-                const opacity = interpolateWithEasing(
-                    settleProgress,
-                    [0, 1],
-                    [0, 1],
-                    'ease-out',
-                );
+                const stackProgress = Math.max(visibleIndex - exitProgress, 0);
+                const stackX = stackProgress * stackOffset;
+                const stackY = stackProgress * stackOffset;
+                const isExiting = visibleIndex === 0 && activeIndex < maxIndex;
+                const translateY = isExiting ? exitProgress * (height + 160) : 0;
+                const opacity = isExiting ? 1 - exitProgress : 1;
 
                 return (
                     <ArrayItem
@@ -69,7 +66,7 @@ export function ImageSlide({
                                 position: 'absolute',
                                 top: 0,
                                 left: 0,
-                                zIndex: index + 1,
+                                zIndex: images.length - visibleIndex,
                                 opacity,
                                 transform: `translate(${stackX}px, ${stackY + translateY}px)`,
                             }}

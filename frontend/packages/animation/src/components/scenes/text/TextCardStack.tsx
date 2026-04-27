@@ -9,19 +9,15 @@ import type { TypographyVariant } from '../../../tokens/semantic';
 import { resolveTypography } from '../../../tokens/resolveTypography';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { buildDepthShadow } from '../../../styles';
+import { DEFAULT_SPEED_PERCENTAGE, getSpeed, MIN_SPEED_PERCENTAGE, scaleTiming } from '../../../duration/timings';
 
 const BASE_ENTRY_DURATION = 22;
 const BASE_SETTLE_DURATION = 0;
 const BASE_HOLD_DURATION = 14;
 const BASE_EXIT_DURATION = 10;
 const BASE_CARD_GAP = 1;
-const DEFAULT_SPEED_PERCENTAGE = 100;
-const MIN_SPEED_PERCENTAGE = 25;
 const MIN_VISIBLE_PROGRESS = 0.08;
 
-function scaleTiming(baseDuration: number, speed: number): number {
-  return Math.max(1, Math.round((baseDuration * DEFAULT_SPEED_PERCENTAGE) / Math.max(speed, MIN_SPEED_PERCENTAGE)));
-}
 
 export const TextCardStackDefaults = {
   id: 'textcardstack',
@@ -52,12 +48,14 @@ export const TextCardStack: React.FC<TextCardStackProps> = (initProps) => {
   const { transform: _ignoredOverrideTransform, ...styleOverrideWithoutTransform } = styleOverride;
   const { transform: _ignoredPropStyleTransform, ...propStyleWithoutTransform } = props.style ?? {};
   const typographyStyle = resolveTypography(props.variant, styleConfig, theme, preset);
-  const speed = Math.max(props.speed, MIN_SPEED_PERCENTAGE);
+
+  const speed = getSpeed(props.speed);
   const entryDuration = scaleTiming(BASE_ENTRY_DURATION, speed);
   const settleDuration = scaleTiming(BASE_SETTLE_DURATION, speed);
   const holdDuration = scaleTiming(BASE_HOLD_DURATION, speed);
   const exitDuration = scaleTiming(BASE_EXIT_DURATION, speed);
   const cardGap = scaleTiming(BASE_CARD_GAP, speed);
+
   const cardCycleDuration = entryDuration + settleDuration + holdDuration + exitDuration + cardGap;
   const texts = props.texts.filter((text): text is string => Boolean(text && text.trim()));
   const cardWidth = Math.min(preset.width * 0.78, 920);
@@ -78,6 +76,8 @@ export const TextCardStack: React.FC<TextCardStackProps> = (initProps) => {
   }
 
   const activeIndex = Math.min(Math.floor(Math.max(0, frame - props.startAt) / cardCycleDuration), texts.length - 1);
+
+  const containerStyleOverride = useStyleOverride("container");
 
   return (
     <div
@@ -197,18 +197,14 @@ export const TextCardStack: React.FC<TextCardStackProps> = (initProps) => {
             }}
           >
             <div
-              id={id}
+              id="container"
               style={{
                 width: cardWidth,
                 minHeight: cardMinHeight,
-                padding: `${cardPaddingY}px ${cardPaddingX}px`,
-                borderRadius: cardRadius,
-                border: `4px solid ${theme.colors.foreground}`,
                 boxShadow: buildDepthShadow(3),
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
-                gap: Math.max(16, Math.round(bodyFontSize * 0.18)),
                 transformStyle: 'preserve-3d',
                 transformOrigin: '50% 50%',
                 opacity,
@@ -221,6 +217,12 @@ export const TextCardStack: React.FC<TextCardStackProps> = (initProps) => {
                   `rotateZ(${rotateZ}deg)`,
                   `scale(${scale})`,
                 ),
+                // Default styling, can we passed in the schema but not necessary
+                padding: `${cardPaddingY}px ${cardPaddingX}px`,
+                borderRadius: cardRadius,
+                border: `4px solid ${theme.colors.foreground}`,
+                gap: Math.max(16, Math.round(bodyFontSize * 0.18)),
+                ...containerStyleOverride,
               }}
             >
               <span
@@ -263,6 +265,8 @@ export const TextCardStackSchemaFields = [
   }
 ];
 
+// Here the container styling is applied to all cards in the stack
+// and hence not creating separate onces
 export const TextCardStackDescriptor: ComponentRegistration = {
   name: 'TextCardStack',
   type: 'content',
@@ -271,6 +275,14 @@ export const TextCardStackDescriptor: ComponentRegistration = {
     type: 'component',
     name: 'textcardstack',
     fields: TextCardStackSchemaFields,
+  }, {
+    type: 'component',
+    name: 'container',
+    fields: [{
+      name: 'style',
+      type: 'object',
+      default: {},
+    }],
   }],
   llmSchema: [
     {

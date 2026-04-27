@@ -8,9 +8,10 @@ import { useTheme } from '../../../theme';
 import type { TypographyVariant } from '../../../tokens';
 import { resolveTypography } from '../../../tokens/resolveTypography';
 import {
+    getHighlightedTextAnimationTransform,
     getEntranceTransform,
-    HighlightedTextAnimation,
     type EntranceAnimation,
+    type HighlightedTextAnimation,
     type HighlightStyle,
 } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
@@ -18,7 +19,7 @@ import type { ComponentRegistration } from '../../../registry/registry';
 export const TextHighlightDefaults = {
     id: 'texthighlight',
     text: 'We build amazing {software}',
-    variant: 'heading' as TypographyVariant,
+    variant: 'headingLg' as TypographyVariant,
     highlightStyle: 'glow' as HighlightStyle,
     highlightedTextAnimation: 'jump' as HighlightedTextAnimation,
     highlightColor: '',
@@ -71,19 +72,6 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
         [zoomStartFrame, zoomStartFrame + actualZoomDuration],
         [0, 1],
         'ease-out'
-    );
-
-    const jumpHeight = interpolateWithEasing(
-        frame,
-        [zoomStartFrame, zoomStartFrame + actualZoomDuration / 2],
-        [0, -18],
-        'ease-out'
-    );
-    const landingHeight = interpolateWithEasing(
-        frame,
-        [zoomStartFrame + actualZoomDuration / 2, zoomStartFrame + actualZoomDuration],
-        [-18, 0],
-        'ease-in-out'
     );
 
     const segments = useMemo(() => {
@@ -139,10 +127,7 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
         // Highlight is always at full intensity (no animation delay)
         const progress = 1;
 
-        const baseTransform =
-            actualHighlightedTextAnimation === 'jump'
-                ? `translateY(${frame < zoomStartFrame + actualZoomDuration / 2 ? jumpHeight : landingHeight}px)`
-                : `scale(${1 + zoomProgress * 9})`;
+        const baseTransform = getHighlightedTextAnimationTransform(actualHighlightedTextAnimation, zoomProgress);
 
         switch (actualHighlightStyle) {
             case 'marker':
@@ -222,8 +207,6 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
             style={{
                 display: 'inline-block',
                 opacity: entranceProgress,
-                ...props.style,
-                ...styleOverride,
                 ...dragStyle,
             }}
         >
@@ -231,6 +214,8 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
                 style={{
                     ...resolveTypography(actualVariant, styleConfig, theme, preset),
                     whiteSpace: 'pre-wrap',
+                    ...props.style,
+                    ...styleOverride,
                 }}
             >
                 {segments.map((segment, i) => {

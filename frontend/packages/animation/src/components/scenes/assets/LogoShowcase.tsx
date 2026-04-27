@@ -1,12 +1,10 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
-import z from 'zod';
-import { useArrayPatch, usePatchedProps, useStyleOverride } from '../../../patches';
-import { TYPOGRAPHY_VARIANT_NAMES } from '../../../tokens/semantic';
+import { useArrayPatch, usePatchedProps } from '../../../patches';
 import { LogoAsset } from './LogoAsset';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { interpolateWithEasing } from '../../../styles';
-import { TextStagger, TextStaggerDefaults, TextStaggerProps, TextStaggerSchemaFields } from '../text/TextStagger';
+import { TextStagger, TextStaggerDefaults, TextStaggerSchemaFields } from '../text/TextStagger';
 import { ENTRANCE_ANIMATIONS } from '../types';
 import { ArrayItem } from '../../../core/assets/ArrayItem';
 
@@ -14,7 +12,6 @@ const DEFAULT_TEXT_ENTRANCE_DURATION = 5;
 const DEFAULT_LOGO_STAGGER = 5;
 const DEFAULT_LOGO_ANIMATION_DURATION = 12;
 const DEFAULT_VARIANT = 'heading' as const;
-const DEFAULT_LOGO_GAP = 48;
 const MAX_LOGOS_PER_ROW = 5;
 const DEFAULT_TEXT_STAGGER_SPLIT_BY = 'line' as const;
 const DEFAULT_TEXT_STAGGER_ANIMATION = ENTRANCE_ANIMATIONS[1];

@@ -10,6 +10,7 @@ import {
   AbsoluteCenter,
   PillCarousel,
   MultiImageStack,
+  StatCounter,
 } from '@coasterai/animation'
 
 import { compileRemoteComponent } from '../compiler'
@@ -199,6 +200,15 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
             <TemplateLoadingPlaceholder />
           ) : CompiledComponent ? (
             <SpeedFactorProvider factor={1}>
+              {/* <PatchContextProvider overlay={content?.edits as PatchOverlay}>
+                  <CompiledComponent />
+                  {/* <SafeArea>
+                    <AbsoluteCenter>  
+                      <StatCounter/>
+                    </AbsoluteCenter>
+                  </SafeArea> */}
+              {/* </PatchContextProvider> */}
+
               <PatchContextProvider overlay={{
                 "textstagger": {
                   "text": "One product. Every use case.",

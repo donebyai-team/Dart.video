@@ -20,7 +20,6 @@ import {
     BrandIdentitySchema,
     BrandMedia,
     BrandMediaSchema,
-    BrandColor,
     BrandColorSchema,
     BrandFont,
     BrandFontSchema,
@@ -284,18 +283,6 @@ const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onLogoUpload,
         onUpdate(localIdentity)
     }
 
-    const addColor = async () => {
-        const newColor = create(BrandColorSchema, {
-            colorHexCode: "#000000",
-            priority: BrandAssetPriority.PRIMARY
-        })
-        const updated = create(BrandIdentitySchema, {
-            ...localIdentity,
-            colors: [...localIdentity.colors, newColor]
-        })
-        await onUpdate(updated)
-    }
-
     const updateColor = async (index: number, colorHexCode: string) => {
         const updated = [...localIdentity.colors]
         updated[index] = create(BrandColorSchema, {
@@ -307,14 +294,6 @@ const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onLogoUpload,
             colors: updated
         })
         await onUpdate(updatedIdentity)
-    }
-
-    const isSvg = (url: string) => {
-        if (!url) return false
-
-        // Strip query params before checking
-        const cleanUrl = url.split("?")[0].toLowerCase()
-        return cleanUrl.endsWith(".svg")
     }
 
     const removeColor = async (index: number) => {
@@ -412,43 +391,32 @@ const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onLogoUpload,
                     </div>
 
                     <AnimatePresence>
-                        {localIdentity.logos.map((logo, index) => {
-                            const svg = logo.asset && isSvg(logo.asset.url)
-                            return (
-                                <motion.div
-                                    key={index}
-                                    initial={{ opacity: 0, scale: 0.8 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.8 }}
-                                    className="relative group"
-                                >
-                                    <div className="w-24 h-24 aspect-square rounded-md border bg-muted overflow-hidden flex items-center justify-center">
-                                        {svg ? (
-                                            <object
-                                                type="image/svg+xml"
-                                                data={logo.asset?.url}
-                                                className="w-full h-full p-1.5"
-                                            />
-                                        ) : (
-                                            <img
-                                                src={logo.asset?.url}
-                                                alt={`Logo ${index + 1}`}
-                                                className="w-full h-full object-contain p-1.5"
-                                            />
-                                        )}
-                                    </div>
+                        {localIdentity.logos.map((logo, index) => (
+                            <motion.div
+                                key={index}
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.8 }}
+                                className="relative group"
+                            >
+                                <div className="w-32 h-20 rounded-md border bg-muted overflow-hidden flex items-center justify-center">
+                                    <img
+                                        src={logo.asset?.url}
+                                        alt={`Logo ${index + 1}`}
+                                        className="w-full h-full object-contain p-1.5"
+                                    />
+                                </div>
 
-                                    <Button
-                                        size="icon"
-                                        variant="destructive"
-                                        className="absolute -top-1.5 -right-1.5 w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity"
-                                        onClick={() => removeLogo(index)}
-                                    >
-                                        <X className="w-2.5 h-2.5" />
-                                    </Button>
-                                </motion.div>
-                            )
-                        })}
+                                <Button
+                                    size="icon"
+                                    variant="destructive"
+                                    className="absolute -top-1.5 -right-1.5 w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    onClick={() => removeLogo(index)}
+                                >
+                                    <X className="w-2.5 h-2.5" />
+                                </Button>
+                            </motion.div>
+                        ))}
                     </AnimatePresence>
 
                     {localIdentity.logos.length === 0 && (
@@ -467,10 +435,6 @@ const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onLogoUpload,
                             <Palette className="w-4 h-4 text-primary" />
                             <h3 className="text-sm font-semibold">Brand Colors</h3>
                         </div>
-                        <Button size="sm" variant="outline" onClick={addColor} className="h-8 text-xs">
-                            <Plus className="w-3 h-3 mr-1.5" />
-                            Add
-                        </Button>
                     </div>
 
                     <div className="flex flex-wrap gap-2">
@@ -485,9 +449,12 @@ const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onLogoUpload,
                                 >
                                     <div className="flex items-center gap-2 p-2 rounded-md border bg-muted/50">
                                         <div className="flex items-center justify-center w-10 h-10 rounded border bg-background flex-shrink-0">
-                                            <div
-                                                className="w-8 h-7 rounded-md border border-border"
-                                                style={{ backgroundColor: color.colorHexCode }}
+                                            <DualColorPicker
+                                                primaryColor={color.colorHexCode}
+                                                onPrimaryColor={(value) => updateColor(index, value)}
+                                                primaryLabel="Brand color"
+                                                triggerVariant="input"
+                                                triggerStyle="active-color"
                                             />
                                         </div>
                                         <div className="flex flex-col items-center gap-1">
@@ -495,12 +462,6 @@ const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onLogoUpload,
                                                 {BrandAssetPriority[color.priority]}
                                             </span>
                                         </div>
-                                        <DualColorPicker
-                                            primaryColor={color.colorHexCode}
-                                            onPrimaryColor={(value) => updateColor(index, value)}
-                                            primaryLabel="Text color"
-                                            triggerVariant="input"
-                                        />
                                         <Button
                                             size="icon"
                                             variant="ghost"

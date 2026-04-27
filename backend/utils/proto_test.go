@@ -8,7 +8,7 @@ import (
 func TestMergeStructs_StyleMerge(t *testing.T) {
 	// Step 1: create struct from map
 	s1 := CreateStructFromMap(map[string]interface{}{
-		"textcycle": map[string]interface{}{
+		"wordcycle": map[string]interface{}{
 			"style": map[string]interface{}{
 				"color": "#FFFFFF",
 			},
@@ -17,7 +17,7 @@ func TestMergeStructs_StyleMerge(t *testing.T) {
 
 	// Step 2: raw JSON → struct
 	rawJSON := []byte(`{
-		"textcycle": {
+		"wordcycle": {
 			"variant": "summer",
 			"style": {
 				"fontSize": 12
@@ -37,7 +37,7 @@ func TestMergeStructs_StyleMerge(t *testing.T) {
 	result := merged.AsMap()
 
 	expected := map[string]interface{}{
-		"textcycle": map[string]interface{}{
+		"wordcycle": map[string]interface{}{
 			"variant": "summer",
 			"style": map[string]interface{}{
 				"color":    "#FFFFFF",
