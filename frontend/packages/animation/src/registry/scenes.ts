@@ -2,6 +2,7 @@ import { ComponentRegistration } from "./registry";
 import { AnimatedNumberDescriptor } from "../components/scenes/text/AnimatedNumber";
 import { StatCounterDescriptor } from "../components/scenes/text/StatCounter";
 import { TextStaggerDescriptor } from "../components/scenes/text/TextStagger";
+import { TitleSplitDescriptor } from "../components/scenes/text/TitleSplit";
 import { TextHookStaggerDescriptor } from "../components/scenes/text/TextHookStagger";
 import { TypewriterDescriptor } from "../components/scenes/text/Typewriter";
 import { TextHighlightDescriptor } from "../components/scenes/text/TextHighlight";
@@ -27,6 +28,7 @@ export const SCENE_COMPONENTS: ComponentRegistration[] = [
   AnimatedNumberDescriptor,
   StatCounterDescriptor,
   TextStaggerDescriptor,
+  TitleSplitDescriptor,
   TextHookStaggerDescriptor,
   TypewriterDescriptor,
   TextHighlightDescriptor,

@@ -6,10 +6,6 @@ import {
   SpeedFactorProvider,
   PatchContextProvider,
   type PatchOverlay,
-  SafeArea,
-  AbsoluteCenter,
-  PillCarousel,
-  StatCounter,
 } from '@coasterai/animation'
 
 import { compileRemoteComponent } from '../compiler'
@@ -203,7 +199,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
                   <CompiledComponent />
                   {/* <SafeArea>
                     <AbsoluteCenter>  
-                      <StatCounter/>
+                      <TitleSplit/>
                     </AbsoluteCenter>
                   </SafeArea> */}
                 </PatchContextProvider>              
