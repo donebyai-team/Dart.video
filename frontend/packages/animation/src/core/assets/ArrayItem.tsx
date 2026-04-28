@@ -2,23 +2,25 @@ import { useRef } from 'react'
 import { useArrayPatch } from '../../patches'
 
 interface ArrayItemProps {
-    index: number
-    source: string
-    removeControl?: ControlPosition
-    addControl?: ControlPosition
-    style?: React.CSSProperties
-    children: React.ReactNode
+  index: number
+  source: string
+  min: number
+  max: number
+  removeControl?: ControlPosition
+  addControl?: ControlPosition
+  style?: React.CSSProperties
+  children: React.ReactNode
 }
 
 export type ControlPosition =
-    | 'corner-top-left'
-    | 'corner-top-right'
-    | 'corner-bottom-left'
-    | 'corner-bottom-right'
-    | 'mid-top'
-    | 'mid-right'
-    | 'mid-bottom'
-    | 'mid-left'
+  | 'corner-top-left'
+  | 'corner-top-right'
+  | 'corner-bottom-left'
+  | 'corner-bottom-right'
+  | 'mid-top'
+  | 'mid-right'
+  | 'mid-bottom'
+  | 'mid-left'
 
 export function ArrayItem({
   index,
@@ -26,6 +28,8 @@ export function ArrayItem({
   removeControl = 'corner-top-right',
   addControl = 'mid-right',
   style,
+  min = 1,      // 👈 default min 1
+  max,
   children,
 }: ArrayItemProps) {
   const ref = useRef<HTMLDivElement>(null)
@@ -33,12 +37,14 @@ export function ArrayItem({
 
   // write directly on render, not in useEffect
   if (ref.current) {
-    ;(ref.current as any).__arrayMeta = {
+    ; (ref.current as any).__arrayMeta = {
       index,
       source,
       removeControl,
       addControl,
       array,
+      min, 
+      max,
     }
   }
 

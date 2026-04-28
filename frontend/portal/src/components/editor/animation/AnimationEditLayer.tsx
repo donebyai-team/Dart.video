@@ -22,6 +22,7 @@ import {
   type PatchOverlay,
 } from '@coasterai/renderer'
 import { ArrayControlButton } from './ArrayControlButton'
+import { array } from 'zod'
 
 interface FRect { left: number; top: number; width: number; height: number }
 
@@ -439,10 +440,12 @@ export function AnimationEditLayer({
         const rect = hoveredArrayEl.getBoundingClientRect()
         const removePos = resolveControlPosition(rect, meta.removeControl ?? 'corner-top-right')
         const addPos = resolveControlPosition(rect, meta.addControl ?? 'mid-right')
+        const showRemove = meta.array.length > meta.min
+        const showAdd = meta.max === undefined || meta.array.length < meta.max
 
         return (
           <>
-            {meta.array.length > 1 && (
+            {showRemove && (
               <div style={{ position: 'fixed', top: removePos.top, left: removePos.left, zIndex: 50, pointerEvents: 'all' }}>
                 <ArrayControlButton onClick={() => handleArrayRemove(meta)}>
                   ×
@@ -450,11 +453,13 @@ export function AnimationEditLayer({
               </div>
             )}
 
-            <div style={{ position: 'fixed', top: addPos.top, left: addPos.left, zIndex: 50, pointerEvents: 'all' }}>
-              <ArrayControlButton onClick={() => handleArrayAdd(meta)}>
-                +
-              </ArrayControlButton>
-            </div>
+            {showAdd && (
+              <div style={{ position: 'fixed', top: addPos.top, left: addPos.left, zIndex: 50, pointerEvents: 'all' }}>
+                <ArrayControlButton onClick={() => handleArrayAdd(meta)}>
+                  +
+                </ArrayControlButton>
+              </div>
+            )}
           </>
         )
       })()}
