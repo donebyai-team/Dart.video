@@ -10,9 +10,10 @@ export const ENTRANCE_ANIMATIONS = [
     'tiltY',
     'flipX',
     'flipY',
-    'zoomRotate',
     'elasticScale',
     'swingIn',
+    'zoomIn',
+    'zoomOut'
 ] as const;
 
 export type EntranceAnimation = typeof ENTRANCE_ANIMATIONS[number];
@@ -80,14 +81,16 @@ export function getEntranceTransform(
             return `perspective(800px) rotateX(${inv * 180}deg)`;
         case 'flipY':
             return `perspective(800px) rotateY(${inv * 180}deg)`;
-        case 'zoomRotate':
-            return `scale(${progress}) rotate(${inv * 360}deg)`;
         case 'elasticScale': {
             const elastic = 1 + Math.sin(progress * Math.PI * 3) * inv * 0.3;
             return `scale(${progress * elastic})`;
         }
         case 'swingIn':
             return `perspective(800px) rotateY(${inv * 70}deg) translateX(${inv * -100}px)`;
+        case 'zoomIn':
+            return `scale(${3 - progress * 2})`;    
+        case 'zoomOut':
+        return `scale(${1 + progress * 2})`;    
         case 'fadeIn':
         default:
             return 'none';

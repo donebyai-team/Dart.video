@@ -155,7 +155,18 @@ export default function SceneSettings({
                 triggerStyle="active-color"
               />
             </label>
-          ) : definition.kind === 'number' ? (
+          ) : definition.kind === 'animation_speed' ? (
+            <div key={prop} className="flex items-center justify-between gap-4">
+              <span className="text-sm font-medium">Animation Speed</span>
+              <NumberStepper
+                value={Number(value)}
+                min={25}
+                max={200}
+                onChange={next => onValuePatch(patchEntryId ?? elementId, prop, next)}
+                inputWidth="w-20"
+              />
+            </div>
+          ): definition.kind === 'number' ? (
             <div key={prop} className="flex items-center justify-between gap-4">
               <span className="text-sm font-medium">{toSceneFieldLabel(prop)}</span>
               <NumberStepper

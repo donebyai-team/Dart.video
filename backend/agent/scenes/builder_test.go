@@ -6,7 +6,7 @@ import (
 )
 
 func TestBuildWithNonRequiredProps(t *testing.T) {
-	prompt := BuildScenesList(false)
+	prompt := BuildScenesList(false, SkipLLMFields)
 
 	if prompt == "" {
 		t.Fatalf("invalid prompt")
@@ -14,7 +14,7 @@ func TestBuildWithNonRequiredProps(t *testing.T) {
 }
 
 func TestBuildScenesListIncludesEnumsInEditMode(t *testing.T) {
-	prompt := BuildScenesList(true)
+	prompt := BuildScenesList(true, nil)
 
 	if prompt == "" {
 		t.Fatalf("invalid prompt")

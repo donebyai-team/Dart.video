@@ -15,13 +15,14 @@ import { measureTextWidth } from './measureText';
 
 export const TextWithWordCycleDefaults = {
   id: 'textwithwordcycle',
+  startAt: 0,
   text: 'Sample text',
   cyclingWords: ['first word', 'next word', 'last word'],
   holdDuration: 20,
   transitionDuration: 10,
   textCycleTransition: 'slideUp' as TextCycleTransition,
   entranceAnimation: 'slideUp' as EntranceAnimation,
-  variant: 'headingLg' as TypographyVariant,
+  variant: 'display' as TypographyVariant,
   highlightStyle: 'background' as HighlightStyle,
   highlightColor: undefined as string | undefined,
   style: undefined as React.CSSProperties | undefined,
@@ -50,20 +51,26 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (initProps) =
   const actualHighlightColor = props.highlightColor ?? theme.colors.primary;
   const actualEntranceAnimation = props.entranceAnimation;
   const styleOverride = useStyleOverride(id);
+  const overrideTransform = typeof styleOverride.transform === 'string' ? styleOverride.transform : undefined;
 
   const cycleDuration = props.holdDuration + props.transitionDuration;
   const entranceDuration = 20;
+  const localFrame = Math.max(0, frame - props.startAt);
   const entranceProgress = interpolateWithEasing(
-    frame,
+    localFrame,
     [0, entranceDuration],
     [0, 1],
     'ease-out',
   );
   const entranceTransform = getEntranceTransform(actualEntranceAnimation, entranceProgress);
-  const dragStyle = usePatchedDragStyle(id, entranceTransform, props.style?.transform);
+  const dragStyle = usePatchedDragStyle(id, entranceTransform, props.style?.transform, overrideTransform);
   const typographyStyle = resolveTypography(patchedVariant, styleConfig, theme, preset);
+  const textOverrideStyle: React.CSSProperties = {
+    ...styleOverride,
+  };
+  delete textOverrideStyle.transform;
   const containerStyle: React.CSSProperties = {
-    display: 'inline',
+    display: 'inline-block',
     opacity: entranceProgress,
     ...typographyStyle,
     ...props.style,
@@ -94,13 +101,13 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (initProps) =
         <Text
           text={props.text}
           variant={patchedVariant}
-          style={{ display: 'inline', whiteSpace: 'normal' }}
+          style={{ display: 'inline', whiteSpace: 'normal', ...textOverrideStyle }}
         />
       </span>
     );
   }
 
-  const elapsed = Math.max(0, frame);
+  const elapsed = localFrame;
   const holdDuration = props.holdDuration;
   const transitionDuration = props.transitionDuration;
   const lastCycleIndex = props.cyclingWords.length - 1;
@@ -312,7 +319,7 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (initProps) =
       style={containerStyle}
     >
       {props.text && (
-        <Text text={props.text} variant={patchedVariant} style={{ display: 'inline', whiteSpace: 'normal' }} />
+        <Text text={props.text} variant={patchedVariant} style={{ display: 'inline', whiteSpace: 'pre-wrap', ...textOverrideStyle }} />
       )}
       {props.text ? ' ' : null}
       {renderCyclingWords()}
@@ -325,6 +332,11 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (initProps) =
 // ============================================================================
 
 export const TextWithWordCycleSchemaFields = [
+  {
+    "name": "startAt",
+    "type": "number",
+    "default": TextWithWordCycleDefaults.startAt
+  },
   {
     "name": "text",
     "type": "string",
@@ -346,6 +358,7 @@ export const TextWithWordCycleSchemaFields = [
     "name": "entranceAnimation",
     "type": "string",
     "subtype": "enum",
+    "map": "props.entranceAnimation",
     "default": TextWithWordCycleDefaults.entranceAnimation
   },
   {
@@ -391,6 +404,12 @@ export const TextWithWordCycleDescriptor: ComponentRegistration = {
       "items": {
         "type": "string"
       }
+    },
+    {
+      name: 'entranceAnimation',
+      type: 'enum',
+      required: false,
+      default: TextWithWordCycleDefaults.entranceAnimation,
     }
   ],
   description: 'Static text with cycling highlighted words at the end. Use for dynamic taglines like "We build amazing [software/products/solutions]"',

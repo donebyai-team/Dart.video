@@ -2,6 +2,7 @@ import { ComponentRegistration } from "./registry";
 import { AnimatedNumberDescriptor } from "../components/scenes/text/AnimatedNumber";
 import { StatCounterDescriptor } from "../components/scenes/text/StatCounter";
 import { TextStaggerDescriptor } from "../components/scenes/text/TextStagger";
+import { TitleSplitDescriptor } from "../components/scenes/text/TitleSplit";
 import { TextHookStaggerDescriptor } from "../components/scenes/text/TextHookStagger";
 import { TypewriterDescriptor } from "../components/scenes/text/Typewriter";
 import { TextHighlightDescriptor } from "../components/scenes/text/TextHighlight";
@@ -11,7 +12,7 @@ import { ProblemHeadlineDescriptor } from "../components/scenes/text/ProblemHead
 import { TextCardStackDescriptor } from "../components/scenes/text/TextCardStack";
 import { AnimatedImageDescriptor } from "../components/scenes/assets/AnimatedImage";
 import { AnimatedVideoDescriptor } from "../components/scenes/assets/AnimatedVideo";
-import { ImagePeelDescriptor } from "../components/scenes/assets/ImagePeel";
+import { MultiImageStackDescriptor } from "../components/scenes/assets/image_stack/MultiImageStack";
 import { ProblemCollageDescriptor } from "../components/scenes/assets/ProblemCollage";
 import { LogoAssetDescriptor } from "../components/scenes/assets/LogoAsset";
 import { LogoShowcaseDescriptor } from "../components/scenes/assets/LogoShowcase";
@@ -27,6 +28,7 @@ export const SCENE_COMPONENTS: ComponentRegistration[] = [
   AnimatedNumberDescriptor,
   StatCounterDescriptor,
   TextStaggerDescriptor,
+  TitleSplitDescriptor,
   TextHookStaggerDescriptor,
   TypewriterDescriptor,
   TextHighlightDescriptor,
@@ -41,7 +43,7 @@ export const SCENE_COMPONENTS: ComponentRegistration[] = [
   // AnimatedVideoDescriptor,
   TextWithImageSceneDescriptor,
   TextWithVideoSceneDescriptor,
-  ImagePeelDescriptor,
+  MultiImageStackDescriptor,
   ProblemCollageDescriptor,
   // LogoAssetDescriptor,
   LogoShowcaseDescriptor,

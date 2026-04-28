@@ -263,6 +263,7 @@ export const TextLeadStaggerSchemaFields = [
     "name": "entranceAnimation",
     "type": "string",
     "subtype": "enum",
+    "map": "props.entranceAnimation",
     "default": TextLeadStaggerDefaults.entranceAnimation
   },
   {
@@ -284,6 +285,12 @@ export const TextLeadStaggerDescriptor: ComponentRegistration = {
     {
       name: 'text',
       type: 'string',
+    },
+    {
+      name: 'entranceAnimation',
+      type: 'enum',
+      required: false,
+      default: TextLeadStaggerDefaults.entranceAnimation,
     }
   ],
   celExpression: `((${CEL_BASE_FRAMES} + max(0, segmentCount(props.textleadstagger.text, "word") - 2) * ${CEL_EXTRA_ENTRY_FRAMES} + max(0, segmentCount(props.textleadstagger.text, "word") - 1) * ${CEL_EXTRA_EXIT_FRAMES}) * ${DEFAULT_SPEED_PERCENTAGE}) / max(${MIN_SPEED_PERCENTAGE}, props.textleadstagger.speed)`,

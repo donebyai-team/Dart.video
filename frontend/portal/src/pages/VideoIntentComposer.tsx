@@ -5,18 +5,15 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Film,
   Sparkles,
-  TextIcon,
   X,
   Square
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import FigmaImportPanel, { type ConfirmPayload as FigmaImportConfirmPayload } from '@/components/figma/FigmaImportPanel'
 import ManualMediaImportPanel from '@/components/assets/ManualMediaImportPanel'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Script } from '@coasterai/pb/coasterai/core/v1/video_pb'
-import ScriptEditorDialog from '@/components/dashboard/ScriptEditorDialog'
 import { useClientsContext } from '@coasterai/ui-core/context/ClientContext'
 import { getConnectError } from '@/utils/error'
 import toast from 'react-hot-toast'
@@ -27,11 +24,10 @@ import { type AskUserQuestion, type CreateVideoResponse } from '@coasterai/pb/co
 import QuestionPanel from '@/components/composer/QuestionPanel'
 import ThinkingViewComponent from '@/components/composer/ThinkingViewComponent'
 import { StyleType, VideoMetadataSchema } from '@coasterai/pb/coasterai/core/v1/video_pb'
-import StylePickerDialog from '@/components/composer/StylePickerDialog'
 import AssetUploadDropdown from '@/components/composer/AssetUploadDropdown'
 import LanguageSelector from '@/components/composer/LanguageSelector'
 import BrandLibrarySelector from '@/components/composer/BrandLibrarySelector'
-import { MediaAsset, SelectedMediaAsset, SelectedMediaAssetSchema } from '@coasterai/pb/coasterai/core/v1/media_asset_pb'
+import { MediaAsset, SelectedMediaAssetSchema } from '@coasterai/pb/coasterai/core/v1/media_asset_pb'
 import SelectedAssetsDialog, { type SelectedAssetWithPreview } from '@/components/assets/SelectedAssetsDialog'
 
 const MIN_SCRIPT_SECTIONS = 3
@@ -47,8 +43,6 @@ const VideoIntentComposer = () => {
   const [selectedBrandLibraryId, setSelectedBrandLibraryId] = useState<string | undefined>()
   const [duration, setDuration] = useState('60')
   const [language, setLanguage] = useState('en')
-  const [scriptDialogOpen, setScriptDialogOpen] = useState(false)
-  const [styleDialogOpen, setStyleDialogOpen] = useState(false)
   const [assetDialogOpen, setAssetDialogOpen] = useState(false)
   const [selectedAssetsDialogOpen, setSelectedAssetsDialogOpen] = useState(false)
   const [questionAssetsDialogOpen, setQuestionAssetsDialogOpen] = useState(false)
@@ -72,7 +66,6 @@ const VideoIntentComposer = () => {
   const [customAnswer, setCustomAnswer] = useState('')
   const [questionAssets, setQuestionAssets] = useState<SelectedAssetWithPreview[]>([])
 
-  const hasScript = !!script?.items?.length
   const router = useRouter()
   const { portalClient } = useClientsContext()
 
@@ -296,8 +289,6 @@ const VideoIntentComposer = () => {
     }
   }
 
-  const removeScript = () => setScript(undefined)
-
   const upsertSelectedAsset = (asset: MediaAsset, note?: string) => {
     const nextAsset = create(SelectedMediaAssetSchema, {
       assetID: asset.id,
@@ -322,25 +313,6 @@ const VideoIntentComposer = () => {
       return [...remaining, { selection: nextAsset, asset }]
     })
     setAssetDialogOpen(false)
-  }
-
-  const handleSelectFigmaFrame = async ({ fileKey, selectedFrame, sectionNote }: FigmaImportConfirmPayload) => {
-    try {
-      const res = await portalClient.importFigmaFrame({
-        fileKey,
-        nodeId: selectedFrame.nodeId
-      })
-      if (!res.asset) {
-        throw new Error('Figma import did not return an asset')
-      }
-      if (stage === 'question') {
-        upsertQuestionAsset(res.asset, sectionNote)
-      } else {
-        upsertSelectedAsset(res.asset, sectionNote)
-      }
-    } catch (err) {
-      toast.error(getConnectError(err))
-    }
   }
 
   const handleSelectUploadedAsset = async ({ asset, sectionNote }: { asset: MediaAsset; sectionNote?: string }) => {
@@ -422,36 +394,13 @@ const VideoIntentComposer = () => {
 
   return (
     <div className='flex flex-col w-full max-w-3xl mx-auto px-4 min-h-[calc(100vh-4rem)]'>
-      <ScriptEditorDialog
-        open={scriptDialogOpen}
-        onOpenChange={setScriptDialogOpen}
-        initialScript={script}
-        onSave={(s: Script) => setScript(s)}
-      />
-
-      <StylePickerDialog
-        open={styleDialogOpen}
-        onOpenChange={setStyleDialogOpen}
-        selectedStyle={selectedStyle}
-        onSelect={setSelectedStyle}
-      />
-
       <Dialog open={assetDialogOpen} onOpenChange={setAssetDialogOpen}>
         <DialogContent className='max-w-2xl p-0 overflow-hidden' forceMount>
-          <div className={assetPickerMode === 'figma' ? 'block' : 'hidden'}>
-            <FigmaImportPanel
-              onClose={() => setAssetDialogOpen(false)}
-              onConfirm={handleSelectFigmaFrame}
-              canConfirm={stage === 'compose' || stage === 'question'}
-            />
-          </div>
-          <div className={assetPickerMode === 'upload' ? 'block' : 'hidden'}>
-            <ManualMediaImportPanel
-              onClose={() => setAssetDialogOpen(false)}
-              onConfirm={handleSelectUploadedAsset}
-              canConfirm={stage === 'compose' || stage === 'question'}
-            />
-          </div>
+          <ManualMediaImportPanel
+            onClose={() => setAssetDialogOpen(false)}
+            onConfirm={handleSelectUploadedAsset}
+            canConfirm={stage === 'compose' || stage === 'question'}
+          />
         </DialogContent>
       </Dialog>
 
@@ -477,15 +426,15 @@ const VideoIntentComposer = () => {
 
       {/* Center area — grows to push input to the bottom */}
       <div className='flex-1 flex items-center justify-center py-8'>
-  <div className='text-center'>
-    <h1 className='text-2xl font-semibold tracking-tight'>
-      What feature are you launching today?
-    </h1>
-    <p className='text-sm text-muted-foreground mt-1.5'>
-      Add a detailed script to generate your video.
-    </p>
-  </div>
-</div>
+        <div className='text-center'>
+          <h1 className='text-2xl font-semibold tracking-tight'>
+            What feature are you launching today?
+          </h1>
+          <p className='text-sm text-muted-foreground mt-1.5'>
+            Add a detailed script to generate your video.
+          </p>
+        </div>
+      </div>
 
       {/* Bottom composite area */}
       <div className='pb-6 space-y-2.5'>
@@ -551,16 +500,6 @@ const VideoIntentComposer = () => {
 
             <div className='flex-1' />
 
-            {/* <button
-              onClick={() => setScriptDialogOpen(true)}
-              className='flex items-center gap-1.5 flex-shrink-0 hover:text-foreground rounded px-1.5 py-1 hover:bg-muted/50 transition-colors'
-            >
-              <TextIcon className='w-3.5 h-3.5' />
-              <span>{hasScript ? 'Edit script' : 'Script'}</span>
-            </button>
-
-            <span className='text-border/60 mx-0.5'>·</span> */}
-
             {/* Add Style */}
             {/* <StyleSelector
               selectedStyle={selectedStyle}
@@ -585,30 +524,6 @@ const VideoIntentComposer = () => {
               disabled={stage !== 'compose'}
             />
           </div>
-
-          {/* Script badge */}
-          {hasScript && (
-            <div className='mx-4 mt-2 flex flex-wrap gap-2'>
-              <div
-                onClick={() => setScriptDialogOpen(true)}
-                className='flex items-center justify-between rounded-lg border bg-primary/5 border-primary/15 px-3 py-1.5 text-xs cursor-pointer hover:border-primary/30 transition-colors'
-              >
-                <div className='flex items-center gap-2 text-primary'>
-                  <span className='font-medium'>Script attached</span>
-                  <span className='text-muted-foreground'>· {scriptVoiceoverCount} sections</span>
-                </div>
-                <button
-                  onClick={e => {
-                    e.stopPropagation()
-                    removeScript()
-                  }}
-                  className='p-0.5 rounded hover:bg-destructive/10 hover:text-destructive'
-                >
-                  <X className='w-3.5 h-3.5' />
-                </button>
-              </div>
-            </div>
-          )}
 
           {hasSelectedAssets && (
             <div className='mx-4 mt-2 flex flex-wrap gap-2'>
@@ -642,11 +557,7 @@ const VideoIntentComposer = () => {
           <textarea
             value={prompt}
             onChange={e => setPrompt(e.target.value)}
-            placeholder={
-              hasScript
-                ? 'Add direction or style notes (tone, pacing, visuals)...'
-                : 'Sample script (Hook → Problem → Product Intro → Features → Social Proof → CTA). Example: Hook: Can your AI actually work with you?'
-            }
+            placeholder={'Sample script (Hook → Problem → Product Intro → Features → Social Proof → CTA). Example: Hook: Can your AI actually work with you?'}
             rows={4}
             className='w-full resize-none bg-transparent px-4 py-3 text-sm focus:outline-none placeholder:text-muted-foreground/60'
             disabled={stage !== 'compose'}

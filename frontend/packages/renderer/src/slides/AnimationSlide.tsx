@@ -6,10 +6,6 @@ import {
   SpeedFactorProvider,
   PatchContextProvider,
   type PatchOverlay,
-  SafeArea,
-  AbsoluteCenter,
-  PillCarousel,
-  StatCounter,
 } from '@coasterai/animation'
 
 import { compileRemoteComponent } from '../compiler'
@@ -184,35 +180,30 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
       }}
     >
       <CanvasEffectsLayer
-          zooms={slide.zooms ?? []}
-          spotlights={slide.spotlights ?? []}
-          callouts={slide.callouts ?? []}
-          frame={frame}
-          fps={fps}
-          width={width}
-          height={height}
-          slideDurationInFrames={slide.durationInFrames}
-          isPlaying={isPlaying}
-        >
-          <div style={{ width: '100%', height: '100%' }}>
-            {isLoading ? (
-              <TemplateLoadingPlaceholder />
-            ) : CompiledComponent ? (
-              <SpeedFactorProvider factor={1}>
-                <PatchContextProvider overlay={content?.edits as PatchOverlay}>
-                  <CompiledComponent />
-                  {/* <SafeArea>
-                    <AbsoluteCenter>  
-                      <StatCounter/>
-                    </AbsoluteCenter>
-                  </SafeArea> */}
-                </PatchContextProvider>              
-              </SpeedFactorProvider>
-            ) : templateError ? (
-              <TemplateErrorFallback message={templateError} />
-            ) : null}
-          </div>
-        </CanvasEffectsLayer>
+        zooms={slide.zooms ?? []}
+        spotlights={slide.spotlights ?? []}
+        callouts={slide.callouts ?? []}
+        frame={frame}
+        fps={fps}
+        width={width}
+        height={height}
+        slideDurationInFrames={slide.durationInFrames}
+        isPlaying={isPlaying}
+      >
+        <div style={{ width: '100%', height: '100%' }}>
+          {isLoading ? (
+            <TemplateLoadingPlaceholder />
+          ) : CompiledComponent ? (
+            <SpeedFactorProvider factor={1}>
+              <PatchContextProvider overlay={content?.edits as PatchOverlay}>
+                <CompiledComponent />
+              </PatchContextProvider>
+            </SpeedFactorProvider>
+          ) : templateError ? (
+            <TemplateErrorFallback message={templateError} />
+          ) : null}
+        </div>
+      </CanvasEffectsLayer>
     </AbsoluteFill>
   )
 }

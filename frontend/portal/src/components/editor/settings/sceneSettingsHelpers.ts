@@ -1,4 +1,4 @@
-import { DIRECTIONS, ENTRANCE_ANIMATIONS, HIGHLIGHT_STYLES, HIGHLIGHTED_TEXT_ANIMATIONS, LOGO_ANIMATIONS, SCENE_COMPONENTS, SPLIT_BY_MODES, TEXT_CYCLE_TRANSITIONS, TYPOGRAPHY_VARIANT_NAMES } from "../../../../../packages/animation/src"
+import { DIRECTIONS, ENTRANCE_ANIMATIONS, HIGHLIGHT_STYLES, HIGHLIGHTED_TEXT_ANIMATIONS, LOGO_ANIMATIONS, SCENE_COMPONENTS, SPLIT_BY_MODES, STACK_ANIMATIONS, TEXT_CYCLE_TRANSITIONS, TYPOGRAPHY_VARIANT_NAMES } from "../../../../../packages/animation/src"
 import { resolveComponentFromId } from '@coasterai/renderer'
 
 
@@ -10,6 +10,7 @@ export type SceneFieldKind = 'string' | 'number' | 'boolean' | 'string[]' | 'enu
   | 'image[]'
   | 'video'
   | 'video[]'
+  | 'animation_speed'
 
 export type SceneFieldDefinition = {
   kind: SceneFieldKind
@@ -62,6 +63,10 @@ const RESERVED_FIELD_MAP: Record<string, SceneFieldDefinition> = {
     kind: 'enum',
     options: [...TEXT_CYCLE_TRANSITIONS],
   },
+  stackAnimation: {
+    kind: 'enum',
+    options: [...STACK_ANIMATIONS],
+  },
 }
 
 export function toSceneFieldLabel(prop: string): string {
@@ -84,6 +89,8 @@ export function inferSceneFieldDefinition(prop: string, value: unknown): SceneFi
   const isImageField = lowerProp === 'image' || lowerProp === 'images' || lowerProp === 'src'
   const isColorField = lowerProp.includes('color')
 
+  if (lowerProp === 'speed')
+    return { kind: 'animation_speed' }
 
   if (isVideoField && typeof value === 'string') {
     return { kind: 'video' }
@@ -154,6 +161,8 @@ function getSceneFieldKindPriority(kind: SceneFieldKind): number {
       return 7
     case 'string[]':
       return 8
+    case 'animation_speed':
+      return 100
     default:
       return 10
   }

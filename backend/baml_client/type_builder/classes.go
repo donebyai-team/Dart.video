@@ -83,6 +83,38 @@ func (t *AddSceneResponseClassView) Type() (baml.Type, error) {
 	return t.inner.Type()
 }
 
+type AnimationCategoriesClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *AnimationCategoriesClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *AnimationCategoriesClassView) PropertyEntranceAnimations() (ClassPropertyView, error) {
+	return t.inner.Property("entranceAnimations")
+}
+
+func (t *TypeBuilder) AnimationCategories() (*AnimationCategoriesClassView, error) {
+	bld, err := t.inner.Class("AnimationCategories")
+	if err != nil {
+		return nil, err
+	}
+	return &AnimationCategoriesClassView{inner: bld}, nil
+}
+
+func (t *AnimationCategoriesClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
 type AskUserQuestionClassView struct {
 	inner baml.ClassBuilder
 }
@@ -793,6 +825,10 @@ func (t *VideoGenerationPlanRequestClassView) PropertyVideoBranding() (ClassProp
 
 func (t *VideoGenerationPlanRequestClassView) PropertyComponentList() (ClassPropertyView, error) {
 	return t.inner.Property("ComponentList")
+}
+
+func (t *VideoGenerationPlanRequestClassView) PropertyAnimationCategories() (ClassPropertyView, error) {
+	return t.inner.Property("AnimationCategories")
 }
 
 func (t *TypeBuilder) VideoGenerationPlanRequest() (*VideoGenerationPlanRequestClassView, error) {

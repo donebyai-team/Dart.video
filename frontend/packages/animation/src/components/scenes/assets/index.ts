@@ -2,7 +2,7 @@ export * from './AnimatedImage';
 export * from './AnimatedVideo';
 export * from './TextWithImageScene';
 export * from './TextWithVideoScene';
-export * from './ImagePeel';
+export * from './image_stack';
 export * from './ProblemCollage';
 export * from './IconShowcase';
 export * from './LogoAsset';
