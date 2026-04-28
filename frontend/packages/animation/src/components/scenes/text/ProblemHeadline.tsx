@@ -396,6 +396,7 @@ export const ProblemHeadlineSchemaFields = [
     "name": "entranceAnimation",
     "type": "string",
     "subtype": "enum",
+    "map": "props.entranceAnimation",
     "default": ProblemHeadlineDefaults.entranceAnimation
   },
   {
@@ -419,6 +420,12 @@ export const ProblemHeadlineDescriptor: ComponentRegistration = {
     {
       name: 'text',
       type: 'string',
+    },
+    {
+      name: 'entranceAnimation',
+      type: 'enum',
+      required: false,
+      default: ProblemHeadlineDefaults.entranceAnimation,
     }
   ],
   celExpression: `${CEL_TOTAL_FRAMES}`,

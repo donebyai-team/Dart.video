@@ -79,6 +79,7 @@ Each scene must define a **descriptor** containing:
 ### 2. LLM Schema
 
 * Format expected from the LLM
+* contains fields like type(string, number, enum), required(false if the field is optional), hint(eg values), range(for constraint eg. 2-3 words or 25-200)
 
 ### 3. Mapping
 

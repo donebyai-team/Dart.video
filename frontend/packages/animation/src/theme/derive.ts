@@ -2,7 +2,7 @@ import { BrandTheme } from './types';
 import { ColorTokens } from '../tokens/colors';
 
 /** Parse a hex color into [r, g, b] (0–255). */
-function hexToRgb(hex: string): [number, number, number] {
+export function hexToRgb(hex: string): [number, number, number] {
   const h = hex.replace('#', '');
   const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
   const n = parseInt(full, 16);

@@ -25,6 +25,8 @@ var typeMap = map[string]reflect.Type{
 	"STREAM_TYPES.AddSceneRequest":                 reflect.TypeOf(stream_types.AddSceneRequest{}),
 	"TYPES.AddSceneResponse":                       reflect.TypeOf(types.AddSceneResponse{}),
 	"STREAM_TYPES.AddSceneResponse":                reflect.TypeOf(stream_types.AddSceneResponse{}),
+	"TYPES.AnimationCategories":                    reflect.TypeOf(types.AnimationCategories{}),
+	"STREAM_TYPES.AnimationCategories":             reflect.TypeOf(stream_types.AnimationCategories{}),
 	"TYPES.AskUserQuestion":                        reflect.TypeOf(types.AskUserQuestion{}),
 	"STREAM_TYPES.AskUserQuestion":                 reflect.TypeOf(stream_types.AskUserQuestion{}),
 	"TYPES.AssetAnalysis":                          reflect.TypeOf(types.AssetAnalysis{}),

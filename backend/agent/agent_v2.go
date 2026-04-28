@@ -247,6 +247,9 @@ func (a *agentV2) Start(ctx context.Context, options StartSessionOptions) (*RunR
 		Language:   "English",
 		Resolution: options.Input.Resolution.Id,
 		Script:     script,
+		AnimationCategories: types.AnimationCategories{
+			scenes.GetAvailableEntranceAnimations(),
+		},
 	}
 
 	// use brand guidelines only when specified
@@ -367,7 +370,7 @@ func (a *agentV2) runPlanning(ctx context.Context, req types.VideoGenerationPlan
 		}
 	}()
 
-	req.ComponentList = scenes.BuildScenesList(false)
+	req.ComponentList = scenes.BuildScenesList(false, scenes.SkipLLMFields)
 
 	// Generate and validate upto max attempts
 	for attempt := 0; attempt < maxAttempts; attempt++ {

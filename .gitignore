@@ -35,3 +35,4 @@ redora
 **/generated/
 **/prompt_generator/prompts/
 .gomodcache/
+video.json

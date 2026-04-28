@@ -110,6 +110,48 @@ func (c AddSceneResponse) BamlTypeName() string {
 	return "AddSceneResponse"
 }
 
+type AnimationCategories struct {
+	EntranceAnimations []string `json:"entranceAnimations"`
+}
+
+func (c *AnimationCategories) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "AnimationCategories" {
+		panic(fmt.Sprintf("expected AnimationCategories, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "entranceAnimations":
+			c.EntranceAnimations = baml.Decode(valueHolder).Interface().([]string)
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class AnimationCategories", key))
+
+		}
+	}
+
+}
+
+func (c AnimationCategories) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["entranceAnimations"] = c.EntranceAnimations
+
+	return baml.EncodeClass("AnimationCategories", fields, nil)
+}
+
+func (c AnimationCategories) BamlTypeName() string {
+	return "AnimationCategories"
+}
+
 type AskUserQuestion struct {
 	Tool_name          string              `json:"tool_name"`
 	QuestionType       AskUserQuestionType `json:"questionType"`
@@ -1029,13 +1071,14 @@ func (c VideoGenerationPlan) BamlTypeName() string {
 }
 
 type VideoGenerationPlanRequest struct {
-	Duration      int64         `json:"Duration"`
-	Prompt        string        `json:"Prompt"`
-	Language      string        `json:"Language"`
-	Resolution    string        `json:"Resolution"`
-	Script        []ScriptItem  `json:"Script"`
-	VideoBranding VideoBranding `json:"VideoBranding"`
-	ComponentList string        `json:"ComponentList"`
+	Duration            int64               `json:"Duration"`
+	Prompt              string              `json:"Prompt"`
+	Language            string              `json:"Language"`
+	Resolution          string              `json:"Resolution"`
+	Script              []ScriptItem        `json:"Script"`
+	VideoBranding       VideoBranding       `json:"VideoBranding"`
+	ComponentList       string              `json:"ComponentList"`
+	AnimationCategories AnimationCategories `json:"AnimationCategories"`
 }
 
 func (c *VideoGenerationPlanRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -1073,6 +1116,9 @@ func (c *VideoGenerationPlanRequest) Decode(holder *cffi.CFFIValueClass, typeMap
 		case "ComponentList":
 			c.ComponentList = baml.Decode(valueHolder).Interface().(string)
 
+		case "AnimationCategories":
+			c.AnimationCategories = baml.Decode(valueHolder).Interface().(AnimationCategories)
+
 		default:
 
 			panic(fmt.Sprintf("unexpected field: %s in class VideoGenerationPlanRequest", key))
@@ -1098,6 +1144,8 @@ func (c VideoGenerationPlanRequest) Encode() (*cffi.HostValue, error) {
 	fields["VideoBranding"] = c.VideoBranding
 
 	fields["ComponentList"] = c.ComponentList
+
+	fields["AnimationCategories"] = c.AnimationCategories
 
 	return baml.EncodeClass("VideoGenerationPlanRequest", fields, nil)
 }

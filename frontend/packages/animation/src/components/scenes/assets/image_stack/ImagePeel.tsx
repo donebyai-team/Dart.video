@@ -1,18 +1,12 @@
 import React from 'react';
-import { ArrayItem } from '../../../../core/assets/ArrayItem';
 import { ImageAsset } from '../../../../core/assets/ImageAsset';
 import { interpolateWithEasing } from '../../../../styles/easingResolver';
 import { Direction } from '../../types';
-
-export type ImageStackImageItem = Record<string, {
-    image?: string;
-    width?: number;
-    height?: number;
-}>;
+import { getImageWithLabelImage, type ImageWithLabelItem } from './shared';
 
 export type ImagePeelProps = {
     frame: number;
-    images: ImageStackImageItem[];
+    items: ImageWithLabelItem[];
     holdDuration: number;
     transitionDuration: number;
     stackOffset: number;
@@ -51,7 +45,7 @@ function getTransformOrigin(direction: Direction): string {
 
 export function ImagePeel({
     frame,
-    images,
+    items,
     holdDuration,
     transitionDuration,
     stackOffset,
@@ -59,7 +53,7 @@ export function ImagePeel({
     height,
     direction,
 }: ImagePeelProps): React.ReactElement {
-    const count = images.length;
+    const count = items.length;
     const cycleDuration = holdDuration + transitionDuration;
 
     return (
@@ -70,9 +64,9 @@ export function ImagePeel({
                 height,
             }}
         >
-            {[...images].reverse().map((item, reversedIndex) => {
-                const [eid, patch] = Object.entries(item)[0] ?? [`image-${reversedIndex}`, {}];
+            {[...items].reverse().map((item, reversedIndex) => {
                 const index = count - 1 - reversedIndex;
+                const imagePatch = getImageWithLabelImage(item);
                 const peelStart = index * cycleDuration;
                 const peelProgress = interpolateWithEasing(
                     frame,
@@ -93,32 +87,25 @@ export function ImagePeel({
                 const stackY = reversedIndex * stackOffset;
 
                 return (
-                    <ArrayItem
-                        key={`${eid}-${index}`}
-                        index={index}
-                        source="images"
-                        removeControl="mid-left"
-                        addControl="mid-right"
+                    <div
+                        key={`${imagePatch.id}-${index}`}
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            transformOrigin: getTransformOrigin(direction),
+                            transform: `translate(${stackX}px, ${stackY}px) ${peelTransform}`,
+                            opacity,
+                        }}
                     >
-                        <div
-                            style={{
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                transformOrigin: getTransformOrigin(direction),
-                                transform: `translate(${stackX}px, ${stackY}px) ${peelTransform}`,
-                                opacity,
-                            }}
-                        >
-                            <ImageAsset
-                                id={eid}
-                                image={patch.image ?? ''}
-                                width={patch.width ?? width}
-                                height={patch.height ?? height}
-                                style={{ overflow: 'hidden' }}
-                            />
-                        </div>
-                    </ArrayItem>
+                        <ImageAsset
+                            id={imagePatch.id}
+                            image={imagePatch.image ?? ''}
+                            width={imagePatch.width ?? width}
+                            height={imagePatch.height ?? height}
+                            style={{ overflow: 'hidden' }}
+                        />
+                    </div>
                 );
             })}
         </div>

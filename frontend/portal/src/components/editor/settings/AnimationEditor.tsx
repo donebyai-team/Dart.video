@@ -9,13 +9,12 @@ import ThinkingViewComponent from '@/components/composer/ThinkingViewComponent'
 import AssetUploadDropdown from '@/components/composer/AssetUploadDropdown'
 import BrandLibrarySelector from '@/components/composer/BrandLibrarySelector'
 import ManualMediaImportPanel from '@/components/assets/ManualMediaImportPanel'
-import FigmaImportPanel, { type ConfirmPayload as FigmaImportConfirmPayload } from '@/components/figma/FigmaImportPanel'
 import SelectedAssetsDialog, { type SelectedAssetWithPreview } from '@/components/assets/SelectedAssetsDialog'
 import { useVideoStore } from '@/stores/video'
 import { ActiveToolType, AddOrEditAnimationSettings } from '@/types/tools'
 import type { AskUserQuestion, GenerateOrEditSceneResponse } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
 import { SlideStatus, type Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import { MediaAsset, SelectedMediaAsset, SelectedMediaAssetSchema } from '@coasterai/pb/coasterai/core/v1/media_asset_pb'
+import { MediaAsset, SelectedMediaAssetSchema } from '@coasterai/pb/coasterai/core/v1/media_asset_pb'
 import { getConnectError } from '@/utils/error'
 import toast from 'react-hot-toast'
 import { PatchOverlay } from '@coasterai/renderer'
@@ -313,20 +312,6 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
         setAssetDialogOpen(false)
     }
 
-    const handleSelectFigmaFrame = async ({ fileKey, selectedFrame, sectionNote }: FigmaImportConfirmPayload) => {
-        try {
-            const res = await portalClient.importFigmaFrame({ fileKey, nodeId: selectedFrame.nodeId })
-            if (!res.asset) throw new Error('Figma import did not return an asset')
-            if (stage === 'question') {
-                upsertQuestionAsset(res.asset, sectionNote)
-            } else {
-                upsertSelectedAsset(res.asset, sectionNote)
-            }
-        } catch (err) {
-            toast.error(getConnectError(err))
-        }
-    }
-
     const handleSelectUploadedAsset = ({ asset, sectionNote }: { asset: MediaAsset; sectionNote?: string }) => {
         if (stage === 'question') {
             upsertQuestionAsset(asset, sectionNote)
@@ -442,21 +427,12 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
             {/* Asset picker dialog */}
             <Dialog open={assetDialogOpen} onOpenChange={setAssetDialogOpen}>
                 <DialogContent className='max-w-2xl p-0 overflow-hidden' forceMount>
-                    <div className={assetPickerMode === 'figma' ? 'block' : 'hidden'}>
-                        <FigmaImportPanel
-                            onClose={() => setAssetDialogOpen(false)}
-                            onConfirm={handleSelectFigmaFrame}
-                            canConfirm={stage === 'compose' || stage === 'question'}
-                        />
-                    </div>
-                    <div className={assetPickerMode === 'upload' ? 'block' : 'hidden'}>
-                        <ManualMediaImportPanel
-                            showPreview={false}
-                            onClose={() => setAssetDialogOpen(false)}
-                            onConfirm={handleSelectUploadedAsset}
-                            canConfirm={stage === 'compose' || stage === 'question'}
-                        />
-                    </div>
+                    <ManualMediaImportPanel
+                        showPreview={false}
+                        onClose={() => setAssetDialogOpen(false)}
+                        onConfirm={handleSelectUploadedAsset}
+                        canConfirm={stage === 'compose' || stage === 'question'}
+                    />
                 </DialogContent>
             </Dialog>
 

@@ -40,7 +40,7 @@ export const StatCounterDefaults = {
     speed: DEFAULT_SPEED_PERCENTAGE,
   },
   text: {
-    text: 'Total Users',
+    label: 'Total Users',
     variant: 'subheading' as TypographyVariant,
   },
 };
@@ -86,6 +86,7 @@ export const StatCounter: React.FC<StatCounterProps> = (initProps) => {
         alignItems: 'center',
         justifyContent: 'center',
         transformOrigin: 'center',
+        width: '100%',
       }}
     >
       <div
@@ -96,8 +97,8 @@ export const StatCounter: React.FC<StatCounterProps> = (initProps) => {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          width: 'fit-content',
           maxWidth: '100%',
+          minWidth: '35%',
           textAlign: 'center',
           transform: `scale(${scaleSpring})`,
           ...containerStyle,
@@ -120,7 +121,7 @@ export const StatCounter: React.FC<StatCounterProps> = (initProps) => {
         />
         <Text
           id='text'
-          text={textProps.text}
+          text={textProps.label}
           variant={textProps.variant}
           style={{
             ...labelTypography,

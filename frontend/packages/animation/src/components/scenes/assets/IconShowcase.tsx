@@ -193,6 +193,12 @@ export const IconShowcaseDescriptor: ComponentRegistration = {
                 type: 'string'
             }
         },
+        {
+            name: 'entranceAnimation',
+            type: 'enum',
+            required: false,
+            default: TextStaggerDefaults.entranceAnimation,
+        }
     ],
     description: 'Row of icons + caption. Use for integrations, tech stack, partners, brands. eg. icons={["shopify", "midjourney", "openai"]}, text="caption text".',
     celExpression: '55 + max(0, size(props.icons) - 1) * 5 + max(0, segmentCount(props.textstagger.text, "word") - 1) * 5',

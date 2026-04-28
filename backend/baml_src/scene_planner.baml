@@ -4,6 +4,10 @@ class ScriptItem {
  reference string?
 }
 
+class AnimationCategories {
+  entranceAnimations string[]
+}
+
 class VideoGenerationPlanRequest {
     Duration int
     Prompt string
@@ -12,6 +16,7 @@ class VideoGenerationPlanRequest {
     Script  ScriptItem[]
     VideoBranding VideoBranding
     ComponentList string
+    AnimationCategories AnimationCategories
 }
 
 class SceneSection {
@@ -146,6 +151,7 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     ## INPUT
     Video FPS: 30 frames/second
     Language: {{ input.Language }}
+    Video Tone: **Playful**
 
     ### User provided prompt/script
     {{ input.Prompt }}
@@ -164,6 +170,8 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
 
     {{ BrandGuidelines(input.VideoBranding) }}
 
+    {{ EnterAnimation(input.AnimationCategories) }}
+
     ---
 
     {% if conversation_history %}
@@ -175,96 +183,4 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
 
     {{ ctx.output_format }}
   "#
-}
-
-test Test_GeneratePlanV2 {
-  functions [GeneratePlanV2]
-  args {
-    input {
-      BrandLibraryID "54d0140d-b235-42e6-8ab6-f33b87100898"
-      AvailableAnimationTypes [
-      ]
-      Duration 1800
-      Prompt #"
-      Hook	Can your AI actually work with you?
-      Problem	All teams are stretched thin. Competetion is growing faster than ever. Hiring is slow and expensive
-      Product Intro	Introducing Cursor.
-      	The personal AI assistant built everything at work.
-      Feature 1	Use cursor in agent, plan, debug, ask modes,
-      Feature 2	Work with the latest models from Open AI, Anthropic and everyone else.
-      Feature 3	Add custom plugins to supercharge cursor with your favourite tools
-      Social proof	Shopify, Midjourney, and thousands of startups are using cursor to see 10X productivity
-      CTA	Try Cursor free today.
-      "#
-      Language "English"
-      Resolution "16:9"
-      Script [
-      ]
-      VideoBranding {
-        brandGuideLines #"
-        <brand_details>
-          <name>Cursor</name>
-          <tagline>The best way to code with AI</tagline>
-          <description>Built to make you extraordinarily productive, Cursor is the best way to build software with AI.</description>
-        </brand_details>
-
-        "#
-        attachments #"
-        <attachments>
-          <attachment>
-            <url>@generated/ectplz/0.png</url>
-            <width>2818</width>
-            <height>1490</height>
-            <media_type>MEDIA_TYPE_IMAGE</media_type>
-            <mime_type>image/png</mime_type>
-            <description>A Cursor website landing page is shown with a top navigation bar, a large headline about coding with AI, a download button, and a prominent product screenshot of the Cursor app interface below.</description>
-            <tags>landing-page,software,ai-code-editor,product-screenshot</tags>
-            <user_note>Show it after feature 3</user_note>
-          </attachment>
-          <attachment>
-            <url>@generated/tdhlnn/1.png</url>
-            <width>2758</width>
-            <height>1316</height>
-            <media_type>MEDIA_TYPE_IMAGE</media_type>
-            <mime_type>image/png</mime_type>
-            <description>A marketing-style webpage showing Cursor’s agentic development feature, with a large embedded app mockup for planning a Mission Control interface and a task list/document editor on the right.</description>
-            <tags>product-page,app-mockup,ui-design,developer-tool</tags>
-            <user_note>Show it after feature 3</user_note>
-          </attachment>
-          <attachment>
-            <url>@generated/dexxak/2.png</url>
-            <width>2826</width>
-            <height>1380</height>
-            <media_type>MEDIA_TYPE_IMAGE</media_type>
-            <mime_type>image/png</mime_type>
-            <description>A browser window shows an Acme Research Dashboard in an agent-style interface, with a sidebar of projects, a chat-like task summary, a video preview, and marketing text about autonomous cloud agents on the right.</description>
-            <tags>dashboard,browser-ui,ai-agent,product-landing</tags>
-            <user_note>Show it after feature 3</user_note>
-          </attachment>
-          <attachment>
-            <url>@generated/shgabo/3.png</url>
-            <width>2826</width>
-            <height>1578</height>
-            <media_type>MEDIA_TYPE_IMAGE</media_type>
-            <mime_type>image/png</mime_type>
-            <description>A dark-themed desktop app window showing an AI agent chat workspace on the left, an empty browser tab panel on the right, and a terminal docked at the bottom.</description>
-            <tags>desktop-app,ai-assistant,browser,terminal</tags>
-            <user_note>use it in feature 1</user_note>
-          </attachment>
-          <attachment>
-            <url>@generated/rzzsmx/4.mp4</url>
-            <width>0</width>
-            <height>0</height>
-            <media_type>MEDIA_TYPE_VIDEO</media_type>
-            <mime_type>video/mp4</mime_type>
-            <user_note>use it in feature 3</user_note>
-          </attachment>
-        </attachments>
-
-        "#
-      }
-    }
-    conversation_history [
-    ]
-  }
 }

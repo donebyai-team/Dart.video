@@ -19,7 +19,7 @@ import type { ComponentRegistration } from '../../../registry/registry';
 export const TextHighlightDefaults = {
     id: 'texthighlight',
     text: 'We build amazing {software}',
-    variant: 'headingLg' as TypographyVariant,
+    variant: 'display' as TypographyVariant,
     highlightStyle: 'glow' as HighlightStyle,
     highlightedTextAnimation: 'jump' as HighlightedTextAnimation,
     highlightColor: '',
@@ -249,8 +249,7 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
 export const TextHighlightSchemaFields = [
     {
         "name": "text",
-        "type": "string",
-        
+        "type": "string",        
         "map": "props.text"
     },
     {
@@ -263,6 +262,7 @@ export const TextHighlightSchemaFields = [
         "name": "entranceAnimation",
         "type": "string",
         "subtype": "enum",
+        "map": "props.entranceAnimation",
         "default": TextHighlightDefaults.entranceAnimation
     },
     {
@@ -307,6 +307,12 @@ export const TextHighlightDescriptor: ComponentRegistration = {
         {
             name: 'text',
             type: 'string',
+        },
+        {
+            name: 'entranceAnimation',
+            type: 'enum',
+            required: false,
+            default: TextHighlightDefaults.entranceAnimation,
         }
     ],
     description: 'Bold statement with an emphasized word/phrase. Use for key claims. Use {} to highlight. eg "We build amazing {software}"',

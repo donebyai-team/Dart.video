@@ -285,6 +285,7 @@ const WordCycleSchemaFields = [
     "name": "entranceAnimation",
     "type": "string",
     "subtype": "enum",
+    "map": "props.entranceAnimation",
     "default": WordCycleDefaults.entranceAnimation
   },
   {
@@ -321,6 +322,12 @@ export const WordCycleDescriptor: ComponentRegistration = {
       "items": {
         "type": "string"
       }
+    },
+    {
+      name: 'entranceAnimation',
+      type: 'enum',
+      required: false,
+      default: WordCycleDefaults.entranceAnimation,
     }
   ],
   description: 'Rotates through words on a bold background. Use for emphasis words, or highlighting multiple key points.',

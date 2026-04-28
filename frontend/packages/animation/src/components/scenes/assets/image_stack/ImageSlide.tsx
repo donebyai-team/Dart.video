@@ -1,12 +1,11 @@
 import React from 'react';
-import { ArrayItem } from '../../../../core/assets/ArrayItem';
 import { ImageAsset } from '../../../../core/assets/ImageAsset';
 import { interpolateWithEasing } from '../../../../styles/easingResolver';
-import type { ImageStackImageItem } from './ImagePeel';
+import { getImageWithLabelImage, type ImageWithLabelItem } from './shared';
 
 export type ImageSlideProps = {
     frame: number;
-    images: ImageStackImageItem[];
+    items: ImageWithLabelItem[];
     holdDuration: number;
     transitionDuration: number;
     stackOffset: number;
@@ -16,7 +15,7 @@ export type ImageSlideProps = {
 
 export function ImageSlide({
     frame,
-    images,
+    items,
     holdDuration,
     transitionDuration,
     stackOffset,
@@ -24,7 +23,7 @@ export function ImageSlide({
     height,
 }: ImageSlideProps): React.ReactElement {
     const cycleDuration = holdDuration + transitionDuration;
-    const maxIndex = Math.max(images.length - 1, 0);
+    const maxIndex = Math.max(items.length - 1, 0);
     const activeIndex = Math.min(Math.floor(frame / cycleDuration), maxIndex);
     const cycleFrame = frame - (activeIndex * cycleDuration);
     const exitProgress = activeIndex >= maxIndex ? 0 : interpolateWithEasing(
@@ -33,7 +32,7 @@ export function ImageSlide({
         [0, 1],
         'ease-out',
     );
-    const visibleImages = images.slice(activeIndex);
+    const visibleImages = items.slice(activeIndex);
 
     return (
         <div
@@ -45,7 +44,7 @@ export function ImageSlide({
         >
             {visibleImages.map((item, visibleIndex) => {
                 const index = activeIndex + visibleIndex;
-                const [eid, patch] = Object.entries(item)[0] ?? [`image-${index}`, {}];
+                const imagePatch = getImageWithLabelImage(item);
                 const stackProgress = Math.max(visibleIndex - exitProgress, 0);
                 const stackX = stackProgress * stackOffset;
                 const stackY = stackProgress * stackOffset;
@@ -54,32 +53,25 @@ export function ImageSlide({
                 const opacity = isExiting ? 1 - exitProgress : 1;
 
                 return (
-                    <ArrayItem
-                        key={`${eid}-${index}`}
-                        index={index}
-                        source="images"
-                        removeControl="mid-left"
-                        addControl="mid-right"
+                    <div
+                        key={`${imagePatch.id}-${index}`}
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            zIndex: items.length - visibleIndex,
+                            opacity,
+                            transform: `translate(${stackX}px, ${stackY + translateY}px)`,
+                        }}
                     >
-                        <div
-                            style={{
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                zIndex: images.length - visibleIndex,
-                                opacity,
-                                transform: `translate(${stackX}px, ${stackY + translateY}px)`,
-                            }}
-                        >
-                            <ImageAsset
-                                id={eid}
-                                image={patch.image ?? ''}
-                                width={patch.width ?? width}
-                                height={patch.height ?? height}
-                                style={{ overflow: 'hidden' }}
-                            />
-                        </div>
-                    </ArrayItem>
+                        <ImageAsset
+                            id={imagePatch.id}
+                            image={imagePatch.image ?? ''}
+                            width={imagePatch.width ?? width}
+                            height={imagePatch.height ?? height}
+                            style={{ overflow: 'hidden' }}
+                        />
+                    </div>
                 );
             })}
         </div>

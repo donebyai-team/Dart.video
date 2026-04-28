@@ -146,7 +146,7 @@ export function NumberStepper({
   value,
   onChange,
   min = 0,
-  max = 9999,
+  max,
   step = 1,
   unit,
   inputWidth = 'w-12',
@@ -159,7 +159,12 @@ export function NumberStepper({
   unit?: string
   inputWidth?: string
 }) {
-  const clamp = (n: number) => Math.min(max, Math.max(min, n))
+  const clamp = (n: number) => {
+    let v = n
+    if (min !== undefined) v = Math.max(min, v)
+    if (max !== undefined) v = Math.min(max, v)
+    return v
+  }
 
   return (
     <div className="flex items-center gap-0.5">
@@ -177,7 +182,7 @@ export function NumberStepper({
         type="number"
         value={value}
         min={min}
-        max={max}
+
         step={step}
         onChange={e => {
           const n = parseFloat(e.target.value)
