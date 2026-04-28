@@ -152,139 +152,6 @@ func GetTextColorForSolid(g *pbcore.SolidColor) string {
 	return getReadableTextOnGradient(g.Hex, g.Hex)
 }
 
-func GenerateGradientFromBackground(colors []*pbcore.BrandColor) *pbcore.Gradient {
-	var bg string
-
-	// Extract palette colors
-	for _, c := range colors {
-		switch c.Priority {
-		case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_BACKGROUND:
-			bg = c.ColorHexCode
-		}
-	}
-
-	if bg == "" {
-		return GenerateGradient(colors)
-	}
-
-	start := bg
-	end := lightenHSL(bg, 0.45)
-
-	// Ensure end is light enough for UI backgrounds
-	if lightness(end) < 0.85 {
-		end = lightenHSL(end, 0.25)
-	}
-
-	// Avoid near-white gradients
-	if isTooLight(start) {
-		start = darkenHSL(start, 0.15)
-	}
-
-	if isTooLight(end) {
-		end = darkenHSL(end, 0.05)
-	}
-
-	// Ensure visible difference
-	if colorDistance(start, end) < 20 {
-		end = lightenHSL(end, 0.2)
-	}
-
-	return &pbcore.Gradient{
-		Type:  pbcore.GradientType_GRADIENT_TYPE_LINEAR,
-		Angle: 135,
-		Stops: []*pbcore.GradientStop{
-			{
-				Color:    start,
-				Position: 0,
-			},
-			{
-				Color:    end,
-				Position: 100,
-			},
-		},
-	}
-}
-
-// Gradient is computed EVERY time (pure function)
-// based on current palette (user may edit anytime)
-func GenerateGradient(colors []*pbcore.BrandColor) *pbcore.Gradient {
-	var primary, secondary, accent string
-
-	// Extract palette colors
-	for _, c := range colors {
-		switch c.Priority {
-		case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_PRIMARY:
-			primary = c.ColorHexCode
-		case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_SECONDARY:
-			secondary = c.ColorHexCode
-		case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_ACCENT:
-			accent = c.ColorHexCode
-		}
-	}
-
-	var start, end string
-
-	// ---- PRIMARY STRATEGY ----
-	if accent != "" {
-		start = accent
-
-		// Use secondary only if it is lighter
-		if secondary != "" && lightness(secondary) > lightness(primary) {
-			end = secondary
-		} else {
-			// Generate pastel version of primary
-			end = lightenHSL(accent, 0.45)
-		}
-	} else {
-		// ---- FALLBACK STRATEGY ----
-		if secondary != "" {
-			start = secondary
-			end = lightenHSL(secondary, 0.35)
-		} else if primary != "" {
-			start = primary
-			end = lightenHSL(primary, 0.35)
-		} else if len(colors) > 0 {
-			start = colors[0].ColorHexCode
-			end = lightenHSL(start, 0.35)
-		}
-	}
-
-	// ---- SAFETY RULES ----
-
-	// Ensure end color is light enough for backgrounds
-	if lightness(end) < 0.85 {
-		end = lightenHSL(end, 0.35)
-	}
-
-	// Avoid near white
-	if isTooLight(start) {
-		start = darkenHSL(start, 0.15)
-	}
-	if isTooLight(end) {
-		end = darkenHSL(end, 0.05)
-	}
-
-	// Ensure visible gradient difference
-	if colorDistance(start, end) < 20 {
-		end = lightenHSL(end, 0.2)
-	}
-
-	return &pbcore.Gradient{
-		Type:  pbcore.GradientType_GRADIENT_TYPE_LINEAR,
-		Angle: 135,
-		Stops: []*pbcore.GradientStop{
-			{
-				Color:    start,
-				Position: 0,
-			},
-			{
-				Color:    end,
-				Position: 100,
-			},
-		},
-	}
-}
-
 func lightness(hex string) float64 {
 	r, g, b := hexToRGB(hex)
 
@@ -296,21 +163,6 @@ func lightness(hex string) float64 {
 	min := math.Min(rf, math.Min(gf, bf))
 
 	return (max + min) / 2
-}
-
-// ---------------- TEXT (GRADIENT-AWARE) ----------------
-
-// Computes text color based on BOTH gradient stops
-// Ensures readability across entire gradient
-func GetTextColorForGradient(g *pbcore.Gradient) string {
-	if len(g.Stops) < 2 {
-		return "#FFFFFF"
-	}
-
-	start := g.Stops[0].Color
-	end := g.Stops[1].Color
-
-	return getReadableTextOnGradient(start, end)
 }
 
 // Chooses black or white based on worst-case contrast
@@ -475,12 +327,6 @@ func lightenHSL(hex string, p float64) string {
 	return hslToHex(h, s, l)
 }
 
-func darkenHSL(hex string, p float64) string {
-	h, s, l := hexToHSL(hex)
-	l = math.Max(0, l-p)
-	return hslToHex(h, s, l)
-}
-
 // Shift hue → creates visually distinct accent
 func shiftHue(hex string, deg float64) string {
 	h, s, l := hexToHSL(hex)
@@ -503,20 +349,4 @@ func luminance(hex string) float64 {
 
 func isTooLight(hex string) bool {
 	return luminance(hex) > 0.92
-}
-
-func isDark(hex string) bool {
-	return luminance(hex) < 0.25
-}
-
-// Simple RGB distance to detect visually similar colors
-func colorDistance(a, b string) float64 {
-	r1, g1, b1 := hexToRGB(a)
-	r2, g2, b2 := hexToRGB(b)
-
-	return math.Sqrt(
-		math.Pow(float64(r1-r2), 2) +
-			math.Pow(float64(g1-g2), 2) +
-			math.Pow(float64(b1-b2), 2),
-	)
 }

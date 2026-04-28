@@ -1,4 +1,3 @@
-import type { PillPatchGroup } from '../../../../core/assets/IconTextPill';
 
 export type ImageWithLabelItem = Record<string, {
     image?: string;
@@ -9,17 +8,6 @@ export type ImageWithLabelItem = Record<string, {
     variant?: string;
     style?: React.CSSProperties;
 }>;
-
-export function getImageWithLabelPill(item: ImageWithLabelItem): PillPatchGroup {
-    return Object.fromEntries(
-        Object.entries(item).filter(([eid]) =>
-            eid.startsWith('iconasset-') ||
-            eid.startsWith('text-') ||
-            eid.startsWith('textasset-') ||
-            eid.startsWith('container-'),
-        ),
-    );
-}
 
 export function getImageWithLabelImage(item: ImageWithLabelItem): {
     id: string;
