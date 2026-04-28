@@ -120,7 +120,6 @@ export const TextStaggerSchemaFields = [
     {
         "name": "text",
         "type": "string",
-        
         "map": "props.text"
     },
     {
@@ -138,6 +137,7 @@ export const TextStaggerSchemaFields = [
         "name": "entranceAnimation",
         "type": "string",
         "subtype": "enum",
+        "map": "props.entranceAnimation",
         "default": TextStaggerDefaults.entranceAnimation
     },
     {
@@ -164,7 +164,13 @@ export const TextStaggerDescriptor: ComponentRegistration = {
     llmSchema: [
         {
             name: 'text',
-            type: 'string',     
+            type: 'string',
+        },
+        {
+            name: 'entranceAnimation',
+            type: 'enum',
+            required: false,
+            default: TextStaggerDefaults.entranceAnimation,
         }
     ],
     description: 'Reveals a word or full text phrase word-by-word. Works for both single word and multi-word headlines or body text.',

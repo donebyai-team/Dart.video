@@ -167,6 +167,7 @@ export const AnimatedNumberAssetSchema = [
     {
         name: 'entranceAnimation',
         type: 'string',
+        map: "props.entranceAnimation",
         default: AnimatedNumberDefaults.entranceAnimation,
     },
     {
@@ -235,6 +236,13 @@ export const AnimatedNumberDescriptor: ComponentRegistration = {
             name: 'to',
             type: 'number',
         },
+        {
+            name: 'entranceAnimation',
+            type: 'enum',
+            required: false,
+            default: AnimatedNumberDefaults.entranceAnimation,
+        },
+
     ],
     description: 'Counting metric with label text. Make sure there is no other number in the label. Use for stats and KPIs',
     celExpression: 'props.animatednumber.animationDelay + max(45, min(100, log10(abs(props.animatednumber.to - props.animatednumber.from) + 1) * 20))'

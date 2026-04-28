@@ -4,8 +4,13 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
+	"github.com/shank318/coasterai/utils"
 	"strings"
 )
+
+// LLM fields that we don't want LLM to generate
+// eg. entranceAnimation
+var SkipLLMFields = []string{"width", "height", "dragStyle"}
 
 //go:embed scene_manifest.json
 var componentsJSON []byte
@@ -63,14 +68,15 @@ type FieldSchema struct {
 }
 
 type LLMField struct {
-	Name     string    `json:"name"`
-	Type     string    `json:"type"`
-	Subtype  string    `json:"subtype,omitempty"`
-	Enum     []string  `json:"enum,omitempty"`
-	Required *bool     `json:"required,omitempty"`
-	Items    *LLMItems `json:"items,omitempty"`
-	Hint     string    `json:"hint,omitempty"`
-	Range    string    `json:"range,omitempty"`
+	Name     string      `json:"name"`
+	Type     string      `json:"type"`
+	Subtype  string      `json:"subtype,omitempty"`
+	Enum     []string    `json:"enum,omitempty"`
+	Required *bool       `json:"required,omitempty"`
+	Items    *LLMItems   `json:"items,omitempty"`
+	Hint     string      `json:"hint,omitempty"`
+	Range    string      `json:"range,omitempty"`
+	Default  interface{} `json:"default,omitempty"`
 }
 
 type LLMItems struct {
@@ -92,7 +98,7 @@ func init() {
 	}
 }
 
-func BuildScenesList(editMode bool) string {
+func BuildScenesList(editMode bool, fieldsToSkip []string) string {
 
 	var scenes []Component
 
@@ -118,14 +124,14 @@ func BuildScenesList(editMode bool) string {
 	b.WriteString("# Available Scenes\n\n")
 
 	for _, s := range sectional {
-		writeScene(&b, s, "Sectional")
+		writeScene(&b, s, "Sectional", fieldsToSkip)
 	}
 
 	b.WriteString("## Filler Scenes\n")
 	b.WriteString("Can be used anywhere in the video.\n\n")
 
 	for _, s := range filler {
-		writeScene(&b, s, "Filler")
+		writeScene(&b, s, "Filler", fieldsToSkip)
 	}
 
 	if editMode && len(registry.AvailableEnums) > 0 {
@@ -135,7 +141,7 @@ func BuildScenesList(editMode bool) string {
 	return b.String()
 }
 
-func writeScene(b *strings.Builder, c Component, category string) {
+func writeScene(b *strings.Builder, c Component, category string, fieldsToSkip []string) {
 
 	fmt.Fprintf(b, "### Scene: %s\n\n", c.Name)
 
@@ -153,7 +159,7 @@ func writeScene(b *strings.Builder, c Component, category string) {
 	}
 
 	b.WriteString("**Props**\n")
-	writeProps(b, c.LLMSchema)
+	writeProps(b, c.LLMSchema, fieldsToSkip)
 
 	b.WriteString("\n---\n\n")
 }
@@ -173,6 +179,9 @@ func fieldMeta(f LLMField) string {
 }
 
 func writeFieldDetails(b *strings.Builder, f LLMField, indent string) {
+	if f.Default != nil {
+		fmt.Fprintf(b, "%sDefault: %v\n", indent, f.Default)
+	}
 	if f.Hint != "" {
 		fmt.Fprintf(b, "%sHint: %s\n", indent, f.Hint)
 	}
@@ -186,8 +195,11 @@ func writeFieldDetails(b *strings.Builder, f LLMField, indent string) {
 	}
 }
 
-func writeProps(b *strings.Builder, fields []LLMField) {
+func writeProps(b *strings.Builder, fields []LLMField, skipLLMFields []string) {
 	for _, f := range fields {
+		if utils.Contains(skipLLMFields, f.Name) {
+			continue
+		}
 		if f.Type == "array" && f.Items != nil {
 			if len(f.Items.Fields) > 0 {
 				fmt.Fprintf(b, "- %s: array of objects%s\n", f.Name, fieldMeta(f))
@@ -244,4 +256,39 @@ func findComponent(name string) (*Component, error) {
 	}
 
 	return nil, fmt.Errorf("component %s not found", name)
+}
+
+var llmEntranceAnimations = []string{
+	"slideUp",
+	"slideDown",
+	"slideLeft",
+	"slideRight",
+	"scaleIn",
+	"rotateIn",
+	"elasticScale",
+	"zoomIn",
+}
+
+func GetAvailableEntranceAnimations() []string {
+	for _, g := range registry.AvailableEnums {
+		if g.Name == "entranceAnimation" && !utils.Contains(SkipLLMFields, g.Name) {
+			return filterAllowed(g.Value, llmEntranceAnimations)
+		}
+	}
+	return nil
+}
+
+func filterAllowed(source, allowedList []string) []string {
+	allowed := make(map[string]struct{}, len(allowedList))
+	for _, a := range allowedList {
+		allowed[a] = struct{}{}
+	}
+
+	var result []string
+	for _, v := range source {
+		if _, ok := allowed[v]; ok {
+			result = append(result, v)
+		}
+	}
+	return result
 }

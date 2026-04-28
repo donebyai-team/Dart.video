@@ -334,7 +334,7 @@ func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest ty
 	}
 	l.animationGenerator.ApplyGenerationOptions(optionsBuilder.Build())
 
-	generatePlanRequest.ComponentList = scenes.BuildScenesList(true)
+	generatePlanRequest.ComponentList = scenes.BuildScenesList(true, nil)
 	// Generate and validate upto max attempts
 	for attempt := 0; attempt < maxAttempts; attempt++ {
 		llmResponse, err := l.llmService.GenerateScene(ctx, generatePlanRequest, session.ConversationHistory, func(chunk string) {

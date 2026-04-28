@@ -30,9 +30,10 @@
         "tiltY",
         "flipX",
         "flipY",
-        "zoomRotate",
         "elasticScale",
-        "swingIn"
+        "swingIn",
+        "zoomIn",
+        "zoomOut"
       ]
     },
     {
@@ -107,6 +108,7 @@
                 {
                   "name": "entranceAnimation",
                   "type": "string",
+                  "map": "props.entranceAnimation",
                   "default": "slideUp"
                 },
                 {
@@ -166,6 +168,12 @@
             {
               "name": "to",
               "type": "number"
+            },
+            {
+              "name": "entranceAnimation",
+              "type": "enum",
+              "required": false,
+              "default": "slideUp"
             }
           ],
           "description": "Counting metric with label text. Make sure there is no other number in the label. Use for stats and KPIs",
@@ -316,6 +324,7 @@
                   "name": "entranceAnimation",
                   "type": "string",
                   "subtype": "enum",
+                  "map": "props.entranceAnimation",
                   "default": "scaleIn"
                 },
                 {
@@ -336,6 +345,12 @@
             {
               "name": "text",
               "type": "string"
+            },
+            {
+              "name": "entranceAnimation",
+              "type": "enum",
+              "required": false,
+              "default": "scaleIn"
             }
           ],
           "description": "Reveals a word or full text phrase word-by-word. Works for both single word and multi-word headlines or body text.",
@@ -478,6 +493,7 @@
                   "name": "entranceAnimation",
                   "type": "string",
                   "subtype": "enum",
+                  "map": "props.entranceAnimation",
                   "default": "fadeIn"
                 }
               ]
@@ -487,6 +503,12 @@
             {
               "name": "text",
               "type": "string"
+            },
+            {
+              "name": "entranceAnimation",
+              "type": "enum",
+              "required": false,
+              "default": "fadeIn"
             }
           ],
           "description": "Character-by-character text reveal. Use for dramatic reveals or code/terminal effects.",
@@ -515,6 +537,7 @@
                   "name": "entranceAnimation",
                   "type": "string",
                   "subtype": "enum",
+                  "map": "props.entranceAnimation",
                   "default": "slideUp"
                 },
                 {
@@ -552,6 +575,12 @@
             {
               "name": "text",
               "type": "string"
+            },
+            {
+              "name": "entranceAnimation",
+              "type": "enum",
+              "required": false,
+              "default": "slideUp"
             }
           ],
           "description": "Bold statement with an emphasized word/phrase. Use for key claims. Use {} to highlight. eg \"We build amazing {software}\"",
@@ -581,6 +610,7 @@
                   "name": "entranceAnimation",
                   "type": "string",
                   "subtype": "enum",
+                  "map": "props.entranceAnimation",
                   "default": "slideUp"
                 },
                 {
@@ -609,6 +639,12 @@
               "items": {
                 "type": "string"
               }
+            },
+            {
+              "name": "entranceAnimation",
+              "type": "enum",
+              "required": false,
+              "default": "slideUp"
             }
           ],
           "description": "Rotates through words on a bold background. Use for emphasis words, or highlighting multiple key points.",
@@ -643,6 +679,7 @@
                   "name": "entranceAnimation",
                   "type": "string",
                   "subtype": "enum",
+                  "map": "props.entranceAnimation",
                   "default": "slideUp"
                 },
                 {
@@ -681,6 +718,12 @@
               "items": {
                 "type": "string"
               }
+            },
+            {
+              "name": "entranceAnimation",
+              "type": "enum",
+              "required": false,
+              "default": "slideUp"
             }
           ],
           "description": "Static text with cycling highlighted words at the end. Use for dynamic taglines like \"We build amazing [software/products/solutions]\"",
@@ -709,6 +752,7 @@
                   "name": "entranceAnimation",
                   "type": "string",
                   "subtype": "enum",
+                  "map": "props.entranceAnimation",
                   "default": "slideLeft"
                 },
                 {
@@ -723,6 +767,12 @@
             {
               "name": "text",
               "type": "string"
+            },
+            {
+              "name": "entranceAnimation",
+              "type": "enum",
+              "required": false,
+              "default": "slideLeft"
             }
           ],
           "celExpression": "((50 + max(0, segmentCount(props.textleadstagger.text, \"word\") - 2) * 5 + max(0, segmentCount(props.textleadstagger.text, \"word\") - 1) * 4) * 100) / max(25, props.textleadstagger.speed)",
@@ -755,6 +805,7 @@
                   "name": "entranceAnimation",
                   "type": "string",
                   "subtype": "enum",
+                  "map": "props.entranceAnimation",
                   "default": "slideUp"
                 },
                 {
@@ -770,6 +821,12 @@
             {
               "name": "text",
               "type": "string"
+            },
+            {
+              "name": "entranceAnimation",
+              "type": "enum",
+              "required": false,
+              "default": "slideUp"
             }
           ],
           "celExpression": "82",
@@ -879,6 +936,7 @@
                       "name": "entranceAnimation",
                       "type": "string",
                       "subtype": "enum",
+                      "map": "props.entranceAnimation",
                       "default": "scaleIn"
                     },
                     {
@@ -912,6 +970,7 @@
                       "name": "entranceAnimation",
                       "type": "string",
                       "subtype": "enum",
+                      "map": "props.entranceAnimation",
                       "default": "slideUp"
                     },
                     {
@@ -968,6 +1027,7 @@
                       "name": "entranceAnimation",
                       "type": "string",
                       "subtype": "enum",
+                      "map": "props.entranceAnimation",
                       "default": "slideUp"
                     },
                     {
@@ -1079,6 +1139,7 @@
                       "name": "entranceAnimation",
                       "type": "string",
                       "subtype": "enum",
+                      "map": "props.entranceAnimation",
                       "default": "scaleIn"
                     },
                     {
@@ -1112,6 +1173,7 @@
                       "name": "entranceAnimation",
                       "type": "string",
                       "subtype": "enum",
+                      "map": "props.entranceAnimation",
                       "default": "slideUp"
                     },
                     {
@@ -1168,6 +1230,7 @@
                       "name": "entranceAnimation",
                       "type": "string",
                       "subtype": "enum",
+                      "map": "props.entranceAnimation",
                       "default": "slideUp"
                     },
                     {
@@ -1411,6 +1474,7 @@
                   "name": "entranceAnimation",
                   "type": "string",
                   "subtype": "enum",
+                  "map": "props.entranceAnimation",
                   "default": "scaleIn"
                 },
                 {
@@ -1456,6 +1520,12 @@
             {
               "name": "logos",
               "type": "array"
+            },
+            {
+              "name": "entranceAnimation",
+              "type": "enum",
+              "required": false,
+              "default": "scaleIn"
             }
           ],
           "description": "Row of logos + caption. Use for integrations, tech stack, partners, brands. eg. logos=[\"url1\", \"url2\"], text=\"caption text\".",
@@ -1673,6 +1743,7 @@
                   "name": "entranceAnimation",
                   "type": "string",
                   "subtype": "enum",
+                  "map": "props.entranceAnimation",
                   "default": "scaleIn"
                 },
                 {
@@ -1723,6 +1794,12 @@
               "items": {
                 "type": "string"
               }
+            },
+            {
+              "name": "entranceAnimation",
+              "type": "enum",
+              "required": false,
+              "default": "scaleIn"
             }
           ],
           "description": "Row of icons + caption. Use for integrations, tech stack, partners, brands. eg. icons={[\"shopify\", \"midjourney\", \"openai\"]}, text=\"caption text\".",
@@ -1756,6 +1833,7 @@
                   "name": "entranceAnimation",
                   "type": "string",
                   "subtype": "enum",
+                  "map": "props.entranceAnimation",
                   "default": "scaleIn"
                 }
               ]
@@ -1835,6 +1913,12 @@
                   }
                 ]
               }
+            },
+            {
+              "name": "entranceAnimation",
+              "type": "enum",
+              "required": false,
+              "default": "scaleIn"
             }
           ],
           "description": "A headline with a carousel of items below, each showing text and an icon (choose an icon name that represents the text) as a pill. Use for features, industries, use cases, capabilities, or categories. ~25 frames per item; minimum 3 items.",

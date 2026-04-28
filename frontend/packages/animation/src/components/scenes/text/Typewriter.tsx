@@ -172,6 +172,7 @@ export const TypewriterSchemaFields = [
     "name": "entranceAnimation",
     "type": "string",
     "subtype": "enum",
+    "map": "props.entranceAnimation",
     "default": TypewriterDefaults.entranceAnimation
   }
 ]
@@ -188,6 +189,12 @@ export const TypewriterDescriptor: ComponentRegistration = {
     {
       name: 'text',
       type: 'string',
+    },
+    {
+      name: 'entranceAnimation',
+      type: 'enum',
+      required: false,
+      default: TypewriterDefaults.entranceAnimation,
     }
   ],
   description: 'Character-by-character text reveal. Use for dramatic reveals or code/terminal effects.',

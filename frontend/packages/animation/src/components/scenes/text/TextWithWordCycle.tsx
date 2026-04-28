@@ -346,6 +346,7 @@ export const TextWithWordCycleSchemaFields = [
     "name": "entranceAnimation",
     "type": "string",
     "subtype": "enum",
+    "map": "props.entranceAnimation",
     "default": TextWithWordCycleDefaults.entranceAnimation
   },
   {
@@ -391,6 +392,12 @@ export const TextWithWordCycleDescriptor: ComponentRegistration = {
       "items": {
         "type": "string"
       }
+    },
+    {
+      name: 'entranceAnimation',
+      type: 'enum',
+      required: false,
+      default: TextWithWordCycleDefaults.entranceAnimation,
     }
   ],
   description: 'Static text with cycling highlighted words at the end. Use for dynamic taglines like "We build amazing [software/products/solutions]"',
