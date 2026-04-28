@@ -4,8 +4,8 @@ import { useArrayPatch } from '../../patches'
 interface ArrayItemProps {
   index: number
   source: string
-  min: number
-  max: number
+  min?: number
+  max?: number
   removeControl?: ControlPosition
   addControl?: ControlPosition
   style?: React.CSSProperties
@@ -28,7 +28,7 @@ export function ArrayItem({
   removeControl = 'corner-top-right',
   addControl = 'mid-right',
   style,
-  min = 1,      // 👈 default min 1
+  min = 1,
   max,
   children,
 }: ArrayItemProps) {
