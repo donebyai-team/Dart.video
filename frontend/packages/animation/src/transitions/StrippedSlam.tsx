@@ -2,22 +2,28 @@ import React from 'react';
 import { TransitionPresentation } from "@remotion/transitions";
 import { AbsoluteFill, interpolate } from "remotion";
 import { useTheme } from '../theme';
+import { RemotionTransitionDirection } from './common';
 
 export function TransitionStripedSlam(
-  stripes = 5
-): TransitionPresentation<Record<string, never>> {
+  stripes = 5,
+  direction: RemotionTransitionDirection
+): TransitionPresentation<{ direction?: RemotionTransitionDirection }> {
   const component = ({
     presentationProgress,
     presentationDirection,
     children,
+    passedProps,
   }: {
     presentationProgress: number;
     presentationDirection: "entering" | "exiting";
     children: React.ReactNode;
-    passedProps: Record<string, never>;
+    passedProps: { direction?: RemotionTransitionDirection };
   }) => {
     const theme = useTheme();
     const primaryColor = theme.colors.primary;
+    const motionDirection = passedProps.direction ?? direction;
+    const isVerticalMotion =
+      motionDirection === 'from-top' || motionDirection === 'from-bottom';
 
     if (presentationDirection === "entering") {
       return (
@@ -37,21 +43,17 @@ export function TransitionStripedSlam(
       const MIN_LIGHT = 0.3;
       const MAX_LIGHT = 0.75;
 
-      const t = i / (stripes - 1);
+      const t = stripes <= 1 ? 0 : i / (stripes - 1);
       const lightAmount = MIN_LIGHT + t * (MAX_LIGHT - MIN_LIGHT);
       const color = mixWithWhite(primaryColor, lightAmount);
 
-      const fromLeft = i % 2 === 0;
-      const stagger = (i / stripes) * 0.3;
+      const stagger = isVerticalMotion ? 0 : (i / stripes) * 0.3;
       const p = Math.max(
         0,
         Math.min(1, (presentationProgress - stagger) / (1 - stagger))
       );
       const pe = 1 - Math.pow(1 - p, 3);
-
-      const x = fromLeft
-        ? interpolate(pe, [0, 1], [-112, 0])
-        : interpolate(pe, [0, 1], [112, 0]);
+      const transform = getStripedSlamTransform(motionDirection, i, pe, stripes);
 
       return (
         <div
@@ -63,7 +65,7 @@ export function TransitionStripedSlam(
             width: "112%",
             height: `${h + 0.4}%`,
             background: color,
-            transform: `translateX(${x}%)`,
+            transform,
             pointerEvents: "none",
           }}
         />
@@ -80,8 +82,33 @@ export function TransitionStripedSlam(
     );
   };
 
-  return { component, props: {} };
+  return { component, props: { direction } };
 }
+
+const getStripedSlamTransform = (
+  direction: RemotionTransitionDirection,
+  index: number,
+  progress: number,
+  stripes: number
+) => {
+  const alternatingFromStart = index % 2 === 0;
+  const verticalTravel = Math.max(112, stripes * 112);
+
+  switch (direction) {
+    case 'from-left':
+      return `translateX(${interpolate(progress, [0, 1], [-112, 0])}%)`;
+    case 'from-right':
+      return `translateX(${interpolate(progress, [0, 1], [112, 0])}%)`;
+    case 'from-top':
+      return `translateY(${interpolate(progress, [0, 1], [-verticalTravel, 0])}%)`;
+    case 'from-bottom':
+      return `translateY(${interpolate(progress, [0, 1], [verticalTravel, 0])}%)`;
+    default:
+      return alternatingFromStart
+        ? `translateX(${interpolate(progress, [0, 1], [-112, 0])}%)`
+        : `translateX(${interpolate(progress, [0, 1], [112, 0])}%)`;
+  }
+};
 
 export const mixWithWhite = (hex: string, amount: number) => {
   const num = parseInt(hex.replace("#", ""), 16);

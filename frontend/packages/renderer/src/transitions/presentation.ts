@@ -6,18 +6,18 @@ import { iris } from '@remotion/transitions/iris'
 import { none } from '@remotion/transitions/none'
 import { slide } from '@remotion/transitions/slide'
 import { wipe } from '@remotion/transitions/wipe'
-import { RemotionTransitionDirection, protoDirectionToRemotion } from './config'
-import { TransitionStripedSlam } from '@coasterai/animation'
+import { protoDirectionToRemotion } from './config'
+import { RemotionTransitionDirection, TransitionStripedSlam } from '@coasterai/animation'
 
 const getDirection = (
   direction?: TransitionDirection
-): RemotionTransitionDirection | undefined => {
+): RemotionTransitionDirection => {
   // If slide has an explicit direction, it wins.
   const mapped = protoDirectionToRemotion(direction)
   if (mapped) {
     return mapped
   }
-  return undefined
+  return 'none'
 }
 
 export const getTransitionPresentation = (
@@ -26,7 +26,8 @@ export const getTransitionPresentation = (
   width: number = 1920,
   height: number = 1080
 ) => {
-  const resolvedDirection = getDirection(direction)
+  const _resolvedDirection = getDirection(direction)
+  const resolvedDirection = _resolvedDirection === 'none' ? undefined : _resolvedDirection
   switch (transitionType) {
     case TransitionType.TRANSITION_FADE:
       return fade()
@@ -52,7 +53,7 @@ export const getTransitionPresentation = (
     case TransitionType.TRANSITION_IRIS:
       return iris({ width, height })
     case TransitionType.TRANSITION_STRIPPED_SLAM:
-      return TransitionStripedSlam()
+      return TransitionStripedSlam(5, _resolvedDirection)
     case TransitionType.TRANSITION_NONE:
       return none()
     default:
