@@ -250,18 +250,17 @@ export const TextHighlightSchemaFields = [
     {
         "name": "text",
         "type": "string",        
+        "datatype": "text",
         "map": "props.text"
     },
     {
         "name": "variant",
-        "type": "string",
-        "subtype": "enum",
+        "type": "enum",
         "default": TextHighlightDefaults.variant
     },
     {
         "name": "entranceAnimation",
-        "type": "string",
-        "subtype": "enum",
+        "type": "enum",
         "map": "props.entranceAnimation",
         "default": TextHighlightDefaults.entranceAnimation
     },
@@ -277,20 +276,18 @@ export const TextHighlightSchemaFields = [
     },
     {
         "name": "highlightStyle",
-        "type": "string",
-        "subtype": "enum",
+        "type": "enum",
         "default": TextHighlightDefaults.highlightStyle
     },
     {
         "name": "highlightedTextAnimation",
-        "type": "string",
-        "subtype": "enum",
+        "type": "enum",
         "default": TextHighlightDefaults.highlightedTextAnimation
     },
     {
         "name": "highlightColor",
         "type": "string",
-        "subtype": "color",
+        "datatype": "color",
         "default": TextHighlightDefaults.highlightColor
     }
 ]

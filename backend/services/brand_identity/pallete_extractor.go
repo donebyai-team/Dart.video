@@ -8,31 +8,43 @@ import (
 	"strings"
 )
 
-// ---------------- DEFAULTS ----------------
+const (
+	COLOR_PRIMARY        = "primary"
+	COLOR_SECONDARY      = "secondary"
+	COLOR_ACCENT         = "accent"
+	COLOR_BACKGROUND     = "background"
+	COLOR_TEXT_PRIMARY   = "textPrimary"
+	COLOR_TEXT_SECONDARY = "textSecondary"
+)
 
 // Default fallback colors if nothing is scraped / provided
 var defaultColors = map[string]string{
-	"primary":       "#6366F1",
-	"secondary":     "#A5B4FC",
-	"accent":        "#F59E0B",
-	"background":    "#FFFFFF",
-	"textPrimary":   "#0A0A0A",
-	"textSecondary": "#6B7280",
+	COLOR_PRIMARY:        "#6366F1",
+	COLOR_SECONDARY:      "#A5B4FC",
+	COLOR_ACCENT:         "#F59E0B",
+	COLOR_BACKGROUND:     "#FFFFFF",
+	COLOR_TEXT_PRIMARY:   "#0A0A0A",
+	COLOR_TEXT_SECONDARY: "#6B7280",
 }
 
 // Order ensures consistent output ordering
 var colorOrder = []string{
-	"primary", "secondary", "accent", "background", "textPrimary", "textSecondary",
+	COLOR_PRIMARY,
+	COLOR_SECONDARY,
+	COLOR_ACCENT,
+	COLOR_BACKGROUND,
+	COLOR_TEXT_PRIMARY,
+	COLOR_TEXT_SECONDARY,
 }
 
 // Mapping to protobuf priority
 var priorityMap = map[string]pbcore.BrandAssetPriority{
-	"primary":       pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_PRIMARY,
-	"secondary":     pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_SECONDARY,
-	"accent":        pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_ACCENT,
-	"background":    pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_BACKGROUND,
-	"textPrimary":   pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_TEXT_PRIMARY,
-	"textSecondary": pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_TEXT_SECONDARY,
+	COLOR_PRIMARY:        pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_PRIMARY,
+	COLOR_SECONDARY:      pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_SECONDARY,
+	COLOR_ACCENT:         pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_ACCENT,
+	COLOR_BACKGROUND:     pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_BACKGROUND,
+	COLOR_TEXT_PRIMARY:   pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_TEXT_PRIMARY,
+	COLOR_TEXT_SECONDARY: pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_TEXT_SECONDARY,
 }
 
 // ---------------- MAIN ENTRY ----------------
@@ -103,53 +115,31 @@ func buildColorPalette(input map[string]string) map[string]string {
 	}
 
 	// Accent: hue-shifted version (creates visual separation)
-	if input["accent"] == "" {
-		result["accent"] = shiftHue(primary, 35)
+	if input[COLOR_ACCENT] == "" {
+		result[COLOR_ACCENT] = shiftHue(primary, 35)
 	}
 
 	// Background: very light version of primary
 	// IMPORTANT: never allow pure/near white
-	if input["background"] == "" {
+	if input[COLOR_BACKGROUND] == "" {
 		bg := lightenHSL(primary, 0.9)
 		if isTooLight(bg) {
 			bg = lightenHSL(primary, 0.85)
 		}
-		result["background"] = bg
+		result[COLOR_BACKGROUND] = bg
 	}
 
 	// Text colors are NOT finalized here
 	// They will be computed based on gradient later
-	if input["textPrimary"] == "" {
-		result["textPrimary"] = "#000000"
+	if input[COLOR_TEXT_PRIMARY] == "" {
+		result[COLOR_TEXT_PRIMARY] = "#000000"
 	}
 
-	if input["textSecondary"] == "" {
-		result["textSecondary"] = "#6B7280"
+	if input[COLOR_TEXT_SECONDARY] == "" {
+		result[COLOR_TEXT_SECONDARY] = "#6B7280"
 	}
 
 	return result
-}
-
-// ---------------- GRADIENT ----------------
-const defaultBackgroundColor = "#FFFFFF"
-
-func GenerateSolidFromBackground(colors []*pbcore.BrandColor) *pbcore.SolidColor {
-	bg := defaultBackgroundColor
-
-	// Extract palette colors
-	for _, c := range colors {
-		switch c.Priority {
-		case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_BACKGROUND:
-			bg = c.ColorHexCode
-		}
-	}
-	return &pbcore.SolidColor{
-		Hex: bg,
-	}
-}
-
-func GetTextColorForSolid(g *pbcore.SolidColor) string {
-	return getReadableTextOnGradient(g.Hex, g.Hex)
 }
 
 func lightness(hex string) float64 {
@@ -163,27 +153,6 @@ func lightness(hex string) float64 {
 	min := math.Min(rf, math.Min(gf, bf))
 
 	return (max + min) / 2
-}
-
-// Chooses black or white based on worst-case contrast
-// (minimum contrast across both gradient stops)
-func getReadableTextOnGradient(start, end string) string {
-
-	blackStart := contrastRatio(start, "#000000")
-	blackEnd := contrastRatio(end, "#000000")
-
-	whiteStart := contrastRatio(start, "#FFFFFF")
-	whiteEnd := contrastRatio(end, "#FFFFFF")
-
-	// Take worst-case contrast (important for gradients)
-	blackMin := math.Min(blackStart, blackEnd)
-	whiteMin := math.Min(whiteStart, whiteEnd)
-
-	if blackMin > whiteMin {
-		return "#000000"
-	}
-
-	return "#FFFFFF"
 }
 
 // ---------------- CONTRAST ----------------
@@ -340,11 +309,19 @@ func shiftHue(hex string, deg float64) string {
 func luminance(hex string) float64 {
 	r, g, b := hexToRGB(hex)
 
-	rs := float64(r) / 255
-	gs := float64(g) / 255
-	bs := float64(b) / 255
+	rs := linearizeRGB(float64(r) / 255)
+	gs := linearizeRGB(float64(g) / 255)
+	bs := linearizeRGB(float64(b) / 255)
 
 	return 0.2126*rs + 0.7152*gs + 0.0722*bs
+}
+
+func linearizeRGB(v float64) float64 {
+	if v <= 0.03928 {
+		return v / 12.92
+	}
+
+	return math.Pow((v+0.055)/1.055, 2.4)
 }
 
 func isTooLight(hex string) bool {

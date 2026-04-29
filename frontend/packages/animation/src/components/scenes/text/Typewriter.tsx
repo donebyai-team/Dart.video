@@ -153,25 +153,22 @@ export const TypewriterSchemaFields = [
   {
     "name": "text",
     "type": "string",
-    "required": true,
+    "dataType": "text",
     "map": "props.text"
   },
   {
     "name": "variant",
-    "type": "string",
-    "subtype": "enum",
+    "type": "enum",
     "default": TypewriterDefaults.variant
   },
   {
     "name": "splitBy",
-    "type": "string",
-    "subtype": "enum",
+    "type": "enum",
     "default": TypewriterDefaults.splitBy
   },
   {
     "name": "entranceAnimation",
-    "type": "string",
-    "subtype": "enum",
+    "type": "enum",
     "map": "props.entranceAnimation",
     "default": TypewriterDefaults.entranceAnimation
   }

@@ -1,7 +1,13 @@
 package utils
 
-import "github.com/k3a/html2text"
+import (
+	"regexp"
+	"strings"
+)
 
-func HTMLToText(in string) string {
-	return html2text.HTML2Text(in)
+var hexColorRegex = regexp.MustCompile(`^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$`)
+
+func IsValidHexColor(s string) bool {
+	s = strings.TrimSpace(s)
+	return s == "transparent" || hexColorRegex.MatchString(s)
 }

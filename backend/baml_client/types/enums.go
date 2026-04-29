@@ -153,49 +153,21 @@ func (e AskUserQuestionType) BamlTypeName() string {
 	return "AskUserQuestionType"
 }
 
-type SceneCategory string
+type ColorToken string
 
 const (
-	SceneCategoryTITLE             SceneCategory = "TITLE"
-	SceneCategoryOUTRO             SceneCategory = "OUTRO"
-	SceneCategorySINGLE_STAT       SceneCategory = "SINGLE_STAT"
-	SceneCategoryCOMPARISON        SceneCategory = "COMPARISON"
-	SceneCategoryTREND             SceneCategory = "TREND"
-	SceneCategoryBREAKDOWN         SceneCategory = "BREAKDOWN"
-	SceneCategoryFEATURE_HIGHLIGHT SceneCategory = "FEATURE_HIGHLIGHT"
-	SceneCategoryFEATURE_LIST      SceneCategory = "FEATURE_LIST"
-	SceneCategoryWORKFLOW          SceneCategory = "WORKFLOW"
-	SceneCategoryTESTIMONIAL       SceneCategory = "TESTIMONIAL"
-	SceneCategoryLOGO_WALL         SceneCategory = "LOGO_WALL"
-	SceneCategoryCASE_STUDY_STAT   SceneCategory = "CASE_STUDY_STAT"
-	SceneCategoryPROBLEM           SceneCategory = "PROBLEM"
-	SceneCategorySOLUTION          SceneCategory = "SOLUTION"
-	SceneCategoryHOW_IT_WORKS      SceneCategory = "HOW_IT_WORKS"
+	ColorTokenPRIMARY ColorToken = "PRIMARY"
 )
 
-// Values returns all allowed values for the SceneCategory type.
-func (SceneCategory) Values() []SceneCategory {
-	return []SceneCategory{
-		SceneCategoryTITLE,
-		SceneCategoryOUTRO,
-		SceneCategorySINGLE_STAT,
-		SceneCategoryCOMPARISON,
-		SceneCategoryTREND,
-		SceneCategoryBREAKDOWN,
-		SceneCategoryFEATURE_HIGHLIGHT,
-		SceneCategoryFEATURE_LIST,
-		SceneCategoryWORKFLOW,
-		SceneCategoryTESTIMONIAL,
-		SceneCategoryLOGO_WALL,
-		SceneCategoryCASE_STUDY_STAT,
-		SceneCategoryPROBLEM,
-		SceneCategorySOLUTION,
-		SceneCategoryHOW_IT_WORKS,
+// Values returns all allowed values for the ColorToken type.
+func (ColorToken) Values() []ColorToken {
+	return []ColorToken{
+		ColorTokenPRIMARY,
 	}
 }
 
-// IsValid checks whether the given SceneCategory value is valid.
-func (e SceneCategory) IsValid() bool {
+// IsValid checks whether the given ColorToken value is valid.
+func (e ColorToken) IsValid() bool {
 
 	for _, v := range e.Values() {
 		if e == v {
@@ -206,40 +178,40 @@ func (e SceneCategory) IsValid() bool {
 
 }
 
-// MarshalJSON customizes JSON marshaling for SceneCategory.
-func (e SceneCategory) MarshalJSON() ([]byte, error) {
+// MarshalJSON customizes JSON marshaling for ColorToken.
+func (e ColorToken) MarshalJSON() ([]byte, error) {
 	if !e.IsValid() {
-		return nil, fmt.Errorf("invalid SceneCategory: %q", e)
+		return nil, fmt.Errorf("invalid ColorToken: %q", e)
 	}
 	return json.Marshal(string(e))
 }
 
-// UnmarshalJSON customizes JSON unmarshaling for SceneCategory.
-func (e *SceneCategory) UnmarshalJSON(data []byte) error {
+// UnmarshalJSON customizes JSON unmarshaling for ColorToken.
+func (e *ColorToken) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err != nil {
 		return err
 	}
-	*e = SceneCategory(s)
+	*e = ColorToken(s)
 	if !e.IsValid() {
-		return fmt.Errorf("invalid SceneCategory: %q", s)
+		return fmt.Errorf("invalid ColorToken: %q", s)
 	}
 	return nil
 }
 
-func (e *SceneCategory) Decode(holder *cffi.CFFIValueEnum, typeMap baml.TypeMap) {
+func (e *ColorToken) Decode(holder *cffi.CFFIValueEnum, typeMap baml.TypeMap) {
 	name := holder.Name
-	if name.Name != "SceneCategory" && name.Namespace != cffi.CFFITypeNamespace_TYPES {
-		panic(fmt.Sprintf("expected types.SceneCategory, got %s.%s", string(name.Namespace.String()), string(name.Name)))
+	if name.Name != "ColorToken" && name.Namespace != cffi.CFFITypeNamespace_TYPES {
+		panic(fmt.Sprintf("expected types.ColorToken, got %s.%s", string(name.Namespace.String()), string(name.Name)))
 	}
 	value := holder.Value
-	*e = SceneCategory(value)
+	*e = ColorToken(value)
 }
 
-func (e SceneCategory) Encode() (*cffi.HostValue, error) {
-	return baml.EncodeEnum("SceneCategory", string(e), false)
+func (e ColorToken) Encode() (*cffi.HostValue, error) {
+	return baml.EncodeEnum("ColorToken", string(e), false)
 }
 
-func (e SceneCategory) BamlTypeName() string {
-	return "SceneCategory"
+func (e ColorToken) BamlTypeName() string {
+	return "ColorToken"
 }

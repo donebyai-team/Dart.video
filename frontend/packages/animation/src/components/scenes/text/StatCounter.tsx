@@ -153,12 +153,12 @@ export const StatCounterAssetSchema = [
       {
         name: 'label',
         type: 'string',
+        datatype: 'text',
         map: 'props.label',
       },
       {
         name: 'variant',
-        type: 'string',
-        subtype: 'enum',
+        type: 'enum',
         default: StatCounterDefaults.text.variant,
       }
     ],
@@ -170,33 +170,37 @@ export const StatCounterAssetSchema = [
       {
         name: 'label',
         type: 'string',
+        datatype: 'text',
         map: 'props.label',
       },
       {
         name: 'variant',
-        type: 'string',
-        subtype: 'enum',
+        type: 'enum',
         default: StatCounterDefaults.counter.variant,
       },
       {
         name: 'from',
         type: 'number',
+        datatype: 'text',
         map: 'props.from'
       },
       {
         name: 'to',
         type: 'number',
+        datatype: 'text',
         map: 'props.to'
       },
       {
         name: 'prefix',
         type: 'string',
+        datatype: 'text',
         map: 'props.prefix',
         default: '',
       },
       {
         name: 'suffix',
         type: 'string',
+        datatype: 'text',
         map: 'props.suffix',
         default: '',
       },

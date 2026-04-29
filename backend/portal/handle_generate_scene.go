@@ -178,6 +178,9 @@ func applyTemplateToSlide(slide *pbcore.Slide, template *models.Template) error 
 	animationContent := slide.GetContent()
 	animationContent.CodeRegistry = template.Config.CodeRegistry
 	animationContent.Edits = toPatches
+	if template.BackgroundStyle != nil {
+		slide.BackgroundStyle = template.BackgroundStyle
+	}
 	return nil
 }
 

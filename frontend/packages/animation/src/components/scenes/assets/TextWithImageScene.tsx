@@ -11,6 +11,7 @@ import { TextHighlight, TextHighlightDefaults, TextHighlightSchemaFields } from 
 import { TextStagger, TextStaggerDefaults, TextStaggerSchemaFields } from '../text/TextStagger';
 import { TextWithWordCycle, TextWithWordCycleDefaults, TextWithWordCycleSchemaFields } from '../text/TextWithWordCycle';
 import { resolveContentAwareLayout } from './ContentAwareScene.layout';
+import { TypographyVariant } from '../../../tokens/semantic';
 
 const DEFAULT_ANIMATION = 'slideUp' as const;
 const FALLBACK_WIDTH = 1920;
@@ -86,7 +87,7 @@ export function TextWithImageScene(propsInit: SceneProps): React.ReactElement {
   const textHighlightProps = usePatchedProps('texthighlight', TextHighlightDefaults);
   const textStaggerProps = usePatchedProps('textstagger', TextStaggerDefaults);
   const textWithWordCycleProps = usePatchedProps('textwithwordcycle', TextWithWordCycleDefaults);
-
+  
   const imageDimensions = useImageDimensions(imageProps.image);
   const imageProgress = interpolateWithEasing(frame, [10, 50], [0, 1], 'ease-out');
 
@@ -157,13 +158,13 @@ export function TextWithImageScene(propsInit: SceneProps): React.ReactElement {
         transform: getEntranceTransform(sceneProps.entranceAnimation ?? DEFAULT_ANIMATION, imageProgress),
       }}
     >
-        <ImageAsset
-          id="imageasset"
-          image={imageProps.image}
-          width={Math.max(1, Math.round(fittedImage.width))}
-          height={Math.max(1, Math.round(fittedImage.height))}
-          style={{ objectFit: 'contain', ...imageProps.style }}
-        />
+      <ImageAsset
+        id="imageasset"
+        image={imageProps.image}
+        width={Math.max(1, Math.round(fittedImage.width))}
+        height={Math.max(1, Math.round(fittedImage.height))}
+        style={{ objectFit: 'contain', ...imageProps.style }}
+      />
     </div>
   );
 
@@ -212,8 +213,7 @@ export const TextWithImageSceneDescriptor: ComponentRegistration = {
       fields: [
         {
           "name": "entranceAnimation",
-          "type": "string",
-          "subtype": "enum",
+          "type": "enum",
           "default": DEFAULT_ANIMATION
         }
       ]

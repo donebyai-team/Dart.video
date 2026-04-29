@@ -251,18 +251,17 @@ export const TextLeadStaggerSchemaFields = [
   {
     "name": "text",
     "type": "string",
+    "datatype": "text",
     "map": "props.text"
   },
   {
     "name": "variant",
-    "type": "string",
-    "subtype": "enum",
+    "type": "enum",
     "default": TextLeadStaggerDefaults.variant
   },
   {
     "name": "entranceAnimation",
-    "type": "string",
-    "subtype": "enum",
+    "type": "enum",
     "map": "props.entranceAnimation",
     "default": TextLeadStaggerDefaults.entranceAnimation
   },

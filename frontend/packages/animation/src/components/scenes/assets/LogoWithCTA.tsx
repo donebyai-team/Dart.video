@@ -261,18 +261,17 @@ export const LogoWithCTASchemaFields = [
             {
                 name: 'text',
                 type: 'string',
+                datatype: 'text',
                 map: 'props.brandName',
             },
             {
                 "name": "variant",
-                "type": "string",
-                "subtype": "enum",
+                "type": "enum",
                 "default": BRAND_TEXT_DEFAULTS.variant
             },
             {
                 "name": "entranceAnimation",
-                "type": "string",
-                "subtype": "enum",
+                "type": "enum",
                 "default": BRAND_TEXT_DEFAULTS.entranceAnimation
             },
         ],
@@ -284,18 +283,17 @@ export const LogoWithCTASchemaFields = [
             {
                 name: 'text',
                 type: 'string',
+                datatype: 'text',
                 map: 'props.ctaText',
             },
             {
                 "name": "variant",
-                "type": "string",
-                "subtype": "enum",
+                "type": "enum",
                 "default": TAGLINE_TEXT_DEFAULTS.variant
             },
             {
                 "name": "entranceAnimation",
-                "type": "string",
-                "subtype": "enum",
+                "type": "enum",
                 "default": TAGLINE_TEXT_DEFAULTS.entranceAnimation
             },
         ],

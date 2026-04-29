@@ -7,8 +7,6 @@ import (
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/utils"
 	"net/url"
-	"regexp"
-	"strings"
 )
 
 func registerID(idRegistry map[string]string, id, entityType string) error {
@@ -200,8 +198,6 @@ func validateSlideAnimation(content *pbcore.AnimationSlideContent) error {
 	return nil
 }
 
-var hexColorRegex = regexp.MustCompile(`^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$`)
-
 func IsValidBackgroundStyle(bg *pbcore.BackgroundStyle) bool {
 	if bg == nil {
 		return false
@@ -210,7 +206,7 @@ func IsValidBackgroundStyle(bg *pbcore.BackgroundStyle) bool {
 	switch style := bg.Style.(type) {
 
 	case *pbcore.BackgroundStyle_Solid:
-		return isValidHexColor(style.Solid.Hex)
+		return utils.IsValidHexColor(style.Solid.Hex)
 
 	case *pbcore.BackgroundStyle_Gradient:
 		return isValidGradient(style.Gradient)
@@ -221,11 +217,6 @@ func IsValidBackgroundStyle(bg *pbcore.BackgroundStyle) bool {
 	default:
 		return false
 	}
-}
-
-func isValidHexColor(s string) bool {
-	s = strings.TrimSpace(s)
-	return s == "transparent" || hexColorRegex.MatchString(s)
 }
 
 func isValidGradient(g *pbcore.Gradient) bool {
@@ -256,7 +247,7 @@ func isValidGradient(g *pbcore.Gradient) bool {
 			return false
 		}
 
-		if !isValidHexColor(stop.Color) {
+		if !utils.IsValidHexColor(stop.Color) {
 			return false
 		}
 

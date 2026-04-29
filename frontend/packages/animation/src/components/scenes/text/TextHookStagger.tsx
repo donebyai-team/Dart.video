@@ -115,12 +115,12 @@ export const TextHookStaggerSchemaFields = [
   {
     name: 'text',
     type: 'string',
+    datatype: 'text',
     map: 'props.text',
   },
   {
     name: 'variant',
-    type: 'string',
-    subtype: 'enum',
+    type: 'enum',
     default: TextHookStaggerDefaults.variant,
   },
   {
@@ -130,14 +130,13 @@ export const TextHookStaggerSchemaFields = [
   },
   {
     name: 'highlightedTextAnimation',
-    type: 'string',
-    subtype: 'enum',
+    type: 'enum',
     default: TextHookStaggerDefaults.highlightedTextAnimation,
   },
   {
     name: 'highlightColor',
     type: 'string',
-    subtype: 'color',
+    datatype: 'color',
     default: TextHookStaggerDefaults.highlightColor,
   },
 ];

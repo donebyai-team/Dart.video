@@ -297,6 +297,144 @@ func (u *Union2AskUserQuestionOrScene) AsAskUserQuestion() *AskUserQuestion {
 	return u.variant_AskUserQuestion
 }
 
+type Union2ColorTokenOrString struct {
+	variant string
+
+	variant_ColorToken *ColorToken
+
+	variant_String *string
+}
+
+func (u *Union2ColorTokenOrString) Decode(holder *cffi.CFFIValueUnionVariant, typeMap baml.TypeMap) {
+	valueHolder := holder.Value
+	variantName := holder.ValueOptionName
+	switch variantName {
+	case "ColorToken":
+		u.variant = "ColorToken"
+		value := baml.Decode(valueHolder).Interface().(ColorToken)
+		u.variant_ColorToken = &value
+	case "string":
+		u.variant = "String"
+		value := baml.Decode(valueHolder).Interface().(string)
+		u.variant_String = &value
+
+	default:
+		panic(fmt.Sprintf("invalid union variant: %s", variantName))
+	}
+}
+
+func (u Union2ColorTokenOrString) Encode() (*cffi.HostValue, error) {
+	switch u.variant {
+
+	case "ColorToken":
+		return baml.EncodeValue(*u.variant_ColorToken)
+
+	case "String":
+		return baml.EncodeValue(*u.variant_String)
+
+	case "":
+		return nil, fmt.Errorf("invalid union variant: [unset]")
+	}
+
+	return nil, fmt.Errorf("invalid union variant: %s", u.variant)
+}
+
+func (u Union2ColorTokenOrString) BamlTypeName() string {
+	return "Union2ColorTokenOrString"
+}
+
+func (u Union2ColorTokenOrString) MarshalJSON() ([]byte, error) {
+	switch u.variant {
+
+	case "ColorToken":
+		return json.Marshal(u.variant_ColorToken)
+
+	case "String":
+		return json.Marshal(u.variant_String)
+
+	}
+
+	return nil, fmt.Errorf("invalid union variant: %s", u.variant)
+}
+
+func (u *Union2ColorTokenOrString) UnmarshalJSON(data []byte) error {
+	var err error
+
+	err = json.Unmarshal(data, &u.variant_ColorToken)
+	if err == nil {
+		u.variant = "ColorToken"
+		return nil
+	} else {
+		u.variant_ColorToken = nil
+	}
+
+	err = json.Unmarshal(data, &u.variant_String)
+	if err == nil {
+		u.variant = "String"
+		return nil
+	} else {
+		u.variant_String = nil
+	}
+
+	return fmt.Errorf("invalid union variant: %s", string(data))
+}
+
+func Union2ColorTokenOrString__NewColorToken(v ColorToken) Union2ColorTokenOrString {
+
+	return Union2ColorTokenOrString{
+		variant:            "ColorToken",
+		variant_ColorToken: &v,
+	}
+}
+
+func (u *Union2ColorTokenOrString) SetColorToken(v ColorToken) {
+
+	u.variant = "ColorToken"
+	u.variant_ColorToken = &v
+
+	u.variant_String = nil
+
+}
+
+func (u *Union2ColorTokenOrString) IsColorToken() bool {
+	return u.variant == "ColorToken"
+}
+
+func (u *Union2ColorTokenOrString) AsColorToken() *ColorToken {
+	if u.variant != "ColorToken" {
+		return nil
+	}
+	return u.variant_ColorToken
+}
+
+func Union2ColorTokenOrString__NewString(v string) Union2ColorTokenOrString {
+
+	return Union2ColorTokenOrString{
+		variant:        "String",
+		variant_String: &v,
+	}
+}
+
+func (u *Union2ColorTokenOrString) SetString(v string) {
+
+	u.variant = "String"
+	u.variant_String = &v
+
+	u.variant_ColorToken = nil
+
+}
+
+func (u *Union2ColorTokenOrString) IsString() bool {
+	return u.variant == "String"
+}
+
+func (u *Union2ColorTokenOrString) AsString() *string {
+	if u.variant != "String" {
+		return nil
+	}
+	return u.variant_String
+}
+
 type Union3KassistantOrKtoolOrKuser struct {
 	variant string
 

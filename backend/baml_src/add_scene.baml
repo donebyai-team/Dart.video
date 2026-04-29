@@ -128,6 +128,8 @@ function GenerateScene(input: AddSceneRequest, conversation_history: Message[]) 
     -----
 
     {{ BrandGuidelines(input.VideoBranding) }}
+    
+    {{ BackgroundGuidelines(input.VideoBranding) }}
 
     ---
 

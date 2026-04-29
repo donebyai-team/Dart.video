@@ -1,4 +1,4 @@
-import { EditorConfig} from "@/types/editor";
+import { EditorConfig } from "@/types/editor";
 import { ActiveToolType, SelectedTool } from "@/types/tools";
 import {
     AnimationSlideContentSchema,
@@ -23,8 +23,8 @@ export function resolveBackgroundStyle(
     globalBackground?: BackgroundStyle
 ): BackgroundStyle {
     return (
-        globalBackground ??
         slide?.backgroundStyle ??
+        globalBackground ??
         createDefaultBackgroundStyle()
     );
 }
@@ -98,7 +98,7 @@ export const createSpotlightEffect = (
 
 export const createCalloutEffect = (
     resolution: Resolution,
-   startFrame: number,
+    startFrame: number,
     endFrame: number
 ): CalloutEffect => {
     const width = 200;

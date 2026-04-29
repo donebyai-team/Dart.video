@@ -470,12 +470,12 @@ export const ProblemCollageSchemaFields = [
             {
                 "name": "text",
                 "type": "string",                
+                "datatype": "text",
                 "map": "props.text"
             },
             {
                 "name": "variant",
-                "type": "string",
-                "subtype": "enum",
+                "type": "enum",
                 "default": ProblemCollageTextDefaults.variant
             }
         ],

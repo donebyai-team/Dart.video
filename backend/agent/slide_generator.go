@@ -4,22 +4,20 @@ import (
 	"context"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/shank318/coasterai/baml_client/types"
-	"github.com/shank318/coasterai/services/brand_identity"
-	"github.com/shank318/coasterai/services/voiceover"
-	"strings"
-
 	"github.com/pkg/errors"
+	"github.com/shank318/coasterai/agent/scenes"
+	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/services"
+	"github.com/shank318/coasterai/services/brand_identity"
+	"github.com/shank318/coasterai/services/voiceover"
 	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
 )
 
 // Default transition time for all slides, same in frontend
 const transitionDurationInFrames int32 = 10 // MAKE sure it is synced with frontend
-const defaultPatternOpacity float32 = 0.1
 
 type videoConfigGenerator struct {
 	video                 *pbcore.Video
@@ -82,10 +80,12 @@ func (g *videoConfigGenerator) AddBranding(assetRegistry *services.MediaAssetReg
 	}
 
 	// Step 2: ALWAYS generate gradient
-	solidColor := brand_identity.GenerateSolidFromBackground(generatedBranding.Colors)
-
-	// Step 3: compute safe text color for gradient
-	updatedTextColor := brand_identity.GetTextColorForSolid(solidColor)
+	solidColor := brand_identity.BrandColorTokens(generatedBranding.Colors)[brand_identity.COLOR_BACKGROUND]
+	if solidColor == "" {
+		solidColor = scenes.DefaultBackgroundColor
+	}
+	// Step 3: compute safe text color
+	updatedTextColor := brand_identity.GetReadableTextColorForSolid(solidColor, generatedBranding.Colors, brand_identity.TextNormal)
 
 	// Step 4: update text color
 	for _, brandColor := range generatedBranding.Colors {
@@ -97,13 +97,14 @@ func (g *videoConfigGenerator) AddBranding(assetRegistry *services.MediaAssetReg
 	// Step 5: assign branding
 	g.video.Metadata.GeneratedBranding = generatedBranding
 
-	// Step 6: apply gradient background
 	g.AddVideoBackground(&pbcore.BackgroundStyle{
 		Style: &pbcore.BackgroundStyle_Solid{
-			Solid: solidColor,
+			Solid: &pbcore.SolidColor{
+				Hex: solidColor,
+			},
 		},
 		Pattern:        pbcore.BackgroundPattern_BACKGROUND_PATTERN_DOTS,
-		PatternOpacity: utils.Ptr(defaultPatternOpacity),
+		PatternOpacity: utils.Ptr(scenes.DefaultBackgroundPatternOpacity),
 	})
 }
 
@@ -147,25 +148,6 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 				slide.Transition = pbcore.TransitionType_TRANSITION_STRIPPED_SLAM
 				slide.TransitionDurationInFrames = utils.Ptr(transitionDurationInFrames)
 				slide.Direction = pbcore.TransitionDirection_TRANSITION_DIRECTION_UNSPECIFIED.Enum()
-			}
-
-			if len(pendingSlide.Elements) > 0 && strings.EqualFold(pendingSlide.Elements[0].Component, "WordCycle") {
-				slide.BackgroundStyle = &pbcore.BackgroundStyle{
-					Pattern: pbcore.BackgroundPattern_BACKGROUND_PATTERN_DOTS,
-					Effect: &pbcore.BackgroundEffect{
-						Type: pbcore.BackgroundEffectType_BACKGROUND_EFFECT_TYPE_AURORA,
-					},
-					PatternOpacity: utils.Ptr(defaultPatternOpacity),
-					Style:          &pbcore.BackgroundStyle_Solid{Solid: &pbcore.SolidColor{Hex: "#1207e5"}},
-				}
-				slide.Content.Edits = utils.CreateStructFromMap(map[string]interface{}{
-					"wordcycle": map[string]interface{}{
-						"style": map[string]interface{}{
-							"color": "#FFFFFF",
-						},
-					},
-				})
-
 			}
 
 			section.Slides = append(section.Slides, slide)
@@ -213,7 +195,7 @@ func (g *videoConfigGenerator) UpdateAnimationSlide(
 				slide.SlideStatus = pbcore.SlideStatus_SLIDE_STATUS_GENERATED
 				animation.CodeRegistry = selectedTemplate.Config.CodeRegistry
 				animation.Edits = utils.MergeStructs(animation.Edits, toStructConfig)
-
+				slide.BackgroundStyle = selectedTemplate.BackgroundStyle
 				// update the selected template description
 				// for future slides to know what's being selected so far
 				//animation.Plan.ThinkingSummary = utils.Ptr(selectedTemplate.Description)
