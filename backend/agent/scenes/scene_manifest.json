@@ -1309,12 +1309,7 @@
                   "name": "cyclingWords",
                   "type": "array",
                   "datatype": "text",
-                  "map": "props.cyclingWords",
-                  "default": [
-                    "first word",
-                    "next word",
-                    "last word"
-                  ]
+                  "map": "props.cyclingWords"
                 },
                 {
                   "name": "variant",

@@ -212,7 +212,6 @@ export const MultiImageStackSchemaFields = [
                 type: 'array',
                 datatype: 'text',
                 map: 'props.cyclingWords',
-                default: DEFAULT_HERO_TEXT.cyclingWords,
             },
             {
                 name: 'variant',
