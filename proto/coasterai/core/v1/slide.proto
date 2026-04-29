@@ -40,6 +40,7 @@ enum TransitionType {
   TRANSITION_FLIP_UP = 15;
   TRANSITION_FLIP_DOWN = 16;
   TRANSITION_IRIS = 17;
+  TRANSITION_STRIPPED_SLAM = 18;
 }
 
 enum TransitionDirection {

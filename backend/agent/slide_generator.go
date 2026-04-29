@@ -7,7 +7,6 @@ import (
 	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/services/brand_identity"
 	"github.com/shank318/coasterai/services/voiceover"
-	"math/rand"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -19,7 +18,7 @@ import (
 )
 
 // Default transition time for all slides, same in frontend
-const transitionDurationInFrames int32 = 15
+const transitionDurationInFrames int32 = 10 // MAKE sure it is synced with frontend
 const defaultPatternOpacity float32 = 0.1
 
 type videoConfigGenerator struct {
@@ -170,14 +169,12 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 				},
 			}
 
-			//assignRandomTransitionAndDirection(slide)
 			// TODO: Do it as a pre/post processing stages or specify in the config itself
-			if len(pendingSlide.Elements) > 0 &&
-				(strings.EqualFold(pendingSlide.Elements[0].Component, "TextWithImageScene") ||
-					strings.EqualFold(pendingSlide.Elements[0].Component, "TextWithVideoScene")) {
-				slide.Transition = pbcore.TransitionType_TRANSITION_SLIDE_UP
+			nextSlide := getNextScene(plan.Sections, index, slideIndex)
+			if isContentSlide(nextSlide) {
+				slide.Transition = pbcore.TransitionType_TRANSITION_STRIPPED_SLAM
 				slide.TransitionDurationInFrames = utils.Ptr(transitionDurationInFrames)
-				slide.Direction = pbcore.TransitionDirection_TRANSITION_DIRECTION_FROM_BOTTOM.Enum()
+				slide.Direction = pbcore.TransitionDirection_TRANSITION_DIRECTION_UNSPECIFIED.Enum()
 			}
 
 			if len(pendingSlide.Elements) > 0 && strings.EqualFold(pendingSlide.Elements[0].Component, "WordCycle") {
@@ -283,32 +280,4 @@ func (g *videoConfigGenerator) findSection(sectionID string) (*pbcore.Section, e
 		}
 	}
 	return nil, fmt.Errorf("section not found: %s", sectionID)
-}
-
-var pendingSlideTransitionOptions = []pbcore.TransitionType{
-	pbcore.TransitionType_TRANSITION_FADE,
-	pbcore.TransitionType_TRANSITION_SLIDE_LEFT,
-	pbcore.TransitionType_TRANSITION_WIPE_LEFT,
-	pbcore.TransitionType_TRANSITION_FLIP_LEFT,
-	pbcore.TransitionType_TRANSITION_CLOCK_WIPE,
-	pbcore.TransitionType_TRANSITION_IRIS,
-}
-
-var pendingSlideDirectionOptions = []pbcore.TransitionDirection{
-	pbcore.TransitionDirection_TRANSITION_DIRECTION_FROM_LEFT,
-	pbcore.TransitionDirection_TRANSITION_DIRECTION_FROM_RIGHT,
-	pbcore.TransitionDirection_TRANSITION_DIRECTION_FROM_TOP,
-	pbcore.TransitionDirection_TRANSITION_DIRECTION_FROM_BOTTOM,
-}
-
-func assignRandomTransitionAndDirection(slide *pbcore.Slide) {
-	if slide == nil {
-		return
-	}
-
-	slide.Transition = pendingSlideTransitionOptions[rand.Intn(len(pendingSlideTransitionOptions))]
-	slide.TransitionDurationInFrames = utils.Ptr(transitionDurationInFrames)
-	slide.Direction = pendingSlideDirectionOptions[rand.Intn(len(pendingSlideDirectionOptions))].Enum()
-
-	// TODO: Generate transition and direction via LLM instead of random defaults.
 }

@@ -138,6 +138,7 @@ const (
 	TransitionType_TRANSITION_FLIP_UP         TransitionType = 15
 	TransitionType_TRANSITION_FLIP_DOWN       TransitionType = 16
 	TransitionType_TRANSITION_IRIS            TransitionType = 17
+	TransitionType_TRANSITION_STRIPPED_SLAM   TransitionType = 18
 )
 
 // Enum value maps for TransitionType.
@@ -161,6 +162,7 @@ var (
 		15: "TRANSITION_FLIP_UP",
 		16: "TRANSITION_FLIP_DOWN",
 		17: "TRANSITION_IRIS",
+		18: "TRANSITION_STRIPPED_SLAM",
 	}
 	TransitionType_value = map[string]int32{
 		"TRANSITION_NONE":            0,
@@ -181,6 +183,7 @@ var (
 		"TRANSITION_FLIP_UP":         15,
 		"TRANSITION_FLIP_DOWN":       16,
 		"TRANSITION_IRIS":            17,
+		"TRANSITION_STRIPPED_SLAM":   18,
 	}
 )
 
@@ -1864,7 +1867,7 @@ const file_coasterai_core_v1_slide_proto_rawDesc = "" +
 	"\x14SLIDE_STATUS_PENDING\x10\x02*U\n" +
 	"\x12StackAnimationMode\x12\x1e\n" +
 	"\x1aSTACK_ANIMATION_MODE_STACK\x10\x00\x12\x1f\n" +
-	"\x1bSTACK_ANIMATION_MODE_REVEAL\x10\x01*\xe1\x03\n" +
+	"\x1bSTACK_ANIMATION_MODE_REVEAL\x10\x01*\xff\x03\n" +
 	"\x0eTransitionType\x12\x13\n" +
 	"\x0fTRANSITION_NONE\x10\x00\x12\x13\n" +
 	"\x0fTRANSITION_FADE\x10\x01\x12\x19\n" +
@@ -1884,7 +1887,8 @@ const file_coasterai_core_v1_slide_proto_rawDesc = "" +
 	"\x15TRANSITION_FLIP_RIGHT\x10\x0e\x12\x16\n" +
 	"\x12TRANSITION_FLIP_UP\x10\x0f\x12\x18\n" +
 	"\x14TRANSITION_FLIP_DOWN\x10\x10\x12\x13\n" +
-	"\x0fTRANSITION_IRIS\x10\x11*\xcd\x01\n" +
+	"\x0fTRANSITION_IRIS\x10\x11\x12\x1c\n" +
+	"\x18TRANSITION_STRIPPED_SLAM\x10\x12*\xcd\x01\n" +
 	"\x13TransitionDirection\x12$\n" +
 	" TRANSITION_DIRECTION_UNSPECIFIED\x10\x00\x12\"\n" +
 	"\x1eTRANSITION_DIRECTION_FROM_LEFT\x10\x01\x12#\n" +
