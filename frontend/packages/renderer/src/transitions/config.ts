@@ -26,6 +26,12 @@ export const TRANSITION_OPTIONS: TransitionOptionConfig[] = [
     supportsDirection: false
   },
   {
+    id: TransitionType.TRANSITION_STRIPPED_SLAM,
+    name: 'Striped Slam',
+    preview: 'bg-gradient-to-br from-muted via-primary/20 to-transparent',
+    supportsDirection: false
+  },
+  {
     id: TransitionType.TRANSITION_FADE,
     name: 'Fade',
     preview: 'bg-gradient-to-r from-muted to-transparent',
@@ -70,11 +76,11 @@ export const TRANSITION_DIRECTION_OPTIONS: Array<{
   id: TransitionDirection
   label: string
 }> = [
-  { id: TransitionDirection.FROM_LEFT, label: 'From Left' },
-  { id: TransitionDirection.FROM_RIGHT, label: 'From Right' },
-  { id: TransitionDirection.FROM_TOP, label: 'From Top' },
-  { id: TransitionDirection.FROM_BOTTOM, label: 'From Bottom' }
-]
+    { id: TransitionDirection.FROM_LEFT, label: 'From Left' },
+    { id: TransitionDirection.FROM_RIGHT, label: 'From Right' },
+    { id: TransitionDirection.FROM_TOP, label: 'From Top' },
+    { id: TransitionDirection.FROM_BOTTOM, label: 'From Bottom' }
+  ]
 
 export const transitionOptionById = new Map(
   TRANSITION_OPTIONS.map(option => [option.id, option])

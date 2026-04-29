@@ -29,3 +29,6 @@ export * from './registry'
 
 // Background effects
 export * from './background_effects'
+
+// Transitions
+export * from './transitions'

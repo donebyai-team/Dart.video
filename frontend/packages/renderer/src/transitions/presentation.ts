@@ -7,6 +7,7 @@ import { none } from '@remotion/transitions/none'
 import { slide } from '@remotion/transitions/slide'
 import { wipe } from '@remotion/transitions/wipe'
 import { RemotionTransitionDirection, protoDirectionToRemotion } from './config'
+import { TransitionStripedSlam } from '@coasterai/animation'
 
 const getDirection = (
   direction?: TransitionDirection
@@ -50,6 +51,8 @@ export const getTransitionPresentation = (
       return clockWipe({ width, height })
     case TransitionType.TRANSITION_IRIS:
       return iris({ width, height })
+    case TransitionType.TRANSITION_STRIPPED_SLAM:
+      return TransitionStripedSlam()
     case TransitionType.TRANSITION_NONE:
       return none()
     default:

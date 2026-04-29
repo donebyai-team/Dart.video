@@ -19,7 +19,7 @@ import (
 )
 
 // Default transition time for all slides, same in frontend
-const transitionDurationInFrames int32 = 15
+const transitionDurationInFrames int32 = 10 // MAKE sure it is synced with frontend
 const defaultPatternOpacity float32 = 0.1
 
 type videoConfigGenerator struct {
