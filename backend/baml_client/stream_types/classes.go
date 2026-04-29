@@ -280,21 +280,17 @@ func (c AssetAnalysis) BamlTypeName() string {
 	return "AssetAnalysis"
 }
 
-type BackgroundGradient struct {
-	Color1    *string `json:"color1"`
-	Position1 *int64  `json:"position1"`
-	Color2    *string `json:"color2"`
-	Position2 *int64  `json:"position2"`
-	Angle     *int64  `json:"angle"`
+type Background struct {
+	Solid *types.Union2ColorTokenOrString `json:"solid"`
 }
 
-func (c *BackgroundGradient) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+func (c *Background) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
 	typeName := holder.Name
 	if typeName.Namespace != cffi.CFFITypeNamespace_STREAM_TYPES {
 		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_STREAM_TYPES, got %s", string(typeName.Namespace.String())))
 	}
-	if typeName.Name != "BackgroundGradient" {
-		panic(fmt.Sprintf("expected BackgroundGradient, got %s", typeName.Name))
+	if typeName.Name != "Background" {
+		panic(fmt.Sprintf("expected Background, got %s", typeName.Name))
 	}
 
 	for _, field := range holder.Fields {
@@ -302,48 +298,28 @@ func (c *BackgroundGradient) Decode(holder *cffi.CFFIValueClass, typeMap baml.Ty
 		valueHolder := field.Value
 		switch key {
 
-		case "color1":
-			c.Color1 = baml.Decode(valueHolder).Interface().(*string)
-
-		case "position1":
-			c.Position1 = baml.Decode(valueHolder).Interface().(*int64)
-
-		case "color2":
-			c.Color2 = baml.Decode(valueHolder).Interface().(*string)
-
-		case "position2":
-			c.Position2 = baml.Decode(valueHolder).Interface().(*int64)
-
-		case "angle":
-			c.Angle = baml.Decode(valueHolder).Interface().(*int64)
+		case "solid":
+			c.Solid = baml.Decode(valueHolder).Interface().(*types.Union2ColorTokenOrString)
 
 		default:
 
-			panic(fmt.Sprintf("unexpected field: %s in class BackgroundGradient", key))
+			panic(fmt.Sprintf("unexpected field: %s in class Background", key))
 
 		}
 	}
 
 }
 
-func (c BackgroundGradient) Encode() (*cffi.HostValue, error) {
+func (c Background) Encode() (*cffi.HostValue, error) {
 	fields := map[string]any{}
 
-	fields["color1"] = c.Color1
+	fields["solid"] = c.Solid
 
-	fields["position1"] = c.Position1
-
-	fields["color2"] = c.Color2
-
-	fields["position2"] = c.Position2
-
-	fields["angle"] = c.Angle
-
-	return baml.EncodeClass("BackgroundGradient", fields, nil)
+	return baml.EncodeClass("Background", fields, nil)
 }
 
-func (c BackgroundGradient) BamlTypeName() string {
-	return "BackgroundGradient"
+func (c Background) BamlTypeName() string {
+	return "Background"
 }
 
 type Category struct {
@@ -743,10 +719,10 @@ func (c Message) BamlTypeName() string {
 }
 
 type Scene struct {
-	Index           *int64              `json:"index"`
-	Elements        []SceneElement      `json:"elements"`
-	Background      *BackgroundGradient `json:"background"`
-	ThinkingSummary *string             `json:"thinkingSummary"`
+	Index           *int64         `json:"index"`
+	Elements        []SceneElement `json:"elements"`
+	Background      *Background    `json:"background"`
+	ThinkingSummary *string        `json:"thinkingSummary"`
 }
 
 func (c *Scene) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -770,7 +746,7 @@ func (c *Scene) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
 			c.Elements = baml.Decode(valueHolder).Interface().([]SceneElement)
 
 		case "background":
-			c.Background = baml.Decode(valueHolder).Interface().(*BackgroundGradient)
+			c.Background = baml.Decode(valueHolder).Interface().(*Background)
 
 		case "thinkingSummary":
 			c.ThinkingSummary = baml.Decode(valueHolder).Interface().(*string)

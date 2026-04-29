@@ -393,7 +393,7 @@ func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest ty
 			return nil, err
 		}
 
-		template.BackgroundStyle = toSceneBackground(scene.Background)
+		//template.BackgroundStyle = toSceneBackground(scene.Background)
 
 		// Merge with user edits
 		// There can be orphans object if the scene is replaced

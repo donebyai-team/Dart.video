@@ -384,25 +384,24 @@ export const ProblemHeadlineSchemaFields = [
   {
     "name": "text",
     "type": "string",
+    "datatype": "text",
     "map": "props.text"
   },
   {
     "name": "variant",
-    "type": "string",
-    "subtype": "enum",
+    "type": "enum",
     "default": ProblemHeadlineDefaults.variant
   },
   {
     "name": "entranceAnimation",
-    "type": "string",
-    "subtype": "enum",
+    "type": "enum",
     "map": "props.entranceAnimation",
     "default": ProblemHeadlineDefaults.entranceAnimation
   },
   {
     "name": "highlightColor",
     "type": "string",
-    "subtype": "color",
+    "datatype": "color",
     "default": ProblemHeadlineDefaults.highlightColor
   }
 ];

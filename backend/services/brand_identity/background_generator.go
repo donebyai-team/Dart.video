@@ -28,23 +28,23 @@ func GetReadableTextColorForSolid(
 	kind TextKind,
 ) string {
 
-	palette := extractPalette(colors)
+	palette := ExtractPalette(colors)
 
 	var candidates []string
 
 	switch kind {
 	case TextHighlight:
 		candidates = []string{
-			palette["primary"],
-			palette["secondary"],
-			palette["accent"],
+			palette[COLOR_PRIMARY],
+			palette[COLOR_SECONDARY],
+			palette[COLOR_ACCENT],
 			"#000000",
 			"#FFFFFF",
 		}
 	default:
 		candidates = []string{
-			palette["textPrimary"],
-			palette["textSecondary"],
+			palette[COLOR_TEXT_PRIMARY],
+			palette[COLOR_TEXT_SECONDARY],
 			"#000000",
 			"#FFFFFF",
 		}
@@ -74,23 +74,23 @@ func GetReadableTextColorForSolid(
 	return normalizeHex(best)
 }
 
-func extractPalette(colors []*pbcore.BrandColor) map[string]string {
+func ExtractPalette(colors []*pbcore.BrandColor) map[string]string {
 	out := make(map[string]string)
 
 	for _, c := range colors {
 		switch c.Priority {
 		case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_PRIMARY:
-			out["primary"] = c.ColorHexCode
+			out[COLOR_PRIMARY] = c.ColorHexCode
 		case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_SECONDARY:
-			out["secondary"] = c.ColorHexCode
+			out[COLOR_SECONDARY] = c.ColorHexCode
 		case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_ACCENT:
-			out["accent"] = c.ColorHexCode
+			out[COLOR_ACCENT] = c.ColorHexCode
 		case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_BACKGROUND:
-			out["background"] = c.ColorHexCode
+			out[COLOR_BACKGROUND] = c.ColorHexCode
 		case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_TEXT_PRIMARY:
-			out["textPrimary"] = c.ColorHexCode
+			out[COLOR_TEXT_PRIMARY] = c.ColorHexCode
 		case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_TEXT_SECONDARY:
-			out["textSecondary"] = c.ColorHexCode
+			out[COLOR_TEXT_SECONDARY] = c.ColorHexCode
 		}
 	}
 

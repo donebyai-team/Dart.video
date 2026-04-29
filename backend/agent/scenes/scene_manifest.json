@@ -107,7 +107,7 @@
               "fields": [
                 {
                   "name": "entranceAnimation",
-                  "type": "string",
+                  "type": "enum",
                   "map": "props.entranceAnimation",
                   "default": "slideUp"
                 },
@@ -119,34 +119,38 @@
                 {
                   "name": "startText",
                   "type": "string",
+                  "datatype": "text",
                   "map": "props.startText"
                 },
                 {
                   "name": "endText",
                   "type": "string",
+                  "datatype": "text",
                   "map": "props.endText"
                 },
                 {
                   "name": "from",
                   "type": "number",
+                  "datatype": "text",
                   "map": "props.from",
                   "default": 0
                 },
                 {
                   "name": "to",
                   "type": "number",
+                  "datatype": "text",
                   "map": "props.to",
                   "default": 100
                 },
                 {
                   "name": "format",
                   "type": "string",
+                  "datatype": "text",
                   "default": ""
                 },
                 {
                   "name": "variant",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "display"
                 }
               ]
@@ -214,12 +218,12 @@
                 {
                   "name": "label",
                   "type": "string",
+                  "datatype": "text",
                   "map": "props.label"
                 },
                 {
                   "name": "variant",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "subheading"
                 }
               ]
@@ -231,33 +235,37 @@
                 {
                   "name": "label",
                   "type": "string",
+                  "datatype": "text",
                   "map": "props.label"
                 },
                 {
                   "name": "variant",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "displayLg"
                 },
                 {
                   "name": "from",
                   "type": "number",
+                  "datatype": "text",
                   "map": "props.from"
                 },
                 {
                   "name": "to",
                   "type": "number",
+                  "datatype": "text",
                   "map": "props.to"
                 },
                 {
                   "name": "prefix",
                   "type": "string",
+                  "datatype": "text",
                   "map": "props.prefix",
                   "default": ""
                 },
                 {
                   "name": "suffix",
                   "type": "string",
+                  "datatype": "text",
                   "map": "props.suffix",
                   "default": ""
                 },
@@ -307,12 +315,12 @@
                 {
                   "name": "text",
                   "type": "string",
+                  "datatype": "text",
                   "map": "props.text"
                 },
                 {
                   "name": "variant",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "display"
                 },
                 {
@@ -322,8 +330,7 @@
                 },
                 {
                   "name": "entranceAnimation",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "map": "props.entranceAnimation",
                   "default": "scaleIn"
                 },
@@ -334,8 +341,7 @@
                 },
                 {
                   "name": "splitBy",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "word"
                 }
               ]
@@ -373,22 +379,24 @@
                 {
                   "name": "topText",
                   "type": "string",
+                  "datatype": "text",
                   "map": "props.topText"
                 },
                 {
                   "name": "bottomText",
                   "type": "string",
+                  "datatype": "text",
                   "map": "props.bottomText"
                 },
                 {
                   "name": "variant",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "displayXl"
                 },
                 {
                   "name": "glowColor",
                   "type": "string",
+                  "datatype": "color",
                   "default": ""
                 }
               ]
@@ -426,12 +434,12 @@
                 {
                   "name": "text",
                   "type": "string",
+                  "datatype": "text",
                   "map": "props.text"
                 },
                 {
                   "name": "variant",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "display3xl"
                 },
                 {
@@ -441,14 +449,13 @@
                 },
                 {
                   "name": "highlightedTextAnimation",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "elasticStretch"
                 },
                 {
                   "name": "highlightColor",
                   "type": "string",
-                  "subtype": "color",
+                  "datatype": "color",
                   "default": ""
                 }
               ]
@@ -474,25 +481,22 @@
                 {
                   "name": "text",
                   "type": "string",
-                  "required": true,
+                  "dataType": "text",
                   "map": "props.text"
                 },
                 {
                   "name": "variant",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "display"
                 },
                 {
                   "name": "splitBy",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "char"
                 },
                 {
                   "name": "entranceAnimation",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "map": "props.entranceAnimation",
                   "default": "fadeIn"
                 }
@@ -525,18 +529,17 @@
                 {
                   "name": "text",
                   "type": "string",
+                  "datatype": "text",
                   "map": "props.text"
                 },
                 {
                   "name": "variant",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "display"
                 },
                 {
                   "name": "entranceAnimation",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "map": "props.entranceAnimation",
                   "default": "slideUp"
                 },
@@ -552,20 +555,18 @@
                 },
                 {
                   "name": "highlightStyle",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "glow"
                 },
                 {
                   "name": "highlightedTextAnimation",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "jump"
                 },
                 {
                   "name": "highlightColor",
                   "type": "string",
-                  "subtype": "color",
+                  "datatype": "color",
                   "default": ""
                 }
               ]
@@ -597,26 +598,23 @@
                 {
                   "name": "words",
                   "type": "array",
-                  "subtype": "string",
+                  "datatype": "text",
                   "map": "props.words"
                 },
                 {
                   "name": "variant",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "displayXl"
                 },
                 {
                   "name": "entranceAnimation",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "map": "props.entranceAnimation",
                   "default": "slideUp"
                 },
                 {
                   "name": "textCycleTransition",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "slideUp"
                 },
                 {
@@ -666,24 +664,24 @@
                 {
                   "name": "text",
                   "type": "string",
+                  "datatype": "text",
                   "map": "props.text"
                 },
                 {
                   "name": "cyclingWords",
                   "type": "array",
+                  "datatype": "text",
                   "map": "props.cyclingWords",
                   "default": []
                 },
                 {
                   "name": "variant",
-                  "type": "string",
-                  "sub_type": "enum",
+                  "type": "enum",
                   "default": "display"
                 },
                 {
                   "name": "entranceAnimation",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "map": "props.entranceAnimation",
                   "default": "slideUp"
                 },
@@ -699,14 +697,12 @@
                 },
                 {
                   "name": "textCycleTransition",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "slideUp"
                 },
                 {
                   "name": "highlightStyle",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "background"
                 }
               ]
@@ -745,18 +741,17 @@
                 {
                   "name": "text",
                   "type": "string",
+                  "datatype": "text",
                   "map": "props.text"
                 },
                 {
                   "name": "variant",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "displayLg"
                 },
                 {
                   "name": "entranceAnimation",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "map": "props.entranceAnimation",
                   "default": "slideLeft"
                 },
@@ -798,25 +793,24 @@
                 {
                   "name": "text",
                   "type": "string",
+                  "datatype": "text",
                   "map": "props.text"
                 },
                 {
                   "name": "variant",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "display"
                 },
                 {
                   "name": "entranceAnimation",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "map": "props.entranceAnimation",
                   "default": "slideUp"
                 },
                 {
                   "name": "highlightColor",
                   "type": "string",
-                  "subtype": "color",
+                  "datatype": "color",
                   "default": ""
                 }
               ]
@@ -853,13 +847,12 @@
                 {
                   "name": "texts",
                   "type": "array",
-                  "subtype": "string",
+                  "datatype": "text",
                   "map": "props.texts"
                 },
                 {
                   "name": "variant",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "heading"
                 },
                 {
@@ -907,8 +900,7 @@
               "fields": [
                 {
                   "name": "entranceAnimation",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "slideUp"
                 }
               ]
@@ -924,12 +916,12 @@
                     {
                       "name": "text",
                       "type": "string",
+                      "datatype": "text",
                       "map": "props.text"
                     },
                     {
                       "name": "variant",
-                      "type": "string",
-                      "subtype": "enum",
+                      "type": "enum",
                       "default": "display"
                     },
                     {
@@ -939,8 +931,7 @@
                     },
                     {
                       "name": "entranceAnimation",
-                      "type": "string",
-                      "subtype": "enum",
+                      "type": "enum",
                       "map": "props.entranceAnimation",
                       "default": "scaleIn"
                     },
@@ -951,8 +942,7 @@
                     },
                     {
                       "name": "splitBy",
-                      "type": "string",
-                      "subtype": "enum",
+                      "type": "enum",
                       "default": "word"
                     }
                   ]
@@ -963,18 +953,17 @@
                     {
                       "name": "text",
                       "type": "string",
+                      "datatype": "text",
                       "map": "props.text"
                     },
                     {
                       "name": "variant",
-                      "type": "string",
-                      "subtype": "enum",
+                      "type": "enum",
                       "default": "display"
                     },
                     {
                       "name": "entranceAnimation",
-                      "type": "string",
-                      "subtype": "enum",
+                      "type": "enum",
                       "map": "props.entranceAnimation",
                       "default": "slideUp"
                     },
@@ -990,20 +979,18 @@
                     },
                     {
                       "name": "highlightStyle",
-                      "type": "string",
-                      "subtype": "enum",
+                      "type": "enum",
                       "default": "glow"
                     },
                     {
                       "name": "highlightedTextAnimation",
-                      "type": "string",
-                      "subtype": "enum",
+                      "type": "enum",
                       "default": "jump"
                     },
                     {
                       "name": "highlightColor",
                       "type": "string",
-                      "subtype": "color",
+                      "datatype": "color",
                       "default": ""
                     }
                   ]
@@ -1019,24 +1006,24 @@
                     {
                       "name": "text",
                       "type": "string",
+                      "datatype": "text",
                       "map": "props.text"
                     },
                     {
                       "name": "cyclingWords",
                       "type": "array",
+                      "datatype": "text",
                       "map": "props.cyclingWords",
                       "default": []
                     },
                     {
                       "name": "variant",
-                      "type": "string",
-                      "sub_type": "enum",
+                      "type": "enum",
                       "default": "display"
                     },
                     {
                       "name": "entranceAnimation",
-                      "type": "string",
-                      "subtype": "enum",
+                      "type": "enum",
                       "map": "props.entranceAnimation",
                       "default": "slideUp"
                     },
@@ -1052,14 +1039,12 @@
                     },
                     {
                       "name": "textCycleTransition",
-                      "type": "string",
-                      "subtype": "enum",
+                      "type": "enum",
                       "default": "slideUp"
                     },
                     {
                       "name": "highlightStyle",
-                      "type": "string",
-                      "subtype": "enum",
+                      "type": "enum",
                       "default": "background"
                     }
                   ]
@@ -1115,8 +1100,7 @@
               "fields": [
                 {
                   "name": "entranceAnimation",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "slideUp"
                 }
               ]
@@ -1132,12 +1116,12 @@
                     {
                       "name": "text",
                       "type": "string",
+                      "datatype": "text",
                       "map": "props.text"
                     },
                     {
                       "name": "variant",
-                      "type": "string",
-                      "subtype": "enum",
+                      "type": "enum",
                       "default": "display"
                     },
                     {
@@ -1147,8 +1131,7 @@
                     },
                     {
                       "name": "entranceAnimation",
-                      "type": "string",
-                      "subtype": "enum",
+                      "type": "enum",
                       "map": "props.entranceAnimation",
                       "default": "scaleIn"
                     },
@@ -1159,8 +1142,7 @@
                     },
                     {
                       "name": "splitBy",
-                      "type": "string",
-                      "subtype": "enum",
+                      "type": "enum",
                       "default": "word"
                     }
                   ]
@@ -1171,18 +1153,17 @@
                     {
                       "name": "text",
                       "type": "string",
+                      "datatype": "text",
                       "map": "props.text"
                     },
                     {
                       "name": "variant",
-                      "type": "string",
-                      "subtype": "enum",
+                      "type": "enum",
                       "default": "display"
                     },
                     {
                       "name": "entranceAnimation",
-                      "type": "string",
-                      "subtype": "enum",
+                      "type": "enum",
                       "map": "props.entranceAnimation",
                       "default": "slideUp"
                     },
@@ -1198,20 +1179,18 @@
                     },
                     {
                       "name": "highlightStyle",
-                      "type": "string",
-                      "subtype": "enum",
+                      "type": "enum",
                       "default": "glow"
                     },
                     {
                       "name": "highlightedTextAnimation",
-                      "type": "string",
-                      "subtype": "enum",
+                      "type": "enum",
                       "default": "jump"
                     },
                     {
                       "name": "highlightColor",
                       "type": "string",
-                      "subtype": "color",
+                      "datatype": "color",
                       "default": ""
                     }
                   ]
@@ -1227,24 +1206,24 @@
                     {
                       "name": "text",
                       "type": "string",
+                      "datatype": "text",
                       "map": "props.text"
                     },
                     {
                       "name": "cyclingWords",
                       "type": "array",
+                      "datatype": "text",
                       "map": "props.cyclingWords",
                       "default": []
                     },
                     {
                       "name": "variant",
-                      "type": "string",
-                      "sub_type": "enum",
+                      "type": "enum",
                       "default": "display"
                     },
                     {
                       "name": "entranceAnimation",
-                      "type": "string",
-                      "subtype": "enum",
+                      "type": "enum",
                       "map": "props.entranceAnimation",
                       "default": "slideUp"
                     },
@@ -1260,14 +1239,12 @@
                     },
                     {
                       "name": "textCycleTransition",
-                      "type": "string",
-                      "subtype": "enum",
+                      "type": "enum",
                       "default": "slideUp"
                     },
                     {
                       "name": "highlightStyle",
-                      "type": "string",
-                      "subtype": "enum",
+                      "type": "enum",
                       "default": "background"
                     }
                   ]
@@ -1325,11 +1302,13 @@
                 {
                   "name": "text",
                   "type": "string",
+                  "datatype": "text",
                   "map": "props.headline"
                 },
                 {
                   "name": "cyclingWords",
                   "type": "array",
+                  "datatype": "text",
                   "map": "props.cyclingWords",
                   "default": [
                     "first word",
@@ -1339,27 +1318,23 @@
                 },
                 {
                   "name": "variant",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "display"
                 },
                 {
                   "name": "entranceAnimation",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "map": "props.entranceAnimation",
                   "default": "scaleIn"
                 },
                 {
                   "name": "textCycleTransition",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "slideUp"
                 },
                 {
                   "name": "highlightStyle",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "background"
                 }
               ]
@@ -1388,14 +1363,12 @@
               "fields": [
                 {
                   "name": "stackAnimation",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "Peel"
                 },
                 {
                   "name": "direction",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "right"
                 },
                 {
@@ -1451,12 +1424,12 @@
                 {
                   "name": "text",
                   "type": "string",
+                  "datatype": "text",
                   "map": "props.text"
                 },
                 {
                   "name": "variant",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "heading"
                 }
               ]
@@ -1523,12 +1496,12 @@
                 {
                   "name": "text",
                   "type": "string",
+                  "datatype": "text",
                   "map": "props.text"
                 },
                 {
                   "name": "variant",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "display"
                 },
                 {
@@ -1538,8 +1511,7 @@
                 },
                 {
                   "name": "entranceAnimation",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "map": "props.entranceAnimation",
                   "default": "scaleIn"
                 },
@@ -1550,8 +1522,7 @@
                 },
                 {
                   "name": "splitBy",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "word"
                 }
               ]
@@ -1611,12 +1582,12 @@
                 {
                   "name": "text",
                   "type": "string",
+                  "datatype": "text",
                   "map": "props.text"
                 },
                 {
                   "name": "variant",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "display"
                 },
                 {
@@ -1626,8 +1597,7 @@
                 },
                 {
                   "name": "entranceAnimation",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "scaleIn"
                 },
                 {
@@ -1637,8 +1607,7 @@
                 },
                 {
                   "name": "splitBy",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "char"
                 }
               ]
@@ -1723,18 +1692,17 @@
                 {
                   "name": "text",
                   "type": "string",
+                  "datatype": "text",
                   "map": "props.brandName"
                 },
                 {
                   "name": "variant",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "display"
                 },
                 {
                   "name": "entranceAnimation",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "fadeIn"
                 }
               ]
@@ -1746,18 +1714,17 @@
                 {
                   "name": "text",
                   "type": "string",
+                  "datatype": "text",
                   "map": "props.ctaText"
                 },
                 {
                   "name": "variant",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "heading"
                 },
                 {
                   "name": "entranceAnimation",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "fadeIn"
                 }
               ]
@@ -1792,12 +1759,12 @@
                 {
                   "name": "text",
                   "type": "string",
+                  "datatype": "text",
                   "map": "props.text"
                 },
                 {
                   "name": "variant",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "display"
                 },
                 {
@@ -1807,8 +1774,7 @@
                 },
                 {
                   "name": "entranceAnimation",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "map": "props.entranceAnimation",
                   "default": "scaleIn"
                 },
@@ -1819,8 +1785,7 @@
                 },
                 {
                   "name": "splitBy",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "word"
                 }
               ]
@@ -1887,18 +1852,17 @@
                 {
                   "name": "text",
                   "type": "string",
+                  "datatype": "text",
                   "map": "props.text"
                 },
                 {
                   "name": "variant",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "default": "display"
                 },
                 {
                   "name": "entranceAnimation",
-                  "type": "string",
-                  "subtype": "enum",
+                  "type": "enum",
                   "map": "props.entranceAnimation",
                   "default": "scaleIn"
                 }
@@ -1931,8 +1895,7 @@
                     },
                     {
                       "name": "variant",
-                      "type": "string",
-                      "subtype": "enum",
+                      "type": "enum",
                       "default": "heading"
                     }
                   ]

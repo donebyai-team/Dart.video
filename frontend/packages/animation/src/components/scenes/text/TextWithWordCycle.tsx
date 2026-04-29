@@ -340,24 +340,24 @@ export const TextWithWordCycleSchemaFields = [
   {
     "name": "text",
     "type": "string",
+    "datatype": "text",
     "map": "props.text"
   },
   {
     "name": "cyclingWords",
     "type": "array",
+    "datatype": "text",
     "map": "props.cyclingWords",
     "default": []
   },
   {
     "name": "variant",
-    "type": "string",
-    "sub_type": "enum",
+    "type": "enum",
     "default": TextWithWordCycleDefaults.variant
   },
   {
     "name": "entranceAnimation",
-    "type": "string",
-    "subtype": "enum",
+    "type": "enum",
     "map": "props.entranceAnimation",
     "default": TextWithWordCycleDefaults.entranceAnimation
   },
@@ -373,14 +373,12 @@ export const TextWithWordCycleSchemaFields = [
   },
   {
     "name": "textCycleTransition",
-    "type": "string",
-    "subtype": "enum",
+    "type": "enum",
     "default": TextWithWordCycleDefaults.textCycleTransition
   },
   {
     "name": "highlightStyle",
-    "type": "string",
-    "subtype": "enum",
+    "type": "enum",
     "default": TextWithWordCycleDefaults.highlightStyle
   }
 ]

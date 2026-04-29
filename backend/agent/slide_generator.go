@@ -107,32 +107,73 @@ func (g *videoConfigGenerator) AddBranding(assetRegistry *services.MediaAssetReg
 	})
 }
 
-func toSceneBackground(bg *types.BackgroundGradient) *pbcore.BackgroundStyle {
-	if bg == nil || !utils.IsValidHexColor(bg.Color1) || !utils.IsValidHexColor(bg.Color2) {
-		return nil
+func (g *videoConfigGenerator) addSceneBackground(pendingSlide *pbcore.Slide, selectedScene types.Scene) {
+	if len(selectedScene.Elements) == 0 {
+		return
 	}
 
-	stops := make([]*pbcore.GradientStop, 0, 2)
-	stops = append(stops, &pbcore.GradientStop{
-		Color:    bg.Color1,
-		Position: int32(bg.Position1),
-	})
-	stops = append(stops, &pbcore.GradientStop{
-		Color:    bg.Color2,
-		Position: int32(bg.Position2),
-	})
+	selectedComponent := selectedScene.Elements[0].Component
 
-	return &pbcore.BackgroundStyle{
-		Style: &pbcore.BackgroundStyle_Gradient{
-			Gradient: &pbcore.Gradient{
-				Type:  pbcore.GradientType_GRADIENT_TYPE_LINEAR,
-				Angle: int32(bg.Angle),
-				Stops: stops,
+	// Special cases:
+	if strings.EqualFold(selectedComponent, "WordCycle") {
+		pendingSlide.BackgroundStyle = &pbcore.BackgroundStyle{
+			Pattern: pbcore.BackgroundPattern_BACKGROUND_PATTERN_DOTS,
+			Effect: &pbcore.BackgroundEffect{
+				Type: pbcore.BackgroundEffectType_BACKGROUND_EFFECT_TYPE_AURORA,
+			},
+			PatternOpacity: utils.Ptr(defaultPatternOpacity),
+			Style:          &pbcore.BackgroundStyle_Solid{Solid: &pbcore.SolidColor{Hex: "#1207e5"}},
+		}
+		pendingSlide.Content.Edits = utils.CreateStructFromMap(map[string]interface{}{
+			"wordcycle": map[string]interface{}{
+				"style": map[string]interface{}{
+					"color": "#FFFFFF",
+				},
+			},
+		})
+	}
+
+	// Apply AI selected background color
+	bg := selectedScene.Background
+	if bg == nil {
+		return
+	}
+
+	var hex string
+	if bg.Solid.IsString() && utils.IsValidHexColor(*bg.Solid.AsString()) {
+		hex = *bg.Solid.AsString()
+	}
+
+	if bg.Solid.IsColorToken() && *bg.Solid.AsColorToken() == types.ColorTokenPRIMARY {
+		hex = brand_identity.ExtractPalette(g.video.Metadata.GeneratedBranding.Colors)[brand_identity.COLOR_PRIMARY]
+	}
+
+	if bg.Solid.IsColorToken() && *bg.Solid.AsColorToken() == types.ColorTokenSECONDARY {
+		hex = brand_identity.ExtractPalette(g.video.Metadata.GeneratedBranding.Colors)[brand_identity.COLOR_SECONDARY]
+	}
+
+	if hex == "" {
+		return
+	}
+
+	pendingSlide.BackgroundStyle = &pbcore.BackgroundStyle{
+		Style: &pbcore.BackgroundStyle_Solid{
+			Solid: &pbcore.SolidColor{
+				Hex: hex,
 			},
 		},
 		Pattern:        pbcore.BackgroundPattern_BACKGROUND_PATTERN_DOTS,
 		PatternOpacity: utils.Ptr(defaultPatternOpacity),
 	}
+
+	// modify edits text colors to most readable colors on the sleected background
+	//pendingSlide.Content.Edits = utils.CreateStructFromMap(map[string]interface{}{
+	//	"background": map[string]interface{}{
+	//		"style": map[string]interface{}{
+	//			"color": hex,
+	//		},
+	//	},
+	//})
 }
 
 func (g *videoConfigGenerator) CreatePendingSlidesV2(
@@ -177,27 +218,8 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 				slide.Direction = pbcore.TransitionDirection_TRANSITION_DIRECTION_UNSPECIFIED.Enum()
 			}
 
-			if len(pendingSlide.Elements) > 0 && strings.EqualFold(pendingSlide.Elements[0].Component, "WordCycle") {
-				slide.BackgroundStyle = &pbcore.BackgroundStyle{
-					Pattern: pbcore.BackgroundPattern_BACKGROUND_PATTERN_DOTS,
-					Effect: &pbcore.BackgroundEffect{
-						Type: pbcore.BackgroundEffectType_BACKGROUND_EFFECT_TYPE_AURORA,
-					},
-					PatternOpacity: utils.Ptr(defaultPatternOpacity),
-					Style:          &pbcore.BackgroundStyle_Solid{Solid: &pbcore.SolidColor{Hex: "#1207e5"}},
-				}
-				slide.Content.Edits = utils.CreateStructFromMap(map[string]interface{}{
-					"wordcycle": map[string]interface{}{
-						"style": map[string]interface{}{
-							"color": "#FFFFFF",
-						},
-					},
-				})
-
-			}
-
 			if slide.BackgroundStyle == nil {
-				slide.BackgroundStyle = toSceneBackground(pendingSlide.Background)
+				g.addSceneBackground(slide, pendingSlide)
 			}
 
 			section.Slides = append(section.Slides, slide)

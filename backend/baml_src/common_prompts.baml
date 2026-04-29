@@ -11,27 +11,18 @@ template_string BrandGuidelines(resume: VideoBranding) #"
 "#
 
 template_string BackgroundGuidelines(branding: VideoBranding) #"
-   {% if branding.brandColors %}
-   ### Brand Color Tokens
-   {{ branding.brandColors }}
-
    ### Background Guidelines
-   Background is an optional property. If not specified, `<background>` is used by default.
+   Background is an optional property. Most scenes don't need it.
+   Only use available color tokens unless user has asked for it.
 
    Rules:
-   - Do NOT include a background field for most scenes.
-   - Only specify background for high-impact scenes such as:
+   - Only specify background for high-impact scenes or when changing sections/topic:
      - Hook
      - Problem
      - Key reveal
      - Main insight
-     - Strong CTA
-   - For these scenes, you may use subtle gradients with `<primary>`, `<secondary>``.
-   - Ensure strong contrast with text.
    - Do NOT add background for filler, pacing, or transition scenes.
    - Keep usage minimal and consistent across the video.
-
-   {% endif %}
 "#
 
 template_string EnterAnimation(animation: AnimationCategories) #"

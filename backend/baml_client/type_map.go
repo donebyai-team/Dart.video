@@ -31,8 +31,8 @@ var typeMap = map[string]reflect.Type{
 	"STREAM_TYPES.AskUserQuestion":            reflect.TypeOf(stream_types.AskUserQuestion{}),
 	"TYPES.AssetAnalysis":                     reflect.TypeOf(types.AssetAnalysis{}),
 	"STREAM_TYPES.AssetAnalysis":              reflect.TypeOf(stream_types.AssetAnalysis{}),
-	"TYPES.BackgroundGradient":                reflect.TypeOf(types.BackgroundGradient{}),
-	"STREAM_TYPES.BackgroundGradient":         reflect.TypeOf(stream_types.BackgroundGradient{}),
+	"TYPES.Background":                        reflect.TypeOf(types.Background{}),
+	"STREAM_TYPES.Background":                 reflect.TypeOf(stream_types.Background{}),
 	"TYPES.Category":                          reflect.TypeOf(types.Category{}),
 	"STREAM_TYPES.Category":                   reflect.TypeOf(stream_types.Category{}),
 	"TYPES.EditAnimationCodeRequest":          reflect.TypeOf(types.EditAnimationCodeRequest{}),
@@ -66,10 +66,11 @@ var typeMap = map[string]reflect.Type{
 
 	"TYPES.AnimationCodeEditType": reflect.TypeOf(types.AnimationCodeEditType("")),
 	"TYPES.AskUserQuestionType":   reflect.TypeOf(types.AskUserQuestionType("")),
-	"TYPES.SceneCategory":         reflect.TypeOf(types.SceneCategory("")),
+	"TYPES.ColorToken":            reflect.TypeOf(types.ColorToken("")),
 
 	"TYPES.AskUserQuestion__GeneratedVideoPlan":        reflect.TypeOf(types.Union2AskUserQuestionOrGeneratedVideoPlan{}),
 	"TYPES.AskUserQuestion__Scene":                     reflect.TypeOf(types.Union2AskUserQuestionOrScene{}),
+	"TYPES.ColorToken__string":                         reflect.TypeOf(types.Union2ColorTokenOrString{}),
 	"TYPES.string_assistant__string_tool__string_user": reflect.TypeOf(types.Union3KassistantOrKtoolOrKuser{}),
 
 	"STREAM_TYPES.AskUserQuestion__GeneratedVideoPlan": reflect.TypeOf(stream_types.Union2AskUserQuestionOrGeneratedVideoPlan{}),

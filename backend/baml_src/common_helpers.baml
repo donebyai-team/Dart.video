@@ -1,21 +1,3 @@
-enum SceneCategory {
-  TITLE
-  OUTRO
-  SINGLE_STAT
-  COMPARISON
-  TREND
-  BREAKDOWN
-  FEATURE_HIGHLIGHT
-  FEATURE_LIST
-  WORKFLOW
-  TESTIMONIAL
-  LOGO_WALL
-  CASE_STUDY_STAT
-  PROBLEM
-  SOLUTION
-  HOW_IT_WORKS
-}
-
 class Message {
   role "user" | "assistant" | "tool"
   content string
@@ -47,7 +29,7 @@ class VideoBranding {
 class Scene {
   index int
   elements SceneElement[]
-  background BackgroundGradient? @description("background gradient for scene")
+  background Background? @description("optional background")
   thinkingSummary string? @skip()
 }
 
@@ -57,12 +39,11 @@ class SceneElement {
   children SceneElement[]
 }
 
-class BackgroundGradient {
-   color1 string @description("valid hex code")
-   position1 int @description("0–100")
+enum ColorToken {
+  PRIMARY
+  SECONDARY
+}
 
-   color2 string @description("valid hex code")
-   position2 int @description("0–100")
-
-   angle int @description("0–360")
+class Background {
+   solid ColorToken | string
 }

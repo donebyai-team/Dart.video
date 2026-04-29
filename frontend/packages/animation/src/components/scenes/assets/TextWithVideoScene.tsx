@@ -11,6 +11,7 @@ import { TextHighlight, TextHighlightDefaults, TextHighlightSchemaFields } from 
 import { TextStagger, TextStaggerDefaults, TextStaggerSchemaFields } from '../text/TextStagger';
 import { TextWithWordCycle, TextWithWordCycleDefaults, TextWithWordCycleSchemaFields } from '../text/TextWithWordCycle';
 import { resolveContentAwareLayout } from './ContentAwareScene.layout';
+import { TypographyVariant } from '../../../tokens';
 
 const DEFAULT_ANIMATION = 'slideUp' as const;
 const FALLBACK_WIDTH = 1920;
@@ -87,9 +88,9 @@ export function TextWithVideoScene(propsInit: SceneProps): React.ReactElement {
   const overlay = usePatchOverlay();
   const sceneProps = usePatchedProps('scene', SceneDefaults);
   const videoProps = usePatchedProps('videoasset', VideoDefaults);
-  const textHighlightProps = usePatchedProps('texthighlight', TextHighlightDefaults);
-  const textStaggerProps = usePatchedProps('textstagger', TextStaggerDefaults);
-  const textWithWordCycleProps = usePatchedProps('textwithwordcycle', TextWithWordCycleDefaults);
+  const textHighlightProps = usePatchedProps('texthighlight', { ...TextHighlightDefaults, variant: 'display' as TypographyVariant });
+  const textStaggerProps = usePatchedProps('textstagger', { ...TextStaggerDefaults, variant: 'display' as TypographyVariant });
+  const textWithWordCycleProps = usePatchedProps('textwithwordcycle', { ...TextWithWordCycleDefaults, variant: 'display' as TypographyVariant });
 
   const videoDimensions = useVideoDimensions(videoProps.video);
   const videoProgress = interpolateWithEasing(frame, [10, 50], [0, 1], 'ease-out');
@@ -218,8 +219,7 @@ export const TextWithVideoSceneDescriptor: ComponentRegistration = {
     fields: [
       {
         "name": "entranceAnimation",
-        "type": "string",
-        "subtype": "enum",
+        "type": "enum",
         "default": DEFAULT_ANIMATION
       }
     ]

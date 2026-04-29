@@ -207,11 +207,11 @@ func (t *AssetAnalysisClassView) Type() (baml.Type, error) {
 	return t.inner.Type()
 }
 
-type BackgroundGradientClassView struct {
+type BackgroundClassView struct {
 	inner baml.ClassBuilder
 }
 
-func (t *BackgroundGradientClassView) ListProperties() ([]ClassPropertyView, error) {
+func (t *BackgroundClassView) ListProperties() ([]ClassPropertyView, error) {
 	result, err := t.inner.ListProperties()
 	if err != nil {
 		return nil, err
@@ -223,35 +223,19 @@ func (t *BackgroundGradientClassView) ListProperties() ([]ClassPropertyView, err
 	return builders, nil
 }
 
-func (t *BackgroundGradientClassView) PropertyColor1() (ClassPropertyView, error) {
-	return t.inner.Property("color1")
+func (t *BackgroundClassView) PropertySolid() (ClassPropertyView, error) {
+	return t.inner.Property("solid")
 }
 
-func (t *BackgroundGradientClassView) PropertyPosition1() (ClassPropertyView, error) {
-	return t.inner.Property("position1")
-}
-
-func (t *BackgroundGradientClassView) PropertyColor2() (ClassPropertyView, error) {
-	return t.inner.Property("color2")
-}
-
-func (t *BackgroundGradientClassView) PropertyPosition2() (ClassPropertyView, error) {
-	return t.inner.Property("position2")
-}
-
-func (t *BackgroundGradientClassView) PropertyAngle() (ClassPropertyView, error) {
-	return t.inner.Property("angle")
-}
-
-func (t *TypeBuilder) BackgroundGradient() (*BackgroundGradientClassView, error) {
-	bld, err := t.inner.Class("BackgroundGradient")
+func (t *TypeBuilder) Background() (*BackgroundClassView, error) {
+	bld, err := t.inner.Class("Background")
 	if err != nil {
 		return nil, err
 	}
-	return &BackgroundGradientClassView{inner: bld}, nil
+	return &BackgroundClassView{inner: bld}, nil
 }
 
-func (t *BackgroundGradientClassView) Type() (baml.Type, error) {
+func (t *BackgroundClassView) Type() (baml.Type, error) {
 	return t.inner.Type()
 }
 

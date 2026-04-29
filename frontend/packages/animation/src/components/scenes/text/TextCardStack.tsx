@@ -249,13 +249,12 @@ export const TextCardStackSchemaFields = [
   {
     "name": "texts",
     "type": "array",
-    "subtype": "string",
+    "datatype": "text",
     "map": "props.texts"
   },
   {
     "name": "variant",
-    "type": "string",
-    "subtype": "enum",
+    "type": "enum",
     "default": TextCardStackDefaults.variant
   },
   {

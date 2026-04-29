@@ -3,12 +3,13 @@ package scenes
 import (
 	"fmt"
 	"github.com/shank318/coasterai/agent/scenes/field_resolvers"
+	"github.com/shank318/coasterai/agent/scenes/types"
 	"github.com/shank318/coasterai/services"
 	"reflect"
 	"strings"
 )
 
-func GenerateEditsFromProps(schema []SchemaNode, input map[string]any, direction field_resolvers.FieldResolverDirection, fieldValueMapper *services.MediaAssetRegistry) (map[string]any, error) {
+func GenerateEditsFromProps(schema []types.SchemaNode, input map[string]any, direction field_resolvers.FieldResolverDirection, fieldValueMapper *services.MediaAssetRegistry) (map[string]any, error) {
 
 	output := map[string]any{}
 
@@ -40,7 +41,7 @@ func GenerateEditsFromProps(schema []SchemaNode, input map[string]any, direction
 				continue
 			}
 
-			var component *ComponentSchema
+			var component *types.ComponentSchema
 
 			for i := range node.Components {
 				if node.Components[i].Name == componentName {
@@ -146,7 +147,7 @@ func GenerateEditsFromProps(schema []SchemaNode, input map[string]any, direction
 }
 
 func resolveFields(
-	fields []FieldSchema,
+	fields []types.FieldSchema,
 	input map[string]any,
 	existing map[string]any,
 	item any,

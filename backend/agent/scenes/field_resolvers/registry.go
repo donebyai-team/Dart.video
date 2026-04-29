@@ -1,6 +1,9 @@
 package field_resolvers
 
-import "github.com/shank318/coasterai/services"
+import (
+	"github.com/shank318/coasterai/agent/scenes/types"
+	"github.com/shank318/coasterai/services"
+)
 
 type FieldResolverDirection int
 
@@ -15,20 +18,20 @@ type FieldResolver[T any] interface {
 }
 
 type ResolverRegistry struct {
-	resolvers map[string]FieldResolver[any]
+	resolvers map[types.FieldDataType]FieldResolver[any]
 }
 
 func NewResolverRegistry() *ResolverRegistry {
 	return &ResolverRegistry{
-		resolvers: make(map[string]FieldResolver[any]),
+		resolvers: make(map[types.FieldDataType]FieldResolver[any]),
 	}
 }
 
-func (r *ResolverRegistry) Register(name string, resolver FieldResolver[any]) {
+func (r *ResolverRegistry) Register(name types.FieldDataType, resolver FieldResolver[any]) {
 	r.resolvers[name] = resolver
 }
 
-func (r *ResolverRegistry) ResolveForward(name string, value any, fieldValueMapper *services.MediaAssetRegistry) (any, error) {
+func (r *ResolverRegistry) ResolveForward(name types.FieldDataType, value any, fieldValueMapper *services.MediaAssetRegistry) (any, error) {
 
 	resolver, ok := r.resolvers[name]
 	if !ok {
@@ -38,7 +41,7 @@ func (r *ResolverRegistry) ResolveForward(name string, value any, fieldValueMapp
 	return resolver.Forward(value, fieldValueMapper)
 }
 
-func (r *ResolverRegistry) ResolveReverse(name string, value any, fieldValueMapper *services.MediaAssetRegistry) (any, error) {
+func (r *ResolverRegistry) ResolveReverse(name types.FieldDataType, value any, fieldValueMapper *services.MediaAssetRegistry) (any, error) {
 
 	resolver, ok := r.resolvers[name]
 	if !ok {
@@ -51,7 +54,7 @@ func (r *ResolverRegistry) ResolveReverse(name string, value any, fieldValueMapp
 var FieldMappings = NewResolverRegistry()
 
 func init() {
-	FieldMappings.Register("icon", IconArrayResolver{})
+	FieldMappings.Register(types.DataTypeIcon, IconArrayResolver{})
 	FieldMappings.Register("icons", IconArrayResolver{})
-	FieldMappings.Register("media", MediaAssetUrlResolver{})
+	FieldMappings.Register(types.DataTypeMedia, MediaAssetUrlResolver{})
 }

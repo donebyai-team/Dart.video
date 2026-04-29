@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
+	"github.com/shank318/coasterai/agent/scenes/types"
 	"github.com/shank318/coasterai/utils"
 	"strings"
 )
@@ -22,66 +23,8 @@ type AvailableEnum struct {
 }
 
 type SceneRegistry struct {
-	AvailableEnums []AvailableEnum  `json:"available_enums"`
-	Components     []ComponentGroup `json:"components"`
-}
-
-type ComponentGroup struct {
-	Title       string      `json:"title"`
-	Description string      `json:"description"`
-	Components  []Component `json:"components"`
-}
-
-type Component struct {
-	Name          string       `json:"name"`
-	Type          string       `json:"type"`
-	Tags          []string     `json:"tags,omitempty"`
-	Schema        []SchemaNode `json:"schema"`
-	LLMSchema     []LLMField   `json:"llmSchema"`
-	Description   string       `json:"description,omitempty"`
-	CELExpression string       `json:"celExpression,omitempty"`
-}
-
-type SchemaNode struct {
-	Type       string            `json:"type"` // component | repeat | oneof
-	Name       string            `json:"name,omitempty"`
-	Source     string            `json:"source,omitempty"`
-	Fields     []FieldSchema     `json:"fields,omitempty"`     // used when type is component
-	Components []ComponentSchema `json:"components,omitempty"` // used when type is repeat
-	Map        string            `json:"map,omitempty"`
-	Selector   string            `json:"selector,omitempty"`  // oneof
-	PropsPath  string            `json:"propsPath,omitempty"` //oneof
-}
-
-type ComponentSchema struct {
-	Name   string        `json:"name"`
-	Fields []FieldSchema `json:"fields"`
-}
-
-type FieldSchema struct {
-	Name     string      `json:"name"`
-	Type     string      `json:"type"`
-	Subtype  string      `json:"subtype,omitempty"`
-	Map      string      `json:"map,omitempty"`
-	Default  interface{} `json:"default,omitempty"`
-	DataType string      `json:"datatype,omitempty"`
-}
-
-type LLMField struct {
-	Name     string      `json:"name"`
-	Type     string      `json:"type"`
-	Subtype  string      `json:"subtype,omitempty"`
-	Enum     []string    `json:"enum,omitempty"`
-	Required *bool       `json:"required,omitempty"`
-	Items    *LLMItems   `json:"items,omitempty"`
-	Hint     string      `json:"hint,omitempty"`
-	Range    string      `json:"range,omitempty"`
-	Default  interface{} `json:"default,omitempty"`
-}
-
-type LLMItems struct {
-	Type   string     `json:"type"`
-	Fields []LLMField `json:"fields,omitempty"`
+	AvailableEnums []AvailableEnum        `json:"available_enums"`
+	Components     []types.ComponentGroup `json:"components"`
 }
 
 var (
@@ -100,7 +43,7 @@ func init() {
 
 func BuildScenesList(editMode bool, fieldsToSkip []string) string {
 
-	var scenes []Component
+	var scenes []types.Component
 
 	for _, g := range registry.Components {
 		if g.Title == "Scenes" {
@@ -109,7 +52,7 @@ func BuildScenesList(editMode bool, fieldsToSkip []string) string {
 		}
 	}
 
-	var sectional, filler []Component
+	var sectional, filler []types.Component
 
 	for _, s := range scenes {
 		if len(s.Tags) > 0 {
@@ -141,7 +84,7 @@ func BuildScenesList(editMode bool, fieldsToSkip []string) string {
 	return b.String()
 }
 
-func writeScene(b *strings.Builder, c Component, category string, fieldsToSkip []string) {
+func writeScene(b *strings.Builder, c types.Component, category string, fieldsToSkip []string) {
 
 	fmt.Fprintf(b, "### Scene: %s\n\n", c.Name)
 
@@ -164,7 +107,7 @@ func writeScene(b *strings.Builder, c Component, category string, fieldsToSkip [
 	b.WriteString("\n---\n\n")
 }
 
-func fieldMeta(f LLMField) string {
+func fieldMeta(f types.LLMField) string {
 	var parts []string
 
 	if f.Required != nil && !*f.Required {
@@ -178,7 +121,7 @@ func fieldMeta(f LLMField) string {
 	return ", " + strings.Join(parts, ", ")
 }
 
-func writeFieldDetails(b *strings.Builder, f LLMField, indent string) {
+func writeFieldDetails(b *strings.Builder, f types.LLMField, indent string) {
 	if f.Default != nil {
 		fmt.Fprintf(b, "%sDefault: %v\n", indent, f.Default)
 	}
@@ -195,7 +138,7 @@ func writeFieldDetails(b *strings.Builder, f LLMField, indent string) {
 	}
 }
 
-func writeProps(b *strings.Builder, fields []LLMField, skipLLMFields []string) {
+func writeProps(b *strings.Builder, fields []types.LLMField, skipLLMFields []string) {
 	for _, f := range fields {
 		if utils.Contains(skipLLMFields, f.Name) {
 			continue
@@ -245,7 +188,7 @@ func writeAvailableEnums(b *strings.Builder) {
 	}
 }
 
-func findComponent(name string) (*Component, error) {
+func findComponent(name string) (*types.Component, error) {
 
 	for _, g := range registry.Components {
 		for i := range g.Components {

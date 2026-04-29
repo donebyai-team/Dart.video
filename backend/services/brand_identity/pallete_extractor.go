@@ -8,31 +8,43 @@ import (
 	"strings"
 )
 
-// ---------------- DEFAULTS ----------------
+const (
+	COLOR_PRIMARY        = "primary"
+	COLOR_SECONDARY      = "secondary"
+	COLOR_ACCENT         = "accent"
+	COLOR_BACKGROUND     = "background"
+	COLOR_TEXT_PRIMARY   = "textPrimary"
+	COLOR_TEXT_SECONDARY = "textSecondary"
+)
 
 // Default fallback colors if nothing is scraped / provided
 var defaultColors = map[string]string{
-	"primary":       "#6366F1",
-	"secondary":     "#A5B4FC",
-	"accent":        "#F59E0B",
-	"background":    "#FFFFFF",
-	"textPrimary":   "#0A0A0A",
-	"textSecondary": "#6B7280",
+	COLOR_PRIMARY:        "#6366F1",
+	COLOR_SECONDARY:      "#A5B4FC",
+	COLOR_ACCENT:         "#F59E0B",
+	COLOR_BACKGROUND:     "#FFFFFF",
+	COLOR_TEXT_PRIMARY:   "#0A0A0A",
+	COLOR_TEXT_SECONDARY: "#6B7280",
 }
 
 // Order ensures consistent output ordering
 var colorOrder = []string{
-	"primary", "secondary", "accent", "background", "textPrimary", "textSecondary",
+	COLOR_PRIMARY,
+	COLOR_SECONDARY,
+	COLOR_ACCENT,
+	COLOR_BACKGROUND,
+	COLOR_TEXT_PRIMARY,
+	COLOR_TEXT_SECONDARY,
 }
 
 // Mapping to protobuf priority
 var priorityMap = map[string]pbcore.BrandAssetPriority{
-	"primary":       pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_PRIMARY,
-	"secondary":     pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_SECONDARY,
-	"accent":        pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_ACCENT,
-	"background":    pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_BACKGROUND,
-	"textPrimary":   pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_TEXT_PRIMARY,
-	"textSecondary": pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_TEXT_SECONDARY,
+	COLOR_PRIMARY:        pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_PRIMARY,
+	COLOR_SECONDARY:      pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_SECONDARY,
+	COLOR_ACCENT:         pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_ACCENT,
+	COLOR_BACKGROUND:     pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_BACKGROUND,
+	COLOR_TEXT_PRIMARY:   pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_TEXT_PRIMARY,
+	COLOR_TEXT_SECONDARY: pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_TEXT_SECONDARY,
 }
 
 // ---------------- MAIN ENTRY ----------------
@@ -103,28 +115,28 @@ func buildColorPalette(input map[string]string) map[string]string {
 	}
 
 	// Accent: hue-shifted version (creates visual separation)
-	if input["accent"] == "" {
-		result["accent"] = shiftHue(primary, 35)
+	if input[COLOR_ACCENT] == "" {
+		result[COLOR_ACCENT] = shiftHue(primary, 35)
 	}
 
 	// Background: very light version of primary
 	// IMPORTANT: never allow pure/near white
-	if input["background"] == "" {
+	if input[COLOR_BACKGROUND] == "" {
 		bg := lightenHSL(primary, 0.9)
 		if isTooLight(bg) {
 			bg = lightenHSL(primary, 0.85)
 		}
-		result["background"] = bg
+		result[COLOR_BACKGROUND] = bg
 	}
 
 	// Text colors are NOT finalized here
 	// They will be computed based on gradient later
-	if input["textPrimary"] == "" {
-		result["textPrimary"] = "#000000"
+	if input[COLOR_TEXT_PRIMARY] == "" {
+		result[COLOR_TEXT_PRIMARY] = "#000000"
 	}
 
-	if input["textSecondary"] == "" {
-		result["textSecondary"] = "#6B7280"
+	if input[COLOR_TEXT_SECONDARY] == "" {
+		result[COLOR_TEXT_SECONDARY] = "#6B7280"
 	}
 
 	return result
