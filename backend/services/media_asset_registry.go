@@ -41,6 +41,15 @@ func (registry *MediaAssetRegistry) GetResolvedFieldValue(key string) string {
 	return registry.fieldValueMapper[key]
 }
 
+func (registry *MediaAssetRegistry) GetBrandColors() []*pbcore.BrandColor {
+	if registry.GetIdentity() == nil ||
+		len(registry.GetIdentity().Colors) == 0 {
+		return nil
+	}
+
+	return registry.GetIdentity().Colors
+}
+
 func (b *MediaAssetRegistryBuilder) WithBrandIdentity(identity *pbcore.BrandIdentity) *MediaAssetRegistryBuilder {
 	b.registry.identity = identity
 

@@ -32,6 +32,9 @@ func (r *ResolverRegistry) Register(name types.FieldDataType, resolver FieldReso
 }
 
 func (r *ResolverRegistry) ResolveForward(name types.FieldDataType, value any, fieldValueMapper *services.MediaAssetRegistry) (any, error) {
+	if fieldValueMapper == nil {
+		return value, nil
+	}
 
 	resolver, ok := r.resolvers[name]
 	if !ok {
@@ -42,6 +45,9 @@ func (r *ResolverRegistry) ResolveForward(name types.FieldDataType, value any, f
 }
 
 func (r *ResolverRegistry) ResolveReverse(name types.FieldDataType, value any, fieldValueMapper *services.MediaAssetRegistry) (any, error) {
+	if fieldValueMapper == nil {
+		return value, nil
+	}
 
 	resolver, ok := r.resolvers[name]
 	if !ok {
@@ -57,4 +63,5 @@ func init() {
 	FieldMappings.Register(types.DataTypeIcon, IconArrayResolver{})
 	FieldMappings.Register("icons", IconArrayResolver{})
 	FieldMappings.Register(types.DataTypeMedia, MediaAssetUrlResolver{})
+	FieldMappings.Register(types.DataTypeColor, ColorResolver{}) // TODO: Make datatype color_primary, secondary etc
 }

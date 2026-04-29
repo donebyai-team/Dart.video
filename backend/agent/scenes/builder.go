@@ -188,7 +188,7 @@ func writeAvailableEnums(b *strings.Builder) {
 	}
 }
 
-func findComponent(name string) (*types.Component, error) {
+func FindComponent(name string) (*types.Component, error) {
 
 	for _, g := range registry.Components {
 		for i := range g.Components {

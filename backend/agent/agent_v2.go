@@ -593,6 +593,9 @@ func (a *agentV2) applyPlan(
 				return err
 			}
 
+			// add background if applicable
+			template.BackgroundStyle = sceneConfig.Background
+
 			if err = builder.UpdateAnimationSlide(ctx, slide.Id, template); err != nil {
 				return agenterrors.VideoPersistFailed("failed to persist animation slide", err)
 			}

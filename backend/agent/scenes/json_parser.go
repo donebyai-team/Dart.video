@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"github.com/shank318/coasterai/agent/scenes/field_resolvers"
 	"github.com/shank318/coasterai/agent/scenes/types"
+	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/services"
 	"reflect"
 	"strings"
 )
 
-func GenerateEditsFromProps(schema []types.SchemaNode, input map[string]any, direction field_resolvers.FieldResolverDirection, fieldValueMapper *services.MediaAssetRegistry) (map[string]any, error) {
+func GenerateEditsFromProps(schema []types.SchemaNode, input map[string]any, direction field_resolvers.FieldResolverDirection, fieldValueMapper *services.MediaAssetRegistry, background *pbcore.BackgroundStyle) (map[string]any, error) {
 
 	output := map[string]any{}
 
@@ -71,6 +72,7 @@ func GenerateEditsFromProps(schema []types.SchemaNode, input map[string]any, dir
 				nil,
 				direction,
 				fieldValueMapper,
+				background,
 			)
 
 			if err != nil {
@@ -86,7 +88,7 @@ func GenerateEditsFromProps(schema []types.SchemaNode, input map[string]any, dir
 
 			existing := getExistingNode(input, node.Name)
 
-			props, err := resolveFields(node.Fields, input, existing, nil, direction, fieldValueMapper)
+			props, err := resolveFields(node.Fields, input, existing, nil, direction, fieldValueMapper, background)
 			if err != nil {
 				return nil, fmt.Errorf("failed to resolve fields for component %s: %v", node.Name, err)
 			}
@@ -107,7 +109,7 @@ func GenerateEditsFromProps(schema []types.SchemaNode, input map[string]any, dir
 
 						existing := getExistingNode(input, key)
 
-						props, err := resolveFields(comp.Fields, input, existing, item, direction, fieldValueMapper)
+						props, err := resolveFields(comp.Fields, input, existing, item, direction, fieldValueMapper, background)
 						if err != nil {
 							return nil, fmt.Errorf("failed to resolve fields for component %s: %v", comp.Name, err)
 						}
@@ -132,7 +134,7 @@ func GenerateEditsFromProps(schema []types.SchemaNode, input map[string]any, dir
 
 					existing, _ := value.(map[string]any)
 
-					props, err := resolveFields(comp.Fields, input, existing, nil, direction, fieldValueMapper)
+					props, err := resolveFields(comp.Fields, input, existing, nil, direction, fieldValueMapper, background)
 					if err != nil {
 						return nil, fmt.Errorf("failed to resolve fields for component %s: %v", comp.Name, err)
 					}
@@ -153,6 +155,7 @@ func resolveFields(
 	item any,
 	direction field_resolvers.FieldResolverDirection,
 	fieldValueMapper *services.MediaAssetRegistry,
+	background *pbcore.BackgroundStyle,
 ) (map[string]any, error) {
 
 	out := map[string]any{}
@@ -224,7 +227,11 @@ func resolveFields(
 		}
 	}
 
-	return out, nil
+	styleResolver := field_resolvers.StyleResolver{
+		FieldValueMapper: fieldValueMapper,
+		BackgroundStyle:  background,
+	}
+	return styleResolver.Resolve(out, fields), nil
 }
 
 func mergeMediaAssetFields(out map[string]any, mediaAssetFields *field_resolvers.MediaAssetFields) {

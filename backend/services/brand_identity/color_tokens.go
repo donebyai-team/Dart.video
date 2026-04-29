@@ -28,7 +28,7 @@ func GetReadableTextColorForSolid(
 	kind TextKind,
 ) string {
 
-	palette := ExtractPalette(colors)
+	palette := BrandColorTokens(colors)
 
 	var candidates []string
 
@@ -74,8 +74,11 @@ func GetReadableTextColorForSolid(
 	return normalizeHex(best)
 }
 
-func ExtractPalette(colors []*pbcore.BrandColor) map[string]string {
+func BrandColorTokens(colors []*pbcore.BrandColor) map[string]string {
 	out := make(map[string]string)
+	if colors == nil {
+		return out
+	}
 
 	for _, c := range colors {
 		switch c.Priority {

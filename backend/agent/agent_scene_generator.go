@@ -393,17 +393,8 @@ func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest ty
 			return nil, err
 		}
 
-		//template.BackgroundStyle = toSceneBackground(scene.Background)
-
-		// Merge with user edits
-		// There can be orphans object if the scene is replaced
-		//if slide.Content != nil && slide.Content.Edits != nil {
-		//	edits, err := scenes.ReconcileEditsPatch(slide.Content.Edits, template.GeneratedPatches)
-		//	if err != nil {
-		//		return nil, agenterrors.InvalidInput("failed to merge edits", err)
-		//	}
-		//	template.GeneratedPatches = edits
-		//}
+		// add background if applicable
+		template.BackgroundStyle = sceneConfig.Background
 
 		return &RunResult{
 			Status:             RunStatusCompleted,
