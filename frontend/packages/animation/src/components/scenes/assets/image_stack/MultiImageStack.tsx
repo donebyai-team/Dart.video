@@ -1,7 +1,7 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
 import { ArrayItem } from '../../../../core/assets/ArrayItem';
-import { DEFAULT_SPEED_PERCENTAGE, getSpeed, MIN_SPEED_PERCENTAGE, scaleTiming } from '../../../../duration/timings';
+import { DEFAULT_SPEED_PERCENTAGE, getSpeed, MIN_SPEED_PERCENTAGE, scaleTiming } from '../../../../speed/timings';
 import { useArrayPatch, usePatchedProps } from '../../../../patches';
 import type { ComponentRegistration } from '../../../../registry/registry';
 import { interpolateWithEasing, useAspectPreset } from '../../../../styles';

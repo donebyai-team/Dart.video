@@ -9,7 +9,7 @@ import { Text } from '../../../core/assets/Text';
 import { normalizeContainerStyle } from '../../../core/assets/ContainerAsset';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { Counter } from './Counter';
-import { DEFAULT_SPEED_PERCENTAGE, getSpeed, MIN_SPEED_PERCENTAGE, scaleTiming } from '../../../duration/timings';
+import { DEFAULT_SPEED_PERCENTAGE, getSpeed, MIN_SPEED_PERCENTAGE, scaleTiming } from '../../../speed/timings';
 
 const BASE_COUNTER_DURATION = 50;
 const BASE_COUNTER_DELAY = 10;

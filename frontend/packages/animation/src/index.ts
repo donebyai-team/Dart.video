@@ -7,14 +7,8 @@ export * from './tokens';
 // Styles, contexts, aspect presets
 export * from './styles';
 
-// Duration system
-export * from './duration';
-
 // Layout primitives
 export * from './core/layout';
-
-// Animation primitives
-export * from './core/animation_primitives';
 
 // Content primitives
 export * from './components/scenes/text';

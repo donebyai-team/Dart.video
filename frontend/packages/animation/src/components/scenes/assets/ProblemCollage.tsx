@@ -7,7 +7,7 @@ import type { ComponentRegistration } from '../../../registry/registry';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { TextStagger, type TextStaggerProps, TextStaggerSchemaFields } from '../text/TextStagger';
-import { DEFAULT_SPEED_PERCENTAGE, getSpeed, MIN_SPEED_PERCENTAGE, scaleTiming } from '../../../duration/timings';
+import { DEFAULT_SPEED_PERCENTAGE, getSpeed, MIN_SPEED_PERCENTAGE, scaleTiming } from '../../../speed/timings';
 
 const DEFAULT_CARD_WIDTH = 420;
 const DEFAULT_CARD_HEIGHT = 236;
