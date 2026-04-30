@@ -7,17 +7,21 @@
 
 import React, { useMemo } from 'react'
 import { HexColorPicker } from 'react-colorful'
-import { useState } from 'react'
 import {
   buildDepthTextShadow,
   DEPTH_STYLE_PROPERTY,
   MAX_ELEMENT_DEPTH,
   parseDepthFromShadow,
-  SUPPORTED_FONTS,
 } from '@coasterai/renderer'
 import { DualColorPicker } from './stylers/DualColorPicker'
 import { FontSelector } from './stylers/FontSelector'
-import { FONT_WEIGHT_OPTIONS, LETTER_SPACING_OPTIONS, TEXT_ALIGN_OPTIONS, toHex } from './stylers/options'
+import {
+  FONT_WEIGHT_OPTIONS,
+  LETTER_SPACING_OPTIONS,
+  TEXT_ALIGN_OPTIONS,
+  TEXT_TRANSFORM_OPTIONS,
+  toHex,
+} from './stylers/options'
 
 /**
  * Reads computed styles from a DOM element by ID.
@@ -52,6 +56,7 @@ function useComputedStyles(elementId?: string) {
       fontWeight: computed.fontWeight,
       letterSpacing: computed.letterSpacing,
       textAlign: computed.textAlign,
+      textTransform: computed.textTransform,
       boxShadow: computed.boxShadow,
       textShadow: computed.textShadow,
       depth: Number(computed.getPropertyValue(DEPTH_STYLE_PROPERTY)) || undefined,
@@ -365,10 +370,11 @@ export function TextToolbar({
   const fontWeight = (styleOverride.fontWeight ?? computed.fontWeight) as string | number | undefined
   const letterSpacing = (styleOverride.letterSpacing ?? computed.letterSpacing) as string | undefined
   const textAlign = (styleOverride.textAlign ?? computed.textAlign) as string | undefined
+  const textTransform = (styleOverride.textTransform ?? computed.textTransform) as string | undefined
   const depth = getDepthValue(styleOverride, computed)
 
   return (
-    <div className="flex items-center gap-3 whitespace-nowrap">
+    <div className="flex max-w-full flex-wrap items-center gap-3">
       {/* Colors – single picker with Text / Background tabs */}
       <DualColorPicker
         primaryColor={toHex(color ?? '#ffffff')}
@@ -414,6 +420,15 @@ export function TextToolbar({
           options={TEXT_ALIGN_OPTIONS}
           onChange={v => onStyleOverride({ textAlign: v })}
           width="w-20"
+        />
+      </LabeledField>
+
+      <LabeledField label="Case">
+        <SelectInput
+          value={String(textTransform ?? 'none')}
+          options={TEXT_TRANSFORM_OPTIONS}
+          onChange={v => onStyleOverride({ textTransform: v })}
+          width="w-28"
         />
       </LabeledField>
 

@@ -82,8 +82,9 @@ export const TitleSplit: React.FC<TitleSplitProps> = (initProps) => {
     letterSpacing: '0.15em',
     lineHeight: 1,
     textAlign: 'center',
-    ...typographyStyle,
     textTransform: 'uppercase',
+    ...typographyStyle,
+    ...styleOverride
   };
 
   return (
