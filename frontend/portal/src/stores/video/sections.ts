@@ -2,7 +2,6 @@ import type { Section } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { VideoStoreSet, VideoStoreGet } from "./types";
 import { createNewSection } from "./defaults";
 import { findSlideLocation, getSections, updateVideoConfigSections } from "./utils";
-import { DragEndEvent } from "@dnd-kit/core";
 
 export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
 
@@ -85,38 +84,6 @@ export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => 
     set({
       videoConfig: newVideoConfig,
       editingSectionId: null,
-    });
-
-    get().refreshPendingChanges();
-  },
-
-  /* ================= DRAG ================= */
-
-  handleSectionDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
-    if (!over || active.id === over.id) return;
-
-    const { videoConfig } = get();
-    if (!videoConfig) return;
-
-    const sections = getSections(videoConfig);
-
-    const oldIdx = sections.findIndex(s => s.id === active.id);
-    const newIdx = sections.findIndex(s => s.id === over.id);
-
-    if (oldIdx === -1 || newIdx === -1) return;
-
-    const reordered = [...sections];
-    const [moved] = reordered.splice(oldIdx, 1);
-    reordered.splice(newIdx, 0, moved);
-
-    const newVideoConfig = updateVideoConfigSections(
-      videoConfig,
-      () => reordered
-    );
-
-    set({
-      videoConfig: newVideoConfig,
     });
 
     get().refreshPendingChanges();

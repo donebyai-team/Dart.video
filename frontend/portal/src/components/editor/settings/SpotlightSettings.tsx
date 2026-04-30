@@ -3,7 +3,7 @@ import { Slider } from '@/components/ui/slider'
 import { Button } from '@/components/ui/button'
 import { Pause, Play } from 'lucide-react'
 import { SpotlightEffect } from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import DurationChangeComponent from '../remotion/components/DurationChangeComponent'
+import DurationChangeComponent from '../toolbar/DurationChangeComponent'
 
 interface SpotlightSettingsProps {
   settings: Partial<SpotlightEffect>

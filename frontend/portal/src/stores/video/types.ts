@@ -6,7 +6,6 @@ import type { EntityId } from "@/types/selection";
 import { SelectedTool } from "@/types/tools";
 import { Section, Slide, TransitionDirection, TransitionType, CalloutEffect, BackgroundStyle, ZoomEffect, SpotlightEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { Resolution, Video } from "@coasterai/pb/coasterai/core/v1/video_pb";
-import { DragEndEvent } from "@dnd-kit/core";
 import type { StateCreator } from "zustand";
 
 // Zustand store types
@@ -58,7 +57,6 @@ export interface VideoActions {
     addSection: () => void;
     removeSection: (sectionId: string) => void;
     updateSectionTitle: (sectionId: string, newTitle: string) => void;
-    handleSectionDragEnd: (event: DragEndEvent) => void;
     setEditingSectionId: (sectionId: string | null) => void;
     setEditingSectionTitle: (title: string) => void;
 

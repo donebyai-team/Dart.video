@@ -1,4 +1,4 @@
-import { Music, VolumeX, Waves, Sunrise, BeakerIcon, PointerIcon, VolumeIcon } from "lucide-react";
+import { VolumeX, Waves, Sunrise, BeakerIcon, VolumeIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,

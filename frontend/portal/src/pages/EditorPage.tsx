@@ -6,7 +6,7 @@ import { Mic2, Volume2, RefreshCw, Home, Timer, Brain, Check, X, ExternalLink } 
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import ResolutionSelector from '@/components/editor/remotion/components/ResolutionSelector'
+import ResolutionSelector from '@/components/editor/toolbar/ResolutionSelector'
 import StoryboardPanel from '@/components/editor/StoryboardPanel'
 import ToolsSettingsPanel from '@/components/editor/ToolsSettingsPanel'
 import RemotionPlayer, { RemotionPlayerHandle } from '@/components/editor/canvas/RemotionPlayer'
@@ -20,7 +20,7 @@ import { getConnectError } from '@/utils/error';
 import { ActiveToolType } from '@/types/tools';
 import { createSlideEntityId, createOverlayEntityId } from '@/types/selection';
 import Link from 'next/link';
-import BackgroundMusicSelector from '@/components/editor/remotion/components/BackgroundMusicSelector';
+import BackgroundMusicSelector from '@/components/editor/toolbar/BackgroundMusicSelector';
 import { useClientsContext } from '@coasterai/ui-core/context/ClientContext';
 import { pollVideoRender } from '@/services/utils';
 import VideoGenerationProgress from '@/components/editor/VideoGenerationProgress';
@@ -518,10 +518,6 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
               onSelectOverlayFromTimeline={(overlayId, slideId) => {
                 // Use unified selection handler
                 handleSelectEntity(createOverlayEntityId(slideId, overlayId))
-              }}
-              // Duration change handler — newDuration is in seconds, store as frames
-              onSlideSpeedChange={(_slideId, newSpeed) => {
-                console.debug('slide speed changed: ', newSpeed)
               }}
               // Duration change handler — newDuration is in seconds, store as frames
               onDurationChange={(_slideId, newDurationInSeconds) => {

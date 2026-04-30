@@ -1,11 +1,4 @@
 import { Monitor, Smartphone, Square } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useVideoStore } from "@/stores/video";
 import { Resolution } from "@coasterai/pb/coasterai/core/v1/video_pb";
 
