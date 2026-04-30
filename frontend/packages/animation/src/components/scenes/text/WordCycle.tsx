@@ -272,26 +272,23 @@ const WordCycleSchemaFields = [
   {
     "name": "words",
     "type": "array",
-    "subtype": "string",
+    "datatype": "text",
     "map": "props.words"
   },
   {
     "name": "variant",
-    "type": "string",
-    "subtype": "enum",
+    "type": "enum",
     "default": WordCycleDefaults.variant
   },
   {
     "name": "entranceAnimation",
-    "type": "string",
-    "subtype": "enum",
+    "type": "enum",
     "map": "props.entranceAnimation",
     "default": WordCycleDefaults.entranceAnimation
   },
   {
     "name": "textCycleTransition",
-    "type": "string",
-    "subtype": "enum",
+    "type": "enum",
     "default": WordCycleDefaults.textCycleTransition
   },
   {

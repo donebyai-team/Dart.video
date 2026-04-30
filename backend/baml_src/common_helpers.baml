@@ -1,21 +1,3 @@
-enum SceneCategory {
-  TITLE
-  OUTRO
-  SINGLE_STAT
-  COMPARISON
-  TREND
-  BREAKDOWN
-  FEATURE_HIGHLIGHT
-  FEATURE_LIST
-  WORKFLOW
-  TESTIMONIAL
-  LOGO_WALL
-  CASE_STUDY_STAT
-  PROBLEM
-  SOLUTION
-  HOW_IT_WORKS
-}
-
 class Message {
   role "user" | "assistant" | "tool"
   content string
@@ -39,13 +21,15 @@ class AskUserQuestion {
 }
 
 class VideoBranding {
-  brandGuideLines string? @skip @description("user provided brand guidelines")
+  brandGuideLines string? @description("user provided brand guidelines")
+  brandColors string? @description("user provided brand tokens")
   attachments string?
 }
 
 class Scene {
   index int
   elements SceneElement[]
+  background Background? @description("optional background")
   thinkingSummary string? @skip()
 }
 
@@ -53,4 +37,12 @@ class SceneElement {
   component string
   props string @description("required props in VALID JSON format as per the scene")
   children SceneElement[]
+}
+
+enum ColorToken {
+  PRIMARY
+}
+
+class Background {
+   solid ColorToken | string
 }

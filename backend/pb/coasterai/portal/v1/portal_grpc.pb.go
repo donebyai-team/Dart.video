@@ -38,8 +38,9 @@ const (
 	PortalService_StopVideo_FullMethodName             = "/coasterai.portal.v1.PortalService/StopVideo"
 	PortalService_GetVideos_FullMethodName             = "/coasterai.portal.v1.PortalService/GetVideos"
 	PortalService_DeleteVideo_FullMethodName           = "/coasterai.portal.v1.PortalService/DeleteVideo"
-	PortalService_UpdateVideoConfig_FullMethodName     = "/coasterai.portal.v1.PortalService/UpdateVideoConfig"
+	PortalService_DuplicateVideo_FullMethodName        = "/coasterai.portal.v1.PortalService/DuplicateVideo"
 	PortalService_RenderVideo_FullMethodName           = "/coasterai.portal.v1.PortalService/RenderVideo"
+	PortalService_UpdateVideoConfig_FullMethodName     = "/coasterai.portal.v1.PortalService/UpdateVideoConfig"
 	PortalService_ListFigmaFrames_FullMethodName       = "/coasterai.portal.v1.PortalService/ListFigmaFrames"
 	PortalService_ImportFigmaFrame_FullMethodName      = "/coasterai.portal.v1.PortalService/ImportFigmaFrame"
 	PortalService_CreateBrandIdentity_FullMethodName   = "/coasterai.portal.v1.PortalService/CreateBrandIdentity"
@@ -72,9 +73,10 @@ type PortalServiceClient interface {
 	GetVideo(ctx context.Context, in *GetVideoRequest, opts ...grpc.CallOption) (PortalService_GetVideoClient, error)
 	StopVideo(ctx context.Context, in *StopVideoRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetVideos(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetVideosResponse, error)
-	DeleteVideo(ctx context.Context, in *DeleteVideoRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	DeleteVideo(ctx context.Context, in *VideoRequestWithID, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	DuplicateVideo(ctx context.Context, in *VideoRequestWithID, opts ...grpc.CallOption) (*GetVideoResponse, error)
+	RenderVideo(ctx context.Context, in *VideoRequestWithID, opts ...grpc.CallOption) (*RenderVideoResponse, error)
 	UpdateVideoConfig(ctx context.Context, in *UpdateVideoConfigRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	RenderVideo(ctx context.Context, in *RenderVideoRequest, opts ...grpc.CallOption) (*RenderVideoResponse, error)
 	ListFigmaFrames(ctx context.Context, in *ListFigmaFramesRequest, opts ...grpc.CallOption) (*ListFigmaFramesResponse, error)
 	ImportFigmaFrame(ctx context.Context, in *ImportFigmaFrameRequest, opts ...grpc.CallOption) (*ImportFigmaFrameResponse, error)
 	// brand identity request
@@ -309,9 +311,27 @@ func (c *portalServiceClient) GetVideos(ctx context.Context, in *emptypb.Empty, 
 	return out, nil
 }
 
-func (c *portalServiceClient) DeleteVideo(ctx context.Context, in *DeleteVideoRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *portalServiceClient) DeleteVideo(ctx context.Context, in *VideoRequestWithID, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, PortalService_DeleteVideo_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *portalServiceClient) DuplicateVideo(ctx context.Context, in *VideoRequestWithID, opts ...grpc.CallOption) (*GetVideoResponse, error) {
+	out := new(GetVideoResponse)
+	err := c.cc.Invoke(ctx, PortalService_DuplicateVideo_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *portalServiceClient) RenderVideo(ctx context.Context, in *VideoRequestWithID, opts ...grpc.CallOption) (*RenderVideoResponse, error) {
+	out := new(RenderVideoResponse)
+	err := c.cc.Invoke(ctx, PortalService_RenderVideo_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -321,15 +341,6 @@ func (c *portalServiceClient) DeleteVideo(ctx context.Context, in *DeleteVideoRe
 func (c *portalServiceClient) UpdateVideoConfig(ctx context.Context, in *UpdateVideoConfigRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, PortalService_UpdateVideoConfig_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *portalServiceClient) RenderVideo(ctx context.Context, in *RenderVideoRequest, opts ...grpc.CallOption) (*RenderVideoResponse, error) {
-	out := new(RenderVideoResponse)
-	err := c.cc.Invoke(ctx, PortalService_RenderVideo_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -453,9 +464,10 @@ type PortalServiceServer interface {
 	GetVideo(*GetVideoRequest, PortalService_GetVideoServer) error
 	StopVideo(context.Context, *StopVideoRequest) (*emptypb.Empty, error)
 	GetVideos(context.Context, *emptypb.Empty) (*GetVideosResponse, error)
-	DeleteVideo(context.Context, *DeleteVideoRequest) (*emptypb.Empty, error)
+	DeleteVideo(context.Context, *VideoRequestWithID) (*emptypb.Empty, error)
+	DuplicateVideo(context.Context, *VideoRequestWithID) (*GetVideoResponse, error)
+	RenderVideo(context.Context, *VideoRequestWithID) (*RenderVideoResponse, error)
 	UpdateVideoConfig(context.Context, *UpdateVideoConfigRequest) (*emptypb.Empty, error)
-	RenderVideo(context.Context, *RenderVideoRequest) (*RenderVideoResponse, error)
 	ListFigmaFrames(context.Context, *ListFigmaFramesRequest) (*ListFigmaFramesResponse, error)
 	ImportFigmaFrame(context.Context, *ImportFigmaFrameRequest) (*ImportFigmaFrameResponse, error)
 	// brand identity request
@@ -522,14 +534,17 @@ func (UnimplementedPortalServiceServer) StopVideo(context.Context, *StopVideoReq
 func (UnimplementedPortalServiceServer) GetVideos(context.Context, *emptypb.Empty) (*GetVideosResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetVideos not implemented")
 }
-func (UnimplementedPortalServiceServer) DeleteVideo(context.Context, *DeleteVideoRequest) (*emptypb.Empty, error) {
+func (UnimplementedPortalServiceServer) DeleteVideo(context.Context, *VideoRequestWithID) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteVideo not implemented")
+}
+func (UnimplementedPortalServiceServer) DuplicateVideo(context.Context, *VideoRequestWithID) (*GetVideoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DuplicateVideo not implemented")
+}
+func (UnimplementedPortalServiceServer) RenderVideo(context.Context, *VideoRequestWithID) (*RenderVideoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RenderVideo not implemented")
 }
 func (UnimplementedPortalServiceServer) UpdateVideoConfig(context.Context, *UpdateVideoConfigRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateVideoConfig not implemented")
-}
-func (UnimplementedPortalServiceServer) RenderVideo(context.Context, *RenderVideoRequest) (*RenderVideoResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RenderVideo not implemented")
 }
 func (UnimplementedPortalServiceServer) ListFigmaFrames(context.Context, *ListFigmaFramesRequest) (*ListFigmaFramesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListFigmaFrames not implemented")
@@ -866,7 +881,7 @@ func _PortalService_GetVideos_Handler(srv interface{}, ctx context.Context, dec 
 }
 
 func _PortalService_DeleteVideo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteVideoRequest)
+	in := new(VideoRequestWithID)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -878,7 +893,43 @@ func _PortalService_DeleteVideo_Handler(srv interface{}, ctx context.Context, de
 		FullMethod: PortalService_DeleteVideo_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PortalServiceServer).DeleteVideo(ctx, req.(*DeleteVideoRequest))
+		return srv.(PortalServiceServer).DeleteVideo(ctx, req.(*VideoRequestWithID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PortalService_DuplicateVideo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VideoRequestWithID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PortalServiceServer).DuplicateVideo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PortalService_DuplicateVideo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PortalServiceServer).DuplicateVideo(ctx, req.(*VideoRequestWithID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PortalService_RenderVideo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VideoRequestWithID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PortalServiceServer).RenderVideo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PortalService_RenderVideo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PortalServiceServer).RenderVideo(ctx, req.(*VideoRequestWithID))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -897,24 +948,6 @@ func _PortalService_UpdateVideoConfig_Handler(srv interface{}, ctx context.Conte
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PortalServiceServer).UpdateVideoConfig(ctx, req.(*UpdateVideoConfigRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _PortalService_RenderVideo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RenderVideoRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PortalServiceServer).RenderVideo(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: PortalService_RenderVideo_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PortalServiceServer).RenderVideo(ctx, req.(*RenderVideoRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1130,12 +1163,16 @@ var PortalService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _PortalService_DeleteVideo_Handler,
 		},
 		{
-			MethodName: "UpdateVideoConfig",
-			Handler:    _PortalService_UpdateVideoConfig_Handler,
+			MethodName: "DuplicateVideo",
+			Handler:    _PortalService_DuplicateVideo_Handler,
 		},
 		{
 			MethodName: "RenderVideo",
 			Handler:    _PortalService_RenderVideo_Handler,
+		},
+		{
+			MethodName: "UpdateVideoConfig",
+			Handler:    _PortalService_UpdateVideoConfig_Handler,
 		},
 		{
 			MethodName: "ListFigmaFrames",

@@ -91,11 +91,11 @@ func (t *AskUserQuestionTypeEnumView) Type() (baml.Type, error) {
 	return t.inner.Type()
 }
 
-type SceneCategoryEnumView struct {
+type ColorTokenEnumView struct {
 	inner baml.EnumBuilder
 }
 
-func (t *SceneCategoryEnumView) ListValues() ([]EnumValueView, error) {
+func (t *ColorTokenEnumView) ListValues() ([]EnumValueView, error) {
 	result, err := t.inner.ListValues()
 	if err != nil {
 		return nil, err
@@ -107,74 +107,18 @@ func (t *SceneCategoryEnumView) ListValues() ([]EnumValueView, error) {
 	return builders, nil
 }
 
-func (t *SceneCategoryEnumView) ValueTITLE() (EnumValueView, error) {
-	return t.inner.Value("TITLE")
+func (t *ColorTokenEnumView) ValuePRIMARY() (EnumValueView, error) {
+	return t.inner.Value("PRIMARY")
 }
 
-func (t *SceneCategoryEnumView) ValueOUTRO() (EnumValueView, error) {
-	return t.inner.Value("OUTRO")
-}
-
-func (t *SceneCategoryEnumView) ValueSINGLE_STAT() (EnumValueView, error) {
-	return t.inner.Value("SINGLE_STAT")
-}
-
-func (t *SceneCategoryEnumView) ValueCOMPARISON() (EnumValueView, error) {
-	return t.inner.Value("COMPARISON")
-}
-
-func (t *SceneCategoryEnumView) ValueTREND() (EnumValueView, error) {
-	return t.inner.Value("TREND")
-}
-
-func (t *SceneCategoryEnumView) ValueBREAKDOWN() (EnumValueView, error) {
-	return t.inner.Value("BREAKDOWN")
-}
-
-func (t *SceneCategoryEnumView) ValueFEATURE_HIGHLIGHT() (EnumValueView, error) {
-	return t.inner.Value("FEATURE_HIGHLIGHT")
-}
-
-func (t *SceneCategoryEnumView) ValueFEATURE_LIST() (EnumValueView, error) {
-	return t.inner.Value("FEATURE_LIST")
-}
-
-func (t *SceneCategoryEnumView) ValueWORKFLOW() (EnumValueView, error) {
-	return t.inner.Value("WORKFLOW")
-}
-
-func (t *SceneCategoryEnumView) ValueTESTIMONIAL() (EnumValueView, error) {
-	return t.inner.Value("TESTIMONIAL")
-}
-
-func (t *SceneCategoryEnumView) ValueLOGO_WALL() (EnumValueView, error) {
-	return t.inner.Value("LOGO_WALL")
-}
-
-func (t *SceneCategoryEnumView) ValueCASE_STUDY_STAT() (EnumValueView, error) {
-	return t.inner.Value("CASE_STUDY_STAT")
-}
-
-func (t *SceneCategoryEnumView) ValuePROBLEM() (EnumValueView, error) {
-	return t.inner.Value("PROBLEM")
-}
-
-func (t *SceneCategoryEnumView) ValueSOLUTION() (EnumValueView, error) {
-	return t.inner.Value("SOLUTION")
-}
-
-func (t *SceneCategoryEnumView) ValueHOW_IT_WORKS() (EnumValueView, error) {
-	return t.inner.Value("HOW_IT_WORKS")
-}
-
-func (t *TypeBuilder) SceneCategory() (*SceneCategoryEnumView, error) {
-	bld, err := t.inner.Enum("SceneCategory")
+func (t *TypeBuilder) ColorToken() (*ColorTokenEnumView, error) {
+	bld, err := t.inner.Enum("ColorToken")
 	if err != nil {
 		return nil, err
 	}
-	return &SceneCategoryEnumView{inner: bld}, nil
+	return &ColorTokenEnumView{inner: bld}, nil
 }
 
-func (t *SceneCategoryEnumView) Type() (baml.Type, error) {
+func (t *ColorTokenEnumView) Type() (baml.Type, error) {
 	return t.inner.Type()
 }

@@ -240,7 +240,25 @@ func (p *Portal) streamAgentRun(
 	}
 }
 
-func (p *Portal) DeleteVideo(ctx context.Context, c *connect.Request[pbportal.DeleteVideoRequest]) (*connect.Response[emptypb.Empty], error) {
+func (p *Portal) DuplicateVideo(ctx context.Context, c *connect.Request[pbportal.VideoRequestWithID]) (*connect.Response[pbportal.GetVideoResponse], error) {
+	actor, err := p.gethAuthContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	videoID := c.Msg.VideoId
+
+	video, err := p.videoGenerationService.DuplicateVideo(ctx, actor.OrganizationID, videoID)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	return connect.NewResponse(&pbportal.GetVideoResponse{
+		Video: video.ToProto(),
+	}), nil
+}
+
+func (p *Portal) DeleteVideo(ctx context.Context, c *connect.Request[pbportal.VideoRequestWithID]) (*connect.Response[emptypb.Empty], error) {
 	actor, err := p.gethAuthContext(ctx)
 	if err != nil {
 		return nil, err

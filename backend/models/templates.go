@@ -66,6 +66,7 @@ type Template struct {
 
 	GeneratedPatches json.RawMessage            `db:"-"` // Maps to edits in slide
 	GeneratedPlan    *pbcore.AnimationSlidePlan `db:"-"`
+	BackgroundStyle  *pbcore.BackgroundStyle    `db:"-"`
 }
 
 type TemplateConfig struct {

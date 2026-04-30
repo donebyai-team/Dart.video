@@ -748,6 +748,11 @@ export enum TransitionType {
    * @generated from enum value: TRANSITION_IRIS = 17;
    */
   TRANSITION_IRIS = 17,
+
+  /**
+   * @generated from enum value: TRANSITION_STRIPPED_SLAM = 18;
+   */
+  TRANSITION_STRIPPED_SLAM = 18,
 }
 
 /**

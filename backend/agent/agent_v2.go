@@ -257,6 +257,7 @@ func (a *agentV2) Start(ctx context.Context, options StartSessionOptions) (*RunR
 		generatePlanRequest.VideoBranding = types.VideoBranding{
 			BrandGuideLines: a.assetRegistry.FormatBrandDetails(),
 			Attachments:     a.assetRegistry.FormatAssets(),
+			BrandColors:     a.assetRegistry.FormatBrandTokens(),
 		}
 	}
 
@@ -591,6 +592,9 @@ func (a *agentV2) applyPlan(
 			if err != nil {
 				return err
 			}
+
+			// add background if applicable
+			template.BackgroundStyle = sceneConfig.Background
 
 			if err = builder.UpdateAnimationSlide(ctx, slide.Id, template); err != nil {
 				return agenterrors.VideoPersistFailed("failed to persist animation slide", err)

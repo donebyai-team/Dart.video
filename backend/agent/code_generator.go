@@ -142,57 +142,10 @@ func (l *codeGenerator) GenerateCodeFromScene(ctx context.Context, scene *scenes
 			template.GeneratedPatches = scene.ToEditsPatch()
 			template.Config.VisibleDurationInFrames = scene.ComputeDurationFrames()
 			template.Config.TotalDurationInFrames = template.Config.VisibleDurationInFrames
-
-			//diff := math.Abs(float64(generatedAnimation.SettledFrame) - float64(template.Config.VisibleDuration))
-			//if diff > 30 {
-			//	l.logger.Info("difference between llm and computed settledFrame is more than 30",
-			//		zap.Int("llm_settled_frame", int(generatedAnimation.SettledFrame)),
-			//		zap.Int("computed", int(template.Config.VisibleDuration)),
-			//	)
-			//} else if diff > 0 {
-			//	l.logger.Info("found difference between llm and computed settledFrame",
-			//		zap.Int("llm_settled_frame", int(generatedAnimation.SettledFrame)),
-			//		zap.Int("computed", int(template.Config.VisibleDuration)),
-			//	)
-			//}
-			//
-			//if generatedAnimation.ThinkingSummary != nil {
-			//	template.Description = *generatedAnimation.ThinkingSummary
-			//}
-			//template.Config.VisibleDuration = template.Config.VisibleDuration
-			//template.Config.TotalDuration = generatedAnimation.SettledFrame
-
 			return template, nil
 		}
 
-		// Retry only on build errors
-		//var buildErr *services.BuildError
-		//if errors.As(err, &buildErr) {
-		//	// append thinking summary
-		//	if generatedAnimation.ThinkingSummary != nil {
-		//		conversationHistory = append(conversationHistory, types.Message{
-		//			Role:    types.Union3KassistantOrKtoolOrKuser__NewKassistant(),
-		//			Content: *generatedAnimation.ThinkingSummary,
-		//		})
-		//	}
-		//
-		//	conversationHistory = appendRetryConversation(
-		//		conversationHistory,
-		//		indentedCode,
-		//		buildFailureMessage(buildErr),
-		//	)
-		//
-		//	l.logger.Error("failed to build animation",
-		//		zap.Int("attempt_left", maxAttempts-attempt),
-		//		zap.Error(buildErr))
-		//
-		//	// 🔧 Refinement loop
-		//	callback(TemplateGenerationProgress{
-		//		Message: CreativeStageMessage(StageRefining, attempt),
-		//	})
-		//	continue
-		//}
-
+		l.logger.Error("failed to build animation", zap.Error(err))
 		return nil, agenterrors.AnimationGenerationFailed("failed to build animation", err)
 	}
 

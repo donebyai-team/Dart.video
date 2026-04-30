@@ -218,8 +218,7 @@ export const TextWithVideoSceneDescriptor: ComponentRegistration = {
     fields: [
       {
         "name": "entranceAnimation",
-        "type": "string",
-        "subtype": "enum",
+        "type": "enum",
         "default": DEFAULT_ANIMATION
       }
     ]

@@ -3,11 +3,17 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Copy, Play } from "lucide-react";
+import { Copy, MoreHorizontal, Play, Trash2 } from "lucide-react";
 import { toJsonString } from "@bufbuild/protobuf";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useClientsContext } from "@coasterai/ui-core/context/ClientContext";
 import { Video as VideoConfig, VideoMetadataSchema } from "@coasterai/pb/coasterai/core/v1/video_pb";
 import toast from "react-hot-toast";
@@ -24,6 +30,8 @@ const RecentVideos = () => {
 
   const [videos, setVideos] = useState<VideoConfig[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [duplicatingVideoId, setDuplicatingVideoId] = useState<string | null>(null);
+  const [deletingVideoId, setDeletingVideoId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchVideos = async () => {
@@ -64,6 +72,39 @@ const RecentVideos = () => {
     }
   };
 
+  const handleDuplicateVideo = async (video: VideoConfig) => {
+    try {
+      setDuplicatingVideoId(video.id);
+      const res = await portalClient.duplicateVideo({ videoId: video.id });
+      const duplicatedVideoId = res.video?.id;
+
+      if (!duplicatedVideoId) {
+        toast.error("Unable to open duplicated video");
+        return;
+      }
+
+      router.push(`/editor/${duplicatedVideoId}`);
+    } catch (err) {
+      console.error("Failed to duplicate video", err);
+      toast.error(getConnectError(err));
+    } finally {
+      setDuplicatingVideoId(null);
+    }
+  };
+
+  const handleDeleteVideo = async (video: VideoConfig) => {
+    try {
+      setDeletingVideoId(video.id);
+      await portalClient.deleteVideo({ videoId: video.id });
+      setVideos((currentVideos) => currentVideos.filter(({ id }) => id !== video.id));
+    } catch (err) {
+      console.error("Failed to delete video", err);
+      toast.error(getConnectError(err));
+    } finally {
+      setDeletingVideoId(null);
+    }
+  };
+
   return (
     <div className="p-8">
       <h2 className="text-xl font-semibold mb-4">Recent Videos</h2>
@@ -75,7 +116,7 @@ const RecentVideos = () => {
           const thumbnailSlide = firstSlide
             ? {
                 ...firstSlide,
-                backgroundStyle: video.metadata?.backgroundStyle ?? firstSlide.backgroundStyle,
+                backgroundStyle: firstSlide.backgroundStyle ?? video.metadata?.backgroundStyle,
               }
             : null;
           const thumbnailResolution = video.metadata?.resolution ?? { width: 1280, height: 720 };
@@ -114,19 +155,43 @@ const RecentVideos = () => {
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-3">
                     <h3 className="font-medium truncate">{video.name}</h3>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      className="h-8 shrink-0 px-2"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCopyPrompt(video);
-                      }}
-                    >
-                      <Copy className="w-3.5 h-3.5 mr-1" />
-                      Copy prompt
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 shrink-0"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                          <span className="sr-only">Open video actions</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="end"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <DropdownMenuItem onSelect={() => handleCopyPrompt(video)}>
+                          <Copy className="mr-2 h-4 w-4" />
+                          Copy prompt
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          disabled={duplicatingVideoId === video.id || deletingVideoId === video.id}
+                          onSelect={() => void handleDuplicateVideo(video)}
+                        >
+                          {duplicatingVideoId === video.id ? "Duplicating..." : "Duplicate video"}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          disabled={deletingVideoId === video.id || duplicatingVideoId === video.id}
+                          onSelect={() => void handleDeleteVideo(video)}
+                          className="text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          {deletingVideoId === video.id ? "Deleting..." : "Delete"}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
 
                   <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">

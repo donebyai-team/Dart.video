@@ -33,9 +33,13 @@ service PortalService {
   rpc GetVideo(GetVideoRequest) returns (stream GetVideoResponse);
   rpc StopVideo(StopVideoRequest) returns (.google.protobuf.Empty);
   rpc GetVideos(.google.protobuf.Empty) returns (GetVideosResponse);
-  rpc DeleteVideo(DeleteVideoRequest) returns (.google.protobuf.Empty);
+
+  rpc DeleteVideo(VideoRequestWithID) returns (.google.protobuf.Empty);
+  rpc DuplicateVideo(VideoRequestWithID) returns (GetVideoResponse);
+  rpc RenderVideo(VideoRequestWithID) returns (RenderVideoResponse);
+
   rpc UpdateVideoConfig(UpdateVideoConfigRequest) returns (.google.protobuf.Empty);
-  rpc RenderVideo(RenderVideoRequest) returns (RenderVideoResponse);
+
   rpc ListFigmaFrames(ListFigmaFramesRequest) returns (ListFigmaFramesResponse);
   rpc ImportFigmaFrame(ImportFigmaFrameRequest) returns (ImportFigmaFrameResponse);
 
@@ -95,10 +99,6 @@ message BrandIdentityResponse {
   repeated string supportedFonts = 2;
 }
 
-message RenderVideoRequest {
-  string videoId = 1;
-}
-
 message RenderVideoResponse {
   string jobId = 1;
   string videoId = 2;
@@ -133,7 +133,7 @@ message StopVideoRequest {
   string video_id = 1;
 }
 
-message DeleteVideoRequest {
+message VideoRequestWithID {
   string video_id = 1;
 }
 

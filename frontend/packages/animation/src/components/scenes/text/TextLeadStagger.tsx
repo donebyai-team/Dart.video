@@ -10,7 +10,7 @@ import { resolveTypography } from '../../../tokens/resolveTypography';
 import { getEntranceTransform } from '../types';
 import type { EntranceAnimation } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
-import { DEFAULT_SPEED_PERCENTAGE, getSpeed, MIN_SPEED_PERCENTAGE, scaleTiming } from '../../../duration/timings';
+import { DEFAULT_SPEED_PERCENTAGE, getSpeed, MIN_SPEED_PERCENTAGE, scaleTiming } from '../../../speed/timings';
 
 // Delay before the oversized lead word starts settling down.
 const BASE_LEAD_DELAY = 8;
@@ -251,18 +251,17 @@ export const TextLeadStaggerSchemaFields = [
   {
     "name": "text",
     "type": "string",
+    "datatype": "text",
     "map": "props.text"
   },
   {
     "name": "variant",
-    "type": "string",
-    "subtype": "enum",
+    "type": "enum",
     "default": TextLeadStaggerDefaults.variant
   },
   {
     "name": "entranceAnimation",
-    "type": "string",
-    "subtype": "enum",
+    "type": "enum",
     "map": "props.entranceAnimation",
     "default": TextLeadStaggerDefaults.entranceAnimation
   },

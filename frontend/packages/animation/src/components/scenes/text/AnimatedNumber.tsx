@@ -166,7 +166,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (initProps) => {
 export const AnimatedNumberAssetSchema = [
     {
         name: 'entranceAnimation',
-        type: 'string',
+        type: 'enum',
         map: "props.entranceAnimation",
         default: AnimatedNumberDefaults.entranceAnimation,
     },
@@ -178,35 +178,39 @@ export const AnimatedNumberAssetSchema = [
     {
         "name": "startText",
         "type": "string",
+        "datatype": "text",
         "map": "props.startText"
     },
 
     {
         "name": "endText",
         "type": "string",
+        "datatype": "text",
         "map": "props.endText"
     },
     {
         "name": "from",
         "type": "number",
+        "datatype": "text",
         "map": "props.from",
         "default": AnimatedNumberDefaults.from
     },
     {
         "name": "to",
         "type": "number",
+        "datatype": "text",
         "map": "props.to",
         "default": AnimatedNumberDefaults.to
     },
     {
         "name": "format",
         "type": "string",
+        "datatype": "text",
         "default": ""
     },
     {
         "name": "variant",
-        "type": "string",
-        "subtype": "enum",
+        "type": "enum",
         "default": AnimatedNumberDefaults.variant
     }
 ]

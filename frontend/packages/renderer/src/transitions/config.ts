@@ -1,14 +1,9 @@
+import { RemotionTransitionDirection } from '@coasterai/animation/src/transitions/common'
 import {
   Slide,
   TransitionDirection,
   TransitionType
 } from '@coasterai/pb/coasterai/core/v1/slide_pb'
-
-export type RemotionTransitionDirection =
-  | 'from-left'
-  | 'from-right'
-  | 'from-top'
-  | 'from-bottom'
 
 export interface TransitionOptionConfig {
   id: TransitionType
@@ -24,6 +19,12 @@ export const TRANSITION_OPTIONS: TransitionOptionConfig[] = [
     name: 'None',
     preview: 'bg-muted',
     supportsDirection: false
+  },
+  {
+    id: TransitionType.TRANSITION_STRIPPED_SLAM,
+    name: 'Striped',
+    preview: 'bg-gradient-to-br from-muted via-primary/20 to-transparent',
+    supportsDirection: true
   },
   {
     id: TransitionType.TRANSITION_FADE,
@@ -70,11 +71,12 @@ export const TRANSITION_DIRECTION_OPTIONS: Array<{
   id: TransitionDirection
   label: string
 }> = [
-  { id: TransitionDirection.FROM_LEFT, label: 'From Left' },
-  { id: TransitionDirection.FROM_RIGHT, label: 'From Right' },
-  { id: TransitionDirection.FROM_TOP, label: 'From Top' },
-  { id: TransitionDirection.FROM_BOTTOM, label: 'From Bottom' }
-]
+    { id: TransitionDirection.UNSPECIFIED, label: 'none' },
+    { id: TransitionDirection.FROM_LEFT, label: 'From Left' },
+    { id: TransitionDirection.FROM_RIGHT, label: 'From Right' },
+    { id: TransitionDirection.FROM_TOP, label: 'From Top' },
+    { id: TransitionDirection.FROM_BOTTOM, label: 'From Bottom' }
+  ]
 
 export const transitionOptionById = new Map(
   TRANSITION_OPTIONS.map(option => [option.id, option])
@@ -85,7 +87,7 @@ export const isDirectionSupportedTransition = (transitionType: TransitionType): 
 
 export const protoDirectionToRemotion = (
   direction?: TransitionDirection
-): RemotionTransitionDirection | undefined => {
+): RemotionTransitionDirection => {
   switch (direction) {
     case TransitionDirection.FROM_LEFT:
       return 'from-left'
@@ -96,7 +98,7 @@ export const protoDirectionToRemotion = (
     case TransitionDirection.FROM_BOTTOM:
       return 'from-bottom'
     default:
-      return undefined
+      return 'none'
   }
 }
 
@@ -113,7 +115,7 @@ export const remotionDirectionToProto = (
     case 'from-bottom':
       return TransitionDirection.FROM_BOTTOM
     default:
-      return undefined
+      return TransitionDirection.UNSPECIFIED
   }
 }
 

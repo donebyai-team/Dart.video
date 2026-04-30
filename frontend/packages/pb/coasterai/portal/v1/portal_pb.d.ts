@@ -197,22 +197,6 @@ export declare type BrandIdentityResponse = Message<"coasterai.portal.v1.BrandId
 export declare const BrandIdentityResponseSchema: GenMessage<BrandIdentityResponse>;
 
 /**
- * @generated from message coasterai.portal.v1.RenderVideoRequest
- */
-export declare type RenderVideoRequest = Message<"coasterai.portal.v1.RenderVideoRequest"> & {
-  /**
-   * @generated from field: string videoId = 1;
-   */
-  videoId: string;
-};
-
-/**
- * Describes the message coasterai.portal.v1.RenderVideoRequest.
- * Use `create(RenderVideoRequestSchema)` to create a new message.
- */
-export declare const RenderVideoRequestSchema: GenMessage<RenderVideoRequest>;
-
-/**
  * @generated from message coasterai.portal.v1.RenderVideoResponse
  */
 export declare type RenderVideoResponse = Message<"coasterai.portal.v1.RenderVideoResponse"> & {
@@ -359,9 +343,9 @@ export declare type StopVideoRequest = Message<"coasterai.portal.v1.StopVideoReq
 export declare const StopVideoRequestSchema: GenMessage<StopVideoRequest>;
 
 /**
- * @generated from message coasterai.portal.v1.DeleteVideoRequest
+ * @generated from message coasterai.portal.v1.VideoRequestWithID
  */
-export declare type DeleteVideoRequest = Message<"coasterai.portal.v1.DeleteVideoRequest"> & {
+export declare type VideoRequestWithID = Message<"coasterai.portal.v1.VideoRequestWithID"> & {
   /**
    * @generated from field: string video_id = 1;
    */
@@ -369,10 +353,10 @@ export declare type DeleteVideoRequest = Message<"coasterai.portal.v1.DeleteVide
 };
 
 /**
- * Describes the message coasterai.portal.v1.DeleteVideoRequest.
- * Use `create(DeleteVideoRequestSchema)` to create a new message.
+ * Describes the message coasterai.portal.v1.VideoRequestWithID.
+ * Use `create(VideoRequestWithIDSchema)` to create a new message.
  */
-export declare const DeleteVideoRequestSchema: GenMessage<DeleteVideoRequest>;
+export declare const VideoRequestWithIDSchema: GenMessage<VideoRequestWithID>;
 
 /**
  * @generated from message coasterai.portal.v1.GetVideoResponse
@@ -1438,8 +1422,24 @@ export declare const PortalService: GenService<{
    */
   deleteVideo: {
     methodKind: "unary";
-    input: typeof DeleteVideoRequestSchema;
+    input: typeof VideoRequestWithIDSchema;
     output: typeof EmptySchema;
+  },
+  /**
+   * @generated from rpc coasterai.portal.v1.PortalService.DuplicateVideo
+   */
+  duplicateVideo: {
+    methodKind: "unary";
+    input: typeof VideoRequestWithIDSchema;
+    output: typeof GetVideoResponseSchema;
+  },
+  /**
+   * @generated from rpc coasterai.portal.v1.PortalService.RenderVideo
+   */
+  renderVideo: {
+    methodKind: "unary";
+    input: typeof VideoRequestWithIDSchema;
+    output: typeof RenderVideoResponseSchema;
   },
   /**
    * @generated from rpc coasterai.portal.v1.PortalService.UpdateVideoConfig
@@ -1448,14 +1448,6 @@ export declare const PortalService: GenService<{
     methodKind: "unary";
     input: typeof UpdateVideoConfigRequestSchema;
     output: typeof EmptySchema;
-  },
-  /**
-   * @generated from rpc coasterai.portal.v1.PortalService.RenderVideo
-   */
-  renderVideo: {
-    methodKind: "unary";
-    input: typeof RenderVideoRequestSchema;
-    output: typeof RenderVideoResponseSchema;
   },
   /**
    * @generated from rpc coasterai.portal.v1.PortalService.ListFigmaFrames

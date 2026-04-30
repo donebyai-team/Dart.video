@@ -42,17 +42,17 @@ export const SingleSlidePreview: React.FC<{
   const hasAnimatedBackground = supportsAnimatedBackgroundEffect(slide.backgroundStyle)
   const slideForRender = hasAnimatedBackground ? { ...slide, backgroundStyle: undefined } : slide
 
-  return (
-    <BackgroundLayer backgroundStyle={slide.backgroundStyle}>
-      <AnimationSlide
-        slide={slideForRender}
-        width={width}
-        height={height}
-        isEditing={isEditing}
-        isSelected={false}
-      />
-    </BackgroundLayer>
-  )
+    return (
+      <BackgroundLayer backgroundStyle={slide.backgroundStyle}>
+        <AnimationSlide
+          slide={slideForRender}
+          width={width}
+          height={height}
+          isEditing={isEditing}
+          isSelected={false}
+        />
+      </BackgroundLayer>
+    )
 }
 
 /**

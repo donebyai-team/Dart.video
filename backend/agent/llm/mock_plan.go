@@ -1,7 +1,7 @@
 package llm
 
 const mockGeneratePlanV2ResponseJSON = `{
-    "videoName": "Cursor Works With You",
+    "videoName": "Cursor Workflow",
     "sections": [
       {
         "name": "Hook",
@@ -10,21 +10,25 @@ const mockGeneratePlanV2ResponseJSON = `{
             "index": 0,
             "elements": [
               {
-                "component": "TextStagger",
-                "props": "{\"text\":\"Can your AI actually work with you?\"}",
+                "component": "TextHookStagger",
+                "props": "{\"text\":\"Can your AI work with you?\"}",
                 "children": []
               }
-            ]
+            ],
+            "background": {
+              "solid": "PRIMARY"
+            }
           },
           {
             "index": 1,
             "elements": [
               {
-                "component": "TextHighlight",
-                "props": "{\"text\":\"Beyond chat. Into {real execution}.\"}",
+                "component": "TitleSplit",
+                "props": "{\"topText\":\"REAL AI\",\"bottomText\":\"TEAMMATE\"}",
                 "children": []
               }
-            ]
+            ],
+            "background": null
           }
         ]
       },
@@ -35,31 +39,47 @@ const mockGeneratePlanV2ResponseJSON = `{
             "index": 2,
             "elements": [
               {
-                "component": "TextCycle",
-                "props": "{\"texts\":[\"Teams are stretched thin\",\"Competition keeps accelerating\",\"Headcount cannot keep up\"]}",
+                "component": "ProblemHeadline",
+                "props": "{\"text\":\"Teams are stretched\"}",
                 "children": []
               }
-            ]
+            ],
+            "background": {
+              "solid": "SECONDARY"
+            }
           },
           {
             "index": 3,
             "elements": [
               {
-                "component": "TextHighlight",
-                "props": "{\"text\":\"Hiring more help is {slow and expensive}.\"}",
+                "component": "TextCardStack",
+                "props": "{\"texts\":[\"Competition keeps accelerating\",\"Hiring takes too long\",\"Talent is getting expensive\"]}",
                 "children": []
               }
-            ]
+            ],
+            "background": null
           },
           {
             "index": 4,
             "elements": [
               {
-                "component": "AnimatedImage",
-                "props": "{\"text\":\"Work keeps piling up while deadlines stay fixed\",\"src\":\"https://placehold.co/1600x900.png?text=Workload+Pressure\"}",
+                "component": "ProblemCollage",
+                "props": "{\"text\":\"More competition. Less bandwidth.\",\"images\":[\"https://placehold.co/800x400.png?text=Task+Overflow\",\"https://placehold.co/800x400.png?text=Missed+Deadlines\",\"https://placehold.co/800x400.png?text=Too+Many+Tools\",\"https://placehold.co/800x400.png?text=Hiring+Pipeline\",\"https://placehold.co/800x400.png?text=Team+Burnout\"]}",
                 "children": []
               }
-            ]
+            ],
+            "background": null
+          },
+          {
+            "index": 5,
+            "elements": [
+              {
+                "component": "TextLeadStagger",
+                "props": "{\"text\":\"Hiring won't scale\"}",
+                "children": []
+              }
+            ],
+            "background": null
           }
         ]
       },
@@ -67,124 +87,137 @@ const mockGeneratePlanV2ResponseJSON = `{
         "name": "Solution",
         "slides": [
           {
-            "index": 5,
+            "index": 6,
             "elements": [
               {
                 "component": "LogoWithBrandName",
                 "props": "{\"text\":\"Cursor\"}",
                 "children": []
               }
-            ]
+            ],
+            "background": {
+              "solid": "PRIMARY"
+            }
           },
-          {
-            "index": 6,
-            "elements": [
-              {
-                "component": "TextHighlight",
-                "props": "{\"text\":\"A personal AI assistant for {building software faster}.\"}",
-                "children": []
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "name": "Product Info",
-        "slides": [
           {
             "index": 7,
             "elements": [
               {
-                "component": "TextWithWordCycle",
-                "props": "{\"text\":\"One workspace for\",\"cyclingWords\":[\"Agent\",\"Plan\",\"Debug\",\"Ask\"]}",
+                "component": "TextHighlight",
+                "props": "{\"text\":\"The best way to code with {AI}\"}",
                 "children": []
               }
-            ]
+            ],
+            "background": null
           },
           {
             "index": 8,
             "elements": [
               {
-                "component": "AnimatedImage",
-                "props": "{\"text\":\"Agent mode handles multi-step tasks for you\",\"src\":\"https://placehold.co/1600x900.png?text=Agent+Mode\"}",
+                "component": "TextStagger",
+                "props": "{\"text\":\"Your personal AI assistant for building software\"}",
                 "children": []
               }
-            ]
-          },
+            ],
+            "background": null
+          }
+        ]
+      },
+      {
+        "name": "Product",
+        "slides": [
           {
             "index": 9,
             "elements": [
               {
-                "component": "Typewriter",
-                "props": "{\"text\":\"Plan mode maps the next move before you code.\"}",
+                "component": "TextWithImageScene",
+                "props": "{\"textComponent\":\"textwithwordcycle\",\"textComponentProps\":{\"text\":\"Jump between\",\"cyclingWords\":[\"agent\",\"plan\",\"debug\",\"ask\"]},\"image\":\"https://placehold.co/1280x720.png?text=Cursor+Modes\"}",
                 "children": []
               }
-            ]
+            ],
+            "background": null
           },
           {
             "index": 10,
             "elements": [
               {
-                "component": "AnimatedImage",
-                "props": "{\"text\":\"Debug mode helps fix issues with full context\",\"src\":\"https://placehold.co/1600x900.png?text=Debug+Mode\"}",
+                "component": "PillCarousel",
+                "props": "{\"text\":\"Modes for every moment\",\"pills\":[{\"icon\":\"bot\",\"text\":\"Agent\"},{\"icon\":\"map\",\"text\":\"Plan\"},{\"icon\":\"bug\",\"text\":\"Debug\"},{\"icon\":\"message-square\",\"text\":\"Ask\"}]}",
                 "children": []
               }
-            ]
+            ],
+            "background": null
           },
           {
             "index": 11,
             "elements": [
               {
-                "component": "IconShowcase",
-                "props": "{\"text\":\"Use the latest models in the same workflow\",\"icons\":[\"openai\",\"anthropic\",\"sparkles\"]}",
+                "component": "TextWithImageScene",
+                "props": "{\"textComponent\":\"textwithwordcycle\",\"textComponentProps\":{\"text\":\"Work with\",\"cyclingWords\":[\"OpenAI\",\"Anthropic\",\"more\"]},\"image\":\"@asset/cavxyj/0.png\"}",
                 "children": []
               }
-            ]
+            ],
+            "background": null
           },
           {
             "index": 12,
             "elements": [
               {
-                "component": "AnimatedImage",
-                "props": "{\"text\":\"Custom plugins connect Cursor to your favorite tools\",\"src\":\"https://placehold.co/1600x900.png?text=Plugins\"}",
+                "component": "IconShowcase",
+                "props": "{\"text\":\"Latest models, your choice\",\"icons\":[\"sparkles\",\"brain\",\"cpu\"]}",
                 "children": []
               }
-            ]
+            ],
+            "background": null
           },
           {
             "index": 13,
             "elements": [
               {
-                "component": "TextHighlight",
-                "props": "{\"text\":\"Get more output from the team you already {have}.\"}",
+                "component": "TextWithVideoScene",
+                "props": "{\"textComponent\":\"texthighlight\",\"textComponentProps\":{\"text\":\"Add custom {plugins}\"},\"video\":\"@asset/qfbbfw/1.mp4\"}",
                 "children": []
               }
-            ]
-          }
-        ]
-      },
-      {
-        "name": "Social Proof",
-        "slides": [
+            ],
+            "background": null
+          },
           {
             "index": 14,
             "elements": [
               {
-                "component": "LogoShowcase",
-                "props": "{\"text\":\"Trusted by Shopify, Midjourney, and fast-moving startups\",\"logos\":[\"https://placehold.co/300x120.png?text=Shopify\",\"https://placehold.co/300x120.png?text=Midjourney\",\"https://placehold.co/300x120.png?text=Startups\"]}",
+                "component": "TextStagger",
+                "props": "{\"text\":\"Connect the tools you already love\"}",
                 "children": []
               }
-            ]
-          },
+            ],
+            "background": null
+          }
+        ]
+      },
+      {
+        "name": "Proof",
+        "slides": [
           {
             "index": 15,
             "elements": [
               {
-                "component": "TextHighlight",
-                "props": "{\"text\":\"{Thousands of teams} use Cursor to ship faster.\"}",
+                "component": "LogoShowcase",
+                "props": "{\"text\":\"Used by brands building fast\",\"logos\":[\"https://placehold.co/320x160.png?text=Shopify\",\"https://placehold.co/320x160.png?text=Midjourney\",\"https://placehold.co/320x160.png?text=1000%2B+Startups\"]}",
                 "children": []
               }
-            ]
+            ],
+            "background": null
+          },
+          {
+            "index": 16,
+            "elements": [
+              {
+                "component": "StatCounter",
+                "props": "{\"label\":\"productivity gain\",\"from\":0,\"to\":10,\"suffix\":\"X\"}",
+                "children": []
+              }
+            ],
+            "background": null
           }
         ]
       },
@@ -192,26 +225,19 @@ const mockGeneratePlanV2ResponseJSON = `{
         "name": "CTA",
         "slides": [
           {
-            "index": 16,
-            "elements": [
-              {
-                "component": "TextStagger",
-                "props": "{\"text\":\"Try Cursor free today.\"}",
-                "children": []
-              }
-            ]
-          },
-          {
             "index": 17,
             "elements": [
               {
-                "component": "LogoAsset",
-                "props": "{}",
+                "component": "LogoWithCTA",
+                "props": "{\"brandName\":\"Cursor\",\"ctaText\":\"Try Cursor free today\"}",
                 "children": []
               }
-            ]
+            ],
+            "background": {
+              "solid": "PRIMARY"
+            }
           }
         ]
       }
     ]
-}`
+  }`

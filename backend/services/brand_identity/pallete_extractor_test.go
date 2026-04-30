@@ -2,44 +2,9 @@ package brand_identity
 
 import (
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
-	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
 )
-
-func TestGenerateGradient_PrimarySecondary(t *testing.T) {
-	colors := []*pbcore.BrandColor{
-		{
-			Priority:     pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_PRIMARY,
-			ColorHexCode: "#F54E00",
-		},
-		{
-			Priority:     pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_SECONDARY,
-			ColorHexCode: "#FFA175",
-		},
-	}
-
-	gradient := GenerateGradient(colors)
-
-	assert.NotNil(t, gradient)
-	assert.Equal(t, pbcore.GradientType_GRADIENT_TYPE_LINEAR, gradient.Type)
-	assert.Equal(t, int32(135), gradient.Angle)
-
-	assert.Len(t, gradient.Stops, 2)
-
-	start := gradient.Stops[0].Color
-	end := gradient.Stops[1].Color
-
-	assert.Equal(t, "#F54E00", start)
-
-	// Ensure gradient end is lighter
-	assert.True(t, lightness(end) > lightness(start),
-		"end color should be lighter than start")
-
-	// Ensure it is light enough for background
-	assert.True(t, lightness(end) >= 0.75,
-		"end color should be light enough for UI background")
-}
 
 func TestColorSystem(t *testing.T) {
 

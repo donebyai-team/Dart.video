@@ -99,12 +99,12 @@ export const LogoWithBrandNameSchemaFields = [
             {
                 "name": "text",
                 "type": "string",
+                "datatype": "text",
                 "map": "props.text"
             },
             {
                 "name": "variant",
-                "type": "string",
-                "subtype": "enum",
+                "type": "enum",
                 "default": TextStaggerDefaults.variant
             },
             {
@@ -114,8 +114,7 @@ export const LogoWithBrandNameSchemaFields = [
             },
             {
                 "name": "entranceAnimation",
-                "type": "string",
-                "subtype": "enum",
+                "type": "enum",
                 "default": TextStaggerDefaults.entranceAnimation
             },
             {
@@ -125,8 +124,7 @@ export const LogoWithBrandNameSchemaFields = [
             },
             {
                 "name": "splitBy",
-                "type": "string",
-                "subtype": "enum",
+                "type": "enum",
                 "default": SPLIT_BY_MODES[0]
             }
         ]

@@ -163,6 +163,7 @@ func (a *sceneGenerator) ContinueAgent(
 		generatePlanRequest.VideoBranding = types.VideoBranding{
 			BrandGuideLines: a.assetRegistry.FormatBrandDetails(),
 			Attachments:     a.assetRegistry.FormatAssets(),
+			BrandColors:     a.assetRegistry.FormatBrandTokens(),
 		}
 	}
 
@@ -392,15 +393,8 @@ func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest ty
 			return nil, err
 		}
 
-		// Merge with user edits
-		// There can be orphans object if the scene is replaced
-		//if slide.Content != nil && slide.Content.Edits != nil {
-		//	edits, err := scenes.ReconcileEditsPatch(slide.Content.Edits, template.GeneratedPatches)
-		//	if err != nil {
-		//		return nil, agenterrors.InvalidInput("failed to merge edits", err)
-		//	}
-		//	template.GeneratedPatches = edits
-		//}
+		// add background if applicable
+		template.BackgroundStyle = sceneConfig.Background
 
 		return &RunResult{
 			Status:             RunStatusCompleted,

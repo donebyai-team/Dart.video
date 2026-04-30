@@ -1,7 +1,7 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
 import { ArrayItem } from '../../../../core/assets/ArrayItem';
-import { DEFAULT_SPEED_PERCENTAGE, getSpeed, MIN_SPEED_PERCENTAGE, scaleTiming } from '../../../../duration/timings';
+import { DEFAULT_SPEED_PERCENTAGE, getSpeed, MIN_SPEED_PERCENTAGE, scaleTiming } from '../../../../speed/timings';
 import { useArrayPatch, usePatchedProps } from '../../../../patches';
 import type { ComponentRegistration } from '../../../../registry/registry';
 import { interpolateWithEasing, useAspectPreset } from '../../../../styles';
@@ -204,37 +204,34 @@ export const MultiImageStackSchemaFields = [
             {
                 name: 'text',
                 type: 'string',
+                datatype: 'text',
                 map: 'props.headline',
             },
             {
                 name: 'cyclingWords',
                 type: 'array',
+                datatype: 'text',
                 map: 'props.cyclingWords',
-                default: DEFAULT_HERO_TEXT.cyclingWords,
             },
             {
                 name: 'variant',
-                type: 'string',
-                subtype: 'enum',
+                type: 'enum',
                 default: DEFAULT_HERO_TEXT.variant,
             },
             {
                 name: 'entranceAnimation',
-                type: 'string',
-                subtype: 'enum',
+                type: 'enum',
                 map: 'props.entranceAnimation',
                 default: DEFAULT_HERO_TEXT.entranceAnimation,
             },
             {
                 name: 'textCycleTransition',
-                type: 'string',
-                subtype: 'enum',
+                type: 'enum',
                 default: DEFAULT_HERO_TEXT.textCycleTransition,
             },
             {
                 name: 'highlightStyle',
-                type: 'string',
-                subtype: 'enum',
+                type: 'enum',
                 default: DEFAULT_HERO_TEXT.highlightStyle,
             },
         ],
@@ -263,14 +260,12 @@ export const MultiImageStackSchemaFields = [
         fields: [
             {
                 name: 'stackAnimation',
-                type: 'string',
-                subtype: 'enum',
+                type: 'enum',
                 default: DEFAULT_STACK_ANIMATION,
             },
             {
                 name: 'direction',
-                type: 'string',
-                subtype: 'enum',
+                type: 'enum',
                 default: DEFAULT_DIRECTION,
             },
             {

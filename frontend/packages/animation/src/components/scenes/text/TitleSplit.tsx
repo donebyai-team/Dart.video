@@ -131,22 +131,24 @@ export const TitleSplitSchemaFields = [
   {
     name: 'topText',
     type: 'string',
+    datatype: 'text',
     map: 'props.topText',
   },
   {
     name: 'bottomText',
     type: 'string',
+    datatype: 'text',
     map: 'props.bottomText',
   },
   {
     name: 'variant',
-    type: 'string',
-    subtype: 'enum',
+    type: 'enum',
     default: TitleSplitDefaults.variant,
   },
   {
     name: 'glowColor',
     type: 'string',
+    datatype: 'color',
     default: TitleSplitDefaults.glowColor,
   },
 ];

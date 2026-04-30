@@ -7,7 +7,7 @@ import type { ComponentRegistration } from '../../../registry/registry';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { TextStagger, type TextStaggerProps, TextStaggerSchemaFields } from '../text/TextStagger';
-import { DEFAULT_SPEED_PERCENTAGE, getSpeed, MIN_SPEED_PERCENTAGE, scaleTiming } from '../../../duration/timings';
+import { DEFAULT_SPEED_PERCENTAGE, getSpeed, MIN_SPEED_PERCENTAGE, scaleTiming } from '../../../speed/timings';
 
 const DEFAULT_CARD_WIDTH = 420;
 const DEFAULT_CARD_HEIGHT = 236;
@@ -408,7 +408,7 @@ export const ProblemCollage: React.FC = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         zIndex: 5,
-                        pointerEvents: 'none',
+
                         padding: '0 8%',
                     }}
                 >
@@ -470,12 +470,12 @@ export const ProblemCollageSchemaFields = [
             {
                 "name": "text",
                 "type": "string",                
+                "datatype": "text",
                 "map": "props.text"
             },
             {
                 "name": "variant",
-                "type": "string",
-                "subtype": "enum",
+                "type": "enum",
                 "default": ProblemCollageTextDefaults.variant
             }
         ],

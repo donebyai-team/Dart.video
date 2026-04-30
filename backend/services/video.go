@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"github.com/shank318/coasterai/datastore"
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
@@ -18,6 +19,7 @@ type VideoGeneration interface {
 	GetVideos(ctx context.Context, organizationID string, options VideoOptions) ([]*models.Video, error)
 	UpdateVideoConfig(ctx context.Context, video *models.Video) error
 	UpdateVideoStatus(ctx context.Context, ID string, status models.VideoStatus) error
+	DuplicateVideo(ctx context.Context, organizationID, videoID string) (*models.Video, error)
 }
 
 type VideoOptions struct {
@@ -158,6 +160,35 @@ func (v videoGeneration) CreateVideo(ctx context.Context, organizationID string,
 		},
 	})
 
+	if err != nil {
+		return nil, err
+	}
+
+	return video, nil
+}
+
+func (v videoGeneration) DuplicateVideo(ctx context.Context, organizationID, videoID string) (*models.Video, error) {
+	existingVideo, err := v.db.GetVideoById(ctx, videoID, organizationID)
+	if err != nil {
+		return nil, err
+	}
+
+	video, err := v.db.CreateVideo(ctx, &models.Video{
+		Name:           fmt.Sprintf("%s (copy)", existingVideo.Name),
+		Script:         existingVideo.Script,
+		OrganizationID: organizationID,
+		Status:         existingVideo.Status,
+		Metadata:       existingVideo.Metadata,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	video.AIGeneratedConfig = existingVideo.AIGeneratedConfig
+	video.Config = existingVideo.Config
+	video.Version = 0
+
+	err = v.db.UpdateVideo(ctx, video)
 	if err != nil {
 		return nil, err
 	}

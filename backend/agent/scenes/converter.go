@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/shank318/coasterai/agent/scenes/field_resolvers"
 	"github.com/shank318/coasterai/baml_client/types"
+	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/services"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/structpb"
@@ -18,6 +19,7 @@ type SceneConfig struct {
 	Props              map[string]any
 	DurationExpression string
 	Children           []SceneConfig
+	Background         *pbcore.BackgroundStyle
 }
 
 // Convert the LLM generated scene to internal config
@@ -33,12 +35,18 @@ func ConvertToSceneConfig(scene *types.Scene, fieldValueMapper *services.MediaAs
 		return nil, fmt.Errorf("invalid scene props json: %w", err)
 	}
 
-	component, err := findComponent(element.Component)
+	component, err := FindComponent(element.Component)
 	if err != nil {
 		return nil, err
 	}
 
-	finalProps, err := GenerateEditsFromProps(component.Schema, props, field_resolvers.FieldResolverForward, fieldValueMapper)
+	background := resolveSceneBackground(scene, fieldValueMapper)
+	finalProps, err := GenerateEditsFromProps(
+		component.Schema,
+		props,
+		field_resolvers.FieldResolverForward,
+		fieldValueMapper,
+		background)
 	if err != nil {
 		return nil, err
 	}
@@ -48,6 +56,7 @@ func ConvertToSceneConfig(scene *types.Scene, fieldValueMapper *services.MediaAs
 		Name:               component.Name,
 		DurationExpression: component.CELExpression,
 		Props:              finalProps,
+		Background:         background,
 	}
 
 	// TODO: Move it in a better place
@@ -144,12 +153,12 @@ func sceneConfigFromPatch(data []byte, fieldValueMapper *services.MediaAssetRegi
 	}
 
 	// Resolve
-	component, err := findComponent(cfg.Name)
+	component, err := FindComponent(cfg.Name)
 	if err != nil {
 		return nil, err
 	}
 
-	finalProps, err := GenerateEditsFromProps(component.Schema, cfg.Props, field_resolvers.FieldResolverReverse, fieldValueMapper)
+	finalProps, err := GenerateEditsFromProps(component.Schema, cfg.Props, field_resolvers.FieldResolverReverse, fieldValueMapper, nil)
 	if err != nil {
 		return nil, err
 	}

@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react'
 
 import { AbsoluteFill, continueRender, delayRender, useCurrentFrame, useVideoConfig } from 'remotion'
 import {
-  SpeedFactorProvider,
   PatchContextProvider,
   type PatchOverlay,
 } from '@coasterai/animation'
@@ -194,11 +193,9 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
           {isLoading ? (
             <TemplateLoadingPlaceholder />
           ) : CompiledComponent ? (
-            <SpeedFactorProvider factor={1}>
               <PatchContextProvider overlay={content?.edits as PatchOverlay}>
                 <CompiledComponent />
               </PatchContextProvider>
-            </SpeedFactorProvider>
           ) : templateError ? (
             <TemplateErrorFallback message={templateError} />
           ) : null}

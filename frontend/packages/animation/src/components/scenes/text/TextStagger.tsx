@@ -120,12 +120,12 @@ export const TextStaggerSchemaFields = [
     {
         "name": "text",
         "type": "string",
+        "datatype": "text",
         "map": "props.text"
     },
     {
         "name": "variant",
-        "type": "string",
-        "subtype": "enum",
+        "type": "enum",
         "default": TextStaggerDefaults.variant
     },
     {
@@ -135,8 +135,7 @@ export const TextStaggerSchemaFields = [
     },
     {
         "name": "entranceAnimation",
-        "type": "string",
-        "subtype": "enum",
+        "type": "enum",
         "map": "props.entranceAnimation",
         "default": TextStaggerDefaults.entranceAnimation
     },
@@ -147,8 +146,7 @@ export const TextStaggerSchemaFields = [
     },
     {
         "name": "splitBy",
-        "type": "string",
-        "subtype": "enum",
+        "type": "enum",
         "default": TextStaggerDefaults.splitBy
     }
 ]

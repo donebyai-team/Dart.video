@@ -236,18 +236,17 @@ export const HeroPillCarouselSchemaFields = [
             {
                 name: 'text',
                 type: 'string',
+                datatype: 'text',
                 map: 'props.text',
             },
             {
                 "name": "variant",
-                "type": "string",
-                "subtype": "enum",
+                "type": "enum",
                 "default": HERO_TEXT_DEFAULTS.variant
             },
             {
                 "name": "entranceAnimation",
-                "type": "string",
-                "subtype": "enum",
+                "type": "enum",
                 "map": "props.entranceAnimation",
                 "default": HERO_TEXT_DEFAULTS.entranceAnimation
             },
@@ -280,8 +279,7 @@ export const HeroPillCarouselSchemaFields = [
                     },
                     {
                         name: 'variant',
-                        type: 'string',
-                        subtype: 'enum',
+                        type: 'enum',
                         default: IconTextPillDefaults.variant,
                     }
                 ]

@@ -1,6 +1,5 @@
 import React, { createContext, useContext } from 'react';
 import { PatchOverlay, createEmptyPatchOverlay } from './types';
-import { useSpeedFactor } from '../duration/speedFactor';
 import { deepMerge } from './utils';
 
 /**
@@ -53,7 +52,6 @@ export function usePrimitivePatches(
   defaults: TimingDefaults,
 ): ResolvedTiming {
   const overlay = useContext(PatchContext);
-  const speedFactor = useSpeedFactor();
 
   let startAt = defaults.startAt;
   let duration = defaults.durationInFrames;
@@ -62,12 +60,6 @@ export function usePrimitivePatches(
     const entry = overlay[id];
     if (typeof entry?.startAt === 'number') startAt = entry.startAt;
     if (typeof entry?.durationInFrames === 'number') duration = entry.durationInFrames;
-  }
-
-  // Apply speed factor — scales all timing proportionally
-  if (speedFactor !== 1) {
-    startAt = Math.round(startAt / speedFactor);
-    duration = Math.round(duration / speedFactor);
   }
 
   return { effectiveStartAt: startAt, effectiveDurationInFrames: duration };
