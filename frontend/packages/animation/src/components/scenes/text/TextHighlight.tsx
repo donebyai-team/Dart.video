@@ -25,7 +25,7 @@ export const TextHighlightDefaults = {
     highlightColor: '',
     entranceAnimation: 'slideUp' as EntranceAnimation,
     animationDelay: 30,
-    zoomDuration: 30,
+    animationDuration: 30,
     className: undefined as string | undefined,
     style: undefined as React.CSSProperties | undefined,
 };
@@ -49,7 +49,7 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
     const actualHighlightColor = props.highlightColor || theme.colors.primary;
     const actualAnimation = props.entranceAnimation;
     const actualAnimationDelay = props.animationDelay;
-    const actualZoomDuration = props.zoomDuration;
+    const actualAnimationDuration = props.animationDuration;
     const styleOverride = useStyleOverride(id);
 
     // Animation timeline:
@@ -69,7 +69,7 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
     const zoomStartFrame = actualAnimationDelay;
     const zoomProgress = interpolateWithEasing(
         frame,
-        [zoomStartFrame, zoomStartFrame + actualZoomDuration],
+        [zoomStartFrame, zoomStartFrame + actualAnimationDuration],
         [0, 1],
         'ease-out'
     );
@@ -270,9 +270,9 @@ export const TextHighlightSchemaFields = [
         "default": TextHighlightDefaults.animationDelay
     },
     {
-        "name": "zoomDuration",
+        "name": "animationDuration",
         "type": "number",
-        "default": TextHighlightDefaults.zoomDuration
+        "default": TextHighlightDefaults.animationDuration
     },
     {
         "name": "highlightStyle",
@@ -313,5 +313,5 @@ export const TextHighlightDescriptor: ComponentRegistration = {
         }
     ],
     description: 'Bold statement with an emphasized word/phrase. Use for key claims. Use {} to highlight. eg "We build amazing {software}"',
-    celExpression: 'props.texthighlight.animationDelay + props.texthighlight.zoomDuration',
+    celExpression: 'props.texthighlight.animationDelay + props.texthighlight.animationDuration',
 };

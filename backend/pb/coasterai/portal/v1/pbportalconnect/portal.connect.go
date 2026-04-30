@@ -81,12 +81,15 @@ const (
 	// PortalServiceDeleteVideoProcedure is the fully-qualified name of the PortalService's DeleteVideo
 	// RPC.
 	PortalServiceDeleteVideoProcedure = "/coasterai.portal.v1.PortalService/DeleteVideo"
-	// PortalServiceUpdateVideoConfigProcedure is the fully-qualified name of the PortalService's
-	// UpdateVideoConfig RPC.
-	PortalServiceUpdateVideoConfigProcedure = "/coasterai.portal.v1.PortalService/UpdateVideoConfig"
+	// PortalServiceDuplicateVideoProcedure is the fully-qualified name of the PortalService's
+	// DuplicateVideo RPC.
+	PortalServiceDuplicateVideoProcedure = "/coasterai.portal.v1.PortalService/DuplicateVideo"
 	// PortalServiceRenderVideoProcedure is the fully-qualified name of the PortalService's RenderVideo
 	// RPC.
 	PortalServiceRenderVideoProcedure = "/coasterai.portal.v1.PortalService/RenderVideo"
+	// PortalServiceUpdateVideoConfigProcedure is the fully-qualified name of the PortalService's
+	// UpdateVideoConfig RPC.
+	PortalServiceUpdateVideoConfigProcedure = "/coasterai.portal.v1.PortalService/UpdateVideoConfig"
 	// PortalServiceListFigmaFramesProcedure is the fully-qualified name of the PortalService's
 	// ListFigmaFrames RPC.
 	PortalServiceListFigmaFramesProcedure = "/coasterai.portal.v1.PortalService/ListFigmaFrames"
@@ -133,8 +136,9 @@ var (
 	portalServiceStopVideoMethodDescriptor             = portalServiceServiceDescriptor.Methods().ByName("StopVideo")
 	portalServiceGetVideosMethodDescriptor             = portalServiceServiceDescriptor.Methods().ByName("GetVideos")
 	portalServiceDeleteVideoMethodDescriptor           = portalServiceServiceDescriptor.Methods().ByName("DeleteVideo")
-	portalServiceUpdateVideoConfigMethodDescriptor     = portalServiceServiceDescriptor.Methods().ByName("UpdateVideoConfig")
+	portalServiceDuplicateVideoMethodDescriptor        = portalServiceServiceDescriptor.Methods().ByName("DuplicateVideo")
 	portalServiceRenderVideoMethodDescriptor           = portalServiceServiceDescriptor.Methods().ByName("RenderVideo")
+	portalServiceUpdateVideoConfigMethodDescriptor     = portalServiceServiceDescriptor.Methods().ByName("UpdateVideoConfig")
 	portalServiceListFigmaFramesMethodDescriptor       = portalServiceServiceDescriptor.Methods().ByName("ListFigmaFrames")
 	portalServiceImportFigmaFrameMethodDescriptor      = portalServiceServiceDescriptor.Methods().ByName("ImportFigmaFrame")
 	portalServiceCreateBrandIdentityMethodDescriptor   = portalServiceServiceDescriptor.Methods().ByName("CreateBrandIdentity")
@@ -165,9 +169,10 @@ type PortalServiceClient interface {
 	GetVideo(context.Context, *connect.Request[v1.GetVideoRequest]) (*connect.ServerStreamForClient[v1.GetVideoResponse], error)
 	StopVideo(context.Context, *connect.Request[v1.StopVideoRequest]) (*connect.Response[emptypb.Empty], error)
 	GetVideos(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetVideosResponse], error)
-	DeleteVideo(context.Context, *connect.Request[v1.DeleteVideoRequest]) (*connect.Response[emptypb.Empty], error)
+	DeleteVideo(context.Context, *connect.Request[v1.VideoRequestWithID]) (*connect.Response[emptypb.Empty], error)
+	DuplicateVideo(context.Context, *connect.Request[v1.VideoRequestWithID]) (*connect.Response[v1.GetVideoResponse], error)
+	RenderVideo(context.Context, *connect.Request[v1.VideoRequestWithID]) (*connect.Response[v1.RenderVideoResponse], error)
 	UpdateVideoConfig(context.Context, *connect.Request[v1.UpdateVideoConfigRequest]) (*connect.Response[emptypb.Empty], error)
-	RenderVideo(context.Context, *connect.Request[v1.RenderVideoRequest]) (*connect.Response[v1.RenderVideoResponse], error)
 	ListFigmaFrames(context.Context, *connect.Request[v1.ListFigmaFramesRequest]) (*connect.Response[v1.ListFigmaFramesResponse], error)
 	ImportFigmaFrame(context.Context, *connect.Request[v1.ImportFigmaFrameRequest]) (*connect.Response[v1.ImportFigmaFrameResponse], error)
 	// brand identity request
@@ -287,22 +292,28 @@ func NewPortalServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(portalServiceGetVideosMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
-		deleteVideo: connect.NewClient[v1.DeleteVideoRequest, emptypb.Empty](
+		deleteVideo: connect.NewClient[v1.VideoRequestWithID, emptypb.Empty](
 			httpClient,
 			baseURL+PortalServiceDeleteVideoProcedure,
 			connect.WithSchema(portalServiceDeleteVideoMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
+		duplicateVideo: connect.NewClient[v1.VideoRequestWithID, v1.GetVideoResponse](
+			httpClient,
+			baseURL+PortalServiceDuplicateVideoProcedure,
+			connect.WithSchema(portalServiceDuplicateVideoMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
+		renderVideo: connect.NewClient[v1.VideoRequestWithID, v1.RenderVideoResponse](
+			httpClient,
+			baseURL+PortalServiceRenderVideoProcedure,
+			connect.WithSchema(portalServiceRenderVideoMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
 		updateVideoConfig: connect.NewClient[v1.UpdateVideoConfigRequest, emptypb.Empty](
 			httpClient,
 			baseURL+PortalServiceUpdateVideoConfigProcedure,
 			connect.WithSchema(portalServiceUpdateVideoConfigMethodDescriptor),
-			connect.WithClientOptions(opts...),
-		),
-		renderVideo: connect.NewClient[v1.RenderVideoRequest, v1.RenderVideoResponse](
-			httpClient,
-			baseURL+PortalServiceRenderVideoProcedure,
-			connect.WithSchema(portalServiceRenderVideoMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
 		listFigmaFrames: connect.NewClient[v1.ListFigmaFramesRequest, v1.ListFigmaFramesResponse](
@@ -374,9 +385,10 @@ type portalServiceClient struct {
 	getVideo              *connect.Client[v1.GetVideoRequest, v1.GetVideoResponse]
 	stopVideo             *connect.Client[v1.StopVideoRequest, emptypb.Empty]
 	getVideos             *connect.Client[emptypb.Empty, v1.GetVideosResponse]
-	deleteVideo           *connect.Client[v1.DeleteVideoRequest, emptypb.Empty]
+	deleteVideo           *connect.Client[v1.VideoRequestWithID, emptypb.Empty]
+	duplicateVideo        *connect.Client[v1.VideoRequestWithID, v1.GetVideoResponse]
+	renderVideo           *connect.Client[v1.VideoRequestWithID, v1.RenderVideoResponse]
 	updateVideoConfig     *connect.Client[v1.UpdateVideoConfigRequest, emptypb.Empty]
-	renderVideo           *connect.Client[v1.RenderVideoRequest, v1.RenderVideoResponse]
 	listFigmaFrames       *connect.Client[v1.ListFigmaFramesRequest, v1.ListFigmaFramesResponse]
 	importFigmaFrame      *connect.Client[v1.ImportFigmaFrameRequest, v1.ImportFigmaFrameResponse]
 	createBrandIdentity   *connect.Client[v1.BrandIdentityRequest, v11.BrandIdentity]
@@ -468,18 +480,23 @@ func (c *portalServiceClient) GetVideos(ctx context.Context, req *connect.Reques
 }
 
 // DeleteVideo calls coasterai.portal.v1.PortalService.DeleteVideo.
-func (c *portalServiceClient) DeleteVideo(ctx context.Context, req *connect.Request[v1.DeleteVideoRequest]) (*connect.Response[emptypb.Empty], error) {
+func (c *portalServiceClient) DeleteVideo(ctx context.Context, req *connect.Request[v1.VideoRequestWithID]) (*connect.Response[emptypb.Empty], error) {
 	return c.deleteVideo.CallUnary(ctx, req)
+}
+
+// DuplicateVideo calls coasterai.portal.v1.PortalService.DuplicateVideo.
+func (c *portalServiceClient) DuplicateVideo(ctx context.Context, req *connect.Request[v1.VideoRequestWithID]) (*connect.Response[v1.GetVideoResponse], error) {
+	return c.duplicateVideo.CallUnary(ctx, req)
+}
+
+// RenderVideo calls coasterai.portal.v1.PortalService.RenderVideo.
+func (c *portalServiceClient) RenderVideo(ctx context.Context, req *connect.Request[v1.VideoRequestWithID]) (*connect.Response[v1.RenderVideoResponse], error) {
+	return c.renderVideo.CallUnary(ctx, req)
 }
 
 // UpdateVideoConfig calls coasterai.portal.v1.PortalService.UpdateVideoConfig.
 func (c *portalServiceClient) UpdateVideoConfig(ctx context.Context, req *connect.Request[v1.UpdateVideoConfigRequest]) (*connect.Response[emptypb.Empty], error) {
 	return c.updateVideoConfig.CallUnary(ctx, req)
-}
-
-// RenderVideo calls coasterai.portal.v1.PortalService.RenderVideo.
-func (c *portalServiceClient) RenderVideo(ctx context.Context, req *connect.Request[v1.RenderVideoRequest]) (*connect.Response[v1.RenderVideoResponse], error) {
-	return c.renderVideo.CallUnary(ctx, req)
 }
 
 // ListFigmaFrames calls coasterai.portal.v1.PortalService.ListFigmaFrames.
@@ -542,9 +559,10 @@ type PortalServiceHandler interface {
 	GetVideo(context.Context, *connect.Request[v1.GetVideoRequest], *connect.ServerStream[v1.GetVideoResponse]) error
 	StopVideo(context.Context, *connect.Request[v1.StopVideoRequest]) (*connect.Response[emptypb.Empty], error)
 	GetVideos(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetVideosResponse], error)
-	DeleteVideo(context.Context, *connect.Request[v1.DeleteVideoRequest]) (*connect.Response[emptypb.Empty], error)
+	DeleteVideo(context.Context, *connect.Request[v1.VideoRequestWithID]) (*connect.Response[emptypb.Empty], error)
+	DuplicateVideo(context.Context, *connect.Request[v1.VideoRequestWithID]) (*connect.Response[v1.GetVideoResponse], error)
+	RenderVideo(context.Context, *connect.Request[v1.VideoRequestWithID]) (*connect.Response[v1.RenderVideoResponse], error)
 	UpdateVideoConfig(context.Context, *connect.Request[v1.UpdateVideoConfigRequest]) (*connect.Response[emptypb.Empty], error)
-	RenderVideo(context.Context, *connect.Request[v1.RenderVideoRequest]) (*connect.Response[v1.RenderVideoResponse], error)
 	ListFigmaFrames(context.Context, *connect.Request[v1.ListFigmaFramesRequest]) (*connect.Response[v1.ListFigmaFramesResponse], error)
 	ImportFigmaFrame(context.Context, *connect.Request[v1.ImportFigmaFrameRequest]) (*connect.Response[v1.ImportFigmaFrameResponse], error)
 	// brand identity request
@@ -666,16 +684,22 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(portalServiceDeleteVideoMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
-	portalServiceUpdateVideoConfigHandler := connect.NewUnaryHandler(
-		PortalServiceUpdateVideoConfigProcedure,
-		svc.UpdateVideoConfig,
-		connect.WithSchema(portalServiceUpdateVideoConfigMethodDescriptor),
+	portalServiceDuplicateVideoHandler := connect.NewUnaryHandler(
+		PortalServiceDuplicateVideoProcedure,
+		svc.DuplicateVideo,
+		connect.WithSchema(portalServiceDuplicateVideoMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
 	portalServiceRenderVideoHandler := connect.NewUnaryHandler(
 		PortalServiceRenderVideoProcedure,
 		svc.RenderVideo,
 		connect.WithSchema(portalServiceRenderVideoMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
+	portalServiceUpdateVideoConfigHandler := connect.NewUnaryHandler(
+		PortalServiceUpdateVideoConfigProcedure,
+		svc.UpdateVideoConfig,
+		connect.WithSchema(portalServiceUpdateVideoConfigMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
 	portalServiceListFigmaFramesHandler := connect.NewUnaryHandler(
@@ -762,10 +786,12 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 			portalServiceGetVideosHandler.ServeHTTP(w, r)
 		case PortalServiceDeleteVideoProcedure:
 			portalServiceDeleteVideoHandler.ServeHTTP(w, r)
-		case PortalServiceUpdateVideoConfigProcedure:
-			portalServiceUpdateVideoConfigHandler.ServeHTTP(w, r)
+		case PortalServiceDuplicateVideoProcedure:
+			portalServiceDuplicateVideoHandler.ServeHTTP(w, r)
 		case PortalServiceRenderVideoProcedure:
 			portalServiceRenderVideoHandler.ServeHTTP(w, r)
+		case PortalServiceUpdateVideoConfigProcedure:
+			portalServiceUpdateVideoConfigHandler.ServeHTTP(w, r)
 		case PortalServiceListFigmaFramesProcedure:
 			portalServiceListFigmaFramesHandler.ServeHTTP(w, r)
 		case PortalServiceImportFigmaFrameProcedure:
@@ -855,16 +881,20 @@ func (UnimplementedPortalServiceHandler) GetVideos(context.Context, *connect.Req
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.GetVideos is not implemented"))
 }
 
-func (UnimplementedPortalServiceHandler) DeleteVideo(context.Context, *connect.Request[v1.DeleteVideoRequest]) (*connect.Response[emptypb.Empty], error) {
+func (UnimplementedPortalServiceHandler) DeleteVideo(context.Context, *connect.Request[v1.VideoRequestWithID]) (*connect.Response[emptypb.Empty], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.DeleteVideo is not implemented"))
+}
+
+func (UnimplementedPortalServiceHandler) DuplicateVideo(context.Context, *connect.Request[v1.VideoRequestWithID]) (*connect.Response[v1.GetVideoResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.DuplicateVideo is not implemented"))
+}
+
+func (UnimplementedPortalServiceHandler) RenderVideo(context.Context, *connect.Request[v1.VideoRequestWithID]) (*connect.Response[v1.RenderVideoResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.RenderVideo is not implemented"))
 }
 
 func (UnimplementedPortalServiceHandler) UpdateVideoConfig(context.Context, *connect.Request[v1.UpdateVideoConfigRequest]) (*connect.Response[emptypb.Empty], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.UpdateVideoConfig is not implemented"))
-}
-
-func (UnimplementedPortalServiceHandler) RenderVideo(context.Context, *connect.Request[v1.RenderVideoRequest]) (*connect.Response[v1.RenderVideoResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.RenderVideo is not implemented"))
 }
 
 func (UnimplementedPortalServiceHandler) ListFigmaFrames(context.Context, *connect.Request[v1.ListFigmaFramesRequest]) (*connect.Response[v1.ListFigmaFramesResponse], error) {

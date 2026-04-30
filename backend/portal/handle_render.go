@@ -9,7 +9,7 @@ import (
 	"github.com/shank318/coasterai/services"
 )
 
-func (p *Portal) RenderVideo(ctx context.Context, c *connect.Request[pbportal.RenderVideoRequest]) (*connect.Response[pbportal.RenderVideoResponse], error) {
+func (p *Portal) RenderVideo(ctx context.Context, c *connect.Request[pbportal.VideoRequestWithID]) (*connect.Response[pbportal.RenderVideoResponse], error) {
 	actor, err := p.gethAuthContext(ctx)
 	if err != nil {
 		return nil, err

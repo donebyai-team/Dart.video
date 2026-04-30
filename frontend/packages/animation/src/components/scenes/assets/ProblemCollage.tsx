@@ -408,7 +408,7 @@ export const ProblemCollage: React.FC = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         zIndex: 5,
-                        pointerEvents: 'none',
+
                         padding: '0 8%',
                     }}
                 >

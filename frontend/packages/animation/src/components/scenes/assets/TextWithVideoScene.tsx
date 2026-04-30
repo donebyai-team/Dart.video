@@ -11,7 +11,6 @@ import { TextHighlight, TextHighlightDefaults, TextHighlightSchemaFields } from 
 import { TextStagger, TextStaggerDefaults, TextStaggerSchemaFields } from '../text/TextStagger';
 import { TextWithWordCycle, TextWithWordCycleDefaults, TextWithWordCycleSchemaFields } from '../text/TextWithWordCycle';
 import { resolveContentAwareLayout } from './ContentAwareScene.layout';
-import { TypographyVariant } from '../../../tokens';
 
 const DEFAULT_ANIMATION = 'slideUp' as const;
 const FALLBACK_WIDTH = 1920;
