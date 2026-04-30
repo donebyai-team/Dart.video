@@ -2,6 +2,7 @@ import { BrandAsset, BrandTheme, DEFAULT_BRAND_THEME } from "@coasterai/animatio
 import { BrandAssetPriority, BrandMedia, BrandMediaType } from "@coasterai/pb/coasterai/core/v1/brandkit_pb";
 import { MediaAsset } from "@coasterai/pb/coasterai/core/v1/media_asset_pb";
 import { GeneratedVideoBranding } from "@coasterai/pb/coasterai/core/v1/video_pb";
+import { loadFonts } from "./load_fonts";
 
 export function brandingToTheme(
     branding?: GeneratedVideoBranding
@@ -67,6 +68,8 @@ export function brandingToTheme(
     for (const c of branding.brandIdentity?.fonts || []) {
         theme.font = c.googleFontsName;
         if (theme.font)
+            // load font before hand
+            loadFonts([theme.font])
             break;
     }
 
