@@ -16,11 +16,11 @@ export const createToolActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     if (!resolution) return;
 
     const fps = getFPS();
-    const slideDurationFrames = selectedSlide.slide.durationInFrames;
+    const slideDurationFrames = selectedSlide.durationInFrames;
     const transitionFrames = TRANSITION_DURATION_FRAMES
 
     const allSlides = get().getTimelineSlides();
-    const slideStartFrame = getRealSlideStartFrame(allSlides, selectedSlide.slide.id, fps);
+    const slideStartFrame = getRealSlideStartFrame(allSlides, selectedSlide.id, fps);
     const relativeFrame = Math.max(0, (currentFrame ?? 0) - slideStartFrame);
 
     const zoomDuration = fps * 3; // 3 seconds

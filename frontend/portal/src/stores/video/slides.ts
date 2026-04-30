@@ -1,12 +1,13 @@
 import { TimelineSlide } from '@/components/editor/timeline/types'
 import { Slide, TransitionDirection, TransitionType, BackgroundStyle, Section, BackgroundStyleSchema } from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import { arrayMove } from '@dnd-kit/sortable'
 import { clone, create } from '@bufbuild/protobuf'
 import { createNewSlide, getDefaulVideotMetadata, createDefaultBackgroundStyle, resolveBackgroundStyle } from './defaults'
 import { VideoStoreSet, VideoStoreGet } from './types'
-import { getSections, updateVideoConfigSections, updateSelectedSlide, updateTotalDuration, getPreviousSlide } from './utils'
+import { findSlideById, getSections, updateVideoConfigSections, updateSelectedSlide, updateTotalDuration, getPreviousSlide, updateSlideById } from './utils'
 import defaultEditorConfig from '@/data/editorConfig'
 import { TRANSITION_DURATION_FRAMES } from '@coasterai/renderer/src/frameUtils'
+
+const SECTION_END_DROP_PREFIX = 'section-end:'
 
 export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   /* ================= ADD ================= */
@@ -61,11 +62,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
 
     set({ videoConfig: newVideoConfig });
 
-    const section = getSections(newVideoConfig).find(s => s.id === sectionId);
-
-    if (section) {
-      set({ selectedSlide: { section, slide: newSlide } });
-    }
+    set({ selectedSlide: newSlide });
 
     console.debug("added slide", newSlide.id, "after", afterSlideId);
 
@@ -112,7 +109,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
         sections.map((section) => ({
           ...section,
           slides: section.slides.map((slide) => {
-            const isSelected = slide.id === selectedSlide.slide.id && section.id === selectedSlide.section.id;
+            const isSelected = slide.id === selectedSlide.id;
             
             if (isSelected) {
               const clonedBg = clone(BackgroundStyleSchema, background);
@@ -150,18 +147,10 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     const { videoConfig, selectedSlide } = get()
     if (!videoConfig || !selectedSlide) return
 
-    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
-      sections.map(section =>
-        section.id === selectedSlide.section.id
-          ? {
-            ...section,
-            slides: section.slides.map(slide =>
-              slide.id === selectedSlide.slide.id ? { ...slide, transcript } : slide
-            )
-          }
-          : section
-      )
-    )
+    const newVideoConfig = updateSlideById(videoConfig, selectedSlide.id, slide => ({
+      ...slide,
+      transcript
+    }))
 
     set({
       videoConfig: newVideoConfig,
@@ -190,17 +179,17 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
 
     set({ videoConfig: newVideoConfig })
 
-    if (selectedSlide?.slide.id === slideId) {
+    if (selectedSlide?.id === slideId) {
       const sections = getSections(newVideoConfig)
       const section = sections.find(s => s.id === sectionId)
       const fallback = section?.slides?.[0]
 
       if (fallback) {
-        set({ selectedSlide: { section, slide: fallback } })
+        set({ selectedSlide: fallback })
       } else {
         const next = sections.find(s => s.slides.length > 0)
         set({
-          selectedSlide: next ? { section: next, slide: next.slides[0] } : null
+          selectedSlide: next ? next.slides[0] : null
         })
       }
     }
@@ -214,16 +203,10 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     const { videoConfig, selectedSlide } = get()
     if (!videoConfig || !selectedSlide) return
 
-    let newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
-      sections.map(section =>
-        section.id === selectedSlide.section.id
-          ? {
-            ...section,
-            slides: section.slides.map(sl => (sl.id === selectedSlide.slide.id ? { ...sl, ...updates } : sl))
-          }
-          : section
-      )
-    )
+    let newVideoConfig = updateSlideById(videoConfig, selectedSlide.id, slide => ({
+      ...slide,
+      ...updates
+    }))
 
     newVideoConfig = updateTotalDuration(newVideoConfig)
 
@@ -274,19 +257,13 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     const { videoConfig, selectedSlide } = get()
     if (!videoConfig || !selectedSlide) return
 
-    const content = selectedSlide.slide.content || {}
+    const content = selectedSlide.content || {}
     const newContent = { ...content, ...updates }
 
-    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
-      sections.map(section =>
-        section.id === selectedSlide.section.id
-          ? {
-            ...section,
-            slides: section.slides.map(sl => (sl.id === selectedSlide.slide.id ? { ...sl, content: newContent } as Slide : sl))
-          }
-          : section
-      )
-    )
+    const newVideoConfig = updateSlideById(videoConfig, selectedSlide.id, slide => ({
+      ...slide,
+      content: newContent
+    } as Slide))
 
     set({
       videoConfig: newVideoConfig,
@@ -343,7 +320,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       videoConfig: newVideoConfig,
       // Keep selectedSlide in sync when transition is edited from storyboard controls.
       selectedSlide:
-        selectedSlide?.slide.id === slideId
+        selectedSlide?.id === slideId
           ? updateSelectedSlide(selectedSlide, slide => {
             const updatedSlide: any = {
               ...slide,
@@ -400,7 +377,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
 
     const updatedSection = getSections(newVideoConfig).find(s => s.id === sectionId)
     if (updatedSection) {
-      set({ selectedSlide: { section: updatedSection, slide: duplicatedSlide } })
+      set({ selectedSlide: duplicatedSlide })
     }
 
     get().refreshPendingChanges()
@@ -408,27 +385,57 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
 
   /* ================= REORDER ================= */
 
-  reorderSlidesInSection(sectionId: string, activeId: string, overId: string) {
-    const { videoConfig } = get()
+  // Storyboard sections expose synthetic bottom drop zones like `section-end:<id>`
+  // so a dragged slide can land in an empty section or append after the last slide.
+  // If `overId` is a real slide id, we insert before that slide; otherwise we append.
+  reorderSlidesInSection(activeId: string, overId: string) {
+    const { videoConfig, selectedSlide } = get()
     if (!videoConfig) return
 
-    const sections = getSections(videoConfig)
+    const sections = getSections(videoConfig).map(section => ({
+      ...section,
+      slides: [...section.slides]
+    }))
 
-    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
-      sections.map(section => {
-        if (section.id !== sectionId) return section
-
-        const oldIndex = section.slides.findIndex(sl => sl.id === activeId)
-        const newIndex = section.slides.findIndex(sl => sl.id === overId)
-
-        return {
-          ...section,
-          slides: arrayMove(section.slides, oldIndex, newIndex)
-        }
-      })
+    const sourceSectionIndex = sections.findIndex(section =>
+      section.slides.some(slide => slide.id === activeId)
     )
+    if (sourceSectionIndex === -1) return
 
-    set({ videoConfig: newVideoConfig })
+    const sourceSlideIndex = sections[sourceSectionIndex].slides.findIndex(
+      slide => slide.id === activeId
+    )
+    if (sourceSlideIndex === -1) return
+
+    const [movedSlide] = sections[sourceSectionIndex].slides.splice(sourceSlideIndex, 1)
+    if (!movedSlide) return
+
+    if (overId.startsWith(SECTION_END_DROP_PREFIX)) {
+      const targetSectionId = overId.slice(SECTION_END_DROP_PREFIX.length)
+      const targetSectionIndex = sections.findIndex(section => section.id === targetSectionId)
+      if (targetSectionIndex === -1) return
+
+      sections[targetSectionIndex].slides.push(movedSlide)
+    } else {
+      const targetSectionIndex = sections.findIndex(section =>
+        section.slides.some(slide => slide.id === overId)
+      )
+      if (targetSectionIndex === -1) return
+
+      const targetSlideIndex = sections[targetSectionIndex].slides.findIndex(
+        slide => slide.id === overId
+      )
+      if (targetSlideIndex === -1) return
+
+      sections[targetSectionIndex].slides.splice(targetSlideIndex, 0, movedSlide)
+    }
+
+    const newVideoConfig = updateVideoConfigSections(videoConfig, () => sections)
+
+    set({
+      videoConfig: newVideoConfig,
+      selectedSlide: selectedSlide ? findSlideById(newVideoConfig, selectedSlide.id) : null
+    })
 
     get().refreshPendingChanges()
   }

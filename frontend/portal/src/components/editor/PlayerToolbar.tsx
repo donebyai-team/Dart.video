@@ -17,7 +17,7 @@ import { useVideoStore } from '@/stores/video'
 import { EffectType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { ActiveToolType } from '@/types/tools'
 import { backgroundStyleToCSS } from '@coasterai/renderer'
-import DurationChangeComponent from './remotion/components/DurationChangeComponent'
+import DurationChangeComponent from './toolbar/DurationChangeComponent'
 import { isPlatformAdmin } from '@coasterai/ui-core/helper/role'
 import { useAuth } from '@coasterai/ui-core/hooks/useAuth'
 
@@ -48,7 +48,7 @@ const PlayerToolbar = ({ onDurationChange, minDuration = 1, maxDuration = 180, c
   const getSlideDurationInSeconds = useVideoStore(s => s.getSlideDurationInSeconds)
 
   if (!selectedSlide) return
-  let slide = selectedSlide.slide
+  let slide = selectedSlide
 
   const currentBg = backgroundStyleToCSS(getSlideWithBackground(slide));
   const isBackgroundActive = activeTool?.type === ActiveToolType.BACKGROUND

@@ -96,7 +96,7 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
     useEffect(() => {
         if (selectedSlide) {
             setPrompt(
-                (selectedSlide.slide?.content?.plan?.selectedTemplateDescription) || ''
+                (selectedSlide.content?.plan?.selectedTemplateDescription) || ''
             );
         }
     }, [selectedSlide]);
@@ -145,8 +145,8 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
         const updatedContent = slide.content;
         if (!updatedContent) return
 
-        const existingContent = selectedSlide?.slide.content
-            ? selectedSlide.slide.content
+        const existingContent = selectedSlide?.content
+            ? selectedSlide.content
             : undefined
 
         const pathOverlay = updatedContent.edits as unknown as PatchOverlay
@@ -215,7 +215,7 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
 
     const startStream = async (overridePrompt?: string) => {
         const finalPrompt = (overridePrompt ?? prompt).trim()
-        const slideId = selectedSlide?.slide.id
+        const slideId = selectedSlide?.id
         if (!videoId || !finalPrompt || !slideId || isSubmitting) return
 
         const controller = new AbortController()
@@ -233,7 +233,7 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
             const stream = portalClient.generateOrEditScene(
                 {
                     videoId,
-                    slideToEdit: selectedSlide?.slide,
+                    slideToEdit: selectedSlide,
                     input: {
                         case: 'request',
                         value: {
@@ -371,7 +371,7 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
 
     const handleContinuePlanning = async (responseOverride?: string) => {
         const response = (responseOverride ?? answerInput).trim()
-        const slideId = selectedSlide?.slide.id
+        const slideId = selectedSlide?.id
         if (!videoId || !response || !slideId || isSubmitting) return
 
         const controller = new AbortController()
@@ -390,7 +390,7 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
 
             const stream = portalClient.generateOrEditScene({
                 videoId,
-                slideToEdit: selectedSlide?.slide,
+                slideToEdit: selectedSlide,
                 input: {
                     case: 'askUserInput',
                     value: {

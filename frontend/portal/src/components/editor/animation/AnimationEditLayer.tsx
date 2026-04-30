@@ -66,14 +66,15 @@ export function AnimationEditLayer({
   const estimatedToolbarHeight = 48
 
   function supportsToolbar(id: string): boolean {
-    const lowerId = id.toLowerCase()
-    return lowerId.includes('text') ||
-      lowerId.includes('icon') ||
-      lowerId.includes('container') ||
-      lowerId.includes('counter') ||
-      lowerId.includes('typewriter') ||
-      lowerId.includes('image') ||
-      lowerId.includes('video')
+    // const lowerId = id.toLowerCase()
+    // return lowerId.includes('text') ||
+    //   lowerId.includes('icon') ||
+    //   lowerId.includes('container') ||
+    //   lowerId.includes('counter') ||
+    //   lowerId.includes('typewriter') ||
+    //   lowerId.includes('image') ||
+    //   lowerId.includes('video')
+    return true
   }
 
   // TODO: add it for all text components

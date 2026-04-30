@@ -1,7 +1,6 @@
 import { create } from '@bufbuild/protobuf'
 import { Config, ConfigSchema } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
 import { portalClient } from './grpc'
-import { log } from './logger'
 
 // this is present on build (i.e. http://api.freightstream.ai)
 export const CONFIG_API_URI = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8787'

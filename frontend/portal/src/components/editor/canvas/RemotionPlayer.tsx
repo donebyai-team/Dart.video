@@ -38,7 +38,6 @@ interface RemotionPlayerProps {
   onPlaybackStateChange?: (isPlaying: boolean) => void;
   transcriptPanel?: React.ReactNode;
   onSelectOverlayFromTimeline?: (overlayId: string, slideId: string) => void;
-  onSlideSpeedChange: (slideId: string, newDuration: number) => void;
   onSelectTemplate?: (slideId: string) => void;
   onDurationChange: (slideId: string, newDuration: number) => void;
   animationEdit: {
@@ -63,7 +62,6 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
     onFullscreenChange,
     onPlaybackStateChange,
     onSelectOverlayFromTimeline,
-    onSlideSpeedChange,
     onDurationChange,
     onSelectTemplate,
     animationEdit,
@@ -75,7 +73,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   const canvasContainerRef = useRef<HTMLDivElement>(null);
 
   const videoConfigFromStore = useVideoStore(s => s.videoConfig);
-  const selectedSlide = useVideoStore(s => s.selectedSlide)?.slide;
+  const selectedSlide = useVideoStore(s => s.selectedSlide);
   const onSelectOEffect = useVideoStore(s => s.handleSelectEffect);
 
   const resolution = videoConfigFromStore?.metadata?.resolution;
@@ -392,7 +390,6 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
     <div ref={fullscreenContainerRef} className="flex flex-col h-full" onMouseMove={handleMouseMove}>
       {!isFullscreen && (
         <PlayerToolbar
-          // onSlideSpeedChange={(newDuration) => onSlideSpeedChange(selectedSlideId, newDuration)}
           onDurationChange={(newDuration) => onDurationChange(selectedSlideId, newDuration)}
           currentFrame={controls.getCurrentFrame()}
         />

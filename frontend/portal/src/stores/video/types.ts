@@ -6,18 +6,11 @@ import type { EntityId } from "@/types/selection";
 import { SelectedTool } from "@/types/tools";
 import { Section, Slide, TransitionDirection, TransitionType, CalloutEffect, BackgroundStyle, ZoomEffect, SpotlightEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { Resolution, Video } from "@coasterai/pb/coasterai/core/v1/video_pb";
-import { DragEndEvent } from "@dnd-kit/core";
 import type { StateCreator } from "zustand";
 
 // Zustand store types
 export type VideoStoreSet = Parameters<StateCreator<VideoState & VideoActions, [], [], VideoState & VideoActions>>[0]
 export type VideoStoreGet = Parameters<StateCreator<VideoState & VideoActions, [], [], VideoState & VideoActions>>[1]
-
-export interface SelectedSection {
-    section: Section
-    slide: Slide
-}
-
 
 export interface VideoState {
     videoConfig: Video | null;
@@ -25,7 +18,7 @@ export interface VideoState {
     hasPendingChanges: boolean;
     isInitialized: boolean;
     selectedEntityId: EntityId;
-    selectedSlide: SelectedSection | null;
+    selectedSlide: Slide | null;
     selectedEffectId: string | null;
     activeTool: SelectedTool;
     showScreenshots: boolean;
@@ -64,7 +57,6 @@ export interface VideoActions {
     addSection: () => void;
     removeSection: (sectionId: string) => void;
     updateSectionTitle: (sectionId: string, newTitle: string) => void;
-    handleSectionDragEnd: (event: DragEndEvent) => void;
     setEditingSectionId: (sectionId: string | null) => void;
     setEditingSectionTitle: (title: string) => void;
 
@@ -78,7 +70,7 @@ export interface VideoActions {
     updateSlide: (updates: Partial<Slide>) => void
     updateSlideContent: (updates: Record<string, unknown>) => void
     updateSlideTransition: (sectionId: string, slideId: string, transitionId: TransitionType, direction?: TransitionDirection) => void
-    reorderSlidesInSection: (sectionId: string, activeId: string, overId: string) => void
+    reorderSlidesInSection: (activeId: string, overId: string) => void
 
     // Canvas
     // Define function interface here for effects to get in VideoActions

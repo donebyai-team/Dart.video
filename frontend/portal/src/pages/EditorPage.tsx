@@ -6,7 +6,7 @@ import { Mic2, Volume2, RefreshCw, Home, Timer, Brain, Check, X, ExternalLink } 
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import ResolutionSelector from '@/components/editor/remotion/components/ResolutionSelector'
+import ResolutionSelector from '@/components/editor/toolbar/ResolutionSelector'
 import StoryboardPanel from '@/components/editor/StoryboardPanel'
 import ToolsSettingsPanel from '@/components/editor/ToolsSettingsPanel'
 import RemotionPlayer, { RemotionPlayerHandle } from '@/components/editor/canvas/RemotionPlayer'
@@ -20,7 +20,7 @@ import { getConnectError } from '@/utils/error';
 import { ActiveToolType } from '@/types/tools';
 import { createSlideEntityId, createOverlayEntityId } from '@/types/selection';
 import Link from 'next/link';
-import BackgroundMusicSelector from '@/components/editor/remotion/components/BackgroundMusicSelector';
+import BackgroundMusicSelector from '@/components/editor/toolbar/BackgroundMusicSelector';
 import { useClientsContext } from '@coasterai/ui-core/context/ClientContext';
 import { pollVideoRender } from '@/services/utils';
 import VideoGenerationProgress from '@/components/editor/VideoGenerationProgress';
@@ -440,7 +440,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
                 onValuePatch={animationEdit.applyValuePatch}
                 setOverlay={animationEdit.setOverlay}
                 isPreviewPlaying={isPlayerPlaying}
-                onPreviewTemplate={() => handleTogglePreviewSlide(selectedSlide.slide.id)}
+                onPreviewTemplate={() => handleTogglePreviewSlide(selectedSlide.id)}
                 onUpdateSpotlight={updates => {
                   if (selectedEffectId) {
                     updateSpotlight(selectedEffectId, updates)
@@ -460,7 +460,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
                   // Apply spotlight - just close the panel
                   handleCloseTool()
                 }}
-                onSpotlightPlay={() => handleTogglePreviewSlide(selectedSlide.slide.id)}
+                onSpotlightPlay={() => handleTogglePreviewSlide(selectedSlide.id)}
               />
             ) : (
               <motion.div
@@ -520,10 +520,6 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
                 handleSelectEntity(createOverlayEntityId(slideId, overlayId))
               }}
               // Duration change handler — newDuration is in seconds, store as frames
-              onSlideSpeedChange={(_slideId, newSpeed) => {
-                console.debug('slide speed changed: ', newSpeed)
-              }}
-              // Duration change handler — newDuration is in seconds, store as frames
               onDurationChange={(_slideId, newDurationInSeconds) => {
                 updateSlide({ durationInFrames: Math.round(newDurationInSeconds * fps()) })
               }}
@@ -564,7 +560,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
                   )
                 }
 
-                let currentTranscript = selectedSlide.slide.transcript
+                let currentTranscript = selectedSlide.transcript
                 let handleTranscriptChange = updateSlideTranscript
 
                 return (
@@ -601,11 +597,11 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
                               onClick={handleGenerateSlideVoiceover}
                               disabled={
                                 !selectedSlide ||
-                                generatingSlideVoiceover === selectedSlide.slide.id ||
+                                generatingSlideVoiceover === selectedSlide.id ||
                                 isStreamingVideo
                               }
                             >
-                              {selectedSlide && generatingSlideVoiceover === selectedSlide.slide.id ? (
+                              {selectedSlide && generatingSlideVoiceover === selectedSlide.id ? (
                                 <motion.div
                                   animate={{ rotate: 360 }}
                                   transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
@@ -618,7 +614,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent className='text-xs'>
-                            {selectedSlide?.slide.voiceoverGenerated ? 'Regenerate' : 'Generate'} voiceover
+                            {selectedSlide?.voiceoverGenerated ? 'Regenerate' : 'Generate'} voiceover
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>

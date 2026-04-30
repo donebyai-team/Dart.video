@@ -53,7 +53,7 @@ export interface SurfaceConfig {
 }
 
 export type FontFamily = 'sans' | 'serif' | 'mono' | 'handwritten';
-export type TextTransform = 'none' | 'uppercase' | 'lowercase';
+export type TextTransform = 'none' | 'uppercase' | 'lowercase' | 'capitalize';
 export type LetterSpacing = 'tight' | 'normal' | 'wide';
 
 export interface TypeConfig {

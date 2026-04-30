@@ -33,7 +33,7 @@ const PlayerTimeline = ({
   onDraggingChange,
   fps,
 }: PlayerTimelineProps) => {
-  const selectedSlideId = useVideoStore(s => s.selectedSlide)?.slide.id;
+  const selectedSlideId = useVideoStore(s => s.selectedSlide)?.id;
   const selectedEffectId = useVideoStore(s => s.selectedEffectId);
 
   const timelineContainerRef = useRef<HTMLDivElement>(null);

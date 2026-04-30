@@ -25,8 +25,8 @@ export function useAnimationEdit(): UseAnimationEditReturn {
   const selectedSlide = useVideoStore(s => s.selectedSlide)
   const updateSlide = useVideoStore(s => s.updateSlide)
 
-  const content = selectedSlide?.slide?.content
-  const slideId = selectedSlide?.slide?.id
+  const content = selectedSlide?.content
+  const slideId = selectedSlide?.id
 
   const selectedSlideRef = useRef(selectedSlide)
   useEffect(() => { selectedSlideRef.current = selectedSlide }, [selectedSlide])
@@ -127,7 +127,7 @@ export function useAnimationEdit(): UseAnimationEditReturn {
   const debouncedPersist = useMemo(
     () =>
       debounce((ov: PatchOverlay) => {
-        const slideContent = selectedSlideRef.current?.slide?.content
+        const slideContent = selectedSlideRef.current?.content
         updateSlide({
           content: {
             ...slideContent,
@@ -155,7 +155,7 @@ export function useAnimationEdit(): UseAnimationEditReturn {
 
   const flushPersist = useCallback(() => {
     debouncedPersist.cancel?.()
-    const slideContent = selectedSlideRef.current?.slide?.content
+    const slideContent = selectedSlideRef.current?.content
     updateSlide({
       content: {
         ...slideContent,

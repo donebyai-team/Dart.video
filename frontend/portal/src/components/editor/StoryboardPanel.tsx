@@ -2,17 +2,12 @@ import { useRef, useEffect } from "react";
 import {
     closestCenter,
     DndContext,
-    DragEndEvent,
     KeyboardSensor,
     PointerSensor,
     useSensor,
     useSensors,
 } from "@dnd-kit/core";
-import {
-    SortableContext,
-    sortableKeyboardCoordinates,
-    verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { Plus } from "lucide-react";
 import StoryboardSection from "./StoryboardSection";
 import { useVideoStore } from "@/stores/video";
@@ -36,12 +31,11 @@ const StoryboardPanel = ({
 
     const videoConfig = useVideoStore(s => s.videoConfig);
 
-    const selectedSlideId = useVideoStore(s => s.selectedSlide?.slide.id);
+    const selectedSlideId = useVideoStore(s => s.selectedSlide?.id);
     const editingSectionId = useVideoStore(s => s.editingSectionId);
     const editingSectionTitle = useVideoStore(s => s.editingSectionTitle);
     const showTransitionPicker = useVideoStore(s => s.showTransitionPicker);
 
-    const onSectionDragEnd = useVideoStore(s => s.handleSectionDragEnd);
     const onReorderSlides = useVideoStore(s => s.reorderSlidesInSection);
 
     const onRemoveSection = useVideoStore(s => s.removeSection);
@@ -103,62 +97,57 @@ const StoryboardPanel = ({
                 <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
-                    onDragEnd={onSectionDragEnd}
+                    onDragEnd={({ active, over }) => {
+                        if (over && active.id !== over.id) {
+                            onReorderSlides(String(active.id), String(over.id));
+                        }
+                    }}
                 >
-                    <SortableContext
-                        items={sections.map(s => s.id)}
-                        strategy={verticalListSortingStrategy}
-                    >
-                        {sections.map((section, index) => (
-                            <StoryboardSection
-                                key={section.id}
-                                section={section}
-                                index={index}
-                                isLastSection={index === sections.length - 1}
-                                selectedSlideId={selectedSlideId!}
-                                editingSectionId={editingSectionId}
-                                editingSectionTitle={editingSectionTitle}
-                                showTransitionPicker={showTransitionPicker}
+                    {sections.map((section, index) => (
+                        <StoryboardSection
+                            key={section.id}
+                            section={section}
+                            index={index}
+                            isLastSection={index === sections.length - 1}
+                            selectedSlideId={selectedSlideId!}
+                            editingSectionId={editingSectionId}
+                            editingSectionTitle={editingSectionTitle}
+                            showTransitionPicker={showTransitionPicker}
 
-                                onSelectSlide={onSelectSlide}
+                            onSelectSlide={onSelectSlide}
 
-                                onRemoveSection={() => onRemoveSection(section.id)}
-                                onRemoveSlide={(slideId) =>
-                                    onRemoveSlide(section.id, slideId)
-                                }
-                                onDuplicateSlide={(slideId) =>
-                                    onDuplicateSlide(section.id, slideId)
-                                }
+                            onRemoveSection={() => onRemoveSection(section.id)}
+                            onRemoveSlide={(slideId) =>
+                                onRemoveSlide(section.id, slideId)
+                            }
+                            onDuplicateSlide={(slideId) =>
+                                onDuplicateSlide(section.id, slideId)
+                            }
 
-                                onStartEditTitle={() =>
-                                    onStartEditTitle(section.id, section.title)
-                                }
+                            onStartEditTitle={() =>
+                                onStartEditTitle(section.id, section.title)
+                            }
 
-                                onEditTitleChange={onEditTitleChange}
-                                onSaveTitle={onSaveTitle}
-                                onCancelEditTitle={() => onCancelEditTitle(null)}
+                            onEditTitleChange={onEditTitleChange}
+                            onSaveTitle={onSaveTitle}
+                            onCancelEditTitle={() => onCancelEditTitle(null)}
 
-                                onShowTransitionPicker={onShowTransitionPicker}
+                            onShowTransitionPicker={onShowTransitionPicker}
 
-                                onUpdateTransition={(slideId, transitionId, direction) =>
-                                    onUpdateTransition(
-                                        section.id,
-                                        slideId,
-                                        transitionId,
-                                        direction
-                                    )
-                                }
+                            onUpdateTransition={(slideId, transitionId, direction) =>
+                                onUpdateTransition(
+                                    section.id,
+                                    slideId,
+                                    transitionId,
+                                    direction
+                                )
+                            }
 
-                                onAddSlide={(afterSlideId) => {                                    
-                                    handleAddAnimation(section.id, afterSlideId)
-                                }}
-
-                                onReorderSlides={(activeId, overId) =>
-                                    onReorderSlides(section.id, activeId, overId)
-                                }
-                            />
-                        ))}
-                    </SortableContext>
+                            onAddSlide={(afterSlideId) => {
+                                handleAddAnimation(section.id, afterSlideId)
+                            }}
+                        />
+                    ))}
                 </DndContext>
             </div>
 

@@ -1,8 +1,14 @@
 import { Section, Slide, TransitionType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Video, VideoMetadata } from '@coasterai/pb/coasterai/core/v1/video_pb'
-import { SelectedSection } from './types'
 
 export const getSections = (videoConfig: Video) => videoConfig?.config?.sections || []
+
+export interface SlideLocation {
+  section: Section
+  sectionIndex: number
+  slide: Slide
+  slideIndex: number
+}
 /**
 * Returns the nearest previous slide relative to a section.
 *
@@ -41,17 +47,50 @@ export const updateVideoConfigSections = (videoConfig: Video, updater: (sections
   }
 }
 
-export const updateSelectedSlide = (
-  selectedSlide: SelectedSection,
-  updater: (slide: Slide) => Slide
-): SelectedSection => {
-  if (!selectedSlide?.slide) return selectedSlide
+export const findSlideLocation = (
+  videoConfig: Video,
+  slideId: string
+): SlideLocation | null => {
+  const sections = getSections(videoConfig)
 
-  return {
-    ...selectedSlide,
-    slide: updater(selectedSlide.slide)
+  for (let sectionIndex = 0; sectionIndex < sections.length; sectionIndex += 1) {
+    const section = sections[sectionIndex]
+    const slideIndex = section.slides.findIndex(slide => slide.id === slideId)
+
+    if (slideIndex !== -1) {
+      return {
+        section,
+        sectionIndex,
+        slide: section.slides[slideIndex],
+        slideIndex,
+      }
+    }
   }
+
+  return null
 }
+
+export const findSlideById = (videoConfig: Video, slideId: string): Slide | null =>
+  findSlideLocation(videoConfig, slideId)?.slide ?? null
+
+export const updateSlideById = (
+  videoConfig: Video,
+  slideId: string,
+  updater: (slide: Slide) => Slide
+): Video =>
+  updateVideoConfigSections(videoConfig, sections =>
+    sections.map(section => ({
+      ...section,
+      slides: section.slides.map(slide =>
+        slide.id === slideId ? updater(slide) : slide
+      )
+    }))
+  )
+
+export const updateSelectedSlide = (
+  selectedSlide: Slide,
+  updater: (slide: Slide) => Slide
+): Slide => updater(selectedSlide)
 
 export const updateTotalDuration = (videoConfig: Video): Video => {
   if (!videoConfig?.config?.sections) return videoConfig

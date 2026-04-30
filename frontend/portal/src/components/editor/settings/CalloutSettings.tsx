@@ -1,6 +1,6 @@
 import ColorPickerInput from '@/components/editor/ColorPickerInput'
 import { Label } from '@/components/ui/label'
-import DurationButtonRange from '../remotion/components/DurationChangeComponent'
+import DurationButtonRange from '../toolbar/DurationChangeComponent'
 import { CalloutEffect } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 
 interface CalloutSettingsProps {

@@ -31,6 +31,14 @@ export const TEXT_ALIGN_OPTIONS = [
   { label: 'End', value: 'end' },
 ]
 
+/** Text transform options matching CSS textTransform property. */
+export const TEXT_TRANSFORM_OPTIONS = [
+  { label: 'None', value: 'none' },
+  { label: 'Uppercase', value: 'uppercase' },
+  { label: 'Lowercase', value: 'lowercase' },
+  { label: 'Capitalize', value: 'capitalize' },
+]
+
 // ─── Utility: toHex ─────────────────────────────────────────────────────────
 
 export function toHex(color: unknown): string {
