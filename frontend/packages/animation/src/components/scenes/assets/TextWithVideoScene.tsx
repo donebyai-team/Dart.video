@@ -238,7 +238,7 @@ export const TextWithVideoSceneDescriptor: ComponentRegistration = {
       {
         name: "video",
         type: "string",
-        dataType: "media",
+        datatype: "media",
         map: "props.video"
       }
     ]

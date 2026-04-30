@@ -248,7 +248,7 @@ export const MultiImageStackSchemaFields = [
                         name: 'image',
                         type: 'string',
                         map: 'item',
-                        dataType: 'media',
+                        datatype: 'media',
                     }
                 ],
             },

@@ -127,7 +127,7 @@ export const VideoAssetSchema = [
             {
                 "name": "src",
                 "type": "string",
-                "dataType": "media",
+                "datatype": "media",
                 "map": "props.src"
             },
             {

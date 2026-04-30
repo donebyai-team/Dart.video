@@ -150,7 +150,7 @@ export const LogoShowcaseSchemaFields = [
                     {
                         name: "src",
                         type: "string",
-                        dataType: "media",
+                        datatype: "media",
                         map: "item"
                     }
                 ]

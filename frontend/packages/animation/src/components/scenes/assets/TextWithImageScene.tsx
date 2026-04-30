@@ -233,7 +233,7 @@ export const TextWithImageSceneDescriptor: ComponentRegistration = {
         {
           name: "image",
           type: "string",
-          dataType: "media",
+          datatype: "media",
           map: "props.image"
         }
       ]

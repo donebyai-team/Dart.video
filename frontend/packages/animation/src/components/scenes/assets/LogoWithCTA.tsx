@@ -241,7 +241,7 @@ export const LogoWithCTASchemaFields = [
             {
                 "name": "src",
                 "type": "string",
-                "dataType": "media",
+                "datatype": "media",
                 "default": "",
             },
             {

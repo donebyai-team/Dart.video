@@ -141,7 +141,7 @@ export const StatCounterAssetSchema = [
       {
         name: 'style',
         type: 'object',
-        dataType: 'style',
+        datatype: 'style',
         default: StatCounterContainerDefaults,
       },
     ],
