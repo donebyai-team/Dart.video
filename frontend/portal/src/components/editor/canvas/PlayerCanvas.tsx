@@ -101,12 +101,12 @@ const PlayerCanvas = ({
     return <div className='flex items-center justify-center h-full text-muted-foreground'>Loading...</div>
   }
 
-  const spotlights = selectedSlide.slide.spotlights ?? []
-  const callouts = selectedSlide.slide.callouts ?? []
-  const zooms = selectedSlide.slide.zooms ?? []
+  const spotlights = selectedSlide.spotlights ?? []
+  const callouts = selectedSlide.callouts ?? []
+  const zooms = selectedSlide.zooms ?? []
 
   // Calculate slide start frame for overlay visibility check
-  const slideStartFrame = getRealSlideStartFrame(getTimelineSlides(), selectedSlide.slide.id, fps)
+  const slideStartFrame = getRealSlideStartFrame(getTimelineSlides(), selectedSlide.id, fps)
 
   return (
     <div

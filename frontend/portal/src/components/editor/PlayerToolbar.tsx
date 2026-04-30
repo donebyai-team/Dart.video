@@ -48,7 +48,7 @@ const PlayerToolbar = ({ onDurationChange, minDuration = 1, maxDuration = 180, c
   const getSlideDurationInSeconds = useVideoStore(s => s.getSlideDurationInSeconds)
 
   if (!selectedSlide) return
-  let slide = selectedSlide.slide
+  let slide = selectedSlide
 
   const currentBg = backgroundStyleToCSS(getSlideWithBackground(slide));
   const isBackgroundActive = activeTool?.type === ActiveToolType.BACKGROUND

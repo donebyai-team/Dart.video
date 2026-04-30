@@ -22,11 +22,11 @@ export const CodeEditor = ({ onClose }: CodeEditorProps) => {
   const [error, setError] = useState<string | null>(null)
 
   const animationContent = useMemo(() => {
-    return selectedSlide?.slide.content
+    return selectedSlide?.content
   }, [selectedSlide])
 
   const templateUrl = animationContent?.codeRegistry?.mUrl?.trim() ?? ''
-  const slideId = selectedSlide?.slide.id ?? ''
+  const slideId = selectedSlide?.id ?? ''
 
   useEffect(() => {
     if (activeTool.type !== ActiveToolType.ANIMATION_CODE) return

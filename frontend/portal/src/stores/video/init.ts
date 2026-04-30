@@ -23,7 +23,7 @@ export const createInitActions = (
 
 
     const selectedSlide = getInitialSelection(newVideoConfig);
-    const firstSlideId = selectedSlide?.slide?.id ?? "";
+    const firstSlideId = selectedSlide?.id ?? "";
 
     set({
       videoConfig: newVideoConfig,

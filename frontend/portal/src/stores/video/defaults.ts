@@ -15,7 +15,6 @@ import {
 } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { Resolution, ResolutionSchema, Video, VideoMetadata, VideoMetadataSchema, VideoSchema } from "@coasterai/pb/coasterai/core/v1/video_pb";
 import { clone, create } from "@bufbuild/protobuf";
-import { SelectedSection } from "./types";
 import { TRANSITION_DURATION_FRAMES } from "@coasterai/renderer/src/frameUtils";
 
 export function resolveBackgroundStyle(
@@ -158,18 +157,11 @@ export const getDefaultResolution = (config: EditorConfig): Resolution => {
 };
 
 
-export const getInitialSelection = (videoConfig: Video): SelectedSection | null => {
+export const getInitialSelection = (videoConfig: Video): Slide | null => {
     const firstSection = videoConfig.config?.sections?.[0];
     const firstSlide = firstSection?.slides?.[0];
 
-    if (!firstSection) return null;
-
-    if (firstSlide) {
-        return { section: firstSection, slide: firstSlide };
-    }
-
-    // Section exists but no slides
-    return null;
+    return firstSection && firstSlide ? firstSlide : null;
 }
 
 export const getDefaulVideotMetadata = (config: EditorConfig): VideoMetadata => {
@@ -206,7 +198,6 @@ export const ensureVideoResolution = (
     // Already valid → return original (important for avoiding extra renders)
     return video;
 };
-
 
 
 

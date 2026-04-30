@@ -81,12 +81,9 @@ export const createStreamingActions = (set: VideoStoreSet, get: VideoStoreGet) =
                 const firstSection = sections[0];
                 const firstSlide = firstSection?.slides?.[0];
 
-                if (firstSlide && firstSection) {
+                if (firstSlide) {
                   set({
-                    selectedSlide: {
-                      section: firstSection,
-                      slide: firstSlide
-                    },
+                    selectedSlide: firstSlide,
                     selectedEntityId: createSlideEntityId(firstSlide.id)
                   });
                 }
@@ -94,26 +91,21 @@ export const createStreamingActions = (set: VideoStoreSet, get: VideoStoreGet) =
 
               // ✅ Refresh selected slide reference
               else {
-                const currentSlideId = nextState.selectedSlide.slide.id;
+                const currentSlideId = nextState.selectedSlide.id;
 
                 let foundSlide = null;
-                let foundSection = null;
 
                 for (const section of sections) {
                   const slide = section.slides?.find(s => s.id === currentSlideId);
                   if (slide) {
                     foundSlide = slide;
-                    foundSection = section;
                     break;
                   }
                 }
 
-                if (foundSlide && foundSection) {
+                if (foundSlide) {
                   set({
-                    selectedSlide: {
-                      section: foundSection,
-                      slide: foundSlide
-                    }
+                    selectedSlide: foundSlide
                   });
                 }
               }

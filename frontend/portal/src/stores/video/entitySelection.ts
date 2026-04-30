@@ -38,10 +38,7 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
       if (!foundSlide || !foundSection) return
 
       set({
-        selectedSlide: {
-          section: foundSection,
-          slide: foundSlide
-        }
+        selectedSlide: foundSlide
       })
 
       if (parsed.type === 'overlay') {

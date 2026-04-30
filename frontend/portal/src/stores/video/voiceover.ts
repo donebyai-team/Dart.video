@@ -1,5 +1,5 @@
 import { VideoStoreSet, VideoStoreGet } from "./types";
-import { updateVideoConfigSections, updateSelectedSlide } from "./utils";
+import { updateSelectedSlide, updateSlideById, updateVideoConfigSections } from "./utils";
 
 export const createVoiceoverActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
 
@@ -9,22 +9,14 @@ export const createVoiceoverActions = (set: VideoStoreSet, get: VideoStoreGet) =
     const { selectedSlide, videoConfig } = get();
     if (!selectedSlide || !videoConfig) return;
 
-    set({ generatingSlideVoiceover: selectedSlide.slide.id });
+    set({ generatingSlideVoiceover: selectedSlide.id });
 
     setTimeout(() => {
 
-      const newVideoConfig = updateVideoConfigSections(
-        videoConfig,
-        sections =>
-          sections.map(section => ({
-            ...section,
-            slides: section.slides.map(slide =>
-              slide.id === selectedSlide.slide.id
-                ? { ...slide, voiceoverGenerated: true }
-                : slide
-            ),
-          }))
-      );
+      const newVideoConfig = updateSlideById(videoConfig, selectedSlide.id, slide => ({
+        ...slide,
+        voiceoverGenerated: true,
+      }));
 
       set({
         videoConfig: newVideoConfig,

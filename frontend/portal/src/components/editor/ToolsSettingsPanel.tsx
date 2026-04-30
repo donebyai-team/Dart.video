@@ -94,7 +94,7 @@ const ToolsSettingsPanel = ({
     >
       {activeTool.type === ActiveToolType.BACKGROUND && (
         <BackgroundSettings
-          value={getSlideWithBackground(selectedSlide?.slide!)}
+          value={getSlideWithBackground(selectedSlide!)}
           onChange={updateSlideBackground}
           onClose={handleCloseTool}
         />
@@ -148,9 +148,9 @@ const ToolsSettingsPanel = ({
             }}
             onClose={handleCloseTool}
             canDelete={true}
-            slideDurationInSecond={getSlideDurationInSeconds(selectedSlide?.slide!)}
-            slideDurationInFrames={selectedSlide?.slide.durationInFrames}
-            slideStartFrame={getRealSlideStartFrame(getTimelineSlides(), selectedSlide?.slide.id ?? '', fps)}
+            slideDurationInSecond={getSlideDurationInSeconds(selectedSlide!)}
+            slideDurationInFrames={selectedSlide?.durationInFrames}
+            slideStartFrame={getRealSlideStartFrame(getTimelineSlides(), selectedSlide?.id ?? '', fps)}
             slideStartTime={0}
             transitionDurationInFrames={TRANSITION_DURATION_FRAMES}
             fps={fps}

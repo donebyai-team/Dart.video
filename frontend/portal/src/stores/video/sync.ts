@@ -112,12 +112,9 @@ export const createSyncActions = (set: VideoStoreSet, get: VideoStoreGet) => {
             let nextSelectedSlide = getInitialSelection(restoredVideoConfig);
             if (selectedSlide) {
                 for (const section of restoredVideoConfig.config?.sections ?? []) {
-                    const restoredSlide = section.slides.find(slide => slide.id === selectedSlide.slide.id);
+                    const restoredSlide = section.slides.find(slide => slide.id === selectedSlide.id);
                     if (restoredSlide) {
-                        nextSelectedSlide = {
-                            section,
-                            slide: restoredSlide,
-                        };
+                        nextSelectedSlide = restoredSlide;
                         break;
                     }
                 }
@@ -126,7 +123,7 @@ export const createSyncActions = (set: VideoStoreSet, get: VideoStoreGet) => {
             set({
                 videoConfig: restoredVideoConfig,
                 selectedSlide: nextSelectedSlide,
-                selectedEntityId: createSlideEntityId(nextSelectedSlide?.slide.id ?? ""),
+                selectedEntityId: createSlideEntityId(nextSelectedSlide?.id ?? ""),
                 selectedEffectId: null,
                 hasPendingChanges: false,
             });

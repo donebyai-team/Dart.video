@@ -1,7 +1,7 @@
 import { CalloutEffect, SpotlightEffect, ZoomEffect } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { VideoStoreGet, VideoStoreSet } from './types'
 
-import { updateVideoConfigSections, updateSelectedSlide } from './utils'
+import { updateSelectedSlide, updateSlideById } from './utils'
 
 export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
 
@@ -9,27 +9,17 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
 
   getSpotlights: () => {
     const { selectedSlide } = get()
-    return selectedSlide?.slide?.spotlights || []
+    return selectedSlide?.spotlights || []
   },
 
   addSpotlight(effect: SpotlightEffect) {
     const { videoConfig, selectedSlide } = get()
-    if (!selectedSlide?.slide || !selectedSlide?.section || !videoConfig) return
+    if (!selectedSlide || !videoConfig) return
 
-    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
-      sections.map(section =>
-        section.id === selectedSlide.section.id
-          ? {
-            ...section,
-            slides: section.slides.map(slide =>
-              slide.id === selectedSlide.slide.id
-                ? { ...slide, spotlights: [...(slide.spotlights || []), effect] }
-                : slide
-            ),
-          }
-          : section
-      )
-    )
+    const newVideoConfig = updateSlideById(videoConfig, selectedSlide.id, slide => ({
+      ...slide,
+      spotlights: [...(slide.spotlights || []), effect]
+    }))
 
     set({
       videoConfig: newVideoConfig,
@@ -44,27 +34,14 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
 
   updateSpotlight(effectId: string, updates: Partial<SpotlightEffect>) {
     const { videoConfig, selectedSlide } = get()
-    if (!selectedSlide?.slide || !selectedSlide?.section || !videoConfig) return
+    if (!selectedSlide || !videoConfig) return
 
-    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
-      sections.map(section =>
-        section.id === selectedSlide.section.id
-          ? {
-            ...section,
-            slides: section.slides.map(slide =>
-              slide.id === selectedSlide.slide.id
-                ? {
-                  ...slide,
-                  spotlights: (slide.spotlights || []).map(e =>
-                    e?.id === effectId ? { ...e, ...updates } : e
-                  ),
-                }
-                : slide
-            ),
-          }
-          : section
-      )
-    )
+    const newVideoConfig = updateSlideById(videoConfig, selectedSlide.id, slide => ({
+      ...slide,
+      spotlights: (slide.spotlights || []).map(e =>
+        e?.id === effectId ? { ...e, ...updates } : e
+      ),
+    }))
 
     set({
       videoConfig: newVideoConfig,
@@ -81,25 +58,12 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
 
   deleteSpotlight(effectId: string) {
     const { videoConfig, selectedSlide } = get()
-    if (!selectedSlide?.slide || !selectedSlide?.section || !videoConfig) return
+    if (!selectedSlide || !videoConfig) return
 
-    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
-      sections.map(section =>
-        section.id === selectedSlide.section.id
-          ? {
-            ...section,
-            slides: section.slides.map(slide =>
-              slide.id === selectedSlide.slide.id
-                ? {
-                  ...slide,
-                  spotlights: (slide.spotlights || []).filter(e => e?.id !== effectId),
-                }
-                : slide
-            ),
-          }
-          : section
-      )
-    )
+    const newVideoConfig = updateSlideById(videoConfig, selectedSlide.id, slide => ({
+      ...slide,
+      spotlights: (slide.spotlights || []).filter(e => e?.id !== effectId),
+    }))
 
     set({
       videoConfig: newVideoConfig,
@@ -117,27 +81,17 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
 
   getCallouts: () => {
     const { selectedSlide } = get()
-    return selectedSlide?.slide?.callouts || []
+    return selectedSlide?.callouts || []
   },
 
   addCallout(effect: CalloutEffect) {
     const { videoConfig, selectedSlide } = get()
-    if (!selectedSlide?.slide || !selectedSlide?.section || !videoConfig) return
+    if (!selectedSlide || !videoConfig) return
 
-    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
-      sections.map(section =>
-        section.id === selectedSlide.section.id
-          ? {
-            ...section,
-            slides: section.slides.map(slide =>
-              slide.id === selectedSlide.slide.id
-                ? { ...slide, callouts: [...(slide.callouts || []), effect] }
-                : slide
-            ),
-          }
-          : section
-      )
-    )
+    const newVideoConfig = updateSlideById(videoConfig, selectedSlide.id, slide => ({
+      ...slide,
+      callouts: [...(slide.callouts || []), effect]
+    }))
 
     set({
       videoConfig: newVideoConfig,
@@ -152,27 +106,14 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
 
   updateCallout(effectId: string, updates: Partial<CalloutEffect>) {
     const { videoConfig, selectedSlide } = get()
-    if (!selectedSlide?.slide || !selectedSlide?.section || !videoConfig) return
+    if (!selectedSlide || !videoConfig) return
 
-    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
-      sections.map(section =>
-        section.id === selectedSlide.section.id
-          ? {
-            ...section,
-            slides: section.slides.map(slide =>
-              slide.id === selectedSlide.slide.id
-                ? {
-                  ...slide,
-                  callouts: (slide.callouts || []).map(e =>
-                    e?.id === effectId ? { ...e, ...updates } : e
-                  ),
-                }
-                : slide
-            ),
-          }
-          : section
-      )
-    )
+    const newVideoConfig = updateSlideById(videoConfig, selectedSlide.id, slide => ({
+      ...slide,
+      callouts: (slide.callouts || []).map(e =>
+        e?.id === effectId ? { ...e, ...updates } : e
+      ),
+    }))
 
     set({
       videoConfig: newVideoConfig,
@@ -189,25 +130,12 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
 
   deleteCallout(effectId: string) {
     const { videoConfig, selectedSlide } = get()
-    if (!selectedSlide?.slide || !selectedSlide?.section || !videoConfig) return
+    if (!selectedSlide || !videoConfig) return
 
-    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
-      sections.map(section =>
-        section.id === selectedSlide.section.id
-          ? {
-            ...section,
-            slides: section.slides.map(slide =>
-              slide.id === selectedSlide.slide.id
-                ? {
-                  ...slide,
-                  callouts: (slide.callouts || []).filter(e => e?.id !== effectId),
-                }
-                : slide
-            ),
-          }
-          : section
-      )
-    )
+    const newVideoConfig = updateSlideById(videoConfig, selectedSlide.id, slide => ({
+      ...slide,
+      callouts: (slide.callouts || []).filter(e => e?.id !== effectId),
+    }))
 
     set({
       videoConfig: newVideoConfig,
@@ -225,27 +153,17 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
 
   getZooms: () => {
     const { selectedSlide } = get()
-    return selectedSlide?.slide?.zooms || []
+    return selectedSlide?.zooms || []
   },
 
   addZoom(effect: ZoomEffect) {
     const { videoConfig, selectedSlide } = get()
-    if (!selectedSlide?.slide || !selectedSlide?.section || !videoConfig) return
+    if (!selectedSlide || !videoConfig) return
 
-    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
-      sections.map(section =>
-        section.id === selectedSlide.section.id
-          ? {
-            ...section,
-            slides: section.slides.map(slide =>
-              slide.id === selectedSlide.slide.id
-                ? { ...slide, zooms: [...(slide.zooms || []), effect] }
-                : slide
-            ),
-          }
-          : section
-      )
-    )
+    const newVideoConfig = updateSlideById(videoConfig, selectedSlide.id, slide => ({
+      ...slide,
+      zooms: [...(slide.zooms || []), effect]
+    }))
 
     set({
       videoConfig: newVideoConfig,
@@ -260,27 +178,14 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
 
   updateZoom(effectId: string, updates: Partial<ZoomEffect>) {
     const { videoConfig, selectedSlide } = get()
-    if (!selectedSlide?.slide || !selectedSlide?.section || !videoConfig) return
+    if (!selectedSlide || !videoConfig) return
 
-    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
-      sections.map(section =>
-        section.id === selectedSlide.section.id
-          ? {
-            ...section,
-            slides: section.slides.map(slide =>
-              slide.id === selectedSlide.slide.id
-                ? {
-                  ...slide,
-                  zooms: (slide.zooms || []).map(e =>
-                    e?.id === effectId ? { ...e, ...updates } : e
-                  ),
-                }
-                : slide
-            ),
-          }
-          : section
-      )
-    )
+    const newVideoConfig = updateSlideById(videoConfig, selectedSlide.id, slide => ({
+      ...slide,
+      zooms: (slide.zooms || []).map(e =>
+        e?.id === effectId ? { ...e, ...updates } : e
+      ),
+    }))
 
     set({
       videoConfig: newVideoConfig,
@@ -297,25 +202,12 @@ export const createCanvasActions = (set: VideoStoreSet, get: VideoStoreGet) => (
 
   deleteZoom(effectId: string) {
     const { videoConfig, selectedSlide } = get()
-    if (!selectedSlide?.slide || !selectedSlide?.section || !videoConfig) return
+    if (!selectedSlide || !videoConfig) return
 
-    const newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
-      sections.map(section =>
-        section.id === selectedSlide.section.id
-          ? {
-            ...section,
-            slides: section.slides.map(slide =>
-              slide.id === selectedSlide.slide.id
-                ? {
-                  ...slide,
-                  zooms: (slide.zooms || []).filter(e => e?.id !== effectId),
-                }
-                : slide
-            ),
-          }
-          : section
-      )
-    )
+    const newVideoConfig = updateSlideById(videoConfig, selectedSlide.id, slide => ({
+      ...slide,
+      zooms: (slide.zooms || []).filter(e => e?.id !== effectId),
+    }))
 
     set({
       videoConfig: newVideoConfig,

@@ -1,22 +1,12 @@
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import {
-    closestCenter,
-    DndContext,
-    DragEndEvent,
-    KeyboardSensor,
-    PointerSensor,
-    useSensor,
-    useSensors,
+    useDroppable,
 } from "@dnd-kit/core";
 import {
     SortableContext,
-    sortableKeyboardCoordinates,
     verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import {
     ChevronDown,
-    GripVertical,
     Pencil,
     Plus,
     Trash2,
@@ -60,7 +50,6 @@ interface StoryboardSectionProps {
     onShowTransitionPicker: (slideId: string | null) => void;
     onUpdateTransition: (slideId: string, transitionId: TransitionType, direction?: TransitionDirection) => void;
     onAddSlide: (afterSlideId?: string) => void;
-    onReorderSlides: (activeId: string, overId: string) => void;
 }
 
 const StoryboardSection = ({
@@ -81,56 +70,18 @@ const StoryboardSection = ({
     onShowTransitionPicker,
     onUpdateTransition,
     onAddSlide,
-    onReorderSlides,
 }: StoryboardSectionProps) => {
     const {
-        attributes,
-        listeners,
-        setNodeRef,
-        transform,
-        transition,
-        isDragging,
-    } = useSortable({ id: section.id });
-
-    const style = {
-        transform: CSS.Transform.toString(transform),
-        transition,
-        opacity: isDragging ? 0.5 : 1,
-        zIndex: isDragging ? 100 : undefined,
-    };
-
-    const sensors = useSensors(
-        useSensor(PointerSensor, {
-            activationConstraint: {
-                distance: 5,
-            },
-        }),
-        useSensor(KeyboardSensor, {
-            coordinateGetter: sortableKeyboardCoordinates,
-        })
-    );
-
-    const handleDragEnd = (event: DragEndEvent) => {
-        const { active, over } = event;
-        if (over && active.id !== over.id) {
-            onReorderSlides(active.id as string, over.id as string);
-        }
-    };
+        setNodeRef: setSectionEndRef,
+        isOver: isOverSectionEnd,
+    } = useDroppable({
+        id: `section-end:${section.id}`,
+    });
 
     return (
-        <div ref={setNodeRef} style={style}>
+        <div>
             <Collapsible open={true}>
                 <div className="flex items-center gap-1">
-                    {/* Section drag handle */}
-                    <div
-                        {...attributes}
-                        {...listeners}
-                        className="cursor-grab active:cursor-grabbing p-1 hover:bg-muted rounded transition-colors"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <GripVertical className="w-3 h-3 text-muted-foreground/50" />
-                    </div>
-
                     {editingSectionId === section.id ? (
                         <div className="flex-1 flex items-center gap-1 px-2">
                             <div className={`w-2 h-2 rounded-full ${section.color}`} />
@@ -247,76 +198,75 @@ const StoryboardSection = ({
 
                 <CollapsibleContent>
                     <div className="pl-6 pr-1 py-1 space-y-1">
-                        <DndContext
-                            sensors={sensors}
-                            collisionDetection={closestCenter}
-                            onDragEnd={handleDragEnd}
+                        <SortableContext
+                            items={section.slides.map((s) => s.id)}
+                            strategy={verticalListSortingStrategy}
                         >
-                            <SortableContext
-                                items={section.slides.map((s) => s.id)}
-                                strategy={verticalListSortingStrategy}
-                            >
-                                {section.slides.map((slide, slideIndex) => {
-                                    const isLastSlideInSection = slideIndex === section.slides.length - 1;
-                                    const showTransition = !(isLastSection && isLastSlideInSection);
-                                    const currentDirection = getSlideTransitionDirectionValue(slide);
+                            {section.slides.map((slide, slideIndex) => {
+                                const isLastSlideInSection = slideIndex === section.slides.length - 1;
+                                const showTransition = !(isLastSection && isLastSlideInSection);
+                                const currentDirection = getSlideTransitionDirectionValue(slide);
 
-                                    return (
-                                        <div key={slide.id} className="space-y-1">
-                                            <SortableSlideCard
-                                                slide={slide}
-                                                isSelected={selectedSlideId === slide.id}
-                                                index={slideIndex}
-                                                onSelect={() => onSelectSlide(section, slide)}
-                                                onDelete={() => onRemoveSlide(slide.id)}
-                                                onDuplicate={() => onDuplicateSlide(slide.id)}
-                                            />
+                                return (
+                                    <div key={slide.id} className="space-y-1">
+                                        <SortableSlideCard
+                                            slide={slide}
+                                            isSelected={selectedSlideId === slide.id}
+                                            index={slideIndex}
+                                            onSelect={() => onSelectSlide(section, slide)}
+                                            onDelete={() => onRemoveSlide(slide.id)}
+                                            onDuplicate={() => onDuplicateSlide(slide.id)}
+                                        />
 
-                                            {/* Between-slide controls: transition + add slide */}
-                                            {showTransition && (
-                                                <div className="relative flex items-center justify-center py-2">
-                                                    {/* Vertical connector line */}
-                                                    {/* <div className="absolute left-1/2 right-1/2 top-0 bottom-0 w-px bg-border" /> */}
+                                        {/* Between-slide controls: transition + add slide */}
+                                        {showTransition && (
+                                            <div className="relative flex items-center justify-center py-2">
+                                                {/* Add slide button (left of center) */}
+                                                <button
+                                                    onClick={() => onAddSlide(slide.id)}
+                                                    className="relative z-10 flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-medium transition-colors bg-muted hover:bg-muted/80 text-muted-foreground mr-1"
+                                                >
+                                                    <Plus className="w-3 h-3" />
+                                                    Add scene
+                                                </button>
 
-                                                    {/* Add slide button (left of center) */}
-                                                    <button
-                                                        onClick={() => onAddSlide(slide.id)}
-                                                        className="relative z-10 flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-medium transition-colors bg-muted hover:bg-muted/80 text-muted-foreground mr-1"
-                                                    >
-                                                        <Plus className="w-3 h-3" />
-                                                        Add scene
-                                                    </button>
+                                                <TransitionPicker
+                                                    currentTransitionType={slide.transition || TransitionType.TRANSITION_NONE}
+                                                    currentDirection={currentDirection}
+                                                    isOpen={showTransitionPicker === slide.id}
+                                                    onToggle={() =>
+                                                        onShowTransitionPicker(
+                                                            showTransitionPicker === slide.id ? null : slide.id
+                                                        )
+                                                    }
+                                                    onSelectTransition={(transitionId) => {
+                                                        const defaultDirection =
+                                                            isDirectionSupportedTransition(transitionId)
+                                                                ? (currentDirection ?? TransitionDirection.FROM_RIGHT)
+                                                                : undefined;
+                                                        onUpdateTransition(slide.id, transitionId, defaultDirection);
+                                                    }}
+                                                    onSelectDirection={(direction) =>
+                                                        onUpdateTransition(slide.id, slide.transition, direction)
+                                                    }
+                                                    onClose={() => onShowTransitionPicker(null)}
+                                                    inline
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </SortableContext>
 
-                                                    {/* Transition picker (right of center) */}
-                                                    <TransitionPicker
-                                                        currentTransitionType={slide.transition || TransitionType.TRANSITION_NONE}
-                                                        currentDirection={currentDirection}
-                                                        isOpen={showTransitionPicker === slide.id}
-                                                        onToggle={() =>
-                                                            onShowTransitionPicker(
-                                                                showTransitionPicker === slide.id ? null : slide.id
-                                                            )
-                                                        }
-                                                        onSelectTransition={(transitionId) => {
-                                                            const defaultDirection =
-                                                                isDirectionSupportedTransition(transitionId)
-                                                                    ? (currentDirection ?? TransitionDirection.FROM_RIGHT)
-                                                                    : undefined;
-                                                            onUpdateTransition(slide.id, transitionId, defaultDirection);
-                                                        }}
-                                                        onSelectDirection={(direction) =>
-                                                            onUpdateTransition(slide.id, slide.transition, direction)
-                                                        }
-                                                        onClose={() => onShowTransitionPicker(null)}
-                                                        inline
-                                                    />
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                            </SortableContext>
-                        </DndContext>
+                        <div
+                            ref={setSectionEndRef}
+                            className={`rounded-md border border-dashed px-3 py-2 text-[10px] text-muted-foreground transition-colors ${
+                                isOverSectionEnd ? "border-primary bg-primary/5 text-primary" : "border-border/60"
+                            }`}
+                        >
+                            {section.slides.length === 0 ? "Drop scene here" : "Drop at end of section"}
+                        </div>
                     </div>
                 </CollapsibleContent>
             </Collapsible>

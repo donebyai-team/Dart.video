@@ -13,19 +13,13 @@ import type { StateCreator } from "zustand";
 export type VideoStoreSet = Parameters<StateCreator<VideoState & VideoActions, [], [], VideoState & VideoActions>>[0]
 export type VideoStoreGet = Parameters<StateCreator<VideoState & VideoActions, [], [], VideoState & VideoActions>>[1]
 
-export interface SelectedSection {
-    section: Section
-    slide: Slide
-}
-
-
 export interface VideoState {
     videoConfig: Video | null;
     acceptedVideoConfig: Video | null;
     hasPendingChanges: boolean;
     isInitialized: boolean;
     selectedEntityId: EntityId;
-    selectedSlide: SelectedSection | null;
+    selectedSlide: Slide | null;
     selectedEffectId: string | null;
     activeTool: SelectedTool;
     showScreenshots: boolean;
@@ -78,7 +72,7 @@ export interface VideoActions {
     updateSlide: (updates: Partial<Slide>) => void
     updateSlideContent: (updates: Record<string, unknown>) => void
     updateSlideTransition: (sectionId: string, slideId: string, transitionId: TransitionType, direction?: TransitionDirection) => void
-    reorderSlidesInSection: (sectionId: string, activeId: string, overId: string) => void
+    reorderSlidesInSection: (activeId: string, overId: string) => void
 
     // Canvas
     // Define function interface here for effects to get in VideoActions

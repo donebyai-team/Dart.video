@@ -75,7 +75,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   const canvasContainerRef = useRef<HTMLDivElement>(null);
 
   const videoConfigFromStore = useVideoStore(s => s.videoConfig);
-  const selectedSlide = useVideoStore(s => s.selectedSlide)?.slide;
+  const selectedSlide = useVideoStore(s => s.selectedSlide);
   const onSelectOEffect = useVideoStore(s => s.handleSelectEffect);
 
   const resolution = videoConfigFromStore?.metadata?.resolution;

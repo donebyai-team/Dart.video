@@ -1,7 +1,7 @@
 import type { Section } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { VideoStoreSet, VideoStoreGet } from "./types";
 import { createNewSection } from "./defaults";
-import { getSections, updateVideoConfigSections } from "./utils";
+import { findSlideLocation, getSections, updateVideoConfigSections } from "./utils";
 import { DragEndEvent } from "@dnd-kit/core";
 
 export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
@@ -55,16 +55,11 @@ export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => 
     });
 
     // Reselect fallback if needed
-    if (selectedSlide?.section.id === sectionId) {
+    if (selectedSlide && findSlideLocation(videoConfig, selectedSlide.id)?.section.id === sectionId) {
       const first = newSections.find(s => s.slides.length > 0);
 
       if (first) {
-        set({
-          selectedSlide: {
-            section: first,
-            slide: first.slides[0],
-          },
-        });
+        set({ selectedSlide: first.slides[0] });
       } else {
         set({ selectedSlide: null });
       }
@@ -91,18 +86,6 @@ export const createSectionActions = (set: VideoStoreSet, get: VideoStoreGet) => 
       videoConfig: newVideoConfig,
       editingSectionId: null,
     });
-
-    if (selectedSlide?.section.id === sectionId) {
-      set({
-        selectedSlide: {
-          ...selectedSlide,
-          section: {
-            ...selectedSlide.section,
-            title: newTitle,
-          },
-        },
-      });
-    }
 
     get().refreshPendingChanges();
   },
