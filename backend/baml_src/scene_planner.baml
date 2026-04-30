@@ -77,7 +77,7 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
 
     - **Prioritize scenes over fillers**; use scenes when the script can be effectively represented, otherwise use fillers
     - Rephrase text as needed to fit scene requirements while preserving the original meaning
-    - You may trim, split, or format text (including punctuation) for clarity, rhythm, or scene constraints.
+    - You can trim, split, or format text (including punctuation) for clarity, rhythm, or scene constraints.
     - Select scenes not only by section tags but also when they effectively visualize the underlying concept
 
     ## PLANNING RULES
@@ -111,14 +111,14 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     ## ASK QUESTIONS RULES
 
     Ask before proceeding if:
-    - **Sections are missing** that would significantly improve the video
-      (e.g. no Hook, no CTA). Ask whether to add them or proceed as is.
-    - **Script is too short** to generate 15-20 scenes — ask whether to expand it or add new content.
-    - If a scene seems suitable but the mapping from script data is unclear, ask for clarification or use the closest meaningful subset of the script
-    - A scene implies brand presence but no brand name is provided — ask user to add brand identity.
-    - An attachment is provided but usage is unclear — use *ATTACHMENT_CLARIFICATION*.
-    - A scene needs an attachment that wasn't uploaded — use *UPLOAD_ATTACHMENT* or placeholder.
-    - Any key visual storytelling decision is ambiguous.
+    - Missing critical sections would weaken the video (e.g., no Hook/CTA): ask whether to add them or proceed as-is.
+    - **Script is too short** for 15–20 scenes: ask whether to expand or add content.
+    - **Script is provided**: ask whether to use it exactly or allow light edits.
+    - Script-to-scene mapping is unclear: ask for clarification, or use the closest meaningful script subset.
+    - Brand presence is implied but no brand name/identity is provided: ask for brand identity.
+    - Attachment is provided but usage is unclear: use **ATTACHMENT_CLARIFICATION**.
+    - Scene requires a missing attachment: use **UPLOAD_ATTACHMENT or a placeholder**.
+    - A key visual storytelling decision is ambiguous.
 
     Do not ask about:
     - Props or component internals — the generator handles these.
