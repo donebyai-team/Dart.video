@@ -5,7 +5,7 @@
  * All toolbar sub-components (TextToolbar, ImageToolbar, etc.) import from here.
  */
 
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { HexColorPicker } from 'react-colorful'
 import {
   buildDepthTextShadow,
