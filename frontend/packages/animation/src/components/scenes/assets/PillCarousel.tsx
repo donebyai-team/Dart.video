@@ -263,7 +263,7 @@ export const HeroPillCarouselSchemaFields = [
                     {
                         name: "icon",
                         type: "string",
-                        dataType: "icon",
+                        datatype: "icon",
                         map: "item.icon"
                     }
                 ]
@@ -274,7 +274,7 @@ export const HeroPillCarouselSchemaFields = [
                     {
                         name: "text",
                         type: "string",
-                        dataType: "text",
+                        datatype: "text",
                         map: "item.text"
                     },
                     {
@@ -290,7 +290,7 @@ export const HeroPillCarouselSchemaFields = [
                     {
                         name: 'style',
                         type: 'object',
-                        dataType: 'style',
+                        datatype: 'style',
                         default: {
                             backgroundColor: IconTextPillDefaults.backgroundColor,
                             borderRadius: IconTextPillDefaults.borderRadius,

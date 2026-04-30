@@ -199,7 +199,7 @@ export const LogoAssetSchemaFields = [
     {
         "name": "src",
         "type": "string",
-        "dataType": "media",
+        "datatype": "media",
         "map": "props.src"
     },
     {

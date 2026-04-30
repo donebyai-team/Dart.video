@@ -162,7 +162,7 @@ export const IconShowcaseSchema = [
                     {
                         name: "icon",
                         type: "string",
-                        dataType: "icon",
+                        datatype: "icon",
                         map: "item"
                     },
                     {

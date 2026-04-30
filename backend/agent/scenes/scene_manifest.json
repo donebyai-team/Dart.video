@@ -198,7 +198,7 @@
                 {
                   "name": "style",
                   "type": "object",
-                  "dataType": "style",
+                  "datatype": "style",
                   "default": {
                     "backgroundColor": "none",
                     "borderRadius": 0,
@@ -481,7 +481,7 @@
                 {
                   "name": "text",
                   "type": "string",
-                  "dataType": "text",
+                  "datatype": "text",
                   "map": "props.text"
                 },
                 {
@@ -1058,7 +1058,7 @@
                 {
                   "name": "image",
                   "type": "string",
-                  "dataType": "media",
+                  "datatype": "media",
                   "map": "props.image"
                 }
               ]
@@ -1258,7 +1258,7 @@
                 {
                   "name": "video",
                   "type": "string",
-                  "dataType": "media",
+                  "datatype": "media",
                   "map": "props.video"
                 }
               ]
@@ -1346,7 +1346,7 @@
                       "name": "image",
                       "type": "string",
                       "map": "item",
-                      "dataType": "media"
+                      "datatype": "media"
                     }
                   ]
                 }
@@ -1441,7 +1441,7 @@
                       "name": "image",
                       "type": "string",
                       "map": "item",
-                      "dataType": "media"
+                      "datatype": "media"
                     }
                   ]
                 }
@@ -1533,7 +1533,7 @@
                     {
                       "name": "src",
                       "type": "string",
-                      "dataType": "media",
+                      "datatype": "media",
                       "map": "item"
                     }
                   ]
@@ -1614,7 +1614,7 @@
                 {
                   "name": "src",
                   "type": "string",
-                  "dataType": "media",
+                  "datatype": "media",
                   "map": "props.src"
                 },
                 {
@@ -1667,7 +1667,7 @@
                 {
                   "name": "src",
                   "type": "string",
-                  "dataType": "media",
+                  "datatype": "media",
                   "default": ""
                 },
                 {
@@ -1796,7 +1796,7 @@
                     {
                       "name": "icon",
                       "type": "string",
-                      "dataType": "icon",
+                      "datatype": "icon",
                       "map": "item"
                     },
                     {
@@ -1874,7 +1874,7 @@
                     {
                       "name": "icon",
                       "type": "string",
-                      "dataType": "icon",
+                      "datatype": "icon",
                       "map": "item.icon"
                     }
                   ]
@@ -1885,7 +1885,7 @@
                     {
                       "name": "text",
                       "type": "string",
-                      "dataType": "text",
+                      "datatype": "text",
                       "map": "item.text"
                     },
                     {
@@ -1901,7 +1901,7 @@
                     {
                       "name": "style",
                       "type": "object",
-                      "dataType": "style",
+                      "datatype": "style",
                       "default": {
                         "backgroundColor": "transparent",
                         "borderRadius": 50,

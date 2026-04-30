@@ -492,7 +492,7 @@ export const ProblemCollageSchemaFields = [
                         name: 'image',
                         type: 'string',
                         map: 'item',
-                        dataType: 'media',
+                        datatype: 'media',
                     }                   
                 ],
             },

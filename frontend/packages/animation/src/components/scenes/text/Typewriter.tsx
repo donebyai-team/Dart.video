@@ -153,7 +153,7 @@ export const TypewriterSchemaFields = [
   {
     "name": "text",
     "type": "string",
-    "dataType": "text",
+    "datatype": "text",
     "map": "props.text"
   },
   {
