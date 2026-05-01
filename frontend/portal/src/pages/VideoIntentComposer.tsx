@@ -67,7 +67,6 @@ const VideoIntentComposer = () => {
   const [customAnswer, setCustomAnswer] = useState('')
   const [questionAssets, setQuestionAssets] = useState<SelectedAssetWithPreview[]>([])
   const [composeQuestionResponses, setComposeQuestionResponses] = useState<ComposeSubmissionQuestionResponse[]>([])
-  const [editingComposeQuestionId, setEditingComposeQuestionId] = useState<string | undefined>()
   const [hasReviewedComposeQuestions, setHasReviewedComposeQuestions] = useState(false)
 
   const router = useRouter()
@@ -104,7 +103,6 @@ const VideoIntentComposer = () => {
     if (allowsCustom) return customAnswer.trim()
     return ''
   }, [activeQuestion, customAnswer, selectedAnswer])
-  const answeredComposeQuestionCount = composeQuestionResponses.length
   const showThinking = hasSubmitted && stage === 'planning'
 
   useEffect(() => {
@@ -197,7 +195,6 @@ const VideoIntentComposer = () => {
     setPendingQuestion(undefined)
     setQuestionAssets([])
     setQuestionAssetsDialogOpen(false)
-    setEditingComposeQuestionId(undefined)
   }
 
   const startVideoCreation = async (submissionQuestionResponses: ComposeSubmissionQuestionResponse[] = []) => {
@@ -263,15 +260,13 @@ const VideoIntentComposer = () => {
       return
     }
 
-    setEditingComposeQuestionId(undefined)
     setStage('composeQuestions')
   }
 
   const handleComposeQuestionsComplete = async (responses: ComposeSubmissionQuestionResponse[]) => {
     setComposeQuestionResponses(responses)
     setHasReviewedComposeQuestions(true)
-    setEditingComposeQuestionId(undefined)
-    setStage('compose')
+    await startVideoCreation(responses)
   }
 
   const handleContinuePlanning = async (responseOverride?: string) => {
@@ -497,10 +492,7 @@ const VideoIntentComposer = () => {
             isSubmitting={isSubmitting}
             questions={COMPOSE_SUBMISSION_QUESTIONS}
             initialResponses={composeQuestionResponses}
-            initialQuestionId={editingComposeQuestionId}
-            submitLabel='Done'
             onCancel={() => {
-              setEditingComposeQuestionId(undefined)
               setStage('compose')
             }}
             onComplete={responses => {
@@ -598,24 +590,6 @@ const VideoIntentComposer = () => {
                   <X className='w-3.5 h-3.5' />
                 </button>
               </div>
-            </div>
-          )}
-
-          {hasReviewedComposeQuestions && (
-            <div className='mx-4 mt-2 flex flex-wrap gap-2'>
-              <button
-                type='button'
-                onClick={() => {
-                  setEditingComposeQuestionId(undefined)
-                  setStage('composeQuestions')
-                }}
-                className='flex cursor-pointer items-center rounded-lg border border-primary/15 bg-primary/5 px-3 py-1.5 text-xs transition-colors hover:border-primary/30'
-              >
-                <span className='font-medium text-primary'>Question details</span>
-                <span className='ml-1 text-muted-foreground'>
-                  · {answeredComposeQuestionCount} answered
-                </span>
-              </button>
             </div>
           )}
 

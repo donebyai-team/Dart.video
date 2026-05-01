@@ -56,8 +56,6 @@ interface ComposeSubmissionQuestionsPanelProps {
   onComplete: (responses: ComposeSubmissionQuestionResponse[]) => void
   questions?: ComposeSubmissionQuestion[]
   initialResponses?: ComposeSubmissionQuestionResponse[]
-  initialQuestionId?: string
-  submitLabel?: string
 }
 
 const ComposeSubmissionQuestionsPanel = ({
@@ -65,9 +63,7 @@ const ComposeSubmissionQuestionsPanel = ({
   onCancel,
   onComplete,
   questions = [],
-  initialResponses = [],
-  initialQuestionId,
-  submitLabel = 'Done'
+  initialResponses = []
 }: ComposeSubmissionQuestionsPanelProps) => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [responsesByQuestionId, setResponsesByQuestionId] = useState<Record<string, {
@@ -87,9 +83,6 @@ const ComposeSubmissionQuestionsPanel = ({
       return acc
     }, {})
 
-    const requestedQuestionIndex = initialQuestionId
-      ? questions.findIndex(question => question.id === initialQuestionId)
-      : -1
     const firstUnansweredIndex = questions.findIndex(question => {
       const response = nextResponsesByQuestionId[question.id]
       return !response?.selectedOption?.trim() && !response?.customText?.trim()
@@ -97,13 +90,11 @@ const ComposeSubmissionQuestionsPanel = ({
 
     setResponsesByQuestionId(nextResponsesByQuestionId)
     setCurrentIndex(
-      requestedQuestionIndex >= 0
-        ? requestedQuestionIndex
-        : firstUnansweredIndex >= 0
-          ? firstUnansweredIndex
-          : 0
+      firstUnansweredIndex >= 0
+        ? firstUnansweredIndex
+        : 0
     )
-  }, [initialQuestionId, initialResponses, questions])
+  }, [initialResponses, questions])
 
   const currentQuestion = questions[currentIndex]
   const currentResponse = currentQuestion
@@ -239,7 +230,7 @@ const ComposeSubmissionQuestionsPanel = ({
           disabled={isSubmitting || (!currentQuestion.optional && !isCurrentQuestionAnswered)}
           className='gap-1.5'
         >
-          {isLastQuestion ? submitLabel : 'Continue'}
+          Continue
           <ChevronRight className='w-3.5 h-3.5' />
         </Button>
       </div>
