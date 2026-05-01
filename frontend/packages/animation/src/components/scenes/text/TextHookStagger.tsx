@@ -4,7 +4,6 @@ import type { ComponentRegistration } from '../../../registry/registry';
 import { useElement } from '../../../patches';
 import { interpolateWithEasing } from '../../../styles';
 import { useTheme } from '../../../theme';
-import { useTypography } from '../../../tokens';
 import type { TypographyVariant } from '../../../tokens/semantic';
 import {
   getHighlightedTextAnimationTransform,
@@ -39,15 +38,15 @@ export const TextHookStagger: React.FC<TextHookStaggerProps> = (initProps) => {
   const frame = useCurrentFrame();
   const theme = useTheme();
   const id = initProps.id ?? TextHookStaggerDefaults.id;
-  const { props, getStyle } = useElement(id, TextHookStaggerDefaults, initProps);
-  const typographyStyle = useTypography(props.variant);
-  const style = getStyle({
-    baseStyle: (resolvedProps) => ({
+  const el = useElement(id, TextHookStaggerDefaults, initProps);
+  const { props } = el;
+  const style = el.rootStyle({
+    typography: true,
+    base: () => ({
       display: 'block',
       width: '100%',
       maxWidth: '100%',
       textAlign: 'center',
-      ...typographyStyle,
     }),
   });
   const actualHighlightColor = props.highlightColor || theme.colors.primary;
@@ -90,8 +89,7 @@ export const TextHookStagger: React.FC<TextHookStaggerProps> = (initProps) => {
 
   return (
     <span
-      id={id}
-      className={props.className}
+      {...el.rootProps}
       style={style}
     >
       {words.map((word, index) => (

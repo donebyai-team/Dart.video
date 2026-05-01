@@ -1,6 +1,6 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
-import { useArrayPatch, usePatchedProps } from '../../../patches';
+import { useArrayPatch, useElement } from '../../../patches';
 import { LogoAsset } from './LogoAsset';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { interpolateWithEasing } from '../../../styles';
@@ -29,7 +29,8 @@ function getSlotLayout(count: number) {
 }
 
 export const LogoShowcase: React.FC = () => {
-    const textProps = usePatchedProps("textstagger", TextStaggerDefaults);
+    const textEl = useElement("textstagger", TextStaggerDefaults);
+    const textProps = textEl.props;
     const arrayProps = useArrayPatch("logos");
 
     const frame = useCurrentFrame();
@@ -187,4 +188,3 @@ export const LogoShowcaseDescriptor: ComponentRegistration = {
     description: 'Row of logos + caption. Use for integrations, tech stack, partners, brands. eg. logos=["url1", "url2"], text="caption text".',
     celExpression: '55 + max(0, size(props.logos) - 1) * 5 + max(0, segmentCount(props.textstagger.text, "word") - 1) * 5',
 };
-

@@ -1,15 +1,10 @@
 import React from "react";
 import { useCurrentFrame } from "remotion";
-import z from 'zod';
-import { usePatchedProps } from "../../../patches/PatchContext";
-import { useStyleContext } from "../../../styles/StyleContext";
-import { useAspectPreset } from "../../../styles/AspectPresetContext";
+import { useElement } from "../../../patches";
 import { interpolateWithEasing } from "../../../styles/easingResolver";
 import { useTheme } from "../../../theme";
-import { resolveTypography } from "../../../tokens/resolveTypography";
-import { TYPOGRAPHY_VARIANT_NAMES } from "../../../tokens/semantic";
-import { LogoAsset, LogoAssetDefaults, LogoAssetProps, LogoAssetSchemaFields } from "./LogoAsset";
-import { TextStagger, TextStaggerDefaults, TextStaggerProps, TextStaggerSchemaFields } from "../text/TextStagger";
+import { LogoAsset, LogoAssetDefaults, LogoAssetSchemaFields } from "./LogoAsset";
+import { TextStagger, TextStaggerDefaults, TextStaggerSchemaFields } from "../text/TextStagger";
 import type { ComponentRegistration } from '../../../registry/registry';
 import { SPLIT_BY_MODES } from "../types";
 
@@ -21,14 +16,14 @@ const DEFAULT_SRC = ""
 
 
 export function LogoWithBrandName(): React.ReactElement {
-    const textProps = usePatchedProps("textstagger", TextStaggerDefaults);
-    const logoAssetProps = usePatchedProps("logoasset", LogoAssetDefaults);
+    const textEl = useElement("textstagger", TextStaggerDefaults);
+    const logoEl = useElement("logoasset", LogoAssetDefaults);
+    const textProps = textEl.props;
+    const logoAssetProps = logoEl.props;
 
 
     const frame = useCurrentFrame();
-    const styleConfig = useStyleContext();
     const theme = useTheme();
-    const preset = useAspectPreset();
 
 
     const resolvedLogo = logoAssetProps.src || theme.logoIcon?.url;
@@ -37,9 +32,8 @@ export function LogoWithBrandName(): React.ReactElement {
     const actualVariant = textProps.variant ?? DEFAULT_VARIANT;
 
     // Derive logo size from text's resolved font size
-    const typo = resolveTypography(actualVariant, styleConfig, theme, preset);
-    const fontSize = typeof typo.fontSize === 'number' ? typo.fontSize : 48;
-    const lineHeight = typeof typo.lineHeight === 'number' ? typo.lineHeight : 1.1;
+    const fontSize = textEl.fontSizePx;
+    const lineHeight = typeof textEl.typography?.lineHeight === 'number' ? textEl.typography.lineHeight : 1.1;
     const resolvedLogoSize = Math.round(fontSize * lineHeight);
 
     // Check first char opacity to animate the gap

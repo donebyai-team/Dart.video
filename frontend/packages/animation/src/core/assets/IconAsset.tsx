@@ -2,7 +2,6 @@ import React from "react";
 import { preloadImage } from "@remotion/preload";
 import { useEffect, useState, useCallback } from "react";
 import { useRemotionEnvironment, delayRender, continueRender } from "remotion";
-import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from "../../patches";
 import { useTheme } from "../../theme";
 import { useAspectPreset } from "../../styles";
 import { scaleToCanvas } from "../../theme/scale";
@@ -27,15 +26,9 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
   const { isRendering } = useRemotionEnvironment();
   const preset = useAspectPreset();
 
-  const styleOverride = useStyleOverride(propsInit.id);
-  const patchedProps = usePatchedProps(propsInit.id, propsInit);
-  const props = { ...patchedProps, id: propsInit.id };
-  const overrideTransform = typeof styleOverride.transform === 'string' ? styleOverride.transform : undefined;
-  const dragStyle = usePatchedDragStyle(props.id, props.style?.transform, overrideTransform);
-
-  const patchedIcon = props.icon;
-  const patchedSize = props.size || 64;
-  const patchedRadius = props.borderRadius || 0;
+  const patchedIcon = propsInit.icon;
+  const patchedSize = propsInit.size || 64;
+  const patchedRadius = propsInit.borderRadius || 0;
 
   const variant = theme.iconStyle ?? "outline";
   const fallbackUrl = `${ICON_BASE}/${variant}/${PLACEHOLDER_ICON}.svg`;
@@ -94,8 +87,8 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
 
   return (
     <div
-      id={props.id}
-      className={props.className}
+      id={propsInit.id}
+      className={propsInit.className}
       style={{
         width: scaledSize,
         height: scaledSize,
@@ -105,9 +98,7 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
         justifyContent: "center",
         flexShrink: 0,
         overflow: "hidden",
-        ...props.style,
-        ...styleOverride,
-        ...dragStyle,
+        ...propsInit.style,
       }}
     >
       {errored ? (

@@ -4,7 +4,6 @@ import { useElement } from '../../../patches';
 import { interpolateWithEasing } from '../../../styles';
 import { useTheme } from '../../../theme';
 import type { TypographyVariant } from '../../../tokens';
-import { useTypography } from '../../../tokens/resolveTypography';
 import {
     getHighlightedTextAnimationTransform,
     getEntranceTransform,
@@ -35,38 +34,16 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
     const theme = useTheme();
 
     const id = initProps.id ?? TextHighlightDefaults.id;
-    const { props, style } = useElement(id, TextHighlightDefaults, initProps, {
-        baseStyle: (resolvedProps) => ({
-            display: 'inline-block',
-            opacity: interpolateWithEasing(
-                frame,
-                [0, resolvedProps.animationDelay],
-                [0, 1],
-                'ease-out',
-            ),
-        }),
-        transform: (resolvedProps) => getEntranceTransform(
-            resolvedProps.entranceAnimation,
-            interpolateWithEasing(
-                frame,
-                [0, resolvedProps.animationDelay],
-                [0, 1],
-                'ease-out',
-            ),
-            200,
-        ),
-    });
+    const el = useElement(id, TextHighlightDefaults, initProps);
+    const { props } = el;
 
     // Apply defaults
-    const actualVariant = props.variant;
     const actualHighlightStyle = props.highlightStyle;
     const actualHighlightedTextAnimation = props.highlightedTextAnimation;
     const actualHighlightColor = props.highlightColor || theme.colors.primary;
     const actualAnimation = props.entranceAnimation;
     const actualAnimationDelay = props.animationDelay;
     const actualAnimationDuration = props.animationDuration;
-    const typographyStyle = useTypography(actualVariant);
-    const { transform: _ignoredStyleTransform, ...textStyleOverride } = props.style ?? {};
 
     // Animation timeline:
     // Phase 1: Entrance animation with highlight already visible (0 to animationDelay)
@@ -79,6 +56,14 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
         [0, 1],
         'ease-out'
     );
+    const style = el.rootStyle({
+        typography: true,
+        base: {
+            display: 'inline-block',
+            opacity: entranceProgress,
+        },
+        transform: getEntranceTransform(actualAnimation, entranceProgress, 200),
+    });
 
     const zoomStartFrame = actualAnimationDelay;
     const zoomProgress = interpolateWithEasing(
@@ -216,16 +201,17 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
 
     return (
         <span
-            id={id}
-            className={props.className}
+            {...el.rootProps}
             style={style}
         >
             <span
-                style={{
-                    ...typographyStyle,
+                style={el.textStyle({
+                    typography: false,
+                    includeUserStyle: false,
+                    base: {
                     whiteSpace: 'pre-wrap',
-                    ...textStyleOverride,
-                }}
+                    },
+                })}
             >
                 {segments.map((segment, i) => {
                     if (!segment.highlight) {

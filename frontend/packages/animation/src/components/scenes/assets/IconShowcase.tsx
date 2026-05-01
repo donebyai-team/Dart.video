@@ -1,9 +1,8 @@
 import React from 'react';
 import { interpolate, useCurrentFrame } from 'remotion';
-import z from 'zod';
 import { IconAsset } from '../../../core/assets/IconAsset';
-import { TextStagger, TextStaggerDefaults, TextStaggerProps, TextStaggerSchemaFields } from '../text/TextStagger';
-import { useArrayPatch, usePatchedProps } from '../../../patches';
+import { TextStagger, TextStaggerDefaults, TextStaggerSchemaFields } from '../text/TextStagger';
+import { useArrayPatch, useElement } from '../../../patches';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { ENTRANCE_ANIMATIONS, SPLIT_BY_MODES } from '../types';
 import { interpolateWithEasing } from '../../../styles';
@@ -19,7 +18,8 @@ const DEFAULT_ICON_SIZE = 90;
 const DEFAULT_ICON_GAP = 64;
 
 export const IconShowcase: React.FC = () => {
-    const textProps = usePatchedProps("textstagger", TextStaggerDefaults);
+    const textEl = useElement("textstagger", TextStaggerDefaults);
+    const textProps = textEl.props;
     const arrayProps = useArrayPatch("icons");
 
 
@@ -203,5 +203,4 @@ export const IconShowcaseDescriptor: ComponentRegistration = {
     description: 'Row of icons + caption. Use for integrations, tech stack, partners, brands. eg. icons={["shopify", "midjourney", "openai"]}, text="caption text".',
     celExpression: '55 + max(0, size(props.icons) - 1) * 5 + max(0, segmentCount(props.textstagger.text, "word") - 1) * 5',
 };
-
 

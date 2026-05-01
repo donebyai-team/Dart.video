@@ -1,7 +1,7 @@
 import { preloadImage } from "@remotion/preload";
 import { useEffect, useState } from "react";
 import { useCurrentFrame, useRemotionEnvironment } from "remotion";
-import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from "../../../patches";
+import { useElement } from "../../../patches";
 import { useAspectPreset } from "../../../styles/AspectPresetContext";
 import { interpolateWithEasing } from "../../../styles/easingResolver";
 import { useTheme } from "../../../theme";
@@ -65,18 +65,14 @@ function getLogoAnimationStyle(animation: LogoAnimation, progress: number): Reac
 }
 
 export function LogoAsset(initProps: LogoAssetProps): React.ReactElement {
-    const defaultProps = { ...LogoAssetDefaults, ...initProps };
-    const id = defaultProps.id;
-    
-    const props = usePatchedProps(id, defaultProps);
+    const id = initProps.id ?? LogoAssetDefaults.id;
+    const el = useElement(id, LogoAssetDefaults, initProps);
+    const { props } = el;
 
     const frame = useCurrentFrame();
     const { logo } = useTheme();
     const { isRendering } = useRemotionEnvironment();
     const preset = useAspectPreset();
-    const styleOverride = useStyleOverride(props.id);
-    const overrideTransform = typeof styleOverride.transform === 'string' ? styleOverride.transform : undefined;
-    const dragStyle = usePatchedDragStyle(props.id, props.style?.transform, overrideTransform);
     const [intrinsicSize, setIntrinsicSize] = useState(() => ({
         width: logo?.width || FALLBACK_LOGO_WIDTH,
         height: logo?.height || FALLBACK_LOGO_HEIGHT,
@@ -86,7 +82,6 @@ export function LogoAsset(initProps: LogoAssetProps): React.ReactElement {
     const actualAnimation = props.logoAnimation ?? DEFAULT_ANIMATION;
 
     const { objectFit: styleObjectFit, ...restStyle } = props.style ?? {};
-    const { objectFit: overrideObjectFit, ...wrapperStyleOverride } = styleOverride;
     const defaultSrc = props.src || logo?.url || DEFAULT_LOGO_SVG;
 
     const defaultBoxSize = Math.min(preset.width, preset.height) * 0.35;
@@ -108,9 +103,8 @@ export function LogoAsset(initProps: LogoAssetProps): React.ReactElement {
         ?? (props.height ? props.height * intrinsicAspectRatioValue : autoBoxWidth);
     const resolvedBoxHeight = props.height
         ?? (props.width ? props.width / intrinsicAspectRatioValue : autoBoxHeight);
-    const rawObjectFit = overrideObjectFit ?? styleObjectFit;
     const resolvedObjectFit: React.CSSProperties['objectFit'] =
-        typeof rawObjectFit === 'string' ? rawObjectFit as React.CSSProperties['objectFit'] : 'contain';
+        typeof styleObjectFit === 'string' ? styleObjectFit as React.CSSProperties['objectFit'] : 'contain';
 
     const animDuration = DEFAULT_ANIMATION_DURATION;
     const animProgress = actualAnimation !== 'none'
@@ -150,18 +144,17 @@ export function LogoAsset(initProps: LogoAssetProps): React.ReactElement {
 
     return (
         <span
-            id={props.id}
-            className={props.className}
-            style={{
+            {...el.rootProps}
+            style={el.rootStyle({
+                base: {
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 width: resolvedBoxWidth,
                 height: resolvedBoxHeight,
                 ...restStyle,
-                ...wrapperStyleOverride,
-                ...dragStyle,
-            }}
+                },
+            })}
         >
             <span
                 style={{

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useCurrentFrame } from 'remotion';
 import { ArrayItem } from '../../../core/assets/ArrayItem';
 import { ImageAsset } from '../../../core/assets/ImageAsset';
-import { useArrayPatch, usePatchedProps } from '../../../patches';
+import { useArrayPatch, useElement } from '../../../patches';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
@@ -331,8 +331,10 @@ function ProblemCollageImage({
 export const ProblemCollage: React.FC = () => {
     const frame = useCurrentFrame();
     const preset = useAspectPreset();
-    const textProps = usePatchedProps('textstagger', ProblemCollageTextDefaults);
-    const sceneProps = usePatchedProps('scene', ProblemCollageSceneDefaults);
+    const textEl = useElement('textstagger', ProblemCollageTextDefaults);
+    const sceneEl = useElement('scene', ProblemCollageSceneDefaults);
+    const textProps = textEl.props;
+    const sceneProps = sceneEl.props;
     const imageEntries = useArrayPatch('images');
     const resolvedImages = useMemo<ResolvedImageItem[]>(() => {
         return imageEntries.map((item, index) => {

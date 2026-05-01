@@ -3,7 +3,6 @@ import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
 import { useElement } from '../../../patches';
 import { useTheme } from '../../../theme/ThemeContext';
 import type { TypographyVariant } from '../../../tokens/semantic';
-import { useTypography } from '../../../tokens/resolveTypography';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { Text } from '../../../core/assets';
 import { hexToRgb } from '../../../theme';
@@ -31,8 +30,8 @@ export const TitleSplit: React.FC<TitleSplitProps> = (initProps) => {
   const theme = useTheme();
 
   const id = initProps.id ?? TitleSplitDefaults.id;
-  const { props, style } = useElement(id, TitleSplitDefaults, initProps, {
-    baseStyle: (resolvedProps) => ({
+  const el = useElement(id, TitleSplitDefaults, initProps, {
+    base: (resolvedProps) => ({
       width: '100%',
       height: '100%',
       display: 'flex',
@@ -43,10 +42,10 @@ export const TitleSplit: React.FC<TitleSplitProps> = (initProps) => {
       gap: resolvedProps.gap,
     }),
   });
-  const { transform: _ignoredStyleTransform, ...textStyleOverride } = props.style ?? {};
+  const { props } = el;
+  const style = el.rootStyle();
 
   const elapsed = Math.max(0, frame - props.startAt);
-  const typographyStyle = useTypography(props.variant);
   const glowColor = props.glowColor || theme.colors.primary;
 
 
@@ -84,14 +83,12 @@ export const TitleSplit: React.FC<TitleSplitProps> = (initProps) => {
     lineHeight: 1,
     textAlign: 'center',
     textTransform: 'uppercase',
-    ...typographyStyle,
-    ...textStyleOverride,
+    ...el.textStyle(),
   };
 
   return (
     <div
-      id={id}
-      className={props.className}
+      {...el.rootProps}
       style={style}
     >
       <Text

@@ -4,7 +4,6 @@ import { useElement } from '../../../patches';
 import { useTheme } from '../../../theme/ThemeContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import type { TypographyVariant } from '../../../tokens/semantic';
-import { useTypography } from '../../../tokens/resolveTypography';
 import { Text } from '../../../core/assets/Text';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { getEntranceTransform } from '../types';
@@ -38,15 +37,17 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (initProps) =
   const frame = useCurrentFrame();
   const theme = useTheme();
   const id = initProps.id ?? TextWithWordCycleDefaults.id;
-  const { props, getStyle } = useElement(id, TextWithWordCycleDefaults, initProps);
+  const el = useElement(id, TextWithWordCycleDefaults, initProps);
+  const { props } = el;
 
   const patchedVariant = props.variant;
   const actualHighlightStyle = props.highlightStyle;
   const actualHighlightColor = props.highlightColor ?? theme.colors.primary;
   const actualEntranceAnimation = props.entranceAnimation;
-  const typographyStyle = useTypography(patchedVariant);
-  const style = getStyle({
-    baseStyle: {
+  const typographyStyle = el.typography ?? {};
+  const style = el.rootStyle({
+    typography: true,
+    base: {
       display: 'inline-block',
       opacity: interpolateWithEasing(
         Math.max(0, frame - props.startAt),
@@ -54,7 +55,6 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (initProps) =
         [0, 1],
         'ease-out',
       ),
-      ...typographyStyle,
     },
     transform: getEntranceTransform(
       actualEntranceAnimation,
@@ -77,7 +77,7 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (initProps) =
     'ease-out',
   );
   const entranceTransform = getEntranceTransform(actualEntranceAnimation, entranceProgress);
-  const { transform: _ignoredStyleTransform, ...textOverrideStyle } = props.style ?? {};
+  const textOverrideStyle = el.textStyle({ typography: false });
   const containerStyle: React.CSSProperties = {
     ...style,
   };
@@ -101,7 +101,7 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (initProps) =
 
   if (props.cyclingWords.length === 0) {
     return (
-      <span id={id} className={props.className} style={containerStyle}>
+      <span {...el.rootProps} style={containerStyle}>
         <Text
           text={props.text}
           variant={patchedVariant}
@@ -317,11 +317,7 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (initProps) =
   };
 
   return (
-    <span
-      id={id}
-      className={props.className}
-      style={containerStyle}
-    >
+    <span {...el.rootProps} style={containerStyle}>
       {props.text && (
         <Text text={props.text} variant={patchedVariant} style={{ display: 'inline', whiteSpace: 'pre-wrap', ...textOverrideStyle }} />
       )}

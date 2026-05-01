@@ -57,7 +57,7 @@ export function Counter({
   id,
 }: CounterProps): React.ReactElement {
   const frame = useCurrentFrame();
-  const { props, style: resolvedStyle } = useElement(id, {
+  const el = useElement(id, {
     startAt,
     durationInFrames,
     easing,
@@ -71,6 +71,7 @@ export function Counter({
     className,
     id,
   });
+  const { props } = el;
 
   const progress = interpolateWithEasing(
     frame,
@@ -87,7 +88,7 @@ export function Counter({
       text={formatNumber(currentValue, props.format, props.prefix, props.suffix)}
       variant={props.variant ?? 'heading'}
       className={props.className}
-      style={resolvedStyle}
+      style={el.rootStyle({ typography: true })}
     />
   );
 }

@@ -3,7 +3,6 @@ import { useCurrentFrame } from 'remotion';
 import type { TypographyVariant } from '../../../tokens/semantic';
 import { useElement } from '../../../patches';
 import { interpolateWithEasing } from '../../../styles';
-import { useTypography } from '../../../tokens';
 import {
     getEntranceTransform,
     type EntranceAnimation,
@@ -44,25 +43,22 @@ export const TextStagger: React.FC<TextStaggerProps> = (initProps) => {
 
     const frame = useCurrentFrame();
     const id = initProps.id ?? TextStaggerDefaults.id;
-    const { props, style } = useElement(id, TextStaggerDefaults, initProps, {
-        baseStyle: {
+    const el = useElement(id, TextStaggerDefaults, initProps, {
+        typography: true,
+        base: {
             display: 'inline-block',
         },
     });
-
+    const { props } = el;
+    const style = el.rootStyle();
 
     // Apply defaults (split-mode-aware)
-    const actualVariant = props.variant;
-    const typographyStyle = useTypography(actualVariant);
     const actualAnimation = props.entranceAnimation;
     const actualStartAt = props.startAt;
     const splitBy = props.splitBy;
     const modeDefaults = getSplitModeDefaults(splitBy);
     const actualStaggerDelay = props.staggerDelay ?? modeDefaults.staggerDelay;
     const actualDuration = props.duration ?? modeDefaults.duration;
-
-
-    const { transform: _unitTransform, ...unitStyle } = props.style ?? {};
 
     const units = splitBy === 'char' ? props.text.split('') : splitBy === 'line' ? props.text.split('\n') : props.text.split(' ');
 
@@ -82,20 +78,19 @@ export const TextStagger: React.FC<TextStaggerProps> = (initProps) => {
 
     return (
         <span
-            id={id}
-            className={props.className}
+            {...el.rootProps}
             style={style}
         >
             {units.map((unit, index) => (
                 <span
                     key={index}
-                    style={{
-                        display: 'inline-block',
-                        marginRight: splitBy === 'word' && index < units.length - 1 ? '0.25em' : 0,
-                        ...getAnimationStyles(index),
-                        ...typographyStyle,
-                        ...unitStyle,
-                    }}
+                    style={el.childStyle({
+                        base: {
+                            display: 'inline-block',
+                            marginRight: splitBy === 'word' && index < units.length - 1 ? '0.25em' : 0,
+                            ...getAnimationStyles(index),
+                        },
+                    })}
                 >
                     {unit}
                 </span>

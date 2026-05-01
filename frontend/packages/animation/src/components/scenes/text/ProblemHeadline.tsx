@@ -5,7 +5,6 @@ import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme/ThemeContext';
 import type { TypographyVariant } from '../../../tokens/semantic';
-import { useTypography } from '../../../tokens/resolveTypography';
 import { getEntranceTransform } from '../types';
 import type { EntranceAnimation } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
@@ -46,19 +45,6 @@ export const ProblemHeadlineDefaults = {
 };
 
 export type ProblemHeadlineProps = Partial<typeof ProblemHeadlineDefaults>;
-
-function parsePixelValue(value: React.CSSProperties['fontSize']): number {
-  if (typeof value === 'number') {
-    return value;
-  }
-
-  if (typeof value === 'string') {
-    const parsed = parseFloat(value);
-    return Number.isFinite(parsed) ? parsed : 96;
-  }
-
-  return 96;
-}
 
 function estimateLineWidth(line: string, fontSizePx: number): number {
   const characterCount = line.trim().length || 1;
@@ -142,10 +128,11 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
   const theme = useTheme();
   const preset = useAspectPreset();
   const id = initProps.id ?? ProblemHeadlineDefaults.id;
-  const { props, getStyle } = useElement(id, ProblemHeadlineDefaults, initProps);
-  const { transform: _ignoredPropTransform, ...propStyleWithoutTransform } = props.style ?? {};
-  const typographyStyle = useTypography(props.variant);
-  const fontSizePx = parsePixelValue(typographyStyle.fontSize);
+
+  const el = useElement(id, ProblemHeadlineDefaults, initProps);
+  const { props } = el;
+
+  const fontSizePx = el.fontSizePx;
   const lineGapPx = fontSizePx * 1.1;
   const availableWidth = preset.width - preset.safeArea.left - preset.safeArea.right;
   const maxTextWidthPx = Math.max(fontSizePx * 6, availableWidth * 0.72);
@@ -238,12 +225,7 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
     ) * (1 - exit.progress * 0.45);
   const groupOpacity = exit.opacity;
   const textOpacity = exit.opacity;
-  const { color: _ignoredPropColor, ...propTextStyleWithoutColor } = propStyleWithoutTransform;
-  const textLayerStyle: React.CSSProperties = {
-    ...typographyStyle,
-    color: typeof typographyStyle.color === 'string' ? typographyStyle.color : '#111111',
-    ...propTextStyleWithoutColor,
-  };
+  const textLayerStyle = el.textStyle();
 
   const getLineOneWordStyle = (word: string, wordIndex: number): React.CSSProperties => {
     const entryStart = wordIndex * lineOneStaggerDelay;
@@ -277,16 +259,14 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
 
   return (
     <div
-      id={id}
-      className={props.className}
-      style={getStyle({
-        baseStyle: {
+      {...el.rootProps}
+      style={el.rootStyle({
+        base: {
         position: 'relative',
         width: brushWidth,
         height: brushHeight + fontSizePx * 0.8,
         transformOrigin: 'center center',
         opacity: groupOpacity,
-        pointerEvents: 'none',
         },
         transform: groupTransform,
       })}

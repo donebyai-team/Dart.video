@@ -1,7 +1,7 @@
 import React from 'react';
 import { interpolate, useCurrentFrame } from 'remotion';
 import { ArrayItem } from '../../../core/assets/ArrayItem';
-import { useArrayPatch, usePatchedProps } from '../../../patches';
+import { useArrayPatch, useElement } from '../../../patches';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { useAspectPreset } from '../../../styles';
 import { useStyleContext } from '../../../styles/StyleContext';
@@ -70,7 +70,8 @@ export function PillCarousel(): React.ReactElement {
     const theme = useTheme();
     const preset = useAspectPreset();
 
-    const textProps = usePatchedProps('textstagger', HERO_TEXT_DEFAULTS);
+    const textEl = useElement('textstagger', HERO_TEXT_DEFAULTS);
+    const textProps = textEl.props;
     const pillItems = useArrayPatch('pills');
 
     const pillCount = pillItems.length;

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useCurrentFrame } from 'remotion';
-import { usePatchOverlay, usePatchedProps } from '../../../patches';
+import { useElement, usePatchOverlay } from '../../../patches';
 import { ImageAsset } from '../../../core/assets';
 import { Row, Stack } from '../../../core/layout';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
@@ -81,11 +81,16 @@ export function TextWithImageScene(propsInit: SceneProps): React.ReactElement {
   const frame = useCurrentFrame();
   const preset = useAspectPreset();
   const overlay = usePatchOverlay();
-  const sceneProps = usePatchedProps('scene', SceneDefaults);
-  const imageProps = usePatchedProps('imageasset', ImageDefaults);
-  const textHighlightProps = usePatchedProps('texthighlight', TextHighlightDefaults);
-  const textStaggerProps = usePatchedProps('textstagger', TextStaggerDefaults);
-  const textWithWordCycleProps = usePatchedProps('textwithwordcycle', TextWithWordCycleDefaults);
+  const sceneEl = useElement('scene', SceneDefaults);
+  const imageEl = useElement('imageasset', ImageDefaults);
+  const textHighlightEl = useElement('texthighlight', TextHighlightDefaults);
+  const textStaggerEl = useElement('textstagger', TextStaggerDefaults);
+  const textWithWordCycleEl = useElement('textwithwordcycle', TextWithWordCycleDefaults);
+  const sceneProps = sceneEl.props;
+  const imageProps = imageEl.props;
+  const textHighlightProps = textHighlightEl.props;
+  const textStaggerProps = textStaggerEl.props;
+  const textWithWordCycleProps = textWithWordCycleEl.props;
   
   const imageDimensions = useImageDimensions(imageProps.image);
   const imageProgress = interpolateWithEasing(frame, [10, 50], [0, 1], 'ease-out');

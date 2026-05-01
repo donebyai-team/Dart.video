@@ -2,7 +2,6 @@ import React from 'react';
 import { spring, useCurrentFrame, useVideoConfig } from 'remotion';
 import { useElement } from '../../../patches';
 import { buildDepthShadow, DEFAULT_MEDIA_DEPTH } from '../../../styles';
-import { useTypography } from '../../../tokens';
 import type { TypographyVariant } from '../../../tokens/semantic';
 import { Text } from '../../../core/assets/Text';
 import { normalizeContainerStyle } from '../../../core/assets/ContainerAsset';
@@ -51,9 +50,12 @@ export const StatCounter: React.FC<StatCounterProps> = (initProps) => {
   const { fps } = useVideoConfig();
 
   const defaultProps = { ...StatCounterDefaults, ...initProps };
-  const { props: containerProps } = useElement('container', defaultProps.container);
-  const { props: counterProps } = useElement('counter', defaultProps.counter);
-  const { props: textProps } = useElement('text', defaultProps.text);
+  const containerEl = useElement('container', defaultProps.container);
+  const counterEl = useElement('counter', defaultProps.counter);
+  const textEl = useElement('text', defaultProps.text);
+  const { props: containerProps } = containerEl;
+  const { props: counterProps } = counterEl;
+  const { props: textProps } = textEl;
 
   const containerStyle = normalizeContainerStyle(
     StatCounterContainerDefaults,
@@ -70,8 +72,8 @@ export const StatCounter: React.FC<StatCounterProps> = (initProps) => {
     config: { damping: 12, stiffness: 100 },
   });
 
-  const numberTypography = useTypography(counterProps.variant);
-  const labelTypography = useTypography(textProps.variant);
+  const numberTypography = counterEl.typography ?? {};
+  const labelTypography = textEl.typography ?? {};
 
   return (
     <div

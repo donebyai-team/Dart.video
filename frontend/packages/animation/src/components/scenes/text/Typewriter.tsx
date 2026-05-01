@@ -3,7 +3,6 @@ import { useCurrentFrame } from 'remotion';
 import { useElement } from '../../../patches';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
-import { useTypography } from '../../../tokens/resolveTypography';
 import { EntranceAnimation, getEntranceTransform } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { TypographyVariant } from '../../../tokens';
@@ -34,11 +33,13 @@ export function Typewriter(initProps: TypewriterProps): React.ReactElement {
   const frame = useCurrentFrame();
   const styleConfig = useStyleContext();
   const id = initProps.id ?? TypewriterDefaults.id;
-  const { props, style } = useElement(id, TypewriterDefaults, initProps, {
-    baseStyle: {
+  const el = useElement(id, TypewriterDefaults, initProps, {
+    base: {
       display: 'inline-block',
     },
   });
+  const { props } = el;
+  const style = el.rootStyle();
 
   const entranceDuration = 20;
   const entranceProgress = interpolateWithEasing(
@@ -88,22 +89,19 @@ export function Typewriter(initProps: TypewriterProps): React.ReactElement {
   const pulseCenter = -30 + (pulseProgress * 160);
   const pulseBandStart = pulseCenter - 18;
   const pulseBandEnd = pulseCenter + 18;
-  const { transform: _ignoredTransform, display: _ignoredDisplay, position: _ignoredPosition, ...textStyleProps } = props.style ?? {};
-  const typographyStyle = useTypography(props.variant);
-  const textStyles = {
-    ...typographyStyle,
-    ...textStyleProps,
+  const textStyles = el.textStyle({
+    base: {
     opacity: entranceProgress,
-    transform: getEntranceTransform(props.entranceAnimation, entranceProgress),
     display: 'inline-block',
     position: 'relative' as const,
     whiteSpace: 'pre-wrap' as const,
-  };
+    },
+    transform: getEntranceTransform(props.entranceAnimation, entranceProgress),
+  });
 
   return (
     <span
-      id={id}
-      className={props.className}
+      {...el.rootProps}
       style={style}
     >
       <span

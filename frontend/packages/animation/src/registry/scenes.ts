@@ -10,8 +10,6 @@ import { TextWithWordCycleDescriptor } from "../components/scenes/text/TextWithW
 import { TextLeadStaggerDescriptor } from "../components/scenes/text/TextLeadStagger";
 import { ProblemHeadlineDescriptor } from "../components/scenes/text/ProblemHeadline";
 import { TextCardStackDescriptor } from "../components/scenes/text/TextCardStack";
-import { AnimatedImageDescriptor } from "../components/scenes/assets/AnimatedImage";
-import { AnimatedVideoDescriptor } from "../components/scenes/assets/AnimatedVideo";
 import { MultiImageStackDescriptor } from "../components/scenes/assets/image_stack/MultiImageStack";
 import { ProblemCollageDescriptor } from "../components/scenes/assets/ProblemCollage";
 import { LogoAssetDescriptor } from "../components/scenes/assets/LogoAsset";

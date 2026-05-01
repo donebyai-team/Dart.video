@@ -2,7 +2,7 @@ import React from 'react';
 import { useCurrentFrame } from 'remotion';
 import { ArrayItem } from '../../../../core/assets/ArrayItem';
 import { DEFAULT_SPEED_PERCENTAGE, getSpeed, MIN_SPEED_PERCENTAGE, scaleTiming } from '../../../../speed/timings';
-import { useArrayPatch, usePatchedProps } from '../../../../patches';
+import { useArrayPatch, useElement } from '../../../../patches';
 import type { ComponentRegistration } from '../../../../registry/registry';
 import { interpolateWithEasing, useAspectPreset } from '../../../../styles';
 import type { TypographyVariant } from '../../../../tokens';
@@ -73,8 +73,10 @@ function getSyncedCyclingWords(words: string[], itemCount: number): string[] {
 export function MultiImageStack(): React.ReactElement {
     const frame = useCurrentFrame();
     const preset = useAspectPreset();
-    const textProps = usePatchedProps('textwithwordcycle', DEFAULT_HERO_TEXT);
-    const sceneProps = usePatchedProps('scene', MultiImageStackDefaults);
+    const textEl = useElement('textwithwordcycle', DEFAULT_HERO_TEXT);
+    const sceneEl = useElement('scene', MultiImageStackDefaults);
+    const textProps = textEl.props;
+    const sceneProps = sceneEl.props;
     const items = useArrayPatch('images') as ImageStackItem[];
 
     const speed = getSpeed(sceneProps.speed);

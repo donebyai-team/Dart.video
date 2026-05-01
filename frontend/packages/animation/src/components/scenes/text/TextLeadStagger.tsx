@@ -4,7 +4,6 @@ import { useElement } from '../../../patches';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import type { TypographyVariant } from '../../../tokens/semantic';
-import { useTypography } from '../../../tokens/resolveTypography';
 import { getEntranceTransform } from '../types';
 import type { EntranceAnimation } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
@@ -48,19 +47,6 @@ export const TextLeadStaggerDefaults = {
 
 export type TextLeadStaggerProps = Partial<typeof TextLeadStaggerDefaults>;
 
-function parsePixelValue(value: React.CSSProperties['fontSize']): number {
-  if (typeof value === 'number') {
-    return value;
-  }
-
-  if (typeof value === 'string') {
-    const parsed = parseFloat(value);
-    return Number.isFinite(parsed) ? parsed : 96;
-  }
-
-  return 96;
-}
-
 function estimateWordWidth(word: string, fontSizePx: number): number {
   return Math.max(fontSizePx * 0.9, word.length * fontSizePx * 0.62);
 }
@@ -74,16 +60,17 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
   const frame = useCurrentFrame();
   const preset = useAspectPreset();
   const id = initProps.id ?? TextLeadStaggerDefaults.id;
-  const { props, getStyle } = useElement(id, TextLeadStaggerDefaults, initProps);
-  const typographyStyle = useTypography(props.variant);
-  const style = getStyle({
-    baseStyle: {
+  const el = useElement(id, TextLeadStaggerDefaults, initProps);
+  const { props } = el;
+  const typographyStyle = el.typography ?? {};
+  const style = el.rootStyle({
+    typography: true,
+    base: {
       display: 'inline-block',
       whiteSpace: 'nowrap',
-      ...typographyStyle,
     },
   });
-  const { transform: _ignoredStyleTransform, ...textStyleOverride } = props.style ?? {};
+  const textStyleOverride = el.textStyle({ typography: false });
   const elapsed = Math.max(0, frame - props.startAt);
   
   const speed = getSpeed(props.speed);
@@ -95,7 +82,7 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
   const exitStaggerDelay = scaleTiming(BASE_EXIT_STAGGER_DELAY, speed);
   const exitDuration = scaleTiming(BASE_EXIT_DURATION, speed);
   const handoffGap = scaleTiming(BASE_HANDOFF_GAP, speed);
-  const fontSizePx = parsePixelValue(typographyStyle.fontSize);
+  const fontSizePx = el.fontSizePx;
   const wordGapPx = fontSizePx * 0.25;
 
   const words = useMemo(() => props.text.trim().split(/\s+/).filter(Boolean), [props.text]);

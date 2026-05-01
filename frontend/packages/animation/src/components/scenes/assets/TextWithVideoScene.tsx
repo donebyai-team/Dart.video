@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useCurrentFrame } from 'remotion';
-import { usePatchOverlay, usePatchedProps } from '../../../patches';
+import { useElement, usePatchOverlay } from '../../../patches';
 import { VideoAsset } from '../../../core/assets';
 import { Row, Stack } from '../../../core/layout';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
@@ -85,11 +85,16 @@ export function TextWithVideoScene(propsInit: SceneProps): React.ReactElement {
   const frame = useCurrentFrame();
   const preset = useAspectPreset();
   const overlay = usePatchOverlay();
-  const sceneProps = usePatchedProps('scene', SceneDefaults);
-  const videoProps = usePatchedProps('videoasset', VideoDefaults);
-  const textHighlightProps = usePatchedProps('texthighlight', TextHighlightDefaults);
-  const textStaggerProps = usePatchedProps('textstagger', TextStaggerDefaults);
-  const textWithWordCycleProps = usePatchedProps('textwithwordcycle', TextWithWordCycleDefaults);
+  const sceneEl = useElement('scene', SceneDefaults);
+  const videoEl = useElement('videoasset', VideoDefaults);
+  const textHighlightEl = useElement('texthighlight', TextHighlightDefaults);
+  const textStaggerEl = useElement('textstagger', TextStaggerDefaults);
+  const textWithWordCycleEl = useElement('textwithwordcycle', TextWithWordCycleDefaults);
+  const sceneProps = sceneEl.props;
+  const videoProps = videoEl.props;
+  const textHighlightProps = textHighlightEl.props;
+  const textStaggerProps = textStaggerEl.props;
+  const textWithWordCycleProps = textWithWordCycleEl.props;
 
   const videoDimensions = useVideoDimensions(videoProps.video);
   const videoProgress = interpolateWithEasing(frame, [10, 50], [0, 1], 'ease-out');

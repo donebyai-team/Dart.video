@@ -3,7 +3,6 @@ import { useCurrentFrame } from 'remotion';
 import { useElement } from '../../../patches';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import type { TypographyVariant } from '../../../tokens/semantic';
-import { useTypography } from '../../../tokens/resolveTypography';
 import { Text } from '../../../core/assets/Text';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { getEntranceTransform } from '../types';
@@ -34,14 +33,15 @@ export const WordCycle: React.FC<WordCycleProps> = (initProps) => {
   const frame = useCurrentFrame();
 
   const id = initProps.id ?? WordCycleDefaults.id;
-  const { props, getStyle } = useElement(id, WordCycleDefaults, initProps);
+  const el = useElement(id, WordCycleDefaults, initProps);
+  const { props } = el;
 
   const patchedVariant = props.variant;
   const actualEntranceAnimation = props.entranceAnimation;
-  const typographyStyle = useTypography(patchedVariant);
-  const style = getStyle({
-    baseStyle: {
-      ...typographyStyle,
+  const typographyStyle = el.typography ?? {};
+  const style = el.rootStyle({
+    typography: true,
+    base: {
       opacity: interpolateWithEasing(
         frame,
         [0, 20],
@@ -71,7 +71,7 @@ export const WordCycle: React.FC<WordCycleProps> = (initProps) => {
     'ease-out',
   );
   const entranceTransform = getEntranceTransform(actualEntranceAnimation, entranceProgress);
-  const { transform: _ignoredStyleTransform, ...textOverrideStyle } = props.style ?? {};
+  const textOverrideStyle = el.textStyle({ typography: false });
 
   const spacerMeasurementStyle = useMemo(
     () => ({
@@ -94,12 +94,8 @@ export const WordCycle: React.FC<WordCycleProps> = (initProps) => {
   if (props.words.length === 0) {
     return (
       <span
-        id={id}
-        className={props.className}
-        style={{
-          ...typographyStyle,
-          ...style,
-        }}
+        {...el.rootProps}
+        style={style}
       >
         <Text text="" variant={patchedVariant} style={textOverrideStyle} />
       </span>

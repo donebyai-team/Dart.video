@@ -1,11 +1,9 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
-import { usePatchedProps } from '../../../patches/PatchContext';
-import { useStyleContext } from '../../../styles/StyleContext';
+import { useElement } from '../../../patches';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { useTheme } from '../../../theme';
-import { resolveTypography } from '../../../tokens/resolveTypography';
 import { LogoAsset, LogoAssetDefaults, LogoAssetSchemaFields } from './LogoAsset';
 import { TextStagger, TextStaggerDefaults } from '../text/TextStagger';
 import type { ComponentRegistration } from '../../../registry/registry';
@@ -47,18 +45,19 @@ function getWordRevealDuration(text: string, staggerDelay: number, duration: num
 
 export function LogoWithCTA(): React.ReactElement {
     const frame = useCurrentFrame();
-    const styleConfig = useStyleContext();
     const preset = useAspectPreset();
     const theme = useTheme();
-    const logoProps = usePatchedProps('logoasset', LogoAssetDefaults);
-    const brandProps = usePatchedProps('textstagger-brandname', BRAND_TEXT_DEFAULTS);
-    const taglineProps = usePatchedProps('textstagger-tagline', TAGLINE_TEXT_DEFAULTS);
+    const logoEl = useElement('logoasset', LogoAssetDefaults);
+    const brandEl = useElement('textstagger-brandname', BRAND_TEXT_DEFAULTS);
+    const taglineEl = useElement('textstagger-tagline', TAGLINE_TEXT_DEFAULTS);
+    const logoProps = logoEl.props;
+    const brandProps = brandEl.props;
+    const taglineProps = taglineEl.props;
 
     const resolvedLogo = logoProps.src || theme.logoIcon?.url;
 
-    const brandTypography = resolveTypography(brandProps.variant, styleConfig, theme, preset);
-    const brandFontSize = typeof brandTypography.fontSize === 'number' ? brandTypography.fontSize : 44;
-    const brandLineHeight = typeof brandTypography.lineHeight === 'number' ? brandTypography.lineHeight : 1.1;
+    const brandFontSize = brandEl.fontSizePx;
+    const brandLineHeight = typeof brandEl.typography?.lineHeight === 'number' ? brandEl.typography.lineHeight : 1.1;
     const resolvedLogoSize = logoProps.width
         ?? logoProps.height
         ?? Math.round(brandFontSize * brandLineHeight * 1.02);

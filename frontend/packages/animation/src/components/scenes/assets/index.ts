@@ -1,5 +1,3 @@
-export * from './AnimatedImage';
-export * from './AnimatedVideo';
 export * from './TextWithImageScene';
 export * from './TextWithVideoScene';
 export * from './image_stack';

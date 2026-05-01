@@ -1,6 +1,12 @@
 import React, { createContext, useContext } from 'react';
 import { PatchOverlay, createEmptyPatchOverlay } from './types';
 import { deepMerge } from './utils';
+import { useAspectPreset } from '../styles/AspectPresetContext';
+import { useStyleContext } from '../styles/StyleContext';
+import { useTheme } from '../theme/ThemeContext';
+import { resolveTypography } from '../tokens/resolveTypography';
+import type { TypographyVariant } from '../tokens/semantic';
+import { parsePixelValue } from '../components/scenes/text/measureText';
 
 /**
  * PatchContext holds the active PatchOverlay for the current animation.
@@ -29,74 +35,6 @@ export function PatchContextProvider({ overlay, children }: PatchContextProvider
   );
 }
 
-export interface TimingDefaults {
-  startAt: number;
-  durationInFrames: number;
-}
-
-export interface ResolvedTiming {
-  /** startAt after patch applied */
-  effectiveStartAt: number;
-  /** durationInFrames after patch applied */
-  effectiveDurationInFrames: number;
-}
-
-/**
- * Returns effective startAt and durationInFrames for a primitive,
- * accounting for:
- *   1. User patches on these timing props
- *   2. Global speed factor (> 1 = faster, < 1 = slower)
- */
-export function usePrimitivePatches(
-  id: string | undefined,
-  defaults: TimingDefaults,
-): ResolvedTiming {
-  const overlay = useContext(PatchContext);
-
-  let startAt = defaults.startAt;
-  let duration = defaults.durationInFrames;
-
-  if (id) {
-    const entry = overlay[id];
-    if (typeof entry?.startAt === 'number') startAt = entry.startAt;
-    if (typeof entry?.durationInFrames === 'number') duration = entry.durationInFrames;
-  }
-
-  return { effectiveStartAt: startAt, effectiveDurationInFrames: duration };
-}
-
-/**
- * Returns the patched value for any prop on an element.
- * If no patch exists, returns the default.
- */
-export function usePatchedProp<T>(
-  id: string | undefined,
-  prop: string,
-  defaultValue: T,
-): T {
-  const overlay = useContext(PatchContext);
-  if (!id) return defaultValue;
-
-  const entry = overlay[id];
-  if (!prop) return entry as T;
-  if (entry && prop in entry) return entry[prop] as T;
-  return defaultValue;
-}
-
-export function usePatchedProps<T>(
-  id: string | undefined,
-  defaultValue: T,
-): T {
-  const overlay = useContext(PatchContext);
-
-  if (!id) return defaultValue;
-
-  const entry = overlay[id] as Partial<T> | undefined;
-  if (!entry) return defaultValue;
-
-  return deepMerge(defaultValue, entry);
-}
-
 type TransformPart = string | null | undefined | false;
 
 function composeTransforms(...transforms: TransformPart[]): string | undefined {
@@ -105,14 +43,24 @@ function composeTransforms(...transforms: TransformPart[]): string | undefined {
 }
 
 export interface UseElementOptionsWithProps<T> {
-  baseStyle?: React.CSSProperties | ((props: T) => React.CSSProperties);
+  base?: React.CSSProperties | ((props: T) => React.CSSProperties);
   transform?: TransformPart | ((props: T) => TransformPart);
+  typography?: boolean;
+  includeUserStyle?: boolean;
 }
 
 export interface UseElementResult<T> {
+  id: string | undefined;
   props: T;
-  style: React.CSSProperties;
-  getStyle: (options?: UseElementOptionsWithProps<T>) => React.CSSProperties;
+  rootProps: {
+    id: string | undefined;
+    className?: string;
+  };
+  typography: React.CSSProperties | undefined;
+  fontSizePx: number;
+  rootStyle: (options?: UseElementOptionsWithProps<T>) => React.CSSProperties;
+  childStyle: (options?: UseElementOptionsWithProps<T>) => React.CSSProperties;
+  textStyle: (options?: UseElementOptionsWithProps<T>) => React.CSSProperties;
 }
 
 /**
@@ -121,9 +69,12 @@ export interface UseElementResult<T> {
  * Merge order:
  *   defaults < input props < patch props
  *
- * Style order:
- *   base style < props.style, with transform composed as
+ * rootStyle handles object-level style:
+ *   optional typography < base < props.style, with transform composed as
  *   drag transform + component transform + props.style.transform
+ *
+ * childStyle handles internal animation pieces and intentionally does not
+ * include drag or patched root transforms. textStyle is for inner text nodes.
  */
 export function useElement<T extends object>(
   id: string | undefined,
@@ -132,6 +83,9 @@ export function useElement<T extends object>(
   options: UseElementOptionsWithProps<T> = {},
 ): UseElementResult<T> {
   const overlay = useContext(PatchContext);
+  const styleConfig = useStyleContext();
+  const theme = useTheme();
+  const preset = useAspectPreset();
 
   const propsWithInput = inputProps ? deepMerge(defaults, inputProps) : defaults;
   const patchEntry = id ? (overlay[id] as Partial<T> | undefined) : undefined;
@@ -142,12 +96,24 @@ export function useElement<T extends object>(
   const dragX = typeof (props as any).dragX === 'number' ? (props as any).dragX : 0;
   const dragY = typeof (props as any).dragY === 'number' ? (props as any).dragY : 0;
   const dragTransform = dragX || dragY ? `translate(${dragX}px, ${dragY}px)` : undefined;
-  const getStyle = (styleOptions: UseElementOptionsWithProps<T> = options): React.CSSProperties => {
+  const className = typeof (props as any).className === 'string' ? (props as any).className : undefined;
+  const variant = (props as { variant?: TypographyVariant }).variant;
+  const typography = variant ? resolveTypography(variant, styleConfig, theme, preset) : undefined;
+  const typographyFontSizePx = parsePixelValue(typography?.fontSize, 16);
+  const fontSizePx = parsePixelValue(styleWithoutTransform.fontSize, typographyFontSizePx);
+
+  const resolveBaseStyle = (styleOptions: UseElementOptionsWithProps<T>): React.CSSProperties | undefined => {
+    const base = styleOptions.base;
+    return typeof base === 'function' ? base(props) : base;
+  };
+
+  const rootStyle = (styleOptions: UseElementOptionsWithProps<T> = options): React.CSSProperties => {
     const componentTransform = typeof styleOptions.transform === 'function' ? styleOptions.transform(props) : styleOptions.transform;
     const transform = composeTransforms(dragTransform, componentTransform, styleTransform);
-    const baseStyle = typeof styleOptions.baseStyle === 'function' ? styleOptions.baseStyle(props) : styleOptions.baseStyle;
+    const baseStyle = resolveBaseStyle(styleOptions);
 
     return {
+      ...(styleOptions.typography ? typography : undefined),
       ...baseStyle,
       ...styleWithoutTransform,
       ...(transform ? { transform } : {}),
@@ -155,10 +121,40 @@ export function useElement<T extends object>(
     };
   };
 
+  const childStyle = (styleOptions: UseElementOptionsWithProps<T> = {}): React.CSSProperties => {
+    const componentTransform = typeof styleOptions.transform === 'function' ? styleOptions.transform(props) : styleOptions.transform;
+    const baseStyle = resolveBaseStyle(styleOptions);
+
+    return {
+      ...baseStyle,
+      ...(componentTransform ? { transform: componentTransform } : {}),
+      ...(componentTransform ? { willChange: 'transform' } : {}),
+    };
+  };
+
+  const textStyle = (styleOptions: UseElementOptionsWithProps<T> = {}): React.CSSProperties => {
+    const componentTransform = typeof styleOptions.transform === 'function' ? styleOptions.transform(props) : styleOptions.transform;
+    const baseStyle = resolveBaseStyle(styleOptions);
+    const includeUserStyle = styleOptions.includeUserStyle ?? true;
+
+    return {
+      ...(styleOptions.typography === false ? undefined : typography),
+      ...(includeUserStyle ? styleWithoutTransform : undefined),
+      ...baseStyle,
+      ...(componentTransform ? { transform: componentTransform } : {}),
+      ...(componentTransform ? { willChange: 'transform' } : {}),
+    };
+  };
+
   return {
+    id,
     props,
-    style: getStyle(options),
-    getStyle,
+    rootProps: { id, className },
+    typography,
+    fontSizePx,
+    rootStyle,
+    childStyle,
+    textStyle,
   };
 }
 
@@ -179,15 +175,4 @@ export function useArrayPatch(source: string) {
   return Object.entries(byIndex)
     .sort(([a], [b]) => parseInt(a) - parseInt(b))
     .map(([_, item]) => item)
-}
-
-/**
- * Returns the style override object for an element.
- * Merge this on top of component style — user overrides always win.
- */
-export function useStyleOverride(id: string | undefined): Record<string, string | number> {
-  const overlay = useContext(PatchContext);
-  if (!id) return {};
-  const entry = overlay[id];
-  return (entry?.style as Record<string, string | number> | undefined) ?? {};
 }

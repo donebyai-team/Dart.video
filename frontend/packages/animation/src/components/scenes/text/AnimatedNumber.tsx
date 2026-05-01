@@ -3,7 +3,6 @@ import { useCurrentFrame } from 'remotion';
 import { useElement } from '../../../patches';
 import { interpolateWithEasing } from '../../../styles';
 import { useTheme } from '../../../theme';
-import { useTypography } from '../../../tokens';
 import type { TypographyVariant } from '../../../tokens/semantic';
 import { getEntranceTransform } from '../types';
 import type { EntranceAnimation, HighlightStyle } from '../types';
@@ -35,13 +34,12 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (initProps) => {
     const theme = useTheme();
 
     const id = initProps.id ?? AnimatedNumberDefaults.id;
-    const { props, getStyle } = useElement(id, AnimatedNumberDefaults, initProps);
+    const el = useElement(id, AnimatedNumberDefaults, initProps);
+    const { props } = el;
 
     const actualVariant = props.variant;
-    const typographyStyle = useTypography(actualVariant);
-    const style = getStyle({
-        baseStyle: {
-            ...typographyStyle,
+    const style = el.rootStyle({
+        base: {
             opacity: interpolateWithEasing(
                 frame,
                 [0, props.animationDelay],
@@ -61,7 +59,6 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (initProps) => {
         ),
     });
     const actualHighlightColor = props.highlightColor ?? theme.colors.primary;
-    const { transform: _ignoredStyleTransform, ...textStyleOverride } = props.style ?? {};
 
     const getHighlightStyles = (): React.CSSProperties => {
         switch (props.highlightStyle) {
@@ -124,18 +121,16 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (initProps) => {
 
     return (
         <span
-            id={id}
-            className={props.className}
+            {...el.rootProps}
             style={style}
         >
 
 
-            <Text text={props.startText} style={
-                {
+            <Text text={props.startText} style={el.textStyle({
+                base: {
                     marginRight: '0.25em',
-                    ...typographyStyle,
-                    ...textStyleOverride,
-                }} />
+                },
+            })} />
 
             <span style={getHighlightStyles()}>
                 <Counter
@@ -149,12 +144,11 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (initProps) => {
                     durationInFrames={props.counterDuration}
                 />
             </span>
-            <Text text={props.endText} style={
-                {
+            <Text text={props.endText} style={el.textStyle({
+                base: {
                     // marginLeft: '0.25em',
-                    ...typographyStyle,
-                    ...textStyleOverride,
-                }} />
+                },
+            })} />
         </span>
     );
 };
