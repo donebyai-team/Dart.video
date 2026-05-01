@@ -1039,6 +1039,7 @@ type VideoGenerationPlanRequest struct {
 	VideoBranding       *VideoBranding       `json:"VideoBranding"`
 	ComponentList       *string              `json:"ComponentList"`
 	AnimationCategories *AnimationCategories `json:"AnimationCategories"`
+	Questions           map[string]string    `json:"Questions"`
 }
 
 func (c *VideoGenerationPlanRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -1079,6 +1080,9 @@ func (c *VideoGenerationPlanRequest) Decode(holder *cffi.CFFIValueClass, typeMap
 		case "AnimationCategories":
 			c.AnimationCategories = baml.Decode(valueHolder).Interface().(*AnimationCategories)
 
+		case "Questions":
+			c.Questions = baml.Decode(valueHolder).Interface().(map[string]string)
+
 		default:
 
 			panic(fmt.Sprintf("unexpected field: %s in class VideoGenerationPlanRequest", key))
@@ -1106,6 +1110,8 @@ func (c VideoGenerationPlanRequest) Encode() (*cffi.HostValue, error) {
 	fields["ComponentList"] = c.ComponentList
 
 	fields["AnimationCategories"] = c.AnimationCategories
+
+	fields["Questions"] = c.Questions
 
 	return baml.EncodeClass("VideoGenerationPlanRequest", fields, nil)
 }
