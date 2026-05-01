@@ -77,6 +77,7 @@ func (a *agentV2) Continue(ctx context.Context, options ContinueSessionOptions) 
 		Prompt:     session.Request.Prompt,
 		Language:   "English",
 		Resolution: session.Request.Resolution.Id,
+		Questions:  session.Request.Questions,
 	}
 
 	// If the user has provided more assets or clarification, update the attachments
@@ -250,6 +251,7 @@ func (a *agentV2) Start(ctx context.Context, options StartSessionOptions) (*RunR
 		AnimationCategories: types.AnimationCategories{
 			scenes.GetAvailableEntranceAnimations(),
 		},
+		Questions: options.Input.Questions,
 	}
 
 	// use brand guidelines only when specified

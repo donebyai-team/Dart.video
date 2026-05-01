@@ -158,8 +158,6 @@ message GetVideosResponse {
   repeated core.v1.Video videos = 1;
 }
 
-
-
 message CreateVideoRequest {
   core.v1.Script script = 1;
   string prompt = 2;
@@ -170,6 +168,7 @@ message CreateVideoRequest {
   core.v1.StyleType styleType = 7;
   int32 fps = 8;
   repeated core.v1.SelectedMediaAsset assets = 9;
+  map<string, string> questions = 10;
 }
 
 message CreateVideoResponse {

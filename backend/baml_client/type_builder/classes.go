@@ -815,6 +815,10 @@ func (t *VideoGenerationPlanRequestClassView) PropertyAnimationCategories() (Cla
 	return t.inner.Property("AnimationCategories")
 }
 
+func (t *VideoGenerationPlanRequestClassView) PropertyQuestions() (ClassPropertyView, error) {
+	return t.inner.Property("Questions")
+}
+
 func (t *TypeBuilder) VideoGenerationPlanRequest() (*VideoGenerationPlanRequestClassView, error) {
 	bld, err := t.inner.Class("VideoGenerationPlanRequest")
 	if err != nil {

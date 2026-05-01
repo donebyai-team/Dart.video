@@ -29,12 +29,13 @@ import LanguageSelector from '@/components/composer/LanguageSelector'
 import BrandLibrarySelector from '@/components/composer/BrandLibrarySelector'
 import { MediaAsset, SelectedMediaAssetSchema } from '@coasterai/pb/coasterai/core/v1/media_asset_pb'
 import SelectedAssetsDialog, { type SelectedAssetWithPreview } from '@/components/assets/SelectedAssetsDialog'
+import ComposeSubmissionQuestionsPanel, { COMPOSE_SUBMISSION_QUESTIONS, type ComposeSubmissionQuestionResponse } from '@/components/composer/ComposeSubmissionQuestionsPanel'
 
 const MIN_SCRIPT_SECTIONS = 3
 const MIN_PROMPT_LENGTH = 10
 const VIDEO_COMPOSER_PREFILL_STORAGE_KEY = 'video-composer-prefill-metadata'
 
-type ComposerStage = 'compose' | 'planning' | 'question'
+type ComposerStage = 'compose' | 'composeQuestions' | 'planning' | 'question'
 type AssetPickerMode = 'figma' | 'upload'
 
 const VideoIntentComposer = () => {
@@ -65,6 +66,8 @@ const VideoIntentComposer = () => {
   const [selectedAnswer, setSelectedAnswer] = useState('')
   const [customAnswer, setCustomAnswer] = useState('')
   const [questionAssets, setQuestionAssets] = useState<SelectedAssetWithPreview[]>([])
+  const [composeQuestionResponses, setComposeQuestionResponses] = useState<ComposeSubmissionQuestionResponse[]>([])
+  const [hasReviewedComposeQuestions, setHasReviewedComposeQuestions] = useState(false)
 
   const router = useRouter()
   const { portalClient } = useClientsContext()
@@ -100,7 +103,7 @@ const VideoIntentComposer = () => {
     if (allowsCustom) return customAnswer.trim()
     return ''
   }, [activeQuestion, customAnswer, selectedAnswer])
-  const showThinking = hasSubmitted && stage !== 'question'
+  const showThinking = hasSubmitted && stage === 'planning'
 
   useEffect(() => {
     if (!pendingQuestion) return
@@ -194,8 +197,13 @@ const VideoIntentComposer = () => {
     setQuestionAssetsDialogOpen(false)
   }
 
-  const handleSubmit = async () => {
-    if (!canGenerate || isSubmitting) return
+  const startVideoCreation = async (submissionQuestionResponses: ComposeSubmissionQuestionResponse[] = []) => {
+    const questionResponseMap = Object.fromEntries(
+      COMPOSE_SUBMISSION_QUESTIONS.map(question => {
+        const matchingResponse = submissionQuestionResponses.find(response => response.questionId === question.id)
+        return [question.questionText, matchingResponse?.response ?? '']
+      })
+    )
 
     const selectedResolution =
       defaultEditorConfig.resolution.options.find(r => r.id === resolutionId) ??
@@ -222,7 +230,8 @@ const VideoIntentComposer = () => {
         durationInSec: Number(duration),
         brandLibraryId: selectedBrandLibraryId,
         styleType: selectedStyle,
-        assets: selectedAssetMessages
+        assets: selectedAssetMessages,
+        questions: questionResponseMap
       }, { signal: controller.signal })
 
       await consumePlanningStream(stream, controller.signal, streamSession)
@@ -241,6 +250,23 @@ const VideoIntentComposer = () => {
         abortControllerRef.current = null
       }
     }
+  }
+
+  const handleSubmit = async () => {
+    if (!canGenerate || isSubmitting) return
+
+    if (hasReviewedComposeQuestions) {
+      await startVideoCreation(composeQuestionResponses)
+      return
+    }
+
+    setStage('composeQuestions')
+  }
+
+  const handleComposeQuestionsComplete = async (responses: ComposeSubmissionQuestionResponse[]) => {
+    setComposeQuestionResponses(responses)
+    setHasReviewedComposeQuestions(true)
+    await startVideoCreation(responses)
   }
 
   const handleContinuePlanning = async (responseOverride?: string) => {
@@ -461,6 +487,20 @@ const VideoIntentComposer = () => {
           />
         )}
 
+        {stage === 'composeQuestions' && (
+          <ComposeSubmissionQuestionsPanel
+            isSubmitting={isSubmitting}
+            questions={COMPOSE_SUBMISSION_QUESTIONS}
+            initialResponses={composeQuestionResponses}
+            onCancel={() => {
+              setStage('compose')
+            }}
+            onComplete={responses => {
+              void handleComposeQuestionsComplete(responses)
+            }}
+          />
+        )}
+
         {/* Main input card */}
         <div className='rounded-2xl border bg-background shadow-sm overflow-hidden'>
 
@@ -565,7 +605,7 @@ const VideoIntentComposer = () => {
 
           {/* Action row */}
           <div className='px-4 pb-3 flex justify-end'>
-            {isSubmitting || stage === 'question' ? (
+            {isSubmitting || stage === 'question' || stage === 'composeQuestions' ? (
               <Button
                 onClick={handleStop}
                 variant='outline'

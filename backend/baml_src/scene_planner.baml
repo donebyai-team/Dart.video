@@ -17,6 +17,7 @@ class VideoGenerationPlanRequest {
     VideoBranding VideoBranding
     ComponentList string
     AnimationCategories AnimationCategories
+    Questions map<string, string>
 }
 
 class SceneSection {
@@ -148,31 +149,30 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     ]
     ```
 
-    ## INPUT
-    Video FPS: 30 frames/second
-    Language: {{ input.Language }}
-    Video Tone: **Playful**
-
-    ### User provided prompt/script
-    {{ input.Prompt }}
-    -----
-
-    {% if input.Script %}
-    ### Script Breakdown (STRICTLY FOLLOW)
-    {% for item in input.Script %}
-    - {{ item.name }}
-      Voiceover: {{ item.voiceover }}
-      {% if item.reference %}
-      Reference: {{ item.reference }}
-      {% endif %}
-    {% endfor %}
-    {% endif %}
-
     {{ BrandGuidelines(input.VideoBranding) }}
 
     {{ BackgroundGuidelines(input.VideoBranding) }}
 
     {{ EnterAnimation(input.AnimationCategories) }}
+
+    ---
+
+    ## INPUT
+    Video FPS: 30 frames/second
+    Language: {{ input.Language }}
+
+    ### User provided prompt/script:
+    {{ input.Prompt }}
+
+    {%- if input.Questions -%}
+    ### Questions answered by the user:
+    {% for question in input.Questions -%}
+      {%- if input.Questions[question] %}
+      Q: {{ question }}
+      A: {{ input.Questions[question] }}
+      {%- endif %}
+    {%- endfor %}
+    {%- endif %}
 
     ---
 

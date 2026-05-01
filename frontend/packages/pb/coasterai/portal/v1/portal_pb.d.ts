@@ -495,6 +495,11 @@ export declare type CreateVideoRequest = Message<"coasterai.portal.v1.CreateVide
    * @generated from field: repeated coasterai.core.v1.SelectedMediaAsset assets = 9;
    */
   assets: SelectedMediaAsset[];
+
+  /**
+   * @generated from field: map<string, string> questions = 10;
+   */
+  questions: { [key: string]: string };
 };
 
 /**
