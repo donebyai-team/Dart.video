@@ -1,11 +1,9 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
-import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
+import { useElement } from '../../../patches';
 import { useStyleContext } from '../../../styles/StyleContext';
-import { useAspectPreset } from '../../../styles/AspectPresetContext';
-import { useTheme } from '../../../theme/ThemeContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
-import { resolveTypography } from '../../../tokens/resolveTypography';
+import { useTypography } from '../../../tokens/resolveTypography';
 import { EntranceAnimation, getEntranceTransform } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { TypographyVariant } from '../../../tokens';
@@ -35,15 +33,12 @@ export type TypewriterProps = typeof TypewriterDefaults;
 export function Typewriter(initProps: TypewriterProps): React.ReactElement {
   const frame = useCurrentFrame();
   const styleConfig = useStyleContext();
-  const theme = useTheme();
-  const preset = useAspectPreset();
-  const defaultProps = { ...TypewriterDefaults, ...initProps };
-  const id = defaultProps.id;
-
-  const props = usePatchedProps(id, defaultProps);
-
-  const styleOverride = useStyleOverride(id);
-  const dragStyle = usePatchedDragStyle(id, props.style?.transform);
+  const id = initProps.id ?? TypewriterDefaults.id;
+  const { props, style } = useElement(id, TypewriterDefaults, initProps, {
+    baseStyle: {
+      display: 'inline-block',
+    },
+  });
 
   const entranceDuration = 20;
   const entranceProgress = interpolateWithEasing(
@@ -94,26 +89,22 @@ export function Typewriter(initProps: TypewriterProps): React.ReactElement {
   const pulseBandStart = pulseCenter - 18;
   const pulseBandEnd = pulseCenter + 18;
   const { transform: _ignoredTransform, display: _ignoredDisplay, position: _ignoredPosition, ...textStyleProps } = props.style ?? {};
+  const typographyStyle = useTypography(props.variant);
   const textStyles = {
-    ...resolveTypography(props.variant, styleConfig, theme, preset),
+    ...typographyStyle,
     ...textStyleProps,
     opacity: entranceProgress,
     transform: getEntranceTransform(props.entranceAnimation, entranceProgress),
     display: 'inline-block',
     position: 'relative' as const,
     whiteSpace: 'pre-wrap' as const,
-    ...styleOverride,
   };
 
   return (
     <span
       id={id}
       className={props.className}
-      style={{
-        display: 'inline-block',
-        ...props.style,
-        ...dragStyle,
-      }}
+      style={style}
     >
       <span
         style={textStyles}

@@ -97,6 +97,71 @@ export function usePatchedProps<T>(
   return deepMerge(defaultValue, entry);
 }
 
+type TransformPart = string | null | undefined | false;
+
+function composeTransforms(...transforms: TransformPart[]): string | undefined {
+  const parts = transforms.filter((transform): transform is string => Boolean(transform && transform.trim()));
+  return parts.length > 0 ? parts.join(' ') : undefined;
+}
+
+export interface UseElementOptionsWithProps<T> {
+  baseStyle?: React.CSSProperties | ((props: T) => React.CSSProperties);
+  transform?: TransformPart | ((props: T) => TransformPart);
+}
+
+export interface UseElementResult<T> {
+  props: T;
+  style: React.CSSProperties;
+  getStyle: (options?: UseElementOptionsWithProps<T>) => React.CSSProperties;
+}
+
+/**
+ * Single entrypoint for element props and style resolution.
+ *
+ * Merge order:
+ *   defaults < input props < patch props
+ *
+ * Style order:
+ *   base style < props.style, with transform composed as
+ *   drag transform + component transform + props.style.transform
+ */
+export function useElement<T extends object>(
+  id: string | undefined,
+  defaults: T,
+  inputProps?: Partial<T>,
+  options: UseElementOptionsWithProps<T> = {},
+): UseElementResult<T> {
+  const overlay = useContext(PatchContext);
+
+  const propsWithInput = inputProps ? deepMerge(defaults, inputProps) : defaults;
+  const patchEntry = id ? (overlay[id] as Partial<T> | undefined) : undefined;
+  const props = patchEntry ? deepMerge(propsWithInput, patchEntry) : propsWithInput;
+
+  const style = ((props as { style?: React.CSSProperties }).style) ?? {};
+  const { transform: styleTransform, ...styleWithoutTransform } = style;
+  const dragX = typeof (props as any).dragX === 'number' ? (props as any).dragX : 0;
+  const dragY = typeof (props as any).dragY === 'number' ? (props as any).dragY : 0;
+  const dragTransform = dragX || dragY ? `translate(${dragX}px, ${dragY}px)` : undefined;
+  const getStyle = (styleOptions: UseElementOptionsWithProps<T> = options): React.CSSProperties => {
+    const componentTransform = typeof styleOptions.transform === 'function' ? styleOptions.transform(props) : styleOptions.transform;
+    const transform = composeTransforms(dragTransform, componentTransform, styleTransform);
+    const baseStyle = typeof styleOptions.baseStyle === 'function' ? styleOptions.baseStyle(props) : styleOptions.baseStyle;
+
+    return {
+      ...baseStyle,
+      ...styleWithoutTransform,
+      ...(transform ? { transform } : {}),
+      ...(dragTransform ? { willChange: 'transform' } : {}),
+    };
+  };
+
+  return {
+    props,
+    style: getStyle(options),
+    getStyle,
+  };
+}
+
 export function useArrayPatch(source: string) {
   const patches = useContext(PatchContext)
   const regex = new RegExp(`^\\w+-${source}-(\\d+)$`)

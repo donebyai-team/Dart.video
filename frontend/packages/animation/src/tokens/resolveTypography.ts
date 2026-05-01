@@ -3,7 +3,9 @@ import { TypographyVariant, TYPOGRAPHY_VARIANTS } from './semantic';
 import { FONT_SIZE_VALUES, FONT_WEIGHT_VALUES, FONT_SCALE_BASE } from './typography';
 import { FontFamily, StyleConfig } from '../styles/types';
 import { ResolvedTheme } from '../theme/types';
-import { AspectPreset } from '../styles/AspectPresetContext';
+import { AspectPreset, useAspectPreset } from '../styles/AspectPresetContext';
+import { useStyleContext } from '../styles/StyleContext';
+import { useTheme } from '../theme/ThemeContext';
 
 const LETTER_SPACING_MAP: Record<string, string> = {
   tight:  '-0.05em',
@@ -63,4 +65,12 @@ export function resolveTypography(
     letterSpacing: LETTER_SPACING_MAP[styleConfig.type.tracking] ?? '0em',
     color,
   };
+}
+
+export function useTypography(variant: TypographyVariant): React.CSSProperties {
+  const styleConfig = useStyleContext();
+  const theme = useTheme();
+  const preset = useAspectPreset();
+
+  return resolveTypography(variant, styleConfig, theme, preset);
 }

@@ -1,11 +1,9 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
 import type { TypographyVariant } from '../../../tokens/semantic';
-import { useStyleContext } from '../../../styles/StyleContext';
-import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
-import { interpolateWithEasing, useAspectPreset } from '../../../styles';
-import { useTheme } from '../../../theme';
-import { resolveTypography } from '../../../tokens';
+import { useElement } from '../../../patches';
+import { interpolateWithEasing } from '../../../styles';
+import { useTypography } from '../../../tokens';
 import {
     getEntranceTransform,
     type EntranceAnimation,
@@ -45,17 +43,17 @@ export type TextStaggerProps = Partial<typeof TextStaggerDefaults>
 export const TextStagger: React.FC<TextStaggerProps> = (initProps) => {
 
     const frame = useCurrentFrame();
-    const styleConfig = useStyleContext();
-    const theme = useTheme();
-    const preset = useAspectPreset();
-    const defaultProps = { ...TextStaggerDefaults, ...initProps };
-    const id = defaultProps.id;
-
-    const props = usePatchedProps(id, defaultProps);
+    const id = initProps.id ?? TextStaggerDefaults.id;
+    const { props, style } = useElement(id, TextStaggerDefaults, initProps, {
+        baseStyle: {
+            display: 'inline-block',
+        },
+    });
 
 
     // Apply defaults (split-mode-aware)
     const actualVariant = props.variant;
+    const typographyStyle = useTypography(actualVariant);
     const actualAnimation = props.entranceAnimation;
     const actualStartAt = props.startAt;
     const splitBy = props.splitBy;
@@ -64,8 +62,7 @@ export const TextStagger: React.FC<TextStaggerProps> = (initProps) => {
     const actualDuration = props.duration ?? modeDefaults.duration;
 
 
-    const styleOverride = useStyleOverride(id);
-    const dragStyle = usePatchedDragStyle(id, props.style?.transform);
+    const { transform: _unitTransform, ...unitStyle } = props.style ?? {};
 
     const units = splitBy === 'char' ? props.text.split('') : splitBy === 'line' ? props.text.split('\n') : props.text.split(' ');
 
@@ -87,11 +84,7 @@ export const TextStagger: React.FC<TextStaggerProps> = (initProps) => {
         <span
             id={id}
             className={props.className}
-            style={{
-                display: 'inline-block',
-                ...props.style,
-                ...dragStyle,
-            }}
+            style={style}
         >
             {units.map((unit, index) => (
                 <span
@@ -100,9 +93,8 @@ export const TextStagger: React.FC<TextStaggerProps> = (initProps) => {
                         display: 'inline-block',
                         marginRight: splitBy === 'word' && index < units.length - 1 ? '0.25em' : 0,
                         ...getAnimationStyles(index),
-                        ...resolveTypography(actualVariant, styleConfig, theme, preset),
-                        ...props.style,
-                        ...styleOverride
+                        ...typographyStyle,
+                        ...unitStyle,
                     }}
                 >
                     {unit}

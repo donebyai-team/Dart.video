@@ -1,9 +1,9 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
-import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
-import { useStyleContext, useAspectPreset, interpolateWithEasing } from '../../../styles';
+import { useElement } from '../../../patches';
+import { interpolateWithEasing } from '../../../styles';
 import { useTheme } from '../../../theme';
-import { resolveTypography } from '../../../tokens';
+import { useTypography } from '../../../tokens';
 import type { TypographyVariant } from '../../../tokens/semantic';
 import { getEntranceTransform } from '../types';
 import type { EntranceAnimation, HighlightStyle } from '../types';
@@ -32,30 +32,36 @@ export type AnimatedNumberProps = Partial<typeof AnimatedNumberDefaults> & { id?
 
 export const AnimatedNumber: React.FC<AnimatedNumberProps> = (initProps) => {
     const frame = useCurrentFrame();
-    const styleConfig = useStyleContext();
     const theme = useTheme();
-    const preset = useAspectPreset();
 
-    const defaultProps = { ...AnimatedNumberDefaults, ...initProps };
-    const id = defaultProps.id;
-    const props = usePatchedProps(id, defaultProps);
+    const id = initProps.id ?? AnimatedNumberDefaults.id;
+    const { props, getStyle } = useElement(id, AnimatedNumberDefaults, initProps);
 
-    // Apply defaults
     const actualVariant = props.variant;
+    const typographyStyle = useTypography(actualVariant);
+    const style = getStyle({
+        baseStyle: {
+            ...typographyStyle,
+            opacity: interpolateWithEasing(
+                frame,
+                [0, props.animationDelay],
+                [0, 1],
+                'ease-out',
+            ),
+            display: 'inline-block',
+        },
+        transform: getEntranceTransform(
+            props.entranceAnimation,
+            interpolateWithEasing(
+                frame,
+                [0, props.animationDelay],
+                [0, 1],
+                'ease-out',
+            ),
+        ),
+    });
     const actualHighlightColor = props.highlightColor ?? theme.colors.primary;
-    const actualAnimation = props.entranceAnimation;
-    const actualAnimationDelay = props.animationDelay;
-
-    const styleOverride = useStyleOverride(id);
-
-    const entranceProgress = interpolateWithEasing(
-        frame,
-        [0, actualAnimationDelay],
-        [0, 1],
-        'ease-out'
-    );
-    const entranceTransform = getEntranceTransform(actualAnimation, entranceProgress);
-    const dragStyle = usePatchedDragStyle(id, entranceTransform, props.style?.transform);
+    const { transform: _ignoredStyleTransform, ...textStyleOverride } = props.style ?? {};
 
     const getHighlightStyles = (): React.CSSProperties => {
         switch (props.highlightStyle) {
@@ -116,19 +122,11 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (initProps) => {
         }
     };
 
-    const typographyStyle = resolveTypography(actualVariant, styleConfig, theme, preset);
-
     return (
         <span
+            id={id}
             className={props.className}
-            style={{
-                ...typographyStyle,
-                opacity: entranceProgress,
-                display: 'inline-block',
-                ...props.style,
-                ...styleOverride,
-                ...dragStyle,
-            }}
+            style={style}
         >
 
 
@@ -136,8 +134,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (initProps) => {
                 {
                     marginRight: '0.25em',
                     ...typographyStyle,
-                    ...props.style,
-                    ...styleOverride
+                    ...textStyleOverride,
                 }} />
 
             <span style={getHighlightStyles()}>
@@ -156,8 +153,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (initProps) => {
                 {
                     // marginLeft: '0.25em',
                     ...typographyStyle,
-                    ...props.style,
-                    ...styleOverride
+                    ...textStyleOverride,
                 }} />
         </span>
     );

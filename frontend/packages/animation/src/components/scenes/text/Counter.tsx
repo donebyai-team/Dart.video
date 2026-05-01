@@ -1,6 +1,6 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
-import { usePatchedDragStyle, usePrimitivePatches, usePatchedProp, useStyleOverride } from '../../../patches';
+import { useElement } from '../../../patches';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { type Easing } from '../../../styles/types';
 import { TypographyVariant } from '../../../tokens/semantic';
@@ -57,39 +57,37 @@ export function Counter({
   id,
 }: CounterProps): React.ReactElement {
   const frame = useCurrentFrame();
-
-  const { effectiveStartAt, effectiveDurationInFrames } = usePrimitivePatches(id, { startAt, durationInFrames });
-
-  const patchedFrom = usePatchedProp(id, 'from', from);
-  const patchedTo = usePatchedProp(id, 'to', to);
-  const patchedFormat = usePatchedProp(id, 'format', format);
-  const patchedPrefix = usePatchedProp(id, 'prefix', prefix);
-  const patchedSuffix = usePatchedProp(id, 'suffix', suffix);
-  const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', variant);
-  const styleOverride = useStyleOverride(id);
-  const overrideTransform = typeof styleOverride.transform === 'string' ? styleOverride.transform : undefined;
-  const dragStyle = usePatchedDragStyle(id, style?.transform, overrideTransform);
+  const { props, style: resolvedStyle } = useElement(id, {
+    startAt,
+    durationInFrames,
+    easing,
+    from,
+    to,
+    format,
+    prefix,
+    suffix,
+    variant,
+    style,
+    className,
+    id,
+  });
 
   const progress = interpolateWithEasing(
     frame,
-    [effectiveStartAt, effectiveStartAt + effectiveDurationInFrames],
+    [props.startAt ?? 0, (props.startAt ?? 0) + (props.durationInFrames ?? 45)],
     [0, 1],
     'ease-out',
   );
 
-  const currentValue = patchedFrom + (patchedTo - patchedFrom) * progress;
+  const currentValue = (props.from ?? 0) + (props.to - (props.from ?? 0)) * progress;
 
   return (
     <Text
       id={id}
-      text={formatNumber(currentValue, patchedFormat, patchedPrefix, patchedSuffix)}
-      variant={patchedVariant}
-      className={className}
-      style={{
-        ...style,
-        ...styleOverride,
-        ...dragStyle,
-      }}
+      text={formatNumber(currentValue, props.format, props.prefix, props.suffix)}
+      variant={props.variant ?? 'heading'}
+      className={props.className}
+      style={resolvedStyle}
     />
   );
 }

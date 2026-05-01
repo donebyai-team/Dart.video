@@ -1,9 +1,8 @@
 import React from 'react';
 import { spring, useCurrentFrame, useVideoConfig } from 'remotion';
-import { usePatchedProps, useStyleOverride } from '../../../patches';
-import { buildDepthShadow, DEFAULT_MEDIA_DEPTH, useAspectPreset, useStyleContext } from '../../../styles';
-import { useTheme } from '../../../theme';
-import { resolveTypography } from '../../../tokens';
+import { useElement } from '../../../patches';
+import { buildDepthShadow, DEFAULT_MEDIA_DEPTH } from '../../../styles';
+import { useTypography } from '../../../tokens';
 import type { TypographyVariant } from '../../../tokens/semantic';
 import { Text } from '../../../core/assets/Text';
 import { normalizeContainerStyle } from '../../../core/assets/ContainerAsset';
@@ -50,20 +49,15 @@ export type StatCounterProps = Partial<typeof StatCounterDefaults> & { id?: stri
 export const StatCounter: React.FC<StatCounterProps> = (initProps) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const styleConfig = useStyleContext();
-  const theme = useTheme();
-  const preset = useAspectPreset();
 
   const defaultProps = { ...StatCounterDefaults, ...initProps };
-  const containerProps = usePatchedProps('container', defaultProps.container);
-  const counterProps = usePatchedProps('counter', defaultProps.counter);
-  const textProps = usePatchedProps('text', defaultProps.text);
-  const containerStyleOverride = useStyleOverride('container');
+  const { props: containerProps } = useElement('container', defaultProps.container);
+  const { props: counterProps } = useElement('counter', defaultProps.counter);
+  const { props: textProps } = useElement('text', defaultProps.text);
 
   const containerStyle = normalizeContainerStyle(
     StatCounterContainerDefaults,
     containerProps.style,
-    containerStyleOverride,
   );
   const speed = getSpeed(counterProps.speed);
   const animationDelay = scaleTiming(BASE_ANIMATION_DELAY, speed);
@@ -76,8 +70,8 @@ export const StatCounter: React.FC<StatCounterProps> = (initProps) => {
     config: { damping: 12, stiffness: 100 },
   });
 
-  const numberTypography = resolveTypography(counterProps.variant, styleConfig, theme, preset);
-  const labelTypography = resolveTypography(textProps.variant, styleConfig, theme, preset);
+  const numberTypography = useTypography(counterProps.variant);
+  const labelTypography = useTypography(textProps.variant);
 
   return (
     <div

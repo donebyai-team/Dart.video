@@ -1,12 +1,10 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
-import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
+import { useElement } from '../../../patches';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
-import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
-import { useTheme } from '../../../theme/ThemeContext';
 import type { TypographyVariant } from '../../../tokens/semantic';
-import { resolveTypography } from '../../../tokens/resolveTypography';
+import { useTypography } from '../../../tokens/resolveTypography';
 import { getEntranceTransform } from '../types';
 import type { EntranceAnimation } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
@@ -74,17 +72,18 @@ function composeTransforms(...transforms: Array<string | undefined>): string | u
 
 export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
   const frame = useCurrentFrame();
-  const styleConfig = useStyleContext();
-  const theme = useTheme();
   const preset = useAspectPreset();
-  const defaultProps = { ...TextLeadStaggerDefaults, ...initProps };
-  const id = defaultProps.id;
-  const props = usePatchedProps(id, defaultProps);
-
-  const styleOverride = useStyleOverride(id);
-  const overrideTransform = typeof styleOverride.transform === 'string' ? styleOverride.transform : undefined;
-  const dragStyle = usePatchedDragStyle(id, props.style?.transform, overrideTransform);
-  const typographyStyle = resolveTypography(props.variant, styleConfig, theme, preset);
+  const id = initProps.id ?? TextLeadStaggerDefaults.id;
+  const { props, getStyle } = useElement(id, TextLeadStaggerDefaults, initProps);
+  const typographyStyle = useTypography(props.variant);
+  const style = getStyle({
+    baseStyle: {
+      display: 'inline-block',
+      whiteSpace: 'nowrap',
+      ...typographyStyle,
+    },
+  });
+  const { transform: _ignoredStyleTransform, ...textStyleOverride } = props.style ?? {};
   const elapsed = Math.max(0, frame - props.startAt);
   
   const speed = getSpeed(props.speed);
@@ -157,8 +156,7 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
         transform: exitTranslate,
         transformOrigin: 'left center',
         ...typographyStyle,
-        ...props.style,
-        ...styleOverride,
+        ...textStyleOverride,
       };
     }
 
@@ -189,8 +187,7 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
       transform: composeTransforms(entranceTransform, exitTranslate),
       transformOrigin: 'left center',
       ...typographyStyle,
-      ...props.style,
-      ...styleOverride,
+      ...textStyleOverride,
     };
   };
 
@@ -218,8 +215,7 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
     transform: `translate(-50%, -50%) scale(${leadScale - (leadScale - 1) * leadSettleProgress})`,
     transformOrigin: 'center center',
     ...typographyStyle,
-    ...props.style,
-    ...styleOverride,
+    ...textStyleOverride,
   };
 
   return (
@@ -228,14 +224,7 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
       <span
         id={id}
         className={props.className}
-        style={{
-          display: 'inline-block',
-          whiteSpace: 'nowrap',
-          ...typographyStyle,
-          ...props.style,
-          ...styleOverride,
-          ...dragStyle,
-        }}
+        style={style}
       >
         {words.map((word, index) => (
           <span key={`${word}-${index}`} style={getWordStyle(word, index)}>

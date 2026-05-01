@@ -1,11 +1,10 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
 import type { ComponentRegistration } from '../../../registry/registry';
-import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
-import { interpolateWithEasing, useAspectPreset } from '../../../styles';
-import { useStyleContext } from '../../../styles/StyleContext';
+import { useElement } from '../../../patches';
+import { interpolateWithEasing } from '../../../styles';
 import { useTheme } from '../../../theme';
-import { resolveTypography } from '../../../tokens';
+import { useTypography } from '../../../tokens';
 import type { TypographyVariant } from '../../../tokens/semantic';
 import {
   getHighlightedTextAnimationTransform,
@@ -38,17 +37,19 @@ function splitWords(text: string): string[] {
 
 export const TextHookStagger: React.FC<TextHookStaggerProps> = (initProps) => {
   const frame = useCurrentFrame();
-  const styleConfig = useStyleContext();
   const theme = useTheme();
-  const preset = useAspectPreset();
-  const defaultProps = { ...TextHookStaggerDefaults, ...initProps };
-  const id = defaultProps.id;
-  const props = usePatchedProps(id, defaultProps);
-
-  const styleOverride = useStyleOverride(id);
-  const overrideTransform = typeof styleOverride.transform === 'string' ? styleOverride.transform : undefined;
-  const dragStyle = usePatchedDragStyle(id, props.style?.transform, overrideTransform);
-  const typographyStyle = resolveTypography(props.variant, styleConfig, theme, preset);
+  const id = initProps.id ?? TextHookStaggerDefaults.id;
+  const { props, getStyle } = useElement(id, TextHookStaggerDefaults, initProps);
+  const typographyStyle = useTypography(props.variant);
+  const style = getStyle({
+    baseStyle: (resolvedProps) => ({
+      display: 'block',
+      width: '100%',
+      maxWidth: '100%',
+      textAlign: 'center',
+      ...typographyStyle,
+    }),
+  });
   const actualHighlightColor = props.highlightColor || theme.colors.primary;
   const elapsed = Math.max(0, frame - props.startAt);
   const words = useMemo(() => splitWords(props.text), [props.text]);
@@ -91,16 +92,7 @@ export const TextHookStagger: React.FC<TextHookStaggerProps> = (initProps) => {
     <span
       id={id}
       className={props.className}
-      style={{
-        display: 'block',
-        width: '100%',
-        maxWidth: '100%',
-        textAlign: 'center',
-        ...typographyStyle,
-        ...props.style,
-        ...styleOverride,
-        ...dragStyle,
-      }}
+      style={style}
     >
       {words.map((word, index) => (
         <span key={`${word}-${index}`} style={getWordStyle(index)}>

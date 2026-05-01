@@ -1,12 +1,10 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
-import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
-import { useStyleContext } from '../../../styles/StyleContext';
-import { useAspectPreset } from '../../../styles/AspectPresetContext';
+import { useElement } from '../../../patches';
 import { useTheme } from '../../../theme/ThemeContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import type { TypographyVariant } from '../../../tokens/semantic';
-import { resolveTypography } from '../../../tokens/resolveTypography';
+import { useTypography } from '../../../tokens/resolveTypography';
 import { Text } from '../../../core/assets/Text';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { getEntranceTransform } from '../types';
@@ -38,20 +36,36 @@ export type TextWithWordCycleProps = typeof TextWithWordCycleDefaults;
  */
 export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (initProps) => {
   const frame = useCurrentFrame();
-  const styleConfig = useStyleContext();
   const theme = useTheme();
-  const preset = useAspectPreset();
-  const defaultProps = { ...TextWithWordCycleDefaults, ...initProps };
-  const id = defaultProps.id;
-
-  const props = usePatchedProps(id, defaultProps);
+  const id = initProps.id ?? TextWithWordCycleDefaults.id;
+  const { props, getStyle } = useElement(id, TextWithWordCycleDefaults, initProps);
 
   const patchedVariant = props.variant;
   const actualHighlightStyle = props.highlightStyle;
   const actualHighlightColor = props.highlightColor ?? theme.colors.primary;
   const actualEntranceAnimation = props.entranceAnimation;
-  const styleOverride = useStyleOverride(id);
-  const overrideTransform = typeof styleOverride.transform === 'string' ? styleOverride.transform : undefined;
+  const typographyStyle = useTypography(patchedVariant);
+  const style = getStyle({
+    baseStyle: {
+      display: 'inline-block',
+      opacity: interpolateWithEasing(
+        Math.max(0, frame - props.startAt),
+        [0, 20],
+        [0, 1],
+        'ease-out',
+      ),
+      ...typographyStyle,
+    },
+    transform: getEntranceTransform(
+      actualEntranceAnimation,
+      interpolateWithEasing(
+        Math.max(0, frame - props.startAt),
+        [0, 20],
+        [0, 1],
+        'ease-out',
+      ),
+    ),
+  });
 
   const cycleDuration = props.holdDuration + props.transitionDuration;
   const entranceDuration = 20;
@@ -63,19 +77,9 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (initProps) =
     'ease-out',
   );
   const entranceTransform = getEntranceTransform(actualEntranceAnimation, entranceProgress);
-  const dragStyle = usePatchedDragStyle(id, entranceTransform, props.style?.transform, overrideTransform);
-  const typographyStyle = resolveTypography(patchedVariant, styleConfig, theme, preset);
-  const textOverrideStyle: React.CSSProperties = {
-    ...styleOverride,
-  };
-  delete textOverrideStyle.transform;
+  const { transform: _ignoredStyleTransform, ...textOverrideStyle } = props.style ?? {};
   const containerStyle: React.CSSProperties = {
-    display: 'inline-block',
-    opacity: entranceProgress,
-    ...typographyStyle,
-    ...props.style,
-    ...styleOverride,
-    ...dragStyle,
+    ...style,
   };
 
   const spacerMeasurementStyle = useMemo(

@@ -1,11 +1,9 @@
 import React from 'react';
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
-import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
-import { useStyleContext } from '../../../styles/StyleContext';
-import { useAspectPreset } from '../../../styles/AspectPresetContext';
+import { useElement } from '../../../patches';
 import { useTheme } from '../../../theme/ThemeContext';
 import type { TypographyVariant } from '../../../tokens/semantic';
-import { resolveTypography } from '../../../tokens/resolveTypography';
+import { useTypography } from '../../../tokens/resolveTypography';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { Text } from '../../../core/assets';
 import { hexToRgb } from '../../../theme';
@@ -30,22 +28,25 @@ export type TitleSplitProps = Partial<typeof TitleSplitDefaults>;
 export const TitleSplit: React.FC<TitleSplitProps> = (initProps) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const styleConfig = useStyleContext();
   const theme = useTheme();
-  const preset = useAspectPreset();
 
-  const defaultProps = { ...TitleSplitDefaults, ...initProps };
-  const id = defaultProps.id;
-  const props = usePatchedProps(id, defaultProps);
-
-  const styleOverride = useStyleOverride(id);
-  const dragStyle = usePatchedDragStyle(id, props.style?.transform);
-
-
-  const { transform: _ignoredOverrideTransform, ...styleOverrideWithoutTransform } = styleOverride;
+  const id = initProps.id ?? TitleSplitDefaults.id;
+  const { props, style } = useElement(id, TitleSplitDefaults, initProps, {
+    baseStyle: (resolvedProps) => ({
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      overflow: 'hidden',
+      gap: resolvedProps.gap,
+    }),
+  });
+  const { transform: _ignoredStyleTransform, ...textStyleOverride } = props.style ?? {};
 
   const elapsed = Math.max(0, frame - props.startAt);
-  const typographyStyle = resolveTypography(props.variant, styleConfig, theme, preset);
+  const typographyStyle = useTypography(props.variant);
   const glowColor = props.glowColor || theme.colors.primary;
 
 
@@ -84,25 +85,14 @@ export const TitleSplit: React.FC<TitleSplitProps> = (initProps) => {
     textAlign: 'center',
     textTransform: 'uppercase',
     ...typographyStyle,
-    ...styleOverride
+    ...textStyleOverride,
   };
 
   return (
     <div
       id={id}
       className={props.className}
-      style={{
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        overflow: 'hidden',
-        gap: props.gap,
-        ...styleOverrideWithoutTransform,
-        ...dragStyle,
-      }}
+      style={style}
     >
       <Text
         text={props.topText}

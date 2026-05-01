@@ -1,12 +1,9 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
-import { composeTransforms, usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
-import { useStyleContext } from '../../../styles/StyleContext';
-import { useAspectPreset } from '../../../styles/AspectPresetContext';
-import { useTheme } from '../../../theme/ThemeContext';
+import { useElement } from '../../../patches';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import type { TypographyVariant } from '../../../tokens/semantic';
-import { resolveTypography } from '../../../tokens/resolveTypography';
+import { useTypography } from '../../../tokens/resolveTypography';
 import { Text } from '../../../core/assets/Text';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { getEntranceTransform } from '../types';
@@ -35,18 +32,35 @@ export type WordCycleProps = Partial<typeof WordCycleDefaults>;
  */
 export const WordCycle: React.FC<WordCycleProps> = (initProps) => {
   const frame = useCurrentFrame();
-  const styleConfig = useStyleContext();
-  const theme = useTheme();
-  const preset = useAspectPreset();
 
-  const defaultProps = { ...WordCycleDefaults, ...initProps };
-  const id = defaultProps.id;
-  const props = usePatchedProps(id, defaultProps);
+  const id = initProps.id ?? WordCycleDefaults.id;
+  const { props, getStyle } = useElement(id, WordCycleDefaults, initProps);
 
   const patchedVariant = props.variant;
   const actualEntranceAnimation = props.entranceAnimation;
-  const styleOverride = useStyleOverride(id);
-  const overrideTransform = typeof styleOverride.transform === 'string' ? styleOverride.transform : undefined;
+  const typographyStyle = useTypography(patchedVariant);
+  const style = getStyle({
+    baseStyle: {
+      ...typographyStyle,
+      opacity: interpolateWithEasing(
+        frame,
+        [0, 20],
+        [0, 1],
+        'ease-out',
+      ),
+      position: 'relative',
+      display: 'inline-block',
+    },
+    transform: getEntranceTransform(
+      actualEntranceAnimation,
+      interpolateWithEasing(
+        frame,
+        [0, 20],
+        [0, 1],
+        'ease-out',
+      ),
+    ),
+  });
 
   const cycleDuration = props.holdDuration + props.transitionDuration;
   const entranceDuration = 20;
@@ -57,12 +71,7 @@ export const WordCycle: React.FC<WordCycleProps> = (initProps) => {
     'ease-out',
   );
   const entranceTransform = getEntranceTransform(actualEntranceAnimation, entranceProgress);
-  const dragStyle = usePatchedDragStyle(id, entranceTransform, props.style?.transform, overrideTransform);
-  const typographyStyle = resolveTypography(patchedVariant, styleConfig, theme, preset);
-  const textOverrideStyle: React.CSSProperties = {
-    ...styleOverride,
-  };
-  delete textOverrideStyle.transform;
+  const { transform: _ignoredStyleTransform, ...textOverrideStyle } = props.style ?? {};
 
   const spacerMeasurementStyle = useMemo(
     () => ({
@@ -89,10 +98,7 @@ export const WordCycle: React.FC<WordCycleProps> = (initProps) => {
         className={props.className}
         style={{
           ...typographyStyle,
-          opacity: entranceProgress,
-          display: 'inline-block',
-          ...props.style,
-          ...dragStyle,
+          ...style,
         }}
       >
         <Text text="" variant={patchedVariant} style={textOverrideStyle} />
@@ -123,12 +129,7 @@ export const WordCycle: React.FC<WordCycleProps> = (initProps) => {
   // Outer container — sized by the invisible spacer (widestWord), never by
   // the visible word. This is what eliminates layout reflow.
   const containerStyle: React.CSSProperties = {
-    ...typographyStyle,
-    opacity: entranceProgress,
-    position: 'relative',
-    display: 'inline-block',
-    ...props.style,
-    ...dragStyle,
+    ...style,
   };
 
   // Invisible spacer — always renders the widest word to hold container width.
@@ -199,10 +200,7 @@ export const WordCycle: React.FC<WordCycleProps> = (initProps) => {
           style={{
             ...absoluteLayerStyle,
             ...textOverrideStyle,
-            transform: composeTransforms(
-              typeof textOverrideStyle.transform === 'string' ? textOverrideStyle.transform : undefined,
-              isTransitioning ? `translateY(-${transitionProgress * 100}%)` : 'translateY(0)',
-            ),
+            transform: isTransitioning ? `translateY(-${transitionProgress * 100}%)` : 'translateY(0)',
             opacity: isTransitioning ? 1 - transitionProgress : 1,
           }}
         />
@@ -214,10 +212,7 @@ export const WordCycle: React.FC<WordCycleProps> = (initProps) => {
             style={{
               ...absoluteLayerStyle,
               ...textOverrideStyle,
-              transform: composeTransforms(
-                typeof textOverrideStyle.transform === 'string' ? textOverrideStyle.transform : undefined,
-                `translateY(${(1 - transitionProgress) * 100}%)`,
-              ),
+              transform: `translateY(${(1 - transitionProgress) * 100}%)`,
               opacity: transitionProgress,
             }}
           />
@@ -237,10 +232,7 @@ export const WordCycle: React.FC<WordCycleProps> = (initProps) => {
         style={{
           ...absoluteLayerStyle,
           ...textOverrideStyle,
-          transform: composeTransforms(
-            typeof textOverrideStyle.transform === 'string' ? textOverrideStyle.transform : undefined,
-            isTransitioning ? `rotateX(${transitionProgress * 90}deg)` : 'rotateX(0deg)',
-          ),
+          transform: isTransitioning ? `rotateX(${transitionProgress * 90}deg)` : 'rotateX(0deg)',
           opacity: isTransitioning ? 1 - transitionProgress : 1,
         }}
       />
@@ -252,10 +244,7 @@ export const WordCycle: React.FC<WordCycleProps> = (initProps) => {
           style={{
             ...absoluteLayerStyle,
             ...textOverrideStyle,
-            transform: composeTransforms(
-              typeof textOverrideStyle.transform === 'string' ? textOverrideStyle.transform : undefined,
-              `rotateX(${(1 - transitionProgress) * -90}deg)`,
-            ),
+            transform: `rotateX(${(1 - transitionProgress) * -90}deg)`,
             opacity: transitionProgress,
           }}
         />

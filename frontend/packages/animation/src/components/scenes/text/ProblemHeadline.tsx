@@ -1,12 +1,11 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
-import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
+import { useElement } from '../../../patches';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
-import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme/ThemeContext';
 import type { TypographyVariant } from '../../../tokens/semantic';
-import { resolveTypography } from '../../../tokens/resolveTypography';
+import { useTypography } from '../../../tokens/resolveTypography';
 import { getEntranceTransform } from '../types';
 import type { EntranceAnimation } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
@@ -140,19 +139,12 @@ function buildBrushPasses(hasSecondLine: boolean): Array<{ d: string; width: num
 
 export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
   const frame = useCurrentFrame();
-  const styleConfig = useStyleContext();
   const theme = useTheme();
   const preset = useAspectPreset();
-  const defaultProps = { ...ProblemHeadlineDefaults, ...initProps };
-  const id = defaultProps.id;
-  const props = usePatchedProps(id, defaultProps);
-
-  const styleOverride = useStyleOverride(id);
-  const overrideTransform = typeof styleOverride.transform === 'string' ? styleOverride.transform : undefined;
-  const propTransform = typeof props.style?.transform === 'string' ? props.style.transform : undefined;
-  const { transform: _ignoredStyleTransform, ...styleOverrideWithoutTransform } = styleOverride;
+  const id = initProps.id ?? ProblemHeadlineDefaults.id;
+  const { props, getStyle } = useElement(id, ProblemHeadlineDefaults, initProps);
   const { transform: _ignoredPropTransform, ...propStyleWithoutTransform } = props.style ?? {};
-  const typographyStyle = resolveTypography(props.variant, styleConfig, theme, preset);
+  const typographyStyle = useTypography(props.variant);
   const fontSizePx = parsePixelValue(typographyStyle.fontSize);
   const lineGapPx = fontSizePx * 1.1;
   const availableWidth = preset.width - preset.safeArea.left - preset.safeArea.right;
@@ -205,10 +197,7 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
 
   const groupTransform = composeTransforms(
     `scale(${exit.scale})`,
-    propTransform,
-    overrideTransform,
   );
-  const dragStyle = usePatchedDragStyle(id, groupTransform);
 
   const lineOneBaseY = interpolateWithEasing(
     elapsed,
@@ -250,12 +239,10 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
   const groupOpacity = exit.opacity;
   const textOpacity = exit.opacity;
   const { color: _ignoredPropColor, ...propTextStyleWithoutColor } = propStyleWithoutTransform;
-  const { color: _ignoredOverrideColor, ...overrideTextStyleWithoutColor } = styleOverrideWithoutTransform;
   const textLayerStyle: React.CSSProperties = {
     ...typographyStyle,
     color: typeof typographyStyle.color === 'string' ? typographyStyle.color : '#111111',
     ...propTextStyleWithoutColor,
-    ...overrideTextStyleWithoutColor,
   };
 
   const getLineOneWordStyle = (word: string, wordIndex: number): React.CSSProperties => {
@@ -292,16 +279,17 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
     <div
       id={id}
       className={props.className}
-      style={{
+      style={getStyle({
+        baseStyle: {
         position: 'relative',
         width: brushWidth,
         height: brushHeight + fontSizePx * 0.8,
-        transform: groupTransform,
         transformOrigin: 'center center',
         opacity: groupOpacity,
         pointerEvents: 'none',
-        ...dragStyle,
-      }}
+        },
+        transform: groupTransform,
+      })}
     >
       <svg
         width={brushWidth}

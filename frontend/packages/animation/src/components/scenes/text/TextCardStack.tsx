@@ -1,12 +1,11 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
-import { composeTransforms, usePatchedProps, useStyleOverride } from '../../../patches';
+import { composeTransforms, useElement } from '../../../patches';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
-import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme/ThemeContext';
 import type { TypographyVariant } from '../../../tokens/semantic';
-import { resolveTypography } from '../../../tokens/resolveTypography';
+import { useTypography } from '../../../tokens/resolveTypography';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { buildDepthShadow } from '../../../styles';
 import { DEFAULT_SPEED_PERCENTAGE, getSpeed, MIN_SPEED_PERCENTAGE, scaleTiming } from '../../../speed/timings';
@@ -37,17 +36,15 @@ export type TextCardStackProps = Partial<typeof TextCardStackDefaults>;
 
 export const TextCardStack: React.FC<TextCardStackProps> = (initProps) => {
   const frame = useCurrentFrame();
-  const styleConfig = useStyleContext();
   const theme = useTheme();
   const preset = useAspectPreset();
-  const defaultProps = { ...TextCardStackDefaults, ...initProps };
-  const id = defaultProps.id;
-  const props = usePatchedProps(id, defaultProps);
-
-  const styleOverride = useStyleOverride(id);
-  const { transform: _ignoredOverrideTransform, ...styleOverrideWithoutTransform } = styleOverride;
+  const id = initProps.id ?? TextCardStackDefaults.id;
+  const { props, getStyle } = useElement(id, TextCardStackDefaults, initProps);
+  const { style: containerPatchStyle } = useElement('container', {
+    style: undefined as React.CSSProperties | undefined,
+  });
   const { transform: _ignoredPropStyleTransform, ...propStyleWithoutTransform } = props.style ?? {};
-  const typographyStyle = resolveTypography(props.variant, styleConfig, theme, preset);
+  const typographyStyle = useTypography(props.variant);
 
   const speed = getSpeed(props.speed);
   const entryDuration = scaleTiming(BASE_ENTRY_DURATION, speed);
@@ -68,7 +65,6 @@ export const TextCardStack: React.FC<TextCardStackProps> = (initProps) => {
     : Number.parseFloat(String(typographyStyle.fontSize ?? 64)) || 64;
   const textStyleOverrides: React.CSSProperties = {
     ...propStyleWithoutTransform,
-    ...styleOverrideWithoutTransform,
   };
 
   if (texts.length === 0) {
@@ -77,18 +73,19 @@ export const TextCardStack: React.FC<TextCardStackProps> = (initProps) => {
 
   const activeIndex = Math.min(Math.floor(Math.max(0, frame - props.startAt) / cardCycleDuration), texts.length - 1);
 
-  const containerStyleOverride = useStyleOverride("container");
-
   return (
     <div
+      id={id}
       className={props.className}
-      style={{
+      style={getStyle({
+        baseStyle: {
         position: 'relative',
         width: '100%',
         height: '100%',
         perspective: 1800,
         transformStyle: 'preserve-3d',
-      }}
+        },
+      })}
     >
       {texts.map((text, index) => {
         const localFrame = frame - props.startAt - index * cardCycleDuration;
@@ -222,7 +219,7 @@ export const TextCardStack: React.FC<TextCardStackProps> = (initProps) => {
                 borderRadius: cardRadius,
                 border: `4px solid ${theme.colors.foreground}`,
                 gap: Math.max(16, Math.round(bodyFontSize * 0.18)),
-                ...containerStyleOverride,
+                ...containerPatchStyle,
               }}
             >
               <span
