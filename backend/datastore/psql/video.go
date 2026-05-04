@@ -3,6 +3,7 @@ package psql
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/shank318/coasterai/models"
 )
@@ -59,6 +60,7 @@ func (r *Database) UpdateVideo(ctx context.Context, video *models.Video) error {
 		"metadata":            video.Metadata,
 		"name":                video.Name,
 		"id":                  video.ID,
+		"updated_at":          time.Now(),
 	})
 	if err != nil {
 		return fmt.Errorf("failed to update video %q: %w", video.ID, err)

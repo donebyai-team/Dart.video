@@ -1,7 +1,7 @@
 import { Composition, getInputProps, getRemotionEnvironment } from 'remotion'
 import video from './video.json'
 import Slideshow from './RemotionSlideshow'
-import { loadAllFonts, SUPPORTED_FONTS } from './load_fonts'
+import { loadAllFonts } from './fonts'
 
 export const MyVideo = () => {
   const inputProps = getInputProps() as { video?: typeof video } | undefined
@@ -15,11 +15,8 @@ export const MyVideo = () => {
   const width = videoData.metadata.resolution.width
   const height = videoData.metadata.resolution.height
 
-  // load fonts
-  // TODO: Load applied fonts across scenes and theme from backend or gcp bucket
-  if (getRemotionEnvironment().isRendering) {    
+  if (getRemotionEnvironment().isRendering) {
     loadAllFonts()
-    console.log('Loaded fonts', SUPPORTED_FONTS.length)
   }
 
   return (

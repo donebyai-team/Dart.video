@@ -3,16 +3,18 @@ import { BrandTheme, ResolvedTheme } from './types';
 import { derivePalette } from './derive';
 import { DEFAULT_BRAND_THEME } from './defaults';
 
-const SANS_FALLBACK  = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-const MONO_FALLBACK  = 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace';
-const SERIF_FALLBACK = 'Georgia, "Times New Roman", Times, serif';
+// Fallback to popular Google Fonts from our supported list
+const SANS_FALLBACK  = 'Inter, Roboto, "Open Sans", sans-serif';
+const MONO_FALLBACK  = '"Roboto Mono", "Source Code Pro", "IBM Plex Mono", monospace';
+const SERIF_FALLBACK = 'Merriweather, Lora, "Noto Serif", serif';
 
 function resolveFonts(brand: BrandTheme): Pick<ResolvedTheme, 'font' | 'fontMono' | 'fontSerif'> {
-  return {
+  const resolved = {
     font:      brand.font      ? `${brand.font}, ${SANS_FALLBACK}`  : SANS_FALLBACK,
     fontMono:  brand.fontMono  ? `${brand.fontMono}, ${MONO_FALLBACK}`  : MONO_FALLBACK,
     fontSerif: brand.fontSerif ? `${brand.fontSerif}, ${SERIF_FALLBACK}` : SERIF_FALLBACK,
   };
+  return resolved;
 }
 
 const DEFAULT_RESOLVED: ResolvedTheme = {

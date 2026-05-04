@@ -265,7 +265,7 @@ const StoryboardSection = ({
                                 isOverSectionEnd ? "border-primary bg-primary/5 text-primary" : "border-border/60"
                             }`}
                         >
-                            {section.slides.length === 0 ? "Drop scene here" : "Drop at end of section"}
+                            {/* {section.slides.length === 0 ? "Drop scene here" : "Drop at end of section"} */}
                         </div>
                     </div>
                 </CollapsibleContent>
