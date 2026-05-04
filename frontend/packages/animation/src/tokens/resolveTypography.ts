@@ -11,7 +11,6 @@ const LETTER_SPACING_MAP: Record<string, string> = {
   wide:   '0.1em',
 };
 
-const HANDWRITTEN_STACK = '"Segoe Script", "Comic Sans MS", cursive';
 
 /**
  * Resolves a FontFamily token to a full CSS font-family stack.
@@ -19,12 +18,15 @@ const HANDWRITTEN_STACK = '"Segoe Script", "Comic Sans MS", cursive';
  * - handwritten: style-owned fixed fallback stack (not a brand decision)
  */
 export function resolveFont(family: FontFamily, theme: ResolvedTheme): string {
-  switch (family) {
-    case 'mono':        return theme.fontMono;
-    case 'serif':       return theme.fontSerif;
-    case 'handwritten': return HANDWRITTEN_STACK;
-    default:            return theme.font; // 'sans' and any future additions
-  }
+  const resolvedFont = (() => {
+    switch (family) {
+      case 'mono':        return theme.fontMono;
+      case 'serif':       return theme.fontSerif;
+      default:            return theme.font; // 'sans' and any future additions
+    }
+  })();
+
+  return resolvedFont;
 }
 
 /**

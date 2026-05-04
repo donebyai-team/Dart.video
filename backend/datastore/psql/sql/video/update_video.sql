@@ -5,7 +5,8 @@ SET
     status = :status,
     name = :name,
     version = :version,
-    metadata = :metadata
+    metadata = :metadata,
+    updated_at = :updated_at
 WHERE
     id = :id
     AND organization_id = :organization_id;

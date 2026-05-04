@@ -2,8 +2,8 @@ import { fromJson, JsonObject } from '@bufbuild/protobuf'
 import { Slide, TransitionType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Video, VideoSchema } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import { linearTiming, TransitionSeries } from '@remotion/transitions'
-import React, { useMemo } from 'react'
-import { AbsoluteFill, useVideoConfig, Html5Audio, Series } from 'remotion'
+import React, { useMemo, useState, useEffect } from 'react'
+import { AbsoluteFill, useVideoConfig, Html5Audio, Series, delayRender, continueRender } from 'remotion'
 import {
   ThemeProvider,
   AspectPresetProvider,
@@ -86,13 +86,26 @@ export const Slideshow: React.FC<SlideshowProps> = ({
   const aspectPreset = useMemo<AspectPreset>(() => (ASPECT_PRESETS["web"]), [width, height])
 
   // Use the one that is generated from backend or default
-  const brandTheme = useMemo(
-    () =>
-      videoConfig?.metadata?.generatedBranding
-        ? brandingToTheme(videoConfig.metadata.generatedBranding)
-        : defaultTheme,
-    [videoConfig?.metadata?.generatedBranding]
-  );
+  // Note: Fonts are already loaded by loadAllFonts() in Video.tsx
+  const [brandTheme, setBrandTheme] = useState(defaultTheme);
+
+  useEffect(() => {
+    const loadTheme = async () => {
+      try {
+        if (videoConfig?.metadata?.generatedBranding) {
+          const theme = await brandingToTheme(videoConfig.metadata.generatedBranding);
+          setBrandTheme(theme);
+        } else {
+          setBrandTheme(defaultTheme);
+        }
+      } catch (error) {
+        console.error('[Slideshow] Failed to load brand theme:', error);
+        setBrandTheme(defaultTheme);
+      }
+    };
+
+    loadTheme();
+  }, [videoConfig?.metadata?.generatedBranding]);
 
   /* ================= GATE ================= */
 

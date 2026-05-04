@@ -2,11 +2,11 @@ import { BrandAsset, BrandTheme, DEFAULT_BRAND_THEME } from "@coasterai/animatio
 import { BrandAssetPriority, BrandMedia, BrandMediaType } from "@coasterai/pb/coasterai/core/v1/brandkit_pb";
 import { MediaAsset } from "@coasterai/pb/coasterai/core/v1/media_asset_pb";
 import { GeneratedVideoBranding } from "@coasterai/pb/coasterai/core/v1/video_pb";
-import { loadFonts } from "./load_fonts";
+import { loadRemotionFont } from "./fonts";
 
-export function brandingToTheme(
+export async function brandingToTheme(
     branding?: GeneratedVideoBranding
-): BrandTheme {
+): Promise<BrandTheme> {
 
     if (!branding) {
         return DEFAULT_BRAND_THEME;
@@ -65,12 +65,16 @@ export function brandingToTheme(
     }
 
     // Set fonts
-    for (const c of branding.brandIdentity?.fonts || []) {
-        theme.font = c.googleFontsName;
-        if (theme.font)
-            // load font before hand
-            loadFonts([theme.font])
+    const brandFonts = branding.brandIdentity?.fonts || [];
+
+    for (const c of brandFonts) {
+        const fontName = c.googleFontsName || c.name;
+        if (fontName) {
+            // Load font using Remotion's font loader (works in cloud rendering)
+            const loadedFont = await loadRemotionFont(fontName);
+            theme.font = loadedFont;
             break;
+        }
     }
 
     return theme;
