@@ -14,7 +14,7 @@ import type { EntranceAnimation, TextCycleTransition } from '../types';
 import { measureTextWidth } from '../text/measureText';
 
 export const WordCycleDefaults = {
-  id: 'textcycle',
+  id: 'wordcycle',
   words: ['First text', 'Second text', 'Third text'],
   holdDuration: 20,
   transitionDuration: 5,

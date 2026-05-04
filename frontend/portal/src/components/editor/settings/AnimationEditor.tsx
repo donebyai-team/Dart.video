@@ -161,7 +161,8 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                 ...(existingContent ?? {}),
                 codeRegistry: updatedContent.codeRegistry,
                 edits: pathOverlay,
-            }
+            },
+            backgroundStyle: slide.backgroundStyle
         } as Slide)
 
         // Force sync changes to backend only if a new slide is added
