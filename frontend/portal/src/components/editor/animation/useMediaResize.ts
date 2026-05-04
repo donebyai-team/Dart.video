@@ -21,6 +21,7 @@ interface MediaResizeState {
   scaleX: number
   scaleY: number
   previewEl: HTMLElement
+  previewContentEl: HTMLElement | null
 }
 
 interface UseMediaResizeParams {
@@ -78,6 +79,10 @@ export function useMediaResize({
     const previewRect = previewEl.getBoundingClientRect()
     const initialWidth = previewEl.offsetWidth || previewRect.width
     const initialHeight = previewEl.offsetHeight || previewRect.height
+    const previewContentEl =
+      previewEl.firstElementChild instanceof HTMLElement
+        ? previewEl.firstElementChild
+        : null
     const aspectRatio =
       initialWidth > 0 && initialHeight > 0 ? initialWidth / initialHeight : 1
 
@@ -94,6 +99,7 @@ export function useMediaResize({
       scaleX: previewRect.width > 0 ? initialWidth / previewRect.width : 1,
       scaleY: previewRect.height > 0 ? initialHeight / previewRect.height : 1,
       previewEl,
+      previewContentEl,
     }
 
     e.currentTarget.setPointerCapture(e.pointerId)
@@ -131,6 +137,10 @@ export function useMediaResize({
     resizeState.pendingHeight = nextSize.height
     resizeState.previewEl.style.width = `${nextSize.width}px`
     resizeState.previewEl.style.height = `${nextSize.height}px`
+    if (resizeState.previewContentEl) {
+      resizeState.previewContentEl.style.width = `${nextSize.width}px`
+      resizeState.previewContentEl.style.height = `${nextSize.height}px`
+    }
 
     const nextRect = resizeState.previewEl.getBoundingClientRect()
     setElementRect({

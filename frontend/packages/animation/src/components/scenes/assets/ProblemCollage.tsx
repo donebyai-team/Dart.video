@@ -93,12 +93,14 @@ type ImagePatch = {
     image?: string;
     width?: number;
     height?: number;
+    dragX?: number;
+    dragY?: number;
     style?: React.CSSProperties;
+    className?: string;
 };
 
 type ResolvedImageItem = {
     id: string;
-    patch: ImagePatch;
 };
 
 type CollageSlot = {
@@ -201,7 +203,6 @@ function buildCollageSlots(count: number): CollageSlot[] {
 type ProblemCollageImageProps = {
     id: string;
     index: number;
-    patch: ImagePatch;
     slot: CollageSlot;
     frame: number;
     centerX: number;
@@ -215,7 +216,6 @@ type ProblemCollageImageProps = {
 function ProblemCollageImage({
     id,
     index,
-    patch,
     slot,
     frame,
     centerX,
@@ -225,28 +225,31 @@ function ProblemCollageImage({
     boundsWidth,
     boundsHeight,
 }: ProblemCollageImageProps) {
-    const naturalDimensions = useImageDimensions(patch.image);
+    const imageEl = useElement<ImagePatch>(id);
+    const { props } = imageEl;
+    const naturalDimensions = useImageDimensions(props.image);
+    const hasExplicitSize = typeof props.width === 'number' || typeof props.height === 'number';
     const targetSize = useMemo(() => {
-        if (patch.width && patch.height) {
+        if (props.width && props.height) {
             return {
-                width: patch.width,
-                height: patch.height,
+                width: props.width,
+                height: props.height,
             };
         }
 
-        if (patch.width) {
+        if (props.width) {
             const ratio = naturalDimensions.width / Math.max(1, naturalDimensions.height);
             return {
-                width: patch.width,
-                height: Math.round(patch.width / ratio),
+                width: props.width,
+                height: Math.round(props.width / ratio),
             };
         }
 
-        if (patch.height) {
+        if (props.height) {
             const ratio = naturalDimensions.width / Math.max(1, naturalDimensions.height);
             return {
-                width: Math.round(patch.height * ratio),
-                height: patch.height,
+                width: Math.round(props.height * ratio),
+                height: props.height,
             };
         }
 
@@ -254,7 +257,7 @@ function ProblemCollageImage({
             width: naturalDimensions.width,
             height: naturalDimensions.height,
         };
-    }, [naturalDimensions.height, naturalDimensions.width, patch.height, patch.width]);
+    }, [naturalDimensions.height, naturalDimensions.width, props.height, props.width]);
 
     const progress = interpolateWithEasing(
         frame,
@@ -262,12 +265,17 @@ function ProblemCollageImage({
         [0, 1],
         'ease-out',
     );
-    const fittedSize = fitWithin(
-        targetSize.width,
-        targetSize.height,
-        Math.max(1, Math.min(boundsWidth * MAX_SCATTER_WIDTH, boundsWidth - COLLAGE_VIEW_PADDING * 2)),
-        Math.max(1, Math.min(boundsHeight * MAX_SCATTER_HEIGHT, boundsHeight - COLLAGE_VIEW_PADDING * 2)),
-    );
+    const fittedSize = hasExplicitSize
+        ? {
+            width: Math.max(1, Math.round(targetSize.width)),
+            height: Math.max(1, Math.round(targetSize.height)),
+        }
+        : fitWithin(
+            targetSize.width,
+            targetSize.height,
+            Math.max(1, Math.min(boundsWidth * MAX_SCATTER_WIDTH, boundsWidth - COLLAGE_VIEW_PADDING * 2)),
+            Math.max(1, Math.min(boundsHeight * MAX_SCATTER_HEIGHT, boundsHeight - COLLAGE_VIEW_PADDING * 2)),
+        );
     const halfWidth = fittedSize.width / 2;
     const halfHeight = fittedSize.height / 2;
     const safeRadiusX = Math.max(0, boundsWidth - fittedSize.width - COLLAGE_VIEW_PADDING * 2);
@@ -291,39 +299,32 @@ function ProblemCollageImage({
 
     return (
         <ArrayItem
-            key={`images-${index}`}
+            key={id}
+            {...imageEl.rootProps}
             index={index}
             source="images"
             removeControl="corner-top-right"
             addControl="corner-top-left"
-            style={{
-                position: 'absolute',
-                left: safeLeft,
-                top: safeTop,
-                width: fittedSize.width,
-                height: fittedSize.height,
-                zIndex: slot.zIndex,
-                opacity,
+            style={imageEl.rootStyle({
+                base: {
+                    position: 'absolute',
+                    left: safeLeft,
+                    top: safeTop,
+                    width: fittedSize.width,
+                    height: fittedSize.height,
+                    zIndex: slot.zIndex,
+                    opacity,
+                    transformOrigin: 'center center',
+                },
                 transform: `translate(-50%, -50%) translate(${translateX}px, ${translateY}px) scale(${scale})`,
-                transformOrigin: 'center center',
-            }}
+            })}
         >
-            <div
-                style={{
-                    width: '100%',
-                    height: '100%',
-                }}
-            >
-                <ImageAsset
-                    id={id}
-                    image={patch.image}
-                    width={fittedSize.width}
-                    height={fittedSize.height}
-                    style={{
-                        ...patch.style,
-                    }}
-                />
-            </div>
+            <ImageAsset
+                image={props.image}
+                width={fittedSize.width}
+                height={fittedSize.height}
+                style={{ objectFit: props.style?.objectFit }}
+            />
         </ArrayItem>
     );
 }
@@ -336,20 +337,15 @@ export const ProblemCollage: React.FC = () => {
     const textProps = textEl.props;
     const sceneProps = sceneEl.props;
     const imageEntries = useArrayPatch('images');
+
     const resolvedImages = useMemo<ResolvedImageItem[]>(() => {
-        return imageEntries.map((item, index) => {
-                const [id, patch] = Object.entries(item)[0] as [string, ImagePatch];
+        return imageEntries.map((item) => {
+                const [id] = Object.entries(item)[0] as [string, ImagePatch];
 
                 return {
                     id: id,
-                    patch,
                 };
             });
-
-        // return DEFAULT_PLACEHOLDER_IMAGES.map((patch, index) => ({
-        //     id: `imageasset-images-${index}`,
-        //     patch,
-        // }));
     }, [imageEntries]);
 
     const contentWidth = preset.width - preset.safeArea.left - preset.safeArea.right;
@@ -417,8 +413,6 @@ export const ProblemCollage: React.FC = () => {
                     <div
                         style={{
                             textAlign: 'center',
-                            whiteSpace: 'nowrap',
-                            maxWidth: '100%',
                         }}
                     >
                         <TextStagger
@@ -426,8 +420,6 @@ export const ProblemCollage: React.FC = () => {
                             id="textstagger"
                             startAt={0}
                             style={{
-                                display: 'inline-block',
-                                whiteSpace: 'nowrap',
                                 textAlign: 'center',
                                 ...textProps.style,
                             }}
@@ -435,7 +427,7 @@ export const ProblemCollage: React.FC = () => {
                     </div>
                 </div>
 
-                {resolvedImages.map(({ id, patch }, index) => {
+                {resolvedImages.map(({ id }, index) => {
                     const slot = collageSlots[index];
 
                     if (!slot) {
@@ -447,7 +439,6 @@ export const ProblemCollage: React.FC = () => {
                             key={id}
                             id={id}
                             index={index}
-                            patch={patch}
                             slot={slot}
                             frame={frame}
                             centerX={centerX}

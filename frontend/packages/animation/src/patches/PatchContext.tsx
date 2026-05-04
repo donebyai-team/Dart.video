@@ -76,9 +76,9 @@ export interface UseElementResult<T> {
  * childStyle handles internal animation pieces and intentionally does not
  * include drag or patched root transforms. textStyle is for inner text nodes.
  */
-export function useElement<T extends object>(
+export function useElement<T extends object = Record<string, never>>(
   id: string | undefined,
-  defaults: T,
+  defaults?: T,
   inputProps?: Partial<T>,
   options: UseElementOptionsWithProps<T> = {},
 ): UseElementResult<T> {
@@ -87,7 +87,8 @@ export function useElement<T extends object>(
   const theme = useTheme();
   const preset = useAspectPreset();
 
-  const propsWithInput = inputProps ? deepMerge(defaults, inputProps) : defaults;
+  const resolvedDefaults = (defaults ?? {}) as T;
+  const propsWithInput = inputProps ? deepMerge(resolvedDefaults, inputProps) : resolvedDefaults;
   const patchEntry = id ? (overlay[id] as Partial<T> | undefined) : undefined;
   const props = patchEntry ? deepMerge(propsWithInput, patchEntry) : propsWithInput;
 

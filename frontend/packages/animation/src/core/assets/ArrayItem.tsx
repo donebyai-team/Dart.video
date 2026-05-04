@@ -2,6 +2,8 @@ import { useRef } from 'react'
 import { useArrayPatch } from '../../patches'
 
 interface ArrayItemProps {
+  id?: string
+  className?: string
   index: number
   source: string
   min?: number
@@ -23,6 +25,8 @@ export type ControlPosition =
   | 'mid-left'
 
 export function ArrayItem({
+  id,
+  className,
   index,
   source,
   removeControl = 'corner-top-right',
@@ -51,6 +55,8 @@ export function ArrayItem({
   return (
     <div
       ref={ref}
+      id={id}
+      className={className}
       data-array-index={String(index)}
       data-array-source={source}
       style={style}

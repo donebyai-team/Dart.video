@@ -186,21 +186,24 @@ export function AnimationEditLayer({
     overlayEl: HTMLElement,
   ): { id: string; el: HTMLElement }[] {
     overlayEl.style.pointerEvents = 'none'
-    const topEl = document.elementFromPoint(clientX, clientY) as HTMLElement | null
+    const elements = document.elementsFromPoint(clientX, clientY) as HTMLElement[]
     overlayEl.style.pointerEvents = 'auto'
 
-    // const cRect = overlayEl.getBoundingClientRect()
     const hits: { id: string; el: HTMLElement }[] = []
+    const seen = new Set<string>()
 
-    let walkEl = topEl
-    while (walkEl && walkEl !== overlayEl) {
-      const elId = walkEl.getAttribute('id')
-      if (elId && isSelectable(elId)) {
-        // const r = walkEl.getBoundingClientRect()
-        // if (r.width > cRect.width * 0.9 && r.height > cRect.height * 0.9) break
-        hits.push({ id: elId, el: walkEl })
+    for (const topEl of elements) {
+      let walkEl: HTMLElement | null = topEl
+
+      while (walkEl && walkEl !== overlayEl) {
+        const elId = walkEl.getAttribute('id')
+        if (elId && isSelectable(elId) && !seen.has(elId)) {
+          seen.add(elId)
+          hits.push({ id: elId, el: walkEl })
+          break
+        }
+        walkEl = walkEl.parentElement
       }
-      walkEl = walkEl.parentElement
     }
 
     return hits
@@ -222,6 +225,16 @@ export function AnimationEditLayer({
       case 'mid-bottom': return { top: rect.bottom - 12, left: rect.left + rect.width / 2 - 12 }
       case 'mid-left': return { top: rect.top + rect.height / 2 - 12, left: rect.left - 12 }
     }
+  }
+
+  function getArrayControlAnchorEl(arrayEl: Element): Element {
+    const draggedPreviewEl = dragStateRef.current?.previewEl
+    if (draggedPreviewEl && arrayEl.contains(draggedPreviewEl)) {
+      return draggedPreviewEl
+    }
+
+    const selectableChild = arrayEl.querySelector('[id]')
+    return selectableChild ?? arrayEl
   }
 
   function handleArrayAdd(meta: any) {
@@ -438,7 +451,8 @@ export function AnimationEditLayer({
       {hoveredArrayEl && (() => {
         const meta = (hoveredArrayEl as any).__arrayMeta
         if (!meta) return null
-        const rect = hoveredArrayEl.getBoundingClientRect()
+        const controlAnchorEl = getArrayControlAnchorEl(hoveredArrayEl)
+        const rect = controlAnchorEl.getBoundingClientRect()
         const removePos = resolveControlPosition(rect, meta.removeControl ?? 'corner-top-right')
         const addPos = resolveControlPosition(rect, meta.addControl ?? 'mid-right')
         const showRemove = meta.array.length > meta.min
