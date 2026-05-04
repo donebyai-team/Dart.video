@@ -86,25 +86,11 @@ export const Slideshow: React.FC<SlideshowProps> = ({
   const aspectPreset = useMemo<AspectPreset>(() => (ASPECT_PRESETS["web"]), [width, height])
 
   // Use the one that is generated from backend or default
-  // Note: Fonts are already loaded by loadAllFonts() in Video.tsx
-  const [brandTheme, setBrandTheme] = useState(defaultTheme);
-
-  useEffect(() => {
-    const loadTheme = async () => {
-      try {
-        if (videoConfig?.metadata?.generatedBranding) {
-          const theme = await brandingToTheme(videoConfig.metadata.generatedBranding);
-          setBrandTheme(theme);
-        } else {
-          setBrandTheme(defaultTheme);
-        }
-      } catch (error) {
-        console.error('[Slideshow] Failed to load brand theme:', error);
-        setBrandTheme(defaultTheme);
-      }
-    };
-
-    loadTheme();
+  const brandTheme = useMemo(() => {
+    if (videoConfig?.metadata?.generatedBranding) {
+      return brandingToTheme(videoConfig.metadata.generatedBranding);
+    }
+    return defaultTheme;
   }, [videoConfig?.metadata?.generatedBranding]);
 
   /* ================= GATE ================= */

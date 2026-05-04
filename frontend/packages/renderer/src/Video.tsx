@@ -15,12 +15,9 @@ export const MyVideo = () => {
   const width = videoData.metadata.resolution.width
   const height = videoData.metadata.resolution.height
 
-  // Load all supported fonts during rendering
-  // This ensures any font used in text element styleOverrides will be available
-  // TEMPORARILY DISABLED to test if this is causing template timeouts
-  // if (getRemotionEnvironment().isRendering) {
-  //   loadAllFonts()
-  // }
+  if (getRemotionEnvironment().isRendering) {
+    loadAllFonts()
+  }
 
   return (
     <>

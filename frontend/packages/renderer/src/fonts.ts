@@ -136,25 +136,12 @@ export async function loadFonts(fontNames: string[], waitForLoad = false): Promi
 
 /**
  * Load all supported fonts for rendering
- * This ensures any font used in text elements will be available
- * Uses delayRender to wait for fonts before rendering starts
+ * Loads in background without blocking - matches old load_fonts.ts behavior
  */
 export function loadAllFonts(): void {
-  // Import delayRender and continueRender from remotion
-  import('remotion').then(({ delayRender, continueRender }) => {
-    const handle = delayRender('Loading all fonts');
-    console.log('[loadAllFonts] Loading', SUPPORTED_FONTS.length, 'fonts');
-    
-    loadFonts(SUPPORTED_FONTS, true)
-      .then(() => {
-        console.log('[loadAllFonts] All fonts loaded');
-        continueRender(handle);
-      })
-      .catch((err) => {
-        console.error('[loadAllFonts] Failed to load fonts:', err);
-        continueRender(handle); // Continue anyway with fallbacks
-      });
-  });
+  console.log('[loadAllFonts] Loading', SUPPORTED_FONTS.length, 'fonts in background');
+  // Load without waiting - fonts will be available as they load
+  loadFonts(SUPPORTED_FONTS, false);
 }
 
 // Every font available in the editor dropdown
