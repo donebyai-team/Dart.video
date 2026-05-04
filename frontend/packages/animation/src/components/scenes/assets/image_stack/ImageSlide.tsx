@@ -1,5 +1,6 @@
 import React from 'react';
 import { ImageAsset } from '../../../../core/assets/ImageAsset';
+import { useElement } from '../../../../patches';
 import { interpolateWithEasing } from '../../../../styles/easingResolver';
 import { getImageWithLabelImage, type ImageWithLabelItem } from './shared';
 
@@ -12,6 +13,55 @@ export type ImageSlideProps = {
     width: number;
     height: number;
 };
+
+type ImageSlideItemProps = {
+    imagePatch: ReturnType<typeof getImageWithLabelImage>;
+    index: number;
+    visibleIndex: number;
+    itemCount: number;
+    opacity: number;
+    transform: string;
+    width: number;
+    height: number;
+};
+
+function ImageSlideItem({
+    imagePatch,
+    index,
+    visibleIndex,
+    itemCount,
+    opacity,
+    transform,
+    width,
+    height,
+}: ImageSlideItemProps): React.ReactElement {
+    const el = useElement<ReturnType<typeof getImageWithLabelImage>>(imagePatch.id);
+    const { props } = el;
+
+    return (
+        <div
+            key={`${imagePatch.id}-${index}`}
+            {...el.rootProps}
+            style={el.rootStyle({
+                base: {
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    zIndex: itemCount - visibleIndex,
+                    opacity,
+                },
+                transform,
+            })}
+        >
+            <ImageAsset
+                image={props.image ?? ''}
+                width={props.width ?? width}
+                height={props.height ?? height}
+                style={{ overflow: 'hidden', objectFit: props.style?.objectFit }}
+            />
+        </div>
+    );
+}
 
 export function ImageSlide({
     frame,
@@ -53,25 +103,17 @@ export function ImageSlide({
                 const opacity = isExiting ? 1 - exitProgress : 1;
 
                 return (
-                    <div
+                    <ImageSlideItem
                         key={`${imagePatch.id}-${index}`}
-                        style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            zIndex: items.length - visibleIndex,
-                            opacity,
-                            transform: `translate(${stackX}px, ${stackY + translateY}px)`,
-                        }}
-                    >
-                        <ImageAsset
-                            id={imagePatch.id}
-                            image={imagePatch.image ?? ''}
-                            width={imagePatch.width ?? width}
-                            height={imagePatch.height ?? height}
-                            style={{ overflow: 'hidden' }}
-                        />
-                    </div>
+                        imagePatch={imagePatch}
+                        index={index}
+                        visibleIndex={visibleIndex}
+                        itemCount={items.length}
+                        opacity={opacity}
+                        transform={`translate(${stackX}px, ${stackY + translateY}px)`}
+                        width={width}
+                        height={height}
+                    />
                 );
             })}
         </div>

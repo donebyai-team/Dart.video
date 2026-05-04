@@ -125,27 +125,20 @@ export function useElement<T extends object = Record<string, never>>(
   const childStyle = (styleOptions: UseElementOptionsWithProps<T> = {}): React.CSSProperties => {
     const componentTransform = typeof styleOptions.transform === 'function' ? styleOptions.transform(props) : styleOptions.transform;
     const baseStyle = resolveBaseStyle(styleOptions);
-
-    return {
-      ...baseStyle,
-      ...(componentTransform ? { transform: componentTransform } : {}),
-      ...(componentTransform ? { willChange: 'transform' } : {}),
-    };
-  };
-
-  const textStyle = (styleOptions: UseElementOptionsWithProps<T> = {}): React.CSSProperties => {
-    const componentTransform = typeof styleOptions.transform === 'function' ? styleOptions.transform(props) : styleOptions.transform;
-    const baseStyle = resolveBaseStyle(styleOptions);
     const includeUserStyle = styleOptions.includeUserStyle ?? true;
 
     return {
-      ...(styleOptions.typography === false ? undefined : typography),
       ...(includeUserStyle ? styleWithoutTransform : undefined),
       ...baseStyle,
       ...(componentTransform ? { transform: componentTransform } : {}),
       ...(componentTransform ? { willChange: 'transform' } : {}),
     };
   };
+
+  const textStyle = (styleOptions: UseElementOptionsWithProps<T> = {}): React.CSSProperties => ({
+    ...(styleOptions.typography === false ? undefined : typography),
+    ...childStyle(styleOptions),
+  });
 
   return {
     id,

@@ -79,7 +79,9 @@ export const LogoShowcase: React.FC = () => {
                 }}
             >
                 {arrayProps.map((item, index) => {
-                    const [eid, patch] = Object.entries(item)[0]
+                    const [eid] = Object.entries(item)[0]
+                    const logoEl = useElement(eid);
+                    const { props } = logoEl;
 
                     const logoStartFrame = logosStartFrame + index * DEFAULT_LOGO_STAGGER;
                     const logoLocalFrame = frame - logoStartFrame;
@@ -105,22 +107,25 @@ export const LogoShowcase: React.FC = () => {
                         >
                             <div
                                 key={`${index}`}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    flex: `0 0 ${slotLayout.width}px`,
-                                    width: slotLayout.width,
-                                    height: slotLayout.height,
-                                    padding: slotLayout.padding,
-                                    boxSizing: 'border-box',
-                                    opacity,
+                                style={logoEl.rootStyle({
+                                    base: {
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flex: `0 0 ${slotLayout.width}px`,
+                                        width: slotLayout.width,
+                                        height: slotLayout.height,
+                                        padding: slotLayout.padding,
+                                        boxSizing: 'border-box',
+                                        opacity,
+                                    },
                                     transform: `translateY(${translateY}px) scale(${scale})`,
-                                }}
+                                })}
+
                             >
                                 <LogoAsset
                                     id={eid}
-                                    src={patch.src}
+                                    src={props.src}
                                     width={slotLayout.width - slotLayout.padding * 2}
                                     height={slotLayout.height - slotLayout.padding * 2}
                                     logoAnimation="none"

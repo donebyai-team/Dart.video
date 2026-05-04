@@ -106,14 +106,13 @@ export const IconShowcase: React.FC = () => {
                             removeControl="mid-top"
                             addControl="mid-bottom"
                         >
-                            <div
-                                style={{
-                                    transform: `scale(${scale}) rotate(${rotation}deg)`,
-                                    opacity,
-                                }}
-                            >
-                                <IconAsset id={eid} icon={patch.icon} size={patch.size} />
-                            </div>
+                            <IconShowcaseItem
+                                id={eid}
+                                index={index}
+                                scale={scale}
+                                rotation={rotation}
+                                opacity={opacity}
+                            />
                         </ArrayItem>
                     );
                 })}
@@ -139,6 +138,45 @@ export const IconShowcase: React.FC = () => {
         </div>
     );
 };
+
+type IconShowcaseItemProps = {
+    id: string;
+    index: number;
+    scale: number;
+    rotation: number;
+    opacity: number;
+};
+
+function IconShowcaseItem({
+    id,
+    index,
+    scale,
+    rotation,
+    opacity,
+}: IconShowcaseItemProps): React.ReactElement {
+    const iconEl = useElement(id);
+    const { props } = iconEl;
+
+    return (
+        <div
+            key={`${id}-${index}`}
+            {...iconEl.rootProps}
+            style={iconEl.rootStyle({
+                base: {
+                    opacity,
+                },
+                transform: `scale(${scale}) rotate(${rotation}deg)`,
+            })}
+        >
+            <IconAsset
+                icon={props.icon ?? ''}
+                size={props.size ?? DEFAULT_ICON_SIZE}
+                className={props.className}
+                style={iconEl.childStyle()}
+            />
+        </div>
+    );
+}
 
 
 // ============================================================================
@@ -203,4 +241,3 @@ export const IconShowcaseDescriptor: ComponentRegistration = {
     description: 'Row of icons + caption. Use for integrations, tech stack, partners, brands. eg. icons={["shopify", "midjourney", "openai"]}, text="caption text".',
     celExpression: '55 + max(0, size(props.icons) - 1) * 5 + max(0, segmentCount(props.textstagger.text, "word") - 1) * 5',
 };
-

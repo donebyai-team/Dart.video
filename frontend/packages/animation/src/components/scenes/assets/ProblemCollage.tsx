@@ -323,7 +323,7 @@ function ProblemCollageImage({
                 image={props.image}
                 width={fittedSize.width}
                 height={fittedSize.height}
-                style={{ objectFit: props.style?.objectFit }}
+                style={imageEl.childStyle()}
             />
         </ArrayItem>
     );
@@ -410,21 +410,14 @@ export const ProblemCollage: React.FC = () => {
                         padding: '0 8%',
                     }}
                 >
-                    <div
-                        style={{
-                            textAlign: 'center',
-                        }}
-                    >
-                        <TextStagger
+                     <TextStagger
                             {...textProps}
                             id="textstagger"
                             startAt={0}
                             style={{
-                                textAlign: 'center',
                                 ...textProps.style,
                             }}
                         />
-                    </div>
                 </div>
 
                 {resolvedImages.map(({ id }, index) => {

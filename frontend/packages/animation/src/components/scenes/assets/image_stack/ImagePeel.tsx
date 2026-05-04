@@ -1,5 +1,6 @@
 import React from 'react';
 import { ImageAsset } from '../../../../core/assets/ImageAsset';
+import { useElement } from '../../../../patches';
 import { interpolateWithEasing } from '../../../../styles/easingResolver';
 import { Direction } from '../../types';
 import { getImageWithLabelImage, type ImageWithLabelItem } from './shared';
@@ -41,6 +42,57 @@ function getTransformOrigin(direction: Direction): string {
         case 'down':
             return 'bottom center';
     }
+}
+
+type ImagePeelItemProps = {
+    imagePatch: ReturnType<typeof getImageWithLabelImage>;
+    index: number;
+    stackX: number;
+    stackY: number;
+    peelTransform: string;
+    opacity: number;
+    width: number;
+    height: number;
+    direction: Direction;
+};
+
+function ImagePeelItem({
+    imagePatch,
+    index,
+    stackX,
+    stackY,
+    peelTransform,
+    opacity,
+    width,
+    height,
+    direction,
+}: ImagePeelItemProps): React.ReactElement {
+    const el = useElement<ReturnType<typeof getImageWithLabelImage>>(imagePatch.id);
+    const { props } = el;
+
+    return (
+        <div
+            key={`${imagePatch.id}-${index}`}
+            {...el.rootProps}
+            style={el.rootStyle({
+                base: {
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    transformOrigin: getTransformOrigin(direction),
+                    opacity,
+                },
+                transform: `translate(${stackX}px, ${stackY}px) ${peelTransform}`,
+            })}
+        >
+            <ImageAsset
+                image={props.image ?? ''}
+                width={props.width ?? width}
+                height={props.height ?? height}
+                style={{ overflow: 'hidden', objectFit: props.style?.objectFit }}
+            />
+        </div>
+    );
 }
 
 export function ImagePeel({
@@ -87,25 +139,18 @@ export function ImagePeel({
                 const stackY = reversedIndex * stackOffset;
 
                 return (
-                    <div
+                    <ImagePeelItem
                         key={`${imagePatch.id}-${index}`}
-                        style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            transformOrigin: getTransformOrigin(direction),
-                            transform: `translate(${stackX}px, ${stackY}px) ${peelTransform}`,
-                            opacity,
-                        }}
-                    >
-                        <ImageAsset
-                            id={imagePatch.id}
-                            image={imagePatch.image ?? ''}
-                            width={imagePatch.width ?? width}
-                            height={imagePatch.height ?? height}
-                            style={{ overflow: 'hidden' }}
-                        />
-                    </div>
+                        imagePatch={imagePatch}
+                        index={index}
+                        stackX={stackX}
+                        stackY={stackY}
+                        peelTransform={peelTransform}
+                        opacity={opacity}
+                        width={width}
+                        height={height}
+                        direction={direction}
+                    />
                 );
             })}
         </div>

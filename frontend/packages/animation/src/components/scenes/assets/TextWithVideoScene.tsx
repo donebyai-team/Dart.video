@@ -23,23 +23,9 @@ type SceneProps = {
   entranceAnimation?: (typeof ENTRANCE_ANIMATIONS)[number];
 };
 
-type VideoProps = {
-  video: string;
-  width?: number;
-  height?: number;
-  style?: React.CSSProperties;
-};
-
 const SceneDefaults: SceneProps = {
   id: 'textwithvideoscene',
   entranceAnimation: DEFAULT_ANIMATION,
-};
-
-const VideoDefaults: VideoProps = {
-  video: '',
-  width: undefined,
-  height: undefined,
-  style: {},
 };
 
 function useVideoDimensions(src: string) {
@@ -86,7 +72,7 @@ export function TextWithVideoScene(propsInit: SceneProps): React.ReactElement {
   const preset = useAspectPreset();
   const overlay = usePatchOverlay();
   const sceneEl = useElement('scene', SceneDefaults);
-  const videoEl = useElement('videoasset', VideoDefaults);
+  const videoEl = useElement('videoasset');
   const textHighlightEl = useElement('texthighlight', TextHighlightDefaults);
   const textStaggerEl = useElement('textstagger', TextStaggerDefaults);
   const textWithWordCycleEl = useElement('textwithwordcycle', TextWithWordCycleDefaults);
@@ -163,17 +149,19 @@ export function TextWithVideoScene(propsInit: SceneProps): React.ReactElement {
 
   const videoNode = (
     <div
-      style={{
-        opacity: videoProgress,
+      {...videoEl.rootProps}
+      style={videoEl.rootStyle({
+        base: {
+          opacity: videoProgress,
+        },
         transform: getEntranceTransform(sceneProps.entranceAnimation ?? DEFAULT_ANIMATION, videoProgress),
-      }}
+      })}
     >
       <VideoAsset
-        id="videoasset"
         video={videoProps.video}
         width={resolvedVideoWidth}
         height={resolvedVideoHeight}
-        style={{ objectFit: 'contain', ...videoProps.style }}
+        style={{ objectFit: 'contain', ...videoEl.childStyle() }}
       />
     </div>
   );

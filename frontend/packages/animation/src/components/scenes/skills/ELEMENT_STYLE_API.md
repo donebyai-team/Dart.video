@@ -70,7 +70,16 @@ Use `el.childStyle(...)` for internal animation pieces such as words, characters
 ))}
 ```
 
-`childStyle` is for internal piece-level animation. It does not include drag or patched root transforms.
+`childStyle` is for internal piece-level rendering. It includes safe user style without root transform, and it does not include drag or patched root transforms.
+
+```tsx
+<ImageAsset
+  image={props.image}
+  width={props.width}
+  height={props.height}
+  style={el.childStyle({ base: { objectFit: 'contain' } })}
+/>
+```
 
 ## Inner Text
 
@@ -107,6 +116,7 @@ Instead:
 
 - Use `el.rootStyle({ typography: true })` when typography belongs on the root.
 - Use `el.textStyle()` when typography belongs on an inner text node.
+- Use `el.childStyle()` for non-text inner primitives.
 - Use `el.typography` only for measurement/layout math, such as estimating text width or font size.
 - Use `el.fontSizePx` when layout math needs a numeric font size. Do not parse `fontSize` inside a scene.
 

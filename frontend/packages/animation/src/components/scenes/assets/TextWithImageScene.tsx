@@ -23,20 +23,12 @@ type SceneProps = {
   entranceAnimation?: (typeof ENTRANCE_ANIMATIONS)[number];
 };
 
-type ImageProps = {
-  image: string;
-  style?: React.CSSProperties;
-};
 
 const SceneDefaults: SceneProps = {
   id: 'textwithimagescene',
   entranceAnimation: DEFAULT_ANIMATION,
 };
 
-const ImageDefaults: ImageProps = {
-  image: '',
-  style: {},
-};
 
 function useImageDimensions(src: string) {
   const [dimensions, setDimensions] = useState({
@@ -82,7 +74,7 @@ export function TextWithImageScene(propsInit: SceneProps): React.ReactElement {
   const preset = useAspectPreset();
   const overlay = usePatchOverlay();
   const sceneEl = useElement('scene', SceneDefaults);
-  const imageEl = useElement('imageasset', ImageDefaults);
+  const imageEl = useElement('imageasset');
   const textHighlightEl = useElement('texthighlight', TextHighlightDefaults);
   const textStaggerEl = useElement('textstagger', TextStaggerDefaults);
   const textWithWordCycleEl = useElement('textwithwordcycle', TextWithWordCycleDefaults);
@@ -154,20 +146,24 @@ export function TextWithImageScene(propsInit: SceneProps): React.ReactElement {
   }
 
   const fittedImage = fitImage(imageDimensions.width, imageDimensions.height, maxImageWidth, maxImageHeight);
+  const resolvedImageWidth = imageProps.width ?? Math.max(1, Math.round(fittedImage.width));
+  const resolvedImageHeight = imageProps.height ?? Math.max(1, Math.round(fittedImage.height));
 
   const imageNode = (
     <div
-      style={{
-        opacity: imageProgress,
+      {...imageEl.rootProps}
+      style={imageEl.rootStyle({
+        base: {
+          opacity: imageProgress,
+        },
         transform: getEntranceTransform(sceneProps.entranceAnimation ?? DEFAULT_ANIMATION, imageProgress),
-      }}
+      })}
     >
       <ImageAsset
-        id="imageasset"
         image={imageProps.image}
-        width={Math.max(1, Math.round(fittedImage.width))}
-        height={Math.max(1, Math.round(fittedImage.height))}
-        style={{ objectFit: 'contain', ...imageProps.style }}
+        width={resolvedImageWidth}
+        height={resolvedImageHeight}
+        style={{ objectFit: 'contain', ...imageEl.childStyle() }}
       />
     </div>
   );

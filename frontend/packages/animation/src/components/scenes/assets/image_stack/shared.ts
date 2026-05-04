@@ -14,6 +14,7 @@ export function getImageWithLabelImage(item: ImageWithLabelItem): {
     image?: string;
     width?: number;
     height?: number;
+    style?: React.CSSProperties;
 } {
     const imageEntry = Object.entries(item).find(([eid]) => eid.startsWith('imageasset-'));
 
@@ -30,6 +31,7 @@ export function getImageWithLabelImage(item: ImageWithLabelItem): {
         image: patch.image,
         width: patch.width,
         height: patch.height,
+        style: patch.style,
     };
 }
 

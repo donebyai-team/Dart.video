@@ -44,9 +44,7 @@ export const TextCardStack: React.FC<TextCardStackProps> = (initProps) => {
   const id = initProps.id ?? TextCardStackDefaults.id;
   const el = useElement(id, TextCardStackDefaults, initProps);
   const { props } = el;
-  const containerEl = useElement('container', {
-    style: undefined as React.CSSProperties | undefined,
-  });
+  const containerEl = useElement('container');
   const containerPatchStyle = containerEl.rootStyle();
   const typographyStyle = el.typography ?? {};
 
@@ -78,11 +76,11 @@ export const TextCardStack: React.FC<TextCardStackProps> = (initProps) => {
       {...el.rootProps}
       style={el.rootStyle({
         base: {
-        position: 'relative',
-        width: '100%',
-        height: '100%',
-        perspective: 1800,
-        transformStyle: 'preserve-3d',
+          position: 'relative',
+          width: '100%',
+          height: '100%',
+          perspective: 1800,
+          transformStyle: 'preserve-3d',
         },
       })}
     >
@@ -194,32 +192,33 @@ export const TextCardStack: React.FC<TextCardStackProps> = (initProps) => {
           >
             <div
               id="container"
-              style={{
-                width: cardWidth,
-                minHeight: cardMinHeight,
-                boxShadow: buildDepthShadow(3),
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                transformStyle: 'preserve-3d',
-                transformOrigin: '50% 50%',
-                opacity,
+              style={containerEl.rootStyle({
+                base: {
+                  width: cardWidth,
+                  minHeight: cardMinHeight,
+                  boxShadow: buildDepthShadow(3),
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  transformStyle: 'preserve-3d',
+                  transformOrigin: '50% 50%',
+                  opacity,                  
+                  // Default styling, can we passed in the schema but not necessary
+                  padding: `${cardPaddingY}px ${cardPaddingX}px`,
+                  borderRadius: cardRadius,
+                  border: `4px solid ${theme.colors.foreground}`,
+                  gap: Math.max(16, Math.round(bodyFontSize * 0.18)),
+                },
                 transform: composeTransforms(
-                  // Entry / hold / exit travel lives here so the whole card moves as one piece.
-                  'perspective(2200px)',
-                  `translate3d(${translateX}px, ${translateY}px, ${translateZ}px)`,
-                  `rotateX(${rotateX}deg)`,
-                  `rotateY(${rotateY}deg)`,
-                  `rotateZ(${rotateZ}deg)`,
-                  `scale(${scale})`,
-                ),
-                // Default styling, can we passed in the schema but not necessary
-                padding: `${cardPaddingY}px ${cardPaddingX}px`,
-                borderRadius: cardRadius,
-                border: `4px solid ${theme.colors.foreground}`,
-                gap: Math.max(16, Math.round(bodyFontSize * 0.18)),
-                ...containerPatchStyle,
-              }}
+                    // Entry / hold / exit travel lives here so the whole card moves as one piece.
+                    'perspective(2200px)',
+                    `translate3d(${translateX}px, ${translateY}px, ${translateZ}px)`,
+                    `rotateX(${rotateX}deg)`,
+                    `rotateY(${rotateY}deg)`,
+                    `rotateZ(${rotateZ}deg)`,
+                    `scale(${scale})`,
+                  ),
+              })}
             >
               <span
                 style={{
