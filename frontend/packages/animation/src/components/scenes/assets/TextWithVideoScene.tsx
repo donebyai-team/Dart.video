@@ -173,7 +173,7 @@ export function TextWithVideoScene(propsInit: SceneProps): React.ReactElement {
     </div>
   );
 
-  const textBasis = `${Math.round(textWidthPercent * 100)}%`;
+  const fullSafeAreaWidth = Math.max(1, availableWidth);
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
@@ -182,7 +182,7 @@ export function TextWithVideoScene(propsInit: SceneProps): React.ReactElement {
           <div style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
             {videoNode}
           </div>
-          <div style={{ flexBasis: textBasis, maxWidth: textBasis, minWidth: 0, display: 'flex', alignItems: 'center' }}>
+          <div style={{ flex: '1 1 0', minWidth: 0, display: 'flex', alignItems: 'center' }}>
             {textNode}
           </div>
         </Row>
@@ -197,8 +197,17 @@ export function TextWithVideoScene(propsInit: SceneProps): React.ReactElement {
             boxSizing: 'border-box',
           }}
         >
-          <Stack gap={VERTICAL_STACK_GAP_PX} align="center" justify="center" style={{ width: '100%', maxWidth: '100%' }}>
-            <div style={{ width: textBasis, maxWidth: '100%', margin: '0 auto', flexShrink: 0 }}>{textNode}</div>
+          <Stack gap={VERTICAL_STACK_GAP_PX}  style={{ width: '100%', maxWidth: '100%' }}>
+            <div
+              style={{
+                width: fullSafeAreaWidth,
+                maxWidth: '100%',
+                margin: '0 auto',
+                flexShrink: 0,
+              }}
+            >
+              {textNode}
+            </div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', flexShrink: 0 }}>{videoNode}</div>
           </Stack>
         </div>

@@ -5,6 +5,7 @@ import { useAspectPreset, useStyleContext } from '../styles';
 import { useTheme } from '../theme';
 import { resolveTypography, TypographyVariant } from '../tokens';
 import { composeTransforms } from './transform';
+import { loadFontViaStylesheet } from './font';
 
 /**
  * PatchContext holds the active PatchOverlay for the current animation.
@@ -92,6 +93,13 @@ export function useStyleOverride(id: string | undefined): Record<string, string 
   const overlay = useContext(PatchContext);
   if (!id) return {};
   const entry = overlay[id];
+
+  // load font
+  const fontFamily = entry?.style?.fontFamily;
+  if (fontFamily) {
+    loadFontViaStylesheet(String(fontFamily))
+  }
+
   return (entry?.style as Record<string, string | number> | undefined) ?? {};
 }
 

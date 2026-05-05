@@ -195,9 +195,16 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
         }
     };
 
-    const splitHighlightSegment = (text: string): string[] => {
-        const parts = text.match(/\S+\s*|\s+/g);
-        return parts && parts.length > 0 ? parts : [text];
+    const splitHighlightSegment = (text: string): Array<{ text: string; whitespace: boolean }> => {
+        const parts = text.match(/\S+|\s+/g);
+        if (!parts || parts.length === 0) {
+            return [{ text, whitespace: /^\s+$/.test(text) }];
+        }
+
+        return parts.map((part) => ({
+            text: part,
+            whitespace: /^\s+$/.test(part),
+        }));
     };
 
     return (
@@ -205,7 +212,9 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
             id={props.id}
             className={props.className}
             style={{
-                display: 'inline-block',
+                display: 'block',
+                width: '100%',
+                maxWidth: '100%',
                 opacity: entranceProgress,
                 ...dragStyle,
             }}
@@ -224,8 +233,8 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
                     }
 
                     return splitHighlightSegment(segment.text).map((part, partIndex) => {
-                        if (!part.trim()) {
-                            return <React.Fragment key={`${i}-${partIndex}`}>{part}</React.Fragment>;
+                        if (part.whitespace) {
+                            return <React.Fragment key={`${i}-${partIndex}`}>{part.text}</React.Fragment>;
                         }
 
                         return (
@@ -236,7 +245,7 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
                                     ...getHighlightStyles(segment.index),
                                 }}
                             >
-                                {part}
+                                {part.text}
                             </span>
                         );
                     });

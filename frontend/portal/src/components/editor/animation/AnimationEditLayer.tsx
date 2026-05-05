@@ -62,10 +62,11 @@ export function AnimationEditLayer({
 
   const [canvasRect, setCanvasRect] = useState<FRect | null>(null)
   const [elementRect, setElementRect] = useState<FRect | null>(null)
+  const [toolbarHeight, setToolbarHeight] = useState(48)
+  const [isToolbarVisible, setIsToolbarVisible] = useState(true)
   const toolbarOffset = 12
-  const estimatedToolbarHeight = 48
 
-  function supportsToolbar(id: string): boolean {
+  function supportsToolbar(_id: string): boolean {
     // const lowerId = id.toLowerCase()
     // return lowerId.includes('text') ||
     //   lowerId.includes('icon') ||
@@ -125,10 +126,33 @@ export function AnimationEditLayer({
     if (!selectedEid) setElementRect(null)
   }, [selectedEid])
 
+  useEffect(() => {
+    setIsToolbarVisible(Boolean(selectedEid))
+  }, [selectedEid])
+
+  useEffect(() => {
+    if (!selectedEid || !toolbarRef.current) return
+
+    const update = () => {
+      if (!toolbarRef.current) return
+      setToolbarHeight(toolbarRef.current.getBoundingClientRect().height)
+    }
+
+    update()
+    const observer = new ResizeObserver(update)
+    observer.observe(toolbarRef.current)
+    window.addEventListener('resize', update)
+
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', update)
+    }
+  }, [selectedEid])
+
   // ── Hit testing ───────────────────────────────────────────────────────────
 
   /** Check if an element ID is selectable (has a toolbar). */
-  function isSelectable(id: string): boolean {
+  function isSelectable(_id: string): boolean {
     // const elType = getElementTypeFromId(id)
     // if (elType === 'html' || elType === 'custom') return true
     // const registration = resolveComponentFromId(id)
@@ -299,6 +323,26 @@ export function AnimationEditLayer({
 
   const deselect = useCallback(() => onSelectElement(null), [onSelectElement])
 
+  useEffect(() => {
+    if (!selectedEid) return
+
+    const handlePointerDownOutside = (event: PointerEvent) => {
+      const target = event.target as Node | null
+      if (!target) return
+
+      if (toolbarRef.current?.contains(target)) return
+      if (playerRef.current?.contains(target)) return
+      if (target instanceof Element && target.closest('[data-animation-settings-panel="true"]')) return
+
+      setIsToolbarVisible(false)
+    }
+
+    document.addEventListener('pointerdown', handlePointerDownOutside, true)
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDownOutside, true)
+    }
+  }, [playerRef, selectedEid])
+
   function handleTextResizePointerDown(e: React.PointerEvent<HTMLDivElement>) {
     if (!selectedEid || !isPlainTextElement(selectedEid)) return
 
@@ -368,6 +412,8 @@ export function AnimationEditLayer({
    *   - At topmost: keep it selected.
    */
   function handleCanvasClick(e: React.MouseEvent<HTMLDivElement>) {
+    setIsToolbarVisible(true)
+
     if (suppressClickRef.current) {
       suppressClickRef.current = false
       return
@@ -546,15 +592,15 @@ export function AnimationEditLayer({
       )}
 
       {/* Toolbar */}
-      {selectedEid && supportsToolbar(selectedEid) && (
+      {selectedEid && isToolbarVisible && supportsToolbar(selectedEid) && (
         <div
           ref={toolbarRef}
           style={{
             position: 'fixed',
             top:
-              canvasRect.top > estimatedToolbarHeight + toolbarOffset
-                ? canvasRect.top - estimatedToolbarHeight - toolbarOffset
-                : canvasRect.top + toolbarOffset,
+              canvasRect.top > toolbarHeight + toolbarOffset
+                ? canvasRect.top - toolbarHeight - toolbarOffset
+                : canvasRect.top + canvasRect.height + toolbarOffset,
             left: canvasRect.left + canvasRect.width / 2,
             transform: 'translateX(-50%)',
             zIndex: 50,

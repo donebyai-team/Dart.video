@@ -42,17 +42,18 @@ export const TextStaggerDefaults = {
 
 export type TextStaggerProps = Partial<typeof TextStaggerDefaults>
 
+const renderUnit = (unit: string) => {
+  if (unit === ' ') return '\u00A0';
+  if (unit === '\n') return <br />;
+  return unit;
+};
+
 export const TextStagger: React.FC<TextStaggerProps> = (initProps) => {
 
     const frame = useCurrentFrame();
-    const styleConfig = useStyleContext();
-    const theme = useTheme();
-    const preset = useAspectPreset();
     const defaultProps = { ...TextStaggerDefaults, ...initProps };
-    const id = defaultProps.id;
-
-    const props = usePatchedProps(id, defaultProps);
-
+    const el = useElement(defaultProps.id, defaultProps);
+    const {props} = el;
 
     // Apply defaults (split-mode-aware)
     // const actualVariant = props.variant;
@@ -62,7 +63,6 @@ export const TextStagger: React.FC<TextStaggerProps> = (initProps) => {
     const modeDefaults = getSplitModeDefaults(splitBy);
     const actualStaggerDelay = props.staggerDelay ?? modeDefaults.staggerDelay;
     const actualDuration = props.duration ?? modeDefaults.duration;
-    const el = useElement(defaultProps.id, defaultProps);
 
 
     // const styleOverride = useStyleOverride(id);
@@ -91,7 +91,7 @@ export const TextStagger: React.FC<TextStaggerProps> = (initProps) => {
 
     return (
         <span
-            id={id}
+            id={el.id}
             className={props.className}
             style={{
                 display: 'block',
@@ -111,7 +111,7 @@ export const TextStagger: React.FC<TextStaggerProps> = (initProps) => {
                         ...getAnimationStyles(index),
                     }}
                 >
-                    {unit}
+                    {renderUnit(unit)}
                 </span>
             ))}
         </span>
