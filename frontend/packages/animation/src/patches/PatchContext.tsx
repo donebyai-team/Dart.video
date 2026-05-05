@@ -1,6 +1,10 @@
 import React, { createContext, useContext } from 'react';
 import { PatchOverlay, createEmptyPatchOverlay } from './types';
 import { deepMerge } from './utils';
+import { useAspectPreset, useStyleContext } from '../styles';
+import { useTheme } from '../theme';
+import { resolveTypography, TypographyVariant } from '../tokens';
+import { composeTransforms } from './transform';
 
 /**
  * PatchContext holds the active PatchOverlay for the current animation.
@@ -27,42 +31,6 @@ export function PatchContextProvider({ overlay, children }: PatchContextProvider
       {children}
     </PatchContext.Provider>
   );
-}
-
-export interface TimingDefaults {
-  startAt: number;
-  durationInFrames: number;
-}
-
-export interface ResolvedTiming {
-  /** startAt after patch applied */
-  effectiveStartAt: number;
-  /** durationInFrames after patch applied */
-  effectiveDurationInFrames: number;
-}
-
-/**
- * Returns effective startAt and durationInFrames for a primitive,
- * accounting for:
- *   1. User patches on these timing props
- *   2. Global speed factor (> 1 = faster, < 1 = slower)
- */
-export function usePrimitivePatches(
-  id: string | undefined,
-  defaults: TimingDefaults,
-): ResolvedTiming {
-  const overlay = useContext(PatchContext);
-
-  let startAt = defaults.startAt;
-  let duration = defaults.durationInFrames;
-
-  if (id) {
-    const entry = overlay[id];
-    if (typeof entry?.startAt === 'number') startAt = entry.startAt;
-    if (typeof entry?.durationInFrames === 'number') duration = entry.durationInFrames;
-  }
-
-  return { effectiveStartAt: startAt, effectiveDurationInFrames: duration };
 }
 
 /**
@@ -125,4 +93,59 @@ export function useStyleOverride(id: string | undefined): Record<string, string 
   if (!id) return {};
   const entry = overlay[id];
   return (entry?.style as Record<string, string | number> | undefined) ?? {};
+}
+
+export interface UseElementResult<T> {
+  id: string;
+  props: Omit<T, 'style'>; // contains all merged props excluding any style
+  containerStyle: React.CSSProperties // contains the drag transform style
+  style: React.CSSProperties   // user overriden style including typography
+}
+
+// useElement returns the resolved props and styles for an element.
+//
+// Each element is wrapped in a container:
+// - `containerStyle` is applied to the outer container (e.g. drag transform).
+// - `style` is applied to the element itself (user overrides + typography).
+//
+// `props` contains all merged properties with `style` removed.
+//
+// All returned styles should be applied after the base scene styles.
+// Example: { ...baseStyle, ...containerStyle }
+export function useElement<T>(
+  id: string,
+  defaultValue: T,
+): UseElementResult<T> {
+  const styleConfig = useStyleContext();
+  const theme = useTheme();
+  const preset = useAspectPreset();
+  const overlay = useContext(PatchContext);
+
+  const patchEntry = overlay[id] as Partial<T>;
+  const merged = patchEntry ? deepMerge(defaultValue, patchEntry) : defaultValue;
+
+  // 🔥 extract style out of props
+  const { style: rawStyle, ...props } = (merged as T & { style?: React.CSSProperties });
+
+  const style = rawStyle ?? {};
+  const { transform: styleTransform, ...styleWithoutTransform } = style;
+
+  // construct container style
+  const dragX = typeof (props as any).dragX === 'number' ? (props as any).dragX : 0;
+  const dragY = typeof (props as any).dragY === 'number' ? (props as any).dragY : 0;
+  const dragTransform = dragX || dragY ? `translate(${dragX}px, ${dragY}px)` : undefined;
+  const transform = composeTransforms(dragTransform, styleTransform);
+
+  // typography
+  const variant = (props as { variant?: TypographyVariant }).variant;
+  const typography = variant
+    ? resolveTypography(variant, styleConfig, theme, preset)
+    : undefined;
+
+  return {
+    id,
+    props,
+    containerStyle: transform ? { transform } : {},
+    style: typography ? { ...typography, ...styleWithoutTransform } : styleWithoutTransform,
+  };
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
-import { usePatchedDragStyle, usePrimitivePatches, usePatchedProp, useStyleOverride } from '../../../patches';
+import { usePatchedDragStyle, usePatchedProp, useStyleOverride } from '../../../patches';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { type Easing } from '../../../styles/types';
 import { TypographyVariant } from '../../../tokens/semantic';
@@ -58,8 +58,6 @@ export function Counter({
 }: CounterProps): React.ReactElement {
   const frame = useCurrentFrame();
 
-  const { effectiveStartAt, effectiveDurationInFrames } = usePrimitivePatches(id, { startAt, durationInFrames });
-
   const patchedFrom = usePatchedProp(id, 'from', from);
   const patchedTo = usePatchedProp(id, 'to', to);
   const patchedFormat = usePatchedProp(id, 'format', format);
@@ -72,7 +70,7 @@ export function Counter({
 
   const progress = interpolateWithEasing(
     frame,
-    [effectiveStartAt, effectiveStartAt + effectiveDurationInFrames],
+    [startAt, startAt + durationInFrames],
     [0, 1],
     'ease-out',
   );

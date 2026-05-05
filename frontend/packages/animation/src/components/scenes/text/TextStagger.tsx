@@ -2,7 +2,7 @@ import React from 'react';
 import { useCurrentFrame } from 'remotion';
 import type { TypographyVariant } from '../../../tokens/semantic';
 import { useStyleContext } from '../../../styles/StyleContext';
-import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
+import { useElement, usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
 import { interpolateWithEasing, useAspectPreset } from '../../../styles';
 import { useTheme } from '../../../theme';
 import { resolveTypography } from '../../../tokens';
@@ -55,18 +55,19 @@ export const TextStagger: React.FC<TextStaggerProps> = (initProps) => {
 
 
     // Apply defaults (split-mode-aware)
-    const actualVariant = props.variant;
+    // const actualVariant = props.variant;
     const actualAnimation = props.entranceAnimation;
     const actualStartAt = props.startAt;
     const splitBy = props.splitBy;
     const modeDefaults = getSplitModeDefaults(splitBy);
     const actualStaggerDelay = props.staggerDelay ?? modeDefaults.staggerDelay;
     const actualDuration = props.duration ?? modeDefaults.duration;
+    const el = useElement(defaultProps.id, defaultProps);
 
 
-    const styleOverride = useStyleOverride(id);
-    const dragStyle = usePatchedDragStyle(id, props.style?.transform);
-    const typographyStyle = resolveTypography(actualVariant, styleConfig, theme, preset);
+    // const styleOverride = useStyleOverride(id);
+    // const dragStyle = usePatchedDragStyle(id, props.style?.transform);
+    // const typographyStyle = resolveTypography(actualVariant, styleConfig, theme, preset);
 
     const units = splitBy === 'char'
         ? props.text.split('')
@@ -93,13 +94,11 @@ export const TextStagger: React.FC<TextStaggerProps> = (initProps) => {
             id={id}
             className={props.className}
             style={{
-                display: 'block',                
+                display: 'block',
                 whiteSpace: splitBy === 'line' ? 'pre-line' : 'normal',
                 textAlign: 'center',
-                ...typographyStyle,
-                ...props.style,
-                ...styleOverride,
-                ...dragStyle,
+                ...el.style,
+                ...el.containerStyle
             }}
         >
             {units.map((unit, index) => (
