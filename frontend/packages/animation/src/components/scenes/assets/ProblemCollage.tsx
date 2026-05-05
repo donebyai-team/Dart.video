@@ -336,13 +336,13 @@ export const ProblemCollage: React.FC = () => {
     const imageEntries = useArrayPatch('images');
     const resolvedImages = useMemo<ResolvedImageItem[]>(() => {
         return imageEntries.map((item, index) => {
-                const [id, patch] = Object.entries(item)[0] as [string, ImagePatch];
+            const [id, patch] = Object.entries(item)[0] as [string, ImagePatch];
 
-                return {
-                    id: id,
-                    patch,
-                };
-            });
+            return {
+                id: id,
+                patch,
+            };
+        });
 
         // return DEFAULT_PLACEHOLDER_IMAGES.map((patch, index) => ({
         //     id: `imageasset-images-${index}`,
@@ -352,7 +352,7 @@ export const ProblemCollage: React.FC = () => {
 
     const contentWidth = preset.width - preset.safeArea.left - preset.safeArea.right;
     const contentHeight = preset.height - preset.safeArea.top - preset.safeArea.bottom;
-    
+
     const speed = getSpeed(sceneProps.speed);
     const textDelay = scaleTiming(BASE_TEXT_DELAY, speed);
     const imageStagger = scaleTiming(BASE_IMAGE_STAGGER, speed);
@@ -408,29 +408,18 @@ export const ProblemCollage: React.FC = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         zIndex: 5,
-
                         padding: '0 8%',
                     }}
                 >
-                    <div
-                        style={{
-                            textAlign: 'center',
-                            whiteSpace: 'nowrap',
-                            maxWidth: '100%',
-                        }}
-                    >
-                        <TextStagger
-                            {...textProps}
-                            id="textstagger"
-                            startAt={0}
-                            style={{
-                                display: 'inline-block',
-                                whiteSpace: 'nowrap',
-                                textAlign: 'center',
-                                ...textProps.style,
-                            }}
-                        />
-                    </div>
+                    
+                    <TextStagger
+                        {...textProps}
+                        id="textstagger"
+                        startAt={0}
+                        splitBy='line'
+                        style={textProps.style}
+                    />
+
                 </div>
 
                 {resolvedImages.map(({ id, patch }, index) => {
@@ -469,7 +458,7 @@ export const ProblemCollageSchemaFields = [
         fields: [
             {
                 "name": "text",
-                "type": "string",                
+                "type": "string",
                 "datatype": "text",
                 "map": "props.text"
             },
@@ -493,7 +482,7 @@ export const ProblemCollageSchemaFields = [
                         type: 'string',
                         map: 'item',
                         datatype: 'media',
-                    }                   
+                    }
                 ],
             },
         ],

@@ -66,8 +66,13 @@ export const TextStagger: React.FC<TextStaggerProps> = (initProps) => {
 
     const styleOverride = useStyleOverride(id);
     const dragStyle = usePatchedDragStyle(id, props.style?.transform);
+    const typographyStyle = resolveTypography(actualVariant, styleConfig, theme, preset);
 
-    const units = splitBy === 'char' ? props.text.split('') : splitBy === 'line' ? props.text.split('\n') : props.text.split(' ');
+    const units = splitBy === 'char'
+        ? props.text.split('')
+        : splitBy === 'line'
+            ? props.text.split('\n')
+            : props.text.trim().split(/\s+/).filter(Boolean);
 
     const getAnimationStyles = (unitIndex: number): React.CSSProperties => {
         const wordStartAt = actualStartAt + unitIndex * actualStaggerDelay;
@@ -88,8 +93,12 @@ export const TextStagger: React.FC<TextStaggerProps> = (initProps) => {
             id={id}
             className={props.className}
             style={{
-                display: 'inline-block',
+                display: 'block',                
+                whiteSpace: splitBy === 'line' ? 'pre-line' : 'normal',
+                textAlign: 'center',
+                ...typographyStyle,
                 ...props.style,
+                ...styleOverride,
                 ...dragStyle,
             }}
         >
@@ -97,12 +106,10 @@ export const TextStagger: React.FC<TextStaggerProps> = (initProps) => {
                 <span
                     key={index}
                     style={{
-                        display: 'inline-block',
+                        display: splitBy === 'line' ? 'block' : 'inline-block',
                         marginRight: splitBy === 'word' && index < units.length - 1 ? '0.25em' : 0,
+                        whiteSpace: splitBy === 'word' ? 'nowrap' : undefined,
                         ...getAnimationStyles(index),
-                        ...resolveTypography(actualVariant, styleConfig, theme, preset),
-                        ...props.style,
-                        ...styleOverride
                     }}
                 >
                     {unit}

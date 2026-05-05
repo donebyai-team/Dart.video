@@ -103,6 +103,10 @@ export function usePrimitiveDrag({
     const hit = hits[0]
     if (!hit) return
 
+    const arrayEl = hit.el.closest('[data-array-index]') ?? null
+    hoveredArrayElRef.current = arrayEl
+    setHoveredArrayEl(arrayEl)
+
     setElementRect(hit.el.getBoundingClientRect())
     if (selectedEid !== hit.id) {
       pointerSelectedIdRef.current = hit.id
@@ -155,11 +159,6 @@ export function usePrimitiveDrag({
       return
     }
 
-    // drag branch — force re-render so buttons follow
-    if (hoveredArrayElRef.current) {
-      setHoveredArrayEl(prev => prev)
-    }
-
     const deltaX = (e.clientX - dragState.startClientX) * dragState.scaleX
     const deltaY = (e.clientY - dragState.startClientY) * dragState.scaleY
 
@@ -176,6 +175,8 @@ export function usePrimitiveDrag({
       dragState.baseTransform,
     )
     dragState.previewEl.style.willChange = 'transform'
+
+    setElementRect(dragState.previewEl.getBoundingClientRect())
   }
 
   function handlePointerEnd(e: React.PointerEvent<HTMLDivElement>) {
