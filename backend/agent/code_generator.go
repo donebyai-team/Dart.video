@@ -237,25 +237,26 @@ func (l *codeGenerator) uploadAndBuild(
 	//	return nil, fmt.Errorf("failed to build animation: %w", err)
 	//}
 	assetID := uuid.New().String()
-	codeFilePath = fmt.Sprintf("%s/%s", codeFilePath, assetID)
+	//codeFilePath = fmt.Sprintf("%s/%s", codeFilePath, assetID)
 
-	uploadCodeAsset, err := l.mediaStore.UploadCode(ctx, code, codeFilePath)
-	if err != nil {
-		return nil, err
-	}
-
-	l.logger.Info("uploaded generated code",
-		zap.String("assigned_ids_url", uploadCodeAsset.Url))
-
-	callback(TemplateGenerationProgress{
-		Message: CreativeStageMessage(StageReady, attempt),
-	})
+	//uploadCodeAsset, err := l.mediaStore.UploadCode(ctx, code, codeFilePath)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//l.logger.Info("uploaded generated code",
+	//	zap.String("assigned_ids_url", uploadCodeAsset.Url))
+	//
+	//callback(TemplateGenerationProgress{
+	//	Message: CreativeStageMessage(StageReady, attempt),
+	//})
 
 	return &models.Template{
 		ID: assetID,
 		Config: &models.TemplateConfig{
 			CodeRegistry: &pbcore.CodeRegistry{
-				MUrl: uploadCodeAsset.Url,
+				//MUrl: uploadCodeAsset.Url,
+				Code: code,
 			},
 		},
 		Repeatable: false,
