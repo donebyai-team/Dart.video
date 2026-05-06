@@ -748,7 +748,7 @@
           "celExpression": "(((22 + 0 + 14 + 10 + 1) * size(props.textcardstack.texts)) * 100) / max(25, props.textcardstack.speed)"
         },
         {
-          "name": "TextWithImageScene",
+          "name": "TextWithMediaScene",
           "type": "scene",
           "tags": [
             "Solution",
@@ -918,13 +918,13 @@
             },
             {
               "type": "component",
-              "name": "imageasset",
+              "name": "mediaasset",
               "fields": [
                 {
-                  "name": "image",
+                  "name": "src",
                   "type": "string",
                   "datatype": "media",
-                  "map": "props.image"
+                  "map": "props.src"
                 }
               ]
             }
@@ -944,216 +944,12 @@
               "type": "object"
             },
             {
-              "name": "image",
+              "name": "src",
               "type": "string"
             }
           ],
-          "description": "Displays text with an image. Choose one of the filler component and its props in textComponentProps: texthighlight, textstagger, or textwithwordcycle.",
-          "celExpression": "80"
-        },
-        {
-          "name": "TextWithVideoScene",
-          "type": "scene",
-          "tags": [
-            "Solution",
-            "Product/Benefit Info"
-          ],
-          "schema": [
-            {
-              "type": "component",
-              "name": "scene",
-              "fields": [
-                {
-                  "name": "entranceAnimation",
-                  "type": "enum",
-                  "default": "slideUp"
-                }
-              ]
-            },
-            {
-              "type": "oneof",
-              "selector": "props.textComponent",
-              "propsPath": "props.textComponentProps",
-              "components": [
-                {
-                  "name": "textstagger",
-                  "fields": [
-                    {
-                      "name": "text",
-                      "type": "string",
-                      "datatype": "text",
-                      "map": "props.text"
-                    },
-                    {
-                      "name": "variant",
-                      "type": "enum",
-                      "map": "props.variant",
-                      "default": "display"
-                    },
-                    {
-                      "name": "staggerDelay",
-                      "type": "number",
-                      "map": "props.staggerDelay",
-                      "default": 5
-                    },
-                    {
-                      "name": "entranceAnimation",
-                      "type": "enum",
-                      "map": "props.entranceAnimation",
-                      "default": "scaleIn"
-                    },
-                    {
-                      "name": "duration",
-                      "type": "number",
-                      "map": "props.duration",
-                      "default": 15
-                    },
-                    {
-                      "name": "splitBy",
-                      "type": "enum",
-                      "map": "props.splitBy",
-                      "default": "word"
-                    }
-                  ]
-                },
-                {
-                  "name": "texthighlight",
-                  "fields": [
-                    {
-                      "name": "text",
-                      "type": "string",
-                      "datatype": "text",
-                      "map": "props.text"
-                    },
-                    {
-                      "name": "variant",
-                      "type": "enum",
-                      "default": "display"
-                    },
-                    {
-                      "name": "entranceAnimation",
-                      "type": "enum",
-                      "map": "props.entranceAnimation",
-                      "default": "slideUp"
-                    },
-                    {
-                      "name": "animationDelay",
-                      "type": "number",
-                      "default": 30
-                    },
-                    {
-                      "name": "animationDuration",
-                      "type": "number",
-                      "default": 30
-                    },
-                    {
-                      "name": "highlightStyle",
-                      "type": "enum",
-                      "default": "glow"
-                    },
-                    {
-                      "name": "highlightedTextAnimation",
-                      "type": "enum",
-                      "default": "jump"
-                    },
-                    {
-                      "name": "highlightColor",
-                      "type": "string",
-                      "datatype": "color",
-                      "default": ""
-                    }
-                  ]
-                },
-                {
-                  "name": "textwithwordcycle",
-                  "fields": [
-                    {
-                      "name": "startAt",
-                      "type": "number",
-                      "default": 0
-                    },
-                    {
-                      "name": "text",
-                      "type": "string",
-                      "datatype": "text",
-                      "map": "props.text"
-                    },
-                    {
-                      "name": "cyclingWords",
-                      "type": "array",
-                      "datatype": "text",
-                      "map": "props.cyclingWords",
-                      "default": []
-                    },
-                    {
-                      "name": "variant",
-                      "type": "enum",
-                      "default": "display"
-                    },
-                    {
-                      "name": "entranceAnimation",
-                      "type": "enum",
-                      "map": "props.entranceAnimation",
-                      "default": "slideUp"
-                    },
-                    {
-                      "name": "holdDuration",
-                      "type": "number",
-                      "default": 20
-                    },
-                    {
-                      "name": "transitionDuration",
-                      "type": "number",
-                      "default": 10
-                    },
-                    {
-                      "name": "textCycleTransition",
-                      "type": "enum",
-                      "default": "slideUp"
-                    },
-                    {
-                      "name": "highlightStyle",
-                      "type": "enum",
-                      "default": "background"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "component",
-              "name": "videoasset",
-              "fields": [
-                {
-                  "name": "video",
-                  "type": "string",
-                  "datatype": "media",
-                  "map": "props.video"
-                }
-              ]
-            }
-          ],
-          "llmSchema": [
-            {
-              "name": "textComponent",
-              "type": "enum",
-              "enum": [
-                "textstagger",
-                "texthighlight",
-                "textwithwordcycle"
-              ]
-            },
-            {
-              "name": "textComponentProps",
-              "type": "object"
-            },
-            {
-              "name": "video",
-              "type": "string"
-            }
-          ],
-          "description": "Displays text with a video. Choose one of the filler component and its props in textComponentProps: texthighlight, textstagger, or textwithwordcycle.",
-          "celExpression": "\"videoasset\" in props ? props.videoasset._duration : 90"
+          "description": "Displays text with a image or video. Choose one of the filler component and its props in textComponentProps: texthighlight, textstagger, or textwithwordcycle.",
+          "celExpression": "\"mediaasset\" in props ? props.mediaasset._duration : 90"
         },
         {
           "name": "MultiImageStack",

@@ -23,7 +23,11 @@ async function loadCompiledTemplate(templateUrl: string): Promise<React.Componen
   if (inFlight) return inFlight
 
   const promise = (async () => {
-    const code = await loadTemplateSource(templateUrl)
+    const code = (await loadTemplateSource(templateUrl))
+      //HACK to replace legacy/removed comp
+      .replaceAll('TextWithImageScene', 'TextWithMediaScene')
+      .replaceAll('TextWithVideoScene', 'TextWithMediaScene')
+
     const result = compileRemoteComponent(code)
     if (result.error || !result.Component) {
       throw new Error(`Compilation failed: ${result.error ?? 'Unknown compilation error'}`)
@@ -78,9 +82,6 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
   const content = slide.content
-
-  // template id for hard-coded local templates
-  // const localTemplateId = content?.templateId
 
   // URL to fetch LLM-generated TSX source from
   const templateUrl = content?.codeRegistry?.mUrl

@@ -11,8 +11,7 @@ func isContentSlide(scene *types.Scene) bool {
 	}
 
 	component := scene.Element.Component
-	return strings.EqualFold(component, "TextWithImageScene") ||
-		//strings.EqualFold(component, "TextWithVideoScene") ||
+	return strings.EqualFold(component, "TextWithMediaScene") ||
 		strings.EqualFold(component, "MultiImageStack")
 }
 

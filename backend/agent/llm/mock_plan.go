@@ -130,8 +130,8 @@ const mockGeneratePlanV2ResponseJSON = `{
             "index": 9,
             "elements": [
               {
-                "component": "TextWithImageScene",
-                "props": "{\"textComponent\":\"textwithwordcycle\",\"textComponentProps\":{\"text\":\"Jump between\",\"cyclingWords\":[\"agent\",\"plan\",\"debug\",\"ask\"]},\"image\":\"https://placehold.co/1280x720.png?text=Cursor+Modes\"}",
+                "component": "TextWithMediaScene",
+                "props": "{\"textComponent\":\"textwithwordcycle\",\"textComponentProps\":{\"text\":\"Jump between\",\"cyclingWords\":[\"agent\",\"plan\",\"debug\",\"ask\"]},\"src\":\"https://placehold.co/1280x720.png?text=Cursor+Modes\"}",
                 "children": []
               }
             ],
@@ -152,8 +152,8 @@ const mockGeneratePlanV2ResponseJSON = `{
             "index": 11,
             "elements": [
               {
-                "component": "TextWithImageScene",
-                "props": "{\"textComponent\":\"textwithwordcycle\",\"textComponentProps\":{\"text\":\"Work with\",\"cyclingWords\":[\"OpenAI\",\"Anthropic\",\"more\"]},\"image\":\"@asset/cavxyj/0.png\"}",
+                "component": "TextWithMediaScene",
+                "props": "{\"textComponent\":\"textwithwordcycle\",\"textComponentProps\":{\"text\":\"Work with\",\"cyclingWords\":[\"OpenAI\",\"Anthropic\",\"more\"]},\"src\":\"@asset/cavxyj/0.png\"}",
                 "children": []
               }
             ],
@@ -174,8 +174,8 @@ const mockGeneratePlanV2ResponseJSON = `{
             "index": 13,
             "elements": [
               {
-                "component": "TextWithVideoScene",
-                "props": "{\"textComponent\":\"texthighlight\",\"textComponentProps\":{\"text\":\"Add custom {plugins}\"},\"video\":\"@asset/qfbbfw/1.mp4\"}",
+                "component": "TextWithMediaScene",
+                "props": "{\"textComponent\":\"texthighlight\",\"textComponentProps\":{\"text\":\"Add custom {plugins}\"},\"src\":\"@asset/qfbbfw/1.mp4\"}",
                 "children": []
               }
             ],

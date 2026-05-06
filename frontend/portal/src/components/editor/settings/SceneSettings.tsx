@@ -99,7 +99,7 @@ export default function SceneSettings({
             <label key={prop} className="flex flex-col gap-2">
               <span className="text-sm font-medium">{toSceneFieldLabel(prop)}</span>
               <SingleSceneMediaPicker
-                mediaType='image'
+                // mediaType='image'
                 fieldName={prop}
                 value={String(value)}
                 onChange={next => onValuePatch(patchEntryId ?? elementId, prop, next)}
@@ -109,7 +109,7 @@ export default function SceneSettings({
             <div key={prop} className="flex flex-col gap-2">
               <span className="text-sm font-medium">{toSceneFieldLabel(prop)}</span>
               <MultiSceneMediaPicker
-                mediaType='image'
+                // mediaType='image'
                 value={value as string[]}
                 onChange={next => onValuePatch(patchEntryId ?? elementId, prop, next)}
                 minItems={MIN_ARRAY_ITEMS}
@@ -119,7 +119,7 @@ export default function SceneSettings({
             <label key={prop} className="flex flex-col gap-2">
               <span className="text-sm font-medium">{toSceneFieldLabel(prop)}</span>
               <SingleSceneMediaPicker
-                mediaType='video'
+                // mediaType='video'
                 fieldName={prop}
                 value={String(value)}
                 onChange={next => onValuePatch(patchEntryId ?? elementId, prop, next)}
@@ -129,7 +129,7 @@ export default function SceneSettings({
             <div key={prop} className="flex flex-col gap-2">
               <span className="text-sm font-medium">{toSceneFieldLabel(prop)}</span>
               <MultiSceneMediaPicker
-                mediaType='video'
+                // mediaType='video'
                 value={value as string[]}
                 onChange={next => onValuePatch(patchEntryId ?? elementId, prop, next)}
                 minItems={MIN_ARRAY_ITEMS}

@@ -29,7 +29,7 @@ export const TextWithWordCycleDefaults = {
   className: undefined as string | undefined,
 };
 
-export type TextWithWordCycleProps = typeof TextWithWordCycleDefaults;
+export type TextWithWordCycleProps = Partial<typeof TextWithWordCycleDefaults>
 
 /**
  * Displays static text followed by cycling highlighted words with animated transitions.

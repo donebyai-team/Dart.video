@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useCurrentFrame } from 'remotion';
-import { usePatchOverlay, usePatchedProps } from '../../../patches';
-import { VideoAsset } from '../../../core/assets';
+import { useElement, usePatchOverlay } from '../../../patches';
+import { MediaAsset, MediaAssetProps, } from '../../../core/assets';
 import { Row, Stack } from '../../../core/layout';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
@@ -11,6 +11,7 @@ import { TextHighlight, TextHighlightDefaults, TextHighlightSchemaFields } from 
 import { TextStagger, TextStaggerDefaults, TextStaggerSchemaFields } from '../text/TextStagger';
 import { TextWithWordCycle, TextWithWordCycleDefaults, TextWithWordCycleSchemaFields } from '../text/TextWithWordCycle';
 import { resolveContentAwareLayout } from './ContentAwareScene.layout';
+import { TypographyVariant } from '../../../tokens';
 
 const DEFAULT_ANIMATION = 'slideUp' as const;
 const FALLBACK_WIDTH = 1920;
@@ -23,23 +24,9 @@ type SceneProps = {
   entranceAnimation?: (typeof ENTRANCE_ANIMATIONS)[number];
 };
 
-type VideoProps = {
-  video: string;
-  width?: number;
-  height?: number;
-  style?: React.CSSProperties;
-};
-
 const SceneDefaults: SceneProps = {
   id: 'textwithvideoscene',
   entranceAnimation: DEFAULT_ANIMATION,
-};
-
-const VideoDefaults: VideoProps = {
-  video: '',
-  width: undefined,
-  height: undefined,
-  style: {},
 };
 
 function useVideoDimensions(src: string) {
@@ -81,18 +68,23 @@ function fitVideo(sourceW: number, sourceH: number, maxW: number, maxH: number) 
   return { width: maxH * ratio, height: maxH };
 }
 
-export function TextWithVideoScene(propsInit: SceneProps): React.ReactElement {
+export function TextWithMediaScene(): React.ReactElement {
   const frame = useCurrentFrame();
   const preset = useAspectPreset();
   const overlay = usePatchOverlay();
-  const sceneProps = usePatchedProps('scene', SceneDefaults);
-  const videoProps = usePatchedProps('videoasset', VideoDefaults);
-  const textHighlightProps = usePatchedProps('texthighlight', TextHighlightDefaults);
-  const textStaggerProps = usePatchedProps('textstagger', TextStaggerDefaults);
-  const textWithWordCycleProps = usePatchedProps('textwithwordcycle', TextWithWordCycleDefaults);
 
-  const videoDimensions = useVideoDimensions(videoProps.video);
-  const videoProgress = interpolateWithEasing(frame, [10, 50], [0, 1], 'ease-out');
+  const assetKey = ['imageasset', 'videoasset', 'mediaasset']
+  .find((key) => overlay?.[key]);
+
+  const { props: sceneProps } = useElement('scene', SceneDefaults);
+  const { props: mediaProps } = useElement<MediaAssetProps>(assetKey || 'mediaasset', {});
+  
+  const { props: textHighlightProps } = useElement('texthighlight', {...TextHighlightDefaults, variant: "headingLg" as TypographyVariant} );
+  const { props: textStaggerProps } = useElement('textstagger', {...TextStaggerDefaults, variant: "headingLg" as TypographyVariant});
+  const { props: textWithWordCycleProps } = useElement('textwithwordcycle', {...TextWithWordCycleDefaults, variant: "headingLg" as TypographyVariant});
+
+  const mediaDimentions = useVideoDimensions(mediaProps.src || '');
+  const mediaProgress = interpolateWithEasing(frame, [10, 50], [0, 1], 'ease-out');
 
   const availableWidth = preset.width - preset.safeArea.left - preset.safeArea.right;
   const availableHeight = preset.height - preset.safeArea.top - preset.safeArea.bottom;
@@ -127,8 +119,8 @@ export function TextWithVideoScene(propsInit: SceneProps): React.ReactElement {
   const resolved = resolveContentAwareLayout({
     canvasWidth: availableWidth,
     canvasHeight: availableHeight,
-    imageWidth: videoDimensions.width,
-    imageHeight: videoDimensions.height,
+    imageWidth: mediaDimentions.width,
+    imageHeight: mediaDimentions.height,
     text: textContent,
     variant: textVariant as any,
   });
@@ -152,23 +144,23 @@ export function TextWithVideoScene(propsInit: SceneProps): React.ReactElement {
     maxVideoHeight = paddedHeight * 0.7;
   }
 
-  const fittedVideo = fitVideo(videoDimensions.width, videoDimensions.height, maxVideoWidth, maxVideoHeight);
-  const resolvedVideoWidth = videoProps.width ?? Math.max(1, Math.round(fittedVideo.width));
-  const resolvedVideoHeight = videoProps.height ?? Math.max(1, Math.round(fittedVideo.height));
+  const fittedVideo = fitVideo(mediaDimentions.width, mediaDimentions.height, maxVideoWidth, maxVideoHeight);
+  const resolvedVideoWidth = mediaProps.width ?? Math.max(1, Math.round(fittedVideo.width));
+  const resolvedVideoHeight = mediaProps.height ?? Math.max(1, Math.round(fittedVideo.height));
 
-  const videoNode = (
+  const mediaNode = (
     <div
       style={{
-        opacity: videoProgress,
-        transform: getEntranceTransform(sceneProps.entranceAnimation ?? DEFAULT_ANIMATION, videoProgress),
+        opacity: mediaProgress,
+        transform: getEntranceTransform(sceneProps.entranceAnimation ?? DEFAULT_ANIMATION, mediaProgress),
       }}
     >
-      <VideoAsset
-        id="videoasset"
-        video={videoProps.video}
+      <MediaAsset
+        id={assetKey || 'mediaasset'}
+        src={mediaProps.src || mediaProps.image || mediaProps.video}
         width={resolvedVideoWidth}
         height={resolvedVideoHeight}
-        style={{ objectFit: 'contain', ...videoProps.style }}
+        style={{ objectFit: 'contain' }}
       />
     </div>
   );
@@ -180,7 +172,7 @@ export function TextWithVideoScene(propsInit: SceneProps): React.ReactElement {
       {resolved.layout === 'image-left-text-right' ? (
         <Row gap={ROW_SHARED_GAP} align="center" justify="center" style={{ width: '100%', height: '100%' }}>
           <div style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-            {videoNode}
+            {mediaNode}
           </div>
           <div style={{ flex: '1 1 0', minWidth: 0, display: 'flex', alignItems: 'center' }}>
             {textNode}
@@ -208,7 +200,7 @@ export function TextWithVideoScene(propsInit: SceneProps): React.ReactElement {
             >
               {textNode}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', flexShrink: 0 }}>{videoNode}</div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', flexShrink: 0 }}>{mediaNode}</div>
           </Stack>
         </div>
       )}
@@ -217,8 +209,8 @@ export function TextWithVideoScene(propsInit: SceneProps): React.ReactElement {
 }
 
 
-export const TextWithVideoSceneDescriptor: ComponentRegistration = {
-  name: 'TextWithVideoScene',
+export const TextWithMediaSceneDescriptor: ComponentRegistration = {
+  name: 'TextWithMediaScene',
   type: 'scene',
   tags: ['Solution', 'Product/Benefit Info'],
   schema: [{
@@ -242,13 +234,13 @@ export const TextWithVideoSceneDescriptor: ComponentRegistration = {
     ],
   }, {
     type: "component",
-    name: 'videoasset',
+    name: 'mediaasset',
     fields: [
       {
-        name: "video",
+        name: "src",
         type: "string",
         datatype: "media",
-        map: "props.video"
+        map: "props.src"
       }
     ]
   }],
@@ -267,10 +259,10 @@ export const TextWithVideoSceneDescriptor: ComponentRegistration = {
       type: "object"
     },
     {
-      name: "video",
+      name: "src",
       type: "string"
     }
   ],
-  description: 'Displays text with a video. Choose one of the filler component and its props in textComponentProps: texthighlight, textstagger, or textwithwordcycle.',
-  celExpression: '"videoasset" in props ? props.videoasset._duration : 90',
+  description: 'Displays text with a image or video. Choose one of the filler component and its props in textComponentProps: texthighlight, textstagger, or textwithwordcycle.',
+  celExpression: '"mediaasset" in props ? props.mediaasset._duration : 90',
 };

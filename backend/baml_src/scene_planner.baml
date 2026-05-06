@@ -70,8 +70,6 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     - Add pacing between scenes
     - Fill out scene count when a section needs more depth
     - **When an appropriate scene is not available**
-    - TextStagger can be used back-to-back to maintain flow—for example, showing features as a single word per scene,
-      like “Autonomous”, “Precise”, “Reliable” in consecutive filler scenes.
 
     ## SCENE SELECTION
 

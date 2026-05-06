@@ -40,9 +40,9 @@ export const CONTENT_COMPONENTS: ComponentRegistration[] = [
     description: 'renders a static image from a URL — use for product screens, photos, and illustrations',
   },
   {
-    name: 'VideoAsset',
+    name: 'MediaAsset',
     type: 'content',
-    description: 'renders a static video file from a url — use for product tutorials, and explainer content',
+    description: 'renders a static image or video from a URL — use for product screens, photos, videos, and illustrations',
   },
   {
     name: 'IconAsset',

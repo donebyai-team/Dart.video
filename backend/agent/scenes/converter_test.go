@@ -140,33 +140,33 @@ func TestConvertSceneToSceneConfig(t *testing.T) {
 			inputJSON: `{
 	  "elements": [
 		{
-		  "component": "TextWithImageScene",
+		  "component": "TextWithMediaScene",
 		  "props": "{\"textComponent\":\"textwithwordcycle\",\"textComponentProps\":{\"text\":\"An AI assistant for\",\"cyclingWords\":[\"planning\",\"debugging\",\"shipping\"]},\"image\":\"fake_handle\"}",
 		  "children": []
 		}
 	  ]
 	}`,
 			expectedJSON: `{
-  "ID": "textwithimagescene",
-  "Name": "TextWithImageScene",
+  "ID": "TextWithMediaScene",
+  "Name": "TextWithMediaScene",
   "Props": {
     "textwithwordcycle": {
       "text": "AI models",
       "cyclingWords": ["planning","debugging","shipping"]
     },
-    "imageasset": {
-      "image": "https://www.thesvg.org/icons/openai/light.svg"
+    "mediaasset": {
+      "src": "https://www.thesvg.org/icons/openai/light.svg"
     }
   },
   "Children": null
 }`,
 			expectJSX: []string{
-				"<TextWithImageScene",
+				"<TextWithMediaScene",
 			},
 			editsToScene: []string{
-				"imageasset",
+				"mediaasset",
 				"textwithwordcycle",
-				"image",
+				"src",
 				"fake_original_url",
 				"width",
 				"height",

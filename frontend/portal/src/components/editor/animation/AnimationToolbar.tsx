@@ -21,10 +21,8 @@ export function AnimationToolbar({
   const resolvedName = resolvedComponent?.name ?? ''
   const name = resolvedName?.toLowerCase() || "";
 
-  const isImage = name.includes("image");
-  const isVideo = name.includes("video");
   const isContainer = selectedId.toLowerCase().includes('container');
-  const isMediaComponent = isImage || isVideo;
+  const isMediaComponent = name.includes("media") || name.includes("image") || name.includes("video")
 
   return (
     <div className="flex flex-wrap items-center gap-2 px-3 py-1.5 rounded-xl bg-background/95 backdrop-blur-lg border border-border shadow-xl text-sm select-none max-w-[850px]">
