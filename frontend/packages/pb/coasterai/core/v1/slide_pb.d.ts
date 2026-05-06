@@ -146,6 +146,11 @@ export declare type CodeRegistry = Message<"coasterai.core.v1.CodeRegistry"> & {
    * @generated from field: string tUrl = 2;
    */
   tUrl: string;
+
+  /**
+   * @generated from field: string code = 3;
+   */
+  code: string;
 };
 
 /**

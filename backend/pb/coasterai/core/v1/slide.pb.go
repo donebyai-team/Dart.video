@@ -738,6 +738,7 @@ type CodeRegistry struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	MUrl          string                 `protobuf:"bytes,1,opt,name=mUrl,proto3" json:"mUrl,omitempty"`
 	TUrl          string                 `protobuf:"bytes,2,opt,name=tUrl,proto3" json:"tUrl,omitempty"`
+	Code          string                 `protobuf:"bytes,3,opt,name=code,proto3" json:"code,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -782,6 +783,13 @@ func (x *CodeRegistry) GetMUrl() string {
 func (x *CodeRegistry) GetTUrl() string {
 	if x != nil {
 		return x.TUrl
+	}
+	return ""
+}
+
+func (x *CodeRegistry) GetCode() string {
+	if x != nil {
+		return x.Code
 	}
 	return ""
 }
@@ -1754,10 +1762,11 @@ const file_coasterai_core_v1_slide_proto_rawDesc = "" +
 	"\x15AnimationSlideContent\x12C\n" +
 	"\fcodeRegistry\x18\x01 \x01(\v2\x1f.coasterai.core.v1.CodeRegistryR\fcodeRegistry\x129\n" +
 	"\x04plan\x18\x02 \x01(\v2%.coasterai.core.v1.AnimationSlidePlanR\x04plan\x12-\n" +
-	"\x05edits\x18\x03 \x01(\v2\x17.google.protobuf.StructR\x05edits\"6\n" +
+	"\x05edits\x18\x03 \x01(\v2\x17.google.protobuf.StructR\x05edits\"J\n" +
 	"\fCodeRegistry\x12\x12\n" +
 	"\x04mUrl\x18\x01 \x01(\tR\x04mUrl\x12\x12\n" +
-	"\x04tUrl\x18\x02 \x01(\tR\x04tUrl\"\xeb\x01\n" +
+	"\x04tUrl\x18\x02 \x01(\tR\x04tUrl\x12\x12\n" +
+	"\x04code\x18\x03 \x01(\tR\x04code\"\xeb\x01\n" +
 	"\x0fSpotlightEffect\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\f\n" +
 	"\x01x\x18\x02 \x01(\x02R\x01x\x12\f\n" +

@@ -1620,6 +1620,92 @@
           ],
           "description": "A headline with a carousel of items below, each showing text and an icon (choose an icon name that represents the text) as a pill. Use for features, industries, use cases, capabilities, or categories. ~25 frames per item; minimum 3 items.",
           "celExpression": "35 + max(0, size(props.pills) - 1) * 25"
+        },
+        {
+          "name": "ProductImageFeatures",
+          "type": "scene",
+          "tags": [
+            "Solution",
+            "Product Info",
+            "Features"
+          ],
+          "schema": [
+            {
+              "type": "component",
+              "name": "mediaasset",
+              "fields": [
+                {
+                  "name": "src",
+                  "type": "string",
+                  "datatype": "media",
+                  "map": "props.src"
+                }
+              ]
+            },
+            {
+              "type": "repeat",
+              "source": "features",
+              "map": "props.features",
+              "components": [
+                {
+                  "name": "iconasset",
+                  "fields": [
+                    {
+                      "name": "icon",
+                      "type": "string",
+                      "datatype": "icon",
+                      "map": "item.icon"
+                    }
+                  ]
+                },
+                {
+                  "name": "text",
+                  "fields": [
+                    {
+                      "name": "text",
+                      "type": "string",
+                      "datatype": "text",
+                      "map": "item.text"
+                    },
+                    {
+                      "name": "variant",
+                      "type": "enum",
+                      "default": "subheading"
+                    }
+                  ]
+                },
+                {
+                  "name": "container",
+                  "fields": []
+                }
+              ]
+            }
+          ],
+          "llmSchema": [
+            {
+              "name": "src",
+              "type": "string"
+            },
+            {
+              "name": "features",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "fields": [
+                  {
+                    "name": "icon",
+                    "type": "string"
+                  },
+                  {
+                    "name": "text",
+                    "type": "string"
+                  }
+                ]
+              }
+            }
+          ],
+          "description": "Shows a large product image or video with stacked feature cards on the top-right. Each feature card contains an icon and a short label.",
+          "celExpression": "max(30, 20 + max(0, size(props.features) - 1) * 15 + 20)"
         }
       ]
     }

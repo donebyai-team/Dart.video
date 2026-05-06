@@ -15,33 +15,49 @@ import { CanvasEffectsLayer } from '../effects/CanvasEffectsLayer'
 const compiledTemplateCache = new Map<string, React.ComponentType<any>>()
 const compiledTemplatePromiseCache = new Map<string, Promise<React.ComponentType<any>>>()
 
-async function loadCompiledTemplate(templateUrl: string): Promise<React.ComponentType<any>> {
-  const cached = compiledTemplateCache.get(templateUrl)
+async function loadCompiledTemplate(
+  key: string,
+  inlineCode?: string
+): Promise<React.ComponentType<any>> {
+  const cached = compiledTemplateCache.get(key)
   if (cached) return cached
 
-  const inFlight = compiledTemplatePromiseCache.get(templateUrl)
+  const inFlight = compiledTemplatePromiseCache.get(key)
   if (inFlight) return inFlight
 
   const promise = (async () => {
-    const code = (await loadTemplateSource(templateUrl))
-      //HACK to replace legacy/removed comp
+    let code: string
+
+    if (inlineCode?.trim()) {
+      code = inlineCode
+    } else {
+      code = await loadTemplateSource(key)
+    }
+
+    code = code
+      // HACK to replace legacy/removed comp
       .replaceAll('TextWithImageScene', 'TextWithMediaScene')
       .replaceAll('TextWithVideoScene', 'TextWithMediaScene')
 
     const result = compileRemoteComponent(code)
+
     if (result.error || !result.Component) {
-      throw new Error(`Compilation failed: ${result.error ?? 'Unknown compilation error'}`)
+      throw new Error(
+        `Compilation failed: ${result.error ?? 'Unknown compilation error'}`
+      )
     }
 
-    compiledTemplateCache.set(templateUrl, result.Component)
-    compiledTemplatePromiseCache.delete(templateUrl)
+    compiledTemplateCache.set(key, result.Component)
+    compiledTemplatePromiseCache.delete(key)
+
     return result.Component
   })().catch((error) => {
-    compiledTemplatePromiseCache.delete(templateUrl)
+    compiledTemplatePromiseCache.delete(key)
     throw error
   })
 
-  compiledTemplatePromiseCache.set(templateUrl, promise)
+  compiledTemplatePromiseCache.set(key, promise)
+
   return promise
 }
 
@@ -84,31 +100,38 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
   const content = slide.content
 
   // URL to fetch LLM-generated TSX source from
+  const inlineCode = content?.codeRegistry?.code?.trim()
   const templateUrl = content?.codeRegistry?.mUrl
+
+  // Unique cache key
+  const templateKey = inlineCode
+    ? `inline:${btoa(inlineCode)}`
+    : templateUrl
 
   const background = backgroundStyleToCSS(slide.backgroundStyle)
 
 
   const [renderHandle] = useState(() => {
-    if (!templateUrl) return null
-    return delayRender(`Loading remote template: ${templateUrl}`)
+    if (!templateKey) return null
+    return delayRender(`Loading remote template: ${templateKey}`)
   })
 
   useEffect(() => {
-    if (!templateUrl) {
+    if (!templateKey) {
       setIsLoading(false)
       setCompiledComponent(null)
       setTemplateError(null)
       return
     }
 
-    const cached = compiledTemplateCache.get(templateUrl)
+    const cached = compiledTemplateCache.get(templateKey)
+
     if (cached) {
       setCompiledComponent(() => cached)
       setIsLoading(false)
       setTemplateError(null)
     }
-  }, [templateUrl])
+  }, [templateKey])
 
   const handleTemplateRenderError = React.useCallback((error: Error) => {
     setCompiledComponent(null)
@@ -117,15 +140,19 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
   }, [])
 
   useEffect(() => {
-    if (!templateUrl) return
+    if (!templateKey) return
 
     let disposed = false
-    const cached = compiledTemplateCache.get(templateUrl)
+
+    const cached = compiledTemplateCache.get(templateKey)
+
     if (cached) {
       setCompiledComponent(() => cached)
       setIsLoading(false)
       setTemplateError(null)
+
       if (renderHandle) continueRender(renderHandle)
+
       return () => {
         disposed = true
       }
@@ -136,32 +163,50 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
 
       ; (async () => {
         try {
-          const component = await loadCompiledTemplate(templateUrl)
+          const component = await loadCompiledTemplate(
+            templateKey,
+            inlineCode
+          )
+
           if (!disposed) {
             setCompiledComponent(() => component)
             setTemplateError(null)
           }
         } catch (error) {
-          if (error instanceof TypeError) {
-            console.warn(`Failed to load template "${templateUrl}" (network/CORS/blocked request)`, {
-              message: error.message,
-              templateUrlJson: JSON.stringify(templateUrl),
-              length: templateUrl.length
-            })
+          if (!inlineCode && error instanceof TypeError) {
+            console.warn(
+              `Failed to load template "${templateUrl}" (network/CORS/blocked request)`,
+              {
+                message: error.message,
+                templateUrlJson: JSON.stringify(templateUrl),
+                length: templateUrl?.length
+              }
+            )
           } else {
-            const message = error instanceof Error ? error.message : String(error)
-            console.warn(`Failed to load template "${templateUrl}": ${message}`)
+            const message =
+              error instanceof Error ? error.message : String(error)
+
+            console.warn(
+              `Failed to compile template "${templateKey}": ${message}`
+            )
           }
+
           if (!disposed) {
             setCompiledComponent(null)
-            const message = error instanceof Error ? error.message : String(error)
-            setTemplateError(message.startsWith('Compilation failed:')
-              ? message
-              : `Failed to load template: ${message}`)
+
+            const message =
+              error instanceof Error ? error.message : String(error)
+
+            setTemplateError(
+              message.startsWith('Compilation failed:')
+                ? message
+                : `Failed to load template: ${message}`
+            )
           }
         } finally {
           if (!disposed) {
             setIsLoading(false)
+
             if (renderHandle) continueRender(renderHandle)
           }
         }
@@ -170,7 +215,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
     return () => {
       disposed = true
     }
-  }, [templateUrl])
+  }, [templateKey, inlineCode, templateUrl, renderHandle])
 
   // PatchOverlay — read from window (set by useAnimationEdit in editor)
   // or fall back to persisted edits (during Remotion rendering).

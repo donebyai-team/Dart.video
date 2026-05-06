@@ -122,7 +122,7 @@ export interface UseElementResult<T> {
 // Example: { ...baseStyle, ...containerStyle }
 export function useElement<T>(
   id: string,
-  defaultValue: T,
+  defaultValue?: T,
 ): UseElementResult<T> {
   const styleConfig = useStyleContext();
   const theme = useTheme();
@@ -130,7 +130,7 @@ export function useElement<T>(
   const overlay = useContext(PatchContext);
 
   const patchEntry = overlay[id] as Partial<T>;
-  const merged = patchEntry ? deepMerge(defaultValue, patchEntry) : defaultValue;
+  const merged = patchEntry ? deepMerge(defaultValue, patchEntry) : defaultValue ? defaultValue : {};
 
   // 🔥 extract style out of props
   const { style: rawStyle, ...props } = (merged as T & { style?: React.CSSProperties });

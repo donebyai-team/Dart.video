@@ -85,6 +85,7 @@ message AnimationSlideContent {
 message CodeRegistry {
   string mUrl = 1;
   string tUrl = 2;
+  string code = 3;
 }
 
 // ===================== EFFECTS =====================
