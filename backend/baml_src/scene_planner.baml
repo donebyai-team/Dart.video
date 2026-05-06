@@ -61,7 +61,6 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     - All scenes should feel connected, forming a continuous flow that maintains visual rhythm and tone.
     - NEVER duplicate the same text across scenes
     - Never include large amounts of text in a single scene; split it into multiple scenes while preserving meaning
-    - Don't stack similar scenes back to back — vary the visual rhythm.
     - Always finish with CTA scene.
     - Target **15-20 scenes total** for a 60s video. Distribute across sections naturally based on
       how much the script emphasizes each section. Do not pad sections artificially.
@@ -86,6 +85,7 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     - **Define the props of scenes in SceneElement props in JSON format**
     - Use placeholder values if real data is not provided.
     - For images, you can use https://placehold.co/{width}x{height}.png width/height in px.
+    - DO NOT add too much text in any of the scene. Limit to max 6-7 words combined. If needed, split the scene using fillers
 
     ## PLAN BEFORE EXECUTING
 
