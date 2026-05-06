@@ -100,7 +100,7 @@ export const LogoWithBrandNameSchemaFields = [
                 "name": "text",
                 "type": "string",
                 "datatype": "text",
-                "map": "props.text"
+                "map": "props.brandname"
             },
             {
                 "name": "variant",
@@ -143,7 +143,7 @@ export const LogoWithBrandNameDescriptor: ComponentRegistration = {
     tags: ['Solution'],
     schema: LogoWithBrandNameSchemaFields,
     llmSchema: [{
-        name: 'text',
+        name: 'brandname',
         type: 'string',
     }],
     description: 'Logo + brand name reveal. Use for brand intro.',

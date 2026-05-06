@@ -366,7 +366,6 @@
           "name": "TitleSplit",
           "type": "content",
           "tags": [
-            "Hook",
             "Intro",
             "Solution",
             "Problem"
@@ -1578,7 +1577,7 @@
                   "name": "text",
                   "type": "string",
                   "datatype": "text",
-                  "map": "props.text"
+                  "map": "props.brandname"
                 },
                 {
                   "name": "variant",
@@ -1646,7 +1645,7 @@
           ],
           "llmSchema": [
             {
-              "name": "text",
+              "name": "brandname",
               "type": "string"
             }
           ],

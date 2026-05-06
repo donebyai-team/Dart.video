@@ -30,7 +30,7 @@ function getSplitModeDefaults(splitBy: SplitByMode) {
 export const TextStaggerDefaults = {
     id: 'textstagger',
     startAt: 0,
-    text: 'Sample text',
+    text: '',
     variant: 'display' as TypographyVariant,
     staggerDelay: 5,
     entranceAnimation: 'scaleIn' as EntranceAnimation,

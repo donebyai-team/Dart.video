@@ -109,6 +109,12 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
     }
   }, [templateUrl])
 
+  const handleTemplateRenderError = React.useCallback((error: Error) => {
+    setCompiledComponent(null)
+    setTemplateError(`Template render failed: ${error.message}`)
+    setIsLoading(false)
+  }, [])
+
   useEffect(() => {
     if (!templateUrl) return
 
@@ -136,13 +142,14 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
           }
         } catch (error) {
           if (error instanceof TypeError) {
-            console.error(`Failed to load template "${templateUrl}" (network/CORS/blocked request)`, {
-              error,
+            console.warn(`Failed to load template "${templateUrl}" (network/CORS/blocked request)`, {
+              message: error.message,
               templateUrlJson: JSON.stringify(templateUrl),
               length: templateUrl.length
             })
           } else {
-            console.error(`Failed to load template "${templateUrl}"`, error)
+            const message = error instanceof Error ? error.message : String(error)
+            console.warn(`Failed to load template "${templateUrl}": ${message}`)
           }
           if (!disposed) {
             setCompiledComponent(null)
@@ -193,9 +200,9 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
           {isLoading ? (
             <TemplateLoadingPlaceholder />
           ) : CompiledComponent ? (
-              <PatchContextProvider overlay={content?.edits as PatchOverlay}>
-                <CompiledComponent />
-              </PatchContextProvider>
+            <PatchContextProvider overlay={content?.edits as PatchOverlay}>
+              <CompiledComponent __onTemplateRuntimeError={handleTemplateRenderError} />
+            </PatchContextProvider>
           ) : templateError ? (
             <TemplateErrorFallback message={templateError} />
           ) : null}
@@ -240,10 +247,9 @@ const TemplateErrorFallback: React.FC<{ message: string }> = ({ message }) => (
     }}
   >
     <div>
-      <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>
-        Template Compilation Failed
+      <div style={{ fontSize: 64, fontWeight: 700, marginBottom: 8 }}>
+        Failed to Render
       </div>
-      <div style={{ fontSize: 12, opacity: 0.95, wordBreak: 'break-word' }}>{message}</div>
     </div>
   </div>
 )

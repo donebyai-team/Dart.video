@@ -14,6 +14,11 @@ export interface CompileRemoteComponentOptions {
   validateShapeProps?: boolean;
 }
 
+interface GuardedRemoteComponentProps {
+  __onTemplateRuntimeError?: (error: Error) => void;
+  [key: string]: unknown;
+}
+
 
 
 // Parameter names injected into every compiled component's scope.
@@ -32,9 +37,7 @@ const SHARED_PARAM_NAMES: string[] = [
   // automatically available here. LLM writes <FadeIn> and this scope has FadeIn.
   ...Array.from(REGISTERED_COMPONENT_NAMES),
 ];
-
 function getSharedParamValues(validateShapePropsOption: boolean): unknown[] {
-
   return [
     React,
     useState,
@@ -220,7 +223,24 @@ export function compileRemoteComponent(
       };
     }
 
-    return { Component: Component as React.ComponentType<any>, error: null };
+    const GuardedComponent: React.FC<GuardedRemoteComponentProps> = (props) => {
+      const { __onTemplateRuntimeError, ...componentProps } = props;
+
+      try {
+        return (Component as (props: Record<string, unknown>) => React.ReactNode)(componentProps);
+      } catch (error) {
+        const normalizedError = error instanceof Error ? error : new Error(String(error));
+        __onTemplateRuntimeError?.(normalizedError);
+        return null;
+      }
+    };
+
+    GuardedComponent.displayName =
+      (Component as { displayName?: string; name?: string }).displayName ??
+      (Component as { name?: string }).name ??
+      "GuardedRemoteComponent";
+
+    return { Component: GuardedComponent, error: null };
   } catch (error) {
     return {        
       Component: null,

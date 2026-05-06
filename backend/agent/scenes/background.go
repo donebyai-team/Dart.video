@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-const DefaultBackgroundPatternOpacity float32 = 0.1
+const DefaultBackgroundPatternOpacity float32 = 0.3
 const WordCycleBackgroundColor = "#1207e5"
 const DefaultBackgroundColor = "#FFFFFF"
 

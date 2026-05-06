@@ -158,7 +158,6 @@ export const TitleSplitDescriptor: ComponentRegistration = {
   name: 'TitleSplit',
   type: 'content',
   tags: [
-    'Hook',
     'Intro',
     'Solution',
     'Problem',

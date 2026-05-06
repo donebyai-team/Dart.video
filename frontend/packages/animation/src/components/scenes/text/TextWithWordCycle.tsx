@@ -16,7 +16,7 @@ import { measureTextWidth } from './measureText';
 export const TextWithWordCycleDefaults = {
   id: 'textwithwordcycle',
   startAt: 0,
-  text: 'Sample text',
+  text: '',
   cyclingWords: ['first word', 'next word', 'last word'],
   holdDuration: 20,
   transitionDuration: 10,

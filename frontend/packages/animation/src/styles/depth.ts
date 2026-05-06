@@ -1,6 +1,6 @@
 export const DEPTH_STYLE_PROPERTY = '--coaster-depth';
 export const DEFAULT_MEDIA_DEPTH = 4;
-export const MAX_ELEMENT_DEPTH = 10;
+export const MAX_ELEMENT_DEPTH = 20;
 
 function formatPx(value: number): string {
   return Number.isInteger(value) ? `${value}px` : `${Number(value.toFixed(2))}px`;
