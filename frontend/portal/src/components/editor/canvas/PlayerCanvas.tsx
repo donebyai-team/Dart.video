@@ -8,7 +8,6 @@ import { AnimationEditLayer } from '../animation/AnimationEditLayer'
 import type { PatchOverlay } from '@coasterai/renderer'
 import { getRealSlideStartFrame } from '../frame_calculations'
 import { ActiveToolType } from '@/types/tools'
-import { resolveOwningSceneElementId } from '../settings/sceneSettingsHelpers'
 
 interface PlayerCanvasProps {
   playerRef: React.RefObject<PlayerRef>

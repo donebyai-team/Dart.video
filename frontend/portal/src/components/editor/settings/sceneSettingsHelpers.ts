@@ -1,23 +1,18 @@
 import { DIRECTIONS, ENTRANCE_ANIMATIONS, HIGHLIGHT_STYLES, HIGHLIGHTED_TEXT_ANIMATIONS, LOGO_ANIMATIONS, SCENE_COMPONENTS, SPLIT_BY_MODES, STACK_ANIMATIONS, TEXT_CYCLE_TRANSITIONS, TYPOGRAPHY_VARIANT_NAMES } from "../../../../../packages/animation/src"
-import { resolveComponentFromId } from '@coasterai/renderer'
 
 
 export type SceneFieldKind = 'string' | 'number' | 'boolean' | 'string[]' | 'enum'
   | 'color'
   | 'icon'
   | 'icon[]'
-  | 'image'
-  | 'image[]'
-  | 'video'
-  | 'video[]'
+  | 'media'
+  | 'media[]'
   | 'animation_speed'
 
 export type SceneFieldDefinition = {
   kind: SceneFieldKind
   options?: string[]
 }
-
-const SCENE_COMPONENT_NAME_SET = new Set(SCENE_COMPONENTS.map(component => component.name))
 
 const RESERVED_FIELD_MAP: Record<string, SceneFieldDefinition> = {
   variant: {
@@ -85,25 +80,23 @@ export function inferSceneFieldDefinition(prop: string, value: unknown): SceneFi
 
   const lowerProp = prop.toLowerCase()
 
-  const isVideoField = lowerProp === 'video' || lowerProp === 'videos'
-  const isImageField = lowerProp === 'image' || lowerProp === 'images' || lowerProp === 'src'
+  // TODO: Move it using the schema
+  const isMediaField = 
+  lowerProp.includes('video') || 
+  lowerProp.includes('image') || 
+  lowerProp.includes('media') ||
+  lowerProp.includes('src')
+
   const isColorField = lowerProp.includes('color')
 
   if (lowerProp === 'speed')
     return { kind: 'animation_speed' }
 
-  if (isVideoField && typeof value === 'string') {
-    return { kind: 'video' }
+  if (isMediaField && typeof value === 'string') {
+    return { kind: 'media' }
   }
-  if (isVideoField && Array.isArray(value) && value.every(item => typeof item === 'string')) {
-    return { kind: 'video[]' }
-  }
-
-  if (isImageField && typeof value === 'string') {
-    return { kind: 'image' }
-  }
-  if (isImageField && Array.isArray(value) && value.every(item => typeof item === 'string')) {
-    return { kind: 'image[]' }
+  if (isMediaField && Array.isArray(value) && value.every(item => typeof item === 'string')) {
+    return { kind: 'media[]' }
   }
 
   if (lowerProp.includes('icon') && typeof value === 'string') {
@@ -147,14 +140,10 @@ function getSceneFieldKindPriority(kind: SceneFieldKind): number {
       return 3
     case 'icon[]':
       return 3
-    case 'image':
+    case 'media':
       return 4
-    case 'image[]':
+    case 'media[]':
       return 5
-    case 'video':
-      return 6
-    case 'video[]':
-      return 7
     case 'enum':
       return 8
     case 'boolean':
@@ -180,14 +169,10 @@ export function getSceneFieldGroupLabel(kind: SceneFieldKind): string {
       return 'Icons'
     case 'icon[]':
       return 'Icons'
-    case 'image':
-      return 'Images'
-    case 'image[]':
-      return 'Images'
-    case 'video':
-      return 'Videos'
-    case 'video[]':
-      return 'Videos'
+    case 'media':
+      return 'Media Asset'
+    case 'media[]':
+      return 'Media Assets'
     case 'enum':
       return 'Options'
     case 'boolean':
@@ -225,31 +210,6 @@ export function resolveScenePatchEntryId(
   }
 
   return null
-}
-
-export function resolveOwningSceneElementId(elementId: string): string | null {
-  let current = elementId
-  let resolvedSceneId: string | null = null
-
-  // Child primitives keep their own ids for toolbar selection, but scene settings
-  // should always target the owning scene id that appears as the suffix of a child id.
-  // Nested ids follow "<child-local-id>-<parent-id>", and the child-local part may
-  // itself contain dashes like "text-right" or "text-0". Because of that, we test
-  // each remaining suffix as a full id by removing one leftmost segment at a time.
-  // This is intentionally based on the scenes registry rather than registration.type,
-  // because some scene-capable components (like text scenes) are typed as "content".
-  while (current.length > 0) {
-    const registration = resolveComponentFromId(current)
-    if (registration && SCENE_COMPONENT_NAME_SET.has(registration.name)) {
-      resolvedSceneId = current
-    }
-
-    const firstDashIdx = current.indexOf('-')
-    if (firstDashIdx <= 0) break
-    current = current.slice(firstDashIdx + 1)
-  }
-
-  return resolvedSceneId
 }
 
 export function getEditableSceneFields(

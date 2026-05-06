@@ -27,7 +27,7 @@ interface MediaResizeState {
 interface UseMediaResizeParams {
   playerRef: React.RefObject<HTMLDivElement>
   selectedEid: string | null
-  isResizableMediaElement: (id: string) => boolean
+  isMediaComponent: (id: string) => boolean
   onValuePatch: (id: string, prop: string, value: unknown) => void
   setElementRect: (rect: ElementRect) => void
 }
@@ -61,14 +61,14 @@ function clampSizeToMinimum(width: number, height: number, aspectRatio: number) 
 export function useMediaResize({
   playerRef,
   selectedEid,
-  isResizableMediaElement,
+  isMediaComponent,
   onValuePatch,
   setElementRect,
 }: UseMediaResizeParams): UseMediaResizeResult {
   const mediaResizeStateRef = useRef<MediaResizeState | null>(null)
 
   function handleMediaResizePointerDown(e: React.PointerEvent<HTMLDivElement>) {
-    if (!selectedEid || !isResizableMediaElement(selectedEid)) return
+    if (!selectedEid || !isMediaComponent(selectedEid)) return
 
     const previewEl = playerRef.current?.querySelector(`[id="${selectedEid}"]`) as HTMLElement | null
     if (!previewEl) return

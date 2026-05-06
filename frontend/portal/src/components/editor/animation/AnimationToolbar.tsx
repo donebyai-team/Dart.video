@@ -2,6 +2,7 @@ import { resolveComponentFromId, type PatchOverlay } from '@coasterai/renderer'
 import { ContainerToolbar } from './toolbars/ContainerToolbar'
 import { MediaToolbar } from './toolbars/MediaToolbar'
 import { TextToolbar } from './toolbars/TextToolbar'
+import { isMediaComponent } from '@coasterai/animation'
 
 interface AnimationToolbarProps {
   selectedId: string
@@ -17,12 +18,8 @@ export function AnimationToolbar({
   onStyleOverride,
 }: AnimationToolbarProps) {
   const style = (overlay[selectedId]?.style as Record<string, string | number> | undefined) ?? {}
-  const resolvedComponent = resolveComponentFromId(selectedId)
-  const resolvedName = resolvedComponent?.name ?? ''
-  const name = resolvedName?.toLowerCase() || "";
-
   const isContainer = selectedId.toLowerCase().includes('container');
-  const isMediaComponent = name.includes("media") || name.includes("image") || name.includes("video")
+  const isMedia = isMediaComponent(selectedId)
 
   return (
     <div className="flex flex-wrap items-center gap-2 px-3 py-1.5 rounded-xl bg-background/95 backdrop-blur-lg border border-border shadow-xl text-sm select-none max-w-[850px]">
@@ -32,7 +29,7 @@ export function AnimationToolbar({
           selectedElementId={selectedId}
           onStyleOverride={next => onStyleOverride(selectedId, next)}
         />
-      ) : isMediaComponent ? (
+      ) : isMedia ? (
         <MediaToolbar
           styleOverride={style}
           selectedElementId={selectedId}

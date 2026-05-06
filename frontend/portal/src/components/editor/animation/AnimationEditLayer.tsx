@@ -18,11 +18,10 @@ import { AnimationToolbar } from './AnimationToolbar'
 import { usePrimitiveDrag } from './usePrimitiveDrag'
 import { useMediaResize } from './useMediaResize'
 import {
-  resolveComponentFromId,
   type PatchOverlay,
 } from '@coasterai/renderer'
 import { ArrayControlButton } from './ArrayControlButton'
-import { array } from 'zod'
+import { isMediaComponent, isPlainTextElement } from '@coasterai/animation'
 
 interface FRect { left: number; top: number; width: number; height: number }
 
@@ -78,15 +77,6 @@ export function AnimationEditLayer({
     return true
   }
 
-  // TODO: add it for all text components
-  function isPlainTextElement(id: string): boolean {
-    return resolveComponentFromId(id)?.name === 'Text'
-  }
-
-  function isResizableMediaElement(id: string): boolean {
-    const componentName = resolveComponentFromId(id)?.name
-    return componentName === 'ImageAsset' || componentName === 'LogoAsset' || componentName === 'VideoAsset'
-  }
 
   // ── Track canvas position ─────────────────────────────────────────────────
   useEffect(() => {
@@ -285,7 +275,7 @@ export function AnimationEditLayer({
   } = useMediaResize({
     playerRef,
     selectedEid,
-    isResizableMediaElement,
+    isMediaComponent,
     onValuePatch,
     setElementRect,
   })
@@ -564,7 +554,7 @@ export function AnimationEditLayer({
       )}
 
       {/* Media resize handle */}
-      {elementRect && selectedEid && isResizableMediaElement(selectedEid) && (
+      {elementRect && selectedEid && isMediaComponent(selectedEid) && (
         <div
           style={{
             position: 'fixed',

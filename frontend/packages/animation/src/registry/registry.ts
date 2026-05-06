@@ -71,6 +71,18 @@ export function resolveComponentFromId(id: string): ComponentRegistration | null
   return null;
 }
 
+export function isMediaComponent(id: string): boolean {
+  const componentName = resolveComponentFromId(id)?.name
+  return componentName === 'ImageAsset' ||
+    componentName === 'LogoAsset' ||
+    componentName === 'VideoAsset' ||
+    componentName === 'MediaAsset'
+}
+
+export function isPlainTextElement(id: string): boolean {
+  return resolveComponentFromId(id)?.name === 'Text'
+}
+
 /**
  * Determine element type from its ID prefix.
  *   "fadein-0"  → 'primitive'
