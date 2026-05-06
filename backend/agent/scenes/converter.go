@@ -24,20 +24,21 @@ type SceneConfig struct {
 
 // Convert the LLM generated scene to internal config
 // Merge the props from scene with defaults
-func ConvertToSceneConfig(scene *types.Scene, fieldValueMapper *services.MediaAssetRegistry) (*SceneConfig, error) {
-	if len(scene.Elements) == 0 {
-		return nil, fmt.Errorf("scene can't have empty elements")
-	}
-
-	element := scene.Elements[0]
-	var props map[string]any
-	if err := json.Unmarshal([]byte(element.Props), &props); err != nil {
-		return nil, fmt.Errorf("invalid scene props json: %w", err)
+func ConvertToSceneConfig(scene *types.Scene, fieldValueMapper *services.MediaAssetRegistry) ([]*SceneConfig, error) {
+	element := scene.Element
+	groupedComponent, ok := groupedComponents[element.Component]
+	if ok {
+		return groupedComponent.Ungroup(scene, fieldValueMapper)
 	}
 
 	component, err := FindComponent(element.Component)
 	if err != nil {
 		return nil, err
+	}
+
+	var props map[string]any
+	if err := json.Unmarshal([]byte(element.Props), &props); err != nil {
+		return nil, fmt.Errorf("invalid scene props json: %w", err)
 	}
 
 	background := resolveSceneBackground(scene, fieldValueMapper)
@@ -51,7 +52,7 @@ func ConvertToSceneConfig(scene *types.Scene, fieldValueMapper *services.MediaAs
 		return nil, err
 	}
 
-	cfg := SceneConfig{
+	cfg := &SceneConfig{
 		ID:                 strings.ToLower(component.Name),
 		Name:               component.Name,
 		DurationExpression: component.CELExpression,
@@ -72,7 +73,7 @@ func ConvertToSceneConfig(scene *types.Scene, fieldValueMapper *services.MediaAs
 	//	cfg.Children = append(cfg.Children, ConvertSceneElement(child))
 	//}
 
-	return &cfg, nil
+	return []*SceneConfig{cfg}, nil
 }
 
 // Convert to edits
@@ -113,16 +114,12 @@ func EditsToScene(edits *structpb.Struct, fieldValueMapper *services.MediaAssetR
 		return nil, fmt.Errorf("failed to marshal node props: %w", err)
 	}
 
-	elements := make([]types.SceneElement, 0)
-	elements = append(elements, types.SceneElement{
-		Component: config.Name,
-		Props:     string(marshal),
-		Children:  nil,
-	})
-
 	// Call your existing parser
 	return &types.Scene{
-		Elements: elements,
+		Element: types.SceneElement{
+			Component: config.Name,
+			Props:     string(marshal),
+		},
 	}, nil
 }
 

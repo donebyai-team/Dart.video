@@ -25,10 +25,10 @@ import { TextWithImageSceneDescriptor, TextWithVideoSceneDescriptor, WordCycleDe
 
 export const SCENE_COMPONENTS: ComponentRegistration[] = [
   // Text components with schemas and duration calculators
-  AnimatedNumberDescriptor,
+  // AnimatedNumberDescriptor,
   StatCounterDescriptor,
   TextStaggerDescriptor,
-  TitleSplitDescriptor,
+  // TitleSplitDescriptor,
   TextHookStaggerDescriptor,
   TypewriterDescriptor,
   TextHighlightDescriptor,

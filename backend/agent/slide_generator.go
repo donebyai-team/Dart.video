@@ -112,46 +112,55 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 	ctx context.Context,
 	assetRegistry *services.MediaAssetRegistry,
 	plan *types.GeneratedVideoPlan,
-) (*pbcore.Video, map[string]*types.Scene, error) {
-	// save background
+) (*pbcore.Video, map[string]*scenes.SceneConfig, error) {
 	g.AddBranding(assetRegistry)
 
-	// save slides
 	sections := make([]*pbcore.Section, 0, len(plan.Sections))
-	sceneMapper := make(map[string]*types.Scene)
-	for index, pendingSection := range plan.Sections {
+	sceneMapper := make(map[string]*scenes.SceneConfig)
+
+	for sectionIndex, pendingSection := range plan.Sections {
 		section := &pbcore.Section{
 			Id:     fmt.Sprintf("section-%s", uuid.NewString()),
 			Title:  pendingSection.Name,
 			Color:  pickRandomColor(),
 			Slides: []*pbcore.Slide{},
-			Index:  int32(index),
+			Index:  int32(sectionIndex),
 		}
-		for slideIndex, pendingSlide := range pendingSection.Slides {
-			slide := &pbcore.Slide{
-				Id:          fmt.Sprintf("slide-%s", uuid.NewString()),
-				SlideStatus: pbcore.SlideStatus_SLIDE_STATUS_PENDING,
-				Index:       int32(slideIndex),
+
+		slideIndex := 0
+
+		for _, pendingSlide := range pendingSection.Slides {
+			sceneConfigs, err := scenes.ConvertToSceneConfig(&pendingSlide, assetRegistry)
+			if err != nil {
+				return nil, nil, err
 			}
 
-			sceneMapper[slide.Id] = &pendingSlide
+			for _, sceneConfig := range sceneConfigs {
+				slide := &pbcore.Slide{
+					Id:          fmt.Sprintf("slide-%s", uuid.NewString()),
+					SlideStatus: pbcore.SlideStatus_SLIDE_STATUS_PENDING,
+					Index:       int32(slideIndex),
+					Content: &pbcore.AnimationSlideContent{
+						Plan: &pbcore.AnimationSlidePlan{
+							Index: pendingSlide.Index,
+						},
+					},
+				}
 
-			slide.Content = &pbcore.AnimationSlideContent{
-				Plan: &pbcore.AnimationSlidePlan{
-					Index: pendingSlide.Index,
-				},
+				sceneMapper[slide.Id] = sceneConfig
+
+				nextSlide := getNextScene(plan.Sections, sectionIndex, slideIndex)
+				if isContentSlide(nextSlide) {
+					slide.Transition = pbcore.TransitionType_TRANSITION_STRIPPED_SLAM
+					slide.TransitionDurationInFrames = utils.Ptr(transitionDurationInFrames)
+					slide.Direction = pbcore.TransitionDirection_TRANSITION_DIRECTION_UNSPECIFIED.Enum()
+				}
+
+				section.Slides = append(section.Slides, slide)
+				slideIndex++
 			}
-
-			// TODO: Do it as a pre/post processing stages or specify in the config itself
-			nextSlide := getNextScene(plan.Sections, index, slideIndex)
-			if isContentSlide(nextSlide) {
-				slide.Transition = pbcore.TransitionType_TRANSITION_STRIPPED_SLAM
-				slide.TransitionDurationInFrames = utils.Ptr(transitionDurationInFrames)
-				slide.Direction = pbcore.TransitionDirection_TRANSITION_DIRECTION_UNSPECIFIED.Enum()
-			}
-
-			section.Slides = append(section.Slides, slide)
 		}
+
 		sections = append(sections, section)
 	}
 
@@ -162,8 +171,7 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 	g.video.Config.Sections = sections
 	g.video.Metadata.ThinkingSummary = plan.ThinkingSummary
 
-	err := g.update(ctx, models.VideoStatusPROCESSING)
-	if err != nil {
+	if err := g.update(ctx, models.VideoStatusPROCESSING); err != nil {
 		return nil, nil, err
 	}
 

@@ -577,13 +577,7 @@ func (a *agentV2) applyPlan(
 				return errUserSoftCancelled
 			}
 
-			scene := sceneMapper[slide.Id]
-
-			//Convert to config
-			sceneConfig, err := scenes.ConvertToSceneConfig(scene, a.assetRegistry)
-			if err != nil {
-				return fmt.Errorf("converting scene to config: %w", err)
-			}
+			sceneConfig := sceneMapper[slide.Id]
 
 			template, err := a.animationGenerator.GenerateCodeFromScene(ctx, sceneConfig, func(progress TemplateGenerationProgress) {
 				a.updateState(ctx, VideoAgentState{

@@ -62,6 +62,18 @@ func BuildScenesList(editMode bool, fieldsToSkip []string) string {
 		}
 	}
 
+	// groups are only available while planning
+	if !editMode {
+		for _, group := range groupedComponents {
+			sectional = append(sectional, types.Component{
+				Tags:        group.Tags,
+				Name:        group.Name,
+				Description: group.Description,
+				LLMSchema:   group.LLMSchema,
+			})
+		}
+	}
+
 	var b strings.Builder
 
 	b.WriteString("# Available Scenes\n\n")

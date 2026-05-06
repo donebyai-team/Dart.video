@@ -367,7 +367,7 @@ func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest ty
 		//}
 
 		// Validate scene and add default props
-		sceneConfig, err := scenes.ConvertToSceneConfig(scene, l.assetRegistry)
+		sceneConfigs, err := scenes.ConvertToSceneConfig(scene, l.assetRegistry)
 		if err != nil {
 			marshalScene, _ := json.Marshal(scene)
 			session.ConversationHistory = appendRetryConversation(
@@ -382,6 +382,8 @@ func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest ty
 
 			continue
 		}
+
+		sceneConfig := sceneConfigs[0]
 
 		template, err := l.animationGenerator.GenerateCodeFromScene(ctx, sceneConfig, func(progress TemplateGenerationProgress) {
 			l.publishTransientState(VideoAgentState{

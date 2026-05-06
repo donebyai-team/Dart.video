@@ -28,7 +28,7 @@ class VideoBranding {
 
 class Scene {
   index int
-  elements SceneElement[]
+  element SceneElement
   background Background? @description("optional background")
   thinkingSummary string? @skip()
 }
@@ -36,7 +36,6 @@ class Scene {
 class SceneElement {
   component string
   props string @description("required props in VALID JSON format as per the scene")
-  children SceneElement[]
 }
 
 enum ColorToken {

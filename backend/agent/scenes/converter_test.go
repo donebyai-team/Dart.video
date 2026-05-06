@@ -198,12 +198,14 @@ func TestConvertSceneToSceneConfig(t *testing.T) {
 				t.Fatalf("failed to unmarshal input: %v", err)
 			}
 
-			scene.Elements[0].Props = strings.ReplaceAll(scene.Elements[0].Props, "fake_handle", handles[0])
+			scene.Element.Props = strings.ReplaceAll(scene.Element.Props, "fake_handle", handles[0])
 
-			out, err := ConvertToSceneConfig(&scene, registry)
+			configs, err := ConvertToSceneConfig(&scene, registry)
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
+
+			out := configs[0]
 
 			// Convert output to generic map
 			outBytes, err := json.Marshal(out)
@@ -252,7 +254,7 @@ func TestConvertSceneToSceneConfig(t *testing.T) {
 				t.Fatalf("scene config is nil")
 			}
 
-			propsString := sceneAfterEdits.Elements[0].Props
+			propsString := sceneAfterEdits.Element.Props
 
 			for _, s := range tt.editsToScene {
 				if !strings.Contains(propsString, s) {
@@ -260,6 +262,45 @@ func TestConvertSceneToSceneConfig(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestUngroupGroupedComponent(t *testing.T) {
+	var scene types.Scene
+	inputJSON := `{
+	  "element": 
+		{
+		  "component": "SocialProofList",
+		  "props": "{\"texts\":[\"Hello Word\", \"Hello Word\"]}"
+		}	
+	}`
+
+	if err := json.Unmarshal([]byte(inputJSON), &scene); err != nil {
+		t.Fatalf("failed to unmarshal input: %v", err)
+	}
+
+	configs, err := ConvertToSceneConfig(&scene, nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(configs) != 2 {
+		t.Fatalf("expected 2 scenes, got %d", len(configs))
+	}
+
+	out := configs[0]
+
+	textStaggerProps, ok := out.Props["textstagger"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected nested textstagger props, got %#v", out.Props)
+	}
+
+	if got := textStaggerProps["variant"]; got != "headingLg" {
+		t.Fatalf("expected variant headingLg, got %v", got)
+	}
+
+	if got := textStaggerProps["text"]; got != "Hello Word" {
+		t.Fatalf("expected text Hello, got %v", got)
 	}
 }
 
@@ -279,10 +320,12 @@ func TestConvertToSceneConfig_TextStaggerSingleWordUsesDisplay2xl(t *testing.T) 
 		t.Fatalf("failed to unmarshal input: %v", err)
 	}
 
-	out, err := ConvertToSceneConfig(&scene, nil)
+	configs, err := ConvertToSceneConfig(&scene, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
+
+	out := configs[0]
 
 	textStaggerProps, ok := out.Props["textstagger"].(map[string]any)
 	if !ok {

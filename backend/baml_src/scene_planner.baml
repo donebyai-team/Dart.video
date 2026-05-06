@@ -80,14 +80,10 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     - Rephrase text as needed to fit scene requirements while preserving the original meaning
     - You can trim, split, or format text (including punctuation) for clarity, rhythm, or scene constraints.
     - Select scenes not only by section tags but also when they effectively visualize the underlying concept
-
-    ## PLANNING RULES
-
-    ### Structure
-    - Each scene must stand alone. No siblings.
-    - **Define the props of scenes in SceneElement props in JSON format**
+    - DO NOT repeat scenes
 
     ### Data
+    - **Define the props of scenes in SceneElement props in JSON format**
     - Use placeholder values if real data is not provided.
     - For images, you can use https://placehold.co/{width}x{height}.png width/height in px.
 

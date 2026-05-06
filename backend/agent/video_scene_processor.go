@@ -6,11 +6,11 @@ import (
 )
 
 func isContentSlide(scene *types.Scene) bool {
-	if scene == nil || len(scene.Elements) == 0 {
+	if scene == nil {
 		return false
 	}
 
-	component := scene.Elements[0].Component
+	component := scene.Element.Component
 	return strings.EqualFold(component, "TextWithImageScene") ||
 		//strings.EqualFold(component, "TextWithVideoScene") ||
 		strings.EqualFold(component, "MultiImageStack")

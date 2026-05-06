@@ -719,10 +719,10 @@ func (c Message) BamlTypeName() string {
 }
 
 type Scene struct {
-	Index           *int64         `json:"index"`
-	Elements        []SceneElement `json:"elements"`
-	Background      *Background    `json:"background"`
-	ThinkingSummary *string        `json:"thinkingSummary"`
+	Index           *int64        `json:"index"`
+	Element         *SceneElement `json:"element"`
+	Background      *Background   `json:"background"`
+	ThinkingSummary *string       `json:"thinkingSummary"`
 }
 
 func (c *Scene) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -742,8 +742,8 @@ func (c *Scene) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
 		case "index":
 			c.Index = baml.Decode(valueHolder).Interface().(*int64)
 
-		case "elements":
-			c.Elements = baml.Decode(valueHolder).Interface().([]SceneElement)
+		case "element":
+			c.Element = baml.Decode(valueHolder).Interface().(*SceneElement)
 
 		case "background":
 			c.Background = baml.Decode(valueHolder).Interface().(*Background)
@@ -765,7 +765,7 @@ func (c Scene) Encode() (*cffi.HostValue, error) {
 
 	fields["index"] = c.Index
 
-	fields["elements"] = c.Elements
+	fields["element"] = c.Element
 
 	fields["background"] = c.Background
 
@@ -779,9 +779,8 @@ func (c Scene) BamlTypeName() string {
 }
 
 type SceneElement struct {
-	Component *string        `json:"component"`
-	Props     *string        `json:"props"`
-	Children  []SceneElement `json:"children"`
+	Component *string `json:"component"`
+	Props     *string `json:"props"`
 }
 
 func (c *SceneElement) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -804,9 +803,6 @@ func (c *SceneElement) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap)
 		case "props":
 			c.Props = baml.Decode(valueHolder).Interface().(*string)
 
-		case "children":
-			c.Children = baml.Decode(valueHolder).Interface().([]SceneElement)
-
 		default:
 
 			panic(fmt.Sprintf("unexpected field: %s in class SceneElement", key))
@@ -822,8 +818,6 @@ func (c SceneElement) Encode() (*cffi.HostValue, error) {
 	fields["component"] = c.Component
 
 	fields["props"] = c.Props
-
-	fields["children"] = c.Children
 
 	return baml.EncodeClass("SceneElement", fields, nil)
 }

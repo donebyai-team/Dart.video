@@ -34,7 +34,7 @@ const insertTools: { id: EffectType; name: string; icon: React.ElementType }[] =
   { id: EffectType.ZOOM, name: 'Zoom', icon: ZoomIn },
 ]
 
-const PlayerToolbar = ({ onDurationChange, minDuration = 1, maxDuration = 180, currentFrame = 0 }: PlayerToolbarProps) => {
+const PlayerToolbar = ({ onDurationChange, minDuration = 0.3, maxDuration = 180, currentFrame = 0 }: PlayerToolbarProps) => {
 
   const { user } = useAuth()
   const isPlatformAdminUser = user && isPlatformAdmin(user);

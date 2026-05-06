@@ -132,11 +132,13 @@ export const TextStaggerSchemaFields = [
     {
         "name": "variant",
         "type": "enum",
+        "map": "props.variant",
         "default": TextStaggerDefaults.variant
     },
     {
         "name": "staggerDelay",
         "type": "number",
+        "map": "props.staggerDelay",
         "default": TextStaggerDefaults.staggerDelay
     },
     {
@@ -148,11 +150,13 @@ export const TextStaggerSchemaFields = [
     {
         "name": "duration",
         "type": "number",
+        "map": "props.duration",
         "default": TextStaggerDefaults.duration
     },
     {
         "name": "splitBy",
         "type": "enum",
+        "map": "props.splitBy",
         "default": TextStaggerDefaults.splitBy
     }
 ]

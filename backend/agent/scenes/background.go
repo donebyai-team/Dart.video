@@ -15,12 +15,12 @@ const DefaultBackgroundColor = "#FFFFFF"
 
 // apply background to a scene
 func resolveSceneBackground(selectedScene *types.Scene, fieldValueMapper *services.MediaAssetRegistry) *pbcore.BackgroundStyle {
-	if len(selectedScene.Elements) == 0 || fieldValueMapper == nil {
+	if fieldValueMapper == nil {
 		return nil
 	}
 
 	// special case
-	selectedComponent := selectedScene.Elements[0].Component
+	selectedComponent := selectedScene.Element.Component
 
 	if strings.EqualFold(selectedComponent, "WordCycle") {
 		return &pbcore.BackgroundStyle{
