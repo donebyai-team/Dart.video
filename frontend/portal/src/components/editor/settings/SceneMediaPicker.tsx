@@ -3,6 +3,7 @@ import ManualMediaImportPanel, { type ManualMediaConfirmPayload } from '@/compon
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import SceneSortablePillList from './SceneSortablePillList'
+import { MediaAsset } from '@coasterai/pb/coasterai/core/v1/media_asset_pb'
 
 function getMediaLabel(url: string): string {
   try {
@@ -31,12 +32,12 @@ export function SingleSceneMediaPicker({
   mediaType?: 'image' | 'video'
   fieldName?: string
   value: string
-  onChange: (value: string) => void
+  onChange: (asset: MediaAsset) => void
 }) {
   const [open, setOpen] = useState(false)
 
   const handleConfirm = async ({ asset }: ManualMediaConfirmPayload) => {
-    onChange(asset.url)
+    onChange(asset)
     setOpen(false)
   }
 

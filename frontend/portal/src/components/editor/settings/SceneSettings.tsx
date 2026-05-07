@@ -102,7 +102,11 @@ export default function SceneSettings({
                 // mediaType='image'
                 fieldName={prop}
                 value={String(value)}
-                onChange={next => onValuePatch(patchEntryId ?? elementId, prop, next)}
+                onChange={next => {
+                  // Add other properties if needed
+                  onValuePatch(patchEntryId ?? elementId, prop, next.url)
+                  onValuePatch(patchEntryId ?? elementId, "_duration", next.duration * 30)
+                }}
               />
             </label>
           ) : definition.kind === 'media[]' ? (
@@ -146,7 +150,7 @@ export default function SceneSettings({
                 inputWidth="w-20"
               />
             </div>
-          ): definition.kind === 'number' ? (
+          ) : definition.kind === 'number' ? (
             <div key={prop} className="flex items-center justify-between gap-4">
               <span className="text-sm font-medium">{toSceneFieldLabel(prop)}</span>
               <NumberStepper

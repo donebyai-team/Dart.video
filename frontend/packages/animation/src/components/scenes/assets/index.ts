@@ -9,3 +9,4 @@ export * from './LogoWithCTA';
 export * from '../../../core/assets/IconTextPill';
 export * from './PillCarousel';
 export * from './ProductImageFeatures';
+export * from './AnimatedMedia';

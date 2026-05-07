@@ -470,7 +470,17 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                         <SceneSettings
                             elementId={selectedAnimationElementId}
                             overlay={overlay}
-                            onValuePatch={onValuePatch}
+                            onValuePatch={(id: string, prop: string, value: unknown) => {
+                                // TODO: Move it at a better place
+                                // Update scene duration
+                                if (prop === '_duration' && typeof value === 'number' && value > 0) {
+                                    updateSlide({
+                                        durationInFrames: Math.round(value),
+                                        settledFrame: Math.round(value)
+                                    });
+                                }
+                                onValuePatch(id, prop, value);
+                            }}
                             onPlay={onPlay}
                             isPreviewPlaying={isPreviewPlaying}
                         />

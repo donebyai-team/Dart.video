@@ -1,3 +1,4 @@
+import { MEDIA_MOTION_PRESETS } from "@coasterai/animation/src/core/assets/MediaMotionPreset"
 import { DIRECTIONS, ENTRANCE_ANIMATIONS, HIGHLIGHT_STYLES, HIGHLIGHTED_TEXT_ANIMATIONS, LOGO_ANIMATIONS, SCENE_COMPONENTS, SPLIT_BY_MODES, STACK_ANIMATIONS, TEXT_CYCLE_TRANSITIONS, TYPOGRAPHY_VARIANT_NAMES } from "../../../../../packages/animation/src"
 
 
@@ -62,6 +63,10 @@ const RESERVED_FIELD_MAP: Record<string, SceneFieldDefinition> = {
     kind: 'enum',
     options: [...STACK_ANIMATIONS],
   },
+  motionPreset: {
+    kind: 'enum',
+    options: [...MEDIA_MOTION_PRESETS],
+  }
 }
 
 export function toSceneFieldLabel(prop: string): string {
