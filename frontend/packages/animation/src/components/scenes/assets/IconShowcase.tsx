@@ -1,11 +1,10 @@
 import React from 'react';
 import { interpolate, useCurrentFrame } from 'remotion';
-import z from 'zod';
 import { IconAsset } from '../../../core/assets/IconAsset';
-import { TextStagger, TextStaggerDefaults, TextStaggerProps, TextStaggerSchemaFields } from '../text/TextStagger';
+import { TextStagger, TextStaggerDefaults } from '../text/TextStagger';
 import { useArrayPatch, usePatchedProps } from '../../../patches';
 import type { ComponentRegistration } from '../../../registry/registry';
-import { ENTRANCE_ANIMATIONS, SPLIT_BY_MODES } from '../types';
+import { ENTRANCE_ANIMATIONS } from '../types';
 import { interpolateWithEasing } from '../../../styles';
 import { ArrayItem } from '../../../core/assets/ArrayItem';
 
@@ -14,9 +13,11 @@ const DEFAULT_ENTRANCE_DURATION = 10;
 const DEFAULT_ICON_STAGGER = 5;
 const DEFAULT_ICON_ANIMATION_DURATION = 10;
 const DEFAULT_TEXT_DELAY = 5;
-const DEFAULT_VARIANT = 'heading' as const;
+const DEFAULT_VARIANT = 'headingLg' as const;
 const DEFAULT_ICON_SIZE = 90;
 const DEFAULT_ICON_GAP = 64;
+const DEFAULT_TEXT_STAGGER_SPLIT_BY = 'line' as const;
+const DEFAULT_TEXT_STAGGER_ANIMATION = ENTRANCE_ANIMATIONS[1];
 
 export const IconShowcase: React.FC = () => {
     const textProps = usePatchedProps("textstagger", TextStaggerDefaults);
@@ -130,8 +131,8 @@ export const IconShowcase: React.FC = () => {
                         id={`textstagger`}
                         text={textProps.text}
                         variant={DEFAULT_VARIANT}
-                        splitBy={SPLIT_BY_MODES[1]}
-                        entranceAnimation={ENTRANCE_ANIMATIONS[3]}
+                        splitBy={DEFAULT_TEXT_STAGGER_SPLIT_BY}
+                        entranceAnimation={DEFAULT_TEXT_STAGGER_ANIMATION}
                         startAt={textStartFrame}
                     />
                 </div>
@@ -149,7 +150,44 @@ export const IconShowcaseSchema = [
     {
         type: "component",
         name: 'textstagger',
-        fields: TextStaggerSchemaFields
+        fields: [
+            {
+                "name": "text",
+                "type": "string",
+                "datatype": "text",
+                "map": "props.text"
+            },
+            {
+                "name": "variant",
+                "type": "enum",
+                "map": "props.variant",
+                "default": DEFAULT_VARIANT
+            },
+            {
+                "name": "staggerDelay",
+                "type": "number",
+                "map": "props.staggerDelay",
+                "default": TextStaggerDefaults.staggerDelay
+            },
+            {
+                "name": "entranceAnimation",
+                "type": "enum",
+                "map": "props.entranceAnimation",
+                "default": DEFAULT_TEXT_STAGGER_ANIMATION
+            },
+            {
+                "name": "duration",
+                "type": "number",
+                "map": "props.duration",
+                "default": TextStaggerDefaults.duration
+            },
+            {
+                "name": "splitBy",
+                "type": "enum",
+                "map": "props.splitBy",
+                "default": DEFAULT_TEXT_STAGGER_SPLIT_BY
+            }
+        ]
     },
     {
         type: "repeat",
@@ -185,23 +223,23 @@ export const IconShowcaseDescriptor: ComponentRegistration = {
         {
             name: 'text',
             type: 'string',
+            hint: 'caption to show below the icons'
         },
         {
             name: 'icons',
             type: 'array',
             items: {
                 type: 'string'
-            }
+            },
+            range: 'min 4 brand icons',
         },
         {
             name: 'entranceAnimation',
             type: 'enum',
             required: false,
-            default: TextStaggerDefaults.entranceAnimation,
+            default: DEFAULT_TEXT_STAGGER_ANIMATION,
         }
     ],
     description: 'Row of icons + caption. Use for integrations, tech stack, partners, brands. eg. icons={["shopify", "midjourney", "openai"]}, text="caption text".',
-    celExpression: '55 + max(0, size(props.icons) - 1) * 5 + max(0, segmentCount(props.textstagger.text, "word") - 1) * 5',
+    celExpression: `${DEFAULT_ENTRANCE_DURATION} + max(0, size(props.icons) - 1) * ${DEFAULT_ICON_STAGGER} + ${DEFAULT_ICON_ANIMATION_DURATION} + min(1, segmentCount(props.textstagger.text, props.textstagger.splitBy)) * (${DEFAULT_TEXT_DELAY} + max(0, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * ${TextStaggerDefaults.staggerDelay} + ${TextStaggerDefaults.duration})`,
 };
-
-

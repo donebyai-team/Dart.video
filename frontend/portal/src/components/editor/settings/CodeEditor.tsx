@@ -25,15 +25,17 @@ export const CodeEditor = ({ onClose }: CodeEditorProps) => {
     return selectedSlide?.content
   }, [selectedSlide])
 
+  const inlineCode = animationContent?.codeRegistry?.code?.trim() ?? ''
   const templateUrl = animationContent?.codeRegistry?.mUrl?.trim() ?? ''
   const slideId = selectedSlide?.id ?? ''
 
   useEffect(() => {
     if (activeTool.type !== ActiveToolType.ANIMATION_CODE) return
+
     if (!selectedSlide || !animationContent) {
       handleCloseTool()
     }
-  }, [activeTool.type, handleCloseTool, selectedSlide])
+  }, [activeTool.type, handleCloseTool, selectedSlide, animationContent])
 
   useEffect(() => {
     let cancelled = false
@@ -45,6 +47,15 @@ export const CodeEditor = ({ onClose }: CodeEditorProps) => {
       return
     }
 
+    // Prefer inline code
+    if (inlineCode) {
+      setCode(inlineCode)
+      setError(null)
+      setIsLoading(false)
+      return
+    }
+
+    // Fallback to remote template
     if (!templateUrl) {
       setCode('')
       setError(null)
@@ -58,16 +69,24 @@ export const CodeEditor = ({ onClose }: CodeEditorProps) => {
     ;(async () => {
       try {
         const source = await loadTemplateSource(templateUrl)
+
         if (!cancelled) {
           setCode(source)
         }
       } catch (loadError) {
         if (!cancelled) {
           setCode('')
-          const message = loadError instanceof Error ? loadError.message : String(loadError)
-          setError(message.startsWith('Failed to fetch template:')
-            ? message
-            : `Failed to load template: ${message}`)
+
+          const message =
+            loadError instanceof Error
+              ? loadError.message
+              : String(loadError)
+
+          setError(
+            message.startsWith('Failed to fetch template:')
+              ? message
+              : `Failed to load template: ${message}`
+          )
         }
       } finally {
         if (!cancelled) {
@@ -79,17 +98,29 @@ export const CodeEditor = ({ onClose }: CodeEditorProps) => {
     return () => {
       cancelled = true
     }
-  }, [slideId, templateUrl, selectedSlide])
+  }, [
+    slideId,
+    templateUrl,
+    inlineCode,
+    selectedSlide,
+    animationContent
+  ])
 
   return (
     <div className='h-full flex flex-col bg-card'>
       <div className='flex items-center justify-between px-5 py-4 border-b border-border'>
         <div className='min-w-0'>
-          <h3 className='font-semibold text-sm tracking-tight'>Code Editor</h3>
+          <h3 className='font-semibold text-sm tracking-tight'>
+            Code Editor
+          </h3>
+
           <p className='text-xs text-muted-foreground truncate'>
-            {templateUrl || 'No generated animation code available'}
+            {inlineCode
+              ? 'Inline generated animation code'
+              : templateUrl || 'No generated animation code available'}
           </p>
         </div>
+
         <Button variant='ghost' size='icon' onClick={onClose}>
           <X className='w-4 h-4' />
         </Button>
@@ -99,8 +130,14 @@ export const CodeEditor = ({ onClose }: CodeEditorProps) => {
         <div className='h-full rounded-lg border border-border bg-slate-950 text-slate-100 overflow-hidden flex flex-col'>
           <div className='flex items-center gap-2 px-4 py-3 border-b border-slate-800 bg-slate-900/80'>
             <FileCode2 className='w-4 h-4 text-slate-400' />
-            <span className='text-xs font-medium text-slate-300'>Generated animation.tsx</span>
-            <span className='ml-auto text-[11px] uppercase tracking-wide text-slate-500'>Read only</span>
+
+            <span className='text-xs font-medium text-slate-300'>
+              Generated animation.tsx
+            </span>
+
+            <span className='ml-auto text-[11px] uppercase tracking-wide text-slate-500'>
+              Read only
+            </span>
           </div>
 
           <div className='flex-1 min-h-0 overflow-auto'>
@@ -112,7 +149,7 @@ export const CodeEditor = ({ onClose }: CodeEditorProps) => {
               <div className='h-full flex items-center justify-center px-6 text-sm text-red-300 text-center'>
                 {error}
               </div>
-            ) : !templateUrl ? (
+            ) : !inlineCode && !templateUrl ? (
               <div className='h-full flex items-center justify-center px-6 text-sm text-slate-400 text-center'>
                 This animation slide does not have generated code yet.
               </div>

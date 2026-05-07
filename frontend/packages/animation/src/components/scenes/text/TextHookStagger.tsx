@@ -154,8 +154,9 @@ export const TextHookStaggerDescriptor: ComponentRegistration = {
     {
       name: 'text',
       type: 'string',
+      range: '4-5 words',
     },
   ],
-  description: 'Reveals a short hook or intro phrase word-by-word. Best for 4-5 word hook/intro scenes.',
+  description: 'Reveals a short hook or intro phrase word-by-word with animated last word',
   celExpression: `max(0, segmentCount(props.texthookstagger.text, "word") - 1) * props.texthookstagger.staggerDelay + ${DEFAULT_REVEAL_DURATION} + ${DEFAULT_ANIMATION_DURATION}`,
 };

@@ -11,7 +11,7 @@ import { ArrayItem } from '../../../core/assets/ArrayItem';
 const DEFAULT_TEXT_ENTRANCE_DURATION = 5;
 const DEFAULT_LOGO_STAGGER = 5;
 const DEFAULT_LOGO_ANIMATION_DURATION = 12;
-const DEFAULT_VARIANT = 'heading' as const;
+const DEFAULT_VARIANT = 'headingLg' as const;
 const MAX_LOGOS_PER_ROW = 5;
 const DEFAULT_TEXT_STAGGER_SPLIT_BY = 'line' as const;
 const DEFAULT_TEXT_STAGGER_ANIMATION = ENTRANCE_ANIMATIONS[1];
@@ -137,7 +137,44 @@ export const LogoShowcaseSchemaFields = [
     {
         type: "component",
         name: 'textstagger',
-        fields: TextStaggerSchemaFields
+        fields: [
+            {
+                "name": "text",
+                "type": "string",
+                "datatype": "text",
+                "map": "props.text"
+            },
+            {
+                "name": "variant",
+                "type": "enum",
+                "map": "props.variant",
+                "default": DEFAULT_VARIANT
+            },
+            {
+                "name": "staggerDelay",
+                "type": "number",
+                "map": "props.staggerDelay",
+                "default": TextStaggerDefaults.staggerDelay
+            },
+            {
+                "name": "entranceAnimation",
+                "type": "enum",
+                "map": "props.entranceAnimation",
+                "default": DEFAULT_TEXT_STAGGER_ANIMATION
+            },
+            {
+                "name": "duration",
+                "type": "number",
+                "map": "props.duration",
+                "default": TextStaggerDefaults.duration
+            },
+            {
+                "name": "splitBy",
+                "type": "enum",
+                "map": "props.splitBy",
+                "default": DEFAULT_TEXT_STAGGER_SPLIT_BY
+            }
+        ]
     },
     {
         type: "repeat",
@@ -170,7 +207,8 @@ export const LogoShowcaseDescriptor: ComponentRegistration = {
             type: 'string',
             "items": {
                 "type": "string"
-            }
+            },
+            hint: 'caption to show below the icons'
         },
         {
             name: 'logos',
@@ -181,10 +219,9 @@ export const LogoShowcaseDescriptor: ComponentRegistration = {
             name: 'entranceAnimation',
             type: 'enum',
             required: false,
-            default: TextStaggerDefaults.entranceAnimation,
+            default: DEFAULT_TEXT_STAGGER_ANIMATION,
         }
     ],
     description: 'Row of logos + caption. Use for integrations, tech stack, partners, brands. eg. logos=["url1", "url2"], text="caption text".',
-    celExpression: '55 + max(0, size(props.logos) - 1) * 5 + max(0, segmentCount(props.textstagger.text, "word") - 1) * 5',
+    celExpression: `10 + max(min(1, segmentCount(props.textstagger.text, props.textstagger.splitBy)) * (max(0, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * ${TextStaggerDefaults.staggerDelay} + ${TextStaggerDefaults.duration}), ${DEFAULT_TEXT_ENTRANCE_DURATION} + max(0, size(props.logos) - 1) * ${DEFAULT_LOGO_STAGGER} + ${DEFAULT_LOGO_ANIMATION_DURATION})`,
 };
-

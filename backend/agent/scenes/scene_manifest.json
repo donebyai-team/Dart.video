@@ -325,10 +325,11 @@
           "llmSchema": [
             {
               "name": "text",
-              "type": "string"
+              "type": "string",
+              "range": "4-5 words"
             }
           ],
-          "description": "Reveals a short hook or intro phrase word-by-word. Best for 4-5 word hook/intro scenes.",
+          "description": "Reveals a short hook or intro phrase word-by-word with animated last word",
           "celExpression": "max(0, segmentCount(props.texthookstagger.text, \"word\") - 1) * props.texthookstagger.staggerDelay + 4 + 22"
         },
         {
@@ -690,7 +691,7 @@
             }
           ],
           "celExpression": "82",
-          "description": "A short headline scene for concise text. Use it to show the main problem, key pain point, or an important headline from the script. Best for 2-6 words"
+          "description": "A short headline scene for concise text. Use it to show the main problem, key pain point, or an important headline from the script. Best for 4-6 words"
         },
         {
           "name": "TextCardStack",
@@ -1163,7 +1164,7 @@
                   "name": "variant",
                   "type": "enum",
                   "map": "props.variant",
-                  "default": "display"
+                  "default": "headingLg"
                 },
                 {
                   "name": "staggerDelay",
@@ -1175,7 +1176,7 @@
                   "name": "entranceAnimation",
                   "type": "enum",
                   "map": "props.entranceAnimation",
-                  "default": "scaleIn"
+                  "default": "slideUp"
                 },
                 {
                   "name": "duration",
@@ -1187,7 +1188,7 @@
                   "name": "splitBy",
                   "type": "enum",
                   "map": "props.splitBy",
-                  "default": "word"
+                  "default": "line"
                 }
               ]
             },
@@ -1216,7 +1217,8 @@
               "type": "string",
               "items": {
                 "type": "string"
-              }
+              },
+              "hint": "caption to show below the icons"
             },
             {
               "name": "logos",
@@ -1226,11 +1228,11 @@
               "name": "entranceAnimation",
               "type": "enum",
               "required": false,
-              "default": "scaleIn"
+              "default": "slideUp"
             }
           ],
           "description": "Row of logos + caption. Use for integrations, tech stack, partners, brands. eg. logos=[\"url1\", \"url2\"], text=\"caption text\".",
-          "celExpression": "55 + max(0, size(props.logos) - 1) * 5 + max(0, segmentCount(props.textstagger.text, \"word\") - 1) * 5"
+          "celExpression": "10 + max(min(1, segmentCount(props.textstagger.text, props.textstagger.splitBy)) * (max(0, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * 5 + 15), 5 + max(0, size(props.logos) - 1) * 5 + 12)"
         },
         {
           "name": "LogoWithBrandName",
@@ -1430,7 +1432,7 @@
                   "name": "variant",
                   "type": "enum",
                   "map": "props.variant",
-                  "default": "display"
+                  "default": "headingLg"
                 },
                 {
                   "name": "staggerDelay",
@@ -1442,7 +1444,7 @@
                   "name": "entranceAnimation",
                   "type": "enum",
                   "map": "props.entranceAnimation",
-                  "default": "scaleIn"
+                  "default": "slideUp"
                 },
                 {
                   "name": "duration",
@@ -1454,7 +1456,7 @@
                   "name": "splitBy",
                   "type": "enum",
                   "map": "props.splitBy",
-                  "default": "word"
+                  "default": "line"
                 }
               ]
             },
@@ -1485,24 +1487,26 @@
           "llmSchema": [
             {
               "name": "text",
-              "type": "string"
+              "type": "string",
+              "hint": "caption to show below the icons"
             },
             {
               "name": "icons",
               "type": "array",
               "items": {
                 "type": "string"
-              }
+              },
+              "range": "min 4 brand icons"
             },
             {
               "name": "entranceAnimation",
               "type": "enum",
               "required": false,
-              "default": "scaleIn"
+              "default": "slideUp"
             }
           ],
           "description": "Row of icons + caption. Use for integrations, tech stack, partners, brands. eg. icons={[\"shopify\", \"midjourney\", \"openai\"]}, text=\"caption text\".",
-          "celExpression": "55 + max(0, size(props.icons) - 1) * 5 + max(0, segmentCount(props.textstagger.text, \"word\") - 1) * 5"
+          "celExpression": "10 + max(0, size(props.icons) - 1) * 5 + 10 + min(1, segmentCount(props.textstagger.text, props.textstagger.splitBy)) * (5 + max(0, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * 5 + 15)"
         },
         {
           "name": "PillCarousel",
