@@ -88,8 +88,6 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
   isEditing = false,
   isSelected = false,
   isPlaying = true,
-  onUpdate,
-  onSelect
 }) => {
   const [CompiledComponent, setCompiledComponent] = React.useState<React.ComponentType<any> | null>(null)
   const [isLoading, setIsLoading] = useState(true)

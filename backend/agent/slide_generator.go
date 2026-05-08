@@ -106,6 +106,9 @@ func (g *videoConfigGenerator) AddBranding(assetRegistry *services.MediaAssetReg
 		},
 		Pattern:        pbcore.BackgroundPattern_BACKGROUND_PATTERN_DOTS,
 		PatternOpacity: utils.Ptr(scenes.DefaultBackgroundPatternOpacity),
+		Effect: &pbcore.BackgroundEffect{
+			Type: pbcore.BackgroundEffectType_BACKGROUND_EFFECT_TYPE_GLOW,
+		},
 	})
 }
 

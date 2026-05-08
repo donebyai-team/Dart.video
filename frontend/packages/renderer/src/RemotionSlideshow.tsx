@@ -153,11 +153,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({
             height={height}
             isEditing={isEditing}
             isSelected={isSelected}
-            isPlaying={isPlaying}
-            onUpdate={onUpdate}
-            onSelect={() => {
-              onSelectTemplate?.(slide.id);
-            }}
+            isPlaying={isPlaying}            
           />
         </BackgroundLayer>
       )

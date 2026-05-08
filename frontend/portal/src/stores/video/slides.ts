@@ -104,7 +104,8 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       const { backgroundStyle: _, ...metadataWithoutBg } = 
         videoConfig.metadata ?? getDefaulVideotMetadata(defaultEditorConfig);
 
-      // Push global background to other slides, apply new background to selected
+      // Convert inherited global backgrounds into slide-level backgrounds without
+      // overwriting slides that already have their own background override.
       newVideoConfig = updateVideoConfigSections(videoConfig, (sections) =>
         sections.map((section) => ({
           ...section,
@@ -118,6 +119,10 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
             }
 
             if (globalBackground) {
+              if (slide.backgroundStyle) {
+                return slide;
+              }
+
               const clonedGlobalBg = clone(BackgroundStyleSchema, globalBackground);
               clonedGlobalBg.applyAll = false;
               return { ...slide, backgroundStyle: clonedGlobalBg };
