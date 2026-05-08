@@ -5,13 +5,13 @@ import { DEFAULT_SPEED_PERCENTAGE, getSpeed, MIN_SPEED_PERCENTAGE, scaleTiming }
 import { useArrayPatch, usePatchedProps } from '../../../../patches';
 import type { ComponentRegistration } from '../../../../registry/registry';
 import { interpolateWithEasing, useAspectPreset } from '../../../../styles';
-import type { TextEntrancePresetName } from '../../../../core/assets';
 import type { TypographyVariant } from '../../../../tokens';
 import { TextWithWordCycle, TextWithWordCycleDefaults } from '../../text/TextWithWordCycle';
 import type { Direction } from '../../types';
 import { ImagePeel } from './ImagePeel';
 import { ImageSlide } from './ImageSlide';
 import type { ImageStackItem } from './shared';
+import { AnimationPresetName } from '../../../../core/assets/AnimationPreset';
 
 export const STACK_ANIMATIONS = ['Peel', 'SlideDown'] as const;
 export type StackAnimation = typeof STACK_ANIMATIONS[number];
@@ -19,7 +19,7 @@ export type StackAnimation = typeof STACK_ANIMATIONS[number];
 const DEFAULT_HERO_TEXT = {
     ...TextWithWordCycleDefaults,
     variant: 'display' as TypographyVariant,
-    entranceAnimation: 'scaleIn' as TextEntrancePresetName,
+    entranceAnimation: 'scaleIn' as AnimationPresetName,
     highlightStyle: 'background' as const,
     textCycleTransition: 'slideUp' as const,
 };

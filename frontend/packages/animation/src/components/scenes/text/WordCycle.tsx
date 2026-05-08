@@ -8,10 +8,7 @@ import { interpolateWithEasing } from '../../../styles/easingResolver';
 import type { TypographyVariant } from '../../../tokens/semantic';
 import { resolveTypography } from '../../../tokens/resolveTypography';
 import { Text } from '../../../core/assets/Text';
-import {
-  resolveTextMotionPhase,
-  type TextEntrancePresetName,
-} from '../../../core/assets';
+import { AnimationPresetName, resolveAnimationPreset } from '../../../core/assets/AnimationPreset';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { TextCycleTransition } from '../types';
 import { measureTextWidth } from '../text/measureText';
@@ -22,7 +19,7 @@ export const WordCycleDefaults = {
   holdDuration: 20,
   transitionDuration: 5,
   textCycleTransition: 'slideUp' as TextCycleTransition,
-  entranceAnimation: 'slideUp' as TextEntrancePresetName,
+  entranceAnimation: 'slideUp' as AnimationPresetName,
   variant: 'displayXl' as TypographyVariant,
   style: undefined as React.CSSProperties | undefined,
   className: undefined as string | undefined,
@@ -53,9 +50,17 @@ export const WordCycle: React.FC<WordCycleProps> = (initProps) => {
 
   const cycleDuration = props.holdDuration + props.transitionDuration;
   const entranceDuration = 20;
-  const entranceMotion = resolveTextMotionPhase(frame, 'entrance', {
-    preset: actualEntranceAnimation,
+  const entranceProgress = interpolateWithEasing(
+    frame,
+    [0, entranceDuration],
+    [0, 1],
+    'ease-out',
+  );
+  const entranceMotion = resolveAnimationPreset({
+    frame,
+    startAt: 0,
     duration: entranceDuration,
+    presetName: actualEntranceAnimation,
     easing: 'ease-out',
   });
   const dragStyle = usePatchedDragStyle(id, entranceMotion.transform, props.style?.transform, overrideTransform);

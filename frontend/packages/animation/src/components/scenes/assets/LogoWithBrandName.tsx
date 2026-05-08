@@ -1,15 +1,13 @@
 import React from "react";
 import { useCurrentFrame } from "remotion";
-import z from 'zod';
 import { usePatchedProps } from "../../../patches/PatchContext";
 import { useStyleContext } from "../../../styles/StyleContext";
 import { useAspectPreset } from "../../../styles/AspectPresetContext";
 import { interpolateWithEasing } from "../../../styles/easingResolver";
 import { useTheme } from "../../../theme";
 import { resolveTypography } from "../../../tokens/resolveTypography";
-import { TYPOGRAPHY_VARIANT_NAMES } from "../../../tokens/semantic";
-import { LogoAsset, LogoAssetDefaults, LogoAssetProps, LogoAssetSchemaFields } from "./LogoAsset";
-import { TextStagger, TextStaggerDefaults, TextStaggerProps, TextStaggerSchemaFields } from "../text/TextStagger";
+import { LogoAsset, LogoAssetDefaults, LogoAssetSchemaFields } from "./LogoAsset";
+import { TextStagger, TextStaggerDefaults } from "../text/TextStagger";
 import type { ComponentRegistration } from '../../../registry/registry';
 import { SPLIT_BY_MODES } from "../types";
 

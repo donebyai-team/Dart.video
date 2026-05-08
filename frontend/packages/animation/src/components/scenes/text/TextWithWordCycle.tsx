@@ -8,10 +8,7 @@ import { interpolateWithEasing } from '../../../styles/easingResolver';
 import type { TypographyVariant } from '../../../tokens/semantic';
 import { resolveTypography } from '../../../tokens/resolveTypography';
 import { Text } from '../../../core/assets/Text';
-import {
-  resolveTextMotionPhase,
-  type TextEntrancePresetName,
-} from '../../../core/assets';
+import { AnimationPresetName, resolveAnimationPreset } from '../../../core/assets/AnimationPreset';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { HighlightStyle, TextCycleTransition } from '../types';
 import { measureTextWidth } from './measureText';
@@ -24,9 +21,9 @@ export const TextWithWordCycleDefaults = {
   holdDuration: 20,
   transitionDuration: 10,
   textCycleTransition: 'slideUp' as TextCycleTransition,
-  entranceAnimation: 'slideUp' as TextEntrancePresetName,
+  entranceAnimation: 'slideUp' as AnimationPresetName,
   variant: 'display' as TypographyVariant,
-  highlightStyle: 'background' as HighlightStyle,
+  highlightStyle: 'simple' as HighlightStyle,
   highlightColor: undefined as string | undefined,
   style: undefined as React.CSSProperties | undefined,
   className: undefined as string | undefined,
@@ -59,9 +56,12 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (initProps) =
   const cycleDuration = props.holdDuration + props.transitionDuration;
   const entranceDuration = 20;
   const localFrame = Math.max(0, frame - props.startAt);
-  const entranceMotion = resolveTextMotionPhase(localFrame, 'entrance', {
-    preset: actualEntranceAnimation,
+
+  const entranceMotion = resolveAnimationPreset({
+    frame: localFrame,
+    startAt: 0,
     duration: entranceDuration,
+    presetName: actualEntranceAnimation,
     easing: 'ease-out',
   });
   const dragStyle = usePatchedDragStyle(id, entranceMotion.transform, props.style?.transform, overrideTransform);
@@ -161,6 +161,13 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (initProps) =
         return {
           ...baseStyle,
           textShadow: `0 0 20px ${actualHighlightColor}`,
+          color: actualHighlightColor,
+          display: 'inline-block',
+        };
+
+      case 'simple':
+        return {
+          ...baseStyle,
           color: actualHighlightColor,
           display: 'inline-block',
         };

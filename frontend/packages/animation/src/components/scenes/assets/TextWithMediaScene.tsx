@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useCurrentFrame } from 'remotion';
 import { useElement, usePatchOverlay } from '../../../patches';
-import { MediaAsset, MediaAssetProps, resolveTextMotionPhase, type TextEntrancePresetName } from '../../../core/assets';
+import { MediaAsset, MediaAssetProps, } from '../../../core/assets';
+import { resolveAnimationPreset } from '../../../core/assets/AnimationPreset';
 import { Row, Stack } from '../../../core/layout';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import type { ComponentRegistration } from '../../../registry/registry';
-import { TextHighlight, TextHighlightDefaults, TextHighlightSchemaFields } from '../text/TextHighlight';
-import { TextStagger, TextStaggerDefaults, TextStaggerSchemaFields } from '../text/TextStagger';
+import { TextHighlight, TextHighlightDefaults } from '../text/TextHighlight';
+import { TextStagger, TextStaggerDefaults } from '../text/TextStagger';
 import { TextWithWordCycle, TextWithWordCycleDefaults, TextWithWordCycleSchemaFields } from '../text/TextWithWordCycle';
 import { resolveContentAwareLayout } from './ContentAwareScene.layout';
 import { TypographyVariant } from '../../../tokens';
+import { AnimationPresetName } from '../../../core/assets/AnimationPreset';
 
 const DEFAULT_ANIMATION = 'slideUp' as const;
 const FALLBACK_WIDTH = 1920;
@@ -19,7 +21,7 @@ const VERTICAL_STACK_GAP_PX = 64;
 
 type SceneProps = {
   id?: string;
-  entranceAnimation?: TextEntrancePresetName;
+  entranceAnimation?: AnimationPresetName;
 };
 
 const SceneDefaults: SceneProps = {
@@ -72,20 +74,22 @@ export function TextWithMediaScene(): React.ReactElement {
   const overlay = usePatchOverlay();
 
   const assetKey = ['imageasset', 'videoasset', 'mediaasset']
-  .find((key) => overlay?.[key]);
+    .find((key) => overlay?.[key]);
 
   const { props: sceneProps } = useElement('scene', SceneDefaults);
   const { props: mediaProps } = useElement<MediaAssetProps>(assetKey || 'mediaasset', {});
-  
-  const { props: textHighlightProps } = useElement('texthighlight', {...TextHighlightDefaults, variant: "headingLg" as TypographyVariant} );
-  const { props: textStaggerProps } = useElement('textstagger', {...TextStaggerDefaults, variant: "headingLg" as TypographyVariant});
-  const { props: textWithWordCycleProps } = useElement('textwithwordcycle', {...TextWithWordCycleDefaults, variant: "headingLg" as TypographyVariant});
+
+  const { props: textHighlightProps } = useElement('texthighlight', { ...TextHighlightDefaults, variant: "headingLg" as TypographyVariant });
+  const { props: textStaggerProps } = useElement('textstagger', { ...TextStaggerDefaults, variant: "headingLg" as TypographyVariant });
+  const { props: textWithWordCycleProps } = useElement('textwithwordcycle', { ...TextWithWordCycleDefaults, variant: "headingLg" as TypographyVariant });
 
   const mediaDimentions = useVideoDimensions(mediaProps.src || '');
-  const mediaMotion = resolveTextMotionPhase(frame, 'entrance', {
-    preset: sceneProps.entranceAnimation ?? DEFAULT_ANIMATION,
-    delay: 10,
+
+  const mediaMotion = resolveAnimationPreset({
+    frame,
+    startAt: 10,
     duration: 40,
+    presetName: sceneProps.entranceAnimation ?? DEFAULT_ANIMATION,
     easing: 'ease-out',
   });
 
@@ -192,7 +196,7 @@ export function TextWithMediaScene(): React.ReactElement {
             boxSizing: 'border-box',
           }}
         >
-          <Stack gap={VERTICAL_STACK_GAP_PX}  style={{ width: '100%', maxWidth: '100%' }}>
+          <Stack gap={VERTICAL_STACK_GAP_PX} style={{ width: '100%', maxWidth: '100%' }}>
             <div
               style={{
                 width: fullSafeAreaWidth,
@@ -231,8 +235,123 @@ export const TextWithMediaSceneDescriptor: ComponentRegistration = {
     selector: 'props.textComponent',
     propsPath: 'props.textComponentProps',
     components: [
-      { name: 'textstagger', fields: TextStaggerSchemaFields },
-      { name: 'texthighlight', fields: TextHighlightSchemaFields },
+      {
+        name: 'textstagger', fields: [
+          {
+            "name": "text",
+            "type": "string",
+            "datatype": "text",
+            "map": "props.text"
+          },
+          {
+            "name": "variant",
+            "type": "enum",
+            "map": "props.variant",
+            "default": TextStaggerDefaults.variant
+          },
+          {
+            "name": "staggerDelay",
+            "type": "number",
+            "map": "props.staggerDelay",
+            "default": TextStaggerDefaults.staggerDelay
+          },
+          {
+            "name": "entranceAnimation",
+            "type": "enum",
+            "map": "props.entranceAnimation",
+            "default": TextStaggerDefaults.entranceAnimation
+          },
+          {
+            "name": "duration",
+            "type": "number",
+            "map": "props.duration",
+            "default": TextStaggerDefaults.duration
+          },
+          {
+            "name": "exitAnimation",
+            "type": "enum",
+            "map": "props.exitAnimation",
+            "default": "none"
+          },
+          {
+            "name": "exitDuration",
+            "type": "number",
+            "map": "props.exitDuration",
+            "default": TextStaggerDefaults.exitDuration
+          },
+          {
+            "name": "splitBy",
+            "type": "enum",
+            "map": "props.splitBy",
+            "default": TextStaggerDefaults.splitBy
+          }
+        ]
+      },
+      {
+        name: 'texthighlight', fields: [
+          {
+            "name": "text",
+            "type": "string",
+            "datatype": "text",
+            "map": "props.text"
+          },
+          {
+            "name": "variant",
+            "type": "enum",
+            "map": "props.variant",
+            "default": TextHighlightDefaults.variant
+          },
+          {
+            "name": "entranceAnimation",
+            "type": "enum",
+            "map": "props.entranceAnimation",
+            "default": TextHighlightDefaults.entranceAnimation
+          },
+          {
+            "name": "animationDelay",
+            "type": "number",
+            "map": "props.animationDelay",
+            "default": TextHighlightDefaults.animationDelay
+          },
+          {
+            "name": "animationDuration",
+            "type": "number",
+            "map": "props.animationDuration",
+            "default": TextHighlightDefaults.animationDuration
+          },
+          {
+            "name": "exitAnimation",
+            "type": "enum",
+            "map": "props.exitAnimation",
+            "default": "none"
+          },
+          {
+            "name": "exitDuration",
+            "type": "number",
+            "map": "props.exitDuration",
+            "default": TextHighlightDefaults.exitDuration
+          },
+          {
+            "name": "highlightStyle",
+            "type": "enum",
+            "map": "props.highlightStyle",
+            "default": TextHighlightDefaults.highlightStyle
+          },
+          {
+            "name": "highlightedTextAnimation",
+            "type": "enum",
+            "map": "props.highlightedTextAnimation",
+            "default": "none"
+          },
+          {
+            "name": "highlightColor",
+            "type": "string",
+            "datatype": "color",
+            "map": "props.highlightColor",
+            "default": TextHighlightDefaults.highlightColor
+          }
+        ]
+      },
       { name: 'textwithwordcycle', fields: TextWithWordCycleSchemaFields },
     ],
   }, {

@@ -7,20 +7,24 @@ import { useElement } from '../../../patches';
 import { useAspectPreset } from '../../../styles';
 import { TextStagger, TextStaggerDefaults } from '../text/TextStagger';
 import { MediaMotionPreset, getMotionTransform } from '../../../core/assets/MediaMotionPreset';
+import { AnimationPresetName } from '../../../core/assets/AnimationPreset';
 
 const DEFAULT_SCENE_DURATION = 60;
 const DEFAULT_MOTION_PRESET = 'zoomTiltReveal' as const;
-const DEFAULT_VARIANT = 'headingLg' as const;
+
+const ANIMATED_MEDIA_DEFAULTS = {
+    ...TextStaggerDefaults,
+    id: 'textstagger',
+    text: 'Your headline here',
+    variant: 'headingLg' as const,
+    splitBy: 'line' as const,
+    staggerDelay: 0,
+    entranceAnimation: 'scaleIn' as AnimationPresetName,
+};
 
 type TimedMediaAssetProps = MediaAssetProps & {
   _duration?: number;
   motionPreset?: MediaMotionPreset;
-};
-
-const textDefaults = {
-  ...TextStaggerDefaults,
-  variant: DEFAULT_VARIANT,
-  text: 'Your headline here',
 };
 
 const mediaDefaults: TimedMediaAssetProps = {
@@ -31,7 +35,7 @@ const mediaDefaults: TimedMediaAssetProps = {
 export function AnimatedMedia(): React.ReactElement {
   const frame = useCurrentFrame();
   const preset = useAspectPreset();
-  const { props: textProps } = useElement('textstagger', textDefaults);
+  const { props: textProps } = useElement('textstagger', ANIMATED_MEDIA_DEFAULTS);
   const { props: mediaProps } = useElement<TimedMediaAssetProps>('mediaasset', mediaDefaults);
 
   const motionPreset = mediaProps.motionPreset ?? DEFAULT_MOTION_PRESET;
@@ -108,31 +112,31 @@ export const AnimatedMediaDescriptor: ComponentRegistration = {
         "name": "variant",
         "type": "enum",
         "map": "props.variant",
-        "default": DEFAULT_VARIANT
+        "default": ANIMATED_MEDIA_DEFAULTS.variant
     },
     {
         "name": "staggerDelay",
         "type": "number",
         "map": "props.staggerDelay",
-        "default": TextStaggerDefaults.staggerDelay
+        "default": ANIMATED_MEDIA_DEFAULTS.staggerDelay
     },
     {
         "name": "entranceAnimation",
         "type": "enum",
         "map": "props.entranceAnimation",
-        "default": TextStaggerDefaults.entranceAnimation
+        "default": ANIMATED_MEDIA_DEFAULTS.entranceAnimation
     },
     {
         "name": "duration",
         "type": "number",
         "map": "props.duration",
-        "default": TextStaggerDefaults.duration
+        "default": ANIMATED_MEDIA_DEFAULTS.duration
     },
     {
         "name": "splitBy",
         "type": "enum",
         "map": "props.splitBy",
-        "default": "line"
+        "default": ANIMATED_MEDIA_DEFAULTS.splitBy
     }],
     },
     {

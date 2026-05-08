@@ -4,9 +4,9 @@ import { useArrayPatch, usePatchedProps } from '../../../patches';
 import { LogoAsset } from './LogoAsset';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { interpolateWithEasing } from '../../../styles';
-import { TextStagger, TextStaggerDefaults, TextStaggerSchemaFields } from '../text/TextStagger';
-import { ENTRANCE_ANIMATIONS } from '../types';
+import { TextStagger, TextStaggerDefaults } from '../text/TextStagger';
 import { ArrayItem } from '../../../core/assets/ArrayItem';
+import { ANIMATION_PRESET_ENTRANCE_ANIMATIONS } from '../../../core/assets/AnimationPreset';
 
 const DEFAULT_TEXT_ENTRANCE_DURATION = 5;
 const DEFAULT_LOGO_STAGGER = 5;
@@ -14,7 +14,7 @@ const DEFAULT_LOGO_ANIMATION_DURATION = 12;
 const DEFAULT_VARIANT = 'headingLg' as const;
 const MAX_LOGOS_PER_ROW = 5;
 const DEFAULT_TEXT_STAGGER_SPLIT_BY = 'line' as const;
-const DEFAULT_TEXT_STAGGER_ANIMATION = ENTRANCE_ANIMATIONS[1];
+const DEFAULT_TEXT_STAGGER_ANIMATION = ANIMATION_PRESET_ENTRANCE_ANIMATIONS[1];
 
 const SLOT_LAYOUT_BY_COUNT: Record<number, { width: number; height: number; gap: number; padding: number }> = {
     1: { width: 320, height: 180, gap: 0, padding: 24 },

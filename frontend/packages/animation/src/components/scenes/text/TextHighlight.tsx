@@ -7,10 +7,7 @@ import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme';
 import type { TypographyVariant } from '../../../tokens';
 import { resolveTypography } from '../../../tokens/resolveTypography';
-import {
-    resolveTextMotionPhase,
-    type TextEntrancePresetName,
-} from '../../../core/assets';
+import { AnimationPresetName, resolveAnimationPreset } from '../../../core/assets/AnimationPreset';
 import {
     getHighlightedTextAnimationTransform,
     type HighlightedTextAnimation,
@@ -23,11 +20,13 @@ export const TextHighlightDefaults = {
     text: '',
     variant: 'display' as TypographyVariant,
     highlightStyle: 'simple' as HighlightStyle,
-    highlightedTextAnimation: 'jump' as HighlightedTextAnimation,
+    highlightedTextAnimation: 'none' as HighlightedTextAnimation,
     highlightColor: '',
-    entranceAnimation: 'zoomIn' as TextEntrancePresetName,
-    animationDelay: 30,
-    animationDuration: 30,
+    entranceAnimation: 'slideLeft' as AnimationPresetName,
+    exitAnimation: 'none' as AnimationPresetName,
+    animationDelay: 15,
+    animationDuration: 20,
+    exitDuration: 15,
     className: undefined as string | undefined,
     style: undefined as React.CSSProperties | undefined,
 };
@@ -50,8 +49,10 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
     const actualHighlightedTextAnimation = props.highlightedTextAnimation;
     const actualHighlightColor = props.highlightColor || theme.colors.primary;
     const actualAnimation = props.entranceAnimation;
+    const actualExitAnimation = props.exitAnimation;
     const actualAnimationDelay = props.animationDelay;
     const actualAnimationDuration = props.animationDuration;
+    const actualExitDuration = props.exitDuration ?? TextHighlightDefaults.exitDuration;
     const styleOverride = useStyleOverride(id);
 
     // Animation timeline:
@@ -59,9 +60,11 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
     // Phase 2: Highlighted text animation (animationDelay to animationDelay + zoomDuration)
     // Phase 3: Text remains visible after animation completes
 
-    const entranceMotion = resolveTextMotionPhase(frame, 'entrance', {
-        preset: actualAnimation,
+    const entranceMotion = resolveAnimationPreset({
+        frame,
+        startAt: 0,
         duration: actualAnimationDelay,
+        presetName: actualAnimation,
         distance: 200,
         easing: 'ease-out',
     });
@@ -72,7 +75,16 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
         frame,
         [zoomStartFrame, zoomStartFrame + actualAnimationDuration],
         [0, 1],
+        'ease-out'
     );
+    const exitStartFrame = actualAnimationDelay + actualAnimationDuration;
+    const exitMotion = resolveAnimationPreset({
+        frame,
+        startAt: exitStartFrame,
+        duration: actualExitDuration,
+        presetName: actualExitAnimation,
+        mode: 'exit',
+    });
 
     const segments = useMemo(() => {
         const parts: { text: string; highlight: boolean; index: number }[] = [];
@@ -183,8 +195,7 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
                     color: progress > 0.5 ? actualHighlightColor : 'inherit',
                     transform: baseTransform,
                     display: 'inline-block',
-                };                
-
+                };
             case 'background':
                 return {
                     position: 'relative',
@@ -223,91 +234,56 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
                 display: 'block',
                 width: '100%',
                 maxWidth: '100%',
-                opacity: entranceMotion.opacity,
-                ...dragStyle,
+                opacity: exitMotion.opacity,
+                transform: exitMotion.transform,
             }}
         >
             <span
                 style={{
-                    ...resolveTypography(actualVariant, styleConfig, theme, preset),
-                    whiteSpace: 'pre-wrap',
-                    ...props.style,
-                    ...styleOverride,
+                    display: 'inline-block',
+                    width: '100%',
+                    maxWidth: '100%',
+                    opacity: entranceMotion.opacity,
+                    ...dragStyle,
                 }}
             >
-                {segments.map((segment, i) => {
-                    if (!segment.highlight) {
-                        return <React.Fragment key={i}>{segment.text}</React.Fragment>;
-                    }
-
-                    return splitHighlightSegment(segment.text).map((part, partIndex) => {
-                        if (part.whitespace) {
-                            return <React.Fragment key={`${i}-${partIndex}`}>{part.text}</React.Fragment>;
+                <span
+                    style={{
+                        ...resolveTypography(actualVariant, styleConfig, theme, preset),
+                        whiteSpace: 'pre-wrap',
+                        ...props.style,
+                        ...styleOverride,
+                    }}
+                >
+                    {segments.map((segment, i) => {
+                        if (!segment.highlight) {
+                            return <React.Fragment key={i}>{segment.text}</React.Fragment>;
                         }
 
-                        return (
-                            <span
-                                key={`${i}-${partIndex}`}
-                                style={{
-                                    whiteSpace: 'pre-wrap',
-                                    ...getHighlightStyles(segment.index),
-                                }}
-                            >
-                                {part.text}
-                            </span>
-                        );
-                    });
-                })}
+                        return splitHighlightSegment(segment.text).map((part, partIndex) => {
+                            if (part.whitespace) {
+                                return <React.Fragment key={`${i}-${partIndex}`}>{part.text}</React.Fragment>;
+                            }
+
+                            return (
+                                <span
+                                    key={`${i}-${partIndex}`}
+                                    style={{
+                                        whiteSpace: 'pre-wrap',
+                                        ...getHighlightStyles(segment.index),
+                                    }}
+                                >
+                                    {part.text}
+                                </span>
+                            );
+                        });
+                    })}
+                </span>
             </span>
         </span>
     );
 };
 
-export const TextHighlightSchemaFields = [
-    {
-        "name": "text",
-        "type": "string",        
-        "datatype": "text",
-        "map": "props.text"
-    },
-    {
-        "name": "variant",
-        "type": "enum",
-        "default": TextHighlightDefaults.variant
-    },
-    {
-        "name": "entranceAnimation",
-        "type": "enum",
-        "map": "props.entranceAnimation",
-        "default": TextHighlightDefaults.entranceAnimation
-    },
-    {
-        "name": "animationDelay",
-        "type": "number",
-        "default": TextHighlightDefaults.animationDelay
-    },
-    {
-        "name": "animationDuration",
-        "type": "number",
-        "default": TextHighlightDefaults.animationDuration
-    },
-    {
-        "name": "highlightStyle",
-        "type": "enum",
-        "default": TextHighlightDefaults.highlightStyle
-    },
-    {
-        "name": "highlightedTextAnimation",
-        "type": "enum",
-        "default": TextHighlightDefaults.highlightedTextAnimation
-    },
-    {
-        "name": "highlightColor",
-        "type": "string",
-        "datatype": "color",
-        "default": TextHighlightDefaults.highlightColor
-    }
-]
 
 export const TextHighlightDescriptor: ComponentRegistration = {
     name: 'TextHighlight',
@@ -315,7 +291,69 @@ export const TextHighlightDescriptor: ComponentRegistration = {
     schema: [{
         type: 'component',
         name: 'texthighlight',
-        fields: TextHighlightSchemaFields
+        fields: [
+            {
+                "name": "text",
+                "type": "string",
+                "datatype": "text",
+                "map": "props.text"
+            },
+            {
+                "name": "variant",
+                "type": "enum",
+                "map": "props.variant",
+                "default": TextHighlightDefaults.variant
+            },
+            {
+                "name": "entranceAnimation",
+                "type": "enum",
+                "map": "props.entranceAnimation",
+                "default": TextHighlightDefaults.entranceAnimation
+            },
+            {
+                "name": "animationDelay",
+                "type": "number",
+                "map": "props.animationDelay",
+                "default": TextHighlightDefaults.animationDelay
+            },
+            {
+                "name": "animationDuration",
+                "type": "number",
+                "map": "props.animationDuration",
+                "default": TextHighlightDefaults.animationDuration
+            },
+            {
+                "name": "exitAnimation",
+                "type": "enum",
+                "map": "props.exitAnimation",
+                "default": "zoomOut"
+            },
+            {
+                "name": "exitDuration",
+                "type": "number",
+                "map": "props.exitDuration",
+                "default": TextHighlightDefaults.exitDuration
+            },
+            {
+                "name": "highlightStyle",
+                "type": "enum",
+                "map": "props.highlightStyle",
+                "default": TextHighlightDefaults.highlightStyle
+            },
+            {
+                "name": "highlightedTextAnimation",
+                "type": "enum",
+                "map": "props.highlightedTextAnimation",
+                "default": "jump"
+            },
+            {
+                "name": "highlightColor",
+                "type": "string",
+                "datatype": "color",
+                "map": "props.highlightColor",
+                "default": TextHighlightDefaults.highlightColor
+            }
+        ]
     }],
     llmSchema: [
         {
@@ -330,5 +368,5 @@ export const TextHighlightDescriptor: ComponentRegistration = {
         }
     ],
     description: 'Bold statement with an emphasized word/phrase. Use for key claims. Use {} to highlight. eg "We build amazing {software}"',
-    celExpression: 'props.texthighlight.animationDelay + props.texthighlight.animationDuration',
+    celExpression: 'props.texthighlight.animationDelay + props.texthighlight.animationDuration + (props.texthighlight.exitAnimation != "none" ? props.texthighlight.exitDuration : 0)',
 };

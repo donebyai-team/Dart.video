@@ -1,16 +1,14 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
 import type { TypographyVariant } from '../../../tokens/semantic';
-import { useElement, composeTransforms } from '../../../patches';
+import { useElement } from '../../../patches';
 import {
-    resolveTextMotionPhase,
-    type TextEntrancePresetName,
-    type TextExitPresetName,
-} from '../../../core/assets';
-import {
-    type SplitByMode,
-} from '../types';
+    resolveAnimationPreset,
+    type AnimationPresetName,
+} from '../../../core/assets/AnimationPreset';
+import { type SplitByMode } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
+
 function getSplitModeDefaults(splitBy: SplitByMode) {
     switch (splitBy) {
         case 'char':
@@ -32,12 +30,11 @@ export const TextStaggerDefaults = {
     text: '',
     variant: 'display' as TypographyVariant,
     staggerDelay: 5,
-    entranceAnimation: 'scaleIn' as TextEntrancePresetName,
+    entranceAnimation: 'scaleIn' as AnimationPresetName,
     duration: 15,
-    exitAnimation: 'none' as TextExitPresetName,
-    exitDelay: 0,
+    exitAnimation: 'none' as AnimationPresetName,
     exitDuration: 15,
-    splitBy: 'word' as SplitByMode,
+    splitBy: 'line' as SplitByMode,
     className: undefined as string | undefined,
     style: undefined as React.CSSProperties | undefined,
 };
@@ -66,7 +63,6 @@ export const TextStagger: React.FC<TextStaggerProps> = (initProps) => {
     const modeDefaults = getSplitModeDefaults(splitBy);
     const actualStaggerDelay = props.staggerDelay ?? modeDefaults.staggerDelay;
     const actualDuration = props.duration ?? modeDefaults.duration;
-    const actualExitDelay = props.exitDelay ?? TextStaggerDefaults.exitDelay;
     const actualExitDuration = props.exitDuration ?? actualDuration;
 
 
@@ -82,27 +78,27 @@ export const TextStagger: React.FC<TextStaggerProps> = (initProps) => {
 
     const lastUnitIndex = Math.max(0, units.length - 1);
     const exitBaseStartAt =
-        actualStartAt + lastUnitIndex * actualStaggerDelay + actualDuration + actualExitDelay;
+        actualStartAt + lastUnitIndex * actualStaggerDelay + actualDuration;
+    const exitMotion = resolveAnimationPreset({
+        frame,
+        startAt: exitBaseStartAt,
+        duration: actualExitDuration,
+        presetName: actualExitAnimation,
+        mode: 'exit',
+    });
 
     const getAnimationStyles = (unitIndex: number): React.CSSProperties => {
-        const wordStartAt = actualStartAt + unitIndex * actualStaggerDelay;
-        const entranceMotion = resolveTextMotionPhase(frame, 'entrance', {
-            preset: actualAnimation,
-            delay: wordStartAt,
+        const enterStartAt = actualStartAt + unitIndex * actualStaggerDelay;
+        const entranceMotion = resolveAnimationPreset({
+            frame,
+            startAt: enterStartAt,
             duration: actualDuration,
-        });
-        const exitMotion = resolveTextMotionPhase(frame, 'exit', {
-            preset: actualExitAnimation,
-            delay: exitBaseStartAt + unitIndex * actualStaggerDelay,
-            duration: actualExitDuration,
+            presetName: actualAnimation,
         });
 
         return {
-            opacity: entranceMotion.opacity * exitMotion.opacity,
-            transform: composeTransforms(
-                entranceMotion.transform,
-                exitMotion.transform,
-            ),
+            opacity: entranceMotion.opacity,
+            transform: entranceMotion.transform,
         };
     };
 
@@ -114,6 +110,8 @@ export const TextStagger: React.FC<TextStaggerProps> = (initProps) => {
                 display: 'block',
                 whiteSpace: splitBy === 'line' ? 'pre-line' : 'normal',
                 textAlign: 'center',
+                opacity: exitMotion.opacity,
+                transform: exitMotion.transform,
                 ...el.style,
                 ...el.containerStyle
             }}
@@ -174,13 +172,7 @@ export const TextStaggerSchemaFields = [
         "name": "exitAnimation",
         "type": "enum",
         "map": "props.exitAnimation",
-        "default": TextStaggerDefaults.exitAnimation
-    },
-    {
-        "name": "exitDelay",
-        "type": "number",
-        "map": "props.exitDelay",
-        "default": TextStaggerDefaults.exitDelay
+        "default": "zoomOut"
     },
     {
         "name": "exitDuration",
@@ -214,14 +206,8 @@ export const TextStaggerDescriptor: ComponentRegistration = {
             type: 'enum',
             required: false,
             default: TextStaggerDefaults.entranceAnimation,
-        },
-        {
-            name: 'exitAnimation',
-            type: 'enum',
-            required: false,
-            default: TextStaggerDefaults.exitAnimation,
         }
     ],
     description: 'Reveals a word or full text phrase word-by-word. Works for both single word and multi-word headlines or body text.',
-    celExpression: `max(0, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * props.textstagger.staggerDelay + props.textstagger.duration + (props.textstagger.exitAnimation != "none" ? props.textstagger.exitDelay + max(0, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * props.textstagger.staggerDelay + props.textstagger.exitDuration : 0)`
+    celExpression: `max(0, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * props.textstagger.staggerDelay + props.textstagger.duration + (props.textstagger.exitAnimation != "none" ? props.textstagger.exitDuration : 0)`
 };

@@ -7,7 +7,7 @@ import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme/ThemeContext';
 import type { TypographyVariant } from '../../../tokens/semantic';
 import { resolveTypography } from '../../../tokens/resolveTypography';
-import { resolveTextMotionPhase, type TextEntrancePresetName } from '../../../core/assets';
+import { AnimationPresetName, resolveAnimationPreset } from '../../../core/assets/AnimationPreset';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { DEFAULT_SPEED_PERCENTAGE, getSpeed, MIN_SPEED_PERCENTAGE, scaleTiming } from '../../../speed/timings';
 
@@ -41,7 +41,7 @@ export const TextLeadStaggerDefaults = {
   startAt: 0,
   text: "Isn't getting clicks",
   variant: 'displayLg' as TypographyVariant,
-  entranceAnimation: 'slideLeft' as TextEntrancePresetName,
+  entranceAnimation: 'slideLeft' as AnimationPresetName,
   speed: DEFAULT_SPEED_PERCENTAGE,
   className: undefined as string | undefined,
   style: undefined as React.CSSProperties | undefined,
@@ -170,10 +170,11 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
     );
     const visibleProgress = Math.max(0, Math.min(1, entryProgress * exitVisibility));
     const isVisible = visibleProgress > MIN_VISIBLE_PROGRESS;
-    const entranceTransform = resolveTextMotionPhase(elapsed, 'entrance', {
-      preset: props.entranceAnimation,
-      delay: entryStart,
+    const entranceTransform = resolveAnimationPreset({
+      frame: elapsed,
+      startAt: entryStart,
       duration: wordEntranceDuration,
+      presetName: props.entranceAnimation,
       distance: Math.max(fontSizePx, 120),
       easing: 'ease-out',
     }).transform;

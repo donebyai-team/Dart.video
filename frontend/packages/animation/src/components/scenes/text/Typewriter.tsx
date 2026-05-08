@@ -6,7 +6,7 @@ import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme/ThemeContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { resolveTypography } from '../../../tokens/resolveTypography';
-import { resolveTextMotionPhase, type TextEntrancePresetName } from '../../../core/assets';
+import { AnimationPresetName, resolveAnimationPreset } from '../../../core/assets/AnimationPreset';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { TypographyVariant } from '../../../tokens';
 
@@ -19,7 +19,7 @@ export const TypewriterDefaults = {
   startAt: 0,
   splitBy: "char" as const,
   variant: "display" as TypographyVariant,
-  entranceAnimation: "fadeIn" as TextEntrancePresetName,
+  entranceAnimation: "fadeIn" as AnimationPresetName,
   typingDuration: TYPEWRITER_TYPING_DURATION,
   style: undefined as React.CSSProperties | undefined,
   className: undefined as string | undefined,
@@ -46,9 +46,17 @@ export function Typewriter(initProps: TypewriterProps): React.ReactElement {
   const dragStyle = usePatchedDragStyle(id, props.style?.transform);
 
   const entranceDuration = 20;
-  const entranceMotion = resolveTextMotionPhase(frame, 'entrance', {
-    preset: props.entranceAnimation,
+  const entranceProgress = interpolateWithEasing(
+    frame,
+    [0, entranceDuration],
+    [0, 1],
+    'linear',
+  );
+  const entranceMotion = resolveAnimationPreset({
+    frame,
+    startAt: 0,
     duration: entranceDuration,
+    presetName: props.entranceAnimation,
     easing: 'linear',
   });
 

@@ -7,9 +7,10 @@ import { MultiSceneIconPicker, SingleSceneIconPicker } from './SceneIconPicker'
 import { MultiSceneMediaPicker, SingleSceneMediaPicker } from './SceneMediaPicker'
 import SceneSortablePillList from './SceneSortablePillList'
 import { DualColorPicker } from '../animation/toolbars/stylers/DualColorPicker'
+import { FieldDataType } from '../../../../../packages/animation/src'
 import {
-  compareSceneFieldsByPriority,
   getEditableSceneFields,
+  getReservedSceneFieldOptions,
   resolveScenePatchEntryId,
   toSceneFieldLabel,
 } from './sceneSettingsHelpers'
@@ -33,12 +34,13 @@ export default function SceneSettings({
   const MIN_ARRAY_ITEMS = 2
   const [arrayDrafts, setArrayDrafts] = useState<Record<string, string>>({})
   const patchEntryId = useMemo(() => resolveScenePatchEntryId(elementId, overlay), [elementId, overlay])
+  const patchEntry = useMemo<Record<string, unknown>>(() => {
+    if (!patchEntryId) return {}
+    const entry = overlay[patchEntryId]
+    return typeof entry === 'object' && entry !== null ? (entry as Record<string, unknown>) : {}
+  }, [overlay, patchEntryId])
 
-  const fields = useMemo(() => {
-    return getEditableSceneFields(elementId, overlay).sort((left, right) =>
-      compareSceneFieldsByPriority(left, right),
-    )
-  }, [elementId, overlay])
+  const fields = useMemo(() => getEditableSceneFields(elementId, overlay), [elementId, overlay])
 
   if (fields.length == 0) {
     return null;
@@ -61,16 +63,19 @@ export default function SceneSettings({
           <div className="text-sm text-muted-foreground">No editable props found yet.</div>
         )} */}
 
-        {fields.map((field, index) => {
-          const { prop, value, definition } = field
-          if (!definition) return null
+        {fields.map(field => {
+          const prop = field.name
+          const value = patchEntry[prop]
+          const enumOptions = getReservedSceneFieldOptions(prop)
+          const isArrayField = field.type === 'array'
+          const isBooleanField = typeof value === 'boolean'
 
-          const content = definition.kind === 'enum' ? (
+          const content = field.type === 'enum' ? (
             <label key={prop} className="flex flex-col gap-2">
               <span className="text-sm font-medium">{toSceneFieldLabel(prop)}</span>
               <SelectInput
                 value={String(value ?? 'body')}
-                options={(definition.options ?? []).map((option: string) => ({
+                options={(enumOptions ?? []).map(option => ({
                   label: option,
                   value: option,
                 }))}
@@ -78,7 +83,7 @@ export default function SceneSettings({
                 width="w-full"
               />
             </label>
-          ) : definition.kind === 'icon' ? (
+          ) : field.datatype === FieldDataType.Icon && !isArrayField ? (
             <label key={prop} className="flex flex-col gap-2">
               <span className="text-sm font-medium">{toSceneFieldLabel(prop)}</span>
               <SingleSceneIconPicker
@@ -86,22 +91,22 @@ export default function SceneSettings({
                 onChange={next => onValuePatch(patchEntryId ?? elementId, prop, next.icon)}
               />
             </label>
-          ) : definition.kind === 'icon[]' ? (
+          ) : field.datatype === FieldDataType.Icon && isArrayField ? (
             <div key={prop} className="flex flex-col gap-2">
               <span className="text-sm font-medium">{toSceneFieldLabel(prop)}</span>
               <MultiSceneIconPicker
-                value={(value as string[]).map(v => ({ name: "", icon: v } as Icon))}
+                value={(Array.isArray(value) ? value : []).map(v => ({ name: "", icon: String(v) } as Icon))}
                 onChange={next => onValuePatch(patchEntryId ?? elementId, prop, next.map(i => i.icon))}
                 minItems={MIN_ARRAY_ITEMS}
               />
             </div>
-          ) : definition.kind === 'media' ? (
+          ) : field.datatype === FieldDataType.Media && !isArrayField ? (
             <label key={prop} className="flex flex-col gap-2">
               <span className="text-sm font-medium">{toSceneFieldLabel(prop)}</span>
               <SingleSceneMediaPicker
                 // mediaType='image'
                 fieldName={prop}
-                value={String(value)}
+                value={String(value ?? '')}
                 onChange={next => {
                   // Add other properties if needed
                   onValuePatch(patchEntryId ?? elementId, prop, next.url)
@@ -109,57 +114,46 @@ export default function SceneSettings({
                 }}
               />
             </label>
-          ) : definition.kind === 'media[]' ? (
+          ) : field.datatype === FieldDataType.Media && isArrayField ? (
             <div key={prop} className="flex flex-col gap-2">
               <span className="text-sm font-medium">{toSceneFieldLabel(prop)}</span>
               <MultiSceneMediaPicker
                 // mediaType='image'
-                value={value as string[]}
+                value={Array.isArray(value) ? value.map(item => String(item)) : []}
                 onChange={next => onValuePatch(patchEntryId ?? elementId, prop, next)}
                 minItems={MIN_ARRAY_ITEMS}
               />
             </div>
-          ) : definition.kind === 'string' ? (
-            <label key={prop} className="flex flex-col gap-2">
-              <span className="text-sm font-medium">{toSceneFieldLabel(prop)}</span>
-              <textarea
-                value={String(value)}
-                onChange={e => onValuePatch(patchEntryId ?? elementId, prop, e.target.value)}
-                className="h-9 px-3 rounded-md border border-border bg-background text-sm focus:outline-none focus:ring-1 focus:ring-ring/50"
-              />
-            </label>
-          ) : definition.kind === 'color' ? (
+          ) : field.datatype === FieldDataType.Color ? (
             <label key={prop} className="flex flex-col gap-2">
               <span className="text-sm font-medium">{toSceneFieldLabel(prop)}</span>
               <DualColorPicker
-                primaryColor={String(value)}
+                primaryColor={String(value ?? '')}
                 onPrimaryColor={next => onValuePatch(patchEntryId ?? elementId, prop, next)}
                 primaryLabel="Text color"
                 triggerVariant="input"
                 triggerStyle="active-color"
               />
             </label>
-          ) : definition.kind === 'animation_speed' ? (
-            <div key={prop} className="flex items-center justify-between gap-4">
-              <span className="text-sm font-medium">Animation Speed</span>
-              <NumberStepper
-                value={Number(value)}
-                min={25}
-                max={200}
-                onChange={next => onValuePatch(patchEntryId ?? elementId, prop, next)}
-                inputWidth="w-20"
+          ) : field.type === 'string' ? (
+            <label key={prop} className="flex flex-col gap-2">
+              <span className="text-sm font-medium">{toSceneFieldLabel(prop)}</span>
+              <textarea
+                value={String(value ?? '')}
+                onChange={e => onValuePatch(patchEntryId ?? elementId, prop, e.target.value)}
+                className="h-9 px-3 rounded-md border border-border bg-background text-sm focus:outline-none focus:ring-1 focus:ring-ring/50"
               />
-            </div>
-          ) : definition.kind === 'number' ? (
+            </label>
+          ) : field.type === 'number' ? (
             <div key={prop} className="flex items-center justify-between gap-4">
               <span className="text-sm font-medium">{toSceneFieldLabel(prop)}</span>
               <NumberStepper
-                value={Number(value)}
+                value={Number(value ?? field.default ?? 0)}
                 onChange={next => onValuePatch(patchEntryId ?? elementId, prop, next)}
                 inputWidth="w-20"
               />
             </div>
-          ) : definition.kind === 'boolean' ? (
+          ) : isBooleanField ? (
             <label key={prop} className="flex items-center justify-between gap-4">
               <span className="text-sm font-medium">{toSceneFieldLabel(prop)}</span>
               <input
@@ -169,26 +163,26 @@ export default function SceneSettings({
                 className="h-4 w-4 rounded border-border"
               />
             </label>
-          ) : definition.kind === 'string[]' ? (
+          ) : field.type === 'array' ? (
             <div key={prop} className="flex flex-col gap-2">
               <span className="text-sm font-medium">{toSceneFieldLabel(prop)}</span>
               <SceneSortablePillList
-                items={(value as string[]).map((item, itemIndex) => ({
+                items={(Array.isArray(value) ? value : []).map((item, itemIndex) => ({
                   id: `${itemIndex}:${item}`,
-                  label: item,
+                  label: String(item),
                 }))}
                 minItems={MIN_ARRAY_ITEMS}
                 onRemove={id => {
-                  const next = (value as string[])
+                  const next = (Array.isArray(value) ? value : [])
                     .map((item, itemIndex) => ({ id: `${itemIndex}:${item}`, value: item }))
                     .filter(item => item.id !== id)
                     .map(item => item.value)
                   onValuePatch(patchEntryId ?? elementId, prop, next)
                 }}
                 onReorder={nextIds => {
-                  const indexed = (value as string[]).map((item, itemIndex) => ({
+                  const indexed = (Array.isArray(value) ? value : []).map((item, itemIndex) => ({
                     id: `${itemIndex}:${item}`,
-                    value: item,
+                    value: String(item),
                   }))
                   const next = nextIds
                     .map(id => indexed.find(item => item.id === id))
@@ -212,7 +206,7 @@ export default function SceneSettings({
                     e.preventDefault()
                     const nextItem = (arrayDrafts[prop] ?? '').trim()
                     if (!nextItem) return
-                    onValuePatch(patchEntryId ?? elementId, prop, [...(value as string[]), nextItem])
+                    onValuePatch(patchEntryId ?? elementId, prop, [...(Array.isArray(value) ? value : []), nextItem])
                     setArrayDrafts(prev => ({ ...prev, [prop]: '' }))
                   }}
                   className="h-9 flex-1 px-3 rounded-md border border-border bg-background text-sm focus:outline-none focus:ring-1 focus:ring-ring/50"
@@ -223,7 +217,7 @@ export default function SceneSettings({
                   onClick={() => {
                     const nextItem = (arrayDrafts[prop] ?? '').trim()
                     if (!nextItem) return
-                    onValuePatch(patchEntryId ?? elementId, prop, [...(value as string[]), nextItem])
+                    onValuePatch(patchEntryId ?? elementId, prop, [...(Array.isArray(value) ? value : []), nextItem])
                     setArrayDrafts(prev => ({ ...prev, [prop]: '' }))
                   }}
                   className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-background text-muted-foreground hover:text-foreground"

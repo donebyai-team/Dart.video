@@ -1,4 +1,5 @@
-import { DIRECTIONS, ENTRANCE_ANIMATIONS, EXIT_ANIMATIONS, HIGHLIGHT_STYLES, HIGHLIGHTED_TEXT_ANIMATIONS, LOGO_ANIMATIONS, SPLIT_BY_MODES, TEXT_CYCLE_TRANSITIONS } from "../../components/scenes";
+import { DIRECTIONS,  HIGHLIGHT_STYLES, HIGHLIGHTED_TEXT_ANIMATIONS, LOGO_ANIMATIONS, SPLIT_BY_MODES, TEXT_CYCLE_TRANSITIONS } from "../../components/scenes";
+import { ANIMATION_PRESET_ENTRANCE_ANIMATIONS, ANIMATION_PRESET_EXIT_ANIMATIONS } from "../../core/assets/AnimationPreset";
 import { TYPOGRAPHY_VARIANT_NAMES } from "../../tokens";
 
 export const AVAILABLE_ENUMS = [
@@ -10,12 +11,12 @@ export const AVAILABLE_ENUMS = [
     {
         name: "entranceAnimation",
         description: "used for entrance animations",
-        value: ENTRANCE_ANIMATIONS
+        value: ANIMATION_PRESET_ENTRANCE_ANIMATIONS
     },
     {
         name: "exitAnimation",
         description: "used for exit animations",
-        value: EXIT_ANIMATIONS
+        value: ANIMATION_PRESET_EXIT_ANIMATIONS
     },
     {
         name: "splitBy",

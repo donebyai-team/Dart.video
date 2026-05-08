@@ -6,11 +6,11 @@ import type { ComponentRegistration } from '../../../registry/registry';
 import { useAspectPreset } from '../../../styles';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { useTheme } from '../../../theme';
-import { TextStagger, TextStaggerDefaults, TextStaggerSchemaFields } from '../text/TextStagger';
+import { TextStagger, TextStaggerDefaults } from '../text/TextStagger';
 import { getIconTextPillMetrics, getNormalizedPill, IconTextPill, IconTextPillDefaults, PillPatchGroup } from '../../../core/assets/IconTextPill';
-import type { TextEntrancePresetName } from '../../../core/assets';
 import { TypographyVariant } from '../../../tokens';
 import { resolveTypography } from '../../../tokens/resolveTypography';
+import { AnimationPresetName } from '../../../core/assets/AnimationPreset';
 
 const HERO_TEXT_DEFAULTS = {
     ...TextStaggerDefaults,
@@ -19,7 +19,7 @@ const HERO_TEXT_DEFAULTS = {
     variant: 'display' as TypographyVariant,
     splitBy: 'line' as const,
     staggerDelay: 0,
-    entranceAnimation: 'scaleIn' as TextEntrancePresetName,
+    entranceAnimation: 'scaleIn' as AnimationPresetName,
 };
 
 const DEFAULT_ENTRANCE_FRAMES = 18;

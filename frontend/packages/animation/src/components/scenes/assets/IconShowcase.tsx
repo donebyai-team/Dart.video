@@ -4,9 +4,9 @@ import { IconAsset } from '../../../core/assets/IconAsset';
 import { TextStagger, TextStaggerDefaults } from '../text/TextStagger';
 import { useArrayPatch, usePatchedProps } from '../../../patches';
 import type { ComponentRegistration } from '../../../registry/registry';
-import { ENTRANCE_ANIMATIONS } from '../types';
 import { interpolateWithEasing } from '../../../styles';
 import { ArrayItem } from '../../../core/assets/ArrayItem';
+import { ANIMATION_PRESET_ENTRANCE_ANIMATIONS } from '../../../core/assets/AnimationPreset';
 
 // Default constants
 const DEFAULT_ENTRANCE_DURATION = 10;
@@ -17,7 +17,7 @@ const DEFAULT_VARIANT = 'headingLg' as const;
 const DEFAULT_ICON_SIZE = 90;
 const DEFAULT_ICON_GAP = 64;
 const DEFAULT_TEXT_STAGGER_SPLIT_BY = 'line' as const;
-const DEFAULT_TEXT_STAGGER_ANIMATION = ENTRANCE_ANIMATIONS[1];
+const DEFAULT_TEXT_STAGGER_ANIMATION = ANIMATION_PRESET_ENTRANCE_ANIMATIONS[1];
 
 export const IconShowcase: React.FC = () => {
     const textProps = usePatchedProps("textstagger", TextStaggerDefaults);

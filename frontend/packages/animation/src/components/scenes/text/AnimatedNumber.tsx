@@ -5,7 +5,7 @@ import { useStyleContext, useAspectPreset, interpolateWithEasing } from '../../.
 import { useTheme } from '../../../theme';
 import { resolveTypography } from '../../../tokens';
 import type { TypographyVariant } from '../../../tokens/semantic';
-import { resolveTextMotionPhase, type TextEntrancePresetName } from '../../../core/assets';
+import { AnimationPresetName, resolveAnimationPreset } from '../../../core/assets/AnimationPreset';
 import type { HighlightStyle } from '../types';
 import { Counter } from './Counter';
 import { Text } from '../../../core/assets/Text';
@@ -21,7 +21,7 @@ export const AnimatedNumberDefaults = {
     variant: 'display' as TypographyVariant,
     highlightStyle: 'glow' as HighlightStyle,
     highlightColor: undefined as string | undefined,
-    entranceAnimation: 'slideUp' as TextEntrancePresetName,
+    entranceAnimation: 'slideUp' as AnimationPresetName,
     animationDelay: 30,
     counterDuration: 45,
     className: undefined as string | undefined,
@@ -48,9 +48,17 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (initProps) => {
 
     const styleOverride = useStyleOverride(id);
 
-    const entranceMotion = resolveTextMotionPhase(frame, 'entrance', {
-        preset: actualAnimation,
+    const entranceProgress = interpolateWithEasing(
+        frame,
+        [0, actualAnimationDelay],
+        [0, 1],
+        'ease-out'
+    );
+    const entranceMotion = resolveAnimationPreset({
+        frame,
+        startAt: 0,
         duration: actualAnimationDelay,
+        presetName: actualAnimation,
         easing: 'ease-out',
     });
     const dragStyle = usePatchedDragStyle(id, entranceMotion.transform, props.style?.transform);

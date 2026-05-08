@@ -19,6 +19,7 @@
       "name": "entranceAnimation",
       "description": "used for entrance animations",
       "value": [
+        "none",
         "fadeIn",
         "slideUp",
         "slideDown",
@@ -32,7 +33,19 @@
         "flipY",
         "elasticScale",
         "swingIn",
-        "zoomIn",
+        "zoomIn"
+      ]
+    },
+    {
+      "name": "exitAnimation",
+      "description": "used for exit animations",
+      "value": [
+        "none",
+        "fadeOut",
+        "slideUp",
+        "slideDown",
+        "slideLeft",
+        "slideRight",
         "zoomOut"
       ]
     },
@@ -67,6 +80,7 @@
     {
       "name": "highlightStyle",
       "value": [
+        "simple",
         "marker",
         "underline",
         "box",
@@ -101,8 +115,7 @@
           "name": "StatCounter",
           "type": "scene",
           "tags": [
-            "Social Proof",
-            "Problem"
+            "Stats"
           ],
           "schema": [
             {
@@ -215,7 +228,7 @@
               "required": false
             }
           ],
-          "description": "Centered animated metric counter with a short 2-3 word label below it. Use for large number, single stat, metric, or KPI with or without prefix/suffix eg. 1240, 500$, 500K, 500M",
+          "description": "Centered animated metric counter with a short 2-3 word label below it. Use for large numbers(at least 2 digit), metric, or KPI with or without prefix/suffix eg. 1240, 500$, 500K, 500M",
           "celExpression": "(((10 + 50 + 2 + 1) * 100) / max(25, props.counter.speed))"
         },
         {
@@ -257,10 +270,22 @@
                   "default": 15
                 },
                 {
+                  "name": "exitAnimation",
+                  "type": "enum",
+                  "map": "props.exitAnimation",
+                  "default": "zoomOut"
+                },
+                {
+                  "name": "exitDuration",
+                  "type": "number",
+                  "map": "props.exitDuration",
+                  "default": 15
+                },
+                {
                   "name": "splitBy",
                   "type": "enum",
                   "map": "props.splitBy",
-                  "default": "word"
+                  "default": "line"
                 }
               ]
             }
@@ -278,7 +303,7 @@
             }
           ],
           "description": "Reveals a word or full text phrase word-by-word. Works for both single word and multi-word headlines or body text.",
-          "celExpression": "(segmentCount(props.textstagger.text, props.textstagger.splitBy) * props.textstagger.staggerDelay) + props.textstagger.duration"
+          "celExpression": "max(0, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * props.textstagger.staggerDelay + props.textstagger.duration + (props.textstagger.exitAnimation != \"none\" ? props.textstagger.exitDuration : 0)"
         },
         {
           "name": "TextHookStagger",
@@ -397,38 +422,56 @@
                 {
                   "name": "variant",
                   "type": "enum",
+                  "map": "props.variant",
                   "default": "display"
                 },
                 {
                   "name": "entranceAnimation",
                   "type": "enum",
                   "map": "props.entranceAnimation",
-                  "default": "slideUp"
+                  "default": "slideLeft"
                 },
                 {
                   "name": "animationDelay",
                   "type": "number",
-                  "default": 30
+                  "map": "props.animationDelay",
+                  "default": 15
                 },
                 {
                   "name": "animationDuration",
                   "type": "number",
-                  "default": 30
+                  "map": "props.animationDuration",
+                  "default": 20
+                },
+                {
+                  "name": "exitAnimation",
+                  "type": "enum",
+                  "map": "props.exitAnimation",
+                  "default": "zoomOut"
+                },
+                {
+                  "name": "exitDuration",
+                  "type": "number",
+                  "map": "props.exitDuration",
+                  "default": 15
                 },
                 {
                   "name": "highlightStyle",
                   "type": "enum",
-                  "default": "glow"
+                  "map": "props.highlightStyle",
+                  "default": "simple"
                 },
                 {
                   "name": "highlightedTextAnimation",
                   "type": "enum",
+                  "map": "props.highlightedTextAnimation",
                   "default": "jump"
                 },
                 {
                   "name": "highlightColor",
                   "type": "string",
                   "datatype": "color",
+                  "map": "props.highlightColor",
                   "default": ""
                 }
               ]
@@ -443,11 +486,11 @@
               "name": "entranceAnimation",
               "type": "enum",
               "required": false,
-              "default": "slideUp"
+              "default": "slideLeft"
             }
           ],
           "description": "Bold statement with an emphasized word/phrase. Use for key claims. Use {} to highlight. eg \"We build amazing {software}\"",
-          "celExpression": "props.texthighlight.animationDelay + props.texthighlight.animationDuration"
+          "celExpression": "props.texthighlight.animationDelay + props.texthighlight.animationDuration + (props.texthighlight.exitAnimation != \"none\" ? props.texthighlight.exitDuration : 0)"
         },
         {
           "name": "WordCycle",
@@ -565,7 +608,7 @@
                 {
                   "name": "highlightStyle",
                   "type": "enum",
-                  "default": "background"
+                  "default": "simple"
                 }
               ]
             }
@@ -806,10 +849,22 @@
                       "default": 15
                     },
                     {
+                      "name": "exitAnimation",
+                      "type": "enum",
+                      "map": "props.exitAnimation",
+                      "default": "none"
+                    },
+                    {
+                      "name": "exitDuration",
+                      "type": "number",
+                      "map": "props.exitDuration",
+                      "default": 15
+                    },
+                    {
                       "name": "splitBy",
                       "type": "enum",
                       "map": "props.splitBy",
-                      "default": "word"
+                      "default": "line"
                     }
                   ]
                 },
@@ -825,38 +880,56 @@
                     {
                       "name": "variant",
                       "type": "enum",
+                      "map": "props.variant",
                       "default": "display"
                     },
                     {
                       "name": "entranceAnimation",
                       "type": "enum",
                       "map": "props.entranceAnimation",
-                      "default": "slideUp"
+                      "default": "slideLeft"
                     },
                     {
                       "name": "animationDelay",
                       "type": "number",
-                      "default": 30
+                      "map": "props.animationDelay",
+                      "default": 15
                     },
                     {
                       "name": "animationDuration",
                       "type": "number",
-                      "default": 30
+                      "map": "props.animationDuration",
+                      "default": 20
+                    },
+                    {
+                      "name": "exitAnimation",
+                      "type": "enum",
+                      "map": "props.exitAnimation",
+                      "default": "none"
+                    },
+                    {
+                      "name": "exitDuration",
+                      "type": "number",
+                      "map": "props.exitDuration",
+                      "default": 15
                     },
                     {
                       "name": "highlightStyle",
                       "type": "enum",
-                      "default": "glow"
+                      "map": "props.highlightStyle",
+                      "default": "simple"
                     },
                     {
                       "name": "highlightedTextAnimation",
                       "type": "enum",
-                      "default": "jump"
+                      "map": "props.highlightedTextAnimation",
+                      "default": "none"
                     },
                     {
                       "name": "highlightColor",
                       "type": "string",
                       "datatype": "color",
+                      "map": "props.highlightColor",
                       "default": ""
                     }
                   ]
@@ -911,7 +984,7 @@
                     {
                       "name": "highlightStyle",
                       "type": "enum",
-                      "default": "background"
+                      "default": "simple"
                     }
                   ]
                 }
@@ -1176,7 +1249,7 @@
                   "name": "entranceAnimation",
                   "type": "enum",
                   "map": "props.entranceAnimation",
-                  "default": "slideUp"
+                  "default": "fadeIn"
                 },
                 {
                   "name": "duration",
@@ -1228,7 +1301,7 @@
               "name": "entranceAnimation",
               "type": "enum",
               "required": false,
-              "default": "slideUp"
+              "default": "fadeIn"
             }
           ],
           "description": "Row of logos + caption. Use for integrations, tech stack, partners, brands. eg. logos=[\"url1\", \"url2\"], text=\"caption text\".",
@@ -1444,7 +1517,7 @@
                   "name": "entranceAnimation",
                   "type": "enum",
                   "map": "props.entranceAnimation",
-                  "default": "slideUp"
+                  "default": "fadeIn"
                 },
                 {
                   "name": "duration",
@@ -1502,7 +1575,7 @@
               "name": "entranceAnimation",
               "type": "enum",
               "required": false,
-              "default": "slideUp"
+              "default": "fadeIn"
             }
           ],
           "description": "Row of icons + caption. Use for integrations, tech stack, partners, brands. eg. icons={[\"shopify\", \"midjourney\", \"openai\"]}, text=\"caption text\".",
@@ -1710,6 +1783,86 @@
           ],
           "description": "Shows a large product image or video with stacked feature cards on the top-right. Each feature card contains an icon and a short label.",
           "celExpression": "max(30, 20 + max(0, size(props.features) - 1) * 15 + 20)"
+        },
+        {
+          "name": "AnimatedMedia",
+          "type": "scene",
+          "tags": [
+            "Product UI"
+          ],
+          "description": "An animated media element (image or video) with text overlay.",
+          "schema": [
+            {
+              "type": "component",
+              "name": "textstagger",
+              "fields": [
+                {
+                  "name": "text",
+                  "type": "string",
+                  "datatype": "text",
+                  "map": "props.text"
+                },
+                {
+                  "name": "variant",
+                  "type": "enum",
+                  "map": "props.variant",
+                  "default": "headingLg"
+                },
+                {
+                  "name": "staggerDelay",
+                  "type": "number",
+                  "map": "props.staggerDelay",
+                  "default": 0
+                },
+                {
+                  "name": "entranceAnimation",
+                  "type": "enum",
+                  "map": "props.entranceAnimation",
+                  "default": "scaleIn"
+                },
+                {
+                  "name": "duration",
+                  "type": "number",
+                  "map": "props.duration",
+                  "default": 15
+                },
+                {
+                  "name": "splitBy",
+                  "type": "enum",
+                  "map": "props.splitBy",
+                  "default": "line"
+                }
+              ]
+            },
+            {
+              "type": "component",
+              "name": "mediaasset",
+              "fields": [
+                {
+                  "name": "src",
+                  "type": "string",
+                  "datatype": "media",
+                  "map": "props.src"
+                },
+                {
+                  "name": "motionPreset",
+                  "type": "enum",
+                  "default": "zoomTiltReveal"
+                }
+              ]
+            }
+          ],
+          "llmSchema": [
+            {
+              "name": "text",
+              "type": "string"
+            },
+            {
+              "name": "src",
+              "type": "string"
+            }
+          ],
+          "celExpression": "\"mediaasset\" in props ? props.mediaasset._duration : 90"
         }
       ]
     }
