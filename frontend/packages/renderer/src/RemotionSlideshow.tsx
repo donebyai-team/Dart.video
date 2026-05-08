@@ -39,20 +39,28 @@ export const SingleSlidePreview: React.FC<{
   isEditing?: boolean
 }> = ({ slide, isEditing = false }) => {
   const { width, height } = useVideoConfig()
+  const styleConfig = useMemo(() => resolveStyle('clean'), [])
+  const aspectPreset = useMemo<AspectPreset>(() => ASPECT_PRESETS["web"], [width, height])
   const hasAnimatedBackground = supportsAnimatedBackgroundEffect(slide.backgroundStyle)
   const slideForRender = hasAnimatedBackground ? { ...slide, backgroundStyle: undefined } : slide
 
-    return (
-      <BackgroundLayer backgroundStyle={slide.backgroundStyle}>
-        <AnimationSlide
-          slide={slideForRender}
-          width={width}
-          height={height}
-          isEditing={isEditing}
-          isSelected={false}
-        />
-      </BackgroundLayer>
-    )
+  return (
+    <ThemeProvider theme={defaultTheme}>
+      <AspectPresetProvider preset={aspectPreset}>
+        <StyleContextProvider style={styleConfig}>
+          <BackgroundLayer backgroundStyle={slide.backgroundStyle}>
+            <AnimationSlide
+              slide={slideForRender}
+              width={width}
+              height={height}
+              isEditing={isEditing}
+              isSelected={false}
+            />
+          </BackgroundLayer>
+        </StyleContextProvider>
+      </AspectPresetProvider>
+    </ThemeProvider>
+  )
 }
 
 /**

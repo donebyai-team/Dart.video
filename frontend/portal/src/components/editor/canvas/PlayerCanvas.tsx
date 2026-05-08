@@ -119,7 +119,7 @@ const PlayerCanvas = ({
         style={{
           width: canvasSize.width,
           height: canvasSize.height,
-          transform: `scale(${scale})`,
+          transform: scale === 1 ? 'none' : `scale(${scale})`,
           transformOrigin: 'center',
         }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
