@@ -14,6 +14,7 @@ import (
 	"github.com/shank318/coasterai/services/voiceover"
 	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
+	"strings"
 )
 
 // Default transition time for all slides, same in frontend
@@ -118,6 +119,8 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 	sections := make([]*pbcore.Section, 0, len(plan.Sections))
 	sceneMapper := make(map[string]*scenes.SceneConfig)
 
+	isTextHighlightSeen := false
+
 	for sectionIndex, pendingSection := range plan.Sections {
 		section := &pbcore.Section{
 			Id:     fmt.Sprintf("section-%s", uuid.NewString()),
@@ -145,6 +148,18 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 							Index: pendingSlide.Index,
 						},
 					},
+				}
+
+				// TODO: Move to a better place
+				// By default, TextHighlight exit is animated with zoom on the whole slide,
+				// But we want to change to highledited text only, so we need to change the exit animation to none
+				// But we do it only once, in case there are multiple TextHighlights in the same slide
+				if strings.EqualFold(sceneConfig.Name, "TextHighlight") && !isTextHighlightSeen {
+					isTextHighlightSeen = true
+					if textHighlightProps, ok := sceneConfig.Props["texthighlight"].(map[string]any); ok {
+						textHighlightProps["highlightedTextAnimation"] = "zoom"
+						textHighlightProps["exitAnimation"] = "none"
+					}
 				}
 
 				sceneMapper[slide.Id] = sceneConfig
