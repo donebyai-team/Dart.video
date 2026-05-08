@@ -1,11 +1,9 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
 import type { TypographyVariant } from '../../../tokens/semantic';
-import { useStyleContext } from '../../../styles/StyleContext';
-import { useElement, usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
-import { interpolateWithEasing, useAspectPreset } from '../../../styles';
-import { useTheme } from '../../../theme';
-import { resolveTypography } from '../../../tokens';
+import { useElement } from '../../../patches';
+import { interpolateWithEasing } from '../../../styles';
+
 import {
     getEntranceTransform,
     type EntranceAnimation,

@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { SCENE_COMPONENTS } from './scenes';
 import { CONTENT_COMPONENTS } from './assets';
 import { LAYOUT_COMPONENTS } from './layouts';
+import { FieldSchema } from './types';
 
 /** Component taxonomy types. */
 export type ComponentType = 'layout' | 'animation' | 'content' | 'scene' | 'headless' | 'brand';
@@ -69,6 +70,69 @@ export function resolveComponentFromId(id: string): ComponentRegistration | null
   }
 
   return null;
+}
+
+
+// TODO: We should simply replave this with backend sending the
+// FieldSchema
+export function getElementSchema(
+  componentName: string,
+  elementId: string
+): FieldSchema[] {
+  console.debug("Component:", componentName, "Element:", elementId)
+
+  if (!componentName){
+    return []
+  }
+
+  let registration = REGISTRY_BY_LOWERCASE.get(componentName.toLowerCase());
+  // TODO: Remove later
+  if (componentName.includes("TextWithImageScene") || componentName.includes("TextWithVideoScene")) {
+    registration = REGISTRY_BY_LOWERCASE.get("textwithmediascene");
+  }
+
+  if (!registration) {
+    console.error(`Component ${componentName} not found`)
+    return [];
+  }
+
+  const schema = registration.schema ?? [];
+
+  const normalizedElementId = elementId
+    .toLowerCase()
+    .replace(/imageasset/g, "mediaasset")
+    .replace(/videoasset/g, "mediaasset");
+
+  // Priority:
+  // 1. Full elementId
+  // 2. Split parts of elementId
+  const candidates = [
+    normalizedElementId,
+    ...normalizedElementId.split("-"),
+  ];
+
+  for (const candidate of candidates) {
+    for (const item of schema) {
+      // Match top-level schema.name
+      if (item.name?.toLowerCase() === candidate) {
+        return item.fields ?? [];
+      }
+
+      // Match nested components[].name
+      if (Array.isArray(item.components)) {
+        const matchedComponent = item.components.find(
+          (c: any) => c.name?.toLowerCase() === candidate
+        );
+
+        if (matchedComponent) {
+          return matchedComponent.fields ?? [];
+        }
+      }
+    }
+  }
+
+  console.error(`Schema fields not found for elementId "${elementId}"`)
+  return [];
 }
 
 export function isMediaComponent(id: string): boolean {

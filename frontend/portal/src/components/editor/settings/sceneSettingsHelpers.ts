@@ -1,72 +1,31 @@
-import { MEDIA_MOTION_PRESETS } from "@coasterai/animation/src/core/assets/MediaMotionPreset"
-import { DIRECTIONS, ENTRANCE_ANIMATIONS, HIGHLIGHT_STYLES, HIGHLIGHTED_TEXT_ANIMATIONS, LOGO_ANIMATIONS, SCENE_COMPONENTS, SPLIT_BY_MODES, STACK_ANIMATIONS, TEXT_CYCLE_TRANSITIONS, TYPOGRAPHY_VARIANT_NAMES } from "../../../../../packages/animation/src"
+import {
+  DIRECTIONS,
+  ENTRANCE_ANIMATIONS,
+  getElementSchema,
+  HIGHLIGHT_STYLES,
+  HIGHLIGHTED_TEXT_ANIMATIONS,
+  LOGO_ANIMATIONS,
+  SPLIT_BY_MODES,
+  STACK_ANIMATIONS,
+  TEXT_CYCLE_TRANSITIONS,
+  TYPOGRAPHY_VARIANT_NAMES,
+  type FieldSchema,
+} from '../../../../../packages/animation/src'
+import { MEDIA_MOTION_PRESETS } from '@coasterai/animation/src/core/assets/MediaMotionPreset'
 
-
-export type SceneFieldKind = 'string' | 'number' | 'boolean' | 'string[]' | 'enum'
-  | 'color'
-  | 'icon'
-  | 'icon[]'
-  | 'media'
-  | 'media[]'
-  | 'animation_speed'
-
-export type SceneFieldDefinition = {
-  kind: SceneFieldKind
-  options?: string[]
-}
-
-const RESERVED_FIELD_MAP: Record<string, SceneFieldDefinition> = {
-  variant: {
-    kind: 'enum',
-    options: [...TYPOGRAPHY_VARIANT_NAMES],
-  },
-  varient: {
-    kind: 'enum',
-    options: [...TYPOGRAPHY_VARIANT_NAMES],
-  },
-  entranceAnimation: {
-    kind: 'enum',
-    options: [...ENTRANCE_ANIMATIONS],
-  },
-  direction: {
-    kind: 'enum',
-    options: [...DIRECTIONS],
-  },
-  logoAnimation: {
-    kind: 'enum',
-    options: [...LOGO_ANIMATIONS],
-  },
-  splitBy: {
-    kind: 'enum',
-    options: [...SPLIT_BY_MODES],
-  },
-  transition: {
-    kind: 'enum',
-    options: [...TEXT_CYCLE_TRANSITIONS],
-  },
-  text: {
-    kind: 'string',
-  },
-  highlightStyle: {
-    kind: 'enum',
-    options: [...HIGHLIGHT_STYLES],
-  },
-  highlightedTextAnimation: {
-    kind: 'enum',
-    options: [...HIGHLIGHTED_TEXT_ANIMATIONS],
-  },
-  textCycleTransition: {
-    kind: 'enum',
-    options: [...TEXT_CYCLE_TRANSITIONS],
-  },
-  stackAnimation: {
-    kind: 'enum',
-    options: [...STACK_ANIMATIONS],
-  },
-  motionPreset: {
-    kind: 'enum',
-    options: [...MEDIA_MOTION_PRESETS],
-  }
+const RESERVED_FIELD_MAP: Record<string, string[]> = {
+  variant: [...TYPOGRAPHY_VARIANT_NAMES],
+  varient: [...TYPOGRAPHY_VARIANT_NAMES],
+  entranceAnimation: [...ENTRANCE_ANIMATIONS],
+  direction: [...DIRECTIONS],
+  logoAnimation: [...LOGO_ANIMATIONS],
+  splitBy: [...SPLIT_BY_MODES],
+  transition: [...TEXT_CYCLE_TRANSITIONS],
+  highlightStyle: [...HIGHLIGHT_STYLES],
+  highlightedTextAnimation: [...HIGHLIGHTED_TEXT_ANIMATIONS],
+  textCycleTransition: [...TEXT_CYCLE_TRANSITIONS],
+  stackAnimation: [...STACK_ANIMATIONS],
+  motionPreset: [...MEDIA_MOTION_PRESETS],
 }
 
 export function toSceneFieldLabel(prop: string): string {
@@ -75,131 +34,12 @@ export function toSceneFieldLabel(prop: string): string {
     .replace(/^./, c => c.toUpperCase())
 }
 
-export function getReservedSceneField(prop: string): SceneFieldDefinition | null {
+export function getReservedSceneFieldOptions(prop: string): string[] | null {
   return RESERVED_FIELD_MAP[prop] ?? null
 }
 
-export function inferSceneFieldDefinition(prop: string, value: unknown): SceneFieldDefinition | null {
-  const reserved = getReservedSceneField(prop)
-  if (reserved) return reserved
-
-  const lowerProp = prop.toLowerCase()
-
-  // TODO: Move it using the schema
-  const isMediaField = 
-  lowerProp.includes('video') || 
-  lowerProp.includes('image') || 
-  lowerProp.includes('media') ||
-  lowerProp.includes('src')
-
-  const isColorField = lowerProp.includes('color')
-
-  if (lowerProp === 'speed')
-    return { kind: 'animation_speed' }
-
-  if (isMediaField && typeof value === 'string') {
-    return { kind: 'media' }
-  }
-  if (isMediaField && Array.isArray(value) && value.every(item => typeof item === 'string')) {
-    return { kind: 'media[]' }
-  }
-
-  if (lowerProp.includes('icon') && typeof value === 'string') {
-    return { kind: 'icon' }
-  }
-  if (lowerProp.includes('icon') && Array.isArray(value)) {
-    return { kind: 'icon[]' }
-  }
-
-  if (isColorField && typeof value === 'string') {
-    return { kind: 'color' }
-  }
-
-  if (typeof value === 'string') return { kind: 'string' }
-  if (typeof value === 'number') return { kind: 'number' }
-  if (typeof value === 'boolean') return { kind: 'boolean' }
-  if (Array.isArray(value) && value.every(item => typeof item === 'string')) {
-    return { kind: 'string[]' }
-  }
-
-  return null
-}
-
-function getSceneFieldPriority(prop: string): number {
-  const lower = prop.toLowerCase()
-
-  if (lower === 'text' || lower === 'children') return 0
-  if (lower.includes('text') || lower === 'variant') return 1
-  return 10
-}
-
-function getSceneFieldKindPriority(kind: SceneFieldKind): number {
-  switch (kind) {
-    case 'string':
-      return 0
-    case 'number':
-      return 1
-    case 'color':
-      return 2
-    case 'icon':
-      return 3
-    case 'icon[]':
-      return 3
-    case 'media':
-      return 4
-    case 'media[]':
-      return 5
-    case 'enum':
-      return 8
-    case 'boolean':
-      return 7
-    case 'string[]':
-      return 8
-    case 'animation_speed':
-      return 100
-    default:
-      return 10
-  }
-}
-
-export function getSceneFieldGroupLabel(kind: SceneFieldKind): string {
-  switch (kind) {
-    case 'string':
-      return 'Text'
-    case 'number':
-      return 'Numbers'
-    case 'color':
-      return 'Colors'
-    case 'icon':
-      return 'Icons'
-    case 'icon[]':
-      return 'Icons'
-    case 'media':
-      return 'Media Asset'
-    case 'media[]':
-      return 'Media Assets'
-    case 'enum':
-      return 'Options'
-    case 'boolean':
-      return 'Toggles'
-    case 'string[]':
-      return 'Lists'
-    default:
-      return 'Fields'
-  }
-}
-
-export function compareSceneFieldsByPriority(
-  a: { prop: string; definition: SceneFieldDefinition },
-  b: { prop: string; definition: SceneFieldDefinition },
-): number {
-  const kindDiff =
-    getSceneFieldKindPriority(a.definition.kind) - getSceneFieldKindPriority(b.definition.kind)
-  if (kindDiff !== 0) return kindDiff
-
-  const priorityDiff = getSceneFieldPriority(a.prop) - getSceneFieldPriority(b.prop)
-  if (priorityDiff !== 0) return priorityDiff
-  return a.prop.localeCompare(b.prop)
+function isEditableSceneProp(prop: string): boolean {
+  return !prop.startsWith('_') && prop !== 'style' && prop !== 'dragX' && prop !== 'dragY'
 }
 
 export function resolveScenePatchEntryId(
@@ -220,30 +60,10 @@ export function resolveScenePatchEntryId(
 export function getEditableSceneFields(
   elementId: string,
   overlay: Record<string, unknown>,
-): Array<{ prop: string; value: unknown; definition: SceneFieldDefinition }> {
-  const patchEntryId = resolveScenePatchEntryId(elementId, overlay)
-  const patchEntry =
-    patchEntryId && typeof overlay[patchEntryId] === 'object' && overlay[patchEntryId] !== null
-      ? (overlay[patchEntryId] as Record<string, unknown>)
-      : {}
+): FieldSchema[] {    
+  const componentName = overlay.name as string
 
-  return Object.entries(patchEntry)
-    .filter(([prop]) => !prop.startsWith('_') && prop !== 'style' && prop !== 'dragX' && prop !== 'dragY') // skip these fields to edit
-    .map(([prop, value]) => ({
-      prop,
-      value,
-      definition: inferSceneFieldDefinition(prop, value),
-    }))
-    .filter(
-      (
-        field,
-      ): field is {
-        prop: string
-        value: unknown
-        definition: SceneFieldDefinition
-      } => field.definition !== null,
-    )
-    .sort((left, right) => compareSceneFieldsByPriority(left, right))
+  return getElementSchema(componentName, elementId).filter(field => isEditableSceneProp(field.name))
 }
 
 export function hasEditableSceneFields(
