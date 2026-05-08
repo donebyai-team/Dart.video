@@ -6,7 +6,7 @@ import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme/ThemeContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { resolveTypography } from '../../../tokens/resolveTypography';
-import { EntranceAnimation, getEntranceTransform } from '../types';
+import { resolveTextMotionPhase, type TextEntrancePresetName } from '../../../core/assets';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { TypographyVariant } from '../../../tokens';
 
@@ -19,7 +19,7 @@ export const TypewriterDefaults = {
   startAt: 0,
   splitBy: "char" as const,
   variant: "display" as TypographyVariant,
-  entranceAnimation: "fadeIn" as EntranceAnimation,
+  entranceAnimation: "fadeIn" as TextEntrancePresetName,
   typingDuration: TYPEWRITER_TYPING_DURATION,
   style: undefined as React.CSSProperties | undefined,
   className: undefined as string | undefined,
@@ -46,12 +46,11 @@ export function Typewriter(initProps: TypewriterProps): React.ReactElement {
   const dragStyle = usePatchedDragStyle(id, props.style?.transform);
 
   const entranceDuration = 20;
-  const entranceProgress = interpolateWithEasing(
-    frame,
-    [0, entranceDuration],
-    [0, 1],
-    'linear',
-  );
+  const entranceMotion = resolveTextMotionPhase(frame, 'entrance', {
+    preset: props.entranceAnimation,
+    duration: entranceDuration,
+    easing: 'linear',
+  });
 
   const progress = interpolateWithEasing(
     frame,
@@ -97,8 +96,8 @@ export function Typewriter(initProps: TypewriterProps): React.ReactElement {
   const textStyles = {
     ...resolveTypography(props.variant, styleConfig, theme, preset),
     ...textStyleProps,
-    opacity: entranceProgress,
-    transform: getEntranceTransform(props.entranceAnimation, entranceProgress),
+    opacity: entranceMotion.opacity,
+    transform: entranceMotion.transform,
     display: 'inline-block',
     position: 'relative' as const,
     whiteSpace: 'pre-wrap' as const,
@@ -131,7 +130,7 @@ export function Typewriter(initProps: TypewriterProps): React.ReactElement {
               backgroundImage: `linear-gradient(90deg, rgba(255,255,255,0) ${pulseBandStart}%, rgba(255,255,255,0.95) ${pulseCenter}%, rgba(255,255,255,0) ${pulseBandEnd}%)`,
               backgroundClip: 'text',
               WebkitBackgroundClip: 'text',
-              opacity: entranceProgress,
+              opacity: entranceMotion.opacity,
             }}
           >
             {visibleText}

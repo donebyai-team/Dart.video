@@ -1,22 +1,19 @@
-export const ENTRANCE_ANIMATIONS = [
-    'fadeIn',
-    'slideUp',
-    'slideDown',
-    'slideLeft',
-    'slideRight',
-    'scaleIn',
-    'rotateIn',
-    'tiltX',
-    'tiltY',
-    'flipX',
-    'flipY',
-    'elasticScale',
-    'swingIn',
-    'zoomIn',
-    'zoomOut'
-] as const;
+import { Easing } from "remotion";
+import {
+    TEXT_ENTRANCE_PRESETS,
+    TEXT_EXIT_PRESETS,
+    getTextMotionTransform,
+    type TextEntrancePresetName,
+    type TextExitPresetName,
+} from "../../core/assets";
 
-export type EntranceAnimation = typeof ENTRANCE_ANIMATIONS[number];
+export const ENTRANCE_ANIMATIONS = TEXT_ENTRANCE_PRESETS;
+
+export type EntranceAnimation = TextEntrancePresetName;
+
+export const EXIT_ANIMATIONS = TEXT_EXIT_PRESETS;
+
+export type ExitAnimation = TextExitPresetName;
 
 export const LOGO_ANIMATIONS = [
     'none',
@@ -46,7 +43,7 @@ export const SPLIT_BY_MODES = ['char', 'word', 'line'] as const;
 
 export type SplitByMode = typeof SPLIT_BY_MODES[number];
 
-export const HIGHLIGHT_STYLES = ['marker', 'underline', 'box', 'glow', 'background'] as const;
+export const HIGHLIGHT_STYLES = ['simple', 'marker', 'underline', 'box', 'glow', 'background'] as const;
 
 export type HighlightStyle = typeof HIGHLIGHT_STYLES[number];
 
@@ -59,42 +56,15 @@ export function getEntranceTransform(
     progress: number,
     distance: number = 200,
 ): string {
-    const inv = 1 - progress;
-    switch (animation) {
-        case 'slideUp':
-            return `translateY(${inv * distance}px)`;
-        case 'slideDown':
-            return `translateY(${inv * -distance}px)`;
-        case 'slideLeft':
-            return `translateX(${inv * distance}px)`;
-        case 'slideRight':
-            return `translateX(${inv * -distance}px)`;
-        case 'scaleIn':
-            return `scale(${0.5 + progress * 0.5})`;
-        case 'rotateIn':
-            return `rotate(${inv * 180}deg) scale(${0.5 + progress * 0.5})`;
-        case 'tiltX':
-            return `perspective(800px) rotateX(${inv * 90}deg)`;
-        case 'tiltY':
-            return `perspective(800px) rotateY(${inv * 90}deg)`;
-        case 'flipX':
-            return `perspective(800px) rotateX(${inv * 180}deg)`;
-        case 'flipY':
-            return `perspective(800px) rotateY(${inv * 180}deg)`;
-        case 'elasticScale': {
-            const elastic = 1 + Math.sin(progress * Math.PI * 3) * inv * 0.3;
-            return `scale(${progress * elastic})`;
-        }
-        case 'swingIn':
-            return `perspective(800px) rotateY(${inv * 70}deg) translateX(${inv * -100}px)`;
-        case 'zoomIn':
-            return `scale(${3 - progress * 2})`;    
-        case 'zoomOut':
-        return `scale(${1 + progress * 2})`;    
-        case 'fadeIn':
-        default:
-            return 'none';
-    }
+    return getTextMotionTransform(animation, 'entrance', progress, distance);
+}
+
+export function getExitTransform(
+    animation: ExitAnimation,
+    progress: number,
+    distance: number = 200,
+): string {
+    return getTextMotionTransform(animation, 'exit', progress, distance);
 }
 
 export function getHighlightedTextAnimationTransform(
@@ -105,7 +75,8 @@ export function getHighlightedTextAnimationTransform(
 
     switch (animation) {
         case 'zoom':
-            return `scale(${1 + clampedProgress * 9})`;
+            const eased = Easing.in(Easing.exp)(clampedProgress);
+            return `scale(${1 + eased * 10})`;
         case 'jump': {
             const jumpHeight = -18 * Math.sin(clampedProgress * Math.PI);
             return `translateY(${jumpHeight}px)`;

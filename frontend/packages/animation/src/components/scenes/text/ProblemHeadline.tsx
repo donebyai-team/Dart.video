@@ -7,9 +7,9 @@ import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme/ThemeContext';
 import type { TypographyVariant } from '../../../tokens/semantic';
 import { resolveTypography } from '../../../tokens/resolveTypography';
-import { getEntranceTransform } from '../types';
-import type { EntranceAnimation } from '../types';
+import { resolveTextMotionPhase, type TextEntrancePresetName } from '../../../core/assets';
 import type { ComponentRegistration } from '../../../registry/registry';
+import { parsePixelValue } from './measureText';
 
 const BASE_LINE_ONE_STAGGER = 5;
 const BASE_LINE_ONE_DURATION = 12;
@@ -40,26 +40,13 @@ export const ProblemHeadlineDefaults = {
   startAt: 0,
   text: 'Static products lose customers',
   variant: 'display' as TypographyVariant,
-  entranceAnimation: 'slideUp' as EntranceAnimation,
+  entranceAnimation: 'slideUp' as TextEntrancePresetName,
   highlightColor: '',
   className: undefined as string | undefined,
   style: undefined as React.CSSProperties | undefined,
 };
 
 export type ProblemHeadlineProps = Partial<typeof ProblemHeadlineDefaults>;
-
-function parsePixelValue(value: React.CSSProperties['fontSize']): number {
-  if (typeof value === 'number') {
-    return value;
-  }
-
-  if (typeof value === 'string') {
-    const parsed = parseFloat(value);
-    return Number.isFinite(parsed) ? parsed : 96;
-  }
-
-  return 96;
-}
 
 function estimateLineWidth(line: string, fontSizePx: number): number {
   const characterCount = line.trim().length || 1;
@@ -153,7 +140,7 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
   const { transform: _ignoredStyleTransform, ...styleOverrideWithoutTransform } = styleOverride;
   const { transform: _ignoredPropTransform, ...propStyleWithoutTransform } = props.style ?? {};
   const typographyStyle = resolveTypography(props.variant, styleConfig, theme, preset);
-  const fontSizePx = parsePixelValue(typographyStyle.fontSize);
+  const fontSizePx = parsePixelValue(typographyStyle.fontSize, 60);
   const lineGapPx = fontSizePx * 1.1;
   const availableWidth = preset.width - preset.safeArea.left - preset.safeArea.right;
   const maxTextWidthPx = Math.max(fontSizePx * 6, availableWidth * 0.72);
@@ -227,11 +214,13 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
       'ease-out',
     )
     : 0;
-  const lineTwoTransform = getEntranceTransform(
-    props.entranceAnimation,
-    lineTwoOpacity,
-    Math.max(fontSizePx * 0.9, 80),
-  );
+  const lineTwoTransform = resolveTextMotionPhase(elapsed, 'entrance', {
+    preset: props.entranceAnimation,
+    delay: lineTwoStart,
+    duration: lineTwoDuration,
+    distance: Math.max(fontSizePx * 0.9, 80),
+    easing: 'ease-out',
+  }).transform;
 
   const brushSweepProgress = interpolateWithEasing(
     elapsed,
@@ -269,11 +258,13 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
     const visibleProgress = Math.max(0, Math.min(1, entryProgress));
     const isVisible = visibleProgress > MIN_VISIBLE_PROGRESS;
     const estimatedWidth = estimateWordWidth(word, fontSizePx);
-    const entranceTransform = getEntranceTransform(
-      props.entranceAnimation,
-      visibleProgress,
-      Math.max(fontSizePx * 0.75, 60),
-    );
+    const entranceTransform = resolveTextMotionPhase(elapsed, 'entrance', {
+      preset: props.entranceAnimation,
+      delay: entryStart,
+      duration: lineOneWordDuration,
+      distance: Math.max(fontSizePx * 0.75, 60),
+      easing: 'ease-out',
+    }).transform;
 
     return {
       display: 'inline-block',

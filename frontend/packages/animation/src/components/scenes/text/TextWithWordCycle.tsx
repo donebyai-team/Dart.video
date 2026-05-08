@@ -8,9 +8,12 @@ import { interpolateWithEasing } from '../../../styles/easingResolver';
 import type { TypographyVariant } from '../../../tokens/semantic';
 import { resolveTypography } from '../../../tokens/resolveTypography';
 import { Text } from '../../../core/assets/Text';
+import {
+  resolveTextMotionPhase,
+  type TextEntrancePresetName,
+} from '../../../core/assets';
 import type { ComponentRegistration } from '../../../registry/registry';
-import { getEntranceTransform } from '../types';
-import type { EntranceAnimation, HighlightStyle, TextCycleTransition } from '../types';
+import type { HighlightStyle, TextCycleTransition } from '../types';
 import { measureTextWidth } from './measureText';
 
 export const TextWithWordCycleDefaults = {
@@ -21,7 +24,7 @@ export const TextWithWordCycleDefaults = {
   holdDuration: 20,
   transitionDuration: 10,
   textCycleTransition: 'slideUp' as TextCycleTransition,
-  entranceAnimation: 'slideUp' as EntranceAnimation,
+  entranceAnimation: 'slideUp' as TextEntrancePresetName,
   variant: 'display' as TypographyVariant,
   highlightStyle: 'background' as HighlightStyle,
   highlightColor: undefined as string | undefined,
@@ -56,14 +59,12 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (initProps) =
   const cycleDuration = props.holdDuration + props.transitionDuration;
   const entranceDuration = 20;
   const localFrame = Math.max(0, frame - props.startAt);
-  const entranceProgress = interpolateWithEasing(
-    localFrame,
-    [0, entranceDuration],
-    [0, 1],
-    'ease-out',
-  );
-  const entranceTransform = getEntranceTransform(actualEntranceAnimation, entranceProgress);
-  const dragStyle = usePatchedDragStyle(id, entranceTransform, props.style?.transform, overrideTransform);
+  const entranceMotion = resolveTextMotionPhase(localFrame, 'entrance', {
+    preset: actualEntranceAnimation,
+    duration: entranceDuration,
+    easing: 'ease-out',
+  });
+  const dragStyle = usePatchedDragStyle(id, entranceMotion.transform, props.style?.transform, overrideTransform);
   const typographyStyle = resolveTypography(patchedVariant, styleConfig, theme, preset);
   const textOverrideStyle: React.CSSProperties = {
     ...styleOverride,
@@ -71,7 +72,7 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (initProps) =
   delete textOverrideStyle.transform;
   const containerStyle: React.CSSProperties = {
     display: 'inline-block',
-    opacity: entranceProgress,
+    opacity: entranceMotion.opacity,
     ...typographyStyle,
     ...props.style,
     ...styleOverride,

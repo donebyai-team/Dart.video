@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useCurrentFrame } from 'remotion';
 import { useElement, usePatchOverlay } from '../../../patches';
-import { MediaAsset, MediaAssetProps, } from '../../../core/assets';
+import { MediaAsset, MediaAssetProps, resolveTextMotionPhase, type TextEntrancePresetName } from '../../../core/assets';
 import { Row, Stack } from '../../../core/layout';
-import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import type { ComponentRegistration } from '../../../registry/registry';
-import { getEntranceTransform, ENTRANCE_ANIMATIONS } from '../types';
 import { TextHighlight, TextHighlightDefaults, TextHighlightSchemaFields } from '../text/TextHighlight';
 import { TextStagger, TextStaggerDefaults, TextStaggerSchemaFields } from '../text/TextStagger';
 import { TextWithWordCycle, TextWithWordCycleDefaults, TextWithWordCycleSchemaFields } from '../text/TextWithWordCycle';
@@ -21,7 +19,7 @@ const VERTICAL_STACK_GAP_PX = 64;
 
 type SceneProps = {
   id?: string;
-  entranceAnimation?: (typeof ENTRANCE_ANIMATIONS)[number];
+  entranceAnimation?: TextEntrancePresetName;
 };
 
 const SceneDefaults: SceneProps = {
@@ -84,7 +82,12 @@ export function TextWithMediaScene(): React.ReactElement {
   const { props: textWithWordCycleProps } = useElement('textwithwordcycle', {...TextWithWordCycleDefaults, variant: "headingLg" as TypographyVariant});
 
   const mediaDimentions = useVideoDimensions(mediaProps.src || '');
-  const mediaProgress = interpolateWithEasing(frame, [10, 50], [0, 1], 'ease-out');
+  const mediaMotion = resolveTextMotionPhase(frame, 'entrance', {
+    preset: sceneProps.entranceAnimation ?? DEFAULT_ANIMATION,
+    delay: 10,
+    duration: 40,
+    easing: 'ease-out',
+  });
 
   const availableWidth = preset.width - preset.safeArea.left - preset.safeArea.right;
   const availableHeight = preset.height - preset.safeArea.top - preset.safeArea.bottom;
@@ -151,8 +154,8 @@ export function TextWithMediaScene(): React.ReactElement {
   const mediaNode = (
     <div
       style={{
-        opacity: mediaProgress,
-        transform: getEntranceTransform(sceneProps.entranceAnimation ?? DEFAULT_ANIMATION, mediaProgress),
+        opacity: mediaMotion.opacity,
+        transform: mediaMotion.transform,
       }}
     >
       <MediaAsset

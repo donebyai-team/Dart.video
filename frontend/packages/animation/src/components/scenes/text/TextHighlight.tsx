@@ -8,9 +8,11 @@ import { useTheme } from '../../../theme';
 import type { TypographyVariant } from '../../../tokens';
 import { resolveTypography } from '../../../tokens/resolveTypography';
 import {
+    resolveTextMotionPhase,
+    type TextEntrancePresetName,
+} from '../../../core/assets';
+import {
     getHighlightedTextAnimationTransform,
-    getEntranceTransform,
-    type EntranceAnimation,
     type HighlightedTextAnimation,
     type HighlightStyle,
 } from '../types';
@@ -20,10 +22,10 @@ export const TextHighlightDefaults = {
     id: 'texthighlight',
     text: '',
     variant: 'display' as TypographyVariant,
-    highlightStyle: 'glow' as HighlightStyle,
+    highlightStyle: 'simple' as HighlightStyle,
     highlightedTextAnimation: 'jump' as HighlightedTextAnimation,
     highlightColor: '',
-    entranceAnimation: 'slideUp' as EntranceAnimation,
+    entranceAnimation: 'zoomIn' as TextEntrancePresetName,
     animationDelay: 30,
     animationDuration: 30,
     className: undefined as string | undefined,
@@ -57,21 +59,19 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
     // Phase 2: Highlighted text animation (animationDelay to animationDelay + zoomDuration)
     // Phase 3: Text remains visible after animation completes
 
-    const entranceProgress = interpolateWithEasing(
-        frame,
-        [0, actualAnimationDelay],
-        [0, 1],
-        'ease-out'
-    );
-    const entranceTransform = getEntranceTransform(actualAnimation, entranceProgress, 200);
-    const dragStyle = usePatchedDragStyle(id, entranceTransform, props.style?.transform);
+    const entranceMotion = resolveTextMotionPhase(frame, 'entrance', {
+        preset: actualAnimation,
+        duration: actualAnimationDelay,
+        distance: 200,
+        easing: 'ease-out',
+    });
+    const dragStyle = usePatchedDragStyle(id, entranceMotion.transform, props.style?.transform);
 
     const zoomStartFrame = actualAnimationDelay;
     const zoomProgress = interpolateWithEasing(
         frame,
         [zoomStartFrame, zoomStartFrame + actualAnimationDuration],
         [0, 1],
-        'ease-out'
     );
 
     const segments = useMemo(() => {
@@ -177,6 +177,14 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
                     display: 'inline-block',
                 };
 
+            case 'simple':
+                return {
+                    position: 'relative',
+                    color: progress > 0.5 ? actualHighlightColor : 'inherit',
+                    transform: baseTransform,
+                    display: 'inline-block',
+                };                
+
             case 'background':
                 return {
                     position: 'relative',
@@ -215,7 +223,7 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
                 display: 'block',
                 width: '100%',
                 maxWidth: '100%',
-                opacity: entranceProgress,
+                opacity: entranceMotion.opacity,
                 ...dragStyle,
             }}
         >

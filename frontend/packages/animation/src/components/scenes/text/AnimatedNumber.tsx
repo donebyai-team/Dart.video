@@ -5,8 +5,8 @@ import { useStyleContext, useAspectPreset, interpolateWithEasing } from '../../.
 import { useTheme } from '../../../theme';
 import { resolveTypography } from '../../../tokens';
 import type { TypographyVariant } from '../../../tokens/semantic';
-import { getEntranceTransform } from '../types';
-import type { EntranceAnimation, HighlightStyle } from '../types';
+import { resolveTextMotionPhase, type TextEntrancePresetName } from '../../../core/assets';
+import type { HighlightStyle } from '../types';
 import { Counter } from './Counter';
 import { Text } from '../../../core/assets/Text';
 import type { ComponentRegistration } from '../../../registry/registry';
@@ -21,7 +21,7 @@ export const AnimatedNumberDefaults = {
     variant: 'display' as TypographyVariant,
     highlightStyle: 'glow' as HighlightStyle,
     highlightColor: undefined as string | undefined,
-    entranceAnimation: 'slideUp' as EntranceAnimation,
+    entranceAnimation: 'slideUp' as TextEntrancePresetName,
     animationDelay: 30,
     counterDuration: 45,
     className: undefined as string | undefined,
@@ -48,14 +48,12 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (initProps) => {
 
     const styleOverride = useStyleOverride(id);
 
-    const entranceProgress = interpolateWithEasing(
-        frame,
-        [0, actualAnimationDelay],
-        [0, 1],
-        'ease-out'
-    );
-    const entranceTransform = getEntranceTransform(actualAnimation, entranceProgress);
-    const dragStyle = usePatchedDragStyle(id, entranceTransform, props.style?.transform);
+    const entranceMotion = resolveTextMotionPhase(frame, 'entrance', {
+        preset: actualAnimation,
+        duration: actualAnimationDelay,
+        easing: 'ease-out',
+    });
+    const dragStyle = usePatchedDragStyle(id, entranceMotion.transform, props.style?.transform);
 
     const getHighlightStyles = (): React.CSSProperties => {
         switch (props.highlightStyle) {
@@ -123,7 +121,7 @@ export const AnimatedNumber: React.FC<AnimatedNumberProps> = (initProps) => {
             className={props.className}
             style={{
                 ...typographyStyle,
-                opacity: entranceProgress,
+                opacity: entranceMotion.opacity,
                 display: 'inline-block',
                 ...props.style,
                 ...styleOverride,

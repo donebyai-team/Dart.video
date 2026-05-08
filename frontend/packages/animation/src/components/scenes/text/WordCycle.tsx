@@ -8,9 +8,12 @@ import { interpolateWithEasing } from '../../../styles/easingResolver';
 import type { TypographyVariant } from '../../../tokens/semantic';
 import { resolveTypography } from '../../../tokens/resolveTypography';
 import { Text } from '../../../core/assets/Text';
+import {
+  resolveTextMotionPhase,
+  type TextEntrancePresetName,
+} from '../../../core/assets';
 import type { ComponentRegistration } from '../../../registry/registry';
-import { getEntranceTransform } from '../types';
-import type { EntranceAnimation, TextCycleTransition } from '../types';
+import type { TextCycleTransition } from '../types';
 import { measureTextWidth } from '../text/measureText';
 
 export const WordCycleDefaults = {
@@ -19,7 +22,7 @@ export const WordCycleDefaults = {
   holdDuration: 20,
   transitionDuration: 5,
   textCycleTransition: 'slideUp' as TextCycleTransition,
-  entranceAnimation: 'slideUp' as EntranceAnimation,
+  entranceAnimation: 'slideUp' as TextEntrancePresetName,
   variant: 'displayXl' as TypographyVariant,
   style: undefined as React.CSSProperties | undefined,
   className: undefined as string | undefined,
@@ -50,14 +53,12 @@ export const WordCycle: React.FC<WordCycleProps> = (initProps) => {
 
   const cycleDuration = props.holdDuration + props.transitionDuration;
   const entranceDuration = 20;
-  const entranceProgress = interpolateWithEasing(
-    frame,
-    [0, entranceDuration],
-    [0, 1],
-    'ease-out',
-  );
-  const entranceTransform = getEntranceTransform(actualEntranceAnimation, entranceProgress);
-  const dragStyle = usePatchedDragStyle(id, entranceTransform, props.style?.transform, overrideTransform);
+  const entranceMotion = resolveTextMotionPhase(frame, 'entrance', {
+    preset: actualEntranceAnimation,
+    duration: entranceDuration,
+    easing: 'ease-out',
+  });
+  const dragStyle = usePatchedDragStyle(id, entranceMotion.transform, props.style?.transform, overrideTransform);
   const typographyStyle = resolveTypography(patchedVariant, styleConfig, theme, preset);
   const textOverrideStyle: React.CSSProperties = {
     ...styleOverride,
@@ -89,7 +90,7 @@ export const WordCycle: React.FC<WordCycleProps> = (initProps) => {
         className={props.className}
         style={{
           ...typographyStyle,
-          opacity: entranceProgress,
+          opacity: entranceMotion.opacity,
           display: 'inline-block',
           ...props.style,
           ...dragStyle,
@@ -124,7 +125,7 @@ export const WordCycle: React.FC<WordCycleProps> = (initProps) => {
   // the visible word. This is what eliminates layout reflow.
   const containerStyle: React.CSSProperties = {
     ...typographyStyle,
-    opacity: entranceProgress,
+    opacity: entranceMotion.opacity,
     position: 'relative',
     display: 'inline-block',
     ...props.style,
