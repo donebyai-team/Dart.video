@@ -15,7 +15,7 @@ const DEFAULT_MOTION_PRESET = 'zoomTiltReveal' as const;
 const ANIMATED_MEDIA_DEFAULTS = {
     ...TextStaggerDefaults,
     id: 'textstagger',
-    text: 'Your headline here',
+    text: '',
     variant: 'headingLg' as const,
     splitBy: 'line' as const,
     staggerDelay: 0,
@@ -161,6 +161,7 @@ export const AnimatedMediaDescriptor: ComponentRegistration = {
     {
       name: 'text',
       type: 'string',
+      required: false
     },
     {
       name: 'src',
