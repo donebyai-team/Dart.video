@@ -10,6 +10,7 @@ import { resolveTypography } from '../../../tokens/resolveTypography';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { buildDepthShadow } from '../../../styles';
 import { DEFAULT_SPEED_PERCENTAGE, getSpeed, MIN_SPEED_PERCENTAGE, scaleTiming } from '../../../speed/timings';
+import { CardAsset } from '../../../core/assets';
 
 const BASE_ENTRY_DURATION = 22;
 const BASE_SETTLE_DURATION = 0;
@@ -76,8 +77,6 @@ export const TextCardStack: React.FC<TextCardStackProps> = (initProps) => {
   }
 
   const activeIndex = Math.min(Math.floor(Math.max(0, frame - props.startAt) / cardCycleDuration), texts.length - 1);
-
-  const containerStyleOverride = useStyleOverride("container");
 
   return (
     <div
@@ -196,7 +195,7 @@ export const TextCardStack: React.FC<TextCardStackProps> = (initProps) => {
               zIndex: 1,
             }}
           >
-            <div
+            <CardAsset
               id="container"
               style={{
                 width: cardWidth,
@@ -222,7 +221,6 @@ export const TextCardStack: React.FC<TextCardStackProps> = (initProps) => {
                 borderRadius: cardRadius,
                 border: `4px solid ${theme.colors.foreground}`,
                 gap: Math.max(16, Math.round(bodyFontSize * 0.18)),
-                ...containerStyleOverride,
               }}
             >
               <span
@@ -237,7 +235,7 @@ export const TextCardStack: React.FC<TextCardStackProps> = (initProps) => {
               >
                 {text}
               </span>
-            </div>
+            </CardAsset>
           </div>
         );
       })}

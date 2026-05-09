@@ -5,9 +5,8 @@ import { useStyleContext } from '../../styles/StyleContext';
 import { useTheme } from '../../theme';
 import type { TypographyVariant } from '../../tokens/semantic';
 import { resolveTypography } from '../../tokens/resolveTypography';
-import { Text } from '.';
+import { CardAsset, Text } from '.';
 import { measureTextWidth } from '../../components/scenes/text/measureText';
-import { normalizeContainerStyle, type ContainerStylePatch } from './ContainerAsset';
 
 export const IconTextPillDefaults = {
     id: 'icontextpill',
@@ -43,11 +42,7 @@ export type TextPatch = {
     style?: React.CSSProperties;
 };
 
-export type ContainerPatch = {
-    style?: ContainerStylePatch;
-};
-
-export type PillPatchGroup = Record<string, IconPatch | TextPatch | ContainerPatch>;
+export type PillPatchGroup = Record<string, IconPatch | TextPatch>;
 
 function normalizeTextStyle(style: React.CSSProperties | undefined): React.CSSProperties {
     if (!style) {
@@ -66,40 +61,20 @@ export function getNormalizedPill(item: PillPatchGroup): typeof IconTextPillDefa
     const entries = Object.entries(item);
     const iconEntry = entries.find(([eid]) => eid.startsWith('iconasset-')) as [string, IconPatch] | undefined;
     const textEntry = entries.find(([eid]) => eid.startsWith('text-') || eid.startsWith('textasset-')) as [string, TextPatch] | undefined;
-    const containerEntry = entries.find(([eid]) => eid.startsWith('container-')) as [string, ContainerPatch] | undefined;
+    const containerEntry = entries.find(([eid]) => eid.startsWith('container-'));
 
     const iconId = iconEntry?.[0] ?? IconTextPillDefaults.iconId;
     const textId = textEntry?.[0] ?? IconTextPillDefaults.textId;
     const containerId = containerEntry?.[0] ?? IconTextPillDefaults.containerId;
     const iconPatch = iconEntry?.[1] ?? {};
     const textPatch = textEntry?.[1] ?? {};
-    const containerStyle = containerEntry?.[1].style ?? {};
     const normalizedTextStyle = {
         ...IconTextPillDefaults.textStyle,
         ...normalizeTextStyle(textPatch.style),
     };
-    const normalizedContainerStyle = normalizeContainerStyle(IconTextPillDefaults, containerStyle);
 
     return {
-        ...IconTextPillDefaults,
-        backgroundColor: typeof normalizedContainerStyle.backgroundColor === 'string'
-            ? normalizedContainerStyle.backgroundColor
-            : IconTextPillDefaults.backgroundColor,
-        borderRadius: typeof normalizedContainerStyle.borderRadius === 'number'
-            ? normalizedContainerStyle.borderRadius
-            : IconTextPillDefaults.borderRadius,
-        borderWidth: typeof normalizedContainerStyle.borderWidth === 'number'
-            ? normalizedContainerStyle.borderWidth
-            : IconTextPillDefaults.borderWidth,
-        borderColor: typeof normalizedContainerStyle.borderColor === 'string'
-            ? normalizedContainerStyle.borderColor
-            : IconTextPillDefaults.borderColor,
-        padding: typeof normalizedContainerStyle.padding === 'number'
-            ? normalizedContainerStyle.padding
-            : IconTextPillDefaults.padding,
-        gap: typeof normalizedContainerStyle.gap === 'number'
-            ? normalizedContainerStyle.gap
-            : IconTextPillDefaults.gap,
+        ...IconTextPillDefaults,      
         icon: iconPatch.icon ?? IconTextPillDefaults.icon,
         iconStyle: iconPatch.style ?? IconTextPillDefaults.iconStyle,
         text: textPatch.text ?? IconTextPillDefaults.text,
@@ -141,15 +116,14 @@ export function IconTextPill(initProps: IconTextPillProps): React.ReactElement {
     const props = { ...IconTextPillDefaults, ...initProps };
     const typo = resolveTypography(props.variant, styleConfig, theme, preset);
     const metrics = getIconTextPillMetrics(props, typo);
-    const containerStyle = normalizeContainerStyle(IconTextPillDefaults, props);
 
     return (
-        <div
+        <CardAsset
             id={props.containerId ?? props.id}
             style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                ...containerStyle,
+                ...IconTextPillDefaults,
             }}
 
         >
@@ -171,6 +145,6 @@ export function IconTextPill(initProps: IconTextPillProps): React.ReactElement {
                     whiteSpace: 'nowrap', // to prevent text from wrapping and causing the pill to grow
                 }}
             />
-        </div>
+        </CardAsset>
     );
 }

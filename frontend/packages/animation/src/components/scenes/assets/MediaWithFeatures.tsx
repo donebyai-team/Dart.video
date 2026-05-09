@@ -1,6 +1,6 @@
 import React from 'react';
 import { Easing, interpolate, useCurrentFrame } from 'remotion';
-import { IconAsset, IconAssetProps, MediaAsset, MediaAssetProps, Text, TextProps } from '../../../core/assets';
+import { CardAsset, IconAsset, IconAssetProps, MediaAsset, MediaAssetProps, Text, TextProps } from '../../../core/assets';
 import { ArrayItem } from '../../../core/assets/ArrayItem';
 import { useArrayPatch, useElement } from '../../../patches';
 import type { ComponentRegistration } from '../../../registry/registry';
@@ -15,18 +15,7 @@ const FEATURE_STAGGER_FRAMES = 15;
 const FEATURE_REVEAL_DURATION = 20;
 const BASE_SCENE_FRAMES = Math.max(IMAGE_SCALE_IN_END_FRAME, IMAGE_OPACITY_IN_END_FRAME);
 
-const FEATURE_CONTAINER_DEFAULTS = {
-    backgroundColor: 'rgba(255,255,255,0.92)',
-    borderRadius: 30,
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.05)',
-    padding: 22,
-    gap: 18,
-    boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
-};
-
-
-export function ProductImageFeatures(): React.ReactElement {
+export function MediaWithFeatures(): React.ReactElement {
     const frame = useCurrentFrame();
     const preset = useAspectPreset();
     const mediaElement = useElement<MediaAssetProps>('mediaasset');
@@ -105,7 +94,6 @@ export function ProductImageFeatures(): React.ReactElement {
                             {featureItems.map((item, index) => {
                                 const { props: iconProps } = useElement<IconAssetProps>(`iconasset-features-${index}`);
                                 const { props: textProps } = useElement<TextProps>(`text-features-${index}`);
-                                const { style: containerStyle } = useElement(`container-features-${index}`);
 
                                 const featureStartFrame = FEATURE_REVEAL_START_FRAME + index * FEATURE_STAGGER_FRAMES;
                                 const featureEndFrame = featureStartFrame + FEATURE_REVEAL_DURATION;
@@ -134,11 +122,9 @@ export function ProductImageFeatures(): React.ReactElement {
                                             transform: `translateY(${featureY}px)`,
                                         }}
                                     >
-                                        <div
+                                        <CardAsset
                                             id={`container-features-${index}`}
                                             style={{
-                                                ...FEATURE_CONTAINER_DEFAULTS,
-                                                ...containerStyle,
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 minWidth: 360,
@@ -158,7 +144,7 @@ export function ProductImageFeatures(): React.ReactElement {
                                                 variant="subheading"
                                             />
 
-                                        </div>
+                                        </CardAsset>
                                     </ArrayItem>
                                 );
                             })}
@@ -170,7 +156,7 @@ export function ProductImageFeatures(): React.ReactElement {
     );
 }
 
-export const ProductImageFeaturesSchema = [
+export const MediaWithFeaturesSchema = [
     {
         type: 'component',
         name: 'mediaasset',
@@ -223,11 +209,11 @@ export const ProductImageFeaturesSchema = [
     },
 ];
 
-export const ProductImageFeaturesDescriptor: ComponentRegistration = {
-    name: 'ProductImageFeatures',
+export const MediaWithFeaturesDescriptor: ComponentRegistration = {
+    name: 'MediaWithFeatures',
     type: 'scene',
     tags: ['Solution', 'Product Info', 'Features'],
-    schema: ProductImageFeaturesSchema,
+    schema: MediaWithFeaturesSchema,
     llmSchema: [
         {
             name: 'src',

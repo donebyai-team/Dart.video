@@ -8,5 +8,5 @@ export * from './LogoWithBrandName';
 export * from './LogoWithCTA';
 export * from '../../../core/assets/IconTextPill';
 export * from './PillCarousel';
-export * from './ProductImageFeatures';
+export * from './MediaWithFeatures';
 export * from './AnimatedMedia';

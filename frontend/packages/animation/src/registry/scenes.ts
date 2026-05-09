@@ -15,7 +15,7 @@ import { LogoWithBrandNameDescriptor } from "../components/scenes/assets/LogoWit
 import { LogoWithCTADescriptor } from "../components/scenes/assets/LogoWithCTA";
 import { IconShowcaseDescriptor } from "../components/scenes/assets/IconShowcase";
 import { PillCarouselDescriptor } from "../components/scenes/assets/PillCarousel";
-import { ProductImageFeaturesDescriptor } from "../components/scenes/assets/ProductImageFeatures";
+import { MediaWithFeaturesDescriptor } from "../components/scenes/assets/MediaWithFeatures";
 import { AnimatedMediaDescriptor } from "../components/scenes/assets/AnimatedMedia";
 import { TextWithMediaSceneDescriptor, WordCycleDescriptor } from "../components/scenes";
 
@@ -47,6 +47,6 @@ export const SCENE_COMPONENTS: ComponentRegistration[] = [
   LogoWithCTADescriptor,
   IconShowcaseDescriptor,
   PillCarouselDescriptor,
-  ProductImageFeaturesDescriptor,
+  MediaWithFeaturesDescriptor,
   AnimatedMediaDescriptor,
 ];

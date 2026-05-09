@@ -16,7 +16,7 @@ const HERO_TEXT_DEFAULTS = {
     ...TextStaggerDefaults,
     id: 'textstagger',
     text: 'One product. Every use case.',
-    variant: 'display' as TypographyVariant,
+    variant: 'headingLg' as TypographyVariant,
     splitBy: 'line' as const,
     staggerDelay: 0,
     entranceAnimation: 'scaleIn' as AnimationPresetName,

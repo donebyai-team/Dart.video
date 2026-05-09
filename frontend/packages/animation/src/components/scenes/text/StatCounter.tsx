@@ -1,15 +1,15 @@
 import React from 'react';
 import { spring, useCurrentFrame, useVideoConfig } from 'remotion';
-import { usePatchedProps, useStyleOverride } from '../../../patches';
+import { usePatchedProps } from '../../../patches';
 import { buildDepthShadow, DEFAULT_MEDIA_DEPTH, useAspectPreset, useStyleContext } from '../../../styles';
 import { useTheme } from '../../../theme';
 import { resolveTypography } from '../../../tokens';
 import type { TypographyVariant } from '../../../tokens/semantic';
 import { Text } from '../../../core/assets/Text';
-import { normalizeContainerStyle } from '../../../core/assets/ContainerAsset';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { Counter } from './Counter';
 import { DEFAULT_SPEED_PERCENTAGE, getSpeed, MIN_SPEED_PERCENTAGE, scaleTiming } from '../../../speed/timings';
+import { CardAsset } from '../../../core/assets';
 
 const BASE_COUNTER_DURATION = 50;
 const BASE_COUNTER_DELAY = 10;
@@ -55,16 +55,10 @@ export const StatCounter: React.FC<StatCounterProps> = (initProps) => {
   const preset = useAspectPreset();
 
   const defaultProps = { ...StatCounterDefaults, ...initProps };
-  const containerProps = usePatchedProps('container', defaultProps.container);
   const counterProps = usePatchedProps('counter', defaultProps.counter);
   const textProps = usePatchedProps('text', defaultProps.text);
-  const containerStyleOverride = useStyleOverride('container');
 
-  const containerStyle = normalizeContainerStyle(
-    StatCounterContainerDefaults,
-    containerProps.style,
-    containerStyleOverride,
-  );
+
   const speed = getSpeed(counterProps.speed);
   const animationDelay = scaleTiming(BASE_ANIMATION_DELAY, speed);
   const counterDelay = scaleTiming(BASE_COUNTER_DELAY, speed);
@@ -89,7 +83,7 @@ export const StatCounter: React.FC<StatCounterProps> = (initProps) => {
         width: '100%',
       }}
     >
-      <div
+      <CardAsset
         id='container'
         style={{
           position: 'relative',
@@ -101,7 +95,7 @@ export const StatCounter: React.FC<StatCounterProps> = (initProps) => {
           minWidth: '35%',
           textAlign: 'center',
           transform: `scale(${scaleSpring})`,
-          ...containerStyle,
+          ...StatCounterContainerDefaults,
         }}
       >
         <Counter
@@ -128,7 +122,7 @@ export const StatCounter: React.FC<StatCounterProps> = (initProps) => {
             opacity: 0.8,
           }}
         />
-      </div>
+      </CardAsset>
     </div>
   );
 };
