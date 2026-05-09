@@ -6,7 +6,7 @@ import { useArrayPatch, usePatchedProps } from '../../../patches';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
-import { TextStagger, type TextStaggerProps, TextStaggerSchemaFields } from '../text/TextStagger';
+import { TextStagger, type TextStaggerProps } from '../text/TextStagger';
 import { DEFAULT_SPEED_PERCENTAGE, getSpeed, MIN_SPEED_PERCENTAGE, scaleTiming } from '../../../speed/timings';
 
 const DEFAULT_CARD_WIDTH = 420;
@@ -30,7 +30,7 @@ const ProblemCollageTextDefaults: TextStaggerProps = {
     staggerDelay: 4,
     entranceAnimation: 'scaleIn' as const,
     duration: 12,
-    splitBy: 'word' as const,
+    splitBy: 'line' as const,
     className: undefined as string | undefined,
 };
 
@@ -411,7 +411,7 @@ export const ProblemCollage: React.FC = () => {
                         padding: '0 8%',
                     }}
                 >
-                    
+
                     <TextStagger
                         {...textProps}
                         id="textstagger"
@@ -466,6 +466,30 @@ export const ProblemCollageSchemaFields = [
                 "name": "variant",
                 "type": "enum",
                 "default": ProblemCollageTextDefaults.variant
+            },
+            {
+                "name": "staggerDelay",
+                "type": "number",
+                "map": "props.staggerDelay",
+                "default": ProblemCollageTextDefaults.staggerDelay
+            },
+            {
+                "name": "entranceAnimation",
+                "type": "enum",
+                "map": "props.entranceAnimation",
+                "default": ProblemCollageTextDefaults.entranceAnimation
+            },
+            {
+                "name": "duration",
+                "type": "number",
+                "map": "props.duration",
+                "default": ProblemCollageTextDefaults.duration
+            },
+            {
+                "name": "splitBy",
+                "type": "enum",
+                "map": "props.splitBy",
+                "default": ProblemCollageTextDefaults.splitBy
             }
         ],
     },

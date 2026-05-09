@@ -39,8 +39,8 @@ const CEL_EXTRA_EXIT_FRAMES = BASE_EXIT_STAGGER_DELAY;
 export const TextLeadStaggerDefaults = {
   id: 'textleadstagger',
   startAt: 0,
-  text: "Isn't getting clicks",
-  variant: 'displayLg' as TypographyVariant,
+  text: "Simple text",
+  variant: 'headingLg' as TypographyVariant,
   entranceAnimation: 'slideLeft' as AnimationPresetName,
   speed: DEFAULT_SPEED_PERCENTAGE,
   className: undefined as string | undefined,
@@ -281,6 +281,7 @@ export const TextLeadStaggerSchemaFields = [
 export const TextLeadStaggerDescriptor: ComponentRegistration = {
   name: 'TextLeadStagger',
   type: 'content',
+  tags: ['Problem', 'Hook', 'Intro', 'Filler'],
   schema: [{
     type: 'component',
     name: 'textleadstagger',
@@ -290,6 +291,7 @@ export const TextLeadStaggerDescriptor: ComponentRegistration = {
     {
       name: 'text',
       type: 'string',
+      range: '3-7 words',
     },
     {
       name: 'entranceAnimation',
@@ -299,17 +301,5 @@ export const TextLeadStaggerDescriptor: ComponentRegistration = {
     }
   ],
   celExpression: `((${CEL_BASE_FRAMES} + max(0, segmentCount(props.textleadstagger.text, "word") - 2) * ${CEL_EXTRA_ENTRY_FRAMES} + max(0, segmentCount(props.textleadstagger.text, "word") - 1) * ${CEL_EXTRA_EXIT_FRAMES}) * ${DEFAULT_SPEED_PERCENTAGE}) / max(${MIN_SPEED_PERCENTAGE}, props.textleadstagger.speed)`,
-  description: `First word starts enlarged and then settles down. The remaining words enter in a stagger, making it ideal for emphasis moments (MAX 3–4 words).
-Examples:
-text="Isn't getting clicks"
-text="You're missing out"
-
-You can combine it with other **fillers scenes** for showcasing a **"Problem" or "Solution" section** of a video or use it as a standalone filler with other scenes.
-
-Example problem: "If your Airbnb listing isn't getting clicks"
-
-- Scene 1: If (TextStagger)
-- Scene 2: your (TextStagger)
-- Scene 3: Airbnb {listing} (TextHighlight)
-- Scene 4: isn't getting clicks (TextLeadStagger)`,
+  description: `First word starts enlarged and then settles down. The remaining words enter in a stagger and exit in stagger.`
 };

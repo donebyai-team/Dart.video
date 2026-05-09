@@ -18,7 +18,7 @@ export const TypewriterDefaults = {
   text: "Try cursor today",
   startAt: 0,
   splitBy: "char" as const,
-  variant: "display" as TypographyVariant,
+  variant: "headingLg" as TypographyVariant,
   entranceAnimation: "fadeIn" as AnimationPresetName,
   typingDuration: TYPEWRITER_TYPING_DURATION,
   style: undefined as React.CSSProperties | undefined,

@@ -236,7 +236,8 @@ export const TextWithMediaSceneDescriptor: ComponentRegistration = {
     propsPath: 'props.textComponentProps',
     components: [
       {
-        name: 'textstagger', fields: [
+        name: 'textstagger',
+        fields: [
           {
             "name": "text",
             "type": "string",
@@ -247,7 +248,7 @@ export const TextWithMediaSceneDescriptor: ComponentRegistration = {
             "name": "variant",
             "type": "enum",
             "map": "props.variant",
-            "default": TextStaggerDefaults.variant
+            "default": "display"
           },
           {
             "name": "staggerDelay",

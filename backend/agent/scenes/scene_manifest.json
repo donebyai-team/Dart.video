@@ -249,7 +249,7 @@
                   "name": "variant",
                   "type": "enum",
                   "map": "props.variant",
-                  "default": "display"
+                  "default": "headingLg"
                 },
                 {
                   "name": "staggerDelay",
@@ -374,7 +374,7 @@
                 {
                   "name": "variant",
                   "type": "enum",
-                  "default": "display"
+                  "default": "headingLg"
                 },
                 {
                   "name": "splitBy",
@@ -638,6 +638,12 @@
         {
           "name": "TextLeadStagger",
           "type": "content",
+          "tags": [
+            "Problem",
+            "Hook",
+            "Intro",
+            "Filler"
+          ],
           "schema": [
             {
               "type": "component",
@@ -652,7 +658,7 @@
                 {
                   "name": "variant",
                   "type": "enum",
-                  "default": "displayLg"
+                  "default": "headingLg"
                 },
                 {
                   "name": "entranceAnimation",
@@ -671,7 +677,8 @@
           "llmSchema": [
             {
               "name": "text",
-              "type": "string"
+              "type": "string",
+              "range": "3-7 words"
             },
             {
               "name": "entranceAnimation",
@@ -681,7 +688,7 @@
             }
           ],
           "celExpression": "((50 + max(0, segmentCount(props.textleadstagger.text, \"word\") - 2) * 5 + max(0, segmentCount(props.textleadstagger.text, \"word\") - 1) * 4) * 100) / max(25, props.textleadstagger.speed)",
-          "description": "First word starts enlarged and then settles down. The remaining words enter in a stagger, making it ideal for emphasis moments (MAX 3–4 words).\nExamples:\ntext=\"Isn't getting clicks\"\ntext=\"You're missing out\"\n\nYou can combine it with other **fillers scenes** for showcasing a **\"Problem\" or \"Solution\" section** of a video or use it as a standalone filler with other scenes.\n\nExample problem: \"If your Airbnb listing isn't getting clicks\"\n\n- Scene 1: If (TextStagger)\n- Scene 2: your (TextStagger)\n- Scene 3: Airbnb {listing} (TextHighlight)\n- Scene 4: isn't getting clicks (TextLeadStagger)"
+          "description": "First word starts enlarged and then settles down. The remaining words enter in a stagger and exit in stagger."
         },
         {
           "name": "ProblemHeadline",
@@ -1165,6 +1172,30 @@
                   "name": "variant",
                   "type": "enum",
                   "default": "heading"
+                },
+                {
+                  "name": "staggerDelay",
+                  "type": "number",
+                  "map": "props.staggerDelay",
+                  "default": 4
+                },
+                {
+                  "name": "entranceAnimation",
+                  "type": "enum",
+                  "map": "props.entranceAnimation",
+                  "default": "scaleIn"
+                },
+                {
+                  "name": "duration",
+                  "type": "number",
+                  "map": "props.duration",
+                  "default": 12
+                },
+                {
+                  "name": "splitBy",
+                  "type": "enum",
+                  "map": "props.splitBy",
+                  "default": "line"
                 }
               ]
             },
@@ -1327,7 +1358,7 @@
                 {
                   "name": "variant",
                   "type": "enum",
-                  "default": "display"
+                  "default": "headingLg"
                 },
                 {
                   "name": "staggerDelay",
@@ -1855,7 +1886,8 @@
           "llmSchema": [
             {
               "name": "text",
-              "type": "string"
+              "type": "string",
+              "required": false
             },
             {
               "name": "src",

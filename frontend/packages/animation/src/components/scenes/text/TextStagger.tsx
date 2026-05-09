@@ -28,7 +28,7 @@ export const TextStaggerDefaults = {
     id: 'textstagger',
     startAt: 0,
     text: '',
-    variant: 'display' as TypographyVariant,
+    variant: 'headingLg' as TypographyVariant,
     staggerDelay: 5,
     entranceAnimation: 'scaleIn' as AnimationPresetName,
     duration: 15,
