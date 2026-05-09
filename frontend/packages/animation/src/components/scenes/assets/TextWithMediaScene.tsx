@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useCurrentFrame } from 'remotion';
 import { useElement, usePatchOverlay } from '../../../patches';
 import { MediaAsset, MediaAssetProps, } from '../../../core/assets';
-import { resolveAnimationPreset } from '../../../core/assets/AnimationPreset';
+import { resolveAnimationPreset } from '../../../core/animation_preset/AnimationPreset';
 import { Row, Stack } from '../../../core/layout';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import type { ComponentRegistration } from '../../../registry/registry';
@@ -11,7 +11,7 @@ import { TextStagger, TextStaggerDefaults } from '../text/TextStagger';
 import { TextWithWordCycle, TextWithWordCycleDefaults, TextWithWordCycleSchemaFields } from '../text/TextWithWordCycle';
 import { resolveContentAwareLayout } from './ContentAwareScene.layout';
 import { TypographyVariant } from '../../../tokens';
-import { AnimationPresetName } from '../../../core/assets/AnimationPreset';
+import { AnimationPresetName } from '../../../core/animation_preset/AnimationPreset';
 
 const DEFAULT_ANIMATION = 'slideUp' as const;
 const FALLBACK_WIDTH = 1920;

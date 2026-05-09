@@ -10,7 +10,7 @@ import { TextStagger, TextStaggerDefaults } from '../text/TextStagger';
 import { getIconTextPillMetrics, getNormalizedPill, IconTextPill, IconTextPillDefaults, PillPatchGroup } from '../../../core/assets/IconTextPill';
 import { TypographyVariant } from '../../../tokens';
 import { resolveTypography } from '../../../tokens/resolveTypography';
-import { AnimationPresetName } from '../../../core/assets/AnimationPreset';
+import { AnimationPresetName } from '../../../core/animation_preset/AnimationPreset';
 
 const HERO_TEXT_DEFAULTS = {
     ...TextStaggerDefaults,

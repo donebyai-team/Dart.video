@@ -6,8 +6,8 @@ import type { ComponentRegistration } from '../../../registry/registry';
 import { useElement } from '../../../patches';
 import { useAspectPreset } from '../../../styles';
 import { TextStagger, TextStaggerDefaults } from '../text/TextStagger';
-import { MediaMotionPreset, getMotionTransform } from '../../../core/assets/MediaMotionPreset';
-import { AnimationPresetName } from '../../../core/assets/AnimationPreset';
+import { MediaMotionPreset, getMotionTransform } from '../../../core/animation_preset/MediaMotionPreset';
+import { AnimationPresetName } from '../../../core/animation_preset/AnimationPreset';
 
 const DEFAULT_SCENE_DURATION = 60;
 const DEFAULT_MOTION_PRESET = 'zoomTiltReveal' as const;
@@ -17,8 +17,7 @@ const ANIMATED_MEDIA_DEFAULTS = {
     id: 'textstagger',
     text: '',
     variant: 'headingLg' as const,
-    splitBy: 'line' as const,
-    staggerDelay: 0,
+    splitBy: 'word' as const,
     entranceAnimation: 'scaleIn' as AnimationPresetName,
 };
 
@@ -76,15 +75,8 @@ export function AnimatedMedia(): React.ReactElement {
 
       <div
         style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          width: '70%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          transform: 'translate(-50%, -50%)',
-          textAlign: 'center',
+          position: 'absolute',  
+          maxWidth: '60%'        
         }}
       >
         <TextStagger {...textProps} id="textstagger" />
@@ -152,7 +144,7 @@ export const AnimatedMediaDescriptor: ComponentRegistration = {
         {
           name: 'motionPreset',
           type: 'enum',
-          default: DEFAULT_MOTION_PRESET,
+          default: mediaDefaults.motionPreset,
         },
       ],
     },
@@ -161,7 +153,8 @@ export const AnimatedMediaDescriptor: ComponentRegistration = {
     {
       name: 'text',
       type: 'string',
-      required: false
+      required: false,
+      hint: 'one liner text to specity what feature is being demonstrated',
     },
     {
       name: 'src',

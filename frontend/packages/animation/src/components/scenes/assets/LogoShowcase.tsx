@@ -6,7 +6,7 @@ import type { ComponentRegistration } from '../../../registry/registry';
 import { interpolateWithEasing } from '../../../styles';
 import { TextStagger, TextStaggerDefaults } from '../text/TextStagger';
 import { ArrayItem } from '../../../core/assets/ArrayItem';
-import { ANIMATION_PRESET_ENTRANCE_ANIMATIONS } from '../../../core/assets/AnimationPreset';
+import { ANIMATION_PRESET_ENTRANCE_ANIMATIONS } from '../../../core/animation_preset/AnimationPreset';
 
 const DEFAULT_TEXT_ENTRANCE_DURATION = 5;
 const DEFAULT_LOGO_STAGGER = 5;

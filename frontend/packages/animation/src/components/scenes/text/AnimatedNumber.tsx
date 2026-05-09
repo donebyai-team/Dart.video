@@ -5,7 +5,7 @@ import { useStyleContext, useAspectPreset, interpolateWithEasing } from '../../.
 import { useTheme } from '../../../theme';
 import { resolveTypography } from '../../../tokens';
 import type { TypographyVariant } from '../../../tokens/semantic';
-import { AnimationPresetName, resolveAnimationPreset } from '../../../core/assets/AnimationPreset';
+import { AnimationPresetName, resolveAnimationPreset } from '../../../core/animation_preset/AnimationPreset';
 import type { HighlightStyle } from '../types';
 import { Counter } from './Counter';
 import { Text } from '../../../core/assets/Text';

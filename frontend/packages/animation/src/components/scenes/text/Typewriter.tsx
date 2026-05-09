@@ -6,7 +6,7 @@ import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme/ThemeContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { resolveTypography } from '../../../tokens/resolveTypography';
-import { AnimationPresetName, resolveAnimationPreset } from '../../../core/assets/AnimationPreset';
+import { AnimationPresetName, resolveAnimationPreset } from '../../../core/animation_preset/AnimationPreset';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { TypographyVariant } from '../../../tokens';
 

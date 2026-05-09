@@ -11,7 +11,7 @@ import type { Direction } from '../../types';
 import { ImagePeel } from './ImagePeel';
 import { ImageSlide } from './ImageSlide';
 import type { ImageStackItem } from './shared';
-import { AnimationPresetName } from '../../../../core/assets/AnimationPreset';
+import { AnimationPresetName } from '../../../../core/animation_preset/AnimationPreset';
 
 export const STACK_ANIMATIONS = ['Peel', 'SlideDown'] as const;
 export type StackAnimation = typeof STACK_ANIMATIONS[number];

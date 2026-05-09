@@ -1,4 +1,8 @@
-import { ANIMATION_PRESET_ENTRANCE_ANIMATIONS, ANIMATION_PRESET_EXIT_ANIMATIONS } from '@coasterai/animation/src/core/assets/AnimationPreset'
+
+import {
+  ANIMATION_PRESET_ENTRANCE_ANIMATIONS,
+  ANIMATION_PRESET_EXIT_ANIMATIONS,
+} from '@coasterai/animation/src/core/animation_preset/AnimationPreset'
 import {
   DIRECTIONS,
   getElementSchema,
@@ -10,8 +14,8 @@ import {
   TEXT_CYCLE_TRANSITIONS,
   TYPOGRAPHY_VARIANT_NAMES,
   type FieldSchema,
-} from '../../../../../packages/animation/src'
-import { MEDIA_MOTION_PRESETS } from '@coasterai/animation/src/core/assets/MediaMotionPreset'
+} from '@coasterai/animation/src'
+import { MEDIA_MOTION_PRESETS } from '@coasterai/animation/src/core/animation_preset/MediaMotionPreset'
 
 const RESERVED_FIELD_MAP: Record<string, string[]> = {
   variant: [...TYPOGRAPHY_VARIANT_NAMES],
@@ -61,7 +65,7 @@ export function resolveScenePatchEntryId(
 export function getEditableSceneFields(
   elementId: string,
   overlay: Record<string, unknown>,
-): FieldSchema[] {    
+): FieldSchema[] {
   const componentName = overlay.name as string
 
   return getElementSchema(componentName, elementId).filter(field => isEditableSceneProp(field.name))

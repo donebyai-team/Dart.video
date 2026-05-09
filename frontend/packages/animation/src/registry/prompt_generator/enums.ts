@@ -1,5 +1,5 @@
 import { DIRECTIONS,  HIGHLIGHT_STYLES, HIGHLIGHTED_TEXT_ANIMATIONS, LOGO_ANIMATIONS, SPLIT_BY_MODES, TEXT_CYCLE_TRANSITIONS } from "../../components/scenes";
-import { ANIMATION_PRESET_ENTRANCE_ANIMATIONS, ANIMATION_PRESET_EXIT_ANIMATIONS } from "../../core/assets/AnimationPreset";
+import { ANIMATION_PRESET_ENTRANCE_ANIMATIONS, ANIMATION_PRESET_EXIT_ANIMATIONS } from "../../core/animation_preset/AnimationPreset";
 import { TYPOGRAPHY_VARIANT_NAMES } from "../../tokens";
 
 export const AVAILABLE_ENUMS = [

@@ -6,7 +6,7 @@ import { useArrayPatch, usePatchedProps } from '../../../patches';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { interpolateWithEasing } from '../../../styles';
 import { ArrayItem } from '../../../core/assets/ArrayItem';
-import { ANIMATION_PRESET_ENTRANCE_ANIMATIONS } from '../../../core/assets/AnimationPreset';
+import { ANIMATION_PRESET_ENTRANCE_ANIMATIONS } from '../../../core/animation_preset/AnimationPreset';
 
 // Default constants
 const DEFAULT_ENTRANCE_DURATION = 10;

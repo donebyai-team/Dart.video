@@ -7,7 +7,7 @@ import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme/ThemeContext';
 import type { TypographyVariant } from '../../../tokens/semantic';
 import { resolveTypography } from '../../../tokens/resolveTypography';
-import { AnimationPresetName, resolveAnimationPreset } from '../../../core/assets/AnimationPreset';
+import { AnimationPresetName, resolveAnimationPreset } from '../../../core/animation_preset/AnimationPreset';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { DEFAULT_SPEED_PERCENTAGE, getSpeed, MIN_SPEED_PERCENTAGE, scaleTiming } from '../../../speed/timings';
 

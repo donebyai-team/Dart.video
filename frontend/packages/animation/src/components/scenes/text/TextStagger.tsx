@@ -5,7 +5,7 @@ import { useElement } from '../../../patches';
 import {
     resolveAnimationPreset,
     type AnimationPresetName,
-} from '../../../core/assets/AnimationPreset';
+} from '../../../core/animation_preset/AnimationPreset';
 import { type SplitByMode } from '../types';
 import type { ComponentRegistration } from '../../../registry/registry';
 

@@ -45,7 +45,7 @@ export function getHighlightedTextAnimationTransform(
     switch (animation) {
         case 'zoom':
             const eased = Easing.in(Easing.exp)(clampedProgress);
-            return `scale(${1 + eased * 10})`;
+            return `scale(${1 + eased * 20})`;
         case 'jump': {
             const jumpHeight = -18 * Math.sin(clampedProgress * Math.PI);
             return `translateY(${jumpHeight}px)`;

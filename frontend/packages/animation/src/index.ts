@@ -32,3 +32,5 @@ export * from './background_effects'
 
 // Transitions
 export * from './transitions'
+
+export * from './core/animation_preset'

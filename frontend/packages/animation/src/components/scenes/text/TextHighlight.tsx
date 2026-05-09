@@ -7,7 +7,7 @@ import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme';
 import type { TypographyVariant } from '../../../tokens';
 import { resolveTypography } from '../../../tokens/resolveTypography';
-import { AnimationPresetName, resolveAnimationPreset } from '../../../core/assets/AnimationPreset';
+import { AnimationPresetName, resolveAnimationPreset } from '../../../core/animation_preset/AnimationPreset';
 import {
     getHighlightedTextAnimationTransform,
     type HighlightedTextAnimation,

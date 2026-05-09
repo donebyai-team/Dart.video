@@ -8,7 +8,7 @@ import { interpolateWithEasing } from '../../../styles/easingResolver';
 import type { TypographyVariant } from '../../../tokens/semantic';
 import { resolveTypography } from '../../../tokens/resolveTypography';
 import { Text } from '../../../core/assets/Text';
-import { AnimationPresetName, resolveAnimationPreset } from '../../../core/assets/AnimationPreset';
+import { AnimationPresetName, resolveAnimationPreset } from '../../../core/animation_preset/AnimationPreset';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { TextCycleTransition } from '../types';
 import { measureTextWidth } from '../text/measureText';
