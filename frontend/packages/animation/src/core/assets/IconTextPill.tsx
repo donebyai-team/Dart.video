@@ -1,10 +1,6 @@
 import React from 'react';
 import { IconAsset } from './IconAsset';
-import { useAspectPreset } from '../../styles';
-import { useStyleContext } from '../../styles/StyleContext';
-import { useTheme } from '../../theme';
 import type { TypographyVariant } from '../../tokens/semantic';
-import { resolveTypography } from '../../tokens/resolveTypography';
 import { CardAsset, Text } from '.';
 import { measureTextWidth } from '../../components/scenes/text/measureText';
 
@@ -44,18 +40,6 @@ export type TextPatch = {
 
 export type PillPatchGroup = Record<string, IconPatch | TextPatch>;
 
-function normalizeTextStyle(style: React.CSSProperties | undefined): React.CSSProperties {
-    if (!style) {
-        return {};
-    }
-
-    const fontWeight = style.fontWeight === 0 ? 400 : style.fontWeight;
-
-    return {
-        ...style,
-        fontWeight,
-    };
-}
 
 export function getNormalizedPill(item: PillPatchGroup): typeof IconTextPillDefaults {
     const entries = Object.entries(item);
@@ -70,7 +54,7 @@ export function getNormalizedPill(item: PillPatchGroup): typeof IconTextPillDefa
     const textPatch = textEntry?.[1] ?? {};
     const normalizedTextStyle = {
         ...IconTextPillDefaults.textStyle,
-        ...normalizeTextStyle(textPatch.style),
+        ...textPatch.style,
     };
 
     return {
@@ -110,12 +94,8 @@ export function getIconTextPillMetrics(
 }
 
 export function IconTextPill(initProps: IconTextPillProps): React.ReactElement {
-    const styleConfig = useStyleContext();
-    const theme = useTheme();
-    const preset = useAspectPreset();
     const props = { ...IconTextPillDefaults, ...initProps };
-    const typo = resolveTypography(props.variant, styleConfig, theme, preset);
-    const metrics = getIconTextPillMetrics(props, typo);
+    const metrics = getIconTextPillMetrics(props, initProps.textStyle || {});
 
     return (
         <CardAsset

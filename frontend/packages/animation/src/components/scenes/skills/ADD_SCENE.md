@@ -1,127 +1,90 @@
-Here’s a clean, structured Markdown version optimized as an LLM “skill” reference:
+# Scene Template Design Prompt
 
----
+Use this prompt when asking an LLM to create a new scene template similar in structure and quality to [MediaWithFeatures.tsx](/Users/shank/Documents/code/streamingfast/CoasterAI/frontend/packages/animation/src/components/scenes/assets/MediaWithFeatures.tsx).
 
-# 🎬 Scene Design Skill for LLM
+## Prompt
 
-## What is a Scene?
+```md
+Design a new Remotion scene template for this animation system.
 
-A **scene** is a visual representation of a concept from a video script.
+Follow the same overall engineering style as `MediaWithFeatures.tsx`:
+- Build a self-contained scene component.
+- Keep the layout polished, editable, and animation-friendly.
+- Prefer clear structure, simple composition, and reusable assets.
 
-* A full script is broken into sections like **Hook, Problem, Solution, Product, CTA**
-* Each section can use **one or more scenes**
-* The goal is to select and configure scenes that best represent the intent of each section
+### Scene Rules
 
----
+1. The scene does not receive props.
+2. All editable values must come from hooks.
+3. Every editable element in the scene must have a unique `id`.
+4. Use consistent naming for ids so repeated items stay predictable.
 
-## Scene Selection Logic
+### Available Hooks
 
-* Each scene is tagged with **relevant sections**
-* Each scene includes a **description**:
+#### `useElement(id, defaultProps)`
+Use this hook for every editable element.
 
-  * One-line summary of what it looks like
-  * Optional usage examples
-  * Optional example prop values
-  * Additional hints (e.g., “use for pricing tiers”, “use for multi-ROI comparisons”)
+It returns:
+- `props`: `Omit<T, 'style'>`
+  - This contains the merged element props except `style`.
+- `containerStyle`: `React.CSSProperties`
+  - This is the style for the outer wrapper that handles drag/transform behavior.
+- `style`: `React.CSSProperties`
+  - This is the user-overridden style for the element itself, including typography.
 
-> ⚠️ The description is the **most important field** — it must be concise and instantly understandable.
+Important usage rules:
+- Apply `containerStyle` to the wrapper around the element.
+- Apply `style` to the element itself.
+- Do not hardcode editable content directly if it should be user-controlled.
 
----
+#### `useArray(group)`
+Use this hook when the scene includes repeated items such as features, steps, cards, bullets, logos, or stats.
 
-## Scene Design Principles
+Rules:
+- The hook returns the array of items for that group.
+- For each repeated item, generate stable unique ids using the item index.
+- Example pattern:
+  - `iconasset-features-0`
+  - `text-features-0`
+  - `container-features-0`
 
-### 1. Base Structure
+### Assets Available for Scenes
 
-* Follow an existing component pattern (e.g., `PillCarousel`)
-* Scenes can reuse other scenes/components (e.g., `TextStagger` for hero text)
+Use these scene assets where appropriate:
+- `MediaAsset`
+- `Text`
+- `CardAsset`
+- `IconAsset`
+- `ArrayItem`
 
-### 2. Elements
+### Design Expectations
 
-* Every element must have:
+- Create a scene that feels production-ready and visually balanced.
+- Prefer a strong visual hierarchy with clear focal points.
+- Use motion intentionally; avoid unnecessary complexity.
+- Make the scene easy to customize through hooks and element ids.
+- Keep spacing, alignment, and composition clean.
+- Use repeated structures through `useArray(...)` when the design has a list or grouped content.
+- Wrap repeated editable content with `ArrayItem` when needed by the system.
 
-  * A unique `id` (for interactivity, example id "textstagger" or "textstagger-left")
-* All elements must include **default values**
-* All Input props are key and its object, where key is the id of the element and value is the properties/props specific to that id. Eg. variant, style, text, speed, etc. 
-* When a user click on an element, we should the object of that element with all its properties/props in the settings which user can modify.
-* The same schema has to be exposed as Schema Architecture
+### Implementation Guidance
 
-### 3. Styling
+- Import only the assets and hooks needed by the scene.
+- Use `useCurrentFrame()` and Remotion interpolation helpers when animation is needed.
+- Derive sizes from presets or element props where useful instead of hardcoding everything.
+- Keep the JSX organized into clear visual sections.
+- Use `CardAsset` for framed or highlighted content blocks.
+- Use `IconAsset` and `Text` together for repeatable feature rows or callouts.
+- Use `MediaAsset` for the primary image or video region.
 
-* Each element has a `style` prop (CSS object)
-* Styling must be **element-specific**
-* It is an optional prop. If user changes any css property, it will be reflected in the style. 
-* Default styles can be set in default config
+### Output Requirements
 
-### 4. Data Handling
+Generate:
+1. A scene component.
+2. A schema for editable fields.
+3. A descriptor/registration object for the scene.
+4. Clean ids for every editable element.
+5. Hook-driven values for all editable content.
 
-* Use `ArrayItem` for arrays/objects requiring add/remove functionality
-* For simple text/word lists, `ArrayItem` is **not required**
-
-### 5. Animation Speed
-* Each element or scene can expose a speed attribute using which animation speed can be controlled. Instead of exposing many params like animation delay, hold etc., use a single speed attribute.
-* use `timings.ts` for common functions to calculate animation duration based on speed.
-
-### 6. Container styling
-* If a scene has a card or a container which needs to be styled, use the `ContainerAsset` component. It has some common functions
-* This is used if the scene has a card or wrapper which you'd want to style like chaging border, background color, depth, store etc.
-* You should pass an id starting with "container" or "container-" prefix if there are multiple. 
-
----
-
-## Schema Architecture
-
-Each scene must define a **descriptor** containing:
-
-### 1. Input Schema
-
-* Raw input format
-
-### 2. LLM Schema
-
-* Format expected from the LLM
-* contains fields like type(string, number, enum), required(false if the field is optional), hint(eg values), range(for constraint eg. 2-3 words or 25-200)
-
-### 3. Mapping
-
-* Converts LLM schema → Scene schema
-
-### 4. Scene Schema
-
-* Final structure used by the frontend for rendering
-
----
-
-## Behavior & Logic
-
-* Scenes **own all animation logic**
-* Scenes must define a `celExpression` for duration:
-
-  * Static example: `10` (simple scenes)
-  * Dynamic example: `10 + animationDuration`
-  * Units: **frames (30fps)**
-
----
-
-## Layout & Rendering
-
-* Scenes are automatically wrapped with:
-
-  * `SafeArea`
-  * `AbsoluteCenter`
-* Default layout is **centered**
-* Scenes should be **responsive** unless impractical
-
----
-
-## Utilities
-
-* Use `@measureText.tsx` when text measurement is required
-
----
-
-## Key Guidelines
-
-* Keep scenes **modular and reusable**
-* Prefer **simple, editable structures**
-* Ensure **every element is selectable and configurable**
-* Descriptions must enable **fast and accurate scene selection by LLM**
+The output should look like a real scene template that can be dropped into this codebase and follow the same editable architecture as `MediaWithFeatures.tsx`.
+```
