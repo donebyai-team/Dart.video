@@ -7,59 +7,56 @@ export const GlowBackground: React.FC<{
 }> = ({ color }) => {
   const frame = useCurrentFrame()
 
-  const driftX = Math.sin(frame / 70) * 24
-  const driftY = Math.cos(frame / 90) * 18
-  const pulse = 1 + Math.sin(frame / 60) * 0.03
+  // Soft cinematic floating
+  const driftX = Math.sin(frame / 40) * 24
+  const driftY = Math.cos(frame / 52) * 16
+
+  const pulse = 1 + Math.sin(frame / 48) * 0.025
 
   return (
     <AbsoluteFill
       style={{
         overflow: 'hidden',
 
-        // Stable neutral base
-        background: 'rgb(245, 246, 250)',
+        // Warm neutral beige background
+        background: 'rgb(247, 243, 238)',
       }}
     >
-      {/* Main color glow */}
       <div
         style={effectLayerStyle({
           left: '50%',
           top: '50%',
-          width: '65%',
-          height: '65%',
-          borderRadius: '9999px',
-          background: `
-        radial-gradient(
-          circle,
-          ${toRgba(color, 0.80)} 0%,
-          ${toRgba(color, 0.35)} 42%,
-          rgba(255,255,255,0) 78%
-        )
-      `,
-          filter: 'blur(90px)',
-          opacity: 1,
-          transform: `
-        translate(-50%, -50%)
-        translate(${driftX}px, ${driftY}px)
-        scale(${pulse})
-      `,
-        })}
-      />
 
-      {/* Ambient top wash */}
-      <div
-        style={effectLayerStyle({
-          inset: '-10%',
+          // Smaller concentrated glow
+          width: '46%',
+          height: '46%',
+
+          borderRadius: '50%',
+
           background: `
-        radial-gradient(
-          circle at 50% 30%,
-          rgba(255,255,255,0.7) 0%,
-          ${toRgba(color, 0.05)} 50%,
-          rgba(255,255,255,0) 75%
-        )
-      `,
-          filter: 'blur(70px)',
-          opacity: 0.8,
+            radial-gradient(
+              circle,
+
+              ${toRgba(color, 0.78)} 0%,
+              ${toRgba(color, 0.64)} 14%,
+              ${toRgba(color, 0.44)} 32%,
+              ${toRgba(color, 0.22)} 52%,
+              ${toRgba(color, 0.10)} 68%,
+              ${toRgba(color, 0.04)} 82%,
+              rgba(247,243,238,0) 100%
+            )
+          `,
+
+          // Keeps center visible while softening edges
+          filter: 'blur(36px)',
+
+          opacity: 1,
+
+          transform: `
+            translate(-50%, -50%)
+            translate(${driftX}px, ${driftY}px)
+            scale(${pulse})
+          `,
         })}
       />
     </AbsoluteFill>
