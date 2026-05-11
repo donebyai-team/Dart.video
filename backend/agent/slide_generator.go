@@ -81,17 +81,26 @@ func (g *videoConfigGenerator) AddBranding(assetRegistry *services.MediaAssetReg
 	}
 
 	// Step 2: ALWAYS generate gradient
-	solidColor := brand_identity.BrandColorTokens(generatedBranding.Colors)[brand_identity.COLOR_BACKGROUND]
-	if solidColor == "" {
-		solidColor = scenes.DefaultBackgroundColor
-	}
+	// We are using glow gradient with primary color at center
+	//solidColor := brand_identity.BrandColorTokens(generatedBranding.Colors)[brand_identity.COLOR_PRIMARY]
+	bg := brand_identity.BrandColorTokens(generatedBranding.Colors)[brand_identity.COLOR_BACKGROUND]
+	primary := brand_identity.BrandColorTokens(generatedBranding.Colors)[brand_identity.COLOR_PRIMARY]
+	solidColor := brand_identity.DarkestOrBlack(bg, primary)
+
 	// Step 3: compute safe text color
-	updatedTextColor := brand_identity.GetReadableTextColorForSolid(solidColor, generatedBranding.Colors, brand_identity.TextNormal)
+	//updatedTextColor := brand_identity.GetReadableTextColorForSolid(solidColor, generatedBranding.Colors, brand_identity.TextNormal)
+	textColor := brand_identity.BrandColorTokens(generatedBranding.Colors)[brand_identity.COLOR_TEXT_PRIMARY]
+
+	// because we are using glow gradient, we need to make sure the text color is dark enough,
+	isTextDark := brand_identity.IsDark(textColor)
+	if !isTextDark {
+		textColor = "#000000"
+	}
 
 	// Step 4: update text color
 	for _, brandColor := range generatedBranding.Colors {
 		if brandColor.Priority == pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_TEXT_PRIMARY {
-			brandColor.ColorHexCode = updatedTextColor
+			brandColor.ColorHexCode = textColor
 		}
 	}
 

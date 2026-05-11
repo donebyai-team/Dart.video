@@ -99,3 +99,32 @@ func BrandColorTokens(colors []*pbcore.BrandColor) map[string]string {
 
 	return out
 }
+
+func IsDark(color string) bool {
+	return luminance(color) < 0.5
+}
+
+func DarkestOrBlack(a, b string) string {
+	l1 := luminance(a)
+	l2 := luminance(b)
+
+	isADark := IsDark(a)
+	isBDark := IsDark(b)
+
+	switch {
+	case isADark && isBDark:
+		if l1 < l2 {
+			return a
+		}
+		return b
+
+	case isADark:
+		return a
+
+	case isBDark:
+		return b
+
+	default:
+		return "#000000"
+	}
+}

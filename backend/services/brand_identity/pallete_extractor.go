@@ -61,7 +61,6 @@ func ExtractOrGenerateColors(input map[string]string) []*pbcore.BrandColor {
 	colors := buildColorPalette(input)
 
 	result := make([]*pbcore.BrandColor, 0)
-	seen := make(map[string]bool)
 
 	for _, colorName := range colorOrder {
 		hex := strings.TrimSpace(colors[colorName])
@@ -69,15 +68,11 @@ func ExtractOrGenerateColors(input map[string]string) []*pbcore.BrandColor {
 			continue
 		}
 
-		// Avoid duplicate hex values
-		hexLower := strings.ToLower(hex)
-		if !seen[hexLower] {
-			result = append(result, &pbcore.BrandColor{
-				ColorHexCode: hex,
-				Priority:     priorityMap[colorName],
-			})
-			seen[hexLower] = true
-		}
+		result = append(result, &pbcore.BrandColor{
+			ColorHexCode: hex,
+			Priority:     priorityMap[colorName],
+		})
+
 	}
 
 	return result

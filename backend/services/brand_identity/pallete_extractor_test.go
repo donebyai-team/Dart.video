@@ -100,28 +100,6 @@ func TestColorSystem(t *testing.T) {
 				}
 			},
 		},
-		{
-			name: "duplicate colors removed",
-			input: map[string]string{
-				"primary":   "#123456",
-				"secondary": "#123456",
-			},
-			validate: func(t *testing.T, result []*pbcore.BrandColor) {
-
-				seen := map[string]bool{}
-
-				for _, c := range result {
-
-					key := strings.ToLower(c.ColorHexCode)
-
-					if seen[key] {
-						t.Fatalf("duplicate color detected: %s", key)
-					}
-
-					seen[key] = true
-				}
-			},
-		},
 	}
 
 	for _, tt := range tests {
