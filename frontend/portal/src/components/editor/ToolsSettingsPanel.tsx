@@ -60,7 +60,7 @@ const ToolsSettingsPanel = ({
   const getSlideDurationInSeconds = useVideoStore(s => s.getSlideDurationInSeconds)
   const getTimelineSlides = useVideoStore(s => s.getTimelineSlides)
   const fps = useVideoStore(s => s.videoConfig?.metadata?.fps) || 30
- 
+
   console.log("active tool", activeTool);
 
   if (activeTool.type == ActiveToolType.NONE) return null;
@@ -118,7 +118,12 @@ const ToolsSettingsPanel = ({
       )}
 
        {activeTool.type === ActiveToolType.REIMAGINE && (
-         <ReimagineSettings onClose={handleCloseTool} setOverlay={setOverlay} />
+         <ReimagineSettings
+           onClose={handleCloseTool}
+           setOverlay={setOverlay}
+           onPlay={onPreviewTemplate}
+           isPreviewPlaying={isPreviewPlaying}
+         />
       )}
 
       {activeTool.type === ActiveToolType.INSERT

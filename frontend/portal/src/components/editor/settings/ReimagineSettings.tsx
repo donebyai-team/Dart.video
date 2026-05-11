@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react'
-import { X } from 'lucide-react'
+import { Pause, Play, X } from 'lucide-react'
 import { useClientsContext } from '@coasterai/ui-core/context/ClientContext'
 import { PatchOverlay } from '@coasterai/renderer'
 import { SlideStatus, type Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Button } from '@/components/ui/button'
 import SlideThumbnail from '@/components/editor/SlideThumbnail'
 import { useVideoStore } from '@/stores/video'
-import { ActiveToolType } from '@/types/tools'
 import { getConnectError } from '@/utils/error'
 import toast from 'react-hot-toast'
 
@@ -15,32 +14,27 @@ const sceneSuggestionsCache = new Map<string, Slide[]>()
 interface ReimagineSettingsProps {
   onClose: () => void
   setOverlay: (overlay: PatchOverlay) => void
+  onPlay?: () => void
+  isPreviewPlaying?: boolean
 }
 
-const ReimagineSettings = ({ onClose, setOverlay }: ReimagineSettingsProps) => {
+const ReimagineSettings = ({
+  onClose,
+  setOverlay,
+  onPlay,
+  isPreviewPlaying = false,
+}: ReimagineSettingsProps) => {
   const { portalClient } = useClientsContext()
   const updateSlide = useVideoStore(s => s.updateSlide)
   const videoId = useVideoStore(s => s.videoConfig?.id)
   const selectedSlide = useVideoStore(s => s.selectedSlide)
   const resolution = useVideoStore(s => s.videoConfig?.metadata?.resolution)
   const fps = useVideoStore(s => s.videoConfig?.metadata?.fps) ?? 30
-  const acceptVideoConfigChanges = useVideoStore(s => s.acceptVideoConfigChanges)
-  const handleSelectTool = useVideoStore(s => s.handleSelectTool)
 
   const [scenes, setScenes] = useState<Slide[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
-  const reselectIfNeeded = (edits: PatchOverlay) => {
-    const firstId = Object.keys(edits)[0]
-    if (firstId) {
-      handleSelectTool({
-        type: ActiveToolType.ADD_OR_EDIT_ANIMATION,
-        settings: { animationElementId: firstId },
-      })
-    }
-  }
-
-  const applySlideToStore = (slide: Slide) => {
+  const applySlide = (slide: Slide) => {
     const updatedContent = slide.content
     if (!updatedContent) return
 
@@ -50,7 +44,6 @@ const ReimagineSettings = ({ onClose, setOverlay }: ReimagineSettingsProps) => {
 
     const pathOverlay = updatedContent.edits as unknown as PatchOverlay
     setOverlay(pathOverlay)
-    reselectIfNeeded(pathOverlay)
 
     updateSlide({
       slideStatus: SlideStatus.GENERATED,
@@ -62,13 +55,7 @@ const ReimagineSettings = ({ onClose, setOverlay }: ReimagineSettingsProps) => {
         edits: pathOverlay,
       },
       backgroundStyle: slide.backgroundStyle,
-    } as Slide)
-
-    if (!existingContent?.edits || Object.keys(existingContent.edits).length === 0) {
-      acceptVideoConfigChanges()
-    }
-
-    onClose()
+    } as Slide)  
   }
 
   useEffect(() => {
@@ -119,7 +106,7 @@ const ReimagineSettings = ({ onClose, setOverlay }: ReimagineSettingsProps) => {
   }, [portalClient, selectedSlide?.id, videoId])
 
   return (
-    <div className='h-full flex flex-col bg-card pb-10'>
+    <div className='h-full flex flex-col bg-card'>
       <div className='flex items-center justify-between px-5 border-b border-border'>
         <h3 className='font-semibold text-sm tracking-tight'>AI Suggestions</h3>
         <Button variant='ghost' size='icon' onClick={onClose}>
@@ -143,7 +130,7 @@ const ReimagineSettings = ({ onClose, setOverlay }: ReimagineSettingsProps) => {
               <button
                 key={`${slide.id || 'suggested-slide'}-${index}`}
                 type='button'
-                onClick={() => applySlideToStore(slide)}
+                onClick={() => applySlide(slide)}
                 className='overflow-hidden rounded-lg border border-border bg-muted/20 text-left transition-colors hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40'
               >
                 <div
@@ -157,6 +144,15 @@ const ReimagineSettings = ({ onClose, setOverlay }: ReimagineSettingsProps) => {
           </div>
         )}
       </div>
+
+      {onPlay && (
+        <div className='border-t border-border px-5 py-4 mt-auto'>
+          <Button variant='default' size='sm' className='w-full gap-2' onClick={onPlay}>
+            {isPreviewPlaying ? <Pause className='w-3.5 h-3.5' /> : <Play className='w-3.5 h-3.5' />}
+            {isPreviewPlaying ? 'Stop Preview' : 'Preview'}
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

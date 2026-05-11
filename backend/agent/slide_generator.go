@@ -83,9 +83,6 @@ func (g *videoConfigGenerator) AddBranding(assetRegistry *services.MediaAssetReg
 	// Step 2: ALWAYS generate gradient
 	// We are using glow gradient with primary color at center
 	//solidColor := brand_identity.BrandColorTokens(generatedBranding.Colors)[brand_identity.COLOR_PRIMARY]
-	bg := brand_identity.BrandColorTokens(generatedBranding.Colors)[brand_identity.COLOR_BACKGROUND]
-	primary := brand_identity.BrandColorTokens(generatedBranding.Colors)[brand_identity.COLOR_PRIMARY]
-	solidColor := brand_identity.DarkestOrBlack(bg, primary)
 
 	// Step 3: compute safe text color
 	//updatedTextColor := brand_identity.GetReadableTextColorForSolid(solidColor, generatedBranding.Colors, brand_identity.TextNormal)
@@ -107,7 +104,15 @@ func (g *videoConfigGenerator) AddBranding(assetRegistry *services.MediaAssetReg
 	// Step 5: assign branding
 	g.video.Metadata.GeneratedBranding = generatedBranding
 
-	g.AddVideoBackground(&pbcore.BackgroundStyle{
+	g.AddVideoBackground(generateDefaultBackground(generatedBranding))
+}
+
+func generateDefaultBackground(generatedBranding *pbcore.GeneratedVideoBranding) *pbcore.BackgroundStyle {
+	bg := brand_identity.BrandColorTokens(generatedBranding.Colors)[brand_identity.COLOR_BACKGROUND]
+	primary := brand_identity.BrandColorTokens(generatedBranding.Colors)[brand_identity.COLOR_PRIMARY]
+	solidColor := brand_identity.DarkestOrBlack(bg, primary)
+
+	return &pbcore.BackgroundStyle{
 		Style: &pbcore.BackgroundStyle_Solid{
 			Solid: &pbcore.SolidColor{
 				Hex: solidColor,
@@ -118,7 +123,7 @@ func (g *videoConfigGenerator) AddBranding(assetRegistry *services.MediaAssetReg
 		Effect: &pbcore.BackgroundEffect{
 			Type: pbcore.BackgroundEffectType_BACKGROUND_EFFECT_TYPE_GLOW,
 		},
-	})
+	}
 }
 
 func (g *videoConfigGenerator) CreatePendingSlidesV2(

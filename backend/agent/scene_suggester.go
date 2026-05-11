@@ -80,10 +80,7 @@ func (s SceneSuggester) GenerateSuggestions(
 		)
 	}
 
-	bgStyle := video.Metadata.BackgroundStyle
-	if bgStyle == nil && currSlide != nil {
-		bgStyle = currSlide.BackgroundStyle
-	}
+	bgStyle := generateDefaultBackground(video.Metadata.GeneratedBranding)
 
 	suggestedScenes := make([]*pbcore.Slide, 0, len(suggestScenesFromLLM.Scenes))
 

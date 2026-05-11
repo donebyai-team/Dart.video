@@ -163,27 +163,21 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
     previewEndFrameRef,
   });
 
-  // Ref to track which slide changes were already handled to prevent double-seeking.
-  // handleSlideSelect sets this before calling onSlideChange so the effect below skips it.
-  const lastHandledSlideRef = useRef(selectedSlideId);
-
-  // Handle external slide changes (e.g. from settings panel) when not playing
+  // Keep the player preview aligned whenever the selected slide changes or its data updates.
+  // This covers cases like reimagine / animation edits where the same slide id remains selected
+  // but its duration or content changes underneath the current frame.
   useEffect(() => {
-    if (selectedSlideId === lastHandledSlideRef.current) return;
-    lastHandledSlideRef.current = selectedSlideId;
-
-    if (!isPlaying && selectedSlideId) {
+    if (!isPlaying && selectedSlide) {
       const frame = getSlideEditPreviewFrame(allSlides, selectedSlideId, fps);
       playerRef.current?.seekTo(frame);
       setPlayFromSlideId(selectedSlideId);
     }
-  }, [selectedSlideId, isPlaying, allSlides, fps]);
+  }, [selectedSlide, selectedSlideId, isPlaying, allSlides, fps]);
 
   // Called when user clicks a slide tile in the timeline.
   // Pauses playback and seeks to the visual end of the slide (last frame before transition).
   // Sets playFromSlideId so that pressing play restarts from the slide's beginning.
   const handleSlideSelect = useCallback((slideId: string) => {
-    lastHandledSlideRef.current = slideId;
     previewEndFrameRef.current = null;
     playerRef.current?.pause();
     const frame = isPlaying

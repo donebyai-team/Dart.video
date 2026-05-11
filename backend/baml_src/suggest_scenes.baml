@@ -69,6 +69,7 @@ function SuggestScenes(input: SuggestScenesRequest) -> SuggestScenesResponse {
     - Return ONLY valid JSON
     - Return an array of scenes
     - Generate 3-5 scene suggestions
+    - DO NOT return duplicate component irrespective of props.
 
     ---
 

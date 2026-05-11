@@ -354,6 +354,7 @@ export const TextHighlightDescriptor: ComponentRegistration = {
         {
             name: 'text',
             type: 'string',
+            hint: 'Use {} to highlight. eg "We build amazing {software}"'
         },
         {
             name: 'entranceAnimation',
@@ -362,6 +363,6 @@ export const TextHighlightDescriptor: ComponentRegistration = {
             default: TextHighlightDefaults.entranceAnimation,
         }
     ],
-    description: 'Bold statement with an emphasized word/phrase. Use for key claims. Use {} to highlight. eg "We build amazing {software}"',
+    description: 'Bold statement with an emphasized word to highlight',
     celExpression: 'props.texthighlight.animationDelay + props.texthighlight.animationDuration + (props.texthighlight.exitAnimation != "none" ? props.texthighlight.exitDuration : 0)',
 };

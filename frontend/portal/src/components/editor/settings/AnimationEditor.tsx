@@ -39,6 +39,7 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
     const videoId = useVideoStore(s => s.videoConfig?.id)
     const brandIdentity = useVideoStore(s => s.videoConfig?.metadata?.generatedBranding?.brandIdentity)
     const brandLibraryID = useVideoStore(s => s.videoConfig?.metadata?.generatedBranding?.brandLibraryID)
+    const handleSelectEntity = useVideoStore(s => s.handleSelectEntity)
     const acceptVideoConfigChanges = useVideoStore(s => s.acceptVideoConfigChanges)
 
     const handleSelectTool = useVideoStore(s => s.handleSelectTool)
@@ -169,6 +170,9 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
         if (!existingContent?.edits || Object.keys(existingContent.edits).length === 0) {
             acceptVideoConfigChanges();
         }
+
+        // to retrigger the selected slide
+        handleSelectEntity(slide.id);
     }
 
     const consumeStream = async (

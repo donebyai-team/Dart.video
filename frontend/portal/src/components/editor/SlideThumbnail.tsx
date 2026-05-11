@@ -63,7 +63,10 @@ const SlideThumbnail = ({ slide, index = 0, resolution: resolutionProp, fps: fps
     return debouncedSlide.durationInFrames
   }, [debouncedSlide])
 
-  const initialFrame = Math.max(0, durationInFrames - 1)
+  // Show the mid frame
+  const midFrame = Math.floor(durationInFrames / 2)
+
+  const initialFrame = Math.max(0, midFrame)
 
   if (!resolution) {
     return (
