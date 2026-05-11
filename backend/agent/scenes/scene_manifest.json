@@ -267,7 +267,7 @@
                   "name": "duration",
                   "type": "number",
                   "map": "props.duration",
-                  "default": 15
+                  "default": 20
                 },
                 {
                   "name": "exitAnimation",
@@ -326,7 +326,7 @@
                 {
                   "name": "variant",
                   "type": "enum",
-                  "default": "display3xl"
+                  "default": "display2xl"
                 },
                 {
                   "name": "staggerDelay",
@@ -731,7 +731,8 @@
           "llmSchema": [
             {
               "name": "text",
-              "type": "string"
+              "type": "string",
+              "range": "4-6 words"
             },
             {
               "name": "entranceAnimation",
@@ -741,7 +742,7 @@
             }
           ],
           "celExpression": "82",
-          "description": "A short headline scene for concise text. Use it to show the main problem, key pain point, or an important headline from the script. Best for 4-6 words"
+          "description": "A short headline scene for concise text. Use it to show the main problem, key pain point, or an important headline from the script."
         },
         {
           "name": "TextCardStack",
@@ -853,7 +854,7 @@
                       "name": "duration",
                       "type": "number",
                       "map": "props.duration",
-                      "default": 15
+                      "default": 20
                     },
                     {
                       "name": "exitAnimation",
@@ -1286,7 +1287,7 @@
                   "name": "duration",
                   "type": "number",
                   "map": "props.duration",
-                  "default": 15
+                  "default": 20
                 },
                 {
                   "name": "splitBy",
@@ -1336,7 +1337,7 @@
             }
           ],
           "description": "Row of logos + caption. Use for integrations, tech stack, partners, brands. eg. logos=[\"url1\", \"url2\"], text=\"caption text\".",
-          "celExpression": "10 + max(min(1, segmentCount(props.textstagger.text, props.textstagger.splitBy)) * (max(0, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * 5 + 15), 5 + max(0, size(props.logos) - 1) * 5 + 12)"
+          "celExpression": "10 + max(min(1, segmentCount(props.textstagger.text, props.textstagger.splitBy)) * (max(0, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * 5 + 20), 5 + max(0, size(props.logos) - 1) * 5 + 12)"
         },
         {
           "name": "LogoWithBrandName",
@@ -1373,7 +1374,7 @@
                 {
                   "name": "duration",
                   "type": "number",
-                  "default": 15
+                  "default": 20
                 },
                 {
                   "name": "splitBy",
@@ -1554,7 +1555,7 @@
                   "name": "duration",
                   "type": "number",
                   "map": "props.duration",
-                  "default": 15
+                  "default": 20
                 },
                 {
                   "name": "splitBy",
@@ -1610,7 +1611,7 @@
             }
           ],
           "description": "Row of icons + caption. Use for integrations, tech stack, partners, brands. eg. icons={[\"shopify\", \"midjourney\", \"openai\"]}, text=\"caption text\".",
-          "celExpression": "10 + max(0, size(props.icons) - 1) * 5 + 10 + min(1, segmentCount(props.textstagger.text, props.textstagger.splitBy)) * (5 + max(0, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * 5 + 15)"
+          "celExpression": "10 + max(0, size(props.icons) - 1) * 5 + 10 + min(1, segmentCount(props.textstagger.text, props.textstagger.splitBy)) * (5 + max(0, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * 5 + 20)"
         },
         {
           "name": "PillCarousel",
@@ -1634,7 +1635,7 @@
                 {
                   "name": "variant",
                   "type": "enum",
-                  "default": "display"
+                  "default": "headingLg"
                 },
                 {
                   "name": "entranceAnimation",
@@ -1727,10 +1728,10 @@
             }
           ],
           "description": "A headline with a carousel of items below, each showing text and an icon (choose an icon name that represents the text) as a pill. Use for features, industries, use cases, capabilities, or categories. ~25 frames per item; minimum 3 items.",
-          "celExpression": "35 + max(0, size(props.pills) - 1) * 25"
+          "celExpression": "40 + max(0, size(props.pills) - 1) * 25"
         },
         {
-          "name": "ProductImageFeatures",
+          "name": "MediaWithFeatures",
           "type": "scene",
           "tags": [
             "Solution",
@@ -1843,7 +1844,7 @@
                   "name": "staggerDelay",
                   "type": "number",
                   "map": "props.staggerDelay",
-                  "default": 0
+                  "default": 5
                 },
                 {
                   "name": "entranceAnimation",
@@ -1855,13 +1856,13 @@
                   "name": "duration",
                   "type": "number",
                   "map": "props.duration",
-                  "default": 15
+                  "default": 20
                 },
                 {
                   "name": "splitBy",
                   "type": "enum",
                   "map": "props.splitBy",
-                  "default": "line"
+                  "default": "word"
                 }
               ]
             },
@@ -1887,7 +1888,8 @@
             {
               "name": "text",
               "type": "string",
-              "required": false
+              "required": false,
+              "hint": "one liner text to specity what feature is being demonstrated"
             },
             {
               "name": "src",

@@ -424,6 +424,7 @@ export const ProblemHeadlineDescriptor: ComponentRegistration = {
     {
       name: 'text',
       type: 'string',
+      range: '4-6 words'
     },
     {
       name: 'entranceAnimation',
@@ -433,5 +434,5 @@ export const ProblemHeadlineDescriptor: ComponentRegistration = {
     }
   ],
   celExpression: `${CEL_TOTAL_FRAMES}`,
-  description: `A short headline scene for concise text. Use it to show the main problem, key pain point, or an important headline from the script. Best for 4-${MAX_RECOMMENDED_WORDS} words`,
+  description: `A short headline scene for concise text. Use it to show the main problem, key pain point, or an important headline from the script.`,
 };

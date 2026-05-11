@@ -31,7 +31,7 @@ export const TextStaggerDefaults = {
     variant: 'headingLg' as TypographyVariant,
     staggerDelay: 5,
     entranceAnimation: 'scaleIn' as AnimationPresetName,
-    duration: 15,
+    duration: 20,
     exitAnimation: 'none' as AnimationPresetName,
     exitDuration: 15,
     splitBy: 'line' as SplitByMode,
@@ -64,12 +64,7 @@ export const TextStagger: React.FC<TextStaggerProps> = (initProps) => {
     const actualStaggerDelay = props.staggerDelay ?? modeDefaults.staggerDelay;
     const actualDuration = props.duration ?? modeDefaults.duration;
     const actualExitDuration = props.exitDuration ?? actualDuration;
-
-
-    // const styleOverride = useStyleOverride(id);
-    // const dragStyle = usePatchedDragStyle(id, props.style?.transform);
-    // const typographyStyle = resolveTypography(actualVariant, styleConfig, theme, preset);
-
+    
     const units = splitBy === 'char'
         ? props.text.split('')
         : splitBy === 'line'

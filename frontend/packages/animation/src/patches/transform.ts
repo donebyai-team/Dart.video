@@ -4,7 +4,11 @@ import { usePatchedProp } from './PatchContext';
 type TransformPart = string | null | undefined | false;
 
 export function composeTransforms(...transforms: TransformPart[]): string | undefined {
-  const parts = transforms.filter((transform): transform is string => Boolean(transform && transform.trim()));
+  const parts = transforms.filter((transform): transform is string => {
+    if (!transform) return false;
+    const trimmed = transform.trim();
+    return Boolean(trimmed && trimmed !== 'none');
+  });
   return parts.length > 0 ? parts.join(' ') : undefined;
 }
 

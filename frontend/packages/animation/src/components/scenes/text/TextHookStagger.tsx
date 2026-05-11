@@ -20,7 +20,7 @@ export const TextHookStaggerDefaults = {
   id: 'texthookstagger',
   startAt: 0,
   text: 'Stop losing easy sales',
-  variant: 'display3xl' as TypographyVariant,
+  variant: 'display2xl' as TypographyVariant,
   staggerDelay: DEFAULT_STAGGER_DELAY,
   revealDuration: DEFAULT_REVEAL_DURATION,
   highlightedTextAnimation: 'elasticStretch' as HighlightedTextAnimation,

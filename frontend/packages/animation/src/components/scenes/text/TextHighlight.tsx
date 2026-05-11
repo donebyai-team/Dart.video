@@ -1,12 +1,11 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
-import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
+import { composeTransforms, useElement } from '../../../patches';
 import { interpolateWithEasing } from '../../../styles';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme';
 import type { TypographyVariant } from '../../../tokens';
-import { resolveTypography } from '../../../tokens/resolveTypography';
 import { AnimationPresetName, resolveAnimationPreset } from '../../../core/animation_preset/AnimationPreset';
 import {
     getHighlightedTextAnimationTransform,
@@ -36,15 +35,12 @@ export type TextHighlightProps = Partial<typeof TextHighlightDefaults>;
 export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
     const frame = useCurrentFrame();
     const theme = useTheme();
-    const styleConfig = useStyleContext();
-    const preset = useAspectPreset();
 
     const defaultProps = { ...TextHighlightDefaults, ...initProps };
-    const id = defaultProps.id;
-    const props = usePatchedProps(id, defaultProps);
+    const el = useElement(defaultProps.id, defaultProps);
+    const { props } = el;
 
     // Apply defaults
-    const actualVariant = props.variant;
     const actualHighlightStyle = props.highlightStyle;
     const actualHighlightedTextAnimation = props.highlightedTextAnimation;
     const actualHighlightColor = props.highlightColor || theme.colors.primary;
@@ -53,7 +49,8 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
     const actualAnimationDelay = props.animationDelay;
     const actualAnimationDuration = props.animationDuration;
     const actualExitDuration = props.exitDuration ?? TextHighlightDefaults.exitDuration;
-    const styleOverride = useStyleOverride(id);
+
+
 
     // Animation timeline:
     // Phase 1: Entrance animation with highlight already visible (0 to animationDelay)
@@ -68,7 +65,6 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
         distance: 200,
         easing: 'ease-out',
     });
-    const dragStyle = usePatchedDragStyle(id, entranceMotion.transform, props.style?.transform);
 
     const zoomStartFrame = actualAnimationDelay;
     const zoomProgress = interpolateWithEasing(
@@ -85,6 +81,8 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
         presetName: actualExitAnimation,
         mode: 'exit',
     });
+    const wrapperTransform = composeTransforms(entranceMotion.transform, exitMotion.transform);
+    const wrapperOpacity = entranceMotion.opacity * exitMotion.opacity;
 
     const segments = useMemo(() => {
         const parts: { text: string; highlight: boolean; index: number }[] = [];
@@ -231,28 +229,25 @@ export const TextHighlight: React.FC<TextHighlightProps> = (initProps) => {
             id={props.id}
             className={props.className}
             style={{
-                display: 'block',
-                width: '100%',
-                maxWidth: '100%',
-                opacity: exitMotion.opacity,
-                transform: exitMotion.transform,
+                ...el.containerStyle,
             }}
         >
             <span
                 style={{
-                    display: 'inline-block',
+                    display: 'block',
                     width: '100%',
                     maxWidth: '100%',
-                    opacity: entranceMotion.opacity,
-                    ...dragStyle,
+                    textAlign: 'center',
+                    opacity: wrapperOpacity,
+                    transform: wrapperTransform,
                 }}
             >
                 <span
                     style={{
-                        ...resolveTypography(actualVariant, styleConfig, theme, preset),
+                        display: 'inline-block',
+                        maxWidth: '100%',
                         whiteSpace: 'pre-wrap',
-                        ...props.style,
-                        ...styleOverride,
+                        ...el.style,
                     }}
                 >
                     {segments.map((segment, i) => {
