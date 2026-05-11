@@ -77,6 +77,7 @@ func ungroupSocialProof(scene *baml_client.Scene, fieldValueMapper *services.Med
 				"variant":           "headingLg",
 				"entranceAnimation": "zoomIn",
 				"splitBy":           "line",
+				"exitAnimation":     "none",
 				"staggerDelay":      15,
 				"duration":          15,
 			},

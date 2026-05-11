@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { measureText } from '@remotion/layout-utils';
 import { useCurrentFrame } from 'remotion';
 import { composeTransforms, usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
 import { useStyleContext } from '../../../styles/StyleContext';
@@ -11,7 +12,6 @@ import { Text } from '../../../core/assets/Text';
 import { AnimationPresetName, resolveAnimationPreset } from '../../../core/animation_preset/AnimationPreset';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { TextCycleTransition } from '../types';
-import { measureTextWidth } from '../text/measureText';
 
 export const WordCycleDefaults = {
   id: 'wordcycle',
@@ -26,6 +26,21 @@ export const WordCycleDefaults = {
 };
 
 export type WordCycleProps = Partial<typeof WordCycleDefaults>;
+
+function measureWordWidth(text: string, style: React.CSSProperties): number {
+  return measureText({
+    text,
+    fontFamily: style.fontFamily as string,
+    fontSize: style.fontSize as number,
+    fontWeight: style.fontWeight as number,
+    letterSpacing: style.letterSpacing as string | undefined,
+    textTransform: style.textTransform as Parameters<typeof measureText>[0]['textTransform'],
+    additionalStyles: {
+      fontStyle: typeof style.fontStyle === 'string' ? style.fontStyle : undefined,
+      fontVariant: typeof style.fontVariant === 'string' ? style.fontVariant : undefined,
+    },
+  }).width;
+}
 
 /**
  * Cycles through an array of words with animated transitions.
@@ -81,7 +96,7 @@ export const WordCycle: React.FC<WordCycleProps> = (initProps) => {
   // Reserve width using the widest rendered word, not the longest string.
   const widestWord = useMemo(
     () => props.words.reduce((widest, candidate) => (
-      measureTextWidth(candidate, spacerMeasurementStyle) > measureTextWidth(widest, spacerMeasurementStyle)
+      measureWordWidth(candidate, spacerMeasurementStyle) > measureWordWidth(widest, spacerMeasurementStyle)
         ? candidate
         : widest
     ), ''),

@@ -1,8 +1,8 @@
 import React from 'react';
+import { measureText } from '@remotion/layout-utils';
 import { IconAsset } from './IconAsset';
 import type { TypographyVariant } from '../../tokens/semantic';
 import { CardAsset, Text } from '.';
-import { measureTextWidth } from '../../components/scenes/text/measureText';
 
 export const IconTextPillDefaults = {
     id: 'icontextpill',
@@ -39,6 +39,21 @@ export type TextPatch = {
 };
 
 export type PillPatchGroup = Record<string, IconPatch | TextPatch>;
+
+function measureWordWidth(text: string, style: React.CSSProperties): number {
+    return measureText({
+        text,
+        fontFamily: style.fontFamily as string,
+        fontSize: style.fontSize as number,
+        fontWeight: style.fontWeight as number,
+        letterSpacing: style.letterSpacing as string | undefined,
+        textTransform: style.textTransform as Parameters<typeof measureText>[0]['textTransform'],
+        additionalStyles: {
+            fontStyle: typeof style.fontStyle === 'string' ? style.fontStyle : undefined,
+            fontVariant: typeof style.fontVariant === 'string' ? style.fontVariant : undefined,
+        },
+    }).width;
+}
 
 
 export function getNormalizedPill(item: PillPatchGroup): typeof IconTextPillDefaults {
@@ -82,7 +97,7 @@ export function getIconTextPillMetrics(
     const fontSize = typeof resolvedTextStyle.fontSize === 'number' ? resolvedTextStyle.fontSize : 48;
     const lineHeight = typeof resolvedTextStyle.lineHeight === 'number' ? resolvedTextStyle.lineHeight : 1.1;
     const iconSize = Math.round(fontSize * lineHeight);
-    const textWidth = measureTextWidth(props.text, resolvedTextStyle);
+    const textWidth = measureWordWidth(props.text, resolvedTextStyle);
     const width = (props.padding * 2) + (props.borderWidth * 2) + iconSize + props.gap + textWidth;
     const height = (props.padding * 2) + (props.borderWidth * 2) + Math.max(iconSize, fontSize * lineHeight);
 

@@ -48,6 +48,13 @@ Rules:
   - `text-features-0`
   - `container-features-0`
 
+### `useCurrentFrame()`
+Use it to get the current frame number for animations and timing.
+
+
+### Utility functions
+Use `import {measureText} from '@remotion/layout-utils';` for text measurement. Needed when measuring text or word wrapping.
+
 ### Assets Available for Scenes
 
 Use these scene assets where appropriate:
@@ -56,6 +63,7 @@ Use these scene assets where appropriate:
 - `CardAsset`
 - `IconAsset`
 - `ArrayItem`
+
 
 ### Design Expectations
 

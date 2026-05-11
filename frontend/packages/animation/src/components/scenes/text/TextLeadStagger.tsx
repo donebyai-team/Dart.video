@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { measureText } from '@remotion/layout-utils';
 import { useCurrentFrame } from 'remotion';
 import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
@@ -62,13 +63,24 @@ function parsePixelValue(value: React.CSSProperties['fontSize']): number {
   return 96;
 }
 
-function estimateWordWidth(word: string, fontSizePx: number): number {
-  return Math.max(fontSizePx * 0.9, word.length * fontSizePx * 0.62);
-}
-
 function composeTransforms(...transforms: Array<string | undefined>): string | undefined {
   const parts = transforms.filter((transform): transform is string => Boolean(transform && transform.trim()));
   return parts.length > 0 ? parts.join(' ') : undefined;
+}
+
+function measureWordWidth(text: string, style: React.CSSProperties): number {
+  return measureText({
+    text,
+    fontFamily: style.fontFamily as string,
+    fontSize: style.fontSize as number,
+    fontWeight: style.fontWeight as number,
+    letterSpacing: style.letterSpacing as string | undefined,
+    textTransform: style.textTransform as Parameters<typeof measureText>[0]['textTransform'],
+    additionalStyles: {
+      fontStyle: typeof style.fontStyle === 'string' ? style.fontStyle : undefined,
+      fontVariant: typeof style.fontVariant === 'string' ? style.fontVariant : undefined,
+    },
+  }).width;
 }
 
 export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
@@ -100,8 +112,20 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
 
   const words = useMemo(() => props.text.trim().split(/\s+/).filter(Boolean), [props.text]);
   const wordCount = words.length;
+  const measuredWordStyle = useMemo<React.CSSProperties>(
+    () => ({
+      ...typographyStyle,
+      ...props.style,
+      ...styleOverride,
+    }),
+    [props.style, styleOverride, typographyStyle],
+  );
+  const wordWidths = useMemo(
+    () => words.map((word) => measureWordWidth(word, measuredWordStyle) + 2),
+    [measuredWordStyle, words],
+  );
   const leadWord = words[0] ?? '';
-  const leadWordWidth = estimateWordWidth(leadWord, fontSizePx);
+  const leadWordWidth = wordWidths[0] ?? 0;
   const leadScale = leadWordWidth > 0
     ? Math.min(Math.max((preset.width * LEAD_VIEWPORT_COVERAGE) / leadWordWidth, 1.8), 6)
     : 1;
@@ -119,7 +143,7 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
   const exitBaseFrame = allVisibleFrame + holdDuration;
 
   const getWordStyle = (word: string, wordIndex: number): React.CSSProperties => {
-    const estimatedWidth = estimateWordWidth(word, fontSizePx);
+    const measuredWidth = wordWidths[wordIndex] ?? measureWordWidth(word, measuredWordStyle) + 2;
     const exitStart = exitBaseFrame + wordIndex * exitStaggerDelay;
     const exitProgress = interpolateWithEasing(
       elapsed,
@@ -128,7 +152,7 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
       'ease-in-out',
     );
     const exitVisibility = 1 - exitProgress;
-    const exitTranslate = `translateX(${-estimatedWidth * 0.18 * exitProgress}px)`;
+    const exitTranslate = `translateX(${-measuredWidth * 0.18 * exitProgress}px)`;
 
     if (wordIndex === 0) {
       const revealProgress = interpolateWithEasing(
@@ -150,7 +174,7 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
         paddingBottom: '0.08em',
         marginTop: '-0.08em',
         marginBottom: '-0.08em',
-        maxWidth: `${estimatedWidth * (isVisible ? visibleProgress : 0)}px`,
+        maxWidth: `${measuredWidth * (isVisible ? visibleProgress : 0)}px`,
         marginRight: wordIndex < wordCount - 1 ? `${wordGapPx * (isVisible ? visibleProgress : 0)}px` : 0,
         opacity: isVisible ? visibleProgress : 0,
         transform: exitTranslate,
@@ -189,7 +213,7 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
       paddingBottom: '0.08em',
       marginTop: '-0.08em',
       marginBottom: '-0.08em',
-      maxWidth: `${estimatedWidth * (isVisible ? visibleProgress : 0)}px`,
+      maxWidth: `${measuredWidth * (isVisible ? visibleProgress : 0)}px`,
       marginRight: wordIndex < wordCount - 1 ? `${wordGapPx * (isVisible ? visibleProgress : 0)}px` : 0,
       opacity: isVisible ? visibleProgress : 0,
       transform: composeTransforms(entranceTransform, exitTranslate),

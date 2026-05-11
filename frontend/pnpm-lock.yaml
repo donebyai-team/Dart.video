@@ -180,6 +180,9 @@ importers:
 
   packages/animation:
     dependencies:
+      '@remotion/layout-utils':
+        specifier: ^4.0.432
+        version: 4.0.432
       '@remotion/preload':
         specifier: 4.0.421
         version: 4.0.421
