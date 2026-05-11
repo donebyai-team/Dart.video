@@ -551,10 +551,6 @@ func (t *SceneClassView) ListProperties() ([]ClassPropertyView, error) {
 	return builders, nil
 }
 
-func (t *SceneClassView) PropertyIndex() (ClassPropertyView, error) {
-	return t.inner.Property("index")
-}
-
 func (t *SceneClassView) PropertyElement() (ClassPropertyView, error) {
 	return t.inner.Property("element")
 }
@@ -688,6 +684,86 @@ func (t *TypeBuilder) ScriptItem() (*ScriptItemClassView, error) {
 }
 
 func (t *ScriptItemClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
+type SuggestScenesRequestClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *SuggestScenesRequestClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *SuggestScenesRequestClassView) PropertyVideoBranding() (ClassPropertyView, error) {
+	return t.inner.Property("VideoBranding")
+}
+
+func (t *SuggestScenesRequestClassView) PropertyComponentList() (ClassPropertyView, error) {
+	return t.inner.Property("ComponentList")
+}
+
+func (t *SuggestScenesRequestClassView) PropertyBefore() (ClassPropertyView, error) {
+	return t.inner.Property("before")
+}
+
+func (t *SuggestScenesRequestClassView) PropertyCurrent() (ClassPropertyView, error) {
+	return t.inner.Property("current")
+}
+
+func (t *SuggestScenesRequestClassView) PropertyAfter() (ClassPropertyView, error) {
+	return t.inner.Property("after")
+}
+
+func (t *TypeBuilder) SuggestScenesRequest() (*SuggestScenesRequestClassView, error) {
+	bld, err := t.inner.Class("SuggestScenesRequest")
+	if err != nil {
+		return nil, err
+	}
+	return &SuggestScenesRequestClassView{inner: bld}, nil
+}
+
+func (t *SuggestScenesRequestClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
+type SuggestScenesResponseClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *SuggestScenesResponseClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *SuggestScenesResponseClassView) PropertyScenes() (ClassPropertyView, error) {
+	return t.inner.Property("scenes")
+}
+
+func (t *TypeBuilder) SuggestScenesResponse() (*SuggestScenesResponseClassView, error) {
+	bld, err := t.inner.Class("SuggestScenesResponse")
+	if err != nil {
+		return nil, err
+	}
+	return &SuggestScenesResponseClassView{inner: bld}, nil
+}
+
+func (t *SuggestScenesResponseClassView) Type() (baml.Type, error) {
 	return t.inner.Type()
 }
 

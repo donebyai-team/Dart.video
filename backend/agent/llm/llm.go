@@ -34,11 +34,19 @@ type LLMService interface {
 		conversationHistory []types.Message,
 		onThinking func(thinking string),
 	) (*types.Union2AskUserQuestionOrScene, error)
+	SuggestScenes(
+		ctx context.Context,
+		req types.SuggestScenesRequest,
+	) (types.SuggestScenesResponse, error)
 }
 
 type llmService struct {
 	logger *zap.Logger
 	cache  cache.Cache
+}
+
+func (l *llmService) SuggestScenes(ctx context.Context, req types.SuggestScenesRequest) (types.SuggestScenesResponse, error) {
+	return baml_client.SuggestScenes(ctx, req)
 }
 
 func getTags(ctx context.Context) map[string]string {

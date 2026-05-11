@@ -14,6 +14,7 @@ import { CodeEditor } from './settings/CodeEditor'
 import { getRealSlideStartFrame } from './frame_calculations'
 import { TRANSITION_DURATION_FRAMES } from '@coasterai/renderer/src/frameUtils'
 import type { PatchOverlay } from '@coasterai/renderer'
+import ReimagineSettings from './settings/ReimagineSettings'
 
 interface ToolsSettingsPanelProps {
   onPreviewTemplate: () => void
@@ -114,6 +115,10 @@ const ToolsSettingsPanel = ({
 
       {activeTool.type === ActiveToolType.ANIMATION_CODE && (
         <CodeEditor onClose={handleCloseTool} />
+      )}
+
+       {activeTool.type === ActiveToolType.REIMAGINE && (
+         <ReimagineSettings onClose={handleCloseTool} setOverlay={setOverlay} />
       )}
 
       {activeTool.type === ActiveToolType.INSERT

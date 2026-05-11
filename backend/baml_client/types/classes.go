@@ -717,7 +717,6 @@ func (c Message) BamlTypeName() string {
 }
 
 type Scene struct {
-	Index           int64        `json:"index"`
 	Element         SceneElement `json:"element"`
 	Background      *Background  `json:"background"`
 	ThinkingSummary *string      `json:"thinkingSummary"`
@@ -736,9 +735,6 @@ func (c *Scene) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
 		key := field.Key
 		valueHolder := field.Value
 		switch key {
-
-		case "index":
-			c.Index = baml.Decode(valueHolder).Int()
 
 		case "element":
 			c.Element = baml.Decode(valueHolder).Interface().(SceneElement)
@@ -760,8 +756,6 @@ func (c *Scene) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
 
 func (c Scene) Encode() (*cffi.HostValue, error) {
 	fields := map[string]any{}
-
-	fields["index"] = c.Index
 
 	fields["element"] = c.Element
 
@@ -924,6 +918,114 @@ func (c ScriptItem) Encode() (*cffi.HostValue, error) {
 
 func (c ScriptItem) BamlTypeName() string {
 	return "ScriptItem"
+}
+
+type SuggestScenesRequest struct {
+	VideoBranding VideoBranding `json:"VideoBranding"`
+	ComponentList string        `json:"ComponentList"`
+	Before        string        `json:"before"`
+	Current       string        `json:"current"`
+	After         string        `json:"after"`
+}
+
+func (c *SuggestScenesRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "SuggestScenesRequest" {
+		panic(fmt.Sprintf("expected SuggestScenesRequest, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "VideoBranding":
+			c.VideoBranding = baml.Decode(valueHolder).Interface().(VideoBranding)
+
+		case "ComponentList":
+			c.ComponentList = baml.Decode(valueHolder).Interface().(string)
+
+		case "before":
+			c.Before = baml.Decode(valueHolder).Interface().(string)
+
+		case "current":
+			c.Current = baml.Decode(valueHolder).Interface().(string)
+
+		case "after":
+			c.After = baml.Decode(valueHolder).Interface().(string)
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class SuggestScenesRequest", key))
+
+		}
+	}
+
+}
+
+func (c SuggestScenesRequest) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["VideoBranding"] = c.VideoBranding
+
+	fields["ComponentList"] = c.ComponentList
+
+	fields["before"] = c.Before
+
+	fields["current"] = c.Current
+
+	fields["after"] = c.After
+
+	return baml.EncodeClass("SuggestScenesRequest", fields, nil)
+}
+
+func (c SuggestScenesRequest) BamlTypeName() string {
+	return "SuggestScenesRequest"
+}
+
+type SuggestScenesResponse struct {
+	Scenes []Scene `json:"scenes"`
+}
+
+func (c *SuggestScenesResponse) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "SuggestScenesResponse" {
+		panic(fmt.Sprintf("expected SuggestScenesResponse, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "scenes":
+			c.Scenes = baml.Decode(valueHolder).Interface().([]Scene)
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class SuggestScenesResponse", key))
+
+		}
+	}
+
+}
+
+func (c SuggestScenesResponse) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["scenes"] = c.Scenes
+
+	return baml.EncodeClass("SuggestScenesResponse", fields, nil)
+}
+
+func (c SuggestScenesResponse) BamlTypeName() string {
+	return "SuggestScenesResponse"
 }
 
 type VideoBranding struct {

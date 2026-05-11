@@ -156,9 +156,7 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 					SlideStatus: pbcore.SlideStatus_SLIDE_STATUS_PENDING,
 					Index:       int32(slideIndex),
 					Content: &pbcore.AnimationSlideContent{
-						Plan: &pbcore.AnimationSlidePlan{
-							Index: pendingSlide.Index,
-						},
+						Plan: &pbcore.AnimationSlidePlan{},
 					},
 				}
 

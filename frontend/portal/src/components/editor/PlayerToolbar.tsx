@@ -8,7 +8,10 @@ import {
   Focus,
   CircleDot,
   ZoomIn,
-  Figma
+  Figma,
+  MessageCircleIcon,
+  MagnetIcon,
+  WandIcon
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
@@ -40,7 +43,6 @@ const PlayerToolbar = ({ onDurationChange, minDuration = 0.3, maxDuration = 180,
   const isPlatformAdminUser = user && isPlatformAdmin(user);
 
   const getSlideWithBackground = useVideoStore(s => s.getSlideWithBackground)
-  const onChangeTextAnimation = useVideoStore(s => s.handleEditAnimation)
   const onViewAnimationCode = useVideoStore(s => s.handleViewAnimationCode)
   const activeTool = useVideoStore(s => s.activeTool)
   const onSelectTool = useVideoStore(s => s.handleSelectTool)
@@ -158,10 +160,35 @@ const PlayerToolbar = ({ onDurationChange, minDuration = 0.3, maxDuration = 180,
             </DropdownMenuContent>
           </DropdownMenu>
         </>
+        <>
+          <div className='h-4 w-px bg-border mx-1' />
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={"ghost"}
+                  size='sm'
+                  className='gap-2 h-8'
+                  onClick={() => {
+                    onSelectTool({ type: ActiveToolType.REIMAGINE })
+                  }}
+                >
+                  <WandIcon className='w-4 h-4' />
+                  <span className='text-xs'>ReImagine</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side='bottom' className='text-xs'>
+                Replace this scene
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+        </>
+
       </div>
 
       {/* Right side: Duration control */}
-      <div className='flex items-center gap-2'>       
+      <div className='flex items-center gap-2'>
         <TooltipProvider delayDuration={100}>
           <Tooltip>
             <TooltipTrigger asChild>

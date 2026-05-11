@@ -197,7 +197,6 @@ func NewAgentV2(
 			mediaStore,
 			codeBuilder,
 			logger,
-			llmService,
 		),
 	}
 }

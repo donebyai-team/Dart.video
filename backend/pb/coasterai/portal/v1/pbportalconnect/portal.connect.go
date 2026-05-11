@@ -74,6 +74,9 @@ const (
 	PortalServiceContinueVideoPlanningProcedure = "/coasterai.portal.v1.PortalService/ContinueVideoPlanning"
 	// PortalServiceGetVideoProcedure is the fully-qualified name of the PortalService's GetVideo RPC.
 	PortalServiceGetVideoProcedure = "/coasterai.portal.v1.PortalService/GetVideo"
+	// PortalServiceSuggestScenesProcedure is the fully-qualified name of the PortalService's
+	// SuggestScenes RPC.
+	PortalServiceSuggestScenesProcedure = "/coasterai.portal.v1.PortalService/SuggestScenes"
 	// PortalServiceStopVideoProcedure is the fully-qualified name of the PortalService's StopVideo RPC.
 	PortalServiceStopVideoProcedure = "/coasterai.portal.v1.PortalService/StopVideo"
 	// PortalServiceGetVideosProcedure is the fully-qualified name of the PortalService's GetVideos RPC.
@@ -133,6 +136,7 @@ var (
 	portalServiceCreateVideoMethodDescriptor           = portalServiceServiceDescriptor.Methods().ByName("CreateVideo")
 	portalServiceContinueVideoPlanningMethodDescriptor = portalServiceServiceDescriptor.Methods().ByName("ContinueVideoPlanning")
 	portalServiceGetVideoMethodDescriptor              = portalServiceServiceDescriptor.Methods().ByName("GetVideo")
+	portalServiceSuggestScenesMethodDescriptor         = portalServiceServiceDescriptor.Methods().ByName("SuggestScenes")
 	portalServiceStopVideoMethodDescriptor             = portalServiceServiceDescriptor.Methods().ByName("StopVideo")
 	portalServiceGetVideosMethodDescriptor             = portalServiceServiceDescriptor.Methods().ByName("GetVideos")
 	portalServiceDeleteVideoMethodDescriptor           = portalServiceServiceDescriptor.Methods().ByName("DeleteVideo")
@@ -167,6 +171,7 @@ type PortalServiceClient interface {
 	CreateVideo(context.Context, *connect.Request[v1.CreateVideoRequest]) (*connect.ServerStreamForClient[v1.CreateVideoResponse], error)
 	ContinueVideoPlanning(context.Context, *connect.Request[v1.ContinueVideoPlanningRequest]) (*connect.ServerStreamForClient[v1.CreateVideoResponse], error)
 	GetVideo(context.Context, *connect.Request[v1.GetVideoRequest]) (*connect.ServerStreamForClient[v1.GetVideoResponse], error)
+	SuggestScenes(context.Context, *connect.Request[v1.SuggestScenesRequest]) (*connect.Response[v1.SuggestScenesResponse], error)
 	StopVideo(context.Context, *connect.Request[v1.StopVideoRequest]) (*connect.Response[emptypb.Empty], error)
 	GetVideos(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetVideosResponse], error)
 	DeleteVideo(context.Context, *connect.Request[v1.VideoRequestWithID]) (*connect.Response[emptypb.Empty], error)
@@ -280,6 +285,12 @@ func NewPortalServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(portalServiceGetVideoMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		suggestScenes: connect.NewClient[v1.SuggestScenesRequest, v1.SuggestScenesResponse](
+			httpClient,
+			baseURL+PortalServiceSuggestScenesProcedure,
+			connect.WithSchema(portalServiceSuggestScenesMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 		stopVideo: connect.NewClient[v1.StopVideoRequest, emptypb.Empty](
 			httpClient,
 			baseURL+PortalServiceStopVideoProcedure,
@@ -383,6 +394,7 @@ type portalServiceClient struct {
 	createVideo           *connect.Client[v1.CreateVideoRequest, v1.CreateVideoResponse]
 	continueVideoPlanning *connect.Client[v1.ContinueVideoPlanningRequest, v1.CreateVideoResponse]
 	getVideo              *connect.Client[v1.GetVideoRequest, v1.GetVideoResponse]
+	suggestScenes         *connect.Client[v1.SuggestScenesRequest, v1.SuggestScenesResponse]
 	stopVideo             *connect.Client[v1.StopVideoRequest, emptypb.Empty]
 	getVideos             *connect.Client[emptypb.Empty, v1.GetVideosResponse]
 	deleteVideo           *connect.Client[v1.VideoRequestWithID, emptypb.Empty]
@@ -467,6 +479,11 @@ func (c *portalServiceClient) ContinueVideoPlanning(ctx context.Context, req *co
 // GetVideo calls coasterai.portal.v1.PortalService.GetVideo.
 func (c *portalServiceClient) GetVideo(ctx context.Context, req *connect.Request[v1.GetVideoRequest]) (*connect.ServerStreamForClient[v1.GetVideoResponse], error) {
 	return c.getVideo.CallServerStream(ctx, req)
+}
+
+// SuggestScenes calls coasterai.portal.v1.PortalService.SuggestScenes.
+func (c *portalServiceClient) SuggestScenes(ctx context.Context, req *connect.Request[v1.SuggestScenesRequest]) (*connect.Response[v1.SuggestScenesResponse], error) {
+	return c.suggestScenes.CallUnary(ctx, req)
 }
 
 // StopVideo calls coasterai.portal.v1.PortalService.StopVideo.
@@ -557,6 +574,7 @@ type PortalServiceHandler interface {
 	CreateVideo(context.Context, *connect.Request[v1.CreateVideoRequest], *connect.ServerStream[v1.CreateVideoResponse]) error
 	ContinueVideoPlanning(context.Context, *connect.Request[v1.ContinueVideoPlanningRequest], *connect.ServerStream[v1.CreateVideoResponse]) error
 	GetVideo(context.Context, *connect.Request[v1.GetVideoRequest], *connect.ServerStream[v1.GetVideoResponse]) error
+	SuggestScenes(context.Context, *connect.Request[v1.SuggestScenesRequest]) (*connect.Response[v1.SuggestScenesResponse], error)
 	StopVideo(context.Context, *connect.Request[v1.StopVideoRequest]) (*connect.Response[emptypb.Empty], error)
 	GetVideos(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetVideosResponse], error)
 	DeleteVideo(context.Context, *connect.Request[v1.VideoRequestWithID]) (*connect.Response[emptypb.Empty], error)
@@ -664,6 +682,12 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 		PortalServiceGetVideoProcedure,
 		svc.GetVideo,
 		connect.WithSchema(portalServiceGetVideoMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
+	portalServiceSuggestScenesHandler := connect.NewUnaryHandler(
+		PortalServiceSuggestScenesProcedure,
+		svc.SuggestScenes,
+		connect.WithSchema(portalServiceSuggestScenesMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
 	portalServiceStopVideoHandler := connect.NewUnaryHandler(
@@ -780,6 +804,8 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 			portalServiceContinueVideoPlanningHandler.ServeHTTP(w, r)
 		case PortalServiceGetVideoProcedure:
 			portalServiceGetVideoHandler.ServeHTTP(w, r)
+		case PortalServiceSuggestScenesProcedure:
+			portalServiceSuggestScenesHandler.ServeHTTP(w, r)
 		case PortalServiceStopVideoProcedure:
 			portalServiceStopVideoHandler.ServeHTTP(w, r)
 		case PortalServiceGetVideosProcedure:
@@ -871,6 +897,10 @@ func (UnimplementedPortalServiceHandler) ContinueVideoPlanning(context.Context, 
 
 func (UnimplementedPortalServiceHandler) GetVideo(context.Context, *connect.Request[v1.GetVideoRequest], *connect.ServerStream[v1.GetVideoResponse]) error {
 	return connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.GetVideo is not implemented"))
+}
+
+func (UnimplementedPortalServiceHandler) SuggestScenes(context.Context, *connect.Request[v1.SuggestScenesRequest]) (*connect.Response[v1.SuggestScenesResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.SuggestScenes is not implemented"))
 }
 
 func (UnimplementedPortalServiceHandler) StopVideo(context.Context, *connect.Request[v1.StopVideoRequest]) (*connect.Response[emptypb.Empty], error) {

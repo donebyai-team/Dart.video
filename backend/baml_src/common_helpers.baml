@@ -27,7 +27,6 @@ class VideoBranding {
 }
 
 class Scene {
-  index int
   element SceneElement
   background Background? @description("optional background")
   thinkingSummary string? @skip()

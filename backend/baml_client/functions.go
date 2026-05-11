@@ -390,3 +390,77 @@ func MatchCategories(ctx context.Context, resume types.MatchCategoriesRequest, o
 		return types.MatchCategoriesResponse{}, fmt.Errorf("No data returned from stream")
 	}
 }
+
+func SuggestScenes(ctx context.Context, input types.SuggestScenesRequest, opts ...CallOptionFunc) (types.SuggestScenesResponse, error) {
+
+	var callOpts callOption
+	for _, opt := range opts {
+		opt(&callOpts)
+	}
+
+	// Resolve client option to clientRegistry (client takes precedence)
+	if callOpts.client != nil {
+		if callOpts.clientRegistry == nil {
+			callOpts.clientRegistry = baml.NewClientRegistry()
+		}
+		callOpts.clientRegistry.SetPrimaryClient(*callOpts.client)
+	}
+
+	args := baml.BamlFunctionArguments{
+		Kwargs: map[string]any{"input": input},
+		Env:    getEnvVars(callOpts.env),
+	}
+
+	if callOpts.clientRegistry != nil {
+		args.ClientRegistry = callOpts.clientRegistry
+	}
+
+	if callOpts.collectors != nil {
+		args.Collectors = callOpts.collectors
+	}
+
+	if callOpts.typeBuilder != nil {
+		args.TypeBuilder = callOpts.typeBuilder
+	}
+
+	if callOpts.tags != nil {
+		args.Tags = callOpts.tags
+	}
+
+	encoded, err := args.Encode()
+	if err != nil {
+		panic(err)
+	}
+
+	if callOpts.onTick == nil {
+		result, err := bamlRuntime.CallFunction(ctx, "SuggestScenes", encoded, callOpts.onTick)
+		if err != nil {
+			return types.SuggestScenesResponse{}, err
+		}
+
+		if result.Error != nil {
+			return types.SuggestScenesResponse{}, result.Error
+		}
+
+		casted := (result.Data).(types.SuggestScenesResponse)
+
+		return casted, nil
+	} else {
+		channel, err := bamlRuntime.CallFunctionStream(ctx, "SuggestScenes", encoded, callOpts.onTick)
+		if err != nil {
+			return types.SuggestScenesResponse{}, err
+		}
+
+		for result := range channel {
+			if result.Error != nil {
+				return types.SuggestScenesResponse{}, result.Error
+			}
+
+			if result.HasData {
+				return result.Data.(types.SuggestScenesResponse), nil
+			}
+		}
+
+		return types.SuggestScenesResponse{}, fmt.Errorf("No data returned from stream")
+	}
+}

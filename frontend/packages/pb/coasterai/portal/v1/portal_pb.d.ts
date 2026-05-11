@@ -144,6 +144,43 @@ export declare type GenerateOrEditSceneResponse = Message<"coasterai.portal.v1.G
 export declare const GenerateOrEditSceneResponseSchema: GenMessage<GenerateOrEditSceneResponse>;
 
 /**
+ * @generated from message coasterai.portal.v1.SuggestScenesRequest
+ */
+export declare type SuggestScenesRequest = Message<"coasterai.portal.v1.SuggestScenesRequest"> & {
+  /**
+   * @generated from field: string videoId = 1;
+   */
+  videoId: string;
+
+  /**
+   * @generated from field: string sceneId = 2;
+   */
+  sceneId: string;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.SuggestScenesRequest.
+ * Use `create(SuggestScenesRequestSchema)` to create a new message.
+ */
+export declare const SuggestScenesRequestSchema: GenMessage<SuggestScenesRequest>;
+
+/**
+ * @generated from message coasterai.portal.v1.SuggestScenesResponse
+ */
+export declare type SuggestScenesResponse = Message<"coasterai.portal.v1.SuggestScenesResponse"> & {
+  /**
+   * @generated from field: repeated coasterai.core.v1.Slide scenes = 1;
+   */
+  scenes: Slide[];
+};
+
+/**
+ * Describes the message coasterai.portal.v1.SuggestScenesResponse.
+ * Use `create(SuggestScenesResponseSchema)` to create a new message.
+ */
+export declare const SuggestScenesResponseSchema: GenMessage<SuggestScenesResponse>;
+
+/**
  * @generated from message coasterai.portal.v1.UpdateBrandIdentityRequest
  */
 export declare type UpdateBrandIdentityRequest = Message<"coasterai.portal.v1.UpdateBrandIdentityRequest"> & {
@@ -1405,6 +1442,14 @@ export declare const PortalService: GenService<{
     methodKind: "server_streaming";
     input: typeof GetVideoRequestSchema;
     output: typeof GetVideoResponseSchema;
+  },
+  /**
+   * @generated from rpc coasterai.portal.v1.PortalService.SuggestScenes
+   */
+  suggestScenes: {
+    methodKind: "unary";
+    input: typeof SuggestScenesRequestSchema;
+    output: typeof SuggestScenesResponseSchema;
   },
   /**
    * @generated from rpc coasterai.portal.v1.PortalService.StopVideo

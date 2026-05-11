@@ -15,6 +15,7 @@ export enum ActiveToolType {
   BACKGROUND = "background",
   INSERT = "insert",
   ANIMATION_CODE = "animation-code",
+  REIMAGINE = "reimagine",
   TEXT_ANIMATION_TEMPLATE = "text-animation-template",
   VISUAL_ANIMATION_SETTINGS = "visual-animation-settings",
   TEXT_ANIMATION_SETTINGS = "text-animation-settings",

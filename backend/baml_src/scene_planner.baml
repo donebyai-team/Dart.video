@@ -123,23 +123,19 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     ```json
     [
       {
-        "index": 0,
-        "elements": [
+        "element":
           {
             "component": "AnimatedNumber",
             "props": "{\"startText\": \"Solving\", \"endText\": \"incidents\", \"from\": 0, \"to\": 100}"
           }
-        ]
       },
       {
-              "index": 1,
-              "elements": [
-                {
-                  "component": "AnimatedImage",
-                  "props": "{\"src\": \"@generated/ectplz/0.png\"}"
-                }
-              ]
-      }
+         "element":
+          {
+            "component": "AnimatedImage",
+             "props": "{\"src\": \"@generated/ectplz/0.png\"}"
+           }
+       }
     ]
     ```
 

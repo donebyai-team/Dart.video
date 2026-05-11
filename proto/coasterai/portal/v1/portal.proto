@@ -31,6 +31,7 @@ service PortalService {
   rpc CreateVideo(CreateVideoRequest) returns (stream CreateVideoResponse);
   rpc ContinueVideoPlanning(ContinueVideoPlanningRequest) returns (stream CreateVideoResponse);
   rpc GetVideo(GetVideoRequest) returns (stream GetVideoResponse);
+  rpc SuggestScenes(SuggestScenesRequest) returns (SuggestScenesResponse);
   rpc StopVideo(StopVideoRequest) returns (.google.protobuf.Empty);
   rpc GetVideos(.google.protobuf.Empty) returns (GetVideosResponse);
 
@@ -84,6 +85,15 @@ message GenerateOrEditSceneResponse {
   bool waiting_for_user_input = 4;
   bool completed = 6;
   string error_message = 7;
+}
+
+message SuggestScenesRequest {
+  string videoId = 1;
+  string sceneId = 2;
+}
+
+message SuggestScenesResponse {
+  repeated core.v1.Slide scenes = 1;
 }
 
 message UpdateBrandIdentityRequest {

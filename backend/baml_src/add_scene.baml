@@ -33,7 +33,6 @@ function GenerateScene(input: AddSceneRequest, conversation_history: Message[]) 
     ### Structure
     - Scene has a single clear purpose. One idea per scene.
     - Scene must stand alone. No siblings.
-    - Scene index is always 0.
     - **Define the props of scenes in SceneElement props in JSON format**
 
     ### Data

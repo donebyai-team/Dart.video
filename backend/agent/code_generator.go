@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/shank318/coasterai/agent/agenterrors"
-	"github.com/shank318/coasterai/agent/llm"
 	"github.com/shank318/coasterai/agent/scenes"
 	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/models"
@@ -94,7 +93,6 @@ type codeGenerator struct {
 	mediaStore        services.MediaStore
 	codeBuilder       services.TemplateCodeBuilder
 	generationOptions AnimationGenerationOptions
-	llmService        llm.LLMService
 	logger            *zap.Logger
 }
 
@@ -161,7 +159,7 @@ func NewAnimationGenerator(sessionID string,
 	mediaStore services.MediaStore,
 	codeBuilder services.TemplateCodeBuilder,
 	logger *zap.Logger,
-	llmService llm.LLMService) CodeGenerator {
+) CodeGenerator {
 	return &codeGenerator{
 		sessionID:   sessionID,
 		orgID:       orgID,
@@ -169,7 +167,6 @@ func NewAnimationGenerator(sessionID string,
 		mediaStore:  mediaStore,
 		codeBuilder: codeBuilder,
 		logger:      logger,
-		llmService:  llmService,
 	}
 }
 

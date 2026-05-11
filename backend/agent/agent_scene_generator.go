@@ -87,7 +87,6 @@ func NewAgentAnimationEditor(
 			mediaStore,
 			codeBuilder,
 			logger,
-			llmService,
 		),
 	}
 }
