@@ -372,7 +372,11 @@ func (a *agentV2) runPlanning(ctx context.Context, req types.VideoGenerationPlan
 		}
 	}()
 
-	req.ComponentList = scenes.BuildScenesList(false, scenes.SkipLLMFields)
+	req.ComponentList = scenes.BuildScenesList(scenes.BuildSceneListOptions{
+		Groups:       true,
+		Enums:        false,
+		FieldsToSkip: scenes.SkipLLMFields,
+	})
 
 	// Generate and validate upto max attempts
 	for attempt := 0; attempt < maxAttempts; attempt++ {

@@ -325,6 +325,7 @@ export const PillCarouselDescriptor: ComponentRegistration = {
                     {
                         name: 'icon',
                         type: 'string',
+                        hint: 'brand or generic icon name that best represet the text'
                     },
                     {
                         name: 'text',

@@ -41,7 +41,13 @@ func init() {
 	}
 }
 
-func BuildScenesList(editMode bool, fieldsToSkip []string) string {
+type BuildSceneListOptions struct {
+	Groups       bool
+	Enums        bool
+	FieldsToSkip []string
+}
+
+func BuildScenesList(options BuildSceneListOptions) string {
 
 	var scenes []types.Component
 
@@ -63,7 +69,7 @@ func BuildScenesList(editMode bool, fieldsToSkip []string) string {
 	}
 
 	// groups are only available while planning
-	if !editMode {
+	if options.Groups {
 		for _, group := range groupedComponents {
 			sectional = append(sectional, types.Component{
 				Tags:        group.Tags,
@@ -79,17 +85,17 @@ func BuildScenesList(editMode bool, fieldsToSkip []string) string {
 	b.WriteString("# Available Scenes\n\n")
 
 	for _, s := range sectional {
-		writeScene(&b, s, "Sectional", fieldsToSkip)
+		writeScene(&b, s, "Sectional", options.FieldsToSkip)
 	}
 
 	b.WriteString("## Filler Scenes\n")
 	b.WriteString("Can be used anywhere in the video.\n\n")
 
 	for _, s := range filler {
-		writeScene(&b, s, "Filler", fieldsToSkip)
+		writeScene(&b, s, "Filler", options.FieldsToSkip)
 	}
 
-	if editMode && len(registry.AvailableEnums) > 0 {
+	if options.Enums && len(registry.AvailableEnums) > 0 {
 		writeAvailableEnums(&b)
 	}
 

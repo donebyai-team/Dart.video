@@ -50,13 +50,16 @@ func (s SceneSuggester) GenerateSuggestions(
 	}
 
 	suggestInput := types.SuggestScenesRequest{
-		ComponentList: scenes.BuildScenesList(true, scenes.SkipLLMFields),
+		ComponentList: scenes.BuildScenesList(scenes.BuildSceneListOptions{
+			Groups:       false,
+			Enums:        false,
+			FieldsToSkip: scenes.SkipLLMFields,
+		}),
 	}
 
 	if registry != nil {
 		suggestInput.VideoBranding = types.VideoBranding{
 			BrandGuideLines: registry.FormatBrandDetails(),
-			Attachments:     registry.FormatAssets(),
 		}
 	}
 
