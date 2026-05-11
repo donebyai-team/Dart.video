@@ -206,6 +206,10 @@ func (s SceneSuggester) buildSuggestedSlide(
 		)
 	}
 
+	if sceneConfig.Background != nil {
+		bgStyle = sceneConfig.Background
+	}
+
 	return &pbcore.Slide{
 		BackgroundStyle:  bgStyle,
 		DurationInFrames: template.Config.VisibleDurationInFrames,
