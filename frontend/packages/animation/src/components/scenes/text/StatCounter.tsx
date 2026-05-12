@@ -13,7 +13,7 @@ import { CardAsset } from '../../../core/assets';
 
 const BASE_COUNTER_DURATION = 50;
 const BASE_COUNTER_DELAY = 10;
-const BASE_ANIMATION_DELAY = 12;
+const BASE_ANIMATION_DELAY = 0;
 const BASE_HOLD_DURATION = 2;
 
 const StatCounterContainerDefaults = {

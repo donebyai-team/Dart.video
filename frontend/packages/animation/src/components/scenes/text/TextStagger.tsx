@@ -64,7 +64,7 @@ export const TextStagger: React.FC<TextStaggerProps> = (initProps) => {
     const actualStaggerDelay = props.staggerDelay ?? modeDefaults.staggerDelay;
     const actualDuration = props.duration ?? modeDefaults.duration;
     const actualExitDuration = props.exitDuration ?? actualDuration;
-    
+
     const units = splitBy === 'char'
         ? props.text.split('')
         : splitBy === 'line'
@@ -204,5 +204,5 @@ export const TextStaggerDescriptor: ComponentRegistration = {
         }
     ],
     description: 'Reveals a word or full text phrase word-by-word. Works for both single word and multi-word headlines or body text.',
-    celExpression: `max(0, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * props.textstagger.staggerDelay + props.textstagger.duration + (props.textstagger.exitAnimation != "none" ? props.textstagger.exitDuration : 0)`
+    celExpression: `max(1, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * props.textstagger.staggerDelay + props.textstagger.duration + (props.textstagger.exitAnimation != "none" ? props.textstagger.exitDuration : 0)`
 };

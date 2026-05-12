@@ -164,11 +164,11 @@ export function PillCarousel(): React.ReactElement {
                 <div
                     style={{
                         position: 'relative',
-                        width: `${DEFAULT_CAROUSEL_WIDTH_PERCENT}%`,
+                        width: `100%`,
                         alignSelf: 'center',
                         height: DEFAULT_CAROUSEL_HEIGHT,
                         marginTop: DEFAULT_CAROUSEL_TOP_MARGIN,
-                        overflow: 'hidden',
+                        // overflow: 'hidden',
                         transform: `translate(${carouselTranslateX}px, ${carouselTranslateY}px)`,
                         opacity: carouselOpacity,
                     }}

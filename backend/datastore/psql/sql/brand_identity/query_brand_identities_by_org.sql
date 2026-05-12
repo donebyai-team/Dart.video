@@ -1,1 +1,1 @@
-SELECT * FROM brand_identity WHERE organization_id = :organization_id;
+SELECT * FROM brand_identity WHERE organization_id = :organization_id ORDER BY COALESCE(updated_at, created_at) DESC;

@@ -105,6 +105,7 @@ func (b brandIdentity) CreateBrandIdentity(ctx context.Context, orgID string, we
 		}
 	} else {
 		brandIdentity = existingIdentity.BrandIdentity
+		brandIdentity.Id = existingIdentity.ID
 	}
 
 	maxTimeout := 300000 // 5 minutes, Firecrawl's maximum
