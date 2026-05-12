@@ -1,6 +1,9 @@
 package brand_identity
 
-import pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
+import (
+	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
+	"github.com/shank318/coasterai/utils"
+)
 
 type TextKind string
 
@@ -91,6 +94,9 @@ func BrandColorTokens(colors []*pbcore.BrandColor) map[string]string {
 		case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_BACKGROUND:
 			out[COLOR_BACKGROUND] = c.ColorHexCode
 		case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_TEXT_PRIMARY:
+			if c.ColorHexCode == "transparent" || !utils.IsValidHexColor(c.ColorHexCode) {
+				c.ColorHexCode = "#000000"
+			}
 			out[COLOR_TEXT_PRIMARY] = c.ColorHexCode
 		case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_TEXT_SECONDARY:
 			out[COLOR_TEXT_SECONDARY] = c.ColorHexCode

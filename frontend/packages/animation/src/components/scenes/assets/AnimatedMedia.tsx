@@ -9,7 +9,7 @@ import { TextStagger, TextStaggerDefaults } from '../text/TextStagger';
 import { MediaMotionPreset, getMotionTransform } from '../../../core/animation_preset/MediaMotionPreset';
 import { AnimationPresetName } from '../../../core/animation_preset/AnimationPreset';
 
-const DEFAULT_SCENE_DURATION = 60;
+const DEFAULT_SCENE_DURATION = 90;
 const DEFAULT_MOTION_PRESET = 'zoomTiltReveal' as const;
 
 const ANIMATED_MEDIA_DEFAULTS = {
@@ -61,17 +61,20 @@ export function AnimatedMedia(): React.ReactElement {
         justifyContent: 'center',
       }}
     >
-      <MediaAsset
-        id="mediaasset"
-        src={mediaProps.src}
-        width={mediaWidth}
-        height={mediaHeight}
+      <div
         style={{
           transform: mediaMotion.transform,
           opacity: mediaMotion.opacity,
           transformOrigin: 'center',
         }}
-      />
+      >
+        <MediaAsset
+          id="mediaasset"
+          src={mediaProps.src}
+          width={mediaWidth}
+          height={mediaHeight}
+        />
+      </div>
 
       <div
         style={{

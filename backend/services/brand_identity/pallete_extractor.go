@@ -184,7 +184,28 @@ func normalizeHex(hex string) string {
 }
 
 func hexToRGB(hex string) (int, int, int) {
+	hex = strings.TrimSpace(strings.ToLower(hex))
+
+	// Handle transparent
+	if hex == "transparent" || hex == "" {
+		return 255, 255, 255 // treat as white
+	}
+
 	hex = strings.TrimPrefix(hex, "#")
+
+	// Support shorthand hex (#fff)
+	if len(hex) == 3 {
+		hex = string([]byte{
+			hex[0], hex[0],
+			hex[1], hex[1],
+			hex[2], hex[2],
+		})
+	}
+
+	// Fallback safety
+	if len(hex) != 6 {
+		return 255, 255, 255
+	}
 
 	r, _ := strconv.ParseInt(hex[0:2], 16, 0)
 	g, _ := strconv.ParseInt(hex[2:4], 16, 0)
