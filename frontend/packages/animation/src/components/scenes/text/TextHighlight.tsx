@@ -354,7 +354,7 @@ export const TextHighlightDescriptor: ComponentRegistration = {
         {
             name: 'text',
             type: 'string',
-            hint: 'Use {} to highlight. eg "We build amazing {software}"'
+            hint: 'Use {} to highlight one word. eg "We build amazing {software}"'
         },
         {
             name: 'entranceAnimation',

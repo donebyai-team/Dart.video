@@ -94,13 +94,16 @@ func BrandColorTokens(colors []*pbcore.BrandColor) map[string]string {
 		case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_BACKGROUND:
 			out[COLOR_BACKGROUND] = c.ColorHexCode
 		case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_TEXT_PRIMARY:
-			if c.ColorHexCode == "transparent" || !utils.IsValidHexColor(c.ColorHexCode) {
-				c.ColorHexCode = "#000000"
-			}
 			out[COLOR_TEXT_PRIMARY] = c.ColorHexCode
 		case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_TEXT_SECONDARY:
 			out[COLOR_TEXT_SECONDARY] = c.ColorHexCode
 		}
+	}
+
+	// if text primary is missing
+	s := out[COLOR_TEXT_PRIMARY]
+	if s == "transparent" || !utils.IsValidHexColor(s) {
+		out[COLOR_TEXT_PRIMARY] = "#000000"
 	}
 
 	return out
