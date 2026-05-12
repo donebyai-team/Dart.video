@@ -1,4 +1,4 @@
-import { VolumeX, Waves, Sunrise, BeakerIcon, VolumeIcon } from "lucide-react";
+import { VolumeX, Waves, Sunrise, BeakerIcon, VolumeIcon, TrendingUp, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -21,6 +21,18 @@ const backgroundTracks = [
         icon: VolumeIcon,
     },
     {
+        id: "steady-rise",
+        name: "Steady Rise",
+        url: "https://storage.googleapis.com/coasterai-public/background_music/The_Steady_Rise.mp3",
+        icon: TrendingUp,
+    },
+    {
+        id: "upward-trajectory",
+        name: "Upward Trajectory",
+        url: "https://storage.googleapis.com/coasterai-public/background_music/Upward_Trajectory.mp3",
+        icon: Rocket,
+    },
+    {
         id: "next-wave",
         name: "Next Wave",
         url: "https://storage.googleapis.com/coasterai-public/background_music/above-the-next-wave.mp3",
@@ -37,7 +49,7 @@ const backgroundTracks = [
         name: "Chasing the Morning",
         url: "https://storage.googleapis.com/coasterai-public/background_music/chasing-the-morning-light.mp3",
         icon: Sunrise,
-    },
+    },    
 ];
 
 
