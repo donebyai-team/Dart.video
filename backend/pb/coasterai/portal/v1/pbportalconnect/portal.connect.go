@@ -117,6 +117,9 @@ const (
 	// PortalServiceGetMediaAssetsByIDProcedure is the fully-qualified name of the PortalService's
 	// GetMediaAssetsByID RPC.
 	PortalServiceGetMediaAssetsByIDProcedure = "/coasterai.portal.v1.PortalService/GetMediaAssetsByID"
+	// PortalServiceGenerateMusicProcedure is the fully-qualified name of the PortalService's
+	// GenerateMusic RPC.
+	PortalServiceGenerateMusicProcedure = "/coasterai.portal.v1.PortalService/GenerateMusic"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
@@ -151,6 +154,7 @@ var (
 	portalServiceGenerateOrEditSceneMethodDescriptor   = portalServiceServiceDescriptor.Methods().ByName("GenerateOrEditScene")
 	portalServiceGetMediaAssetsMethodDescriptor        = portalServiceServiceDescriptor.Methods().ByName("GetMediaAssets")
 	portalServiceGetMediaAssetsByIDMethodDescriptor    = portalServiceServiceDescriptor.Methods().ByName("GetMediaAssetsByID")
+	portalServiceGenerateMusicMethodDescriptor         = portalServiceServiceDescriptor.Methods().ByName("GenerateMusic")
 )
 
 // PortalServiceClient is a client for the coasterai.portal.v1.PortalService service.
@@ -189,6 +193,7 @@ type PortalServiceClient interface {
 	// Assets
 	GetMediaAssets(context.Context, *connect.Request[v1.GetMediaAssetsRequest]) (*connect.Response[v1.GetMediaAssetsResponse], error)
 	GetMediaAssetsByID(context.Context, *connect.Request[v1.GetMediaAssetsByIDs]) (*connect.Response[v1.GetMediaAssetsResponse], error)
+	GenerateMusic(context.Context, *connect.Request[v1.VideoRequestWithID]) (*connect.Response[v1.GetMediaAssetsResponse], error)
 }
 
 // NewPortalServiceClient constructs a client for the coasterai.portal.v1.PortalService service. By
@@ -375,6 +380,12 @@ func NewPortalServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(portalServiceGetMediaAssetsByIDMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		generateMusic: connect.NewClient[v1.VideoRequestWithID, v1.GetMediaAssetsResponse](
+			httpClient,
+			baseURL+PortalServiceGenerateMusicProcedure,
+			connect.WithSchema(portalServiceGenerateMusicMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -409,6 +420,7 @@ type portalServiceClient struct {
 	generateOrEditScene   *connect.Client[v1.GenerateOrEditSceneRequest, v1.GenerateOrEditSceneResponse]
 	getMediaAssets        *connect.Client[v1.GetMediaAssetsRequest, v1.GetMediaAssetsResponse]
 	getMediaAssetsByID    *connect.Client[v1.GetMediaAssetsByIDs, v1.GetMediaAssetsResponse]
+	generateMusic         *connect.Client[v1.VideoRequestWithID, v1.GetMediaAssetsResponse]
 }
 
 // GetConfig calls coasterai.portal.v1.PortalService.GetConfig.
@@ -556,6 +568,11 @@ func (c *portalServiceClient) GetMediaAssetsByID(ctx context.Context, req *conne
 	return c.getMediaAssetsByID.CallUnary(ctx, req)
 }
 
+// GenerateMusic calls coasterai.portal.v1.PortalService.GenerateMusic.
+func (c *portalServiceClient) GenerateMusic(ctx context.Context, req *connect.Request[v1.VideoRequestWithID]) (*connect.Response[v1.GetMediaAssetsResponse], error) {
+	return c.generateMusic.CallUnary(ctx, req)
+}
+
 // PortalServiceHandler is an implementation of the coasterai.portal.v1.PortalService service.
 type PortalServiceHandler interface {
 	GetConfig(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.Config], error)
@@ -592,6 +609,7 @@ type PortalServiceHandler interface {
 	// Assets
 	GetMediaAssets(context.Context, *connect.Request[v1.GetMediaAssetsRequest]) (*connect.Response[v1.GetMediaAssetsResponse], error)
 	GetMediaAssetsByID(context.Context, *connect.Request[v1.GetMediaAssetsByIDs]) (*connect.Response[v1.GetMediaAssetsResponse], error)
+	GenerateMusic(context.Context, *connect.Request[v1.VideoRequestWithID]) (*connect.Response[v1.GetMediaAssetsResponse], error)
 }
 
 // NewPortalServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -774,6 +792,12 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(portalServiceGetMediaAssetsByIDMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	portalServiceGenerateMusicHandler := connect.NewUnaryHandler(
+		PortalServiceGenerateMusicProcedure,
+		svc.GenerateMusic,
+		connect.WithSchema(portalServiceGenerateMusicMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/coasterai.portal.v1.PortalService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case PortalServiceGetConfigProcedure:
@@ -834,6 +858,8 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 			portalServiceGetMediaAssetsHandler.ServeHTTP(w, r)
 		case PortalServiceGetMediaAssetsByIDProcedure:
 			portalServiceGetMediaAssetsByIDHandler.ServeHTTP(w, r)
+		case PortalServiceGenerateMusicProcedure:
+			portalServiceGenerateMusicHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -957,4 +983,8 @@ func (UnimplementedPortalServiceHandler) GetMediaAssets(context.Context, *connec
 
 func (UnimplementedPortalServiceHandler) GetMediaAssetsByID(context.Context, *connect.Request[v1.GetMediaAssetsByIDs]) (*connect.Response[v1.GetMediaAssetsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.GetMediaAssetsByID is not implemented"))
+}
+
+func (UnimplementedPortalServiceHandler) GenerateMusic(context.Context, *connect.Request[v1.VideoRequestWithID]) (*connect.Response[v1.GetMediaAssetsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.GenerateMusic is not implemented"))
 }

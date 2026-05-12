@@ -3241,7 +3241,7 @@ const file_coasterai_portal_v1_portal_proto_rawDesc = "" +
 	"\x1eINTEGRATION_STATE_AUTH_REVOKED\x10\x02\x12'\n" +
 	"#INTEGRATION_STATE_ACCOUNT_SUSPENDED\x10\x03\x12\"\n" +
 	"\x1eINTEGRATION_STATE_AUTH_EXPIRED\x10\x04\x12%\n" +
-	"!INTEGRATION_STATE_NOT_ESTABLISHED\x10\x052\xd5\x15\n" +
+	"!INTEGRATION_STATE_NOT_ESTABLISHED\x10\x052\xbc\x16\n" +
 	"\rPortalService\x12@\n" +
 	"\tGetConfig\x12\x16.google.protobuf.Empty\x1a\x1b.coasterai.portal.v1.Config\x129\n" +
 	"\x04Self\x12\x16.google.protobuf.Empty\x1a\x19.coasterai.portal.v1.User\x12_\n" +
@@ -3271,7 +3271,8 @@ const file_coasterai_portal_v1_portal_proto_rawDesc = "" +
 	"\x13UpdateBrandIdentity\x12/.coasterai.portal.v1.UpdateBrandIdentityRequest\x1a\x16.google.protobuf.Empty\x12z\n" +
 	"\x13GenerateOrEditScene\x12/.coasterai.portal.v1.GenerateOrEditSceneRequest\x1a0.coasterai.portal.v1.GenerateOrEditSceneResponse0\x01\x12i\n" +
 	"\x0eGetMediaAssets\x12*.coasterai.portal.v1.GetMediaAssetsRequest\x1a+.coasterai.portal.v1.GetMediaAssetsResponse\x12k\n" +
-	"\x12GetMediaAssetsByID\x12(.coasterai.portal.v1.GetMediaAssetsByIDs\x1a+.coasterai.portal.v1.GetMediaAssetsResponseB?Z=github.com/shank318/coasterai/pb/coasterai/portal/v1;pbportalb\x06proto3"
+	"\x12GetMediaAssetsByID\x12(.coasterai.portal.v1.GetMediaAssetsByIDs\x1a+.coasterai.portal.v1.GetMediaAssetsResponse\x12e\n" +
+	"\rGenerateMusic\x12'.coasterai.portal.v1.VideoRequestWithID\x1a+.coasterai.portal.v1.GetMediaAssetsResponseB?Z=github.com/shank318/coasterai/pb/coasterai/portal/v1;pbportalb\x06proto3"
 
 var (
 	file_coasterai_portal_v1_portal_proto_rawDescOnce sync.Once
@@ -3428,37 +3429,39 @@ var file_coasterai_portal_v1_portal_proto_depIdxs = []int32{
 	8,  // 67: coasterai.portal.v1.PortalService.GenerateOrEditScene:input_type -> coasterai.portal.v1.GenerateOrEditSceneRequest
 	6,  // 68: coasterai.portal.v1.PortalService.GetMediaAssets:input_type -> coasterai.portal.v1.GetMediaAssetsRequest
 	5,  // 69: coasterai.portal.v1.PortalService.GetMediaAssetsByID:input_type -> coasterai.portal.v1.GetMediaAssetsByIDs
-	30, // 70: coasterai.portal.v1.PortalService.GetConfig:output_type -> coasterai.portal.v1.Config
-	35, // 71: coasterai.portal.v1.PortalService.Self:output_type -> coasterai.portal.v1.User
-	45, // 72: coasterai.portal.v1.PortalService.GetIntegration:output_type -> coasterai.portal.v1.Integrations
-	67, // 73: coasterai.portal.v1.PortalService.RevokeIntegration:output_type -> google.protobuf.Empty
-	67, // 74: coasterai.portal.v1.PortalService.UpdateIntegration:output_type -> google.protobuf.Empty
-	67, // 75: coasterai.portal.v1.PortalService.PasswordlessStart:output_type -> google.protobuf.Empty
-	39, // 76: coasterai.portal.v1.PortalService.PasswordlessVerify:output_type -> coasterai.portal.v1.JWT
-	37, // 77: coasterai.portal.v1.PortalService.OauthAuthorize:output_type -> coasterai.portal.v1.OauthAuthorizeResponse
-	50, // 78: coasterai.portal.v1.PortalService.OauthCallback:output_type -> coasterai.portal.v1.OauthCallbackResponse
-	39, // 79: coasterai.portal.v1.PortalService.SocialLoginCallback:output_type -> coasterai.portal.v1.JWT
-	45, // 80: coasterai.portal.v1.PortalService.GetIntegrations:output_type -> coasterai.portal.v1.Integrations
-	27, // 81: coasterai.portal.v1.PortalService.CreateVideo:output_type -> coasterai.portal.v1.CreateVideoResponse
-	27, // 82: coasterai.portal.v1.PortalService.ContinueVideoPlanning:output_type -> coasterai.portal.v1.CreateVideoResponse
-	22, // 83: coasterai.portal.v1.PortalService.GetVideo:output_type -> coasterai.portal.v1.GetVideoResponse
-	11, // 84: coasterai.portal.v1.PortalService.SuggestScenes:output_type -> coasterai.portal.v1.SuggestScenesResponse
-	67, // 85: coasterai.portal.v1.PortalService.StopVideo:output_type -> google.protobuf.Empty
-	25, // 86: coasterai.portal.v1.PortalService.GetVideos:output_type -> coasterai.portal.v1.GetVideosResponse
-	67, // 87: coasterai.portal.v1.PortalService.DeleteVideo:output_type -> google.protobuf.Empty
-	22, // 88: coasterai.portal.v1.PortalService.DuplicateVideo:output_type -> coasterai.portal.v1.GetVideoResponse
-	15, // 89: coasterai.portal.v1.PortalService.RenderVideo:output_type -> coasterai.portal.v1.RenderVideoResponse
-	67, // 90: coasterai.portal.v1.PortalService.UpdateVideoConfig:output_type -> google.protobuf.Empty
-	17, // 91: coasterai.portal.v1.PortalService.ListFigmaFrames:output_type -> coasterai.portal.v1.ListFigmaFramesResponse
-	19, // 92: coasterai.portal.v1.PortalService.ImportFigmaFrame:output_type -> coasterai.portal.v1.ImportFigmaFrameResponse
-	55, // 93: coasterai.portal.v1.PortalService.CreateBrandIdentity:output_type -> coasterai.core.v1.BrandIdentity
-	14, // 94: coasterai.portal.v1.PortalService.GetBrandIdentities:output_type -> coasterai.portal.v1.BrandIdentityResponse
-	67, // 95: coasterai.portal.v1.PortalService.UpdateBrandIdentity:output_type -> google.protobuf.Empty
-	9,  // 96: coasterai.portal.v1.PortalService.GenerateOrEditScene:output_type -> coasterai.portal.v1.GenerateOrEditSceneResponse
-	7,  // 97: coasterai.portal.v1.PortalService.GetMediaAssets:output_type -> coasterai.portal.v1.GetMediaAssetsResponse
-	7,  // 98: coasterai.portal.v1.PortalService.GetMediaAssetsByID:output_type -> coasterai.portal.v1.GetMediaAssetsResponse
-	70, // [70:99] is the sub-list for method output_type
-	41, // [41:70] is the sub-list for method input_type
+	21, // 70: coasterai.portal.v1.PortalService.GenerateMusic:input_type -> coasterai.portal.v1.VideoRequestWithID
+	30, // 71: coasterai.portal.v1.PortalService.GetConfig:output_type -> coasterai.portal.v1.Config
+	35, // 72: coasterai.portal.v1.PortalService.Self:output_type -> coasterai.portal.v1.User
+	45, // 73: coasterai.portal.v1.PortalService.GetIntegration:output_type -> coasterai.portal.v1.Integrations
+	67, // 74: coasterai.portal.v1.PortalService.RevokeIntegration:output_type -> google.protobuf.Empty
+	67, // 75: coasterai.portal.v1.PortalService.UpdateIntegration:output_type -> google.protobuf.Empty
+	67, // 76: coasterai.portal.v1.PortalService.PasswordlessStart:output_type -> google.protobuf.Empty
+	39, // 77: coasterai.portal.v1.PortalService.PasswordlessVerify:output_type -> coasterai.portal.v1.JWT
+	37, // 78: coasterai.portal.v1.PortalService.OauthAuthorize:output_type -> coasterai.portal.v1.OauthAuthorizeResponse
+	50, // 79: coasterai.portal.v1.PortalService.OauthCallback:output_type -> coasterai.portal.v1.OauthCallbackResponse
+	39, // 80: coasterai.portal.v1.PortalService.SocialLoginCallback:output_type -> coasterai.portal.v1.JWT
+	45, // 81: coasterai.portal.v1.PortalService.GetIntegrations:output_type -> coasterai.portal.v1.Integrations
+	27, // 82: coasterai.portal.v1.PortalService.CreateVideo:output_type -> coasterai.portal.v1.CreateVideoResponse
+	27, // 83: coasterai.portal.v1.PortalService.ContinueVideoPlanning:output_type -> coasterai.portal.v1.CreateVideoResponse
+	22, // 84: coasterai.portal.v1.PortalService.GetVideo:output_type -> coasterai.portal.v1.GetVideoResponse
+	11, // 85: coasterai.portal.v1.PortalService.SuggestScenes:output_type -> coasterai.portal.v1.SuggestScenesResponse
+	67, // 86: coasterai.portal.v1.PortalService.StopVideo:output_type -> google.protobuf.Empty
+	25, // 87: coasterai.portal.v1.PortalService.GetVideos:output_type -> coasterai.portal.v1.GetVideosResponse
+	67, // 88: coasterai.portal.v1.PortalService.DeleteVideo:output_type -> google.protobuf.Empty
+	22, // 89: coasterai.portal.v1.PortalService.DuplicateVideo:output_type -> coasterai.portal.v1.GetVideoResponse
+	15, // 90: coasterai.portal.v1.PortalService.RenderVideo:output_type -> coasterai.portal.v1.RenderVideoResponse
+	67, // 91: coasterai.portal.v1.PortalService.UpdateVideoConfig:output_type -> google.protobuf.Empty
+	17, // 92: coasterai.portal.v1.PortalService.ListFigmaFrames:output_type -> coasterai.portal.v1.ListFigmaFramesResponse
+	19, // 93: coasterai.portal.v1.PortalService.ImportFigmaFrame:output_type -> coasterai.portal.v1.ImportFigmaFrameResponse
+	55, // 94: coasterai.portal.v1.PortalService.CreateBrandIdentity:output_type -> coasterai.core.v1.BrandIdentity
+	14, // 95: coasterai.portal.v1.PortalService.GetBrandIdentities:output_type -> coasterai.portal.v1.BrandIdentityResponse
+	67, // 96: coasterai.portal.v1.PortalService.UpdateBrandIdentity:output_type -> google.protobuf.Empty
+	9,  // 97: coasterai.portal.v1.PortalService.GenerateOrEditScene:output_type -> coasterai.portal.v1.GenerateOrEditSceneResponse
+	7,  // 98: coasterai.portal.v1.PortalService.GetMediaAssets:output_type -> coasterai.portal.v1.GetMediaAssetsResponse
+	7,  // 99: coasterai.portal.v1.PortalService.GetMediaAssetsByID:output_type -> coasterai.portal.v1.GetMediaAssetsResponse
+	7,  // 100: coasterai.portal.v1.PortalService.GenerateMusic:output_type -> coasterai.portal.v1.GetMediaAssetsResponse
+	71, // [71:101] is the sub-list for method output_type
+	41, // [41:71] is the sub-list for method input_type
 	41, // [41:41] is the sub-list for extension type_name
 	41, // [41:41] is the sub-list for extension extendee
 	0,  // [0:41] is the sub-list for field type_name

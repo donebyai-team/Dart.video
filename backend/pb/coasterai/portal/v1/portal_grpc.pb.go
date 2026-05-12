@@ -50,6 +50,7 @@ const (
 	PortalService_GenerateOrEditScene_FullMethodName   = "/coasterai.portal.v1.PortalService/GenerateOrEditScene"
 	PortalService_GetMediaAssets_FullMethodName        = "/coasterai.portal.v1.PortalService/GetMediaAssets"
 	PortalService_GetMediaAssetsByID_FullMethodName    = "/coasterai.portal.v1.PortalService/GetMediaAssetsByID"
+	PortalService_GenerateMusic_FullMethodName         = "/coasterai.portal.v1.PortalService/GenerateMusic"
 )
 
 // PortalServiceClient is the client API for PortalService service.
@@ -90,6 +91,7 @@ type PortalServiceClient interface {
 	// Assets
 	GetMediaAssets(ctx context.Context, in *GetMediaAssetsRequest, opts ...grpc.CallOption) (*GetMediaAssetsResponse, error)
 	GetMediaAssetsByID(ctx context.Context, in *GetMediaAssetsByIDs, opts ...grpc.CallOption) (*GetMediaAssetsResponse, error)
+	GenerateMusic(ctx context.Context, in *VideoRequestWithID, opts ...grpc.CallOption) (*GetMediaAssetsResponse, error)
 }
 
 type portalServiceClient struct {
@@ -453,6 +455,15 @@ func (c *portalServiceClient) GetMediaAssetsByID(ctx context.Context, in *GetMed
 	return out, nil
 }
 
+func (c *portalServiceClient) GenerateMusic(ctx context.Context, in *VideoRequestWithID, opts ...grpc.CallOption) (*GetMediaAssetsResponse, error) {
+	out := new(GetMediaAssetsResponse)
+	err := c.cc.Invoke(ctx, PortalService_GenerateMusic_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PortalServiceServer is the server API for PortalService service.
 // All implementations must embed UnimplementedPortalServiceServer
 // for forward compatibility
@@ -491,6 +502,7 @@ type PortalServiceServer interface {
 	// Assets
 	GetMediaAssets(context.Context, *GetMediaAssetsRequest) (*GetMediaAssetsResponse, error)
 	GetMediaAssetsByID(context.Context, *GetMediaAssetsByIDs) (*GetMediaAssetsResponse, error)
+	GenerateMusic(context.Context, *VideoRequestWithID) (*GetMediaAssetsResponse, error)
 	mustEmbedUnimplementedPortalServiceServer()
 }
 
@@ -584,6 +596,9 @@ func (UnimplementedPortalServiceServer) GetMediaAssets(context.Context, *GetMedi
 }
 func (UnimplementedPortalServiceServer) GetMediaAssetsByID(context.Context, *GetMediaAssetsByIDs) (*GetMediaAssetsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMediaAssetsByID not implemented")
+}
+func (UnimplementedPortalServiceServer) GenerateMusic(context.Context, *VideoRequestWithID) (*GetMediaAssetsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GenerateMusic not implemented")
 }
 func (UnimplementedPortalServiceServer) mustEmbedUnimplementedPortalServiceServer() {}
 
@@ -1132,6 +1147,24 @@ func _PortalService_GetMediaAssetsByID_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PortalService_GenerateMusic_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VideoRequestWithID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PortalServiceServer).GenerateMusic(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PortalService_GenerateMusic_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PortalServiceServer).GenerateMusic(ctx, req.(*VideoRequestWithID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PortalService_ServiceDesc is the grpc.ServiceDesc for PortalService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1238,6 +1271,10 @@ var PortalService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetMediaAssetsByID",
 			Handler:    _PortalService_GetMediaAssetsByID_Handler,
+		},
+		{
+			MethodName: "GenerateMusic",
+			Handler:    _PortalService_GenerateMusic_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

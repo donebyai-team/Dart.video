@@ -55,6 +55,7 @@ service PortalService {
   // Assets
   rpc GetMediaAssets(GetMediaAssetsRequest) returns (GetMediaAssetsResponse);
   rpc GetMediaAssetsByID(GetMediaAssetsByIDs) returns (GetMediaAssetsResponse);
+  rpc GenerateMusic(VideoRequestWithID) returns (GetMediaAssetsResponse);
 }
 
 message GetMediaAssetsByIDs {

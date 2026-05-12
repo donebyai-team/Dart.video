@@ -1569,5 +1569,13 @@ export declare const PortalService: GenService<{
     input: typeof GetMediaAssetsByIDsSchema;
     output: typeof GetMediaAssetsResponseSchema;
   },
+  /**
+   * @generated from rpc coasterai.portal.v1.PortalService.GenerateMusic
+   */
+  generateMusic: {
+    methodKind: "unary";
+    input: typeof VideoRequestWithIDSchema;
+    output: typeof GetMediaAssetsResponseSchema;
+  },
 }>;
 

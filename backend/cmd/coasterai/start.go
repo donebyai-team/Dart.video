@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/shank318/coasterai/cache"
+	"github.com/shank318/coasterai/services/audio"
 	"github.com/shank318/coasterai/services/brand_identity"
 	"os"
 	"regexp"
@@ -40,6 +41,7 @@ var StartCmd = cli.Command(startCmdE,
 		flags.String("common-steel-api-key", "", "Steel Browser api key")
 		flags.String("common-imagekit-api-key", "", "Imagekit api key")
 		flags.String("common-firecrawl-api-key", "", "Firecrawl api key")
+		flags.String("common-elevenlabs-api-key", "", "Elevenlabs api key")
 		flags.String("common-code-builder-service", "", "Code builder service")
 		flags.String("common-google-api-key", "", "Google api key")
 		flags.String("common-openai-api-key", "", "LiteLLM API key")
@@ -191,6 +193,11 @@ func portalApp(cmd *cobra.Command, isAppReady func() bool) (App, error) {
 		return nil, errors.Wrap(err, "unable to create render video service")
 	}
 
+	provider, err := audio.NewElevenLabsProvider(sflags.MustGetString(cmd, "common-elevenlabs-api-key"), deps.MediaStore)
+	if err != nil {
+		return nil, err
+	}
+
 	p := portal.New(
 		deps.MediaStore,
 		deps.GoogleClient,
@@ -203,6 +210,7 @@ func portalApp(cmd *cobra.Command, isAppReady func() bool) (App, error) {
 		videoRenderService,
 		brand_identity.NewBrandIdentityService(zlog, deps.DataStore, deps.MediaStore, sflags.MustGetString(cmd, "common-firecrawl-api-key")),
 		services.NewTemplateCodeBuilderService(sflags.MustGetString(cmd, "common-code-builder-service")),
+		provider,
 		sflags.MustGetString(cmd, "portal-http-listen-addr"),
 		deps.CorsURLRegexAllow,
 		config,

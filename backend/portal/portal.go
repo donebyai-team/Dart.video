@@ -6,6 +6,7 @@ import (
 	figma2 "github.com/shank318/coasterai/integrations/figma"
 	google2 "github.com/shank318/coasterai/integrations/google"
 	"github.com/shank318/coasterai/portal/server/handlers"
+	"github.com/shank318/coasterai/services/audio"
 	"github.com/shank318/coasterai/services/brand_identity"
 	figmasvc "github.com/shank318/coasterai/services/figma"
 	"regexp"
@@ -22,25 +23,26 @@ import (
 
 type Portal struct {
 	*shutter.Shutter
-	authUsecase            *services.AuthUsecase
-	isAppReady             func() bool
-	httpListenAddr         string
-	corsURLRegexAllow      *regexp.Regexp
-	domainWhitelist        []*regexp.Regexp
-	db                     datastore.Repository
-	config                 *pbportal.Config
-	logger                 *zap.Logger
-	tracer                 logging.Tracer
-	authenticator          *auth.Authenticator
-	authStateStore         cache.Cache
-	googleOauthClient      *google2.OauthClient
-	figmaOauthClient       *figma2.OauthClient
-	figmaService           figmasvc.Service
-	mediaService           services.MediaStore
-	codeBuilderService     services.TemplateCodeBuilder
-	videoGenerationService services.VideoGeneration
-	renderVideoService     services.RenderVideoService
-	brandIdentityService   brand_identity.BrandIdentity
+	authUsecase             *services.AuthUsecase
+	isAppReady              func() bool
+	httpListenAddr          string
+	corsURLRegexAllow       *regexp.Regexp
+	domainWhitelist         []*regexp.Regexp
+	db                      datastore.Repository
+	config                  *pbportal.Config
+	logger                  *zap.Logger
+	tracer                  logging.Tracer
+	authenticator           *auth.Authenticator
+	authStateStore          cache.Cache
+	googleOauthClient       *google2.OauthClient
+	figmaOauthClient        *figma2.OauthClient
+	figmaService            figmasvc.Service
+	mediaService            services.MediaStore
+	codeBuilderService      services.TemplateCodeBuilder
+	videoGenerationService  services.VideoGeneration
+	renderVideoService      services.RenderVideoService
+	brandIdentityService    brand_identity.BrandIdentity
+	audioGenerationProvider audio.Provider
 }
 
 func New(
@@ -55,6 +57,7 @@ func New(
 	renderVideoService services.RenderVideoService,
 	brandIdentityService brand_identity.BrandIdentity,
 	codeBuilderService services.TemplateCodeBuilder,
+	audioGenerationProvider audio.Provider,
 	httpListenAddr string,
 	corsURLRegexAllow *regexp.Regexp,
 	config *pbportal.Config,
@@ -64,26 +67,27 @@ func New(
 	tracer logging.Tracer,
 ) *Portal {
 	return &Portal{
-		brandIdentityService:   brandIdentityService,
-		mediaService:           mediaService,
-		codeBuilderService:     codeBuilderService,
-		googleOauthClient:      googleOauthClient,
-		figmaOauthClient:       figmaOauthClient,
-		figmaService:           figmasvc.NewService(db, figmaOauthClient, mediaService, logger),
-		authStateStore:         authStateStore,
-		authUsecase:            authUsecase,
-		Shutter:                shutter.New(),
-		config:                 config,
-		authenticator:          authenticator,
-		db:                     db,
-		httpListenAddr:         httpListenAddr,
-		corsURLRegexAllow:      corsURLRegexAllow,
-		domainWhitelist:        domainWhitelist,
-		isAppReady:             isAppReady,
-		logger:                 logger.Named("portal"),
-		tracer:                 tracer,
-		videoGenerationService: videoGenerationService,
-		renderVideoService:     renderVideoService,
+		brandIdentityService:    brandIdentityService,
+		mediaService:            mediaService,
+		codeBuilderService:      codeBuilderService,
+		googleOauthClient:       googleOauthClient,
+		figmaOauthClient:        figmaOauthClient,
+		figmaService:            figmasvc.NewService(db, figmaOauthClient, mediaService, logger),
+		authStateStore:          authStateStore,
+		authUsecase:             authUsecase,
+		Shutter:                 shutter.New(),
+		config:                  config,
+		authenticator:           authenticator,
+		db:                      db,
+		httpListenAddr:          httpListenAddr,
+		corsURLRegexAllow:       corsURLRegexAllow,
+		domainWhitelist:         domainWhitelist,
+		isAppReady:              isAppReady,
+		logger:                  logger.Named("portal"),
+		tracer:                  tracer,
+		videoGenerationService:  videoGenerationService,
+		renderVideoService:      renderVideoService,
+		audioGenerationProvider: audioGenerationProvider,
 	}
 }
 
