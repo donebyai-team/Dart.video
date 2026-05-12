@@ -59,7 +59,7 @@ func GetReadableTextColorForSolid(
 			continue
 		}
 
-		cr := contrastRatio(bg, c)
+		cr := ContrastRatio(bg, c)
 
 		if cr >= minContrast {
 			return normalizeHex(c)

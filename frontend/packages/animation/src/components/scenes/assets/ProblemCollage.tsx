@@ -537,13 +537,12 @@ export const ProblemCollageDescriptor: ComponentRegistration = {
         {
             name: 'images',
             type: 'array',
+            hint: 'Provide 5 default images of size 800x400 that user can change later',
             items: {
                 type: 'string',
             },
         },
     ],
-    description: `Centered problem statement with screenshots that fly in around it as a scattered collage. Best used to show data scattered across tools, fragmentation, multiple issues kind of problems.
-Provide 5 default images of size 800x400 that user can change later
-Takes around **66 frames** to complete`,
+    description: `Centered problem statement with screenshots that fly in around it as a scattered collage. Best used to show data scattered across tools, fragmentation, multiple issues kind of problems. Takes around **66 frames** to complete`,
     celExpression: `((${CEL_BASE_FRAMES} + max(0, size(props.images) - 1) * ${CEL_PER_IMAGE_FRAMES}) * ${DEFAULT_SPEED_PERCENTAGE}) / max(props.scene.speed, ${MIN_SPEED_PERCENTAGE})`,
 };

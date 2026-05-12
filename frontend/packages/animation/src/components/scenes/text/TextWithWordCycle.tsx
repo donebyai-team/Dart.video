@@ -24,7 +24,7 @@ export const TextWithWordCycleDefaults = {
   entranceAnimation: 'slideUp' as AnimationPresetName,
   variant: 'display' as TypographyVariant,
   highlightStyle: 'simple' as HighlightStyle,
-  highlightColor: undefined as string | undefined,
+  highlightColor: '',
   style: undefined as React.CSSProperties | undefined,
   className: undefined as string | undefined,
 };
@@ -403,6 +403,12 @@ export const TextWithWordCycleSchemaFields = [
     "name": "highlightStyle",
     "type": "enum",
     "default": TextWithWordCycleDefaults.highlightStyle
+  },
+  {
+    "name": "highlightColor",
+    "type": "string",
+    "datatype": "color",
+    "default": TextWithWordCycleDefaults.highlightColor
   }
 ]
 

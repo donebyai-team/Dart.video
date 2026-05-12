@@ -153,7 +153,7 @@ func lightness(hex string) float64 {
 // ---------------- CONTRAST ----------------
 
 // Standard WCAG contrast ratio formula
-func contrastRatio(a, b string) float64 {
+func ContrastRatio(a, b string) float64 {
 	l1 := luminance(a)
 	l2 := luminance(b)
 

@@ -7,6 +7,9 @@ import (
 
 type ColorResolver struct{}
 
+const fallbackHighlightColor = "#ffe604"
+const minContrastRatio = 1.5
+
 func (r ColorResolver) Forward(value any, fieldValueMapper *services.MediaAssetRegistry) (any, error) {
 	brandColors := fieldValueMapper.GetBrandColors()
 	if len(brandColors) == 0 {
@@ -19,9 +22,17 @@ func (r ColorResolver) Forward(value any, fieldValueMapper *services.MediaAssetR
 		return value, nil
 	}
 
-	// else set it to primary color
 	palette := brand_identity.BrandColorTokens(brandColors)
-	return palette[brand_identity.COLOR_PRIMARY], nil
+	textPrimary := palette[brand_identity.COLOR_TEXT_PRIMARY]
+	primary := palette[brand_identity.COLOR_PRIMARY]
+
+	// If the contrast is too low, the highlight effect won't be visible
+	// In this case, we fall back to an arbitrary color
+	if brand_identity.ContrastRatio(textPrimary, primary) < minContrastRatio {
+		primary = fallbackHighlightColor
+	}
+
+	return primary, nil
 }
 
 func (r ColorResolver) Reverse(value any, fieldValueMapper *services.MediaAssetRegistry) (any, error) {

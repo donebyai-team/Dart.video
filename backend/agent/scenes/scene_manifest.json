@@ -610,6 +610,12 @@
                   "name": "highlightStyle",
                   "type": "enum",
                   "default": "simple"
+                },
+                {
+                  "name": "highlightColor",
+                  "type": "string",
+                  "datatype": "color",
+                  "default": ""
                 }
               ]
             }
@@ -994,6 +1000,12 @@
                       "name": "highlightStyle",
                       "type": "enum",
                       "default": "simple"
+                    },
+                    {
+                      "name": "highlightColor",
+                      "type": "string",
+                      "datatype": "color",
+                      "default": ""
                     }
                   ]
                 }
@@ -1239,12 +1251,13 @@
             {
               "name": "images",
               "type": "array",
+              "hint": "Provide 5 default images of size 800x400 that user can change later",
               "items": {
                 "type": "string"
               }
             }
           ],
-          "description": "Centered problem statement with screenshots that fly in around it as a scattered collage. Best used to show data scattered across tools, fragmentation, multiple issues kind of problems.\nProvide 5 default images of size 800x400 that user can change later\nTakes around **66 frames** to complete",
+          "description": "Centered problem statement with screenshots that fly in around it as a scattered collage. Best used to show data scattered across tools, fragmentation, multiple issues kind of problems. Takes around **66 frames** to complete",
           "celExpression": "((38 + max(0, size(props.images) - 1) * 7) * 100) / max(props.scene.speed, 25)"
         },
         {

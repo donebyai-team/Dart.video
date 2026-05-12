@@ -11,7 +11,6 @@ import (
 
 const DefaultBackgroundPatternOpacity float32 = 0.3
 const WordCycleBackgroundColor = "#1207e5"
-const DefaultBackgroundColor = "#FFFFFF"
 
 // apply background to a scene
 func resolveSceneBackground(selectedScene *types.Scene, fieldValueMapper *services.MediaAssetRegistry) *pbcore.BackgroundStyle {
