@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Player } from '@remotion/player'
+import { Thumbnail } from '@remotion/player'
 import { Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { useVideoStore } from '@/stores/video'
 import { SingleSlidePreview } from '@coasterai/renderer'
@@ -79,16 +79,14 @@ const SlideThumbnail = ({ slide, index = 0, resolution: resolutionProp, fps: fps
   return (
     <div ref={rootRef} className='w-full h-full bg-slate-900'>
       {shouldRenderPlayer ? (
-        <Player
+        <Thumbnail
           component={SingleSlidePreview as any}
           inputProps={{ slide: debouncedSlide, isEditing: false }}
           durationInFrames={durationInFrames}
           compositionWidth={resolution.width}
           compositionHeight={resolution.height}
           fps={fps}
-          initialFrame={initialFrame}
-          controls={false}
-          autoPlay={false}
+          frameToDisplay={initialFrame}
           style={{
             width: '100%',
             height: '100%'

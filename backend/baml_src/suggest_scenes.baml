@@ -24,17 +24,6 @@ function SuggestScenes(input: SuggestScenesRequest) -> SuggestScenesResponse {
     - optionally the previous scene
     - optionally the next scene
     - a list of available components
-
-    The suggested scenes should preserve the same meaning, subject, and data represented in the current scene.
-
-    IMPORTANT:
-    - Primarily use the text, media assets, and data already present in the CURRENT scene props
-    - Reuse the same content whenever possible
-    - If some data is missing, you may derive or infer it using the previous or next scenes
-    - NEVER copy text directly from the previous or next scenes
-    - Previous and next scenes are only for contextual understanding
-    - The generated scenes should still represent the CURRENT scene
-
     ---
 
     ## AVAILABLE COMPONENTS
@@ -66,8 +55,9 @@ function SuggestScenes(input: SuggestScenesRequest) -> SuggestScenesResponse {
     https://placehold.co/{width}x{height}.png
 
     ### Output Rules
-    - Return ONLY valid JSON
-    - Return an array of scenes
+    - Primarily use the text, media assets, and data already present in the CURRENT scene props(eg. text, words, src etc)
+    - If some data is missing, you may derive or infer it using the previous or next scenes
+    - NEVER copy text directly from the previous or next scenes, previous and next scenes are only for contextual understanding
     - Generate 3-5 scene suggestions
     - DO NOT return duplicate component irrespective of props.
 
