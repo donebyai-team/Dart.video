@@ -182,6 +182,7 @@ export function LogoWithCTA(): React.ReactElement {
                         left: resolvedLogoSize + LOCKUP_GAP,
                         top: '50%',
                         width: brandMaxWidth,
+                        overflow: 'hidden',
                         transform: 'translateY(-50%)',
                     }}
                 >
@@ -198,6 +199,7 @@ export function LogoWithCTA(): React.ReactElement {
                         style={{
                             ...(brandProps.style ?? {}),
                             textAlign: 'left',
+                            whiteSpace: 'nowrap',
                         }}
                     />
                 </div>
