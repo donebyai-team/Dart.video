@@ -113,10 +113,18 @@ export function MediaAsset({
   const mediaSrc = resolvedSrc ?? DEFAULT_IMAGE_SVG;
   const resolvedBoxWidth = patchedWidth ?? preset.width;
   const resolvedBoxHeight = patchedHeight ?? preset.height;
-  const resolvedObjectFit =
-    typeof el.style.objectFit === "string" ? el.style.objectFit : "cover";
-
-  const { objectFit: _objectFit, ...wrapperStyle } = el.style;
+  const {
+    objectFit,
+    borderRadius = 0,
+    borderWidth = 0,
+    borderColor = "transparent",
+    ...wrapperStyle
+  } = el.style;
+  const resolvedObjectFit = typeof objectFit === "string" ? objectFit : "cover";
+  const innerBorderRadius = Math.max(
+    Number(borderRadius) - Number(borderWidth),
+    0,
+  );
 
   // The outer wrapper owns sizing, shadow, and drag transforms; the inner media only stretches to fit it.
   const mediaStyle: React.CSSProperties = {
@@ -124,6 +132,7 @@ export function MediaAsset({
     width: "100%",
     height: "100%",
     objectFit: resolvedObjectFit,
+    borderRadius: innerBorderRadius,
   };
 
   const [handle] = useState(() =>
@@ -197,9 +206,12 @@ export function MediaAsset({
         justifyContent: "center",
         position: "relative",
         flexShrink: 0,
+        boxSizing: "border-box",
         width: resolvedBoxWidth,
         height: resolvedBoxHeight,
-        borderRadius: 16,
+        border: `${borderWidth}px solid ${String(borderColor)}`,
+        backgroundColor: borderColor,
+        borderRadius,
         overflow: "hidden",
         boxShadow: buildDepthShadow(DEFAULT_MEDIA_DEPTH),
         ...wrapperStyle,
@@ -213,6 +225,8 @@ export function MediaAsset({
             display: "block",
             width: "100%",
             height: "100%",
+            borderRadius: innerBorderRadius,
+            overflow: "hidden",
           }}
         >
           {isRendering ? (

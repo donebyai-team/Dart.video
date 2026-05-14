@@ -3,6 +3,7 @@ import { ImageAsset } from '../../../../core/assets/ImageAsset';
 import { interpolateWithEasing } from '../../../../styles/easingResolver';
 import { Direction } from '../../types';
 import { getImageWithLabelImage, type ImageWithLabelItem } from './shared';
+import { DEFAULT_MEDIA_FRAME_STYLE } from '../TextWithMediaScene';
 
 export type ImagePeelProps = {
     frame: number;
@@ -103,7 +104,7 @@ export function ImagePeel({
                             image={imagePatch.image ?? ''}
                             width={imagePatch.width ?? width}
                             height={imagePatch.height ?? height}
-                            style={{ overflow: 'hidden' }}
+                            style={DEFAULT_MEDIA_FRAME_STYLE}
                         />
                     </div>
                 );

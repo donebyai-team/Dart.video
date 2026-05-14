@@ -18,6 +18,12 @@ const FALLBACK_WIDTH = 1920;
 const FALLBACK_HEIGHT = 1080;
 const ROW_SHARED_GAP = 32;
 const VERTICAL_STACK_GAP_PX = 64;
+export const DEFAULT_MEDIA_FRAME_STYLE = {
+  objectFit: 'cover' as const,
+  borderRadius: 16, // always > borderWidth
+  borderWidth: 8,
+  borderColor: '#c4c9d4',
+};
 
 type SceneProps = {
   id?: string;
@@ -167,7 +173,7 @@ export function TextWithMediaScene(): React.ReactElement {
         src={mediaProps.src || mediaProps.image || mediaProps.video}
         width={resolvedVideoWidth}
         height={resolvedVideoHeight}
-        style={{ objectFit: 'contain' }}
+        style={DEFAULT_MEDIA_FRAME_STYLE}
       />
     </div>
   );

@@ -20,7 +20,7 @@ interface SceneSettingsProps {
   elementId: string
   overlay: PatchOverlay
   onValuePatch: (id: string, prop: string, value: unknown) => void
-  onPlay?: () => void
+  onPreviewTemplate?: () => void
   isPreviewPlaying?: boolean
 }
 
@@ -28,7 +28,7 @@ export default function SceneSettings({
   elementId,
   overlay,
   onValuePatch,
-  onPlay,
+  onPreviewTemplate,
   isPreviewPlaying = false,
 }: SceneSettingsProps) {
   const MIN_ARRAY_ITEMS = 2
@@ -50,8 +50,8 @@ export default function SceneSettings({
     <div className="h-full flex flex-col rounded-xl border bg-background shadow-sm">
       <div className="p-2 border-b border-border flex items-center justify-between">
         <h2 className="font-semibold">Settings</h2>
-        {onPlay && (
-          <Button variant='secondary' size='sm' className='h-7 gap-1.5 px-2.5 text-xs' onClick={onPlay}>
+        {onPreviewTemplate && (
+          <Button variant='secondary' size='sm' className='h-7 gap-1.5 px-2.5 text-xs' onClick={onPreviewTemplate}>
             {isPreviewPlaying ? <Pause className='w-3 h-3' /> : <Play className='w-3 h-3' />}
             {isPreviewPlaying ? 'Stop' : 'Preview'}
           </Button>

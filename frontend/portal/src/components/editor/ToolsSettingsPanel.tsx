@@ -108,7 +108,7 @@ const ToolsSettingsPanel = ({
           onValuePatch={onValuePatch}
           setOverlay={setOverlay}
           onClose={handleCloseTool}
-          onPlay={onPreviewTemplate}
+          onPreviewTemplate={onPreviewTemplate}
           isPreviewPlaying={isPreviewPlaying}
         />
       )}

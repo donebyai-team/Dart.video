@@ -8,6 +8,7 @@ import { useAspectPreset } from '../../../styles';
 import { TextStagger, TextStaggerDefaults } from '../text/TextStagger';
 import { MediaMotionPreset, getMotionTransform } from '../../../core/animation_preset/MediaMotionPreset';
 import { AnimationPresetName } from '../../../core/animation_preset/AnimationPreset';
+import { DEFAULT_MEDIA_FRAME_STYLE } from './TextWithMediaScene';
 
 const DEFAULT_SCENE_DURATION = 90;
 const DEFAULT_MOTION_PRESET = 'zoomTiltReveal' as const;
@@ -73,6 +74,7 @@ export function AnimatedMedia(): React.ReactElement {
           src={mediaProps.src}
           width={mediaWidth}
           height={mediaHeight}
+          style={DEFAULT_MEDIA_FRAME_STYLE}
         />
       </div>
 

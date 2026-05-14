@@ -5,6 +5,7 @@ import { ArrayItem } from '../../../core/assets/ArrayItem';
 import { useArrayPatch, useElement } from '../../../patches';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { useAspectPreset } from '../../../styles';
+import { DEFAULT_MEDIA_FRAME_STYLE } from './TextWithMediaScene';
 
 const IMAGE_REVEAL_START_FRAME = 0;
 const IMAGE_SCALE_IN_END_FRAME = 20;
@@ -19,7 +20,7 @@ export function MediaWithFeatures(): React.ReactElement {
     const frame = useCurrentFrame();
     const preset = useAspectPreset();
     const mediaElement = useElement<MediaAssetProps>('mediaasset');
-    const { props: mediaProps, style: mediaStyle } = mediaElement;
+    const { props: mediaProps } = mediaElement;
     const featureItems = useArrayPatch('features');
 
     const mockupScale = interpolate(frame, [IMAGE_REVEAL_START_FRAME, IMAGE_SCALE_IN_END_FRAME], [0.7, 1], {
@@ -74,10 +75,7 @@ export function MediaWithFeatures(): React.ReactElement {
                                 src={mediaProps.src}
                                 width={mediaWidth}
                                 height={mediaHeight}
-                                style={{
-                                    objectFit: 'cover',
-                                    ...mediaStyle,
-                                }}
+                                style={DEFAULT_MEDIA_FRAME_STYLE}
                             />
                         </div>
 
