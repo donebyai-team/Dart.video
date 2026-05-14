@@ -103,6 +103,7 @@ const PlayerCanvas = ({
   const spotlights = selectedSlide.spotlights ?? []
   const callouts = selectedSlide.callouts ?? []
   const zooms = selectedSlide.zooms ?? []
+  const isZoomSelected = Boolean(selectedEffectId && zooms.some(zoom => zoom.id === selectedEffectId))
 
   // Calculate slide start frame for overlay visibility check
   const slideStartFrame = getRealSlideStartFrame(getTimelineSlides(), selectedSlide.id, fps)
@@ -116,6 +117,7 @@ const PlayerCanvas = ({
       <motion.div
         ref={canvasRef}
         className={`relative overflow-hidden ${isFullscreen ? 'bg-transparent' : 'bg-background shadow-2xl'}`}
+        data-coaster-canvas-root="true"
         style={{
           width: canvasSize.width,
           height: canvasSize.height,
@@ -157,14 +159,17 @@ const PlayerCanvas = ({
         )}
       </motion.div>
 
-      {/* Animation edit layer - disabled when an effect (zoom/spotlight/callout) is selected */}
-      {isEditing && !isPlaying && !selectedEffectId && (
+      {/* Keep scene selection active while a zoom is selected so users can still edit scene elements.
+          Spotlight/callout keep the old exclusive behavior because they occupy arbitrary canvas regions. */}
+      {isEditing && !isPlaying && (!selectedEffectId || isZoomSelected) && (
         <AnimationEditLayer
           playerRef={canvasRef}
           selectedEid={selectedEid}
           overlay={overlay}
           animEditVersion={animEditVersion}
           onSelectElement={eid => {
+            handleSelectEffect(null)
+
             // Get the parent scene id from the clicked id
             // so we can open the scene settings
             const sceneElementId = eid || "scene"

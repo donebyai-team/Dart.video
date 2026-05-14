@@ -200,6 +200,8 @@ export function MediaAsset({
     <span
       id={el.id}
       className={patchedClassName}
+      // The editor overlay and zoom effect resolve media bounds from this wrapper.
+      data-coaster-media-root="true"
       style={{
         display: "inline-flex",
         alignItems: "center",
@@ -218,26 +220,29 @@ export function MediaAsset({
         ...el.containerStyle,
       }}
     >
-      {mediaKind === "video" && resolvedSrc ? (
-        <span
-          style={{
-            position: "relative",
-            display: "block",
-            width: "100%",
-            height: "100%",
-            borderRadius: innerBorderRadius,
-            overflow: "hidden",
-          }}
-        >
-          {isRendering ? (
+      <span
+        // Zoom is applied here so frame sizing, border, and drag transforms stay intact.
+        data-coaster-media-content="true"
+        style={{
+          position: "relative",
+          display: "block",
+          width: "100%",
+          height: "100%",
+          borderRadius: innerBorderRadius,
+          overflow: "hidden",
+          transformOrigin: "center center",
+        }}
+      >
+        {mediaKind === "video" && resolvedSrc ? (
+          isRendering ? (
             <OffthreadVideo src={resolvedSrc} style={mediaStyle} />
           ) : (
             <Html5Video src={resolvedSrc} playsInline muted style={mediaStyle} />
-          )}
-        </span>
-      ) : (
-        <img src={mediaSrc} style={mediaStyle} />
-      )}
+          )
+        ) : (
+          <img src={mediaSrc} style={mediaStyle} />
+        )}
+      </span>
     </span>
   );
 }

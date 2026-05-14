@@ -118,15 +118,15 @@ export const createCalloutEffect = (
 };
 
 export const createZoomEffect = (
-    resolution: Resolution,
+    _resolution: Resolution,
     startFrame: number,
     endFrame: number
 ): ZoomEffect => {
     return create(ZoomEffectSchema, {
         id: `zoom-effect-${Date.now()}`,
-        x: resolution.width / 2,
-        y: resolution.height / 2,
-        zoomLevel: 1.2,
+        x: 0.5,
+        y: 0.5,
+        zoomLevel: 1.5,
         startFrame,
         endFrame,
     });
@@ -198,8 +198,6 @@ export const ensureVideoResolution = (
     // Already valid → return original (important for avoiding extra renders)
     return video;
 };
-
-
 
 
 
