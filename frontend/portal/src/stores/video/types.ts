@@ -68,9 +68,11 @@ export interface VideoActions {
     removeSlide: (sectionId: string, slideId: string) => void
     duplicateSlide: (sectionId: string, slideId: string) => void
     updateSlide: (updates: Partial<Slide>) => void
+    updateSlideById: (slideId: string, updates: Partial<Slide>) => void
     updateSlideContent: (updates: Record<string, unknown>) => void
     updateSlideTransition: (sectionId: string, slideId: string, transitionId: TransitionType, direction?: TransitionDirection) => void
     reorderSlidesInSection: (activeId: string, overId: string) => void
+    setSelectedSlideById: (slideId: string) => void
 
     // Canvas
     // Define function interface here for effects to get in VideoActions

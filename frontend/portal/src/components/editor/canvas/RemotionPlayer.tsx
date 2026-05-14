@@ -36,6 +36,7 @@ interface RemotionPlayerProps {
   onSlideChange?: (slideId: string) => void;
   onFullscreenChange?: (isFullscreen: boolean) => void;
   onPlaybackStateChange?: (isPlaying: boolean) => void;
+  onPreviewPlaybackChange?: (isPreviewPlaying: boolean) => void;
   transcriptPanel?: React.ReactNode;
   onSelectOverlayFromTimeline?: (overlayId: string, slideId: string) => void;
   onSelectTemplate?: (slideId: string) => void;
@@ -61,6 +62,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
     onSlideChange,
     onFullscreenChange,
     onPlaybackStateChange,
+    onPreviewPlaybackChange,
     onSelectOverlayFromTimeline,
     onDurationChange,
     onSelectTemplate,
@@ -87,6 +89,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   const selectedSlideId = selectedSlide?.id || "";
 
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
   const [volume, setVolume] = useState([80]);
   const [isMuted, setIsMuted] = useState(false);
@@ -135,6 +138,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
     setPlayFromSlideId,
     fps,
     previewEndFrameRef,
+    setIsPreviewPlaying,
   );
 
   // Seek to frame 1 on mount to avoid blank screen at frame 0
@@ -161,12 +165,15 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
     setCurrentFrame,
     fps,
     previewEndFrameRef,
+    setIsPreviewPlaying,
   });
 
   // Keep the player preview aligned whenever the selected slide changes or its data updates.
   // This covers cases like reimagine / animation edits where the same slide id remains selected
   // but its duration or content changes underneath the current frame.
   useEffect(() => {
+    if (previewEndFrameRef.current !== null) return;
+
     if (!isPlaying && selectedSlide) {
       const frame = getSlideEditPreviewFrame(allSlides, selectedSlideId, fps);
       playerRef.current?.seekTo(frame);
@@ -230,6 +237,10 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   useEffect(() => {
     onPlaybackStateChange?.(isPlaying);
   }, [isPlaying, onPlaybackStateChange]);
+
+  useEffect(() => {
+    onPreviewPlaybackChange?.(isPreviewPlaying);
+  }, [isPreviewPlaying, onPreviewPlaybackChange]);
 
   // Show controls on mouse move in fullscreen; hide after 3s of inactivity
   const handleMouseMove = useCallback(() => {

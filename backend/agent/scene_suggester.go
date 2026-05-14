@@ -37,7 +37,7 @@ func (s SceneSuggester) GenerateSuggestions(
 	ctx context.Context,
 	sceneID string,
 	video *models.Video,
-) ([]*pbcore.Slide, error) {
+) ([]*pbcore.Section, error) {
 	ctx = context.WithValue(ctx, "session_id", sceneID)
 	prevSlide, currSlide, nextSlide, err := findSlides(video, sceneID)
 	if err != nil {
@@ -51,7 +51,7 @@ func (s SceneSuggester) GenerateSuggestions(
 
 	suggestInput := types.SuggestScenesRequest{
 		ComponentList: scenes.BuildScenesList(scenes.BuildSceneListOptions{
-			Groups:       false,
+			Groups:       true,
 			Enums:        false,
 			FieldsToSkip: scenes.SkipLLMFields,
 		}),
@@ -85,7 +85,7 @@ func (s SceneSuggester) GenerateSuggestions(
 
 	bgStyle := generateDefaultBackground(video.Metadata.GeneratedBranding)
 
-	suggestedScenes := make([]*pbcore.Slide, 0, len(suggestScenesFromLLM.Scenes))
+	suggestedScenes := make([]*pbcore.Section, 0, len(suggestScenesFromLLM.Scenes))
 
 	for _, scene := range suggestScenesFromLLM.Scenes {
 		slide, err := s.buildSuggestedSlide(ctx, &scene, bgStyle, registry)
@@ -93,7 +93,9 @@ func (s SceneSuggester) GenerateSuggestions(
 			return nil, err
 		}
 
-		suggestedScenes = append(suggestedScenes, slide)
+		suggestedScenes = append(suggestedScenes, &pbcore.Section{
+			Slides: slide,
+		})
 	}
 
 	return suggestedScenes, nil
@@ -174,56 +176,59 @@ func (s SceneSuggester) buildSuggestedSlide(
 	scene *types.Scene,
 	bgStyle *pbcore.BackgroundStyle,
 	mediaRegistry *services.MediaAssetRegistry,
-) (*pbcore.Slide, error) {
+) ([]*pbcore.Slide, error) {
 
+	slides := make([]*pbcore.Slide, 0)
 	sceneConfigs, err := scenes.ConvertToSceneConfig(scene, mediaRegistry)
 	if err != nil {
 		return nil, err
 	}
 
-	sceneConfig := sceneConfigs[0]
-
-	template, err := s.animationGenerator.GenerateCodeFromScene(
-		ctx,
-		sceneConfig,
-		func(progress TemplateGenerationProgress) {},
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	toStructConfig, err := utils.RawMessageToStruct(
-		template.GeneratedPatches,
-	)
-	if err != nil {
-		s.logger.Error(
-			"failed to convert template config",
-			zap.Error(err),
-			zap.Any("template_config", template.GeneratedPatches),
+	for _, sceneConfig := range sceneConfigs {
+		template, err := s.animationGenerator.GenerateCodeFromScene(
+			ctx,
+			sceneConfig,
+			func(progress TemplateGenerationProgress) {},
 		)
+		if err != nil {
+			return nil, err
+		}
 
-		return nil, errors.Wrapf(
-			err,
-			"invalid template config: %s",
-			template.Name,
+		toStructConfig, err := utils.RawMessageToStruct(
+			template.GeneratedPatches,
 		)
+		if err != nil {
+			s.logger.Error(
+				"failed to convert template config",
+				zap.Error(err),
+				zap.Any("template_config", template.GeneratedPatches),
+			)
+
+			return nil, errors.Wrapf(
+				err,
+				"invalid template config: %s",
+				template.Name,
+			)
+		}
+
+		if sceneConfig.Background != nil {
+			bgStyle = sceneConfig.Background
+		}
+
+		slides = append(slides, &pbcore.Slide{
+			BackgroundStyle:  bgStyle,
+			DurationInFrames: template.Config.VisibleDurationInFrames,
+			SettledFrame:     template.Config.VisibleDurationInFrames,
+			Content: &pbcore.AnimationSlideContent{
+				CodeRegistry: template.Config.CodeRegistry,
+				Plan:         &pbcore.AnimationSlidePlan{},
+				Edits:        toStructConfig,
+			},
+			SlideStatus: pbcore.SlideStatus_SLIDE_STATUS_GENERATED,
+		})
 	}
 
-	if sceneConfig.Background != nil {
-		bgStyle = sceneConfig.Background
-	}
-
-	return &pbcore.Slide{
-		BackgroundStyle:  bgStyle,
-		DurationInFrames: template.Config.VisibleDurationInFrames,
-		SettledFrame:     template.Config.VisibleDurationInFrames,
-		Content: &pbcore.AnimationSlideContent{
-			CodeRegistry: template.Config.CodeRegistry,
-			Plan:         &pbcore.AnimationSlidePlan{},
-			Edits:        toStructConfig,
-		},
-		SlideStatus: pbcore.SlideStatus_SLIDE_STATUS_GENERATED,
-	}, nil
+	return slides, nil
 }
 
 func (s SceneSuggester) createMediaAssetRegistry(ctx context.Context, brandIdentity *pbcore.BrandIdentity) (*services.MediaAssetRegistry, error) {

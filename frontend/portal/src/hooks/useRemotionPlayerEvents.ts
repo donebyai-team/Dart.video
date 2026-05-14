@@ -13,6 +13,7 @@ interface UseRemotionPlayerEventsProps {
   setCurrentFrame: (frame: number) => void;
   fps: number;
   previewEndFrameRef: React.MutableRefObject<number | null>;
+  setIsPreviewPlaying: (isPreviewPlaying: boolean) => void;
 }
 
 export function useRemotionPlayerEvents({
@@ -25,13 +26,21 @@ export function useRemotionPlayerEvents({
   setCurrentFrame,
   fps,
   previewEndFrameRef,
+  setIsPreviewPlaying,
 }: UseRemotionPlayerEventsProps) {
   useEffect(() => {
     const player = playerRef.current;
     if (!player) return;
 
     const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
+    const handlePause = () => {
+      setIsPlaying(false);
+
+      if (previewEndFrameRef.current !== null) {
+        setIsPreviewPlaying(false);
+        previewEndFrameRef.current = null;
+      }
+    };
 
     const handleFrameUpdate = (data: { detail: { frame: number } }) => {
       const frame = data.detail.frame;
@@ -40,6 +49,7 @@ export function useRemotionPlayerEvents({
 
       // Auto-pause at slide boundary during slide preview
       if (previewEndFrameRef.current !== null && frame >= previewEndFrameRef.current) {
+        setIsPreviewPlaying(false);
         previewEndFrameRef.current = null;
         player.pause();
         return;
@@ -81,5 +91,5 @@ export function useRemotionPlayerEvents({
       player.removeEventListener("pause", handlePause);
       player.removeEventListener("frameupdate", handleFrameUpdate as never);
     };
-  }, [playerRef, allSlides, selectedSlideId, onSlideChange, onFrameChange, setIsPlaying, setCurrentFrame, fps, previewEndFrameRef]);
+  }, [playerRef, allSlides, selectedSlideId, onSlideChange, onFrameChange, setIsPlaying, setCurrentFrame, fps, previewEndFrameRef, setIsPreviewPlaying]);
 }

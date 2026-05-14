@@ -48,6 +48,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
   const [isExportingVideo, setIsExportingVideo] = useState(false)
   const [isAcceptingChanges, setIsAcceptingChanges] = useState(false)
   const [isPlayerPlaying, setIsPlayerPlaying] = useState(false)
+  const [isPreviewPlaying, setIsPreviewPlaying] = useState(false)
   const [exportProgress, setExportProgress] = useState<ExportProgressState | null>(null)
   const prepareProgressRef = useRef(0)
 
@@ -240,16 +241,18 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
     }
   }, [stopVideoStream, reset])
 
-  // Centralized preview handler - plays a slide from start and auto-pauses at slide end
-  const handleTogglePreviewSlide = (slideId: string) => {
+  // A bounded preview can target one slide or a contiguous slide range.
+  const handleTogglePreviewSlide = (slideId?: string, endSlideId?: string) => {
+    if (!slideId) return
+
     const currentlyPlaying = playerRef.current?.isPlaying() ?? false
 
-    if (currentlyPlaying) {
+    if (currentlyPlaying && isPreviewPlaying) {
       playerRef.current?.pause()
       return
     }
 
-    playerRef.current?.playSlidePreview(slideId)
+    playerRef.current?.playSlidePreview(slideId, endSlideId)
   }
 
   // Centralized fullscreen handler
@@ -439,8 +442,8 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
                 overlay={animationEdit.overlay}
                 onValuePatch={animationEdit.applyValuePatch}
                 setOverlay={animationEdit.setOverlay}
-                isPreviewPlaying={isPlayerPlaying}
-                onPreviewTemplate={() => handleTogglePreviewSlide(selectedSlide.id)}
+                isPreviewPlaying={isPreviewPlaying}
+                onPreviewTemplate={(slideId, endSlideId) => handleTogglePreviewSlide(slideId ?? selectedSlide.id, endSlideId)}
                 onUpdateSpotlight={updates => {
                   if (selectedEffectId) {
                     updateSpotlight(selectedEffectId, updates)
@@ -510,11 +513,13 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
             <RemotionPlayer
               ref={playerRef}
               onSlideChange={slideId => {
+                if (isPreviewPlaying) return
                 // Use unified selection handler
                 handleSelectEntity(createSlideEntityId(slideId))
               }}
               onFullscreenChange={handleFullscreenChange}
               onPlaybackStateChange={setIsPlayerPlaying}
+              onPreviewPlaybackChange={setIsPreviewPlaying}
               onSelectOverlayFromTimeline={(overlayId, slideId) => {
                 // Use unified selection handler
                 handleSelectEntity(createOverlayEntityId(slideId, overlayId))

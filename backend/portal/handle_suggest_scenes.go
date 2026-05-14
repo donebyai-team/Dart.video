@@ -39,5 +39,5 @@ func (p *Portal) SuggestScenes(ctx context.Context, c *connect.Request[pbportal.
 	if err != nil {
 		return nil, err
 	}
-	return connect.NewResponse(&pbportal.SuggestScenesResponse{Scenes: suggestions}), nil
+	return connect.NewResponse(&pbportal.SuggestScenesResponse{Groups: suggestions}), nil
 }

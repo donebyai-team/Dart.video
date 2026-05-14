@@ -17,7 +17,7 @@ import type { PatchOverlay } from '@coasterai/renderer'
 import ReimagineSettings from './settings/ReimagineSettings'
 
 interface ToolsSettingsPanelProps {
-  onPreviewTemplate: () => void
+  onPreviewTemplate: (slideId?: string, endSlideId?: string) => void
   isPreviewPlaying?: boolean
   onUpdateSpotlight: (updates: Partial<SpotlightEffect>) => void
   onUpdateCallout: (updates: Partial<CalloutEffect>) => void
@@ -121,7 +121,7 @@ const ToolsSettingsPanel = ({
          <ReimagineSettings
            onClose={handleCloseTool}
            setOverlay={setOverlay}
-           onPlay={onPreviewTemplate}
+           onPreviewTemplate={onPreviewTemplate}
            isPreviewPlaying={isPreviewPlaying}
          />
       )}

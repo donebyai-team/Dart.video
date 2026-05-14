@@ -93,7 +93,7 @@ message SuggestScenesRequest {
 }
 
 message SuggestScenesResponse {
-  repeated core.v1.Slide scenes = 1;
+  repeated core.v1.Section groups = 1; // We call Section as a group of slides
 }
 
 message UpdateBrandIdentityRequest {

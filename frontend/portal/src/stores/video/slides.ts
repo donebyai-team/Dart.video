@@ -226,6 +226,42 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     get().refreshPendingChanges()
   },
 
+  updateSlideById(slideId: string, updates: Partial<Slide>) {
+    const { videoConfig, selectedSlide } = get()
+    if (!videoConfig) return
+
+    let newVideoConfig = updateSlideById(videoConfig, slideId, slide => ({
+      ...slide,
+      ...updates
+    }))
+
+    newVideoConfig = updateTotalDuration(newVideoConfig)
+
+    set({
+      videoConfig: newVideoConfig,
+      selectedSlide:
+        selectedSlide?.id === slideId
+          ? updateSelectedSlide(selectedSlide, slide => ({
+            ...slide,
+            ...updates
+          }))
+          : selectedSlide
+    })
+
+    get().refreshPendingChanges()
+  },
+
+  setSelectedSlideById(slideId: string) {
+    const { videoConfig } = get()
+    if (!videoConfig) return
+
+    const nextSelectedSlide = findSlideById(videoConfig, slideId)
+    if (!nextSelectedSlide) return
+
+    // Keep selection anchored to the intended slide while helper flows add/remove siblings.
+    set({ selectedSlide: nextSelectedSlide })
+  },
+
   getSlideDurationInSeconds: (slide: Slide) => {
     return slide.durationInFrames / get().getFPS()
   },
