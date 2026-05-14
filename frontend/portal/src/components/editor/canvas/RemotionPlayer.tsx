@@ -173,13 +173,14 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   // but its duration or content changes underneath the current frame.
   useEffect(() => {
     if (previewEndFrameRef.current !== null) return;
+    if (playerRef.current?.isPlaying()) return;
 
-    if (!isPlaying && selectedSlide) {
+    if (selectedSlide) {
       const frame = getSlideEditPreviewFrame(allSlides, selectedSlideId, fps);
       playerRef.current?.seekTo(frame);
       setPlayFromSlideId(selectedSlideId);
     }
-  }, [selectedSlide, selectedSlideId, isPlaying, allSlides, fps]);
+  }, [selectedSlide, selectedSlideId, allSlides, fps]);
 
   // Called when user clicks a slide tile in the timeline.
   // Pauses playback and seeks to the visual end of the slide (last frame before transition).
