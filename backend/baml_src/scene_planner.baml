@@ -73,10 +73,10 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
 
     ## SCENE SELECTION
 
-    - **Prioritize scenes over fillers**; use scenes when the script can be effectively represented, otherwise use fillers
-    - Rephrase text as needed to fit scene requirements while preserving the original meaning
+    - Choose scenes/fillers based on its description and how effectively it can communicate the script
     - Select scenes not only by section tags but also when they effectively visualize the underlying concept
     - DO NOT repeat scenes
+    - Use `<attachments>` for image or video scenes. Use placeholder scenes only when no attachments are provided.
 
     ### Data
     Define scene props in `SceneElement` using JSON format.

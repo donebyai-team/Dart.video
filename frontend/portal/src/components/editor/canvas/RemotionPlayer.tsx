@@ -77,6 +77,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   const videoConfigFromStore = useVideoStore(s => s.videoConfig);
   const selectedSlide = useVideoStore(s => s.selectedSlide);
   const onSelectOEffect = useVideoStore(s => s.handleSelectEffect);
+  const selectedEffectId = useVideoStore(s => s.selectedEffectId);
 
   const resolution = videoConfigFromStore?.metadata?.resolution;
   const fps = videoConfigFromStore?.metadata?.fps || 30;
@@ -174,13 +175,16 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   useEffect(() => {
     if (previewEndFrameRef.current !== null) return;
     if (playerRef.current?.isPlaying()) return;
+    // Do not auto-seek while an overlay effect is being edited, otherwise drag updates
+    // fight the user's interaction by snapping the playhead back to the slide preview frame.
+    if (selectedEffectId) return;
 
     if (selectedSlide) {
       const frame = getSlideEditPreviewFrame(allSlides, selectedSlideId, fps);
       playerRef.current?.seekTo(frame);
       setPlayFromSlideId(selectedSlideId);
     }
-  }, [selectedSlide, selectedSlideId, allSlides, fps]);
+  }, [selectedSlide, selectedSlideId, allSlides, fps, selectedEffectId]);
 
   // Called when user clicks a slide tile in the timeline.
   // Pauses playback and seeks to the visual end of the slide (last frame before transition).

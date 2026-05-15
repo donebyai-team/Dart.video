@@ -25,6 +25,8 @@ const ZoomOverlay = ({
   const [mediaBounds, setMediaBounds] = useState<{ left: number; top: number; width: number; height: number } | null>(null)
   const dragStartRef = useRef({ x: 0, y: 0 })
   const initialValuesRef = useRef({ x: 0, y: 0 })
+  const dragDistanceRef = useRef(0)
+  const suppressClickRef = useRef(false)
   const zoomLevel = Math.max(1, zoom.zoomLevel || 2)
 
   const resolveMediaBounds = useCallback(() => {
@@ -115,26 +117,38 @@ const ZoomOverlay = ({
   const left = cx - rectWidth / 2
   const top = cy - rectHeight / 2
 
-  const handleBoxMouseDown = useCallback(
-    (e: React.MouseEvent) => {
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
       e.preventDefault()
       e.stopPropagation()
+      e.currentTarget.setPointerCapture(e.pointerId)
       onSelect()
       setIsDragging(true)
+      dragDistanceRef.current = 0
+      suppressClickRef.current = false
       dragStartRef.current = { x: e.clientX, y: e.clientY }
       initialValuesRef.current = { x: zoom.x ?? 0.5, y: zoom.y ?? 0.5 }
     },
     [zoom.x, zoom.y, onSelect]
   )
 
-  const handleMouseMove = useCallback(
-    (e: MouseEvent) => {
+  const handlePointerMove = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
       if (!isDragging) return
+      e.preventDefault()
+      e.stopPropagation()
 
       const dragStart = dragStartRef.current
       const initialValues = initialValuesRef.current
-      const dx = targetBounds.width > 0 ? (e.clientX - dragStart.x) / targetBounds.width : 0
-      const dy = targetBounds.height > 0 ? (e.clientY - dragStart.y) / targetBounds.height : 0
+      const rawDx = e.clientX - dragStart.x
+      const rawDy = e.clientY - dragStart.y
+      dragDistanceRef.current = Math.max(dragDistanceRef.current, Math.hypot(rawDx, rawDy))
+      if (dragDistanceRef.current > 3) {
+        suppressClickRef.current = true
+      }
+
+      const dx = targetBounds.width > 0 ? rawDx / targetBounds.width : 0
+      const dy = targetBounds.height > 0 ? rawDy / targetBounds.height : 0
 
       const newX = Math.max(0, Math.min(1, initialValues.x + dx))
       const newY = Math.max(0, Math.min(1, initialValues.y + dy))
@@ -143,19 +157,32 @@ const ZoomOverlay = ({
     [isDragging, onUpdate, targetBounds.height, targetBounds.width]
   )
 
-  const handleMouseUp = useCallback(() => {
+  const handlePointerUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
     setIsDragging(false)
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId)
+    } catch {
+      // Ignore if capture was already released.
+    }
   }, [])
 
   useEffect(() => {
     if (!isDragging) return
-    window.addEventListener('mousemove', handleMouseMove)
-    window.addEventListener('mouseup', handleMouseUp)
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove)
-      window.removeEventListener('mouseup', handleMouseUp)
+
+    const preventWindowClick = (event: MouseEvent) => {
+      if (!suppressClickRef.current) return
+      event.preventDefault()
+      event.stopPropagation()
+      suppressClickRef.current = false
     }
-  }, [isDragging, handleMouseMove, handleMouseUp])
+
+    window.addEventListener('click', preventWindowClick, true)
+    return () => {
+      window.removeEventListener('click', preventWindowClick, true)
+    }
+  }, [isDragging])
 
   return createPortal(
     <div
@@ -169,9 +196,20 @@ const ZoomOverlay = ({
         zIndex: 60,
         pointerEvents: 'auto',
         cursor: isDragging ? 'grabbing' : 'grab',
+        touchAction: 'none',
+        userSelect: 'none',
       }}
-      onMouseDown={handleBoxMouseDown}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
       onClick={e => {
+        if (suppressClickRef.current) {
+          e.preventDefault()
+          e.stopPropagation()
+          suppressClickRef.current = false
+          return
+        }
         e.stopPropagation()
         onSelect()
       }}
@@ -193,11 +231,6 @@ const ZoomOverlay = ({
 
       {/* Keep interaction on a small center handle so the overlay does not block scene selection. */}
       <div
-        onMouseDown={handleBoxMouseDown}
-        onClick={e => {
-          e.stopPropagation()
-          onSelect()
-        }}
         style={{
           position: 'absolute',
           left: '50%',
