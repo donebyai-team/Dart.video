@@ -1,11 +1,16 @@
 import { getAvailableFonts } from '@remotion/google-fonts';
 import { FONT_WEIGHT_VALUES } from '@coasterai/animation';
 
+export interface FontRequest {
+  fontName: string;
+  weights?: string[];
+}
+
 interface FontLoader {
   fontFamily: string;
   loadFont: (style?: string, options?: { weights?: string[]; subsets?: string[] }) => {
     fontFamily: string;
-    waitUntilDone: () => Promise<void>;
+    waitUntilDone?: () => Promise<void>;
   };
 }
 
@@ -15,15 +20,16 @@ const fontCache = new Map<string, FontLoader>();
 const FONT_WEIGHTS = Object.values(FONT_WEIGHT_VALUES)
   .filter((weight): weight is number => typeof weight === 'number')
   .sort((a, b) => a - b);
+const DEFAULT_RENDER_WEIGHTS = FONT_WEIGHTS.map((weight) => String(weight));
 
 /**
  * Fallback font loader for browser/editor environment
  * Uses Google Fonts API directly via <link> tag
  */
-function loadFontViaStylesheet(fontName: string): Promise<void> {
-  const weights = FONT_WEIGHTS.join(';');
+function loadFontViaStylesheet(fontName: string, weights: string[] = DEFAULT_RENDER_WEIGHTS): Promise<void> {
+  const uniqueWeights = Array.from(new Set(weights));
   const encodedFont = encodeURIComponent(fontName).replace(/%20/g, '+');
-  const href = `https://fonts.googleapis.com/css2?family=${encodedFont}:wght@${weights}&display=swap`;
+  const href = `https://fonts.googleapis.com/css2?family=${encodedFont}:wght@${uniqueWeights.join(';')}&display=swap`;
 
   return new Promise<void>((resolve) => {
     if (typeof document === 'undefined') {
@@ -57,7 +63,7 @@ function loadFontViaStylesheet(fontName: string): Promise<void> {
  * - In rendering: Uses Remotion's font loader (works in cloud)
  * - In editor: Falls back to Google Fonts API via stylesheet
  */
-export async function loadRemotionFont(fontName: string, useRemotionLoader = true): Promise<string> {
+export async function loadRemotionFont(fontName: string, useRemotionLoader = true, weights: string[] = DEFAULT_RENDER_WEIGHTS): Promise<string> {
   if (!fontName) {
     console.warn('[loadFont] No font name provided');
     return 'Inter'; // Default to Inter from SUPPORTED_FONTS
@@ -80,15 +86,15 @@ export async function loadRemotionFont(fontName: string, useRemotionLoader = tru
 
       if (!fontInfo) {
         console.warn('[loadFont] Font not available in @remotion/google-fonts, using stylesheet fallback:', normalizedFontName);
-        await loadFontViaStylesheet(normalizedFontName);
+        await loadFontViaStylesheet(normalizedFontName, weights);
         return normalizedFontName;
       }
 
 
-      const fontModule = await import(`@remotion/google-fonts/${fontInfo.importName}`);
+      const fontModule = await fontInfo.load();
       const loader = fontModule.loadFont('normal', {
-        weights: FONT_WEIGHTS.map(w => String(w)),
-        subsets: ['latin'],
+        weights,
+        ignoreTooManyRequestsWarning: true,
       });
 
       fontCache.set(normalizedFontName, {
@@ -96,19 +102,21 @@ export async function loadRemotionFont(fontName: string, useRemotionLoader = tru
         loadFont: fontModule.loadFont,
       });
 
-      await loader.waitUntilDone();
+      if (typeof loader.waitUntilDone === 'function') {
+        await loader.waitUntilDone();
+      }
       return loader.fontFamily;
     } catch (error) {
       console.warn('[loadFont] Remotion loader failed, falling back to stylesheet:', {
         fontName: normalizedFontName,
         error: error instanceof Error ? error.message : String(error),
       });
-      await loadFontViaStylesheet(normalizedFontName);
+      await loadFontViaStylesheet(normalizedFontName, weights);
       return normalizedFontName;
     }
   } else {
     // Direct stylesheet loading for editor
-    await loadFontViaStylesheet(normalizedFontName);
+    await loadFontViaStylesheet(normalizedFontName, weights);
     return normalizedFontName;
   }
 }
@@ -130,6 +138,51 @@ export async function loadFonts(fontNames: string[], waitForLoad = false): Promi
     // Fire and forget for editor
     Promise.all(promises).catch(err => 
       console.warn('[loadFonts] Some fonts failed to load:', err)
+    );
+  }
+}
+
+export async function loadFontRequests(requests: FontRequest[], waitForLoad = false): Promise<void> {
+  const deduped = new Map<string, Set<string>>();
+
+  for (const request of requests) {
+    const fontName = request.fontName.trim();
+    if (!fontName || SYSTEM_FONTS.includes(fontName)) {
+      continue;
+    }
+
+    const weights = request.weights?.length ? request.weights : DEFAULT_RENDER_WEIGHTS;
+    const existing = deduped.get(fontName) ?? new Set<string>();
+    for (const weight of weights) {
+      existing.add(weight);
+    }
+    deduped.set(fontName, existing);
+  }
+
+  const normalizedRequests = Array.from(deduped.entries()).map(([fontName, weights]) => ({
+    fontName,
+    weights: Array.from(weights).sort(),
+  }));
+
+  const totalWeightLoads = normalizedRequests.reduce((sum, request) => sum + request.weights.length, 0);
+  const fontSummary = normalizedRequests.map(({ fontName, weights }) => `${fontName} [${weights.join(', ')}]`);
+  console.log(`[loadFontRequests] Preparing renderer font preload: ${fontSummary.join(' | ')}`, {
+    familyCount: normalizedRequests.length,
+    totalWeightLoads,
+    fonts: fontSummary,
+    requests: normalizedRequests,
+    waitForLoad,
+  });
+
+  const promises = normalizedRequests.map(({ fontName, weights }) =>
+    loadRemotionFont(fontName, waitForLoad, weights)
+  );
+
+  if (waitForLoad) {
+    await Promise.all(promises);
+  } else {
+    Promise.all(promises).catch((err) =>
+      console.warn('[loadFontRequests] Some fonts failed to load:', err)
     );
   }
 }
