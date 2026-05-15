@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
 import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
-import { AnimatedText } from '../../../core/assets';
+import { AnimatedText, useTextMeasurement } from '../../../core/assets';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
@@ -64,10 +64,6 @@ function parsePixelValue(value: React.CSSProperties['fontSize']): number {
 function estimateLineWidth(line: string, fontSizePx: number): number {
   const characterCount = line.trim().length || 1;
   return Math.max(fontSizePx * 2.4, characterCount * fontSizePx * 0.6);
-}
-
-function estimateWordWidth(word: string, fontSizePx: number): number {
-  return Math.max(fontSizePx, word.trim().length * fontSizePx * 0.72);
 }
 
 function splitTextIntoLines(text: string, maxWidthPx: number, fontSizePx: number): [string, string] {
@@ -184,14 +180,6 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
   const holdEnd = highlightEnd + holdDuration;
   const scaleOutEnd = holdEnd + scaleOutDuration;
 
-  const brushColor = props.highlightColor || theme.colors.primary;
-  const maxLineWidth = Math.max(
-    estimateLineWidth(resolvedLineOne, fontSizePx),
-    estimateLineWidth(resolvedLineTwo, fontSizePx),
-  );
-  const brushWidth = maxLineWidth + fontSizePx * 1.8;
-  const brushHeight = (hasSecondLine ? lineGapPx + fontSizePx * 1.6 : fontSizePx * 1.45) + fontSizePx * 0.55;
-
   const lineShiftProgress = hasSecondLine
     ? interpolateWithEasing(
       elapsed,
@@ -260,6 +248,23 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
     ...propTextStyleWithoutColor,
     ...overrideTextStyleWithoutColor,
   };
+  const textMeasurement = useTextMeasurement(textLayerStyle);
+  const brushColor = props.highlightColor || theme.colors.primary;
+  const measureWidth = (value: string): number => {
+    if (!value.trim()) {
+      return 0;
+    }
+
+    return textMeasurement.ready
+      ? textMeasurement.width(value)
+      : estimateLineWidth(value, fontSizePx);
+  };
+  const maxLineWidth = Math.max(
+    measureWidth(resolvedLineOne),
+    measureWidth(resolvedLineTwo),
+  );
+  const brushWidth = maxLineWidth + fontSizePx * 1.8;
+  const brushHeight = (hasSecondLine ? lineGapPx + fontSizePx * 1.6 : fontSizePx * 1.45) + fontSizePx * 0.55;
 
   const getLineOneWordClipStyle = (word: string, wordIndex: number): React.CSSProperties => {
     const entryStart = wordIndex * lineOneStaggerDelay;
@@ -271,9 +276,11 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
     );
     const visibleProgress = Math.max(0, Math.min(1, entryProgress));
     const isVisible = visibleProgress > MIN_VISIBLE_PROGRESS;
-    const estimatedWidth = estimateWordWidth(word, fontSizePx);
+    const measuredWidth = textMeasurement.ready
+      ? textMeasurement.width(word)
+      : Math.max(fontSizePx, word.trim().length * fontSizePx * 0.72);
     return {
-      maxWidth: visibleProgress >= 0.999 ? 'none' : `${estimatedWidth * (isVisible ? visibleProgress : 0)}px`,
+      maxWidth: visibleProgress >= 0.999 ? 'none' : `${measuredWidth * (isVisible ? visibleProgress : 0)}px`,
       marginRight: wordIndex < lineOneWordCount - 1 ? `${fontSizePx * 0.22 * (isVisible ? visibleProgress : 0)}px` : 0,
       opacity: isVisible ? visibleProgress : 0,
       visibility: isVisible ? 'visible' : 'hidden',
@@ -297,6 +304,10 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
       transform: entranceTransform,
     };
   };
+
+  if (!textMeasurement.ready) {
+    return null;
+  }
 
   return (
     <div

@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import { measureText } from '@remotion/layout-utils';
+import { getPrimaryFontFamily } from '../../patches/font';
+import { useTextMeasurement } from './useTextMeasurement';
 
 const MIN_VERTICAL_SAFETY_PX = 2;
 const FONT_METRIC_PROBE_TEXT = 'HgjpqyQÅ';
@@ -65,34 +66,6 @@ function parseLineHeightPx(
   return fontSizePx * 1.2;
 }
 
-function measureRenderedText(text: string, style: React.CSSProperties): { width: number; height: number } | null {
-  if (typeof document === 'undefined') {
-    return null;
-  }
-
-  try {
-    return measureText({
-      text,
-      fontFamily: typeof style.fontFamily === 'string' ? style.fontFamily : '',
-      fontSize: typeof style.fontSize === 'number' ? style.fontSize : String(style.fontSize ?? ''),
-      fontWeight: typeof style.fontWeight === 'string' || typeof style.fontWeight === 'number'
-        ? style.fontWeight
-        : undefined,
-      letterSpacing: typeof style.letterSpacing === 'string' ? style.letterSpacing : undefined,
-      textTransform: style.textTransform as Parameters<typeof measureText>[0]['textTransform'],
-      additionalStyles: {
-        fontStyle: typeof style.fontStyle === 'string' ? style.fontStyle : undefined,
-        fontVariant: typeof style.fontVariant === 'string' ? style.fontVariant : undefined,
-        lineHeight: typeof style.lineHeight === 'string' || typeof style.lineHeight === 'number'
-          ? style.lineHeight
-          : undefined,
-      },
-    });
-  } catch {
-    return null;
-  }
-}
-
 function buildCanvasFont(style: React.CSSProperties, fontSizePx: number): string {
   const fontStyle = typeof style.fontStyle === 'string' ? style.fontStyle : 'normal';
   const fontVariant = typeof style.fontVariant === 'string' ? style.fontVariant : 'normal';
@@ -136,13 +109,15 @@ export function AnimatedText({
   contentStyle,
 }: AnimatedTextProps): React.ReactElement {
   const display = inline ? 'inline-block' : 'block';
+  const textMeasurement = useTextMeasurement(style);
+
   const clipMetrics = useMemo(() => {
     const resolvedStyle = style ?? {};
     const fontSizePx = parsePixelValue(resolvedStyle.fontSize, 96);
     const lineHeightPx = parseLineHeightPx(resolvedStyle.lineHeight, fontSizePx);
     const fallbackPaddingPx = Math.max(MIN_VERTICAL_SAFETY_PX, Math.ceil(fontSizePx * 0.04));
-    const measured = measureRenderedText(text, resolvedStyle);
-    const inkBoundsHeightPx = measureInkBoundsHeight(text, resolvedStyle, fontSizePx);
+    const measured = textMeasurement.ready ? textMeasurement.box(text) : null;
+    const inkBoundsHeightPx = textMeasurement.ready ? measureInkBoundsHeight(text, resolvedStyle, fontSizePx) : null;
     const measuredHeightPx = Math.max(
       lineHeightPx,
       measured?.height ?? 0,
@@ -155,7 +130,7 @@ export function AnimatedText({
       paddingTopPx: fallbackPaddingPx + extraPaddingPx,
       paddingBottomPx: fallbackPaddingPx + extraPaddingPx,
     };
-  }, [style, text]);
+  }, [style, text, textMeasurement]);
 
   return (
     <span

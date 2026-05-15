@@ -4,4 +4,5 @@ export * from './ImageAsset';
 export * from './IconAsset';
 export * from './Text';
 export * from './AnimatedText';
+export * from './useTextMeasurement';
 export * from './CardAsset';

@@ -1,8 +1,7 @@
 import React, { useMemo } from 'react';
-import { measureText } from '@remotion/layout-utils';
 import { useCurrentFrame } from 'remotion';
 import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
-import { AnimatedText } from '../../../core/assets';
+import { AnimatedText, useTextMeasurement } from '../../../core/assets';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
@@ -69,21 +68,6 @@ function composeTransforms(...transforms: Array<string | undefined>): string | u
   return parts.length > 0 ? parts.join(' ') : undefined;
 }
 
-function measureWordWidth(text: string, style: React.CSSProperties): number {
-  return measureText({
-    text,
-    fontFamily: style.fontFamily as string,
-    fontSize: style.fontSize as number,
-    fontWeight: style.fontWeight as number,
-    letterSpacing: style.letterSpacing as string | undefined,
-    textTransform: style.textTransform as Parameters<typeof measureText>[0]['textTransform'],
-    additionalStyles: {
-      fontStyle: typeof style.fontStyle === 'string' ? style.fontStyle : undefined,
-      fontVariant: typeof style.fontVariant === 'string' ? style.fontVariant : undefined,
-    },
-  }).width;
-}
-
 export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
   const frame = useCurrentFrame();
   const styleConfig = useStyleContext();
@@ -123,9 +107,11 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
     }),
     [propStyleWithoutTransform, styleOverrideWithoutTransform, typographyStyle],
   );
+  const textMeasurement = useTextMeasurement(resolvedWordTextStyle);
+
   const wordWidths = useMemo(
-    () => words.map((word) => measureWordWidth(word, resolvedWordTextStyle) + 2),
-    [resolvedWordTextStyle, words],
+    () => textMeasurement.ready ? words.map((word) => textMeasurement.width(word) + 2) : [],
+    [textMeasurement, words],
   );
   const leadWord = words[0] ?? '';
   const leadWordWidth = wordWidths[0] ?? 0;
@@ -146,7 +132,7 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
   const exitBaseFrame = allVisibleFrame + holdDuration;
 
   const getWordClipStyle = (word: string, wordIndex: number): React.CSSProperties => {
-    const measuredWidth = wordWidths[wordIndex] ?? measureWordWidth(word, resolvedWordTextStyle) + 2;
+    const measuredWidth = wordWidths[wordIndex] ?? textMeasurement.width(word) + 2;
     const exitStart = exitBaseFrame + wordIndex * exitStaggerDelay;
     const exitProgress = interpolateWithEasing(
       elapsed,
@@ -193,7 +179,7 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
   };
 
   const getWordInnerStyle = (word: string, wordIndex: number): React.CSSProperties => {
-    const measuredWidth = wordWidths[wordIndex] ?? measureWordWidth(word, resolvedWordTextStyle) + 2;
+    const measuredWidth = wordWidths[wordIndex] ?? textMeasurement.width(word) + 2;
     const exitStart = exitBaseFrame + wordIndex * exitStaggerDelay;
     const exitProgress = interpolateWithEasing(
       elapsed,
@@ -257,6 +243,10 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
     ...props.style,
     ...styleOverride,
   };
+
+  if (!textMeasurement.ready) {
+    return null;
+  }
 
   return (
     <>
