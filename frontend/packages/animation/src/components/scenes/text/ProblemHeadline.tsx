@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
 import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
+import { AnimatedText } from '../../../core/assets';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
@@ -260,7 +261,7 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
     ...overrideTextStyleWithoutColor,
   };
 
-  const getLineOneWordStyle = (word: string, wordIndex: number): React.CSSProperties => {
+  const getLineOneWordClipStyle = (word: string, wordIndex: number): React.CSSProperties => {
     const entryStart = wordIndex * lineOneStaggerDelay;
     const entryProgress = interpolateWithEasing(
       elapsed,
@@ -271,6 +272,16 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
     const visibleProgress = Math.max(0, Math.min(1, entryProgress));
     const isVisible = visibleProgress > MIN_VISIBLE_PROGRESS;
     const estimatedWidth = estimateWordWidth(word, fontSizePx);
+    return {
+      maxWidth: visibleProgress >= 0.999 ? 'none' : `${estimatedWidth * (isVisible ? visibleProgress : 0)}px`,
+      marginRight: wordIndex < lineOneWordCount - 1 ? `${fontSizePx * 0.22 * (isVisible ? visibleProgress : 0)}px` : 0,
+      opacity: isVisible ? visibleProgress : 0,
+      visibility: isVisible ? 'visible' : 'hidden',
+    };
+  };
+
+  const getLineOneWordInnerStyle = (wordIndex: number): React.CSSProperties => {
+    const entryStart = wordIndex * lineOneStaggerDelay;
     const entranceTransform = resolveAnimationPreset({
       frame: elapsed,
       startAt: entryStart,
@@ -282,14 +293,8 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
 
     return {
       display: 'inline-block',
-      overflow: 'hidden',
-      maxWidth: visibleProgress >= 0.999 ? 'none' : `${estimatedWidth * (isVisible ? visibleProgress : 0)}px`,
-      marginRight: wordIndex < lineOneWordCount - 1 ? `${fontSizePx * 0.22 * (isVisible ? visibleProgress : 0)}px` : 0,
-      opacity: isVisible ? visibleProgress : 0,
-      transform: entranceTransform,
-      visibility: isVisible ? 'visible' : 'hidden',
       whiteSpace: 'nowrap',
-      verticalAlign: 'top',
+      transform: entranceTransform,
     };
   };
 
@@ -359,9 +364,13 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
           }}
         >
           {lineOneWords.map((word, index) => (
-            <span key={`${word}-${index}`} style={getLineOneWordStyle(word, index)}>
-              {word}
-            </span>
+            <AnimatedText
+              key={`${word}-${index}`}
+              text={word}
+              style={textLayerStyle}
+              clipStyle={getLineOneWordClipStyle(word, index)}
+              contentStyle={getLineOneWordInnerStyle(index)}
+            />
           ))}
         </div>
 

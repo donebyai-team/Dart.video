@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { measureText } from '@remotion/layout-utils';
 import { useCurrentFrame } from 'remotion';
 import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
+import { AnimatedText } from '../../../core/assets';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
@@ -97,6 +98,8 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
   const dragStyle = usePatchedDragStyle(id, props.style?.transform, overrideTransform);
   const typographyStyle = resolveTypography(props.variant, styleConfig, theme, preset);
   const elapsed = Math.max(0, frame - props.startAt);
+  const { transform: _ignoredPropTransform, ...propStyleWithoutTransform } = props.style ?? {};
+  const { transform: _ignoredOverrideTransform, ...styleOverrideWithoutTransform } = styleOverride;
   
   const speed = getSpeed(props.speed);
   const leadDelay = scaleTiming(BASE_LEAD_DELAY, speed);
@@ -112,17 +115,17 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
 
   const words = useMemo(() => props.text.trim().split(/\s+/).filter(Boolean), [props.text]);
   const wordCount = words.length;
-  const measuredWordStyle = useMemo<React.CSSProperties>(
+  const resolvedWordTextStyle = useMemo<React.CSSProperties>(
     () => ({
       ...typographyStyle,
-      ...props.style,
-      ...styleOverride,
+      ...propStyleWithoutTransform,
+      ...styleOverrideWithoutTransform,
     }),
-    [props.style, styleOverride, typographyStyle],
+    [propStyleWithoutTransform, styleOverrideWithoutTransform, typographyStyle],
   );
   const wordWidths = useMemo(
-    () => words.map((word) => measureWordWidth(word, measuredWordStyle) + 2),
-    [measuredWordStyle, words],
+    () => words.map((word) => measureWordWidth(word, resolvedWordTextStyle) + 2),
+    [resolvedWordTextStyle, words],
   );
   const leadWord = words[0] ?? '';
   const leadWordWidth = wordWidths[0] ?? 0;
@@ -142,8 +145,8 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
   // Frame where the staggered exit sequence begins.
   const exitBaseFrame = allVisibleFrame + holdDuration;
 
-  const getWordStyle = (word: string, wordIndex: number): React.CSSProperties => {
-    const measuredWidth = wordWidths[wordIndex] ?? measureWordWidth(word, measuredWordStyle) + 2;
+  const getWordClipStyle = (word: string, wordIndex: number): React.CSSProperties => {
+    const measuredWidth = wordWidths[wordIndex] ?? measureWordWidth(word, resolvedWordTextStyle) + 2;
     const exitStart = exitBaseFrame + wordIndex * exitStaggerDelay;
     const exitProgress = interpolateWithEasing(
       elapsed,
@@ -165,23 +168,10 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
       const isVisible = visibleProgress > MIN_VISIBLE_PROGRESS;
 
       return {
-        display: 'inline-block',
-        overflow: 'hidden',
         visibility: isVisible ? 'visible' : 'hidden',
-        whiteSpace: 'nowrap',
-        verticalAlign: 'top',
-        paddingTop: '0.08em',
-        paddingBottom: '0.08em',
-        marginTop: '-0.08em',
-        marginBottom: '-0.08em',
         maxWidth: `${measuredWidth * (isVisible ? visibleProgress : 0)}px`,
         marginRight: wordIndex < wordCount - 1 ? `${wordGapPx * (isVisible ? visibleProgress : 0)}px` : 0,
         opacity: isVisible ? visibleProgress : 0,
-        transform: exitTranslate,
-        transformOrigin: 'left center',
-        ...typographyStyle,
-        ...props.style,
-        ...styleOverride,
       };
     }
 
@@ -194,6 +184,35 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
     );
     const visibleProgress = Math.max(0, Math.min(1, entryProgress * exitVisibility));
     const isVisible = visibleProgress > MIN_VISIBLE_PROGRESS;
+    return {
+      visibility: isVisible ? 'visible' : 'hidden',
+      maxWidth: `${measuredWidth * (isVisible ? visibleProgress : 0)}px`,
+      marginRight: wordIndex < wordCount - 1 ? `${wordGapPx * (isVisible ? visibleProgress : 0)}px` : 0,
+      opacity: isVisible ? visibleProgress : 0,
+    };
+  };
+
+  const getWordInnerStyle = (word: string, wordIndex: number): React.CSSProperties => {
+    const measuredWidth = wordWidths[wordIndex] ?? measureWordWidth(word, resolvedWordTextStyle) + 2;
+    const exitStart = exitBaseFrame + wordIndex * exitStaggerDelay;
+    const exitProgress = interpolateWithEasing(
+      elapsed,
+      [exitStart, exitStart + exitDuration],
+      [0, 1],
+      'ease-in-out',
+    );
+    const exitTranslate = `translateX(${-measuredWidth * 0.18 * exitProgress}px)`;
+
+    if (wordIndex === 0) {
+      return {
+        display: 'inline-block',
+        whiteSpace: 'nowrap',
+        transform: exitTranslate,
+        transformOrigin: 'left center',
+      };
+    }
+
+    const entryStart = leadTimelineEnd + (wordIndex - 1) * staggerDelay;
     const entranceTransform = resolveAnimationPreset({
       frame: elapsed,
       startAt: entryStart,
@@ -205,22 +224,9 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
 
     return {
       display: 'inline-block',
-      overflow: 'hidden',
-      visibility: isVisible ? 'visible' : 'hidden',
       whiteSpace: 'nowrap',
-      verticalAlign: 'top',
-      paddingTop: '0.08em',
-      paddingBottom: '0.08em',
-      marginTop: '-0.08em',
-      marginBottom: '-0.08em',
-      maxWidth: `${measuredWidth * (isVisible ? visibleProgress : 0)}px`,
-      marginRight: wordIndex < wordCount - 1 ? `${wordGapPx * (isVisible ? visibleProgress : 0)}px` : 0,
-      opacity: isVisible ? visibleProgress : 0,
       transform: composeTransforms(entranceTransform, exitTranslate),
       transformOrigin: 'left center',
-      ...typographyStyle,
-      ...props.style,
-      ...styleOverride,
     };
   };
 
@@ -268,9 +274,13 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
         }}
       >
         {words.map((word, index) => (
-          <span key={`${word}-${index}`} style={getWordStyle(word, index)}>
-            {word}
-          </span>
+          <AnimatedText
+            key={`${word}-${index}`}
+            text={word}
+            style={resolvedWordTextStyle}
+            clipStyle={getWordClipStyle(word, index)}
+            contentStyle={getWordInnerStyle(word, index)}
+          />
         ))}
       </span>
     </>
