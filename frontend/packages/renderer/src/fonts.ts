@@ -122,7 +122,7 @@ const SYSTEM_FONTS = ['Arial', 'Helvetica'];
 export async function loadFonts(fontNames: string[], waitForLoad = false): Promise<void> {
   // Filter out system fonts - they're already available
   const fontsToLoad = fontNames.filter(font => !SYSTEM_FONTS.includes(font));
-  const promises = fontsToLoad.map(font => loadRemotionFont(font, false));
+  const promises = fontsToLoad.map(font => loadRemotionFont(font, waitForLoad));
   
   if (waitForLoad) {
     await Promise.all(promises);
@@ -135,13 +135,12 @@ export async function loadFonts(fontNames: string[], waitForLoad = false): Promi
 }
 
 /**
- * Load all supported fonts for rendering
- * Loads in background without blocking - matches old load_fonts.ts behavior
+ * Load all supported fonts for rendering.
+ * In rendering we want real Remotion font loaders and we wait for readiness.
  */
-export function loadAllFonts(): void {
+export async function loadAllFonts(waitForLoad = false): Promise<void> {
   console.log('[loadAllFonts] Loading', SUPPORTED_FONTS.length, 'fonts in background');
-  // Load without waiting - fonts will be available as they load
-  loadFonts(SUPPORTED_FONTS, false);
+  await loadFonts(SUPPORTED_FONTS, waitForLoad);
 }
 
 // Every font available in the editor dropdown
