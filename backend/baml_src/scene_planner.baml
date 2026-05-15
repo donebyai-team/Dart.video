@@ -60,7 +60,7 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     - One idea per scene. Never combine two components in one scene.
     - All scenes should feel connected, forming a continuous flow that maintains visual rhythm and tone.
     - NEVER duplicate the same text across scenes
-    - Never include large amounts of text in a single scene; split it into multiple scenes while preserving meaning
+    - Always use Logo scenes to introduce/revel the brand and the supporting text before the scene.
     - Always finish with CTA scene.
     - Target **15-20 scenes total** for a 60s video. Distribute across sections naturally based on
       how much the script emphasizes each section. Do not pad sections artificially.
@@ -75,15 +75,19 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
 
     - **Prioritize scenes over fillers**; use scenes when the script can be effectively represented, otherwise use fillers
     - Rephrase text as needed to fit scene requirements while preserving the original meaning
-    - You can trim, split, or format text (including punctuation) for clarity, rhythm, or scene constraints.
     - Select scenes not only by section tags but also when they effectively visualize the underlying concept
     - DO NOT repeat scenes
 
     ### Data
-    - **Define the props of scenes in SceneElement props in JSON format**
-    - Use placeholder values if real data is not provided.
-    - For images, you can use https://placehold.co/{width}x{height}.png width/height in px.
-    - DO NOT add too much text in any of the scene. Limit to max 6-7 words combined. If needed, split the scene using fillers
+    Define scene props in `SceneElement` using JSON format.
+    - Use placeholder values when actual data is unavailable.
+    - Remove trailing commas, periods, and special characters from text.
+    - Never ever place large text blocks in a single scene. Limit each scene to:
+        **Max 2 lines**
+        **Max 10 words**
+        **50–55 characters maximum**
+       Split longer content into multiple scenes or fillers while preserving meaning.
+    - For image or video placeholders, use: `https://placehold.co/{width}x{height}.png` where `width` and `height` are pixel values.
 
     ## PLAN BEFORE EXECUTING
 
@@ -92,7 +96,6 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     1. **Section mapping** — map or break the script into the appropriate sections?
        Quote the relevant script portion for each section found.
     2. Then break each video section further into multiple scenes or fillers.
-    2. **Scene count** — how many scenes does each section need to hit 15-20 total?
     3. **Narrative arc** — does the section order tell a coherent story?
     4. **Hero vs supporting scenes** — which scenes carry the main message vs add pacing?
     5. **Assets** — do any attachments match scene intent?
@@ -107,7 +110,6 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
 
     Ask before proceeding if:
     - Missing critical sections would weaken the video (e.g., no Hook/CTA): ask whether to add them or proceed as-is.
-    - **Script is too short** for 15–20 scenes: ask whether to expand or add content.
     - **Script is provided**: ask whether to use it exactly or allow light edits.
     - Script-to-scene mapping is unclear: ask for clarification, or use the closest meaningful script subset.
     - Brand presence is implied but no brand name/identity is provided: ask for brand identity.

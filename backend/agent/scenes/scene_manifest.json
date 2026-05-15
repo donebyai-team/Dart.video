@@ -542,7 +542,8 @@
               "type": "array",
               "items": {
                 "type": "string"
-              }
+              },
+              "range": "min 2 words"
             },
             {
               "name": "entranceAnimation",
@@ -630,7 +631,8 @@
               "type": "array",
               "items": {
                 "type": "string"
-              }
+              },
+              "range": "min 2 words"
             },
             {
               "name": "entranceAnimation",
@@ -843,7 +845,7 @@
                       "name": "variant",
                       "type": "enum",
                       "map": "props.variant",
-                      "default": "display"
+                      "default": "headingLg"
                     },
                     {
                       "name": "staggerDelay",
@@ -896,7 +898,7 @@
                       "name": "variant",
                       "type": "enum",
                       "map": "props.variant",
-                      "default": "display"
+                      "default": "headingLg"
                     },
                     {
                       "name": "entranceAnimation",
@@ -953,11 +955,6 @@
                   "name": "textwithwordcycle",
                   "fields": [
                     {
-                      "name": "startAt",
-                      "type": "number",
-                      "default": 0
-                    },
-                    {
                       "name": "text",
                       "type": "string",
                       "datatype": "text",
@@ -973,7 +970,7 @@
                     {
                       "name": "variant",
                       "type": "enum",
-                      "default": "display"
+                      "default": "headingLg"
                     },
                     {
                       "name": "entranceAnimation",
@@ -1074,13 +1071,23 @@
                 {
                   "name": "variant",
                   "type": "enum",
-                  "default": "display"
+                  "default": "headingLg"
                 },
                 {
                   "name": "entranceAnimation",
                   "type": "enum",
                   "map": "props.entranceAnimation",
-                  "default": "scaleIn"
+                  "default": "slideUp"
+                },
+                {
+                  "name": "holdDuration",
+                  "type": "number",
+                  "default": 20
+                },
+                {
+                  "name": "transitionDuration",
+                  "type": "number",
+                  "default": 10
                 },
                 {
                   "name": "textCycleTransition",
@@ -1090,7 +1097,13 @@
                 {
                   "name": "highlightStyle",
                   "type": "enum",
-                  "default": "background"
+                  "default": "simple"
+                },
+                {
+                  "name": "highlightColor",
+                  "type": "string",
+                  "datatype": "color",
+                  "default": ""
                 }
               ]
             },
@@ -1150,7 +1163,8 @@
               "hint": "The features to highlight per image",
               "items": {
                 "type": "string"
-              }
+              },
+              "range": "min 2 words"
             },
             {
               "name": "images",

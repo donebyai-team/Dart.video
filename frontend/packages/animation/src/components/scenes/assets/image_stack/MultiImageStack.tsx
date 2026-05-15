@@ -18,7 +18,7 @@ export type StackAnimation = typeof STACK_ANIMATIONS[number];
 
 const DEFAULT_HERO_TEXT = {
     ...TextWithWordCycleDefaults,
-    variant: 'display' as TypographyVariant,
+    variant: 'headingLg' as TypographyVariant,
     entranceAnimation: 'scaleIn' as AnimationPresetName,
     highlightStyle: 'background' as const,
     textCycleTransition: 'slideUp' as const,
@@ -220,21 +220,37 @@ export const MultiImageStackSchemaFields = [
                 default: DEFAULT_HERO_TEXT.variant,
             },
             {
-                name: 'entranceAnimation',
-                type: 'enum',
-                map: 'props.entranceAnimation',
-                default: DEFAULT_HERO_TEXT.entranceAnimation,
+                "name": "entranceAnimation",
+                "type": "enum",
+                "map": "props.entranceAnimation",
+                "default": TextWithWordCycleDefaults.entranceAnimation
             },
             {
-                name: 'textCycleTransition',
-                type: 'enum',
-                default: DEFAULT_HERO_TEXT.textCycleTransition,
+                "name": "holdDuration",
+                "type": "number",
+                "default": TextWithWordCycleDefaults.holdDuration
             },
             {
-                name: 'highlightStyle',
-                type: 'enum',
-                default: DEFAULT_HERO_TEXT.highlightStyle,
+                "name": "transitionDuration",
+                "type": "number",
+                "default": TextWithWordCycleDefaults.transitionDuration
             },
+            {
+                "name": "textCycleTransition",
+                "type": "enum",
+                "default": TextWithWordCycleDefaults.textCycleTransition
+            },
+            {
+                "name": "highlightStyle",
+                "type": "enum",
+                "default": TextWithWordCycleDefaults.highlightStyle
+            },
+            {
+                "name": "highlightColor",
+                "type": "string",
+                "datatype": "color",
+                "default": TextWithWordCycleDefaults.highlightColor
+            }
         ],
     },
     {
@@ -300,6 +316,7 @@ export const MultiImageStackDescriptor: ComponentRegistration = {
             items: {
                 type: 'string',
             },
+            range: 'min 2 words'
         },
         {
             name: 'images',

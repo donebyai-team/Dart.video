@@ -254,7 +254,7 @@ export const TextWithMediaSceneDescriptor: ComponentRegistration = {
             "name": "variant",
             "type": "enum",
             "map": "props.variant",
-            "default": "display"
+            "default": "headingLg"
           },
           {
             "name": "staggerDelay",
@@ -306,7 +306,7 @@ export const TextWithMediaSceneDescriptor: ComponentRegistration = {
             "name": "variant",
             "type": "enum",
             "map": "props.variant",
-            "default": TextHighlightDefaults.variant
+            "default": "headingLg"
           },
           {
             "name": "entranceAnimation",
@@ -359,7 +359,60 @@ export const TextWithMediaSceneDescriptor: ComponentRegistration = {
           }
         ]
       },
-      { name: 'textwithwordcycle', fields: TextWithWordCycleSchemaFields },
+      {
+        name: 'textwithwordcycle', fields: [
+          {
+            "name": "text",
+            "type": "string",
+            "datatype": "text",
+            "map": "props.text"
+          },
+          {
+            "name": "cyclingWords",
+            "type": "array",
+            "datatype": "text",
+            "map": "props.cyclingWords",
+            "default": []
+          },
+          {
+            "name": "variant",
+            "type": "enum",
+            "default": "headingLg"
+          },
+          {
+            "name": "entranceAnimation",
+            "type": "enum",
+            "map": "props.entranceAnimation",
+            "default": TextWithWordCycleDefaults.entranceAnimation
+          },
+          {
+            "name": "holdDuration",
+            "type": "number",
+            "default": TextWithWordCycleDefaults.holdDuration
+          },
+          {
+            "name": "transitionDuration",
+            "type": "number",
+            "default": TextWithWordCycleDefaults.transitionDuration
+          },
+          {
+            "name": "textCycleTransition",
+            "type": "enum",
+            "default": TextWithWordCycleDefaults.textCycleTransition
+          },
+          {
+            "name": "highlightStyle",
+            "type": "enum",
+            "default": TextWithWordCycleDefaults.highlightStyle
+          },
+          {
+            "name": "highlightColor",
+            "type": "string",
+            "datatype": "color",
+            "default": TextWithWordCycleDefaults.highlightColor
+          }
+        ]
+      },
     ],
   }, {
     type: "component",

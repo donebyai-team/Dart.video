@@ -339,7 +339,8 @@ export const WordCycleDescriptor: ComponentRegistration = {
       type: 'array',
       "items": {
         "type": "string"
-      }
+      },
+      range: 'min 2 words'
     },
     {
       name: 'entranceAnimation',
