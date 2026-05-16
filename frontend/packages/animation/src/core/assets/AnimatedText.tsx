@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
-import { getPrimaryFontFamily } from '../../patches/font';
-import { useTextMeasurement } from './useTextMeasurement';
+import { useTextMeasurement, type UseTextMeasurementResult } from './useTextMeasurement';
 
 const MIN_VERTICAL_SAFETY_PX = 2;
+const HORIZONTAL_SAFETY_PX = 2;
 const FONT_METRIC_PROBE_TEXT = 'HgjpqyQÅ';
 
 /**
@@ -19,6 +19,15 @@ const FONT_METRIC_PROBE_TEXT = 'HgjpqyQÅ';
  * - measures text height using Remotion utilities
  * - adds strict vertical safety padding using canvas ink bounds for difficult fonts
  *
+ * Prop guidance:
+ * - `text` is the only required prop; most scenes should rely on `AnimatedText`
+ *   to measure its own bounds from `text` + `style`
+ * - `textMeasurement` is an optional shared measurement helper for performance-
+ *   sensitive scenes rendering many `AnimatedText` siblings with the same style
+ * - `measuredWidthPx` is an optional escape hatch for scenes that already need
+ *   per-word width for their own choreography math and want to avoid measuring
+ *   the same string twice; most scenes should omit it
+ *
  * Scene responsibilities that stay outside this component:
  * - timing, easing, opacity
  * - transforms / choreography
@@ -31,6 +40,27 @@ export interface AnimatedTextProps {
   inline?: boolean;
   clipStyle?: React.CSSProperties;
   contentStyle?: React.CSSProperties;
+  textMeasurement?: UseTextMeasurementResult;
+  measuredWidthPx?: number;
+}
+
+function parseRequestedWidth(value: React.CSSProperties['maxWidth']): number | null {
+  if (typeof value === 'number') {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    if (value === 'none') {
+      return Number.POSITIVE_INFINITY;
+    }
+
+    const parsed = Number.parseFloat(value);
+    if (Number.isFinite(parsed)) {
+      return parsed;
+    }
+  }
+
+  return null;
 }
 
 function parsePixelValue(value: React.CSSProperties['fontSize'], fallback: number): number {
@@ -107,9 +137,14 @@ export function AnimatedText({
   inline = true,
   clipStyle,
   contentStyle,
+  textMeasurement: providedTextMeasurement,
+  measuredWidthPx,
 }: AnimatedTextProps): React.ReactElement {
   const display = inline ? 'inline-block' : 'block';
-  const textMeasurement = useTextMeasurement(style);
+  const ownedTextMeasurement = useTextMeasurement(style);
+  const textMeasurement = providedTextMeasurement ?? ownedTextMeasurement;
+  const { maxWidth: clipMaxWidth, overflow: _ignoredOverflow, ...clipStyleWithoutMaxWidth } = clipStyle ?? {};
+  const resolvedMeasuredWidth = measuredWidthPx ?? (textMeasurement.ready ? textMeasurement.width(text) : 0);
 
   const clipMetrics = useMemo(() => {
     const resolvedStyle = style ?? {};
@@ -131,36 +166,60 @@ export function AnimatedText({
       paddingBottomPx: fallbackPaddingPx + extraPaddingPx,
     };
   }, [style, text, textMeasurement]);
+  const measuredWidth = textMeasurement.ready
+    ? Math.ceil(resolvedMeasuredWidth) + HORIZONTAL_SAFETY_PX
+    : 0;
+  const requestedWidth = parseRequestedWidth(clipMaxWidth);
+  const layoutWidth = requestedWidth === Number.POSITIVE_INFINITY
+    ? measuredWidth
+    : requestedWidth === null
+      ? null
+      : Math.max(0, Math.ceil(requestedWidth) + HORIZONTAL_SAFETY_PX);
 
   return (
     <span
       style={{
         display,
+        overflow: 'visible',
+        whiteSpace: 'nowrap',
+        verticalAlign: 'top',
+        lineHeight: 'inherit',
+        paddingTop: clipMetrics.paddingTopPx,
+        paddingBottom: clipMetrics.paddingBottomPx,
+        ...style,
+        ...clipStyleWithoutMaxWidth,
       }}
     >
       <span
         style={{
           display,
-          overflow: 'hidden',
           whiteSpace: 'nowrap',
           verticalAlign: 'top',
-          lineHeight: 'inherit',
-          paddingTop: clipMetrics.paddingTopPx,
-          paddingBottom: clipMetrics.paddingBottomPx,
-          marginTop: -clipMetrics.paddingTopPx,
-          marginBottom: -clipMetrics.paddingBottomPx,
-          ...style,
-          ...clipStyle,
+          width: layoutWidth !== null ? layoutWidth : undefined,
         }}
       >
         <span
           style={{
-            display: 'inline-block',
+            display,
+            overflow: 'hidden',
             whiteSpace: 'nowrap',
-            ...contentStyle,
+            verticalAlign: 'top',
+            width: layoutWidth !== null ? layoutWidth : undefined,
+            paddingTop: clipMetrics.paddingTopPx,
+            paddingBottom: clipMetrics.paddingBottomPx,
+            marginTop: -clipMetrics.paddingTopPx,
+            marginBottom: -clipMetrics.paddingBottomPx,
           }}
         >
-          {text}
+          <span
+            style={{
+              display: 'inline-block',
+              whiteSpace: 'nowrap',
+              ...contentStyle,
+            }}
+          >
+            {text}
+          </span>
         </span>
       </span>
     </span>

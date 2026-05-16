@@ -78,6 +78,7 @@ export const MyVideo = () => {
   const { isRendering } = getRemotionEnvironment()
   const inputProps = getInputProps() as { video?: typeof video } | undefined
   const videoData = inputProps?.video ?? video
+  const [fontsReady, setFontsReady] = useState(!isRendering)
   const [renderHandle] = useState(() =>
     isRendering ? delayRender('Loading renderer fonts') : null,
   )
@@ -116,6 +117,11 @@ export const MyVideo = () => {
     let disposed = false;
 
     loadFontRequests(fontRequests, true)
+      .then(() => {
+        if (!disposed) {
+          setFontsReady(true)
+        }
+      })
       .finally(() => {
         if (!disposed && renderHandle !== null) {
           continueRender(renderHandle)
@@ -138,6 +144,7 @@ export const MyVideo = () => {
         height={height}
         defaultProps={{
           fps,
+          fontsReady,
           isEditing: false, // Only enable editing when NOT playing
           onSelectTemplate: undefined,
           video: videoData

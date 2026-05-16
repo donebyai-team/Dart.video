@@ -1,13 +1,12 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
-import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
+import { useElement } from '../../../patches';
 import { AnimatedText, useTextMeasurement } from '../../../core/assets';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme/ThemeContext';
 import type { TypographyVariant } from '../../../tokens/semantic';
-import { resolveTypography } from '../../../tokens/resolveTypography';
 import { AnimationPresetName, resolveAnimationPreset } from '../../../core/animation_preset/AnimationPreset';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { DEFAULT_SPEED_PERCENTAGE, getSpeed, MIN_SPEED_PERCENTAGE, scaleTiming } from '../../../speed/timings';
@@ -70,21 +69,14 @@ function composeTransforms(...transforms: Array<string | undefined>): string | u
 
 export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
   const frame = useCurrentFrame();
-  const styleConfig = useStyleContext();
-  const theme = useTheme();
   const preset = useAspectPreset();
+
   const defaultProps = { ...TextLeadStaggerDefaults, ...initProps };
   const id = defaultProps.id;
-  const props = usePatchedProps(id, defaultProps);
+  const { props, style, containerStyle } = useElement(id, defaultProps)
 
-  const styleOverride = useStyleOverride(id);
-  const overrideTransform = typeof styleOverride.transform === 'string' ? styleOverride.transform : undefined;
-  const dragStyle = usePatchedDragStyle(id, props.style?.transform, overrideTransform);
-  const typographyStyle = resolveTypography(props.variant, styleConfig, theme, preset);
   const elapsed = Math.max(0, frame - props.startAt);
-  const { transform: _ignoredPropTransform, ...propStyleWithoutTransform } = props.style ?? {};
-  const { transform: _ignoredOverrideTransform, ...styleOverrideWithoutTransform } = styleOverride;
-  
+   
   const speed = getSpeed(props.speed);
   const leadDelay = scaleTiming(BASE_LEAD_DELAY, speed);
   const leadSettleDuration = scaleTiming(BASE_LEAD_SETTLE_DURATION, speed);
@@ -94,23 +86,17 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
   const exitStaggerDelay = scaleTiming(BASE_EXIT_STAGGER_DELAY, speed);
   const exitDuration = scaleTiming(BASE_EXIT_DURATION, speed);
   const handoffGap = scaleTiming(BASE_HANDOFF_GAP, speed);
-  const fontSizePx = parsePixelValue(typographyStyle.fontSize);
+
+  const fontSizePx = parsePixelValue(style.fontSize);
   const wordGapPx = fontSizePx * 0.25;
 
   const words = useMemo(() => props.text.trim().split(/\s+/).filter(Boolean), [props.text]);
   const wordCount = words.length;
-  const resolvedWordTextStyle = useMemo<React.CSSProperties>(
-    () => ({
-      ...typographyStyle,
-      ...propStyleWithoutTransform,
-      ...styleOverrideWithoutTransform,
-    }),
-    [propStyleWithoutTransform, styleOverrideWithoutTransform, typographyStyle],
-  );
-  const textMeasurement = useTextMeasurement(resolvedWordTextStyle);
+
+  const textMeasurement = useTextMeasurement(style);
 
   const wordWidths = useMemo(
-    () => textMeasurement.ready ? words.map((word) => textMeasurement.width(word) + 2) : [],
+    () => textMeasurement.ready ? words.map((word) => textMeasurement.width(word)) : [],
     [textMeasurement, words],
   );
   const leadWord = words[0] ?? '';
@@ -132,7 +118,7 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
   const exitBaseFrame = allVisibleFrame + holdDuration;
 
   const getWordClipStyle = (word: string, wordIndex: number): React.CSSProperties => {
-    const measuredWidth = wordWidths[wordIndex] ?? textMeasurement.width(word) + 2;
+    const measuredWidth = wordWidths[wordIndex] ?? textMeasurement.width(word);
     const exitStart = exitBaseFrame + wordIndex * exitStaggerDelay;
     const exitProgress = interpolateWithEasing(
       elapsed,
@@ -141,7 +127,6 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
       'ease-in-out',
     );
     const exitVisibility = 1 - exitProgress;
-    const exitTranslate = `translateX(${-measuredWidth * 0.18 * exitProgress}px)`;
 
     if (wordIndex === 0) {
       const revealProgress = interpolateWithEasing(
@@ -179,7 +164,7 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
   };
 
   const getWordInnerStyle = (word: string, wordIndex: number): React.CSSProperties => {
-    const measuredWidth = wordWidths[wordIndex] ?? textMeasurement.width(word) + 2;
+    const measuredWidth = wordWidths[wordIndex] ?? textMeasurement.width(word);
     const exitStart = exitBaseFrame + wordIndex * exitStaggerDelay;
     const exitProgress = interpolateWithEasing(
       elapsed,
@@ -239,9 +224,7 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
     opacity: leadOverlayFade,
     transform: `translate(-50%, -50%) scale(${leadScale - (leadScale - 1) * leadSettleProgress})`,
     transformOrigin: 'center center',
-    ...typographyStyle,
-    ...props.style,
-    ...styleOverride,
+    ...style
   };
 
   if (!textMeasurement.ready) {
@@ -257,19 +240,18 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
         style={{
           display: 'inline-block',
           whiteSpace: 'nowrap',
-          ...typographyStyle,
-          ...props.style,
-          ...styleOverride,
-          ...dragStyle,
+          ...containerStyle
         }}
       >
         {words.map((word, index) => (
           <AnimatedText
             key={`${word}-${index}`}
             text={word}
-            style={resolvedWordTextStyle}
+            style={style}
             clipStyle={getWordClipStyle(word, index)}
             contentStyle={getWordInnerStyle(word, index)}
+            textMeasurement={textMeasurement}
+            measuredWidthPx={wordWidths[index]}
           />
         ))}
       </span>

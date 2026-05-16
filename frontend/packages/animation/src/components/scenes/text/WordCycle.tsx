@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-import { measureText } from '@remotion/layout-utils';
 import { useCurrentFrame } from 'remotion';
 import { composeTransforms, usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
 import { useStyleContext } from '../../../styles/StyleContext';
@@ -9,6 +8,7 @@ import { interpolateWithEasing } from '../../../styles/easingResolver';
 import type { TypographyVariant } from '../../../tokens/semantic';
 import { resolveTypography } from '../../../tokens/resolveTypography';
 import { Text } from '../../../core/assets/Text';
+import { useTextMeasurement } from '../../../core/assets';
 import { AnimationPresetName, resolveAnimationPreset } from '../../../core/animation_preset/AnimationPreset';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { TextCycleTransition } from '../types';
@@ -26,21 +26,6 @@ export const WordCycleDefaults = {
 };
 
 export type WordCycleProps = Partial<typeof WordCycleDefaults>;
-
-function measureWordWidth(text: string, style: React.CSSProperties): number {
-  return measureText({
-    text,
-    fontFamily: style.fontFamily as string,
-    fontSize: style.fontSize as number,
-    fontWeight: style.fontWeight as number,
-    letterSpacing: style.letterSpacing as string | undefined,
-    textTransform: style.textTransform as Parameters<typeof measureText>[0]['textTransform'],
-    additionalStyles: {
-      fontStyle: typeof style.fontStyle === 'string' ? style.fontStyle : undefined,
-      fontVariant: typeof style.fontVariant === 'string' ? style.fontVariant : undefined,
-    },
-  }).width;
-}
 
 /**
  * Cycles through an array of words with animated transitions.
@@ -92,16 +77,21 @@ export const WordCycle: React.FC<WordCycleProps> = (initProps) => {
     }),
     [textOverrideStyle, typographyStyle],
   );
+  const textMeasurement = useTextMeasurement(spacerMeasurementStyle);
 
   // Reserve width using the widest rendered word, not the longest string.
   const widestWord = useMemo(
     () => props.words.reduce((widest, candidate) => (
-      measureWordWidth(candidate, spacerMeasurementStyle) > measureWordWidth(widest, spacerMeasurementStyle)
+      textMeasurement.width(candidate) > textMeasurement.width(widest)
         ? candidate
         : widest
     ), ''),
-    [props.words, spacerMeasurementStyle],
+    [props.words, textMeasurement],
   );
+
+  if (!textMeasurement.ready) {
+    return <span id={id} className={props.className} style={{ display: 'inline-block', ...props.style, ...dragStyle }} />;
+  }
 
   if (props.words.length === 0) {
     return (

@@ -25,6 +25,7 @@ import { brandingToTheme } from './utils'
 
 interface SlideshowProps {
   fps: number
+  fontsReady?: boolean
   isEditing?: boolean
   onSelectTemplate?: (slideId: string) => void
   video?: JsonObject
@@ -75,6 +76,7 @@ export const SingleSlidePreview: React.FC<{
 // Main slideshow composition using Remotion's TransitionSeries
 export const Slideshow: React.FC<SlideshowProps> = ({
   fps,
+  fontsReady = true,
   isEditing,
   onSelectTemplate,
   video,
@@ -102,6 +104,10 @@ export const Slideshow: React.FC<SlideshowProps> = ({
   }, [videoConfig?.metadata?.generatedBranding]);
 
   /* ================= GATE ================= */
+
+  if (!fontsReady) {
+    return <AbsoluteFill style={{ background: 'transparent' }} />
+  }
 
   if (!videoConfig?.config) {
     return <AbsoluteFill style={{ background: 'black' }} />

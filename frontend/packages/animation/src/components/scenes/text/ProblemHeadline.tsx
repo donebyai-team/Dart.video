@@ -381,6 +381,7 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
               style={textLayerStyle}
               clipStyle={getLineOneWordClipStyle(word, index)}
               contentStyle={getLineOneWordInnerStyle(index)}
+              textMeasurement={textMeasurement}
             />
           ))}
         </div>

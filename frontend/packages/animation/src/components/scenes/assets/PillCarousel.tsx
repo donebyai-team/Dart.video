@@ -11,6 +11,7 @@ import { getIconTextPillMetrics, getNormalizedPill, IconTextPill, IconTextPillDe
 import { TypographyVariant } from '../../../tokens';
 import { resolveTypography } from '../../../tokens/resolveTypography';
 import { AnimationPresetName } from '../../../core/animation_preset/AnimationPreset';
+import { measureTextWithStyle } from '../../../core/assets/useTextMeasurement';
 
 const HERO_TEXT_DEFAULTS = {
     ...TextStaggerDefaults,
@@ -128,10 +129,15 @@ export function PillCarousel(): React.ReactElement {
         { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
     );
     const normalizedPills = pillItems.map((item) => getNormalizedPill(item as PillPatchGroup));
-    const pillWidths = normalizedPills.map((pillProps) => {
+    const pillWidths = normalizedPills.map((pillProps, index) => {
         const typographyStyle = resolveTypography(pillProps.variant, styleConfig, theme, preset);
+        const resolvedTextStyle = {
+            ...typographyStyle,
+            ...pillProps.textStyle,
+        };
+        const textWidth = measureTextWithStyle(pillProps.text, resolvedTextStyle).width;
 
-        return getIconTextPillMetrics(pillProps, typographyStyle).width;
+        return getIconTextPillMetrics(pillProps, typographyStyle, textWidth).width;
     });
     const pillCenters = buildPillCenters(pillWidths, DEFAULT_PILL_GAP);
     const progressPosition = getCarouselProgressPosition(progress, pillCenters);
