@@ -35,6 +35,7 @@ export function PatchContextProvider({ overlay, children }: PatchContextProvider
 }
 
 /**
+ * @deprecated Use useElement instead.
  * Returns the patched value for any prop on an element.
  * If no patch exists, returns the default.
  */
@@ -52,6 +53,9 @@ export function usePatchedProp<T>(
   return defaultValue;
 }
 
+/** 
+ * @deprecated Use useElement instead.
+ */
 export function usePatchedProps<T>(
   id: string | undefined,
   defaultValue: T,
@@ -85,7 +89,8 @@ export function useArrayPatch(source: string) {
     .map(([_, item]) => item)
 }
 
-/**
+/** 
+ * @deprecated Use useElement instead.
  * Returns the style override object for an element.
  * Merge this on top of component style — user overrides always win.
  */
