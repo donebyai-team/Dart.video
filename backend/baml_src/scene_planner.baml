@@ -62,8 +62,8 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     - NEVER duplicate the same text across scenes
     - Always use Logo scenes to introduce/revel the brand and the supporting text before the scene.
     - Always finish with CTA scene.
-    - Target **15-20 scenes total** for a 60s video. Distribute across sections naturally based on
-      how much the script emphasizes each section. Do not pad sections artificially.
+    - **Target 15–20 scenes total when possible, but avoid forcing unnecessary scenes and force fitting. Distribute across sections naturally based on
+      how much the script emphasizes each section. Do not pad sections artificially.**
 
     Fillers work in any section. Use them to:
     - Develop an idea within a section with scenes
@@ -73,10 +73,18 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
 
     ## SCENE SELECTION
 
-    - Choose scenes/fillers based on its description and how effectively it can communicate the script
-    - Select scenes not only by section tags but also when they effectively visualize the underlying concept
-    - DO NOT repeat scenes
-    - Use `<attachments>` for image or video scenes. Use placeholder scenes only when no attachments are provided.
+    - Choose scenes/fillers based on how well they visually communicate each script segment.
+    - Select scenes using both section tags and underlying script meaning.
+    - *DO NOT repeat scenes.*
+    - *DO NOT force-fit scenes. Use a scene only if it supports the script visually and contextually.*
+    - Use `<attachments>` for image or video scenes. Use placeholders only when no attachments are provided.
+    - Divide/Split script text into scenes at logical sentence breaks. Do not split mid-sentence.
+        **Good**
+        * `AI is changing how teams work`
+        * `Most workflows are still manual`
+        **Bad**
+        * `AI is changing`
+        * `how teams work`
 
     ### Data
     Define scene props in `SceneElement` using JSON format.
@@ -86,7 +94,6 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
         **Max 2 lines**
         **Max 10 words**
         **50–55 characters maximum**
-       Split longer content into multiple scenes or fillers while preserving meaning.
     - For image or video placeholders, use: `https://placehold.co/{width}x{height}.png` where `width` and `height` are pixel values.
 
     ## PLAN BEFORE EXECUTING
