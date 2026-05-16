@@ -8,7 +8,7 @@ import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { TextHighlight, TextHighlightDefaults } from '../text/TextHighlight';
 import { TextStagger, TextStaggerDefaults } from '../text/TextStagger';
-import { TextWithWordCycle, TextWithWordCycleDefaults, TextWithWordCycleSchemaFields } from '../text/TextWithWordCycle';
+import { TextWithWordCycle, TextWithWordCycleDefaults } from '../text/TextWithWordCycle';
 import { resolveContentAwareLayout } from './ContentAwareScene.layout';
 import { TypographyVariant } from '../../../tokens';
 import { AnimationPresetName } from '../../../core/animation_preset/AnimationPreset';

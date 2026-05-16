@@ -14,7 +14,7 @@ function getSplitModeDefaults(splitBy: SplitByMode) {
         case 'char':
             return { staggerDelay: 2, duration: 8 };
         case 'line':
-            return { staggerDelay: 10, duration: 20 };
+            return { staggerDelay: 15, duration: 20 };
         case 'word':
         default:
             return {
@@ -29,7 +29,7 @@ export const TextStaggerDefaults = {
     startAt: 0,
     text: '',
     variant: 'headingLg' as TypographyVariant,
-    staggerDelay: 5,
+    staggerDelay: 2,
     entranceAnimation: 'scaleIn' as AnimationPresetName,
     duration: 20,
     exitAnimation: 'none' as AnimationPresetName,
@@ -89,6 +89,8 @@ export const TextStagger: React.FC<TextStaggerProps> = (initProps) => {
             startAt: enterStartAt,
             duration: actualDuration,
             presetName: actualAnimation,
+            distance: 60,
+            easing: 'ease-in-out-circ'
         });
 
         return {
