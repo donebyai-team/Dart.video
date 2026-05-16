@@ -6,11 +6,11 @@ const HORIZONTAL_SAFETY_PX = 2;
 const FONT_METRIC_PROBE_TEXT = 'HgjpqyQÅ';
 
 /**
- * `AnimatedText` is the safe default for any text that will be partially clipped,
+ * `ClippedText` is the safe default for any text that will be partially clipped,
  * revealed, or moved inside an overflow-hidden viewport.
  *
  * Use `Text` when the whole text stays fully visible.
- * Use `AnimatedText` when a scene animates text through a clipped wrapper
+ * Use `ClippedText` when a scene animates text through a clipped wrapper
  * (for example width reveals, masked word entrances, slide-through viewports,
  * or split text effects).
  *
@@ -20,10 +20,10 @@ const FONT_METRIC_PROBE_TEXT = 'HgjpqyQÅ';
  * - adds strict vertical safety padding using canvas ink bounds for difficult fonts
  *
  * Prop guidance:
- * - `text` is the only required prop; most scenes should rely on `AnimatedText`
+ * - `text` is the only required prop; most scenes should rely on `ClippedText`
  *   to measure its own bounds from `text` + `style`
  * - `textMeasurement` is an optional shared measurement helper for performance-
- *   sensitive scenes rendering many `AnimatedText` siblings with the same style
+ *   sensitive scenes rendering many `ClippedText` siblings with the same style
  * - `measuredWidthPx` is an optional escape hatch for scenes that already need
  *   per-word width for their own choreography math and want to avoid measuring
  *   the same string twice; most scenes should omit it
@@ -34,7 +34,7 @@ const FONT_METRIC_PROBE_TEXT = 'HgjpqyQÅ';
  * - line breaking and overall layout
  * - width calculations used for scene-specific animation math
  */
-export interface AnimatedTextProps {
+export interface ClippedTextProps {
   text: string;
   style?: React.CSSProperties;
   inline?: boolean;
@@ -131,7 +131,7 @@ function measureInkBoundsHeight(text: string, style: React.CSSProperties, fontSi
   return height > 0 ? height : null;
 }
 
-export function AnimatedText({
+export function ClippedText({
   text,
   style,
   inline = true,
@@ -139,7 +139,7 @@ export function AnimatedText({
   contentStyle,
   textMeasurement: providedTextMeasurement,
   measuredWidthPx,
-}: AnimatedTextProps): React.ReactElement {
+}: ClippedTextProps): React.ReactElement {
   const display = inline ? 'inline-block' : 'block';
   const ownedTextMeasurement = useTextMeasurement(style);
   const textMeasurement = providedTextMeasurement ?? ownedTextMeasurement;

@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
 import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
-import { AnimatedText, useTextMeasurement } from '../../../core/assets';
+import { ClippedText, useTextMeasurement } from '../../../core/assets';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
@@ -375,7 +375,7 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
           }}
         >
           {lineOneWords.map((word, index) => (
-            <AnimatedText
+            <ClippedText
               key={`${word}-${index}`}
               text={word}
               style={textLayerStyle}

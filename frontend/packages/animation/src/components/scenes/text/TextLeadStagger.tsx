@@ -1,11 +1,9 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
 import { useElement } from '../../../patches';
-import { AnimatedText, useTextMeasurement } from '../../../core/assets';
+import { ClippedText, useTextMeasurement } from '../../../core/assets';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
-import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
-import { useTheme } from '../../../theme/ThemeContext';
 import type { TypographyVariant } from '../../../tokens/semantic';
 import { AnimationPresetName, resolveAnimationPreset } from '../../../core/animation_preset/AnimationPreset';
 import type { ComponentRegistration } from '../../../registry/registry';
@@ -244,7 +242,7 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
         }}
       >
         {words.map((word, index) => (
-          <AnimatedText
+          <ClippedText
             key={`${word}-${index}`}
             text={word}
             style={style}
