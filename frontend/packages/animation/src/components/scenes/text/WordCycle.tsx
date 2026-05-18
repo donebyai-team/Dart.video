@@ -17,7 +17,7 @@ export const WordCycleDefaults = {
   id: 'wordcycle',
   words: ['First text', 'Second text', 'Third text'],
   holdDuration: 20,
-  transitionDuration: 5,
+  transitionDuration: 10,
   textCycleTransition: 'slideUp' as TextCycleTransition,
   entranceAnimation: 'slideUp' as AnimationPresetName,
   variant: 'displayXl' as TypographyVariant,
@@ -127,7 +127,7 @@ export const WordCycle: React.FC<WordCycleProps> = (initProps) => {
       cycleFrame,
       [holdDuration, holdDuration + transitionDuration],
       [0, 1],
-      'ease-out',
+      'ease-out-circ',
     )
     : 0;
 
