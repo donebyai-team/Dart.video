@@ -37,7 +37,7 @@ const CEL_EXTRA_EXIT_FRAMES = BASE_EXIT_STAGGER_DELAY;
 export const TextLeadStaggerDefaults = {
   id: 'textleadstagger',
   startAt: 0,
-  text: "Simple text",
+  text: "",
   variant: 'headingLg' as TypographyVariant,
   entranceAnimation: 'slideLeft' as AnimationPresetName,
   speed: DEFAULT_SPEED_PERCENTAGE,

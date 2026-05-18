@@ -13,7 +13,7 @@ import type { ComponentRegistration } from '../../../registry/registry';
 const BRAND_TEXT_DEFAULTS = {
     ...TextStaggerDefaults,
     id: 'textstagger-brandname',
-    text: 'Quarterzip',
+    text: '',
     variant: 'display' as const,
     staggerDelay: 1,
     duration: 8,

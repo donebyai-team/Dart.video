@@ -40,7 +40,7 @@ export const StatCounterDefaults = {
     speed: DEFAULT_SPEED_PERCENTAGE,
   },
   text: {
-    label: 'Total Users',
+    label: '',
     variant: 'subheading' as TypographyVariant,
   },
 };

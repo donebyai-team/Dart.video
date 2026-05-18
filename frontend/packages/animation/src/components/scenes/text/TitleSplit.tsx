@@ -16,8 +16,8 @@ const TITLE_SPLIT_HOLD_FRAMES = 16;
 export const TitleSplitDefaults = {
   id: 'titlesplit',
   startAt: 0,
-  topText: 'AI WILL EDIT',
-  bottomText: 'THIS CHANGES',
+  topText: '',
+  bottomText: '',
   variant: 'displayXl' as TypographyVariant,
   glowColor: '',
   gap: 80,

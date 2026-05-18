@@ -38,7 +38,7 @@ const CEL_TOTAL_FRAMES = CEL_BASE_FRAMES + (MAX_FIRST_LINE_WORDS - 1) * BASE_LIN
 export const ProblemHeadlineDefaults = {
   id: 'problemheadline',
   startAt: 0,
-  text: 'Static products lose customers',
+  text: '',
   variant: 'display' as TypographyVariant,
   entranceAnimation: 'slideUp' as AnimationPresetName,
   highlightColor: '',

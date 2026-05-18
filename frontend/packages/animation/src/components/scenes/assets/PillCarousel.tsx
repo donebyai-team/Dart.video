@@ -16,7 +16,7 @@ import { measureTextWithStyle } from '../../../core/assets/useTextMeasurement';
 const HERO_TEXT_DEFAULTS = {
     ...TextStaggerDefaults,
     id: 'textstagger',
-    text: 'One product. Every use case.',
+    text: '',
     variant: 'headingLg' as TypographyVariant,
     splitBy: 'line' as const,
     staggerDelay: 0,

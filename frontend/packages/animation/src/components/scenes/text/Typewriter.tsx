@@ -15,7 +15,7 @@ const TYPEWRITER_PULSE_DURATION = 24;
 
 export const TypewriterDefaults = {
   id: 'typewriter',
-  text: "Try cursor today",
+  text: "",
   startAt: 0,
   splitBy: "char" as const,
   variant: "headingLg" as TypographyVariant,

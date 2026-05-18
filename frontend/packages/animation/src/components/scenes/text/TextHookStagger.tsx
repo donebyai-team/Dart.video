@@ -19,7 +19,7 @@ const DEFAULT_ANIMATION_DURATION = 22; // Duration of the highlighted text anima
 export const TextHookStaggerDefaults = {
   id: 'texthookstagger',
   startAt: 0,
-  text: 'Stop losing easy sales',
+  text: '',
   variant: 'display2xl' as TypographyVariant,
   staggerDelay: DEFAULT_STAGGER_DELAY,
   revealDuration: DEFAULT_REVEAL_DURATION,

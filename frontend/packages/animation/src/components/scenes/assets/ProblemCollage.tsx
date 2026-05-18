@@ -25,7 +25,7 @@ const CEL_BASE_FRAMES = BASE_TEXT_DELAY + BASE_IMAGE_DURATION + BASE_HOLD_DURATI
 const ProblemCollageTextDefaults: TextStaggerProps = {
     id: 'textstagger',
     startAt: 0,
-    text: 'Dashboards, logs, and alerts did not adapt.',
+    text: '',
     variant: 'heading' as const,
     staggerDelay: 4,
     entranceAnimation: 'scaleIn' as const,
