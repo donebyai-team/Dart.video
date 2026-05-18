@@ -23,7 +23,7 @@ const BRAND_TEXT_DEFAULTS = {
 const TAGLINE_TEXT_DEFAULTS = {
     ...TextStaggerDefaults,
     id: 'textstagger-tagline',
-    text: 'Go live in minutes',
+    text: '',
     variant: 'heading' as const,
     staggerDelay: 3,
     duration: 12,
