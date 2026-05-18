@@ -46,12 +46,6 @@ export function Typewriter(initProps: TypewriterProps): React.ReactElement {
   const dragStyle = usePatchedDragStyle(id, props.style?.transform);
 
   const entranceDuration = 20;
-  const entranceProgress = interpolateWithEasing(
-    frame,
-    [0, entranceDuration],
-    [0, 1],
-    'linear',
-  );
   const entranceMotion = resolveAnimationPreset({
     frame,
     startAt: 0,
@@ -201,7 +195,8 @@ export const TypewriterDescriptor: ComponentRegistration = {
       default: TypewriterDefaults.entranceAnimation,
     }
   ],
-  description: 'Character-by-character text reveal. Use for dramatic reveals or code/terminal effects.',
+  description: 'Character-by-character typewriter effect',
+  instructions: 'Use for dramatic reveals or code/terminal effects.',
   celExpression: `${TYPEWRITER_TYPING_DURATION + TYPEWRITER_PULSE_DURATION}`
 
 };

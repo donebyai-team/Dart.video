@@ -327,9 +327,7 @@ export const MultiImageStackDescriptor: ComponentRegistration = {
             },
         },
     ],
-    description: `
-    A centered TextWithWordCycle headline above a stacked images revealing one by one with word cycle. 
-    use it to show multi features of a usecase with product images
-    Takes around 170 frames for 3 images.`,
+    description: 'A centered TextWithWordCycle headline above a stacked images revealing one by one with word cycle.',
+    instructions: 'use it to show multi features of a usecase with product images. Takes around 170 frames for 3 images.',
     celExpression: `((${BASE_SCENE_FRAMES} + size(props.images) * ${PER_IMAGE_BASE_FRAMES}) * ${DEFAULT_SPEED_PERCENTAGE}) / max(props.scene.speed, ${MIN_SPEED_PERCENTAGE})`,
 };

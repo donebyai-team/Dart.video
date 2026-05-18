@@ -455,5 +455,6 @@ export const ProblemHeadlineDescriptor: ComponentRegistration = {
     }
   ],
   celExpression: `${CEL_TOTAL_FRAMES}`,
-  description: `A short headline scene for concise text. Use it to show the main problem, key pain point, or an important headline from the script.`,
+  description: `A short headline scene for concise text with brush paint animation on the text`,
+  instructions: 'Use it to show the main problem, key pain point, or an important headline from the script.',
 };

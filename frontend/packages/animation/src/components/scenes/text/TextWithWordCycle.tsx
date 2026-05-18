@@ -430,6 +430,7 @@ export const TextWithWordCycleDescriptor: ComponentRegistration = {
       default: TextWithWordCycleDefaults.entranceAnimation,
     }
   ],
-  description: 'Static text with cycling highlighted words at the end. Use for dynamic taglines like "We build amazing [software/products/solutions]"',
+  description: 'Static text with cycling highlighted words at the end',
+  instructions: 'Use for dynamic taglines like "We build amazing [software/products/solutions]"',
   celExpression: '(props.textwithwordcycle.holdDuration + props.textwithwordcycle.transitionDuration) * size(props.textwithwordcycle.cyclingWords)',
 };

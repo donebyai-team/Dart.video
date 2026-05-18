@@ -231,6 +231,7 @@ export const LogoAssetDescriptor: ComponentRegistration = {
         fields: LogoAssetSchemaFields
     }],
     llmSchema: [],
-    description: 'Logo reveal. Default is brand logo, no props. Use as the final scene.',
+    description: 'Logo reveal. Default is brand logo, no props.',
+    instructions: 'Use as the final scene.',
     celExpression: '30',
 };

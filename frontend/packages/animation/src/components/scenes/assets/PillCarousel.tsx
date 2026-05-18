@@ -347,6 +347,7 @@ export const PillCarouselDescriptor: ComponentRegistration = {
             default: HERO_TEXT_DEFAULTS.entranceAnimation
         }
     ],
-    description: 'A headline with a carousel of items below, each showing text and an icon (choose an icon name that represents the text) as a pill. Use for features, industries, use cases, capabilities, or categories. ~25 frames per item; minimum 3 items.',
+    description: 'A headline with a carousel of items below, each showing text and an icon (choose an icon name that represents the text) as a pill',
+    instructions: 'Use for features, industries, use cases, capabilities, or categories. ~25 frames per item; minimum 3 items.',
     celExpression: `${BASE_SCENE_FRAMES} + max(0, size(props.pills) - 1) * ${PER_PILL_SCENE_FRAMES}`,
 };

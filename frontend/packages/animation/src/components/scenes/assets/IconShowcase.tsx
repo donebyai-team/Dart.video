@@ -240,6 +240,7 @@ export const IconShowcaseDescriptor: ComponentRegistration = {
             default: DEFAULT_TEXT_STAGGER_ANIMATION,
         }
     ],
-    description: 'Row of icons + caption. Use for integrations, tech stack, partners, brands. eg. icons={["shopify", "midjourney", "openai"]}, text="caption text".',
+    description: 'Row of rotating brand icons + caption.',
+    instructions: 'Use for integrations, tech stack, partners, brands. eg. icons={["shopify", "midjourney", "openai"]}, text="caption text".',
     celExpression: `${DEFAULT_ENTRANCE_DURATION} + max(0, size(props.icons) - 1) * ${DEFAULT_ICON_STAGGER} + ${DEFAULT_ICON_ANIMATION_DURATION} + min(1, segmentCount(props.textstagger.text, props.textstagger.splitBy)) * (${DEFAULT_TEXT_DELAY} + max(0, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * ${TextStaggerDefaults.staggerDelay} + ${TextStaggerDefaults.duration})`,
 };

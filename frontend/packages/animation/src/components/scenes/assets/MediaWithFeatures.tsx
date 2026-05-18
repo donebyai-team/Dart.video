@@ -235,6 +235,6 @@ export const MediaWithFeaturesDescriptor: ComponentRegistration = {
             },
         },
     ],
-    description: 'Shows a large product image or video with stacked feature cards on the top-right. Each feature card contains an icon and a short label.',
+    description: 'Shows a large product image or video with stacked feature cards on the top-right. Each feature card contains an icon and a short label revealed in staggered animation',
     celExpression: `max(${BASE_SCENE_FRAMES}, ${FEATURE_REVEAL_START_FRAME} + max(0, size(props.features) - 1) * ${FEATURE_STAGGER_FRAMES} + ${FEATURE_REVEAL_DURATION})`,
 };

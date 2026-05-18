@@ -222,6 +222,7 @@ export const LogoShowcaseDescriptor: ComponentRegistration = {
             default: DEFAULT_TEXT_STAGGER_ANIMATION,
         }
     ],
-    description: 'Row of logos + caption. Use for integrations, tech stack, partners, brands. eg. logos=["url1", "url2"], text="caption text".',
+    description: 'Row of brand logos + caption.',
+    instructions: 'Use for integrations, tech stack, partners, brands. eg. logos=["url1", "url2"], text="caption text".',
     celExpression: `10 + max(min(1, segmentCount(props.textstagger.text, props.textstagger.splitBy)) * (max(0, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * ${TextStaggerDefaults.staggerDelay} + ${TextStaggerDefaults.duration}), ${DEFAULT_TEXT_ENTRANCE_DURATION} + max(0, size(props.logos) - 1) * ${DEFAULT_LOGO_STAGGER} + ${DEFAULT_LOGO_ANIMATION_DURATION})`,
 };

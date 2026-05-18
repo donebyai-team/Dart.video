@@ -144,6 +144,7 @@ export const LogoWithBrandNameDescriptor: ComponentRegistration = {
         name: 'brandname',
         type: 'string',
     }],
-    description: 'Logo + brand name reveal. Use for brand intro.',
+    description: 'Logo + brand name reveal.',
+    instructions: 'Use for brand intros',
     celExpression: 'max(0, segmentCount(props.textstagger.text, "char") - 1) * 5 + 20',
 };

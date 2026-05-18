@@ -228,7 +228,8 @@
               "required": false
             }
           ],
-          "description": "Centered animated metric counter with a short 2-3 word label below it. Use for large numbers(at least 2 digit), metric, or KPI with or without prefix/suffix eg. 1240, 500$, 500K, 500M",
+          "description": "Centered animated metric counter with a short 2-3 word label below it",
+          "instructions": "Use for large numbers(at least 2 digit), metric, or KPI with or without prefix/suffix eg. 1240, 500$, 500K, 500M",
           "celExpression": "(((10 + 50 + 2 + 1) * 100) / max(25, props.counter.speed))"
         },
         {
@@ -255,7 +256,7 @@
                   "name": "staggerDelay",
                   "type": "number",
                   "map": "props.staggerDelay",
-                  "default": 5
+                  "default": 2
                 },
                 {
                   "name": "entranceAnimation",
@@ -302,7 +303,8 @@
               "default": "scaleIn"
             }
           ],
-          "description": "Reveals a word or full text phrase word-by-word. Works for both single word and multi-word headlines or body text.",
+          "description": "Reveals a word or full text phrase word-by-word",
+          "instructions": "Works for both single word and multi-word headlines or body text.",
           "celExpression": "max(1, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * props.textstagger.staggerDelay + props.textstagger.duration + (props.textstagger.exitAnimation != \"none\" ? props.textstagger.exitDuration : 0)"
         },
         {
@@ -354,7 +356,7 @@
               "range": "4-5 words"
             }
           ],
-          "description": "Reveals a short hook or intro phrase word-by-word with animated last word",
+          "description": "Reveals a short hook or intro bold phrase word-by-word with animated last word",
           "celExpression": "max(0, segmentCount(props.texthookstagger.text, \"word\") - 1) * props.texthookstagger.staggerDelay + 4 + 22"
         },
         {
@@ -402,7 +404,8 @@
               "default": "fadeIn"
             }
           ],
-          "description": "Character-by-character text reveal. Use for dramatic reveals or code/terminal effects.",
+          "description": "Character-by-character typewriter effect",
+          "instructions": "Use for dramatic reveals or code/terminal effects.",
           "celExpression": "54"
         },
         {
@@ -552,7 +555,8 @@
               "default": "slideUp"
             }
           ],
-          "description": "Rotates through words on a bold background. Use for emphasis words, or highlighting multiple key points.",
+          "description": "Rotates through words on a bold background",
+          "instructions": "Use for emphasis words, or highlighting multiple key points.",
           "celExpression": "(props.wordcycle.holdDuration + props.wordcycle.transitionDuration) * size(props.wordcycle.words)"
         },
         {
@@ -641,7 +645,8 @@
               "default": "slideUp"
             }
           ],
-          "description": "Static text with cycling highlighted words at the end. Use for dynamic taglines like \"We build amazing [software/products/solutions]\"",
+          "description": "Static text with cycling highlighted words at the end",
+          "instructions": "Use for dynamic taglines like \"We build amazing [software/products/solutions]\"",
           "celExpression": "(props.textwithwordcycle.holdDuration + props.textwithwordcycle.transitionDuration) * size(props.textwithwordcycle.cyclingWords)"
         },
         {
@@ -751,7 +756,8 @@
             }
           ],
           "celExpression": "82",
-          "description": "A short headline scene for concise text. Use it to show the main problem, key pain point, or an important headline from the script."
+          "description": "A short headline scene for concise text with brush paint animation on the text",
+          "instructions": "Use it to show the main problem, key pain point, or an important headline from the script."
         },
         {
           "name": "TextCardStack",
@@ -805,7 +811,8 @@
               }
             }
           ],
-          "description": "Displays problem or solution statements as playful stacked cards. Best for short descriptive phrases; avoid very brief (one- or two-word) content.",
+          "description": "Displays problem or solution statements as playful stacked cards",
+          "instructions": "Best for short descriptive phrases; avoid very brief (one- or two-word) content.",
           "celExpression": "(((22 + 0 + 14 + 10 + 1) * size(props.textcardstack.texts)) * 100) / max(25, props.textcardstack.speed)"
         },
         {
@@ -851,7 +858,7 @@
                       "name": "staggerDelay",
                       "type": "number",
                       "map": "props.staggerDelay",
-                      "default": 5
+                      "default": 2
                     },
                     {
                       "name": "entranceAnimation",
@@ -1040,7 +1047,8 @@
               "type": "string"
             }
           ],
-          "description": "Displays text with a image or video. Choose one of the filler component and its props in textComponentProps: texthighlight, textstagger, or textwithwordcycle.",
+          "description": "Displays text with a image or video.",
+          "instructions": "Choose one of the filler component and its props in textComponentProps: texthighlight, textstagger, or textwithwordcycle.",
           "celExpression": "\"mediaasset\" in props ? props.mediaasset._duration : 90"
         },
         {
@@ -1175,7 +1183,8 @@
               }
             }
           ],
-          "description": "\n    A centered TextWithWordCycle headline above a stacked images revealing one by one with word cycle. \n    use it to show multi features of a usecase with product images\n    Takes around 170 frames for 3 images.",
+          "description": "A centered TextWithWordCycle headline above a stacked images revealing one by one with word cycle.",
+          "instructions": "use it to show multi features of a usecase with product images. Takes around 170 frames for 3 images.",
           "celExpression": "((45 + size(props.images) * 42) * 100) / max(props.scene.speed, 25)"
         },
         {
@@ -1271,7 +1280,8 @@
               }
             }
           ],
-          "description": "Centered problem statement with screenshots that fly in around it as a scattered collage. Best used to show data scattered across tools, fragmentation, multiple issues kind of problems. Takes around **66 frames** to complete",
+          "description": "Centered problem statement with screenshots that fly in around it as a scattered collage",
+          "instructions": "Best used to show data scattered across tools, fragmentation, multiple issues kind of problems. Takes around **66 frames** to complete",
           "celExpression": "((38 + max(0, size(props.images) - 1) * 7) * 100) / max(props.scene.speed, 25)"
         },
         {
@@ -1303,7 +1313,7 @@
                   "name": "staggerDelay",
                   "type": "number",
                   "map": "props.staggerDelay",
-                  "default": 5
+                  "default": 2
                 },
                 {
                   "name": "entranceAnimation",
@@ -1364,8 +1374,9 @@
               "default": "fadeIn"
             }
           ],
-          "description": "Row of logos + caption. Use for integrations, tech stack, partners, brands. eg. logos=[\"url1\", \"url2\"], text=\"caption text\".",
-          "celExpression": "10 + max(min(1, segmentCount(props.textstagger.text, props.textstagger.splitBy)) * (max(0, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * 5 + 20), 5 + max(0, size(props.logos) - 1) * 5 + 12)"
+          "description": "Row of brand logos + caption.",
+          "instructions": "Use for integrations, tech stack, partners, brands. eg. logos=[\"url1\", \"url2\"], text=\"caption text\".",
+          "celExpression": "10 + max(min(1, segmentCount(props.textstagger.text, props.textstagger.splitBy)) * (max(0, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * 2 + 20), 5 + max(0, size(props.logos) - 1) * 5 + 12)"
         },
         {
           "name": "LogoWithBrandName",
@@ -1392,7 +1403,7 @@
                 {
                   "name": "staggerDelay",
                   "type": "number",
-                  "default": 5
+                  "default": 2
                 },
                 {
                   "name": "entranceAnimation",
@@ -1454,7 +1465,8 @@
               "type": "string"
             }
           ],
-          "description": "Logo + brand name reveal. Use for brand intro.",
+          "description": "Logo + brand name reveal.",
+          "instructions": "Use for brand intros",
           "celExpression": "max(0, segmentCount(props.textstagger.text, \"char\") - 1) * 5 + 20"
         },
         {
@@ -1539,7 +1551,8 @@
               "type": "string"
             }
           ],
-          "description": "Logo icon and brand name reveal with a CTA text below that. Use as the final scene.",
+          "description": "Logo icon and brand name reveal with a CTA text below that.",
+          "instructions": "Use as the final scene.",
           "celExpression": "33 + (segmentCount(props.[\"textstagger-tagline\"].text, \"word\") - 1) * 3 + 12"
         },
         {
@@ -1571,7 +1584,7 @@
                   "name": "staggerDelay",
                   "type": "number",
                   "map": "props.staggerDelay",
-                  "default": 5
+                  "default": 2
                 },
                 {
                   "name": "entranceAnimation",
@@ -1638,8 +1651,9 @@
               "default": "fadeIn"
             }
           ],
-          "description": "Row of icons + caption. Use for integrations, tech stack, partners, brands. eg. icons={[\"shopify\", \"midjourney\", \"openai\"]}, text=\"caption text\".",
-          "celExpression": "10 + max(0, size(props.icons) - 1) * 5 + 10 + min(1, segmentCount(props.textstagger.text, props.textstagger.splitBy)) * (5 + max(0, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * 5 + 20)"
+          "description": "Row of rotating brand icons + caption.",
+          "instructions": "Use for integrations, tech stack, partners, brands. eg. icons={[\"shopify\", \"midjourney\", \"openai\"]}, text=\"caption text\".",
+          "celExpression": "10 + max(0, size(props.icons) - 1) * 5 + 10 + min(1, segmentCount(props.textstagger.text, props.textstagger.splitBy)) * (5 + max(0, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * 2 + 20)"
         },
         {
           "name": "PillCarousel",
@@ -1756,7 +1770,8 @@
               "default": "scaleIn"
             }
           ],
-          "description": "A headline with a carousel of items below, each showing text and an icon (choose an icon name that represents the text) as a pill. Use for features, industries, use cases, capabilities, or categories. ~25 frames per item; minimum 3 items.",
+          "description": "A headline with a carousel of items below, each showing text and an icon (choose an icon name that represents the text) as a pill",
+          "instructions": "Use for features, industries, use cases, capabilities, or categories. ~25 frames per item; minimum 3 items.",
           "celExpression": "40 + max(0, size(props.pills) - 1) * 25"
         },
         {
@@ -1842,7 +1857,7 @@
               }
             }
           ],
-          "description": "Shows a large product image or video with stacked feature cards on the top-right. Each feature card contains an icon and a short label.",
+          "description": "Shows a large product image or video with stacked feature cards on the top-right. Each feature card contains an icon and a short label revealed in staggered animation",
           "celExpression": "max(30, 20 + max(0, size(props.features) - 1) * 15 + 20)"
         },
         {
@@ -1873,7 +1888,7 @@
                   "name": "staggerDelay",
                   "type": "number",
                   "map": "props.staggerDelay",
-                  "default": 5
+                  "default": 2
                 },
                 {
                   "name": "entranceAnimation",

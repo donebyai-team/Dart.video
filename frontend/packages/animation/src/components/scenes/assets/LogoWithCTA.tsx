@@ -317,6 +317,7 @@ export const LogoWithCTADescriptor: ComponentRegistration = {
             type: 'string',
         },
     ],
-    description: 'Logo icon and brand name reveal with a CTA text below that. Use as the final scene.',
+    description: 'Logo icon and brand name reveal with a CTA text below that.',
+    instructions: 'Use as the final scene.',
     celExpression: '33 + (segmentCount(props.["textstagger-tagline"].text, "word") - 1) * 3 + 12',
 };

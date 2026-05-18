@@ -543,6 +543,7 @@ export const ProblemCollageDescriptor: ComponentRegistration = {
             },
         },
     ],
-    description: `Centered problem statement with screenshots that fly in around it as a scattered collage. Best used to show data scattered across tools, fragmentation, multiple issues kind of problems. Takes around **66 frames** to complete`,
+    description: `Centered problem statement with screenshots that fly in around it as a scattered collage`,
+    instructions: 'Best used to show data scattered across tools, fragmentation, multiple issues kind of problems. Takes around **66 frames** to complete',
     celExpression: `((${CEL_BASE_FRAMES} + max(0, size(props.images) - 1) * ${CEL_PER_IMAGE_FRAMES}) * ${DEFAULT_SPEED_PERCENTAGE}) / max(props.scene.speed, ${MIN_SPEED_PERCENTAGE})`,
 };

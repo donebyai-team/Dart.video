@@ -12,6 +12,9 @@ export function composeTransforms(...transforms: TransformPart[]): string | unde
   return parts.length > 0 ? parts.join(' ') : undefined;
 }
 
+/** 
+ * @deprecated Use useElement instead.
+ */
 export function usePatchedDragStyle(
   id: string | undefined,
   ...baseTransforms: TransformPart[]

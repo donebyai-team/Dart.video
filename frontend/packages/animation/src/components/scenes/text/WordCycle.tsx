@@ -339,6 +339,7 @@ export const WordCycleDescriptor: ComponentRegistration = {
       default: WordCycleDefaults.entranceAnimation,
     }
   ],
-  description: 'Rotates through words on a bold background. Use for emphasis words, or highlighting multiple key points.',
+  description: 'Rotates through words on a bold background',
+  instructions: 'Use for emphasis words, or highlighting multiple key points.',
   celExpression: '(props.wordcycle.holdDuration + props.wordcycle.transitionDuration) * size(props.wordcycle.words)',
 };

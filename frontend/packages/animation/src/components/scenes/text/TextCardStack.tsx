@@ -290,6 +290,7 @@ export const TextCardStackDescriptor: ComponentRegistration = {
       },
     },
   ],
-  description: 'Displays problem or solution statements as playful stacked cards. Best for short descriptive phrases; avoid very brief (one- or two-word) content.',
+  description: 'Displays problem or solution statements as playful stacked cards',
+  instructions: 'Best for short descriptive phrases; avoid very brief (one- or two-word) content.',
   celExpression: `(((${BASE_ENTRY_DURATION} + ${BASE_SETTLE_DURATION} + ${BASE_HOLD_DURATION} + ${BASE_EXIT_DURATION} + ${BASE_CARD_GAP}) * size(props.textcardstack.texts)) * ${DEFAULT_SPEED_PERCENTAGE}) / max(${MIN_SPEED_PERCENTAGE}, props.textcardstack.speed)`,
 };

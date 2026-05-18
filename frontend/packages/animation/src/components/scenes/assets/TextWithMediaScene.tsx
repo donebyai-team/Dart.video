@@ -445,6 +445,7 @@ export const TextWithMediaSceneDescriptor: ComponentRegistration = {
       type: "string"
     }
   ],
-  description: 'Displays text with a image or video. Choose one of the filler component and its props in textComponentProps: texthighlight, textstagger, or textwithwordcycle.',
+  description: 'Displays text with a image or video.',
+  instructions: 'Choose one of the filler component and its props in textComponentProps: texthighlight, textstagger, or textwithwordcycle.',
   celExpression: '"mediaasset" in props ? props.mediaasset._duration : 90',
 };

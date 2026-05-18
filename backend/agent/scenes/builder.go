@@ -72,10 +72,11 @@ func BuildScenesList(options BuildSceneListOptions) string {
 	if options.Groups {
 		for _, group := range groupedComponents {
 			sectional = append(sectional, types.Component{
-				Tags:        group.Tags,
-				Name:        group.Name,
-				Description: group.Description,
-				LLMSchema:   group.LLMSchema,
+				Tags:         group.Tags,
+				Name:         group.Name,
+				Description:  group.Description,
+				Instructions: group.Instructions,
+				LLMSchema:    group.LLMSchema,
 			})
 		}
 	}
@@ -114,9 +115,22 @@ func writeScene(b *strings.Builder, c types.Component, category string, fieldsTo
 
 	b.WriteString("\n")
 
+	// append the c.Instructions at the end of Description with .
 	if c.Description != "" {
+		desc := strings.TrimSpace(c.Description)
+
+		// Add trailing period if missing
+		if !strings.HasSuffix(desc, ".") {
+			desc += "."
+		}
+
+		// Append instructions if present
+		if strings.TrimSpace(c.Instructions) != "" {
+			desc += " " + strings.TrimSpace(c.Instructions)
+		}
+
 		b.WriteString("**Description**\n")
-		fmt.Fprintf(b, "%s\n\n", c.Description)
+		fmt.Fprintf(b, "%s\n\n", desc)
 	}
 
 	b.WriteString("**Props**\n")

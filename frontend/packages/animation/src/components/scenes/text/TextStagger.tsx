@@ -205,6 +205,7 @@ export const TextStaggerDescriptor: ComponentRegistration = {
             default: TextStaggerDefaults.entranceAnimation,
         }
     ],
-    description: 'Reveals a word or full text phrase word-by-word. Works for both single word and multi-word headlines or body text.',
+    description: 'Reveals a word or full text phrase word-by-word',
+    instructions: 'Works for both single word and multi-word headlines or body text.',
     celExpression: `max(1, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * props.textstagger.staggerDelay + props.textstagger.duration + (props.textstagger.exitAnimation != "none" ? props.textstagger.exitDuration : 0)`
 };
