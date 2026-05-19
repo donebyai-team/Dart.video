@@ -80,6 +80,13 @@ func (resolver StyleResolver) backgroundColor() (string, bool) {
 		return "", false
 	}
 
+	// If the effect is glow that is a light color,
+	// the hex color will be dark and hence we override it
+	if resolver.BackgroundStyle.Effect != nil &&
+		resolver.BackgroundStyle.Effect.Type == pbcore.BackgroundEffectType_BACKGROUND_EFFECT_TYPE_GLOW {
+		resolver.BackgroundStyle.GetSolid().Hex = "#FFFFFF"
+	}
+
 	return resolver.BackgroundStyle.GetSolid().Hex, true
 }
 

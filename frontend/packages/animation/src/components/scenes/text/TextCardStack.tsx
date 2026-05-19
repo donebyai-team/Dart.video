@@ -188,10 +188,7 @@ export const TextCardStack: React.FC<TextCardStackProps> = (initProps) => {
               id="container"
               style={{
                 width: cardWidth,
-                minHeight: cardMinHeight,
-                boxShadow: buildDepthShadow(3),
-                backgroundColor: 'transparent',
-                borderColor: style.color,
+                minHeight: cardMinHeight,      
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
@@ -207,10 +204,13 @@ export const TextCardStack: React.FC<TextCardStackProps> = (initProps) => {
                   `rotateZ(${rotateZ}deg)`,
                   `scale(${scale})`,
                 ),
-                // Default styling, can we passed in the schema but not necessary
                 padding: `${cardPaddingY}px ${cardPaddingX}px`,
+                // Default styling, can we passed in the schema but not necessary
+                // boxShadow: buildDepthShadow(3),
+                backgroundColor: 'transparent',
+                borderColor: style.color,
                 borderRadius: cardRadius,
-                border: `4px solid ${theme.colors.foreground}`,
+                borderWidth: 5,
                 gap: Math.max(16, Math.round(bodyFontSize * 0.18)),
               }}
             >
