@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
-import { useElement } from '../../../patches';
+import { composeTransforms, useElement } from '../../../patches';
 import { ClippedText, useTextMeasurement } from '../../../core/assets';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
@@ -60,11 +60,6 @@ function parsePixelValue(value: React.CSSProperties['fontSize']): number {
   return 96;
 }
 
-function composeTransforms(...transforms: Array<string | undefined>): string | undefined {
-  const parts = transforms.filter((transform): transform is string => Boolean(transform && transform.trim()));
-  return parts.length > 0 ? parts.join(' ') : undefined;
-}
-
 export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
   const frame = useCurrentFrame();
   const preset = useAspectPreset();
@@ -92,13 +87,12 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
   const wordCount = words.length;
 
   const textMeasurement = useTextMeasurement(style);
-
   const wordWidths = useMemo(
     () => textMeasurement.ready ? words.map((word) => textMeasurement.width(word)) : [],
     [textMeasurement, words],
   );
   const leadWord = words[0] ?? '';
-  const leadWordWidth = wordWidths[0] ?? 0;
+  const leadWordWidth = leadWord ? (wordWidths[0] ?? textMeasurement.width(leadWord)) : 0;
   const leadScale = leadWordWidth > 0
     ? Math.min(Math.max((preset.width * LEAD_VIEWPORT_COVERAGE) / leadWordWidth, 1.8), 6)
     : 1;
@@ -224,10 +218,6 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
     transformOrigin: 'center center',
     ...style
   };
-
-  if (!textMeasurement.ready) {
-    return null;
-  }
 
   return (
     <>

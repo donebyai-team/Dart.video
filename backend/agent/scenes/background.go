@@ -48,10 +48,6 @@ func resolveSceneBackground(selectedScene *types.Scene, fieldValueMapper *servic
 		hex = brand_identity.BrandColorTokens(fieldValueMapper.GetBrandColors())[brand_identity.COLOR_PRIMARY]
 	}
 
-	//if bg.Solid.IsColorToken() && *bg.Solid.AsColorToken() == types.ColorTokenSECONDARY {
-	//	hex = brand_identity.BrandColorTokens(fieldValueMapper.GetBrandColors())[brand_identity.COLOR_SECONDARY]
-	//}
-
 	if hex == "" {
 		return nil
 	}

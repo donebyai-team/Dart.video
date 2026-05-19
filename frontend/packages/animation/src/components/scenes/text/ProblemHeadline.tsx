@@ -1,13 +1,12 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
-import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
+import { composeTransforms, useElement } from '../../../patches';
 import { ClippedText, useTextMeasurement } from '../../../core/assets';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme/ThemeContext';
 import type { TypographyVariant } from '../../../tokens/semantic';
-import { resolveTypography } from '../../../tokens/resolveTypography';
 import { AnimationPresetName, resolveAnimationPreset } from '../../../core/animation_preset/AnimationPreset';
 import type { ComponentRegistration } from '../../../registry/registry';
 
@@ -99,11 +98,6 @@ function splitTextIntoLines(text: string, maxWidthPx: number, fontSizePx: number
   return bestSplit;
 }
 
-function composeTransforms(...transforms: Array<string | undefined>): string | undefined {
-  const parts = transforms.filter((transform): transform is string => Boolean(transform && transform.trim()));
-  return parts.length > 0 ? parts.join(' ') : undefined;
-}
-
 function getScaleFadeExit(frame: number, holdEnd: number, scaleOutEnd: number) {
   // Shared scene exit pattern: hold briefly, then scale up while fading out.
   const progress = interpolateWithEasing(
@@ -136,20 +130,12 @@ function buildBrushPasses(hasSecondLine: boolean): Array<{ d: string; width: num
 
 export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
   const frame = useCurrentFrame();
-  const styleConfig = useStyleContext();
   const theme = useTheme();
   const preset = useAspectPreset();
   const defaultProps = { ...ProblemHeadlineDefaults, ...initProps };
   const id = defaultProps.id;
-  const props = usePatchedProps(id, defaultProps);
-
-  const styleOverride = useStyleOverride(id);
-  const overrideTransform = typeof styleOverride.transform === 'string' ? styleOverride.transform : undefined;
-  const propTransform = typeof props.style?.transform === 'string' ? props.style.transform : undefined;
-  const { transform: _ignoredStyleTransform, ...styleOverrideWithoutTransform } = styleOverride;
-  const { transform: _ignoredPropTransform, ...propStyleWithoutTransform } = props.style ?? {};
-  const typographyStyle = resolveTypography(props.variant, styleConfig, theme, preset);
-  const fontSizePx = parsePixelValue(typographyStyle.fontSize);
+  const { props, style, containerStyle } = useElement(id, defaultProps);
+  const fontSizePx = parsePixelValue(style.fontSize);
   const lineGapPx = fontSizePx * 1.1;
   const availableWidth = preset.width - preset.safeArea.left - preset.safeArea.right;
   const maxTextWidthPx = Math.max(fontSizePx * 6, availableWidth * 0.72);
@@ -193,10 +179,9 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
 
   const groupTransform = composeTransforms(
     `scale(${exit.scale})`,
-    propTransform,
-    overrideTransform,
+    containerStyle.transform,
   );
-  const dragStyle = usePatchedDragStyle(id, groupTransform);
+
 
   const lineOneBaseY = interpolateWithEasing(
     elapsed,
@@ -240,15 +225,8 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
     ) * (1 - exit.progress * 0.45);
   const groupOpacity = exit.opacity;
   const textOpacity = exit.opacity;
-  const { color: _ignoredPropColor, ...propTextStyleWithoutColor } = propStyleWithoutTransform;
-  const { color: _ignoredOverrideColor, ...overrideTextStyleWithoutColor } = styleOverrideWithoutTransform;
-  const textLayerStyle: React.CSSProperties = {
-    ...typographyStyle,
-    color: typeof typographyStyle.color === 'string' ? typographyStyle.color : '#111111',
-    ...propTextStyleWithoutColor,
-    ...overrideTextStyleWithoutColor,
-  };
-  const textMeasurement = useTextMeasurement(textLayerStyle);
+
+  const textMeasurement = useTextMeasurement(style);
   const brushColor = props.highlightColor || theme.colors.primary;
   const measureWidth = (value: string): number => {
     if (!value.trim()) {
@@ -321,7 +299,7 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
         transformOrigin: 'center center',
         opacity: groupOpacity,
         pointerEvents: 'none',
-        ...dragStyle,
+        ...containerStyle,
       }}
     >
       <svg
@@ -360,7 +338,7 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          ...textLayerStyle,
+          ...style,
           opacity: textOpacity,
         }}
       >
@@ -378,7 +356,7 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
             <ClippedText
               key={`${word}-${index}`}
               text={word}
-              style={textLayerStyle}
+              style={style}
               clipStyle={getLineOneWordClipStyle(word, index)}
               contentStyle={getLineOneWordInnerStyle(index)}
               textMeasurement={textMeasurement}

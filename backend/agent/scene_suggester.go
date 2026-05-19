@@ -83,7 +83,16 @@ func (s SceneSuggester) GenerateSuggestions(
 		)
 	}
 
-	bgStyle := brand_identity.GenerateDefaultBackground(video.Metadata.GeneratedBranding.Colors)
+	// the current slide background is used as the default background for the suggested slides
+	bgStyle := currSlide.BackgroundStyle
+	if bgStyle == nil {
+		bgStyle = video.Metadata.BackgroundStyle
+	}
+	if bgStyle == nil {
+		bgStyle = brand_identity.GenerateDefaultBackground(
+			video.Metadata.GeneratedBranding.Colors,
+		)
+	}
 
 	suggestedScenes := make([]*pbcore.Section, 0, len(suggestScenesFromLLM.Scenes))
 
@@ -179,7 +188,7 @@ func (s SceneSuggester) buildSuggestedSlide(
 ) ([]*pbcore.Slide, error) {
 
 	slides := make([]*pbcore.Slide, 0)
-	sceneConfigs, err := scenes.ConvertToSceneConfig(scene, mediaRegistry)
+	sceneConfigs, err := scenes.ConvertToSceneConfigWithBackground(scene, bgStyle, mediaRegistry)
 	if err != nil {
 		return nil, err
 	}
@@ -193,6 +202,9 @@ func (s SceneSuggester) buildSuggestedSlide(
 		if err != nil {
 			return nil, err
 		}
+		// TODO:
+		// We extract the variant, color, font from the currentSlide
+		// and apply it in the suggested slide.
 
 		toStructConfig, err := utils.RawMessageToStruct(
 			template.GeneratedPatches,

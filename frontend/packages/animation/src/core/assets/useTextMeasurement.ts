@@ -209,9 +209,9 @@ export function useTextMeasurement(style?: React.CSSProperties): UseTextMeasurem
     return measureText({
       text,
       ...sharedMeasureConfig,
-      validateFontIsLoaded: true,
+      validateFontIsLoaded: ready,
     });
-  }, [sharedMeasureConfig]);
+  }, [ready, sharedMeasureConfig]);
 
   const width = useCallback((text: string): number => box(text).width, [box]);
 

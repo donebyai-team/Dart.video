@@ -22,12 +22,14 @@ type SceneConfig struct {
 	Background         *pbcore.BackgroundStyle
 }
 
-// Convert the LLM generated scene to internal config
-// Merge the props from scene with defaults
-func ConvertToSceneConfig(scene *types.Scene, fieldValueMapper *services.MediaAssetRegistry) ([]*SceneConfig, error) {
+func convertToSceneConfig(
+	scene *types.Scene,
+	background *pbcore.BackgroundStyle,
+	fieldValueMapper *services.MediaAssetRegistry,
+) ([]*SceneConfig, error) {
 	element := scene.Element
-	groupedComponent, ok := groupedComponents[element.Component]
-	if ok {
+
+	if groupedComponent, ok := groupedComponents[element.Component]; ok {
 		return groupedComponent.Ungroup(scene, fieldValueMapper)
 	}
 
@@ -41,13 +43,13 @@ func ConvertToSceneConfig(scene *types.Scene, fieldValueMapper *services.MediaAs
 		return nil, fmt.Errorf("invalid scene props json: %w", err)
 	}
 
-	background := resolveSceneBackground(scene, fieldValueMapper)
 	finalProps, err := GenerateEditsFromProps(
 		component.Schema,
 		props,
 		field_resolvers.FieldResolverForward,
 		fieldValueMapper,
-		background)
+		background,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -60,20 +62,43 @@ func ConvertToSceneConfig(scene *types.Scene, fieldValueMapper *services.MediaAs
 		Background:         background,
 	}
 
+	return []*SceneConfig{cfg}, nil
+}
+
+func ConvertToSceneConfigWithBackground(
+	scene *types.Scene,
+	background *pbcore.BackgroundStyle,
+	fieldValueMapper *services.MediaAssetRegistry,
+) ([]*SceneConfig, error) {
+	return convertToSceneConfig(scene, background, fieldValueMapper)
+}
+
+// Convert the LLM generated scene to internal config
+// Merge the props from scene with defaults
+func ConvertToSceneConfig(
+	scene *types.Scene,
+	fieldValueMapper *services.MediaAssetRegistry,
+) ([]*SceneConfig, error) {
+	background := resolveSceneBackground(scene, fieldValueMapper)
+
+	configs, err := convertToSceneConfig(scene, background, fieldValueMapper)
+	if err != nil {
+		return nil, err
+	}
+
 	// TODO: Move it in a better place
-	if strings.EqualFold(cfg.Name, "textstagger") {
-		textStaggerProps := cfg.Props["textstagger"].(map[string]any)
-		text := textStaggerProps["text"].(string)
-		if len(strings.Split(text, " ")) == 1 {
-			textStaggerProps["variant"] = "display2xl"
+	for _, cfg := range configs {
+		if strings.EqualFold(cfg.Name, "textstagger") {
+			textStaggerProps := cfg.Props["textstagger"].(map[string]any)
+			text := textStaggerProps["text"].(string)
+
+			if len(strings.Split(text, " ")) == 1 {
+				textStaggerProps["variant"] = "display2xl"
+			}
 		}
 	}
 
-	//for _, child := range e.Children {
-	//	cfg.Children = append(cfg.Children, ConvertSceneElement(child))
-	//}
-
-	return []*SceneConfig{cfg}, nil
+	return configs, nil
 }
 
 // Convert to edits
