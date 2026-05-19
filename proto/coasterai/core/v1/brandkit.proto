@@ -4,6 +4,7 @@ import "google/protobuf/wrappers.proto";
 package coasterai.core.v1;
 option go_package = "github.com/shank318/coasterai/pb/coasterai/core/v1;pbcore";
 import "coasterai/core/v1/media_asset.proto";
+import "coasterai/core/v1/slide.proto";
 
 enum BrandMediaType {
   BRAND_MEDIA_TYPE_UNSPECIFIED = 0;
@@ -58,4 +59,5 @@ message BrandIdentity {
   repeated BrandSocialMedia socials = 7;
   repeated BrandFont fonts = 8;
   repeated BrandColor colors = 9;
+  optional core.v1.BackgroundStyle bgStyle = 10;
 }

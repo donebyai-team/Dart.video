@@ -379,6 +379,7 @@ type BrandIdentity struct {
 	Socials       []*BrandSocialMedia     `protobuf:"bytes,7,rep,name=socials,proto3" json:"socials,omitempty"`
 	Fonts         []*BrandFont            `protobuf:"bytes,8,rep,name=fonts,proto3" json:"fonts,omitempty"`
 	Colors        []*BrandColor           `protobuf:"bytes,9,rep,name=colors,proto3" json:"colors,omitempty"`
+	BgStyle       *BackgroundStyle        `protobuf:"bytes,10,opt,name=bgStyle,proto3,oneof" json:"bgStyle,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -476,11 +477,18 @@ func (x *BrandIdentity) GetColors() []*BrandColor {
 	return nil
 }
 
+func (x *BrandIdentity) GetBgStyle() *BackgroundStyle {
+	if x != nil {
+		return x.BgStyle
+	}
+	return nil
+}
+
 var File_coasterai_core_v1_brandkit_proto protoreflect.FileDescriptor
 
 const file_coasterai_core_v1_brandkit_proto_rawDesc = "" +
 	"\n" +
-	" coasterai/core/v1/brandkit.proto\x12\x11coasterai.core.v1\x1a\x1egoogle/protobuf/wrappers.proto\x1a#coasterai/core/v1/media_asset.proto\"\xbb\x01\n" +
+	" coasterai/core/v1/brandkit.proto\x12\x11coasterai.core.v1\x1a\x1egoogle/protobuf/wrappers.proto\x1a#coasterai/core/v1/media_asset.proto\x1a\x1dcoasterai/core/v1/slide.proto\"\xbb\x01\n" +
 	"\n" +
 	"BrandMedia\x123\n" +
 	"\x05asset\x18\x01 \x01(\v2\x1d.coasterai.core.v1.MediaAssetR\x05asset\x12A\n" +
@@ -496,7 +504,7 @@ const file_coasterai_core_v1_brandkit_proto_rawDesc = "" +
 	"\x03url\x18\x03 \x01(\tR\x03url\"i\n" +
 	"\tBrandFont\x12H\n" +
 	"\x11google_fonts_name\x18\x01 \x01(\v2\x1c.google.protobuf.StringValueR\x0fgoogleFontsName\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\"\xab\x03\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\"\xfa\x03\n" +
 	"\rBrandIdentity\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1f\n" +
@@ -507,7 +515,11 @@ const file_coasterai_core_v1_brandkit_proto_rawDesc = "" +
 	"\x05logos\x18\x06 \x03(\v2\x1d.coasterai.core.v1.BrandMediaR\x05logos\x12=\n" +
 	"\asocials\x18\a \x03(\v2#.coasterai.core.v1.BrandSocialMediaR\asocials\x122\n" +
 	"\x05fonts\x18\b \x03(\v2\x1c.coasterai.core.v1.BrandFontR\x05fonts\x125\n" +
-	"\x06colors\x18\t \x03(\v2\x1d.coasterai.core.v1.BrandColorR\x06colors*\xe0\x01\n" +
+	"\x06colors\x18\t \x03(\v2\x1d.coasterai.core.v1.BrandColorR\x06colors\x12A\n" +
+	"\abgStyle\x18\n" +
+	" \x01(\v2\".coasterai.core.v1.BackgroundStyleH\x00R\abgStyle\x88\x01\x01B\n" +
+	"\n" +
+	"\b_bgStyle*\xe0\x01\n" +
 	"\x0eBrandMediaType\x12 \n" +
 	"\x1cBRAND_MEDIA_TYPE_UNSPECIFIED\x10\x00\x12\x19\n" +
 	"\x15BRAND_MEDIA_TYPE_LOGO\x10\x01\x12\x19\n" +
@@ -549,6 +561,7 @@ var file_coasterai_core_v1_brandkit_proto_goTypes = []any{
 	(*BrandIdentity)(nil),          // 6: coasterai.core.v1.BrandIdentity
 	(*MediaAsset)(nil),             // 7: coasterai.core.v1.MediaAsset
 	(*wrapperspb.StringValue)(nil), // 8: google.protobuf.StringValue
+	(*BackgroundStyle)(nil),        // 9: coasterai.core.v1.BackgroundStyle
 }
 var file_coasterai_core_v1_brandkit_proto_depIdxs = []int32{
 	7,  // 0: coasterai.core.v1.BrandMedia.asset:type_name -> coasterai.core.v1.MediaAsset
@@ -562,11 +575,12 @@ var file_coasterai_core_v1_brandkit_proto_depIdxs = []int32{
 	4,  // 8: coasterai.core.v1.BrandIdentity.socials:type_name -> coasterai.core.v1.BrandSocialMedia
 	5,  // 9: coasterai.core.v1.BrandIdentity.fonts:type_name -> coasterai.core.v1.BrandFont
 	3,  // 10: coasterai.core.v1.BrandIdentity.colors:type_name -> coasterai.core.v1.BrandColor
-	11, // [11:11] is the sub-list for method output_type
-	11, // [11:11] is the sub-list for method input_type
-	11, // [11:11] is the sub-list for extension type_name
-	11, // [11:11] is the sub-list for extension extendee
-	0,  // [0:11] is the sub-list for field type_name
+	9,  // 11: coasterai.core.v1.BrandIdentity.bgStyle:type_name -> coasterai.core.v1.BackgroundStyle
+	12, // [12:12] is the sub-list for method output_type
+	12, // [12:12] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_coasterai_core_v1_brandkit_proto_init() }
@@ -575,6 +589,8 @@ func file_coasterai_core_v1_brandkit_proto_init() {
 		return
 	}
 	file_coasterai_core_v1_media_asset_proto_init()
+	file_coasterai_core_v1_slide_proto_init()
+	file_coasterai_core_v1_brandkit_proto_msgTypes[4].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

@@ -16,7 +16,10 @@ import { gradientToCSS, patternToCSS, PATTERN_OPTIONS } from "@coasterai/rendere
 interface BackgroundSettingsProps {
   value?: BackgroundStyle | null;
   onChange: (style: BackgroundStyle) => void;
-  onClose: () => void;
+  onClose?: () => void;
+  showHeader?: boolean;
+  showApplyAll?: boolean;
+  className?: string;
 }
 
 /* ---------------- SOLID PRESETS ---------------- */
@@ -26,6 +29,7 @@ const solidPresets = [
   "#4f46e5", "#7c3aed", "#3b82f6", "#06b6d4",
   "#14b8a6", "#10b981", "#22c55e", "#eab308",
   "#f97316", "#ef4444", "#ec4899", "#f43f5e",
+  "#ffffff", "#00000"
 ];
 
 /* ---------------- MODERN GRADIENT PRESETS ---------------- */
@@ -72,6 +76,9 @@ export default function BackgroundSettings({
   value,
   onChange,
   onClose,
+  showHeader = true,
+  showApplyAll = true,
+  className,
 }: BackgroundSettingsProps) {
   /* ---------- SAFE DEFAULT ---------- */
 
@@ -186,27 +193,29 @@ export default function BackgroundSettings({
   /* ---------- RENDER ---------- */
 
   return (
-    <div className="h-full flex flex-col bg-card pb-10">
-      {/* Header */}
-      <div className="flex items-center justify-between px-5  border-b border-border">
-        <h3 className="font-semibold text-sm tracking-tight">
-          Background
-        </h3>
-        <Button variant="ghost" size="icon" onClick={onClose}>
-          <X className="w-4 h-4" />
-        </Button>
-      </div>
+    <div className={["h-full flex flex-col bg-card pb-10", className].filter(Boolean).join(" ")}>
+      {showHeader && (
+        <div className="flex items-center justify-between px-5 border-b border-border">
+          <h3 className="font-semibold text-sm tracking-tight">
+            Background
+          </h3>
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+      )}
 
       <div className="flex-1 overflow-y-auto px-5 py-6 space-y-6">
 
-        {/* Apply to all */}
-        <div className="flex items-center justify-between">
-          <Label className="text-sm">Apply to all slides</Label>
-          <Switch
-            checked={safeValue.applyAll ?? false}
-            onCheckedChange={updateApplyAll}
-          />
-        </div>
+        {showApplyAll && (
+          <div className="flex items-center justify-between">
+            <Label className="text-sm">Apply to all slides</Label>
+            <Switch
+              checked={safeValue.applyAll ?? false}
+              onCheckedChange={updateApplyAll}
+            />
+          </div>
+        )}
 
         <BrandColors
           selectedColor={activeCase === "solid" ? safeValue.style?.value.hex : undefined}

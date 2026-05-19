@@ -83,7 +83,7 @@ func (s SceneSuggester) GenerateSuggestions(
 		)
 	}
 
-	bgStyle := generateDefaultBackground(video.Metadata.GeneratedBranding)
+	bgStyle := brand_identity.GenerateDefaultBackground(video.Metadata.GeneratedBranding.Colors)
 
 	suggestedScenes := make([]*pbcore.Section, 0, len(suggestScenesFromLLM.Scenes))
 

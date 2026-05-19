@@ -8,6 +8,7 @@ import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { TextStagger, type TextStaggerProps } from '../text/TextStagger';
 import { DEFAULT_SPEED_PERCENTAGE, getSpeed, MIN_SPEED_PERCENTAGE, scaleTiming } from '../../../speed/timings';
+import { MediaAsset } from '../../../core/assets';
 
 const DEFAULT_CARD_WIDTH = 420;
 const DEFAULT_CARD_HEIGHT = 236;
@@ -90,7 +91,7 @@ function useImageDimensions(src?: string) {
 }
 
 type ImagePatch = {
-    image?: string;
+    src?: string;
     width?: number;
     height?: number;
     style?: React.CSSProperties;
@@ -225,7 +226,7 @@ function ProblemCollageImage({
     boundsWidth,
     boundsHeight,
 }: ProblemCollageImageProps) {
-    const naturalDimensions = useImageDimensions(patch.image);
+    const naturalDimensions = useImageDimensions(patch.src);
     const targetSize = useMemo(() => {
         if (patch.width && patch.height) {
             return {
@@ -314,9 +315,9 @@ function ProblemCollageImage({
                     height: '100%',
                 }}
             >
-                <ImageAsset
+                <MediaAsset
                     id={id}
-                    image={patch.image}
+                    image={patch.src}
                     width={fittedSize.width}
                     height={fittedSize.height}
                     style={{
@@ -499,10 +500,10 @@ export const ProblemCollageSchemaFields = [
         map: 'props.images',
         components: [
             {
-                name: 'imageasset',
+                name: 'mediaasset',
                 fields: [
                     {
-                        name: 'image',
+                        name: 'src',
                         type: 'string',
                         map: 'item',
                         datatype: 'media',
