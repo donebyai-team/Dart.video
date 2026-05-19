@@ -5,7 +5,8 @@ import {
   DEPTH_STYLE_PROPERTY,
   MAX_ELEMENT_DEPTH,
 } from '@coasterai/renderer'
-import { ColorSwatch, getDepthValue, LabeledField, NumberStepper, rgbaToHex, SelectInput, SliderInput } from './TextToolbar'
+import { DualColorPicker } from './stylers/DualColorPicker'
+import { getDepthValue, LabeledField, NumberStepper, rgbaToHex, SelectInput, SliderInput } from './TextToolbar'
 
 const OBJECT_FIT_OPTIONS = [
   { label: 'Contain', value: 'contain' },
@@ -112,11 +113,11 @@ export function MediaToolbar({
       </LabeledField>
 
       <LabeledField label="Stroke">
-        <ColorSwatch
-          color={currentBorderColor}
-          label=""
-          title="Media stroke color"
-          onChange={value => onStyleOverride({ borderColor: value })}
+        <DualColorPicker
+          primaryColor={currentBorderColor}
+          onPrimaryColor={value => onStyleOverride({ borderColor: value })}
+          primaryLabel="Stroke"
+          triggerStyle="active-color"
         />
       </LabeledField>
     </div>

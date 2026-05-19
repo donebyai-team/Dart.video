@@ -130,7 +130,7 @@ export function MediaWithFeatures(): React.ReactElement {
                                                 WebkitBackdropFilter: 'blur(30px)',
                                             }}
                                         >
-                                            <div style={{ background: 'rgba(0,102,204,0.1)', padding: 12, borderRadius: 16 }}>
+                                            <div style={{ background: 'rgba(0,102,204,0.1)', padding: 8, borderRadius: 16 }}>
                                                 <IconAsset
                                                     id={`iconasset-features-${index}`}
                                                     icon={iconProps.icon}

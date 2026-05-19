@@ -1,12 +1,10 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
-import { composeTransforms, usePatchedProps, useStyleOverride } from '../../../patches';
+import { composeTransforms, useElement } from '../../../patches';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
-import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme/ThemeContext';
 import type { TypographyVariant } from '../../../tokens/semantic';
-import { resolveTypography } from '../../../tokens/resolveTypography';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { buildDepthShadow } from '../../../styles';
 import { DEFAULT_SPEED_PERCENTAGE, getSpeed, MIN_SPEED_PERCENTAGE, scaleTiming } from '../../../speed/timings';
@@ -38,17 +36,11 @@ export type TextCardStackProps = Partial<typeof TextCardStackDefaults>;
 
 export const TextCardStack: React.FC<TextCardStackProps> = (initProps) => {
   const frame = useCurrentFrame();
-  const styleConfig = useStyleContext();
   const theme = useTheme();
   const preset = useAspectPreset();
   const defaultProps = { ...TextCardStackDefaults, ...initProps };
   const id = defaultProps.id;
-  const props = usePatchedProps(id, defaultProps);
-
-  const styleOverride = useStyleOverride(id);
-  const { transform: _ignoredOverrideTransform, ...styleOverrideWithoutTransform } = styleOverride;
-  const { transform: _ignoredPropStyleTransform, ...propStyleWithoutTransform } = props.style ?? {};
-  const typographyStyle = resolveTypography(props.variant, styleConfig, theme, preset);
+  const { props, style } = useElement(id, defaultProps);
 
   const speed = getSpeed(props.speed);
   const entryDuration = scaleTiming(BASE_ENTRY_DURATION, speed);
@@ -64,13 +56,10 @@ export const TextCardStack: React.FC<TextCardStackProps> = (initProps) => {
   const cardPaddingX = Math.max(40, Math.round(cardWidth * 0.065));
   const cardPaddingY = Math.max(30, Math.round(cardMinHeight * 0.16));
   const cardRadius = Math.max(28, Math.round(cardWidth * 0.055));
-  const bodyFontSize = typeof typographyStyle.fontSize === 'number'
-    ? typographyStyle.fontSize
-    : Number.parseFloat(String(typographyStyle.fontSize ?? 64)) || 64;
-  const textStyleOverrides: React.CSSProperties = {
-    ...propStyleWithoutTransform,
-    ...styleOverrideWithoutTransform,
-  };
+  const bodyFontSize = typeof style.fontSize === 'number'
+    ? style.fontSize
+    : Number.parseFloat(String(style.fontSize ?? 64)) || 64;
+
 
   if (texts.length === 0) {
     return null;
@@ -201,6 +190,8 @@ export const TextCardStack: React.FC<TextCardStackProps> = (initProps) => {
                 width: cardWidth,
                 minHeight: cardMinHeight,
                 boxShadow: buildDepthShadow(3),
+                backgroundColor: 'transparent',
+                borderColor: style.color,
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
@@ -225,12 +216,9 @@ export const TextCardStack: React.FC<TextCardStackProps> = (initProps) => {
             >
               <span
                 style={{
-                  ...typographyStyle,
-                  // color: textStyleOverrides.color ?? theme.colors.cardForeground,
                   lineHeight: 1.08,
                   maxWidth: '96%',
-                  // Text styling overrides should affect every card consistently.
-                  ...textStyleOverrides,
+                  ...style,
                 }}
               >
                 {text}

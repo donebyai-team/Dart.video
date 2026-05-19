@@ -1,12 +1,25 @@
 // ─── Dual Color Picker ──────────────────────────────────────────────────────
 // Single button that opens a popover with tabs for two color values.
 
+import { Droplets } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { HexColorPicker } from "react-colorful"
 
 import BrandColors from "@/components/editor/settings/BrandColors"
 
 const FALLBACK_COLOR = "#000000"
+
+function getTriggerBackground(color: string | undefined, triggerStyle: "gradient" | "active-color") {
+  if (triggerStyle !== "active-color") {
+    return "linear-gradient(135deg, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00)"
+  }
+
+  if (!color || color === "transparent") {
+    return "repeating-conic-gradient(#d4d4d8 0% 25%, #ffffff 0% 50%) 50% / 10px 10px"
+  }
+
+  return color
+}
 
 export function DualColorPicker({
   primaryColor,
@@ -17,6 +30,7 @@ export function DualColorPicker({
   secondaryLabel = "Secondary",
   triggerStyle = "gradient",
   triggerVariant = "swatch",
+  transparentTarget,
 }: {
   primaryColor: string
   secondaryColor?: string
@@ -26,6 +40,7 @@ export function DualColorPicker({
   secondaryLabel?: string
   triggerStyle?: "gradient" | "active-color"
   triggerVariant?: "swatch" | "input"
+  transparentTarget?: 'primary' | 'secondary'
 }) {
   const [open, setOpen] = useState(false)
   const [tab, setTab] = useState<'primary' | 'secondary'>('primary')
@@ -34,8 +49,10 @@ export function DualColorPicker({
   const hasSecondary = !!secondaryColor && !!onSecondaryColor
   const activeTab = hasSecondary ? tab : 'primary'
   const activeColorValue = activeTab === 'primary' ? primaryColor : secondaryColor
-  const activeColor = activeColorValue || FALLBACK_COLOR
+  const activeColor = activeColorValue && activeColorValue !== 'transparent' ? activeColorValue : FALLBACK_COLOR
   const onChangeActive = activeTab === 'primary' ? onPrimaryColor : onSecondaryColor
+  const showTransparentButton = transparentTarget === activeTab || (transparentTarget === undefined && activeTab === 'secondary')
+  const isTransparentActive = activeColorValue === 'transparent'
 
   if (!onChangeActive) {
     return null
@@ -73,10 +90,7 @@ export function DualColorPicker({
         style={
           triggerVariant === "swatch" || triggerVariant === "input"
             ? {
-                background:
-                  triggerStyle === "active-color"
-                    ? activeColorValue || FALLBACK_COLOR
-                    : "linear-gradient(135deg, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00)",
+                background: getTriggerBackground(activeColorValue, triggerStyle),
               }
             : undefined
         }
@@ -117,6 +131,21 @@ export function DualColorPicker({
             </div>
           )}
 
+          {showTransparentButton && (
+            <button
+              type="button"
+              onClick={() => onChangeActive?.('transparent')}
+              className={`flex w-full items-center justify-center gap-2 rounded-md border px-2 py-1.5 text-xs transition-colors ${
+                isTransparentActive
+                  ? 'border-primary bg-primary/10 text-foreground'
+                  : 'border-border bg-muted text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Droplets className="h-3.5 w-3.5" />
+              Transparent
+            </button>
+          )}
+
           <HexColorPicker color={activeColor} onChange={onChangeActive} />
 
           <BrandColors
@@ -127,7 +156,7 @@ export function DualColorPicker({
           />
 
           <input
-            value={activeColor}
+            value={activeColorValue || FALLBACK_COLOR}
             onChange={(e) => onChangeActive(e.target.value)}
             className="w-full text-xs px-2 py-1 border border-border rounded bg-muted"
           />

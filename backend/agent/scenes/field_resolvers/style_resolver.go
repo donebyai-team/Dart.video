@@ -53,21 +53,21 @@ func (resolver StyleResolver) Resolve(
 		brand_identity.TextHighlight,
 	)
 
-	hasTextField := false
+	//hasTextField := false
 
 	for _, field := range fields {
 		switch field.DataType {
-		case types.DataTypeText:
-			hasTextField = true
+		//case types.DataTypeText:
+		//	hasTextField = true
 
 		case types.DataTypeColor:
 			props[field.Name] = textHighlightColor
 		}
 	}
 
-	if hasTextField {
-		mergeStyleColor(props, textNormalColor)
-	}
+	//if hasTextField {
+	mergeStyleColor(props, textNormalColor)
+	//}
 
 	return props
 }
@@ -89,6 +89,4 @@ func mergeStyleColor(props map[string]any, color string) {
 		style = make(map[string]any)
 		props["style"] = style
 	}
-
-	style["color"] = color
 }
