@@ -512,7 +512,7 @@ const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onLogoUpload,
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center gap-3">
+                                        {/* <div className="flex items-center gap-3">
                                             <DualColorPicker
                                                 primaryColor={previewBackground}
                                                 onPrimaryColor={(value) => updateBrandColor(BrandAssetPriority.BACKGROUND, value)}
@@ -524,7 +524,7 @@ const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onLogoUpload,
                                                 <p className="text-sm font-medium">Background</p>
                                                 <p className="text-xs text-muted-foreground">{previewSecondary}</p>
                                             </div>
-                                        </div>
+                                        </div> */}
                                     </div>
                                 </div>
 
