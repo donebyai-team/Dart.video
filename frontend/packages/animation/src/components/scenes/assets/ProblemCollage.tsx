@@ -1,14 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useCurrentFrame } from 'remotion';
 import { ArrayItem } from '../../../core/assets/ArrayItem';
-import { ImageAsset } from '../../../core/assets/ImageAsset';
 import { useArrayPatch, usePatchedProps } from '../../../patches';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
-import { TextStagger, type TextStaggerProps } from '../text/TextStagger';
 import { DEFAULT_SPEED_PERCENTAGE, getSpeed, MIN_SPEED_PERCENTAGE, scaleTiming } from '../../../speed/timings';
 import { MediaAsset } from '../../../core/assets';
+import { AnimatedText, AnimatedTextProps } from '../text';
 
 const DEFAULT_CARD_WIDTH = 420;
 const DEFAULT_CARD_HEIGHT = 236;
@@ -23,8 +22,8 @@ const MAX_SCATTER_HEIGHT = 0.34;
 const CEL_PER_IMAGE_FRAMES = BASE_IMAGE_STAGGER;
 const CEL_BASE_FRAMES = BASE_TEXT_DELAY + BASE_IMAGE_DURATION + BASE_HOLD_DURATION + BASE_OUTRO_DURATION;
 
-const ProblemCollageTextDefaults: TextStaggerProps = {
-    id: 'textstagger',
+const ProblemCollageTextDefaults: AnimatedTextProps = {
+    id: 'animatedtext',
     startAt: 0,
     text: '',
     variant: 'heading' as const,
@@ -413,9 +412,9 @@ export const ProblemCollage: React.FC = () => {
                     }}
                 >
 
-                    <TextStagger
+                    <AnimatedText
                         {...textProps}
-                        id="textstagger"
+                        id="animatedtext"
                         startAt={0}
                         splitBy='line'
                         style={textProps.style}
@@ -455,7 +454,7 @@ export const ProblemCollage: React.FC = () => {
 export const ProblemCollageSchemaFields = [
     {
         type: 'component',
-        name: 'textstagger',
+        name: 'animatedtext',
         fields: [
             {
                 "name": "text",

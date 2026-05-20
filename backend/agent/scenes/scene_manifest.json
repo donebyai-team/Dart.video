@@ -52,9 +52,9 @@
     {
       "name": "splitBy",
       "value": [
-        "char",
+        "line",
         "word",
-        "line"
+        "char"
       ]
     },
     {
@@ -233,12 +233,12 @@
           "celExpression": "(((10 + 50 + 2 + 1) * 100) / max(25, props.counter.speed))"
         },
         {
-          "name": "TextStagger",
+          "name": "AnimatedText",
           "type": "content",
           "schema": [
             {
               "type": "component",
-              "name": "textstagger",
+              "name": "animatedtext",
               "fields": [
                 {
                   "name": "text",
@@ -287,6 +287,25 @@
                   "type": "enum",
                   "map": "props.splitBy",
                   "default": "line"
+                },
+                {
+                  "name": "highlightStyle",
+                  "type": "enum",
+                  "map": "props.highlightStyle",
+                  "default": "simple"
+                },
+                {
+                  "name": "highlightedTextAnimation",
+                  "type": "enum",
+                  "map": "props.highlightedTextAnimation",
+                  "default": "none"
+                },
+                {
+                  "name": "highlightColor",
+                  "type": "string",
+                  "datatype": "color",
+                  "map": "props.highlightColor",
+                  "default": ""
                 }
               ]
             }
@@ -294,24 +313,19 @@
           "llmSchema": [
             {
               "name": "text",
-              "type": "string"
+              "type": "string",
+              "hint": "Use {} around text that should be highlighted. Example: \"We build {great software}\""
             },
             {
               "name": "splitBy",
               "type": "enum",
               "required": false,
               "default": "line"
-            },
-            {
-              "name": "entranceAnimation",
-              "type": "enum",
-              "required": false,
-              "default": "scaleIn"
             }
           ],
-          "description": "Reveals a word or full text",
-          "instructions": "Use splitBy=\"word\" or \"line\" based on how the text should be revealed. Use splitBy=\"word\" for sequential word reveals and \"line\" for grouped multi-line reveals. When using \"line\", define line breaks with \"\\n\".",
-          "celExpression": "max(1, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * props.textstagger.staggerDelay + props.textstagger.duration + (props.textstagger.exitAnimation != \"none\" ? props.textstagger.exitDuration : 0)"
+          "description": "Reveals a word or a text",
+          "instructions": "\n- Use splitBy=\"word\" or \"line\" based on how the text should be revealed.\n- Use splitBy=\"word\" for sequential word reveals and \"line\" for grouped multi-line reveals.\n- When using splitBy=\"line\", define line breaks with \"\\n\".\n- Optionally wrap words in {} to highlight or emphasize specific parts of the text.\n",
+          "celExpression": "max(0, segmentCount(props.animatedtext.text, props.animatedtext.splitBy) - 1) * props.animatedtext.staggerDelay + props.animatedtext.duration + (props.animatedtext.highlightedTextAnimation != \"none\" ? props.animatedtext.duration : 0) + (props.animatedtext.exitAnimation != \"none\" ? props.animatedtext.exitDuration : 0)"
         },
         {
           "name": "TextHookStagger",
@@ -413,94 +427,6 @@
           "description": "Character-by-character typewriter effect",
           "instructions": "Use for dramatic reveals or code/terminal effects.",
           "celExpression": "54"
-        },
-        {
-          "name": "TextHighlight",
-          "type": "content",
-          "schema": [
-            {
-              "type": "component",
-              "name": "texthighlight",
-              "fields": [
-                {
-                  "name": "text",
-                  "type": "string",
-                  "datatype": "text",
-                  "map": "props.text"
-                },
-                {
-                  "name": "variant",
-                  "type": "enum",
-                  "map": "props.variant",
-                  "default": "display"
-                },
-                {
-                  "name": "entranceAnimation",
-                  "type": "enum",
-                  "map": "props.entranceAnimation",
-                  "default": "slideLeft"
-                },
-                {
-                  "name": "animationDelay",
-                  "type": "number",
-                  "map": "props.animationDelay",
-                  "default": 15
-                },
-                {
-                  "name": "animationDuration",
-                  "type": "number",
-                  "map": "props.animationDuration",
-                  "default": 20
-                },
-                {
-                  "name": "exitAnimation",
-                  "type": "enum",
-                  "map": "props.exitAnimation",
-                  "default": "zoomOut"
-                },
-                {
-                  "name": "exitDuration",
-                  "type": "number",
-                  "map": "props.exitDuration",
-                  "default": 15
-                },
-                {
-                  "name": "highlightStyle",
-                  "type": "enum",
-                  "map": "props.highlightStyle",
-                  "default": "simple"
-                },
-                {
-                  "name": "highlightedTextAnimation",
-                  "type": "enum",
-                  "map": "props.highlightedTextAnimation",
-                  "default": "jump"
-                },
-                {
-                  "name": "highlightColor",
-                  "type": "string",
-                  "datatype": "color",
-                  "map": "props.highlightColor",
-                  "default": ""
-                }
-              ]
-            }
-          ],
-          "llmSchema": [
-            {
-              "name": "text",
-              "type": "string",
-              "hint": "Use {} to highlight one word. eg \"We build amazing {software}\""
-            },
-            {
-              "name": "entranceAnimation",
-              "type": "enum",
-              "required": false,
-              "default": "slideLeft"
-            }
-          ],
-          "description": "Bold statement with an emphasized word to highlight",
-          "celExpression": "props.texthighlight.animationDelay + props.texthighlight.animationDuration + (props.texthighlight.exitAnimation != \"none\" ? props.texthighlight.exitDuration : 0)"
         },
         {
           "name": "WordCycle",
@@ -846,7 +772,7 @@
               "propsPath": "props.textComponentProps",
               "components": [
                 {
-                  "name": "textstagger",
+                  "name": "animatedtext",
                   "fields": [
                     {
                       "name": "text",
@@ -895,72 +821,6 @@
                       "type": "enum",
                       "map": "props.splitBy",
                       "default": "line"
-                    }
-                  ]
-                },
-                {
-                  "name": "texthighlight",
-                  "fields": [
-                    {
-                      "name": "text",
-                      "type": "string",
-                      "datatype": "text",
-                      "map": "props.text"
-                    },
-                    {
-                      "name": "variant",
-                      "type": "enum",
-                      "map": "props.variant",
-                      "default": "headingLg"
-                    },
-                    {
-                      "name": "entranceAnimation",
-                      "type": "enum",
-                      "map": "props.entranceAnimation",
-                      "default": "slideLeft"
-                    },
-                    {
-                      "name": "animationDelay",
-                      "type": "number",
-                      "map": "props.animationDelay",
-                      "default": 15
-                    },
-                    {
-                      "name": "animationDuration",
-                      "type": "number",
-                      "map": "props.animationDuration",
-                      "default": 20
-                    },
-                    {
-                      "name": "exitAnimation",
-                      "type": "enum",
-                      "map": "props.exitAnimation",
-                      "default": "none"
-                    },
-                    {
-                      "name": "exitDuration",
-                      "type": "number",
-                      "map": "props.exitDuration",
-                      "default": 15
-                    },
-                    {
-                      "name": "highlightStyle",
-                      "type": "enum",
-                      "map": "props.highlightStyle",
-                      "default": "simple"
-                    },
-                    {
-                      "name": "highlightedTextAnimation",
-                      "type": "enum",
-                      "map": "props.highlightedTextAnimation",
-                      "default": "none"
-                    },
-                    {
-                      "name": "highlightColor",
-                      "type": "string",
-                      "datatype": "color",
-                      "map": "props.highlightColor",
-                      "default": ""
                     }
                   ]
                 },
@@ -1039,8 +899,7 @@
               "name": "textComponent",
               "type": "enum",
               "enum": [
-                "textstagger",
-                "texthighlight",
+                "animatedtext",
                 "textwithwordcycle"
               ]
             },
@@ -1054,7 +913,7 @@
             }
           ],
           "description": "Displays text with a image or video.",
-          "instructions": "Choose one of the filler component and its props in textComponentProps: texthighlight, textstagger, or textwithwordcycle.",
+          "instructions": "One liner text with animated text or word cycle. Choose one of the filler component and its props in textComponentProps: animatedtext, or textwithwordcycle.",
           "celExpression": "\"mediaasset\" in props ? props.mediaasset._duration : 90"
         },
         {
@@ -1203,7 +1062,7 @@
           "schema": [
             {
               "type": "component",
-              "name": "textstagger",
+              "name": "animatedtext",
               "fields": [
                 {
                   "name": "text",
@@ -1382,7 +1241,7 @@
           ],
           "description": "Row of brand logos + caption.",
           "instructions": "Use for integrations, tech stack, partners, brands. eg. logos=[\"url1\", \"url2\"], text=\"caption text\".",
-          "celExpression": "10 + max(min(1, segmentCount(props.textstagger.text, props.textstagger.splitBy)) * (max(0, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * 15 + 20), 5 + max(0, size(props.logos) - 1) * 5 + 12)"
+          "celExpression": "10 + max(min(1, segmentCount(props.animatedtext.text, props.animatedtext.splitBy)) * (max(0, segmentCount(props.animatedtext.text, props.animatedtext.splitBy) - 1) * 15 + 20), 5 + max(0, size(props.logos) - 1) * 5 + 12)"
         },
         {
           "name": "LogoWithBrandName",
@@ -1424,7 +1283,7 @@
                 {
                   "name": "splitBy",
                   "type": "enum",
-                  "default": "char"
+                  "default": "line"
                 }
               ]
             },
@@ -1473,7 +1332,7 @@
           ],
           "description": "Logo + brand name reveal.",
           "instructions": "Use for brand intros",
-          "celExpression": "max(0, segmentCount(props.textstagger.text, \"char\") - 1) * 5 + 20"
+          "celExpression": "max(0, segmentCount(props.animatedtext.text, \"char\") - 1) * 5 + 20"
         },
         {
           "name": "LogoWithCTA",
@@ -1504,7 +1363,7 @@
             },
             {
               "type": "component",
-              "name": "textstagger-brandname",
+              "name": "animatedtext-brandname",
               "fields": [
                 {
                   "name": "text",
@@ -1526,7 +1385,7 @@
             },
             {
               "type": "component",
-              "name": "textstagger-tagline",
+              "name": "animatedtext-tagline",
               "fields": [
                 {
                   "name": "text",
@@ -1559,7 +1418,7 @@
           ],
           "description": "Logo icon and brand name reveal with a CTA text below that.",
           "instructions": "Use as the final scene.",
-          "celExpression": "33 + (segmentCount(props.[\"textstagger-tagline\"].text, \"word\") - 1) * 3 + 12"
+          "celExpression": "33 + (segmentCount(props.[\"animatedtext-tagline\"].text, \"word\") - 1) * 3 + 12"
         },
         {
           "name": "IconShowcase",
@@ -1659,7 +1518,7 @@
           ],
           "description": "Row of rotating brand icons + caption.",
           "instructions": "Use for integrations, tech stack, partners, brands. eg. icons={[\"shopify\", \"midjourney\", \"openai\"]}, text=\"caption text\".",
-          "celExpression": "10 + max(0, size(props.icons) - 1) * 5 + 10 + min(1, segmentCount(props.textstagger.text, props.textstagger.splitBy)) * (5 + max(0, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * 15 + 20)"
+          "celExpression": "10 + max(0, size(props.icons) - 1) * 5 + 10 + min(1, segmentCount(props.animatedtext.text, props.animatedtext.splitBy)) * (5 + max(0, segmentCount(props.animatedtext.text, props.animatedtext.splitBy) - 1) * 15 + 20)"
         },
         {
           "name": "PillCarousel",
@@ -1876,7 +1735,7 @@
           "schema": [
             {
               "type": "component",
-              "name": "textstagger",
+              "name": "animatedtext",
               "fields": [
                 {
                   "name": "text",

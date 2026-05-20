@@ -1,12 +1,12 @@
 import React from 'react';
 import { interpolate, useCurrentFrame } from 'remotion';
 import { IconAsset } from '../../../core/assets/IconAsset';
-import { TextStagger, TextStaggerDefaults } from '../text/TextStagger';
 import { useArrayPatch, usePatchedProps } from '../../../patches';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { interpolateWithEasing } from '../../../styles';
 import { ArrayItem } from '../../../core/assets/ArrayItem';
 import { ANIMATION_PRESET_ENTRANCE_ANIMATIONS } from '../../../core/animation_preset/AnimationPreset';
+import { AnimatedText, AnimatedTextDefaults } from '../text';
 
 // Default constants
 const DEFAULT_ENTRANCE_DURATION = 10;
@@ -20,7 +20,7 @@ const DEFAULT_TEXT_STAGGER_SPLIT_BY = 'line' as const;
 const DEFAULT_TEXT_STAGGER_ANIMATION = ANIMATION_PRESET_ENTRANCE_ANIMATIONS[1];
 
 export const IconShowcase: React.FC = () => {
-    const textProps = usePatchedProps("textstagger", TextStaggerDefaults);
+    const textProps = usePatchedProps("animatedtext", AnimatedTextDefaults);
     const arrayProps = useArrayPatch("icons");
 
 
@@ -127,8 +127,8 @@ export const IconShowcase: React.FC = () => {
                         marginTop: 60,
                     }}
                 >
-                    <TextStagger
-                        id={`textstagger`}
+                    <AnimatedText
+                        id={`animatedtext`}
                         text={textProps.text}
                         variant={DEFAULT_VARIANT}
                         splitBy={DEFAULT_TEXT_STAGGER_SPLIT_BY}
@@ -167,7 +167,7 @@ export const IconShowcaseSchema = [
                 "name": "staggerDelay",
                 "type": "number",
                 "map": "props.staggerDelay",
-                "default": TextStaggerDefaults.staggerDelay
+                "default": AnimatedTextDefaults.staggerDelay
             },
             {
                 "name": "entranceAnimation",
@@ -179,7 +179,7 @@ export const IconShowcaseSchema = [
                 "name": "duration",
                 "type": "number",
                 "map": "props.duration",
-                "default": TextStaggerDefaults.duration
+                "default": AnimatedTextDefaults.duration
             },
             {
                 "name": "splitBy",
@@ -242,5 +242,5 @@ export const IconShowcaseDescriptor: ComponentRegistration = {
     ],
     description: 'Row of rotating brand icons + caption.',
     instructions: 'Use for integrations, tech stack, partners, brands. eg. icons={["shopify", "midjourney", "openai"]}, text="caption text".',
-    celExpression: `${DEFAULT_ENTRANCE_DURATION} + max(0, size(props.icons) - 1) * ${DEFAULT_ICON_STAGGER} + ${DEFAULT_ICON_ANIMATION_DURATION} + min(1, segmentCount(props.textstagger.text, props.textstagger.splitBy)) * (${DEFAULT_TEXT_DELAY} + max(0, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * ${TextStaggerDefaults.staggerDelay} + ${TextStaggerDefaults.duration})`,
+    celExpression: `${DEFAULT_ENTRANCE_DURATION} + max(0, size(props.icons) - 1) * ${DEFAULT_ICON_STAGGER} + ${DEFAULT_ICON_ANIMATION_DURATION} + min(1, segmentCount(props.animatedtext.text, props.animatedtext.splitBy)) * (${DEFAULT_TEXT_DELAY} + max(0, segmentCount(props.animatedtext.text, props.animatedtext.splitBy) - 1) * ${AnimatedTextDefaults.staggerDelay} + ${AnimatedTextDefaults.duration})`,
 };

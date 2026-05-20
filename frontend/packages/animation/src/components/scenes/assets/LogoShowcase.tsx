@@ -4,9 +4,9 @@ import { useArrayPatch, usePatchedProps } from '../../../patches';
 import { LogoAsset } from './LogoAsset';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { interpolateWithEasing } from '../../../styles';
-import { TextStagger, TextStaggerDefaults } from '../text/TextStagger';
 import { ArrayItem } from '../../../core/assets/ArrayItem';
 import { ANIMATION_PRESET_ENTRANCE_ANIMATIONS } from '../../../core/animation_preset/AnimationPreset';
+import { AnimatedText, AnimatedTextDefaults } from '../text';
 
 const DEFAULT_TEXT_ENTRANCE_DURATION = 5;
 const DEFAULT_LOGO_STAGGER = 5;
@@ -29,7 +29,7 @@ function getSlotLayout(count: number) {
 }
 
 export const LogoShowcase: React.FC = () => {
-    const textProps = usePatchedProps("textstagger", TextStaggerDefaults);
+    const textProps = usePatchedProps("animatedtext", AnimatedTextDefaults);
     const arrayProps = useArrayPatch("logos");
 
     const frame = useCurrentFrame();
@@ -53,8 +53,8 @@ export const LogoShowcase: React.FC = () => {
                 height: '100%',
             }}
         >
-            <TextStagger
-                id='textstagger'
+            <AnimatedText
+                id='animatedtext'
                 text={textProps.text}
                 variant={DEFAULT_VARIANT}
                 splitBy={DEFAULT_TEXT_STAGGER_SPLIT_BY}
@@ -154,7 +154,7 @@ export const LogoShowcaseSchemaFields = [
                 "name": "staggerDelay",
                 "type": "number",
                 "map": "props.staggerDelay",
-                "default": TextStaggerDefaults.staggerDelay
+                "default": AnimatedTextDefaults.staggerDelay
             },
             {
                 "name": "entranceAnimation",
@@ -166,7 +166,7 @@ export const LogoShowcaseSchemaFields = [
                 "name": "duration",
                 "type": "number",
                 "map": "props.duration",
-                "default": TextStaggerDefaults.duration
+                "default": AnimatedTextDefaults.duration
             },
             {
                 "name": "splitBy",
@@ -224,5 +224,5 @@ export const LogoShowcaseDescriptor: ComponentRegistration = {
     ],
     description: 'Row of brand logos + caption.',
     instructions: 'Use for integrations, tech stack, partners, brands. eg. logos=["url1", "url2"], text="caption text".',
-    celExpression: `10 + max(min(1, segmentCount(props.textstagger.text, props.textstagger.splitBy)) * (max(0, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * ${TextStaggerDefaults.staggerDelay} + ${TextStaggerDefaults.duration}), ${DEFAULT_TEXT_ENTRANCE_DURATION} + max(0, size(props.logos) - 1) * ${DEFAULT_LOGO_STAGGER} + ${DEFAULT_LOGO_ANIMATION_DURATION})`,
+    celExpression: `10 + max(min(1, segmentCount(props.animatedtext.text, props.animatedtext.splitBy)) * (max(0, segmentCount(props.animatedtext.text, props.animatedtext.splitBy) - 1) * ${AnimatedTextDefaults.staggerDelay} + ${AnimatedTextDefaults.duration}), ${DEFAULT_TEXT_ENTRANCE_DURATION} + max(0, size(props.logos) - 1) * ${DEFAULT_LOGO_STAGGER} + ${DEFAULT_LOGO_ANIMATION_DURATION})`,
 };

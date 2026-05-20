@@ -7,12 +7,12 @@ import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { useTheme } from '../../../theme';
 import { resolveTypography } from '../../../tokens/resolveTypography';
 import { LogoAsset, LogoAssetDefaults, LogoAssetSchemaFields } from './LogoAsset';
-import { TextStagger, TextStaggerDefaults } from '../text/TextStagger';
 import type { ComponentRegistration } from '../../../registry/registry';
+import { AnimatedText, AnimatedTextDefaults } from '../text';
 
 const BRAND_TEXT_DEFAULTS = {
-    ...TextStaggerDefaults,
-    id: 'textstagger-brandname',
+    ...AnimatedTextDefaults,
+    id: 'animatedtext-brandname',
     text: '',
     variant: 'display' as const,
     staggerDelay: 1,
@@ -21,8 +21,8 @@ const BRAND_TEXT_DEFAULTS = {
 };
 
 const TAGLINE_TEXT_DEFAULTS = {
-    ...TextStaggerDefaults,
-    id: 'textstagger-tagline',
+    ...AnimatedTextDefaults,
+    id: 'animatedtext-tagline',
     text: '',
     variant: 'heading' as const,
     staggerDelay: 3,
@@ -51,8 +51,8 @@ export function LogoWithCTA(): React.ReactElement {
     const preset = useAspectPreset();
     const theme = useTheme();
     const logoProps = usePatchedProps('logoasset', LogoAssetDefaults);
-    const brandProps = usePatchedProps('textstagger-brandname', BRAND_TEXT_DEFAULTS);
-    const taglineProps = usePatchedProps('textstagger-tagline', TAGLINE_TEXT_DEFAULTS);
+    const brandProps = usePatchedProps('animatedtext-brandname', BRAND_TEXT_DEFAULTS);
+    const taglineProps = usePatchedProps('animatedtext-tagline', TAGLINE_TEXT_DEFAULTS);
 
     const resolvedLogo = logoProps.src || theme.logoIcon?.url;
 
@@ -186,8 +186,8 @@ export function LogoWithCTA(): React.ReactElement {
                         transform: 'translateY(-50%)',
                     }}
                 >
-                    <TextStagger
-                        id="textstagger-brandname"
+                    <AnimatedText
+                        id="animatedtext-brandname"
                         text={brandProps.text}
                         startAt={LOGO_HOLD_FRAMES + 4}
                         splitBy="word"
@@ -216,8 +216,8 @@ export function LogoWithCTA(): React.ReactElement {
                     transform: `translateY(${taglineTranslateY}px)`,
                 }}
             >
-                <TextStagger
-                    id="textstagger-tagline"
+                <AnimatedText
+                    id="animatedtext-tagline"
                     text={taglineProps.text}
                     startAt={taglineStart}
                     splitBy="word"
@@ -258,7 +258,7 @@ export const LogoWithCTASchemaFields = [
     },
     {
         type: 'component',
-        name: 'textstagger-brandname',
+        name: 'animatedtext-brandname',
         fields: [
             {
                 name: 'text',
@@ -280,7 +280,7 @@ export const LogoWithCTASchemaFields = [
     },
     {
         type: 'component',
-        name: 'textstagger-tagline',
+        name: 'animatedtext-tagline',
         fields: [
             {
                 name: 'text',
@@ -319,5 +319,5 @@ export const LogoWithCTADescriptor: ComponentRegistration = {
     ],
     description: 'Logo icon and brand name reveal with a CTA text below that.',
     instructions: 'Use as the final scene.',
-    celExpression: '33 + (segmentCount(props.["textstagger-tagline"].text, "word") - 1) * 3 + 12',
+    celExpression: '33 + (segmentCount(props.["animatedtext-tagline"].text, "word") - 1) * 3 + 12',
 };

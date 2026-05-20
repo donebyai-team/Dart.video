@@ -88,8 +88,8 @@ func ConvertToSceneConfig(
 
 	// TODO: Move it in a better place
 	for _, cfg := range configs {
-		if strings.EqualFold(cfg.Name, "textstagger") {
-			textStaggerProps := cfg.Props["textstagger"].(map[string]any)
+		if strings.EqualFold(cfg.Name, "animatedtext") {
+			textStaggerProps := cfg.Props["animatedtext"].(map[string]any)
 			text := textStaggerProps["text"].(string)
 
 			if len(strings.Split(text, " ")) == 1 {

@@ -7,9 +7,9 @@ import { interpolateWithEasing } from "../../../styles/easingResolver";
 import { useTheme } from "../../../theme";
 import { resolveTypography } from "../../../tokens/resolveTypography";
 import { LogoAsset, LogoAssetDefaults, LogoAssetSchemaFields } from "./LogoAsset";
-import { TextStagger, TextStaggerDefaults } from "../text/TextStagger";
 import type { ComponentRegistration } from '../../../registry/registry';
 import { SPLIT_BY_MODES } from "../types";
+import { AnimatedText, AnimatedTextDefaults } from "../text";
 
 // Default constants
 const DEFAULT_CHAR_STAGGER = 5;
@@ -19,7 +19,7 @@ const DEFAULT_SRC = ""
 
 
 export function LogoWithBrandName(): React.ReactElement {
-    const textProps = usePatchedProps("textstagger", TextStaggerDefaults);
+    const textProps = usePatchedProps("animatedtext", AnimatedTextDefaults);
     const logoAssetProps = usePatchedProps("logoasset", LogoAssetDefaults);
 
 
@@ -71,8 +71,8 @@ export function LogoWithBrandName(): React.ReactElement {
                     height={resolvedLogoSize}
                     logoAnimation="none"
                 />
-                <TextStagger
-                    id="textstagger"
+                <AnimatedText
+                    id="animatedtext"
                     text={textProps.text}
                     splitBy={SPLIT_BY_MODES[0]}
                     staggerDelay={DEFAULT_CHAR_STAGGER}
@@ -92,7 +92,7 @@ export function LogoWithBrandName(): React.ReactElement {
 export const LogoWithBrandNameSchemaFields = [
     {
         type: "component",
-        name: 'textstagger',
+        name: 'animatedtext',
         fields: [
             {
                 "name": "text",
@@ -103,27 +103,27 @@ export const LogoWithBrandNameSchemaFields = [
             {
                 "name": "variant",
                 "type": "enum",
-                "default": TextStaggerDefaults.variant
+                "default": AnimatedTextDefaults.variant
             },
             {
                 "name": "staggerDelay",
                 "type": "number",
-                "default": TextStaggerDefaults.staggerDelay
+                "default": AnimatedTextDefaults.staggerDelay
             },
             {
                 "name": "entranceAnimation",
                 "type": "enum",
-                "default": TextStaggerDefaults.entranceAnimation
+                "default": AnimatedTextDefaults.entranceAnimation
             },
             {
                 "name": "duration",
                 "type": "number",
-                "default": TextStaggerDefaults.duration
+                "default": AnimatedTextDefaults.duration
             },
             {
                 "name": "splitBy",
                 "type": "enum",
-                "default": SPLIT_BY_MODES[0]
+                "default": SPLIT_BY_MODES[2]
             }
         ]
     },
@@ -146,5 +146,5 @@ export const LogoWithBrandNameDescriptor: ComponentRegistration = {
     }],
     description: 'Logo + brand name reveal.',
     instructions: 'Use for brand intros',
-    celExpression: 'max(0, segmentCount(props.textstagger.text, "char") - 1) * 5 + 20',
+    celExpression: 'max(0, segmentCount(props.animatedtext.text, "char") - 1) * 5 + 20',
 };

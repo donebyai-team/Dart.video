@@ -64,7 +64,7 @@ func ungroupSocialProof(scene *baml_client.Scene, fieldValueMapper *services.Med
 		texts = append(texts, text)
 	}
 
-	component, err := FindComponent("textstagger")
+	component, err := FindComponent("animatedtext")
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +81,7 @@ func ungroupSocialProof(scene *baml_client.Scene, fieldValueMapper *services.Med
 				"splitBy":           "line",
 				"exitAnimation":     "none",
 				"staggerDelay":      15,
-				"duration":          15,
+				"duration":          20,
 			},
 			field_resolvers.FieldResolverForward,
 			fieldValueMapper,

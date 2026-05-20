@@ -6,12 +6,11 @@ import { resolveAnimationPreset } from '../../../core/animation_preset/Animation
 import { Row, Stack } from '../../../core/layout';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import type { ComponentRegistration } from '../../../registry/registry';
-import { TextHighlight, TextHighlightDefaults } from '../text/TextHighlight';
-import { TextStagger, TextStaggerDefaults } from '../text/TextStagger';
 import { TextWithWordCycle, TextWithWordCycleDefaults } from '../text/TextWithWordCycle';
 import { resolveContentAwareLayout } from './ContentAwareScene.layout';
 import { TypographyVariant } from '../../../tokens';
 import { AnimationPresetName } from '../../../core/animation_preset/AnimationPreset';
+import { AnimatedText, AnimatedTextDefaults } from '../text';
 
 const DEFAULT_ANIMATION = 'slideUp' as const;
 const FALLBACK_WIDTH = 1920;
@@ -85,8 +84,7 @@ export function TextWithMediaScene(): React.ReactElement {
   const { props: sceneProps } = useElement('scene', SceneDefaults);
   const { props: mediaProps } = useElement<MediaAssetProps>(assetKey || 'mediaasset', {});
 
-  const { props: textHighlightProps } = useElement('texthighlight', { ...TextHighlightDefaults, variant: "headingLg" as TypographyVariant });
-  const { props: textStaggerProps } = useElement('textstagger', { ...TextStaggerDefaults, variant: "headingLg" as TypographyVariant });
+  const { props: animatedTextProps } = useElement('animatedtext', { ...AnimatedTextDefaults, variant: "headingLg" as TypographyVariant });
   const { props: textWithWordCycleProps } = useElement('textwithwordcycle', { ...TextWithWordCycleDefaults, variant: "headingLg" as TypographyVariant });
 
   const mediaDimentions = useVideoDimensions(mediaProps.src || '');
@@ -103,22 +101,16 @@ export function TextWithMediaScene(): React.ReactElement {
   const availableHeight = preset.height - preset.safeArea.top - preset.safeArea.bottom;
 
   // Determine active text component
-  const activeTextType = overlay.texthighlight ? 'texthighlight'
-    : overlay.textstagger ? 'textstagger'
-      : 'textwithwordcycle';
+  const activeTextType = overlay.animatedtext ? 'animatedtext': 'textwithwordcycle';
 
   let textNode: React.ReactElement;
   let textContent: string;
   let textVariant: string;
 
-  if (activeTextType === 'texthighlight') {
-    textContent = textHighlightProps.text;
-    textVariant = textHighlightProps.variant;
-    textNode = <TextHighlight {...textHighlightProps} id="texthighlight" />;
-  } else if (activeTextType === 'textstagger') {
-    textContent = textStaggerProps.text;
-    textVariant = textStaggerProps.variant;
-    textNode = <TextStagger {...textStaggerProps} id="textstagger" />;
+  if (activeTextType === 'animatedtext') {
+    textContent = animatedTextProps.text;
+    textVariant = animatedTextProps.variant;
+    textNode = <AnimatedText {...animatedTextProps} id="animatedtext" />;
   } else {
     const longestWord = textWithWordCycleProps.cyclingWords.reduce(
       (longest, current) => (current.length > longest.length ? current : longest),
@@ -242,7 +234,7 @@ export const TextWithMediaSceneDescriptor: ComponentRegistration = {
     propsPath: 'props.textComponentProps',
     components: [
       {
-        name: 'textstagger',
+        name: 'animatedtext',
         fields: [
           {
             "name": "text",
@@ -260,19 +252,19 @@ export const TextWithMediaSceneDescriptor: ComponentRegistration = {
             "name": "staggerDelay",
             "type": "number",
             "map": "props.staggerDelay",
-            "default": TextStaggerDefaults.staggerDelay
+            "default": AnimatedTextDefaults.staggerDelay
           },
           {
             "name": "entranceAnimation",
             "type": "enum",
             "map": "props.entranceAnimation",
-            "default": TextStaggerDefaults.entranceAnimation
+            "default": AnimatedTextDefaults.entranceAnimation
           },
           {
             "name": "duration",
             "type": "number",
             "map": "props.duration",
-            "default": TextStaggerDefaults.duration
+            "default": AnimatedTextDefaults.duration
           },
           {
             "name": "exitAnimation",
@@ -284,81 +276,16 @@ export const TextWithMediaSceneDescriptor: ComponentRegistration = {
             "name": "exitDuration",
             "type": "number",
             "map": "props.exitDuration",
-            "default": TextStaggerDefaults.exitDuration
+            "default": AnimatedTextDefaults.exitDuration
           },
           {
             "name": "splitBy",
             "type": "enum",
             "map": "props.splitBy",
-            "default": TextStaggerDefaults.splitBy
+            "default": AnimatedTextDefaults.splitBy
           }
         ]
-      },
-      {
-        name: 'texthighlight', fields: [
-          {
-            "name": "text",
-            "type": "string",
-            "datatype": "text",
-            "map": "props.text"
-          },
-          {
-            "name": "variant",
-            "type": "enum",
-            "map": "props.variant",
-            "default": "headingLg"
-          },
-          {
-            "name": "entranceAnimation",
-            "type": "enum",
-            "map": "props.entranceAnimation",
-            "default": TextHighlightDefaults.entranceAnimation
-          },
-          {
-            "name": "animationDelay",
-            "type": "number",
-            "map": "props.animationDelay",
-            "default": TextHighlightDefaults.animationDelay
-          },
-          {
-            "name": "animationDuration",
-            "type": "number",
-            "map": "props.animationDuration",
-            "default": TextHighlightDefaults.animationDuration
-          },
-          {
-            "name": "exitAnimation",
-            "type": "enum",
-            "map": "props.exitAnimation",
-            "default": "none"
-          },
-          {
-            "name": "exitDuration",
-            "type": "number",
-            "map": "props.exitDuration",
-            "default": TextHighlightDefaults.exitDuration
-          },
-          {
-            "name": "highlightStyle",
-            "type": "enum",
-            "map": "props.highlightStyle",
-            "default": TextHighlightDefaults.highlightStyle
-          },
-          {
-            "name": "highlightedTextAnimation",
-            "type": "enum",
-            "map": "props.highlightedTextAnimation",
-            "default": "none"
-          },
-          {
-            "name": "highlightColor",
-            "type": "string",
-            "datatype": "color",
-            "map": "props.highlightColor",
-            "default": TextHighlightDefaults.highlightColor
-          }
-        ]
-      },
+      },   
       {
         name: 'textwithwordcycle', fields: [
           {
@@ -431,8 +358,7 @@ export const TextWithMediaSceneDescriptor: ComponentRegistration = {
       name: "textComponent",
       type: "enum",
       enum: [
-        "textstagger",
-        "texthighlight",
+        "animatedtext",
         "textwithwordcycle"
       ]
     },
@@ -446,6 +372,6 @@ export const TextWithMediaSceneDescriptor: ComponentRegistration = {
     }
   ],
   description: 'Displays text with a image or video.',
-  instructions: 'Choose one of the filler component and its props in textComponentProps: texthighlight, textstagger, or textwithwordcycle.',
+  instructions: 'One liner text with animated text or word cycle. Choose one of the filler component and its props in textComponentProps: animatedtext, or textwithwordcycle.',
   celExpression: '"mediaasset" in props ? props.mediaasset._duration : 90',
 };

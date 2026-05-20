@@ -6,16 +6,16 @@ import type { ComponentRegistration } from '../../../registry/registry';
 import { useAspectPreset } from '../../../styles';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { useTheme } from '../../../theme';
-import { TextStagger, TextStaggerDefaults } from '../text/TextStagger';
 import { getIconTextPillMetrics, getNormalizedPill, IconTextPill, IconTextPillDefaults, PillPatchGroup } from '../../../core/assets/IconTextPill';
 import { TypographyVariant } from '../../../tokens';
 import { resolveTypography } from '../../../tokens/resolveTypography';
 import { AnimationPresetName } from '../../../core/animation_preset/AnimationPreset';
 import { measureTextWithStyle } from '../../../core/assets/useTextMeasurement';
+import { AnimatedText, AnimatedTextDefaults } from '../text';
 
 const HERO_TEXT_DEFAULTS = {
-    ...TextStaggerDefaults,
-    id: 'textstagger',
+    ...AnimatedTextDefaults,
+    id: 'animatedtext',
     text: '',
     variant: 'headingLg' as TypographyVariant,
     splitBy: 'line' as const,
@@ -155,8 +155,8 @@ export function PillCarousel(): React.ReactElement {
                     transform: `translateY(${headlineTranslateY}px)`,
                 }}
             >
-                <TextStagger
-                    id="textstagger"
+                <AnimatedText
+                    id="animatedtext"
                     text={textProps.text}
                     splitBy="line"
                     staggerDelay={0}

@@ -5,17 +5,17 @@ import type { MediaAssetProps } from '../../../core/assets';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { useElement } from '../../../patches';
 import { useAspectPreset } from '../../../styles';
-import { TextStagger, TextStaggerDefaults } from '../text/TextStagger';
 import { MediaMotionPreset, getMotionTransform } from '../../../core/animation_preset/MediaMotionPreset';
 import { AnimationPresetName } from '../../../core/animation_preset/AnimationPreset';
 import { DEFAULT_MEDIA_FRAME_STYLE } from './TextWithMediaScene';
+import { AnimatedText, AnimatedTextDefaults } from '../text';
 
 const DEFAULT_SCENE_DURATION = 90;
 const DEFAULT_MOTION_PRESET = 'zoomTiltReveal' as const;
 
 const ANIMATED_MEDIA_DEFAULTS = {
-    ...TextStaggerDefaults,
-    id: 'textstagger',
+    ...AnimatedTextDefaults,
+    id: 'animatedtext',
     text: '',
     variant: 'headingLg' as const,
     splitBy: 'word' as const,
@@ -84,7 +84,7 @@ export function AnimatedMedia(): React.ReactElement {
           maxWidth: '60%'        
         }}
       >
-        <TextStagger {...textProps} id="textstagger" />
+        <AnimatedText {...textProps} id="animatedtext" />
       </div>
     </div>
   );
@@ -98,7 +98,7 @@ export const AnimatedMediaDescriptor: ComponentRegistration = {
   schema: [
     {
       type: 'component',
-      name: 'textstagger',
+      name: 'animatedtext',
       fields: [{
         "name": "text",
         "type": "string",

@@ -65,7 +65,7 @@ func (resolver StyleResolver) Resolve(
 			props[field.Name] = textHighlightColor
 		}
 
-		// For TextStagger, we need to change the entrance animation and stagger delay
+		// For AnimatedText, we need to change the entrance animation and stagger delay
 		if field.Name == "splitBy" {
 			if splitBy, ok := props[field.Name].(string); ok && strings.HasPrefix(splitBy, "word") {
 				props["staggerDelay"] = 2
