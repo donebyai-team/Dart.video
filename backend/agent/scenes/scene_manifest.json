@@ -256,7 +256,7 @@
                   "name": "staggerDelay",
                   "type": "number",
                   "map": "props.staggerDelay",
-                  "default": 2
+                  "default": 15
                 },
                 {
                   "name": "entranceAnimation",
@@ -280,7 +280,7 @@
                   "name": "exitDuration",
                   "type": "number",
                   "map": "props.exitDuration",
-                  "default": 15
+                  "default": 20
                 },
                 {
                   "name": "splitBy",
@@ -297,14 +297,20 @@
               "type": "string"
             },
             {
+              "name": "splitBy",
+              "type": "enum",
+              "required": false,
+              "default": "line"
+            },
+            {
               "name": "entranceAnimation",
               "type": "enum",
               "required": false,
               "default": "scaleIn"
             }
           ],
-          "description": "Reveals a word or full text phrase word-by-word",
-          "instructions": "Works for both single word and multi-word headlines or body text.",
+          "description": "Reveals a word or full text",
+          "instructions": "Use splitBy=\"word\" or \"line\" based on how the text should be revealed. Use splitBy=\"word\" for sequential word reveals and \"line\" for grouped multi-line reveals. When using \"line\", define line breaks with \"\\n\".",
           "celExpression": "max(1, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * props.textstagger.staggerDelay + props.textstagger.duration + (props.textstagger.exitAnimation != \"none\" ? props.textstagger.exitDuration : 0)"
         },
         {
@@ -858,7 +864,7 @@
                       "name": "staggerDelay",
                       "type": "number",
                       "map": "props.staggerDelay",
-                      "default": 2
+                      "default": 15
                     },
                     {
                       "name": "entranceAnimation",
@@ -882,7 +888,7 @@
                       "name": "exitDuration",
                       "type": "number",
                       "map": "props.exitDuration",
-                      "default": 15
+                      "default": 20
                     },
                     {
                       "name": "splitBy",
@@ -1242,10 +1248,10 @@
               "map": "props.images",
               "components": [
                 {
-                  "name": "imageasset",
+                  "name": "mediaasset",
                   "fields": [
                     {
-                      "name": "image",
+                      "name": "src",
                       "type": "string",
                       "map": "item",
                       "datatype": "media"
@@ -1313,7 +1319,7 @@
                   "name": "staggerDelay",
                   "type": "number",
                   "map": "props.staggerDelay",
-                  "default": 2
+                  "default": 15
                 },
                 {
                   "name": "entranceAnimation",
@@ -1376,7 +1382,7 @@
           ],
           "description": "Row of brand logos + caption.",
           "instructions": "Use for integrations, tech stack, partners, brands. eg. logos=[\"url1\", \"url2\"], text=\"caption text\".",
-          "celExpression": "10 + max(min(1, segmentCount(props.textstagger.text, props.textstagger.splitBy)) * (max(0, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * 2 + 20), 5 + max(0, size(props.logos) - 1) * 5 + 12)"
+          "celExpression": "10 + max(min(1, segmentCount(props.textstagger.text, props.textstagger.splitBy)) * (max(0, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * 15 + 20), 5 + max(0, size(props.logos) - 1) * 5 + 12)"
         },
         {
           "name": "LogoWithBrandName",
@@ -1403,7 +1409,7 @@
                 {
                   "name": "staggerDelay",
                   "type": "number",
-                  "default": 2
+                  "default": 15
                 },
                 {
                   "name": "entranceAnimation",
@@ -1584,7 +1590,7 @@
                   "name": "staggerDelay",
                   "type": "number",
                   "map": "props.staggerDelay",
-                  "default": 2
+                  "default": 15
                 },
                 {
                   "name": "entranceAnimation",
@@ -1653,7 +1659,7 @@
           ],
           "description": "Row of rotating brand icons + caption.",
           "instructions": "Use for integrations, tech stack, partners, brands. eg. icons={[\"shopify\", \"midjourney\", \"openai\"]}, text=\"caption text\".",
-          "celExpression": "10 + max(0, size(props.icons) - 1) * 5 + 10 + min(1, segmentCount(props.textstagger.text, props.textstagger.splitBy)) * (5 + max(0, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * 2 + 20)"
+          "celExpression": "10 + max(0, size(props.icons) - 1) * 5 + 10 + min(1, segmentCount(props.textstagger.text, props.textstagger.splitBy)) * (5 + max(0, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * 15 + 20)"
         },
         {
           "name": "PillCarousel",
@@ -1888,7 +1894,7 @@
                   "name": "staggerDelay",
                   "type": "number",
                   "map": "props.staggerDelay",
-                  "default": 2
+                  "default": 15
                 },
                 {
                   "name": "entranceAnimation",

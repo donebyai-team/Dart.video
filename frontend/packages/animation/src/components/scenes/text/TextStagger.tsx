@@ -13,9 +13,9 @@ function getSplitModeDefaults(splitBy: SplitByMode) {
     switch (splitBy) {
         case 'char':
             return { staggerDelay: 2, duration: 8 };
-        case 'line':
-            return { staggerDelay: 15, duration: 20 };
         case 'word':
+            return { staggerDelay: 5, duration: 20 };
+        case 'line':            
         default:
             return {
                 staggerDelay: TextStaggerDefaults.staggerDelay,
@@ -29,11 +29,11 @@ export const TextStaggerDefaults = {
     startAt: 0,
     text: '',
     variant: 'headingLg' as TypographyVariant,
-    staggerDelay: 2,
+    staggerDelay: 15,
     entranceAnimation: 'scaleIn' as AnimationPresetName,
     duration: 20,
     exitAnimation: 'none' as AnimationPresetName,
-    exitDuration: 15,
+    exitDuration: 20,
     splitBy: 'line' as SplitByMode,
     className: undefined as string | undefined,
     style: undefined as React.CSSProperties | undefined,
@@ -199,13 +199,19 @@ export const TextStaggerDescriptor: ComponentRegistration = {
             type: 'string',
         },
         {
+            name: 'splitBy',
+            type: 'enum',
+            required: false,
+            default: TextStaggerDefaults.splitBy,
+        },
+        {
             name: 'entranceAnimation',
             type: 'enum',
             required: false,
             default: TextStaggerDefaults.entranceAnimation,
         }
     ],
-    description: 'Reveals a word or full text phrase word-by-word',
-    instructions: 'Works for both single word and multi-word headlines or body text.',
+    description: 'Reveals a word or full text',
+    instructions: 'Use splitBy="word" or "line" based on how the text should be revealed. Use splitBy="word" for sequential word reveals and "line" for grouped multi-line reveals. When using "line", define line breaks with "\\n".',
     celExpression: `max(1, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * props.textstagger.staggerDelay + props.textstagger.duration + (props.textstagger.exitAnimation != "none" ? props.textstagger.exitDuration : 0)`
 };
