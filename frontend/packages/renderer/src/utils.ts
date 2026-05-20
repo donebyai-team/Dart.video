@@ -1,5 +1,5 @@
 import { BrandAsset, BrandTheme } from "@coasterai/animation";
-import { BrandAssetPriority, BrandMedia, BrandMediaType } from "@coasterai/pb/coasterai/core/v1/brandkit_pb";
+import { BrandAssetPriority, BrandMediaType } from "@coasterai/pb/coasterai/core/v1/brandkit_pb";
 import { MediaAsset } from "@coasterai/pb/coasterai/core/v1/media_asset_pb";
 import { GeneratedVideoBranding } from "@coasterai/pb/coasterai/core/v1/video_pb";
 import { loadFonts } from "./fonts";

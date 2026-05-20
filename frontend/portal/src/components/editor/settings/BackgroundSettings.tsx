@@ -209,7 +209,7 @@ export default function BackgroundSettings({
 
         {showApplyAll && (
           <div className="flex items-center justify-between">
-            <Label className="text-sm">Apply to all slides</Label>
+            <Label className="text-sm">Apply to all scenes</Label>
             <Switch
               checked={safeValue.applyAll ?? false}
               onCheckedChange={updateApplyAll}

@@ -150,8 +150,6 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
 
     {{ BrandGuidelines(input.VideoBranding) }}
 
-    {{ BackgroundGuidelines(input.VideoBranding) }}
-
     {{ EnterAnimation(input.AnimationCategories) }}
 
     ---

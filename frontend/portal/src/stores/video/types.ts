@@ -4,6 +4,7 @@ import type {
 } from "@/types/editor";
 import type { EntityId } from "@/types/selection";
 import { SelectedTool } from "@/types/tools";
+import { BrandAssetPriority } from "@coasterai/pb/coasterai/core/v1/brandkit_pb";
 import { Section, Slide, TransitionDirection, TransitionType, CalloutEffect, BackgroundStyle, ZoomEffect, SpotlightEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { Resolution, Video } from "@coasterai/pb/coasterai/core/v1/video_pb";
 import type { StateCreator } from "zustand";
@@ -115,6 +116,7 @@ export interface VideoActions {
     setShowVoiceover: (show: boolean) => void
 
     updateSlideTranscript: (transcript: string) => void
+    updateGeneratedBrandingColor: (priority: BrandAssetPriority, colorHexCode: string) => void
     setResolution: (resolution: Resolution) => void
     setBackgroundMusic: (url?: string)  => void
 

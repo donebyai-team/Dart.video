@@ -31,6 +31,7 @@ export function DualColorPicker({
   triggerStyle = "gradient",
   triggerVariant = "swatch",
   transparentTarget,
+  onApplyPrimaryToAllScenes,
 }: {
   primaryColor: string
   secondaryColor?: string
@@ -41,9 +42,11 @@ export function DualColorPicker({
   triggerStyle?: "gradient" | "active-color"
   triggerVariant?: "swatch" | "input"
   transparentTarget?: 'primary' | 'secondary'
+  onApplyPrimaryToAllScenes?: (v: string) => void
 }) {
   const [open, setOpen] = useState(false)
   const [tab, setTab] = useState<'primary' | 'secondary'>('primary')
+  const [applyPrimaryToAllScenes, setApplyPrimaryToAllScenes] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
   const hasSecondary = !!secondaryColor && !!onSecondaryColor
@@ -53,10 +56,25 @@ export function DualColorPicker({
   const onChangeActive = activeTab === 'primary' ? onPrimaryColor : onSecondaryColor
   const showTransparentButton = transparentTarget === activeTab || (transparentTarget === undefined && activeTab === 'secondary')
   const isTransparentActive = activeColorValue === 'transparent'
+  const showApplyPrimaryOption = !!onApplyPrimaryToAllScenes
+
+  const handlePrimaryColorChange = (nextColor: string) => {
+    onPrimaryColor(nextColor)
+
+    if (applyPrimaryToAllScenes) {
+      onApplyPrimaryToAllScenes?.(nextColor)
+    }
+  }
 
   if (!onChangeActive) {
     return null
   }
+
+  useEffect(() => {
+    if (!showApplyPrimaryOption && applyPrimaryToAllScenes) {
+      setApplyPrimaryToAllScenes(false)
+    }
+  }, [applyPrimaryToAllScenes, showApplyPrimaryOption])
 
   useEffect(() => {
     if (!open) {
@@ -146,18 +164,47 @@ export function DualColorPicker({
             </button>
           )}
 
-          <HexColorPicker color={activeColor} onChange={onChangeActive} />
+          {showApplyPrimaryOption && activeTab === 'primary' && (
+            <label className="flex items-center gap-2 text-xs text-foreground">
+              <input
+                type="checkbox"
+                checked={applyPrimaryToAllScenes}
+                onChange={(e) => {
+                  const checked = e.target.checked
+                  setApplyPrimaryToAllScenes(checked)
+                  if (checked) {
+                    onApplyPrimaryToAllScenes?.(primaryColor)
+                  }
+                }}
+                className="h-4 w-4 rounded border-border"
+              />
+              Apply to all scenes
+            </label>
+          )}
+
+          <HexColorPicker
+            color={activeColor}
+            onChange={activeTab === 'primary' ? handlePrimaryColorChange : onChangeActive}
+          />
 
           <BrandColors
             selectedColor={activeColor}
-            onSelect={onChangeActive}
+            onSelect={activeTab === 'primary' ? handlePrimaryColorChange : onChangeActive}
             className="flex flex-wrap gap-1"
             swatchClassName="w-5 h-5 rounded border transition-all hover:scale-110"
           />
 
           <input
             value={activeColorValue || FALLBACK_COLOR}
-            onChange={(e) => onChangeActive(e.target.value)}
+            onChange={(e) => {
+              const nextColor = e.target.value
+              if (activeTab === 'primary') {
+                handlePrimaryColorChange(nextColor)
+                return
+              }
+
+              onChangeActive(nextColor)
+            }}
             className="w-full text-xs px-2 py-1 border border-border rounded bg-muted"
           />
         </div>

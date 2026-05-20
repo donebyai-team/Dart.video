@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { IconAsset } from './IconAsset';
 import type { TypographyVariant } from '../../tokens/semantic';
 import { CardAsset, Text } from '.';
-import { measureTextWithStyle, useTextMeasurement } from './useTextMeasurement';
+import { useTextMeasurement } from './useTextMeasurement';
 import { useStyleContext } from '../../styles/StyleContext';
 import { useAspectPreset } from '../../styles/AspectPresetContext';
 import { useTheme } from '../../theme/ThemeContext';
