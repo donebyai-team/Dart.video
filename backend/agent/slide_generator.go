@@ -86,7 +86,7 @@ func (g *videoConfigGenerator) AddBranding(assetRegistry *services.MediaAssetReg
 	if bgStyle == nil {
 		bgStyle = brand_identity.GenerateDefaultBackground(generatedBranding.Colors)
 	}
-	generatedBranding.Colors = brand_identity.ModifyTextColor(generatedBranding.Colors)
+	generatedBranding.Colors = brand_identity.ModifyTextColor(generatedBranding.Colors, bgStyle)
 
 	// Step 5: assign branding
 	g.video.Metadata.GeneratedBranding = generatedBranding

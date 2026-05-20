@@ -18,7 +18,6 @@ export const IconTextPillDefaults = {
     variant: 'heading' as TypographyVariant,
     iconStyle: undefined as React.CSSProperties | undefined,
     textStyle: {
-        color: '#111827',
         fontWeight: 400,
         opacity: 0.8,
     } as React.CSSProperties,
@@ -112,8 +111,9 @@ export function IconTextPill(initProps: IconTextPillProps): React.ReactElement {
     const textMeasurement = useTextMeasurement(resolvedTextStyle);
     const textWidth = textMeasurement.ready
         ? textMeasurement.width(props.text)
-        : measureTextWithStyle(props.text, resolvedTextStyle).width;
+        : textMeasurement.width(props.text);
     const metrics = getIconTextPillMetrics(props, typographyStyle, textWidth);
+    console.log("Rgsef", props)
 
     return (
         <CardAsset

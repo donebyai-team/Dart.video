@@ -36,12 +36,10 @@ export interface BrandTheme {
 }
 
 /**
- * Fully resolved theme — derived by ThemeProvider from BrandTheme.
- * This is what components consume via useTheme().
- * Contains the full 26-slot color palette + resolved font stacks.
- * Never constructed manually — always derived from BrandTheme.
+ * Fully resolved theme consumed by components via useTheme().
+ * Colors are a direct mapping of the incoming BrandTheme values.
  */
-export interface ResolvedTheme {
+export interface ResolvedTheme extends BrandTheme {
   colors: ColorTokens;
   /** Resolved sans font stack (brand font + system fallbacks) */
   font: string;

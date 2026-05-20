@@ -46,19 +46,25 @@ func (b brandIdentity) GetBrandIdentity(ctx context.Context, ID string) (*models
 	return identity, nil
 }
 
-func ModifyTextColor(colors []*pbcore.BrandColor) []*pbcore.BrandColor {
-	textColor := BrandColorTokens(colors)[COLOR_TEXT_PRIMARY]
-
-	// because we are using glow gradient, we need to make sure the text color is dark enough,
-	isTextDark := IsDark(textColor)
-	if !isTextDark {
-		textColor = "#000000"
+func ModifyTextColor(colors []*pbcore.BrandColor, bgStyle *pbcore.BackgroundStyle) []*pbcore.BrandColor {
+	// If the effect is glow that is a light color,
+	// the hex color will be dark and hence we override it
+	bgColor := bgStyle.GetSolid().Hex
+	if bgStyle.Effect != nil &&
+		bgStyle.Effect.Type == pbcore.BackgroundEffectType_BACKGROUND_EFFECT_TYPE_GLOW {
+		bgColor = "#FFFFFF"
 	}
+
+	textNormalColor := GetReadableTextColorForSolid(
+		bgColor,
+		colors,
+		TextNormal,
+	)
 
 	// Step 4: update text color
 	for _, brandColor := range colors {
 		if brandColor.Priority == pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_TEXT_PRIMARY {
-			brandColor.ColorHexCode = textColor
+			brandColor.ColorHexCode = textNormalColor
 		}
 	}
 
@@ -205,7 +211,7 @@ func (b brandIdentity) CreateBrandIdentity(ctx context.Context, orgID string, we
 	// Generate background style
 	brandIdentity.BgStyle = GenerateDefaultBackground(brandIdentity.Colors)
 	// Modify text color based on background color
-	brandIdentity.Colors = ModifyTextColor(brandIdentity.Colors)
+	brandIdentity.Colors = ModifyTextColor(brandIdentity.Colors, brandIdentity.BgStyle)
 
 	if existingIdentity != nil {
 		err = b.db.UpdateBrandIdentity(ctx, orgID, brandIdentity)

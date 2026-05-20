@@ -20,6 +20,7 @@ export { compileRemoteComponent, stripImports } from './compiler';
 export type { CompilationResult, CompileRemoteComponentOptions } from './compiler';
 export { loadTemplateSource, getCachedTemplateSource } from './templateSource';
 export { SUPPORTED_FONTS, loadFonts, loadAllFonts, loadRemotionFont } from './fonts';
+export { brandingToTheme } from './utils';
 export {
   TRANSITION_OPTIONS,
   TRANSITION_DIRECTION_OPTIONS,

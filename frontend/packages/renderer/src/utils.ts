@@ -1,4 +1,4 @@
-import { BrandAsset, BrandTheme, DEFAULT_BRAND_THEME } from "@coasterai/animation";
+import { BrandAsset, BrandTheme } from "@coasterai/animation";
 import { BrandAssetPriority, BrandMedia, BrandMediaType } from "@coasterai/pb/coasterai/core/v1/brandkit_pb";
 import { MediaAsset } from "@coasterai/pb/coasterai/core/v1/media_asset_pb";
 import { GeneratedVideoBranding } from "@coasterai/pb/coasterai/core/v1/video_pb";
@@ -7,15 +7,18 @@ import { loadFonts } from "./fonts";
 export function brandingToTheme(
     branding?: GeneratedVideoBranding
 ): BrandTheme {
+    const theme: BrandTheme = {
+        primary: "",
+        secondary: "",
+        bg: "",
+        accent: "",
+        text: "",
+    };
+    let hasPrimaryTextColor = false;
 
-    if (!branding) {
-        return DEFAULT_BRAND_THEME;
-    }
-
-    const theme: BrandTheme = { ...DEFAULT_BRAND_THEME };
-
-    for (const c of branding.colors) {
+    for (const c of branding?.colors || []) {
         const color = c.colorHexCode;
+        if (!color) continue;
 
         switch (c.priority) {
 
@@ -33,19 +36,20 @@ export function brandingToTheme(
 
             case BrandAssetPriority.TEXT_PRIMARY:
                 theme.text = color;
+                hasPrimaryTextColor = true;
                 break;
 
             case BrandAssetPriority.TEXT_SECONDARY:
-                if (!theme.text) theme.text = color;
+                if (!hasPrimaryTextColor) theme.text = color;
                 break;
 
             case BrandAssetPriority.ACCENT:
-                if (theme.accent) theme.accent = color;
+                theme.accent = color;
                 break;
         }
     }
 
-    for (const c of branding.brandIdentity?.logos || []) {
+    for (const c of branding?.brandIdentity?.logos || []) {
         if (!c.asset) continue;
 
         const asset = toBrandAsset(c.asset);
@@ -65,7 +69,7 @@ export function brandingToTheme(
     }
 
     // Set fonts
-    const brandFonts = branding.brandIdentity?.fonts || [];
+    const brandFonts = branding?.brandIdentity?.fonts || [];
 
     for (const c of brandFonts) {
         const fontName = c.googleFontsName || c.name;

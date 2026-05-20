@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Thumbnail } from '@remotion/player'
 import { Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { useVideoStore } from '@/stores/video'
-import { SingleSlidePreview } from '@coasterai/renderer'
+import { SingleSlidePreview, brandingToTheme } from '@coasterai/renderer'
 
 interface SlideThumbnailProps {
   slide: Slide
@@ -23,8 +23,13 @@ const SlideThumbnail = ({ slide, index = 0, resolution: resolutionProp, fps: fps
 
   const storeResolution = useVideoStore(s => s.videoConfig?.metadata?.resolution)
   const storeFps = useVideoStore(s => s.videoConfig?.metadata?.fps)
+  const generatedBranding = useVideoStore(s => s.videoConfig?.metadata?.generatedBranding)
   const resolution = resolutionProp ?? storeResolution
   const fps = fpsProp ?? storeFps ?? 30
+  const theme = useMemo(
+    () => generatedBranding ? brandingToTheme(generatedBranding) : undefined,
+    [generatedBranding],
+  )
 
   useEffect(() => {
     const node = rootRef.current
@@ -81,7 +86,7 @@ const SlideThumbnail = ({ slide, index = 0, resolution: resolutionProp, fps: fps
       {shouldRenderPlayer ? (
         <Thumbnail
           component={SingleSlidePreview as any}
-          inputProps={{ slide: debouncedSlide, isEditing: false }}
+          inputProps={{ slide: debouncedSlide, theme, isEditing: false }}
           durationInFrames={durationInFrames}
           compositionWidth={resolution.width}
           compositionHeight={resolution.height}

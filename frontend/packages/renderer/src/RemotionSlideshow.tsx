@@ -11,7 +11,7 @@ import {
   resolveStyle,
   type AspectPreset,
   ASPECT_PRESETS,
-  defaultTheme,
+  type BrandTheme,
 } from '@coasterai/animation'
 import { AnimationSlide } from './slides'
 import { BackgroundLayer } from './BackgroundLayer'
@@ -37,16 +37,21 @@ interface SlideshowProps {
 
 export const SingleSlidePreview: React.FC<{
   slide: Slide
+  theme?: BrandTheme
   isEditing?: boolean
-}> = ({ slide, isEditing = false }) => {
+}> = ({ slide, theme, isEditing = false }) => {
   const { width, height } = useVideoConfig()
   const styleConfig = useMemo(() => resolveStyle('clean'), [])
   const aspectPreset = useMemo<AspectPreset>(() => ASPECT_PRESETS["web"], [width, height])
   const hasAnimatedBackground = supportsAnimatedBackgroundEffect(slide.backgroundStyle)
   const slideForRender = hasAnimatedBackground ? { ...slide, backgroundStyle: undefined } : slide
 
+  if (!theme) {
+    return <AbsoluteFill style={{ background: 'transparent' }} />
+  }
+
   return (
-    <ThemeProvider theme={defaultTheme}>
+    <ThemeProvider theme={theme}>
       <AspectPresetProvider preset={aspectPreset}>
         <StyleContextProvider style={styleConfig}>
           <BackgroundLayer backgroundStyle={slide.backgroundStyle}>
@@ -96,12 +101,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({
   const aspectPreset = useMemo<AspectPreset>(() => (ASPECT_PRESETS["web"]), [width, height])
 
   // Use the one that is generated from backend or default
-  const brandTheme = useMemo(() => {
-    if (videoConfig?.metadata?.generatedBranding) {
-      return brandingToTheme(videoConfig.metadata.generatedBranding);
-    }
-    return defaultTheme;
-  }, [videoConfig?.metadata?.generatedBranding]);
+  const brandTheme = brandingToTheme(videoConfig?.metadata?.generatedBranding);
 
   /* ================= GATE ================= */
 
