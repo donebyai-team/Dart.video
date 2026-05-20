@@ -88,7 +88,7 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
 
   const textMeasurement = useTextMeasurement(style);
   const wordWidths = useMemo(
-    () => textMeasurement.ready ? words.map((word) => textMeasurement.width(word)) : [],
+    () => words.map((word) => textMeasurement.width(word)),
     [textMeasurement, words],
   );
   const leadWord = words[0] ?? '';
@@ -132,7 +132,9 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
 
       return {
         visibility: isVisible ? 'visible' : 'hidden',
-        maxWidth: `${measuredWidth * (isVisible ? visibleProgress : 0)}px`,
+        maxWidth: visibleProgress >= 0.999
+          ? 'none'
+          : `${measuredWidth * (isVisible ? visibleProgress : 0)}px`,
         marginRight: wordIndex < wordCount - 1 ? `${wordGapPx * (isVisible ? visibleProgress : 0)}px` : 0,
         opacity: isVisible ? visibleProgress : 0,
       };
@@ -149,7 +151,9 @@ export const TextLeadStagger: React.FC<TextLeadStaggerProps> = (initProps) => {
     const isVisible = visibleProgress > MIN_VISIBLE_PROGRESS;
     return {
       visibility: isVisible ? 'visible' : 'hidden',
-      maxWidth: `${measuredWidth * (isVisible ? visibleProgress : 0)}px`,
+      maxWidth: visibleProgress >= 0.999
+        ? 'none'
+        : `${measuredWidth * (isVisible ? visibleProgress : 0)}px`,
       marginRight: wordIndex < wordCount - 1 ? `${wordGapPx * (isVisible ? visibleProgress : 0)}px` : 0,
       opacity: isVisible ? visibleProgress : 0,
     };

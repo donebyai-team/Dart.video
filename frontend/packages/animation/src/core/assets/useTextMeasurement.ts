@@ -6,16 +6,19 @@ import { getPrimaryFontFamily, loadFontViaStylesheet, waitForFontAvailability } 
 /**
  * Shared text measurement utilities for animation scenes and assets.
  *
- * Use `useTextMeasurement(style)` in React components when the text metrics affect
- * rendering flow and must wait for the correct font to be ready. This is the
- * intended choice for animated scenes because it:
- * - tracks font readiness
- * - delays Remotion render when needed
- * - exposes a stable `ready` flag plus `width()` / `box()` helpers
+ * Use `useTextMeasurement(style)` in React components when text metrics affect
+ * layout and should stay aware of font loading. This is the intended choice for
+ * animated scenes because it:
+ * - tracks font readiness internally
+ * - delays Remotion render internally when needed
+ * - exposes stable `width()` / `box()` helpers
  *
  * Future scene code should be structured around this hook so text measurement
  * stays font-aware by default and scene authors do not need to think about
  * loading timing or fallback metrics manually.
+ *
+ * Scenes should treat this hook as "measure now with fallback, improve when the
+ * font is ready." Font readiness remains an internal concern of the hook.
  */
 export interface UseTextMeasurementResult {
   ready: boolean;
@@ -25,6 +28,7 @@ export interface UseTextMeasurementResult {
 
 const FONT_VALIDATION_PROBE_TEXT = 'Hamburgefonsiv';
 const FONT_MEASUREMENT_TIMEOUT_MS = 4000;
+const announcedReadyKeys = new Set<string>();
 
 function normalizeFontSize(value: React.CSSProperties['fontSize']): number | string {
   if (typeof value === 'number' || typeof value === 'string') {
@@ -125,10 +129,30 @@ async function waitForValidatedMeasurement(
 
 export function useTextMeasurement(style?: React.CSSProperties): UseTextMeasurementResult {
   const { isRendering } = getRemotionEnvironment();
+  const styleFontFamily = style?.fontFamily;
+  const styleFontSize = style?.fontSize;
+  const styleFontWeight = style?.fontWeight;
+  const styleLetterSpacing = style?.letterSpacing;
+  const styleTextTransform = style?.textTransform;
+  const styleFontStyle = style?.fontStyle;
+  const styleFontVariant = style?.fontVariant;
+  const styleLineHeight = style?.lineHeight;
   const normalizedStyle = style ?? {};
-  const sharedMeasureConfig = useMemo(() => getTextMeasurementConfig(normalizedStyle), [normalizedStyle]);
+  const sharedMeasureConfig = useMemo(
+    () => getTextMeasurementConfig(normalizedStyle),
+    [
+      styleFontFamily,
+      styleFontSize,
+      styleFontWeight,
+      styleLetterSpacing,
+      styleTextTransform,
+      styleFontStyle,
+      styleFontVariant,
+      styleLineHeight,
+    ],
+  );
   const fontFamily = sharedMeasureConfig.fontFamily;
-  const fontWeight = normalizedStyle.fontWeight;
+  const fontWeight = styleFontWeight;
   const readinessKey = `${fontFamily}::${fontWeight ?? 400}`;
   const [loadedReadinessKey, setLoadedReadinessKey] = useState(() => (!fontFamily ? readinessKey : null));
   const ready = !fontFamily || loadedReadinessKey === readinessKey;
@@ -177,6 +201,10 @@ export function useTextMeasurement(style?: React.CSSProperties): UseTextMeasurem
 
         if (isAvailable && isFontMeasurementReady(sharedMeasureConfig)) {
           setLoadedReadinessKey(readinessKey);
+          if (!announcedReadyKeys.has(readinessKey)) {
+            announcedReadyKeys.add(readinessKey);
+            console.info(`[useTextMeasurement] Font ready for measurement: ${readinessKey}`);
+          }
           return;
         }
 

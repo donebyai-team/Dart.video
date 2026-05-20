@@ -1,8 +1,11 @@
 import React, { useMemo } from 'react';
-import { useTextMeasurement, type UseTextMeasurementResult } from './useTextMeasurement';
+import {
+  type UseTextMeasurementResult,
+  useTextMeasurement,
+} from './useTextMeasurement';
 
 const MIN_VERTICAL_SAFETY_PX = 2;
-const HORIZONTAL_SAFETY_PX = 2;
+const HORIZONTAL_SAFETY_PX = 6;
 const FONT_METRIC_PROBE_TEXT = 'HgjpqyQÅ';
 
 /**
@@ -131,20 +134,41 @@ function measureInkBoundsHeight(text: string, style: React.CSSProperties, fontSi
   return height > 0 ? height : null;
 }
 
-export function ClippedText({
+function measureInkBoundsWidth(text: string, style: React.CSSProperties, fontSizePx: number): number | null {
+  if (typeof document === 'undefined') {
+    return null;
+  }
+
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+  if (!context) {
+    return null;
+  }
+
+  context.font = buildCanvasFont(style, fontSizePx);
+
+  const measured = context.measureText(text || FONT_METRIC_PROBE_TEXT);
+  const width = (measured.actualBoundingBoxLeft || 0) + (measured.actualBoundingBoxRight || 0);
+
+  return width > 0 ? width : null;
+}
+
+interface ClippedTextLayoutProps extends ClippedTextProps {
+  textMeasurement: UseTextMeasurementResult;
+}
+
+function ClippedTextLayout({
   text,
   style,
   inline = true,
   clipStyle,
   contentStyle,
-  textMeasurement: providedTextMeasurement,
+  textMeasurement,
   measuredWidthPx,
-}: ClippedTextProps): React.ReactElement {
+}: ClippedTextLayoutProps): React.ReactElement {
   const display = inline ? 'inline-block' : 'block';
-  const ownedTextMeasurement = useTextMeasurement(style);
-  const textMeasurement = providedTextMeasurement ?? ownedTextMeasurement;
   const { maxWidth: clipMaxWidth, overflow: _ignoredOverflow, ...clipStyleWithoutMaxWidth } = clipStyle ?? {};
-  const resolvedMeasuredWidth = measuredWidthPx ?? (textMeasurement.ready ? textMeasurement.width(text) : 0);
+  const resolvedMeasuredWidth = measuredWidthPx ?? textMeasurement.width(text);
 
   const clipMetrics = useMemo(() => {
     const resolvedStyle = style ?? {};
@@ -153,6 +177,7 @@ export function ClippedText({
     const fallbackPaddingPx = Math.max(MIN_VERTICAL_SAFETY_PX, Math.ceil(fontSizePx * 0.04));
     const measured = textMeasurement.ready ? textMeasurement.box(text) : null;
     const inkBoundsHeightPx = textMeasurement.ready ? measureInkBoundsHeight(text, resolvedStyle, fontSizePx) : null;
+    const inkBoundsWidthPx = textMeasurement.ready ? measureInkBoundsWidth(text, resolvedStyle, fontSizePx) : null;
     const measuredHeightPx = Math.max(
       lineHeightPx,
       measured?.height ?? 0,
@@ -162,16 +187,19 @@ export function ClippedText({
     const extraPaddingPx = Math.ceil(overflowPx / 2);
 
     return {
+      safeWidthPx: Math.max(
+        resolvedMeasuredWidth,
+        measured?.width ?? 0,
+        inkBoundsWidthPx ?? 0,
+      ),
       paddingTopPx: fallbackPaddingPx + extraPaddingPx,
       paddingBottomPx: fallbackPaddingPx + extraPaddingPx,
     };
-  }, [style, text, textMeasurement]);
-  const measuredWidth = textMeasurement.ready
-    ? Math.ceil(resolvedMeasuredWidth) + HORIZONTAL_SAFETY_PX
-    : 0;
+  }, [resolvedMeasuredWidth, style, text, textMeasurement]);
+  const measuredWidth = Math.ceil(clipMetrics.safeWidthPx) + HORIZONTAL_SAFETY_PX;
   const requestedWidth = parseRequestedWidth(clipMaxWidth);
   const layoutWidth = requestedWidth === Number.POSITIVE_INFINITY
-    ? measuredWidth
+    ? (textMeasurement.ready ? measuredWidth : null)
     : requestedWidth === null
       ? null
       : Math.max(0, Math.ceil(requestedWidth) + HORIZONTAL_SAFETY_PX);
@@ -224,4 +252,21 @@ export function ClippedText({
       </span>
     </span>
   );
+}
+
+export function ClippedText({
+  textMeasurement: providedTextMeasurement,
+  ...props
+}: ClippedTextProps): React.ReactElement {
+  if (providedTextMeasurement) {
+    return <ClippedTextLayout {...props} textMeasurement={providedTextMeasurement} />;
+  }
+
+  return <ClippedTextWithOwnedMeasurement {...props} />;
+}
+
+function ClippedTextWithOwnedMeasurement(props: ClippedTextProps): React.ReactElement {
+  const ownedTextMeasurement = useTextMeasurement(props.style);
+
+  return <ClippedTextLayout {...props} textMeasurement={ownedTextMeasurement} />;
 }

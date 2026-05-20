@@ -89,10 +89,6 @@ export const WordCycle: React.FC<WordCycleProps> = (initProps) => {
     [props.words, textMeasurement],
   );
 
-  if (!textMeasurement.ready) {
-    return <span id={id} className={props.className} style={{ display: 'inline-block', ...props.style, ...dragStyle }} />;
-  }
-
   if (props.words.length === 0) {
     return (
       <span

@@ -2,8 +2,6 @@ import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
 import { composeTransforms, useElement } from '../../../patches';
 import { interpolateWithEasing } from '../../../styles';
-import { useStyleContext } from '../../../styles/StyleContext';
-import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme';
 import type { TypographyVariant } from '../../../tokens';
 import { AnimationPresetName, resolveAnimationPreset } from '../../../core/animation_preset/AnimationPreset';

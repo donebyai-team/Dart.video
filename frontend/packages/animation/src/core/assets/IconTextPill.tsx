@@ -109,9 +109,7 @@ export function IconTextPill(initProps: IconTextPillProps): React.ReactElement {
         [props.textStyle, typographyStyle],
     );
     const textMeasurement = useTextMeasurement(resolvedTextStyle);
-    const textWidth = textMeasurement.ready
-        ? textMeasurement.width(props.text)
-        : textMeasurement.width(props.text);
+    const textWidth = textMeasurement.width(props.text);
     const metrics = getIconTextPillMetrics(props, typographyStyle, textWidth);
 
     return (

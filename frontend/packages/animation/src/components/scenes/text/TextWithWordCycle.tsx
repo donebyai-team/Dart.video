@@ -97,10 +97,6 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (initProps) =
     [props.cyclingWords, textMeasurement],
   );
 
-  if (!textMeasurement.ready) {
-    return <span id={id} className={props.className} style={containerStyle} />;
-  }
-
   if (props.cyclingWords.length === 0) {
     return (
       <span id={id} className={props.className} style={containerStyle}>

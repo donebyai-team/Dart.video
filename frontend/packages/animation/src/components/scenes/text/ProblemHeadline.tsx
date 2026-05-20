@@ -60,12 +60,11 @@ function parsePixelValue(value: React.CSSProperties['fontSize']): number {
   return 96;
 }
 
-function estimateLineWidth(line: string, fontSizePx: number): number {
-  const characterCount = line.trim().length || 1;
-  return Math.max(fontSizePx * 2.4, characterCount * fontSizePx * 0.6);
-}
-
-function splitTextIntoLines(text: string, maxWidthPx: number, fontSizePx: number): [string, string] {
+function splitTextIntoLines(
+  text: string,
+  maxWidthPx: number,
+  measureWidth: (value: string) => number,
+): [string, string] {
   const words = text.trim().split(/\s+/).filter(Boolean);
 
   if (words.length === 0) {
@@ -73,7 +72,7 @@ function splitTextIntoLines(text: string, maxWidthPx: number, fontSizePx: number
   }
 
   const fullText = words.join(' ');
-  if (words.length <= 2 || (words.length <= 3 && estimateLineWidth(fullText, fontSizePx) <= maxWidthPx)) {
+  if (words.length <= 2 || (words.length <= 3 && measureWidth(fullText) <= maxWidthPx)) {
     return [fullText, ''];
   }
 
@@ -83,8 +82,8 @@ function splitTextIntoLines(text: string, maxWidthPx: number, fontSizePx: number
   for (let splitIndex = 1; splitIndex < words.length; splitIndex += 1) {
     const lineOne = words.slice(0, splitIndex).join(' ');
     const lineTwo = words.slice(splitIndex).join(' ');
-    const lineOneWidth = estimateLineWidth(lineOne, fontSizePx);
-    const lineTwoWidth = estimateLineWidth(lineTwo, fontSizePx);
+    const lineOneWidth = measureWidth(lineOne);
+    const lineTwoWidth = measureWidth(lineTwo);
     const overflowPenalty = Math.max(0, lineOneWidth - maxWidthPx) + Math.max(0, lineTwoWidth - maxWidthPx);
     const balancePenalty = Math.abs(lineOne.length - lineTwo.length) + Math.abs(lineOneWidth - lineTwoWidth) * 0.08;
     const score = overflowPenalty * 10 + balancePenalty;
@@ -139,6 +138,7 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
   const lineGapPx = fontSizePx * 1.1;
   const availableWidth = preset.width - preset.safeArea.left - preset.safeArea.right;
   const maxTextWidthPx = Math.max(fontSizePx * 6, availableWidth * 0.72);
+  const textMeasurement = useTextMeasurement(style);
   const elapsed = Math.max(0, frame - props.startAt);
   const lineOneStaggerDelay = BASE_LINE_ONE_STAGGER;
   const lineOneWordDuration = BASE_LINE_ONE_DURATION;
@@ -149,8 +149,8 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
   const scaleOutDuration = BASE_SCALE_OUT_DURATION;
 
   const [resolvedLineOne, resolvedLineTwo] = useMemo(
-    () => splitTextIntoLines(props.text.trim(), maxTextWidthPx, fontSizePx),
-    [fontSizePx, maxTextWidthPx, props.text],
+    () => splitTextIntoLines(props.text.trim(), maxTextWidthPx, textMeasurement.width),
+    [maxTextWidthPx, props.text, textMeasurement.width],
   );
 
   const hasSecondLine = resolvedLineTwo.length > 0;
@@ -226,16 +226,13 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
   const groupOpacity = exit.opacity;
   const textOpacity = exit.opacity;
 
-  const textMeasurement = useTextMeasurement(style);
   const brushColor = props.highlightColor || theme.colors.primary;
   const measureWidth = (value: string): number => {
     if (!value.trim()) {
       return 0;
     }
 
-    return textMeasurement.ready
-      ? textMeasurement.width(value)
-      : estimateLineWidth(value, fontSizePx);
+    return textMeasurement.width(value);
   };
   const maxLineWidth = Math.max(
     measureWidth(resolvedLineOne),
@@ -254,9 +251,7 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
     );
     const visibleProgress = Math.max(0, Math.min(1, entryProgress));
     const isVisible = visibleProgress > MIN_VISIBLE_PROGRESS;
-    const measuredWidth = textMeasurement.ready
-      ? textMeasurement.width(word)
-      : Math.max(fontSizePx, word.trim().length * fontSizePx * 0.72);
+    const measuredWidth = textMeasurement.width(word);
     return {
       maxWidth: visibleProgress >= 0.999 ? 'none' : `${measuredWidth * (isVisible ? visibleProgress : 0)}px`,
       marginRight: wordIndex < lineOneWordCount - 1 ? `${fontSizePx * 0.22 * (isVisible ? visibleProgress : 0)}px` : 0,
@@ -282,10 +277,6 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
       transform: entranceTransform,
     };
   };
-
-  if (!textMeasurement.ready) {
-    return null;
-  }
 
   return (
     <div
