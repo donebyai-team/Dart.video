@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Thumbnail } from '@remotion/player'
 import { Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { GeneratedVideoBranding } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import { useVideoStore } from '@/stores/video'
 import { SingleSlidePreview, brandingToTheme } from '@coasterai/renderer'
 
@@ -12,20 +13,28 @@ interface SlideThumbnailProps {
     height: number
   } | null
   fps?: number | null
+  generatedBranding?: GeneratedVideoBranding | null
 }
 
 const MAX_STAGGER_ITEMS = 8
 
-const SlideThumbnail = ({ slide, index = 0, resolution: resolutionProp, fps: fpsProp }: SlideThumbnailProps) => {
+const SlideThumbnail = ({
+  slide,
+  index = 0,
+  resolution: resolutionProp,
+  fps: fpsProp,
+  generatedBranding: generatedBrandingProp,
+}: SlideThumbnailProps) => {
   const rootRef = useRef<HTMLDivElement | null>(null)
   const [isVisible, setIsVisible] = useState(false)
   const [debouncedSlide, setDebouncedSlide] = useState(slide)
 
   const storeResolution = useVideoStore(s => s.videoConfig?.metadata?.resolution)
   const storeFps = useVideoStore(s => s.videoConfig?.metadata?.fps)
-  const generatedBranding = useVideoStore(s => s.videoConfig?.metadata?.generatedBranding)
+  const storeGeneratedBranding = useVideoStore(s => s.videoConfig?.metadata?.generatedBranding)
   const resolution = resolutionProp ?? storeResolution
   const fps = fpsProp ?? storeFps ?? 30
+  const generatedBranding = generatedBrandingProp ?? storeGeneratedBranding
   const theme = useMemo(
     () => generatedBranding ? brandingToTheme(generatedBranding) : undefined,
     [generatedBranding],
