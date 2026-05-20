@@ -1,8 +1,7 @@
 import React from "react";
-import { preloadImage } from "@remotion/preload";
 import { useEffect, useState, useCallback } from "react";
 import { useRemotionEnvironment, delayRender, continueRender } from "remotion";
-import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from "../../patches";
+import { useElement } from "../../patches";
 import { useTheme } from "../../theme";
 import { useAspectPreset } from "../../styles";
 import { scaleToCanvas } from "../../theme/scale";
@@ -27,17 +26,14 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
   const { isRendering } = useRemotionEnvironment();
   const preset = useAspectPreset();
 
-  const styleOverride = useStyleOverride(propsInit.id);
-  const patchedProps = usePatchedProps(propsInit.id, propsInit);
-  const props = { ...patchedProps, id: propsInit.id };
-  const overrideTransform = typeof styleOverride.transform === 'string' ? styleOverride.transform : undefined;
-  const dragStyle = usePatchedDragStyle(props.id, props.style?.transform, overrideTransform);
+  const { props, style, containerStyle} = useElement(propsInit.id!, propsInit)
 
   const patchedIcon = props.icon;
   const patchedSize = props.size || 64;
   const patchedRadius = props.borderRadius || 0;
 
   const variant = theme.iconStyle ?? "outline";
+  const color = theme.colors.foreground;
   const fallbackUrl = `${ICON_BASE}/${variant}/${PLACEHOLDER_ICON}.svg`;
 
   const scaledSize = scaleToCanvas(patchedSize, preset);
@@ -105,9 +101,9 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
         justifyContent: "center",
         flexShrink: 0,
         overflow: "hidden",
-        ...props.style,
-        ...styleOverride,
-        ...dragStyle,
+        color: color,
+        ...style,
+        ...containerStyle,
       }}
     >
       {errored ? (

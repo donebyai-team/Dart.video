@@ -113,7 +113,6 @@ export function IconTextPill(initProps: IconTextPillProps): React.ReactElement {
         ? textMeasurement.width(props.text)
         : textMeasurement.width(props.text);
     const metrics = getIconTextPillMetrics(props, typographyStyle, textWidth);
-    console.log("Rgsef", props)
 
     return (
         <CardAsset
