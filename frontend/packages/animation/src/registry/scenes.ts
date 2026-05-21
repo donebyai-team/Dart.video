@@ -1,10 +1,8 @@
 import { ComponentRegistration } from "./registry";
 import { StatCounterDescriptor } from "../components/scenes/text/StatCounter";
 import { AnimatedTextDescriptor } from "../components/scenes/text/AnimatedText";
-import { TextStaggerDescriptor } from "../components/scenes/text/TextStagger";
 import { TextHookStaggerDescriptor } from "../components/scenes/text/TextHookStagger";
 import { TypewriterDescriptor } from "../components/scenes/text/Typewriter";
-import { TextHighlightDescriptor } from "../components/scenes/text/TextHighlight";
 import { TextWithWordCycleDescriptor } from "../components/scenes/text/TextWithWordCycle";
 import { TextLeadStaggerDescriptor } from "../components/scenes/text/TextLeadStagger";
 import { ProblemHeadlineDescriptor } from "../components/scenes/text/ProblemHeadline";

@@ -127,7 +127,7 @@ export function MultiImageStack(): React.ReactElement {
             >
                 <div
                     style={{
-                        textAlign: 'center',
+                        textAlign: 'left',
                         width: '100%',
                     }}
                 >

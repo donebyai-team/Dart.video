@@ -521,10 +521,17 @@ export const AnimatedTextDescriptor: ComponentRegistration = {
     ],
     description: 'Reveals a word or a text',
     instructions: `
-- Use splitBy="word" or "line" based on how the text should be revealed.
+- Use splitBy="char", "word", or "line" based on how the text should be revealed.
+- Use splitBy="char" for character-by-character reveals.
 - Use splitBy="word" for sequential word reveals and "line" for grouped multi-line reveals.
 - When using splitBy="line", define line breaks with "\\n".
 - Optionally wrap words in {} to highlight or emphasize specific parts of the text.
 `,
-    celExpression: `max(0, segmentCount(props.animatedtext.text, props.animatedtext.splitBy) - 1) * props.animatedtext.staggerDelay + props.animatedtext.duration + (props.animatedtext.highlightedTextAnimation != "none" ? props.animatedtext.duration : 0) + (props.animatedtext.exitAnimation != "none" ? props.animatedtext.exitDuration : 0)`,
+    celExpression: `max(
+  30,
+  max(0, segmentCount(props.animatedtext.text, props.animatedtext.splitBy) - 1) * props.animatedtext.staggerDelay
+  + props.animatedtext.duration
+  + (props.animatedtext.highlightedTextAnimation != "none" ? props.animatedtext.duration : 0)
+  + (props.animatedtext.exitAnimation != "none" ? props.animatedtext.exitDuration : 0)
+)`
 };

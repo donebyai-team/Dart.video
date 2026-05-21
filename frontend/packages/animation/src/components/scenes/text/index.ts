@@ -4,8 +4,6 @@ export * from './StatCounter';
 export * from './Typewriter';
 export * from './WordCycle';
 export * from './TextWithWordCycle';
-export * from './TextHighlight';
-export * from './TextStagger';
 export * from './TextHookStagger';
 export * from './TextLeadStagger';
 export * from './ProblemHeadline';

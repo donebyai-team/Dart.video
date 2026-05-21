@@ -324,8 +324,8 @@
             }
           ],
           "description": "Reveals a word or a text",
-          "instructions": "\n- Use splitBy=\"word\" or \"line\" based on how the text should be revealed.\n- Use splitBy=\"word\" for sequential word reveals and \"line\" for grouped multi-line reveals.\n- When using splitBy=\"line\", define line breaks with \"\\n\".\n- Optionally wrap words in {} to highlight or emphasize specific parts of the text.\n",
-          "celExpression": "max(0, segmentCount(props.animatedtext.text, props.animatedtext.splitBy) - 1) * props.animatedtext.staggerDelay + props.animatedtext.duration + (props.animatedtext.highlightedTextAnimation != \"none\" ? props.animatedtext.duration : 0) + (props.animatedtext.exitAnimation != \"none\" ? props.animatedtext.exitDuration : 0)"
+          "instructions": "\n- Use splitBy=\"char\", \"word\", or \"line\" based on how the text should be revealed.\n- Use splitBy=\"char\" for character-by-character reveals.\n- Use splitBy=\"word\" for sequential word reveals and \"line\" for grouped multi-line reveals.\n- When using splitBy=\"line\", define line breaks with \"\\n\".\n- Optionally wrap words in {} to highlight or emphasize specific parts of the text.\n",
+          "celExpression": "max(\n  30,\n  max(0, segmentCount(props.animatedtext.text, props.animatedtext.splitBy) - 1) * props.animatedtext.staggerDelay\n  + props.animatedtext.duration\n  + (props.animatedtext.highlightedTextAnimation != \"none\" ? props.animatedtext.duration : 0)\n  + (props.animatedtext.exitAnimation != \"none\" ? props.animatedtext.exitDuration : 0)\n)"
         },
         {
           "name": "TextHookStagger",
@@ -399,11 +399,6 @@
                   "default": "headingLg"
                 },
                 {
-                  "name": "splitBy",
-                  "type": "enum",
-                  "default": "char"
-                },
-                {
                   "name": "entranceAnimation",
                   "type": "enum",
                   "map": "props.entranceAnimation",
@@ -426,7 +421,7 @@
           ],
           "description": "Character-by-character typewriter effect",
           "instructions": "Use for dramatic reveals or code/terminal effects.",
-          "celExpression": "54"
+          "celExpression": "60"
         },
         {
           "name": "WordCycle",
@@ -587,8 +582,7 @@
           "tags": [
             "Problem",
             "Hook",
-            "Intro",
-            "Filler"
+            "Intro"
           ],
           "schema": [
             {
@@ -634,7 +628,8 @@
             }
           ],
           "celExpression": "((50 + max(0, segmentCount(props.textleadstagger.text, \"word\") - 2) * 5 + max(0, segmentCount(props.textleadstagger.text, \"word\") - 1) * 4) * 100) / max(25, props.textleadstagger.speed)",
-          "description": "First word starts enlarged and then settles down. The remaining words enter in a stagger and exit in stagger."
+          "description": "First word starts enlarged and then settles down. The remaining words enter in a stagger and exit in stagger.",
+          "instructions": "Do not use it more than once"
         },
         {
           "name": "ProblemHeadline",
@@ -1252,7 +1247,7 @@
           "schema": [
             {
               "type": "component",
-              "name": "textstagger",
+              "name": "animatedtext",
               "fields": [
                 {
                   "name": "text",
@@ -1266,24 +1261,9 @@
                   "default": "headingLg"
                 },
                 {
-                  "name": "staggerDelay",
-                  "type": "number",
-                  "default": 15
-                },
-                {
                   "name": "entranceAnimation",
                   "type": "enum",
                   "default": "scaleIn"
-                },
-                {
-                  "name": "duration",
-                  "type": "number",
-                  "default": 20
-                },
-                {
-                  "name": "splitBy",
-                  "type": "enum",
-                  "default": "line"
                 }
               ]
             },
@@ -1332,7 +1312,7 @@
           ],
           "description": "Logo + brand name reveal.",
           "instructions": "Use for brand intros",
-          "celExpression": "max(0, segmentCount(props.animatedtext.text, \"char\") - 1) * 5 + 20"
+          "celExpression": "max(0, segmentCount(props.animatedtext.text, \"char\")) * 5 + 20"
         },
         {
           "name": "LogoWithCTA",

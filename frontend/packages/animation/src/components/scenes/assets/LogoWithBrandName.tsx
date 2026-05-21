@@ -74,7 +74,7 @@ export function LogoWithBrandName(): React.ReactElement {
                 <AnimatedText
                     id="animatedtext"
                     text={textProps.text}
-                    splitBy={SPLIT_BY_MODES[0]}
+                    splitBy={SPLIT_BY_MODES[2]}
                     staggerDelay={DEFAULT_CHAR_STAGGER}
                     duration={DEFAULT_CHAR_FADE_DURATION}
                     variant={actualVariant}
@@ -104,27 +104,12 @@ export const LogoWithBrandNameSchemaFields = [
                 "name": "variant",
                 "type": "enum",
                 "default": AnimatedTextDefaults.variant
-            },
-            {
-                "name": "staggerDelay",
-                "type": "number",
-                "default": AnimatedTextDefaults.staggerDelay
-            },
+            },            
             {
                 "name": "entranceAnimation",
                 "type": "enum",
                 "default": AnimatedTextDefaults.entranceAnimation
-            },
-            {
-                "name": "duration",
-                "type": "number",
-                "default": AnimatedTextDefaults.duration
-            },
-            {
-                "name": "splitBy",
-                "type": "enum",
-                "default": SPLIT_BY_MODES[2]
-            }
+            },            
         ]
     },
     {
@@ -146,5 +131,5 @@ export const LogoWithBrandNameDescriptor: ComponentRegistration = {
     }],
     description: 'Logo + brand name reveal.',
     instructions: 'Use for brand intros',
-    celExpression: 'max(0, segmentCount(props.animatedtext.text, "char") - 1) * 5 + 20',
+    celExpression: `max(0, segmentCount(props.animatedtext.text, "char")) * ${DEFAULT_CHAR_STAGGER} + ${DEFAULT_CHAR_FADE_DURATION}`,
 };

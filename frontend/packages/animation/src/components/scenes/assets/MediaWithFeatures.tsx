@@ -134,12 +134,14 @@ export function MediaWithFeatures(): React.ReactElement {
                                                 <IconAsset
                                                     id={`iconasset-features-${index}`}
                                                     icon={iconProps.icon}
+                                                    style={{ color: '#000000' }}
                                                     size={64} />
                                             </div>
                                             <Text
                                                 id={`text-features-${index}`}
                                                 text={textProps.text}
                                                 variant="subheading"
+                                                style={{ color: '#000000' }} // as the card background is white
                                             />
 
                                         </CardAsset>

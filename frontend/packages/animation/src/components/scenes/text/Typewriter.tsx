@@ -1,23 +1,19 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
-import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
+import { useElement } from '../../../patches';
 import { useStyleContext } from '../../../styles/StyleContext';
-import { useAspectPreset } from '../../../styles/AspectPresetContext';
-import { useTheme } from '../../../theme/ThemeContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
-import { resolveTypography } from '../../../tokens/resolveTypography';
 import { AnimationPresetName, resolveAnimationPreset } from '../../../core/animation_preset/AnimationPreset';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { TypographyVariant } from '../../../tokens';
 
-const TYPEWRITER_TYPING_DURATION = 30;
-const TYPEWRITER_PULSE_DURATION = 24;
+export const TYPEWRITER_TYPING_DURATION = 30;
+export const TYPEWRITER_PULSE_DURATION = 30;
 
 export const TypewriterDefaults = {
   id: 'typewriter',
   text: "",
   startAt: 0,
-  splitBy: "char" as const,
   variant: "headingLg" as TypographyVariant,
   entranceAnimation: "fadeIn" as AnimationPresetName,
   typingDuration: TYPEWRITER_TYPING_DURATION,
@@ -27,6 +23,83 @@ export const TypewriterDefaults = {
 
 export type TypewriterProps = typeof TypewriterDefaults;
 
+type TypewriterSegments = {
+  stablePrefix: string;
+  activeWordVisible: string;
+  activeWordHidden: string;
+  trailingHidden: string;
+};
+
+function getTypewriterSegments(text: string, visibleLength: number): TypewriterSegments {
+  const clampedVisibleLength = Math.max(0, Math.min(text.length, visibleLength));
+  const visibleText = text.slice(0, clampedVisibleLength);
+  const hiddenText = text.slice(clampedVisibleLength);
+
+  if (hiddenText.length === 0 || /\s$/.test(visibleText)) {
+    return {
+      stablePrefix: visibleText,
+      activeWordVisible: '',
+      activeWordHidden: '',
+      trailingHidden: hiddenText,
+    };
+  }
+
+  const currentWordStart = visibleText.search(/\S+$/);
+  if (currentWordStart === -1) {
+    return {
+      stablePrefix: visibleText,
+      activeWordVisible: '',
+      activeWordHidden: '',
+      trailingHidden: hiddenText,
+    };
+  }
+
+  const activeWordEndMatch = hiddenText.match(/^\S*/);
+  const activeWordHidden = activeWordEndMatch?.[0] ?? '';
+
+  return {
+    stablePrefix: visibleText.slice(0, currentWordStart),
+    activeWordVisible: visibleText.slice(currentWordStart),
+    activeWordHidden,
+    trailingHidden: hiddenText.slice(activeWordHidden.length),
+  };
+}
+
+function renderTypewriterText(
+  segments: TypewriterSegments,
+  hiddenStyle: React.CSSProperties,
+  showCursor: boolean,
+  cursorChar: string,
+  cursorVisible: boolean,
+): React.ReactNode {
+  return (
+    <>
+      {segments.stablePrefix}
+      {segments.activeWordVisible || segments.activeWordHidden ? (
+        <span style={{ whiteSpace: 'nowrap' }}>
+          {segments.activeWordVisible}
+          {showCursor && cursorChar && (
+            <span style={{ opacity: cursorVisible ? 1 : 0 }}>{cursorChar}</span>
+          )}
+          {segments.activeWordHidden && (
+            <span aria-hidden style={hiddenStyle}>
+              {segments.activeWordHidden}
+            </span>
+          )}
+        </span>
+      ) : (
+        showCursor && cursorChar && (
+          <span style={{ opacity: cursorVisible ? 1 : 0 }}>{cursorChar}</span>
+        )
+      )}
+      {segments.trailingHidden && (
+        <span aria-hidden style={hiddenStyle}>
+          {segments.trailingHidden}
+        </span>
+      )}
+    </>
+  );
+}
 
 /**
  * Reveals text progressively using linear easing.
@@ -35,15 +108,11 @@ export type TypewriterProps = typeof TypewriterDefaults;
 export function Typewriter(initProps: TypewriterProps): React.ReactElement {
   const frame = useCurrentFrame();
   const styleConfig = useStyleContext();
-  const theme = useTheme();
-  const preset = useAspectPreset();
   const defaultProps = { ...TypewriterDefaults, ...initProps };
   const id = defaultProps.id;
 
-  const props = usePatchedProps(id, defaultProps);
+  const {props, style, containerStyle} = useElement(id, defaultProps);
 
-  const styleOverride = useStyleOverride(id);
-  const dragStyle = usePatchedDragStyle(id, props.style?.transform);
 
   const entranceDuration = 20;
   const entranceMotion = resolveAnimationPreset({
@@ -61,16 +130,9 @@ export function Typewriter(initProps: TypewriterProps): React.ReactElement {
     'linear',
   );
 
-  let visibleText: string;
-  if (props.splitBy === 'char') {
-    visibleText = props.text.slice(0, Math.floor(progress * props.text.length));
-  } else if (props.splitBy === 'word') {
-    const words = props.text.split(' ');
-    visibleText = words.slice(0, Math.floor(progress * words.length)).join(' ');
-  } else {
-    const lines = props.text.split('\n');
-    visibleText = lines.slice(0, Math.floor(progress * lines.length)).join('\n');
-  }
+  const visibleLength = Math.floor(progress * props.text.length);
+  const visibleText = props.text.slice(0, visibleLength);
+  const segments = getTypewriterSegments(props.text, visibleLength);
 
   const { cursor } = styleConfig;
   const cursorCharMap: Record<string, string> = {
@@ -94,16 +156,17 @@ export function Typewriter(initProps: TypewriterProps): React.ReactElement {
   const pulseCenter = -30 + (pulseProgress * 160);
   const pulseBandStart = pulseCenter - 18;
   const pulseBandEnd = pulseCenter + 18;
-  const { transform: _ignoredTransform, display: _ignoredDisplay, position: _ignoredPosition, ...textStyleProps } = props.style ?? {};
+  const hiddenTextStyle = {
+    visibility: 'hidden' as const,
+  };
+
   const textStyles = {
-    ...resolveTypography(props.variant, styleConfig, theme, preset),
-    ...textStyleProps,
     opacity: entranceMotion.opacity,
     transform: entranceMotion.transform,
     display: 'inline-block',
     position: 'relative' as const,
     whiteSpace: 'pre-wrap' as const,
-    ...styleOverride,
+    ...style,
   };
 
   return (
@@ -112,15 +175,20 @@ export function Typewriter(initProps: TypewriterProps): React.ReactElement {
       className={props.className}
       style={{
         display: 'inline-block',
-        ...props.style,
-        ...dragStyle,
+        ...containerStyle,
       }}
     >
       <span
         style={textStyles}
       >
-        {visibleText}
-        {pulseActive && (
+        {renderTypewriterText(
+          segments,
+          hiddenTextStyle,
+          showCursor,
+          cursorChar,
+          cursorVisible,
+        )}
+        {pulseActive && visibleText && (
           <span
             aria-hidden
             style={{
@@ -132,14 +200,12 @@ export function Typewriter(initProps: TypewriterProps): React.ReactElement {
               backgroundImage: `linear-gradient(90deg, rgba(255,255,255,0) ${pulseBandStart}%, rgba(255,255,255,0.95) ${pulseCenter}%, rgba(255,255,255,0) ${pulseBandEnd}%)`,
               backgroundClip: 'text',
               WebkitBackgroundClip: 'text',
+              mixBlendMode: 'difference',
               opacity: entranceMotion.opacity,
             }}
           >
             {visibleText}
           </span>
-        )}
-        {showCursor && cursorChar && (
-          <span style={{ opacity: cursorVisible ? 1 : 0 }}>{cursorChar}</span>
         )}
       </span>
     </span>
@@ -161,11 +227,6 @@ export const TypewriterSchemaFields = [
     "name": "variant",
     "type": "enum",
     "default": TypewriterDefaults.variant
-  },
-  {
-    "name": "splitBy",
-    "type": "enum",
-    "default": TypewriterDefaults.splitBy
   },
   {
     "name": "entranceAnimation",

@@ -279,7 +279,7 @@ export const TextLeadStaggerSchemaFields = [
 export const TextLeadStaggerDescriptor: ComponentRegistration = {
   name: 'TextLeadStagger',
   type: 'content',
-  tags: ['Problem', 'Hook', 'Intro', 'Filler'],
+  tags: ['Problem', 'Hook', 'Intro'],
   schema: [{
     type: 'component',
     name: 'textleadstagger',
@@ -299,5 +299,6 @@ export const TextLeadStaggerDescriptor: ComponentRegistration = {
     }
   ],
   celExpression: `((${CEL_BASE_FRAMES} + max(0, segmentCount(props.textleadstagger.text, "word") - 2) * ${CEL_EXTRA_ENTRY_FRAMES} + max(0, segmentCount(props.textleadstagger.text, "word") - 1) * ${CEL_EXTRA_EXIT_FRAMES}) * ${DEFAULT_SPEED_PERCENTAGE}) / max(${MIN_SPEED_PERCENTAGE}, props.textleadstagger.speed)`,
-  description: `First word starts enlarged and then settles down. The remaining words enter in a stagger and exit in stagger.`
+  description: `First word starts enlarged and then settles down. The remaining words enter in a stagger and exit in stagger.`,
+  instructions: 'Do not use it more than once'
 };

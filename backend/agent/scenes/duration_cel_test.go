@@ -5,22 +5,48 @@ import "testing"
 func TestSceneConfigComputeDurationFrames(t *testing.T) {
 	t.Run("computes duration for single component scene", func(t *testing.T) {
 		scene := SceneConfig{
-			Name:               "TextStagger",
-			DurationExpression: `(segmentCount(props.textstagger.text, props.textstagger.splitBy) * props.textstagger.staggerDelay) + props.textstagger.duration`,
+			Name:               "AnimatedText",
+			DurationExpression: "max(\n  30,\n  max(0, segmentCount(props.animatedtext.text, props.animatedtext.splitBy) - 1) * props.animatedtext.staggerDelay\n  + props.animatedtext.duration\n  + (props.animatedtext.highlightedTextAnimation != \"none\" ? props.animatedtext.duration : 0)\n  + (props.animatedtext.exitAnimation != \"none\" ? props.animatedtext.exitDuration : 0)\n)",
 			Props: map[string]any{
-				"textstagger": map[string]any{
-					"text":              "AI models",
-					"variant":           "heading",
-					"staggerDelay":      5,
-					"entranceAnimation": "scaleIn",
-					"duration":          15,
-					"splitBy":           "word",
+				"animatedtext": map[string]any{
+					"text":                     "AI models",
+					"variant":                  "heading",
+					"staggerDelay":             5,
+					"entranceAnimation":        "scaleIn",
+					"duration":                 15,
+					"splitBy":                  "word",
+					"highlightedTextAnimation": "none",
+					"exitAnimation":            "none",
 				},
 			},
 		}
 
-		if got := scene.ComputeDurationFrames(); got != 25 {
-			t.Fatalf("expected 25 frames, got %d", got)
+		if got := scene.ComputeDurationFrames(); got != 30 {
+			t.Fatalf("expected 30 frames, got %d", got)
+		}
+	})
+
+	t.Run("computes duration for multi line component scene", func(t *testing.T) {
+		scene := SceneConfig{
+			Name:               "AnimatedText",
+			DurationExpression: "max(\n  30,\n  max(0, segmentCount(props.animatedtext.text, props.animatedtext.splitBy) - 1) * props.animatedtext.staggerDelay\n  + props.animatedtext.duration\n  + (props.animatedtext.highlightedTextAnimation != \"none\" ? props.animatedtext.duration : 0)\n  + (props.animatedtext.exitAnimation != \"none\" ? props.animatedtext.exitDuration : 0)\n)",
+			Props: map[string]any{
+				"animatedtext": map[string]any{
+					"text":                     "AI models\nare the future of AI",
+					"variant":                  "heading",
+					"staggerDelay":             15,
+					"entranceAnimation":        "scaleIn",
+					"duration":                 20,
+					"exitDuration":             20,
+					"splitBy":                  "line",
+					"highlightedTextAnimation": "none",
+					"exitAnimation":            "zoomOut",
+				},
+			},
+		}
+
+		if got := scene.ComputeDurationFrames(); got != 55 {
+			t.Fatalf("expected 55 frames, got %d", got)
 		}
 	})
 
