@@ -71,7 +71,7 @@ export function PillCarousel(): React.ReactElement {
     const theme = useTheme();
     const preset = useAspectPreset();
 
-    const textProps = usePatchedProps('textstagger', HERO_TEXT_DEFAULTS);
+    const textProps = usePatchedProps('animatedtext', HERO_TEXT_DEFAULTS);
     const pillItems = useArrayPatch('pills');
 
     const pillCount = pillItems.length;
@@ -150,21 +150,18 @@ export function PillCarousel(): React.ReactElement {
                 flexDirection: 'column',
             }}
         >
-            <div
+
+            <AnimatedText
+                id="animatedtext"
+                text={textProps.text}
+                splitBy="line"
+                duration={textProps.duration}
+                entranceAnimation={textProps.entranceAnimation}
+                variant={textProps.variant}
                 style={{
                     transform: `translateY(${headlineTranslateY}px)`,
                 }}
-            >
-                <AnimatedText
-                    id="animatedtext"
-                    text={textProps.text}
-                    splitBy="line"
-                    staggerDelay={0}
-                    duration={textProps.duration}
-                    entranceAnimation={textProps.entranceAnimation}
-                    variant={textProps.variant}
-                />
-            </div>
+            />
 
             {pillCount > 0 && (
                 <div
@@ -237,7 +234,7 @@ export function PillCarousel(): React.ReactElement {
 export const HeroPillCarouselSchemaFields = [
     {
         type: 'component',
-        name: 'textstagger',
+        name: 'animatedtext',
         fields: [
             {
                 name: 'text',
