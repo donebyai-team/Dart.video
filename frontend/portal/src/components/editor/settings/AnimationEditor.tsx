@@ -491,7 +491,7 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                     </div>
                 )}
 
-                <div className='flex-1 min-h-0 rounded-xl bg-background/60 backdrop-blur-sm p-3 overflow-auto'>
+                {/* <div className='flex-1 min-h-0 rounded-xl bg-background/60 backdrop-blur-sm p-3 overflow-auto'>
                     {stage === 'question' && activeQuestion && (
                         <QuestionPanel
                             question={activeQuestion}
@@ -509,17 +509,17 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                             onOpenSelectedAssetsDialog={() => setQuestionAssetsDialogOpen(true)}
                         />
                     )}
-                </div>
+                </div> */}
 
-                {showThinking && (
+                {/* {showThinking && (
                     <div className='mt-3'>
                         <ThinkingViewComponent thinkingChunk={thinkingChunk} />
                     </div>
-                )}
+                )} */}
 
-                <div className="mt-3 rounded-xl border bg-background shadow-sm overflow-hidden relative">
+                {/* <div className="mt-3 rounded-xl border bg-background shadow-sm overflow-hidden relative"> */}
                     {/* Toolbar row */}
-                    <div className='flex items-center gap-1.5 px-3 pt-2 pb-1.5 text-xs text-muted-foreground border-b border-border/40 flex-wrap'>
+                    {/* <div className='flex items-center gap-1.5 px-3 pt-2 pb-1.5 text-xs text-muted-foreground border-b border-border/40 flex-wrap'>
                         {hasBrand ? (
                             <span className='flex items-center gap-1 flex-shrink-0'>
                                 <Palette className='w-4 h-4 opacity-70' />
@@ -540,10 +540,10 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                             disabled={stage !== 'compose'}
                             onOpenAssetPicker={openAssetDialog}
                         />
-                    </div>
+                    </div> */}
 
                     {/* Selected assets badge */}
-                    {hasSelectedAssets && (
+                    {/* {hasSelectedAssets && (
                         <div className='mx-3 mt-1.5 flex flex-wrap gap-2'>
                             <div
                                 onClick={() => setSelectedAssetsDialogOpen(true)}
@@ -566,9 +566,9 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                                 </button>
                             </div>
                         </div>
-                    )}
+                    )} */}
 
-                    <textarea
+                    {/* <textarea
                         value={prompt}
                         onChange={e => setPrompt(e.target.value)}
                         onKeyDown={e => {
@@ -581,9 +581,9 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                         rows={8}
                         disabled={isSubmitting || stage === 'question'}
                         className="w-full resize-none bg-transparent px-3 py-2.5 pr-12 text-sm focus:outline-none placeholder:text-muted-foreground/60 disabled:opacity-50"
-                    />
+                    /> */}
 
-                    <div className="absolute bottom-2 right-2">
+                    {/* <div className="absolute bottom-2 right-2">
                         {isSubmitting || stage === 'question' ? (
                             <Button
                                 onClick={handleStop}
@@ -603,8 +603,8 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                                 <Sparkles className="w-3.5 h-3.5" />
                             </Button>
                         )}
-                    </div>
-                </div>
+                    </div> */}
+                {/* </div> */}
             </div>
         </div>
     )
