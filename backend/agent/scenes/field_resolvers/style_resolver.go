@@ -5,6 +5,7 @@ import (
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/services"
 	"github.com/shank318/coasterai/services/brand_identity"
+	"strings"
 )
 
 type StyleResolver struct {
@@ -53,21 +54,29 @@ func (resolver StyleResolver) Resolve(
 		brand_identity.TextHighlight,
 	)
 
-	hasTextField := false
+	//hasTextField := false
 
 	for _, field := range fields {
 		switch field.DataType {
 		case types.DataTypeText:
-			hasTextField = true
+			//hasTextField = true
 
 		case types.DataTypeColor:
 			props[field.Name] = textHighlightColor
 		}
+
+		// For AnimatedText, we need to change the entrance animation and stagger delay
+		if field.Name == "splitBy" {
+			if splitBy, ok := props[field.Name].(string); ok && strings.HasPrefix(splitBy, "word") {
+				props["staggerDelay"] = 2
+				props["entranceAnimation"] = "slideUp"
+			}
+		}
 	}
 
-	if hasTextField {
-		mergeStyleColor(props, textNormalColor)
-	}
+	//if hasTextField {
+	mergeStyleColor(props, textNormalColor)
+	//}
 
 	return props
 }
@@ -78,6 +87,13 @@ func (resolver StyleResolver) backgroundColor() (string, bool) {
 		resolver.BackgroundStyle.GetSolid() == nil ||
 		resolver.BackgroundStyle.GetSolid().Hex == "" {
 		return "", false
+	}
+
+	// If the effect is glow that is a light color,
+	// the hex color will be dark and hence we override it
+	if resolver.BackgroundStyle.Effect != nil &&
+		resolver.BackgroundStyle.Effect.Type == pbcore.BackgroundEffectType_BACKGROUND_EFFECT_TYPE_GLOW {
+		resolver.BackgroundStyle.GetSolid().Hex = "#FFFFFF"
 	}
 
 	return resolver.BackgroundStyle.GetSolid().Hex, true

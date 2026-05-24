@@ -16,6 +16,7 @@ export interface ComponentRegistration {
   schema?: any;
   llmSchema?: any;
   celExpression?: string;
+  instructions?: string;
 }
 
 

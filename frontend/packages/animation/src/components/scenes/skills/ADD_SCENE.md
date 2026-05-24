@@ -53,13 +53,42 @@ Use it to get the current frame number for animations and timing.
 
 
 ### Utility functions
-Use `import {measureText} from '@remotion/layout-utils';` for text measurement. Needed when measuring text or word wrapping.
+Use shared text-measurement utilities from `core/assets`, not `measureText` directly.
+
+#### `useTextMeasurement(style)`
+Use this when a scene needs font-aware text metrics during render.
+
+Use it for:
+- word widths used in animation math
+- line widths used in layout decisions
+- any text measurement that must wait for the correct font
+
+Usage rules:
+- This is the default choice for new scenes.
+- Call it with the same style the text will actually render with.
+- Respect the `ready` flag before relying on `width()` or `box()`.
+- If the scene cannot render correctly without real text metrics, return `null` or a safe fallback until `ready` is true.
+
+#### `ClippedText`
+Use this instead of `Text` when text will be revealed, masked, or moved inside an overflow-hidden viewport.
+
+Use it for:
+- width reveals
+- staggered word entrances through a clipped wrapper
+- masked slide-in text
+- any text where glyphs might be clipped by a reveal container
+
+Usage rules:
+- Use plain `Text` when the full text stays visible the whole time.
+- Use `ClippedText` when the scene needs a safe clipping wrapper around animated text.
+- Keep scene timing and transforms outside the component; `ClippedText` only handles clip-safe layout.
 
 ### Assets Available for Scenes
 
 Use these scene assets where appropriate:
 - `MediaAsset`
 - `Text`
+- `ClippedText`
 - `CardAsset`
 - `IconAsset`
 - `ArrayItem`
@@ -84,6 +113,8 @@ Use these scene assets where appropriate:
 - Use `CardAsset` for framed or highlighted content blocks.
 - Use `IconAsset` and `Text` together for repeatable feature rows or callouts.
 - Use `MediaAsset` for the primary image or video region.
+- Do not import `measureText` from `@remotion/layout-utils` in new scenes; prefer `useTextMeasurement()`.
+- If text is being clipped or revealed, prefer `ClippedText` over building a custom overflow-hidden text wrapper from scratch.
 
 ### Output Requirements
 

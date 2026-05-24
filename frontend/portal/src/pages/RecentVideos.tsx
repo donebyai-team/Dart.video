@@ -141,6 +141,7 @@ const RecentVideos = () => {
                         slide={thumbnailSlide!}
                         resolution={thumbnailResolution}
                         fps={thumbnailFps}
+                        generatedBranding={video.metadata?.generatedBranding}
                       />
 
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">

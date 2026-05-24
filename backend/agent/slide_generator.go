@@ -62,6 +62,7 @@ func (g *videoConfigGenerator) Fail(ctx context.Context, cause error, status mod
 
 func (g *videoConfigGenerator) AddBranding(assetRegistry *services.MediaAssetRegistry) {
 	generatedBranding := &pbcore.GeneratedVideoBranding{}
+	var bgStyle *pbcore.BackgroundStyle
 
 	// Step 1: get colors (already processed)
 	if assetRegistry == nil {
@@ -72,6 +73,7 @@ func (g *videoConfigGenerator) AddBranding(assetRegistry *services.MediaAssetReg
 			generatedBranding.Colors = brand_identity.ExtractOrGenerateColors(nil)
 		} else {
 			generatedBranding.BrandIdentity = brandIdentity
+			bgStyle = brandIdentity.BgStyle
 			if len(brandIdentity.Colors) == 0 {
 				generatedBranding.Colors = brand_identity.ExtractOrGenerateColors(nil)
 			} else {
@@ -80,50 +82,15 @@ func (g *videoConfigGenerator) AddBranding(assetRegistry *services.MediaAssetReg
 		}
 	}
 
-	// Step 2: ALWAYS generate gradient
-	// We are using glow gradient with primary color at center
-	//solidColor := brand_identity.BrandColorTokens(generatedBranding.Colors)[brand_identity.COLOR_PRIMARY]
-
-	// Step 3: compute safe text color
-	//updatedTextColor := brand_identity.GetReadableTextColorForSolid(solidColor, generatedBranding.Colors, brand_identity.TextNormal)
-	textColor := brand_identity.BrandColorTokens(generatedBranding.Colors)[brand_identity.COLOR_TEXT_PRIMARY]
-
-	// because we are using glow gradient, we need to make sure the text color is dark enough,
-	isTextDark := brand_identity.IsDark(textColor)
-	if !isTextDark {
-		textColor = "#000000"
+	// Generate background and text colors
+	if bgStyle == nil {
+		bgStyle = brand_identity.GenerateDefaultBackground(generatedBranding.Colors)
 	}
-
-	// Step 4: update text color
-	for _, brandColor := range generatedBranding.Colors {
-		if brandColor.Priority == pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_TEXT_PRIMARY {
-			brandColor.ColorHexCode = textColor
-		}
-	}
+	generatedBranding.Colors = brand_identity.ModifyTextColor(generatedBranding.Colors, bgStyle)
 
 	// Step 5: assign branding
 	g.video.Metadata.GeneratedBranding = generatedBranding
-
-	g.AddVideoBackground(generateDefaultBackground(generatedBranding))
-}
-
-func generateDefaultBackground(generatedBranding *pbcore.GeneratedVideoBranding) *pbcore.BackgroundStyle {
-	bg := brand_identity.BrandColorTokens(generatedBranding.Colors)[brand_identity.COLOR_BACKGROUND]
-	primary := brand_identity.BrandColorTokens(generatedBranding.Colors)[brand_identity.COLOR_PRIMARY]
-	solidColor := brand_identity.DarkestOrBlack(bg, primary)
-
-	return &pbcore.BackgroundStyle{
-		Style: &pbcore.BackgroundStyle_Solid{
-			Solid: &pbcore.SolidColor{
-				Hex: solidColor,
-			},
-		},
-		Pattern:        pbcore.BackgroundPattern_BACKGROUND_PATTERN_DOTS,
-		PatternOpacity: utils.Ptr(scenes.DefaultBackgroundPatternOpacity),
-		Effect: &pbcore.BackgroundEffect{
-			Type: pbcore.BackgroundEffectType_BACKGROUND_EFFECT_TYPE_GLOW,
-		},
-	}
+	g.AddVideoBackground(bgStyle)
 }
 
 func (g *videoConfigGenerator) CreatePendingSlidesV2(

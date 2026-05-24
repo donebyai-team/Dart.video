@@ -4,6 +4,7 @@ import type {
 } from "@/types/editor";
 import type { EntityId } from "@/types/selection";
 import { SelectedTool } from "@/types/tools";
+import { BrandAssetPriority } from "@coasterai/pb/coasterai/core/v1/brandkit_pb";
 import { Section, Slide, TransitionDirection, TransitionType, CalloutEffect, BackgroundStyle, ZoomEffect, SpotlightEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { Resolution, Video } from "@coasterai/pb/coasterai/core/v1/video_pb";
 import type { StateCreator } from "zustand";
@@ -68,9 +69,11 @@ export interface VideoActions {
     removeSlide: (sectionId: string, slideId: string) => void
     duplicateSlide: (sectionId: string, slideId: string) => void
     updateSlide: (updates: Partial<Slide>) => void
+    updateSlideById: (slideId: string, updates: Partial<Slide>) => void
     updateSlideContent: (updates: Record<string, unknown>) => void
     updateSlideTransition: (sectionId: string, slideId: string, transitionId: TransitionType, direction?: TransitionDirection) => void
     reorderSlidesInSection: (activeId: string, overId: string) => void
+    setSelectedSlideById: (slideId: string) => void
 
     // Canvas
     // Define function interface here for effects to get in VideoActions
@@ -113,6 +116,7 @@ export interface VideoActions {
     setShowVoiceover: (show: boolean) => void
 
     updateSlideTranscript: (transcript: string) => void
+    updateGeneratedBrandingColor: (priority: BrandAssetPriority, colorHexCode: string) => void
     setResolution: (resolution: Resolution) => void
     setBackgroundMusic: (url?: string)  => void
 

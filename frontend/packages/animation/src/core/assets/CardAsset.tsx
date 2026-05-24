@@ -19,7 +19,7 @@ export type CardAssetProps = {
 };
 
 export function CardAsset({ id, children, style }: CardAssetProps): React.ReactElement {
-  const { style: overrideStyle } = useElement<{ style?: React.CSSProperties }>(id);
+  const { style: overrideStyle } = useElement(id);
 
   return (
     <div

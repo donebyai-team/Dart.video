@@ -5,6 +5,7 @@ import { ArrayItem } from '../../../core/assets/ArrayItem';
 import { useArrayPatch, useElement } from '../../../patches';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { useAspectPreset } from '../../../styles';
+import { DEFAULT_MEDIA_FRAME_STYLE } from './TextWithMediaScene';
 
 const IMAGE_REVEAL_START_FRAME = 0;
 const IMAGE_SCALE_IN_END_FRAME = 20;
@@ -19,7 +20,7 @@ export function MediaWithFeatures(): React.ReactElement {
     const frame = useCurrentFrame();
     const preset = useAspectPreset();
     const mediaElement = useElement<MediaAssetProps>('mediaasset');
-    const { props: mediaProps, style: mediaStyle } = mediaElement;
+    const { props: mediaProps } = mediaElement;
     const featureItems = useArrayPatch('features');
 
     const mockupScale = interpolate(frame, [IMAGE_REVEAL_START_FRAME, IMAGE_SCALE_IN_END_FRAME], [0.7, 1], {
@@ -74,10 +75,7 @@ export function MediaWithFeatures(): React.ReactElement {
                                 src={mediaProps.src}
                                 width={mediaWidth}
                                 height={mediaHeight}
-                                style={{
-                                    objectFit: 'cover',
-                                    ...mediaStyle,
-                                }}
+                                style={DEFAULT_MEDIA_FRAME_STYLE}
                             />
                         </div>
 
@@ -132,16 +130,18 @@ export function MediaWithFeatures(): React.ReactElement {
                                                 WebkitBackdropFilter: 'blur(30px)',
                                             }}
                                         >
-                                            <div style={{ background: 'rgba(0,102,204,0.1)', padding: 12, borderRadius: 16 }}>
+                                            <div style={{ background: 'rgba(0,102,204,0.1)', padding: 8, borderRadius: 16 }}>
                                                 <IconAsset
                                                     id={`iconasset-features-${index}`}
                                                     icon={iconProps.icon}
+                                                    style={{ color: '#000000' }}
                                                     size={64} />
                                             </div>
                                             <Text
                                                 id={`text-features-${index}`}
                                                 text={textProps.text}
                                                 variant="subheading"
+                                                style={{ color: '#000000' }} // as the card background is white
                                             />
 
                                         </CardAsset>
@@ -237,6 +237,6 @@ export const MediaWithFeaturesDescriptor: ComponentRegistration = {
             },
         },
     ],
-    description: 'Shows a large product image or video with stacked feature cards on the top-right. Each feature card contains an icon and a short label.',
+    description: 'Shows a large product image or video with stacked feature cards on the top-right. Each feature card contains an icon and a short label revealed in staggered animation',
     celExpression: `max(${BASE_SCENE_FRAMES}, ${FEATURE_REVEAL_START_FRAME} + max(0, size(props.features) - 1) * ${FEATURE_STAGGER_FRAMES} + ${FEATURE_REVEAL_DURATION})`,
 };

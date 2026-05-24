@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
-import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
+import { composeTransforms, useElement } from '../../../patches';
+import { ClippedText, useTextMeasurement } from '../../../core/assets';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme/ThemeContext';
 import type { TypographyVariant } from '../../../tokens/semantic';
-import { resolveTypography } from '../../../tokens/resolveTypography';
 import { AnimationPresetName, resolveAnimationPreset } from '../../../core/animation_preset/AnimationPreset';
 import type { ComponentRegistration } from '../../../registry/registry';
 
@@ -37,7 +37,7 @@ const CEL_TOTAL_FRAMES = CEL_BASE_FRAMES + (MAX_FIRST_LINE_WORDS - 1) * BASE_LIN
 export const ProblemHeadlineDefaults = {
   id: 'problemheadline',
   startAt: 0,
-  text: 'Static products lose customers',
+  text: '',
   variant: 'display' as TypographyVariant,
   entranceAnimation: 'slideUp' as AnimationPresetName,
   highlightColor: '',
@@ -60,16 +60,11 @@ function parsePixelValue(value: React.CSSProperties['fontSize']): number {
   return 96;
 }
 
-function estimateLineWidth(line: string, fontSizePx: number): number {
-  const characterCount = line.trim().length || 1;
-  return Math.max(fontSizePx * 2.4, characterCount * fontSizePx * 0.6);
-}
-
-function estimateWordWidth(word: string, fontSizePx: number): number {
-  return Math.max(fontSizePx, word.trim().length * fontSizePx * 0.72);
-}
-
-function splitTextIntoLines(text: string, maxWidthPx: number, fontSizePx: number): [string, string] {
+function splitTextIntoLines(
+  text: string,
+  maxWidthPx: number,
+  measureWidth: (value: string) => number,
+): [string, string] {
   const words = text.trim().split(/\s+/).filter(Boolean);
 
   if (words.length === 0) {
@@ -77,7 +72,7 @@ function splitTextIntoLines(text: string, maxWidthPx: number, fontSizePx: number
   }
 
   const fullText = words.join(' ');
-  if (words.length <= 2 || (words.length <= 3 && estimateLineWidth(fullText, fontSizePx) <= maxWidthPx)) {
+  if (words.length <= 2 || (words.length <= 3 && measureWidth(fullText) <= maxWidthPx)) {
     return [fullText, ''];
   }
 
@@ -87,8 +82,8 @@ function splitTextIntoLines(text: string, maxWidthPx: number, fontSizePx: number
   for (let splitIndex = 1; splitIndex < words.length; splitIndex += 1) {
     const lineOne = words.slice(0, splitIndex).join(' ');
     const lineTwo = words.slice(splitIndex).join(' ');
-    const lineOneWidth = estimateLineWidth(lineOne, fontSizePx);
-    const lineTwoWidth = estimateLineWidth(lineTwo, fontSizePx);
+    const lineOneWidth = measureWidth(lineOne);
+    const lineTwoWidth = measureWidth(lineTwo);
     const overflowPenalty = Math.max(0, lineOneWidth - maxWidthPx) + Math.max(0, lineTwoWidth - maxWidthPx);
     const balancePenalty = Math.abs(lineOne.length - lineTwo.length) + Math.abs(lineOneWidth - lineTwoWidth) * 0.08;
     const score = overflowPenalty * 10 + balancePenalty;
@@ -100,11 +95,6 @@ function splitTextIntoLines(text: string, maxWidthPx: number, fontSizePx: number
   }
 
   return bestSplit;
-}
-
-function composeTransforms(...transforms: Array<string | undefined>): string | undefined {
-  const parts = transforms.filter((transform): transform is string => Boolean(transform && transform.trim()));
-  return parts.length > 0 ? parts.join(' ') : undefined;
 }
 
 function getScaleFadeExit(frame: number, holdEnd: number, scaleOutEnd: number) {
@@ -139,23 +129,16 @@ function buildBrushPasses(hasSecondLine: boolean): Array<{ d: string; width: num
 
 export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
   const frame = useCurrentFrame();
-  const styleConfig = useStyleContext();
   const theme = useTheme();
   const preset = useAspectPreset();
   const defaultProps = { ...ProblemHeadlineDefaults, ...initProps };
   const id = defaultProps.id;
-  const props = usePatchedProps(id, defaultProps);
-
-  const styleOverride = useStyleOverride(id);
-  const overrideTransform = typeof styleOverride.transform === 'string' ? styleOverride.transform : undefined;
-  const propTransform = typeof props.style?.transform === 'string' ? props.style.transform : undefined;
-  const { transform: _ignoredStyleTransform, ...styleOverrideWithoutTransform } = styleOverride;
-  const { transform: _ignoredPropTransform, ...propStyleWithoutTransform } = props.style ?? {};
-  const typographyStyle = resolveTypography(props.variant, styleConfig, theme, preset);
-  const fontSizePx = parsePixelValue(typographyStyle.fontSize);
+  const { props, style, containerStyle } = useElement(id, defaultProps);
+  const fontSizePx = parsePixelValue(style.fontSize);
   const lineGapPx = fontSizePx * 1.1;
   const availableWidth = preset.width - preset.safeArea.left - preset.safeArea.right;
   const maxTextWidthPx = Math.max(fontSizePx * 6, availableWidth * 0.72);
+  const textMeasurement = useTextMeasurement(style);
   const elapsed = Math.max(0, frame - props.startAt);
   const lineOneStaggerDelay = BASE_LINE_ONE_STAGGER;
   const lineOneWordDuration = BASE_LINE_ONE_DURATION;
@@ -166,8 +149,8 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
   const scaleOutDuration = BASE_SCALE_OUT_DURATION;
 
   const [resolvedLineOne, resolvedLineTwo] = useMemo(
-    () => splitTextIntoLines(props.text.trim(), maxTextWidthPx, fontSizePx),
-    [fontSizePx, maxTextWidthPx, props.text],
+    () => splitTextIntoLines(props.text.trim(), maxTextWidthPx, textMeasurement.width),
+    [maxTextWidthPx, props.text, textMeasurement.width],
   );
 
   const hasSecondLine = resolvedLineTwo.length > 0;
@@ -183,14 +166,6 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
   const holdEnd = highlightEnd + holdDuration;
   const scaleOutEnd = holdEnd + scaleOutDuration;
 
-  const brushColor = props.highlightColor || theme.colors.primary;
-  const maxLineWidth = Math.max(
-    estimateLineWidth(resolvedLineOne, fontSizePx),
-    estimateLineWidth(resolvedLineTwo, fontSizePx),
-  );
-  const brushWidth = maxLineWidth + fontSizePx * 1.8;
-  const brushHeight = (hasSecondLine ? lineGapPx + fontSizePx * 1.6 : fontSizePx * 1.45) + fontSizePx * 0.55;
-
   const lineShiftProgress = hasSecondLine
     ? interpolateWithEasing(
       elapsed,
@@ -204,10 +179,9 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
 
   const groupTransform = composeTransforms(
     `scale(${exit.scale})`,
-    propTransform,
-    overrideTransform,
+    containerStyle.transform,
   );
-  const dragStyle = usePatchedDragStyle(id, groupTransform);
+
 
   const lineOneBaseY = interpolateWithEasing(
     elapsed,
@@ -251,16 +225,23 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
     ) * (1 - exit.progress * 0.45);
   const groupOpacity = exit.opacity;
   const textOpacity = exit.opacity;
-  const { color: _ignoredPropColor, ...propTextStyleWithoutColor } = propStyleWithoutTransform;
-  const { color: _ignoredOverrideColor, ...overrideTextStyleWithoutColor } = styleOverrideWithoutTransform;
-  const textLayerStyle: React.CSSProperties = {
-    ...typographyStyle,
-    color: typeof typographyStyle.color === 'string' ? typographyStyle.color : '#111111',
-    ...propTextStyleWithoutColor,
-    ...overrideTextStyleWithoutColor,
-  };
 
-  const getLineOneWordStyle = (word: string, wordIndex: number): React.CSSProperties => {
+  const brushColor = props.highlightColor || theme.colors.primary;
+  const measureWidth = (value: string): number => {
+    if (!value.trim()) {
+      return 0;
+    }
+
+    return textMeasurement.width(value);
+  };
+  const maxLineWidth = Math.max(
+    measureWidth(resolvedLineOne),
+    measureWidth(resolvedLineTwo),
+  );
+  const brushWidth = maxLineWidth + fontSizePx * 1.8;
+  const brushHeight = (hasSecondLine ? lineGapPx + fontSizePx * 1.6 : fontSizePx * 1.45) + fontSizePx * 0.55;
+
+  const getLineOneWordClipStyle = (word: string, wordIndex: number): React.CSSProperties => {
     const entryStart = wordIndex * lineOneStaggerDelay;
     const entryProgress = interpolateWithEasing(
       elapsed,
@@ -270,7 +251,17 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
     );
     const visibleProgress = Math.max(0, Math.min(1, entryProgress));
     const isVisible = visibleProgress > MIN_VISIBLE_PROGRESS;
-    const estimatedWidth = estimateWordWidth(word, fontSizePx);
+    const measuredWidth = textMeasurement.width(word);
+    return {
+      maxWidth: visibleProgress >= 0.999 ? 'none' : `${measuredWidth * (isVisible ? visibleProgress : 0)}px`,
+      marginRight: wordIndex < lineOneWordCount - 1 ? `${fontSizePx * 0.22 * (isVisible ? visibleProgress : 0)}px` : 0,
+      opacity: isVisible ? visibleProgress : 0,
+      visibility: isVisible ? 'visible' : 'hidden',
+    };
+  };
+
+  const getLineOneWordInnerStyle = (wordIndex: number): React.CSSProperties => {
+    const entryStart = wordIndex * lineOneStaggerDelay;
     const entranceTransform = resolveAnimationPreset({
       frame: elapsed,
       startAt: entryStart,
@@ -282,14 +273,8 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
 
     return {
       display: 'inline-block',
-      overflow: 'hidden',
-      maxWidth: visibleProgress >= 0.999 ? 'none' : `${estimatedWidth * (isVisible ? visibleProgress : 0)}px`,
-      marginRight: wordIndex < lineOneWordCount - 1 ? `${fontSizePx * 0.22 * (isVisible ? visibleProgress : 0)}px` : 0,
-      opacity: isVisible ? visibleProgress : 0,
-      transform: entranceTransform,
-      visibility: isVisible ? 'visible' : 'hidden',
       whiteSpace: 'nowrap',
-      verticalAlign: 'top',
+      transform: entranceTransform,
     };
   };
 
@@ -305,7 +290,7 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
         transformOrigin: 'center center',
         opacity: groupOpacity,
         pointerEvents: 'none',
-        ...dragStyle,
+        ...containerStyle,
       }}
     >
       <svg
@@ -344,7 +329,7 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          ...textLayerStyle,
+          ...style,
           opacity: textOpacity,
         }}
       >
@@ -359,9 +344,14 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
           }}
         >
           {lineOneWords.map((word, index) => (
-            <span key={`${word}-${index}`} style={getLineOneWordStyle(word, index)}>
-              {word}
-            </span>
+            <ClippedText
+              key={`${word}-${index}`}
+              text={word}
+              style={style}
+              clipStyle={getLineOneWordClipStyle(word, index)}
+              contentStyle={getLineOneWordInnerStyle(index)}
+              textMeasurement={textMeasurement}
+            />
           ))}
         </div>
 
@@ -434,5 +424,6 @@ export const ProblemHeadlineDescriptor: ComponentRegistration = {
     }
   ],
   celExpression: `${CEL_TOTAL_FRAMES}`,
-  description: `A short headline scene for concise text. Use it to show the main problem, key pain point, or an important headline from the script.`,
+  description: `A short headline scene for concise text with brush paint animation on the text`,
+  instructions: 'Use it to show the main problem, key pain point, or an important headline from the script.',
 };

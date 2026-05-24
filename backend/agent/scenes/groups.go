@@ -16,19 +16,21 @@ type UngroupFunc func(
 ) ([]*SceneConfig, error)
 
 type GroupedComponent struct {
-	Name        string
-	Tags        []string
-	LLMSchema   []types.LLMField
-	Description string
-	Ungroup     UngroupFunc
+	Name         string
+	Tags         []string
+	LLMSchema    []types.LLMField
+	Description  string
+	Instructions string
+	Ungroup      UngroupFunc
 }
 
 var groupedComponents = map[string]GroupedComponent{
 	"SocialProofList": {
-		Name:        "SocialProofList",
-		Tags:        []string{"Social Proof"},
-		Description: "Fast social proof sequence. Use near the end of a video to quickly show multiple social proofs, achievements, stats, or wins before the final CTA. Each text appears for 30 frames.",
-		Ungroup:     ungroupSocialProof,
+		Name:         "SocialProofList",
+		Tags:         []string{"Social Proof"},
+		Description:  "Multiple scenes with a dramatic text, back to back",
+		Instructions: "Use near the end of a video to quickly show multiple social proofs, achievements, stats, or wins before the final CTA. Each text appears for 30 frames.",
+		Ungroup:      ungroupSocialProof,
 		LLMSchema: []types.LLMField{
 			{
 				Name:  "proofs",
@@ -62,7 +64,7 @@ func ungroupSocialProof(scene *baml_client.Scene, fieldValueMapper *services.Med
 		texts = append(texts, text)
 	}
 
-	component, err := FindComponent("textstagger")
+	component, err := FindComponent("animatedtext")
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +81,7 @@ func ungroupSocialProof(scene *baml_client.Scene, fieldValueMapper *services.Med
 				"splitBy":           "line",
 				"exitAnimation":     "none",
 				"staggerDelay":      15,
-				"duration":          15,
+				"duration":          20,
 			},
 			field_resolvers.FieldResolverForward,
 			fieldValueMapper,

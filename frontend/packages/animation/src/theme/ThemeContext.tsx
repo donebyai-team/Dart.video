@@ -1,7 +1,5 @@
 import React, { createContext, useContext, useMemo } from 'react';
 import { BrandTheme, ResolvedTheme } from './types';
-import { derivePalette } from './derive';
-import { DEFAULT_BRAND_THEME } from './defaults';
 
 // Fallback to popular Google Fonts from our supported list
 const SANS_FALLBACK  = 'Inter, Roboto, "Open Sans", sans-serif';
@@ -17,12 +15,7 @@ function resolveFonts(brand: BrandTheme): Pick<ResolvedTheme, 'font' | 'fontMono
   return resolved;
 }
 
-const DEFAULT_RESOLVED: ResolvedTheme = {
-  colors: derivePalette(DEFAULT_BRAND_THEME),
-  ...resolveFonts(DEFAULT_BRAND_THEME),
-};
-
-const ThemeContext = createContext<ResolvedTheme>(DEFAULT_RESOLVED);
+const ThemeContext = createContext<ResolvedTheme | null>(null);
 
 export interface ThemeProviderProps {
   theme: BrandTheme;
@@ -30,16 +23,20 @@ export interface ThemeProviderProps {
 }
 
 /**
- * Accepts a BrandTheme, derives the full ResolvedTheme (26 color slots + font stacks),
- * and provides it to all components via useTheme().
- * Set once per project — wraps the outermost composition root.
+ * Accepts a BrandTheme and exposes its colors directly to all children.
  */
 export function ThemeProvider({ theme, children }: ThemeProviderProps): React.ReactElement {
-  const resolved = useMemo<ResolvedTheme>(() => ({
-    colors: derivePalette(theme),
-    ...resolveFonts(theme),
-    ...theme,
-  }), [theme]);
+  const resolved = useMemo<ResolvedTheme>(() => {
+    return {
+      ...theme,
+      colors: {
+        foreground: theme.text,
+        primary: theme.primary,
+        secondary: theme.secondary,
+      },
+      ...resolveFonts(theme),
+    };
+  }, [theme]);
 
   return (
     <ThemeContext.Provider value={resolved}>
@@ -49,9 +46,12 @@ export function ThemeProvider({ theme, children }: ThemeProviderProps): React.Re
 }
 
 /**
- * Returns the fully resolved theme (26 color slots + font stacks).
- * Falls back to a derived default if no ThemeProvider is present.
+ * Returns the current brand theme.
  */
 export function useTheme(): ResolvedTheme {
-  return useContext(ThemeContext);
+  const theme = useContext(ThemeContext);
+  if (!theme) {
+    throw new Error('useTheme must be used within a ThemeProvider');
+  }
+  return theme;
 }

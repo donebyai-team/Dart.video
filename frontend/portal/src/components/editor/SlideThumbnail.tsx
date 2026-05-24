@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Player } from '@remotion/player'
+import { Thumbnail } from '@remotion/player'
 import { Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { GeneratedVideoBranding } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import { useVideoStore } from '@/stores/video'
-import { SingleSlidePreview } from '@coasterai/renderer'
+import { SingleSlidePreview, brandingToTheme } from '@coasterai/renderer'
 
 interface SlideThumbnailProps {
   slide: Slide
@@ -12,19 +13,32 @@ interface SlideThumbnailProps {
     height: number
   } | null
   fps?: number | null
+  generatedBranding?: GeneratedVideoBranding | null
 }
 
 const MAX_STAGGER_ITEMS = 8
 
-const SlideThumbnail = ({ slide, index = 0, resolution: resolutionProp, fps: fpsProp }: SlideThumbnailProps) => {
+const SlideThumbnail = ({
+  slide,
+  index = 0,
+  resolution: resolutionProp,
+  fps: fpsProp,
+  generatedBranding: generatedBrandingProp,
+}: SlideThumbnailProps) => {
   const rootRef = useRef<HTMLDivElement | null>(null)
   const [isVisible, setIsVisible] = useState(false)
   const [debouncedSlide, setDebouncedSlide] = useState(slide)
 
   const storeResolution = useVideoStore(s => s.videoConfig?.metadata?.resolution)
   const storeFps = useVideoStore(s => s.videoConfig?.metadata?.fps)
+  const storeGeneratedBranding = useVideoStore(s => s.videoConfig?.metadata?.generatedBranding)
   const resolution = resolutionProp ?? storeResolution
   const fps = fpsProp ?? storeFps ?? 30
+  const generatedBranding = generatedBrandingProp ?? storeGeneratedBranding
+  const theme = useMemo(
+    () => generatedBranding ? brandingToTheme(generatedBranding) : undefined,
+    [generatedBranding],
+  )
 
   useEffect(() => {
     const node = rootRef.current
@@ -79,16 +93,14 @@ const SlideThumbnail = ({ slide, index = 0, resolution: resolutionProp, fps: fps
   return (
     <div ref={rootRef} className='w-full h-full bg-slate-900'>
       {shouldRenderPlayer ? (
-        <Player
+        <Thumbnail
           component={SingleSlidePreview as any}
-          inputProps={{ slide: debouncedSlide, isEditing: false }}
+          inputProps={{ slide: debouncedSlide, theme, isEditing: false }}
           durationInFrames={durationInFrames}
           compositionWidth={resolution.width}
           compositionHeight={resolution.height}
           fps={fps}
-          initialFrame={initialFrame}
-          controls={false}
-          autoPlay={false}
+          frameToDisplay={initialFrame}
           style={{
             width: '100%',
             height: '100%'

@@ -34,11 +34,6 @@ async function loadCompiledTemplate(
       code = await loadTemplateSource(key)
     }
 
-    code = code
-      // HACK to replace legacy/removed comp
-      .replaceAll('TextWithImageScene', 'TextWithMediaScene')
-      .replaceAll('TextWithVideoScene', 'TextWithMediaScene')
-
     const result = compileRemoteComponent(code)
 
     if (result.error || !result.Component) {

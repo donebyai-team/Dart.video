@@ -5,6 +5,7 @@
 import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv1";
 import type { Message } from "@bufbuild/protobuf";
 import type { MediaAsset } from "./media_asset_pb";
+import type { BackgroundStyle } from "./slide_pb";
 
 /**
  * Describes the file coasterai/core/v1/brandkit.proto.
@@ -153,6 +154,11 @@ export declare type BrandIdentity = Message<"coasterai.core.v1.BrandIdentity"> &
    * @generated from field: repeated coasterai.core.v1.BrandColor colors = 9;
    */
   colors: BrandColor[];
+
+  /**
+   * @generated from field: optional coasterai.core.v1.BackgroundStyle bgStyle = 10;
+   */
+  bgStyle?: BackgroundStyle;
 };
 
 /**

@@ -5,7 +5,8 @@ import {
   DEPTH_STYLE_PROPERTY,
   MAX_ELEMENT_DEPTH,
 } from '@coasterai/renderer'
-import { ColorSwatch, getDepthValue, LabeledField, NumberStepper, rgbaToHex, SliderInput } from './TextToolbar'
+import { DualColorPicker } from './stylers/DualColorPicker'
+import { getDepthValue, LabeledField, NumberStepper, rgbaToHex, SliderInput } from './TextToolbar'
 
 interface ContainerToolbarProps {
   styleOverride: Record<string, string | number>
@@ -41,6 +42,18 @@ function getNumberValue(value: string | number | undefined, fallback: number): n
   return fallback
 }
 
+function getToolbarColorValue(
+  override: string | number | undefined,
+  computedColor: string | undefined,
+  fallback: string,
+): string {
+  if (typeof override === 'string') return override
+  if (computedColor === 'transparent' || computedColor === 'rgba(0, 0, 0, 0)') {
+    return 'transparent'
+  }
+  return rgbaToHex(computedColor ?? '') ?? fallback
+}
+
 export function ContainerToolbar({
   styleOverride,
   onStyleOverride,
@@ -48,8 +61,8 @@ export function ContainerToolbar({
 }: ContainerToolbarProps) {
   const computed = useComputedContainerStyles(selectedElementId)
 
-  const backgroundColor = (styleOverride.backgroundColor ?? rgbaToHex(computed.backgroundColor ?? '') ?? '#ffffff') as string
-  const borderColor = (styleOverride.borderColor ?? rgbaToHex(computed.borderColor ?? '') ?? '#d5d6d9') as string
+  const backgroundColor = getToolbarColorValue(styleOverride.backgroundColor, computed.backgroundColor, '#ffffff')
+  const borderColor = getToolbarColorValue(styleOverride.borderColor, computed.borderColor, '#d5d6d9')
   const borderRadius = getNumberValue(styleOverride.borderRadius, computed.borderRadius ?? 0)
   const borderWidth = getNumberValue(styleOverride.borderWidth, computed.borderWidth ?? 0)
   const padding = getNumberValue(styleOverride.padding, computed.padding ?? 0)
@@ -59,11 +72,12 @@ export function ContainerToolbar({
   return (
     <div className="flex flex-wrap items-center gap-3 max-w-full">
       <LabeledField label="Fill">
-        <ColorSwatch
-          color={backgroundColor}
-          label=""
-          title="Background color"
-          onChange={value => onStyleOverride({ backgroundColor: value })}
+        <DualColorPicker
+          primaryColor={backgroundColor}
+          onPrimaryColor={value => onStyleOverride({ backgroundColor: value })}
+          primaryLabel="Background"
+          triggerStyle="active-color"
+          transparentTarget="primary"
         />
       </LabeledField>
 
@@ -102,11 +116,11 @@ export function ContainerToolbar({
       </LabeledField>
 
       <LabeledField label="Stroke">
-        <ColorSwatch
-          color={borderColor}
-          label=""
-          title="Border color"
-          onChange={value => onStyleOverride({ borderColor: value })}
+        <DualColorPicker
+          primaryColor={borderColor}
+          onPrimaryColor={value => onStyleOverride({ borderColor: value })}
+          primaryLabel="Border"
+          triggerStyle="active-color"
         />
       </LabeledField>
 

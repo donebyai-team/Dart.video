@@ -24,7 +24,7 @@ export type Direction = typeof DIRECTIONS[number];
 
 export type HighlightedTextAnimation = typeof HIGHLIGHTED_TEXT_ANIMATIONS[number];
 
-export const SPLIT_BY_MODES = ['char', 'word', 'line'] as const;
+export const SPLIT_BY_MODES = [ 'line', 'word','char',] as const;
 
 export type SplitByMode = typeof SPLIT_BY_MODES[number];
 

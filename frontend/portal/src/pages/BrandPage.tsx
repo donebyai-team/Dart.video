@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Plus, Upload, X, Palette, Type, Globe, FileText, Sparkles, Check, ChevronsUpDown, LucideOctagon, Stamp, Image } from "lucide-react"
+import { Plus, X, Type, Globe, FileText, Sparkles, Check, ChevronsUpDown, Image } from "lucide-react"
 import { create } from "@bufbuild/protobuf"
 import toast from "react-hot-toast"
 
@@ -18,9 +18,9 @@ import { uploadMedia } from "@/services/utils"
 import {
     BrandIdentity,
     BrandIdentitySchema,
-    BrandMedia,
     BrandMediaSchema,
     BrandColorSchema,
+    BrandColor,
     BrandFont,
     BrandFontSchema,
     BrandMediaType,
@@ -43,8 +43,47 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 import { DualColorPicker } from "@/components/editor/animation/toolbars/stylers/DualColorPicker"
+import BackgroundSettings from "@/components/editor/settings/BackgroundSettings"
+import { BackgroundStyle } from "@coasterai/pb/coasterai/core/v1/slide_pb"
+import BrandBackgroundPreview from "@/components/brand/BrandBackgroundPreview"
+
+const BRAND_PREVIEW_TEXT = "Brand Preview"
+
+const getBrandColorByPriority = (colors: BrandColor[], priority: BrandAssetPriority) =>
+    colors.find((color) => color.priority === priority)?.colorHexCode
+
+const upsertBrandColor = (
+    colors: BrandColor[],
+    priority: BrandAssetPriority,
+    colorHexCode: string
+) => {
+    const existingIndex = colors.findIndex((color) => color.priority === priority)
+
+    if (existingIndex === -1) {
+        return [
+            ...colors,
+            create(BrandColorSchema, {
+                colorHexCode,
+                priority,
+            }),
+        ]
+    }
+
+    const updatedColors = [...colors]
+    updatedColors[existingIndex] = create(BrandColorSchema, {
+        ...updatedColors[existingIndex],
+        colorHexCode,
+    })
+    return updatedColors
+}
+
+const getPrimaryBrandFont = (fonts: BrandFont[]) =>
+    fonts.find((font) => (font.googleFontsName || font.name || "").trim())?.googleFontsName
+    || fonts.find((font) => (font.googleFontsName || font.name || "").trim())?.name
+    || ""
 
 const BrandPage = () => {
     const { portalClient } = useClientsContext()
@@ -258,7 +297,7 @@ const BrandPage = () => {
 
 interface BrandIdentityEditorProps {
     identity: BrandIdentity
-    onUpdate: (identity: BrandIdentity) => void
+    onUpdate: (identity: BrandIdentity) => void | Promise<void>
     onLogoUpload: (file: File) => void
     isUploading: boolean
     availableFonts: string[]
@@ -266,10 +305,29 @@ interface BrandIdentityEditorProps {
 
 const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onLogoUpload, isUploading }: BrandIdentityEditorProps) => {
     const [localIdentity, setLocalIdentity] = useState(identity)
+    const [isBackgroundEditorOpen, setIsBackgroundEditorOpen] = useState(false)
 
     useEffect(() => {
         setLocalIdentity(identity)
     }, [identity])
+
+    const previewFont = getPrimaryBrandFont(localIdentity.fonts)
+    const previewPrimary = getBrandColorByPriority(
+        localIdentity.colors,
+        BrandAssetPriority.PRIMARY
+    ) || "#ffffff"
+    const previewSecondary = getBrandColorByPriority(
+        localIdentity.colors,
+        BrandAssetPriority.SECONDARY
+    ) || "#ffffff"
+    const previewBackground = getBrandColorByPriority(
+        localIdentity.colors,
+        BrandAssetPriority.BACKGROUND
+    ) || "#ffffff"
+    const previewTextPrimary = getBrandColorByPriority(
+        localIdentity.colors,
+        BrandAssetPriority.TEXT_PRIMARY
+    ) || "#ffffff"
 
     const updateField = (field: keyof BrandIdentity, value: any) => {
         const updated = create(BrandIdentitySchema, {
@@ -283,68 +341,41 @@ const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onLogoUpload,
         onUpdate(localIdentity)
     }
 
-    const updateColor = async (index: number, colorHexCode: string) => {
-        const updated = [...localIdentity.colors]
-        updated[index] = create(BrandColorSchema, {
-            ...updated[index],
-            colorHexCode
-        })
-        const updatedIdentity = create(BrandIdentitySchema, {
-            ...localIdentity,
-            colors: updated
-        })
-        await onUpdate(updatedIdentity)
-    }
-
-    const removeColor = async (index: number) => {
+    const updateBrandStyleField = async (field: keyof BrandIdentity, value: any) => {
         const updated = create(BrandIdentitySchema, {
             ...localIdentity,
-            colors: localIdentity.colors.filter((_, i) => i !== index)
-        })
-        await onUpdate(updated)
-    }
-
-    const addFont = async () => {
-        const newFont = create(BrandFontSchema, {
-            name: "",
-            googleFontsName: ""
-        })
-        const updated = create(BrandIdentitySchema, {
-            ...localIdentity,
-            fonts: [...localIdentity.fonts, newFont]
-        })
-        await onUpdate(updated)
-    }
-
-    const updateFont = (index: number, field: keyof BrandFont, value: string) => {
-        const updated = [...localIdentity.fonts]
-        updated[index] = create(BrandFontSchema, {
-            ...updated[index],
             [field]: value
         })
-        updateField("fonts", updated)
-    }
 
-    const updateFontAndSave = async (index: number, googleFontsName: string) => {
-        const updated = [...localIdentity.fonts]
-        updated[index] = create(BrandFontSchema, {
-            ...updated[index],
-            name: googleFontsName,
-            googleFontsName: googleFontsName
-        })
-        const updatedIdentity = create(BrandIdentitySchema, {
-            ...localIdentity,
-            fonts: updated
-        })
-        await onUpdate(updatedIdentity)
-    }
-
-    const removeFont = async (index: number) => {
-        const updated = create(BrandIdentitySchema, {
-            ...localIdentity,
-            fonts: localIdentity.fonts.filter((_, i) => i !== index)
-        })
+        setLocalIdentity(updated)
         await onUpdate(updated)
+    }
+
+    const updatePrimaryFont = async (googleFontsName: string) => {
+        const nextFont = create(BrandFontSchema, {
+            name: googleFontsName,
+            googleFontsName,
+        })
+        const nextFonts = localIdentity.fonts.length > 0
+            ? [nextFont, ...localIdentity.fonts.slice(1)]
+            : [nextFont]
+
+        await updateBrandStyleField("fonts", nextFonts)
+    }
+
+    const updateBrandColor = async (priority: BrandAssetPriority, colorHexCode: string) => {
+        await updateBrandStyleField(
+            "colors",
+            upsertBrandColor(localIdentity.colors, priority, colorHexCode)
+        )
+    }
+
+    const updateTextPrimary = async (colorHexCode: string) => {
+        await updateBrandColor(BrandAssetPriority.TEXT_PRIMARY, colorHexCode)
+    }
+
+    const updateBackgroundStyle = async (bgStyle: BackgroundStyle) => {
+        await updateBrandStyleField("bgStyle", bgStyle)
     }
 
     const removeLogo = async (index: number) => {
@@ -427,131 +458,133 @@ const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onLogoUpload,
                 </CardContent>
             </Card>
 
-            {/* Colors */}
+            {/* Brand Style */}
             <Card>
                 <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
-                            <Palette className="w-4 h-4 text-primary" />
-                            <h3 className="text-sm font-semibold">Brand Colors</h3>
+                            <Type className="w-4 h-4 text-primary" />
+                            <h3 className="text-sm font-semibold">Brand Style</h3>
                         </div>
                     </div>
 
-                    <div className="flex flex-wrap gap-2">
-                        <AnimatePresence>
-                            {localIdentity.colors.map((color, index) => (
-                                <motion.div
-                                    key={index}
-                                    initial={{ opacity: 0, scale: 0.8 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.8 }}
-                                    className="relative group"
-                                >
-                                    <div className="flex items-center gap-2 p-2 rounded-md border bg-muted/50">
-                                        <div className="flex items-center justify-center w-10 h-10 rounded border bg-background flex-shrink-0">
+                    <div className="space-y-4">
+                        <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+                            <div className="w-[400px] h-[225px] overflow-hidden rounded-xl border">
+                                <BrandBackgroundPreview
+                                    backgroundStyle={localIdentity.bgStyle}
+                                    text={BRAND_PREVIEW_TEXT}
+                                    subtext={`${previewFont || "Choose a font"} · ${previewTextPrimary}`}
+                                    textColor={previewTextPrimary}
+                                    fontFamily={previewFont || undefined}
+                                />
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label className="text-xs">Brand Colors</Label>
+                                    <div className="grid grid-cols-1 gap-3 rounded-lg border bg-muted/30 p-3 sm:grid-cols-2">
+                                        <div className="flex items-center gap-3">
                                             <DualColorPicker
-                                                primaryColor={color.colorHexCode}
-                                                onPrimaryColor={(value) => updateColor(index, value)}
-                                                primaryLabel="Brand color"
+                                                primaryColor={previewPrimary}
+                                                onPrimaryColor={(value) => updateBrandColor(BrandAssetPriority.PRIMARY, value)}
+                                                primaryLabel="Primary"
                                                 triggerVariant="input"
                                                 triggerStyle="active-color"
                                             />
+                                            <div>
+                                                <p className="text-sm font-medium">Primary</p>
+                                                <p className="text-xs text-muted-foreground">{previewPrimary}</p>
+                                            </div>
                                         </div>
-                                        <div className="flex flex-col items-center gap-1">
-                                            <span className="text-xs text-muted-foreground">
-                                                {BrandAssetPriority[color.priority]}
-                                            </span>
+
+                                        <div className="flex items-center gap-3">
+                                            <DualColorPicker
+                                                primaryColor={previewSecondary}
+                                                onPrimaryColor={(value) => updateBrandColor(BrandAssetPriority.SECONDARY, value)}
+                                                primaryLabel="Secondary"
+                                                triggerVariant="input"
+                                                triggerStyle="active-color"
+                                            />
+                                            <div>
+                                                <p className="text-sm font-medium">Secondary</p>
+                                                <p className="text-xs text-muted-foreground">{previewSecondary}</p>
+                                            </div>
                                         </div>
-                                        <Button
-                                            size="icon"
-                                            variant="ghost"
-                                            className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
-                                            onClick={() => removeColor(index)}
-                                        >
-                                            <X className="w-3 h-3" />
-                                        </Button>
+
+                                        {/* <div className="flex items-center gap-3">
+                                            <DualColorPicker
+                                                primaryColor={previewBackground}
+                                                onPrimaryColor={(value) => updateBrandColor(BrandAssetPriority.BACKGROUND, value)}
+                                                primaryLabel="Secondary"
+                                                triggerVariant="input"
+                                                triggerStyle="active-color"
+                                            />
+                                            <div>
+                                                <p className="text-sm font-medium">Background</p>
+                                                <p className="text-xs text-muted-foreground">{previewSecondary}</p>
+                                            </div>
+                                        </div> */}
                                     </div>
-                                </motion.div>
-                            ))}
-                        </AnimatePresence>
-                    </div>
+                                </div>
 
-                    {localIdentity.colors.length === 0 && (
-                        <div className="text-center py-6 text-sm text-muted-foreground">
-                            No colors defined yet
+                                <div className="space-y-2">
+                                    <Label className="text-xs">Text Primary</Label>
+                                    <div className="flex items-center gap-3 rounded-lg border bg-muted/30 p-3">
+                                        <DualColorPicker
+                                            primaryColor={previewTextPrimary}
+                                            onPrimaryColor={updateTextPrimary}
+                                            primaryLabel="Text primary"
+                                            triggerVariant="input"
+                                            triggerStyle="active-color"
+                                        />
+                                        <span className="text-sm text-muted-foreground">{previewTextPrimary}</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    )}
-                </CardContent>
-            </Card>
 
-            {/* Fonts */}
-            <Card>
-                <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                            <Type className="w-4 h-4 text-primary" />
-                            <h3 className="text-sm font-semibold">Brand Fonts</h3>
+                        <div className="space-y-2">
+                            <Label className="text-xs">Font</Label>
+                            <FontSelector
+                                value={previewFont}
+                                availableFonts={availableFonts}
+                                onSelect={updatePrimaryFont}
+                            />
                         </div>
-                        <Button size="sm" variant="outline" onClick={addFont} className="h-8 text-xs">
-                            <Plus className="w-3 h-3 mr-1.5" />
-                            Add Font
-                        </Button>
-                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <AnimatePresence>
-                            {localIdentity.fonts.map((font, index) => (
-                                <motion.div
-                                    key={index}
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.95 }}
-                                    className="relative group"
+                        <div className="rounded-xl border bg-muted/20">
+                            <div className="flex items-center justify-between border-b px-4 py-3">
+                                <div>
+                                    <p className="text-sm font-medium">Video Background</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        Select a background style for your video
+                                    </p>
+                                </div>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 text-xs"
+                                    onClick={() => setIsBackgroundEditorOpen(true)}
                                 >
-                                    <div className="p-3 rounded-lg border-2 border-muted hover:border-primary/50 transition-colors bg-gradient-to-br from-background to-muted/30">
-                                        <div className="flex items-start justify-between gap-2 mb-2">
-                                            <div className="flex-1 min-w-0">
-                                                <FontSelector
-                                                    value={font.googleFontsName || ""}
-                                                    availableFonts={availableFonts}
-                                                    onSelect={(value) => updateFontAndSave(index, value)}
-                                                />
-                                            </div>
-                                            <Button
-                                                size="icon"
-                                                variant="ghost"
-                                                className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/10 hover:text-destructive"
-                                                onClick={() => removeFont(index)}
-                                            >
-                                                <X className="w-3.5 h-3.5" />
-                                            </Button>
-                                        </div>
-                                        {font.googleFontsName && (
-                                            <div className="mt-2 pt-2 border-t border-border/50">
-                                                <p
-                                                    className="text-lg truncate"
-                                                    style={{ fontFamily: font.googleFontsName }}
-                                                >
-                                                    The quick brown fox
-                                                </p>
-                                                <p className="text-xs text-muted-foreground mt-1">
-                                                    {font.googleFontsName}
-                                                </p>
-                                            </div>
-                                        )}
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </AnimatePresence>
-                    </div>
-
-                    {localIdentity.fonts.length === 0 && (
-                        <div className="text-center py-8 text-sm text-muted-foreground">
-                            <Type className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                            <p>No fonts defined yet</p>
-                            <p className="text-xs mt-1">Add a Google Font to get started</p>
+                                    Edit background
+                                </Button>
+                            </div>
                         </div>
-                    )}
+
+                        <Dialog open={isBackgroundEditorOpen} onOpenChange={setIsBackgroundEditorOpen}>
+                            <DialogContent className="max-w-[500px] overflow-hidden p-0">
+                                <BackgroundSettings
+                                    value={localIdentity.bgStyle}
+                                    onChange={updateBackgroundStyle}
+                                    onClose={() => setIsBackgroundEditorOpen(false)}
+                                    showApplyAll={false}
+                                    className="max-h-[80vh] pb-0"
+                                />
+                            </DialogContent>
+                        </Dialog>
+                    </div>
                 </CardContent>
             </Card>
             {/* Basic Information */}

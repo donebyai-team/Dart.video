@@ -34,7 +34,7 @@ const ZoomSettings = ({
   // Get current values as global timeline seconds
   const zoomStartSec = slideStartSec + (settings.startFrame ?? 0) / fps
   const zoomEndSec = slideStartSec + (settings.endFrame ?? slideDurationInFrames) / fps
-  const zoomLevel = settings.zoomLevel ?? 2
+  const zoomLevel = settings.zoomLevel ?? 3 // default coming from defaults.ts
 
   // Debug: log values to check for NaN
   console.log('ZoomSettings values:', {

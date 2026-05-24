@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/shank318/coasterai/agent/scenes"
+	"github.com/shank318/coasterai/agent/scenes/types"
 	"github.com/shank318/coasterai/models"
 	"strings"
 )
@@ -19,6 +20,7 @@ type SceneDescription struct {
 	Description                string `json:"description"`
 	DurationInFrames           int    `json:"duration_in_frames"`
 	Section                    string `json:"section"`
+	Text                       string `json:"text"`
 	TransitionDurationInFrames int    `json:"transition_duration_in_frames"`
 }
 
@@ -45,6 +47,33 @@ func GenerateVideoDescription(video *models.Video) VideoDescription {
 			if err != nil {
 				continue
 			}
+
+			for _, schema := range component.Schema {
+				if schema.Type != "component" {
+					continue
+				}
+				for _, field := range schema.Fields {
+					elementObject := scene.Content.Edits.Fields[schema.Name]
+					if elementObject == nil {
+						continue
+					}
+
+					if field.Type == types.FieldTypeString && field.DataType == types.DataTypeText {
+						structValue := elementObject.GetStructValue()
+						if structValue == nil {
+							continue
+						}
+
+						textField := structValue.Fields["text"]
+						if textField == nil {
+							continue
+						}
+
+						sceneDescription.Text = textField.GetStringValue()
+					}
+				}
+			}
+
 			sceneDescription.Description = component.Description
 			sceneDescription.DurationInFrames = int(scene.DurationInFrames)
 			if scene.TransitionDurationInFrames != nil && *scene.TransitionDurationInFrames > 0 {
@@ -86,6 +115,7 @@ func GeneratePrompt(video *models.Video) (*VideoDescription, error) {
 		if transitionMs > 0 {
 			builder.WriteString(fmt.Sprintf("  Transition  : %dms\n", transitionMs))
 		}
+		builder.WriteString(fmt.Sprintf("  Text        : %s\n", scene.Text))
 		builder.WriteString(fmt.Sprintf("  Description : %s\n", scene.Description))
 
 		if idx != len(description.Scenes)-1 {

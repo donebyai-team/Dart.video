@@ -1,8 +1,12 @@
-import React from 'react';
-import { measureText } from '@remotion/layout-utils';
+import React, { useMemo } from 'react';
 import { IconAsset } from './IconAsset';
 import type { TypographyVariant } from '../../tokens/semantic';
 import { CardAsset, Text } from '.';
+import { useTextMeasurement } from './useTextMeasurement';
+import { useStyleContext } from '../../styles/StyleContext';
+import { useAspectPreset } from '../../styles/AspectPresetContext';
+import { useTheme } from '../../theme/ThemeContext';
+import { resolveTypography } from '../../tokens/resolveTypography';
 
 export const IconTextPillDefaults = {
     id: 'icontextpill',
@@ -14,7 +18,6 @@ export const IconTextPillDefaults = {
     variant: 'heading' as TypographyVariant,
     iconStyle: undefined as React.CSSProperties | undefined,
     textStyle: {
-        color: '#111827',
         fontWeight: 400,
         opacity: 0.8,
     } as React.CSSProperties,
@@ -39,22 +42,6 @@ export type TextPatch = {
 };
 
 export type PillPatchGroup = Record<string, IconPatch | TextPatch>;
-
-function measureWordWidth(text: string, style: React.CSSProperties): number {
-    return measureText({
-        text,
-        fontFamily: style.fontFamily as string,
-        fontSize: style.fontSize as number,
-        fontWeight: style.fontWeight as number,
-        letterSpacing: style.letterSpacing as string | undefined,
-        textTransform: style.textTransform as Parameters<typeof measureText>[0]['textTransform'],
-        additionalStyles: {
-            fontStyle: typeof style.fontStyle === 'string' ? style.fontStyle : undefined,
-            fontVariant: typeof style.fontVariant === 'string' ? style.fontVariant : undefined,
-        },
-    }).width;
-}
-
 
 export function getNormalizedPill(item: PillPatchGroup): typeof IconTextPillDefaults {
     const entries = Object.entries(item);
@@ -89,6 +76,7 @@ export function getNormalizedPill(item: PillPatchGroup): typeof IconTextPillDefa
 export function getIconTextPillMetrics(
     props: typeof IconTextPillDefaults,
     typographyStyle: React.CSSProperties,
+    textWidth: number,
 ): { width: number; height: number; iconSize: number } {
     const resolvedTextStyle = {
         ...typographyStyle,
@@ -97,7 +85,6 @@ export function getIconTextPillMetrics(
     const fontSize = typeof resolvedTextStyle.fontSize === 'number' ? resolvedTextStyle.fontSize : 48;
     const lineHeight = typeof resolvedTextStyle.lineHeight === 'number' ? resolvedTextStyle.lineHeight : 1.1;
     const iconSize = Math.round(fontSize * lineHeight);
-    const textWidth = measureWordWidth(props.text, resolvedTextStyle);
     const width = (props.padding * 2) + (props.borderWidth * 2) + iconSize + props.gap + textWidth;
     const height = (props.padding * 2) + (props.borderWidth * 2) + Math.max(iconSize, fontSize * lineHeight);
 
@@ -110,7 +97,20 @@ export function getIconTextPillMetrics(
 
 export function IconTextPill(initProps: IconTextPillProps): React.ReactElement {
     const props = { ...IconTextPillDefaults, ...initProps };
-    const metrics = getIconTextPillMetrics(props, initProps.textStyle || {});
+    const styleConfig = useStyleContext();
+    const theme = useTheme();
+    const preset = useAspectPreset();
+    const typographyStyle = resolveTypography(props.variant, styleConfig, theme, preset);
+    const resolvedTextStyle = useMemo(
+        () => ({
+            ...typographyStyle,
+            ...props.textStyle,
+        }),
+        [props.textStyle, typographyStyle],
+    );
+    const textMeasurement = useTextMeasurement(resolvedTextStyle);
+    const textWidth = textMeasurement.width(props.text);
+    const metrics = getIconTextPillMetrics(props, typographyStyle, textWidth);
 
     return (
         <CardAsset

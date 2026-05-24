@@ -1,6 +1,7 @@
-import { Wand2 } from "lucide-react";
+import { Check, Wand2 } from "lucide-react";
 import { BackgroundEffectType } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const EFFECT_OPTIONS: { value: BackgroundEffectType; label: string; description: string }[] = [
   {
@@ -55,14 +56,24 @@ export default function BackgroundEffectsPicker({
             <Button
               key={option.value}
               type="button"
-              variant={isActive ? "secondary" : "outline"}
-              className="h-auto items-start justify-start px-3 py-2 text-left"
+              variant="outline"
+              className={cn(
+                "relative h-auto items-start justify-start px-3 py-2 text-left transition-all",
+                isActive && "border-primary bg-primary/10 text-foreground ring-2 ring-primary/40 shadow-sm",
+                !isActive && "border-border bg-background/60 hover:border-primary/40 hover:bg-accent/40",
+                disabled && "opacity-60"
+              )}
               disabled={disabled}
               onClick={() => onChange(option.value)}
             >
-              <div>
-                <div className="text-sm font-medium">{option.label}</div>
-                <div className="text-[11px] text-muted-foreground whitespace-normal">
+              {isActive && (
+                <span className="absolute right-2 top-2 rounded-full bg-primary/15 p-1 text-primary">
+                  <Check className="h-3 w-3" />
+                </span>
+              )}
+              <div className="pr-6">
+                <div className={cn("text-sm font-medium", isActive && "text-primary")}>{option.label}</div>
+                <div className={cn("text-[11px] whitespace-normal", isActive ? "text-foreground/80" : "text-muted-foreground")}>
                   {option.description}
                 </div>
               </div>

@@ -5,7 +5,7 @@
 import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv1";
 import type { Message } from "@bufbuild/protobuf";
 import type { MediaAsset, MediaType, SelectedMediaAsset } from "../../core/v1/media_asset_pb";
-import type { Slide } from "../../core/v1/slide_pb";
+import type { Section, Slide } from "../../core/v1/slide_pb";
 import type { BrandIdentity, BrandIdentitySchema } from "../../core/v1/brandkit_pb";
 import type { FigmaFrame, FigmaPage } from "../../core/v1/figma_pb";
 import type { Resolution, Script, StyleType, Video, VideoConfig, VideoLanguage, VideoMetadata } from "../../core/v1/video_pb";
@@ -169,9 +169,11 @@ export declare const SuggestScenesRequestSchema: GenMessage<SuggestScenesRequest
  */
 export declare type SuggestScenesResponse = Message<"coasterai.portal.v1.SuggestScenesResponse"> & {
   /**
-   * @generated from field: repeated coasterai.core.v1.Slide scenes = 1;
+   * We call Section as a group of slides
+   *
+   * @generated from field: repeated coasterai.core.v1.Section groups = 1;
    */
-  scenes: Slide[];
+  groups: Section[];
 };
 
 /**

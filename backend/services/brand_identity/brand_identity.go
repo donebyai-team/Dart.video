@@ -8,11 +8,14 @@ import (
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/services"
+	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 	"net/url"
 	"strings"
 )
+
+const DefaultBackgroundPatternOpacity float32 = 0.3
 
 type BrandIdentity interface {
 	CreateBrandIdentity(ctx context.Context, orgID string, website string) (*pbcore.BrandIdentity, error)
@@ -37,7 +40,58 @@ func (b brandIdentity) GetBrandIdentity(ctx context.Context, ID string) (*models
 		return nil, err
 	}
 	identity.BrandIdentity.Id = identity.ID
+	if identity.BrandIdentity.BgStyle == nil {
+		identity.BrandIdentity.BgStyle = GenerateDefaultBackground(identity.BrandIdentity.Colors)
+	}
 	return identity, nil
+}
+
+func ModifyTextColor(colors []*pbcore.BrandColor, bgStyle *pbcore.BackgroundStyle) []*pbcore.BrandColor {
+	// If the effect is glow that is a light color,
+	// the hex color will be dark and hence we override it
+	bgColor := bgStyle.GetSolid().Hex
+	if bgStyle.Effect != nil &&
+		bgStyle.Effect.Type == pbcore.BackgroundEffectType_BACKGROUND_EFFECT_TYPE_GLOW {
+		bgColor = "#FFFFFF"
+	}
+
+	textNormalColor := GetReadableTextColorForSolid(
+		bgColor,
+		colors,
+		TextNormal,
+	)
+
+	// Step 4: update text color
+	for _, brandColor := range colors {
+		if brandColor.Priority == pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_TEXT_PRIMARY {
+			brandColor.ColorHexCode = textNormalColor
+		}
+	}
+
+	return colors
+}
+
+func GenerateDefaultBackground(colors []*pbcore.BrandColor) *pbcore.BackgroundStyle {
+	if len(colors) == 0 {
+		return nil
+	}
+
+	bg := BrandColorTokens(colors)[COLOR_BACKGROUND]
+	primary := BrandColorTokens(colors)[COLOR_PRIMARY]
+	solidColor := DarkestOrBlack(bg, primary)
+
+	return &pbcore.BackgroundStyle{
+		Style: &pbcore.BackgroundStyle_Solid{
+			Solid: &pbcore.SolidColor{
+				Hex: solidColor,
+			},
+		},
+		Pattern:        pbcore.BackgroundPattern_BACKGROUND_PATTERN_DOTS,
+		PatternOpacity: utils.Ptr(DefaultBackgroundPatternOpacity),
+		Effect: &pbcore.BackgroundEffect{
+			Type: pbcore.BackgroundEffectType_BACKGROUND_EFFECT_TYPE_GLOW,
+		},
+	}
 }
 
 func (b brandIdentity) GetBrandIdentityByID(ctx context.Context, ID string) (*models.BrandIdentity, error) {
@@ -154,6 +208,11 @@ func (b brandIdentity) CreateBrandIdentity(ctx context.Context, orgID string, we
 		brandIdentity.Logos = make([]*pbcore.BrandMedia, 0)
 	}
 
+	// Generate background style
+	brandIdentity.BgStyle = GenerateDefaultBackground(brandIdentity.Colors)
+	// Modify text color based on background color
+	brandIdentity.Colors = ModifyTextColor(brandIdentity.Colors, brandIdentity.BgStyle)
+
 	if existingIdentity != nil {
 		err = b.db.UpdateBrandIdentity(ctx, orgID, brandIdentity)
 		if err != nil {
@@ -241,5 +300,14 @@ func (b brandIdentity) UpdateBrandIdentity(ctx context.Context, orgID string, id
 }
 
 func (b brandIdentity) GetBrandIdentities(ctx context.Context, orgID string) ([]*pbcore.BrandIdentity, error) {
-	return b.db.GetBrandIdentities(ctx, orgID)
+	identities, err := b.db.GetBrandIdentities(ctx, orgID)
+	if err != nil {
+		return nil, err
+	}
+	for _, identity := range identities {
+		if identity.BgStyle == nil {
+			identity.BgStyle = GenerateDefaultBackground(identity.Colors)
+		}
+	}
+	return identities, nil
 }

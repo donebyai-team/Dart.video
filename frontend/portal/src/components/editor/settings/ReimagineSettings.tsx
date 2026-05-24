@@ -1,76 +1,132 @@
-import { useEffect, useState } from 'react'
-import { Pause, Play, X } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Layers3, Pause, Play, X } from 'lucide-react'
 import { useClientsContext } from '@coasterai/ui-core/context/ClientContext'
 import { PatchOverlay } from '@coasterai/renderer'
-import { SlideStatus, type Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { Section, SlideStatus, type Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Button } from '@/components/ui/button'
 import SlideThumbnail from '@/components/editor/SlideThumbnail'
 import { useVideoStore } from '@/stores/video'
 import { getConnectError } from '@/utils/error'
 import toast from 'react-hot-toast'
 
-const sceneSuggestionsCache = new Map<string, Slide[]>()
+const sceneSuggestionsCache = new Map<string, Section[]>()
 
 interface ReimagineSettingsProps {
   onClose: () => void
   setOverlay: (overlay: PatchOverlay) => void
-  onPlay?: () => void
+  onPreviewTemplate?: (slideId?: string, endSlideId?: string) => void
   isPreviewPlaying?: boolean
 }
 
 const ReimagineSettings = ({
   onClose,
   setOverlay,
-  onPlay,
+  onPreviewTemplate,
   isPreviewPlaying = false,
 }: ReimagineSettingsProps) => {
   const { portalClient } = useClientsContext()
-  const updateSlide = useVideoStore(s => s.updateSlide)
+  const updateSlideById = useVideoStore(s => s.updateSlideById)
+  const addSlide = useVideoStore(s => s.addSlide)
+  const removeSlide = useVideoStore(s => s.removeSlide)
+  const setSelectedSlideById = useVideoStore(s => s.setSelectedSlideById)
+  const videoConfig = useVideoStore(s => s.videoConfig)
   const videoId = useVideoStore(s => s.videoConfig?.id)
   const selectedSlide = useVideoStore(s => s.selectedSlide)
   const resolution = useVideoStore(s => s.videoConfig?.metadata?.resolution)
   const fps = useVideoStore(s => s.videoConfig?.metadata?.fps) ?? 30
 
-  const [scenes, setScenes] = useState<Slide[]>([])
+  const targetSlideIdRef = useRef(selectedSlide?.id ?? '')
+  const insertedSlideIdsRef = useRef<string[]>([])
+  const [scenes, setScenes] = useState<Section[]>([])
+  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
 
-  const applySlide = (slide: Slide) => {
-    const updatedContent = slide.content
+  const targetSectionId = useMemo(() => {
+    const targetSlideId = targetSlideIdRef.current
+    if (!targetSlideId || !videoConfig?.config?.sections) return null
+
+    for (const section of videoConfig.config.sections) {
+      if (section.slides.some(slide => slide.id === targetSlideId)) {
+        return section.id
+      }
+    }
+
+    return null
+  }, [videoConfig])
+
+  const applySuggestion = (suggestion: Section, suggestionIndex: number) => {
+    const slides = suggestion.slides
+    const firstSlide = slides[0]
+    const targetSlideId = targetSlideIdRef.current
+    if (!targetSectionId || !targetSlideId || !firstSlide) return
+
+    // Remove previously inserted sibling slides before applying the next suggestion.
+    for (const insertedSlideId of insertedSlideIdsRef.current) {
+      removeSlide(targetSectionId, insertedSlideId)
+    }
+    insertedSlideIdsRef.current = []
+
+    const updatedContent = firstSlide.content
     if (!updatedContent) return
 
-    const existingContent = selectedSlide?.content
-      ? selectedSlide.content
-      : undefined
+    const existingContent = videoConfig?.config?.sections
+      .flatMap(section => section.slides)
+      .find(slide => slide.id === targetSlideId)
+      ?.content
 
     const pathOverlay = updatedContent.edits as unknown as PatchOverlay
     setOverlay(pathOverlay)
+    setSelectedSlideById(targetSlideId)
 
-    updateSlide({
+    updateSlideById(targetSlideId, {
       slideStatus: SlideStatus.GENERATED,
-      durationInFrames: slide.durationInFrames,
-      settledFrame: slide.settledFrame,
+      durationInFrames: firstSlide.durationInFrames,
+      settledFrame: firstSlide.settledFrame,
       content: {
         ...(existingContent ?? {}),
         codeRegistry: updatedContent.codeRegistry,
         edits: pathOverlay,
       },
-      backgroundStyle: slide.backgroundStyle,
-    } as Slide)  
+      backgroundStyle: firstSlide.backgroundStyle,
+    } as Slide)
+
+    let previousSlideId = targetSlideId
+    const nextInsertedSlideIds: string[] = []
+
+    for (const slide of slides.slice(1)) {
+      const insertedSlideId = addSlide(targetSectionId, previousSlideId)
+      nextInsertedSlideIds.push(insertedSlideId)
+      previousSlideId = insertedSlideId
+
+      updateSlideById(insertedSlideId, {
+        slideStatus: SlideStatus.GENERATED,
+        durationInFrames: slide.durationInFrames,
+        settledFrame: slide.settledFrame,
+        content: slide.content,
+        backgroundStyle: slide.backgroundStyle,
+      } as Slide)
+    }
+
+    insertedSlideIdsRef.current = nextInsertedSlideIds
+    setSelectedSlideById(targetSlideId)
+    setSelectedSuggestionIndex(suggestionIndex)
   }
 
   useEffect(() => {
     let cancelled = false
 
     const loadSuggestions = async () => {
-      if (!videoId || !selectedSlide?.id) {
+      const targetSlideId = targetSlideIdRef.current
+      if (!videoId || !targetSlideId) {
         setScenes([])
         setIsLoading(false)
         return
       }
 
-      const cachedScenes = sceneSuggestionsCache.get(selectedSlide.id)
+      const cachedScenes = sceneSuggestionsCache.get(targetSlideId)
       if (cachedScenes) {
         setScenes(cachedScenes)
+        setSelectedSuggestionIndex(0)
         setIsLoading(false)
         return
       }
@@ -79,12 +135,15 @@ const ReimagineSettings = ({
         setIsLoading(true)
         const response = await portalClient.suggestScenes({
           videoId,
-          sceneId: selectedSlide.id,
+          sceneId: targetSlideId,
         })
 
         if (!cancelled) {
-          sceneSuggestionsCache.set(selectedSlide.id, response.scenes)
-          setScenes(response.scenes)
+          const suggestionSections = (response.groups ?? []).filter(section => section.slides.length > 0)
+
+          sceneSuggestionsCache.set(targetSlideId, suggestionSections)
+          setScenes(suggestionSections)
+          setSelectedSuggestionIndex(0)
         }
       } catch (err: any) {
         if (!cancelled) {
@@ -103,7 +162,35 @@ const ReimagineSettings = ({
     return () => {
       cancelled = true
     }
-  }, [portalClient, selectedSlide?.id, videoId])
+  }, [portalClient, videoId])
+
+  const selectedSuggestion = scenes[selectedSuggestionIndex]
+
+  const handlePreview = () => {
+    if (isPreviewPlaying) {
+      onPreviewTemplate?.()
+      return
+    }
+
+    if (!selectedSuggestion) return
+
+    // Preview always reflects the currently highlighted suggestion, even before an explicit apply click.
+    applySuggestion(selectedSuggestion, selectedSuggestionIndex)
+
+    const slides = selectedSuggestion.slides
+    const firstSlideId = targetSlideIdRef.current
+    const previewSlideIds = [firstSlideId, ...insertedSlideIdsRef.current].filter(Boolean)
+    const lastSlideId = previewSlideIds.at(-1)
+
+    if (!firstSlideId || !lastSlideId || slides.length === 0) return
+
+    setSelectedSlideById(firstSlideId)
+
+    // Let the player re-read the updated slide list before resolving the preview end slide.
+    setTimeout(() => {
+      onPreviewTemplate?.(firstSlideId, previewSlideIds.length > 1 ? lastSlideId : undefined)
+    }, 0)
+  }
 
   return (
     <div className='h-full flex flex-col bg-card'>
@@ -126,28 +213,41 @@ const ReimagineSettings = ({
           </div>
         ) : (
           <div className='grid grid-cols-2 gap-4'>
-            {scenes.map((slide, index) => (
+            {scenes.map((suggestion, index) => {
+              const previewSlide = suggestion.slides[0]
+              if (!previewSlide) return null
+
+              return (
               <button
-                key={`${slide.id || 'suggested-slide'}-${index}`}
+                key={`${suggestion.id || previewSlide.id || 'suggested-slide'}-${index}`}
                 type='button'
-                onClick={() => applySlide(slide)}
-                className='overflow-hidden rounded-lg border border-border bg-muted/20 text-left transition-colors hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40'
+                onClick={() => applySuggestion(suggestion, index)}
+                className={`overflow-hidden rounded-lg border bg-muted/20 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-primary/40 ${
+                  selectedSuggestionIndex === index ? 'border-primary' : 'border-border hover:border-primary'
+                }`}
               >
                 <div
-                  className='overflow-hidden'
+                  className='relative overflow-hidden'
                   style={resolution ? { aspectRatio: `${resolution.width} / ${resolution.height}` } : undefined}
                 >
-                  <SlideThumbnail slide={slide} index={index} resolution={resolution} fps={fps} />
+                  <SlideThumbnail slide={previewSlide} index={index} resolution={resolution} fps={fps} />
+                  {suggestion.slides.length > 1 && (
+                    <div className='absolute bottom-0 right-0 inline-flex items-center gap-0.5 bg-background/45 px-1 py-0.5 text-[10px] font-medium text-foreground backdrop-blur-sm'>
+                      <Layers3 className='h-3 w-3' />
+                      <span>{suggestion.slides.length}</span>
+                    </div>
+                  )}
                 </div>
               </button>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>
 
-      {onPlay && (
+      {onPreviewTemplate && (
         <div className='border-t border-border px-5 py-4 mt-auto'>
-          <Button variant='default' size='sm' className='w-full gap-2' onClick={onPlay}>
+          <Button variant='default' size='sm' className='w-full gap-2' onClick={handlePreview} disabled={!selectedSuggestion}>
             {isPreviewPlaying ? <Pause className='w-3.5 h-3.5' /> : <Play className='w-3.5 h-3.5' />}
             {isPreviewPlaying ? 'Stop Preview' : 'Preview'}
           </Button>

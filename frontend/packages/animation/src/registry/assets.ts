@@ -40,6 +40,11 @@ export const CONTENT_COMPONENTS: ComponentRegistration[] = [
     description: 'renders a static image from a URL — use for product screens, photos, and illustrations',
   },
   {
+    name: 'ClippedText',
+    type: 'content',
+    description: 'renders text that can be animated with clipping and movement — use for headlines, captions, and body text',
+  },
+  {
     name: 'MediaAsset',
     type: 'content',
     description: 'renders a static image or video from a URL — use for product screens, photos, videos, and illustrations',

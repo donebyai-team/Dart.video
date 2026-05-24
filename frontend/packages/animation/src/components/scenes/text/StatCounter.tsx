@@ -40,7 +40,7 @@ export const StatCounterDefaults = {
     speed: DEFAULT_SPEED_PERCENTAGE,
   },
   text: {
-    label: 'Total Users',
+    label: '',
     variant: 'subheading' as TypographyVariant,
   },
 };
@@ -236,6 +236,7 @@ export const StatCounterDescriptor: ComponentRegistration = {
       required: false,
     },
   ],
-  description: 'Centered animated metric counter with a short 2-3 word label below it. Use for large numbers(at least 2 digit), metric, or KPI with or without prefix/suffix eg. 1240, 500$, 500K, 500M',
+  description: 'Centered animated metric counter with a short 2-3 word label below it',
+  instructions: 'Use for large numbers(at least 2 digit), metric, or KPI with or without prefix/suffix eg. 1240, 500$, 500K, 500M',
   celExpression: `(((${BASE_COUNTER_DELAY} + ${BASE_COUNTER_DURATION} + ${BASE_HOLD_DURATION} + 1) * ${DEFAULT_SPEED_PERCENTAGE}) / max(${MIN_SPEED_PERCENTAGE}, props.counter.speed))`,
 };

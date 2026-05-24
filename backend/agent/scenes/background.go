@@ -9,7 +9,6 @@ import (
 	"strings"
 )
 
-const DefaultBackgroundPatternOpacity float32 = 0.3
 const WordCycleBackgroundColor = "#1207e5"
 
 // apply background to a scene
@@ -27,7 +26,7 @@ func resolveSceneBackground(selectedScene *types.Scene, fieldValueMapper *servic
 			Effect: &pbcore.BackgroundEffect{
 				Type: pbcore.BackgroundEffectType_BACKGROUND_EFFECT_TYPE_AURORA,
 			},
-			PatternOpacity: utils.Ptr(DefaultBackgroundPatternOpacity),
+			PatternOpacity: utils.Ptr(brand_identity.DefaultBackgroundPatternOpacity),
 			Style:          &pbcore.BackgroundStyle_Solid{Solid: &pbcore.SolidColor{Hex: WordCycleBackgroundColor}},
 		}
 	}
@@ -49,10 +48,6 @@ func resolveSceneBackground(selectedScene *types.Scene, fieldValueMapper *servic
 		hex = brand_identity.BrandColorTokens(fieldValueMapper.GetBrandColors())[brand_identity.COLOR_PRIMARY]
 	}
 
-	//if bg.Solid.IsColorToken() && *bg.Solid.AsColorToken() == types.ColorTokenSECONDARY {
-	//	hex = brand_identity.BrandColorTokens(fieldValueMapper.GetBrandColors())[brand_identity.COLOR_SECONDARY]
-	//}
-
 	if hex == "" {
 		return nil
 	}
@@ -64,6 +59,6 @@ func resolveSceneBackground(selectedScene *types.Scene, fieldValueMapper *servic
 			},
 		},
 		Pattern:        pbcore.BackgroundPattern_BACKGROUND_PATTERN_DOTS,
-		PatternOpacity: utils.Ptr(DefaultBackgroundPatternOpacity),
+		PatternOpacity: utils.Ptr(brand_identity.DefaultBackgroundPatternOpacity),
 	}
 }

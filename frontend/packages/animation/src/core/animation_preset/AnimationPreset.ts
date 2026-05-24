@@ -53,6 +53,18 @@ export interface ResolvedAnimationPreset {
   transform: string;
 }
 
+function getDefaultPresetEasing(presetName: AnimationPresetName): Easing {
+  switch (presetName) {
+    case 'slideUp':
+    case 'slideDown':
+    case 'slideLeft':
+    case 'slideRight':
+      return 'ease-out-cubic';
+    default:
+      return 'ease-out';
+  }
+}
+
 function getAnimationTransform(
   presetName: AnimationPresetName,
   mode: 'enter' | 'exit',
@@ -165,7 +177,7 @@ export function resolveAnimationPreset({
   presetName,
   mode = 'enter',
   distance,
-  easing = 'ease-out',
+  easing,
 }: ResolveAnimationPresetInput): ResolvedAnimationPreset {
   if (presetName === 'none') {
     return {
@@ -176,13 +188,14 @@ export function resolveAnimationPreset({
   }
 
   const safeDuration = Math.max(0, duration);
+  const resolvedEasing = easing ?? getDefaultPresetEasing(presetName);
   const progress = safeDuration === 0
     ? frame >= startAt ? 1 : 0
     : interpolateWithEasing(
       frame,
       [startAt, startAt + safeDuration],
       [0, 1],
-      easing,
+      resolvedEasing,
     );
 
   return {

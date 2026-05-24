@@ -231,7 +231,10 @@ func resolveFields(
 		FieldValueMapper: fieldValueMapper,
 		BackgroundStyle:  background,
 	}
-	return styleResolver.Resolve(out, fields), nil
+	
+	propsResolver := field_resolvers.PropsResolver{}
+
+	return propsResolver.Resolve(styleResolver.Resolve(out, fields), fields), nil
 }
 
 func mergeMediaAssetFields(out map[string]any, mediaAssetFields *field_resolvers.MediaAssetFields) {

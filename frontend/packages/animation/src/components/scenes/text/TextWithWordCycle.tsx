@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-import { measureText } from '@remotion/layout-utils';
 import { useCurrentFrame } from 'remotion';
 import { usePatchedDragStyle, usePatchedProps, useStyleOverride } from '../../../patches';
 import { useStyleContext } from '../../../styles/StyleContext';
@@ -9,6 +8,7 @@ import { interpolateWithEasing } from '../../../styles/easingResolver';
 import type { TypographyVariant } from '../../../tokens/semantic';
 import { resolveTypography } from '../../../tokens/resolveTypography';
 import { Text } from '../../../core/assets/Text';
+import { useTextMeasurement } from '../../../core/assets';
 import { AnimationPresetName, resolveAnimationPreset } from '../../../core/animation_preset/AnimationPreset';
 import type { ComponentRegistration } from '../../../registry/registry';
 import type { HighlightStyle, TextCycleTransition } from '../types';
@@ -30,21 +30,6 @@ export const TextWithWordCycleDefaults = {
 };
 
 export type TextWithWordCycleProps = Partial<typeof TextWithWordCycleDefaults>
-
-function measureWordWidth(text: string, style: React.CSSProperties): number {
-  return measureText({
-    text,
-    fontFamily: style.fontFamily as string,
-    fontSize: style.fontSize as number,
-    fontWeight: style.fontWeight as number,
-    letterSpacing: style.letterSpacing as string | undefined,
-    textTransform: style.textTransform as Parameters<typeof measureText>[0]['textTransform'],
-    additionalStyles: {
-      fontStyle: typeof style.fontStyle === 'string' ? style.fontStyle : undefined,
-      fontVariant: typeof style.fontVariant === 'string' ? style.fontVariant : undefined,
-    },
-  }).width;
-}
 
 /**
  * Displays static text followed by cycling highlighted words with animated transitions.
@@ -100,15 +85,16 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (initProps) =
     }),
     [typographyStyle],
   );
+  const textMeasurement = useTextMeasurement(spacerMeasurementStyle);
 
   // Reserve width using the widest rendered word, not the longest string.
   const widestWord = useMemo(
     () => props.cyclingWords.reduce((widest, candidate) => (
-      measureWordWidth(candidate, spacerMeasurementStyle) > measureWordWidth(widest, spacerMeasurementStyle)
+      textMeasurement.width(candidate) > textMeasurement.width(widest)
         ? candidate
         : widest
     ), ''),
-    [props.cyclingWords, spacerMeasurementStyle],
+    [props.cyclingWords, textMeasurement],
   );
 
   if (props.cyclingWords.length === 0) {
@@ -430,7 +416,8 @@ export const TextWithWordCycleDescriptor: ComponentRegistration = {
       type: 'array',
       "items": {
         "type": "string"
-      }
+      },
+      range: 'min 2 words'
     },
     {
       name: 'entranceAnimation',
@@ -439,6 +426,7 @@ export const TextWithWordCycleDescriptor: ComponentRegistration = {
       default: TextWithWordCycleDefaults.entranceAnimation,
     }
   ],
-  description: 'Static text with cycling highlighted words at the end. Use for dynamic taglines like "We build amazing [software/products/solutions]"',
+  description: 'Static text with cycling highlighted words at the end',
+  instructions: 'Use for dynamic taglines like "We build amazing [software/products/solutions]"',
   celExpression: '(props.textwithwordcycle.holdDuration + props.textwithwordcycle.transitionDuration) * size(props.textwithwordcycle.cyclingWords)',
 };

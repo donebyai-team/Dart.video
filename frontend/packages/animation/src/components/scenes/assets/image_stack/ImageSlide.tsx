@@ -2,6 +2,8 @@ import React from 'react';
 import { ImageAsset } from '../../../../core/assets/ImageAsset';
 import { interpolateWithEasing } from '../../../../styles/easingResolver';
 import { getImageWithLabelImage, type ImageWithLabelItem } from './shared';
+import { DEFAULT_MEDIA_FRAME_STYLE } from '../TextWithMediaScene';
+
 
 export type ImageSlideProps = {
     frame: number;
@@ -69,7 +71,7 @@ export function ImageSlide({
                             image={imagePatch.image ?? ''}
                             width={imagePatch.width ?? width}
                             height={imagePatch.height ?? height}
-                            style={{ overflow: 'hidden' }}
+                            style={DEFAULT_MEDIA_FRAME_STYLE}
                         />
                     </div>
                 );

@@ -7,12 +7,14 @@
 
 import React, { useMemo, useState } from 'react'
 import { HexColorPicker } from 'react-colorful'
+import { BrandAssetPriority } from '@coasterai/pb/coasterai/core/v1/brandkit_pb'
 import {
   buildDepthTextShadow,
   DEPTH_STYLE_PROPERTY,
   MAX_ELEMENT_DEPTH,
   parseDepthFromShadow,
 } from '@coasterai/renderer'
+import { useVideoStore } from '@/stores/video'
 import { DualColorPicker } from './stylers/DualColorPicker'
 import { FontSelector } from './stylers/FontSelector'
 import {
@@ -362,6 +364,7 @@ export function TextToolbar({
   selectedElementId?: string
   collapsible?: boolean
 }) {
+  const updateGeneratedBrandingColor = useVideoStore(s => s.updateGeneratedBrandingColor)
   const computed = useComputedStyles(selectedElementId)
 
   const color = (styleOverride.color ?? computed.color) as string | undefined
@@ -381,6 +384,7 @@ export function TextToolbar({
         secondaryColor={toHex(backgroundColor ?? 'transparent')}
         onPrimaryColor={v => onStyleOverride({ color: v })}
         onSecondaryColor={v => onStyleOverride({ backgroundColor: v })}
+        onApplyPrimaryToAllScenes={v => updateGeneratedBrandingColor(BrandAssetPriority.TEXT_PRIMARY, v)}
         primaryLabel="Text"
         secondaryLabel="Background"
       />

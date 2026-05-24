@@ -18,7 +18,7 @@ export type StackAnimation = typeof STACK_ANIMATIONS[number];
 
 const DEFAULT_HERO_TEXT = {
     ...TextWithWordCycleDefaults,
-    variant: 'display' as TypographyVariant,
+    variant: 'headingLg' as TypographyVariant,
     entranceAnimation: 'scaleIn' as AnimationPresetName,
     highlightStyle: 'background' as const,
     textCycleTransition: 'slideUp' as const,
@@ -127,7 +127,7 @@ export function MultiImageStack(): React.ReactElement {
             >
                 <div
                     style={{
-                        textAlign: 'center',
+                        textAlign: 'left',
                         width: '100%',
                     }}
                 >
@@ -220,21 +220,37 @@ export const MultiImageStackSchemaFields = [
                 default: DEFAULT_HERO_TEXT.variant,
             },
             {
-                name: 'entranceAnimation',
-                type: 'enum',
-                map: 'props.entranceAnimation',
-                default: DEFAULT_HERO_TEXT.entranceAnimation,
+                "name": "entranceAnimation",
+                "type": "enum",
+                "map": "props.entranceAnimation",
+                "default": TextWithWordCycleDefaults.entranceAnimation
             },
             {
-                name: 'textCycleTransition',
-                type: 'enum',
-                default: DEFAULT_HERO_TEXT.textCycleTransition,
+                "name": "holdDuration",
+                "type": "number",
+                "default": TextWithWordCycleDefaults.holdDuration
             },
             {
-                name: 'highlightStyle',
-                type: 'enum',
-                default: DEFAULT_HERO_TEXT.highlightStyle,
+                "name": "transitionDuration",
+                "type": "number",
+                "default": TextWithWordCycleDefaults.transitionDuration
             },
+            {
+                "name": "textCycleTransition",
+                "type": "enum",
+                "default": TextWithWordCycleDefaults.textCycleTransition
+            },
+            {
+                "name": "highlightStyle",
+                "type": "enum",
+                "default": TextWithWordCycleDefaults.highlightStyle
+            },
+            {
+                "name": "highlightColor",
+                "type": "string",
+                "datatype": "color",
+                "default": TextWithWordCycleDefaults.highlightColor
+            }
         ],
     },
     {
@@ -300,6 +316,7 @@ export const MultiImageStackDescriptor: ComponentRegistration = {
             items: {
                 type: 'string',
             },
+            range: 'min 2 words'
         },
         {
             name: 'images',
@@ -310,9 +327,7 @@ export const MultiImageStackDescriptor: ComponentRegistration = {
             },
         },
     ],
-    description: `
-    A centered TextWithWordCycle headline above a stacked images revealing one by one with word cycle. 
-    use it to show multi features of a usecase with product images
-    Takes around 170 frames for 3 images.`,
+    description: 'A centered TextWithWordCycle headline above a stacked images revealing one by one with word cycle.',
+    instructions: 'use it to show multi features of a usecase with product images. Takes around 170 frames for 3 images.',
     celExpression: `((${BASE_SCENE_FRAMES} + size(props.images) * ${PER_IMAGE_BASE_FRAMES}) * ${DEFAULT_SPEED_PERCENTAGE}) / max(props.scene.speed, ${MIN_SPEED_PERCENTAGE})`,
 };

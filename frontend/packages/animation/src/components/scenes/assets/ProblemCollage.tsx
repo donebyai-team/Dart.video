@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useCurrentFrame } from 'remotion';
 import { ArrayItem } from '../../../core/assets/ArrayItem';
-import { ImageAsset } from '../../../core/assets/ImageAsset';
 import { useArrayPatch, usePatchedProps } from '../../../patches';
 import type { ComponentRegistration } from '../../../registry/registry';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { interpolateWithEasing } from '../../../styles/easingResolver';
-import { TextStagger, type TextStaggerProps } from '../text/TextStagger';
 import { DEFAULT_SPEED_PERCENTAGE, getSpeed, MIN_SPEED_PERCENTAGE, scaleTiming } from '../../../speed/timings';
+import { MediaAsset } from '../../../core/assets';
+import { AnimatedText, AnimatedTextProps } from '../text';
 
 const DEFAULT_CARD_WIDTH = 420;
 const DEFAULT_CARD_HEIGHT = 236;
@@ -22,10 +22,10 @@ const MAX_SCATTER_HEIGHT = 0.34;
 const CEL_PER_IMAGE_FRAMES = BASE_IMAGE_STAGGER;
 const CEL_BASE_FRAMES = BASE_TEXT_DELAY + BASE_IMAGE_DURATION + BASE_HOLD_DURATION + BASE_OUTRO_DURATION;
 
-const ProblemCollageTextDefaults: TextStaggerProps = {
-    id: 'textstagger',
+const ProblemCollageTextDefaults: AnimatedTextProps = {
+    id: 'animatedtext',
     startAt: 0,
-    text: 'Dashboards, logs, and alerts did not adapt.',
+    text: '',
     variant: 'heading' as const,
     staggerDelay: 4,
     entranceAnimation: 'scaleIn' as const,
@@ -90,7 +90,7 @@ function useImageDimensions(src?: string) {
 }
 
 type ImagePatch = {
-    image?: string;
+    src?: string;
     width?: number;
     height?: number;
     style?: React.CSSProperties;
@@ -225,7 +225,7 @@ function ProblemCollageImage({
     boundsWidth,
     boundsHeight,
 }: ProblemCollageImageProps) {
-    const naturalDimensions = useImageDimensions(patch.image);
+    const naturalDimensions = useImageDimensions(patch.src);
     const targetSize = useMemo(() => {
         if (patch.width && patch.height) {
             return {
@@ -314,9 +314,9 @@ function ProblemCollageImage({
                     height: '100%',
                 }}
             >
-                <ImageAsset
+                <MediaAsset
                     id={id}
-                    image={patch.image}
+                    image={patch.src}
                     width={fittedSize.width}
                     height={fittedSize.height}
                     style={{
@@ -412,9 +412,9 @@ export const ProblemCollage: React.FC = () => {
                     }}
                 >
 
-                    <TextStagger
+                    <AnimatedText
                         {...textProps}
-                        id="textstagger"
+                        id="animatedtext"
                         startAt={0}
                         splitBy='line'
                         style={textProps.style}
@@ -454,7 +454,7 @@ export const ProblemCollage: React.FC = () => {
 export const ProblemCollageSchemaFields = [
     {
         type: 'component',
-        name: 'textstagger',
+        name: 'animatedtext',
         fields: [
             {
                 "name": "text",
@@ -499,10 +499,10 @@ export const ProblemCollageSchemaFields = [
         map: 'props.images',
         components: [
             {
-                name: 'imageasset',
+                name: 'mediaasset',
                 fields: [
                     {
-                        name: 'image',
+                        name: 'src',
                         type: 'string',
                         map: 'item',
                         datatype: 'media',
@@ -543,6 +543,7 @@ export const ProblemCollageDescriptor: ComponentRegistration = {
             },
         },
     ],
-    description: `Centered problem statement with screenshots that fly in around it as a scattered collage. Best used to show data scattered across tools, fragmentation, multiple issues kind of problems. Takes around **66 frames** to complete`,
+    description: `Centered problem statement with screenshots that fly in around it as a scattered collage`,
+    instructions: 'Best used to show data scattered across tools, fragmentation, multiple issues kind of problems. Takes around **66 frames** to complete',
     celExpression: `((${CEL_BASE_FRAMES} + max(0, size(props.images) - 1) * ${CEL_PER_IMAGE_FRAMES}) * ${DEFAULT_SPEED_PERCENTAGE}) / max(props.scene.speed, ${MIN_SPEED_PERCENTAGE})`,
 };

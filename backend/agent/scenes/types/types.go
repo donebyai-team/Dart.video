@@ -13,6 +13,7 @@ type Component struct {
 	Schema        []SchemaNode `json:"schema"`
 	LLMSchema     []LLMField   `json:"llmSchema"`
 	Description   string       `json:"description,omitempty"`
+	Instructions  string       `json:"instructions,omitempty"`
 	CELExpression string       `json:"celExpression,omitempty"`
 }
 

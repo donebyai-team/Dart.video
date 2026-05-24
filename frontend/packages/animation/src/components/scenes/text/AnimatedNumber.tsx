@@ -254,6 +254,7 @@ export const AnimatedNumberDescriptor: ComponentRegistration = {
         },
 
     ],
-    description: 'Counting metric with label text. Make sure there is no other number in the label. Use for stats and KPIs',
+    description: 'Counting metric with label text.',
+    instructions: 'Make sure there is no other number in the label. Use for stats and KPIs',
     celExpression: 'props.animatednumber.animationDelay + max(45, min(100, log10(abs(props.animatednumber.to - props.animatednumber.from) + 1) * 20))'
 };

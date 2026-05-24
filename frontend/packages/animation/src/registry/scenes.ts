@@ -1,9 +1,8 @@
 import { ComponentRegistration } from "./registry";
 import { StatCounterDescriptor } from "../components/scenes/text/StatCounter";
-import { TextStaggerDescriptor } from "../components/scenes/text/TextStagger";
+import { AnimatedTextDescriptor } from "../components/scenes/text/AnimatedText";
 import { TextHookStaggerDescriptor } from "../components/scenes/text/TextHookStagger";
 import { TypewriterDescriptor } from "../components/scenes/text/Typewriter";
-import { TextHighlightDescriptor } from "../components/scenes/text/TextHighlight";
 import { TextWithWordCycleDescriptor } from "../components/scenes/text/TextWithWordCycle";
 import { TextLeadStaggerDescriptor } from "../components/scenes/text/TextLeadStagger";
 import { ProblemHeadlineDescriptor } from "../components/scenes/text/ProblemHeadline";
@@ -22,19 +21,22 @@ import { TextWithMediaSceneDescriptor, WordCycleDescriptor } from "../components
 
 export const SCENE_COMPONENTS: ComponentRegistration[] = [
   // Text components with schemas and duration calculators
-  // AnimatedNumberDescriptor,
+
+  /* @deprecated
+  */
+  // TextStaggerDescriptor,
+  // TextHighlightDescriptor,
+
   StatCounterDescriptor,
-  TextStaggerDescriptor,
-  // TitleSplitDescriptor,
+  AnimatedTextDescriptor,
   TextHookStaggerDescriptor,
   TypewriterDescriptor,
-  TextHighlightDescriptor,
   WordCycleDescriptor,
   TextWithWordCycleDescriptor,
   TextLeadStaggerDescriptor,
   ProblemHeadlineDescriptor,
   TextCardStackDescriptor,
-  
+
   // Asset components with schemas and duration calculators
   // AnimatedImageDescriptor,
   // AnimatedVideoDescriptor,

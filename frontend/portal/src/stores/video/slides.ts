@@ -1,11 +1,13 @@
 import { TimelineSlide } from '@/components/editor/timeline/types'
 import { Slide, TransitionDirection, TransitionType, BackgroundStyle, Section, BackgroundStyleSchema } from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import { clone, create } from '@bufbuild/protobuf'
+import { clone } from '@bufbuild/protobuf'
+import { BrandAssetPriority, type BrandColor } from '@coasterai/pb/coasterai/core/v1/brandkit_pb'
 import { createNewSlide, getDefaulVideotMetadata, createDefaultBackgroundStyle, resolveBackgroundStyle } from './defaults'
 import { VideoStoreSet, VideoStoreGet } from './types'
 import { findSlideById, getSections, updateVideoConfigSections, updateSelectedSlide, updateTotalDuration, getPreviousSlide, updateSlideById } from './utils'
 import defaultEditorConfig from '@/data/editorConfig'
 import { TRANSITION_DURATION_FRAMES } from '@coasterai/renderer/src/frameUtils'
+import { GeneratedVideoBranding } from '@coasterai/pb/coasterai/core/v1/video_pb'
 
 const SECTION_END_DROP_PREFIX = 'section-end:'
 
@@ -168,6 +170,36 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     get().refreshPendingChanges()
   },
 
+  updateGeneratedBrandingColor(priority: BrandAssetPriority, colorHexCode: string) {
+    const { videoConfig } = get()
+    if (!videoConfig) return
+
+    const existingBranding = videoConfig.metadata?.generatedBranding
+    const colors = [...(existingBranding?.colors ?? [])]
+    const existingColor = colors.find((color) => color.priority === priority)
+
+    if (existingColor) {
+      existingColor.colorHexCode = colorHexCode
+    } else {
+      colors.push({ colorHexCode, priority } as BrandColor)
+    }
+
+    set({
+      videoConfig: {
+        ...videoConfig,
+        metadata: {
+          ...(videoConfig.metadata ?? getDefaulVideotMetadata(defaultEditorConfig)),
+          generatedBranding: {
+            ...existingBranding,
+            colors,
+          } as GeneratedVideoBranding,
+        },
+      },
+    })
+
+    get().refreshPendingChanges()
+  },
+
   /* ================= REMOVE ================= */
 
   removeSlide(sectionId: string, slideId: string) {
@@ -224,6 +256,42 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     })
 
     get().refreshPendingChanges()
+  },
+
+  updateSlideById(slideId: string, updates: Partial<Slide>) {
+    const { videoConfig, selectedSlide } = get()
+    if (!videoConfig) return
+
+    let newVideoConfig = updateSlideById(videoConfig, slideId, slide => ({
+      ...slide,
+      ...updates
+    }))
+
+    newVideoConfig = updateTotalDuration(newVideoConfig)
+
+    set({
+      videoConfig: newVideoConfig,
+      selectedSlide:
+        selectedSlide?.id === slideId
+          ? updateSelectedSlide(selectedSlide, slide => ({
+            ...slide,
+            ...updates
+          }))
+          : selectedSlide
+    })
+
+    get().refreshPendingChanges()
+  },
+
+  setSelectedSlideById(slideId: string) {
+    const { videoConfig } = get()
+    if (!videoConfig) return
+
+    const nextSelectedSlide = findSlideById(videoConfig, slideId)
+    if (!nextSelectedSlide) return
+
+    // Keep selection anchored to the intended slide while helper flows add/remove siblings.
+    set({ selectedSlide: nextSelectedSlide })
   },
 
   getSlideDurationInSeconds: (slide: Slide) => {

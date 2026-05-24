@@ -6,16 +6,17 @@ import type { ComponentRegistration } from '../../../registry/registry';
 import { useAspectPreset } from '../../../styles';
 import { useStyleContext } from '../../../styles/StyleContext';
 import { useTheme } from '../../../theme';
-import { TextStagger, TextStaggerDefaults } from '../text/TextStagger';
 import { getIconTextPillMetrics, getNormalizedPill, IconTextPill, IconTextPillDefaults, PillPatchGroup } from '../../../core/assets/IconTextPill';
 import { TypographyVariant } from '../../../tokens';
 import { resolveTypography } from '../../../tokens/resolveTypography';
 import { AnimationPresetName } from '../../../core/animation_preset/AnimationPreset';
+import { measureTextWithStyle } from '../../../core/assets/useTextMeasurement';
+import { AnimatedText, AnimatedTextDefaults } from '../text';
 
 const HERO_TEXT_DEFAULTS = {
-    ...TextStaggerDefaults,
-    id: 'textstagger',
-    text: 'One product. Every use case.',
+    ...AnimatedTextDefaults,
+    id: 'animatedtext',
+    text: '',
     variant: 'headingLg' as TypographyVariant,
     splitBy: 'line' as const,
     staggerDelay: 0,
@@ -70,7 +71,7 @@ export function PillCarousel(): React.ReactElement {
     const theme = useTheme();
     const preset = useAspectPreset();
 
-    const textProps = usePatchedProps('textstagger', HERO_TEXT_DEFAULTS);
+    const textProps = usePatchedProps('animatedtext', HERO_TEXT_DEFAULTS);
     const pillItems = useArrayPatch('pills');
 
     const pillCount = pillItems.length;
@@ -128,10 +129,15 @@ export function PillCarousel(): React.ReactElement {
         { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' },
     );
     const normalizedPills = pillItems.map((item) => getNormalizedPill(item as PillPatchGroup));
-    const pillWidths = normalizedPills.map((pillProps) => {
+    const pillWidths = normalizedPills.map((pillProps, index) => {
         const typographyStyle = resolveTypography(pillProps.variant, styleConfig, theme, preset);
+        const resolvedTextStyle = {
+            ...typographyStyle,
+            ...pillProps.textStyle,
+        };
+        const textWidth = measureTextWithStyle(pillProps.text, resolvedTextStyle).width;
 
-        return getIconTextPillMetrics(pillProps, typographyStyle).width;
+        return getIconTextPillMetrics(pillProps, typographyStyle, textWidth).width;
     });
     const pillCenters = buildPillCenters(pillWidths, DEFAULT_PILL_GAP);
     const progressPosition = getCarouselProgressPosition(progress, pillCenters);
@@ -144,21 +150,18 @@ export function PillCarousel(): React.ReactElement {
                 flexDirection: 'column',
             }}
         >
-            <div
+
+            <AnimatedText
+                id="animatedtext"
+                text={textProps.text}
+                splitBy="line"
+                duration={textProps.duration}
+                entranceAnimation={textProps.entranceAnimation}
+                variant={textProps.variant}
                 style={{
                     transform: `translateY(${headlineTranslateY}px)`,
                 }}
-            >
-                <TextStagger
-                    id="textstagger"
-                    text={textProps.text}
-                    splitBy="line"
-                    staggerDelay={0}
-                    duration={textProps.duration}
-                    entranceAnimation={textProps.entranceAnimation}
-                    variant={textProps.variant}
-                />
-            </div>
+            />
 
             {pillCount > 0 && (
                 <div
@@ -231,7 +234,7 @@ export function PillCarousel(): React.ReactElement {
 export const HeroPillCarouselSchemaFields = [
     {
         type: 'component',
-        name: 'textstagger',
+        name: 'animatedtext',
         fields: [
             {
                 name: 'text',
@@ -341,6 +344,7 @@ export const PillCarouselDescriptor: ComponentRegistration = {
             default: HERO_TEXT_DEFAULTS.entranceAnimation
         }
     ],
-    description: 'A headline with a carousel of items below, each showing text and an icon (choose an icon name that represents the text) as a pill. Use for features, industries, use cases, capabilities, or categories. ~25 frames per item; minimum 3 items.',
+    description: 'A headline with a carousel of items below, each showing text and an icon (choose an icon name that represents the text) as a pill',
+    instructions: 'Use for features, industries, use cases, capabilities, or categories. ~25 frames per item; minimum 3 items.',
     celExpression: `${BASE_SCENE_FRAMES} + max(0, size(props.pills) - 1) * ${PER_PILL_SCENE_FRAMES}`,
 };

@@ -19,7 +19,7 @@ export const GlowBackground: React.FC<{
         overflow: 'hidden',
 
         // Warm neutral beige background
-        background: 'rgb(247, 243, 238)',
+        background: 'rgb(250, 248, 245)',
       }}
     >
       <div

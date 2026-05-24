@@ -52,9 +52,9 @@
     {
       "name": "splitBy",
       "value": [
-        "char",
+        "line",
         "word",
-        "line"
+        "char"
       ]
     },
     {
@@ -228,16 +228,17 @@
               "required": false
             }
           ],
-          "description": "Centered animated metric counter with a short 2-3 word label below it. Use for large numbers(at least 2 digit), metric, or KPI with or without prefix/suffix eg. 1240, 500$, 500K, 500M",
+          "description": "Centered animated metric counter with a short 2-3 word label below it",
+          "instructions": "Use for large numbers(at least 2 digit), metric, or KPI with or without prefix/suffix eg. 1240, 500$, 500K, 500M",
           "celExpression": "(((10 + 50 + 2 + 1) * 100) / max(25, props.counter.speed))"
         },
         {
-          "name": "TextStagger",
+          "name": "AnimatedText",
           "type": "content",
           "schema": [
             {
               "type": "component",
-              "name": "textstagger",
+              "name": "animatedtext",
               "fields": [
                 {
                   "name": "text",
@@ -255,7 +256,7 @@
                   "name": "staggerDelay",
                   "type": "number",
                   "map": "props.staggerDelay",
-                  "default": 5
+                  "default": 15
                 },
                 {
                   "name": "entranceAnimation",
@@ -279,13 +280,32 @@
                   "name": "exitDuration",
                   "type": "number",
                   "map": "props.exitDuration",
-                  "default": 15
+                  "default": 20
                 },
                 {
                   "name": "splitBy",
                   "type": "enum",
                   "map": "props.splitBy",
                   "default": "line"
+                },
+                {
+                  "name": "highlightStyle",
+                  "type": "enum",
+                  "map": "props.highlightStyle",
+                  "default": "simple"
+                },
+                {
+                  "name": "highlightedTextAnimation",
+                  "type": "enum",
+                  "map": "props.highlightedTextAnimation",
+                  "default": "none"
+                },
+                {
+                  "name": "highlightColor",
+                  "type": "string",
+                  "datatype": "color",
+                  "map": "props.highlightColor",
+                  "default": ""
                 }
               ]
             }
@@ -293,17 +313,19 @@
           "llmSchema": [
             {
               "name": "text",
-              "type": "string"
+              "type": "string",
+              "hint": "Use {} around text that should be highlighted. Example: \"We build {great software}\""
             },
             {
-              "name": "entranceAnimation",
+              "name": "splitBy",
               "type": "enum",
               "required": false,
-              "default": "scaleIn"
+              "default": "line"
             }
           ],
-          "description": "Reveals a word or full text phrase word-by-word. Works for both single word and multi-word headlines or body text.",
-          "celExpression": "max(1, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * props.textstagger.staggerDelay + props.textstagger.duration + (props.textstagger.exitAnimation != \"none\" ? props.textstagger.exitDuration : 0)"
+          "description": "Reveals a word or a text",
+          "instructions": "\n- Use splitBy=\"char\", \"word\", or \"line\" based on how the text should be revealed.\n- Use splitBy=\"char\" for character-by-character reveals.\n- Use splitBy=\"word\" for sequential word reveals and \"line\" for grouped multi-line reveals.\n- When using splitBy=\"line\", define line breaks with \"\\n\".\n- Optionally wrap words in {} to highlight or emphasize specific parts of the text.\n",
+          "celExpression": "max(\n  30,\n  max(0, segmentCount(props.animatedtext.text, props.animatedtext.splitBy) - 1) * props.animatedtext.staggerDelay\n  + props.animatedtext.duration\n  + (props.animatedtext.highlightedTextAnimation != \"none\" ? props.animatedtext.duration : 0)\n  + (props.animatedtext.exitAnimation != \"none\" ? props.animatedtext.exitDuration : 0)\n)"
         },
         {
           "name": "TextHookStagger",
@@ -354,7 +376,7 @@
               "range": "4-5 words"
             }
           ],
-          "description": "Reveals a short hook or intro phrase word-by-word with animated last word",
+          "description": "Reveals a short hook or intro bold phrase word-by-word with animated last word",
           "celExpression": "max(0, segmentCount(props.texthookstagger.text, \"word\") - 1) * props.texthookstagger.staggerDelay + 4 + 22"
         },
         {
@@ -377,11 +399,6 @@
                   "default": "headingLg"
                 },
                 {
-                  "name": "splitBy",
-                  "type": "enum",
-                  "default": "char"
-                },
-                {
                   "name": "entranceAnimation",
                   "type": "enum",
                   "map": "props.entranceAnimation",
@@ -402,96 +419,9 @@
               "default": "fadeIn"
             }
           ],
-          "description": "Character-by-character text reveal. Use for dramatic reveals or code/terminal effects.",
-          "celExpression": "54"
-        },
-        {
-          "name": "TextHighlight",
-          "type": "content",
-          "schema": [
-            {
-              "type": "component",
-              "name": "texthighlight",
-              "fields": [
-                {
-                  "name": "text",
-                  "type": "string",
-                  "datatype": "text",
-                  "map": "props.text"
-                },
-                {
-                  "name": "variant",
-                  "type": "enum",
-                  "map": "props.variant",
-                  "default": "display"
-                },
-                {
-                  "name": "entranceAnimation",
-                  "type": "enum",
-                  "map": "props.entranceAnimation",
-                  "default": "slideLeft"
-                },
-                {
-                  "name": "animationDelay",
-                  "type": "number",
-                  "map": "props.animationDelay",
-                  "default": 15
-                },
-                {
-                  "name": "animationDuration",
-                  "type": "number",
-                  "map": "props.animationDuration",
-                  "default": 20
-                },
-                {
-                  "name": "exitAnimation",
-                  "type": "enum",
-                  "map": "props.exitAnimation",
-                  "default": "zoomOut"
-                },
-                {
-                  "name": "exitDuration",
-                  "type": "number",
-                  "map": "props.exitDuration",
-                  "default": 15
-                },
-                {
-                  "name": "highlightStyle",
-                  "type": "enum",
-                  "map": "props.highlightStyle",
-                  "default": "simple"
-                },
-                {
-                  "name": "highlightedTextAnimation",
-                  "type": "enum",
-                  "map": "props.highlightedTextAnimation",
-                  "default": "jump"
-                },
-                {
-                  "name": "highlightColor",
-                  "type": "string",
-                  "datatype": "color",
-                  "map": "props.highlightColor",
-                  "default": ""
-                }
-              ]
-            }
-          ],
-          "llmSchema": [
-            {
-              "name": "text",
-              "type": "string",
-              "hint": "Use {} to highlight one word. eg \"We build amazing {software}\""
-            },
-            {
-              "name": "entranceAnimation",
-              "type": "enum",
-              "required": false,
-              "default": "slideLeft"
-            }
-          ],
-          "description": "Bold statement with an emphasized word to highlight",
-          "celExpression": "props.texthighlight.animationDelay + props.texthighlight.animationDuration + (props.texthighlight.exitAnimation != \"none\" ? props.texthighlight.exitDuration : 0)"
+          "description": "Character-by-character typewriter effect",
+          "instructions": "Use for dramatic reveals or code/terminal effects.",
+          "celExpression": "60"
         },
         {
           "name": "WordCycle",
@@ -531,7 +461,7 @@
                 {
                   "name": "transitionDuration",
                   "type": "number",
-                  "default": 5
+                  "default": 10
                 }
               ]
             }
@@ -542,7 +472,8 @@
               "type": "array",
               "items": {
                 "type": "string"
-              }
+              },
+              "range": "min 2 words"
             },
             {
               "name": "entranceAnimation",
@@ -551,7 +482,8 @@
               "default": "slideUp"
             }
           ],
-          "description": "Rotates through words on a bold background. Use for emphasis words, or highlighting multiple key points.",
+          "description": "Rotates through words on a bold background",
+          "instructions": "Use for emphasis words, or highlighting multiple key points.",
           "celExpression": "(props.wordcycle.holdDuration + props.wordcycle.transitionDuration) * size(props.wordcycle.words)"
         },
         {
@@ -630,7 +562,8 @@
               "type": "array",
               "items": {
                 "type": "string"
-              }
+              },
+              "range": "min 2 words"
             },
             {
               "name": "entranceAnimation",
@@ -639,7 +572,8 @@
               "default": "slideUp"
             }
           ],
-          "description": "Static text with cycling highlighted words at the end. Use for dynamic taglines like \"We build amazing [software/products/solutions]\"",
+          "description": "Static text with cycling highlighted words at the end",
+          "instructions": "Use for dynamic taglines like \"We build amazing [software/products/solutions]\"",
           "celExpression": "(props.textwithwordcycle.holdDuration + props.textwithwordcycle.transitionDuration) * size(props.textwithwordcycle.cyclingWords)"
         },
         {
@@ -648,8 +582,7 @@
           "tags": [
             "Problem",
             "Hook",
-            "Intro",
-            "Filler"
+            "Intro"
           ],
           "schema": [
             {
@@ -695,7 +628,8 @@
             }
           ],
           "celExpression": "((50 + max(0, segmentCount(props.textleadstagger.text, \"word\") - 2) * 5 + max(0, segmentCount(props.textleadstagger.text, \"word\") - 1) * 4) * 100) / max(25, props.textleadstagger.speed)",
-          "description": "First word starts enlarged and then settles down. The remaining words enter in a stagger and exit in stagger."
+          "description": "First word starts enlarged and then settles down. The remaining words enter in a stagger and exit in stagger.",
+          "instructions": "Do not use it more than once"
         },
         {
           "name": "ProblemHeadline",
@@ -749,7 +683,8 @@
             }
           ],
           "celExpression": "82",
-          "description": "A short headline scene for concise text. Use it to show the main problem, key pain point, or an important headline from the script."
+          "description": "A short headline scene for concise text with brush paint animation on the text",
+          "instructions": "Use it to show the main problem, key pain point, or an important headline from the script."
         },
         {
           "name": "TextCardStack",
@@ -803,7 +738,8 @@
               }
             }
           ],
-          "description": "Displays problem or solution statements as playful stacked cards. Best for short descriptive phrases; avoid very brief (one- or two-word) content.",
+          "description": "Displays problem or solution statements as playful stacked cards",
+          "instructions": "Best for short descriptive phrases; avoid very brief (one- or two-word) content.",
           "celExpression": "(((22 + 0 + 14 + 10 + 1) * size(props.textcardstack.texts)) * 100) / max(25, props.textcardstack.speed)"
         },
         {
@@ -831,7 +767,7 @@
               "propsPath": "props.textComponentProps",
               "components": [
                 {
-                  "name": "textstagger",
+                  "name": "animatedtext",
                   "fields": [
                     {
                       "name": "text",
@@ -843,13 +779,13 @@
                       "name": "variant",
                       "type": "enum",
                       "map": "props.variant",
-                      "default": "display"
+                      "default": "headingLg"
                     },
                     {
                       "name": "staggerDelay",
                       "type": "number",
                       "map": "props.staggerDelay",
-                      "default": 5
+                      "default": 15
                     },
                     {
                       "name": "entranceAnimation",
@@ -873,7 +809,7 @@
                       "name": "exitDuration",
                       "type": "number",
                       "map": "props.exitDuration",
-                      "default": 15
+                      "default": 20
                     },
                     {
                       "name": "splitBy",
@@ -884,79 +820,8 @@
                   ]
                 },
                 {
-                  "name": "texthighlight",
-                  "fields": [
-                    {
-                      "name": "text",
-                      "type": "string",
-                      "datatype": "text",
-                      "map": "props.text"
-                    },
-                    {
-                      "name": "variant",
-                      "type": "enum",
-                      "map": "props.variant",
-                      "default": "display"
-                    },
-                    {
-                      "name": "entranceAnimation",
-                      "type": "enum",
-                      "map": "props.entranceAnimation",
-                      "default": "slideLeft"
-                    },
-                    {
-                      "name": "animationDelay",
-                      "type": "number",
-                      "map": "props.animationDelay",
-                      "default": 15
-                    },
-                    {
-                      "name": "animationDuration",
-                      "type": "number",
-                      "map": "props.animationDuration",
-                      "default": 20
-                    },
-                    {
-                      "name": "exitAnimation",
-                      "type": "enum",
-                      "map": "props.exitAnimation",
-                      "default": "none"
-                    },
-                    {
-                      "name": "exitDuration",
-                      "type": "number",
-                      "map": "props.exitDuration",
-                      "default": 15
-                    },
-                    {
-                      "name": "highlightStyle",
-                      "type": "enum",
-                      "map": "props.highlightStyle",
-                      "default": "simple"
-                    },
-                    {
-                      "name": "highlightedTextAnimation",
-                      "type": "enum",
-                      "map": "props.highlightedTextAnimation",
-                      "default": "none"
-                    },
-                    {
-                      "name": "highlightColor",
-                      "type": "string",
-                      "datatype": "color",
-                      "map": "props.highlightColor",
-                      "default": ""
-                    }
-                  ]
-                },
-                {
                   "name": "textwithwordcycle",
                   "fields": [
-                    {
-                      "name": "startAt",
-                      "type": "number",
-                      "default": 0
-                    },
                     {
                       "name": "text",
                       "type": "string",
@@ -973,7 +838,7 @@
                     {
                       "name": "variant",
                       "type": "enum",
-                      "default": "display"
+                      "default": "headingLg"
                     },
                     {
                       "name": "entranceAnimation",
@@ -1029,8 +894,7 @@
               "name": "textComponent",
               "type": "enum",
               "enum": [
-                "textstagger",
-                "texthighlight",
+                "animatedtext",
                 "textwithwordcycle"
               ]
             },
@@ -1043,7 +907,8 @@
               "type": "string"
             }
           ],
-          "description": "Displays text with a image or video. Choose one of the filler component and its props in textComponentProps: texthighlight, textstagger, or textwithwordcycle.",
+          "description": "Displays text with a image or video.",
+          "instructions": "One liner text with animated text or word cycle. Choose one of the filler component and its props in textComponentProps: animatedtext, or textwithwordcycle.",
           "celExpression": "\"mediaasset\" in props ? props.mediaasset._duration : 90"
         },
         {
@@ -1074,13 +939,23 @@
                 {
                   "name": "variant",
                   "type": "enum",
-                  "default": "display"
+                  "default": "headingLg"
                 },
                 {
                   "name": "entranceAnimation",
                   "type": "enum",
                   "map": "props.entranceAnimation",
-                  "default": "scaleIn"
+                  "default": "slideUp"
+                },
+                {
+                  "name": "holdDuration",
+                  "type": "number",
+                  "default": 20
+                },
+                {
+                  "name": "transitionDuration",
+                  "type": "number",
+                  "default": 10
                 },
                 {
                   "name": "textCycleTransition",
@@ -1090,7 +965,13 @@
                 {
                   "name": "highlightStyle",
                   "type": "enum",
-                  "default": "background"
+                  "default": "simple"
+                },
+                {
+                  "name": "highlightColor",
+                  "type": "string",
+                  "datatype": "color",
+                  "default": ""
                 }
               ]
             },
@@ -1150,7 +1031,8 @@
               "hint": "The features to highlight per image",
               "items": {
                 "type": "string"
-              }
+              },
+              "range": "min 2 words"
             },
             {
               "name": "images",
@@ -1161,7 +1043,8 @@
               }
             }
           ],
-          "description": "\n    A centered TextWithWordCycle headline above a stacked images revealing one by one with word cycle. \n    use it to show multi features of a usecase with product images\n    Takes around 170 frames for 3 images.",
+          "description": "A centered TextWithWordCycle headline above a stacked images revealing one by one with word cycle.",
+          "instructions": "use it to show multi features of a usecase with product images. Takes around 170 frames for 3 images.",
           "celExpression": "((45 + size(props.images) * 42) * 100) / max(props.scene.speed, 25)"
         },
         {
@@ -1174,7 +1057,7 @@
           "schema": [
             {
               "type": "component",
-              "name": "textstagger",
+              "name": "animatedtext",
               "fields": [
                 {
                   "name": "text",
@@ -1219,10 +1102,10 @@
               "map": "props.images",
               "components": [
                 {
-                  "name": "imageasset",
+                  "name": "mediaasset",
                   "fields": [
                     {
-                      "name": "image",
+                      "name": "src",
                       "type": "string",
                       "map": "item",
                       "datatype": "media"
@@ -1257,7 +1140,8 @@
               }
             }
           ],
-          "description": "Centered problem statement with screenshots that fly in around it as a scattered collage. Best used to show data scattered across tools, fragmentation, multiple issues kind of problems. Takes around **66 frames** to complete",
+          "description": "Centered problem statement with screenshots that fly in around it as a scattered collage",
+          "instructions": "Best used to show data scattered across tools, fragmentation, multiple issues kind of problems. Takes around **66 frames** to complete",
           "celExpression": "((38 + max(0, size(props.images) - 1) * 7) * 100) / max(props.scene.speed, 25)"
         },
         {
@@ -1289,7 +1173,7 @@
                   "name": "staggerDelay",
                   "type": "number",
                   "map": "props.staggerDelay",
-                  "default": 5
+                  "default": 15
                 },
                 {
                   "name": "entranceAnimation",
@@ -1350,8 +1234,9 @@
               "default": "fadeIn"
             }
           ],
-          "description": "Row of logos + caption. Use for integrations, tech stack, partners, brands. eg. logos=[\"url1\", \"url2\"], text=\"caption text\".",
-          "celExpression": "10 + max(min(1, segmentCount(props.textstagger.text, props.textstagger.splitBy)) * (max(0, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * 5 + 20), 5 + max(0, size(props.logos) - 1) * 5 + 12)"
+          "description": "Row of brand logos + caption.",
+          "instructions": "Use for integrations, tech stack, partners, brands. eg. logos=[\"url1\", \"url2\"], text=\"caption text\".",
+          "celExpression": "10 + max(min(1, segmentCount(props.animatedtext.text, props.animatedtext.splitBy)) * (max(0, segmentCount(props.animatedtext.text, props.animatedtext.splitBy) - 1) * 15 + 20), 5 + max(0, size(props.logos) - 1) * 5 + 12)"
         },
         {
           "name": "LogoWithBrandName",
@@ -1362,7 +1247,7 @@
           "schema": [
             {
               "type": "component",
-              "name": "textstagger",
+              "name": "animatedtext",
               "fields": [
                 {
                   "name": "text",
@@ -1376,24 +1261,9 @@
                   "default": "headingLg"
                 },
                 {
-                  "name": "staggerDelay",
-                  "type": "number",
-                  "default": 5
-                },
-                {
                   "name": "entranceAnimation",
                   "type": "enum",
                   "default": "scaleIn"
-                },
-                {
-                  "name": "duration",
-                  "type": "number",
-                  "default": 20
-                },
-                {
-                  "name": "splitBy",
-                  "type": "enum",
-                  "default": "char"
                 }
               ]
             },
@@ -1440,8 +1310,9 @@
               "type": "string"
             }
           ],
-          "description": "Logo + brand name reveal. Use for brand intro.",
-          "celExpression": "max(0, segmentCount(props.textstagger.text, \"char\") - 1) * 5 + 20"
+          "description": "Logo + brand name reveal.",
+          "instructions": "Use for brand intros",
+          "celExpression": "max(0, segmentCount(props.animatedtext.text, \"char\")) * 5 + 20"
         },
         {
           "name": "LogoWithCTA",
@@ -1472,7 +1343,7 @@
             },
             {
               "type": "component",
-              "name": "textstagger-brandname",
+              "name": "animatedtext-brandname",
               "fields": [
                 {
                   "name": "text",
@@ -1494,7 +1365,7 @@
             },
             {
               "type": "component",
-              "name": "textstagger-tagline",
+              "name": "animatedtext-tagline",
               "fields": [
                 {
                   "name": "text",
@@ -1525,8 +1396,9 @@
               "type": "string"
             }
           ],
-          "description": "Logo icon and brand name reveal with a CTA text below that. Use as the final scene.",
-          "celExpression": "33 + (segmentCount(props.[\"textstagger-tagline\"].text, \"word\") - 1) * 3 + 12"
+          "description": "Logo icon and brand name reveal with a CTA text below that.",
+          "instructions": "Use as the final scene.",
+          "celExpression": "33 + (segmentCount(props.[\"animatedtext-tagline\"].text, \"word\") - 1) * 3 + 12"
         },
         {
           "name": "IconShowcase",
@@ -1557,7 +1429,7 @@
                   "name": "staggerDelay",
                   "type": "number",
                   "map": "props.staggerDelay",
-                  "default": 5
+                  "default": 15
                 },
                 {
                   "name": "entranceAnimation",
@@ -1624,8 +1496,9 @@
               "default": "fadeIn"
             }
           ],
-          "description": "Row of icons + caption. Use for integrations, tech stack, partners, brands. eg. icons={[\"shopify\", \"midjourney\", \"openai\"]}, text=\"caption text\".",
-          "celExpression": "10 + max(0, size(props.icons) - 1) * 5 + 10 + min(1, segmentCount(props.textstagger.text, props.textstagger.splitBy)) * (5 + max(0, segmentCount(props.textstagger.text, props.textstagger.splitBy) - 1) * 5 + 20)"
+          "description": "Row of rotating brand icons + caption.",
+          "instructions": "Use for integrations, tech stack, partners, brands. eg. icons={[\"shopify\", \"midjourney\", \"openai\"]}, text=\"caption text\".",
+          "celExpression": "10 + max(0, size(props.icons) - 1) * 5 + 10 + min(1, segmentCount(props.animatedtext.text, props.animatedtext.splitBy)) * (5 + max(0, segmentCount(props.animatedtext.text, props.animatedtext.splitBy) - 1) * 15 + 20)"
         },
         {
           "name": "PillCarousel",
@@ -1742,7 +1615,8 @@
               "default": "scaleIn"
             }
           ],
-          "description": "A headline with a carousel of items below, each showing text and an icon (choose an icon name that represents the text) as a pill. Use for features, industries, use cases, capabilities, or categories. ~25 frames per item; minimum 3 items.",
+          "description": "A headline with a carousel of items below, each showing text and an icon (choose an icon name that represents the text) as a pill",
+          "instructions": "Use for features, industries, use cases, capabilities, or categories. ~25 frames per item; minimum 3 items.",
           "celExpression": "40 + max(0, size(props.pills) - 1) * 25"
         },
         {
@@ -1828,7 +1702,7 @@
               }
             }
           ],
-          "description": "Shows a large product image or video with stacked feature cards on the top-right. Each feature card contains an icon and a short label.",
+          "description": "Shows a large product image or video with stacked feature cards on the top-right. Each feature card contains an icon and a short label revealed in staggered animation",
           "celExpression": "max(30, 20 + max(0, size(props.features) - 1) * 15 + 20)"
         },
         {
@@ -1841,7 +1715,7 @@
           "schema": [
             {
               "type": "component",
-              "name": "textstagger",
+              "name": "animatedtext",
               "fields": [
                 {
                   "name": "text",
@@ -1859,7 +1733,7 @@
                   "name": "staggerDelay",
                   "type": "number",
                   "map": "props.staggerDelay",
-                  "default": 5
+                  "default": 15
                 },
                 {
                   "name": "entranceAnimation",

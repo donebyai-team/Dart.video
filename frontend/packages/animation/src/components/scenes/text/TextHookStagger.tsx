@@ -19,7 +19,7 @@ const DEFAULT_ANIMATION_DURATION = 22; // Duration of the highlighted text anima
 export const TextHookStaggerDefaults = {
   id: 'texthookstagger',
   startAt: 0,
-  text: 'Stop losing easy sales',
+  text: '',
   variant: 'display2xl' as TypographyVariant,
   staggerDelay: DEFAULT_STAGGER_DELAY,
   revealDuration: DEFAULT_REVEAL_DURATION,
@@ -157,6 +157,6 @@ export const TextHookStaggerDescriptor: ComponentRegistration = {
       range: '4-5 words',
     },
   ],
-  description: 'Reveals a short hook or intro phrase word-by-word with animated last word',
+  description: 'Reveals a short hook or intro bold phrase word-by-word with animated last word',
   celExpression: `max(0, segmentCount(props.texthookstagger.text, "word") - 1) * props.texthookstagger.staggerDelay + ${DEFAULT_REVEAL_DURATION} + ${DEFAULT_ANIMATION_DURATION}`,
 };
