@@ -33,9 +33,9 @@ type ElevenLabs struct {
 }
 
 func NewElevenLabsProvider(apiKey string, mediaStore services.MediaStore) (Provider, error) {
-	if apiKey == "" {
-		return nil, fmt.Errorf("elevenlabs api key is empty")
-	}
+	//if apiKey == "" {
+	//	return nil, fmt.Errorf("elevenlabs api key is empty")
+	//}
 
 	return &ElevenLabs{
 		apiKey:     apiKey,
