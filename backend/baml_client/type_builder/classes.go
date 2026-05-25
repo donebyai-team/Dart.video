@@ -387,6 +387,74 @@ func (t *EditStringClassView) Type() (baml.Type, error) {
 	return t.inner.Type()
 }
 
+type GenerateAnimationCodeRequestClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *GenerateAnimationCodeRequestClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *GenerateAnimationCodeRequestClassView) PropertyPrompt() (ClassPropertyView, error) {
+	return t.inner.Property("prompt")
+}
+
+func (t *TypeBuilder) GenerateAnimationCodeRequest() (*GenerateAnimationCodeRequestClassView, error) {
+	bld, err := t.inner.Class("GenerateAnimationCodeRequest")
+	if err != nil {
+		return nil, err
+	}
+	return &GenerateAnimationCodeRequestClassView{inner: bld}, nil
+}
+
+func (t *GenerateAnimationCodeRequestClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
+type GenerateAnimationCodeResponseClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *GenerateAnimationCodeResponseClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *GenerateAnimationCodeResponseClassView) PropertyCode() (ClassPropertyView, error) {
+	return t.inner.Property("code")
+}
+
+func (t *GenerateAnimationCodeResponseClassView) PropertyTotal_frames() (ClassPropertyView, error) {
+	return t.inner.Property("total_frames")
+}
+
+func (t *TypeBuilder) GenerateAnimationCodeResponse() (*GenerateAnimationCodeResponseClassView, error) {
+	bld, err := t.inner.Class("GenerateAnimationCodeResponse")
+	if err != nil {
+		return nil, err
+	}
+	return &GenerateAnimationCodeResponseClassView{inner: bld}, nil
+}
+
+func (t *GenerateAnimationCodeResponseClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
 type GeneratedVideoPlanClassView struct {
 	inner baml.ClassBuilder
 }

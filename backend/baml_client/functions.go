@@ -169,6 +169,80 @@ func EditAnimationCode(ctx context.Context, resume types.EditAnimationCodeReques
 	}
 }
 
+func GenerateAnimation(ctx context.Context, resume types.GenerateAnimationCodeRequest, conversation_history []types.Message, opts ...CallOptionFunc) (types.GenerateAnimationCodeResponse, error) {
+
+	var callOpts callOption
+	for _, opt := range opts {
+		opt(&callOpts)
+	}
+
+	// Resolve client option to clientRegistry (client takes precedence)
+	if callOpts.client != nil {
+		if callOpts.clientRegistry == nil {
+			callOpts.clientRegistry = baml.NewClientRegistry()
+		}
+		callOpts.clientRegistry.SetPrimaryClient(*callOpts.client)
+	}
+
+	args := baml.BamlFunctionArguments{
+		Kwargs: map[string]any{"resume": resume, "conversation_history": conversation_history},
+		Env:    getEnvVars(callOpts.env),
+	}
+
+	if callOpts.clientRegistry != nil {
+		args.ClientRegistry = callOpts.clientRegistry
+	}
+
+	if callOpts.collectors != nil {
+		args.Collectors = callOpts.collectors
+	}
+
+	if callOpts.typeBuilder != nil {
+		args.TypeBuilder = callOpts.typeBuilder
+	}
+
+	if callOpts.tags != nil {
+		args.Tags = callOpts.tags
+	}
+
+	encoded, err := args.Encode()
+	if err != nil {
+		panic(err)
+	}
+
+	if callOpts.onTick == nil {
+		result, err := bamlRuntime.CallFunction(ctx, "GenerateAnimation", encoded, callOpts.onTick)
+		if err != nil {
+			return types.GenerateAnimationCodeResponse{}, err
+		}
+
+		if result.Error != nil {
+			return types.GenerateAnimationCodeResponse{}, result.Error
+		}
+
+		casted := (result.Data).(types.GenerateAnimationCodeResponse)
+
+		return casted, nil
+	} else {
+		channel, err := bamlRuntime.CallFunctionStream(ctx, "GenerateAnimation", encoded, callOpts.onTick)
+		if err != nil {
+			return types.GenerateAnimationCodeResponse{}, err
+		}
+
+		for result := range channel {
+			if result.Error != nil {
+				return types.GenerateAnimationCodeResponse{}, result.Error
+			}
+
+			if result.HasData {
+				return result.Data.(types.GenerateAnimationCodeResponse), nil
+			}
+		}
+
+		return types.GenerateAnimationCodeResponse{}, fmt.Errorf("No data returned from stream")
+	}
+}
+
 func GeneratePlan(ctx context.Context, input types.VideoGenerationPlanRequest, conversation_history []types.Message, opts ...CallOptionFunc) (types.VideoGenerationPlan, error) {
 
 	var callOpts callOption

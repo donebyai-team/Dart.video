@@ -78,6 +78,20 @@ client<llm> CustomOpenAI5WithThinkingSummary {
   }
 }
 
+client<llm> CustomOpenAI55WithThinkingSummary {
+  provider "openai-responses"
+  retry_policy Exponential
+  options {
+    model "gpt-5.5"
+    api_key env.OPENAI_API_KEY
+    //max_completion_tokens 12000
+    reasoning {
+      effort "medium"
+      summary "auto"
+    }
+  }
+}
+
 client<llm> CustomOpenAI5WithLowThinkingSummary {
   provider "openai-responses"
   retry_policy Exponential

@@ -520,6 +520,96 @@ func (c EditString) BamlTypeName() string {
 	return "EditString"
 }
 
+type GenerateAnimationCodeRequest struct {
+	Prompt *string `json:"prompt"`
+}
+
+func (c *GenerateAnimationCodeRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_STREAM_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_STREAM_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "GenerateAnimationCodeRequest" {
+		panic(fmt.Sprintf("expected GenerateAnimationCodeRequest, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "prompt":
+			c.Prompt = baml.Decode(valueHolder).Interface().(*string)
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class GenerateAnimationCodeRequest", key))
+
+		}
+	}
+
+}
+
+func (c GenerateAnimationCodeRequest) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["prompt"] = c.Prompt
+
+	return baml.EncodeClass("GenerateAnimationCodeRequest", fields, nil)
+}
+
+func (c GenerateAnimationCodeRequest) BamlTypeName() string {
+	return "GenerateAnimationCodeRequest"
+}
+
+type GenerateAnimationCodeResponse struct {
+	Code         *string `json:"code"`
+	Total_frames *int64  `json:"total_frames"`
+}
+
+func (c *GenerateAnimationCodeResponse) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_STREAM_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_STREAM_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "GenerateAnimationCodeResponse" {
+		panic(fmt.Sprintf("expected GenerateAnimationCodeResponse, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "code":
+			c.Code = baml.Decode(valueHolder).Interface().(*string)
+
+		case "total_frames":
+			c.Total_frames = baml.Decode(valueHolder).Interface().(*int64)
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class GenerateAnimationCodeResponse", key))
+
+		}
+	}
+
+}
+
+func (c GenerateAnimationCodeResponse) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["code"] = c.Code
+
+	fields["total_frames"] = c.Total_frames
+
+	return baml.EncodeClass("GenerateAnimationCodeResponse", fields, nil)
+}
+
+func (c GenerateAnimationCodeResponse) BamlTypeName() string {
+	return "GenerateAnimationCodeResponse"
+}
+
 type GeneratedVideoPlan struct {
 	VideoName       *string        `json:"videoName"`
 	Sections        []SceneSection `json:"sections"`

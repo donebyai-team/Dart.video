@@ -11,6 +11,7 @@ import (
 	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/cache"
 	"github.com/shank318/coasterai/datastore"
+	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
 	"github.com/shank318/coasterai/services"
@@ -341,69 +342,83 @@ func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest ty
 	})
 	// Generate and validate upto max attempts
 	for attempt := 0; attempt < maxAttempts; attempt++ {
-		llmResponse, err := l.llmService.GenerateScene(ctx, generatePlanRequest, session.ConversationHistory, func(chunk string) {
-			l.publishTransientState(VideoAgentState{
-				Thinking: chunk,
-				State:    stateStatusProcessing,
-			})
-		})
+		//llmResponse, err := l.llmService.GenerateScene(ctx, generatePlanRequest, session.ConversationHistory, func(chunk string) {
+		//	l.publishTransientState(VideoAgentState{
+		//		Thinking: chunk,
+		//		State:    stateStatusProcessing,
+		//	})
+		//})
+		//if err != nil {
+		//	return nil, agenterrors.LLMPlanningFailed("failed to generate scene", err)
+		//}
+		//
+		//handled, result, err := l.handleToolCalls(ctx, session, llmResponse, "")
+		//if handled {
+		//	return result, err
+		//}
+		//
+		//scene := llmResponse.AsScene()
+		//if scene == nil {
+		//	return nil, agenterrors.Internal("scene is missing", nil)
+		//}
+		//
+		//// replace generated asset handles
+		////if l.assetRegistry != nil {
+		////	for i := range scene.Elements {
+		////		resolved := l.assetRegistry.ResolveMediaHandles(scene.Elements[i].Props)
+		////		scene.Elements[i].Props = resolved
+		////	}
+		////}
+		//
+		//// Validate scene and add default props
+		//sceneConfigs, err := scenes.ConvertToSceneConfig(scene, l.assetRegistry)
+		//if err != nil {
+		//	marshalScene, _ := json.Marshal(scene)
+		//	session.ConversationHistory = appendRetryConversation(
+		//		session.ConversationHistory,
+		//		string(marshalScene),
+		//		err.Error(),
+		//	)
+		//
+		//	l.logger.Error("received invalid scene, retrying..",
+		//		zap.Int("attempts", attempt),
+		//		zap.String("scene_error", err.Error()))
+		//
+		//	continue
+		//}
+		//
+		//sceneConfig := sceneConfigs[0]
+		//
+		//template, err := l.animationGenerator.GenerateCodeFromScene(ctx, sceneConfig, func(progress TemplateGenerationProgress) {
+		//	l.publishTransientState(VideoAgentState{
+		//		Thinking: progress.Message,
+		//		State:    stateStatusProcessing,
+		//	})
+		//})
+		//if err != nil {
+		//	return nil, err
+		//}
+		//
+		//// add background if applicable
+		//template.BackgroundStyle = sceneConfig.Background
+
+		llmResponse, err := l.llmService.GenerateAnimation(ctx, session.Request.Prompt)
 		if err != nil {
 			return nil, agenterrors.LLMPlanningFailed("failed to generate scene", err)
 		}
 
-		handled, result, err := l.handleToolCalls(ctx, session, llmResponse, "")
-		if handled {
-			return result, err
-		}
-
-		scene := llmResponse.AsScene()
-		if scene == nil {
-			return nil, agenterrors.Internal("scene is missing", nil)
-		}
-
-		// replace generated asset handles
-		//if l.assetRegistry != nil {
-		//	for i := range scene.Elements {
-		//		resolved := l.assetRegistry.ResolveMediaHandles(scene.Elements[i].Props)
-		//		scene.Elements[i].Props = resolved
-		//	}
-		//}
-
-		// Validate scene and add default props
-		sceneConfigs, err := scenes.ConvertToSceneConfig(scene, l.assetRegistry)
-		if err != nil {
-			marshalScene, _ := json.Marshal(scene)
-			session.ConversationHistory = appendRetryConversation(
-				session.ConversationHistory,
-				string(marshalScene),
-				err.Error(),
-			)
-
-			l.logger.Error("received invalid scene, retrying..",
-				zap.Int("attempts", attempt),
-				zap.String("scene_error", err.Error()))
-
-			continue
-		}
-
-		sceneConfig := sceneConfigs[0]
-
-		template, err := l.animationGenerator.GenerateCodeFromScene(ctx, sceneConfig, func(progress TemplateGenerationProgress) {
-			l.publishTransientState(VideoAgentState{
-				Thinking: progress.Message,
-				State:    stateStatusProcessing,
-			})
-		})
-		if err != nil {
-			return nil, err
-		}
-
-		// add background if applicable
-		template.BackgroundStyle = sceneConfig.Background
-
 		return &RunResult{
-			Status:             RunStatusCompleted,
-			GeneratedAnimation: template,
+			Status: RunStatusCompleted,
+			GeneratedAnimation: &models.Template{
+				Config: &models.TemplateConfig{
+					CodeRegistry: &pbcore.CodeRegistry{
+						Code: llmResponse.Code,
+					},
+					VisibleDurationInFrames: int32(llmResponse.Total_frames),
+					TotalDurationInFrames:   int32(llmResponse.Total_frames),
+				},
+				GeneratedPatches: json.RawMessage(`{}`),
+			},
 		}, nil
 
 	}
