@@ -80,7 +80,7 @@ func ungroupSocialProof(scene *baml_client.Scene, fieldValueMapper *services.Med
 				"entranceAnimation": "zoomIn",
 				"splitBy":           "line",
 				"exitAnimation":     "none",
-				"staggerDelay":      15,
+				"staggerDelay":      20,
 				"duration":          20,
 			},
 			field_resolvers.FieldResolverForward,
@@ -95,6 +95,7 @@ func ungroupSocialProof(scene *baml_client.Scene, fieldValueMapper *services.Med
 			Name:               component.Name,
 			DurationExpression: component.CELExpression,
 			Props:              finalProps,
+			Background:         background,
 		})
 
 	}

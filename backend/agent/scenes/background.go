@@ -31,6 +31,8 @@ func resolveSceneBackground(selectedScene *types.Scene, fieldValueMapper *servic
 		}
 	}
 
+	return nil
+
 	// Handle LLM generated background color
 	bg := selectedScene.Background
 	if bg == nil {

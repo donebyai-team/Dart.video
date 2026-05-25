@@ -256,7 +256,7 @@
                   "name": "staggerDelay",
                   "type": "number",
                   "map": "props.staggerDelay",
-                  "default": 15
+                  "default": 20
                 },
                 {
                   "name": "entranceAnimation",
@@ -785,7 +785,7 @@
                       "name": "staggerDelay",
                       "type": "number",
                       "map": "props.staggerDelay",
-                      "default": 15
+                      "default": 20
                     },
                     {
                       "name": "entranceAnimation",
@@ -1173,7 +1173,7 @@
                   "name": "staggerDelay",
                   "type": "number",
                   "map": "props.staggerDelay",
-                  "default": 15
+                  "default": 20
                 },
                 {
                   "name": "entranceAnimation",
@@ -1236,7 +1236,7 @@
           ],
           "description": "Row of brand logos + caption.",
           "instructions": "Use for integrations, tech stack, partners, brands. eg. logos=[\"url1\", \"url2\"], text=\"caption text\".",
-          "celExpression": "10 + max(min(1, segmentCount(props.animatedtext.text, props.animatedtext.splitBy)) * (max(0, segmentCount(props.animatedtext.text, props.animatedtext.splitBy) - 1) * 15 + 20), 5 + max(0, size(props.logos) - 1) * 5 + 12)"
+          "celExpression": "10 + max(min(1, segmentCount(props.animatedtext.text, props.animatedtext.splitBy)) * (max(0, segmentCount(props.animatedtext.text, props.animatedtext.splitBy) - 1) * 20 + 20), 5 + max(0, size(props.logos) - 1) * 5 + 12)"
         },
         {
           "name": "LogoWithBrandName",
@@ -1429,7 +1429,7 @@
                   "name": "staggerDelay",
                   "type": "number",
                   "map": "props.staggerDelay",
-                  "default": 15
+                  "default": 20
                 },
                 {
                   "name": "entranceAnimation",
@@ -1498,7 +1498,7 @@
           ],
           "description": "Row of rotating brand icons + caption.",
           "instructions": "Use for integrations, tech stack, partners, brands. eg. icons={[\"shopify\", \"midjourney\", \"openai\"]}, text=\"caption text\".",
-          "celExpression": "10 + max(0, size(props.icons) - 1) * 5 + 10 + min(1, segmentCount(props.animatedtext.text, props.animatedtext.splitBy)) * (5 + max(0, segmentCount(props.animatedtext.text, props.animatedtext.splitBy) - 1) * 15 + 20)"
+          "celExpression": "10 + max(0, size(props.icons) - 1) * 5 + 10 + min(1, segmentCount(props.animatedtext.text, props.animatedtext.splitBy)) * (5 + max(0, segmentCount(props.animatedtext.text, props.animatedtext.splitBy) - 1) * 20 + 20)"
         },
         {
           "name": "PillCarousel",
@@ -1511,7 +1511,7 @@
           "schema": [
             {
               "type": "component",
-              "name": "textstagger",
+              "name": "animatedtext",
               "fields": [
                 {
                   "name": "text",
@@ -1733,7 +1733,7 @@
                   "name": "staggerDelay",
                   "type": "number",
                   "map": "props.staggerDelay",
-                  "default": 15
+                  "default": 20
                 },
                 {
                   "name": "entranceAnimation",

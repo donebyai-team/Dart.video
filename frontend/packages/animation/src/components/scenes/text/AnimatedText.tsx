@@ -36,7 +36,7 @@ export const AnimatedTextDefaults = {
     startAt: 0,
     text: '',
     variant: 'headingLg' as TypographyVariant,
-    staggerDelay: 15,
+    staggerDelay: 20,
     entranceAnimation: 'scaleIn' as AnimationPresetName,
     duration: 20,
     exitAnimation: 'none' as AnimationPresetName,
