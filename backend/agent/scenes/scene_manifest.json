@@ -1786,6 +1786,57 @@
             }
           ],
           "celExpression": "\"mediaasset\" in props ? props.mediaasset._duration : 90"
+        },
+        {
+          "name": "TimelineCardStack",
+          "type": "scene",
+          "tags": [
+            "Solution",
+            "Product Info",
+            "Features"
+          ],
+          "schema": [
+            {
+              "type": "repeat",
+              "source": "features",
+              "map": "props.features",
+              "components": [
+                {
+                  "name": "text",
+                  "fields": [
+                    {
+                      "name": "text",
+                      "type": "string",
+                      "datatype": "text",
+                      "map": "item"
+                    },
+                    {
+                      "name": "variant",
+                      "type": "enum",
+                      "default": "display"
+                    }
+                  ]
+                },
+                {
+                  "name": "container",
+                  "fields": []
+                }
+              ]
+            }
+          ],
+          "llmSchema": [
+            {
+              "name": "features",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "range": "min 2 short feature labels"
+            }
+          ],
+          "description": "Timeline-style vertical sequence of feature cards. One card centers at a time, then hands off to the next with a dashed connector.",
+          "instructions": "use it to show a list of features or emphasis words",
+          "celExpression": "22 + 14 + max(0, size(props.features) - 1) * (18 + 14)"
         }
       ]
     }

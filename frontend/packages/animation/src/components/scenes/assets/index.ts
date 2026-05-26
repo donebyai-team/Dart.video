@@ -10,3 +10,4 @@ export * from '../../../core/assets/IconTextPill';
 export * from './PillCarousel';
 export * from './MediaWithFeatures';
 export * from './AnimatedMedia';
+export * from './TimelineCardStack';

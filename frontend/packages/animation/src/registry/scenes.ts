@@ -16,6 +16,7 @@ import { IconShowcaseDescriptor } from "../components/scenes/assets/IconShowcase
 import { PillCarouselDescriptor } from "../components/scenes/assets/PillCarousel";
 import { MediaWithFeaturesDescriptor } from "../components/scenes/assets/MediaWithFeatures";
 import { AnimatedMediaDescriptor } from "../components/scenes/assets/AnimatedMedia";
+import { TimelineCardStackDescriptor } from "../components/scenes/assets/TimelineCardStack";
 import { TextWithMediaSceneDescriptor, WordCycleDescriptor } from "../components/scenes";
 
 
@@ -51,4 +52,5 @@ export const SCENE_COMPONENTS: ComponentRegistration[] = [
   PillCarouselDescriptor,
   MediaWithFeaturesDescriptor,
   AnimatedMediaDescriptor,
+  TimelineCardStackDescriptor,
 ];
