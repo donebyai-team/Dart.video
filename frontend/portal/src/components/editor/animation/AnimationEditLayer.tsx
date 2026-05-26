@@ -46,6 +46,36 @@ interface AnimationEditLayerProps {
   onStyleOverride: (id: string, style: Record<string, string | number>) => void
 }
 
+function clampRectToCanvas(rect: FRect, canvas: FRect): FRect | null {
+  const left = Math.max(rect.left, canvas.left)
+  const top = Math.max(rect.top, canvas.top)
+  const right = Math.min(rect.left + rect.width, canvas.left + canvas.width)
+  const bottom = Math.min(rect.top + rect.height, canvas.top + canvas.height)
+
+  if (right <= left || bottom <= top) return null
+
+  return {
+    left,
+    top,
+    width: right - left,
+    height: bottom - top,
+  }
+}
+
+function insetRect(rect: FRect, inset: number): FRect | null {
+  const width = rect.width - inset * 2
+  const height = rect.height - inset * 2
+
+  if (width <= 0 || height <= 0) return null
+
+  return {
+    left: rect.left + inset,
+    top: rect.top + inset,
+    width,
+    height,
+  }
+}
+
 export function AnimationEditLayer({
   playerRef,
   selectedEid,
@@ -450,6 +480,9 @@ export function AnimationEditLayer({
 
   if (!canvasRect) return null
 
+  const clampedElementRect = elementRect ? clampRectToCanvas(elementRect, canvasRect) : null
+  const selectionRect = clampedElementRect ? insetRect(clampedElementRect, 2) : null
+
   return createPortal(
     <>
       {/* Click capture */}
@@ -472,14 +505,14 @@ export function AnimationEditLayer({
       />
 
       {/* Selection highlight */}
-      {elementRect && selectedEid && (
+      {selectionRect && selectedEid && (
         <div
           style={{
             position: 'fixed',
-            left: elementRect.left - 2,
-            top: elementRect.top - 2,
-            width: elementRect.width + 4,
-            height: elementRect.height + 4,
+            left: selectionRect.left,
+            top: selectionRect.top,
+            width: selectionRect.width,
+            height: selectionRect.height,
             border: '2px dashed rgba(99,102,241,0.8)',
             borderRadius: 3,
             boxSizing: 'border-box',
@@ -526,12 +559,12 @@ export function AnimationEditLayer({
       })()}
 
       {/* Plain Text resize handle */}
-      {elementRect && selectedEid && isPlainTextElement(selectedEid) && (
+      {clampedElementRect && selectedEid && isPlainTextElement(selectedEid) && (
         <div
           style={{
             position: 'fixed',
-            left: elementRect.left + elementRect.width - 5,
-            top: elementRect.top + elementRect.height / 2 - 5,
+            left: clampedElementRect.left + clampedElementRect.width - 5,
+            top: clampedElementRect.top + clampedElementRect.height / 2 - 5,
             width: 10,
             height: 10,
             background: '#ffffff',
@@ -554,12 +587,12 @@ export function AnimationEditLayer({
       )}
 
       {/* Media resize handle */}
-      {elementRect && selectedEid && isMediaComponent(selectedEid) && (
+      {clampedElementRect && selectedEid && isMediaComponent(selectedEid) && (
         <div
           style={{
             position: 'fixed',
-            left: elementRect.left + elementRect.width - 6,
-            top: elementRect.top + elementRect.height - 6,
+            left: clampedElementRect.left + clampedElementRect.width - 6,
+            top: clampedElementRect.top + clampedElementRect.height - 6,
             width: 12,
             height: 12,
             background: '#ffffff',
