@@ -1,3 +1,4 @@
+import { spring } from 'remotion';
 import { Easing, interpolateWithEasing } from '../../styles';
 
 export const ANIMATION_PRESET_ENTRANCE_ANIMATIONS = [
@@ -51,6 +52,28 @@ export interface ResolvedAnimationPreset {
   progress: number;
   opacity: number;
   transform: string;
+}
+
+function shouldUseSpringForPreset(
+  presetName: AnimationPresetName,
+  mode: 'enter' | 'exit',
+): boolean {
+  if (mode !== 'enter') {
+    return false;
+  }
+
+  switch (presetName) {
+    case 'fadeIn':
+    case 'slideUp':
+    case 'slideDown':
+    case 'slideLeft':
+    case 'slideRight':
+    case 'scaleIn':
+    case 'swingIn':
+      return true;
+    default:
+      return false;
+  }
 }
 
 function getDefaultPresetEasing(presetName: AnimationPresetName): Easing {
@@ -191,16 +214,29 @@ export function resolveAnimationPreset({
   const resolvedEasing = easing ?? getDefaultPresetEasing(presetName);
   const progress = safeDuration === 0
     ? frame >= startAt ? 1 : 0
-    : interpolateWithEasing(
-      frame,
-      [startAt, startAt + safeDuration],
-      [0, 1],
-      resolvedEasing,
-    );
+    : shouldUseSpringForPreset(presetName, mode)
+      ? spring({
+        fps: 30,
+        frame: Math.max(0, frame - startAt),
+        durationInFrames: safeDuration,
+        config: {
+          damping: 8,
+          stiffness: 140,
+          mass: 0.9,
+        },
+      })
+      : interpolateWithEasing(
+        frame,
+        [startAt, startAt + safeDuration],
+        [0, 1],
+        resolvedEasing,
+      );
 
   return {
     progress,
-    opacity: mode === 'exit' ? 1 - progress : getAnimationOpacity(presetName, progress),
+    opacity: mode === 'exit'
+      ? Math.max(0, Math.min(1, 1 - progress))
+      : getAnimationOpacity(presetName, progress),
     transform: getAnimationTransform(presetName, mode, progress, distance),
   };
 }

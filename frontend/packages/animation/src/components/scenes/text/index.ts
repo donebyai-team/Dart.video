@@ -1,5 +1,6 @@
 export * from './AnimatedNumber';
 export * from './AnimatedText';
+export * from './IntroText';
 export * from './StatCounter';
 export * from './Typewriter';
 export * from './WordCycle';
