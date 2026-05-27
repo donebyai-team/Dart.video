@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+import "google/protobuf/wrappers.proto";
+package coasterai.core.v1;
+option go_package = "github.com/shank318/coasterai/pb/coasterai/core/v1;pbcore";
+
+message BackgroundTrack {
+  string id = 1;
+  string name = 2;
+  string url = 3;
+  optional string icon = 4;
+}
