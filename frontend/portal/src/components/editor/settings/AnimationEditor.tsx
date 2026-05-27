@@ -469,14 +469,12 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
             </div>
 
             <div className='flex flex-col flex-1 min-h-0'>
-                {selectedAnimationElementId && stage !== 'question' && (
+                {selectedAnimationElementId && stage !== 'question' ? (
                     <div className='mb-3 overflow-hidden'>
                         <SceneSettings
                             elementId={selectedAnimationElementId}
                             overlay={overlay}
                             onValuePatch={(id: string, prop: string, value: unknown) => {
-                                // TODO: Move it at a better place
-                                // Update scene duration
                                 if (prop === '_duration' && typeof value === 'number' && value > 0) {
                                     updateSlide({
                                         durationInFrames: Math.round(value),
@@ -489,123 +487,127 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                             isPreviewPlaying={isPreviewPlaying}
                         />
                     </div>
-                )}
+                ) : (
+                    <>
+                        <div className='flex-1 min-h-0 rounded-xl bg-background/60 backdrop-blur-sm p-3 overflow-auto'>
+                            {stage === 'question' && activeQuestion && (
+                                <QuestionPanel
+                                    question={activeQuestion}
+                                    isSubmitting={isSubmitting}
+                                    customAnswer={customAnswer}
+                                    answerInput={answerInput}
+                                    onOptionClick={option => {
+                                        setSelectedAnswer(option)
+                                        void handleContinuePlanning(option)
+                                    }}
+                                    onCustomAnswerChange={setCustomAnswer}
+                                    onContinue={responseOverride => void handleContinuePlanning(responseOverride)}
+                                    selectedQuestionAssets={questionAssets}
+                                    onOpenAssetPicker={openAssetDialog}
+                                    onOpenSelectedAssetsDialog={() => setQuestionAssetsDialogOpen(true)}
+                                />
+                            )}
+                        </div>
 
-                {/* <div className='flex-1 min-h-0 rounded-xl bg-background/60 backdrop-blur-sm p-3 overflow-auto'>
-                    {stage === 'question' && activeQuestion && (
-                        <QuestionPanel
-                            question={activeQuestion}
-                            isSubmitting={isSubmitting}
-                            customAnswer={customAnswer}
-                            answerInput={answerInput}
-                            onOptionClick={option => {
-                                setSelectedAnswer(option)
-                                void handleContinuePlanning(option)
-                            }}
-                            onCustomAnswerChange={setCustomAnswer}
-                            onContinue={responseOverride => void handleContinuePlanning(responseOverride)}
-                            selectedQuestionAssets={questionAssets}
-                            onOpenAssetPicker={openAssetDialog}
-                            onOpenSelectedAssetsDialog={() => setQuestionAssetsDialogOpen(true)}
-                        />
-                    )}
-                </div> */}
-
-                {/* {showThinking && (
-                    <div className='mt-3'>
-                        <ThinkingViewComponent thinkingChunk={thinkingChunk} />
-                    </div>
-                )} */}
-
-                {/* <div className="mt-3 rounded-xl border bg-background shadow-sm overflow-hidden relative"> */}
-                    {/* Toolbar row */}
-                    {/* <div className='flex items-center gap-1.5 px-3 pt-2 pb-1.5 text-xs text-muted-foreground border-b border-border/40 flex-wrap'>
-                        {hasBrand ? (
-                            <span className='flex items-center gap-1 flex-shrink-0'>
-                                <Palette className='w-4 h-4 opacity-70' />
-                                <span className='text-xs'>{brandIdentity?.name ?? 'Brand'}</span>
-                            </span>
-                        ) : (
-                            <BrandLibrarySelector
-                                selectedBrandLibraryId={undefined}
-                                onChange={() => { }}
-                                onAddBrand={() => router.push('/dashboard/brand')}
-                                disabled={stage !== 'compose'}
-                            />
+                        {showThinking && (
+                            <div className='mt-3'>
+                                <ThinkingViewComponent thinkingChunk={thinkingChunk} />
+                            </div>
                         )}
 
-                        <span className='text-border/60 mx-0.5'>·</span>
-
-                        <AssetUploadDropdown
-                            disabled={stage !== 'compose'}
-                            onOpenAssetPicker={openAssetDialog}
-                        />
-                    </div> */}
-
-                    {/* Selected assets badge */}
-                    {/* {hasSelectedAssets && (
-                        <div className='mx-3 mt-1.5 flex flex-wrap gap-2'>
-                            <div
-                                onClick={() => setSelectedAssetsDialogOpen(true)}
-                                className='flex cursor-pointer items-center justify-between rounded-lg border border-primary/15 bg-primary/5 px-3 py-1.5 text-xs transition-colors hover:border-primary/30'
-                            >
-                                <div className='flex items-center gap-2 text-primary'>
-                                    <span className='font-medium'>
-                                        {selectedAssets.length} asset{selectedAssets.length > 1 ? 's' : ''}
+                        <div className="mt-3 rounded-xl border bg-background shadow-sm overflow-hidden relative">
+                            {/* Toolbar row */}
+                            <div className='flex items-center gap-1.5 px-3 pt-2 pb-1.5 text-xs text-muted-foreground border-b border-border/40 flex-wrap'>
+                                {hasBrand ? (
+                                    <span className='flex items-center gap-1 flex-shrink-0'>
+                                        <Palette className='w-4 h-4 opacity-70' />
+                                        <span className='text-xs'>{brandIdentity?.name ?? 'Brand'}</span>
                                     </span>
+                                ) : (
+                                    <BrandLibrarySelector
+                                        selectedBrandLibraryId={undefined}
+                                        onChange={() => { }}
+                                        onAddBrand={() => router.push('/dashboard/brand')}
+                                        disabled={stage !== 'compose'}
+                                    />
+                                )}
+
+                                <span className='text-border/60 mx-0.5'>·</span>
+
+                                <AssetUploadDropdown
+                                    disabled={stage !== 'compose'}
+                                    onOpenAssetPicker={openAssetDialog}
+                                />
+                            </div>
+
+                            {/* Selected assets badge */}
+                            {hasSelectedAssets && (
+                                <div className='mx-3 mt-1.5 flex flex-wrap gap-2'>
+                                    <div
+                                        onClick={() => setSelectedAssetsDialogOpen(true)}
+                                        className='flex cursor-pointer items-center justify-between rounded-lg border border-primary/15 bg-primary/5 px-3 py-1.5 text-xs transition-colors hover:border-primary/30'
+                                    >
+                                        <div className='flex items-center gap-2 text-primary'>
+                                            <span className='font-medium'>
+                                                {selectedAssets.length} asset{selectedAssets.length > 1 ? 's' : ''}
+                                            </span>
+                                        </div>
+                                        <button
+                                            onClick={e => {
+                                                e.stopPropagation()
+                                                setSelectedAssets([])
+                                            }}
+                                            className='ml-2 p-0.5 rounded hover:bg-destructive/10 hover:text-destructive'
+                                            type='button'
+                                        >
+                                            <X className='w-3.5 h-3.5' />
+                                        </button>
+                                    </div>
                                 </div>
-                                <button
-                                    onClick={e => {
-                                        e.stopPropagation()
-                                        setSelectedAssets([])
-                                    }}
-                                    className='ml-2 p-0.5 rounded hover:bg-destructive/10 hover:text-destructive'
-                                    type='button'
-                                >
-                                    <X className='w-3.5 h-3.5' />
-                                </button>
+                            )}
+
+                            <textarea
+                                value={prompt}
+                                onChange={e => setPrompt(e.target.value)}
+                                onKeyDown={e => {
+                                    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && canSubmit && !isSubmitting) {
+                                        e.preventDefault()
+                                        void handleSubmit()
+                                    }
+                                }}
+                                placeholder="Describe the changes you'd like to make..."
+                                rows={8}
+                                disabled={isSubmitting || stage === 'question'}
+                                className="w-full resize-none bg-transparent px-3 py-2.5 pr-12 text-sm focus:outline-none placeholder:text-muted-foreground/60 disabled:opacity-50"
+                            />
+
+                            <div className="absolute bottom-2 right-2">
+                                {isSubmitting || stage === 'question' ? (
+                                    <Button
+                                        onClick={handleStop}
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-8 w-8 rounded-lg hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
+                                    >
+                                        <Square className="w-3 h-3 fill-current" />
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        onClick={handleSubmit}
+                                        size="sm"
+                                        disabled={!canSubmit}
+                                        className="h-8 w-8 rounded-lg"
+                                    >
+                                        <Sparkles className="w-3.5 h-3.5" />
+                                    </Button>
+                                )}
                             </div>
                         </div>
-                    )} */}
-
-                    {/* <textarea
-                        value={prompt}
-                        onChange={e => setPrompt(e.target.value)}
-                        onKeyDown={e => {
-                            if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && canSubmit && !isSubmitting) {
-                                e.preventDefault()
-                                void handleSubmit()
-                            }
-                        }}
-                        placeholder="Describe the changes you'd like to make..."
-                        rows={8}
-                        disabled={isSubmitting || stage === 'question'}
-                        className="w-full resize-none bg-transparent px-3 py-2.5 pr-12 text-sm focus:outline-none placeholder:text-muted-foreground/60 disabled:opacity-50"
-                    /> */}
-
-                    {/* <div className="absolute bottom-2 right-2">
-                        {isSubmitting || stage === 'question' ? (
-                            <Button
-                                onClick={handleStop}
-                                variant="outline"
-                                size="sm"
-                                className="h-8 w-8 rounded-lg hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
-                            >
-                                <Square className="w-3 h-3 fill-current" />
-                            </Button>
-                        ) : (
-                            <Button
-                                onClick={handleSubmit}
-                                size="sm"
-                                disabled={!canSubmit}
-                                className="h-8 w-8 rounded-lg"
-                            >
-                                <Sparkles className="w-3.5 h-3.5" />
-                            </Button>
-                        )}
-                    </div> */}
-                {/* </div> */}
+                    </>
+                )}
             </div>
+
+
         </div>
     )
 }
