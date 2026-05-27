@@ -9,3 +9,4 @@ export * from './TextHookStagger';
 export * from './TextLeadStagger';
 export * from './ProblemHeadline';
 export * from './TextCardStack';
+export * from './ProblemCollagePills';

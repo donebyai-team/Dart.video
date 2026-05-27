@@ -743,6 +743,53 @@
           "celExpression": "(((22 + 0 + 14 + 10 + 1) * size(props.textcardstack.texts)) * 100) / max(25, props.textcardstack.speed)"
         },
         {
+          "name": "ProblemCollagePills",
+          "type": "content",
+          "tags": [
+            "Problem",
+            "Data",
+            "Scatter"
+          ],
+          "schema": [
+            {
+              "type": "component",
+              "name": "problemcollagepills",
+              "fields": [
+                {
+                  "name": "texts",
+                  "type": "array",
+                  "datatype": "text",
+                  "map": "props.texts"
+                }
+              ]
+            },
+            {
+              "type": "component",
+              "name": "container",
+              "fields": [
+                {
+                  "name": "style",
+                  "type": "object",
+                  "default": {}
+                }
+              ]
+            }
+          ],
+          "llmSchema": [
+            {
+              "name": "texts",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "range": "7 short phrases, 3-4 word per phrase"
+            }
+          ],
+          "description": "Starts with one typed pill in the center, then zooms out into a scattered field of typing data pills.",
+          "instructions": "Best used to show problems, scattered data, fragmented workflows, multiple blockers, or disconnected context. Infer exactly 7 short signals from the script even if not explicitly stated.",
+          "celExpression": "(30 + (max(size(props.problemcollagepills.texts) - 1, 0) * 5) + 14 + 20 + 30)"
+        },
+        {
           "name": "IntroText",
           "type": "scene",
           "tags": [

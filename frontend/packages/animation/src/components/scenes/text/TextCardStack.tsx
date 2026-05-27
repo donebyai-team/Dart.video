@@ -6,7 +6,6 @@ import { useAspectPreset } from '../../../styles/AspectPresetContext';
 import { useTheme } from '../../../theme/ThemeContext';
 import type { TypographyVariant } from '../../../tokens/semantic';
 import type { ComponentRegistration } from '../../../registry/registry';
-import { buildDepthShadow } from '../../../styles';
 import { DEFAULT_SPEED_PERCENTAGE, getSpeed, MIN_SPEED_PERCENTAGE, scaleTiming } from '../../../speed/timings';
 import { CardAsset } from '../../../core/assets';
 
