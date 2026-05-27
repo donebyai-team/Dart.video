@@ -1,41 +1,55 @@
 package voiceover
 
 import (
+	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"math/rand"
 	"time"
 )
 
-type BackgroundTrack struct {
-	ID   string
-	Name string
-	URL  string
-	Icon string
-}
-
-var BackgroundTracks = []BackgroundTrack{
+var BackgroundTracks = []pbcore.BackgroundTrack{
 	{
-		ID:   "deep-calm",
+		Id:   "deep-calm",
 		Name: "Deep Calm",
-		URL:  "https://ik.imagekit.io/coasterai/freepik-deep-calm_A4WXzk4Mk.mp3",
+		Url:  "https://ik.imagekit.io/coasterai/freepik-deep-calm_A4WXzk4Mk.mp3",
 	},
 	{
-		ID:   "next-wave",
+		Id:   "fast-beat",
+		Name: "Fast Beat",
+		Url:  "https://storage.googleapis.com/coasterai-public/background_music/FastBeat.mp3",
+	},
+	{
+		Id:   "dance-groove",
+		Name: "Dance Groove",
+		Url:  "https://storage.googleapis.com/coasterai-public/background_music/DanceGroove.mp3",
+	},
+	{
+		Id:   "steady-rise",
+		Name: "Steady Rise",
+		Url:  "https://storage.googleapis.com/coasterai-public/background_music/The_Steady_Rise.mp3",
+	},
+	{
+		Id:   "upward-trajectory",
+		Name: "Upward Trajectory",
+		Url:  "https://storage.googleapis.com/coasterai-public/background_music/Upward_Trajectory.mp3",
+	},
+	{
+		Id:   "next-wave",
 		Name: "Next Wave",
-		URL:  "https://storage.googleapis.com/coasterai-public/background_music/above-the-next-wave.mp3",
+		Url:  "https://storage.googleapis.com/coasterai-public/background_music/above-the-next-wave.mp3",
 	},
 	{
-		ID:   "boardroom-groove",
+		Id:   "boardroom-groove",
 		Name: "Boardroom Groove",
-		URL:  "https://storage.googleapis.com/coasterai-public/background_music/boardroom-groove-revolution.mp3",
+		Url:  "https://storage.googleapis.com/coasterai-public/background_music/boardroom-groove-revolution.mp3",
 	},
 	{
-		ID:   "chasing-the-morning",
+		Id:   "chasing-the-morning",
 		Name: "Chasing the Morning",
-		URL:  "https://storage.googleapis.com/coasterai-public/background_music/chasing-the-morning-light.mp3",
+		Url:  "https://storage.googleapis.com/coasterai-public/background_music/chasing-the-morning-light.mp3",
 	},
 }
 
-func GenerateBackgroundMusic() BackgroundTrack {
+func GenerateBackgroundMusic() pbcore.BackgroundTrack {
 	rand.Seed(time.Now().UnixNano())
 	return BackgroundTracks[rand.Intn(len(BackgroundTracks))]
 }

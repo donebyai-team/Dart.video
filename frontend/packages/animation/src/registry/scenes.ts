@@ -7,6 +7,8 @@ import { TextWithWordCycleDescriptor } from "../components/scenes/text/TextWithW
 import { TextLeadStaggerDescriptor } from "../components/scenes/text/TextLeadStagger";
 import { ProblemHeadlineDescriptor } from "../components/scenes/text/ProblemHeadline";
 import { TextCardStackDescriptor } from "../components/scenes/text/TextCardStack";
+import { ProblemCollagePillsDescriptor } from "../components/scenes/text/ProblemCollagePills";
+import { IntroTextDescriptor } from "../components/scenes/text/IntroText";
 import { MultiImageStackDescriptor } from "../components/scenes/assets/image_stack/MultiImageStack";
 import { ProblemCollageDescriptor } from "../components/scenes/assets/ProblemCollage";
 import { LogoShowcaseDescriptor } from "../components/scenes/assets/LogoShowcase";
@@ -37,6 +39,8 @@ export const SCENE_COMPONENTS: ComponentRegistration[] = [
   TextLeadStaggerDescriptor,
   ProblemHeadlineDescriptor,
   TextCardStackDescriptor,
+  ProblemCollagePillsDescriptor,
+  IntroTextDescriptor,
 
   // Asset components with schemas and duration calculators
   // AnimatedImageDescriptor,

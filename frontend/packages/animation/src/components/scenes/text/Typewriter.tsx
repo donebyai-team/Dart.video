@@ -14,6 +14,7 @@ export const TypewriterDefaults = {
   id: 'typewriter',
   text: "",
   startAt: 0,
+  pulse: true,
   variant: "headingLg" as TypographyVariant,
   entranceAnimation: "fadeIn" as AnimationPresetName,
   typingDuration: TYPEWRITER_TYPING_DURATION,
@@ -152,7 +153,7 @@ export function Typewriter(initProps: TypewriterProps): React.ReactElement {
     [0, 1],
     'ease-in-out',
   );
-  const pulseActive = frame >= pulseStartFrame && frame <= pulseEndFrame && visibleText.length > 0;
+  const pulseActive = props.pulse && frame >= pulseStartFrame && frame <= pulseEndFrame && visibleText.length > 0;
   const pulseCenter = -30 + (pulseProgress * 160);
   const pulseBandStart = pulseCenter - 18;
   const pulseBandEnd = pulseCenter + 18;

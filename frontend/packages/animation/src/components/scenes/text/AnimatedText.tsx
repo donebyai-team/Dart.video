@@ -36,7 +36,7 @@ export const AnimatedTextDefaults = {
     startAt: 0,
     text: '',
     variant: 'headingLg' as TypographyVariant,
-    staggerDelay: 20,
+    staggerDelay: 25,
     entranceAnimation: 'scaleIn' as AnimationPresetName,
     duration: 20,
     exitAnimation: 'none' as AnimationPresetName,
@@ -70,6 +70,8 @@ type ParsedLinePart = {
 type ParsedLine = {
     parts: ParsedLinePart[];
 };
+
+const LINE_GAP_EM = 0.2;
 
 const parseHighlightedRanges = (text: string) => {
     const chars: ParsedChar[] = [];
@@ -269,14 +271,17 @@ export const AnimatedText: React.FC<AnimatedTextProps> = (initProps) => {
         mode: 'exit',
     });
 
-    const getAnimationStyles = (unitIndex: number): React.CSSProperties => {
+    const getAnimationStyles = (
+        unitIndex: number,
+        unitType: SplitByMode = splitBy,
+    ): React.CSSProperties => {
         const enterStartAt = actualStartAt + unitIndex * actualStaggerDelay;
         const entranceMotion = resolveAnimationPreset({
             frame,
             startAt: enterStartAt,
             duration: actualDuration,
-            presetName: actualAnimation,
-            distance: 60,
+            presetName: unitType === 'line' ? 'slideUp' : actualAnimation,
+            distance: unitType === 'line' ? 40 : 60,
             easing: 'ease-in-out-circ',
         });
 
@@ -413,17 +418,28 @@ export const AnimatedText: React.FC<AnimatedTextProps> = (initProps) => {
                 })}
 
             {splitBy === 'line' &&
-                (units as ParsedLine[]).map((line, index) => (
+                (
                     <span
-                        key={index}
                         style={{
-                            display: 'block',
-                            ...getAnimationStyles(index),
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            rowGap: `${LINE_GAP_EM}em`,
                         }}
                     >
-                        {renderHighlightedLine(line, highlightStyles)}
+                        {(units as ParsedLine[]).map((line, index) => (
+                            <span
+                                key={index}
+                                style={{
+                                    display: 'block',
+                                    ...getAnimationStyles(index, 'line'),
+                                }}
+                            >
+                                {renderHighlightedLine(line, highlightStyles)}
+                            </span>
+                        ))}
                     </span>
-                ))}
+                )}
         </span>
     );
 };
@@ -463,7 +479,7 @@ export const AnimatedTextSchemaFields = [
         name: 'exitAnimation',
         type: 'enum',
         map: 'props.exitAnimation',
-        default: 'zoomOut',
+        default: 'none',
     },
     {
         name: 'exitDuration',
