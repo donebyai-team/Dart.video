@@ -167,13 +167,25 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
         } as Slide)
 
         // Force sync changes to backend only if a new slide is added
-        if (!existingContent?.edits || Object.keys(existingContent.edits).length === 0) {
+        if (isSlideEmpty(slide)) {
             acceptVideoConfigChanges();
         }
 
         // to retrigger the selected slide
         handleSelectEntity(slide.id);
     }
+
+    function isSlideEmpty(slide: Slide) {
+         const updatedContent = slide.content;
+        if (!updatedContent) return
+
+        const existingContent = selectedSlide?.content
+            ? selectedSlide.content
+            : undefined
+
+        return !existingContent?.edits || Object.keys(existingContent.edits).length === 0;
+    }
+
 
     const consumeStream = async (
         stream: AsyncIterable<GenerateOrEditSceneResponse>,
@@ -469,7 +481,7 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
             </div>
 
             <div className='flex flex-col flex-1 min-h-0'>
-                {selectedAnimationElementId && stage !== 'question' ? (
+                {selectedAnimationElementId && stage !== 'question' && !isSlideEmpty(selectedSlide!) ? (
                     <div className='mb-3 overflow-hidden'>
                         <SceneSettings
                             elementId={selectedAnimationElementId}
