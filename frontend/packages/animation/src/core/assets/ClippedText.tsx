@@ -3,6 +3,7 @@ import {
   type UseTextMeasurementResult,
   useTextMeasurement,
 } from './useTextMeasurement';
+import { Text, type TextProps } from './Text';
 
 const MIN_VERTICAL_SAFETY_PX = 2;
 const HORIZONTAL_SAFETY_PX = 6;
@@ -38,8 +39,11 @@ const FONT_METRIC_PROBE_TEXT = 'HgjpqyQÅ';
  * - width calculations used for scene-specific animation math
  */
 export interface ClippedTextProps {
+  id?: string;
   text: string;
+  variant?: TextProps['variant'];
   style?: React.CSSProperties;
+  className?: string;
   inline?: boolean;
   clipStyle?: React.CSSProperties;
   contentStyle?: React.CSSProperties;
@@ -158,8 +162,11 @@ interface ClippedTextLayoutProps extends ClippedTextProps {
 }
 
 function ClippedTextLayout({
+  id,
   text,
+  variant,
   style,
+  className,
   inline = true,
   clipStyle,
   contentStyle,
@@ -246,7 +253,13 @@ function ClippedTextLayout({
               ...contentStyle,
             }}
           >
-            {text}
+            <Text
+              id={id}
+              text={text}
+              variant={variant}
+              className={className}
+              style={style}
+            />
           </span>
         </span>
       </span>

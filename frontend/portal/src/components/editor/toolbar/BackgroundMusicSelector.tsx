@@ -1,4 +1,4 @@
-import { VolumeX, Waves, Sunrise, BeakerIcon, VolumeIcon, TrendingUp, Rocket } from "lucide-react";
+import { VolumeX, Waves, Sunrise, BeakerIcon, VolumeIcon, TrendingUp, Rocket, BookHeartIcon, HeartIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -13,6 +13,24 @@ const backgroundTracks = [
         id: "none",
         name: "No Music",
         icon: VolumeX,
+    },
+    {
+        id: "dramatic-beat",
+        name: "Dramatic Beats",
+        url: "https://storage.googleapis.com/coasterai-public/background_music/DramaticBeats.mp3",
+        icon: HeartIcon,
+    },
+    {
+        id: "fast-beat",
+        name: "Fast Beat",
+        url: "https://storage.googleapis.com/coasterai-public/background_music/FastBeat.mp3",
+        icon: BookHeartIcon,
+    },
+    {
+        id: "dance-groove",
+        name: "Dance Groove",
+        url: "https://storage.googleapis.com/coasterai-public/background_music/DanceGroove.mp3",
+        icon: Waves,
     },
     {
         id: "deep-calm",
@@ -49,7 +67,7 @@ const backgroundTracks = [
         name: "Chasing the Morning",
         url: "https://storage.googleapis.com/coasterai-public/background_music/chasing-the-morning-light.mp3",
         icon: Sunrise,
-    },    
+    },        
 ];
 
 

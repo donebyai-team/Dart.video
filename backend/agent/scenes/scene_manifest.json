@@ -256,7 +256,7 @@
                   "name": "staggerDelay",
                   "type": "number",
                   "map": "props.staggerDelay",
-                  "default": 20
+                  "default": 25
                 },
                 {
                   "name": "entranceAnimation",
@@ -274,7 +274,7 @@
                   "name": "exitAnimation",
                   "type": "enum",
                   "map": "props.exitAnimation",
-                  "default": "zoomOut"
+                  "default": "none"
                 },
                 {
                   "name": "exitDuration",
@@ -743,6 +743,139 @@
           "celExpression": "(((22 + 0 + 14 + 10 + 1) * size(props.textcardstack.texts)) * 100) / max(25, props.textcardstack.speed)"
         },
         {
+          "name": "ProblemCollagePills",
+          "type": "content",
+          "tags": [
+            "Problem",
+            "Data",
+            "Scatter"
+          ],
+          "schema": [
+            {
+              "type": "component",
+              "name": "problemcollagepills",
+              "fields": [
+                {
+                  "name": "texts",
+                  "type": "array",
+                  "datatype": "text",
+                  "map": "props.texts"
+                }
+              ]
+            },
+            {
+              "type": "component",
+              "name": "container",
+              "fields": [
+                {
+                  "name": "style",
+                  "type": "object",
+                  "default": {}
+                }
+              ]
+            }
+          ],
+          "llmSchema": [
+            {
+              "name": "texts",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "range": "7 short phrases, 3-4 word per phrase"
+            }
+          ],
+          "description": "Starts with one typed pill in the center, then zooms out into a scattered field of typing data pills.",
+          "instructions": "Best used to show problems, scattered data, fragmented workflows, multiple blockers, or disconnected context. Infer exactly 7 short signals from the script even if not explicitly stated.",
+          "celExpression": "(30 + (max(size(props.problemcollagepills.texts) - 1, 0) * 5) + 14 + 20 + 30)"
+        },
+        {
+          "name": "IntroText",
+          "type": "scene",
+          "tags": [
+            "Intro",
+            "Reveal",
+            "Launch"
+          ],
+          "schema": [
+            {
+              "type": "component",
+              "name": "animatedtext-label",
+              "fields": [
+                {
+                  "name": "text",
+                  "type": "string",
+                  "datatype": "text",
+                  "map": "props.intro_label"
+                },
+                {
+                  "name": "variant",
+                  "type": "enum",
+                  "default": "display"
+                }
+              ]
+            },
+            {
+              "type": "component",
+              "name": "animatedtext-body",
+              "fields": [
+                {
+                  "name": "text",
+                  "type": "string",
+                  "datatype": "text",
+                  "map": "props.intro_body"
+                },
+                {
+                  "name": "variant",
+                  "type": "enum",
+                  "default": "headingLg"
+                },
+                {
+                  "name": "entranceAnimation",
+                  "type": "enum",
+                  "default": "slideLeft"
+                },
+                {
+                  "name": "staggerDelay",
+                  "type": "number",
+                  "default": 2
+                },
+                {
+                  "name": "splitBy",
+                  "type": "enum",
+                  "default": "word"
+                },
+                {
+                  "name": "highlightStyle",
+                  "type": "enum",
+                  "default": "simple"
+                },
+                {
+                  "name": "highlightColor",
+                  "type": "string",
+                  "datatype": "color",
+                  "default": ""
+                }
+              ]
+            }
+          ],
+          "llmSchema": [
+            {
+              "name": "intro_label",
+              "type": "string",
+              "hint": "Short lead-in like \"Introducing\", \"Meet\", or \"Now live\"."
+            },
+            {
+              "name": "intro_body",
+              "type": "string",
+              "hint": "Main reveal text shown below the label"
+            }
+          ],
+          "description": "Starts with a centered intro label, then settles it upward while the main text reveals word-by-word below.",
+          "instructions": "Use this before introducing a brand logo or product",
+          "celExpression": "max(\n  46,\n  20\n    + max(0, segmentCount(props[\"animatedtext-body\"].text, props[\"animatedtext-body\"].splitBy) - 1)\n      * props[\"animatedtext-body\"].staggerDelay\n    + 18\n) + 12"
+        },
+        {
           "name": "TextWithMediaScene",
           "type": "scene",
           "tags": [
@@ -785,7 +918,7 @@
                       "name": "staggerDelay",
                       "type": "number",
                       "map": "props.staggerDelay",
-                      "default": 20
+                      "default": 25
                     },
                     {
                       "name": "entranceAnimation",
@@ -1173,7 +1306,7 @@
                   "name": "staggerDelay",
                   "type": "number",
                   "map": "props.staggerDelay",
-                  "default": 20
+                  "default": 25
                 },
                 {
                   "name": "entranceAnimation",
@@ -1236,7 +1369,7 @@
           ],
           "description": "Row of brand logos + caption.",
           "instructions": "Use for integrations, tech stack, partners, brands. eg. logos=[\"url1\", \"url2\"], text=\"caption text\".",
-          "celExpression": "10 + max(min(1, segmentCount(props.animatedtext.text, props.animatedtext.splitBy)) * (max(0, segmentCount(props.animatedtext.text, props.animatedtext.splitBy) - 1) * 20 + 20), 5 + max(0, size(props.logos) - 1) * 5 + 12)"
+          "celExpression": "10 + max(min(1, segmentCount(props.animatedtext.text, props.animatedtext.splitBy)) * (max(0, segmentCount(props.animatedtext.text, props.animatedtext.splitBy) - 1) * 25 + 20), 5 + max(0, size(props.logos) - 1) * 5 + 12)"
         },
         {
           "name": "LogoWithBrandName",
@@ -1429,7 +1562,7 @@
                   "name": "staggerDelay",
                   "type": "number",
                   "map": "props.staggerDelay",
-                  "default": 20
+                  "default": 25
                 },
                 {
                   "name": "entranceAnimation",
@@ -1498,7 +1631,7 @@
           ],
           "description": "Row of rotating brand icons + caption.",
           "instructions": "Use for integrations, tech stack, partners, brands. eg. icons={[\"shopify\", \"midjourney\", \"openai\"]}, text=\"caption text\".",
-          "celExpression": "10 + max(0, size(props.icons) - 1) * 5 + 10 + min(1, segmentCount(props.animatedtext.text, props.animatedtext.splitBy)) * (5 + max(0, segmentCount(props.animatedtext.text, props.animatedtext.splitBy) - 1) * 20 + 20)"
+          "celExpression": "10 + max(0, size(props.icons) - 1) * 5 + 10 + min(1, segmentCount(props.animatedtext.text, props.animatedtext.splitBy)) * (5 + max(0, segmentCount(props.animatedtext.text, props.animatedtext.splitBy) - 1) * 25 + 20)"
         },
         {
           "name": "PillCarousel",
@@ -1733,7 +1866,7 @@
                   "name": "staggerDelay",
                   "type": "number",
                   "map": "props.staggerDelay",
-                  "default": 20
+                  "default": 25
                 },
                 {
                   "name": "entranceAnimation",
@@ -1786,6 +1919,57 @@
             }
           ],
           "celExpression": "\"mediaasset\" in props ? props.mediaasset._duration : 90"
+        },
+        {
+          "name": "TimelineCardStack",
+          "type": "scene",
+          "tags": [
+            "Solution",
+            "Product Info",
+            "Features"
+          ],
+          "schema": [
+            {
+              "type": "repeat",
+              "source": "features",
+              "map": "props.features",
+              "components": [
+                {
+                  "name": "text",
+                  "fields": [
+                    {
+                      "name": "text",
+                      "type": "string",
+                      "datatype": "text",
+                      "map": "item"
+                    },
+                    {
+                      "name": "variant",
+                      "type": "enum",
+                      "default": "display"
+                    }
+                  ]
+                },
+                {
+                  "name": "container",
+                  "fields": []
+                }
+              ]
+            }
+          ],
+          "llmSchema": [
+            {
+              "name": "features",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "range": "min 2 short feature labels"
+            }
+          ],
+          "description": "Timeline-style vertical sequence of feature cards. One card centers at a time, then hands off to the next with a dashed connector.",
+          "instructions": "use it to show a list of features or emphasis words",
+          "celExpression": "22 + 14 + max(0, size(props.features) - 1) * (18 + 14)"
         }
       ]
     }

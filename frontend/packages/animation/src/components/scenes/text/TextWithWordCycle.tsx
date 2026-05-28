@@ -18,6 +18,7 @@ export const TextWithWordCycleDefaults = {
   startAt: 0,
   text: '',
   cyclingWords: ['first word', 'next word', 'last word'],
+  wordCycleHoldDuration: 25,
   holdDuration: 20,
   transitionDuration: 10,
   textCycleTransition: 'slideUp' as TextCycleTransition,
@@ -113,8 +114,9 @@ export const TextWithWordCycle: React.FC<TextWithWordCycleProps> = (initProps) =
   const holdDuration = props.holdDuration;
   const transitionDuration = props.transitionDuration;
   const lastCycleIndex = props.cyclingWords.length - 1;
-  const cycleIndex = Math.min(Math.floor(elapsed / cycleDuration), lastCycleIndex);
-  const cycleFrame = elapsed - cycleIndex * cycleDuration;
+  const cycleElapsed = Math.max(0, elapsed - props.wordCycleHoldDuration);
+  const cycleIndex = Math.min(Math.floor(cycleElapsed / cycleDuration), lastCycleIndex);
+  const cycleFrame = cycleElapsed - cycleIndex * cycleDuration;
 
   const currentWord = props.cyclingWords[cycleIndex % props.cyclingWords.length] ?? props.cyclingWords[0] ?? '';
   const nextWord = props.cyclingWords[Math.min(cycleIndex + 1, lastCycleIndex)] ?? currentWord;
@@ -371,6 +373,11 @@ export const TextWithWordCycleSchemaFields = [
     "default": TextWithWordCycleDefaults.entranceAnimation
   },
   {
+    "name": "wordCycleHoldDuration",
+    "type": "number",
+    "default": TextWithWordCycleDefaults.wordCycleHoldDuration
+  },
+  {
     "name": "holdDuration",
     "type": "number",
     "default": TextWithWordCycleDefaults.holdDuration
@@ -428,5 +435,5 @@ export const TextWithWordCycleDescriptor: ComponentRegistration = {
   ],
   description: 'Static text with cycling highlighted words at the end',
   instructions: 'Use for dynamic taglines like "We build amazing [software/products/solutions]"',
-  celExpression: '(props.textwithwordcycle.holdDuration + props.textwithwordcycle.transitionDuration) * size(props.textwithwordcycle.cyclingWords)',
+  celExpression: 'props.textwithwordcycle.wordCycleHoldDuration + ((props.textwithwordcycle.holdDuration + props.textwithwordcycle.transitionDuration) * size(props.textwithwordcycle.cyclingWords))',
 };

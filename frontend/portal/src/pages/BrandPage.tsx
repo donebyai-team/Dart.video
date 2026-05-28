@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useMemo } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import { Plus, X, Type, Globe, FileText, Sparkles, Check, ChevronsUpDown, Image } from "lucide-react"
 import { create } from "@bufbuild/protobuf"
 import toast from "react-hot-toast"
@@ -155,28 +155,31 @@ const BrandPage = () => {
         }
     }
 
-    const handleLogoUpload = async (file: File) => {
+    const handleBrandMediaUpload = async (file: File, type: BrandMediaType) => {
         try {
             setIsUploading(true)
             const uploadedMedia = await uploadMedia(file)
 
             if (selectedIdentity) {
-                const newLogo = create(BrandMediaSchema, {
+                const newBrandMedia = create(BrandMediaSchema, {
                     asset: uploadedMedia,
-                    type: BrandMediaType.LOGO,
+                    type,
                     priority: BrandAssetPriority.PRIMARY
                 })
 
                 const updatedIdentity = create(BrandIdentitySchema, {
                     ...selectedIdentity,
-                    logos: [...selectedIdentity.logos, newLogo]
+                    logos: [
+                        ...selectedIdentity.logos.filter((media) => media.type !== type),
+                        newBrandMedia
+                    ]
                 })
 
                 await handleUpdateIdentity(updatedIdentity)
-                toast.success("Logo uploaded!")
+                toast.success(type === BrandMediaType.ICON ? "Icon uploaded!" : "Logo uploaded!")
             }
         } catch (err) {
-            console.error("Failed to upload logo", err)
+            console.error("Failed to upload brand media", err)
             toast.error(getConnectError(err))
         } finally {
             setIsUploading(false)
@@ -284,7 +287,7 @@ const BrandPage = () => {
                                 availableFonts={availableFonts}
                                 identity={selectedIdentity}
                                 onUpdate={handleUpdateIdentity}
-                                onLogoUpload={handleLogoUpload}
+                                onBrandMediaUpload={handleBrandMediaUpload}
                                 isUploading={isUploading}
                             />
                         </div>
@@ -298,12 +301,12 @@ const BrandPage = () => {
 interface BrandIdentityEditorProps {
     identity: BrandIdentity
     onUpdate: (identity: BrandIdentity) => void | Promise<void>
-    onLogoUpload: (file: File) => void
+    onBrandMediaUpload: (file: File, type: BrandMediaType) => void
     isUploading: boolean
     availableFonts: string[]
 }
 
-const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onLogoUpload, isUploading }: BrandIdentityEditorProps) => {
+const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onBrandMediaUpload, isUploading }: BrandIdentityEditorProps) => {
     const [localIdentity, setLocalIdentity] = useState(identity)
     const [isBackgroundEditorOpen, setIsBackgroundEditorOpen] = useState(false)
 
@@ -328,6 +331,8 @@ const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onLogoUpload,
         localIdentity.colors,
         BrandAssetPriority.TEXT_PRIMARY
     ) || "#ffffff"
+    const primaryIcon = localIdentity.logos.find((media) => media.type === BrandMediaType.ICON)
+    const primaryLogo = localIdentity.logos.find((media) => media.type === BrandMediaType.LOGO)
 
     const updateField = (field: keyof BrandIdentity, value: any) => {
         const updated = create(BrandIdentitySchema, {
@@ -378,83 +383,155 @@ const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onLogoUpload,
         await updateBrandStyleField("bgStyle", bgStyle)
     }
 
-    const removeLogo = async (index: number) => {
+    const removeBrandMedia = async (type: BrandMediaType) => {
         const updated = create(BrandIdentitySchema, {
             ...localIdentity,
-            logos: localIdentity.logos.filter((_, i) => i !== index)
+            logos: localIdentity.logos.filter((media) => media.type !== type)
         })
         await onUpdate(updated)
     }
 
     return (
         <div className="space-y-4">
-            {/* Logos */}
+            {/* Brand Assets */}
             <Card>
                 <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                            <Image className="w-4 h-4 text-primary" />
-                            <h3 className="text-sm font-semibold">Logos</h3>
-                        </div>
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => document.getElementById("logo-upload")?.click()}
-                            disabled={isUploading}
-                            className="h-8 text-xs"
-                        >
-                            <Plus className="w-3 h-3 mr-1.5" />
-                            {isUploading ? "Uploading..." : "Add"}
-                        </Button>
-                        <input
-                            id="logo-upload"
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => {
-                                const file = e.target.files?.[0]
-                                if (file) {
-                                    onLogoUpload(file)
-                                    e.target.value = ""
-                                }
-                            }}
-                        />
+                    <div className="flex items-center gap-2 mb-4">
+                        <Image className="w-4 h-4 text-primary" />
+                        <h3 className="text-sm font-semibold">Brand Assets</h3>
                     </div>
 
-                    <AnimatePresence>
-                        {localIdentity.logos.map((logo, index) => (
-                            <motion.div
-                                key={index}
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.8 }}
-                                className="relative group"
-                            >
-                                <div className="w-32 h-20 rounded-md border bg-muted overflow-hidden flex items-center justify-center">
-                                    <img
-                                        src={logo.asset?.url}
-                                        alt={`Logo ${index + 1}`}
-                                        className="w-full h-full object-contain p-1.5"
+                    <div className="grid gap-4 md:grid-cols-2">
+                        <div className="flex items-center gap-2">
+                            <div className="w-full rounded-lg border p-4 space-y-3">
+                                <div className="flex items-start justify-between gap-3">
+                                    <div>
+                                        <h4 className="text-sm font-semibold">Icon</h4>
+                                        <p className="text-xs text-muted-foreground">
+                                            A simple symbol or mark used in small spaces like avatars, favicons, or app icons.
+                                        </p>
+                                    </div>
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => document.getElementById("icon-upload")?.click()}
+                                        disabled={isUploading}
+                                        className="h-8 text-xs"
+                                    >
+                                        <Plus className="w-3 h-3 mr-1.5" />
+                                        {isUploading ? "Uploading..." : primaryIcon ? "Replace" : "Add"}
+                                    </Button>
+                                    <input
+                                        id="icon-upload"
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0]
+                                            if (file) {
+                                                onBrandMediaUpload(file, BrandMediaType.ICON)
+                                                e.target.value = ""
+                                            }
+                                        }}
                                     />
                                 </div>
 
-                                <Button
-                                    size="icon"
-                                    variant="destructive"
-                                    className="absolute -top-1.5 -right-1.5 w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity"
-                                    onClick={() => removeLogo(index)}
-                                >
-                                    <X className="w-2.5 h-2.5" />
-                                </Button>
-                            </motion.div>
-                        ))}
-                    </AnimatePresence>
+                                {primaryIcon ? (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        className="relative group w-fit"
+                                    >
+                                        <div className="w-32 h-20 rounded-md border bg-muted overflow-hidden flex items-center justify-center">
+                                            <img
+                                                src={primaryIcon.asset?.url}
+                                                alt="Primary brand icon"
+                                                className="w-full h-full object-contain p-1.5"
+                                            />
+                                        </div>
 
-                    {localIdentity.logos.length === 0 && (
-                        <div className="text-center py-6 text-sm text-muted-foreground">
-                            No logos uploaded yet
+                                        <Button
+                                            size="icon"
+                                            variant="destructive"
+                                            className="absolute -top-1.5 -right-1.5 w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            onClick={() => removeBrandMedia(BrandMediaType.ICON)}
+                                        >
+                                            <X className="w-2.5 h-2.5" />
+                                        </Button>
+                                    </motion.div>
+                                ) : (
+                                    <div className="text-sm text-muted-foreground py-3 text-center border border-dashed rounded-md">
+                                        No icon uploaded yet
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                    )}
+
+                        <div className="flex items-center gap-2">
+                            <div className="w-full rounded-lg border p-4 space-y-3">
+                                <div className="flex items-start justify-between gap-3">
+                                    <div>
+                                        <h4 className="text-sm font-semibold">Logo</h4>
+                                        <p className="text-xs text-muted-foreground">
+                                            Your full brand lockup, wordmark, or complete logo used in headers, decks, and marketing.
+                                        </p>
+                                    </div>
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => document.getElementById("logo-upload")?.click()}
+                                        disabled={isUploading}
+                                        className="h-8 text-xs"
+                                    >
+                                        <Plus className="w-3 h-3 mr-1.5" />
+                                        {isUploading ? "Uploading..." : primaryLogo ? "Replace" : "Add"}
+                                    </Button>
+                                    <input
+                                        id="logo-upload"
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0]
+                                            if (file) {
+                                                onBrandMediaUpload(file, BrandMediaType.LOGO)
+                                                e.target.value = ""
+                                            }
+                                        }}
+                                    />
+                                </div>
+
+                                {primaryLogo ? (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        className="relative group w-fit"
+                                    >
+                                        <div className="w-32 h-20 rounded-md border bg-muted overflow-hidden flex items-center justify-center">
+                                            <img
+                                                src={primaryLogo.asset?.url}
+                                                alt="Primary brand logo"
+                                                className="w-full h-full object-contain p-1.5"
+                                            />
+                                        </div>
+
+                                        <Button
+                                            size="icon"
+                                            variant="destructive"
+                                            className="absolute -top-1.5 -right-1.5 w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            onClick={() => removeBrandMedia(BrandMediaType.LOGO)}
+                                        >
+                                            <X className="w-2.5 h-2.5" />
+                                        </Button>
+                                    </motion.div>
+                                ) : (
+                                    <div className="text-sm text-muted-foreground py-3 text-center border border-dashed rounded-md">
+                                        No logo uploaded yet
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
                 </CardContent>
             </Card>
 
