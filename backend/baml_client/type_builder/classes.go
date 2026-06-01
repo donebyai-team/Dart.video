@@ -404,7 +404,11 @@ func (t *GenerateAnimationCodeRequestClassView) ListProperties() ([]ClassPropert
 }
 
 func (t *GenerateAnimationCodeRequestClassView) PropertyPrompt() (ClassPropertyView, error) {
-	return t.inner.Property("prompt")
+	return t.inner.Property("Prompt")
+}
+
+func (t *GenerateAnimationCodeRequestClassView) PropertyVideoBranding() (ClassPropertyView, error) {
+	return t.inner.Property("VideoBranding")
 }
 
 func (t *TypeBuilder) GenerateAnimationCodeRequest() (*GenerateAnimationCodeRequestClassView, error) {
@@ -441,6 +445,10 @@ func (t *GenerateAnimationCodeResponseClassView) PropertyCode() (ClassPropertyVi
 
 func (t *GenerateAnimationCodeResponseClassView) PropertyTotal_frames() (ClassPropertyView, error) {
 	return t.inner.Property("total_frames")
+}
+
+func (t *GenerateAnimationCodeResponseClassView) PropertyThinkingSummary() (ClassPropertyView, error) {
+	return t.inner.Property("thinkingSummary")
 }
 
 func (t *TypeBuilder) GenerateAnimationCodeResponse() (*GenerateAnimationCodeResponseClassView, error) {
@@ -587,8 +595,12 @@ func (t *MessageClassView) PropertyContent() (ClassPropertyView, error) {
 	return t.inner.Property("content")
 }
 
-func (t *MessageClassView) PropertyTool_call_id() (ClassPropertyView, error) {
-	return t.inner.Property("tool_call_id")
+func (t *MessageClassView) PropertyImages() (ClassPropertyView, error) {
+	return t.inner.Property("images")
+}
+
+func (t *MessageClassView) PropertyVideos() (ClassPropertyView, error) {
+	return t.inner.Property("videos")
 }
 
 func (t *TypeBuilder) Message() (*MessageClassView, error) {

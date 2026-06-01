@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/shank318/coasterai/agent/common"
 	"github.com/shank318/coasterai/services"
 	"strings"
 
@@ -44,26 +45,25 @@ func (p *Portal) GenerateOrEditScene(ctx context.Context, c *connect.Request[pbp
 		return err
 	}
 
-	animationAgent := p.newAnimationGeneratorAgent(logger, videoID, slideToEdit.Id, actor.OrganizationID)
+	animationAgent, statePublisher := p.newAnimationGeneratorAgent(logger, videoID, slideToEdit.Id, actor.OrganizationID)
 
 	return p.streamAnimationGenerationRun(
 		ctx,
 		stream,
-		animationAgent,
+		statePublisher,
 		slideToEdit,
-		func(runCtx context.Context) (*agent.RunResult, error) {
+		func(runCtx context.Context) (*common.RunResult, error) {
 			switch input := c.Msg.GetInput().(type) {
 			case *pbportal.GenerateOrEditSceneRequest_Request:
 				if video.Metadata.GeneratedBranding.BrandIdentity != nil {
 					input.Request.BrandLibraryId = utils.Ptr(video.Metadata.GeneratedBranding.BrandIdentity.Id)
 				}
 
-				return animationAgent.GenerateScene(runCtx, c.Msg.SlideToEdit, input.Request)
+				return animationAgent.GenerateCode(runCtx, c.Msg.SlideToEdit, input.Request)
 
 			case *pbportal.GenerateOrEditSceneRequest_AskUserInput:
 				return animationAgent.ContinueAgent(runCtx, agent.ContinueSessionOptions{
 					UserResponse:        c.Msg.GetAskUserInput().Response,
-					SlideToEdit:         c.Msg.SlideToEdit,
 					SelectedMediaAssets: c.Msg.GetAskUserInput().Assets})
 			default:
 				return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("invalid input type"))
@@ -75,12 +75,12 @@ func (p *Portal) GenerateOrEditScene(ctx context.Context, c *connect.Request[pbp
 func (p *Portal) streamAnimationGenerationRun(
 	ctx context.Context,
 	stream *connect.ServerStream[pbportal.GenerateOrEditSceneResponse],
-	animationAgent agent.SceneGeneratorAgent,
+	statePublisher common.AgentStatusPublisher,
 	targetSlide *pbcore.Slide,
-	run func(context.Context) (*agent.RunResult, error),
+	run func(context.Context) (*common.RunResult, error),
 ) error {
 	type runOutput struct {
-		result *agent.RunResult
+		result *common.RunResult
 		err    error
 	}
 
@@ -96,7 +96,7 @@ func (p *Portal) streamAnimationGenerationRun(
 		}
 	}()
 
-	stateUpdates := animationAgent.StateUpdates()
+	stateUpdates := statePublisher.StateUpdates()
 	lastThinking := ""
 
 	for {
@@ -134,13 +134,13 @@ func (p *Portal) streamAnimationGenerationRun(
 func sendAnimationResult(
 	stream *connect.ServerStream[pbportal.GenerateOrEditSceneResponse],
 	slide *pbcore.Slide,
-	runResult *agent.RunResult,
+	runResult *common.RunResult,
 ) error {
 	if runResult == nil {
 		return errors.New("animation agent returned empty result")
 	}
 
-	if runResult.Status == agent.RunStatusWaitingForUserInput {
+	if runResult.Status == common.RunStatusWaitingForUserInput {
 		if err := stream.Send(&pbportal.GenerateOrEditSceneResponse{
 			Slide:               slide,
 			WaitingForUserInput: true,
@@ -184,16 +184,32 @@ func applyTemplateToSlide(slide *pbcore.Slide, template *models.Template) error 
 	return nil
 }
 
-func (p *Portal) newAnimationGeneratorAgent(logger *zap.Logger, sessionID, slideID, orgID string) agent.SceneGeneratorAgent {
-	return agent.NewAgentAnimationEditor(
+//func (p *Portal) newAnimationGeneratorAgent(logger *zap.Logger, sessionID, slideID, orgID string) (agent.SceneGeneratorAgent, common.AgentStatusPublisher) {
+//	statePublisher := common.CreateAgentStatusPublisher(fmt.Sprintf("%s-%s", sessionID, slideID), logger)
+//	return agent.NewSceneGeneratorAgent(
+//		sessionID,
+//		slideID,
+//		orgID,
+//		logger,
+//		p.authStateStore,
+//		p.db,
+//		p.llmService,
+//		p.brandIdentityService,
+//		statePublisher,
+//	), statePublisher
+//}
+
+func (p *Portal) newAnimationGeneratorAgent(logger *zap.Logger, sessionID, slideID, orgID string) (agent.CodeGeneratorAgent, common.AgentStatusPublisher) {
+	statePublisher := common.CreateAgentStatusPublisher(fmt.Sprintf("%s-%s", sessionID, slideID), logger)
+	return agent.NewCodeGeneratorAgent(
 		sessionID,
 		slideID,
 		orgID,
-		logger,
+		p.llmService,
 		p.authStateStore,
 		p.db,
-		p.mediaService,
-		p.codeBuilderService,
+		logger,
 		p.brandIdentityService,
-	)
+		statePublisher,
+	), statePublisher
 }

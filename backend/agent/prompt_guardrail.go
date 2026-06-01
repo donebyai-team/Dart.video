@@ -63,7 +63,6 @@ var (
 )
 
 func ValidatePrompt(prompt string) error {
-
 	prompt = strings.TrimSpace(prompt)
 
 	if prompt == "" {
@@ -71,13 +70,13 @@ func ValidatePrompt(prompt string) error {
 	}
 
 	// -------- Length Guard --------
-	if len(prompt) > 1000 {
-		return errors.New("prompt length is too big, use \"Add Script\" instead")
+	if len(prompt) > 5000 {
+		return errors.New("prompt length is too big")
 	}
 
 	wordCount := len(strings.Fields(prompt))
-	if wordCount > 200 {
-		return errors.New("prompt length is too big, use \"Add Script\" instead")
+	if wordCount > 1000 {
+		return errors.New("prompt length is too big")
 	}
 
 	// -------- HTML / XML Injection --------

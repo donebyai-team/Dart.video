@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package coasterai.core.v1;
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/shank318/coasterai/pb/coasterai/core/v1;pbcore";
+
+enum ConversationRole {
+  CONVERSATION_ROLE_UNSPECIFIED = 0;
+  CONVERSATION_ROLE_USER = 1;
+  CONVERSATION_ROLE_ASSISTANT = 2;
+  CONVERSATION_ROLE_TOOL = 3;
+}
+
+
+
+message ConversationMessage {
+  ConversationRole role = 1;
+  string message = 2;
+  repeated string assetIds = 3;
+  /** Model used for generation */
+  string model = 4;
+  string codeSnapshot = 5;
+  .google.protobuf.Timestamp created_at = 6;
+}
+

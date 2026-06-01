@@ -20,14 +20,14 @@ import (
 type SceneSuggester struct {
 	brandIdentityService brand_identity.BrandIdentity
 	llmService           llm.LLMService
-	animationGenerator   CodeGenerator
+	codeGenerator        CodeGeneratorAgent
 	logger               *zap.Logger
 }
 
 func NewSceneSuggester(brandIdentityService brand_identity.BrandIdentity, logger *zap.Logger) *SceneSuggester {
 	return &SceneSuggester{
 		llmService:           llm.NewLlmService(logger, nil),
-		animationGenerator:   &codeGenerator{logger: logger},
+		codeGenerator:        &codeGenerator{logger: logger},
 		brandIdentityService: brandIdentityService,
 		logger:               logger,
 	}
@@ -194,10 +194,9 @@ func (s SceneSuggester) buildSuggestedSlide(
 	}
 
 	for _, sceneConfig := range sceneConfigs {
-		template, err := s.animationGenerator.GenerateCodeFromScene(
+		template, err := s.codeGenerator.GenerateCodeFromScene(
 			ctx,
 			sceneConfig,
-			func(progress TemplateGenerationProgress) {},
 		)
 		if err != nil {
 			return nil, err

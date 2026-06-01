@@ -169,7 +169,7 @@ func EditAnimationCode(ctx context.Context, resume types.EditAnimationCodeReques
 	}
 }
 
-func GenerateAnimation(ctx context.Context, resume types.GenerateAnimationCodeRequest, conversation_history []types.Message, opts ...CallOptionFunc) (types.GenerateAnimationCodeResponse, error) {
+func GenerateAnimation(ctx context.Context, resume types.GenerateAnimationCodeRequest, conversation_history []types.Message, opts ...CallOptionFunc) (types.Union2AskUserQuestionOrGenerateAnimationCodeResponse, error) {
 
 	var callOpts callOption
 	for _, opt := range opts {
@@ -213,33 +213,33 @@ func GenerateAnimation(ctx context.Context, resume types.GenerateAnimationCodeRe
 	if callOpts.onTick == nil {
 		result, err := bamlRuntime.CallFunction(ctx, "GenerateAnimation", encoded, callOpts.onTick)
 		if err != nil {
-			return types.GenerateAnimationCodeResponse{}, err
+			return types.Union2AskUserQuestionOrGenerateAnimationCodeResponse{}, err
 		}
 
 		if result.Error != nil {
-			return types.GenerateAnimationCodeResponse{}, result.Error
+			return types.Union2AskUserQuestionOrGenerateAnimationCodeResponse{}, result.Error
 		}
 
-		casted := (result.Data).(types.GenerateAnimationCodeResponse)
+		casted := (result.Data).(types.Union2AskUserQuestionOrGenerateAnimationCodeResponse)
 
 		return casted, nil
 	} else {
 		channel, err := bamlRuntime.CallFunctionStream(ctx, "GenerateAnimation", encoded, callOpts.onTick)
 		if err != nil {
-			return types.GenerateAnimationCodeResponse{}, err
+			return types.Union2AskUserQuestionOrGenerateAnimationCodeResponse{}, err
 		}
 
 		for result := range channel {
 			if result.Error != nil {
-				return types.GenerateAnimationCodeResponse{}, result.Error
+				return types.Union2AskUserQuestionOrGenerateAnimationCodeResponse{}, result.Error
 			}
 
 			if result.HasData {
-				return result.Data.(types.GenerateAnimationCodeResponse), nil
+				return result.Data.(types.Union2AskUserQuestionOrGenerateAnimationCodeResponse), nil
 			}
 		}
 
-		return types.GenerateAnimationCodeResponse{}, fmt.Errorf("No data returned from stream")
+		return types.Union2AskUserQuestionOrGenerateAnimationCodeResponse{}, fmt.Errorf("No data returned from stream")
 	}
 }
 

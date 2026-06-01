@@ -1,14 +1,16 @@
 class GenerateAnimationCodeRequest {
-  prompt string @description("Visual animation blueprint generated earlier")
+  Prompt string @description("Visual animation blueprint generated earlier")
+  VideoBranding VideoBranding
 }
 
 class GenerateAnimationCodeResponse {
   code string @description("Typescript code")
   total_frames int @description("total frames for this animation at 30fps")
+  thinkingSummary string? @skip()
 }
 
-function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_history: Message[]) -> GenerateAnimationCodeResponse {
-  client CustomOpenAI55WithThinkingSummary
+function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_history: Message[]) -> GenerateAnimationCodeResponse | AskUserQuestion {
+  client CustomGeminiFlash
   prompt #"
     You are an expert in generating React components for Remotion animations.
 
@@ -36,10 +38,51 @@ function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_hi
 
     ## LAYOUT RULES
 
-    - Use full width of container with appropriate padding
-    - Never constrain content to a small centered box
-    - Use Math.max(minValue, Math.round(width * percentage)) for responsive sizing
-    - Wrap the code under <SafeArea> and <AbsoluteCenter>
+    - Use the full canvas with explicit dimensions from `useVideoConfig()`.
+    Required root pattern:
+    {% raw %}
+    ```tsx
+    const { width, height, fps } = useVideoConfig();
+
+    return (
+      <div
+        style={{
+          width,
+          height,
+          position: "relative",
+          overflow: "hidden",
+          fontFamily: "Inter, sans-serif",
+        }}
+      >
+        {/* animation */}
+      </div>
+    );
+    ```
+
+    * Use full width of the canvas with appropriate padding.
+    * Never constrain content to a small centered webpage-like box.
+    * Use `Math.max(minValue, Math.round(width * percentage))` for responsive sizing.
+    * Use `position: "absolute"` for animated elements.
+
+    ### Never generate
+
+    ```tsx
+    flex: 1
+    ```
+
+    ```tsx
+    width: "100%"
+    height: "100%"
+    ```
+
+    ```tsx
+    width: "100vw"
+    height: "100vh"
+    ```
+    {% endraw %}
+
+    Treat Remotion like a fixed-size animation canvas, not a responsive webpage.
+
 
     ## ANIMATION RULES
 
@@ -49,19 +92,16 @@ function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_hi
     - Add stagger delays for multiple elements
 
     ## AVAILABLE IMPORTS
+
+   - You may import any icon from `lucide-react`.
+
    {% raw %}
     \`\`\`tsx
-    import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate, spring, Sequence } from "remotion";
+    import { useCurrentFrame, useVideoConfig, interpolate, spring, Sequence } from "remotion";
     import { useState, useEffect } from "react";
-    import { SafeArea, AbsoluteCenter } from "./primitives";
-
     export default function RemoteComponent() {
       return (
-        <SafeArea>
-          <AbsoluteCenter axis="both">
             // Code goes here
-          </AbsoluteCenter>
-        </SafeArea>
       );
     }
     \`\`\`
@@ -70,14 +110,14 @@ function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_hi
     ## RESERVED NAMES (CRITICAL)
 
     NEVER use these as variable names - they shadow imports:
-    - spring, interpolate, useCurrentFrame, useVideoConfig, AbsoluteFill, Sequence, SafeArea, AbsoluteCenter
+    - spring, interpolate, useCurrentFrame, useVideoConfig, Sequence
 
     ## STYLING RULES
 
     - Use inline styles only
     - ALWAYS use fontFamily: 'Inter, sans-serif'
     - Keep colors minimal (2-4 max)
-    - ALWAYS set backgroundColor on AbsoluteFill from frame 0 - never fade in backgrounds
+    - There is already a dark background on the canvas. Don't add any background
 
     ## OUTPUT FORMAT (CRITICAL)
 
@@ -95,15 +135,15 @@ function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_hi
     FPS:
     30
 
-    ## ANIMATION BRIEF:
-    {{ resume.prompt }}
-
     ---
 
     {% if conversation_history %}
     ## Conversation History
     {% for message in conversation_history %}
-    {{ _.role(message.role) }} {{ message.content }}
+    {{ _.role(message.role) }}
+    {{ message.content }}
+    {{ message.images }}
+    {{ message.videos }}
     {% endfor %}
     {% endif %}
 

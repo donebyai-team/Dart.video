@@ -119,8 +119,8 @@ func (*parse_stream) EditAnimationCode(text string, opts ...CallOptionFunc) (str
 	return casted, nil
 }
 
-// / Parse version of GenerateAnimation (Takes in string and returns stream_types.GenerateAnimationCodeResponse)
-func (*parse_stream) GenerateAnimation(text string, opts ...CallOptionFunc) (stream_types.GenerateAnimationCodeResponse, error) {
+// / Parse version of GenerateAnimation (Takes in string and returns stream_types.Union2AskUserQuestionOrGenerateAnimationCodeResponse)
+func (*parse_stream) GenerateAnimation(text string, opts ...CallOptionFunc) (stream_types.Union2AskUserQuestionOrGenerateAnimationCodeResponse, error) {
 
 	var callOpts callOption
 	for _, opt := range opts {
@@ -158,10 +158,10 @@ func (*parse_stream) GenerateAnimation(text string, opts ...CallOptionFunc) (str
 
 	result, err := bamlRuntime.CallFunctionParse(context.Background(), "GenerateAnimation", encoded)
 	if err != nil {
-		return stream_types.GenerateAnimationCodeResponse{}, err
+		return stream_types.Union2AskUserQuestionOrGenerateAnimationCodeResponse{}, err
 	}
 
-	casted := (result).(stream_types.GenerateAnimationCodeResponse)
+	casted := (result).(stream_types.Union2AskUserQuestionOrGenerateAnimationCodeResponse)
 
 	return casted, nil
 }

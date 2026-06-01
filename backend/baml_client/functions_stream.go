@@ -191,7 +191,7 @@ func (*stream) EditAnimationCode(ctx context.Context, resume types.EditAnimation
 }
 
 // / Streaming version of GenerateAnimation
-func (*stream) GenerateAnimation(ctx context.Context, resume types.GenerateAnimationCodeRequest, conversation_history []types.Message, opts ...CallOptionFunc) (<-chan StreamValue[stream_types.GenerateAnimationCodeResponse, types.GenerateAnimationCodeResponse], error) {
+func (*stream) GenerateAnimation(ctx context.Context, resume types.GenerateAnimationCodeRequest, conversation_history []types.Message, opts ...CallOptionFunc) (<-chan StreamValue[stream_types.Union2AskUserQuestionOrGenerateAnimationCodeResponse, types.Union2AskUserQuestionOrGenerateAnimationCodeResponse], error) {
 
 	var callOpts callOption
 	for _, opt := range opts {
@@ -232,11 +232,11 @@ func (*stream) GenerateAnimation(ctx context.Context, resume types.GenerateAnima
 		return nil, err
 	}
 
-	channel := make(chan StreamValue[stream_types.GenerateAnimationCodeResponse, types.GenerateAnimationCodeResponse])
+	channel := make(chan StreamValue[stream_types.Union2AskUserQuestionOrGenerateAnimationCodeResponse, types.Union2AskUserQuestionOrGenerateAnimationCodeResponse])
 	go func() {
 		for result := range internal_channel {
 			if result.Error != nil {
-				channel <- StreamValue[stream_types.GenerateAnimationCodeResponse, types.GenerateAnimationCodeResponse]{
+				channel <- StreamValue[stream_types.Union2AskUserQuestionOrGenerateAnimationCodeResponse, types.Union2AskUserQuestionOrGenerateAnimationCodeResponse]{
 					IsError: true,
 					Error:   result.Error,
 				}
@@ -244,14 +244,14 @@ func (*stream) GenerateAnimation(ctx context.Context, resume types.GenerateAnima
 				return
 			}
 			if result.HasData {
-				data := (result.Data).(types.GenerateAnimationCodeResponse)
-				channel <- StreamValue[stream_types.GenerateAnimationCodeResponse, types.GenerateAnimationCodeResponse]{
+				data := (result.Data).(types.Union2AskUserQuestionOrGenerateAnimationCodeResponse)
+				channel <- StreamValue[stream_types.Union2AskUserQuestionOrGenerateAnimationCodeResponse, types.Union2AskUserQuestionOrGenerateAnimationCodeResponse]{
 					IsFinal:  true,
 					as_final: &data,
 				}
 			} else {
-				data := (result.StreamData).(stream_types.GenerateAnimationCodeResponse)
-				channel <- StreamValue[stream_types.GenerateAnimationCodeResponse, types.GenerateAnimationCodeResponse]{
+				data := (result.StreamData).(stream_types.Union2AskUserQuestionOrGenerateAnimationCodeResponse)
+				channel <- StreamValue[stream_types.Union2AskUserQuestionOrGenerateAnimationCodeResponse, types.Union2AskUserQuestionOrGenerateAnimationCodeResponse]{
 					IsFinal:   false,
 					as_stream: &data,
 				}

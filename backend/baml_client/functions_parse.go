@@ -119,8 +119,8 @@ func (*parse) EditAnimationCode(text string, opts ...CallOptionFunc) (types.Edit
 	return casted, nil
 }
 
-// / Parse version of GenerateAnimation (Takes in string and returns types.GenerateAnimationCodeResponse)
-func (*parse) GenerateAnimation(text string, opts ...CallOptionFunc) (types.GenerateAnimationCodeResponse, error) {
+// / Parse version of GenerateAnimation (Takes in string and returns types.Union2AskUserQuestionOrGenerateAnimationCodeResponse)
+func (*parse) GenerateAnimation(text string, opts ...CallOptionFunc) (types.Union2AskUserQuestionOrGenerateAnimationCodeResponse, error) {
 
 	var callOpts callOption
 	for _, opt := range opts {
@@ -158,10 +158,10 @@ func (*parse) GenerateAnimation(text string, opts ...CallOptionFunc) (types.Gene
 
 	result, err := bamlRuntime.CallFunctionParse(context.Background(), "GenerateAnimation", encoded)
 	if err != nil {
-		return types.GenerateAnimationCodeResponse{}, err
+		return types.Union2AskUserQuestionOrGenerateAnimationCodeResponse{}, err
 	}
 
-	casted := (result).(types.GenerateAnimationCodeResponse)
+	casted := (result).(types.Union2AskUserQuestionOrGenerateAnimationCodeResponse)
 
 	return casted, nil
 }

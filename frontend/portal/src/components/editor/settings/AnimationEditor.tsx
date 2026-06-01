@@ -200,6 +200,7 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                 setIsThinkingBusy(true)
             }
 
+
             if (event.completed) {
                 setIsThinkingBusy(false)
 
@@ -209,6 +210,8 @@ export default function AnimationEditor({ settings, overlay, onValuePatch, setOv
                 setPrompt('')
                 setStage('compose')
                 setIsSubmitting(false)
+                setThinkingChunk(event.thinkingSummary)
+                setIsThinkingBusy(false)
                 abortControllerRef.current?.abort()
                 return
             }

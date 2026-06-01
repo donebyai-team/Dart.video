@@ -76,11 +76,13 @@ var typeMap = map[string]reflect.Type{
 	"TYPES.AskUserQuestionType":   reflect.TypeOf(types.AskUserQuestionType("")),
 	"TYPES.ColorToken":            reflect.TypeOf(types.ColorToken("")),
 
-	"TYPES.AskUserQuestion__GeneratedVideoPlan":        reflect.TypeOf(types.Union2AskUserQuestionOrGeneratedVideoPlan{}),
-	"TYPES.AskUserQuestion__Scene":                     reflect.TypeOf(types.Union2AskUserQuestionOrScene{}),
-	"TYPES.ColorToken__string":                         reflect.TypeOf(types.Union2ColorTokenOrString{}),
-	"TYPES.string_assistant__string_tool__string_user": reflect.TypeOf(types.Union3KassistantOrKtoolOrKuser{}),
+	"TYPES.AskUserQuestion__GenerateAnimationCodeResponse": reflect.TypeOf(types.Union2AskUserQuestionOrGenerateAnimationCodeResponse{}),
+	"TYPES.AskUserQuestion__GeneratedVideoPlan":            reflect.TypeOf(types.Union2AskUserQuestionOrGeneratedVideoPlan{}),
+	"TYPES.AskUserQuestion__Scene":                         reflect.TypeOf(types.Union2AskUserQuestionOrScene{}),
+	"TYPES.ColorToken__string":                             reflect.TypeOf(types.Union2ColorTokenOrString{}),
+	"TYPES.string_assistant__string_tool__string_user":     reflect.TypeOf(types.Union3KassistantOrKtoolOrKuser{}),
 
-	"STREAM_TYPES.AskUserQuestion__GeneratedVideoPlan": reflect.TypeOf(stream_types.Union2AskUserQuestionOrGeneratedVideoPlan{}),
-	"STREAM_TYPES.AskUserQuestion__Scene":              reflect.TypeOf(stream_types.Union2AskUserQuestionOrScene{}),
+	"STREAM_TYPES.AskUserQuestion__GenerateAnimationCodeResponse": reflect.TypeOf(stream_types.Union2AskUserQuestionOrGenerateAnimationCodeResponse{}),
+	"STREAM_TYPES.AskUserQuestion__GeneratedVideoPlan":            reflect.TypeOf(stream_types.Union2AskUserQuestionOrGeneratedVideoPlan{}),
+	"STREAM_TYPES.AskUserQuestion__Scene":                         reflect.TypeOf(stream_types.Union2AskUserQuestionOrScene{}),
 }

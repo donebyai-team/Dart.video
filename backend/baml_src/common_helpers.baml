@@ -1,7 +1,8 @@
 class Message {
   role "user" | "assistant" | "tool"
   content string
-  tool_call_id string? @description("ID for tool calls and responses")
+  images image[]
+  videos video[]
 }
 
 enum AskUserQuestionType {
