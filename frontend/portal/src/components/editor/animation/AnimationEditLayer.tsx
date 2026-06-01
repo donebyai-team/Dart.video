@@ -446,9 +446,9 @@ export function AnimationEditLayer({
 
     const hits = selectableStackAtPoint(e.clientX, e.clientY, e.currentTarget)
     if (hits.length === 0) {
-      const fallbackId = getFallbackSelectionId()
+      // const fallbackId = getFallbackSelectionId()
       setElementRect(null)
-      onSelectElement(fallbackId)
+      // onSelectElement(fallbackId)
       return
     }
 

@@ -90,7 +90,7 @@ export const createToolActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
 
     set({
       activeTool: {
-        type: ActiveToolType.ADD_OR_EDIT_ANIMATION,
+        type: ActiveToolType.REIMAGINE,
       }
     })
   }

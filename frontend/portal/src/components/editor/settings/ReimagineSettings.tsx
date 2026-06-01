@@ -281,7 +281,7 @@ const ReimagineSettings = ({
         </Button>
       </div>
 
-      <div className='flex-1 overflow-y-auto px-5 py-6 pb-36'>
+      <div className='flex-1 overflow-y-auto px-3 py-2 pb-36'>
         <Tabs value={activeTab} onValueChange={value => setActiveTab(value as 'browse' | 'generate')} className='h-full'>
           <TabsList className='grid w-full grid-cols-2'>
             <TabsTrigger value='browse'>Browse</TabsTrigger>
@@ -308,15 +308,30 @@ const ReimagineSettings = ({
           </TabsContent>
 
           <TabsContent value='generate' className='mt-4'>
-            <ChatTab messages={chatMessages} isLoading={isChatLoading} />
+            <ChatTab
+              messages={chatMessages}
+              isLoading={isChatLoading}
+              setOverlay={setOverlay}
+              onConversationUpdated={() => void loadConversationHistory()}
+            />
           </TabsContent>
         </Tabs>
       </div>
 
       {onPreviewTemplate && (
-        <div className='border-t border-border px-5 py-4 mt-4'>
-          <Button variant='default' size='sm' className='w-full gap-2' onClick={handlePreview} disabled={!selectedSuggestion}>
-            {isPreviewPlaying ? <Pause className='w-3.5 h-3.5' /> : <Play className='w-3.5 h-3.5' />}
+        <div className='border-t border-border px-5 py-2 mt-2'>
+          <Button
+            variant='default'
+            size='sm'
+            className='w-full gap-2 h-8 text-sm'
+            onClick={handlePreview}
+            disabled={!selectedSuggestion}
+          >
+            {isPreviewPlaying ? (
+              <Pause className='w-3.5 h-3.5' />
+            ) : (
+              <Play className='w-3.5 h-3.5' />
+            )}
             {isPreviewPlaying ? 'Stop Preview' : 'Preview'}
           </Button>
         </div>
