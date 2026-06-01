@@ -111,6 +111,9 @@ const (
 	// PortalServiceGenerateOrEditSceneProcedure is the fully-qualified name of the PortalService's
 	// GenerateOrEditScene RPC.
 	PortalServiceGenerateOrEditSceneProcedure = "/coasterai.portal.v1.PortalService/GenerateOrEditScene"
+	// PortalServiceGetConversationHistoryProcedure is the fully-qualified name of the PortalService's
+	// GetConversationHistory RPC.
+	PortalServiceGetConversationHistoryProcedure = "/coasterai.portal.v1.PortalService/GetConversationHistory"
 	// PortalServiceGetMediaAssetsProcedure is the fully-qualified name of the PortalService's
 	// GetMediaAssets RPC.
 	PortalServiceGetMediaAssetsProcedure = "/coasterai.portal.v1.PortalService/GetMediaAssets"
@@ -124,37 +127,38 @@ const (
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
 var (
-	portalServiceServiceDescriptor                     = v1.File_coasterai_portal_v1_portal_proto.Services().ByName("PortalService")
-	portalServiceGetConfigMethodDescriptor             = portalServiceServiceDescriptor.Methods().ByName("GetConfig")
-	portalServiceSelfMethodDescriptor                  = portalServiceServiceDescriptor.Methods().ByName("Self")
-	portalServiceGetIntegrationMethodDescriptor        = portalServiceServiceDescriptor.Methods().ByName("GetIntegration")
-	portalServiceRevokeIntegrationMethodDescriptor     = portalServiceServiceDescriptor.Methods().ByName("RevokeIntegration")
-	portalServiceUpdateIntegrationMethodDescriptor     = portalServiceServiceDescriptor.Methods().ByName("UpdateIntegration")
-	portalServicePasswordlessStartMethodDescriptor     = portalServiceServiceDescriptor.Methods().ByName("PasswordlessStart")
-	portalServicePasswordlessVerifyMethodDescriptor    = portalServiceServiceDescriptor.Methods().ByName("PasswordlessVerify")
-	portalServiceOauthAuthorizeMethodDescriptor        = portalServiceServiceDescriptor.Methods().ByName("OauthAuthorize")
-	portalServiceOauthCallbackMethodDescriptor         = portalServiceServiceDescriptor.Methods().ByName("OauthCallback")
-	portalServiceSocialLoginCallbackMethodDescriptor   = portalServiceServiceDescriptor.Methods().ByName("SocialLoginCallback")
-	portalServiceGetIntegrationsMethodDescriptor       = portalServiceServiceDescriptor.Methods().ByName("GetIntegrations")
-	portalServiceCreateVideoMethodDescriptor           = portalServiceServiceDescriptor.Methods().ByName("CreateVideo")
-	portalServiceContinueVideoPlanningMethodDescriptor = portalServiceServiceDescriptor.Methods().ByName("ContinueVideoPlanning")
-	portalServiceGetVideoMethodDescriptor              = portalServiceServiceDescriptor.Methods().ByName("GetVideo")
-	portalServiceSuggestScenesMethodDescriptor         = portalServiceServiceDescriptor.Methods().ByName("SuggestScenes")
-	portalServiceStopVideoMethodDescriptor             = portalServiceServiceDescriptor.Methods().ByName("StopVideo")
-	portalServiceGetVideosMethodDescriptor             = portalServiceServiceDescriptor.Methods().ByName("GetVideos")
-	portalServiceDeleteVideoMethodDescriptor           = portalServiceServiceDescriptor.Methods().ByName("DeleteVideo")
-	portalServiceDuplicateVideoMethodDescriptor        = portalServiceServiceDescriptor.Methods().ByName("DuplicateVideo")
-	portalServiceRenderVideoMethodDescriptor           = portalServiceServiceDescriptor.Methods().ByName("RenderVideo")
-	portalServiceUpdateVideoConfigMethodDescriptor     = portalServiceServiceDescriptor.Methods().ByName("UpdateVideoConfig")
-	portalServiceListFigmaFramesMethodDescriptor       = portalServiceServiceDescriptor.Methods().ByName("ListFigmaFrames")
-	portalServiceImportFigmaFrameMethodDescriptor      = portalServiceServiceDescriptor.Methods().ByName("ImportFigmaFrame")
-	portalServiceCreateBrandIdentityMethodDescriptor   = portalServiceServiceDescriptor.Methods().ByName("CreateBrandIdentity")
-	portalServiceGetBrandIdentitiesMethodDescriptor    = portalServiceServiceDescriptor.Methods().ByName("GetBrandIdentities")
-	portalServiceUpdateBrandIdentityMethodDescriptor   = portalServiceServiceDescriptor.Methods().ByName("UpdateBrandIdentity")
-	portalServiceGenerateOrEditSceneMethodDescriptor   = portalServiceServiceDescriptor.Methods().ByName("GenerateOrEditScene")
-	portalServiceGetMediaAssetsMethodDescriptor        = portalServiceServiceDescriptor.Methods().ByName("GetMediaAssets")
-	portalServiceGetMediaAssetsByIDMethodDescriptor    = portalServiceServiceDescriptor.Methods().ByName("GetMediaAssetsByID")
-	portalServiceGenerateMusicMethodDescriptor         = portalServiceServiceDescriptor.Methods().ByName("GenerateMusic")
+	portalServiceServiceDescriptor                      = v1.File_coasterai_portal_v1_portal_proto.Services().ByName("PortalService")
+	portalServiceGetConfigMethodDescriptor              = portalServiceServiceDescriptor.Methods().ByName("GetConfig")
+	portalServiceSelfMethodDescriptor                   = portalServiceServiceDescriptor.Methods().ByName("Self")
+	portalServiceGetIntegrationMethodDescriptor         = portalServiceServiceDescriptor.Methods().ByName("GetIntegration")
+	portalServiceRevokeIntegrationMethodDescriptor      = portalServiceServiceDescriptor.Methods().ByName("RevokeIntegration")
+	portalServiceUpdateIntegrationMethodDescriptor      = portalServiceServiceDescriptor.Methods().ByName("UpdateIntegration")
+	portalServicePasswordlessStartMethodDescriptor      = portalServiceServiceDescriptor.Methods().ByName("PasswordlessStart")
+	portalServicePasswordlessVerifyMethodDescriptor     = portalServiceServiceDescriptor.Methods().ByName("PasswordlessVerify")
+	portalServiceOauthAuthorizeMethodDescriptor         = portalServiceServiceDescriptor.Methods().ByName("OauthAuthorize")
+	portalServiceOauthCallbackMethodDescriptor          = portalServiceServiceDescriptor.Methods().ByName("OauthCallback")
+	portalServiceSocialLoginCallbackMethodDescriptor    = portalServiceServiceDescriptor.Methods().ByName("SocialLoginCallback")
+	portalServiceGetIntegrationsMethodDescriptor        = portalServiceServiceDescriptor.Methods().ByName("GetIntegrations")
+	portalServiceCreateVideoMethodDescriptor            = portalServiceServiceDescriptor.Methods().ByName("CreateVideo")
+	portalServiceContinueVideoPlanningMethodDescriptor  = portalServiceServiceDescriptor.Methods().ByName("ContinueVideoPlanning")
+	portalServiceGetVideoMethodDescriptor               = portalServiceServiceDescriptor.Methods().ByName("GetVideo")
+	portalServiceSuggestScenesMethodDescriptor          = portalServiceServiceDescriptor.Methods().ByName("SuggestScenes")
+	portalServiceStopVideoMethodDescriptor              = portalServiceServiceDescriptor.Methods().ByName("StopVideo")
+	portalServiceGetVideosMethodDescriptor              = portalServiceServiceDescriptor.Methods().ByName("GetVideos")
+	portalServiceDeleteVideoMethodDescriptor            = portalServiceServiceDescriptor.Methods().ByName("DeleteVideo")
+	portalServiceDuplicateVideoMethodDescriptor         = portalServiceServiceDescriptor.Methods().ByName("DuplicateVideo")
+	portalServiceRenderVideoMethodDescriptor            = portalServiceServiceDescriptor.Methods().ByName("RenderVideo")
+	portalServiceUpdateVideoConfigMethodDescriptor      = portalServiceServiceDescriptor.Methods().ByName("UpdateVideoConfig")
+	portalServiceListFigmaFramesMethodDescriptor        = portalServiceServiceDescriptor.Methods().ByName("ListFigmaFrames")
+	portalServiceImportFigmaFrameMethodDescriptor       = portalServiceServiceDescriptor.Methods().ByName("ImportFigmaFrame")
+	portalServiceCreateBrandIdentityMethodDescriptor    = portalServiceServiceDescriptor.Methods().ByName("CreateBrandIdentity")
+	portalServiceGetBrandIdentitiesMethodDescriptor     = portalServiceServiceDescriptor.Methods().ByName("GetBrandIdentities")
+	portalServiceUpdateBrandIdentityMethodDescriptor    = portalServiceServiceDescriptor.Methods().ByName("UpdateBrandIdentity")
+	portalServiceGenerateOrEditSceneMethodDescriptor    = portalServiceServiceDescriptor.Methods().ByName("GenerateOrEditScene")
+	portalServiceGetConversationHistoryMethodDescriptor = portalServiceServiceDescriptor.Methods().ByName("GetConversationHistory")
+	portalServiceGetMediaAssetsMethodDescriptor         = portalServiceServiceDescriptor.Methods().ByName("GetMediaAssets")
+	portalServiceGetMediaAssetsByIDMethodDescriptor     = portalServiceServiceDescriptor.Methods().ByName("GetMediaAssetsByID")
+	portalServiceGenerateMusicMethodDescriptor          = portalServiceServiceDescriptor.Methods().ByName("GenerateMusic")
 )
 
 // PortalServiceClient is a client for the coasterai.portal.v1.PortalService service.
@@ -190,6 +194,7 @@ type PortalServiceClient interface {
 	UpdateBrandIdentity(context.Context, *connect.Request[v1.UpdateBrandIdentityRequest]) (*connect.Response[emptypb.Empty], error)
 	// Edit animations
 	GenerateOrEditScene(context.Context, *connect.Request[v1.GenerateOrEditSceneRequest]) (*connect.ServerStreamForClient[v1.GenerateOrEditSceneResponse], error)
+	GetConversationHistory(context.Context, *connect.Request[v1.GetConversationHistoryRequest]) (*connect.Response[v1.GetConversationHistoryResponse], error)
 	// Assets
 	GetMediaAssets(context.Context, *connect.Request[v1.GetMediaAssetsRequest]) (*connect.Response[v1.GetMediaAssetsResponse], error)
 	GetMediaAssetsByID(context.Context, *connect.Request[v1.GetMediaAssetsByIDs]) (*connect.Response[v1.GetMediaAssetsResponse], error)
@@ -368,6 +373,12 @@ func NewPortalServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(portalServiceGenerateOrEditSceneMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		getConversationHistory: connect.NewClient[v1.GetConversationHistoryRequest, v1.GetConversationHistoryResponse](
+			httpClient,
+			baseURL+PortalServiceGetConversationHistoryProcedure,
+			connect.WithSchema(portalServiceGetConversationHistoryMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 		getMediaAssets: connect.NewClient[v1.GetMediaAssetsRequest, v1.GetMediaAssetsResponse](
 			httpClient,
 			baseURL+PortalServiceGetMediaAssetsProcedure,
@@ -391,36 +402,37 @@ func NewPortalServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 
 // portalServiceClient implements PortalServiceClient.
 type portalServiceClient struct {
-	getConfig             *connect.Client[emptypb.Empty, v1.Config]
-	self                  *connect.Client[emptypb.Empty, v1.User]
-	getIntegration        *connect.Client[v1.GetIntegrationRequest, v1.Integrations]
-	revokeIntegration     *connect.Client[v1.RevokeIntegrationRequest, emptypb.Empty]
-	updateIntegration     *connect.Client[v1.UpdateIntegrationRequest, emptypb.Empty]
-	passwordlessStart     *connect.Client[v1.PasswordlessStartRequest, emptypb.Empty]
-	passwordlessVerify    *connect.Client[v1.PasswordlessStartVerify, v1.JWT]
-	oauthAuthorize        *connect.Client[v1.OauthAuthorizeRequest, v1.OauthAuthorizeResponse]
-	oauthCallback         *connect.Client[v1.OauthCallbackRequest, v1.OauthCallbackResponse]
-	socialLoginCallback   *connect.Client[v1.OauthCallbackRequest, v1.JWT]
-	getIntegrations       *connect.Client[emptypb.Empty, v1.Integrations]
-	createVideo           *connect.Client[v1.CreateVideoRequest, v1.CreateVideoResponse]
-	continueVideoPlanning *connect.Client[v1.ContinueVideoPlanningRequest, v1.CreateVideoResponse]
-	getVideo              *connect.Client[v1.GetVideoRequest, v1.GetVideoResponse]
-	suggestScenes         *connect.Client[v1.SuggestScenesRequest, v1.SuggestScenesResponse]
-	stopVideo             *connect.Client[v1.StopVideoRequest, emptypb.Empty]
-	getVideos             *connect.Client[emptypb.Empty, v1.GetVideosResponse]
-	deleteVideo           *connect.Client[v1.VideoRequestWithID, emptypb.Empty]
-	duplicateVideo        *connect.Client[v1.VideoRequestWithID, v1.GetVideoResponse]
-	renderVideo           *connect.Client[v1.VideoRequestWithID, v1.RenderVideoResponse]
-	updateVideoConfig     *connect.Client[v1.UpdateVideoConfigRequest, emptypb.Empty]
-	listFigmaFrames       *connect.Client[v1.ListFigmaFramesRequest, v1.ListFigmaFramesResponse]
-	importFigmaFrame      *connect.Client[v1.ImportFigmaFrameRequest, v1.ImportFigmaFrameResponse]
-	createBrandIdentity   *connect.Client[v1.BrandIdentityRequest, v11.BrandIdentity]
-	getBrandIdentities    *connect.Client[emptypb.Empty, v1.BrandIdentityResponse]
-	updateBrandIdentity   *connect.Client[v1.UpdateBrandIdentityRequest, emptypb.Empty]
-	generateOrEditScene   *connect.Client[v1.GenerateOrEditSceneRequest, v1.GenerateOrEditSceneResponse]
-	getMediaAssets        *connect.Client[v1.GetMediaAssetsRequest, v1.GetMediaAssetsResponse]
-	getMediaAssetsByID    *connect.Client[v1.GetMediaAssetsByIDs, v1.GetMediaAssetsResponse]
-	generateMusic         *connect.Client[v1.VideoRequestWithID, v1.GetMediaAssetsResponse]
+	getConfig              *connect.Client[emptypb.Empty, v1.Config]
+	self                   *connect.Client[emptypb.Empty, v1.User]
+	getIntegration         *connect.Client[v1.GetIntegrationRequest, v1.Integrations]
+	revokeIntegration      *connect.Client[v1.RevokeIntegrationRequest, emptypb.Empty]
+	updateIntegration      *connect.Client[v1.UpdateIntegrationRequest, emptypb.Empty]
+	passwordlessStart      *connect.Client[v1.PasswordlessStartRequest, emptypb.Empty]
+	passwordlessVerify     *connect.Client[v1.PasswordlessStartVerify, v1.JWT]
+	oauthAuthorize         *connect.Client[v1.OauthAuthorizeRequest, v1.OauthAuthorizeResponse]
+	oauthCallback          *connect.Client[v1.OauthCallbackRequest, v1.OauthCallbackResponse]
+	socialLoginCallback    *connect.Client[v1.OauthCallbackRequest, v1.JWT]
+	getIntegrations        *connect.Client[emptypb.Empty, v1.Integrations]
+	createVideo            *connect.Client[v1.CreateVideoRequest, v1.CreateVideoResponse]
+	continueVideoPlanning  *connect.Client[v1.ContinueVideoPlanningRequest, v1.CreateVideoResponse]
+	getVideo               *connect.Client[v1.GetVideoRequest, v1.GetVideoResponse]
+	suggestScenes          *connect.Client[v1.SuggestScenesRequest, v1.SuggestScenesResponse]
+	stopVideo              *connect.Client[v1.StopVideoRequest, emptypb.Empty]
+	getVideos              *connect.Client[emptypb.Empty, v1.GetVideosResponse]
+	deleteVideo            *connect.Client[v1.VideoRequestWithID, emptypb.Empty]
+	duplicateVideo         *connect.Client[v1.VideoRequestWithID, v1.GetVideoResponse]
+	renderVideo            *connect.Client[v1.VideoRequestWithID, v1.RenderVideoResponse]
+	updateVideoConfig      *connect.Client[v1.UpdateVideoConfigRequest, emptypb.Empty]
+	listFigmaFrames        *connect.Client[v1.ListFigmaFramesRequest, v1.ListFigmaFramesResponse]
+	importFigmaFrame       *connect.Client[v1.ImportFigmaFrameRequest, v1.ImportFigmaFrameResponse]
+	createBrandIdentity    *connect.Client[v1.BrandIdentityRequest, v11.BrandIdentity]
+	getBrandIdentities     *connect.Client[emptypb.Empty, v1.BrandIdentityResponse]
+	updateBrandIdentity    *connect.Client[v1.UpdateBrandIdentityRequest, emptypb.Empty]
+	generateOrEditScene    *connect.Client[v1.GenerateOrEditSceneRequest, v1.GenerateOrEditSceneResponse]
+	getConversationHistory *connect.Client[v1.GetConversationHistoryRequest, v1.GetConversationHistoryResponse]
+	getMediaAssets         *connect.Client[v1.GetMediaAssetsRequest, v1.GetMediaAssetsResponse]
+	getMediaAssetsByID     *connect.Client[v1.GetMediaAssetsByIDs, v1.GetMediaAssetsResponse]
+	generateMusic          *connect.Client[v1.VideoRequestWithID, v1.GetMediaAssetsResponse]
 }
 
 // GetConfig calls coasterai.portal.v1.PortalService.GetConfig.
@@ -558,6 +570,11 @@ func (c *portalServiceClient) GenerateOrEditScene(ctx context.Context, req *conn
 	return c.generateOrEditScene.CallServerStream(ctx, req)
 }
 
+// GetConversationHistory calls coasterai.portal.v1.PortalService.GetConversationHistory.
+func (c *portalServiceClient) GetConversationHistory(ctx context.Context, req *connect.Request[v1.GetConversationHistoryRequest]) (*connect.Response[v1.GetConversationHistoryResponse], error) {
+	return c.getConversationHistory.CallUnary(ctx, req)
+}
+
 // GetMediaAssets calls coasterai.portal.v1.PortalService.GetMediaAssets.
 func (c *portalServiceClient) GetMediaAssets(ctx context.Context, req *connect.Request[v1.GetMediaAssetsRequest]) (*connect.Response[v1.GetMediaAssetsResponse], error) {
 	return c.getMediaAssets.CallUnary(ctx, req)
@@ -606,6 +623,7 @@ type PortalServiceHandler interface {
 	UpdateBrandIdentity(context.Context, *connect.Request[v1.UpdateBrandIdentityRequest]) (*connect.Response[emptypb.Empty], error)
 	// Edit animations
 	GenerateOrEditScene(context.Context, *connect.Request[v1.GenerateOrEditSceneRequest], *connect.ServerStream[v1.GenerateOrEditSceneResponse]) error
+	GetConversationHistory(context.Context, *connect.Request[v1.GetConversationHistoryRequest]) (*connect.Response[v1.GetConversationHistoryResponse], error)
 	// Assets
 	GetMediaAssets(context.Context, *connect.Request[v1.GetMediaAssetsRequest]) (*connect.Response[v1.GetMediaAssetsResponse], error)
 	GetMediaAssetsByID(context.Context, *connect.Request[v1.GetMediaAssetsByIDs]) (*connect.Response[v1.GetMediaAssetsResponse], error)
@@ -780,6 +798,12 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(portalServiceGenerateOrEditSceneMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	portalServiceGetConversationHistoryHandler := connect.NewUnaryHandler(
+		PortalServiceGetConversationHistoryProcedure,
+		svc.GetConversationHistory,
+		connect.WithSchema(portalServiceGetConversationHistoryMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	portalServiceGetMediaAssetsHandler := connect.NewUnaryHandler(
 		PortalServiceGetMediaAssetsProcedure,
 		svc.GetMediaAssets,
@@ -854,6 +878,8 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 			portalServiceUpdateBrandIdentityHandler.ServeHTTP(w, r)
 		case PortalServiceGenerateOrEditSceneProcedure:
 			portalServiceGenerateOrEditSceneHandler.ServeHTTP(w, r)
+		case PortalServiceGetConversationHistoryProcedure:
+			portalServiceGetConversationHistoryHandler.ServeHTTP(w, r)
 		case PortalServiceGetMediaAssetsProcedure:
 			portalServiceGetMediaAssetsHandler.ServeHTTP(w, r)
 		case PortalServiceGetMediaAssetsByIDProcedure:
@@ -975,6 +1001,10 @@ func (UnimplementedPortalServiceHandler) UpdateBrandIdentity(context.Context, *c
 
 func (UnimplementedPortalServiceHandler) GenerateOrEditScene(context.Context, *connect.Request[v1.GenerateOrEditSceneRequest], *connect.ServerStream[v1.GenerateOrEditSceneResponse]) error {
 	return connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.GenerateOrEditScene is not implemented"))
+}
+
+func (UnimplementedPortalServiceHandler) GetConversationHistory(context.Context, *connect.Request[v1.GetConversationHistoryRequest]) (*connect.Response[v1.GetConversationHistoryResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.GetConversationHistory is not implemented"))
 }
 
 func (UnimplementedPortalServiceHandler) GetMediaAssets(context.Context, *connect.Request[v1.GetMediaAssetsRequest]) (*connect.Response[v1.GetMediaAssetsResponse], error) {

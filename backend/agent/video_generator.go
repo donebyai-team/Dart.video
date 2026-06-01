@@ -35,7 +35,7 @@ type VideoAgent interface {
 	// StopAgent is the single stop entry-point used by HTTP handlers.
 	// It writes stateStatusCancelled to Redis (so applyPlan exits) and marks
 	// video status as USER_CANCELLED.
-	StopAgent(ctx context.Context, videoID string) error
+	StopAgent(ctx context.Context) error
 }
 
 type StartSessionOptions struct {
@@ -81,7 +81,7 @@ func NewAgentV2(
 	brandIdentityService brand_identity.BrandIdentity,
 	state common.AgentStatusPublisher,
 ) VideoAgent {
-	session := common.CreateNewSession(sessionID, sessionKeyPrefix, cache, db, logger)
+	session := common.NewAgentSession(sessionID, sessionKeyPrefix, cache, db, logger)
 	return &agentV2{
 		fps:                  defaultFPS,
 		orgID:                orgID,
@@ -189,8 +189,10 @@ func deduplicateAssets(
 	return deduped
 }
 
-func (a *agentV2) StopAgent(ctx context.Context, videoID string) error {
-	return nil
+func (a *agentV2) StopAgent(ctx context.Context) error {
+	return a.state.Save(ctx, common.AgentState{
+		State: common.StateStatusCancelled,
+	})
 }
 
 func (a *agentV2) Start(ctx context.Context, options StartSessionOptions) (*common.RunResult, error) {
@@ -343,7 +345,7 @@ func (a *agentV2) runPlanning(ctx context.Context, req types.VideoGenerationPlan
 		FieldsToSkip: scenes.SkipLLMFields,
 	})
 
-	history, err := a.session.ConvertToContextMessages(ctx, session.ConversationHistory)
+	history, err := a.session.ConvertToContextMessages(ctx, session.ConversationHistory, a.assetRegistry)
 	if err != nil {
 		return nil, err
 	}

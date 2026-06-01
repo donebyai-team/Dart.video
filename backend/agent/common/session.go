@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/shank318/coasterai/agent/agenterrors"
 	"github.com/shank318/coasterai/baml_client"
@@ -14,6 +15,7 @@ import (
 	"github.com/shank318/coasterai/services"
 	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type SessionContext struct {
@@ -24,7 +26,7 @@ type SessionContext struct {
 type AgentSession interface {
 	GetID() string
 	Get(ctx context.Context) (*SessionContext, error)
-	ConvertToContextMessages(ctx context.Context, history []*pbcore.ConversationMessage) ([]types.Message, error)
+	ConvertToContextMessages(ctx context.Context, history []*pbcore.ConversationMessage, registry *services.MediaAssetRegistry) ([]types.Message, error)
 	Save(ctx context.Context, session *SessionContext) error
 }
 
@@ -36,7 +38,7 @@ type session struct {
 	logger     *zap.Logger
 }
 
-func CreateNewSession(sessionID string, sessionKey string, cache cache.Cache, db datastore.Repository, logger *zap.Logger) AgentSession {
+func NewAgentSession(sessionID string, sessionKey string, cache cache.Cache, db datastore.Repository, logger *zap.Logger) AgentSession {
 	return &session{
 		sessionKey: sessionKey,
 		sessionID:  sessionID,
@@ -56,6 +58,12 @@ func (a *session) Save(ctx context.Context, session *SessionContext) error {
 		return agenterrors.SessionUnavailable("failed to encode planning session", err)
 	}
 
+	for _, message := range session.ConversationHistory {
+		if message.CreatedAt == nil {
+			message.CreatedAt = timestamppb.Now()
+		}
+	}
+
 	if err := a.cache.SetKey(ctx, fmt.Sprintf("%s:%s", a.sessionKey, a.sessionID), string(payload), stateTTL); err != nil {
 		return agenterrors.SessionUnavailable("failed to persist planning session", err)
 	}
@@ -64,8 +72,12 @@ func (a *session) Save(ctx context.Context, session *SessionContext) error {
 
 func (a *session) Get(ctx context.Context) (*SessionContext, error) {
 	value, err := a.cache.GetKey(ctx, fmt.Sprintf("%s:%s", a.sessionKey, a.sessionID))
-	if err != nil {
-		return nil, agenterrors.SessionUnavailable("failed to read planning session", err)
+	if err != nil && !errors.Is(err, cache.ErrCacheMiss) {
+		return nil, agenterrors.SessionUnavailable("failed to read session", err)
+	}
+
+	if err != nil && errors.Is(err, cache.ErrCacheMiss) {
+		return nil, nil
 	}
 
 	var sessionCtx SessionContext
@@ -126,7 +138,7 @@ func (p *SessionContext) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcore.ConversationMessage) ([]types.Message, error) {
+func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcore.ConversationMessage, registry *services.MediaAssetRegistry) ([]types.Message, error) {
 	messages := make([]types.Message, 0, len(history))
 
 	for _, item := range history {
@@ -152,27 +164,43 @@ func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcor
 			message.Content = code
 		}
 
-		mediaAssets, err := a.db.GetMediaAssetsByID(ctx, item.AssetIds)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get media assets: %w", err)
+		// References
+		if len(item.ReferenceIds) > 0 {
+			mediaAssets, err := a.db.GetMediaAssetsByID(ctx, item.ReferenceIds)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get media assets: %w", err)
+			}
+
+			for _, mediaAsset := range mediaAssets {
+				if mediaAsset.MediaType == pbcore.MediaType_MEDIA_TYPE_IMAGE {
+					img, err := baml_client.NewImageFromUrl(mediaAsset.Path, utils.Ptr(mediaAsset.MimeType))
+					if err != nil {
+						return nil, fmt.Errorf("failed to convert image from url: %w", err)
+					}
+					message.Images = append(message.Images, img)
+				}
+
+				if mediaAsset.MediaType == pbcore.MediaType_MEDIA_TYPE_VIDEO {
+					video, err := baml_client.NewVideoFromUrl(mediaAsset.Path, utils.Ptr(mediaAsset.MimeType))
+					if err != nil {
+						return nil, fmt.Errorf("failed to convert video from url: %w", err)
+					}
+					message.Videos = append(message.Videos, video)
+				}
+			}
 		}
 
-		for _, mediaAsset := range mediaAssets {
-			if mediaAsset.MediaType == pbcore.MediaType_MEDIA_TYPE_IMAGE {
-				img, err := baml_client.NewImageFromUrl(mediaAsset.Path, utils.Ptr(pbcore.MediaType_MEDIA_TYPE_IMAGE.String()))
-				if err != nil {
-					return nil, fmt.Errorf("failed to convert image from url: %w", err)
-				}
-				message.Images = append(message.Images, img)
+		// Attachments
+		if len(item.AssetIds) > 0 {
+			attachedAssets, err := a.db.GetMediaAssetsByID(ctx, item.AssetIds)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get attached assets: %w", err)
 			}
 
-			if mediaAsset.MediaType == pbcore.MediaType_MEDIA_TYPE_VIDEO {
-				video, err := baml_client.NewVideoFromUrl(mediaAsset.Path, utils.Ptr(pbcore.MediaType_MEDIA_TYPE_VIDEO.String()))
-				if err != nil {
-					return nil, fmt.Errorf("failed to convert video from url: %w", err)
-				}
-				message.Videos = append(message.Videos, video)
-			}
+			builderFromExisting := services.NewMediaAssetRegistryBuilderFromExisting(registry)
+			attachments := builderFromExisting.AddAndFormatAssets(attachedAssets)
+			message.Content += "\n\n" + *attachments
+
 		}
 
 		messages = append(messages, message)

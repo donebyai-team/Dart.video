@@ -299,7 +299,7 @@ func (p *Portal) StopVideo(ctx context.Context, req *connect.Request[pbportal.St
 	statePublisher := common.CreatePersistedAgentStatusPublisher(videoID, p.authStateStore, logger)
 	videoAgent := p.newVideoAgent(logger, videoID, actor.OrganizationID, statePublisher)
 
-	if err := videoAgent.StopAgent(ctx, videoID); err != nil {
+	if err := videoAgent.StopAgent(ctx); err != nil {
 		logger.Error("StopVideo: StopAgent failed", zap.String("video_id", videoID), zap.Error(err))
 		return nil, errorx.ToConnect(errorx.New(errorx.CodeInternal, "STOP_AGENT_FAILED", "failed to stop agent", err))
 	}

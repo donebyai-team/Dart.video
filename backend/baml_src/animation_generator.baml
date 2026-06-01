@@ -9,7 +9,7 @@ class GenerateAnimationCodeResponse {
   thinkingSummary string? @skip()
 }
 
-function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_history: Message[]) -> GenerateAnimationCodeResponse | AskUserQuestion {
+function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_history: Message[]) -> GenerateAnimationCodeResponse | AskUserQuestion {
   client CustomGeminiFlash
   prompt #"
     You are an expert in generating React components for Remotion animations.
@@ -116,15 +116,14 @@ function GenerateAnimation(resume: GenerateAnimationCodeRequest, conversation_hi
 
     - Use inline styles only
     - ALWAYS use fontFamily: 'Inter, sans-serif'
-    - Keep colors minimal (2-4 max)
     - There is already a dark background on the canvas. Don't add any background
 
     ## OUTPUT FORMAT (CRITICAL)
 
-    - Output ONLY code - no explanations, no questions
-    - Response must start with "import" and end with "};"
-    - If prompt is ambiguous, make a reasonable choice - do not ask for clarification
+    - If prompt is ambiguous or you lack clarity on what should visually appear in a scene, ask for clarification
+      Use the ask tool — do not assume missing creative direction.
 
+   {{ BrandGuidelines(input.VideoBranding) }}
 
     ---
     ## INPUT

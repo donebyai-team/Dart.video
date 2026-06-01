@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	generateCodeSessionKeyPrefix = "generateCodeSessionKeyPrefix:session"
+	GenerateCodeSessionKeyPrefix = "generateCodeSessionKeyPrefix:session"
 )
 
 type CodeGeneratorAgent interface {
@@ -40,7 +40,7 @@ type CodeGeneratorAgent interface {
 }
 
 type codeGenerator struct {
-	sessionID            string
+	videoID              string
 	slideID              string
 	orgID                string
 	llmService           llm.LLMService
@@ -55,23 +55,26 @@ type codeGenerator struct {
 }
 
 func NewCodeGeneratorAgent(
-	sessionID string,
+	videoID string,
 	slideID string,
 	orgID string,
 	llmService llm.LLMService,
 	cache cache.Cache,
 	db datastore.Repository,
+	mediaStore services.MediaStore,
 	logger *zap.Logger,
 	brandIdentityService brand_identity.BrandIdentity,
 	state common.AgentStatusPublisher,
 ) CodeGeneratorAgent {
-	session := common.CreateNewSession(sessionID, generateCodeSessionKeyPrefix, cache, db, logger)
+	sessionID := fmt.Sprintf("%s:%s", videoID, slideID)
+	session := common.NewAgentSession(sessionID, GenerateCodeSessionKeyPrefix, cache, db, logger)
 	return &codeGenerator{
-		sessionID:            sessionID,
+		videoID:              videoID,
 		orgID:                orgID,
 		slideID:              slideID,
 		logger:               logger,
 		llmService:           llmService,
+		mediaStore:           mediaStore,
 		brandIdentityService: brandIdentityService,
 		state:                state,
 		session:              session,
@@ -202,7 +205,7 @@ func (l *codeGenerator) GenerateCode(
 	}
 
 	session, err := l.session.Get(ctx)
-	if err != nil && !errors.Is(err, cache.ErrCacheMiss) {
+	if err != nil {
 		return nil, err
 	}
 
@@ -235,6 +238,10 @@ func (l *codeGenerator) GenerateCode(
 		Message: input.Prompt,
 	}
 
+	for _, asset := range input.References {
+		newMessage.ReferenceIds = append(newMessage.ReferenceIds, asset.AssetID)
+	}
+
 	for _, asset := range input.Assets {
 		newMessage.AssetIds = append(newMessage.AssetIds, asset.AssetID)
 	}
@@ -262,7 +269,7 @@ func (l *codeGenerator) runPlanning(ctx context.Context, generatePlanRequest typ
 		}
 	}()
 
-	history, err := l.session.ConvertToContextMessages(ctx, session.ConversationHistory)
+	history, err := l.session.ConvertToContextMessages(ctx, session.ConversationHistory, l.assetRegistry)
 	if err != nil {
 		return nil, err
 	}
@@ -296,6 +303,23 @@ func (l *codeGenerator) runPlanning(ctx context.Context, generatePlanRequest typ
 		}
 
 		// TODO: Handle build errors
+
+		// Save the code in history
+		if codeResponse.ThinkingSummary != nil && *codeResponse.ThinkingSummary != "" {
+			session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
+				Role:    pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
+				Message: *codeResponse.ThinkingSummary,
+			})
+		}
+		session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
+			Role:         pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
+			CodeSnapshot: asset.Url,
+		})
+
+		err = l.session.Save(ctx, session)
+		if err != nil {
+			return nil, err
+		}
 
 		return &common.RunResult{
 			Status: common.RunStatusCompleted,

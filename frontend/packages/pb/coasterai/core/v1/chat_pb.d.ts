@@ -43,7 +43,12 @@ export declare type ConversationMessage = Message<"coasterai.core.v1.Conversatio
   codeSnapshot: string;
 
   /**
-   * @generated from field: google.protobuf.Timestamp created_at = 6;
+   * @generated from field: repeated string referenceIds = 6;
+   */
+  referenceIds: string[];
+
+  /**
+   * @generated from field: google.protobuf.Timestamp created_at = 7;
    */
   createdAt?: Timestamp;
 };

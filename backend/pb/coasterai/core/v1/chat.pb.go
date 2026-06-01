@@ -82,7 +82,8 @@ type ConversationMessage struct {
 	// * Model used for generation
 	Model         string                 `protobuf:"bytes,4,opt,name=model,proto3" json:"model,omitempty"`
 	CodeSnapshot  string                 `protobuf:"bytes,5,opt,name=codeSnapshot,proto3" json:"codeSnapshot,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	ReferenceIds  []string               `protobuf:"bytes,6,rep,name=referenceIds,proto3" json:"referenceIds,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -152,6 +153,13 @@ func (x *ConversationMessage) GetCodeSnapshot() string {
 	return ""
 }
 
+func (x *ConversationMessage) GetReferenceIds() []string {
+	if x != nil {
+		return x.ReferenceIds
+	}
+	return nil
+}
+
 func (x *ConversationMessage) GetCreatedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.CreatedAt
@@ -163,15 +171,16 @@ var File_coasterai_core_v1_chat_proto protoreflect.FileDescriptor
 
 const file_coasterai_core_v1_chat_proto_rawDesc = "" +
 	"\n" +
-	"\x1ccoasterai/core/v1/chat.proto\x12\x11coasterai.core.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xf9\x01\n" +
+	"\x1ccoasterai/core/v1/chat.proto\x12\x11coasterai.core.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\x9d\x02\n" +
 	"\x13ConversationMessage\x127\n" +
 	"\x04role\x18\x01 \x01(\x0e2#.coasterai.core.v1.ConversationRoleR\x04role\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12\x1a\n" +
 	"\bassetIds\x18\x03 \x03(\tR\bassetIds\x12\x14\n" +
 	"\x05model\x18\x04 \x01(\tR\x05model\x12\"\n" +
-	"\fcodeSnapshot\x18\x05 \x01(\tR\fcodeSnapshot\x129\n" +
+	"\fcodeSnapshot\x18\x05 \x01(\tR\fcodeSnapshot\x12\"\n" +
+	"\freferenceIds\x18\x06 \x03(\tR\freferenceIds\x129\n" +
 	"\n" +
-	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt*\x8e\x01\n" +
+	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt*\x8e\x01\n" +
 	"\x10ConversationRole\x12!\n" +
 	"\x1dCONVERSATION_ROLE_UNSPECIFIED\x10\x00\x12\x1a\n" +
 	"\x16CONVERSATION_ROLE_USER\x10\x01\x12\x1f\n" +

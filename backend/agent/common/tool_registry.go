@@ -44,7 +44,7 @@ func (a *ToolRegistry) HandleAskQuestion(
 	}
 
 	session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
-		Role:    pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
+		Role:    pbcore.ConversationRole_CONVERSATION_ROLE_TOOL,
 		Message: question.Question_text,
 	})
 

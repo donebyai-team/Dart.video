@@ -169,7 +169,7 @@ func EditAnimationCode(ctx context.Context, resume types.EditAnimationCodeReques
 	}
 }
 
-func GenerateAnimation(ctx context.Context, resume types.GenerateAnimationCodeRequest, conversation_history []types.Message, opts ...CallOptionFunc) (types.Union2AskUserQuestionOrGenerateAnimationCodeResponse, error) {
+func GenerateAnimation(ctx context.Context, input types.GenerateAnimationCodeRequest, conversation_history []types.Message, opts ...CallOptionFunc) (types.Union2AskUserQuestionOrGenerateAnimationCodeResponse, error) {
 
 	var callOpts callOption
 	for _, opt := range opts {
@@ -185,7 +185,7 @@ func GenerateAnimation(ctx context.Context, resume types.GenerateAnimationCodeRe
 	}
 
 	args := baml.BamlFunctionArguments{
-		Kwargs: map[string]any{"resume": resume, "conversation_history": conversation_history},
+		Kwargs: map[string]any{"input": input, "conversation_history": conversation_history},
 		Env:    getEnvVars(callOpts.env),
 	}
 

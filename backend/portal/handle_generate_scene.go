@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/shank318/coasterai/agent/agenterrors"
 	"github.com/shank318/coasterai/agent/common"
 	"github.com/shank318/coasterai/services"
 	"strings"
@@ -55,6 +56,15 @@ func (p *Portal) GenerateOrEditScene(ctx context.Context, c *connect.Request[pbp
 		func(runCtx context.Context) (*common.RunResult, error) {
 			switch input := c.Msg.GetInput().(type) {
 			case *pbportal.GenerateOrEditSceneRequest_Request:
+
+				if len(input.Request.Assets) > 4 {
+					return nil, agenterrors.InvalidInput("too many assets, max 4 allowed", nil)
+				}
+
+				if len(input.Request.References) > 4 {
+					return nil, agenterrors.InvalidInput("too many references, max 4 allowed", nil)
+				}
+
 				if video.Metadata.GeneratedBranding.BrandIdentity != nil {
 					input.Request.BrandLibraryId = utils.Ptr(video.Metadata.GeneratedBranding.BrandIdentity.Id)
 				}
@@ -208,8 +218,52 @@ func (p *Portal) newAnimationGeneratorAgent(logger *zap.Logger, sessionID, slide
 		p.llmService,
 		p.authStateStore,
 		p.db,
+		p.mediaService,
 		logger,
 		p.brandIdentityService,
 		statePublisher,
 	), statePublisher
+}
+
+func (p *Portal) GetConversationHistory(ctx context.Context, c *connect.Request[pbportal.GetConversationHistoryRequest]) (*connect.Response[pbportal.GetConversationHistoryResponse], error) {
+	actor, err := p.gethAuthContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	videoID := strings.TrimSpace(c.Msg.VideoId)
+	if videoID == "" {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("video id is required"))
+	}
+
+	slideID := strings.TrimSpace(c.Msg.SlideId)
+	if slideID == "" {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("slide id is required"))
+	}
+
+	logger := logging.Logger(ctx, p.logger).With(
+		zap.String("video_id", videoID),
+		zap.String("organization_id", actor.OrganizationID),
+		zap.String("slide_id", slideID),
+	)
+
+	sessionID := fmt.Sprintf("%s:%s", videoID, slideID)
+	session := common.NewAgentSession(sessionID, agent.GenerateCodeSessionKeyPrefix, p.authStateStore, p.db, logger)
+	sessionContext, err := session.Get(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if sessionContext == nil {
+		return connect.NewResponse(&pbportal.GetConversationHistoryResponse{Messages: make([]*pbcore.ConversationMessage, 0)}), nil
+	}
+
+	conversation := make([]*pbcore.ConversationMessage, 0, len(sessionContext.ConversationHistory))
+	for _, message := range sessionContext.ConversationHistory {
+		if message.Role == pbcore.ConversationRole_CONVERSATION_ROLE_USER || message.Role == pbcore.ConversationRole_CONVERSATION_ROLE_TOOL {
+			conversation = append(conversation, message)
+		}
+	}
+
+	return connect.NewResponse(&pbportal.GetConversationHistoryResponse{Messages: conversation}), nil
 }

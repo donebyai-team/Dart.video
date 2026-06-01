@@ -21,6 +21,7 @@ message ConversationMessage {
   /** Model used for generation */
   string model = 4;
   string codeSnapshot = 5;
-  .google.protobuf.Timestamp created_at = 6;
+  repeated string referenceIds = 6;
+  .google.protobuf.Timestamp created_at = 7;
 }
 

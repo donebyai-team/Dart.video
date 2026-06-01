@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/shank318/coasterai/agent/agenterrors"
 	"github.com/shank318/coasterai/agent/common"
 	"github.com/shank318/coasterai/agent/llm"
@@ -36,7 +37,7 @@ type SceneGeneratorAgent interface {
 }
 
 type sceneGenerator struct {
-	sessionID            string
+	videoID              string
 	slideID              string
 	orgID                string
 	db                   datastore.Repository
@@ -53,7 +54,7 @@ type sceneGenerator struct {
 }
 
 func NewSceneGeneratorAgent(
-	sessionID string,
+	videoID string,
 	slideID string,
 	orgID string,
 	logger *zap.Logger,
@@ -63,10 +64,11 @@ func NewSceneGeneratorAgent(
 	brandIdentityService brand_identity.BrandIdentity,
 	state common.AgentStatusPublisher,
 ) SceneGeneratorAgent {
-	session := common.CreateNewSession(sessionID, generateOrEditAnimationSessionKeyPrefix, cache, db, logger)
+	sessionID := fmt.Sprintf("%s:%s", videoID, slideID)
+	session := common.NewAgentSession(sessionID, generateOrEditAnimationSessionKeyPrefix, cache, db, logger)
 	return &sceneGenerator{
 		fps:                  defaultFPS,
-		sessionID:            sessionID,
+		videoID:              videoID,
 		orgID:                orgID,
 		slideID:              slideID,
 		logger:               logger,
@@ -164,31 +166,31 @@ func (a *sceneGenerator) injectMediaAssets(ctx context.Context, input *pbportal.
 		}
 	}
 
-	if len(assetIDs) > 0 {
-		a.state.Publish(common.AgentState{
-			Thinking: "Analysing attachments..",
-			State:    common.StateStatusProcessing,
-		})
-		mediaAssets, err := a.db.GetMediaAssetsByID(ctx, assetIDs)
-		if err != nil {
-			return err
-		}
-		// Analyze image
-		for _, mediaAsset := range mediaAssets {
-			imageAnalysis, err := a.llmService.AnalyzeImage(ctx, mediaAsset)
-			if err != nil {
-				return err
-			}
-			mediaAsset.Description = imageAnalysis.Description
-			mediaAsset.Tags = strings.Join(imageAnalysis.Tags, ",")
-			note, ok := userNoteMap[mediaAsset.ID]
-			if ok {
-				mediaAsset.UserNote = note
-			}
-		}
-
-		registryBuilder.AddAssets(mediaAssets)
-	}
+	//if len(assetIDs) > 0 {
+	//	a.state.Publish(common.AgentState{
+	//		Thinking: "Analysing attachments..",
+	//		State:    common.StateStatusProcessing,
+	//	})
+	//	mediaAssets, err := a.db.GetMediaAssetsByID(ctx, assetIDs)
+	//	if err != nil {
+	//		return err
+	//	}
+	//	// Analyze image
+	//	for _, mediaAsset := range mediaAssets {
+	//		imageAnalysis, err := a.llmService.AnalyzeImage(ctx, mediaAsset)
+	//		if err != nil {
+	//			return err
+	//		}
+	//		mediaAsset.Description = imageAnalysis.Description
+	//		mediaAsset.Tags = strings.Join(imageAnalysis.Tags, ",")
+	//		note, ok := userNoteMap[mediaAsset.ID]
+	//		if ok {
+	//			mediaAsset.UserNote = note
+	//		}
+	//	}
+	//
+	//	registryBuilder.AddAssets(mediaAssets)
+	//}
 
 	a.assetRegistry = registryBuilder.Build()
 	return nil
@@ -231,12 +233,6 @@ func (l *sceneGenerator) GenerateScene(
 		}
 	}
 
-	// if there are assets and there is an ongoing conversation
-	// we want LLM to know that assets are updated and use the latest ones
-	if len(input.Assets) > 0 && len(session.ConversationHistory) > 0 {
-		input.Prompt += "\n\n" + assetUpdatedMessage
-	}
-
 	// Check if its a edit call and add previously scene
 	if slide.Content != nil && slide.Content.Edits != nil && len(slide.Content.Edits.Fields) > 0 {
 		sceneToEdit, err := scenes.EditsToScene(slide.Content.Edits, l.assetRegistry)
@@ -254,11 +250,17 @@ func (l *sceneGenerator) GenerateScene(
 		})
 	}
 
-	// Prompt always goes in the conversation
-	session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
+	newMessage := &pbcore.ConversationMessage{
 		Role:    pbcore.ConversationRole_CONVERSATION_ROLE_USER,
 		Message: input.Prompt,
-	})
+	}
+
+	for _, asset := range input.Assets {
+		newMessage.AssetIds = append(newMessage.AssetIds, asset.AssetID)
+	}
+
+	// Prompt always goes in the conversation
+	session.ConversationHistory = append(session.ConversationHistory, newMessage)
 
 	if err := l.session.Save(ctx, session); err != nil {
 		return nil, err
@@ -286,7 +288,7 @@ func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest ty
 		FieldsToSkip: nil,
 	})
 
-	history, err := l.session.ConvertToContextMessages(ctx, session.ConversationHistory)
+	history, err := l.session.ConvertToContextMessages(ctx, session.ConversationHistory, l.assetRegistry)
 	if err != nil {
 		return nil, err
 	}
