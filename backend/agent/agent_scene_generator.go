@@ -101,12 +101,6 @@ func (a *sceneGenerator) ContinueAgent(
 
 	generatePlanRequest := types.AddSceneRequest{}
 
-	// If the user has provided more assets or clarification, update the attachments
-	if options.SelectedMediaAssets != nil && len(options.SelectedMediaAssets) > 0 {
-		session.Request.Assets = append(session.Request.Assets, options.SelectedMediaAssets...)
-		userResponse += "\n\n" + assetUpdatedMessage
-	}
-
 	err = a.injectMediaAssets(ctx, session.Request)
 	if err != nil {
 		return nil, err
@@ -121,10 +115,16 @@ func (a *sceneGenerator) ContinueAgent(
 		}
 	}
 
-	session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
+	newMessage := &pbcore.ConversationMessage{
 		Role:    pbcore.ConversationRole_CONVERSATION_ROLE_USER,
 		Message: userResponse,
-	})
+	}
+	
+	for _, asset := range options.SelectedMediaAssets {
+		newMessage.AssetIds = append(newMessage.AssetIds, asset.AssetID)
+	}
+
+	session.ConversationHistory = append(session.ConversationHistory, newMessage)
 
 	if err := a.session.Save(ctx, session); err != nil {
 		return nil, err

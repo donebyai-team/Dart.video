@@ -49,10 +49,9 @@ type ContinueSessionOptions struct {
 }
 
 const (
-	sessionKeyPrefix           = "video_generation:session"
-	defaultFPS                 = 30
-	assetUpdatedMessage string = "<attachments> list has been updated. Newly added or updated attachments appear at the bottom."
-	generating                 = "Generating..."
+	sessionKeyPrefix = "video_generation:session"
+	defaultFPS       = 30
+	generating       = "Generating..."
 )
 
 type agentV2 struct {
@@ -125,12 +124,6 @@ func (a *agentV2) Continue(ctx context.Context, options ContinueSessionOptions) 
 		Questions:  session.Request.Questions,
 	}
 
-	// If the user has provided more assets or clarification, update the attachments
-	if options.SelectedMediaAssets != nil && len(options.SelectedMediaAssets) > 0 {
-		session.Request.Assets = append(session.Request.Assets, options.SelectedMediaAssets...)
-		userResponse += "\n\n" + assetUpdatedMessage
-	}
-
 	err = a.injectMediaAssets(ctx, session.Request)
 	if err != nil {
 		return nil, err
@@ -144,10 +137,15 @@ func (a *agentV2) Continue(ctx context.Context, options ContinueSessionOptions) 
 		}
 	}
 
-	session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
-		Role:    pbcore.ConversationRole_CONVERSATION_ROLE_TOOL,
+	newMessage := &pbcore.ConversationMessage{
+		Role:    pbcore.ConversationRole_CONVERSATION_ROLE_USER,
 		Message: userResponse,
-	})
+	}
+	for _, asset := range options.SelectedMediaAssets {
+		newMessage.AssetIds = append(newMessage.AssetIds, asset.AssetID)
+	}
+
+	session.ConversationHistory = append(session.ConversationHistory, newMessage)
 
 	if err := a.session.Save(ctx, session); err != nil {
 		return nil, err
