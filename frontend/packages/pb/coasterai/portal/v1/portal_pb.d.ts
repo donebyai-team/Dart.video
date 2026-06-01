@@ -7,6 +7,7 @@ import type { Message } from "@bufbuild/protobuf";
 import type { MediaAsset, MediaType, SelectedMediaAsset } from "../../core/v1/media_asset_pb";
 import type { Section, Slide } from "../../core/v1/slide_pb";
 import type { ConversationMessage } from "../../core/v1/chat_pb";
+import type { AnimationCategory } from "../../core/v1/template_pb";
 import type { BrandIdentity, BrandIdentitySchema } from "../../core/v1/brandkit_pb";
 import type { FigmaFrame, FigmaPage } from "../../core/v1/figma_pb";
 import type { Resolution, Script, StyleType, Video, VideoConfig, VideoLanguage, VideoMetadata } from "../../core/v1/video_pb";
@@ -194,6 +195,11 @@ export declare type SuggestScenesRequest = Message<"coasterai.portal.v1.SuggestS
    * @generated from field: string sceneId = 2;
    */
   sceneId: string;
+
+  /**
+   * @generated from field: coasterai.core.v1.AnimationCategory category = 3;
+   */
+  category: AnimationCategory;
 };
 
 /**

@@ -1,13 +1,19 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { Layers3, Pause, Play, X } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Pause, Play, X } from 'lucide-react'
 import { useClientsContext } from '@coasterai/ui-core/context/ClientContext'
 import { PatchOverlay } from '@coasterai/renderer'
+import { ConversationRole, type ConversationMessage } from '@coasterai/pb/coasterai/core/v1/chat_pb'
 import { Section, SlideStatus, type Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { AnimationCategory } from '@coasterai/pb/coasterai/core/v1/template_pb'
 import { Button } from '@/components/ui/button'
-import SlideThumbnail from '@/components/editor/SlideThumbnail'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useVideoStore } from '@/stores/video'
 import { getConnectError } from '@/utils/error'
 import toast from 'react-hot-toast'
+import BrowseTab from './reimagine/BrowseTab'
+import ChatTab from './reimagine/ChatTab'
+import { categories } from './reimagine/constants'
+import type { CategoryItem } from './reimagine/types'
 
 const sceneSuggestionsCache = new Map<string, Section[]>()
 
@@ -37,9 +43,17 @@ const ReimagineSettings = ({
 
   const targetSlideIdRef = useRef(selectedSlide?.id ?? '')
   const insertedSlideIdsRef = useRef<string[]>([])
-  const [scenes, setScenes] = useState<Section[]>([])
-  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(0)
-  const [isLoading, setIsLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState<'browse' | 'generate'>('browse')
+  const [defaultScenes, setDefaultScenes] = useState<Section[]>([])
+  const [categoryScenes, setCategoryScenes] = useState<Section[]>([])
+  const [selectedDefaultSuggestionIndex, setSelectedDefaultSuggestionIndex] = useState(0)
+  const [selectedCategorySuggestionIndex, setSelectedCategorySuggestionIndex] = useState(0)
+  const [selectedCategory, setSelectedCategory] = useState<CategoryItem | null>(null)
+  const [activeSuggestionSource, setActiveSuggestionSource] = useState<'default' | 'category'>('default')
+  const [isDefaultLoading, setIsDefaultLoading] = useState(true)
+  const [isCategoryLoading, setIsCategoryLoading] = useState(false)
+  const [chatMessages, setChatMessages] = useState<ConversationMessage[]>([])
+  const [isChatLoading, setIsChatLoading] = useState(false)
 
   const targetSectionId = useMemo(() => {
     const targetSlideId = targetSlideIdRef.current
@@ -54,7 +68,7 @@ const ReimagineSettings = ({
     return null
   }, [videoConfig])
 
-  const applySuggestion = (suggestion: Section, suggestionIndex: number) => {
+  const applySuggestion = useCallback((suggestion: Section, suggestionIndex: number, source: 'default' | 'category') => {
     const slides = suggestion.slides
     const firstSlide = slides[0]
     const targetSlideId = targetSlideIdRef.current
@@ -109,62 +123,124 @@ const ReimagineSettings = ({
 
     insertedSlideIdsRef.current = nextInsertedSlideIds
     setSelectedSlideById(targetSlideId)
-    setSelectedSuggestionIndex(suggestionIndex)
-  }
+    setActiveSuggestionSource(source)
+
+    if (source === 'category') {
+      setSelectedCategorySuggestionIndex(suggestionIndex)
+      return
+    }
+
+    setSelectedDefaultSuggestionIndex(suggestionIndex)
+  }, [addSlide, removeSlide, setOverlay, setSelectedSlideById, targetSectionId, updateSlideById, videoConfig])
+
+  const loadSuggestions = useCallback(async (category: AnimationCategory, options?: { silent?: boolean }) => {
+    const targetSlideId = targetSlideIdRef.current
+    const cacheKey = `${targetSlideId}:${category}`
+    const isCategoryRequest = category !== AnimationCategory.UNSPECIFIED
+
+    const setLoadingState = isCategoryRequest ? setIsCategoryLoading : setIsDefaultLoading
+    const setScenesState = isCategoryRequest ? setCategoryScenes : setDefaultScenes
+
+    if (!videoId || !targetSlideId) {
+      setScenesState([])
+      setLoadingState(false)
+      return
+    }
+
+    const cachedScenes = sceneSuggestionsCache.get(cacheKey)
+    if (cachedScenes) {
+      setScenesState(cachedScenes)
+      setLoadingState(false)
+      return
+    }
+
+    if (!options?.silent) {
+      setLoadingState(true)
+    }
+
+    try {
+      const response = await portalClient.suggestScenes({
+        videoId,
+        sceneId: targetSlideId,
+        category,
+      })
+
+      const suggestionSections = (response.groups ?? []).filter(section => section.slides.length > 0)
+
+      sceneSuggestionsCache.set(cacheKey, suggestionSections)
+      setScenesState(suggestionSections)
+    } catch (err: any) {
+      setScenesState([])
+      toast.error(getConnectError(err))
+    } finally {
+      setLoadingState(false)
+    }
+  }, [portalClient, videoId])
 
   useEffect(() => {
     let cancelled = false
 
-    const loadSuggestions = async () => {
-      const targetSlideId = targetSlideIdRef.current
-      if (!videoId || !targetSlideId) {
-        setScenes([])
-        setIsLoading(false)
-        return
-      }
+    const loadDefaultSuggestions = async () => {
+      setIsDefaultLoading(true)
 
-      const cachedScenes = sceneSuggestionsCache.get(targetSlideId)
-      if (cachedScenes) {
-        setScenes(cachedScenes)
-        setSelectedSuggestionIndex(0)
-        setIsLoading(false)
-        return
-      }
+      await loadSuggestions(AnimationCategory.UNSPECIFIED)
 
-      try {
-        setIsLoading(true)
-        const response = await portalClient.suggestScenes({
-          videoId,
-          sceneId: targetSlideId,
-        })
-
-        if (!cancelled) {
-          const suggestionSections = (response.groups ?? []).filter(section => section.slides.length > 0)
-
-          sceneSuggestionsCache.set(targetSlideId, suggestionSections)
-          setScenes(suggestionSections)
-          setSelectedSuggestionIndex(0)
-        }
-      } catch (err: any) {
-        if (!cancelled) {
-          setScenes([])
-          toast.error(getConnectError(err))
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false)
-        }
+      if (!cancelled) {
+        setSelectedDefaultSuggestionIndex(0)
       }
     }
 
-    void loadSuggestions()
+    void loadDefaultSuggestions()
 
     return () => {
       cancelled = true
     }
+  }, [loadSuggestions])
+
+  const handleSelectCategory = useCallback((category: CategoryItem) => {
+    setSelectedCategory(category)
+    setActiveSuggestionSource('category')
+    setSelectedCategorySuggestionIndex(0)
+    void loadSuggestions(category.value)
+  }, [loadSuggestions])
+
+  const loadConversationHistory = useCallback(async () => {
+    const slideId = targetSlideIdRef.current
+    if (!videoId || !slideId) {
+      setChatMessages([])
+      setIsChatLoading(false)
+      return
+    }
+
+    try {
+      setIsChatLoading(true)
+      const response = await portalClient.getConversationHistory({
+        videoId,
+        slideId,
+      })
+
+      setChatMessages(
+        (response.messages ?? []).filter(message =>
+          message.role === ConversationRole.USER || message.role === ConversationRole.ASSISTANT
+        )
+      )
+    } catch (err: any) {
+      setChatMessages([])
+      toast.error(getConnectError(err))
+    } finally {
+      setIsChatLoading(false)
+    }
   }, [portalClient, videoId])
 
-  const selectedSuggestion = scenes[selectedSuggestionIndex]
+  useEffect(() => {
+    if (activeTab !== 'generate') return
+    void loadConversationHistory()
+  }, [activeTab, loadConversationHistory])
+
+  const selectedSuggestion =
+    activeSuggestionSource === 'category' && selectedCategory
+      ? categoryScenes[selectedCategorySuggestionIndex] ?? defaultScenes[selectedDefaultSuggestionIndex]
+      : defaultScenes[selectedDefaultSuggestionIndex]
 
   const handlePreview = () => {
     if (isPreviewPlaying) {
@@ -175,7 +251,11 @@ const ReimagineSettings = ({
     if (!selectedSuggestion) return
 
     // Preview always reflects the currently highlighted suggestion, even before an explicit apply click.
-    applySuggestion(selectedSuggestion, selectedSuggestionIndex)
+    applySuggestion(
+      selectedSuggestion,
+      activeSuggestionSource === 'category' ? selectedCategorySuggestionIndex : selectedDefaultSuggestionIndex,
+      activeSuggestionSource
+    )
 
     const slides = selectedSuggestion.slides
     const firstSlideId = targetSlideIdRef.current
@@ -195,58 +275,46 @@ const ReimagineSettings = ({
   return (
     <div className='h-full flex flex-col bg-card'>
       <div className='flex items-center justify-between px-5 border-b border-border'>
-        <h3 className='font-semibold text-sm tracking-tight'>AI Suggestions</h3>
+        <h3 className='font-semibold text-sm tracking-tight'>Reimagine</h3>
         <Button variant='ghost' size='icon' onClick={onClose}>
           <X className='w-4 h-4' />
         </Button>
       </div>
 
-      <div className='flex-1 overflow-y-auto px-5 py-6'>
-        {isLoading ? (
-          <div className='flex h-full min-h-48 flex-col items-center justify-center gap-3 text-sm text-muted-foreground'>
-            <div className='h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent' />
-            <p>Generating scene suggestions...</p>
-          </div>
-        ) : scenes.length === 0 ? (
-          <div className='flex h-full min-h-48 items-center justify-center text-sm text-muted-foreground'>
-            No suggestions available.
-          </div>
-        ) : (
-          <div className='grid grid-cols-2 gap-4'>
-            {scenes.map((suggestion, index) => {
-              const previewSlide = suggestion.slides[0]
-              if (!previewSlide) return null
+      <div className='flex-1 overflow-y-auto px-5 py-6 pb-36'>
+        <Tabs value={activeTab} onValueChange={value => setActiveTab(value as 'browse' | 'generate')} className='h-full'>
+          <TabsList className='grid w-full grid-cols-2'>
+            <TabsTrigger value='browse'>Browse</TabsTrigger>
+            <TabsTrigger value='generate'>Generate New</TabsTrigger>
+          </TabsList>
 
-              return (
-              <button
-                key={`${suggestion.id || previewSlide.id || 'suggested-slide'}-${index}`}
-                type='button'
-                onClick={() => applySuggestion(suggestion, index)}
-                className={`overflow-hidden rounded-lg border bg-muted/20 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-primary/40 ${
-                  selectedSuggestionIndex === index ? 'border-primary' : 'border-border hover:border-primary'
-                }`}
-              >
-                <div
-                  className='relative overflow-hidden'
-                  style={resolution ? { aspectRatio: `${resolution.width} / ${resolution.height}` } : undefined}
-                >
-                  <SlideThumbnail slide={previewSlide} index={index} resolution={resolution} fps={fps} />
-                  {suggestion.slides.length > 1 && (
-                    <div className='absolute bottom-0 right-0 inline-flex items-center gap-0.5 bg-background/45 px-1 py-0.5 text-[10px] font-medium text-foreground backdrop-blur-sm'>
-                      <Layers3 className='h-3 w-3' />
-                      <span>{suggestion.slides.length}</span>
-                    </div>
-                  )}
-                </div>
-              </button>
-              )
-            })}
-          </div>
-        )}
+          <TabsContent value='browse' className='mt-4'>
+            <BrowseTab
+              aiSuggestions={defaultScenes}
+              aiSelectedIndex={selectedDefaultSuggestionIndex}
+              isAiLoading={isDefaultLoading}
+              onSelectAiSuggestion={(suggestion, index) => applySuggestion(suggestion, index, 'default')}
+              categories={categories}
+              selectedCategory={selectedCategory}
+              onSelectCategory={handleSelectCategory}
+              onGenerateNew={() => setActiveTab('generate')}
+              categorySuggestions={categoryScenes}
+              categorySelectedIndex={selectedCategorySuggestionIndex}
+              isCategoryLoading={isCategoryLoading}
+              onSelectCategorySuggestion={(suggestion, index) => applySuggestion(suggestion, index, 'category')}
+              resolution={resolution}
+              fps={fps}
+            />
+          </TabsContent>
+
+          <TabsContent value='generate' className='mt-4'>
+            <ChatTab messages={chatMessages} isLoading={isChatLoading} />
+          </TabsContent>
+        </Tabs>
       </div>
 
       {onPreviewTemplate && (
-        <div className='border-t border-border px-5 py-4 mt-auto'>
+        <div className='border-t border-border px-5 py-4 mt-4'>
           <Button variant='default' size='sm' className='w-full gap-2' onClick={handlePreview} disabled={!selectedSuggestion}>
             {isPreviewPlaying ? <Pause className='w-3.5 h-3.5' /> : <Play className='w-3.5 h-3.5' />}
             {isPreviewPlaying ? 'Stop Preview' : 'Preview'}

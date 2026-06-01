@@ -102,6 +102,7 @@ message GenerateOrEditSceneResponse {
 message SuggestScenesRequest {
   string videoId = 1;
   string sceneId = 2;
+  core.v1.AnimationCategory category = 3;
 }
 
 message SuggestScenesResponse {

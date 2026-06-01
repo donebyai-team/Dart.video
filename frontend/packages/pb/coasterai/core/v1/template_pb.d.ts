@@ -2,7 +2,7 @@
 // @generated from file coasterai/core/v1/template.proto (package coasterai.core.v1, syntax proto3)
 /* eslint-disable */
 
-import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv1";
+import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv1";
 import type { JsonObject, Message } from "@bufbuild/protobuf";
 import type { AnimationSlidePlan, CodeRegistry } from "./slide_pb";
 
@@ -63,4 +63,39 @@ export declare type AnimationTemplate = Message<"coasterai.core.v1.AnimationTemp
  * Use `create(AnimationTemplateSchema)` to create a new message.
  */
 export declare const AnimationTemplateSchema: GenMessage<AnimationTemplate>;
+
+/**
+ * @generated from enum coasterai.core.v1.AnimationCategory
+ */
+export enum AnimationCategory {
+  /**
+   * @generated from enum value: ANIMATION_CATEGORY_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: ANIMATION_CATEGORY_TEXT = 1;
+   */
+  TEXT = 1,
+
+  /**
+   * @generated from enum value: ANIMATION_CATEGORY_INTRO = 2;
+   */
+  INTRO = 2,
+
+  /**
+   * @generated from enum value: ANIMATION_CATEGORY_VISUALS = 3;
+   */
+  VISUALS = 3,
+
+  /**
+   * @generated from enum value: ANIMATION_CATEGORY_CONTENT = 4;
+   */
+  CONTENT = 4,
+}
+
+/**
+ * Describes the enum coasterai.core.v1.AnimationCategory.
+ */
+export declare const AnimationCategorySchema: GenEnum<AnimationCategory>;
 

@@ -261,6 +261,10 @@ func (p *Portal) GetConversationHistory(ctx context.Context, c *connect.Request[
 	conversation := make([]*pbcore.ConversationMessage, 0, len(sessionContext.ConversationHistory))
 	for _, message := range sessionContext.ConversationHistory {
 		if message.Role == pbcore.ConversationRole_CONVERSATION_ROLE_USER || message.Role == pbcore.ConversationRole_CONVERSATION_ROLE_TOOL {
+
+			if message.Role == pbcore.ConversationRole_CONVERSATION_ROLE_TOOL {
+				message.Role = pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT
+			}
 			conversation = append(conversation, message)
 		}
 	}

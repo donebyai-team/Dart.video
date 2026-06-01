@@ -23,6 +23,61 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type AnimationCategory int32
+
+const (
+	AnimationCategory_ANIMATION_CATEGORY_UNSPECIFIED AnimationCategory = 0
+	AnimationCategory_ANIMATION_CATEGORY_TEXT        AnimationCategory = 1
+	AnimationCategory_ANIMATION_CATEGORY_INTRO       AnimationCategory = 2
+	AnimationCategory_ANIMATION_CATEGORY_VISUALS     AnimationCategory = 3
+	AnimationCategory_ANIMATION_CATEGORY_CONTENT     AnimationCategory = 4
+)
+
+// Enum value maps for AnimationCategory.
+var (
+	AnimationCategory_name = map[int32]string{
+		0: "ANIMATION_CATEGORY_UNSPECIFIED",
+		1: "ANIMATION_CATEGORY_TEXT",
+		2: "ANIMATION_CATEGORY_INTRO",
+		3: "ANIMATION_CATEGORY_VISUALS",
+		4: "ANIMATION_CATEGORY_CONTENT",
+	}
+	AnimationCategory_value = map[string]int32{
+		"ANIMATION_CATEGORY_UNSPECIFIED": 0,
+		"ANIMATION_CATEGORY_TEXT":        1,
+		"ANIMATION_CATEGORY_INTRO":       2,
+		"ANIMATION_CATEGORY_VISUALS":     3,
+		"ANIMATION_CATEGORY_CONTENT":     4,
+	}
+)
+
+func (x AnimationCategory) Enum() *AnimationCategory {
+	p := new(AnimationCategory)
+	*p = x
+	return p
+}
+
+func (x AnimationCategory) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (AnimationCategory) Descriptor() protoreflect.EnumDescriptor {
+	return file_coasterai_core_v1_template_proto_enumTypes[0].Descriptor()
+}
+
+func (AnimationCategory) Type() protoreflect.EnumType {
+	return &file_coasterai_core_v1_template_proto_enumTypes[0]
+}
+
+func (x AnimationCategory) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use AnimationCategory.Descriptor instead.
+func (AnimationCategory) EnumDescriptor() ([]byte, []int) {
+	return file_coasterai_core_v1_template_proto_rawDescGZIP(), []int{0}
+}
+
 type AnimationTemplate struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -138,7 +193,13 @@ const file_coasterai_core_v1_template_proto_rawDesc = "" +
 	"\bregistry\x18\x05 \x01(\v2\x17.google.protobuf.StructR\bregistry\x12-\n" +
 	"\x05edits\x18\x06 \x01(\v2\x17.google.protobuf.StructR\x05edits\x129\n" +
 	"\x04plan\x18\a \x01(\v2%.coasterai.core.v1.AnimationSlidePlanR\x04plan\x12\x1a\n" +
-	"\bduration\x18\b \x01(\x02R\bdurationB;Z9github.com/shank318/coasterai/pb/coasterai/core/v1;pbcoreb\x06proto3"
+	"\bduration\x18\b \x01(\x02R\bduration*\xb2\x01\n" +
+	"\x11AnimationCategory\x12\"\n" +
+	"\x1eANIMATION_CATEGORY_UNSPECIFIED\x10\x00\x12\x1b\n" +
+	"\x17ANIMATION_CATEGORY_TEXT\x10\x01\x12\x1c\n" +
+	"\x18ANIMATION_CATEGORY_INTRO\x10\x02\x12\x1e\n" +
+	"\x1aANIMATION_CATEGORY_VISUALS\x10\x03\x12\x1e\n" +
+	"\x1aANIMATION_CATEGORY_CONTENT\x10\x04B;Z9github.com/shank318/coasterai/pb/coasterai/core/v1;pbcoreb\x06proto3"
 
 var (
 	file_coasterai_core_v1_template_proto_rawDescOnce sync.Once
@@ -152,18 +213,20 @@ func file_coasterai_core_v1_template_proto_rawDescGZIP() []byte {
 	return file_coasterai_core_v1_template_proto_rawDescData
 }
 
+var file_coasterai_core_v1_template_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_coasterai_core_v1_template_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
 var file_coasterai_core_v1_template_proto_goTypes = []any{
-	(*AnimationTemplate)(nil),  // 0: coasterai.core.v1.AnimationTemplate
-	(*CodeRegistry)(nil),       // 1: coasterai.core.v1.CodeRegistry
-	(*structpb.Struct)(nil),    // 2: google.protobuf.Struct
-	(*AnimationSlidePlan)(nil), // 3: coasterai.core.v1.AnimationSlidePlan
+	(AnimationCategory)(0),     // 0: coasterai.core.v1.AnimationCategory
+	(*AnimationTemplate)(nil),  // 1: coasterai.core.v1.AnimationTemplate
+	(*CodeRegistry)(nil),       // 2: coasterai.core.v1.CodeRegistry
+	(*structpb.Struct)(nil),    // 3: google.protobuf.Struct
+	(*AnimationSlidePlan)(nil), // 4: coasterai.core.v1.AnimationSlidePlan
 }
 var file_coasterai_core_v1_template_proto_depIdxs = []int32{
-	1, // 0: coasterai.core.v1.AnimationTemplate.codeRegistry:type_name -> coasterai.core.v1.CodeRegistry
-	2, // 1: coasterai.core.v1.AnimationTemplate.registry:type_name -> google.protobuf.Struct
-	2, // 2: coasterai.core.v1.AnimationTemplate.edits:type_name -> google.protobuf.Struct
-	3, // 3: coasterai.core.v1.AnimationTemplate.plan:type_name -> coasterai.core.v1.AnimationSlidePlan
+	2, // 0: coasterai.core.v1.AnimationTemplate.codeRegistry:type_name -> coasterai.core.v1.CodeRegistry
+	3, // 1: coasterai.core.v1.AnimationTemplate.registry:type_name -> google.protobuf.Struct
+	3, // 2: coasterai.core.v1.AnimationTemplate.edits:type_name -> google.protobuf.Struct
+	4, // 3: coasterai.core.v1.AnimationTemplate.plan:type_name -> coasterai.core.v1.AnimationSlidePlan
 	4, // [4:4] is the sub-list for method output_type
 	4, // [4:4] is the sub-list for method input_type
 	4, // [4:4] is the sub-list for extension type_name
@@ -182,13 +245,14 @@ func file_coasterai_core_v1_template_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_coasterai_core_v1_template_proto_rawDesc), len(file_coasterai_core_v1_template_proto_rawDesc)),
-			NumEnums:      0,
+			NumEnums:      1,
 			NumMessages:   1,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
 		GoTypes:           file_coasterai_core_v1_template_proto_goTypes,
 		DependencyIndexes: file_coasterai_core_v1_template_proto_depIdxs,
+		EnumInfos:         file_coasterai_core_v1_template_proto_enumTypes,
 		MessageInfos:      file_coasterai_core_v1_template_proto_msgTypes,
 	}.Build()
 	File_coasterai_core_v1_template_proto = out.File
