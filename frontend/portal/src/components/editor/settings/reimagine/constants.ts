@@ -1,30 +1,43 @@
-import { CaseUpper, Clapperboard, Sparkles, Type } from 'lucide-react'
 import { AnimationCategory } from '@coasterai/pb/coasterai/core/v1/template_pb'
 import type { CategoryItem } from './types'
+import {
+  Type,
+  Film,
+  Video,
+  MousePointerClick,
+  Share2,
+  Rocket,
+} from 'lucide-react';
 
 export const categories: CategoryItem[] = [
   {
     value: AnimationCategory.TEXT,
     label: 'Text',
-    description: 'Headline-driven motion',
     icon: Type,
   },
   {
     value: AnimationCategory.INTRO,
     label: 'Intro',
-    description: 'Openers and reveals',
-    icon: Sparkles,
+    icon: Rocket,
   },
   {
     value: AnimationCategory.VISUALS,
     label: 'Visuals',
-    description: 'Graphic and media-first',
-    icon: Clapperboard,
+    icon: Film,
   },
   {
-    value: AnimationCategory.CONTENT,
-    label: 'Content',
-    description: 'Structured information',
-    icon: CaseUpper,
+    value: AnimationCategory.MEDIA,
+    label: 'Media',
+    icon: Video,
   },
-]
+  {
+    value: AnimationCategory.CTA,
+    label: 'CTA',
+    icon: MousePointerClick,
+  },
+  {
+    value: AnimationCategory.SOCIAL,
+    label: 'Social',
+    icon: Share2,
+  },
+];

@@ -168,15 +168,21 @@ func (l *codeGenerator) GenerateCodeFromScene(ctx context.Context, scene *scenes
 		return nil, agenterrors.AnimationGenerationFailed("failed to generate animation", err)
 	}
 
-	return &models.Template{
+	template := &models.Template{
 		ID: uuid.New().String(),
 		Config: &models.TemplateConfig{
 			CodeRegistry: &pbcore.CodeRegistry{
 				Code: generatedAnimation,
 			},
 		},
-		Repeatable: false,
-	}, nil
+		GeneratedPatches: scene.ToEditsPatch(),
+		Repeatable:       false,
+	}
+
+	template.Config.VisibleDurationInFrames = scene.ComputeDurationFrames()
+	template.Config.TotalDurationInFrames = template.Config.VisibleDurationInFrames
+
+	return template, nil
 }
 
 func (l *codeGenerator) GenerateCode(

@@ -1033,6 +1033,7 @@ func (c ScriptItem) BamlTypeName() string {
 type SuggestScenesRequest struct {
 	VideoBranding *VideoBranding `json:"VideoBranding"`
 	ComponentList *string        `json:"ComponentList"`
+	Category      *string        `json:"Category"`
 	Before        *string        `json:"before"`
 	Current       *string        `json:"current"`
 	After         *string        `json:"after"`
@@ -1058,6 +1059,9 @@ func (c *SuggestScenesRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.
 		case "ComponentList":
 			c.ComponentList = baml.Decode(valueHolder).Interface().(*string)
 
+		case "Category":
+			c.Category = baml.Decode(valueHolder).Interface().(*string)
+
 		case "before":
 			c.Before = baml.Decode(valueHolder).Interface().(*string)
 
@@ -1082,6 +1086,8 @@ func (c SuggestScenesRequest) Encode() (*cffi.HostValue, error) {
 	fields["VideoBranding"] = c.VideoBranding
 
 	fields["ComponentList"] = c.ComponentList
+
+	fields["Category"] = c.Category
 
 	fields["before"] = c.Before
 

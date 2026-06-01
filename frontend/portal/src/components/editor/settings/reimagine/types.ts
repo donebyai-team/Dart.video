@@ -5,7 +5,6 @@ import type { LucideIcon } from 'lucide-react'
 export interface CategoryItem {
   value: AnimationCategory
   label: string
-  description: string
   icon: LucideIcon
 }
 

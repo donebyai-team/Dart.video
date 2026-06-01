@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import type { Section } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import type { CategoryItem } from './types'
 import CategoryGrid from './CategoryGrid'
@@ -39,12 +40,22 @@ export default function BrowseTab({
   resolution,
   fps,
 }: BrowseTabProps) {
+  const categorySuggestionsRef = useRef<HTMLElement | null>(null)
+
+  useEffect(() => {
+    if (!selectedCategory) return
+
+    categorySuggestionsRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    })
+  }, [selectedCategory])
+
   return (
     <div className='space-y-6'>
       <section className='space-y-3'>
         <div className='space-y-1'>
           <h4 className='text-sm font-semibold tracking-tight text-foreground'>AI Suggestions</h4>
-          <p className='text-xs text-muted-foreground'>Start with a few curated scene directions for this slide.</p>
         </div>
 
         <SuggestionGrid
@@ -61,7 +72,7 @@ export default function BrowseTab({
 
       <section className='space-y-3'>
         <div className='space-y-1'>
-          <h4 className='text-sm font-semibold tracking-tight text-foreground'>Browse Categories</h4>
+          <h4 className='text-sm font-semibold tracking-tight text-foreground'>Categories</h4>
         </div>
 
         <CategoryGrid
@@ -73,7 +84,10 @@ export default function BrowseTab({
       </section>
 
       {selectedCategory && (
-        <section className='space-y-3'>
+        <section
+          ref={categorySuggestionsRef}
+          className='space-y-3'
+        >
           {/* <div className='space-y-1'>
             <h4 className='text-sm font-semibold tracking-tight text-foreground'>{selectedCategory.label} Suggestions</h4>
           </div> */}

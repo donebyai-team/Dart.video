@@ -30,7 +30,9 @@ const (
 	AnimationCategory_ANIMATION_CATEGORY_TEXT        AnimationCategory = 1
 	AnimationCategory_ANIMATION_CATEGORY_INTRO       AnimationCategory = 2
 	AnimationCategory_ANIMATION_CATEGORY_VISUALS     AnimationCategory = 3
-	AnimationCategory_ANIMATION_CATEGORY_CONTENT     AnimationCategory = 4
+	AnimationCategory_ANIMATION_CATEGORY_MEDIA       AnimationCategory = 4
+	AnimationCategory_ANIMATION_CATEGORY_SOCIAL      AnimationCategory = 5
+	AnimationCategory_ANIMATION_CATEGORY_CTA         AnimationCategory = 6
 )
 
 // Enum value maps for AnimationCategory.
@@ -40,14 +42,18 @@ var (
 		1: "ANIMATION_CATEGORY_TEXT",
 		2: "ANIMATION_CATEGORY_INTRO",
 		3: "ANIMATION_CATEGORY_VISUALS",
-		4: "ANIMATION_CATEGORY_CONTENT",
+		4: "ANIMATION_CATEGORY_MEDIA",
+		5: "ANIMATION_CATEGORY_SOCIAL",
+		6: "ANIMATION_CATEGORY_CTA",
 	}
 	AnimationCategory_value = map[string]int32{
 		"ANIMATION_CATEGORY_UNSPECIFIED": 0,
 		"ANIMATION_CATEGORY_TEXT":        1,
 		"ANIMATION_CATEGORY_INTRO":       2,
 		"ANIMATION_CATEGORY_VISUALS":     3,
-		"ANIMATION_CATEGORY_CONTENT":     4,
+		"ANIMATION_CATEGORY_MEDIA":       4,
+		"ANIMATION_CATEGORY_SOCIAL":      5,
+		"ANIMATION_CATEGORY_CTA":         6,
 	}
 )
 
@@ -193,13 +199,15 @@ const file_coasterai_core_v1_template_proto_rawDesc = "" +
 	"\bregistry\x18\x05 \x01(\v2\x17.google.protobuf.StructR\bregistry\x12-\n" +
 	"\x05edits\x18\x06 \x01(\v2\x17.google.protobuf.StructR\x05edits\x129\n" +
 	"\x04plan\x18\a \x01(\v2%.coasterai.core.v1.AnimationSlidePlanR\x04plan\x12\x1a\n" +
-	"\bduration\x18\b \x01(\x02R\bduration*\xb2\x01\n" +
+	"\bduration\x18\b \x01(\x02R\bduration*\xeb\x01\n" +
 	"\x11AnimationCategory\x12\"\n" +
 	"\x1eANIMATION_CATEGORY_UNSPECIFIED\x10\x00\x12\x1b\n" +
 	"\x17ANIMATION_CATEGORY_TEXT\x10\x01\x12\x1c\n" +
 	"\x18ANIMATION_CATEGORY_INTRO\x10\x02\x12\x1e\n" +
-	"\x1aANIMATION_CATEGORY_VISUALS\x10\x03\x12\x1e\n" +
-	"\x1aANIMATION_CATEGORY_CONTENT\x10\x04B;Z9github.com/shank318/coasterai/pb/coasterai/core/v1;pbcoreb\x06proto3"
+	"\x1aANIMATION_CATEGORY_VISUALS\x10\x03\x12\x1c\n" +
+	"\x18ANIMATION_CATEGORY_MEDIA\x10\x04\x12\x1d\n" +
+	"\x19ANIMATION_CATEGORY_SOCIAL\x10\x05\x12\x1a\n" +
+	"\x16ANIMATION_CATEGORY_CTA\x10\x06B;Z9github.com/shank318/coasterai/pb/coasterai/core/v1;pbcoreb\x06proto3"
 
 var (
 	file_coasterai_core_v1_template_proto_rawDescOnce sync.Once

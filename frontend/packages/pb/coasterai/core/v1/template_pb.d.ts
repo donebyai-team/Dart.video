@@ -89,9 +89,19 @@ export enum AnimationCategory {
   VISUALS = 3,
 
   /**
-   * @generated from enum value: ANIMATION_CATEGORY_CONTENT = 4;
+   * @generated from enum value: ANIMATION_CATEGORY_MEDIA = 4;
    */
-  CONTENT = 4,
+  MEDIA = 4,
+
+  /**
+   * @generated from enum value: ANIMATION_CATEGORY_SOCIAL = 5;
+   */
+  SOCIAL = 5,
+
+  /**
+   * @generated from enum value: ANIMATION_CATEGORY_CTA = 6;
+   */
+  CTA = 6,
 }
 
 /**

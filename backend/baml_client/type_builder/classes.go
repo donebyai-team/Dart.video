@@ -791,6 +791,10 @@ func (t *SuggestScenesRequestClassView) PropertyComponentList() (ClassPropertyVi
 	return t.inner.Property("ComponentList")
 }
 
+func (t *SuggestScenesRequestClassView) PropertyCategory() (ClassPropertyView, error) {
+	return t.inner.Property("Category")
+}
+
 func (t *SuggestScenesRequestClassView) PropertyBefore() (ClassPropertyView, error) {
 	return t.inner.Property("before")
 }
