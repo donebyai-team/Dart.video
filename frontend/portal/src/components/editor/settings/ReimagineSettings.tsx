@@ -246,9 +246,23 @@ const ReimagineSettings = ({
         ? null
         : defaultScenes[selectedDefaultSuggestionIndex] ?? null
 
+  const canPreviewCurrentTab = isPreviewPlaying
+    || (activeTab === 'generate'
+      ? Boolean(targetSlideIdRef.current)
+      : Boolean(selectedSuggestion))
+
   const handlePreview = () => {
     if (isPreviewPlaying) {
       onPreviewTemplate?.()
+      return
+    }
+
+    if (activeTab === 'generate') {
+      const targetSlideId = targetSlideIdRef.current
+      if (!targetSlideId) return
+
+      setSelectedSlideById(targetSlideId)
+      onPreviewTemplate?.(targetSlideId)
       return
     }
 
@@ -334,7 +348,7 @@ const ReimagineSettings = ({
             size='sm'
             className='w-full gap-2 h-8 text-sm'
             onClick={handlePreview}
-            disabled={!selectedSuggestion}
+            disabled={!canPreviewCurrentTab}
           >
             {isPreviewPlaying ? (
               <Pause className='w-3.5 h-3.5' />
