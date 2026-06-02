@@ -94,12 +94,13 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
 
     ## AVAILABLE IMPORTS
 
-   - You may import any icon from `lucide-react`.
+   - You may import any icon from `lucide-react` if needed.
 
    {% raw %}
     \`\`\`tsx
     import { useCurrentFrame, useVideoConfig, interpolate, spring, Sequence } from "remotion";
     import { useState, useEffect } from "react";
+    import { Text } from './Text';
     export default function RemoteComponent() {
       return (
             // Code goes here
@@ -126,7 +127,7 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
     * If the prompt is ambiguous or visual details are unclear, ask for clarification using the **ask** tool. Do not assume missing creative direction.
     * Always return the **total number of frames** for the animation.
     * If `manualEdits` are provided in follow-up requests, always return the updated `manualEdits` along with the updated code.
-    * `manualEdits` reference elements by `elementId`. If a code change removes or renames an element so its ID no longer exists, remove the corresponding entry from `manualEdits`.
+    * `manualEdits` reference code and elements by `elementId`. If a code change removes or renames an element so its ID no longer exists, remove the corresponding entry from `manualEdits`.
 
    {{ BrandGuidelines(input.VideoBranding) }}
 

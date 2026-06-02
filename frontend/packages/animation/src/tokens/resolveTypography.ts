@@ -38,6 +38,44 @@ export function getFontScale(preset: AspectPreset): number {
   return Math.min(preset.width, preset.height) / FONT_SCALE_BASE;
 }
 
+export function scaleFontSize(
+  fontSize: React.CSSProperties['fontSize'],
+  preset: AspectPreset,
+): React.CSSProperties['fontSize'] {
+  const scale = getFontScale(preset);
+
+  if (typeof fontSize === 'number') {
+    return Math.round(fontSize * scale);
+  }
+
+  if (typeof fontSize === 'string') {
+    const match = fontSize.trim().match(/^(-?\d*\.?\d+)px$/i);
+    if (match) {
+      return `${Math.round(Number(match[1]) * scale)}px`;
+    }
+  }
+
+  return fontSize;
+}
+
+export function resolveInlineTypography(
+  style: React.CSSProperties,
+  styleConfig: StyleConfig,
+  theme: ResolvedTheme,
+  preset: AspectPreset,
+): React.CSSProperties {
+  const resolved: React.CSSProperties = {
+    fontFamily: resolveFont(styleConfig.type.family, theme),
+    color: theme.colors.foreground,
+  };
+
+  if (style.fontSize != null) {
+    resolved.fontSize = scaleFontSize(style.fontSize, preset);
+  }
+
+  return resolved;
+}
+
 /**
  * Resolves a TypographyVariant + StyleConfig + ResolvedTheme + AspectPreset into CSS properties.
  * - Font size: base token × scale (scale = min(w,h) / 1080)

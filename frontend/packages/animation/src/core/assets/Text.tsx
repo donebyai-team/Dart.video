@@ -1,10 +1,10 @@
 import React from 'react';
-import { usePatchedProp, usePatchedDragStyle, useStyleOverride } from '../../patches';
-import { useStyleContext } from '../../styles/StyleContext';
+import { usePatchedDragStyle, usePatchedProp, useStyleOverride } from '../../patches';
 import { useAspectPreset } from '../../styles/AspectPresetContext';
+import { useStyleContext } from '../../styles/StyleContext';
 import { useTheme } from '../../theme/ThemeContext';
 import { TypographyVariant } from '../../tokens/semantic';
-import { resolveTypography } from '../../tokens/resolveTypography';
+import { resolveInlineTypography, resolveTypography } from '../../tokens/resolveTypography';
 import { FieldSchema } from '../../registry/types';
 
 export interface TextProps {
@@ -22,11 +22,6 @@ export const TextFieldSchema: FieldSchema[] = [
     type: 'string',
     datatype: 'text',
   },
-  {
-    name: 'variant',
-    type: 'enum',
-    default: 'heading',
-  },
 ];
 
 /**
@@ -37,7 +32,7 @@ export const TextFieldSchema: FieldSchema[] = [
  */
 export function Text({
   text,
-  variant = 'heading',
+  variant,
   style,
   className,
   id,
@@ -46,22 +41,28 @@ export function Text({
   const theme = useTheme();
   const preset = useAspectPreset();
 
-  const patchedVariant = usePatchedProp<TypographyVariant>(id, 'variant', variant);
+  const patchedVariant = usePatchedProp<TypographyVariant | undefined>(id, 'variant', variant);
   const patchedText = usePatchedProp<React.ReactNode>(id, 'text', text);
+  const patchedClassName = usePatchedProp<string | undefined>(id, 'className', className);
   const styleOverride = useStyleOverride(id);
   const overrideTransform = typeof styleOverride.transform === 'string' ? styleOverride.transform : undefined;
   const dragStyle = usePatchedDragStyle(id, style?.transform, overrideTransform);
+  const mergedStyle = { ...(style ?? {}), ...styleOverride };
+  const { transform: _mergedTransform, ...mergedStyleWithoutTransform } = mergedStyle;
+
+  const typography = patchedVariant
+    ? resolveTypography(patchedVariant, styleConfig, theme, preset)
+    : resolveInlineTypography(mergedStyleWithoutTransform, styleConfig, theme, preset);
 
   return (
     <span
       id={id}
-      className={className}
+      className={patchedClassName}
       style={{
         display: 'inline-block',
         whiteSpace: 'pre-wrap',
-        ...resolveTypography(patchedVariant, styleConfig, theme, preset),
-        ...style,
-        ...styleOverride,
+        ...typography,
+        ...mergedStyleWithoutTransform,
         ...dragStyle,
       }}
     >
