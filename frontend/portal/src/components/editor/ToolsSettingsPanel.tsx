@@ -128,6 +128,7 @@ const ToolsSettingsPanel = ({
               }}
               onPreviewTemplate={() => onPreviewTemplate?.(selectedSlide?.id)}
               isPreviewPlaying={isPreviewPlaying}
+              onClose={handleCloseTool}
             />
           </div>
         </div>

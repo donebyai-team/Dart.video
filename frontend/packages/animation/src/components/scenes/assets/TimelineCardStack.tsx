@@ -18,7 +18,7 @@ const DEFAULT_CARD_BORDER = 'rgba(255,255,255,0.12)';
 const DEFAULT_TEXT_COLOR = '#F5F5F5';
 const DEFAULT_TEXT_PROPS: TextProps = {
   text: '',
-  variant: 'display',
+  variant: 'heading',
 };
 
 type CardVisualState = {

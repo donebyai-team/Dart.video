@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { PatchOverlay } from '@coasterai/renderer'
 import { NumberStepper, SelectInput } from '../animation/toolbars/TextToolbar'
 import { Button } from '@/components/ui/button'
@@ -22,6 +22,7 @@ interface SceneSettingsProps {
   onValuePatch: (id: string, prop: string, value: unknown) => void
   onPreviewTemplate?: () => void
   isPreviewPlaying?: boolean
+  onClose?: () => void;
 }
 
 export default function SceneSettings({
@@ -30,6 +31,7 @@ export default function SceneSettings({
   onValuePatch,
   onPreviewTemplate,
   isPreviewPlaying = false,
+  onClose,
 }: SceneSettingsProps) {
   const MIN_ARRAY_ITEMS = 2
   const [arrayDrafts, setArrayDrafts] = useState<Record<string, string>>({})
@@ -42,8 +44,14 @@ export default function SceneSettings({
 
   const fields = useMemo(() => getEditableSceneFields(elementId, overlay), [elementId, overlay])
 
+  useEffect(() => {
+    if (fields.length === 0) {
+      onClose?.()
+    }
+  }, [fields.length, onClose])
+
   if (fields.length == 0) {
-    return null;
+    return null
   }
 
   return (
