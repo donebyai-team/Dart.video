@@ -87,10 +87,9 @@ function SuggestScenes(input: SuggestScenesRequest) -> SuggestScenesResponse {
 
     ## INPUT
 
-    {{ input.current }}
     {% if input.current %}
     ### Current Scene
-    {{ input.before }}
+    {{ input.current }}
     {% endif %}
 
     {% if input.before %}

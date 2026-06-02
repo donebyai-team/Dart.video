@@ -13,6 +13,7 @@ export interface ComponentRegistration {
   tags?: string[];
   description: string;
   type: ComponentType;
+  elementHints?: string[];
   schema?: any;
   llmSchema?: any;
   celExpression?: string;
@@ -38,6 +39,50 @@ export const LAYOUT_COMPONENT_NAMES = new Set(
 const REGISTRY_BY_LOWERCASE = new Map(
   COMPONENT_REGISTRY.map((c) => [c.name.toLowerCase(), c]),
 );
+
+function tokenizeElementId(elementId: string): string[] {
+  return elementId
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+}
+
+function getRegistrationFields(registration?: ComponentRegistration | null): FieldSchema[] {
+  const schema = registration?.schema ?? [];
+
+  for (const item of schema) {
+    if (Array.isArray(item.fields)) {
+      return item.fields;
+    }
+  }
+
+  return [];
+}
+
+function getFallbackSchemaFromElementId(elementId: string): FieldSchema[] {
+  const tokens = tokenizeElementId(elementId);
+
+  for (const registration of COMPONENT_REGISTRY) {
+    if (!registration.elementHints?.length) continue;
+
+    const matchedHint = registration.elementHints.find((hint) => tokens.includes(hint.toLowerCase()));
+    if (!matchedHint) continue;
+
+    const schema = registration.schema ?? [];
+    for (const item of schema) {
+      if (item.name?.toLowerCase() === matchedHint.toLowerCase()) {
+        return item.fields ?? [];
+      }
+    }
+
+    const fields = getRegistrationFields(registration);
+    if (fields.length > 0) {
+      return fields;
+    }
+  }
+
+  return [];
+}
 
 /** Look up a registration by component name. */
 export function getComponentRegistration(name: string): ComponentRegistration | undefined {
@@ -81,6 +126,13 @@ export function getElementSchema(
 ): FieldSchema[] {
   console.debug("Component:", componentName, "Element:", elementId)
 
+  const normalizedElementId = elementId.toLowerCase()
+
+  const fallbackSchema = getFallbackSchemaFromElementId(normalizedElementId);
+  if (!componentName && fallbackSchema.length > 0) {
+    return fallbackSchema;
+  }
+
   if (!componentName){
     return []
   }
@@ -91,17 +143,12 @@ export function getElementSchema(
     registration = REGISTRY_BY_LOWERCASE.get("textwithmediascene");
   }
 
-  if (!registration) {
+  if (!registration) {  
     console.error(`Component ${componentName} not found`)
     return [];
   }
 
   const schema = registration.schema ?? [];
-
-  const normalizedElementId = elementId
-    .toLowerCase()
-    .replace(/imageasset/g, "mediaasset")
-    .replace(/videoasset/g, "mediaasset");
 
   // Priority:
   // 1. Full elementId
@@ -129,6 +176,10 @@ export function getElementSchema(
         }
       }
     }
+  }
+
+  if (fallbackSchema.length > 0) {
+    return fallbackSchema;
   }
 
   console.error(`Schema fields not found for elementId "${elementId}"`)

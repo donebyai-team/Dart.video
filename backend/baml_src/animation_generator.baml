@@ -6,6 +6,7 @@ class GenerateAnimationCodeRequest {
 class GenerateAnimationCodeResponse {
   code string @description("Typescript code")
   total_frames int @description("total frames for this animation at 30fps")
+  manualEdits string? @description("valid json")
   thinkingSummary string? @skip()
 }
 
@@ -118,10 +119,14 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
     - ALWAYS use fontFamily: 'Inter, sans-serif'
     - There is already a dark background on the canvas. Don't add any background
 
+    {{ AnimationPrimitives() }}
+
     ## OUTPUT FORMAT (CRITICAL)
 
-    - If prompt is ambiguous or you lack clarity on what should visually appear in a scene, ask for clarification
-      Use the ask tool — do not assume missing creative direction.
+    * If the prompt is ambiguous or visual details are unclear, ask for clarification using the **ask** tool. Do not assume missing creative direction.
+    * Always return the **total number of frames** for the animation.
+    * If `manualEdits` are provided in follow-up requests, always return the updated `manualEdits` along with the updated code.
+    * `manualEdits` reference elements by `elementId`. If a code change removes or renames an element so its ID no longer exists, remove the corresponding entry from `manualEdits`.
 
    {{ BrandGuidelines(input.VideoBranding) }}
 

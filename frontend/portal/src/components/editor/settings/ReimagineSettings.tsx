@@ -43,7 +43,11 @@ const ReimagineSettings = ({
 
   const targetSlideIdRef = useRef(selectedSlide?.id ?? '')
   const insertedSlideIdsRef = useRef<string[]>([])
-  const [activeTab, setActiveTab] = useState<'browse' | 'generate'>('browse')
+  // Slides backed by a Monaco/code session should reopen in chat mode so the
+  // user lands on the existing conversation flow instead of template browsing.
+  const [activeTab, setActiveTab] = useState<'browse' | 'generate'>(() =>
+    selectedSlide?.content?.codeRegistry?.mUrl?.trim() ? 'generate' : 'browse'
+  )
   const [defaultScenes, setDefaultScenes] = useState<Section[]>([])
   const [categoryScenes, setCategoryScenes] = useState<Section[]>([])
   const [selectedDefaultSuggestionIndex, setSelectedDefaultSuggestionIndex] = useState<number | null>(null)

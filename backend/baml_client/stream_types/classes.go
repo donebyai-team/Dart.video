@@ -571,6 +571,7 @@ func (c GenerateAnimationCodeRequest) BamlTypeName() string {
 type GenerateAnimationCodeResponse struct {
 	Code            *string `json:"code"`
 	Total_frames    *int64  `json:"total_frames"`
+	ManualEdits     *string `json:"manualEdits"`
 	ThinkingSummary *string `json:"thinkingSummary"`
 }
 
@@ -594,6 +595,9 @@ func (c *GenerateAnimationCodeResponse) Decode(holder *cffi.CFFIValueClass, type
 		case "total_frames":
 			c.Total_frames = baml.Decode(valueHolder).Interface().(*int64)
 
+		case "manualEdits":
+			c.ManualEdits = baml.Decode(valueHolder).Interface().(*string)
+
 		case "thinkingSummary":
 			c.ThinkingSummary = baml.Decode(valueHolder).Interface().(*string)
 
@@ -612,6 +616,8 @@ func (c GenerateAnimationCodeResponse) Encode() (*cffi.HostValue, error) {
 	fields["code"] = c.Code
 
 	fields["total_frames"] = c.Total_frames
+
+	fields["manualEdits"] = c.ManualEdits
 
 	fields["thinkingSummary"] = c.ThinkingSummary
 

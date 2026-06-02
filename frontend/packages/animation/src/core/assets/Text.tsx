@@ -5,6 +5,7 @@ import { useAspectPreset } from '../../styles/AspectPresetContext';
 import { useTheme } from '../../theme/ThemeContext';
 import { TypographyVariant } from '../../tokens/semantic';
 import { resolveTypography } from '../../tokens/resolveTypography';
+import { FieldSchema } from '../../registry/types';
 
 export interface TextProps {
   /** Semantic typography variant. Never hardcode font sizes. */
@@ -14,6 +15,19 @@ export interface TextProps {
   className?: string;
   id?: string;
 }
+
+export const TextFieldSchema: FieldSchema[] = [
+  {
+    name: 'text',
+    type: 'string',
+    datatype: 'text',
+  },
+  {
+    name: 'variant',
+    type: 'enum',
+    default: 'heading',
+  },
+];
 
 /**
  * Static text with semantic typography variants.

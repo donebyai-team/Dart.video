@@ -1,5 +1,5 @@
-import z from "zod";
 import { ComponentRegistration } from "./registry";
+import { TextFieldSchema } from "../core/assets/Text";
 
 // export const ImageAssetSchema = z.object({
 //   src: z.string().optional(),
@@ -32,36 +32,48 @@ export const CONTENT_COMPONENTS: ComponentRegistration[] = [
   {
     name: 'LogoAsset',
     type: 'content',
+    elementHints: ['logo', 'logoasset'],
     description: '',
   },
   {
     name: 'ImageAsset',
     type: 'content',
+    elementHints: ['image', 'imageasset'],
     description: 'renders a static image from a URL — use for product screens, photos, and illustrations',
   },
   {
     name: 'ClippedText',
     type: 'content',
+    elementHints: ['clippedtext'],
     description: 'renders text that can be animated with clipping and movement — use for headlines, captions, and body text',
   },
   {
     name: 'MediaAsset',
     type: 'content',
+    elementHints: ['media', 'mediaasset', 'video', 'videoasset'],
     description: 'renders a static image or video from a URL — use for product screens, photos, videos, and illustrations',
   },
   {
     name: 'IconAsset',
     type: 'content',
+    elementHints: ['icon', 'iconasset'],
     description: 'renders a single icon by name from the icon library — use for decorative or supportive visual cues',
   },
   {
     name: 'IconTextPill',
     type: 'content',
+    elementHints: ['pill', 'icontextpill'],
     description: 'renders a rounded pill with a logo/icon and short text label — use inside feature rows and carousels',
   },
   {
     name: 'Text',
     type: 'content',
-    description: 'renders a single icon by name from the icon library — use for decorative or supportive visual cues',
+    elementHints: ['text'],
+    schema: [{
+      type: 'component',
+      name: 'text',
+      fields: TextFieldSchema,
+    }],
+    description: 'renders static text with semantic typography variants',
   },
 ];

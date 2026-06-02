@@ -447,6 +447,10 @@ func (t *GenerateAnimationCodeResponseClassView) PropertyTotal_frames() (ClassPr
 	return t.inner.Property("total_frames")
 }
 
+func (t *GenerateAnimationCodeResponseClassView) PropertyManualEdits() (ClassPropertyView, error) {
+	return t.inner.Property("manualEdits")
+}
+
 func (t *GenerateAnimationCodeResponseClassView) PropertyThinkingSummary() (ClassPropertyView, error) {
 	return t.inner.Property("thinkingSummary")
 }

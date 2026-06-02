@@ -181,6 +181,28 @@ func (l *codeGenerator) GenerateCodeFromScene(ctx context.Context, scene *scenes
 	return template, nil
 }
 
+func IsSlideHasTemplateComponent(slide *pbcore.Slide) bool {
+	if slide.Content == nil && slide.Content.Edits == nil {
+		return false
+	}
+
+	if len(slide.Content.Edits.Fields) == 0 {
+		return false
+	}
+
+	componentField := slide.Content.Edits.Fields["name"]
+	if componentField == nil {
+		return false
+	}
+
+	component, err := scenes.FindComponent(componentField.GetStringValue())
+	if err != nil {
+		return false
+	}
+
+	return component != nil
+}
+
 func (l *codeGenerator) GenerateCode(
 	ctx context.Context,
 	slide *pbcore.Slide,
@@ -219,7 +241,7 @@ func (l *codeGenerator) GenerateCode(
 	}
 
 	// Check if its a edit call and add previously scene
-	if slide.Content != nil && slide.Content.Edits != nil && len(slide.Content.Edits.Fields) > 0 {
+	if IsSlideHasTemplateComponent(slide) {
 		return nil, agenterrors.InvalidInput("edit via prompt not allows, click the scene to edit", nil)
 	}
 
@@ -230,6 +252,18 @@ func (l *codeGenerator) GenerateCode(
 			Role:         pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
 			CodeSnapshot: slide.Content.CodeRegistry.MUrl,
 		})
+
+		// If manual edits are available
+		if len(slide.Content.Edits.Fields) > 0 {
+			edits, err := slide.Content.Edits.MarshalJSON()
+			if err != nil {
+				return nil, agenterrors.Internal("failed to marshal edits", err)
+			}
+			session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
+				Role:    pbcore.ConversationRole_CONVERSATION_ROLE_USER,
+				Message: "User made some edits, consider this in follow ups. \n\n" + string(edits),
+			})
+		}
 	}
 
 	newMessage := &pbcore.ConversationMessage{
@@ -316,18 +350,30 @@ func (l *codeGenerator) runPlanning(ctx context.Context, generatePlanRequest typ
 			return nil, err
 		}
 
-		return &common.RunResult{
-			Status: common.RunStatusCompleted,
-			GeneratedAnimation: &models.Template{
-				Config: &models.TemplateConfig{
-					CodeRegistry: &pbcore.CodeRegistry{
-						MUrl: asset.Url,
-					},
-					VisibleDurationInFrames: int32(codeResponse.Total_frames),
-					TotalDurationInFrames:   int32(codeResponse.Total_frames),
+		template := &models.Template{
+			Config: &models.TemplateConfig{
+				CodeRegistry: &pbcore.CodeRegistry{
+					MUrl: asset.Url,
 				},
-				GeneratedPatches: json.RawMessage(`{}`),
+				VisibleDurationInFrames: int32(codeResponse.Total_frames),
+				TotalDurationInFrames:   int32(codeResponse.Total_frames),
 			},
+			GeneratedPatches: json.RawMessage(`{}`),
+		}
+
+		if codeResponse.ManualEdits != nil {
+			raw := []byte(*codeResponse.ManualEdits)
+
+			if !json.Valid(raw) {
+				l.logger.Warn("invalid manual edits", zap.String("manual_edits", *codeResponse.ManualEdits))
+			} else {
+				template.GeneratedPatches = raw
+			}
+		}
+
+		return &common.RunResult{
+			Status:             common.RunStatusCompleted,
+			GeneratedAnimation: template,
 		}, nil
 
 	}
@@ -462,3 +508,55 @@ func appendRetryConversation(history []types.Message, assistantCode string, feed
 	})
 	return history
 }
+
+//
+//var disallowedEditKeys = []string{
+//	"dragX",
+//	"dragY",
+//	"_duration",
+//	"width",
+//	"height",
+//	"dragStyle",
+//}
+//
+//func StructToFilteredJSONString(
+//	s *structpb.Struct,
+//	disallowedKeys []string,
+//) (string, error) {
+//	if s == nil {
+//		return "{}", nil
+//	}
+//
+//	disallowed := make(map[string]struct{}, len(disallowedKeys))
+//	for _, k := range disallowedKeys {
+//		disallowed[k] = struct{}{}
+//	}
+//
+//	data := s.AsMap()
+//	removeKeysDeep(data, disallowed)
+//
+//	b, err := json.Marshal(data)
+//	if err != nil {
+//		return "", err
+//	}
+//
+//	return string(b), nil
+//}
+//
+//func removeKeysDeep(v any, disallowed map[string]struct{}) {
+//	switch t := v.(type) {
+//	case map[string]any:
+//		for k := range disallowed {
+//			delete(t, k)
+//		}
+//
+//		for _, child := range t {
+//			removeKeysDeep(child, disallowed)
+//		}
+//
+//	case []any:
+//		for _, child := range t {
+//			removeKeysDeep(child, disallowed)
+//		}
+//	}
+//}

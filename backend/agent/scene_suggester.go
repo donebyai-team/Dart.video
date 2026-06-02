@@ -168,6 +168,12 @@ func slideToSceneJSON(
 		return "", nil
 	}
 
+	// TODO: Optimize this to extract only component name and text fields.
+	if !IsSlideHasTemplateComponent(slide) {
+		edits, err := slide.Content.Edits.MarshalJSON()
+		return string(edits), err
+	}
+
 	sceneToEdit, err := scenes.EditsToScene(
 		slide.Content.Edits,
 		mediaRegistry,
