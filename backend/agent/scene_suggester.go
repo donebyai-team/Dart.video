@@ -40,10 +40,7 @@ func (s SceneSuggester) GenerateSuggestions(
 	video *models.Video,
 ) ([]*pbcore.Section, error) {
 	ctx = context.WithValue(ctx, "session_id", sceneID)
-	prevSlide, currSlide, nextSlide, err := findSlides(video, sceneID)
-	if err != nil {
-		return nil, err
-	}
+	prevSlide, currSlide, nextSlide, fallbackSlide := findSlides(video, sceneID)
 
 	registry, err := s.createMediaAssetRegistry(ctx, video.Metadata.GeneratedBranding.BrandIdentity)
 	if err != nil {
@@ -94,6 +91,11 @@ func (s SceneSuggester) GenerateSuggestions(
 		bgStyle = currSlide.BackgroundStyle
 	}
 
+	// try the last slide
+	if fallbackSlide != nil && fallbackSlide.BackgroundStyle != nil {
+		bgStyle = fallbackSlide.BackgroundStyle
+	}
+
 	if bgStyle == nil {
 		bgStyle = brand_identity.GenerateDefaultBackground(
 			video.Metadata.GeneratedBranding.Colors,
@@ -119,12 +121,17 @@ func (s SceneSuggester) GenerateSuggestions(
 func findSlides(
 	video *models.Video,
 	sceneID string,
-) (prev, curr, next *pbcore.Slide, err error) {
+) (prev, curr, next, fallback *pbcore.Slide) {
 
 	var allSlides []*pbcore.Slide
 
 	for _, section := range video.Config.Sections {
 		allSlides = append(allSlides, section.Slides...)
+	}
+
+	// Set fallback to the last slide (if any)
+	if len(allSlides) > 0 {
+		fallback = allSlides[len(allSlides)-1]
 	}
 
 	for i, slide := range allSlides {
@@ -142,10 +149,10 @@ func findSlides(
 			next = allSlides[i+1]
 		}
 
-		return prev, curr, next, nil
+		return prev, curr, next, fallback
 	}
 
-	return nil, nil, nil, nil
+	return nil, nil, nil, fallback
 }
 
 func slideToSceneJSON(

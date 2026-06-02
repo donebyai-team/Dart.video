@@ -46,8 +46,8 @@ const ReimagineSettings = ({
   const [activeTab, setActiveTab] = useState<'browse' | 'generate'>('browse')
   const [defaultScenes, setDefaultScenes] = useState<Section[]>([])
   const [categoryScenes, setCategoryScenes] = useState<Section[]>([])
-  const [selectedDefaultSuggestionIndex, setSelectedDefaultSuggestionIndex] = useState(0)
-  const [selectedCategorySuggestionIndex, setSelectedCategorySuggestionIndex] = useState(0)
+  const [selectedDefaultSuggestionIndex, setSelectedDefaultSuggestionIndex] = useState<number | null>(null)
+  const [selectedCategorySuggestionIndex, setSelectedCategorySuggestionIndex] = useState<number | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<CategoryItem | null>(null)
   const [activeSuggestionSource, setActiveSuggestionSource] = useState<'default' | 'category'>('default')
   const [isDefaultLoading, setIsDefaultLoading] = useState(true)
@@ -186,7 +186,7 @@ const ReimagineSettings = ({
       await loadSuggestions(AnimationCategory.UNSPECIFIED)
 
       if (!cancelled) {
-        setSelectedDefaultSuggestionIndex(0)
+        setSelectedDefaultSuggestionIndex(null)
       }
     }
 
@@ -200,7 +200,7 @@ const ReimagineSettings = ({
   const handleSelectCategory = useCallback((category: CategoryItem) => {
     setSelectedCategory(category)
     setActiveSuggestionSource('category')
-    setSelectedCategorySuggestionIndex(0)
+    setSelectedCategorySuggestionIndex(null)
     void loadSuggestions(category.value)
   }, [loadSuggestions])
 
@@ -239,8 +239,12 @@ const ReimagineSettings = ({
 
   const selectedSuggestion =
     activeSuggestionSource === 'category' && selectedCategory
-      ? categoryScenes[selectedCategorySuggestionIndex] ?? defaultScenes[selectedDefaultSuggestionIndex]
-      : defaultScenes[selectedDefaultSuggestionIndex]
+      ? selectedCategorySuggestionIndex === null
+        ? null
+        : categoryScenes[selectedCategorySuggestionIndex] ?? null
+      : selectedDefaultSuggestionIndex === null
+        ? null
+        : defaultScenes[selectedDefaultSuggestionIndex] ?? null
 
   const handlePreview = () => {
     if (isPreviewPlaying) {
@@ -250,10 +254,15 @@ const ReimagineSettings = ({
 
     if (!selectedSuggestion) return
 
+    const selectedSuggestionIndex =
+      activeSuggestionSource === 'category' ? selectedCategorySuggestionIndex : selectedDefaultSuggestionIndex
+
+    if (selectedSuggestionIndex === null) return
+
     // Preview always reflects the currently highlighted suggestion, even before an explicit apply click.
     applySuggestion(
       selectedSuggestion,
-      activeSuggestionSource === 'category' ? selectedCategorySuggestionIndex : selectedDefaultSuggestionIndex,
+      selectedSuggestionIndex,
       activeSuggestionSource
     )
 

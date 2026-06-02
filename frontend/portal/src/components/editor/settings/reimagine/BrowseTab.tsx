@@ -6,7 +6,7 @@ import SuggestionGrid from './SuggestionGrid'
 
 interface BrowseTabProps {
   aiSuggestions: Section[]
-  aiSelectedIndex: number
+  aiSelectedIndex: number | null
   isAiLoading: boolean
   onSelectAiSuggestion: (suggestion: Section, index: number) => void
   categories: CategoryItem[]
@@ -14,7 +14,7 @@ interface BrowseTabProps {
   onSelectCategory: (category: CategoryItem) => void
   onGenerateNew: () => void
   categorySuggestions: Section[]
-  categorySelectedIndex: number
+  categorySelectedIndex: number | null
   isCategoryLoading: boolean
   onSelectCategorySuggestion: (suggestion: Section, index: number) => void
   resolution?: {

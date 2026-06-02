@@ -4,6 +4,11 @@ export interface AddOrEditAnimationSettings {
   animationElementId?: string
 }
 
+export enum SlideType {
+  ANIMATION = "animation",
+  MEDIA = "media",
+}
+
 export interface SelectedTool {
   type: ActiveToolType
   tool?: EffectType

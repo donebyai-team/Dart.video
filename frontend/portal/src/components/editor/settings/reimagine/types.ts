@@ -10,7 +10,7 @@ export interface CategoryItem {
 
 export interface SuggestionGridProps {
   suggestions: Section[]
-  selectedIndex: number
+  selectedIndex: number | null
   onSelect: (suggestion: Section, index: number) => void
   resolution?: {
     width: number

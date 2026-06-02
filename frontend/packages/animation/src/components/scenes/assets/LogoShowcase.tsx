@@ -136,7 +136,7 @@ export const LogoShowcase: React.FC = () => {
 export const LogoShowcaseSchemaFields = [
     {
         type: "component",
-        name: 'textstagger',
+        name: 'animatedtext',
         fields: [
             {
                 "name": "text",

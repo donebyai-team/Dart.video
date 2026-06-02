@@ -16,6 +16,7 @@ import (
 	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"time"
 )
 
 type SessionContext struct {
@@ -29,6 +30,8 @@ type AgentSession interface {
 	ConvertToContextMessages(ctx context.Context, history []*pbcore.ConversationMessage, registry *services.MediaAssetRegistry) ([]types.Message, error)
 	Save(ctx context.Context, session *SessionContext) error
 }
+
+const sessionTTL = 6 * 24 * time.Hour
 
 type session struct {
 	sessionKey string
@@ -53,18 +56,18 @@ func (a *session) GetID() string {
 }
 
 func (a *session) Save(ctx context.Context, session *SessionContext) error {
-	payload, err := json.Marshal(session)
-	if err != nil {
-		return agenterrors.SessionUnavailable("failed to encode planning session", err)
-	}
-
 	for _, message := range session.ConversationHistory {
 		if message.CreatedAt == nil {
 			message.CreatedAt = timestamppb.Now()
 		}
 	}
 
-	if err := a.cache.SetKey(ctx, fmt.Sprintf("%s:%s", a.sessionKey, a.sessionID), string(payload), stateTTL); err != nil {
+	payload, err := json.Marshal(session)
+	if err != nil {
+		return agenterrors.SessionUnavailable("failed to encode planning session", err)
+	}
+
+	if err := a.cache.SetKey(ctx, fmt.Sprintf("%s:%s", a.sessionKey, a.sessionID), string(payload), sessionTTL); err != nil {
 		return agenterrors.SessionUnavailable("failed to persist planning session", err)
 	}
 	return nil
@@ -85,9 +88,9 @@ func (a *session) Get(ctx context.Context) (*SessionContext, error) {
 		return nil, agenterrors.SessionUnavailable("invalid planning session payload", err)
 	}
 
-	// keep only the last 5 messages
-	if len(sessionCtx.ConversationHistory) > 5 {
-		sessionCtx.ConversationHistory = sessionCtx.ConversationHistory[len(sessionCtx.ConversationHistory)-5:]
+	// keep only the last 10 messages
+	if len(sessionCtx.ConversationHistory) > 10 {
+		sessionCtx.ConversationHistory = sessionCtx.ConversationHistory[len(sessionCtx.ConversationHistory)-10:]
 	}
 
 	return &sessionCtx, nil
@@ -169,6 +172,28 @@ func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcor
 			mediaAssets, err := a.db.GetMediaAssetsByID(ctx, item.ReferenceIds)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get media assets: %w", err)
+			}
+
+			var imageCount, videoCount int
+
+			for _, mediaAsset := range mediaAssets {
+				switch mediaAsset.MediaType {
+				case pbcore.MediaType_MEDIA_TYPE_IMAGE:
+					imageCount++
+
+				case pbcore.MediaType_MEDIA_TYPE_VIDEO:
+					videoCount++
+				}
+			}
+
+			// Prevent mixing images + videos
+			if imageCount > 0 && videoCount > 0 {
+				return nil, fmt.Errorf("cannot add both image and video assets")
+			}
+
+			// Allow only a single video
+			if videoCount > 1 {
+				return nil, fmt.Errorf("only one video media asset is allowed")
 			}
 
 			for _, mediaAsset := range mediaAssets {

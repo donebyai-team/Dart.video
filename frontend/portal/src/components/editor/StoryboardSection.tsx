@@ -6,12 +6,21 @@ import {
     verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import {
+    Clapperboard,
     ChevronDown,
+    Image,
     Pencil,
     Plus,
     Trash2,
+    Video,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
     Collapsible,
@@ -30,6 +39,7 @@ import {
     getSlideTransitionDirectionValue,
     isDirectionSupportedTransition
 } from "@coasterai/renderer";
+import { SlideType } from "@/types/tools";
 
 interface StoryboardSectionProps {
     section: Section;
@@ -49,7 +59,7 @@ interface StoryboardSectionProps {
     onCancelEditTitle: () => void;
     onShowTransitionPicker: (slideId: string | null) => void;
     onUpdateTransition: (slideId: string, transitionId: TransitionType, direction?: TransitionDirection) => void;
-    onAddSlide: (afterSlideId?: string) => void;
+    onAddSlide: (afterSlideId?: string, slideType?: SlideType) => void;
 }
 
 const StoryboardSection = ({
@@ -222,13 +232,28 @@ const StoryboardSection = ({
                                         {showTransition && (
                                             <div className="relative flex items-center justify-center py-2">
                                                 {/* Add slide button (left of center) */}
-                                                <button
-                                                    onClick={() => onAddSlide(slide.id)}
-                                                    className="relative z-10 flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-medium transition-colors bg-muted hover:bg-muted/80 text-muted-foreground mr-1"
-                                                >
-                                                    <Plus className="w-3 h-3" />
-                                                    Add scene
-                                                </button>
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <button
+                                                            className="relative z-10 flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-medium transition-colors bg-muted hover:bg-muted/80 text-muted-foreground mr-1"
+                                                        >
+                                                            <Plus className="w-3 h-3" />
+                                                            Add scene
+                                                        </button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="start" className="w-40 bg-popover">
+                                                        <DropdownMenuItem onSelect={() => onAddSlide(slide.id, SlideType.ANIMATION)}>
+                                                            <Clapperboard className="w-3.5 h-3.5 mr-2" />
+                                                            Animation
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem onSelect={() => onAddSlide(slide.id, SlideType.MEDIA)}>
+                                                            <div className="flex items-center mr-2">
+                                                                <Image className="w-3.5 h-3.5" />
+                                                            </div>
+                                                            Image/Video
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
 
                                                 <TransitionPicker
                                                     currentTransitionType={slide.transition || TransitionType.TRANSITION_NONE}

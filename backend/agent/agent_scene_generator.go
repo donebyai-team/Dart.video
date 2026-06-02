@@ -119,16 +119,12 @@ func (a *sceneGenerator) ContinueAgent(
 		Role:    pbcore.ConversationRole_CONVERSATION_ROLE_USER,
 		Message: userResponse,
 	}
-	
+
 	for _, asset := range options.SelectedMediaAssets {
 		newMessage.AssetIds = append(newMessage.AssetIds, asset.AssetID)
 	}
 
 	session.ConversationHistory = append(session.ConversationHistory, newMessage)
-
-	if err := a.session.Save(ctx, session); err != nil {
-		return nil, err
-	}
 
 	a.state.Publish(common.AgentState{
 		State: common.StateStatusProcessing,
@@ -262,10 +258,6 @@ func (l *sceneGenerator) GenerateScene(
 	// Prompt always goes in the conversation
 	session.ConversationHistory = append(session.ConversationHistory, newMessage)
 
-	if err := l.session.Save(ctx, session); err != nil {
-		return nil, err
-	}
-
 	return l.runPlanning(ctx, generatePlanRequest, session)
 }
 
@@ -313,6 +305,12 @@ func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest ty
 		scene := llmResponse.AsScene()
 		if scene == nil {
 			return nil, agenterrors.Internal("scene is missing", nil)
+		}
+
+		// save session
+		err = l.session.Save(ctx, session)
+		if err != nil {
+			return nil, err
 		}
 
 		// replace generated asset handles

@@ -127,10 +127,6 @@ func (a *codeGenerator) ContinueAgent(
 	// Prompt always goes in the conversation
 	session.ConversationHistory = append(session.ConversationHistory, newMessage)
 
-	if err := a.session.Save(ctx, session); err != nil {
-		return nil, err
-	}
-
 	a.state.Publish(common.AgentState{
 		State: common.StateStatusProcessing,
 	})
@@ -239,6 +235,16 @@ func (l *codeGenerator) GenerateCode(
 	//	})
 	//}
 
+	if slide != nil &&
+		slide.Content != nil &&
+		slide.Content.CodeRegistry != nil &&
+		slide.Content.CodeRegistry.MUrl != "" {
+		session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
+			Role:         pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
+			CodeSnapshot: slide.Content.CodeRegistry.MUrl,
+		})
+	}
+
 	newMessage := &pbcore.ConversationMessage{
 		Role:    pbcore.ConversationRole_CONVERSATION_ROLE_USER,
 		Message: input.Prompt,
@@ -254,10 +260,6 @@ func (l *codeGenerator) GenerateCode(
 
 	// Prompt always goes in the conversation
 	session.ConversationHistory = append(session.ConversationHistory, newMessage)
-
-	if err := l.session.Save(ctx, session); err != nil {
-		return nil, err
-	}
 
 	return l.runPlanning(ctx, generatePlanRequest, session)
 }
@@ -308,8 +310,6 @@ func (l *codeGenerator) runPlanning(ctx context.Context, generatePlanRequest typ
 			return nil, err
 		}
 
-		// TODO: Handle build errors
-
 		// Save the code in history
 		if codeResponse.ThinkingSummary != nil && *codeResponse.ThinkingSummary != "" {
 			session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
@@ -317,10 +317,12 @@ func (l *codeGenerator) runPlanning(ctx context.Context, generatePlanRequest typ
 				Message: *codeResponse.ThinkingSummary,
 			})
 		}
-		session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
-			Role:         pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
-			CodeSnapshot: asset.Url,
-		})
+		//session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
+		//	Role:         pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
+		//	CodeSnapshot: asset.Url,
+		//})
+
+		// TODO: Handle build errors and retry before saving
 
 		err = l.session.Save(ctx, session)
 		if err != nil {
