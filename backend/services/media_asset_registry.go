@@ -33,6 +33,12 @@ func NewMediaAssetRegistryBuilder() *MediaAssetRegistryBuilder {
 	}
 }
 
+func NewMediaAssetRegistryBuilderFromExisting(registry *MediaAssetRegistry) *MediaAssetRegistryBuilder {
+	return &MediaAssetRegistryBuilder{
+		registry: registry,
+	}
+}
+
 func (registry *MediaAssetRegistry) AddFieldValueMapping(key string, value string) {
 	registry.fieldValueMapper[key] = value
 }
@@ -65,6 +71,15 @@ func (b *MediaAssetRegistryBuilder) AddAssets(assets []*models.MediaAsset) *Medi
 		b.addAsset(a)
 	}
 	return b
+}
+
+func (b *MediaAssetRegistryBuilder) AddAndFormatAssets(assets []*models.MediaAsset) *string {
+	handleIDs := make([]string, 0, len(assets))
+	for _, a := range assets {
+		handleIDs = append(handleIDs, b.addAsset(a))
+	}
+
+	return utils.Ptr(b.registry.toAttachment(handleIDs))
 }
 
 func (b *MediaAssetRegistryBuilder) WithBrandAssets() *MediaAssetRegistryBuilder {
@@ -113,7 +128,7 @@ func (b *MediaAssetRegistryBuilder) Build() *MediaAssetRegistry {
 	return b.registry
 }
 
-func (b *MediaAssetRegistryBuilder) addAsset(a *models.MediaAsset) {
+func (b *MediaAssetRegistryBuilder) addAsset(a *models.MediaAsset) string {
 	index := len(b.registry.assetHandles)
 
 	handleID := fmt.Sprintf(
@@ -125,6 +140,7 @@ func (b *MediaAssetRegistryBuilder) addAsset(a *models.MediaAsset) {
 
 	b.registry.assetMapper[handleID] = a
 	b.registry.assetHandles = append(b.registry.assetHandles, handleID)
+	return handleID
 }
 
 func generateRandomID() string {

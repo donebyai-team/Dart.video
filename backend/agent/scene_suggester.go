@@ -20,14 +20,14 @@ import (
 type SceneSuggester struct {
 	brandIdentityService brand_identity.BrandIdentity
 	llmService           llm.LLMService
-	animationGenerator   CodeGenerator
+	codeGenerator        CodeGeneratorAgent
 	logger               *zap.Logger
 }
 
 func NewSceneSuggester(brandIdentityService brand_identity.BrandIdentity, logger *zap.Logger) *SceneSuggester {
 	return &SceneSuggester{
 		llmService:           llm.NewLlmService(logger, nil),
-		animationGenerator:   &codeGenerator{logger: logger},
+		codeGenerator:        &codeGenerator{logger: logger},
 		brandIdentityService: brandIdentityService,
 		logger:               logger,
 	}
@@ -36,13 +36,11 @@ func NewSceneSuggester(brandIdentityService brand_identity.BrandIdentity, logger
 func (s SceneSuggester) GenerateSuggestions(
 	ctx context.Context,
 	sceneID string,
+	category pbcore.AnimationCategory,
 	video *models.Video,
 ) ([]*pbcore.Section, error) {
 	ctx = context.WithValue(ctx, "session_id", sceneID)
-	prevSlide, currSlide, nextSlide, err := findSlides(video, sceneID)
-	if err != nil {
-		return nil, err
-	}
+	prevSlide, currSlide, nextSlide, fallbackSlide := findSlides(video, sceneID)
 
 	registry, err := s.createMediaAssetRegistry(ctx, video.Metadata.GeneratedBranding.BrandIdentity)
 	if err != nil {
@@ -75,6 +73,10 @@ func (s SceneSuggester) GenerateSuggestions(
 		return nil, err
 	}
 
+	if category != pbcore.AnimationCategory_ANIMATION_CATEGORY_UNSPECIFIED {
+		suggestInput.Category = category.String()
+	}
+
 	suggestScenesFromLLM, err := s.llmService.SuggestScenes(ctx, suggestInput)
 	if err != nil {
 		return nil, agenterrors.LLMPlanningFailed(
@@ -84,10 +86,16 @@ func (s SceneSuggester) GenerateSuggestions(
 	}
 
 	// the current slide background is used as the default background for the suggested slides
-	bgStyle := currSlide.BackgroundStyle
-	if bgStyle == nil {
-		bgStyle = video.Metadata.BackgroundStyle
+	bgStyle := video.Metadata.BackgroundStyle
+	if currSlide != nil && currSlide.BackgroundStyle != nil {
+		bgStyle = currSlide.BackgroundStyle
 	}
+
+	// try the last slide
+	if fallbackSlide != nil && fallbackSlide.BackgroundStyle != nil {
+		bgStyle = fallbackSlide.BackgroundStyle
+	}
+
 	if bgStyle == nil {
 		bgStyle = brand_identity.GenerateDefaultBackground(
 			video.Metadata.GeneratedBranding.Colors,
@@ -113,12 +121,17 @@ func (s SceneSuggester) GenerateSuggestions(
 func findSlides(
 	video *models.Video,
 	sceneID string,
-) (prev, curr, next *pbcore.Slide, err error) {
+) (prev, curr, next, fallback *pbcore.Slide) {
 
 	var allSlides []*pbcore.Slide
 
 	for _, section := range video.Config.Sections {
 		allSlides = append(allSlides, section.Slides...)
+	}
+
+	// Set fallback to the last slide (if any)
+	if len(allSlides) > 0 {
+		fallback = allSlides[len(allSlides)-1]
 	}
 
 	for i, slide := range allSlides {
@@ -136,13 +149,10 @@ func findSlides(
 			next = allSlides[i+1]
 		}
 
-		return prev, curr, next, nil
+		return prev, curr, next, fallback
 	}
 
-	return nil, nil, nil, fmt.Errorf(
-		"slide with sceneID %s not found",
-		sceneID,
-	)
+	return nil, nil, nil, fallback
 }
 
 func slideToSceneJSON(
@@ -194,10 +204,9 @@ func (s SceneSuggester) buildSuggestedSlide(
 	}
 
 	for _, sceneConfig := range sceneConfigs {
-		template, err := s.animationGenerator.GenerateCodeFromScene(
+		template, err := s.codeGenerator.GenerateCodeFromScene(
 			ctx,
 			sceneConfig,
-			func(progress TemplateGenerationProgress) {},
 		)
 		if err != nil {
 			return nil, err

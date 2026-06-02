@@ -8,13 +8,15 @@ import {
   SpotlightEffect,
   ZoomEffect
 } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { X } from 'lucide-react'
 import { motion } from 'framer-motion'
-import AnimationEditor from './settings/AnimationEditor'
 import { CodeEditor } from './settings/CodeEditor'
 import { getRealSlideStartFrame } from './frame_calculations'
 import { TRANSITION_DURATION_FRAMES } from '@coasterai/renderer/src/frameUtils'
 import type { PatchOverlay } from '@coasterai/renderer'
 import ReimagineSettings from './settings/ReimagineSettings'
+import SceneSettings from './settings/SceneSettings'
+import { Button } from '@/components/ui/button'
 
 interface ToolsSettingsPanelProps {
   onPreviewTemplate: (slideId?: string, endSlideId?: string) => void
@@ -57,6 +59,7 @@ const ToolsSettingsPanel = ({
   const callouts = useVideoStore(s => s.getCallouts) || []
   const zooms = useVideoStore(s => s.getZooms) || []
   const updateSlideBackground = useVideoStore(s => s.updateSlideBackground)
+  const updateSlide = useVideoStore(s => s.updateSlide)
   const getSlideDurationInSeconds = useVideoStore(s => s.getSlideDurationInSeconds)
   const getTimelineSlides = useVideoStore(s => s.getTimelineSlides)
   const fps = useVideoStore(s => s.videoConfig?.metadata?.fps) || 30
@@ -101,16 +104,33 @@ const ToolsSettingsPanel = ({
         />
       )}
 
-      {activeTool.type === ActiveToolType.ADD_OR_EDIT_ANIMATION && (
-        <AnimationEditor
-          settings={activeTool.settings ?? {}}
-          overlay={overlay}
-          onValuePatch={onValuePatch}
-          setOverlay={setOverlay}
-          onClose={handleCloseTool}
-          onPreviewTemplate={onPreviewTemplate}
-          isPreviewPlaying={isPreviewPlaying}
-        />
+      {activeTool.type === ActiveToolType.ADD_OR_EDIT_ANIMATION && activeTool.settings?.animationElementId && (
+        <div className='flex h-full flex-col gap-3 p-4'>
+          <div className='flex items-center justify-between'>
+            <span className='text-sm font-medium text-foreground'>Scene Settings</span>
+            <Button variant='ghost' size='sm' className='h-6 w-6 p-0' onClick={handleCloseTool}>
+              <X className='h-4 w-4' />
+            </Button>
+          </div>
+
+          <div className='min-h-0 flex-1 overflow-hidden'>
+            <SceneSettings
+              elementId={activeTool.settings.animationElementId}
+              overlay={overlay}
+              onValuePatch={(id: string, prop: string, value: unknown) => {
+                if (prop === '_duration' && typeof value === 'number' && value > 0) {
+                  updateSlide({
+                    durationInFrames: Math.round(value),
+                    settledFrame: Math.round(value),
+                  })
+                }
+                onValuePatch(id, prop, value)
+              }}
+              onPreviewTemplate={() => onPreviewTemplate?.(selectedSlide?.id)}
+              isPreviewPlaying={isPreviewPlaying}
+            />
+          </div>
+        </div>
       )}
 
       {activeTool.type === ActiveToolType.ANIMATION_CODE && (

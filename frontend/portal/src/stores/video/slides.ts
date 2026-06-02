@@ -1,13 +1,14 @@
 import { TimelineSlide } from '@/components/editor/timeline/types'
-import { Slide, TransitionDirection, TransitionType, BackgroundStyle, Section, BackgroundStyleSchema } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { Slide, TransitionDirection, TransitionType, BackgroundStyle, Section, BackgroundStyleSchema, AnimationSlideContent } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { clone } from '@bufbuild/protobuf'
 import { BrandAssetPriority, type BrandColor } from '@coasterai/pb/coasterai/core/v1/brandkit_pb'
-import { createNewSlide, getDefaulVideotMetadata, createDefaultBackgroundStyle, resolveBackgroundStyle } from './defaults'
+import { createNewSlide, getDefaulVideotMetadata, createDefaultBackgroundStyle, resolveBackgroundStyle, defaultImageSlideContent, defaultAnimationSlideContent } from './defaults'
 import { VideoStoreSet, VideoStoreGet } from './types'
 import { findSlideById, getSections, updateVideoConfigSections, updateSelectedSlide, updateTotalDuration, getPreviousSlide, updateSlideById } from './utils'
 import defaultEditorConfig from '@/data/editorConfig'
 import { TRANSITION_DURATION_FRAMES } from '@coasterai/renderer/src/frameUtils'
 import { GeneratedVideoBranding } from '@coasterai/pb/coasterai/core/v1/video_pb'
+import { SlideType } from '@/types/tools'
 
 const SECTION_END_DROP_PREFIX = 'section-end:'
 
@@ -30,7 +31,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     return resolveBackgroundStyle(slide, globalBackground);
   },
 
-  addSlide(sectionId: string, afterSlideId?: string): string {
+  addSlide(sectionId: string, afterSlideId?: string, slideType?: SlideType): string {
     const { videoConfig } = get();
     if (!videoConfig?.config) return "";
 
@@ -44,9 +45,16 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       previousSlide?.backgroundStyle ??
       createDefaultBackgroundStyle();
 
-    const newSlide = createNewSlide({
-      inheritedBg,
-    });
+    let slideContent = defaultAnimationSlideContent;
+
+    if (slideType === SlideType.MEDIA) {
+      slideContent = defaultImageSlideContent;
+    }
+
+    const newSlide = createNewSlide(
+      { inheritedBg },
+      slideContent
+    );
 
     let newVideoConfig = updateVideoConfigSections(videoConfig, sections =>
       sections.map(s => {
@@ -65,8 +73,6 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     set({ videoConfig: newVideoConfig });
 
     set({ selectedSlide: newSlide });
-
-    console.debug("added slide", newSlide.id, "after", afterSlideId);
 
     get().refreshPendingChanges();
     return newSlide.id;
@@ -103,7 +109,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
       });
     } else {
       const globalBackground = videoConfig.metadata?.backgroundStyle;
-      const { backgroundStyle: _, ...metadataWithoutBg } = 
+      const { backgroundStyle: _, ...metadataWithoutBg } =
         videoConfig.metadata ?? getDefaulVideotMetadata(defaultEditorConfig);
 
       // Convert inherited global backgrounds into slide-level backgrounds without
@@ -113,7 +119,7 @@ export const createSlideActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
           ...section,
           slides: section.slides.map((slide) => {
             const isSelected = slide.id === selectedSlide.id;
-            
+
             if (isSelected) {
               const clonedBg = clone(BackgroundStyleSchema, background);
               clonedBg.applyAll = false;

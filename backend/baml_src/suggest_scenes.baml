@@ -1,6 +1,7 @@
 class SuggestScenesRequest {
   VideoBranding VideoBranding
   ComponentList string
+  Category string
   before string
   current string
   after string
@@ -86,8 +87,11 @@ function SuggestScenes(input: SuggestScenesRequest) -> SuggestScenesResponse {
 
     ## INPUT
 
-    ### Current Scene
     {{ input.current }}
+    {% if input.current %}
+    ### Current Scene
+    {{ input.before }}
+    {% endif %}
 
     {% if input.before %}
     ### Previous Scene
@@ -97,6 +101,11 @@ function SuggestScenes(input: SuggestScenesRequest) -> SuggestScenesResponse {
     {% if input.after %}
     ### Next Scene
     {{ input.after }}
+    {% endif %}
+
+    {% if input.Category %}
+    ### Animation Type
+    {{ input.Category }}
     {% endif %}
 
     ---

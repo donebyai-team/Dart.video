@@ -4,6 +4,16 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as AnimationPrimitives from "@coasterai/animation";
 import { REGISTERED_COMPONENT_NAMES } from "@coasterai/animation";
 
+import {
+  AbsoluteFill,
+  Img,
+  Sequence,
+  interpolate,
+  spring,
+  useCurrentFrame,
+  useVideoConfig,
+} from "remotion";
+
 
 export interface CompilationResult {
   Component: React.ComponentType<any> | null;
@@ -24,11 +34,17 @@ interface GuardedRemoteComponentProps {
 // Parameter names injected into every compiled component's scope.
 // Order must exactly match SHARED_PARAM_VALUES below.
 const SHARED_PARAM_NAMES: string[] = [
-  "React",  
+  "React",
   "useState",
   "useEffect",
   "useMemo",
-  "useRef",  
+  "useRef",
+  "AbsoluteFill",
+  "interpolate",
+  "useCurrentFrame",
+  "useVideoConfig",
+  "spring",
+  "Sequence",
   // Lucide icons — injected as the full module; individual icons are
   // destructured from this via buildLucideDestructure()
   "__LucideReact__",
@@ -43,7 +59,13 @@ function getSharedParamValues(validateShapePropsOption: boolean): unknown[] {
     useState,
     useEffect,
     useMemo,
-    useRef,   
+    useRef,
+    AbsoluteFill,
+    interpolate,
+    useCurrentFrame,
+    useVideoConfig,
+    spring,
+    Sequence,
     LucideReact,
     // Animation primitive values — each registered component name maps to its implementation.
     // Order must match the names appended to SHARED_PARAM_NAMES above.
@@ -242,7 +264,7 @@ export function compileRemoteComponent(
 
     return { Component: GuardedComponent, error: null };
   } catch (error) {
-    return {        
+    return {
       Component: null,
       error: error instanceof Error ? error.message : "Unknown compilation error",
     };

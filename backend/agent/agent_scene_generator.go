@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/shank318/coasterai/agent/agenterrors"
+	"github.com/shank318/coasterai/agent/common"
 	"github.com/shank318/coasterai/agent/llm"
 	"github.com/shank318/coasterai/agent/scenes"
 	"github.com/shank318/coasterai/baml_client/types"
@@ -28,115 +29,69 @@ type SceneGeneratorAgent interface {
 		ctx context.Context,
 		slide *pbcore.Slide,
 		input *pbportal.CreateVideoRequest,
-	) (*RunResult, error)
+	) (*common.RunResult, error)
 	ContinueAgent(
 		ctx context.Context,
 		options ContinueSessionOptions,
-	) (*RunResult, error)
-	ApplyGenerationOptions(options AnimationGenerationOptions)
-	StateUpdates() <-chan VideoAgentState
+	) (*common.RunResult, error)
 }
 
 type sceneGenerator struct {
-	sessionID            string
+	videoID              string
 	slideID              string
 	orgID                string
 	db                   datastore.Repository
 	llmService           llm.LLMService
-	cache                cache.Cache
-	animationGenerator   CodeGenerator
+	codeGenerator        CodeGeneratorAgent
 	generationOptions    AnimationGenerationOptions
 	logger               *zap.Logger
-	stateUpdates         chan VideoAgentState
 	fps                  int64
 	brandIdentityService brand_identity.BrandIdentity
 	assetRegistry        *services.MediaAssetRegistry
+	session              common.AgentSession
+	state                common.AgentStatusPublisher
+	toolRegistry         *common.ToolRegistry
 }
 
-func (a *sceneGenerator) StateUpdates() <-chan VideoAgentState {
-	return a.stateUpdates
-}
-
-func NewAgentAnimationEditor(
-	sessionID string,
+func NewSceneGeneratorAgent(
+	videoID string,
 	slideID string,
 	orgID string,
 	logger *zap.Logger,
 	cache cache.Cache,
 	db datastore.Repository,
-	mediaStore services.MediaStore,
-	codeBuilder services.TemplateCodeBuilder,
+	llmService llm.LLMService,
 	brandIdentityService brand_identity.BrandIdentity,
+	state common.AgentStatusPublisher,
 ) SceneGeneratorAgent {
-	llmService := llm.NewLlmService(logger, cache)
+	sessionID := fmt.Sprintf("%s:%s", videoID, slideID)
+	session := common.NewAgentSession(sessionID, generateOrEditAnimationSessionKeyPrefix, cache, db, logger)
 	return &sceneGenerator{
 		fps:                  defaultFPS,
-		sessionID:            sessionID,
+		videoID:              videoID,
 		orgID:                orgID,
 		slideID:              slideID,
 		logger:               logger,
-		cache:                cache,
 		db:                   db,
 		llmService:           llmService,
 		brandIdentityService: brandIdentityService,
-		stateUpdates:         make(chan VideoAgentState, 64),
-		animationGenerator: NewAnimationGenerator(
-			sessionID,
-			orgID,
-			slideID,
-			mediaStore,
-			codeBuilder,
-			logger,
-		),
+		state:                state,
+		session:              session,
+		codeGenerator:        &codeGenerator{logger: logger},
+		toolRegistry:         common.NewToolRegistry(state, session, logger),
 	}
-}
-
-func (a *sceneGenerator) ApplyGenerationOptions(options AnimationGenerationOptions) {
-	a.generationOptions = options
-	a.animationGenerator.ApplyGenerationOptions(options)
-}
-
-func (a *sceneGenerator) savePlanningSession(ctx context.Context, session *planningSession) error {
-	payload, err := json.Marshal(session)
-	if err != nil {
-		return agenterrors.SessionUnavailable("failed to encode planning session", err)
-	}
-
-	if err := a.cache.SetKey(ctx, fmt.Sprintf("%s:%s:%s", generateOrEditAnimationSessionKeyPrefix, a.sessionID, a.slideID), string(payload), stateTTL); err != nil {
-		return agenterrors.SessionUnavailable("failed to persist planning session", err)
-	}
-	return nil
-}
-
-func (a *sceneGenerator) getGenerateOrEditAnimationSession(ctx context.Context) (*planningSession, error) {
-	value, err := a.cache.GetKey(ctx, fmt.Sprintf("%s:%s:%s", generateOrEditAnimationSessionKeyPrefix, a.sessionID, a.slideID))
-	if err != nil {
-		return nil, agenterrors.SessionUnavailable("failed to read planning session", err)
-	}
-
-	var session planningSession
-	if err := json.Unmarshal([]byte(value), &session); err != nil {
-		return nil, agenterrors.SessionUnavailable("invalid planning session payload", err)
-	}
-
-	// keep only the last 5 messages
-	if len(session.ConversationHistory) > 5 {
-		session.ConversationHistory = session.ConversationHistory[len(session.ConversationHistory)-5:]
-	}
-
-	return &session, nil
 }
 
 func (a *sceneGenerator) ContinueAgent(
 	ctx context.Context,
 	options ContinueSessionOptions,
-) (*RunResult, error) {
+) (*common.RunResult, error) {
 	userResponse := strings.TrimSpace(options.UserResponse)
 	if userResponse == "" {
 		return nil, agenterrors.InvalidInput("user response is required", nil)
 	}
 
-	session, err := a.getGenerateOrEditAnimationSession(ctx)
+	session, err := a.session.Get(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -145,12 +100,6 @@ func (a *sceneGenerator) ContinueAgent(
 	}
 
 	generatePlanRequest := types.AddSceneRequest{}
-
-	// If the user has provided more assets or clarification, update the attachments
-	if options.SelectedMediaAssets != nil && len(options.SelectedMediaAssets) > 0 {
-		session.Request.Assets = append(session.Request.Assets, options.SelectedMediaAssets...)
-		userResponse += "\n\n" + assetUpdatedMessage
-	}
 
 	err = a.injectMediaAssets(ctx, session.Request)
 	if err != nil {
@@ -166,23 +115,24 @@ func (a *sceneGenerator) ContinueAgent(
 		}
 	}
 
-	session.ConversationHistory = append(session.ConversationHistory, types.Message{
-		Role:    types.Union3KassistantOrKtoolOrKuser__NewKuser(),
-		Content: userResponse,
-	})
-
-	if err := a.savePlanningSession(ctx, session); err != nil {
-		return nil, err
+	newMessage := &pbcore.ConversationMessage{
+		Role:    pbcore.ConversationRole_CONVERSATION_ROLE_USER,
+		Message: userResponse,
 	}
 
-	a.publishTransientState(VideoAgentState{
-		State:            stateStatusProcessing,
-		LastUserResponse: userResponse,
+	for _, asset := range options.SelectedMediaAssets {
+		newMessage.AssetIds = append(newMessage.AssetIds, asset.AssetID)
+	}
+
+	session.ConversationHistory = append(session.ConversationHistory, newMessage)
+
+	a.state.Publish(common.AgentState{
+		State: common.StateStatusProcessing,
 	})
 
 	a.logger.Info("continuing agent session with user response", zap.String("response", userResponse))
 
-	return a.runPlanning(ctx, generatePlanRequest, session, options.SlideToEdit)
+	return a.runPlanning(ctx, generatePlanRequest, session)
 }
 
 func (a *sceneGenerator) injectMediaAssets(ctx context.Context, input *pbportal.CreateVideoRequest) error {
@@ -212,31 +162,31 @@ func (a *sceneGenerator) injectMediaAssets(ctx context.Context, input *pbportal.
 		}
 	}
 
-	if len(assetIDs) > 0 {
-		a.publishTransientState(VideoAgentState{
-			Thinking: "Analysing attachments..",
-			State:    stateStatusProcessing,
-		})
-		mediaAssets, err := a.db.GetMediaAssetsByID(ctx, assetIDs)
-		if err != nil {
-			return err
-		}
-		// Analyze image
-		for _, mediaAsset := range mediaAssets {
-			imageAnalysis, err := a.llmService.AnalyzeImage(ctx, mediaAsset)
-			if err != nil {
-				return err
-			}
-			mediaAsset.Description = imageAnalysis.Description
-			mediaAsset.Tags = strings.Join(imageAnalysis.Tags, ",")
-			note, ok := userNoteMap[mediaAsset.ID]
-			if ok {
-				mediaAsset.UserNote = note
-			}
-		}
-
-		registryBuilder.AddAssets(mediaAssets)
-	}
+	//if len(assetIDs) > 0 {
+	//	a.state.Publish(common.AgentState{
+	//		Thinking: "Analysing attachments..",
+	//		State:    common.StateStatusProcessing,
+	//	})
+	//	mediaAssets, err := a.db.GetMediaAssetsByID(ctx, assetIDs)
+	//	if err != nil {
+	//		return err
+	//	}
+	//	// Analyze image
+	//	for _, mediaAsset := range mediaAssets {
+	//		imageAnalysis, err := a.llmService.AnalyzeImage(ctx, mediaAsset)
+	//		if err != nil {
+	//			return err
+	//		}
+	//		mediaAsset.Description = imageAnalysis.Description
+	//		mediaAsset.Tags = strings.Join(imageAnalysis.Tags, ",")
+	//		note, ok := userNoteMap[mediaAsset.ID]
+	//		if ok {
+	//			mediaAsset.UserNote = note
+	//		}
+	//	}
+	//
+	//	registryBuilder.AddAssets(mediaAssets)
+	//}
 
 	a.assetRegistry = registryBuilder.Build()
 	return nil
@@ -246,7 +196,7 @@ func (l *sceneGenerator) GenerateScene(
 	ctx context.Context,
 	slide *pbcore.Slide,
 	input *pbportal.CreateVideoRequest,
-) (*RunResult, error) {
+) (*common.RunResult, error) {
 
 	if err := ValidatePrompt(input.Prompt); err != nil {
 		return nil, err
@@ -267,22 +217,16 @@ func (l *sceneGenerator) GenerateScene(
 		}
 	}
 
-	session, err := l.getGenerateOrEditAnimationSession(ctx)
+	session, err := l.session.Get(ctx)
 	if err != nil && !errors.Is(err, cache.ErrCacheMiss) {
 		return nil, err
 	}
 
 	if session == nil {
-		session = &planningSession{
+		session = &common.SessionContext{
 			Request:             input,
-			ConversationHistory: make([]types.Message, 0),
+			ConversationHistory: make([]*pbcore.ConversationMessage, 0),
 		}
-	}
-
-	// if there are assets and there is an ongoing conversation
-	// we want LLM to know that assets are updated and use the latest ones
-	if len(input.Assets) > 0 && len(session.ConversationHistory) > 0 {
-		input.Prompt += "\n\n" + assetUpdatedMessage
 	}
 
 	// Check if its a edit call and add previously scene
@@ -296,26 +240,28 @@ func (l *sceneGenerator) GenerateScene(
 			return nil, agenterrors.InvalidInput("invalid scene patch", err)
 		}
 
-		session.ConversationHistory = append(session.ConversationHistory, types.Message{
-			Role:    types.Union3KassistantOrKtoolOrKuser__NewKassistant(),
-			Content: string(marshalScene),
+		session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
+			Role:    pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
+			Message: string(marshalScene),
 		})
 	}
 
-	// Prompt always goes in the conversation
-	session.ConversationHistory = append(session.ConversationHistory, types.Message{
-		Role:    types.Union3KassistantOrKtoolOrKuser__NewKuser(),
-		Content: input.Prompt,
-	})
-
-	if err := l.savePlanningSession(ctx, session); err != nil {
-		return nil, err
+	newMessage := &pbcore.ConversationMessage{
+		Role:    pbcore.ConversationRole_CONVERSATION_ROLE_USER,
+		Message: input.Prompt,
 	}
 
-	return l.runPlanning(ctx, generatePlanRequest, session, slide)
+	for _, asset := range input.Assets {
+		newMessage.AssetIds = append(newMessage.AssetIds, asset.AssetID)
+	}
+
+	// Prompt always goes in the conversation
+	session.ConversationHistory = append(session.ConversationHistory, newMessage)
+
+	return l.runPlanning(ctx, generatePlanRequest, session)
 }
 
-func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest types.AddSceneRequest, session *planningSession, slide *pbcore.Slide) (result *RunResult, retErr error) {
+func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest types.AddSceneRequest, session *common.SessionContext) (result *common.RunResult, retErr error) {
 	defer func() {
 		if retErr != nil {
 			// Treat both a hard context cancel (runCtx cancelled by the handler) and a
@@ -328,30 +274,30 @@ func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest ty
 		}
 	}()
 
-	optionsBuilder := NewAnimationGenerationOptionsBuilder()
-	if l.assetRegistry != nil {
-		optionsBuilder.WithAssetRegistry(l.assetRegistry)
-	}
-	l.animationGenerator.ApplyGenerationOptions(optionsBuilder.Build())
-
 	generatePlanRequest.ComponentList = scenes.BuildScenesList(scenes.BuildSceneListOptions{
 		Groups:       false,
 		Enums:        true,
 		FieldsToSkip: nil,
 	})
+
+	history, err := l.session.ConvertToContextMessages(ctx, session.ConversationHistory, l.assetRegistry)
+	if err != nil {
+		return nil, err
+	}
+
 	// Generate and validate upto max attempts
 	for attempt := 0; attempt < maxAttempts; attempt++ {
-		llmResponse, err := l.llmService.GenerateScene(ctx, generatePlanRequest, session.ConversationHistory, func(chunk string) {
-			l.publishTransientState(VideoAgentState{
+		llmResponse, err := l.llmService.GenerateScene(ctx, generatePlanRequest, history, func(chunk string) {
+			l.state.Publish(common.AgentState{
 				Thinking: chunk,
-				State:    stateStatusProcessing,
+				State:    common.StateStatusProcessing,
 			})
 		})
 		if err != nil {
 			return nil, agenterrors.LLMPlanningFailed("failed to generate scene", err)
 		}
 
-		handled, result, err := l.handleToolCalls(ctx, session, llmResponse, "")
+		handled, result, err := l.toolRegistry.HandleAskQuestion(ctx, session, llmResponse.AsAskUserQuestion(), "", l.assetRegistry)
 		if handled {
 			return result, err
 		}
@@ -359,6 +305,12 @@ func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest ty
 		scene := llmResponse.AsScene()
 		if scene == nil {
 			return nil, agenterrors.Internal("scene is missing", nil)
+		}
+
+		// save session
+		err = l.session.Save(ctx, session)
+		if err != nil {
+			return nil, err
 		}
 
 		// replace generated asset handles
@@ -373,8 +325,8 @@ func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest ty
 		sceneConfigs, err := scenes.ConvertToSceneConfig(scene, l.assetRegistry)
 		if err != nil {
 			marshalScene, _ := json.Marshal(scene)
-			session.ConversationHistory = appendRetryConversation(
-				session.ConversationHistory,
+			history = appendRetryConversation(
+				history,
 				string(marshalScene),
 				err.Error(),
 			)
@@ -388,12 +340,7 @@ func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest ty
 
 		sceneConfig := sceneConfigs[0]
 
-		template, err := l.animationGenerator.GenerateCodeFromScene(ctx, sceneConfig, func(progress TemplateGenerationProgress) {
-			l.publishTransientState(VideoAgentState{
-				Thinking: progress.Message,
-				State:    stateStatusProcessing,
-			})
-		})
+		template, err := l.codeGenerator.GenerateCodeFromScene(ctx, sceneConfig)
 		if err != nil {
 			return nil, err
 		}
@@ -401,8 +348,8 @@ func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest ty
 		// add background if applicable
 		template.BackgroundStyle = sceneConfig.Background
 
-		return &RunResult{
-			Status:             RunStatusCompleted,
+		return &common.RunResult{
+			Status:             common.RunStatusCompleted,
 			GeneratedAnimation: template,
 		}, nil
 
@@ -410,11 +357,4 @@ func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest ty
 
 	return nil, agenterrors.AnimationGenerationFailed("unable to generate, all retries exhausted", nil)
 
-}
-
-func (a *sceneGenerator) publishTransientState(state VideoAgentState) {
-	select {
-	case a.stateUpdates <- state:
-	default:
-	}
 }

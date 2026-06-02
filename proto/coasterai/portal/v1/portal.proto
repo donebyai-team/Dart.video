@@ -13,6 +13,7 @@ import "coasterai/core/v1/brandkit.proto";
 import "coasterai/core/v1/template.proto";
 import "coasterai/core/v1/figma.proto";
 import "coasterai/core/v1/media_asset.proto";
+import "coasterai/core/v1/chat.proto";
 
 service PortalService {
   rpc GetConfig(.google.protobuf.Empty) returns (Config);
@@ -51,6 +52,7 @@ service PortalService {
 
   // Edit animations
   rpc GenerateOrEditScene(GenerateOrEditSceneRequest) returns (stream GenerateOrEditSceneResponse);
+  rpc GetConversationHistory(GetConversationHistoryRequest) returns (GetConversationHistoryResponse);
 
   // Assets
   rpc GetMediaAssets(GetMediaAssetsRequest) returns (GetMediaAssetsResponse);
@@ -79,6 +81,15 @@ message GenerateOrEditSceneRequest {
   }
 }
 
+message GetConversationHistoryRequest {
+  string videoId = 1;
+  string slideId = 2;
+}
+
+message GetConversationHistoryResponse {
+  repeated core.v1.ConversationMessage messages = 1;
+}
+
 message GenerateOrEditSceneResponse {
   core.v1.Slide slide = 1;
   string thinking_summary = 2;
@@ -91,6 +102,7 @@ message GenerateOrEditSceneResponse {
 message SuggestScenesRequest {
   string videoId = 1;
   string sceneId = 2;
+  core.v1.AnimationCategory category = 3;
 }
 
 message SuggestScenesResponse {
@@ -180,6 +192,7 @@ message CreateVideoRequest {
   int32 fps = 8;
   repeated core.v1.SelectedMediaAsset assets = 9;
   map<string, string> questions = 10;
+  repeated core.v1.SelectedMediaAsset references = 11;
 }
 
 message CreateVideoResponse {

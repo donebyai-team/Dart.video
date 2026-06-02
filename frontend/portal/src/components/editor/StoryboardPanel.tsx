@@ -143,8 +143,8 @@ const StoryboardPanel = ({
                                 )
                             }
 
-                            onAddSlide={(afterSlideId) => {
-                                handleAddAnimation(section.id, afterSlideId)
+                            onAddSlide={(afterSlideId, slideType) => {
+                                handleAddAnimation(section.id, afterSlideId, slideType)
                             }}
                         />
                     ))}

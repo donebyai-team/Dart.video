@@ -3,7 +3,7 @@ import type {
     EditorConfig,
 } from "@/types/editor";
 import type { EntityId } from "@/types/selection";
-import { SelectedTool } from "@/types/tools";
+import { SelectedTool, SlideType } from "@/types/tools";
 import { BrandAssetPriority } from "@coasterai/pb/coasterai/core/v1/brandkit_pb";
 import { Section, Slide, TransitionDirection, TransitionType, CalloutEffect, BackgroundStyle, ZoomEffect, SpotlightEffect } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { Resolution, Video } from "@coasterai/pb/coasterai/core/v1/video_pb";
@@ -65,7 +65,7 @@ export interface VideoActions {
     getSlideDurationInSeconds: (slide: Slide) => number;
     getSlideWithBackground: (slide : Slide) => BackgroundStyle;
     getTimelineSlides: () => TimelineSlide[]
-    addSlide: (sectionId: string, afterSlideId?: string) => string
+    addSlide: (sectionId: string, afterSlideId?: string, slideType?: SlideType) => string
     removeSlide: (sectionId: string, slideId: string) => void
     duplicateSlide: (sectionId: string, slideId: string) => void
     updateSlide: (updates: Partial<Slide>) => void
@@ -108,7 +108,7 @@ export interface VideoActions {
     handleCloseTool: () => void
     handleEditAnimation: () => void
     handleViewAnimationCode: () => void
-    handleAddAnimation: (sectionId: string, afterSlideId?: string) => void                                          
+    handleAddAnimation: (sectionId: string, afterSlideId?: string, slideType?: SlideType) => void                                          
 
     // Voiceover
     handleGenerateSlideVoiceover: () => void

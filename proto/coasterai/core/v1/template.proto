@@ -16,3 +16,13 @@ message AnimationTemplate {
   AnimationSlidePlan plan = 7;
   float duration = 8;
 }
+
+enum AnimationCategory {
+  ANIMATION_CATEGORY_UNSPECIFIED = 0;
+  ANIMATION_CATEGORY_TEXT = 1;
+  ANIMATION_CATEGORY_INTRO = 2;
+  ANIMATION_CATEGORY_VISUALS = 3;
+  ANIMATION_CATEGORY_MEDIA = 4;
+  ANIMATION_CATEGORY_SOCIAL = 5;
+  ANIMATION_CATEGORY_CTA = 6;
+}

@@ -1,6 +1,7 @@
 import { EditorConfig } from "@/types/editor";
 import { ActiveToolType, SelectedTool } from "@/types/tools";
 import {
+    AnimationSlideContent,
     AnimationSlideContentSchema,
     BackgroundStyle,
     BackgroundStyleSchema,
@@ -46,20 +47,48 @@ export function createDefaultBackgroundStyle(
     });
 }
 
-export function createNewSlide(params: { inheritedBg: BackgroundStyle }) {
-    const {
-        inheritedBg,
-    } = params;
+export const defaultImageSlideContent = {
+    codeRegistry: {
+        code: `
+export default function RemoteComponent() {
+  return (
+    <SafeArea>
+      <AbsoluteCenter axis="both">
+        <AnimatedMedia />
+      </AbsoluteCenter>
+    </SafeArea>
+  );
+}
+`,
+    },
+    plan: {},
+    edits: {
+        animatedtext: {},
+        mediaasset: {
+            motionPreset: 'none',
+            src: 'https://placehold.co/1280x720.png',
+        },
+        name: 'AnimatedMedia',
+    },
+};
+
+export const defaultAnimationSlideContent = {};
+
+export function createNewSlide(
+    params: { inheritedBg: BackgroundStyle },
+    content: Partial<AnimationSlideContent> = defaultAnimationSlideContent
+) {
+    const { inheritedBg } = params;
 
     return create(SlideSchema, {
         id: `slide-${crypto.randomUUID()}`,
-        transcript: "",
+        transcript: '',
         slideStatus: SlideStatus.PENDING,
         durationInFrames: 5 * 30,
         transition: TransitionType.TRANSITION_NONE,
         backgroundStyle: inheritedBg,
         transitionDurationInFrames: TRANSITION_DURATION_FRAMES,
-        content: create(AnimationSlideContentSchema, {}),
+        content: create(AnimationSlideContentSchema, content),
         spotlights: [],
         callouts: [],
         zooms: [],

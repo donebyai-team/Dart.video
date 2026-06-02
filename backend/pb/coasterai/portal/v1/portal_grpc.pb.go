@@ -21,36 +21,37 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	PortalService_GetConfig_FullMethodName             = "/coasterai.portal.v1.PortalService/GetConfig"
-	PortalService_Self_FullMethodName                  = "/coasterai.portal.v1.PortalService/Self"
-	PortalService_GetIntegration_FullMethodName        = "/coasterai.portal.v1.PortalService/GetIntegration"
-	PortalService_RevokeIntegration_FullMethodName     = "/coasterai.portal.v1.PortalService/RevokeIntegration"
-	PortalService_UpdateIntegration_FullMethodName     = "/coasterai.portal.v1.PortalService/UpdateIntegration"
-	PortalService_PasswordlessStart_FullMethodName     = "/coasterai.portal.v1.PortalService/PasswordlessStart"
-	PortalService_PasswordlessVerify_FullMethodName    = "/coasterai.portal.v1.PortalService/PasswordlessVerify"
-	PortalService_OauthAuthorize_FullMethodName        = "/coasterai.portal.v1.PortalService/OauthAuthorize"
-	PortalService_OauthCallback_FullMethodName         = "/coasterai.portal.v1.PortalService/OauthCallback"
-	PortalService_SocialLoginCallback_FullMethodName   = "/coasterai.portal.v1.PortalService/SocialLoginCallback"
-	PortalService_GetIntegrations_FullMethodName       = "/coasterai.portal.v1.PortalService/GetIntegrations"
-	PortalService_CreateVideo_FullMethodName           = "/coasterai.portal.v1.PortalService/CreateVideo"
-	PortalService_ContinueVideoPlanning_FullMethodName = "/coasterai.portal.v1.PortalService/ContinueVideoPlanning"
-	PortalService_GetVideo_FullMethodName              = "/coasterai.portal.v1.PortalService/GetVideo"
-	PortalService_SuggestScenes_FullMethodName         = "/coasterai.portal.v1.PortalService/SuggestScenes"
-	PortalService_StopVideo_FullMethodName             = "/coasterai.portal.v1.PortalService/StopVideo"
-	PortalService_GetVideos_FullMethodName             = "/coasterai.portal.v1.PortalService/GetVideos"
-	PortalService_DeleteVideo_FullMethodName           = "/coasterai.portal.v1.PortalService/DeleteVideo"
-	PortalService_DuplicateVideo_FullMethodName        = "/coasterai.portal.v1.PortalService/DuplicateVideo"
-	PortalService_RenderVideo_FullMethodName           = "/coasterai.portal.v1.PortalService/RenderVideo"
-	PortalService_UpdateVideoConfig_FullMethodName     = "/coasterai.portal.v1.PortalService/UpdateVideoConfig"
-	PortalService_ListFigmaFrames_FullMethodName       = "/coasterai.portal.v1.PortalService/ListFigmaFrames"
-	PortalService_ImportFigmaFrame_FullMethodName      = "/coasterai.portal.v1.PortalService/ImportFigmaFrame"
-	PortalService_CreateBrandIdentity_FullMethodName   = "/coasterai.portal.v1.PortalService/CreateBrandIdentity"
-	PortalService_GetBrandIdentities_FullMethodName    = "/coasterai.portal.v1.PortalService/GetBrandIdentities"
-	PortalService_UpdateBrandIdentity_FullMethodName   = "/coasterai.portal.v1.PortalService/UpdateBrandIdentity"
-	PortalService_GenerateOrEditScene_FullMethodName   = "/coasterai.portal.v1.PortalService/GenerateOrEditScene"
-	PortalService_GetMediaAssets_FullMethodName        = "/coasterai.portal.v1.PortalService/GetMediaAssets"
-	PortalService_GetMediaAssetsByID_FullMethodName    = "/coasterai.portal.v1.PortalService/GetMediaAssetsByID"
-	PortalService_GenerateMusic_FullMethodName         = "/coasterai.portal.v1.PortalService/GenerateMusic"
+	PortalService_GetConfig_FullMethodName              = "/coasterai.portal.v1.PortalService/GetConfig"
+	PortalService_Self_FullMethodName                   = "/coasterai.portal.v1.PortalService/Self"
+	PortalService_GetIntegration_FullMethodName         = "/coasterai.portal.v1.PortalService/GetIntegration"
+	PortalService_RevokeIntegration_FullMethodName      = "/coasterai.portal.v1.PortalService/RevokeIntegration"
+	PortalService_UpdateIntegration_FullMethodName      = "/coasterai.portal.v1.PortalService/UpdateIntegration"
+	PortalService_PasswordlessStart_FullMethodName      = "/coasterai.portal.v1.PortalService/PasswordlessStart"
+	PortalService_PasswordlessVerify_FullMethodName     = "/coasterai.portal.v1.PortalService/PasswordlessVerify"
+	PortalService_OauthAuthorize_FullMethodName         = "/coasterai.portal.v1.PortalService/OauthAuthorize"
+	PortalService_OauthCallback_FullMethodName          = "/coasterai.portal.v1.PortalService/OauthCallback"
+	PortalService_SocialLoginCallback_FullMethodName    = "/coasterai.portal.v1.PortalService/SocialLoginCallback"
+	PortalService_GetIntegrations_FullMethodName        = "/coasterai.portal.v1.PortalService/GetIntegrations"
+	PortalService_CreateVideo_FullMethodName            = "/coasterai.portal.v1.PortalService/CreateVideo"
+	PortalService_ContinueVideoPlanning_FullMethodName  = "/coasterai.portal.v1.PortalService/ContinueVideoPlanning"
+	PortalService_GetVideo_FullMethodName               = "/coasterai.portal.v1.PortalService/GetVideo"
+	PortalService_SuggestScenes_FullMethodName          = "/coasterai.portal.v1.PortalService/SuggestScenes"
+	PortalService_StopVideo_FullMethodName              = "/coasterai.portal.v1.PortalService/StopVideo"
+	PortalService_GetVideos_FullMethodName              = "/coasterai.portal.v1.PortalService/GetVideos"
+	PortalService_DeleteVideo_FullMethodName            = "/coasterai.portal.v1.PortalService/DeleteVideo"
+	PortalService_DuplicateVideo_FullMethodName         = "/coasterai.portal.v1.PortalService/DuplicateVideo"
+	PortalService_RenderVideo_FullMethodName            = "/coasterai.portal.v1.PortalService/RenderVideo"
+	PortalService_UpdateVideoConfig_FullMethodName      = "/coasterai.portal.v1.PortalService/UpdateVideoConfig"
+	PortalService_ListFigmaFrames_FullMethodName        = "/coasterai.portal.v1.PortalService/ListFigmaFrames"
+	PortalService_ImportFigmaFrame_FullMethodName       = "/coasterai.portal.v1.PortalService/ImportFigmaFrame"
+	PortalService_CreateBrandIdentity_FullMethodName    = "/coasterai.portal.v1.PortalService/CreateBrandIdentity"
+	PortalService_GetBrandIdentities_FullMethodName     = "/coasterai.portal.v1.PortalService/GetBrandIdentities"
+	PortalService_UpdateBrandIdentity_FullMethodName    = "/coasterai.portal.v1.PortalService/UpdateBrandIdentity"
+	PortalService_GenerateOrEditScene_FullMethodName    = "/coasterai.portal.v1.PortalService/GenerateOrEditScene"
+	PortalService_GetConversationHistory_FullMethodName = "/coasterai.portal.v1.PortalService/GetConversationHistory"
+	PortalService_GetMediaAssets_FullMethodName         = "/coasterai.portal.v1.PortalService/GetMediaAssets"
+	PortalService_GetMediaAssetsByID_FullMethodName     = "/coasterai.portal.v1.PortalService/GetMediaAssetsByID"
+	PortalService_GenerateMusic_FullMethodName          = "/coasterai.portal.v1.PortalService/GenerateMusic"
 )
 
 // PortalServiceClient is the client API for PortalService service.
@@ -88,6 +89,7 @@ type PortalServiceClient interface {
 	UpdateBrandIdentity(ctx context.Context, in *UpdateBrandIdentityRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// Edit animations
 	GenerateOrEditScene(ctx context.Context, in *GenerateOrEditSceneRequest, opts ...grpc.CallOption) (PortalService_GenerateOrEditSceneClient, error)
+	GetConversationHistory(ctx context.Context, in *GetConversationHistoryRequest, opts ...grpc.CallOption) (*GetConversationHistoryResponse, error)
 	// Assets
 	GetMediaAssets(ctx context.Context, in *GetMediaAssetsRequest, opts ...grpc.CallOption) (*GetMediaAssetsResponse, error)
 	GetMediaAssetsByID(ctx context.Context, in *GetMediaAssetsByIDs, opts ...grpc.CallOption) (*GetMediaAssetsResponse, error)
@@ -437,6 +439,15 @@ func (x *portalServiceGenerateOrEditSceneClient) Recv() (*GenerateOrEditSceneRes
 	return m, nil
 }
 
+func (c *portalServiceClient) GetConversationHistory(ctx context.Context, in *GetConversationHistoryRequest, opts ...grpc.CallOption) (*GetConversationHistoryResponse, error) {
+	out := new(GetConversationHistoryResponse)
+	err := c.cc.Invoke(ctx, PortalService_GetConversationHistory_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *portalServiceClient) GetMediaAssets(ctx context.Context, in *GetMediaAssetsRequest, opts ...grpc.CallOption) (*GetMediaAssetsResponse, error) {
 	out := new(GetMediaAssetsResponse)
 	err := c.cc.Invoke(ctx, PortalService_GetMediaAssets_FullMethodName, in, out, opts...)
@@ -499,6 +510,7 @@ type PortalServiceServer interface {
 	UpdateBrandIdentity(context.Context, *UpdateBrandIdentityRequest) (*emptypb.Empty, error)
 	// Edit animations
 	GenerateOrEditScene(*GenerateOrEditSceneRequest, PortalService_GenerateOrEditSceneServer) error
+	GetConversationHistory(context.Context, *GetConversationHistoryRequest) (*GetConversationHistoryResponse, error)
 	// Assets
 	GetMediaAssets(context.Context, *GetMediaAssetsRequest) (*GetMediaAssetsResponse, error)
 	GetMediaAssetsByID(context.Context, *GetMediaAssetsByIDs) (*GetMediaAssetsResponse, error)
@@ -590,6 +602,9 @@ func (UnimplementedPortalServiceServer) UpdateBrandIdentity(context.Context, *Up
 }
 func (UnimplementedPortalServiceServer) GenerateOrEditScene(*GenerateOrEditSceneRequest, PortalService_GenerateOrEditSceneServer) error {
 	return status.Errorf(codes.Unimplemented, "method GenerateOrEditScene not implemented")
+}
+func (UnimplementedPortalServiceServer) GetConversationHistory(context.Context, *GetConversationHistoryRequest) (*GetConversationHistoryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetConversationHistory not implemented")
 }
 func (UnimplementedPortalServiceServer) GetMediaAssets(context.Context, *GetMediaAssetsRequest) (*GetMediaAssetsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMediaAssets not implemented")
@@ -1111,6 +1126,24 @@ func (x *portalServiceGenerateOrEditSceneServer) Send(m *GenerateOrEditSceneResp
 	return x.ServerStream.SendMsg(m)
 }
 
+func _PortalService_GetConversationHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetConversationHistoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PortalServiceServer).GetConversationHistory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PortalService_GetConversationHistory_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PortalServiceServer).GetConversationHistory(ctx, req.(*GetConversationHistoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _PortalService_GetMediaAssets_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetMediaAssetsRequest)
 	if err := dec(in); err != nil {
@@ -1263,6 +1296,10 @@ var PortalService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateBrandIdentity",
 			Handler:    _PortalService_UpdateBrandIdentity_Handler,
+		},
+		{
+			MethodName: "GetConversationHistory",
+			Handler:    _PortalService_GetConversationHistory_Handler,
 		},
 		{
 			MethodName: "GetMediaAssets",

@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/shank318/coasterai/agent"
+	"github.com/shank318/coasterai/agent/common"
 	"github.com/shank318/coasterai/errorx"
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
@@ -71,15 +72,17 @@ func (p *Portal) CreateVideo(ctx context.Context, c *connect.Request[pbportal.Cr
 		return errorx.ToConnect(errorx.New(errorx.CodeInternal, "STREAM_SEND_FAILED", "failed to send initial planning event", err))
 	}
 
-	videoAgent := p.newVideoAgent(logger, videoID, actor.OrganizationID)
+	statePublisher := common.CreatePersistedAgentStatusPublisher(videoID, p.authStateStore, logger)
+	videoAgent := p.newVideoAgent(logger, videoID, actor.OrganizationID, statePublisher)
 
 	logger.Info("created video successfully; starting interactive planning", zap.String("video_id", video.ID))
 
 	return p.streamAgentRun(ctx,
 		stream,
 		videoAgent,
+		statePublisher,
 		video.ID,
-		func(runCtx context.Context) (*agent.RunResult, error) {
+		func(runCtx context.Context) (*common.RunResult, error) {
 			return videoAgent.Start(runCtx, agent.StartSessionOptions{
 				OrgID: actor.OrganizationID,
 				Input: c.Msg,
@@ -116,14 +119,16 @@ func (p *Portal) ContinueVideoPlanning(ctx context.Context, c *connect.Request[p
 		return errorx.ToConnect(errorx.New(errorx.CodeInvalidArgument, "USER_RESPONSE_REQUIRED", "response is required", nil))
 	}
 
-	videoAgent := p.newVideoAgent(logger, videoID, actor.OrganizationID)
+	statePublisher := common.CreatePersistedAgentStatusPublisher(videoID, p.authStateStore, logger)
+	videoAgent := p.newVideoAgent(logger, videoID, actor.OrganizationID, statePublisher)
 
 	return p.streamAgentRun(
 		ctx,
 		stream,
 		videoAgent,
+		statePublisher,
 		c.Msg.Id,
-		func(runCtx context.Context) (*agent.RunResult, error) {
+		func(runCtx context.Context) (*common.RunResult, error) {
 			return videoAgent.Continue(runCtx, agent.ContinueSessionOptions{
 				UserResponse:        c.Msg.Response,
 				SelectedMediaAssets: c.Msg.Assets,
@@ -133,17 +138,17 @@ func (p *Portal) ContinueVideoPlanning(ctx context.Context, c *connect.Request[p
 	)
 }
 
-func (p *Portal) newVideoAgent(logger *zap.Logger, sessionID, orgID string) agent.VideoAgent {
+func (p *Portal) newVideoAgent(logger *zap.Logger, sessionID, orgID string, statePublisher common.AgentStatusPublisher) agent.VideoAgent {
 	return agent.NewAgentV2(
 		sessionID,
 		orgID,
 		logger,
 		p.authStateStore,
 		p.db,
-		p.mediaService,
-		p.codeBuilderService,
+		p.llmService,
 		p.videoGenerationService,
 		p.brandIdentityService,
+		statePublisher,
 	)
 }
 
@@ -151,15 +156,16 @@ func (p *Portal) streamAgentRun(
 	ctx context.Context, // THIS is the Connect request context — do not cancel it
 	stream *connect.ServerStream[pbportal.CreateVideoResponse],
 	videoAgent agent.VideoAgent,
+	statePublisher common.AgentStatusPublisher,
 	videoID string,
-	run func(ctx context.Context) (*agent.RunResult, error), // run MUST accept ctx
+	run func(ctx context.Context) (*common.RunResult, error), // run MUST accept ctx
 	logger *zap.Logger,
 ) (err error) {
 	runCtx, cancelRun := context.WithCancel(context.Background())
 	defer cancelRun()
 
 	type runOutput struct {
-		result *agent.RunResult
+		result *common.RunResult
 		err    error
 	}
 
@@ -173,7 +179,7 @@ func (p *Portal) streamAgentRun(
 		}
 	}()
 
-	stateUpdates := videoAgent.StateUpdates()
+	stateUpdates := statePublisher.StateUpdates()
 	lastThinking := ""
 
 	for {
@@ -214,7 +220,7 @@ func (p *Portal) streamAgentRun(
 				return nil
 			}
 
-			if out.result.Status == agent.RunStatusWaitingForUserInput {
+			if out.result.Status == common.RunStatusWaitingForUserInput {
 				logger.Info("agent stopped waiting for user input")
 				if err := stream.Send(&pbportal.CreateVideoResponse{
 					Id:                  videoID,
@@ -290,10 +296,10 @@ func (p *Portal) StopVideo(ctx context.Context, req *connect.Request[pbportal.St
 	logger := logging.Logger(ctx, p.logger).With(zap.String("session_id", videoID))
 
 	logger.Info("StopVideo: user requested agent stop")
+	statePublisher := common.CreatePersistedAgentStatusPublisher(videoID, p.authStateStore, logger)
+	videoAgent := p.newVideoAgent(logger, videoID, actor.OrganizationID, statePublisher)
 
-	videoAgent := p.newVideoAgent(logger, videoID, actor.OrganizationID)
-
-	if err := videoAgent.StopAgent(ctx, videoID); err != nil {
+	if err := videoAgent.StopAgent(ctx); err != nil {
 		logger.Error("StopVideo: StopAgent failed", zap.String("video_id", videoID), zap.Error(err))
 		return nil, errorx.ToConnect(errorx.New(errorx.CodeInternal, "STOP_AGENT_FAILED", "failed to stop agent", err))
 	}
@@ -317,6 +323,7 @@ func (p *Portal) GetVideo(
 	logger := logging.Logger(ctx, p.logger).With(zap.String("session_id", videoID))
 
 	var videoAgent agent.VideoAgent // lazy init
+	var statePublisher common.AgentStatusPublisher
 
 	sendCurrent := func() (*models.Video, error) {
 		video, totalSlides, err := p.videoGenerationService.GetVideo(ctx, videoID, actor.OrganizationID, services.VideoOptions{IncludePending: false})
@@ -338,9 +345,10 @@ func (p *Portal) GetVideo(
 		thinking := ""
 		if video.Status == models.VideoStatusPROCESSING {
 			if videoAgent == nil {
-				videoAgent = p.newVideoAgent(logger, videoID, actor.OrganizationID)
+				statePublisher = common.CreatePersistedAgentStatusPublisher(videoID, p.authStateStore, logger)
+				videoAgent = p.newVideoAgent(logger, videoID, actor.OrganizationID, statePublisher)
 			}
-			state, err := videoAgent.GetState(ctx)
+			state, err := statePublisher.Get(ctx)
 			if err != nil {
 				logger.Debug("failed to load agent state in GetVideo",
 					zap.String("video_id", videoID),
