@@ -390,7 +390,7 @@ func (p *Portal) GetVideo(
 		select {
 		case <-ctx.Done():
 			logger.Info("GetVideo: client disconnected, stopping poll loop (agent keeps running)")
-			return ctx.Err()
+			return connect.NewError(connect.CodeInvalidArgument, ctx.Err())
 
 		case <-ticker.C:
 			continue

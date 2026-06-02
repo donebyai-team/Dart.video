@@ -134,7 +134,7 @@ func (p *Portal) streamAnimationGenerationRun(
 
 		case out := <-done:
 			if out.err != nil {
-				return out.err
+				return connect.NewError(connect.CodeInvalidArgument, out.err)
 			}
 			return sendAnimationResult(stream, targetSlide, out.result)
 		}

@@ -54,10 +54,6 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
   const [questionAssets, setQuestionAssets] = useState<SelectedAssetWithPreview[]>([])
 
   const hasSelectedAssets = selectedAssets.length > 0
-  const selectedAssetMessages = useMemo(
-    () => selectedAssets.map(asset => asset.selection),
-    [selectedAssets]
-  )
   const abortControllerRef = useRef<AbortController | null>(null)
   const streamSessionRef = useRef(0)
   const canSubmit = prompt.trim().length > 0
@@ -130,14 +126,21 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
   }
 
   const resetAfterStop = () => {
+    setPrompt('')
+    setSelectedAssets([])
+    setSelectedAssetsDialogOpen(false)
+    setQuestionAssets([])
+    setQuestionAssetsDialogOpen(false)
+  }
+
+  const resetAfterStreamEnd = () => {
     setStage('compose')
     setIsSubmitting(false)
     setIsThinkingBusy(false)
     setThinkingChunk('')
     setActiveQuestion(undefined)
     setPendingQuestion(undefined)
-    setQuestionAssets([])
-    setQuestionAssetsDialogOpen(false)
+    resetAfterStop()
   }
 
   const consumeStream = async (
@@ -160,10 +163,7 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
           applySlideToStore(event.slide)
         }
 
-        setPrompt('')
-        setSelectedAssets([])
-        setStage('compose')
-        setIsSubmitting(false)
+        resetAfterStreamEnd()
         setThinkingChunk(event.thinkingSummary)
         abortControllerRef.current?.abort()
         onConversationUpdated?.()
@@ -180,14 +180,13 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
     }
 
     if (!signal.aborted && streamSessionRef.current === streamSession) {
-      setStage('compose')
-      setIsSubmitting(false)
-      setIsThinkingBusy(false)
+      resetAfterStreamEnd()
     }
   }
 
   const startStream = async (overridePrompt?: string) => {
     const finalPrompt = (overridePrompt ?? prompt).trim()
+    const references = selectedAssets.map(asset => asset.selection)
     const slideId = selectedSlide?.id
     if (!videoId || !finalPrompt || !slideId || isSubmitting) return
 
@@ -211,7 +210,7 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
             case: 'request',
             value: {
               prompt: finalPrompt,
-              assets: selectedAssetMessages,
+              references,
             },
           },
         },
@@ -241,7 +240,7 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
     streamSessionRef.current++
     abortControllerRef.current?.abort()
     abortControllerRef.current = null
-    resetAfterStop()
+    resetAfterStreamEnd()
   }
 
   const openAssetDialog = (_mode?: 'figma' | 'upload') => {
@@ -359,7 +358,7 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
             value: {
               slideId,
               response,
-              assets: questionAssets.map(asset => asset.selection),
+              // assets: questionAssets.map(asset => asset.selection),
             },
           },
         },
