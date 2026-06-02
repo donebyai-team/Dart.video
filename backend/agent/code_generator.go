@@ -219,24 +219,11 @@ func (l *codeGenerator) GenerateCode(
 	}
 
 	// Check if its a edit call and add previously scene
-	//if slide.Content != nil && slide.Content.Edits != nil && len(slide.Content.Edits.Fields) > 0 {
-	//	sceneToEdit, err := scenes.EditsToScene(slide.Content.Edits, l.assetRegistry)
-	//	if err != nil {
-	//		return nil, agenterrors.InvalidInput("invalid scene patch", err)
-	//	}
-	//	marshalScene, err := json.Marshal(sceneToEdit)
-	//	if err != nil {
-	//		return nil, agenterrors.InvalidInput("invalid scene patch", err)
-	//	}
-	//
-	//	session.ConversationHistory = append(session.ConversationHistory, types.Message{
-	//		Role:    types.Union3KassistantOrKtoolOrKuser__NewKassistant(),
-	//		Content: string(marshalScene),
-	//	})
-	//}
+	if slide.Content != nil && slide.Content.Edits != nil && len(slide.Content.Edits.Fields) > 0 {
+		return nil, agenterrors.InvalidInput("edit via prompt not allows, click the scene to edit", nil)
+	}
 
-	if slide != nil &&
-		slide.Content != nil &&
+	if slide.Content != nil &&
 		slide.Content.CodeRegistry != nil &&
 		slide.Content.CodeRegistry.MUrl != "" {
 		session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
