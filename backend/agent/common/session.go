@@ -183,7 +183,7 @@ func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcor
 
 				case pbcore.MediaType_MEDIA_TYPE_VIDEO:
 					videoCount++
-					if mediaAsset.Metadata.Duration > 10 {
+					if mediaAsset.Metadata.Duration == 0 || mediaAsset.Metadata.Duration > 10 {
 						return nil, fmt.Errorf("maximum video duration allowed is 10 seconds")
 					}
 				}
