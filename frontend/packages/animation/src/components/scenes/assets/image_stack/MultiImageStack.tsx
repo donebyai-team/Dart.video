@@ -136,6 +136,9 @@ export function MultiImageStack(): React.ReactElement {
                         startAt={STACK_START_FRAME + STACK_ENTRANCE_DURATION}
                         text={textProps.text}
                         cyclingWords={cyclingWords}
+                        // Delay the headline swap until the peel motion has completed,
+                        // so the next word settles when the next image is revealed.
+                        wordCycleHoldDuration={transitionDuration}
                         holdDuration={holdDuration}
                         transitionDuration={transitionDuration}
                         entranceAnimation={textProps.entranceAnimation}
@@ -224,6 +227,11 @@ export const MultiImageStackSchemaFields = [
                 "type": "enum",
                 "map": "props.entranceAnimation",
                 "default": TextWithWordCycleDefaults.entranceAnimation
+            },
+            {
+                "name": "wordCycleHoldDuration",
+                "type": "number",
+                "default": BASE_TRANSITION_DURATION
             },
             {
                 "name": "holdDuration",

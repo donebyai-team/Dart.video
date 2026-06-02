@@ -2,7 +2,7 @@
 // @generated from file coasterai/core/v1/template.proto (package coasterai.core.v1, syntax proto3)
 /* eslint-disable */
 
-import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv1";
+import { enumDesc, fileDesc, messageDesc, tsEnum } from "@bufbuild/protobuf/codegenv1";
 import { file_google_protobuf_struct, file_google_protobuf_timestamp } from "@bufbuild/protobuf/wkt";
 import { file_coasterai_core_v1_slide } from "./slide_pb";
 
@@ -10,7 +10,7 @@ import { file_coasterai_core_v1_slide } from "./slide_pb";
  * Describes the file coasterai/core/v1/template.proto.
  */
 export const file_coasterai_core_v1_template = /*@__PURE__*/
-  fileDesc("CiBjb2FzdGVyYWkvY29yZS92MS90ZW1wbGF0ZS5wcm90bxIRY29hc3RlcmFpLmNvcmUudjEikgIKEUFuaW1hdGlvblRlbXBsYXRlEgoKAmlkGAEgASgJEjUKDGNvZGVSZWdpc3RyeRgCIAEoCzIfLmNvYXN0ZXJhaS5jb3JlLnYxLkNvZGVSZWdpc3RyeRIMCgRuYW1lGAMgASgJEhIKCnByZXZpZXdVcmwYBCABKAkSKQoIcmVnaXN0cnkYBSABKAsyFy5nb29nbGUucHJvdG9idWYuU3RydWN0EiYKBWVkaXRzGAYgASgLMhcuZ29vZ2xlLnByb3RvYnVmLlN0cnVjdBIzCgRwbGFuGAcgASgLMiUuY29hc3RlcmFpLmNvcmUudjEuQW5pbWF0aW9uU2xpZGVQbGFuEhAKCGR1cmF0aW9uGAggASgCQjtaOWdpdGh1Yi5jb20vc2hhbmszMTgvY29hc3RlcmFpL3BiL2NvYXN0ZXJhaS9jb3JlL3YxO3BiY29yZWIGcHJvdG8z", [file_google_protobuf_timestamp, file_coasterai_core_v1_slide, file_google_protobuf_struct]);
+  fileDesc("CiBjb2FzdGVyYWkvY29yZS92MS90ZW1wbGF0ZS5wcm90bxIRY29hc3RlcmFpLmNvcmUudjEikgIKEUFuaW1hdGlvblRlbXBsYXRlEgoKAmlkGAEgASgJEjUKDGNvZGVSZWdpc3RyeRgCIAEoCzIfLmNvYXN0ZXJhaS5jb3JlLnYxLkNvZGVSZWdpc3RyeRIMCgRuYW1lGAMgASgJEhIKCnByZXZpZXdVcmwYBCABKAkSKQoIcmVnaXN0cnkYBSABKAsyFy5nb29nbGUucHJvdG9idWYuU3RydWN0EiYKBWVkaXRzGAYgASgLMhcuZ29vZ2xlLnByb3RvYnVmLlN0cnVjdBIzCgRwbGFuGAcgASgLMiUuY29hc3RlcmFpLmNvcmUudjEuQW5pbWF0aW9uU2xpZGVQbGFuEhAKCGR1cmF0aW9uGAggASgCKusBChFBbmltYXRpb25DYXRlZ29yeRIiCh5BTklNQVRJT05fQ0FURUdPUllfVU5TUEVDSUZJRUQQABIbChdBTklNQVRJT05fQ0FURUdPUllfVEVYVBABEhwKGEFOSU1BVElPTl9DQVRFR09SWV9JTlRSTxACEh4KGkFOSU1BVElPTl9DQVRFR09SWV9WSVNVQUxTEAMSHAoYQU5JTUFUSU9OX0NBVEVHT1JZX01FRElBEAQSHQoZQU5JTUFUSU9OX0NBVEVHT1JZX1NPQ0lBTBAFEhoKFkFOSU1BVElPTl9DQVRFR09SWV9DVEEQBkI7WjlnaXRodWIuY29tL3NoYW5rMzE4L2NvYXN0ZXJhaS9wYi9jb2FzdGVyYWkvY29yZS92MTtwYmNvcmViBnByb3RvMw", [file_google_protobuf_timestamp, file_coasterai_core_v1_slide, file_google_protobuf_struct]);
 
 /**
  * Describes the message coasterai.core.v1.AnimationTemplate.
@@ -18,4 +18,16 @@ export const file_coasterai_core_v1_template = /*@__PURE__*/
  */
 export const AnimationTemplateSchema = /*@__PURE__*/
   messageDesc(file_coasterai_core_v1_template, 0);
+
+/**
+ * Describes the enum coasterai.core.v1.AnimationCategory.
+ */
+export const AnimationCategorySchema = /*@__PURE__*/
+  enumDesc(file_coasterai_core_v1_template, 0);
+
+/**
+ * @generated from enum coasterai.core.v1.AnimationCategory
+ */
+export const AnimationCategory = /*@__PURE__*/
+  tsEnum(AnimationCategorySchema);
 

@@ -6,6 +6,8 @@ import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobu
 import type { Message } from "@bufbuild/protobuf";
 import type { MediaAsset, MediaType, SelectedMediaAsset } from "../../core/v1/media_asset_pb";
 import type { Section, Slide } from "../../core/v1/slide_pb";
+import type { ConversationMessage } from "../../core/v1/chat_pb";
+import type { AnimationCategory } from "../../core/v1/template_pb";
 import type { BrandIdentity, BrandIdentitySchema } from "../../core/v1/brandkit_pb";
 import type { FigmaFrame, FigmaPage } from "../../core/v1/figma_pb";
 import type { Resolution, Script, StyleType, Video, VideoConfig, VideoLanguage, VideoMetadata } from "../../core/v1/video_pb";
@@ -103,6 +105,43 @@ export declare type GenerateOrEditSceneRequest = Message<"coasterai.portal.v1.Ge
 export declare const GenerateOrEditSceneRequestSchema: GenMessage<GenerateOrEditSceneRequest>;
 
 /**
+ * @generated from message coasterai.portal.v1.GetConversationHistoryRequest
+ */
+export declare type GetConversationHistoryRequest = Message<"coasterai.portal.v1.GetConversationHistoryRequest"> & {
+  /**
+   * @generated from field: string videoId = 1;
+   */
+  videoId: string;
+
+  /**
+   * @generated from field: string slideId = 2;
+   */
+  slideId: string;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.GetConversationHistoryRequest.
+ * Use `create(GetConversationHistoryRequestSchema)` to create a new message.
+ */
+export declare const GetConversationHistoryRequestSchema: GenMessage<GetConversationHistoryRequest>;
+
+/**
+ * @generated from message coasterai.portal.v1.GetConversationHistoryResponse
+ */
+export declare type GetConversationHistoryResponse = Message<"coasterai.portal.v1.GetConversationHistoryResponse"> & {
+  /**
+   * @generated from field: repeated coasterai.core.v1.ConversationMessage messages = 1;
+   */
+  messages: ConversationMessage[];
+};
+
+/**
+ * Describes the message coasterai.portal.v1.GetConversationHistoryResponse.
+ * Use `create(GetConversationHistoryResponseSchema)` to create a new message.
+ */
+export declare const GetConversationHistoryResponseSchema: GenMessage<GetConversationHistoryResponse>;
+
+/**
  * @generated from message coasterai.portal.v1.GenerateOrEditSceneResponse
  */
 export declare type GenerateOrEditSceneResponse = Message<"coasterai.portal.v1.GenerateOrEditSceneResponse"> & {
@@ -156,6 +195,11 @@ export declare type SuggestScenesRequest = Message<"coasterai.portal.v1.SuggestS
    * @generated from field: string sceneId = 2;
    */
   sceneId: string;
+
+  /**
+   * @generated from field: coasterai.core.v1.AnimationCategory category = 3;
+   */
+  category: AnimationCategory;
 };
 
 /**
@@ -539,6 +583,11 @@ export declare type CreateVideoRequest = Message<"coasterai.portal.v1.CreateVide
    * @generated from field: map<string, string> questions = 10;
    */
   questions: { [key: string]: string };
+
+  /**
+   * @generated from field: repeated coasterai.core.v1.SelectedMediaAsset references = 11;
+   */
+  references: SelectedMediaAsset[];
 };
 
 /**
@@ -1552,6 +1601,14 @@ export declare const PortalService: GenService<{
     methodKind: "server_streaming";
     input: typeof GenerateOrEditSceneRequestSchema;
     output: typeof GenerateOrEditSceneResponseSchema;
+  },
+  /**
+   * @generated from rpc coasterai.portal.v1.PortalService.GetConversationHistory
+   */
+  getConversationHistory: {
+    methodKind: "unary";
+    input: typeof GetConversationHistoryRequestSchema;
+    output: typeof GetConversationHistoryResponseSchema;
   },
   /**
    * Assets

@@ -41,7 +41,7 @@ type MediaStore interface {
 		code string,
 		fileName string,
 	) (*pbcore.MediaAsset, error)
-	DownloadCode(ctx context.Context, url string) (string, error)
+	//DownloadCode(ctx context.Context, url string) (string, error)
 }
 
 type gcpMediaStore struct {
@@ -110,6 +110,42 @@ func normalizeFileName(name string) string {
 	return name
 }
 
+func indentCode(code string) string {
+	lines := strings.Split(code, "\n")
+	var result []string
+
+	indentLevel := 0
+	indent := "  " // 2 spaces (change if needed)
+
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+
+		// Skip empty lines
+		if trimmed == "" {
+			result = append(result, "")
+			continue
+		}
+
+		// Decrease indent if line starts with closing brace
+		if strings.HasPrefix(trimmed, "}") {
+			if indentLevel > 0 {
+				indentLevel--
+			}
+		}
+
+		// Apply indentation
+		indentedLine := strings.Repeat(indent, indentLevel) + trimmed
+		result = append(result, indentedLine)
+
+		// Increase indent if line ends with opening brace
+		if strings.HasSuffix(trimmed, "{") {
+			indentLevel++
+		}
+	}
+
+	return strings.Join(result, "\n")
+}
+
 func IsImageTypeSupported(imageURL string) bool {
 	if strings.HasPrefix(imageURL, "data:image/") {
 		// For data URIs, check the MIME type in the header
@@ -163,7 +199,7 @@ func DetectMediaType(contentType string) pbcore.MediaType {
 	}
 }
 
-func (g gcpMediaStore) DownloadCode(ctx context.Context, url string) (string, error) {
+func DownloadCode(ctx context.Context, url string) (string, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return "", err
@@ -184,7 +220,7 @@ func (g gcpMediaStore) DownloadCode(ctx context.Context, url string) (string, er
 		return "", err
 	}
 
-	return string(body), nil
+	return indentCode(string(body)), nil
 }
 
 func (g gcpMediaStore) UploadFromURL(
@@ -239,7 +275,7 @@ func (g gcpMediaStore) UploadCode(
 	code string,
 	filePath string,
 ) (*pbcore.MediaAsset, error) {
-
+	code = indentCode(code)
 	data := []byte(code)
 	file := bytes.NewReader(data)
 

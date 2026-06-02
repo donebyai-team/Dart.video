@@ -1,5 +1,5 @@
 import { EffectType, Section, Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import { ActiveToolType, SelectedTool } from '@/types/tools'
+import { ActiveToolType, SelectedTool, SlideType } from '@/types/tools'
 import { VideoStoreSet, VideoStoreGet } from './types'
 import { createCalloutEffect, createSpotlightEffect, createZoomEffect, getDefaultSelectedTool } from './defaults'
 import { getRealSlideStartFrame } from '@/components/editor/frame_calculations'
@@ -35,9 +35,9 @@ export const createToolActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     const normalizedTool =
       tool.type === ActiveToolType.ADD_OR_EDIT_ANIMATION
         ? {
-            ...tool,
-            settings: tool.settings ?? {},
-          }
+          ...tool,
+          settings: tool.settings ?? {},
+        }
         : tool
 
     set({ activeTool: normalizedTool });
@@ -82,15 +82,20 @@ export const createToolActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     set({ activeTool: { type: ActiveToolType.ANIMATION_CODE } })
   },
 
-  handleAddAnimation(sectionId: string, afterSlideId?: string) {
+  handleAddAnimation(sectionId: string, afterSlideId?: string, slideType?: SlideType) {
     const { addSlide } = get()
 
     // Add an empty slide
-    addSlide(sectionId, afterSlideId)
+    addSlide(sectionId, afterSlideId, slideType)
+    if (slideType === SlideType.MEDIA) {
+      get().acceptVideoConfigChanges();
+      return
+    }
 
+    // Open settings only for animation slides
     set({
       activeTool: {
-        type: ActiveToolType.ADD_OR_EDIT_ANIMATION,
+        type: ActiveToolType.REIMAGINE,
       }
     })
   }

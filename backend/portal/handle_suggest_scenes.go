@@ -35,7 +35,7 @@ func (p *Portal) SuggestScenes(ctx context.Context, c *connect.Request[pbportal.
 	}
 
 	suggester := agent.NewSceneSuggester(p.brandIdentityService, logger)
-	suggestions, err := suggester.GenerateSuggestions(ctx, c.Msg.SceneId, video)
+	suggestions, err := suggester.GenerateSuggestions(ctx, c.Msg.SceneId, c.Msg.Category, video)
 	if err != nil {
 		return nil, err
 	}

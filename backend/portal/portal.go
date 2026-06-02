@@ -2,6 +2,7 @@ package portal
 
 import (
 	"context"
+	"github.com/shank318/coasterai/agent/llm"
 	"github.com/shank318/coasterai/cache"
 	figma2 "github.com/shank318/coasterai/integrations/figma"
 	google2 "github.com/shank318/coasterai/integrations/google"
@@ -40,6 +41,7 @@ type Portal struct {
 	mediaService            services.MediaStore
 	codeBuilderService      services.TemplateCodeBuilder
 	videoGenerationService  services.VideoGeneration
+	llmService              llm.LLMService
 	renderVideoService      services.RenderVideoService
 	brandIdentityService    brand_identity.BrandIdentity
 	audioGenerationProvider audio.Provider
@@ -58,6 +60,7 @@ func New(
 	brandIdentityService brand_identity.BrandIdentity,
 	codeBuilderService services.TemplateCodeBuilder,
 	audioGenerationProvider audio.Provider,
+	llmService llm.LLMService,
 	httpListenAddr string,
 	corsURLRegexAllow *regexp.Regexp,
 	config *pbportal.Config,
@@ -88,6 +91,7 @@ func New(
 		videoGenerationService:  videoGenerationService,
 		renderVideoService:      renderVideoService,
 		audioGenerationProvider: audioGenerationProvider,
+		llmService:              llmService,
 	}
 }
 

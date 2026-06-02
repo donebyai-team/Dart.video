@@ -8,11 +8,18 @@ import (
 
 var (
 	// XML / HTML tag detection
-	htmlTagRegex = regexp.MustCompile(`</?([a-zA-Z][a-zA-Z0-9]*)[^>]*>`)
+	dangerousHTMLPatterns = []*regexp.Regexp{
+		regexp.MustCompile(`(?i)<script\b`),
+		regexp.MustCompile(`(?i)<iframe\b`),
+		regexp.MustCompile(`(?i)<object\b`),
+		regexp.MustCompile(`(?i)<embed\b`),
+		regexp.MustCompile(`(?i)<meta\b`),
+		regexp.MustCompile(`(?i)<link\b`),
+	}
 
 	// Common code patterns that are unlikely to occur in normal prose
 	codePatterns = []*regexp.Regexp{
-		regexp.MustCompile("```"),
+		regexp.MustCompile("```(js|ts|tsx|go|py|java|cpp|c|sh|bash|sql)"),
 		regexp.MustCompile(`\bfunction\s*\(`),
 		regexp.MustCompile(`\bfunc\s*\(`),
 		regexp.MustCompile(`\bconsole\.log\b`),
@@ -63,7 +70,6 @@ var (
 )
 
 func ValidatePrompt(prompt string) error {
-
 	prompt = strings.TrimSpace(prompt)
 
 	if prompt == "" {
@@ -71,18 +77,20 @@ func ValidatePrompt(prompt string) error {
 	}
 
 	// -------- Length Guard --------
-	if len(prompt) > 1000 {
-		return errors.New("prompt length is too big, use \"Add Script\" instead")
+	if len(prompt) > 5000 {
+		return errors.New("prompt length is too big")
 	}
 
 	wordCount := len(strings.Fields(prompt))
-	if wordCount > 200 {
-		return errors.New("prompt length is too big, use \"Add Script\" instead")
+	if wordCount > 1000 {
+		return errors.New("prompt length is too big")
 	}
 
 	// -------- HTML / XML Injection --------
-	if htmlTagRegex.MatchString(prompt) {
-		return errors.New("prompt contains HTML/XML which is not allowed")
+	for _, pattern := range dangerousHTMLPatterns {
+		if pattern.MatchString(prompt) {
+			return errors.New("prompt contains unsafe HTML")
+		}
 	}
 
 	lower := strings.ToLower(prompt)

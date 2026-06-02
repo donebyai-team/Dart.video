@@ -190,6 +190,80 @@ func (*stream) EditAnimationCode(ctx context.Context, resume types.EditAnimation
 	return channel, nil
 }
 
+// / Streaming version of GenerateAnimation
+func (*stream) GenerateAnimation(ctx context.Context, input types.GenerateAnimationCodeRequest, conversation_history []types.Message, opts ...CallOptionFunc) (<-chan StreamValue[stream_types.Union2AskUserQuestionOrGenerateAnimationCodeResponse, types.Union2AskUserQuestionOrGenerateAnimationCodeResponse], error) {
+
+	var callOpts callOption
+	for _, opt := range opts {
+		opt(&callOpts)
+	}
+
+	args := baml.BamlFunctionArguments{
+		Kwargs: map[string]any{"input": input, "conversation_history": conversation_history},
+		Env:    getEnvVars(callOpts.env),
+	}
+
+	if callOpts.clientRegistry != nil {
+		args.ClientRegistry = callOpts.clientRegistry
+	}
+
+	if callOpts.collectors != nil {
+		args.Collectors = callOpts.collectors
+	}
+
+	if callOpts.typeBuilder != nil {
+		args.TypeBuilder = callOpts.typeBuilder
+	}
+
+	if callOpts.tags != nil {
+		args.Tags = callOpts.tags
+	}
+
+	encoded, err := args.Encode()
+	if err != nil {
+		// This should never happen. if it does, please file an issue at https://github.com/boundaryml/baml/issues
+		// and include the type of the args you're passing in.
+		wrapped_err := fmt.Errorf("BAML INTERNAL ERROR: GenerateAnimation: %w", err)
+		panic(wrapped_err)
+	}
+
+	internal_channel, err := bamlRuntime.CallFunctionStream(ctx, "GenerateAnimation", encoded, callOpts.onTick)
+	if err != nil {
+		return nil, err
+	}
+
+	channel := make(chan StreamValue[stream_types.Union2AskUserQuestionOrGenerateAnimationCodeResponse, types.Union2AskUserQuestionOrGenerateAnimationCodeResponse])
+	go func() {
+		for result := range internal_channel {
+			if result.Error != nil {
+				channel <- StreamValue[stream_types.Union2AskUserQuestionOrGenerateAnimationCodeResponse, types.Union2AskUserQuestionOrGenerateAnimationCodeResponse]{
+					IsError: true,
+					Error:   result.Error,
+				}
+				close(channel)
+				return
+			}
+			if result.HasData {
+				data := (result.Data).(types.Union2AskUserQuestionOrGenerateAnimationCodeResponse)
+				channel <- StreamValue[stream_types.Union2AskUserQuestionOrGenerateAnimationCodeResponse, types.Union2AskUserQuestionOrGenerateAnimationCodeResponse]{
+					IsFinal:  true,
+					as_final: &data,
+				}
+			} else {
+				data := (result.StreamData).(stream_types.Union2AskUserQuestionOrGenerateAnimationCodeResponse)
+				channel <- StreamValue[stream_types.Union2AskUserQuestionOrGenerateAnimationCodeResponse, types.Union2AskUserQuestionOrGenerateAnimationCodeResponse]{
+					IsFinal:   false,
+					as_stream: &data,
+				}
+			}
+		}
+
+		// when internal_channel is closed, close the output too
+		close(channel)
+	}()
+	return channel, nil
+}
+
 // / Streaming version of GeneratePlan
 func (*stream) GeneratePlan(ctx context.Context, input types.VideoGenerationPlanRequest, conversation_history []types.Message, opts ...CallOptionFunc) (<-chan StreamValue[stream_types.VideoGenerationPlan, types.VideoGenerationPlan], error) {
 

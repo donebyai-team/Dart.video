@@ -191,9 +191,9 @@ func validateSlideAnimation(content *pbcore.AnimationSlideContent) error {
 		return fmt.Errorf("code registry can't be empty")
 	}
 
-	if content.Edits == nil || len(content.Edits.Fields) == 0 {
-		return fmt.Errorf("edits can't be empty")
-	}
+	//if content.Edits == nil || len(content.Edits.Fields) == 0 {
+	//	return fmt.Errorf("edits can't be empty")
+	//}
 
 	return nil
 }

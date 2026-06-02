@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/pkg/errors"
+	"github.com/shank318/coasterai/agent/llm"
 	"github.com/shank318/coasterai/cache"
 	"github.com/shank318/coasterai/services/audio"
 	"github.com/shank318/coasterai/services/brand_identity"
@@ -211,6 +212,7 @@ func portalApp(cmd *cobra.Command, isAppReady func() bool) (App, error) {
 		brand_identity.NewBrandIdentityService(zlog, deps.DataStore, deps.MediaStore, sflags.MustGetString(cmd, "common-firecrawl-api-key")),
 		services.NewTemplateCodeBuilderService(sflags.MustGetString(cmd, "common-code-builder-service")),
 		provider,
+		llm.NewLlmService(zlog, cacheStore),
 		sflags.MustGetString(cmd, "portal-http-listen-addr"),
 		deps.CorsURLRegexAllow,
 		config,

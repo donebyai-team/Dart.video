@@ -518,6 +518,108 @@ func (c EditString) BamlTypeName() string {
 	return "EditString"
 }
 
+type GenerateAnimationCodeRequest struct {
+	Prompt        string        `json:"Prompt"`
+	VideoBranding VideoBranding `json:"VideoBranding"`
+}
+
+func (c *GenerateAnimationCodeRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "GenerateAnimationCodeRequest" {
+		panic(fmt.Sprintf("expected GenerateAnimationCodeRequest, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "Prompt":
+			c.Prompt = baml.Decode(valueHolder).Interface().(string)
+
+		case "VideoBranding":
+			c.VideoBranding = baml.Decode(valueHolder).Interface().(VideoBranding)
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class GenerateAnimationCodeRequest", key))
+
+		}
+	}
+
+}
+
+func (c GenerateAnimationCodeRequest) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["Prompt"] = c.Prompt
+
+	fields["VideoBranding"] = c.VideoBranding
+
+	return baml.EncodeClass("GenerateAnimationCodeRequest", fields, nil)
+}
+
+func (c GenerateAnimationCodeRequest) BamlTypeName() string {
+	return "GenerateAnimationCodeRequest"
+}
+
+type GenerateAnimationCodeResponse struct {
+	Code            string  `json:"code"`
+	Total_frames    int64   `json:"total_frames"`
+	ThinkingSummary *string `json:"thinkingSummary"`
+}
+
+func (c *GenerateAnimationCodeResponse) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "GenerateAnimationCodeResponse" {
+		panic(fmt.Sprintf("expected GenerateAnimationCodeResponse, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "code":
+			c.Code = baml.Decode(valueHolder).Interface().(string)
+
+		case "total_frames":
+			c.Total_frames = baml.Decode(valueHolder).Int()
+
+		case "thinkingSummary":
+			c.ThinkingSummary = baml.Decode(valueHolder).Interface().(*string)
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class GenerateAnimationCodeResponse", key))
+
+		}
+	}
+
+}
+
+func (c GenerateAnimationCodeResponse) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["code"] = c.Code
+
+	fields["total_frames"] = c.Total_frames
+
+	fields["thinkingSummary"] = c.ThinkingSummary
+
+	return baml.EncodeClass("GenerateAnimationCodeResponse", fields, nil)
+}
+
+func (c GenerateAnimationCodeResponse) BamlTypeName() string {
+	return "GenerateAnimationCodeResponse"
+}
+
 type GeneratedVideoPlan struct {
 	VideoName       string         `json:"videoName"`
 	Sections        []SceneSection `json:"sections"`
@@ -663,9 +765,10 @@ func (c MatchCategoriesResponse) BamlTypeName() string {
 }
 
 type Message struct {
-	Role         Union3KassistantOrKtoolOrKuser `json:"role"`
-	Content      string                         `json:"content"`
-	Tool_call_id *string                        `json:"tool_call_id"`
+	Role    Union3KassistantOrKtoolOrKuser `json:"role"`
+	Content string                         `json:"content"`
+	Images  []Image                        `json:"images"`
+	Videos  []Video                        `json:"videos"`
 }
 
 func (c *Message) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -688,8 +791,11 @@ func (c *Message) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
 		case "content":
 			c.Content = baml.Decode(valueHolder).Interface().(string)
 
-		case "tool_call_id":
-			c.Tool_call_id = baml.Decode(valueHolder).Interface().(*string)
+		case "images":
+			c.Images = baml.Decode(valueHolder).Interface().([]Image)
+
+		case "videos":
+			c.Videos = baml.Decode(valueHolder).Interface().([]Video)
 
 		default:
 
@@ -707,7 +813,9 @@ func (c Message) Encode() (*cffi.HostValue, error) {
 
 	fields["content"] = c.Content
 
-	fields["tool_call_id"] = c.Tool_call_id
+	fields["images"] = c.Images
+
+	fields["videos"] = c.Videos
 
 	return baml.EncodeClass("Message", fields, nil)
 }
@@ -923,6 +1031,7 @@ func (c ScriptItem) BamlTypeName() string {
 type SuggestScenesRequest struct {
 	VideoBranding VideoBranding `json:"VideoBranding"`
 	ComponentList string        `json:"ComponentList"`
+	Category      string        `json:"Category"`
 	Before        string        `json:"before"`
 	Current       string        `json:"current"`
 	After         string        `json:"after"`
@@ -948,6 +1057,9 @@ func (c *SuggestScenesRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.
 		case "ComponentList":
 			c.ComponentList = baml.Decode(valueHolder).Interface().(string)
 
+		case "Category":
+			c.Category = baml.Decode(valueHolder).Interface().(string)
+
 		case "before":
 			c.Before = baml.Decode(valueHolder).Interface().(string)
 
@@ -972,6 +1084,8 @@ func (c SuggestScenesRequest) Encode() (*cffi.HostValue, error) {
 	fields["VideoBranding"] = c.VideoBranding
 
 	fields["ComponentList"] = c.ComponentList
+
+	fields["Category"] = c.Category
 
 	fields["before"] = c.Before
 

@@ -21,6 +21,144 @@ import (
 	"github.com/boundaryml/baml/engine/language_client_go/pkg/cffi"
 )
 
+type Union2AskUserQuestionOrGenerateAnimationCodeResponse struct {
+	variant string
+
+	variant_GenerateAnimationCodeResponse *GenerateAnimationCodeResponse
+
+	variant_AskUserQuestion *AskUserQuestion
+}
+
+func (u *Union2AskUserQuestionOrGenerateAnimationCodeResponse) Decode(holder *cffi.CFFIValueUnionVariant, typeMap baml.TypeMap) {
+	valueHolder := holder.Value
+	variantName := holder.ValueOptionName
+	switch variantName {
+	case "GenerateAnimationCodeResponse":
+		u.variant = "GenerateAnimationCodeResponse"
+		value := baml.Decode(valueHolder).Interface().(GenerateAnimationCodeResponse)
+		u.variant_GenerateAnimationCodeResponse = &value
+	case "AskUserQuestion":
+		u.variant = "AskUserQuestion"
+		value := baml.Decode(valueHolder).Interface().(AskUserQuestion)
+		u.variant_AskUserQuestion = &value
+
+	default:
+		panic(fmt.Sprintf("invalid union variant: %s", variantName))
+	}
+}
+
+func (u Union2AskUserQuestionOrGenerateAnimationCodeResponse) Encode() (*cffi.HostValue, error) {
+	switch u.variant {
+
+	case "GenerateAnimationCodeResponse":
+		return baml.EncodeValue(*u.variant_GenerateAnimationCodeResponse)
+
+	case "AskUserQuestion":
+		return baml.EncodeValue(*u.variant_AskUserQuestion)
+
+	case "":
+		return nil, fmt.Errorf("invalid union variant: [unset]")
+	}
+
+	return nil, fmt.Errorf("invalid union variant: %s", u.variant)
+}
+
+func (u Union2AskUserQuestionOrGenerateAnimationCodeResponse) BamlTypeName() string {
+	return "Union2AskUserQuestionOrGenerateAnimationCodeResponse"
+}
+
+func (u Union2AskUserQuestionOrGenerateAnimationCodeResponse) MarshalJSON() ([]byte, error) {
+	switch u.variant {
+
+	case "GenerateAnimationCodeResponse":
+		return json.Marshal(u.variant_GenerateAnimationCodeResponse)
+
+	case "AskUserQuestion":
+		return json.Marshal(u.variant_AskUserQuestion)
+
+	}
+
+	return nil, fmt.Errorf("invalid union variant: %s", u.variant)
+}
+
+func (u *Union2AskUserQuestionOrGenerateAnimationCodeResponse) UnmarshalJSON(data []byte) error {
+	var err error
+
+	err = json.Unmarshal(data, &u.variant_GenerateAnimationCodeResponse)
+	if err == nil {
+		u.variant = "GenerateAnimationCodeResponse"
+		return nil
+	} else {
+		u.variant_GenerateAnimationCodeResponse = nil
+	}
+
+	err = json.Unmarshal(data, &u.variant_AskUserQuestion)
+	if err == nil {
+		u.variant = "AskUserQuestion"
+		return nil
+	} else {
+		u.variant_AskUserQuestion = nil
+	}
+
+	return fmt.Errorf("invalid union variant: %s", string(data))
+}
+
+func Union2AskUserQuestionOrGenerateAnimationCodeResponse__NewGenerateAnimationCodeResponse(v GenerateAnimationCodeResponse) Union2AskUserQuestionOrGenerateAnimationCodeResponse {
+
+	return Union2AskUserQuestionOrGenerateAnimationCodeResponse{
+		variant:                               "GenerateAnimationCodeResponse",
+		variant_GenerateAnimationCodeResponse: &v,
+	}
+}
+
+func (u *Union2AskUserQuestionOrGenerateAnimationCodeResponse) SetGenerateAnimationCodeResponse(v GenerateAnimationCodeResponse) {
+
+	u.variant = "GenerateAnimationCodeResponse"
+	u.variant_GenerateAnimationCodeResponse = &v
+
+	u.variant_AskUserQuestion = nil
+
+}
+
+func (u *Union2AskUserQuestionOrGenerateAnimationCodeResponse) IsGenerateAnimationCodeResponse() bool {
+	return u.variant == "GenerateAnimationCodeResponse"
+}
+
+func (u *Union2AskUserQuestionOrGenerateAnimationCodeResponse) AsGenerateAnimationCodeResponse() *GenerateAnimationCodeResponse {
+	if u.variant != "GenerateAnimationCodeResponse" {
+		return nil
+	}
+	return u.variant_GenerateAnimationCodeResponse
+}
+
+func Union2AskUserQuestionOrGenerateAnimationCodeResponse__NewAskUserQuestion(v AskUserQuestion) Union2AskUserQuestionOrGenerateAnimationCodeResponse {
+
+	return Union2AskUserQuestionOrGenerateAnimationCodeResponse{
+		variant:                 "AskUserQuestion",
+		variant_AskUserQuestion: &v,
+	}
+}
+
+func (u *Union2AskUserQuestionOrGenerateAnimationCodeResponse) SetAskUserQuestion(v AskUserQuestion) {
+
+	u.variant = "AskUserQuestion"
+	u.variant_AskUserQuestion = &v
+
+	u.variant_GenerateAnimationCodeResponse = nil
+
+}
+
+func (u *Union2AskUserQuestionOrGenerateAnimationCodeResponse) IsAskUserQuestion() bool {
+	return u.variant == "AskUserQuestion"
+}
+
+func (u *Union2AskUserQuestionOrGenerateAnimationCodeResponse) AsAskUserQuestion() *AskUserQuestion {
+	if u.variant != "AskUserQuestion" {
+		return nil
+	}
+	return u.variant_AskUserQuestion
+}
+
 type Union2AskUserQuestionOrGeneratedVideoPlan struct {
 	variant string
 

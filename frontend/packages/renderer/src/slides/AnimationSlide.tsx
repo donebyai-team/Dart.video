@@ -85,6 +85,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
   isPlaying = true,
 }) => {
   const [CompiledComponent, setCompiledComponent] = React.useState<React.ComponentType<any> | null>(null)
+
   const [isLoading, setIsLoading] = useState(true)
   const [templateError, setTemplateError] = useState<string | null>(null)
 
@@ -97,9 +98,13 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
   const templateUrl = content?.codeRegistry?.mUrl
 
   // Unique cache key
-  const templateKey = inlineCode
-    ? `inline:${btoa(inlineCode)}`
-    : templateUrl
+  const templateKey = React.useMemo(() => {
+    if (inlineCode) {
+      return `inline:${hashString(inlineCode)}`;
+    }
+
+    return templateUrl ?? null;
+  }, [inlineCode, templateUrl]);
 
   const background = backgroundStyleToCSS(slide.backgroundStyle)
 
@@ -125,6 +130,17 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
       setTemplateError(null)
     }
   }, [templateKey])
+
+  function hashString(str: string): string {
+    let hash = 2166136261;
+
+    for (let i = 0; i < str.length; i++) {
+      hash ^= str.charCodeAt(i);
+      hash = Math.imul(hash, 16777619);
+    }
+
+    return (hash >>> 0).toString(36);
+  }
 
   const handleTemplateRenderError = React.useCallback((error: Error) => {
     setCompiledComponent(null)

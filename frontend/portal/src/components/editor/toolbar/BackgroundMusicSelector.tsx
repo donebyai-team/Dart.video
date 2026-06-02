@@ -1,4 +1,4 @@
-import { VolumeX, Waves, Sunrise, BeakerIcon, VolumeIcon, TrendingUp, Rocket, BookHeartIcon } from "lucide-react";
+import { VolumeX, Waves, Sunrise, BeakerIcon, VolumeIcon, TrendingUp, Rocket, BookHeartIcon, HeartIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -14,6 +14,12 @@ const backgroundTracks = [
         id: "none",
         name: "No Music",
         icon: VolumeX,
+    },
+    {
+        id: "dramatic-beat",
+        name: "Dramatic Beats",
+        url: "https://storage.googleapis.com/coasterai-public/background_music/DramaticBeats.mp3",
+        icon: HeartIcon,
     },
     {
         id: "fast-beat",
