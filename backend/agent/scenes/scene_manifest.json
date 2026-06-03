@@ -1958,7 +1958,7 @@
                     {
                       "name": "variant",
                       "type": "enum",
-                      "default": "heading"
+                      "default": "headingLg"
                     }
                   ]
                 },
