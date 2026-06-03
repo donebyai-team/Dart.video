@@ -1,4 +1,4 @@
-import { VolumeX, Waves, Sunrise, BeakerIcon, VolumeIcon, TrendingUp, Rocket, BookHeartIcon, HeartIcon } from "lucide-react";
+import { VolumeX, Waves, Sunrise, BeakerIcon, VolumeIcon, TrendingUp, Rocket, BookHeartIcon, HeartIcon, MoveUpIcon, GuitarIcon, FunctionSquareIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -27,6 +27,25 @@ const backgroundTracks = [
         url: "https://storage.googleapis.com/coasterai-public/background_music/FastBeat.mp3",
         icon: BookHeartIcon,
     },
+    {
+        id: "up-beat",
+        name: "UpBeat",
+        url: "https://storage.googleapis.com/coasterai-public/background_music/upbeat.mp3",
+        icon: MoveUpIcon,
+    },
+    {
+        id: "future-pass",
+        name: "Future Pass",
+        url: "https://storage.googleapis.com/coasterai-public/background_music/future-pass.mp3",
+        icon: FunctionSquareIcon,
+    },
+    {
+        id: "deep-electronic",
+        name: "Deep Electronic",
+        url: "https://storage.googleapis.com/coasterai-public/background_music/Deep%20Electronic.mp3",
+        icon: GuitarIcon,
+    },
+
     {
         id: "dance-groove",
         name: "Dance Groove",
@@ -68,7 +87,7 @@ const backgroundTracks = [
         name: "Chasing the Morning",
         url: "https://storage.googleapis.com/coasterai-public/background_music/chasing-the-morning-light.mp3",
         icon: Sunrise,
-    },        
+    },
 ];
 
 
@@ -83,7 +102,7 @@ const BackgroundMusicSelector = () => {
         backgroundTracks.find(track => track.url === currentUrl) ||
         backgroundTracks[0];
 
-    const SelectedIcon = selectedTrack.icon;    
+    const SelectedIcon = selectedTrack.icon;
 
 
     return (
