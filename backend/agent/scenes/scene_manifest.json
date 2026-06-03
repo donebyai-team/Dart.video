@@ -4,6 +4,8 @@
       "name": "variant",
       "description": "used for changing the font sizes",
       "value": [
+        "caption",
+        "label",
         "body",
         "subheading",
         "heading",
@@ -524,6 +526,11 @@
                   "default": "slideUp"
                 },
                 {
+                  "name": "wordCycleHoldDuration",
+                  "type": "number",
+                  "default": 25
+                },
+                {
                   "name": "holdDuration",
                   "type": "number",
                   "default": 20
@@ -574,7 +581,7 @@
           ],
           "description": "Static text with cycling highlighted words at the end",
           "instructions": "Use for dynamic taglines like \"We build amazing [software/products/solutions]\"",
-          "celExpression": "(props.textwithwordcycle.holdDuration + props.textwithwordcycle.transitionDuration) * size(props.textwithwordcycle.cyclingWords)"
+          "celExpression": "props.textwithwordcycle.wordCycleHoldDuration + ((props.textwithwordcycle.holdDuration + props.textwithwordcycle.transitionDuration) * size(props.textwithwordcycle.cyclingWords))"
         },
         {
           "name": "TextLeadStagger",
@@ -1081,6 +1088,11 @@
                   "default": "slideUp"
                 },
                 {
+                  "name": "wordCycleHoldDuration",
+                  "type": "number",
+                  "default": 14
+                },
+                {
                   "name": "holdDuration",
                   "type": "number",
                   "default": 20
@@ -1288,7 +1300,7 @@
           "schema": [
             {
               "type": "component",
-              "name": "textstagger",
+              "name": "animatedtext",
               "fields": [
                 {
                   "name": "text",
@@ -1946,7 +1958,7 @@
                     {
                       "name": "variant",
                       "type": "enum",
-                      "default": "display"
+                      "default": "heading"
                     }
                   ]
                 },
