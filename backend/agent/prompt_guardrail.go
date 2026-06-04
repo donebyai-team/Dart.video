@@ -39,34 +39,34 @@ var (
 	}
 
 	// Prompt injection attempts
-	injectionPatterns = []string{
-		"ignore previous",
-		"disregard above",
-		"act as system",
-		"you are now",
-		"pretend to be",
-		"override",
-		"bypass",
-		"developer mode",
-		"reveal instructions",
-		"show hidden",
-		"follow these rules instead",
-		"new instructions",
-		"forget earlier",
-		"stop following",
-	}
-
-	// Restricted words
-	restrictedWords = []string{
-		"password",
-		"secret",
-		"api key",
-		"private key",
-		"token",
-		"credentials",
-		"ssh",
-		"root access",
-	}
+	//injectionPatterns = []string{
+	//	"ignore previous",
+	//	"disregard above",
+	//	"act as system",
+	//	"you are now",
+	//	"pretend to be",
+	//	"override",
+	//	"bypass",
+	//	"developer mode",
+	//	"reveal instructions",
+	//	"show hidden",
+	//	"follow these rules instead",
+	//	"new instructions",
+	//	"forget earlier",
+	//	"stop following",
+	//}
+	//
+	//// Restricted words
+	//restrictedWords = []string{
+	//	"password",
+	//	"secret",
+	//	"api key",
+	//	"private key",
+	//	"token",
+	//	"credentials",
+	//	"ssh",
+	//	"root access",
+	//}
 )
 
 func ValidatePrompt(prompt string) error {
@@ -109,18 +109,18 @@ func ValidatePrompt(prompt string) error {
 	}
 
 	// -------- Prompt Injection --------
-	for _, pattern := range injectionPatterns {
-		if strings.Contains(lower, pattern) {
-			return errors.New("prompt contains unsafe instruction patterns")
-		}
-	}
-
-	// -------- Restricted Words --------
-	for _, word := range restrictedWords {
-		if strings.Contains(lower, word) {
-			return errors.New("prompt contains restricted content")
-		}
-	}
+	//for _, pattern := range injectionPatterns {
+	//	if strings.Contains(lower, pattern) {
+	//		return errors.New("prompt contains unsafe instruction patterns")
+	//	}
+	//}
+	//
+	//// -------- Restricted Words --------
+	//for _, word := range restrictedWords {
+	//	if strings.Contains(lower, word) {
+	//		return errors.New("prompt contains restricted content")
+	//	}
+	//}
 
 	return nil
 }
