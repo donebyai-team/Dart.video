@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import type React from 'react'
 import type { PatchOverlay } from '@coasterai/renderer'
+import { type ElementRect, getNormalizedElementRect } from './elementBounds'
 
 export interface SelectableHit {
   id: string
@@ -31,7 +32,7 @@ interface UsePrimitiveDragParams {
   selectedEid: string | null
   onSelectElement: (eid: string | null) => void
   onValuePatch: (id: string, prop: string, value: unknown) => void
-  setElementRect: (rect: DOMRect) => void
+  setElementRect: (rect: ElementRect) => void
   selectableStackAtPoint: (
     clientX: number,
     clientY: number,
@@ -107,7 +108,7 @@ export function usePrimitiveDrag({
     hoveredArrayElRef.current = arrayEl
     setHoveredArrayEl(arrayEl)
 
-    setElementRect(hit.el.getBoundingClientRect())
+    setElementRect(getNormalizedElementRect(hit.el))
     if (selectedEid !== hit.id) {
       pointerSelectedIdRef.current = hit.id
       onSelectElement(hit.id)
@@ -176,7 +177,7 @@ export function usePrimitiveDrag({
     )
     dragState.previewEl.style.willChange = 'transform'
 
-    setElementRect(dragState.previewEl.getBoundingClientRect())
+    setElementRect(getNormalizedElementRect(dragState.previewEl))
   }
 
   function handlePointerEnd(e: React.PointerEvent<HTMLDivElement>) {

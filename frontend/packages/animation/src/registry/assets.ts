@@ -58,15 +58,14 @@ export const CONTENT_COMPONENTS: ComponentRegistration[] = [
     name: 'MediaAsset',
     type: 'content',
     elementHints: ['mediaasset', 'video', 'image'],
-    schema: {
+    schema: [{
       type: 'component',
       name: 'mediaasset',
       fields: [
         {
           name: 'src',
           type: 'string',
-          datatype: 'media',
-          map: 'props.src',
+          datatype: 'media'
         },
         {
           name: 'motionPreset',
@@ -74,7 +73,7 @@ export const CONTENT_COMPONENTS: ComponentRegistration[] = [
           default: "none",
         },
       ],
-    },
+    }],
     description: 'renders a static image or video from a URL — use for product screens, photos, videos, and illustrations',
   },
   {

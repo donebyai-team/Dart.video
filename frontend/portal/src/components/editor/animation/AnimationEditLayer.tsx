@@ -21,19 +21,8 @@ import {
   type PatchOverlay,
 } from '@coasterai/renderer'
 import { ArrayControlButton } from './ArrayControlButton'
-import { isMediaComponent, isPlainTextElement } from '@coasterai/animation'
-
-interface FRect { left: number; top: number; width: number; height: number }
-
-interface TextResizeState {
-  pointerId: number
-  elementId: string
-  startClientX: number
-  initialWidth: number
-  pendingWidth: number
-  scaleX: number
-  previewEl: HTMLElement
-}
+import { type ElementRect as FRect, getNormalizedElementRect } from './elementBounds'
+import { isMediaComponent } from '@coasterai/animation'
 
 interface AnimationEditLayerProps {
   playerRef: React.RefObject<HTMLDivElement>
@@ -87,7 +76,6 @@ export function AnimationEditLayer({
   onStyleOverride,
 }: AnimationEditLayerProps) {
   const toolbarRef = useRef<HTMLDivElement>(null)
-  const textResizeStateRef = useRef<TextResizeState | null>(null)
 
   const [canvasRect, setCanvasRect] = useState<FRect | null>(null)
   const [elementRect, setElementRect] = useState<FRect | null>(null)
@@ -132,13 +120,11 @@ export function AnimationEditLayer({
   useEffect(() => {
     if (!selectedEid || !animEditVersion) return
     if (dragStateRef.current?.elementId === selectedEid) return
-    if (textResizeStateRef.current?.elementId === selectedEid) return
     if (mediaResizeStateRef.current?.elementId === selectedEid) return
     requestAnimationFrame(() => {
       const el = playerRef.current?.querySelector(`[id="${selectedEid}"]`) as HTMLElement | null
       if (!el) return
-      const r = el.getBoundingClientRect()
-      setElementRect({ left: r.left, top: r.top, width: r.width, height: r.height })
+      setElementRect(getNormalizedElementRect(el))
     })
   }, [animEditVersion, selectedEid, playerRef])
 
@@ -179,45 +165,6 @@ export function AnimationEditLayer({
     // if (!registration) return false
     // return registration.type !== 'scene'
     return true
-  }
-
-  // used as fallback click on the scene
-  function hasTextLikeField(entry: unknown): boolean {
-    if (!entry || typeof entry !== 'object') return false
-
-    // Some scenes store copy as a string array (`texts`) instead of a single `text` field.
-    // Treat both plain strings and non-empty string arrays as text-like content.
-    return Object.entries(entry as Record<string, unknown>).some(([prop, value]) => {
-      if (prop === 'style' || prop === 'dragX' || prop === 'dragY') return false
-
-      const lowerProp = prop.toLowerCase()
-      const hasStringValue = typeof value === 'string' && value.trim().length > 0
-      const hasStringArrayValue = Array.isArray(value) && value.some(
-        (item) => typeof item === 'string' && item.trim().length > 0,
-      )
-
-      if (!hasStringValue && !hasStringArrayValue) return false
-
-      return (
-        lowerProp === 'text' ||
-        lowerProp === 'title' ||
-        lowerProp === 'subtitle' ||
-        lowerProp === 'word' ||
-        lowerProp.includes('text')
-      )
-    })
-  }
-
-  function getFallbackSelectionId(): string | null {
-    const sceneEntry = overlay.scene
-    if (sceneEntry && typeof sceneEntry === 'object') return 'scene'
-
-    const overlayEntries = Object.entries(overlay)
-
-    const textEntry = overlayEntries.find(([, entry]) => hasTextLikeField(entry))
-    if (textEntry) return textEntry[0]
-
-    return overlayEntries[0]?.[0] ?? null
   }
 
   /**
@@ -363,68 +310,6 @@ export function AnimationEditLayer({
     }
   }, [playerRef, selectedEid])
 
-  function handleTextResizePointerDown(e: React.PointerEvent<HTMLDivElement>) {
-    if (!selectedEid || !isPlainTextElement(selectedEid)) return
-
-    const previewEl = playerRef.current?.querySelector(`[id="${selectedEid}"]`) as HTMLElement | null
-    if (!previewEl) return
-
-    e.preventDefault()
-    e.stopPropagation()
-
-    const previewRect = previewEl.getBoundingClientRect()
-    const initialWidth = previewEl.offsetWidth || previewRect.width
-    const scaleX = previewRect.width > 0 ? initialWidth / previewRect.width : 1
-
-    textResizeStateRef.current = {
-      pointerId: e.pointerId,
-      elementId: selectedEid,
-      startClientX: e.clientX,
-      initialWidth,
-      pendingWidth: initialWidth,
-      scaleX,
-      previewEl,
-    }
-
-    e.currentTarget.setPointerCapture(e.pointerId)
-  }
-
-  function handleTextResizePointerMove(e: React.PointerEvent<HTMLDivElement>) {
-    const resizeState = textResizeStateRef.current
-    if (!resizeState || resizeState.pointerId !== e.pointerId) return
-
-    e.preventDefault()
-    e.stopPropagation()
-
-    const deltaX = (e.clientX - resizeState.startClientX) * resizeState.scaleX
-    const nextWidth = Math.max(40, Math.round(resizeState.initialWidth + deltaX))
-    resizeState.pendingWidth = nextWidth
-    resizeState.previewEl.style.width = `${nextWidth}px`
-
-    const nextRect = resizeState.previewEl.getBoundingClientRect()
-    setElementRect({
-      left: nextRect.left,
-      top: nextRect.top,
-      width: nextRect.width,
-      height: nextRect.height,
-    })
-  }
-
-  function handleTextResizePointerEnd(e: React.PointerEvent<HTMLDivElement>) {
-    const resizeState = textResizeStateRef.current
-    if (!resizeState || resizeState.pointerId !== e.pointerId) return
-
-    e.preventDefault()
-    e.stopPropagation()
-
-    onStyleOverride(resizeState.elementId, { width: resizeState.pendingWidth })
-    textResizeStateRef.current = null
-
-    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
-      e.currentTarget.releasePointerCapture(e.pointerId)
-    }
-  }
-
   /**
    * Click handler with parent-walk:
    *   - First click: select deepest element.
@@ -454,27 +339,27 @@ export function AnimationEditLayer({
 
     if (!selectedEid) {
       const hit = hits[0]
-      setElementRect(hit.el.getBoundingClientRect())
+      setElementRect(getNormalizedElementRect(hit.el))
       onSelectElement(hit.id)
       return
     }
     const idx = hits.findIndex(h => h.id === selectedEid)
     if (idx !== -1 && idx < hits.length - 1) {
       const parent = hits[idx + 1]
-      setElementRect(parent.el.getBoundingClientRect())
+      setElementRect(getNormalizedElementRect(parent.el))
       onSelectElement(parent.id)
       return
     }
 
     if (idx === hits.length - 1) {
       const hit = hits[idx]
-      setElementRect(hit.el.getBoundingClientRect())
+      setElementRect(getNormalizedElementRect(hit.el))
       onSelectElement(hit.id)
       return
     }
 
     const hit = hits[0]
-    setElementRect(hit.el.getBoundingClientRect())
+    setElementRect(getNormalizedElementRect(hit.el))
     onSelectElement(hit.id)
   }
 
@@ -557,34 +442,6 @@ export function AnimationEditLayer({
           </>
         )
       })()}
-
-      {/* Plain Text resize handle */}
-      {clampedElementRect && selectedEid && isPlainTextElement(selectedEid) && (
-        <div
-          style={{
-            position: 'fixed',
-            left: clampedElementRect.left + clampedElementRect.width - 5,
-            top: clampedElementRect.top + clampedElementRect.height / 2 - 5,
-            width: 10,
-            height: 10,
-            background: '#ffffff',
-            border: '2px solid rgba(99,102,241,0.95)',
-            borderRadius: 3,
-            boxSizing: 'border-box',
-            cursor: 'ew-resize',
-            pointerEvents: 'auto',
-            zIndex: 42,
-          }}
-          onPointerDown={handleTextResizePointerDown}
-          onPointerMove={handleTextResizePointerMove}
-          onPointerUp={handleTextResizePointerEnd}
-          onPointerCancel={handleTextResizePointerEnd}
-          onClick={e => {
-            e.preventDefault()
-            e.stopPropagation()
-          }}
-        />
-      )}
 
       {/* Media resize handle */}
       {clampedElementRect && selectedEid && isMediaComponent(selectedEid) && (

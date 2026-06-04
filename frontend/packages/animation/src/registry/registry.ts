@@ -66,7 +66,7 @@ function getFallbackSchemaFromElementId(elementId: string): FieldSchema[] {
     if (!registration.elementHints?.length) continue;
 
     const matchedHint = registration.elementHints.find((hint) => tokens.includes(hint.toLowerCase()));
-    console.log("efwefwe", matchedHint, tokens, registration.elementHints)
+
     if (!matchedHint) continue;
 
     const schema = registration.schema ?? [];
@@ -193,10 +193,6 @@ export function isMediaComponent(id: string): boolean {
     componentName === 'LogoAsset' ||
     componentName === 'VideoAsset' ||
     componentName === 'MediaAsset'
-}
-
-export function isPlainTextElement(id: string): boolean {
-  return resolveComponentFromId(id)?.name === 'Text'
 }
 
 /**
