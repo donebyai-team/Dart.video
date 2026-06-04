@@ -66,6 +66,7 @@ function getFallbackSchemaFromElementId(elementId: string): FieldSchema[] {
     if (!registration.elementHints?.length) continue;
 
     const matchedHint = registration.elementHints.find((hint) => tokens.includes(hint.toLowerCase()));
+    console.log("efwefwe", matchedHint, tokens, registration.elementHints)
     if (!matchedHint) continue;
 
     const schema = registration.schema ?? [];

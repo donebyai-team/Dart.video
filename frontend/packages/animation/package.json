@@ -15,6 +15,7 @@
   "dependencies": {
     "@remotion/layout-utils": "^4.0.432",
     "@remotion/preload": "4.0.421",
+    "lucide-react": "^0.408.0",
     "react": "^18.3.1",
     "remotion": "4.0.421",
     "zod": "^3.24.4"

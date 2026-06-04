@@ -47,6 +47,12 @@ func (b brandIdentity) GetBrandIdentity(ctx context.Context, ID string) (*models
 }
 
 func ModifyTextColor(colors []*pbcore.BrandColor, bgStyle *pbcore.BackgroundStyle) []*pbcore.BrandColor {
+
+	// User has modified the background color, so we don't need to modify the text color'
+	if bgStyle.GetGradient() != nil {
+		return colors
+	}
+
 	// If the effect is glow that is a light color,
 	// the hex color will be dark and hence we override it
 	bgColor := bgStyle.GetSolid().Hex

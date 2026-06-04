@@ -1,5 +1,7 @@
 import { ComponentRegistration } from "./registry";
 import { TextFieldSchema } from "../core/assets/Text";
+import { IconAssetFieldSchema } from "../core/assets/IconAsset";
+import { LogoAssetSchemaFields } from "../components/scenes/assets/LogoAsset";
 
 // export const ImageAssetSchema = z.object({
 //   src: z.string().optional(),
@@ -32,13 +34,18 @@ export const CONTENT_COMPONENTS: ComponentRegistration[] = [
   {
     name: 'LogoAsset',
     type: 'content',
-    elementHints: ['logo', 'logoasset'],
+    elementHints: ['logoasset'],
     description: '',
+    schema: [{
+      type: 'component',
+      name: 'logo',
+      fields: LogoAssetSchemaFields,
+    }],
   },
   {
     name: 'ImageAsset',
     type: 'content',
-    elementHints: ['image', 'imageasset'],
+    elementHints: ['imageasset'],
     description: 'renders a static image from a URL — use for product screens, photos, and illustrations',
   },
   {
@@ -56,7 +63,12 @@ export const CONTENT_COMPONENTS: ComponentRegistration[] = [
   {
     name: 'IconAsset',
     type: 'content',
-    elementHints: ['icon', 'iconasset'],
+    elementHints: ['iconasset'],
+    schema: [{
+      type: 'component',
+      name: 'icon',
+      fields: IconAssetFieldSchema,
+    }],
     description: 'renders a single icon by name from the icon library — use for decorative or supportive visual cues',
   },
   {
@@ -68,7 +80,7 @@ export const CONTENT_COMPONENTS: ComponentRegistration[] = [
   {
     name: 'Text',
     type: 'content',
-    elementHints: ['text'],
+    elementHints: ['textasset'],
     schema: [{
       type: 'component',
       name: 'text',

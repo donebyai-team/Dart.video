@@ -11,9 +11,8 @@ import (
 )
 
 type ThinkingExtractor struct {
-	onThinking       func(string)
-	thinkingMessages []string
-
+	onThinking          func(string)
+	thinkingMessages    []string
 	msgIndex            int
 	startTime           time.Time
 	started             bool

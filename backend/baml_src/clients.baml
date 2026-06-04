@@ -6,6 +6,7 @@ client<llm> CustomGeminiProPreview {
   options {
     model "gemini-3.1-pro-preview"
     api_key env.GOOGLE_API_KEY
+    generationConfig { thinkingConfig { includeThoughts true } }
   }
 }
 

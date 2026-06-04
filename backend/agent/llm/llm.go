@@ -213,6 +213,16 @@ func (l *llmService) GeneratePlanV2(
 ) (*types.Union2AskUserQuestionOrGeneratedVideoPlan, error) {
 	l.logger.Info("🚀 Starting video plan generation..")
 
+	var plan types.GeneratedVideoPlan
+	err := json.Unmarshal([]byte(mockGeneratePlanV2ResponseJSON), &plan)
+	if err != nil {
+		return nil, err
+	}
+
+	a := types.Union2AskUserQuestionOrGeneratedVideoPlan__NewGeneratedVideoPlan(plan)
+
+	return &a, nil
+
 	thinkingMessages := []string{
 		"Understanding the request...",
 		"Planning the video structure...",

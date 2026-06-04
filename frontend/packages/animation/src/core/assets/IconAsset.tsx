@@ -1,13 +1,16 @@
 import React from "react";
 import { useEffect, useState, useCallback } from "react";
+import type { LucideIcon } from "lucide-react";
 import { useRemotionEnvironment, delayRender, continueRender } from "remotion";
 import { useElement } from "../../patches";
 import { useTheme } from "../../theme";
 import { useAspectPreset } from "../../styles";
 import { scaleToCanvas } from "../../theme/scale";
+import { FieldSchema } from "../../registry/types";
 
 export interface IconAssetProps {
-  icon: string;
+  icon?: string;
+  Icon?: LucideIcon;
   size?: number;
   width?: number;
   height?: number;
@@ -17,6 +20,14 @@ export interface IconAssetProps {
   className?: string;
   id?: string;
 }
+
+export const IconAssetFieldSchema: FieldSchema[] = [
+  {
+    name: 'icon',
+    type: 'string',
+    datatype: "icon",
+  },
+];
 
 const ICON_BASE = "https://storage.googleapis.com/coasterai-public/icons";
 const PLACEHOLDER_ICON = "heart";
@@ -28,7 +39,9 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
 
   const { props, style, containerStyle} = useElement(propsInit.id!, propsInit)
 
-  const patchedIcon = props.icon;
+  const patchedIcon = typeof props.icon === "string" ? props.icon : "";
+  const PatchedLucideIcon = props.Icon;
+  const iconSourceLabel = patchedIcon || PatchedLucideIcon?.displayName || PatchedLucideIcon?.name || PLACEHOLDER_ICON;
   const patchedSize = props.size || 64;
   const patchedRadius = props.borderRadius || 0;
 
@@ -41,7 +54,7 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
   const [loaded, setLoaded] = useState(false);
   const [errored, setErrored] = useState(false);
   const [handle] = useState(() =>
-    isRendering ? delayRender(`Loading icon: ${patchedIcon}`) : null
+    isRendering ? delayRender(`Loading icon: ${iconSourceLabel}`) : null
   );
 
   const onLoad = useCallback(() => {
@@ -60,12 +73,18 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
   useEffect(() => {
     setLoaded(false);
     setErrored(false);
-  }, [patchedIcon]);
+  }, [patchedIcon, PatchedLucideIcon]);
 
   /* Preload icon during rendering */
 
   useEffect(() => {
     if (!isRendering || handle === null) return;
+
+    if (!patchedIcon) {
+      setLoaded(true);
+      continueRender(handle);
+      return;
+    }
 
     const img = new Image();
     img.src = patchedIcon;
@@ -83,10 +102,13 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
 
   /* Detect Tabler icon */
 
-  const isTabler =
+  const hasStringIcon = patchedIcon.length > 0;
+  const hasLucideIcon = !hasStringIcon && !!PatchedLucideIcon;
+  const isTabler = hasStringIcon && (
     patchedIcon.includes("@tabler") ||
     patchedIcon.includes("/icons/outline/") ||
-    patchedIcon.includes("/icons/filled/");
+    patchedIcon.includes("/icons/filled/")
+  );
 
   return (
     <div
@@ -116,6 +138,15 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
             objectFit: "contain",
           }}
         />
+      ) : hasLucideIcon ? (
+        <PatchedLucideIcon
+          size={scaledSize}
+          color="currentColor"
+          style={{
+            width: "100%",
+            height: "100%",
+          }}
+        />
       ) : isTabler ? (
         /* Tabler icon → colorable mask */
 
@@ -135,7 +166,7 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
             maskSize: "contain",
           }}
         />
-      ) : (
+      ) : hasStringIcon ? (
         /* Brand icon → normal image */
 
         <img
@@ -143,6 +174,16 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
           alt={patchedIcon}
           onLoad={onLoad}
           onError={onError}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+          }}
+        />
+      ) : (
+        <img
+          src={fallbackUrl}
+          alt="placeholder"
           style={{
             width: "100%",
             height: "100%",

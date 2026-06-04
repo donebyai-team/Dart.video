@@ -331,13 +331,13 @@ func (l *codeGenerator) runPlanning(ctx context.Context, generatePlanRequest typ
 			return nil, err
 		}
 
-		// Save the code in history
-		if codeResponse.ThinkingSummary != nil && *codeResponse.ThinkingSummary != "" {
-			session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
-				Role:    pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
-				Message: *codeResponse.ThinkingSummary,
-			})
-		}
+		// Save the code in history, we may avoid saving the thinking summary if the animation is generated
+		//if codeResponse.ThinkingSummary != nil && *codeResponse.ThinkingSummary != "" {
+		//	session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
+		//		Role:    pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
+		//		Message: *codeResponse.ThinkingSummary,
+		//	})
+		//}
 		//session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
 		//	Role:         pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
 		//	CodeSnapshot: asset.Url,
@@ -349,7 +349,6 @@ func (l *codeGenerator) runPlanning(ctx context.Context, generatePlanRequest typ
 		if err != nil {
 			return nil, err
 		}
-
 		template := &models.Template{
 			Config: &models.TemplateConfig{
 				CodeRegistry: &pbcore.CodeRegistry{

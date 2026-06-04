@@ -1,243 +1,174 @@
 package llm
 
 const mockGeneratePlanV2ResponseJSON = `{
-    "videoName": "Cursor Workflow",
-    "sections": [
-      {
-        "name": "Hook",
-        "slides": [
-          {
-            "index": 0,
-            "elements": [
-              {
-                "component": "TextHookStagger",
-                "props": "{\"text\":\"Can your AI work with you?\"}",
-                "children": []
-              }
-            ],
-            "background": {
-              "solid": "PRIMARY"
-            }
+  "videoName": "Jisr ATS Offer Generation",
+  "sections": [
+    {
+      "name": "Intro",
+      "slides": [
+        {
+          "element": {
+            "component": "TextLeadStagger",
+            "props": "{\"text\":\"Are your recruiters still sending offers manually\"}"
           },
-          {
-            "index": 1,
-            "elements": [
-              {
-                "component": "TitleSplit",
-                "props": "{\"topText\":\"REAL AI\",\"bottomText\":\"TEAMMATE\"}",
-                "children": []
-              }
-            ],
-            "background": null
+          "background": {
+            "solid": "#0F172A"
           }
-        ]
-      },
-      {
-        "name": "Problem",
-        "slides": [
-          {
-            "index": 2,
-            "elements": [
-              {
-                "component": "ProblemHeadline",
-                "props": "{\"text\":\"Teams are stretched\"}",
-                "children": []
-              }
-            ],
-            "background": {
-              "solid": "SECONDARY"
-            }
+        }
+      ]
+    },
+    {
+      "name": "Problem",
+      "slides": [
+        {
+          "element": {
+            "component": "AnimatedText",
+            "props": "{\"text\":\"Struggling with manual edits\\nerrors\\ncandidate follow-ups\",\"splitBy\":\"line\"}"
           },
-          {
-            "index": 3,
-            "elements": [
-              {
-                "component": "TextCardStack",
-                "props": "{\"texts\":[\"Competition keeps accelerating\",\"Hiring takes too long\",\"Talent is getting expensive\"]}",
-                "children": []
-              }
-            ],
-            "background": null
+          "background": null
+        },
+        {
+          "element": {
+            "component": "Typewriter",
+            "props": "{\"text\":\"Dont let offer delays cost you top candidates\"}"
           },
-          {
-            "index": 4,
-            "elements": [
-              {
-                "component": "ProblemCollage",
-                "props": "{\"text\":\"More competition. Less bandwidth.\",\"images\":[\"https://placehold.co/800x400.png?text=Task+Overflow\",\"https://placehold.co/800x400.png?text=Missed+Deadlines\",\"https://placehold.co/800x400.png?text=Too+Many+Tools\",\"https://placehold.co/800x400.png?text=Hiring+Pipeline\",\"https://placehold.co/800x400.png?text=Team+Burnout\"]}",
-                "children": []
-              }
-            ],
-            "background": null
-          },
-          {
-            "index": 5,
-            "elements": [
-              {
-                "component": "TextLeadStagger",
-                "props": "{\"text\":\"Hiring won't scale\"}",
-                "children": []
-              }
-            ],
-            "background": null
+          "background": {
+            "solid": "#111827"
           }
-        ]
-      },
-      {
-        "name": "Solution",
-        "slides": [
-          {
-            "index": 6,
-            "elements": [
-              {
-                "component": "LogoWithBrandName",
-                "props": "{\"text\":\"Cursor\"}",
-                "children": []
-              }
-            ],
-            "background": {
-              "solid": "PRIMARY"
-            }
+        }
+      ]
+    },
+    {
+      "name": "Solution",
+      "slides": [
+        {
+          "element": {
+            "component": "IntroText",
+            "props": "{\"intro_label\":\"Introducing\",\"intro_body\":\"offer generation in Jisr ATS\"}"
           },
-          {
-            "index": 7,
-            "elements": [
-              {
-                "component": "TextHighlight",
-                "props": "{\"text\":\"The best way to code with {AI}\"}",
-                "children": []
-              }
-            ],
-            "background": null
-          },
-          {
-            "index": 8,
-            "elements": [
-              {
-                "component": "TextStagger",
-                "props": "{\"text\":\"Your personal AI assistant for building software\"}",
-                "children": []
-              }
-            ],
-            "background": null
+          "background": {
+            "solid": "PRIMARY"
           }
-        ]
-      },
-      {
-        "name": "Product",
-        "slides": [
-          {
-            "index": 9,
-            "elements": [
-              {
-                "component": "TextWithMediaScene",
-                "props": "{\"textComponent\":\"textwithwordcycle\",\"textComponentProps\":{\"text\":\"Jump between\",\"cyclingWords\":[\"agent\",\"plan\",\"debug\",\"ask\"]},\"src\":\"https://placehold.co/1280x720.png?text=Cursor+Modes\"}",
-                "children": []
-              }
-            ],
-            "background": null
+        },
+        {
+          "element": {
+            "component": "LogoWithBrandName",
+            "props": "{\"brandname\":\"Jisr ATS\"}"
           },
-          {
-            "index": 10,
-            "elements": [
-              {
-                "component": "PillCarousel",
-                "props": "{\"text\":\"Modes for every moment\",\"pills\":[{\"icon\":\"bot\",\"text\":\"Agent\"},{\"icon\":\"map\",\"text\":\"Plan\"},{\"icon\":\"bug\",\"text\":\"Debug\"},{\"icon\":\"message-square\",\"text\":\"Ask\"}]}",
-                "children": []
-              }
-            ],
-            "background": null
-          },
-          {
-            "index": 11,
-            "elements": [
-              {
-                "component": "TextWithMediaScene",
-                "props": "{\"textComponent\":\"textwithwordcycle\",\"textComponentProps\":{\"text\":\"Work with\",\"cyclingWords\":[\"OpenAI\",\"Anthropic\",\"more\"]},\"src\":\"@asset/cavxyj/0.png\"}",
-                "children": []
-              }
-            ],
-            "background": null
-          },
-          {
-            "index": 12,
-            "elements": [
-              {
-                "component": "IconShowcase",
-                "props": "{\"text\":\"Latest models, your choice\",\"icons\":[\"sparkles\",\"brain\",\"cpu\"]}",
-                "children": []
-              }
-            ],
-            "background": null
-          },
-          {
-            "index": 13,
-            "elements": [
-              {
-                "component": "TextWithMediaScene",
-                "props": "{\"textComponent\":\"texthighlight\",\"textComponentProps\":{\"text\":\"Add custom {plugins}\"},\"src\":\"@asset/qfbbfw/1.mp4\"}",
-                "children": []
-              }
-            ],
-            "background": null
-          },
-          {
-            "index": 14,
-            "elements": [
-              {
-                "component": "TextStagger",
-                "props": "{\"text\":\"Connect the tools you already love\"}",
-                "children": []
-              }
-            ],
-            "background": null
+          "background": {
+            "solid": "PRIMARY"
           }
-        ]
-      },
-      {
-        "name": "Proof",
-        "slides": [
-          {
-            "index": 15,
-            "elements": [
-              {
-                "component": "LogoShowcase",
-                "props": "{\"text\":\"Used by brands building fast\",\"logos\":[\"https://placehold.co/320x160.png?text=Shopify\",\"https://placehold.co/320x160.png?text=Midjourney\",\"https://placehold.co/320x160.png?text=1000%2B+Startups\"]}",
-                "children": []
-              }
-            ],
-            "background": null
+        }
+      ]
+    },
+    {
+      "name": "Product Info",
+      "slides": [
+        {
+          "element": {
+            "component": "TextWithMediaScene",
+            "props": "{\"textComponent\":\"animatedtext\",\"textComponentProps\":{\"text\":\"Send offer letters in minutes\",\"splitBy\":\"word\"},\"src\":\"https://placehold.co/1280x720.png\"}"
           },
-          {
-            "index": 16,
-            "elements": [
-              {
-                "component": "StatCounter",
-                "props": "{\"label\":\"productivity gain\",\"from\":0,\"to\":10,\"suffix\":\"X\"}",
-                "children": []
-              }
-            ],
-            "background": null
+          "background": null
+        },
+        {
+          "element": {
+            "component": "TextHookStagger",
+            "props": "{\"text\":\"Win top candidates faster\"}"
+          },
+          "background": {
+            "solid": "#0B1020"
           }
-        ]
-      },
-      {
-        "name": "CTA",
-        "slides": [
-          {
-            "index": 17,
-            "elements": [
-              {
-                "component": "LogoWithCTA",
-                "props": "{\"brandName\":\"Cursor\",\"ctaText\":\"Try Cursor free today\"}",
-                "children": []
-              }
-            ],
-            "background": {
-              "solid": "PRIMARY"
-            }
+        },
+        {
+          "element": {
+            "component": "MultiImageStack",
+            "props": "{\"headline\":\"Create professional offer letter templates\",\"cyclingWords\":[\"English\",\"Arabic\"],\"images\":[\"https://placehold.co/1200x800.png\",\"https://placehold.co/1200x800.png\"]}"
+          },
+          "background": null
+        },
+        {
+          "element": {
+            "component": "MediaWithFeatures",
+            "props": "{\"src\":\"https://placehold.co/1280x720.png\",\"features\":[{\"icon\":\"user\",\"text\":\"Name\"},{\"icon\":\"briefcase\",\"text\":\"Job tittle\"},{\"icon\":\"wallet\",\"text\":\"Salary\"},{\"icon\":\"plus\",\"text\":\"More\"}]}"
+          },
+          "background": null
+        },
+        {
+          "element": {
+            "component": "PillCarousel",
+            "props": "{\"text\":\"Send personalised offer letters\",\"pills\":[{\"icon\":\"users\",\"text\":\"To candidates\"},{\"icon\":\"send\",\"text\":\"Directly\"},{\"icon\":\"layout-dashboard\",\"text\":\"From your ATS\"}]}"
+          },
+          "background": null
+        },
+        {
+          "element": {
+            "component": "AnimatedMedia",
+            "props": "{\"text\":\"From headcount planning to sending offers\",\"src\":\"https://placehold.co/1280x720.png\"}"
+          },
+          "background": null
+        },
+        {
+          "element": {
+            "component": "TimelineCardStack",
+            "props": "{\"features\":[\"Headcount planning\",\"Candidate review\",\"Send offers\"]}"
+          },
+          "background": null
+        },
+        {
+          "element": {
+            "component": "TextCardStack",
+            "props": "{\"texts\":[\"Run you entire hiring process\",\"with Jisr ATS\"]}"
+          },
+          "background": {
+            "solid": "#F8FAFC"
           }
-        ]
-      }
-    ]
-  }`
+        },
+        {
+          "element": {
+            "component": "TextWithWordCycle",
+            "props": "{\"text\":\"All in one\",\"cyclingWords\":[\"HR\",\"Talent\",\"Spend\"]}"
+          },
+          "background": {
+            "solid": "PRIMARY"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Social Proof",
+      "slides": [
+        {
+          "element": {
+            "component": "StatCounter",
+            "props": "{\"label\":\"businesses trusted\",\"from\":0,\"to\":4700,\"suffix\":\"+\"}"
+          },
+          "background": {
+            "solid": "#0F172A"
+          }
+        },
+        {
+          "element": {
+            "component": "SocialProofList",
+            "props": "{\"proofs\":[\"Trusted by 500K+ employees\",\"10B+ SAR in payroll\",\"Built for modern KSA businesses\"]}"
+          },
+          "background": null
+        }
+      ]
+    },
+    {
+      "name": "CTA",
+      "slides": [
+        {
+          "element": {
+            "component": "LogoWithCTA",
+            "props": "{\"brandName\":\"Jisr\",\"ctaText\":\"Book a demo\"}"
+          },
+          "background": {
+            "solid": "PRIMARY"
+          }
+        }
+      ]
+    }
+  ]
+}`

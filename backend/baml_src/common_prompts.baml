@@ -54,13 +54,34 @@ template_string AnimationPrimitives() #"
     ### Typography:
    - Use `Text` for all visible text. Never use `span`, `p`, `h1-h6`, or other text elements.
    - Every `Text` component MUST have an `id`.
-   - The `id` of a `Text` component MUST start with `text-`.
-   - Examples: `text-1`, `text-title`, `text-subtitle`, `text-caption`.
+   - The `id` of a `Text` component MUST start with `textasset-`, eg: `textasset-1`.
    - Do not use any other prefix for `Text` component IDs.
 
     {% raw %}
     ```tsx
-    <Text id="text-1" text="Hello" style={{}} />
+    <Text id="textasset-1" text="Hello" style={{}} />
     ```
     {% endraw %}
+
+    ### Icon and Logo:
+    - Use IconAsset for all icons.
+    - For `lucide-react` icons, import the icon component and pass it via the `Icon` prop.
+    - Use LogoAsset for logos with placeholder image
+    - Every `IconAsset` and `LogoAsset` component MUST have an `id` which start with `iconasset-`, `logoasset-` respectively.
+    - Examples: `iconasset-1`, `logoasset-1`.
+
+    {% raw %}
+    ```tsx
+     import { Heart } from "lucide-react";
+     <IconAsset id="iconasset-1" Icon={Heart} size={48} style={{}} />
+     <LogoAsset
+       id="logoasset-1"
+       src="https://placehold.co/200x80.png"
+       width={200}
+       height={80}
+       style={{}}
+     />
+     ```
+    {% endraw %}
+
 "#
