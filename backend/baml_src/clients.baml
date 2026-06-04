@@ -1,10 +1,19 @@
 // Learn more about clients at https://docs.boundaryml.com/docs/snippets/clients/overview
 
-client<llm> CustomGeminiFlash {
+client<llm> CustomGeminiProPreview {
   provider google-ai
   retry_policy Exponential
   options {
     model "gemini-3.1-pro-preview"
+    api_key env.GOOGLE_API_KEY
+  }
+}
+
+client<llm> CustomGeminiFlash {
+  provider google-ai
+  retry_policy Exponential
+  options {
+    model "gemini-2.5-flash"
     api_key env.GOOGLE_API_KEY
   }
 }

@@ -184,6 +184,13 @@ const ReimagineSettings = ({
   useEffect(() => {
     let cancelled = false
 
+    if (activeTab !== 'browse') {
+      setIsDefaultLoading(false)
+      return () => {
+        cancelled = true
+      }
+    }
+
     const loadDefaultSuggestions = async () => {
       setIsDefaultLoading(true)
 
@@ -199,7 +206,7 @@ const ReimagineSettings = ({
     return () => {
       cancelled = true
     }
-  }, [loadSuggestions])
+  }, [activeTab, loadSuggestions])
 
   const handleSelectCategory = useCallback((category: CategoryItem) => {
     setSelectedCategory(category)
@@ -316,22 +323,24 @@ const ReimagineSettings = ({
           </TabsList>
 
           <TabsContent value='browse' className='mt-4'>
-            <BrowseTab
-              aiSuggestions={defaultScenes}
-              aiSelectedIndex={selectedDefaultSuggestionIndex}
-              isAiLoading={isDefaultLoading}
-              onSelectAiSuggestion={(suggestion, index) => applySuggestion(suggestion, index, 'default')}
-              categories={categories}
-              selectedCategory={selectedCategory}
-              onSelectCategory={handleSelectCategory}
-              onGenerateNew={() => setActiveTab('generate')}
-              categorySuggestions={categoryScenes}
-              categorySelectedIndex={selectedCategorySuggestionIndex}
-              isCategoryLoading={isCategoryLoading}
-              onSelectCategorySuggestion={(suggestion, index) => applySuggestion(suggestion, index, 'category')}
-              resolution={resolution}
-              fps={fps}
-            />
+            {activeTab === 'browse' && (
+              <BrowseTab
+                aiSuggestions={defaultScenes}
+                aiSelectedIndex={selectedDefaultSuggestionIndex}
+                isAiLoading={isDefaultLoading}
+                onSelectAiSuggestion={(suggestion, index) => applySuggestion(suggestion, index, 'default')}
+                categories={categories}
+                selectedCategory={selectedCategory}
+                onSelectCategory={handleSelectCategory}
+                onGenerateNew={() => setActiveTab('generate')}
+                categorySuggestions={categoryScenes}
+                categorySelectedIndex={selectedCategorySuggestionIndex}
+                isCategoryLoading={isCategoryLoading}
+                onSelectCategorySuggestion={(suggestion, index) => applySuggestion(suggestion, index, 'category')}
+                resolution={resolution}
+                fps={fps}
+              />
+            )}
           </TabsContent>
 
           <TabsContent value='generate' className='mt-4'>
