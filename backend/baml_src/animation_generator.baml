@@ -52,7 +52,6 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
           height,
           position: "relative",
           overflow: "hidden",
-          fontFamily: "Inter, sans-serif",
         }}
       >
         {/* animation */}
@@ -83,7 +82,6 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
     {% endraw %}
 
     Treat Remotion like a fixed-size animation canvas, not a responsive webpage.
-
 
     ## ANIMATION RULES
 
@@ -117,15 +115,14 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
     ## STYLING RULES
 
     - Use inline styles only
-    - ALWAYS use fontFamily: 'Inter, sans-serif'
-    - There is already a dark background on the canvas. Don't add any background
+    - There is already background on the canvas. Don't add any background
 
     {{ AnimationPrimitives() }}
 
     ## OUTPUT FORMAT (CRITICAL)
 
     * If the prompt is ambiguous or visual details are unclear, ask for clarification using the **ask** tool. Do not assume missing creative direction.
-    * Always return the **total number of frames** for the animation.
+    * Always return the **total frame count**, keeping it consistent with the scene timings and FPS. Avoid unnecessary idle or dead frames.
     * If `manualEdits` are provided in follow-up requests, always return the updated `manualEdits` along with the updated code.
     * `manualEdits` reference code and elements by `elementId`. If a code change removes or renames an element so its ID no longer exists, remove the corresponding entry from `manualEdits`.
 

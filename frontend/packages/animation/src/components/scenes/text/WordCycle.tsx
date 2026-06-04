@@ -111,8 +111,9 @@ export const WordCycle: React.FC<WordCycleProps> = (initProps) => {
   const holdDuration = props.holdDuration;
   const transitionDuration = props.transitionDuration;
   const lastCycleIndex = props.words.length - 1;
-  const cycleIndex = Math.min(Math.floor(elapsed / cycleDuration), lastCycleIndex);
-  const cycleFrame = elapsed - cycleIndex * cycleDuration;
+  const cycleElapsed = Math.max(0, elapsed - holdDuration);
+  const cycleIndex = Math.min(Math.floor(cycleElapsed / cycleDuration), lastCycleIndex);
+  const cycleFrame = cycleElapsed - cycleIndex * cycleDuration;
 
   const currentWord = props.words[cycleIndex % props.words.length] ?? props.words[0] ?? '';
   const nextWord = props.words[Math.min(cycleIndex + 1, lastCycleIndex)] ?? currentWord;
@@ -337,5 +338,5 @@ export const WordCycleDescriptor: ComponentRegistration = {
   ],
   description: 'Rotates through words on a bold background',
   instructions: 'Use for emphasis words, or highlighting multiple key points.',
-  celExpression: '(props.wordcycle.holdDuration + props.wordcycle.transitionDuration) * size(props.wordcycle.words)',
+  celExpression: 'props.wordcycle.holdDuration + ((props.wordcycle.holdDuration + props.wordcycle.transitionDuration) * size(props.wordcycle.words))',
 };
