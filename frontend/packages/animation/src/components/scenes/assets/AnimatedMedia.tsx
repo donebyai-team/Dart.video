@@ -35,7 +35,7 @@ const mediaDefaults: TimedMediaAssetProps = {
 export function AnimatedMedia(): React.ReactElement {
   const frame = useCurrentFrame();
   const preset = useAspectPreset();
-  const { props: textProps } = useElement('textstagger', ANIMATED_MEDIA_DEFAULTS);
+  const { props: textProps } = useElement('animatedtext', ANIMATED_MEDIA_DEFAULTS);
   const { props: mediaProps } = useElement<TimedMediaAssetProps>('mediaasset', mediaDefaults);
 
   const motionPreset = mediaProps.motionPreset ?? DEFAULT_MOTION_PRESET;

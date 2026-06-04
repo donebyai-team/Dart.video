@@ -16,7 +16,7 @@ Follow the same overall engineering style as `MediaWithFeatures.tsx`:
 
 1. The scene does not receive props.
 2. All editable values must come from hooks.
-3. Every editable element in the scene must have a unique `id`.
+3. Every editable element in the scene must have a unique `id` which is the name of the asset itself. If multiple assets are there then you can add a suffix to make it unique. Eg. `iconasset-0`, `iconasset`.
 4. Use consistent naming for ids so repeated items stay predictable.
 
 ### Available Hooks

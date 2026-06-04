@@ -331,7 +331,7 @@ function ProblemCollageImage({
 export const ProblemCollage: React.FC = () => {
     const frame = useCurrentFrame();
     const preset = useAspectPreset();
-    const textProps = usePatchedProps('textstagger', ProblemCollageTextDefaults);
+    const textProps = usePatchedProps('animatedtext', ProblemCollageTextDefaults);
     const sceneProps = usePatchedProps('scene', ProblemCollageSceneDefaults);
     const imageEntries = useArrayPatch('images');
     const resolvedImages = useMemo<ResolvedImageItem[]>(() => {

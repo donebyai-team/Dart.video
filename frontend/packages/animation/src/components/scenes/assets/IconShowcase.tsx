@@ -149,7 +149,7 @@ export const IconShowcase: React.FC = () => {
 export const IconShowcaseSchema = [
     {
         type: "component",
-        name: 'textstagger',
+        name: 'animatedtext',
         fields: [
             {
                 "name": "text",

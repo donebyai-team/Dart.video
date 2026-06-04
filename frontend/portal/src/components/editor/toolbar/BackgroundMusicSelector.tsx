@@ -7,7 +7,6 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useVideoStore } from "@/stores/video";
-import { url } from "inspector";
 
 const backgroundTracks = [
     {
@@ -45,7 +44,6 @@ const backgroundTracks = [
         url: "https://storage.googleapis.com/coasterai-public/background_music/Deep%20Electronic.mp3",
         icon: GuitarIcon,
     },
-
     {
         id: "dance-groove",
         name: "Dance Groove",
