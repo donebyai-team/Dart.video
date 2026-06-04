@@ -55,6 +55,7 @@ function useComputedStyles(elementId?: string) {
       color: rgbaToHex(computed.color),
       backgroundColor: rgbaToHex(computed.backgroundColor),
       fontFamily: extractFontName(computed.fontFamily || ''),
+      fontSize: parseFloat(computed.fontSize) || undefined,
       fontWeight: computed.fontWeight,
       letterSpacing: computed.letterSpacing,
       textAlign: computed.textAlign,
@@ -87,6 +88,15 @@ export function getDepthValue(
   if (parsedDepth > 0) return parsedDepth
 
   return computed.depth ?? fallbackDepth
+}
+
+function getNumericStyleValue(value: string | number | undefined, fallback: number): number {
+  if (typeof value === 'number') return value
+  if (typeof value === 'string') {
+    const parsed = Number.parseFloat(value)
+    return Number.isFinite(parsed) ? parsed : fallback
+  }
+  return fallback
 }
 
 /**
@@ -370,6 +380,7 @@ export function TextToolbar({
   const color = (styleOverride.color ?? computed.color) as string | undefined
   const backgroundColor = (styleOverride.backgroundColor ?? computed.backgroundColor) as string | undefined
   const fontFamily = (styleOverride.fontFamily ?? computed.fontFamily) as string | undefined
+  const fontSize = getNumericStyleValue(styleOverride.fontSize, computed.fontSize ?? 16)
   const fontWeight = (styleOverride.fontWeight ?? computed.fontWeight) as string | number | undefined
   const letterSpacing = (styleOverride.letterSpacing ?? computed.letterSpacing) as string | undefined
   const textAlign = (styleOverride.textAlign ?? computed.textAlign) as string | undefined
@@ -394,6 +405,17 @@ export function TextToolbar({
         <FontSelector
           value={fontFamily ?? ''}
           onChange={v => onStyleOverride({ fontFamily: v })}
+        />
+      </LabeledField>
+
+      <LabeledField label="Size">
+        <NumberStepper
+          value={fontSize}
+          onChange={value => onStyleOverride({ fontSize: value })}
+          min={1}
+          step={2}
+          inputWidth="w-14"
+          unit="px"
         />
       </LabeledField>
 

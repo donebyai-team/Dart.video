@@ -22,7 +22,7 @@ export function AnimationToolbar({
   const isMedia = isMediaComponent(selectedId)
 
   return (
-    <div className="flex flex-wrap items-center gap-2 px-3 py-1.5 rounded-xl bg-background/95 backdrop-blur-lg border border-border shadow-xl text-sm select-none max-w-[850px]">
+    <div className="flex w-[min(800px,calc(100vw-54px))] flex-wrap items-center gap-2 px-3 py-1.5 rounded-xl bg-background/95 backdrop-blur-lg border border-border shadow-xl text-sm select-none">
       {isContainer ? (
         <ContainerToolbar
           styleOverride={style}
