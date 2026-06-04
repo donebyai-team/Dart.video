@@ -2,7 +2,7 @@ import * as Babel from "@babel/standalone";
 import * as LucideReact from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as AnimationPrimitives from "@coasterai/animation";
-import { REGISTERED_COMPONENT_NAMES } from "@coasterai/animation";
+import { REGISTERED_COMPONENT_NAMES, useTheme } from "@coasterai/animation";
 
 import {
   AbsoluteFill,
@@ -52,6 +52,7 @@ const SHARED_PARAM_NAMES: string[] = [
   // Derived from @coasterai/animation registry; adding a component there makes it
   // automatically available here. LLM writes <FadeIn> and this scope has FadeIn.
   ...Array.from(REGISTERED_COMPONENT_NAMES),
+  "useTheme"
 ];
 function getSharedParamValues(validateShapePropsOption: boolean): unknown[] {
   return [
@@ -73,6 +74,7 @@ function getSharedParamValues(validateShapePropsOption: boolean): unknown[] {
       const val = (AnimationPrimitives as Record<string, unknown>)[name];
       return val;
     }),
+    useTheme,
   ];
 }
 

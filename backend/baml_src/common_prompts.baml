@@ -63,12 +63,14 @@ template_string AnimationPrimitives() #"
     ```
     {% endraw %}
 
-    ### Icon and Logo:
-    - Use IconAsset for all icons.
+    ### Image, Video, Icon and Logo:
+    - Never use `img`, `video` or other media tags
+    - Use IconAsset for icons.
+    - Use LogoAsset for logos.
+    - Use MediaAsset for image or video.
     - For `lucide-react` icons, import the icon component and pass it via the `Icon` prop.
-    - Use LogoAsset for logos with placeholder image
-    - Every `IconAsset` and `LogoAsset` component MUST have an `id` which start with `iconasset-`, `logoasset-` respectively.
-    - Examples: `iconasset-1`, `logoasset-1`.
+    - Every `IconAsset`, `LogoAsset`, `MediaAsset` component MUST have an `id` which start with `iconasset-`, `logoasset-`, `mediaasset-` respectively.
+    - Examples: `iconasset-1`, `logoasset-1`, `mediaasset-1`.
 
     {% raw %}
     ```tsx
@@ -81,7 +83,38 @@ template_string AnimationPrimitives() #"
        height={80}
        style={{}}
      />
+     <MediaAsset
+        id="mediaasset-1"
+        src="https://placehold.co/200x80.png"
+        width={1200}
+        height={800}
+        style={{}}
+      />
      ```
     {% endraw %}
 
+    ### Branding
+    - Use useTheme() to access brand assets and color tokens.
+    - Use LogoAsset to render the logo or icon by passing the corresponding URL to src.
+    {% raw %}
+    ```tsx
+     const theme = useTheme();
+
+     // Brand colors
+     theme.colors.foreground // Primary text color
+     theme.colors.primary    // Brand/highlight color
+
+     // Brand assets
+     theme.logo.url
+     theme.logo.width
+     theme.logo.height
+
+     theme.logoIcon.url
+     theme.logoIcon.width
+     theme.logoIcon.height
+     ```
+    {% endraw %}
+
+    - Prefer theme.colors.foreground for text and theme.colors.primary for accents, highlights, and primary actions.
+    - Use theme.logo for the full logo and theme.logoIcon for compact/icon-only branding.
 "#

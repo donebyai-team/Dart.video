@@ -214,9 +214,8 @@ export const LogoAssetSchemaFields = [
     },
     {
         "name": "logoAnimation",
-        "type": "string",
+        "type": "enum",
         "default": DEFAULT_ANIMATION,
-        "sub_type": "enum",
         "enum": LOGO_ANIMATIONS
     }
 ]

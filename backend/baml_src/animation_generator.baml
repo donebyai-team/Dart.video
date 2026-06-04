@@ -100,7 +100,7 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
     \`\`\`tsx
     import { useCurrentFrame, useVideoConfig, interpolate, spring, Sequence } from "remotion";
     import { useState, useEffect } from "react";
-    import { Text, LogoAsset, IconAsset } from './';
+    import { Text, LogoAsset, IconAsset, useTheme } from './';
     export default function RemoteComponent() {
       return (
             // Code goes here
