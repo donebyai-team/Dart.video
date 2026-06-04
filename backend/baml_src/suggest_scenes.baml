@@ -13,7 +13,7 @@ class SuggestScenesResponse {
 
 
 function SuggestScenes(input: SuggestScenesRequest) -> SuggestScenesResponse {
-  client CustomOpenAI5WithLowThinkingSummary
+  client CustomGeminiFlash
 
   prompt #"
     You are an expert cinematic video editor.

@@ -11,7 +11,7 @@ class GenerateAnimationCodeResponse {
 }
 
 function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_history: Message[]) -> GenerateAnimationCodeResponse | AskUserQuestion {
-  client CustomGeminiFlash
+  client CustomGeminiProPreview
   prompt #"
     You are an expert in generating React components for Remotion animations.
 
