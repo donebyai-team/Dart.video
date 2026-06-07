@@ -49,6 +49,27 @@ template_string EnterAnimation(animation: AnimationCategories) #"
 "#
 
 
+template_string TemplatePropsRules() #"
+    ### Constants Rules
+    All user-facing content (text, labels, icons, etc.) must be stored in a single DEFAULT_DATA constant defined inside the component.
+
+    Example:
+    {% raw %}
+    const DEFAULT_DATA = {
+      title: "AI Automation",
+      subtitle: "Save 10 hours per week",
+      icon: "Bot",
+      features: [
+        {
+          title: "Automation",
+          description: "Automate repetitive work",
+          icon: "Zap",
+        },
+      ],
+    };
+    {% endraw %}
+"#
+
 template_string AnimationPrimitives() #"
 
     ### Typography:
