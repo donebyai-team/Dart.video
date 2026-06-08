@@ -83,7 +83,7 @@ func NewSceneGeneratorAgent(
 }
 
 func (l *sceneGenerator) setTags(ctx context.Context) context.Context {
-	ctx = context.WithValue(ctx, llm.VideoIDKey, l.session.GetID())
+	ctx = context.WithValue(ctx, llm.VideoIDKey, l.videoID)
 	ctx = context.WithValue(ctx, llm.SceneIDKey, l.slideID)
 	return ctx
 }
