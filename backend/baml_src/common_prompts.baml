@@ -49,12 +49,14 @@ template_string EnterAnimation(animation: AnimationCategories) #"
 "#
 
 
-template_string TemplatePropsRules() #"
-    ### Constants Rules
-    All user-facing content (text, labels, icons, etc.) must be stored in a single DEFAULT_DATA constant defined inside the component.
+template_string ConstantsRules() #"
+    ## CONSTANTS RULES (CRITICAL)
 
-    Example:
+    - ALL constants MUST be defined INSIDE the component body, AFTER hooks:
+    - All user-facing elements (text, labels, icons, etc.) must be stored in a single DEFAULT_DATA constant defined inside the component.
+    - For rest of the constants you can keep it in other constants
     {% raw %}
+    ```tsx
     const DEFAULT_DATA = {
       title: "AI Automation",
       subtitle: "Save 10 hours per week",
@@ -67,7 +69,12 @@ template_string TemplatePropsRules() #"
         },
       ],
     };
+
+    - Timing: const FADE_DURATION = 20;
+    - Layout: const PADDING = 40;
+    ```
     {% endraw %}
+    This allows users to easily customize the animation.
 "#
 
 template_string AnimationPrimitives() #"
@@ -86,17 +93,13 @@ template_string AnimationPrimitives() #"
 
     ### Image, Video, Icon and Logo:
     - Never use `img`, `video` or other media tags
-    - Use IconAsset for icons.
     - Use LogoAsset for logos.
     - Use MediaAsset for image or video.
-    - For `lucide-react` icons, import the icon component and pass it via the `Icon` prop.
-    - Every `IconAsset`, `LogoAsset`, `MediaAsset` component MUST have an `id` which start with `iconasset-`, `logoasset-`, `mediaasset-` respectively.
+    - Every `LogoAsset`, `MediaAsset` component MUST have an `id` which start with `iconasset-`, `logoasset-`, `mediaasset-` respectively.
     - Examples: `iconasset-1`, `logoasset-1`, `mediaasset-1`.
 
     {% raw %}
     ```tsx
-     import { Heart } from "lucide-react";
-     <IconAsset id="iconasset-1" Icon={Heart} size={48} style={{}} />
      <LogoAsset
        id="logoasset-1"
        src="https://placehold.co/200x80.png"
@@ -114,6 +117,31 @@ template_string AnimationPrimitives() #"
      ```
     {% endraw %}
 
+    ### Icons
+    - Always use `IconAsset` to render icons.
+    - If the icon exists in `lucide-react`, import it and pass the component to the `Icon` prop.
+    - If the icon does not exist in `lucide-react`, pass a string identifier using the format `icon:<icon-name>`. eg. `icon:google`
+    - Every `IconAsset` must have a unique `id` starting with `iconasset-`.
+
+    Examples:
+    {% raw %}
+    ```tsx
+    import { Heart } from "lucide-react";
+
+    <IconAsset
+      id="iconasset-heart"
+      Icon={Heart}
+      size={48}
+    />
+
+    <IconAsset
+      id="iconasset-drive"
+      Icon="icon:google-drive"
+      size={48}
+    />
+    ```
+    {% endraw %}
+
     ### Branding
     - Use useTheme() to access brand assets and color tokens.
     - Use LogoAsset to render the logo or icon by passing the corresponding URL to src.
@@ -126,13 +154,13 @@ template_string AnimationPrimitives() #"
      theme.colors.primary    // Brand/highlight color
 
      // Brand assets
-     theme.logo.url
-     theme.logo.width
-     theme.logo.height
+     theme.logo?.url
+     theme.logo?.width
+     theme.logo?.height
 
-     theme.logoIcon.url
-     theme.logoIcon.width
-     theme.logoIcon.height
+     theme.logoIcon?.url
+     theme.logoIcon?.width
+     theme.logoIcon?.height
      ```
     {% endraw %}
 

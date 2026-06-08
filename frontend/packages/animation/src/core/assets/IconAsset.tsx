@@ -9,8 +9,9 @@ import { scaleToCanvas } from "../../theme/scale";
 import { FieldSchema } from "../../registry/types";
 
 export interface IconAssetProps {
+  /** @deprecated Use `Icon` instead. */
   icon?: string;
-  Icon?: LucideIcon;
+  Icon?: LucideIcon | string;
   size?: number;
   width?: number;
   height?: number;
@@ -23,9 +24,13 @@ export interface IconAssetProps {
 
 export const IconAssetFieldSchema: FieldSchema[] = [
   {
-    name: 'icon',
+    name: 'Icon',
     type: 'string',
     datatype: "icon",
+  },
+  {
+    name: 'size',
+    type: 'number',
   },
 ];
 
@@ -37,10 +42,11 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
   const { isRendering } = useRemotionEnvironment();
   const preset = useAspectPreset();
 
-  const { props, style, containerStyle} = useElement(propsInit.id!, propsInit)
+  const { props, style, containerStyle } = useElement(propsInit.id!, propsInit)
 
-  const patchedIcon = typeof props.icon === "string" ? props.icon : "";
-  const PatchedLucideIcon = props.Icon;
+  const resolvedIcon = props.Icon ?? props.icon;
+  const patchedIcon = typeof resolvedIcon === "string" ? resolvedIcon : "";
+  const PatchedLucideIcon = typeof resolvedIcon === "string" ? undefined : resolvedIcon;
   const iconSourceLabel = patchedIcon || PatchedLucideIcon?.displayName || PatchedLucideIcon?.name || PLACEHOLDER_ICON;
   const patchedSize = props.size || 64;
   const patchedRadius = props.borderRadius || 0;

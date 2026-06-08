@@ -145,6 +145,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
   const handleTemplateRenderError = React.useCallback((error: Error) => {
     setCompiledComponent(null)
     setTemplateError(`Template render failed: ${error.message}`)
+    console.log("Template render error:", error)
     setIsLoading(false)
   }, [])
 

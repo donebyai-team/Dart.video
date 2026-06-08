@@ -5,7 +5,7 @@ import { Palette, Sparkles, Square, X } from 'lucide-react'
 import type { PatchOverlay } from '@coasterai/renderer'
 import { useRouter } from 'next/navigation'
 import type { AskUserQuestion, GenerateOrEditSceneResponse } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
-import { MediaAsset, SelectedMediaAssetSchema } from '@coasterai/pb/coasterai/core/v1/media_asset_pb'
+import { MediaType, SelectedMediaAssetSchema, type MediaAsset, type SelectedMediaAsset } from '@coasterai/pb/coasterai/core/v1/media_asset_pb'
 import { SlideStatus, type Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
@@ -25,6 +25,72 @@ interface ScenePromptComposerProps {
 }
 
 type Stage = 'compose' | 'thinking' | 'question'
+
+/**
+ * Returns true for images that should be treated as attachments (assets)
+ * instead of image references sent to the model.
+ *
+ * Typically considered assets:
+ * - App / website icons (32x32, 64x64, 128x128 or < 256 and area 98304)
+ * - Favicons
+ * - Small badges or stickers
+ * - Small UI graphics
+ *
+ * Typically NOT considered assets:
+ * - Product screenshots
+ * - Website screenshots
+ * - Photos
+ * - Diagrams
+ * - Documents exported as images
+ * - Whiteboard screenshots
+ * - Full-page UI screenshots (e.g. 1440x900)
+ *
+ * Currently this only classifies small images that are likely to be icons
+ * or similar UI assets.
+ */
+const isLikelyIconOrLogoImage = (asset: MediaAsset) => {
+  if (asset.mediaType !== MediaType.IMAGE) return false
+
+  // Favicon / icon files should always be treated as assets.
+  if (asset.url?.toLowerCase().endsWith('.ico')) return true
+
+  const width = asset.width
+  const height = asset.height
+
+  // If dimensions are unavailable, treat it as a normal image reference.
+  if (!width || !height) return false
+
+  const longestSide = Math.max(width, height)
+  const area = width * height
+
+  // Small images are typically icons, favicons, badges, etc.
+  const isLikelyIcon = longestSide <= 256 && area <= 98304
+
+  return isLikelyIcon
+}
+
+const splitSelectedReferences = (
+  selectedReferences: SelectedAssetWithPreview[]
+) => {
+  const assets: SelectedMediaAsset[] = []
+  const references: SelectedMediaAsset[] = []
+
+  for (const selectedReference of selectedReferences) {
+    const asset = selectedReference.asset
+
+    const shouldSendAsAsset =
+      asset?.mediaType === MediaType.SVG ||
+      (asset && isLikelyIconOrLogoImage(asset))
+
+    if (shouldSendAsAsset) {
+      assets.push(selectedReference.selection)
+    } else {
+      references.push(selectedReference.selection)
+    }
+  }
+
+  return { assets, references }
+}
 
 export default function ScenePromptComposer({ setOverlay, onConversationUpdated }: ScenePromptComposerProps) {
   const updateSlide = useVideoStore(s => s.updateSlide)
@@ -47,13 +113,13 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
   const [selectedAnswer, setSelectedAnswer] = useState('')
   const [customAnswer, setCustomAnswer] = useState('')
   const [isThinkingBusy, setIsThinkingBusy] = useState(false)
-  const [selectedAssets, setSelectedAssets] = useState<SelectedAssetWithPreview[]>([])
+  const [selectedReferences, setSelectedReferences] = useState<SelectedAssetWithPreview[]>([])
   const [assetDialogOpen, setAssetDialogOpen] = useState(false)
   const [selectedAssetsDialogOpen, setSelectedAssetsDialogOpen] = useState(false)
   const [questionAssetsDialogOpen, setQuestionAssetsDialogOpen] = useState(false)
   const [questionAssets, setQuestionAssets] = useState<SelectedAssetWithPreview[]>([])
 
-  const hasSelectedAssets = selectedAssets.length > 0
+  const hasSelectedAssets = selectedReferences.length > 0
   const abortControllerRef = useRef<AbortController | null>(null)
   const streamSessionRef = useRef(0)
   const canSubmit = prompt.trim().length > 0
@@ -127,7 +193,7 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
 
   const resetAfterStop = () => {
     setPrompt('')
-    setSelectedAssets([])
+    setSelectedReferences([])
     setSelectedAssetsDialogOpen(false)
     setQuestionAssets([])
     setQuestionAssetsDialogOpen(false)
@@ -186,7 +252,7 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
 
   const startStream = async (overridePrompt?: string) => {
     const finalPrompt = (overridePrompt ?? prompt).trim()
-    const references = selectedAssets.map(asset => asset.selection)
+    const { assets, references } = splitSelectedReferences(selectedReferences)
     const slideId = selectedSlide?.id
     if (!videoId || !finalPrompt || !slideId || isSubmitting) return
 
@@ -210,6 +276,7 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
             case: 'request',
             value: {
               prompt: finalPrompt,
+              assets,
               references,
             },
           },
@@ -253,7 +320,7 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
       note: note?.trim() || undefined,
     })
 
-    setSelectedAssets(current => {
+    setSelectedReferences(current => {
       const remaining = current.filter(item => item.selection.assetID !== nextAsset.assetID)
       return [...remaining, { selection: nextAsset, asset }]
     })
@@ -283,11 +350,11 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
   }
 
   const removeSelectedAsset = (assetID: string) => {
-    setSelectedAssets(current => current.filter(asset => asset.selection.assetID !== assetID))
+    setSelectedReferences(current => current.filter(asset => asset.selection.assetID !== assetID))
   }
 
   const updateSelectedAssetNote = (assetID: string, note?: string) => {
-    setSelectedAssets(current =>
+    setSelectedReferences(current =>
       current.map(asset =>
         asset.selection.assetID === assetID
           ? { ...asset, selection: create(SelectedMediaAssetSchema, { assetID, note }) }
@@ -298,7 +365,7 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
 
   const hydrateSelectedAssets = (assets: MediaAsset[]) => {
     if (assets.length === 0) return
-    setSelectedAssets(current =>
+    setSelectedReferences(current =>
       current.map(selectedAsset => {
         const fullAsset = assets.find(asset => asset.id === selectedAsset.selection.assetID)
         return fullAsset ? { ...selectedAsset, asset: fullAsset } : selectedAsset
@@ -399,7 +466,7 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
 
       <SelectedAssetsDialog
         open={selectedAssetsDialogOpen}
-        selectedAssets={selectedAssets}
+        selectedAssets={selectedReferences}
         onOpenChange={setSelectedAssetsDialogOpen}
         onHydrateAssets={hydrateSelectedAssets}
         onRemoveAsset={removeSelectedAsset}
@@ -473,13 +540,13 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
             >
               <div className='flex items-center gap-2 text-primary'>
                 <span className='font-medium'>
-                  {selectedAssets.length} asset{selectedAssets.length > 1 ? 's' : ''}
+                  {selectedReferences.length} asset{selectedReferences.length > 1 ? 's' : ''}
                 </span>
               </div>
               <button
                 onClick={event => {
                   event.stopPropagation()
-                  setSelectedAssets([])
+                  setSelectedReferences([])
                 }}
                 className='ml-2 rounded p-0.5 hover:bg-destructive/10 hover:text-destructive'
                 type='button'

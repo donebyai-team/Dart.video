@@ -59,7 +59,7 @@ type agentV2 struct {
 	db                   datastore.Repository
 	brandIdentityService brand_identity.BrandIdentity
 	assetRegistry        *services.MediaAssetRegistry
-	llmService           llm.LLMService
+	llmService           llm.Service
 	videoService         services.VideoGeneration
 	logger               *zap.Logger
 	fps                  int64
@@ -75,7 +75,7 @@ func NewAgentV2(
 	logger *zap.Logger,
 	cache cache.Cache,
 	db datastore.Repository,
-	llmService llm.LLMService,
+	llmService llm.Service,
 	videoService services.VideoGeneration,
 	brandIdentityService brand_identity.BrandIdentity,
 	state common.AgentStatusPublisher,
@@ -97,7 +97,7 @@ func NewAgentV2(
 }
 
 func (a *agentV2) setTags(ctx context.Context) context.Context {
-	return context.WithValue(ctx, "session_id", a.session.GetID())
+	return context.WithValue(ctx, llm.VideoIDKey, a.session.GetID())
 }
 
 func (a *agentV2) Continue(ctx context.Context, options ContinueSessionOptions) (*common.RunResult, error) {

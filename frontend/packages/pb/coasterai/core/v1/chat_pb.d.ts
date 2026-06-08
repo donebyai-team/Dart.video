@@ -51,6 +51,11 @@ export declare type ConversationMessage = Message<"coasterai.core.v1.Conversatio
    * @generated from field: google.protobuf.Timestamp created_at = 7;
    */
   createdAt?: Timestamp;
+
+  /**
+   * @generated from field: coasterai.core.v1.ConversationMessageType type = 8;
+   */
+  type: ConversationMessageType;
 };
 
 /**
@@ -88,4 +93,38 @@ export enum ConversationRole {
  * Describes the enum coasterai.core.v1.ConversationRole.
  */
 export declare const ConversationRoleSchema: GenEnum<ConversationRole>;
+
+/**
+ * @generated from enum coasterai.core.v1.ConversationMessageType
+ */
+export enum ConversationMessageType {
+  /**
+   * @generated from enum value: CONVERSATION_MESSAGE_TYPE = 0;
+   */
+  CONVERSATION_MESSAGE_TYPE = 0,
+
+  /**
+   * Thinking before the code, eg tool calls etc
+   *
+   * @generated from enum value: CONVERSATION_MESSAGE_THINKING = 1;
+   */
+  CONVERSATION_MESSAGE_THINKING = 1,
+
+  /**
+   * Thinking for the code is generated
+   *
+   * @generated from enum value: CONVERSATION_MESSAGE_FINAL_THINKING = 2;
+   */
+  CONVERSATION_MESSAGE_FINAL_THINKING = 2,
+
+  /**
+   * @generated from enum value: CONVERSATION_MESSAGE_MANUAL_EDITS = 3;
+   */
+  CONVERSATION_MESSAGE_MANUAL_EDITS = 3,
+}
+
+/**
+ * Describes the enum coasterai.core.v1.ConversationMessageType.
+ */
+export declare const ConversationMessageTypeSchema: GenEnum<ConversationMessageType>;
 

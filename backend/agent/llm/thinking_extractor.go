@@ -6,11 +6,11 @@ import (
 	"fmt"
 	baml "github.com/boundaryml/baml/engine/language_client_go/pkg"
 	"math/rand"
-	"strings"
 	"time"
 )
 
 type ThinkingExtractor struct {
+	extractor           Extractor
 	onThinking          func(string)
 	thinkingMessages    []string
 	msgIndex            int
@@ -30,11 +30,13 @@ type ThinkingExtractor struct {
 }
 
 func (l *llmService) NewThinkingExtractor(
+	extractor Extractor,
 	onThinking func(string),
 	thinkingMessages []string,
 ) *ThinkingExtractor {
 
 	t := &ThinkingExtractor{
+		extractor:        extractor,
 		onThinking:       onThinking,
 		thinkingMessages: thinkingMessages,
 		emitCh:           make(chan struct{}, 1),
@@ -79,6 +81,66 @@ func (t *ThinkingExtractor) runEmitter() {
 	}
 }
 
+func (t *ThinkingExtractor) handleEvent(event Event) {
+
+	switch event.Type {
+
+	case EventThinkingStarted:
+
+		t.started = true
+
+		select {
+		case t.emitCh <- struct{}{}:
+		default:
+		}
+
+	case EventThinkingChunk:
+
+		if event.Text != "" {
+			t.finalSummary += event.Text
+		}
+
+		select {
+		case t.emitCh <- struct{}{}:
+		default:
+		}
+
+	case EventThinkingDone:
+
+		if t.doneProcessed {
+			return
+		}
+
+		t.doneProcessed = true
+		t.duration = event.Duration
+
+		if event.Text != "" {
+			t.finalSummary = event.Text
+		}
+
+		close(t.stopCh)
+
+		if t.onThinking != nil {
+
+			if t.duration < 60 {
+				t.onThinking(
+					fmt.Sprintf(
+						"Thought for %.2fs...",
+						t.duration,
+					),
+				)
+			} else {
+				t.onThinking(
+					fmt.Sprintf(
+						"Thought for %.2fm...",
+						t.duration/60,
+					),
+				)
+			}
+		}
+	}
+}
+
 func (t *ThinkingExtractor) HandleTick(
 	ctx context.Context,
 	reason baml.TickReason,
@@ -107,90 +169,84 @@ func (t *ThinkingExtractor) HandleTick(
 	}
 
 	for i := t.lastProcessedIndex; i < len(responses); i++ {
-		response := responses[i]
 
-		var data map[string]interface{}
+		response := responses[i]
 
 		text, err := response.Text()
 		if err != nil {
 			continue
 		}
 
+		var data map[string]interface{}
+
 		if err := json.Unmarshal([]byte(text), &data); err != nil {
 			continue
 		}
 
-		eventType, _ := data["type"].(string)
+		events, err := t.extractor.ProcessChunk(data)
+		if err != nil {
+			continue
+		}
 
-		switch eventType {
+		for _, event := range events {
 
-		// 🧠 reasoning started (still comes as added)
-		case "response.reasoning_summary_part.added":
+			switch event.Type {
 
-			if !t.started {
-				t.startTime = time.Now()
-				t.started = true
-			}
+			case EventThinkingStarted:
 
-			select {
-			case t.emitCh <- struct{}{}:
-			default:
-			}
-
-		// ✅ NEW DONE EVENT
-		case "response.output_item.done":
-
-			if t.doneProcessed {
-				continue
-			}
-
-			item, ok := data["item"].(map[string]interface{})
-			if !ok {
-				continue
-			}
-
-			itemType, _ := item["type"].(string)
-
-			// only care about reasoning summaries
-			if itemType != "reasoning" {
-				continue
-			}
-
-			t.doneProcessed = true
-
-			endTime := time.Now()
-
-			if t.started {
-				t.duration = endTime.Sub(t.startTime).Seconds()
-			}
-
-			// ✅ extract summary array
-			if summaries, ok := item["summary"].([]interface{}); ok {
-				var builder strings.Builder
-
-				for _, s := range summaries {
-					sMap, ok := s.(map[string]interface{})
-					if !ok {
-						continue
-					}
-
-					if txt, ok := sMap["text"].(string); ok {
-						builder.WriteString(txt)
-						builder.WriteString("\n\n") // spacing between blocks
-					}
+				if !t.started {
+					t.started = true
 				}
 
-				t.finalSummary = builder.String()
-			}
+				select {
+				case t.emitCh <- struct{}{}:
+				default:
+				}
 
-			// 🛑 stop emitter
-			close(t.stopCh)
+			case EventThinkingChunk:
 
-			if t.onThinking != nil {
-				if t.duration < 60 {
-					t.onThinking(fmt.Sprintf("Thought for %.2fs...", t.duration))
-				} else {
-					t.onThinking(fmt.Sprintf("Thought for %.2fm...", t.duration/60))
+				if event.Text != "" {
+					t.finalSummary += event.Text
+				}
+
+				select {
+				case t.emitCh <- struct{}{}:
+				default:
+				}
+
+			case EventThinkingDone:
+
+				if t.doneProcessed {
+					continue
+				}
+
+				t.doneProcessed = true
+				t.duration = event.Duration
+
+				// OpenAI provides the final reasoning summary
+				if event.Text != "" {
+					t.finalSummary = event.Text
+				}
+
+				close(t.stopCh)
+
+				if t.onThinking != nil {
+
+					if t.duration < 60 {
+						t.onThinking(
+							fmt.Sprintf(
+								"Thought for %.2fs...",
+								t.duration,
+							),
+						)
+					} else {
+						t.onThinking(
+							fmt.Sprintf(
+								"Thought for %.2fm...",
+								t.duration/60,
+							),
+						)
+					}
 				}
 			}
 		}

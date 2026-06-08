@@ -39,6 +39,7 @@ func (a *ToolRegistry) HandleAskQuestion(
 	if question.ThinkingSummary != nil && *question.ThinkingSummary != "" {
 		session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
 			Role:    pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
+			Type:    pbcore.ConversationMessageType_CONVERSATION_MESSAGE_THINKING,
 			Message: *question.ThinkingSummary,
 		})
 	}

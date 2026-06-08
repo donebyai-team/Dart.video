@@ -74,16 +74,69 @@ func (ConversationRole) EnumDescriptor() ([]byte, []int) {
 	return file_coasterai_core_v1_chat_proto_rawDescGZIP(), []int{0}
 }
 
+type ConversationMessageType int32
+
+const (
+	ConversationMessageType_CONVERSATION_MESSAGE_TYPE           ConversationMessageType = 0
+	ConversationMessageType_CONVERSATION_MESSAGE_THINKING       ConversationMessageType = 1 // Thinking before the code, eg tool calls etc
+	ConversationMessageType_CONVERSATION_MESSAGE_FINAL_THINKING ConversationMessageType = 2 // Thinking for the code is generated
+	ConversationMessageType_CONVERSATION_MESSAGE_MANUAL_EDITS   ConversationMessageType = 3
+)
+
+// Enum value maps for ConversationMessageType.
+var (
+	ConversationMessageType_name = map[int32]string{
+		0: "CONVERSATION_MESSAGE_TYPE",
+		1: "CONVERSATION_MESSAGE_THINKING",
+		2: "CONVERSATION_MESSAGE_FINAL_THINKING",
+		3: "CONVERSATION_MESSAGE_MANUAL_EDITS",
+	}
+	ConversationMessageType_value = map[string]int32{
+		"CONVERSATION_MESSAGE_TYPE":           0,
+		"CONVERSATION_MESSAGE_THINKING":       1,
+		"CONVERSATION_MESSAGE_FINAL_THINKING": 2,
+		"CONVERSATION_MESSAGE_MANUAL_EDITS":   3,
+	}
+)
+
+func (x ConversationMessageType) Enum() *ConversationMessageType {
+	p := new(ConversationMessageType)
+	*p = x
+	return p
+}
+
+func (x ConversationMessageType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ConversationMessageType) Descriptor() protoreflect.EnumDescriptor {
+	return file_coasterai_core_v1_chat_proto_enumTypes[1].Descriptor()
+}
+
+func (ConversationMessageType) Type() protoreflect.EnumType {
+	return &file_coasterai_core_v1_chat_proto_enumTypes[1]
+}
+
+func (x ConversationMessageType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ConversationMessageType.Descriptor instead.
+func (ConversationMessageType) EnumDescriptor() ([]byte, []int) {
+	return file_coasterai_core_v1_chat_proto_rawDescGZIP(), []int{1}
+}
+
 type ConversationMessage struct {
 	state    protoimpl.MessageState `protogen:"open.v1"`
 	Role     ConversationRole       `protobuf:"varint,1,opt,name=role,proto3,enum=coasterai.core.v1.ConversationRole" json:"role,omitempty"`
 	Message  string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	AssetIds []string               `protobuf:"bytes,3,rep,name=assetIds,proto3" json:"assetIds,omitempty"`
 	// * Model used for generation
-	Model         string                 `protobuf:"bytes,4,opt,name=model,proto3" json:"model,omitempty"`
-	CodeSnapshot  string                 `protobuf:"bytes,5,opt,name=codeSnapshot,proto3" json:"codeSnapshot,omitempty"`
-	ReferenceIds  []string               `protobuf:"bytes,6,rep,name=referenceIds,proto3" json:"referenceIds,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	Model         string                  `protobuf:"bytes,4,opt,name=model,proto3" json:"model,omitempty"`
+	CodeSnapshot  string                  `protobuf:"bytes,5,opt,name=codeSnapshot,proto3" json:"codeSnapshot,omitempty"`
+	ReferenceIds  []string                `protobuf:"bytes,6,rep,name=referenceIds,proto3" json:"referenceIds,omitempty"`
+	CreatedAt     *timestamppb.Timestamp  `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	Type          ConversationMessageType `protobuf:"varint,8,opt,name=type,proto3,enum=coasterai.core.v1.ConversationMessageType" json:"type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -167,11 +220,18 @@ func (x *ConversationMessage) GetCreatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *ConversationMessage) GetType() ConversationMessageType {
+	if x != nil {
+		return x.Type
+	}
+	return ConversationMessageType_CONVERSATION_MESSAGE_TYPE
+}
+
 var File_coasterai_core_v1_chat_proto protoreflect.FileDescriptor
 
 const file_coasterai_core_v1_chat_proto_rawDesc = "" +
 	"\n" +
-	"\x1ccoasterai/core/v1/chat.proto\x12\x11coasterai.core.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\x9d\x02\n" +
+	"\x1ccoasterai/core/v1/chat.proto\x12\x11coasterai.core.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xdd\x02\n" +
 	"\x13ConversationMessage\x127\n" +
 	"\x04role\x18\x01 \x01(\x0e2#.coasterai.core.v1.ConversationRoleR\x04role\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12\x1a\n" +
@@ -180,12 +240,18 @@ const file_coasterai_core_v1_chat_proto_rawDesc = "" +
 	"\fcodeSnapshot\x18\x05 \x01(\tR\fcodeSnapshot\x12\"\n" +
 	"\freferenceIds\x18\x06 \x03(\tR\freferenceIds\x129\n" +
 	"\n" +
-	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt*\x8e\x01\n" +
+	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12>\n" +
+	"\x04type\x18\b \x01(\x0e2*.coasterai.core.v1.ConversationMessageTypeR\x04type*\x8e\x01\n" +
 	"\x10ConversationRole\x12!\n" +
 	"\x1dCONVERSATION_ROLE_UNSPECIFIED\x10\x00\x12\x1a\n" +
 	"\x16CONVERSATION_ROLE_USER\x10\x01\x12\x1f\n" +
 	"\x1bCONVERSATION_ROLE_ASSISTANT\x10\x02\x12\x1a\n" +
-	"\x16CONVERSATION_ROLE_TOOL\x10\x03B;Z9github.com/shank318/coasterai/pb/coasterai/core/v1;pbcoreb\x06proto3"
+	"\x16CONVERSATION_ROLE_TOOL\x10\x03*\xab\x01\n" +
+	"\x17ConversationMessageType\x12\x1d\n" +
+	"\x19CONVERSATION_MESSAGE_TYPE\x10\x00\x12!\n" +
+	"\x1dCONVERSATION_MESSAGE_THINKING\x10\x01\x12'\n" +
+	"#CONVERSATION_MESSAGE_FINAL_THINKING\x10\x02\x12%\n" +
+	"!CONVERSATION_MESSAGE_MANUAL_EDITS\x10\x03B;Z9github.com/shank318/coasterai/pb/coasterai/core/v1;pbcoreb\x06proto3"
 
 var (
 	file_coasterai_core_v1_chat_proto_rawDescOnce sync.Once
@@ -199,21 +265,23 @@ func file_coasterai_core_v1_chat_proto_rawDescGZIP() []byte {
 	return file_coasterai_core_v1_chat_proto_rawDescData
 }
 
-var file_coasterai_core_v1_chat_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_coasterai_core_v1_chat_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
 var file_coasterai_core_v1_chat_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
 var file_coasterai_core_v1_chat_proto_goTypes = []any{
 	(ConversationRole)(0),         // 0: coasterai.core.v1.ConversationRole
-	(*ConversationMessage)(nil),   // 1: coasterai.core.v1.ConversationMessage
-	(*timestamppb.Timestamp)(nil), // 2: google.protobuf.Timestamp
+	(ConversationMessageType)(0),  // 1: coasterai.core.v1.ConversationMessageType
+	(*ConversationMessage)(nil),   // 2: coasterai.core.v1.ConversationMessage
+	(*timestamppb.Timestamp)(nil), // 3: google.protobuf.Timestamp
 }
 var file_coasterai_core_v1_chat_proto_depIdxs = []int32{
 	0, // 0: coasterai.core.v1.ConversationMessage.role:type_name -> coasterai.core.v1.ConversationRole
-	2, // 1: coasterai.core.v1.ConversationMessage.created_at:type_name -> google.protobuf.Timestamp
-	2, // [2:2] is the sub-list for method output_type
-	2, // [2:2] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	3, // 1: coasterai.core.v1.ConversationMessage.created_at:type_name -> google.protobuf.Timestamp
+	1, // 2: coasterai.core.v1.ConversationMessage.type:type_name -> coasterai.core.v1.ConversationMessageType
+	3, // [3:3] is the sub-list for method output_type
+	3, // [3:3] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_coasterai_core_v1_chat_proto_init() }
@@ -226,7 +294,7 @@ func file_coasterai_core_v1_chat_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_coasterai_core_v1_chat_proto_rawDesc), len(file_coasterai_core_v1_chat_proto_rawDesc)),
-			NumEnums:      1,
+			NumEnums:      2,
 			NumMessages:   1,
 			NumExtensions: 0,
 			NumServices:   0,

@@ -41,7 +41,7 @@ type sceneGenerator struct {
 	slideID              string
 	orgID                string
 	db                   datastore.Repository
-	llmService           llm.LLMService
+	llmService           llm.Service
 	codeGenerator        CodeGeneratorAgent
 	generationOptions    AnimationGenerationOptions
 	logger               *zap.Logger
@@ -60,7 +60,7 @@ func NewSceneGeneratorAgent(
 	logger *zap.Logger,
 	cache cache.Cache,
 	db datastore.Repository,
-	llmService llm.LLMService,
+	llmService llm.Service,
 	brandIdentityService brand_identity.BrandIdentity,
 	state common.AgentStatusPublisher,
 ) SceneGeneratorAgent {
@@ -82,16 +82,23 @@ func NewSceneGeneratorAgent(
 	}
 }
 
-func (a *sceneGenerator) ContinueAgent(
+func (l *sceneGenerator) setTags(ctx context.Context) context.Context {
+	ctx = context.WithValue(ctx, llm.VideoIDKey, l.session.GetID())
+	ctx = context.WithValue(ctx, llm.SceneIDKey, l.slideID)
+	return ctx
+}
+
+func (l *sceneGenerator) ContinueAgent(
 	ctx context.Context,
 	options ContinueSessionOptions,
 ) (*common.RunResult, error) {
+	ctx = l.setTags(ctx)
 	userResponse := strings.TrimSpace(options.UserResponse)
 	if userResponse == "" {
 		return nil, agenterrors.InvalidInput("user response is required", nil)
 	}
 
-	session, err := a.session.Get(ctx)
+	session, err := l.session.Get(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -101,17 +108,17 @@ func (a *sceneGenerator) ContinueAgent(
 
 	generatePlanRequest := types.AddSceneRequest{}
 
-	err = a.injectMediaAssets(ctx, session.Request)
+	err = l.injectMediaAssets(ctx, session.Request)
 	if err != nil {
 		return nil, err
 	}
 
 	// use brand guidelines only when specified
-	if a.assetRegistry != nil {
+	if l.assetRegistry != nil {
 		generatePlanRequest.VideoBranding = types.VideoBranding{
-			BrandGuideLines: a.assetRegistry.FormatBrandDetails(),
-			Attachments:     a.assetRegistry.FormatAssets(),
-			BrandColors:     a.assetRegistry.FormatBrandTokens(),
+			BrandGuideLines: l.assetRegistry.FormatBrandDetails(),
+			Attachments:     l.assetRegistry.FormatAssets(),
+			BrandColors:     l.assetRegistry.FormatBrandTokens(),
 		}
 	}
 
@@ -126,22 +133,22 @@ func (a *sceneGenerator) ContinueAgent(
 
 	session.ConversationHistory = append(session.ConversationHistory, newMessage)
 
-	a.state.Publish(common.AgentState{
+	l.state.Publish(common.AgentState{
 		State: common.StateStatusProcessing,
 	})
 
-	a.logger.Info("continuing agent session with user response", zap.String("response", userResponse))
+	l.logger.Info("continuing agent session with user response", zap.String("response", userResponse))
 
-	return a.runPlanning(ctx, generatePlanRequest, session)
+	return l.runPlanning(ctx, generatePlanRequest, session)
 }
 
-func (a *sceneGenerator) injectMediaAssets(ctx context.Context, input *pbportal.CreateVideoRequest) error {
+func (l *sceneGenerator) injectMediaAssets(ctx context.Context, input *pbportal.CreateVideoRequest) error {
 	input.Assets = deduplicateAssets(input.Assets)
 
 	registryBuilder := services.NewMediaAssetRegistryBuilder()
 
 	if input.BrandLibraryId != nil {
-		brandIdentity, err := a.brandIdentityService.GetBrandIdentity(ctx, *input.BrandLibraryId)
+		brandIdentity, err := l.brandIdentityService.GetBrandIdentity(ctx, *input.BrandLibraryId)
 		if err != nil {
 			if errors.Is(err, datastore.NotFound) {
 				return agenterrors.InvalidInput("brand_identity not found", nil)
@@ -188,7 +195,7 @@ func (a *sceneGenerator) injectMediaAssets(ctx context.Context, input *pbportal.
 	//	registryBuilder.AddAssets(mediaAssets)
 	//}
 
-	a.assetRegistry = registryBuilder.Build()
+	l.assetRegistry = registryBuilder.Build()
 	return nil
 }
 
@@ -197,7 +204,7 @@ func (l *sceneGenerator) GenerateScene(
 	slide *pbcore.Slide,
 	input *pbportal.CreateVideoRequest,
 ) (*common.RunResult, error) {
-
+	ctx = l.setTags(ctx)
 	if err := ValidatePrompt(input.Prompt); err != nil {
 		return nil, err
 	}

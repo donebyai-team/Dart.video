@@ -259,12 +259,19 @@ func (p *Portal) GetConversationHistory(ctx context.Context, c *connect.Request[
 	}
 
 	conversation := make([]*pbcore.ConversationMessage, 0, len(sessionContext.ConversationHistory))
-	for _, message := range sessionContext.ConversationHistory {
-		if message.Role == pbcore.ConversationRole_CONVERSATION_ROLE_USER || message.Role == pbcore.ConversationRole_CONVERSATION_ROLE_TOOL {
 
-			if message.Role == pbcore.ConversationRole_CONVERSATION_ROLE_TOOL {
-				message.Role = pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT
-			}
+	// Include USER/TOOL messages that are not MANUAL_EDITS, and if the message is THINKING then only include it for admins.
+	for _, message := range sessionContext.ConversationHistory {
+		isUserOrTool := message.Role == pbcore.ConversationRole_CONVERSATION_ROLE_USER ||
+			message.Role == pbcore.ConversationRole_CONVERSATION_ROLE_TOOL
+
+		isThinking := message.Type == pbcore.ConversationMessageType_CONVERSATION_MESSAGE_THINKING ||
+			message.Type == pbcore.ConversationMessageType_CONVERSATION_MESSAGE_FINAL_THINKING
+
+		if isUserOrTool &&
+			message.Type != pbcore.ConversationMessageType_CONVERSATION_MESSAGE_MANUAL_EDITS &&
+			(!isThinking || actor.IsPlatformAdmin()) {
+
 			conversation = append(conversation, message)
 		}
 	}
