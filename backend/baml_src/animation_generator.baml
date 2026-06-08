@@ -20,11 +20,11 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
     1. Start with ES6 imports
     2. Export as: export default function RemoteComponent() { ... }
     3. Component body order:
+       - DEFAULT_DATA
        - Multi-line comment description (2-3 sentences)
        - Hooks (useCurrentFrame, useVideoConfig, etc.)
-       - Constants (COLORS, TEXT, TIMING, LAYOUT) - all UPPER_SNAKE_CASE
+       - Constants (COLORS, TIMING, LAYOUT) - all UPPER_SNAKE_CASE
        - Calculations and derived values
-       - Don't add any background color
        - return JSX
 
     ## LAYOUT RULES

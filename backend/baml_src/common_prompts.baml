@@ -139,9 +139,9 @@ template_string BrandUsageInstructions() #"
     ### Branding
     - Brand details: `<brand_details>`
     - Brand colors: `<brand_tokens>`
-    - Brand logo and icon: `<attachments>`
+    - Brand logo and icon: `<attachments>`. Only use when an animation explicitly requires a logo or icon. Render with `LogoAsset` and set `src` to the attachment `url`.
     - Use `text_foreground` for text. If it lacks contrast, use a readable alternative.
     - Use `primary`,  for highlights and emphasis.
-    - Use `secondary` for supporting accents and secondary UI elements.
-    - Render the logo with `LogoAsset` and set `src` to the logo URL from `<attachments>`.
+    - Use `secondary` for supporting accents and secondary UI elements..
+    - **If an Image/Video is attached, always prioritize the colors from the image**
 "#
