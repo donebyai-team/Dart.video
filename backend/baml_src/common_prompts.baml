@@ -120,9 +120,11 @@ template_string AnimationPrimitives() #"
     {% endraw %}
 
     ### Branding
-    - Brand details are provided in <brand_details>
-    - Brand colors are provided in the <brand_tokens>.
-    - Brand logo and icon are provided in the <attachments>
-    - **Make sure the text_foreground color is always visible on the cards or backgrounds.**
-    - Use LogoAsset to render the logo by passing the attachment URL to src.
+    - Brand details: `<brand_details>`
+    - Brand colors: `<brand_tokens>`
+    - Brand logo and icon: `<attachments>`
+    - Use `text_foreground` for text. If it lacks contrast, use a readable alternative.
+    - Use `primary`,  for highlights and emphasis.
+    - Use `secondary` for supporting accents and secondary UI elements.
+    - Render the logo with `LogoAsset` and set `src` to the logo URL from `<attachments>`.
 "#
