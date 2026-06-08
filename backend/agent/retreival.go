@@ -21,10 +21,10 @@ type RetrievalService interface {
 
 type llmRetrievalService struct {
 	db         datastore.Repository
-	llmService llm.LLMService
+	llmService llm.Service
 }
 
-func NewLlmRetrievalService(db datastore.Repository, llmService llm.LLMService) RetrievalService {
+func NewLlmRetrievalService(db datastore.Repository, llmService llm.Service) RetrievalService {
 	return &llmRetrievalService{db: db, llmService: llmService}
 }
 

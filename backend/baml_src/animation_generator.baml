@@ -119,14 +119,18 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
 
     {{ AnimationPrimitives() }}
 
+    {{ BrandGuidelines(input.VideoBranding) }}
+
+    ## ASK QUESTIONS RULES
+
+    - If the prompt is ambiguous or visual details are unclear.
+    - Use the **ask_user_question** tool — do not assume missing creative direction.
+
     ## OUTPUT FORMAT (CRITICAL)
 
-    * If the prompt is ambiguous or visual details are unclear, ask for clarification using the **ask** tool. Do not assume missing creative direction.
     * Always return the **total frame count**, keeping it consistent with the scene timings and FPS. Avoid unnecessary idle or dead frames.
     * If `manualEdits` are provided in follow-up requests, always return the updated `manualEdits` along with the updated code.
     * `manualEdits` reference code and elements by `elementId`. If a code change removes or renames an element so its ID no longer exists, remove the corresponding entry from `manualEdits`.
-
-   {{ BrandGuidelines(input.VideoBranding) }}
 
     ---
     ## INPUT

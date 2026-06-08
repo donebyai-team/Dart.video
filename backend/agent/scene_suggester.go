@@ -19,7 +19,7 @@ import (
 
 type SceneSuggester struct {
 	brandIdentityService brand_identity.BrandIdentity
-	llmService           llm.LLMService
+	llmService           llm.Service
 	codeGenerator        CodeGeneratorAgent
 	logger               *zap.Logger
 }
@@ -39,7 +39,9 @@ func (s SceneSuggester) GenerateSuggestions(
 	category pbcore.AnimationCategory,
 	video *models.Video,
 ) ([]*pbcore.Section, error) {
-	ctx = context.WithValue(ctx, "session_id", sceneID)
+	ctx = context.WithValue(ctx, llm.VideoIDKey, video.ID)
+	ctx = context.WithValue(ctx, llm.SceneIDKey, sceneID)
+
 	prevSlide, currSlide, nextSlide, fallbackSlide := findSlides(video, sceneID)
 
 	registry, err := s.createMediaAssetRegistry(ctx, video.Metadata.GeneratedBranding.BrandIdentity)

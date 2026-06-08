@@ -2,7 +2,6 @@ package llm
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/shank318/coasterai/baml_client"
 	"github.com/shank318/coasterai/baml_client/types"
@@ -12,17 +11,11 @@ import (
 	"go.uber.org/zap"
 )
 
-// LLMService declares all LLM interactions in the pipeline.
+// Service declares all LLM interactions in the pipeline.
 // Not implemented — wire in your preferred provider (Anthropic, OpenAI, etc.)
-type LLMService interface {
+type Service interface {
 	AnalyzeImage(ctx context.Context, asset *models.MediaAsset) (*types.AssetAnalysis, error)
 	GeneratePlanV2(
-		ctx context.Context,
-		req types.VideoGenerationPlanRequest,
-		conversationHistory []types.Message,
-		onThinking func(thinking string),
-	) (*types.Union2AskUserQuestionOrGeneratedVideoPlan, error)
-	GeneratePlanV2Mock(
 		ctx context.Context,
 		req types.VideoGenerationPlanRequest,
 		conversationHistory []types.Message,
@@ -122,20 +115,10 @@ func (l *llmService) GenerateAnimation(
 }
 
 func (l *llmService) SuggestScenes(ctx context.Context, req types.SuggestScenesRequest) (types.SuggestScenesResponse, error) {
-	return baml_client.SuggestScenes(ctx, req)
+	return baml_client.SuggestScenes(ctx, req, baml_client.WithTags(getTags(ctx)))
 }
 
-func getTags(ctx context.Context) map[string]string {
-	tags := make(map[string]string)
-
-	if traceID, ok := ctx.Value("session_id").(string); ok {
-		tags["trace_id"] = traceID
-	}
-
-	return tags
-}
-
-func NewLlmService(logger *zap.Logger, cache cache.Cache) LLMService {
+func NewLlmService(logger *zap.Logger, cache cache.Cache) Service {
 	return &llmService{logger: logger, cache: cache}
 }
 
@@ -284,29 +267,4 @@ func (l *llmService) GeneratePlanV2(
 	}
 
 	return nil, fmt.Errorf("stream closed without final result")
-}
-
-func (l *llmService) GeneratePlanV2Mock(
-	ctx context.Context,
-	req types.VideoGenerationPlanRequest,
-	conversationHistory []types.Message,
-	onThinking func(thinking string),
-) (*types.Union2AskUserQuestionOrGeneratedVideoPlan, error) {
-	if onThinking != nil {
-		onThinking("Loading mock video plan...")
-	}
-
-	var generatedPlan types.GeneratedVideoPlan
-	if err := json.Unmarshal([]byte(mockGeneratePlanV2ResponseJSON), &generatedPlan); err == nil {
-		mockPlan := types.Union2AskUserQuestionOrGeneratedVideoPlan__NewGeneratedVideoPlan(generatedPlan)
-		return &mockPlan, nil
-	}
-
-	var askUserQuestion types.AskUserQuestion
-	if err := json.Unmarshal([]byte(mockGeneratePlanV2ResponseJSON), &askUserQuestion); err == nil {
-		mockPlan := types.Union2AskUserQuestionOrGeneratedVideoPlan__NewAskUserQuestion(askUserQuestion)
-		return &mockPlan, nil
-	}
-
-	return nil, fmt.Errorf("unmarshal mock GeneratePlanV2 response: json did not match GeneratedVideoPlan or AskUserQuestion")
 }

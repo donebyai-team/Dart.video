@@ -43,7 +43,7 @@ type codeGenerator struct {
 	videoID              string
 	slideID              string
 	orgID                string
-	llmService           llm.LLMService
+	llmService           llm.Service
 	logger               *zap.Logger
 	fps                  int64
 	brandIdentityService brand_identity.BrandIdentity
@@ -58,7 +58,7 @@ func NewCodeGeneratorAgent(
 	videoID string,
 	slideID string,
 	orgID string,
-	llmService llm.LLMService,
+	llmService llm.Service,
 	cache cache.Cache,
 	db datastore.Repository,
 	mediaStore services.MediaStore,
@@ -82,16 +82,23 @@ func NewCodeGeneratorAgent(
 	}
 }
 
-func (a *codeGenerator) ContinueAgent(
+func (l *codeGenerator) setTags(ctx context.Context) context.Context {
+	ctx = context.WithValue(ctx, llm.VideoIDKey, l.session.GetID())
+	ctx = context.WithValue(ctx, llm.SceneIDKey, l.slideID)
+	return ctx
+}
+
+func (l *codeGenerator) ContinueAgent(
 	ctx context.Context,
 	options ContinueSessionOptions,
 ) (*common.RunResult, error) {
+	ctx = l.setTags(ctx)
 	userResponse := strings.TrimSpace(options.UserResponse)
 	if userResponse == "" {
 		return nil, agenterrors.InvalidInput("user response is required", nil)
 	}
 
-	session, err := a.session.Get(ctx)
+	session, err := l.session.Get(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -101,17 +108,17 @@ func (a *codeGenerator) ContinueAgent(
 
 	generatePlanRequest := types.GenerateAnimationCodeRequest{}
 
-	err = a.injectMediaAssets(ctx, session.Request)
+	err = l.injectMediaAssets(ctx, session.Request)
 	if err != nil {
 		return nil, err
 	}
 
 	// use brand guidelines only when specified
-	if a.assetRegistry != nil {
+	if l.assetRegistry != nil {
 		generatePlanRequest.VideoBranding = types.VideoBranding{
-			BrandGuideLines: a.assetRegistry.FormatBrandDetails(),
-			Attachments:     a.assetRegistry.FormatAssets(),
-			BrandColors:     a.assetRegistry.FormatBrandTokens(),
+			BrandGuideLines: l.assetRegistry.FormatBrandDetails(),
+			Attachments:     l.assetRegistry.FormatAssets(),
+			BrandColors:     l.assetRegistry.FormatBrandTokens(),
 		}
 	}
 
@@ -127,22 +134,22 @@ func (a *codeGenerator) ContinueAgent(
 	// Prompt always goes in the conversation
 	session.ConversationHistory = append(session.ConversationHistory, newMessage)
 
-	a.state.Publish(common.AgentState{
+	l.state.Publish(common.AgentState{
 		State: common.StateStatusProcessing,
 	})
 
-	a.logger.Info("continuing agent session with user response", zap.String("response", userResponse))
+	l.logger.Info("continuing agent session with user response", zap.String("response", userResponse))
 
-	return a.runPlanning(ctx, generatePlanRequest, session)
+	return l.runPlanning(ctx, generatePlanRequest, session)
 }
 
-func (a *codeGenerator) injectMediaAssets(ctx context.Context, input *pbportal.CreateVideoRequest) error {
+func (l *codeGenerator) injectMediaAssets(ctx context.Context, input *pbportal.CreateVideoRequest) error {
 	input.Assets = deduplicateAssets(input.Assets)
 
 	registryBuilder := services.NewMediaAssetRegistryBuilder()
 
 	if input.BrandLibraryId != nil {
-		brandIdentity, err := a.brandIdentityService.GetBrandIdentity(ctx, *input.BrandLibraryId)
+		brandIdentity, err := l.brandIdentityService.GetBrandIdentity(ctx, *input.BrandLibraryId)
 		if err != nil {
 			if errors.Is(err, datastore.NotFound) {
 				return agenterrors.InvalidInput("brand_identity not found", nil)
@@ -154,7 +161,7 @@ func (a *codeGenerator) injectMediaAssets(ctx context.Context, input *pbportal.C
 			WithBrandAssets() // only while editing
 	}
 
-	a.assetRegistry = registryBuilder.Build()
+	l.assetRegistry = registryBuilder.Build()
 	return nil
 }
 
@@ -208,7 +215,7 @@ func (l *codeGenerator) GenerateCode(
 	slide *pbcore.Slide,
 	input *pbportal.CreateVideoRequest,
 ) (*common.RunResult, error) {
-
+	ctx = l.setTags(ctx)
 	if err := ValidatePrompt(input.Prompt); err != nil {
 		return nil, err
 	}

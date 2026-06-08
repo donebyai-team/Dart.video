@@ -41,7 +41,7 @@ type Portal struct {
 	mediaService            services.MediaStore
 	codeBuilderService      services.TemplateCodeBuilder
 	videoGenerationService  services.VideoGeneration
-	llmService              llm.LLMService
+	llmService              llm.Service
 	renderVideoService      services.RenderVideoService
 	brandIdentityService    brand_identity.BrandIdentity
 	audioGenerationProvider audio.Provider
@@ -60,7 +60,7 @@ func New(
 	brandIdentityService brand_identity.BrandIdentity,
 	codeBuilderService services.TemplateCodeBuilder,
 	audioGenerationProvider audio.Provider,
-	llmService llm.LLMService,
+	llmService llm.Service,
 	httpListenAddr string,
 	corsURLRegexAllow *regexp.Regexp,
 	config *pbportal.Config,
