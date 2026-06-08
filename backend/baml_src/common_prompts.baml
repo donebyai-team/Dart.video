@@ -127,4 +127,5 @@ template_string AnimationPrimitives() #"
     - Use `primary`,  for highlights and emphasis.
     - Use `secondary` for supporting accents and secondary UI elements.
     - Render the logo with `LogoAsset` and set `src` to the logo URL from `<attachments>`.
+    - **If an Image/Video is attached, always prioritize the colors from the image**
 "#

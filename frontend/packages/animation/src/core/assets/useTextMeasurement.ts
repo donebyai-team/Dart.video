@@ -203,7 +203,6 @@ export function useTextMeasurement(style?: React.CSSProperties): UseTextMeasurem
           setLoadedReadinessKey(readinessKey);
           if (!announcedReadyKeys.has(readinessKey)) {
             announcedReadyKeys.add(readinessKey);
-            console.info(`[useTextMeasurement] Font ready for measurement: ${readinessKey}`);
           }
           return;
         }
