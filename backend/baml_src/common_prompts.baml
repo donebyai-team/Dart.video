@@ -4,6 +4,11 @@ template_string BrandGuidelines(resume: VideoBranding) #"
     {{ resume.brandGuideLines }}
     {% endif %}
 
+    {% if resume.brandColors %}
+    ### Brand Colors:
+    {{ resume.brandColors }}
+    {% endif %}
+
     {% if resume.attachments %}
     ### Attachments:
     {{ resume.attachments }}
@@ -149,27 +154,9 @@ template_string AnimationPrimitives() #"
     {% endraw %}
 
     ### Branding
-    - Use useTheme() to access brand assets and color tokens.
-    - Use LogoAsset to render the logo or icon by passing the corresponding URL to src.
-    {% raw %}
-    ```tsx
-     const theme = useTheme();
-
-     // Brand colors
-     theme.colors.foreground // Primary text color
-     theme.colors.primary    // Brand/highlight color
-
-     // Brand assets
-     theme.logo?.url
-     theme.logo?.width
-     theme.logo?.height
-
-     theme.logoIcon?.url
-     theme.logoIcon?.width
-     theme.logoIcon?.height
-     ```
-    {% endraw %}
-
-    - Prefer theme.colors.foreground for text and theme.colors.primary for accents, highlights, and primary actions.
-    - Use theme.logo for the full logo and theme.logoIcon for compact/icon-only branding.
+    - Brand details are provided in <brand_details>
+    - Brand colors are provided in the <brand_tokens>.
+    - Brand logo and icon are provided in the <attachments>
+    - **Make sure the text_foreground color is always visible on the cards or backgrounds.**
+    - Use LogoAsset to render the logo by passing the attachment URL to src.
 "#

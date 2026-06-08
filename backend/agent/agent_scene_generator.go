@@ -118,7 +118,6 @@ func (l *sceneGenerator) ContinueAgent(
 		generatePlanRequest.VideoBranding = types.VideoBranding{
 			BrandGuideLines: l.assetRegistry.FormatBrandDetails(),
 			Attachments:     l.assetRegistry.FormatAssets(),
-			BrandColors:     l.assetRegistry.FormatBrandTokens(),
 		}
 	}
 

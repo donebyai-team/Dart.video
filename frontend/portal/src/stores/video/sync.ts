@@ -64,7 +64,7 @@ export const createSyncActions = (set: VideoStoreSet, get: VideoStoreGet) => {
                 !equals(VideoSchema, acceptedVideoConfig, videoConfig)
             );
 
-            logChanges(acceptedVideoConfig!, videoConfig!);
+            // logChanges(acceptedVideoConfig!, videoConfig!);
 
             set({ hasPendingChanges });
         },

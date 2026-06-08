@@ -24,6 +24,7 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
        - Hooks (useCurrentFrame, useVideoConfig, etc.)
        - Constants (COLORS, TEXT, TIMING, LAYOUT) - all UPPER_SNAKE_CASE
        - Calculations and derived values
+       - Don't add any background color
        - return JSX
 
    {{ ConstantsRules() }}
@@ -89,7 +90,7 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
     \`\`\`tsx
     import { useCurrentFrame, useVideoConfig, interpolate, spring, Sequence } from "remotion";
     import { useState, useEffect } from "react";
-    import { Text, LogoAsset, IconAsset, useTheme, MediaAsset } from './';
+    import { Text, LogoAsset, IconAsset, MediaAsset } from './';
     export default function RemoteComponent() {
       return (
             // Code goes here
@@ -106,7 +107,8 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
     ## STYLING RULES
 
     - Use inline styles only
-    - There is already background on the canvas. Don't add any background
+    - **There is already background on the canvas.**
+    - **Don't add any background on the root, even if the reference image/video has it. Keep it transparent**
 
     {{ AnimationPrimitives() }}
 
