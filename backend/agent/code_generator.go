@@ -268,6 +268,7 @@ func (l *codeGenerator) GenerateCode(
 			}
 			session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
 				Role:    pbcore.ConversationRole_CONVERSATION_ROLE_USER,
+				Type:    pbcore.ConversationMessageType_CONVERSATION_MESSAGE_MANUAL_EDITS,
 				Message: "User made some edits, consider this in follow ups. \n\n" + string(edits),
 			})
 		}
@@ -339,12 +340,13 @@ func (l *codeGenerator) runPlanning(ctx context.Context, generatePlanRequest typ
 		}
 
 		// Save the code in history, we may avoid saving the thinking summary if the animation is generated
-		//if codeResponse.ThinkingSummary != nil && *codeResponse.ThinkingSummary != "" {
-		//	session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
-		//		Role:    pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
-		//		Message: *codeResponse.ThinkingSummary,
-		//	})
-		//}
+		if codeResponse.ThinkingSummary != nil && *codeResponse.ThinkingSummary != "" {
+			session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
+				Role:    pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
+				Message: *codeResponse.ThinkingSummary,
+				Type:    pbcore.ConversationMessageType_CONVERSATION_MESSAGE_FINAL_THINKING,
+			})
+		}
 		//session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
 		//	Role:         pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
 		//	CodeSnapshot: asset.Url,
@@ -407,6 +409,8 @@ func (l *codeGenerator) uploadAndBuild(ctx context.Context, code string) (*pbcor
 
 	// Sanitize
 	code = common.SanitizeCommonCode(code)
+	// Resolve media assets
+	code = l.assetRegistry.ResolveMediaHandles(code)
 
 	uploadCodeAsset, err := l.mediaStore.UploadCode(ctx, code, codeFilePath)
 	if err != nil {

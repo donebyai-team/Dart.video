@@ -145,6 +145,11 @@ func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcor
 	messages := make([]types.Message, 0, len(history))
 
 	for _, item := range history {
+		// Skip final thinking messages to avoid context bloating
+		if item.Type == pbcore.ConversationMessageType_CONVERSATION_MESSAGE_FINAL_THINKING {
+			continue
+		}
+
 		message := types.Message{
 			Content: item.Message,
 		}
