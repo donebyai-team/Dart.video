@@ -230,9 +230,9 @@ func (l *codeGenerator) GenerateCode(
 
 	if l.assetRegistry != nil {
 		generatePlanRequest.VideoBranding = types.VideoBranding{
-			BrandGuideLines: l.assetRegistry.FormatBrandDetails(),
-			BrandColors:     l.assetRegistry.FormatBrandTokens(),
-			Attachments:     l.assetRegistry.FormatAssets(),
+			//BrandGuideLines: l.assetRegistry.FormatBrandDetails(),
+			//BrandColors:     l.assetRegistry.FormatBrandTokens(),
+			//Attachments:     l.assetRegistry.FormatAssets(),
 		}
 	}
 

@@ -27,34 +27,16 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
        - Don't add any background color
        - return JSX
 
-   {{ ConstantsRules() }}
-
     ## LAYOUT RULES
 
     - Use the full canvas with explicit dimensions from `useVideoConfig()`.
-    Required root pattern:
+    - Use full width of the canvas with appropriate padding.
+    - Never constrain content to a small centered webpage-like box.
+    - Use `Math.max(minValue, Math.round(width * percentage))` for responsive sizing.
+    - Use `position: "absolute"` for animated elements.
+
     {% raw %}
     ```tsx
-    const { width, height, fps } = useVideoConfig();
-
-    return (
-      <div
-        style={{
-          width,
-          height,
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
-        {/* animation */}
-      </div>
-    );
-    ```
-
-    * Use full width of the canvas with appropriate padding.
-    * Never constrain content to a small centered webpage-like box.
-    * Use `Math.max(minValue, Math.round(width * percentage))` for responsive sizing.
-    * Use `position: "absolute"` for animated elements.
 
     ### Never generate
 
@@ -75,12 +57,7 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
 
     Treat Remotion like a fixed-size animation canvas, not a responsive webpage.
 
-    ## ANIMATION RULES
-
-    - Prefer spring() for organic motion (entrances, bounces, scaling)
-    - Use interpolate() for linear progress (progress bars, opacity fades)
-    - Always use { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-    - Add stagger delays for multiple elements
+    {{ ConstantsRules() }}
 
     ## AVAILABLE IMPORTS
 
@@ -91,13 +68,52 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
     import { useCurrentFrame, useVideoConfig, interpolate, spring, Sequence } from "remotion";
     import { useState, useEffect } from "react";
     import { Text, LogoAsset, IconAsset, MediaAsset } from './';
+
+    const DEFAULT_DATA = {
+      title: "AI Automation",
+      subtitle: "Save 10 hours per week",
+      icon: "Bot",
+      features: [
+        {
+          title: "Automation",
+          icon: Heart,
+        },
+        {
+          title: "Tool",
+          icon: "icon:google-drive",
+        },
+      ],
+    };
+
     export default function RemoteComponent() {
-      return (
-            // Code goes here
-      );
+    const { width, height, fps } = useVideoConfig();
+
+    {/* OTHER CONSTs */}
+    const FADE_DURATION = xx;
+    const PADDING = xx;
+
+    return (
+      <div
+        style={{
+          width,
+          height,
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        {/* animation */}
+      </div>
+    );
     }
     \`\`\`
    {% endraw %}
+
+    ## ANIMATION RULES
+
+    - Prefer spring() for organic motion (entrances, bounces, scaling)
+    - Use interpolate() for linear progress (progress bars, opacity fades)
+    - Always use { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+    - Add stagger delays for multiple elements
 
     ## RESERVED NAMES (CRITICAL)
 

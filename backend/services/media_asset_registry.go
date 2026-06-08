@@ -216,8 +216,8 @@ func (registry *MediaAssetRegistry) FormatBrandTokens() *string {
 			case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_PRIMARY:
 				writeLine(2, "<primary>%s</primary>", c.ColorHexCode)
 
-			//case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_SECONDARY:
-			//	writeLine(2, "<secondary>%s</secondary>", c.ColorHexCode)
+			case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_SECONDARY:
+				writeLine(2, "<secondary>%s</secondary>", c.ColorHexCode)
 
 			//case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_ACCENT:
 			//	writeLine(2, "<accent>%s</accent>", c.ColorHexCode)

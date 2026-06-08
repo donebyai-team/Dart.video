@@ -1,4 +1,8 @@
 template_string BrandGuidelines(resume: VideoBranding) #"
+    {% if resume.brandColors %}
+    {{ BrandUsageInstructions() }}
+    {% endif %}
+
     {% if resume.brandGuideLines %}
     ### Brand Details:
     {{ resume.brandGuideLines }}
@@ -61,30 +65,7 @@ template_string ConstantsRules() #"
     - DEFAULT_DATA must be declared at module scope, before the component.
     - There must be exactly one module-level constant: DEFAULT_DATA.
     - ALL other constants MUST be defined INSIDE the component body, AFTER hooks.
-    - Never hardcode user-facing text or icons in JSX.
-    - For rest of the constants you can keep it in other constants
-    {% raw %}
-    ```tsx
-    const DEFAULT_DATA = {
-      title: "AI Automation",
-      subtitle: "Save 10 hours per week",
-      icon: "Bot",
-      features: [
-        {
-          title: "Automation",
-          icon: Heart,
-        },
-        {
-          title: "Tool",
-          icon: "icon:google-drive",
-        },
-      ],
-    };
-
-    - Timing: const FADE_DURATION = 20;
-    - Layout: const PADDING = 40;
-    ```
-    {% endraw %}
+    - **Never hardcode user-facing text or icons in JSX.**
     This allows users to easily customize the animation.
 "#
 
@@ -152,11 +133,15 @@ template_string AnimationPrimitives() #"
     />
     ```
     {% endraw %}
+"#
 
+template_string BrandUsageInstructions() #"
     ### Branding
-    - Brand details are provided in <brand_details>
-    - Brand colors are provided in the <brand_tokens>.
-    - Brand logo and icon are provided in the <attachments>
-    - **Make sure the text_foreground color is always visible on the cards or backgrounds.**
-    - Use LogoAsset to render the logo by passing the attachment URL to src.
+    - Brand details: `<brand_details>`
+    - Brand colors: `<brand_tokens>`
+    - Brand logo and icon: `<attachments>`
+    - Use `text_foreground` for text. If it lacks contrast, use a readable alternative.
+    - Use `primary`,  for highlights and emphasis.
+    - Use `secondary` for supporting accents and secondary UI elements.
+    - Render the logo with `LogoAsset` and set `src` to the logo URL from `<attachments>`.
 "#
