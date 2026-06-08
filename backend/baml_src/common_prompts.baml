@@ -65,17 +65,13 @@ template_string AnimationPrimitives() #"
 
     ### Image, Video, Icon and Logo:
     - Never use `img`, `video` or other media tags
-    - Use IconAsset for icons.
     - Use LogoAsset for logos.
     - Use MediaAsset for image or video.
-    - For `lucide-react` icons, import the icon component and pass it via the `Icon` prop.
-    - Every `IconAsset`, `LogoAsset`, `MediaAsset` component MUST have an `id` which start with `iconasset-`, `logoasset-`, `mediaasset-` respectively.
+    - Every `LogoAsset`, `MediaAsset` component MUST have an `id` which start with `iconasset-`, `logoasset-`, `mediaasset-` respectively.
     - Examples: `iconasset-1`, `logoasset-1`, `mediaasset-1`.
 
     {% raw %}
     ```tsx
-     import { Heart } from "lucide-react";
-     <IconAsset id="iconasset-1" Icon={Heart} size={48} style={{}} />
      <LogoAsset
        id="logoasset-1"
        src="https://placehold.co/200x80.png"
@@ -93,6 +89,31 @@ template_string AnimationPrimitives() #"
      ```
     {% endraw %}
 
+    ### Icons
+    - Always use `IconAsset` to render icons.
+    - If the icon exists in `lucide-react`, import it and pass the component to the `Icon` prop.
+    - If the icon does not exist in `lucide-react`, pass a string identifier using the format `icon:<icon-name>`. eg. `icon:google`
+    - Every `IconAsset` must have a unique `id` starting with `iconasset-`.
+
+    Examples:
+    {% raw %}
+    ```tsx
+    import { Heart } from "lucide-react";
+
+    <IconAsset
+      id="iconasset-heart"
+      Icon={Heart}
+      size={48}
+    />
+
+    <IconAsset
+      id="iconasset-drive"
+      Icon="icon:google-drive"
+      size={48}
+    />
+    ```
+    {% endraw %}
+
     ### Branding
     - Use useTheme() to access brand assets and color tokens.
     - Use LogoAsset to render the logo or icon by passing the corresponding URL to src.
@@ -105,13 +126,13 @@ template_string AnimationPrimitives() #"
      theme.colors.primary    // Brand/highlight color
 
      // Brand assets
-     theme.logo.url
-     theme.logo.width
-     theme.logo.height
+     theme.logo?.url
+     theme.logo?.width
+     theme.logo?.height
 
-     theme.logoIcon.url
-     theme.logoIcon.width
-     theme.logoIcon.height
+     theme.logoIcon?.url
+     theme.logoIcon?.width
+     theme.logoIcon?.height
      ```
     {% endraw %}
 

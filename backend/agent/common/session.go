@@ -163,6 +163,7 @@ func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcor
 			if err != nil {
 				return nil, fmt.Errorf("failed to download code snapshot: %w", err)
 			}
+			code = ResolveIconURL(code)
 
 			message.Content = code
 		}

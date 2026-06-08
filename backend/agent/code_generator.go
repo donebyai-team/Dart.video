@@ -398,6 +398,9 @@ func (l *codeGenerator) uploadAndBuild(ctx context.Context, code string) (*pbcor
 	assetID := uuid.New().String()
 	codeFilePath = fmt.Sprintf("%s/%s", codeFilePath, assetID)
 
+	// Sanitize
+	code = common.SanitizeCommonCode(code)
+
 	uploadCodeAsset, err := l.mediaStore.UploadCode(ctx, code, codeFilePath)
 	if err != nil {
 		return nil, err
