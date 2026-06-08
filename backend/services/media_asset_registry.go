@@ -216,24 +216,20 @@ func (registry *MediaAssetRegistry) FormatBrandTokens() *string {
 			case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_PRIMARY:
 				writeLine(2, "<primary>%s</primary>", c.ColorHexCode)
 
-			case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_SECONDARY:
-				writeLine(2, "<secondary>%s</secondary>", c.ColorHexCode)
+			//case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_SECONDARY:
+			//	writeLine(2, "<secondary>%s</secondary>", c.ColorHexCode)
 
-			case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_ACCENT:
-				writeLine(2, "<accent>%s</accent>", c.ColorHexCode)
-
-			case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_BACKGROUND:
-				writeLine(2, "<background>%s</background>", c.ColorHexCode)
+			//case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_ACCENT:
+			//	writeLine(2, "<accent>%s</accent>", c.ColorHexCode)
+			//
+			//case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_BACKGROUND:
+			//	writeLine(2, "<background>%s</background>", c.ColorHexCode)
 
 			case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_TEXT_PRIMARY:
-				writeLine(2, "<text_primary>%s</text_primary>", c.ColorHexCode)
+				writeLine(2, "<text_foreground>%s</text_foreground>", c.ColorHexCode)
 
-			case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_TEXT_SECONDARY:
-				writeLine(2, "<text_secondary>%s</text_secondary>", c.ColorHexCode)
-
-			default:
-				// fallback (in case new enums show up)
-				writeLine(2, "<color>%s</color>", c.ColorHexCode)
+				//case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_TEXT_SECONDARY:
+				//	writeLine(2, "<text_secondary>%s</text_secondary>", c.ColorHexCode)
 			}
 		}
 
@@ -315,7 +311,9 @@ func (registry *MediaAssetRegistry) toAttachment(handles []string) string {
 			writeLine(2, "<tags>%s</tags>", asset.Tags)
 		}
 
-		writeLine(2, "<user_note>%s</user_note>", asset.UserNote)
+		if asset.UserNote != "" {
+			writeLine(2, "<user_note>%s</user_note>", asset.UserNote)
+		}
 		writeLine(1, "</attachment>")
 	}
 

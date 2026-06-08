@@ -9,11 +9,12 @@ import { FieldSchema } from '../../registry/types';
 
 export interface TextProps {
   /** Semantic typography variant. Never hardcode font sizes. */
-  text: string;
+  text?: string;
   variant?: TypographyVariant;
   style?: React.CSSProperties;
   className?: string;
   id?: string;
+  children?: React.ReactNode;
 }
 
 export const TextFieldSchema: FieldSchema[] = [
@@ -36,13 +37,15 @@ export function Text({
   style,
   className,
   id,
+  children,
 }: TextProps): React.ReactElement {
   const styleConfig = useStyleContext();
   const theme = useTheme();
   const preset = useAspectPreset();
 
   const patchedVariant = usePatchedProp<TypographyVariant | undefined>(id, 'variant', variant);
-  const patchedText = usePatchedProp<React.ReactNode>(id, 'text', text);
+  const content = text ?? children;
+  const patchedText = usePatchedProp<React.ReactNode>(id, 'text', content);
   const patchedClassName = usePatchedProp<string | undefined>(id, 'className', className);
   const styleOverride = useStyleOverride(id);
   const overrideTransform = typeof styleOverride.transform === 'string' ? styleOverride.transform : undefined;

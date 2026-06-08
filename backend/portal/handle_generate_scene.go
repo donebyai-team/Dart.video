@@ -262,15 +262,19 @@ func (p *Portal) GetConversationHistory(ctx context.Context, c *connect.Request[
 
 	// Include USER/TOOL messages that are not MANUAL_EDITS, and if the message is THINKING then only include it for admins.
 	for _, message := range sessionContext.ConversationHistory {
-		isUserOrTool := message.Role == pbcore.ConversationRole_CONVERSATION_ROLE_USER ||
-			message.Role == pbcore.ConversationRole_CONVERSATION_ROLE_TOOL
+		isUserOrTool :=
+			message.Role == pbcore.ConversationRole_CONVERSATION_ROLE_USER ||
+				message.Role == pbcore.ConversationRole_CONVERSATION_ROLE_TOOL
 
-		isThinking := message.Type == pbcore.ConversationMessageType_CONVERSATION_MESSAGE_THINKING ||
-			message.Type == pbcore.ConversationMessageType_CONVERSATION_MESSAGE_FINAL_THINKING
+		isAdminThinking :=
+			actor.IsPlatformAdmin() &&
+				message.Role == pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT &&
+				(message.Type == pbcore.ConversationMessageType_CONVERSATION_MESSAGE_THINKING ||
+					message.Type == pbcore.ConversationMessageType_CONVERSATION_MESSAGE_FINAL_THINKING)
 
-		if isUserOrTool &&
-			message.Type != pbcore.ConversationMessageType_CONVERSATION_MESSAGE_MANUAL_EDITS &&
-			(!isThinking || actor.IsPlatformAdmin()) {
+		if (isUserOrTool &&
+			message.Type != pbcore.ConversationMessageType_CONVERSATION_MESSAGE_MANUAL_EDITS) ||
+			isAdminThinking {
 
 			conversation = append(conversation, message)
 		}
