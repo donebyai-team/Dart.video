@@ -1,4 +1,8 @@
 template_string BrandGuidelines(resume: VideoBranding) #"
+    {% if resume.brandColors %}
+    {{ BrandUsageInstructions() }}
+    {% endif %}
+
     {% if resume.brandGuideLines %}
     ### Brand Details:
     {{ resume.brandGuideLines }}
@@ -53,6 +57,17 @@ template_string EnterAnimation(animation: AnimationCategories) #"
     {% endif %}
 "#
 
+
+template_string ConstantsRules() #"
+    ## CONSTANTS RULES (CRITICAL)
+
+    - All user-facing elements (text, labels, icons, etc.) must be stored in a single DEFAULT_DATA constant.
+    - DEFAULT_DATA must be declared at module scope, before the component.
+    - There must be exactly one module-level constant: DEFAULT_DATA.
+    - ALL other constants MUST be defined INSIDE the component body, AFTER hooks.
+    - **Never hardcode user-facing text or icons in JSX.**
+    This allows users to easily customize the animation.
+"#
 
 template_string AnimationPrimitives() #"
 
@@ -118,14 +133,15 @@ template_string AnimationPrimitives() #"
     />
     ```
     {% endraw %}
+"#
 
+template_string BrandUsageInstructions() #"
     ### Branding
     - Brand details: `<brand_details>`
     - Brand colors: `<brand_tokens>`
-    - Brand logo and icon: `<attachments>`
+    - Brand logo and icon: `<attachments>`. Only use when an animation explicitly requires a logo or icon. Render with `LogoAsset` and set `src` to the attachment `url`.
     - Use `text_foreground` for text. If it lacks contrast, use a readable alternative.
     - Use `primary`,  for highlights and emphasis.
-    - Use `secondary` for supporting accents and secondary UI elements.
-    - Render the logo with `LogoAsset` and set `src` to the logo URL from `<attachments>`.
+    - Use `secondary` for supporting accents and secondary UI elements..
     - **If an Image/Video is attached, always prioritize the colors from the image**
 "#

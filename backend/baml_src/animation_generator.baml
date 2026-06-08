@@ -20,50 +20,23 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
     1. Start with ES6 imports
     2. Export as: export default function RemoteComponent() { ... }
     3. Component body order:
+       - DEFAULT_DATA
        - Multi-line comment description (2-3 sentences)
        - Hooks (useCurrentFrame, useVideoConfig, etc.)
-       - Constants (COLORS, TEXT, TIMING, LAYOUT) - all UPPER_SNAKE_CASE
+       - Constants (COLORS, TIMING, LAYOUT) - all UPPER_SNAKE_CASE
        - Calculations and derived values
-       - Don't add any background color
        - return JSX
-
-    ## CONSTANTS RULES (CRITICAL)
-   {% raw %}
-    ALL constants MUST be defined INSIDE the component body, AFTER hooks:
-    ```tsx
-    - Text: const TITLE_TEXT = "Hello World";
-    - Timing: const FADE_DURATION = 20;
-    - Layout: const PADDING = 40;
-    ```
-   {% endraw %}
-    This allows users to easily customize the animation.
 
     ## LAYOUT RULES
 
     - Use the full canvas with explicit dimensions from `useVideoConfig()`.
-    Required root pattern:
+    - Use full width of the canvas with appropriate padding.
+    - Never constrain content to a small centered webpage-like box.
+    - Use `Math.max(minValue, Math.round(width * percentage))` for responsive sizing.
+    - Use `position: "absolute"` for animated elements.
+
     {% raw %}
     ```tsx
-    const { width, height, fps } = useVideoConfig();
-
-    return (
-      <div
-        style={{
-          width,
-          height,
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
-        {/* animation */}
-      </div>
-    );
-    ```
-
-    * Use full width of the canvas with appropriate padding.
-    * Never constrain content to a small centered webpage-like box.
-    * Use `Math.max(minValue, Math.round(width * percentage))` for responsive sizing.
-    * Use `position: "absolute"` for animated elements.
 
     ### Never generate
 
@@ -84,12 +57,7 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
 
     Treat Remotion like a fixed-size animation canvas, not a responsive webpage.
 
-    ## ANIMATION RULES
-
-    - Prefer spring() for organic motion (entrances, bounces, scaling)
-    - Use interpolate() for linear progress (progress bars, opacity fades)
-    - Always use { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-    - Add stagger delays for multiple elements
+    {{ ConstantsRules() }}
 
     ## AVAILABLE IMPORTS
 
@@ -100,13 +68,52 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
     import { useCurrentFrame, useVideoConfig, interpolate, spring, Sequence } from "remotion";
     import { useState, useEffect } from "react";
     import { Text, LogoAsset, IconAsset, MediaAsset } from './';
+
+    const DEFAULT_DATA = {
+      title: "AI Automation",
+      subtitle: "Save 10 hours per week",
+      icon: "Bot",
+      features: [
+        {
+          title: "Automation",
+          icon: Heart,
+        },
+        {
+          title: "Tool",
+          icon: "icon:google-drive",
+        },
+      ],
+    };
+
     export default function RemoteComponent() {
-      return (
-            // Code goes here
-      );
+    const { width, height, fps } = useVideoConfig();
+
+    {/* OTHER CONSTs */}
+    const FADE_DURATION = xx;
+    const PADDING = xx;
+
+    return (
+      <div
+        style={{
+          width,
+          height,
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        {/* animation */}
+      </div>
+    );
     }
     \`\`\`
    {% endraw %}
+
+    ## ANIMATION RULES
+
+    - Prefer spring() for organic motion (entrances, bounces, scaling)
+    - Use interpolate() for linear progress (progress bars, opacity fades)
+    - Always use { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+    - Add stagger delays for multiple elements
 
     ## RESERVED NAMES (CRITICAL)
 
