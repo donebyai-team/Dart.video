@@ -78,7 +78,6 @@ export const usePlayerControls = (
   const playSlidePreview = useCallback((slideId: string, endSlideId?: string) => {
     const startFrame = getRealSlideStartFrame(sections, slideId, fps);
     const endFrame = getSlideVisualEndFrame(sections, endSlideId ?? slideId, fps);
-    console.log("rwgwegf", startFrame, endFrame, slideId, endSlideId)
     setIsPreviewPlaying(true);
     previewEndFrameRef.current = endFrame;
     playerRef.current?.seekTo(startFrame);
