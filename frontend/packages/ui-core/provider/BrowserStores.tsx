@@ -11,7 +11,6 @@ export class BrowserTokenStore {
 
   async Get(): Promise<JWT | undefined> {
     const storedToken = window.localStorage.getItem(TOKEN_KEY)
-    console.log("Rgsegsegse", storedToken)
     if (!storedToken) {
       return undefined
     }
