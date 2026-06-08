@@ -52,8 +52,11 @@ template_string EnterAnimation(animation: AnimationCategories) #"
 template_string ConstantsRules() #"
     ## CONSTANTS RULES (CRITICAL)
 
-    - ALL constants MUST be defined INSIDE the component body, AFTER hooks:
-    - All user-facing elements (text, labels, icons, etc.) must be stored in a single DEFAULT_DATA constant defined inside the component.
+    - All user-facing elements (text, labels, icons, etc.) must be stored in a single DEFAULT_DATA constant.
+    - DEFAULT_DATA must be declared at module scope, before the component.
+    - There must be exactly one module-level constant: DEFAULT_DATA.
+    - ALL other constants MUST be defined INSIDE the component body, AFTER hooks.
+    - Never hardcode user-facing text or icons in JSX.
     - For rest of the constants you can keep it in other constants
     {% raw %}
     ```tsx
@@ -64,8 +67,11 @@ template_string ConstantsRules() #"
       features: [
         {
           title: "Automation",
-          description: "Automate repetitive work",
-          icon: "Zap",
+          icon: Heart,
+        },
+        {
+          title: "Tool",
+          icon: "icon:google-drive",
         },
       ],
     };
