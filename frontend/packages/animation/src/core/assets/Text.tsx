@@ -66,6 +66,7 @@ export function Text({
         whiteSpace: 'pre-wrap',
         ...typography,
         ...mergedStyleWithoutTransform,
+        pointerEvents: 'auto',
         ...dragStyle,
       }}
     >

@@ -289,7 +289,6 @@ export const ProblemHeadline: React.FC<ProblemHeadlineProps> = (initProps) => {
         transform: groupTransform,
         transformOrigin: 'center center',
         opacity: groupOpacity,
-        pointerEvents: 'none',
         ...containerStyle,
       }}
     >
