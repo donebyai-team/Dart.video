@@ -67,7 +67,7 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
     \`\`\`tsx
     import { useCurrentFrame, useVideoConfig, interpolate, spring, Sequence } from "remotion";
     import { useState, useEffect } from "react";
-    import { Text, LogoAsset, IconAsset, MediaAsset } from './';
+    import { Text, LogoAsset, IconAsset, useTheme, MediaAsset } from './';
 
     const DEFAULT_DATA = {
       title: "AI Automation",

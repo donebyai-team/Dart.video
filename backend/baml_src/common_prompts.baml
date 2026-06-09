@@ -137,11 +137,42 @@ template_string AnimationPrimitives() #"
 
 template_string BrandUsageInstructions() #"
     ### Branding
+    Use `const theme = useTheme()` for all brand colors and assets at runtime.
+
+    Available brand information:
     - Brand details: `<brand_details>`
-    - Brand colors: `<brand_tokens>`
-    - Brand logo and icon: `<attachments>`. Only use when an animation explicitly requires a logo or icon. Render with `LogoAsset` and set `src` to the attachment `url`.
-    - Use `text_foreground` for text. If it lacks contrast, use a readable alternative.
-    - Use `primary`,  for highlights and emphasis.
-    - Use `secondary` for supporting accents and secondary UI elements..
-    - **If an Image/Video is attached, always prioritize the colors from the image**
+    - Brand tokens/colors: `<brand_tokens>`
+    - Brand assets: `<attachments>`
+
+    Use the provided brand details and tokens to understand the visual identity and make design decisions (e.g. contrast, emphasis, hierarchy),
+    but always reference colors and assets through `theme` in generated code.
+
+    ```tsx
+    const theme = useTheme();
+
+    // Colors
+    theme.colors.foreground // Primary text
+    theme.colors.primary    // Primary accent/highlight
+    theme.colors.secondary  // Secondary accent
+
+    // Assets
+    theme.logo.url
+    theme.logo.width
+    theme.logo.height
+
+    theme.logoIcon.url
+    theme.logoIcon.width
+    theme.logoIcon.height
+    ````
+
+    Guidelines:
+
+    * Use `theme.colors.foreground` for text. If contrast is insufficient, choose a readable alternative.
+    * Use `theme.colors.primary` for highlights, emphasis, and primary actions.
+    * Use `theme.colors.secondary` for supporting accents and secondary UI elements.
+    * Use `theme.logo` for full branding and `theme.logoIcon` for compact/icon-only branding.
+    * Render logos/icons with `LogoAsset` using `theme.logo.url` or `theme.logoIcon.url`.
+    * Only include logos/icons when they meaningfully support the animation.
+    * If an image or video is provided, prioritize its color palette over brand colors when appropriate.
+    ```
 "#
