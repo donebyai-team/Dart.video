@@ -80,12 +80,14 @@ message AnimationSlideContent {
   CodeRegistry codeRegistry = 1;
   AnimationSlidePlan plan = 2;
   google.protobuf.Struct edits = 3;
+  repeated CodeRegistry history = 4;
 }
 
 message CodeRegistry {
   string mUrl = 1;
   string tUrl = 2;
   string code = 3;
+  optional google.protobuf.Struct edits = 4;
 }
 
 // ===================== EFFECTS =====================

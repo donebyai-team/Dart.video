@@ -222,6 +222,10 @@ func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcor
 					message.Videos = append(message.Videos, video)
 				}
 			}
+
+			builderFromExisting := services.NewMediaAssetRegistryBuilderFromExisting(registry)
+			attachments := builderFromExisting.AddAndFormatAssets(mediaAssets)
+			message.Content += "\n\nReferences (already provided as image/video input, in the same order as listed below):\n\n" + *attachments
 		}
 
 		// Attachments
@@ -233,8 +237,7 @@ func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcor
 
 			builderFromExisting := services.NewMediaAssetRegistryBuilderFromExisting(registry)
 			attachments := builderFromExisting.AddAndFormatAssets(attachedAssets)
-			message.Content += "\n\n" + *attachments
-
+			message.Content += "\n\nAttachments available for use:\n\n" + *attachments
 		}
 
 		messages = append(messages, message)

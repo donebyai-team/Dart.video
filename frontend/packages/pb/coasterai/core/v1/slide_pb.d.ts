@@ -125,6 +125,11 @@ export declare type AnimationSlideContent = Message<"coasterai.core.v1.Animation
    * @generated from field: google.protobuf.Struct edits = 3;
    */
   edits?: JsonObject;
+
+  /**
+   * @generated from field: repeated coasterai.core.v1.CodeRegistry history = 4;
+   */
+  history: CodeRegistry[];
 };
 
 /**
@@ -151,6 +156,11 @@ export declare type CodeRegistry = Message<"coasterai.core.v1.CodeRegistry"> & {
    * @generated from field: string code = 3;
    */
   code: string;
+
+  /**
+   * @generated from field: optional google.protobuf.Struct edits = 4;
+   */
+  edits?: JsonObject;
 };
 
 /**
