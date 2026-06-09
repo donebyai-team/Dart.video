@@ -2,10 +2,11 @@
 // Single button that opens a popover with tabs for two color values.
 
 import { Droplets } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { HexColorPicker } from "react-colorful"
 
 import BrandColors from "@/components/editor/settings/BrandColors"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 const FALLBACK_COLOR = "#000000"
 
@@ -47,7 +48,6 @@ export function DualColorPicker({
   const [open, setOpen] = useState(false)
   const [tab, setTab] = useState<'primary' | 'secondary'>('primary')
   const [applyPrimaryToAllScenes, setApplyPrimaryToAllScenes] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
 
   const hasSecondary = !!secondaryColor && !!onSecondaryColor
   const activeTab = hasSecondary ? tab : 'primary'
@@ -76,46 +76,28 @@ export function DualColorPicker({
     }
   }, [applyPrimaryToAllScenes, showApplyPrimaryOption])
 
-  useEffect(() => {
-    if (!open) {
-      return
-    }
-
-    const handlePointerDown = (event: MouseEvent) => {
-      if (!containerRef.current?.contains(event.target as Node)) {
-        setOpen(false)
-      }
-    }
-
-    document.addEventListener("mousedown", handlePointerDown)
-
-    return () => {
-      document.removeEventListener("mousedown", handlePointerDown)
-    }
-  }, [open])
-
   return (
-    <div ref={containerRef} className="relative flex items-center">
-      <button
-        type="button"
-        title="Colors"
-        onClick={() => setOpen(!open)}
-        className={
-          triggerVariant === "input"
-            ? "flex h-7 w-9 items-center justify-center rounded-md border border-input bg-background shadow-sm"
-            : "w-8 h-7 rounded-md border border-border shadow-sm cursor-pointer"
-        }
-        style={
-          triggerVariant === "swatch" || triggerVariant === "input"
-            ? {
-                background: getTriggerBackground(activeColorValue, triggerStyle),
-              }
-            : undefined
-        }
-      />
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          title="Colors"
+          className={
+            triggerVariant === "input"
+              ? "flex h-7 w-9 items-center justify-center rounded-md border border-input bg-background shadow-sm"
+              : "w-8 h-7 rounded-md border border-border shadow-sm cursor-pointer"
+          }
+          style={
+            triggerVariant === "swatch" || triggerVariant === "input"
+              ? {
+                  background: getTriggerBackground(activeColorValue, triggerStyle),
+                }
+              : undefined
+          }
+        />
+      </PopoverTrigger>
 
-      {open && (
-        <div className="absolute top-9 left-0 z-50 bg-background border border-border rounded-lg shadow-lg p-3 w-56 space-y-3">
+      <PopoverContent align="start" sideOffset={8} className="w-56 space-y-3 p-3">
           {hasSecondary && (
             <div className="flex rounded-md border border-border overflow-hidden text-xs">
               <button
@@ -207,8 +189,7 @@ export function DualColorPicker({
             }}
             className="w-full text-xs px-2 py-1 border border-border rounded bg-muted"
           />
-        </div>
-      )}
-    </div>
+      </PopoverContent>
+    </Popover>
   )
 }
