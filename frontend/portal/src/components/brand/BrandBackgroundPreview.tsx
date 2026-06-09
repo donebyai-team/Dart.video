@@ -13,6 +13,8 @@ interface BrandBackgroundPreviewCompositionProps {
   text: string
   subtext?: string
   textColor: string
+  primaryColor?: string
+  secondaryColor?: string
   fontFamily?: string
   overlayClassName?: string
 }
@@ -22,6 +24,8 @@ const BrandBackgroundPreviewComposition = ({
   text,
   subtext,
   textColor,
+  primaryColor,
+  secondaryColor,
   fontFamily,
   overlayClassName,
 }: BrandBackgroundPreviewCompositionProps) => {
@@ -33,7 +37,7 @@ const BrandBackgroundPreviewComposition = ({
       >
         <div>
           <p
-            className="text-6xl font-semibold tracking-tight"
+            className="text-7xl font-semibold tracking-tight"
             style={{
               color: textColor,
               fontFamily: fontFamily || "inherit",
@@ -43,7 +47,7 @@ const BrandBackgroundPreviewComposition = ({
           </p>
           {subtext ? (
             <p
-              className="mt-3 text-2xl opacity-90"
+              className="mt-4 text-3xl opacity-90"
               style={{
                 color: textColor,
                 fontFamily: fontFamily || "inherit",
@@ -51,6 +55,32 @@ const BrandBackgroundPreviewComposition = ({
             >
               {subtext}
             </p>
+          ) : null}
+          {primaryColor || secondaryColor ? (
+            <div className="mt-10 flex items-center justify-center gap-5">
+              {primaryColor ? (
+                <span
+                  className="rounded-full border border-white/20 px-6 py-3.5 text-4xl font-semibold"
+                  style={{
+                    color: primaryColor,
+                    fontFamily: fontFamily || "inherit",
+                  }}
+                >
+                  Primary Accent
+                </span>
+              ) : null}
+              {secondaryColor ? (
+                <span
+                  className="rounded-full border border-white/20 px-6 py-3.5 text-4xl font-semibold"
+                  style={{
+                    color: secondaryColor,
+                    fontFamily: fontFamily || "inherit",
+                  }}
+                >
+                  Secondary Accent
+                </span>
+              ) : null}
+            </div>
           ) : null}
         </div>
       </AbsoluteFill>
@@ -63,6 +93,8 @@ interface BrandBackgroundPreviewProps {
   text: string
   subtext?: string
   textColor: string
+  primaryColor?: string
+  secondaryColor?: string
   fontFamily?: string
   className?: string
   overlayClassName?: string
@@ -77,6 +109,8 @@ export default function BrandBackgroundPreview({
   text,
   subtext,
   textColor,
+  primaryColor,
+  secondaryColor,
   fontFamily,
   className,
   overlayClassName,
@@ -102,6 +136,8 @@ export default function BrandBackgroundPreview({
           text,
           subtext,
           textColor,
+          primaryColor,
+          secondaryColor,
           fontFamily,
           overlayClassName,
         }}

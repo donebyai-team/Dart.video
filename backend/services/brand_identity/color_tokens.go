@@ -137,3 +137,30 @@ func DarkestOrBlack(a, b string) string {
 		return "#000000"
 	}
 }
+
+const WCAGNormalTextContrast = 3
+
+// IsReadableColorOnBackground returns true if the text color meets
+// the WCAG AA minimum contrast ratio (4.5:1) against the background color.
+func IsReadableColorOnBackground(bgColor, textColor string) bool {
+	return ContrastRatio(bgColor, textColor) >= WCAGNormalTextContrast
+}
+
+// IsReadableColorOnGradient returns true if the text color meets
+// the WCAG AA minimum contrast ratio (4.5:1) against every gradient stop.
+//
+// This is a conservative check that guarantees readability across the
+// entire gradient by validating all defined stop colors.
+func IsReadableColorOnGradient(gradient *pbcore.Gradient, textColor string) bool {
+	if gradient == nil || len(gradient.Stops) == 0 {
+		return false
+	}
+
+	for _, stop := range gradient.Stops {
+		if !IsReadableColorOnBackground(stop.Color, textColor) {
+			return false
+		}
+	}
+
+	return true
+}

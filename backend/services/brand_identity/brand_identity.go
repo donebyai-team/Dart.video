@@ -301,7 +301,60 @@ func (a brandIdentity) extractFonts(fonts []FontInfo) []*pbcore.BrandFont {
 	return result
 }
 
-func (b brandIdentity) UpdateBrandIdentity(ctx context.Context, orgID string, identity *pbcore.BrandIdentity) error {
+func (b brandIdentity) UpdateBrandIdentity(
+	ctx context.Context,
+	orgID string,
+	identity *pbcore.BrandIdentity,
+) error {
+	for _, color := range identity.Colors {
+		if utils.IsValidHexColor(color.ColorHexCode) {
+			color.ColorHexCode = strings.ToUpper(color.ColorHexCode)
+		} else {
+			return fmt.Errorf("invalid hex color code: %s", color.ColorHexCode)
+		}
+	}
+
+	//var colorsToValidate []string
+	//
+	//for _, color := range identity.Colors {
+	//	switch color.Priority {
+	//	case pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_PRIMARY,
+	//		pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_SECONDARY,
+	//		pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_TEXT_PRIMARY:
+	//
+	//		colorsToValidate = append(colorsToValidate, color.ColorHexCode)
+	//	}
+	//}
+
+	//if identity.BgStyle != nil {
+	//	switch {
+	//	case identity.BgStyle.GetSolid() != nil:
+	//		bg := identity.BgStyle.GetSolid().Hex
+	//
+	//		for _, color := range colorsToValidate {
+	//			if !IsReadableColorOnBackground(bg, color) {
+	//				return fmt.Errorf(
+	//					"color %s is not readable on background %s",
+	//					color,
+	//					bg,
+	//				)
+	//			}
+	//		}
+	//
+	//	case identity.BgStyle.GetGradient() != nil:
+	//		gradient := identity.BgStyle.GetGradient()
+	//
+	//		for _, color := range colorsToValidate {
+	//			if !IsReadableColorOnGradient(gradient, color) {
+	//				return fmt.Errorf(
+	//					"color %s is not readable on gradient background",
+	//					color,
+	//				)
+	//			}
+	//		}
+	//	}
+	//}
+
 	return b.db.UpdateBrandIdentity(ctx, orgID, identity)
 }
 

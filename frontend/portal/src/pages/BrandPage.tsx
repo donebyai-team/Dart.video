@@ -553,6 +553,8 @@ const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onBrandMediaU
                                     text={BRAND_PREVIEW_TEXT}
                                     subtext={`${previewFont || "Choose a font"} · ${previewTextPrimary}`}
                                     textColor={previewTextPrimary}
+                                    primaryColor={previewPrimary}
+                                    secondaryColor={previewSecondary}
                                     fontFamily={previewFont || undefined}
                                 />
                             </div>

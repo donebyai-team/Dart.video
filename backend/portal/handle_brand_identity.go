@@ -54,7 +54,7 @@ func (p *Portal) UpdateBrandIdentity(ctx context.Context, c *connect.Request[pbp
 
 	err = p.brandIdentityService.UpdateBrandIdentity(ctx, actor.OrganizationID, c.Msg.Identity)
 	if err != nil {
-		return nil, connect.NewError(connect.CodeInternal, err)
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 
 	return connect.NewResponse(&emptypb.Empty{}), nil
