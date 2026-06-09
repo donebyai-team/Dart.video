@@ -300,6 +300,7 @@ export function AnimationEditLayer({
       if (toolbarRef.current?.contains(target)) return
       if (playerRef.current?.contains(target)) return
       if (target instanceof Element && target.closest('[data-animation-settings-panel="true"]')) return
+      if (target instanceof Element && target.closest('[data-toolbar-popover="true"]')) return
 
       setIsToolbarVisible(false)
     }

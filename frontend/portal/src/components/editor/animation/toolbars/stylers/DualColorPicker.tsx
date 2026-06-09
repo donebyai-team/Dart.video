@@ -97,7 +97,7 @@ export function DualColorPicker({
         />
       </PopoverTrigger>
 
-      <PopoverContent align="start" sideOffset={8} className="w-56 space-y-3 p-3">
+      <PopoverContent data-toolbar-popover="true" align="start" sideOffset={8} className="w-56 space-y-3 p-3">
           {hasSecondary && (
             <div className="flex rounded-md border border-border overflow-hidden text-xs">
               <button
