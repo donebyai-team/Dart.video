@@ -6,7 +6,7 @@ import type { PatchOverlay } from '@coasterai/renderer'
 import { useRouter } from 'next/navigation'
 import type { AskUserQuestion, GenerateOrEditSceneResponse } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
 import { MediaType, SelectedMediaAssetSchema, type MediaAsset, type SelectedMediaAsset } from '@coasterai/pb/coasterai/core/v1/media_asset_pb'
-import { SlideStatus, type Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
+import { CodeRegistrySchema, SlideStatus, type Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import QuestionPanel from '@/components/composer/QuestionPanel'
@@ -170,6 +170,19 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
     const existingContent = selectedSlide?.content ? selectedSlide.content : undefined
     const pathOverlay = updatedContent.edits as unknown as PatchOverlay
 
+    const previousHistoryEntry = existingContent?.codeRegistry
+      ? create(CodeRegistrySchema, {
+        ...existingContent.codeRegistry,
+        edits: existingContent.edits,
+      })
+      : undefined
+
+    const history = [...(existingContent?.history ?? [])];
+
+    if (previousHistoryEntry) {
+      history.push(previousHistoryEntry);
+    }
+
     setOverlay(pathOverlay)
 
     updateSlide({
@@ -180,6 +193,7 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
         ...(existingContent ?? {}),
         codeRegistry: updatedContent.codeRegistry,
         edits: pathOverlay,
+        history,
       },
       backgroundStyle: slide.backgroundStyle,
     } as Slide)
@@ -518,7 +532,7 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
           ) : (
             <BrandLibrarySelector
               selectedBrandLibraryId={undefined}
-              onChange={() => {}}
+              onChange={() => { }}
               onAddBrand={() => router.push('/dashboard/brand')}
               disabled={stage !== 'compose'}
             />
