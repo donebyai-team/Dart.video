@@ -17,6 +17,8 @@ export interface VideoState {
     videoConfig: Video | null;
     acceptedVideoConfig: Video | null;
     hasPendingChanges: boolean;
+    isSyncing: boolean;
+    undoStack: Video[];
     isInitialized: boolean;
     selectedEntityId: EntityId;
     selectedSlide: Slide | null;
@@ -45,6 +47,7 @@ export interface VideoActions {
     refreshPendingChanges: () => void;
     acceptVideoConfigChanges: () => Promise<void>;
     discardVideoConfigChanges: () => void;
+    undoVideoConfigChanges: () => Promise<void>;
     getSyncStatus: () => 'idle' | 'syncing' | 'error';
     getFPS: () => number;
 

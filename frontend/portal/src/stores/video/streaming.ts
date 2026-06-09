@@ -67,6 +67,8 @@ export const createStreamingActions = (set: VideoStoreSet, get: VideoStoreGet) =
               videoConfig: safeVideo,
               acceptedVideoConfig: clone(VideoSchema, safeVideo),
               hasPendingChanges: false,
+              isSyncing: false,
+              undoStack: [],
             });
             // }
 

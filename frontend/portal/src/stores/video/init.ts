@@ -29,6 +29,8 @@ export const createInitActions = (
       videoConfig: newVideoConfig,
       acceptedVideoConfig: clone(VideoSchema, newVideoConfig),
       hasPendingChanges: false,
+      isSyncing: false,
+      undoStack: [],
       selectedEntityId: createSlideEntityId(firstSlideId),
       selectedSlide,
       isInitialized: true,

@@ -88,7 +88,7 @@ export const createToolActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
     // Add an empty slide
     addSlide(sectionId, afterSlideId, slideType)
     if (slideType === SlideType.MEDIA) {
-      get().acceptVideoConfigChanges();
+      // get().acceptVideoConfigChanges();
       return
     }
 

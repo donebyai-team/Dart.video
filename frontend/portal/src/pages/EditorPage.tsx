@@ -46,7 +46,6 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
   // State for loading video data
   const [isLoadingVideo, setIsLoadingVideo] = useState(true)
   const [isExportingVideo, setIsExportingVideo] = useState(false)
-  const [isAcceptingChanges, setIsAcceptingChanges] = useState(false)
   const [isPlayerPlaying, setIsPlayerPlaying] = useState(false)
   const [isPreviewPlaying, setIsPreviewPlaying] = useState(false)
   const [exportProgress, setExportProgress] = useState<ExportProgressState | null>(null)
@@ -67,6 +66,8 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
   // Video data from store (this is the single source of truth)
   const videoConfigFromStore = useVideoStore(s => s.videoConfig);
   const hasPendingChanges = useVideoStore(s => s.hasPendingChanges)
+  const isSyncing = useVideoStore(s => s.isSyncing)
+  const undoCount = useVideoStore(s => s.undoStack.length)
   const selectedSlide = useVideoStore(s => s.selectedSlide)
 
   const setShowVoiceover = useVideoStore(s => s.setShowVoiceover)
@@ -88,6 +89,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
   const handleCloseTool = useVideoStore(s => s.handleCloseTool)
   const acceptVideoConfigChanges = useVideoStore(s => s.acceptVideoConfigChanges)
   const discardVideoConfigChanges = useVideoStore(s => s.discardVideoConfigChanges)
+  const undoVideoConfigChanges = useVideoStore(s => s.undoVideoConfigChanges)
   const updateSpotlight = useVideoStore(s => s.updateSpotlight)
   const updateCallout = useVideoStore(s => s.updateCallout)
   const updateZoom = useVideoStore(s => s.updateZoom)
@@ -114,19 +116,6 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
   }
 
   const isProcessingVideo = videoConfigFromStore?.status === VideoStatus.PROCESSING
-
-  const handleAcceptChanges = async () => {
-    if (isAcceptingChanges || isProcessingVideo) return
-
-    try {
-      setIsAcceptingChanges(true)
-      await acceptVideoConfigChanges()
-    } catch (error) {
-      console.error('Accept changes failed', error)
-    } finally {
-      setIsAcceptingChanges(false)
-    }
-  }
 
   const handleExportVideo = async () => {
     if (!portalClient || !videoConfigFromStore) return
@@ -232,6 +221,39 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
     config,
     initialize
   ]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null
+      const isTypingTarget = Boolean(
+        target &&
+        (
+          target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT' ||
+          target.isContentEditable
+        )
+      )
+
+      if (isTypingTarget) {
+        return
+      }
+
+      if (!(event.metaKey || event.ctrlKey) || event.shiftKey || event.key.toLowerCase() !== 'z') {
+        return
+      }
+
+      if (isProcessingVideo || isSyncing || hasPendingChanges || undoCount === 0) {
+        return
+      }
+
+      event.preventDefault()
+      void undoVideoConfigChanges()
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [hasPendingChanges, isProcessingVideo, isSyncing, undoCount, undoVideoConfigChanges])
 
   // Clean up store when leaving the editor
   useEffect(() => {
@@ -350,13 +372,12 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
 
         <div className='flex items-center gap-2'>
           {/* Pending changes */}
-            {hasPendingChanges && !isProcessingVideo && (
+          {hasPendingChanges && !isProcessingVideo && !isSyncing && (
             <>
               <Button
                 variant='ghost'
                 size='icon'
                 onClick={discardVideoConfigChanges}
-                disabled={isAcceptingChanges}
                 className='h-8 w-8'
                 aria-label='Discard changes'
               >
@@ -364,14 +385,19 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
               </Button>
               <Button
                 size='sm'
-                onClick={handleAcceptChanges}
-                disabled={isAcceptingChanges}
+                onClick={() => void acceptVideoConfigChanges()}
                 className='h-8 gap-1 rounded-md px-2 py-1 text-sm'
               >
                 <Check className='w-4 h-4' />
                 Accept changes
               </Button>
             </>
+          )}
+
+          {isSyncing && !isProcessingVideo && (
+            <div className='px-2 py-1 text-sm text-muted-foreground'>
+              Syncing...
+            </div>
           )}
 
           {/* Thinking Summary */}

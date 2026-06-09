@@ -45,6 +45,10 @@ export default function SceneSettings({
   const fields = useMemo(() => getEditableSceneFields(elementId, overlay), [elementId, overlay])
 
   useEffect(() => {
+    setArrayDrafts({})
+  }, [patchEntryId])
+
+  useEffect(() => {
     if (fields.length === 0) {
       onClose?.()
     }

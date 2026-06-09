@@ -198,9 +198,9 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
       backgroundStyle: slide.backgroundStyle,
     } as Slide)
 
-    if (isSlideEmpty(slide)) {
-      acceptVideoConfigChanges()
-    }
+    // if (isSlideEmpty(slide)) {
+    //   acceptVideoConfigChanges()
+    // }
 
     handleSelectEntity(slide.id)
   }

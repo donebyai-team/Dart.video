@@ -7,6 +7,8 @@ export const initialState: VideoState = {
   videoConfig: null,
   acceptedVideoConfig: null,
   hasPendingChanges: false,
+  isSyncing: false,
+  undoStack: [],
 
 
   // TODO: move these into a separate states maybe

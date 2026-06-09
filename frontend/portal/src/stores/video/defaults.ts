@@ -1,7 +1,6 @@
 import { EditorConfig } from "@/types/editor";
 import { ActiveToolType, SelectedTool } from "@/types/tools";
 import {
-    AnimationSlideContent,
     AnimationSlideContentSchema,
     BackgroundStyle,
     BackgroundStyleSchema,
@@ -15,7 +14,7 @@ import {
     ZoomEffectSchema,
 } from "@coasterai/pb/coasterai/core/v1/slide_pb";
 import { Resolution, ResolutionSchema, Video, VideoMetadata, VideoMetadataSchema, VideoSchema } from "@coasterai/pb/coasterai/core/v1/video_pb";
-import { clone, create } from "@bufbuild/protobuf";
+import { clone, create, type MessageInitShape } from "@bufbuild/protobuf";
 import { TRANSITION_DURATION_FRAMES } from "@coasterai/renderer/src/frameUtils";
 
 export function resolveBackgroundStyle(
@@ -47,7 +46,7 @@ export function createDefaultBackgroundStyle(
     });
 }
 
-export const defaultImageSlideContent = {
+export const defaultImageSlideContent: MessageInitShape<typeof AnimationSlideContentSchema> = {
     codeRegistry: {
         code: `
 export default function RemoteComponent() {
@@ -72,18 +71,33 @@ export default function RemoteComponent() {
     },
 };
 
-export const defaultAnimationSlideContent = {};
+export const defaultAnimationSlideContent: MessageInitShape<typeof AnimationSlideContentSchema> =  {
+    codeRegistry: {
+        code: `
+export default function RemoteComponent() {
+  return (
+    <SafeArea>
+      <AbsoluteCenter axis="both">
+      </AbsoluteCenter>
+    </SafeArea>
+  );
+}
+`,
+    },
+    plan: {},
+    edits: {},
+};
 
 export function createNewSlide(
     params: { inheritedBg: BackgroundStyle },
-    content: Partial<AnimationSlideContent> = defaultAnimationSlideContent
+    content: MessageInitShape<typeof AnimationSlideContentSchema> = defaultAnimationSlideContent
 ) {
     const { inheritedBg } = params;
 
     return create(SlideSchema, {
         id: `slide-${crypto.randomUUID()}`,
         transcript: '',
-        slideStatus: SlideStatus.PENDING,
+        slideStatus: SlideStatus.GENERATED,
         durationInFrames: 5 * 30,
         transition: TransitionType.TRANSITION_NONE,
         backgroundStyle: inheritedBg,
@@ -227,6 +241,4 @@ export const ensureVideoResolution = (
     // Already valid → return original (important for avoiding extra renders)
     return video;
 };
-
-
 

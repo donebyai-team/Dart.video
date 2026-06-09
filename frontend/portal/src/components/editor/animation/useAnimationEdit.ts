@@ -27,6 +27,7 @@ export function useAnimationEdit(): UseAnimationEditReturn {
 
   const content = selectedSlide?.content
   const slideId = selectedSlide?.id
+  const contentEdits = content?.edits as PatchOverlay | undefined
 
   const selectedSlideRef = useRef(selectedSlide)
   useEffect(() => { selectedSlideRef.current = selectedSlide }, [selectedSlide])
@@ -61,16 +62,26 @@ export function useAnimationEdit(): UseAnimationEditReturn {
   // Track the slideId that was last loaded to avoid persisting on initial load
   const loadedSlideIdRef = useRef<string | undefined>(undefined)
 
-  // ── Load saved overlay when slide changes and set initial overlay─────────────────────────────────
+  // ── Load saved overlay when slide changes or when the current slide is externally replaced
+  // (for example after undo/discard). Keep local edits intact when the incoming overlay is
+  // already the one we are editing.
   useEffect(() => {
+    const nextOverlay = contentEdits ?? {}
+    const isNewSlide = loadedSlideIdRef.current !== slideId
+    const hasExternalOverlayChange = overlayRef.current !== nextOverlay
+
+    if (!isNewSlide && !hasExternalOverlayChange) {
+      return
+    }
+
     isLoadingRef.current = true
     loadedSlideIdRef.current = slideId
     setSelectedEid(null)
     setAnimEditVersion(0)
 
-    overlayRef.current = (content?.edits as PatchOverlay) ?? {}
+    overlayRef.current = nextOverlay
     setOverlay(overlayRef.current)
-  }, [slideId])
+  }, [contentEdits, slideId])
 
   // ── Apply a single value patch ────────────────────────────────────────────
   const applyValuePatch = useCallback((id: string, prop: string, value: unknown) => {
