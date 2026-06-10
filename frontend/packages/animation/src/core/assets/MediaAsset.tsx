@@ -28,6 +28,7 @@ const IMAGE_EXTENSIONS = new Set([
   "png",
   "svg",
   "webp",
+  "ico"
 ]);
 
 const VIDEO_EXTENSIONS = new Set([
@@ -63,7 +64,7 @@ function getPathname(src: string): string {
   }
 }
 
-function inferMediaKind(src?: string): MediaKind {
+export function inferMediaKind(src?: string): MediaKind {
   if (!src) {
     return "image";
   }
@@ -120,7 +121,7 @@ export function MediaAsset({
     borderColor = "transparent",
     ...wrapperStyle
   } = el.style;
-  const resolvedObjectFit = typeof objectFit === "string" ? objectFit : "cover";
+  const resolvedObjectFit = typeof objectFit === "string" ? objectFit : "contain";
   const innerBorderRadius = Math.max(
     Number(borderRadius) - Number(borderWidth),
     0,
@@ -212,7 +213,7 @@ export function MediaAsset({
         width: resolvedBoxWidth,
         height: resolvedBoxHeight,
         border: `${borderWidth}px solid ${String(borderColor)}`,
-        backgroundColor: borderColor,
+        backgroundColor: Number(borderWidth) > 0 ? String(borderColor) : "transparent",
         borderRadius,
         overflow: "hidden",
         boxShadow: buildDepthShadow(DEFAULT_MEDIA_DEPTH),

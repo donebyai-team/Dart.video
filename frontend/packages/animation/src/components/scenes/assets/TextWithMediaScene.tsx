@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useCurrentFrame } from 'remotion';
 import { useElement, usePatchOverlay } from '../../../patches';
-import { MediaAsset, MediaAssetProps, } from '../../../core/assets';
+import { inferMediaKind, MediaAsset, MediaAssetProps, } from '../../../core/assets';
 import { resolveAnimationPreset } from '../../../core/animation_preset/AnimationPreset';
 import { Row, Stack } from '../../../core/layout';
 import { useAspectPreset } from '../../../styles/AspectPresetContext';
@@ -34,7 +34,7 @@ const SceneDefaults: SceneProps = {
   entranceAnimation: DEFAULT_ANIMATION,
 };
 
-function useVideoDimensions(src: string) {
+function useMediaDimensions(src: string) {
   const [dimensions, setDimensions] = useState({
     width: FALLBACK_WIDTH,
     height: FALLBACK_HEIGHT,
@@ -45,15 +45,29 @@ function useVideoDimensions(src: string) {
 
     let cancelled = false;
 
-    const video = document.createElement('video');
-    video.onloadedmetadata = () => {
-      if (cancelled) return;
-      setDimensions({
-        width: video.videoWidth || FALLBACK_WIDTH,
-        height: video.videoHeight || FALLBACK_HEIGHT,
-      });
-    };
-    video.src = src;
+    const mediaKind = inferMediaKind(src);
+
+    if (mediaKind === 'image') {
+      const image = new Image();
+      image.onload = () => {
+        if (cancelled) return;
+        setDimensions({
+          width: image.naturalWidth || FALLBACK_WIDTH,
+          height: image.naturalHeight || FALLBACK_HEIGHT,
+        });
+      };
+      image.src = src;
+    } else {
+      const video = document.createElement('video');
+      video.onloadedmetadata = () => {
+        if (cancelled) return;
+        setDimensions({
+          width: video.videoWidth || FALLBACK_WIDTH,
+          height: video.videoHeight || FALLBACK_HEIGHT,
+        });
+      };
+      video.src = src;
+    }
 
     return () => {
       cancelled = true;
@@ -87,7 +101,7 @@ export function TextWithMediaScene(): React.ReactElement {
   const { props: animatedTextProps } = useElement('animatedtext', { ...AnimatedTextDefaults, variant: "headingLg" as TypographyVariant });
   const { props: textWithWordCycleProps } = useElement('textwithwordcycle', { ...TextWithWordCycleDefaults, variant: "headingLg" as TypographyVariant });
 
-  const mediaDimentions = useVideoDimensions(mediaProps.src || '');
+  const mediaDimentions = useMediaDimensions(mediaProps.src || '');
 
   const mediaMotion = resolveAnimationPreset({
     frame,
