@@ -94,7 +94,7 @@ func (s SceneSuggester) GenerateSuggestions(
 	}
 
 	// try the last slide
-	if fallbackSlide != nil && fallbackSlide.BackgroundStyle != nil {
+	if bgStyle == nil && fallbackSlide != nil && fallbackSlide.BackgroundStyle != nil {
 		bgStyle = fallbackSlide.BackgroundStyle
 	}
 
