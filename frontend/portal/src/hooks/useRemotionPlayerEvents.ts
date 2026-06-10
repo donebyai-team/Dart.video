@@ -14,6 +14,7 @@ interface UseRemotionPlayerEventsProps {
   fps: number;
   previewEndFrameRef: React.MutableRefObject<number | null>;
   setIsPreviewPlaying: (isPreviewPlaying: boolean) => void;
+  suspendSlideSync?: boolean;
 }
 
 export function useRemotionPlayerEvents({
@@ -27,6 +28,7 @@ export function useRemotionPlayerEvents({
   fps,
   previewEndFrameRef,
   setIsPreviewPlaying,
+  suspendSlideSync = false,
 }: UseRemotionPlayerEventsProps) {
   useEffect(() => {
     const player = playerRef.current;
@@ -77,7 +79,7 @@ export function useRemotionPlayerEvents({
         ).slide;
       }
 
-      if (currentSlide && currentSlide.id !== selectedSlideId) {
+      if (!suspendSlideSync && currentSlide && currentSlide.id !== selectedSlideId) {
         onSlideChange?.(currentSlide.id);
       }
     };
@@ -91,5 +93,5 @@ export function useRemotionPlayerEvents({
       player.removeEventListener("pause", handlePause);
       player.removeEventListener("frameupdate", handleFrameUpdate as never);
     };
-  }, [playerRef, allSlides, selectedSlideId, onSlideChange, onFrameChange, setIsPlaying, setCurrentFrame, fps, previewEndFrameRef, setIsPreviewPlaying]);
+  }, [playerRef, allSlides, selectedSlideId, onSlideChange, onFrameChange, setIsPlaying, setCurrentFrame, fps, previewEndFrameRef, setIsPreviewPlaying, suspendSlideSync]);
 }

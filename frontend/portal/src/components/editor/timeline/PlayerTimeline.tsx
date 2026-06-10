@@ -43,6 +43,11 @@ const PlayerTimeline = ({
   const userScrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Prevents programmatic scrolls from being mistaken for user scroll
   const isProgrammaticScrollRef = useRef(false);
+  // Ref mirrors drag state immediately so scroll effects don't wait for a rerender.
+  const isDraggingRef = useRef(false);
+  const dragPointerClientXRef = useRef<number | null>(null);
+  const dragAutoScrollFrameRef = useRef<number | null>(null);
+  const lastDragFrameRef = useRef<number | null>(null);
 
   const [isDragging, setIsDragging] = useState(false);
   // dragFrame gives immediate visual feedback during drag without waiting for
@@ -66,18 +71,31 @@ const PlayerTimeline = ({
     overlayItems: assignOverlayTracks(calculateOverlayItems(slides, fps)),
   }), [slides, pixelsPerSecond, fps]);
 
-  // Convert a mouse event to a frame number, accounting for horizontal scroll offset
-  const getFrameFromMouseEvent = useCallback((e: MouseEvent | React.MouseEvent): number | null => {
+  const getFrameFromClientX = useCallback((clientX: number): number | null => {
     if (!timelineContainerRef.current) return null;
     const rect = timelineContainerRef.current.getBoundingClientRect();
     const scrollLeft = timelineContainerRef.current.scrollLeft;
-    const mouseX = e.clientX - rect.left + scrollLeft;
+    const mouseX = clientX - rect.left + scrollLeft;
     const time = Math.max(0, Math.min(realTotalDuration, mouseX / pixelsPerSecond));
     return Math.round(time * fps);
   }, [pixelsPerSecond, realTotalDuration, fps]);
 
+  // Convert a mouse event to a frame number, accounting for horizontal scroll offset
+  const getFrameFromMouseEvent = useCallback((e: MouseEvent | React.MouseEvent): number | null => {
+    return getFrameFromClientX(e.clientX);
+  }, [getFrameFromClientX]);
+
+  const updateDragFrameFromClientX = useCallback((clientX: number) => {
+    const frame = getFrameFromClientX(clientX);
+    if (frame !== null && frame !== lastDragFrameRef.current) {
+      lastDragFrameRef.current = frame;
+      setDragFrame(frame);
+      onSeek(frame);
+    }
+  }, [getFrameFromClientX, onSeek]);
+
   const handleTimelineClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (isDragging) return;
+    if (isDraggingRef.current) return;
     const frame = getFrameFromMouseEvent(e);
     if (frame !== null) onSeek(frame);
   };
@@ -86,28 +104,72 @@ const PlayerTimeline = ({
     e.preventDefault();
     e.stopPropagation();
 
+    isDraggingRef.current = true;
+    dragPointerClientXRef.current = e.clientX;
     setIsDragging(true);
     onDraggingChange?.(true);
 
     // Immediately seek to clicked position
     const initialFrame = getFrameFromMouseEvent(e);
     if (initialFrame !== null) {
+      lastDragFrameRef.current = initialFrame;
       setDragFrame(initialFrame);
       onSeek(initialFrame);
     }
 
-    const handleMouseMove = (e: MouseEvent) => {
-      const frame = getFrameFromMouseEvent(e);
-      if (frame !== null) {
-        setDragFrame(frame);
-        onSeek(frame); // Updates Remotion canvas in real-time
+    const runDragAutoScroll = () => {
+      if (!isDraggingRef.current || !timelineContainerRef.current || dragPointerClientXRef.current === null) {
+        dragAutoScrollFrameRef.current = null;
+        return;
       }
+
+      const container = timelineContainerRef.current;
+      const rect = container.getBoundingClientRect();
+      const maxScrollLeft = Math.max(0, container.scrollWidth - container.clientWidth);
+      const edgeThreshold = Math.min(120, rect.width * 0.2);
+      const pointerOffsetX = dragPointerClientXRef.current - rect.left;
+
+      let scrollDelta = 0;
+
+      if (pointerOffsetX > rect.width - edgeThreshold) {
+        const overflow = pointerOffsetX - (rect.width - edgeThreshold);
+        scrollDelta = Math.min(24, Math.max(6, (overflow / edgeThreshold) * 24));
+      } else if (pointerOffsetX < edgeThreshold) {
+        const overflow = edgeThreshold - pointerOffsetX;
+        scrollDelta = -Math.min(24, Math.max(6, (overflow / edgeThreshold) * 24));
+      }
+
+      if (scrollDelta !== 0) {
+        const nextScrollLeft = Math.max(0, Math.min(maxScrollLeft, container.scrollLeft + scrollDelta));
+        if (nextScrollLeft !== container.scrollLeft) {
+          isProgrammaticScrollRef.current = true;
+          container.scrollLeft = nextScrollLeft;
+          requestAnimationFrame(() => { isProgrammaticScrollRef.current = false; });
+          updateDragFrameFromClientX(dragPointerClientXRef.current);
+        }
+      }
+
+      dragAutoScrollFrameRef.current = requestAnimationFrame(runDragAutoScroll);
+    };
+
+    dragAutoScrollFrameRef.current = requestAnimationFrame(runDragAutoScroll);
+
+    const handleMouseMove = (e: MouseEvent) => {
+      dragPointerClientXRef.current = e.clientX;
+      updateDragFrameFromClientX(e.clientX); // Updates Remotion canvas in real-time
     };
 
     const handleMouseUp = (e: MouseEvent) => {
       const frame = getFrameFromMouseEvent(e);
       if (frame !== null) onSeek(frame);
 
+      isDraggingRef.current = false;
+      dragPointerClientXRef.current = null;
+      lastDragFrameRef.current = null;
+      if (dragAutoScrollFrameRef.current !== null) {
+        cancelAnimationFrame(dragAutoScrollFrameRef.current);
+        dragAutoScrollFrameRef.current = null;
+      }
       setIsDragging(false);
       setDragFrame(null);
       onDraggingChange?.(false);
@@ -118,7 +180,7 @@ const PlayerTimeline = ({
 
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
-  }, [getFrameFromMouseEvent, onSeek, onDraggingChange]);
+  }, [getFrameFromMouseEvent, onSeek, onDraggingChange, updateDragFrameFromClientX]);
 
   // Height calculations
   const maxTrackIndex = overlayItems.length > 0 ? Math.max(...overlayItems.map(o => o.trackIndex)) : -1;
@@ -138,7 +200,7 @@ const PlayerTimeline = ({
     if (!container) return;
 
     const handleScroll = () => {
-      if (isProgrammaticScrollRef.current || isDragging) return;
+      if (isProgrammaticScrollRef.current || isDraggingRef.current) return;
       isUserScrollingRef.current = true;
       if (userScrollTimerRef.current) clearTimeout(userScrollTimerRef.current);
       userScrollTimerRef.current = setTimeout(() => {
@@ -147,14 +209,25 @@ const PlayerTimeline = ({
     };
 
     container.addEventListener("scroll", handleScroll, { passive: true });
-    return () => container.removeEventListener("scroll", handleScroll);
-  }, [isDragging]);
+    return () => {
+      container.removeEventListener("scroll", handleScroll);
+      if (userScrollTimerRef.current) clearTimeout(userScrollTimerRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (dragAutoScrollFrameRef.current !== null) {
+        cancelAnimationFrame(dragAutoScrollFrameRef.current);
+      }
+    };
+  }, []);
 
   // Edge-trigger auto-scroll: when the playhead crosses 85% of the visible width
   // (or exits the left edge), jump the timeline to put the playhead at ~25% from left.
   // Skipped during drag and while the user is manually scrolling.
   useEffect(() => {
-    if (isDragging || isUserScrollingRef.current) return;
+    if (isDraggingRef.current || isUserScrollingRef.current) return;
     const container = timelineContainerRef.current;
     if (!container) return;
 
@@ -170,10 +243,15 @@ const PlayerTimeline = ({
       container.scrollLeft = Math.max(0, playheadPixel - containerWidth * 0.25);
       requestAnimationFrame(() => { isProgrammaticScrollRef.current = false; });
     }
-  }, [currentFrame, isDragging, pixelsPerSecond]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentFrame, pixelsPerSecond]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-scroll to center the selected slide when selection changes
   useEffect(() => {
+    if (isDraggingRef.current) {
+      if (selectedSlideId) prevSelectedSlideIdRef.current = selectedSlideId;
+      return;
+    }
+
     if (selectedSlideId !== prevSelectedSlideIdRef.current && timelineContainerRef.current) {
       const selectedSlideItem = slideItems.find(item => item.slideId === selectedSlideId);
 

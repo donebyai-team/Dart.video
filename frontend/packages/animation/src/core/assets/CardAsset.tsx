@@ -19,7 +19,7 @@ export type CardAssetProps = {
 };
 
 export function CardAsset({ id, children, style }: CardAssetProps): React.ReactElement {
-  const { style: overrideStyle } = useElement(id);
+  const { style: overrideStyle, containerStyle } = useElement(id);
 
   return (
     <div
@@ -28,6 +28,7 @@ export function CardAsset({ id, children, style }: CardAssetProps): React.ReactE
         ...CardAssetDefault,
         ...style,
         ...overrideStyle,
+        ...containerStyle,
       }}
     >
       {children}

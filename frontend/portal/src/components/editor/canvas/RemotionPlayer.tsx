@@ -98,6 +98,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   const [userZoom, setUserZoom] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [currentFrame, setCurrentFrame] = useState(1);
+  const [isTimelineDragging, setIsTimelineDragging] = useState(false);
   // Auto-hide controls in fullscreen after 3s of no mouse movement
   const [controlsVisible, setControlsVisible] = useState(true);
   const controlsHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -113,6 +114,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   // Pause on drag start; stay paused when drag ends (user presses play to resume)
   // while dragging set isPlaying to true so that we can see the changes in the player and effect 
   const handleDraggingChange = useCallback((dragging: boolean) => {
+    setIsTimelineDragging(dragging);
     if (dragging){
       playerRef.current?.pause();
       setIsPlaying(true)
@@ -167,6 +169,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
     fps,
     previewEndFrameRef,
     setIsPreviewPlaying,
+    suspendSlideSync: isTimelineDragging,
   });
 
   // Keep the player preview aligned whenever the selected slide changes or its data updates.
@@ -175,6 +178,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   useEffect(() => {
     if (previewEndFrameRef.current !== null) return;
     if (playerRef.current?.isPlaying()) return;
+    if (isTimelineDragging) return;
     // Do not auto-seek while an overlay effect is being edited, otherwise drag updates
     // fight the user's interaction by snapping the playhead back to the slide preview frame.
     if (selectedEffectId) return;
@@ -184,7 +188,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
       playerRef.current?.seekTo(frame);
       setPlayFromSlideId(selectedSlideId);
     }
-  }, [selectedSlide, selectedSlideId, allSlides, fps, selectedEffectId]);
+  }, [selectedSlide, selectedSlideId, allSlides, fps, selectedEffectId, isTimelineDragging]);
 
   // Called when user clicks a slide tile in the timeline.
   // Pauses playback and seeks to the visual end of the slide (last frame before transition).
