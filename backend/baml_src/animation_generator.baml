@@ -32,8 +32,7 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
     - Use the full canvas with explicit dimensions from `useVideoConfig()`.
     - Use full width of the canvas with appropriate padding.
     - Never constrain content to a small centered webpage-like box.
-    - Use `Math.max(minValue, Math.round(width * percentage))` for responsive sizing.
-    - Use `position: "absolute"` for animated elements.
+    - **Keep layouts responsive and readable: use proportional sizing (`Math.max(minValue, Math.round(width * percentage))`) and sufficient `lineHeight` to prevent overlap or overflow.**
 
     {% raw %}
     ```tsx
@@ -132,7 +131,9 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
 
     ## ASK QUESTIONS RULES
 
+    Ask before proceeding if:
     - If the prompt is ambiguous or visual details are unclear.
+    - You're not clear on what to animate.
     - Use the **ask_user_question** tool — do not assume missing creative direction.
 
     ## OUTPUT FORMAT (CRITICAL)

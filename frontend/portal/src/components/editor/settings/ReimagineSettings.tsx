@@ -230,11 +230,7 @@ const ReimagineSettings = ({
         slideId,
       })
 
-      setChatMessages(
-        (response.messages ?? []).filter(message =>
-          message.role === ConversationRole.USER || message.role === ConversationRole.ASSISTANT
-        )
-      )
+      setChatMessages(response.messages)
     } catch (err: any) {
       setChatMessages([])
       toast.error(getConnectError(err))
