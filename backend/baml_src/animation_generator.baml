@@ -113,6 +113,7 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
     - Use interpolate() for linear progress (progress bars, opacity fades)
     - Always use { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
     - Add stagger delays for multiple elements
+    - **Animate references by default; use them as attachments only when explicitly requested.**
 
     ## RESERVED NAMES (CRITICAL)
 
