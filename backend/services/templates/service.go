@@ -1,46 +1,93 @@
-package services
+package templates
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/shank318/coasterai/datastore"
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
+	"github.com/shank318/coasterai/services"
+	"github.com/shank318/coasterai/services/brand_identity"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/structpb"
 	"regexp"
 	"strings"
 )
 
-type Template interface {
+type Service interface {
 	CreateTemplate(ctx context.Context) (*models.Template, error)
 	GetTemplateByID(ctx context.Context, id string) (*models.Template, error)
 	UpdateTemplateConfig(ctx context.Context, video *models.Video) error
 	UpdateTemplate(ctx context.Context, req *pbportal.UpdateTemplateRequest) error
 	GetTemplates(ctx context.Context, categories []string) ([]*models.Template, error)
+	DeleteTemplateByID(ctx context.Context, id string) error
 }
 
 type templateService struct {
 	db datastore.Repository
 }
 
-func NewTemplateService(db datastore.Repository) Template {
+func NewService(db datastore.Repository) Service {
 	return &templateService{db: db}
 }
 
+func (t templateService) DeleteTemplateByID(ctx context.Context, id string) error {
+	return t.db.DeleteTemplateByID(ctx, id)
+}
+
 func (t templateService) CreateTemplate(ctx context.Context) (*models.Template, error) {
+	durationInFrames := int32(5 * services.DefaultVideoFPS)
+	videoMetadata := &pbcore.VideoMetadata{
+		Fps:              services.DefaultVideoFPS,
+		DurationInFrames: durationInFrames,
+		Language:         pbcore.VideoLanguage_VIDE_LANGUAGE_EN,
+		Resolution: &pbcore.Resolution{
+			Id:     "16:9",
+			Name:   "Landscape",
+			Aspect: "16/9",
+			Width:  1920,
+			Height: 1080,
+		},
+	}
+	brand_identity.AddVideoBranding(videoMetadata)
+
 	template, err := t.db.CreateTemplate(ctx, &models.Template{
-		Name:       GenerateRandomName(5, 10),
+		Name:       fmt.Sprintf("Template %s", services.GenerateRandomName(2, 5)),
 		Status:     models.TemplateStatusCREATED,
 		Categories: []string{},
 		Schema:     json.RawMessage(`{}`),
-		Metadata: &pbcore.VideoMetadata{
-			Fps:              defaultVideoFPS,
-			DurationInFrames: 5 * defaultVideoFPS,
-			Language:         pbcore.VideoLanguage_VIDE_LANGUAGE_EN,
-			Resolution:       &pbcore.Resolution{},
-		},
+		Config: &pbcore.VideoConfig{Sections: []*pbcore.Section{
+			{
+				Id:    "section-" + uuid.New().String(),
+				Title: "Service",
+				Color: "#FF6B6B",
+				Slides: []*pbcore.Slide{{
+					Id:               "slide-" + uuid.NewString(),
+					DurationInFrames: durationInFrames,
+					SettledFrame:     durationInFrames,
+					Content: &pbcore.AnimationSlideContent{
+						CodeRegistry: &pbcore.CodeRegistry{
+							Code: `export default function RemoteComponent() {
+  									return (
+    									<SafeArea>
+      										<AbsoluteCenter axis="both">
+      										</AbsoluteCenter>
+										</SafeArea>
+									);
+							}`,
+						},
+						Edits: &structpb.Struct{},
+					},
+					SlideStatus: pbcore.SlideStatus_SLIDE_STATUS_GENERATED,
+					Index:       0,
+				}},
+				Index: 0,
+			},
+		}},
+		Metadata: videoMetadata,
 	})
 
 	if err != nil {

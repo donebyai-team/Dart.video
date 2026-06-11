@@ -1671,5 +1671,13 @@ export declare const PortalService: GenService<{
     input: typeof UpdateTemplateRequestSchema;
     output: typeof EmptySchema;
   },
+  /**
+   * @generated from rpc coasterai.portal.v1.PortalService.DeleteTemplate
+   */
+  deleteTemplate: {
+    methodKind: "unary";
+    input: typeof GetTemplateRequestSchema;
+    output: typeof EmptySchema;
+  },
 }>;
 

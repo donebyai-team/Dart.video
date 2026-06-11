@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql/driver"
 	"encoding/json"
+	"fmt"
 	"github.com/lib/pq"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -81,7 +82,7 @@ func (r *Template) ToProto() *pbcore.AnimationTemplate {
 
 func (r *Template) ToVideo() *pbcore.Video {
 	return &pbcore.Video{
-		Id:        r.ID,
+		Id:        fmt.Sprintf("template:%s", r.ID),
 		Name:      r.Name,
 		Version:   0,
 		Config:    r.Config,

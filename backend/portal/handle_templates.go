@@ -7,6 +7,7 @@ import (
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"net/url"
 	"strings"
 )
 
@@ -94,9 +95,31 @@ func (p *Portal) GetTemplate(ctx context.Context, c *connect.Request[pbportal.Ge
 	return connect.NewResponse(template.ToProto()), nil
 }
 
+func (p *Portal) DeleteTemplate(ctx context.Context, c *connect.Request[pbportal.GetTemplateRequest]) (*connect.Response[emptypb.Empty], error) {
+	actor, err := p.gethAuthContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if !actor.IsPlatformAdmin() {
+		return nil, connect.NewError(connect.CodePermissionDenied, fmt.Errorf("not allowed to create templates"))
+	}
+
+	err = p.templateService.DeleteTemplateByID(ctx, c.Msg.Id)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(&emptypb.Empty{}), nil
+}
+
 const templatePrefix = "template:"
 
 func parseResourceID(id string) (resourceID string, isTemplate bool) {
+	// Decode URL-encoded values if present.
+	if decoded, err := url.PathUnescape(id); err == nil {
+		id = decoded
+	}
+
 	if strings.HasPrefix(id, templatePrefix) {
 		return strings.TrimPrefix(id, templatePrefix), true
 	}

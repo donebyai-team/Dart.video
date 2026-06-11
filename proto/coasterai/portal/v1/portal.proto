@@ -65,6 +65,7 @@ service PortalService {
   rpc GetTemplate(portal.v1.GetTemplateRequest) returns (core.v1.AnimationTemplate);
   rpc GetTemplates(.google.protobuf.Empty) returns (portal.v1.GetTemplatesResponse);
   rpc SaveTemplate(portal.v1.UpdateTemplateRequest) returns (.google.protobuf.Empty);
+  rpc DeleteTemplate(GetTemplateRequest) returns (.google.protobuf.Empty);
 }
 
 message GetMediaAssetsByIDs {

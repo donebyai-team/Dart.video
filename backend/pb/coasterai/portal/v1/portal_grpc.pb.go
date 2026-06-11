@@ -56,6 +56,7 @@ const (
 	PortalService_GetTemplate_FullMethodName            = "/coasterai.portal.v1.PortalService/GetTemplate"
 	PortalService_GetTemplates_FullMethodName           = "/coasterai.portal.v1.PortalService/GetTemplates"
 	PortalService_SaveTemplate_FullMethodName           = "/coasterai.portal.v1.PortalService/SaveTemplate"
+	PortalService_DeleteTemplate_FullMethodName         = "/coasterai.portal.v1.PortalService/DeleteTemplate"
 )
 
 // PortalServiceClient is the client API for PortalService service.
@@ -103,6 +104,7 @@ type PortalServiceClient interface {
 	GetTemplate(ctx context.Context, in *GetTemplateRequest, opts ...grpc.CallOption) (*v1.AnimationTemplate, error)
 	GetTemplates(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTemplatesResponse, error)
 	SaveTemplate(ctx context.Context, in *UpdateTemplateRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	DeleteTemplate(ctx context.Context, in *GetTemplateRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type portalServiceClient struct {
@@ -520,6 +522,15 @@ func (c *portalServiceClient) SaveTemplate(ctx context.Context, in *UpdateTempla
 	return out, nil
 }
 
+func (c *portalServiceClient) DeleteTemplate(ctx context.Context, in *GetTemplateRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, PortalService_DeleteTemplate_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PortalServiceServer is the server API for PortalService service.
 // All implementations must embed UnimplementedPortalServiceServer
 // for forward compatibility
@@ -565,6 +576,7 @@ type PortalServiceServer interface {
 	GetTemplate(context.Context, *GetTemplateRequest) (*v1.AnimationTemplate, error)
 	GetTemplates(context.Context, *emptypb.Empty) (*GetTemplatesResponse, error)
 	SaveTemplate(context.Context, *UpdateTemplateRequest) (*emptypb.Empty, error)
+	DeleteTemplate(context.Context, *GetTemplateRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedPortalServiceServer()
 }
 
@@ -676,6 +688,9 @@ func (UnimplementedPortalServiceServer) GetTemplates(context.Context, *emptypb.E
 }
 func (UnimplementedPortalServiceServer) SaveTemplate(context.Context, *UpdateTemplateRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SaveTemplate not implemented")
+}
+func (UnimplementedPortalServiceServer) DeleteTemplate(context.Context, *GetTemplateRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteTemplate not implemented")
 }
 func (UnimplementedPortalServiceServer) mustEmbedUnimplementedPortalServiceServer() {}
 
@@ -1332,6 +1347,24 @@ func _PortalService_SaveTemplate_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PortalService_DeleteTemplate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTemplateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PortalServiceServer).DeleteTemplate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PortalService_DeleteTemplate_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PortalServiceServer).DeleteTemplate(ctx, req.(*GetTemplateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PortalService_ServiceDesc is the grpc.ServiceDesc for PortalService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1462,6 +1495,10 @@ var PortalService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SaveTemplate",
 			Handler:    _PortalService_SaveTemplate_Handler,
+		},
+		{
+			MethodName: "DeleteTemplate",
+			Handler:    _PortalService_DeleteTemplate_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

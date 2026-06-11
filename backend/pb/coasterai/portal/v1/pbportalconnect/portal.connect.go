@@ -135,6 +135,9 @@ const (
 	// PortalServiceSaveTemplateProcedure is the fully-qualified name of the PortalService's
 	// SaveTemplate RPC.
 	PortalServiceSaveTemplateProcedure = "/coasterai.portal.v1.PortalService/SaveTemplate"
+	// PortalServiceDeleteTemplateProcedure is the fully-qualified name of the PortalService's
+	// DeleteTemplate RPC.
+	PortalServiceDeleteTemplateProcedure = "/coasterai.portal.v1.PortalService/DeleteTemplate"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
@@ -175,6 +178,7 @@ var (
 	portalServiceGetTemplateMethodDescriptor            = portalServiceServiceDescriptor.Methods().ByName("GetTemplate")
 	portalServiceGetTemplatesMethodDescriptor           = portalServiceServiceDescriptor.Methods().ByName("GetTemplates")
 	portalServiceSaveTemplateMethodDescriptor           = portalServiceServiceDescriptor.Methods().ByName("SaveTemplate")
+	portalServiceDeleteTemplateMethodDescriptor         = portalServiceServiceDescriptor.Methods().ByName("DeleteTemplate")
 )
 
 // PortalServiceClient is a client for the coasterai.portal.v1.PortalService service.
@@ -220,6 +224,7 @@ type PortalServiceClient interface {
 	GetTemplate(context.Context, *connect.Request[v1.GetTemplateRequest]) (*connect.Response[v11.AnimationTemplate], error)
 	GetTemplates(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetTemplatesResponse], error)
 	SaveTemplate(context.Context, *connect.Request[v1.UpdateTemplateRequest]) (*connect.Response[emptypb.Empty], error)
+	DeleteTemplate(context.Context, *connect.Request[v1.GetTemplateRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewPortalServiceClient constructs a client for the coasterai.portal.v1.PortalService service. By
@@ -442,6 +447,12 @@ func NewPortalServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(portalServiceSaveTemplateMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		deleteTemplate: connect.NewClient[v1.GetTemplateRequest, emptypb.Empty](
+			httpClient,
+			baseURL+PortalServiceDeleteTemplateProcedure,
+			connect.WithSchema(portalServiceDeleteTemplateMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -482,6 +493,7 @@ type portalServiceClient struct {
 	getTemplate            *connect.Client[v1.GetTemplateRequest, v11.AnimationTemplate]
 	getTemplates           *connect.Client[emptypb.Empty, v1.GetTemplatesResponse]
 	saveTemplate           *connect.Client[v1.UpdateTemplateRequest, emptypb.Empty]
+	deleteTemplate         *connect.Client[v1.GetTemplateRequest, emptypb.Empty]
 }
 
 // GetConfig calls coasterai.portal.v1.PortalService.GetConfig.
@@ -659,6 +671,11 @@ func (c *portalServiceClient) SaveTemplate(ctx context.Context, req *connect.Req
 	return c.saveTemplate.CallUnary(ctx, req)
 }
 
+// DeleteTemplate calls coasterai.portal.v1.PortalService.DeleteTemplate.
+func (c *portalServiceClient) DeleteTemplate(ctx context.Context, req *connect.Request[v1.GetTemplateRequest]) (*connect.Response[emptypb.Empty], error) {
+	return c.deleteTemplate.CallUnary(ctx, req)
+}
+
 // PortalServiceHandler is an implementation of the coasterai.portal.v1.PortalService service.
 type PortalServiceHandler interface {
 	GetConfig(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.Config], error)
@@ -702,6 +719,7 @@ type PortalServiceHandler interface {
 	GetTemplate(context.Context, *connect.Request[v1.GetTemplateRequest]) (*connect.Response[v11.AnimationTemplate], error)
 	GetTemplates(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetTemplatesResponse], error)
 	SaveTemplate(context.Context, *connect.Request[v1.UpdateTemplateRequest]) (*connect.Response[emptypb.Empty], error)
+	DeleteTemplate(context.Context, *connect.Request[v1.GetTemplateRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewPortalServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -920,6 +938,12 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(portalServiceSaveTemplateMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	portalServiceDeleteTemplateHandler := connect.NewUnaryHandler(
+		PortalServiceDeleteTemplateProcedure,
+		svc.DeleteTemplate,
+		connect.WithSchema(portalServiceDeleteTemplateMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/coasterai.portal.v1.PortalService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case PortalServiceGetConfigProcedure:
@@ -992,6 +1016,8 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 			portalServiceGetTemplatesHandler.ServeHTTP(w, r)
 		case PortalServiceSaveTemplateProcedure:
 			portalServiceSaveTemplateHandler.ServeHTTP(w, r)
+		case PortalServiceDeleteTemplateProcedure:
+			portalServiceDeleteTemplateHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -1139,4 +1165,8 @@ func (UnimplementedPortalServiceHandler) GetTemplates(context.Context, *connect.
 
 func (UnimplementedPortalServiceHandler) SaveTemplate(context.Context, *connect.Request[v1.UpdateTemplateRequest]) (*connect.Response[emptypb.Empty], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.SaveTemplate is not implemented"))
+}
+
+func (UnimplementedPortalServiceHandler) DeleteTemplate(context.Context, *connect.Request[v1.GetTemplateRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.DeleteTemplate is not implemented"))
 }

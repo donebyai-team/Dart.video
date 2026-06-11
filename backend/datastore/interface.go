@@ -87,6 +87,7 @@ type TemplateRepository interface {
 	) (*models.TemplateCategory, error)
 	CreateTemplate(ctx context.Context, t *models.Template) (*models.Template, error)
 	UpdateTemplate(ctx context.Context, t *models.Template) error
+	DeleteTemplateByID(ctx context.Context, id string) error
 	GetTemplatesByCategory(
 		ctx context.Context,
 		category []string,

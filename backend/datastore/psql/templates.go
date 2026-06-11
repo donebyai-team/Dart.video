@@ -21,6 +21,7 @@ func init() {
 		"templates/update_template.sql",
 		"templates/query_template_by_category.sql",
 		"templates/query_template_by_id.sql",
+		"templates/delete_template_by_id.sql",
 	})
 }
 
@@ -88,6 +89,7 @@ func (r *Database) CreateTemplate(ctx context.Context, t *models.Template) (*mod
 		"categories":  pq.Array(toUpperCategories(t.Categories)),
 		"description": t.Description,
 		"schema":      t.Schema,
+		"config":      t.Config,
 		"repeatable":  t.Repeatable,
 		"metadata":    t.Metadata,
 		"status":      t.Status,
@@ -106,6 +108,17 @@ func toUpperCategories(categories []string) []string {
 		result[i] = strings.ToUpper(category)
 	}
 	return result
+}
+
+func (r *Database) DeleteTemplateByID(ctx context.Context, id string) error {
+	stmt := r.mustGetStmt("templates/delete_template_by_id.sql")
+	_, err := stmt.ExecContext(ctx, map[string]interface{}{
+		"id": id,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to delete template %w", err)
+	}
+	return nil
 }
 
 func (r *Database) UpdateTemplate(ctx context.Context, t *models.Template) error {

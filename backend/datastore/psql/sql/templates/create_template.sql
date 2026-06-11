@@ -3,6 +3,7 @@ INSERT INTO templates (
     categories,
     description,
     schema,
+    config,
     metadata,
     status,
     repeatable
@@ -12,6 +13,7 @@ VALUES (
            :categories,
            :description,
            :schema,
+        :config,
            :metadata,
         :status,
            :repeatable

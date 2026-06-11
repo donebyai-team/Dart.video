@@ -326,6 +326,8 @@ func (p *Portal) GetVideo(
 		}); err != nil {
 			return err
 		}
+
+		return nil
 	}
 
 	actor, err := p.gethAuthContext(ctx)
