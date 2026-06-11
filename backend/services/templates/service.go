@@ -127,6 +127,9 @@ func (t templateService) UpdateTemplateConfig(ctx context.Context, video *models
 	for i, slide := range allSlides {
 		totalDurationInFrames += slide.DurationInFrames
 
+		if len(slide.Content.Edits.Fields) > 0 {
+			return fmt.Errorf("manual edits are not supported for templates, use prompt to modify")
+		}
 		// subtract transition for every slide except the last one globally
 		if i < len(allSlides)-1 &&
 			slide.TransitionDurationInFrames != nil &&

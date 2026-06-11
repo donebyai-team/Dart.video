@@ -5,6 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/shank318/coasterai/agent"
 	"github.com/shank318/coasterai/agent/common"
 	"github.com/shank318/coasterai/errorx"
@@ -416,9 +417,7 @@ func (p *Portal) GetVideo(
 func handleVideoTerminalState(video *models.Video) error {
 	switch video.Status {
 	case models.VideoStatusFAILED:
-		return errorx.ToConnect(
-			errorx.New(errorx.CodeInternal, "VIDEO_FAILED", "video generation failed", nil),
-		)
+		return connect.NewError(connect.CodeInternal, fmt.Errorf("failed to generate video"))
 
 	case models.VideoStatusCOMPLETED,
 		models.VideoStatusUSERCANCELLED:
@@ -477,14 +476,10 @@ func (p *Portal) UpdateVideoConfig(ctx context.Context, c *connect.Request[pbpor
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errorx.ToConnect(
-				errorx.New(errorx.CodeNotFound, "VIDEO_NOT_FOUND", "video not found", err),
-			)
+			return nil, connect.NewError(connect.CodeNotFound, err)
 		}
 
-		return nil, errorx.ToConnect(
-			errorx.New(errorx.CodeInternal, "VIDEO_UPDATE_FAILED", "failed to update video config", err),
-		)
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 
 	return connect.NewResponse(&emptypb.Empty{}), nil
