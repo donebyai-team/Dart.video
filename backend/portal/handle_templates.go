@@ -7,8 +7,6 @@ import (
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"net/url"
-	"strings"
 )
 
 func (p *Portal) CreateTemplate(ctx context.Context, c *connect.Request[emptypb.Empty]) (*connect.Response[pbcore.AnimationTemplate], error) {
@@ -63,15 +61,17 @@ func (p *Portal) SaveTemplate(ctx context.Context, c *connect.Request[pbportal.U
 
 	if c.Msg.Id == "" ||
 		c.Msg.Name == "" ||
+		len(c.Msg.Name) > 10 ||
 		c.Msg.Description == "" ||
-		c.Msg.UsageDescription == "" ||
+		len(c.Msg.Description) > 150 ||
 		len(c.Msg.Categories) == 0 {
-		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("invalid template arguments"))
+		return nil, connect.NewError(connect.CodeInvalidArgument,
+			fmt.Errorf("invalid template arguments, max length of name and description is 10 and 150 characters respectively, and categories must be provided"))
 	}
 
 	err = p.templateService.UpdateTemplate(ctx, c.Msg)
 	if err != nil {
-		return nil, err
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 
 	return connect.NewResponse(&emptypb.Empty{}), nil
@@ -110,19 +110,4 @@ func (p *Portal) DeleteTemplate(ctx context.Context, c *connect.Request[pbportal
 		return nil, err
 	}
 	return connect.NewResponse(&emptypb.Empty{}), nil
-}
-
-const templatePrefix = "template:"
-
-func parseResourceID(id string) (resourceID string, isTemplate bool) {
-	// Decode URL-encoded values if present.
-	if decoded, err := url.PathUnescape(id); err == nil {
-		id = decoded
-	}
-
-	if strings.HasPrefix(id, templatePrefix) {
-		return strings.TrimPrefix(id, templatePrefix), true
-	}
-
-	return id, false
 }

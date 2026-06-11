@@ -12,7 +12,7 @@ message AnimationTemplate {
   string name = 2;
   repeated string categories = 3;
   string description = 4;
-  google.protobuf.Struct schema = 5;
+  repeated google.protobuf.Struct schema = 5;
   VideoConfig config = 6;
   VideoMetadata metadata = 7;
   .google.protobuf.Timestamp created_at = 8;

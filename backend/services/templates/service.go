@@ -13,6 +13,7 @@ import (
 	"github.com/shank318/coasterai/services/brand_identity"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/structpb"
+	"net/url"
 	"regexp"
 	"strings"
 )
@@ -58,7 +59,7 @@ func (t templateService) CreateTemplate(ctx context.Context) (*models.Template, 
 		Name:       fmt.Sprintf("Template %s", services.GenerateRandomName(2, 5)),
 		Status:     models.TemplateStatusCREATED,
 		Categories: []string{},
-		Schema:     json.RawMessage(`{}`),
+		Schema:     json.RawMessage(`[]`),
 		Config: &pbcore.VideoConfig{Sections: []*pbcore.Section{
 			{
 				Id:    "section-" + uuid.New().String(),
@@ -134,7 +135,6 @@ func (t templateService) UpdateTemplateConfig(ctx context.Context, video *models
 			totalDurationInFrames -= *slide.TransitionDurationInFrames
 		}
 	}
-	existingTemplate.Status = models.TemplateStatusWAITING
 	existingTemplate.Metadata.DurationInFrames = totalDurationInFrames
 
 	return t.db.UpdateTemplate(ctx, existingTemplate)
@@ -146,7 +146,43 @@ func (t templateService) UpdateTemplate(ctx context.Context, req *pbportal.Updat
 		return err
 	}
 
-	existingTemplate.Description = req.Description + "\n\n" + req.UsageDescription
+	var schema []json.RawMessage
+
+	for _, section := range existingTemplate.Config.Sections {
+		for _, slide := range section.Slides {
+			if slide.Content.CodeRegistry.MUrl != "" {
+				code, err := services.DownloadCode(ctx, slide.Content.CodeRegistry.MUrl)
+				if err != nil {
+					return fmt.Errorf("failed to download code: %w", err)
+				}
+
+				defaults, err := ExtractDefaultData(code)
+				if err != nil {
+					return fmt.Errorf("failed to extract template params: %w", err)
+				}
+
+				schema = append(schema, defaults)
+			}
+
+		}
+	}
+
+	if len(schema) == 0 {
+		return fmt.Errorf("invalid template: no slides with code registry found")
+	}
+
+	schemaBytes, err := json.Marshal(schema)
+	if err != nil {
+		return fmt.Errorf("failed to marshal schema: %w", err)
+	}
+
+	existingTemplate.Schema = schemaBytes
+
+	existingTemplate.Description = req.Description
+
+	if req.UsageDescription != nil {
+		existingTemplate.Description += "\n\nUsage: " + *req.UsageDescription
+	}
 	existingTemplate.Status = models.TemplateStatusWAITING
 	existingTemplate.Categories = req.Categories
 	existingTemplate.Name = req.Name
@@ -181,6 +217,7 @@ func ExtractDefaultData(code string) (json.RawMessage, error) {
 	depth := 0
 	end := -1
 
+outer:
 	for i := start; i < len(code); i++ {
 		switch code[i] {
 		case '{':
@@ -189,7 +226,7 @@ func ExtractDefaultData(code string) (json.RawMessage, error) {
 			depth--
 			if depth == 0 {
 				end = i
-				break
+				break outer
 			}
 		}
 	}
@@ -203,11 +240,11 @@ func ExtractDefaultData(code string) (json.RawMessage, error) {
 	// ------------------------------------------------------------------
 	// Convert PascalCase identifiers into strings
 	//
-	// Example:
 	// icon: Heart,
 	// icon: BarChart3,
 	//
-	// becomes:
+	// ->
+	//
 	// icon: "Heart",
 	// icon: "BarChart3",
 	// ------------------------------------------------------------------
@@ -215,14 +252,15 @@ func ExtractDefaultData(code string) (json.RawMessage, error) {
 	obj = pascalCaseValue.ReplaceAllString(obj, `: "$1"$2`)
 
 	// ------------------------------------------------------------------
-	// Quote keys
+	// Quote object keys WITHOUT touching URLs such as:
+	// "https://example.com"
 	//
-	// title: "Hello"
-	// ->
-	// "title": "Hello"
+	// We only quote identifiers that appear after:
+	//   {
+	//   ,
 	// ------------------------------------------------------------------
-	keyRegex := regexp.MustCompile(`([A-Za-z_][A-Za-z0-9_]*)\s*:`)
-	obj = keyRegex.ReplaceAllString(obj, `"$1":`)
+	keyRegex := regexp.MustCompile(`([,{]\s*)([A-Za-z_][A-Za-z0-9_]*)(\s*:)`)
+	obj = keyRegex.ReplaceAllString(obj, `$1"$2"$3`)
 
 	// ------------------------------------------------------------------
 	// Remove trailing commas
@@ -238,8 +276,27 @@ func ExtractDefaultData(code string) (json.RawMessage, error) {
 	// ------------------------------------------------------------------
 	var tmp any
 	if err := json.Unmarshal([]byte(obj), &tmp); err != nil {
-		return nil, fmt.Errorf("DEFAULT_DATA is not valid JSON after normalization: %w", err)
+		return nil, fmt.Errorf(
+			"DEFAULT_DATA is not valid JSON after normalization: %w\nNormalized JSON:\n%s",
+			err,
+			obj,
+		)
 	}
 
 	return json.RawMessage(obj), nil
+}
+
+const templatePrefix = "template:"
+
+func ParseResourceID(id string) (resourceID string, isTemplate bool) {
+	// Decode URL-encoded values if present.
+	if decoded, err := url.PathUnescape(id); err == nil {
+		id = decoded
+	}
+
+	if strings.HasPrefix(id, templatePrefix) {
+		return strings.TrimPrefix(id, templatePrefix), true
+	}
+
+	return id, false
 }

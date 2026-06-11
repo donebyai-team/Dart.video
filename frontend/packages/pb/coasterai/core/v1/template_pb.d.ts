@@ -37,9 +37,9 @@ export declare type AnimationTemplate = Message<"coasterai.core.v1.AnimationTemp
   description: string;
 
   /**
-   * @generated from field: google.protobuf.Struct schema = 5;
+   * @generated from field: repeated google.protobuf.Struct schema = 5;
    */
-  schema?: JsonObject;
+  schema: JsonObject[];
 
   /**
    * @generated from field: coasterai.core.v1.VideoConfig config = 6;

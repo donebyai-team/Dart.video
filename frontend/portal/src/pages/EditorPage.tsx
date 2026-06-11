@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Mic2, Volume2, RefreshCw, Home, Timer, Brain, Check, X, ExternalLink } from 'lucide-react'
+import { Mic2, Volume2, RefreshCw, Home, Timer, Brain, Check, X, ExternalLink, Save } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -26,6 +26,7 @@ import { pollVideoRender } from '@/services/utils';
 import VideoGenerationProgress from '@/components/editor/VideoGenerationProgress';
 import { convertFramesToSeconds } from '@coasterai/renderer/src/frameUtils';
 import { useAnimationEdit } from '@/components/editor/animation/useAnimationEdit';
+import SaveTemplate from '@/components/editor/SaveTemplate';
 
 interface EditorPageProps {
   videoId: string
@@ -39,9 +40,12 @@ type ExportProgressState = {
   etaSeconds?: number
 }
 
+const TEMPLATE_PREFIX = 'template:'
+
 const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) => {
   const { portalClient } = useClientsContext()
   const playerRef = useRef<RemotionPlayerHandle>(null)
+  const decodedVideoId = decodeURIComponent(videoId)
 
   // State for loading video data
   const [isLoadingVideo, setIsLoadingVideo] = useState(true)
@@ -49,6 +53,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
   const [isPlayerPlaying, setIsPlayerPlaying] = useState(false)
   const [isPreviewPlaying, setIsPreviewPlaying] = useState(false)
   const [exportProgress, setExportProgress] = useState<ExportProgressState | null>(null)
+  const [isSaveTemplateOpen, setIsSaveTemplateOpen] = useState(false)
   const prepareProgressRef = useRef(0)
 
   // ---- Values (reactive) ----
@@ -116,6 +121,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
   }
 
   const isProcessingVideo = videoConfigFromStore?.status === VideoStatus.PROCESSING
+  const isTemplateVideo = decodedVideoId.startsWith(TEMPLATE_PREFIX)
 
   const handleExportVideo = async () => {
     if (!portalClient || !videoConfigFromStore) return
@@ -301,6 +307,12 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
 
   return (
     <div className='h-screen flex flex-col bg-muted/30 relative'>
+      <SaveTemplate
+        open={isSaveTemplateOpen}
+        onOpenChange={setIsSaveTemplateOpen}
+        videoId={decodedVideoId}
+      />
+
       {/* Video Generation Progress — floating overlay while the agent generates slides */}
       {isStreamingVideo && (
         <VideoGenerationProgress
@@ -435,6 +447,17 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
             <Mic2 className='w-4 h-4' />
             Voiceover
           </Button> */}
+          {isTemplateVideo && (
+            <Button
+              variant='outline'
+              className='gap-2'
+              disabled={isStreamingVideo || isSyncing || hasPendingChanges}
+              onClick={() => setIsSaveTemplateOpen(true)}
+            >
+              <Save className='w-4 h-4' />
+              Save Template
+            </Button>
+          )}
           <Button
             className='btn-accent-gradient gap-2'
             disabled={isStreamingVideo ||

@@ -116,7 +116,7 @@ type UpdateTemplateRequest struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
 	Id               string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Description      string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	UsageDescription string                 `protobuf:"bytes,3,opt,name=usage_description,json=usageDescription,proto3" json:"usage_description,omitempty"`
+	UsageDescription *string                `protobuf:"bytes,3,opt,name=usage_description,json=usageDescription,proto3,oneof" json:"usage_description,omitempty"`
 	Categories       []string               `protobuf:"bytes,4,rep,name=categories,proto3" json:"categories,omitempty"`
 	Name             string                 `protobuf:"bytes,5,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields    protoimpl.UnknownFields
@@ -168,8 +168,8 @@ func (x *UpdateTemplateRequest) GetDescription() string {
 }
 
 func (x *UpdateTemplateRequest) GetUsageDescription() string {
-	if x != nil {
-		return x.UsageDescription
+	if x != nil && x.UsageDescription != nil {
+		return *x.UsageDescription
 	}
 	return ""
 }
@@ -196,15 +196,16 @@ const file_coasterai_portal_v1_templates_proto_rawDesc = "" +
 	"\x14GetTemplatesResponse\x12B\n" +
 	"\ttemplates\x18\x01 \x03(\v2$.coasterai.core.v1.AnimationTemplateR\ttemplates\"$\n" +
 	"\x12GetTemplateRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"\xaa\x01\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"\xc5\x01\n" +
 	"\x15UpdateTemplateRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\x12+\n" +
-	"\x11usage_description\x18\x03 \x01(\tR\x10usageDescription\x12\x1e\n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x120\n" +
+	"\x11usage_description\x18\x03 \x01(\tH\x00R\x10usageDescription\x88\x01\x01\x12\x1e\n" +
 	"\n" +
 	"categories\x18\x04 \x03(\tR\n" +
 	"categories\x12\x12\n" +
-	"\x04name\x18\x05 \x01(\tR\x04nameB?Z=github.com/shank318/coasterai/pb/coasterai/portal/v1;pbportalb\x06proto3"
+	"\x04name\x18\x05 \x01(\tR\x04nameB\x14\n" +
+	"\x12_usage_descriptionB?Z=github.com/shank318/coasterai/pb/coasterai/portal/v1;pbportalb\x06proto3"
 
 var (
 	file_coasterai_portal_v1_templates_proto_rawDescOnce sync.Once
@@ -239,6 +240,7 @@ func file_coasterai_portal_v1_templates_proto_init() {
 	if File_coasterai_portal_v1_templates_proto != nil {
 		return
 	}
+	file_coasterai_portal_v1_templates_proto_msgTypes[2].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

@@ -90,7 +90,7 @@ type AnimationTemplate struct {
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	Categories    []string               `protobuf:"bytes,3,rep,name=categories,proto3" json:"categories,omitempty"`
 	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
-	Schema        *structpb.Struct       `protobuf:"bytes,5,opt,name=schema,proto3" json:"schema,omitempty"`
+	Schema        []*structpb.Struct     `protobuf:"bytes,5,rep,name=schema,proto3" json:"schema,omitempty"`
 	Config        *VideoConfig           `protobuf:"bytes,6,opt,name=config,proto3" json:"config,omitempty"`
 	Metadata      *VideoMetadata         `protobuf:"bytes,7,opt,name=metadata,proto3" json:"metadata,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
@@ -158,7 +158,7 @@ func (x *AnimationTemplate) GetDescription() string {
 	return ""
 }
 
-func (x *AnimationTemplate) GetSchema() *structpb.Struct {
+func (x *AnimationTemplate) GetSchema() []*structpb.Struct {
 	if x != nil {
 		return x.Schema
 	}
@@ -212,7 +212,7 @@ const file_coasterai_core_v1_template_proto_rawDesc = "" +
 	"categories\x18\x03 \x03(\tR\n" +
 	"categories\x12 \n" +
 	"\vdescription\x18\x04 \x01(\tR\vdescription\x12/\n" +
-	"\x06schema\x18\x05 \x01(\v2\x17.google.protobuf.StructR\x06schema\x126\n" +
+	"\x06schema\x18\x05 \x03(\v2\x17.google.protobuf.StructR\x06schema\x126\n" +
 	"\x06config\x18\x06 \x01(\v2\x1e.coasterai.core.v1.VideoConfigR\x06config\x12<\n" +
 	"\bmetadata\x18\a \x01(\v2 .coasterai.core.v1.VideoMetadataR\bmetadata\x129\n" +
 	"\n" +

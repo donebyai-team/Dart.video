@@ -40,7 +40,7 @@ func (p *Portal) GenerateOrEditScene(ctx context.Context, c *connect.Request[pbp
 		zap.String("slide_id", slideToEdit.Id),
 	)
 
-	video, _, err := p.videoGenerationService.GetVideo(ctx, videoID, actor.OrganizationID, services.VideoOptions{IncludePending: false})
+	video, _, err := p.getVideo(ctx, videoID, actor.OrganizationID, services.VideoOptions{IncludePending: false})
 	if err != nil {
 		return err
 	}
