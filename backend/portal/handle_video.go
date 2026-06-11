@@ -314,12 +314,26 @@ func (p *Portal) GetVideo(
 	stream *connect.ServerStream[pbportal.GetVideoResponse],
 ) error {
 
+	resourceID, isTemplate := parseResourceID(req.Msg.Id)
+
+	if isTemplate {
+		template, err := p.templateService.GetTemplateByID(ctx, resourceID)
+		if err != nil {
+			return err
+		}
+		if err := stream.Send(&pbportal.GetVideoResponse{
+			Video: template.ToVideo(),
+		}); err != nil {
+			return err
+		}
+	}
+
 	actor, err := p.gethAuthContext(ctx)
 	if err != nil {
 		return err
 	}
 
-	videoID := req.Msg.Id
+	videoID := resourceID
 	logger := logging.Logger(ctx, p.logger).With(zap.String("session_id", videoID))
 
 	var videoAgent agent.VideoAgent // lazy init
@@ -450,12 +464,26 @@ func (p *Portal) UpdateVideoConfig(ctx context.Context, c *connect.Request[pbpor
 		return nil, errorx.ToConnect(errorx.New(errorx.CodeInvalidArgument, "VIDEO_CONFIG_INVALID", err.Error(), err))
 	}
 
-	err = p.videoGenerationService.UpdateVideoConfig(ctx, updateVideoInput)
+	resourceID, isTemplate := parseResourceID(c.Msg.Id)
+
+	updateVideoInput.ID = resourceID
+
+	if isTemplate {
+		err = p.templateService.UpdateTemplateConfig(ctx, updateVideoInput)
+	} else {
+		err = p.videoGenerationService.UpdateVideoConfig(ctx, updateVideoInput)
+	}
+
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errorx.ToConnect(errorx.New(errorx.CodeNotFound, "VIDEO_NOT_FOUND", "video not found", err))
+			return nil, errorx.ToConnect(
+				errorx.New(errorx.CodeNotFound, "VIDEO_NOT_FOUND", "video not found", err),
+			)
 		}
-		return nil, errorx.ToConnect(errorx.New(errorx.CodeInternal, "VIDEO_UPDATE_FAILED", "failed to update video config", err))
+
+		return nil, errorx.ToConnect(
+			errorx.New(errorx.CodeInternal, "VIDEO_UPDATE_FAILED", "failed to update video config", err),
+		)
 	}
 
 	return connect.NewResponse(&emptypb.Empty{}), nil

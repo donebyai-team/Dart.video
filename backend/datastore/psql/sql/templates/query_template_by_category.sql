@@ -1,9 +1,6 @@
 SELECT *
 FROM templates
-WHERE categories @> ARRAY[:category]
-  AND animation_type = :animation_type
-  AND (
-    repeatable = true
-        OR id <> ALL(CAST(:usedIds AS uuid[]))
-    )
+WHERE
+    COALESCE(array_length(CAST(:categories AS text[]), 1), 0) = 0
+   OR categories && CAST(:categories AS text[])
 ORDER BY created_at DESC;

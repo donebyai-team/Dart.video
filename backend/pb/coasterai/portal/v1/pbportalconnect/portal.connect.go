@@ -123,6 +123,18 @@ const (
 	// PortalServiceGenerateMusicProcedure is the fully-qualified name of the PortalService's
 	// GenerateMusic RPC.
 	PortalServiceGenerateMusicProcedure = "/coasterai.portal.v1.PortalService/GenerateMusic"
+	// PortalServiceCreateTemplateProcedure is the fully-qualified name of the PortalService's
+	// CreateTemplate RPC.
+	PortalServiceCreateTemplateProcedure = "/coasterai.portal.v1.PortalService/CreateTemplate"
+	// PortalServiceGetTemplateProcedure is the fully-qualified name of the PortalService's GetTemplate
+	// RPC.
+	PortalServiceGetTemplateProcedure = "/coasterai.portal.v1.PortalService/GetTemplate"
+	// PortalServiceGetTemplatesProcedure is the fully-qualified name of the PortalService's
+	// GetTemplates RPC.
+	PortalServiceGetTemplatesProcedure = "/coasterai.portal.v1.PortalService/GetTemplates"
+	// PortalServiceSaveTemplateProcedure is the fully-qualified name of the PortalService's
+	// SaveTemplate RPC.
+	PortalServiceSaveTemplateProcedure = "/coasterai.portal.v1.PortalService/SaveTemplate"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
@@ -159,6 +171,10 @@ var (
 	portalServiceGetMediaAssetsMethodDescriptor         = portalServiceServiceDescriptor.Methods().ByName("GetMediaAssets")
 	portalServiceGetMediaAssetsByIDMethodDescriptor     = portalServiceServiceDescriptor.Methods().ByName("GetMediaAssetsByID")
 	portalServiceGenerateMusicMethodDescriptor          = portalServiceServiceDescriptor.Methods().ByName("GenerateMusic")
+	portalServiceCreateTemplateMethodDescriptor         = portalServiceServiceDescriptor.Methods().ByName("CreateTemplate")
+	portalServiceGetTemplateMethodDescriptor            = portalServiceServiceDescriptor.Methods().ByName("GetTemplate")
+	portalServiceGetTemplatesMethodDescriptor           = portalServiceServiceDescriptor.Methods().ByName("GetTemplates")
+	portalServiceSaveTemplateMethodDescriptor           = portalServiceServiceDescriptor.Methods().ByName("SaveTemplate")
 )
 
 // PortalServiceClient is a client for the coasterai.portal.v1.PortalService service.
@@ -199,6 +215,11 @@ type PortalServiceClient interface {
 	GetMediaAssets(context.Context, *connect.Request[v1.GetMediaAssetsRequest]) (*connect.Response[v1.GetMediaAssetsResponse], error)
 	GetMediaAssetsByID(context.Context, *connect.Request[v1.GetMediaAssetsByIDs]) (*connect.Response[v1.GetMediaAssetsResponse], error)
 	GenerateMusic(context.Context, *connect.Request[v1.VideoRequestWithID]) (*connect.Response[v1.GetMediaAssetsResponse], error)
+	// Templates
+	CreateTemplate(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v11.AnimationTemplate], error)
+	GetTemplate(context.Context, *connect.Request[v1.GetTemplateRequest]) (*connect.Response[v11.AnimationTemplate], error)
+	GetTemplates(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetTemplatesResponse], error)
+	SaveTemplate(context.Context, *connect.Request[v1.UpdateTemplateRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewPortalServiceClient constructs a client for the coasterai.portal.v1.PortalService service. By
@@ -397,6 +418,30 @@ func NewPortalServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(portalServiceGenerateMusicMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		createTemplate: connect.NewClient[emptypb.Empty, v11.AnimationTemplate](
+			httpClient,
+			baseURL+PortalServiceCreateTemplateProcedure,
+			connect.WithSchema(portalServiceCreateTemplateMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
+		getTemplate: connect.NewClient[v1.GetTemplateRequest, v11.AnimationTemplate](
+			httpClient,
+			baseURL+PortalServiceGetTemplateProcedure,
+			connect.WithSchema(portalServiceGetTemplateMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
+		getTemplates: connect.NewClient[emptypb.Empty, v1.GetTemplatesResponse](
+			httpClient,
+			baseURL+PortalServiceGetTemplatesProcedure,
+			connect.WithSchema(portalServiceGetTemplatesMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
+		saveTemplate: connect.NewClient[v1.UpdateTemplateRequest, emptypb.Empty](
+			httpClient,
+			baseURL+PortalServiceSaveTemplateProcedure,
+			connect.WithSchema(portalServiceSaveTemplateMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -433,6 +478,10 @@ type portalServiceClient struct {
 	getMediaAssets         *connect.Client[v1.GetMediaAssetsRequest, v1.GetMediaAssetsResponse]
 	getMediaAssetsByID     *connect.Client[v1.GetMediaAssetsByIDs, v1.GetMediaAssetsResponse]
 	generateMusic          *connect.Client[v1.VideoRequestWithID, v1.GetMediaAssetsResponse]
+	createTemplate         *connect.Client[emptypb.Empty, v11.AnimationTemplate]
+	getTemplate            *connect.Client[v1.GetTemplateRequest, v11.AnimationTemplate]
+	getTemplates           *connect.Client[emptypb.Empty, v1.GetTemplatesResponse]
+	saveTemplate           *connect.Client[v1.UpdateTemplateRequest, emptypb.Empty]
 }
 
 // GetConfig calls coasterai.portal.v1.PortalService.GetConfig.
@@ -590,6 +639,26 @@ func (c *portalServiceClient) GenerateMusic(ctx context.Context, req *connect.Re
 	return c.generateMusic.CallUnary(ctx, req)
 }
 
+// CreateTemplate calls coasterai.portal.v1.PortalService.CreateTemplate.
+func (c *portalServiceClient) CreateTemplate(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[v11.AnimationTemplate], error) {
+	return c.createTemplate.CallUnary(ctx, req)
+}
+
+// GetTemplate calls coasterai.portal.v1.PortalService.GetTemplate.
+func (c *portalServiceClient) GetTemplate(ctx context.Context, req *connect.Request[v1.GetTemplateRequest]) (*connect.Response[v11.AnimationTemplate], error) {
+	return c.getTemplate.CallUnary(ctx, req)
+}
+
+// GetTemplates calls coasterai.portal.v1.PortalService.GetTemplates.
+func (c *portalServiceClient) GetTemplates(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetTemplatesResponse], error) {
+	return c.getTemplates.CallUnary(ctx, req)
+}
+
+// SaveTemplate calls coasterai.portal.v1.PortalService.SaveTemplate.
+func (c *portalServiceClient) SaveTemplate(ctx context.Context, req *connect.Request[v1.UpdateTemplateRequest]) (*connect.Response[emptypb.Empty], error) {
+	return c.saveTemplate.CallUnary(ctx, req)
+}
+
 // PortalServiceHandler is an implementation of the coasterai.portal.v1.PortalService service.
 type PortalServiceHandler interface {
 	GetConfig(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.Config], error)
@@ -628,6 +697,11 @@ type PortalServiceHandler interface {
 	GetMediaAssets(context.Context, *connect.Request[v1.GetMediaAssetsRequest]) (*connect.Response[v1.GetMediaAssetsResponse], error)
 	GetMediaAssetsByID(context.Context, *connect.Request[v1.GetMediaAssetsByIDs]) (*connect.Response[v1.GetMediaAssetsResponse], error)
 	GenerateMusic(context.Context, *connect.Request[v1.VideoRequestWithID]) (*connect.Response[v1.GetMediaAssetsResponse], error)
+	// Templates
+	CreateTemplate(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v11.AnimationTemplate], error)
+	GetTemplate(context.Context, *connect.Request[v1.GetTemplateRequest]) (*connect.Response[v11.AnimationTemplate], error)
+	GetTemplates(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetTemplatesResponse], error)
+	SaveTemplate(context.Context, *connect.Request[v1.UpdateTemplateRequest]) (*connect.Response[emptypb.Empty], error)
 }
 
 // NewPortalServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -822,6 +896,30 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(portalServiceGenerateMusicMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	portalServiceCreateTemplateHandler := connect.NewUnaryHandler(
+		PortalServiceCreateTemplateProcedure,
+		svc.CreateTemplate,
+		connect.WithSchema(portalServiceCreateTemplateMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
+	portalServiceGetTemplateHandler := connect.NewUnaryHandler(
+		PortalServiceGetTemplateProcedure,
+		svc.GetTemplate,
+		connect.WithSchema(portalServiceGetTemplateMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
+	portalServiceGetTemplatesHandler := connect.NewUnaryHandler(
+		PortalServiceGetTemplatesProcedure,
+		svc.GetTemplates,
+		connect.WithSchema(portalServiceGetTemplatesMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
+	portalServiceSaveTemplateHandler := connect.NewUnaryHandler(
+		PortalServiceSaveTemplateProcedure,
+		svc.SaveTemplate,
+		connect.WithSchema(portalServiceSaveTemplateMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/coasterai.portal.v1.PortalService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case PortalServiceGetConfigProcedure:
@@ -886,6 +984,14 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 			portalServiceGetMediaAssetsByIDHandler.ServeHTTP(w, r)
 		case PortalServiceGenerateMusicProcedure:
 			portalServiceGenerateMusicHandler.ServeHTTP(w, r)
+		case PortalServiceCreateTemplateProcedure:
+			portalServiceCreateTemplateHandler.ServeHTTP(w, r)
+		case PortalServiceGetTemplateProcedure:
+			portalServiceGetTemplateHandler.ServeHTTP(w, r)
+		case PortalServiceGetTemplatesProcedure:
+			portalServiceGetTemplatesHandler.ServeHTTP(w, r)
+		case PortalServiceSaveTemplateProcedure:
+			portalServiceSaveTemplateHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -1017,4 +1123,20 @@ func (UnimplementedPortalServiceHandler) GetMediaAssetsByID(context.Context, *co
 
 func (UnimplementedPortalServiceHandler) GenerateMusic(context.Context, *connect.Request[v1.VideoRequestWithID]) (*connect.Response[v1.GetMediaAssetsResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.GenerateMusic is not implemented"))
+}
+
+func (UnimplementedPortalServiceHandler) CreateTemplate(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v11.AnimationTemplate], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.CreateTemplate is not implemented"))
+}
+
+func (UnimplementedPortalServiceHandler) GetTemplate(context.Context, *connect.Request[v1.GetTemplateRequest]) (*connect.Response[v11.AnimationTemplate], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.GetTemplate is not implemented"))
+}
+
+func (UnimplementedPortalServiceHandler) GetTemplates(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetTemplatesResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.GetTemplates is not implemented"))
+}
+
+func (UnimplementedPortalServiceHandler) SaveTemplate(context.Context, *connect.Request[v1.UpdateTemplateRequest]) (*connect.Response[emptypb.Empty], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.SaveTemplate is not implemented"))
 }

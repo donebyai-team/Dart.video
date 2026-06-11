@@ -45,6 +45,7 @@ type Portal struct {
 	renderVideoService      services.RenderVideoService
 	brandIdentityService    brand_identity.BrandIdentity
 	audioGenerationProvider audio.Provider
+	templateService         services.Template
 }
 
 func New(
@@ -61,6 +62,7 @@ func New(
 	codeBuilderService services.TemplateCodeBuilder,
 	audioGenerationProvider audio.Provider,
 	llmService llm.Service,
+	templateService services.Template,
 	httpListenAddr string,
 	corsURLRegexAllow *regexp.Regexp,
 	config *pbportal.Config,
@@ -92,6 +94,7 @@ func New(
 		renderVideoService:      renderVideoService,
 		audioGenerationProvider: audioGenerationProvider,
 		llmService:              llmService,
+		templateService:         templateService,
 	}
 }
 

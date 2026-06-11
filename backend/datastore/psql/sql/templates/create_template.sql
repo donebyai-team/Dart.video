@@ -1,21 +1,19 @@
 INSERT INTO templates (
     name,
-    animation_type,
     categories,
     description,
     schema,
-    config,
-    preview_url,
+    metadata,
+    status,
     repeatable
 )
 VALUES (
         lower(:name),
-           :animation_type,
            :categories,
            :description,
            :schema,
-           :config,
-           :preview_url,
+           :metadata,
+        :status,
            :repeatable
        )
     RETURNING id;

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/pkg/errors"
 	"github.com/shank318/coasterai/agent/agenterrors"
 	"github.com/shank318/coasterai/agent/llm"
 	"github.com/shank318/coasterai/agent/scenes"
@@ -13,7 +12,6 @@ import (
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/services"
 	"github.com/shank318/coasterai/services/brand_identity"
-	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
 )
 
@@ -223,38 +221,12 @@ func (s SceneSuggester) buildSuggestedSlide(
 		// We extract the variant, color, font from the currentSlide
 		// and apply it in the suggested slide.
 
-		toStructConfig, err := utils.RawMessageToStruct(
-			template.GeneratedPatches,
-		)
-		if err != nil {
-			s.logger.Error(
-				"failed to convert template config",
-				zap.Error(err),
-				zap.Any("template_config", template.GeneratedPatches),
-			)
-
-			return nil, errors.Wrapf(
-				err,
-				"invalid template config: %s",
-				template.Name,
-			)
-		}
-
 		if sceneConfig.Background != nil {
-			bgStyle = sceneConfig.Background
+			template.BackgroundStyle = sceneConfig.Background
 		}
+		template.SlideStatus = pbcore.SlideStatus_SLIDE_STATUS_GENERATED
 
-		slides = append(slides, &pbcore.Slide{
-			BackgroundStyle:  bgStyle,
-			DurationInFrames: template.Config.VisibleDurationInFrames,
-			SettledFrame:     template.Config.VisibleDurationInFrames,
-			Content: &pbcore.AnimationSlideContent{
-				CodeRegistry: template.Config.CodeRegistry,
-				Plan:         &pbcore.AnimationSlidePlan{},
-				Edits:        toStructConfig,
-			},
-			SlideStatus: pbcore.SlideStatus_SLIDE_STATUS_GENERATED,
-		})
+		slides = append(slides, template)
 	}
 
 	return slides, nil

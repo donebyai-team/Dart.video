@@ -10,7 +10,7 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	structpb "google.golang.org/protobuf/types/known/structpb"
-	_ "google.golang.org/protobuf/types/known/timestamppb"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -87,13 +87,15 @@ func (AnimationCategory) EnumDescriptor() ([]byte, []int) {
 type AnimationTemplate struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	CodeRegistry  *CodeRegistry          `protobuf:"bytes,2,opt,name=codeRegistry,proto3" json:"codeRegistry,omitempty"`
-	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	PreviewUrl    string                 `protobuf:"bytes,4,opt,name=previewUrl,proto3" json:"previewUrl,omitempty"`
-	Registry      *structpb.Struct       `protobuf:"bytes,5,opt,name=registry,proto3" json:"registry,omitempty"`
-	Edits         *structpb.Struct       `protobuf:"bytes,6,opt,name=edits,proto3" json:"edits,omitempty"` // the GeneratedConfig
-	Plan          *AnimationSlidePlan    `protobuf:"bytes,7,opt,name=plan,proto3" json:"plan,omitempty"`
-	Duration      float32                `protobuf:"fixed32,8,opt,name=duration,proto3" json:"duration,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Categories    []string               `protobuf:"bytes,3,rep,name=categories,proto3" json:"categories,omitempty"`
+	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	Schema        *structpb.Struct       `protobuf:"bytes,5,opt,name=schema,proto3" json:"schema,omitempty"`
+	Config        *VideoConfig           `protobuf:"bytes,6,opt,name=config,proto3" json:"config,omitempty"`
+	Metadata      *VideoMetadata         `protobuf:"bytes,7,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	Status        string                 `protobuf:"bytes,9,opt,name=status,proto3" json:"status,omitempty"`
+	Version       int64                  `protobuf:"varint,10,opt,name=version,proto3" json:"version,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -135,13 +137,6 @@ func (x *AnimationTemplate) GetId() string {
 	return ""
 }
 
-func (x *AnimationTemplate) GetCodeRegistry() *CodeRegistry {
-	if x != nil {
-		return x.CodeRegistry
-	}
-	return nil
-}
-
 func (x *AnimationTemplate) GetName() string {
 	if x != nil {
 		return x.Name
@@ -149,37 +144,58 @@ func (x *AnimationTemplate) GetName() string {
 	return ""
 }
 
-func (x *AnimationTemplate) GetPreviewUrl() string {
+func (x *AnimationTemplate) GetCategories() []string {
 	if x != nil {
-		return x.PreviewUrl
+		return x.Categories
+	}
+	return nil
+}
+
+func (x *AnimationTemplate) GetDescription() string {
+	if x != nil {
+		return x.Description
 	}
 	return ""
 }
 
-func (x *AnimationTemplate) GetRegistry() *structpb.Struct {
+func (x *AnimationTemplate) GetSchema() *structpb.Struct {
 	if x != nil {
-		return x.Registry
+		return x.Schema
 	}
 	return nil
 }
 
-func (x *AnimationTemplate) GetEdits() *structpb.Struct {
+func (x *AnimationTemplate) GetConfig() *VideoConfig {
 	if x != nil {
-		return x.Edits
+		return x.Config
 	}
 	return nil
 }
 
-func (x *AnimationTemplate) GetPlan() *AnimationSlidePlan {
+func (x *AnimationTemplate) GetMetadata() *VideoMetadata {
 	if x != nil {
-		return x.Plan
+		return x.Metadata
 	}
 	return nil
 }
 
-func (x *AnimationTemplate) GetDuration() float32 {
+func (x *AnimationTemplate) GetCreatedAt() *timestamppb.Timestamp {
 	if x != nil {
-		return x.Duration
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *AnimationTemplate) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *AnimationTemplate) GetVersion() int64 {
+	if x != nil {
+		return x.Version
 	}
 	return 0
 }
@@ -188,18 +204,22 @@ var File_coasterai_core_v1_template_proto protoreflect.FileDescriptor
 
 const file_coasterai_core_v1_template_proto_rawDesc = "" +
 	"\n" +
-	" coasterai/core/v1/template.proto\x12\x11coasterai.core.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1dcoasterai/core/v1/slide.proto\x1a\x1cgoogle/protobuf/struct.proto\"\xd7\x02\n" +
+	" coasterai/core/v1/template.proto\x12\x11coasterai.core.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1dcoasterai/core/v1/slide.proto\x1a\x1dcoasterai/core/v1/video.proto\x1a\x1cgoogle/protobuf/struct.proto\"\x8d\x03\n" +
 	"\x11AnimationTemplate\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12C\n" +
-	"\fcodeRegistry\x18\x02 \x01(\v2\x1f.coasterai.core.v1.CodeRegistryR\fcodeRegistry\x12\x12\n" +
-	"\x04name\x18\x03 \x01(\tR\x04name\x12\x1e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1e\n" +
 	"\n" +
-	"previewUrl\x18\x04 \x01(\tR\n" +
-	"previewUrl\x123\n" +
-	"\bregistry\x18\x05 \x01(\v2\x17.google.protobuf.StructR\bregistry\x12-\n" +
-	"\x05edits\x18\x06 \x01(\v2\x17.google.protobuf.StructR\x05edits\x129\n" +
-	"\x04plan\x18\a \x01(\v2%.coasterai.core.v1.AnimationSlidePlanR\x04plan\x12\x1a\n" +
-	"\bduration\x18\b \x01(\x02R\bduration*\xeb\x01\n" +
+	"categories\x18\x03 \x03(\tR\n" +
+	"categories\x12 \n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\x12/\n" +
+	"\x06schema\x18\x05 \x01(\v2\x17.google.protobuf.StructR\x06schema\x126\n" +
+	"\x06config\x18\x06 \x01(\v2\x1e.coasterai.core.v1.VideoConfigR\x06config\x12<\n" +
+	"\bmetadata\x18\a \x01(\v2 .coasterai.core.v1.VideoMetadataR\bmetadata\x129\n" +
+	"\n" +
+	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x16\n" +
+	"\x06status\x18\t \x01(\tR\x06status\x12\x18\n" +
+	"\aversion\x18\n" +
+	" \x01(\x03R\aversion*\xeb\x01\n" +
 	"\x11AnimationCategory\x12\"\n" +
 	"\x1eANIMATION_CATEGORY_UNSPECIFIED\x10\x00\x12\x1b\n" +
 	"\x17ANIMATION_CATEGORY_TEXT\x10\x01\x12\x1c\n" +
@@ -224,17 +244,18 @@ func file_coasterai_core_v1_template_proto_rawDescGZIP() []byte {
 var file_coasterai_core_v1_template_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_coasterai_core_v1_template_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
 var file_coasterai_core_v1_template_proto_goTypes = []any{
-	(AnimationCategory)(0),     // 0: coasterai.core.v1.AnimationCategory
-	(*AnimationTemplate)(nil),  // 1: coasterai.core.v1.AnimationTemplate
-	(*CodeRegistry)(nil),       // 2: coasterai.core.v1.CodeRegistry
-	(*structpb.Struct)(nil),    // 3: google.protobuf.Struct
-	(*AnimationSlidePlan)(nil), // 4: coasterai.core.v1.AnimationSlidePlan
+	(AnimationCategory)(0),        // 0: coasterai.core.v1.AnimationCategory
+	(*AnimationTemplate)(nil),     // 1: coasterai.core.v1.AnimationTemplate
+	(*structpb.Struct)(nil),       // 2: google.protobuf.Struct
+	(*VideoConfig)(nil),           // 3: coasterai.core.v1.VideoConfig
+	(*VideoMetadata)(nil),         // 4: coasterai.core.v1.VideoMetadata
+	(*timestamppb.Timestamp)(nil), // 5: google.protobuf.Timestamp
 }
 var file_coasterai_core_v1_template_proto_depIdxs = []int32{
-	2, // 0: coasterai.core.v1.AnimationTemplate.codeRegistry:type_name -> coasterai.core.v1.CodeRegistry
-	3, // 1: coasterai.core.v1.AnimationTemplate.registry:type_name -> google.protobuf.Struct
-	3, // 2: coasterai.core.v1.AnimationTemplate.edits:type_name -> google.protobuf.Struct
-	4, // 3: coasterai.core.v1.AnimationTemplate.plan:type_name -> coasterai.core.v1.AnimationSlidePlan
+	2, // 0: coasterai.core.v1.AnimationTemplate.schema:type_name -> google.protobuf.Struct
+	3, // 1: coasterai.core.v1.AnimationTemplate.config:type_name -> coasterai.core.v1.VideoConfig
+	4, // 2: coasterai.core.v1.AnimationTemplate.metadata:type_name -> coasterai.core.v1.VideoMetadata
+	5, // 3: coasterai.core.v1.AnimationTemplate.created_at:type_name -> google.protobuf.Timestamp
 	4, // [4:4] is the sub-list for method output_type
 	4, // [4:4] is the sub-list for method input_type
 	4, // [4:4] is the sub-list for extension type_name
@@ -248,6 +269,7 @@ func file_coasterai_core_v1_template_proto_init() {
 		return
 	}
 	file_coasterai_core_v1_slide_proto_init()
+	file_coasterai_core_v1_video_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

@@ -4,15 +4,15 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"github.com/lib/pq"
-	"github.com/pkg/errors"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"time"
 )
 
-////go:generate go-enum -f=$GOFILE
-//
-//// ENUM(TEXT, VISUAL, STATS, CHART)
-//type AnimationType string
+// //go:generate go-enum -f=$GOFILE
+
+// ENUM(CREATED, WAITING, AVAILABLE)
+type TemplateStatus string
 
 type TemplateCategory struct {
 	ID            string     `db:"id"`
@@ -52,59 +52,41 @@ func (a *TemplateCategories) Scan(src interface{}) error {
 }
 
 type Template struct {
-	ID            string             `db:"id"`
-	Name          string             `db:"name"`
-	AnimationType string             `db:"animation_type"`
-	Categories    TemplateCategories `db:"categories"`
-	Description   string             `db:"description"`
-	Schema        json.RawMessage    `db:"schema"`
-	PreviewUrl    string             `db:"preview_url"`
-	CreatedAt     time.Time          `db:"created_at"`
-	UpdatedAt     *time.Time         `db:"updated_at"`
-	Repeatable    bool               `db:"repeatable"`
-	Config        *TemplateConfig    `db:"config"`
-
-	GeneratedPatches json.RawMessage            `db:"-"` // Maps to edits in slide
-	GeneratedPlan    *pbcore.AnimationSlidePlan `db:"-"`
-	BackgroundStyle  *pbcore.BackgroundStyle    `db:"-"`
+	ID          string                `db:"id"`
+	Name        string                `db:"name"`
+	Categories  TemplateCategories    `db:"categories"`
+	Description string                `db:"description"`
+	Schema      json.RawMessage       `db:"schema"`
+	CreatedAt   time.Time             `db:"created_at"`
+	UpdatedAt   *time.Time            `db:"updated_at"`
+	Repeatable  bool                  `db:"repeatable"`
+	Config      *pbcore.VideoConfig   `db:"config"`
+	Metadata    *pbcore.VideoMetadata `db:"metadata"`
+	Status      TemplateStatus        `db:"status"`
 }
 
-type TemplateConfig struct {
-	CodeRegistry            *pbcore.CodeRegistry `json:"code_registry"`
-	VisibleDurationInFrames int32                `json:"visible_duration"`
-	TotalDurationInFrames   int32                `json:"total_duration"`
-	Repeatable              bool                 `json:"repeatable"`
-	Categories              TemplateCategories   `json:"categories"`
+func (r *Template) ToProto() *pbcore.AnimationTemplate {
+	return &pbcore.AnimationTemplate{
+		Id:          r.ID,
+		Name:        r.Name,
+		Version:     0,
+		Config:      r.Config,
+		Status:      r.Status.String(),
+		Metadata:    r.Metadata,
+		Description: r.Description,
+		Categories:  r.Categories,
+		CreatedAt:   timestamppb.New(r.CreatedAt),
+	}
 }
 
-func (v *TemplateConfig) Value() (driver.Value, error) {
-	b, err := json.Marshal(v)
-	if err != nil {
-		return nil, errors.Wrap(err, "TemplateConfig metadata")
+func (r *Template) ToVideo() *pbcore.Video {
+	return &pbcore.Video{
+		Id:        r.ID,
+		Name:      r.Name,
+		Version:   0,
+		Config:    r.Config,
+		Status:    pbcore.VideoStatus_VIDEO_STATUS_COMPLETED,
+		Metadata:  r.Metadata,
+		CreatedAt: timestamppb.New(r.CreatedAt),
 	}
-	return b, nil
-}
-
-func (v *TemplateConfig) Scan(value any) error {
-	if value == nil {
-		*v = TemplateConfig{}
-		return nil
-	}
-
-	var data []byte
-
-	switch val := value.(type) {
-	case []byte:
-		data = val
-	case string:
-		data = []byte(val)
-	default:
-		return errors.Errorf("unsupported type for TemplateConfig: %T", value)
-	}
-
-	if err := json.Unmarshal(data, v); err != nil {
-		return errors.Wrap(err, "TemplateConfig metadata")
-	}
-
-	return nil
 }

@@ -213,6 +213,7 @@ func portalApp(cmd *cobra.Command, isAppReady func() bool) (App, error) {
 		services.NewTemplateCodeBuilderService(sflags.MustGetString(cmd, "common-code-builder-service")),
 		provider,
 		llm.NewLlmService(zlog, cacheStore),
+		services.NewTemplateService(deps.DataStore),
 		sflags.MustGetString(cmd, "portal-http-listen-addr"),
 		deps.CorsURLRegexAllow,
 		config,

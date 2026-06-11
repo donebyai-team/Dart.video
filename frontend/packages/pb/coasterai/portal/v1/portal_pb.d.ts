@@ -7,11 +7,12 @@ import type { Message } from "@bufbuild/protobuf";
 import type { MediaAsset, MediaType, SelectedMediaAsset } from "../../core/v1/media_asset_pb";
 import type { Section, Slide } from "../../core/v1/slide_pb";
 import type { ConversationMessage } from "../../core/v1/chat_pb";
-import type { AnimationCategory } from "../../core/v1/template_pb";
+import type { AnimationCategory, AnimationTemplateSchema } from "../../core/v1/template_pb";
 import type { BrandIdentity, BrandIdentitySchema } from "../../core/v1/brandkit_pb";
 import type { FigmaFrame, FigmaPage } from "../../core/v1/figma_pb";
 import type { Resolution, Script, StyleType, Video, VideoConfig, VideoLanguage, VideoMetadata } from "../../core/v1/video_pb";
 import type { EmptySchema, Timestamp } from "@bufbuild/protobuf/wkt";
+import type { GetTemplateRequestSchema, GetTemplatesResponseSchema, UpdateTemplateRequestSchema } from "./templates_pb";
 
 /**
  * Describes the file coasterai/portal/v1/portal.proto.
@@ -1635,6 +1636,40 @@ export declare const PortalService: GenService<{
     methodKind: "unary";
     input: typeof VideoRequestWithIDSchema;
     output: typeof GetMediaAssetsResponseSchema;
+  },
+  /**
+   * Templates
+   *
+   * @generated from rpc coasterai.portal.v1.PortalService.CreateTemplate
+   */
+  createTemplate: {
+    methodKind: "unary";
+    input: typeof EmptySchema;
+    output: typeof AnimationTemplateSchema;
+  },
+  /**
+   * @generated from rpc coasterai.portal.v1.PortalService.GetTemplate
+   */
+  getTemplate: {
+    methodKind: "unary";
+    input: typeof GetTemplateRequestSchema;
+    output: typeof AnimationTemplateSchema;
+  },
+  /**
+   * @generated from rpc coasterai.portal.v1.PortalService.GetTemplates
+   */
+  getTemplates: {
+    methodKind: "unary";
+    input: typeof EmptySchema;
+    output: typeof GetTemplatesResponseSchema;
+  },
+  /**
+   * @generated from rpc coasterai.portal.v1.PortalService.SaveTemplate
+   */
+  saveTemplate: {
+    methodKind: "unary";
+    input: typeof UpdateTemplateRequestSchema;
+    output: typeof EmptySchema;
   },
 }>;
 

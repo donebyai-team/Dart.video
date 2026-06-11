@@ -1,14 +1,118 @@
 package services
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/shank318/coasterai/datastore"
+	"github.com/shank318/coasterai/models"
+	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
+	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
+	"google.golang.org/protobuf/proto"
 	"regexp"
 	"strings"
 )
 
-type TemplateRegistry interface {
-	CreateTemplate(code string) (string, error)
+type Template interface {
+	CreateTemplate(ctx context.Context) (*models.Template, error)
+	GetTemplateByID(ctx context.Context, id string) (*models.Template, error)
+	UpdateTemplateConfig(ctx context.Context, video *models.Video) error
+	UpdateTemplate(ctx context.Context, req *pbportal.UpdateTemplateRequest) error
+	GetTemplates(ctx context.Context, categories []string) ([]*models.Template, error)
+}
+
+type templateService struct {
+	db datastore.Repository
+}
+
+func NewTemplateService(db datastore.Repository) Template {
+	return &templateService{db: db}
+}
+
+func (t templateService) CreateTemplate(ctx context.Context) (*models.Template, error) {
+	template, err := t.db.CreateTemplate(ctx, &models.Template{
+		Name:       GenerateRandomName(5, 10),
+		Status:     models.TemplateStatusCREATED,
+		Categories: []string{},
+		Schema:     json.RawMessage(`{}`),
+		Metadata: &pbcore.VideoMetadata{
+			Fps:              defaultVideoFPS,
+			DurationInFrames: 5 * defaultVideoFPS,
+			Language:         pbcore.VideoLanguage_VIDE_LANGUAGE_EN,
+			Resolution:       &pbcore.Resolution{},
+		},
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return template, nil
+}
+
+func (t templateService) UpdateTemplateConfig(ctx context.Context, video *models.Video) error {
+	existingTemplate, err := t.db.GetTemplateByID(ctx, video.ID)
+	if err != nil {
+		return err
+	}
+
+	configChanged := !proto.Equal(existingTemplate.Config, video.Config)
+	nameChanged := video.Name != existingTemplate.Name
+
+	// Apply updates
+	if configChanged {
+		existingTemplate.Config = video.Config
+	}
+
+	if nameChanged {
+		existingTemplate.Name = video.Name
+	}
+
+	// Flatten all slides across sections — transitions can cross section boundaries,
+	// so we must treat slides as one continuous sequence (mirrors frontend updateTotalDuration).
+	var allSlides []*pbcore.Slide
+	for _, section := range existingTemplate.Config.Sections {
+		allSlides = append(allSlides, section.Slides...)
+	}
+
+	totalDurationInFrames := int32(0)
+	for i, slide := range allSlides {
+		totalDurationInFrames += slide.DurationInFrames
+
+		// subtract transition for every slide except the last one globally
+		if i < len(allSlides)-1 &&
+			slide.TransitionDurationInFrames != nil &&
+			slide.Transition != pbcore.TransitionType_TRANSITION_NONE {
+
+			totalDurationInFrames -= *slide.TransitionDurationInFrames
+		}
+	}
+	existingTemplate.Status = models.TemplateStatusWAITING
+	existingTemplate.Metadata.DurationInFrames = totalDurationInFrames
+
+	return t.db.UpdateTemplate(ctx, existingTemplate)
+}
+
+func (t templateService) UpdateTemplate(ctx context.Context, req *pbportal.UpdateTemplateRequest) error {
+	existingTemplate, err := t.db.GetTemplateByID(ctx, req.Id)
+	if err != nil {
+		return err
+	}
+
+	existingTemplate.Description = req.Description + "\n\n" + req.UsageDescription
+	existingTemplate.Status = models.TemplateStatusWAITING
+	existingTemplate.Categories = req.Categories
+	existingTemplate.Name = req.Name
+
+	return t.db.UpdateTemplate(ctx, existingTemplate)
+}
+
+func (t templateService) GetTemplateByID(ctx context.Context, ID string) (*models.Template, error) {
+	return t.db.GetTemplateByID(ctx, ID)
+}
+
+func (t templateService) GetTemplates(ctx context.Context, categories []string) ([]*models.Template, error) {
+	return t.db.GetTemplatesByCategory(ctx, categories)
 }
 
 func ExtractDefaultData(code string) (json.RawMessage, error) {

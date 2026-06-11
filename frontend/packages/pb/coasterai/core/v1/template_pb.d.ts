@@ -4,7 +4,8 @@
 
 import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv1";
 import type { JsonObject, Message } from "@bufbuild/protobuf";
-import type { AnimationSlidePlan, CodeRegistry } from "./slide_pb";
+import type { VideoConfig, VideoMetadata } from "./video_pb";
+import type { Timestamp } from "@bufbuild/protobuf/wkt";
 
 /**
  * Describes the file coasterai/core/v1/template.proto.
@@ -21,41 +22,49 @@ export declare type AnimationTemplate = Message<"coasterai.core.v1.AnimationTemp
   id: string;
 
   /**
-   * @generated from field: coasterai.core.v1.CodeRegistry codeRegistry = 2;
-   */
-  codeRegistry?: CodeRegistry;
-
-  /**
-   * @generated from field: string name = 3;
+   * @generated from field: string name = 2;
    */
   name: string;
 
   /**
-   * @generated from field: string previewUrl = 4;
+   * @generated from field: repeated string categories = 3;
    */
-  previewUrl: string;
+  categories: string[];
 
   /**
-   * @generated from field: google.protobuf.Struct registry = 5;
+   * @generated from field: string description = 4;
    */
-  registry?: JsonObject;
+  description: string;
 
   /**
-   * the GeneratedConfig
-   *
-   * @generated from field: google.protobuf.Struct edits = 6;
+   * @generated from field: google.protobuf.Struct schema = 5;
    */
-  edits?: JsonObject;
+  schema?: JsonObject;
 
   /**
-   * @generated from field: coasterai.core.v1.AnimationSlidePlan plan = 7;
+   * @generated from field: coasterai.core.v1.VideoConfig config = 6;
    */
-  plan?: AnimationSlidePlan;
+  config?: VideoConfig;
 
   /**
-   * @generated from field: float duration = 8;
+   * @generated from field: coasterai.core.v1.VideoMetadata metadata = 7;
    */
-  duration: number;
+  metadata?: VideoMetadata;
+
+  /**
+   * @generated from field: google.protobuf.Timestamp created_at = 8;
+   */
+  createdAt?: Timestamp;
+
+  /**
+   * @generated from field: string status = 9;
+   */
+  status: string;
+
+  /**
+   * @generated from field: int64 version = 10;
+   */
+  version: bigint;
 };
 
 /**

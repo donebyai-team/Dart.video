@@ -4,17 +4,20 @@ package coasterai.core.v1;
 option go_package = "github.com/shank318/coasterai/pb/coasterai/core/v1;pbcore";
 import "google/protobuf/timestamp.proto";
 import "coasterai/core/v1/slide.proto";
+import "coasterai/core/v1/video.proto";
 import "google/protobuf/struct.proto";
 
 message AnimationTemplate {
   string id = 1;
-  CodeRegistry codeRegistry = 2;
-  string name = 3;
-  string previewUrl = 4;
-  google.protobuf.Struct registry = 5;
-  google.protobuf.Struct edits = 6; // the GeneratedConfig
-  AnimationSlidePlan plan = 7;
-  float duration = 8;
+  string name = 2;
+  repeated string categories = 3;
+  string description = 4;
+  google.protobuf.Struct schema = 5;
+  VideoConfig config = 6;
+  VideoMetadata metadata = 7;
+  .google.protobuf.Timestamp created_at = 8;
+  string status = 9;
+  int64 version = 10;
 }
 
 enum AnimationCategory {

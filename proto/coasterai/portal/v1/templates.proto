@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package coasterai.portal.v1;
+
+option go_package = "github.com/shank318/coasterai/pb/coasterai/portal/v1;pbportal";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "coasterai/core/v1/template.proto";
+
+message GetTemplatesResponse {
+  repeated core.v1.AnimationTemplate templates = 1;
+}
+
+message GetTemplateRequest {
+  string id = 1;
+}
+
+message UpdateTemplateRequest {
+  string id = 1;
+  string description = 2;
+  string usage_description = 3;
+  repeated string categories = 4;
+  string name = 5;
+}

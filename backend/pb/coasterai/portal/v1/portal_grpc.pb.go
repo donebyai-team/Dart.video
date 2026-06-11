@@ -52,6 +52,10 @@ const (
 	PortalService_GetMediaAssets_FullMethodName         = "/coasterai.portal.v1.PortalService/GetMediaAssets"
 	PortalService_GetMediaAssetsByID_FullMethodName     = "/coasterai.portal.v1.PortalService/GetMediaAssetsByID"
 	PortalService_GenerateMusic_FullMethodName          = "/coasterai.portal.v1.PortalService/GenerateMusic"
+	PortalService_CreateTemplate_FullMethodName         = "/coasterai.portal.v1.PortalService/CreateTemplate"
+	PortalService_GetTemplate_FullMethodName            = "/coasterai.portal.v1.PortalService/GetTemplate"
+	PortalService_GetTemplates_FullMethodName           = "/coasterai.portal.v1.PortalService/GetTemplates"
+	PortalService_SaveTemplate_FullMethodName           = "/coasterai.portal.v1.PortalService/SaveTemplate"
 )
 
 // PortalServiceClient is the client API for PortalService service.
@@ -94,6 +98,11 @@ type PortalServiceClient interface {
 	GetMediaAssets(ctx context.Context, in *GetMediaAssetsRequest, opts ...grpc.CallOption) (*GetMediaAssetsResponse, error)
 	GetMediaAssetsByID(ctx context.Context, in *GetMediaAssetsByIDs, opts ...grpc.CallOption) (*GetMediaAssetsResponse, error)
 	GenerateMusic(ctx context.Context, in *VideoRequestWithID, opts ...grpc.CallOption) (*GetMediaAssetsResponse, error)
+	// Templates
+	CreateTemplate(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*v1.AnimationTemplate, error)
+	GetTemplate(ctx context.Context, in *GetTemplateRequest, opts ...grpc.CallOption) (*v1.AnimationTemplate, error)
+	GetTemplates(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTemplatesResponse, error)
+	SaveTemplate(ctx context.Context, in *UpdateTemplateRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type portalServiceClient struct {
@@ -475,6 +484,42 @@ func (c *portalServiceClient) GenerateMusic(ctx context.Context, in *VideoReques
 	return out, nil
 }
 
+func (c *portalServiceClient) CreateTemplate(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*v1.AnimationTemplate, error) {
+	out := new(v1.AnimationTemplate)
+	err := c.cc.Invoke(ctx, PortalService_CreateTemplate_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *portalServiceClient) GetTemplate(ctx context.Context, in *GetTemplateRequest, opts ...grpc.CallOption) (*v1.AnimationTemplate, error) {
+	out := new(v1.AnimationTemplate)
+	err := c.cc.Invoke(ctx, PortalService_GetTemplate_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *portalServiceClient) GetTemplates(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTemplatesResponse, error) {
+	out := new(GetTemplatesResponse)
+	err := c.cc.Invoke(ctx, PortalService_GetTemplates_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *portalServiceClient) SaveTemplate(ctx context.Context, in *UpdateTemplateRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, PortalService_SaveTemplate_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PortalServiceServer is the server API for PortalService service.
 // All implementations must embed UnimplementedPortalServiceServer
 // for forward compatibility
@@ -515,6 +560,11 @@ type PortalServiceServer interface {
 	GetMediaAssets(context.Context, *GetMediaAssetsRequest) (*GetMediaAssetsResponse, error)
 	GetMediaAssetsByID(context.Context, *GetMediaAssetsByIDs) (*GetMediaAssetsResponse, error)
 	GenerateMusic(context.Context, *VideoRequestWithID) (*GetMediaAssetsResponse, error)
+	// Templates
+	CreateTemplate(context.Context, *emptypb.Empty) (*v1.AnimationTemplate, error)
+	GetTemplate(context.Context, *GetTemplateRequest) (*v1.AnimationTemplate, error)
+	GetTemplates(context.Context, *emptypb.Empty) (*GetTemplatesResponse, error)
+	SaveTemplate(context.Context, *UpdateTemplateRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedPortalServiceServer()
 }
 
@@ -614,6 +664,18 @@ func (UnimplementedPortalServiceServer) GetMediaAssetsByID(context.Context, *Get
 }
 func (UnimplementedPortalServiceServer) GenerateMusic(context.Context, *VideoRequestWithID) (*GetMediaAssetsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GenerateMusic not implemented")
+}
+func (UnimplementedPortalServiceServer) CreateTemplate(context.Context, *emptypb.Empty) (*v1.AnimationTemplate, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateTemplate not implemented")
+}
+func (UnimplementedPortalServiceServer) GetTemplate(context.Context, *GetTemplateRequest) (*v1.AnimationTemplate, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTemplate not implemented")
+}
+func (UnimplementedPortalServiceServer) GetTemplates(context.Context, *emptypb.Empty) (*GetTemplatesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTemplates not implemented")
+}
+func (UnimplementedPortalServiceServer) SaveTemplate(context.Context, *UpdateTemplateRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SaveTemplate not implemented")
 }
 func (UnimplementedPortalServiceServer) mustEmbedUnimplementedPortalServiceServer() {}
 
@@ -1198,6 +1260,78 @@ func _PortalService_GenerateMusic_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PortalService_CreateTemplate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PortalServiceServer).CreateTemplate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PortalService_CreateTemplate_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PortalServiceServer).CreateTemplate(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PortalService_GetTemplate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTemplateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PortalServiceServer).GetTemplate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PortalService_GetTemplate_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PortalServiceServer).GetTemplate(ctx, req.(*GetTemplateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PortalService_GetTemplates_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PortalServiceServer).GetTemplates(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PortalService_GetTemplates_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PortalServiceServer).GetTemplates(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PortalService_SaveTemplate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateTemplateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PortalServiceServer).SaveTemplate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PortalService_SaveTemplate_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PortalServiceServer).SaveTemplate(ctx, req.(*UpdateTemplateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PortalService_ServiceDesc is the grpc.ServiceDesc for PortalService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1312,6 +1446,22 @@ var PortalService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GenerateMusic",
 			Handler:    _PortalService_GenerateMusic_Handler,
+		},
+		{
+			MethodName: "CreateTemplate",
+			Handler:    _PortalService_CreateTemplate_Handler,
+		},
+		{
+			MethodName: "GetTemplate",
+			Handler:    _PortalService_GetTemplate_Handler,
+		},
+		{
+			MethodName: "GetTemplates",
+			Handler:    _PortalService_GetTemplates_Handler,
+		},
+		{
+			MethodName: "SaveTemplate",
+			Handler:    _PortalService_SaveTemplate_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

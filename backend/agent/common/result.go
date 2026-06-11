@@ -1,7 +1,7 @@
 package common
 
 import (
-	"github.com/shank318/coasterai/models"
+	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
 )
 
@@ -15,5 +15,5 @@ const (
 type RunResult struct {
 	Status             RunStatus
 	AskUserQuestion    *pbportal.AskUserQuestion
-	GeneratedAnimation *models.Template
+	GeneratedAnimation *pbcore.Slide
 }
