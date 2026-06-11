@@ -229,32 +229,31 @@ const StoryboardSection = ({
                                         />
 
                                         {/* Between-slide controls: transition + add slide */}
-                                        {showTransition && (
-                                            <div className="relative flex items-center justify-center py-2">
-                                                {/* Add slide button (left of center) */}
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <button
-                                                            className="relative z-10 flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-medium transition-colors bg-muted hover:bg-muted/80 text-muted-foreground mr-1"
-                                                        >
-                                                            <Plus className="w-3 h-3" />
-                                                            Add scene
-                                                        </button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="start" className="w-40 bg-popover">
-                                                        <DropdownMenuItem onSelect={() => onAddSlide(slide.id, SlideType.ANIMATION)}>
-                                                            <Clapperboard className="w-3.5 h-3.5 mr-2" />
-                                                            Animation
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem onSelect={() => onAddSlide(slide.id, SlideType.MEDIA)}>
-                                                            <div className="flex items-center mr-2">
-                                                                <Image className="w-3.5 h-3.5" />
-                                                            </div>
-                                                            Image/Video
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
+                                        <div className="relative flex items-center justify-center py-2">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <button
+                                                        className="relative z-10 flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-medium transition-colors bg-muted hover:bg-muted/80 text-muted-foreground mr-1"
+                                                    >
+                                                        <Plus className="w-3 h-3" />
+                                                        Add scene
+                                                    </button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="start" className="w-40 bg-popover">
+                                                    <DropdownMenuItem onSelect={() => onAddSlide(slide.id, SlideType.ANIMATION)}>
+                                                        <Clapperboard className="w-3.5 h-3.5 mr-2" />
+                                                        Animation
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onSelect={() => onAddSlide(slide.id, SlideType.MEDIA)}>
+                                                        <div className="flex items-center mr-2">
+                                                            <Image className="w-3.5 h-3.5" />
+                                                        </div>
+                                                        Image/Video
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
 
+                                            {showTransition && (
                                                 <TransitionPicker
                                                     currentTransitionType={slide.transition || TransitionType.TRANSITION_NONE}
                                                     currentDirection={currentDirection}
@@ -277,8 +276,8 @@ const StoryboardSection = ({
                                                     onClose={() => onShowTransitionPicker(null)}
                                                     inline
                                                 />
-                                            </div>
-                                        )}
+                                            )}
+                                        </div>
                                     </div>
                                 );
                             })}

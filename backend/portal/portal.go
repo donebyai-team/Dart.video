@@ -10,6 +10,7 @@ import (
 	"github.com/shank318/coasterai/services/audio"
 	"github.com/shank318/coasterai/services/brand_identity"
 	figmasvc "github.com/shank318/coasterai/services/figma"
+	"github.com/shank318/coasterai/services/templates"
 	"regexp"
 
 	"github.com/shank318/coasterai/auth"
@@ -45,6 +46,7 @@ type Portal struct {
 	renderVideoService      services.RenderVideoService
 	brandIdentityService    brand_identity.BrandIdentity
 	audioGenerationProvider audio.Provider
+	templateService         templates.Service
 }
 
 func New(
@@ -61,6 +63,7 @@ func New(
 	codeBuilderService services.TemplateCodeBuilder,
 	audioGenerationProvider audio.Provider,
 	llmService llm.Service,
+	templateService templates.Service,
 	httpListenAddr string,
 	corsURLRegexAllow *regexp.Regexp,
 	config *pbportal.Config,
@@ -92,6 +95,7 @@ func New(
 		renderVideoService:      renderVideoService,
 		audioGenerationProvider: audioGenerationProvider,
 		llmService:              llmService,
+		templateService:         templateService,
 	}
 }
 

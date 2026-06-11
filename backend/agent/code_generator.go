@@ -13,11 +13,11 @@ import (
 	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/cache"
 	"github.com/shank318/coasterai/datastore"
-	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
 	"github.com/shank318/coasterai/services"
 	"github.com/shank318/coasterai/services/brand_identity"
+	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
 	"strings"
 )
@@ -27,7 +27,7 @@ const (
 )
 
 type CodeGeneratorAgent interface {
-	GenerateCodeFromScene(ctx context.Context, scene *scenes.SceneConfig) (*models.Template, error)
+	GenerateCodeFromScene(ctx context.Context, scene *scenes.SceneConfig) (*pbcore.Slide, error)
 	GenerateCode(
 		ctx context.Context,
 		slide *pbcore.Slide,
@@ -165,27 +165,30 @@ func (l *codeGenerator) injectMediaAssets(ctx context.Context, input *pbportal.C
 	return nil
 }
 
-func (l *codeGenerator) GenerateCodeFromScene(ctx context.Context, scene *scenes.SceneConfig) (*models.Template, error) {
+func (l *codeGenerator) GenerateCodeFromScene(ctx context.Context, scene *scenes.SceneConfig) (*pbcore.Slide, error) {
 	generatedAnimation, err := scenes.RenderJSXCodeFromSceneConfig(scene)
 	if err != nil {
 		return nil, agenterrors.AnimationGenerationFailed("failed to generate animation", err)
 	}
 
-	template := &models.Template{
-		ID: uuid.New().String(),
-		Config: &models.TemplateConfig{
+	durationInFrames := scene.ComputeDurationFrames()
+
+	toPatches, err := utils.RawMessageToStruct(scene.ToEditsPatch())
+	if err != nil {
+		return nil, fmt.Errorf("invalid template registry patch: %s", scene.Name)
+	}
+
+	slide := &pbcore.Slide{
+		DurationInFrames: durationInFrames,
+		SettledFrame:     durationInFrames,
+		Content: &pbcore.AnimationSlideContent{
 			CodeRegistry: &pbcore.CodeRegistry{
 				Code: generatedAnimation,
 			},
+			Edits: toPatches,
 		},
-		GeneratedPatches: scene.ToEditsPatch(),
-		Repeatable:       false,
 	}
-
-	template.Config.VisibleDurationInFrames = scene.ComputeDurationFrames()
-	template.Config.TotalDurationInFrames = template.Config.VisibleDurationInFrames
-
-	return template, nil
+	return slide, nil
 }
 
 func IsSlideHasTemplateComponent(slide *pbcore.Slide) bool {
@@ -359,15 +362,17 @@ func (l *codeGenerator) runPlanning(ctx context.Context, generatePlanRequest typ
 		if err != nil {
 			return nil, err
 		}
-		template := &models.Template{
-			Config: &models.TemplateConfig{
+
+		edits := json.RawMessage(`{}`)
+
+		slide := &pbcore.Slide{
+			DurationInFrames: int32(codeResponse.Total_frames),
+			SettledFrame:     int32(codeResponse.Total_frames),
+			Content: &pbcore.AnimationSlideContent{
 				CodeRegistry: &pbcore.CodeRegistry{
 					MUrl: asset.Url,
 				},
-				VisibleDurationInFrames: int32(codeResponse.Total_frames),
-				TotalDurationInFrames:   int32(codeResponse.Total_frames),
 			},
-			GeneratedPatches: json.RawMessage(`{}`),
 		}
 
 		if codeResponse.ManualEdits != nil {
@@ -376,13 +381,20 @@ func (l *codeGenerator) runPlanning(ctx context.Context, generatePlanRequest typ
 			if !json.Valid(raw) {
 				l.logger.Warn("invalid manual edits", zap.String("manual_edits", *codeResponse.ManualEdits))
 			} else {
-				template.GeneratedPatches = raw
+				edits = raw
 			}
 		}
 
+		toPatches, err := utils.RawMessageToStruct(edits)
+		if err != nil {
+			return nil, fmt.Errorf("invalid template registry patch")
+		}
+
+		slide.Content.Edits = toPatches
+
 		return &common.RunResult{
 			Status:             common.RunStatusCompleted,
-			GeneratedAnimation: template,
+			GeneratedAnimation: slide,
 		}, nil
 
 	}

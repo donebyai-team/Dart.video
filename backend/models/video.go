@@ -25,6 +25,8 @@ type Video struct {
 	Metadata          *pbcore.VideoMetadata `db:"metadata"`
 	CreatedAt         time.Time             `db:"created_at"`
 	UpdatedAt         *time.Time            `db:"updated_at"`
+
+	IsTemplate bool `db:"-"`
 }
 
 func (r *VideoStatus) ToProto() pbcore.VideoStatus {

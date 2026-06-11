@@ -12,6 +12,7 @@ import (
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
 	"github.com/shank318/coasterai/services"
+	"github.com/shank318/coasterai/services/templates"
 	"github.com/streamingfast/logging"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -308,12 +309,26 @@ func (p *Portal) StopVideo(ctx context.Context, req *connect.Request[pbportal.St
 	return connect.NewResponse(&emptypb.Empty{}), nil
 }
 
+func (p *Portal) getVideo(ctx context.Context, videoID string, orgId string, options services.VideoOptions) (*models.Video, int, error) {
+	resourceID, isTemplate := templates.ParseResourceID(videoID)
+
+	if isTemplate {
+		template, err := p.templateService.GetTemplateByID(ctx, resourceID)
+		if err != nil {
+			return nil, 0, err
+		}
+
+		return template.ToModelVideo(), 0, nil
+	}
+
+	return p.videoGenerationService.GetVideo(ctx, videoID, orgId, options)
+}
+
 func (p *Portal) GetVideo(
 	ctx context.Context,
 	req *connect.Request[pbportal.GetVideoRequest],
 	stream *connect.ServerStream[pbportal.GetVideoResponse],
 ) error {
-
 	actor, err := p.gethAuthContext(ctx)
 	if err != nil {
 		return err
@@ -326,7 +341,7 @@ func (p *Portal) GetVideo(
 	var statePublisher common.AgentStatusPublisher
 
 	sendCurrent := func() (*models.Video, error) {
-		video, totalSlides, err := p.videoGenerationService.GetVideo(ctx, videoID, actor.OrganizationID, services.VideoOptions{IncludePending: false})
+		video, totalSlides, err := p.getVideo(ctx, videoID, actor.OrganizationID, services.VideoOptions{IncludePending: false})
 		if err != nil {
 			return nil, err
 		}
@@ -450,12 +465,26 @@ func (p *Portal) UpdateVideoConfig(ctx context.Context, c *connect.Request[pbpor
 		return nil, errorx.ToConnect(errorx.New(errorx.CodeInvalidArgument, "VIDEO_CONFIG_INVALID", err.Error(), err))
 	}
 
-	err = p.videoGenerationService.UpdateVideoConfig(ctx, updateVideoInput)
+	resourceID, isTemplate := templates.ParseResourceID(c.Msg.Id)
+
+	updateVideoInput.ID = resourceID
+
+	if isTemplate {
+		err = p.templateService.UpdateTemplateConfig(ctx, updateVideoInput)
+	} else {
+		err = p.videoGenerationService.UpdateVideoConfig(ctx, updateVideoInput)
+	}
+
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errorx.ToConnect(errorx.New(errorx.CodeNotFound, "VIDEO_NOT_FOUND", "video not found", err))
+			return nil, errorx.ToConnect(
+				errorx.New(errorx.CodeNotFound, "VIDEO_NOT_FOUND", "video not found", err),
+			)
 		}
-		return nil, errorx.ToConnect(errorx.New(errorx.CodeInternal, "VIDEO_UPDATE_FAILED", "failed to update video config", err))
+
+		return nil, errorx.ToConnect(
+			errorx.New(errorx.CodeInternal, "VIDEO_UPDATE_FAILED", "failed to update video config", err),
+		)
 	}
 
 	return connect.NewResponse(&emptypb.Empty{}), nil

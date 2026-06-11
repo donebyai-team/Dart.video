@@ -29,9 +29,13 @@ func (p *Portal) SuggestScenes(ctx context.Context, c *connect.Request[pbportal.
 		zap.String("slide_id", c.Msg.SceneId),
 	)
 
-	video, _, err := p.videoGenerationService.GetVideo(ctx, videoID, actor.OrganizationID, services.VideoOptions{IncludePending: false})
+	video, _, err := p.getVideo(ctx, videoID, actor.OrganizationID, services.VideoOptions{IncludePending: false})
 	if err != nil {
 		return nil, err
+	}
+
+	if video.IsTemplate {
+		return connect.NewResponse(&pbportal.SuggestScenesResponse{}), nil
 	}
 
 	suggester := agent.NewSceneSuggester(p.brandIdentityService, logger)

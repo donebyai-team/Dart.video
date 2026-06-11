@@ -87,16 +87,14 @@ type TemplateRepository interface {
 	) (*models.TemplateCategory, error)
 	CreateTemplate(ctx context.Context, t *models.Template) (*models.Template, error)
 	UpdateTemplate(ctx context.Context, t *models.Template) error
+	DeleteTemplateByID(ctx context.Context, id string) error
 	GetTemplatesByCategory(
 		ctx context.Context,
-		category string,
-		animationType string,
-		usedIds []string,
+		category []string,
 	) ([]*models.Template, error)
-	GetTemplateByName(
+	GetTemplateByID(
 		ctx context.Context,
-		animationType string,
-		name string,
+		ID string,
 	) (*models.Template, error)
 }
 

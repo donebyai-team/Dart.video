@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/lib/pq"
 	"github.com/shank318/coasterai/models"
+	"strings"
 )
 
 func init() {
@@ -19,7 +20,8 @@ func init() {
 		"templates/create_template.sql",
 		"templates/update_template.sql",
 		"templates/query_template_by_category.sql",
-		"templates/query_template_by_name.sql",
+		"templates/query_template_by_id.sql",
+		"templates/delete_template_by_id.sql",
 	})
 }
 
@@ -83,14 +85,14 @@ func (r *Database) CreateTemplate(ctx context.Context, t *models.Template) (*mod
 	var id string
 
 	err := stmt.GetContext(ctx, &id, map[string]interface{}{
-		"name":           t.Name,
-		"animation_type": t.AnimationType,
-		"categories":     pq.Array(t.Categories),
-		"description":    t.Description,
-		"schema":         t.Schema,
-		"config":         t.Config,
-		"repeatable":     t.Repeatable,
-		"preview_url":    t.PreviewUrl,
+		"name":        t.Name,
+		"categories":  pq.Array(toUpperCategories(t.Categories)),
+		"description": t.Description,
+		"schema":      t.Schema,
+		"config":      t.Config,
+		"repeatable":  t.Repeatable,
+		"metadata":    t.Metadata,
+		"status":      t.Status,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create template: %w", err)
@@ -100,16 +102,37 @@ func (r *Database) CreateTemplate(ctx context.Context, t *models.Template) (*mod
 	return t, nil
 }
 
+func toUpperCategories(categories []string) []string {
+	result := make([]string, len(categories))
+	for i, category := range categories {
+		result[i] = strings.ToUpper(category)
+	}
+	return result
+}
+
+func (r *Database) DeleteTemplateByID(ctx context.Context, id string) error {
+	stmt := r.mustGetStmt("templates/delete_template_by_id.sql")
+	_, err := stmt.ExecContext(ctx, map[string]interface{}{
+		"id": id,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to delete template %w", err)
+	}
+	return nil
+}
+
 func (r *Database) UpdateTemplate(ctx context.Context, t *models.Template) error {
 	stmt := r.mustGetStmt("templates/update_template.sql")
 	_, err := stmt.ExecContext(ctx, map[string]interface{}{
 		"id":          t.ID,
-		"categories":  pq.Array(t.Categories),
+		"categories":  pq.Array(toUpperCategories(t.Categories)),
 		"description": t.Description,
 		"schema":      t.Schema,
 		"config":      t.Config,
 		"repeatable":  t.Repeatable,
-		"preview_url": t.PreviewUrl,
+		"metadata":    t.Metadata,
+		"status":      t.Status,
+		"name":        t.Name,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to update template: %w", err)
@@ -119,34 +142,28 @@ func (r *Database) UpdateTemplate(ctx context.Context, t *models.Template) error
 
 func (r *Database) GetTemplatesByCategory(
 	ctx context.Context,
-	category string,
-	animationType string,
-	usedIds []string,
+	category []string,
 ) ([]*models.Template, error) {
 	return getMany[models.Template](
 		ctx,
 		r,
 		"templates/query_template_by_category.sql",
 		map[string]any{
-			"category":       category,
-			"animation_type": animationType,
-			"usedIds":        pq.Array(usedIds),
+			"categories": pq.Array(category),
 		},
 	)
 }
 
-func (r *Database) GetTemplateByName(
+func (r *Database) GetTemplateByID(
 	ctx context.Context,
-	animationType string,
-	name string,
+	ID string,
 ) (*models.Template, error) {
 	return getOne[models.Template](
 		ctx,
 		r,
-		"templates/query_template_by_name.sql",
+		"templates/query_template_by_id.sql",
 		map[string]any{
-			"animation_type": animationType,
-			"name":           name,
+			"id": ID,
 		},
 	)
 }

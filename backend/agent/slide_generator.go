@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/pkg/errors"
 	"github.com/shank318/coasterai/agent/scenes"
 	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/models"
@@ -178,28 +177,19 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 func (g *videoConfigGenerator) UpdateAnimationSlide(
 	ctx context.Context,
 	slideID string,
-	selectedTemplate *models.Template,
+	selectedTemplate *pbcore.Slide,
 ) error {
-	toStructConfig, err := utils.RawMessageToStruct(selectedTemplate.GeneratedPatches)
-	if err != nil {
-		g.logger.Error("failed to convert template config",
-			zap.Error(err),
-			zap.Any("template_config", selectedTemplate.GeneratedPatches),
-		)
-		return errors.Wrapf(err, "invalid template config: %s", selectedTemplate.Name)
-	}
-
 	for _, section := range g.video.Config.Sections {
 		for _, slide := range section.Slides {
 			if slide.Id == slideID {
 				// update durations, here we receive in frames, no need to convert
-				slide.DurationInFrames = selectedTemplate.Config.VisibleDurationInFrames
-				slide.SettledFrame = selectedTemplate.Config.VisibleDurationInFrames
+				slide.DurationInFrames = selectedTemplate.DurationInFrames
+				slide.SettledFrame = selectedTemplate.SettledFrame
 
 				animation := slide.Content
 				slide.SlideStatus = pbcore.SlideStatus_SLIDE_STATUS_GENERATED
-				animation.CodeRegistry = selectedTemplate.Config.CodeRegistry
-				animation.Edits = utils.MergeStructs(animation.Edits, toStructConfig)
+				animation.CodeRegistry = selectedTemplate.Content.CodeRegistry
+				animation.Edits = utils.MergeStructs(animation.Edits, selectedTemplate.Content.Edits)
 				slide.BackgroundStyle = selectedTemplate.BackgroundStyle
 				// update the selected template description
 				// for future slides to know what's being selected so far

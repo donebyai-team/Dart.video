@@ -61,7 +61,7 @@ export function formatTimestampToDate(timestamp?: Timestamp): Date {
 
 };
 
-export function getSlideCount(video: Video) {
+export function getSlideCount(video: Pick<Video, "config">) {
   return (
     video.config?.sections?.reduce(
       (acc: number, section: any) => acc + (section.slides?.length || 0),

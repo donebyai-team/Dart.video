@@ -8,6 +8,9 @@ import (
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/services"
+	"github.com/shank318/coasterai/services/voiceover"
+
+	//"github.com/shank318/coasterai/services"
 	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/wrapperspb"
@@ -369,4 +372,17 @@ func (b brandIdentity) GetBrandIdentities(ctx context.Context, orgID string) ([]
 		}
 	}
 	return identities, nil
+}
+
+func AddVideoBranding(metadata *pbcore.VideoMetadata) {
+	generatedBranding := &pbcore.GeneratedVideoBranding{
+		Colors: ExtractOrGenerateColors(nil),
+	}
+	bgStyle := GenerateDefaultBackground(generatedBranding.Colors)
+	generatedBranding.Colors = ModifyTextColor(generatedBranding.Colors, bgStyle)
+
+	// Step 5: assign branding
+	metadata.GeneratedBranding = generatedBranding
+	metadata.BackgroundStyle = bgStyle
+	metadata.BackgroundAudioUrl = utils.Ptr(voiceover.GenerateBackgroundMusic().Url)
 }

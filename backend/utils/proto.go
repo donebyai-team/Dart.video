@@ -44,6 +44,29 @@ func UnmarshalProto(value any, msg proto.Message) error {
 	return protojson.Unmarshal(bs, msg)
 }
 
+func RawMessageToStructs(raw json.RawMessage) ([]*structpb.Struct, error) {
+	var data []map[string]interface{}
+
+	if len(raw) > 0 {
+		if err := json.Unmarshal(raw, &data); err != nil {
+			return nil, err
+		}
+	}
+
+	result := make([]*structpb.Struct, 0, len(data))
+
+	for _, item := range data {
+		s, err := structpb.NewStruct(item)
+		if err != nil {
+			return nil, err
+		}
+
+		result = append(result, s)
+	}
+
+	return result, nil
+}
+
 func RawMessageToStruct(raw json.RawMessage) (*structpb.Struct, error) {
 	var data map[string]interface{}
 

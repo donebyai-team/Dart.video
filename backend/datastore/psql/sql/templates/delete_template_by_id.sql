@@ -1,0 +1,1 @@
+DELETE FROM templates WHERE id = :id;

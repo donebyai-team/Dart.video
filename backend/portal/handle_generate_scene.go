@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/shank318/coasterai/agent"
-	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
 	"github.com/shank318/coasterai/utils"
@@ -41,7 +40,7 @@ func (p *Portal) GenerateOrEditScene(ctx context.Context, c *connect.Request[pbp
 		zap.String("slide_id", slideToEdit.Id),
 	)
 
-	video, _, err := p.videoGenerationService.GetVideo(ctx, videoID, actor.OrganizationID, services.VideoOptions{IncludePending: false})
+	video, _, err := p.getVideo(ctx, videoID, actor.OrganizationID, services.VideoOptions{IncludePending: false})
 	if err != nil {
 		return err
 	}
@@ -162,9 +161,7 @@ func sendAnimationResult(
 	}
 
 	if runResult.GeneratedAnimation != nil {
-		if err := applyTemplateToSlide(slide, runResult.GeneratedAnimation); err != nil {
-			return err
-		}
+		applyTemplateToSlide(slide, runResult.GeneratedAnimation)
 	}
 
 	if err := stream.Send(&pbportal.GenerateOrEditSceneResponse{
@@ -177,21 +174,15 @@ func sendAnimationResult(
 	return nil
 }
 
-func applyTemplateToSlide(slide *pbcore.Slide, template *models.Template) error {
-	slide.DurationInFrames = template.Config.TotalDurationInFrames
-	slide.SettledFrame = template.Config.VisibleDurationInFrames
-	toPatches, err := utils.RawMessageToStruct(template.GeneratedPatches)
-	if err != nil {
-		return fmt.Errorf("invalid template registry: %s", template.Name)
-	}
-
+func applyTemplateToSlide(slide *pbcore.Slide, template *pbcore.Slide) {
+	slide.DurationInFrames = template.DurationInFrames
+	slide.SettledFrame = template.SettledFrame
 	animationContent := slide.GetContent()
-	animationContent.CodeRegistry = template.Config.CodeRegistry
-	animationContent.Edits = toPatches
+	animationContent.CodeRegistry = template.Content.CodeRegistry
+	animationContent.Edits = template.Content.Edits
 	if template.BackgroundStyle != nil {
 		slide.BackgroundStyle = template.BackgroundStyle
 	}
-	return nil
 }
 
 //func (p *Portal) newAnimationGeneratorAgent(logger *zap.Logger, sessionID, slideID, orgID string) (agent.SceneGeneratorAgent, common.AgentStatusPublisher) {

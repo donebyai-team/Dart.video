@@ -4,7 +4,8 @@ import {
     PanelLeft,
     Video,
     Home,
-    Palette
+    Palette,
+    LayoutTemplate
 } from "lucide-react";
 import {
     Sidebar,
@@ -23,11 +24,12 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@coasterai/ui-core/hooks/useAuth";
 import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
+import { isPlatformAdmin } from "@coasterai/ui-core/helper/role";
 
 export function AppSidebar() {
     const { isMobile, toggleSidebar, openMobile } = useSidebar();
     const location = usePathname();
-    const { currentOrganization } = useAuth();
+    const { currentOrganization, user } = useAuth();
 
     const isActive = (path: string) => {
         return location?.startsWith(path);
@@ -53,6 +55,15 @@ export function AppSidebar() {
             active: isActive("/dashboard/brand"),
         }
     ];
+
+    if (user && isPlatformAdmin(user)) {
+        mainMenuItems.push({
+            title: "Templates",
+            icon: LayoutTemplate,
+            path: "/dashboard/templates",
+            active: isActive("/dashboard/templates"),
+        })
+    }
 
 
     return (

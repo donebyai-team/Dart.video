@@ -7,6 +7,7 @@ import (
 	"github.com/shank318/coasterai/cache"
 	"github.com/shank318/coasterai/services/audio"
 	"github.com/shank318/coasterai/services/brand_identity"
+	"github.com/shank318/coasterai/services/templates"
 	"os"
 	"regexp"
 	"time"
@@ -213,6 +214,7 @@ func portalApp(cmd *cobra.Command, isAppReady func() bool) (App, error) {
 		services.NewTemplateCodeBuilderService(sflags.MustGetString(cmd, "common-code-builder-service")),
 		provider,
 		llm.NewLlmService(zlog, cacheStore),
+		templates.NewService(deps.DataStore),
 		sflags.MustGetString(cmd, "portal-http-listen-addr"),
 		deps.CorsURLRegexAllow,
 		config,

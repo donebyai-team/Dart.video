@@ -40,7 +40,7 @@ func (v videoGeneration) UpdateVideoStatus(ctx context.Context, ID string, statu
 	return v.db.UpdateVideoStatus(ctx, &models.Video{Status: status, ID: ID})
 }
 
-const defaultVideoFPS = 30
+const DefaultVideoFPS = 30
 
 func isMetadataChanged(existing *pbcore.VideoMetadata, new *pbcore.VideoMetadata) bool {
 	backgroundChanged := proto.Equal(existing.BackgroundStyle, new.BackgroundStyle)
@@ -151,9 +151,9 @@ func (v videoGeneration) CreateVideo(ctx context.Context, organizationID string,
 		OrganizationID: organizationID,
 		Status:         models.VideoStatusPLANNING,
 		Metadata: &pbcore.VideoMetadata{
-			Fps:              defaultVideoFPS,
+			Fps:              DefaultVideoFPS,
 			Prompt:           params.Prompt,
-			DurationInFrames: params.DurationInSec * defaultVideoFPS,
+			DurationInFrames: params.DurationInSec * DefaultVideoFPS,
 			Language:         params.Language,
 			Resolution:       params.Resolution,
 			Assets:           params.Assets,
