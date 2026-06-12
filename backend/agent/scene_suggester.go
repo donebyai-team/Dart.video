@@ -12,6 +12,8 @@ import (
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/services"
 	"github.com/shank318/coasterai/services/brand_identity"
+	"github.com/shank318/coasterai/services/templates"
+	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
 )
 
@@ -29,6 +31,56 @@ func NewSceneSuggester(brandIdentityService brand_identity.BrandIdentity, logger
 		brandIdentityService: brandIdentityService,
 		logger:               logger,
 	}
+}
+
+func (s SceneSuggester) CategorizeScene(
+	ctx context.Context,
+	slide *pbcore.Slide,
+) (*types.MatchCategoriesResponse, error) {
+	var original, edits string
+
+	if slide.Content != nil &&
+		slide.Content.CodeRegistry.Defaults != nil &&
+		len(slide.Content.CodeRegistry.Defaults.Fields) > 0 {
+		payload, err := templates.BuildLLMDataPayload(slide.Content.CodeRegistry.Defaults)
+		if err != nil {
+			s.logger.Error("failed to build llm data payload", zap.Error(err))
+		}
+
+		if payload != "" {
+			original = payload
+		}
+	}
+
+	if slide.Content != nil &&
+		slide.Content.Edits != nil &&
+		len(slide.Content.Edits.Fields) > 0 {
+		payload, err := templates.BuildLLMDataPayload(slide.Content.Edits)
+		if err != nil {
+			s.logger.Error("failed to build llm data payload", zap.Error(err))
+		}
+
+		if payload != "" {
+			edits = payload
+		}
+	}
+
+	// If there is no default payload, use the edits payload as original
+	if original == "" && edits != "" {
+		original = edits
+	}
+
+	// TODO: Handle the case where edits and defaults both are empty
+	req := types.MatchCategoriesRequest{
+		Categories: scenes.TemplateCategories,
+		Original:   original,
+	}
+
+	if edits != "" {
+		req.Edits = utils.Ptr(edits)
+	}
+
+	return s.llmService.CategorizeScene(ctx, req)
 }
 
 func (s SceneSuggester) GenerateSuggestions(

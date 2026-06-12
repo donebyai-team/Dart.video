@@ -15,7 +15,7 @@ const defaultDataKey = "DEFAULT_DATA"
 var iconRegex = regexp.MustCompile(`"(icon:[^"]+)"`)
 var urlRegex = regexp.MustCompile(`"(https?://[^"]+)"`)
 
-func ResolveIcons(code string) string {
+func resolveIcons(code string) string {
 	// icon:name -> URL
 	code = iconRegex.ReplaceAllStringFunc(code, func(match string) string {
 		value := strings.Trim(match, `"`)
@@ -32,7 +32,7 @@ func ResolveIcons(code string) string {
 	return code
 }
 
-func ResolveIconURL(code string) string {
+func resolveIconURL(code string) string {
 	// URL -> icon:name
 	code = urlRegex.ReplaceAllStringFunc(code, func(match string) string {
 		value := strings.Trim(match, `"`)
@@ -48,7 +48,14 @@ func ResolveIconURL(code string) string {
 	return code
 }
 
-func sanitizeCommonCode(code string) string {
+func SanitizeCodeBeforeSendingToLLM(code string) string {
+	code = resolveIconURL(code)
+
+	return code
+}
+
+func SanitizeCodeBeforeSaving(code string) string {
+	// Replace theme.logo.url with theme.logo?.url
 	replacements := map[string]string{
 		"theme.logo.url":        "theme.logo?.url",
 		"theme.logo.width":      "theme.logo?.width",
@@ -62,12 +69,13 @@ func sanitizeCommonCode(code string) string {
 		code = strings.ReplaceAll(code, old, newVal)
 	}
 
-	code = ResolveIcons(code)
+	// Resolve icons eg. Icon: "icon:heart" -> our icon URL
+	code = resolveIcons(code)
 
 	return code
 }
 
-func ExtractData(
+func ExtractDefaultDataPropsFromGeneratedCode(
 	code string,
 ) (json.RawMessage, string, error) {
 	marker := fmt.Sprintf("const %s =", defaultDataKey)
@@ -169,7 +177,7 @@ outer:
 	return json.RawMessage(obj), updatedCode, nil
 }
 
-func InjectDefaultData(
+func InjectDefaultDataBackToGeneratedCode(
 	code string,
 	data *structpb.Struct,
 ) (string, error) {

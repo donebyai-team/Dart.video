@@ -31,6 +31,7 @@ type Service interface {
 		ctx context.Context,
 		req types.SuggestScenesRequest,
 	) (types.SuggestScenesResponse, error)
+	CategorizeScene(ctx context.Context, req types.MatchCategoriesRequest) (*types.MatchCategoriesResponse, error)
 	GenerateAnimation(ctx context.Context,
 		req types.GenerateAnimationCodeRequest,
 		conversationHistory []types.Message,
@@ -40,6 +41,14 @@ type Service interface {
 type llmService struct {
 	logger *zap.Logger
 	cache  cache.Cache
+}
+
+func (l *llmService) CategorizeScene(ctx context.Context, req types.MatchCategoriesRequest) (*types.MatchCategoriesResponse, error) {
+	categories, err := baml_client.MatchCategories(ctx, req, baml_client.WithTags(getTags(ctx)))
+	if err != nil {
+		return nil, err
+	}
+	return &categories, nil
 }
 
 func (l *llmService) GenerateAnimation(

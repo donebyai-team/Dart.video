@@ -684,7 +684,8 @@ func (c GeneratedVideoPlan) BamlTypeName() string {
 
 type MatchCategoriesRequest struct {
 	Categories []Category `json:"categories"`
-	Query      *string    `json:"query"`
+	Original   *string    `json:"original"`
+	Edits      *string    `json:"edits"`
 }
 
 func (c *MatchCategoriesRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -704,8 +705,11 @@ func (c *MatchCategoriesRequest) Decode(holder *cffi.CFFIValueClass, typeMap bam
 		case "categories":
 			c.Categories = baml.Decode(valueHolder).Interface().([]Category)
 
-		case "query":
-			c.Query = baml.Decode(valueHolder).Interface().(*string)
+		case "original":
+			c.Original = baml.Decode(valueHolder).Interface().(*string)
+
+		case "edits":
+			c.Edits = baml.Decode(valueHolder).Interface().(*string)
 
 		default:
 
@@ -721,7 +725,9 @@ func (c MatchCategoriesRequest) Encode() (*cffi.HostValue, error) {
 
 	fields["categories"] = c.Categories
 
-	fields["query"] = c.Query
+	fields["original"] = c.Original
+
+	fields["edits"] = c.Edits
 
 	return baml.EncodeClass("MatchCategoriesRequest", fields, nil)
 }
@@ -732,6 +738,7 @@ func (c MatchCategoriesRequest) BamlTypeName() string {
 
 type MatchCategoriesResponse struct {
 	Categories []Category `json:"categories"`
+	Summary    *string    `json:"summary"`
 }
 
 func (c *MatchCategoriesResponse) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -751,6 +758,9 @@ func (c *MatchCategoriesResponse) Decode(holder *cffi.CFFIValueClass, typeMap ba
 		case "categories":
 			c.Categories = baml.Decode(valueHolder).Interface().([]Category)
 
+		case "summary":
+			c.Summary = baml.Decode(valueHolder).Interface().(*string)
+
 		default:
 
 			panic(fmt.Sprintf("unexpected field: %s in class MatchCategoriesResponse", key))
@@ -764,6 +774,8 @@ func (c MatchCategoriesResponse) Encode() (*cffi.HostValue, error) {
 	fields := map[string]any{}
 
 	fields["categories"] = c.Categories
+
+	fields["summary"] = c.Summary
 
 	return baml.EncodeClass("MatchCategoriesResponse", fields, nil)
 }

@@ -107,7 +107,7 @@ func (p *Portal) DeleteTemplate(ctx context.Context, c *connect.Request[pbportal
 
 	err = p.templateService.DeleteTemplateByID(ctx, c.Msg.Id)
 	if err != nil {
-		return nil, err
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 	return connect.NewResponse(&emptypb.Empty{}), nil
 }

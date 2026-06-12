@@ -1,77 +1,63 @@
 class Category {
   name string
-  description string @description("Clear explanation of the conceptual animation category. Describes the idea or scenario this category represents (e.g., data fragmentation, growth acceleration, workflow automation, before vs after transformation). Not a visual style.")
+  description string
 }
 
 class MatchCategoriesRequest {
-  categories Category[] @description("Predefined conceptual animation categories to choose from. You must select only from this list.")
-  query string @description("Concept or idea that needs to be mapped to the most relevant conceptual animation category.")
+  categories Category[]
+  original string
+  edits string?
 }
 
 class MatchCategoriesResponse {
-  categories Category[] @description("matched category based on the query, return empty if no match found")
+  categories Category[]
+  summary string
 }
 
 function MatchCategories(resume: MatchCategoriesRequest) -> MatchCategoriesResponse {
-  // Specify a client as provider/model-name
-  // You can also use custom LLM params with a custom client name from clients.baml like "client CustomGPT5" or "client CustomSonnet4"
-  client CustomOpenAI5
+  client CustomGPTNano
   prompt #"
-  Category Matching Engine
+    You are a content classification engine.
 
-  You are a strict semantic classification engine.
+    Analyze the final intended message of the scene.
 
-  Your task is to match the given query to one or more predefined conceptual categories.
+    Use the original scene JSON and, if provided, the user edits. User edits override the original content.
 
-  You must ONLY select from the provided categories.
-  You must NEVER invent new categories.
-  You must NEVER modify category names or descriptions.
+    Categories:
+    {% for category in resume.categories %}
+    - {{ category.name }}: {{ category.description }}
+    {% endfor %}
 
-  --------------------------------------------------
-  INPUT
-  --------------------------------------------------
+    Tasks:
 
-  Query:
-  {{ resume.query }}
+    1. Understand the final message being communicated.
+    2. Select the categories that best describe that message.
+    3. Create a concise summary (1-2 sentences) that captures the scene's intent and can be used to recreate the scene using a different template.
+    4. Include important text, product names, company names, features, benefits, problems, claims, and calls-to-action from the scene when relevant.
 
-  Available Categories:
-  {% for category in resume.categories %}
-  - {{ category.name }}:
-    {{ category.description }}
-  {% endfor %}
+    Rules:
 
-  --------------------------------------------------
-  MATCHING RULES
-  --------------------------------------------------
+    - Match categories based on overall meaning and intent.
+    - Consider both the original scene and edits together.
+    - Prefer information from edits when present.
+    - Preserve important wording from the scene when useful for the summary.
+    - Only use the provided categories.
+    - Do not invent categories.
+    - Return categories ordered by relevance.
+    - Do not explain your reasoning.
 
-  1. Understand the core concept expressed in the query.
-  2. Compare it against category descriptions.
-  3. Select categories that clearly represent the same conceptual idea.
-  4. Exclude categories that:
-     - Only partially match
-     - Are loosely related
-     - Represent visual style instead of concept
-     - Do not strongly align with the core idea
+    Original Scene:
+    {{ resume.original }}
 
-  Be conservative:
-  If the match is unclear or weak, return an empty list.
+    {% if resume.edits %}
+    Edits:
+    {{ resume.edits }}
+    {% endif %}
 
-  If multiple categories clearly match, return them ordered by strongest relevance first.
+    --------------------------------------------------
+    OUTPUT FORMAT
+    --------------------------------------------------
 
-  --------------------------------------------------
-  IMPORTANT RULES
-  --------------------------------------------------
-
-  - Only return categories from the provided list.
-  - Do NOT create new categories.
-  - Do NOT explain reasoning.
-  - Do NOT include thinking.
-  - If none clearly match, return an empty array.
-
-  --------------------------------------------------
-  OUTPUT FORMAT
-  --------------------------------------------------
-
-  {{ ctx.output_format }}
+    {{ ctx.output_format }}
   "#
 }

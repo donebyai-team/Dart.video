@@ -94,7 +94,7 @@ func (s *codeBuilderService) ValidateAndBuild(
 	code := input.Animation.Code
 
 	// Sanitize
-	code = sanitizeCommonCode(code)
+	code = SanitizeCodeBeforeSaving(code)
 	// Resolve media assets
 	code = input.MediaAssetRegistry.ResolveMediaHandles(code)
 
@@ -102,7 +102,7 @@ func (s *codeBuilderService) ValidateAndBuild(
 
 	// Extract Defaults
 	var defaultData *structpb.Struct
-	data, updatedCode, err := ExtractData(code)
+	data, updatedCode, err := ExtractDefaultDataPropsFromGeneratedCode(code)
 	if err != nil {
 		s.logger.Error("failed to extract defaults", zap.Error(err))
 		//return nil, &BuildError{ErrorType: BUILD_ERROR_TYPE_DEFAULTS, Errors: []string{err.Error()}}

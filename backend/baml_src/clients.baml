@@ -19,6 +19,15 @@ client<llm> CustomGeminiFlash {
   }
 }
 
+client<llm> CustomGPTNano {
+  provider openai
+  retry_policy Exponential
+  options {
+    model "gpt-5-nano"
+    api_key env.OPENAI_API_KEY
+  }
+}
+
 client<llm> CustomClaudeOpus {
   provider "anthropic"
   retry_policy Exponential

@@ -171,7 +171,7 @@ func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcor
 			}
 
 			if item.DefaultCodeData != nil && len(item.DefaultCodeData.Fields) > 0 {
-				injectedCode, err := code_builder.InjectDefaultData(code, item.DefaultCodeData)
+				injectedCode, err := code_builder.InjectDefaultDataBackToGeneratedCode(code, item.DefaultCodeData)
 				if err != nil {
 					return nil, fmt.Errorf("failed to inject default code data: %w", err)
 				}
@@ -179,7 +179,7 @@ func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcor
 				code = injectedCode
 			}
 
-			code = code_builder.ResolveIconURL(code)
+			code = code_builder.SanitizeCodeBeforeSendingToLLM(code)
 
 			message.Content = code
 		}

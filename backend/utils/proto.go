@@ -107,7 +107,7 @@ func MergeStructs(s1, s2 *structpb.Struct) *structpb.Struct {
 		m2 = s2.AsMap()
 	}
 
-	merged := deepMergeMaps(m1, m2)
+	merged := DeepMergeMaps(m1, m2)
 
 	s, err := structpb.NewStruct(merged)
 	if err != nil {
@@ -117,7 +117,7 @@ func MergeStructs(s1, s2 *structpb.Struct) *structpb.Struct {
 }
 
 // helper: recursively merge maps
-func deepMergeMaps(m1, m2 map[string]interface{}) map[string]interface{} {
+func DeepMergeMaps(m1, m2 map[string]interface{}) map[string]interface{} {
 	result := make(map[string]interface{})
 
 	// copy m1
@@ -133,7 +133,7 @@ func deepMergeMaps(m1, m2 map[string]interface{}) map[string]interface{} {
 			map2, ok2 := v2.(map[string]interface{})
 
 			if ok1 && ok2 {
-				result[k] = deepMergeMaps(map1, map2)
+				result[k] = DeepMergeMaps(map1, map2)
 				continue
 			}
 		}

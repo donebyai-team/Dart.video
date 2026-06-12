@@ -527,8 +527,12 @@ func (t *MatchCategoriesRequestClassView) PropertyCategories() (ClassPropertyVie
 	return t.inner.Property("categories")
 }
 
-func (t *MatchCategoriesRequestClassView) PropertyQuery() (ClassPropertyView, error) {
-	return t.inner.Property("query")
+func (t *MatchCategoriesRequestClassView) PropertyOriginal() (ClassPropertyView, error) {
+	return t.inner.Property("original")
+}
+
+func (t *MatchCategoriesRequestClassView) PropertyEdits() (ClassPropertyView, error) {
+	return t.inner.Property("edits")
 }
 
 func (t *TypeBuilder) MatchCategoriesRequest() (*MatchCategoriesRequestClassView, error) {
@@ -561,6 +565,10 @@ func (t *MatchCategoriesResponseClassView) ListProperties() ([]ClassPropertyView
 
 func (t *MatchCategoriesResponseClassView) PropertyCategories() (ClassPropertyView, error) {
 	return t.inner.Property("categories")
+}
+
+func (t *MatchCategoriesResponseClassView) PropertySummary() (ClassPropertyView, error) {
+	return t.inner.Property("summary")
 }
 
 func (t *TypeBuilder) MatchCategoriesResponse() (*MatchCategoriesResponseClassView, error) {
