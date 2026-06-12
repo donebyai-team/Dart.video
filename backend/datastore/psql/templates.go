@@ -127,7 +127,6 @@ func (r *Database) UpdateTemplate(ctx context.Context, t *models.Template) error
 		"id":          t.ID,
 		"categories":  pq.Array(toUpperCategories(t.Categories)),
 		"description": t.Description,
-		"schema":      t.Schema,
 		"config":      t.Config,
 		"repeatable":  t.Repeatable,
 		"metadata":    t.Metadata,

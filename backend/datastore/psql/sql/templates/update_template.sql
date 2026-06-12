@@ -1,7 +1,6 @@
 UPDATE templates
 SET categories  = :categories,
     description = :description,
-    schema      = :schema,
     config     = :config,
     metadata   = :metadata,
     status     = :status,

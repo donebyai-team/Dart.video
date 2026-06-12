@@ -168,8 +168,6 @@ func (t templateService) UpdateTemplate(ctx context.Context, req *pbportal.Updat
 		return fmt.Errorf("invalid template: no slides with code registry found")
 	}
 
-	existingTemplate.Schema = json.RawMessage{}
-
 	existingTemplate.Description = req.Description
 
 	if req.UsageDescription != nil {
