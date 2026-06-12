@@ -7,6 +7,7 @@ import (
 	"github.com/shank318/coasterai/cache"
 	"github.com/shank318/coasterai/services/audio"
 	"github.com/shank318/coasterai/services/brand_identity"
+	"github.com/shank318/coasterai/services/code_builder"
 	"github.com/shank318/coasterai/services/templates"
 	"os"
 	"regexp"
@@ -211,7 +212,7 @@ func portalApp(cmd *cobra.Command, isAppReady func() bool) (App, error) {
 		services.NewVideoGeneration(deps.DataStore, zlog),
 		videoRenderService,
 		brand_identity.NewBrandIdentityService(zlog, deps.DataStore, deps.MediaStore, sflags.MustGetString(cmd, "common-firecrawl-api-key")),
-		services.NewTemplateCodeBuilderService(sflags.MustGetString(cmd, "common-code-builder-service")),
+		code_builder.NewCodeBuilderService(deps.MediaStore, zlog),
 		provider,
 		llm.NewLlmService(zlog, cacheStore),
 		templates.NewService(deps.DataStore),

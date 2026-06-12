@@ -13,6 +13,7 @@ import (
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
 	"github.com/shank318/coasterai/services"
+	"github.com/shank318/coasterai/services/code_builder"
 	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -168,7 +169,17 @@ func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcor
 			if err != nil {
 				return nil, fmt.Errorf("failed to download code snapshot: %w", err)
 			}
-			code = ResolveIconURL(code)
+
+			if item.DefaultCodeData != nil && len(item.DefaultCodeData.Fields) > 0 {
+				injectedCode, err := code_builder.InjectDefaultData(code, item.DefaultCodeData)
+				if err != nil {
+					return nil, fmt.Errorf("failed to inject default code data: %w", err)
+				}
+
+				code = injectedCode
+			}
+
+			code = code_builder.ResolveIconURL(code)
 
 			message.Content = code
 		}

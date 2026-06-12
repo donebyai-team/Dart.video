@@ -14,7 +14,6 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/structpb"
 	"net/url"
-	"regexp"
 	"strings"
 )
 
@@ -127,7 +126,8 @@ func (t templateService) UpdateTemplateConfig(ctx context.Context, video *models
 	for i, slide := range allSlides {
 		totalDurationInFrames += slide.DurationInFrames
 
-		if len(slide.Content.Edits.Fields) > 0 {
+		// For code templates, we don't support manual edits'
+		if slide.Content.CodeRegistry.MUrl != "" && len(slide.Content.Edits.Fields) > 0 {
 			return fmt.Errorf("manual edits are not supported for templates, use prompt to modify")
 		}
 		// subtract transition for every slide except the last one globally
@@ -149,22 +149,16 @@ func (t templateService) UpdateTemplate(ctx context.Context, req *pbportal.Updat
 		return err
 	}
 
-	var schema []json.RawMessage
+	var schema []*structpb.Struct
 
 	for _, section := range existingTemplate.Config.Sections {
 		for _, slide := range section.Slides {
 			if slide.Content.CodeRegistry.MUrl != "" {
-				code, err := services.DownloadCode(ctx, slide.Content.CodeRegistry.MUrl)
-				if err != nil {
-					return fmt.Errorf("failed to download code: %w", err)
+				if slide.Content.CodeRegistry.Defaults == nil ||
+					len(slide.Content.CodeRegistry.Defaults.Fields) == 0 {
+					return fmt.Errorf("invalid template: no default values found")
 				}
-
-				defaults, err := ExtractDefaultData(code)
-				if err != nil {
-					return fmt.Errorf("failed to extract template params: %w", err)
-				}
-
-				schema = append(schema, defaults)
+				schema = append(schema, slide.Content.CodeRegistry.Defaults)
 			}
 
 		}
@@ -174,12 +168,7 @@ func (t templateService) UpdateTemplate(ctx context.Context, req *pbportal.Updat
 		return fmt.Errorf("invalid template: no slides with code registry found")
 	}
 
-	schemaBytes, err := json.Marshal(schema)
-	if err != nil {
-		return fmt.Errorf("failed to marshal schema: %w", err)
-	}
-
-	existingTemplate.Schema = schemaBytes
+	existingTemplate.Schema = json.RawMessage{}
 
 	existingTemplate.Description = req.Description
 
@@ -199,94 +188,6 @@ func (t templateService) GetTemplateByID(ctx context.Context, ID string) (*model
 
 func (t templateService) GetTemplates(ctx context.Context, categories []string) ([]*models.Template, error) {
 	return t.db.GetTemplatesByCategory(ctx, categories)
-}
-
-func ExtractDefaultData(code string) (json.RawMessage, error) {
-	const marker = "const DEFAULT_DATA ="
-
-	idx := strings.Index(code, marker)
-	if idx == -1 {
-		return nil, fmt.Errorf("DEFAULT_DATA not found")
-	}
-
-	// Find opening brace
-	start := strings.Index(code[idx:], "{")
-	if start == -1 {
-		return nil, fmt.Errorf("opening brace for DEFAULT_DATA not found")
-	}
-	start += idx
-
-	// Extract object using brace counting
-	depth := 0
-	end := -1
-
-outer:
-	for i := start; i < len(code); i++ {
-		switch code[i] {
-		case '{':
-			depth++
-		case '}':
-			depth--
-			if depth == 0 {
-				end = i
-				break outer
-			}
-		}
-	}
-
-	if end == -1 {
-		return nil, fmt.Errorf("closing brace for DEFAULT_DATA not found")
-	}
-
-	obj := code[start : end+1]
-
-	// ------------------------------------------------------------------
-	// Convert PascalCase identifiers into strings
-	//
-	// icon: Heart,
-	// icon: BarChart3,
-	//
-	// ->
-	//
-	// icon: "Heart",
-	// icon: "BarChart3",
-	// ------------------------------------------------------------------
-	pascalCaseValue := regexp.MustCompile(`:\s*([A-Z][A-Za-z0-9_]*)\s*([,\}\]])`)
-	obj = pascalCaseValue.ReplaceAllString(obj, `: "$1"$2`)
-
-	// ------------------------------------------------------------------
-	// Quote object keys WITHOUT touching URLs such as:
-	// "https://example.com"
-	//
-	// We only quote identifiers that appear after:
-	//   {
-	//   ,
-	// ------------------------------------------------------------------
-	keyRegex := regexp.MustCompile(`([,{]\s*)([A-Za-z_][A-Za-z0-9_]*)(\s*:)`)
-	obj = keyRegex.ReplaceAllString(obj, `$1"$2"$3`)
-
-	// ------------------------------------------------------------------
-	// Remove trailing commas
-	// ------------------------------------------------------------------
-	trailingObjectComma := regexp.MustCompile(`,\s*}`)
-	obj = trailingObjectComma.ReplaceAllString(obj, `}`)
-
-	trailingArrayComma := regexp.MustCompile(`,\s*]`)
-	obj = trailingArrayComma.ReplaceAllString(obj, `]`)
-
-	// ------------------------------------------------------------------
-	// Validate JSON
-	// ------------------------------------------------------------------
-	var tmp any
-	if err := json.Unmarshal([]byte(obj), &tmp); err != nil {
-		return nil, fmt.Errorf(
-			"DEFAULT_DATA is not valid JSON after normalization: %w\nNormalized JSON:\n%s",
-			err,
-			obj,
-		)
-	}
-
-	return json.RawMessage(obj), nil
 }
 
 const templatePrefix = "template:"

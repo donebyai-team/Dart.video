@@ -747,7 +747,8 @@ type CodeRegistry struct {
 	MUrl          string                 `protobuf:"bytes,1,opt,name=mUrl,proto3" json:"mUrl,omitempty"`
 	TUrl          string                 `protobuf:"bytes,2,opt,name=tUrl,proto3" json:"tUrl,omitempty"`
 	Code          string                 `protobuf:"bytes,3,opt,name=code,proto3" json:"code,omitempty"`
-	Edits         *structpb.Struct       `protobuf:"bytes,4,opt,name=edits,proto3,oneof" json:"edits,omitempty"`
+	Edits         *structpb.Struct       `protobuf:"bytes,4,opt,name=edits,proto3,oneof" json:"edits,omitempty"` // only used to keep it as history
+	Defaults      *structpb.Struct       `protobuf:"bytes,5,opt,name=defaults,proto3,oneof" json:"defaults,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -806,6 +807,13 @@ func (x *CodeRegistry) GetCode() string {
 func (x *CodeRegistry) GetEdits() *structpb.Struct {
 	if x != nil {
 		return x.Edits
+	}
+	return nil
+}
+
+func (x *CodeRegistry) GetDefaults() *structpb.Struct {
+	if x != nil {
+		return x.Defaults
 	}
 	return nil
 }
@@ -1779,13 +1787,15 @@ const file_coasterai_core_v1_slide_proto_rawDesc = "" +
 	"\fcodeRegistry\x18\x01 \x01(\v2\x1f.coasterai.core.v1.CodeRegistryR\fcodeRegistry\x129\n" +
 	"\x04plan\x18\x02 \x01(\v2%.coasterai.core.v1.AnimationSlidePlanR\x04plan\x12-\n" +
 	"\x05edits\x18\x03 \x01(\v2\x17.google.protobuf.StructR\x05edits\x129\n" +
-	"\ahistory\x18\x04 \x03(\v2\x1f.coasterai.core.v1.CodeRegistryR\ahistory\"\x88\x01\n" +
+	"\ahistory\x18\x04 \x03(\v2\x1f.coasterai.core.v1.CodeRegistryR\ahistory\"\xcf\x01\n" +
 	"\fCodeRegistry\x12\x12\n" +
 	"\x04mUrl\x18\x01 \x01(\tR\x04mUrl\x12\x12\n" +
 	"\x04tUrl\x18\x02 \x01(\tR\x04tUrl\x12\x12\n" +
 	"\x04code\x18\x03 \x01(\tR\x04code\x122\n" +
-	"\x05edits\x18\x04 \x01(\v2\x17.google.protobuf.StructH\x00R\x05edits\x88\x01\x01B\b\n" +
-	"\x06_edits\"\xeb\x01\n" +
+	"\x05edits\x18\x04 \x01(\v2\x17.google.protobuf.StructH\x00R\x05edits\x88\x01\x01\x128\n" +
+	"\bdefaults\x18\x05 \x01(\v2\x17.google.protobuf.StructH\x01R\bdefaults\x88\x01\x01B\b\n" +
+	"\x06_editsB\v\n" +
+	"\t_defaults\"\xeb\x01\n" +
 	"\x0fSpotlightEffect\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\f\n" +
 	"\x01x\x18\x02 \x01(\x02R\x01x\x12\f\n" +
@@ -1994,29 +2004,30 @@ var file_coasterai_core_v1_slide_proto_depIdxs = []int32{
 	23, // 2: coasterai.core.v1.AnimationSlideContent.edits:type_name -> google.protobuf.Struct
 	11, // 3: coasterai.core.v1.AnimationSlideContent.history:type_name -> coasterai.core.v1.CodeRegistry
 	23, // 4: coasterai.core.v1.CodeRegistry.edits:type_name -> google.protobuf.Struct
-	2,  // 5: coasterai.core.v1.Slide.transition:type_name -> coasterai.core.v1.TransitionType
-	16, // 6: coasterai.core.v1.Slide.background_style:type_name -> coasterai.core.v1.BackgroundStyle
-	3,  // 7: coasterai.core.v1.Slide.direction:type_name -> coasterai.core.v1.TransitionDirection
-	10, // 8: coasterai.core.v1.Slide.content:type_name -> coasterai.core.v1.AnimationSlideContent
-	12, // 9: coasterai.core.v1.Slide.spotlights:type_name -> coasterai.core.v1.SpotlightEffect
-	13, // 10: coasterai.core.v1.Slide.callouts:type_name -> coasterai.core.v1.CalloutEffect
-	14, // 11: coasterai.core.v1.Slide.zooms:type_name -> coasterai.core.v1.ZoomEffect
-	23, // 12: coasterai.core.v1.Slide.plan:type_name -> google.protobuf.Struct
-	0,  // 13: coasterai.core.v1.Slide.slideStatus:type_name -> coasterai.core.v1.SlideStatus
-	18, // 14: coasterai.core.v1.BackgroundStyle.solid:type_name -> coasterai.core.v1.SolidColor
-	20, // 15: coasterai.core.v1.BackgroundStyle.gradient:type_name -> coasterai.core.v1.Gradient
-	19, // 16: coasterai.core.v1.BackgroundStyle.image:type_name -> coasterai.core.v1.BackgroundImage
-	6,  // 17: coasterai.core.v1.BackgroundStyle.pattern:type_name -> coasterai.core.v1.BackgroundPattern
-	17, // 18: coasterai.core.v1.BackgroundStyle.effect:type_name -> coasterai.core.v1.BackgroundEffect
-	7,  // 19: coasterai.core.v1.BackgroundEffect.type:type_name -> coasterai.core.v1.BackgroundEffectType
-	5,  // 20: coasterai.core.v1.Gradient.type:type_name -> coasterai.core.v1.GradientType
-	21, // 21: coasterai.core.v1.Gradient.stops:type_name -> coasterai.core.v1.GradientStop
-	15, // 22: coasterai.core.v1.Section.slides:type_name -> coasterai.core.v1.Slide
-	23, // [23:23] is the sub-list for method output_type
-	23, // [23:23] is the sub-list for method input_type
-	23, // [23:23] is the sub-list for extension type_name
-	23, // [23:23] is the sub-list for extension extendee
-	0,  // [0:23] is the sub-list for field type_name
+	23, // 5: coasterai.core.v1.CodeRegistry.defaults:type_name -> google.protobuf.Struct
+	2,  // 6: coasterai.core.v1.Slide.transition:type_name -> coasterai.core.v1.TransitionType
+	16, // 7: coasterai.core.v1.Slide.background_style:type_name -> coasterai.core.v1.BackgroundStyle
+	3,  // 8: coasterai.core.v1.Slide.direction:type_name -> coasterai.core.v1.TransitionDirection
+	10, // 9: coasterai.core.v1.Slide.content:type_name -> coasterai.core.v1.AnimationSlideContent
+	12, // 10: coasterai.core.v1.Slide.spotlights:type_name -> coasterai.core.v1.SpotlightEffect
+	13, // 11: coasterai.core.v1.Slide.callouts:type_name -> coasterai.core.v1.CalloutEffect
+	14, // 12: coasterai.core.v1.Slide.zooms:type_name -> coasterai.core.v1.ZoomEffect
+	23, // 13: coasterai.core.v1.Slide.plan:type_name -> google.protobuf.Struct
+	0,  // 14: coasterai.core.v1.Slide.slideStatus:type_name -> coasterai.core.v1.SlideStatus
+	18, // 15: coasterai.core.v1.BackgroundStyle.solid:type_name -> coasterai.core.v1.SolidColor
+	20, // 16: coasterai.core.v1.BackgroundStyle.gradient:type_name -> coasterai.core.v1.Gradient
+	19, // 17: coasterai.core.v1.BackgroundStyle.image:type_name -> coasterai.core.v1.BackgroundImage
+	6,  // 18: coasterai.core.v1.BackgroundStyle.pattern:type_name -> coasterai.core.v1.BackgroundPattern
+	17, // 19: coasterai.core.v1.BackgroundStyle.effect:type_name -> coasterai.core.v1.BackgroundEffect
+	7,  // 20: coasterai.core.v1.BackgroundEffect.type:type_name -> coasterai.core.v1.BackgroundEffectType
+	5,  // 21: coasterai.core.v1.Gradient.type:type_name -> coasterai.core.v1.GradientType
+	21, // 22: coasterai.core.v1.Gradient.stops:type_name -> coasterai.core.v1.GradientStop
+	15, // 23: coasterai.core.v1.Section.slides:type_name -> coasterai.core.v1.Slide
+	24, // [24:24] is the sub-list for method output_type
+	24, // [24:24] is the sub-list for method input_type
+	24, // [24:24] is the sub-list for extension type_name
+	24, // [24:24] is the sub-list for extension extendee
+	0,  // [0:24] is the sub-list for field type_name
 }
 
 func init() { file_coasterai_core_v1_slide_proto_init() }

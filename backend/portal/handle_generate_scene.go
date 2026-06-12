@@ -210,6 +210,7 @@ func (p *Portal) newAnimationGeneratorAgent(logger *zap.Logger, sessionID, slide
 		p.authStateStore,
 		p.db,
 		p.mediaService,
+		p.codeBuilderService,
 		logger,
 		p.brandIdentityService,
 		statePublisher,

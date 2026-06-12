@@ -87,7 +87,8 @@ message CodeRegistry {
   string mUrl = 1;
   string tUrl = 2;
   string code = 3;
-  optional google.protobuf.Struct edits = 4;
+  optional google.protobuf.Struct edits = 4; // only used to keep it as history
+  optional google.protobuf.Struct defaults = 5;
 }
 
 // ===================== EFFECTS =====================

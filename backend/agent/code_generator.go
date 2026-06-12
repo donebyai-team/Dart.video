@@ -2,10 +2,8 @@ package agent
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
 	"github.com/shank318/coasterai/agent/agenterrors"
 	"github.com/shank318/coasterai/agent/common"
 	"github.com/shank318/coasterai/agent/llm"
@@ -17,6 +15,7 @@ import (
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
 	"github.com/shank318/coasterai/services"
 	"github.com/shank318/coasterai/services/brand_identity"
+	"github.com/shank318/coasterai/services/code_builder"
 	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
 	"strings"
@@ -47,6 +46,7 @@ type codeGenerator struct {
 	logger               *zap.Logger
 	fps                  int64
 	brandIdentityService brand_identity.BrandIdentity
+	codeBuilder          code_builder.CodeBuilder
 	assetRegistry        *services.MediaAssetRegistry
 	mediaStore           services.MediaStore
 	state                common.AgentStatusPublisher
@@ -62,6 +62,7 @@ func NewCodeGeneratorAgent(
 	cache cache.Cache,
 	db datastore.Repository,
 	mediaStore services.MediaStore,
+	codeBuilder code_builder.CodeBuilder,
 	logger *zap.Logger,
 	brandIdentityService brand_identity.BrandIdentity,
 	state common.AgentStatusPublisher,
@@ -79,6 +80,7 @@ func NewCodeGeneratorAgent(
 		state:                state,
 		session:              session,
 		toolRegistry:         common.NewToolRegistry(state, session, logger),
+		codeBuilder:          codeBuilder,
 	}
 }
 
@@ -260,8 +262,9 @@ func (l *codeGenerator) GenerateCode(
 		slide.Content.CodeRegistry != nil &&
 		slide.Content.CodeRegistry.MUrl != "" {
 		session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
-			Role:         pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
-			CodeSnapshot: slide.Content.CodeRegistry.MUrl,
+			Role:            pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
+			CodeSnapshot:    slide.Content.CodeRegistry.MUrl,
+			DefaultCodeData: slide.Content.CodeRegistry.Defaults,
 		})
 
 		// If manual edits are available
@@ -338,8 +341,33 @@ func (l *codeGenerator) runPlanning(ctx context.Context, generatePlanRequest typ
 			return nil, agenterrors.Internal("codeResponse is missing", nil)
 		}
 
-		asset, err := l.uploadAndBuild(ctx, codeResponse.Code)
+		codeFilePath := fmt.Sprintf("templates/generated/%s", l.orgID)
+		if l.slideID != "" {
+			codeFilePath = fmt.Sprintf("%s/%s", codeFilePath, l.slideID)
+		}
+
+		buildOutput, err := l.codeBuilder.ValidateAndBuild(ctx, code_builder.ValidateAndBuildInput{
+			Animation:          codeResponse,
+			OutputPath:         codeFilePath,
+			MediaAssetRegistry: l.assetRegistry,
+		})
 		if err != nil {
+			var buildErr *code_builder.BuildError
+			// Handle build errors and retry before saving
+			if errors.As(err, &buildErr) {
+				l.logger.Info("runPlanning: build failed, retrying",
+					zap.Int("attempt", attempt),
+					zap.Error(err))
+
+				l.state.Publish(common.AgentState{
+					Thinking: "Build failed, retrying...",
+					State:    common.StateStatusProcessing,
+				})
+
+				appendRetryConversation(history, codeResponse.Code, buildErr.Error())
+				continue
+			}
+
 			return nil, err
 		}
 
@@ -356,41 +384,20 @@ func (l *codeGenerator) runPlanning(ctx context.Context, generatePlanRequest typ
 		//	CodeSnapshot: asset.Url,
 		//})
 
-		// TODO: Handle build errors and retry before saving
-
 		err = l.session.Save(ctx, session)
 		if err != nil {
 			return nil, err
 		}
 
-		edits := json.RawMessage(`{}`)
-
 		slide := &pbcore.Slide{
 			DurationInFrames: int32(codeResponse.Total_frames),
 			SettledFrame:     int32(codeResponse.Total_frames),
 			Content: &pbcore.AnimationSlideContent{
-				CodeRegistry: &pbcore.CodeRegistry{
-					MUrl: asset.Url,
-				},
+				CodeRegistry: buildOutput.CodeRegistry,
 			},
 		}
 
-		if codeResponse.ManualEdits != nil {
-			raw := []byte(*codeResponse.ManualEdits)
-
-			if !json.Valid(raw) {
-				l.logger.Warn("invalid manual edits", zap.String("manual_edits", *codeResponse.ManualEdits))
-			} else {
-				edits = raw
-			}
-		}
-
-		toPatches, err := utils.RawMessageToStruct(edits)
-		if err != nil {
-			return nil, fmt.Errorf("invalid template registry patch")
-		}
-
-		slide.Content.Edits = toPatches
+		slide.Content.Edits = buildOutput.CodeRegistry.Edits
 
 		return &common.RunResult{
 			Status:             common.RunStatusCompleted,
@@ -401,39 +408,6 @@ func (l *codeGenerator) runPlanning(ctx context.Context, generatePlanRequest typ
 
 	return nil, agenterrors.AnimationGenerationFailed("unable to generate, all retries exhausted", nil)
 
-}
-
-func (l *codeGenerator) uploadAndBuild(ctx context.Context, code string) (*pbcore.MediaAsset, error) {
-	codeFilePath := fmt.Sprintf("templates/generated/%s", l.orgID)
-	if l.slideID != "" {
-		codeFilePath = fmt.Sprintf("%s/%s", codeFilePath, l.slideID)
-	}
-
-	//buildOutput, err := l.codeBuilder.ValidateAndBuild(ctx, &services.ValidateAndBuildInput{
-	//	Code:       code,
-	//	OutputPath: codeFilePath,
-	//})
-	//
-	//if err != nil {
-	//	return nil, fmt.Errorf("failed to build animation: %w", err)
-	//}
-	assetID := uuid.New().String()
-	codeFilePath = fmt.Sprintf("%s/%s", codeFilePath, assetID)
-
-	// Sanitize
-	code = common.SanitizeCommonCode(code)
-	// Resolve media assets
-	code = l.assetRegistry.ResolveMediaHandles(code)
-
-	uploadCodeAsset, err := l.mediaStore.UploadCode(ctx, code, codeFilePath)
-	if err != nil {
-		return nil, err
-	}
-
-	l.logger.Info("uploaded generated code",
-		zap.String("assigned_ids_url", uploadCodeAsset.Url))
-
-	return uploadCodeAsset, nil
 }
 
 type GenerationStage string
@@ -500,7 +474,7 @@ func CreativeStageMessage(stage GenerationStage, attempt int) string {
 	}
 }
 
-const maxAttempts = 1
+const maxAttempts = 3
 
 type TemplateGenerationCallback func(TemplateGenerationProgress)
 
@@ -508,16 +482,12 @@ type TemplateGenerationProgress struct {
 	Message string
 }
 
-func buildFailureMessage(buildErr *services.BuildError) string {
+func buildFailureMessage(buildErr *code_builder.BuildError) string {
 	switch buildErr.ErrorType {
 	case "compile_error":
 		return "Compile failed with error:\n" + buildErr.Error()
-	case "rule_not_enforced":
-		return "Generated code violated required animation rules:\n" + buildErr.Error() + "\nReview the generation rules and rewrite the component to follow them exactly."
 	case "render_error":
 		return "GenerateEditsFromProps failed with error:\n" + buildErr.Error()
-	case "framerules_not_enforced":
-		return "Generated code violated required frame duration rules:\n" + buildErr.Error() + "\nReview the FRAME DURATION RULES rules and rewrite the component to follow them exactly."
 	default:
 		return "Build failed with error:\n" + buildErr.Error()
 	}

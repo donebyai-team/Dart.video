@@ -24,6 +24,7 @@ const TEMPLATE_CATEGORIES = [
   "HOOK",
   "PROBLEM",
   "SOLUTION",
+  "REVEAL",
   "CTA",
   "INTRO",
   "OUTRO",

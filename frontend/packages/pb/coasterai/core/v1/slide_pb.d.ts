@@ -158,9 +158,16 @@ export declare type CodeRegistry = Message<"coasterai.core.v1.CodeRegistry"> & {
   code: string;
 
   /**
+   * only used to keep it as history
+   *
    * @generated from field: optional google.protobuf.Struct edits = 4;
    */
   edits?: JsonObject;
+
+  /**
+   * @generated from field: optional google.protobuf.Struct defaults = 5;
+   */
+  defaults?: JsonObject;
 };
 
 /**

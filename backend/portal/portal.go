@@ -9,6 +9,7 @@ import (
 	"github.com/shank318/coasterai/portal/server/handlers"
 	"github.com/shank318/coasterai/services/audio"
 	"github.com/shank318/coasterai/services/brand_identity"
+	"github.com/shank318/coasterai/services/code_builder"
 	figmasvc "github.com/shank318/coasterai/services/figma"
 	"github.com/shank318/coasterai/services/templates"
 	"regexp"
@@ -40,7 +41,7 @@ type Portal struct {
 	figmaOauthClient        *figma2.OauthClient
 	figmaService            figmasvc.Service
 	mediaService            services.MediaStore
-	codeBuilderService      services.TemplateCodeBuilder
+	codeBuilderService      code_builder.CodeBuilder
 	videoGenerationService  services.VideoGeneration
 	llmService              llm.Service
 	renderVideoService      services.RenderVideoService
@@ -60,7 +61,7 @@ func New(
 	videoGenerationService services.VideoGeneration,
 	renderVideoService services.RenderVideoService,
 	brandIdentityService brand_identity.BrandIdentity,
-	codeBuilderService services.TemplateCodeBuilder,
+	codeBuilderService code_builder.CodeBuilder,
 	audioGenerationProvider audio.Provider,
 	llmService llm.Service,
 	templateService templates.Service,

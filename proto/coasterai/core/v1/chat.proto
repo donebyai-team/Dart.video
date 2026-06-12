@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package coasterai.core.v1;
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
 
 option go_package = "github.com/shank318/coasterai/pb/coasterai/core/v1;pbcore";
 
@@ -30,5 +31,6 @@ message ConversationMessage {
   repeated string referenceIds = 6;
   .google.protobuf.Timestamp created_at = 7;
   ConversationMessageType type = 8;
+  optional google.protobuf.Struct defaultCodeData = 9;
 }
 

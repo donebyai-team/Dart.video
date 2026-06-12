@@ -15,23 +15,35 @@ import { CanvasEffectsLayer } from '../effects/CanvasEffectsLayer'
 const compiledTemplateCache = new Map<string, React.ComponentType<any>>()
 const compiledTemplatePromiseCache = new Map<string, Promise<React.ComponentType<any>>>()
 
+function sanitizeTemplateCode(code: string, defaults?: unknown): string {
+  return code.replace(
+    '__DEFAULT_DATA__',
+    JSON.stringify(defaults, null, 2)
+  )
+}
+
 async function loadCompiledTemplate(
-  key: string,
+  cacheKey: string,
+  templateSourceKey: string,
+  defaults?: unknown,
   inlineCode?: string
 ): Promise<React.ComponentType<any>> {
-  const cached = compiledTemplateCache.get(key)
+  const cached = compiledTemplateCache.get(cacheKey)
   if (cached) return cached
 
-  const inFlight = compiledTemplatePromiseCache.get(key)
+  const inFlight = compiledTemplatePromiseCache.get(cacheKey)
   if (inFlight) return inFlight
 
   const promise = (async () => {
     let code: string
 
     if (inlineCode?.trim()) {
-      code = inlineCode
+      code = sanitizeTemplateCode(inlineCode, defaults)
     } else {
-      code = await loadTemplateSource(key)
+      code = sanitizeTemplateCode(
+        await loadTemplateSource(templateSourceKey),
+        defaults
+      )
     }
 
     const result = compileRemoteComponent(code)
@@ -42,16 +54,16 @@ async function loadCompiledTemplate(
       )
     }
 
-    compiledTemplateCache.set(key, result.Component)
-    compiledTemplatePromiseCache.delete(key)
+    compiledTemplateCache.set(cacheKey, result.Component)
+    compiledTemplatePromiseCache.delete(cacheKey)
 
     return result.Component
   })().catch((error) => {
-    compiledTemplatePromiseCache.delete(key)
+    compiledTemplatePromiseCache.delete(cacheKey)
     throw error
   })
 
-  compiledTemplatePromiseCache.set(key, promise)
+  compiledTemplatePromiseCache.set(cacheKey, promise)
 
   return promise
 }
@@ -92,19 +104,29 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
   const content = slide.content
+  const defaults = content?.codeRegistry?.defaults
 
   // URL to fetch LLM-generated TSX source from
   const inlineCode = content?.codeRegistry?.code?.trim()
   const templateUrl = content?.codeRegistry?.mUrl
+  const sanitizedInlineCode = React.useMemo(() => {
+    if (!inlineCode) return inlineCode
+
+    return sanitizeTemplateCode(inlineCode, defaults)
+  }, [inlineCode, defaults])
 
   // Unique cache key
   const templateKey = React.useMemo(() => {
-    if (inlineCode) {
-      return `inline:${hashString(inlineCode)}`;
+    if (templateUrl) {
+      return templateUrl
+    }
+
+    if (sanitizedInlineCode) {
+      return `inline:${hashString(sanitizedInlineCode)}`;
     }
 
     return templateUrl ?? null;
-  }, [inlineCode, templateUrl]);
+  }, [sanitizedInlineCode, templateUrl]);
 
   const background = backgroundStyleToCSS(slide.backgroundStyle)
 
@@ -175,7 +197,9 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
         try {
           const component = await loadCompiledTemplate(
             templateKey,
-            inlineCode
+            templateUrl ?? templateKey,
+            defaults,
+            templateUrl ? undefined : sanitizedInlineCode
           )
 
           if (!disposed) {
@@ -225,7 +249,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
     return () => {
       disposed = true
     }
-  }, [templateKey, inlineCode, templateUrl, renderHandle])
+  }, [templateKey, sanitizedInlineCode, inlineCode, templateUrl, defaults, renderHandle])
 
   // PatchOverlay — read from window (set by useAnimationEdit in editor)
   // or fall back to persisted edits (during Remotion rendering).
@@ -257,7 +281,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
             <TemplateLoadingPlaceholder />
           ) : CompiledComponent ? (
             <PatchContextProvider overlay={content?.edits as PatchOverlay}>
-              <CompiledComponent __onTemplateRuntimeError={handleTemplateRenderError} />
+              <CompiledComponent {...defaults} __onTemplateRuntimeError={handleTemplateRenderError} />
             </PatchContextProvider>
           ) : templateError ? (
             <TemplateErrorFallback message={templateError} />

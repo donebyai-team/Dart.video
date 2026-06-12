@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv1";
-import type { Message } from "@bufbuild/protobuf";
+import type { JsonObject, Message } from "@bufbuild/protobuf";
 import type { Timestamp } from "@bufbuild/protobuf/wkt";
 
 /**
@@ -56,6 +56,11 @@ export declare type ConversationMessage = Message<"coasterai.core.v1.Conversatio
    * @generated from field: coasterai.core.v1.ConversationMessageType type = 8;
    */
   type: ConversationMessageType;
+
+  /**
+   * @generated from field: optional google.protobuf.Struct defaultCodeData = 9;
+   */
+  defaultCodeData?: JsonObject;
 };
 
 /**

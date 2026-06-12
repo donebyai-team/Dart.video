@@ -1,4 +1,4 @@
-package common
+package code_builder
 
 import (
 	"github.com/stretchr/testify/require"

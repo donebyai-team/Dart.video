@@ -9,6 +9,7 @@ package pbcore
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	structpb "google.golang.org/protobuf/types/known/structpb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
@@ -132,13 +133,14 @@ type ConversationMessage struct {
 	Message  string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	AssetIds []string               `protobuf:"bytes,3,rep,name=assetIds,proto3" json:"assetIds,omitempty"`
 	// * Model used for generation
-	Model         string                  `protobuf:"bytes,4,opt,name=model,proto3" json:"model,omitempty"`
-	CodeSnapshot  string                  `protobuf:"bytes,5,opt,name=codeSnapshot,proto3" json:"codeSnapshot,omitempty"`
-	ReferenceIds  []string                `protobuf:"bytes,6,rep,name=referenceIds,proto3" json:"referenceIds,omitempty"`
-	CreatedAt     *timestamppb.Timestamp  `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	Type          ConversationMessageType `protobuf:"varint,8,opt,name=type,proto3,enum=coasterai.core.v1.ConversationMessageType" json:"type,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	Model           string                  `protobuf:"bytes,4,opt,name=model,proto3" json:"model,omitempty"`
+	CodeSnapshot    string                  `protobuf:"bytes,5,opt,name=codeSnapshot,proto3" json:"codeSnapshot,omitempty"`
+	ReferenceIds    []string                `protobuf:"bytes,6,rep,name=referenceIds,proto3" json:"referenceIds,omitempty"`
+	CreatedAt       *timestamppb.Timestamp  `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	Type            ConversationMessageType `protobuf:"varint,8,opt,name=type,proto3,enum=coasterai.core.v1.ConversationMessageType" json:"type,omitempty"`
+	DefaultCodeData *structpb.Struct        `protobuf:"bytes,9,opt,name=defaultCodeData,proto3,oneof" json:"defaultCodeData,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *ConversationMessage) Reset() {
@@ -227,11 +229,18 @@ func (x *ConversationMessage) GetType() ConversationMessageType {
 	return ConversationMessageType_CONVERSATION_MESSAGE_TYPE
 }
 
+func (x *ConversationMessage) GetDefaultCodeData() *structpb.Struct {
+	if x != nil {
+		return x.DefaultCodeData
+	}
+	return nil
+}
+
 var File_coasterai_core_v1_chat_proto protoreflect.FileDescriptor
 
 const file_coasterai_core_v1_chat_proto_rawDesc = "" +
 	"\n" +
-	"\x1ccoasterai/core/v1/chat.proto\x12\x11coasterai.core.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xdd\x02\n" +
+	"\x1ccoasterai/core/v1/chat.proto\x12\x11coasterai.core.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\"\xb9\x03\n" +
 	"\x13ConversationMessage\x127\n" +
 	"\x04role\x18\x01 \x01(\x0e2#.coasterai.core.v1.ConversationRoleR\x04role\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12\x1a\n" +
@@ -241,7 +250,9 @@ const file_coasterai_core_v1_chat_proto_rawDesc = "" +
 	"\freferenceIds\x18\x06 \x03(\tR\freferenceIds\x129\n" +
 	"\n" +
 	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12>\n" +
-	"\x04type\x18\b \x01(\x0e2*.coasterai.core.v1.ConversationMessageTypeR\x04type*\x8e\x01\n" +
+	"\x04type\x18\b \x01(\x0e2*.coasterai.core.v1.ConversationMessageTypeR\x04type\x12F\n" +
+	"\x0fdefaultCodeData\x18\t \x01(\v2\x17.google.protobuf.StructH\x00R\x0fdefaultCodeData\x88\x01\x01B\x12\n" +
+	"\x10_defaultCodeData*\x8e\x01\n" +
 	"\x10ConversationRole\x12!\n" +
 	"\x1dCONVERSATION_ROLE_UNSPECIFIED\x10\x00\x12\x1a\n" +
 	"\x16CONVERSATION_ROLE_USER\x10\x01\x12\x1f\n" +
@@ -272,16 +283,18 @@ var file_coasterai_core_v1_chat_proto_goTypes = []any{
 	(ConversationMessageType)(0),  // 1: coasterai.core.v1.ConversationMessageType
 	(*ConversationMessage)(nil),   // 2: coasterai.core.v1.ConversationMessage
 	(*timestamppb.Timestamp)(nil), // 3: google.protobuf.Timestamp
+	(*structpb.Struct)(nil),       // 4: google.protobuf.Struct
 }
 var file_coasterai_core_v1_chat_proto_depIdxs = []int32{
 	0, // 0: coasterai.core.v1.ConversationMessage.role:type_name -> coasterai.core.v1.ConversationRole
 	3, // 1: coasterai.core.v1.ConversationMessage.created_at:type_name -> google.protobuf.Timestamp
 	1, // 2: coasterai.core.v1.ConversationMessage.type:type_name -> coasterai.core.v1.ConversationMessageType
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	4, // 3: coasterai.core.v1.ConversationMessage.defaultCodeData:type_name -> google.protobuf.Struct
+	4, // [4:4] is the sub-list for method output_type
+	4, // [4:4] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_coasterai_core_v1_chat_proto_init() }
@@ -289,6 +302,7 @@ func file_coasterai_core_v1_chat_proto_init() {
 	if File_coasterai_core_v1_chat_proto != nil {
 		return
 	}
+	file_coasterai_core_v1_chat_proto_msgTypes[0].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
