@@ -4,57 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/shank318/coasterai/services"
-	"google.golang.org/protobuf/encoding/protojson"
-	"google.golang.org/protobuf/types/known/structpb"
 	"regexp"
 	"strings"
 )
 
-const defaultDataKey = "DEFAULT_DATA"
-
-var iconRegex = regexp.MustCompile(`"(icon:[^"]+)"`)
-var urlRegex = regexp.MustCompile(`"(https?://[^"]+)"`)
-
-func resolveIcons(code string) string {
-	// icon:name -> URL
-	code = iconRegex.ReplaceAllStringFunc(code, func(match string) string {
-		value := strings.Trim(match, `"`)
-
-		iconName := strings.TrimPrefix(value, "icon:")
-		url := services.ResolveIconFromName(iconName)
-
-		if url == "" {
-			return match
-		}
-
-		return `"` + url + `"`
-	})
-	return code
-}
-
-func resolveIconURL(code string) string {
-	// URL -> icon:name
-	code = urlRegex.ReplaceAllStringFunc(code, func(match string) string {
-		value := strings.Trim(match, `"`)
-
-		iconName := services.ResolveIconNameFromURL(value)
-		if iconName == "" {
-			return match
-		}
-
-		return `"icon:` + iconName + `"`
-	})
-
-	return code
-}
-
-func SanitizeCodeBeforeSendingToLLM(code string) string {
-	code = resolveIconURL(code)
-
-	return code
-}
-
-func SanitizeCodeBeforeSaving(code string) string {
+func PostProcess(code string) string {
 	// Replace theme.logo.url with theme.logo?.url
 	replacements := map[string]string{
 		"theme.logo.url":        "theme.logo?.url",
@@ -72,6 +26,25 @@ func SanitizeCodeBeforeSaving(code string) string {
 	// Resolve icons eg. Icon: "icon:heart" -> our icon URL
 	code = resolveIcons(code)
 
+	return code
+}
+
+var iconRegex = regexp.MustCompile(`"(icon:[^"]+)"`)
+
+func resolveIcons(code string) string {
+	// icon:name -> URL
+	code = iconRegex.ReplaceAllStringFunc(code, func(match string) string {
+		value := strings.Trim(match, `"`)
+
+		iconName := strings.TrimPrefix(value, "icon:")
+		url := services.ResolveIconFromName(iconName)
+
+		if url == "" {
+			return match
+		}
+
+		return `"` + url + `"`
+	})
 	return code
 }
 
@@ -175,34 +148,4 @@ outer:
 			code[end+1:]
 
 	return json.RawMessage(obj), updatedCode, nil
-}
-
-func InjectDefaultDataBackToGeneratedCode(
-	code string,
-	data *structpb.Struct,
-) (string, error) {
-	if data == nil {
-		return "", fmt.Errorf("%s data is nil", defaultDataKey)
-	}
-
-	placeholder := fmt.Sprintf("__%s__", defaultDataKey)
-
-	if !strings.Contains(code, placeholder) {
-		return "", fmt.Errorf("placeholder %s not found", placeholder)
-	}
-
-	jsonBytes, err := protojson.MarshalOptions{
-		Multiline: true,
-		Indent:    "  ",
-	}.Marshal(data)
-	if err != nil {
-		return "", fmt.Errorf("marshal %s: %w", defaultDataKey, err)
-	}
-
-	return strings.Replace(
-		code,
-		placeholder,
-		string(jsonBytes),
-		1,
-	), nil
 }

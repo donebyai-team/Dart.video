@@ -94,7 +94,7 @@ func (s *codeBuilderService) ValidateAndBuild(
 	code := input.Animation.Code
 
 	// Sanitize
-	code = SanitizeCodeBeforeSaving(code)
+	code = PostProcess(code)
 	// Resolve media assets
 	code = input.MediaAssetRegistry.ResolveMediaHandles(code)
 
