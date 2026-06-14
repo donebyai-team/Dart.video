@@ -35,6 +35,7 @@ export const IconAssetFieldSchema: FieldSchema[] = [
 ];
 
 const ICON_BASE = "https://storage.googleapis.com/coasterai-public/icons";
+const LUCIDE_CDN_BASE = "https://cdn.jsdelivr.net/npm/lucide-static@0.408.0/icons";
 const PLACEHOLDER_ICON = "heart";
 
 const toKebabCase = (value: string): string => value.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
@@ -58,10 +59,10 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
   const fallbackUrl = `${ICON_BASE}/${variant}/${PLACEHOLDER_ICON}.svg`;
   const isLikelyLucideName = /^[A-Z][A-Za-z0-9]*$/.test(patchedIcon);
   /* Assumption: a bare PascalCase string like `Heart` or `ArrowRight` is intended
-     to reference a Lucide icon name, so we first try the matching CDN asset before
-     falling back to the original string as an image/file source. */
+     to reference a Lucide icon name, so we first try the matching Lucide CDN asset
+     before falling back to the original string as an image/file source. */
   const lucideStringUrl = isLikelyLucideName
-    ? `${ICON_BASE}/${variant}/${toKebabCase(patchedIcon)}.svg`
+    ? `${LUCIDE_CDN_BASE}/${toKebabCase(patchedIcon)}.svg`
     : "";
 
   const scaledSize = scaleToCanvas(patchedSize, preset);

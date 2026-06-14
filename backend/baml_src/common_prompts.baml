@@ -110,10 +110,15 @@ template_string AnimationPrimitives() #"
     {% endraw %}
 
     ### Icons
-    - Always use `IconAsset` to render icons.
-    - If the icon exists in `lucide-react`, import it and pass the component to the `Icon` prop.
-    - If the icon does not exist in `lucide-react`, pass a string identifier using the format `icon:<icon-name>`. eg. `icon:google`
-    - Every `IconAsset` must have a unique `id` starting with `iconasset-`.
+
+    - Always render icons using `IconAsset`.
+    - If the icon exists in `lucide-react`, import it and pass the icon component to the `Icon` prop.
+    - If it does not exist in `lucide-react`, use a string in the format `icon:<icon-name>` (e.g. `icon:google`).
+    - Every `IconAsset` must have a unique `id` prefixed with `iconasset-`.
+    - The `Icon` prop accepts:
+      * A Lucide icon component
+      * A Lucide icon name as a string (e.g. `"Heart"`)
+      * A custom icon string in the format `icon:<icon-name>`
 
     Examples:
     {% raw %}
@@ -121,15 +126,10 @@ template_string AnimationPrimitives() #"
     import { Heart } from "lucide-react";
 
     <IconAsset
-      id="iconasset-heart"
-      Icon={Heart}
+      id="iconasset-1"
+      Icon={Heart} or {"Heart"} or {"icon:aws"}
       size={48}
-    />
-
-    <IconAsset
-      id="iconasset-drive"
-      Icon="icon:google-drive"
-      size={48}
+      style={{}}
     />
     ```
     {% endraw %}

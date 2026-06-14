@@ -6,12 +6,12 @@ import { REGISTERED_COMPONENT_NAMES, useTheme } from "@coasterai/animation";
 
 import {
   AbsoluteFill,
-  Img,
   Sequence,
   interpolate,
   spring,
   useCurrentFrame,
   useVideoConfig,
+  Easing,
 } from "remotion";
 
 
@@ -45,6 +45,7 @@ const SHARED_PARAM_NAMES: string[] = [
   "useVideoConfig",
   "spring",
   "Sequence",
+  "Easing",
   // Lucide icons — injected as the full module; individual icons are
   // destructured from this via buildLucideDestructure()
   "__LucideReact__",
@@ -67,6 +68,7 @@ function getSharedParamValues(validateShapePropsOption: boolean): unknown[] {
     useVideoConfig,
     spring,
     Sequence,
+    Easing,
     LucideReact,
     // Animation primitive values — each registered component name maps to its implementation.
     // Order must match the names appended to SHARED_PARAM_NAMES above.
