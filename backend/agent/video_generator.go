@@ -342,7 +342,7 @@ func (a *agentV2) runPlanning(ctx context.Context, req types.VideoGenerationPlan
 		FieldsToSkip: scenes.SkipLLMFields,
 	})
 
-	history, err := a.session.ConvertToContextMessages(ctx, session.ConversationHistory, a.assetRegistry)
+	history, _, err := a.session.ConvertToContextMessages(ctx, session.ConversationHistory, a.assetRegistry)
 	if err != nil {
 		return nil, err
 	}

@@ -6,6 +6,12 @@ import "google/protobuf/struct.proto";
 
 option go_package = "github.com/shank318/coasterai/pb/coasterai/core/v1;pbcore";
 
+enum AIModel {
+    AI_MODEL_UNSPECIFIED = 0;
+    AI_MODEL_GEMINI_3_PRO = 1;
+    AI_MODEL_GPT_5_5 = 2;
+}
+
 enum ConversationRole {
   CONVERSATION_ROLE_UNSPECIFIED = 0;
   CONVERSATION_ROLE_USER = 1;
@@ -26,7 +32,7 @@ message ConversationMessage {
   string message = 2;
   repeated string assetIds = 3;
   /** Model used for generation */
-  string model = 4;
+  optional AIModel aiModel = 4;
   string codeSnapshot = 5;
   repeated string referenceIds = 6;
   .google.protobuf.Timestamp created_at = 7;

@@ -2,6 +2,7 @@ import { create } from '@bufbuild/protobuf'
 import { useClientsContext } from '@coasterai/ui-core/context/ClientContext'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Palette, Sparkles, Square, X } from 'lucide-react'
+import { AIModel } from '@coasterai/pb/coasterai/core/v1/chat_pb'
 import type { PatchOverlay } from '@coasterai/renderer'
 import { useRouter } from 'next/navigation'
 import type { AskUserQuestion, GenerateOrEditSceneResponse } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
@@ -12,12 +13,15 @@ import { Dialog, DialogContent } from '@/components/ui/dialog'
 import QuestionPanel from '@/components/composer/QuestionPanel'
 import ThinkingViewComponent from '@/components/composer/ThinkingViewComponent'
 import AssetUploadDropdown from '@/components/composer/AssetUploadDropdown'
+import AIModelSelector from '@/components/composer/AIModelSelector'
 import BrandLibrarySelector from '@/components/composer/BrandLibrarySelector'
 import ManualMediaImportPanel from '@/components/assets/ManualMediaImportPanel'
 import SelectedAssetsDialog, { type SelectedAssetWithPreview } from '@/components/assets/SelectedAssetsDialog'
 import { useVideoStore } from '@/stores/video'
 import { getConnectError } from '@/utils/error'
 import toast from 'react-hot-toast'
+import { useAuth } from '@coasterai/ui-core/hooks/useAuth'
+import { isPlatformAdmin } from '@coasterai/ui-core/helper/role'
 
 interface ScenePromptComposerProps {
   setOverlay: (overlay: PatchOverlay) => void
@@ -100,6 +104,7 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
   const brandLibraryID = useVideoStore(s => s.videoConfig?.metadata?.generatedBranding?.brandLibraryID)
   const handleSelectEntity = useVideoStore(s => s.handleSelectEntity)
   const acceptVideoConfigChanges = useVideoStore(s => s.acceptVideoConfigChanges)
+  const { user } = useAuth()
   const { portalClient } = useClientsContext()
   const router = useRouter()
 
@@ -118,6 +123,7 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
   const [selectedAssetsDialogOpen, setSelectedAssetsDialogOpen] = useState(false)
   const [questionAssetsDialogOpen, setQuestionAssetsDialogOpen] = useState(false)
   const [questionAssets, setQuestionAssets] = useState<SelectedAssetWithPreview[]>([])
+  const [selectedAIModel, setSelectedAIModel] = useState<AIModel | undefined>()
 
   const hasSelectedAssets = selectedReferences.length > 0
   const abortControllerRef = useRef<AbortController | null>(null)
@@ -289,6 +295,7 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
           input: {
             case: 'request',
             value: {
+              aiModel: selectedAIModel,
               prompt: finalPrompt,
               assets,
               references,
@@ -583,8 +590,16 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
           placeholder="Describe the changes you'd like to make..."
           rows={5}
           disabled={isSubmitting || stage === 'question'}
-          className='w-full resize-none bg-transparent px-3 py-2.5 pr-12 text-sm placeholder:text-muted-foreground/60 focus:outline-none disabled:opacity-50'
+          className='w-full resize-none bg-transparent px-3 py-2.5 pb-11 pr-12 text-sm placeholder:text-muted-foreground/60 focus:outline-none disabled:opacity-50'
         />
+
+        {user && isPlatformAdmin(user) && <div className='absolute bottom-2 left-2'>
+          <AIModelSelector
+            value={selectedAIModel}
+            onChange={setSelectedAIModel}
+            disabled={isSubmitting || stage === 'question'}
+          />
+        </div>}
 
         <div className='absolute bottom-2 right-2'>
           {isSubmitting || stage === 'question' ? (

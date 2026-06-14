@@ -201,6 +201,7 @@ message CreateVideoRequest {
   repeated core.v1.SelectedMediaAsset assets = 9;
   map<string, string> questions = 10;
   repeated core.v1.SelectedMediaAsset references = 11;
+  optional core.v1.AIModel aiModel = 12;
 }
 
 message CreateVideoResponse {

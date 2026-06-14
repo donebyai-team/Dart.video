@@ -286,7 +286,7 @@ func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest ty
 		FieldsToSkip: nil,
 	})
 
-	history, err := l.session.ConvertToContextMessages(ctx, session.ConversationHistory, l.assetRegistry)
+	history, _, err := l.session.ConvertToContextMessages(ctx, session.ConversationHistory, l.assetRegistry)
 	if err != nil {
 		return nil, err
 	}

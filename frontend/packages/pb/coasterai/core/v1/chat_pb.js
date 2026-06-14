@@ -9,7 +9,7 @@ import { file_google_protobuf_struct, file_google_protobuf_timestamp } from "@bu
  * Describes the file coasterai/core/v1/chat.proto.
  */
 export const file_coasterai_core_v1_chat = /*@__PURE__*/
-  fileDesc("Chxjb2FzdGVyYWkvY29yZS92MS9jaGF0LnByb3RvEhFjb2FzdGVyYWkuY29yZS52MSLbAgoTQ29udmVyc2F0aW9uTWVzc2FnZRIxCgRyb2xlGAEgASgOMiMuY29hc3RlcmFpLmNvcmUudjEuQ29udmVyc2F0aW9uUm9sZRIPCgdtZXNzYWdlGAIgASgJEhAKCGFzc2V0SWRzGAMgAygJEg0KBW1vZGVsGAQgASgJEhQKDGNvZGVTbmFwc2hvdBgFIAEoCRIUCgxyZWZlcmVuY2VJZHMYBiADKAkSLgoKY3JlYXRlZF9hdBgHIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASOAoEdHlwZRgIIAEoDjIqLmNvYXN0ZXJhaS5jb3JlLnYxLkNvbnZlcnNhdGlvbk1lc3NhZ2VUeXBlEjUKD2RlZmF1bHRDb2RlRGF0YRgJIAEoCzIXLmdvb2dsZS5wcm90b2J1Zi5TdHJ1Y3RIAIgBAUISChBfZGVmYXVsdENvZGVEYXRhKo4BChBDb252ZXJzYXRpb25Sb2xlEiEKHUNPTlZFUlNBVElPTl9ST0xFX1VOU1BFQ0lGSUVEEAASGgoWQ09OVkVSU0FUSU9OX1JPTEVfVVNFUhABEh8KG0NPTlZFUlNBVElPTl9ST0xFX0FTU0lTVEFOVBACEhoKFkNPTlZFUlNBVElPTl9ST0xFX1RPT0wQAyqrAQoXQ29udmVyc2F0aW9uTWVzc2FnZVR5cGUSHQoZQ09OVkVSU0FUSU9OX01FU1NBR0VfVFlQRRAAEiEKHUNPTlZFUlNBVElPTl9NRVNTQUdFX1RISU5LSU5HEAESJwojQ09OVkVSU0FUSU9OX01FU1NBR0VfRklOQUxfVEhJTktJTkcQAhIlCiFDT05WRVJTQVRJT05fTUVTU0FHRV9NQU5VQUxfRURJVFMQA0I7WjlnaXRodWIuY29tL3NoYW5rMzE4L2NvYXN0ZXJhaS9wYi9jb2FzdGVyYWkvY29yZS92MTtwYmNvcmViBnByb3RvMw", [file_google_protobuf_timestamp, file_google_protobuf_struct]);
+  fileDesc("Chxjb2FzdGVyYWkvY29yZS92MS9jaGF0LnByb3RvEhFjb2FzdGVyYWkuY29yZS52MSKKAwoTQ29udmVyc2F0aW9uTWVzc2FnZRIxCgRyb2xlGAEgASgOMiMuY29hc3RlcmFpLmNvcmUudjEuQ29udmVyc2F0aW9uUm9sZRIPCgdtZXNzYWdlGAIgASgJEhAKCGFzc2V0SWRzGAMgAygJEjAKB2FpTW9kZWwYBCABKA4yGi5jb2FzdGVyYWkuY29yZS52MS5BSU1vZGVsSACIAQESFAoMY29kZVNuYXBzaG90GAUgASgJEhQKDHJlZmVyZW5jZUlkcxgGIAMoCRIuCgpjcmVhdGVkX2F0GAcgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBI4CgR0eXBlGAggASgOMiouY29hc3RlcmFpLmNvcmUudjEuQ29udmVyc2F0aW9uTWVzc2FnZVR5cGUSNQoPZGVmYXVsdENvZGVEYXRhGAkgASgLMhcuZ29vZ2xlLnByb3RvYnVmLlN0cnVjdEgBiAEBQgoKCF9haU1vZGVsQhIKEF9kZWZhdWx0Q29kZURhdGEqVAoHQUlNb2RlbBIYChRBSV9NT0RFTF9VTlNQRUNJRklFRBAAEhkKFUFJX01PREVMX0dFTUlOSV8zX1BSTxABEhQKEEFJX01PREVMX0dQVF81XzUQAiqOAQoQQ29udmVyc2F0aW9uUm9sZRIhCh1DT05WRVJTQVRJT05fUk9MRV9VTlNQRUNJRklFRBAAEhoKFkNPTlZFUlNBVElPTl9ST0xFX1VTRVIQARIfChtDT05WRVJTQVRJT05fUk9MRV9BU1NJU1RBTlQQAhIaChZDT05WRVJTQVRJT05fUk9MRV9UT09MEAMqqwEKF0NvbnZlcnNhdGlvbk1lc3NhZ2VUeXBlEh0KGUNPTlZFUlNBVElPTl9NRVNTQUdFX1RZUEUQABIhCh1DT05WRVJTQVRJT05fTUVTU0FHRV9USElOS0lORxABEicKI0NPTlZFUlNBVElPTl9NRVNTQUdFX0ZJTkFMX1RISU5LSU5HEAISJQohQ09OVkVSU0FUSU9OX01FU1NBR0VfTUFOVUFMX0VESVRTEANCO1o5Z2l0aHViLmNvbS9zaGFuazMxOC9jb2FzdGVyYWkvcGIvY29hc3RlcmFpL2NvcmUvdjE7cGJjb3JlYgZwcm90bzM", [file_google_protobuf_timestamp, file_google_protobuf_struct]);
 
 /**
  * Describes the message coasterai.core.v1.ConversationMessage.
@@ -19,10 +19,22 @@ export const ConversationMessageSchema = /*@__PURE__*/
   messageDesc(file_coasterai_core_v1_chat, 0);
 
 /**
+ * Describes the enum coasterai.core.v1.AIModel.
+ */
+export const AIModelSchema = /*@__PURE__*/
+  enumDesc(file_coasterai_core_v1_chat, 0);
+
+/**
+ * @generated from enum coasterai.core.v1.AIModel
+ */
+export const AIModel = /*@__PURE__*/
+  tsEnum(AIModelSchema);
+
+/**
  * Describes the enum coasterai.core.v1.ConversationRole.
  */
 export const ConversationRoleSchema = /*@__PURE__*/
-  enumDesc(file_coasterai_core_v1_chat, 0);
+  enumDesc(file_coasterai_core_v1_chat, 1);
 
 /**
  * @generated from enum coasterai.core.v1.ConversationRole
@@ -34,7 +46,7 @@ export const ConversationRole = /*@__PURE__*/
  * Describes the enum coasterai.core.v1.ConversationMessageType.
  */
 export const ConversationMessageTypeSchema = /*@__PURE__*/
-  enumDesc(file_coasterai_core_v1_chat, 1);
+  enumDesc(file_coasterai_core_v1_chat, 2);
 
 /**
  * @generated from enum coasterai.core.v1.ConversationMessageType

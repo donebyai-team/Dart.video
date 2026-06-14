@@ -28,7 +28,7 @@ type SessionContext struct {
 type AgentSession interface {
 	GetID() string
 	Get(ctx context.Context) (*SessionContext, error)
-	ConvertToContextMessages(ctx context.Context, history []*pbcore.ConversationMessage, registry *services.MediaAssetRegistry) ([]types.Message, error)
+	ConvertToContextMessages(ctx context.Context, history []*pbcore.ConversationMessage, registry *services.MediaAssetRegistry) ([]types.Message, pbcore.AIModel, error)
 	Save(ctx context.Context, session *SessionContext) error
 }
 
@@ -142,10 +142,16 @@ func (p *SessionContext) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcore.ConversationMessage, registry *services.MediaAssetRegistry) ([]types.Message, error) {
+func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcore.ConversationMessage, registry *services.MediaAssetRegistry) ([]types.Message, pbcore.AIModel, error) {
 	messages := make([]types.Message, 0, len(history))
+	var lastAIModel pbcore.AIModel = pbcore.AIModel_AI_MODEL_UNSPECIFIED
 
 	for _, item := range history {
+		// Track latest model
+		if item.AiModel != nil {
+			lastAIModel = *item.AiModel
+		}
+
 		// Skip final thinking messages to avoid context bloating
 		if item.Type == pbcore.ConversationMessageType_CONVERSATION_MESSAGE_FINAL_THINKING {
 			continue
@@ -161,19 +167,19 @@ func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcor
 		} else if item.Role == pbcore.ConversationRole_CONVERSATION_ROLE_TOOL {
 			message.Role = types.Union3KassistantOrKtoolOrKuser__NewKtool()
 		} else {
-			return nil, agenterrors.InvalidInput("invalid conversation message role", nil)
+			return nil, lastAIModel, agenterrors.InvalidInput("invalid conversation message role", nil)
 		}
 
 		if item.CodeSnapshot != "" {
 			code, err := services.DownloadCode(ctx, item.CodeSnapshot)
 			if err != nil {
-				return nil, fmt.Errorf("failed to download code snapshot: %w", err)
+				return nil, lastAIModel, fmt.Errorf("failed to download code snapshot: %w", err)
 			}
 
 			if item.DefaultCodeData != nil && len(item.DefaultCodeData.Fields) > 0 {
 				injectedCode, err := code_builder.InjectDefaultDataGeneratedCode(code, item.DefaultCodeData)
 				if err != nil {
-					return nil, fmt.Errorf("failed to inject default code data: %w", err)
+					return nil, lastAIModel, fmt.Errorf("failed to inject default code data: %w", err)
 				}
 
 				code = injectedCode
@@ -188,7 +194,7 @@ func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcor
 		if len(item.ReferenceIds) > 0 {
 			mediaAssets, err := a.db.GetMediaAssetsByID(ctx, item.ReferenceIds)
 			if err != nil {
-				return nil, fmt.Errorf("failed to get media assets: %w", err)
+				return nil, lastAIModel, fmt.Errorf("failed to get media assets: %w", err)
 			}
 
 			var imageCount, videoCount int
@@ -201,26 +207,26 @@ func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcor
 				case pbcore.MediaType_MEDIA_TYPE_VIDEO:
 					videoCount++
 					if mediaAsset.Metadata.Duration == 0 || mediaAsset.Metadata.Duration > 10 {
-						return nil, fmt.Errorf("maximum video duration allowed is 10 seconds")
+						return nil, lastAIModel, fmt.Errorf("maximum video duration allowed is 10 seconds")
 					}
 				}
 			}
 
 			// Prevent mixing images + videos
 			if imageCount > 0 && videoCount > 0 {
-				return nil, fmt.Errorf("cannot add both image and video assets")
+				return nil, lastAIModel, fmt.Errorf("cannot add both image and video assets")
 			}
 
 			// Allow only a single video
 			if videoCount > 1 {
-				return nil, fmt.Errorf("only one video media asset is allowed")
+				return nil, lastAIModel, fmt.Errorf("only one video media asset is allowed")
 			}
 
 			for _, mediaAsset := range mediaAssets {
 				if mediaAsset.MediaType == pbcore.MediaType_MEDIA_TYPE_IMAGE {
 					img, err := baml_client.NewImageFromUrl(mediaAsset.Path, utils.Ptr(mediaAsset.MimeType))
 					if err != nil {
-						return nil, fmt.Errorf("failed to convert image from url: %w", err)
+						return nil, lastAIModel, fmt.Errorf("failed to convert image from url: %w", err)
 					}
 					message.Images = append(message.Images, img)
 				}
@@ -228,7 +234,7 @@ func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcor
 				if mediaAsset.MediaType == pbcore.MediaType_MEDIA_TYPE_VIDEO {
 					video, err := baml_client.NewVideoFromUrl(mediaAsset.Path, utils.Ptr(mediaAsset.MimeType))
 					if err != nil {
-						return nil, fmt.Errorf("failed to convert video from url: %w", err)
+						return nil, lastAIModel, fmt.Errorf("failed to convert video from url: %w", err)
 					}
 					message.Videos = append(message.Videos, video)
 				}
@@ -243,7 +249,7 @@ func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcor
 		if len(item.AssetIds) > 0 {
 			attachedAssets, err := a.db.GetMediaAssetsByID(ctx, item.AssetIds)
 			if err != nil {
-				return nil, fmt.Errorf("failed to get attached assets: %w", err)
+				return nil, lastAIModel, fmt.Errorf("failed to get attached assets: %w", err)
 			}
 
 			builderFromExisting := services.NewMediaAssetRegistryBuilderFromExisting(registry)
@@ -254,5 +260,5 @@ func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcor
 		messages = append(messages, message)
 	}
 
-	return messages, nil
+	return messages, lastAIModel, nil
 }
