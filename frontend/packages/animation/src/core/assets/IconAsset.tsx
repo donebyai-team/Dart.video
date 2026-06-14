@@ -37,6 +37,8 @@ export const IconAssetFieldSchema: FieldSchema[] = [
 const ICON_BASE = "https://storage.googleapis.com/coasterai-public/icons";
 const PLACEHOLDER_ICON = "heart";
 
+const toKebabCase = (value: string): string => value.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
+
 export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
   const theme = useTheme();
   const { isRendering } = useRemotionEnvironment();
@@ -54,11 +56,20 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
   const variant = theme.iconStyle ?? "outline";
   const color = theme.colors.foreground;
   const fallbackUrl = `${ICON_BASE}/${variant}/${PLACEHOLDER_ICON}.svg`;
+  const isLikelyLucideName = /^[A-Z][A-Za-z0-9]*$/.test(patchedIcon);
+  /* Assumption: a bare PascalCase string like `Heart` or `ArrowRight` is intended
+     to reference a Lucide icon name, so we first try the matching CDN asset before
+     falling back to the original string as an image/file source. */
+  const lucideStringUrl = isLikelyLucideName
+    ? `${ICON_BASE}/${variant}/${toKebabCase(patchedIcon)}.svg`
+    : "";
 
   const scaledSize = scaleToCanvas(patchedSize, preset);
 
   const [loaded, setLoaded] = useState(false);
   const [errored, setErrored] = useState(false);
+  const [stringIconSrc, setStringIconSrc] = useState(() => lucideStringUrl || patchedIcon);
+  const [didFallbackFromLucideName, setDidFallbackFromLucideName] = useState(false);
   const [handle] = useState(() =>
     isRendering ? delayRender(`Loading icon: ${iconSourceLabel}`) : null
   );
@@ -69,31 +80,42 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
   }, [handle]);
 
   const onError = useCallback(() => {
-    console.warn(`Icon not found at ${patchedIcon}`);
+    if (lucideStringUrl && !didFallbackFromLucideName && stringIconSrc !== patchedIcon && patchedIcon) {
+      /* If our PascalCase -> Lucide assumption was wrong, fall back to the original
+         string so existing file/image inputs keep working without importing all icons. */
+      console.warn(`Lucide icon not found for ${patchedIcon}, falling back to original string source`);
+      setDidFallbackFromLucideName(true);
+      setStringIconSrc(patchedIcon);
+      return;
+    }
+
+    console.warn(`Icon not found at ${stringIconSrc || patchedIcon}`);
     setErrored(true);
     if (handle !== null) continueRender(handle);
-  }, [handle, patchedIcon]);
+  }, [didFallbackFromLucideName, handle, lucideStringUrl, patchedIcon, stringIconSrc]);
 
   /* Reset when icon changes */
 
   useEffect(() => {
     setLoaded(false);
     setErrored(false);
-  }, [patchedIcon, PatchedLucideIcon]);
+    setDidFallbackFromLucideName(false);
+    setStringIconSrc(lucideStringUrl || patchedIcon);
+  }, [patchedIcon, PatchedLucideIcon, lucideStringUrl]);
 
   /* Preload icon during rendering */
 
   useEffect(() => {
     if (!isRendering || handle === null) return;
 
-    if (!patchedIcon) {
+    if (!stringIconSrc) {
       setLoaded(true);
       continueRender(handle);
       return;
     }
 
     const img = new Image();
-    img.src = patchedIcon;
+    img.src = stringIconSrc;
 
     img.onload = () => {
       setLoaded(true);
@@ -101,10 +123,16 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
     };
 
     img.onerror = () => {
+      if (lucideStringUrl && !didFallbackFromLucideName && stringIconSrc !== patchedIcon && patchedIcon) {
+        setDidFallbackFromLucideName(true);
+        setStringIconSrc(patchedIcon);
+        return;
+      }
+
       setErrored(true);
       continueRender(handle);
     };
-  }, [isRendering, patchedIcon, handle]);
+  }, [didFallbackFromLucideName, handle, isRendering, lucideStringUrl, patchedIcon, stringIconSrc]);
 
   /* Detect Tabler icon */
 
@@ -176,7 +204,7 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
         /* Brand icon → normal image */
 
         <img
-          src={patchedIcon}
+          src={stringIconSrc}
           alt={patchedIcon}
           onLoad={onLoad}
           onError={onError}
