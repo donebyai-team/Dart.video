@@ -35,10 +35,15 @@ export const IconAssetFieldSchema: FieldSchema[] = [
 ];
 
 const ICON_BASE = "https://storage.googleapis.com/coasterai-public/icons";
-const LUCIDE_CDN_BASE = "https://cdn.jsdelivr.net/npm/lucide-static@0.408.0/icons";
+const LUCIDE_CDN_BASE = "https://cdn.jsdelivr.net/npm/lucide-static@latest/icons";
 const PLACEHOLDER_ICON = "heart";
 
-const toKebabCase = (value: string): string => value.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
+const toKebabCase = (value: string): string => value
+  .replace(/([A-Z]+)([A-Z][a-z])/g, "$1-$2")
+  .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
+  .replace(/([a-zA-Z])([0-9])/g, "$1-$2")
+  .replace(/([0-9])([a-zA-Z])/g, "$1-$2")
+  .toLowerCase();
 
 export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
   const theme = useTheme();
