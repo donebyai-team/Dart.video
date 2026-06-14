@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/shank318/coasterai/services"
+	"github.com/titanous/json5"
 	"regexp"
 	"strings"
 )
@@ -90,7 +91,7 @@ outer:
 	obj := code[start : end+1]
 
 	// ------------------------------------------------------------------
-	// Convert PascalCase identifiers into strings
+	// Convert component identifiers into strings
 	//
 	// icon: Heart,
 	// icon: BarChart3,
@@ -104,30 +105,32 @@ outer:
 	obj = pascalCaseValue.ReplaceAllString(obj, `: "$1"$2`)
 
 	// ------------------------------------------------------------------
-	// Quote object keys
+	// Parse as JSON5
+	// Handles:
+	// - unquoted keys
+	// - single quoted strings
+	// - trailing commas
 	// ------------------------------------------------------------------
-	keyRegex := regexp.MustCompile(`([,{]\s*)([A-Za-z_][A-Za-z0-9_]*)(\s*:)`)
-	obj = keyRegex.ReplaceAllString(obj, `$1"$2"$3`)
+	var parsed any
 
-	// ------------------------------------------------------------------
-	// Remove trailing commas
-	// ------------------------------------------------------------------
-	trailingObjectComma := regexp.MustCompile(`,\s*}`)
-	obj = trailingObjectComma.ReplaceAllString(obj, `}`)
-
-	trailingArrayComma := regexp.MustCompile(`,\s*]`)
-	obj = trailingArrayComma.ReplaceAllString(obj, `]`)
-
-	// ------------------------------------------------------------------
-	// Validate JSON
-	// ------------------------------------------------------------------
-	var tmp any
-	if err := json.Unmarshal([]byte(obj), &tmp); err != nil {
+	if err := json5.Unmarshal([]byte(obj), &parsed); err != nil {
 		return nil, "", fmt.Errorf(
-			"%s is not valid JSON after normalization: %w\nNormalized JSON:\n%s",
+			"failed to parse %s as JSON5: %w\nObject:\n%s",
 			defaultDataKey,
 			err,
 			obj,
+		)
+	}
+
+	// ------------------------------------------------------------------
+	// Convert back to strict JSON
+	// ------------------------------------------------------------------
+	normalizedJSON, err := json.Marshal(parsed)
+	if err != nil {
+		return nil, "", fmt.Errorf(
+			"failed to marshal %s to JSON: %w",
+			defaultDataKey,
+			err,
 		)
 	}
 
@@ -147,5 +150,5 @@ outer:
 			placeholder +
 			code[end+1:]
 
-	return json.RawMessage(obj), updatedCode, nil
+	return json.RawMessage(normalizedJSON), updatedCode, nil
 }

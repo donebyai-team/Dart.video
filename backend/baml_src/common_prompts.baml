@@ -1,7 +1,5 @@
 template_string BrandGuidelines(resume: VideoBranding) #"
-    {% if resume.brandColors %}
-    {{ BrandUsageInstructions() }}
-    {% endif %}
+    {{ BrandUsageInstructions(resume) }}
 
     {% if resume.brandGuideLines %}
     ### Brand Details:
@@ -135,10 +133,11 @@ template_string AnimationPrimitives() #"
     {% endraw %}
 "#
 
-template_string BrandUsageInstructions() #"
+template_string BrandUsageInstructions(resume: VideoBranding) #"
     ### Branding
-    Use `const theme = useTheme()` for all brand colors and assets at runtime.
+    Use `useTheme()` hook for all brand colors and assets at runtime.
 
+    {% if resume.brandColors %}
     Available brand information:
     - Brand details: `<brand_details>`
     - Brand tokens/colors: `<brand_tokens>`
@@ -146,6 +145,10 @@ template_string BrandUsageInstructions() #"
 
     Use the provided brand details and tokens to understand the visual identity and make design decisions (e.g. contrast, emphasis, hierarchy),
     but always reference colors and assets through `theme` in generated code.
+    {% else %}
+    Ensuring the animation works across different themes and backgrounds.
+    Hardcode only neutral surface/background colors when necessary (e.g. cards, panels), and ensure sufficient contrast and visibility for all elements.
+    {% endif %}
 
     ```tsx
     const theme = useTheme();
@@ -174,5 +177,14 @@ template_string BrandUsageInstructions() #"
     * Render logos/icons with `LogoAsset` using `theme.logo.url` or `theme.logoIcon.url`.
     * Only include logos/icons when they meaningfully support the animation.
     * If an image or video is provided, prioritize its color palette over brand colors when appropriate.
+
+    {% if not resume.brandColors %}
+    ### Visibility & Contrast
+
+    * When using hardcoded surfaces (cards, panels, badges, overlays, etc.), ensure all content on that surface has sufficient contrast.
+    * Do not assume `theme.colors.foreground` will be readable on a hardcoded surface.
+    * If a hardcoded surface could conflict with theme colors (e.g. a white card and a light foreground color), use hardcoded foreground/icon colors that remain clearly visible.
+    * Always design surfaces and their contents together: if the background is hardcoded, choose content colors that guarantee readability regardless of the active theme.
+    {% endif %}
     ```
 "#

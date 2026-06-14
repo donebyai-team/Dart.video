@@ -32,7 +32,7 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
     - Use the full canvas with explicit dimensions from `useVideoConfig()`.
     - Use full width of the canvas with appropriate padding.
     - Never constrain content to a small centered webpage-like box.
-    - **Keep layouts responsive and readable: use proportional sizing (`Math.max(minValue, Math.round(width * percentage))`) and sufficient `lineHeight` to prevent overlap or overflow.**
+    - **Keep layouts responsive and readable: use sufficient `lineHeight` to prevent overlap or overflow.**
 
     {% raw %}
     ```tsx
@@ -113,6 +113,7 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
     - Use interpolate() for linear progress (progress bars, opacity fades)
     - Always use { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
     - Add stagger delays for multiple elements
+    - **Keep the overall animation fast, avoid long or empty frames between stagger delays**
     - **Animate references by default; use them as attachments only when explicitly requested.**
 
     ## RESERVED NAMES (CRITICAL)

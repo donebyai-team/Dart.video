@@ -15,7 +15,6 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/iancoleman/strcase v0.3.0
 	github.com/jmoiron/sqlx v1.4.0
-	github.com/k3a/html2text v1.2.1
 	github.com/lib/pq v1.10.9
 	github.com/nyaruka/phonenumbers v1.5.0
 	github.com/pkg/errors v0.9.1
@@ -56,6 +55,7 @@ require (
 	github.com/google/cel-go v0.28.0
 	github.com/hashicorp/go-retryablehttp v0.7.8
 	github.com/streamingfast/dstore v0.1.2
+	github.com/titanous/json5 v1.0.0
 	golang.org/x/image v0.0.0-20190802002840-cff245a6509b
 )
 
