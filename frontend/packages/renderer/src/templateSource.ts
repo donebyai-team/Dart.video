@@ -1,6 +1,13 @@
 const templateSourceCache = new Map<string, string>()
 const templateSourcePromiseCache = new Map<string, Promise<string>>()
 
+ export function sanitizeTemplateCode(code: string, defaults?: unknown): string {
+   return code.replace(
+     '__DEFAULT_DATA__',
+     JSON.stringify(defaults, null, 2)
+   )
+ }
+
 export async function loadTemplateSource(templateUrl: string): Promise<string> {
   const cached = templateSourceCache.get(templateUrl)
   if (cached) return cached
@@ -30,3 +37,26 @@ export async function loadTemplateSource(templateUrl: string): Promise<string> {
 export function getCachedTemplateSource(templateUrl: string): string | undefined {
   return templateSourceCache.get(templateUrl)
 }
+
+ export async function loadPreparedTemplateSource({
+   templateUrl,
+   defaults,
+   inlineCode,
+ }: {
+   templateUrl?: string | null
+   defaults?: unknown
+   inlineCode?: string | null
+ }): Promise<string> {
+   if (inlineCode?.trim()) {
+     return inlineCode
+   }
+
+   if (!templateUrl?.trim()) {
+     return ''
+   }
+
+   return sanitizeTemplateCode(
+     await loadTemplateSource(templateUrl),
+     defaults
+   )
+ }

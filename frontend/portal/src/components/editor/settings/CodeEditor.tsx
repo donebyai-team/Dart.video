@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { X, FileCode2 } from 'lucide-react'
-import { loadTemplateSource } from '@coasterai/renderer'
+import { loadPreparedTemplateSource } from '@coasterai/renderer'
 
 import { Button } from '@/components/ui/button'
 import { useVideoStore } from '@/stores/video'
@@ -27,6 +27,7 @@ export const CodeEditor = ({ onClose }: CodeEditorProps) => {
 
   const inlineCode = animationContent?.codeRegistry?.code?.trim() ?? ''
   const templateUrl = animationContent?.codeRegistry?.mUrl?.trim() ?? ''
+  const defaults = animationContent?.codeRegistry?.defaults
   const slideId = selectedSlide?.id ?? ''
 
   useEffect(() => {
@@ -47,16 +48,7 @@ export const CodeEditor = ({ onClose }: CodeEditorProps) => {
       return
     }
 
-    // Prefer inline code
-    if (inlineCode) {
-      setCode(inlineCode)
-      setError(null)
-      setIsLoading(false)
-      return
-    }
-
-    // Fallback to remote template
-    if (!templateUrl) {
+    if (!inlineCode && !templateUrl) {
       setCode('')
       setError(null)
       setIsLoading(false)
@@ -68,7 +60,11 @@ export const CodeEditor = ({ onClose }: CodeEditorProps) => {
 
     ;(async () => {
       try {
-        const source = await loadTemplateSource(templateUrl)
+        const source = await loadPreparedTemplateSource({
+          templateUrl,
+          defaults,
+          inlineCode,
+        })
 
         if (!cancelled) {
           setCode(source)
@@ -102,6 +98,7 @@ export const CodeEditor = ({ onClose }: CodeEditorProps) => {
     slideId,
     templateUrl,
     inlineCode,
+    defaults,
     selectedSlide,
     animationContent
   ])
