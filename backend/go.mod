@@ -51,7 +51,7 @@ require (
 require (
 	cloud.google.com/go/storage v1.50.0
 	github.com/abema/go-mp4 v1.5.0
-	github.com/boundaryml/baml v0.220.0
+	github.com/boundaryml/baml v0.222.0
 	github.com/google/cel-go v0.28.0
 	github.com/hashicorp/go-retryablehttp v0.7.8
 	github.com/streamingfast/dstore v0.1.2

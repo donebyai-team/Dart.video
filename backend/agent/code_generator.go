@@ -329,6 +329,7 @@ func (l *codeGenerator) runPlanning(ctx context.Context, generatePlanRequest typ
 			})
 		}, &llm.LLMOptions{Model: aiModel})
 		if err != nil {
+			l.logger.Info("runPlanning: LLM failed", zap.Error(err))
 			return nil, agenterrors.LLMPlanningFailed("failed to generate scene", err)
 		}
 

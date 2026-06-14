@@ -3,6 +3,7 @@ package llm
 import (
 	"context"
 	"fmt"
+	baml "github.com/boundaryml/baml/engine/language_client_go/pkg"
 	"github.com/shank318/coasterai/baml_client"
 	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/cache"
@@ -71,9 +72,14 @@ func (l *llmService) GenerateAnimation(
 		baml_client.WithTags(getTags(ctx)),
 	}
 
+	cr := baml.NewClientRegistry()
+
 	if options != nil && options.Model == pbcore.AIModel_AI_MODEL_GPT_5_5 {
-		callOptions = append(callOptions, baml_client.WithClient("CustomOpenAI55WithThinkingSummary"))
+		//callOptions = append(callOptions, baml_client.WithClient("CustomOpenAI55WithThinkingSummary"))
+		cr.SetPrimaryClient("CustomOpenAI55WithThinkingSummary")
 	}
+
+	callOptions = append(callOptions, baml_client.WithClientRegistry(cr))
 
 	stream, err := baml_client.Stream.GenerateAnimation(ctx, req, conversationHistory, callOptions...)
 	if err != nil {
