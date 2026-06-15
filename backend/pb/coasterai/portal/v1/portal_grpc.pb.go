@@ -57,6 +57,8 @@ const (
 	PortalService_GetTemplates_FullMethodName           = "/coasterai.portal.v1.PortalService/GetTemplates"
 	PortalService_SaveTemplate_FullMethodName           = "/coasterai.portal.v1.PortalService/SaveTemplate"
 	PortalService_DeleteTemplate_FullMethodName         = "/coasterai.portal.v1.PortalService/DeleteTemplate"
+	PortalService_GenerateSuggestions_FullMethodName    = "/coasterai.portal.v1.PortalService/GenerateSuggestions"
+	PortalService_RenderSuggestion_FullMethodName       = "/coasterai.portal.v1.PortalService/RenderSuggestion"
 )
 
 // PortalServiceClient is the client API for PortalService service.
@@ -105,6 +107,9 @@ type PortalServiceClient interface {
 	GetTemplates(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTemplatesResponse, error)
 	SaveTemplate(ctx context.Context, in *UpdateTemplateRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	DeleteTemplate(ctx context.Context, in *GetTemplateRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// AI Suggestions
+	GenerateSuggestions(ctx context.Context, in *GenerateSuggestionsInput, opts ...grpc.CallOption) (*GenerateSuggestionsResponse, error)
+	RenderSuggestion(ctx context.Context, in *RenderSuggestionsInput, opts ...grpc.CallOption) (*SuggestScenesResponse, error)
 }
 
 type portalServiceClient struct {
@@ -531,6 +536,24 @@ func (c *portalServiceClient) DeleteTemplate(ctx context.Context, in *GetTemplat
 	return out, nil
 }
 
+func (c *portalServiceClient) GenerateSuggestions(ctx context.Context, in *GenerateSuggestionsInput, opts ...grpc.CallOption) (*GenerateSuggestionsResponse, error) {
+	out := new(GenerateSuggestionsResponse)
+	err := c.cc.Invoke(ctx, PortalService_GenerateSuggestions_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *portalServiceClient) RenderSuggestion(ctx context.Context, in *RenderSuggestionsInput, opts ...grpc.CallOption) (*SuggestScenesResponse, error) {
+	out := new(SuggestScenesResponse)
+	err := c.cc.Invoke(ctx, PortalService_RenderSuggestion_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PortalServiceServer is the server API for PortalService service.
 // All implementations must embed UnimplementedPortalServiceServer
 // for forward compatibility
@@ -577,6 +600,9 @@ type PortalServiceServer interface {
 	GetTemplates(context.Context, *emptypb.Empty) (*GetTemplatesResponse, error)
 	SaveTemplate(context.Context, *UpdateTemplateRequest) (*emptypb.Empty, error)
 	DeleteTemplate(context.Context, *GetTemplateRequest) (*emptypb.Empty, error)
+	// AI Suggestions
+	GenerateSuggestions(context.Context, *GenerateSuggestionsInput) (*GenerateSuggestionsResponse, error)
+	RenderSuggestion(context.Context, *RenderSuggestionsInput) (*SuggestScenesResponse, error)
 	mustEmbedUnimplementedPortalServiceServer()
 }
 
@@ -691,6 +717,12 @@ func (UnimplementedPortalServiceServer) SaveTemplate(context.Context, *UpdateTem
 }
 func (UnimplementedPortalServiceServer) DeleteTemplate(context.Context, *GetTemplateRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteTemplate not implemented")
+}
+func (UnimplementedPortalServiceServer) GenerateSuggestions(context.Context, *GenerateSuggestionsInput) (*GenerateSuggestionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GenerateSuggestions not implemented")
+}
+func (UnimplementedPortalServiceServer) RenderSuggestion(context.Context, *RenderSuggestionsInput) (*SuggestScenesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RenderSuggestion not implemented")
 }
 func (UnimplementedPortalServiceServer) mustEmbedUnimplementedPortalServiceServer() {}
 
@@ -1365,6 +1397,42 @@ func _PortalService_DeleteTemplate_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PortalService_GenerateSuggestions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GenerateSuggestionsInput)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PortalServiceServer).GenerateSuggestions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PortalService_GenerateSuggestions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PortalServiceServer).GenerateSuggestions(ctx, req.(*GenerateSuggestionsInput))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PortalService_RenderSuggestion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RenderSuggestionsInput)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PortalServiceServer).RenderSuggestion(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PortalService_RenderSuggestion_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PortalServiceServer).RenderSuggestion(ctx, req.(*RenderSuggestionsInput))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PortalService_ServiceDesc is the grpc.ServiceDesc for PortalService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1499,6 +1567,14 @@ var PortalService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteTemplate",
 			Handler:    _PortalService_DeleteTemplate_Handler,
+		},
+		{
+			MethodName: "GenerateSuggestions",
+			Handler:    _PortalService_GenerateSuggestions_Handler,
+		},
+		{
+			MethodName: "RenderSuggestion",
+			Handler:    _PortalService_RenderSuggestion_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

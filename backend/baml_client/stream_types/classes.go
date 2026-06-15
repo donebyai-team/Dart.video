@@ -520,6 +520,102 @@ func (c EditString) BamlTypeName() string {
 	return "EditString"
 }
 
+type ExtractTemplateConfigRequest struct {
+	Content       *string        `json:"content"`
+	Schema        []string       `json:"schema"`
+	VideoBranding *VideoBranding `json:"VideoBranding"`
+}
+
+func (c *ExtractTemplateConfigRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_STREAM_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_STREAM_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "ExtractTemplateConfigRequest" {
+		panic(fmt.Sprintf("expected ExtractTemplateConfigRequest, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "content":
+			c.Content = baml.Decode(valueHolder).Interface().(*string)
+
+		case "schema":
+			c.Schema = baml.Decode(valueHolder).Interface().([]string)
+
+		case "VideoBranding":
+			c.VideoBranding = baml.Decode(valueHolder).Interface().(*VideoBranding)
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class ExtractTemplateConfigRequest", key))
+
+		}
+	}
+
+}
+
+func (c ExtractTemplateConfigRequest) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["content"] = c.Content
+
+	fields["schema"] = c.Schema
+
+	fields["VideoBranding"] = c.VideoBranding
+
+	return baml.EncodeClass("ExtractTemplateConfigRequest", fields, nil)
+}
+
+func (c ExtractTemplateConfigRequest) BamlTypeName() string {
+	return "ExtractTemplateConfigRequest"
+}
+
+type ExtractTemplateConfigResponse struct {
+	Props []string `json:"props"`
+}
+
+func (c *ExtractTemplateConfigResponse) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_STREAM_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_STREAM_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "ExtractTemplateConfigResponse" {
+		panic(fmt.Sprintf("expected ExtractTemplateConfigResponse, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "props":
+			c.Props = baml.Decode(valueHolder).Interface().([]string)
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class ExtractTemplateConfigResponse", key))
+
+		}
+	}
+
+}
+
+func (c ExtractTemplateConfigResponse) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["props"] = c.Props
+
+	return baml.EncodeClass("ExtractTemplateConfigResponse", fields, nil)
+}
+
+func (c ExtractTemplateConfigResponse) BamlTypeName() string {
+	return "ExtractTemplateConfigResponse"
+}
+
 type GenerateAnimationCodeRequest struct {
 	Prompt        *string        `json:"Prompt"`
 	VideoBranding *VideoBranding `json:"VideoBranding"`
@@ -684,7 +780,7 @@ func (c GeneratedVideoPlan) BamlTypeName() string {
 
 type MatchCategoriesRequest struct {
 	Categories []Category `json:"categories"`
-	Original   *string    `json:"original"`
+	Content    *string    `json:"content"`
 	Edits      *string    `json:"edits"`
 }
 
@@ -705,8 +801,8 @@ func (c *MatchCategoriesRequest) Decode(holder *cffi.CFFIValueClass, typeMap bam
 		case "categories":
 			c.Categories = baml.Decode(valueHolder).Interface().([]Category)
 
-		case "original":
-			c.Original = baml.Decode(valueHolder).Interface().(*string)
+		case "content":
+			c.Content = baml.Decode(valueHolder).Interface().(*string)
 
 		case "edits":
 			c.Edits = baml.Decode(valueHolder).Interface().(*string)
@@ -725,7 +821,7 @@ func (c MatchCategoriesRequest) Encode() (*cffi.HostValue, error) {
 
 	fields["categories"] = c.Categories
 
-	fields["original"] = c.Original
+	fields["content"] = c.Content
 
 	fields["edits"] = c.Edits
 
@@ -737,8 +833,7 @@ func (c MatchCategoriesRequest) BamlTypeName() string {
 }
 
 type MatchCategoriesResponse struct {
-	Categories []Category `json:"categories"`
-	Summary    *string    `json:"summary"`
+	Categories []string `json:"categories"`
 }
 
 func (c *MatchCategoriesResponse) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -756,10 +851,7 @@ func (c *MatchCategoriesResponse) Decode(holder *cffi.CFFIValueClass, typeMap ba
 		switch key {
 
 		case "categories":
-			c.Categories = baml.Decode(valueHolder).Interface().([]Category)
-
-		case "summary":
-			c.Summary = baml.Decode(valueHolder).Interface().(*string)
+			c.Categories = baml.Decode(valueHolder).Interface().([]string)
 
 		default:
 
@@ -774,8 +866,6 @@ func (c MatchCategoriesResponse) Encode() (*cffi.HostValue, error) {
 	fields := map[string]any{}
 
 	fields["categories"] = c.Categories
-
-	fields["summary"] = c.Summary
 
 	return baml.EncodeClass("MatchCategoriesResponse", fields, nil)
 }

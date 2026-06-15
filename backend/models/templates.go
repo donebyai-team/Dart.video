@@ -108,3 +108,15 @@ func (r *Template) ToVideo() *pbcore.Video {
 		CreatedAt: timestamppb.New(r.CreatedAt),
 	}
 }
+
+type TemplateCursor struct {
+	Categories    []string  `json:"categories"`
+	MatchPriority int       `json:"matchPriority"`
+	CreatedAt     time.Time `json:"createdAt"`
+	ID            string    `json:"id"`
+}
+
+type TemplatePage struct {
+	Templates  []Template
+	NextCursor *string
+}

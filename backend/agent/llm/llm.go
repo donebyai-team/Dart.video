@@ -35,7 +35,17 @@ type Service interface {
 	GenerateAnimation(ctx context.Context,
 		req types.GenerateAnimationCodeRequest,
 		conversationHistory []types.Message,
+<<<<<<< Updated upstream
 		onThinking func(thinking string)) (*types.Union2AskUserQuestionOrGenerateAnimationCodeResponse, error)
+=======
+		onThinking func(thinking string),
+		options *LLMOptions) (*types.Union2AskUserQuestionOrGenerateAnimationCodeResponse, error)
+	ExtractTemplateConfig(ctx context.Context, req types.ExtractTemplateConfigRequest) (*types.ExtractTemplateConfigResponse, error)
+}
+
+type LLMOptions struct {
+	Model pbcore.AIModel
+>>>>>>> Stashed changes
 }
 
 type llmService struct {
@@ -45,6 +55,14 @@ type llmService struct {
 
 func (l *llmService) CategorizeScene(ctx context.Context, req types.MatchCategoriesRequest) (*types.MatchCategoriesResponse, error) {
 	categories, err := baml_client.MatchCategories(ctx, req, baml_client.WithTags(getTags(ctx)))
+	if err != nil {
+		return nil, err
+	}
+	return &categories, nil
+}
+
+func (l *llmService) ExtractTemplateConfig(ctx context.Context, req types.ExtractTemplateConfigRequest) (*types.ExtractTemplateConfigResponse, error) {
+	categories, err := baml_client.ExtractTemplateConfig(ctx, req, baml_client.WithTags(getTags(ctx)))
 	if err != nil {
 		return nil, err
 	}

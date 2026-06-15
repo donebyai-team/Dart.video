@@ -138,6 +138,12 @@ const (
 	// PortalServiceDeleteTemplateProcedure is the fully-qualified name of the PortalService's
 	// DeleteTemplate RPC.
 	PortalServiceDeleteTemplateProcedure = "/coasterai.portal.v1.PortalService/DeleteTemplate"
+	// PortalServiceGenerateSuggestionsProcedure is the fully-qualified name of the PortalService's
+	// GenerateSuggestions RPC.
+	PortalServiceGenerateSuggestionsProcedure = "/coasterai.portal.v1.PortalService/GenerateSuggestions"
+	// PortalServiceRenderSuggestionProcedure is the fully-qualified name of the PortalService's
+	// RenderSuggestion RPC.
+	PortalServiceRenderSuggestionProcedure = "/coasterai.portal.v1.PortalService/RenderSuggestion"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
@@ -179,6 +185,8 @@ var (
 	portalServiceGetTemplatesMethodDescriptor           = portalServiceServiceDescriptor.Methods().ByName("GetTemplates")
 	portalServiceSaveTemplateMethodDescriptor           = portalServiceServiceDescriptor.Methods().ByName("SaveTemplate")
 	portalServiceDeleteTemplateMethodDescriptor         = portalServiceServiceDescriptor.Methods().ByName("DeleteTemplate")
+	portalServiceGenerateSuggestionsMethodDescriptor    = portalServiceServiceDescriptor.Methods().ByName("GenerateSuggestions")
+	portalServiceRenderSuggestionMethodDescriptor       = portalServiceServiceDescriptor.Methods().ByName("RenderSuggestion")
 )
 
 // PortalServiceClient is a client for the coasterai.portal.v1.PortalService service.
@@ -225,6 +233,9 @@ type PortalServiceClient interface {
 	GetTemplates(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetTemplatesResponse], error)
 	SaveTemplate(context.Context, *connect.Request[v1.UpdateTemplateRequest]) (*connect.Response[emptypb.Empty], error)
 	DeleteTemplate(context.Context, *connect.Request[v1.GetTemplateRequest]) (*connect.Response[emptypb.Empty], error)
+	// AI Suggestions
+	GenerateSuggestions(context.Context, *connect.Request[v1.GenerateSuggestionsInput]) (*connect.Response[v1.GenerateSuggestionsResponse], error)
+	RenderSuggestion(context.Context, *connect.Request[v1.RenderSuggestionsInput]) (*connect.Response[v1.SuggestScenesResponse], error)
 }
 
 // NewPortalServiceClient constructs a client for the coasterai.portal.v1.PortalService service. By
@@ -453,6 +464,18 @@ func NewPortalServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(portalServiceDeleteTemplateMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		generateSuggestions: connect.NewClient[v1.GenerateSuggestionsInput, v1.GenerateSuggestionsResponse](
+			httpClient,
+			baseURL+PortalServiceGenerateSuggestionsProcedure,
+			connect.WithSchema(portalServiceGenerateSuggestionsMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
+		renderSuggestion: connect.NewClient[v1.RenderSuggestionsInput, v1.SuggestScenesResponse](
+			httpClient,
+			baseURL+PortalServiceRenderSuggestionProcedure,
+			connect.WithSchema(portalServiceRenderSuggestionMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -494,6 +517,8 @@ type portalServiceClient struct {
 	getTemplates           *connect.Client[emptypb.Empty, v1.GetTemplatesResponse]
 	saveTemplate           *connect.Client[v1.UpdateTemplateRequest, emptypb.Empty]
 	deleteTemplate         *connect.Client[v1.GetTemplateRequest, emptypb.Empty]
+	generateSuggestions    *connect.Client[v1.GenerateSuggestionsInput, v1.GenerateSuggestionsResponse]
+	renderSuggestion       *connect.Client[v1.RenderSuggestionsInput, v1.SuggestScenesResponse]
 }
 
 // GetConfig calls coasterai.portal.v1.PortalService.GetConfig.
@@ -676,6 +701,16 @@ func (c *portalServiceClient) DeleteTemplate(ctx context.Context, req *connect.R
 	return c.deleteTemplate.CallUnary(ctx, req)
 }
 
+// GenerateSuggestions calls coasterai.portal.v1.PortalService.GenerateSuggestions.
+func (c *portalServiceClient) GenerateSuggestions(ctx context.Context, req *connect.Request[v1.GenerateSuggestionsInput]) (*connect.Response[v1.GenerateSuggestionsResponse], error) {
+	return c.generateSuggestions.CallUnary(ctx, req)
+}
+
+// RenderSuggestion calls coasterai.portal.v1.PortalService.RenderSuggestion.
+func (c *portalServiceClient) RenderSuggestion(ctx context.Context, req *connect.Request[v1.RenderSuggestionsInput]) (*connect.Response[v1.SuggestScenesResponse], error) {
+	return c.renderSuggestion.CallUnary(ctx, req)
+}
+
 // PortalServiceHandler is an implementation of the coasterai.portal.v1.PortalService service.
 type PortalServiceHandler interface {
 	GetConfig(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.Config], error)
@@ -720,6 +755,9 @@ type PortalServiceHandler interface {
 	GetTemplates(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetTemplatesResponse], error)
 	SaveTemplate(context.Context, *connect.Request[v1.UpdateTemplateRequest]) (*connect.Response[emptypb.Empty], error)
 	DeleteTemplate(context.Context, *connect.Request[v1.GetTemplateRequest]) (*connect.Response[emptypb.Empty], error)
+	// AI Suggestions
+	GenerateSuggestions(context.Context, *connect.Request[v1.GenerateSuggestionsInput]) (*connect.Response[v1.GenerateSuggestionsResponse], error)
+	RenderSuggestion(context.Context, *connect.Request[v1.RenderSuggestionsInput]) (*connect.Response[v1.SuggestScenesResponse], error)
 }
 
 // NewPortalServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -944,6 +982,18 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(portalServiceDeleteTemplateMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	portalServiceGenerateSuggestionsHandler := connect.NewUnaryHandler(
+		PortalServiceGenerateSuggestionsProcedure,
+		svc.GenerateSuggestions,
+		connect.WithSchema(portalServiceGenerateSuggestionsMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
+	portalServiceRenderSuggestionHandler := connect.NewUnaryHandler(
+		PortalServiceRenderSuggestionProcedure,
+		svc.RenderSuggestion,
+		connect.WithSchema(portalServiceRenderSuggestionMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/coasterai.portal.v1.PortalService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case PortalServiceGetConfigProcedure:
@@ -1018,6 +1068,10 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 			portalServiceSaveTemplateHandler.ServeHTTP(w, r)
 		case PortalServiceDeleteTemplateProcedure:
 			portalServiceDeleteTemplateHandler.ServeHTTP(w, r)
+		case PortalServiceGenerateSuggestionsProcedure:
+			portalServiceGenerateSuggestionsHandler.ServeHTTP(w, r)
+		case PortalServiceRenderSuggestionProcedure:
+			portalServiceRenderSuggestionHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -1169,4 +1223,12 @@ func (UnimplementedPortalServiceHandler) SaveTemplate(context.Context, *connect.
 
 func (UnimplementedPortalServiceHandler) DeleteTemplate(context.Context, *connect.Request[v1.GetTemplateRequest]) (*connect.Response[emptypb.Empty], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.DeleteTemplate is not implemented"))
+}
+
+func (UnimplementedPortalServiceHandler) GenerateSuggestions(context.Context, *connect.Request[v1.GenerateSuggestionsInput]) (*connect.Response[v1.GenerateSuggestionsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.GenerateSuggestions is not implemented"))
+}
+
+func (UnimplementedPortalServiceHandler) RenderSuggestion(context.Context, *connect.Request[v1.RenderSuggestionsInput]) (*connect.Response[v1.SuggestScenesResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.RenderSuggestion is not implemented"))
 }

@@ -5,6 +5,7 @@
 import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv1";
 import type { Message } from "@bufbuild/protobuf";
 import type { AnimationTemplate } from "../../core/v1/template_pb";
+import type { Slide } from "../../core/v1/slide_pb";
 
 /**
  * Describes the file coasterai/portal/v1/templates.proto.
@@ -78,4 +79,87 @@ export declare type UpdateTemplateRequest = Message<"coasterai.portal.v1.UpdateT
  * Use `create(UpdateTemplateRequestSchema)` to create a new message.
  */
 export declare const UpdateTemplateRequestSchema: GenMessage<UpdateTemplateRequest>;
+
+/**
+ * @generated from message coasterai.portal.v1.GenerateSuggestionsInput
+ */
+export declare type GenerateSuggestionsInput = Message<"coasterai.portal.v1.GenerateSuggestionsInput"> & {
+  /**
+   * @generated from field: repeated string categories = 1;
+   */
+  categories: string[];
+
+  /**
+   * @generated from field: coasterai.core.v1.Slide slide = 2;
+   */
+  slide?: Slide;
+
+  /**
+   * @generated from field: int32 pageSize = 3;
+   */
+  pageSize: number;
+
+  /**
+   * @generated from field: optional string nextPage = 4;
+   */
+  nextPage?: string;
+
+  /**
+   * @generated from field: string videoId = 5;
+   */
+  videoId: string;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.GenerateSuggestionsInput.
+ * Use `create(GenerateSuggestionsInputSchema)` to create a new message.
+ */
+export declare const GenerateSuggestionsInputSchema: GenMessage<GenerateSuggestionsInput>;
+
+/**
+ * @generated from message coasterai.portal.v1.GenerateSuggestionsResponse
+ */
+export declare type GenerateSuggestionsResponse = Message<"coasterai.portal.v1.GenerateSuggestionsResponse"> & {
+  /**
+   * @generated from field: repeated string tid = 1;
+   */
+  tid: string[];
+
+  /**
+   * @generated from field: optional string nextPage = 2;
+   */
+  nextPage?: string;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.GenerateSuggestionsResponse.
+ * Use `create(GenerateSuggestionsResponseSchema)` to create a new message.
+ */
+export declare const GenerateSuggestionsResponseSchema: GenMessage<GenerateSuggestionsResponse>;
+
+/**
+ * @generated from message coasterai.portal.v1.RenderSuggestionsInput
+ */
+export declare type RenderSuggestionsInput = Message<"coasterai.portal.v1.RenderSuggestionsInput"> & {
+  /**
+   * @generated from field: string videoId = 1;
+   */
+  videoId: string;
+
+  /**
+   * @generated from field: coasterai.core.v1.Slide slide = 2;
+   */
+  slide?: Slide;
+
+  /**
+   * @generated from field: string tid = 3;
+   */
+  tid: string;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.RenderSuggestionsInput.
+ * Use `create(RenderSuggestionsInputSchema)` to create a new message.
+ */
+export declare const RenderSuggestionsInputSchema: GenMessage<RenderSuggestionsInput>;
 

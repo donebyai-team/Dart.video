@@ -134,7 +134,7 @@ func writeScene(b *strings.Builder, c types.Component, category string, fieldsTo
 	}
 
 	b.WriteString("**Props**\n")
-	writeProps(b, c.LLMSchema, fieldsToSkip)
+	WriteProps(b, c.LLMSchema, fieldsToSkip)
 
 	b.WriteString("\n---\n\n")
 }
@@ -170,7 +170,7 @@ func writeFieldDetails(b *strings.Builder, f types.LLMField, indent string) {
 	}
 }
 
-func writeProps(b *strings.Builder, fields []types.LLMField, skipLLMFields []string) {
+func WriteProps(b *strings.Builder, fields []types.LLMField, skipLLMFields []string) {
 	for _, f := range fields {
 		if utils.Contains(skipLLMFields, f.Name) {
 			continue

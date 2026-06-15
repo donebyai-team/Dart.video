@@ -188,11 +188,199 @@ func (x *UpdateTemplateRequest) GetName() string {
 	return ""
 }
 
+type GenerateSuggestionsInput struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Categories    []string               `protobuf:"bytes,1,rep,name=categories,proto3" json:"categories,omitempty"`
+	Slide         *v1.Slide              `protobuf:"bytes,2,opt,name=slide,proto3" json:"slide,omitempty"`
+	PageSize      int32                  `protobuf:"varint,3,opt,name=pageSize,proto3" json:"pageSize,omitempty"`
+	NextPage      *string                `protobuf:"bytes,4,opt,name=nextPage,proto3,oneof" json:"nextPage,omitempty"`
+	VideoId       string                 `protobuf:"bytes,5,opt,name=videoId,proto3" json:"videoId,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GenerateSuggestionsInput) Reset() {
+	*x = GenerateSuggestionsInput{}
+	mi := &file_coasterai_portal_v1_templates_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GenerateSuggestionsInput) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GenerateSuggestionsInput) ProtoMessage() {}
+
+func (x *GenerateSuggestionsInput) ProtoReflect() protoreflect.Message {
+	mi := &file_coasterai_portal_v1_templates_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GenerateSuggestionsInput.ProtoReflect.Descriptor instead.
+func (*GenerateSuggestionsInput) Descriptor() ([]byte, []int) {
+	return file_coasterai_portal_v1_templates_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *GenerateSuggestionsInput) GetCategories() []string {
+	if x != nil {
+		return x.Categories
+	}
+	return nil
+}
+
+func (x *GenerateSuggestionsInput) GetSlide() *v1.Slide {
+	if x != nil {
+		return x.Slide
+	}
+	return nil
+}
+
+func (x *GenerateSuggestionsInput) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *GenerateSuggestionsInput) GetNextPage() string {
+	if x != nil && x.NextPage != nil {
+		return *x.NextPage
+	}
+	return ""
+}
+
+func (x *GenerateSuggestionsInput) GetVideoId() string {
+	if x != nil {
+		return x.VideoId
+	}
+	return ""
+}
+
+type GenerateSuggestionsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Tid           []string               `protobuf:"bytes,1,rep,name=tid,proto3" json:"tid,omitempty"`
+	NextPage      *string                `protobuf:"bytes,2,opt,name=nextPage,proto3,oneof" json:"nextPage,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GenerateSuggestionsResponse) Reset() {
+	*x = GenerateSuggestionsResponse{}
+	mi := &file_coasterai_portal_v1_templates_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GenerateSuggestionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GenerateSuggestionsResponse) ProtoMessage() {}
+
+func (x *GenerateSuggestionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_coasterai_portal_v1_templates_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GenerateSuggestionsResponse.ProtoReflect.Descriptor instead.
+func (*GenerateSuggestionsResponse) Descriptor() ([]byte, []int) {
+	return file_coasterai_portal_v1_templates_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *GenerateSuggestionsResponse) GetTid() []string {
+	if x != nil {
+		return x.Tid
+	}
+	return nil
+}
+
+func (x *GenerateSuggestionsResponse) GetNextPage() string {
+	if x != nil && x.NextPage != nil {
+		return *x.NextPage
+	}
+	return ""
+}
+
+type RenderSuggestionsInput struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	VideoId       string                 `protobuf:"bytes,1,opt,name=videoId,proto3" json:"videoId,omitempty"`
+	Slide         *v1.Slide              `protobuf:"bytes,2,opt,name=slide,proto3" json:"slide,omitempty"`
+	Tid           string                 `protobuf:"bytes,3,opt,name=tid,proto3" json:"tid,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RenderSuggestionsInput) Reset() {
+	*x = RenderSuggestionsInput{}
+	mi := &file_coasterai_portal_v1_templates_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RenderSuggestionsInput) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RenderSuggestionsInput) ProtoMessage() {}
+
+func (x *RenderSuggestionsInput) ProtoReflect() protoreflect.Message {
+	mi := &file_coasterai_portal_v1_templates_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RenderSuggestionsInput.ProtoReflect.Descriptor instead.
+func (*RenderSuggestionsInput) Descriptor() ([]byte, []int) {
+	return file_coasterai_portal_v1_templates_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *RenderSuggestionsInput) GetVideoId() string {
+	if x != nil {
+		return x.VideoId
+	}
+	return ""
+}
+
+func (x *RenderSuggestionsInput) GetSlide() *v1.Slide {
+	if x != nil {
+		return x.Slide
+	}
+	return nil
+}
+
+func (x *RenderSuggestionsInput) GetTid() string {
+	if x != nil {
+		return x.Tid
+	}
+	return ""
+}
+
 var File_coasterai_portal_v1_templates_proto protoreflect.FileDescriptor
 
 const file_coasterai_portal_v1_templates_proto_rawDesc = "" +
 	"\n" +
-	"#coasterai/portal/v1/templates.proto\x12\x13coasterai.portal.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a coasterai/core/v1/template.proto\"Z\n" +
+	"#coasterai/portal/v1/templates.proto\x12\x13coasterai.portal.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a coasterai/core/v1/template.proto\x1a\x1dcoasterai/core/v1/slide.proto\"Z\n" +
 	"\x14GetTemplatesResponse\x12B\n" +
 	"\ttemplates\x18\x01 \x03(\v2$.coasterai.core.v1.AnimationTemplateR\ttemplates\"$\n" +
 	"\x12GetTemplateRequest\x12\x0e\n" +
@@ -205,7 +393,24 @@ const file_coasterai_portal_v1_templates_proto_rawDesc = "" +
 	"categories\x18\x04 \x03(\tR\n" +
 	"categories\x12\x12\n" +
 	"\x04name\x18\x05 \x01(\tR\x04nameB\x14\n" +
-	"\x12_usage_descriptionB?Z=github.com/shank318/coasterai/pb/coasterai/portal/v1;pbportalb\x06proto3"
+	"\x12_usage_description\"\xce\x01\n" +
+	"\x18GenerateSuggestionsInput\x12\x1e\n" +
+	"\n" +
+	"categories\x18\x01 \x03(\tR\n" +
+	"categories\x12.\n" +
+	"\x05slide\x18\x02 \x01(\v2\x18.coasterai.core.v1.SlideR\x05slide\x12\x1a\n" +
+	"\bpageSize\x18\x03 \x01(\x05R\bpageSize\x12\x1f\n" +
+	"\bnextPage\x18\x04 \x01(\tH\x00R\bnextPage\x88\x01\x01\x12\x18\n" +
+	"\avideoId\x18\x05 \x01(\tR\avideoIdB\v\n" +
+	"\t_nextPage\"]\n" +
+	"\x1bGenerateSuggestionsResponse\x12\x10\n" +
+	"\x03tid\x18\x01 \x03(\tR\x03tid\x12\x1f\n" +
+	"\bnextPage\x18\x02 \x01(\tH\x00R\bnextPage\x88\x01\x01B\v\n" +
+	"\t_nextPage\"t\n" +
+	"\x16RenderSuggestionsInput\x12\x18\n" +
+	"\avideoId\x18\x01 \x01(\tR\avideoId\x12.\n" +
+	"\x05slide\x18\x02 \x01(\v2\x18.coasterai.core.v1.SlideR\x05slide\x12\x10\n" +
+	"\x03tid\x18\x03 \x01(\tR\x03tidB?Z=github.com/shank318/coasterai/pb/coasterai/portal/v1;pbportalb\x06proto3"
 
 var (
 	file_coasterai_portal_v1_templates_proto_rawDescOnce sync.Once
@@ -219,20 +424,26 @@ func file_coasterai_portal_v1_templates_proto_rawDescGZIP() []byte {
 	return file_coasterai_portal_v1_templates_proto_rawDescData
 }
 
-var file_coasterai_portal_v1_templates_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_coasterai_portal_v1_templates_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_coasterai_portal_v1_templates_proto_goTypes = []any{
-	(*GetTemplatesResponse)(nil),  // 0: coasterai.portal.v1.GetTemplatesResponse
-	(*GetTemplateRequest)(nil),    // 1: coasterai.portal.v1.GetTemplateRequest
-	(*UpdateTemplateRequest)(nil), // 2: coasterai.portal.v1.UpdateTemplateRequest
-	(*v1.AnimationTemplate)(nil),  // 3: coasterai.core.v1.AnimationTemplate
+	(*GetTemplatesResponse)(nil),        // 0: coasterai.portal.v1.GetTemplatesResponse
+	(*GetTemplateRequest)(nil),          // 1: coasterai.portal.v1.GetTemplateRequest
+	(*UpdateTemplateRequest)(nil),       // 2: coasterai.portal.v1.UpdateTemplateRequest
+	(*GenerateSuggestionsInput)(nil),    // 3: coasterai.portal.v1.GenerateSuggestionsInput
+	(*GenerateSuggestionsResponse)(nil), // 4: coasterai.portal.v1.GenerateSuggestionsResponse
+	(*RenderSuggestionsInput)(nil),      // 5: coasterai.portal.v1.RenderSuggestionsInput
+	(*v1.AnimationTemplate)(nil),        // 6: coasterai.core.v1.AnimationTemplate
+	(*v1.Slide)(nil),                    // 7: coasterai.core.v1.Slide
 }
 var file_coasterai_portal_v1_templates_proto_depIdxs = []int32{
-	3, // 0: coasterai.portal.v1.GetTemplatesResponse.templates:type_name -> coasterai.core.v1.AnimationTemplate
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	6, // 0: coasterai.portal.v1.GetTemplatesResponse.templates:type_name -> coasterai.core.v1.AnimationTemplate
+	7, // 1: coasterai.portal.v1.GenerateSuggestionsInput.slide:type_name -> coasterai.core.v1.Slide
+	7, // 2: coasterai.portal.v1.RenderSuggestionsInput.slide:type_name -> coasterai.core.v1.Slide
+	3, // [3:3] is the sub-list for method output_type
+	3, // [3:3] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_coasterai_portal_v1_templates_proto_init() }
@@ -241,13 +452,15 @@ func file_coasterai_portal_v1_templates_proto_init() {
 		return
 	}
 	file_coasterai_portal_v1_templates_proto_msgTypes[2].OneofWrappers = []any{}
+	file_coasterai_portal_v1_templates_proto_msgTypes[3].OneofWrappers = []any{}
+	file_coasterai_portal_v1_templates_proto_msgTypes[4].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_coasterai_portal_v1_templates_proto_rawDesc), len(file_coasterai_portal_v1_templates_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

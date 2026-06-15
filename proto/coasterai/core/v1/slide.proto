@@ -156,6 +156,7 @@ message Slide {
   google.protobuf.Struct plan = 21;
   SlideStatus slideStatus = 22;
   int32 index = 24;
+  string tid = 27; // Template ID
 }
 
 message BackgroundStyle {

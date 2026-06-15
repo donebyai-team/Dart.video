@@ -96,6 +96,16 @@ type TemplateRepository interface {
 		ctx context.Context,
 		ID string,
 	) (*models.Template, error)
+	GetTemplatesByCategoryRandom(
+		ctx context.Context,
+		category string,
+	) ([]*models.Template, error)
+	ListTemplatesByCategories(
+		ctx context.Context,
+		categories []string,
+		pageSize int,
+		cursor *models.TemplateCursor,
+	) (*models.TemplatePage, error)
 }
 
 type MediaAssetRepository interface {

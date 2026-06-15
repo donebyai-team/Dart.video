@@ -2,6 +2,8 @@ package psql
 
 import (
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"github.com/lib/pq"
 	"github.com/shank318/coasterai/models"
@@ -22,6 +24,8 @@ func init() {
 		"templates/query_template_by_category.sql",
 		"templates/query_template_by_id.sql",
 		"templates/delete_template_by_id.sql",
+		"templates/query_templates_by_category_priority.sql",
+		"templates/query_templates_random.sql",
 	})
 }
 
@@ -165,4 +169,93 @@ func (r *Database) GetTemplateByID(
 			"id": ID,
 		},
 	)
+}
+
+func (r *Database) GetTemplatesByCategoryRandom(
+	ctx context.Context,
+	category string,
+) ([]*models.Template, error) {
+	return getMany[models.Template](
+		ctx,
+		r,
+		"templates/query_templates_random.sql",
+		map[string]any{
+			"category": category,
+		},
+	)
+}
+
+type templateWithPriority struct {
+	models.Template
+	MatchPriority int `db:"match_priority"`
+}
+
+func (r *Database) ListTemplatesByCategories(
+	ctx context.Context,
+	categories []string,
+	pageSize int,
+	cursor *models.TemplateCursor,
+) (*models.TemplatePage, error) {
+
+	args := map[string]any{
+		"categories": pq.Array(categories),
+		"limit":      pageSize + 1,
+	}
+
+	if cursor != nil {
+		args["cursorPriority"] = cursor.MatchPriority
+		args["cursorCreatedAt"] = cursor.CreatedAt
+		args["cursorID"] = cursor.ID
+	} else {
+		args["cursorPriority"] = nil
+		args["cursorCreatedAt"] = nil
+		args["cursorID"] = nil
+	}
+
+	rows, err := getMany[templateWithPriority](
+		ctx,
+		r,
+		"templates/query_templates_by_category_priority.sql",
+		args,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	hasNextPage := len(rows) > pageSize
+
+	if hasNextPage {
+		rows = rows[:pageSize]
+	}
+
+	templates := make([]models.Template, len(rows))
+	for i, row := range rows {
+		templates[i] = row.Template
+	}
+
+	var nextCursor *string
+
+	if hasNextPage {
+		last := rows[len(rows)-1]
+
+		c := models.TemplateCursor{
+			Categories:    categories,
+			MatchPriority: last.MatchPriority,
+			CreatedAt:     last.CreatedAt,
+			ID:            last.ID,
+		}
+
+		data, err := json.Marshal(c)
+		if err != nil {
+			return nil, err
+		}
+
+		encoded := base64.RawURLEncoding.EncodeToString(data)
+		nextCursor = &encoded
+	}
+
+	return &models.TemplatePage{
+		Templates:  templates,
+		NextCursor: nextCursor,
+	}, nil
 }
