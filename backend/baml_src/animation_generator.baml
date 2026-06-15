@@ -130,6 +130,7 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
 
     {{ AnimationPrimitives() }}
 
+    {{ BrandUsageInstructions(input.VideoBranding) }}
     {{ BrandGuidelines(input.VideoBranding) }}
 
     ## ASK QUESTIONS RULES

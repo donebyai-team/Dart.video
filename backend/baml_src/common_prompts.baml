@@ -1,6 +1,4 @@
 template_string BrandGuidelines(resume: VideoBranding) #"
-    {{ BrandUsageInstructions(resume) }}
-
     {% if resume.brandGuideLines %}
     ### Brand Details:
     {{ resume.brandGuideLines }}
