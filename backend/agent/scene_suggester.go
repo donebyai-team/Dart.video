@@ -17,7 +17,6 @@ import (
 	"github.com/shank318/coasterai/services/brand_identity"
 	"github.com/shank318/coasterai/services/templates"
 	"go.uber.org/zap"
-	"strings"
 )
 
 type SceneSuggester struct {
@@ -100,9 +99,13 @@ func (s SceneSuggester) RenderSuggestion(ctx context.Context,
 	templateName := template.Name
 	component, _ := scenes.FindComponent(templateName)
 	if component != nil {
-		var b strings.Builder
-		scenes.WriteProps(&b, component.LLMSchema, nil)
-		schemas = append(schemas, b.String())
+		//var b strings.Builder
+		//scenes.WriteProps(&b, component.LLMSchema, nil)
+		marshal, err := json.Marshal(component.LLMSchema)
+		if err != nil {
+			return nil, err
+		}
+		schemas = append(schemas, string(marshal))
 	} else {
 		for _, section := range template.Config.Sections {
 			for _, slide := range section.Slides {
@@ -162,6 +165,7 @@ func (s SceneSuggester) RenderSuggestion(ctx context.Context,
 
 				slide.Content.CodeRegistry.Defaults = output
 				slide.BackgroundStyle = contentSlide.BackgroundStyle
+				slide.Content.History = nil
 			}
 		}
 	}

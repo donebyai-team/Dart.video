@@ -284,6 +284,7 @@ func (l *codeGenerator) GenerateCode(
 	newMessage := &pbcore.ConversationMessage{
 		Role:    pbcore.ConversationRole_CONVERSATION_ROLE_USER,
 		Message: input.Prompt,
+		AiModel: input.AiModel,
 	}
 
 	for _, asset := range input.References {
@@ -313,7 +314,7 @@ func (l *codeGenerator) runPlanning(ctx context.Context, generatePlanRequest typ
 		}
 	}()
 
-	history, err := l.session.ConvertToContextMessages(ctx, session.ConversationHistory, l.assetRegistry)
+	history, aiModel, err := l.session.ConvertToContextMessages(ctx, session.ConversationHistory, l.assetRegistry)
 	if err != nil {
 		return nil, err
 	}
@@ -326,8 +327,9 @@ func (l *codeGenerator) runPlanning(ctx context.Context, generatePlanRequest typ
 				Thinking: chunk,
 				State:    common.StateStatusProcessing,
 			})
-		})
+		}, &llm.LLMOptions{Model: aiModel})
 		if err != nil {
+			l.logger.Info("runPlanning: LLM failed", zap.Error(err))
 			return nil, agenterrors.LLMPlanningFailed("failed to generate scene", err)
 		}
 

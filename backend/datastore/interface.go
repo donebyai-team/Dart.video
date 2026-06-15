@@ -106,6 +106,10 @@ type TemplateRepository interface {
 		pageSize int,
 		cursor *models.TemplateCursor,
 	) (*models.TemplatePage, error)
+	GetTemplateByName(
+		ctx context.Context,
+		name string,
+	) (*models.Template, error)
 }
 
 type MediaAssetRepository interface {

@@ -3,10 +3,12 @@ package llm
 import (
 	"context"
 	"fmt"
+	baml "github.com/boundaryml/baml/engine/language_client_go/pkg"
 	"github.com/shank318/coasterai/baml_client"
 	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/cache"
 	"github.com/shank318/coasterai/models"
+	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
 )
@@ -35,9 +37,6 @@ type Service interface {
 	GenerateAnimation(ctx context.Context,
 		req types.GenerateAnimationCodeRequest,
 		conversationHistory []types.Message,
-<<<<<<< Updated upstream
-		onThinking func(thinking string)) (*types.Union2AskUserQuestionOrGenerateAnimationCodeResponse, error)
-=======
 		onThinking func(thinking string),
 		options *LLMOptions) (*types.Union2AskUserQuestionOrGenerateAnimationCodeResponse, error)
 	ExtractTemplateConfig(ctx context.Context, req types.ExtractTemplateConfigRequest) (*types.ExtractTemplateConfigResponse, error)
@@ -45,7 +44,6 @@ type Service interface {
 
 type LLMOptions struct {
 	Model pbcore.AIModel
->>>>>>> Stashed changes
 }
 
 type llmService struct {
@@ -73,14 +71,29 @@ func (l *llmService) GenerateAnimation(
 	ctx context.Context,
 	req types.GenerateAnimationCodeRequest,
 	conversationHistory []types.Message,
-	onThinking func(thinking string)) (*types.Union2AskUserQuestionOrGenerateAnimationCodeResponse, error) {
+	onThinking func(thinking string), options *LLMOptions) (*types.Union2AskUserQuestionOrGenerateAnimationCodeResponse, error) {
 	l.logger.Info("🚀 Starting code generation..")
 
-	extractor := l.NewThinkingExtractor(NewGeminiExtractor(), onThinking, thinkingMessages)
+	var extractor *ThinkingExtractor
 
-	stream, err := baml_client.Stream.GenerateAnimation(ctx, req, conversationHistory,
+	callOptions := []baml_client.CallOptionFunc{
 		baml_client.WithOnTick(extractor.HandleTick),
-		baml_client.WithTags(getTags(ctx)))
+		baml_client.WithTags(getTags(ctx)),
+	}
+
+	cr := baml.NewClientRegistry()
+
+	if options != nil && options.Model == pbcore.AIModel_AI_MODEL_GPT_5_5 {
+		//callOptions = append(callOptions, baml_client.WithClient("CustomOpenAI55WithThinkingSummary"))
+		cr.SetPrimaryClient("CustomOpenAI55WithThinkingSummary")
+		extractor = l.NewThinkingExtractor(NewOpenAIExtractor(), onThinking, thinkingMessages)
+	} else {
+		extractor = l.NewThinkingExtractor(NewGeminiExtractor(), onThinking, thinkingMessages)
+	}
+
+	callOptions = append(callOptions, baml_client.WithClientRegistry(cr))
+
+	stream, err := baml_client.Stream.GenerateAnimation(ctx, req, conversationHistory, callOptions...)
 	if err != nil {
 		return nil, handleInitialError(err)
 	}

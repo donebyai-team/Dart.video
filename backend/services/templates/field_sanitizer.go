@@ -3,6 +3,7 @@ package templates
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/shank318/coasterai/services/code_builder"
 	"github.com/shank318/coasterai/utils"
 	"net/url"
 	"regexp"
@@ -55,6 +56,7 @@ func MergeLLMOutput(
 		return nil, fmt.Errorf("original is nil")
 	}
 
+	llmOutput = code_builder.ResolveIcons(llmOutput)
 	// Return original on any error.
 	fallback := original
 

@@ -33,9 +33,9 @@ export declare type ConversationMessage = Message<"coasterai.core.v1.Conversatio
   /**
    * * Model used for generation 
    *
-   * @generated from field: string model = 4;
+   * @generated from field: optional coasterai.core.v1.AIModel aiModel = 4;
    */
-  model: string;
+  aiModel?: AIModel;
 
   /**
    * @generated from field: string codeSnapshot = 5;
@@ -68,6 +68,31 @@ export declare type ConversationMessage = Message<"coasterai.core.v1.Conversatio
  * Use `create(ConversationMessageSchema)` to create a new message.
  */
 export declare const ConversationMessageSchema: GenMessage<ConversationMessage>;
+
+/**
+ * @generated from enum coasterai.core.v1.AIModel
+ */
+export enum AIModel {
+  /**
+   * @generated from enum value: AI_MODEL_UNSPECIFIED = 0;
+   */
+  AI_MODEL_UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: AI_MODEL_GEMINI_3_PRO = 1;
+   */
+  AI_MODEL_GEMINI_3_PRO = 1,
+
+  /**
+   * @generated from enum value: AI_MODEL_GPT_5_5 = 2;
+   */
+  AI_MODEL_GPT_5_5 = 2,
+}
+
+/**
+ * Describes the enum coasterai.core.v1.AIModel.
+ */
+export declare const AIModelSchema: GenEnum<AIModel>;
 
 /**
  * @generated from enum coasterai.core.v1.ConversationRole

@@ -26,6 +26,7 @@ func init() {
 		"templates/delete_template_by_id.sql",
 		"templates/query_templates_by_category_priority.sql",
 		"templates/query_templates_random.sql",
+		"templates/query_template_by_name.sql",
 	})
 }
 
@@ -167,6 +168,20 @@ func (r *Database) GetTemplateByID(
 		"templates/query_template_by_id.sql",
 		map[string]any{
 			"id": ID,
+		},
+	)
+}
+
+func (r *Database) GetTemplateByName(
+	ctx context.Context,
+	name string,
+) (*models.Template, error) {
+	return getOne[models.Template](
+		ctx,
+		r,
+		"templates/query_template_by_name.sql",
+		map[string]any{
+			"name": strings.ToLower(name),
 		},
 	)
 }

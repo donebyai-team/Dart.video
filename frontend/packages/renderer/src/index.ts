@@ -18,7 +18,12 @@ export {
 } from '@coasterai/animation';
 export { compileRemoteComponent, stripImports } from './compiler';
 export type { CompilationResult, CompileRemoteComponentOptions } from './compiler';
-export { loadTemplateSource, getCachedTemplateSource } from './templateSource';
+export {
+  loadTemplateSource,
+  getCachedTemplateSource,
+  sanitizeTemplateCode,
+  loadPreparedTemplateSource,
+} from './templateSource';
 export { SUPPORTED_FONTS, loadFonts, loadAllFonts, loadRemotionFont } from './fonts';
 export { brandingToTheme } from './utils';
 export {

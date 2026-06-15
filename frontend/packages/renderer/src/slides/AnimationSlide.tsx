@@ -9,18 +9,11 @@ import {
 
 import { compileRemoteComponent } from '../compiler'
 import { backgroundStyleToCSS } from '../backgroundUtils'
-import { loadTemplateSource } from '../templateSource'
+import { loadPreparedTemplateSource } from '../templateSource'
 import { CanvasEffectsLayer } from '../effects/CanvasEffectsLayer'
 
 const compiledTemplateCache = new Map<string, React.ComponentType<any>>()
 const compiledTemplatePromiseCache = new Map<string, Promise<React.ComponentType<any>>>()
-
-function sanitizeTemplateCode(code: string, defaults?: unknown): string {
-  return code.replace(
-    '__DEFAULT_DATA__',
-    JSON.stringify(defaults, null, 2)
-  )
-}
 
 async function loadCompiledTemplate(
   cacheKey: string,
@@ -35,16 +28,11 @@ async function loadCompiledTemplate(
   if (inFlight) return inFlight
 
   const promise = (async () => {
-    let code: string
-
-    if (inlineCode?.trim()) {
-      code = sanitizeTemplateCode(inlineCode, defaults)
-    } else {
-      code = sanitizeTemplateCode(
-        await loadTemplateSource(templateSourceKey),
-        defaults
-      )
-    }
+    const code = await loadPreparedTemplateSource({
+      templateUrl: inlineCode?.trim() ? undefined : templateSourceKey,
+      defaults,
+      inlineCode,
+    })
 
     const result = compileRemoteComponent(code)
 
@@ -109,24 +97,20 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
   // URL to fetch LLM-generated TSX source from
   const inlineCode = content?.codeRegistry?.code?.trim()
   const templateUrl = content?.codeRegistry?.mUrl
-  const sanitizedInlineCode = React.useMemo(() => {
-    if (!inlineCode) return inlineCode
-
-    return sanitizeTemplateCode(inlineCode, defaults)
-  }, [inlineCode, defaults])
+  const defaultsKey = React.useMemo(() => JSON.stringify(defaults) ?? 'null', [defaults])
 
   // Unique cache key
   const templateKey = React.useMemo(() => {
     if (templateUrl) {
-      return templateUrl
+      return `${templateUrl}::${hashString(defaultsKey)}`
     }
 
-    if (sanitizedInlineCode) {
-      return `inline:${hashString(sanitizedInlineCode)}`;
+    if (inlineCode) {
+      return `inline:${hashString(inlineCode)}`;
     }
 
     return templateUrl ?? null;
-  }, [sanitizedInlineCode, templateUrl]);
+  }, [defaultsKey, inlineCode, templateUrl]);
 
   const background = backgroundStyleToCSS(slide.backgroundStyle)
 
@@ -199,7 +183,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
             templateKey,
             templateUrl ?? templateKey,
             defaults,
-            templateUrl ? undefined : sanitizedInlineCode
+            templateUrl ? undefined : inlineCode
           )
 
           if (!disposed) {
@@ -249,7 +233,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
     return () => {
       disposed = true
     }
-  }, [templateKey, sanitizedInlineCode, inlineCode, templateUrl, defaults, renderHandle])
+  }, [templateKey, inlineCode, templateUrl, defaults, renderHandle])
 
   // PatchOverlay — read from window (set by useAnimationEdit in editor)
   // or fall back to persisted edits (during Remotion rendering).

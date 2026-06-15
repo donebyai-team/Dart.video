@@ -6,7 +6,7 @@ import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobu
 import type { Message } from "@bufbuild/protobuf";
 import type { MediaAsset, MediaType, SelectedMediaAsset } from "../../core/v1/media_asset_pb";
 import type { Section, Slide } from "../../core/v1/slide_pb";
-import type { ConversationMessage } from "../../core/v1/chat_pb";
+import type { AIModel, ConversationMessage } from "../../core/v1/chat_pb";
 import type { AnimationCategory, AnimationTemplateSchema } from "../../core/v1/template_pb";
 import type { BrandIdentity, BrandIdentitySchema } from "../../core/v1/brandkit_pb";
 import type { FigmaFrame, FigmaPage } from "../../core/v1/figma_pb";
@@ -589,6 +589,11 @@ export declare type CreateVideoRequest = Message<"coasterai.portal.v1.CreateVide
    * @generated from field: repeated coasterai.core.v1.SelectedMediaAsset references = 11;
    */
   references: SelectedMediaAsset[];
+
+  /**
+   * @generated from field: optional coasterai.core.v1.AIModel aiModel = 12;
+   */
+  aiModel?: AIModel;
 };
 
 /**

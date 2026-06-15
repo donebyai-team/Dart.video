@@ -73,6 +73,10 @@ export function resolveInlineTypography(
     resolved.fontSize = scaleFontSize(style.fontSize, preset);
   }
 
+  if (style.lineHeight == null) {
+    resolved.lineHeight = 1.2;
+  }
+
   return resolved;
 }
 

@@ -47,6 +47,30 @@ type BuildSceneListOptions struct {
 	FieldsToSkip []string
 }
 
+func GetAllTemplates() []types.Component {
+	var scenes []types.Component
+
+	for _, g := range registry.Components {
+		if g.Title == "Scenes" {
+			scenes = g.Components
+			break
+		}
+	}
+
+	// groups are only available while planning
+	for _, group := range groupedComponents {
+		scenes = append(scenes, types.Component{
+			Tags:         group.Tags,
+			Name:         group.Name,
+			Description:  group.Description,
+			Instructions: group.Instructions,
+			LLMSchema:    group.LLMSchema,
+		})
+	}
+
+	return scenes
+}
+
 func BuildScenesList(options BuildSceneListOptions) string {
 
 	var scenes []types.Component
