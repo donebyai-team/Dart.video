@@ -22,16 +22,18 @@ type SceneSuggester struct {
 	brandIdentityService brand_identity.BrandIdentity
 	llmService           llm.Service
 	db                   datastore.Repository
+	templateService      templates.Service
 	codeGenerator        CodeGeneratorAgent
 	logger               *zap.Logger
 }
 
-func NewSceneSuggester(brandIdentityService brand_identity.BrandIdentity, db datastore.Repository, logger *zap.Logger) *SceneSuggester {
+func NewSceneSuggester(brandIdentityService brand_identity.BrandIdentity, db datastore.Repository, templateService templates.Service, logger *zap.Logger) *SceneSuggester {
 	return &SceneSuggester{
 		llmService:           llm.NewLlmService(logger, nil),
 		codeGenerator:        &codeGenerator{logger: logger},
 		brandIdentityService: brandIdentityService,
 		db:                   db,
+		templateService:      templateService,
 		logger:               logger,
 	}
 }
@@ -92,13 +94,10 @@ func (s SceneSuggester) RenderSuggestion(ctx context.Context,
 		return nil, err
 	}
 
-	templateRegistry := NewTemplateRegistry(registry, s.codeGenerator, s.logger)
-	for _, templateID := range templateIDs {
-		template, err := s.db.GetTemplateByID(ctx, templateID)
-		if err != nil {
-			return nil, err
-		}
-		templateRegistry.AddTemplate(template)
+	templateRegistry := NewTemplateRegistry(s.templateService, registry, s.codeGenerator, s.logger)
+	err = templateRegistry.WithTemplateIds(ctx, templateIDs)
+	if err != nil {
+		return nil, err
 	}
 
 	extractReq := types.ExtractTemplateConfigRequest{
@@ -164,7 +163,7 @@ func (s SceneSuggester) GenerateSuggestions(ctx context.Context, req *pbportal.G
 
 		if currentSlideContent != "" {
 			reqMatchCat := types.MatchCategoriesRequest{
-				Categories: scenes.TemplateCategories,
+				Categories: scenes.AvailableCategoriesToCategorize,
 				Content:    currentSlideContent,
 			}
 

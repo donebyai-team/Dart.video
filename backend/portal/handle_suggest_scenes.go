@@ -32,7 +32,7 @@ func (p *Portal) GenerateSuggestions(ctx context.Context, c *connect.Request[pbp
 	// TODO: Remove it later
 	c.Msg.PageSize = 4
 
-	suggester := agent.NewSceneSuggester(p.brandIdentityService, p.db, logger)
+	suggester := agent.NewSceneSuggester(p.brandIdentityService, p.db, p.templateService, logger)
 	suggestions, err := suggester.GenerateSuggestions(ctx, c.Msg)
 	if err != nil {
 		logger.Error("failed to generate suggestions", zap.Error(err))
@@ -67,7 +67,7 @@ func (p *Portal) RenderSuggestion(ctx context.Context, c *connect.Request[pbport
 		return connect.NewResponse(&pbportal.SuggestScenesResponse{}), nil
 	}
 
-	suggester := agent.NewSceneSuggester(p.brandIdentityService, p.db, logger)
+	suggester := agent.NewSceneSuggester(p.brandIdentityService, p.db, p.templateService, logger)
 	suggestions, err := suggester.RenderSuggestion(ctx, c.Msg.Tid, c.Msg.Slide, video)
 	if err != nil {
 		return nil, err

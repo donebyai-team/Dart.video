@@ -11,22 +11,73 @@ import (
 	"github.com/shank318/coasterai/services"
 	"github.com/shank318/coasterai/services/templates"
 	"go.uber.org/zap"
+	"sort"
 	"strings"
 )
 
 type TemplateRegistry struct {
-	assetRegistry *services.MediaAssetRegistry
-	templates     map[string]*models.Template
-	codeGenerator CodeGeneratorAgent
-	logger        *zap.Logger
+	assetRegistry   *services.MediaAssetRegistry
+	templates       map[string]*models.Template
+	templateService templates.Service
+	codeGenerator   CodeGeneratorAgent
+	logger          *zap.Logger
 }
 
-func NewTemplateRegistry(assetRegistry *services.MediaAssetRegistry, codeGenerator CodeGeneratorAgent, logger *zap.Logger) *TemplateRegistry {
+func NewTemplateRegistry(
+	templateService templates.Service,
+	assetRegistry *services.MediaAssetRegistry,
+	codeGenerator CodeGeneratorAgent,
+	logger *zap.Logger) *TemplateRegistry {
 	return &TemplateRegistry{
-		assetRegistry: assetRegistry,
-		templates:     make(map[string]*models.Template),
-		codeGenerator: codeGenerator,
-		logger:        logger}
+		templateService: templateService,
+		assetRegistry:   assetRegistry,
+		templates:       make(map[string]*models.Template),
+		codeGenerator:   codeGenerator,
+		logger:          logger}
+}
+
+func (r *TemplateRegistry) WithRandomTemplates(ctx context.Context) error {
+	selectedTemplates, err := r.templateService.FetchTemplatesByCategories(ctx, scenes.AllCategories)
+	if err != nil {
+		return err
+	}
+
+	for _, template := range selectedTemplates {
+		r.templates[strings.ToLower(template.Name)] = template
+	}
+
+	return nil
+}
+
+func (r *TemplateRegistry) WithTemplateIds(ctx context.Context, templateIds []string) error {
+	seen := make(map[string]struct{})
+
+	for _, templateId := range templateIds {
+		if _, exists := seen[templateId]; exists {
+			continue
+		}
+		seen[templateId] = struct{}{}
+
+		template, err := r.templateService.GetTemplateByID(ctx, templateId)
+		if err != nil {
+			return err
+		}
+		r.templates[strings.ToLower(template.Name)] = template
+	}
+
+	return nil
+}
+
+func (r *TemplateRegistry) GetIDs() []string {
+	ids := make([]string, 0, len(r.templates))
+	for _, temp := range r.templates {
+		ids = append(ids, temp.ID)
+	}
+	return ids
+}
+
+func (r *TemplateRegistry) GetAssetRegistry() *services.MediaAssetRegistry {
+	return r.assetRegistry
 }
 
 func (r *TemplateRegistry) AddTemplate(template *models.Template) {
@@ -68,13 +119,24 @@ func writeScene(b *strings.Builder, c *models.Template) {
 }
 
 func (r *TemplateRegistry) BuildPrompt() string {
+	// Sort before construction to avail prompt caching
+	sortedTemplates := make([]*models.Template, 0, len(r.templates))
+	for _, t := range r.templates {
+		sortedTemplates = append(sortedTemplates, t)
+	}
+
+	sort.Slice(sortedTemplates, func(i, j int) bool {
+		return sortedTemplates[i].ID < sortedTemplates[j].ID
+		// or strings.ToLower(templates[i].Name) < strings.ToLower(templates[j].Name)
+	})
+
 	var b strings.Builder
 
 	b.WriteString("# Available Scenes\n\n")
 
 	var components []types2.Component
 
-	for _, template := range r.templates {
+	for _, template := range sortedTemplates {
 		component, _ := scenes.FindComponent(template.Name)
 		if component != nil {
 			components = append(components, *component)
@@ -120,6 +182,9 @@ func (r *TemplateRegistry) ToSceneElements() []types.SceneElement {
 
 func (r *TemplateRegistry) GenerateScene(ctx context.Context, scene *types.Scene) ([]*pbcore.Slide, error) {
 	template := r.templates[strings.ToLower(scene.Element.Component)]
+	if template == nil {
+		return nil, fmt.Errorf("scene %s not found", scene.Element.Component)
+	}
 
 	slides := make([]*pbcore.Slide, 0)
 	// Check if its old template

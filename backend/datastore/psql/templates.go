@@ -189,6 +189,7 @@ func (r *Database) GetTemplateByName(
 func (r *Database) GetTemplatesByCategoryRandom(
 	ctx context.Context,
 	category string,
+	limit int,
 ) ([]*models.Template, error) {
 	return getMany[models.Template](
 		ctx,
@@ -196,6 +197,7 @@ func (r *Database) GetTemplatesByCategoryRandom(
 		"templates/query_templates_random.sql",
 		map[string]any{
 			"category": category,
+			"limit":    limit,
 		},
 	)
 }

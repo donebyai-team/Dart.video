@@ -2,7 +2,24 @@ package scenes
 
 import "github.com/shank318/coasterai/baml_client/types"
 
-var TemplateCategories = []types.Category{
+const (
+	CATEGORY_TEXT   = "TEXT"
+	CATEGORY_FILLER = "FILLER"
+)
+
+var AllCategories = append(
+	[]types.Category{
+		{
+			Name: CATEGORY_TEXT,
+		},
+		{
+			Name: CATEGORY_FILLER,
+		},
+	},
+	AvailableCategoriesToCategorize...,
+)
+
+var AvailableCategoriesToCategorize = []types.Category{
 	{
 		Name:        "HOOK",
 		Description: "An attention-grabbing statement, question, fact, story, or claim designed to immediately capture interest and draw the audience into the message.",
