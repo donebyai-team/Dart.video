@@ -70,10 +70,6 @@ func ParseLLMOutputToTemplateDefaults(
 	llmOutput string,
 	template *models.Template,
 ) (*models.Template, error) {
-	if template == nil {
-		return nil, fmt.Errorf("template is nil")
-	}
-
 	llmOutput = code_builder.ResolveIcons(llmOutput)
 
 	var outputs []json.RawMessage
