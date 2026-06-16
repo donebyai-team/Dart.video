@@ -387,6 +387,78 @@ func (t *EditStringClassView) Type() (baml.Type, error) {
 	return t.inner.Type()
 }
 
+type ExtractTemplateConfigRequestClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *ExtractTemplateConfigRequestClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *ExtractTemplateConfigRequestClassView) PropertyContent() (ClassPropertyView, error) {
+	return t.inner.Property("content")
+}
+
+func (t *ExtractTemplateConfigRequestClassView) PropertyScenes() (ClassPropertyView, error) {
+	return t.inner.Property("scenes")
+}
+
+func (t *ExtractTemplateConfigRequestClassView) PropertyVideoBranding() (ClassPropertyView, error) {
+	return t.inner.Property("VideoBranding")
+}
+
+func (t *TypeBuilder) ExtractTemplateConfigRequest() (*ExtractTemplateConfigRequestClassView, error) {
+	bld, err := t.inner.Class("ExtractTemplateConfigRequest")
+	if err != nil {
+		return nil, err
+	}
+	return &ExtractTemplateConfigRequestClassView{inner: bld}, nil
+}
+
+func (t *ExtractTemplateConfigRequestClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
+type ExtractTemplateConfigResponseClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *ExtractTemplateConfigResponseClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *ExtractTemplateConfigResponseClassView) PropertyScenes() (ClassPropertyView, error) {
+	return t.inner.Property("scenes")
+}
+
+func (t *TypeBuilder) ExtractTemplateConfigResponse() (*ExtractTemplateConfigResponseClassView, error) {
+	bld, err := t.inner.Class("ExtractTemplateConfigResponse")
+	if err != nil {
+		return nil, err
+	}
+	return &ExtractTemplateConfigResponseClassView{inner: bld}, nil
+}
+
+func (t *ExtractTemplateConfigResponseClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
 type GenerateAnimationCodeRequestClassView struct {
 	inner baml.ClassBuilder
 }
@@ -527,8 +599,8 @@ func (t *MatchCategoriesRequestClassView) PropertyCategories() (ClassPropertyVie
 	return t.inner.Property("categories")
 }
 
-func (t *MatchCategoriesRequestClassView) PropertyOriginal() (ClassPropertyView, error) {
-	return t.inner.Property("original")
+func (t *MatchCategoriesRequestClassView) PropertyContent() (ClassPropertyView, error) {
+	return t.inner.Property("content")
 }
 
 func (t *MatchCategoriesRequestClassView) PropertyEdits() (ClassPropertyView, error) {
@@ -565,10 +637,6 @@ func (t *MatchCategoriesResponseClassView) ListProperties() ([]ClassPropertyView
 
 func (t *MatchCategoriesResponseClassView) PropertyCategories() (ClassPropertyView, error) {
 	return t.inner.Property("categories")
-}
-
-func (t *MatchCategoriesResponseClassView) PropertySummary() (ClassPropertyView, error) {
-	return t.inner.Property("summary")
 }
 
 func (t *TypeBuilder) MatchCategoriesResponse() (*MatchCategoriesResponseClassView, error) {

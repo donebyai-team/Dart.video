@@ -210,7 +210,7 @@ export const StatCounterAssetSchema = [
 export const StatCounterDescriptor: ComponentRegistration = {
   name: 'StatCounter',
   type: 'scene',
-  tags: ['Stats'],
+  tags: ['SOCIAL_PROOF'],
   schema: StatCounterAssetSchema,
   llmSchema: [
     {

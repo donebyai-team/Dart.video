@@ -19,17 +19,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { categories } from "./settings/reimagine/constants"
 
-const TEMPLATE_CATEGORIES = [
-  "HOOK",
-  "PROBLEM",
-  "SOLUTION",
-  "REVEAL",
-  "CTA",
-  "INTRO",
-  "OUTRO",
-  "SOCIAL_PROOF",
-]
 
 type SaveTemplateProps = {
   open: boolean
@@ -182,15 +173,6 @@ const SaveTemplate = ({ open, onOpenChange, videoId }: SaveTemplateProps) => {
           </div>
         ) : (
           <div className="max-h-[70vh] space-y-5 overflow-y-auto pr-1">
-            <div className="space-y-2">
-              <Label htmlFor="template-name">Template Name(Max 10 characters)</Label>
-              <Input
-                id="template-name"
-                value={form.name}
-                onChange={event => updateField("name", event.target.value)}
-                placeholder="Enter template name"
-              />
-            </div>
 
             <div className="space-y-2">
               <Label htmlFor="template-description">Description(Max 2 lines)</Label>
@@ -219,20 +201,20 @@ const SaveTemplate = ({ open, onOpenChange, videoId }: SaveTemplateProps) => {
             <div className="space-y-3">
               <Label>Categories</Label>
               <div className="grid grid-cols-2 gap-3">
-                {TEMPLATE_CATEGORIES.map(category => {
-                  const checked = form.categories.includes(category)
+                {categories.map(category => {
+                  const checked = form.categories.includes(category.value)
 
                   return (
                     <label
-                      key={category}
+                      key={category.value}
                       className="flex items-center gap-2 rounded-md border border-border px-2.5 py-1.5 text-xs"
                     >
                       <Checkbox
                         checked={checked}
-                        onCheckedChange={value => toggleCategory(category, value === true)}
+                        onCheckedChange={value => toggleCategory(category.value, value === true)}
                         className="h-3.5 w-3.5"
                       />
-                      <span className="leading-none">{category}</span>
+                      <span className="leading-none">{category.value}</span>
                     </label>
                   )
                 })}

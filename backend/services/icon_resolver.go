@@ -133,6 +133,7 @@ Public API
 */
 
 func ResolveIconFromName(name string) string {
+	name = strings.TrimPrefix(name, "icon:")
 	if url, ok := resolveBrandIcon(name); ok {
 		return url
 	}

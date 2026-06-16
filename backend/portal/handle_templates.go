@@ -44,6 +44,11 @@ func (p *Portal) GetTemplates(ctx context.Context, c *connect.Request[emptypb.Em
 
 	templatesProto := make([]*pbcore.AnimationTemplate, 0, len(templates))
 	for _, template := range templates {
+		if template.Config == nil ||
+			template.Metadata == nil ||
+			len(template.Config.Sections) == 0 {
+			continue
+		}
 		templatesProto = append(templatesProto, template.ToProto())
 	}
 	return connect.NewResponse(&pbportal.GetTemplatesResponse{Templates: templatesProto}), nil
@@ -60,8 +65,6 @@ func (p *Portal) SaveTemplate(ctx context.Context, c *connect.Request[pbportal.U
 	}
 
 	if c.Msg.Id == "" ||
-		c.Msg.Name == "" ||
-		len(c.Msg.Name) > 10 ||
 		c.Msg.Description == "" ||
 		len(c.Msg.Description) > 150 ||
 		len(c.Msg.Categories) == 0 {

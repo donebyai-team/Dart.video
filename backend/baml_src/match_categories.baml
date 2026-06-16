@@ -5,13 +5,12 @@ class Category {
 
 class MatchCategoriesRequest {
   categories Category[]
-  original string
+  content string
   edits string?
 }
 
 class MatchCategoriesResponse {
-  categories Category[]
-  summary string
+  categories string[]
 }
 
 function MatchCategories(resume: MatchCategoriesRequest) -> MatchCategoriesResponse {
@@ -31,28 +30,19 @@ function MatchCategories(resume: MatchCategoriesRequest) -> MatchCategoriesRespo
     Tasks:
 
     1. Understand the final message being communicated.
-    2. Select the categories that best describe that message.
-    3. Create a concise summary (1-2 sentences) that captures the scene's intent and can be used to recreate the scene using a different template.
-    4. Include important text, product names, company names, features, benefits, problems, claims, and calls-to-action from the scene when relevant.
+    2. Evaluate all provided categories.
+    3. Rank the categories from best match to worst match.
 
     Rules:
 
-    - Match categories based on overall meaning and intent.
-    - Consider both the original scene and edits together.
-    - Prefer information from edits when present.
-    - Preserve important wording from the scene when useful for the summary.
-    - Only use the provided categories.
-    - Do not invent categories.
+    - Consider every category.
     - Return categories ordered by relevance.
+    - The first category must be the strongest match.
+    - Categories should be ranked relative to each other.
     - Do not explain your reasoning.
 
-    Original Scene:
-    {{ resume.original }}
-
-    {% if resume.edits %}
-    Edits:
-    {{ resume.edits }}
-    {% endif %}
+    Scene Content:
+    {{ resume.content }}
 
     --------------------------------------------------
     OUTPUT FORMAT

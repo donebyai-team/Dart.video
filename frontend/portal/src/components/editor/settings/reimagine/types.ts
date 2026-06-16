@@ -1,23 +1,30 @@
 import type { Section } from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import type { AnimationCategory } from '@coasterai/pb/coasterai/core/v1/template_pb'
 import type { LucideIcon } from 'lucide-react'
 
 export interface CategoryItem {
-  value: AnimationCategory
+  value: string
   label: string
   icon: LucideIcon
 }
 
+export interface SuggestionItem {
+  templateId: string
+  suggestion: Section | null
+  status: 'loading' | 'ready'
+}
+
 export interface SuggestionGridProps {
-  suggestions: Section[]
-  selectedIndex: number | null
-  onSelect: (suggestion: Section, index: number) => void
+  suggestions: SuggestionItem[]
+  selectedTemplateId: string | null
+  onSelect: (suggestion: SuggestionItem) => void
   resolution?: {
     width: number
     height: number
   } | null
   fps: number
   isLoading?: boolean
+  isLoadingMore?: boolean
   emptyMessage: string
-  maxItems?: number
+  hasMore?: boolean
+  onLoadMore?: () => void
 }

@@ -33,7 +33,6 @@ service PortalService {
   rpc CreateVideo(CreateVideoRequest) returns (stream CreateVideoResponse);
   rpc ContinueVideoPlanning(ContinueVideoPlanningRequest) returns (stream CreateVideoResponse);
   rpc GetVideo(GetVideoRequest) returns (stream GetVideoResponse);
-  rpc SuggestScenes(SuggestScenesRequest) returns (SuggestScenesResponse);
   rpc StopVideo(StopVideoRequest) returns (.google.protobuf.Empty);
   rpc GetVideos(.google.protobuf.Empty) returns (GetVideosResponse);
 
@@ -66,6 +65,10 @@ service PortalService {
   rpc GetTemplates(.google.protobuf.Empty) returns (portal.v1.GetTemplatesResponse);
   rpc SaveTemplate(portal.v1.UpdateTemplateRequest) returns (.google.protobuf.Empty);
   rpc DeleteTemplate(GetTemplateRequest) returns (.google.protobuf.Empty);
+
+  // AI Suggestions
+  rpc GenerateSuggestions(portal.v1.GenerateSuggestionsInput) returns (portal.v1.GenerateSuggestionsResponse);
+  rpc RenderSuggestion(portal.v1.RenderSuggestionsInput) returns (SuggestScenesResponse);
 }
 
 message GetMediaAssetsByIDs {

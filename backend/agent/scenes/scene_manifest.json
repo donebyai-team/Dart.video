@@ -117,7 +117,7 @@
           "name": "StatCounter",
           "type": "scene",
           "tags": [
-            "Stats"
+            "SOCIAL_PROOF"
           ],
           "schema": [
             {
@@ -333,8 +333,8 @@
           "name": "TextHookStagger",
           "type": "scene",
           "tags": [
-            "Intro",
-            "Hook"
+            "INTRO",
+            "HOOK"
           ],
           "schema": [
             {
@@ -486,7 +486,7 @@
           ],
           "description": "Rotates through words on a bold background",
           "instructions": "Use for emphasis words, or highlighting multiple key points.",
-          "celExpression": "(props.wordcycle.holdDuration + props.wordcycle.transitionDuration) * size(props.wordcycle.words)"
+          "celExpression": "props.wordcycle.holdDuration + ((props.wordcycle.holdDuration + props.wordcycle.transitionDuration) * size(props.wordcycle.words))"
         },
         {
           "name": "TextWithWordCycle",
@@ -587,9 +587,9 @@
           "name": "TextLeadStagger",
           "type": "content",
           "tags": [
-            "Problem",
-            "Hook",
-            "Intro"
+            "PROBLEM",
+            "HOOK",
+            "INTRO"
           ],
           "schema": [
             {
@@ -642,8 +642,8 @@
           "name": "ProblemHeadline",
           "type": "scene",
           "tags": [
-            "Problem",
-            "Hook"
+            "PROBLEM",
+            "HOOK"
           ],
           "schema": [
             {
@@ -697,9 +697,8 @@
           "name": "TextCardStack",
           "type": "content",
           "tags": [
-            "Problem",
-            "Solution",
-            "Pain Points"
+            "PROBLEM",
+            "SOLUTION"
           ],
           "schema": [
             {
@@ -753,9 +752,8 @@
           "name": "ProblemCollagePills",
           "type": "content",
           "tags": [
-            "Problem",
-            "Data",
-            "Scatter"
+            "PROBLEM",
+            "FRAGMENTATION"
           ],
           "schema": [
             {
@@ -800,9 +798,7 @@
           "name": "IntroText",
           "type": "scene",
           "tags": [
-            "Intro",
-            "Reveal",
-            "Launch"
+            "INTRO"
           ],
           "schema": [
             {
@@ -886,8 +882,8 @@
           "name": "TextWithMediaScene",
           "type": "scene",
           "tags": [
-            "Solution",
-            "Product/Benefit Info"
+            "SOLUTION",
+            "PRODUCT_DEMO"
           ],
           "schema": [
             {
@@ -1055,9 +1051,7 @@
           "name": "MultiImageStack",
           "type": "scene",
           "tags": [
-            "Solution",
-            "Product Info",
-            "Use Cases"
+            "PRODUCT_DEMO"
           ],
           "schema": [
             {
@@ -1196,8 +1190,8 @@
           "name": "ProblemCollage",
           "type": "scene",
           "tags": [
-            "Problem",
-            "Pain Point"
+            "PROBLEM",
+            "FRAGMENTATION"
           ],
           "schema": [
             {
@@ -1293,9 +1287,7 @@
           "name": "LogoShowcase",
           "type": "scene",
           "tags": [
-            "Solution",
-            "Product Info",
-            "Social proof"
+            "SOCIAL_PROOF"
           ],
           "schema": [
             {
@@ -1387,7 +1379,7 @@
           "name": "LogoWithBrandName",
           "type": "scene",
           "tags": [
-            "Solution"
+            "INTRO"
           ],
           "schema": [
             {
@@ -1434,9 +1426,8 @@
                 },
                 {
                   "name": "logoAnimation",
-                  "type": "string",
+                  "type": "enum",
                   "default": "zoomIn",
-                  "sub_type": "enum",
                   "enum": [
                     "none",
                     "fadeIn",
@@ -1549,14 +1540,13 @@
           "name": "IconShowcase",
           "type": "scene",
           "tags": [
-            "Solution",
-            "Product Info",
-            "Social proof"
+            "SOLUTIONS",
+            "SOCIAL_PROOF"
           ],
           "schema": [
             {
               "type": "component",
-              "name": "textstagger",
+              "name": "animatedtext",
               "fields": [
                 {
                   "name": "text",
@@ -1649,9 +1639,8 @@
           "name": "PillCarousel",
           "type": "scene",
           "tags": [
-            "Solution",
-            "Product Info",
-            "Use Cases"
+            "SOLUTION",
+            "FEATURES"
           ],
           "schema": [
             {
@@ -1768,9 +1757,8 @@
           "name": "MediaWithFeatures",
           "type": "scene",
           "tags": [
-            "Solution",
-            "Product Info",
-            "Features"
+            "SOLUTION",
+            "FEATURES"
           ],
           "schema": [
             {
@@ -1854,7 +1842,7 @@
           "name": "AnimatedMedia",
           "type": "scene",
           "tags": [
-            "Product UI"
+            "PRODUCT_DEMO"
           ],
           "description": "An animated media element (image or video) with text overlay.",
           "schema": [
@@ -1936,9 +1924,8 @@
           "name": "TimelineCardStack",
           "type": "scene",
           "tags": [
-            "Solution",
-            "Product Info",
-            "Features"
+            "SOLUTION",
+            "FEATURES"
           ],
           "schema": [
             {

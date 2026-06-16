@@ -119,6 +119,53 @@ func (*parse) EditAnimationCode(text string, opts ...CallOptionFunc) (types.Edit
 	return casted, nil
 }
 
+// / Parse version of ExtractTemplateConfig (Takes in string and returns types.ExtractTemplateConfigResponse)
+func (*parse) ExtractTemplateConfig(text string, opts ...CallOptionFunc) (types.ExtractTemplateConfigResponse, error) {
+
+	var callOpts callOption
+	for _, opt := range opts {
+		opt(&callOpts)
+	}
+
+	args := baml.BamlFunctionArguments{
+		Kwargs: map[string]any{"text": text, "stream": false},
+		Env:    getEnvVars(callOpts.env),
+	}
+
+	if callOpts.clientRegistry != nil {
+		args.ClientRegistry = callOpts.clientRegistry
+	}
+
+	if callOpts.collectors != nil {
+		args.Collectors = callOpts.collectors
+	}
+
+	if callOpts.typeBuilder != nil {
+		args.TypeBuilder = callOpts.typeBuilder
+	}
+
+	if callOpts.tags != nil {
+		args.Tags = callOpts.tags
+	}
+
+	encoded, err := args.Encode()
+	if err != nil {
+		// This should never happen. if it does, please file an issue at https://github.com/boundaryml/baml/issues
+		// and include the type of the args you're passing in.
+		wrapped_err := fmt.Errorf("BAML INTERNAL ERROR: ExtractTemplateConfig: %w", err)
+		panic(wrapped_err)
+	}
+
+	result, err := bamlRuntime.CallFunctionParse(context.Background(), "ExtractTemplateConfig", encoded)
+	if err != nil {
+		return types.ExtractTemplateConfigResponse{}, err
+	}
+
+	casted := (result).(types.ExtractTemplateConfigResponse)
+
+	return casted, nil
+}
+
 // / Parse version of GenerateAnimation (Takes in string and returns types.Union2AskUserQuestionOrGenerateAnimationCodeResponse)
 func (*parse) GenerateAnimation(text string, opts ...CallOptionFunc) (types.Union2AskUserQuestionOrGenerateAnimationCodeResponse, error) {
 

@@ -2,289 +2,204 @@ package agent
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/shank318/coasterai/agent/agenterrors"
 	"github.com/shank318/coasterai/agent/llm"
 	"github.com/shank318/coasterai/agent/scenes"
 	"github.com/shank318/coasterai/baml_client/types"
+	"github.com/shank318/coasterai/datastore"
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
+	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
 	"github.com/shank318/coasterai/services"
 	"github.com/shank318/coasterai/services/brand_identity"
 	"github.com/shank318/coasterai/services/templates"
-	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
 )
 
 type SceneSuggester struct {
 	brandIdentityService brand_identity.BrandIdentity
 	llmService           llm.Service
+	db                   datastore.Repository
 	codeGenerator        CodeGeneratorAgent
 	logger               *zap.Logger
 }
 
-func NewSceneSuggester(brandIdentityService brand_identity.BrandIdentity, logger *zap.Logger) *SceneSuggester {
+func NewSceneSuggester(brandIdentityService brand_identity.BrandIdentity, db datastore.Repository, logger *zap.Logger) *SceneSuggester {
 	return &SceneSuggester{
 		llmService:           llm.NewLlmService(logger, nil),
 		codeGenerator:        &codeGenerator{logger: logger},
 		brandIdentityService: brandIdentityService,
+		db:                   db,
 		logger:               logger,
 	}
 }
 
-func (s SceneSuggester) CategorizeScene(
-	ctx context.Context,
-	slide *pbcore.Slide,
-) (*types.MatchCategoriesResponse, error) {
-	var original, edits string
+func (s SceneSuggester) extractSceneContent(slide *pbcore.Slide) string {
+	var currentSlideContent string
 
 	if slide.Content != nil &&
 		slide.Content.CodeRegistry.Defaults != nil &&
 		len(slide.Content.CodeRegistry.Defaults.Fields) > 0 {
-		payload, err := templates.BuildLLMDataPayload(slide.Content.CodeRegistry.Defaults)
+		payload, err := templates.BuildAndSanitizeLLMPropsPayload(slide.Content.CodeRegistry.Defaults)
 		if err != nil {
 			s.logger.Error("failed to build llm data payload", zap.Error(err))
 		}
 
 		if payload != "" {
-			original = payload
+			currentSlideContent = payload
 		}
 	}
 
 	if slide.Content != nil &&
 		slide.Content.Edits != nil &&
 		len(slide.Content.Edits.Fields) > 0 {
-		payload, err := templates.BuildLLMDataPayload(slide.Content.Edits)
+		payload, err := templates.BuildAndSanitizeLLMPropsPayload(slide.Content.Edits)
 		if err != nil {
 			s.logger.Error("failed to build llm data payload", zap.Error(err))
 		}
 
-		if payload != "" {
-			edits = payload
+		if currentSlideContent == "" {
+			currentSlideContent = payload
+		} else {
+			currentSlideContent += "\n\nEdits: " + payload
 		}
 	}
-
-	// If there is no default payload, use the edits payload as original
-	if original == "" && edits != "" {
-		original = edits
-	}
-
-	// TODO: Handle the case where edits and defaults both are empty
-	req := types.MatchCategoriesRequest{
-		Categories: scenes.TemplateCategories,
-		Original:   original,
-	}
-
-	if edits != "" {
-		req.Edits = utils.Ptr(edits)
-	}
-
-	return s.llmService.CategorizeScene(ctx, req)
+	return currentSlideContent
 }
 
-func (s SceneSuggester) GenerateSuggestions(
-	ctx context.Context,
-	sceneID string,
-	category pbcore.AnimationCategory,
-	video *models.Video,
-) ([]*pbcore.Section, error) {
+type SceneSuggesterOptions struct {
+	Categories []string
+	Cursor     *string
+}
+
+func (s SceneSuggester) RenderSuggestion(ctx context.Context,
+	templateIDs []string,
+	contentSlide *pbcore.Slide,
+	video *models.Video) ([]*pbcore.Section, error) {
 	ctx = context.WithValue(ctx, llm.VideoIDKey, video.ID)
-	ctx = context.WithValue(ctx, llm.SceneIDKey, sceneID)
+	ctx = context.WithValue(ctx, llm.SceneIDKey, contentSlide.GetId())
 
-	prevSlide, currSlide, nextSlide, fallbackSlide := findSlides(video, sceneID)
+	sections := make([]*pbcore.Section, 0)
+	currentSlideContent := s.extractSceneContent(contentSlide)
+	if currentSlideContent == "" || len(templateIDs) == 0 {
+		return sections, nil
+	}
 
-	registry, err := s.createMediaAssetRegistry(ctx, video.Metadata.GeneratedBranding.BrandIdentity)
+	registry, err := s.createMediaAssetRegistry(video.Metadata.GeneratedBranding.BrandIdentity)
 	if err != nil {
 		return nil, err
 	}
 
-	suggestInput := types.SuggestScenesRequest{
-		ComponentList: scenes.BuildScenesList(scenes.BuildSceneListOptions{
-			Groups:       true,
-			Enums:        false,
-			FieldsToSkip: scenes.SkipLLMFields,
-		}),
+	templateRegistry := NewTemplateRegistry(registry, s.codeGenerator, s.logger)
+	for _, templateID := range templateIDs {
+		template, err := s.db.GetTemplateByID(ctx, templateID)
+		if err != nil {
+			return nil, err
+		}
+		templateRegistry.AddTemplate(template)
+	}
+
+	extractReq := types.ExtractTemplateConfigRequest{
+		Content: currentSlideContent,
+		Scenes:  templateRegistry.ToSceneElements(),
 	}
 
 	if registry != nil {
-		suggestInput.VideoBranding = types.VideoBranding{
+		extractReq.VideoBranding = types.VideoBranding{
 			BrandGuideLines: registry.FormatBrandDetails(),
 		}
 	}
 
-	if suggestInput.Current, err = slideToSceneJSON(currSlide, "current", registry); err != nil {
-		return nil, err
-	}
-
-	if suggestInput.Before, err = slideToSceneJSON(prevSlide, "prev", registry); err != nil {
-		return nil, err
-	}
-
-	if suggestInput.After, err = slideToSceneJSON(nextSlide, "next", registry); err != nil {
-		return nil, err
-	}
-
-	if category != pbcore.AnimationCategory_ANIMATION_CATEGORY_UNSPECIFIED {
-		suggestInput.Category = category.String()
-	}
-
-	suggestScenesFromLLM, err := s.llmService.SuggestScenes(ctx, suggestInput)
+	response, err := s.llmService.ExtractTemplateConfig(ctx, extractReq)
 	if err != nil {
-		return nil, agenterrors.LLMPlanningFailed(
-			"failed to generate scene suggestions",
-			err,
-		)
+		return nil, err
 	}
 
-	// the current slide background is used as the default background for the suggested slides
-	bgStyle := video.Metadata.BackgroundStyle
-	if currSlide != nil && currSlide.BackgroundStyle != nil {
-		bgStyle = currSlide.BackgroundStyle
-	}
-
-	// try the last slide
-	if bgStyle == nil && fallbackSlide != nil && fallbackSlide.BackgroundStyle != nil {
-		bgStyle = fallbackSlide.BackgroundStyle
-	}
-
-	if bgStyle == nil {
-		bgStyle = brand_identity.GenerateDefaultBackground(
-			video.Metadata.GeneratedBranding.Colors,
-		)
-	}
-
-	suggestedScenes := make([]*pbcore.Section, 0, len(suggestScenesFromLLM.Scenes))
-
-	for _, scene := range suggestScenesFromLLM.Scenes {
-		slide, err := s.buildSuggestedSlide(ctx, &scene, bgStyle, registry)
+	for _, scene := range response.Scenes {
+		slides, err := templateRegistry.GenerateScene(ctx, &types.Scene{
+			Element: scene,
+		})
 		if err != nil {
 			return nil, err
 		}
 
-		suggestedScenes = append(suggestedScenes, &pbcore.Section{
-			Slides: slide,
+		// Apply background
+		for _, slide := range slides {
+			slide.BackgroundStyle = contentSlide.BackgroundStyle
+		}
+
+		sections = append(sections, &pbcore.Section{
+			Slides: slides,
 		})
 	}
 
-	return suggestedScenes, nil
+	return sections, nil
 }
 
-func findSlides(
-	video *models.Video,
-	sceneID string,
-) (prev, curr, next, fallback *pbcore.Slide) {
+func (s SceneSuggester) GenerateSuggestions(ctx context.Context, req *pbportal.GenerateSuggestionsInput) (*pbportal.GenerateSuggestionsResponse, error) {
+	ctx = context.WithValue(ctx, llm.VideoIDKey, req.VideoId)
+	ctx = context.WithValue(ctx, llm.SceneIDKey, req.Slide.GetId())
 
-	var allSlides []*pbcore.Slide
-
-	for _, section := range video.Config.Sections {
-		allSlides = append(allSlides, section.Slides...)
+	var categories []string
+	if len(req.Categories) > 0 {
+		categories = req.Categories
 	}
 
-	// Set fallback to the last slide (if any)
-	if len(allSlides) > 0 {
-		fallback = allSlides[len(allSlides)-1]
-	}
-
-	for i, slide := range allSlides {
-		if slide.GetId() != sceneID {
-			continue
+	var cursor *models.TemplateCursor
+	if req.NextPage != nil {
+		cursorDecoded, err := decodeTemplateCursor(*req.NextPage)
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode cursor: %w", err)
 		}
 
-		curr = slide
+		// use categories from the cursor
+		categories = cursorDecoded.Categories
+		cursor = cursorDecoded
+	}
 
-		if i > 0 {
-			prev = allSlides[i-1]
+	if len(categories) == 0 {
+		currentSlideContent := s.extractSceneContent(req.Slide)
+
+		if currentSlideContent != "" {
+			reqMatchCat := types.MatchCategoriesRequest{
+				Categories: scenes.TemplateCategories,
+				Content:    currentSlideContent,
+			}
+
+			scene, err := s.llmService.CategorizeScene(ctx, reqMatchCat)
+			if err != nil {
+				return nil, err
+			}
+
+			categories = scene.Categories
 		}
-
-		if i < len(allSlides)-1 {
-			next = allSlides[i+1]
-		}
-
-		return prev, curr, next, fallback
 	}
 
-	return nil, nil, nil, fallback
-}
-
-func slideToSceneJSON(
-	slide *pbcore.Slide,
-	label string,
-	mediaRegistry *services.MediaAssetRegistry,
-) (string, error) {
-
-	if slide == nil ||
-		slide.Content == nil ||
-		slide.Content.Edits == nil ||
-		len(slide.Content.Edits.Fields) == 0 {
-		return "", nil
+	// if no categories found, return empty
+	if len(categories) == 0 {
+		return &pbportal.GenerateSuggestionsResponse{}, nil
 	}
 
-	// TODO: Optimize this to extract only component name and text fields.
-	if !IsSlideHasTemplateComponent(slide) {
-		edits, err := slide.Content.Edits.MarshalJSON()
-		return string(edits), err
-	}
-
-	sceneToEdit, err := scenes.EditsToScene(
-		slide.Content.Edits,
-		mediaRegistry,
-	)
-	if err != nil {
-		return "", agenterrors.InvalidInput(
-			fmt.Sprintf("invalid %s scene patch", label),
-			err,
-		)
-	}
-
-	marshaled, err := json.Marshal(sceneToEdit)
-	if err != nil {
-		return "", agenterrors.InvalidInput(
-			fmt.Sprintf("invalid %s scene patch", label),
-			err,
-		)
-	}
-
-	return string(marshaled), nil
-}
-
-func (s SceneSuggester) buildSuggestedSlide(
-	ctx context.Context,
-	scene *types.Scene,
-	bgStyle *pbcore.BackgroundStyle,
-	mediaRegistry *services.MediaAssetRegistry,
-) ([]*pbcore.Slide, error) {
-
-	slides := make([]*pbcore.Slide, 0)
-	sceneConfigs, err := scenes.ConvertToSceneConfigWithBackground(scene, bgStyle, mediaRegistry)
+	templatePage, err := s.db.ListTemplatesByCategories(ctx, categories, int(req.PageSize), cursor)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, sceneConfig := range sceneConfigs {
-		template, err := s.codeGenerator.GenerateCodeFromScene(
-			ctx,
-			sceneConfig,
-		)
-		if err != nil {
-			return nil, err
-		}
-		// TODO:
-		// We extract the variant, color, font from the currentSlide
-		// and apply it in the suggested slide.
-
-		if sceneConfig.Background != nil {
-			template.BackgroundStyle = sceneConfig.Background
-		}
-		template.SlideStatus = pbcore.SlideStatus_SLIDE_STATUS_GENERATED
-
-		slides = append(slides, template)
+	templateIds := make([]string, len(templatePage.Templates))
+	for i, template := range templatePage.Templates {
+		templateIds[i] = template.ID
 	}
 
-	return slides, nil
+	return &pbportal.GenerateSuggestionsResponse{
+		Tid:      templateIds,
+		NextPage: templatePage.NextCursor,
+	}, nil
+
 }
 
-func (s SceneSuggester) createMediaAssetRegistry(ctx context.Context, brandIdentity *pbcore.BrandIdentity) (*services.MediaAssetRegistry, error) {
+func (s SceneSuggester) createMediaAssetRegistry(brandIdentity *pbcore.BrandIdentity) (*services.MediaAssetRegistry, error) {
 	registryBuilder := services.NewMediaAssetRegistryBuilder()
 
 	if brandIdentity != nil {
@@ -294,4 +209,22 @@ func (s SceneSuggester) createMediaAssetRegistry(ctx context.Context, brandIdent
 	}
 
 	return registryBuilder.Build(), nil
+}
+
+func decodeTemplateCursor(cursor string) (*models.TemplateCursor, error) {
+	if cursor == "" {
+		return nil, nil
+	}
+
+	data, err := base64.RawURLEncoding.DecodeString(cursor)
+	if err != nil {
+		return nil, err
+	}
+
+	var c models.TemplateCursor
+	if err := json.Unmarshal(data, &c); err != nil {
+		return nil, err
+	}
+
+	return &c, nil
 }

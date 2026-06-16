@@ -254,7 +254,7 @@ export const TextCardStackSchemaFields = [
 export const TextCardStackDescriptor: ComponentRegistration = {
   name: 'TextCardStack',
   type: 'content',
-  tags: ['Problem', 'Solution', 'Pain Points'],
+  tags: ['PROBLEM', 'SOLUTION'],
   schema: [{
     type: 'component',
     name: 'textcardstack',

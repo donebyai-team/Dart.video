@@ -159,7 +159,7 @@ export const IntroText: React.FC<IntroTextProps> = (initProps) => {
 export const IntroTextDescriptor: ComponentRegistration = {
     name: 'IntroText',
     type: 'scene',
-    tags: ['Intro', 'Reveal', 'Launch'],
+    tags: ['INTRO'],
     schema: [
         {
             type: 'component',

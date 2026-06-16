@@ -2,7 +2,11 @@ package templates
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/shank318/coasterai/models"
+	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
+	"github.com/shank318/coasterai/services/code_builder"
 	"github.com/shank318/coasterai/utils"
 	"net/url"
 	"regexp"
@@ -30,13 +34,103 @@ var (
 	hexColorRegex = regexp.MustCompile(`(?i)^#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$`)
 )
 
-// Used to send the template schema to LLM to generate new scene
-func BuildLLMDataPayload(data *structpb.Struct) (string, error) {
+// Defaults are used as schema of the template
+func BuildTemplateSchemaFromDefaults(template *models.Template) (string, error) {
+	var payload []json.RawMessage
+
+	var slides []*pbcore.Slide
+	for _, section := range template.Config.Sections {
+		slides = append(slides, section.Slides...)
+	}
+
+	for _, slide := range slides {
+		if slide.Content.CodeRegistry.Defaults == nil {
+			continue
+		}
+
+		s, err := BuildAndSanitizeLLMPropsPayload(
+			slide.Content.CodeRegistry.Defaults,
+		)
+		if err != nil {
+			return "", err
+		}
+
+		payload = append(payload, json.RawMessage(s))
+	}
+
+	b, err := json.MarshalIndent(payload, "", "  ")
+	if err != nil {
+		return "", err
+	}
+
+	return string(b), nil
+}
+
+func ParseLLMOutputToTemplateDefaults(
+	llmOutput string,
+	template *models.Template,
+) (*models.Template, error) {
+	llmOutput = code_builder.ResolveIcons(llmOutput)
+
+	var outputs []json.RawMessage
+	if err := json.Unmarshal([]byte(llmOutput), &outputs); err != nil {
+		return template, fmt.Errorf("failed to parse llm output: %w", err)
+	}
+
+	outputIndex := 0
+	var errs []error
+
+	for _, section := range template.Config.Sections {
+		for _, slide := range section.Slides {
+			if slide.Content.CodeRegistry.Defaults == nil {
+				continue
+			}
+
+			if outputIndex >= len(outputs) {
+				errs = append(
+					errs,
+					fmt.Errorf(
+						"missing llm output for slide %d",
+						outputIndex,
+					),
+				)
+				break
+			}
+
+			merged, err := mergeLLMOutput(
+				slide.Content.CodeRegistry.Defaults,
+				string(outputs[outputIndex]),
+			)
+			if err != nil {
+				errs = append(
+					errs,
+					fmt.Errorf(
+						"slide %d merge failed: %w",
+						outputIndex,
+						err,
+					),
+				)
+			}
+
+			slide.Content.CodeRegistry.Defaults = merged
+			outputIndex++
+		}
+	}
+
+	return template, errors.Join(errs...)
+}
+
+// Used to extract relevant fields from edits or defaults
+func BuildAndSanitizeLLMPropsPayload(data *structpb.Struct) (string, error) {
 	if data == nil {
-		return "{}", nil
+		return "", nil
 	}
 
 	filtered := filterValue(data.AsMap())
+
+	if filtered == nil {
+		return "", nil
+	}
 
 	b, err := json.MarshalIndent(filtered, "", "  ")
 	if err != nil {
@@ -47,14 +141,13 @@ func BuildLLMDataPayload(data *structpb.Struct) (string, error) {
 }
 
 // Used to merge LLM output with the original template schema
-func MergeLLMOutput(
+func mergeLLMOutput(
 	original *structpb.Struct,
 	llmOutput string,
 ) (*structpb.Struct, error) {
 	if original == nil {
 		return nil, fmt.Errorf("original is nil")
 	}
-
 	// Return original on any error.
 	fallback := original
 

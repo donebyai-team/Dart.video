@@ -25,14 +25,14 @@ func PostProcess(code string) string {
 	}
 
 	// Resolve icons eg. Icon: "icon:heart" -> our icon URL
-	code = resolveIcons(code)
+	code = ResolveIcons(code)
 
 	return code
 }
 
 var iconRegex = regexp.MustCompile(`"(icon:[^"]+)"`)
 
-func resolveIcons(code string) string {
+func ResolveIcons(code string) string {
 	// icon:name -> URL
 	code = iconRegex.ReplaceAllStringFunc(code, func(match string) string {
 		value := strings.Trim(match, `"`)

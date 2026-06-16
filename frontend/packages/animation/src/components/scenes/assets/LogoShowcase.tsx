@@ -199,7 +199,7 @@ export const LogoShowcaseSchemaFields = [
 export const LogoShowcaseDescriptor: ComponentRegistration = {
     name: 'LogoShowcase',
     type: 'scene',
-    tags: ['Solution', 'Product Info', 'Social proof'],
+    tags: ['SOCIAL_PROOF'],
     schema: LogoShowcaseSchemaFields,
     llmSchema: [
         {

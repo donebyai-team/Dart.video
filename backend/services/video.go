@@ -126,10 +126,12 @@ func (v videoGeneration) UpdateVideoConfig(ctx context.Context, video *models.Vi
 
 const letters = "abcdefghijklmnopqrstuvwxyz"
 
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
 // GenerateRandomName generates a random name with first letter capitalized
 func GenerateRandomName(minLen, maxLen int) string {
-	rand.Seed(time.Now().UnixNano())
-
 	length := rand.Intn(maxLen-minLen+1) + minLen
 
 	name := make([]byte, length)

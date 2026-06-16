@@ -74,9 +74,6 @@ const (
 	PortalServiceContinueVideoPlanningProcedure = "/coasterai.portal.v1.PortalService/ContinueVideoPlanning"
 	// PortalServiceGetVideoProcedure is the fully-qualified name of the PortalService's GetVideo RPC.
 	PortalServiceGetVideoProcedure = "/coasterai.portal.v1.PortalService/GetVideo"
-	// PortalServiceSuggestScenesProcedure is the fully-qualified name of the PortalService's
-	// SuggestScenes RPC.
-	PortalServiceSuggestScenesProcedure = "/coasterai.portal.v1.PortalService/SuggestScenes"
 	// PortalServiceStopVideoProcedure is the fully-qualified name of the PortalService's StopVideo RPC.
 	PortalServiceStopVideoProcedure = "/coasterai.portal.v1.PortalService/StopVideo"
 	// PortalServiceGetVideosProcedure is the fully-qualified name of the PortalService's GetVideos RPC.
@@ -138,6 +135,12 @@ const (
 	// PortalServiceDeleteTemplateProcedure is the fully-qualified name of the PortalService's
 	// DeleteTemplate RPC.
 	PortalServiceDeleteTemplateProcedure = "/coasterai.portal.v1.PortalService/DeleteTemplate"
+	// PortalServiceGenerateSuggestionsProcedure is the fully-qualified name of the PortalService's
+	// GenerateSuggestions RPC.
+	PortalServiceGenerateSuggestionsProcedure = "/coasterai.portal.v1.PortalService/GenerateSuggestions"
+	// PortalServiceRenderSuggestionProcedure is the fully-qualified name of the PortalService's
+	// RenderSuggestion RPC.
+	PortalServiceRenderSuggestionProcedure = "/coasterai.portal.v1.PortalService/RenderSuggestion"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
@@ -157,7 +160,6 @@ var (
 	portalServiceCreateVideoMethodDescriptor            = portalServiceServiceDescriptor.Methods().ByName("CreateVideo")
 	portalServiceContinueVideoPlanningMethodDescriptor  = portalServiceServiceDescriptor.Methods().ByName("ContinueVideoPlanning")
 	portalServiceGetVideoMethodDescriptor               = portalServiceServiceDescriptor.Methods().ByName("GetVideo")
-	portalServiceSuggestScenesMethodDescriptor          = portalServiceServiceDescriptor.Methods().ByName("SuggestScenes")
 	portalServiceStopVideoMethodDescriptor              = portalServiceServiceDescriptor.Methods().ByName("StopVideo")
 	portalServiceGetVideosMethodDescriptor              = portalServiceServiceDescriptor.Methods().ByName("GetVideos")
 	portalServiceDeleteVideoMethodDescriptor            = portalServiceServiceDescriptor.Methods().ByName("DeleteVideo")
@@ -179,6 +181,8 @@ var (
 	portalServiceGetTemplatesMethodDescriptor           = portalServiceServiceDescriptor.Methods().ByName("GetTemplates")
 	portalServiceSaveTemplateMethodDescriptor           = portalServiceServiceDescriptor.Methods().ByName("SaveTemplate")
 	portalServiceDeleteTemplateMethodDescriptor         = portalServiceServiceDescriptor.Methods().ByName("DeleteTemplate")
+	portalServiceGenerateSuggestionsMethodDescriptor    = portalServiceServiceDescriptor.Methods().ByName("GenerateSuggestions")
+	portalServiceRenderSuggestionMethodDescriptor       = portalServiceServiceDescriptor.Methods().ByName("RenderSuggestion")
 )
 
 // PortalServiceClient is a client for the coasterai.portal.v1.PortalService service.
@@ -199,7 +203,6 @@ type PortalServiceClient interface {
 	CreateVideo(context.Context, *connect.Request[v1.CreateVideoRequest]) (*connect.ServerStreamForClient[v1.CreateVideoResponse], error)
 	ContinueVideoPlanning(context.Context, *connect.Request[v1.ContinueVideoPlanningRequest]) (*connect.ServerStreamForClient[v1.CreateVideoResponse], error)
 	GetVideo(context.Context, *connect.Request[v1.GetVideoRequest]) (*connect.ServerStreamForClient[v1.GetVideoResponse], error)
-	SuggestScenes(context.Context, *connect.Request[v1.SuggestScenesRequest]) (*connect.Response[v1.SuggestScenesResponse], error)
 	StopVideo(context.Context, *connect.Request[v1.StopVideoRequest]) (*connect.Response[emptypb.Empty], error)
 	GetVideos(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetVideosResponse], error)
 	DeleteVideo(context.Context, *connect.Request[v1.VideoRequestWithID]) (*connect.Response[emptypb.Empty], error)
@@ -225,6 +228,9 @@ type PortalServiceClient interface {
 	GetTemplates(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetTemplatesResponse], error)
 	SaveTemplate(context.Context, *connect.Request[v1.UpdateTemplateRequest]) (*connect.Response[emptypb.Empty], error)
 	DeleteTemplate(context.Context, *connect.Request[v1.GetTemplateRequest]) (*connect.Response[emptypb.Empty], error)
+	// AI Suggestions
+	GenerateSuggestions(context.Context, *connect.Request[v1.GenerateSuggestionsInput]) (*connect.Response[v1.GenerateSuggestionsResponse], error)
+	RenderSuggestion(context.Context, *connect.Request[v1.RenderSuggestionsInput]) (*connect.Response[v1.SuggestScenesResponse], error)
 }
 
 // NewPortalServiceClient constructs a client for the coasterai.portal.v1.PortalService service. By
@@ -319,12 +325,6 @@ func NewPortalServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			httpClient,
 			baseURL+PortalServiceGetVideoProcedure,
 			connect.WithSchema(portalServiceGetVideoMethodDescriptor),
-			connect.WithClientOptions(opts...),
-		),
-		suggestScenes: connect.NewClient[v1.SuggestScenesRequest, v1.SuggestScenesResponse](
-			httpClient,
-			baseURL+PortalServiceSuggestScenesProcedure,
-			connect.WithSchema(portalServiceSuggestScenesMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
 		stopVideo: connect.NewClient[v1.StopVideoRequest, emptypb.Empty](
@@ -453,6 +453,18 @@ func NewPortalServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(portalServiceDeleteTemplateMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		generateSuggestions: connect.NewClient[v1.GenerateSuggestionsInput, v1.GenerateSuggestionsResponse](
+			httpClient,
+			baseURL+PortalServiceGenerateSuggestionsProcedure,
+			connect.WithSchema(portalServiceGenerateSuggestionsMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
+		renderSuggestion: connect.NewClient[v1.RenderSuggestionsInput, v1.SuggestScenesResponse](
+			httpClient,
+			baseURL+PortalServiceRenderSuggestionProcedure,
+			connect.WithSchema(portalServiceRenderSuggestionMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -472,7 +484,6 @@ type portalServiceClient struct {
 	createVideo            *connect.Client[v1.CreateVideoRequest, v1.CreateVideoResponse]
 	continueVideoPlanning  *connect.Client[v1.ContinueVideoPlanningRequest, v1.CreateVideoResponse]
 	getVideo               *connect.Client[v1.GetVideoRequest, v1.GetVideoResponse]
-	suggestScenes          *connect.Client[v1.SuggestScenesRequest, v1.SuggestScenesResponse]
 	stopVideo              *connect.Client[v1.StopVideoRequest, emptypb.Empty]
 	getVideos              *connect.Client[emptypb.Empty, v1.GetVideosResponse]
 	deleteVideo            *connect.Client[v1.VideoRequestWithID, emptypb.Empty]
@@ -494,6 +505,8 @@ type portalServiceClient struct {
 	getTemplates           *connect.Client[emptypb.Empty, v1.GetTemplatesResponse]
 	saveTemplate           *connect.Client[v1.UpdateTemplateRequest, emptypb.Empty]
 	deleteTemplate         *connect.Client[v1.GetTemplateRequest, emptypb.Empty]
+	generateSuggestions    *connect.Client[v1.GenerateSuggestionsInput, v1.GenerateSuggestionsResponse]
+	renderSuggestion       *connect.Client[v1.RenderSuggestionsInput, v1.SuggestScenesResponse]
 }
 
 // GetConfig calls coasterai.portal.v1.PortalService.GetConfig.
@@ -564,11 +577,6 @@ func (c *portalServiceClient) ContinueVideoPlanning(ctx context.Context, req *co
 // GetVideo calls coasterai.portal.v1.PortalService.GetVideo.
 func (c *portalServiceClient) GetVideo(ctx context.Context, req *connect.Request[v1.GetVideoRequest]) (*connect.ServerStreamForClient[v1.GetVideoResponse], error) {
 	return c.getVideo.CallServerStream(ctx, req)
-}
-
-// SuggestScenes calls coasterai.portal.v1.PortalService.SuggestScenes.
-func (c *portalServiceClient) SuggestScenes(ctx context.Context, req *connect.Request[v1.SuggestScenesRequest]) (*connect.Response[v1.SuggestScenesResponse], error) {
-	return c.suggestScenes.CallUnary(ctx, req)
 }
 
 // StopVideo calls coasterai.portal.v1.PortalService.StopVideo.
@@ -676,6 +684,16 @@ func (c *portalServiceClient) DeleteTemplate(ctx context.Context, req *connect.R
 	return c.deleteTemplate.CallUnary(ctx, req)
 }
 
+// GenerateSuggestions calls coasterai.portal.v1.PortalService.GenerateSuggestions.
+func (c *portalServiceClient) GenerateSuggestions(ctx context.Context, req *connect.Request[v1.GenerateSuggestionsInput]) (*connect.Response[v1.GenerateSuggestionsResponse], error) {
+	return c.generateSuggestions.CallUnary(ctx, req)
+}
+
+// RenderSuggestion calls coasterai.portal.v1.PortalService.RenderSuggestion.
+func (c *portalServiceClient) RenderSuggestion(ctx context.Context, req *connect.Request[v1.RenderSuggestionsInput]) (*connect.Response[v1.SuggestScenesResponse], error) {
+	return c.renderSuggestion.CallUnary(ctx, req)
+}
+
 // PortalServiceHandler is an implementation of the coasterai.portal.v1.PortalService service.
 type PortalServiceHandler interface {
 	GetConfig(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.Config], error)
@@ -694,7 +712,6 @@ type PortalServiceHandler interface {
 	CreateVideo(context.Context, *connect.Request[v1.CreateVideoRequest], *connect.ServerStream[v1.CreateVideoResponse]) error
 	ContinueVideoPlanning(context.Context, *connect.Request[v1.ContinueVideoPlanningRequest], *connect.ServerStream[v1.CreateVideoResponse]) error
 	GetVideo(context.Context, *connect.Request[v1.GetVideoRequest], *connect.ServerStream[v1.GetVideoResponse]) error
-	SuggestScenes(context.Context, *connect.Request[v1.SuggestScenesRequest]) (*connect.Response[v1.SuggestScenesResponse], error)
 	StopVideo(context.Context, *connect.Request[v1.StopVideoRequest]) (*connect.Response[emptypb.Empty], error)
 	GetVideos(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetVideosResponse], error)
 	DeleteVideo(context.Context, *connect.Request[v1.VideoRequestWithID]) (*connect.Response[emptypb.Empty], error)
@@ -720,6 +737,9 @@ type PortalServiceHandler interface {
 	GetTemplates(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetTemplatesResponse], error)
 	SaveTemplate(context.Context, *connect.Request[v1.UpdateTemplateRequest]) (*connect.Response[emptypb.Empty], error)
 	DeleteTemplate(context.Context, *connect.Request[v1.GetTemplateRequest]) (*connect.Response[emptypb.Empty], error)
+	// AI Suggestions
+	GenerateSuggestions(context.Context, *connect.Request[v1.GenerateSuggestionsInput]) (*connect.Response[v1.GenerateSuggestionsResponse], error)
+	RenderSuggestion(context.Context, *connect.Request[v1.RenderSuggestionsInput]) (*connect.Response[v1.SuggestScenesResponse], error)
 }
 
 // NewPortalServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -810,12 +830,6 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 		PortalServiceGetVideoProcedure,
 		svc.GetVideo,
 		connect.WithSchema(portalServiceGetVideoMethodDescriptor),
-		connect.WithHandlerOptions(opts...),
-	)
-	portalServiceSuggestScenesHandler := connect.NewUnaryHandler(
-		PortalServiceSuggestScenesProcedure,
-		svc.SuggestScenes,
-		connect.WithSchema(portalServiceSuggestScenesMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
 	portalServiceStopVideoHandler := connect.NewUnaryHandler(
@@ -944,6 +958,18 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(portalServiceDeleteTemplateMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	portalServiceGenerateSuggestionsHandler := connect.NewUnaryHandler(
+		PortalServiceGenerateSuggestionsProcedure,
+		svc.GenerateSuggestions,
+		connect.WithSchema(portalServiceGenerateSuggestionsMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
+	portalServiceRenderSuggestionHandler := connect.NewUnaryHandler(
+		PortalServiceRenderSuggestionProcedure,
+		svc.RenderSuggestion,
+		connect.WithSchema(portalServiceRenderSuggestionMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/coasterai.portal.v1.PortalService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case PortalServiceGetConfigProcedure:
@@ -974,8 +1000,6 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 			portalServiceContinueVideoPlanningHandler.ServeHTTP(w, r)
 		case PortalServiceGetVideoProcedure:
 			portalServiceGetVideoHandler.ServeHTTP(w, r)
-		case PortalServiceSuggestScenesProcedure:
-			portalServiceSuggestScenesHandler.ServeHTTP(w, r)
 		case PortalServiceStopVideoProcedure:
 			portalServiceStopVideoHandler.ServeHTTP(w, r)
 		case PortalServiceGetVideosProcedure:
@@ -1018,6 +1042,10 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 			portalServiceSaveTemplateHandler.ServeHTTP(w, r)
 		case PortalServiceDeleteTemplateProcedure:
 			portalServiceDeleteTemplateHandler.ServeHTTP(w, r)
+		case PortalServiceGenerateSuggestionsProcedure:
+			portalServiceGenerateSuggestionsHandler.ServeHTTP(w, r)
+		case PortalServiceRenderSuggestionProcedure:
+			portalServiceRenderSuggestionHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -1081,10 +1109,6 @@ func (UnimplementedPortalServiceHandler) ContinueVideoPlanning(context.Context, 
 
 func (UnimplementedPortalServiceHandler) GetVideo(context.Context, *connect.Request[v1.GetVideoRequest], *connect.ServerStream[v1.GetVideoResponse]) error {
 	return connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.GetVideo is not implemented"))
-}
-
-func (UnimplementedPortalServiceHandler) SuggestScenes(context.Context, *connect.Request[v1.SuggestScenesRequest]) (*connect.Response[v1.SuggestScenesResponse], error) {
-	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.SuggestScenes is not implemented"))
 }
 
 func (UnimplementedPortalServiceHandler) StopVideo(context.Context, *connect.Request[v1.StopVideoRequest]) (*connect.Response[emptypb.Empty], error) {
@@ -1169,4 +1193,12 @@ func (UnimplementedPortalServiceHandler) SaveTemplate(context.Context, *connect.
 
 func (UnimplementedPortalServiceHandler) DeleteTemplate(context.Context, *connect.Request[v1.GetTemplateRequest]) (*connect.Response[emptypb.Empty], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.DeleteTemplate is not implemented"))
+}
+
+func (UnimplementedPortalServiceHandler) GenerateSuggestions(context.Context, *connect.Request[v1.GenerateSuggestionsInput]) (*connect.Response[v1.GenerateSuggestionsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.GenerateSuggestions is not implemented"))
+}
+
+func (UnimplementedPortalServiceHandler) RenderSuggestion(context.Context, *connect.Request[v1.RenderSuggestionsInput]) (*connect.Response[v1.SuggestScenesResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.RenderSuggestion is not implemented"))
 }

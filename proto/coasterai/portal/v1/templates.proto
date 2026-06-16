@@ -7,6 +7,7 @@ option go_package = "github.com/shank318/coasterai/pb/coasterai/portal/v1;pbport
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 import "coasterai/core/v1/template.proto";
+import "coasterai/core/v1/slide.proto";
 
 message GetTemplatesResponse {
   repeated core.v1.AnimationTemplate templates = 1;
@@ -22,4 +23,23 @@ message UpdateTemplateRequest {
   optional string usage_description = 3;
   repeated string categories = 4;
   string name = 5;
+}
+
+message GenerateSuggestionsInput {
+  repeated string categories = 1;
+  core.v1.Slide slide = 2;
+  int32 pageSize = 3;
+  optional string nextPage = 4;
+  string videoId = 5;
+}
+
+message GenerateSuggestionsResponse {
+  repeated string tid = 1;
+  optional string nextPage = 2;
+}
+
+message RenderSuggestionsInput {
+  string videoId = 1;
+  core.v1.Slide slide = 2;
+  repeated string tid = 3;
 }

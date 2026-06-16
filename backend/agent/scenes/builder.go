@@ -47,6 +47,59 @@ type BuildSceneListOptions struct {
 	FieldsToSkip []string
 }
 
+func GetAllTemplates() []types.Component {
+	var scenes []types.Component
+
+	for _, g := range registry.Components {
+		if g.Title == "Scenes" {
+			scenes = g.Components
+			break
+		}
+	}
+
+	// groups are only available while planning
+	for _, group := range groupedComponents {
+		scenes = append(scenes, types.Component{
+			Tags:         group.Tags,
+			Name:         group.Name,
+			Description:  group.Description,
+			Instructions: group.Instructions,
+			LLMSchema:    group.LLMSchema,
+		})
+	}
+
+	return scenes
+}
+
+func BuildScenesListFromComponents(b *strings.Builder, components []types.Component, options BuildSceneListOptions) string {
+	var sectional, filler []types.Component
+
+	for _, s := range components {
+		if len(s.Tags) > 0 && !utils.Contains(s.Tags, "FILLER") {
+			sectional = append(sectional, s)
+		} else {
+			filler = append(filler, s)
+		}
+	}
+
+	for _, s := range sectional {
+		writeScene(b, s, "Sectional", options.FieldsToSkip)
+	}
+
+	b.WriteString("## Filler Scenes\n")
+	b.WriteString("Can be used anywhere in the video.\n\n")
+
+	for _, s := range filler {
+		writeScene(b, s, "Filler", options.FieldsToSkip)
+	}
+
+	if options.Enums && len(registry.AvailableEnums) > 0 {
+		writeAvailableEnums(b)
+	}
+
+	return b.String()
+}
+
 func BuildScenesList(options BuildSceneListOptions) string {
 
 	var scenes []types.Component
@@ -58,20 +111,10 @@ func BuildScenesList(options BuildSceneListOptions) string {
 		}
 	}
 
-	var sectional, filler []types.Component
-
-	for _, s := range scenes {
-		if len(s.Tags) > 0 {
-			sectional = append(sectional, s)
-		} else {
-			filler = append(filler, s)
-		}
-	}
-
 	// groups are only available while planning
 	if options.Groups {
 		for _, group := range groupedComponents {
-			sectional = append(sectional, types.Component{
+			scenes = append(scenes, types.Component{
 				Tags:         group.Tags,
 				Name:         group.Name,
 				Description:  group.Description,
@@ -82,25 +125,9 @@ func BuildScenesList(options BuildSceneListOptions) string {
 	}
 
 	var b strings.Builder
-
 	b.WriteString("# Available Scenes\n\n")
 
-	for _, s := range sectional {
-		writeScene(&b, s, "Sectional", options.FieldsToSkip)
-	}
-
-	b.WriteString("## Filler Scenes\n")
-	b.WriteString("Can be used anywhere in the video.\n\n")
-
-	for _, s := range filler {
-		writeScene(&b, s, "Filler", options.FieldsToSkip)
-	}
-
-	if options.Enums && len(registry.AvailableEnums) > 0 {
-		writeAvailableEnums(&b)
-	}
-
-	return b.String()
+	return BuildScenesListFromComponents(&b, scenes, options)
 }
 
 func writeScene(b *strings.Builder, c types.Component, category string, fieldsToSkip []string) {
@@ -134,7 +161,7 @@ func writeScene(b *strings.Builder, c types.Component, category string, fieldsTo
 	}
 
 	b.WriteString("**Props**\n")
-	writeProps(b, c.LLMSchema, fieldsToSkip)
+	WriteProps(b, c.LLMSchema, fieldsToSkip)
 
 	b.WriteString("\n---\n\n")
 }
@@ -170,7 +197,7 @@ func writeFieldDetails(b *strings.Builder, f types.LLMField, indent string) {
 	}
 }
 
-func writeProps(b *strings.Builder, fields []types.LLMField, skipLLMFields []string) {
+func WriteProps(b *strings.Builder, fields []types.LLMField, skipLLMFields []string) {
 	for _, f := range fields {
 		if utils.Contains(skipLLMFields, f.Name) {
 			continue
