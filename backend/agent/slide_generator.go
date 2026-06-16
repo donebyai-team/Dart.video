@@ -93,10 +93,10 @@ func (g *videoConfigGenerator) AddBranding(assetRegistry *services.MediaAssetReg
 
 func (g *videoConfigGenerator) CreatePendingSlidesV2(
 	ctx context.Context,
-	assetRegistry *services.MediaAssetRegistry,
+	templateRegistry *TemplateRegistry,
 	plan *types.GeneratedVideoPlan,
-) (*pbcore.Video, map[string]*scenes.SceneConfig, error) {
-	g.AddBranding(assetRegistry)
+) (*pbcore.Video, error) {
+	g.AddBranding(templateRegistry.GetAssetRegistry())
 
 	sections := make([]*pbcore.Section, 0, len(plan.Sections))
 	sceneMapper := make(map[string]*scenes.SceneConfig)
@@ -113,22 +113,20 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 		slideIndex := 0
 
 		for _, pendingSlide := range pendingSection.Slides {
-			sceneConfigs, err := scenes.ConvertToSceneConfig(&pendingSlide, assetRegistry)
+			slides, err := templateRegistry.GenerateScene(ctx, &pendingSlide)
 			if err != nil {
-				return nil, nil, err
+				return nil, err
 			}
 
-			for _, sceneConfig := range sceneConfigs {
+			for _, slide := range slides {
 				slide := &pbcore.Slide{
-					Id:          fmt.Sprintf("slide-%s", uuid.NewString()),
-					SlideStatus: pbcore.SlideStatus_SLIDE_STATUS_PENDING,
-					Index:       int32(slideIndex),
-					Content: &pbcore.AnimationSlideContent{
-						Plan: &pbcore.AnimationSlidePlan{},
-					},
+					Id:               fmt.Sprintf("slide-%s", uuid.NewString()),
+					SlideStatus:      pbcore.SlideStatus_SLIDE_STATUS_GENERATED,
+					Index:            int32(slideIndex),
+					Content:          slide.Content,
+					DurationInFrames: slide.DurationInFrames,
+					SettledFrame:     slide.SettledFrame,
 				}
-
-				sceneMapper[slide.Id] = sceneConfig
 
 				nextSlide := getNextScene(plan.Sections, sectionIndex, slideIndex)
 				if isContentSlide(nextSlide) {
@@ -153,10 +151,10 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 	g.video.Metadata.ThinkingSummary = plan.ThinkingSummary
 
 	if err := g.update(ctx, models.VideoStatusPROCESSING); err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return g.video, sceneMapper, nil
+	return g.video, nil
 }
 
 func (g *videoConfigGenerator) UpdateAnimationSlide(

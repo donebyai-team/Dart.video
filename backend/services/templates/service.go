@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/datastore"
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
@@ -24,6 +25,7 @@ type Service interface {
 	UpdateTemplate(ctx context.Context, req *pbportal.UpdateTemplateRequest) error
 	GetTemplates(ctx context.Context, categories []string) ([]*models.Template, error)
 	DeleteTemplateByID(ctx context.Context, id string) error
+	FetchTemplatesByCategories(ctx context.Context, categories []types.Category) ([]*models.Template, error)
 }
 
 type templateService struct {
@@ -204,4 +206,21 @@ func ParseResourceID(id string) (resourceID string, isTemplate bool) {
 	}
 
 	return id, false
+}
+
+const maxTemplatesPerCategory = 4
+
+func (t templateService) FetchTemplatesByCategories(ctx context.Context, categories []types.Category) ([]*models.Template, error) {
+	templates := make([]*models.Template, 0)
+
+	for _, category := range categories {
+		t, err := t.db.GetTemplatesByCategoryRandom(ctx, category.Name, maxTemplatesPerCategory)
+		if err != nil {
+			return nil, err
+		}
+
+		templates = append(templates, t...)
+	}
+
+	return templates, nil
 }

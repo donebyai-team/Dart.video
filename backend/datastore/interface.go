@@ -99,6 +99,7 @@ type TemplateRepository interface {
 	GetTemplatesByCategoryRandom(
 		ctx context.Context,
 		category string,
+		limit int,
 	) ([]*models.Template, error)
 	ListTemplatesByCategories(
 		ctx context.Context,

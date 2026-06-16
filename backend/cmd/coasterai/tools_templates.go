@@ -59,7 +59,7 @@ func toolsSyncTemplatesRunE(cmd *cobra.Command, args []string) error {
 
 		// If an animation is not tagged, we tag it with
 		if len(template.Tags) == 0 {
-			templateToUpdate.Categories = []string{"TEXT", "FILLER"}
+			templateToUpdate.Categories = []string{scenes.CATEGORY_TEXT, scenes.CATEGORY_FILLER}
 		}
 
 		if template.Instructions != "" {

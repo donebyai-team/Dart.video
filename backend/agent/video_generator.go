@@ -2,7 +2,6 @@ package agent
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/shank318/coasterai/agent/agenterrors"
@@ -17,6 +16,7 @@ import (
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
 	"github.com/shank318/coasterai/services"
 	"github.com/shank318/coasterai/services/brand_identity"
+	"github.com/shank318/coasterai/services/templates"
 	"go.uber.org/zap"
 	"strings"
 	"time"
@@ -59,6 +59,7 @@ type agentV2 struct {
 	db                   datastore.Repository
 	brandIdentityService brand_identity.BrandIdentity
 	assetRegistry        *services.MediaAssetRegistry
+	templateRegistry     *TemplateRegistry
 	llmService           llm.Service
 	videoService         services.VideoGeneration
 	logger               *zap.Logger
@@ -67,6 +68,7 @@ type agentV2 struct {
 	state                common.AgentStatusPublisher
 	codeGenerator        CodeGeneratorAgent
 	toolRegistry         *common.ToolRegistry
+	templateService      templates.Service
 }
 
 func NewAgentV2(
@@ -76,6 +78,7 @@ func NewAgentV2(
 	cache cache.Cache,
 	db datastore.Repository,
 	llmService llm.Service,
+	templateService templates.Service,
 	videoService services.VideoGeneration,
 	brandIdentityService brand_identity.BrandIdentity,
 	state common.AgentStatusPublisher,
@@ -89,6 +92,7 @@ func NewAgentV2(
 		videoService:         videoService,
 		brandIdentityService: brandIdentityService,
 		llmService:           llmService,
+		templateService:      templateService,
 		state:                state,
 		session:              session,
 		codeGenerator:        &codeGenerator{logger: logger},
@@ -112,7 +116,7 @@ func (a *agentV2) Continue(ctx context.Context, options ContinueSessionOptions) 
 		return nil, err
 	}
 
-	if session == nil {
+	if session == nil || len(session.TemplateIds) == 0 {
 		return nil, agenterrors.InvalidInput("session is nil", nil)
 	}
 
@@ -128,6 +132,14 @@ func (a *agentV2) Continue(ctx context.Context, options ContinueSessionOptions) 
 	if err != nil {
 		return nil, err
 	}
+
+	registry := NewTemplateRegistry(a.templateService, a.assetRegistry, a.codeGenerator, a.logger)
+	err = registry.WithTemplateIds(ctx, session.TemplateIds)
+	if err != nil {
+		return nil, err
+	}
+
+	a.templateRegistry = registry
 
 	// use brand guidelines only when specified
 	if a.assetRegistry != nil {
@@ -221,6 +233,14 @@ func (a *agentV2) Start(ctx context.Context, options StartSessionOptions) (*comm
 		return nil, err
 	}
 
+	registry := NewTemplateRegistry(a.templateService, a.assetRegistry, a.codeGenerator, a.logger)
+	err = registry.WithRandomTemplates(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	a.templateRegistry = registry
+
 	script := make([]types.ScriptItem, 0)
 	if options.Input.Script != nil {
 		script = make([]types.ScriptItem, len(options.Input.Script.Items))
@@ -255,6 +275,7 @@ func (a *agentV2) Start(ctx context.Context, options StartSessionOptions) (*comm
 
 	session := &common.SessionContext{
 		Request:             options.Input,
+		TemplateIds:         registry.GetIDs(),
 		ConversationHistory: make([]*pbcore.ConversationMessage, 0),
 	}
 
@@ -336,11 +357,7 @@ func (a *agentV2) runPlanning(ctx context.Context, req types.VideoGenerationPlan
 		}
 	}()
 
-	req.ComponentList = scenes.BuildScenesList(scenes.BuildSceneListOptions{
-		Groups:       true,
-		Enums:        false,
-		FieldsToSkip: scenes.SkipLLMFields,
-	})
+	req.ComponentList = a.templateRegistry.BuildPrompt()
 
 	history, _, err := a.session.ConvertToContextMessages(ctx, session.ConversationHistory, a.assetRegistry)
 	if err != nil {
@@ -370,43 +387,35 @@ func (a *agentV2) runPlanning(ctx context.Context, req types.VideoGenerationPlan
 		}
 
 		// Validate Scenes
-		sceneErrors := make([]string, 0)
-		for _, section := range plan.Sections {
-			for _, scene := range section.Slides {
-				_, err := scenes.ConvertToSceneConfig(&scene, nil)
-				if err != nil {
-					sceneErrors = append(sceneErrors, err.Error())
-				}
-
-				// replace generated asset handles
-				//if a.assetRegistry != nil {
-				//	for i := range scene.Elements {
-				//		resolved := a.assetRegistry.ResolveMediaHandles(scene.Elements[i].Props)
-				//		scene.Elements[i].Props = resolved
-				//	}
-				//}
-			}
-		}
-
-		// Retry
-		if len(sceneErrors) > 0 {
-			marshal, _ := json.Marshal(plan)
-			session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
-				Role:    pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
-				Message: string(marshal),
-			})
-
-			session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
-				Role:    pbcore.ConversationRole_CONVERSATION_ROLE_USER,
-				Message: fmt.Sprintf("Here are some of the invalid scenes you generated, please return the full plan again \n %s", strings.Join(sceneErrors, "\n")),
-			})
-
-			a.logger.Error("received invalid scenes, retrying..",
-				zap.Int("attempts", attempt),
-				zap.Strings("scene_errors", sceneErrors))
-
-			continue
-		}
+		//sceneErrors := make([]string, 0)
+		//for _, section := range plan.Sections {
+		//	for _, scene := range section.Slides {
+		//		_, err := scenes.ConvertToSceneConfig(&scene, nil)
+		//		if err != nil {
+		//			sceneErrors = append(sceneErrors, err.Error())
+		//		}
+		//	}
+		//}
+		//
+		//// Retry
+		//if len(sceneErrors) > 0 {
+		//	marshal, _ := json.Marshal(plan)
+		//	session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
+		//		Role:    pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
+		//		Message: string(marshal),
+		//	})
+		//
+		//	session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
+		//		Role:    pbcore.ConversationRole_CONVERSATION_ROLE_USER,
+		//		Message: fmt.Sprintf("Here are some of the invalid scenes you generated, please return the full plan again \n %s", strings.Join(sceneErrors, "\n")),
+		//	})
+		//
+		//	a.logger.Error("received invalid scenes, retrying..",
+		//		zap.Int("attempts", attempt),
+		//		zap.Strings("scene_errors", sceneErrors))
+		//
+		//	continue
+		//}
 
 		// Planning is complete; execute applyPlan asynchronously so Create/Continue
 		// can return after the first slide is persisted while generation continues.
@@ -464,16 +473,16 @@ func (a *agentV2) applyPlan(
 	// save config with pending items
 	builder := NewVideoConfigGenerator(a.logger, a.videoService).
 		Init(a.session.GetID(), aiPlan.VideoName)
-	pendingVideo, sceneMapper, err := builder.CreatePendingSlidesV2(ctx, a.assetRegistry, aiPlan)
+	_, err = builder.CreatePendingSlidesV2(ctx, a.templateRegistry, aiPlan)
 	if err != nil {
 		return fmt.Errorf("creating pending slides: %w", err)
 	}
 
-	plan := pendingVideo.Config
-	a.state.Save(ctx, common.AgentState{
-		Thinking: generating,
-		State:    common.StateStatusProcessing,
-	})
+	//plan := pendingVideo.Config
+	//a.state.Save(ctx, common.AgentState{
+	//	Thinking: generating,
+	//	State:    common.StateStatusProcessing,
+	//})
 
 	defer func() {
 		if err != nil {
@@ -521,43 +530,35 @@ func (a *agentV2) applyPlan(
 		}
 	}
 
-	for _, section := range plan.Sections {
+	markReadyOnce()
 
-		for _, slide := range section.Slides {
-			// ---- Cancellation check (runs before every slide) ----
-			//
-			// Hard cancel: runCtx was cancelled (e.g. client disconnected during planning).
-			if ctx.Err() != nil {
-				a.logger.Info("applyPlan: context cancelled, stopping slide generation")
-				return ctx.Err()
-			}
-			// Soft cancel: StopAgent wrote stateStatusCancelled to Redis.
-			// This is the path taken when the client disconnects from the editor
-			// (GetVideo stream ends) — we do not cancel runCtx in that case so
-			// we rely on this Redis-based signal instead.
-			if currentState, stateErr := a.state.Get(ctx); stateErr == nil &&
-				currentState != nil && currentState.State == common.StateStatusCancelled {
-				a.logger.Info("applyPlan: soft-cancel signal detected in Redis, stopping slide generation")
-				return errUserSoftCancelled
-			}
-
-			sceneConfig := sceneMapper[slide.Id]
-
-			template, err := a.codeGenerator.GenerateCodeFromScene(ctx, sceneConfig)
-			if err != nil {
-				return err
-			}
-
-			// add background if applicable
-			template.BackgroundStyle = sceneConfig.Background
-
-			if err = builder.UpdateAnimationSlide(ctx, slide.Id, template); err != nil {
-				return agenterrors.VideoPersistFailed("failed to persist animation slide", err)
-			}
-
-			markReadyOnce()
-		}
-	}
+	//for _, section := range plan.Sections {
+	//
+	//	for _, slide := range section.Slides {
+	//		// ---- Cancellation check (runs before every slide) ----
+	//		//
+	//		// Hard cancel: runCtx was cancelled (e.g. client disconnected during planning).
+	//		if ctx.Err() != nil {
+	//			a.logger.Info("applyPlan: context cancelled, stopping slide generation")
+	//			return ctx.Err()
+	//		}
+	//		// Soft cancel: StopAgent wrote stateStatusCancelled to Redis.
+	//		// This is the path taken when the client disconnects from the editor
+	//		// (GetVideo stream ends) — we do not cancel runCtx in that case so
+	//		// we rely on this Redis-based signal instead.
+	//		if currentState, stateErr := a.state.Get(ctx); stateErr == nil &&
+	//			currentState != nil && currentState.State == common.StateStatusCancelled {
+	//			a.logger.Info("applyPlan: soft-cancel signal detected in Redis, stopping slide generation")
+	//			return errUserSoftCancelled
+	//		}
+	//
+	//		//if err = builder.UpdateAnimationSlide(ctx, slide.Id, template); err != nil {
+	//		//	return agenterrors.VideoPersistFailed("failed to persist animation slide", err)
+	//		//}
+	//
+	//		markReadyOnce()
+	//	}
+	//}
 
 	return builder.Done(ctx)
 }
