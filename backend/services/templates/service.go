@@ -55,7 +55,7 @@ func (t templateService) CreateTemplate(ctx context.Context) (*models.Template, 
 	brand_identity.AddVideoBranding(videoMetadata)
 
 	template, err := t.db.CreateTemplate(ctx, &models.Template{
-		Name:       fmt.Sprintf("Template %s", services.GenerateRandomName(2, 5)),
+		Name:       services.GenerateRandomName(2, 5),
 		Status:     models.TemplateStatusCREATED,
 		Categories: []string{},
 		Schema:     json.RawMessage(`[]`),
@@ -122,6 +122,10 @@ func (t templateService) UpdateTemplateConfig(ctx context.Context, video *models
 		allSlides = append(allSlides, section.Slides...)
 	}
 
+	if len(existingTemplate.Config.Sections) > 1 || len(allSlides) > 2 {
+		return fmt.Errorf("not allowed")
+	}
+
 	totalDurationInFrames := int32(0)
 	for i, slide := range allSlides {
 		totalDurationInFrames += slide.DurationInFrames
@@ -175,7 +179,6 @@ func (t templateService) UpdateTemplate(ctx context.Context, req *pbportal.Updat
 	}
 	existingTemplate.Status = models.TemplateStatusWAITING
 	existingTemplate.Categories = req.Categories
-	existingTemplate.Name = req.Name
 
 	return t.db.UpdateTemplate(ctx, existingTemplate)
 }

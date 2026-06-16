@@ -71,6 +71,35 @@ func GetAllTemplates() []types.Component {
 	return scenes
 }
 
+func BuildScenesListFromComponents(b *strings.Builder, components []types.Component, options BuildSceneListOptions) string {
+	var sectional, filler []types.Component
+
+	for _, s := range components {
+		if len(s.Tags) > 0 && !utils.Contains(s.Tags, "FILLER") {
+			sectional = append(sectional, s)
+		} else {
+			filler = append(filler, s)
+		}
+	}
+
+	for _, s := range sectional {
+		writeScene(b, s, "Sectional", options.FieldsToSkip)
+	}
+
+	b.WriteString("## Filler Scenes\n")
+	b.WriteString("Can be used anywhere in the video.\n\n")
+
+	for _, s := range filler {
+		writeScene(b, s, "Filler", options.FieldsToSkip)
+	}
+
+	if options.Enums && len(registry.AvailableEnums) > 0 {
+		writeAvailableEnums(b)
+	}
+
+	return b.String()
+}
+
 func BuildScenesList(options BuildSceneListOptions) string {
 
 	var scenes []types.Component
@@ -82,20 +111,10 @@ func BuildScenesList(options BuildSceneListOptions) string {
 		}
 	}
 
-	var sectional, filler []types.Component
-
-	for _, s := range scenes {
-		if len(s.Tags) > 0 {
-			sectional = append(sectional, s)
-		} else {
-			filler = append(filler, s)
-		}
-	}
-
 	// groups are only available while planning
 	if options.Groups {
 		for _, group := range groupedComponents {
-			sectional = append(sectional, types.Component{
+			scenes = append(scenes, types.Component{
 				Tags:         group.Tags,
 				Name:         group.Name,
 				Description:  group.Description,
@@ -106,25 +125,9 @@ func BuildScenesList(options BuildSceneListOptions) string {
 	}
 
 	var b strings.Builder
-
 	b.WriteString("# Available Scenes\n\n")
 
-	for _, s := range sectional {
-		writeScene(&b, s, "Sectional", options.FieldsToSkip)
-	}
-
-	b.WriteString("## Filler Scenes\n")
-	b.WriteString("Can be used anywhere in the video.\n\n")
-
-	for _, s := range filler {
-		writeScene(&b, s, "Filler", options.FieldsToSkip)
-	}
-
-	if options.Enums && len(registry.AvailableEnums) > 0 {
-		writeAvailableEnums(&b)
-	}
-
-	return b.String()
+	return BuildScenesListFromComponents(&b, scenes, options)
 }
 
 func writeScene(b *strings.Builder, c types.Component, category string, fieldsToSkip []string) {

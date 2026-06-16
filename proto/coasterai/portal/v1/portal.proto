@@ -33,7 +33,6 @@ service PortalService {
   rpc CreateVideo(CreateVideoRequest) returns (stream CreateVideoResponse);
   rpc ContinueVideoPlanning(ContinueVideoPlanningRequest) returns (stream CreateVideoResponse);
   rpc GetVideo(GetVideoRequest) returns (stream GetVideoResponse);
-  rpc SuggestScenes(SuggestScenesRequest) returns (SuggestScenesResponse);
   rpc StopVideo(StopVideoRequest) returns (.google.protobuf.Empty);
   rpc GetVideos(.google.protobuf.Empty) returns (GetVideosResponse);
 

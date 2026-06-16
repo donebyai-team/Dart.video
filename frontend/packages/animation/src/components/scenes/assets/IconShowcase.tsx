@@ -217,7 +217,7 @@ export const IconShowcaseSchema = [
 export const IconShowcaseDescriptor: ComponentRegistration = {
     name: 'IconShowcase',
     type: 'scene',
-    tags: ['Solution', 'Product Info', 'Social proof'],
+    tags: ['SOLUTIONS', 'SOCIAL_PROOF'],
     schema: IconShowcaseSchema,
     llmSchema: [
         {

@@ -320,7 +320,7 @@ type RenderSuggestionsInput struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	VideoId       string                 `protobuf:"bytes,1,opt,name=videoId,proto3" json:"videoId,omitempty"`
 	Slide         *v1.Slide              `protobuf:"bytes,2,opt,name=slide,proto3" json:"slide,omitempty"`
-	Tid           string                 `protobuf:"bytes,3,opt,name=tid,proto3" json:"tid,omitempty"`
+	Tid           []string               `protobuf:"bytes,3,rep,name=tid,proto3" json:"tid,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -369,11 +369,11 @@ func (x *RenderSuggestionsInput) GetSlide() *v1.Slide {
 	return nil
 }
 
-func (x *RenderSuggestionsInput) GetTid() string {
+func (x *RenderSuggestionsInput) GetTid() []string {
 	if x != nil {
 		return x.Tid
 	}
-	return ""
+	return nil
 }
 
 var File_coasterai_portal_v1_templates_proto protoreflect.FileDescriptor
@@ -410,7 +410,7 @@ const file_coasterai_portal_v1_templates_proto_rawDesc = "" +
 	"\x16RenderSuggestionsInput\x12\x18\n" +
 	"\avideoId\x18\x01 \x01(\tR\avideoId\x12.\n" +
 	"\x05slide\x18\x02 \x01(\v2\x18.coasterai.core.v1.SlideR\x05slide\x12\x10\n" +
-	"\x03tid\x18\x03 \x01(\tR\x03tidB?Z=github.com/shank318/coasterai/pb/coasterai/portal/v1;pbportalb\x06proto3"
+	"\x03tid\x18\x03 \x03(\tR\x03tidB?Z=github.com/shank318/coasterai/pb/coasterai/portal/v1;pbportalb\x06proto3"
 
 var (
 	file_coasterai_portal_v1_templates_proto_rawDescOnce sync.Once

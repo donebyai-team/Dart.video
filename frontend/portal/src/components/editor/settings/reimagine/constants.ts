@@ -1,43 +1,66 @@
-import { AnimationCategory } from '@coasterai/pb/coasterai/core/v1/template_pb'
 import type { CategoryItem } from './types'
 import {
-  Type,
-  Film,
-  Video,
   MousePointerClick,
-  Share2,
   Rocket,
+  BadgeCheck,
+  Lightbulb,
+  ListChecks,
+  MonitorPlay,
+  Network,
+  TriangleAlert,
+  Zap,
+  Pen,
 } from 'lucide-react';
 
 export const categories: CategoryItem[] = [
   {
-    value: AnimationCategory.TEXT,
-    label: 'Text',
-    icon: Type,
+    value: 'TEXT',
+    label: 'TEXT',
+    icon: Pen,
   },
   {
-    value: AnimationCategory.INTRO,
-    label: 'Intro',
+    value: 'HOOK',
+    label: 'HOOK',
+    icon: Zap,
+  },
+  {
+    value: 'INTRO',
+    label: 'INTRO',
     icon: Rocket,
   },
   {
-    value: AnimationCategory.VISUALS,
-    label: 'Visuals',
-    icon: Film,
+    value: 'PROBLEM',
+    label: 'PROBLEM',
+    icon: TriangleAlert,
   },
   {
-    value: AnimationCategory.MEDIA,
-    label: 'Media',
-    icon: Video,
+    value: 'FRAGMENTATION',
+    label: 'FRAGMENTATION',
+    icon: Network,
   },
   {
-    value: AnimationCategory.CTA,
+    value: 'SOLUTION',
+    label: 'SOLUTION',
+    icon: Lightbulb,
+  },
+  {
+    value: 'FEATURES',
+    label: 'FEATURES',
+    icon: ListChecks,
+  },
+  {
+    value: 'PRODUCT_DEMO',
+    label: 'PRODUCT DEMO',
+    icon: MonitorPlay,
+  },
+  {
+    value: 'SOCIAL_PROOF',
+    label: 'SOCIAL PROOF',
+    icon: BadgeCheck,
+  },
+  {
+    value: 'CTA',
     label: 'CTA',
     icon: MousePointerClick,
-  },
-  {
-    value: AnimationCategory.SOCIAL,
-    label: 'Social',
-    icon: Share2,
   },
 ];

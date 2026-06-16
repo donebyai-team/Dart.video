@@ -519,9 +519,9 @@ func (c EditString) BamlTypeName() string {
 }
 
 type ExtractTemplateConfigRequest struct {
-	Content       string        `json:"content"`
-	Schema        []string      `json:"schema"`
-	VideoBranding VideoBranding `json:"VideoBranding"`
+	Content       string         `json:"content"`
+	Scenes        []SceneElement `json:"scenes"`
+	VideoBranding VideoBranding  `json:"VideoBranding"`
 }
 
 func (c *ExtractTemplateConfigRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -541,8 +541,8 @@ func (c *ExtractTemplateConfigRequest) Decode(holder *cffi.CFFIValueClass, typeM
 		case "content":
 			c.Content = baml.Decode(valueHolder).Interface().(string)
 
-		case "schema":
-			c.Schema = baml.Decode(valueHolder).Interface().([]string)
+		case "scenes":
+			c.Scenes = baml.Decode(valueHolder).Interface().([]SceneElement)
 
 		case "VideoBranding":
 			c.VideoBranding = baml.Decode(valueHolder).Interface().(VideoBranding)
@@ -561,7 +561,7 @@ func (c ExtractTemplateConfigRequest) Encode() (*cffi.HostValue, error) {
 
 	fields["content"] = c.Content
 
-	fields["schema"] = c.Schema
+	fields["scenes"] = c.Scenes
 
 	fields["VideoBranding"] = c.VideoBranding
 
@@ -573,7 +573,7 @@ func (c ExtractTemplateConfigRequest) BamlTypeName() string {
 }
 
 type ExtractTemplateConfigResponse struct {
-	Props []string `json:"props"`
+	Scenes []SceneElement `json:"scenes"`
 }
 
 func (c *ExtractTemplateConfigResponse) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -590,8 +590,8 @@ func (c *ExtractTemplateConfigResponse) Decode(holder *cffi.CFFIValueClass, type
 		valueHolder := field.Value
 		switch key {
 
-		case "props":
-			c.Props = baml.Decode(valueHolder).Interface().([]string)
+		case "scenes":
+			c.Scenes = baml.Decode(valueHolder).Interface().([]SceneElement)
 
 		default:
 
@@ -605,7 +605,7 @@ func (c *ExtractTemplateConfigResponse) Decode(holder *cffi.CFFIValueClass, type
 func (c ExtractTemplateConfigResponse) Encode() (*cffi.HostValue, error) {
 	fields := map[string]any{}
 
-	fields["props"] = c.Props
+	fields["scenes"] = c.Scenes
 
 	return baml.EncodeClass("ExtractTemplateConfigResponse", fields, nil)
 }

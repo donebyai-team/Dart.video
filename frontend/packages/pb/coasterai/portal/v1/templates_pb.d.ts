@@ -152,9 +152,9 @@ export declare type RenderSuggestionsInput = Message<"coasterai.portal.v1.Render
   slide?: Slide;
 
   /**
-   * @generated from field: string tid = 3;
+   * @generated from field: repeated string tid = 3;
    */
-  tid: string;
+  tid: string[];
 };
 
 /**

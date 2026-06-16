@@ -2,9 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Pause, Play, X } from 'lucide-react'
 import { useClientsContext } from '@coasterai/ui-core/context/ClientContext'
 import { PatchOverlay } from '@coasterai/renderer'
-import { ConversationRole, type ConversationMessage } from '@coasterai/pb/coasterai/core/v1/chat_pb'
+import { type ConversationMessage } from '@coasterai/pb/coasterai/core/v1/chat_pb'
 import { Section, SlideStatus, type Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import { AnimationCategory } from '@coasterai/pb/coasterai/core/v1/template_pb'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useVideoStore } from '@/stores/video'
@@ -13,9 +12,9 @@ import toast from 'react-hot-toast'
 import BrowseTab from './reimagine/BrowseTab'
 import ChatTab from './reimagine/ChatTab'
 import { categories } from './reimagine/constants'
-import type { CategoryItem } from './reimagine/types'
-
-const sceneSuggestionsCache = new Map<string, Section[]>()
+import { resolveSuggestionSourceSlide } from './reimagine/slideSource'
+import type { CategoryItem, SuggestionItem } from './reimagine/types'
+import { useTemplateSuggestions } from './reimagine/useTemplateSuggestions'
 
 interface ReimagineSettingsProps {
   onClose: () => void
@@ -34,6 +33,7 @@ const ReimagineSettings = ({
   const updateSlideById = useVideoStore(s => s.updateSlideById)
   const addSlide = useVideoStore(s => s.addSlide)
   const removeSlide = useVideoStore(s => s.removeSlide)
+  const getSlideWithBackground = useVideoStore(s => s.getSlideWithBackground)
   const setSelectedSlideById = useVideoStore(s => s.setSelectedSlideById)
   const videoConfig = useVideoStore(s => s.videoConfig)
   const videoId = useVideoStore(s => s.videoConfig?.id)
@@ -43,21 +43,82 @@ const ReimagineSettings = ({
 
   const targetSlideIdRef = useRef(selectedSlide?.id ?? '')
   const insertedSlideIdsRef = useRef<string[]>([])
+  const [browseTargetSlideId, setBrowseTargetSlideId] = useState(selectedSlide?.id ?? '')
+  const [browseSelectedSlideSnapshot, setBrowseSelectedSlideSnapshot] = useState<Slide | null>(selectedSlide)
+  const [browseSourceSlideSnapshot, setBrowseSourceSlideSnapshot] = useState<Slide | null>(() =>
+    resolveSuggestionSourceSlide({
+      videoConfig,
+      selectedSlide,
+      getSlideWithBackground,
+    })
+  )
   // Slides backed by a Monaco/code session should reopen in chat mode so the
   // user lands on the existing conversation flow instead of template browsing.
   const [activeTab, setActiveTab] = useState<'browse' | 'generate'>(() =>
     selectedSlide?.content?.codeRegistry?.mUrl?.trim() ? 'generate' : 'browse'
   )
-  const [defaultScenes, setDefaultScenes] = useState<Section[]>([])
-  const [categoryScenes, setCategoryScenes] = useState<Section[]>([])
-  const [selectedDefaultSuggestionIndex, setSelectedDefaultSuggestionIndex] = useState<number | null>(null)
-  const [selectedCategorySuggestionIndex, setSelectedCategorySuggestionIndex] = useState<number | null>(null)
+  const [selectedDefaultTemplateId, setSelectedDefaultTemplateId] = useState<string | null>(null)
+  const [selectedCategoryTemplateId, setSelectedCategoryTemplateId] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<CategoryItem | null>(null)
   const [activeSuggestionSource, setActiveSuggestionSource] = useState<'default' | 'category'>('default')
-  const [isDefaultLoading, setIsDefaultLoading] = useState(true)
-  const [isCategoryLoading, setIsCategoryLoading] = useState(false)
   const [chatMessages, setChatMessages] = useState<ConversationMessage[]>([])
   const [isChatLoading, setIsChatLoading] = useState(false)
+
+  const emptyCategories = useMemo<string[]>(() => [], [])
+
+  const suggestionSourceSlide = browseSourceSlideSnapshot
+
+  const selectedCategoryValues = useMemo(
+    () => (selectedCategory ? [selectedCategory.value] : []),
+    [selectedCategory]
+  )
+
+  const handleSuggestionError = useCallback((error: unknown) => {
+    toast.error(getConnectError(error))
+  }, [])
+
+  const defaultSuggestionState = useTemplateSuggestions({
+    client: portalClient,
+    videoId,
+    slide: suggestionSourceSlide,
+    categories: emptyCategories,
+    enabled: activeTab === 'browse',
+    onError: handleSuggestionError,
+  })
+
+  const categorySuggestionState = useTemplateSuggestions({
+    client: portalClient,
+    videoId,
+    slide: suggestionSourceSlide,
+    categories: selectedCategoryValues,
+    enabled: activeTab === 'browse' && Boolean(selectedCategory),
+    onError: handleSuggestionError,
+  })
+
+  useEffect(() => {
+    if ((selectedSlide?.id ?? '') === browseTargetSlideId) {
+      return
+    }
+
+    setBrowseTargetSlideId(selectedSlide?.id ?? '')
+    setBrowseSelectedSlideSnapshot(selectedSlide)
+    setBrowseSourceSlideSnapshot(
+      resolveSuggestionSourceSlide({
+        videoConfig,
+        selectedSlide,
+        getSlideWithBackground,
+      })
+    )
+  }, [browseTargetSlideId, getSlideWithBackground, selectedSlide, videoConfig])
+
+  useEffect(() => {
+    targetSlideIdRef.current = browseTargetSlideId || suggestionSourceSlide?.id || ''
+  }, [browseTargetSlideId, suggestionSourceSlide?.id])
+
+  useEffect(() => {
+    setSelectedDefaultTemplateId(null)
+    setSelectedCategoryTemplateId(null)
+  }, [browseTargetSlideId, suggestionSourceSlide?.id])
 
   const targetSectionId = useMemo(() => {
     const targetSlideId = targetSlideIdRef.current
@@ -72,7 +133,7 @@ const ReimagineSettings = ({
     return null
   }, [videoConfig])
 
-  const applySuggestion = useCallback((suggestion: Section, suggestionIndex: number, source: 'default' | 'category') => {
+  const applySuggestion = useCallback((suggestion: Section, templateId: string, source: 'default' | 'category') => {
     const slides = suggestion.slides
     const firstSlide = slides[0]
     const targetSlideId = targetSlideIdRef.current
@@ -130,90 +191,28 @@ const ReimagineSettings = ({
     setActiveSuggestionSource(source)
 
     if (source === 'category') {
-      setSelectedCategorySuggestionIndex(suggestionIndex)
+      setSelectedCategoryTemplateId(templateId)
       return
     }
 
-    setSelectedDefaultSuggestionIndex(suggestionIndex)
+    setSelectedDefaultTemplateId(templateId)
   }, [addSlide, removeSlide, setOverlay, setSelectedSlideById, targetSectionId, updateSlideById, videoConfig])
-
-  const loadSuggestions = useCallback(async (category: AnimationCategory, options?: { silent?: boolean }) => {
-    const targetSlideId = targetSlideIdRef.current
-    const cacheKey = `${targetSlideId}:${category}`
-    const isCategoryRequest = category !== AnimationCategory.UNSPECIFIED
-
-    const setLoadingState = isCategoryRequest ? setIsCategoryLoading : setIsDefaultLoading
-    const setScenesState = isCategoryRequest ? setCategoryScenes : setDefaultScenes
-
-    if (!videoId || !targetSlideId) {
-      setScenesState([])
-      setLoadingState(false)
-      return
-    }
-
-    const cachedScenes = sceneSuggestionsCache.get(cacheKey)
-    if (cachedScenes) {
-      setScenesState(cachedScenes)
-      setLoadingState(false)
-      return
-    }
-
-    if (!options?.silent) {
-      setLoadingState(true)
-    }
-
-    try {
-      const response = await portalClient.suggestScenes({
-        videoId,
-        sceneId: targetSlideId,
-        category,
-      })
-
-      const suggestionSections = (response.groups ?? []).filter(section => section.slides.length > 0)
-
-      sceneSuggestionsCache.set(cacheKey, suggestionSections)
-      setScenesState(suggestionSections)
-    } catch (err: any) {
-      setScenesState([])
-      toast.error(getConnectError(err))
-    } finally {
-      setLoadingState(false)
-    }
-  }, [portalClient, videoId])
-
-  useEffect(() => {
-    let cancelled = false
-
-    if (activeTab !== 'browse') {
-      setIsDefaultLoading(false)
-      return () => {
-        cancelled = true
-      }
-    }
-
-    const loadDefaultSuggestions = async () => {
-      setIsDefaultLoading(true)
-
-      await loadSuggestions(AnimationCategory.UNSPECIFIED)
-
-      if (!cancelled) {
-        setSelectedDefaultSuggestionIndex(null)
-      }
-    }
-
-    void loadDefaultSuggestions()
-
-    return () => {
-      cancelled = true
-    }
-  }, [activeTab, loadSuggestions])
 
   const handleSelectCategory = useCallback((category: CategoryItem) => {
     setSelectedCategory(category)
     setActiveSuggestionSource('category')
-    setSelectedCategorySuggestionIndex(null)
-    void loadSuggestions(category.value)
-  }, [loadSuggestions])
+    setSelectedCategoryTemplateId(null)
+  }, [])
+
+  const handleSelectDefaultSuggestion = useCallback((suggestion: SuggestionItem) => {
+    if (!suggestion.suggestion) return
+    applySuggestion(suggestion.suggestion, suggestion.templateId, 'default')
+  }, [applySuggestion])
+
+  const handleSelectCategorySuggestion = useCallback((suggestion: SuggestionItem) => {
+    if (!suggestion.suggestion) return
+    applySuggestion(suggestion.suggestion, suggestion.templateId, 'category')
+  }, [applySuggestion])
 
   const loadConversationHistory = useCallback(async () => {
     const slideId = targetSlideIdRef.current
@@ -244,21 +243,19 @@ const ReimagineSettings = ({
     void loadConversationHistory()
   }, [activeTab, loadConversationHistory])
 
-  const selectedSuggestion =
+  const selectedSuggestionItem =
     activeSuggestionSource === 'category' && selectedCategory
-      ? selectedCategorySuggestionIndex === null
-        ? null
-        : categoryScenes[selectedCategorySuggestionIndex] ?? null
-      : selectedDefaultSuggestionIndex === null
-        ? null
-        : defaultScenes[selectedDefaultSuggestionIndex] ?? null
+      ? categorySuggestionState.suggestions.find(suggestion => suggestion.templateId === selectedCategoryTemplateId) ?? null
+      : defaultSuggestionState.suggestions.find(suggestion => suggestion.templateId === selectedDefaultTemplateId) ?? null
+
+  const selectedSuggestion = selectedSuggestionItem?.suggestion ?? null
 
   const canPreviewCurrentTab = isPreviewPlaying
     || (activeTab === 'generate'
       ? Boolean(targetSlideIdRef.current)
       : Boolean(selectedSuggestion))
 
-  const handlePreview = () => {
+  const handlePreview = useCallback(() => {
     if (isPreviewPlaying) {
       onPreviewTemplate?.()
       return
@@ -275,32 +272,25 @@ const ReimagineSettings = ({
 
     if (!selectedSuggestion) return
 
-    const selectedSuggestionIndex =
-      activeSuggestionSource === 'category' ? selectedCategorySuggestionIndex : selectedDefaultSuggestionIndex
+    const selectedTemplateId =
+      activeSuggestionSource === 'category' ? selectedCategoryTemplateId : selectedDefaultTemplateId
 
-    if (selectedSuggestionIndex === null) return
-
-    // Preview always reflects the currently highlighted suggestion, even before an explicit apply click.
-    applySuggestion(
-      selectedSuggestion,
-      selectedSuggestionIndex,
-      activeSuggestionSource
-    )
+    if (!selectedTemplateId) return
 
     const slides = selectedSuggestion.slides
-    const firstSlideId = targetSlideIdRef.current
+    const firstSlideId = browseTargetSlideId || targetSlideIdRef.current
     const previewSlideIds = [firstSlideId, ...insertedSlideIdsRef.current].filter(Boolean)
-    const lastSlideId = previewSlideIds.at(-1)
+    const lastSlideId = slides.length > 1 ? previewSlideIds.at(-1) : undefined
 
-    if (!firstSlideId || !lastSlideId || slides.length === 0) return
+    if (!firstSlideId || slides.length === 0) return
 
     setSelectedSlideById(firstSlideId)
 
     // Let the player re-read the updated slide list before resolving the preview end slide.
     setTimeout(() => {
-      onPreviewTemplate?.(firstSlideId, previewSlideIds.length > 1 ? lastSlideId : undefined)
+      onPreviewTemplate?.(firstSlideId, lastSlideId)
     }, 0)
-  }
+  }, [activeSuggestionSource, browseTargetSlideId, insertedSlideIdsRef, isPreviewPlaying, onPreviewTemplate, selectedCategoryTemplateId, selectedDefaultTemplateId, selectedSuggestion, setSelectedSlideById])
 
   return (
     <div className='h-full flex flex-col bg-card'>
@@ -321,18 +311,24 @@ const ReimagineSettings = ({
           <TabsContent value='browse' className='mt-4'>
             {activeTab === 'browse' && (
               <BrowseTab
-                aiSuggestions={defaultScenes}
-                aiSelectedIndex={selectedDefaultSuggestionIndex}
-                isAiLoading={isDefaultLoading}
-                onSelectAiSuggestion={(suggestion, index) => applySuggestion(suggestion, index, 'default')}
+                aiSuggestions={defaultSuggestionState.suggestions}
+                aiSelectedTemplateId={selectedDefaultTemplateId}
+                isAiLoading={defaultSuggestionState.isLoading}
+                isAiLoadingMore={defaultSuggestionState.isLoadingMore}
+                hasAiMore={defaultSuggestionState.hasMore}
+                onLoadMoreAiSuggestions={() => void defaultSuggestionState.loadMore()}
+                onSelectAiSuggestion={handleSelectDefaultSuggestion}
                 categories={categories}
                 selectedCategory={selectedCategory}
                 onSelectCategory={handleSelectCategory}
                 onGenerateNew={() => setActiveTab('generate')}
-                categorySuggestions={categoryScenes}
-                categorySelectedIndex={selectedCategorySuggestionIndex}
-                isCategoryLoading={isCategoryLoading}
-                onSelectCategorySuggestion={(suggestion, index) => applySuggestion(suggestion, index, 'category')}
+                categorySuggestions={categorySuggestionState.suggestions}
+                categorySelectedTemplateId={selectedCategoryTemplateId}
+                isCategoryLoading={categorySuggestionState.isLoading}
+                isCategoryLoadingMore={categorySuggestionState.isLoadingMore}
+                hasCategoryMore={categorySuggestionState.hasMore}
+                onLoadMoreCategorySuggestions={() => void categorySuggestionState.loadMore()}
+                onSelectCategorySuggestion={handleSelectCategorySuggestion}
                 resolution={resolution}
                 fps={fps}
               />

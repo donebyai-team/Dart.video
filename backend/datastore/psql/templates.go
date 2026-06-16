@@ -90,7 +90,7 @@ func (r *Database) CreateTemplate(ctx context.Context, t *models.Template) (*mod
 	var id string
 
 	err := stmt.GetContext(ctx, &id, map[string]interface{}{
-		"name":        t.Name,
+		"name":        strings.ToLower(t.Name),
 		"categories":  pq.Array(toUpperCategories(t.Categories)),
 		"description": t.Description,
 		"schema":      t.Schema,
@@ -136,7 +136,7 @@ func (r *Database) UpdateTemplate(ctx context.Context, t *models.Template) error
 		"repeatable":  t.Repeatable,
 		"metadata":    t.Metadata,
 		"status":      t.Status,
-		"name":        t.Name,
+		"name":        strings.ToLower(t.Name),
 	})
 	if err != nil {
 		return fmt.Errorf("failed to update template: %w", err)

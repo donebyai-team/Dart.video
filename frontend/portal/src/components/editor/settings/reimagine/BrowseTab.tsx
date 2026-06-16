@@ -1,22 +1,27 @@
 import { useEffect, useRef } from 'react'
-import type { Section } from '@coasterai/pb/coasterai/core/v1/slide_pb'
-import type { CategoryItem } from './types'
+import type { CategoryItem, SuggestionItem } from './types'
 import CategoryGrid from './CategoryGrid'
 import SuggestionGrid from './SuggestionGrid'
 
 interface BrowseTabProps {
-  aiSuggestions: Section[]
-  aiSelectedIndex: number | null
+  aiSuggestions: SuggestionItem[]
+  aiSelectedTemplateId: string | null
   isAiLoading: boolean
-  onSelectAiSuggestion: (suggestion: Section, index: number) => void
+  isAiLoadingMore?: boolean
+  hasAiMore?: boolean
+  onLoadMoreAiSuggestions?: () => void
+  onSelectAiSuggestion: (suggestion: SuggestionItem) => void
   categories: CategoryItem[]
   selectedCategory: CategoryItem | null
   onSelectCategory: (category: CategoryItem) => void
   onGenerateNew: () => void
-  categorySuggestions: Section[]
-  categorySelectedIndex: number | null
+  categorySuggestions: SuggestionItem[]
+  categorySelectedTemplateId: string | null
   isCategoryLoading: boolean
-  onSelectCategorySuggestion: (suggestion: Section, index: number) => void
+  isCategoryLoadingMore?: boolean
+  hasCategoryMore?: boolean
+  onLoadMoreCategorySuggestions?: () => void
+  onSelectCategorySuggestion: (suggestion: SuggestionItem) => void
   resolution?: {
     width: number
     height: number
@@ -26,16 +31,22 @@ interface BrowseTabProps {
 
 export default function BrowseTab({
   aiSuggestions,
-  aiSelectedIndex,
+  aiSelectedTemplateId,
   isAiLoading,
+  isAiLoadingMore,
+  hasAiMore,
+  onLoadMoreAiSuggestions,
   onSelectAiSuggestion,
   categories,
   selectedCategory,
   onSelectCategory,
   onGenerateNew,
   categorySuggestions,
-  categorySelectedIndex,
+  categorySelectedTemplateId,
   isCategoryLoading,
+  isCategoryLoadingMore,
+  hasCategoryMore,
+  onLoadMoreCategorySuggestions,
   onSelectCategorySuggestion,
   resolution,
   fps,
@@ -60,13 +71,15 @@ export default function BrowseTab({
 
         <SuggestionGrid
           suggestions={aiSuggestions}
-          selectedIndex={aiSelectedIndex}
+          selectedTemplateId={aiSelectedTemplateId}
           onSelect={onSelectAiSuggestion}
           resolution={resolution}
           fps={fps}
           isLoading={isAiLoading}
+          isLoadingMore={isAiLoadingMore}
+          hasMore={hasAiMore}
+          onLoadMore={onLoadMoreAiSuggestions}
           emptyMessage='No suggestions available.'
-          maxItems={6}
         />
       </section>
 
@@ -94,11 +107,14 @@ export default function BrowseTab({
 
           <SuggestionGrid
             suggestions={categorySuggestions}
-            selectedIndex={categorySelectedIndex}
+            selectedTemplateId={categorySelectedTemplateId}
             onSelect={onSelectCategorySuggestion}
             resolution={resolution}
             fps={fps}
             isLoading={isCategoryLoading}
+            isLoadingMore={isCategoryLoadingMore}
+            hasMore={hasCategoryMore}
+            onLoadMore={onLoadMoreCategorySuggestions}
             emptyMessage={`No ${selectedCategory.label.toLowerCase()} suggestions available right now.`}
           />
         </section>

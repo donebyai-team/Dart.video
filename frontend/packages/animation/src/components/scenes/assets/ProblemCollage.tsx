@@ -527,7 +527,7 @@ export const ProblemCollageSchemaFields = [
 export const ProblemCollageDescriptor: ComponentRegistration = {
     name: 'ProblemCollage',
     type: 'scene',
-    tags: ['Problem', 'Pain Point'],
+    tags: ['PROBLEM', 'FRAGMENTATION'],
     schema: ProblemCollageSchemaFields,
     llmSchema: [
         {

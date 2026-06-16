@@ -1501,14 +1501,6 @@ export declare const PortalService: GenService<{
     output: typeof GetVideoResponseSchema;
   },
   /**
-   * @generated from rpc coasterai.portal.v1.PortalService.SuggestScenes
-   */
-  suggestScenes: {
-    methodKind: "unary";
-    input: typeof SuggestScenesRequestSchema;
-    output: typeof SuggestScenesResponseSchema;
-  },
-  /**
    * @generated from rpc coasterai.portal.v1.PortalService.StopVideo
    */
   stopVideo: {

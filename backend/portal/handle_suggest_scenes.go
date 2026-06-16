@@ -30,10 +30,10 @@ func (p *Portal) GenerateSuggestions(ctx context.Context, c *connect.Request[pbp
 	)
 
 	// TODO: Remove it later
-	c.Msg.PageSize = 1
+	c.Msg.PageSize = 4
 
 	suggester := agent.NewSceneSuggester(p.brandIdentityService, p.db, logger)
-	suggestions, err := suggester.GenerateSuggestionsV2(ctx, c.Msg)
+	suggestions, err := suggester.GenerateSuggestions(ctx, c.Msg)
 	if err != nil {
 		logger.Error("failed to generate suggestions", zap.Error(err))
 		return nil, connect.NewError(connect.CodeInternal, err)
@@ -69,40 +69,6 @@ func (p *Portal) RenderSuggestion(ctx context.Context, c *connect.Request[pbport
 
 	suggester := agent.NewSceneSuggester(p.brandIdentityService, p.db, logger)
 	suggestions, err := suggester.RenderSuggestion(ctx, c.Msg.Tid, c.Msg.Slide, video)
-	if err != nil {
-		return nil, err
-	}
-	return connect.NewResponse(&pbportal.SuggestScenesResponse{Groups: suggestions}), nil
-}
-
-func (p *Portal) SuggestScenes(ctx context.Context, c *connect.Request[pbportal.SuggestScenesRequest]) (*connect.Response[pbportal.SuggestScenesResponse], error) {
-	actor, err := p.gethAuthContext(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	videoID := strings.TrimSpace(c.Msg.VideoId)
-	if videoID == "" {
-		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("video id is required"))
-	}
-
-	logger := logging.Logger(ctx, p.logger).With(
-		zap.String("session_id", videoID),
-		zap.String("organization_id", actor.OrganizationID),
-		zap.String("slide_id", c.Msg.SceneId),
-	)
-
-	video, _, err := p.getVideo(ctx, videoID, actor.OrganizationID, services.VideoOptions{IncludePending: false})
-	if err != nil {
-		return nil, err
-	}
-
-	if video.IsTemplate {
-		return connect.NewResponse(&pbportal.SuggestScenesResponse{}), nil
-	}
-
-	suggester := agent.NewSceneSuggester(p.brandIdentityService, p.db, logger)
-	suggestions, err := suggester.GenerateSuggestions(ctx, c.Msg.SceneId, c.Msg.Category, video)
 	if err != nil {
 		return nil, err
 	}

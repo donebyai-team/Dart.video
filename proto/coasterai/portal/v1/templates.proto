@@ -41,5 +41,5 @@ message GenerateSuggestionsResponse {
 message RenderSuggestionsInput {
   string videoId = 1;
   core.v1.Slide slide = 2;
-  string tid = 3;
+  repeated string tid = 3;
 }

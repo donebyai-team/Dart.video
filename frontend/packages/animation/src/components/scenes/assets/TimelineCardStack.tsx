@@ -341,7 +341,7 @@ export const TimelineCardStackSchema = [
 export const TimelineCardStackDescriptor: ComponentRegistration = {
   name: 'TimelineCardStack',
   type: 'scene',
-  tags: ['Solution', 'Product Info', 'Features'],
+  tags: ['SOLUTION', 'FEATURES'],
   schema: TimelineCardStackSchema,
   llmSchema: [
     {

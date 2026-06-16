@@ -212,7 +212,7 @@ export const MediaWithFeaturesSchema = [
 export const MediaWithFeaturesDescriptor: ComponentRegistration = {
     name: 'MediaWithFeatures',
     type: 'scene',
-    tags: ['Solution', 'Product Info', 'Features'],
+    tags: ['SOLUTION', 'FEATURES'],
     schema: MediaWithFeaturesSchema,
     llmSchema: [
         {

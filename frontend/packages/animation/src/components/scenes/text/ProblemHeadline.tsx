@@ -403,7 +403,7 @@ export const ProblemHeadlineSchemaFields = [
 export const ProblemHeadlineDescriptor: ComponentRegistration = {
   name: 'ProblemHeadline',
   type: 'scene',
-  tags: ['Problem', 'Hook'],
+  tags: ['PROBLEM', 'HOOK'],
   schema: [{
     type: 'component',
     name: 'problemheadline',

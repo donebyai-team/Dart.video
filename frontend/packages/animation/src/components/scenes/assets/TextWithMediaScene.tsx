@@ -231,7 +231,7 @@ export function TextWithMediaScene(): React.ReactElement {
 export const TextWithMediaSceneDescriptor: ComponentRegistration = {
   name: 'TextWithMediaScene',
   type: 'scene',
-  tags: ['Solution', 'Product/Benefit Info'],
+  tags: ['SOLUTION', 'PRODUCT_DEMO'],
   schema: [{
     type: "component",
     name: 'scene',

@@ -65,8 +65,6 @@ func (p *Portal) SaveTemplate(ctx context.Context, c *connect.Request[pbportal.U
 	}
 
 	if c.Msg.Id == "" ||
-		c.Msg.Name == "" ||
-		len(c.Msg.Name) > 10 ||
 		c.Msg.Description == "" ||
 		len(c.Msg.Description) > 150 ||
 		len(c.Msg.Categories) == 0 {

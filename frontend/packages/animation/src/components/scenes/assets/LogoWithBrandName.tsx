@@ -123,7 +123,7 @@ export const LogoWithBrandNameSchemaFields = [
 export const LogoWithBrandNameDescriptor: ComponentRegistration = {
     name: 'LogoWithBrandName',
     type: 'scene',
-    tags: ['Solution'],
+    tags: ['INTRO'],
     schema: LogoWithBrandNameSchemaFields,
     llmSchema: [{
         name: 'brandname',

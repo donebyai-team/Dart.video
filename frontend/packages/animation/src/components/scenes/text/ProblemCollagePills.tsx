@@ -360,7 +360,7 @@ export const ProblemCollagePillsSchemaFields = [
 export const ProblemCollagePillsDescriptor: ComponentRegistration = {
   name: 'ProblemCollagePills',
   type: 'content',
-  tags: ['Problem', 'Data', 'Scatter'],
+  tags: ['PROBLEM', 'FRAGMENTATION'],
   schema: [
     {
       type: 'component',

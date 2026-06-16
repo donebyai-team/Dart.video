@@ -310,7 +310,7 @@ export const MultiImageStackSchemaFields = [
 export const MultiImageStackDescriptor: ComponentRegistration = {
     name: 'MultiImageStack',
     type: 'scene',
-    tags: ['Solution', 'Product Info', 'Use Cases'],
+    tags: ['PRODUCT_DEMO'],
     schema: MultiImageStackSchemaFields,
     llmSchema: [
         {

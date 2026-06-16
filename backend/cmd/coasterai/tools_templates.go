@@ -57,6 +57,11 @@ func toolsSyncTemplatesRunE(cmd *cobra.Command, args []string) error {
 			Status:      models.TemplateStatusAVAILABLE,
 		}
 
+		// If an animation is not tagged, we tag it with
+		if len(template.Tags) == 0 {
+			templateToUpdate.Categories = []string{"TEXT", "FILLER"}
+		}
+
 		if template.Instructions != "" {
 			templateToUpdate.Description = templateToUpdate.Description + "\n\n" + template.Instructions
 		}

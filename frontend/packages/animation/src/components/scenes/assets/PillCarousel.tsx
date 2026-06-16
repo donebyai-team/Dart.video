@@ -312,7 +312,7 @@ export const HeroPillCarouselSchemaFields = [
 export const PillCarouselDescriptor: ComponentRegistration = {
     name: 'PillCarousel',
     type: 'scene',
-    tags: ['Solution', 'Product Info', 'Use Cases'],
+    tags: ['SOLUTION', 'FEATURES'],
     schema: HeroPillCarouselSchemaFields,
     llmSchema: [
         {

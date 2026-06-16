@@ -407,8 +407,8 @@ func (t *ExtractTemplateConfigRequestClassView) PropertyContent() (ClassProperty
 	return t.inner.Property("content")
 }
 
-func (t *ExtractTemplateConfigRequestClassView) PropertySchema() (ClassPropertyView, error) {
-	return t.inner.Property("schema")
+func (t *ExtractTemplateConfigRequestClassView) PropertyScenes() (ClassPropertyView, error) {
+	return t.inner.Property("scenes")
 }
 
 func (t *ExtractTemplateConfigRequestClassView) PropertyVideoBranding() (ClassPropertyView, error) {
@@ -443,8 +443,8 @@ func (t *ExtractTemplateConfigResponseClassView) ListProperties() ([]ClassProper
 	return builders, nil
 }
 
-func (t *ExtractTemplateConfigResponseClassView) PropertyProps() (ClassPropertyView, error) {
-	return t.inner.Property("props")
+func (t *ExtractTemplateConfigResponseClassView) PropertyScenes() (ClassPropertyView, error) {
+	return t.inner.Property("scenes")
 }
 
 func (t *TypeBuilder) ExtractTemplateConfigResponse() (*ExtractTemplateConfigResponseClassView, error) {
