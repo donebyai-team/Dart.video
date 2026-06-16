@@ -57,7 +57,7 @@ func (t templateService) CreateTemplate(ctx context.Context) (*models.Template, 
 	brand_identity.AddVideoBranding(videoMetadata)
 
 	template, err := t.db.CreateTemplate(ctx, &models.Template{
-		Name:       services.GenerateRandomName(2, 5),
+		Name:       services.GenerateRandomName(5, 5),
 		Status:     models.TemplateStatusCREATED,
 		Categories: []string{},
 		Schema:     json.RawMessage(`[]`),
