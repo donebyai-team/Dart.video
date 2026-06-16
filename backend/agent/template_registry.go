@@ -172,6 +172,7 @@ func (r *TemplateRegistry) ToSceneElements() []types.SceneElement {
 			if schema == "" {
 				continue
 			}
+			scene.Props = schema
 		}
 
 		sceneElements = append(sceneElements, scene)
@@ -218,6 +219,7 @@ func (r *TemplateRegistry) GenerateScene(ctx context.Context, scene *types.Scene
 			return slides, nil
 		}
 
+		// remove history
 		slides = append(slides, updatedTemplate.Config.Sections[0].Slides...)
 	}
 

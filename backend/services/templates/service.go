@@ -176,7 +176,7 @@ func (t templateService) UpdateTemplate(ctx context.Context, req *pbportal.Updat
 
 	existingTemplate.Description = req.Description
 
-	if req.UsageDescription != nil {
+	if req.UsageDescription != nil && *req.UsageDescription != "" {
 		existingTemplate.Description += "\n\nUsage: " + *req.UsageDescription
 	}
 	existingTemplate.Status = models.TemplateStatusWAITING

@@ -118,15 +118,17 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 				return nil, err
 			}
 
-			for _, slide := range slides {
+			for _, slideT := range slides {
 				slide := &pbcore.Slide{
 					Id:               fmt.Sprintf("slide-%s", uuid.NewString()),
 					SlideStatus:      pbcore.SlideStatus_SLIDE_STATUS_GENERATED,
 					Index:            int32(slideIndex),
-					Content:          slide.Content,
-					DurationInFrames: slide.DurationInFrames,
-					SettledFrame:     slide.SettledFrame,
+					Content:          slideT.Content,
+					DurationInFrames: slideT.DurationInFrames,
+					SettledFrame:     slideT.SettledFrame,
 				}
+
+				slide.Content.History = nil
 
 				nextSlide := getNextScene(plan.Sections, sectionIndex, slideIndex)
 				if isContentSlide(nextSlide) {

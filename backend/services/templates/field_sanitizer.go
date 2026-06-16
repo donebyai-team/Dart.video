@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/shank318/coasterai/agent/scenes"
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
+	"github.com/shank318/coasterai/services"
 	"github.com/shank318/coasterai/services/code_builder"
 	"github.com/shank318/coasterai/utils"
 	"net/url"
@@ -17,18 +19,24 @@ import (
 
 var (
 	ignoredKeys = map[string]struct{}{
-		"style":     {},
-		"width":     {},
-		"height":    {},
-		"id":        {},
-		"scale":     {},
-		"color":     {},
-		"dragX":     {},
-		"dragY":     {},
-		"_duration": {},
-		"x":         {},
-		"y":         {},
-		"delay":     {},
+		"style":             {},
+		"width":             {},
+		"height":            {},
+		"id":                {},
+		"scale":             {},
+		"color":             {},
+		"dragX":             {},
+		"dragY":             {},
+		"_duration":         {},
+		"x":                 {},
+		"y":                 {},
+		"delay":             {},
+		"entranceanimation": {},
+		"variant":           {},
+		"splitby":           {},
+		"duration":          {},
+		"staggerdelay":      {},
+		"highlightstyle":    {},
 	}
 
 	hexColorRegex = regexp.MustCompile(`(?i)^#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$`)
@@ -73,8 +81,20 @@ func ParseLLMOutputToTemplateDefaults(
 	llmOutput = code_builder.ResolveIcons(llmOutput)
 
 	var outputs []json.RawMessage
+	// Preferred: array of outputs.
+	// Handle both cases: single output object and array of output objects: LLM hallucination
 	if err := json.Unmarshal([]byte(llmOutput), &outputs); err != nil {
-		return template, fmt.Errorf("failed to parse llm output: %w", err)
+
+		// Fallback: single output object.
+		var single json.RawMessage
+		if err2 := json.Unmarshal([]byte(llmOutput), &single); err2 != nil {
+			return template, fmt.Errorf(
+				"failed to parse llm output: %w",
+				err,
+			)
+		}
+
+		outputs = []json.RawMessage{single}
 	}
 
 	outputIndex := 0
@@ -169,6 +189,19 @@ func mergeLLMOutput(
 	return result, nil
 }
 
+func isComponentName(key string) bool {
+	_, err := scenes.FindComponent(key)
+	return err == nil
+}
+
+func sanitizeKey(key string) string {
+	if isComponentName(key) {
+		return services.GenerateRandomName(3, 3)
+	}
+
+	return key
+}
+
 func filterValue(v any) any {
 	switch x := v.(type) {
 
@@ -180,13 +213,19 @@ func filterValue(v any) any {
 				continue
 			}
 
+			if strings.EqualFold(k, "name") {
+				if s, ok := v.(string); ok && isComponentName(s) {
+					continue
+				}
+			}
+
 			filtered := filterValue(v)
 
 			if isEmpty(filtered) {
 				continue
 			}
 
-			result[k] = filtered
+			result[sanitizeKey(k)] = filtered
 		}
 
 		if len(result) == 0 {

@@ -11,49 +11,99 @@ class ExtractTemplateConfigResponse {
 function ExtractTemplateConfig(input: ExtractTemplateConfigRequest) -> ExtractTemplateConfigResponse {
   client CustomGPTNano
   prompt #"
-    You are an expert at populating template configuration objects from the provided Scene Content.
+    You are an expert at populating component props from the provided Scene Content and Brand Details.
 
-    Your task is to fill the values in the provided Schema using information from the Scene Content.
+    Your task is to generate prop values for each component using the provided component schemas.
 
-    Rules:
-    * Return JSON that exactly matches the provided Schema structure.
-    * Do not add new fields.
-    * Do not remove fields.
-    * Preserve all object nesting and array structures exactly as provided.
-    * Only modify field values.
-    * If a field value cannot be determined from the Scene Content, generate a reasonable value that fits the context.
-    * If a field requires an icon, return a value in the format:
-      "icon:<icon-name>"
-      Example:
-      "icon:rocket"
-    * If a field requires a logo or media or image, use placeholder not icons.
+    ## Rules
 
-    Array Rules:
-    * Preserve the exact array or object structure from the Schema.
-    * If an array contains objects, return the same number of objects as provided in the Schema.
-    * If an array contains arrays of objects, preserve the same number of nested arrays and objects.
-    * Never add or remove array items.
+    * Return the same number of scenes as the input.
+    * Preserve the component names.
+    * Do not add or remove component.
+    * Do not add or remove fields.
+    * Only modify values.
 
-    Image Rules:
+    ## Props Rules
 
-    * For placeholder images use:
-      https://placehold.co/{width}x{height}.png
+    Component props may be defined in different shapes:
 
-    Scene Content:
-    {{ input.content }}
+    ```text
+    - title: string
+    - subtitle: string
+    ```
 
-    {{ BrandGuidelines(input.VideoBranding) }}
+    ```json
+    [
+      {
+        "title": "Example"
+      }
+    ]
+    ```
 
-    Schemas:
-    {% for scene in input.scenes %}
-     Component: {{ scene.component }}
-     Props: {{ scene.props }}
-     {% endfor %}
-    ---
+    * Nested objects or arrays
+
+    Props must be returned as a JSON-encoded string.
+    The JSON encoded in props must preserve the exact structure of the Props Schema.
+    If the Props Schema is an array, return a JSON string containing an array.
+    If the Props Schema is an object, return a JSON string containing an object.
+    Never convert arrays to objects.
+    Never convert objects to arrays.
+
+    ## Value Generation
+
+    Populate values using:
+    1. Scene Content
+    2. Brand Details
+
+    If a value cannot be determined, generate a reasonable value that fits the context.
+
+    ## Assets
+
+    * Icons → `icon:<icon-name>`
+    * Images, logos, and media → use placeholders or provided brand assets
+    * Placeholder format:
+
+    ```text
+    https://placehold.co/{width}x{height}.png
+    ```
+
+    ## Arrays
+
+    * Preserve the exact number of array items.
+    * Never add items.
+    * Never remove items.
+
+    ## Component Constraints
+    Follow all field hints, ranges, defaults, and requirements defined in the component schema.
+
+   Scene Content:
+   {{ input.content }}
+
+   {{ BrandGuidelines(input.VideoBranding) }}
+
+   Component Schemas ({{ input.scenes|length }} total)
+
+   {% for scene in input.scenes %}
+   Component: {{ scene.component }}
+
+   Props Schema:
+   {{ scene.props }}
+
+   {% endfor %}
+
+
+    ## Critical Requirement
+    - Output scene count MUST be exactly {{ input.scenes|length }}.
+    - Generate exactly one output scene for each Component Schema above.
+    - Preserve the order of Component Schemas.
+    - Use the same component names.
+    - Never skip a component.
+    - Never generate additional components.
+
+   ---
 
     ## OUTPUT FORMAT
 
     {{ ctx.output_format }}
-
   "#
 }

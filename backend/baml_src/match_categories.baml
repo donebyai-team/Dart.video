@@ -36,7 +36,7 @@ function MatchCategories(resume: MatchCategoriesRequest) -> MatchCategoriesRespo
     Rules:
 
     - Consider every category.
-    - Return categories ordered by relevance.
+    - Always Return **ALL CATEGORIES* ordered by relevance.
     - The first category must be the strongest match.
     - Categories should be ranked relative to each other.
     - Do not explain your reasoning.
