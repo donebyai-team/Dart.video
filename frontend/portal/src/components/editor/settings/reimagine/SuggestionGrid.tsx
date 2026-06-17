@@ -3,10 +3,10 @@ import type { SuggestionGridProps } from './types'
 import SlideThumbnail from '@/components/editor/SlideThumbnail'
 
 const LoadingDots = () => (
-  <div className='flex items-center justify-center gap-1'>
-    <span className='h-1.5 w-1.5 animate-bounce rounded-full bg-primary [animation-delay:-0.3s]' />
-    <span className='h-1.5 w-1.5 animate-bounce rounded-full bg-primary [animation-delay:-0.15s]' />
-    <span className='h-1.5 w-1.5 animate-bounce rounded-full bg-primary' />
+  <div className='inline-flex items-center justify-center gap-1 rounded-full border border-border/50 bg-background/80 px-2 py-1 shadow-sm backdrop-blur-md'>
+    <span className='h-1 w-1 animate-bounce rounded-full bg-primary/90 [animation-delay:-0.3s]' />
+    <span className='h-1 w-1 animate-bounce rounded-full bg-primary/90 [animation-delay:-0.15s]' />
+    <span className='h-1 w-1 animate-bounce rounded-full bg-primary/90' />
   </div>
 )
 
@@ -51,28 +51,28 @@ export default function SuggestionGrid({
               type='button'
               onClick={() => isReady && onSelect(suggestion)}
               disabled={!isReady}
-              className={`overflow-hidden rounded-2xl border bg-muted/20 text-left transition-all focus:outline-none focus:ring-2 focus:ring-primary/40 ${
+              className={`overflow-hidden rounded-[20px] border bg-gradient-to-b from-background to-muted/20 text-left shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/40 ${
                 selectedTemplateId === suggestion.templateId
-                  ? 'border-primary shadow-[0_0_0_1px_rgba(59,130,246,0.25)]'
-                  : 'border-border hover:border-primary/60 hover:bg-muted/30'
+                  ? 'border-primary shadow-[0_0_0_1px_rgba(59,130,246,0.25),0_12px_30px_rgba(15,23,42,0.08)]'
+                  : 'border-border/70 hover:border-primary/50 hover:shadow-[0_10px_24px_rgba(15,23,42,0.08)]'
               } ${!isReady ? 'cursor-default' : ''}`}
             >
               <div
-                className='relative overflow-hidden bg-muted/30'
+                className={`relative overflow-hidden bg-muted/30 ${resolution ? '' : 'min-h-40'}`}
                 style={resolution ? { aspectRatio: `${resolution.width} / ${resolution.height}` } : undefined}
               >
                 {previewSlide ? (
                   <>
                     <SlideThumbnail slide={previewSlide} index={index} resolution={resolution} fps={fps} />
                     {suggestion.suggestion && suggestion.suggestion.slides.length > 1 && (
-                      <div className='absolute bottom-0 right-0 inline-flex items-center gap-0.5 bg-background/45 px-1 py-0.5 text-[10px] font-medium text-foreground backdrop-blur-sm'>
+                      <div className='absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-full border border-border/40 bg-background/70 px-1.5 py-0.5 text-[10px] font-medium text-foreground shadow-sm backdrop-blur-md'>
                         <Layers3 className='h-3 w-3' />
                         <span>{suggestion.suggestion.slides.length}</span>
                       </div>
                     )}
                   </>
                 ) : (
-                  <div className='flex h-full min-h-40 items-center justify-center text-muted-foreground'>
+                  <div className='absolute inset-0 flex items-center justify-center bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.14),transparent_65%)] text-muted-foreground'>
                     <LoadingDots />
                   </div>
                 )}

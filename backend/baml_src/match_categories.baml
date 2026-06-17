@@ -14,7 +14,7 @@ class MatchCategoriesResponse {
 }
 
 function MatchCategories(resume: MatchCategoriesRequest) -> MatchCategoriesResponse {
-  client CustomGPTNano
+  client SmallBoyFastGPT
   prompt #"
     You are a content classification engine.
 

@@ -1,11 +1,9 @@
 // import { useState } from "react";
 import {
-    X,
-    PanelLeft,
     Video,
     Home,
     Palette,
-    LayoutTemplate
+    Wand2,
 } from "lucide-react";
 import {
     Sidebar,
@@ -27,7 +25,7 @@ import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
 import { isPlatformAdmin } from "@coasterai/ui-core/helper/role";
 
 export function AppSidebar() {
-    const { isMobile, toggleSidebar, openMobile } = useSidebar();
+    // const { isMobile, toggleSidebar, openMobile } = useSidebar();
     const location = usePathname();
     const { currentOrganization, user } = useAuth();
 
@@ -58,8 +56,8 @@ export function AppSidebar() {
 
     if (user && isPlatformAdmin(user)) {
         mainMenuItems.push({
-            title: "Templates",
-            icon: LayoutTemplate,
+            title: "Animations",
+            icon: Wand2,
             path: "/dashboard/templates",
             active: isActive("/dashboard/templates"),
         })

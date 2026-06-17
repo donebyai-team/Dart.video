@@ -121,7 +121,8 @@ func (s SceneSuggester) RenderSuggestion(ctx context.Context,
 			Element: scene,
 		})
 		if err != nil {
-			return nil, err
+			s.logger.Error("failed to generate scene", zap.Error(err))
+			continue
 		}
 
 		// Apply background

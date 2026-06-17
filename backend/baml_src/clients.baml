@@ -19,11 +19,11 @@ client<llm> CustomGeminiFlash {
   }
 }
 
-client<llm> CustomGPTNano {
+client<llm> SmallBoyFastGPT {
   provider openai
   retry_policy Exponential
   options {
-    model "gpt-5-nano"
+    model "gpt-4o-mini"
     api_key env.OPENAI_API_KEY
   }
 }

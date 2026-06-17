@@ -9,7 +9,7 @@ class ExtractTemplateConfigResponse {
 }
 
 function ExtractTemplateConfig(input: ExtractTemplateConfigRequest) -> ExtractTemplateConfigResponse {
-  client CustomGPTNano
+  client SmallBoyFastGPT
   prompt #"
     You are an expert at populating component props from the provided Scene Content and Brand Details.
 
