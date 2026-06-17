@@ -21,7 +21,7 @@ const BODY_HOLD_DURATION = 12;
 const LABEL_FINAL_TRANSLATE_Y = -74;
 const LABEL_FINAL_SCALE = 0.64;
 const LABEL_FINAL_OPACITY = 0.72;
-const BODY_BASE_OFFSET_Y = 58;
+const BODY_BASE_OFFSET_Y = 45;
 
 const LABEL_TRANSITION_START = LABEL_HOLD_DURATION;
 const LABEL_TRANSITION_END = LABEL_TRANSITION_START + LABEL_SETTLE_DURATION;
@@ -143,7 +143,10 @@ export const IntroText: React.FC<IntroTextProps> = (initProps) => {
                     top: '50%',
                     width: '100%',
                     opacity: bodyRevealProgress,
-                    transform: `translate(-50%, calc(-50% + ${BODY_BASE_OFFSET_Y + bodyTranslateY}px))`,
+                    transform: composeTransforms(
+                        'translateX(-50%)',
+                        `translateY(${BODY_BASE_OFFSET_Y + bodyTranslateY}px)`,
+                    ),
                 }}
             >
                 <AnimatedText
