@@ -105,6 +105,8 @@ func ParseLLMOutputToTemplateDefaults(
 			if slide.Content.CodeRegistry.Defaults == nil {
 				continue
 			}
+			// Set the TID to the template ID, so that the slide can be linked to the template.
+			slide.Tid = template.ID
 
 			if outputIndex >= len(outputs) {
 				errs = append(

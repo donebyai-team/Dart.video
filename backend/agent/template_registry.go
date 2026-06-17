@@ -205,6 +205,8 @@ func (r *TemplateRegistry) GenerateScene(ctx context.Context, scene *types.Scene
 
 			// add background if applicable
 			newTemplate.BackgroundStyle = sceneConfig.Background
+			// Set the TID to the template ID, so that the slide can be linked to the template.
+			newTemplate.Tid = template.ID
 			slides = append(slides, newTemplate)
 		}
 

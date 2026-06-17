@@ -124,7 +124,6 @@ func (s SceneSuggester) RenderSuggestion(ctx context.Context,
 			s.logger.Error("failed to generate scene", zap.Error(err))
 			continue
 		}
-
 		// Apply background
 		for _, slide := range slides {
 			slide.BackgroundStyle = contentSlide.BackgroundStyle

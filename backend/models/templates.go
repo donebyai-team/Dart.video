@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/lib/pq"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
-	"github.com/shank318/coasterai/utils"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"time"
 )
@@ -68,10 +67,6 @@ type Template struct {
 }
 
 func (r *Template) ToProto() *pbcore.AnimationTemplate {
-	toStruct, err := utils.RawMessageToStructs(r.Schema)
-	if err != nil {
-		return nil
-	}
 	return &pbcore.AnimationTemplate{
 		Id:          r.ID,
 		Name:        r.Name,
@@ -81,7 +76,6 @@ func (r *Template) ToProto() *pbcore.AnimationTemplate {
 		Metadata:    r.Metadata,
 		Description: r.Description,
 		Categories:  r.Categories,
-		Schema:      toStruct,
 		CreatedAt:   timestamppb.New(r.CreatedAt),
 	}
 }
