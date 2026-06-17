@@ -71,12 +71,6 @@ func (l *llmService) GenerateAnimation(
 	l.logger.Info("🚀 Starting code generation..")
 
 	var extractor *ThinkingExtractor
-
-	callOptions := []baml_client.CallOptionFunc{
-		baml_client.WithOnTick(extractor.HandleTick),
-		baml_client.WithTags(getTags(ctx)),
-	}
-
 	cr := baml.NewClientRegistry()
 
 	if options != nil && options.Model == pbcore.AIModel_AI_MODEL_GPT_5_5 {
@@ -85,6 +79,11 @@ func (l *llmService) GenerateAnimation(
 		extractor = l.NewThinkingExtractor(NewOpenAIExtractor(), onThinking, thinkingMessages)
 	} else {
 		extractor = l.NewThinkingExtractor(NewGeminiExtractor(), onThinking, thinkingMessages)
+	}
+
+	callOptions := []baml_client.CallOptionFunc{
+		baml_client.WithOnTick(extractor.HandleTick),
+		baml_client.WithTags(getTags(ctx)),
 	}
 
 	callOptions = append(callOptions, baml_client.WithClientRegistry(cr))
