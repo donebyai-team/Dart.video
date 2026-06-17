@@ -217,7 +217,7 @@ func (a *auth0) verifyPasswordlessFlow(code, email, ipaddress string) (*Auth0Tok
 	}
 
 	if err := gjson.GetBytes(cnt, "error").String(); err != "" {
-		return nil, fmt.Errorf(gjson.GetBytes(cnt, "error_description").String())
+		return nil, fmt.Errorf("%s", gjson.GetBytes(cnt, "error_description").String())
 	}
 
 	out := &Auth0Token{}

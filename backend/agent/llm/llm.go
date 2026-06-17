@@ -29,10 +29,6 @@ type Service interface {
 		conversationHistory []types.Message,
 		onThinking func(thinking string),
 	) (*types.Union2AskUserQuestionOrScene, error)
-	SuggestScenes(
-		ctx context.Context,
-		req types.SuggestScenesRequest,
-	) (types.SuggestScenesResponse, error)
 	CategorizeScene(ctx context.Context, req types.MatchCategoriesRequest) (*types.MatchCategoriesResponse, error)
 	GenerateAnimation(ctx context.Context,
 		req types.GenerateAnimationCodeRequest,
@@ -142,10 +138,6 @@ func (l *llmService) GenerateAnimation(
 	}
 
 	return nil, fmt.Errorf("stream closed without final result")
-}
-
-func (l *llmService) SuggestScenes(ctx context.Context, req types.SuggestScenesRequest) (types.SuggestScenesResponse, error) {
-	return baml_client.SuggestScenes(ctx, req, baml_client.WithTags(getTags(ctx)))
 }
 
 func NewLlmService(logger *zap.Logger, cache cache.Cache) Service {

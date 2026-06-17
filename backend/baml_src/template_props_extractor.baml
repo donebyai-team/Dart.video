@@ -15,39 +15,15 @@ function ExtractTemplateConfig(input: ExtractTemplateConfigRequest) -> ExtractTe
 
     Your task is to generate prop values for each component using the provided component schemas.
 
-    ## Rules
-
-    * Return the same number of scenes as the input.
-    * Preserve the component names.
-    * Do not add or remove component.
-    * Do not add or remove fields.
-    * Only modify values.
-
     ## Props Rules
 
-    Component props may be defined in different shapes:
-
-    ```text
-    - title: string
-    - subtitle: string
-    ```
-
-    ```json
-    [
-      {
-        "title": "Example"
-      }
-    ]
-    ```
-
-    * Nested objects or arrays
-
     Props must be returned as a JSON-encoded string.
-    The JSON encoded in props must preserve the exact structure of the Props Schema.
-    If the Props Schema is an array, return a JSON string containing an array.
-    If the Props Schema is an object, return a JSON string containing an object.
-    Never convert arrays to objects.
-    Never convert objects to arrays.
+    The JSON encoded in props must exactly match the structure of the provided Props Schema, including arrays, objects, nesting, and field names.
+
+    Never:
+    - convert arrays to objects
+    - convert objects to arrays
+    - change nesting
 
     ## Value Generation
 
@@ -67,29 +43,23 @@ function ExtractTemplateConfig(input: ExtractTemplateConfigRequest) -> ExtractTe
     https://placehold.co/{width}x{height}.png
     ```
 
-    ## Arrays
-
-    * Preserve the exact number of array items.
-    * Never add items.
-    * Never remove items.
-
     ## Component Constraints
     Follow all field hints, ranges, defaults, and requirements defined in the component schema.
 
-   Scene Content:
-   {{ input.content }}
+    Scene Content:
+    {{ input.content }}
 
-   {{ BrandGuidelines(input.VideoBranding) }}
+    {{ BrandGuidelines(input.VideoBranding) }}
 
-   Component Schemas ({{ input.scenes|length }} total)
+    ## Component Schemas ({{ input.scenes|length }} total)
 
-   {% for scene in input.scenes %}
-   Component: {{ scene.component }}
+    {% for scene in input.scenes %}
+    ### Component: {{ scene.component }}
 
-   Props Schema:
-   {{ scene.props }}
+    Props Schema:
+    {{ scene.props }}
 
-   {% endfor %}
+    {% endfor %}
 
 
     ## Critical Requirement
@@ -99,6 +69,8 @@ function ExtractTemplateConfig(input: ExtractTemplateConfigRequest) -> ExtractTe
     - Use the same component names.
     - Never skip a component.
     - Never generate additional components.
+    - Do not add or remove fields.
+    - Only modify values.
 
    ---
 

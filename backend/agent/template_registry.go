@@ -162,7 +162,7 @@ func (r *TemplateRegistry) ToSceneElements() []types.SceneElement {
 		component, _ := scenes.FindComponent(templateName)
 		if component != nil {
 			var b strings.Builder
-			scenes.WriteProps(&b, component.LLMSchema, nil)
+			scenes.WriteJSONProps(&b, component.LLMSchema, nil)
 			scene.Props = b.String()
 		} else {
 			schema, err := templates.BuildTemplateSchemaFromDefaults(template)

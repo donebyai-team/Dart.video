@@ -161,7 +161,7 @@ func writeScene(b *strings.Builder, c types.Component, category string, fieldsTo
 	}
 
 	b.WriteString("**Props**\n")
-	WriteProps(b, c.LLMSchema, fieldsToSkip)
+	WriteJSONProps(b, c.LLMSchema, fieldsToSkip)
 
 	b.WriteString("\n---\n\n")
 }
@@ -293,4 +293,126 @@ func filterAllowed(source, allowedList []string) []string {
 		}
 	}
 	return result
+}
+
+func WriteJSONProps(
+	b *strings.Builder,
+	fields []types.LLMField,
+	skipLLMFields []string,
+) {
+	schema := buildPropsSchema(fields, skipLLMFields)
+
+	schemaBytes, _ := json.MarshalIndent(schema, "", "  ")
+	b.Write(schemaBytes)
+
+	writeConstraints(b, fields, skipLLMFields)
+}
+
+func buildPropsSchema(
+	fields []types.LLMField,
+	skipLLMFields []string,
+) map[string]any {
+	schema := make(map[string]any)
+
+	for _, f := range fields {
+		if utils.Contains(skipLLMFields, f.Name) {
+			continue
+		}
+
+		schema[f.Name] = buildFieldSchema(f)
+	}
+
+	return schema
+}
+
+func buildFieldSchema(f types.LLMField) any {
+	switch f.Type {
+
+	case "array":
+		if f.Items == nil {
+			return []any{}
+		}
+
+		if len(f.Items.Fields) > 0 {
+			item := map[string]any{}
+
+			for _, child := range f.Items.Fields {
+				item[child.Name] = buildFieldSchema(child)
+			}
+
+			return []any{item}
+		}
+
+		return []any{f.Items.Type}
+
+	case "object":
+		obj := map[string]any{}
+
+		if f.Items != nil {
+			for _, child := range f.Items.Fields {
+				obj[child.Name] = buildFieldSchema(child)
+			}
+		}
+
+		return obj
+
+	case "enum":
+		return "enum"
+
+	default:
+		return f.Type
+	}
+}
+
+func writeConstraints(
+	b *strings.Builder,
+	fields []types.LLMField,
+	skipLLMFields []string,
+) {
+	var constraints []string
+
+	for _, f := range fields {
+		if utils.Contains(skipLLMFields, f.Name) {
+			continue
+		}
+
+		if f.Range != "" {
+			constraints = append(
+				constraints,
+				fmt.Sprintf("- %s: %s", f.Name, f.Range),
+			)
+		}
+
+		if f.Hint != "" {
+			constraints = append(
+				constraints,
+				fmt.Sprintf("- %s hint: %s", f.Name, f.Hint),
+			)
+		}
+
+		if f.Default != nil {
+			constraints = append(
+				constraints,
+				fmt.Sprintf("- %s default: %v", f.Name, f.Default),
+			)
+		}
+
+		if len(f.Enum) > 0 {
+			constraints = append(
+				constraints,
+				fmt.Sprintf("- %s enum: %s", f.Name, strings.Join(f.Enum, ", ")),
+			)
+		}
+	}
+
+	if len(constraints) == 0 {
+		return
+	}
+
+	b.WriteString("\n\nConstraints:\n")
+
+	for _, c := range constraints {
+		b.WriteString(c)
+		b.WriteString("\n")
+	}
 }
