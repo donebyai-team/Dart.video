@@ -264,9 +264,9 @@ func (p *Portal) GetConversationHistory(ctx context.Context, c *connect.Request[
 				(message.Type == pbcore.ConversationMessageType_CONVERSATION_MESSAGE_THINKING ||
 					message.Type == pbcore.ConversationMessageType_CONVERSATION_MESSAGE_FINAL_THINKING)
 
-		if (isUserOrTool &&
+		if ((isUserOrTool &&
 			message.Type != pbcore.ConversationMessageType_CONVERSATION_MESSAGE_MANUAL_EDITS) ||
-			isAdminThinking {
+			isAdminThinking) || (c.Msg.All != nil && actor.IsPlatformAdmin()) {
 
 			conversation = append(conversation, message)
 		}

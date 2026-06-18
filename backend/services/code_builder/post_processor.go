@@ -37,8 +37,7 @@ func ResolveIcons(code string) string {
 	code = iconRegex.ReplaceAllStringFunc(code, func(match string) string {
 		value := strings.Trim(match, `"`)
 
-		iconName := strings.TrimPrefix(value, "icon:")
-		url := services.ResolveIconFromName(iconName)
+		url := services.ResolveIconFromName(value)
 
 		if url == "" {
 			return match

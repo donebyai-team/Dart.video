@@ -381,10 +381,6 @@ func (l *codeGenerator) runPlanning(ctx context.Context, generatePlanRequest typ
 				Type:    pbcore.ConversationMessageType_CONVERSATION_MESSAGE_FINAL_THINKING,
 			})
 		}
-		//session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
-		//	Role:         pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
-		//	CodeSnapshot: asset.Url,
-		//})
 
 		err = l.session.Save(ctx, session)
 		if err != nil {

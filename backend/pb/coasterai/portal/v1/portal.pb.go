@@ -527,6 +527,7 @@ type GetConversationHistoryRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	VideoId       string                 `protobuf:"bytes,1,opt,name=videoId,proto3" json:"videoId,omitempty"`
 	SlideId       string                 `protobuf:"bytes,2,opt,name=slideId,proto3" json:"slideId,omitempty"`
+	All           *bool                  `protobuf:"varint,3,opt,name=all,proto3,oneof" json:"all,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -573,6 +574,13 @@ func (x *GetConversationHistoryRequest) GetSlideId() string {
 		return x.SlideId
 	}
 	return ""
+}
+
+func (x *GetConversationHistoryRequest) GetAll() bool {
+	if x != nil && x.All != nil {
+		return *x.All
+	}
+	return false
 }
 
 type GetConversationHistoryResponse struct {
@@ -3151,10 +3159,12 @@ const file_coasterai_portal_v1_portal_proto_rawDesc = "" +
 	"\vslideToEdit\x18\x02 \x01(\v2\x18.coasterai.core.v1.SlideR\vslideToEdit\x12C\n" +
 	"\arequest\x18\x03 \x01(\v2'.coasterai.portal.v1.CreateVideoRequestH\x00R\arequest\x12Y\n" +
 	"\x0eask_user_input\x18\x04 \x01(\v21.coasterai.portal.v1.ContinueVideoPlanningRequestH\x00R\faskUserInputB\a\n" +
-	"\x05input\"S\n" +
+	"\x05input\"r\n" +
 	"\x1dGetConversationHistoryRequest\x12\x18\n" +
 	"\avideoId\x18\x01 \x01(\tR\avideoId\x12\x18\n" +
-	"\aslideId\x18\x02 \x01(\tR\aslideId\"d\n" +
+	"\aslideId\x18\x02 \x01(\tR\aslideId\x12\x15\n" +
+	"\x03all\x18\x03 \x01(\bH\x00R\x03all\x88\x01\x01B\x06\n" +
+	"\x04_all\"d\n" +
 	"\x1eGetConversationHistoryResponse\x12B\n" +
 	"\bmessages\x18\x01 \x03(\v2&.coasterai.core.v1.ConversationMessageR\bmessages\"\xc2\x02\n" +
 	"\x1bGenerateOrEditSceneResponse\x12.\n" +
@@ -3647,6 +3657,7 @@ func file_coasterai_portal_v1_portal_proto_init() {
 		(*GenerateOrEditSceneRequest_Request)(nil),
 		(*GenerateOrEditSceneRequest_AskUserInput)(nil),
 	}
+	file_coasterai_portal_v1_portal_proto_msgTypes[4].OneofWrappers = []any{}
 	file_coasterai_portal_v1_portal_proto_msgTypes[13].OneofWrappers = []any{}
 	file_coasterai_portal_v1_portal_proto_msgTypes[23].OneofWrappers = []any{}
 	file_coasterai_portal_v1_portal_proto_msgTypes[25].OneofWrappers = []any{}

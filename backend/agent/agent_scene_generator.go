@@ -319,14 +319,6 @@ func (l *sceneGenerator) runPlanning(ctx context.Context, generatePlanRequest ty
 			return nil, err
 		}
 
-		// replace generated asset handles
-		//if l.assetRegistry != nil {
-		//	for i := range scene.Elements {
-		//		resolved := l.assetRegistry.ResolveMediaHandles(scene.Elements[i].Props)
-		//		scene.Elements[i].Props = resolved
-		//	}
-		//}
-
 		// Validate scene and add default props
 		sceneConfigs, err := scenes.ConvertToSceneConfig(scene, l.assetRegistry)
 		if err != nil {

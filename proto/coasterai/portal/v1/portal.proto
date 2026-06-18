@@ -95,6 +95,7 @@ message GenerateOrEditSceneRequest {
 message GetConversationHistoryRequest {
   string videoId = 1;
   string slideId = 2;
+  optional bool all = 3;
 }
 
 message GetConversationHistoryResponse {

@@ -118,6 +118,11 @@ export declare type GetConversationHistoryRequest = Message<"coasterai.portal.v1
    * @generated from field: string slideId = 2;
    */
   slideId: string;
+
+  /**
+   * @generated from field: optional bool all = 3;
+   */
+  all?: boolean;
 };
 
 /**

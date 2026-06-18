@@ -20,6 +20,7 @@ interface SelectedAssetsDialogProps {
   onRemoveAsset: (assetId: string) => void
   onUpdateAssetNote: (assetId: string, note?: string) => void
   onOpenUpload: () => void
+  preview?: boolean
 }
 
 export interface SelectedAssetWithPreview {
@@ -41,7 +42,8 @@ const SelectedAssetsDialog = ({
   onHydrateAssets,
   onRemoveAsset,
   onUpdateAssetNote,
-  onOpenUpload
+  onOpenUpload,
+  preview = true
 }: SelectedAssetsDialogProps) => {
   const { portalClient } = useClientsContext()
   const [previewState, setPreviewState] = useState<PreviewState>(null)
@@ -139,8 +141,8 @@ const SelectedAssetsDialog = ({
                     <button
                       type='button'
                       className='w-full text-left'
-                      onClick={() => asset && handleOpenPreview(asset, selection.note)}
-                      disabled={!asset}
+                      onClick={() => asset && preview && handleOpenPreview(asset, selection.note)}
+                      disabled={!asset || !preview}
                     >
                       {asset ? (
                         isVideoAsset(asset) ? (
@@ -173,48 +175,52 @@ const SelectedAssetsDialog = ({
                       </div>
                     </button>
 
-                    <div className='mt-3 flex items-center justify-between gap-2'>
-                      <Button
-                        type='button'
-                        variant='ghost'
-                        size='sm'
-                        className='px-2'
-                        onClick={() => asset && handleOpenPreview(asset, selection.note)}
-                        disabled={!asset}
-                      >
-                        {asset && isVideoAsset(asset) ? <Video className='h-4 w-4' /> : null}
-                        Preview
-                      </Button>
-                      <Button
-                        type='button'
-                        variant='ghost'
-                        size='sm'
-                        className='px-2 text-destructive hover:text-destructive'
-                        onClick={() => onRemoveAsset(selection.assetID)}
-                      >
-                        <Trash2 className='h-4 w-4' />
-                        Remove
-                      </Button>
-                    </div>
+                    {preview && (
+                      <div className='mt-3 flex items-center justify-between gap-2'>
+                        <Button
+                          type='button'
+                          variant='ghost'
+                          size='sm'
+                          className='px-2'
+                          onClick={() => asset && handleOpenPreview(asset, selection.note)}
+                          disabled={!asset}
+                        >
+                          {asset && isVideoAsset(asset) ? <Video className='h-4 w-4' /> : null}
+                          Preview
+                        </Button>
+                        <Button
+                          type='button'
+                          variant='ghost'
+                          size='sm'
+                          className='px-2 text-destructive hover:text-destructive'
+                          onClick={() => onRemoveAsset(selection.assetID)}
+                        >
+                          <Trash2 className='h-4 w-4' />
+                          Remove
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
             </ScrollArea>
           )}
 
-          <div className='flex justify-end border-t border-border pt-4'>
-            <Button
-              type='button'
-              className='gap-2'
-              onClick={() => {
-                onOpenChange(false)
-                onOpenUpload()
-              }}
-            >
-              <Upload className='h-4 w-4' />
-              Upload media
-            </Button>
-          </div>
+          {preview && (
+            <div className='flex justify-end border-t border-border pt-4'>
+              <Button
+                type='button'
+                className='gap-2'
+                onClick={() => {
+                  onOpenChange(false)
+                  onOpenUpload()
+                }}
+              >
+                <Upload className='h-4 w-4' />
+                Upload media
+              </Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </>

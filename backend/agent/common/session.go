@@ -17,8 +17,11 @@ import (
 	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"sort"
 	"time"
 )
+
+const MaxConversationMessages = 10
 
 type SessionContext struct {
 	Request             *pbportal.CreateVideoRequest  `json:"request"`
@@ -33,7 +36,7 @@ type AgentSession interface {
 	Save(ctx context.Context, session *SessionContext) error
 }
 
-const sessionTTL = 6 * 24 * time.Hour
+const sessionTTL = 30 * 24 * time.Hour
 
 type session struct {
 	sessionKey string
@@ -90,11 +93,6 @@ func (a *session) Get(ctx context.Context) (*SessionContext, error) {
 		return nil, agenterrors.SessionUnavailable("invalid planning session payload", err)
 	}
 
-	// keep only the last 10 messages
-	if len(sessionCtx.ConversationHistory) > 10 {
-		sessionCtx.ConversationHistory = sessionCtx.ConversationHistory[len(sessionCtx.ConversationHistory)-10:]
-	}
-
 	return &sessionCtx, nil
 }
 
@@ -148,6 +146,15 @@ func (p *SessionContext) UnmarshalJSON(data []byte) error {
 }
 
 func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcore.ConversationMessage, registry *services.MediaAssetRegistry) ([]types.Message, pbcore.AIModel, error) {
+	// Sort ASC and Limit
+	sort.SliceStable(history, func(i, j int) bool {
+		return history[i].CreatedAt.AsTime().Before(history[j].CreatedAt.AsTime())
+	})
+
+	if len(history) > MaxConversationMessages {
+		history = history[len(history)-MaxConversationMessages:]
+	}
+
 	messages := make([]types.Message, 0, len(history))
 	var lastAIModel pbcore.AIModel = pbcore.AIModel_AI_MODEL_UNSPECIFIED
 

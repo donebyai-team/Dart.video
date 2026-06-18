@@ -1,8 +1,11 @@
+import { create } from '@bufbuild/protobuf'
 import { useEffect, useRef, useState } from 'react'
 import type { ConversationMessage } from '@coasterai/pb/coasterai/core/v1/chat_pb'
 import { ConversationRole } from '@coasterai/pb/coasterai/core/v1/chat_pb'
+import { type MediaAsset, SelectedMediaAssetSchema } from '@coasterai/pb/coasterai/core/v1/media_asset_pb'
 import type { PatchOverlay } from '@coasterai/renderer'
 import { Paperclip } from 'lucide-react'
+import SelectedAssetsDialog, { type SelectedAssetWithPreview } from '@/components/assets/SelectedAssetsDialog'
 import { cn } from '@/lib/utils'
 import { getFormattedDate } from '@/utils/format'
 import ScenePromptComposer from './ScenePromptComposer'
@@ -14,9 +17,9 @@ interface ChatTabProps {
   onConversationUpdated?: () => void
 }
 
-function MessageBubble({ message }: { message: ConversationMessage }) {
+function MessageBubble({ message, onOpenAttachments }: { message: ConversationMessage; onOpenAttachments: () => void }) {
   const isUser = message.role === ConversationRole.USER
-  const attachmentCount = message.assetIds.length + message.referenceIds.length
+  const attachmentCount = Array.from(new Set(message.assetIds.concat(message.referenceIds))).length
   const [isExpanded, setIsExpanded] = useState(false)
   const [isOverflowing, setIsOverflowing] = useState(false)
   const textRef = useRef<HTMLParagraphElement | null>(null)
@@ -77,10 +80,10 @@ function MessageBubble({ message }: { message: ConversationMessage }) {
           )}
         >
           {attachmentCount > 0 && (
-            <span className='inline-flex items-center gap-1'>
+            <button type='button' onClick={onOpenAttachments} className='inline-flex items-center gap-1 hover:underline'>
               <Paperclip className='h-3 w-3' />
               <span>{attachmentCount} attachment{attachmentCount > 1 ? 's' : ''}</span>
-            </span>
+            </button>
           )}
           <span>{getFormattedDate(message.createdAt)}</span>
         </div>
@@ -90,8 +93,67 @@ function MessageBubble({ message }: { message: ConversationMessage }) {
 }
 
 export default function ChatTab({ messages, isLoading, setOverlay, onConversationUpdated }: ChatTabProps) {
+  const [selectedAssetsDialogOpen, setSelectedAssetsDialogOpen] = useState(false)
+  const [selectedAssets, setSelectedAssets] = useState<SelectedAssetWithPreview[]>([])
+
+  const openMessageAttachments = (message: ConversationMessage) => {
+    const attachmentIDs = Array.from(new Set(message.assetIds.concat(message.referenceIds)))
+
+    setSelectedAssets(
+      attachmentIDs.map(assetID => ({
+        selection: create(SelectedMediaAssetSchema, {
+          assetID
+        })
+      }))
+    )
+    setSelectedAssetsDialogOpen(true)
+  }
+
+  const hydrateSelectedAssets = (assets: MediaAsset[]) => {
+    if (assets.length === 0) return
+
+    setSelectedAssets(current =>
+      current.map(selectedAsset => {
+        const fullAsset = assets.find(asset => asset.id === selectedAsset.selection.assetID)
+        return fullAsset
+          ? { ...selectedAsset, asset: fullAsset }
+          : selectedAsset
+      })
+    )
+  }
+
+  const removeSelectedAsset = (assetID: string) => {
+    setSelectedAssets(current => current.filter(asset => asset.selection.assetID !== assetID))
+  }
+
+  const updateSelectedAssetNote = (assetID: string, note?: string) => {
+    setSelectedAssets(current =>
+      current.map(asset => asset.selection.assetID === assetID
+        ? {
+          ...asset,
+          selection: create(SelectedMediaAssetSchema, {
+            assetID,
+            note
+          })
+        }
+        : asset
+      )
+    )
+  }
+
   return (
     <div className='flex h-[calc(100vh-14rem)] min-h-0 flex-col gap-4'>
+      <SelectedAssetsDialog
+        open={selectedAssetsDialogOpen}
+        selectedAssets={selectedAssets}
+        onOpenChange={setSelectedAssetsDialogOpen}
+        onHydrateAssets={hydrateSelectedAssets}
+        onRemoveAsset={removeSelectedAsset}
+        onUpdateAssetNote={updateSelectedAssetNote}
+        onOpenUpload={() => {}}
+        preview={false}
+      />
+
       <div className='min-h-0 flex-1'>
         {isLoading ? (
           <div className='flex h-full min-h-48 items-center justify-center rounded-2xl border border-dashed border-border/70 bg-muted/10 px-6 text-center text-sm text-muted-foreground'>
@@ -108,6 +170,7 @@ export default function ChatTab({ messages, isLoading, setOverlay, onConversatio
                 <MessageBubble
                   key={`${message.createdAt?.seconds ?? 'message'}-${index}`}
                   message={message}
+                  onOpenAttachments={() => openMessageAttachments(message)}
                 />
               ))}
             </div>

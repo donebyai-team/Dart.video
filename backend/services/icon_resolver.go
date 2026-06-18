@@ -151,8 +151,18 @@ func loadTablerIcons() error {
 	return nil
 }
 
+// github                -> github
+// icon:github           -> github
+// icon:random:github    -> github
+// random:github         -> github
 func ResolveIconFromName(name string) string {
-	name = strings.TrimPrefix(name, "icon:")
+	name = strings.TrimSpace(name)
+
+	if idx := strings.LastIndex(name, ":"); idx >= 0 {
+		name = name[idx+1:]
+	}
+
+	name = strings.TrimSpace(name)
 
 	// Brand icons always get priority.
 	if url, ok := resolveBrandIcon(name); ok {

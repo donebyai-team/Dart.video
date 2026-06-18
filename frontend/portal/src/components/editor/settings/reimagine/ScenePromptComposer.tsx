@@ -161,14 +161,6 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
     }
   }, [])
 
-  const isSlideEmpty = (slide: Slide) => {
-    const updatedContent = slide.content
-    if (!updatedContent) return false
-
-    const existingContent = selectedSlide?.content ? selectedSlide.content : undefined
-    return !existingContent?.edits || Object.keys(existingContent.edits).length === 0
-  }
-
   const applySlideToStore = (slide: Slide) => {
     const updatedContent = slide.content
     if (!updatedContent) return
@@ -211,10 +203,13 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
     handleSelectEntity(slide.id)
   }
 
-  const resetAfterStop = () => {
+  const clearComposeInputs = () => {
     setPrompt('')
     setSelectedReferences([])
     setSelectedAssetsDialogOpen(false)
+  }
+
+  const resetAfterStop = () => {
     setQuestionAssets([])
     setQuestionAssetsDialogOpen(false)
   }
@@ -227,6 +222,11 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
     setActiveQuestion(undefined)
     setPendingQuestion(undefined)
     resetAfterStop()
+  }
+
+  const resetAfterSuccessfulStreamEnd = () => {
+    resetAfterStreamEnd()
+    clearComposeInputs()
   }
 
   const consumeStream = async (
@@ -249,7 +249,7 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
           applySlideToStore(event.slide)
         }
 
-        resetAfterStreamEnd()
+        resetAfterSuccessfulStreamEnd()
         setThinkingChunk(event.thinkingSummary)
         abortControllerRef.current?.abort()
         onConversationUpdated?.()
