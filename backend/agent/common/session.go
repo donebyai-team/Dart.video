@@ -96,6 +96,11 @@ func (a *session) Get(ctx context.Context) (*SessionContext, error) {
 	return &sessionCtx, nil
 }
 
+func (p *SessionContext) AddMessage(message *pbcore.ConversationMessage) {
+	message.CreatedAt = timestamppb.Now()
+	p.ConversationHistory = append(p.ConversationHistory, message)
+}
+
 func (p *SessionContext) MarshalJSON() ([]byte, error) {
 	var reqBytes []byte
 	var err error
@@ -147,7 +152,7 @@ func (p *SessionContext) UnmarshalJSON(data []byte) error {
 
 func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcore.ConversationMessage, registry *services.MediaAssetRegistry) ([]types.Message, pbcore.AIModel, error) {
 	// Sort ASC and Limit
-	sort.SliceStable(history, func(i, j int) bool {
+	sort.Slice(history, func(i, j int) bool {
 		return history[i].CreatedAt.AsTime().Before(history[j].CreatedAt.AsTime())
 	})
 
@@ -155,10 +160,24 @@ func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcor
 		history = history[len(history)-MaxConversationMessages:]
 	}
 
+	var codeSnapshotIndexes []int
+	for i, item := range history {
+		if item.CodeSnapshot != "" {
+			codeSnapshotIndexes = append(codeSnapshotIndexes, i)
+		}
+	}
+
+	keepCode := make(map[int]struct{})
+	start := max(0, len(codeSnapshotIndexes)-2)
+
+	for _, idx := range codeSnapshotIndexes[start:] {
+		keepCode[idx] = struct{}{}
+	}
+
 	messages := make([]types.Message, 0, len(history))
 	var lastAIModel pbcore.AIModel = pbcore.AIModel_AI_MODEL_UNSPECIFIED
 
-	for _, item := range history {
+	for idx, item := range history {
 		// Track latest model
 		if item.AiModel != nil {
 			lastAIModel = *item.AiModel
@@ -183,23 +202,26 @@ func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcor
 		}
 
 		if item.CodeSnapshot != "" {
-			code, err := services.DownloadCode(ctx, item.CodeSnapshot)
-			if err != nil {
-				return nil, lastAIModel, fmt.Errorf("failed to download code snapshot: %w", err)
-			}
-
-			if item.DefaultCodeData != nil && len(item.DefaultCodeData.Fields) > 0 {
-				injectedCode, err := code_builder.InjectDefaultDataGeneratedCode(code, item.DefaultCodeData)
+			_, shouldKeep := keepCode[idx]
+			if !shouldKeep {
+				message.Content = "[Older generated code omitted. A newer version exists later in the conversation.]"
+			} else {
+				code, err := services.DownloadCode(ctx, item.CodeSnapshot)
 				if err != nil {
-					return nil, lastAIModel, fmt.Errorf("failed to inject default code data: %w", err)
+					return nil, lastAIModel, fmt.Errorf("failed to download code snapshot: %w", err)
 				}
 
-				code = injectedCode
+				if item.DefaultCodeData != nil && len(item.DefaultCodeData.Fields) > 0 {
+					injectedCode, err := code_builder.InjectDefaultDataGeneratedCode(code, item.DefaultCodeData)
+					if err != nil {
+						return nil, lastAIModel, fmt.Errorf("failed to inject default code data: %w", err)
+					}
+					code = injectedCode
+				}
+
+				code = code_builder.PreProcess(code)
+				message.Content = code
 			}
-
-			code = code_builder.PreProcess(code)
-
-			message.Content = code
 		}
 
 		// References

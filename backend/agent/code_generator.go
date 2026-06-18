@@ -134,7 +134,7 @@ func (l *codeGenerator) ContinueAgent(
 	}
 
 	// Prompt always goes in the conversation
-	session.ConversationHistory = append(session.ConversationHistory, newMessage)
+	session.AddMessage(newMessage)
 
 	l.state.Publish(common.AgentState{
 		State: common.StateStatusProcessing,
@@ -261,7 +261,7 @@ func (l *codeGenerator) GenerateCode(
 	if slide.Content != nil &&
 		slide.Content.CodeRegistry != nil &&
 		slide.Content.CodeRegistry.MUrl != "" {
-		session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
+		session.AddMessage(&pbcore.ConversationMessage{
 			Role:            pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
 			CodeSnapshot:    slide.Content.CodeRegistry.MUrl,
 			DefaultCodeData: slide.Content.CodeRegistry.Defaults,
@@ -273,7 +273,7 @@ func (l *codeGenerator) GenerateCode(
 			if err != nil {
 				return nil, agenterrors.Internal("failed to marshal edits", err)
 			}
-			session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
+			session.AddMessage(&pbcore.ConversationMessage{
 				Role:    pbcore.ConversationRole_CONVERSATION_ROLE_USER,
 				Type:    pbcore.ConversationMessageType_CONVERSATION_MESSAGE_MANUAL_EDITS,
 				Message: "User made some edits, consider this in follow ups. \n\n" + string(edits),
@@ -296,7 +296,7 @@ func (l *codeGenerator) GenerateCode(
 	}
 
 	// Prompt always goes in the conversation
-	session.ConversationHistory = append(session.ConversationHistory, newMessage)
+	session.AddMessage(newMessage)
 
 	return l.runPlanning(ctx, generatePlanRequest, session)
 }
@@ -375,7 +375,7 @@ func (l *codeGenerator) runPlanning(ctx context.Context, generatePlanRequest typ
 
 		// Save the code in history, we may avoid saving the thinking summary if the animation is generated
 		if codeResponse.ThinkingSummary != nil && *codeResponse.ThinkingSummary != "" {
-			session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
+			session.AddMessage(&pbcore.ConversationMessage{
 				Role:    pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
 				Message: *codeResponse.ThinkingSummary,
 				Type:    pbcore.ConversationMessageType_CONVERSATION_MESSAGE_FINAL_THINKING,

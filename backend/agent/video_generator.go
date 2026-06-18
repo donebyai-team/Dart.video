@@ -157,7 +157,7 @@ func (a *agentV2) Continue(ctx context.Context, options ContinueSessionOptions) 
 		newMessage.AssetIds = append(newMessage.AssetIds, asset.AssetID)
 	}
 
-	session.ConversationHistory = append(session.ConversationHistory, newMessage)
+	session.AddMessage(newMessage)
 
 	if err := a.session.Save(ctx, session); err != nil {
 		return nil, err

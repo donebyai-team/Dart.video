@@ -130,7 +130,7 @@ func (l *sceneGenerator) ContinueAgent(
 		newMessage.AssetIds = append(newMessage.AssetIds, asset.AssetID)
 	}
 
-	session.ConversationHistory = append(session.ConversationHistory, newMessage)
+	session.AddMessage(newMessage)
 
 	l.state.Publish(common.AgentState{
 		State: common.StateStatusProcessing,
@@ -246,7 +246,7 @@ func (l *sceneGenerator) GenerateScene(
 			return nil, agenterrors.InvalidInput("invalid scene patch", err)
 		}
 
-		session.ConversationHistory = append(session.ConversationHistory, &pbcore.ConversationMessage{
+		session.AddMessage(&pbcore.ConversationMessage{
 			Role:    pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
 			Message: string(marshalScene),
 		})
@@ -262,7 +262,7 @@ func (l *sceneGenerator) GenerateScene(
 	}
 
 	// Prompt always goes in the conversation
-	session.ConversationHistory = append(session.ConversationHistory, newMessage)
+	session.AddMessage(newMessage)
 
 	return l.runPlanning(ctx, generatePlanRequest, session)
 }
