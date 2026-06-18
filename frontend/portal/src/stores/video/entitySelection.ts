@@ -6,6 +6,7 @@ import { ActiveToolType } from '@/types/tools'
 import { VideoStoreGet, VideoStoreSet } from './types'
 import { getDefaultSelectedTool } from './defaults'
 import { getSections } from './utils'
+import { shouldChangeActiveTool } from './tools'
 
 export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
 
@@ -16,8 +17,6 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
     if (!videoConfig) return
 
     const sections = getSections(videoConfig)
-
-    set({ selectedEntityId: entityId })
 
     try {
       const parsed = parseEntityId(entityId)
@@ -36,6 +35,14 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
       }
 
       if (!foundSlide || !foundSection) return
+
+      const nextToolType = parsed.type === 'overlay'
+        ? ActiveToolType.INSERT
+        : ActiveToolType.NONE
+
+      if (!shouldChangeActiveTool(get, nextToolType)) return
+
+      set({ selectedEntityId: entityId })
 
       set({
         selectedSlide: foundSlide
@@ -56,7 +63,6 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
         }
 
       } else {
-
         set({
           selectedEffectId: null,
           activeTool: getDefaultSelectedTool()
@@ -110,6 +116,7 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
       const toolType = getEffectTypeFromID(parsed.overlayId!, get)
 
       if (toolType) {
+        if (!shouldChangeActiveTool(get, ActiveToolType.INSERT)) return
         set({
           activeTool: {
             type: ActiveToolType.INSERT,
@@ -128,13 +135,13 @@ export const createEntitySelectionActions = (set: VideoStoreSet, get: VideoStore
     const { selectedSlide } = get()
     if (!selectedSlide) return
 
-    set({ selectedEffectId: effectId })
-
     if (!effectId) return
 
     const toolType = getEffectTypeFromID(effectId, get)
 
     if (toolType) {
+      if (!shouldChangeActiveTool(get, ActiveToolType.INSERT)) return
+      set({ selectedEffectId: effectId })
       set({
         activeTool: {
           type: ActiveToolType.INSERT,

@@ -24,6 +24,7 @@ export interface VideoState {
     selectedSlide: Slide | null;
     selectedEffectId: string | null;
     activeTool: SelectedTool;
+    sceneGenerationRunning: boolean;
     showScreenshots: boolean;
     showVoiceover: boolean;
     showTransitionPicker: string | null;

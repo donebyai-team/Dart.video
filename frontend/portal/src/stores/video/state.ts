@@ -19,6 +19,7 @@ export const initialState: VideoState = {
   selectedEffectId: null,
 
   activeTool: getDefaultSelectedTool(),
+  sceneGenerationRunning: false,
   showScreenshots: false,
   showVoiceover: false,
   showTransitionPicker: null,

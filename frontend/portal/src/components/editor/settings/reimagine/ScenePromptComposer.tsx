@@ -157,9 +157,16 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
 
   useEffect(() => {
     return () => {
+      useVideoStore.setState({ sceneGenerationRunning: false })
       abortControllerRef.current?.abort()
     }
   }, [])
+
+  // Mirror local request state into the shared store so external tool switches
+  // can decide whether leaving Reimagine should be blocked.
+  useEffect(() => {
+    useVideoStore.setState({ sceneGenerationRunning: isSubmitting })
+  }, [isSubmitting])
 
   const applySlideToStore = (slide: Slide) => {
     const updatedContent = slide.content

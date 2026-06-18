@@ -5,12 +5,32 @@ import { createCalloutEffect, createSpotlightEffect, createZoomEffect, getDefaul
 import { getRealSlideStartFrame } from '@/components/editor/frame_calculations'
 import { TRANSITION_DURATION_FRAMES } from '@coasterai/renderer/src/frameUtils'
 
+// Centralized guard for any action that would replace the current active tool.
+// We only interrupt the transition when Reimagine is open and scene generation is still running.
+export const shouldChangeActiveTool = (get: VideoStoreGet, nextToolType?: ActiveToolType) => {
+  const { activeTool, sceneGenerationRunning } = get()
+
+  if (
+    activeTool.type !== ActiveToolType.REIMAGINE
+    || !sceneGenerationRunning
+    || nextToolType === ActiveToolType.REIMAGINE
+  ) {
+    return true
+  }
+
+  // This can be reached from store actions, so guard browser-only confirmation usage.
+  if (typeof window === 'undefined') return false
+
+  return window.confirm('Scene generation is in progress. Are you sure you want to stop?')
+}
+
 export const createToolActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   handleSelectTool(tool: SelectedTool, currentFrame?: number) {
     const { videoConfig, getFPS } = get();
     const { selectedSlide } = get();
 
     if (!selectedSlide || !videoConfig) return;
+    if (!shouldChangeActiveTool(get, tool.type)) return;
 
     const resolution = videoConfig.metadata?.resolution;
     if (!resolution) return;
@@ -65,12 +85,14 @@ export const createToolActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   ,
 
   handleCloseTool() {
+    if (!shouldChangeActiveTool(get, ActiveToolType.NONE)) return
     set({ activeTool: getDefaultSelectedTool() })
   },
 
   handleEditAnimation() {
     const { selectedSlide } = get()
     if (!selectedSlide) return
+    if (!shouldChangeActiveTool(get, ActiveToolType.ADD_OR_EDIT_ANIMATION)) return
 
     set({ activeTool: { type: ActiveToolType.ADD_OR_EDIT_ANIMATION, settings: {} } })
   },
@@ -78,6 +100,7 @@ export const createToolActions = (set: VideoStoreSet, get: VideoStoreGet) => ({
   handleViewAnimationCode() {
     const { selectedSlide } = get()
     if (!selectedSlide) return
+    if (!shouldChangeActiveTool(get, ActiveToolType.ANIMATION_CODE)) return
 
     set({ activeTool: { type: ActiveToolType.ANIMATION_CODE } })
   },
