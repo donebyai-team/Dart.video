@@ -4,9 +4,11 @@ import "github.com/shank318/coasterai/baml_client/types"
 
 const (
 	CATEGORY_TEXT   = "TEXT"
-	CATEGORY_FILLER = "FILLER"
+	CATEGORY_FILLER = "FILLER" // Templates that are tagged with this category are always sent to the video generation pipelines
 )
 
+// Special categories that are not categorized by the LLM.
+// Mostly used for User to filter templates
 var AllCategories = append(
 	[]types.Category{
 		{
@@ -19,6 +21,8 @@ var AllCategories = append(
 	AvailableCategoriesToCategorize...,
 )
 
+// AvailableCategoriesToCategorize are used to categorize scenes based on the current slide content.
+// These are categories which can represent a data
 var AvailableCategoriesToCategorize = []types.Category{
 	{
 		Name:        "HOOK",

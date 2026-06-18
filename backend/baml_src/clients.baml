@@ -10,11 +10,11 @@ client<llm> CustomGeminiProPreview {
   }
 }
 
-client<llm> CustomGeminiFlash {
+client<llm> SmallBoyFastGemini {
   provider google-ai
   retry_policy Exponential
   options {
-    model "gemini-2.5-flash"
+    model "gemini-2.5-flash-lite"
     api_key env.GOOGLE_API_KEY
   }
 }
@@ -59,24 +59,6 @@ client<llm> CustomOpenAI5 {
     reasoning {
       effort "medium"
     }
-  }
-}
-
-client<llm> CustomOpenAI5Nano {
-  provider "openai-responses"
-  retry_policy Exponential
-  options {
-    model "gpt-5.4-mini"
-    api_key env.OPENAI_API_KEY
-  }
-}
-
-client<llm> OpenAIImageAnalysis {
-  provider "openai-responses"
-  retry_policy Exponential
-  options {
-    model "gpt-5.4-mini"
-    api_key env.OPENAI_API_KEY
   }
 }
 

@@ -109,12 +109,13 @@ template_string AnimationPrimitives() #"
 
     - Always render icons using `IconAsset`.
     - If the icon exists in `lucide-react`, import it and pass the icon component to the `Icon` prop.
-    - If it does not exist in `lucide-react`, use a string in the format `icon:<icon-name>` (e.g. `icon:google`).
+    - If it does not exist in `lucide-react`, use a string in the format `icon:<icon-name>` (e.g. `icon:google`, `icon:aws`, `icon:google-drive`).
     - Every `IconAsset` must have a unique `id` prefixed with `iconasset-`.
     - The `Icon` prop accepts:
       * A Lucide icon component
       * A Lucide icon name as a string (e.g. `"Heart"`)
       * A custom icon string in the format `icon:<icon-name>`
+    - Never use URLs, CDN links, jsDelivr links, or namespaced icon formats such as `simple-icons:*`, `mdi:*`, or `logos:*`.
 
     Examples:
     {% raw %}

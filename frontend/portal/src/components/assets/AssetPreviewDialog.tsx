@@ -2,9 +2,6 @@
 
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader } from '@/components/ui/dialog'
-import {
-  createEmptyPatchOverlay,
-} from '../../../../packages/animation/src'
 
 interface AssetPreviewDialogProps {
   title: string
@@ -22,8 +19,6 @@ interface AssetPreviewDialogProps {
   onNoteChange: (value: string) => void
   onSelect: () => void
 }
-
-const previewOverlay = createEmptyPatchOverlay()
 
 const AssetPreviewDialog = ({
   title,

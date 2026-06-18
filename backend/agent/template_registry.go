@@ -162,6 +162,11 @@ func (r *TemplateRegistry) ToSceneElements() []types.SceneElement {
 		component, _ := scenes.FindComponent(templateName)
 		if component != nil {
 			var b strings.Builder
+			//if component.Instructions != "" {
+			//	desc := strings.TrimSpace(component.Instructions)
+			//	b.WriteString("**Instructions**\n")
+			//	b.WriteString(fmt.Sprintf("%s\n", desc))
+			//}
 			scenes.WriteJSONProps(&b, component.LLMSchema, nil)
 			scene.Props = b.String()
 		} else {

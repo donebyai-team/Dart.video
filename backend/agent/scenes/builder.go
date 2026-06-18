@@ -306,6 +306,53 @@ func WriteJSONProps(
 	b.Write(schemaBytes)
 
 	writeConstraints(b, fields, skipLLMFields)
+
+	// Special case for textComponentProps, textwithmedia scene
+	for _, f := range fields {
+		if f.Name != "textComponentProps" {
+			continue
+		}
+
+		// Find the sibling textComponent field which contains the enum values.
+		var textComponentField *types.LLMField
+
+		for i := range fields {
+			if fields[i].Name == "textComponent" {
+				textComponentField = &fields[i]
+				break
+			}
+		}
+
+		if textComponentField == nil {
+			continue
+		}
+
+		for _, componentName := range textComponentField.Enum {
+			component, err := FindComponent(componentName)
+			if err != nil {
+				continue
+			}
+
+			b.WriteString(fmt.Sprintf(
+				"\n\ntextComponentProps schema when textComponent = %q:\n",
+				componentName,
+			))
+
+			componentSchema := buildPropsSchema(
+				component.LLMSchema,
+				skipLLMFields,
+			)
+
+			schemaBytes, _ = json.MarshalIndent(componentSchema, "", "  ")
+			b.Write(schemaBytes)
+
+			writeConstraints(
+				b,
+				component.LLMSchema,
+				skipLLMFields,
+			)
+		}
+	}
 }
 
 func buildPropsSchema(

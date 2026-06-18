@@ -16,7 +16,7 @@ export default function CategoryGrid({
   onGenerateNew,
 }: CategoryGridProps) {
   return (
-    <div className='mb-2 grid grid-cols-4 gap-2'>
+    <div className='mb-2 grid grid-cols-5 gap-1.5'>
       {categories.map(category => {
         const Icon = category.icon
         const isSelected = selectedCategory?.value === category.value
@@ -27,16 +27,24 @@ export default function CategoryGrid({
             type='button'
             onClick={() => onSelectCategory(category)}
             className={cn(
-              'flex min-h-[64px] flex-col items-center justify-center gap-1 rounded-xl border px-1.5 py-1.5 text-center transition-all focus:outline-none focus:ring-2 focus:ring-primary/40',
+              'flex h-14 flex-col items-center justify-center gap-1 rounded-lg border text-center transition-all focus:outline-none focus:ring-2 focus:ring-primary/30',
               isSelected
-                ? 'border-primary bg-primary/6 shadow-[0_0_0_1px_rgba(59,130,246,0.2)]'
-                : 'border-border bg-muted/10 hover:border-primary/50 hover:bg-muted/20'
+                ? 'border-primary bg-primary/5 text-primary'
+                : 'border-border hover:border-primary/40 hover:bg-muted/20'
             )}
           >
-            <span className='inline-flex h-8 w-8 items-center justify-center rounded-lg bg-background/80 text-foreground shadow-sm'>
-              <Icon className='h-4 w-4' />
+            <span
+              className={cn(
+                'inline-flex h-6 w-6 items-center justify-center rounded-md',
+                isSelected ? 'bg-primary/10' : 'bg-muted/40'
+              )}
+            >
+              <Icon className='h-3.5 w-3.5' />
             </span>
-            <div className='text-[11px] font-medium leading-none text-foreground'>{category.label}</div>
+
+            <div className='text-[9px] font-medium leading-none tracking-tight'>
+              {category.label}
+            </div>
           </button>
         )
       })}
@@ -44,12 +52,15 @@ export default function CategoryGrid({
       <button
         type='button'
         onClick={onGenerateNew}
-        className='flex min-h-[64px] flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-border bg-muted/5 px-1.5 py-1.5 text-center transition-all focus:outline-none focus:ring-2 focus:ring-primary/40 hover:border-primary/50 hover:bg-muted/15'
+        className='flex h-14 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border text-center transition-all focus:outline-none focus:ring-2 focus:ring-primary/30 hover:border-primary/40 hover:bg-muted/15'
       >
-        <span className='inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary shadow-sm'>
-          <MessageSquarePlus className='h-4 w-4' />
+        <span className='inline-flex h-6 w-6 items-center justify-center rounded-md bg-primary/10 text-primary'>
+          <MessageSquarePlus className='h-3.5 w-3.5' />
         </span>
-        <div className='text-[11px] font-medium leading-none text-foreground'>Generate New</div>
+
+        <div className='text-[9px] font-medium leading-none tracking-tight'>
+          Generate
+        </div>
       </button>
     </div>
   )

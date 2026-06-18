@@ -4,7 +4,7 @@ class AssetAnalysis {
 }
 
 function AnalyzeImage(image: image) -> AssetAnalysis {
-  client OpenAIImageAnalysis
+  client SmallBoyFastGemini
   prompt #"
     Analyze the provided image in detail.
 

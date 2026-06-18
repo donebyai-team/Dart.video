@@ -1,7 +1,10 @@
+import { create, equals } from '@bufbuild/protobuf'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { AnimationSlideContentSchema } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import type { Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import type { SuggestScenesResponse } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
 import type { GenerateSuggestionsResponse } from '@coasterai/pb/coasterai/portal/v1/templates_pb'
+import { defaultImageSlideContent } from '@/stores/video/defaults'
 import type { SuggestionItem } from './types'
 
 interface SuggestionsCacheEntry {
@@ -71,6 +74,17 @@ const mergeSuggestionItems = (current: SuggestionItem[], incoming: SuggestionIte
   return [...current, ...incoming.filter(item => !seenTemplateIds.has(item.templateId))]
 }
 
+const defaultImageContent = create(AnimationSlideContentSchema, defaultImageSlideContent)
+
+// If its a MEDIA slide, then show product demo template suggestions
+const getEffectiveCategories = (slide: Slide, categories: string[]) => {
+  if (slide.content && equals(AnimationSlideContentSchema, slide.content, defaultImageContent)) {
+    return ['PRODUCT_DEMO']
+  }
+
+  return categories
+}
+
 export const useTemplateSuggestions = ({
   client,
   videoId,
@@ -99,10 +113,11 @@ export const useTemplateSuggestions = ({
     const isPaginating = Boolean(cursor)
     const requestId = requestIdRef.current + 1
     requestIdRef.current = requestId
+    const effectiveCategories = getEffectiveCategories(slide, categories)
     const cacheKey = getCacheKey({
       videoId,
       slide,
-      categories,
+      categories: effectiveCategories,
       pageSize,
       cursor,
     })
@@ -128,7 +143,7 @@ export const useTemplateSuggestions = ({
       const response = await client.generateSuggestions({
         videoId,
         slide,
-        categories,
+        categories: effectiveCategories,
         pageSize,
         nextPage: cursor,
       })

@@ -10,13 +10,14 @@ import {
   TriangleAlert,
   Zap,
   Pen,
+  Type,
 } from 'lucide-react';
 
 export const categories: CategoryItem[] = [
   {
     value: 'TEXT',
     label: 'TEXT',
-    icon: Pen,
+    icon: Type,
   },
   {
     value: 'HOOK',
