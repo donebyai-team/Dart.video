@@ -108,8 +108,9 @@ func (t templateService) UpdateTemplateConfig(ctx context.Context, video *models
 	configChanged := !proto.Equal(existingTemplate.Config, video.Config)
 	nameChanged := video.Name != existingTemplate.Name
 
-	// Apply updates
+	// Apply updates and reset the status for approval
 	if configChanged {
+		existingTemplate.Status = models.TemplateStatusWAITING
 		existingTemplate.Config = video.Config
 	}
 
@@ -145,7 +146,6 @@ func (t templateService) UpdateTemplateConfig(ctx context.Context, video *models
 		}
 	}
 	existingTemplate.Metadata.DurationInFrames = totalDurationInFrames
-
 	return t.db.UpdateTemplate(ctx, existingTemplate)
 }
 
@@ -179,7 +179,6 @@ func (t templateService) UpdateTemplate(ctx context.Context, req *pbportal.Updat
 	if req.UsageDescription != nil && *req.UsageDescription != "" {
 		existingTemplate.Description += "\n\nUsage: " + *req.UsageDescription
 	}
-	existingTemplate.Status = models.TemplateStatusWAITING
 	existingTemplate.Categories = req.Categories
 
 	return t.db.UpdateTemplate(ctx, existingTemplate)
