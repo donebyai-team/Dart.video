@@ -340,9 +340,9 @@ const ReimagineSettings = ({
 
       <div className='flex-1 overflow-y-auto px-3 py-2 pb-36'>
         <Tabs value={activeTab} onValueChange={value => setActiveTab(value as typeof activeTab)} className='h-full'>
-          <TabsList className={`grid w-full ${showTemplatesTab ? 'grid-cols-3' : 'grid-cols-2'}`}>
-            <TabsTrigger value={reimagineTabs.SUGGESTIONS}>Suggestions</TabsTrigger>
+          <TabsList className={`grid w-full ${showTemplatesTab ? 'grid-cols-3' : 'grid-cols-2'}`}>            
             {showTemplatesTab && <TabsTrigger value={reimagineTabs.TEMPLATES}>Templates</TabsTrigger>}
+            <TabsTrigger value={reimagineTabs.SUGGESTIONS}>Suggestions</TabsTrigger>
             <TabsTrigger value={reimagineTabs.GENERATE}>Generate New</TabsTrigger>
           </TabsList>
 
