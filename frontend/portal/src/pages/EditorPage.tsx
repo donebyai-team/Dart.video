@@ -27,6 +27,7 @@ import VideoGenerationProgress from '@/components/editor/VideoGenerationProgress
 import { convertFramesToSeconds } from '@coasterai/renderer/src/frameUtils';
 import { useAnimationEdit } from '@/components/editor/animation/useAnimationEdit';
 import SaveTemplate from '@/components/editor/SaveTemplate';
+import { isTemplateVideoId } from '@/utils/constants'
 
 interface EditorPageProps {
   videoId: string
@@ -39,8 +40,6 @@ type ExportProgressState = {
   percent?: number
   etaSeconds?: number
 }
-
-const TEMPLATE_PREFIX = 'template:'
 
 const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) => {
   const { portalClient } = useClientsContext()
@@ -121,7 +120,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
   }
 
   const isProcessingVideo = videoConfigFromStore?.status === VideoStatus.PROCESSING
-  const isTemplateVideo = decodedVideoId.startsWith(TEMPLATE_PREFIX)
+  const isTemplateVideo = isTemplateVideoId(videoId)
 
   const handleExportVideo = async () => {
     if (!portalClient || !videoConfigFromStore) return

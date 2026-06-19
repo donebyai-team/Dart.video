@@ -51,7 +51,7 @@ export default function SuggestionGrid({
               type='button'
               onClick={() => isReady && onSelect(suggestion)}
               disabled={!isReady}
-              className={`overflow-hidden rounded-[20px] border bg-gradient-to-b from-background to-muted/20 text-left shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/40 ${
+              className={`overflow-hidden rounded-[5px] border bg-gradient-to-b from-background to-muted/20 text-left shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/40 ${
                 selectedTemplateId === suggestion.templateId
                   ? 'border-primary shadow-[0_0_0_1px_rgba(59,130,246,0.25),0_12px_30px_rgba(15,23,42,0.08)]'
                   : 'border-border/70 hover:border-primary/50 hover:shadow-[0_10px_24px_rgba(15,23,42,0.08)]'

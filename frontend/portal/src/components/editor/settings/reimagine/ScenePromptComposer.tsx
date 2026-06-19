@@ -103,7 +103,6 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
   const brandIdentity = useVideoStore(s => s.videoConfig?.metadata?.generatedBranding?.brandIdentity)
   const brandLibraryID = useVideoStore(s => s.videoConfig?.metadata?.generatedBranding?.brandLibraryID)
   const handleSelectEntity = useVideoStore(s => s.handleSelectEntity)
-  const acceptVideoConfigChanges = useVideoStore(s => s.acceptVideoConfigChanges)
   const { user } = useAuth()
   const { portalClient } = useClientsContext()
   const router = useRouter()

@@ -1,7 +1,9 @@
-const LeadsCountPerPage = 10;
-const defaultPageNumber = 1;
+export const TEMPLATE_PREFIX = 'template:'
 
-export { 
-    LeadsCountPerPage,
-    defaultPageNumber
-};
+export const isTemplateVideoId = (videoId?: string | null) => {
+  if (!videoId) {
+    return false
+  }
+
+  return decodeURIComponent(videoId).startsWith(TEMPLATE_PREFIX)
+}

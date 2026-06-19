@@ -16,10 +16,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { categories } from "./settings/reimagine/constants"
+import { TEMPLATE_PREFIX } from "@/utils/constants"
 
 
 type SaveTemplateProps = {
@@ -66,7 +66,7 @@ const SaveTemplate = ({ open, onOpenChange, videoId }: SaveTemplateProps) => {
   const { portalClient } = useClientsContext()
   const templateId = useMemo(() => {
     const decodedVideoId = decodeURIComponent(videoId)
-    return decodedVideoId.replace(/^template:/, "")
+    return decodedVideoId.replace(TEMPLATE_PREFIX, "")
   }, [videoId])
 
   const [form, setForm] = useState<FormState>(EMPTY_FORM)

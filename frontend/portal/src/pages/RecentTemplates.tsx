@@ -20,8 +20,7 @@ import { getConnectError } from "@/utils/error";
 import SlideThumbnail from "@/components/editor/SlideThumbnail";
 import { getFormattedDate, getSlideCount } from "@/utils/format";
 import { AuthLoading } from "@/components/Loader/loader";
-
-const TEMPLATE_PREFIX = "template:";
+import { TEMPLATE_PREFIX } from "@/utils/constants";
 
 const RecentTemplates = () => {
   const router = useRouter();

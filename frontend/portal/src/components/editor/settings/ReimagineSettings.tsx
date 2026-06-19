@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Pause, Play, X } from 'lucide-react'
 import { useClientsContext } from '@coasterai/ui-core/context/ClientContext'
+import { isPlatformAdmin } from '@coasterai/ui-core/helper/role'
+import { useAuth } from '@coasterai/ui-core/hooks/useAuth'
 import { PatchOverlay } from '@coasterai/renderer'
 import { type ConversationMessage } from '@coasterai/pb/coasterai/core/v1/chat_pb'
 import { Section, SlideStatus, type Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
@@ -8,12 +10,15 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useVideoStore } from '@/stores/video'
 import { getConnectError } from '@/utils/error'
+import { isTemplateVideoId } from '@/utils/constants'
 import toast from 'react-hot-toast'
 import BrowseTab from './reimagine/BrowseTab'
 import ChatTab from './reimagine/ChatTab'
-import { categories } from './reimagine/constants'
+import SuggestionGrid from './reimagine/SuggestionGrid'
+import { categories, reimagineTabs, suggestionSources, type ReimagineTab, type SuggestionSource } from './reimagine/constants'
 import { resolveSuggestionSourceSlide } from './reimagine/slideSource'
 import type { CategoryItem, SuggestionItem } from './reimagine/types'
+import { useTemplates } from './reimagine/useTemplates'
 import { useTemplateSuggestions } from './reimagine/useTemplateSuggestions'
 
 interface ReimagineSettingsProps {
@@ -30,6 +35,7 @@ const ReimagineSettings = ({
   isPreviewPlaying = false,
 }: ReimagineSettingsProps) => {
   const { portalClient } = useClientsContext()
+  const { user } = useAuth()
   const updateSlideById = useVideoStore(s => s.updateSlideById)
   const addSlide = useVideoStore(s => s.addSlide)
   const removeSlide = useVideoStore(s => s.removeSlide)
@@ -44,7 +50,7 @@ const ReimagineSettings = ({
   const targetSlideIdRef = useRef(selectedSlide?.id ?? '')
   const insertedSlideIdsRef = useRef<string[]>([])
   const [browseTargetSlideId, setBrowseTargetSlideId] = useState(selectedSlide?.id ?? '')
-  const [browseSelectedSlideSnapshot, setBrowseSelectedSlideSnapshot] = useState<Slide | null>(selectedSlide)
+  const [, setBrowseSelectedSlideSnapshot] = useState<Slide | null>(selectedSlide)
   const [browseSourceSlideSnapshot, setBrowseSourceSlideSnapshot] = useState<Slide | null>(() =>
     resolveSuggestionSourceSlide({
       videoConfig,
@@ -52,21 +58,21 @@ const ReimagineSettings = ({
       getSlideWithBackground,
     })
   )
-  // Slides backed by a Monaco/code session should reopen in chat mode so the
-  // user lands on the existing conversation flow instead of template browsing.
-  const [activeTab, setActiveTab] = useState<'browse' | 'generate'>(() =>
-    selectedSlide?.content?.codeRegistry?.mUrl?.trim() ? 'generate' : 'browse'
+  const [activeTab, setActiveTab] = useState<ReimagineTab>(() =>
+    selectedSlide?.content?.codeRegistry?.mUrl?.trim() ? reimagineTabs.GENERATE : reimagineTabs.BROWSE
   )
   const [selectedDefaultTemplateId, setSelectedDefaultTemplateId] = useState<string | null>(null)
   const [selectedCategoryTemplateId, setSelectedCategoryTemplateId] = useState<string | null>(null)
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<CategoryItem | null>(null)
-  const [activeSuggestionSource, setActiveSuggestionSource] = useState<'default' | 'category'>('default')
+  const [activeSuggestionSource, setActiveSuggestionSource] = useState<SuggestionSource>(suggestionSources.DEFAULT)
   const [chatMessages, setChatMessages] = useState<ConversationMessage[]>([])
   const [isChatLoading, setIsChatLoading] = useState(false)
 
   const emptyCategories = useMemo<string[]>(() => [], [])
 
   const suggestionSourceSlide = browseSourceSlideSnapshot
+  const showTemplatesTab = Boolean(user && isPlatformAdmin(user) && !isTemplateVideoId(videoId))
 
   const selectedCategoryValues = useMemo(
     () => (selectedCategory ? [selectedCategory.value] : []),
@@ -82,7 +88,7 @@ const ReimagineSettings = ({
     videoId,
     slide: suggestionSourceSlide,
     categories: emptyCategories,
-    enabled: activeTab === 'browse',
+    enabled: activeTab === reimagineTabs.SUGGESTIONS,
     onError: handleSuggestionError,
   })
 
@@ -91,9 +97,21 @@ const ReimagineSettings = ({
     videoId,
     slide: suggestionSourceSlide,
     categories: selectedCategoryValues,
-    enabled: activeTab === 'browse' && Boolean(selectedCategory),
+    enabled: activeTab === reimagineTabs.BROWSE && Boolean(selectedCategory),
     onError: handleSuggestionError,
   })
+
+  const templatesState = useTemplates({
+    client: portalClient,
+    enabled: showTemplatesTab && activeTab === reimagineTabs.TEMPLATES,
+    onError: handleSuggestionError,
+  })
+
+  useEffect(() => {
+    if (!showTemplatesTab && activeTab === reimagineTabs.TEMPLATES) {
+      setActiveTab(reimagineTabs.BROWSE)
+    }
+  }, [activeTab, showTemplatesTab])
 
   useEffect(() => {
     if ((selectedSlide?.id ?? '') === browseTargetSlideId) {
@@ -118,6 +136,7 @@ const ReimagineSettings = ({
   useEffect(() => {
     setSelectedDefaultTemplateId(null)
     setSelectedCategoryTemplateId(null)
+    setSelectedTemplateId(null)
   }, [browseTargetSlideId, suggestionSourceSlide?.id])
 
   const targetSectionId = useMemo(() => {
@@ -133,7 +152,7 @@ const ReimagineSettings = ({
     return null
   }, [videoConfig])
 
-  const applySuggestion = useCallback((suggestion: Section, templateId: string, source: 'default' | 'category') => {
+  const applySuggestion = useCallback((suggestion: Section, templateId: string, source: SuggestionSource) => {
     const slides = suggestion.slides
     const firstSlide = slides[0]
     const targetSlideId = targetSlideIdRef.current
@@ -166,6 +185,7 @@ const ReimagineSettings = ({
         codeRegistry: updatedContent.codeRegistry,
         edits: pathOverlay,
       },
+      tid: firstSlide.tid,
       backgroundStyle: firstSlide.backgroundStyle,
     } as Slide)
 
@@ -182,6 +202,7 @@ const ReimagineSettings = ({
         durationInFrames: slide.durationInFrames,
         settledFrame: slide.settledFrame,
         content: slide.content,
+        tid: slide.tid,
         backgroundStyle: slide.backgroundStyle,
       } as Slide)
     }
@@ -190,8 +211,13 @@ const ReimagineSettings = ({
     setSelectedSlideById(targetSlideId)
     setActiveSuggestionSource(source)
 
-    if (source === 'category') {
+    if (source === suggestionSources.CATEGORY) {
       setSelectedCategoryTemplateId(templateId)
+      return
+    }
+
+    if (source === suggestionSources.TEMPLATE) {
+      setSelectedTemplateId(templateId)
       return
     }
 
@@ -200,18 +226,23 @@ const ReimagineSettings = ({
 
   const handleSelectCategory = useCallback((category: CategoryItem) => {
     setSelectedCategory(category)
-    setActiveSuggestionSource('category')
+    setActiveSuggestionSource(suggestionSources.CATEGORY)
     setSelectedCategoryTemplateId(null)
   }, [])
 
   const handleSelectDefaultSuggestion = useCallback((suggestion: SuggestionItem) => {
     if (!suggestion.suggestion) return
-    applySuggestion(suggestion.suggestion, suggestion.templateId, 'default')
+    applySuggestion(suggestion.suggestion, suggestion.templateId, suggestionSources.DEFAULT)
   }, [applySuggestion])
 
   const handleSelectCategorySuggestion = useCallback((suggestion: SuggestionItem) => {
     if (!suggestion.suggestion) return
-    applySuggestion(suggestion.suggestion, suggestion.templateId, 'category')
+    applySuggestion(suggestion.suggestion, suggestion.templateId, suggestionSources.CATEGORY)
+  }, [applySuggestion])
+
+  const handleSelectTemplate = useCallback((suggestion: SuggestionItem) => {
+    if (!suggestion.suggestion) return
+    applySuggestion(suggestion.suggestion, suggestion.templateId, suggestionSources.TEMPLATE)
   }, [applySuggestion])
 
   const loadConversationHistory = useCallback(async () => {
@@ -239,19 +270,21 @@ const ReimagineSettings = ({
   }, [portalClient, videoId])
 
   useEffect(() => {
-    if (activeTab !== 'generate') return
+    if (activeTab !== reimagineTabs.GENERATE) return
     void loadConversationHistory()
   }, [activeTab, loadConversationHistory])
 
   const selectedSuggestionItem =
-    activeSuggestionSource === 'category' && selectedCategory
+    activeSuggestionSource === suggestionSources.CATEGORY && selectedCategory
       ? categorySuggestionState.suggestions.find(suggestion => suggestion.templateId === selectedCategoryTemplateId) ?? null
+      : activeSuggestionSource === suggestionSources.TEMPLATE
+        ? templatesState.suggestions.find(suggestion => suggestion.templateId === selectedTemplateId) ?? null
       : defaultSuggestionState.suggestions.find(suggestion => suggestion.templateId === selectedDefaultTemplateId) ?? null
 
   const selectedSuggestion = selectedSuggestionItem?.suggestion ?? null
 
   const canPreviewCurrentTab = isPreviewPlaying
-    || (activeTab === 'generate'
+    || (activeTab === reimagineTabs.GENERATE
       ? Boolean(targetSlideIdRef.current)
       : Boolean(selectedSuggestion))
 
@@ -261,7 +294,7 @@ const ReimagineSettings = ({
       return
     }
 
-    if (activeTab === 'generate') {
+    if (activeTab === reimagineTabs.GENERATE) {
       const targetSlideId = targetSlideIdRef.current
       if (!targetSlideId) return
 
@@ -272,10 +305,14 @@ const ReimagineSettings = ({
 
     if (!selectedSuggestion) return
 
-    const selectedTemplateId =
-      activeSuggestionSource === 'category' ? selectedCategoryTemplateId : selectedDefaultTemplateId
+    const chosenTemplateId =
+      activeSuggestionSource === suggestionSources.CATEGORY
+        ? selectedCategoryTemplateId
+        : activeSuggestionSource === suggestionSources.TEMPLATE
+          ? selectedTemplateId
+          : selectedDefaultTemplateId
 
-    if (!selectedTemplateId) return
+    if (!chosenTemplateId) return
 
     const slides = selectedSuggestion.slides
     const firstSlideId = browseTargetSlideId || targetSlideIdRef.current
@@ -290,7 +327,7 @@ const ReimagineSettings = ({
     setTimeout(() => {
       onPreviewTemplate?.(firstSlideId, lastSlideId)
     }, 0)
-  }, [activeSuggestionSource, browseTargetSlideId, insertedSlideIdsRef, isPreviewPlaying, onPreviewTemplate, selectedCategoryTemplateId, selectedDefaultTemplateId, selectedSuggestion, setSelectedSlideById])
+  }, [activeSuggestionSource, activeTab, browseTargetSlideId, insertedSlideIdsRef, isPreviewPlaying, onPreviewTemplate, selectedCategoryTemplateId, selectedDefaultTemplateId, selectedSuggestion, selectedTemplateId, setSelectedSlideById])
 
   return (
     <div className='h-full flex flex-col bg-card'>
@@ -302,14 +339,15 @@ const ReimagineSettings = ({
       </div>
 
       <div className='flex-1 overflow-y-auto px-3 py-2 pb-36'>
-        <Tabs value={activeTab} onValueChange={value => setActiveTab(value as 'browse' | 'generate')} className='h-full'>
-          <TabsList className='grid w-full grid-cols-2'>
-            <TabsTrigger value='browse'>Browse</TabsTrigger>
-            <TabsTrigger value='generate'>Generate New</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={value => setActiveTab(value as typeof activeTab)} className='h-full'>
+          <TabsList className={`grid w-full ${showTemplatesTab ? 'grid-cols-3' : 'grid-cols-2'}`}>
+            <TabsTrigger value={reimagineTabs.SUGGESTIONS}>Suggestions</TabsTrigger>
+            {showTemplatesTab && <TabsTrigger value={reimagineTabs.TEMPLATES}>Templates</TabsTrigger>}
+            <TabsTrigger value={reimagineTabs.GENERATE}>Generate New</TabsTrigger>
           </TabsList>
 
-          <TabsContent value='browse' className='mt-4'>
-            {activeTab === 'browse' && (
+          <TabsContent value={reimagineTabs.SUGGESTIONS} className='mt-4'>
+            {activeTab === reimagineTabs.SUGGESTIONS && (
               <BrowseTab
                 aiSuggestions={defaultSuggestionState.suggestions}
                 aiSelectedTemplateId={selectedDefaultTemplateId}
@@ -321,7 +359,7 @@ const ReimagineSettings = ({
                 categories={categories}
                 selectedCategory={selectedCategory}
                 onSelectCategory={handleSelectCategory}
-                onGenerateNew={() => setActiveTab('generate')}
+                onGenerateNew={() => setActiveTab(reimagineTabs.GENERATE)}
                 categorySuggestions={categorySuggestionState.suggestions}
                 categorySelectedTemplateId={selectedCategoryTemplateId}
                 isCategoryLoading={categorySuggestionState.isLoading}
@@ -335,7 +373,21 @@ const ReimagineSettings = ({
             )}
           </TabsContent>
 
-          <TabsContent value='generate' className='mt-4'>
+          <TabsContent value={reimagineTabs.TEMPLATES} className='mt-4'>
+            {showTemplatesTab && activeTab === reimagineTabs.TEMPLATES && (
+              <SuggestionGrid
+                suggestions={templatesState.suggestions}
+                selectedTemplateId={selectedTemplateId}
+                onSelect={handleSelectTemplate}
+                resolution={resolution}
+                fps={fps}
+                isLoading={templatesState.isLoading}
+                emptyMessage='No templates available.'
+              />
+            )}
+          </TabsContent>
+
+          <TabsContent value={reimagineTabs.GENERATE} className='mt-4'>
             <ChatTab
               messages={chatMessages}
               isLoading={isChatLoading}

@@ -42,7 +42,7 @@ export default function CategoryGrid({
               <Icon className='h-3.5 w-3.5' />
             </span>
 
-            <div className='text-[9px] font-medium leading-none tracking-tight'>
+            <div className='text-[10px] font-medium leading-none tracking-tight'>
               {category.label}
             </div>
           </button>
