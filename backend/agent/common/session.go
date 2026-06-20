@@ -247,9 +247,9 @@ func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcor
 			}
 
 			// Prevent mixing images + videos
-			if imageCount > 0 && videoCount > 0 {
-				return nil, lastAIModel, fmt.Errorf("cannot add both image and video assets")
-			}
+			//if imageCount > 0 && videoCount > 0 {
+			//	return nil, lastAIModel, fmt.Errorf("cannot add both image and video assets")
+			//}
 
 			// Allow only a single video
 			if videoCount > 1 {
