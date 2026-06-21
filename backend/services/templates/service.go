@@ -110,7 +110,7 @@ func (t templateService) UpdateTemplateConfig(ctx context.Context, video *models
 
 	// Apply updates and reset the status for approval
 	if configChanged {
-		existingTemplate.Status = models.TemplateStatusWAITING
+		//existingTemplate.Status = models.TemplateStatusWAITING
 		existingTemplate.Config = video.Config
 	}
 
@@ -180,7 +180,7 @@ func (t templateService) UpdateTemplate(ctx context.Context, req *pbportal.Updat
 		existingTemplate.Description += "\n\nUsage: " + *req.UsageDescription
 	}
 	existingTemplate.Categories = req.Categories
-
+	existingTemplate.Status = models.TemplateStatusAVAILABLE
 	return t.db.UpdateTemplate(ctx, existingTemplate)
 }
 

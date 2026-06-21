@@ -59,7 +59,7 @@ const ReimagineSettings = ({
     })
   )
   const [activeTab, setActiveTab] = useState<ReimagineTab>(() =>
-    selectedSlide?.content?.codeRegistry?.mUrl?.trim() ? reimagineTabs.GENERATE : reimagineTabs.BROWSE
+    selectedSlide?.content?.codeRegistry?.mUrl?.trim() ? reimagineTabs.GENERATE : reimagineTabs.SUGGESTIONS
   )
   const [selectedDefaultTemplateId, setSelectedDefaultTemplateId] = useState<string | null>(null)
   const [selectedCategoryTemplateId, setSelectedCategoryTemplateId] = useState<string | null>(null)
@@ -109,7 +109,7 @@ const ReimagineSettings = ({
 
   useEffect(() => {
     if (!showTemplatesTab && activeTab === reimagineTabs.TEMPLATES) {
-      setActiveTab(reimagineTabs.BROWSE)
+      setActiveTab(reimagineTabs.SUGGESTIONS)
     }
   }, [activeTab, showTemplatesTab])
 

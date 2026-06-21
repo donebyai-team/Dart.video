@@ -184,6 +184,10 @@ template_string BrandUsageInstructions(resume: VideoBranding) #"
     * Do not assume `theme.colors.foreground` will be readable on a hardcoded surface.
     * If a hardcoded surface could conflict with theme colors (e.g. a white card and a light foreground color), use hardcoded foreground/icon colors that remain clearly visible.
     * Always design surfaces and their contents together: if the background is hardcoded, choose content colors that guarantee readability regardless of the active theme.
+
+    ### Placeholders
+    * Always use placehold for placeholders https://placehold.co/widthxheight.png
+    * DO not use external urls or unsplash
     {% endif %}
     ```
 "#
