@@ -62,7 +62,9 @@ template_string ConstantsRules() #"
     - There must be exactly one module-level constant: DEFAULT_DATA.
     - ALL other constants MUST be defined INSIDE the component body, AFTER hooks.
     - **Never hardcode user-facing text or icons in JSX.**
-    This allows users to easily customize the animation.
+    - ** Avoid putting any element `id` in the `DEFAULT_DATA` and instead put it inline or use array index in JSX.
+    -  Treat `DEFAULT_DATA` like component props: it should contain only customizable user-facing data, not internal logic or implementation details.
+    This allows users to easily customize the animation by changing just text, icon or images. Nothing else
 "#
 
 template_string AnimationPrimitives() #"
