@@ -141,7 +141,7 @@ func (s SceneSuggester) RenderSuggestion(ctx context.Context,
 func (s SceneSuggester) GenerateSuggestions(ctx context.Context, req *pbportal.GenerateSuggestionsInput) (*pbportal.GenerateSuggestionsResponse, error) {
 	ctx = context.WithValue(ctx, llm.VideoIDKey, req.VideoId)
 	ctx = context.WithValue(ctx, llm.SceneIDKey, req.Slide.GetId())
-	
+
 	var categories []string
 	if len(req.Categories) > 0 {
 		categories = req.Categories
@@ -204,8 +204,8 @@ func (s SceneSuggester) createMediaAssetRegistry(brandIdentity *pbcore.BrandIden
 
 	if brandIdentity != nil {
 		registryBuilder.
-			WithBrandIdentity(brandIdentity).
-			WithBrandAssets() // only while editing
+			WithBrandIdentity(brandIdentity)
+		//WithBrandAssets() // not needed as templates used logo/logoIcon via theme
 	}
 
 	return registryBuilder.Build(), nil

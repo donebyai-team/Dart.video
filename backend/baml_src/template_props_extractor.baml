@@ -29,9 +29,23 @@ function ExtractTemplateConfig(input: ExtractTemplateConfigRequest) -> ExtractTe
 
     Populate values using:
     1. Scene Content
-    2. Brand Details
+    2. Brand Details (Only when needed, eg the prop field mention brandName, tagline etc)
+    3. If a value is a placeholder url, don't replace it. Keep it as it is.
 
-    If a value cannot be determined, generate a reasonable value that fits the context.
+    Rules:
+    - The Props Schema may contain sample values. Treat them as examples that indicate the expected structure, format, and content style.
+    - Preserve the schema structure exactly.
+    - Preserve array lengths unless the schema explicitly allows otherwise.
+    - Match the format of sample values when generating replacements.
+    - Preserve content shape whenever possible (e.g. word count, text length etc).
+
+    Examples:
+    - If a sample array contains 10 items, generate 10 items.
+    - If each sample text contains 1–2 words, generate replacement text with a similar length.
+    - If an array contains an array of words, generate replacement words using Scene Contentb
+    - If a field contains a short headline, generate a short headline rather than a paragraph.
+
+    If a value cannot be determined from the scene content or brand details, generate a reasonable value that fits the context.
 
     ## Assets
 
