@@ -57,14 +57,32 @@ template_string EnterAnimation(animation: AnimationCategories) #"
 template_string ConstantsRules() #"
     ## CONSTANTS RULES (CRITICAL)
 
-    - All user-facing elements (text, labels, icons, etc.) must be stored in a single DEFAULT_DATA constant.
-    - DEFAULT_DATA must be declared at module scope, before the component.
-    - There must be exactly one module-level constant: DEFAULT_DATA.
-    - ALL other constants MUST be defined INSIDE the component body, AFTER hooks.
-    - **Never hardcode user-facing text or icons in JSX.**
-    - ** Avoid putting any element `id` in the `DEFAULT_DATA` and instead put it inline or use array index in JSX.
-    -  Treat `DEFAULT_DATA` like component props: it should contain only customizable user-facing data, not internal logic or implementation details.
-    This allows users to easily customize the animation by changing just text, icon or images. Nothing else
+    - Define exactly one module-level constant: `DEFAULT_DATA`.
+    - `DEFAULT_DATA` must be declared before the component.
+    - Store all customizable user-facing content in `DEFAULT_DATA`, including:
+      - Text
+      - Labels
+      - Placeholder Images
+      - Content-driven icons
+
+    - A content-driven icon is an icon whose meaning comes from the data being displayed and is expected to change when the content changes.
+      - Example: a list of categories where each category has its own icon.
+      - Example: feature cards with a matching icon for each feature.
+      - These icons MUST be stored in `DEFAULT_DATA`.
+      - Follow the icon format defined in the `### Icons` section.
+
+    - UI or functional icons are NOT user-facing content and should NOT be stored in `DEFAULT_DATA`.
+      - Example: submit button icon.
+      - Example: search icon inside an input.
+      - Example: close, menu, play, pause, next, previous, chevron, arrow, or navigation icons.
+      - These icons should be defined inline in JSX or as internal component logic.
+
+    - Never hardcode user-facing text or content-driven icons in JSX.
+    - Do NOT store element IDs, React keys, or other implementation details in `DEFAULT_DATA`.
+    - Any constant other than `DEFAULT_DATA` must be declared inside the component body, after hooks.
+    - Treat `DEFAULT_DATA` like component props: it should contain only customizable content, not internal logic, styling, animation settings, or implementation details.
+
+    This allows users to customize the animation by modifying only the content (text, images, and content-driven icons) without touching the implementation.
 "#
 
 template_string AnimationPrimitives() #"
