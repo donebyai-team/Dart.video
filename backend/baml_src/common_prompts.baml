@@ -62,7 +62,7 @@ template_string ConstantsRules() #"
     - Store all customizable user-facing content in `DEFAULT_DATA`, including:
       - Text
       - Labels
-      - Placeholder Images
+      - Placeholder Images (Except logo or logoIcon)
       - Content-driven icons
 
     - A content-driven icon is an icon whose meaning comes from the data being displayed and is expected to change when the content changes.
@@ -178,11 +178,11 @@ template_string BrandUsageInstructions(resume: VideoBranding) #"
     theme.colors.secondary  // Secondary accent
 
     // Assets
-    theme.logo.url
+    theme.logo.url // use it to show bigger logo
     theme.logo.width
     theme.logo.height
 
-    theme.logoIcon.url
+    theme.logoIcon.url // use it show the icon of the brand
     theme.logoIcon.width
     theme.logoIcon.height
     ````
