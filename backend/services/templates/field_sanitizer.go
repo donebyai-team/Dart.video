@@ -39,7 +39,8 @@ var (
 		"highlightstyle":    {},
 	}
 
-	hexColorRegex = regexp.MustCompile(`(?i)^#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$`)
+	hexColorRegex          = regexp.MustCompile(`(?i)^#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$`)
+	maxSanitizedTextLength = 60
 )
 
 // Defaults are used as schema of the template
@@ -260,7 +261,7 @@ func filterValue(v any) any {
 			return nil
 		}
 
-		return x
+		return sanitizeTextValue(x)
 
 	default:
 		// drops numbers, bools, nulls, etc.
@@ -284,11 +285,21 @@ func shouldDropString(v string) bool {
 		return true
 	}
 
-	if isURL(v) {
+	// redact any urls except placeholders so LLM can replace it
+	if isURL(v) && !strings.Contains(strings.ToLower(v), "placehold") {
 		return true
 	}
 
 	return false
+}
+
+func sanitizeTextValue(v string) string {
+	content := strings.Join(strings.Fields(v), " ")
+	if len(content) > maxSanitizedTextLength {
+		return content[:maxSanitizedTextLength-3] + "..."
+	}
+
+	return content
 }
 
 func isURL(s string) bool {
