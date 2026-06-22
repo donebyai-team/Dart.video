@@ -14,6 +14,7 @@ function ExtractTemplateConfig(input: ExtractTemplateConfigRequest) -> ExtractTe
     You are an expert at populating component props from the provided Scene Content and Brand Details.
 
     Your task is to generate prop values for each component using the provided component schemas.
+    component are templates of animations with their props.
 
     ## Props Rules
 
