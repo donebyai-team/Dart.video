@@ -217,7 +217,7 @@ func (p *Portal) newAnimationGeneratorAgent(logger *zap.Logger, sessionID, slide
 	), statePublisher
 }
 
-func (p *Portal) GetConversationHistory(ctx context.Context, c *connect.Request[pbportal.GetConversationHistoryRequest]) (*connect.Response[pbportal.GetConversationHistoryResponse], error) {
+func (p *Portal) GetConversationHistory(ctx context.Context, c *connect.Request[pbportal.ConversationHistoryRequest]) (*connect.Response[pbportal.GetConversationHistoryResponse], error) {
 	actor, err := p.gethAuthContext(ctx)
 	if err != nil {
 		return nil, err
@@ -250,26 +250,9 @@ func (p *Portal) GetConversationHistory(ctx context.Context, c *connect.Request[
 		return connect.NewResponse(&pbportal.GetConversationHistoryResponse{Messages: make([]*pbcore.ConversationMessage, 0)}), nil
 	}
 
-	conversation := make([]*pbcore.ConversationMessage, 0, len(sessionContext.ConversationHistory))
-
-	// Include USER/TOOL messages that are not MANUAL_EDITS, and if the message is THINKING then only include it for admins.
-	for _, message := range sessionContext.ConversationHistory {
-		isUserOrTool :=
-			message.Role == pbcore.ConversationRole_CONVERSATION_ROLE_USER ||
-				message.Role == pbcore.ConversationRole_CONVERSATION_ROLE_TOOL
-
-		isAdminThinking :=
-			actor.IsPlatformAdmin() &&
-				message.Role == pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT &&
-				(message.Type == pbcore.ConversationMessageType_CONVERSATION_MESSAGE_THINKING ||
-					message.Type == pbcore.ConversationMessageType_CONVERSATION_MESSAGE_FINAL_THINKING)
-
-		if ((isUserOrTool &&
-			message.Type != pbcore.ConversationMessageType_CONVERSATION_MESSAGE_MANUAL_EDITS) ||
-			isAdminThinking) || (c.Msg.All != nil && actor.IsPlatformAdmin()) {
-
-			conversation = append(conversation, message)
-		}
+	conversation, err := sessionContext.FilterAndGetConversation(actor.IsPlatformAdmin(), c.Msg.All != nil, strings.TrimSpace(c.Msg.GetCheckpoint()))
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 
 	return connect.NewResponse(&pbportal.GetConversationHistoryResponse{Messages: conversation}), nil

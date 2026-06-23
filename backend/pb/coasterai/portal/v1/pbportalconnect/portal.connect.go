@@ -217,7 +217,7 @@ type PortalServiceClient interface {
 	UpdateBrandIdentity(context.Context, *connect.Request[v1.UpdateBrandIdentityRequest]) (*connect.Response[emptypb.Empty], error)
 	// Edit animations
 	GenerateOrEditScene(context.Context, *connect.Request[v1.GenerateOrEditSceneRequest]) (*connect.ServerStreamForClient[v1.GenerateOrEditSceneResponse], error)
-	GetConversationHistory(context.Context, *connect.Request[v1.GetConversationHistoryRequest]) (*connect.Response[v1.GetConversationHistoryResponse], error)
+	GetConversationHistory(context.Context, *connect.Request[v1.ConversationHistoryRequest]) (*connect.Response[v1.GetConversationHistoryResponse], error)
 	// Assets
 	GetMediaAssets(context.Context, *connect.Request[v1.GetMediaAssetsRequest]) (*connect.Response[v1.GetMediaAssetsResponse], error)
 	GetMediaAssetsByID(context.Context, *connect.Request[v1.GetMediaAssetsByIDs]) (*connect.Response[v1.GetMediaAssetsResponse], error)
@@ -399,7 +399,7 @@ func NewPortalServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(portalServiceGenerateOrEditSceneMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
-		getConversationHistory: connect.NewClient[v1.GetConversationHistoryRequest, v1.GetConversationHistoryResponse](
+		getConversationHistory: connect.NewClient[v1.ConversationHistoryRequest, v1.GetConversationHistoryResponse](
 			httpClient,
 			baseURL+PortalServiceGetConversationHistoryProcedure,
 			connect.WithSchema(portalServiceGetConversationHistoryMethodDescriptor),
@@ -496,7 +496,7 @@ type portalServiceClient struct {
 	getBrandIdentities     *connect.Client[emptypb.Empty, v1.BrandIdentityResponse]
 	updateBrandIdentity    *connect.Client[v1.UpdateBrandIdentityRequest, emptypb.Empty]
 	generateOrEditScene    *connect.Client[v1.GenerateOrEditSceneRequest, v1.GenerateOrEditSceneResponse]
-	getConversationHistory *connect.Client[v1.GetConversationHistoryRequest, v1.GetConversationHistoryResponse]
+	getConversationHistory *connect.Client[v1.ConversationHistoryRequest, v1.GetConversationHistoryResponse]
 	getMediaAssets         *connect.Client[v1.GetMediaAssetsRequest, v1.GetMediaAssetsResponse]
 	getMediaAssetsByID     *connect.Client[v1.GetMediaAssetsByIDs, v1.GetMediaAssetsResponse]
 	generateMusic          *connect.Client[v1.VideoRequestWithID, v1.GetMediaAssetsResponse]
@@ -640,7 +640,7 @@ func (c *portalServiceClient) GenerateOrEditScene(ctx context.Context, req *conn
 }
 
 // GetConversationHistory calls coasterai.portal.v1.PortalService.GetConversationHistory.
-func (c *portalServiceClient) GetConversationHistory(ctx context.Context, req *connect.Request[v1.GetConversationHistoryRequest]) (*connect.Response[v1.GetConversationHistoryResponse], error) {
+func (c *portalServiceClient) GetConversationHistory(ctx context.Context, req *connect.Request[v1.ConversationHistoryRequest]) (*connect.Response[v1.GetConversationHistoryResponse], error) {
 	return c.getConversationHistory.CallUnary(ctx, req)
 }
 
@@ -726,7 +726,7 @@ type PortalServiceHandler interface {
 	UpdateBrandIdentity(context.Context, *connect.Request[v1.UpdateBrandIdentityRequest]) (*connect.Response[emptypb.Empty], error)
 	// Edit animations
 	GenerateOrEditScene(context.Context, *connect.Request[v1.GenerateOrEditSceneRequest], *connect.ServerStream[v1.GenerateOrEditSceneResponse]) error
-	GetConversationHistory(context.Context, *connect.Request[v1.GetConversationHistoryRequest]) (*connect.Response[v1.GetConversationHistoryResponse], error)
+	GetConversationHistory(context.Context, *connect.Request[v1.ConversationHistoryRequest]) (*connect.Response[v1.GetConversationHistoryResponse], error)
 	// Assets
 	GetMediaAssets(context.Context, *connect.Request[v1.GetMediaAssetsRequest]) (*connect.Response[v1.GetMediaAssetsResponse], error)
 	GetMediaAssetsByID(context.Context, *connect.Request[v1.GetMediaAssetsByIDs]) (*connect.Response[v1.GetMediaAssetsResponse], error)
@@ -1159,7 +1159,7 @@ func (UnimplementedPortalServiceHandler) GenerateOrEditScene(context.Context, *c
 	return connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.GenerateOrEditScene is not implemented"))
 }
 
-func (UnimplementedPortalServiceHandler) GetConversationHistory(context.Context, *connect.Request[v1.GetConversationHistoryRequest]) (*connect.Response[v1.GetConversationHistoryResponse], error) {
+func (UnimplementedPortalServiceHandler) GetConversationHistory(context.Context, *connect.Request[v1.ConversationHistoryRequest]) (*connect.Response[v1.GetConversationHistoryResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.GetConversationHistory is not implemented"))
 }
 

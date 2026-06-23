@@ -97,7 +97,92 @@ func (a *session) Get(ctx context.Context) (*SessionContext, error) {
 	return &sessionCtx, nil
 }
 
+func (p *SessionContext) FilterAndGetConversation(isPlatformAdmin bool, includeAll bool, checkpoint string) ([]*pbcore.ConversationMessage, error) {
+	history := make([]*pbcore.ConversationMessage, len(p.ConversationHistory))
+	copy(history, p.ConversationHistory)
+
+	sort.Slice(history, func(i, j int) bool {
+		leftCreatedAt := history[i].GetCreatedAt()
+		rightCreatedAt := history[j].GetCreatedAt()
+
+		if leftCreatedAt == nil && rightCreatedAt == nil {
+			return history[i].GetId() < history[j].GetId()
+		}
+
+		if leftCreatedAt == nil {
+			return true
+		}
+
+		if rightCreatedAt == nil {
+			return false
+		}
+
+		leftTime := leftCreatedAt.AsTime()
+		rightTime := rightCreatedAt.AsTime()
+		if leftTime.Equal(rightTime) {
+			return history[i].GetId() < history[j].GetId()
+		}
+
+		return leftTime.Before(rightTime)
+	})
+
+	if checkpoint != "" {
+		for i, message := range history {
+			if message.GetId() == checkpoint {
+				if message.Type != pbcore.ConversationMessageType_CONVERSATION_MESSAGE_TYPE_CHECKPOINT ||
+					message.CodeSnapshot == "" {
+					return nil, fmt.Errorf("invalid checkpoint")
+				}
+				history = history[:i+1]
+				break
+			}
+		}
+	}
+
+	conversation := make([]*pbcore.ConversationMessage, 0, len(history))
+
+	// Include USER/TOOL messages that are not MANUAL_EDITS, and if the message is THINKING then only include it for admins.
+	for _, message := range history {
+		isUserOrTool :=
+			message.Role == pbcore.ConversationRole_CONVERSATION_ROLE_USER ||
+				message.Role == pbcore.ConversationRole_CONVERSATION_ROLE_TOOL
+
+		// Code changes
+		if message.Type == pbcore.ConversationMessageType_CONVERSATION_MESSAGE_TYPE_CHECKPOINT &&
+			message.Role == pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT {
+			isUserOrTool = true
+		}
+
+		isAdminThinking :=
+			isPlatformAdmin &&
+				message.Role == pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT &&
+				(message.Type == pbcore.ConversationMessageType_CONVERSATION_MESSAGE_THINKING ||
+					message.Type == pbcore.ConversationMessageType_CONVERSATION_MESSAGE_FINAL_THINKING)
+
+		if ((isUserOrTool &&
+			message.Type != pbcore.ConversationMessageType_CONVERSATION_MESSAGE_MANUAL_EDITS) ||
+			isAdminThinking) || (includeAll && isPlatformAdmin) {
+			conversation = append(conversation, message)
+		}
+	}
+
+	return conversation, nil
+}
+
 func (p *SessionContext) AddMessage(message *pbcore.ConversationMessage) {
+	message.CreatedAt = timestamppb.Now()
+	message.Id = uuid.New().String()
+	p.ConversationHistory = append(p.ConversationHistory, message)
+}
+
+func (p *SessionContext) AddCodeCheckpoint(codeRegistry *pbcore.CodeRegistry, frames int32) {
+	message := &pbcore.ConversationMessage{
+		Role:             pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
+		CodeSnapshot:     codeRegistry.MUrl,
+		DefaultCodeData:  codeRegistry.Defaults,
+		DurationInFrames: utils.Ptr(frames),
+		Type:             pbcore.ConversationMessageType_CONVERSATION_MESSAGE_TYPE_CHECKPOINT,
+	}
 	message.CreatedAt = timestamppb.Now()
 	message.Id = uuid.New().String()
 	p.ConversationHistory = append(p.ConversationHistory, message)

@@ -4,7 +4,6 @@ import { useClientsContext } from '@coasterai/ui-core/context/ClientContext'
 import { isPlatformAdmin } from '@coasterai/ui-core/helper/role'
 import { useAuth } from '@coasterai/ui-core/hooks/useAuth'
 import { PatchOverlay } from '@coasterai/renderer'
-import { type ConversationMessage } from '@coasterai/pb/coasterai/core/v1/chat_pb'
 import { Section, SlideStatus, type Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -66,8 +65,6 @@ const ReimagineSettings = ({
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<CategoryItem | null>(null)
   const [activeSuggestionSource, setActiveSuggestionSource] = useState<SuggestionSource>(suggestionSources.DEFAULT)
-  const [chatMessages, setChatMessages] = useState<ConversationMessage[]>([])
-  const [isChatLoading, setIsChatLoading] = useState(false)
 
   const emptyCategories = useMemo<string[]>(() => [], [])
 
@@ -132,6 +129,8 @@ const ReimagineSettings = ({
   useEffect(() => {
     targetSlideIdRef.current = browseTargetSlideId || suggestionSourceSlide?.id || ''
   }, [browseTargetSlideId, suggestionSourceSlide?.id])
+
+  const targetSlideId = browseTargetSlideId || suggestionSourceSlide?.id || ''
 
   useEffect(() => {
     setSelectedDefaultTemplateId(null)
@@ -245,35 +244,6 @@ const ReimagineSettings = ({
     applySuggestion(suggestion.suggestion, suggestion.templateId, suggestionSources.TEMPLATE)
   }, [applySuggestion])
 
-  const loadConversationHistory = useCallback(async () => {
-    const slideId = targetSlideIdRef.current
-    if (!videoId || !slideId) {
-      setChatMessages([])
-      setIsChatLoading(false)
-      return
-    }
-
-    try {
-      setIsChatLoading(true)
-      const response = await portalClient.getConversationHistory({
-        videoId,
-        slideId,
-      })
-
-      setChatMessages(response.messages)
-    } catch (err: any) {
-      setChatMessages([])
-      toast.error(getConnectError(err))
-    } finally {
-      setIsChatLoading(false)
-    }
-  }, [portalClient, videoId])
-
-  useEffect(() => {
-    if (activeTab !== reimagineTabs.GENERATE) return
-    void loadConversationHistory()
-  }, [activeTab, loadConversationHistory])
-
   const selectedSuggestionItem =
     activeSuggestionSource === suggestionSources.CATEGORY && selectedCategory
       ? categorySuggestionState.suggestions.find(suggestion => suggestion.templateId === selectedCategoryTemplateId) ?? null
@@ -285,7 +255,7 @@ const ReimagineSettings = ({
 
   const canPreviewCurrentTab = isPreviewPlaying
     || (activeTab === reimagineTabs.GENERATE
-      ? Boolean(targetSlideIdRef.current)
+      ? Boolean(targetSlideId)
       : Boolean(selectedSuggestion))
 
   const handlePreview = useCallback(() => {
@@ -295,7 +265,6 @@ const ReimagineSettings = ({
     }
 
     if (activeTab === reimagineTabs.GENERATE) {
-      const targetSlideId = targetSlideIdRef.current
       if (!targetSlideId) return
 
       setSelectedSlideById(targetSlideId)
@@ -327,7 +296,7 @@ const ReimagineSettings = ({
     setTimeout(() => {
       onPreviewTemplate?.(firstSlideId, lastSlideId)
     }, 0)
-  }, [activeSuggestionSource, activeTab, browseTargetSlideId, insertedSlideIdsRef, isPreviewPlaying, onPreviewTemplate, selectedCategoryTemplateId, selectedDefaultTemplateId, selectedSuggestion, selectedTemplateId, setSelectedSlideById])
+  }, [activeSuggestionSource, activeTab, browseTargetSlideId, insertedSlideIdsRef, isPreviewPlaying, onPreviewTemplate, selectedCategoryTemplateId, selectedDefaultTemplateId, selectedSuggestion, selectedTemplateId, setSelectedSlideById, targetSlideId])
 
   return (
     <div className='h-full flex flex-col bg-card'>
@@ -389,10 +358,9 @@ const ReimagineSettings = ({
 
           <TabsContent value={reimagineTabs.GENERATE} className='mt-4'>
             <ChatTab
-              messages={chatMessages}
-              isLoading={isChatLoading}
+              videoId={videoId}
+              enabled={activeTab === reimagineTabs.GENERATE}
               setOverlay={setOverlay}
-              onConversationUpdated={() => void loadConversationHistory()}
             />
           </TabsContent>
         </Tabs>

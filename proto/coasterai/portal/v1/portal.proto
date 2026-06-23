@@ -52,7 +52,7 @@ service PortalService {
 
   // Edit animations
   rpc GenerateOrEditScene(GenerateOrEditSceneRequest) returns (stream GenerateOrEditSceneResponse);
-  rpc GetConversationHistory(GetConversationHistoryRequest) returns (GetConversationHistoryResponse);
+  rpc GetConversationHistory(ConversationHistoryRequest) returns (GetConversationHistoryResponse);
 
   // Assets
   rpc GetMediaAssets(GetMediaAssetsRequest) returns (GetMediaAssetsResponse);
@@ -92,10 +92,11 @@ message GenerateOrEditSceneRequest {
   }
 }
 
-message GetConversationHistoryRequest {
+message ConversationHistoryRequest {
   string videoId = 1;
   string slideId = 2;
   optional bool all = 3;
+  optional string checkpoint = 4;
 }
 
 message GetConversationHistoryResponse {

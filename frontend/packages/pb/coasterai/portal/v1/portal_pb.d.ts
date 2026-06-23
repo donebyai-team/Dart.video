@@ -106,9 +106,9 @@ export declare type GenerateOrEditSceneRequest = Message<"coasterai.portal.v1.Ge
 export declare const GenerateOrEditSceneRequestSchema: GenMessage<GenerateOrEditSceneRequest>;
 
 /**
- * @generated from message coasterai.portal.v1.GetConversationHistoryRequest
+ * @generated from message coasterai.portal.v1.ConversationHistoryRequest
  */
-export declare type GetConversationHistoryRequest = Message<"coasterai.portal.v1.GetConversationHistoryRequest"> & {
+export declare type ConversationHistoryRequest = Message<"coasterai.portal.v1.ConversationHistoryRequest"> & {
   /**
    * @generated from field: string videoId = 1;
    */
@@ -123,13 +123,18 @@ export declare type GetConversationHistoryRequest = Message<"coasterai.portal.v1
    * @generated from field: optional bool all = 3;
    */
   all?: boolean;
+
+  /**
+   * @generated from field: optional string checkpoint = 4;
+   */
+  checkpoint?: string;
 };
 
 /**
- * Describes the message coasterai.portal.v1.GetConversationHistoryRequest.
- * Use `create(GetConversationHistoryRequestSchema)` to create a new message.
+ * Describes the message coasterai.portal.v1.ConversationHistoryRequest.
+ * Use `create(ConversationHistoryRequestSchema)` to create a new message.
  */
-export declare const GetConversationHistoryRequestSchema: GenMessage<GetConversationHistoryRequest>;
+export declare const ConversationHistoryRequestSchema: GenMessage<ConversationHistoryRequest>;
 
 /**
  * @generated from message coasterai.portal.v1.GetConversationHistoryResponse
@@ -1610,7 +1615,7 @@ export declare const PortalService: GenService<{
    */
   getConversationHistory: {
     methodKind: "unary";
-    input: typeof GetConversationHistoryRequestSchema;
+    input: typeof ConversationHistoryRequestSchema;
     output: typeof GetConversationHistoryResponseSchema;
   },
   /**

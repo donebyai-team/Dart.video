@@ -94,7 +94,7 @@ type PortalServiceClient interface {
 	UpdateBrandIdentity(ctx context.Context, in *UpdateBrandIdentityRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// Edit animations
 	GenerateOrEditScene(ctx context.Context, in *GenerateOrEditSceneRequest, opts ...grpc.CallOption) (PortalService_GenerateOrEditSceneClient, error)
-	GetConversationHistory(ctx context.Context, in *GetConversationHistoryRequest, opts ...grpc.CallOption) (*GetConversationHistoryResponse, error)
+	GetConversationHistory(ctx context.Context, in *ConversationHistoryRequest, opts ...grpc.CallOption) (*GetConversationHistoryResponse, error)
 	// Assets
 	GetMediaAssets(ctx context.Context, in *GetMediaAssetsRequest, opts ...grpc.CallOption) (*GetMediaAssetsResponse, error)
 	GetMediaAssetsByID(ctx context.Context, in *GetMediaAssetsByIDs, opts ...grpc.CallOption) (*GetMediaAssetsResponse, error)
@@ -444,7 +444,7 @@ func (x *portalServiceGenerateOrEditSceneClient) Recv() (*GenerateOrEditSceneRes
 	return m, nil
 }
 
-func (c *portalServiceClient) GetConversationHistory(ctx context.Context, in *GetConversationHistoryRequest, opts ...grpc.CallOption) (*GetConversationHistoryResponse, error) {
+func (c *portalServiceClient) GetConversationHistory(ctx context.Context, in *ConversationHistoryRequest, opts ...grpc.CallOption) (*GetConversationHistoryResponse, error) {
 	out := new(GetConversationHistoryResponse)
 	err := c.cc.Invoke(ctx, PortalService_GetConversationHistory_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -577,7 +577,7 @@ type PortalServiceServer interface {
 	UpdateBrandIdentity(context.Context, *UpdateBrandIdentityRequest) (*emptypb.Empty, error)
 	// Edit animations
 	GenerateOrEditScene(*GenerateOrEditSceneRequest, PortalService_GenerateOrEditSceneServer) error
-	GetConversationHistory(context.Context, *GetConversationHistoryRequest) (*GetConversationHistoryResponse, error)
+	GetConversationHistory(context.Context, *ConversationHistoryRequest) (*GetConversationHistoryResponse, error)
 	// Assets
 	GetMediaAssets(context.Context, *GetMediaAssetsRequest) (*GetMediaAssetsResponse, error)
 	GetMediaAssetsByID(context.Context, *GetMediaAssetsByIDs) (*GetMediaAssetsResponse, error)
@@ -676,7 +676,7 @@ func (UnimplementedPortalServiceServer) UpdateBrandIdentity(context.Context, *Up
 func (UnimplementedPortalServiceServer) GenerateOrEditScene(*GenerateOrEditSceneRequest, PortalService_GenerateOrEditSceneServer) error {
 	return status.Errorf(codes.Unimplemented, "method GenerateOrEditScene not implemented")
 }
-func (UnimplementedPortalServiceServer) GetConversationHistory(context.Context, *GetConversationHistoryRequest) (*GetConversationHistoryResponse, error) {
+func (UnimplementedPortalServiceServer) GetConversationHistory(context.Context, *ConversationHistoryRequest) (*GetConversationHistoryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetConversationHistory not implemented")
 }
 func (UnimplementedPortalServiceServer) GetMediaAssets(context.Context, *GetMediaAssetsRequest) (*GetMediaAssetsResponse, error) {
@@ -1203,7 +1203,7 @@ func (x *portalServiceGenerateOrEditSceneServer) Send(m *GenerateOrEditSceneResp
 }
 
 func _PortalService_GetConversationHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetConversationHistoryRequest)
+	in := new(ConversationHistoryRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -1215,7 +1215,7 @@ func _PortalService_GetConversationHistory_Handler(srv interface{}, ctx context.
 		FullMethod: PortalService_GetConversationHistory_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PortalServiceServer).GetConversationHistory(ctx, req.(*GetConversationHistoryRequest))
+		return srv.(PortalServiceServer).GetConversationHistory(ctx, req.(*ConversationHistoryRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

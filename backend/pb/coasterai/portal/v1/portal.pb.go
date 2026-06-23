@@ -523,29 +523,30 @@ func (*GenerateOrEditSceneRequest_Request) isGenerateOrEditSceneRequest_Input() 
 
 func (*GenerateOrEditSceneRequest_AskUserInput) isGenerateOrEditSceneRequest_Input() {}
 
-type GetConversationHistoryRequest struct {
+type ConversationHistoryRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	VideoId       string                 `protobuf:"bytes,1,opt,name=videoId,proto3" json:"videoId,omitempty"`
 	SlideId       string                 `protobuf:"bytes,2,opt,name=slideId,proto3" json:"slideId,omitempty"`
 	All           *bool                  `protobuf:"varint,3,opt,name=all,proto3,oneof" json:"all,omitempty"`
+	Checkpoint    *string                `protobuf:"bytes,4,opt,name=checkpoint,proto3,oneof" json:"checkpoint,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetConversationHistoryRequest) Reset() {
-	*x = GetConversationHistoryRequest{}
+func (x *ConversationHistoryRequest) Reset() {
+	*x = ConversationHistoryRequest{}
 	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetConversationHistoryRequest) String() string {
+func (x *ConversationHistoryRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetConversationHistoryRequest) ProtoMessage() {}
+func (*ConversationHistoryRequest) ProtoMessage() {}
 
-func (x *GetConversationHistoryRequest) ProtoReflect() protoreflect.Message {
+func (x *ConversationHistoryRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_coasterai_portal_v1_portal_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -557,30 +558,37 @@ func (x *GetConversationHistoryRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetConversationHistoryRequest.ProtoReflect.Descriptor instead.
-func (*GetConversationHistoryRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ConversationHistoryRequest.ProtoReflect.Descriptor instead.
+func (*ConversationHistoryRequest) Descriptor() ([]byte, []int) {
 	return file_coasterai_portal_v1_portal_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *GetConversationHistoryRequest) GetVideoId() string {
+func (x *ConversationHistoryRequest) GetVideoId() string {
 	if x != nil {
 		return x.VideoId
 	}
 	return ""
 }
 
-func (x *GetConversationHistoryRequest) GetSlideId() string {
+func (x *ConversationHistoryRequest) GetSlideId() string {
 	if x != nil {
 		return x.SlideId
 	}
 	return ""
 }
 
-func (x *GetConversationHistoryRequest) GetAll() bool {
+func (x *ConversationHistoryRequest) GetAll() bool {
 	if x != nil && x.All != nil {
 		return *x.All
 	}
 	return false
+}
+
+func (x *ConversationHistoryRequest) GetCheckpoint() string {
+	if x != nil && x.Checkpoint != nil {
+		return *x.Checkpoint
+	}
+	return ""
 }
 
 type GetConversationHistoryResponse struct {
@@ -3159,12 +3167,16 @@ const file_coasterai_portal_v1_portal_proto_rawDesc = "" +
 	"\vslideToEdit\x18\x02 \x01(\v2\x18.coasterai.core.v1.SlideR\vslideToEdit\x12C\n" +
 	"\arequest\x18\x03 \x01(\v2'.coasterai.portal.v1.CreateVideoRequestH\x00R\arequest\x12Y\n" +
 	"\x0eask_user_input\x18\x04 \x01(\v21.coasterai.portal.v1.ContinueVideoPlanningRequestH\x00R\faskUserInputB\a\n" +
-	"\x05input\"r\n" +
-	"\x1dGetConversationHistoryRequest\x12\x18\n" +
+	"\x05input\"\xa3\x01\n" +
+	"\x1aConversationHistoryRequest\x12\x18\n" +
 	"\avideoId\x18\x01 \x01(\tR\avideoId\x12\x18\n" +
 	"\aslideId\x18\x02 \x01(\tR\aslideId\x12\x15\n" +
-	"\x03all\x18\x03 \x01(\bH\x00R\x03all\x88\x01\x01B\x06\n" +
-	"\x04_all\"d\n" +
+	"\x03all\x18\x03 \x01(\bH\x00R\x03all\x88\x01\x01\x12#\n" +
+	"\n" +
+	"checkpoint\x18\x04 \x01(\tH\x01R\n" +
+	"checkpoint\x88\x01\x01B\x06\n" +
+	"\x04_allB\r\n" +
+	"\v_checkpoint\"d\n" +
 	"\x1eGetConversationHistoryResponse\x12B\n" +
 	"\bmessages\x18\x01 \x03(\v2&.coasterai.core.v1.ConversationMessageR\bmessages\"\xc2\x02\n" +
 	"\x1bGenerateOrEditSceneResponse\x12.\n" +
@@ -3383,7 +3395,7 @@ const file_coasterai_portal_v1_portal_proto_rawDesc = "" +
 	"\x1eINTEGRATION_STATE_AUTH_REVOKED\x10\x02\x12'\n" +
 	"#INTEGRATION_STATE_ACCOUNT_SUSPENDED\x10\x03\x12\"\n" +
 	"\x1eINTEGRATION_STATE_AUTH_EXPIRED\x10\x04\x12%\n" +
-	"!INTEGRATION_STATE_NOT_ESTABLISHED\x10\x052\xe5\x1b\n" +
+	"!INTEGRATION_STATE_NOT_ESTABLISHED\x10\x052\xe1\x1b\n" +
 	"\rPortalService\x12@\n" +
 	"\tGetConfig\x12\x16.google.protobuf.Empty\x1a\x1b.coasterai.portal.v1.Config\x129\n" +
 	"\x04Self\x12\x16.google.protobuf.Empty\x1a\x19.coasterai.portal.v1.User\x12_\n" +
@@ -3410,8 +3422,8 @@ const file_coasterai_portal_v1_portal_proto_rawDesc = "" +
 	"\x13CreateBrandIdentity\x12).coasterai.portal.v1.BrandIdentityRequest\x1a .coasterai.core.v1.BrandIdentity\x12X\n" +
 	"\x12GetBrandIdentities\x12\x16.google.protobuf.Empty\x1a*.coasterai.portal.v1.BrandIdentityResponse\x12^\n" +
 	"\x13UpdateBrandIdentity\x12/.coasterai.portal.v1.UpdateBrandIdentityRequest\x1a\x16.google.protobuf.Empty\x12z\n" +
-	"\x13GenerateOrEditScene\x12/.coasterai.portal.v1.GenerateOrEditSceneRequest\x1a0.coasterai.portal.v1.GenerateOrEditSceneResponse0\x01\x12\x81\x01\n" +
-	"\x16GetConversationHistory\x122.coasterai.portal.v1.GetConversationHistoryRequest\x1a3.coasterai.portal.v1.GetConversationHistoryResponse\x12i\n" +
+	"\x13GenerateOrEditScene\x12/.coasterai.portal.v1.GenerateOrEditSceneRequest\x1a0.coasterai.portal.v1.GenerateOrEditSceneResponse0\x01\x12~\n" +
+	"\x16GetConversationHistory\x12/.coasterai.portal.v1.ConversationHistoryRequest\x1a3.coasterai.portal.v1.GetConversationHistoryResponse\x12i\n" +
 	"\x0eGetMediaAssets\x12*.coasterai.portal.v1.GetMediaAssetsRequest\x1a+.coasterai.portal.v1.GetMediaAssetsResponse\x12k\n" +
 	"\x12GetMediaAssetsByID\x12(.coasterai.portal.v1.GetMediaAssetsByIDs\x1a+.coasterai.portal.v1.GetMediaAssetsResponse\x12e\n" +
 	"\rGenerateMusic\x12'.coasterai.portal.v1.VideoRequestWithID\x1a+.coasterai.portal.v1.GetMediaAssetsResponse\x12N\n" +
@@ -3447,7 +3459,7 @@ var file_coasterai_portal_v1_portal_proto_goTypes = []any{
 	(*GetMediaAssetsRequest)(nil),          // 6: coasterai.portal.v1.GetMediaAssetsRequest
 	(*GetMediaAssetsResponse)(nil),         // 7: coasterai.portal.v1.GetMediaAssetsResponse
 	(*GenerateOrEditSceneRequest)(nil),     // 8: coasterai.portal.v1.GenerateOrEditSceneRequest
-	(*GetConversationHistoryRequest)(nil),  // 9: coasterai.portal.v1.GetConversationHistoryRequest
+	(*ConversationHistoryRequest)(nil),     // 9: coasterai.portal.v1.ConversationHistoryRequest
 	(*GetConversationHistoryResponse)(nil), // 10: coasterai.portal.v1.GetConversationHistoryResponse
 	(*GenerateOrEditSceneResponse)(nil),    // 11: coasterai.portal.v1.GenerateOrEditSceneResponse
 	(*SuggestScenesRequest)(nil),           // 12: coasterai.portal.v1.SuggestScenesRequest
@@ -3592,7 +3604,7 @@ var file_coasterai_portal_v1_portal_proto_depIdxs = []int32{
 	73, // 68: coasterai.portal.v1.PortalService.GetBrandIdentities:input_type -> google.protobuf.Empty
 	14, // 69: coasterai.portal.v1.PortalService.UpdateBrandIdentity:input_type -> coasterai.portal.v1.UpdateBrandIdentityRequest
 	8,  // 70: coasterai.portal.v1.PortalService.GenerateOrEditScene:input_type -> coasterai.portal.v1.GenerateOrEditSceneRequest
-	9,  // 71: coasterai.portal.v1.PortalService.GetConversationHistory:input_type -> coasterai.portal.v1.GetConversationHistoryRequest
+	9,  // 71: coasterai.portal.v1.PortalService.GetConversationHistory:input_type -> coasterai.portal.v1.ConversationHistoryRequest
 	6,  // 72: coasterai.portal.v1.PortalService.GetMediaAssets:input_type -> coasterai.portal.v1.GetMediaAssetsRequest
 	5,  // 73: coasterai.portal.v1.PortalService.GetMediaAssetsByID:input_type -> coasterai.portal.v1.GetMediaAssetsByIDs
 	23, // 74: coasterai.portal.v1.PortalService.GenerateMusic:input_type -> coasterai.portal.v1.VideoRequestWithID

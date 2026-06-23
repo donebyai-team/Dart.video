@@ -24,6 +24,7 @@ enum ConversationMessageType {
   CONVERSATION_MESSAGE_THINKING = 1; // Thinking before the code, eg tool calls etc
   CONVERSATION_MESSAGE_FINAL_THINKING = 2; // Thinking for the code is generated
   CONVERSATION_MESSAGE_MANUAL_EDITS = 3;
+  CONVERSATION_MESSAGE_TYPE_CHECKPOINT = 4;
 }
 
 

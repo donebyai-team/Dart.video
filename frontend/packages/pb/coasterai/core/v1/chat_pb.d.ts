@@ -161,6 +161,11 @@ export enum ConversationMessageType {
    * @generated from enum value: CONVERSATION_MESSAGE_MANUAL_EDITS = 3;
    */
   CONVERSATION_MESSAGE_MANUAL_EDITS = 3,
+
+  /**
+   * @generated from enum value: CONVERSATION_MESSAGE_TYPE_CHECKPOINT = 4;
+   */
+  CONVERSATION_MESSAGE_TYPE_CHECKPOINT = 4,
 }
 
 /**

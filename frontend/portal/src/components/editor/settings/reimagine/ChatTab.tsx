@@ -1,20 +1,21 @@
 import { create } from '@bufbuild/protobuf'
 import { useEffect, useRef, useState } from 'react'
 import type { ConversationMessage } from '@coasterai/pb/coasterai/core/v1/chat_pb'
-import { ConversationRole } from '@coasterai/pb/coasterai/core/v1/chat_pb'
+import { ConversationMessageType, ConversationRole } from '@coasterai/pb/coasterai/core/v1/chat_pb'
 import { type MediaAsset, SelectedMediaAssetSchema } from '@coasterai/pb/coasterai/core/v1/media_asset_pb'
 import type { PatchOverlay } from '@coasterai/renderer'
-import { Paperclip } from 'lucide-react'
+import { Paperclip, RotateCcw } from 'lucide-react'
 import SelectedAssetsDialog, { type SelectedAssetWithPreview } from '@/components/assets/SelectedAssetsDialog'
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { getFormattedDate } from '@/utils/format'
 import ScenePromptComposer from './ScenePromptComposer'
+import { useConversationHistory } from './useConversationHistory'
 
 interface ChatTabProps {
-  messages: ConversationMessage[]
-  isLoading: boolean
+  videoId?: string
+  enabled: boolean
   setOverlay: (overlay: PatchOverlay) => void
-  onConversationUpdated?: () => void
 }
 
 function MessageBubble({ message, onOpenAttachments }: { message: ConversationMessage; onOpenAttachments: () => void }) {
@@ -92,9 +93,33 @@ function MessageBubble({ message, onOpenAttachments }: { message: ConversationMe
   )
 }
 
-export default function ChatTab({ messages, isLoading, setOverlay, onConversationUpdated }: ChatTabProps) {
+function CheckpointRow({ message, isLoading, onRevert }: { message: ConversationMessage; isLoading: boolean; onRevert: () => void }) {
+  const canRevert = Boolean(message.id)
+
+  return (
+    <div className='flex justify-center'>
+      <Button
+        type='button'
+        variant='ghost'
+        size='sm'
+        className='h-7 cursor-pointer gap-2 px-2 text-xs text-muted-foreground hover:text-foreground disabled:cursor-not-allowed'
+        onClick={onRevert}
+        disabled={isLoading || !canRevert}
+      >
+        <RotateCcw className='h-3.5 w-3.5' />
+        <span>Revert to this point</span>
+      </Button>
+    </div>
+  )
+}
+
+export default function ChatTab({ videoId, enabled, setOverlay }: ChatTabProps) {
   const [selectedAssetsDialogOpen, setSelectedAssetsDialogOpen] = useState(false)
   const [selectedAssets, setSelectedAssets] = useState<SelectedAssetWithPreview[]>([])
+  const { messages, isLoading, revertToCheckpoint, refreshConversationHistory } = useConversationHistory({
+    videoId,
+    enabled,
+  })
 
   const openMessageAttachments = (message: ConversationMessage) => {
     const attachmentIDs = Array.from(new Set(message.assetIds.concat(message.referenceIds)))
@@ -167,11 +192,20 @@ export default function ChatTab({ messages, isLoading, setOverlay, onConversatio
           <div className='h-full overflow-y-auto rounded-2xl border border-border/70 bg-muted/10 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
             <div className='space-y-4 p-4'>
               {messages.map((message, index) => (
-                <MessageBubble
-                  key={`${message.createdAt?.seconds ?? 'message'}-${index}`}
-                  message={message}
-                  onOpenAttachments={() => openMessageAttachments(message)}
-                />
+                message.type === ConversationMessageType.CONVERSATION_MESSAGE_TYPE_CHECKPOINT ? (
+                  <CheckpointRow
+                    key={message.id || `${message.createdAt?.seconds ?? 'checkpoint'}-${index}`}
+                    message={message}
+                    isLoading={isLoading}
+                    onRevert={() => void revertToCheckpoint(message)}
+                  />
+                ) : (
+                  <MessageBubble
+                    key={message.id || `${message.createdAt?.seconds ?? 'message'}-${index}`}
+                    message={message}
+                    onOpenAttachments={() => openMessageAttachments(message)}
+                  />
+                )
               ))}
             </div>
           </div>
@@ -181,7 +215,7 @@ export default function ChatTab({ messages, isLoading, setOverlay, onConversatio
       <div className='shrink-0'>
         <ScenePromptComposer
           setOverlay={setOverlay}
-          onConversationUpdated={onConversationUpdated}
+          onConversationUpdated={() => void refreshConversationHistory()}
         />
       </div>
     </div>

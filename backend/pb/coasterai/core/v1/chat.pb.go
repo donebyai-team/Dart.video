@@ -131,6 +131,7 @@ const (
 	ConversationMessageType_CONVERSATION_MESSAGE_THINKING         ConversationMessageType = 1 // Thinking before the code, eg tool calls etc
 	ConversationMessageType_CONVERSATION_MESSAGE_FINAL_THINKING   ConversationMessageType = 2 // Thinking for the code is generated
 	ConversationMessageType_CONVERSATION_MESSAGE_MANUAL_EDITS     ConversationMessageType = 3
+	ConversationMessageType_CONVERSATION_MESSAGE_TYPE_CHECKPOINT  ConversationMessageType = 4
 )
 
 // Enum value maps for ConversationMessageType.
@@ -140,12 +141,14 @@ var (
 		1: "CONVERSATION_MESSAGE_THINKING",
 		2: "CONVERSATION_MESSAGE_FINAL_THINKING",
 		3: "CONVERSATION_MESSAGE_MANUAL_EDITS",
+		4: "CONVERSATION_MESSAGE_TYPE_CHECKPOINT",
 	}
 	ConversationMessageType_value = map[string]int32{
 		"CONVERSATION_MESSAGE_TYPE_UNSPECIFIED": 0,
 		"CONVERSATION_MESSAGE_THINKING":         1,
 		"CONVERSATION_MESSAGE_FINAL_THINKING":   2,
 		"CONVERSATION_MESSAGE_MANUAL_EDITS":     3,
+		"CONVERSATION_MESSAGE_TYPE_CHECKPOINT":  4,
 	}
 )
 
@@ -332,12 +335,13 @@ const file_coasterai_core_v1_chat_proto_rawDesc = "" +
 	"\x1dCONVERSATION_ROLE_UNSPECIFIED\x10\x00\x12\x1a\n" +
 	"\x16CONVERSATION_ROLE_USER\x10\x01\x12\x1f\n" +
 	"\x1bCONVERSATION_ROLE_ASSISTANT\x10\x02\x12\x1a\n" +
-	"\x16CONVERSATION_ROLE_TOOL\x10\x03*\xb7\x01\n" +
+	"\x16CONVERSATION_ROLE_TOOL\x10\x03*\xe1\x01\n" +
 	"\x17ConversationMessageType\x12)\n" +
 	"%CONVERSATION_MESSAGE_TYPE_UNSPECIFIED\x10\x00\x12!\n" +
 	"\x1dCONVERSATION_MESSAGE_THINKING\x10\x01\x12'\n" +
 	"#CONVERSATION_MESSAGE_FINAL_THINKING\x10\x02\x12%\n" +
-	"!CONVERSATION_MESSAGE_MANUAL_EDITS\x10\x03B;Z9github.com/shank318/coasterai/pb/coasterai/core/v1;pbcoreb\x06proto3"
+	"!CONVERSATION_MESSAGE_MANUAL_EDITS\x10\x03\x12(\n" +
+	"$CONVERSATION_MESSAGE_TYPE_CHECKPOINT\x10\x04B;Z9github.com/shank318/coasterai/pb/coasterai/core/v1;pbcoreb\x06proto3"
 
 var (
 	file_coasterai_core_v1_chat_proto_rawDescOnce sync.Once

@@ -261,12 +261,7 @@ func (l *codeGenerator) GenerateCode(
 	if slide.Content != nil &&
 		slide.Content.CodeRegistry != nil &&
 		slide.Content.CodeRegistry.MUrl != "" {
-		session.AddMessage(&pbcore.ConversationMessage{
-			Role:             pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
-			CodeSnapshot:     slide.Content.CodeRegistry.MUrl,
-			DefaultCodeData:  slide.Content.CodeRegistry.Defaults,
-			DurationInFrames: utils.Ptr(slide.DurationInFrames),
-		})
+		session.AddCodeCheckpoint(slide.Content.CodeRegistry, slide.DurationInFrames)
 
 		// If manual edits are available
 		if len(slide.Content.Edits.Fields) > 0 {
