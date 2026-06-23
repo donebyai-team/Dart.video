@@ -147,17 +147,17 @@ func (p *SessionContext) FilterAndGetConversation(isPlatformAdmin bool, includeA
 			message.Role == pbcore.ConversationRole_CONVERSATION_ROLE_USER ||
 				message.Role == pbcore.ConversationRole_CONVERSATION_ROLE_TOOL
 
-		//if message.Type == pbcore.ConversationMessageType_CONVERSATION_MESSAGE_TYPE_CHECKPOINT &&
-		//	message.Role == pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT {
-		//	isUserOrTool = true
-		//}
-
-		if message.CodeSnapshot != "" &&
+		if message.Type == pbcore.ConversationMessageType_CONVERSATION_MESSAGE_TYPE_CHECKPOINT &&
 			message.Role == pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT {
-			message.Type = pbcore.ConversationMessageType_CONVERSATION_MESSAGE_TYPE_CHECKPOINT
-			message.Id = "aaa"
 			isUserOrTool = true
 		}
+
+		//if message.CodeSnapshot != "" &&
+		//	message.Role == pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT {
+		//	message.Type = pbcore.ConversationMessageType_CONVERSATION_MESSAGE_TYPE_CHECKPOINT
+		//	message.Id = "aaa"
+		//	isUserOrTool = true
+		//}
 
 		isAdminThinking :=
 			isPlatformAdmin &&
