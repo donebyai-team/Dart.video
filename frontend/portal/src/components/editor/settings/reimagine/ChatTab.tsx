@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { getFormattedDate } from '@/utils/format'
 import ScenePromptComposer from './ScenePromptComposer'
+import SlideScenePreview from './SlideScenePreview'
 import { useConversationHistory } from './useConversationHistory'
 
 interface ChatTabProps {
@@ -97,7 +98,8 @@ function CheckpointRow({ message, isLoading, onRevert }: { message: Conversation
   const canRevert = Boolean(message.id)
 
   return (
-    <div className='flex justify-center'>
+    <div className='flex items-center gap-3'>
+      <div className='h-px flex-1 bg-border/70' />
       <Button
         type='button'
         variant='ghost'
@@ -109,6 +111,7 @@ function CheckpointRow({ message, isLoading, onRevert }: { message: Conversation
         <RotateCcw className='h-3.5 w-3.5' />
         <span>Revert to this point</span>
       </Button>
+      <div className='h-px flex-1 bg-border/70' />
     </div>
   )
 }
@@ -116,10 +119,23 @@ function CheckpointRow({ message, isLoading, onRevert }: { message: Conversation
 export default function ChatTab({ videoId, enabled, setOverlay }: ChatTabProps) {
   const [selectedAssetsDialogOpen, setSelectedAssetsDialogOpen] = useState(false)
   const [selectedAssets, setSelectedAssets] = useState<SelectedAssetWithPreview[]>([])
-  const { messages, isLoading, revertToCheckpoint, refreshConversationHistory } = useConversationHistory({
+  const [previewCheckpointMessage, setPreviewCheckpointMessage] = useState<ConversationMessage | null>(null)
+  const { messages, isLoading, revertToCheckpoint, refreshConversationHistory, isRevertingCheckpoint } = useConversationHistory({
     videoId,
     enabled,
   })
+
+  const handlePreviewOpenChange = (open: boolean) => {
+    if (!open) {
+      setPreviewCheckpointMessage(null)
+    }
+  }
+
+  const handleConfirmRevert = async () => {
+    if (!previewCheckpointMessage) return
+    await revertToCheckpoint(previewCheckpointMessage)
+    setPreviewCheckpointMessage(null)
+  }
 
   const openMessageAttachments = (message: ConversationMessage) => {
     const attachmentIDs = Array.from(new Set(message.assetIds.concat(message.referenceIds)))
@@ -168,6 +184,14 @@ export default function ChatTab({ videoId, enabled, setOverlay }: ChatTabProps) 
 
   return (
     <div className='flex h-[calc(100vh-14rem)] min-h-0 flex-col gap-4'>
+      <SlideScenePreview
+        checkpointMessage={previewCheckpointMessage}
+        open={Boolean(previewCheckpointMessage)}
+        onOpenChange={handlePreviewOpenChange}
+        onRevert={() => void handleConfirmRevert()}
+        isReverting={isRevertingCheckpoint}
+      />
+
       <SelectedAssetsDialog
         open={selectedAssetsDialogOpen}
         selectedAssets={selectedAssets}
@@ -197,7 +221,7 @@ export default function ChatTab({ videoId, enabled, setOverlay }: ChatTabProps) 
                     key={message.id || `${message.createdAt?.seconds ?? 'checkpoint'}-${index}`}
                     message={message}
                     isLoading={isLoading}
-                    onRevert={() => void revertToCheckpoint(message)}
+                    onRevert={() => setPreviewCheckpointMessage(message)}
                   />
                 ) : (
                   <MessageBubble

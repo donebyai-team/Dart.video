@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ConversationMessage } from '@coasterai/pb/coasterai/core/v1/chat_pb'
-import type { Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { useClientsContext } from '@coasterai/ui-core/context/ClientContext'
 import { useVideoStore } from '@/stores/video'
 import { getConnectError } from '@/utils/error'
 import toast from 'react-hot-toast'
+import { getCheckpointSlideUpdate } from './checkpointSlide'
 
 interface UseConversationHistoryOptions {
   videoId?: string
@@ -52,20 +52,7 @@ export const useConversationHistory = ({ videoId, enabled }: UseConversationHist
 
       if (checkpointMessage) {
         const currentSelectedSlide = selectedSlideRef.current
-        const existingContent = currentSelectedSlide?.content
-        const existingCodeRegistry = currentSelectedSlide?.content?.codeRegistry
-
-        updateSlideById(slideId, {
-          durationInFrames: checkpointMessage.durationInFrames ?? currentSelectedSlide?.durationInFrames,
-          content: {
-            ...(existingContent ?? {}),
-            codeRegistry: {
-              ...(existingCodeRegistry ?? {}),
-              mUrl: checkpointMessage.codeSnapshot,
-              defaults: checkpointMessage.defaultCodeData,
-            },
-          },
-        } as Slide)
+        updateSlideById(slideId, getCheckpointSlideUpdate(currentSelectedSlide ?? undefined, checkpointMessage))
       }
 
       setMessages(response.messages)
@@ -96,5 +83,6 @@ export const useConversationHistory = ({ videoId, enabled }: UseConversationHist
     isLoading,
     refreshConversationHistory: () => loadConversationHistory(),
     revertToCheckpoint: (checkpointMessage: ConversationMessage) => loadConversationHistory(checkpointMessage),
+    isRevertingCheckpoint: isLoading,
   }
 }
