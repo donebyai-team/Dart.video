@@ -127,25 +127,25 @@ func (ConversationRole) EnumDescriptor() ([]byte, []int) {
 type ConversationMessageType int32
 
 const (
-	ConversationMessageType_CONVERSATION_MESSAGE_TYPE           ConversationMessageType = 0
-	ConversationMessageType_CONVERSATION_MESSAGE_THINKING       ConversationMessageType = 1 // Thinking before the code, eg tool calls etc
-	ConversationMessageType_CONVERSATION_MESSAGE_FINAL_THINKING ConversationMessageType = 2 // Thinking for the code is generated
-	ConversationMessageType_CONVERSATION_MESSAGE_MANUAL_EDITS   ConversationMessageType = 3
+	ConversationMessageType_CONVERSATION_MESSAGE_TYPE_UNSPECIFIED ConversationMessageType = 0
+	ConversationMessageType_CONVERSATION_MESSAGE_THINKING         ConversationMessageType = 1 // Thinking before the code, eg tool calls etc
+	ConversationMessageType_CONVERSATION_MESSAGE_FINAL_THINKING   ConversationMessageType = 2 // Thinking for the code is generated
+	ConversationMessageType_CONVERSATION_MESSAGE_MANUAL_EDITS     ConversationMessageType = 3
 )
 
 // Enum value maps for ConversationMessageType.
 var (
 	ConversationMessageType_name = map[int32]string{
-		0: "CONVERSATION_MESSAGE_TYPE",
+		0: "CONVERSATION_MESSAGE_TYPE_UNSPECIFIED",
 		1: "CONVERSATION_MESSAGE_THINKING",
 		2: "CONVERSATION_MESSAGE_FINAL_THINKING",
 		3: "CONVERSATION_MESSAGE_MANUAL_EDITS",
 	}
 	ConversationMessageType_value = map[string]int32{
-		"CONVERSATION_MESSAGE_TYPE":           0,
-		"CONVERSATION_MESSAGE_THINKING":       1,
-		"CONVERSATION_MESSAGE_FINAL_THINKING": 2,
-		"CONVERSATION_MESSAGE_MANUAL_EDITS":   3,
+		"CONVERSATION_MESSAGE_TYPE_UNSPECIFIED": 0,
+		"CONVERSATION_MESSAGE_THINKING":         1,
+		"CONVERSATION_MESSAGE_FINAL_THINKING":   2,
+		"CONVERSATION_MESSAGE_MANUAL_EDITS":     3,
 	}
 )
 
@@ -182,14 +182,16 @@ type ConversationMessage struct {
 	Message  string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	AssetIds []string               `protobuf:"bytes,3,rep,name=assetIds,proto3" json:"assetIds,omitempty"`
 	// * Model used for generation
-	AiModel         *AIModel                `protobuf:"varint,4,opt,name=aiModel,proto3,enum=coasterai.core.v1.AIModel,oneof" json:"aiModel,omitempty"`
-	CodeSnapshot    string                  `protobuf:"bytes,5,opt,name=codeSnapshot,proto3" json:"codeSnapshot,omitempty"`
-	ReferenceIds    []string                `protobuf:"bytes,6,rep,name=referenceIds,proto3" json:"referenceIds,omitempty"`
-	CreatedAt       *timestamppb.Timestamp  `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	Type            ConversationMessageType `protobuf:"varint,8,opt,name=type,proto3,enum=coasterai.core.v1.ConversationMessageType" json:"type,omitempty"`
-	DefaultCodeData *structpb.Struct        `protobuf:"bytes,9,opt,name=defaultCodeData,proto3,oneof" json:"defaultCodeData,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	AiModel          *AIModel                `protobuf:"varint,4,opt,name=aiModel,proto3,enum=coasterai.core.v1.AIModel,oneof" json:"aiModel,omitempty"`
+	CodeSnapshot     string                  `protobuf:"bytes,5,opt,name=codeSnapshot,proto3" json:"codeSnapshot,omitempty"`
+	ReferenceIds     []string                `protobuf:"bytes,6,rep,name=referenceIds,proto3" json:"referenceIds,omitempty"`
+	CreatedAt        *timestamppb.Timestamp  `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	Type             ConversationMessageType `protobuf:"varint,8,opt,name=type,proto3,enum=coasterai.core.v1.ConversationMessageType" json:"type,omitempty"`
+	DefaultCodeData  *structpb.Struct        `protobuf:"bytes,9,opt,name=defaultCodeData,proto3,oneof" json:"defaultCodeData,omitempty"`
+	DurationInFrames *int32                  `protobuf:"varint,10,opt,name=durationInFrames,proto3,oneof" json:"durationInFrames,omitempty"`
+	Id               string                  `protobuf:"bytes,11,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *ConversationMessage) Reset() {
@@ -275,7 +277,7 @@ func (x *ConversationMessage) GetType() ConversationMessageType {
 	if x != nil {
 		return x.Type
 	}
-	return ConversationMessageType_CONVERSATION_MESSAGE_TYPE
+	return ConversationMessageType_CONVERSATION_MESSAGE_TYPE_UNSPECIFIED
 }
 
 func (x *ConversationMessage) GetDefaultCodeData() *structpb.Struct {
@@ -285,11 +287,25 @@ func (x *ConversationMessage) GetDefaultCodeData() *structpb.Struct {
 	return nil
 }
 
+func (x *ConversationMessage) GetDurationInFrames() int32 {
+	if x != nil && x.DurationInFrames != nil {
+		return *x.DurationInFrames
+	}
+	return 0
+}
+
+func (x *ConversationMessage) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
 var File_coasterai_core_v1_chat_proto protoreflect.FileDescriptor
 
 const file_coasterai_core_v1_chat_proto_rawDesc = "" +
 	"\n" +
-	"\x1ccoasterai/core/v1/chat.proto\x12\x11coasterai.core.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\"\xea\x03\n" +
+	"\x1ccoasterai/core/v1/chat.proto\x12\x11coasterai.core.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\"\xc0\x04\n" +
 	"\x13ConversationMessage\x127\n" +
 	"\x04role\x18\x01 \x01(\x0e2#.coasterai.core.v1.ConversationRoleR\x04role\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12\x1a\n" +
@@ -300,10 +316,14 @@ const file_coasterai_core_v1_chat_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12>\n" +
 	"\x04type\x18\b \x01(\x0e2*.coasterai.core.v1.ConversationMessageTypeR\x04type\x12F\n" +
-	"\x0fdefaultCodeData\x18\t \x01(\v2\x17.google.protobuf.StructH\x01R\x0fdefaultCodeData\x88\x01\x01B\n" +
+	"\x0fdefaultCodeData\x18\t \x01(\v2\x17.google.protobuf.StructH\x01R\x0fdefaultCodeData\x88\x01\x01\x12/\n" +
+	"\x10durationInFrames\x18\n" +
+	" \x01(\x05H\x02R\x10durationInFrames\x88\x01\x01\x12\x0e\n" +
+	"\x02id\x18\v \x01(\tR\x02idB\n" +
 	"\n" +
 	"\b_aiModelB\x12\n" +
-	"\x10_defaultCodeData*T\n" +
+	"\x10_defaultCodeDataB\x13\n" +
+	"\x11_durationInFrames*T\n" +
 	"\aAIModel\x12\x18\n" +
 	"\x14AI_MODEL_UNSPECIFIED\x10\x00\x12\x19\n" +
 	"\x15AI_MODEL_GEMINI_3_PRO\x10\x01\x12\x14\n" +
@@ -312,9 +332,9 @@ const file_coasterai_core_v1_chat_proto_rawDesc = "" +
 	"\x1dCONVERSATION_ROLE_UNSPECIFIED\x10\x00\x12\x1a\n" +
 	"\x16CONVERSATION_ROLE_USER\x10\x01\x12\x1f\n" +
 	"\x1bCONVERSATION_ROLE_ASSISTANT\x10\x02\x12\x1a\n" +
-	"\x16CONVERSATION_ROLE_TOOL\x10\x03*\xab\x01\n" +
-	"\x17ConversationMessageType\x12\x1d\n" +
-	"\x19CONVERSATION_MESSAGE_TYPE\x10\x00\x12!\n" +
+	"\x16CONVERSATION_ROLE_TOOL\x10\x03*\xb7\x01\n" +
+	"\x17ConversationMessageType\x12)\n" +
+	"%CONVERSATION_MESSAGE_TYPE_UNSPECIFIED\x10\x00\x12!\n" +
 	"\x1dCONVERSATION_MESSAGE_THINKING\x10\x01\x12'\n" +
 	"#CONVERSATION_MESSAGE_FINAL_THINKING\x10\x02\x12%\n" +
 	"!CONVERSATION_MESSAGE_MANUAL_EDITS\x10\x03B;Z9github.com/shank318/coasterai/pb/coasterai/core/v1;pbcoreb\x06proto3"

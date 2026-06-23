@@ -174,19 +174,6 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
     const existingContent = selectedSlide?.content ? selectedSlide.content : undefined
     const pathOverlay = updatedContent.edits as unknown as PatchOverlay
 
-    const previousHistoryEntry = existingContent?.codeRegistry
-      ? create(CodeRegistrySchema, {
-        ...existingContent.codeRegistry,
-        edits: existingContent.edits,
-      })
-      : undefined
-
-    const history = [...(existingContent?.history ?? [])];
-
-    if (previousHistoryEntry) {
-      history.push(previousHistoryEntry);
-    }
-
     setOverlay(pathOverlay)
 
     updateSlide({
@@ -197,7 +184,6 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
         ...(existingContent ?? {}),
         codeRegistry: updatedContent.codeRegistry,
         edits: pathOverlay,
-        history,
       },
       backgroundStyle: slide.backgroundStyle,
     } as Slide)

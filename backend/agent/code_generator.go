@@ -262,9 +262,10 @@ func (l *codeGenerator) GenerateCode(
 		slide.Content.CodeRegistry != nil &&
 		slide.Content.CodeRegistry.MUrl != "" {
 		session.AddMessage(&pbcore.ConversationMessage{
-			Role:            pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
-			CodeSnapshot:    slide.Content.CodeRegistry.MUrl,
-			DefaultCodeData: slide.Content.CodeRegistry.Defaults,
+			Role:             pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
+			CodeSnapshot:     slide.Content.CodeRegistry.MUrl,
+			DefaultCodeData:  slide.Content.CodeRegistry.Defaults,
+			DurationInFrames: utils.Ptr(slide.DurationInFrames),
 		})
 
 		// If manual edits are available

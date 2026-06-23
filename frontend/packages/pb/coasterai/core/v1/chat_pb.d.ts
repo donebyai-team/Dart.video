@@ -61,6 +61,16 @@ export declare type ConversationMessage = Message<"coasterai.core.v1.Conversatio
    * @generated from field: optional google.protobuf.Struct defaultCodeData = 9;
    */
   defaultCodeData?: JsonObject;
+
+  /**
+   * @generated from field: optional int32 durationInFrames = 10;
+   */
+  durationInFrames?: number;
+
+  /**
+   * @generated from field: string id = 11;
+   */
+  id: string;
 };
 
 /**
@@ -129,9 +139,9 @@ export declare const ConversationRoleSchema: GenEnum<ConversationRole>;
  */
 export enum ConversationMessageType {
   /**
-   * @generated from enum value: CONVERSATION_MESSAGE_TYPE = 0;
+   * @generated from enum value: CONVERSATION_MESSAGE_TYPE_UNSPECIFIED = 0;
    */
-  CONVERSATION_MESSAGE_TYPE = 0,
+  CONVERSATION_MESSAGE_TYPE_UNSPECIFIED = 0,
 
   /**
    * Thinking before the code, eg tool calls etc

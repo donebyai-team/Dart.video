@@ -20,7 +20,7 @@ enum ConversationRole {
 }
 
 enum ConversationMessageType {
-  CONVERSATION_MESSAGE_TYPE = 0;
+  CONVERSATION_MESSAGE_TYPE_UNSPECIFIED = 0;
   CONVERSATION_MESSAGE_THINKING = 1; // Thinking before the code, eg tool calls etc
   CONVERSATION_MESSAGE_FINAL_THINKING = 2; // Thinking for the code is generated
   CONVERSATION_MESSAGE_MANUAL_EDITS = 3;
@@ -38,5 +38,7 @@ message ConversationMessage {
   .google.protobuf.Timestamp created_at = 7;
   ConversationMessageType type = 8;
   optional google.protobuf.Struct defaultCodeData = 9;
+  optional int32 durationInFrames = 10;
+  string id = 11;
 }
 

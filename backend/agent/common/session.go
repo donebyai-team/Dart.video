@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/shank318/coasterai/agent/agenterrors"
 	"github.com/shank318/coasterai/baml_client"
 	"github.com/shank318/coasterai/baml_client/types"
@@ -98,6 +99,7 @@ func (a *session) Get(ctx context.Context) (*SessionContext, error) {
 
 func (p *SessionContext) AddMessage(message *pbcore.ConversationMessage) {
 	message.CreatedAt = timestamppb.Now()
+	message.Id = uuid.New().String()
 	p.ConversationHistory = append(p.ConversationHistory, message)
 }
 
