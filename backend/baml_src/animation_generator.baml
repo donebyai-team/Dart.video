@@ -133,6 +133,16 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
     {{ BrandUsageInstructions(input.VideoBranding) }}
     {{ BrandGuidelines(input.VideoBranding) }}
 
+    {% if not input.VideoBranding.brandColors %}
+    ## TEMPLATING RULES
+    - Remember: you are generating a reusable animation template, not a one-off animation.
+    - Design layouts to accommodate varying content lengths.
+    - Text should gracefully wrap, reflow, resize, or use multiple lines when necessary.
+    - Minor layout adjustments (wrapping, repositioning, scaling) are preferred over text overflow, clipping, or overlap.
+    - Prioritize visual quality over extreme responsiveness.
+    - Optimize for realistic content variations, not arbitrarily long text.
+    {% endif %}
+
     ## ASK QUESTIONS RULES
 
     Ask before proceeding if:
