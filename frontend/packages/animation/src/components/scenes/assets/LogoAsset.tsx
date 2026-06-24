@@ -67,7 +67,8 @@ function getLogoAnimationStyle(animation: LogoAnimation, progress: number): Reac
 export function LogoAsset(initProps: LogoAssetProps): React.ReactElement {
     const defaultProps = { ...LogoAssetDefaults, ...initProps };
     const id = defaultProps.id;
-    
+    const hasExplicitSrcProp = Object.prototype.hasOwnProperty.call(initProps, 'src');
+
     const props = usePatchedProps(id, defaultProps);
 
     const frame = useCurrentFrame();
@@ -87,7 +88,8 @@ export function LogoAsset(initProps: LogoAssetProps): React.ReactElement {
 
     const { objectFit: styleObjectFit, ...restStyle } = props.style ?? {};
     const { objectFit: overrideObjectFit, ...wrapperStyleOverride } = styleOverride;
-    const defaultSrc = props.src || logo?.url || DEFAULT_LOGO_SVG;
+    const shouldSkipThemeLogoFallback = hasExplicitSrcProp && initProps.src === undefined;
+    const defaultSrc = props.src || (shouldSkipThemeLogoFallback ? undefined : logo?.url) || DEFAULT_LOGO_SVG;
 
     const defaultBoxSize = Math.min(preset.width, preset.height) * 0.35;
     const canUseThemeLogoMetadata = !!logo?.url && defaultSrc === logo.url;

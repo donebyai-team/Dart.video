@@ -165,6 +165,7 @@ func (t templateService) UpdateTemplate(ctx context.Context, req *pbportal.Updat
 					return fmt.Errorf("invalid template: no default values found")
 				}
 				schema = append(schema, slide.Content.CodeRegistry.Defaults)
+				slide.BackgroundStyle = nil // don't store this
 			}
 
 		}
