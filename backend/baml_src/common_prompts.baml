@@ -78,9 +78,7 @@ template_string ConstantsRules() #"
       - These icons should be defined inline in JSX or as internal component logic.
 
     - Never hardcode user-facing text or content-driven icons in JSX.
-    - Do NOT store element IDs, React keys, or other implementation details in `DEFAULT_DATA`.
     - Any constant other than `DEFAULT_DATA` must be declared inside the component body, after hooks.
-    - Treat `DEFAULT_DATA` like component props: it should contain only customizable content, not internal logic, styling, animation settings, or implementation details.
 
     This allows users to customize the animation by modifying only the content (text, images, and content-driven icons) without touching the implementation.
 "#
@@ -206,8 +204,11 @@ template_string BrandUsageInstructions(resume: VideoBranding) #"
     * Always design surfaces and their contents together: if the background is hardcoded, choose content colors that guarantee readability regardless of the active theme.
 
     ### Placeholders
-    * Always use placehold for placeholders https://placehold.co/widthxheight.png
-    * DO not use external urls or unsplash
+
+    - Use placeholders only in the format: `https://placehold.co/{width}x{height}.png`
+    - Replace `{width}` and `{height}` with numeric dimensions.
+    - Do not append colors, text, query parameters, paths, or any additional URL segments.
+    - Do not use external image URLs, Unsplash, logos, CDNs, or stock image services.
     {% endif %}
     ```
 "#

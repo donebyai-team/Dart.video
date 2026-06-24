@@ -33,6 +33,8 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
     - Use full width of the canvas with appropriate padding.
     - Never constrain content to a small centered webpage-like box.
     - **Keep layouts responsive and readable: use sufficient `lineHeight` to prevent overlap or overflow.**
+    - Do not measure DOM elements or text dimensions for layout or responsiveness.
+    - Prefer CSS layout techniques (flexbox, grid, wrapping, scaling) over measuring content dimensions.
 
     {% raw %}
     ```tsx
@@ -135,18 +137,23 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
 
     {% if not input.VideoBranding.brandColors %}
     ## TEMPLATING RULES
+
     - Remember: you are generating a reusable animation template, not a one-off animation.
-    - Design layouts to accommodate varying content lengths.
-    - Text should gracefully wrap, reflow, resize, or use multiple lines when necessary.
-    - Minor layout adjustments (wrapping, repositioning, scaling) are preferred over text overflow, clipping, or overlap.
+    - Design layouts to accommodate realistic variations in content length.
+    - Text may wrap, reflow, resize, or use multiple lines when needed.
+    - Prefer CSS layout techniques (flexbox, grid, wrapping, scaling) over measuring content dimensions.
+    - Minor layout adjustments are preferred over text overflow, clipping, or overlap.
     - Prioritize visual quality over extreme responsiveness.
-    - Optimize for realistic content variations, not arbitrarily long text.
+    - Treat `DEFAULT_DATA` like component props: it should contain only customizable content, not internal logic, styling, animation settings, or implementation details.
+    - Do NOT store element IDs, colors, React keys, or other implementation details in `DEFAULT_DATA`.
+
     {% endif %}
 
     ## ASK QUESTIONS RULES
 
     Ask before proceeding if:
     - If the prompt is ambiguous or visual details are unclear.
+    - You are unclear on a key decision which you want to clarify before proceeding
     - You're not clear on what to animate.
     - Use the **ask_user_question** tool — do not assume missing creative direction.
 
