@@ -266,6 +266,10 @@ func (registry *MediaAssetRegistry) FormatBrandDetails() *string {
 		writeLine(1, "<description>%s</description>", b.Description.Value)
 	}
 
+	if b.WebsiteUrl != "" {
+		writeLine(1, "<website>%s</website>", b.WebsiteUrl)
+	}
+
 	attachments := registry.toAttachment(registry.brandAssetHandles)
 	if attachments != "" {
 		writeLine(1, "%s", attachments)
