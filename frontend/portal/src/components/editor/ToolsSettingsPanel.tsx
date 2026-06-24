@@ -64,8 +64,6 @@ const ToolsSettingsPanel = ({
   const getTimelineSlides = useVideoStore(s => s.getTimelineSlides)
   const fps = useVideoStore(s => s.videoConfig?.metadata?.fps) || 30
 
-  console.log("active tool", activeTool);
-
   if (activeTool.type == ActiveToolType.NONE) return null;
 
   const spotlightsList = spotlights() ?? [];

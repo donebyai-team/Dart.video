@@ -151,9 +151,17 @@ const ReimagineSettings = ({
     return null
   }, [videoConfig])
 
+  // Use the bg from suggestion or template if not, fallback to current slide
+  // template won't have bg from backend
+  // suggestions in some cases, bg can be overriden from backend
+  const resolveAppliedSuggestionSlide = (suggestionSlide: Slide) => ({
+    ...suggestionSlide,
+    backgroundStyle: suggestionSlide.backgroundStyle ?? (selectedSlide ? getSlideWithBackground(selectedSlide) : undefined),
+  })
+
   const applySuggestion = useCallback((suggestion: Section, templateId: string, source: SuggestionSource) => {
     const slides = suggestion.slides
-    const firstSlide = slides[0]
+    const firstSlide = slides[0] ? resolveAppliedSuggestionSlide(slides[0]) : null
     const targetSlideId = targetSlideIdRef.current
     if (!targetSectionId || !targetSlideId || !firstSlide) return
 
@@ -192,17 +200,19 @@ const ReimagineSettings = ({
     const nextInsertedSlideIds: string[] = []
 
     for (const slide of slides.slice(1)) {
+      const resolvedSlide = resolveAppliedSuggestionSlide(slide)
+
       const insertedSlideId = addSlide(targetSectionId, previousSlideId)
       nextInsertedSlideIds.push(insertedSlideId)
       previousSlideId = insertedSlideId
 
       updateSlideById(insertedSlideId, {
         slideStatus: SlideStatus.GENERATED,
-        durationInFrames: slide.durationInFrames,
-        settledFrame: slide.settledFrame,
-        content: slide.content,
-        tid: slide.tid,
-        backgroundStyle: slide.backgroundStyle,
+        durationInFrames: resolvedSlide.durationInFrames,
+        settledFrame: resolvedSlide.settledFrame,
+        content: resolvedSlide.content,
+        tid: resolvedSlide.tid,
+        backgroundStyle: resolvedSlide.backgroundStyle,
       } as Slide)
     }
 
@@ -221,7 +231,7 @@ const ReimagineSettings = ({
     }
 
     setSelectedDefaultTemplateId(templateId)
-  }, [addSlide, removeSlide, setOverlay, setSelectedSlideById, targetSectionId, updateSlideById, videoConfig])
+  }, [addSlide, removeSlide, resolveAppliedSuggestionSlide, setOverlay, setSelectedSlideById, targetSectionId, updateSlideById, videoConfig])
 
   const handleSelectCategory = useCallback((category: CategoryItem) => {
     setSelectedCategory(category)
@@ -249,7 +259,7 @@ const ReimagineSettings = ({
       ? categorySuggestionState.suggestions.find(suggestion => suggestion.templateId === selectedCategoryTemplateId) ?? null
       : activeSuggestionSource === suggestionSources.TEMPLATE
         ? templatesState.suggestions.find(suggestion => suggestion.templateId === selectedTemplateId) ?? null
-      : defaultSuggestionState.suggestions.find(suggestion => suggestion.templateId === selectedDefaultTemplateId) ?? null
+        : defaultSuggestionState.suggestions.find(suggestion => suggestion.templateId === selectedDefaultTemplateId) ?? null
 
   const selectedSuggestion = selectedSuggestionItem?.suggestion ?? null
 
@@ -309,7 +319,7 @@ const ReimagineSettings = ({
 
       <div className='flex-1 overflow-y-auto px-3 py-2 pb-36'>
         <Tabs value={activeTab} onValueChange={value => setActiveTab(value as typeof activeTab)} className='h-full'>
-          <TabsList className={`grid w-full ${showTemplatesTab ? 'grid-cols-3' : 'grid-cols-2'}`}>            
+          <TabsList className={`grid w-full ${showTemplatesTab ? 'grid-cols-3' : 'grid-cols-2'}`}>
             {showTemplatesTab && <TabsTrigger value={reimagineTabs.TEMPLATES}>Templates</TabsTrigger>}
             <TabsTrigger value={reimagineTabs.SUGGESTIONS}>Suggestions</TabsTrigger>
             <TabsTrigger value={reimagineTabs.GENERATE}>Generate New</TabsTrigger>

@@ -49,6 +49,13 @@ func (p *Portal) GetTemplates(ctx context.Context, c *connect.Request[emptypb.Em
 			len(template.Config.Sections) == 0 {
 			continue
 		}
+
+		// For templates, we don't send bg
+		for _, section := range template.Config.Sections {
+			for _, slide := range section.Slides {
+				slide.BackgroundStyle = nil
+			}
+		}
 		templatesProto = append(templatesProto, template.ToProto())
 	}
 	return connect.NewResponse(&pbportal.GetTemplatesResponse{Templates: templatesProto}), nil

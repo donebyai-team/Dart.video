@@ -4,6 +4,18 @@ import { MediaAsset } from "@coasterai/pb/coasterai/core/v1/media_asset_pb";
 import { GeneratedVideoBranding } from "@coasterai/pb/coasterai/core/v1/video_pb";
 import { loadFonts } from "./fonts";
 
+ const PLACEHOLDER_BRAND_LOGO_ASSET: BrandAsset = {
+     url: "https://placehold.co/100x100.png",
+     width: 100,
+     height: 100,
+ };
+
+  const PLACEHOLDER_BRAND_LOGO_ICON_ASSET: BrandAsset = {
+     url: "https://placehold.co/48x48.png",
+     width: 48,
+     height: 48,
+ };
+
 export function brandingToTheme(
     branding?: GeneratedVideoBranding
 ): BrandTheme {
@@ -59,14 +71,17 @@ export function brandingToTheme(
         }
 
         if (c.type === BrandMediaType.ICON) {
-            theme.logoIcon = asset;
-
-            // fallback logo if no real logo exists
-            if (!theme.logo) {
-                theme.logo = asset;
-            }
+            theme.logoIcon = asset;         
         }
     }
+
+     if (!theme.logo) {
+         theme.logo = PLACEHOLDER_BRAND_LOGO_ASSET;
+     }
+
+     if (!theme.logoIcon) {
+         theme.logoIcon = PLACEHOLDER_BRAND_LOGO_ICON_ASSET;
+     }
 
     // Set fonts
     const brandFonts = branding?.brandIdentity?.fonts || [];
