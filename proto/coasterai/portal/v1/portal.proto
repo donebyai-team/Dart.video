@@ -98,6 +98,7 @@ message ConversationHistoryRequest {
   string slideId = 2;
   optional bool all = 3;
   optional string checkpoint = 4;
+  int64 videoVersion = 5;
 }
 
 message GetConversationHistoryResponse {

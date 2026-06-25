@@ -244,6 +244,17 @@ func (p *Portal) GetConversationHistory(ctx context.Context, c *connect.Request[
 		zap.String("slide_id", slideID),
 	)
 
+	if c.Msg.Checkpoint != nil {
+		video, _, err := p.getVideo(ctx, videoID, actor.OrganizationID, services.VideoOptions{IncludePending: false})
+		if err != nil {
+			return nil, err
+		}
+
+		if video.Version != int(c.Msg.VideoVersion) {
+			return nil, connect.NewError(connect.CodeAborted, errorx.ErrVersionMismatch)
+		}
+	}
+
 	sessionID := fmt.Sprintf("%s:%s", videoID, slideID)
 	session := common.NewAgentSession(sessionID, agent.GenerateCodeSessionKeyPrefix, p.authStateStore, p.db, logger)
 	sessionContext, err := session.Get(ctx)

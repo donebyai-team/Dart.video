@@ -133,6 +133,11 @@ export declare type ConversationHistoryRequest = Message<"coasterai.portal.v1.Co
    * @generated from field: optional string checkpoint = 4;
    */
   checkpoint?: string;
+
+  /**
+   * @generated from field: int64 videoVersion = 5;
+   */
+  videoVersion: bigint;
 };
 
 /**

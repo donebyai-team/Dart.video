@@ -537,6 +537,7 @@ type ConversationHistoryRequest struct {
 	SlideId       string                 `protobuf:"bytes,2,opt,name=slideId,proto3" json:"slideId,omitempty"`
 	All           *bool                  `protobuf:"varint,3,opt,name=all,proto3,oneof" json:"all,omitempty"`
 	Checkpoint    *string                `protobuf:"bytes,4,opt,name=checkpoint,proto3,oneof" json:"checkpoint,omitempty"`
+	VideoVersion  int64                  `protobuf:"varint,5,opt,name=videoVersion,proto3" json:"videoVersion,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -597,6 +598,13 @@ func (x *ConversationHistoryRequest) GetCheckpoint() string {
 		return *x.Checkpoint
 	}
 	return ""
+}
+
+func (x *ConversationHistoryRequest) GetVideoVersion() int64 {
+	if x != nil {
+		return x.VideoVersion
+	}
+	return 0
 }
 
 type GetConversationHistoryResponse struct {
@@ -3228,14 +3236,15 @@ const file_coasterai_portal_v1_portal_proto_rawDesc = "" +
 	"\arequest\x18\x03 \x01(\v2'.coasterai.portal.v1.CreateVideoRequestH\x00R\arequest\x12Y\n" +
 	"\x0eask_user_input\x18\x04 \x01(\v21.coasterai.portal.v1.ContinueVideoPlanningRequestH\x00R\faskUserInput\x12\x18\n" +
 	"\aversion\x18\x05 \x01(\x03R\aversionB\a\n" +
-	"\x05input\"\xa3\x01\n" +
+	"\x05input\"\xc7\x01\n" +
 	"\x1aConversationHistoryRequest\x12\x18\n" +
 	"\avideoId\x18\x01 \x01(\tR\avideoId\x12\x18\n" +
 	"\aslideId\x18\x02 \x01(\tR\aslideId\x12\x15\n" +
 	"\x03all\x18\x03 \x01(\bH\x00R\x03all\x88\x01\x01\x12#\n" +
 	"\n" +
 	"checkpoint\x18\x04 \x01(\tH\x01R\n" +
-	"checkpoint\x88\x01\x01B\x06\n" +
+	"checkpoint\x88\x01\x01\x12\"\n" +
+	"\fvideoVersion\x18\x05 \x01(\x03R\fvideoVersionB\x06\n" +
 	"\x04_allB\r\n" +
 	"\v_checkpoint\"d\n" +
 	"\x1eGetConversationHistoryResponse\x12B\n" +

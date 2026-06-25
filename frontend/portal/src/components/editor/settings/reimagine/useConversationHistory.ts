@@ -14,6 +14,7 @@ interface UseConversationHistoryOptions {
 export const useConversationHistory = ({ videoId, enabled }: UseConversationHistoryOptions) => {
   const { portalClient } = useClientsContext()
   const selectedSlide = useVideoStore(s => s.selectedSlide)
+  const videoVersion = useVideoStore(s => s.videoConfig?.version ?? (0 as unknown as bigint))
   const selectedSlideId = selectedSlide?.id
   const updateSlideById = useVideoStore(s => s.updateSlideById)
   const requestIdRef = useRef(0)
@@ -44,6 +45,7 @@ export const useConversationHistory = ({ videoId, enabled }: UseConversationHist
         videoId,
         slideId,
         checkpoint: checkpointMessage?.id,
+        videoVersion,
       })
 
       if (requestId !== requestIdRef.current) {
@@ -68,7 +70,7 @@ export const useConversationHistory = ({ videoId, enabled }: UseConversationHist
         setIsLoading(false)
       }
     }
-  }, [portalClient, updateSlideById, videoId])
+  }, [portalClient, updateSlideById, videoId, videoVersion])
 
   useEffect(() => {
     if (!enabled) {
