@@ -2,7 +2,7 @@ import * as Babel from "@babel/standalone";
 import * as LucideReact from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as AnimationPrimitives from "@coasterai/animation";
-import { REGISTERED_COMPONENT_NAMES, useTheme } from "@coasterai/animation";
+import { REGISTERED_COMPONENT_NAMES, useTheme, parseText } from "@coasterai/animation";
 
 import {
   AbsoluteFill,
@@ -48,6 +48,7 @@ const SHARED_PARAM_NAMES: string[] = [
   "Sequence",
   "Easing",
   "random",
+  "parseText",
   // Lucide icons — injected as the full module; individual icons are
   // destructured from this via buildLucideDestructure()
   "__LucideReact__",
@@ -72,6 +73,7 @@ function getSharedParamValues(validateShapePropsOption: boolean): unknown[] {
     Sequence,
     Easing,
     random,
+    parseText,
     LucideReact,
     // Animation primitive values — each registered component name maps to its implementation.
     // Order must match the names appended to SHARED_PARAM_NAMES above.

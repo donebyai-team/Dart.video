@@ -68,7 +68,7 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
     \`\`\`tsx
     import { useCurrentFrame, useVideoConfig, interpolate, spring, Sequence, Easing, random } from "remotion";
     import { useState, useEffect } from "react";
-    import { Text, LogoAsset, IconAsset, useTheme, MediaAsset } from './';
+    import { Text, LogoAsset, IconAsset, useTheme, MediaAsset, parseText } from './';
 
     const DEFAULT_DATA = {
       title: "AI Automation",
@@ -130,7 +130,7 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
     - **There is already background on the canvas.**
     - **Don't add any background on the root, even if the reference image/video has it. Keep it transparent**
 
-    {{ AnimationPrimitives() }}
+    {{ AnimationPrimitives(input.VideoBranding) }}
 
     {{ BrandUsageInstructions(input.VideoBranding) }}
     {{ BrandGuidelines(input.VideoBranding) }}

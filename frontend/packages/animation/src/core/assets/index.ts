@@ -6,3 +6,4 @@ export * from './Text';
 export * from './ClippedText';
 export * from './useTextMeasurement';
 export * from './CardAsset';
+export * from './parseText'

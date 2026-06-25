@@ -21,10 +21,6 @@ import (
 )
 
 var typeMap = map[string]reflect.Type{
-	"TYPES.AddSceneRequest":                      reflect.TypeOf(types.AddSceneRequest{}),
-	"STREAM_TYPES.AddSceneRequest":               reflect.TypeOf(stream_types.AddSceneRequest{}),
-	"TYPES.AddSceneResponse":                     reflect.TypeOf(types.AddSceneResponse{}),
-	"STREAM_TYPES.AddSceneResponse":              reflect.TypeOf(stream_types.AddSceneResponse{}),
 	"TYPES.AnimationCategories":                  reflect.TypeOf(types.AnimationCategories{}),
 	"STREAM_TYPES.AnimationCategories":           reflect.TypeOf(stream_types.AnimationCategories{}),
 	"TYPES.AskUserQuestion":                      reflect.TypeOf(types.AskUserQuestion{}),
@@ -35,12 +31,6 @@ var typeMap = map[string]reflect.Type{
 	"STREAM_TYPES.Background":                    reflect.TypeOf(stream_types.Background{}),
 	"TYPES.Category":                             reflect.TypeOf(types.Category{}),
 	"STREAM_TYPES.Category":                      reflect.TypeOf(stream_types.Category{}),
-	"TYPES.EditAnimationCodeRequest":             reflect.TypeOf(types.EditAnimationCodeRequest{}),
-	"STREAM_TYPES.EditAnimationCodeRequest":      reflect.TypeOf(stream_types.EditAnimationCodeRequest{}),
-	"TYPES.EditAnimationCodeResponse":            reflect.TypeOf(types.EditAnimationCodeResponse{}),
-	"STREAM_TYPES.EditAnimationCodeResponse":     reflect.TypeOf(stream_types.EditAnimationCodeResponse{}),
-	"TYPES.EditString":                           reflect.TypeOf(types.EditString{}),
-	"STREAM_TYPES.EditString":                    reflect.TypeOf(stream_types.EditString{}),
 	"TYPES.ExtractTemplateConfigRequest":         reflect.TypeOf(types.ExtractTemplateConfigRequest{}),
 	"STREAM_TYPES.ExtractTemplateConfigRequest":  reflect.TypeOf(stream_types.ExtractTemplateConfigRequest{}),
 	"TYPES.ExtractTemplateConfigResponse":        reflect.TypeOf(types.ExtractTemplateConfigResponse{}),
@@ -72,17 +62,14 @@ var typeMap = map[string]reflect.Type{
 	"TYPES.VideoGenerationPlanRequest":           reflect.TypeOf(types.VideoGenerationPlanRequest{}),
 	"STREAM_TYPES.VideoGenerationPlanRequest":    reflect.TypeOf(stream_types.VideoGenerationPlanRequest{}),
 
-	"TYPES.AnimationCodeEditType": reflect.TypeOf(types.AnimationCodeEditType("")),
-	"TYPES.AskUserQuestionType":   reflect.TypeOf(types.AskUserQuestionType("")),
-	"TYPES.ColorToken":            reflect.TypeOf(types.ColorToken("")),
+	"TYPES.AskUserQuestionType": reflect.TypeOf(types.AskUserQuestionType("")),
+	"TYPES.ColorToken":          reflect.TypeOf(types.ColorToken("")),
 
 	"TYPES.AskUserQuestion__GenerateAnimationCodeResponse": reflect.TypeOf(types.Union2AskUserQuestionOrGenerateAnimationCodeResponse{}),
 	"TYPES.AskUserQuestion__GeneratedVideoPlan":            reflect.TypeOf(types.Union2AskUserQuestionOrGeneratedVideoPlan{}),
-	"TYPES.AskUserQuestion__Scene":                         reflect.TypeOf(types.Union2AskUserQuestionOrScene{}),
 	"TYPES.ColorToken__string":                             reflect.TypeOf(types.Union2ColorTokenOrString{}),
 	"TYPES.string_assistant__string_tool__string_user":     reflect.TypeOf(types.Union3KassistantOrKtoolOrKuser{}),
 
 	"STREAM_TYPES.AskUserQuestion__GenerateAnimationCodeResponse": reflect.TypeOf(stream_types.Union2AskUserQuestionOrGenerateAnimationCodeResponse{}),
 	"STREAM_TYPES.AskUserQuestion__GeneratedVideoPlan":            reflect.TypeOf(stream_types.Union2AskUserQuestionOrGeneratedVideoPlan{}),
-	"STREAM_TYPES.AskUserQuestion__Scene":                         reflect.TypeOf(stream_types.Union2AskUserQuestionOrScene{}),
 }

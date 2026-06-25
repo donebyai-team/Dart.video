@@ -83,21 +83,75 @@ template_string ConstantsRules() #"
     This allows users to customize the animation by modifying only the content (text, images, and content-driven icons) without touching the implementation.
 "#
 
-template_string AnimationPrimitives() #"
+template_string AnimationPrimitives(resume: VideoBranding) #"
 
-    ### Typography:
-   - Use `Text` for all visible text. Never use `span`, `p`, `h1-h6`, or other text elements.
-   - Every `Text` component MUST have an `id`.
-   - The `id` of a `Text` component MUST start with `textasset-`, eg: `textasset-1`.
-   - Do not use any other prefix for `Text` component IDs.
+    ## Typography
+    ### Text
+
+    - Use `Text` for all static text.
+    - Never use `span`, `p`, `h1-h6`, or other text elements.
+    - Every `Text` component MUST have an `id`.
+    - The `id` MUST start with `textasset-`, eg: `textasset-1`.
 
     {% raw %}
     ```tsx
-    <Text id="textasset-1" text="Hello" style={{}} />
+    <Text
+      id="textasset-1"
+      text="Hello"
+      style={{}}
+    />
     ```
     {% endraw %}
 
-    ### Image, Video, Icon and Logo:
+    {% if not resume.brandColors %}
+    ### parseText()
+
+    - When text spans multiple lines or contains highlighted words, store it as a single `text` string and use `parseText()` to parse it.
+    - Use `\n` for explicit line breaks.
+    - Wrap highlighted text in `{}`.
+    - Do not split text into arrays, words, or line objects in `DEFAULT_DATA`.
+    - Do not implement custom text parsing logic.
+    - `parseText()` preserves the original whitespace and returns an array of lines. Each line contains one or more text parts. Every part has:
+      - `text`: The text to render.
+      - `highlight`: Whether the text is highlighted.
+    - `parseText()` only parses the text. Decide independently how the parsed output should be laid out or animated based on the desired design.
+    - Preserve the original whitespace from `parseText()`. Render adjacent text parts as continuous inline text on the same baseline, without adding spacing (e.g. `gap`, margins, or padding) unless intentionally required by the animation.
+
+    {% raw %}
+    ```tsx
+    const DEFAULT_DATA = {
+      title: "Launch {AI}\nwith {Remotion}",
+    };
+
+    const lines = parseText(DEFAULT_DATA.title);
+
+    {lines.map((line, lineIndex) => (
+      <div
+        key={lineIndex}
+        style={{
+          display: "flex",
+          alignItems: "baseline",
+        }}
+      >
+        {line.map((part, partIndex) => (
+          <Text
+            key={partIndex}
+            id={`textasset-${lineIndex}-${partIndex}`}
+            text={part.text}
+            style={{
+              color: part.highlight
+                ? theme.colors.primary
+                : theme.colors.foreground,
+            }}
+          />
+        ))}
+      </div>
+    ))}
+    ```
+    {% endraw %}
+    {% endif %}
+
+    ## Image, Video, Icon and Logo:
     - Never use `img`, `video` or other media tags
     - Use LogoAsset for logos.
     - Use MediaAsset for image or video.
@@ -123,7 +177,7 @@ template_string AnimationPrimitives() #"
      ```
     {% endraw %}
 
-    ### Icons
+    ## Icons
 
     - Always render icons using `IconAsset`.
     - If the icon exists in `lucide-react`, import it and pass the icon component to the `Icon` prop.

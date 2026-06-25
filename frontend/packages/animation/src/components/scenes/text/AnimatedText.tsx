@@ -1,9 +1,11 @@
 import React, { useMemo } from 'react';
 import { useCurrentFrame } from 'remotion';
 import { useElement } from '../../../patches';
-import { interpolateWithEasing } from '../../../styles';
+import { interpolateWithEasing, useAspectPreset } from '../../../styles';
+import { useStyleContext } from '../../../styles/StyleContext';
 import { useTheme } from '../../../theme';
 import type { TypographyVariant } from '../../../tokens/semantic';
+import { resolveInlineTypography } from '../../../tokens/resolveTypography';
 import {
     resolveAnimationPreset,
     type AnimationPresetName,
@@ -35,7 +37,7 @@ export const AnimatedTextDefaults = {
     id: 'animatedtext',
     startAt: 0,
     text: '',
-    variant: 'headingLg' as TypographyVariant,
+    variant: undefined as TypographyVariant | undefined,
     staggerDelay: 25,
     entranceAnimation: 'scaleIn' as AnimationPresetName,
     duration: 20,
@@ -219,6 +221,8 @@ const renderHighlightedLine = (
 export const AnimatedText: React.FC<AnimatedTextProps> = (initProps) => {
     const frame = useCurrentFrame();
     const theme = useTheme();
+    const styleConfig = useStyleContext();
+    const preset = useAspectPreset();
     const defaultProps = { ...AnimatedTextDefaults, ...initProps };
     const el = useElement(defaultProps.id, defaultProps);
     const { props } = el;
@@ -234,6 +238,12 @@ export const AnimatedText: React.FC<AnimatedTextProps> = (initProps) => {
     const actualStaggerDelay = props.staggerDelay ?? modeDefaults.staggerDelay;
     const actualDuration = props.duration ?? modeDefaults.duration;
     const actualExitDuration = props.exitDuration ?? actualDuration;
+    const resolvedTextStyle = props.variant
+        ? el.style
+        : {
+            ...resolveInlineTypography(el.style, styleConfig, theme, preset),
+            ...el.style,
+        };
 
     const parsedChars = useMemo(() => parseHighlightedRanges(props.text), [props.text]);
 
@@ -372,7 +382,7 @@ export const AnimatedText: React.FC<AnimatedTextProps> = (initProps) => {
                 textAlign: 'center',
                 opacity: exitMotion.opacity,
                 transform: exitMotion.transform,
-                ...el.style,
+                ...resolvedTextStyle,
                 ...el.containerStyle,
             }}
         >
