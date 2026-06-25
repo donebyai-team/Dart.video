@@ -137,6 +137,7 @@ func (r *Database) UpdateTemplate(ctx context.Context, t *models.Template) error
 		"metadata":    t.Metadata,
 		"status":      t.Status,
 		"name":        strings.ToLower(t.Name),
+		"version":     t.Version,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to update template: %w", err)

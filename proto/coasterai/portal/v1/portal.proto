@@ -40,7 +40,7 @@ service PortalService {
   rpc DuplicateVideo(VideoRequestWithID) returns (GetVideoResponse);
   rpc RenderVideo(VideoRequestWithID) returns (RenderVideoResponse);
 
-  rpc UpdateVideoConfig(UpdateVideoConfigRequest) returns (.google.protobuf.Empty);
+  rpc UpdateVideoConfig(UpdateVideoConfigRequest) returns (UpdateVideoConfigResponse);
 
   rpc ListFigmaFrames(ListFigmaFramesRequest) returns (ListFigmaFramesResponse);
   rpc ImportFigmaFrame(ImportFigmaFrameRequest) returns (ImportFigmaFrameResponse);
@@ -90,6 +90,7 @@ message GenerateOrEditSceneRequest {
     CreateVideoRequest request = 3;
     ContinueVideoPlanningRequest ask_user_input = 4;
   }
+  int64 version = 5;
 }
 
 message ConversationHistoryRequest {
@@ -184,6 +185,11 @@ message UpdateVideoConfigRequest {
   core.v1.VideoConfig config = 2;
   core.v1.VideoMetadata metadata = 4;
   string name = 5;
+  int64 version = 7;
+}
+
+message UpdateVideoConfigResponse {
+  int64 version = 1;
 }
 
 message GetVideoRequest {

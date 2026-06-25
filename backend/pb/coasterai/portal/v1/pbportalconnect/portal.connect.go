@@ -208,7 +208,7 @@ type PortalServiceClient interface {
 	DeleteVideo(context.Context, *connect.Request[v1.VideoRequestWithID]) (*connect.Response[emptypb.Empty], error)
 	DuplicateVideo(context.Context, *connect.Request[v1.VideoRequestWithID]) (*connect.Response[v1.GetVideoResponse], error)
 	RenderVideo(context.Context, *connect.Request[v1.VideoRequestWithID]) (*connect.Response[v1.RenderVideoResponse], error)
-	UpdateVideoConfig(context.Context, *connect.Request[v1.UpdateVideoConfigRequest]) (*connect.Response[emptypb.Empty], error)
+	UpdateVideoConfig(context.Context, *connect.Request[v1.UpdateVideoConfigRequest]) (*connect.Response[v1.UpdateVideoConfigResponse], error)
 	ListFigmaFrames(context.Context, *connect.Request[v1.ListFigmaFramesRequest]) (*connect.Response[v1.ListFigmaFramesResponse], error)
 	ImportFigmaFrame(context.Context, *connect.Request[v1.ImportFigmaFrameRequest]) (*connect.Response[v1.ImportFigmaFrameResponse], error)
 	// brand identity request
@@ -357,7 +357,7 @@ func NewPortalServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(portalServiceRenderVideoMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
-		updateVideoConfig: connect.NewClient[v1.UpdateVideoConfigRequest, emptypb.Empty](
+		updateVideoConfig: connect.NewClient[v1.UpdateVideoConfigRequest, v1.UpdateVideoConfigResponse](
 			httpClient,
 			baseURL+PortalServiceUpdateVideoConfigProcedure,
 			connect.WithSchema(portalServiceUpdateVideoConfigMethodDescriptor),
@@ -489,7 +489,7 @@ type portalServiceClient struct {
 	deleteVideo            *connect.Client[v1.VideoRequestWithID, emptypb.Empty]
 	duplicateVideo         *connect.Client[v1.VideoRequestWithID, v1.GetVideoResponse]
 	renderVideo            *connect.Client[v1.VideoRequestWithID, v1.RenderVideoResponse]
-	updateVideoConfig      *connect.Client[v1.UpdateVideoConfigRequest, emptypb.Empty]
+	updateVideoConfig      *connect.Client[v1.UpdateVideoConfigRequest, v1.UpdateVideoConfigResponse]
 	listFigmaFrames        *connect.Client[v1.ListFigmaFramesRequest, v1.ListFigmaFramesResponse]
 	importFigmaFrame       *connect.Client[v1.ImportFigmaFrameRequest, v1.ImportFigmaFrameResponse]
 	createBrandIdentity    *connect.Client[v1.BrandIdentityRequest, v11.BrandIdentity]
@@ -605,7 +605,7 @@ func (c *portalServiceClient) RenderVideo(ctx context.Context, req *connect.Requ
 }
 
 // UpdateVideoConfig calls coasterai.portal.v1.PortalService.UpdateVideoConfig.
-func (c *portalServiceClient) UpdateVideoConfig(ctx context.Context, req *connect.Request[v1.UpdateVideoConfigRequest]) (*connect.Response[emptypb.Empty], error) {
+func (c *portalServiceClient) UpdateVideoConfig(ctx context.Context, req *connect.Request[v1.UpdateVideoConfigRequest]) (*connect.Response[v1.UpdateVideoConfigResponse], error) {
 	return c.updateVideoConfig.CallUnary(ctx, req)
 }
 
@@ -717,7 +717,7 @@ type PortalServiceHandler interface {
 	DeleteVideo(context.Context, *connect.Request[v1.VideoRequestWithID]) (*connect.Response[emptypb.Empty], error)
 	DuplicateVideo(context.Context, *connect.Request[v1.VideoRequestWithID]) (*connect.Response[v1.GetVideoResponse], error)
 	RenderVideo(context.Context, *connect.Request[v1.VideoRequestWithID]) (*connect.Response[v1.RenderVideoResponse], error)
-	UpdateVideoConfig(context.Context, *connect.Request[v1.UpdateVideoConfigRequest]) (*connect.Response[emptypb.Empty], error)
+	UpdateVideoConfig(context.Context, *connect.Request[v1.UpdateVideoConfigRequest]) (*connect.Response[v1.UpdateVideoConfigResponse], error)
 	ListFigmaFrames(context.Context, *connect.Request[v1.ListFigmaFramesRequest]) (*connect.Response[v1.ListFigmaFramesResponse], error)
 	ImportFigmaFrame(context.Context, *connect.Request[v1.ImportFigmaFrameRequest]) (*connect.Response[v1.ImportFigmaFrameResponse], error)
 	// brand identity request
@@ -1131,7 +1131,7 @@ func (UnimplementedPortalServiceHandler) RenderVideo(context.Context, *connect.R
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.RenderVideo is not implemented"))
 }
 
-func (UnimplementedPortalServiceHandler) UpdateVideoConfig(context.Context, *connect.Request[v1.UpdateVideoConfigRequest]) (*connect.Response[emptypb.Empty], error) {
+func (UnimplementedPortalServiceHandler) UpdateVideoConfig(context.Context, *connect.Request[v1.UpdateVideoConfigRequest]) (*connect.Response[v1.UpdateVideoConfigResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.UpdateVideoConfig is not implemented"))
 }
 

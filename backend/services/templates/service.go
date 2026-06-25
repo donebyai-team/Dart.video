@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/datastore"
+	"github.com/shank318/coasterai/errorx"
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
@@ -21,7 +22,7 @@ import (
 type Service interface {
 	CreateTemplate(ctx context.Context) (*models.Template, error)
 	GetTemplateByID(ctx context.Context, id string) (*models.Template, error)
-	UpdateTemplateConfig(ctx context.Context, video *models.Video) error
+	UpdateTemplateConfig(ctx context.Context, video *models.Video) (*models.Video, error)
 	UpdateTemplate(ctx context.Context, req *pbportal.UpdateTemplateRequest) error
 	GetTemplates(ctx context.Context, categories []string) ([]*models.Template, error)
 	DeleteTemplateByID(ctx context.Context, id string) error
@@ -99,14 +100,22 @@ func (t templateService) CreateTemplate(ctx context.Context) (*models.Template, 
 	return template, nil
 }
 
-func (t templateService) UpdateTemplateConfig(ctx context.Context, video *models.Video) error {
+func (t templateService) UpdateTemplateConfig(ctx context.Context, video *models.Video) (*models.Video, error) {
 	existingTemplate, err := t.db.GetTemplateByID(ctx, video.ID)
 	if err != nil {
-		return err
+		return nil, err
+	}
+
+	if video.Version != existingTemplate.Version {
+		return nil, errorx.ErrVersionMismatch
 	}
 
 	configChanged := !proto.Equal(existingTemplate.Config, video.Config)
 	nameChanged := video.Name != existingTemplate.Name
+
+	if !configChanged && !nameChanged {
+		return video, nil
+	}
 
 	// Apply updates and reset the status for approval
 	if configChanged {
@@ -126,7 +135,7 @@ func (t templateService) UpdateTemplateConfig(ctx context.Context, video *models
 	}
 
 	if len(existingTemplate.Config.Sections) > 1 || len(allSlides) > 2 {
-		return fmt.Errorf("not allowed")
+		return nil, fmt.Errorf("not allowed")
 	}
 
 	totalDurationInFrames := int32(0)
@@ -135,7 +144,7 @@ func (t templateService) UpdateTemplateConfig(ctx context.Context, video *models
 
 		// For code templates, we don't support manual edits'
 		if slide.Content.CodeRegistry.MUrl != "" && len(slide.Content.Edits.Fields) > 0 {
-			return fmt.Errorf("manual edits are not supported for templates, use prompt to modify")
+			return nil, fmt.Errorf("manual edits are not supported for templates, use prompt to modify")
 		}
 		// subtract transition for every slide except the last one globally
 		if i < len(allSlides)-1 &&
@@ -146,7 +155,17 @@ func (t templateService) UpdateTemplateConfig(ctx context.Context, video *models
 		}
 	}
 	existingTemplate.Metadata.DurationInFrames = totalDurationInFrames
-	return t.db.UpdateTemplate(ctx, existingTemplate)
+
+	if configChanged || nameChanged {
+		existingTemplate.Version++
+	}
+
+	err = t.db.UpdateTemplate(ctx, existingTemplate)
+	if err != nil {
+		return nil, err
+	}
+
+	return existingTemplate.ToModelVideo(), nil
 }
 
 func (t templateService) UpdateTemplate(ctx context.Context, req *pbportal.UpdateTemplateRequest) error {
@@ -161,7 +180,7 @@ func (t templateService) UpdateTemplate(ctx context.Context, req *pbportal.Updat
 		for _, slide := range section.Slides {
 			if slide.Content.CodeRegistry.MUrl != "" {
 				if slide.Content.CodeRegistry.Defaults == nil ||
-					len(slide.Content.CodeRegistry.Defaults.Fields) == 0 {
+					slide.Content.CodeRegistry.Defaults.Fields == nil {
 					return fmt.Errorf("invalid template: no default values found")
 				}
 				schema = append(schema, slide.Content.CodeRegistry.Defaults)

@@ -100,6 +100,7 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
   const updateSlide = useVideoStore(s => s.updateSlide)
   const selectedSlide = useVideoStore(s => s.selectedSlide)
   const videoId = useVideoStore(s => s.videoConfig?.id)
+  const videoVersion = useVideoStore(s => s.videoConfig?.version ?? (0 as unknown as bigint))
   const brandIdentity = useVideoStore(s => s.videoConfig?.metadata?.generatedBranding?.brandIdentity)
   const brandLibraryID = useVideoStore(s => s.videoConfig?.metadata?.generatedBranding?.brandLibraryID)
   const handleSelectEntity = useVideoStore(s => s.handleSelectEntity)
@@ -284,6 +285,7 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
         {
           videoId,
           slideToEdit: selectedSlide,
+          version: videoVersion,
           input: {
             case: 'request',
             value: {
@@ -433,6 +435,7 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
         {
           videoId,
           slideToEdit: selectedSlide,
+          version: videoVersion,
           input: {
             case: 'askUserInput',
             value: {

@@ -200,7 +200,12 @@ func (g *videoConfigGenerator) update(ctx context.Context, status models.VideoSt
 		video.Status = status
 	}
 
-	return g.videoGeneratorService.UpdateVideoConfig(ctx, video)
+	_, err := g.videoGeneratorService.UpdateVideoConfig(ctx, video)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (g *videoConfigGenerator) findSection(sectionID string) (*pbcore.Section, error) {

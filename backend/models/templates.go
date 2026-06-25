@@ -55,6 +55,7 @@ func (a *TemplateCategories) Scan(src interface{}) error {
 type Template struct {
 	ID          string                `db:"id"`
 	Name        string                `db:"name"`
+	Version     int                   `db:"version"`
 	Categories  TemplateCategories    `db:"categories"`
 	Description string                `db:"description"`
 	Schema      json.RawMessage       `db:"schema"`
@@ -70,7 +71,7 @@ func (r *Template) ToProto() *pbcore.AnimationTemplate {
 	return &pbcore.AnimationTemplate{
 		Id:          r.ID,
 		Name:        r.Name,
-		Version:     0,
+		Version:     int64(r.Version),
 		Config:      r.Config,
 		Status:      r.Status.String(),
 		Metadata:    r.Metadata,
@@ -84,6 +85,7 @@ func (r *Template) ToModelVideo() *Video {
 	return &Video{
 		ID:         fmt.Sprintf("template:%s", r.ID),
 		Name:       r.Name,
+		Version:    r.Version,
 		Config:     r.Config,
 		Metadata:   r.Metadata,
 		IsTemplate: true,
@@ -95,7 +97,7 @@ func (r *Template) ToVideo() *pbcore.Video {
 	return &pbcore.Video{
 		Id:        fmt.Sprintf("template:%s", r.ID),
 		Name:      r.Name,
-		Version:   0,
+		Version:   int64(r.Version),
 		Config:    r.Config,
 		Status:    pbcore.VideoStatus_VIDEO_STATUS_COMPLETED,
 		Metadata:  r.Metadata,

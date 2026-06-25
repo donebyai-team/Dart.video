@@ -3,6 +3,7 @@ import { createSlideEntityId } from "@/types/selection";
 import { portalClient } from "@/services/grpc";
 import toast from "react-hot-toast";
 import { getConnectError } from "@/utils/error";
+import { Code, ConnectError } from "@connectrpc/connect";
 import { Video, VideoSchema, VideoStatus } from "@coasterai/pb/coasterai/core/v1/video_pb";
 import { VideoStoreSet, VideoStoreGet } from "./types";
 import { getInitialSelection } from "./defaults";
@@ -27,12 +28,27 @@ export function debounce<T extends (...args: any[]) => any>(
     return debounced;
 }
 
-const hasConfigChanges = (acceptedVideoConfig: Video | null, videoConfig: Video | null) =>
-    Boolean(
-        videoConfig &&
-        acceptedVideoConfig &&
-        !equals(VideoSchema, acceptedVideoConfig, videoConfig)
+const getComparableVideo = (video: Video | null) => {
+    if (!video) {
+        return null;
+    }
+
+    const comparableVideo = clone(VideoSchema, video);
+    comparableVideo.version = 0 as unknown as bigint;
+    return comparableVideo;
+};
+
+const hasConfigChanges = (acceptedVideoConfig: Video | null, videoConfig: Video | null) => {
+    if (!acceptedVideoConfig || !videoConfig) {
+        return false;
+    }
+
+    return !equals(
+        VideoSchema,
+        getComparableVideo(acceptedVideoConfig) as Video,
+        getComparableVideo(videoConfig) as Video
     );
+};
 
 const getUndoStackWithSnapshot = (undoStack: Video[], snapshot: Video | null) => {
     if (!snapshot) {
@@ -94,19 +110,29 @@ export const createSyncActions = (set: VideoStoreSet, get: VideoStoreGet) => {
             needsResync = false;
             set({ isSyncing: true });
 
-            await portalClient.updateVideoConfig({
+            const updateResponse = await portalClient.updateVideoConfig({
                 id: videoToAccept.id,
                 config: videoToAccept.config,
                 metadata: videoToAccept.metadata,
                 name: videoToAccept.name,
+                version: videoToAccept.version,
             });
 
             const nextAcceptedVideoConfig = clone(VideoSchema, videoToAccept);
+            nextAcceptedVideoConfig.version = updateResponse.version;
             const currentVideoConfig = get().videoConfig;
+            const nextCurrentVideoConfig = currentVideoConfig
+                ? clone(VideoSchema, currentVideoConfig)
+                : null;
+
+            if (nextCurrentVideoConfig) {
+                nextCurrentVideoConfig.version = updateResponse.version;
+            }
 
             set({
+                videoConfig: nextCurrentVideoConfig,
                 acceptedVideoConfig: nextAcceptedVideoConfig,
-                hasPendingChanges: hasConfigChanges(nextAcceptedVideoConfig, currentVideoConfig),
+                hasPendingChanges: hasConfigChanges(nextAcceptedVideoConfig, nextCurrentVideoConfig),
                 isSyncing: false,
                 undoStack: options.nextUndoStack ?? (
                     options.pushUndoEntry === false
@@ -125,7 +151,13 @@ export const createSyncActions = (set: VideoStoreSet, get: VideoStoreGet) => {
             syncStatus = "error";
             set({ isSyncing: false });
             console.error("Failed to sync video config to server:", error);
-            toast.error(getConnectError(error));
+
+            if (error instanceof ConnectError && error.code === Code.Aborted) {
+                toast.error("This video was modified in another session. Refresh to load the latest version.");
+            } else {
+                toast.error(getConnectError(error));
+            }
+
             throw error;
         }
     };

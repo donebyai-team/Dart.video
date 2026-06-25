@@ -5,5 +5,6 @@ SET categories  = :categories,
     metadata   = :metadata,
     status     = :status,
     name       = :name,
-    repeatable  = :repeatable
+    repeatable  = :repeatable,
+    version    = :version
 WHERE id = :id;

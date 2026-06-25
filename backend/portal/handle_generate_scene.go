@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/shank318/coasterai/agent/agenterrors"
 	"github.com/shank318/coasterai/agent/common"
+	"github.com/shank318/coasterai/errorx"
 	"github.com/shank318/coasterai/services"
 	"strings"
 
@@ -43,6 +44,10 @@ func (p *Portal) GenerateOrEditScene(ctx context.Context, c *connect.Request[pbp
 	video, _, err := p.getVideo(ctx, videoID, actor.OrganizationID, services.VideoOptions{IncludePending: false})
 	if err != nil {
 		return err
+	}
+
+	if video.Version != int(c.Msg.Version) {
+		return connect.NewError(connect.CodeAborted, errorx.ErrVersionMismatch)
 	}
 
 	animationAgent, statePublisher := p.newAnimationGeneratorAgent(logger, videoID, slideToEdit.Id, actor.OrganizationID)

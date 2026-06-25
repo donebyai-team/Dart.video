@@ -97,6 +97,11 @@ export declare type GenerateOrEditSceneRequest = Message<"coasterai.portal.v1.Ge
     value: ContinueVideoPlanningRequest;
     case: "askUserInput";
   } | { case: undefined; value?: undefined };
+
+  /**
+   * @generated from field: int64 version = 5;
+   */
+  version: bigint;
 };
 
 /**
@@ -501,6 +506,11 @@ export declare type UpdateVideoConfigRequest = Message<"coasterai.portal.v1.Upda
    * @generated from field: string name = 5;
    */
   name: string;
+
+  /**
+   * @generated from field: int64 version = 7;
+   */
+  version: bigint;
 };
 
 /**
@@ -508,6 +518,22 @@ export declare type UpdateVideoConfigRequest = Message<"coasterai.portal.v1.Upda
  * Use `create(UpdateVideoConfigRequestSchema)` to create a new message.
  */
 export declare const UpdateVideoConfigRequestSchema: GenMessage<UpdateVideoConfigRequest>;
+
+/**
+ * @generated from message coasterai.portal.v1.UpdateVideoConfigResponse
+ */
+export declare type UpdateVideoConfigResponse = Message<"coasterai.portal.v1.UpdateVideoConfigResponse"> & {
+  /**
+   * @generated from field: int64 version = 1;
+   */
+  version: bigint;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.UpdateVideoConfigResponse.
+ * Use `create(UpdateVideoConfigResponseSchema)` to create a new message.
+ */
+export declare const UpdateVideoConfigResponseSchema: GenMessage<UpdateVideoConfigResponse>;
 
 /**
  * @generated from message coasterai.portal.v1.GetVideoRequest
@@ -1556,7 +1582,7 @@ export declare const PortalService: GenService<{
   updateVideoConfig: {
     methodKind: "unary";
     input: typeof UpdateVideoConfigRequestSchema;
-    output: typeof EmptySchema;
+    output: typeof UpdateVideoConfigResponseSchema;
   },
   /**
    * @generated from rpc coasterai.portal.v1.PortalService.ListFigmaFrames

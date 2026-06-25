@@ -446,7 +446,7 @@ func (p *Portal) GetVideos(ctx context.Context, c *connect.Request[emptypb.Empty
 	return connect.NewResponse(&pbportal.GetVideosResponse{Videos: videoProtos}), nil
 }
 
-func (p *Portal) UpdateVideoConfig(ctx context.Context, c *connect.Request[pbportal.UpdateVideoConfigRequest]) (*connect.Response[emptypb.Empty], error) {
+func (p *Portal) UpdateVideoConfig(ctx context.Context, c *connect.Request[pbportal.UpdateVideoConfigRequest]) (*connect.Response[pbportal.UpdateVideoConfigResponse], error) {
 	actor, err := p.gethAuthContext(ctx)
 	if err != nil {
 		return nil, err
@@ -458,6 +458,7 @@ func (p *Portal) UpdateVideoConfig(ctx context.Context, c *connect.Request[pbpor
 		Config:         c.Msg.Config,
 		Metadata:       c.Msg.Metadata,
 		Name:           c.Msg.Name,
+		Version:        int(c.Msg.Version),
 	}
 
 	err = validateVideoConfig(updateVideoInput)
@@ -469,19 +470,25 @@ func (p *Portal) UpdateVideoConfig(ctx context.Context, c *connect.Request[pbpor
 
 	updateVideoInput.ID = resourceID
 
+	var updatedVideo *models.Video
+
 	if isTemplate {
-		err = p.templateService.UpdateTemplateConfig(ctx, updateVideoInput)
+		updatedVideo, err = p.templateService.UpdateTemplateConfig(ctx, updateVideoInput)
 	} else {
-		err = p.videoGenerationService.UpdateVideoConfig(ctx, updateVideoInput)
+		updatedVideo, err = p.videoGenerationService.UpdateVideoConfig(ctx, updateVideoInput)
 	}
 
 	if err != nil {
+		if errors.Is(err, errorx.ErrVersionMismatch) {
+			return nil, connect.NewError(connect.CodeAborted, err)
+		}
+
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, connect.NewError(connect.CodeNotFound, err)
+			return nil, connect.NewError(connect.CodeAborted, err)
 		}
 
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 
-	return connect.NewResponse(&emptypb.Empty{}), nil
+	return connect.NewResponse(&pbportal.UpdateVideoConfigResponse{Version: int64(updatedVideo.Version)}), nil
 }

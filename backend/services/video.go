@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/shank318/coasterai/datastore"
+	"github.com/shank318/coasterai/errorx"
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
@@ -17,7 +18,7 @@ type VideoGeneration interface {
 	CreateVideo(ctx context.Context, organizationID string, params *pbportal.CreateVideoRequest) (*models.Video, error)
 	GetVideo(ctx context.Context, id, organizationID string, options VideoOptions) (*models.Video, int, error)
 	GetVideos(ctx context.Context, organizationID string, options VideoOptions) ([]*models.Video, error)
-	UpdateVideoConfig(ctx context.Context, video *models.Video) error
+	UpdateVideoConfig(ctx context.Context, video *models.Video) (*models.Video, error)
 	UpdateVideoStatus(ctx context.Context, ID string, status models.VideoStatus) error
 	DuplicateVideo(ctx context.Context, organizationID, videoID string) (*models.Video, error)
 }
@@ -47,16 +48,20 @@ func isMetadataChanged(existing *pbcore.VideoMetadata, new *pbcore.VideoMetadata
 	return !backgroundChanged
 }
 
-func (v videoGeneration) UpdateVideoConfig(ctx context.Context, video *models.Video) error {
+func (v videoGeneration) UpdateVideoConfig(ctx context.Context, video *models.Video) (*models.Video, error) {
 	existingVideo, err := v.db.GetVideoById(ctx, video.ID, video.OrganizationID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if video.AIGeneratedConfig != nil {
 		existingVideo.AIGeneratedConfig = video.AIGeneratedConfig
 		existingVideo.Config = video.AIGeneratedConfig
 		video.Config = video.AIGeneratedConfig
+	} else {
+		if video.Version != existingVideo.Version {
+			return nil, errorx.ErrVersionMismatch
+		}
 	}
 
 	configChanged := !proto.Equal(existingVideo.Config, video.Config)
@@ -121,7 +126,12 @@ func (v videoGeneration) UpdateVideoConfig(ctx context.Context, video *models.Vi
 		existingVideo.Status = video.Status
 	}
 
-	return v.db.UpdateVideo(ctx, existingVideo)
+	err = v.db.UpdateVideo(ctx, existingVideo)
+	if err != nil {
+		return nil, err
+	}
+
+	return existingVideo, nil
 }
 
 const letters = "abcdefghijklmnopqrstuvwxyz"

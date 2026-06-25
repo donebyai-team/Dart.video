@@ -129,6 +129,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
       setIsExportingVideo(true)
       prepareProgressRef.current = 2
       setExportProgress({ status: 'submitting', hasPhase: false, percent: prepareProgressRef.current })
+      const renderVersion = Number(videoConfigFromStore.version)
 
       const renderResponse = await portalClient.renderVideo({ videoId })
       while (true) {
@@ -143,7 +144,7 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
         }
 
         const renderStatus = await pollVideoRender(renderResponse.jobId,
-          renderResponse.videoId, Number(renderResponse.version))
+          renderResponse.videoId, renderVersion)
 
         if (renderStatus.type === 'file') {
           setExportProgress({ status: 'downloading', hasPhase: true, percent: 100 })

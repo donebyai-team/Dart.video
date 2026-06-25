@@ -85,7 +85,7 @@ type PortalServiceClient interface {
 	DeleteVideo(ctx context.Context, in *VideoRequestWithID, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	DuplicateVideo(ctx context.Context, in *VideoRequestWithID, opts ...grpc.CallOption) (*GetVideoResponse, error)
 	RenderVideo(ctx context.Context, in *VideoRequestWithID, opts ...grpc.CallOption) (*RenderVideoResponse, error)
-	UpdateVideoConfig(ctx context.Context, in *UpdateVideoConfigRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	UpdateVideoConfig(ctx context.Context, in *UpdateVideoConfigRequest, opts ...grpc.CallOption) (*UpdateVideoConfigResponse, error)
 	ListFigmaFrames(ctx context.Context, in *ListFigmaFramesRequest, opts ...grpc.CallOption) (*ListFigmaFramesResponse, error)
 	ImportFigmaFrame(ctx context.Context, in *ImportFigmaFrameRequest, opts ...grpc.CallOption) (*ImportFigmaFrameResponse, error)
 	// brand identity request
@@ -358,8 +358,8 @@ func (c *portalServiceClient) RenderVideo(ctx context.Context, in *VideoRequestW
 	return out, nil
 }
 
-func (c *portalServiceClient) UpdateVideoConfig(ctx context.Context, in *UpdateVideoConfigRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *portalServiceClient) UpdateVideoConfig(ctx context.Context, in *UpdateVideoConfigRequest, opts ...grpc.CallOption) (*UpdateVideoConfigResponse, error) {
+	out := new(UpdateVideoConfigResponse)
 	err := c.cc.Invoke(ctx, PortalService_UpdateVideoConfig_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -568,7 +568,7 @@ type PortalServiceServer interface {
 	DeleteVideo(context.Context, *VideoRequestWithID) (*emptypb.Empty, error)
 	DuplicateVideo(context.Context, *VideoRequestWithID) (*GetVideoResponse, error)
 	RenderVideo(context.Context, *VideoRequestWithID) (*RenderVideoResponse, error)
-	UpdateVideoConfig(context.Context, *UpdateVideoConfigRequest) (*emptypb.Empty, error)
+	UpdateVideoConfig(context.Context, *UpdateVideoConfigRequest) (*UpdateVideoConfigResponse, error)
 	ListFigmaFrames(context.Context, *ListFigmaFramesRequest) (*ListFigmaFramesResponse, error)
 	ImportFigmaFrame(context.Context, *ImportFigmaFrameRequest) (*ImportFigmaFrameResponse, error)
 	// brand identity request
@@ -655,7 +655,7 @@ func (UnimplementedPortalServiceServer) DuplicateVideo(context.Context, *VideoRe
 func (UnimplementedPortalServiceServer) RenderVideo(context.Context, *VideoRequestWithID) (*RenderVideoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RenderVideo not implemented")
 }
-func (UnimplementedPortalServiceServer) UpdateVideoConfig(context.Context, *UpdateVideoConfigRequest) (*emptypb.Empty, error) {
+func (UnimplementedPortalServiceServer) UpdateVideoConfig(context.Context, *UpdateVideoConfigRequest) (*UpdateVideoConfigResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateVideoConfig not implemented")
 }
 func (UnimplementedPortalServiceServer) ListFigmaFrames(context.Context, *ListFigmaFramesRequest) (*ListFigmaFramesResponse, error) {
