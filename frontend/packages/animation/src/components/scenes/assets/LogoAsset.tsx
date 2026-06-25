@@ -70,7 +70,6 @@ export function LogoAsset(initProps: LogoAssetProps): React.ReactElement {
     const hasExplicitSrcProp = Object.prototype.hasOwnProperty.call(initProps, 'src');
 
     const props = usePatchedProps(id, defaultProps);
-    console.log("Wefwefwef", props)
 
     const frame = useCurrentFrame();
     const { logo } = useTheme();

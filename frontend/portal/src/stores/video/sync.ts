@@ -204,13 +204,16 @@ export const createSyncActions = (set: VideoStoreSet, get: VideoStoreGet) => {
         async undoVideoConfigChanges() {
             autoSync.cancel?.();
 
-            const { undoStack, selectedSlide } = get();
+            const { undoStack, selectedSlide, acceptedVideoConfig } = get();
             const previousAcceptedVideoConfig = undoStack[undoStack.length - 1];
             if (!previousAcceptedVideoConfig) {
                 return;
             }
 
             const restoredVideoConfig = clone(VideoSchema, previousAcceptedVideoConfig);
+            if (acceptedVideoConfig) {
+                restoredVideoConfig.version = acceptedVideoConfig.version;
+            }
             const restoredEditorState = getRestoredEditorState(restoredVideoConfig, selectedSlide?.id);
             const nextUndoStack = undoStack.slice(0, -1);
 
