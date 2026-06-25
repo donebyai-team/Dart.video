@@ -96,18 +96,21 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
         **50–55 characters maximum**
     - For image or video placeholders, use: `https://placehold.co/{width}x{height}.png` where `width` and `height` are pixel values.
 
-    ## Special Scenes and its Props:
-    - Some props may contain sample values. Treat them as examples that indicate the expected structure, format, and content style.
-    - They are pre existing non-responsive templates, hence their props values are fixed.
-    - Preserve the schema structure exactly.
-    - Preserve array lengths.
-    - Match the format of sample values when generating replacements.
-    - Preserve content shape whenever possible (e.g. word count, text length etc). To avoid overflow as the templates are non-responsive
+    ## Special Scenes and Their Props
+
+    Some scenes use pre-existing, non-responsive templates.
+
+    - Sample prop values are examples only. They define the expected schema, format, and content style—not the literal content.
+    - Preserve the props schema exactly. Do not add, remove, or rename fields.
+    - Preserve array lengths exactly.
+    - Generate replacement values that match the format and style of the sample values.
+    - Preserve the visual footprint of the content as closely as possible (e.g. word count, text length, number of lines, item counts). These templates are non-responsive, so significantly longer or shorter content may overflow or break the layout.
 
     Examples:
-    - If a sample array contains 10 items, generate 10 items.
-    - If each sample text contains 1–2 words, generate replacement text with a similar length.
-    - If a field contains a short headline, generate a short headline rather than a paragraph.
+    - If a sample array contains 10 items, generate exactly 10 items.
+    - If each sample label contains 1–2 words, generate labels of similar length.
+    - If a field contains a short headline, generate a short headline—not a paragraph.
+    - If a field contains a date, currency, percentage, or statistic, generate a replacement in the same format.
 
     ## PLAN BEFORE EXECUTING
 

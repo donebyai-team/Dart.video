@@ -4,7 +4,7 @@ import type { ConversationMessage } from '@coasterai/pb/coasterai/core/v1/chat_p
 import { ConversationMessageType, ConversationRole } from '@coasterai/pb/coasterai/core/v1/chat_pb'
 import { type MediaAsset, SelectedMediaAssetSchema } from '@coasterai/pb/coasterai/core/v1/media_asset_pb'
 import type { PatchOverlay } from '@coasterai/renderer'
-import { Paperclip, RotateCcw } from 'lucide-react'
+import { EyeIcon, Paperclip, RotateCcw } from 'lucide-react'
 import SelectedAssetsDialog, { type SelectedAssetWithPreview } from '@/components/assets/SelectedAssetsDialog'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -108,8 +108,8 @@ function CheckpointRow({ message, isLoading, onRevert }: { message: Conversation
         onClick={onRevert}
         disabled={isLoading || !canRevert}
       >
-        <RotateCcw className='h-3.5 w-3.5' />
-        <span>Revert to this point</span>
+        <EyeIcon className='h-3.5 w-3.5' />
+        <span>View this version</span>
       </Button>
       <div className='h-px flex-1 bg-border/70' />
     </div>

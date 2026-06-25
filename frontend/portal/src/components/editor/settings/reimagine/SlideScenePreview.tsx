@@ -74,7 +74,7 @@ export default function SlideScenePreview({ checkpointMessage, open, onOpenChang
 
             <DialogFooter className='mt-4'>
               <Button type='button' variant='outline' onClick={() => onOpenChange(false)} disabled={isReverting}>Cancel</Button>
-              <Button type='button' onClick={onRevert} disabled={!previewSlide || isReverting}>{isReverting ? 'Reverting...' : 'Revert'}</Button>
+              <Button type='button' onClick={onRevert} disabled={!previewSlide || isReverting}>{isReverting ? 'Reverting...' : 'Use this version'}</Button>
             </DialogFooter>
           </div>
         </div>
