@@ -28,23 +28,24 @@ function ExtractTemplateConfig(input: ExtractTemplateConfigRequest) -> ExtractTe
 
     ## Value Generation
 
-    Populate values using:
+    Populate props values using:
     1. Scene Content
     2. Brand Details (Only when needed, eg the prop field mention brandName, tagline etc)
     3. If a value is a placeholder url, don't replace it. Keep it as it is.
 
-    Rules:
-    - The Props Schema may contain sample values. Treat them as examples that indicate the expected structure, format, and content style.
-    - Preserve the schema structure exactly.
-    - Preserve array lengths unless the schema explicitly allows otherwise.
-    - Match the format of sample values when generating replacements.
-    - Preserve content shape whenever possible (e.g. word count, text length etc).
+    ## Special components and Their Props
+    Some components use pre-existing, non-responsive templates and hence their props has sample values.
+    - Sample prop values are examples only. They define the expected schema, format, and content style—not the literal content.
+    - Preserve the props schema exactly. Do not add, remove, or rename fields.
+    - Preserve array lengths exactly.
+    - Generate replacement values that match the format and style of the sample values.
+    - Preserve the visual footprint of the content as closely as possible (e.g. word count, text length, number of lines, item counts). These templates are non-responsive, so significantly longer or shorter content may overflow or break the layout.
 
     Examples:
-    - If a sample array contains 10 items, generate 10 items.
-    - If each sample text contains 1–2 words, generate replacement text with a similar length.
-    - If an array contains an array of words, generate replacement words using Scene Contentb
-    - If a field contains a short headline, generate a short headline rather than a paragraph.
+    - If a sample array contains 10 items, generate exactly 10 items.
+    - If each sample label contains 1–2 words, generate labels of similar length.
+    - If a field contains a short headline, generate a short headline—not a paragraph.
+    - If a field contains a date, currency, percentage, or statistic, generate a replacement in the same format.
 
     If a value cannot be determined from the scene content or brand details, generate a reasonable value that fits the context.
 
