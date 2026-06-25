@@ -135,7 +135,7 @@ func (s *codeBuilderService) ValidateAndBuild(
 
 	toPatches, err := utils.RawMessageToStruct(edits)
 	if err != nil {
-		return nil, fmt.Errorf("invalid template registry patch")
+		return nil, fmt.Errorf("invalid edits patch")
 	}
 
 	s.logger.Info("uploaded generated code",

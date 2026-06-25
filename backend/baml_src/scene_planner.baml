@@ -96,12 +96,13 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
         **50–55 characters maximum**
     - For image or video placeholders, use: `https://placehold.co/{width}x{height}.png` where `width` and `height` are pixel values.
 
-    ## Special Props:
+    ## Special Scenes and its Props:
     - Some props may contain sample values. Treat them as examples that indicate the expected structure, format, and content style.
+    - They are pre existing non-responsive templates, hence their props values are fixed.
     - Preserve the schema structure exactly.
     - Preserve array lengths.
     - Match the format of sample values when generating replacements.
-    - Preserve content shape whenever possible (e.g. word count, text length etc).
+    - Preserve content shape whenever possible (e.g. word count, text length etc). To avoid overflow as the templates are non-responsive
 
     Examples:
     - If a sample array contains 10 items, generate 10 items.

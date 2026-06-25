@@ -68,16 +68,24 @@ func RawMessageToStructs(raw json.RawMessage) ([]*structpb.Struct, error) {
 }
 
 func RawMessageToStruct(raw json.RawMessage) (*structpb.Struct, error) {
-	var data map[string]interface{}
+	var v any
 
 	if len(raw) > 0 {
-		if err := json.Unmarshal(raw, &data); err != nil {
+		if err := json.Unmarshal(raw, &v); err != nil {
 			return nil, err
 		}
 	}
 
-	if data == nil {
-		data = map[string]interface{}{}
+	var data map[string]any
+
+	switch t := v.(type) {
+	case nil:
+		data = map[string]any{}
+	case map[string]any:
+		data = t
+	default:
+		// Arrays, strings, numbers, booleans, etc. are treated as an empty struct.
+		data = map[string]any{}
 	}
 
 	return structpb.NewStruct(data)

@@ -177,7 +177,7 @@ func (l *codeGenerator) GenerateCodeFromScene(ctx context.Context, scene *scenes
 
 	toPatches, err := utils.RawMessageToStruct(scene.ToEditsPatch())
 	if err != nil {
-		return nil, fmt.Errorf("invalid template registry patch: %s", scene.Name)
+		return nil, fmt.Errorf("invalid edits patch: %s", scene.Name)
 	}
 
 	slide := &pbcore.Slide{
