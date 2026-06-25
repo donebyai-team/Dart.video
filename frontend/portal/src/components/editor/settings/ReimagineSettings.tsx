@@ -94,7 +94,7 @@ const ReimagineSettings = ({
     videoId,
     slide: suggestionSourceSlide,
     categories: selectedCategoryValues,
-    enabled: activeTab === reimagineTabs.BROWSE && Boolean(selectedCategory),
+    enabled: activeTab === reimagineTabs.SUGGESTIONS && Boolean(selectedCategory),
     onError: handleSuggestionError,
   })
 

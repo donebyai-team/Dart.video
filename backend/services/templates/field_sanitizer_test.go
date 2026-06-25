@@ -2,7 +2,6 @@ package templates
 
 import (
 	"encoding/json"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -17,9 +16,9 @@ func TestBuildAndSanitizeLLMPropsPayload_Nil(t *testing.T) {
 
 func TestBuildAndSanitizeLLMPropsPayload(t *testing.T) {
 	tests := []struct {
-		name     string
-		input    map[string]any
-		expected any
+		name      string
+		input     map[string]any
+		expected  any
 		wantEmpty bool
 	}{
 		{
@@ -36,7 +35,7 @@ func TestBuildAndSanitizeLLMPropsPayload(t *testing.T) {
 				"empty":    "   ",
 			},
 			expected: map[string]any{
-				"title":    "Hello world",
+				"title":    "  Hello world  ",
 				"subtitle": "Secondary text",
 				"image":    "https://placehold.co/600x400/png",
 			},
@@ -64,10 +63,10 @@ func TestBuildAndSanitizeLLMPropsPayload(t *testing.T) {
 			expected: map[string]any{
 				"items": []any{
 					map[string]any{
-						"text": "First line second line",
+						"text": " First line \n second line ",
 						"meta": map[string]any{
 							"preview": "https://placehold.co/300x200/jpg",
-							"caption": "nested caption",
+							"caption": " nested caption ",
 						},
 					},
 					map[string]any{
@@ -77,12 +76,12 @@ func TestBuildAndSanitizeLLMPropsPayload(t *testing.T) {
 			},
 		},
 		{
-			name: "truncates long text to max length",
+			name: "preserves long text",
 			input: map[string]any{
-				"title": strings.Repeat("a", maxSanitizedTextLength+10),
+				"title": "SEAMLESSLY\n{INTEGRATES} WITH\nYOUR {STACK}",
 			},
 			expected: map[string]any{
-				"title": strings.Repeat("a", maxSanitizedTextLength-3) + "...",
+				"title": "SEAMLESSLY\n{INTEGRATES} WITH\nYOUR {STACK}",
 			},
 		},
 		{

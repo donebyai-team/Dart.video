@@ -39,8 +39,7 @@ var (
 		"highlightstyle":    {},
 	}
 
-	hexColorRegex          = regexp.MustCompile(`(?i)^#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$`)
-	maxSanitizedTextLength = 60
+	hexColorRegex = regexp.MustCompile(`(?i)^#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$`)
 )
 
 // Defaults are used as schema of the template
@@ -294,12 +293,7 @@ func shouldDropString(v string) bool {
 }
 
 func sanitizeTextValue(v string) string {
-	content := strings.Join(strings.Fields(v), " ")
-	if len(content) > maxSanitizedTextLength {
-		return content[:maxSanitizedTextLength-3] + "..."
-	}
-
-	return content
+	return v
 }
 
 func isURL(s string) bool {

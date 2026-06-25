@@ -112,6 +112,11 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     - If a field contains a short headline, generate a short headline—not a paragraph.
     - If a field contains a date, currency, percentage, or statistic, generate a replacement in the same format.
 
+    Text Formatting Conventions:
+    If a text prop contains formatting markers, eg. { "title": "Launch {AI}\nWith {Remotion}" }:
+    - `\n` represents a line break. Preserve the line-break structure whenever possible.
+    - `{text}` marks text that should be highlighted. Replace only the text inside the braces while preserving the `{}` markers.
+
     ## PLAN BEFORE EXECUTING
 
     Before outputting scenes, reason through:
