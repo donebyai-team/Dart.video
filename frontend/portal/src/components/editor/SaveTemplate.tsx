@@ -42,6 +42,8 @@ const EMPTY_FORM: FormState = {
   categories: [],
 }
 
+const USAGE_SEPARATOR = "---USAGE---"
+
 const splitDescriptionAndUsage = (value?: string) => {
   const content = value?.trim() ?? ""
 
@@ -49,16 +51,18 @@ const splitDescriptionAndUsage = (value?: string) => {
     return { description: "", usageDescription: "" }
   }
 
-  const separator = "\n\n"
-  const separatorIndex = content.indexOf(separator)
+  const parts = content.split(USAGE_SEPARATOR, 2)
 
-  if (separatorIndex === -1) {
-    return { description: content, usageDescription: "" }
+  if (parts.length === 1) {
+    return {
+      description: content,
+      usageDescription: "",
+    }
   }
 
   return {
-    description: content.slice(0, separatorIndex).trim(),
-    usageDescription: content.slice(separatorIndex + separator.length).trim(),
+    description: parts[0].trim(),
+    usageDescription: parts[1].trim(),
   }
 }
 
