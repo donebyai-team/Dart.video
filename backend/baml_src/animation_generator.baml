@@ -118,6 +118,11 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
     - **Keep the overall animation fast, avoid long or empty frames between stagger delays**
     - **Animate references by default; use them as attachments only when explicitly requested.**
 
+    ## Virtual Camera (optional)
+
+    - When beneficial(text animations, product showcases etc), animate a virtual camera instead of keeping the scene static.
+    - The camera may reframe, zoom, shift focus, and follow typed or revealed content to guide the viewer's attention.
+
     ## RESERVED NAMES (CRITICAL)
 
     NEVER use these as variable names - they shadow imports:
@@ -139,13 +144,13 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
     ## TEMPLATING RULES
 
     - Remember: you are generating a reusable animation template, not a one-off animation.
-    - Design layouts to accommodate realistic variations in content length.
+    - **Design layouts to accommodate realistic variations in content length, arrays.**
     - Text may wrap, reflow, resize, or use multiple lines when needed.
     - Prefer CSS layout techniques (flexbox, grid, wrapping, scaling) over measuring content dimensions.
     - Minor layout adjustments are preferred over text overflow, clipping, or overlap.
     - Prioritize visual quality over extreme responsiveness.
     - Treat `DEFAULT_DATA` like component props: it should contain only customizable content, not internal logic, styling, animation settings, or implementation details.
-    - Do NOT store element IDs, colors, React keys, or other implementation details in `DEFAULT_DATA`.
+    - Do NOT store element IDs, colors, React keys, or other implementation details in `DEFAULT_DATA`, use **array index for ids** if needed.
 
     {% endif %}
 
