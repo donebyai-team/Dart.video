@@ -103,7 +103,6 @@ template_string AnimationPrimitives(resume: VideoBranding) #"
     ```
     {% endraw %}
 
-    {% if not resume.brandColors %}
     ### parseText()
 
     - When text spans multiple lines or contains highlighted words, store it as a single `text` string and use `parseText()` to parse it.
@@ -149,7 +148,6 @@ template_string AnimationPrimitives(resume: VideoBranding) #"
     ))}
     ```
     {% endraw %}
-    {% endif %}
 
     ## Image, Video, Icon and Logo:
     - Never use `img`, `video` or other media tags

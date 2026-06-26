@@ -280,6 +280,45 @@ func (c Category) BamlTypeName() string {
 	return "Category"
 }
 
+type DynamicProps struct {
+	DynamicProperties map[string]any
+}
+
+func (c *DynamicProps) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_STREAM_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_STREAM_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "DynamicProps" {
+		panic(fmt.Sprintf("expected DynamicProps, got %s", typeName.Name))
+	}
+
+	c.DynamicProperties = make(map[string]any)
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		default:
+
+			c.DynamicProperties[key] = baml.DecodeToValue(valueHolder)
+
+		}
+	}
+
+}
+
+func (c DynamicProps) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	return baml.EncodeClass("DynamicProps", fields, &c.DynamicProperties)
+}
+
+func (c DynamicProps) BamlTypeName() string {
+	return "DynamicProps"
+}
+
 type ExtractTemplateConfigRequest struct {
 	Content       *string        `json:"content"`
 	Scenes        []SceneElement `json:"scenes"`
@@ -425,10 +464,10 @@ func (c GenerateAnimationCodeRequest) BamlTypeName() string {
 }
 
 type GenerateAnimationCodeResponse struct {
-	Code            *string `json:"code"`
-	Total_frames    *int64  `json:"total_frames"`
-	ManualEdits     *string `json:"manualEdits"`
-	ThinkingSummary *string `json:"thinkingSummary"`
+	Code            *string       `json:"code"`
+	Total_frames    *int64        `json:"total_frames"`
+	ManualEdits     *DynamicProps `json:"manualEdits"`
+	ThinkingSummary *string       `json:"thinkingSummary"`
 }
 
 func (c *GenerateAnimationCodeResponse) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -452,7 +491,7 @@ func (c *GenerateAnimationCodeResponse) Decode(holder *cffi.CFFIValueClass, type
 			c.Total_frames = baml.Decode(valueHolder).Interface().(*int64)
 
 		case "manualEdits":
-			c.ManualEdits = baml.Decode(valueHolder).Interface().(*string)
+			c.ManualEdits = baml.Decode(valueHolder).Interface().(*DynamicProps)
 
 		case "thinkingSummary":
 			c.ThinkingSummary = baml.Decode(valueHolder).Interface().(*string)

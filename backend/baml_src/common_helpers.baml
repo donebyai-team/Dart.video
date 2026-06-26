@@ -38,6 +38,10 @@ class SceneElement {
   props string @description("required props in VALID JSON format as per the scene")
 }
 
+class DynamicProps {
+ @@dynamic
+}
+
 enum ColorToken {
   PRIMARY
 }

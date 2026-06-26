@@ -41,5 +41,6 @@ message ConversationMessage {
   optional google.protobuf.Struct defaultCodeData = 9;
   optional int32 durationInFrames = 10;
   string id = 11;
+  optional google.protobuf.Struct manualEdits = 12;
 }
 

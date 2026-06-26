@@ -19,12 +19,17 @@ export const useConversationHistory = ({ videoId, enabled }: UseConversationHist
   const updateSlideById = useVideoStore(s => s.updateSlideById)
   const requestIdRef = useRef(0)
   const selectedSlideRef = useRef(selectedSlide)
+  const videoVersionRef = useRef(videoVersion)
   const [messages, setMessages] = useState<ConversationMessage[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     selectedSlideRef.current = selectedSlide
   }, [selectedSlide])
+
+  useEffect(() => {
+    videoVersionRef.current = videoVersion
+  }, [videoVersion])
 
   const loadConversationHistory = useCallback(async (checkpointMessage?: ConversationMessage) => {
     const slideId = selectedSlideRef.current?.id
@@ -45,7 +50,7 @@ export const useConversationHistory = ({ videoId, enabled }: UseConversationHist
         videoId,
         slideId,
         checkpoint: checkpointMessage?.id,
-        videoVersion,
+        videoVersion: videoVersionRef.current,
       })
 
       if (requestId !== requestIdRef.current) {
@@ -70,7 +75,7 @@ export const useConversationHistory = ({ videoId, enabled }: UseConversationHist
         setIsLoading(false)
       }
     }
-  }, [portalClient, updateSlideById, videoId, videoVersion])
+  }, [portalClient, updateSlideById, videoId])
 
   useEffect(() => {
     if (!enabled) {

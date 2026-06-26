@@ -261,10 +261,11 @@ func (l *codeGenerator) GenerateCode(
 	if slide.Content != nil &&
 		slide.Content.CodeRegistry != nil &&
 		slide.Content.CodeRegistry.MUrl != "" {
+		slide.Content.CodeRegistry.Edits = slide.Content.Edits
 		session.AddCodeCheckpoint(slide.Content.CodeRegistry, slide.DurationInFrames)
 
 		// If manual edits are available
-		if len(slide.Content.Edits.Fields) > 0 {
+		if len(slide.Content.CodeRegistry.Edits.Fields) > 0 {
 			edits, err := slide.Content.Edits.MarshalJSON()
 			if err != nil {
 				return nil, agenterrors.Internal("failed to marshal edits", err)
@@ -272,7 +273,7 @@ func (l *codeGenerator) GenerateCode(
 			session.AddMessage(&pbcore.ConversationMessage{
 				Role:    pbcore.ConversationRole_CONVERSATION_ROLE_USER,
 				Type:    pbcore.ConversationMessageType_CONVERSATION_MESSAGE_MANUAL_EDITS,
-				Message: "User made some edits, consider this in follow ups. \n\n" + string(edits),
+				Message: "User made some manualEdits. Preserve and update them in follow-up responses.\n\nmanualEdits:\n" + string(edits) + "\n\n",
 			})
 		}
 	}

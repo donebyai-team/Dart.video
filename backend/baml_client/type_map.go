@@ -31,6 +31,8 @@ var typeMap = map[string]reflect.Type{
 	"STREAM_TYPES.Background":                    reflect.TypeOf(stream_types.Background{}),
 	"TYPES.Category":                             reflect.TypeOf(types.Category{}),
 	"STREAM_TYPES.Category":                      reflect.TypeOf(stream_types.Category{}),
+	"TYPES.DynamicProps":                         reflect.TypeOf(types.DynamicProps{}),
+	"STREAM_TYPES.DynamicProps":                  reflect.TypeOf(stream_types.DynamicProps{}),
 	"TYPES.ExtractTemplateConfigRequest":         reflect.TypeOf(types.ExtractTemplateConfigRequest{}),
 	"STREAM_TYPES.ExtractTemplateConfigRequest":  reflect.TypeOf(stream_types.ExtractTemplateConfigRequest{}),
 	"TYPES.ExtractTemplateConfigResponse":        reflect.TypeOf(types.ExtractTemplateConfigResponse{}),

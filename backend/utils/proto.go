@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/shank318/coasterai/baml_client/types"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/structpb"
@@ -91,16 +92,12 @@ func RawMessageToStruct(raw json.RawMessage) (*structpb.Struct, error) {
 	return structpb.NewStruct(data)
 }
 
-// CreateStructFromMap converts map[string]interface{} → *structpb.Struct
-func CreateStructFromMap(data map[string]interface{}) *structpb.Struct {
-	if data == nil {
-		data = map[string]interface{}{}
+func CreateStructFromDynamicClass(props *types.DynamicProps) (*structpb.Struct, error) {
+	if props == nil || props.DynamicProperties == nil {
+		return structpb.NewStruct(map[string]any{})
 	}
-	s, err := structpb.NewStruct(data)
-	if err != nil {
-		panic(fmt.Errorf("unable to CreateStructFromMap: %w", err)) // or log.Fatal
-	}
-	return s
+
+	return structpb.NewStruct(props.DynamicProperties)
 }
 
 // MergeStructs merges struct2 into struct1 (deep merge)

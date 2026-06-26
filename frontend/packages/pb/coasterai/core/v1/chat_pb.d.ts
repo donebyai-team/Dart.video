@@ -71,6 +71,11 @@ export declare type ConversationMessage = Message<"coasterai.core.v1.Conversatio
    * @generated from field: string id = 11;
    */
   id: string;
+
+  /**
+   * @generated from field: optional google.protobuf.Struct manualEdits = 12;
+   */
+  manualEdits?: JsonObject;
 };
 
 /**

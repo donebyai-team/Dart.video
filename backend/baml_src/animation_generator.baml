@@ -6,7 +6,7 @@ class GenerateAnimationCodeRequest {
 class GenerateAnimationCodeResponse {
   code string @description("Typescript code")
   total_frames int @description("total frames for this animation at 30fps")
-  manualEdits string? @description("valid json")
+  manualEdits DynamicProps?
   thinkingSummary string? @skip()
 }
 
@@ -159,9 +159,9 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
 
     ## OUTPUT FORMAT (CRITICAL)
 
-    * Always return the **total frame count**, keeping it consistent with the scene timings and FPS. Avoid unnecessary idle or dead frames.
-    * If `manualEdits` are provided in follow-up requests, always return the updated `manualEdits` along with the updated code.
-    * `manualEdits` reference code and elements by `elementId`. If a code change removes or renames an element so its ID no longer exists, remove the corresponding entry from `manualEdits`.
+     * Always return the **total frame count**, keeping it consistent with the scene timings and FPS. Avoid unnecessary idle or dead frames.
+     * If `manualEdits` are provided in follow-up requests, always return the updated `manualEdits` along with the updated code.
+     * `manualEdits` reference code and elements by `elementId`. If a code change removes or renames an element so its ID no longer exists, remove the corresponding entry from `manualEdits`.
 
     ---
     ## INPUT
@@ -179,8 +179,12 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
     {% for message in conversation_history %}
     {{ _.role(message.role) }}
     {{ message.content }}
+    {% if message.images and message.images|length > 0 %}
     {{ message.images }}
+    {% endif %}
+    {% if message.videos and message.videos|length > 0 %}
     {{ message.videos }}
+    {% endif %}
     {% endfor %}
     {% endif %}
 

@@ -187,6 +187,7 @@ func (p *SessionContext) AddCodeCheckpoint(codeRegistry *pbcore.CodeRegistry, fr
 		CodeSnapshot:     codeRegistry.MUrl,
 		DefaultCodeData:  codeRegistry.Defaults,
 		DurationInFrames: utils.Ptr(frames),
+		ManualEdits:      codeRegistry.Edits,
 		Type:             pbcore.ConversationMessageType_CONVERSATION_MESSAGE_TYPE_CHECKPOINT,
 	}
 	message.CreatedAt = timestamppb.Now()
@@ -314,6 +315,9 @@ func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcor
 
 				code = code_builder.PreProcess(code)
 				message.Content = code
+				if item.DurationInFrames != nil {
+					message.Content += fmt.Sprintf("\n\ntotal_frames: %d", *item.DurationInFrames)
+				}
 			}
 		}
 

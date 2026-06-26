@@ -207,6 +207,38 @@ func (t *CategoryClassView) Type() (baml.Type, error) {
 	return t.inner.Type()
 }
 
+type DynamicPropsClassBuilder struct {
+	inner baml.ClassBuilder
+}
+
+func (t *DynamicPropsClassBuilder) ListProperties() ([]ClassPropertyBuilder, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyBuilder, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *DynamicPropsClassBuilder) AddProperty(name string, propertyType Type) (ClassPropertyBuilder, error) {
+	return t.inner.AddProperty(name, propertyType)
+}
+
+func (t *TypeBuilder) DynamicProps() (*DynamicPropsClassBuilder, error) {
+	bld, err := t.inner.Class("DynamicProps")
+	if err != nil {
+		return nil, err
+	}
+	return &DynamicPropsClassBuilder{inner: bld}, nil
+}
+
+func (t *DynamicPropsClassBuilder) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
 type ExtractTemplateConfigRequestClassView struct {
 	inner baml.ClassBuilder
 }

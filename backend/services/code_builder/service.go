@@ -2,7 +2,6 @@ package code_builder
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/shank318/coasterai/baml_client/types"
@@ -122,18 +121,7 @@ func (s *codeBuilderService) ValidateAndBuild(
 	}
 
 	// Save edits
-	edits := json.RawMessage(`{}`)
-	if input.Animation.ManualEdits != nil {
-		raw := []byte(*input.Animation.ManualEdits)
-
-		if !json.Valid(raw) {
-			s.logger.Warn("invalid manual edits", zap.String("manual_edits", *input.Animation.ManualEdits))
-		} else {
-			edits = raw
-		}
-	}
-
-	toPatches, err := utils.RawMessageToStruct(edits)
+	toPatches, err := utils.CreateStructFromDynamicClass(input.Animation.ManualEdits)
 	if err != nil {
 		return nil, fmt.Errorf("invalid edits patch")
 	}

@@ -9,7 +9,7 @@ export function parseText(text: string): ParsedTextLine[] {
   return text.split("\n").map((line) => {
     const segments: ParsedTextSegment[] = [];
 
-    const regex = /\{([^}]*)\}/g;
+    const regex = /\{([^}]*)\}|\*([^*]+)\*/g;
     let lastIndex = 0;
 
     for (const match of line.matchAll(regex)) {
@@ -23,7 +23,7 @@ export function parseText(text: string): ParsedTextLine[] {
       }
 
       segments.push({
-        text: match[1],
+        text: match[1] ?? match[2], // {} or * *
         highlight: true,
       });
 
@@ -36,7 +36,7 @@ export function parseText(text: string): ParsedTextLine[] {
         highlight: false,
       });
     }
-    console.log("REgesrgweg", segments)
+
     return segments;
   });
 }

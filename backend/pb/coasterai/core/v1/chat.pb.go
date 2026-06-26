@@ -193,6 +193,7 @@ type ConversationMessage struct {
 	DefaultCodeData  *structpb.Struct        `protobuf:"bytes,9,opt,name=defaultCodeData,proto3,oneof" json:"defaultCodeData,omitempty"`
 	DurationInFrames *int32                  `protobuf:"varint,10,opt,name=durationInFrames,proto3,oneof" json:"durationInFrames,omitempty"`
 	Id               string                  `protobuf:"bytes,11,opt,name=id,proto3" json:"id,omitempty"`
+	ManualEdits      *structpb.Struct        `protobuf:"bytes,12,opt,name=manualEdits,proto3,oneof" json:"manualEdits,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -304,11 +305,18 @@ func (x *ConversationMessage) GetId() string {
 	return ""
 }
 
+func (x *ConversationMessage) GetManualEdits() *structpb.Struct {
+	if x != nil {
+		return x.ManualEdits
+	}
+	return nil
+}
+
 var File_coasterai_core_v1_chat_proto protoreflect.FileDescriptor
 
 const file_coasterai_core_v1_chat_proto_rawDesc = "" +
 	"\n" +
-	"\x1ccoasterai/core/v1/chat.proto\x12\x11coasterai.core.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\"\xc0\x04\n" +
+	"\x1ccoasterai/core/v1/chat.proto\x12\x11coasterai.core.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\"\x90\x05\n" +
 	"\x13ConversationMessage\x127\n" +
 	"\x04role\x18\x01 \x01(\x0e2#.coasterai.core.v1.ConversationRoleR\x04role\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12\x1a\n" +
@@ -322,11 +330,13 @@ const file_coasterai_core_v1_chat_proto_rawDesc = "" +
 	"\x0fdefaultCodeData\x18\t \x01(\v2\x17.google.protobuf.StructH\x01R\x0fdefaultCodeData\x88\x01\x01\x12/\n" +
 	"\x10durationInFrames\x18\n" +
 	" \x01(\x05H\x02R\x10durationInFrames\x88\x01\x01\x12\x0e\n" +
-	"\x02id\x18\v \x01(\tR\x02idB\n" +
+	"\x02id\x18\v \x01(\tR\x02id\x12>\n" +
+	"\vmanualEdits\x18\f \x01(\v2\x17.google.protobuf.StructH\x03R\vmanualEdits\x88\x01\x01B\n" +
 	"\n" +
 	"\b_aiModelB\x12\n" +
 	"\x10_defaultCodeDataB\x13\n" +
-	"\x11_durationInFrames*T\n" +
+	"\x11_durationInFramesB\x0e\n" +
+	"\f_manualEdits*T\n" +
 	"\aAIModel\x12\x18\n" +
 	"\x14AI_MODEL_UNSPECIFIED\x10\x00\x12\x19\n" +
 	"\x15AI_MODEL_GEMINI_3_PRO\x10\x01\x12\x14\n" +
@@ -371,11 +381,12 @@ var file_coasterai_core_v1_chat_proto_depIdxs = []int32{
 	4, // 2: coasterai.core.v1.ConversationMessage.created_at:type_name -> google.protobuf.Timestamp
 	2, // 3: coasterai.core.v1.ConversationMessage.type:type_name -> coasterai.core.v1.ConversationMessageType
 	5, // 4: coasterai.core.v1.ConversationMessage.defaultCodeData:type_name -> google.protobuf.Struct
-	5, // [5:5] is the sub-list for method output_type
-	5, // [5:5] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	5, // 5: coasterai.core.v1.ConversationMessage.manualEdits:type_name -> google.protobuf.Struct
+	6, // [6:6] is the sub-list for method output_type
+	6, // [6:6] is the sub-list for method input_type
+	6, // [6:6] is the sub-list for extension type_name
+	6, // [6:6] is the sub-list for extension extendee
+	0, // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_coasterai_core_v1_chat_proto_init() }

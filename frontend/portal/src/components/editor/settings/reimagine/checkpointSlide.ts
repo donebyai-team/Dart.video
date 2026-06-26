@@ -13,6 +13,7 @@ export const getCheckpointSlideUpdate = (
       mUrl: checkpointMessage.codeSnapshot,
       defaults: checkpointMessage.defaultCodeData,
     },
+    edits: checkpointMessage.manualEdits ?? {}
   } as any,
 })
 
