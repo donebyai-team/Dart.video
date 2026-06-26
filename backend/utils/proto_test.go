@@ -1,20 +1,19 @@
 package utils
 
 import (
-	"github.com/shank318/coasterai/baml_client/types"
 	"reflect"
 	"testing"
 )
 
 func TestMergeStructs_StyleMerge(t *testing.T) {
 	// Step 1: create struct from map
-	s1, _ := CreateStructFromDynamicClass(&types.DynamicProps{DynamicProperties: map[string]interface{}{
+	s1 := CreateStructFromMap(map[string]interface{}{
 		"wordcycle": map[string]interface{}{
 			"style": map[string]interface{}{
 				"color": "#FFFFFF",
 			},
 		},
-	}})
+	})
 
 	// Step 2: raw JSON → struct
 	rawJSON := []byte(`{

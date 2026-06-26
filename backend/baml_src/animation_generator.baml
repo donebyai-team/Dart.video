@@ -6,7 +6,7 @@ class GenerateAnimationCodeRequest {
 class GenerateAnimationCodeResponse {
   code string @description("Typescript code")
   total_frames int @description("total frames for this animation at 30fps")
-  manualEdits DynamicProps?
+  manualEdits string? @description("valid json")
   thinkingSummary string? @skip()
 }
 
