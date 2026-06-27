@@ -200,6 +200,18 @@ template_string AnimationPrimitives(resume: VideoBranding) #"
     />
     ```
     {% endraw %}
+
+    ## Sound Effects (optional)
+    - Use **only** these built-in sound effects when they meaningfully enhance the animation:
+    - `mouse-click.wav` (clicks)
+    - `whoosh.wav` or `whip.wav` (swipe, or reveal). Use them sparingly and synchronize them with the visual event.
+    - Limit sound effects to at most 3 per scene, never use it in loops or maps. (MOST CRITICAL)
+
+    ```tsx
+    <Sequence from={eventFrame}>
+      <Audio src="https://remotion.media/mouse-click.wav" />
+    </Sequence>
+    ```
 "#
 
 template_string BrandUsageInstructions(resume: VideoBranding) #"

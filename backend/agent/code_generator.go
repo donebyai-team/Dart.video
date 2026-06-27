@@ -255,7 +255,7 @@ func (l *codeGenerator) GenerateCode(
 
 	// Check if its a edit call and add previously scene
 	if IsSlideHasTemplateComponent(slide) {
-		return nil, agenterrors.InvalidInput("edit via prompt not allows, click the scene to edit", nil)
+		return nil, agenterrors.InvalidInput("This scene can't be edited via prompts. Use the canvas for edits, or click Add Scene to generate a new scene.", nil)
 	}
 
 	if slide.Content != nil &&

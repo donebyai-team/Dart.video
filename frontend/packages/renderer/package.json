@@ -24,6 +24,7 @@
     "@google-cloud/storage": "^7.15.2",
     "@remotion/bundler": "4.0.421",
     "@remotion/layout-utils": "^4.0.432",
+    "@remotion/media": "4.0.421",
     "@remotion/preload": "4.0.421",
     "@remotion/renderer": "4.0.421",
     "ioredis": "^5.3.2",
@@ -31,9 +32,9 @@
     "react": "catalog:",
     "react-dom": "18.3.1",
     "react-hot-toast": "2.4.1",
+    "remotion": "4.0.421",
     "swc-loader": "^0.2.7",
-    "tsx": "^4.19.0",
-    "remotion": "4.0.421"
+    "tsx": "^4.19.0"
   },
   "peerDependencies": {
     "@remotion/transitions": "*"

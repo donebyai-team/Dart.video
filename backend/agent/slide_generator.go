@@ -46,7 +46,10 @@ func (g *videoConfigGenerator) Init(videoID, name string) *videoConfigGenerator 
 
 func (g *videoConfigGenerator) AddVideoBackground(style *pbcore.BackgroundStyle) {
 	g.video.Metadata.BackgroundStyle = style
-	g.video.Metadata.BackgroundAudioUrl = utils.Ptr(voiceover.GenerateBackgroundMusic().Url)
+	g.video.Metadata.BgAudio = &pbcore.BackgroundAudio{
+		Url:    voiceover.GenerateBackgroundMusic().Url,
+		Volume: 0.8,
+	}
 }
 
 func (g *videoConfigGenerator) Done(ctx context.Context) error {

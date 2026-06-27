@@ -271,5 +271,13 @@ func (p *Portal) GetConversationHistory(ctx context.Context, c *connect.Request[
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 
+	if c.Msg.Checkpoint != nil {
+		sessionContext.ConversationHistory = conversation
+		err = session.Save(ctx, sessionContext)
+		if err != nil {
+			return nil, fmt.Errorf("failed to save session: %w", err)
+		}
+	}
+
 	return connect.NewResponse(&pbportal.GetConversationHistoryResponse{Messages: conversation}), nil
 }

@@ -123,6 +123,7 @@ export interface VideoActions {
     updateGeneratedBrandingColor: (priority: BrandAssetPriority, colorHexCode: string) => void
     setResolution: (resolution: Resolution) => void
     setBackgroundMusic: (url?: string)  => void
+    setBackgroundMusicVolume: (volume: number) => void
 
     // setShowScreenshots: (show: boolean) => void;
     setShowTransitionPicker: (slideId: string | null) => void

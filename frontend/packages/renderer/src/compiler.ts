@@ -14,6 +14,7 @@ import {
   Easing,
   random,
 } from "remotion";
+import {Audio} from '@remotion/media';
 
 
 export interface CompilationResult {
@@ -46,6 +47,7 @@ const SHARED_PARAM_NAMES: string[] = [
   "useVideoConfig",
   "spring",
   "Sequence",
+  "Audio",
   "Easing",
   "random",
   "parseText",
@@ -71,6 +73,7 @@ function getSharedParamValues(validateShapePropsOption: boolean): unknown[] {
     useVideoConfig,
     spring,
     Sequence,
+    Audio,
     Easing,
     random,
     parseText,

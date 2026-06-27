@@ -29,7 +29,6 @@ class VideoBranding {
 
 class Scene {
   element SceneElement
-  background Background? @description("optional background")
   thinkingSummary string? @skip()
 }
 

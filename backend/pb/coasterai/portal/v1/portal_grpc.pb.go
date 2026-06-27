@@ -102,7 +102,7 @@ type PortalServiceClient interface {
 	// Templates
 	CreateTemplate(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*v1.AnimationTemplate, error)
 	GetTemplate(ctx context.Context, in *GetTemplateRequest, opts ...grpc.CallOption) (*v1.AnimationTemplate, error)
-	GetTemplates(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTemplatesResponse, error)
+	GetTemplates(ctx context.Context, in *GetTemplatesRequest, opts ...grpc.CallOption) (*GetTemplatesResponse, error)
 	SaveTemplate(ctx context.Context, in *UpdateTemplateRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	DeleteTemplate(ctx context.Context, in *GetTemplateRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// AI Suggestions
@@ -498,7 +498,7 @@ func (c *portalServiceClient) GetTemplate(ctx context.Context, in *GetTemplateRe
 	return out, nil
 }
 
-func (c *portalServiceClient) GetTemplates(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetTemplatesResponse, error) {
+func (c *portalServiceClient) GetTemplates(ctx context.Context, in *GetTemplatesRequest, opts ...grpc.CallOption) (*GetTemplatesResponse, error) {
 	out := new(GetTemplatesResponse)
 	err := c.cc.Invoke(ctx, PortalService_GetTemplates_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -585,7 +585,7 @@ type PortalServiceServer interface {
 	// Templates
 	CreateTemplate(context.Context, *emptypb.Empty) (*v1.AnimationTemplate, error)
 	GetTemplate(context.Context, *GetTemplateRequest) (*v1.AnimationTemplate, error)
-	GetTemplates(context.Context, *emptypb.Empty) (*GetTemplatesResponse, error)
+	GetTemplates(context.Context, *GetTemplatesRequest) (*GetTemplatesResponse, error)
 	SaveTemplate(context.Context, *UpdateTemplateRequest) (*emptypb.Empty, error)
 	DeleteTemplate(context.Context, *GetTemplateRequest) (*emptypb.Empty, error)
 	// AI Suggestions
@@ -694,7 +694,7 @@ func (UnimplementedPortalServiceServer) CreateTemplate(context.Context, *emptypb
 func (UnimplementedPortalServiceServer) GetTemplate(context.Context, *GetTemplateRequest) (*v1.AnimationTemplate, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTemplate not implemented")
 }
-func (UnimplementedPortalServiceServer) GetTemplates(context.Context, *emptypb.Empty) (*GetTemplatesResponse, error) {
+func (UnimplementedPortalServiceServer) GetTemplates(context.Context, *GetTemplatesRequest) (*GetTemplatesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTemplates not implemented")
 }
 func (UnimplementedPortalServiceServer) SaveTemplate(context.Context, *UpdateTemplateRequest) (*emptypb.Empty, error) {
@@ -1311,7 +1311,7 @@ func _PortalService_GetTemplate_Handler(srv interface{}, ctx context.Context, de
 }
 
 func _PortalService_GetTemplates_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+	in := new(GetTemplatesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -1323,7 +1323,7 @@ func _PortalService_GetTemplates_Handler(srv interface{}, ctx context.Context, d
 		FullMethod: PortalService_GetTemplates_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PortalServiceServer).GetTemplates(ctx, req.(*emptypb.Empty))
+		return srv.(PortalServiceServer).GetTemplates(ctx, req.(*GetTemplatesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

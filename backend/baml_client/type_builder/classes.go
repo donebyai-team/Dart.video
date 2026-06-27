@@ -535,10 +535,6 @@ func (t *SceneClassView) PropertyElement() (ClassPropertyView, error) {
 	return t.inner.Property("element")
 }
 
-func (t *SceneClassView) PropertyBackground() (ClassPropertyView, error) {
-	return t.inner.Property("background")
-}
-
 func (t *SceneClassView) PropertyThinkingSummary() (ClassPropertyView, error) {
 	return t.inner.Property("thinkingSummary")
 }

@@ -12,7 +12,7 @@ import type { BrandIdentity, BrandIdentitySchema } from "../../core/v1/brandkit_
 import type { FigmaFrame, FigmaPage } from "../../core/v1/figma_pb";
 import type { Resolution, Script, StyleType, Video, VideoConfig, VideoLanguage, VideoMetadata } from "../../core/v1/video_pb";
 import type { EmptySchema, Timestamp } from "@bufbuild/protobuf/wkt";
-import type { GenerateSuggestionsInputSchema, GenerateSuggestionsResponseSchema, GetTemplateRequestSchema, GetTemplatesResponseSchema, RenderSuggestionsInputSchema, UpdateTemplateRequestSchema } from "./templates_pb";
+import type { GenerateSuggestionsInputSchema, GenerateSuggestionsResponseSchema, GetTemplateRequestSchema, GetTemplatesRequestSchema, GetTemplatesResponseSchema, RenderSuggestionsInputSchema, UpdateTemplateRequestSchema } from "./templates_pb";
 
 /**
  * Describes the file coasterai/portal/v1/portal.proto.
@@ -1698,7 +1698,7 @@ export declare const PortalService: GenService<{
    */
   getTemplates: {
     methodKind: "unary";
-    input: typeof EmptySchema;
+    input: typeof GetTemplatesRequestSchema;
     output: typeof GetTemplatesResponseSchema;
   },
   /**

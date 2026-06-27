@@ -225,7 +225,7 @@ type PortalServiceClient interface {
 	// Templates
 	CreateTemplate(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v11.AnimationTemplate], error)
 	GetTemplate(context.Context, *connect.Request[v1.GetTemplateRequest]) (*connect.Response[v11.AnimationTemplate], error)
-	GetTemplates(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetTemplatesResponse], error)
+	GetTemplates(context.Context, *connect.Request[v1.GetTemplatesRequest]) (*connect.Response[v1.GetTemplatesResponse], error)
 	SaveTemplate(context.Context, *connect.Request[v1.UpdateTemplateRequest]) (*connect.Response[emptypb.Empty], error)
 	DeleteTemplate(context.Context, *connect.Request[v1.GetTemplateRequest]) (*connect.Response[emptypb.Empty], error)
 	// AI Suggestions
@@ -435,7 +435,7 @@ func NewPortalServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(portalServiceGetTemplateMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
-		getTemplates: connect.NewClient[emptypb.Empty, v1.GetTemplatesResponse](
+		getTemplates: connect.NewClient[v1.GetTemplatesRequest, v1.GetTemplatesResponse](
 			httpClient,
 			baseURL+PortalServiceGetTemplatesProcedure,
 			connect.WithSchema(portalServiceGetTemplatesMethodDescriptor),
@@ -502,7 +502,7 @@ type portalServiceClient struct {
 	generateMusic          *connect.Client[v1.VideoRequestWithID, v1.GetMediaAssetsResponse]
 	createTemplate         *connect.Client[emptypb.Empty, v11.AnimationTemplate]
 	getTemplate            *connect.Client[v1.GetTemplateRequest, v11.AnimationTemplate]
-	getTemplates           *connect.Client[emptypb.Empty, v1.GetTemplatesResponse]
+	getTemplates           *connect.Client[v1.GetTemplatesRequest, v1.GetTemplatesResponse]
 	saveTemplate           *connect.Client[v1.UpdateTemplateRequest, emptypb.Empty]
 	deleteTemplate         *connect.Client[v1.GetTemplateRequest, emptypb.Empty]
 	generateSuggestions    *connect.Client[v1.GenerateSuggestionsInput, v1.GenerateSuggestionsResponse]
@@ -670,7 +670,7 @@ func (c *portalServiceClient) GetTemplate(ctx context.Context, req *connect.Requ
 }
 
 // GetTemplates calls coasterai.portal.v1.PortalService.GetTemplates.
-func (c *portalServiceClient) GetTemplates(ctx context.Context, req *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetTemplatesResponse], error) {
+func (c *portalServiceClient) GetTemplates(ctx context.Context, req *connect.Request[v1.GetTemplatesRequest]) (*connect.Response[v1.GetTemplatesResponse], error) {
 	return c.getTemplates.CallUnary(ctx, req)
 }
 
@@ -734,7 +734,7 @@ type PortalServiceHandler interface {
 	// Templates
 	CreateTemplate(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v11.AnimationTemplate], error)
 	GetTemplate(context.Context, *connect.Request[v1.GetTemplateRequest]) (*connect.Response[v11.AnimationTemplate], error)
-	GetTemplates(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetTemplatesResponse], error)
+	GetTemplates(context.Context, *connect.Request[v1.GetTemplatesRequest]) (*connect.Response[v1.GetTemplatesResponse], error)
 	SaveTemplate(context.Context, *connect.Request[v1.UpdateTemplateRequest]) (*connect.Response[emptypb.Empty], error)
 	DeleteTemplate(context.Context, *connect.Request[v1.GetTemplateRequest]) (*connect.Response[emptypb.Empty], error)
 	// AI Suggestions
@@ -1183,7 +1183,7 @@ func (UnimplementedPortalServiceHandler) GetTemplate(context.Context, *connect.R
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.GetTemplate is not implemented"))
 }
 
-func (UnimplementedPortalServiceHandler) GetTemplates(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.GetTemplatesResponse], error) {
+func (UnimplementedPortalServiceHandler) GetTemplates(context.Context, *connect.Request[v1.GetTemplatesRequest]) (*connect.Response[v1.GetTemplatesResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.GetTemplates is not implemented"))
 }
 

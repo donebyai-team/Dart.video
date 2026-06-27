@@ -11,7 +11,7 @@ import { file_coasterai_core_v1_slide } from "../../core/v1/slide_pb";
  * Describes the file coasterai/portal/v1/templates.proto.
  */
 export const file_coasterai_portal_v1_templates = /*@__PURE__*/
-  fileDesc("CiNjb2FzdGVyYWkvcG9ydGFsL3YxL3RlbXBsYXRlcy5wcm90bxITY29hc3RlcmFpLnBvcnRhbC52MSJPChRHZXRUZW1wbGF0ZXNSZXNwb25zZRI3Cgl0ZW1wbGF0ZXMYASADKAsyJC5jb2FzdGVyYWkuY29yZS52MS5BbmltYXRpb25UZW1wbGF0ZSIgChJHZXRUZW1wbGF0ZVJlcXVlc3QSCgoCaWQYASABKAkikAEKFVVwZGF0ZVRlbXBsYXRlUmVxdWVzdBIKCgJpZBgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIeChF1c2FnZV9kZXNjcmlwdGlvbhgDIAEoCUgAiAEBEhIKCmNhdGVnb3JpZXMYBCADKAkSDAoEbmFtZRgFIAEoCUIUChJfdXNhZ2VfZGVzY3JpcHRpb24ingEKGEdlbmVyYXRlU3VnZ2VzdGlvbnNJbnB1dBISCgpjYXRlZ29yaWVzGAEgAygJEicKBXNsaWRlGAIgASgLMhguY29hc3RlcmFpLmNvcmUudjEuU2xpZGUSEAoIcGFnZVNpemUYAyABKAUSFQoIbmV4dFBhZ2UYBCABKAlIAIgBARIPCgd2aWRlb0lkGAUgASgJQgsKCV9uZXh0UGFnZSJOChtHZW5lcmF0ZVN1Z2dlc3Rpb25zUmVzcG9uc2USCwoDdGlkGAEgAygJEhUKCG5leHRQYWdlGAIgASgJSACIAQFCCwoJX25leHRQYWdlIl8KFlJlbmRlclN1Z2dlc3Rpb25zSW5wdXQSDwoHdmlkZW9JZBgBIAEoCRInCgVzbGlkZRgCIAEoCzIYLmNvYXN0ZXJhaS5jb3JlLnYxLlNsaWRlEgsKA3RpZBgDIAMoCUI/Wj1naXRodWIuY29tL3NoYW5rMzE4L2NvYXN0ZXJhaS9wYi9jb2FzdGVyYWkvcG9ydGFsL3YxO3BicG9ydGFsYgZwcm90bzM", [file_google_protobuf_timestamp, file_google_protobuf_empty, file_coasterai_core_v1_template, file_coasterai_core_v1_slide]);
+  fileDesc("CiNjb2FzdGVyYWkvcG9ydGFsL3YxL3RlbXBsYXRlcy5wcm90bxITY29hc3RlcmFpLnBvcnRhbC52MSJPChRHZXRUZW1wbGF0ZXNSZXNwb25zZRI3Cgl0ZW1wbGF0ZXMYASADKAsyJC5jb2FzdGVyYWkuY29yZS52MS5BbmltYXRpb25UZW1wbGF0ZSIgChJHZXRUZW1wbGF0ZVJlcXVlc3QSCgoCaWQYASABKAkiKQoTR2V0VGVtcGxhdGVzUmVxdWVzdBISCgpjYXRlZ29yaWVzGAEgAygJIpABChVVcGRhdGVUZW1wbGF0ZVJlcXVlc3QSCgoCaWQYASABKAkSEwoLZGVzY3JpcHRpb24YAiABKAkSHgoRdXNhZ2VfZGVzY3JpcHRpb24YAyABKAlIAIgBARISCgpjYXRlZ29yaWVzGAQgAygJEgwKBG5hbWUYBSABKAlCFAoSX3VzYWdlX2Rlc2NyaXB0aW9uIp4BChhHZW5lcmF0ZVN1Z2dlc3Rpb25zSW5wdXQSEgoKY2F0ZWdvcmllcxgBIAMoCRInCgVzbGlkZRgCIAEoCzIYLmNvYXN0ZXJhaS5jb3JlLnYxLlNsaWRlEhAKCHBhZ2VTaXplGAMgASgFEhUKCG5leHRQYWdlGAQgASgJSACIAQESDwoHdmlkZW9JZBgFIAEoCUILCglfbmV4dFBhZ2UiTgobR2VuZXJhdGVTdWdnZXN0aW9uc1Jlc3BvbnNlEgsKA3RpZBgBIAMoCRIVCghuZXh0UGFnZRgCIAEoCUgAiAEBQgsKCV9uZXh0UGFnZSJfChZSZW5kZXJTdWdnZXN0aW9uc0lucHV0Eg8KB3ZpZGVvSWQYASABKAkSJwoFc2xpZGUYAiABKAsyGC5jb2FzdGVyYWkuY29yZS52MS5TbGlkZRILCgN0aWQYAyADKAlCP1o9Z2l0aHViLmNvbS9zaGFuazMxOC9jb2FzdGVyYWkvcGIvY29hc3RlcmFpL3BvcnRhbC92MTtwYnBvcnRhbGIGcHJvdG8z", [file_google_protobuf_timestamp, file_google_protobuf_empty, file_coasterai_core_v1_template, file_coasterai_core_v1_slide]);
 
 /**
  * Describes the message coasterai.portal.v1.GetTemplatesResponse.
@@ -28,30 +28,37 @@ export const GetTemplateRequestSchema = /*@__PURE__*/
   messageDesc(file_coasterai_portal_v1_templates, 1);
 
 /**
+ * Describes the message coasterai.portal.v1.GetTemplatesRequest.
+ * Use `create(GetTemplatesRequestSchema)` to create a new message.
+ */
+export const GetTemplatesRequestSchema = /*@__PURE__*/
+  messageDesc(file_coasterai_portal_v1_templates, 2);
+
+/**
  * Describes the message coasterai.portal.v1.UpdateTemplateRequest.
  * Use `create(UpdateTemplateRequestSchema)` to create a new message.
  */
 export const UpdateTemplateRequestSchema = /*@__PURE__*/
-  messageDesc(file_coasterai_portal_v1_templates, 2);
+  messageDesc(file_coasterai_portal_v1_templates, 3);
 
 /**
  * Describes the message coasterai.portal.v1.GenerateSuggestionsInput.
  * Use `create(GenerateSuggestionsInputSchema)` to create a new message.
  */
 export const GenerateSuggestionsInputSchema = /*@__PURE__*/
-  messageDesc(file_coasterai_portal_v1_templates, 3);
+  messageDesc(file_coasterai_portal_v1_templates, 4);
 
 /**
  * Describes the message coasterai.portal.v1.GenerateSuggestionsResponse.
  * Use `create(GenerateSuggestionsResponseSchema)` to create a new message.
  */
 export const GenerateSuggestionsResponseSchema = /*@__PURE__*/
-  messageDesc(file_coasterai_portal_v1_templates, 4);
+  messageDesc(file_coasterai_portal_v1_templates, 5);
 
 /**
  * Describes the message coasterai.portal.v1.RenderSuggestionsInput.
  * Use `create(RenderSuggestionsInputSchema)` to create a new message.
  */
 export const RenderSuggestionsInputSchema = /*@__PURE__*/
-  messageDesc(file_coasterai_portal_v1_templates, 5);
+  messageDesc(file_coasterai_portal_v1_templates, 6);
 

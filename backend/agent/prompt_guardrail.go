@@ -34,7 +34,6 @@ var (
 	// Language keywords that need syntax context to avoid false positives in prose.
 	codeKeywordPatterns = []*regexp.Regexp{
 		regexp.MustCompile(`\bclass\s+[a-zA-Z_][a-zA-Z0-9_]*\s*(\{|extends\b|implements\b|:)`),
-		regexp.MustCompile(`\bimport\s+["'({a-zA-Z0-9_]`),
 		regexp.MustCompile(`\bpackage\s+[a-zA-Z_][a-zA-Z0-9_]*\b`),
 	}
 

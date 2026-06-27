@@ -94,7 +94,7 @@ const BackgroundMusicSelector = () => {
     const videoConfig = useVideoStore(s => s.videoConfig);
     const setBackgroundMusic = useVideoStore(s => s.setBackgroundMusic);
 
-    const currentUrl = videoConfig?.metadata?.backgroundAudioUrl;
+    const currentUrl = videoConfig?.metadata?.bgAudio?.url ?? videoConfig?.metadata?.backgroundAudioUrl;
 
     const selectedTrack =
         backgroundTracks.find(track => track.url === currentUrl) ||

@@ -67,6 +67,7 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
    {% raw %}
     \`\`\`tsx
     import { useCurrentFrame, useVideoConfig, interpolate, spring, Sequence, Easing, random } from "remotion";
+    import { Audio } from '@remotion/media';
     import { useState, useEffect } from "react";
     import { Text, LogoAsset, IconAsset, useTheme, MediaAsset, parseText } from './';
 

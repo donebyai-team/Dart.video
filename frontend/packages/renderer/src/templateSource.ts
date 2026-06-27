@@ -5,7 +5,7 @@ const templateSourcePromiseCache = new Map<string, Promise<string>>()
    return code.replace(
      '__DEFAULT_DATA__',
      JSON.stringify(defaults, null, 2)
-   )
+   ).replaceAll('mouseClick.wav', 'mouse-click.wav')
  }
 
 export async function loadTemplateSource(templateUrl: string): Promise<string> {

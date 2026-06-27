@@ -81,6 +81,7 @@ func (v videoGeneration) UpdateVideoConfig(ctx context.Context, video *models.Vi
 	if video.Metadata != nil {
 		existingVideo.Metadata.BackgroundStyle = video.Metadata.BackgroundStyle
 		existingVideo.Metadata.BackgroundAudioUrl = video.Metadata.BackgroundAudioUrl
+		existingVideo.Metadata.BgAudio = video.Metadata.BgAudio
 
 		// Coming from slide generator
 		if video.Metadata.GeneratedBranding != nil {

@@ -17,6 +17,10 @@ message GetTemplateRequest {
   string id = 1;
 }
 
+message GetTemplatesRequest {
+  repeated string categories = 1;
+}
+
 message UpdateTemplateRequest {
   string id = 1;
   string description = 2;

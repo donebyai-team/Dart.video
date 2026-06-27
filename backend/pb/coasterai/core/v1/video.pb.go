@@ -288,17 +288,19 @@ func (x *GeneratedVideoBranding) GetBrandIdentity() *BrandIdentity {
 }
 
 type VideoMetadata struct {
-	state              protoimpl.MessageState  `protogen:"open.v1"`
-	Fps                int32                   `protobuf:"varint,1,opt,name=fps,proto3" json:"fps,omitempty"`
-	BackgroundStyle    *BackgroundStyle        `protobuf:"bytes,2,opt,name=background_style,json=backgroundStyle,proto3,oneof" json:"background_style,omitempty"`
-	Resolution         *Resolution             `protobuf:"bytes,3,opt,name=resolution,proto3" json:"resolution,omitempty"`
-	DurationInFrames   int32                   `protobuf:"varint,4,opt,name=durationInFrames,proto3" json:"durationInFrames,omitempty"`
-	Prompt             string                  `protobuf:"bytes,5,opt,name=prompt,proto3" json:"prompt,omitempty"`
-	Language           VideoLanguage           `protobuf:"varint,7,opt,name=language,proto3,enum=coasterai.core.v1.VideoLanguage" json:"language,omitempty"`
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Fps              int32                  `protobuf:"varint,1,opt,name=fps,proto3" json:"fps,omitempty"`
+	BackgroundStyle  *BackgroundStyle       `protobuf:"bytes,2,opt,name=background_style,json=backgroundStyle,proto3,oneof" json:"background_style,omitempty"`
+	Resolution       *Resolution            `protobuf:"bytes,3,opt,name=resolution,proto3" json:"resolution,omitempty"`
+	DurationInFrames int32                  `protobuf:"varint,4,opt,name=durationInFrames,proto3" json:"durationInFrames,omitempty"`
+	Prompt           string                 `protobuf:"bytes,5,opt,name=prompt,proto3" json:"prompt,omitempty"`
+	Language         VideoLanguage          `protobuf:"varint,7,opt,name=language,proto3,enum=coasterai.core.v1.VideoLanguage" json:"language,omitempty"`
+	// Deprecated: Marked as deprecated in coasterai/core/v1/video.proto.
 	BackgroundAudioUrl *string                 `protobuf:"bytes,8,opt,name=background_audio_url,json=backgroundAudioUrl,proto3,oneof" json:"background_audio_url,omitempty"`
 	GeneratedBranding  *GeneratedVideoBranding `protobuf:"bytes,9,opt,name=generatedBranding,proto3,oneof" json:"generatedBranding,omitempty"`
 	ThinkingSummary    *string                 `protobuf:"bytes,10,opt,name=thinking_summary,json=thinkingSummary,proto3,oneof" json:"thinking_summary,omitempty"`
 	Assets             []*SelectedMediaAsset   `protobuf:"bytes,11,rep,name=assets,proto3" json:"assets,omitempty"`
+	BgAudio            *BackgroundAudio        `protobuf:"bytes,12,opt,name=bg_audio,json=bgAudio,proto3,oneof" json:"bg_audio,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -375,6 +377,7 @@ func (x *VideoMetadata) GetLanguage() VideoLanguage {
 	return VideoLanguage_VIDE_LANGUAGE_EN
 }
 
+// Deprecated: Marked as deprecated in coasterai/core/v1/video.proto.
 func (x *VideoMetadata) GetBackgroundAudioUrl() string {
 	if x != nil && x.BackgroundAudioUrl != nil {
 		return *x.BackgroundAudioUrl
@@ -403,6 +406,65 @@ func (x *VideoMetadata) GetAssets() []*SelectedMediaAsset {
 	return nil
 }
 
+func (x *VideoMetadata) GetBgAudio() *BackgroundAudio {
+	if x != nil {
+		return x.BgAudio
+	}
+	return nil
+}
+
+type BackgroundAudio struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Url           string                 `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
+	Volume        float32                `protobuf:"fixed32,2,opt,name=volume,proto3" json:"volume,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BackgroundAudio) Reset() {
+	*x = BackgroundAudio{}
+	mi := &file_coasterai_core_v1_video_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BackgroundAudio) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BackgroundAudio) ProtoMessage() {}
+
+func (x *BackgroundAudio) ProtoReflect() protoreflect.Message {
+	mi := &file_coasterai_core_v1_video_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BackgroundAudio.ProtoReflect.Descriptor instead.
+func (*BackgroundAudio) Descriptor() ([]byte, []int) {
+	return file_coasterai_core_v1_video_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *BackgroundAudio) GetUrl() string {
+	if x != nil {
+		return x.Url
+	}
+	return ""
+}
+
+func (x *BackgroundAudio) GetVolume() float32 {
+	if x != nil {
+		return x.Volume
+	}
+	return 0
+}
+
 type Video struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -418,7 +480,7 @@ type Video struct {
 
 func (x *Video) Reset() {
 	*x = Video{}
-	mi := &file_coasterai_core_v1_video_proto_msgTypes[2]
+	mi := &file_coasterai_core_v1_video_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -430,7 +492,7 @@ func (x *Video) String() string {
 func (*Video) ProtoMessage() {}
 
 func (x *Video) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_core_v1_video_proto_msgTypes[2]
+	mi := &file_coasterai_core_v1_video_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -443,7 +505,7 @@ func (x *Video) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Video.ProtoReflect.Descriptor instead.
 func (*Video) Descriptor() ([]byte, []int) {
-	return file_coasterai_core_v1_video_proto_rawDescGZIP(), []int{2}
+	return file_coasterai_core_v1_video_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *Video) GetId() string {
@@ -504,7 +566,7 @@ type VideoConfig struct {
 
 func (x *VideoConfig) Reset() {
 	*x = VideoConfig{}
-	mi := &file_coasterai_core_v1_video_proto_msgTypes[3]
+	mi := &file_coasterai_core_v1_video_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -516,7 +578,7 @@ func (x *VideoConfig) String() string {
 func (*VideoConfig) ProtoMessage() {}
 
 func (x *VideoConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_core_v1_video_proto_msgTypes[3]
+	mi := &file_coasterai_core_v1_video_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -529,7 +591,7 @@ func (x *VideoConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VideoConfig.ProtoReflect.Descriptor instead.
 func (*VideoConfig) Descriptor() ([]byte, []int) {
-	return file_coasterai_core_v1_video_proto_rawDescGZIP(), []int{3}
+	return file_coasterai_core_v1_video_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *VideoConfig) GetSections() []*Section {
@@ -548,7 +610,7 @@ type Script struct {
 
 func (x *Script) Reset() {
 	*x = Script{}
-	mi := &file_coasterai_core_v1_video_proto_msgTypes[4]
+	mi := &file_coasterai_core_v1_video_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -560,7 +622,7 @@ func (x *Script) String() string {
 func (*Script) ProtoMessage() {}
 
 func (x *Script) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_core_v1_video_proto_msgTypes[4]
+	mi := &file_coasterai_core_v1_video_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -573,7 +635,7 @@ func (x *Script) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Script.ProtoReflect.Descriptor instead.
 func (*Script) Descriptor() ([]byte, []int) {
-	return file_coasterai_core_v1_video_proto_rawDescGZIP(), []int{4}
+	return file_coasterai_core_v1_video_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *Script) GetItems() []*ScriptItem {
@@ -594,7 +656,7 @@ type ScriptItem struct {
 
 func (x *ScriptItem) Reset() {
 	*x = ScriptItem{}
-	mi := &file_coasterai_core_v1_video_proto_msgTypes[5]
+	mi := &file_coasterai_core_v1_video_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -606,7 +668,7 @@ func (x *ScriptItem) String() string {
 func (*ScriptItem) ProtoMessage() {}
 
 func (x *ScriptItem) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_core_v1_video_proto_msgTypes[5]
+	mi := &file_coasterai_core_v1_video_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -619,7 +681,7 @@ func (x *ScriptItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ScriptItem.ProtoReflect.Descriptor instead.
 func (*ScriptItem) Descriptor() ([]byte, []int) {
-	return file_coasterai_core_v1_video_proto_rawDescGZIP(), []int{5}
+	return file_coasterai_core_v1_video_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ScriptItem) GetName() string {
@@ -656,7 +718,7 @@ type Resolution struct {
 
 func (x *Resolution) Reset() {
 	*x = Resolution{}
-	mi := &file_coasterai_core_v1_video_proto_msgTypes[6]
+	mi := &file_coasterai_core_v1_video_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -668,7 +730,7 @@ func (x *Resolution) String() string {
 func (*Resolution) ProtoMessage() {}
 
 func (x *Resolution) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_core_v1_video_proto_msgTypes[6]
+	mi := &file_coasterai_core_v1_video_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -681,7 +743,7 @@ func (x *Resolution) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Resolution.ProtoReflect.Descriptor instead.
 func (*Resolution) Descriptor() ([]byte, []int) {
-	return file_coasterai_core_v1_video_proto_rawDescGZIP(), []int{6}
+	return file_coasterai_core_v1_video_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *Resolution) GetId() string {
@@ -729,7 +791,7 @@ const file_coasterai_core_v1_video_proto_rawDesc = "" +
 	"\x0ebrandLibraryID\x18\x02 \x01(\tH\x00R\x0ebrandLibraryID\x88\x01\x01\x12K\n" +
 	"\rbrandIdentity\x18\x03 \x01(\v2 .coasterai.core.v1.BrandIdentityH\x01R\rbrandIdentity\x88\x01\x01B\x11\n" +
 	"\x0f_brandLibraryIDB\x10\n" +
-	"\x0e_brandIdentity\"\x93\x05\n" +
+	"\x0e_brandIdentity\"\xe8\x05\n" +
 	"\rVideoMetadata\x12\x10\n" +
 	"\x03fps\x18\x01 \x01(\x05R\x03fps\x12R\n" +
 	"\x10background_style\x18\x02 \x01(\v2\".coasterai.core.v1.BackgroundStyleH\x00R\x0fbackgroundStyle\x88\x01\x01\x12=\n" +
@@ -738,16 +800,21 @@ const file_coasterai_core_v1_video_proto_rawDesc = "" +
 	"resolution\x12*\n" +
 	"\x10durationInFrames\x18\x04 \x01(\x05R\x10durationInFrames\x12\x16\n" +
 	"\x06prompt\x18\x05 \x01(\tR\x06prompt\x12<\n" +
-	"\blanguage\x18\a \x01(\x0e2 .coasterai.core.v1.VideoLanguageR\blanguage\x125\n" +
-	"\x14background_audio_url\x18\b \x01(\tH\x01R\x12backgroundAudioUrl\x88\x01\x01\x12\\\n" +
+	"\blanguage\x18\a \x01(\x0e2 .coasterai.core.v1.VideoLanguageR\blanguage\x129\n" +
+	"\x14background_audio_url\x18\b \x01(\tB\x02\x18\x01H\x01R\x12backgroundAudioUrl\x88\x01\x01\x12\\\n" +
 	"\x11generatedBranding\x18\t \x01(\v2).coasterai.core.v1.GeneratedVideoBrandingH\x02R\x11generatedBranding\x88\x01\x01\x12.\n" +
 	"\x10thinking_summary\x18\n" +
 	" \x01(\tH\x03R\x0fthinkingSummary\x88\x01\x01\x12=\n" +
-	"\x06assets\x18\v \x03(\v2%.coasterai.core.v1.SelectedMediaAssetR\x06assetsB\x13\n" +
+	"\x06assets\x18\v \x03(\v2%.coasterai.core.v1.SelectedMediaAssetR\x06assets\x12B\n" +
+	"\bbg_audio\x18\f \x01(\v2\".coasterai.core.v1.BackgroundAudioH\x04R\abgAudio\x88\x01\x01B\x13\n" +
 	"\x11_background_styleB\x17\n" +
 	"\x15_background_audio_urlB\x14\n" +
 	"\x12_generatedBrandingB\x13\n" +
-	"\x11_thinking_summary\"\xae\x02\n" +
+	"\x11_thinking_summaryB\v\n" +
+	"\t_bg_audio\";\n" +
+	"\x0fBackgroundAudio\x12\x10\n" +
+	"\x03url\x18\x01 \x01(\tR\x03url\x12\x16\n" +
+	"\x06volume\x18\x02 \x01(\x02R\x06volume\"\xae\x02\n" +
 	"\x05Video\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x126\n" +
@@ -810,7 +877,7 @@ func file_coasterai_core_v1_video_proto_rawDescGZIP() []byte {
 }
 
 var file_coasterai_core_v1_video_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_coasterai_core_v1_video_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_coasterai_core_v1_video_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_coasterai_core_v1_video_proto_goTypes = []any{
 	(VideoStatus)(0),               // 0: coasterai.core.v1.VideoStatus
 	(VideoLanguage)(0),             // 1: coasterai.core.v1.VideoLanguage
@@ -818,37 +885,39 @@ var file_coasterai_core_v1_video_proto_goTypes = []any{
 	(StyleType)(0),                 // 3: coasterai.core.v1.StyleType
 	(*GeneratedVideoBranding)(nil), // 4: coasterai.core.v1.GeneratedVideoBranding
 	(*VideoMetadata)(nil),          // 5: coasterai.core.v1.VideoMetadata
-	(*Video)(nil),                  // 6: coasterai.core.v1.Video
-	(*VideoConfig)(nil),            // 7: coasterai.core.v1.VideoConfig
-	(*Script)(nil),                 // 8: coasterai.core.v1.Script
-	(*ScriptItem)(nil),             // 9: coasterai.core.v1.ScriptItem
-	(*Resolution)(nil),             // 10: coasterai.core.v1.Resolution
-	(*BrandColor)(nil),             // 11: coasterai.core.v1.BrandColor
-	(*BrandIdentity)(nil),          // 12: coasterai.core.v1.BrandIdentity
-	(*BackgroundStyle)(nil),        // 13: coasterai.core.v1.BackgroundStyle
-	(*SelectedMediaAsset)(nil),     // 14: coasterai.core.v1.SelectedMediaAsset
-	(*timestamppb.Timestamp)(nil),  // 15: google.protobuf.Timestamp
-	(*Section)(nil),                // 16: coasterai.core.v1.Section
+	(*BackgroundAudio)(nil),        // 6: coasterai.core.v1.BackgroundAudio
+	(*Video)(nil),                  // 7: coasterai.core.v1.Video
+	(*VideoConfig)(nil),            // 8: coasterai.core.v1.VideoConfig
+	(*Script)(nil),                 // 9: coasterai.core.v1.Script
+	(*ScriptItem)(nil),             // 10: coasterai.core.v1.ScriptItem
+	(*Resolution)(nil),             // 11: coasterai.core.v1.Resolution
+	(*BrandColor)(nil),             // 12: coasterai.core.v1.BrandColor
+	(*BrandIdentity)(nil),          // 13: coasterai.core.v1.BrandIdentity
+	(*BackgroundStyle)(nil),        // 14: coasterai.core.v1.BackgroundStyle
+	(*SelectedMediaAsset)(nil),     // 15: coasterai.core.v1.SelectedMediaAsset
+	(*timestamppb.Timestamp)(nil),  // 16: google.protobuf.Timestamp
+	(*Section)(nil),                // 17: coasterai.core.v1.Section
 }
 var file_coasterai_core_v1_video_proto_depIdxs = []int32{
-	11, // 0: coasterai.core.v1.GeneratedVideoBranding.colors:type_name -> coasterai.core.v1.BrandColor
-	12, // 1: coasterai.core.v1.GeneratedVideoBranding.brandIdentity:type_name -> coasterai.core.v1.BrandIdentity
-	13, // 2: coasterai.core.v1.VideoMetadata.background_style:type_name -> coasterai.core.v1.BackgroundStyle
-	10, // 3: coasterai.core.v1.VideoMetadata.resolution:type_name -> coasterai.core.v1.Resolution
+	12, // 0: coasterai.core.v1.GeneratedVideoBranding.colors:type_name -> coasterai.core.v1.BrandColor
+	13, // 1: coasterai.core.v1.GeneratedVideoBranding.brandIdentity:type_name -> coasterai.core.v1.BrandIdentity
+	14, // 2: coasterai.core.v1.VideoMetadata.background_style:type_name -> coasterai.core.v1.BackgroundStyle
+	11, // 3: coasterai.core.v1.VideoMetadata.resolution:type_name -> coasterai.core.v1.Resolution
 	1,  // 4: coasterai.core.v1.VideoMetadata.language:type_name -> coasterai.core.v1.VideoLanguage
 	4,  // 5: coasterai.core.v1.VideoMetadata.generatedBranding:type_name -> coasterai.core.v1.GeneratedVideoBranding
-	14, // 6: coasterai.core.v1.VideoMetadata.assets:type_name -> coasterai.core.v1.SelectedMediaAsset
-	7,  // 7: coasterai.core.v1.Video.config:type_name -> coasterai.core.v1.VideoConfig
-	5,  // 8: coasterai.core.v1.Video.metadata:type_name -> coasterai.core.v1.VideoMetadata
-	15, // 9: coasterai.core.v1.Video.created_at:type_name -> google.protobuf.Timestamp
-	0,  // 10: coasterai.core.v1.Video.status:type_name -> coasterai.core.v1.VideoStatus
-	16, // 11: coasterai.core.v1.VideoConfig.sections:type_name -> coasterai.core.v1.Section
-	9,  // 12: coasterai.core.v1.Script.items:type_name -> coasterai.core.v1.ScriptItem
-	13, // [13:13] is the sub-list for method output_type
-	13, // [13:13] is the sub-list for method input_type
-	13, // [13:13] is the sub-list for extension type_name
-	13, // [13:13] is the sub-list for extension extendee
-	0,  // [0:13] is the sub-list for field type_name
+	15, // 6: coasterai.core.v1.VideoMetadata.assets:type_name -> coasterai.core.v1.SelectedMediaAsset
+	6,  // 7: coasterai.core.v1.VideoMetadata.bg_audio:type_name -> coasterai.core.v1.BackgroundAudio
+	8,  // 8: coasterai.core.v1.Video.config:type_name -> coasterai.core.v1.VideoConfig
+	5,  // 9: coasterai.core.v1.Video.metadata:type_name -> coasterai.core.v1.VideoMetadata
+	16, // 10: coasterai.core.v1.Video.created_at:type_name -> google.protobuf.Timestamp
+	0,  // 11: coasterai.core.v1.Video.status:type_name -> coasterai.core.v1.VideoStatus
+	17, // 12: coasterai.core.v1.VideoConfig.sections:type_name -> coasterai.core.v1.Section
+	10, // 13: coasterai.core.v1.Script.items:type_name -> coasterai.core.v1.ScriptItem
+	14, // [14:14] is the sub-list for method output_type
+	14, // [14:14] is the sub-list for method input_type
+	14, // [14:14] is the sub-list for extension type_name
+	14, // [14:14] is the sub-list for extension extendee
+	0,  // [0:14] is the sub-list for field type_name
 }
 
 func init() { file_coasterai_core_v1_video_proto_init() }
@@ -861,14 +930,14 @@ func file_coasterai_core_v1_video_proto_init() {
 	file_coasterai_core_v1_media_asset_proto_init()
 	file_coasterai_core_v1_video_proto_msgTypes[0].OneofWrappers = []any{}
 	file_coasterai_core_v1_video_proto_msgTypes[1].OneofWrappers = []any{}
-	file_coasterai_core_v1_video_proto_msgTypes[5].OneofWrappers = []any{}
+	file_coasterai_core_v1_video_proto_msgTypes[6].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_coasterai_core_v1_video_proto_rawDesc), len(file_coasterai_core_v1_video_proto_rawDesc)),
 			NumEnums:      4,
-			NumMessages:   7,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

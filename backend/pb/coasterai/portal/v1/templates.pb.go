@@ -112,6 +112,50 @@ func (x *GetTemplateRequest) GetId() string {
 	return ""
 }
 
+type GetTemplatesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Categories    []string               `protobuf:"bytes,1,rep,name=categories,proto3" json:"categories,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetTemplatesRequest) Reset() {
+	*x = GetTemplatesRequest{}
+	mi := &file_coasterai_portal_v1_templates_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetTemplatesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetTemplatesRequest) ProtoMessage() {}
+
+func (x *GetTemplatesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_coasterai_portal_v1_templates_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetTemplatesRequest.ProtoReflect.Descriptor instead.
+func (*GetTemplatesRequest) Descriptor() ([]byte, []int) {
+	return file_coasterai_portal_v1_templates_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *GetTemplatesRequest) GetCategories() []string {
+	if x != nil {
+		return x.Categories
+	}
+	return nil
+}
+
 type UpdateTemplateRequest struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
 	Id               string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -125,7 +169,7 @@ type UpdateTemplateRequest struct {
 
 func (x *UpdateTemplateRequest) Reset() {
 	*x = UpdateTemplateRequest{}
-	mi := &file_coasterai_portal_v1_templates_proto_msgTypes[2]
+	mi := &file_coasterai_portal_v1_templates_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -137,7 +181,7 @@ func (x *UpdateTemplateRequest) String() string {
 func (*UpdateTemplateRequest) ProtoMessage() {}
 
 func (x *UpdateTemplateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_templates_proto_msgTypes[2]
+	mi := &file_coasterai_portal_v1_templates_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -150,7 +194,7 @@ func (x *UpdateTemplateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateTemplateRequest.ProtoReflect.Descriptor instead.
 func (*UpdateTemplateRequest) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_templates_proto_rawDescGZIP(), []int{2}
+	return file_coasterai_portal_v1_templates_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *UpdateTemplateRequest) GetId() string {
@@ -201,7 +245,7 @@ type GenerateSuggestionsInput struct {
 
 func (x *GenerateSuggestionsInput) Reset() {
 	*x = GenerateSuggestionsInput{}
-	mi := &file_coasterai_portal_v1_templates_proto_msgTypes[3]
+	mi := &file_coasterai_portal_v1_templates_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -213,7 +257,7 @@ func (x *GenerateSuggestionsInput) String() string {
 func (*GenerateSuggestionsInput) ProtoMessage() {}
 
 func (x *GenerateSuggestionsInput) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_templates_proto_msgTypes[3]
+	mi := &file_coasterai_portal_v1_templates_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -226,7 +270,7 @@ func (x *GenerateSuggestionsInput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GenerateSuggestionsInput.ProtoReflect.Descriptor instead.
 func (*GenerateSuggestionsInput) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_templates_proto_rawDescGZIP(), []int{3}
+	return file_coasterai_portal_v1_templates_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *GenerateSuggestionsInput) GetCategories() []string {
@@ -274,7 +318,7 @@ type GenerateSuggestionsResponse struct {
 
 func (x *GenerateSuggestionsResponse) Reset() {
 	*x = GenerateSuggestionsResponse{}
-	mi := &file_coasterai_portal_v1_templates_proto_msgTypes[4]
+	mi := &file_coasterai_portal_v1_templates_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -286,7 +330,7 @@ func (x *GenerateSuggestionsResponse) String() string {
 func (*GenerateSuggestionsResponse) ProtoMessage() {}
 
 func (x *GenerateSuggestionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_templates_proto_msgTypes[4]
+	mi := &file_coasterai_portal_v1_templates_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -299,7 +343,7 @@ func (x *GenerateSuggestionsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GenerateSuggestionsResponse.ProtoReflect.Descriptor instead.
 func (*GenerateSuggestionsResponse) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_templates_proto_rawDescGZIP(), []int{4}
+	return file_coasterai_portal_v1_templates_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *GenerateSuggestionsResponse) GetTid() []string {
@@ -327,7 +371,7 @@ type RenderSuggestionsInput struct {
 
 func (x *RenderSuggestionsInput) Reset() {
 	*x = RenderSuggestionsInput{}
-	mi := &file_coasterai_portal_v1_templates_proto_msgTypes[5]
+	mi := &file_coasterai_portal_v1_templates_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -339,7 +383,7 @@ func (x *RenderSuggestionsInput) String() string {
 func (*RenderSuggestionsInput) ProtoMessage() {}
 
 func (x *RenderSuggestionsInput) ProtoReflect() protoreflect.Message {
-	mi := &file_coasterai_portal_v1_templates_proto_msgTypes[5]
+	mi := &file_coasterai_portal_v1_templates_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -352,7 +396,7 @@ func (x *RenderSuggestionsInput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RenderSuggestionsInput.ProtoReflect.Descriptor instead.
 func (*RenderSuggestionsInput) Descriptor() ([]byte, []int) {
-	return file_coasterai_portal_v1_templates_proto_rawDescGZIP(), []int{5}
+	return file_coasterai_portal_v1_templates_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *RenderSuggestionsInput) GetVideoId() string {
@@ -384,7 +428,11 @@ const file_coasterai_portal_v1_templates_proto_rawDesc = "" +
 	"\x14GetTemplatesResponse\x12B\n" +
 	"\ttemplates\x18\x01 \x03(\v2$.coasterai.core.v1.AnimationTemplateR\ttemplates\"$\n" +
 	"\x12GetTemplateRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"\xc5\x01\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"5\n" +
+	"\x13GetTemplatesRequest\x12\x1e\n" +
+	"\n" +
+	"categories\x18\x01 \x03(\tR\n" +
+	"categories\"\xc5\x01\n" +
 	"\x15UpdateTemplateRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x120\n" +
@@ -424,21 +472,22 @@ func file_coasterai_portal_v1_templates_proto_rawDescGZIP() []byte {
 	return file_coasterai_portal_v1_templates_proto_rawDescData
 }
 
-var file_coasterai_portal_v1_templates_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_coasterai_portal_v1_templates_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_coasterai_portal_v1_templates_proto_goTypes = []any{
 	(*GetTemplatesResponse)(nil),        // 0: coasterai.portal.v1.GetTemplatesResponse
 	(*GetTemplateRequest)(nil),          // 1: coasterai.portal.v1.GetTemplateRequest
-	(*UpdateTemplateRequest)(nil),       // 2: coasterai.portal.v1.UpdateTemplateRequest
-	(*GenerateSuggestionsInput)(nil),    // 3: coasterai.portal.v1.GenerateSuggestionsInput
-	(*GenerateSuggestionsResponse)(nil), // 4: coasterai.portal.v1.GenerateSuggestionsResponse
-	(*RenderSuggestionsInput)(nil),      // 5: coasterai.portal.v1.RenderSuggestionsInput
-	(*v1.AnimationTemplate)(nil),        // 6: coasterai.core.v1.AnimationTemplate
-	(*v1.Slide)(nil),                    // 7: coasterai.core.v1.Slide
+	(*GetTemplatesRequest)(nil),         // 2: coasterai.portal.v1.GetTemplatesRequest
+	(*UpdateTemplateRequest)(nil),       // 3: coasterai.portal.v1.UpdateTemplateRequest
+	(*GenerateSuggestionsInput)(nil),    // 4: coasterai.portal.v1.GenerateSuggestionsInput
+	(*GenerateSuggestionsResponse)(nil), // 5: coasterai.portal.v1.GenerateSuggestionsResponse
+	(*RenderSuggestionsInput)(nil),      // 6: coasterai.portal.v1.RenderSuggestionsInput
+	(*v1.AnimationTemplate)(nil),        // 7: coasterai.core.v1.AnimationTemplate
+	(*v1.Slide)(nil),                    // 8: coasterai.core.v1.Slide
 }
 var file_coasterai_portal_v1_templates_proto_depIdxs = []int32{
-	6, // 0: coasterai.portal.v1.GetTemplatesResponse.templates:type_name -> coasterai.core.v1.AnimationTemplate
-	7, // 1: coasterai.portal.v1.GenerateSuggestionsInput.slide:type_name -> coasterai.core.v1.Slide
-	7, // 2: coasterai.portal.v1.RenderSuggestionsInput.slide:type_name -> coasterai.core.v1.Slide
+	7, // 0: coasterai.portal.v1.GetTemplatesResponse.templates:type_name -> coasterai.core.v1.AnimationTemplate
+	8, // 1: coasterai.portal.v1.GenerateSuggestionsInput.slide:type_name -> coasterai.core.v1.Slide
+	8, // 2: coasterai.portal.v1.RenderSuggestionsInput.slide:type_name -> coasterai.core.v1.Slide
 	3, // [3:3] is the sub-list for method output_type
 	3, // [3:3] is the sub-list for method input_type
 	3, // [3:3] is the sub-list for extension type_name
@@ -451,16 +500,16 @@ func file_coasterai_portal_v1_templates_proto_init() {
 	if File_coasterai_portal_v1_templates_proto != nil {
 		return
 	}
-	file_coasterai_portal_v1_templates_proto_msgTypes[2].OneofWrappers = []any{}
 	file_coasterai_portal_v1_templates_proto_msgTypes[3].OneofWrappers = []any{}
 	file_coasterai_portal_v1_templates_proto_msgTypes[4].OneofWrappers = []any{}
+	file_coasterai_portal_v1_templates_proto_msgTypes[5].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_coasterai_portal_v1_templates_proto_rawDesc), len(file_coasterai_portal_v1_templates_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

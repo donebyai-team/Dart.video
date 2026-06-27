@@ -115,6 +115,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({
 
   const metadata = videoConfig.metadata
   const sections = videoConfig.config.sections ?? []
+  const backgroundAudioUrl = metadata?.bgAudio?.url ?? metadata?.backgroundAudioUrl
   // if external video object exist use it or assign zustand video object
   const allSlides = sections.flatMap(section => section.slides)
 
@@ -188,9 +189,9 @@ export const Slideshow: React.FC<SlideshowProps> = ({
           <BackgroundLayer backgroundStyle={metadata?.backgroundStyle}>
 
             {/* 🎵 Background Audio from URL */}
-            {videoConfig.metadata?.backgroundAudioUrl && (
+            {backgroundAudioUrl && (
               <Html5Audio
-                src={videoConfig.metadata.backgroundAudioUrl}
+                src={backgroundAudioUrl}
                 volume={audioVolume}
                 loop
                 onError={error => {

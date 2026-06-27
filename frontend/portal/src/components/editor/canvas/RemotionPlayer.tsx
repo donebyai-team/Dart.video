@@ -78,9 +78,13 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   const selectedSlide = useVideoStore(s => s.selectedSlide);
   const onSelectOEffect = useVideoStore(s => s.handleSelectEffect);
   const selectedEffectId = useVideoStore(s => s.selectedEffectId);
+  const setBackgroundMusicVolume = useVideoStore(s => s.setBackgroundMusicVolume);
 
   const resolution = videoConfigFromStore?.metadata?.resolution;
   const fps = videoConfigFromStore?.metadata?.fps || 30;
+  const backgroundAudio = videoConfigFromStore?.metadata?.bgAudio;
+  const hasBackgroundAudio = Boolean(backgroundAudio?.url ?? videoConfigFromStore?.metadata?.backgroundAudioUrl);
+  const persistedVolume = backgroundAudio?.volume;
 
   const getTimelineSlides = useVideoStore(s => s.getTimelineSlides);
   // Recompute allSlides whenever videoConfig changes (e.g. slide duration update).
@@ -129,7 +133,13 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   );
   const totalDuration = totalFrames / fps;
   const currentTime = currentFrame / fps;
-  const audioVolume = isMuted ? 0 : volume[0] / 100;
+  const audioVolume = hasBackgroundAudio ? (isMuted ? 0 : volume[0] / 100) : 0;
+
+  useEffect(() => {
+    const nextVolume = Math.round((persistedVolume ?? 0.8) * 100);
+    setVolume(prev => (prev[0] === nextVolume ? prev : [nextVolume]));
+    setIsMuted(nextVolume <= 0);
+  }, [persistedVolume]);
 
   const controls = usePlayerControls(
     playerRef,
@@ -380,6 +390,9 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
                 onValueChange={(v) => {
                   setVolume(v);
                   if (v[0] > 0) setIsMuted(false);
+                  if (hasBackgroundAudio) {
+                    setBackgroundMusicVolume(v[0] / 100);
+                  }
                 }}
                 max={100}
                 step={1}

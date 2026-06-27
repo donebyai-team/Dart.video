@@ -34,33 +34,33 @@ func resolveSceneBackground(selectedScene *types.Scene, fieldValueMapper *servic
 	return nil
 
 	// Handle LLM generated background color
-	bg := selectedScene.Background
-	if bg == nil {
-		return nil
-	}
-
-	var hex string
-	// TODO: For now, ignore color
-	if bg.Solid.IsString() && utils.IsValidHexColor(*bg.Solid.AsString()) {
-		hex = *bg.Solid.AsString()
-		return nil
-	}
-
-	if bg.Solid.IsColorToken() && *bg.Solid.AsColorToken() == types.ColorTokenPRIMARY {
-		hex = brand_identity.BrandColorTokens(fieldValueMapper.GetBrandColors())[brand_identity.COLOR_PRIMARY]
-	}
-
-	if hex == "" {
-		return nil
-	}
-
-	return &pbcore.BackgroundStyle{
-		Style: &pbcore.BackgroundStyle_Solid{
-			Solid: &pbcore.SolidColor{
-				Hex: hex,
-			},
-		},
-		Pattern:        pbcore.BackgroundPattern_BACKGROUND_PATTERN_DOTS,
-		PatternOpacity: utils.Ptr(brand_identity.DefaultBackgroundPatternOpacity),
-	}
+	//bg := selectedScene.Background
+	//if bg == nil {
+	//	return nil
+	//}
+	//
+	//var hex string
+	//// TODO: For now, ignore color
+	//if bg.Solid.IsString() && utils.IsValidHexColor(*bg.Solid.AsString()) {
+	//	hex = *bg.Solid.AsString()
+	//	return nil
+	//}
+	//
+	//if bg.Solid.IsColorToken() && *bg.Solid.AsColorToken() == types.ColorTokenPRIMARY {
+	//	hex = brand_identity.BrandColorTokens(fieldValueMapper.GetBrandColors())[brand_identity.COLOR_PRIMARY]
+	//}
+	//
+	//if hex == "" {
+	//	return nil
+	//}
+	//
+	//return &pbcore.BackgroundStyle{
+	//	Style: &pbcore.BackgroundStyle_Solid{
+	//		Solid: &pbcore.SolidColor{
+	//			Hex: hex,
+	//		},
+	//	},
+	//	Pattern:        pbcore.BackgroundPattern_BACKGROUND_PATTERN_DOTS,
+	//	PatternOpacity: utils.Ptr(brand_identity.DefaultBackgroundPatternOpacity),
+	//}
 }

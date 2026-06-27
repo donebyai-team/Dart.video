@@ -27,7 +27,7 @@ func (p *Portal) CreateTemplate(ctx context.Context, c *connect.Request[emptypb.
 	return connect.NewResponse(template.ToProto()), nil
 }
 
-func (p *Portal) GetTemplates(ctx context.Context, c *connect.Request[emptypb.Empty]) (*connect.Response[pbportal.GetTemplatesResponse], error) {
+func (p *Portal) GetTemplates(ctx context.Context, c *connect.Request[pbportal.GetTemplatesRequest]) (*connect.Response[pbportal.GetTemplatesResponse], error) {
 	actor, err := p.gethAuthContext(ctx)
 	if err != nil {
 		return nil, err
@@ -37,7 +37,7 @@ func (p *Portal) GetTemplates(ctx context.Context, c *connect.Request[emptypb.Em
 		return nil, connect.NewError(connect.CodePermissionDenied, fmt.Errorf("not allowed to create templates"))
 	}
 
-	templates, err := p.templateService.GetTemplates(ctx, []string{})
+	templates, err := p.templateService.GetTemplates(ctx, c.Msg.GetCategories())
 	if err != nil {
 		return nil, err
 	}

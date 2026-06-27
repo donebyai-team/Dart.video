@@ -79,7 +79,8 @@ export declare type VideoMetadata = Message<"coasterai.core.v1.VideoMetadata"> &
   language: VideoLanguage;
 
   /**
-   * @generated from field: optional string background_audio_url = 8;
+   * @generated from field: optional string background_audio_url = 8 [deprecated = true];
+   * @deprecated
    */
   backgroundAudioUrl?: string;
 
@@ -97,6 +98,11 @@ export declare type VideoMetadata = Message<"coasterai.core.v1.VideoMetadata"> &
    * @generated from field: repeated coasterai.core.v1.SelectedMediaAsset assets = 11;
    */
   assets: SelectedMediaAsset[];
+
+  /**
+   * @generated from field: optional coasterai.core.v1.BackgroundAudio bg_audio = 12;
+   */
+  bgAudio?: BackgroundAudio;
 };
 
 /**
@@ -104,6 +110,27 @@ export declare type VideoMetadata = Message<"coasterai.core.v1.VideoMetadata"> &
  * Use `create(VideoMetadataSchema)` to create a new message.
  */
 export declare const VideoMetadataSchema: GenMessage<VideoMetadata>;
+
+/**
+ * @generated from message coasterai.core.v1.BackgroundAudio
+ */
+export declare type BackgroundAudio = Message<"coasterai.core.v1.BackgroundAudio"> & {
+  /**
+   * @generated from field: string url = 1;
+   */
+  url: string;
+
+  /**
+   * @generated from field: float volume = 2;
+   */
+  volume: number;
+};
+
+/**
+ * Describes the message coasterai.core.v1.BackgroundAudio.
+ * Use `create(BackgroundAudioSchema)` to create a new message.
+ */
+export declare const BackgroundAudioSchema: GenMessage<BackgroundAudio>;
 
 /**
  * @generated from message coasterai.core.v1.Video

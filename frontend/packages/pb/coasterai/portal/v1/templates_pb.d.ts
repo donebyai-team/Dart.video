@@ -45,6 +45,22 @@ export declare type GetTemplateRequest = Message<"coasterai.portal.v1.GetTemplat
 export declare const GetTemplateRequestSchema: GenMessage<GetTemplateRequest>;
 
 /**
+ * @generated from message coasterai.portal.v1.GetTemplatesRequest
+ */
+export declare type GetTemplatesRequest = Message<"coasterai.portal.v1.GetTemplatesRequest"> & {
+  /**
+   * @generated from field: repeated string categories = 1;
+   */
+  categories: string[];
+};
+
+/**
+ * Describes the message coasterai.portal.v1.GetTemplatesRequest.
+ * Use `create(GetTemplatesRequestSchema)` to create a new message.
+ */
+export declare const GetTemplatesRequestSchema: GenMessage<GetTemplatesRequest>;
+
+/**
  * @generated from message coasterai.portal.v1.UpdateTemplateRequest
  */
 export declare type UpdateTemplateRequest = Message<"coasterai.portal.v1.UpdateTemplateRequest"> & {
