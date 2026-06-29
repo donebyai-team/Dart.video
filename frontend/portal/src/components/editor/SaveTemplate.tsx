@@ -191,12 +191,12 @@ const SaveTemplate = ({ open, onOpenChange, videoId }: SaveTemplateProps) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="template-usage">Usage Instructions(optional)</Label>
+              <Label htmlFor="template-usage">Usage Instructions</Label>
               <Textarea
                 id="template-usage"
                 value={form.usageDescription}
                 onChange={event => updateField("usageDescription", event.target.value)}
-                placeholder="(Optional)Explain how and when to use this template"
+                placeholder="Explain how and when to use this template"
                 rows={2}
                 className="min-h-[3.5rem] resize-none text-sm"
               />

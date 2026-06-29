@@ -94,6 +94,28 @@ func (r *TemplateRegistry) WithRelevantTemplates(ctx context.Context, script *pb
 			continue
 		}
 
+		if strings.EqualFold(category, "CTA") {
+			ctaTemplates, err := r.templateService.FetchTemplatesByCategories(ctx, []types.Category{{Name: strings.ToUpper(category)}})
+			if err != nil {
+				return err
+			}
+
+			for _, template := range ctaTemplates {
+				if template == nil {
+					continue
+				}
+				if _, exists := seenTemplateIDs[template.ID]; exists {
+					continue
+				}
+
+				seenTemplateIDs[template.ID] = struct{}{}
+				selectedTemplateIDs = append(selectedTemplateIDs, template.ID)
+				r.templates[strings.ToLower(template.Name)] = template
+			}
+
+			continue
+		}
+
 		for _, narration := range item.GetNarattion() {
 			narration = strings.TrimSpace(narration)
 			if narration == "" {
