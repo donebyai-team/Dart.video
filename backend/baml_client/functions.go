@@ -243,7 +243,7 @@ func GenerateAnimation(ctx context.Context, input types.GenerateAnimationCodeReq
 	}
 }
 
-func GeneratePlan(ctx context.Context, input types.VideoGenerationPlanRequest, conversation_history []types.Message, opts ...CallOptionFunc) (types.VideoGenerationPlan, error) {
+func GeneratePlan(ctx context.Context, input types.VideoGenerationPlanRequest, conversation_history []types.Message, opts ...CallOptionFunc) (types.GeneratedVideoPlan, error) {
 
 	var callOpts callOption
 	for _, opt := range opts {
@@ -287,33 +287,107 @@ func GeneratePlan(ctx context.Context, input types.VideoGenerationPlanRequest, c
 	if callOpts.onTick == nil {
 		result, err := bamlRuntime.CallFunction(ctx, "GeneratePlan", encoded, callOpts.onTick)
 		if err != nil {
-			return types.VideoGenerationPlan{}, err
+			return types.GeneratedVideoPlan{}, err
 		}
 
 		if result.Error != nil {
-			return types.VideoGenerationPlan{}, result.Error
+			return types.GeneratedVideoPlan{}, result.Error
 		}
 
-		casted := (result.Data).(types.VideoGenerationPlan)
+		casted := (result.Data).(types.GeneratedVideoPlan)
 
 		return casted, nil
 	} else {
 		channel, err := bamlRuntime.CallFunctionStream(ctx, "GeneratePlan", encoded, callOpts.onTick)
 		if err != nil {
-			return types.VideoGenerationPlan{}, err
+			return types.GeneratedVideoPlan{}, err
 		}
 
 		for result := range channel {
 			if result.Error != nil {
-				return types.VideoGenerationPlan{}, result.Error
+				return types.GeneratedVideoPlan{}, result.Error
 			}
 
 			if result.HasData {
-				return result.Data.(types.VideoGenerationPlan), nil
+				return result.Data.(types.GeneratedVideoPlan), nil
 			}
 		}
 
-		return types.VideoGenerationPlan{}, fmt.Errorf("No data returned from stream")
+		return types.GeneratedVideoPlan{}, fmt.Errorf("No data returned from stream")
+	}
+}
+
+func GenerateScript(ctx context.Context, input types.ScriptPlannerRequest, conversation_history []types.Message, opts ...CallOptionFunc) (types.GenerateScriptPlan, error) {
+
+	var callOpts callOption
+	for _, opt := range opts {
+		opt(&callOpts)
+	}
+
+	// Resolve client option to clientRegistry (client takes precedence)
+	if callOpts.client != nil {
+		if callOpts.clientRegistry == nil {
+			callOpts.clientRegistry = baml.NewClientRegistry()
+		}
+		callOpts.clientRegistry.SetPrimaryClient(*callOpts.client)
+	}
+
+	args := baml.BamlFunctionArguments{
+		Kwargs: map[string]any{"input": input, "conversation_history": conversation_history},
+		Env:    getEnvVars(callOpts.env),
+	}
+
+	if callOpts.clientRegistry != nil {
+		args.ClientRegistry = callOpts.clientRegistry
+	}
+
+	if callOpts.collectors != nil {
+		args.Collectors = callOpts.collectors
+	}
+
+	if callOpts.typeBuilder != nil {
+		args.TypeBuilder = callOpts.typeBuilder
+	}
+
+	if callOpts.tags != nil {
+		args.Tags = callOpts.tags
+	}
+
+	encoded, err := args.Encode()
+	if err != nil {
+		panic(err)
+	}
+
+	if callOpts.onTick == nil {
+		result, err := bamlRuntime.CallFunction(ctx, "GenerateScript", encoded, callOpts.onTick)
+		if err != nil {
+			return types.GenerateScriptPlan{}, err
+		}
+
+		if result.Error != nil {
+			return types.GenerateScriptPlan{}, result.Error
+		}
+
+		casted := (result.Data).(types.GenerateScriptPlan)
+
+		return casted, nil
+	} else {
+		channel, err := bamlRuntime.CallFunctionStream(ctx, "GenerateScript", encoded, callOpts.onTick)
+		if err != nil {
+			return types.GenerateScriptPlan{}, err
+		}
+
+		for result := range channel {
+			if result.Error != nil {
+				return types.GenerateScriptPlan{}, result.Error
+			}
+
+			if result.HasData {
+				return result.Data.(types.GenerateScriptPlan), nil
+			}
+		}
+
+		return types.GenerateScriptPlan{}, fmt.Errorf("No data returned from stream")
 	}
 }
 

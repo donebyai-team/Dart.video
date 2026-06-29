@@ -166,8 +166,8 @@ func (*parse_stream) GenerateAnimation(text string, opts ...CallOptionFunc) (str
 	return casted, nil
 }
 
-// / Parse version of GeneratePlan (Takes in string and returns stream_types.VideoGenerationPlan)
-func (*parse_stream) GeneratePlan(text string, opts ...CallOptionFunc) (stream_types.VideoGenerationPlan, error) {
+// / Parse version of GeneratePlan (Takes in string and returns stream_types.GeneratedVideoPlan)
+func (*parse_stream) GeneratePlan(text string, opts ...CallOptionFunc) (stream_types.GeneratedVideoPlan, error) {
 
 	var callOpts callOption
 	for _, opt := range opts {
@@ -205,10 +205,57 @@ func (*parse_stream) GeneratePlan(text string, opts ...CallOptionFunc) (stream_t
 
 	result, err := bamlRuntime.CallFunctionParse(context.Background(), "GeneratePlan", encoded)
 	if err != nil {
-		return stream_types.VideoGenerationPlan{}, err
+		return stream_types.GeneratedVideoPlan{}, err
 	}
 
-	casted := (result).(stream_types.VideoGenerationPlan)
+	casted := (result).(stream_types.GeneratedVideoPlan)
+
+	return casted, nil
+}
+
+// / Parse version of GenerateScript (Takes in string and returns stream_types.GenerateScriptPlan)
+func (*parse_stream) GenerateScript(text string, opts ...CallOptionFunc) (stream_types.GenerateScriptPlan, error) {
+
+	var callOpts callOption
+	for _, opt := range opts {
+		opt(&callOpts)
+	}
+
+	args := baml.BamlFunctionArguments{
+		Kwargs: map[string]any{"text": text, "stream": true},
+		Env:    getEnvVars(callOpts.env),
+	}
+
+	if callOpts.clientRegistry != nil {
+		args.ClientRegistry = callOpts.clientRegistry
+	}
+
+	if callOpts.collectors != nil {
+		args.Collectors = callOpts.collectors
+	}
+
+	if callOpts.typeBuilder != nil {
+		args.TypeBuilder = callOpts.typeBuilder
+	}
+
+	if callOpts.tags != nil {
+		args.Tags = callOpts.tags
+	}
+
+	encoded, err := args.Encode()
+	if err != nil {
+		// This should never happen. if it does, please file an issue at https://github.com/boundaryml/baml/issues
+		// and include the type of the args you're passing in.
+		wrapped_err := fmt.Errorf("BAML INTERNAL ERROR: GenerateScript: %w", err)
+		panic(wrapped_err)
+	}
+
+	result, err := bamlRuntime.CallFunctionParse(context.Background(), "GenerateScript", encoded)
+	if err != nil {
+		return stream_types.GenerateScriptPlan{}, err
+	}
+
+	casted := (result).(stream_types.GenerateScriptPlan)
 
 	return casted, nil
 }

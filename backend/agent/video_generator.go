@@ -7,7 +7,6 @@ import (
 	"github.com/shank318/coasterai/agent/agenterrors"
 	"github.com/shank318/coasterai/agent/common"
 	"github.com/shank318/coasterai/agent/llm"
-	"github.com/shank318/coasterai/agent/scenes"
 	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/cache"
 	"github.com/shank318/coasterai/datastore"
@@ -17,6 +16,7 @@ import (
 	"github.com/shank318/coasterai/services"
 	"github.com/shank318/coasterai/services/brand_identity"
 	"github.com/shank318/coasterai/services/templates"
+	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
 	"strings"
 	"time"
@@ -46,12 +46,13 @@ type StartSessionOptions struct {
 type ContinueSessionOptions struct {
 	UserResponse        string
 	SelectedMediaAssets []*pbcore.SelectedMediaAsset
+	Script              *pbcore.Script
 }
 
 const (
 	sessionKeyPrefix = "video_generation:session"
 	defaultFPS       = 30
-	generating       = "Generating..."
+	defaultLanguage  = "English"
 )
 
 type agentV2 struct {
@@ -104,6 +105,8 @@ func (a *agentV2) setTags(ctx context.Context) context.Context {
 	return context.WithValue(ctx, llm.VideoIDKey, a.session.GetID())
 }
 
+const SCRIPT_CONFORMATION_RESPONSE = "SCRIPT_APPROVED"
+
 func (a *agentV2) Continue(ctx context.Context, options ContinueSessionOptions) (*common.RunResult, error) {
 	ctx = a.setTags(ctx)
 	userResponse := strings.TrimSpace(options.UserResponse)
@@ -116,16 +119,8 @@ func (a *agentV2) Continue(ctx context.Context, options ContinueSessionOptions) 
 		return nil, err
 	}
 
-	if session == nil || len(session.TemplateIds) == 0 {
+	if session == nil {
 		return nil, agenterrors.InvalidInput("session is nil", nil)
-	}
-
-	generatePlanRequest := types.VideoGenerationPlanRequest{
-		Duration:   int64(session.Request.DurationInSec) * a.fps,
-		Prompt:     session.Request.Prompt,
-		Language:   "English",
-		Resolution: session.Request.Resolution.Id,
-		Questions:  session.Request.Questions,
 	}
 
 	err = a.injectMediaAssets(ctx, session.Request)
@@ -133,43 +128,23 @@ func (a *agentV2) Continue(ctx context.Context, options ContinueSessionOptions) 
 		return nil, err
 	}
 
-	registry := NewTemplateRegistry(a.templateService, a.assetRegistry, a.codeGenerator, a.logger)
-	err = registry.WithTemplateIds(ctx, session.TemplateIds)
-	if err != nil {
-		return nil, err
+	generatePlanRequest := a.buildScriptPlannerRequest(session.Request)
+
+	if options.Script != nil && userResponse == SCRIPT_CONFORMATION_RESPONSE {
+		return a.generateScenes(ctx, a.buildVideoGenerationPlanRequest(session.Request), options.Script)
 	}
 
-	a.templateRegistry = registry
-
-	// use brand guidelines only when specified
-	if a.assetRegistry != nil {
-		generatePlanRequest.VideoBranding = types.VideoBranding{
-			BrandGuideLines: a.assetRegistry.FormatBrandDetails(),
-			Attachments:     a.assetRegistry.FormatAssets(),
-		}
-	}
-
-	newMessage := &pbcore.ConversationMessage{
-		Role:    pbcore.ConversationRole_CONVERSATION_ROLE_USER,
-		Message: userResponse,
-	}
-	for _, asset := range options.SelectedMediaAssets {
-		newMessage.AssetIds = append(newMessage.AssetIds, asset.AssetID)
-	}
-
-	session.AddMessage(newMessage)
+	a.appendContinueMessages(session, options.Script, userResponse, options.SelectedMediaAssets)
 
 	if err := a.session.Save(ctx, session); err != nil {
 		return nil, err
 	}
 
-	a.state.Publish(common.AgentState{
-		State: common.StateStatusProcessing,
-	})
+	a.publishProcessingState("")
 
 	a.logger.Info("continuing agent session with user response", zap.String("response", userResponse))
 
-	return a.runPlanning(ctx, generatePlanRequest, session)
+	return a.runPlanningScript(ctx, generatePlanRequest, session)
 }
 
 func deduplicateAssets(
@@ -207,23 +182,7 @@ func (a *agentV2) StopAgent(ctx context.Context) error {
 
 func (a *agentV2) Start(ctx context.Context, options StartSessionOptions) (*common.RunResult, error) {
 	ctx = a.setTags(ctx)
-	if options.Input == nil {
-		return nil, agenterrors.InvalidInput("input is required", nil)
-	}
-
-	if a.session.GetID() == "" {
-		return nil, agenterrors.InvalidInput("sessionID is required", nil)
-	}
-
-	if a.logger == nil {
-		return nil, agenterrors.InvalidInput("logger is not configured", nil)
-	}
-
-	if options.Input.Resolution == nil || strings.TrimSpace(options.Input.Resolution.Id) == "" {
-		return nil, agenterrors.InvalidInput("resolution is required", nil)
-	}
-
-	if err := ValidatePrompt(options.Input.Prompt); err != nil {
+	if err := a.validateStartOptions(options); err != nil {
 		return nil, err
 	}
 
@@ -233,49 +192,10 @@ func (a *agentV2) Start(ctx context.Context, options StartSessionOptions) (*comm
 		return nil, err
 	}
 
-	registry := NewTemplateRegistry(a.templateService, a.assetRegistry, a.codeGenerator, a.logger)
-	err = registry.WithRandomTemplates(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	a.templateRegistry = registry
-
-	script := make([]types.ScriptItem, 0)
-	if options.Input.Script != nil {
-		script = make([]types.ScriptItem, len(options.Input.Script.Items))
-		for i, item := range options.Input.Script.Items {
-			script[i] = types.ScriptItem{
-				Name:      item.Name,
-				Voiceover: item.Voiceover,
-				Reference: item.Reference,
-			}
-		}
-	}
-
-	generatePlanRequest := types.VideoGenerationPlanRequest{
-		Duration:   int64(options.Input.DurationInSec) * a.fps,
-		Prompt:     options.Input.Prompt,
-		Language:   "English",
-		Resolution: options.Input.Resolution.Id,
-		Script:     script,
-		AnimationCategories: types.AnimationCategories{
-			scenes.GetAvailableEntranceAnimations(),
-		},
-		Questions: options.Input.Questions,
-	}
-
-	// use brand guidelines only when specified
-	if a.assetRegistry != nil {
-		generatePlanRequest.VideoBranding = types.VideoBranding{
-			BrandGuideLines: a.assetRegistry.FormatBrandDetails(),
-			Attachments:     a.assetRegistry.FormatAssets(),
-		}
-	}
+	generatePlanRequest := a.buildScriptPlannerRequest(options.Input)
 
 	session := &common.SessionContext{
 		Request:             options.Input,
-		TemplateIds:         registry.GetIDs(),
 		ConversationHistory: make([]*pbcore.ConversationMessage, 0),
 	}
 
@@ -284,7 +204,27 @@ func (a *agentV2) Start(ctx context.Context, options StartSessionOptions) (*comm
 	}
 
 	a.logger.Info("started agent session")
-	return a.runPlanning(ctx, generatePlanRequest, session)
+	return a.runPlanningScript(ctx, generatePlanRequest, session)
+}
+
+func (a *agentV2) validateStartOptions(options StartSessionOptions) error {
+	if options.Input == nil {
+		return agenterrors.InvalidInput("input is required", nil)
+	}
+
+	if a.session.GetID() == "" {
+		return agenterrors.InvalidInput("sessionID is required", nil)
+	}
+
+	if a.logger == nil {
+		return agenterrors.InvalidInput("logger is not configured", nil)
+	}
+
+	if options.Input.Resolution == nil || strings.TrimSpace(options.Input.Resolution.Id) == "" {
+		return agenterrors.InvalidInput("resolution is required", nil)
+	}
+
+	return ValidatePrompt(options.Input.Prompt)
 }
 
 func (a *agentV2) injectMediaAssets(ctx context.Context, input *pbportal.CreateVideoRequest) error {
@@ -313,10 +253,7 @@ func (a *agentV2) injectMediaAssets(ctx context.Context, input *pbportal.CreateV
 	}
 
 	if len(assetIDs) > 0 {
-		a.state.Publish(common.AgentState{
-			Thinking: "Analysing attachments..",
-			State:    common.StateStatusProcessing,
-		})
+		a.publishProcessingState("Analysing attachments..")
 		mediaAssets, err := a.db.GetMediaAssetsByID(ctx, assetIDs)
 		if err != nil {
 			return err
@@ -342,7 +279,34 @@ func (a *agentV2) injectMediaAssets(ctx context.Context, input *pbportal.CreateV
 	return nil
 }
 
-func (a *agentV2) runPlanning(ctx context.Context, req types.VideoGenerationPlanRequest, session *common.SessionContext) (result *common.RunResult, retErr error) {
+func (a *agentV2) runPlanningScript(ctx context.Context, req types.ScriptPlannerRequest, session *common.SessionContext) (result *common.RunResult, retErr error) {
+	history, _, err := a.session.ConvertToContextMessages(ctx, session.ConversationHistory, a.assetRegistry)
+	if err != nil {
+		return nil, err
+	}
+
+	llmResponse, llmThinking, err := a.llmService.GenerateScript(ctx, req, history, func(chunk string) {
+		a.publishProcessingState(chunk)
+	})
+	if err != nil {
+		return nil, agenterrors.LLMPlanningFailed("failed to generate video plan", err)
+	}
+
+	questionsToAsk := buildQuestionsToAsk(llmResponse)
+
+	_, result, err = a.toolRegistry.HandleAskQuestion(ctx, session, questionsToAsk, llmThinking, a.assetRegistry)
+
+	if llmResponse.IsScript() {
+		attachScriptQuestion(result, llmResponse)
+	}
+
+	return result, err
+}
+
+func (a *agentV2) generateScenes(
+	ctx context.Context,
+	req types.VideoGenerationPlanRequest,
+	script *pbcore.Script) (result *common.RunResult, retErr error) {
 	defer func() {
 		if retErr == nil {
 			return
@@ -357,32 +321,26 @@ func (a *agentV2) runPlanning(ctx context.Context, req types.VideoGenerationPlan
 		}
 	}()
 
-	req.ComponentList = a.templateRegistry.BuildPrompt()
-
-	history, _, err := a.session.ConvertToContextMessages(ctx, session.ConversationHistory, a.assetRegistry)
+	registry := NewTemplateRegistry(a.templateService, a.assetRegistry, a.codeGenerator, a.logger)
+	err := registry.WithRelevantTemplates(ctx, script)
 	if err != nil {
 		return nil, err
 	}
 
+	a.templateRegistry = registry
+
+	req.ComponentList = a.templateRegistry.BuildPrompt()
+
 	// Generate and validate upto max attempts
 	for attempt := 0; attempt < maxAttempts; attempt++ {
-		llmResponse, err := a.llmService.GeneratePlanV2(ctx, req, history, func(chunk string) {
-			a.state.Publish(common.AgentState{
-				Thinking: chunk,
-				State:    common.StateStatusProcessing,
-			})
+		llmResponse, err := a.llmService.GeneratePlanV2(ctx, req, nil, func(chunk string) {
+			a.publishProcessingState(chunk)
 		})
 		if err != nil {
 			return nil, agenterrors.LLMPlanningFailed("failed to generate video plan", err)
 		}
 
-		handled, result, err := a.toolRegistry.HandleAskQuestion(ctx, session, llmResponse.AsAskUserQuestion(), "", a.assetRegistry)
-		if handled {
-			return result, err
-		}
-
-		plan := llmResponse.AsGeneratedVideoPlan()
-		if plan == nil {
+		if llmResponse == nil {
 			return nil, agenterrors.Internal("llm response did not include a plan", nil)
 		}
 
@@ -423,44 +381,153 @@ func (a *agentV2) runPlanning(ctx context.Context, req types.VideoGenerationPlan
 			return nil, ctx.Err()
 		}
 
-		// We wait for the first slide to be generated as its a part of the planning phase
-		// once first slide is generated, we let the applyPlan run async which can be cancelled via StopAgent
-		firstSlideReady := make(chan struct{}, 1)
-		applyPlanDone := make(chan error, 1)
-		applyPlanCtx, cancelBeforeFirstSlide := context.WithCancel(context.Background())
-
-		go func() {
-			defer cancelBeforeFirstSlide()
-			if err := a.applyPlan(applyPlanCtx, plan, firstSlideReady); err != nil {
-				a.logger.Error("applyPlan async run failed", zap.Error(err))
-				applyPlanDone <- err
-				return
-			}
-			applyPlanDone <- nil
-		}()
-
-		select {
-		case <-firstSlideReady:
-			return &common.RunResult{Status: common.RunStatusCompleted}, nil
-		case err := <-applyPlanDone:
-			if err != nil {
-				return nil, err
-			}
-			return &common.RunResult{Status: common.RunStatusCompleted}, nil
-		case <-ctx.Done():
-			// If first slide is not ready yet, treat this as planning cancellation and
-			// stop applyPlan. If first slide is already ready, allow applyPlan to continue.
-			select {
-			case <-firstSlideReady:
-				return &common.RunResult{Status: common.RunStatusCompleted}, nil
-			default:
-				cancelBeforeFirstSlide()
-			}
-			return nil, ctx.Err()
-		}
+		return a.runApplyPlanAsync(ctx, llmResponse)
 	}
 
 	return nil, agenterrors.LLMPlanningFailed("failed to run planning", nil)
+}
+
+func (a *agentV2) buildScriptPlannerRequest(input *pbportal.CreateVideoRequest) types.ScriptPlannerRequest {
+	req := types.ScriptPlannerRequest{
+		Duration:   int64(input.DurationInSec) * a.fps,
+		Prompt:     input.Prompt,
+		Language:   defaultLanguage,
+		Resolution: input.Resolution.Id,
+	}
+	req.VideoBranding = a.buildVideoBranding()
+	return req
+}
+
+func (a *agentV2) buildVideoGenerationPlanRequest(input *pbportal.CreateVideoRequest) types.VideoGenerationPlanRequest {
+	return types.VideoGenerationPlanRequest{
+		Duration:      int64(input.DurationInSec) * a.fps,
+		Language:      defaultLanguage,
+		Resolution:    input.Resolution.Id,
+		VideoBranding: a.buildVideoBranding(),
+	}
+}
+
+func (a *agentV2) buildVideoBranding() types.VideoBranding {
+	if a.assetRegistry == nil {
+		return types.VideoBranding{}
+	}
+
+	return types.VideoBranding{
+		BrandGuideLines: a.assetRegistry.FormatBrandDetails(),
+		Attachments:     a.assetRegistry.FormatAssets(),
+	}
+}
+
+func (a *agentV2) appendContinueMessages(
+	session *common.SessionContext,
+	script *pbcore.Script,
+	userResponse string,
+	selectedAssets []*pbcore.SelectedMediaAsset,
+) {
+	if script != nil {
+		session.AddMessage(&pbcore.ConversationMessage{
+			Role:    pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
+			Message: ToScript(script),
+		})
+	}
+
+	userMessage := &pbcore.ConversationMessage{
+		Role:    pbcore.ConversationRole_CONVERSATION_ROLE_USER,
+		Message: userResponse,
+	}
+
+	for _, asset := range selectedAssets {
+		userMessage.AssetIds = append(userMessage.AssetIds, asset.AssetID)
+	}
+
+	session.AddMessage(userMessage)
+}
+
+func (a *agentV2) publishProcessingState(thinking string) {
+	a.state.Publish(common.AgentState{
+		Thinking: thinking,
+		State:    common.StateStatusProcessing,
+	})
+}
+
+func buildQuestionsToAsk(llmResponse *types.Union2ListAskUserQuestionOrScript) []*types.AskUserQuestion {
+	if llmResponse.IsScript() {
+		return []*types.AskUserQuestion{
+			{
+				QuestionType:       types.AskUserQuestionTypeGENERIC,
+				Question_text:      "Confirm if the script looks good?",
+				Allow_custom_entry: utils.Ptr(true),
+			},
+		}
+	}
+
+	questions := make([]*types.AskUserQuestion, 0)
+	if llmResponse.AsListAskUserQuestion() == nil {
+		return questions
+	}
+
+	for _, question := range *llmResponse.AsListAskUserQuestion() {
+		questionCopy := question
+		questions = append(questions, &questionCopy)
+	}
+
+	return questions
+}
+
+func attachScriptQuestion(result *common.RunResult, llmResponse *types.Union2ListAskUserQuestionOrScript) {
+	if result == nil || len(result.AskUserQuestions) == 0 || !llmResponse.IsScript() {
+		return
+	}
+
+	script := pbcore.Script{}
+	bamlScript := *llmResponse.AsScript()
+	for _, scriptItem := range bamlScript.Sections {
+		script.Items = append(script.Items, &pbcore.ScriptItem{
+			Name:      string(scriptItem.Name),
+			Narattion: scriptItem.Narration,
+		})
+	}
+
+	result.AskUserQuestions[0].Script = &script
+	result.AskUserQuestions[0].QuestionType = pbportal.AskUserQuestionType_ASK_USER_QUESTION_TYPE_SCRIPT
+}
+
+func (a *agentV2) runApplyPlanAsync(ctx context.Context, plan *types.GeneratedVideoPlan) (*common.RunResult, error) {
+	// We wait for the first slide to be generated as its a part of the planning phase
+	// once first slide is generated, we let the applyPlan run async which can be cancelled via StopAgent
+	firstSlideReady := make(chan struct{}, 1)
+	applyPlanDone := make(chan error, 1)
+	applyPlanCtx, cancelBeforeFirstSlide := context.WithCancel(context.Background())
+
+	go func() {
+		defer cancelBeforeFirstSlide()
+		if err := a.applyPlan(applyPlanCtx, plan, firstSlideReady); err != nil {
+			a.logger.Error("applyPlan async run failed", zap.Error(err))
+			applyPlanDone <- err
+			return
+		}
+		applyPlanDone <- nil
+	}()
+
+	select {
+	case <-firstSlideReady:
+		return &common.RunResult{Status: common.RunStatusCompleted}, nil
+	case err := <-applyPlanDone:
+		if err != nil {
+			return nil, err
+		}
+		return &common.RunResult{Status: common.RunStatusCompleted}, nil
+	case <-ctx.Done():
+		// If first slide is not ready yet, treat this as planning cancellation and
+		// stop applyPlan. If first slide is already ready, allow applyPlan to continue.
+		select {
+		case <-firstSlideReady:
+			return &common.RunResult{Status: common.RunStatusCompleted}, nil
+		default:
+			cancelBeforeFirstSlide()
+		}
+		return nil, ctx.Err()
+	}
 }
 
 // aiPlan is sanitized to duration in frames

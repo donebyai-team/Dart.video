@@ -49,6 +49,86 @@ func (r *TemplateRegistry) WithRandomTemplates(ctx context.Context) error {
 	return nil
 }
 
+func (r *TemplateRegistry) WithRelevantTemplates(ctx context.Context, script *pbcore.Script) error {
+	if script == nil {
+		return r.WithRandomTemplates(ctx)
+	}
+
+	// 1. Fetch all fillers
+	fillerTemplates, err := r.templateService.GetTemplates(ctx, []string{scenes.CATEGORY_FILLER})
+	if err != nil {
+		return err
+	}
+	for _, template := range fillerTemplates {
+		if template == nil {
+			continue
+		}
+		r.templates[strings.ToLower(template.Name)] = template
+	}
+
+	// 2. Random from text and then script wise
+	textTemplates, err := r.templateService.FetchTemplatesByCategories(ctx, []types.Category{{Name: scenes.CATEGORY_TEXT}})
+	if err != nil {
+		return err
+	}
+	for _, template := range textTemplates {
+		if template == nil {
+			continue
+		}
+		r.templates[strings.ToLower(template.Name)] = template
+	}
+
+	selectedTemplateIDs := r.GetIDs()
+	seenTemplateIDs := make(map[string]struct{}, len(selectedTemplateIDs))
+	for _, templateID := range selectedTemplateIDs {
+		seenTemplateIDs[templateID] = struct{}{}
+	}
+
+	for _, item := range script.GetItems() {
+		if item == nil {
+			continue
+		}
+
+		category := strings.TrimSpace(item.GetName())
+		if category == "" {
+			continue
+		}
+
+		for _, narration := range item.GetNarattion() {
+			narration = strings.TrimSpace(narration)
+			if narration == "" {
+				continue
+			}
+
+			selectedTemplates, err := r.templateService.GetSimilarTemplates(
+				ctx,
+				fmt.Sprintf("%s %s", category, narration),
+				category,
+				selectedTemplateIDs,
+				2,
+			)
+			if err != nil {
+				return err
+			}
+
+			for _, template := range selectedTemplates {
+				if template == nil {
+					continue
+				}
+				if _, exists := seenTemplateIDs[template.ID]; exists {
+					continue
+				}
+
+				seenTemplateIDs[template.ID] = struct{}{}
+				selectedTemplateIDs = append(selectedTemplateIDs, template.ID)
+				r.templates[strings.ToLower(template.Name)] = template
+			}
+		}
+	}
+
+	return nil
+}
+
 func (r *TemplateRegistry) WithTemplateIds(ctx context.Context, templateIds []string) error {
 	seen := make(map[string]struct{})
 

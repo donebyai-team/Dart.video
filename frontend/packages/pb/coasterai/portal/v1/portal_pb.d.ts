@@ -577,11 +577,6 @@ export declare const GetVideosResponseSchema: GenMessage<GetVideosResponse>;
  */
 export declare type CreateVideoRequest = Message<"coasterai.portal.v1.CreateVideoRequest"> & {
   /**
-   * @generated from field: coasterai.core.v1.Script script = 1;
-   */
-  script?: Script;
-
-  /**
    * @generated from field: string prompt = 2;
    */
   prompt: string;
@@ -658,9 +653,9 @@ export declare type CreateVideoResponse = Message<"coasterai.portal.v1.CreateVid
   thinkingSummary: string;
 
   /**
-   * @generated from field: coasterai.portal.v1.AskUserQuestion ask_user_question = 3;
+   * @generated from field: repeated coasterai.portal.v1.AskUserQuestion ask_user_question = 3;
    */
-  askUserQuestion?: AskUserQuestion;
+  askUserQuestion: AskUserQuestion[];
 
   /**
    * @generated from field: bool waiting_for_user_input = 4;
@@ -709,6 +704,11 @@ export declare type ContinueVideoPlanningRequest = Message<"coasterai.portal.v1.
    * @generated from field: optional string slide_id = 4;
    */
   slideId?: string;
+
+  /**
+   * @generated from field: optional coasterai.core.v1.Script script = 5;
+   */
+  script?: Script;
 };
 
 /**
@@ -750,6 +750,11 @@ export declare type AskUserQuestion = Message<"coasterai.portal.v1.AskUserQuesti
    * @generated from field: coasterai.portal.v1.AskUserQuestionType questionType = 6;
    */
   questionType: AskUserQuestionType;
+
+  /**
+   * @generated from field: optional coasterai.core.v1.Script script = 7;
+   */
+  script?: Script;
 };
 
 /**
@@ -1281,6 +1286,11 @@ export enum AskUserQuestionType {
    * @generated from enum value: ASK_USER_QUESTION_TYPE_UPLOAD_ASSET = 3;
    */
   UPLOAD_ASSET = 3,
+
+  /**
+   * @generated from enum value: ASK_USER_QUESTION_TYPE_SCRIPT = 4;
+   */
+  SCRIPT = 4,
 }
 
 /**

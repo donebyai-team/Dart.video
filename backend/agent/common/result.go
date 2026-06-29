@@ -14,6 +14,6 @@ const (
 
 type RunResult struct {
 	Status             RunStatus
-	AskUserQuestion    *pbportal.AskUserQuestion
+	AskUserQuestions   []*pbportal.AskUserQuestion
 	GeneratedAnimation *pbcore.Slide
 }

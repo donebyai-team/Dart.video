@@ -93,7 +93,6 @@ export function AnimatedMedia(): React.ReactElement {
 export const AnimatedMediaDescriptor: ComponentRegistration = {
   name: 'AnimatedMedia',
   type: 'scene',
-  tags: ['PRODUCT_DEMO'],
   description: 'An animated media element (image or video) with text overlay.',
   schema: [
     {

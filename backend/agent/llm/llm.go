@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	baml "github.com/boundaryml/baml/engine/language_client_go/pkg"
+	"github.com/shank318/coasterai/agent/scenes"
 	"github.com/shank318/coasterai/baml_client"
 	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/cache"
@@ -22,14 +23,20 @@ type Service interface {
 		req types.VideoGenerationPlanRequest,
 		conversationHistory []types.Message,
 		onThinking func(thinking string),
-	) (*types.Union2AskUserQuestionOrGeneratedVideoPlan, error)
+	) (*types.GeneratedVideoPlan, error)
 	CategorizeScene(ctx context.Context, req types.MatchCategoriesRequest) (*types.MatchCategoriesResponse, error)
 	GenerateAnimation(ctx context.Context,
 		req types.GenerateAnimationCodeRequest,
 		conversationHistory []types.Message,
 		onThinking func(thinking string),
-		options *LLMOptions) (*types.Union2AskUserQuestionOrGenerateAnimationCodeResponse, error)
+		options *LLMOptions) (*types.Union2AskUserQuestionOrGenerateAnimationCodeResponse, *string, error)
 	ExtractTemplateConfig(ctx context.Context, req types.ExtractTemplateConfigRequest) (*types.ExtractTemplateConfigResponse, error)
+	GenerateScript(
+		ctx context.Context,
+		req types.ScriptPlannerRequest,
+		conversationHistory []types.Message,
+		onThinking func(thinking string),
+	) (*types.Union2ListAskUserQuestionOrScript, *string, error)
 }
 
 type LLMOptions struct {
@@ -61,7 +68,7 @@ func (l *llmService) GenerateAnimation(
 	ctx context.Context,
 	req types.GenerateAnimationCodeRequest,
 	conversationHistory []types.Message,
-	onThinking func(thinking string), options *LLMOptions) (*types.Union2AskUserQuestionOrGenerateAnimationCodeResponse, error) {
+	onThinking func(thinking string), options *LLMOptions) (*types.Union2AskUserQuestionOrGenerateAnimationCodeResponse, *string, error) {
 	l.logger.Info("🚀 Starting code generation..")
 
 	var extractor *ThinkingExtractor
@@ -84,7 +91,7 @@ func (l *llmService) GenerateAnimation(
 
 	stream, err := baml_client.Stream.GenerateAnimation(ctx, req, conversationHistory, callOptions...)
 	if err != nil {
-		return nil, handleInitialError(err)
+		return nil, nil, handleInitialError(err)
 	}
 
 	// Ensure stream is properly closed on exit
@@ -100,12 +107,12 @@ func (l *llmService) GenerateAnimation(
 		// Handle context cancellation
 		select {
 		case <-ctx.Done():
-			return nil, ctx.Err()
+			return nil, nil, ctx.Err()
 		default:
 		}
 		// Handle streaming errors
 		if value.IsError {
-			return nil, handleContextError(value.Error)
+			return nil, nil, handleContextError(value.Error)
 		}
 
 		// Process final result
@@ -120,17 +127,11 @@ func (l *llmService) GenerateAnimation(
 				zap.Float64("duration", duration),
 			)
 
-			if final.IsGenerateAnimationCodeResponse() {
-				final.AsGenerateAnimationCodeResponse().ThinkingSummary = utils.Ptr(summary)
-			} else if final.IsAskUserQuestion() {
-				final.AsAskUserQuestion().ThinkingSummary = utils.Ptr(summary)
-			}
-
-			return &final, nil
+			return &final, utils.Ptr(summary), nil
 		}
 	}
 
-	return nil, fmt.Errorf("stream closed without final result")
+	return nil, nil, fmt.Errorf("stream closed without final result")
 }
 
 func NewLlmService(logger *zap.Logger, cache cache.Cache) Service {
@@ -142,7 +143,7 @@ func (l *llmService) GeneratePlanV2(
 	req types.VideoGenerationPlanRequest,
 	conversationHistory []types.Message,
 	onThinking func(thinking string),
-) (*types.Union2AskUserQuestionOrGeneratedVideoPlan, error) {
+) (*types.GeneratedVideoPlan, error) {
 	l.logger.Info("🚀 Starting video plan generation..")
 
 	//var plan types.GeneratedVideoPlan
@@ -196,16 +197,84 @@ func (l *llmService) GeneratePlanV2(
 				zap.String("summary", summary),
 				zap.Float64("duration", duration),
 			)
-
-			if final.Plan.IsGeneratedVideoPlan() {
-				final.Plan.AsGeneratedVideoPlan().ThinkingSummary = utils.Ptr(summary)
-			} else if final.Plan.IsAskUserQuestion() {
-				final.Plan.AsAskUserQuestion().ThinkingSummary = utils.Ptr(summary)
-			}
-
-			return &final.Plan, nil
+			return &final, nil
 		}
 	}
 
 	return nil, fmt.Errorf("stream closed without final result")
+}
+
+func (l *llmService) GenerateScript(
+	ctx context.Context,
+	req types.ScriptPlannerRequest,
+	conversationHistory []types.Message,
+	onThinking func(thinking string),
+) (*types.Union2ListAskUserQuestionOrScript, *string, error) {
+	l.logger.Info("🚀 Starting planning script generation..")
+
+	extractor := l.NewThinkingExtractor(NewOpenAIExtractor(), onThinking, thinkingMessages)
+
+	tb, err := baml_client.NewTypeBuilder()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	sec, err := tb.VideoSection()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	for _, category := range scenes.AvailableCategoriesToCategorize {
+		_, err = sec.AddValue(category.Name)
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
+	stream, err := baml_client.Stream.GenerateScript(ctx, req, conversationHistory,
+		baml_client.WithOnTick(extractor.HandleTick),
+		baml_client.WithTypeBuilder(tb),
+		baml_client.WithTags(getTags(ctx)))
+	if err != nil {
+		return nil, nil, handleInitialError(err)
+	}
+
+	// Ensure stream is properly closed on exit
+	defer func() {
+		if stream != nil {
+			// Note: In practice, range automatically handles closing
+			// but explicit cleanup is shown here for demonstration
+			l.logger.Info("Stream completed")
+		}
+	}()
+
+	for value := range stream {
+		// Handle context cancellation
+		select {
+		case <-ctx.Done():
+			return nil, nil, ctx.Err()
+		default:
+		}
+		// Handle streaming errors
+		if value.IsError {
+			return nil, nil, handleContextError(value.Error)
+		}
+
+		// Process final result
+		if value.IsFinal && value.Final() != nil {
+			final := *value.Final()
+
+			summary := extractor.FinalSummary()
+			duration := extractor.Duration()
+
+			l.logger.Info("Final thinking summary",
+				zap.String("summary", summary),
+				zap.Float64("duration", duration),
+			)
+
+			return &final.Plan, utils.Ptr(summary), nil
+		}
+	}
+
+	return nil, nil, fmt.Errorf("stream closed without final result")
 }

@@ -75,9 +75,9 @@ export declare type UpdateTemplateRequest = Message<"coasterai.portal.v1.UpdateT
   description: string;
 
   /**
-   * @generated from field: optional string usage_description = 3;
+   * @generated from field: string usage_description = 3;
    */
-  usageDescription?: string;
+  usageDescription: string;
 
   /**
    * @generated from field: repeated string categories = 4;

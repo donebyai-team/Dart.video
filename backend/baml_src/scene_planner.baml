@@ -1,9 +1,3 @@
-class ScriptItem {
- name string
- voiceover string?
- reference string?
-}
-
 class AnimationCategories {
   entranceAnimations string[]
 }
@@ -13,11 +7,9 @@ class VideoGenerationPlanRequest {
     Prompt string
     Language string
     Resolution string
-    Script  ScriptItem[]
     VideoBranding VideoBranding
     ComponentList string
     AnimationCategories AnimationCategories
-    Questions map<string, string>
 }
 
 class SceneSection {
@@ -31,11 +23,7 @@ class GeneratedVideoPlan {
     thinkingSummary string? @skip()
 }
 
-class VideoGenerationPlan {
-  plan (GeneratedVideoPlan | AskUserQuestion)
-}
-
-function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: Message[]) -> VideoGenerationPlan {
+function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: Message[]) -> GeneratedVideoPlan {
   client CustomOpenAI5WithThinkingSummary
   prompt #"
     You are a cinematic video planning director. Your job is to decompose a video brief into a sequence of scenes.
@@ -134,21 +122,6 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
 
     ---
 
-    ## ASK QUESTIONS RULES
-
-    Ask before proceeding if:
-    - Missing critical sections would weaken the video (e.g., no Hook/CTA): ask whether to add them or proceed as-is.
-    - **Script is provided**: ask whether to use it exactly or allow light edits.
-    - Script-to-scene mapping is unclear: ask for clarification, or use the closest meaningful script subset.
-    - Brand presence is implied but no brand name/identity is provided: ask for brand identity.
-    - Attachment is provided but usage is unclear: use **ATTACHMENT_CLARIFICATION**.
-    - Scene requires a missing attachment: use **UPLOAD_ATTACHMENT or a placeholder**.
-    - A key visual storytelling decision is ambiguous.
-
-    Do not ask about:
-    - Props or component internals — the generator handles these.
-    - Sections the user clearly and intentionally omitted.
-
     ## EXAMPLE SCENES
     ```json
     [
@@ -179,19 +152,8 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     Video FPS: 30 frames/second
     Language: {{ input.Language }}
 
-    ### User provided prompt/script:
+    ### Script:
     {{ input.Prompt }}
-
-    {%- if input.Questions -%}
-    ### Questions answered by the user:
-    {% for question in input.Questions -%}
-      {%- if input.Questions[question] %}
-      Q: {{ question }}
-      A: {{ input.Questions[question] }}
-      {%- endif %}
-    {%- endfor %}
-    {%- endif %}
-
     ---
 
     {% if conversation_history %}

@@ -160,7 +160,6 @@ func GenerateRandomName(minLen, maxLen int) string {
 func (v videoGeneration) CreateVideo(ctx context.Context, organizationID string, params *pbportal.CreateVideoRequest) (*models.Video, error) {
 	video, err := v.db.CreateVideo(ctx, &models.Video{
 		Name:           GenerateRandomName(5, 10),
-		Script:         params.Script,
 		OrganizationID: organizationID,
 		Status:         models.VideoStatusPLANNING,
 		Metadata: &pbcore.VideoMetadata{

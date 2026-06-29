@@ -1,5 +1,7 @@
-FROM postgres:15
+FROM pgvector/pgvector:pg15
 
-RUN apt-get update && apt-get install -y postgresql-15-postgis-3
+RUN apt-get update && \
+    apt-get install -y postgresql-15-postgis-3 && \
+    rm -rf /var/lib/apt/lists/*
 
 # CMD ["/usr/local/bin/docker-entrypoint.sh","postgres"]

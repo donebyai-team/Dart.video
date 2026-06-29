@@ -9,6 +9,7 @@ import (
 	"github.com/shank318/coasterai/datastore"
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
+	"github.com/shank318/coasterai/services/llm"
 	"github.com/spf13/cobra"
 	. "github.com/streamingfast/cli"
 	"github.com/streamingfast/cli/sflags"
@@ -40,11 +41,13 @@ func toolsSyncTemplatesRunE(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
+	embeddingService := llm.NewOpenAIService(zlog, sflags.MustGetString(cmd, "openai-api-key"))
+
 	stats := &syncStats{}
 
-	templates := scenes.GetAllTemplates()
+	allTemplates := scenes.GetAllTemplates()
 
-	for _, template := range templates {
+	for _, template := range allTemplates {
 
 		templateToUpdate := models.Template{
 			Name:        template.Name,
@@ -64,6 +67,14 @@ func toolsSyncTemplatesRunE(cmd *cobra.Command, args []string) error {
 
 		if template.Instructions != "" {
 			templateToUpdate.Description = templateToUpdate.Description + "\n\n" + template.Instructions
+
+			vectorEm, err := embeddingService.CreateEmbedding(ctx, template.Instructions)
+			if err != nil {
+				printSyncFail("failed to create embedding: %v", err)
+				return nil
+			}
+
+			templateToUpdate.DescriptionEmbedding = vectorEm
 		}
 
 		existingTemplate, err := db.GetTemplateByName(ctx, template.Name)
@@ -75,7 +86,6 @@ func toolsSyncTemplatesRunE(cmd *cobra.Command, args []string) error {
 		if existingTemplate != nil {
 			stats.templatesUpdated++
 			templateToUpdate.ID = existingTemplate.ID
-
 			err = db.UpdateTemplate(ctx, &templateToUpdate)
 			if err != nil {
 				printSyncFail("%v", err)

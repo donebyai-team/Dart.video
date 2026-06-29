@@ -7,7 +7,6 @@ import (
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
 	"github.com/shank318/coasterai/services"
-	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
 )
 
@@ -24,65 +23,73 @@ func NewToolRegistry(state AgentStatusPublisher, session AgentSession, logger *z
 func (a *ToolRegistry) HandleAskQuestion(
 	ctx context.Context,
 	session *SessionContext,
-	question *types.AskUserQuestion,
-	thinking string,
+	questions []*types.AskUserQuestion,
+	thinkingSummary *string,
 	assetRegistry *services.MediaAssetRegistry,
 ) (bool, *RunResult, error) {
-	if question == nil {
+	if questions == nil {
 		return false, nil, nil
 	}
 
-	a.logger.Info("planning paused: waiting for user input",
-		zap.String("question", question.Question_text),
-	)
-
-	if question.ThinkingSummary != nil && *question.ThinkingSummary != "" {
+	if thinkingSummary != nil && *thinkingSummary != "" {
 		session.AddMessage(&pbcore.ConversationMessage{
 			Role:    pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
 			Type:    pbcore.ConversationMessageType_CONVERSATION_MESSAGE_THINKING,
-			Message: *question.ThinkingSummary,
+			Message: *thinkingSummary,
 		})
 	}
 
+	questionsAsked := "Questions:"
+	for _, question := range questions {
+		questionsAsked += "\n- " + question.Question_text
+	}
+
+	a.logger.Info("planning paused: waiting for user input",
+		zap.String("question", questionsAsked),
+	)
+
 	session.AddMessage(&pbcore.ConversationMessage{
 		Role:    pbcore.ConversationRole_CONVERSATION_ROLE_TOOL,
-		Message: question.Question_text,
+		Message: questionsAsked,
 	})
 
 	if err := a.session.Save(ctx, session); err != nil {
 		return true, nil, agenterrors.SessionUnavailable("failed to save planning session with tool call", err)
 	}
 
-	questionCopy := *question
 	if err := a.state.Save(ctx, AgentState{
-		Thinking: thinking,
-		State:    StateStatusWaiting,
+		State: StateStatusWaiting,
 	}); err != nil {
 		a.logger.Error("failed to update waiting-for-user-input state", zap.Error(err))
 		return true, nil, err
 	}
 
-	questionProto := toProtoQuestion(&questionCopy)
-
-	if questionCopy.AttachmentUrl != nil {
-		asset := assetRegistry.GetAssetFromHandle(*questionCopy.AttachmentUrl)
-		if asset != nil {
-			questionProto.Asset = asset.ToProto()
+	questionsProtos := make([]*pbportal.AskUserQuestion, 0, len(questions))
+	for _, question := range questions {
+		questionCopy := *question
+		questionProto := toProtoQuestion(&questionCopy)
+		if questionCopy.AttachmentUrl != nil {
+			asset := assetRegistry.GetAssetFromHandle(*questionCopy.AttachmentUrl)
+			if asset != nil {
+				questionProto.Asset = asset.ToProto()
+			}
 		}
-	}
 
-	// if no asset is provided while clarification
-	// fallback to GENERAL, ideally it should not happen
-	if questionProto.Asset == nil && questionCopy.QuestionType == types.AskUserQuestionTypeATTACHMENT_CLARIFICATION {
-		questionProto.QuestionType = pbportal.AskUserQuestionType_ASK_USER_QUESTION_TYPE_GENERAL
-		if len(questionProto.Options) == 0 {
-			questionProto.AllowCustomEntry = utils.Ptr(true)
-		}
+		// if no asset is provided while clarification
+		// fallback to GENERAL, ideally it should not happen
+		//if questionProto.Asset == nil && questionCopy.QuestionType == types.AskUserQuestionTypeATTACHMENT_CLARIFICATION {
+		//	questionProto.QuestionType = pbportal.AskUserQuestionType_ASK_USER_QUESTION_TYPE_GENERAL
+		//	if len(questionProto.Options) == 0 {
+		//		questionProto.AllowCustomEntry = utils.Ptr(true)
+		//	}
+		//}
+
+		questionsProtos = append(questionsProtos, questionProto)
 	}
 
 	return true, &RunResult{
-		Status:          RunStatusWaitingForUserInput,
-		AskUserQuestion: questionProto,
+		Status:           RunStatusWaitingForUserInput,
+		AskUserQuestions: questionsProtos,
 	}, nil
 }
 
@@ -101,8 +108,6 @@ func toProtoQuestion(question *types.AskUserQuestion) *pbportal.AskUserQuestion 
 
 	if question.QuestionType == types.AskUserQuestionTypeGENERIC {
 		proto.QuestionType = pbportal.AskUserQuestionType_ASK_USER_QUESTION_TYPE_GENERAL
-	} else if question.QuestionType == types.AskUserQuestionTypeATTACHMENT_CLARIFICATION {
-		proto.QuestionType = pbportal.AskUserQuestionType_ASK_USER_QUESTION_TYPE_ASSET_CLARIFICATION
 	} else if question.QuestionType == types.AskUserQuestionTypeUPLOAD_ATTACHMENT {
 		proto.QuestionType = pbportal.AskUserQuestionType_ASK_USER_QUESTION_TYPE_UPLOAD_ASSET
 	}

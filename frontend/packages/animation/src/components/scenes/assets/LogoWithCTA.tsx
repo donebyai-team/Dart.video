@@ -318,6 +318,6 @@ export const LogoWithCTADescriptor: ComponentRegistration = {
         },
     ],
     description: 'Logo icon and brand name reveal with a CTA text below that.',
-    instructions: 'Use as the final scene.',
+    instructions: 'Use as the final scene. CTA, demo , try now',
     celExpression: '33 + (segmentCount(props.["animatedtext-tagline"].text, "word") - 1) * 3 + 12',
 };

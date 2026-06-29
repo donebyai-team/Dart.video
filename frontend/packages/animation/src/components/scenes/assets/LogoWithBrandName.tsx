@@ -130,6 +130,6 @@ export const LogoWithBrandNameDescriptor: ComponentRegistration = {
         type: 'string',
     }],
     description: 'Logo + brand name reveal.',
-    instructions: 'Use for brand intros',
+    instructions: 'Use for brand intros, simple brand and its logo',
     celExpression: `max(0, segmentCount(props.animatedtext.text, "char")) * ${DEFAULT_CHAR_STAGGER} + ${DEFAULT_CHAR_FADE_DURATION}`,
 };

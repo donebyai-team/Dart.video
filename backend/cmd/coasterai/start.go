@@ -8,6 +8,7 @@ import (
 	"github.com/shank318/coasterai/services/audio"
 	"github.com/shank318/coasterai/services/brand_identity"
 	"github.com/shank318/coasterai/services/code_builder"
+	servicesllm "github.com/shank318/coasterai/services/llm"
 	"github.com/shank318/coasterai/services/templates"
 	"os"
 	"regexp"
@@ -47,13 +48,8 @@ var StartCmd = cli.Command(startCmdE,
 		flags.String("common-elevenlabs-api-key", "", "Elevenlabs api key")
 		flags.String("common-code-builder-service", "", "Code builder service")
 		flags.String("common-google-api-key", "", "Google api key")
-		flags.String("common-openai-api-key", "", "LiteLLM API key")
-		flags.String("common-openai-gpt-api-key", "", "OpenAI API key")
-		flags.String("common-openai-debug-store", "data/debugstore", "OpenAI debug store")
+		flags.String("common-openai-api-key", "", "OpenAI API key")
 		flags.String("common-playwright-debug-store", "data/debugstore", "PlayWright debug store")
-		flags.String("common-openai-organization", "", "OpenAI Organization")
-		flags.String("common-langsmith-api-key", "", "Langsmith API key")
-		flags.String("common-langsmith-project", "", "Langsmith project name")
 		flags.Uint64("common-auto-mem-limit-percent", 0, "Automatically sets GOMEMLIMIT to a percentage of memory limit from cgroup (useful for container environments)")
 		flags.Duration("spooler-db-polling-interval", 10*time.Minute, "How often the spooler will check the database for new investigation")
 
@@ -215,7 +211,13 @@ func portalApp(cmd *cobra.Command, isAppReady func() bool) (App, error) {
 		code_builder.NewCodeBuilderService(deps.MediaStore, zlog),
 		provider,
 		llm.NewLlmService(zlog, cacheStore),
-		templates.NewService(deps.DataStore),
+		templates.NewService(
+			deps.DataStore,
+			servicesllm.NewOpenAIService(
+				zlog,
+				sflags.MustGetString(cmd, "common-openai-api-key"),
+			),
+		),
 		sflags.MustGetString(cmd, "portal-http-listen-addr"),
 		deps.CorsURLRegexAllow,
 		config,
