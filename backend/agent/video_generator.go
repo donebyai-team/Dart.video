@@ -285,6 +285,7 @@ func (a *agentV2) runPlanningScript(ctx context.Context, req types.ScriptPlanner
 		return nil, err
 	}
 
+	a.publishProcessingState("Generating script...")
 	llmResponse, llmThinking, err := a.llmService.GenerateScript(ctx, req, history, func(chunk string) {
 		a.publishProcessingState(chunk)
 	})
@@ -321,6 +322,7 @@ func (a *agentV2) generateScenes(
 		}
 	}()
 
+	a.publishProcessingState("Preparing storyboard...")
 	registry := NewTemplateRegistry(a.templateService, a.assetRegistry, a.codeGenerator, a.logger)
 	err := registry.WithRelevantTemplates(ctx, script)
 	if err != nil {
@@ -333,6 +335,7 @@ func (a *agentV2) generateScenes(
 
 	// Generate and validate upto max attempts
 	for attempt := 0; attempt < maxAttempts; attempt++ {
+		a.publishProcessingState("Generating scenes...")
 		llmResponse, err := a.llmService.GeneratePlanV2(ctx, req, nil, func(chunk string) {
 			a.publishProcessingState(chunk)
 		})
