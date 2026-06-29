@@ -413,7 +413,7 @@ const VideoIntentComposer = () => {
             What feature are you launching today?
           </h1>
           <p className='text-sm text-muted-foreground mt-1.5'>
-            Add a detailed script to generate your video.
+            Give us a topic, concept, or script, and we'll build it with you.
           </p>
         </div>
       </div>
@@ -532,7 +532,11 @@ const VideoIntentComposer = () => {
           <textarea
             value={prompt}
             onChange={e => setPrompt(e.target.value)}
-            placeholder={'Sample script (Hook → Problem → Product Intro → Features → Social Proof → CTA). Example: Hook: Can your AI actually work with you?'}
+            placeholder={`What do you want to create?
+
+💡 Topic: How AI is changing healthcare
+🧠 Concept: Explain quantum computing simply
+📝 Script: Hook → Problem → Solution → CTA`}
             rows={4}
             className='w-full resize-none bg-transparent px-4 py-3 text-sm focus:outline-none placeholder:text-muted-foreground/60'
             disabled={stage !== 'compose'}
