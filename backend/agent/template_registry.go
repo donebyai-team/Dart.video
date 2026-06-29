@@ -49,6 +49,22 @@ func (r *TemplateRegistry) WithRandomTemplates(ctx context.Context) error {
 	return nil
 }
 
+// WithRelevantTemplates builds the template pool in three passes.
+//
+// Algorithm:
+// 1. Always include filler templates.
+// 2. Always include a random set of text templates.
+// 3. For each script item:
+//   - if the item category is CTA, fetch CTA templates directly and stop there for that item.
+//   - otherwise, keep the item's narration as the semantic query, expand the item's category via
+//     scenes.RelatedCategories, and retrieve similar templates from that expanded category set.
+// 4. Deduplicate templates across all passes using selectedTemplateIDs / seenTemplateIDs.
+//
+// Example:
+// If the script contains a HOOK item with narration "Most teams waste hours switching tools",
+// and HOOK expands to [HOOK, INTRO, PROBLEM], then the similarity query still uses the HOOK
+// narration, but templates can be retrieved from any of those categories. This allows an INTRO
+// template to be selected even when the script has no explicit INTRO section.
 func (r *TemplateRegistry) WithRelevantTemplates(ctx context.Context, script *pbcore.Script) error {
 	if script == nil {
 		return r.WithRandomTemplates(ctx)
@@ -122,10 +138,11 @@ func (r *TemplateRegistry) WithRelevantTemplates(ctx context.Context, script *pb
 				continue
 			}
 
+			relatedCategories := expandRelatedCategories(category)
 			selectedTemplates, err := r.templateService.GetSimilarTemplates(
 				ctx,
 				fmt.Sprintf("%s %s", category, narration),
-				category,
+				relatedCategories,
 				selectedTemplateIDs,
 				2,
 			)
@@ -149,6 +166,39 @@ func (r *TemplateRegistry) WithRelevantTemplates(ctx context.Context, script *pb
 	}
 
 	return nil
+}
+
+func expandRelatedCategories(category string) []string {
+	category = strings.ToUpper(strings.TrimSpace(category))
+	if category == "" {
+		return nil
+	}
+
+	relatedCategories, ok := scenes.RelatedCategories[category]
+	if !ok || len(relatedCategories) == 0 {
+		return []string{category}
+	}
+
+	seenCategories := make(map[string]struct{}, len(relatedCategories))
+	expandedCategories := make([]string, 0, len(relatedCategories))
+	for _, relatedCategory := range relatedCategories {
+		relatedCategory = strings.ToUpper(strings.TrimSpace(relatedCategory))
+		if relatedCategory == "" {
+			continue
+		}
+		if _, exists := seenCategories[relatedCategory]; exists {
+			continue
+		}
+
+		seenCategories[relatedCategory] = struct{}{}
+		expandedCategories = append(expandedCategories, relatedCategory)
+	}
+
+	if len(expandedCategories) == 0 {
+		return []string{category}
+	}
+
+	return expandedCategories
 }
 
 func (r *TemplateRegistry) WithTemplateIds(ctx context.Context, templateIds []string) error {

@@ -26,7 +26,7 @@ type Service interface {
 	UpdateTemplateConfig(ctx context.Context, video *models.Video) (*models.Video, error)
 	UpdateTemplate(ctx context.Context, req *pbportal.UpdateTemplateRequest) error
 	GetTemplates(ctx context.Context, categories []string) ([]*models.Template, error)
-	GetSimilarTemplates(ctx context.Context, usageDescription string, category string, excludedTemplateIDs []string, limit int) ([]*models.Template, error)
+	GetSimilarTemplates(ctx context.Context, usageDescription string, categories []string, excludedTemplateIDs []string, limit int) ([]*models.Template, error)
 	DeleteTemplateByID(ctx context.Context, id string) error
 	FetchTemplatesByCategories(ctx context.Context, categories []types.Category) ([]*models.Template, error)
 }
@@ -221,7 +221,7 @@ func (t templateService) UpdateTemplate(ctx context.Context, req *pbportal.Updat
 func (t templateService) GetSimilarTemplates(
 	ctx context.Context,
 	usageDescription string,
-	category string,
+	categories []string,
 	excludedTemplateIDs []string,
 	limit int,
 ) ([]*models.Template, error) {
@@ -229,8 +229,23 @@ func (t templateService) GetSimilarTemplates(
 	if usageDescription == "" {
 		return nil, fmt.Errorf("usage description is required")
 	}
-	if strings.TrimSpace(category) == "" {
-		return nil, fmt.Errorf("category is required")
+
+	sanitizedCategories := make([]string, 0, len(categories))
+	seenCategories := make(map[string]struct{}, len(categories))
+	for _, category := range categories {
+		category = strings.ToUpper(strings.TrimSpace(category))
+		if category == "" {
+			continue
+		}
+		if _, exists := seenCategories[category]; exists {
+			continue
+		}
+
+		seenCategories[category] = struct{}{}
+		sanitizedCategories = append(sanitizedCategories, category)
+	}
+	if len(sanitizedCategories) == 0 {
+		return nil, fmt.Errorf("at least one category is required")
 	}
 	if limit <= 0 {
 		return nil, fmt.Errorf("limit must be greater than 0")
@@ -241,7 +256,7 @@ func (t templateService) GetSimilarTemplates(
 		return nil, fmt.Errorf("create usage description embedding: %w", err)
 	}
 
-	return t.db.GetSimilarTemplates(ctx, embedding, category, excludedTemplateIDs, limit)
+	return t.db.GetSimilarTemplates(ctx, embedding, sanitizedCategories, excludedTemplateIDs, limit)
 }
 
 func (t templateService) GetTemplateByID(ctx context.Context, ID string) (*models.Template, error) {

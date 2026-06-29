@@ -61,3 +61,42 @@ var AvailableCategoriesToCategorize = []types.Category{
 		Description: "Encourages the audience to take a specific action such as signing up, booking a demo, starting a trial, purchasing, contacting sales, or learning more.",
 	},
 }
+
+var RelatedCategories = map[string][]string{
+	"HOOK": {
+		"HOOK",
+		"INTRO",
+		"PROBLEM",
+	},
+	"INTRO": {
+		"INTRO",
+		"HOOK",
+		"SOLUTION",
+	},
+	"PROBLEM": {
+		"PROBLEM",
+		"FRAGMENTATION",
+		"HOOK",
+	},
+	"SOLUTION": {
+		"SOLUTION",
+		"FEATURES",
+		"PRODUCT_DEMO",
+	},
+	"FEATURES": {
+		"FEATURES",
+		"PRODUCT_DEMO",
+		"SOLUTION",
+	},
+	"PRODUCT_DEMO": {
+		"PRODUCT_DEMO",
+		"FEATURES",
+	},
+	"SOCIAL_PROOF": {
+		"SOCIAL_PROOF",
+		"SOLUTION",
+	},
+	"CTA": {
+		"CTA",
+	},
+}

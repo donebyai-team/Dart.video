@@ -11,7 +11,7 @@ enum VideoSection {
 }
 
 class ScriptSection {
- name VideoSection
+ name VideoSection @description("section to split a video")
  narration string[]
 }
 
@@ -70,9 +70,10 @@ function GenerateScript(input: ScriptPlannerRequest, conversation_history: Messa
 
     ## SCRIPT REQUIREMENTS
 
-    The script should be organized into logical sections.
-    Use only the sections that improve the story. Add, remove or merge sections when appropriate.
-    Each section contains an ordered list of narration blocks.
+    - The script should be organized into logical sections.
+    - Use sections that improve the story. Add, remove or merge sections when appropriate.
+    - Each section contains an ordered list of narration blocks.
+    - *NEVER INVENT A NEW SECTION, only use from the available ones*
 
     Each narration block must:
     - represent one complete idea
@@ -97,17 +98,16 @@ function GenerateScript(input: ScriptPlannerRequest, conversation_history: Messa
 
     ## ASK QUESTIONS WHEN NEEDED
 
-    Examples of information that may be worth asking about:
-    - target audience
-    - product or brand name
-    - primary goal
-    - approximate video duration
-    - call-to-action
-    - missing product details
-    - missing benefits
-    - unclear messaging
-    - any ambiguity that would materially affect the script
-    - Attachment is provided but usage is unclear: use **ATTACHMENT_CLARIFICATION**.
+    Examples of information that may be worth asking about (only if missing or important for the video):
+    - The target audience and who the video is for.
+    - The core problem or pain point being addressed.
+    - The product, feature, or solution being presented.
+    - The product or brand name.
+    - The key benefits or differentiators to highlight.
+    - Any supporting evidence such as statistics, testimonials, or social proof.
+    - The desired call to action (CTA).
+    - Any missing context or ambiguity that would materially change the script.
+    - If an attachment is provided but its intended use is unclear, use **ATTACHMENT_CLARIFICATION**.
 
     Never ask about information that the user has already provided.
 

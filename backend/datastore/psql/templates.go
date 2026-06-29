@@ -212,7 +212,7 @@ func (r *Database) GetTemplatesByCategoryRandom(
 func (r *Database) GetSimilarTemplates(
 	ctx context.Context,
 	embedding []float64,
-	category string,
+	categories []string,
 	excludedTemplateIDs []string,
 	limit int,
 ) ([]*models.Template, error) {
@@ -223,7 +223,7 @@ func (r *Database) GetSimilarTemplates(
 		"templates/query_similar_templates.sql",
 		map[string]any{
 			"embedding":             inputEmbedding,
-			"category":              strings.ToUpper(category),
+			"categories":            pq.Array(toUpperCategories(categories)),
 			"excluded_template_ids": pq.Array(excludedTemplateIDs),
 			"limit":                 limit,
 		},

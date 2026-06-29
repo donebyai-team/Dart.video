@@ -110,7 +110,7 @@ type TemplateRepository interface {
 	GetSimilarTemplates(
 		ctx context.Context,
 		embedding []float64,
-		category string,
+		categories []string,
 		excludedTemplateIDs []string,
 		limit int,
 	) ([]*models.Template, error)
