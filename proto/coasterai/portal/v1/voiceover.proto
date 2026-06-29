@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package coasterai.portal.v1;
+
+option go_package = "github.com/shank318/coasterai/pb/coasterai/portal/v1;pbportal";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+message GenerateNarrationResponse {
+  repeated NarrationSegment segments = 1;
+}
+
+message NarrationSegment {
+  string text = 1;
+}

@@ -168,8 +168,6 @@ func (t templateService) UpdateTemplateConfig(ctx context.Context, video *models
 	return existingTemplate.ToModelVideo(), nil
 }
 
-const usageSeparator = "\n\n---USAGE---\n\n"
-
 func (t templateService) UpdateTemplate(ctx context.Context, req *pbportal.UpdateTemplateRequest) error {
 	existingTemplate, err := t.db.GetTemplateByID(ctx, req.Id)
 	if err != nil {
@@ -201,7 +199,7 @@ func (t templateService) UpdateTemplate(ctx context.Context, req *pbportal.Updat
 	existingTemplate.Description = req.Description
 
 	if req.UsageDescription != nil && *req.UsageDescription != "" {
-		existingTemplate.Description += usageSeparator + *req.UsageDescription
+		existingTemplate.Description += models.UsageSeparator + *req.UsageDescription
 	}
 
 	existingTemplate.Categories = req.Categories

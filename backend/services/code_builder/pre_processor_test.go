@@ -61,7 +61,7 @@ func TestResolveIcons(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			actual := resolveIcons(tt.input)
+			actual := ResolveIcons(tt.input)
 			require.Equal(t, tt.expected, actual)
 		})
 	}

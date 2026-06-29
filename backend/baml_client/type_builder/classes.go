@@ -359,6 +359,38 @@ func (t *GenerateAnimationCodeResponseClassView) Type() (baml.Type, error) {
 	return t.inner.Type()
 }
 
+type GenerateVideoNarrationRequestClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *GenerateVideoNarrationRequestClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *GenerateVideoNarrationRequestClassView) PropertyDescription() (ClassPropertyView, error) {
+	return t.inner.Property("description")
+}
+
+func (t *TypeBuilder) GenerateVideoNarrationRequest() (*GenerateVideoNarrationRequestClassView, error) {
+	bld, err := t.inner.Class("GenerateVideoNarrationRequest")
+	if err != nil {
+		return nil, err
+	}
+	return &GenerateVideoNarrationRequestClassView{inner: bld}, nil
+}
+
+func (t *GenerateVideoNarrationRequestClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
 type GeneratedVideoPlanClassView struct {
 	inner baml.ClassBuilder
 }
@@ -512,6 +544,38 @@ func (t *TypeBuilder) Message() (*MessageClassView, error) {
 }
 
 func (t *MessageClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
+type NarrationSegmentClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *NarrationSegmentClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *NarrationSegmentClassView) PropertyText() (ClassPropertyView, error) {
+	return t.inner.Property("text")
+}
+
+func (t *TypeBuilder) NarrationSegment() (*NarrationSegmentClassView, error) {
+	bld, err := t.inner.Class("NarrationSegment")
+	if err != nil {
+		return nil, err
+	}
+	return &NarrationSegmentClassView{inner: bld}, nil
+}
+
+func (t *NarrationSegmentClassView) Type() (baml.Type, error) {
 	return t.inner.Type()
 }
 
@@ -796,5 +860,37 @@ func (t *TypeBuilder) VideoGenerationPlanRequest() (*VideoGenerationPlanRequestC
 }
 
 func (t *VideoGenerationPlanRequestClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
+type VideoNarrationClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *VideoNarrationClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *VideoNarrationClassView) PropertySegments() (ClassPropertyView, error) {
+	return t.inner.Property("segments")
+}
+
+func (t *TypeBuilder) VideoNarration() (*VideoNarrationClassView, error) {
+	bld, err := t.inner.Class("VideoNarration")
+	if err != nil {
+		return nil, err
+	}
+	return &VideoNarrationClassView{inner: bld}, nil
+}
+
+func (t *VideoNarrationClassView) Type() (baml.Type, error) {
 	return t.inner.Type()
 }

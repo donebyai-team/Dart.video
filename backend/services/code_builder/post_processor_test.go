@@ -143,3 +143,87 @@ const DEFAULT_DATA = {
 		})
 	}
 }
+
+func TestExtractComponentComment(t *testing.T) {
+	tests := []struct {
+		name string
+		code string
+		want string
+	}{
+		{
+			name: "extract component comment",
+			code: `/**
+ * A dynamic typography animation highlighting a sequence of actions.
+ * The prefix text animates in first.
+ * The carousel rotates through items.
+ */
+export default function RemoteComponent() {
+}`,
+			want: `A dynamic typography animation highlighting a sequence of actions.
+The prefix text animates in first.
+The carousel rotates through items.`,
+		},
+		{
+			name: "ignore comments inside component",
+			code: `/**
+ * Component description.
+ */
+export default function RemoteComponent() {
+  // This should not be extracted.
+  /*
+   * Neither should this.
+   */
+}`,
+			want: "Component description.",
+		},
+		{
+			name: "no component comment",
+			code: `export default function RemoteComponent() {
+}`,
+			want: "",
+		},
+		{
+			name: "other comments before component are ignored",
+			code: `// File comment
+
+/* License */
+
+const foo = 1;
+
+/**
+ * Actual component description.
+ */
+export default function RemoteComponent() {
+}`,
+			want: "Actual component description.",
+		},
+		{
+			name: "comment not immediately before component",
+			code: `/**
+ * Old comment.
+ */
+
+const foo = 1;
+
+export default function RemoteComponent() {
+}`,
+			want: "",
+		},
+		{
+			name: "single line comment",
+			code: `/** Single line description. */
+export default function RemoteComponent() {
+}`,
+			want: "Single line description.",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := ExtractDescriptionCommentsFromGeneratedCode(tt.code)
+			if got != tt.want {
+				t.Fatalf("got %q, want %q", got, tt.want)
+			}
+		})
+	}
+}

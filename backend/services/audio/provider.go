@@ -2,10 +2,6 @@ package audio
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-	"log"
-	"net/http"
 	"time"
 
 	"github.com/hashicorp/go-retryablehttp"
@@ -45,36 +41,36 @@ func NewElevenLabsProvider(apiKey string, mediaStore services.MediaStore) (Provi
 }
 
 func (e ElevenLabs) GenerateMusic(ctx context.Context, video *models.Video) ([]*pbcore.MediaAsset, error) {
-	videoDescription, err := GeneratePrompt(video)
-	if err != nil {
-		return nil, err
-	}
-
-	fps := float64(videoDescription.FPS)
-	durationInMs := int(float64(videoDescription.TotalDurationInFrames) / fps * 1000)
-
-	requestBody, err := json.Marshal(compositionPlanRequest{
-		Prompt:   videoDescription.Prompt,
-		Duration: durationInMs,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("marshal composition plan request: %w", err)
-	}
-
-	url := fmt.Sprintf("%s%s", ELEVENLABS_API_URL, ELEVANLABS_COMPOSITION_URL)
-	respBytes, statusCode, err := services.DoRequest(ctx, e.httpClient, http.MethodPost, url, requestBody, map[string]string{
-		"Content-Type": "application/json",
-		"xi-api-key":   e.apiKey,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if statusCode < 200 || statusCode >= 300 {
-		return nil, fmt.Errorf("error: status=%d body=%s", statusCode, string(respBytes))
-	}
-
-	log.Printf("elevenlabs composition plan response: %s", string(respBytes))
+	//videoDescription, err := GeneratePrompt(video)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//fps := float64(videoDescription.FPS)
+	//durationInMs := int(float64(videoDescription.TotalDurationInFrames) / fps * 1000)
+	//
+	//requestBody, err := json.Marshal(compositionPlanRequest{
+	//	Prompt:   videoDescription.Prompt,
+	//	Duration: durationInMs,
+	//})
+	//if err != nil {
+	//	return nil, fmt.Errorf("marshal composition plan request: %w", err)
+	//}
+	//
+	//url := fmt.Sprintf("%s%s", ELEVENLABS_API_URL, ELEVANLABS_COMPOSITION_URL)
+	//respBytes, statusCode, err := services.DoRequest(ctx, e.httpClient, http.MethodPost, url, requestBody, map[string]string{
+	//	"Content-Type": "application/json",
+	//	"xi-api-key":   e.apiKey,
+	//})
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//if statusCode < 200 || statusCode >= 300 {
+	//	return nil, fmt.Errorf("error: status=%d body=%s", statusCode, string(respBytes))
+	//}
+	//
+	//log.Printf("elevenlabs composition plan response: %s", string(respBytes))
 
 	return nil, nil
 }

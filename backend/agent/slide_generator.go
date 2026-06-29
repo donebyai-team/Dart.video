@@ -181,7 +181,7 @@ func (g *videoConfigGenerator) UpdateAnimationSlide(
 				slide.BackgroundStyle = selectedTemplate.BackgroundStyle
 				// update the selected template description
 				// for future slides to know what's being selected so far
-				//animation.Plan.ThinkingSummary = utils.Ptr(selectedTemplate.Description)
+				//animation.Plan.ThinkingSummary = utils.Ptr(selectedTemplate.VisualDescription)
 			}
 		}
 	}

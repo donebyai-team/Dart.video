@@ -48,6 +48,28 @@ func ResolveIcons(code string) string {
 	return code
 }
 
+var remoteComponentCommentRE = regexp.MustCompile(
+	`(?s)/\*\*(.*?)\*/[ \t\r\n]*export\s+default\s+function\s+RemoteComponent\b`,
+)
+
+func ExtractDescriptionCommentsFromGeneratedCode(code string) string {
+	match := remoteComponentCommentRE.FindStringSubmatch(code)
+	if len(match) < 2 {
+		return ""
+	}
+
+	comment := strings.TrimSpace(match[1])
+
+	lines := strings.Split(comment, "\n")
+	for i, line := range lines {
+		line = strings.TrimSpace(line)
+		line = strings.TrimPrefix(line, "*")
+		lines[i] = strings.TrimSpace(line)
+	}
+
+	return strings.Join(lines, "\n")
+}
+
 func ExtractDefaultDataPropsFromGeneratedCode(
 	code string,
 ) (json.RawMessage, string, error) {

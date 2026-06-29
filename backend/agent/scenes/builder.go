@@ -142,7 +142,7 @@ func writeScene(b *strings.Builder, c types.Component, category string, fieldsTo
 
 	b.WriteString("\n")
 
-	// append the c.Instructions at the end of Description with .
+	// append the c.Instructions at the end of VisualDescription with .
 	if c.Description != "" {
 		desc := strings.TrimSpace(c.Description)
 
@@ -156,7 +156,7 @@ func writeScene(b *strings.Builder, c types.Component, category string, fieldsTo
 			desc += " " + strings.TrimSpace(c.Instructions)
 		}
 
-		b.WriteString("**Description**\n")
+		b.WriteString("**VisualDescription**\n")
 		fmt.Fprintf(b, "%s\n\n", desc)
 	}
 

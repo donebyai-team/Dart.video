@@ -317,6 +317,80 @@ func GeneratePlan(ctx context.Context, input types.VideoGenerationPlanRequest, c
 	}
 }
 
+func GenerateVideoNarration(ctx context.Context, input types.GenerateVideoNarrationRequest, opts ...CallOptionFunc) (types.VideoNarration, error) {
+
+	var callOpts callOption
+	for _, opt := range opts {
+		opt(&callOpts)
+	}
+
+	// Resolve client option to clientRegistry (client takes precedence)
+	if callOpts.client != nil {
+		if callOpts.clientRegistry == nil {
+			callOpts.clientRegistry = baml.NewClientRegistry()
+		}
+		callOpts.clientRegistry.SetPrimaryClient(*callOpts.client)
+	}
+
+	args := baml.BamlFunctionArguments{
+		Kwargs: map[string]any{"input": input},
+		Env:    getEnvVars(callOpts.env),
+	}
+
+	if callOpts.clientRegistry != nil {
+		args.ClientRegistry = callOpts.clientRegistry
+	}
+
+	if callOpts.collectors != nil {
+		args.Collectors = callOpts.collectors
+	}
+
+	if callOpts.typeBuilder != nil {
+		args.TypeBuilder = callOpts.typeBuilder
+	}
+
+	if callOpts.tags != nil {
+		args.Tags = callOpts.tags
+	}
+
+	encoded, err := args.Encode()
+	if err != nil {
+		panic(err)
+	}
+
+	if callOpts.onTick == nil {
+		result, err := bamlRuntime.CallFunction(ctx, "GenerateVideoNarration", encoded, callOpts.onTick)
+		if err != nil {
+			return types.VideoNarration{}, err
+		}
+
+		if result.Error != nil {
+			return types.VideoNarration{}, result.Error
+		}
+
+		casted := (result.Data).(types.VideoNarration)
+
+		return casted, nil
+	} else {
+		channel, err := bamlRuntime.CallFunctionStream(ctx, "GenerateVideoNarration", encoded, callOpts.onTick)
+		if err != nil {
+			return types.VideoNarration{}, err
+		}
+
+		for result := range channel {
+			if result.Error != nil {
+				return types.VideoNarration{}, result.Error
+			}
+
+			if result.HasData {
+				return result.Data.(types.VideoNarration), nil
+			}
+		}
+
+		return types.VideoNarration{}, fmt.Errorf("No data returned from stream")
+	}
+}
+
 func MatchCategories(ctx context.Context, resume types.MatchCategoriesRequest, opts ...CallOptionFunc) (types.MatchCategoriesResponse, error) {
 
 	var callOpts callOption

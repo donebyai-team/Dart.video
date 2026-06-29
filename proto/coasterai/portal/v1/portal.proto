@@ -15,6 +15,7 @@ import "coasterai/core/v1/figma.proto";
 import "coasterai/core/v1/media_asset.proto";
 import "coasterai/core/v1/chat.proto";
 import "coasterai/portal/v1/templates.proto";
+import "coasterai/portal/v1/voiceover.proto";
 
 service PortalService {
   rpc GetConfig(.google.protobuf.Empty) returns (Config);
@@ -69,6 +70,9 @@ service PortalService {
   // AI Suggestions
   rpc GenerateSuggestions(portal.v1.GenerateSuggestionsInput) returns (portal.v1.GenerateSuggestionsResponse);
   rpc RenderSuggestion(portal.v1.RenderSuggestionsInput) returns (SuggestScenesResponse);
+
+  // Voiceover
+  rpc GenerateNarration(VideoRequestWithID) returns (portal.v1.GenerateNarrationResponse);
 }
 
 message GetMediaAssetsByIDs {

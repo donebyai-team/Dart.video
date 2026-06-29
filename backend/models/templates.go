@@ -7,6 +7,7 @@ import (
 	"github.com/lib/pq"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"strings"
 	"time"
 )
 
@@ -52,6 +53,8 @@ func (a *TemplateCategories) Scan(src interface{}) error {
 	return nil
 }
 
+const UsageSeparator = "\n\n---USAGE---\n\n"
+
 type Template struct {
 	ID          string                `db:"id"`
 	Name        string                `db:"name"`
@@ -65,6 +68,22 @@ type Template struct {
 	Config      *pbcore.VideoConfig   `db:"config"`
 	Metadata    *pbcore.VideoMetadata `db:"metadata"`
 	Status      TemplateStatus        `db:"status"`
+}
+
+func (r *Template) GetDescription() string {
+	description, _, found := strings.Cut(r.Description, UsageSeparator)
+	if !found {
+		return strings.TrimSpace(r.Description)
+	}
+	return strings.TrimSpace(description)
+}
+
+func (r *Template) GetUsageDescription() string {
+	_, usage, found := strings.Cut(r.Description, UsageSeparator)
+	if !found {
+		return ""
+	}
+	return strings.TrimSpace(usage)
 }
 
 func (r *Template) ToProto() *pbcore.AnimationTemplate {

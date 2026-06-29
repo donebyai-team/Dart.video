@@ -484,6 +484,48 @@ func (c GenerateAnimationCodeResponse) BamlTypeName() string {
 	return "GenerateAnimationCodeResponse"
 }
 
+type GenerateVideoNarrationRequest struct {
+	Description *string `json:"description"`
+}
+
+func (c *GenerateVideoNarrationRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_STREAM_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_STREAM_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "GenerateVideoNarrationRequest" {
+		panic(fmt.Sprintf("expected GenerateVideoNarrationRequest, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "description":
+			c.Description = baml.Decode(valueHolder).Interface().(*string)
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class GenerateVideoNarrationRequest", key))
+
+		}
+	}
+
+}
+
+func (c GenerateVideoNarrationRequest) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["description"] = c.Description
+
+	return baml.EncodeClass("GenerateVideoNarrationRequest", fields, nil)
+}
+
+func (c GenerateVideoNarrationRequest) BamlTypeName() string {
+	return "GenerateVideoNarrationRequest"
+}
+
 type GeneratedVideoPlan struct {
 	VideoName       *string        `json:"videoName"`
 	Sections        []SceneSection `json:"sections"`
@@ -692,6 +734,48 @@ func (c Message) Encode() (*cffi.HostValue, error) {
 
 func (c Message) BamlTypeName() string {
 	return "Message"
+}
+
+type NarrationSegment struct {
+	Text *string `json:"text"`
+}
+
+func (c *NarrationSegment) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_STREAM_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_STREAM_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "NarrationSegment" {
+		panic(fmt.Sprintf("expected NarrationSegment, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "text":
+			c.Text = baml.Decode(valueHolder).Interface().(*string)
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class NarrationSegment", key))
+
+		}
+	}
+
+}
+
+func (c NarrationSegment) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["text"] = c.Text
+
+	return baml.EncodeClass("NarrationSegment", fields, nil)
+}
+
+func (c NarrationSegment) BamlTypeName() string {
+	return "NarrationSegment"
 }
 
 type Scene struct {
@@ -1076,4 +1160,46 @@ func (c VideoGenerationPlanRequest) Encode() (*cffi.HostValue, error) {
 
 func (c VideoGenerationPlanRequest) BamlTypeName() string {
 	return "VideoGenerationPlanRequest"
+}
+
+type VideoNarration struct {
+	Segments []NarrationSegment `json:"segments"`
+}
+
+func (c *VideoNarration) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_STREAM_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_STREAM_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "VideoNarration" {
+		panic(fmt.Sprintf("expected VideoNarration, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "segments":
+			c.Segments = baml.Decode(valueHolder).Interface().([]NarrationSegment)
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class VideoNarration", key))
+
+		}
+	}
+
+}
+
+func (c VideoNarration) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["segments"] = c.Segments
+
+	return baml.EncodeClass("VideoNarration", fields, nil)
+}
+
+func (c VideoNarration) BamlTypeName() string {
+	return "VideoNarration"
 }
