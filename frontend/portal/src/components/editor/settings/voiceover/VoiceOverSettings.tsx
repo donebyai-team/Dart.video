@@ -52,6 +52,7 @@ export const VoiceOverSettings = ({ onClose, onPlayPreview }: VoiceOverSettingsP
   const selectedSlide = useVideoStore(s => s.selectedSlide)
   const setSelectedSlideById = useVideoStore(s => s.setSelectedSlideById)
   const updateSlideById = useVideoStore(s => s.updateSlideById)
+  const setBackgroundMusicVolume = useVideoStore(s => s.setBackgroundMusicVolume)
 
   const [drafts, setDrafts] = useState<Record<string, string>>({})
   const [generatingBySlide, setGeneratingBySlide] = useState<Record<string, boolean>>({})
@@ -119,6 +120,17 @@ export const VoiceOverSettings = ({ onClose, onPlayPreview }: VoiceOverSettingsP
         [slide.id]: voiceoverToEditorText({ ...slide, voiceover }),
       }))
 
+      const currentBackgroundMusicUrl =
+        videoConfig.metadata?.bgAudio?.url ?? videoConfig.metadata?.backgroundAudioUrl
+      const currentBackgroundMusicVolume = videoConfig.metadata?.bgAudio?.volume ?? (
+        currentBackgroundMusicUrl ? 0.8 : undefined
+      )
+
+      if (currentBackgroundMusicUrl && (currentBackgroundMusicVolume ?? 0) > 0.1) {
+        setBackgroundMusicVolume(0.1)
+        toast.success('Background music volume reduced, adjust if needed')
+      }
+
     } catch (error) {
       console.error('Failed to generate voiceover', error)
       toast.error(getConnectError(error))
@@ -128,7 +140,7 @@ export const VoiceOverSettings = ({ onClose, onPlayPreview }: VoiceOverSettingsP
         [slide.id]: false,
       }))
     }
-  }, [drafts, portalClient, updateSlideById, videoConfig?.id])
+  }, [drafts, portalClient, setBackgroundMusicVolume, updateSlideById, videoConfig])
 
   return (
     <div className='flex h-full flex-col gap-3 p-4'>

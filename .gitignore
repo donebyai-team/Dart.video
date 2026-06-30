@@ -36,3 +36,5 @@ redora
 **/prompt_generator/prompts/
 .gomodcache/
 video.json
+
+.pnpm-store
