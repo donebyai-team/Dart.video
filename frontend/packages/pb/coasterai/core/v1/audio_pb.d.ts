@@ -57,7 +57,12 @@ export declare type Voiceover = Message<"coasterai.core.v1.Voiceover"> & {
   voiceId: string;
 
   /**
-   * @generated from field: repeated coasterai.core.v1.VoiceoverSegment segments = 3;
+   * @generated from field: string fullText = 3;
+   */
+  fullText: string;
+
+  /**
+   * @generated from field: repeated coasterai.core.v1.VoiceoverSegment segments = 4;
    */
   segments: VoiceoverSegment[];
 };

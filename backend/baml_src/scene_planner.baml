@@ -62,6 +62,12 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
         * `AI is changing`
         * `how teams work`
 
+    ## VOICEOVER
+    - Use the input script as the source for scene voiceovers.
+    - The voiceover should describe or reinforce what is shown in the scene.
+    - It does not need to match the on-screen text verbatim; it should communicate the same idea naturally.
+    - Not every scene requires a voiceover. Omit it when silence or visuals alone are more effective.
+
     ## Data
     Define scene props in `SceneElement` using JSON format.
     - Use placeholder values when actual data is unavailable.

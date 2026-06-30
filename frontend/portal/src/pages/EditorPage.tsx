@@ -2,12 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Mic2, Volume2, RefreshCw, Home, Timer, Brain, Check, X, ExternalLink, Save } from 'lucide-react'
+import { Home, Timer, Brain, Check, X, ExternalLink, Save } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import ResolutionSelector from '@/components/editor/toolbar/ResolutionSelector'
-import StoryboardPanel from '@/components/editor/StoryboardPanel'
+import EditorSidebarTabs from '@/components/editor/EditorSidebarTabs'
 import ToolsSettingsPanel from '@/components/editor/ToolsSettingsPanel'
 import RemotionPlayer, { RemotionPlayerHandle } from '@/components/editor/canvas/RemotionPlayer'
 import { type EditorConfig } from '@/types/editor'
@@ -74,13 +72,10 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
   const undoCount = useVideoStore(s => s.undoStack.length)
   const selectedSlide = useVideoStore(s => s.selectedSlide)
 
-  const setShowVoiceover = useVideoStore(s => s.setShowVoiceover)
-
   const activeTool = useVideoStore(s => s.activeTool)
   const selectedEffectId = useVideoStore(s => s.selectedEffectId)
   const editingSectionId = useVideoStore(s => s.editingSectionId)
   const editingSectionTitle = useVideoStore(s => s.editingSectionTitle)
-  const generatingSlideVoiceover = useVideoStore(s => s.generatingSlideVoiceover)
 
   // ---- Setters / Actions (stable functions) ----
   const setEditingSectionId = useVideoStore(s => s.setEditingSectionId)
@@ -88,8 +83,6 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
 
   // ---- Handlers / Actions ----
   const updateSectionTitle = useVideoStore(s => s.updateSectionTitle)
-  const updateSlideTranscript = useVideoStore(s => s.updateSlideTranscript)
-  const handleGenerateSlideVoiceover = useVideoStore(s => s.handleGenerateSlideVoiceover)
   const handleCloseTool = useVideoStore(s => s.handleCloseTool)
   const acceptVideoConfigChanges = useVideoStore(s => s.acceptVideoConfigChanges)
   const discardVideoConfigChanges = useVideoStore(s => s.discardVideoConfigChanges)
@@ -437,16 +430,6 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
           </div>
           <ResolutionSelector />
           <BackgroundMusicSelector />
-          {/* <Button
-            variant='outline'
-            size='sm'
-            onClick={() => setShowVoiceover(true)}
-            className='gap-2'
-            disabled={isStreamingVideo}
-          >
-            <Mic2 className='w-4 h-4' />
-            Voiceover
-          </Button> */}
           {isTemplateVideo && (
             <Button
               variant='outline'
@@ -515,42 +498,22 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
                 onSpotlightPlay={() => handleTogglePreviewSlide(selectedSlide.id)}
               />
             ) : (
-              <motion.div
-                key='storyboard'
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.2 }}
-                className='h-full flex flex-col'
-              >
-                <div className='p-4 border-b border-border flex items-center justify-between'>
-                  <h2 className='font-semibold'>Storyboard</h2>
-                  <div className='flex items-center gap-2 text-xs text-muted-foreground'>
-                    <span>{videoConfigFromStore?.config?.sections.length} sections</span>
-                    <span>•</span>
-                    <span>{videoConfigFromStore?.config?.sections.reduce((acc, s) => acc + s.slides.length, 0)} scenes</span>
-                  </div>
-                </div>
-
-                {selectedSlide && (
-                  <StoryboardPanel
-                    isStreamingVideo={isStreamingVideo}
-                    onSelectSlide={(_section, slide) => {
-                      // Update store — RemotionPlayer's useEffect reacts and seeks to visual end
-                      handleSelectEntity(createSlideEntityId(slide.id))
-                    }}
-                    onStartEditTitle={(id, title) => {
-                      setEditingSectionId(id)
-                      setEditingSectionTitle(title)
-                    }}
-                    onSaveTitle={() => {
-                      if (editingSectionId) {
-                        updateSectionTitle(editingSectionId, editingSectionTitle)
-                      }
-                    }}
-                  />
-                )}
-              </motion.div>
+              <EditorSidebarTabs
+                isStreamingVideo={isStreamingVideo}
+                onSelectSlide={(_section, slide) => {
+                  handleSelectEntity(createSlideEntityId(slide.id))
+                }}
+                onStartEditTitle={(id, title) => {
+                  setEditingSectionId(id)
+                  setEditingSectionTitle(title)
+                }}
+                onSaveTitle={() => {
+                  if (editingSectionId) {
+                    updateSectionTitle(editingSectionId, editingSectionTitle)
+                  }
+                }}
+                onPlayVoiceoverPreview={slideId => handleTogglePreviewSlide(slideId)}
+              />
             )}
           </AnimatePresence>
         </motion.aside>
@@ -585,97 +548,6 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
                 // Open template settings when clicking on template
                 openEntitySettings(entityId)
               }}
-              transcriptPanel={(() => {
-                // Handle case where no slide is selected yet (during streaming)
-                if (!selectedSlide) {
-                  return (
-                    <div className='space-y-2'>
-                      <div className='flex items-center gap-2'>
-                        <Volume2 className='w-4 h-4 text-muted-foreground' />
-                        <span className='text-xs font-medium text-muted-foreground uppercase tracking-wide'>
-                          Voiceover Script
-                        </span>
-                      </div>
-                      <div className='flex items-center gap-3'>
-                        <div className='flex-1 max-w-xl'>
-                          <Textarea
-                            value=''
-                            placeholder={isStreamingVideo ? 'Waiting for slides...' : 'No slide selected'}
-                            className='text-sm min-h-[40px] resize-none'
-                            rows={1}
-                            disabled={true}
-                          />
-                        </div>
-                        <Button variant='outline' size='icon' className='h-9 w-9 flex-shrink-0' disabled={true}>
-                          <Mic2 className='w-4 h-4' />
-                        </Button>
-                      </div>
-                    </div>
-                  )
-                }
-
-                let currentTranscript = selectedSlide.transcript
-                let handleTranscriptChange = updateSlideTranscript
-
-                return (
-                  <div className='space-y-2'>
-                    <div className='flex items-center gap-2'>
-                      <Volume2 className='w-4 h-4 text-muted-foreground' />
-                      <span className='text-xs font-medium text-muted-foreground uppercase tracking-wide'>
-                        Voiceover Script
-                      </span>
-                    </div>
-                    <div className='flex items-center gap-3'>
-                      <div className='flex-1 max-w-xl'>
-                        <Textarea
-                          value={currentTranscript || ''}
-                          onChange={e => handleTranscriptChange(e.target.value)}
-                          placeholder='Enter slide transcript...'
-                          className='text-sm min-h-[40px] resize-none'
-                          rows={1}
-                          onInput={e => {
-                            const target = e.target as HTMLTextAreaElement
-                            target.style.height = 'auto'
-                            target.style.height = `${target.scrollHeight}px`
-                          }}
-                          disabled={isStreamingVideo} // Disable editing during streaming
-                        />
-                      </div>
-                      <TooltipProvider delayDuration={200}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant='outline'
-                              size='icon'
-                              className='h-9 w-9 flex-shrink-0'
-                              onClick={handleGenerateSlideVoiceover}
-                              disabled={
-                                !selectedSlide ||
-                                generatingSlideVoiceover === selectedSlide.id ||
-                                isStreamingVideo
-                              }
-                            >
-                              {selectedSlide && generatingSlideVoiceover === selectedSlide.id ? (
-                                <motion.div
-                                  animate={{ rotate: 360 }}
-                                  transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                                >
-                                  <RefreshCw className='w-4 h-4' />
-                                </motion.div>
-                              ) : (
-                                <Mic2 className='w-4 h-4' />
-                              )}
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent className='text-xs'>
-                            {selectedSlide?.voiceoverGenerated ? 'Regenerate' : 'Generate'} voiceover
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                  </div>
-                )
-              })()}
             />
           </div>
 
@@ -685,7 +557,6 @@ const EditorPage = ({ videoId, config = defaultEditorConfig }: EditorPageProps) 
 
       {/* Modals */}
       {/* <ScreenshotLibrary /> */}
-      {/* <VoiceoverPanel /> */}
     </div>
   )
 }

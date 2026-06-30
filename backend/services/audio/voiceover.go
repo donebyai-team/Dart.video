@@ -27,6 +27,8 @@ func NewAudioService(provider providers.Provider, logger *zap.Logger) Service {
 }
 
 const voiceoverFPS = 30
+const DEFAULT_VOICE_ID = "Puck"
+const DEFAULT_VOICE_PROVIDER = "google"
 
 var pauseTokenRegex = regexp.MustCompile(`@(\d+)@`)
 
@@ -41,9 +43,14 @@ func (a audioService) GenerateVoiceover(ctx context.Context, params providers.Vo
 		return nil, err
 	}
 
+	if params.VoiceID == "" {
+		params.VoiceID = DEFAULT_VOICE_ID
+	}
+
 	voiceover := &pbcore.Voiceover{
 		Provider: a.provider.GetName(),
 		VoiceId:  params.VoiceID,
+		FullText: params.Text,
 		Segments: make([]*pbcore.VoiceoverSegment, 0, len(segmentsText)),
 	}
 

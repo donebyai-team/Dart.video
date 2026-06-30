@@ -114,11 +114,6 @@ export interface VideoActions {
     handleViewAnimationCode: () => void
     handleAddAnimation: (sectionId: string, afterSlideId?: string, slideType?: SlideType) => void                                          
 
-    // Voiceover
-    handleGenerateSlideVoiceover: () => void
-    handleGenerateSectionVoiceover: (sectionId: string) => void
-    setShowVoiceover: (show: boolean) => void
-
     updateSlideTranscript: (transcript: string) => void
     updateGeneratedBrandingColor: (priority: BrandAssetPriority, colorHexCode: string) => void
     setResolution: (resolution: Resolution) => void

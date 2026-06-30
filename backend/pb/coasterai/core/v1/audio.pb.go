@@ -94,7 +94,8 @@ type Voiceover struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Provider      string                 `protobuf:"bytes,1,opt,name=provider,proto3" json:"provider,omitempty"`
 	VoiceId       string                 `protobuf:"bytes,2,opt,name=voiceId,proto3" json:"voiceId,omitempty"`
-	Segments      []*VoiceoverSegment    `protobuf:"bytes,3,rep,name=segments,proto3" json:"segments,omitempty"`
+	FullText      string                 `protobuf:"bytes,3,opt,name=fullText,proto3" json:"fullText,omitempty"`
+	Segments      []*VoiceoverSegment    `protobuf:"bytes,4,rep,name=segments,proto3" json:"segments,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -139,6 +140,13 @@ func (x *Voiceover) GetProvider() string {
 func (x *Voiceover) GetVoiceId() string {
 	if x != nil {
 		return x.VoiceId
+	}
+	return ""
+}
+
+func (x *Voiceover) GetFullText() string {
+	if x != nil {
+		return x.FullText
 	}
 	return ""
 }
@@ -236,11 +244,12 @@ const file_coasterai_core_v1_audio_proto_rawDesc = "" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x10\n" +
 	"\x03url\x18\x03 \x01(\tR\x03url\x12\x17\n" +
 	"\x04icon\x18\x04 \x01(\tH\x00R\x04icon\x88\x01\x01B\a\n" +
-	"\x05_icon\"\x82\x01\n" +
+	"\x05_icon\"\x9e\x01\n" +
 	"\tVoiceover\x12\x1a\n" +
 	"\bprovider\x18\x01 \x01(\tR\bprovider\x12\x18\n" +
-	"\avoiceId\x18\x02 \x01(\tR\avoiceId\x12?\n" +
-	"\bsegments\x18\x03 \x03(\v2#.coasterai.core.v1.VoiceoverSegmentR\bsegments\"\xd2\x01\n" +
+	"\avoiceId\x18\x02 \x01(\tR\avoiceId\x12\x1a\n" +
+	"\bfullText\x18\x03 \x01(\tR\bfullText\x12?\n" +
+	"\bsegments\x18\x04 \x03(\v2#.coasterai.core.v1.VoiceoverSegmentR\bsegments\"\xd2\x01\n" +
 	"\x10VoiceoverSegment\x12\x12\n" +
 	"\x04text\x18\x01 \x01(\tR\x04text\x123\n" +
 	"\x05asset\x18\x02 \x01(\v2\x1d.coasterai.core.v1.MediaAssetR\x05asset\x12\x1e\n" +

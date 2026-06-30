@@ -131,6 +131,14 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 					SettledFrame:     slideT.SettledFrame,
 				}
 
+				if pendingSlide.Voiceover != nil {
+					slide.Voiceover = &pbcore.Voiceover{
+						Provider: audio.DEFAULT_VOICE_PROVIDER,
+						VoiceId:  audio.DEFAULT_VOICE_ID,
+						FullText: *pendingSlide.Voiceover,
+					}
+				}
+
 				slide.Content.History = nil
 
 				nextSlide := getNextScene(plan.Sections, sectionIndex, slideIndex)

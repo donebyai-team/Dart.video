@@ -627,6 +627,10 @@ func (t *SceneClassView) PropertyElement() (ClassPropertyView, error) {
 	return t.inner.Property("element")
 }
 
+func (t *SceneClassView) PropertyVoiceover() (ClassPropertyView, error) {
+	return t.inner.Property("voiceover")
+}
+
 func (t *SceneClassView) PropertyThinkingSummary() (ClassPropertyView, error) {
 	return t.inner.Property("thinkingSummary")
 }

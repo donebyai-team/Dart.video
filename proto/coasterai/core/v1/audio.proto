@@ -16,7 +16,8 @@ message BackgroundTrack {
 message Voiceover {
   string provider = 1;
   string voiceId = 2;
-  repeated VoiceoverSegment segments = 3;
+  string fullText = 3;
+  repeated VoiceoverSegment segments = 4;
 }
 
 message VoiceoverSegment {
