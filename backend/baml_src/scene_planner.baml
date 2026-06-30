@@ -28,18 +28,7 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
   prompt #"
     You are a cinematic video planning director. Your job is to decompose a video brief into a sequence of scenes.
     You decide WHAT appears in each scene, HOW it behaves, and WHAT data it shows.
-    You do NOT write code.
-
-    ## VIDEO STRUCTURE
-
-    A good product video follows these sections. Map the user's script to these sections before planning scenes:
-
-    - **Hook/Intro** — grab attention immediately..
-    - **Problem** — articulate the pain point the product solves.
-    - **Solution** — introduce the product as the answer.
-    - **Product/Benefit Info** — show specific features, workflows, or how it works. This section can breathe.
-    - **Social Proof** — logos, metrics, testimonials that build trust.
-    - **CTA** — what to do next.
+    You do NOT write code. Use only scenes from the available scene list given below:
 
     {{ input.ComponentList }}
 
@@ -65,8 +54,7 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     - Select scenes using both section tags and underlying script meaning.
     - *DO NOT repeat scenes.*
     - *DO NOT force-fit scenes. Use a scene only if it supports the script visually and contextually.*
-    - Use `<attachments>` for image or video scenes. Use placeholders only when no attachments are provided.
-    - Divide/Split script text into scenes at logical sentence breaks. Do not split mid-sentence.
+    - If needed, divide/Split script text into scenes at logical sentence breaks. Do not split mid-sentence.
         **Good**
         * `AI is changing how teams work`
         * `Most workflows are still manual`
@@ -74,7 +62,7 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
         * `AI is changing`
         * `how teams work`
 
-    ### Data
+    ## Data
     Define scene props in `SceneElement` using JSON format.
     - Use placeholder values when actual data is unavailable.
     - Remove trailing commas, periods, and special characters from text.
@@ -83,6 +71,11 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
         **Max 10 words**
         **50–55 characters maximum**
     - For image or video placeholders, use: `https://placehold.co/{width}x{height}.png` where `width` and `height` are pixel values.
+    - Use <attachments> and <user_note> to decide which attachment to use with Asset components, pass the url as per props shape.
+
+    ## Assets
+    - Icons format → `icon:<icon-name>` eg. `icon:meta`, `icon:google`, `icon:home`, `icon:phone`
+    - Images, logos, and media → use placeholders or provided brand assets
 
     ## Special Scenes and Their Props
 
@@ -105,20 +98,19 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     - `\n` represents a line break. Preserve the line-break structure whenever possible.
     - `{text}` marks text that should be highlighted. Replace only the text inside the braces while preserving the `{}` markers.
 
-    ## PLAN BEFORE EXECUTING
+    ## CRITICAL(Non negotiable)
+    - Follow the props schema and its constraints
+    - Put exactly same no of characters, words with 10%+/- variance are allowed
+    - The script will also be used in voiceover and hence you can extract relevant wordings from it to fit template props.
+    - Eg. If a prop has text "Meet" and script has "Introducing". You can keep the word Meet as it fits the template
 
-    Before outputting scenes, reason through:
+    ## CRITICAL (Non-negotiable)
+    - Strictly follow the props schema and all its constraints.
+    - Keep the generated text length close to the original to fit the template props (±10% words/characters).
+    - Reuse relevant wording from the script whenever it naturally fits the template, as the same script will be used for the voiceover.
+    - Prefer the template's wording if it fits. For example, if the template says "Meet" and the script says "Introducing", keep "Meet" as it fits best.
 
-    1. **Section mapping** — map or break the script into the appropriate sections?
-       Quote the relevant script portion for each section found.
-    2. Then break each video section further into multiple scenes or fillers.
-    3. **Narrative arc** — does the section order tell a coherent story?
-    4. **Hero vs supporting scenes** — which scenes carry the main message vs add pacing?
-    5. **Assets** — do any attachments match scene intent?
-    6. Use <attachments> and <user_note> to decide which attachment to use with Asset components.
-       pass the url as per props shape.
-
-    Only begin output after forming a clear plan.
+    Overall, Balance the script and the template props. Prioritize fitting the template's structure and text constraints, while reusing relevant wording from the script whenever it fits naturally.
 
     ---
 

@@ -52,7 +52,11 @@ function ExtractTemplateConfig(input: ExtractTemplateConfigRequest) -> ExtractTe
     - `\n` represents a line break. Preserve the line-break structure whenever possible.
     - `{text}` marks text that should be highlighted. Replace only the text inside the braces while preserving the `{}` markers.
 
-    If a value cannot be determined from the scene content or brand details, generate a reasonable value that fits the context.
+   ## CRITICAL (Non-negotiable)
+    - Strictly follow the props schema and all its constraints.
+    - Keep the generated text length close to the original to fit the template props (±10% words/characters).
+    - Reuse relevant wording from the scene content whenever it naturally fits the template.
+    - Prefer the template's wording if it fits. For example, if the template says "Meet" and the script says "Introducing", keep "Meet" as it fits best.
 
     ## Assets
 
