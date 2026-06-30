@@ -208,7 +208,6 @@ func (p *SessionContext) MarshalJSON() ([]byte, error) {
 	tmp := struct {
 		Request             []byte                        `json:"request,omitempty"`
 		ConversationHistory []*pbcore.ConversationMessage `json:"conversation_history"`
-		TemplateIds         []string                      `json:"template_ids,omitempty"`
 	}{
 		Request:             reqBytes,
 		ConversationHistory: p.ConversationHistory,

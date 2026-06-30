@@ -197,9 +197,9 @@ func isComponentName(key string) bool {
 }
 
 func sanitizeKey(key string) string {
-	if isComponentName(key) {
-		return services.GenerateRandomName(3, 3)
-	}
+	//if isComponentName(key) {
+	//	return services.GenerateRandomName(3, 3)
+	//}
 
 	return key
 }
@@ -215,6 +215,7 @@ func filterValue(v any) any {
 				continue
 			}
 
+			// for older templates, we don't want to send name in the payload as its a component name
 			if strings.EqualFold(k, "name") {
 				if s, ok := v.(string); ok && isComponentName(s) {
 					continue
