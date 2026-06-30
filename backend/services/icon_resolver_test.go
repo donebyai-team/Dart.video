@@ -142,7 +142,6 @@ func TestNormalizeIconName(t *testing.T) {
 
 	for input, expected := range tests {
 		actual := normalizeIconName(input)
-
 		if actual != expected {
 			t.Fatalf("input=%s expected=%s got=%s", input, expected, actual)
 		}

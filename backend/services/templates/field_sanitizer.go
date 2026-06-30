@@ -256,6 +256,10 @@ func filterValue(v any) any {
 		return result
 
 	case string:
+		if iconName := services.ResolveIconNameFromURL(strings.TrimSpace(x)); iconName != "" {
+			return sanitizeTextValue("icon:" + iconName) // TODO: Move icon: to constants
+		}
+
 		if shouldDropString(x) {
 			return nil
 		}
