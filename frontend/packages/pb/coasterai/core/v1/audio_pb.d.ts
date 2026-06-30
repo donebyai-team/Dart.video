@@ -4,6 +4,7 @@
 
 import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv1";
 import type { Message } from "@bufbuild/protobuf";
+import type { MediaAsset } from "./media_asset_pb";
 
 /**
  * Describes the file coasterai/core/v1/audio.proto.
@@ -40,4 +41,72 @@ export declare type BackgroundTrack = Message<"coasterai.core.v1.BackgroundTrack
  * Use `create(BackgroundTrackSchema)` to create a new message.
  */
 export declare const BackgroundTrackSchema: GenMessage<BackgroundTrack>;
+
+/**
+ * @generated from message coasterai.core.v1.Voiceover
+ */
+export declare type Voiceover = Message<"coasterai.core.v1.Voiceover"> & {
+  /**
+   * @generated from field: string provider = 1;
+   */
+  provider: string;
+
+  /**
+   * @generated from field: string voiceId = 2;
+   */
+  voiceId: string;
+
+  /**
+   * @generated from field: repeated coasterai.core.v1.VoiceoverSegment segments = 3;
+   */
+  segments: VoiceoverSegment[];
+};
+
+/**
+ * Describes the message coasterai.core.v1.Voiceover.
+ * Use `create(VoiceoverSchema)` to create a new message.
+ */
+export declare const VoiceoverSchema: GenMessage<Voiceover>;
+
+/**
+ * @generated from message coasterai.core.v1.VoiceoverSegment
+ */
+export declare type VoiceoverSegment = Message<"coasterai.core.v1.VoiceoverSegment"> & {
+  /**
+   * @generated from field: string text = 1;
+   */
+  text: string;
+
+  /**
+   * @generated from field: coasterai.core.v1.MediaAsset asset = 2;
+   */
+  asset?: MediaAsset;
+
+  /**
+   * startFrame of the slide this audio should start
+   *
+   * @generated from field: int32 startFrame = 3;
+   */
+  startFrame: number;
+
+  /**
+   * endFrame of the slide this audio should end
+   *
+   * @generated from field: int32 endFrame = 4;
+   */
+  endFrame: number;
+
+  /**
+   * optional when we do captions
+   *
+   * @generated from field: repeated coasterai.core.v1.VoiceoverSegment words = 5;
+   */
+  words: VoiceoverSegment[];
+};
+
+/**
+ * Describes the message coasterai.core.v1.VoiceoverSegment.
+ * Use `create(VoiceoverSegmentSchema)` to create a new message.
+ */
+export declare const VoiceoverSegmentSchema: GenMessage<VoiceoverSegment>;
 

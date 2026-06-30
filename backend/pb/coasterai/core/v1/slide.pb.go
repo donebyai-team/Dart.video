@@ -1137,8 +1137,6 @@ type Slide struct {
 	DurationInFrames           int32                  `protobuf:"varint,25,opt,name=durationInFrames,proto3" json:"durationInFrames,omitempty"`
 	SettledFrame               int32                  `protobuf:"varint,26,opt,name=settledFrame,proto3" json:"settledFrame,omitempty"`
 	Content                    *AnimationSlideContent `protobuf:"bytes,9,opt,name=content,proto3" json:"content,omitempty"`
-	VoiceoverGenerated         *bool                  `protobuf:"varint,15,opt,name=voiceoverGenerated,proto3,oneof" json:"voiceoverGenerated,omitempty"`
-	IsNested                   *bool                  `protobuf:"varint,16,opt,name=isNested,proto3,oneof" json:"isNested,omitempty"`
 	Spotlights                 []*SpotlightEffect     `protobuf:"bytes,18,rep,name=spotlights,proto3" json:"spotlights,omitempty"`
 	Callouts                   []*CalloutEffect       `protobuf:"bytes,19,rep,name=callouts,proto3" json:"callouts,omitempty"`
 	Zooms                      []*ZoomEffect          `protobuf:"bytes,20,rep,name=zooms,proto3" json:"zooms,omitempty"`
@@ -1146,6 +1144,7 @@ type Slide struct {
 	SlideStatus                SlideStatus            `protobuf:"varint,22,opt,name=slideStatus,proto3,enum=coasterai.core.v1.SlideStatus" json:"slideStatus,omitempty"`
 	Index                      int32                  `protobuf:"varint,24,opt,name=index,proto3" json:"index,omitempty"`
 	Tid                        string                 `protobuf:"bytes,27,opt,name=tid,proto3" json:"tid,omitempty"` // Template ID
+	Voiceover                  *Voiceover             `protobuf:"bytes,28,opt,name=voiceover,proto3" json:"voiceover,omitempty"`
 	unknownFields              protoimpl.UnknownFields
 	sizeCache                  protoimpl.SizeCache
 }
@@ -1243,20 +1242,6 @@ func (x *Slide) GetContent() *AnimationSlideContent {
 	return nil
 }
 
-func (x *Slide) GetVoiceoverGenerated() bool {
-	if x != nil && x.VoiceoverGenerated != nil {
-		return *x.VoiceoverGenerated
-	}
-	return false
-}
-
-func (x *Slide) GetIsNested() bool {
-	if x != nil && x.IsNested != nil {
-		return *x.IsNested
-	}
-	return false
-}
-
 func (x *Slide) GetSpotlights() []*SpotlightEffect {
 	if x != nil {
 		return x.Spotlights
@@ -1304,6 +1289,13 @@ func (x *Slide) GetTid() string {
 		return x.Tid
 	}
 	return ""
+}
+
+func (x *Slide) GetVoiceover() *Voiceover {
+	if x != nil {
+		return x.Voiceover
+	}
+	return nil
 }
 
 type BackgroundStyle struct {
@@ -1768,7 +1760,7 @@ var File_coasterai_core_v1_slide_proto protoreflect.FileDescriptor
 
 const file_coasterai_core_v1_slide_proto_rawDesc = "" +
 	"\n" +
-	"\x1dcoasterai/core/v1/slide.proto\x12\x11coasterai.core.v1\x1a\x1cgoogle/protobuf/struct.proto\"\xb5\x03\n" +
+	"\x1dcoasterai/core/v1/slide.proto\x12\x11coasterai.core.v1\x1a\x1cgoogle/protobuf/struct.proto\x1a\x1dcoasterai/core/v1/audio.proto\"\xb5\x03\n" +
 	"\x12AnimationSlidePlan\x12\x14\n" +
 	"\x05index\x18\x01 \x01(\x03R\x05index\x12(\n" +
 	"\x0fbeatDescription\x18\x02 \x01(\tR\x0fbeatDescription\x12$\n" +
@@ -1843,7 +1835,7 @@ const file_coasterai_core_v1_slide_proto_rawDesc = "" +
 	"\n" +
 	"startFrame\x18\x05 \x01(\x02R\n" +
 	"startFrame\x12\x1a\n" +
-	"\bendFrame\x18\x06 \x01(\x02R\bendFrame\"\xfc\a\n" +
+	"\bendFrame\x18\x06 \x01(\x02R\bendFrame\"\xbe\a\n" +
 	"\x05Slide\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1e\n" +
 	"\n" +
@@ -1857,9 +1849,7 @@ const file_coasterai_core_v1_slide_proto_rawDesc = "" +
 	"\tdirection\x18\x17 \x01(\x0e2&.coasterai.core.v1.TransitionDirectionH\x02R\tdirection\x88\x01\x01\x12*\n" +
 	"\x10durationInFrames\x18\x19 \x01(\x05R\x10durationInFrames\x12\"\n" +
 	"\fsettledFrame\x18\x1a \x01(\x05R\fsettledFrame\x12B\n" +
-	"\acontent\x18\t \x01(\v2(.coasterai.core.v1.AnimationSlideContentR\acontent\x123\n" +
-	"\x12voiceoverGenerated\x18\x0f \x01(\bH\x03R\x12voiceoverGenerated\x88\x01\x01\x12\x1f\n" +
-	"\bisNested\x18\x10 \x01(\bH\x04R\bisNested\x88\x01\x01\x12B\n" +
+	"\acontent\x18\t \x01(\v2(.coasterai.core.v1.AnimationSlideContentR\acontent\x12B\n" +
 	"\n" +
 	"spotlights\x18\x12 \x03(\v2\".coasterai.core.v1.SpotlightEffectR\n" +
 	"spotlights\x12<\n" +
@@ -1868,13 +1858,12 @@ const file_coasterai_core_v1_slide_proto_rawDesc = "" +
 	"\x04plan\x18\x15 \x01(\v2\x17.google.protobuf.StructR\x04plan\x12@\n" +
 	"\vslideStatus\x18\x16 \x01(\x0e2\x1e.coasterai.core.v1.SlideStatusR\vslideStatus\x12\x14\n" +
 	"\x05index\x18\x18 \x01(\x05R\x05index\x12\x10\n" +
-	"\x03tid\x18\x1b \x01(\tR\x03tidB\x1d\n" +
+	"\x03tid\x18\x1b \x01(\tR\x03tid\x12:\n" +
+	"\tvoiceover\x18\x1c \x01(\v2\x1c.coasterai.core.v1.VoiceoverR\tvoiceoverB\x1d\n" +
 	"\x1b_transitionDurationInFramesB\x13\n" +
 	"\x11_background_styleB\f\n" +
 	"\n" +
-	"_directionB\x15\n" +
-	"\x13_voiceoverGeneratedB\v\n" +
-	"\t_isNested\"\xb4\x03\n" +
+	"_direction\"\xb4\x03\n" +
 	"\x0fBackgroundStyle\x125\n" +
 	"\x05solid\x18\x01 \x01(\v2\x1d.coasterai.core.v1.SolidColorH\x00R\x05solid\x129\n" +
 	"\bgradient\x18\x02 \x01(\v2\x1b.coasterai.core.v1.GradientH\x00R\bgradient\x12:\n" +
@@ -2006,6 +1995,7 @@ var file_coasterai_core_v1_slide_proto_goTypes = []any{
 	(*GradientStop)(nil),          // 21: coasterai.core.v1.GradientStop
 	(*Section)(nil),               // 22: coasterai.core.v1.Section
 	(*structpb.Struct)(nil),       // 23: google.protobuf.Struct
+	(*Voiceover)(nil),             // 24: coasterai.core.v1.Voiceover
 }
 var file_coasterai_core_v1_slide_proto_depIdxs = []int32{
 	11, // 0: coasterai.core.v1.AnimationSlideContent.codeRegistry:type_name -> coasterai.core.v1.CodeRegistry
@@ -2023,20 +2013,21 @@ var file_coasterai_core_v1_slide_proto_depIdxs = []int32{
 	14, // 12: coasterai.core.v1.Slide.zooms:type_name -> coasterai.core.v1.ZoomEffect
 	23, // 13: coasterai.core.v1.Slide.plan:type_name -> google.protobuf.Struct
 	0,  // 14: coasterai.core.v1.Slide.slideStatus:type_name -> coasterai.core.v1.SlideStatus
-	18, // 15: coasterai.core.v1.BackgroundStyle.solid:type_name -> coasterai.core.v1.SolidColor
-	20, // 16: coasterai.core.v1.BackgroundStyle.gradient:type_name -> coasterai.core.v1.Gradient
-	19, // 17: coasterai.core.v1.BackgroundStyle.image:type_name -> coasterai.core.v1.BackgroundImage
-	6,  // 18: coasterai.core.v1.BackgroundStyle.pattern:type_name -> coasterai.core.v1.BackgroundPattern
-	17, // 19: coasterai.core.v1.BackgroundStyle.effect:type_name -> coasterai.core.v1.BackgroundEffect
-	7,  // 20: coasterai.core.v1.BackgroundEffect.type:type_name -> coasterai.core.v1.BackgroundEffectType
-	5,  // 21: coasterai.core.v1.Gradient.type:type_name -> coasterai.core.v1.GradientType
-	21, // 22: coasterai.core.v1.Gradient.stops:type_name -> coasterai.core.v1.GradientStop
-	15, // 23: coasterai.core.v1.Section.slides:type_name -> coasterai.core.v1.Slide
-	24, // [24:24] is the sub-list for method output_type
-	24, // [24:24] is the sub-list for method input_type
-	24, // [24:24] is the sub-list for extension type_name
-	24, // [24:24] is the sub-list for extension extendee
-	0,  // [0:24] is the sub-list for field type_name
+	24, // 15: coasterai.core.v1.Slide.voiceover:type_name -> coasterai.core.v1.Voiceover
+	18, // 16: coasterai.core.v1.BackgroundStyle.solid:type_name -> coasterai.core.v1.SolidColor
+	20, // 17: coasterai.core.v1.BackgroundStyle.gradient:type_name -> coasterai.core.v1.Gradient
+	19, // 18: coasterai.core.v1.BackgroundStyle.image:type_name -> coasterai.core.v1.BackgroundImage
+	6,  // 19: coasterai.core.v1.BackgroundStyle.pattern:type_name -> coasterai.core.v1.BackgroundPattern
+	17, // 20: coasterai.core.v1.BackgroundStyle.effect:type_name -> coasterai.core.v1.BackgroundEffect
+	7,  // 21: coasterai.core.v1.BackgroundEffect.type:type_name -> coasterai.core.v1.BackgroundEffectType
+	5,  // 22: coasterai.core.v1.Gradient.type:type_name -> coasterai.core.v1.GradientType
+	21, // 23: coasterai.core.v1.Gradient.stops:type_name -> coasterai.core.v1.GradientStop
+	15, // 24: coasterai.core.v1.Section.slides:type_name -> coasterai.core.v1.Slide
+	25, // [25:25] is the sub-list for method output_type
+	25, // [25:25] is the sub-list for method input_type
+	25, // [25:25] is the sub-list for extension type_name
+	25, // [25:25] is the sub-list for extension extendee
+	0,  // [0:25] is the sub-list for field type_name
 }
 
 func init() { file_coasterai_core_v1_slide_proto_init() }
@@ -2044,6 +2035,7 @@ func file_coasterai_core_v1_slide_proto_init() {
 	if File_coasterai_core_v1_slide_proto != nil {
 		return
 	}
+	file_coasterai_core_v1_audio_proto_init()
 	file_coasterai_core_v1_slide_proto_msgTypes[0].OneofWrappers = []any{}
 	file_coasterai_core_v1_slide_proto_msgTypes[1].OneofWrappers = []any{}
 	file_coasterai_core_v1_slide_proto_msgTypes[3].OneofWrappers = []any{}

@@ -7,10 +7,9 @@ option go_package = "github.com/shank318/coasterai/pb/coasterai/portal/v1;pbport
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 
-message GenerateNarrationResponse {
-  repeated NarrationSegment segments = 1;
-}
-
-message NarrationSegment {
-  string text = 1;
+message GenerateVoiceoverRequest {
+  string voiceId = 1;
+  string text = 2;
+  string videoId = 3;
+  string slideId = 4;
 }

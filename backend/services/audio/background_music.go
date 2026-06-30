@@ -1,4 +1,4 @@
-package voiceover
+package audio
 
 import (
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"

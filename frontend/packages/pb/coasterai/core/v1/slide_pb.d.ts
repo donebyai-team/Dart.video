@@ -4,6 +4,7 @@
 
 import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv1";
 import type { JsonObject, Message } from "@bufbuild/protobuf";
+import type { Voiceover } from "./audio_pb";
 
 /**
  * Describes the file coasterai/core/v1/slide.proto.
@@ -384,16 +385,6 @@ export declare type Slide = Message<"coasterai.core.v1.Slide"> & {
   content?: AnimationSlideContent;
 
   /**
-   * @generated from field: optional bool voiceoverGenerated = 15;
-   */
-  voiceoverGenerated?: boolean;
-
-  /**
-   * @generated from field: optional bool isNested = 16;
-   */
-  isNested?: boolean;
-
-  /**
    * @generated from field: repeated coasterai.core.v1.SpotlightEffect spotlights = 18;
    */
   spotlights: SpotlightEffect[];
@@ -429,6 +420,11 @@ export declare type Slide = Message<"coasterai.core.v1.Slide"> & {
    * @generated from field: string tid = 27;
    */
   tid: string;
+
+  /**
+   * @generated from field: coasterai.core.v1.Voiceover voiceover = 28;
+   */
+  voiceover?: Voiceover;
 };
 
 /**

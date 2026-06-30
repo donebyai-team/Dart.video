@@ -4,12 +4,13 @@
 
 import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv1";
 import { file_google_protobuf_wrappers } from "@bufbuild/protobuf/wkt";
+import { file_coasterai_core_v1_media_asset } from "./media_asset_pb";
 
 /**
  * Describes the file coasterai/core/v1/audio.proto.
  */
 export const file_coasterai_core_v1_audio = /*@__PURE__*/
-  fileDesc("Ch1jb2FzdGVyYWkvY29yZS92MS9hdWRpby5wcm90bxIRY29hc3RlcmFpLmNvcmUudjEiVAoPQmFja2dyb3VuZFRyYWNrEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSCwoDdXJsGAMgASgJEhEKBGljb24YBCABKAlIAIgBAUIHCgVfaWNvbkI7WjlnaXRodWIuY29tL3NoYW5rMzE4L2NvYXN0ZXJhaS9wYi9jb2FzdGVyYWkvY29yZS92MTtwYmNvcmViBnByb3RvMw", [file_google_protobuf_wrappers]);
+  fileDesc("Ch1jb2FzdGVyYWkvY29yZS92MS9hdWRpby5wcm90bxIRY29hc3RlcmFpLmNvcmUudjEiVAoPQmFja2dyb3VuZFRyYWNrEgoKAmlkGAEgASgJEgwKBG5hbWUYAiABKAkSCwoDdXJsGAMgASgJEhEKBGljb24YBCABKAlIAIgBAUIHCgVfaWNvbiJlCglWb2ljZW92ZXISEAoIcHJvdmlkZXIYASABKAkSDwoHdm9pY2VJZBgCIAEoCRI1CghzZWdtZW50cxgDIAMoCzIjLmNvYXN0ZXJhaS5jb3JlLnYxLlZvaWNlb3ZlclNlZ21lbnQiqAEKEFZvaWNlb3ZlclNlZ21lbnQSDAoEdGV4dBgBIAEoCRIsCgVhc3NldBgCIAEoCzIdLmNvYXN0ZXJhaS5jb3JlLnYxLk1lZGlhQXNzZXQSEgoKc3RhcnRGcmFtZRgDIAEoBRIQCghlbmRGcmFtZRgEIAEoBRIyCgV3b3JkcxgFIAMoCzIjLmNvYXN0ZXJhaS5jb3JlLnYxLlZvaWNlb3ZlclNlZ21lbnRCO1o5Z2l0aHViLmNvbS9zaGFuazMxOC9jb2FzdGVyYWkvcGIvY29hc3RlcmFpL2NvcmUvdjE7cGJjb3JlYgZwcm90bzM", [file_google_protobuf_wrappers, file_coasterai_core_v1_media_asset]);
 
 /**
  * Describes the message coasterai.core.v1.BackgroundTrack.
@@ -17,4 +18,18 @@ export const file_coasterai_core_v1_audio = /*@__PURE__*/
  */
 export const BackgroundTrackSchema = /*@__PURE__*/
   messageDesc(file_coasterai_core_v1_audio, 0);
+
+/**
+ * Describes the message coasterai.core.v1.Voiceover.
+ * Use `create(VoiceoverSchema)` to create a new message.
+ */
+export const VoiceoverSchema = /*@__PURE__*/
+  messageDesc(file_coasterai_core_v1_audio, 1);
+
+/**
+ * Describes the message coasterai.core.v1.VoiceoverSegment.
+ * Use `create(VoiceoverSegmentSchema)` to create a new message.
+ */
+export const VoiceoverSegmentSchema = /*@__PURE__*/
+  messageDesc(file_coasterai_core_v1_audio, 2);
 

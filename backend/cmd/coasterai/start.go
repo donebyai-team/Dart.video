@@ -9,6 +9,7 @@ import (
 	"github.com/shank318/coasterai/services/brand_identity"
 	"github.com/shank318/coasterai/services/code_builder"
 	servicesllm "github.com/shank318/coasterai/services/llm"
+	"github.com/shank318/coasterai/services/providers"
 	"github.com/shank318/coasterai/services/templates"
 	"os"
 	"regexp"
@@ -192,10 +193,7 @@ func portalApp(cmd *cobra.Command, isAppReady func() bool) (App, error) {
 		return nil, errors.Wrap(err, "unable to create render video service")
 	}
 
-	provider, err := audio.NewElevenLabsProvider(sflags.MustGetString(cmd, "common-elevenlabs-api-key"), deps.MediaStore)
-	if err != nil {
-		return nil, err
-	}
+	googleProvider := providers.NewProviderGoogle(sflags.MustGetString(cmd, "common-google-api-key"), deps.MediaStore, zlog)
 
 	p := portal.New(
 		deps.MediaStore,
@@ -209,7 +207,7 @@ func portalApp(cmd *cobra.Command, isAppReady func() bool) (App, error) {
 		videoRenderService,
 		brand_identity.NewBrandIdentityService(zlog, deps.DataStore, deps.MediaStore, sflags.MustGetString(cmd, "common-firecrawl-api-key")),
 		code_builder.NewCodeBuilderService(deps.MediaStore, zlog),
-		provider,
+		audio.NewAudioService(googleProvider, zlog),
 		llm.NewLlmService(zlog, cacheStore),
 		templates.NewService(
 			deps.DataStore,

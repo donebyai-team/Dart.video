@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"cloud.google.com/go/storage"
 	"context"
+	"encoding/binary"
 	"encoding/xml"
 	"fmt"
 	"github.com/abema/go-mp4"
@@ -192,11 +193,90 @@ func DetectMediaType(contentType string) pbcore.MediaType {
 		return pbcore.MediaType_MEDIA_TYPE_IMAGE
 	case strings.HasPrefix(contentType, "video/"):
 		return pbcore.MediaType_MEDIA_TYPE_VIDEO
+	case strings.HasPrefix(contentType, "audio/"):
+		return pbcore.MediaType_MEDIA_TYPE_AUDIO
 	case strings.Contains(contentType, "text"):
 		return pbcore.MediaType_MEDIA_TYPE_CODE
 	default:
 		return pbcore.MediaType_MEDIA_TYPE_UNDEFINED
 	}
+}
+
+func EncodePCMToWAV(pcmData []byte, sampleRate, channels, bitDepth int) ([]byte, error) {
+	if len(pcmData) == 0 {
+		return nil, fmt.Errorf("pcm data is empty")
+	}
+
+	if sampleRate <= 0 || channels <= 0 || bitDepth <= 0 {
+		return nil, fmt.Errorf("invalid wav format parameters")
+	}
+
+	bytesPerSample := bitDepth / 8
+	if bytesPerSample == 0 {
+		return nil, fmt.Errorf("invalid bit depth")
+	}
+
+	blockAlign := channels * bytesPerSample
+	byteRate := sampleRate * blockAlign
+	dataSize := uint32(len(pcmData))
+	riffSize := 36 + dataSize
+
+	buf := bytes.NewBuffer(make([]byte, 0, int(riffSize)+8))
+	writeString := func(value string) error {
+		_, err := buf.WriteString(value)
+		return err
+	}
+	writeUint16 := func(value uint16) error {
+		return binary.Write(buf, binary.LittleEndian, value)
+	}
+	writeUint32 := func(value uint32) error {
+		return binary.Write(buf, binary.LittleEndian, value)
+	}
+
+	if err := writeString("RIFF"); err != nil {
+		return nil, err
+	}
+	if err := writeUint32(riffSize); err != nil {
+		return nil, err
+	}
+	if err := writeString("WAVE"); err != nil {
+		return nil, err
+	}
+	if err := writeString("fmt "); err != nil {
+		return nil, err
+	}
+	if err := writeUint32(16); err != nil {
+		return nil, err
+	}
+	if err := writeUint16(1); err != nil {
+		return nil, err
+	}
+	if err := writeUint16(uint16(channels)); err != nil {
+		return nil, err
+	}
+	if err := writeUint32(uint32(sampleRate)); err != nil {
+		return nil, err
+	}
+	if err := writeUint32(uint32(byteRate)); err != nil {
+		return nil, err
+	}
+	if err := writeUint16(uint16(blockAlign)); err != nil {
+		return nil, err
+	}
+	if err := writeUint16(uint16(bitDepth)); err != nil {
+		return nil, err
+	}
+	if err := writeString("data"); err != nil {
+		return nil, err
+	}
+	if err := writeUint32(dataSize); err != nil {
+		return nil, err
+	}
+	if _, err := buf.Write(pcmData); err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
 }
 
 func DownloadCode(ctx context.Context, url string) (string, error) {
@@ -392,6 +472,7 @@ func (g gcpMediaStore) Upload(
 		Size:      float32(size),
 		Width:     width,
 		Height:    height,
+		Duration:  float32(duration),
 		MediaType: mediaType,
 		Id:        asset.ID,
 	}, nil
@@ -424,9 +505,77 @@ func (g gcpMediaStore) extractMediaDimensions(reader io.ReadSeeker, mediaType pb
 			return 0, 0, 0
 		}
 		return float32(w), float32(h), duration
+	case pbcore.MediaType_MEDIA_TYPE_AUDIO:
+		if strings.Contains(contentType, "wav") {
+			duration, err := extractWAVDuration(reader)
+			if err != nil {
+				return 0, 0, 0
+			}
+			return 0, 0, duration
+		}
+		return 0, 0, 0
 	default:
 		return 0, 0, 0
 	}
+}
+
+func extractWAVDuration(reader io.ReadSeeker) (float64, error) {
+	if _, err := reader.Seek(0, io.SeekStart); err != nil {
+		return 0, err
+	}
+
+	header := make([]byte, 12)
+	if _, err := io.ReadFull(reader, header); err != nil {
+		return 0, err
+	}
+
+	if string(header[0:4]) != "RIFF" || string(header[8:12]) != "WAVE" {
+		return 0, fmt.Errorf("invalid wav header")
+	}
+
+	var byteRate uint32
+
+	for {
+		chunkHeader := make([]byte, 8)
+		if _, err := io.ReadFull(reader, chunkHeader); err != nil {
+			if err == io.EOF || err == io.ErrUnexpectedEOF {
+				break
+			}
+			return 0, err
+		}
+
+		chunkID := string(chunkHeader[:4])
+		chunkSize := binary.LittleEndian.Uint32(chunkHeader[4:8])
+
+		switch chunkID {
+		case "fmt ":
+			chunkData := make([]byte, chunkSize)
+			if _, err := io.ReadFull(reader, chunkData); err != nil {
+				return 0, err
+			}
+			if len(chunkData) < 16 {
+				return 0, fmt.Errorf("invalid wav fmt chunk")
+			}
+			byteRate = binary.LittleEndian.Uint32(chunkData[8:12])
+		case "data":
+			if byteRate == 0 {
+				return 0, fmt.Errorf("wav byte rate is zero")
+			}
+			return float64(chunkSize) / float64(byteRate), nil
+		default:
+			if _, err := reader.Seek(int64(chunkSize), io.SeekCurrent); err != nil {
+				return 0, err
+			}
+		}
+
+		if chunkSize%2 == 1 {
+			if _, err := reader.Seek(1, io.SeekCurrent); err != nil {
+				return 0, err
+			}
+		}
+	}
+
+	return 0, fmt.Errorf("wav data chunk not found")
 }
 
 func extractMP4Metadata(reader io.ReadSeeker) (width, height, duration float64, err error) {

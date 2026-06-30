@@ -11,34 +11,33 @@ import type { Message } from "@bufbuild/protobuf";
 export declare const file_coasterai_portal_v1_voiceover: GenFile;
 
 /**
- * @generated from message coasterai.portal.v1.GenerateNarrationResponse
+ * @generated from message coasterai.portal.v1.GenerateVoiceoverRequest
  */
-export declare type GenerateNarrationResponse = Message<"coasterai.portal.v1.GenerateNarrationResponse"> & {
+export declare type GenerateVoiceoverRequest = Message<"coasterai.portal.v1.GenerateVoiceoverRequest"> & {
   /**
-   * @generated from field: repeated coasterai.portal.v1.NarrationSegment segments = 1;
+   * @generated from field: string voiceId = 1;
    */
-  segments: NarrationSegment[];
-};
+  voiceId: string;
 
-/**
- * Describes the message coasterai.portal.v1.GenerateNarrationResponse.
- * Use `create(GenerateNarrationResponseSchema)` to create a new message.
- */
-export declare const GenerateNarrationResponseSchema: GenMessage<GenerateNarrationResponse>;
-
-/**
- * @generated from message coasterai.portal.v1.NarrationSegment
- */
-export declare type NarrationSegment = Message<"coasterai.portal.v1.NarrationSegment"> & {
   /**
-   * @generated from field: string text = 1;
+   * @generated from field: string text = 2;
    */
   text: string;
+
+  /**
+   * @generated from field: string videoId = 3;
+   */
+  videoId: string;
+
+  /**
+   * @generated from field: string slideId = 4;
+   */
+  slideId: string;
 };
 
 /**
- * Describes the message coasterai.portal.v1.NarrationSegment.
- * Use `create(NarrationSegmentSchema)` to create a new message.
+ * Describes the message coasterai.portal.v1.GenerateVoiceoverRequest.
+ * Use `create(GenerateVoiceoverRequestSchema)` to create a new message.
  */
-export declare const NarrationSegmentSchema: GenMessage<NarrationSegment>;
+export declare const GenerateVoiceoverRequestSchema: GenMessage<GenerateVoiceoverRequest>;
 

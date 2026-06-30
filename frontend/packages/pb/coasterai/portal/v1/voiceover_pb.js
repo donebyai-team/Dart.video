@@ -9,19 +9,12 @@ import { file_google_protobuf_empty, file_google_protobuf_timestamp } from "@buf
  * Describes the file coasterai/portal/v1/voiceover.proto.
  */
 export const file_coasterai_portal_v1_voiceover = /*@__PURE__*/
-  fileDesc("CiNjb2FzdGVyYWkvcG9ydGFsL3YxL3ZvaWNlb3Zlci5wcm90bxITY29hc3RlcmFpLnBvcnRhbC52MSJUChlHZW5lcmF0ZU5hcnJhdGlvblJlc3BvbnNlEjcKCHNlZ21lbnRzGAEgAygLMiUuY29hc3RlcmFpLnBvcnRhbC52MS5OYXJyYXRpb25TZWdtZW50IiAKEE5hcnJhdGlvblNlZ21lbnQSDAoEdGV4dBgBIAEoCUI/Wj1naXRodWIuY29tL3NoYW5rMzE4L2NvYXN0ZXJhaS9wYi9jb2FzdGVyYWkvcG9ydGFsL3YxO3BicG9ydGFsYgZwcm90bzM", [file_google_protobuf_timestamp, file_google_protobuf_empty]);
+  fileDesc("CiNjb2FzdGVyYWkvcG9ydGFsL3YxL3ZvaWNlb3Zlci5wcm90bxITY29hc3RlcmFpLnBvcnRhbC52MSJbChhHZW5lcmF0ZVZvaWNlb3ZlclJlcXVlc3QSDwoHdm9pY2VJZBgBIAEoCRIMCgR0ZXh0GAIgASgJEg8KB3ZpZGVvSWQYAyABKAkSDwoHc2xpZGVJZBgEIAEoCUI/Wj1naXRodWIuY29tL3NoYW5rMzE4L2NvYXN0ZXJhaS9wYi9jb2FzdGVyYWkvcG9ydGFsL3YxO3BicG9ydGFsYgZwcm90bzM", [file_google_protobuf_timestamp, file_google_protobuf_empty]);
 
 /**
- * Describes the message coasterai.portal.v1.GenerateNarrationResponse.
- * Use `create(GenerateNarrationResponseSchema)` to create a new message.
+ * Describes the message coasterai.portal.v1.GenerateVoiceoverRequest.
+ * Use `create(GenerateVoiceoverRequestSchema)` to create a new message.
  */
-export const GenerateNarrationResponseSchema = /*@__PURE__*/
+export const GenerateVoiceoverRequestSchema = /*@__PURE__*/
   messageDesc(file_coasterai_portal_v1_voiceover, 0);
-
-/**
- * Describes the message coasterai.portal.v1.NarrationSegment.
- * Use `create(NarrationSegmentSchema)` to create a new message.
- */
-export const NarrationSegmentSchema = /*@__PURE__*/
-  messageDesc(file_coasterai_portal_v1_voiceover, 1);
 

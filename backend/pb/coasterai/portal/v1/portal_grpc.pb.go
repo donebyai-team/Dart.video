@@ -58,7 +58,7 @@ const (
 	PortalService_DeleteTemplate_FullMethodName         = "/coasterai.portal.v1.PortalService/DeleteTemplate"
 	PortalService_GenerateSuggestions_FullMethodName    = "/coasterai.portal.v1.PortalService/GenerateSuggestions"
 	PortalService_RenderSuggestion_FullMethodName       = "/coasterai.portal.v1.PortalService/RenderSuggestion"
-	PortalService_GenerateNarration_FullMethodName      = "/coasterai.portal.v1.PortalService/GenerateNarration"
+	PortalService_GenerateVoiceover_FullMethodName      = "/coasterai.portal.v1.PortalService/GenerateVoiceover"
 )
 
 // PortalServiceClient is the client API for PortalService service.
@@ -110,7 +110,7 @@ type PortalServiceClient interface {
 	GenerateSuggestions(ctx context.Context, in *GenerateSuggestionsInput, opts ...grpc.CallOption) (*GenerateSuggestionsResponse, error)
 	RenderSuggestion(ctx context.Context, in *RenderSuggestionsInput, opts ...grpc.CallOption) (*SuggestScenesResponse, error)
 	// Voiceover
-	GenerateNarration(ctx context.Context, in *VideoRequestWithID, opts ...grpc.CallOption) (*GenerateNarrationResponse, error)
+	GenerateVoiceover(ctx context.Context, in *GenerateVoiceoverRequest, opts ...grpc.CallOption) (*v1.Voiceover, error)
 }
 
 type portalServiceClient struct {
@@ -546,9 +546,9 @@ func (c *portalServiceClient) RenderSuggestion(ctx context.Context, in *RenderSu
 	return out, nil
 }
 
-func (c *portalServiceClient) GenerateNarration(ctx context.Context, in *VideoRequestWithID, opts ...grpc.CallOption) (*GenerateNarrationResponse, error) {
-	out := new(GenerateNarrationResponse)
-	err := c.cc.Invoke(ctx, PortalService_GenerateNarration_FullMethodName, in, out, opts...)
+func (c *portalServiceClient) GenerateVoiceover(ctx context.Context, in *GenerateVoiceoverRequest, opts ...grpc.CallOption) (*v1.Voiceover, error) {
+	out := new(v1.Voiceover)
+	err := c.cc.Invoke(ctx, PortalService_GenerateVoiceover_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -604,7 +604,7 @@ type PortalServiceServer interface {
 	GenerateSuggestions(context.Context, *GenerateSuggestionsInput) (*GenerateSuggestionsResponse, error)
 	RenderSuggestion(context.Context, *RenderSuggestionsInput) (*SuggestScenesResponse, error)
 	// Voiceover
-	GenerateNarration(context.Context, *VideoRequestWithID) (*GenerateNarrationResponse, error)
+	GenerateVoiceover(context.Context, *GenerateVoiceoverRequest) (*v1.Voiceover, error)
 	mustEmbedUnimplementedPortalServiceServer()
 }
 
@@ -723,8 +723,8 @@ func (UnimplementedPortalServiceServer) GenerateSuggestions(context.Context, *Ge
 func (UnimplementedPortalServiceServer) RenderSuggestion(context.Context, *RenderSuggestionsInput) (*SuggestScenesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RenderSuggestion not implemented")
 }
-func (UnimplementedPortalServiceServer) GenerateNarration(context.Context, *VideoRequestWithID) (*GenerateNarrationResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GenerateNarration not implemented")
+func (UnimplementedPortalServiceServer) GenerateVoiceover(context.Context, *GenerateVoiceoverRequest) (*v1.Voiceover, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GenerateVoiceover not implemented")
 }
 func (UnimplementedPortalServiceServer) mustEmbedUnimplementedPortalServiceServer() {}
 
@@ -1417,20 +1417,20 @@ func _PortalService_RenderSuggestion_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PortalService_GenerateNarration_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(VideoRequestWithID)
+func _PortalService_GenerateVoiceover_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GenerateVoiceoverRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PortalServiceServer).GenerateNarration(ctx, in)
+		return srv.(PortalServiceServer).GenerateVoiceover(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: PortalService_GenerateNarration_FullMethodName,
+		FullMethod: PortalService_GenerateVoiceover_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PortalServiceServer).GenerateNarration(ctx, req.(*VideoRequestWithID))
+		return srv.(PortalServiceServer).GenerateVoiceover(ctx, req.(*GenerateVoiceoverRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1575,8 +1575,8 @@ var PortalService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _PortalService_RenderSuggestion_Handler,
 		},
 		{
-			MethodName: "GenerateNarration",
-			Handler:    _PortalService_GenerateNarration_Handler,
+			MethodName: "GenerateVoiceover",
+			Handler:    _PortalService_GenerateVoiceover_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

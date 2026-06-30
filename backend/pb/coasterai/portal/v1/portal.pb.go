@@ -3234,7 +3234,7 @@ var File_coasterai_portal_v1_portal_proto protoreflect.FileDescriptor
 
 const file_coasterai_portal_v1_portal_proto_rawDesc = "" +
 	"\n" +
-	" coasterai/portal/v1/portal.proto\x12\x13coasterai.portal.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1ccoasterai/core/v1/core.proto\x1a\x1dcoasterai/core/v1/slide.proto\x1a\x1dcoasterai/core/v1/video.proto\x1a coasterai/core/v1/brandkit.proto\x1a coasterai/core/v1/template.proto\x1a\x1dcoasterai/core/v1/figma.proto\x1a#coasterai/core/v1/media_asset.proto\x1a\x1ccoasterai/core/v1/chat.proto\x1a#coasterai/portal/v1/templates.proto\x1a#coasterai/portal/v1/voiceover.proto\"3\n" +
+	" coasterai/portal/v1/portal.proto\x12\x13coasterai.portal.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1ccoasterai/core/v1/core.proto\x1a\x1dcoasterai/core/v1/slide.proto\x1a\x1dcoasterai/core/v1/video.proto\x1a coasterai/core/v1/brandkit.proto\x1a coasterai/core/v1/template.proto\x1a\x1dcoasterai/core/v1/figma.proto\x1a#coasterai/core/v1/media_asset.proto\x1a\x1ccoasterai/core/v1/chat.proto\x1a#coasterai/portal/v1/templates.proto\x1a#coasterai/portal/v1/voiceover.proto\x1a\x1dcoasterai/core/v1/audio.proto\"3\n" +
 	"\x13GetMediaAssetsByIDs\x12\x1c\n" +
 	"\tassetsIDs\x18\x01 \x03(\tR\tassetsIDs\"S\n" +
 	"\x15GetMediaAssetsRequest\x12:\n" +
@@ -3483,7 +3483,7 @@ const file_coasterai_portal_v1_portal_proto_rawDesc = "" +
 	"\x1eINTEGRATION_STATE_AUTH_REVOKED\x10\x02\x12'\n" +
 	"#INTEGRATION_STATE_ACCOUNT_SUSPENDED\x10\x03\x12\"\n" +
 	"\x1eINTEGRATION_STATE_AUTH_EXPIRED\x10\x04\x12%\n" +
-	"!INTEGRATION_STATE_NOT_ESTABLISHED\x10\x052\xf9\x1c\n" +
+	"!INTEGRATION_STATE_NOT_ESTABLISHED\x10\x052\xed\x1c\n" +
 	"\rPortalService\x12@\n" +
 	"\tGetConfig\x12\x16.google.protobuf.Empty\x1a\x1b.coasterai.portal.v1.Config\x129\n" +
 	"\x04Self\x12\x16.google.protobuf.Empty\x1a\x19.coasterai.portal.v1.User\x12_\n" +
@@ -3521,8 +3521,8 @@ const file_coasterai_portal_v1_portal_proto_rawDesc = "" +
 	"\fSaveTemplate\x12*.coasterai.portal.v1.UpdateTemplateRequest\x1a\x16.google.protobuf.Empty\x12Q\n" +
 	"\x0eDeleteTemplate\x12'.coasterai.portal.v1.GetTemplateRequest\x1a\x16.google.protobuf.Empty\x12v\n" +
 	"\x13GenerateSuggestions\x12-.coasterai.portal.v1.GenerateSuggestionsInput\x1a0.coasterai.portal.v1.GenerateSuggestionsResponse\x12k\n" +
-	"\x10RenderSuggestion\x12+.coasterai.portal.v1.RenderSuggestionsInput\x1a*.coasterai.portal.v1.SuggestScenesResponse\x12l\n" +
-	"\x11GenerateNarration\x12'.coasterai.portal.v1.VideoRequestWithID\x1a..coasterai.portal.v1.GenerateNarrationResponseB?Z=github.com/shank318/coasterai/pb/coasterai/portal/v1;pbportalb\x06proto3"
+	"\x10RenderSuggestion\x12+.coasterai.portal.v1.RenderSuggestionsInput\x1a*.coasterai.portal.v1.SuggestScenesResponse\x12`\n" +
+	"\x11GenerateVoiceover\x12-.coasterai.portal.v1.GenerateVoiceoverRequest\x1a\x1c.coasterai.core.v1.VoiceoverB?Z=github.com/shank318/coasterai/pb/coasterai/portal/v1;pbportalb\x06proto3"
 
 var (
 	file_coasterai_portal_v1_portal_proto_rawDescOnce sync.Once
@@ -3619,10 +3619,11 @@ var file_coasterai_portal_v1_portal_proto_goTypes = []any{
 	(*UpdateTemplateRequest)(nil),          // 77: coasterai.portal.v1.UpdateTemplateRequest
 	(*GenerateSuggestionsInput)(nil),       // 78: coasterai.portal.v1.GenerateSuggestionsInput
 	(*RenderSuggestionsInput)(nil),         // 79: coasterai.portal.v1.RenderSuggestionsInput
-	(*v1.AnimationTemplate)(nil),           // 80: coasterai.core.v1.AnimationTemplate
-	(*GetTemplatesResponse)(nil),           // 81: coasterai.portal.v1.GetTemplatesResponse
-	(*GenerateSuggestionsResponse)(nil),    // 82: coasterai.portal.v1.GenerateSuggestionsResponse
-	(*GenerateNarrationResponse)(nil),      // 83: coasterai.portal.v1.GenerateNarrationResponse
+	(*GenerateVoiceoverRequest)(nil),       // 80: coasterai.portal.v1.GenerateVoiceoverRequest
+	(*v1.AnimationTemplate)(nil),           // 81: coasterai.core.v1.AnimationTemplate
+	(*GetTemplatesResponse)(nil),           // 82: coasterai.portal.v1.GetTemplatesResponse
+	(*GenerateSuggestionsResponse)(nil),    // 83: coasterai.portal.v1.GenerateSuggestionsResponse
+	(*v1.Voiceover)(nil),                   // 84: coasterai.core.v1.Voiceover
 }
 var file_coasterai_portal_v1_portal_proto_depIdxs = []int32{
 	55, // 0: coasterai.portal.v1.GetMediaAssetsRequest.mediaType:type_name -> coasterai.core.v1.MediaType
@@ -3708,7 +3709,7 @@ var file_coasterai_portal_v1_portal_proto_depIdxs = []int32{
 	75, // 80: coasterai.portal.v1.PortalService.DeleteTemplate:input_type -> coasterai.portal.v1.GetTemplateRequest
 	78, // 81: coasterai.portal.v1.PortalService.GenerateSuggestions:input_type -> coasterai.portal.v1.GenerateSuggestionsInput
 	79, // 82: coasterai.portal.v1.PortalService.RenderSuggestion:input_type -> coasterai.portal.v1.RenderSuggestionsInput
-	23, // 83: coasterai.portal.v1.PortalService.GenerateNarration:input_type -> coasterai.portal.v1.VideoRequestWithID
+	80, // 83: coasterai.portal.v1.PortalService.GenerateVoiceover:input_type -> coasterai.portal.v1.GenerateVoiceoverRequest
 	33, // 84: coasterai.portal.v1.PortalService.GetConfig:output_type -> coasterai.portal.v1.Config
 	38, // 85: coasterai.portal.v1.PortalService.Self:output_type -> coasterai.portal.v1.User
 	48, // 86: coasterai.portal.v1.PortalService.GetIntegration:output_type -> coasterai.portal.v1.Integrations
@@ -3739,14 +3740,14 @@ var file_coasterai_portal_v1_portal_proto_depIdxs = []int32{
 	7,  // 111: coasterai.portal.v1.PortalService.GetMediaAssets:output_type -> coasterai.portal.v1.GetMediaAssetsResponse
 	7,  // 112: coasterai.portal.v1.PortalService.GetMediaAssetsByID:output_type -> coasterai.portal.v1.GetMediaAssetsResponse
 	7,  // 113: coasterai.portal.v1.PortalService.GenerateMusic:output_type -> coasterai.portal.v1.GetMediaAssetsResponse
-	80, // 114: coasterai.portal.v1.PortalService.CreateTemplate:output_type -> coasterai.core.v1.AnimationTemplate
-	80, // 115: coasterai.portal.v1.PortalService.GetTemplate:output_type -> coasterai.core.v1.AnimationTemplate
-	81, // 116: coasterai.portal.v1.PortalService.GetTemplates:output_type -> coasterai.portal.v1.GetTemplatesResponse
+	81, // 114: coasterai.portal.v1.PortalService.CreateTemplate:output_type -> coasterai.core.v1.AnimationTemplate
+	81, // 115: coasterai.portal.v1.PortalService.GetTemplate:output_type -> coasterai.core.v1.AnimationTemplate
+	82, // 116: coasterai.portal.v1.PortalService.GetTemplates:output_type -> coasterai.portal.v1.GetTemplatesResponse
 	74, // 117: coasterai.portal.v1.PortalService.SaveTemplate:output_type -> google.protobuf.Empty
 	74, // 118: coasterai.portal.v1.PortalService.DeleteTemplate:output_type -> google.protobuf.Empty
-	82, // 119: coasterai.portal.v1.PortalService.GenerateSuggestions:output_type -> coasterai.portal.v1.GenerateSuggestionsResponse
+	83, // 119: coasterai.portal.v1.PortalService.GenerateSuggestions:output_type -> coasterai.portal.v1.GenerateSuggestionsResponse
 	13, // 120: coasterai.portal.v1.PortalService.RenderSuggestion:output_type -> coasterai.portal.v1.SuggestScenesResponse
-	83, // 121: coasterai.portal.v1.PortalService.GenerateNarration:output_type -> coasterai.portal.v1.GenerateNarrationResponse
+	84, // 121: coasterai.portal.v1.PortalService.GenerateVoiceover:output_type -> coasterai.core.v1.Voiceover
 	84, // [84:122] is the sub-list for method output_type
 	46, // [46:84] is the sub-list for method input_type
 	46, // [46:46] is the sub-list for extension type_name
