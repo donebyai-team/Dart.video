@@ -24,7 +24,7 @@ message GetTemplatesRequest {
 message UpdateTemplateRequest {
   string id = 1;
   string description = 2;
-  optional string usage_description = 3;
+  string usage_description = 3;
   repeated string categories = 4;
   string name = 5;
 }

@@ -41,6 +41,10 @@ var AvailableCategoriesToCategorize = []types.Category{
 		Description: "Highlights disconnected tools, scattered information, siloed teams, complex workflows, or fragmented processes that create inefficiency, confusion, or operational friction.",
 	},
 	{
+		Name:        "FEATURES",
+		Description: "Describes specific product capabilities, functionality, components, integrations, benefits, or use cases that help deliver the solution.",
+	},
+	{
 		Name:        "SOLUTION",
 		Description: "Presents a product, feature, approach, capability, benefit, or use case that solves, improves, automates, simplifies, or eliminates a problem.",
 	},
@@ -56,8 +60,43 @@ var AvailableCategoriesToCategorize = []types.Category{
 		Name:        "CTA",
 		Description: "Encourages the audience to take a specific action such as signing up, booking a demo, starting a trial, purchasing, contacting sales, or learning more.",
 	},
-	{
-		Name:        "FEATURES",
-		Description: "Describes specific product capabilities, functionality, components, integrations, benefits, or use cases that help deliver the solution.",
+}
+
+var RelatedCategories = map[string][]string{
+	"HOOK": {
+		"HOOK",
+		"INTRO",
+		"PROBLEM",
+	},
+	"INTRO": {
+		"INTRO",
+		"HOOK",
+		"SOLUTION",
+	},
+	"PROBLEM": {
+		"PROBLEM",
+		"FRAGMENTATION",
+		"HOOK",
+	},
+	"SOLUTION": {
+		"SOLUTION",
+		"FEATURES",
+		"PRODUCT_DEMO",
+	},
+	"FEATURES": {
+		"FEATURES",
+		"PRODUCT_DEMO",
+		"SOLUTION",
+	},
+	"PRODUCT_DEMO": {
+		"PRODUCT_DEMO",
+		"FEATURES",
+	},
+	"SOCIAL_PROOF": {
+		"SOCIAL_PROOF",
+		"SOLUTION",
+	},
+	"CTA": {
+		"CTA",
 	},
 }

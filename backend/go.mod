@@ -17,6 +17,7 @@ require (
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/lib/pq v1.10.9
 	github.com/nyaruka/phonenumbers v1.5.0
+	github.com/openai/openai-go/v3 v3.41.0
 	github.com/pkg/errors v0.9.1
 	github.com/rs/cors v1.10.1
 	github.com/someone1/gcp-jwt-go v2.0.1+incompatible
@@ -148,6 +149,7 @@ require (
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
+	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/uptrace/opentelemetry-go-extra/otelsql v0.3.2 // indirect
 	github.com/urfave/cli/v2 v2.27.7 // indirect
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect

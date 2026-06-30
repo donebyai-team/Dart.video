@@ -13,7 +13,6 @@ import { Button } from '@/components/ui/button'
 import ManualMediaImportPanel from '@/components/assets/ManualMediaImportPanel'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Script } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import { useClientsContext } from '@coasterai/ui-core/context/ClientContext'
 import { getConnectError } from '@/utils/error'
 import toast from 'react-hot-toast'
@@ -23,20 +22,17 @@ import { getDefaultResolution } from '@/stores/video/defaults'
 import { type AskUserQuestion, type CreateVideoResponse } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
 import QuestionPanel from '@/components/composer/QuestionPanel'
 import ThinkingViewComponent from '@/components/composer/ThinkingViewComponent'
-import { StyleType, VideoMetadataSchema } from '@coasterai/pb/coasterai/core/v1/video_pb'
+import { Script, VideoMetadataSchema } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import AssetUploadDropdown from '@/components/composer/AssetUploadDropdown'
 import LanguageSelector from '@/components/composer/LanguageSelector'
 import BrandLibrarySelector from '@/components/composer/BrandLibrarySelector'
 import { MediaAsset, SelectedMediaAssetSchema } from '@coasterai/pb/coasterai/core/v1/media_asset_pb'
 import SelectedAssetsDialog, { type SelectedAssetWithPreview } from '@/components/assets/SelectedAssetsDialog'
-import ComposeSubmissionQuestionsPanel, { COMPOSE_SUBMISSION_QUESTIONS, type ComposeSubmissionQuestionResponse } from '@/components/composer/ComposeSubmissionQuestionsPanel'
 
-const MIN_SCRIPT_SECTIONS = 3
 const MIN_PROMPT_LENGTH = 10
 const VIDEO_COMPOSER_PREFILL_STORAGE_KEY = 'video-composer-prefill-metadata'
 
-type ComposerStage = 'compose' | 'composeQuestions' | 'planning' | 'question'
-type AssetPickerMode = 'figma' | 'upload'
+type ComposerStage = 'compose' | 'planning' | 'question'
 
 const VideoIntentComposer = () => {
   const [prompt, setPrompt] = useState('')
@@ -47,9 +43,6 @@ const VideoIntentComposer = () => {
   const [assetDialogOpen, setAssetDialogOpen] = useState(false)
   const [selectedAssetsDialogOpen, setSelectedAssetsDialogOpen] = useState(false)
   const [questionAssetsDialogOpen, setQuestionAssetsDialogOpen] = useState(false)
-  const [assetPickerMode, setAssetPickerMode] = useState<AssetPickerMode>('upload')
-  const [selectedStyle, setSelectedStyle] = useState<StyleType>(StyleType.UNDEFINED)
-  const [script, setScript] = useState<Script | undefined>()
   const [selectedAssets, setSelectedAssets] = useState<SelectedAssetWithPreview[]>([])
 
   const [stage, setStage] = useState<ComposerStage>('compose')
@@ -61,22 +54,16 @@ const VideoIntentComposer = () => {
   const [thinkingResetSignal, setThinkingResetSignal] = useState(0)
   const streamSessionRef = useRef(0)
   const abortControllerRef = useRef<AbortController | null>(null)
-  const [activeQuestion, setActiveQuestion] = useState<AskUserQuestion | undefined>()
-  const [pendingQuestion, setPendingQuestion] = useState<AskUserQuestion | undefined>()
-  const [selectedAnswer, setSelectedAnswer] = useState('')
-  const [customAnswer, setCustomAnswer] = useState('')
+  const [activeQuestions, setActiveQuestions] = useState<AskUserQuestion[]>([])
+  const [pendingQuestions, setPendingQuestions] = useState<AskUserQuestion[]>([])
   const [questionAssets, setQuestionAssets] = useState<SelectedAssetWithPreview[]>([])
-  const [composeQuestionResponses, setComposeQuestionResponses] = useState<ComposeSubmissionQuestionResponse[]>([])
-  const [hasReviewedComposeQuestions, setHasReviewedComposeQuestions] = useState(false)
 
   const router = useRouter()
   const { portalClient } = useClientsContext()
 
-  const scriptVoiceoverCount = script?.items?.filter(i => i.voiceover?.trim()).length ?? 0
-  const hasValidScript = scriptVoiceoverCount >= MIN_SCRIPT_SECTIONS
   const hasPrompt = prompt.trim().length > MIN_PROMPT_LENGTH
   const hasSelectedAssets = selectedAssets.length > 0
-  const canGenerate = hasPrompt || hasValidScript || hasSelectedAssets
+  const canGenerate = hasPrompt || hasSelectedAssets
   const selectedAssetMessages = useMemo(
     () => selectedAssets.map(asset => asset.selection),
     [selectedAssets]
@@ -96,27 +83,18 @@ const VideoIntentComposer = () => {
     return merged
   }, [questionAssets, selectedAssetMessages])
 
-  const answerInput = useMemo(() => {
-    if (!activeQuestion) return ''
-    const allowsCustom = !!activeQuestion.allowCustomEntry
-    if (selectedAnswer) return selectedAnswer
-    if (allowsCustom) return customAnswer.trim()
-    return ''
-  }, [activeQuestion, customAnswer, selectedAnswer])
   const showThinking = hasSubmitted && stage === 'planning'
 
   useEffect(() => {
-    if (!pendingQuestion) return
+    if (pendingQuestions.length === 0) return
     if (isThinkingBusy) return
 
-    setActiveQuestion(pendingQuestion)
-    setPendingQuestion(undefined)
-    setSelectedAnswer('')
-    setCustomAnswer('')
+    setActiveQuestions(pendingQuestions)
+    setPendingQuestions([])
     setQuestionAssets([])
     setQuestionAssetsDialogOpen(false)
     setStage('question')
-  }, [pendingQuestion, isThinkingBusy])
+  }, [isThinkingBusy, pendingQuestions])
 
   useEffect(() => {
     return () => {
@@ -162,8 +140,8 @@ const VideoIntentComposer = () => {
         throw new Error(event.errorMessage)
       }
 
-      if (event.waitingForUserInput && event.askUserQuestion) {
-        setPendingQuestion(event.askUserQuestion)
+      if (event.waitingForUserInput && event.askUserQuestion.length > 0) {
+        setPendingQuestions(event.askUserQuestion)
         setIsThinkingBusy(false)
         return
       }
@@ -191,20 +169,13 @@ const VideoIntentComposer = () => {
     setIsSubmitting(false)
     setHasSubmitted(false)
     setStage('compose')
-    setActiveQuestion(undefined)
-    setPendingQuestion(undefined)
+    setActiveQuestions([])
+    setPendingQuestions([])
     setQuestionAssets([])
     setQuestionAssetsDialogOpen(false)
   }
 
-  const startVideoCreation = async (submissionQuestionResponses: ComposeSubmissionQuestionResponse[] = []) => {
-    const questionResponseMap = Object.fromEntries(
-      COMPOSE_SUBMISSION_QUESTIONS.map(question => {
-        const matchingResponse = submissionQuestionResponses.find(response => response.questionId === question.id)
-        return [question.questionText, matchingResponse?.response ?? '']
-      })
-    )
-
+  const startVideoCreation = async () => {
     const selectedResolution =
       defaultEditorConfig.resolution.options.find(r => r.id === resolutionId) ??
       getDefaultResolution(defaultEditorConfig)
@@ -220,18 +191,16 @@ const VideoIntentComposer = () => {
       setHasSubmitted(true)
       setStage('planning')
       setThinkingChunk('Initializing planning...')
-      setActiveQuestion(undefined)
-      setPendingQuestion(undefined)
+      setActiveQuestions([])
+      setPendingQuestions([])
 
       const stream = portalClient.createVideo({
         prompt,
-        script,
         resolution: selectedResolution,
         durationInSec: Number(duration),
         brandLibraryId: selectedBrandLibraryId,
-        styleType: selectedStyle,
         assets: selectedAssetMessages,
-        questions: questionResponseMap
+        questions: {}
       }, { signal: controller.signal })
 
       await consumePlanningStream(stream, controller.signal, streamSession)
@@ -255,23 +224,12 @@ const VideoIntentComposer = () => {
   const handleSubmit = async () => {
     if (!canGenerate || isSubmitting) return
 
-    if (hasReviewedComposeQuestions) {
-      await startVideoCreation(composeQuestionResponses)
-      return
-    }
-
-    setStage('composeQuestions')
+    await startVideoCreation()
   }
 
-  const handleComposeQuestionsComplete = async (responses: ComposeSubmissionQuestionResponse[]) => {
-    setComposeQuestionResponses(responses)
-    setHasReviewedComposeQuestions(true)
-    await startVideoCreation(responses)
-  }
-
-  const handleContinuePlanning = async (responseOverride?: string) => {
-    const response = (responseOverride ?? answerInput).trim()
-    if (!videoId || !response || isSubmitting) return
+  const handleContinuePlanning = async ({ response, script: updatedScript }: { response: string; script?: Script }) => {
+    const trimmedResponse = response.trim()
+    if (!videoId || !trimmedResponse || isSubmitting) return
 
     const controller = new AbortController()
     abortControllerRef.current = controller
@@ -282,16 +240,15 @@ const VideoIntentComposer = () => {
       setThinkingResetSignal(v => v + 1)
       setIsSubmitting(true)
       setStage('planning')
-      setActiveQuestion(undefined)
-      setPendingQuestion(undefined)
-      setSelectedAnswer('')
-      setCustomAnswer('')
+      setActiveQuestions([])
+      setPendingQuestions([])
       setThinkingChunk('Received your answer. Continuing planning...')
 
       const stream = portalClient.continueVideoPlanning({
         id: videoId,
-        response,
-        assets: mergedQuestionAssetMessages
+        response: trimmedResponse,
+        assets: mergedQuestionAssetMessages,
+        script: updatedScript
       }, { signal: controller.signal })
 
       setQuestionAssets([])
@@ -301,7 +258,7 @@ const VideoIntentComposer = () => {
     } catch (err: any) {
       if (!controller.signal.aborted) {
         toast.error(getConnectError(err))
-        setStage(activeQuestion ? 'question' : 'compose')
+        setStage(activeQuestions.length > 0 ? 'question' : 'compose')
         setThinkingChunk('')
         setThinkingResetSignal(v => v + 1)
       }
@@ -349,8 +306,7 @@ const VideoIntentComposer = () => {
     }
   }
 
-  const openAssetDialog = (mode: AssetPickerMode) => {
-    setAssetPickerMode(mode)
+  const openAssetDialog = () => {
     setAssetDialogOpen(true)
   }
 
@@ -437,7 +393,7 @@ const VideoIntentComposer = () => {
         onHydrateAssets={hydrateSelectedAssets}
         onRemoveAsset={removeSelectedAsset}
         onUpdateAssetNote={updateSelectedAssetNote}
-        onOpenUpload={() => openAssetDialog('upload')}
+        onOpenUpload={openAssetDialog}
       />
 
       <SelectedAssetsDialog
@@ -447,7 +403,7 @@ const VideoIntentComposer = () => {
         onHydrateAssets={hydrateQuestionAssets}
         onRemoveAsset={removeQuestionAsset}
         onUpdateAssetNote={updateQuestionAssetNote}
-        onOpenUpload={() => openAssetDialog('upload')}
+        onOpenUpload={openAssetDialog}
       />
 
       {/* Center area — grows to push input to the bottom */}
@@ -457,7 +413,7 @@ const VideoIntentComposer = () => {
             What feature are you launching today?
           </h1>
           <p className='text-sm text-muted-foreground mt-1.5'>
-            Add a detailed script to generate your video.
+            Give us a topic, concept, or script, and we'll build it with you.
           </p>
         </div>
       </div>
@@ -469,35 +425,14 @@ const VideoIntentComposer = () => {
         {showThinking && <ThinkingViewComponent thinkingChunk={thinkingChunk} />}
 
         {/* Question panel — appears above input when agent asks something */}
-        {stage === 'question' && activeQuestion && (
+        {stage === 'question' && activeQuestions.length > 0 && (
           <QuestionPanel
-            question={activeQuestion}
+            questions={activeQuestions}
             isSubmitting={isSubmitting}
-            customAnswer={customAnswer}
-            answerInput={answerInput}
-            onOptionClick={option => {
-              setSelectedAnswer(option)
-              void handleContinuePlanning(option)
-            }}
-            onCustomAnswerChange={setCustomAnswer}
-            onContinue={responseOverride => void handleContinuePlanning(responseOverride)}
+            onContinue={payload => void handleContinuePlanning(payload)}
             selectedQuestionAssets={questionAssets}
             onOpenAssetPicker={openAssetDialog}
             onOpenSelectedAssetsDialog={() => setQuestionAssetsDialogOpen(true)}
-          />
-        )}
-
-        {stage === 'composeQuestions' && (
-          <ComposeSubmissionQuestionsPanel
-            isSubmitting={isSubmitting}
-            questions={COMPOSE_SUBMISSION_QUESTIONS}
-            initialResponses={composeQuestionResponses}
-            onCancel={() => {
-              setStage('compose')
-            }}
-            onComplete={responses => {
-              void handleComposeQuestionsComplete(responses)
-            }}
           />
         )}
 
@@ -597,7 +532,11 @@ const VideoIntentComposer = () => {
           <textarea
             value={prompt}
             onChange={e => setPrompt(e.target.value)}
-            placeholder={'Sample script (Hook → Problem → Product Intro → Features → Social Proof → CTA). Example: Hook: Can your AI actually work with you?'}
+            placeholder={`What do you want to create?
+
+💡 Topic: How AI is changing healthcare
+🧠 Concept: Explain quantum computing simply
+📝 Script: Hook → Problem → Solution → CTA`}
             rows={4}
             className='w-full resize-none bg-transparent px-4 py-3 text-sm focus:outline-none placeholder:text-muted-foreground/60'
             disabled={stage !== 'compose'}
@@ -605,7 +544,7 @@ const VideoIntentComposer = () => {
 
           {/* Action row */}
           <div className='px-4 pb-3 flex justify-end'>
-            {isSubmitting || stage === 'question' || stage === 'composeQuestions' ? (
+            {isSubmitting || stage === 'question' ? (
               <Button
                 onClick={handleStop}
                 variant='outline'

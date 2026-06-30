@@ -155,12 +155,14 @@ func sendAnimationResult(
 	}
 
 	if runResult.Status == common.RunStatusWaitingForUserInput {
-		if err := stream.Send(&pbportal.GenerateOrEditSceneResponse{
-			Slide:               slide,
-			WaitingForUserInput: true,
-			AskUserQuestion:     runResult.AskUserQuestion,
-		}); err != nil {
-			return nil
+		if len(runResult.AskUserQuestions) > 0 {
+			if err := stream.Send(&pbportal.GenerateOrEditSceneResponse{
+				Slide:               slide,
+				WaitingForUserInput: true,
+				AskUserQuestion:     runResult.AskUserQuestions[0],
+			}); err != nil {
+				return nil
+			}
 		}
 		return nil
 	}

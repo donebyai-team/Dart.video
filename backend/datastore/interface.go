@@ -107,6 +107,13 @@ type TemplateRepository interface {
 		pageSize int,
 		cursor *models.TemplateCursor,
 	) (*models.TemplatePage, error)
+	GetSimilarTemplates(
+		ctx context.Context,
+		embedding []float64,
+		categories []string,
+		excludedTemplateIDs []string,
+		limit int,
+	) ([]*models.Template, error)
 	GetTemplateByName(
 		ctx context.Context,
 		name string,

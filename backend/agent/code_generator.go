@@ -319,7 +319,7 @@ func (l *codeGenerator) runPlanning(ctx context.Context, generatePlanRequest typ
 	// Generate and validate upto max attempts
 	for attempt := 0; attempt < maxAttempts; attempt++ {
 
-		llmResponse, err := l.llmService.GenerateAnimation(ctx, generatePlanRequest, history, func(chunk string) {
+		llmResponse, llmThinking, err := l.llmService.GenerateAnimation(ctx, generatePlanRequest, history, func(chunk string) {
 			l.state.Publish(common.AgentState{
 				Thinking: chunk,
 				State:    common.StateStatusProcessing,
@@ -330,9 +330,11 @@ func (l *codeGenerator) runPlanning(ctx context.Context, generatePlanRequest typ
 			return nil, agenterrors.LLMPlanningFailed("failed to generate scene", err)
 		}
 
-		handled, result, err := l.toolRegistry.HandleAskQuestion(ctx, session, llmResponse.AsAskUserQuestion(), "", l.assetRegistry)
-		if handled {
-			return result, err
+		if llmResponse.AsAskUserQuestion() != nil {
+			handled, result, err := l.toolRegistry.HandleAskQuestion(ctx, session, []*types.AskUserQuestion{llmResponse.AsAskUserQuestion()}, llmThinking, l.assetRegistry)
+			if handled {
+				return result, err
+			}
 		}
 
 		codeResponse := llmResponse.AsGenerateAnimationCodeResponse()

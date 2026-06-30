@@ -220,14 +220,9 @@ export declare type ScriptItem = Message<"coasterai.core.v1.ScriptItem"> & {
   name: string;
 
   /**
-   * @generated from field: optional string voiceover = 2;
+   * @generated from field: repeated string narattion = 2;
    */
-  voiceover?: string;
-
-  /**
-   * @generated from field: optional string reference = 3;
-   */
-  reference?: string;
+  narattion: string[];
 };
 
 /**

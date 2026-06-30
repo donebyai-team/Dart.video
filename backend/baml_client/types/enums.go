@@ -24,16 +24,14 @@ import (
 type AskUserQuestionType string
 
 const (
-	AskUserQuestionTypeGENERIC                  AskUserQuestionType = "GENERIC"
-	AskUserQuestionTypeATTACHMENT_CLARIFICATION AskUserQuestionType = "ATTACHMENT_CLARIFICATION"
-	AskUserQuestionTypeUPLOAD_ATTACHMENT        AskUserQuestionType = "UPLOAD_ATTACHMENT"
+	AskUserQuestionTypeGENERIC           AskUserQuestionType = "GENERIC"
+	AskUserQuestionTypeUPLOAD_ATTACHMENT AskUserQuestionType = "UPLOAD_ATTACHMENT"
 )
 
 // Values returns all allowed values for the AskUserQuestionType type.
 func (AskUserQuestionType) Values() []AskUserQuestionType {
 	return []AskUserQuestionType{
 		AskUserQuestionTypeGENERIC,
-		AskUserQuestionTypeATTACHMENT_CLARIFICATION,
 		AskUserQuestionTypeUPLOAD_ATTACHMENT,
 	}
 }
@@ -149,4 +147,62 @@ func (e ColorToken) Encode() (*cffi.HostValue, error) {
 
 func (e ColorToken) BamlTypeName() string {
 	return "ColorToken"
+}
+
+type VideoSection string
+
+const (
+
+// no values defined for VideoSection
+)
+
+// Values returns all allowed values for the VideoSection type.
+func (VideoSection) Values() []VideoSection {
+	return []VideoSection{}
+}
+
+// IsValid checks whether the given VideoSection value is valid.
+func (e VideoSection) IsValid() bool {
+
+	// dynamic enums are always valid
+	return true
+
+}
+
+// MarshalJSON customizes JSON marshaling for VideoSection.
+func (e VideoSection) MarshalJSON() ([]byte, error) {
+	if !e.IsValid() {
+		return nil, fmt.Errorf("invalid VideoSection: %q", e)
+	}
+	return json.Marshal(string(e))
+}
+
+// UnmarshalJSON customizes JSON unmarshaling for VideoSection.
+func (e *VideoSection) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return err
+	}
+	*e = VideoSection(s)
+	if !e.IsValid() {
+		return fmt.Errorf("invalid VideoSection: %q", s)
+	}
+	return nil
+}
+
+func (e *VideoSection) Decode(holder *cffi.CFFIValueEnum, typeMap baml.TypeMap) {
+	name := holder.Name
+	if name.Name != "VideoSection" && name.Namespace != cffi.CFFITypeNamespace_TYPES {
+		panic(fmt.Sprintf("expected types.VideoSection, got %s.%s", string(name.Namespace.String()), string(name.Name)))
+	}
+	value := holder.Value
+	*e = VideoSection(value)
+}
+
+func (e VideoSection) Encode() (*cffi.HostValue, error) {
+	return baml.EncodeEnum("VideoSection", string(e), false)
+}
+
+func (e VideoSection) BamlTypeName() string {
+	return "VideoSection"
 }

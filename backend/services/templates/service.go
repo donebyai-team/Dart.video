@@ -13,6 +13,7 @@ import (
 	pbportal "github.com/shank318/coasterai/pb/coasterai/portal/v1"
 	"github.com/shank318/coasterai/services"
 	"github.com/shank318/coasterai/services/brand_identity"
+	llmprovider "github.com/shank318/coasterai/services/llm"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/structpb"
 	"net/url"
@@ -25,16 +26,18 @@ type Service interface {
 	UpdateTemplateConfig(ctx context.Context, video *models.Video) (*models.Video, error)
 	UpdateTemplate(ctx context.Context, req *pbportal.UpdateTemplateRequest) error
 	GetTemplates(ctx context.Context, categories []string) ([]*models.Template, error)
+	GetSimilarTemplates(ctx context.Context, usageDescription string, categories []string, excludedTemplateIDs []string, limit int) ([]*models.Template, error)
 	DeleteTemplateByID(ctx context.Context, id string) error
 	FetchTemplatesByCategories(ctx context.Context, categories []types.Category) ([]*models.Template, error)
 }
 
 type templateService struct {
-	db datastore.Repository
+	db  datastore.Repository
+	llm llmprovider.Service
 }
 
-func NewService(db datastore.Repository) Service {
-	return &templateService{db: db}
+func NewService(db datastore.Repository, llm llmprovider.Service) Service {
+	return &templateService{db: db, llm: llm}
 }
 
 func (t templateService) DeleteTemplateByID(ctx context.Context, id string) error {
@@ -196,15 +199,62 @@ func (t templateService) UpdateTemplate(ctx context.Context, req *pbportal.Updat
 
 	existingTemplate.Description = req.Description
 
-	existingTemplate.Description = req.Description
-
-	if req.UsageDescription != nil && *req.UsageDescription != "" {
-		existingTemplate.Description += models.UsageSeparator + *req.UsageDescription
+	usageDescription := strings.TrimSpace(req.UsageDescription)
+	if usageDescription == "" {
+		existingTemplate.DescriptionEmbedding = nil
+	} else {
+		embedding, err := t.llm.CreateEmbedding(ctx, usageDescription)
+		if err != nil {
+			return fmt.Errorf("create usage description embedding: %w", err)
+		}
+		existingTemplate.DescriptionEmbedding = models.TemplateEmbedding(embedding)
+		existingTemplate.Description += models.UsageSeparator + usageDescription
 	}
 
 	existingTemplate.Categories = req.Categories
 	existingTemplate.Status = models.TemplateStatusAVAILABLE
 	return t.db.UpdateTemplate(ctx, existingTemplate)
+}
+
+func (t templateService) GetSimilarTemplates(
+	ctx context.Context,
+	usageDescription string,
+	categories []string,
+	excludedTemplateIDs []string,
+	limit int,
+) ([]*models.Template, error) {
+	usageDescription = strings.TrimSpace(usageDescription)
+	if usageDescription == "" {
+		return nil, fmt.Errorf("usage description is required")
+	}
+
+	sanitizedCategories := make([]string, 0, len(categories))
+	seenCategories := make(map[string]struct{}, len(categories))
+	for _, category := range categories {
+		category = strings.ToUpper(strings.TrimSpace(category))
+		if category == "" {
+			continue
+		}
+		if _, exists := seenCategories[category]; exists {
+			continue
+		}
+
+		seenCategories[category] = struct{}{}
+		sanitizedCategories = append(sanitizedCategories, category)
+	}
+	if len(sanitizedCategories) == 0 {
+		return nil, fmt.Errorf("at least one category is required")
+	}
+	if limit <= 0 {
+		return nil, fmt.Errorf("limit must be greater than 0")
+	}
+
+	embedding, err := t.llm.CreateEmbedding(ctx, usageDescription)
+	if err != nil {
+		return nil, fmt.Errorf("create usage description embedding: %w", err)
+	}
+
+	return t.db.GetSimilarTemplates(ctx, embedding, sanitizedCategories, excludedTemplateIDs, limit)
 }
 
 func (t templateService) GetTemplateByID(ctx context.Context, ID string) (*models.Template, error) {

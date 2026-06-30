@@ -51,14 +51,6 @@ func (p *Portal) CreateVideo(ctx context.Context, c *connect.Request[pbportal.Cr
 		return errorx.ToConnect(errorx.New(errorx.CodeInvalidArgument, "VIDEO_INVALID_DURATION", "invalid duration specified", nil))
 	}
 
-	if c.Msg.Script == nil && len(strings.TrimSpace(c.Msg.Prompt)) < 10 {
-		return errorx.ToConnect(errorx.New(errorx.CodeInvalidArgument, "VIDEO_PROMPT_REQUIRED", "prompt is required", nil))
-	}
-
-	if c.Msg.Script != nil && len(c.Msg.Script.Items) < 3 {
-		return errorx.ToConnect(errorx.New(errorx.CodeInvalidArgument, "VIDEO_SCRIPT_TOO_SHORT", "script should have at least 3 items", nil))
-	}
-
 	video, err := p.videoGenerationService.CreateVideo(ctx, actor.OrganizationID, c.Msg)
 	if err != nil {
 		return errorx.ToConnect(errorx.New(errorx.CodeInternal, "VIDEO_CREATE_FAILED", "failed to create video", err))
@@ -134,6 +126,7 @@ func (p *Portal) ContinueVideoPlanning(ctx context.Context, c *connect.Request[p
 			return videoAgent.Continue(runCtx, agent.ContinueSessionOptions{
 				UserResponse:        c.Msg.Response,
 				SelectedMediaAssets: c.Msg.Assets,
+				Script:              c.Msg.Script,
 			})
 		},
 		logger,
@@ -228,7 +221,7 @@ func (p *Portal) streamAgentRun(
 				if err := stream.Send(&pbportal.CreateVideoResponse{
 					Id:                  videoID,
 					WaitingForUserInput: true,
-					AskUserQuestion:     out.result.AskUserQuestion,
+					AskUserQuestion:     out.result.AskUserQuestions,
 				}); err != nil {
 					return nil
 				}

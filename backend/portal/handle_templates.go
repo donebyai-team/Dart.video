@@ -73,6 +73,7 @@ func (p *Portal) SaveTemplate(ctx context.Context, c *connect.Request[pbportal.U
 
 	if c.Msg.Id == "" ||
 		c.Msg.Description == "" ||
+		c.Msg.UsageDescription == "" ||
 		len(c.Msg.Description) > 150 ||
 		len(c.Msg.Categories) == 0 {
 		return nil, connect.NewError(connect.CodeInvalidArgument,

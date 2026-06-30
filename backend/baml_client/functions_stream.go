@@ -265,7 +265,7 @@ func (*stream) GenerateAnimation(ctx context.Context, input types.GenerateAnimat
 }
 
 // / Streaming version of GeneratePlan
-func (*stream) GeneratePlan(ctx context.Context, input types.VideoGenerationPlanRequest, conversation_history []types.Message, opts ...CallOptionFunc) (<-chan StreamValue[stream_types.VideoGenerationPlan, types.VideoGenerationPlan], error) {
+func (*stream) GeneratePlan(ctx context.Context, input types.VideoGenerationPlanRequest, conversation_history []types.Message, opts ...CallOptionFunc) (<-chan StreamValue[stream_types.GeneratedVideoPlan, types.GeneratedVideoPlan], error) {
 
 	var callOpts callOption
 	for _, opt := range opts {
@@ -306,11 +306,11 @@ func (*stream) GeneratePlan(ctx context.Context, input types.VideoGenerationPlan
 		return nil, err
 	}
 
-	channel := make(chan StreamValue[stream_types.VideoGenerationPlan, types.VideoGenerationPlan])
+	channel := make(chan StreamValue[stream_types.GeneratedVideoPlan, types.GeneratedVideoPlan])
 	go func() {
 		for result := range internal_channel {
 			if result.Error != nil {
-				channel <- StreamValue[stream_types.VideoGenerationPlan, types.VideoGenerationPlan]{
+				channel <- StreamValue[stream_types.GeneratedVideoPlan, types.GeneratedVideoPlan]{
 					IsError: true,
 					Error:   result.Error,
 				}
@@ -318,14 +318,88 @@ func (*stream) GeneratePlan(ctx context.Context, input types.VideoGenerationPlan
 				return
 			}
 			if result.HasData {
-				data := (result.Data).(types.VideoGenerationPlan)
-				channel <- StreamValue[stream_types.VideoGenerationPlan, types.VideoGenerationPlan]{
+				data := (result.Data).(types.GeneratedVideoPlan)
+				channel <- StreamValue[stream_types.GeneratedVideoPlan, types.GeneratedVideoPlan]{
 					IsFinal:  true,
 					as_final: &data,
 				}
 			} else {
-				data := (result.StreamData).(stream_types.VideoGenerationPlan)
-				channel <- StreamValue[stream_types.VideoGenerationPlan, types.VideoGenerationPlan]{
+				data := (result.StreamData).(stream_types.GeneratedVideoPlan)
+				channel <- StreamValue[stream_types.GeneratedVideoPlan, types.GeneratedVideoPlan]{
+					IsFinal:   false,
+					as_stream: &data,
+				}
+			}
+		}
+
+		// when internal_channel is closed, close the output too
+		close(channel)
+	}()
+	return channel, nil
+}
+
+// / Streaming version of GenerateScript
+func (*stream) GenerateScript(ctx context.Context, input types.ScriptPlannerRequest, conversation_history []types.Message, opts ...CallOptionFunc) (<-chan StreamValue[stream_types.GenerateScriptPlan, types.GenerateScriptPlan], error) {
+
+	var callOpts callOption
+	for _, opt := range opts {
+		opt(&callOpts)
+	}
+
+	args := baml.BamlFunctionArguments{
+		Kwargs: map[string]any{"input": input, "conversation_history": conversation_history},
+		Env:    getEnvVars(callOpts.env),
+	}
+
+	if callOpts.clientRegistry != nil {
+		args.ClientRegistry = callOpts.clientRegistry
+	}
+
+	if callOpts.collectors != nil {
+		args.Collectors = callOpts.collectors
+	}
+
+	if callOpts.typeBuilder != nil {
+		args.TypeBuilder = callOpts.typeBuilder
+	}
+
+	if callOpts.tags != nil {
+		args.Tags = callOpts.tags
+	}
+
+	encoded, err := args.Encode()
+	if err != nil {
+		// This should never happen. if it does, please file an issue at https://github.com/boundaryml/baml/issues
+		// and include the type of the args you're passing in.
+		wrapped_err := fmt.Errorf("BAML INTERNAL ERROR: GenerateScript: %w", err)
+		panic(wrapped_err)
+	}
+
+	internal_channel, err := bamlRuntime.CallFunctionStream(ctx, "GenerateScript", encoded, callOpts.onTick)
+	if err != nil {
+		return nil, err
+	}
+
+	channel := make(chan StreamValue[stream_types.GenerateScriptPlan, types.GenerateScriptPlan])
+	go func() {
+		for result := range internal_channel {
+			if result.Error != nil {
+				channel <- StreamValue[stream_types.GenerateScriptPlan, types.GenerateScriptPlan]{
+					IsError: true,
+					Error:   result.Error,
+				}
+				close(channel)
+				return
+			}
+			if result.HasData {
+				data := (result.Data).(types.GenerateScriptPlan)
+				channel <- StreamValue[stream_types.GenerateScriptPlan, types.GenerateScriptPlan]{
+					IsFinal:  true,
+					as_final: &data,
+				}
+			} else {
+				data := (result.StreamData).(stream_types.GenerateScriptPlan)
+				channel <- StreamValue[stream_types.GenerateScriptPlan, types.GenerateScriptPlan]{
 					IsFinal:   false,
 					as_stream: &data,
 				}

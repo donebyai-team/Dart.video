@@ -503,16 +503,9 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
       {stage === 'question' && activeQuestion && (
         <div className='rounded-xl bg-background/60 p-3 backdrop-blur-sm'>
           <QuestionPanel
-            question={activeQuestion}
+            questions={[activeQuestion]}
             isSubmitting={isSubmitting}
-            customAnswer={customAnswer}
-            answerInput={answerInput}
-            onOptionClick={option => {
-              setSelectedAnswer(option)
-              void handleContinuePlanning(option)
-            }}
-            onCustomAnswerChange={setCustomAnswer}
-            onContinue={responseOverride => void handleContinuePlanning(responseOverride)}
+            onContinue={payload => void handleContinuePlanning(payload.response)}
             selectedQuestionAssets={questionAssets}
             onOpenAssetPicker={openAssetDialog}
             onOpenSelectedAssetsDialog={() => setQuestionAssetsDialogOpen(true)}

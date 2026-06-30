@@ -648,8 +648,7 @@ func (x *Script) GetItems() []*ScriptItem {
 type ScriptItem struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Voiceover     *string                `protobuf:"bytes,2,opt,name=voiceover,proto3,oneof" json:"voiceover,omitempty"`
-	Reference     *string                `protobuf:"bytes,3,opt,name=reference,proto3,oneof" json:"reference,omitempty"`
+	Narattion     []string               `protobuf:"bytes,2,rep,name=narattion,proto3" json:"narattion,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -691,18 +690,11 @@ func (x *ScriptItem) GetName() string {
 	return ""
 }
 
-func (x *ScriptItem) GetVoiceover() string {
-	if x != nil && x.Voiceover != nil {
-		return *x.Voiceover
+func (x *ScriptItem) GetNarattion() []string {
+	if x != nil {
+		return x.Narattion
 	}
-	return ""
-}
-
-func (x *ScriptItem) GetReference() string {
-	if x != nil && x.Reference != nil {
-		return *x.Reference
-	}
-	return ""
+	return nil
 }
 
 type Resolution struct {
@@ -827,16 +819,11 @@ const file_coasterai_core_v1_video_proto_rawDesc = "" +
 	"\vVideoConfig\x126\n" +
 	"\bsections\x18\x01 \x03(\v2\x1a.coasterai.core.v1.SectionR\bsections\"=\n" +
 	"\x06Script\x123\n" +
-	"\x05items\x18\x01 \x03(\v2\x1d.coasterai.core.v1.ScriptItemR\x05items\"\x82\x01\n" +
+	"\x05items\x18\x01 \x03(\v2\x1d.coasterai.core.v1.ScriptItemR\x05items\">\n" +
 	"\n" +
 	"ScriptItem\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12!\n" +
-	"\tvoiceover\x18\x02 \x01(\tH\x00R\tvoiceover\x88\x01\x01\x12!\n" +
-	"\treference\x18\x03 \x01(\tH\x01R\treference\x88\x01\x01B\f\n" +
-	"\n" +
-	"_voiceoverB\f\n" +
-	"\n" +
-	"_reference\"v\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1c\n" +
+	"\tnarattion\x18\x02 \x03(\tR\tnarattion\"v\n" +
 	"\n" +
 	"Resolution\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
@@ -930,7 +917,6 @@ func file_coasterai_core_v1_video_proto_init() {
 	file_coasterai_core_v1_media_asset_proto_init()
 	file_coasterai_core_v1_video_proto_msgTypes[0].OneofWrappers = []any{}
 	file_coasterai_core_v1_video_proto_msgTypes[1].OneofWrappers = []any{}
-	file_coasterai_core_v1_video_proto_msgTypes[6].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

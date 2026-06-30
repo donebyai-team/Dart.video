@@ -251,8 +251,7 @@
                 {
                   "name": "variant",
                   "type": "enum",
-                  "map": "props.variant",
-                  "default": "headingLg"
+                  "map": "props.variant"
                 },
                 {
                   "name": "staggerDelay",
@@ -1183,7 +1182,7 @@
             }
           ],
           "description": "A centered TextWithWordCycle headline above a stacked images revealing one by one with word cycle.",
-          "instructions": "use it to show multi features of a usecase with product images. Takes around 170 frames for 3 images.",
+          "instructions": "use it to show multi features of a usecase with multiple product images. Takes around 170 frames for 3 images.",
           "celExpression": "((45 + size(props.images) * 42) * 100) / max(props.scene.speed, 25)"
         },
         {
@@ -1394,8 +1393,7 @@
                 },
                 {
                   "name": "variant",
-                  "type": "enum",
-                  "default": "headingLg"
+                  "type": "enum"
                 },
                 {
                   "name": "entranceAnimation",
@@ -1447,7 +1445,7 @@
             }
           ],
           "description": "Logo + brand name reveal.",
-          "instructions": "Use for brand intros",
+          "instructions": "Use for brand intros, simple brand and its logo",
           "celExpression": "max(0, segmentCount(props.animatedtext.text, \"char\")) * 5 + 20"
         },
         {
@@ -1533,7 +1531,7 @@
             }
           ],
           "description": "Logo icon and brand name reveal with a CTA text below that.",
-          "instructions": "Use as the final scene.",
+          "instructions": "Use as the final scene. CTA, demo , try now",
           "celExpression": "33 + (segmentCount(props.[\"animatedtext-tagline\"].text, \"word\") - 1) * 3 + 12"
         },
         {
@@ -1836,14 +1834,12 @@
             }
           ],
           "description": "Shows a large product image or video with stacked feature cards on the top-right. Each feature card contains an icon and a short label revealed in staggered animation",
+          "instructions": "use it to showcase a product images/video with a list of features about that product",
           "celExpression": "max(30, 20 + max(0, size(props.features) - 1) * 15 + 20)"
         },
         {
           "name": "AnimatedMedia",
           "type": "scene",
-          "tags": [
-            "PRODUCT_DEMO"
-          ],
           "description": "An animated media element (image or video) with text overlay.",
           "schema": [
             {

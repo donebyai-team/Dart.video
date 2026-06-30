@@ -206,7 +206,6 @@ message GetVideosResponse {
 }
 
 message CreateVideoRequest {
-  core.v1.Script script = 1;
   string prompt = 2;
   core.v1.Resolution resolution = 3;
   int32 durationInSec = 4;
@@ -223,7 +222,7 @@ message CreateVideoRequest {
 message CreateVideoResponse {
   string id = 1;
   string thinking_summary = 2;
-  AskUserQuestion ask_user_question = 3;
+  repeated AskUserQuestion ask_user_question = 3;
   bool waiting_for_user_input = 4;
   bool planning_completed = 5;
   string error_message = 6;
@@ -234,6 +233,7 @@ message ContinueVideoPlanningRequest {
   string response = 2;
   repeated core.v1.SelectedMediaAsset assets = 3;
   optional string slide_id = 4;
+  optional core.v1.Script script = 5;
 }
 
 message AskUserQuestion {
@@ -243,6 +243,7 @@ message AskUserQuestion {
   optional bool allow_custom_entry = 4;
   optional core.v1.MediaAsset asset = 5;
   AskUserQuestionType questionType = 6;
+  optional core.v1.Script script= 7;
 }
 
 enum AskUserQuestionType {
@@ -250,6 +251,7 @@ enum AskUserQuestionType {
   ASK_USER_QUESTION_TYPE_GENERAL = 1;
   ASK_USER_QUESTION_TYPE_ASSET_CLARIFICATION = 2;
   ASK_USER_QUESTION_TYPE_UPLOAD_ASSET = 3;
+  ASK_USER_QUESTION_TYPE_SCRIPT = 4;
 }
 
 message Config {

@@ -27,6 +27,7 @@ func init() {
 		"templates/query_templates_by_category_priority.sql",
 		"templates/query_templates_random.sql",
 		"templates/query_template_by_name.sql",
+		"templates/query_similar_templates.sql",
 	})
 }
 
@@ -128,16 +129,21 @@ func (r *Database) DeleteTemplateByID(ctx context.Context, id string) error {
 
 func (r *Database) UpdateTemplate(ctx context.Context, t *models.Template) error {
 	stmt := r.mustGetStmt("templates/update_template.sql")
+	var descriptionEmbedding any
+	if t.DescriptionEmbedding != nil {
+		descriptionEmbedding = t.DescriptionEmbedding
+	}
 	_, err := stmt.ExecContext(ctx, map[string]interface{}{
-		"id":          t.ID,
-		"categories":  pq.Array(toUpperCategories(t.Categories)),
-		"description": t.Description,
-		"config":      t.Config,
-		"repeatable":  t.Repeatable,
-		"metadata":    t.Metadata,
-		"status":      t.Status,
-		"name":        strings.ToLower(t.Name),
-		"version":     t.Version,
+		"id":                    t.ID,
+		"categories":            pq.Array(toUpperCategories(t.Categories)),
+		"description":           t.Description,
+		"description_embedding": descriptionEmbedding,
+		"config":                t.Config,
+		"repeatable":            t.Repeatable,
+		"metadata":              t.Metadata,
+		"status":                t.Status,
+		"name":                  strings.ToLower(t.Name),
+		"version":               t.Version,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to update template: %w", err)
@@ -199,6 +205,27 @@ func (r *Database) GetTemplatesByCategoryRandom(
 		map[string]any{
 			"category": category,
 			"limit":    limit,
+		},
+	)
+}
+
+func (r *Database) GetSimilarTemplates(
+	ctx context.Context,
+	embedding []float64,
+	categories []string,
+	excludedTemplateIDs []string,
+	limit int,
+) ([]*models.Template, error) {
+	inputEmbedding := models.TemplateEmbedding(embedding)
+	return getMany[models.Template](
+		ctx,
+		r,
+		"templates/query_similar_templates.sql",
+		map[string]any{
+			"embedding":             inputEmbedding,
+			"categories":            pq.Array(toUpperCategories(categories)),
+			"excluded_template_ids": pq.Array(excludedTemplateIDs),
+			"limit":                 limit,
 		},
 	)
 }

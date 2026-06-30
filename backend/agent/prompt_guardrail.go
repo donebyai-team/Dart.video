@@ -2,6 +2,8 @@ package agent
 
 import (
 	"errors"
+	"fmt"
+	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"regexp"
 	"strings"
 )
@@ -122,4 +124,21 @@ func ValidatePrompt(prompt string) error {
 	//}
 
 	return nil
+}
+
+func ToScript(script *pbcore.Script) string {
+	var b strings.Builder
+
+	for _, section := range script.Items {
+		fmt.Fprintf(&b, "## %s\n", section.Name)
+
+		for _, line := range section.Narattion {
+			b.WriteString(line)
+			b.WriteByte('\n')
+		}
+
+		b.WriteByte('\n')
+	}
+
+	return strings.TrimSpace(b.String())
 }

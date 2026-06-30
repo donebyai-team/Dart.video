@@ -85,6 +85,18 @@ func TestBuildAndSanitizeLLMPropsPayload(t *testing.T) {
 			},
 		},
 		{
+			name: "resolves icon urls to icon names",
+			input: map[string]any{
+				"brandIcon":   "https://www.thesvg.org/icons/github/color.svg",
+				"tableIcon":   "https://cdn.jsdelivr.net/npm/@tabler/icons/icons/outline/arrow-left.svg",
+				"regularLink": "https://example.com",
+			},
+			expected: map[string]any{
+				"brandIcon": "icon:github",
+				"tableIcon": "icon:arrow-left",
+			},
+		},
+		{
 			name: "returns empty when everything is filtered out",
 			input: map[string]any{
 				"style":  "bold",

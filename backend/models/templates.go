@@ -7,6 +7,7 @@ import (
 	"github.com/lib/pq"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -53,22 +54,78 @@ func (a *TemplateCategories) Scan(src interface{}) error {
 	return nil
 }
 
-const UsageSeparator = "\n\n---USAGE---\n\n"
+type TemplateEmbedding []float64
+
+func (e TemplateEmbedding) Value() (driver.Value, error) {
+	if e == nil {
+		return nil, nil
+	}
+
+	parts := make([]string, len(e))
+	for i, value := range e {
+		parts[i] = strconv.FormatFloat(value, 'f', -1, 64)
+	}
+
+	return "[" + strings.Join(parts, ",") + "]", nil
+}
+
+func (e *TemplateEmbedding) Scan(src interface{}) error {
+	if src == nil {
+		*e = nil
+		return nil
+	}
+
+	var raw string
+	switch value := src.(type) {
+	case string:
+		raw = value
+	case []byte:
+		raw = string(value)
+	default:
+		return fmt.Errorf("unsupported template embedding type %T", src)
+	}
+
+	raw = strings.TrimSpace(raw)
+	if raw == "" || raw == "[]" {
+		*e = TemplateEmbedding{}
+		return nil
+	}
+
+	if !strings.HasPrefix(raw, "[") || !strings.HasSuffix(raw, "]") {
+		return fmt.Errorf("invalid vector format %q", raw)
+	}
+
+	parts := strings.Split(raw[1:len(raw)-1], ",")
+	result := make([]float64, len(parts))
+	for i, part := range parts {
+		parsed, err := strconv.ParseFloat(strings.TrimSpace(part), 64)
+		if err != nil {
+			return fmt.Errorf("parse vector value %q: %w", part, err)
+		}
+		result[i] = parsed
+	}
+
+	*e = result
+	return nil
+}
 
 type Template struct {
-	ID          string                `db:"id"`
-	Name        string                `db:"name"`
-	Version     int                   `db:"version"`
-	Categories  TemplateCategories    `db:"categories"`
-	Description string                `db:"description"`
-	Schema      json.RawMessage       `db:"schema"`
-	CreatedAt   time.Time             `db:"created_at"`
-	UpdatedAt   *time.Time            `db:"updated_at"`
-	Repeatable  bool                  `db:"repeatable"`
-	Config      *pbcore.VideoConfig   `db:"config"`
-	Metadata    *pbcore.VideoMetadata `db:"metadata"`
-	Status      TemplateStatus        `db:"status"`
+	ID                   string                `db:"id"`
+	Name                 string                `db:"name"`
+	Version              int                   `db:"version"`
+	Categories           TemplateCategories    `db:"categories"`
+	Description          string                `db:"description"`
+	DescriptionEmbedding TemplateEmbedding     `db:"description_embedding"`
+	Schema               json.RawMessage       `db:"schema"`
+	CreatedAt            time.Time             `db:"created_at"`
+	UpdatedAt            *time.Time            `db:"updated_at"`
+	Repeatable           bool                  `db:"repeatable"`
+	Config               *pbcore.VideoConfig   `db:"config"`
+	Metadata             *pbcore.VideoMetadata `db:"metadata"`
+	Status               TemplateStatus        `db:"status"`
 }
+
+const UsageSeparator = "\n\n---USAGE---\n\n"
 
 func (r *Template) GetDescription() string {
 	description, _, found := strings.Cut(r.Description, UsageSeparator)

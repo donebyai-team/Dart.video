@@ -41,7 +41,9 @@ func UnmarshalProto(value any, msg proto.Message) error {
 		return nil
 	}
 
-	return protojson.Unmarshal(bs, msg)
+	return protojson.UnmarshalOptions{
+		DiscardUnknown: true,
+	}.Unmarshal(bs, msg)
 }
 
 func RawMessageToStructs(raw json.RawMessage) ([]*structpb.Struct, error) {

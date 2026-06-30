@@ -79,8 +79,7 @@ message Script {
 
 message ScriptItem {
     string name = 1;
-    optional string voiceover = 2;
-    optional string reference = 3;
+    repeated string narattion = 2;
 }
 
 // ===================== RESOLUTION =====================

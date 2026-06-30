@@ -63,7 +63,10 @@ export function Text({
       className={patchedClassName}
       style={{
         display: 'inline-block',
+        // Preserve explicit spaces/newlines if any
         whiteSpace: 'pre-wrap',
+        // Prevent a single long word from overflowing
+         overflowWrap: 'break-word',
         ...typography,
         ...mergedStyleWithoutTransform,
         pointerEvents: 'auto',

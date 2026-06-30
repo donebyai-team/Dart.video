@@ -7,7 +7,6 @@ class Message {
 
 enum AskUserQuestionType {
   GENERIC @description("general clarification")
-  ATTACHMENT_CLARIFICATION @description("when you need some clarification on an attached attachment")
   UPLOAD_ATTACHMENT @description("when you need to ask user to upload")
 }
 
@@ -18,7 +17,6 @@ class AskUserQuestion {
   options string[] @description("The answer choices for the user to select from")
   allow_custom_entry bool? @description("Whether to allow custom text entry in addition to the predefined options")
   attachmentUrl string? @description("attachment to get the clarification")
-  thinkingSummary string? @skip()
 }
 
 class VideoBranding {

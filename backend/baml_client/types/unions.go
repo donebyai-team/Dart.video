@@ -159,144 +159,6 @@ func (u *Union2AskUserQuestionOrGenerateAnimationCodeResponse) AsAskUserQuestion
 	return u.variant_AskUserQuestion
 }
 
-type Union2AskUserQuestionOrGeneratedVideoPlan struct {
-	variant string
-
-	variant_GeneratedVideoPlan *GeneratedVideoPlan
-
-	variant_AskUserQuestion *AskUserQuestion
-}
-
-func (u *Union2AskUserQuestionOrGeneratedVideoPlan) Decode(holder *cffi.CFFIValueUnionVariant, typeMap baml.TypeMap) {
-	valueHolder := holder.Value
-	variantName := holder.ValueOptionName
-	switch variantName {
-	case "GeneratedVideoPlan":
-		u.variant = "GeneratedVideoPlan"
-		value := baml.Decode(valueHolder).Interface().(GeneratedVideoPlan)
-		u.variant_GeneratedVideoPlan = &value
-	case "AskUserQuestion":
-		u.variant = "AskUserQuestion"
-		value := baml.Decode(valueHolder).Interface().(AskUserQuestion)
-		u.variant_AskUserQuestion = &value
-
-	default:
-		panic(fmt.Sprintf("invalid union variant: %s", variantName))
-	}
-}
-
-func (u Union2AskUserQuestionOrGeneratedVideoPlan) Encode() (*cffi.HostValue, error) {
-	switch u.variant {
-
-	case "GeneratedVideoPlan":
-		return baml.EncodeValue(*u.variant_GeneratedVideoPlan)
-
-	case "AskUserQuestion":
-		return baml.EncodeValue(*u.variant_AskUserQuestion)
-
-	case "":
-		return nil, fmt.Errorf("invalid union variant: [unset]")
-	}
-
-	return nil, fmt.Errorf("invalid union variant: %s", u.variant)
-}
-
-func (u Union2AskUserQuestionOrGeneratedVideoPlan) BamlTypeName() string {
-	return "Union2AskUserQuestionOrGeneratedVideoPlan"
-}
-
-func (u Union2AskUserQuestionOrGeneratedVideoPlan) MarshalJSON() ([]byte, error) {
-	switch u.variant {
-
-	case "GeneratedVideoPlan":
-		return json.Marshal(u.variant_GeneratedVideoPlan)
-
-	case "AskUserQuestion":
-		return json.Marshal(u.variant_AskUserQuestion)
-
-	}
-
-	return nil, fmt.Errorf("invalid union variant: %s", u.variant)
-}
-
-func (u *Union2AskUserQuestionOrGeneratedVideoPlan) UnmarshalJSON(data []byte) error {
-	var err error
-
-	err = json.Unmarshal(data, &u.variant_GeneratedVideoPlan)
-	if err == nil {
-		u.variant = "GeneratedVideoPlan"
-		return nil
-	} else {
-		u.variant_GeneratedVideoPlan = nil
-	}
-
-	err = json.Unmarshal(data, &u.variant_AskUserQuestion)
-	if err == nil {
-		u.variant = "AskUserQuestion"
-		return nil
-	} else {
-		u.variant_AskUserQuestion = nil
-	}
-
-	return fmt.Errorf("invalid union variant: %s", string(data))
-}
-
-func Union2AskUserQuestionOrGeneratedVideoPlan__NewGeneratedVideoPlan(v GeneratedVideoPlan) Union2AskUserQuestionOrGeneratedVideoPlan {
-
-	return Union2AskUserQuestionOrGeneratedVideoPlan{
-		variant:                    "GeneratedVideoPlan",
-		variant_GeneratedVideoPlan: &v,
-	}
-}
-
-func (u *Union2AskUserQuestionOrGeneratedVideoPlan) SetGeneratedVideoPlan(v GeneratedVideoPlan) {
-
-	u.variant = "GeneratedVideoPlan"
-	u.variant_GeneratedVideoPlan = &v
-
-	u.variant_AskUserQuestion = nil
-
-}
-
-func (u *Union2AskUserQuestionOrGeneratedVideoPlan) IsGeneratedVideoPlan() bool {
-	return u.variant == "GeneratedVideoPlan"
-}
-
-func (u *Union2AskUserQuestionOrGeneratedVideoPlan) AsGeneratedVideoPlan() *GeneratedVideoPlan {
-	if u.variant != "GeneratedVideoPlan" {
-		return nil
-	}
-	return u.variant_GeneratedVideoPlan
-}
-
-func Union2AskUserQuestionOrGeneratedVideoPlan__NewAskUserQuestion(v AskUserQuestion) Union2AskUserQuestionOrGeneratedVideoPlan {
-
-	return Union2AskUserQuestionOrGeneratedVideoPlan{
-		variant:                 "AskUserQuestion",
-		variant_AskUserQuestion: &v,
-	}
-}
-
-func (u *Union2AskUserQuestionOrGeneratedVideoPlan) SetAskUserQuestion(v AskUserQuestion) {
-
-	u.variant = "AskUserQuestion"
-	u.variant_AskUserQuestion = &v
-
-	u.variant_GeneratedVideoPlan = nil
-
-}
-
-func (u *Union2AskUserQuestionOrGeneratedVideoPlan) IsAskUserQuestion() bool {
-	return u.variant == "AskUserQuestion"
-}
-
-func (u *Union2AskUserQuestionOrGeneratedVideoPlan) AsAskUserQuestion() *AskUserQuestion {
-	if u.variant != "AskUserQuestion" {
-		return nil
-	}
-	return u.variant_AskUserQuestion
-}
-
 type Union2ColorTokenOrString struct {
 	variant string
 
@@ -433,6 +295,144 @@ func (u *Union2ColorTokenOrString) AsString() *string {
 		return nil
 	}
 	return u.variant_String
+}
+
+type Union2ListAskUserQuestionOrScript struct {
+	variant string
+
+	variant_Script *Script
+
+	variant_ListAskUserQuestion *[]AskUserQuestion
+}
+
+func (u *Union2ListAskUserQuestionOrScript) Decode(holder *cffi.CFFIValueUnionVariant, typeMap baml.TypeMap) {
+	valueHolder := holder.Value
+	variantName := holder.ValueOptionName
+	switch variantName {
+	case "Script":
+		u.variant = "Script"
+		value := baml.Decode(valueHolder).Interface().(Script)
+		u.variant_Script = &value
+	case "List__AskUserQuestion":
+		u.variant = "ListAskUserQuestion"
+		value := baml.Decode(valueHolder).Interface().([]AskUserQuestion)
+		u.variant_ListAskUserQuestion = &value
+
+	default:
+		panic(fmt.Sprintf("invalid union variant: %s", variantName))
+	}
+}
+
+func (u Union2ListAskUserQuestionOrScript) Encode() (*cffi.HostValue, error) {
+	switch u.variant {
+
+	case "Script":
+		return baml.EncodeValue(*u.variant_Script)
+
+	case "ListAskUserQuestion":
+		return baml.EncodeValue(*u.variant_ListAskUserQuestion)
+
+	case "":
+		return nil, fmt.Errorf("invalid union variant: [unset]")
+	}
+
+	return nil, fmt.Errorf("invalid union variant: %s", u.variant)
+}
+
+func (u Union2ListAskUserQuestionOrScript) BamlTypeName() string {
+	return "Union2ListAskUserQuestionOrScript"
+}
+
+func (u Union2ListAskUserQuestionOrScript) MarshalJSON() ([]byte, error) {
+	switch u.variant {
+
+	case "Script":
+		return json.Marshal(u.variant_Script)
+
+	case "ListAskUserQuestion":
+		return json.Marshal(u.variant_ListAskUserQuestion)
+
+	}
+
+	return nil, fmt.Errorf("invalid union variant: %s", u.variant)
+}
+
+func (u *Union2ListAskUserQuestionOrScript) UnmarshalJSON(data []byte) error {
+	var err error
+
+	err = json.Unmarshal(data, &u.variant_Script)
+	if err == nil {
+		u.variant = "Script"
+		return nil
+	} else {
+		u.variant_Script = nil
+	}
+
+	err = json.Unmarshal(data, &u.variant_ListAskUserQuestion)
+	if err == nil {
+		u.variant = "ListAskUserQuestion"
+		return nil
+	} else {
+		u.variant_ListAskUserQuestion = nil
+	}
+
+	return fmt.Errorf("invalid union variant: %s", string(data))
+}
+
+func Union2ListAskUserQuestionOrScript__NewScript(v Script) Union2ListAskUserQuestionOrScript {
+
+	return Union2ListAskUserQuestionOrScript{
+		variant:        "Script",
+		variant_Script: &v,
+	}
+}
+
+func (u *Union2ListAskUserQuestionOrScript) SetScript(v Script) {
+
+	u.variant = "Script"
+	u.variant_Script = &v
+
+	u.variant_ListAskUserQuestion = nil
+
+}
+
+func (u *Union2ListAskUserQuestionOrScript) IsScript() bool {
+	return u.variant == "Script"
+}
+
+func (u *Union2ListAskUserQuestionOrScript) AsScript() *Script {
+	if u.variant != "Script" {
+		return nil
+	}
+	return u.variant_Script
+}
+
+func Union2ListAskUserQuestionOrScript__NewListAskUserQuestion(v []AskUserQuestion) Union2ListAskUserQuestionOrScript {
+
+	return Union2ListAskUserQuestionOrScript{
+		variant:                     "ListAskUserQuestion",
+		variant_ListAskUserQuestion: &v,
+	}
+}
+
+func (u *Union2ListAskUserQuestionOrScript) SetListAskUserQuestion(v []AskUserQuestion) {
+
+	u.variant = "ListAskUserQuestion"
+	u.variant_ListAskUserQuestion = &v
+
+	u.variant_Script = nil
+
+}
+
+func (u *Union2ListAskUserQuestionOrScript) IsListAskUserQuestion() bool {
+	return u.variant == "ListAskUserQuestion"
+}
+
+func (u *Union2ListAskUserQuestionOrScript) AsListAskUserQuestion() *[]AskUserQuestion {
+	if u.variant != "ListAskUserQuestion" {
+		return nil
+	}
+	return u.variant_ListAskUserQuestion
 }
 
 type Union3KassistantOrKtoolOrKuser struct {

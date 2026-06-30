@@ -26,7 +26,6 @@ func (r *Database) CreateVideo(ctx context.Context, video *models.Video) (*model
 	err := stmt.GetContext(ctx, &id, map[string]interface{}{
 		"name":            video.Name,
 		"status":          video.Status,
-		"script":          video.Script,
 		"organization_id": video.OrganizationID,
 		"metadata":        video.Metadata,
 	})

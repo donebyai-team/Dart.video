@@ -26,7 +26,6 @@ const MaxConversationMessages = 10
 
 type SessionContext struct {
 	Request             *pbportal.CreateVideoRequest  `json:"request"`
-	TemplateIds         []string                      `json:"template_ids"`
 	ConversationHistory []*pbcore.ConversationMessage `json:"conversation_history"`
 }
 
@@ -209,11 +208,9 @@ func (p *SessionContext) MarshalJSON() ([]byte, error) {
 	tmp := struct {
 		Request             []byte                        `json:"request,omitempty"`
 		ConversationHistory []*pbcore.ConversationMessage `json:"conversation_history"`
-		TemplateIds         []string                      `json:"template_ids,omitempty"`
 	}{
 		Request:             reqBytes,
 		ConversationHistory: p.ConversationHistory,
-		TemplateIds:         p.TemplateIds,
 	}
 
 	return json.Marshal(tmp)
@@ -232,7 +229,6 @@ func (p *SessionContext) UnmarshalJSON(data []byte) error {
 	}
 
 	p.ConversationHistory = tmp.ConversationHistory
-	p.TemplateIds = tmp.TemplateIds
 
 	req := &pbportal.CreateVideoRequest{}
 

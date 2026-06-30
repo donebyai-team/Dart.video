@@ -41,6 +41,7 @@ func main() {
 				flags.String("figma-client-id", "", "Figma Client ID")
 				flags.String("figma-client-secret", "", "Figma Client Secret")
 				flags.String("pg-dsn", "postgresql://dev-node:insecure-change-me-in-prod@localhost:5432/dev-node?enable_incremental_sort=off&sslmode=disable", "PostgreSQL DSN, set to empty to disable")
+				flags.String("openai-api-key", "", "PostgreSQL DSN, set to empty to disable")
 				flags.String("jwt-kms-keypath", "", "JWT signing/verifying key, set to empty to disable (e.g. projects/coasterai/locations/global/keyRings/api-auth/cryptoKeys/jwt-signing/cryptoKeyVersions/1)")
 				flags.String("encrypt-kms-keypath", "", "KMS key to encrypt/decrypt provider configs without version (e.g. projects/coasterai/locations/global/keyRings/encrypt-provider-credentials/cryptoKeys/encrypt-credentials-dev)")
 				flags.String("redis-addr", "localhost:6379", "Redis address to store investigator state, set to empty to disable")
