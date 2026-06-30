@@ -260,53 +260,6 @@ func (*parse) GenerateScript(text string, opts ...CallOptionFunc) (types.Generat
 	return casted, nil
 }
 
-// / Parse version of GenerateVideoNarration (Takes in string and returns types.VideoNarration)
-func (*parse) GenerateVideoNarration(text string, opts ...CallOptionFunc) (types.VideoNarration, error) {
-
-	var callOpts callOption
-	for _, opt := range opts {
-		opt(&callOpts)
-	}
-
-	args := baml.BamlFunctionArguments{
-		Kwargs: map[string]any{"text": text, "stream": false},
-		Env:    getEnvVars(callOpts.env),
-	}
-
-	if callOpts.clientRegistry != nil {
-		args.ClientRegistry = callOpts.clientRegistry
-	}
-
-	if callOpts.collectors != nil {
-		args.Collectors = callOpts.collectors
-	}
-
-	if callOpts.typeBuilder != nil {
-		args.TypeBuilder = callOpts.typeBuilder
-	}
-
-	if callOpts.tags != nil {
-		args.Tags = callOpts.tags
-	}
-
-	encoded, err := args.Encode()
-	if err != nil {
-		// This should never happen. if it does, please file an issue at https://github.com/boundaryml/baml/issues
-		// and include the type of the args you're passing in.
-		wrapped_err := fmt.Errorf("BAML INTERNAL ERROR: GenerateVideoNarration: %w", err)
-		panic(wrapped_err)
-	}
-
-	result, err := bamlRuntime.CallFunctionParse(context.Background(), "GenerateVideoNarration", encoded)
-	if err != nil {
-		return types.VideoNarration{}, err
-	}
-
-	casted := (result).(types.VideoNarration)
-
-	return casted, nil
-}
-
 // / Parse version of MatchCategories (Takes in string and returns types.MatchCategoriesResponse)
 func (*parse) MatchCategories(text string, opts ...CallOptionFunc) (types.MatchCategoriesResponse, error) {
 

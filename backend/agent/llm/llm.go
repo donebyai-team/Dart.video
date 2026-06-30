@@ -25,7 +25,6 @@ type Service interface {
 		onThinking func(thinking string),
 	) (*types.GeneratedVideoPlan, error)
 	CategorizeScene(ctx context.Context, req types.MatchCategoriesRequest) (*types.MatchCategoriesResponse, error)
-	GenerateNarration(ctx context.Context, req types.GenerateVideoNarrationRequest) (*types.VideoNarration, error)
 	GenerateAnimation(ctx context.Context,
 		req types.GenerateAnimationCodeRequest,
 		conversationHistory []types.Message,
@@ -47,14 +46,6 @@ type LLMOptions struct {
 type llmService struct {
 	logger *zap.Logger
 	cache  cache.Cache
-}
-
-func (l *llmService) GenerateNarration(ctx context.Context, req types.GenerateVideoNarrationRequest) (*types.VideoNarration, error) {
-	categories, err := baml_client.GenerateVideoNarration(ctx, req, baml_client.WithTags(getTags(ctx)))
-	if err != nil {
-		return nil, err
-	}
-	return &categories, nil
 }
 
 func (l *llmService) CategorizeScene(ctx context.Context, req types.MatchCategoriesRequest) (*types.MatchCategoriesResponse, error) {
