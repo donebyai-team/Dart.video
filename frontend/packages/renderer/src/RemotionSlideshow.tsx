@@ -2,8 +2,8 @@ import { fromJson, JsonObject } from '@bufbuild/protobuf'
 import { Slide, TransitionType } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Video, VideoSchema } from '@coasterai/pb/coasterai/core/v1/video_pb'
 import { linearTiming, TransitionSeries } from '@remotion/transitions'
-import React, { useMemo, useState, useEffect } from 'react'
-import { AbsoluteFill, useVideoConfig, Html5Audio, Series, delayRender, continueRender } from 'remotion'
+import React, { useMemo } from 'react'
+import { AbsoluteFill, useVideoConfig, Html5Audio, Sequence, Series } from 'remotion'
 import {
   ThemeProvider,
   AspectPresetProvider,
@@ -117,7 +117,28 @@ export const Slideshow: React.FC<SlideshowProps> = ({
   const sections = videoConfig.config.sections ?? []
   const backgroundAudioUrl = metadata?.bgAudio?.url ?? metadata?.backgroundAudioUrl
   // if external video object exist use it or assign zustand video object
-  const allSlides = sections.flatMap(section => section.slides)
+  const allSlides = useMemo(() => sections.flatMap(section => section.slides), [sections])
+  const slideStartFrames = useMemo(() => {
+    let currentFrame = 0
+
+    return allSlides.map((slide, index) => {
+      const startFrame = currentFrame
+      const hasTransition =
+        index < allSlides.length - 1 &&
+        slide.transition !== TransitionType.TRANSITION_NONE
+
+      currentFrame += Math.round(slide.durationInFrames)
+
+      if (hasTransition) {
+        currentFrame -= Math.round(TRANSITION_DURATION_FRAMES)
+      }
+
+      return {
+        slide,
+        startFrame,
+      }
+    })
+  }, [allSlides])
 
 
   /* ================= EMPTY ================= */
@@ -199,6 +220,26 @@ export const Slideshow: React.FC<SlideshowProps> = ({
                   return 'fallback'
                 }}
               />
+            )}
+
+            {slideStartFrames.map(({ slide, startFrame }) =>
+              slide.voiceover?.segments
+                ?.filter(segment => Boolean(segment.asset?.url))
+                .map((segment, index) => {
+                  const segmentStartFrame = Math.max(0, Math.round(segment.startFrame))
+                  const segmentEndFrame = Math.max(segmentStartFrame + 1, Math.round(segment.endFrame))
+                  const durationInFrames = Math.max(1, segmentEndFrame - segmentStartFrame)
+
+                  return (
+                    <Sequence
+                      key={`${slide.id}-voiceover-${index}`}
+                      from={startFrame + segmentStartFrame}
+                      durationInFrames={durationInFrames}
+                    >
+                      <Html5Audio src={segment.asset!.url} volume={0.4} />
+                    </Sequence>
+                  )
+                })
             )}
 
             {isEditing ? (

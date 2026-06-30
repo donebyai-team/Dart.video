@@ -46,7 +46,7 @@ type Portal struct {
 	llmService              llm.Service
 	renderVideoService      services.RenderVideoService
 	brandIdentityService    brand_identity.BrandIdentity
-	audioGenerationProvider audio.Provider
+	audioGenerationProvider audio.Service
 	templateService         templates.Service
 }
 
@@ -62,7 +62,7 @@ func New(
 	renderVideoService services.RenderVideoService,
 	brandIdentityService brand_identity.BrandIdentity,
 	codeBuilderService code_builder.CodeBuilder,
-	audioGenerationProvider audio.Provider,
+	audioGenerationProvider audio.Service,
 	llmService llm.Service,
 	templateService templates.Service,
 	httpListenAddr string,

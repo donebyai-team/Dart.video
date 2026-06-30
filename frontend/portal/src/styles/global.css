@@ -152,3 +152,75 @@ pre {
     @apply bg-background text-foreground;
   }
 }
+
+/* react-mentions styles */
+.mentions-input {
+  width: 100%;
+}
+
+.mentions-input__control {
+  min-height: 132px;
+  font-size: 14px;
+  line-height: 24px;
+}
+
+.mentions-input__input {
+  padding: 48px 16px 12px 16px !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 8px !important;
+  outline: none !important;
+  min-height: 132px;
+  transition: border-color 0.15s ease;
+}
+
+.mentions-input__input:focus {
+  border-color: hsl(var(--primary) / 0.8) !important;
+}
+
+.mentions-input__input::placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+.mentions-input__highlighter {
+  padding: 48px 16px 12px 16px !important;
+  border: 1px solid transparent;
+}
+
+.mentions-input__suggestions {
+  background-color: hsl(var(--popover)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important;
+  overflow: hidden !important;
+  margin-top: 4px !important;
+  z-index: 50 !important;
+}
+
+.mentions-input__suggestions__list {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.mentions-input__suggestions__item {
+  padding: 0 !important;
+}
+
+.mentions-input__suggestions__item--focused {
+  background-color: transparent !important;
+}
+
+/* Mention highlight in text */
+.mentions-input__highlighter__substring {
+  visibility: visible !important;
+}
+
+.mentions-input mark {
+  background-color: white;
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px;
+  padding: 0;
+  margin: 0 2px;
+  color: hsl(var(--foreground));
+  font-weight: 500;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+}

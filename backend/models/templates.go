@@ -110,19 +110,37 @@ func (e *TemplateEmbedding) Scan(src interface{}) error {
 }
 
 type Template struct {
-	ID          string                `db:"id"`
-	Name        string                `db:"name"`
-	Version     int                   `db:"version"`
-	Categories  TemplateCategories    `db:"categories"`
-	Description string                `db:"description"`
-	DescriptionEmbedding TemplateEmbedding `db:"description_embedding"`
-	Schema      json.RawMessage       `db:"schema"`
-	CreatedAt   time.Time             `db:"created_at"`
-	UpdatedAt   *time.Time            `db:"updated_at"`
-	Repeatable  bool                  `db:"repeatable"`
-	Config      *pbcore.VideoConfig   `db:"config"`
-	Metadata    *pbcore.VideoMetadata `db:"metadata"`
-	Status      TemplateStatus        `db:"status"`
+	ID                   string                `db:"id"`
+	Name                 string                `db:"name"`
+	Version              int                   `db:"version"`
+	Categories           TemplateCategories    `db:"categories"`
+	Description          string                `db:"description"`
+	DescriptionEmbedding TemplateEmbedding     `db:"description_embedding"`
+	Schema               json.RawMessage       `db:"schema"`
+	CreatedAt            time.Time             `db:"created_at"`
+	UpdatedAt            *time.Time            `db:"updated_at"`
+	Repeatable           bool                  `db:"repeatable"`
+	Config               *pbcore.VideoConfig   `db:"config"`
+	Metadata             *pbcore.VideoMetadata `db:"metadata"`
+	Status               TemplateStatus        `db:"status"`
+}
+
+const UsageSeparator = "\n\n---USAGE---\n\n"
+
+func (r *Template) GetDescription() string {
+	description, _, found := strings.Cut(r.Description, UsageSeparator)
+	if !found {
+		return strings.TrimSpace(r.Description)
+	}
+	return strings.TrimSpace(description)
+}
+
+func (r *Template) GetUsageDescription() string {
+	_, usage, found := strings.Cut(r.Description, UsageSeparator)
+	if !found {
+		return ""
+	}
+	return strings.TrimSpace(usage)
 }
 
 func (r *Template) ToProto() *pbcore.AnimationTemplate {

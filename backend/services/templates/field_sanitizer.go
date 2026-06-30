@@ -10,6 +10,7 @@ import (
 	"github.com/shank318/coasterai/services"
 	"github.com/shank318/coasterai/services/code_builder"
 	"github.com/shank318/coasterai/utils"
+	"go.uber.org/zap"
 	"net/url"
 	"regexp"
 	"strings"
@@ -324,4 +325,37 @@ func isEmpty(v any) bool {
 	}
 
 	return false
+}
+
+func ExtractSceneContent(slide *pbcore.Slide, logger *zap.Logger) string {
+	var currentSlideContent string
+
+	if slide.Content != nil &&
+		slide.Content.CodeRegistry.Defaults != nil &&
+		len(slide.Content.CodeRegistry.Defaults.Fields) > 0 {
+		payload, err := BuildAndSanitizeLLMPropsPayload(slide.Content.CodeRegistry.Defaults)
+		if err != nil {
+			logger.Error("failed to build llm data payload", zap.Error(err))
+		}
+
+		if payload != "" {
+			currentSlideContent = payload
+		}
+	}
+
+	if slide.Content != nil &&
+		slide.Content.Edits != nil &&
+		len(slide.Content.Edits.Fields) > 0 {
+		payload, err := BuildAndSanitizeLLMPropsPayload(slide.Content.Edits)
+		if err != nil {
+			logger.Error("failed to build llm data payload", zap.Error(err))
+		}
+
+		if currentSlideContent == "" {
+			currentSlideContent = payload
+		} else if payload != "" {
+			currentSlideContent += "\n\nEdits: " + payload
+		}
+	}
+	return currentSlideContent
 }

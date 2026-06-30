@@ -13,6 +13,8 @@ import type { FigmaFrame, FigmaPage } from "../../core/v1/figma_pb";
 import type { Resolution, Script, StyleType, Video, VideoConfig, VideoLanguage, VideoMetadata } from "../../core/v1/video_pb";
 import type { EmptySchema, Timestamp } from "@bufbuild/protobuf/wkt";
 import type { GenerateSuggestionsInputSchema, GenerateSuggestionsResponseSchema, GetTemplateRequestSchema, GetTemplatesRequestSchema, GetTemplatesResponseSchema, RenderSuggestionsInputSchema, UpdateTemplateRequestSchema } from "./templates_pb";
+import type { GenerateVoiceoverRequestSchema } from "./voiceover_pb";
+import type { VoiceoverSchema } from "../../core/v1/audio_pb";
 
 /**
  * Describes the file coasterai/portal/v1/portal.proto.
@@ -1744,6 +1746,16 @@ export declare const PortalService: GenService<{
     methodKind: "unary";
     input: typeof RenderSuggestionsInputSchema;
     output: typeof SuggestScenesResponseSchema;
+  },
+  /**
+   * Voiceover
+   *
+   * @generated from rpc coasterai.portal.v1.PortalService.GenerateVoiceover
+   */
+  generateVoiceover: {
+    methodKind: "unary";
+    input: typeof GenerateVoiceoverRequestSchema;
+    output: typeof VoiceoverSchema;
   },
 }>;
 

@@ -3,6 +3,7 @@ syntax = "proto3";
 package coasterai.core.v1;
 option go_package = "github.com/shank318/coasterai/pb/coasterai/core/v1;pbcore";
 import "google/protobuf/struct.proto";
+import "coasterai/core/v1/audio.proto";
 
 // ===================== ENUMS =====================
 
@@ -148,8 +149,6 @@ message Slide {
   int32 durationInFrames = 25;
   int32 settledFrame = 26;
   AnimationSlideContent content = 9;
-  optional bool voiceoverGenerated = 15;
-  optional bool isNested = 16;
   repeated SpotlightEffect spotlights = 18;
   repeated CalloutEffect callouts = 19;
   repeated ZoomEffect zooms = 20;
@@ -157,6 +156,7 @@ message Slide {
   SlideStatus slideStatus = 22;
   int32 index = 24;
   string tid = 27; // Template ID
+  Voiceover voiceover = 28;
 }
 
 message BackgroundStyle {

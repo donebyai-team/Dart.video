@@ -9,8 +9,8 @@ import (
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/services"
+	"github.com/shank318/coasterai/services/audio"
 	"github.com/shank318/coasterai/services/brand_identity"
-	"github.com/shank318/coasterai/services/voiceover"
 	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
 )
@@ -47,7 +47,7 @@ func (g *videoConfigGenerator) Init(videoID, name string) *videoConfigGenerator 
 func (g *videoConfigGenerator) AddVideoBackground(style *pbcore.BackgroundStyle) {
 	g.video.Metadata.BackgroundStyle = style
 	g.video.Metadata.BgAudio = &pbcore.BackgroundAudio{
-		Url:    voiceover.GenerateBackgroundMusic().Url,
+		Url:    audio.GenerateBackgroundMusic().Url,
 		Volume: 0.8,
 	}
 }
@@ -131,6 +131,14 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 					SettledFrame:     slideT.SettledFrame,
 				}
 
+				if pendingSlide.Voiceover != nil {
+					slide.Voiceover = &pbcore.Voiceover{
+						Provider: audio.DEFAULT_VOICE_PROVIDER,
+						VoiceId:  audio.DEFAULT_VOICE_ID,
+						FullText: *pendingSlide.Voiceover,
+					}
+				}
+
 				slide.Content.History = nil
 
 				nextSlide := getNextScene(plan.Sections, sectionIndex, slideIndex)
@@ -181,7 +189,7 @@ func (g *videoConfigGenerator) UpdateAnimationSlide(
 				slide.BackgroundStyle = selectedTemplate.BackgroundStyle
 				// update the selected template description
 				// for future slides to know what's being selected so far
-				//animation.Plan.ThinkingSummary = utils.Ptr(selectedTemplate.Description)
+				//animation.Plan.ThinkingSummary = utils.Ptr(selectedTemplate.VisualDescription)
 			}
 		}
 	}

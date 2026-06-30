@@ -141,6 +141,9 @@ const (
 	// PortalServiceRenderSuggestionProcedure is the fully-qualified name of the PortalService's
 	// RenderSuggestion RPC.
 	PortalServiceRenderSuggestionProcedure = "/coasterai.portal.v1.PortalService/RenderSuggestion"
+	// PortalServiceGenerateVoiceoverProcedure is the fully-qualified name of the PortalService's
+	// GenerateVoiceover RPC.
+	PortalServiceGenerateVoiceoverProcedure = "/coasterai.portal.v1.PortalService/GenerateVoiceover"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
@@ -183,6 +186,7 @@ var (
 	portalServiceDeleteTemplateMethodDescriptor         = portalServiceServiceDescriptor.Methods().ByName("DeleteTemplate")
 	portalServiceGenerateSuggestionsMethodDescriptor    = portalServiceServiceDescriptor.Methods().ByName("GenerateSuggestions")
 	portalServiceRenderSuggestionMethodDescriptor       = portalServiceServiceDescriptor.Methods().ByName("RenderSuggestion")
+	portalServiceGenerateVoiceoverMethodDescriptor      = portalServiceServiceDescriptor.Methods().ByName("GenerateVoiceover")
 )
 
 // PortalServiceClient is a client for the coasterai.portal.v1.PortalService service.
@@ -231,6 +235,8 @@ type PortalServiceClient interface {
 	// AI Suggestions
 	GenerateSuggestions(context.Context, *connect.Request[v1.GenerateSuggestionsInput]) (*connect.Response[v1.GenerateSuggestionsResponse], error)
 	RenderSuggestion(context.Context, *connect.Request[v1.RenderSuggestionsInput]) (*connect.Response[v1.SuggestScenesResponse], error)
+	// Voiceover
+	GenerateVoiceover(context.Context, *connect.Request[v1.GenerateVoiceoverRequest]) (*connect.Response[v11.Voiceover], error)
 }
 
 // NewPortalServiceClient constructs a client for the coasterai.portal.v1.PortalService service. By
@@ -465,6 +471,12 @@ func NewPortalServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(portalServiceRenderSuggestionMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		generateVoiceover: connect.NewClient[v1.GenerateVoiceoverRequest, v11.Voiceover](
+			httpClient,
+			baseURL+PortalServiceGenerateVoiceoverProcedure,
+			connect.WithSchema(portalServiceGenerateVoiceoverMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -507,6 +519,7 @@ type portalServiceClient struct {
 	deleteTemplate         *connect.Client[v1.GetTemplateRequest, emptypb.Empty]
 	generateSuggestions    *connect.Client[v1.GenerateSuggestionsInput, v1.GenerateSuggestionsResponse]
 	renderSuggestion       *connect.Client[v1.RenderSuggestionsInput, v1.SuggestScenesResponse]
+	generateVoiceover      *connect.Client[v1.GenerateVoiceoverRequest, v11.Voiceover]
 }
 
 // GetConfig calls coasterai.portal.v1.PortalService.GetConfig.
@@ -694,6 +707,11 @@ func (c *portalServiceClient) RenderSuggestion(ctx context.Context, req *connect
 	return c.renderSuggestion.CallUnary(ctx, req)
 }
 
+// GenerateVoiceover calls coasterai.portal.v1.PortalService.GenerateVoiceover.
+func (c *portalServiceClient) GenerateVoiceover(ctx context.Context, req *connect.Request[v1.GenerateVoiceoverRequest]) (*connect.Response[v11.Voiceover], error) {
+	return c.generateVoiceover.CallUnary(ctx, req)
+}
+
 // PortalServiceHandler is an implementation of the coasterai.portal.v1.PortalService service.
 type PortalServiceHandler interface {
 	GetConfig(context.Context, *connect.Request[emptypb.Empty]) (*connect.Response[v1.Config], error)
@@ -740,6 +758,8 @@ type PortalServiceHandler interface {
 	// AI Suggestions
 	GenerateSuggestions(context.Context, *connect.Request[v1.GenerateSuggestionsInput]) (*connect.Response[v1.GenerateSuggestionsResponse], error)
 	RenderSuggestion(context.Context, *connect.Request[v1.RenderSuggestionsInput]) (*connect.Response[v1.SuggestScenesResponse], error)
+	// Voiceover
+	GenerateVoiceover(context.Context, *connect.Request[v1.GenerateVoiceoverRequest]) (*connect.Response[v11.Voiceover], error)
 }
 
 // NewPortalServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -970,6 +990,12 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(portalServiceRenderSuggestionMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	portalServiceGenerateVoiceoverHandler := connect.NewUnaryHandler(
+		PortalServiceGenerateVoiceoverProcedure,
+		svc.GenerateVoiceover,
+		connect.WithSchema(portalServiceGenerateVoiceoverMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/coasterai.portal.v1.PortalService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case PortalServiceGetConfigProcedure:
@@ -1046,6 +1072,8 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 			portalServiceGenerateSuggestionsHandler.ServeHTTP(w, r)
 		case PortalServiceRenderSuggestionProcedure:
 			portalServiceRenderSuggestionHandler.ServeHTTP(w, r)
+		case PortalServiceGenerateVoiceoverProcedure:
+			portalServiceGenerateVoiceoverHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -1201,4 +1229,8 @@ func (UnimplementedPortalServiceHandler) GenerateSuggestions(context.Context, *c
 
 func (UnimplementedPortalServiceHandler) RenderSuggestion(context.Context, *connect.Request[v1.RenderSuggestionsInput]) (*connect.Response[v1.SuggestScenesResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.RenderSuggestion is not implemented"))
+}
+
+func (UnimplementedPortalServiceHandler) GenerateVoiceover(context.Context, *connect.Request[v1.GenerateVoiceoverRequest]) (*connect.Response[v11.Voiceover], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.GenerateVoiceover is not implemented"))
 }

@@ -27,6 +27,7 @@ class VideoBranding {
 
 class Scene {
   element SceneElement
+  voiceover string?
   thinkingSummary string? @skip()
 }
 

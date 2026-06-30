@@ -90,17 +90,174 @@ func (x *BackgroundTrack) GetIcon() string {
 	return ""
 }
 
+type Voiceover struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Provider      string                 `protobuf:"bytes,1,opt,name=provider,proto3" json:"provider,omitempty"`
+	VoiceId       string                 `protobuf:"bytes,2,opt,name=voiceId,proto3" json:"voiceId,omitempty"`
+	FullText      string                 `protobuf:"bytes,3,opt,name=fullText,proto3" json:"fullText,omitempty"`
+	Segments      []*VoiceoverSegment    `protobuf:"bytes,4,rep,name=segments,proto3" json:"segments,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Voiceover) Reset() {
+	*x = Voiceover{}
+	mi := &file_coasterai_core_v1_audio_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Voiceover) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Voiceover) ProtoMessage() {}
+
+func (x *Voiceover) ProtoReflect() protoreflect.Message {
+	mi := &file_coasterai_core_v1_audio_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Voiceover.ProtoReflect.Descriptor instead.
+func (*Voiceover) Descriptor() ([]byte, []int) {
+	return file_coasterai_core_v1_audio_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *Voiceover) GetProvider() string {
+	if x != nil {
+		return x.Provider
+	}
+	return ""
+}
+
+func (x *Voiceover) GetVoiceId() string {
+	if x != nil {
+		return x.VoiceId
+	}
+	return ""
+}
+
+func (x *Voiceover) GetFullText() string {
+	if x != nil {
+		return x.FullText
+	}
+	return ""
+}
+
+func (x *Voiceover) GetSegments() []*VoiceoverSegment {
+	if x != nil {
+		return x.Segments
+	}
+	return nil
+}
+
+type VoiceoverSegment struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Text          string                 `protobuf:"bytes,1,opt,name=text,proto3" json:"text,omitempty"`
+	Asset         *MediaAsset            `protobuf:"bytes,2,opt,name=asset,proto3" json:"asset,omitempty"`
+	StartFrame    int32                  `protobuf:"varint,3,opt,name=startFrame,proto3" json:"startFrame,omitempty"` // startFrame of the slide this audio should start
+	EndFrame      int32                  `protobuf:"varint,4,opt,name=endFrame,proto3" json:"endFrame,omitempty"`     // endFrame of the slide this audio should end
+	Words         []*VoiceoverSegment    `protobuf:"bytes,5,rep,name=words,proto3" json:"words,omitempty"`            // optional when we do captions
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VoiceoverSegment) Reset() {
+	*x = VoiceoverSegment{}
+	mi := &file_coasterai_core_v1_audio_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VoiceoverSegment) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VoiceoverSegment) ProtoMessage() {}
+
+func (x *VoiceoverSegment) ProtoReflect() protoreflect.Message {
+	mi := &file_coasterai_core_v1_audio_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VoiceoverSegment.ProtoReflect.Descriptor instead.
+func (*VoiceoverSegment) Descriptor() ([]byte, []int) {
+	return file_coasterai_core_v1_audio_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *VoiceoverSegment) GetText() string {
+	if x != nil {
+		return x.Text
+	}
+	return ""
+}
+
+func (x *VoiceoverSegment) GetAsset() *MediaAsset {
+	if x != nil {
+		return x.Asset
+	}
+	return nil
+}
+
+func (x *VoiceoverSegment) GetStartFrame() int32 {
+	if x != nil {
+		return x.StartFrame
+	}
+	return 0
+}
+
+func (x *VoiceoverSegment) GetEndFrame() int32 {
+	if x != nil {
+		return x.EndFrame
+	}
+	return 0
+}
+
+func (x *VoiceoverSegment) GetWords() []*VoiceoverSegment {
+	if x != nil {
+		return x.Words
+	}
+	return nil
+}
+
 var File_coasterai_core_v1_audio_proto protoreflect.FileDescriptor
 
 const file_coasterai_core_v1_audio_proto_rawDesc = "" +
 	"\n" +
-	"\x1dcoasterai/core/v1/audio.proto\x12\x11coasterai.core.v1\x1a\x1egoogle/protobuf/wrappers.proto\"i\n" +
+	"\x1dcoasterai/core/v1/audio.proto\x12\x11coasterai.core.v1\x1a\x1egoogle/protobuf/wrappers.proto\x1a#coasterai/core/v1/media_asset.proto\"i\n" +
 	"\x0fBackgroundTrack\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x10\n" +
 	"\x03url\x18\x03 \x01(\tR\x03url\x12\x17\n" +
 	"\x04icon\x18\x04 \x01(\tH\x00R\x04icon\x88\x01\x01B\a\n" +
-	"\x05_iconB;Z9github.com/shank318/coasterai/pb/coasterai/core/v1;pbcoreb\x06proto3"
+	"\x05_icon\"\x9e\x01\n" +
+	"\tVoiceover\x12\x1a\n" +
+	"\bprovider\x18\x01 \x01(\tR\bprovider\x12\x18\n" +
+	"\avoiceId\x18\x02 \x01(\tR\avoiceId\x12\x1a\n" +
+	"\bfullText\x18\x03 \x01(\tR\bfullText\x12?\n" +
+	"\bsegments\x18\x04 \x03(\v2#.coasterai.core.v1.VoiceoverSegmentR\bsegments\"\xd2\x01\n" +
+	"\x10VoiceoverSegment\x12\x12\n" +
+	"\x04text\x18\x01 \x01(\tR\x04text\x123\n" +
+	"\x05asset\x18\x02 \x01(\v2\x1d.coasterai.core.v1.MediaAssetR\x05asset\x12\x1e\n" +
+	"\n" +
+	"startFrame\x18\x03 \x01(\x05R\n" +
+	"startFrame\x12\x1a\n" +
+	"\bendFrame\x18\x04 \x01(\x05R\bendFrame\x129\n" +
+	"\x05words\x18\x05 \x03(\v2#.coasterai.core.v1.VoiceoverSegmentR\x05wordsB;Z9github.com/shank318/coasterai/pb/coasterai/core/v1;pbcoreb\x06proto3"
 
 var (
 	file_coasterai_core_v1_audio_proto_rawDescOnce sync.Once
@@ -114,16 +271,22 @@ func file_coasterai_core_v1_audio_proto_rawDescGZIP() []byte {
 	return file_coasterai_core_v1_audio_proto_rawDescData
 }
 
-var file_coasterai_core_v1_audio_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_coasterai_core_v1_audio_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_coasterai_core_v1_audio_proto_goTypes = []any{
-	(*BackgroundTrack)(nil), // 0: coasterai.core.v1.BackgroundTrack
+	(*BackgroundTrack)(nil),  // 0: coasterai.core.v1.BackgroundTrack
+	(*Voiceover)(nil),        // 1: coasterai.core.v1.Voiceover
+	(*VoiceoverSegment)(nil), // 2: coasterai.core.v1.VoiceoverSegment
+	(*MediaAsset)(nil),       // 3: coasterai.core.v1.MediaAsset
 }
 var file_coasterai_core_v1_audio_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	2, // 0: coasterai.core.v1.Voiceover.segments:type_name -> coasterai.core.v1.VoiceoverSegment
+	3, // 1: coasterai.core.v1.VoiceoverSegment.asset:type_name -> coasterai.core.v1.MediaAsset
+	2, // 2: coasterai.core.v1.VoiceoverSegment.words:type_name -> coasterai.core.v1.VoiceoverSegment
+	3, // [3:3] is the sub-list for method output_type
+	3, // [3:3] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_coasterai_core_v1_audio_proto_init() }
@@ -131,6 +294,7 @@ func file_coasterai_core_v1_audio_proto_init() {
 	if File_coasterai_core_v1_audio_proto != nil {
 		return
 	}
+	file_coasterai_core_v1_media_asset_proto_init()
 	file_coasterai_core_v1_audio_proto_msgTypes[0].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -138,7 +302,7 @@ func file_coasterai_core_v1_audio_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_coasterai_core_v1_audio_proto_rawDesc), len(file_coasterai_core_v1_audio_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

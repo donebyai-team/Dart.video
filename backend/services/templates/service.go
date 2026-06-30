@@ -171,8 +171,6 @@ func (t templateService) UpdateTemplateConfig(ctx context.Context, video *models
 	return existingTemplate.ToModelVideo(), nil
 }
 
-const usageSeparator = "\n\n---USAGE---\n\n"
-
 func (t templateService) UpdateTemplate(ctx context.Context, req *pbportal.UpdateTemplateRequest) error {
 	existingTemplate, err := t.db.GetTemplateByID(ctx, req.Id)
 	if err != nil {
@@ -210,7 +208,7 @@ func (t templateService) UpdateTemplate(ctx context.Context, req *pbportal.Updat
 			return fmt.Errorf("create usage description embedding: %w", err)
 		}
 		existingTemplate.DescriptionEmbedding = models.TemplateEmbedding(embedding)
-		existingTemplate.Description += usageSeparator + usageDescription
+		existingTemplate.Description += models.UsageSeparator + usageDescription
 	}
 
 	existingTemplate.Categories = req.Categories

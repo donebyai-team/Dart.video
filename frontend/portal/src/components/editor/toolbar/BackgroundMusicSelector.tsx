@@ -1,4 +1,4 @@
-import { VolumeX, Waves, Sunrise, BeakerIcon, VolumeIcon, TrendingUp, Rocket, BookHeartIcon, HeartIcon, MoveUpIcon, GuitarIcon, FunctionSquareIcon } from "lucide-react";
+import { Volume2, VolumeX, Waves, Sunrise, BeakerIcon, VolumeIcon, TrendingUp, Rocket, BookHeartIcon, HeartIcon, MoveUpIcon, GuitarIcon, FunctionSquareIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -6,6 +6,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Slider } from "@/components/ui/slider";
 import { useVideoStore } from "@/stores/video";
 
 const backgroundTracks = [
@@ -88,13 +89,15 @@ const backgroundTracks = [
     },
 ];
 
-
-
 const BackgroundMusicSelector = () => {
     const videoConfig = useVideoStore(s => s.videoConfig);
     const setBackgroundMusic = useVideoStore(s => s.setBackgroundMusic);
+    const setBackgroundMusicVolume = useVideoStore(s => s.setBackgroundMusicVolume);
 
     const currentUrl = videoConfig?.metadata?.bgAudio?.url ?? videoConfig?.metadata?.backgroundAudioUrl;
+    const hasBackgroundAudio = Boolean(currentUrl);
+    const volume = [Math.round((videoConfig?.metadata?.bgAudio?.volume ?? 0.8) * 100)];
+    const isMuted = volume[0] === 0;
 
     const selectedTrack =
         backgroundTracks.find(track => track.url === currentUrl) ||
@@ -113,7 +116,27 @@ const BackgroundMusicSelector = () => {
 
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="w-56">
+                <div className="flex items-center gap-3 px-2 py-2 mb-4 mt-4" onClick={(e) => e.stopPropagation()}>
+                    <button
+                        onClick={() => setBackgroundMusicVolume(isMuted ? 0.8 : 0)}
+                        className="text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                        {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                    </button>
+                    <Slider
+                        value={volume}
+                        onValueChange={(v) => {
+                            if (hasBackgroundAudio) {
+                                setBackgroundMusicVolume(v[0] / 100);
+                            }
+                        }}
+                        max={100}
+                        step={1}
+                        className="flex-1"
+                    />
+                </div>
+
                 {backgroundTracks.map(track => {
                     const TrackIcon = track.icon;
 

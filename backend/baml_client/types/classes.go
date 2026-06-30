@@ -730,6 +730,7 @@ func (c Message) BamlTypeName() string {
 
 type Scene struct {
 	Element         SceneElement `json:"element"`
+	Voiceover       *string      `json:"voiceover"`
 	ThinkingSummary *string      `json:"thinkingSummary"`
 }
 
@@ -750,6 +751,9 @@ func (c *Scene) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
 		case "element":
 			c.Element = baml.Decode(valueHolder).Interface().(SceneElement)
 
+		case "voiceover":
+			c.Voiceover = baml.Decode(valueHolder).Interface().(*string)
+
 		case "thinkingSummary":
 			c.ThinkingSummary = baml.Decode(valueHolder).Interface().(*string)
 
@@ -766,6 +770,8 @@ func (c Scene) Encode() (*cffi.HostValue, error) {
 	fields := map[string]any{}
 
 	fields["element"] = c.Element
+
+	fields["voiceover"] = c.Voiceover
 
 	fields["thinkingSummary"] = c.ThinkingSummary
 

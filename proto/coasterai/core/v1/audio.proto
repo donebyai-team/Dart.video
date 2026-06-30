@@ -4,9 +4,29 @@ import "google/protobuf/wrappers.proto";
 package coasterai.core.v1;
 option go_package = "github.com/shank318/coasterai/pb/coasterai/core/v1;pbcore";
 
+import "coasterai/core/v1/media_asset.proto";
+
 message BackgroundTrack {
   string id = 1;
   string name = 2;
   string url = 3;
   optional string icon = 4;
+}
+
+message Voiceover {
+  string provider = 1;
+  string voiceId = 2;
+  string fullText = 3;
+  repeated VoiceoverSegment segments = 4;
+}
+
+message VoiceoverSegment {
+  string text = 1;
+  MediaAsset asset = 2;
+  int32 startFrame = 3; // startFrame of the slide this audio should start
+  int32 endFrame = 4; // endFrame of the slide this audio should end
+  repeated VoiceoverSegment words = 5; // optional when we do captions
+
+  //  int32 startMs = 3; // only needed when we introduce captioning
+  //  int32 endMs = 4;
 }

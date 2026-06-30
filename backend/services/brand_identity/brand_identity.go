@@ -8,7 +8,7 @@ import (
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/services"
-	"github.com/shank318/coasterai/services/voiceover"
+	"github.com/shank318/coasterai/services/audio"
 
 	//"github.com/shank318/coasterai/services"
 	"github.com/shank318/coasterai/utils"
@@ -384,5 +384,5 @@ func AddVideoBranding(metadata *pbcore.VideoMetadata) {
 	// Step 5: assign branding
 	metadata.GeneratedBranding = generatedBranding
 	metadata.BackgroundStyle = bgStyle
-	metadata.BackgroundAudioUrl = utils.Ptr(voiceover.GenerateBackgroundMusic().Url)
+	metadata.BackgroundAudioUrl = utils.Ptr(audio.GenerateBackgroundMusic().Url)
 }

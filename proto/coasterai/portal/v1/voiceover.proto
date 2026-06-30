@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package coasterai.portal.v1;
+
+option go_package = "github.com/shank318/coasterai/pb/coasterai/portal/v1;pbportal";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+message GenerateVoiceoverRequest {
+  string voiceId = 1;
+  string text = 2;
+  string videoId = 3;
+  string slideId = 4;
+}

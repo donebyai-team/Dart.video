@@ -38,39 +38,6 @@ func NewSceneSuggester(brandIdentityService brand_identity.BrandIdentity, db dat
 	}
 }
 
-func (s SceneSuggester) extractSceneContent(slide *pbcore.Slide) string {
-	var currentSlideContent string
-
-	if slide.Content != nil &&
-		slide.Content.CodeRegistry.Defaults != nil &&
-		len(slide.Content.CodeRegistry.Defaults.Fields) > 0 {
-		payload, err := templates.BuildAndSanitizeLLMPropsPayload(slide.Content.CodeRegistry.Defaults)
-		if err != nil {
-			s.logger.Error("failed to build llm data payload", zap.Error(err))
-		}
-
-		if payload != "" {
-			currentSlideContent = payload
-		}
-	}
-
-	if slide.Content != nil &&
-		slide.Content.Edits != nil &&
-		len(slide.Content.Edits.Fields) > 0 {
-		payload, err := templates.BuildAndSanitizeLLMPropsPayload(slide.Content.Edits)
-		if err != nil {
-			s.logger.Error("failed to build llm data payload", zap.Error(err))
-		}
-
-		if currentSlideContent == "" {
-			currentSlideContent = payload
-		} else {
-			currentSlideContent += "\n\nEdits: " + payload
-		}
-	}
-	return currentSlideContent
-}
-
 type SceneSuggesterOptions struct {
 	Categories []string
 	Cursor     *string
@@ -84,7 +51,7 @@ func (s SceneSuggester) RenderSuggestion(ctx context.Context,
 	ctx = context.WithValue(ctx, llm.SceneIDKey, contentSlide.GetId())
 
 	sections := make([]*pbcore.Section, 0)
-	currentSlideContent := s.extractSceneContent(contentSlide)
+	currentSlideContent := templates.ExtractSceneContent(contentSlide, s.logger)
 	if currentSlideContent == "" || len(templateIDs) == 0 {
 		return sections, nil
 	}
@@ -160,7 +127,7 @@ func (s SceneSuggester) GenerateSuggestions(ctx context.Context, req *pbportal.G
 	}
 
 	if len(categories) == 0 {
-		currentSlideContent := s.extractSceneContent(req.Slide)
+		currentSlideContent := templates.ExtractSceneContent(req.Slide, s.logger)
 
 		if currentSlideContent != "" {
 			reqMatchCat := types.MatchCategoriesRequest{

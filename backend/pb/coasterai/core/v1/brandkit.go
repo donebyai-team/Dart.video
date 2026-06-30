@@ -29,6 +29,9 @@ func (m MediaType) Extension() string {
 	if m == MediaType_MEDIA_TYPE_VIDEO {
 		return "mp4"
 	}
+	if m == MediaType_MEDIA_TYPE_AUDIO {
+		return "wav"
+	}
 
 	if m == MediaType_MEDIA_TYPE_SVG {
 		return "svg"

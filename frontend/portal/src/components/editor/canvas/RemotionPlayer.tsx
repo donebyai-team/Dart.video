@@ -5,19 +5,11 @@ import {
   Pause,
   SkipBack,
   SkipForward,
-  Volume2,
-  VolumeX,
   Maximize,
   Minus,
   Plus,
 } from "lucide-react";
-import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import PlayerCanvas from "./PlayerCanvas";
 import PlayerTimeline from "../timeline/PlayerTimeline";
 import PlayerToolbar from "../PlayerToolbar";
@@ -37,7 +29,6 @@ interface RemotionPlayerProps {
   onFullscreenChange?: (isFullscreen: boolean) => void;
   onPlaybackStateChange?: (isPlaying: boolean) => void;
   onPreviewPlaybackChange?: (isPreviewPlaying: boolean) => void;
-  transcriptPanel?: React.ReactNode;
   onSelectOverlayFromTimeline?: (overlayId: string, slideId: string) => void;
   onSelectTemplate?: (slideId: string) => void;
   onDurationChange: (slideId: string, newDuration: number) => void;
@@ -78,13 +69,12 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   const selectedSlide = useVideoStore(s => s.selectedSlide);
   const onSelectOEffect = useVideoStore(s => s.handleSelectEffect);
   const selectedEffectId = useVideoStore(s => s.selectedEffectId);
-  const setBackgroundMusicVolume = useVideoStore(s => s.setBackgroundMusicVolume);
 
   const resolution = videoConfigFromStore?.metadata?.resolution;
   const fps = videoConfigFromStore?.metadata?.fps || 30;
   const backgroundAudio = videoConfigFromStore?.metadata?.bgAudio;
   const hasBackgroundAudio = Boolean(backgroundAudio?.url ?? videoConfigFromStore?.metadata?.backgroundAudioUrl);
-  const persistedVolume = backgroundAudio?.volume;
+  const backgroundMusicVolume = Math.round((backgroundAudio?.volume ?? 0.8) * 100);
 
   const getTimelineSlides = useVideoStore(s => s.getTimelineSlides);
   // Recompute allSlides whenever videoConfig changes (e.g. slide duration update).
@@ -96,8 +86,6 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
-  const [volume, setVolume] = useState([80]);
-  const [isMuted, setIsMuted] = useState(false);
   const BASE_PREVIEW_SCALE = 0.75;
   const [userZoom, setUserZoom] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -133,13 +121,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
   );
   const totalDuration = totalFrames / fps;
   const currentTime = currentFrame / fps;
-  const audioVolume = hasBackgroundAudio ? (isMuted ? 0 : volume[0] / 100) : 0;
-
-  useEffect(() => {
-    const nextVolume = Math.round((persistedVolume ?? 0.8) * 100);
-    setVolume(prev => (prev[0] === nextVolume ? prev : [nextVolume]));
-    setIsMuted(nextVolume <= 0);
-  }, [persistedVolume]);
+  const audioVolume = hasBackgroundAudio ? backgroundMusicVolume / 100 : 0;
 
   const controls = usePlayerControls(
     playerRef,
@@ -340,7 +322,7 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
 
       <div className="flex-1" />
 
-      {/* Zoom + Volume + Fullscreen */}
+      {/* Zoom + Fullscreen */}
       <div className="flex items-center gap-1">
         {!isFullscreen && (
           <>
@@ -370,37 +352,6 @@ const RemotionPlayerComponent = forwardRef<RemotionPlayerHandle, RemotionPlayerP
             <Separator orientation="vertical" className="h-5 mx-1" />
           </>
         )}
-
-        <Popover>
-          <PopoverTrigger asChild>
-            <button className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isFullscreen ? "hover:bg-white/10" : "hover:bg-muted"}`}>
-              {isMuted || volume[0] === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="w-36 p-3" side="top">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setIsMuted(!isMuted)}
-                className="text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-              </button>
-              <Slider
-                value={isMuted ? [0] : volume}
-                onValueChange={(v) => {
-                  setVolume(v);
-                  if (v[0] > 0) setIsMuted(false);
-                  if (hasBackgroundAudio) {
-                    setBackgroundMusicVolume(v[0] / 100);
-                  }
-                }}
-                max={100}
-                step={1}
-                className="flex-1"
-              />
-            </div>
-          </PopoverContent>
-        </Popover>
 
         <button
           onClick={handleFullscreen}
