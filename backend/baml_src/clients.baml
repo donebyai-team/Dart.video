@@ -10,6 +10,16 @@ client<llm> CustomGeminiProPreview {
   }
 }
 
+client<llm> CustomGemini3Flash {
+  provider google-ai
+  retry_policy Exponential
+  options {
+    model "gemini-3.5-flash"
+    api_key env.GOOGLE_API_KEY
+    generationConfig { thinkingConfig { includeThoughts true } }
+  }
+}
+
 client<llm> SmallBoyFastGemini {
   provider google-ai
   retry_policy Exponential

@@ -26,9 +26,10 @@ const (
 type AIModel int32
 
 const (
-	AIModel_AI_MODEL_UNSPECIFIED  AIModel = 0
-	AIModel_AI_MODEL_GEMINI_3_PRO AIModel = 1
-	AIModel_AI_MODEL_GPT_5_5      AIModel = 2
+	AIModel_AI_MODEL_UNSPECIFIED      AIModel = 0
+	AIModel_AI_MODEL_GEMINI_3_PRO     AIModel = 1
+	AIModel_AI_MODEL_GPT_5_5          AIModel = 2
+	AIModel_AI_MODEL_GEMINI_3_5_FLASH AIModel = 3
 )
 
 // Enum value maps for AIModel.
@@ -37,11 +38,13 @@ var (
 		0: "AI_MODEL_UNSPECIFIED",
 		1: "AI_MODEL_GEMINI_3_PRO",
 		2: "AI_MODEL_GPT_5_5",
+		3: "AI_MODEL_GEMINI_3_5_FLASH",
 	}
 	AIModel_value = map[string]int32{
-		"AI_MODEL_UNSPECIFIED":  0,
-		"AI_MODEL_GEMINI_3_PRO": 1,
-		"AI_MODEL_GPT_5_5":      2,
+		"AI_MODEL_UNSPECIFIED":      0,
+		"AI_MODEL_GEMINI_3_PRO":     1,
+		"AI_MODEL_GPT_5_5":          2,
+		"AI_MODEL_GEMINI_3_5_FLASH": 3,
 	}
 )
 
@@ -336,11 +339,12 @@ const file_coasterai_core_v1_chat_proto_rawDesc = "" +
 	"\b_aiModelB\x12\n" +
 	"\x10_defaultCodeDataB\x13\n" +
 	"\x11_durationInFramesB\x0e\n" +
-	"\f_manualEdits*T\n" +
+	"\f_manualEdits*s\n" +
 	"\aAIModel\x12\x18\n" +
 	"\x14AI_MODEL_UNSPECIFIED\x10\x00\x12\x19\n" +
 	"\x15AI_MODEL_GEMINI_3_PRO\x10\x01\x12\x14\n" +
-	"\x10AI_MODEL_GPT_5_5\x10\x02*\x8e\x01\n" +
+	"\x10AI_MODEL_GPT_5_5\x10\x02\x12\x1d\n" +
+	"\x19AI_MODEL_GEMINI_3_5_FLASH\x10\x03*\x8e\x01\n" +
 	"\x10ConversationRole\x12!\n" +
 	"\x1dCONVERSATION_ROLE_UNSPECIFIED\x10\x00\x12\x1a\n" +
 	"\x16CONVERSATION_ROLE_USER\x10\x01\x12\x1f\n" +

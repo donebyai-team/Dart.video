@@ -75,9 +75,11 @@ func (l *llmService) GenerateAnimation(
 	cr := baml.NewClientRegistry()
 
 	if options != nil && options.Model == pbcore.AIModel_AI_MODEL_GPT_5_5 {
-		//callOptions = append(callOptions, baml_client.WithClient("CustomOpenAI55WithThinkingSummary"))
 		cr.SetPrimaryClient("CustomOpenAI55WithThinkingSummary")
 		extractor = l.NewThinkingExtractor(NewOpenAIExtractor(), onThinking, thinkingMessages)
+	} else if options != nil && options.Model == pbcore.AIModel_AI_MODEL_GEMINI_3_5_FLASH {
+		cr.SetPrimaryClient("CustomGemini3Flash")
+		extractor = l.NewThinkingExtractor(NewGeminiExtractor(), onThinking, thinkingMessages)
 	} else {
 		extractor = l.NewThinkingExtractor(NewGeminiExtractor(), onThinking, thinkingMessages)
 	}

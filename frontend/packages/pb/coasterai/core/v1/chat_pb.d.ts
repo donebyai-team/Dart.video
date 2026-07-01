@@ -102,6 +102,11 @@ export enum AIModel {
    * @generated from enum value: AI_MODEL_GPT_5_5 = 2;
    */
   AI_MODEL_GPT_5_5 = 2,
+
+  /**
+   * @generated from enum value: AI_MODEL_GEMINI_3_5_FLASH = 3;
+   */
+  AI_MODEL_GEMINI_3_5_FLASH = 3,
 }
 
 /**
