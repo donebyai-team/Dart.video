@@ -25,6 +25,7 @@ import { isPlatformAdmin } from '@coasterai/ui-core/helper/role'
 
 interface ScenePromptComposerProps {
   setOverlay: (overlay: PatchOverlay) => void
+  defaultAIModel?: AIModel
   onConversationUpdated?: () => void
 }
 
@@ -96,7 +97,7 @@ const splitSelectedReferences = (
   return { assets, references }
 }
 
-export default function ScenePromptComposer({ setOverlay, onConversationUpdated }: ScenePromptComposerProps) {
+export default function ScenePromptComposer({ setOverlay, defaultAIModel, onConversationUpdated }: ScenePromptComposerProps) {
   const updateSlide = useVideoStore(s => s.updateSlide)
   const selectedSlide = useVideoStore(s => s.selectedSlide)
   const videoId = useVideoStore(s => s.videoConfig?.id)
@@ -135,6 +136,10 @@ export default function ScenePromptComposer({ setOverlay, onConversationUpdated 
       setPrompt(selectedSlide.content?.plan?.selectedTemplateDescription || '')
     }
   }, [selectedSlide])
+
+  useEffect(() => {
+    setSelectedAIModel(defaultAIModel)
+  }, [defaultAIModel])
 
   const answerInput = useMemo(() => {
     if (!activeQuestion) return ''

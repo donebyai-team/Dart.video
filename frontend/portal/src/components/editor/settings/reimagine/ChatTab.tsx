@@ -1,7 +1,7 @@
 import { create } from '@bufbuild/protobuf'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ConversationMessage } from '@coasterai/pb/coasterai/core/v1/chat_pb'
-import { ConversationMessageType, ConversationRole } from '@coasterai/pb/coasterai/core/v1/chat_pb'
+import { AIModel, ConversationMessageType, ConversationRole } from '@coasterai/pb/coasterai/core/v1/chat_pb'
 import { type MediaAsset, SelectedMediaAssetSchema } from '@coasterai/pb/coasterai/core/v1/media_asset_pb'
 import type { PatchOverlay } from '@coasterai/renderer'
 import { EyeIcon, Paperclip, RotateCcw } from 'lucide-react'
@@ -124,6 +124,10 @@ export default function ChatTab({ videoId, enabled, setOverlay }: ChatTabProps) 
     videoId,
     enabled,
   })
+  const lastUsedAIModel = useMemo(
+    () => [...messages].reverse().find(message => message.aiModel !== undefined && message.aiModel !== AIModel.AI_MODEL_UNSPECIFIED)?.aiModel,
+    [messages]
+  )
 
   const handlePreviewOpenChange = (open: boolean) => {
     if (!open) {
@@ -239,6 +243,7 @@ export default function ChatTab({ videoId, enabled, setOverlay }: ChatTabProps) 
       <div className='shrink-0'>
         <ScenePromptComposer
           setOverlay={setOverlay}
+          defaultAIModel={lastUsedAIModel}
           onConversationUpdated={() => void refreshConversationHistory()}
         />
       </div>
