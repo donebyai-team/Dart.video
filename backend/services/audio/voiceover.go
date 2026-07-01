@@ -18,17 +18,17 @@ type Service interface {
 }
 
 type audioService struct {
-	provider providers.Provider
+	provider providers.LLMProvider
 	logger   *zap.Logger
 }
 
-func NewAudioService(provider providers.Provider, logger *zap.Logger) Service {
+func NewAudioService(provider providers.LLMProvider, logger *zap.Logger) Service {
 	return &audioService{provider: provider, logger: logger}
 }
 
 const voiceoverFPS = 30
-const DEFAULT_VOICE_ID = "Puck"
-const DEFAULT_VOICE_PROVIDER = "google"
+const DefaultVoiceId = "Puck"
+const DefaultVoiceProvider = "google"
 
 var pauseTokenRegex = regexp.MustCompile(`@(\d+)@`)
 
@@ -44,7 +44,7 @@ func (a audioService) GenerateVoiceover(ctx context.Context, params providers.Vo
 	}
 
 	if params.VoiceID == "" {
-		params.VoiceID = DEFAULT_VOICE_ID
+		params.VoiceID = DefaultVoiceId
 	}
 
 	voiceover := &pbcore.Voiceover{

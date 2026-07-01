@@ -1,4 +1,4 @@
-package brand_identity
+package providers
 
 import (
 	"context"
@@ -58,33 +58,28 @@ type ScrapeResponse struct {
 	Error string `json:"error"`
 }
 
-// Client is a minimal Firecrawl REST client.
-type Client struct {
+type FirecrawlClient struct {
 	apiKey     string
 	baseURL    string
 	httpClient *retryablehttp.Client
 }
 
-// NewClient constructs a Client with the provided API key and base URL.
-func NewClient(apiKey, baseURL string) (*Client, error) {
+func NewFireCrawlClient(apiKey string) *FirecrawlClient {
 	if apiKey == "" {
-		return nil, fmt.Errorf("firecrawl api key is empty")
-	}
-	if baseURL == "" {
-		baseURL = DefaultBaseURL
+		panic("firecrawl api key is required")
 	}
 
 	retryClient := services.NewRetryableHTTPClient(5*time.Minute, 100*time.Millisecond, 2*time.Second, 3, nil)
 
-	return &Client{
+	return &FirecrawlClient{
 		apiKey:     apiKey,
-		baseURL:    baseURL,
+		baseURL:    DefaultBaseURL,
 		httpClient: retryClient,
-	}, nil
+	}
 }
 
 // doRequest performs an HTTP request with retry logic and returns the response body.
-func (c *Client) doRequest(ctx context.Context, method, path string, body []byte) ([]byte, error) {
+func (c *FirecrawlClient) doRequest(ctx context.Context, method, path string, body []byte) ([]byte, error) {
 	url := fmt.Sprintf("%s%s", c.baseURL, path)
 	headers := map[string]string{
 		"Authorization": "Bearer " + c.apiKey,
@@ -106,7 +101,7 @@ func (c *Client) doRequest(ctx context.Context, method, path string, body []byte
 }
 
 // Scrape executes a Firecrawl scrape request.
-func (c *Client) Scrape(ctx context.Context, req ScrapeRequest) (*ScrapeResponse, error) {
+func (c *FirecrawlClient) Scrape(ctx context.Context, req ScrapeRequest) (*ScrapeResponse, error) {
 	if req.URL == "" {
 		return nil, fmt.Errorf("scrape url is required")
 	}

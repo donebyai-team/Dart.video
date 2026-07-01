@@ -9,6 +9,7 @@ import (
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/services"
 	"github.com/shank318/coasterai/services/audio"
+	"github.com/shank318/coasterai/services/providers"
 
 	//"github.com/shank318/coasterai/services"
 	"github.com/shank318/coasterai/utils"
@@ -32,7 +33,7 @@ type BrandIdentity interface {
 type brandIdentity struct {
 	db               datastore.Repository
 	logger           *zap.Logger
-	fireCrawlClient  *Client
+	fireCrawlClient  *providers.FirecrawlClient
 	mediaStore       services.MediaStore
 	googleFontLoader fontLoader
 }
@@ -120,15 +121,11 @@ func NewBrandIdentityService(
 	logger *zap.Logger,
 	db datastore.Repository,
 	mediaStore services.MediaStore,
-	fireCrawlAPIKey string) BrandIdentity {
-	client, err := NewClient(fireCrawlAPIKey, DefaultBaseURL)
-	if err != nil {
-		panic(err)
-	}
+	fireCrawlClient *providers.FirecrawlClient) BrandIdentity {
 
 	return &brandIdentity{
 		db:               db,
-		fireCrawlClient:  client,
+		fireCrawlClient:  fireCrawlClient,
 		mediaStore:       mediaStore,
 		logger:           logger,
 		googleFontLoader: newGoogleFontLoader(logger),
@@ -172,9 +169,9 @@ func (b brandIdentity) CreateBrandIdentity(ctx context.Context, orgID string, we
 	}
 
 	maxTimeout := 300000 // 5 minutes, Firecrawl's maximum
-	req := ScrapeRequest{
+	req := providers.ScrapeRequest{
 		URL: website,
-		Formats: []Format{
+		Formats: []providers.Format{
 			{Type: "branding"},
 		},
 		Timeout: &maxTimeout,
@@ -270,7 +267,7 @@ func createBrandMediaFromAsset(_ context.Context, asset *pbcore.MediaAsset, prio
 	}
 }
 
-func (a brandIdentity) extractFonts(fonts []FontInfo) []*pbcore.BrandFont {
+func (a brandIdentity) extractFonts(fonts []providers.FontInfo) []*pbcore.BrandFont {
 	result := make([]*pbcore.BrandFont, 0, len(fonts))
 	seen := make(map[string]struct{})
 

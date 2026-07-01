@@ -134,8 +134,8 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 				// if voiceover is provided, add it only for the first slide if a scene itself has multi slides
 				if pendingSlide.Voiceover != nil && index == 0 {
 					slide.Voiceover = &pbcore.Voiceover{
-						Provider: audio.DEFAULT_VOICE_PROVIDER,
-						VoiceId:  audio.DEFAULT_VOICE_ID,
+						Provider: audio.DefaultVoiceProvider,
+						VoiceId:  audio.DefaultVoiceId,
 						FullText: *pendingSlide.Voiceover,
 					}
 				}

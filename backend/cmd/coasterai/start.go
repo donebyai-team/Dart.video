@@ -54,9 +54,9 @@ var StartCmd = cli.Command(startCmdE,
 		flags.Uint64("common-auto-mem-limit-percent", 0, "Automatically sets GOMEMLIMIT to a percentage of memory limit from cgroup (useful for container environments)")
 		flags.Duration("spooler-db-polling-interval", 10*time.Minute, "How often the spooler will check the database for new investigation")
 
-		flags.String("portal-reddit-redirect-url", "http://localhost:3000/auth/callback", "Reddit App Client ID")
-		flags.String("portal-reddit-client-id", "", "Reddit App Client ID")
-		flags.String("portal-reddit-client-secret", "", "Reddit App Client Secret")
+		flags.String("portal-reddit-redirect-url", "http://localhost:3000/auth/callback", "Reddit App FirecrawlClient ID")
+		flags.String("portal-reddit-client-id", "", "Reddit App FirecrawlClient ID")
+		flags.String("portal-reddit-client-secret", "", "Reddit App FirecrawlClient Secret")
 		flags.String("portal-figma-redirect-url", "http://localhost:3000/auth/callback", "Figma OAuth callback URL")
 
 		flags.String("portal-cors-url-regex-allow", "^.*", "Regex to allow CORS origin requests from, matched on the full URL (scheme, host, port, path, etc.), defaults to allow all")
@@ -64,8 +64,8 @@ var StartCmd = cli.Command(startCmdE,
 
 		flags.String("portal-fullstory-org-id", "", "FullStory org id")
 		flags.String("portal-auth0-domain", "", "Auth0 tenant domain")
-		flags.String("portal-auth0-portal-client-id", "", "Auth0 Portal AppFactory Client ID")
-		flags.String("portal-auth0-portal-client-secret", "", "Auth0 Portal AppFactory Client Secret")
+		flags.String("portal-auth0-portal-client-id", "", "Auth0 Portal AppFactory FirecrawlClient ID")
+		flags.String("portal-auth0-portal-client-secret", "", "Auth0 Portal AppFactory FirecrawlClient Secret")
 		flags.String("portal-auth0-api-redirect-uri", "http://localhost:8787/auth/callback", "The API Auth callback URL")
 	}),
 )
@@ -194,6 +194,7 @@ func portalApp(cmd *cobra.Command, isAppReady func() bool) (App, error) {
 	}
 
 	googleProvider := providers.NewProviderGoogle(sflags.MustGetString(cmd, "common-google-api-key"), deps.MediaStore, zlog)
+	fireCrawlClient := providers.NewFireCrawlClient(sflags.MustGetString(cmd, "common-firecrawl-api-key"))
 
 	p := portal.New(
 		deps.MediaStore,
@@ -205,7 +206,7 @@ func portalApp(cmd *cobra.Command, isAppReady func() bool) (App, error) {
 		deps.DataStore,
 		services.NewVideoGeneration(deps.DataStore, zlog),
 		videoRenderService,
-		brand_identity.NewBrandIdentityService(zlog, deps.DataStore, deps.MediaStore, sflags.MustGetString(cmd, "common-firecrawl-api-key")),
+		brand_identity.NewBrandIdentityService(zlog, deps.DataStore, deps.MediaStore, fireCrawlClient),
 		code_builder.NewCodeBuilderService(deps.MediaStore, zlog),
 		audio.NewAudioService(googleProvider, zlog),
 		llm.NewLlmService(zlog, cacheStore),

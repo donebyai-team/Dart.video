@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-type Provider interface {
+type LLMProvider interface {
 	GenerateVoiceOver(ctx context.Context, params VoiceOverParams) (*pbcore.MediaAsset, error)
 	GetName() string
 }
@@ -29,7 +29,7 @@ func (p ProviderGoogle) GetName() string {
 	return "google"
 }
 
-func NewProviderGoogle(apiKey string, mediaService services.MediaStore, logger *zap.Logger) Provider {
+func NewProviderGoogle(apiKey string, mediaService services.MediaStore, logger *zap.Logger) LLMProvider {
 	client, err := genai.NewClient(context.Background(), &genai.ClientConfig{
 		APIKey:  apiKey,
 		Backend: genai.BackendGeminiAPI,
