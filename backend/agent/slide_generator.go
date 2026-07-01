@@ -121,7 +121,7 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 				return nil, err
 			}
 
-			for _, slideT := range slides {
+			for index, slideT := range slides {
 				slide := &pbcore.Slide{
 					Id:               fmt.Sprintf("slide-%s", uuid.NewString()),
 					SlideStatus:      pbcore.SlideStatus_SLIDE_STATUS_GENERATED,
@@ -131,7 +131,8 @@ func (g *videoConfigGenerator) CreatePendingSlidesV2(
 					SettledFrame:     slideT.SettledFrame,
 				}
 
-				if pendingSlide.Voiceover != nil {
+				// if voiceover is provided, add it only for the first slide if a scene itself has multi slides
+				if pendingSlide.Voiceover != nil && index == 0 {
 					slide.Voiceover = &pbcore.Voiceover{
 						Provider: audio.DEFAULT_VOICE_PROVIDER,
 						VoiceId:  audio.DEFAULT_VOICE_ID,

@@ -61,6 +61,14 @@ export const VoiceOverSettings = ({ onClose, onPlayPreview }: VoiceOverSettingsP
     () => videoConfig?.config?.sections?.flatMap(section => section.slides ?? []) ?? [],
     [videoConfig]
   )
+  const isAnyGenerating = useMemo(
+    () => Object.values(generatingBySlide).some(Boolean),
+    [generatingBySlide]
+  )
+  const slidesMissingVoiceover = useMemo(
+    () => slides.filter(slide => !hasGeneratedVoiceover(slide)),
+    [slides]
+  )
 
   useEffect(() => {
     setDrafts(currentDrafts => {
@@ -82,12 +90,12 @@ export const VoiceOverSettings = ({ onClose, onPlayPreview }: VoiceOverSettingsP
   }, [])
 
   const handleGenerateVoiceover = useCallback(async (slide: Slide) => {
-    if (!portalClient || !videoConfig?.id) return
+    if (!portalClient || !videoConfig?.id) return false
 
     const editorText = (drafts[slide.id] ?? '').trim()
     if (!editorText) {
       toast.error('Please enter voiceover text first')
-      return
+      return false
     }
 
     const voiceId = slide.voiceover?.voiceId || DEFAULT_VOICE_ID
@@ -131,9 +139,11 @@ export const VoiceOverSettings = ({ onClose, onPlayPreview }: VoiceOverSettingsP
         toast.success('Background music volume reduced, adjust if needed')
       }
 
+      return true
     } catch (error) {
       console.error('Failed to generate voiceover', error)
       toast.error(getConnectError(error))
+      return false
     } finally {
       setGeneratingBySlide(current => ({
         ...current,
@@ -141,6 +151,24 @@ export const VoiceOverSettings = ({ onClose, onPlayPreview }: VoiceOverSettingsP
       }))
     }
   }, [drafts, portalClient, setBackgroundMusicVolume, updateSlideById, videoConfig])
+
+  const handleGenerateAllVoiceovers = useCallback(async () => {
+    if (!slidesMissingVoiceover.length || isAnyGenerating) return
+
+    let generatedCount = 0
+
+    for (const slide of slidesMissingVoiceover) {
+      const editorText = (drafts[slide.id] ?? '').trim()
+
+      if (!editorText) continue
+
+      const generated = await handleGenerateVoiceover(slide)
+
+      if (generated) {
+        generatedCount += 1
+      }
+    }       
+  }, [drafts, handleGenerateVoiceover, isAnyGenerating, slidesMissingVoiceover])
 
   return (
     <div className='flex h-full flex-col gap-3 p-4'>
@@ -163,7 +191,7 @@ export const VoiceOverSettings = ({ onClose, onPlayPreview }: VoiceOverSettingsP
         )}
       </div>
 
-      <div className='min-h-0 flex-1 overflow-y-auto pr-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
+      <div className='min-h-0 flex-1 overflow-y-auto pr-1 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
         <div className='space-y-4'>
           {slides.map(slide => {
             const draft = drafts[slide.id] ?? ''
@@ -246,6 +274,27 @@ export const VoiceOverSettings = ({ onClose, onPlayPreview }: VoiceOverSettingsP
             </div>
           )}
         </div>
+      </div>
+
+      <div className='shrink-0 border-t border-border bg-background pt-3'>
+        <Button
+          type='button'
+          className='w-full'
+          onClick={() => void handleGenerateAllVoiceovers()}
+          disabled={!portalClient || isAnyGenerating || slidesMissingVoiceover.length === 0}
+        >
+          {isAnyGenerating ? (
+            <>
+              <RefreshCw className='mr-2 h-4 w-4 animate-spin' />
+              Generating...
+            </>
+          ) : (
+            <>
+              <Sparkles className='mr-2 h-4 w-4' />
+              Generate all
+            </>
+          )}
+        </Button>
       </div>
     </div>
   )
