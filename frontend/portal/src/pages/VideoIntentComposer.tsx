@@ -4,6 +4,10 @@ import { create, fromJsonString } from '@bufbuild/protobuf'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Film,
+  Globe,
+  Link2,
+  Paperclip,
+  FileText,
   Sparkles,
   X,
   Square
@@ -23,16 +27,52 @@ import { type AskUserQuestion, type CreateVideoResponse } from '@coasterai/pb/co
 import QuestionPanel from '@/components/composer/QuestionPanel'
 import ThinkingViewComponent from '@/components/composer/ThinkingViewComponent'
 import { Script, VideoMetadataSchema } from '@coasterai/pb/coasterai/core/v1/video_pb'
-import AssetUploadDropdown from '@/components/composer/AssetUploadDropdown'
 import LanguageSelector from '@/components/composer/LanguageSelector'
 import BrandLibrarySelector from '@/components/composer/BrandLibrarySelector'
 import { MediaAsset, SelectedMediaAssetSchema } from '@coasterai/pb/coasterai/core/v1/media_asset_pb'
 import SelectedAssetsDialog, { type SelectedAssetWithPreview } from '@/components/assets/SelectedAssetsDialog'
+import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { AuthLoading } from '@/components/Loader/loader'
+import type { BrandIdentity } from '@coasterai/pb/coasterai/core/v1/brandkit_pb'
 
 const MIN_PROMPT_LENGTH = 10
 const VIDEO_COMPOSER_PREFILL_STORAGE_KEY = 'video-composer-prefill-metadata'
+const SHOW_FILE_UPLOAD_SHORTCUT = true
+
+const PROMPT_TEMPLATES = {
+  website: 'Create a 60-second explainer video based on the website provided. Focus on the main value proposition, key features, and target audience.',
+  file: 'Create a video script based on the attached document. Extract the core problem, solution, and customer benefits.',
+  script: 'Hook: [The problem your buyer faces]\n\nSolution: [How your product fixes it]\n\nProof: [One customer result]\n\nCTA: [Book a demo]'
+}
 
 type ComposerStage = 'compose' | 'planning' | 'question'
+type QuickStartMode = 'website' | 'file' | 'script'
+
+const isPromptTemplate = (value: string) => {
+  const trimmedValue = value.trim()
+  if (!trimmedValue) return true
+
+  return (
+    trimmedValue === PROMPT_TEMPLATES.file ||
+    trimmedValue === PROMPT_TEMPLATES.script ||
+    trimmedValue.startsWith(PROMPT_TEMPLATES.website)
+  )
+}
+
+const isValidHttpUrl = (value: string) => {
+  try {
+    const url = new URL(value)
+    return url.protocol === 'http:' || url.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
+const buildWebsitePrompt = (urls: string[]) => {
+  if (urls.length === 0) return PROMPT_TEMPLATES.website
+  return `${PROMPT_TEMPLATES.website}\n\nWebsites:\n${urls.map(url => `- ${url}`).join('\n')}`
+}
 
 const VideoIntentComposer = () => {
   const [prompt, setPrompt] = useState('')
@@ -57,6 +97,13 @@ const VideoIntentComposer = () => {
   const [activeQuestions, setActiveQuestions] = useState<AskUserQuestion[]>([])
   const [pendingQuestions, setPendingQuestions] = useState<AskUserQuestion[]>([])
   const [questionAssets, setQuestionAssets] = useState<SelectedAssetWithPreview[]>([])
+  const [brandIdentities, setBrandIdentities] = useState<BrandIdentity[]>([])
+  const [isLoadingBrands, setIsLoadingBrands] = useState(true)
+  const [brandWebsiteUrl, setBrandWebsiteUrl] = useState('')
+  const [showBrandOnboarding, setShowBrandOnboarding] = useState(false)
+  const [quickStartMode, setQuickStartMode] = useState<QuickStartMode | null>(null)
+  const [composerWebsiteUrl, setComposerWebsiteUrl] = useState('')
+  const [attachedWebsiteUrls, setAttachedWebsiteUrls] = useState<string[]>([])
 
   const router = useRouter()
   const { portalClient } = useClientsContext()
@@ -84,6 +131,7 @@ const VideoIntentComposer = () => {
   }, [questionAssets, selectedAssetMessages])
 
   const showThinking = hasSubmitted && stage === 'planning'
+  const hasBrandIdentity = brandIdentities.length > 0
 
   useEffect(() => {
     if (pendingQuestions.length === 0) return
@@ -101,6 +149,25 @@ const VideoIntentComposer = () => {
       abortControllerRef.current?.abort()
     }
   }, [])
+
+  useEffect(() => {
+    if (!portalClient) return
+
+    const fetchBrandIdentities = async () => {
+      try {
+        setIsLoadingBrands(true)
+        const res = await portalClient.getBrandIdentities({})
+        setBrandIdentities(res.identities)
+      } catch (err) {
+        console.error('Failed to fetch brand identities', err)
+        toast.error(getConnectError(err))
+      } finally {
+        setIsLoadingBrands(false)
+      }
+    }
+
+    void fetchBrandIdentities()
+  }, [portalClient])
 
   useEffect(() => {
     const serializedMetadata = window.sessionStorage.getItem(VIDEO_COMPOSER_PREFILL_STORAGE_KEY)
@@ -122,6 +189,18 @@ const VideoIntentComposer = () => {
       window.sessionStorage.removeItem(VIDEO_COMPOSER_PREFILL_STORAGE_KEY)
     }
   }, [])
+
+  useEffect(() => {
+    if (!hasBrandIdentity) return
+    if (quickStartMode === 'file' && !SHOW_FILE_UPLOAD_SHORTCUT) {
+      setQuickStartMode(null)
+    }
+  }, [hasBrandIdentity, quickStartMode])
+
+  useEffect(() => {
+    if (isLoadingBrands) return
+    setShowBrandOnboarding(!hasBrandIdentity)
+  }, [hasBrandIdentity, isLoadingBrands])
 
   const consumePlanningStream = async (stream: AsyncIterable<CreateVideoResponse>, signal?: AbortSignal, streamSession?: number) => {
     for await (const event of stream) {
@@ -310,6 +389,68 @@ const VideoIntentComposer = () => {
     setAssetDialogOpen(true)
   }
 
+  const fillPromptTemplate = (mode: QuickStartMode, websiteUrl?: string) => {
+    if (!isPromptTemplate(prompt)) return
+
+    if (mode === 'website') {
+      const nextUrls = websiteUrl?.trim()
+        ? Array.from(new Set([...attachedWebsiteUrls, websiteUrl.trim()]))
+        : attachedWebsiteUrls
+      setPrompt(buildWebsitePrompt(nextUrls))
+      return
+    }
+
+    setPrompt(PROMPT_TEMPLATES[mode])
+  }
+
+  const handleQuickStart = (mode: QuickStartMode) => {
+    if (stage !== 'compose') return
+
+    if (mode === 'website') {
+      setQuickStartMode('website')
+      return
+    }
+
+    if (mode === 'file') {
+      setQuickStartMode('file')
+      fillPromptTemplate('file')
+      openAssetDialog()
+      return
+    }
+
+    setQuickStartMode(null)
+    fillPromptTemplate('script')
+  }
+
+  const handleAddWebsiteContext = () => {
+    const trimmedUrl = composerWebsiteUrl.trim()
+    if (!trimmedUrl) return
+    if (!isValidHttpUrl(trimmedUrl)) {
+      toast.error('Please enter a valid website URL')
+      return
+    }
+
+    const nextUrls = Array.from(new Set([...attachedWebsiteUrls, trimmedUrl]))
+    setAttachedWebsiteUrls(nextUrls)
+    setQuickStartMode(null)
+    setComposerWebsiteUrl('')
+
+    if (isPromptTemplate(prompt)) {
+      setPrompt(buildWebsitePrompt(nextUrls))
+    }
+  }
+
+  const handleBrandSetupSubmit = () => {
+    const trimmedUrl = brandWebsiteUrl.trim()
+    if (!trimmedUrl) return
+    if (!isValidHttpUrl(trimmedUrl)) {
+      toast.error('Please enter a valid website URL')
+      return
+    }
+
+    router.push(`/dashboard/brand?websiteUrl=${encodeURIComponent(trimmedUrl)}`)
+  }
+
   const removeSelectedAsset = (assetID: string) => {
     setSelectedAssets(current => current.filter(asset => asset.selection.assetID !== assetID))
   }
@@ -374,6 +515,10 @@ const VideoIntentComposer = () => {
     )
   }
 
+  if (isLoadingBrands) {
+    return <AuthLoading />
+  }
+
   return (
     <div className='flex flex-col w-full max-w-3xl mx-auto px-4 min-h-[calc(100vh-4rem)]'>
       <Dialog open={assetDialogOpen} onOpenChange={setAssetDialogOpen}>
@@ -408,18 +553,128 @@ const VideoIntentComposer = () => {
 
       {/* Center area — grows to push input to the bottom */}
       <div className='flex-1 flex items-center justify-center py-8'>
-        <div className='text-center'>
-          <h1 className='text-2xl font-semibold tracking-tight'>
-            What feature are you launching today?
-          </h1>
-          <p className='text-sm text-muted-foreground mt-1.5'>
-            Give us a topic, concept, or script, and we'll build it with you.
-          </p>
+        <div className='w-full'>
+          <div className='mx-auto max-w-2xl text-center'>
+            <h1 className='text-3xl font-semibold tracking-tight'>
+              Turn your GTM assets into videos
+            </h1>
+            <p className='mt-2 text-sm text-muted-foreground'>
+              Start with a website, deck, doc, or script. And watch Dart turn it into an on-brand explainer instantly.
+            </p>
+          </div>
+
+          {stage === 'compose' && showBrandOnboarding ? (
+            <div className='mx-auto mt-10 flex w-full max-w-2xl justify-center pt-2'>
+              <Card className='w-full border-border/70 shadow-sm'>
+                <CardContent className='p-6'>
+                  <div className='mb-4 flex items-center gap-3'>
+                    <div className='flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground'>
+                      1
+                    </div>
+                    <p className='text-base font-semibold'>Match your brand automatically</p>
+                  </div>
+
+                  <p className='mb-4 text-sm text-muted-foreground'>
+                    Add your company website and Dart will pull your colors, fonts, and logo into every video. You can refine this later.
+                  </p>
+
+                  <div className='space-y-3'>
+                    <Input
+                      type='url'
+                      value={brandWebsiteUrl}
+                      onChange={e => setBrandWebsiteUrl(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && handleBrandSetupSubmit()}
+                      placeholder='https://yourcompany.com'
+                    />
+
+                    <div className='flex gap-3'>
+                      <Button
+                        onClick={handleBrandSetupSubmit}
+                        disabled={!brandWebsiteUrl.trim()}
+                      >
+                        {brandWebsiteUrl.trim() ? 'Apply brand & continue' : 'Continue'}
+                      </Button>
+                      <Button
+                        variant='ghost'
+                        onClick={() => setShowBrandOnboarding(false)}
+                      >
+                        Skip for now
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          ) : stage === 'compose' && (
+            <div className='mx-auto mt-10 max-w-3xl space-y-3 pt-2'>
+              <div>
+                <p className='text-sm font-medium text-foreground'>Quick start</p>
+              </div>
+
+              <div className='grid gap-3 md:grid-cols-3'>
+                <button
+                  type='button'
+                  onClick={() => handleQuickStart('website')}
+                  className='rounded-xl border border-border bg-card px-3 py-2 text-left transition-colors hover:border-foreground/20 hover:bg-muted/30'
+                >                 
+                  <p className='text-sm font-semibold'>Start with website</p>
+                  <p className='mt-0.5 text-xs text-muted-foreground'>Pull context from a URL.</p>
+                </button>
+
+                {SHOW_FILE_UPLOAD_SHORTCUT && (
+                  <button
+                    type='button'
+                    onClick={() => handleQuickStart('file')}
+                    className='rounded-xl border border-border bg-card px-3 text-left transition-colors hover:border-foreground/20 hover:bg-muted/30'
+                  >                   
+                    <p className='text-sm font-semibold'>Upload a file</p>
+                    <p className='mt-1 text-xs text-muted-foreground'>PPT, PDF, DOCX </p>
+                  </button>
+                )}
+
+                <button
+                  type='button'
+                  onClick={() => handleQuickStart('script')}
+                  className='rounded-xl border border-border bg-card px-3 py-2 text-left transition-colors hover:border-foreground/20 hover:bg-muted/30'
+                >                  
+                  <p className='text-sm font-semibold'>Use script template</p>
+                  <p className='mt-0.5 text-xs text-muted-foreground'>Start with a structure outline.</p>
+                </button>
+              </div>
+
+              {quickStartMode === 'website' && (
+                <div className='rounded-xl border border-border bg-muted/30 p-4'>
+                  <div className='mb-3 flex items-center gap-2 text-sm font-medium'>
+                    <Globe className='h-4 w-4 text-primary' />
+                    Enter website URL
+                  </div>
+                  <div className='flex flex-col gap-2 md:flex-row'>
+                    <Input
+                      type='url'
+                      value={composerWebsiteUrl}
+                      onChange={e => setComposerWebsiteUrl(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && handleAddWebsiteContext()}
+                      placeholder='https://yourcompany.com'
+                      className='md:flex-1'
+                    />
+                    <div className='flex gap-2'>
+                      <Button onClick={handleAddWebsiteContext} disabled={!composerWebsiteUrl.trim()}>
+                        Add URL
+                      </Button>
+                      <Button variant='ghost' onClick={() => setQuickStartMode(null)}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Bottom composite area */}
-      <div className='pb-6 space-y-2.5'>
+      {!showBrandOnboarding && (
+        <div className='pb-6 space-y-2'>
 
         {/* Thinking bar — appears above input when agent is active */}
         {showThinking && <ThinkingViewComponent thinkingChunk={thinkingChunk} />}
@@ -440,7 +695,7 @@ const VideoIntentComposer = () => {
         <div className='rounded-2xl border bg-background shadow-sm overflow-hidden'>
 
           {/* Toolbar row */}
-          <div className='flex items-center gap-1.5 px-4 pt-2.5 pb-2 text-xs text-muted-foreground border-b border-border/40 flex-wrap'>
+          <div className='flex items-center gap-1.5 px-4 pt-3 pb-2 text-xs text-muted-foreground border-b border-border/40 flex-wrap'>
             <span className='flex items-center gap-1 flex-shrink-0'>
               <Film className='w-4 h-4' />
               <Select value={resolutionId} onValueChange={setResolutionId} disabled={stage !== 'compose'}>
@@ -482,15 +737,6 @@ const VideoIntentComposer = () => {
               disabled={stage !== 'compose'}
             /> */}
 
-            <span className='text-border/60 mx-0.5'>·</span>
-
-            <AssetUploadDropdown
-              disabled={stage !== 'compose'}
-              onOpenAssetPicker={openAssetDialog}
-            />
-
-            <span className='text-border/60 mx-0.5'>·</span>
-
             {/* Add Brand Library */}
             <BrandLibrarySelector
               selectedBrandLibraryId={selectedBrandLibraryId}
@@ -500,31 +746,50 @@ const VideoIntentComposer = () => {
             />
           </div>
 
-          {hasSelectedAssets && (
-            <div className='mx-4 mt-2 flex flex-wrap gap-2'>
-              <div
-                onClick={() => setSelectedAssetsDialogOpen(true)}
-                className='flex cursor-pointer items-center justify-between rounded-lg border border-primary/15 bg-primary/5 px-3 py-1.5 text-xs transition-colors hover:border-primary/30'
-              >
-                <div className='flex items-center gap-2 text-primary'>
-                  <span className='font-medium'>
-                    {selectedAssets.length} selected screen{selectedAssets.length > 1 ? 's' : ''}
-                  </span>
-                  <span className='text-muted-foreground'>
-                    · Imported assets
-                  </span>
+          {(attachedWebsiteUrls.length > 0 || hasSelectedAssets) && (
+            <div className='mx-4 mt-3 flex flex-wrap gap-2'>
+              {attachedWebsiteUrls.map(url => (
+                <div key={url} className='flex items-center gap-2 rounded-full border border-border bg-muted/40 px-3 py-1.5 text-xs text-foreground'>
+                  <Link2 className='h-3.5 w-3.5 text-muted-foreground' />
+                  <span className='max-w-[220px] truncate'>{url}</span>
+                  <button
+                    type='button'
+                    className='rounded p-0.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive'
+                    onClick={() => {
+                      const nextUrls = attachedWebsiteUrls.filter(currentUrl => currentUrl !== url)
+                      setAttachedWebsiteUrls(nextUrls)
+                      if (prompt.trim().startsWith(PROMPT_TEMPLATES.website)) {
+                        setPrompt(buildWebsitePrompt(nextUrls))
+                      }
+                    }}
+                  >
+                    <X className='h-3.5 w-3.5' />
+                  </button>
                 </div>
-                <button
-                  onClick={e => {
-                    e.stopPropagation()
-                    setSelectedAssets([])
-                  }}
-                  className='p-0.5 rounded hover:bg-destructive/10 hover:text-destructive'
-                  type='button'
+              ))}
+
+              {hasSelectedAssets && (
+                <div
+                  onClick={() => setSelectedAssetsDialogOpen(true)}
+                  className='flex cursor-pointer items-center justify-between rounded-full border border-primary/15 bg-primary/5 px-3 py-1.5 text-xs transition-colors hover:border-primary/30'
                 >
-                  <X className='w-3.5 h-3.5' />
-                </button>
-              </div>
+                  <div className='flex items-center gap-2 text-primary'>
+                    <span className='font-medium'>
+                      {selectedAssets.length} attached file{selectedAssets.length > 1 ? 's' : ''}
+                    </span>
+                  </div>
+                  <button
+                    onClick={e => {
+                      e.stopPropagation()
+                      setSelectedAssets([])
+                    }}
+                    className='ml-2 rounded p-0.5 hover:bg-destructive/10 hover:text-destructive'
+                    type='button'
+                  >
+                    <X className='w-3.5 h-3.5' />
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -532,18 +797,35 @@ const VideoIntentComposer = () => {
           <textarea
             value={prompt}
             onChange={e => setPrompt(e.target.value)}
-            placeholder={`What do you want to create?
-
-💡 Topic: How AI is changing healthcare
-🧠 Concept: Explain quantum computing simply
-📝 Script: Hook → Problem → Solution → CTA`}
-            rows={4}
+            placeholder='What do you want to create? Start with a website, attach files, or use the script template above.'
+            rows={5}
             className='w-full resize-none bg-transparent px-4 py-3 text-sm focus:outline-none placeholder:text-muted-foreground/60'
             disabled={stage !== 'compose'}
           />
 
           {/* Action row */}
-          <div className='px-4 pb-3 flex justify-end'>
+          <div className='flex items-center justify-between px-4 pb-4'>
+            <div className='flex items-center gap-4 text-xs text-muted-foreground'>
+              <button
+                type='button'
+                onClick={() => handleQuickStart('website')}
+                className='inline-flex items-center gap-1.5 transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50'
+                disabled={stage !== 'compose'}
+              >
+                <Globe className='h-3.5 w-3.5' />
+                Add URL
+              </button>
+              <button
+                type='button'
+                onClick={openAssetDialog}
+                className='inline-flex items-center gap-1.5 transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50'
+                disabled={stage !== 'compose'}
+              >
+                <Paperclip className='h-3.5 w-3.5' />
+                Attach
+              </button>
+            </div>
+
             {isSubmitting || stage === 'question' ? (
               <Button
                 onClick={handleStop}
@@ -565,7 +847,8 @@ const VideoIntentComposer = () => {
             )}
           </div>
         </div>
-      </div>
+        </div>
+      )}
     </div>
   )
 }

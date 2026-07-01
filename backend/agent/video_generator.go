@@ -16,7 +16,6 @@ import (
 	"github.com/shank318/coasterai/services"
 	"github.com/shank318/coasterai/services/brand_identity"
 	"github.com/shank318/coasterai/services/templates"
-	"github.com/shank318/coasterai/utils"
 	"go.uber.org/zap"
 	"strings"
 	"time"
@@ -498,48 +497,6 @@ func (a *agentV2) publishProcessingState(thinking string) {
 		Thinking: thinking,
 		State:    common.StateStatusProcessing,
 	})
-}
-
-func buildQuestionsToAsk(llmResponse *types.Union3ListAskUserQuestionOrScriptOrToolExtractContent) []*types.AskUserQuestion {
-	if llmResponse.IsScript() {
-		return []*types.AskUserQuestion{
-			{
-				QuestionType:       types.AskUserQuestionTypeGENERIC,
-				Question_text:      "Confirm if the script looks good?",
-				Allow_custom_entry: utils.Ptr(true),
-			},
-		}
-	}
-
-	questions := make([]*types.AskUserQuestion, 0)
-	if llmResponse.AsListAskUserQuestion() == nil {
-		return questions
-	}
-
-	for _, question := range *llmResponse.AsListAskUserQuestion() {
-		questionCopy := question
-		questions = append(questions, &questionCopy)
-	}
-
-	return questions
-}
-
-func attachScriptQuestion(result *common.RunResult, llmResponse *types.Union3ListAskUserQuestionOrScriptOrToolExtractContent) {
-	if result == nil || len(result.AskUserQuestions) == 0 || !llmResponse.IsScript() {
-		return
-	}
-
-	script := pbcore.Script{}
-	bamlScript := *llmResponse.AsScript()
-	for _, scriptItem := range bamlScript.Sections {
-		script.Items = append(script.Items, &pbcore.ScriptItem{
-			Name:      string(scriptItem.Name),
-			Narattion: scriptItem.Narration,
-		})
-	}
-
-	result.AskUserQuestions[0].Script = &script
-	result.AskUserQuestions[0].QuestionType = pbportal.AskUserQuestionType_ASK_USER_QUESTION_TYPE_SCRIPT
 }
 
 func (a *agentV2) runApplyPlanAsync(ctx context.Context, plan *types.GeneratedVideoPlan) (*common.RunResult, error) {

@@ -49,6 +49,7 @@ import { DualColorPicker } from "@/components/editor/animation/toolbars/stylers/
 import BackgroundSettings from "@/components/editor/settings/BackgroundSettings"
 import { BackgroundStyle } from "@coasterai/pb/coasterai/core/v1/slide_pb"
 import BrandBackgroundPreview from "@/components/brand/BrandBackgroundPreview"
+import { useSearchParams } from "next/navigation"
 
 const BRAND_PREVIEW_TEXT = "Brand Preview"
 
@@ -87,6 +88,7 @@ const getPrimaryBrandFont = (fonts: BrandFont[]) =>
 
 const BrandPage = () => {
     const { portalClient } = useClientsContext()
+    const searchParams = useSearchParams()
 
     const [identities, setIdentities] = useState<BrandIdentity[]>([])
     const [availableFonts, setAvailableFonts] = useState<string[]>([])
@@ -99,6 +101,13 @@ const BrandPage = () => {
     useEffect(() => {
         fetchBrandIdentities()
     }, [portalClient])
+
+    useEffect(() => {
+        const prefetchedWebsiteUrl = searchParams.get("websiteUrl")
+        if (!prefetchedWebsiteUrl) return
+
+        setWebsiteUrl((currentValue) => currentValue || prefetchedWebsiteUrl)
+    }, [searchParams])
 
     const fetchBrandIdentities = async () => {
         try {

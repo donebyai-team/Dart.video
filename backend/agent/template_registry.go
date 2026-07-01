@@ -58,6 +58,7 @@ func (r *TemplateRegistry) WithRandomTemplates(ctx context.Context) error {
 //   - if the item category is CTA, fetch CTA templates directly and stop there for that item.
 //   - otherwise, keep the item's narration as the semantic query, expand the item's category via
 //     scenes.RelatedCategories, and retrieve similar templates from that expanded category set.
+//
 // 4. Deduplicate templates across all passes using selectedTemplateIDs / seenTemplateIDs.
 //
 // Example:
@@ -267,6 +268,13 @@ func writeScene(b *strings.Builder, c *models.Template) {
 
 	b.WriteString("**Props**\n")
 	b.WriteString(schema)
+
+	if len(c.Config.Sections) > 0 &&
+		len(c.Config.Sections[0].Slides) > 0 &&
+		c.Config.Sections[0].Slides[0].DurationInFrames > 0 {
+		b.WriteString("\n")
+		b.WriteString(fmt.Sprintf("**Duration:** %d frames\n", c.Config.Sections[0].Slides[0].DurationInFrames))
+	}
 	b.WriteString("\n---\n\n")
 }
 

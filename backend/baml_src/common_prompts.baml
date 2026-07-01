@@ -203,7 +203,7 @@ template_string AnimationPrimitives(resume: VideoBranding) #"
 
     ## Sound Effects (optional)
     - Use **only** these built-in sound effects when they meaningfully enhance the animation:
-    - `mouse-click.wav` (clicks)
+    - `mouse-click.wav` (only for mouse clicks)
     - `whoosh.wav` or `whip.wav` (swipe, or reveal). Use them sparingly and synchronize them with the visual event.
     - Limit sound effects to at most 3 per scene, never use it in loops or maps. (MOST CRITICAL)
 
