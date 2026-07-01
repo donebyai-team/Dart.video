@@ -477,7 +477,7 @@ func (c GenerateAnimationCodeResponse) BamlTypeName() string {
 }
 
 type GenerateScriptPlan struct {
-	Plan Union2ListAskUserQuestionOrScript `json:"plan"`
+	Plan Union3ListAskUserQuestionOrScriptOrToolExtractContent `json:"plan"`
 }
 
 func (c *GenerateScriptPlan) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -495,7 +495,7 @@ func (c *GenerateScriptPlan) Decode(holder *cffi.CFFIValueClass, typeMap baml.Ty
 		switch key {
 
 		case "plan":
-			c.Plan = baml.Decode(valueHolder).Interface().(Union2ListAskUserQuestionOrScript)
+			c.Plan = baml.Decode(valueHolder).Interface().(Union3ListAskUserQuestionOrScriptOrToolExtractContent)
 
 		default:
 
@@ -1038,6 +1038,54 @@ func (c ScriptSection) Encode() (*cffi.HostValue, error) {
 
 func (c ScriptSection) BamlTypeName() string {
 	return "ScriptSection"
+}
+
+type ToolExtractContent struct {
+	Tool_name string   `json:"tool_name"`
+	Links     []string `json:"links"`
+}
+
+func (c *ToolExtractContent) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
+	typeName := holder.Name
+	if typeName.Namespace != cffi.CFFITypeNamespace_TYPES {
+		panic(fmt.Sprintf("expected cffi.CFFITypeNamespace_TYPES, got %s", string(typeName.Namespace.String())))
+	}
+	if typeName.Name != "ToolExtractContent" {
+		panic(fmt.Sprintf("expected ToolExtractContent, got %s", typeName.Name))
+	}
+
+	for _, field := range holder.Fields {
+		key := field.Key
+		valueHolder := field.Value
+		switch key {
+
+		case "tool_name":
+			c.Tool_name = baml.Decode(valueHolder).Interface().(string)
+
+		case "links":
+			c.Links = baml.Decode(valueHolder).Interface().([]string)
+
+		default:
+
+			panic(fmt.Sprintf("unexpected field: %s in class ToolExtractContent", key))
+
+		}
+	}
+
+}
+
+func (c ToolExtractContent) Encode() (*cffi.HostValue, error) {
+	fields := map[string]any{}
+
+	fields["tool_name"] = c.Tool_name
+
+	fields["links"] = c.Links
+
+	return baml.EncodeClass("ToolExtractContent", fields, nil)
+}
+
+func (c ToolExtractContent) BamlTypeName() string {
+	return "ToolExtractContent"
 }
 
 type VideoBranding struct {

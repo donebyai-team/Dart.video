@@ -21,7 +21,7 @@ class Script {
 }
 
 class GenerateScriptPlan {
-  plan (Script | AskUserQuestion[])
+  plan (Script | AskUserQuestion[] | ToolExtractContent)
 }
 
 function GenerateScript(input: ScriptPlannerRequest, conversation_history: Message[]) -> GenerateScriptPlan {

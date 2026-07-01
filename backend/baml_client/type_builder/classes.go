@@ -775,6 +775,42 @@ func (t *ScriptSectionClassView) Type() (baml.Type, error) {
 	return t.inner.Type()
 }
 
+type ToolExtractContentClassView struct {
+	inner baml.ClassBuilder
+}
+
+func (t *ToolExtractContentClassView) ListProperties() ([]ClassPropertyView, error) {
+	result, err := t.inner.ListProperties()
+	if err != nil {
+		return nil, err
+	}
+	builders := make([]ClassPropertyView, len(result))
+	for i, p := range result {
+		builders[i] = p
+	}
+	return builders, nil
+}
+
+func (t *ToolExtractContentClassView) PropertyTool_name() (ClassPropertyView, error) {
+	return t.inner.Property("tool_name")
+}
+
+func (t *ToolExtractContentClassView) PropertyLinks() (ClassPropertyView, error) {
+	return t.inner.Property("links")
+}
+
+func (t *TypeBuilder) ToolExtractContent() (*ToolExtractContentClassView, error) {
+	bld, err := t.inner.Class("ToolExtractContent")
+	if err != nil {
+		return nil, err
+	}
+	return &ToolExtractContentClassView{inner: bld}, nil
+}
+
+func (t *ToolExtractContentClassView) Type() (baml.Type, error) {
+	return t.inner.Type()
+}
+
 type VideoBrandingClassView struct {
 	inner baml.ClassBuilder
 }

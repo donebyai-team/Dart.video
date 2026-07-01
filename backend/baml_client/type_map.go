@@ -61,6 +61,8 @@ var typeMap = map[string]reflect.Type{
 	"STREAM_TYPES.ScriptPlannerRequest":          reflect.TypeOf(stream_types.ScriptPlannerRequest{}),
 	"TYPES.ScriptSection":                        reflect.TypeOf(types.ScriptSection{}),
 	"STREAM_TYPES.ScriptSection":                 reflect.TypeOf(stream_types.ScriptSection{}),
+	"TYPES.ToolExtractContent":                   reflect.TypeOf(types.ToolExtractContent{}),
+	"STREAM_TYPES.ToolExtractContent":            reflect.TypeOf(stream_types.ToolExtractContent{}),
 	"TYPES.VideoBranding":                        reflect.TypeOf(types.VideoBranding{}),
 	"STREAM_TYPES.VideoBranding":                 reflect.TypeOf(stream_types.VideoBranding{}),
 	"TYPES.VideoGenerationPlanRequest":           reflect.TypeOf(types.VideoGenerationPlanRequest{}),
@@ -70,11 +72,11 @@ var typeMap = map[string]reflect.Type{
 	"TYPES.ColorToken":          reflect.TypeOf(types.ColorToken("")),
 	"TYPES.VideoSection":        reflect.TypeOf(types.VideoSection("")),
 
-	"TYPES.AskUserQuestion__GenerateAnimationCodeResponse": reflect.TypeOf(types.Union2AskUserQuestionOrGenerateAnimationCodeResponse{}),
-	"TYPES.ColorToken__string":                             reflect.TypeOf(types.Union2ColorTokenOrString{}),
-	"TYPES.List__AskUserQuestion__Script":                  reflect.TypeOf(types.Union2ListAskUserQuestionOrScript{}),
-	"TYPES.string_assistant__string_tool__string_user":     reflect.TypeOf(types.Union3KassistantOrKtoolOrKuser{}),
+	"TYPES.AskUserQuestion__GenerateAnimationCodeResponse":    reflect.TypeOf(types.Union2AskUserQuestionOrGenerateAnimationCodeResponse{}),
+	"TYPES.ColorToken__string":                                reflect.TypeOf(types.Union2ColorTokenOrString{}),
+	"TYPES.string_assistant__string_tool__string_user":        reflect.TypeOf(types.Union3KassistantOrKtoolOrKuser{}),
+	"TYPES.List__AskUserQuestion__Script__ToolExtractContent": reflect.TypeOf(types.Union3ListAskUserQuestionOrScriptOrToolExtractContent{}),
 
-	"STREAM_TYPES.AskUserQuestion__GenerateAnimationCodeResponse": reflect.TypeOf(stream_types.Union2AskUserQuestionOrGenerateAnimationCodeResponse{}),
-	"STREAM_TYPES.List__AskUserQuestion__Script":                  reflect.TypeOf(stream_types.Union2ListAskUserQuestionOrScript{}),
+	"STREAM_TYPES.AskUserQuestion__GenerateAnimationCodeResponse":    reflect.TypeOf(stream_types.Union2AskUserQuestionOrGenerateAnimationCodeResponse{}),
+	"STREAM_TYPES.List__AskUserQuestion__Script__ToolExtractContent": reflect.TypeOf(stream_types.Union3ListAskUserQuestionOrScriptOrToolExtractContent{}),
 }

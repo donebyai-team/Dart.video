@@ -236,7 +236,6 @@ func (p *Portal) streamAgentRun(
 				return nil
 			}
 			logger.Info("planning completed, started apply plan async")
-			// runPlanning already spawned applyPlan in background.
 			return nil
 		}
 	}

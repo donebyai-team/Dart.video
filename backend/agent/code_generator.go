@@ -79,7 +79,7 @@ func NewCodeGeneratorAgent(
 		brandIdentityService: brandIdentityService,
 		state:                state,
 		session:              session,
-		toolRegistry:         common.NewToolRegistry(state, session, logger),
+		toolRegistry:         common.NewToolRegistry(state, session, nil, logger),
 		codeBuilder:          codeBuilder,
 	}
 }
@@ -330,17 +330,16 @@ func (l *codeGenerator) runPlanning(ctx context.Context, generatePlanRequest typ
 			return nil, agenterrors.LLMPlanningFailed("failed to generate scene", err)
 		}
 
-		if llmResponse.AsAskUserQuestion() != nil {
-			handled, result, err := l.toolRegistry.HandleAskQuestion(ctx, session, []*types.AskUserQuestion{llmResponse.AsAskUserQuestion()}, llmThinking, l.assetRegistry)
-			if handled {
-				return result, err
-			}
+		result, err = l.toolRegistry.HandleAnimationGeneration(ctx, session, llmResponse, llmThinking, l.assetRegistry)
+		if err != nil {
+			return nil, agenterrors.LLMPlanningFailed("failed to generate scene", err)
+		}
+
+		if result.Status == common.RunStatusWaitingForUserInput {
+			return result, nil
 		}
 
 		codeResponse := llmResponse.AsGenerateAnimationCodeResponse()
-		if codeResponse == nil {
-			return nil, agenterrors.Internal("codeResponse is missing", nil)
-		}
 
 		codeFilePath := fmt.Sprintf("templates/generated/%s", l.orgID)
 		if l.slideID != "" {

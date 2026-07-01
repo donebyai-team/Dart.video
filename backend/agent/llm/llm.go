@@ -36,7 +36,7 @@ type Service interface {
 		req types.ScriptPlannerRequest,
 		conversationHistory []types.Message,
 		onThinking func(thinking string),
-	) (*types.Union2ListAskUserQuestionOrScript, *string, error)
+	) (*types.Union3ListAskUserQuestionOrScriptOrToolExtractContent, *string, error)
 }
 
 type LLMOptions struct {
@@ -199,7 +199,7 @@ func (l *llmService) GeneratePlanV2(
 				zap.String("summary", summary),
 				zap.Float64("duration", duration),
 			)
-		
+
 			final.ThinkingSummary = utils.Ptr(summary)
 
 			return &final, nil
@@ -214,7 +214,7 @@ func (l *llmService) GenerateScript(
 	req types.ScriptPlannerRequest,
 	conversationHistory []types.Message,
 	onThinking func(thinking string),
-) (*types.Union2ListAskUserQuestionOrScript, *string, error) {
+) (*types.Union3ListAskUserQuestionOrScriptOrToolExtractContent, *string, error) {
 	l.logger.Info("🚀 Starting planning script generation..")
 
 	extractor := l.NewThinkingExtractor(NewOpenAIExtractor(), onThinking, thinkingMessages)

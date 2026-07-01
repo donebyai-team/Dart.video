@@ -19,6 +19,11 @@ class AskUserQuestion {
   attachmentUrl string? @description("attachment to get the clarification")
 }
 
+class ToolExtractContent {
+ tool_name "extract_content" @description("Use this tool to extract content from a link/website")
+ links string[]
+}
+
 class VideoBranding {
   brandGuideLines string? @description("user provided brand guidelines")
   brandColors string? @description("user provided brand tokens")

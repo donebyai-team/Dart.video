@@ -9,6 +9,7 @@ type RunStatus string
 
 const (
 	RunStatusCompleted           RunStatus = "COMPLETED"
+	RunStatusContinue            RunStatus = "CONTINUE"
 	RunStatusWaitingForUserInput RunStatus = "WAITING_FOR_USER_INPUT"
 )
 

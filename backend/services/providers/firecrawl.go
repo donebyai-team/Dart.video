@@ -3,8 +3,10 @@ package providers
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/go-retryablehttp"
@@ -19,6 +21,11 @@ type FontInfo struct {
 // Format represents a Firecrawl output format entry.
 type Format struct {
 	Type string `json:"type"`
+}
+
+type Parser struct {
+	Type     string `json:"type"`
+	MaxPages int    `json:"maxPages"`
 }
 
 type BrandingResponse struct {
@@ -39,6 +46,7 @@ const (
 type ScrapeRequest struct {
 	URL             string   `json:"url"`
 	Formats         []Format `json:"formats"`
+	Parsers         []Parser `json:"parsers"`
 	OnlyMainContent *bool    `json:"onlyMainContent,omitempty"`
 	IncludeTags     []string `json:"includeTags,omitempty"`
 	ExcludeTags     []string `json:"excludeTags,omitempty"`
@@ -54,6 +62,7 @@ type ScrapeResponse struct {
 	Data    struct {
 		Branding BrandingResponse       `json:"branding"`
 		Metadata map[string]interface{} `json:"metadata"`
+		Markdown string                 `json:"markdown"`
 	} `json:"data"`
 	Error string `json:"error"`
 }
@@ -78,9 +87,31 @@ func NewFireCrawlClient(apiKey string) *FirecrawlClient {
 	}
 }
 
-// doRequest performs an HTTP request with retry logic and returns the response body.
+var ErrUnsupportedWebsite = errors.New("firecrawl: unsupported website")
+
+type FirecrawlError struct {
+	StatusCode int
+	Message    string
+	Err        error
+}
+
+func (e *FirecrawlError) Error() string {
+	return e.Message
+}
+
+func (e *FirecrawlError) Unwrap() error {
+	return e.Err
+}
+
+type errorResponse struct {
+	Success bool   `json:"success"`
+	Error   string `json:"error"`
+}
+
+// doRequest performs an HTTP request and converts Firecrawl API errors into typed errors.
 func (c *FirecrawlClient) doRequest(ctx context.Context, method, path string, body []byte) ([]byte, error) {
 	url := fmt.Sprintf("%s%s", c.baseURL, path)
+
 	headers := map[string]string{
 		"Authorization": "Bearer " + c.apiKey,
 	}
@@ -93,14 +124,30 @@ func (c *FirecrawlClient) doRequest(ctx context.Context, method, path string, bo
 		return nil, err
 	}
 
-	if statusCode < 200 || statusCode >= 300 {
-		return nil, fmt.Errorf("firecrawl error: status=%d body=%s", statusCode, string(respBytes))
+	if statusCode >= http.StatusOK && statusCode < http.StatusMultipleChoices {
+		return respBytes, nil
 	}
 
-	return respBytes, nil
+	var resp errorResponse
+	if err := json.Unmarshal(respBytes, &resp); err == nil && resp.Error != "" {
+		firecrawlErr := &FirecrawlError{
+			StatusCode: statusCode,
+			Message:    resp.Error,
+		}
+
+		if strings.Contains(strings.ToLower(resp.Error), "do not support this site") {
+			firecrawlErr.Err = ErrUnsupportedWebsite
+		}
+
+		return nil, firecrawlErr
+	}
+
+	return nil, &FirecrawlError{
+		StatusCode: statusCode,
+		Message:    fmt.Sprintf("request failed with status %d", statusCode),
+	}
 }
 
-// Scrape executes a Firecrawl scrape request.
 func (c *FirecrawlClient) Scrape(ctx context.Context, req ScrapeRequest) (*ScrapeResponse, error) {
 	if req.URL == "" {
 		return nil, fmt.Errorf("scrape url is required")
@@ -121,11 +168,21 @@ func (c *FirecrawlClient) Scrape(ctx context.Context, req ScrapeRequest) (*Scrap
 		return nil, fmt.Errorf("unmarshal response: %w", err)
 	}
 
+	// Defensive check in case Firecrawl returns success=false with HTTP 200.
 	if !parsed.Success {
-		if parsed.Error != "" {
-			return nil, fmt.Errorf("firecrawl error: %s", parsed.Error)
+		firecrawlErr := &FirecrawlError{
+			Message: parsed.Error,
 		}
-		return nil, fmt.Errorf("firecrawl scrape unsuccessful")
+
+		if strings.Contains(strings.ToLower(parsed.Error), "do not support this site") {
+			firecrawlErr.Err = ErrUnsupportedWebsite
+		}
+
+		if firecrawlErr.Message == "" {
+			firecrawlErr.Message = "firecrawl scrape unsuccessful"
+		}
+
+		return nil, firecrawlErr
 	}
 
 	return &parsed, nil

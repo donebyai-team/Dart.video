@@ -97,7 +97,7 @@ func NewAgentV2(
 		state:                state,
 		session:              session,
 		codeGenerator:        &codeGenerator{logger: logger},
-		toolRegistry:         common.NewToolRegistry(state, session, logger),
+		toolRegistry:         common.NewToolRegistry(state, session, brandIdentityService.GetScrapingClient(), logger),
 	}
 }
 
@@ -281,29 +281,68 @@ func (a *agentV2) injectMediaAssets(ctx context.Context, input *pbportal.CreateV
 	return nil
 }
 
-func (a *agentV2) runPlanningScript(ctx context.Context, req types.ScriptPlannerRequest, session *common.SessionContext) (result *common.RunResult, retErr error) {
-	history, _, err := a.session.ConvertToContextMessages(ctx, session.ConversationHistory, a.assetRegistry)
-	if err != nil {
-		return nil, err
-	}
+const maxPlanningIterations = 5
 
+func (a *agentV2) runPlanningScript(
+	ctx context.Context,
+	req types.ScriptPlannerRequest,
+	session *common.SessionContext,
+) (*common.RunResult, error) {
 	a.publishProcessingState("Generating script...")
-	llmResponse, llmThinking, err := a.llmService.GenerateScript(ctx, req, history, func(chunk string) {
-		a.publishProcessingState(chunk)
-	})
-	if err != nil {
-		return nil, agenterrors.LLMPlanningFailed("failed to generate video plan", err)
+
+	for iteration := 0; iteration < maxPlanningIterations; iteration++ {
+		history, _, err := a.session.ConvertToContextMessages(
+			ctx,
+			session.ConversationHistory,
+			a.assetRegistry,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		llmResponse, llmThinking, err := a.llmService.GenerateScript(
+			ctx,
+			req,
+			history,
+			func(chunk string) {
+				a.publishProcessingState(chunk)
+			},
+		)
+		if err != nil {
+			return nil, agenterrors.LLMPlanningFailed("failed to generate video plan", err)
+		}
+
+		result, err := a.toolRegistry.HandleScriptPlanner(
+			ctx,
+			session,
+			llmResponse,
+			llmThinking,
+			a.assetRegistry,
+		)
+		if err != nil {
+			return nil, agenterrors.LLMPlanningFailed("failed to handle script planner", err)
+		}
+
+		switch result.Status {
+		case common.RunStatusWaitingForUserInput:
+			return result, nil
+
+		case common.RunStatusContinue:
+			// HandleScriptPlanner should have already updated the
+			// conversation history in the session. Rebuild history
+			// and invoke the LLM again.
+			a.publishProcessingState("Collected details, generating script...")
+			continue
+
+		default:
+			return result, nil
+		}
 	}
 
-	questionsToAsk := buildQuestionsToAsk(llmResponse)
-
-	_, result, err = a.toolRegistry.HandleAskQuestion(ctx, session, questionsToAsk, llmThinking, a.assetRegistry)
-
-	if llmResponse.IsScript() {
-		attachScriptQuestion(result, llmResponse)
-	}
-
-	return result, err
+	return nil, agenterrors.LLMPlanningFailed(
+		"maximum planning iterations reached",
+		nil,
+	)
 }
 
 func (a *agentV2) generateScenes(
@@ -461,7 +500,7 @@ func (a *agentV2) publishProcessingState(thinking string) {
 	})
 }
 
-func buildQuestionsToAsk(llmResponse *types.Union2ListAskUserQuestionOrScript) []*types.AskUserQuestion {
+func buildQuestionsToAsk(llmResponse *types.Union3ListAskUserQuestionOrScriptOrToolExtractContent) []*types.AskUserQuestion {
 	if llmResponse.IsScript() {
 		return []*types.AskUserQuestion{
 			{
@@ -485,7 +524,7 @@ func buildQuestionsToAsk(llmResponse *types.Union2ListAskUserQuestionOrScript) [
 	return questions
 }
 
-func attachScriptQuestion(result *common.RunResult, llmResponse *types.Union2ListAskUserQuestionOrScript) {
+func attachScriptQuestion(result *common.RunResult, llmResponse *types.Union3ListAskUserQuestionOrScriptOrToolExtractContent) {
 	if result == nil || len(result.AskUserQuestions) == 0 || !llmResponse.IsScript() {
 		return
 	}

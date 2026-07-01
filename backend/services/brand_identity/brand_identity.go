@@ -28,6 +28,7 @@ type BrandIdentity interface {
 	GetSupportedFonts(ctx context.Context, orgID string) []string
 	GetBrandIdentityByID(ctx context.Context, ID string) (*models.BrandIdentity, error)
 	GetBrandIdentity(ctx context.Context, ID string) (*models.BrandIdentity, error)
+	GetScrapingClient() *providers.FirecrawlClient
 }
 
 type brandIdentity struct {
@@ -36,6 +37,10 @@ type brandIdentity struct {
 	fireCrawlClient  *providers.FirecrawlClient
 	mediaStore       services.MediaStore
 	googleFontLoader fontLoader
+}
+
+func (b brandIdentity) GetScrapingClient() *providers.FirecrawlClient {
+	return b.fireCrawlClient
 }
 
 func (b brandIdentity) GetBrandIdentity(ctx context.Context, ID string) (*models.BrandIdentity, error) {
