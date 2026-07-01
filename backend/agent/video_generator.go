@@ -128,11 +128,13 @@ func (a *agentV2) Continue(ctx context.Context, options ContinueSessionOptions) 
 		return nil, err
 	}
 
-	generatePlanRequest := a.buildScriptPlannerRequest(session.Request)
-
+	// if script if approved, generate scenes
 	if options.Script != nil && userResponse == SCRIPT_CONFORMATION_RESPONSE {
 		return a.generateScenes(ctx, a.buildVideoGenerationPlanRequest(session.Request), options.Script)
 	}
+
+	// else continue with changes
+	generatePlanRequest := a.buildScriptPlannerRequest(session.Request)
 
 	a.appendContinueMessages(session, options.Script, userResponse, options.SelectedMediaAssets)
 
@@ -306,8 +308,11 @@ func (a *agentV2) runPlanningScript(ctx context.Context, req types.ScriptPlanner
 
 func (a *agentV2) generateScenes(
 	ctx context.Context,
-	req types.VideoGenerationPlanRequest,
-	script *pbcore.Script) (result *common.RunResult, retErr error) {
+	req types.VideoGenerationPlanRequest, script *pbcore.Script) (result *common.RunResult, retErr error) {
+	if script == nil {
+		return nil, agenterrors.InvalidInput("script is required", nil)
+	}
+
 	defer func() {
 		if retErr == nil {
 			return
@@ -331,7 +336,10 @@ func (a *agentV2) generateScenes(
 
 	a.templateRegistry = registry
 
+	// Set the available templates
 	req.ComponentList = a.templateRegistry.BuildPrompt()
+	// Set the script
+	req.Prompt = ToScript(script)
 
 	// Generate and validate upto max attempts
 	for attempt := 0; attempt < maxAttempts; attempt++ {

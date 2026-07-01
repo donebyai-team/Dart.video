@@ -199,6 +199,9 @@ func (l *llmService) GeneratePlanV2(
 				zap.String("summary", summary),
 				zap.Float64("duration", duration),
 			)
+		
+			final.ThinkingSummary = utils.Ptr(summary)
+
 			return &final, nil
 		}
 	}
