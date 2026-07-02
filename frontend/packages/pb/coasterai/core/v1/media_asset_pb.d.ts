@@ -130,6 +130,11 @@ export enum MediaType {
    * @generated from enum value: MEDIA_TYPE_AUDIO = 5;
    */
   AUDIO = 5,
+
+  /**
+   * @generated from enum value: MEDIA_TYPE_FILE = 6;
+   */
+  FILE = 6,
 }
 
 /**

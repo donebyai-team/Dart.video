@@ -31,7 +31,6 @@ const BrandBackgroundPreviewComposition = ({
 }: BrandBackgroundPreviewCompositionProps) => {
   return (
     <BackgroundLayer backgroundStyle={backgroundStyle}>
-      <AbsoluteFill className="bg-black/10" />
       <AbsoluteFill
         className={cn("items-center justify-center px-12 text-center", overlayClassName)}
       >

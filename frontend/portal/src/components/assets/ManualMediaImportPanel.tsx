@@ -1,5 +1,6 @@
 'use client'
 
+import type { DragEvent } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -8,7 +9,7 @@ import { portalClient } from '@/services/grpc'
 import { uploadMedia } from '@/services/utils'
 import { getConnectError } from '@/utils/error'
 import AssetPreviewDialog from '@/components/assets/AssetPreviewDialog'
-import { ImagePlus, Loader2, Upload, Video, X } from 'lucide-react'
+import { FileText, ImagePlus, Loader2, Upload, X } from 'lucide-react'
 import { MediaAsset } from '@coasterai/pb/coasterai/core/v1/media_asset_pb'
 
 export interface ManualMediaConfirmPayload {
@@ -21,10 +22,23 @@ interface ManualMediaImportPanelProps {
   onConfirm: (payload: ManualMediaConfirmPayload) => Promise<void> | void
   canConfirm?: boolean
   showPreview?: boolean
-  mediaType?: 'image' | 'video'
+  mediaType?: 'image' | 'video' | 'file'
 }
 
 const isVideoAsset = (asset: MediaAsset) => asset.mimeType.startsWith('video/')
+const isPdfAsset = (asset: MediaAsset) => asset.mimeType === 'application/pdf'
+const getAssetPreviewKind = (asset: MediaAsset): 'image' | 'video' | 'pdf' => {
+  if (isVideoAsset(asset)) {
+    return 'video'
+  }
+
+  if (isPdfAsset(asset)) {
+    return 'pdf'
+  }
+
+  return 'image'
+}
+const MAX_UPLOAD_FILES = 5
 
 const ManualMediaImportPanel = ({
   onClose,
@@ -32,7 +46,7 @@ const ManualMediaImportPanel = ({
   canConfirm = true,
   showPreview = true,
   mediaType
-}: ManualMediaImportPanelProps & { mediaType?: 'image' | 'video' }) => {
+}: ManualMediaImportPanelProps) => {
   const [assets, setAssets] = useState<MediaAsset[]>([])
   const [isLoadingAssets, setIsLoadingAssets] = useState(true)
   const [isUploading, setIsUploading] = useState(false)
@@ -40,7 +54,10 @@ const ManualMediaImportPanel = ({
   const [selectedSectionNote, setSelectedSectionNote] = useState('')
   const [previewAssetId, setPreviewAssetId] = useState<string | null>(null)
   const [previewSectionNote, setPreviewSectionNote] = useState('')
+  const [isDragActive, setIsDragActive] = useState(false)
   const inputRef = useRef<HTMLInputElement | null>(null)
+
+  const acceptValue = mediaType === 'file' ? 'application/pdf,.pdf' : mediaType ? `${mediaType}/*` : 'image/*,video/*,application/pdf,.pdf'
 
   const selectedAsset = useMemo(
     () => assets.find(asset => asset.id === selectedAssetId) ?? null,
@@ -56,7 +73,15 @@ const ManualMediaImportPanel = ({
     try {
       const res = await portalClient.getMediaAssets({})
       if (mediaType) {
-        setAssets(res.assets.filter(asset => asset.mimeType.startsWith(mediaType!)))
+        setAssets(
+          res.assets.filter((asset: MediaAsset) => {
+            if (mediaType === 'file') {
+              return isPdfAsset(asset)
+            }
+
+            return asset.mimeType.startsWith(mediaType)
+          })
+        )
       } else {
         setAssets(res.assets)
       }
@@ -76,15 +101,51 @@ const ManualMediaImportPanel = ({
     loadAssets()
   }, [])
 
-  const handleUploadFiles = async (files: FileList | null) => {
-    if (!files || files.length === 0) {
+  const handleUploadFiles = async (fileList: FileList | File[] | null) => {
+    const files = fileList ? Array.from(fileList) : []
+    if (files.length === 0) {
+      return
+    }
+
+    if (files.length > MAX_UPLOAD_FILES) {
+      toast({
+        title: 'Too many files',
+        description: `You can upload up to ${MAX_UPLOAD_FILES} files at a time.`,
+        variant: 'destructive'
+      })
+      return
+    }
+
+    const invalidFile = files.find(file => {
+      if (mediaType === 'image') {
+        return !file.type.startsWith('image/')
+      }
+
+      if (mediaType === 'video') {
+        return !file.type.startsWith('video/')
+      }
+
+      if (mediaType === 'file') {
+        return file.type !== 'application/pdf'
+      }
+
+      return !file.type.startsWith('image/') && !file.type.startsWith('video/') && file.type !== 'application/pdf'
+    })
+
+    if (invalidFile) {
+      const expectedLabel = mediaType === 'file' ? 'PDF files' : mediaType ? `${mediaType}s` : 'images, videos, or PDF files'
+      toast({
+        title: 'Unsupported file type',
+        description: `Please upload only ${expectedLabel}.`,
+        variant: 'destructive'
+      })
       return
     }
 
     setIsUploading(true)
     try {
       const uploaded: MediaAsset[] = []
-      for (const file of Array.from(files)) {
+      for (const file of files) {
         uploaded.push(await uploadMedia(file))
       }
 
@@ -106,6 +167,30 @@ const ManualMediaImportPanel = ({
         inputRef.current.value = ''
       }
     }
+  }
+
+  const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    if (!isUploading) {
+      setIsDragActive(true)
+    }
+  }
+
+  const handleDragLeave = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    if (event.currentTarget.contains(event.relatedTarget as Node | null)) {
+      return
+    }
+    setIsDragActive(false)
+  }
+
+  const handleDrop = async (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    setIsDragActive(false)
+    if (isUploading) {
+      return
+    }
+    await handleUploadFiles(event.dataTransfer.files)
   }
 
   const handleSelectAsset = async (asset: MediaAsset) => {
@@ -155,7 +240,7 @@ const ManualMediaImportPanel = ({
       <AssetPreviewDialog
         title={previewAsset?.fileName || 'Selected asset'}
         previewUrl={previewAsset?.url}
-        mediaKind={previewAsset && isVideoAsset(previewAsset) ? 'video' : 'image'}
+        mediaKind={previewAsset ? getAssetPreviewKind(previewAsset) : 'image'}
         width={previewAsset?.width}
         height={previewAsset?.height}
         open={!!previewAsset}
@@ -189,20 +274,32 @@ const ManualMediaImportPanel = ({
               <input
                 ref={inputRef}
                 type='file'
-                accept='image/*,video/*'
+                accept={acceptValue}
                 multiple
                 className='hidden'
                 onChange={e => void handleUploadFiles(e.target.files)}
               />
-              <Button
-                size='sm'
-                className='w-full gap-2'
-                onClick={() => inputRef.current?.click()}
-                disabled={isUploading}
+              <div
+                className={`w-full rounded-lg border border-dashed p-3 transition-colors ${
+                  isDragActive ? 'border-primary bg-primary/5' : 'border-border'
+                } ${isUploading ? 'opacity-60' : ''}`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={e => void handleDrop(e)}
               >
-                {isUploading ? <Loader2 className='w-4 h-4 animate-spin' /> : <Upload className='w-4 h-4' />}
-                Upload media
-              </Button>
+                <Button
+                  size='sm'
+                  className='w-full gap-2'
+                  onClick={() => inputRef.current?.click()}
+                  disabled={isUploading}
+                >
+                  {isUploading ? <Loader2 className='w-4 h-4 animate-spin' /> : <Upload className='w-4 h-4' />}
+                  Upload media
+                </Button>
+                <p className='mt-2 text-center text-[11px] text-muted-foreground'>
+                  Drag and drop up to {MAX_UPLOAD_FILES} {mediaType === 'file' ? 'PDF files' : mediaType ? `${mediaType}s` : 'images, videos, or PDF files'}, or click to browse.
+                </p>
+              </div>
             </div>
 
             <div className='space-y-2'>
@@ -227,6 +324,11 @@ const ManualMediaImportPanel = ({
                           preload="metadata"
                           muted
                         />
+                      ) : isPdfAsset(asset) ? (
+                        <div className='mb-2 flex h-28 w-full flex-col items-center justify-center rounded border bg-muted/40 text-muted-foreground'>
+                          <FileText className='mb-2 h-8 w-8' />
+                          <span className='text-[11px] font-medium'>PDF</span>
+                        </div>
                       ) : asset.url ? (
                         <img src={asset.thumbnailUrl || asset.url} alt={asset.fileName} className='mb-2 h-28 w-full rounded object-cover' />
                       ) : (

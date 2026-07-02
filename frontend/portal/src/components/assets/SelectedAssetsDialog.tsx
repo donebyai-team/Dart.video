@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Loader2, Trash2, Upload, Video } from 'lucide-react'
+import { FileText, Loader2, Trash2, Upload, Video } from 'lucide-react'
 
 import AssetPreviewDialog from '@/components/assets/AssetPreviewDialog'
 import { Button } from '@/components/ui/button'
@@ -34,6 +34,18 @@ type PreviewState = {
 } | null
 
 const isVideoAsset = (asset: MediaAsset) => asset.mimeType.startsWith('video/')
+const isPdfAsset = (asset: MediaAsset) => asset.mimeType === 'application/pdf'
+const getAssetPreviewKind = (asset: MediaAsset): 'image' | 'video' | 'pdf' => {
+  if (isVideoAsset(asset)) {
+    return 'video'
+  }
+
+  if (isPdfAsset(asset)) {
+    return 'pdf'
+  }
+
+  return 'image'
+}
 
 const SelectedAssetsDialog = ({
   open,
@@ -95,7 +107,7 @@ const SelectedAssetsDialog = ({
       <AssetPreviewDialog
         title={previewState?.asset.fileName || 'Selected asset'}
         previewUrl={previewState?.asset.url}
-        mediaKind={previewState?.asset && isVideoAsset(previewState.asset) ? 'video' : 'image'}
+        mediaKind={previewState?.asset ? getAssetPreviewKind(previewState.asset) : 'image'}
         width={previewState?.asset.width}
         height={previewState?.asset.height}
         open={!!previewState}
@@ -152,6 +164,11 @@ const SelectedAssetsDialog = ({
                             preload='metadata'
                             muted
                           />
+                        ) : isPdfAsset(asset) ? (
+                          <div className='mb-3 flex h-32 w-full flex-col items-center justify-center rounded border bg-muted/40 text-muted-foreground'>
+                            <FileText className='mb-2 h-8 w-8' />
+                            <span className='text-xs font-medium'>PDF</span>
+                          </div>
                         ) : (
                           <img
                             src={asset.thumbnailUrl || asset.url}

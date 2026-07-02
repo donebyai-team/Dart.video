@@ -9,6 +9,15 @@ import BrandColors from "@/components/editor/settings/BrandColors"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 const FALLBACK_COLOR = "#000000"
+const HEX_COLOR_REGEX = /^#[0-9A-Fa-f]{6}$/
+
+function isValidHexColor(value: string | undefined) {
+  if (!value) {
+    return false
+  }
+
+  return HEX_COLOR_REGEX.test(value)
+}
 
 function getTriggerBackground(color: string | undefined, triggerStyle: "gradient" | "active-color") {
   if (triggerStyle !== "active-color") {
@@ -48,6 +57,7 @@ export function DualColorPicker({
   const [open, setOpen] = useState(false)
   const [tab, setTab] = useState<'primary' | 'secondary'>('primary')
   const [applyPrimaryToAllScenes, setApplyPrimaryToAllScenes] = useState(false)
+  const [hexInput, setHexInput] = useState(primaryColor)
 
   const hasSecondary = !!secondaryColor && !!onSecondaryColor
   const activeTab = hasSecondary ? tab : 'primary'
@@ -75,6 +85,19 @@ export function DualColorPicker({
       setApplyPrimaryToAllScenes(false)
     }
   }, [applyPrimaryToAllScenes, showApplyPrimaryOption])
+
+  useEffect(() => {
+    setHexInput(activeColorValue || FALLBACK_COLOR)
+  }, [activeColorValue, activeTab])
+
+  const commitHexInput = (nextColor: string) => {
+    if (activeTab === 'primary') {
+      handlePrimaryColorChange(nextColor)
+      return
+    }
+
+    onChangeActive(nextColor)
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -177,15 +200,19 @@ export function DualColorPicker({
           />
 
           <input
-            value={activeColorValue || FALLBACK_COLOR}
+            value={hexInput}
             onChange={(e) => {
               const nextColor = e.target.value
-              if (activeTab === 'primary') {
-                handlePrimaryColorChange(nextColor)
-                return
-              }
+              setHexInput(nextColor)
 
-              onChangeActive(nextColor)
+              if (isValidHexColor(nextColor)) {
+                commitHexInput(nextColor)
+              }
+            }}
+            onBlur={() => {
+              if (!isValidHexColor(hexInput)) {
+                setHexInput(activeColorValue || FALLBACK_COLOR)
+              }
             }}
             className="w-full text-xs px-2 py-1 border border-border rounded bg-muted"
           />

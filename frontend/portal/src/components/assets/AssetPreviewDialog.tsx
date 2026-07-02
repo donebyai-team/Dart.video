@@ -7,7 +7,7 @@ interface AssetPreviewDialogProps {
   title: string
   subtitle?: string
   previewUrl?: string
-  mediaKind: 'image' | 'video'
+  mediaKind: 'image' | 'video' | 'pdf'
   width?: number
   height?: number
   open: boolean
@@ -37,6 +37,7 @@ const AssetPreviewDialog = ({
   onSelect
 }: AssetPreviewDialogProps) => {
   const isVideo = mediaKind === 'video'
+  const isPdf = mediaKind === 'pdf'
   const minNoteLength = 20
   // const isNoteValid = !isVideo || note.trim().length >= minNoteLength
   const isNoteValid = true
@@ -86,11 +87,17 @@ const AssetPreviewDialog = ({
 
           <div className='bg-muted/20 p-6'>
             <div className='flex h-full items-center justify-center rounded-xl border border-border bg-background p-4'>
-              {mediaKind === 'video' ? (
+              {isVideo ? (
                 <video
                   src={previewUrl}
                   controls
                   className='max-h-full max-w-full rounded-lg'
+                />
+              ) : isPdf ? (
+                <iframe
+                  src={previewUrl}
+                  title={title}
+                  className='h-[70vh] w-full rounded-lg'
                 />
               ) : (
                 <img src={previewUrl} style={{ objectFit: 'contain' }} />

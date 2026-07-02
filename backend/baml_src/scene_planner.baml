@@ -67,6 +67,8 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     - The voiceover should describe or reinforce what is shown in the scene.
     - It does not need to match the on-screen text verbatim; it should communicate the same idea naturally.
     - Not every scene requires a voiceover. Omit it when silence or visuals alone are more effective.
+    - Ensure the voiceover comfortably fits within the provided voiceover budget, preferably finishing slightly early rather than running long.
+    - If an idea naturally continues across consecutive scenes, split the narration at a natural pause or sentence boundary. Avoid cutting a sentence awkwardly just to fit the duration.
 
     ## Data
     Define scene props in `SceneElement` using JSON format.

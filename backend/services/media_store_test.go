@@ -43,6 +43,12 @@ func TestDetectMediaTypeAudio(t *testing.T) {
 	}
 }
 
+func TestDetectMediaTypePDF(t *testing.T) {
+	if got := DetectMediaType("application/pdf"); got != pbcore.MediaType_MEDIA_TYPE_FILE {
+		t.Fatalf("expected file media type, got %v", got)
+	}
+}
+
 func TestEncodePCMToWAVAndExtractDuration(t *testing.T) {
 	pcmData := make([]byte, 48000)
 

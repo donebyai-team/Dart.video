@@ -74,6 +74,36 @@ const buildWebsitePrompt = (urls: string[]) => {
   return `${PROMPT_TEMPLATES.website}\n\nWebsites:\n${urls.map(url => `- ${url}`).join('\n')}`
 }
 
+const REFERENCE_URLS_HEADER = 'Reference URLs:'
+
+const stripManagedReferenceUrls = (value: string) => {
+  const websiteSectionIndex = value.indexOf('\n\nWebsites:\n')
+  if (websiteSectionIndex >= 0) {
+    return value.slice(0, websiteSectionIndex).trimEnd()
+  }
+
+  const referenceSectionIndex = value.indexOf(`\n\n${REFERENCE_URLS_HEADER}\n`)
+  if (referenceSectionIndex >= 0) {
+    return value.slice(0, referenceSectionIndex).trimEnd()
+  }
+
+  return value.trimEnd()
+}
+
+const buildPromptWithReferenceUrls = (value: string, urls: string[]) => {
+  const basePrompt = stripManagedReferenceUrls(value)
+
+  if (urls.length === 0) {
+    return basePrompt
+  }
+
+  if (!basePrompt || isPromptTemplate(basePrompt)) {
+    return buildWebsitePrompt(urls)
+  }
+
+  return `${basePrompt}\n\n${REFERENCE_URLS_HEADER}\n${urls.map(url => `- ${url}`).join('\n')}`
+}
+
 const VideoIntentComposer = () => {
   const [prompt, setPrompt] = useState('')
   const [resolutionId, setResolutionId] = useState(defaultEditorConfig.resolution.default)
@@ -378,6 +408,17 @@ const VideoIntentComposer = () => {
   }
 
   const handleSelectUploadedAsset = async ({ asset, sectionNote }: { asset: MediaAsset; sectionNote?: string }) => {
+    // Composer-level PDFs are treated as URL context so planning reads the document link from the prompt
+    // instead of sending the file through selected media assets.
+    if (stage === 'compose' && asset.mimeType === 'application/pdf' && isValidHttpUrl(asset.url)) {
+      const nextUrls = Array.from(new Set([...attachedWebsiteUrls, asset.url]))
+      setAttachedWebsiteUrls(nextUrls)
+      setQuickStartMode(null)
+      setPrompt(current => buildPromptWithReferenceUrls(current, nextUrls))
+      setAssetDialogOpen(false)
+      return
+    }
+
     if (stage === 'question') {
       upsertQuestionAsset(asset, sectionNote)
     } else {
@@ -434,10 +475,7 @@ const VideoIntentComposer = () => {
     setAttachedWebsiteUrls(nextUrls)
     setQuickStartMode(null)
     setComposerWebsiteUrl('')
-
-    if (isPromptTemplate(prompt)) {
-      setPrompt(buildWebsitePrompt(nextUrls))
-    }
+    setPrompt(current => buildPromptWithReferenceUrls(current, nextUrls))
   }
 
   const handleBrandSetupSubmit = () => {
@@ -524,6 +562,7 @@ const VideoIntentComposer = () => {
       <Dialog open={assetDialogOpen} onOpenChange={setAssetDialogOpen}>
         <DialogContent className='max-w-2xl p-0 overflow-hidden' forceMount>
           <ManualMediaImportPanel
+            // showPreview={false}
             onClose={() => setAssetDialogOpen(false)}
             onConfirm={handleSelectUploadedAsset}
             canConfirm={stage === 'compose' || stage === 'question'}
@@ -758,9 +797,7 @@ const VideoIntentComposer = () => {
                     onClick={() => {
                       const nextUrls = attachedWebsiteUrls.filter(currentUrl => currentUrl !== url)
                       setAttachedWebsiteUrls(nextUrls)
-                      if (prompt.trim().startsWith(PROMPT_TEMPLATES.website)) {
-                        setPrompt(buildWebsitePrompt(nextUrls))
-                      }
+                      setPrompt(current => buildPromptWithReferenceUrls(current, nextUrls))
                     }}
                   >
                     <X className='h-3.5 w-3.5' />

@@ -11,6 +11,7 @@ import (
 	"github.com/shank318/coasterai/services"
 	"github.com/shank318/coasterai/services/templates"
 	"go.uber.org/zap"
+	"math"
 	"sort"
 	"strings"
 )
@@ -269,13 +270,42 @@ func writeScene(b *strings.Builder, c *models.Template) {
 	b.WriteString("**Props**\n")
 	b.WriteString(schema)
 
+	// add duration and voiceover budget
 	if len(c.Config.Sections) > 0 &&
 		len(c.Config.Sections[0].Slides) > 0 &&
 		c.Config.Sections[0].Slides[0].DurationInFrames > 0 {
+
+		durationInFrames := c.Config.Sections[0].Slides[0].DurationInFrames
+
 		b.WriteString("\n")
-		b.WriteString(fmt.Sprintf("**Duration:** %d frames\n", c.Config.Sections[0].Slides[0].DurationInFrames))
+		b.WriteString(fmt.Sprintf("**Duration:** %d frames\n", durationInFrames))
+
+		minWords, maxWords := VoiceoverWordBudget(durationInFrames)
+		b.WriteString(fmt.Sprintf("**Voiceover Budget:** %d-%d words\n", minWords, maxWords))
 	}
 	b.WriteString("\n---\n\n")
+}
+
+const (
+	fps            = 30.0
+	wordsPerSecond = 2.3 // Slightly conservative (~138 WPM)
+)
+
+func VoiceoverWordBudget(durationInFrames int32) (minWords, maxWords int) {
+	seconds := float64(durationInFrames) / fps
+	target := seconds * wordsPerSecond
+
+	minWords = int(math.Floor(target * 0.9))
+	maxWords = int(math.Ceil(target * 1.1))
+
+	if minWords < 1 {
+		minWords = 1
+	}
+	if maxWords < minWords {
+		maxWords = minWords
+	}
+
+	return
 }
 
 func (r *TemplateRegistry) BuildPrompt() string {

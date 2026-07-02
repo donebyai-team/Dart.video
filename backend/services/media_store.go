@@ -187,6 +187,8 @@ func IsImageTypeSupported(imageURL string) bool {
 
 func DetectMediaType(contentType string) pbcore.MediaType {
 	switch {
+	case strings.HasPrefix(contentType, "application/pdf"):
+		return pbcore.MediaType_MEDIA_TYPE_FILE
 	case strings.HasPrefix(contentType, "image/svg"):
 		return pbcore.MediaType_MEDIA_TYPE_SVG
 	case strings.HasPrefix(contentType, "image/"):

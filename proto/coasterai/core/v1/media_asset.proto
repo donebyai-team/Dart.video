@@ -11,6 +11,7 @@ enum MediaType {
   MEDIA_TYPE_SVG = 3;
   MEDIA_TYPE_CODE = 4;
   MEDIA_TYPE_AUDIO = 5;
+  MEDIA_TYPE_FILE = 6;
 }
 
 message SelectedMediaAsset {

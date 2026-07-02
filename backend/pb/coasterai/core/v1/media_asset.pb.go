@@ -31,6 +31,7 @@ const (
 	MediaType_MEDIA_TYPE_SVG       MediaType = 3
 	MediaType_MEDIA_TYPE_CODE      MediaType = 4
 	MediaType_MEDIA_TYPE_AUDIO     MediaType = 5
+	MediaType_MEDIA_TYPE_FILE      MediaType = 6
 )
 
 // Enum value maps for MediaType.
@@ -42,6 +43,7 @@ var (
 		3: "MEDIA_TYPE_SVG",
 		4: "MEDIA_TYPE_CODE",
 		5: "MEDIA_TYPE_AUDIO",
+		6: "MEDIA_TYPE_FILE",
 	}
 	MediaType_value = map[string]int32{
 		"MEDIA_TYPE_UNDEFINED": 0,
@@ -50,6 +52,7 @@ var (
 		"MEDIA_TYPE_SVG":       3,
 		"MEDIA_TYPE_CODE":      4,
 		"MEDIA_TYPE_AUDIO":     5,
+		"MEDIA_TYPE_FILE":      6,
 	}
 )
 
@@ -278,14 +281,15 @@ const file_coasterai_core_v1_media_asset_proto_rawDesc = "" +
 	"\x02id\x18\t \x01(\tR\x02id\x12:\n" +
 	"\tmediaType\x18\n" +
 	" \x01(\x0e2\x1c.coasterai.core.v1.MediaTypeR\tmediaType\x12\x1a\n" +
-	"\bduration\x18\v \x01(\x02R\bduration*\x90\x01\n" +
+	"\bduration\x18\v \x01(\x02R\bduration*\xa5\x01\n" +
 	"\tMediaType\x12\x18\n" +
 	"\x14MEDIA_TYPE_UNDEFINED\x10\x00\x12\x14\n" +
 	"\x10MEDIA_TYPE_IMAGE\x10\x01\x12\x14\n" +
 	"\x10MEDIA_TYPE_VIDEO\x10\x02\x12\x12\n" +
 	"\x0eMEDIA_TYPE_SVG\x10\x03\x12\x13\n" +
 	"\x0fMEDIA_TYPE_CODE\x10\x04\x12\x14\n" +
-	"\x10MEDIA_TYPE_AUDIO\x10\x05B;Z9github.com/shank318/coasterai/pb/coasterai/core/v1;pbcoreb\x06proto3"
+	"\x10MEDIA_TYPE_AUDIO\x10\x05\x12\x13\n" +
+	"\x0fMEDIA_TYPE_FILE\x10\x06B;Z9github.com/shank318/coasterai/pb/coasterai/core/v1;pbcoreb\x06proto3"
 
 var (
 	file_coasterai_core_v1_media_asset_proto_rawDescOnce sync.Once

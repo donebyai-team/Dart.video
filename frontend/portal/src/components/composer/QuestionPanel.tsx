@@ -8,6 +8,7 @@ import type { AskUserQuestion } from '@coasterai/pb/coasterai/portal/v1/portal_p
 import { AskUserQuestionType } from '@coasterai/pb/coasterai/portal/v1/portal_pb'
 import AssetPreviewDialog from '@/components/assets/AssetPreviewDialog'
 import type { SelectedAssetWithPreview } from '@/components/assets/SelectedAssetsDialog'
+import type { MediaAsset } from '@coasterai/pb/coasterai/core/v1/media_asset_pb'
 import AssetUploadDropdown from './AssetUploadDropdown'
 import ScriptQuestionEditor, { cloneScript } from './ScriptQuestionEditor'
 
@@ -18,6 +19,20 @@ interface QuestionPanelProps {
   selectedQuestionAssets?: SelectedAssetWithPreview[]
   onOpenAssetPicker?: (mode: 'upload') => void
   onOpenSelectedAssetsDialog?: () => void
+}
+
+const isPdfAsset = (asset: MediaAsset) => asset.mimeType === 'application/pdf'
+
+const getAssetPreviewKind = (asset: MediaAsset): 'image' | 'video' | 'pdf' => {
+  if (asset.mimeType?.startsWith('video/')) {
+    return 'video'
+  }
+
+  if (isPdfAsset(asset)) {
+    return 'pdf'
+  }
+
+  return 'image'
 }
 
 const QuestionPanel = ({
@@ -180,7 +195,7 @@ const QuestionPanel = ({
             title={question.asset.fileName || 'Asset'}
             subtitle='Add clarification for this asset'
             previewUrl={question.asset.url}
-            mediaKind={question.asset.mimeType?.startsWith('video/') ? 'video' : 'image'}
+            mediaKind={getAssetPreviewKind(question.asset)}
             width={question.asset.width}
             height={question.asset.height}
             open={assetPreviewOpen}

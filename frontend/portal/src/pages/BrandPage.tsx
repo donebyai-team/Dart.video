@@ -157,7 +157,6 @@ const BrandPage = () => {
 
             setIdentities(identities.map(i => i.id === updatedIdentity.id ? updatedIdentity : i))
             setSelectedIdentity(updatedIdentity)
-            toast.success("Brand identity updated!")
         } catch (err) {
             console.error("Failed to update brand identity", err)
             toast.error(getConnectError(err))
