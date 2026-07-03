@@ -75,18 +75,21 @@ function GenerateScript(input: ScriptPlannerRequest, conversation_history: Messa
     - Each section contains an ordered list of narration blocks.
     - *NEVER INVENT A NEW SECTION, only use from the available ones*
 
-    Each narration block must:
-    - represent one complete idea
-    - sound natural as voiceover
+    Each narration item under a section must:
+    - communicate a single thought
+    - sound natural when spoken as voiceover
     - be understandable without surrounding context
-    - be concise (typically 1–3 sentences)
-    - contain enough semantic detail for another agent to retrieve relevant animation templates
-
+    - be concise
+       **Max 2 lines**
+       **Max 10 words**
     The narration should describe WHAT is being communicated, not HOW it should be animated.
 
     Good:
-    - "Switching between five different dashboards wastes hours every week."
-    - "Our AI automatically converts every blog post into engaging social media videos."
+    PROBLEM
+    - "Managing five tools wastes valuable time."
+    - "Teams constantly switch between platforms."
+    - "Important updates become easy to miss."
+    - "Simple work ends up taking hours."
 
     Bad:
     - "Zoom into the dashboard."

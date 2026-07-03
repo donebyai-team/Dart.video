@@ -46,7 +46,7 @@ const (
 type ScrapeRequest struct {
 	URL             string   `json:"url"`
 	Formats         []Format `json:"formats"`
-	Parsers         []Parser `json:"parsers"`
+	Parsers         []Parser `json:"parsers,omitempty"`
 	OnlyMainContent *bool    `json:"onlyMainContent,omitempty"`
 	IncludeTags     []string `json:"includeTags,omitempty"`
 	ExcludeTags     []string `json:"excludeTags,omitempty"`

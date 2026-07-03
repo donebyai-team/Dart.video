@@ -105,12 +105,6 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     - `\n` represents a line break. Preserve the line-break structure whenever possible.
     - `{text}` marks text that should be highlighted. Replace only the text inside the braces while preserving the `{}` markers.
 
-    ## CRITICAL(Non negotiable)
-    - Follow the props schema and its constraints
-    - Put exactly same no of characters, words with 10%+/- variance are allowed
-    - The script will also be used in voiceover and hence you can extract relevant wordings from it to fit template props.
-    - Eg. If a prop has text "Meet" and script has "Introducing". You can keep the word Meet as it fits the template
-
     ## CRITICAL (Non-negotiable)
     - Strictly follow the props schema and all its constraints.
     - Keep the generated text length close to the original to fit the template props (±10% words/characters).
@@ -119,6 +113,13 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
 
     Overall, Balance the script and the template props. Prioritize fitting the template's structure and text constraints, while reusing relevant wording from the script whenever it fits naturally.
 
+    ## PLAN BEFORE EXECUTING
+    Before outputting scenes, reason through:
+      1. Which scenes can communicate the best section and its narration
+      2. **Hero vs supporting scenes** — which scenes carry the main message vs add pacing?
+      3. Follow the instructions above.
+
+      Only begin output after forming a clear plan.
     ---
 
     ## EXAMPLE SCENES
