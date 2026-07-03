@@ -645,11 +645,7 @@ const VideoIntentComposer = () => {
               </Card>
             </div>
           ) : stage === 'compose' && (
-            <div className='mx-auto mt-10 max-w-3xl space-y-3 pt-2'>
-              <div>
-                <p className='text-sm font-medium text-foreground'>Quick start</p>
-              </div>
-
+            <div className='mx-auto mt-10 max-w-3xl space-y-3 pt-2'>             
               <div className='grid gap-3 md:grid-cols-3'>
                 <button
                   type='button'

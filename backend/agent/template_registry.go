@@ -280,8 +280,8 @@ func writeScene(b *strings.Builder, c *models.Template) {
 		b.WriteString("\n")
 		b.WriteString(fmt.Sprintf("**Duration:** %d frames\n", durationInFrames))
 
-		minWords, maxWords := VoiceoverWordBudget(durationInFrames)
-		b.WriteString(fmt.Sprintf("**Voiceover Budget:** %d-%d words\n", minWords, maxWords))
+		//minWords, maxWords := VoiceoverWordBudget(durationInFrames)
+		//b.WriteString(fmt.Sprintf("**Voiceover Budget:** %d-%d words\n", minWords, maxWords))
 	}
 	b.WriteString("\n---\n\n")
 }
