@@ -116,13 +116,14 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
     - Use interpolate() for linear progress (progress bars, opacity fades)
     - Always use { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
     - Add stagger delays for multiple elements
-    - **Keep the overall animation fast, avoid long or empty frames between stagger delays**
     - **Animate references by default; use them as attachments only when explicitly requested.**
-
-    ## Virtual Camera (optional)
-
-    - When beneficial(text animations, product showcases etc), animate a virtual camera instead of keeping the scene static.
+    - Treat the animation as being viewed through a virtual camera.
     - The camera may reframe, zoom, shift focus, and follow typed or revealed content to guide the viewer's attention.
+
+    ## DURATION
+    - - **Keep the overall animation fast, avoid long or empty frames between stagger delays**
+    - If needed use the duration of the reference attachment. 1s = 30 frames.
+    - Keep hold durations betwwen stagger small around 20frames
 
     ## RESERVED NAMES (CRITICAL)
 
@@ -142,14 +143,12 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
     {{ BrandGuidelines(input.VideoBranding) }}
 
     {% if not input.VideoBranding.brandColors %}
-    ## TEMPLATING RULES
+    ## TEMPLATING RULES (Non-Negotiable)
 
     - Remember: you are generating a reusable animation template, not a one-off animation.
     - **Design layouts to accommodate realistic variations in content length, arrays.**
-    - Text may wrap, reflow, resize, or use multiple lines when needed.
+    - **Text in text heavy animations should auto wrap to next line and text align to center**
     - Prefer CSS layout techniques (flexbox, grid, wrapping, scaling) over measuring content dimensions.
-    - Minor layout adjustments are preferred over text overflow, clipping, or overlap.
-    - Prioritize visual quality over extreme responsiveness.
     - Treat `DEFAULT_DATA` like component props: it should contain only customizable content, not internal logic, styling, animation settings, or implementation details.
     - Do NOT store element IDs, colors, React keys, or other implementation details in `DEFAULT_DATA`, use **array index for ids** if needed.
 
