@@ -283,7 +283,7 @@ func ParseResourceID(id string) (resourceID string, isTemplate bool) {
 	return id, false
 }
 
-const maxTemplatesPerCategory = 4
+const maxTemplatesPerCategory = 5
 
 func (t templateService) FetchTemplatesByCategories(ctx context.Context, categories []types.Category) ([]*models.Template, error) {
 	templates := make([]*models.Template, 0)

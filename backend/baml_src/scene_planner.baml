@@ -39,18 +39,12 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     - NEVER duplicate the same text across scenes
     - Always use Logo scenes to introduce/revel the brand and the supporting text before the scene.
     - Always finish with CTA scene.
-    - **Target 15–20 scenes total when possible, but avoid forcing unnecessary scenes and force fitting. Distribute across sections naturally based on
+    - **Target 10-15 scenes total when possible, but avoid forcing unnecessary scenes and force fitting. Distribute across sections naturally based on
       how much the script emphasizes each section. Do not pad sections artificially.**
-
-    Fillers work in any section. Use them to:
-    - Develop an idea within a section with scenes
-    - Add pacing between scenes
-    - Fill out scene count when a section needs more depth
-    - **When an appropriate scene is not available**
 
     ## SCENE SELECTION
 
-    - Choose scenes/fillers based on how well they visually communicate each script segment.
+    - Choose scenes based on how well they visually communicate each script segment.
     - Select scenes using both section tags and underlying script meaning.
     - *DO NOT repeat scenes.*
     - *DO NOT force-fit scenes. Use a scene only if it supports the script visually and contextually.*
@@ -115,9 +109,10 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
 
     ## PLAN BEFORE EXECUTING
     Before outputting scenes, reason through:
-      1. Which scenes can communicate the best section and its narration
+      1. Which scenes can communicate the best section and its narration/voiceover.
       2. **Hero vs supporting scenes** — which scenes carry the main message vs add pacing?
       3. Follow the instructions above.
+      4. Sectional tags are just for tagging, if you think a scene can communicate narration of an other section, you are free to choose.
 
       Only begin output after forming a clear plan.
     ---
