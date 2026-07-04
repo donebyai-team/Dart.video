@@ -431,8 +431,15 @@ func (g gcpMediaStore) Upload(
 	reader := bytes.NewReader(buf.Bytes())
 
 	mediaType := DetectMediaType(contentType)
+	if mediaType == pbcore.MediaType_MEDIA_TYPE_UNDEFINED {
+		return nil, fmt.Errorf("media type %s not supported", mediaType)
+	}
 
 	width, height, duration := g.extractMediaDimensions(reader, mediaType, contentType)
+
+	if mediaType == pbcore.MediaType_MEDIA_TYPE_VIDEO && duration == 0 {
+		return nil, fmt.Errorf("video dimensions not supported")
+	}
 
 	obj := g.bucket.Object(objectPath)
 	writer := obj.NewWriter(ctx)

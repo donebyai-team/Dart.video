@@ -478,6 +478,7 @@ export default function ScenePromptComposer({ setOverlay, defaultAIModel, onConv
         <DialogContent className='max-w-2xl overflow-hidden p-0' forceMount>
           <ManualMediaImportPanel
             showPreview={false}
+            allowMultipleSelection
             onClose={() => setAssetDialogOpen(false)}
             onConfirm={handleSelectUploadedAsset}
             canConfirm={stage === 'compose' || stage === 'question'}

@@ -22,6 +22,7 @@ interface ManualMediaImportPanelProps {
   onConfirm: (payload: ManualMediaConfirmPayload) => Promise<void> | void
   canConfirm?: boolean
   showPreview?: boolean
+  allowMultipleSelection?: boolean
   mediaType?: 'image' | 'video' | 'file'
 }
 
@@ -45,23 +46,30 @@ const ManualMediaImportPanel = ({
   onConfirm,
   canConfirm = true,
   showPreview = true,
+  allowMultipleSelection = false,
   mediaType
 }: ManualMediaImportPanelProps) => {
   const [assets, setAssets] = useState<MediaAsset[]>([])
   const [isLoadingAssets, setIsLoadingAssets] = useState(true)
   const [isUploading, setIsUploading] = useState(false)
   const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null)
+  const [selectedAssetIds, setSelectedAssetIds] = useState<string[]>([])
   const [selectedSectionNote, setSelectedSectionNote] = useState('')
   const [previewAssetId, setPreviewAssetId] = useState<string | null>(null)
   const [previewSectionNote, setPreviewSectionNote] = useState('')
   const [isDragActive, setIsDragActive] = useState(false)
   const inputRef = useRef<HTMLInputElement | null>(null)
 
+  const isMultiSelectMode = !showPreview && allowMultipleSelection
   const acceptValue = mediaType === 'file' ? 'application/pdf,.pdf' : mediaType ? `${mediaType}/*` : 'image/*,video/*,application/pdf,.pdf'
 
   const selectedAsset = useMemo(
     () => assets.find(asset => asset.id === selectedAssetId) ?? null,
     [assets, selectedAssetId]
+  )
+  const selectedAssets = useMemo(
+    () => assets.filter(asset => selectedAssetIds.includes(asset.id)),
+    [assets, selectedAssetIds]
   )
   const previewAsset = useMemo(
     () => assets.find(asset => asset.id === previewAssetId) ?? null,
@@ -85,7 +93,12 @@ const ManualMediaImportPanel = ({
       } else {
         setAssets(res.assets)
       }
-      setSelectedAssetId(res.assets[0]?.id ?? null)
+      if (isMultiSelectMode) {
+        setSelectedAssetIds(current => current.filter(assetId => res.assets.some(asset => asset.id === assetId)))
+        setSelectedAssetId(null)
+      } else {
+        setSelectedAssetId(res.assets[0]?.id ?? null)
+      }
     } catch (error) {
       toast({
         title: 'Failed to load media assets',
@@ -150,7 +163,11 @@ const ManualMediaImportPanel = ({
       }
 
       setAssets(current => [...uploaded, ...current])
-      setSelectedAssetId(uploaded[0]?.id ?? selectedAssetId)
+      if (isMultiSelectMode) {
+        setSelectedAssetIds(current => Array.from(new Set([...uploaded.map(asset => asset.id), ...current])))
+      } else {
+        setSelectedAssetId(uploaded[0]?.id ?? selectedAssetId)
+      }
       toast({
         title: 'Media uploaded',
         description: `${uploaded.length} asset${uploaded.length > 1 ? 's' : ''} uploaded successfully.`
@@ -196,6 +213,12 @@ const ManualMediaImportPanel = ({
   const handleSelectAsset = async (asset: MediaAsset) => {
     if (showPreview) {
       handleOpenPreview(asset)
+    } else if (isMultiSelectMode) {
+      setSelectedAssetIds(current =>
+        current.includes(asset.id)
+          ? current.filter(assetId => assetId !== asset.id)
+          : [...current, asset.id]
+      )
     } else {
       setSelectedAssetId(asset.id)
       setSelectedSectionNote('')
@@ -233,6 +256,19 @@ const ManualMediaImportPanel = ({
       asset: previewAsset,
       sectionNote: previewSectionNote.trim() || undefined
     })
+  }
+
+  const handleConfirmSelectedAssets = async () => {
+    if (!canConfirm || selectedAssets.length === 0) {
+      return
+    }
+
+    for (const asset of selectedAssets) {
+      await onConfirm({
+        asset,
+        sectionNote: undefined
+      })
+    }
   }
 
   return (
@@ -305,7 +341,11 @@ const ManualMediaImportPanel = ({
             <div className='space-y-2'>
               <div className='flex items-center justify-between'>
                 <p className='text-xs font-medium'>Assets</p>
-                {assets.length > 0 && <p className='text-[11px] text-muted-foreground'>{assets.length} found</p>}
+                {assets.length > 0 && (
+                  <p className='text-[11px] text-muted-foreground'>
+                    {assets.length} found{isMultiSelectMode ? ` • ${selectedAssetIds.length} selected` : ''}
+                  </p>
+                )}
               </div>
               <ScrollArea className='h-[320px] rounded-md border border-border'>
                 <div className='grid grid-cols-2 gap-2 p-2'>
@@ -314,7 +354,7 @@ const ManualMediaImportPanel = ({
                       key={asset.id}
                       type='button'
                       onClick={() => handleSelectAsset(asset)}
-                      className={`rounded-lg border p-2 text-left transition-colors ${selectedAssetId === asset.id ? 'border-primary bg-primary/5' : 'border-border hover:bg-muted/40'
+                      className={`rounded-lg border p-2 text-left transition-colors ${(isMultiSelectMode ? selectedAssetIds.includes(asset.id) : selectedAssetId === asset.id) ? 'border-primary bg-primary/5' : 'border-border hover:bg-muted/40'
                         }`}
                     >
                       {isVideoAsset(asset) ? (
@@ -351,6 +391,21 @@ const ManualMediaImportPanel = ({
               </ScrollArea>
             </div>
 
+          </div>
+        )}
+
+        {isMultiSelectMode && (
+          <div className='flex items-center justify-between border-t border-border px-3 py-2'>
+            <p className='text-xs text-muted-foreground'>
+              Select one or more assets to add.
+            </p>
+            <Button
+              size='sm'
+              onClick={() => void handleConfirmSelectedAssets()}
+              disabled={!canConfirm || selectedAssetIds.length === 0}
+            >
+              Add selected{selectedAssetIds.length > 0 ? ` (${selectedAssetIds.length})` : ''}
+            </Button>
           </div>
         )}
       </div>
