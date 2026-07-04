@@ -144,7 +144,7 @@ export const TextHookStaggerSchemaFields = [
 export const TextHookStaggerDescriptor: ComponentRegistration = {
   name: 'TextHookStagger',
   type: 'scene',
-  tags: ['INTRO', 'HOOK'],
+  tags: ['TEXT'],
   schema: [{
     type: 'component',
     name: 'texthookstagger',

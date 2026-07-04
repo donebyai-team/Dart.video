@@ -197,17 +197,20 @@ func (t templateService) UpdateTemplate(ctx context.Context, req *pbportal.Updat
 		return fmt.Errorf("invalid template: no slides with code registry found")
 	}
 
-	existingTemplate.Description = req.Description
+	previousUsageDescription := existingTemplate.GetUsageDescription()
+	existingTemplate.Description = strings.TrimSpace(req.Description)
 
 	usageDescription := strings.TrimSpace(req.UsageDescription)
 	if usageDescription == "" {
 		existingTemplate.DescriptionEmbedding = nil
 	} else {
-		embedding, err := t.llm.CreateEmbedding(ctx, usageDescription)
-		if err != nil {
-			return fmt.Errorf("create usage description embedding: %w", err)
+		if usageDescription != previousUsageDescription {
+			embedding, err := t.llm.CreateEmbedding(ctx, usageDescription)
+			if err != nil {
+				return fmt.Errorf("create usage description embedding: %w", err)
+			}
+			existingTemplate.DescriptionEmbedding = models.TemplateEmbedding(embedding)
 		}
-		existingTemplate.DescriptionEmbedding = models.TemplateEmbedding(embedding)
 		existingTemplate.Description += models.UsageSeparator + usageDescription
 	}
 

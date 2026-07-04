@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 	. "github.com/streamingfast/cli"
 	"github.com/streamingfast/cli/sflags"
+	"strings"
 )
 
 var toolsTemplatesGroup = Group(
@@ -48,6 +49,11 @@ func toolsSyncTemplatesRunE(cmd *cobra.Command, args []string) error {
 	allTemplates := scenes.GetAllTemplates()
 
 	for _, template := range allTemplates {
+		existingTemplate, err := db.GetTemplateByName(ctx, template.Name)
+		if err != nil && !errors.Is(err, datastore.NotFound) {
+			printSyncFail("%v", err)
+			return nil
+		}
 
 		templateToUpdate := models.Template{
 			Name:        template.Name,
@@ -65,22 +71,21 @@ func toolsSyncTemplatesRunE(cmd *cobra.Command, args []string) error {
 			templateToUpdate.Categories = []string{scenes.CATEGORY_TEXT, scenes.CATEGORY_FILLER}
 		}
 
-		if template.Instructions != "" {
-			templateToUpdate.Description = templateToUpdate.Description + "\n\n" + template.Instructions
+		instructions := strings.TrimSpace(template.Instructions)
+		if instructions != "" {
+			templateToUpdate.Description += models.UsageSeparator + instructions
 
-			vectorEm, err := embeddingService.CreateEmbedding(ctx, template.Instructions)
-			if err != nil {
-				printSyncFail("failed to create embedding: %v", err)
-				return nil
+			if existingTemplate != nil && instructions == existingTemplate.GetUsageDescription() {
+				templateToUpdate.DescriptionEmbedding = existingTemplate.DescriptionEmbedding
+			} else {
+				vectorEm, err := embeddingService.CreateEmbedding(ctx, instructions)
+				if err != nil {
+					printSyncFail("failed to create embedding: %v", err)
+					return nil
+				}
+
+				templateToUpdate.DescriptionEmbedding = vectorEm
 			}
-
-			templateToUpdate.DescriptionEmbedding = vectorEm
-		}
-
-		existingTemplate, err := db.GetTemplateByName(ctx, template.Name)
-		if err != nil && !errors.Is(err, datastore.NotFound) {
-			printSyncFail("%v", err)
-			return nil
 		}
 
 		if existingTemplate != nil {

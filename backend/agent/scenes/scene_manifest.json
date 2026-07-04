@@ -251,7 +251,8 @@
                 {
                   "name": "variant",
                   "type": "enum",
-                  "map": "props.variant"
+                  "map": "props.variant",
+                  "default": "headingLg"
                 },
                 {
                   "name": "staggerDelay",
@@ -332,8 +333,7 @@
           "name": "TextHookStagger",
           "type": "scene",
           "tags": [
-            "INTRO",
-            "HOOK"
+            "TEXT"
           ],
           "schema": [
             {
@@ -586,9 +586,7 @@
           "name": "TextLeadStagger",
           "type": "content",
           "tags": [
-            "PROBLEM",
-            "HOOK",
-            "INTRO"
+            "TEXT"
           ],
           "schema": [
             {
@@ -1393,7 +1391,8 @@
                 },
                 {
                   "name": "variant",
-                  "type": "enum"
+                  "type": "enum",
+                  "default": "headingLg"
                 },
                 {
                   "name": "entranceAnimation",

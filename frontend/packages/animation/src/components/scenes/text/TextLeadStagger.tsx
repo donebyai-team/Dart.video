@@ -279,7 +279,7 @@ export const TextLeadStaggerSchemaFields = [
 export const TextLeadStaggerDescriptor: ComponentRegistration = {
   name: 'TextLeadStagger',
   type: 'content',
-  tags: ['PROBLEM', 'HOOK', 'INTRO'],
+  tags: ['TEXT'],
   schema: [{
     type: 'component',
     name: 'textleadstagger',
