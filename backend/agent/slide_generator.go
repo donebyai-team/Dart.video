@@ -63,31 +63,28 @@ func (g *videoConfigGenerator) Fail(ctx context.Context, cause error, status mod
 
 func (g *videoConfigGenerator) AddBranding(assetRegistry *services.MediaAssetRegistry) {
 	generatedBranding := &pbcore.GeneratedVideoBranding{}
-	var bgStyle *pbcore.BackgroundStyle
 
-	// Step 1: get colors (already processed)
-	if assetRegistry == nil {
-		generatedBranding.Colors = brand_identity.ExtractOrGenerateColors(nil)
-	} else {
-		brandIdentity := assetRegistry.GetIdentity()
-		if brandIdentity == nil {
-			generatedBranding.Colors = brand_identity.ExtractOrGenerateColors(nil)
-		} else {
-			generatedBranding.BrandIdentity = brandIdentity
-			bgStyle = brandIdentity.BgStyle
-			if len(brandIdentity.Colors) == 0 {
-				generatedBranding.Colors = brand_identity.ExtractOrGenerateColors(nil)
-			} else {
-				generatedBranding.Colors = brandIdentity.Colors
-			}
-		}
+	var (
+		bgStyle       *pbcore.BackgroundStyle
+		brandIdentity *pbcore.BrandIdentity
+	)
+
+	if assetRegistry != nil {
+		brandIdentity = assetRegistry.GetIdentity()
 	}
 
-	// Generate background and text colors
-	if bgStyle == nil {
-		bgStyle = brand_identity.GenerateDefaultBackground(generatedBranding.Colors)
+	if brandIdentity != nil {
+		generatedBranding.BrandIdentity = brandIdentity
+		bgStyle = brandIdentity.BgStyle
+		generatedBranding.Colors = brandIdentity.Colors
 	}
-	generatedBranding.Colors = brand_identity.ModifyTextColor(generatedBranding.Colors, bgStyle)
+
+	// When no brand identity is provided, generate a random palette
+	if len(generatedBranding.Colors) == 0 || bgStyle == nil {
+		pallete := brand_identity.BuildPalette(nil)
+		generatedBranding.Colors = pallete.Colors
+		bgStyle = pallete.BgStyle
+	}
 
 	// Step 5: assign branding
 	g.video.Metadata.GeneratedBranding = generatedBranding

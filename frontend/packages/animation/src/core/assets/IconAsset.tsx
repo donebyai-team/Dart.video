@@ -114,7 +114,7 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
   useEffect(() => {
     if (!isRendering || handle === null) return;
 
-    if (!stringIconSrc) {
+    if (!stringIconSrc || PatchedLucideIcon) {
       setLoaded(true);
       continueRender(handle);
       return;
@@ -138,12 +138,13 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
       setErrored(true);
       continueRender(handle);
     };
-  }, [didFallbackFromLucideName, handle, isRendering, lucideStringUrl, patchedIcon, stringIconSrc]);
+  }, [PatchedLucideIcon, didFallbackFromLucideName, handle, isRendering, lucideStringUrl, patchedIcon, stringIconSrc]);
 
   /* Detect Tabler icon */
 
-  const hasStringIcon = patchedIcon.length > 0;
-  const hasLucideIcon = !hasStringIcon && !!PatchedLucideIcon;
+  const hasStringIcon = patchedIcon.length > 0 && !PatchedLucideIcon;
+  const hasLucideIcon = !!PatchedLucideIcon;
+  const isLucideString = hasStringIcon && stringIconSrc === lucideStringUrl && !didFallbackFromLucideName;
   const isTabler = hasStringIcon && (
     patchedIcon.includes("@tabler") ||
     patchedIcon.includes("/icons/outline/") ||
@@ -185,6 +186,7 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
           style={{
             width: "100%",
             height: "100%",
+            ...style,
           }}
         />
       ) : isTabler ? (
@@ -201,6 +203,22 @@ export function IconAsset(propsInit: IconAssetProps): React.ReactElement {
             WebkitMaskSize: "contain",
 
             maskImage: `url(${patchedIcon})`,
+            maskRepeat: "no-repeat",
+            maskPosition: "center",
+            maskSize: "contain",
+          }}
+        />
+      ) : isLucideString ? (
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            backgroundColor: "currentColor",
+            WebkitMaskImage: `url(${stringIconSrc})`,
+            WebkitMaskRepeat: "no-repeat",
+            WebkitMaskPosition: "center",
+            WebkitMaskSize: "contain",
+            maskImage: `url(${stringIconSrc})`,
             maskRepeat: "no-repeat",
             maskPosition: "center",
             maskSize: "contain",

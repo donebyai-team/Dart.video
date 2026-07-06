@@ -9,6 +9,7 @@ interface BrandFontsProps {
   wrapperClassName?: string
   className?: string
   fontClassName?: string
+  fonts?: string[]
 }
 
 export default function BrandFonts({
@@ -17,11 +18,29 @@ export default function BrandFonts({
   title = 'Brand Fonts',
   wrapperClassName = 'space-y-2',
   className = 'flex flex-col gap-1',
-  fontClassName = 'w-full rounded-md px-2 py-1.5 text-left text-base transition-colors hover:bg-accent'
+  fontClassName = 'w-full rounded-md px-2 py-1.5 text-left text-base transition-colors hover:bg-accent',
+  fonts: providedFonts
 }: BrandFontsProps) {
   const brandFonts = useVideoStore(s => s.videoConfig?.metadata?.generatedBranding?.brandIdentity?.fonts)
 
   const fonts = useMemo(() => {
+    if (providedFonts) {
+      const seen = new Set<string>()
+
+      return providedFonts.reduce<string[]>((acc, font) => {
+        const fontName = font.trim()
+        const normalizedFontName = fontName.toLowerCase()
+
+        if (!fontName || seen.has(normalizedFontName)) {
+          return acc
+        }
+
+        seen.add(normalizedFontName)
+        acc.push(fontName)
+        return acc
+      }, [])
+    }
+
     const seen = new Set<string>()
 
     return (brandFonts ?? []).reduce<string[]>((acc, font) => {
@@ -36,7 +55,7 @@ export default function BrandFonts({
       acc.push(fontName)
       return acc
     }, [])
-  }, [brandFonts])
+  }, [brandFonts, providedFonts])
 
   useEffect(() => {
     loadFonts(fonts)

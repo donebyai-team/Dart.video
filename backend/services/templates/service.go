@@ -58,7 +58,7 @@ func (t templateService) CreateTemplate(ctx context.Context) (*models.Template, 
 			Height: 1080,
 		},
 	}
-	brand_identity.AddVideoBranding(videoMetadata)
+	brand_identity.GenerateDefaultVideoBranding(videoMetadata)
 
 	template, err := t.db.CreateTemplate(ctx, &models.Template{
 		Name:       services.GenerateRandomName(5, 5),

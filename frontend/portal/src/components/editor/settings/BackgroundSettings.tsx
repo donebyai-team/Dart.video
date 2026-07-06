@@ -309,21 +309,13 @@ export default function BackgroundSettings({
 
             {/* Controls Row */}
             <div className="flex items-center gap-3">
-
-              {/* Color 1 */}
-              <input
-                type="color"
-                value={gradientColor1}
-                onChange={(e) => setGradientColor1(e.target.value)}
-                className="w-8 h-8 rounded-md border border-border cursor-pointer bg-transparent"
-              />
-
-              {/* Color 2 */}
-              <input
-                type="color"
-                value={gradientColor2}
-                onChange={(e) => setGradientColor2(e.target.value)}
-                className="w-8 h-8 rounded-md border border-border cursor-pointer bg-transparent"
+              <DualColorPicker
+                primaryColor={gradientColor1}
+                secondaryColor={gradientColor2}
+                onPrimaryColor={setGradientColor1}
+                onSecondaryColor={setGradientColor2}
+                primaryLabel="Color 1"
+                secondaryLabel="Color 2"
               />
 
               {/* Angle Compact */}

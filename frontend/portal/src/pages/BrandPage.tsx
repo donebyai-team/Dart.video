@@ -1,8 +1,8 @@
 "use client"
 
-import { useEffect, useState, useMemo } from "react"
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import { Plus, X, Type, Globe, FileText, Sparkles, Check, ChevronsUpDown, Image } from "lucide-react"
+import { Plus, X, Type, Globe, FileText, Sparkles, Image } from "lucide-react"
 import { create } from "@bufbuild/protobuf"
 import toast from "react-hot-toast"
 
@@ -30,22 +30,9 @@ import {
     BrandIdentityRequestSchema,
     UpdateBrandIdentityRequestSchema
 } from "@coasterai/pb/coasterai/portal/v1/portal_pb"
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from "@/components/ui/command"
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { cn } from "@/lib/utils"
 import { DualColorPicker } from "@/components/editor/animation/toolbars/stylers/DualColorPicker"
+import { FontSelector } from "@/components/editor/animation/toolbars/stylers/FontSelector"
 import BackgroundSettings from "@/components/editor/settings/BackgroundSettings"
 import { BackgroundStyle } from "@coasterai/pb/coasterai/core/v1/slide_pb"
 import BrandBackgroundPreview from "@/components/brand/BrandBackgroundPreview"
@@ -103,7 +90,7 @@ const BrandPage = () => {
     }, [portalClient])
 
     useEffect(() => {
-        const prefetchedWebsiteUrl = searchParams.get("websiteUrl")
+        const prefetchedWebsiteUrl = searchParams?.get("websiteUrl")
         if (!prefetchedWebsiteUrl) return
 
         setWebsiteUrl((currentValue) => currentValue || prefetchedWebsiteUrl)
@@ -635,8 +622,15 @@ const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onBrandMediaU
                             <Label className="text-xs">Font</Label>
                             <FontSelector
                                 value={previewFont}
+                                onChange={updatePrimaryFont}
                                 availableFonts={availableFonts}
-                                onSelect={updatePrimaryFont}
+                                brandFonts={[]}
+                                placeholder="Search fonts..."
+                                emptyLabel="Select a Google Font..."
+                                defaultOptionLabel="Default"
+                                className="w-full"
+                                inputClassName="h-9 w-full bg-background text-sm"
+                                popoverClassName="w-full max-h-72"
                             />
                         </div>
 
@@ -745,91 +739,6 @@ const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onBrandMediaU
                 </Button>
             </div>
         </div>
-    )
-}
-
-interface FontSelectorProps {
-    value: string
-    onSelect: (value: string) => void
-    availableFonts: string[]
-}
-
-const FontSelector = ({ value, onSelect, availableFonts }: FontSelectorProps) => {
-    const [open, setOpen] = useState(false)
-    const [searchQuery, setSearchQuery] = useState("")
-
-    const filteredFonts = useMemo(() => {
-        if (!searchQuery) return availableFonts.slice(0, 100)
-        return availableFonts
-            .filter((font: string) =>
-                font.toLowerCase().includes(searchQuery.toLowerCase())
-            )
-            .slice(0, 100)
-    }, [searchQuery])
-
-    return (
-        <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-                <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={open}
-                    className="w-full justify-between h-9 text-sm font-normal hover:bg-muted/50 transition-colors"
-                >
-                    <span className="truncate">{value || "Select a Google Font..."}</span>
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[400px] p-0" align="start" sideOffset={4}>
-                <Command className="rounded-lg border shadow-md">
-                    <div className="flex items-center border-b px-3">
-                        <Type className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-                        <CommandInput
-                            placeholder="Search Google Fonts..."
-                            value={searchQuery}
-                            onValueChange={setSearchQuery}
-                            className="h-10 text-sm border-0 focus:ring-0"
-                        />
-                    </div>
-                    <CommandList>
-                        <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
-                            <Type className="w-8 h-8 mx-auto mb-2 opacity-30" />
-                            <p>No font found.</p>
-                            <p className="text-xs mt-1">Try a different search term</p>
-                        </CommandEmpty>
-                        <CommandGroup className="max-h-[300px] overflow-auto p-2">
-                            {filteredFonts.map((font) => (
-                                <CommandItem
-                                    key={font}
-                                    value={font}
-                                    onSelect={() => {
-                                        onSelect(font)
-                                        setOpen(false)
-                                    }}
-                                    className="flex items-center gap-3 px-3 py-2.5 rounded-md cursor-pointer aria-selected:bg-accent"
-                                >
-                                    <Check
-                                        className={cn(
-                                            "h-4 w-4 shrink-0",
-                                            value === font ? "opacity-100 text-primary" : "opacity-0"
-                                        )}
-                                    />
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-medium truncate">{font}</p>
-                                        <p
-                                            className="text-xs text-muted-foreground truncate mt-0.5"
-                                            style={{ fontFamily: font }}
-                                        >
-                                            The quick brown fox jumps
-                                        </p>
-                                    </div>
-                                </CommandItem>
-                            ))}
-                        </CommandGroup>
-                    </CommandList>
-                </Command>
-            </PopoverContent>
-        </Popover>
     )
 }
 
