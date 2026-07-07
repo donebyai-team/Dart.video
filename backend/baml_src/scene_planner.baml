@@ -39,7 +39,7 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     - NEVER duplicate the same text across scenes
     - Always use Logo scenes to introduce/revel the brand and the supporting text before the scene.
     - Always finish with CTA scene.
-    - **Target 10-15 scenes total when possible, but avoid forcing unnecessary scenes and force fitting. Distribute across sections naturally based on
+    - **Target 12-15 scenes total when possible, but avoid forcing unnecessary scenes and force fitting. Distribute across sections naturally based on
       how much the script emphasizes each section. Do not pad sections artificially.**
 
     ## SCENE SELECTION
@@ -47,6 +47,7 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     - Choose scenes based on how well they visually communicate each script segment.
     - Select scenes using both section tags and underlying script meaning.
     - *DO NOT repeat scenes.*
+    - *Use scenes tagged with TEXT to build up the storyline*
     - *DO NOT force-fit scenes. Use a scene only if it supports the script visually and contextually.*
     - If needed, divide/Split script text into scenes at logical sentence breaks. Do not split mid-sentence.
         **Good**
@@ -61,7 +62,8 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     - The voiceover should describe or reinforce what is shown in the scene.
     - It does not need to match the on-screen text verbatim; it should communicate the same idea naturally.
     - Not every scene requires a voiceover. Omit it when silence or visuals alone are more effective.
-    - If an idea naturally continues across consecutive scenes, split the narration at a natural pause or sentence boundary. Avoid cutting a sentence awkwardly just to fit the duration.
+    - If an idea naturally continues across consecutive scenes.
+    - Split the narration at a natural pause or sentence boundary(Max 10 words). Avoid cutting a sentence awkwardly just to fit the duration.
 
     ## Data
     Define scene props in `SceneElement` using JSON format.

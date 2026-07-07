@@ -49,6 +49,10 @@ func toolsSyncTemplatesRunE(cmd *cobra.Command, args []string) error {
 	allTemplates := scenes.GetAllTemplates()
 
 	for _, template := range allTemplates {
+		if strings.EqualFold(template.Name, "animatedtext") {
+			continue
+		}
+
 		existingTemplate, err := db.GetTemplateByName(ctx, template.Name)
 		if err != nil && !errors.Is(err, datastore.NotFound) {
 			printSyncFail("%v", err)
@@ -68,7 +72,7 @@ func toolsSyncTemplatesRunE(cmd *cobra.Command, args []string) error {
 
 		// If an animation is not tagged, we tag it with
 		if len(template.Tags) == 0 {
-			templateToUpdate.Categories = []string{scenes.CATEGORY_TEXT, scenes.CATEGORY_FILLER}
+			templateToUpdate.Categories = []string{scenes.CATEGORY_FILLER}
 		}
 
 		instructions := strings.TrimSpace(template.Instructions)

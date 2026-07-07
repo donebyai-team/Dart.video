@@ -7,7 +7,6 @@ class GenerateAnimationCodeResponse {
   code string @description("Typescript code")
   total_frames int @description("total frames for this animation at 30fps")
   manualEdits string? @description("valid json")
-  thinkingSummary string? @skip()
 }
 
 function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_history: Message[]) -> GenerateAnimationCodeResponse | AskUserQuestion {

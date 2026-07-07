@@ -372,10 +372,10 @@ func (l *codeGenerator) runPlanning(ctx context.Context, generatePlanRequest typ
 		}
 
 		// Save the code in history, we may avoid saving the thinking summary if the animation is generated
-		if codeResponse.ThinkingSummary != nil && *codeResponse.ThinkingSummary != "" {
+		if llmThinking != nil && *llmThinking != "" {
 			session.AddMessage(&pbcore.ConversationMessage{
 				Role:    pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
-				Message: *codeResponse.ThinkingSummary,
+				Message: *llmThinking,
 				Type:    pbcore.ConversationMessageType_CONVERSATION_MESSAGE_FINAL_THINKING,
 			})
 		}

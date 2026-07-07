@@ -336,7 +336,7 @@ export const ProblemCollagePills: React.FC<ProblemCollagePillsProps> = (initProp
                     width: textBoxWidth,
                     whiteSpace: 'pre-wrap',
                     display: 'block',
-                    color: 'white',
+                    // color: 'white',
                   }}
                 />
               </Sequence>

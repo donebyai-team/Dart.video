@@ -339,10 +339,6 @@ func (t *GenerateAnimationCodeResponseClassView) PropertyManualEdits() (ClassPro
 	return t.inner.Property("manualEdits")
 }
 
-func (t *GenerateAnimationCodeResponseClassView) PropertyThinkingSummary() (ClassPropertyView, error) {
-	return t.inner.Property("thinkingSummary")
-}
-
 func (t *TypeBuilder) GenerateAnimationCodeResponse() (*GenerateAnimationCodeResponseClassView, error) {
 	bld, err := t.inner.Class("GenerateAnimationCodeResponse")
 	if err != nil {
