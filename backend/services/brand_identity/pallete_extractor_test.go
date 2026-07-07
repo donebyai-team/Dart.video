@@ -125,6 +125,7 @@ func TestBuildPalette_WhiteBackgroundBlueBrandGradientIsBlueTint(t *testing.T) {
 }
 
 func TestBuildPalette_ProvidedWhiteBackgroundAndTextPrimary(t *testing.T) {
+	//// Digital API
 	p := BuildPalette(map[string]string{
 		COLOR_PRIMARY:      "#007FFF",
 		COLOR_SECONDARY:    "#00308F",
@@ -132,6 +133,15 @@ func TestBuildPalette_ProvidedWhiteBackgroundAndTextPrimary(t *testing.T) {
 		COLOR_BACKGROUND:   "#FFFFFF",
 		COLOR_TEXT_PRIMARY: "#022169",
 	})
+
+	// Anthropic
+	//p := BuildPalette(map[string]string{
+	//	COLOR_PRIMARY:      "#C6613F",
+	//	COLOR_SECONDARY:    "#D97757",
+	//	COLOR_ACCENT:       "#141413",
+	//	COLOR_BACKGROUND:   "#F0EEE6",
+	//	COLOR_TEXT_PRIMARY: "#141413",
+	//})
 
 	assert.Equal(t, "#007FFF", colorByPriority(p, pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_PRIMARY))
 	assert.Equal(t, "#00308F", colorByPriority(p, pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_SECONDARY))

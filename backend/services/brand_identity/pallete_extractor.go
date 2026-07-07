@@ -59,8 +59,9 @@ func BuildPalette(input map[string]string) Palette {
 
 	secondary := normalizeHex(input[COLOR_SECONDARY])
 	if secondary == "" {
-		secondary = defaultColors[COLOR_SECONDARY]
+		secondary = lightenHSL(primary, 0.25)
 	}
+
 	colors = append(colors, &pbcore.BrandColor{
 		ColorHexCode: secondary,
 		Priority:     pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_SECONDARY,
@@ -72,7 +73,7 @@ func BuildPalette(input map[string]string) Palette {
 
 	accent := normalizeHex(input[COLOR_ACCENT])
 	if accent == "" {
-		accent = defaultColors[COLOR_ACCENT]
+		secondary = lightenHSL(primary, 0.25)
 	}
 	colors = append(colors, &pbcore.BrandColor{
 		ColorHexCode: accent,
@@ -106,7 +107,7 @@ func BuildPalette(input map[string]string) Palette {
 	case isTooLight(background):
 		// White/light backgrounds should stay airy, but pick up a visible brand tint.
 		gradientStart = background
-		gradientEnd = mixColors(background, primary, 0.15)
+		gradientEnd = mixColors(background, primary, 0.55)
 
 	case isTooDark(background):
 		// Dark backgrounds: lift slightly and tint with the brand.

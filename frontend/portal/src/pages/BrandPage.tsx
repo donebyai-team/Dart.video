@@ -39,9 +39,16 @@ import BrandBackgroundPreview from "@/components/brand/BrandBackgroundPreview"
 import { useSearchParams } from "next/navigation"
 
 const BRAND_PREVIEW_TEXT = "Brand Preview"
+const HEX_COLOR_REGEX = /^#[0-9A-Fa-f]{6}$/
 
 const getBrandColorByPriority = (colors: BrandColor[], priority: BrandAssetPriority) =>
     colors.find((color) => color.priority === priority)?.colorHexCode
+
+const isValidBrandColor = (colorHexCode: string | undefined) =>
+    typeof colorHexCode === "string" && HEX_COLOR_REGEX.test(colorHexCode)
+
+const sanitizeBrandColors = (colors: BrandColor[]) =>
+    colors.filter((color) => isValidBrandColor(color.colorHexCode) || color.colorHexCode === "transparent")
 
 const upsertBrandColor = (
     colors: BrandColor[],
@@ -137,13 +144,17 @@ const BrandPage = () => {
 
     const handleUpdateIdentity = async (updatedIdentity: BrandIdentity) => {
         try {
+            const sanitizedIdentity = create(BrandIdentitySchema, {
+                ...updatedIdentity,
+                colors: sanitizeBrandColors(updatedIdentity.colors)
+            })
             const request = create(UpdateBrandIdentityRequestSchema, {
-                identity: updatedIdentity
+                identity: sanitizedIdentity
             })
             await portalClient.updateBrandIdentity(request)
 
-            setIdentities(identities.map(i => i.id === updatedIdentity.id ? updatedIdentity : i))
-            setSelectedIdentity(updatedIdentity)
+            setIdentities(identities.map(i => i.id === sanitizedIdentity.id ? sanitizedIdentity : i))
+            setSelectedIdentity(sanitizedIdentity)
         } catch (err) {
             console.error("Failed to update brand identity", err)
             toast.error(getConnectError(err))
@@ -313,11 +324,13 @@ const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onBrandMediaU
     const previewPrimary = getBrandColorByPriority(
         localIdentity.colors,
         BrandAssetPriority.PRIMARY
-    ) || "#ffffff"
-    const previewSecondary = getBrandColorByPriority(
+    )
+    const previewSecondaryRaw = getBrandColorByPriority(
         localIdentity.colors,
         BrandAssetPriority.SECONDARY
-    ) || "#ffffff"
+    )
+    const previewPrimarySafe = isValidBrandColor(previewPrimary) ? previewPrimary : "#ffffff"
+    const previewSecondary = isValidBrandColor(previewSecondaryRaw) ? previewSecondaryRaw : "#ffffff"
     const previewBackground = getBrandColorByPriority(
         localIdentity.colors,
         BrandAssetPriority.BACKGROUND
@@ -325,7 +338,8 @@ const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onBrandMediaU
     const previewTextPrimary = getBrandColorByPriority(
         localIdentity.colors,
         BrandAssetPriority.TEXT_PRIMARY
-    ) || "#ffffff"
+    )
+    const previewTextPrimarySafe = isValidBrandColor(previewTextPrimary) ? previewTextPrimary : "#ffffff"
     const primaryIcon = localIdentity.logos.find((media) => media.type === BrandMediaType.ICON)
     const primaryLogo = localIdentity.logos.find((media) => media.type === BrandMediaType.LOGO)
 
@@ -546,9 +560,9 @@ const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onBrandMediaU
                                 <BrandBackgroundPreview
                                     backgroundStyle={localIdentity.bgStyle}
                                     text={BRAND_PREVIEW_TEXT}
-                                    subtext={`${previewFont || "Choose a font"} · ${previewTextPrimary}`}
-                                    textColor={previewTextPrimary}
-                                    primaryColor={previewPrimary}
+                                    subtext={`${previewFont || "Choose a font"} · ${previewTextPrimarySafe}`}
+                                    textColor={previewTextPrimarySafe}
+                                    primaryColor={previewPrimarySafe}
                                     secondaryColor={previewSecondary}
                                     fontFamily={previewFont || undefined}
                                 />
@@ -560,7 +574,7 @@ const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onBrandMediaU
                                     <div className="grid grid-cols-1 gap-3 rounded-lg border bg-muted/30 p-3 sm:grid-cols-2">
                                         <div className="flex items-center gap-3">
                                             <DualColorPicker
-                                                primaryColor={previewPrimary}
+                                                primaryColor={previewPrimarySafe}
                                                 onPrimaryColor={(value) => updateBrandColor(BrandAssetPriority.PRIMARY, value)}
                                                 primaryLabel="Primary"
                                                 triggerVariant="input"
@@ -568,7 +582,7 @@ const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onBrandMediaU
                                             />
                                             <div>
                                                 <p className="text-sm font-medium">Primary</p>
-                                                <p className="text-xs text-muted-foreground">{previewPrimary}</p>
+                                                <p className="text-xs text-muted-foreground">{previewPrimarySafe}</p>
                                             </div>
                                         </div>
 
@@ -605,14 +619,14 @@ const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onBrandMediaU
                                 <div className="space-y-2">
                                     <Label className="text-xs">Text Primary</Label>
                                     <div className="flex items-center gap-3 rounded-lg border bg-muted/30 p-3">
-                                        <DualColorPicker
-                                            primaryColor={previewTextPrimary}
-                                            onPrimaryColor={updateTextPrimary}
-                                            primaryLabel="Text primary"
-                                            triggerVariant="input"
-                                            triggerStyle="active-color"
-                                        />
-                                        <span className="text-sm text-muted-foreground">{previewTextPrimary}</span>
+                                            <DualColorPicker
+                                                primaryColor={previewTextPrimarySafe}
+                                                onPrimaryColor={updateTextPrimary}
+                                                primaryLabel="Text primary"
+                                                triggerVariant="input"
+                                                triggerStyle="active-color"
+                                            />
+                                        <span className="text-sm text-muted-foreground">{previewTextPrimarySafe}</span>
                                     </div>
                                 </div>
                             </div>

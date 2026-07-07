@@ -2,6 +2,7 @@ package brand_identity
 
 import (
 	"fmt"
+	"github.com/shank318/coasterai/utils"
 	"math"
 	"strconv"
 	"strings"
@@ -110,6 +111,10 @@ func normalizeHex(hex string) string {
 		return ""
 	}
 
+	if strings.EqualFold(hex, "transparent") {
+		return "transparent"
+	}
+
 	if !strings.HasPrefix(hex, "#") {
 		hex = "#" + hex
 	}
@@ -121,7 +126,12 @@ func normalizeHex(hex string) string {
 		hex = "#" + r + r + g + g + b + b
 	}
 
-	return strings.ToUpper(hex)
+	hex = strings.ToUpper(hex)
+	if !utils.IsValidHexColor(hex) {
+		return ""
+	}
+
+	return hex
 }
 
 func hexToRGB(hex string) (int, int, int) {

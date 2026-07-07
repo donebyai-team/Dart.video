@@ -252,7 +252,7 @@ func (b brandIdentity) UpdateBrandIdentity(
 	identity *pbcore.BrandIdentity,
 ) error {
 	for _, color := range identity.Colors {
-		if utils.IsValidHexColor(color.ColorHexCode) {
+		if utils.IsValidHexColor(color.ColorHexCode) && color.ColorHexCode != "transparent" {
 			color.ColorHexCode = strings.ToUpper(color.ColorHexCode)
 		} else {
 			return fmt.Errorf("invalid hex color code: %s", color.ColorHexCode)
