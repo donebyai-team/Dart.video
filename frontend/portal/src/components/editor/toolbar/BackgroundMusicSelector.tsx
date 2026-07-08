@@ -1,4 +1,4 @@
-import { Volume2, VolumeX, Waves, Sunrise, BeakerIcon, VolumeIcon, TrendingUp, Rocket, BookHeartIcon, HeartIcon, MoveUpIcon, GuitarIcon, FunctionSquareIcon } from "lucide-react";
+import { Volume2, VolumeX, Music } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -11,81 +11,103 @@ import { useVideoStore } from "@/stores/video";
 
 const backgroundTracks = [
     {
-        id: "none",
-        name: "No Music",
-        icon: VolumeX,
+        Id: "none",
+        Name: "No Music",
     },
     {
-        id: "dramatic-beat",
-        name: "Dramatic Beats",
-        url: "https://storage.googleapis.com/coasterai-public/background_music/DramaticBeats.mp3",
-        icon: HeartIcon,
+        Id: "classy-beats",
+        Name: "Classy Beats",
+        Url: "https://storage.googleapis.com/coasterai-public/background_music/ClassyBeats.mov",
     },
     {
-        id: "fast-beat",
-        name: "Fast Beat",
-        url: "https://storage.googleapis.com/coasterai-public/background_music/FastBeat.mp3",
-        icon: BookHeartIcon,
+        Id: "cpr-pulse",
+        Name: "Corporate Pulse",
+        Url: "https://storage.googleapis.com/coasterai-public/background_music/corporate-pulse-128.mp3",
     },
     {
-        id: "up-beat",
-        name: "UpBeat",
-        url: "https://storage.googleapis.com/coasterai-public/background_music/upbeat.mp3",
-        icon: MoveUpIcon,
+        Id: "loop-floor",
+        Name: "Loop Floor",
+        Url: "https://storage.googleapis.com/coasterai-public/background_music/loopfloor-128.mp3",
     },
     {
-        id: "future-pass",
-        name: "Future Pass",
-        url: "https://storage.googleapis.com/coasterai-public/background_music/future-pass.mp3",
-        icon: FunctionSquareIcon,
+        Id: "on-and-on",
+        Name: "On And On",
+        Url: "https://storage.googleapis.com/coasterai-public/background_music/on-and-on.mp3",
     },
     {
-        id: "deep-electronic",
-        name: "Deep Electronic",
-        url: "https://storage.googleapis.com/coasterai-public/background_music/Deep%20Electronic.mp3",
-        icon: GuitarIcon,
+        Id: "retro-office",
+        Name: "Retro Office",
+        Url: "https://storage.googleapis.com/coasterai-public/background_music/retro-office-groove.mp3",
     },
     {
-        id: "dance-groove",
-        name: "Dance Groove",
-        url: "https://storage.googleapis.com/coasterai-public/background_music/DanceGroove.mp3",
-        icon: Waves,
+        Id: "serious-groove",
+        Name: "Serious Groove",
+        Url: "https://storage.googleapis.com/coasterai-public/background_music/serious-groove-engine.mp3",
     },
     {
-        id: "deep-calm",
-        name: "Deep Calm",
-        url: "https://ik.imagekit.io/coasterai/freepik-deep-calm_A4WXzk4Mk.mp3",
-        icon: VolumeIcon,
+        Id: "skywards",
+        Name: "Skyward Spark",
+        Url: "https://storage.googleapis.com/coasterai-public/background_music/skyward-sparks.mp3",
     },
     {
-        id: "steady-rise",
-        name: "Steady Rise",
-        url: "https://storage.googleapis.com/coasterai-public/background_music/The_Steady_Rise.mp3",
-        icon: TrendingUp,
+        Id: "dramatic-beat",
+        Name: "Dramatic Beats",
+        Url: "https://storage.googleapis.com/coasterai-public/background_music/DramaticBeats.mp3",
     },
     {
-        id: "upward-trajectory",
-        name: "Upward Trajectory",
-        url: "https://storage.googleapis.com/coasterai-public/background_music/Upward_Trajectory.mp3",
-        icon: Rocket,
+        Id: "fast-beat",
+        Name: "Fast Beat",
+        Url: "https://storage.googleapis.com/coasterai-public/background_music/FastBeat.mp3",
     },
     {
-        id: "next-wave",
-        name: "Next Wave",
-        url: "https://storage.googleapis.com/coasterai-public/background_music/above-the-next-wave.mp3",
-        icon: Waves,
+        Id: "up-beat",
+        Name: "UpBeat",
+        Url: "https://storage.googleapis.com/coasterai-public/background_music/upbeat.mp3",
     },
     {
-        id: "boardroom-groove",
-        name: "Boardroom Groove",
-        url: "https://storage.googleapis.com/coasterai-public/background_music/boardroom-groove-revolution.mp3",
-        icon: BeakerIcon,
+        Id: "future-pass",
+        Name: "Future Pass",
+        Url: "https://storage.googleapis.com/coasterai-public/background_music/future-pass.mp3",
     },
     {
-        id: "chasing-the-morning",
-        name: "Chasing the Morning",
-        url: "https://storage.googleapis.com/coasterai-public/background_music/chasing-the-morning-light.mp3",
-        icon: Sunrise,
+        Id: "deep-electronic",
+        Name: "Deep Electronic",
+        Url: "https://storage.googleapis.com/coasterai-public/background_music/Deep%20Electronic.mp3",
+    },
+    {
+        Id: "dance-groove",
+        Name: "Dance Groove",
+        Url: "https://storage.googleapis.com/coasterai-public/background_music/DanceGroove.mp3",
+    },
+    {
+        Id: "deep-calm",
+        Name: "Deep Calm",
+        Url: "https://ik.imagekit.io/coasterai/freepik-deep-calm_A4WXzk4Mk.mp3",
+    },
+    {
+        Id: "steady-rise",
+        Name: "Steady Rise",
+        Url: "https://storage.googleapis.com/coasterai-public/background_music/The_Steady_Rise.mp3",
+    },
+    {
+        Id: "upward-trajectory",
+        Name: "Upward Trajectory",
+        Url: "https://storage.googleapis.com/coasterai-public/background_music/Upward_Trajectory.mp3",
+    },
+    {
+        Id: "next-wave",
+        Name: "Next Wave",
+        Url: "https://storage.googleapis.com/coasterai-public/background_music/above-the-next-wave.mp3",
+    },
+    {
+        Id: "boardroom-groove",
+        Name: "Boardroom Groove",
+        Url: "https://storage.googleapis.com/coasterai-public/background_music/boardroom-groove-revolution.mp3",
+    },
+    {
+        Id: "chasing-the-morning",
+        Name: "Chasing the Morning",
+        Url: "https://storage.googleapis.com/coasterai-public/background_music/chasing-the-morning-light.mp3",
     },
 ];
 
@@ -100,30 +122,40 @@ const BackgroundMusicSelector = () => {
     const isMuted = volume[0] === 0;
 
     const selectedTrack =
-        backgroundTracks.find(track => track.url === currentUrl) ||
+        backgroundTracks.find(track => track.Url === currentUrl) ||
         backgroundTracks[0];
-
-    const SelectedIcon = selectedTrack.icon;
 
 
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="gap-2 h-8 text-xs">
-                    <SelectedIcon className="w-3.5 h-3.5" />
-                    {selectedTrack.name}
-                </Button>
+                    {selectedTrack.Name === "No Music" ? (
+                        <VolumeX className="w-4 h-4 text-muted-foreground" />
+                    ) : (
+                        <Music className="w-4 h-4" />
+                    )}
 
+                    {selectedTrack.Name}
+                </Button>
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent align="end" className="w-56">
-                <div className="flex items-center gap-3 px-2 py-2 mb-4 mt-4" onClick={(e) => e.stopPropagation()}>
+            <DropdownMenuContent align="end" className="w-64 p-0">
+                <div
+                    className="flex items-center gap-3 p-4 border-b"
+                    onClick={(e) => e.stopPropagation()}
+                >
                     <button
                         onClick={() => setBackgroundMusicVolume(isMuted ? 0.8 : 0)}
                         className="text-muted-foreground hover:text-foreground transition-colors"
                     >
-                        {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                        {isMuted ? (
+                            <VolumeX className="w-4 h-4" />
+                        ) : (
+                            <Volume2 className="w-4 h-4" />
+                        )}
                     </button>
+
                     <Slider
                         value={volume}
                         onValueChange={(v) => {
@@ -137,21 +169,22 @@ const BackgroundMusicSelector = () => {
                     />
                 </div>
 
-                {backgroundTracks.map(track => {
-                    const TrackIcon = track.icon;
-
-                    return (
+                <div className="max-h-64 overflow-y-auto py-1">
+                    {backgroundTracks.map((track) => (
                         <DropdownMenuItem
-                            key={track.id}
-                            onClick={() => setBackgroundMusic(track.url)}
+                            key={track.Id}
+                            onClick={() => setBackgroundMusic(track.Url)}
                             className="gap-2"
                         >
-                            <TrackIcon className="w-4 h-4" />
-                            <span className="flex-1">{track.name}</span>
+                            {track.Name === "No Music" ? (
+                                <VolumeX className="w-4 h-4 text-muted-foreground" />
+                            ) : (
+                                <span className="w-4 text-center text-muted-foreground">•</span>
+                            )}
+                            <span className="flex-1">{track.Name}</span>
                         </DropdownMenuItem>
-                    );
-                })}
-
+                    ))}
+                </div>
             </DropdownMenuContent>
         </DropdownMenu>
     );
