@@ -25,6 +25,11 @@ var defaultColors = map[string]string{
 	COLOR_TEXT_SECONDARY: "#6B7280",
 }
 
+var defaultBGGradient = []string{
+	"#0b1922",
+	"#0e4f59",
+}
+
 type Palette struct {
 	Colors  []*pbcore.BrandColor
 	BgStyle *pbcore.BackgroundStyle
@@ -119,6 +124,12 @@ func BuildPalette(input map[string]string) Palette {
 		// Mid-tone backgrounds: create gentle depth.
 		gradientStart = lightenHSL(background, 0.03)
 		gradientEnd = darkenHSL(background, 0.03)
+	}
+
+	// if no brand is extracted use this default gradient
+	if len(input) == 0 {
+		gradientStart = defaultBGGradient[0]
+		gradientEnd = defaultBGGradient[1]
 	}
 
 	p.BgStyle = &pbcore.BackgroundStyle{
