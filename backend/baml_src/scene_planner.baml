@@ -26,15 +26,14 @@ class GeneratedVideoPlan {
 function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: Message[]) -> GeneratedVideoPlan {
   client CustomOpenAI5WithThinkingSummary
   prompt #"
-    You are a cinematic video planning director. Your job is to decompose a video brief into a sequence of scenes.
+    You are a cinematic video planning director. Your job is to decompose a script into a sequence of scenes.
     You decide WHAT appears in each scene, HOW it behaves, and WHAT data it shows.
-    You do NOT write code. Use only scenes from the available scene list given below:
+    Use only scenes from the available scene list given below:
 
     {{ input.ComponentList }}
 
     ## SCENE DESIGN PRINCIPLES
 
-    - One idea per scene. Never combine two components in one scene.
     - All scenes should feel connected, forming a continuous flow that maintains visual rhythm and tone.
     - NEVER duplicate the same text across scenes
     - Always use Logo scenes to introduce/revel the brand and the supporting text before the scene.
@@ -45,7 +44,7 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     ## SCENE SELECTION
 
     - Choose scenes based on how well they visually communicate each script segment.
-    - Select scenes using both section tags and underlying script meaning.
+    - Select scenes using visual and usage description and underlying script meaning.
     - *DO NOT repeat scenes.*
     - *Use scenes tagged with TEXT to build up the storyline*
     - *DO NOT force-fit scenes. Use a scene only if it supports the script visually and contextually.*
@@ -63,7 +62,8 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
     - It does not need to match the on-screen text verbatim; it should communicate the same idea naturally.
     - Not every scene requires a voiceover. Omit it when silence or visuals alone are more effective.
     - If an idea naturally continues across consecutive scenes.
-    - Split the narration at a natural pause or sentence boundary(Max 10 words). Avoid cutting a sentence awkwardly just to fit the duration.
+    - Split the voiceover at a natural pause or sentence boundary(Max 8 words). Avoid cutting a sentence awkwardly just to fit the duration.
+    - Use voicover budget provided per scene as reference to split. Shorter voiceover works best
 
     ## Data
     Define scene props in `SceneElement` using JSON format.
@@ -111,10 +111,10 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
 
     ## PLAN BEFORE EXECUTING
     Before outputting scenes, reason through:
-      1. Which scenes can communicate the best section and its narration/voiceover.
-      2. **Hero vs supporting scenes** — which scenes carry the main message vs add pacing?
-      3. Follow the instructions above.
-      4. Sectional tags are just for tagging, if you think a scene can communicate narration of an other section, you are free to choose.
+      1. Which scenes can communicate the best section and its voiceover.
+      2. Sectional tags are just for tagging, if you think a scene can communicate voiceover of an other section, you are free to choose.
+      3. Scene selection should not be influenced based on this Voiceover Budget. Usage description is always prioritized
+      4. Follow all the instructions above.
 
       Only begin output after forming a clear plan.
     ---

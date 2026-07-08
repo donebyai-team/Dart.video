@@ -41,13 +41,22 @@ import { useSearchParams } from "next/navigation"
 const BRAND_PREVIEW_TEXT = "Brand Preview"
 const HEX_COLOR_REGEX = /^#[0-9A-Fa-f]{6}$/
 
-const getBrandColorByPriority = (colors: BrandColor[], priority: BrandAssetPriority) =>
+const getBrandColorByPriority = (
+    colors: BrandColor[],
+    priority: BrandAssetPriority
+): string | undefined =>
     colors.find((color) => color.priority === priority)?.colorHexCode
 
-const isValidBrandColor = (colorHexCode: string | undefined) =>
+const isValidBrandColor = (colorHexCode: string | undefined): colorHexCode is string =>
     typeof colorHexCode === "string" && HEX_COLOR_REGEX.test(colorHexCode)
 
-const sanitizeBrandColors = (colors: BrandColor[]) =>
+const getSafeBrandColor = (
+    colorHexCode: string | undefined,
+    fallback: string = "#ffffff"
+): string =>
+    isValidBrandColor(colorHexCode) ? colorHexCode : fallback
+
+const sanitizeBrandColors = (colors: BrandColor[]): BrandColor[] =>
     colors.filter((color) => isValidBrandColor(color.colorHexCode) || color.colorHexCode === "transparent")
 
 const upsertBrandColor = (
@@ -329,8 +338,8 @@ const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onBrandMediaU
         localIdentity.colors,
         BrandAssetPriority.SECONDARY
     )
-    const previewPrimarySafe = isValidBrandColor(previewPrimary) ? previewPrimary : "#ffffff"
-    const previewSecondary = isValidBrandColor(previewSecondaryRaw) ? previewSecondaryRaw : "#ffffff"
+    const previewPrimarySafe = getSafeBrandColor(previewPrimary)
+    const previewSecondary = getSafeBrandColor(previewSecondaryRaw)
     const previewBackground = getBrandColorByPriority(
         localIdentity.colors,
         BrandAssetPriority.BACKGROUND
@@ -339,7 +348,7 @@ const BrandIdentityEditor = ({ availableFonts, identity, onUpdate, onBrandMediaU
         localIdentity.colors,
         BrandAssetPriority.TEXT_PRIMARY
     )
-    const previewTextPrimarySafe = isValidBrandColor(previewTextPrimary) ? previewTextPrimary : "#ffffff"
+    const previewTextPrimarySafe = getSafeBrandColor(previewTextPrimary)
     const primaryIcon = localIdentity.logos.find((media) => media.type === BrandMediaType.ICON)
     const primaryLogo = localIdentity.logos.find((media) => media.type === BrandMediaType.LOGO)
 

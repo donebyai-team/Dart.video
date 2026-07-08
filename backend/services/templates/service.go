@@ -28,7 +28,7 @@ type Service interface {
 	GetTemplates(ctx context.Context, categories []string) ([]*models.Template, error)
 	GetSimilarTemplates(ctx context.Context, usageDescription string, categories []string, excludedTemplateIDs []string, limit int) ([]*models.Template, error)
 	DeleteTemplateByID(ctx context.Context, id string) error
-	FetchTemplatesByCategories(ctx context.Context, categories []types.Category) ([]*models.Template, error)
+	FetchTemplatesByCategories(ctx context.Context, categories []types.Category, limit int) ([]*models.Template, error)
 }
 
 type templateService struct {
@@ -283,13 +283,11 @@ func ParseResourceID(id string) (resourceID string, isTemplate bool) {
 	return id, false
 }
 
-const maxTemplatesPerCategory = 5
-
-func (t templateService) FetchTemplatesByCategories(ctx context.Context, categories []types.Category) ([]*models.Template, error) {
+func (t templateService) FetchTemplatesByCategories(ctx context.Context, categories []types.Category, limit int) ([]*models.Template, error) {
 	templates := make([]*models.Template, 0)
 
 	for _, category := range categories {
-		t, err := t.db.GetTemplatesByCategoryRandom(ctx, category.Name, maxTemplatesPerCategory)
+		t, err := t.db.GetTemplatesByCategoryRandom(ctx, category.Name, limit)
 		if err != nil {
 			return nil, err
 		}

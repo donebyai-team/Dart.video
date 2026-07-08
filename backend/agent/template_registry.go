@@ -38,7 +38,7 @@ func NewTemplateRegistry(
 }
 
 func (r *TemplateRegistry) WithRandomTemplates(ctx context.Context) error {
-	selectedTemplates, err := r.templateService.FetchTemplatesByCategories(ctx, scenes.AllCategories)
+	selectedTemplates, err := r.templateService.FetchTemplatesByCategories(ctx, scenes.AllCategories, 4)
 	if err != nil {
 		return err
 	}
@@ -85,7 +85,7 @@ func (r *TemplateRegistry) WithRelevantTemplates(ctx context.Context, script *pb
 	}
 
 	// 2. Random from text and then script wise
-	textTemplates, err := r.templateService.FetchTemplatesByCategories(ctx, []types.Category{{Name: scenes.CATEGORY_TEXT}})
+	textTemplates, err := r.templateService.FetchTemplatesByCategories(ctx, []types.Category{{Name: scenes.CATEGORY_TEXT}}, 6)
 	if err != nil {
 		return err
 	}
@@ -113,7 +113,7 @@ func (r *TemplateRegistry) WithRelevantTemplates(ctx context.Context, script *pb
 		}
 
 		if strings.EqualFold(category, "CTA") {
-			ctaTemplates, err := r.templateService.FetchTemplatesByCategories(ctx, []types.Category{{Name: strings.ToUpper(category)}})
+			ctaTemplates, err := r.templateService.FetchTemplatesByCategories(ctx, []types.Category{{Name: strings.ToUpper(category)}}, 4)
 			if err != nil {
 				return err
 			}
@@ -146,7 +146,7 @@ func (r *TemplateRegistry) WithRelevantTemplates(ctx context.Context, script *pb
 				fmt.Sprintf("%s %s", category, narration),
 				relatedCategories,
 				selectedTemplateIDs,
-				2,
+				4,
 			)
 			if err != nil {
 				return err
@@ -280,8 +280,8 @@ func writeScene(b *strings.Builder, c *models.Template) {
 		b.WriteString("\n")
 		b.WriteString(fmt.Sprintf("**Duration:** %d frames\n", durationInFrames))
 
-		//minWords, maxWords := VoiceoverWordBudget(durationInFrames)
-		//b.WriteString(fmt.Sprintf("**Voiceover Budget:** %d-%d words\n", minWords, maxWords))
+		minWords, maxWords := VoiceoverWordBudget(durationInFrames)
+		b.WriteString(fmt.Sprintf("**Voiceover Budget:** %d-%d words\n", minWords, maxWords))
 	}
 	b.WriteString("\n---\n\n")
 }
