@@ -16,6 +16,7 @@ import {
 import { AnimationSlide } from './slides'
 import { BackgroundLayer } from './BackgroundLayer'
 import { supportsAnimatedBackgroundEffect } from './backgroundEffectUtils'
+import { buildSerializedVoiceoverTimeline } from './voiceoverTimeline'
 import { getTransitionPresentation } from './transitions/presentation'
 import { getSlideTransitionDirectionValue } from './transitions/config'
 import { TRANSITION_DURATION_FRAMES } from './frameUtils'
@@ -118,27 +119,14 @@ export const Slideshow: React.FC<SlideshowProps> = ({
   const backgroundAudioUrl = metadata?.bgAudio?.url ?? metadata?.backgroundAudioUrl
   // if external video object exist use it or assign zustand video object
   const allSlides = useMemo(() => sections.flatMap(section => section.slides), [sections])
-  const slideStartFrames = useMemo(() => {
-    let currentFrame = 0
-
-    return allSlides.map((slide, index) => {
-      const startFrame = currentFrame
-      const hasTransition =
-        index < allSlides.length - 1 &&
-        slide.transition !== TransitionType.TRANSITION_NONE
-
-      currentFrame += Math.round(slide.durationInFrames)
-
-      if (hasTransition) {
-        currentFrame -= Math.round(TRANSITION_DURATION_FRAMES)
-      }
-
-      return {
-        slide,
-        startFrame,
-      }
-    })
-  }, [allSlides])
+  /**
+   * Voiceover playback is serialized across slides so we preserve authored visual pacing while
+   * preventing one slide's narration from overlapping the next slide's narration.
+   */
+  const serializedVoiceoverTimeline = useMemo(
+    () => buildSerializedVoiceoverTimeline(allSlides),
+    [allSlides]
+  )
 
 
   /* ================= EMPTY ================= */
@@ -222,25 +210,15 @@ export const Slideshow: React.FC<SlideshowProps> = ({
               />
             )}
 
-            {slideStartFrames.map(({ slide, startFrame }) =>
-              slide.voiceover?.segments
-                ?.filter(segment => Boolean(segment.asset?.url))
-                .map((segment, index) => {
-                  const segmentStartFrame = Math.max(0, Math.round(segment.startFrame))
-                  const segmentEndFrame = Math.max(segmentStartFrame + 1, Math.round(segment.endFrame))
-                  const durationInFrames = Math.max(1, segmentEndFrame - segmentStartFrame)
-
-                  return (
-                    <Sequence
-                      key={`${slide.id}-voiceover-${index}`}
-                      from={startFrame + segmentStartFrame}
-                      durationInFrames={durationInFrames}
-                    >
-                      <Html5Audio src={segment.asset!.url} volume={0.4} />
-                    </Sequence>
-                  )
-                })
-            )}
+            {serializedVoiceoverTimeline.segments.map((segment, index) => (
+              <Sequence
+                key={`${segment.slideId}-voiceover-${index}`}
+                from={segment.from}
+                durationInFrames={segment.durationInFrames}
+              >
+                <Html5Audio src={segment.src} volume={0.4} />
+              </Sequence>
+            ))}
 
             {isEditing ? (
               // In paused editor mode, avoid TransitionSeries overlap so only one slide's

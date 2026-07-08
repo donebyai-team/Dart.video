@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useClientsContext } from '@coasterai/ui-core/context/ClientContext'
+import { buildSerializedVoiceoverTimeline } from '@coasterai/renderer/src/voiceoverTimeline'
 import { Mic2, Play, RefreshCw, Sparkles, X } from 'lucide-react'
 import type { Slide } from '@coasterai/pb/coasterai/core/v1/slide_pb'
 import { Button } from '@/components/ui/button'
@@ -40,11 +41,13 @@ const editorTextToVoiceoverText = (text: string) => text.replace(/\/\[[^\]]+\]\(
 
 const hasGeneratedVoiceover = (slide: Slide) => Boolean(slide.voiceover?.segments?.some(segment => segment.asset))
 
-const getVoiceoverDurationInFrames = (slide: Pick<Slide, 'voiceover'>) =>
-  slide.voiceover?.segments.reduce(
-    (maxEndFrame, segment) => Math.max(maxEndFrame, Math.round(segment.endFrame)),
-    0
-  ) ?? 0
+/**
+ * Keeps authored slide pacing intact and only lets the final slide absorb any narration spillover.
+ */
+const getLastSlideDurationForSerializedVoiceover = (slides: Slide[]) => {
+  const timeline = buildSerializedVoiceoverTimeline(slides)
+  return timeline.requiredLastSlideDurationInFrames
+}
 
 export const VoiceOverSettings = ({ onClose, onPlayPreview }: VoiceOverSettingsProps) => {
   const { portalClient } = useClientsContext()
@@ -114,15 +117,30 @@ export const VoiceOverSettings = ({ onClose, onPlayPreview }: VoiceOverSettingsP
         slideId: slide.id,
       })
 
-      const nextDurationInFrames = Math.max(
-        Math.round(slide.durationInFrames),
-        getVoiceoverDurationInFrames({ voiceover })
-      )
+      const slidesWithUpdatedVoiceover = slides.map(existingSlide => (
+        existingSlide.id === slide.id
+          ? {
+              ...existingSlide,
+              voiceover,
+            }
+          : existingSlide
+      ))
+      const lastSlide = slidesWithUpdatedVoiceover[slidesWithUpdatedVoiceover.length - 1]
+      const requiredLastSlideDurationInFrames = getLastSlideDurationForSerializedVoiceover(slidesWithUpdatedVoiceover)
 
       updateSlideById(slide.id, {
         voiceover,
-        durationInFrames: nextDurationInFrames,
       })
+
+      if (
+        lastSlide &&
+        requiredLastSlideDurationInFrames > Math.round(lastSlide.durationInFrames)
+      ) {
+        updateSlideById(lastSlide.id, {
+          durationInFrames: requiredLastSlideDurationInFrames,
+        })
+      }
+
       setDrafts(currentDrafts => ({
         ...currentDrafts,
         [slide.id]: voiceoverToEditorText({ ...slide, voiceover }),
