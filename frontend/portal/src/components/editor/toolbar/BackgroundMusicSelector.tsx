@@ -20,6 +20,11 @@ const backgroundTracks = [
         Url: "https://storage.googleapis.com/coasterai-public/background_music/ClassyBeats.mov",
     },
     {
+        Id: "rythymic",
+        Name: "Rythymic",
+        Url: "https://storage.googleapis.com/coasterai-public/background_music/Rythymic.mov"
+    },
+    {
         Id: "cpr-pulse",
         Name: "Corporate Pulse",
         Url: "https://storage.googleapis.com/coasterai-public/background_music/corporate-pulse-128.mp3",
