@@ -8,11 +8,6 @@ import (
 	"strings"
 )
 
-// Returns true if the color is too dark to be used as a background.
-func isTooDark(hex string) bool {
-	return luminance(hex) < 0.08
-}
-
 // Alias for consistency.
 func isDark(hex string) bool {
 	return luminance(hex) < 0.5
@@ -44,18 +39,10 @@ func darkenHSL(hex string, amount float64) string {
 	return hslToHex(h, s, l)
 }
 
-// Chooses whichever text color gives the highest WCAG contrast.
-func bestContrast(background string) string {
-	const (
-		white = "#FFFFFF"
-		black = "#000000"
-	)
-
-	if ContrastRatio(background, white) >= ContrastRatio(background, black) {
-		return white
-	}
-
-	return black
+func lightenHSL(hex string, p float64) string {
+	h, s, l := hexToHSL(hex)
+	l = math.Min(1, l+p)
+	return hslToHex(h, s, l)
 }
 
 // Chooses the black/white text color with the strongest worst-case contrast
@@ -256,17 +243,18 @@ func hslToHex(h, s, l float64) string {
 
 // ---------------- DERIVATION ----------------
 
-// Lighten/darken using HSL (better than RGB scaling)
-func lightenHSL(hex string, p float64) string {
+// rotateHueLighten shifts the hue by `degrees` (can be negative) and
+// lightens by `p`, using the same HSL round-trip as lightenHSL.
+func rotateHueLighten(hex string, degrees float64, p float64) string {
 	h, s, l := hexToHSL(hex)
-	l = math.Min(1, l+p)
-	return hslToHex(h, s, l)
-}
 
-// Shift hue → creates visually distinct accent
-func shiftHue(hex string, deg float64) string {
-	h, s, l := hexToHSL(hex)
-	h = math.Mod(h+deg, 360)
+	h = math.Mod(h+degrees, 360)
+	if h < 0 {
+		h += 360
+	}
+
+	l = math.Min(1, l+p)
+
 	return hslToHex(h, s, l)
 }
 
@@ -293,6 +281,16 @@ func linearizeRGB(v float64) float64 {
 
 func isTooLight(hex string) bool {
 	return luminance(hex) > 0.92
+}
+
+// Returns true if the color is too dark to be used as a background.
+func isTooDark(hex string) bool {
+	return luminance(hex) < 0.08
+}
+
+func isGeneric(hex string) bool {
+	_, s, _ := hexToHSL(hex)
+	return s < 0.05
 }
 
 func IsDark(hex string) bool {

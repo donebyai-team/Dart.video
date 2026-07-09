@@ -127,7 +127,7 @@ func TestBuildPalette_WhiteBackgroundBlueBrandGradientIsBlueTint(t *testing.T) {
 func TestBuildPalette_ProvidedWhiteBackgroundAndTextPrimary(t *testing.T) {
 	//// Digital API
 	p := BuildPalette(map[string]string{
-		COLOR_PRIMARY:      "#007FFF",
+		COLOR_PRIMARY:      "#0000EE",
 		COLOR_SECONDARY:    "#00308F",
 		COLOR_ACCENT:       "#007FFF",
 		COLOR_BACKGROUND:   "#FFFFFF",

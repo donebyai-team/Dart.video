@@ -92,7 +92,7 @@ export const VoiceOverSettings = ({ onClose, onPlayPreview }: VoiceOverSettingsP
     }))
   }, [])
 
-  const handleGenerateVoiceover = useCallback(async (slide: Slide) => {
+  const handleGenerateVoiceover = useCallback(async (slide: Slide, showToast: boolean = false) => {
     if (!portalClient || !videoConfig?.id) return false
 
     const editorText = (drafts[slide.id] ?? '').trim()
@@ -120,9 +120,9 @@ export const VoiceOverSettings = ({ onClose, onPlayPreview }: VoiceOverSettingsP
       const slidesWithUpdatedVoiceover = slides.map(existingSlide => (
         existingSlide.id === slide.id
           ? {
-              ...existingSlide,
-              voiceover,
-            }
+            ...existingSlide,
+            voiceover,
+          }
           : existingSlide
       ))
       const lastSlide = slidesWithUpdatedVoiceover[slidesWithUpdatedVoiceover.length - 1]
@@ -154,7 +154,10 @@ export const VoiceOverSettings = ({ onClose, onPlayPreview }: VoiceOverSettingsP
 
       if (currentBackgroundMusicUrl && (currentBackgroundMusicVolume ?? 0) > 0.1) {
         setBackgroundMusicVolume(0.1)
-        toast.success('Background music volume reduced, adjust if needed')
+
+        if (showToast) {
+          toast.success('Background music volume reduced, adjust if needed')
+        }
       }
 
       return true
@@ -185,23 +188,26 @@ export const VoiceOverSettings = ({ onClose, onPlayPreview }: VoiceOverSettingsP
       if (generated) {
         generatedCount += 1
       }
-    }       
+    }
+
+    toast.success('Background music volume reduced, adjust if needed')
+
   }, [drafts, handleGenerateVoiceover, isAnyGenerating, slidesMissingVoiceover])
 
   return (
     <div className='flex h-full flex-col gap-3 p-4'>
       <div className='flex items-center justify-between'>
         <div className="rounded-md border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
-  <ul className="list-disc pl-4 space-y-1">
-    <li>
-      Type <span className="font-medium">'/'</span> to insert pauses and sync
-      the voiceover with the visuals.
-    </li>
-    <li>
-      Regenerate the voiceover after changing the text or pauses.
-    </li>
-  </ul>
-</div>
+          <ul className="list-disc pl-4 space-y-1">
+            <li>
+              Type <span className="font-medium">'/'</span> to insert pauses and sync
+              the voiceover with the visuals.
+            </li>
+            <li>
+              Regenerate the voiceover after changing the text or pauses.
+            </li>
+          </ul>
+        </div>
         {onClose && (
           <Button variant='ghost' size='sm' className='h-6 w-6 p-0' onClick={onClose}>
             <X className='h-4 w-4' />
@@ -229,21 +235,21 @@ export const VoiceOverSettings = ({ onClose, onPlayPreview }: VoiceOverSettingsP
 
                   <div className='pointer-events-auto flex items-center gap-1.5'>
                     {hasPlayableVoiceover && (
-                        <Button
-                          type='button'
-                          size='icon'
-                          variant='secondary'
-                          className='h-7 w-7 rounded-md border border-border/70 bg-background/90 backdrop-blur-sm'
-                          onClick={event => {
-                            event.stopPropagation()
-                            onPlayPreview?.(slide.id)
-                          }}
-                          disabled={!onPlayPreview}
-                          title='Play voiceover'
-                          aria-label='Play voiceover'
-                        >
-                          <Play className='h-3.5 w-3.5' />
-                        </Button>
+                      <Button
+                        type='button'
+                        size='icon'
+                        variant='secondary'
+                        className='h-7 w-7 rounded-md border border-border/70 bg-background/90 backdrop-blur-sm'
+                        onClick={event => {
+                          event.stopPropagation()
+                          onPlayPreview?.(slide.id)
+                        }}
+                        disabled={!onPlayPreview}
+                        title='Play voiceover'
+                        aria-label='Play voiceover'
+                      >
+                        <Play className='h-3.5 w-3.5' />
+                      </Button>
                     )}
 
                     <Button
@@ -253,7 +259,7 @@ export const VoiceOverSettings = ({ onClose, onPlayPreview }: VoiceOverSettingsP
                       className='h-7 w-7 rounded-md border border-border/70 bg-background/90 backdrop-blur-sm'
                       onClick={event => {
                         event.stopPropagation()
-                        void handleGenerateVoiceover(slide)
+                        void handleGenerateVoiceover(slide, true)
                       }}
                       disabled={!portalClient || isGenerating}
                       title={isGenerated ? 'Regenerate voiceover' : 'Generate voiceover'}

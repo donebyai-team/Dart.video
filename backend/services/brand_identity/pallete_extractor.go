@@ -62,9 +62,14 @@ func BuildPalette(input map[string]string) Palette {
 	// Secondary
 	//------------------------------------------------------------------
 
+	// Secondary — fallback chain, but purely for its own use, not background
 	secondary := normalizeHex(input[COLOR_SECONDARY])
 	if secondary == "" {
-		secondary = lightenHSL(primary, 0.25)
+		if accentInput := normalizeHex(input[COLOR_ACCENT]); accentInput != "" {
+			secondary = accentInput
+		} else {
+			secondary = rotateHueLighten(primary, +18, 0.20)
+		}
 	}
 
 	colors = append(colors, &pbcore.BrandColor{
@@ -75,11 +80,12 @@ func BuildPalette(input map[string]string) Palette {
 	//------------------------------------------------------------------
 	// Accent
 	//------------------------------------------------------------------
-
+	// Accent — kept for future, derived independently, never touches gradient
 	accent := normalizeHex(input[COLOR_ACCENT])
 	if accent == "" {
-		secondary = lightenHSL(primary, 0.25)
+		accent = rotateHueLighten(primary, -18, 0.12)
 	}
+
 	colors = append(colors, &pbcore.BrandColor{
 		ColorHexCode: accent,
 		Priority:     pbcore.BrandAssetPriority_BRAND_ASSET_PRIORITY_ACCENT,
@@ -106,24 +112,27 @@ func BuildPalette(input map[string]string) Palette {
 	// Gradient
 	//------------------------------------------------------------------
 
+	const minContrastVsPrimary = 1.6 // decorative-element threshold, not text-scale
+
 	var gradientStart, gradientEnd string
 
 	switch {
-	case isTooLight(background):
-		// White/light backgrounds should stay airy, but pick up a visible brand tint.
-		gradientStart = background
-		gradientEnd = mixColors(background, primary, 0.55)
-
-	case isTooDark(background):
-		// Dark backgrounds: lift slightly and tint with the brand.
-		lifted := lightenHSL(background, 0.06)
-		gradientStart = lifted
-		gradientEnd = mixColors(lifted, primary, 0.14)
+	case isTooLight(background) || isTooDark(background) || isGeneric(background):
+		// Background carries no usable hue signal (white, black, or gray at any
+		// lightness) — discard it entirely and synthesize purely from primary.
+		gradientStart, gradientEnd = synthesizeFromPrimary(primary)
 
 	default:
-		// Mid-tone backgrounds: create gentle depth.
+		// Real, colorful, usable background — keep it, just add gentle depth.
 		gradientStart = lightenHSL(background, 0.03)
 		gradientEnd = darkenHSL(background, 0.03)
+	}
+
+	// Guarantee primary itself stays visible against whatever we picked.
+	// If not, fall back to a safe primary-derived tint that's guaranteed to pass.
+	if ContrastRatio(primary, gradientStart) < minContrastVsPrimary ||
+		ContrastRatio(primary, gradientEnd) < minContrastVsPrimary {
+		gradientStart, gradientEnd = safeFallbackFromPrimary(primary)
 	}
 
 	// if no brand is extracted use this default gradient
@@ -179,6 +188,46 @@ func BuildPalette(input map[string]string) Palette {
 	p.Colors = colors
 
 	return p
+}
+
+// synthesizeFromPrimary produces a light-theme gradient pair by blending
+// primary directly toward white, keeping visible brand hue instead of
+// collapsing it the way pushing HSL lightness does.
+func synthesizeFromPrimary(primary string) (string, string) {
+	h, s, _ := hexToHSL(primary)
+
+	// Preserve most of primary's own saturation — this is what keeps
+	// dark, vivid primaries (like #0C0320) from washing out.
+	tintSat := clampTo(s*0.85, 0.15, 0.90)
+
+	startL := 0.88
+	endL := 0.75
+
+	start := hslToHex(h, tintSat, startL)
+	end := hslToHex(h, tintSat, endL)
+
+	return start, end
+}
+func clampTo(v, min, max float64) float64 {
+	if v < min {
+		return min
+	}
+	if v > max {
+		return max
+	}
+	return v
+}
+
+// safeFallbackFromPrimary produces a near-gray, primary-hued pair that is
+// guaranteed to clear the contrast gate against primary regardless of
+// primary's own lightness.
+func safeFallbackFromPrimary(primary string) (string, string) {
+	h, _, l := hexToHSL(primary)
+	// Push toward whichever extreme is farther from primary's own lightness.
+	if l > 0.5 {
+		return hslToHex(h, 0.10, 0.95), hslToHex(h, 0.10, 0.90)
+	}
+	return hslToHex(h, 0.10, 0.10), hslToHex(h, 0.10, 0.05)
 }
 
 func deriveSecondaryText(primary string) string {
