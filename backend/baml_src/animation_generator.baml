@@ -116,8 +116,15 @@ function GenerateAnimation(input: GenerateAnimationCodeRequest, conversation_his
     - Always use { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
     - Add stagger delays for multiple elements
     - **Animate references by default; use them as attachments only when explicitly requested.**
+
+    ## CAMERA RULES
+
     - Treat the animation as being viewed through a virtual camera.
-    - The camera may reframe, zoom, shift focus, and follow typed or revealed content to guide the viewer's attention.
+    - Available movements: Push In, Pull Back, Pan, Tilt, Orbit, Follow, Dolly Through, Parallax.
+    - Use at most one primary camera movement per scene. Combine movements only when they transition naturally and never reduce readability.
+    - Camera movement complements object animations; do not replace element animations with camera motion.
+    - If a reference image or video is provided, replicate any clear camera entrance, exit, or continuous movement. Otherwise, use camera movement only when it meaningfully improves the animation; keep the camera static if unnecessary.
+    - Camera movement affects the entire scene, while object animations affect individual elements.
 
     ## DURATION
     - - **Keep the overall animation fast, avoid long or empty frames between stagger delays**
