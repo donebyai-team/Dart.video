@@ -205,8 +205,9 @@ template_string AnimationPrimitives(resume: VideoBranding) #"
     - Use **only** these built-in sound effects when they meaningfully enhance the animation:
     - `mouse-click.wav` (only for mouse clicks)
     - `ding.wav` (notification, alert, goal, action )
+    - `pop.mp3` (UI elements, dialogs, modals, tooltips, menus, cards, or panels appearing)
     - `whoosh.wav` or `whip.wav` (swipe, or reveal). Use them sparingly and synchronize them with the visual event.
-    - Limit sound effects to at most 3 per scene, never use it in loops or maps. (MOST CRITICAL)
+    - **Never use sound effects in loops or maps. (MOST CRITICAL)**
 
     ```tsx
     <Sequence from={eventFrame}>

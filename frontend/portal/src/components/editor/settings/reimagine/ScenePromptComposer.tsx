@@ -11,7 +11,6 @@ import { SlideStatus, type Slide } from '@coasterai/pb/coasterai/core/v1/slide_p
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import QuestionPanel from '@/components/composer/QuestionPanel'
-import { createSlideEntityId } from '@/types/selection'
 import ThinkingViewComponent from '@/components/composer/ThinkingViewComponent'
 import AssetUploadDropdown from '@/components/composer/AssetUploadDropdown'
 import AIModelSelector from '@/components/composer/AIModelSelector'
@@ -105,7 +104,6 @@ export default function ScenePromptComposer({ setOverlay, defaultAIModel, onConv
   const videoVersion = useVideoStore(s => s.videoConfig?.version ?? (0 as unknown as bigint))
   const brandIdentity = useVideoStore(s => s.videoConfig?.metadata?.generatedBranding?.brandIdentity)
   const brandLibraryID = useVideoStore(s => s.videoConfig?.metadata?.generatedBranding?.brandLibraryID)
-  const handleSelectEntity = useVideoStore(s => s.handleSelectEntity)
   const { user } = useAuth()
   const { portalClient } = useClientsContext()
   const router = useRouter()
@@ -198,8 +196,6 @@ export default function ScenePromptComposer({ setOverlay, defaultAIModel, onConv
     // if (isSlideEmpty(slide)) {
     //   acceptVideoConfigChanges()
     // }
-
-    handleSelectEntity(createSlideEntityId(slide.id))
   }
 
   const clearComposeInputs = () => {

@@ -26,7 +26,18 @@ func PostProcess(code string) string {
 
 	// Resolve icons eg. Icon: "icon:heart" -> our icon URL
 	code = ResolveIcons(code)
+	code = resolveSFX(code)
 
+	return code
+}
+
+const baseSFXURL = "https://storage.googleapis.com/coasterai-public/sfx"
+
+func resolveSFX(code string) string {
+	// Remotion doesn't host pop.wav/pop.mp3, so rewrite only those URLs
+	// to our own SFX bucket. All other Remotion sound effects are left unchanged.
+	code = strings.ReplaceAll(code, "https://remotion.media/pop.wav", baseSFXURL+"/pop.wav")
+	code = strings.ReplaceAll(code, "https://remotion.media/pop.mp3", baseSFXURL+"/pop.mp3")
 	return code
 }
 
