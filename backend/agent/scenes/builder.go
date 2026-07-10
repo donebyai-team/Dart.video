@@ -57,17 +57,6 @@ func GetAllTemplates() []types.Component {
 		}
 	}
 
-	// groups are only available while planning
-	for _, group := range groupedComponents {
-		scenes = append(scenes, types.Component{
-			Tags:         group.Tags,
-			Name:         group.Name,
-			Description:  group.Description,
-			Instructions: group.Instructions,
-			LLMSchema:    group.LLMSchema,
-		})
-	}
-
 	return scenes
 }
 
@@ -108,19 +97,6 @@ func BuildScenesList(options BuildSceneListOptions) string {
 		if g.Title == "Scenes" {
 			scenes = g.Components
 			break
-		}
-	}
-
-	// groups are only available while planning
-	if options.Groups {
-		for _, group := range groupedComponents {
-			scenes = append(scenes, types.Component{
-				Tags:         group.Tags,
-				Name:         group.Name,
-				Description:  group.Description,
-				Instructions: group.Instructions,
-				LLMSchema:    group.LLMSchema,
-			})
 		}
 	}
 

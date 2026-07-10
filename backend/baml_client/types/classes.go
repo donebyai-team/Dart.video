@@ -273,9 +273,9 @@ func (c Category) BamlTypeName() string {
 }
 
 type ExtractTemplateConfigRequest struct {
-	Content       string         `json:"content"`
-	Scenes        []SceneElement `json:"scenes"`
-	VideoBranding VideoBranding  `json:"VideoBranding"`
+	Content       string        `json:"content"`
+	Scenes        []string      `json:"scenes"`
+	VideoBranding VideoBranding `json:"VideoBranding"`
 }
 
 func (c *ExtractTemplateConfigRequest) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -296,7 +296,7 @@ func (c *ExtractTemplateConfigRequest) Decode(holder *cffi.CFFIValueClass, typeM
 			c.Content = baml.Decode(valueHolder).Interface().(string)
 
 		case "scenes":
-			c.Scenes = baml.Decode(valueHolder).Interface().([]SceneElement)
+			c.Scenes = baml.Decode(valueHolder).Interface().([]string)
 
 		case "VideoBranding":
 			c.VideoBranding = baml.Decode(valueHolder).Interface().(VideoBranding)
@@ -777,8 +777,8 @@ func (c Scene) BamlTypeName() string {
 }
 
 type SceneElement struct {
-	Component string `json:"component"`
-	Props     string `json:"props"`
+	Component string                                                 `json:"component"`
+	Props     Union2ListMapStringKeyJSONValueOrMapStringKeyJSONValue `json:"props"`
 }
 
 func (c *SceneElement) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -799,7 +799,7 @@ func (c *SceneElement) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap)
 			c.Component = baml.Decode(valueHolder).Interface().(string)
 
 		case "props":
-			c.Props = baml.Decode(valueHolder).Interface().(string)
+			c.Props = baml.Decode(valueHolder).Interface().(Union2ListMapStringKeyJSONValueOrMapStringKeyJSONValue)
 
 		default:
 

@@ -86,6 +86,20 @@ client<llm> CustomOpenAI5WithThinkingSummary {
   }
 }
 
+client<llm> SmartBoyGPTSOL {
+  provider "openai-responses"
+  retry_policy Exponential
+  options {
+    model "gpt-5.6-sol"
+    api_key env.OPENAI_API_KEY
+    //max_completion_tokens 12000
+    reasoning {
+      effort "medium"
+      summary "auto"
+    }
+  }
+}
+
 client<llm> CustomOpenAI55WithThinkingSummary {
   provider "openai-responses"
   retry_policy Exponential

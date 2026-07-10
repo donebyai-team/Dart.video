@@ -41,22 +41,24 @@ func resolveSFX(code string) string {
 	return code
 }
 
-var iconRegex = regexp.MustCompile(`"(icon:[^"]+)"`)
+var iconRegex = regexp.MustCompile(`"?icon:[^"]+"?`)
 
 func ResolveIcons(code string) string {
-	// icon:name -> URL
-	code = iconRegex.ReplaceAllStringFunc(code, func(match string) string {
+	return iconRegex.ReplaceAllStringFunc(code, func(match string) string {
+		quoted := strings.HasPrefix(match, `"`) && strings.HasSuffix(match, `"`)
+
 		value := strings.Trim(match, `"`)
 
 		url := services.ResolveIconFromName(value)
-
 		if url == "" {
 			return match
 		}
 
-		return `"` + url + `"`
+		if quoted {
+			return `"` + url + `"`
+		}
+		return url
 	})
-	return code
 }
 
 var remoteComponentCommentRE = regexp.MustCompile(

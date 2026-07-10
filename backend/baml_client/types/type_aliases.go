@@ -12,3 +12,7 @@
 //  $ go install github.com/boundaryml/baml/baml-cli
 
 package types
+
+type JSON = *Union5FloatOrIntOrListJSONOrMapStringKeyJSONValueOrString
+
+type MapOrArray = Union2ListMapStringKeyJSONValueOrMapStringKeyJSONValue

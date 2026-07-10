@@ -1,6 +1,6 @@
 class ExtractTemplateConfigRequest {
   content string
-  scenes SceneElement[]
+  scenes string[]
   VideoBranding VideoBranding
 }
 
@@ -184,14 +184,7 @@ function ExtractTemplateConfig(input: ExtractTemplateConfigRequest) -> ExtractTe
 
     ## Component Schemas ({{ input.scenes|length }} total)
 
-    {% for scene in input.scenes %}
-    ### Component: {{ scene.component }}
-
-    Props Schema:
-    {{ scene.props }}
-
-    {% endfor %}
-
+    {{ input.scenes | join('\n\n') }}
 
     # Final Checklist
 

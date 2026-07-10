@@ -3,6 +3,7 @@ package scenes
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/shank318/coasterai/agent/common"
 	"github.com/shank318/coasterai/agent/scenes/field_resolvers"
 	"github.com/shank318/coasterai/baml_client/types"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
@@ -29,17 +30,13 @@ func convertToSceneConfig(
 ) ([]*SceneConfig, error) {
 	element := scene.Element
 
-	if groupedComponent, ok := groupedComponents[element.Component]; ok {
-		return groupedComponent.Ungroup(scene, fieldValueMapper)
-	}
-
 	component, err := FindComponent(element.Component)
 	if err != nil {
 		return nil, err
 	}
 
-	var props map[string]any
-	if err := json.Unmarshal([]byte(element.Props), &props); err != nil {
+	props, err := common.ConvertBamlJSONToMap[map[string]any](scene.Element.Props)
+	if err != nil {
 		return nil, fmt.Errorf("invalid scene props json: %w", err)
 	}
 
@@ -134,16 +131,16 @@ func EditsToScene(edits *structpb.Struct, fieldValueMapper *services.MediaAssetR
 		return nil, err
 	}
 
-	marshal, err := json.Marshal(config.Props)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal node props: %w", err)
-	}
+	//marshal, err := json.Marshal(config.Props)
+	//if err != nil {
+	//	return nil, fmt.Errorf("failed to marshal node props: %w", err)
+	//}
 
 	// Call your existing parser
 	return &types.Scene{
 		Element: types.SceneElement{
 			Component: config.Name,
-			Props:     string(marshal),
+			//Props:     string(marshal),
 		},
 	}, nil
 }

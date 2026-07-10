@@ -38,8 +38,12 @@ class Scene {
 
 class SceneElement {
   component string
-  props string @description("required props in VALID JSON format as per the scene")
+  props MapOrArray @description("required props in VALID JSON format as per the scene")
 }
+
+type JSON = string | int | float | null | JSON[] | map<string, JSON>
+
+type MapOrArray = map<string, JSON>[] | map<string, JSON>
 
 enum ColorToken {
   PRIMARY

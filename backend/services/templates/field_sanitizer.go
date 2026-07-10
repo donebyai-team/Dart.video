@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/shank318/coasterai/agent/common"
 	"github.com/shank318/coasterai/agent/scenes"
+	"github.com/shank318/coasterai/baml_client/types"
 	"github.com/shank318/coasterai/models"
 	pbcore "github.com/shank318/coasterai/pb/coasterai/core/v1"
 	"github.com/shank318/coasterai/services"
@@ -75,27 +77,66 @@ func BuildTemplateSchemaFromDefaults(template *models.Template) (string, error) 
 	return string(b), nil
 }
 
+func resolveIcons(llmOutput types.Union2ListMapStringKeyJSONValueOrMapStringKeyJSONValue) {
+	if m := llmOutput.AsMapStringKeyJSONValue(); m != nil {
+		for k, v := range *m {
+			(*m)[k] = resolveJSONValue(v)
+		}
+		return
+	}
+
+	if l := llmOutput.AsListMapStringKeyJSONValue(); l != nil {
+		for i := range *l {
+			for k, v := range (*l)[i] {
+				(*l)[i][k] = resolveJSONValue(v)
+			}
+		}
+	}
+}
+
+func resolveJSONValue(v types.JSON) types.JSON {
+	switch {
+	case v.IsString():
+		// ResolveIcons returns a JSONValue.
+		u := types.Union5FloatOrIntOrListJSONOrMapStringKeyJSONValueOrString__NewString(
+			code_builder.ResolveIcons(*v.AsString()),
+		)
+		return &u
+
+	case v.IsMapStringKeyJSONValue():
+		m := *v.AsMapStringKeyJSONValue()
+		for k, child := range m {
+			m[k] = resolveJSONValue(child)
+		}
+		u := types.Union5FloatOrIntOrListJSONOrMapStringKeyJSONValueOrString__NewMapStringKeyJSONValue(m)
+		return &u
+
+	case v.IsListJSON():
+		list := *v.AsListJSON()
+		for i, child := range list {
+			list[i] = resolveJSONValue(child)
+		}
+		u := types.Union5FloatOrIntOrListJSONOrMapStringKeyJSONValueOrString__NewListJSON(list)
+		return &u
+
+	default:
+		// numbers, bools, null, etc.
+		return v
+	}
+}
+
 func ParseLLMOutputToTemplateDefaults(
-	llmOutput string,
+	llmOutput types.Union2ListMapStringKeyJSONValueOrMapStringKeyJSONValue,
 	template *models.Template,
 ) (*models.Template, error) {
-	llmOutput = code_builder.ResolveIcons(llmOutput)
 
-	var outputs []json.RawMessage
-	// Preferred: array of outputs.
-	// Handle both cases: single output object and array of output objects: LLM hallucination
-	if err := json.Unmarshal([]byte(llmOutput), &outputs); err != nil {
-
-		// Fallback: single output object.
-		var single json.RawMessage
-		if err2 := json.Unmarshal([]byte(llmOutput), &single); err2 != nil {
-			return template, fmt.Errorf(
-				"failed to parse llm output: %w",
-				err,
-			)
-		}
-
-		outputs = []json.RawMessage{single}
+	resolveIcons(llmOutput)
+	outputs, err := common.ConvertBamlJSONToMap[[]map[string]any](llmOutput)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"failed to parse llm output: %w",
+			err,
+		)
 	}
 
 	outputIndex := 0
@@ -122,7 +163,7 @@ func ParseLLMOutputToTemplateDefaults(
 
 			merged, err := mergeLLMOutput(
 				slide.Content.CodeRegistry.Defaults,
-				string(outputs[outputIndex]),
+				outputs[outputIndex],
 			)
 			if err != nil {
 				errs = append(
@@ -166,7 +207,7 @@ func BuildAndSanitizeLLMPropsPayload(data *structpb.Struct) (string, error) {
 // Used to merge LLM output with the original template schema
 func mergeLLMOutput(
 	original *structpb.Struct,
-	llmOutput string,
+	llmOutput map[string]any,
 ) (*structpb.Struct, error) {
 	if original == nil {
 		return nil, fmt.Errorf("original is nil")
@@ -174,14 +215,9 @@ func mergeLLMOutput(
 	// Return original on any error.
 	fallback := original
 
-	var updates map[string]interface{}
-	if err := json.Unmarshal([]byte(llmOutput), &updates); err != nil {
-		return fallback, fmt.Errorf("invalid llm json: %w", err)
-	}
-
 	merged := utils.DeepMergeMaps(
 		original.AsMap(),
-		updates,
+		llmOutput,
 	)
 
 	result, err := structpb.NewStruct(merged)

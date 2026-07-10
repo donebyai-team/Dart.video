@@ -342,38 +342,38 @@ func (r *TemplateRegistry) BuildPrompt() string {
 	return b.String()
 }
 
-func (r *TemplateRegistry) ToSceneElements() []types.SceneElement {
-	sceneElements := make([]types.SceneElement, 0)
+func (r *TemplateRegistry) ToComponentSchemas() []string {
+	schemas := make([]string, 0, len(r.templates))
+
 	for _, template := range r.templates {
-		scene := types.SceneElement{
-			Component: template.Name,
-		}
-		templateName := template.Name
-		component, _ := scenes.FindComponent(templateName)
+		var props string
+
+		component, _ := scenes.FindComponent(template.Name)
 		if component != nil {
 			var b strings.Builder
-			//if component.Instructions != "" {
-			//	desc := strings.TrimSpace(component.Instructions)
-			//	b.WriteString("**Instructions**\n")
-			//	b.WriteString(fmt.Sprintf("%s\n", desc))
-			//}
 			scenes.WriteJSONProps(&b, component.LLMSchema, nil)
-			scene.Props = b.String()
+			props = b.String()
 		} else {
 			schema, err := templates.BuildTemplateSchemaFromDefaults(template)
 			if err != nil {
 				r.logger.Error("failed to build template schema from defaults", zap.Error(err))
+				continue
 			}
 			if schema == "" {
 				continue
 			}
-			scene.Props = schema
+			props = schema
 		}
 
-		sceneElements = append(sceneElements, scene)
+		var b strings.Builder
+		fmt.Fprintf(&b, "### Component: %s\n\n", template.Name)
+		b.WriteString("Props Schema:\n")
+		b.WriteString(props)
+
+		schemas = append(schemas, b.String())
 	}
 
-	return sceneElements
+	return schemas
 }
 
 func (r *TemplateRegistry) GenerateScene(ctx context.Context, scene *types.Scene) ([]*pbcore.Slide, error) {

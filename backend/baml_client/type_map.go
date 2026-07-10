@@ -74,9 +74,19 @@ var typeMap = map[string]reflect.Type{
 
 	"TYPES.AskUserQuestion__GenerateAnimationCodeResponse":    reflect.TypeOf(types.Union2AskUserQuestionOrGenerateAnimationCodeResponse{}),
 	"TYPES.ColorToken__string":                                reflect.TypeOf(types.Union2ColorTokenOrString{}),
+	"TYPES.List__Map__string_JSON__Map__string_JSON":          reflect.TypeOf(types.Union2ListMapStringKeyJSONValueOrMapStringKeyJSONValue{}),
 	"TYPES.string_assistant__string_tool__string_user":        reflect.TypeOf(types.Union3KassistantOrKtoolOrKuser{}),
 	"TYPES.List__AskUserQuestion__Script__ToolExtractContent": reflect.TypeOf(types.Union3ListAskUserQuestionOrScriptOrToolExtractContent{}),
+	"TYPES.List__JSON__Map__string_JSON__float__int__string":  reflect.TypeOf(types.Union5FloatOrIntOrListJSONOrMapStringKeyJSONValueOrString{}),
 
 	"STREAM_TYPES.AskUserQuestion__GenerateAnimationCodeResponse":    reflect.TypeOf(stream_types.Union2AskUserQuestionOrGenerateAnimationCodeResponse{}),
+	"STREAM_TYPES.List__Map__string_JSON__Map__string_JSON":          reflect.TypeOf(stream_types.Union2ListMapStringKeyJSONValueOrMapStringKeyJSONValue{}),
 	"STREAM_TYPES.List__AskUserQuestion__Script__ToolExtractContent": reflect.TypeOf(stream_types.Union3ListAskUserQuestionOrScriptOrToolExtractContent{}),
+	"STREAM_TYPES.List__JSON__Map__string_JSON__float__int__string":  reflect.TypeOf(stream_types.Union5FloatOrIntOrListJSONOrMapStringKeyJSONValueOrString{}),
+
+	"TYPES.JSON":       reflect.TypeOf((*types.Union5FloatOrIntOrListJSONOrMapStringKeyJSONValueOrString)(nil)),
+	"TYPES.MapOrArray": reflect.TypeOf(types.Union2ListMapStringKeyJSONValueOrMapStringKeyJSONValue{}),
+
+	"STREAM_TYPES.JSON":       reflect.TypeOf((*stream_types.Union5FloatOrIntOrListJSONOrMapStringKeyJSONValueOrString)(nil)),
+	"STREAM_TYPES.MapOrArray": reflect.TypeOf((*stream_types.Union2ListMapStringKeyJSONValueOrMapStringKeyJSONValue)(nil)),
 }

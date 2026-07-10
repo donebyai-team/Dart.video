@@ -24,13 +24,13 @@ func TestResolveIcons(t *testing.T) {
 			`,
 			expected: `
 				<IconAsset Icon="https://www.thesvg.org/icons/google/color.svg" />
-				<IconAsset Icon="https://www.thesvg.org/icons/openai/default.svg" />
+				<IconAsset Icon="https://www.thesvg.org/icons/openai/light.svg" />
 			`,
 		},
 		{
 			name:     "icon in const",
 			input:    `const ICON = "icon:google"`,
-			expected: `const ICON = "https://www.thesvg.org/icons/google/default.svg"`,
+			expected: `const ICON = "https://www.thesvg.org/icons/google/color.svg"`,
 		},
 		{
 			name: "icon array",
@@ -42,8 +42,8 @@ func TestResolveIcons(t *testing.T) {
 			`,
 			expected: `
 				const icons = [
-					"https://www.thesvg.org/icons/google/default.svg",
-					"https://www.thesvg.org/icons/openai/default.svg",
+					"https://www.thesvg.org/icons/google/color.svg",
+					"https://www.thesvg.org/icons/openai/light.svg",
 				]
 			`,
 		},
@@ -56,6 +56,11 @@ func TestResolveIcons(t *testing.T) {
 			name:     "non icon string untouched",
 			input:    `const title = "Hello World"`,
 			expected: `const title = "Hello World"`,
+		},
+		{
+			name:     "icon as string value",
+			input:    "icon:google",
+			expected: "https://www.thesvg.org/icons/google/color.svg",
 		},
 	}
 

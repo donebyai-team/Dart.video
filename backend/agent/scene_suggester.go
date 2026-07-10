@@ -69,7 +69,7 @@ func (s SceneSuggester) RenderSuggestion(ctx context.Context,
 
 	extractReq := types.ExtractTemplateConfigRequest{
 		Content: currentSlideContent,
-		Scenes:  templateRegistry.ToSceneElements(),
+		Scenes:  templateRegistry.ToComponentSchemas(),
 	}
 
 	if registry != nil {
@@ -85,7 +85,10 @@ func (s SceneSuggester) RenderSuggestion(ctx context.Context,
 
 	for _, scene := range response.Scenes {
 		slides, err := templateRegistry.GenerateScene(ctx, &types.Scene{
-			Element: scene,
+			Element: types.SceneElement{
+				Component: scene.Component,
+				Props:     scene.Props,
+			},
 		})
 		if err != nil {
 			s.logger.Error("failed to generate scene", zap.Error(err))
