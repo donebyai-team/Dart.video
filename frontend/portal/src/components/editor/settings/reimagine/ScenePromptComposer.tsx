@@ -11,6 +11,7 @@ import { SlideStatus, type Slide } from '@coasterai/pb/coasterai/core/v1/slide_p
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import QuestionPanel from '@/components/composer/QuestionPanel'
+import { createSlideEntityId } from '@/types/selection'
 import ThinkingViewComponent from '@/components/composer/ThinkingViewComponent'
 import AssetUploadDropdown from '@/components/composer/AssetUploadDropdown'
 import AIModelSelector from '@/components/composer/AIModelSelector'
@@ -198,7 +199,7 @@ export default function ScenePromptComposer({ setOverlay, defaultAIModel, onConv
     //   acceptVideoConfigChanges()
     // }
 
-    handleSelectEntity(slide.id)
+    handleSelectEntity(createSlideEntityId(slide.id))
   }
 
   const clearComposeInputs = () => {
