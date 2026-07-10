@@ -78,6 +78,7 @@ function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: M
 
     ## Assets
     - Icons format → `icon:<icon-name>` eg. `icon:meta`, `icon:google`, `icon:home`, `icon:phone`
+    - Some Icons are also LucidReact component names
     - Images, logos, and media → use placeholders or provided brand assets
 
     ## Special Scenes and Their Props

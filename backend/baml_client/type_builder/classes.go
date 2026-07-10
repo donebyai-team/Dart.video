@@ -263,6 +263,10 @@ func (t *ExtractTemplateConfigResponseClassView) PropertyScenes() (ClassProperty
 	return t.inner.Property("scenes")
 }
 
+func (t *ExtractTemplateConfigResponseClassView) PropertyReasoning() (ClassPropertyView, error) {
+	return t.inner.Property("reasoning")
+}
+
 func (t *TypeBuilder) ExtractTemplateConfigResponse() (*ExtractTemplateConfigResponseClassView, error) {
 	bld, err := t.inner.Class("ExtractTemplateConfigResponse")
 	if err != nil {

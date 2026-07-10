@@ -6,6 +6,7 @@ class ExtractTemplateConfigRequest {
 
 class ExtractTemplateConfigResponse {
   scenes SceneElement[]
+  reasoning string @description("provide your chain of thoughts for each scene")
 }
 
 function ExtractTemplateConfig(input: ExtractTemplateConfigRequest) -> ExtractTemplateConfigResponse {
@@ -50,47 +51,44 @@ function ExtractTemplateConfig(input: ExtractTemplateConfigRequest) -> ExtractTe
     }
     ```
 
-    These values are **sample content**, not final content.
+    Replace them using the text from **Scene Content** while preserving: [Non-negotiable]
+    - Sample prop values are examples only. They define the expected schema, format, and content style—not the literal content.
+    - Preserve the props schema exactly. Do not add, remove, or rename fields.
+    - Preserve array lengths exactly.
+    - Generate replacement values that match the format and style of the sample values.
+    - Preserve the visual footprint of the content as closely as possible (e.g. word count, text length, number of lines, item counts).
+    - These templates are non-responsive, so significantly longer or shorter content may overflow or break the layout.
 
-    Replace them using the Scene Content while preserving:
+    Examples:
+    - If a sample array contains 10 items, generate exactly 10 items.
+    - **If each sample label contains 1–2 words, generate same no of words of similar length.**
+    - If a field contains a short headline, generate a short headline—not a paragraph.
+    - If a field contains a date, currency, percentage, or statistic, generate a replacement in the same format.
 
-    - schema
-    - array lengths
-    - formatting
-    - writing style
-    - approximate text length (±10%)
-
-    Do **not** copy sample text unless the Scene Content naturally requires the same wording.
+    Text Formatting Conventions:
+    If a text prop contains formatting markers, eg. { "title": "Launch {AI}\nWith {Remotion}" }:
+    - `\n` represents a line break. Preserve the line-break structure whenever possible.
+    - `{text}` marks text that should be highlighted. Replace only the text inside the braces while preserving the `{}` markers.
 
     Every visible text should relate to the Scene Content.
 
     ---
 
-    # General Rules
-
-    Props must be returned as a JSON-encoded string. Only modify values.
-
-    Never:
-    - add fields
-    - remove fields
-    - rename fields
-    - change nesting
-    - convert arrays to objects
-    - convert objects to arrays
-
-    Keep the schema exactly the same.
+    ## General Rules
+    - Props must be returned as a JSON-encoded string. Only modify values.
+    - Keep the schema exactly the same.
 
     ---
 
-    # Value Generation
+    ## Value Generation
 
     Use information in this priority order:
 
     1. Scene Content
     2. Brand Details (only when needed, such as brand name, tagline, website or logo)
-    3. Generate a reasonable value that fits the Scene Content if nothing is explicitly provided.
+    3. Generate a reasonable text that fits the **Scene Content** if nothing is explicitly provided.
 
-    # Scene Text Limits
+    ## Component Text Limits
 
     Unless a component's own constraints are stricter, keep text concise.
     Never place large text blocks in a single scene.
@@ -102,49 +100,11 @@ function ExtractTemplateConfig(input: ExtractTemplateConfigRequest) -> ExtractTe
     If the Scene Content is longer, rewrite or shorten it while preserving the core message.
     Always respect a component's own constraints if they are more restrictive.
 
-    ---
+    ## CRITICAL (Non-negotiable)
+    - Strictly follow the props schema and all the above constraints.
+    - Keep the generated text length close to the original to fit the template props (±10% words/characters).
 
-    # Visual Footprint
-
-    Some templates are not responsive.
-    For template components, preserve the visual footprint as closely as possible.
-    Keep approximately the same:
-    - number of words
-    - number of characters
-    - number of lines
-    - array length
-
-    Examples:
-    - short title → short title
-    - feature list → feature list with the same number of items
-    - 2-word label → another 2-word label
-    - percentage → percentage
-    - date → date
-    - statistic → statistic
-
-    Avoid significantly longer or shorter text.
-
-    ---
-
-    # Formatting
-
-    Preserve formatting.
-
-    If text contains:
-
-    ```
-    Launch {AI}
-    With {Remotion}
-    ```
-
-    then:
-    - preserve `\n`
-    - preserve `{}` markers
-    - replace only the text inside `{}`
-
-    ---
-
-    # Assets
+    ## Assets
 
     Icons:
 
@@ -164,18 +124,6 @@ function ExtractTemplateConfig(input: ExtractTemplateConfigRequest) -> ExtractTe
     Never invent image URLs.
     ---
 
-    # Component Constraints
-
-    Always follow:
-    - field hints
-    - enums
-    - defaults
-    - required fields
-    - min/max limits
-    - formatting requirements
-
-    ---
-
     ## Scene Content:
 
     {{ input.content }}
@@ -192,7 +140,6 @@ function ExtractTemplateConfig(input: ExtractTemplateConfigRequest) -> ExtractTe
     ✓ Output scene count MUST be exactly {{ input.scenes|length }}.
     ✓ Same component order
     ✓ Same component names
-    ✓ Props are valid JSON strings
     ✓ Schema unchanged
     ✓ Arrays unchanged
     ✓ Only values modified

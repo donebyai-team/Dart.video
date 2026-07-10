@@ -16,7 +16,6 @@ client<llm> CustomGemini3Flash {
   options {
     model "gemini-3.5-flash"
     api_key env.GOOGLE_API_KEY
-    generationConfig { thinkingConfig { includeThoughts true } }
   }
 }
 

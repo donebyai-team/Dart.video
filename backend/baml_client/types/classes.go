@@ -327,7 +327,8 @@ func (c ExtractTemplateConfigRequest) BamlTypeName() string {
 }
 
 type ExtractTemplateConfigResponse struct {
-	Scenes []SceneElement `json:"scenes"`
+	Scenes    []SceneElement `json:"scenes"`
+	Reasoning string         `json:"reasoning"`
 }
 
 func (c *ExtractTemplateConfigResponse) Decode(holder *cffi.CFFIValueClass, typeMap baml.TypeMap) {
@@ -347,6 +348,9 @@ func (c *ExtractTemplateConfigResponse) Decode(holder *cffi.CFFIValueClass, type
 		case "scenes":
 			c.Scenes = baml.Decode(valueHolder).Interface().([]SceneElement)
 
+		case "reasoning":
+			c.Reasoning = baml.Decode(valueHolder).Interface().(string)
+
 		default:
 
 			panic(fmt.Sprintf("unexpected field: %s in class ExtractTemplateConfigResponse", key))
@@ -360,6 +364,8 @@ func (c ExtractTemplateConfigResponse) Encode() (*cffi.HostValue, error) {
 	fields := map[string]any{}
 
 	fields["scenes"] = c.Scenes
+
+	fields["reasoning"] = c.Reasoning
 
 	return baml.EncodeClass("ExtractTemplateConfigResponse", fields, nil)
 }
