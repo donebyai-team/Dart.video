@@ -24,7 +24,7 @@ class GeneratedVideoPlan {
 }
 
 function GeneratePlan(input: VideoGenerationPlanRequest, conversation_history: Message[]) -> GeneratedVideoPlan {
-  client CustomOpenAI5WithThinkingSummary
+  client SmartBoyGPTSOL
   prompt #"
     You are a cinematic video planning director. Your job is to decompose a script into a sequence of scenes.
     You decide WHAT appears in each scene, HOW it behaves, and WHAT data it shows.

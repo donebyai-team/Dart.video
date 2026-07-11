@@ -68,7 +68,7 @@ const ManualMediaImportPanel = ({
     [assets, selectedAssetId]
   )
   const selectedAssets = useMemo(
-    () => assets.filter(asset => selectedAssetIds.includes(asset.id)),
+    () => selectedAssetIds.map(assetId => assets.find(asset => asset.id === assetId)).filter((asset): asset is MediaAsset => !!asset),
     [assets, selectedAssetIds]
   )
   const previewAsset = useMemo(

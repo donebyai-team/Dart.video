@@ -95,22 +95,23 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
   const defaults = content?.codeRegistry?.defaults
 
   // URL to fetch LLM-generated TSX source from
-  const inlineCode = content?.codeRegistry?.code?.trim()
+  const inlineCode = content?.codeRegistry?.code
+  const hasInlineCode = inlineCode?.trim().length
   const templateUrl = content?.codeRegistry?.mUrl
   const defaultsKey = React.useMemo(() => JSON.stringify(defaults) ?? 'null', [defaults])
 
   // Unique cache key
   const templateKey = React.useMemo(() => {
+    if (hasInlineCode) {
+      return `inline:${hashString(inlineCode)}`;
+    }
+
     if (templateUrl) {
       return `${templateUrl}::${hashString(defaultsKey)}`
     }
 
-    if (inlineCode) {
-      return `inline:${hashString(inlineCode)}`;
-    }
-
     return templateUrl ?? null;
-  }, [defaultsKey, inlineCode, templateUrl]);
+  }, [defaultsKey, hasInlineCode, inlineCode, templateUrl]);
 
   const background = backgroundStyleToCSS(slide.backgroundStyle)
 
@@ -183,7 +184,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
             templateKey,
             templateUrl ?? templateKey,
             defaults,
-            templateUrl ? undefined : inlineCode
+            inlineCode
           )
 
           if (!disposed) {
@@ -191,7 +192,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
             setTemplateError(null)
           }
         } catch (error) {
-          if (!inlineCode && error instanceof TypeError) {
+          if (!hasInlineCode && error instanceof TypeError) {
             console.warn(
               `Failed to load template "${templateUrl}" (network/CORS/blocked request)`,
               {
@@ -233,7 +234,7 @@ export const AnimationSlide: React.FC<TextAnimationSlideProps> = ({
     return () => {
       disposed = true
     }
-  }, [templateKey, inlineCode, templateUrl, defaults, renderHandle])
+  }, [templateKey, hasInlineCode, inlineCode, templateUrl, defaults, renderHandle])
 
   // PatchOverlay — read from window (set by useAnimationEdit in editor)
   // or fall back to persisted edits (during Remotion rendering).

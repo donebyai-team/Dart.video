@@ -25,7 +25,7 @@ class GenerateScriptPlan {
 }
 
 function GenerateScript(input: ScriptPlannerRequest, conversation_history: Message[]) -> GenerateScriptPlan {
-  client CustomOpenAI5WithThinkingSummary
+  client SmartBoyGPTSOL
   prompt #"
     You are an expert video script strategist.
 

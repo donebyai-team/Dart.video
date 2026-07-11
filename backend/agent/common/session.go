@@ -240,6 +240,11 @@ func (p *SessionContext) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// ConvertToContextMessages normalizes conversation history into BAML context
+// messages, keeps only the most recent code snapshots, expands referenced media,
+// and returns the latest selected AI model, overriding it with Gemini when the
+// context contains a referenced video and recording that override on the latest
+// message in the provided history.
 func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcore.ConversationMessage, registry *services.MediaAssetRegistry) ([]types.Message, pbcore.AIModel, error) {
 	// Sort ASC and Limit
 	sort.Slice(history, func(i, j int) bool {
@@ -266,6 +271,7 @@ func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcor
 
 	messages := make([]types.Message, 0, len(history))
 	var lastAIModel pbcore.AIModel = pbcore.AIModel_AI_MODEL_UNSPECIFIED
+	hasReferenceVideo := false
 
 	for idx, item := range history {
 		// Track latest model
@@ -333,6 +339,7 @@ func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcor
 
 				case pbcore.MediaType_MEDIA_TYPE_VIDEO:
 					videoCount++
+					hasReferenceVideo = true
 					if mediaAsset.Metadata.Duration == 0 || mediaAsset.Metadata.Duration > 5 {
 						return nil, lastAIModel, fmt.Errorf("maximum video duration allowed is 5 seconds")
 					}
@@ -385,6 +392,15 @@ func (a *session) ConvertToContextMessages(ctx context.Context, history []*pbcor
 		}
 
 		messages = append(messages, message)
+	}
+
+	// If the conversation has a video reference, override the latest AI model to Gemini Pro
+	if hasReferenceVideo {
+		model := pbcore.AIModel_AI_MODEL_GEMINI_3_PRO
+		lastAIModel = model
+		if len(history) > 0 {
+			history[len(history)-1].AiModel = &model
+		}
 	}
 
 	return messages, lastAIModel, nil

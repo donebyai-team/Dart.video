@@ -65,7 +65,7 @@ func (p *Portal) GenerateOrEditScene(ctx context.Context, c *connect.Request[pbp
 					return nil, agenterrors.InvalidInput("too many assets, max 4 allowed", nil)
 				}
 
-				if len(input.Request.References) > 4 {
+				if len(input.Request.References) > 6 {
 					return nil, agenterrors.InvalidInput("too many references, max 4 allowed", nil)
 				}
 

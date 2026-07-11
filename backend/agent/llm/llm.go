@@ -283,3 +283,13 @@ func (l *llmService) GenerateScript(
 
 	return nil, nil, fmt.Errorf("stream closed without final result")
 }
+
+var defaultModel = pbcore.AIModel_AI_MODEL_GPT_5_5_SOL
+
+func SelectModelToUseForCodeGeneration(userModel *pbcore.AIModel) *pbcore.AIModel {
+	if userModel == nil || *userModel == pbcore.AIModel_AI_MODEL_UNSPECIFIED {
+		return &defaultModel
+	}
+
+	return userModel
+}

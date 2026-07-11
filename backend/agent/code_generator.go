@@ -281,7 +281,7 @@ func (l *codeGenerator) GenerateCode(
 	newMessage := &pbcore.ConversationMessage{
 		Role:    pbcore.ConversationRole_CONVERSATION_ROLE_USER,
 		Message: input.Prompt,
-		AiModel: input.AiModel,
+		AiModel: llm.SelectModelToUseForCodeGeneration(input.AiModel),
 	}
 
 	for _, asset := range input.References {
@@ -377,6 +377,7 @@ func (l *codeGenerator) runPlanning(ctx context.Context, generatePlanRequest typ
 				Role:    pbcore.ConversationRole_CONVERSATION_ROLE_ASSISTANT,
 				Message: *llmThinking,
 				Type:    pbcore.ConversationMessageType_CONVERSATION_MESSAGE_FINAL_THINKING,
+				AiModel: &aiModel,
 			})
 		}
 

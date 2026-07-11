@@ -16,6 +16,7 @@ export const CodeEditor = ({ onClose }: CodeEditorProps) => {
   const selectedSlide = useVideoStore(s => s.selectedSlide)
   const activeTool = useVideoStore(s => s.activeTool)
   const handleCloseTool = useVideoStore(s => s.handleCloseTool)
+  const updateSlideContent = useVideoStore(s => s.updateSlideContent)
 
   const [code, setCode] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -25,10 +26,23 @@ export const CodeEditor = ({ onClose }: CodeEditorProps) => {
     return selectedSlide?.content
   }, [selectedSlide])
 
-  const inlineCode = animationContent?.codeRegistry?.code?.trim() ?? ''
+  const inlineCode = animationContent?.codeRegistry?.code ?? ''
+  const hasInlineCode = inlineCode.trim().length > 0
   const templateUrl = animationContent?.codeRegistry?.mUrl?.trim() ?? ''
   const defaults = animationContent?.codeRegistry?.defaults
   const slideId = selectedSlide?.id ?? ''
+  const defaultsKey = JSON.stringify(defaults) ?? 'null'
+
+  const handleCodeChange = (nextCode: string) => {
+    setCode(nextCode)
+
+    updateSlideContent({
+      codeRegistry: {
+        ...animationContent?.codeRegistry,
+        code: nextCode,
+      },
+    })
+  }
 
   useEffect(() => {
     if (activeTool.type !== ActiveToolType.ANIMATION_CODE) return
@@ -48,8 +62,15 @@ export const CodeEditor = ({ onClose }: CodeEditorProps) => {
       return
     }
 
-    if (!inlineCode && !templateUrl) {
+    if (!hasInlineCode && !templateUrl) {
       setCode('')
+      setError(null)
+      setIsLoading(false)
+      return
+    }
+
+    if (hasInlineCode) {
+      setCode(inlineCode)
       setError(null)
       setIsLoading(false)
       return
@@ -97,10 +118,7 @@ export const CodeEditor = ({ onClose }: CodeEditorProps) => {
   }, [
     slideId,
     templateUrl,
-    inlineCode,
-    defaults,
-    selectedSlide,
-    animationContent
+    defaultsKey
   ])
 
   return (
@@ -112,7 +130,7 @@ export const CodeEditor = ({ onClose }: CodeEditorProps) => {
           </h3>
 
           <p className='text-xs text-muted-foreground truncate'>
-            {inlineCode
+            {hasInlineCode
               ? 'Inline generated animation code'
               : templateUrl || 'No generated animation code available'}
           </p>
@@ -133,7 +151,7 @@ export const CodeEditor = ({ onClose }: CodeEditorProps) => {
             </span>
 
             <span className='ml-auto text-[11px] uppercase tracking-wide text-slate-500'>
-              Read only
+              Live preview
             </span>
           </div>
 
@@ -146,14 +164,17 @@ export const CodeEditor = ({ onClose }: CodeEditorProps) => {
               <div className='h-full flex items-center justify-center px-6 text-sm text-red-300 text-center'>
                 {error}
               </div>
-            ) : !inlineCode && !templateUrl ? (
+            ) : !hasInlineCode && !templateUrl ? (
               <div className='h-full flex items-center justify-center px-6 text-sm text-slate-400 text-center'>
                 This animation slide does not have generated code yet.
               </div>
             ) : (
-              <pre className='min-h-full p-4 text-[12px] leading-6 overflow-auto font-mono whitespace-pre-wrap break-words'>
-                <code>{code}</code>
-              </pre>
+              <textarea
+                value={code}
+                onChange={event => handleCodeChange(event.target.value)}
+                spellCheck={false}
+                className='min-h-full h-full w-full resize-none border-0 bg-transparent p-4 text-[12px] leading-6 font-mono text-slate-100 outline-none'
+              />
             )}
           </div>
         </div>

@@ -1,7 +1,6 @@
 'use client'
 
-import { ImagePlus, ChevronDown, Paperclip } from 'lucide-react'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Paperclip } from 'lucide-react'
 
 interface AssetUploadDropdownProps {
   disabled?: boolean
@@ -17,28 +16,15 @@ const AssetUploadDropdown = ({
   showLabel = true
 }: AssetUploadDropdownProps) => {
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          disabled={disabled}
-          className={triggerClassName || 'flex items-center gap-1.5 flex-shrink-0 hover:text-foreground rounded px-1.5 py-1 hover:bg-muted/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed'}
-        >
-          <Paperclip className='w-4 h-4' />
-          {showLabel && <span>Attach</span>}
-          <ChevronDown className='w-3 h-3 opacity-60' />
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align='end'>
-        {/* <DropdownMenuItem onSelect={() => onOpenAssetPicker('figma')}>
-          <Figma className='mr-2 h-4 w-4' />
-          Import from Figma
-        </DropdownMenuItem> */}
-        <DropdownMenuItem onSelect={() => onOpenAssetPicker('upload')}>
-          <ImagePlus className='mr-2 h-4 w-4' />
-          Attach file
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <button
+      type='button'
+      disabled={disabled}
+      onClick={() => onOpenAssetPicker('upload')}
+      className={triggerClassName || 'flex items-center gap-1.5 flex-shrink-0 hover:text-foreground rounded px-1.5 py-1 hover:bg-muted/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed'}
+    >
+      <Paperclip className='w-4 h-4' />
+      {showLabel && <span>Attach</span>}
+    </button>
   )
 }
 
