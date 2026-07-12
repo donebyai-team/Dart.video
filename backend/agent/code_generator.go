@@ -341,14 +341,9 @@ func (l *codeGenerator) runPlanning(ctx context.Context, generatePlanRequest typ
 
 		codeResponse := llmResponse.AsGenerateAnimationCodeResponse()
 
-		codeFilePath := fmt.Sprintf("templates/generated/%s", l.orgID)
-		if l.slideID != "" {
-			codeFilePath = fmt.Sprintf("%s/%s", codeFilePath, l.slideID)
-		}
-
 		buildOutput, err := l.codeBuilder.ValidateAndBuild(ctx, code_builder.ValidateAndBuildInput{
 			Animation:          codeResponse,
-			OutputPath:         codeFilePath,
+			OutputPath:         services.GenerateCodeStoragePath(l.slideID, l.orgID),
 			MediaAssetRegistry: l.assetRegistry,
 		})
 		if err != nil {

@@ -48,6 +48,7 @@ const (
 	PortalService_UpdateBrandIdentity_FullMethodName    = "/coasterai.portal.v1.PortalService/UpdateBrandIdentity"
 	PortalService_GenerateOrEditScene_FullMethodName    = "/coasterai.portal.v1.PortalService/GenerateOrEditScene"
 	PortalService_GetConversationHistory_FullMethodName = "/coasterai.portal.v1.PortalService/GetConversationHistory"
+	PortalService_UpdateCode_FullMethodName             = "/coasterai.portal.v1.PortalService/UpdateCode"
 	PortalService_GetMediaAssets_FullMethodName         = "/coasterai.portal.v1.PortalService/GetMediaAssets"
 	PortalService_GetMediaAssetsByID_FullMethodName     = "/coasterai.portal.v1.PortalService/GetMediaAssetsByID"
 	PortalService_GenerateMusic_FullMethodName          = "/coasterai.portal.v1.PortalService/GenerateMusic"
@@ -97,6 +98,7 @@ type PortalServiceClient interface {
 	GenerateOrEditScene(ctx context.Context, in *GenerateOrEditSceneRequest, opts ...grpc.CallOption) (PortalService_GenerateOrEditSceneClient, error)
 	GetConversationHistory(ctx context.Context, in *ConversationHistoryRequest, opts ...grpc.CallOption) (*GetConversationHistoryResponse, error)
 	// Assets
+	UpdateCode(ctx context.Context, in *UpdateCodeRequest, opts ...grpc.CallOption) (*v1.MediaAsset, error)
 	GetMediaAssets(ctx context.Context, in *GetMediaAssetsRequest, opts ...grpc.CallOption) (*GetMediaAssetsResponse, error)
 	GetMediaAssetsByID(ctx context.Context, in *GetMediaAssetsByIDs, opts ...grpc.CallOption) (*GetMediaAssetsResponse, error)
 	GenerateMusic(ctx context.Context, in *VideoRequestWithID, opts ...grpc.CallOption) (*GetMediaAssetsResponse, error)
@@ -456,6 +458,15 @@ func (c *portalServiceClient) GetConversationHistory(ctx context.Context, in *Co
 	return out, nil
 }
 
+func (c *portalServiceClient) UpdateCode(ctx context.Context, in *UpdateCodeRequest, opts ...grpc.CallOption) (*v1.MediaAsset, error) {
+	out := new(v1.MediaAsset)
+	err := c.cc.Invoke(ctx, PortalService_UpdateCode_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *portalServiceClient) GetMediaAssets(ctx context.Context, in *GetMediaAssetsRequest, opts ...grpc.CallOption) (*GetMediaAssetsResponse, error) {
 	out := new(GetMediaAssetsResponse)
 	err := c.cc.Invoke(ctx, PortalService_GetMediaAssets_FullMethodName, in, out, opts...)
@@ -591,6 +602,7 @@ type PortalServiceServer interface {
 	GenerateOrEditScene(*GenerateOrEditSceneRequest, PortalService_GenerateOrEditSceneServer) error
 	GetConversationHistory(context.Context, *ConversationHistoryRequest) (*GetConversationHistoryResponse, error)
 	// Assets
+	UpdateCode(context.Context, *UpdateCodeRequest) (*v1.MediaAsset, error)
 	GetMediaAssets(context.Context, *GetMediaAssetsRequest) (*GetMediaAssetsResponse, error)
 	GetMediaAssetsByID(context.Context, *GetMediaAssetsByIDs) (*GetMediaAssetsResponse, error)
 	GenerateMusic(context.Context, *VideoRequestWithID) (*GetMediaAssetsResponse, error)
@@ -692,6 +704,9 @@ func (UnimplementedPortalServiceServer) GenerateOrEditScene(*GenerateOrEditScene
 }
 func (UnimplementedPortalServiceServer) GetConversationHistory(context.Context, *ConversationHistoryRequest) (*GetConversationHistoryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetConversationHistory not implemented")
+}
+func (UnimplementedPortalServiceServer) UpdateCode(context.Context, *UpdateCodeRequest) (*v1.MediaAsset, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateCode not implemented")
 }
 func (UnimplementedPortalServiceServer) GetMediaAssets(context.Context, *GetMediaAssetsRequest) (*GetMediaAssetsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMediaAssets not implemented")
@@ -1237,6 +1252,24 @@ func _PortalService_GetConversationHistory_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PortalService_UpdateCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateCodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PortalServiceServer).UpdateCode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PortalService_UpdateCode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PortalServiceServer).UpdateCode(ctx, req.(*UpdateCodeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _PortalService_GetMediaAssets_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetMediaAssetsRequest)
 	if err := dec(in); err != nil {
@@ -1533,6 +1566,10 @@ var PortalService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetConversationHistory",
 			Handler:    _PortalService_GetConversationHistory_Handler,
+		},
+		{
+			MethodName: "UpdateCode",
+			Handler:    _PortalService_UpdateCode_Handler,
 		},
 		{
 			MethodName: "GetMediaAssets",

@@ -111,6 +111,9 @@ const (
 	// PortalServiceGetConversationHistoryProcedure is the fully-qualified name of the PortalService's
 	// GetConversationHistory RPC.
 	PortalServiceGetConversationHistoryProcedure = "/coasterai.portal.v1.PortalService/GetConversationHistory"
+	// PortalServiceUpdateCodeProcedure is the fully-qualified name of the PortalService's UpdateCode
+	// RPC.
+	PortalServiceUpdateCodeProcedure = "/coasterai.portal.v1.PortalService/UpdateCode"
 	// PortalServiceGetMediaAssetsProcedure is the fully-qualified name of the PortalService's
 	// GetMediaAssets RPC.
 	PortalServiceGetMediaAssetsProcedure = "/coasterai.portal.v1.PortalService/GetMediaAssets"
@@ -176,6 +179,7 @@ var (
 	portalServiceUpdateBrandIdentityMethodDescriptor    = portalServiceServiceDescriptor.Methods().ByName("UpdateBrandIdentity")
 	portalServiceGenerateOrEditSceneMethodDescriptor    = portalServiceServiceDescriptor.Methods().ByName("GenerateOrEditScene")
 	portalServiceGetConversationHistoryMethodDescriptor = portalServiceServiceDescriptor.Methods().ByName("GetConversationHistory")
+	portalServiceUpdateCodeMethodDescriptor             = portalServiceServiceDescriptor.Methods().ByName("UpdateCode")
 	portalServiceGetMediaAssetsMethodDescriptor         = portalServiceServiceDescriptor.Methods().ByName("GetMediaAssets")
 	portalServiceGetMediaAssetsByIDMethodDescriptor     = portalServiceServiceDescriptor.Methods().ByName("GetMediaAssetsByID")
 	portalServiceGenerateMusicMethodDescriptor          = portalServiceServiceDescriptor.Methods().ByName("GenerateMusic")
@@ -223,6 +227,7 @@ type PortalServiceClient interface {
 	GenerateOrEditScene(context.Context, *connect.Request[v1.GenerateOrEditSceneRequest]) (*connect.ServerStreamForClient[v1.GenerateOrEditSceneResponse], error)
 	GetConversationHistory(context.Context, *connect.Request[v1.ConversationHistoryRequest]) (*connect.Response[v1.GetConversationHistoryResponse], error)
 	// Assets
+	UpdateCode(context.Context, *connect.Request[v1.UpdateCodeRequest]) (*connect.Response[v11.MediaAsset], error)
 	GetMediaAssets(context.Context, *connect.Request[v1.GetMediaAssetsRequest]) (*connect.Response[v1.GetMediaAssetsResponse], error)
 	GetMediaAssetsByID(context.Context, *connect.Request[v1.GetMediaAssetsByIDs]) (*connect.Response[v1.GetMediaAssetsResponse], error)
 	GenerateMusic(context.Context, *connect.Request[v1.VideoRequestWithID]) (*connect.Response[v1.GetMediaAssetsResponse], error)
@@ -411,6 +416,12 @@ func NewPortalServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(portalServiceGetConversationHistoryMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		updateCode: connect.NewClient[v1.UpdateCodeRequest, v11.MediaAsset](
+			httpClient,
+			baseURL+PortalServiceUpdateCodeProcedure,
+			connect.WithSchema(portalServiceUpdateCodeMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 		getMediaAssets: connect.NewClient[v1.GetMediaAssetsRequest, v1.GetMediaAssetsResponse](
 			httpClient,
 			baseURL+PortalServiceGetMediaAssetsProcedure,
@@ -509,6 +520,7 @@ type portalServiceClient struct {
 	updateBrandIdentity    *connect.Client[v1.UpdateBrandIdentityRequest, emptypb.Empty]
 	generateOrEditScene    *connect.Client[v1.GenerateOrEditSceneRequest, v1.GenerateOrEditSceneResponse]
 	getConversationHistory *connect.Client[v1.ConversationHistoryRequest, v1.GetConversationHistoryResponse]
+	updateCode             *connect.Client[v1.UpdateCodeRequest, v11.MediaAsset]
 	getMediaAssets         *connect.Client[v1.GetMediaAssetsRequest, v1.GetMediaAssetsResponse]
 	getMediaAssetsByID     *connect.Client[v1.GetMediaAssetsByIDs, v1.GetMediaAssetsResponse]
 	generateMusic          *connect.Client[v1.VideoRequestWithID, v1.GetMediaAssetsResponse]
@@ -657,6 +669,11 @@ func (c *portalServiceClient) GetConversationHistory(ctx context.Context, req *c
 	return c.getConversationHistory.CallUnary(ctx, req)
 }
 
+// UpdateCode calls coasterai.portal.v1.PortalService.UpdateCode.
+func (c *portalServiceClient) UpdateCode(ctx context.Context, req *connect.Request[v1.UpdateCodeRequest]) (*connect.Response[v11.MediaAsset], error) {
+	return c.updateCode.CallUnary(ctx, req)
+}
+
 // GetMediaAssets calls coasterai.portal.v1.PortalService.GetMediaAssets.
 func (c *portalServiceClient) GetMediaAssets(ctx context.Context, req *connect.Request[v1.GetMediaAssetsRequest]) (*connect.Response[v1.GetMediaAssetsResponse], error) {
 	return c.getMediaAssets.CallUnary(ctx, req)
@@ -746,6 +763,7 @@ type PortalServiceHandler interface {
 	GenerateOrEditScene(context.Context, *connect.Request[v1.GenerateOrEditSceneRequest], *connect.ServerStream[v1.GenerateOrEditSceneResponse]) error
 	GetConversationHistory(context.Context, *connect.Request[v1.ConversationHistoryRequest]) (*connect.Response[v1.GetConversationHistoryResponse], error)
 	// Assets
+	UpdateCode(context.Context, *connect.Request[v1.UpdateCodeRequest]) (*connect.Response[v11.MediaAsset], error)
 	GetMediaAssets(context.Context, *connect.Request[v1.GetMediaAssetsRequest]) (*connect.Response[v1.GetMediaAssetsResponse], error)
 	GetMediaAssetsByID(context.Context, *connect.Request[v1.GetMediaAssetsByIDs]) (*connect.Response[v1.GetMediaAssetsResponse], error)
 	GenerateMusic(context.Context, *connect.Request[v1.VideoRequestWithID]) (*connect.Response[v1.GetMediaAssetsResponse], error)
@@ -930,6 +948,12 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(portalServiceGetConversationHistoryMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	portalServiceUpdateCodeHandler := connect.NewUnaryHandler(
+		PortalServiceUpdateCodeProcedure,
+		svc.UpdateCode,
+		connect.WithSchema(portalServiceUpdateCodeMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	portalServiceGetMediaAssetsHandler := connect.NewUnaryHandler(
 		PortalServiceGetMediaAssetsProcedure,
 		svc.GetMediaAssets,
@@ -1052,6 +1076,8 @@ func NewPortalServiceHandler(svc PortalServiceHandler, opts ...connect.HandlerOp
 			portalServiceGenerateOrEditSceneHandler.ServeHTTP(w, r)
 		case PortalServiceGetConversationHistoryProcedure:
 			portalServiceGetConversationHistoryHandler.ServeHTTP(w, r)
+		case PortalServiceUpdateCodeProcedure:
+			portalServiceUpdateCodeHandler.ServeHTTP(w, r)
 		case PortalServiceGetMediaAssetsProcedure:
 			portalServiceGetMediaAssetsHandler.ServeHTTP(w, r)
 		case PortalServiceGetMediaAssetsByIDProcedure:
@@ -1189,6 +1215,10 @@ func (UnimplementedPortalServiceHandler) GenerateOrEditScene(context.Context, *c
 
 func (UnimplementedPortalServiceHandler) GetConversationHistory(context.Context, *connect.Request[v1.ConversationHistoryRequest]) (*connect.Response[v1.GetConversationHistoryResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.GetConversationHistory is not implemented"))
+}
+
+func (UnimplementedPortalServiceHandler) UpdateCode(context.Context, *connect.Request[v1.UpdateCodeRequest]) (*connect.Response[v11.MediaAsset], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coasterai.portal.v1.PortalService.UpdateCode is not implemented"))
 }
 
 func (UnimplementedPortalServiceHandler) GetMediaAssets(context.Context, *connect.Request[v1.GetMediaAssetsRequest]) (*connect.Response[v1.GetMediaAssetsResponse], error) {

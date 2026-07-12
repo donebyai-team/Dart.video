@@ -4,7 +4,7 @@
 
 import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv1";
 import type { Message } from "@bufbuild/protobuf";
-import type { MediaAsset, MediaType, SelectedMediaAsset } from "../../core/v1/media_asset_pb";
+import type { MediaAsset, MediaAssetSchema, MediaType, SelectedMediaAsset } from "../../core/v1/media_asset_pb";
 import type { Section, Slide } from "../../core/v1/slide_pb";
 import type { AIModel, ConversationMessage } from "../../core/v1/chat_pb";
 import type { AnimationCategory, AnimationTemplateSchema } from "../../core/v1/template_pb";
@@ -68,6 +68,27 @@ export declare type GetMediaAssetsResponse = Message<"coasterai.portal.v1.GetMed
  * Use `create(GetMediaAssetsResponseSchema)` to create a new message.
  */
 export declare const GetMediaAssetsResponseSchema: GenMessage<GetMediaAssetsResponse>;
+
+/**
+ * @generated from message coasterai.portal.v1.UpdateCodeRequest
+ */
+export declare type UpdateCodeRequest = Message<"coasterai.portal.v1.UpdateCodeRequest"> & {
+  /**
+   * @generated from field: string slideId = 1;
+   */
+  slideId: string;
+
+  /**
+   * @generated from field: string code = 2;
+   */
+  code: string;
+};
+
+/**
+ * Describes the message coasterai.portal.v1.UpdateCodeRequest.
+ * Use `create(UpdateCodeRequestSchema)` to create a new message.
+ */
+export declare const UpdateCodeRequestSchema: GenMessage<UpdateCodeRequest>;
 
 /**
  * @generated from message coasterai.portal.v1.GenerateOrEditSceneRequest
@@ -1664,6 +1685,14 @@ export declare const PortalService: GenService<{
   /**
    * Assets
    *
+   * @generated from rpc coasterai.portal.v1.PortalService.UpdateCode
+   */
+  updateCode: {
+    methodKind: "unary";
+    input: typeof UpdateCodeRequestSchema;
+    output: typeof MediaAssetSchema;
+  },
+  /**
    * @generated from rpc coasterai.portal.v1.PortalService.GetMediaAssets
    */
   getMediaAssets: {

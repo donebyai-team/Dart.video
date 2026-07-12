@@ -3,16 +3,20 @@
 import { useEffect, useMemo, useState } from 'react'
 import { X, FileCode2 } from 'lucide-react'
 import { loadPreparedTemplateSource } from '@coasterai/renderer'
+import { useClientsContext } from '@coasterai/ui-core/context/ClientContext'
+import toast from 'react-hot-toast'
 
 import { Button } from '@/components/ui/button'
 import { useVideoStore } from '@/stores/video'
 import { ActiveToolType } from '@/types/tools'
+import { getConnectError } from '@/utils/error'
 
 interface CodeEditorProps {
   onClose: () => void
 }
 
 export const CodeEditor = ({ onClose }: CodeEditorProps) => {
+  const { portalClient } = useClientsContext()
   const selectedSlide = useVideoStore(s => s.selectedSlide)
   const activeTool = useVideoStore(s => s.activeTool)
   const handleCloseTool = useVideoStore(s => s.handleCloseTool)
@@ -20,6 +24,7 @@ export const CodeEditor = ({ onClose }: CodeEditorProps) => {
 
   const [code, setCode] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const animationContent = useMemo(() => {
@@ -42,6 +47,36 @@ export const CodeEditor = ({ onClose }: CodeEditorProps) => {
         code: nextCode,
       },
     })
+  }
+
+  const handleSave = async () => {
+    if (!slideId || !code.trim()) {
+      return
+    }
+
+    try {
+      setIsSaving(true)
+
+      const asset = await portalClient.updateCode({
+        slideId,
+        code,
+      })
+
+      updateSlideContent({
+        codeRegistry: {
+          ...animationContent?.codeRegistry,
+          mUrl: asset.url,
+          code: '',
+        },
+      })
+
+      toast.success('Code saved')
+    } catch (saveError) {
+      console.error('Failed to save code', saveError)
+      toast.error(getConnectError(saveError))
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   useEffect(() => {
@@ -136,9 +171,20 @@ export const CodeEditor = ({ onClose }: CodeEditorProps) => {
           </p>
         </div>
 
-        <Button variant='ghost' size='icon' onClick={onClose}>
-          <X className='w-4 h-4' />
-        </Button>
+        <div className='flex items-center gap-2'>
+          <Button
+            variant='secondary'
+            size='sm'
+            onClick={handleSave}
+            disabled={isSaving || isLoading || !slideId || !code.trim()}
+          >
+            {isSaving ? 'Saving...' : 'Save'}
+          </Button>
+
+          <Button variant='ghost' size='icon' onClick={onClose}>
+            <X className='w-4 h-4' />
+          </Button>
+        </div>
       </div>
 
       <div className='flex-1 min-h-0 overflow-hidden p-4'>

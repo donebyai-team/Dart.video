@@ -57,6 +57,7 @@ service PortalService {
   rpc GetConversationHistory(ConversationHistoryRequest) returns (GetConversationHistoryResponse);
 
   // Assets
+  rpc UpdateCode(UpdateCodeRequest) returns (core.v1.MediaAsset);
   rpc GetMediaAssets(GetMediaAssetsRequest) returns (GetMediaAssetsResponse);
   rpc GetMediaAssetsByID(GetMediaAssetsByIDs) returns (GetMediaAssetsResponse);
   rpc GenerateMusic(VideoRequestWithID) returns (GetMediaAssetsResponse);
@@ -86,6 +87,11 @@ message GetMediaAssetsRequest {
 
 message GetMediaAssetsResponse {
   repeated core.v1.MediaAsset assets = 1;
+}
+
+message UpdateCodeRequest {
+  string slideId = 1;
+  string code = 2;
 }
 
 message GenerateOrEditSceneRequest {
